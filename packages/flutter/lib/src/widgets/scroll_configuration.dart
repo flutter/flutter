@@ -283,14 +283,13 @@ class _WrappedScrollBehavior implements ScrollBehavior {
     required this.delegate,
     this.scrollbars = true,
     this.overscroll = true,
-    Set<PointerDeviceKind>? dragDevices,
+    this._dragDevices,
     this.multitouchDragStrategy,
-    Set<LogicalKeyboardKey>? pointerAxisModifiers,
+    this._pointerAxisModifiers,
     this.physics,
     this.platform,
     this.keyboardDismissBehavior,
-  }) : _dragDevices = dragDevices,
-       _pointerAxisModifiers = pointerAxisModifiers;
+  });
 
   final ScrollBehavior delegate;
   final bool scrollbars;

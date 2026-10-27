@@ -86,6 +86,14 @@ class _AssetManifestBin implements AssetManifest {
     return _AssetManifestBin(data as Map<Object?, Object?>);
   }
 
+  static final RegExp _hashedExtensionSuffixPattern = RegExp(
+    r'\.[0-9a-f]{8}((?:\.(?:js|wasm|mjs)\.map)|(?:\.[^./]+))?$',
+  );
+
+  static String _stripContentHash(String path) {
+    return path.replaceFirstMapped(_hashedExtensionSuffixPattern, (Match m) => m.group(1) ?? '');
+  }
+
   final Map<Object?, Object?> _data;
   final Map<String, List<AssetMetadata>> _typeCastedData = <String, List<AssetMetadata>>{};
 
@@ -105,9 +113,9 @@ class _AssetManifestBin implements AssetManifest {
             final asset = data['asset']! as String;
             final Object? dpr = data['dpr'];
             return AssetMetadata(
-              key: data['asset']! as String,
+              key: asset,
               targetDevicePixelRatio: dpr as double?,
-              main: key == asset,
+              main: key == asset || _stripContentHash(asset) == key,
             );
           })
           .toList();

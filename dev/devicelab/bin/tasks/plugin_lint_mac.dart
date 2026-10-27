@@ -14,9 +14,26 @@ import 'package:path/path.dart' as path;
 Future<void> main() async {
   await task(() async {
     final Directory tempDir = Directory.systemTemp.createTempSync('flutter_plugin_test.');
+
+    // Relative to this script.
+    final String flutterRoot = path.dirname(
+      path.dirname(path.dirname(path.dirname(path.dirname(path.fromUri(Platform.script))))),
+    );
+    print('Flutter root at $flutterRoot');
+
     try {
       // This test validates pods, so we need to disable SwiftPM.
       await flutter('config', options: <String>['--no-enable-swift-package-manager']);
+      await flutter('precache', options: <String>['--macos', '--ios']);
+
+      final String flutterMacOSPodspecPath = _setUpFlutterMacOSPodspec(
+        flutterRoot: flutterRoot,
+        tempDir: tempDir,
+      );
+      final String flutterIosPodspecPath = _setUpFlutterIosPodspec(
+        flutterRoot: flutterRoot,
+        tempDir: tempDir,
+      );
 
       section('Lint integration_test');
 
@@ -24,11 +41,6 @@ Future<void> main() async {
         // Update pod repo.
         await exec('pod', <String>['repo', 'update']);
 
-        // Relative to this script.
-        final String flutterRoot = path.dirname(
-          path.dirname(path.dirname(path.dirname(path.dirname(path.fromUri(Platform.script))))),
-        );
-        print('Flutter root at $flutterRoot');
         final String integrationTestPackage = path.join(
           flutterRoot,
           'packages',
@@ -45,7 +57,7 @@ Future<void> main() async {
           'lint',
           iosintegrationTestPodspec,
           '--use-libraries',
-          '--quick',
+          '--include-podspecs=$flutterIosPodspecPath',
         ]);
 
         final String macosintegrationTestPodspec = path.join(
@@ -54,7 +66,9 @@ Future<void> main() async {
           'macos',
           'integration_test_macos.podspec',
         );
-        await _tryMacOSLint(macosintegrationTestPodspec, <String>[]);
+        await _tryMacOSLint(macosintegrationTestPodspec, <String>[
+          '--include-podspecs=$flutterMacOSPodspecPath',
+        ]);
       });
 
       section('Create plugin');
@@ -78,7 +92,13 @@ Future<void> main() async {
       final String pluginPath = path.join(tempDir.path, pluginName);
       final String podspecPath = path.join(pluginPath, 'ios', '$pluginName.podspec');
       await inDirectory(tempDir, () async {
-        await exec('pod', <String>['lib', 'lint', podspecPath, '--allow-warnings']);
+        await exec('pod', <String>[
+          'lib',
+          'lint',
+          podspecPath,
+          '--allow-warnings',
+          '--include-podspecs=$flutterIosPodspecPath',
+        ]);
       });
 
       section('Lint iOS podspec plugin as library');
@@ -90,6 +110,7 @@ Future<void> main() async {
           podspecPath,
           '--allow-warnings',
           '--use-libraries',
+          '--include-podspecs=$flutterIosPodspecPath',
         ]);
       });
 
@@ -97,13 +118,20 @@ Future<void> main() async {
 
       final String macOSPodspecPath = path.join(pluginPath, 'macos', '$pluginName.podspec');
       await inDirectory(tempDir, () async {
-        await _tryMacOSLint(macOSPodspecPath, <String>['--allow-warnings']);
+        await _tryMacOSLint(macOSPodspecPath, <String>[
+          '--allow-warnings',
+          '--include-podspecs=$flutterMacOSPodspecPath',
+        ]);
       });
 
       section('Lint macOS podspec plugin as library');
 
       await inDirectory(tempDir, () async {
-        await _tryMacOSLint(macOSPodspecPath, <String>['--allow-warnings', '--use-libraries']);
+        await _tryMacOSLint(macOSPodspecPath, <String>[
+          '--allow-warnings',
+          '--use-libraries',
+          '--include-podspecs=$flutterMacOSPodspecPath',
+        ]);
       });
 
       section('Create iOS application');
@@ -292,4 +320,71 @@ void _validateMacOSPodfile(String appPath) {
 
 Future<void> _tryMacOSLint(String podspecPath, List<String> extraArguments) async {
   await eval('pod', <String>['lib', 'lint', podspecPath, ...extraArguments]);
+}
+
+/// Creates a local `FlutterMacOS.podspec` in [tempDir] symlinked to the cached
+/// `FlutterMacOS.xcframework` engine artifact and returns the podspec path.
+///
+/// Passing this podspec via `--include-podspecs` ensures `pod lib lint` builds
+/// against the local engine framework and current deployment target rather than
+/// pulling an outdated `FlutterMacOS` podspec from CocoaPods trunk.
+String _setUpFlutterMacOSPodspec({required String flutterRoot, required Directory tempDir}) {
+  final flutterMacOSPodspec = File(path.join(tempDir.path, 'FlutterMacOS.podspec'));
+  final flutterMacOSFramework = Directory(
+    path.join(
+      flutterRoot,
+      'bin',
+      'cache',
+      'artifacts',
+      'engine',
+      'darwin-x64',
+      'FlutterMacOS.xcframework',
+    ),
+  );
+
+  Link(path.join(tempDir.path, 'FlutterMacOS.xcframework')).createSync(flutterMacOSFramework.path);
+
+  flutterMacOSPodspec.writeAsStringSync('''
+Pod::Spec.new do |s|
+  s.name             = 'FlutterMacOS'
+  s.version          = '1.0.0'
+  s.summary          = 'A UI toolkit for beautiful and fast apps.'
+  s.homepage         = 'https://flutter.dev'
+  s.license          = { :type => 'BSD' }
+  s.author           = { 'Flutter Dev Team' => 'flutter-dev@googlegroups.com' }
+  s.source           = { :git => 'https://github.com/flutter/engine', :tag => s.version.to_s }
+  s.osx.deployment_target = '12.0'
+  s.vendored_frameworks = 'FlutterMacOS.xcframework'
+end
+''');
+  return flutterMacOSPodspec.path;
+}
+
+/// Creates a local `Flutter.podspec` in [tempDir] symlinked to the cached
+/// `Flutter.xcframework` engine artifact and returns the podspec path.
+///
+/// Passing this podspec via `--include-podspecs` ensures `pod lib lint` builds
+/// against the local engine framework and current deployment target rather than
+/// pulling an outdated `Flutter` podspec from CocoaPods trunk.
+String _setUpFlutterIosPodspec({required String flutterRoot, required Directory tempDir}) {
+  final flutterIosPodspec = File(path.join(tempDir.path, 'Flutter.podspec'));
+  final flutterIosFramework = Directory(
+    path.join(flutterRoot, 'bin', 'cache', 'artifacts', 'engine', 'ios', 'Flutter.xcframework'),
+  );
+  Link(path.join(tempDir.path, 'Flutter.xcframework')).createSync(flutterIosFramework.path);
+
+  flutterIosPodspec.writeAsStringSync('''
+Pod::Spec.new do |s|
+  s.name             = 'Flutter'
+  s.version          = '1.0.0'
+  s.summary          = 'A UI toolkit for beautiful and fast apps.'
+  s.homepage         = 'https://flutter.dev'
+  s.license          = { :type => 'BSD' }
+  s.author           = { 'Flutter Dev Team' => 'flutter-dev@googlegroups.com' }
+  s.source           = { :git => 'https://github.com/flutter/engine', :tag => s.version.to_s }
+  s.ios.deployment_target = '15.0'
+  s.vendored_frameworks = 'Flutter.xcframework'
+end
+''');
+  return flutterIosPodspec.path;
 }

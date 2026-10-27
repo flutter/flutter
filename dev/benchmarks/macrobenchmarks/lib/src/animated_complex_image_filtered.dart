@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:ui' as ui;
+
 import 'package:flutter/material.dart';
 
 // Various tests to verify that animated image filtered layers do not

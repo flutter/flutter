@@ -167,8 +167,7 @@ class _SemanticsDebuggerState extends State<SemanticsDebugger> with WidgetsBindi
         onTap: _handleTap,
         onLongPress: _handleLongPress,
         onPanEnd: _handlePanEnd,
-        excludeFromSemantics:
-            true, // otherwise if you don't hit anything, we end up receiving it, which causes an infinite loop...
+        excludeFromSemantics: true, // otherwise if you don't hit anything, we end up receiving it, which causes an infinite loop...
         child: Listener(
           onPointerDown: _handlePointerDown,
           behavior: HitTestBehavior.opaque,

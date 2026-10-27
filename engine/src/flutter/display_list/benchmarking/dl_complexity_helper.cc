@@ -29,10 +29,10 @@ class DlComplexityPathReceiver : public flutter::DlPathReceiver {
   }
   void Close() override {}
 
-  uint32_t line_verb_count;
-  uint32_t quad_verb_count;
-  uint32_t conic_verb_count;
-  uint32_t cubic_verb_count;
+  uint32_t line_verb_count = 0u;
+  uint32_t quad_verb_count = 0u;
+  uint32_t conic_verb_count = 0u;
+  uint32_t cubic_verb_count = 0u;
 };
 
 }  // namespace

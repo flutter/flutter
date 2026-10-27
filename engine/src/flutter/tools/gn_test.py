@@ -29,6 +29,11 @@ class GNTestCase(unittest.TestCase):
     self._expect_build_dir(['--android'], os.path.join('out', 'android_debug'))
     self._expect_build_dir(['--android', '--runtime-mode', 'release'],
                            os.path.join('out', 'android_release'))
+    self._expect_build_dir(['--web'], os.path.join('out', 'wasm_debug'))
+    self._expect_build_dir(['--web', '--runtime-mode', 'profile'],
+                           os.path.join('out', 'wasm_profile'))
+    self._expect_build_dir(['--web', '--runtime-mode', 'release'],
+                           os.path.join('out', 'wasm_release'))
 
   def _gn_args(self, arg_list):
     args = gn.parse_args(['gn'] + arg_list)
@@ -40,6 +45,17 @@ class GNTestCase(unittest.TestCase):
         self._gn_args(['--ios', '--simulator', '--simulator-cpu', 'x64'])['target_cpu'], 'x64'
     )
     self.assertEqual(self._gn_args(['--ios'])['target_cpu'], 'arm64')
+    self.assertEqual(self._gn_args(['--web'])['flutter_runtime_mode'], 'debug')
+    self.assertEqual(
+        self._gn_args(['--web', '--runtime-mode', 'profile'])['flutter_runtime_mode'], 'profile'
+    )
+    self.assertEqual(
+        self._gn_args(['--web', '--runtime-mode', 'release'])['flutter_runtime_mode'], 'release'
+    )
+    self.assertEqual(
+        self._gn_args(['--target-os', 'wasm', '--runtime-mode', 'release'])['flutter_runtime_mode'],
+        'release'
+    )
 
   def test_cannot_use_android_and_enable_unittests(self):
     with self.assertRaises(Exception):

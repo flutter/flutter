@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:ui' as ui;
+
 import 'package:flutter/material.dart';
 
 /// A custom widget displaying a colorful background canvas overlayed with a
@@ -14,9 +15,7 @@ class BackdropFilterBlur extends StatelessWidget {
   Widget build(BuildContext context) {
     return Stack(
       children: <Widget>[
-        const Positioned.fill(
-          child: CustomPaint(painter: _BackgroundPainter()),
-        ),
+        const Positioned.fill(child: CustomPaint(painter: _BackgroundPainter())),
         Center(
           child: ClipRect(
             child: BackdropFilter(
@@ -27,16 +26,11 @@ class BackdropFilterBlur extends StatelessWidget {
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
                   color: Colors.white.withValues(alpha: 0.1),
-                  border: Border.all(
-                    color: Colors.white.withValues(alpha: 0.2),
-                  ),
+                  border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
                 ),
                 child: const Text(
                   'Blur',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                 ),
               ),
             ),
@@ -52,10 +46,7 @@ class _BackgroundPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    canvas.drawRect(
-      Rect.fromLTWH(0, 0, size.width, size.height),
-      Paint()..color = Colors.yellow,
-    );
+    canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), Paint()..color = Colors.yellow);
     canvas.drawCircle(
       Offset(size.width * 0.3, size.height * 0.3),
       60.0,

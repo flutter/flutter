@@ -190,7 +190,6 @@ class _AutocompleteField extends StatelessWidget {
 // The default Material-style Autocomplete options.
 class _AutocompleteOptions<T extends Object> extends StatelessWidget {
   const _AutocompleteOptions({
-    super.key,
     required this.displayStringForOption,
     required this.onSelected,
     required this.openDirection,

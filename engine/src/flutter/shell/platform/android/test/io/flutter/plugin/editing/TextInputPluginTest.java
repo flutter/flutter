@@ -309,7 +309,8 @@ public class TextInputPluginTest {
             true,
             false, // Delta model is disabled.
             TextInputChannel.TextCapitalization.NONE,
-            new TextInputChannel.InputType(TextInputChannel.TextInputType.TEXT, false, false),
+            new TextInputChannel.InputType(
+                TextInputChannel.TextInputType.TEXT, false, false, false),
             null,
             null,
             null,
@@ -431,7 +432,8 @@ public class TextInputPluginTest {
             true,
             true, // Enable delta model.
             TextInputChannel.TextCapitalization.NONE,
-            new TextInputChannel.InputType(TextInputChannel.TextInputType.TEXT, false, false),
+            new TextInputChannel.InputType(
+                TextInputChannel.TextInputType.TEXT, false, false, false),
             null,
             null,
             null,
@@ -567,7 +569,8 @@ public class TextInputPluginTest {
             true,
             true, // Enable delta model.
             TextInputChannel.TextCapitalization.NONE,
-            new TextInputChannel.InputType(TextInputChannel.TextInputType.TEXT, false, false),
+            new TextInputChannel.InputType(
+                TextInputChannel.TextInputType.TEXT, false, false, false),
             null,
             null,
             null,
@@ -684,7 +687,8 @@ public class TextInputPluginTest {
             true,
             true, // Enable delta model.
             TextInputChannel.TextCapitalization.NONE,
-            new TextInputChannel.InputType(TextInputChannel.TextInputType.TEXT, false, false),
+            new TextInputChannel.InputType(
+                TextInputChannel.TextInputType.TEXT, false, false, false),
             null,
             null,
             null,
@@ -799,7 +803,8 @@ public class TextInputPluginTest {
             true,
             true, // Enable delta model.
             TextInputChannel.TextCapitalization.NONE,
-            new TextInputChannel.InputType(TextInputChannel.TextInputType.TEXT, false, false),
+            new TextInputChannel.InputType(
+                TextInputChannel.TextInputType.TEXT, false, false, false),
             null,
             null,
             null,
@@ -911,7 +916,8 @@ public class TextInputPluginTest {
             true,
             false,
             TextInputChannel.TextCapitalization.NONE,
-            new TextInputChannel.InputType(TextInputChannel.TextInputType.TEXT, false, false),
+            new TextInputChannel.InputType(
+                TextInputChannel.TextInputType.TEXT, false, false, false),
             null,
             null,
             null,
@@ -1107,7 +1113,8 @@ public class TextInputPluginTest {
             true,
             false,
             TextInputChannel.TextCapitalization.NONE,
-            new TextInputChannel.InputType(TextInputChannel.TextInputType.TEXT, false, false),
+            new TextInputChannel.InputType(
+                TextInputChannel.TextInputType.TEXT, false, false, false),
             null,
             null,
             null,
@@ -1386,7 +1393,7 @@ public class TextInputPluginTest {
             true,
             false,
             TextInputChannel.TextCapitalization.NONE,
-            new TextInputChannel.InputType(textInputType, false, false),
+            new TextInputChannel.InputType(textInputType, false, false, false),
             null,
             null,
             null,
@@ -1468,7 +1475,8 @@ public class TextInputPluginTest {
             true,
             false,
             TextInputChannel.TextCapitalization.NONE,
-            new TextInputChannel.InputType(TextInputChannel.TextInputType.TEXT, false, false),
+            new TextInputChannel.InputType(
+                TextInputChannel.TextInputType.TEXT, false, false, false),
             null,
             null,
             null,
@@ -1513,7 +1521,8 @@ public class TextInputPluginTest {
             true,
             false,
             TextInputChannel.TextCapitalization.NONE,
-            new TextInputChannel.InputType(TextInputChannel.TextInputType.NONE, false, false),
+            new TextInputChannel.InputType(
+                TextInputChannel.TextInputType.NONE, false, false, false),
             null,
             null,
             null,
@@ -1550,7 +1559,8 @@ public class TextInputPluginTest {
             true,
             false,
             TextInputChannel.TextCapitalization.NONE,
-            new TextInputChannel.InputType(TextInputChannel.TextInputType.NONE, false, false),
+            new TextInputChannel.InputType(
+                TextInputChannel.TextInputType.NONE, false, false, false),
             null,
             null,
             null,
@@ -1585,7 +1595,8 @@ public class TextInputPluginTest {
             true,
             false,
             TextInputChannel.TextCapitalization.NONE,
-            new TextInputChannel.InputType(TextInputChannel.TextInputType.WEB_SEARCH, false, false),
+            new TextInputChannel.InputType(
+                TextInputChannel.TextInputType.WEB_SEARCH, false, false, false),
             null,
             null,
             null,
@@ -1624,7 +1635,8 @@ public class TextInputPluginTest {
             true,
             false,
             TextInputChannel.TextCapitalization.NONE,
-            new TextInputChannel.InputType(TextInputChannel.TextInputType.TWITTER, false, false),
+            new TextInputChannel.InputType(
+                TextInputChannel.TextInputType.TWITTER, false, false, false),
             null,
             null,
             null,
@@ -1664,7 +1676,8 @@ public class TextInputPluginTest {
             true,
             false,
             TextInputChannel.TextCapitalization.NONE,
-            new TextInputChannel.InputType(TextInputChannel.TextInputType.MULTILINE, false, false),
+            new TextInputChannel.InputType(
+                TextInputChannel.TextInputType.MULTILINE, false, false, false),
             null,
             null,
             null,
@@ -1708,7 +1721,8 @@ public class TextInputPluginTest {
             true,
             false,
             TextInputChannel.TextCapitalization.NONE,
-            new TextInputChannel.InputType(TextInputChannel.TextInputType.MULTILINE, false, false),
+            new TextInputChannel.InputType(
+                TextInputChannel.TextInputType.MULTILINE, false, false, false),
             null,
             null,
             null,
@@ -1747,7 +1761,8 @@ public class TextInputPluginTest {
             true,
             false,
             TextInputChannel.TextCapitalization.NONE,
-            new TextInputChannel.InputType(TextInputChannel.TextInputType.MULTILINE, false, false),
+            new TextInputChannel.InputType(
+                TextInputChannel.TextInputType.MULTILINE, false, false, false),
             null,
             null,
             null,
@@ -3026,7 +3041,8 @@ public class TextInputPluginTest {
             true,
             false,
             TextInputChannel.TextCapitalization.NONE,
-            new TextInputChannel.InputType(TextInputChannel.TextInputType.MULTILINE, false, false),
+            new TextInputChannel.InputType(
+                TextInputChannel.TextInputType.MULTILINE, false, false, false),
             null,
             null,
             null,

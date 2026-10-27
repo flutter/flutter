@@ -37,11 +37,10 @@ Future<void> syncAndAsyncError() {
 }
 
 Future<void> delayedThrow(FakeAsync time) {
-  final Future<void> result = Future<void>.delayed(const Duration(milliseconds: 10)).then((
-    _,
-  ) async {
-    throw _CustomException('Delayed Doom');
-  });
+  final Future<void> result = Future<void>.delayed(const Duration(milliseconds: 10))
+      .then((_) async {
+        throw _CustomException('Delayed Doom');
+      });
   time.elapse(const Duration(seconds: 1));
   time.flushMicrotasks();
   return result;

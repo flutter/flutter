@@ -63,8 +63,14 @@ class CkColorFilter implements BackendColorFilter {
     return result;
   }
 
+  bool _isDisposed = false;
+
   @override
   void dispose() {
+    if (_isDisposed) {
+      return;
+    }
+    _isDisposed = true;
     skiaObject.delete();
   }
 }

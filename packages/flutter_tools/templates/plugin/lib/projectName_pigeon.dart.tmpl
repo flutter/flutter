@@ -1,0 +1,19 @@
+import 'package:flutter/foundation.dart';
+
+import '{{projectName}}_platform_interface.dart';
+import 'src/messages.g.dart';
+
+/// An implementation of [{{pluginDartClass}}Platform] that uses Pigeon, for
+/// non-web platforms.
+class Pigeon{{pluginDartClass}} extends {{pluginDartClass}}Platform {
+  /// Creates a new plugin implementation instance.
+  Pigeon{{pluginDartClass}}({@visibleForTesting {{pluginClass}}Api? api})
+    : _hostApi = api ?? {{pluginClass}}Api();
+
+  final {{pluginClass}}Api _hostApi;
+
+  @override
+  Future<String?> getPlatformVersion() async {
+    return _hostApi.getPlatformVersion();
+  }
+}

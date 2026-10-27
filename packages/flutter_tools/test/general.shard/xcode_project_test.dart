@@ -245,22 +245,6 @@ void main() {
       );
 
       testUsingContext(
-        'is false when Xcode is less than 15',
-        () async {
-          final fs = MemoryFileSystem.test();
-          final Directory projectDirectory = fs.directory('path');
-          projectDirectory.childDirectory('ios').createSync(recursive: true);
-          final FlutterManifest manifest = FakeFlutterManifest();
-          final project = FlutterProject(projectDirectory, manifest, manifest);
-          expect(project.ios.usesSwiftPackageManager, isFalse);
-        },
-        overrides: <Type, Generator>{
-          FeatureFlags: () => TestFeatureFlags(isSwiftPackageManagerEnabled: true),
-          XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter(version: Version(14, 0, 0)),
-        },
-      );
-
-      testUsingContext(
         'is false when Swift Package Manager feature is not enabled',
         () async {
           final fs = MemoryFileSystem.test();
@@ -401,7 +385,9 @@ void main() {
           expect(project.lldbInitFile, isNot(exists));
           expect(project.lldbHelperPythonFile, isNot(exists));
 
-          await project.ensureReadyForPlatformSpecificTooling();
+          await project.ensureReadyForPlatformSpecificTooling(
+            toolContext: FakeToolContext(cache: FakeCache(olderThanToolsStamp: true), fs: fs),
+          );
 
           expect(project.lldbInitFile, exists);
           expect(project.lldbHelperPythonFile, exists);
@@ -419,7 +405,9 @@ void main() {
           project.lldbHelperPythonFile.createSync(recursive: true);
           project.lldbHelperPythonFile.writeAsStringSync('old');
 
-          await project.ensureReadyForPlatformSpecificTooling();
+          await project.ensureReadyForPlatformSpecificTooling(
+            toolContext: FakeToolContext(cache: FakeCache(olderThanToolsStamp: true), fs: fs),
+          );
 
           expect(project.lldbInitFile.readAsStringSync(), contains('Generated file, do not edit.'));
           expect(
@@ -513,22 +501,6 @@ void main() {
         overrides: <Type, Generator>{
           FeatureFlags: () => TestFeatureFlags(isSwiftPackageManagerEnabled: true),
           XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter(version: Version(15, 0, 0)),
-        },
-      );
-
-      testUsingContext(
-        'is false when Xcode is less than 15',
-        () async {
-          final fs = MemoryFileSystem.test();
-          final Directory projectDirectory = fs.directory('path');
-          projectDirectory.childDirectory('macos').createSync(recursive: true);
-          final FlutterManifest manifest = FakeFlutterManifest();
-          final project = FlutterProject(projectDirectory, manifest, manifest);
-          expect(project.macos.usesSwiftPackageManager, isFalse);
-        },
-        overrides: <Type, Generator>{
-          FeatureFlags: () => TestFeatureFlags(isSwiftPackageManagerEnabled: true),
-          XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter(version: Version(14, 0, 0)),
         },
       );
 
@@ -814,6 +786,9 @@ class FakeFlutterProject extends Fake implements FlutterProject {
 
   @override
   late final Directory directory = fileSystem.directory('app_name');
+
+  @override
+  Directory get buildDirectory => directory.childDirectory('build');
 
   @override
   bool isModule = false;

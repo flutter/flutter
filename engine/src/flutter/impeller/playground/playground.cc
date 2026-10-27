@@ -767,7 +767,7 @@ bool Playground::ShouldKeepRendering() const {
   return true;
 }
 
-fml::Status Playground::SetCapabilities(
+absl::Status Playground::SetCapabilities(
     const std::shared_ptr<Capabilities>& capabilities) {
   return GetImpl()->SetCapabilities(capabilities);
 }

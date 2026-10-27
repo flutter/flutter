@@ -129,22 +129,19 @@ void main() {
     );
   });
 
-  test(
-    'TimePickerThemeData.inputDecorationTheme accepts only InputDecorationTheme or InputDecorationThemeData instances',
-    () {
-      const decorationTheme = InputDecorationTheme();
-      var timePickerTheme = const TimePickerThemeData(inputDecorationTheme: decorationTheme);
-      expect(timePickerTheme.inputDecorationTheme, decorationTheme.data);
+  test('TimePickerThemeData.inputDecorationTheme accepts only InputDecorationTheme or InputDecorationThemeData instances', () {
+    const decorationTheme = InputDecorationTheme();
+    var timePickerTheme = const TimePickerThemeData(inputDecorationTheme: decorationTheme);
+    expect(timePickerTheme.inputDecorationTheme, decorationTheme.data);
 
-      timePickerTheme = TimePickerThemeData(inputDecorationTheme: decorationTheme.data);
-      expect(timePickerTheme.inputDecorationTheme, decorationTheme.data);
+    timePickerTheme = TimePickerThemeData(inputDecorationTheme: decorationTheme.data);
+    expect(timePickerTheme.inputDecorationTheme, decorationTheme.data);
 
-      // Wrong type throws.
-      expect(() {
-        TimePickerThemeData(inputDecorationTheme: Object());
-      }, throwsA(isA<AssertionError>()));
-    },
-  );
+    // Wrong type throws.
+    expect(() {
+      TimePickerThemeData(inputDecorationTheme: Object());
+    }, throwsA(isA<AssertionError>()));
+  });
 
   testWidgets('Material2 - Passing no TimePickerThemeData uses defaults', (
     WidgetTester tester,

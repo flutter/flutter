@@ -76,7 +76,14 @@ sealed class ImageSource {
 /// An [ImageSource] implementation wrapping a WebCodecs [VideoFrame].
 class VideoFrameImageSource extends ImageSource {
   /// Creates a [VideoFrameImageSource] wrapping the given [videoFrame].
-  VideoFrameImageSource(this.videoFrame);
+  ///
+  /// Dimensions are captured eagerly because multi-threaded Skwasm transfers
+  /// [videoFrame] to the render worker via `postMessage`, which synchronously
+  /// detaches the object on the main thread and resets `displayWidth` and
+  /// `displayHeight` to `0`.
+  VideoFrameImageSource(this.videoFrame)
+    : width = videoFrame.displayWidth.toInt(),
+      height = videoFrame.displayHeight.toInt();
 
   /// The wrapped WebCodecs [VideoFrame] object.
   final VideoFrame videoFrame;
@@ -87,10 +94,10 @@ class VideoFrameImageSource extends ImageSource {
   }
 
   @override
-  int get height => videoFrame.displayHeight.toInt();
+  final int height;
 
   @override
-  int get width => videoFrame.displayWidth.toInt();
+  final int width;
 
   @override
   DomCanvasImageSource get canvasImageSource => videoFrame;
@@ -123,7 +130,12 @@ class ImageElementImageSource extends ImageSource {
 /// An [ImageSource] implementation wrapping an HTML5 [DomImageBitmap].
 class ImageBitmapImageSource extends ImageSource {
   /// Creates an [ImageBitmapImageSource] wrapping the given [imageBitmap].
-  ImageBitmapImageSource(this.imageBitmap);
+  ///
+  /// Dimensions are captured eagerly because multi-threaded Skwasm transfers
+  /// [imageBitmap] to the render worker via `postMessage`, which synchronously
+  /// detaches the bitmap on the main thread and resets `width` and `height` to
+  /// `0` before `_StaticEngineCodec.getNextFrame` constructs the `EngineImage`.
+  ImageBitmapImageSource(this.imageBitmap) : width = imageBitmap.width, height = imageBitmap.height;
 
   /// The wrapped [DomImageBitmap] object.
   final DomImageBitmap imageBitmap;
@@ -135,10 +147,10 @@ class ImageBitmapImageSource extends ImageSource {
   }
 
   @override
-  int get height => imageBitmap.height;
+  final int height;
 
   @override
-  int get width => imageBitmap.width;
+  final int width;
 
   @override
   DomCanvasImageSource get canvasImageSource => imageBitmap;
@@ -359,5 +371,70 @@ class CanvasImageSourceWrapper extends ImageSource {
   @override
   void _doClose() {
     // Generic canvas image sources do not require manual resource disposal.
+  }
+}
+
+/// Tracks and retains [ImageSource] instances drawn onto a [ui.Canvas] during
+/// picture recording.
+///
+/// Keeps underlying DOM image sources alive until all referencing [ui.Picture]
+/// objects are disposed or garbage-collected.
+class PictureImageTracker {
+  Set<ImageSource>? _sources;
+  bool _released = false;
+
+  /// Whether no sources have been recorded by this tracker.
+  bool get isEmpty => _sources == null || _sources!.isEmpty;
+
+  /// Retains and records a specific [ImageSource].
+  void recordSource(ImageSource source) {
+    if (_released) {
+      return;
+    }
+    _sources ??= <ImageSource>{};
+    if (_sources!.add(source)) {
+      source.retain();
+    }
+  }
+
+  /// Extracts and records the underlying [ImageSource] from a [ui.Image], if present.
+  void recordImage(ui.Image image) {
+    if (image case EngineImage(:final imageSource?)) {
+      recordSource(imageSource);
+    }
+  }
+
+  /// Inspects shaders attached to [paint] and records any referenced images.
+  void recordPaint(ui.Paint? paint) {
+    if (paint?.shader case final ui.Shader shader) {
+      if (shader case EngineImageShader(:final image)) {
+        recordImage(image);
+      } else if (shader case EngineFragmentShader(:final samplerImages)) {
+        samplerImages.forEach(recordImage);
+      }
+    }
+  }
+
+  /// Merges all retained sources from [other] into this tracker.
+  void recordFrom(PictureImageTracker? other) {
+    if (_released) {
+      return;
+    }
+    other?._sources?.forEach(recordSource);
+  }
+
+  /// Releases all retained sources and clears the tracked set.
+  void releaseAll() {
+    if (_released) {
+      return;
+    }
+    _released = true;
+    final Set<ImageSource>? sources = _sources;
+    if (sources != null) {
+      for (final ImageSource source in sources) {
+        source.release();
+      }
+      _sources = null;
+    }
   }
 }

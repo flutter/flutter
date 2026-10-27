@@ -35,8 +35,7 @@ class _FloatingHeaderExampleState extends State<FloatingHeaderExample> {
             slivers: <Widget>[
               SliverFloatingHeader(
                 child: ListHeader(
-                  text:
-                      'SliverFloatingHeader\nScroll down a little to show\nScroll up a little to hide',
+                  text: 'SliverFloatingHeader\nScroll down a little to show\nScroll up a little to hide',
                 ),
               ),
               ItemList(),

@@ -37,7 +37,7 @@ class RunMetrics {
   // * UnderlinePosition   underline position relative to baseline
   // * StrikeoutThickness  strikeout thickness
   // * StrikeoutPosition   strikeout position relative to baseline
-  SkFontMetrics font_metrics;
+  SkFontMetrics font_metrics{};
 };
 
 }  // namespace txt

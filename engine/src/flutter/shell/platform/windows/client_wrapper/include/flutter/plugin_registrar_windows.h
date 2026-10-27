@@ -8,6 +8,7 @@
 #include <flutter_windows.h>
 #include <windows.h>
 
+#include <functional>
 #include <memory>
 #include <optional>
 
@@ -111,6 +112,35 @@ class PluginRegistrarWindows : public PluginRegistrar {
   bool GetGraphicsAdapter(IDXGIAdapter** adapter_out) {
     return FlutterDesktopPluginRegistrarGetGraphicsAdapter(registrar(),
                                                            adapter_out);
+  }
+
+  // Returns true if the current thread is the platform thread.
+  // This can be called on any thread.
+  bool IsPlatformThread() const {
+    return FlutterDesktopPluginRegistrarIsPlatformThread(registrar());
+  }
+
+  // Schedule a callback to be called on the platform thread.
+  //
+  // This can be called on any thread. The callback is executed only
+  // once on the platform thread.
+  void PostPlatformThreadTask(std::function<void()> callback) {
+    if (!callback) {
+      return;
+    }
+    FlutterDesktopPluginRegistrarPostPlatformThreadTask(
+        registrar(),
+        /*callback=*/
+        [](void* user_data) {
+          std::unique_ptr<std::function<void()>> cb{
+              static_cast<std::function<void()>*>(user_data)};
+          (*cb)();
+        },
+        /*on_cancel=*/
+        [](void* user_data) {
+          delete static_cast<std::function<void()>*>(user_data);
+        },
+        /*user_data=*/new std::function<void()>(std::move(callback)));
   }
 
  private:

@@ -17,7 +17,7 @@
 
 namespace impeller {
 
-std::shared_ptr<FilterContents> WrapInput(const ContentContext& renderer,
+std::shared_ptr<FilterContents> WrapInput(ContentContext& renderer,
                                           const flutter::DlImageFilter* filter,
                                           const FilterInput::Ref& input) {
   FML_DCHECK(filter);

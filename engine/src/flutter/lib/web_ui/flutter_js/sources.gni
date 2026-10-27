@@ -11,6 +11,7 @@ flutter_js_source_list = [
   "src/loader.js",
   "src/service_worker_loader.js",
   "src/skwasm_loader.js",
+  "src/supports_dart2wasm.js",
   "src/trusted_types.js",
   "src/utils.js",
 

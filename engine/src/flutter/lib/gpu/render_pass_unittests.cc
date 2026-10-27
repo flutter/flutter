@@ -6,6 +6,7 @@
 
 #include "gtest/gtest.h"
 
+#include "flutter/lib/gpu/binding_set.h"
 #include "flutter/lib/gpu/render_pipeline.h"
 #include "flutter/lib/gpu/shader.h"
 #include "fml/memory/ref_ptr.h"
@@ -108,6 +109,34 @@ TEST(FlutterGpuRenderPassTest, RedundantPipelineStateAssignmentsAreIgnored) {
   // A real change still dirties.
   render_pass->SetCullMode(impeller::CullMode::kFrontFace);
   EXPECT_TRUE(render_pass->IsPipelineStateDirtyForTesting());
+}
+
+// A set goes into a slot rather than onto a list, so rebinding it once per
+// draw (the expected usage) must not accumulate bindings on the pass.
+TEST(FlutterGpuRenderPassTest, BindSetReplacesTheSlotContents) {
+  auto render_pass = fml::MakeRefCounted<RenderPass>();
+  auto first = fml::MakeRefCounted<BindingSet>();
+  auto second = fml::MakeRefCounted<BindingSet>();
+
+  render_pass->BindSet(0, first);
+  render_pass->BindSet(0, first);
+  EXPECT_EQ(render_pass->binding_sets[0].get(), first.get());
+
+  render_pass->BindSet(0, second);
+  EXPECT_EQ(render_pass->binding_sets[0].get(), second.get());
+
+  render_pass->BindSet(1, first);
+  EXPECT_EQ(render_pass->binding_sets[0].get(), second.get());
+  EXPECT_EQ(render_pass->binding_sets[1].get(), first.get());
+
+  // An out of range slot is dropped rather than corrupting a valid one.
+  render_pass->BindSet(RenderPass::kMaxBindingSets, first);
+  EXPECT_EQ(render_pass->binding_sets[0].get(), second.get());
+
+  render_pass->ClearBindings();
+  for (const auto& set : render_pass->binding_sets) {
+    EXPECT_EQ(set.get(), nullptr);
+  }
 }
 
 }  // namespace

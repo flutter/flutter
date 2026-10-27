@@ -36,11 +36,10 @@ class IconThemeData with Diagnosticable {
     this.grade,
     this.opticalSize,
     this.color,
-    double? opacity,
+    this._opacity,
     this.shadows,
     this.applyTextScaling,
-  }) : _opacity = opacity,
-       assert(fill == null || (0.0 <= fill && fill <= 1.0)),
+  }) : assert(fill == null || (0.0 <= fill && fill <= 1.0)),
        assert(weight == null || (0.0 < weight)),
        assert(opticalSize == null || (0.0 < opticalSize));
 

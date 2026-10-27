@@ -95,8 +95,9 @@ abstract class GestureRecognizerFactory<T extends GestureRecognizer> {
 typedef GestureRecognizerFactoryConstructor<T extends GestureRecognizer> = T Function();
 
 /// Signature for closures that implement [GestureRecognizerFactory.initializer].
-typedef GestureRecognizerFactoryInitializer<T extends GestureRecognizer> =
-    void Function(T instance);
+typedef GestureRecognizerFactoryInitializer<T extends GestureRecognizer> = void Function(
+  T instance,
+);
 
 /// Factory for creating gesture recognizers that delegates to callbacks.
 ///

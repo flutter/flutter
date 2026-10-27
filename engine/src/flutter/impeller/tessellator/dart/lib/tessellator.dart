@@ -161,18 +161,24 @@ typedef _line_to_type = ffi.Void Function(ffi.Pointer<_PathBuilder>, ffi.Float, 
 
 final _LineToType _lineToFn = _dylib.lookupFunction<_line_to_type, _LineToType>('LineTo');
 
-typedef _CubicToType =
-    void Function(ffi.Pointer<_PathBuilder>, double, double, double, double, double, double);
-typedef _cubic_to_type =
-    ffi.Void Function(
-      ffi.Pointer<_PathBuilder>,
-      ffi.Float,
-      ffi.Float,
-      ffi.Float,
-      ffi.Float,
-      ffi.Float,
-      ffi.Float,
-    );
+typedef _CubicToType = void Function(
+  ffi.Pointer<_PathBuilder>,
+  double,
+  double,
+  double,
+  double,
+  double,
+  double,
+);
+typedef _cubic_to_type = ffi.Void Function(
+  ffi.Pointer<_PathBuilder>,
+  ffi.Float,
+  ffi.Float,
+  ffi.Float,
+  ffi.Float,
+  ffi.Float,
+  ffi.Float,
+);
 
 final _CubicToType _cubicToFn = _dylib.lookupFunction<_cubic_to_type, _CubicToType>('CubicTo');
 
@@ -181,16 +187,20 @@ typedef _close_type = ffi.Void Function(ffi.Pointer<_PathBuilder>, ffi.Bool);
 
 final _CloseType _closeFn = _dylib.lookupFunction<_close_type, _CloseType>('Close');
 
-typedef _TessellateType =
-    ffi.Pointer<_Vertices> Function(ffi.Pointer<_PathBuilder>, int, double, double, double);
-typedef _tessellate_type =
-    ffi.Pointer<_Vertices> Function(
-      ffi.Pointer<_PathBuilder>,
-      ffi.Int,
-      ffi.Float,
-      ffi.Float,
-      ffi.Float,
-    );
+typedef _TessellateType = ffi.Pointer<_Vertices> Function(
+  ffi.Pointer<_PathBuilder>,
+  int,
+  double,
+  double,
+  double,
+);
+typedef _tessellate_type = ffi.Pointer<_Vertices> Function(
+  ffi.Pointer<_PathBuilder>,
+  ffi.Int,
+  ffi.Float,
+  ffi.Float,
+  ffi.Float,
+);
 
 final _TessellateType _tessellateFn = _dylib.lookupFunction<_tessellate_type, _TessellateType>(
   'Tessellate',

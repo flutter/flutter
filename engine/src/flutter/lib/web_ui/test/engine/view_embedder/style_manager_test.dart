@@ -27,7 +27,16 @@ void doTests() {
         styleNonce: 'testing',
         cssSelectorPrefix: DomManager.flutterViewTagName,
       );
-      final expected = isFirefox ? 'rgb(0, 0, 0) 0px' : 'rgb(0, 0, 0) none 0px';
+      final Object expected = isFirefox
+          ? 'rgb(0, 0, 0) 0px'
+          : anyOf(<String>[
+              'rgb(0, 0, 0) none 0px',
+              '0px none rgb(0, 0, 0)',
+              // In WebKit, `:focus` does not match when the Safari window lacks
+              // OS-level WindowServer focus (`!domDocument.hasFocus()`), returning
+              // the initial unfocused outline width (`medium` = `3px`) with `none`.
+              if (isSafari && !domDocument.hasFocus()) '3px none rgb(0, 0, 0)',
+            ]);
 
       // Focus the element.
       flutterViewElement.focusWithoutScroll();
@@ -61,6 +70,12 @@ void doTests() {
       StyleManager.styleSemanticsHost(semanticsHost, 4.0);
       expect(semanticsHost.style.transform, 'scale(0.25)');
       expect(semanticsHost.style.position, 'absolute');
+      // The host must be anchored at the view origin. Without an explicit
+      // left/top it falls back to a static position flowed after its sibling
+      // hosts, offsetting the whole semantics tree. See:
+      // https://github.com/flutter/flutter/issues/190483
+      expect(semanticsHost.style.left, '0px');
+      expect(semanticsHost.style.top, '0px');
       expect(semanticsHost.style.transformOrigin, anyOf('0px 0px 0px', '0px 0px'));
     });
 

@@ -38,6 +38,8 @@ class Compiler {
 
   std::string GetErrorMessages() const;
 
+  std::string GetWarningMessages() const;
+
   /// Gets verbose error messages if available.
   ///
   /// This is only populated when GetErrorMessages() returns a truncated error
@@ -58,6 +60,7 @@ class Compiler {
   std::shared_ptr<fml::Mapping> sl_mapping_;
   std::stringstream error_stream_;
   std::stringstream verbose_error_stream_;
+  std::stringstream warning_stream_;
   std::unique_ptr<Reflector> reflector_;
   std::vector<std::string> included_file_names_;
   bool is_valid_ = false;

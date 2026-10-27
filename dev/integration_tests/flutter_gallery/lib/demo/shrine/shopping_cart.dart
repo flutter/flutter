@@ -110,9 +110,8 @@ class ShoppingCartSummary extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final TextStyle smallAmountStyle = Theme.of(
-      context,
-    ).textTheme.bodyMedium!.copyWith(color: kShrineBrown600);
+    final TextStyle smallAmountStyle = Theme.of(context).textTheme.bodyMedium!
+        .copyWith(color: kShrineBrown600);
     final TextStyle? largeAmountStyle = Theme.of(context).textTheme.headlineMedium;
     final formatter = NumberFormat.simpleCurrency(
       decimalDigits: 2,

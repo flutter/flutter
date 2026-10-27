@@ -26,7 +26,7 @@ DebuggerStatus GetDebuggerStatus() {
   // From Technical Q&A QA1361 Detecting the Debugger
   // https://developer.apple.com/library/archive/qa/qa1361/_index.html
   int management_info_base[4];
-  struct kinfo_proc info;
+  struct kinfo_proc info{};
   size_t size;
 
   // Initialize the flags so that, if sysctl fails for some bizarre

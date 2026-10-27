@@ -24,6 +24,7 @@ const Map<String, String> targetAliases = <String, String>{
   'skwasm_heavy': 'flutter/third_party/canvaskit:skwasm_heavy_group',
   'skwasm_heavy_st': 'flutter/third_party/canvaskit:skwasm_heavy_st_group',
   'wimp': 'flutter/third_party/canvaskit:wimp_group',
+  'wimp_heavy': 'flutter/third_party/canvaskit:wimp_heavy_group',
   'archive': 'flutter/web_sdk:flutter_web_sdk_archive',
 };
 

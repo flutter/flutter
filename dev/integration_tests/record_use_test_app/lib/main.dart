@@ -33,12 +33,7 @@ void main() async {
 const bool isWasm = !identical(1, 1.0);
 
 class MyApp extends StatelessWidget {
-  const MyApp({
-    super.key,
-    required this.hello,
-    required this.friend,
-    required this.count,
-  });
+  const MyApp({super.key, required this.hello, required this.friend, required this.count});
 
   final String hello;
   final String friend;
@@ -57,8 +52,10 @@ class MyApp extends StatelessWidget {
               Text('English: hello -> Pirate: $hello', style: const TextStyle(fontSize: 20)),
               Text('English: friend -> Pirate: $friend', style: const TextStyle(fontSize: 20)),
               const SizedBox(height: 20),
-              Text('Loaded translations count: $count',
-                  style: const TextStyle(fontWeight: FontWeight.bold)),
+              Text(
+                'Loaded translations count: $count',
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
               const SizedBox(height: 20),
               // Tests that dual-target web builds (Wasm with JS fallback) retain
               // the union of icons used by both compilers in the shared font asset.

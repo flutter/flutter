@@ -72,9 +72,9 @@ void main() {
         ),
       );
 
-      final ui.Image referenceImage =
-          (tester.renderObject(find.byKey(repaintBoundaryKey)) as RenderRepaintBoundary)
-              .toImageSync();
+      final ui.Image referenceImage = (tester.renderObject(
+        find.byKey(repaintBoundaryKey),
+      ) as RenderRepaintBoundary).toImageSync();
       addTearDown(referenceImage.dispose);
 
       await expectLater(find.byKey(repaintBoundaryKey), matchesReferenceImage(referenceImage));
@@ -129,9 +129,9 @@ void main() {
         ),
       );
 
-      final ui.Image referenceImage =
-          (tester.renderObject(find.byKey(repaintBoundaryKey)) as RenderRepaintBoundary)
-              .toImageSync();
+      final ui.Image referenceImage = (tester.renderObject(
+        find.byKey(repaintBoundaryKey),
+      ) as RenderRepaintBoundary).toImageSync();
       addTearDown(referenceImage.dispose);
 
       await tester.pumpWidget(

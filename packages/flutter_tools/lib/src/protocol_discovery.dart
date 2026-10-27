@@ -9,7 +9,7 @@ import 'base/logger.dart';
 import 'base/utils.dart';
 import 'device.dart';
 import 'device_port_forwarder.dart';
-import 'globals.dart' as globals;
+import 'vmservice.dart';
 
 /// Discovers a specific service protocol on a device, and forwards the service
 /// protocol device port to the host.
@@ -21,10 +21,9 @@ class ProtocolDiscovery {
     required this.throttleDuration,
     this.hostPort,
     this.devicePort,
-    required bool ipv6,
-    required Logger logger,
-  }) : _logger = logger,
-       _ipv6 = ipv6 {
+    required this._ipv6,
+    required this._logger,
+  }) {
     _deviceLogSubscription = logReader.logLines.listen(_handleLine, onDone: _stopScrapingLogs);
   }
 
@@ -101,7 +100,7 @@ class ProtocolDiscovery {
   }
 
   Match? _getPatternMatch(String line) {
-    return globals.kVMServiceMessageRegExp.firstMatch(line);
+    return kVMServiceMessageRegExp.firstMatch(line);
   }
 
   Uri? _getVmServiceUri(String line) {

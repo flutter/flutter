@@ -98,6 +98,7 @@ source_set("flow") {
     "//flutter/display_list",
     "//flutter/fml",
     "//flutter/txt",
+    "//third_party/abseil-cpp/absl/status",
   ]
 
   deps = [ "//flutter/skia" ]

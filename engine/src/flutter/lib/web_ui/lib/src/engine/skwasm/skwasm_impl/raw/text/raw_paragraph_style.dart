@@ -79,3 +79,12 @@ external void paragraphStyleSetApplyRoundingHack(
   ParagraphStyleHandle handle,
   bool applyRoundingHack,
 );
+
+@Native<Void Function(ParagraphStyleHandle, Bool)>(
+  symbol: 'paragraphStyle_setRenderSoftHyphens',
+  isLeaf: true,
+)
+external void paragraphStyleSetRenderSoftHyphens(
+  ParagraphStyleHandle handle,
+  bool renderSoftHyphens,
+);

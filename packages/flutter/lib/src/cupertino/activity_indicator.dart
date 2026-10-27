@@ -285,9 +285,8 @@ class _CupertinoLinearActivityIndicator extends CustomPainter {
     // Draw the progress portion of the bar.
     if (progress > 0) {
       canvas.drawRRect(
-        BorderRadius.all(
-          Radius.circular(size.height / 2),
-        ).toRRect(Offset.zero & Size(clampDouble(progress, 0.0, 1.0) * size.width, size.height)),
+        BorderRadius.all(Radius.circular(size.height / 2))
+            .toRRect(Offset.zero & Size(clampDouble(progress, 0.0, 1.0) * size.width, size.height)),
         _progressPaint,
       );
     }

@@ -62,7 +62,6 @@ Future<void> run(List<String> args) async {
   final assetDir = argResults[_kOptionAsset] as String;
   final AssetBundle? assets = await buildAssets(
     manifestPath: argResults[_kOptionManifest] as String? ?? defaultManifestPath,
-    assetDirPath: assetDir,
     packageConfigPath:
         argResults[_kOptionPackages] as String? ??
         findPackageConfigFileOrDefault(globals.fs.currentDirectory).path,

@@ -2672,9 +2672,9 @@ void main() {
   testWidgets('SliverSemantics supports heading levels', (WidgetTester tester) async {
     // Default: not a heading.
     expect(
-      SliverSemantics(
-        sliver: const SliverToBoxAdapter(child: Text('dummy text')),
-      ).properties.headingLevel,
+      SliverSemantics(sliver: const SliverToBoxAdapter(child: Text('dummy text')))
+          .properties
+          .headingLevel,
       isNull,
     );
 

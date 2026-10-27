@@ -109,6 +109,11 @@ class TestApp {
       )
       ..pop();
 
+    final childLogicalSize = windowSize * 0.33;
+    final childLogicalOffset = windowCenter - childLogicalSize.center(Offset.zero);
+    final childLogicalBounds = childLogicalOffset & childLogicalSize;
+    final policyRegions = <Map<String, Object>>[];
+
     if (showOverlay) {
       final containerSize = windowSize * .66;
       // Alignment.center
@@ -120,6 +125,16 @@ class TestApp {
         containerOffset.dx + containerSize.width - overlaySize.width,
         containerOffset.dy,
       );
+      final overlayLogicalBounds = overlayOffset & overlaySize;
+      policyRegions.add(<String, Object>{
+        'rectLTRB': <double>[
+          overlayLogicalBounds.left,
+          overlayLogicalBounds.top,
+          overlayLogicalBounds.right,
+          overlayLogicalBounds.bottom,
+        ],
+        'response': 'YES_PRIORITIZE',
+      });
 
       final overlayPhysicalSize = overlaySize * pixelRatio;
       final overlayPhysicalOffset = overlayOffset * pixelRatio;
@@ -129,7 +144,7 @@ class TestApp {
       final overlayCullRect = Offset.zero & overlayPhysicalSize; // in canvas physical coordinates
       final canvas = Canvas(recorder, overlayCullRect);
       canvas.scale(pixelRatio);
-      final paint = Paint()..color = Color.fromARGB(255, 0, 255, 0);
+      final paint = Paint()..color = const Color.fromARGB(255, 0, 255, 0);
       canvas.drawRect(Offset.zero & overlaySize, paint);
       final overlayPicture = recorder.endRecording();
       sceneBuilder
@@ -137,6 +152,26 @@ class TestApp {
         ..addPicture(overlayPhysicalOffset, overlayPicture)
         ..pop();
     }
+
+    policyRegions.add(<String, Object>{
+      'rectLTRB': <double>[
+        childLogicalBounds.left,
+        childLogicalBounds.top,
+        childLogicalBounds.right,
+        childLogicalBounds.bottom,
+      ],
+      'response': 'NO',
+    });
+    final policyMessage = ByteData.sublistView(
+      utf8.encode(
+        json.encode(<String, Object>{
+          'method': 'View.setGestureResponsePolicy',
+          'args': <String, Object>{'defaultResponse': 'YES', 'regions': policyRegions},
+        }),
+      ),
+    );
+    PlatformDispatcher.instance.sendPlatformMessage('flutter/platform_views', policyMessage, null);
+
     sceneBuilder.pop();
 
     window.render(sceneBuilder.build());

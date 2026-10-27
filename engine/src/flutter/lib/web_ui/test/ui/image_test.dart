@@ -67,6 +67,15 @@ Future<void> testMain() async {
     expect(size?.height, 300);
   });
 
+  test('scaledImageSize does not derive a side of 0 for a very thin image', () {
+    final BitmapSize? wide = scaledImageSize(4000, 1, 100, null);
+    expect(wide?.width, 100);
+    expect(wide?.height, 1);
+    final BitmapSize? tall = scaledImageSize(1, 4000, null, 100);
+    expect(tall?.width, 1);
+    expect(tall?.height, 100);
+  });
+
   test('instantiateImageCodecFromBuffer dispose buffer', () async {
     final ui.Image image = await _createImage();
     final ByteData? imageData = await image.toByteData(format: ui.ImageByteFormat.png);

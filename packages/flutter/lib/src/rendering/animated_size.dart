@@ -81,10 +81,9 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
     super.alignment,
     super.textDirection,
     super.child,
-    Clip clipBehavior = Clip.hardEdge,
+    this._clipBehavior = Clip.hardEdge,
     VoidCallback? onEnd,
-  }) : _vsync = vsync,
-       _clipBehavior = clipBehavior {
+  }) : _vsync = vsync {
     _controller =
         AnimationController(vsync: vsync, duration: duration, reverseDuration: reverseDuration)
           ..addListener(() {

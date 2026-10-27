@@ -102,6 +102,7 @@ class IMockGLESImpl {
                              GLsizeiptr size,
                              const void* data) {}
   virtual GLboolean IsTexture(GLuint texture) { return true; }
+  virtual GLboolean IsProgram(GLuint program) { return true; }
   virtual void DiscardFramebufferEXT(GLenum target,
                                      GLsizei numAttachments,
                                      const GLenum* attachments) {};
@@ -144,6 +145,46 @@ class IMockGLESImpl {
                                       const GLchar* uniformBlockName) {
     return 0;
   }
+  virtual GLuint CreateShader(GLenum type) { return 0; }
+  virtual GLuint CreateProgram() { return 0; }
+  virtual void GetShaderiv(GLuint shader, GLenum pname, GLint* params) {}
+  virtual void ActiveTexture(GLenum texture) {}
+  virtual void Uniform1i(GLint location, GLint v0) {}
+  virtual void GetActiveUniform(GLuint program,
+                                GLuint index,
+                                GLsizei bufSize,
+                                GLsizei* length,
+                                GLint* size,
+                                GLenum* type,
+                                GLchar* name) {}
+  virtual GLint GetUniformLocation(GLuint program, const GLchar* name) {
+    return -1;
+  }
+  virtual void TexParameteri(GLenum target, GLenum pname, GLint param) {}
+  virtual void UseProgram(GLuint program) {}
+  virtual void Enable(GLenum cap) {}
+  virtual void Disable(GLenum cap) {}
+  virtual void Scissor(GLint x, GLint y, GLsizei width, GLsizei height) {}
+  virtual void ColorMask(GLboolean red,
+                         GLboolean green,
+                         GLboolean blue,
+                         GLboolean alpha) {}
+  virtual void BlendFuncSeparate(GLenum sfactorRGB,
+                                 GLenum dfactorRGB,
+                                 GLenum sfactorAlpha,
+                                 GLenum dfactorAlpha) {}
+  virtual void BlendEquationSeparate(GLenum modeRGB, GLenum modeAlpha) {}
+  virtual void DepthFunc(GLenum func) {}
+  virtual void DepthMask(GLboolean flag) {}
+  virtual void StencilFuncSeparate(GLenum face,
+                                   GLenum func,
+                                   GLint ref,
+                                   GLuint mask) {}
+  virtual void StencilOpSeparate(GLenum face,
+                                 GLenum sfail,
+                                 GLenum dpfail,
+                                 GLenum dppass) {}
+  virtual void StencilMaskSeparate(GLenum face, GLuint mask) {}
 };
 
 class MockGLESImpl : public IMockGLESImpl {
@@ -277,6 +318,7 @@ class MockGLESImpl : public IMockGLESImpl {
       (GLenum target, GLintptr offset, GLsizeiptr size, const void* data),
       (override));
   MOCK_METHOD(GLboolean, IsTexture, (GLuint texture), (override));
+  MOCK_METHOD(GLboolean, IsProgram, (GLuint program), (override));
   MOCK_METHOD(void,
               DiscardFramebufferEXT,
               (GLenum target,
@@ -347,6 +389,68 @@ class MockGLESImpl : public IMockGLESImpl {
               GetUniformBlockIndex,
               (GLuint program, const GLchar* uniformBlockName),
               (override));
+  MOCK_METHOD(GLuint, CreateShader, (GLenum type), (override));
+  MOCK_METHOD(GLuint, CreateProgram, (), (override));
+  MOCK_METHOD(void,
+              GetShaderiv,
+              (GLuint shader, GLenum pname, GLint* params),
+              (override));
+  MOCK_METHOD(void, ActiveTexture, (GLenum texture), (override));
+  MOCK_METHOD(void, Uniform1i, (GLint location, GLint v0), (override));
+  MOCK_METHOD(void,
+              GetActiveUniform,
+              (GLuint program,
+               GLuint index,
+               GLsizei bufSize,
+               GLsizei* length,
+               GLint* size,
+               GLenum* type,
+               GLchar* name),
+              (override));
+  MOCK_METHOD(GLint,
+              GetUniformLocation,
+              (GLuint program, const GLchar* name),
+              (override));
+  MOCK_METHOD(void,
+              TexParameteri,
+              (GLenum target, GLenum pname, GLint param),
+              (override));
+  MOCK_METHOD(void, UseProgram, (GLuint program), (override));
+  MOCK_METHOD(void, Enable, (GLenum cap), (override));
+  MOCK_METHOD(void, Disable, (GLenum cap), (override));
+  MOCK_METHOD(void,
+              Scissor,
+              (GLint x, GLint y, GLsizei width, GLsizei height),
+              (override));
+  MOCK_METHOD(void,
+              ColorMask,
+              (GLboolean red, GLboolean green, GLboolean blue, GLboolean alpha),
+              (override));
+  MOCK_METHOD(void,
+              BlendFuncSeparate,
+              (GLenum sfactorRGB,
+               GLenum dfactorRGB,
+               GLenum sfactorAlpha,
+               GLenum dfactorAlpha),
+              (override));
+  MOCK_METHOD(void,
+              BlendEquationSeparate,
+              (GLenum modeRGB, GLenum modeAlpha),
+              (override));
+  MOCK_METHOD(void, DepthFunc, (GLenum func), (override));
+  MOCK_METHOD(void, DepthMask, (GLboolean flag), (override));
+  MOCK_METHOD(void,
+              StencilFuncSeparate,
+              (GLenum face, GLenum func, GLint ref, GLuint mask),
+              (override));
+  MOCK_METHOD(void,
+              StencilOpSeparate,
+              (GLenum face, GLenum sfail, GLenum dpfail, GLenum dppass),
+              (override));
+  MOCK_METHOD(void,
+              StencilMaskSeparate,
+              (GLenum face, GLuint mask),
+              (override));
 };
 
 /// @brief      Provides a mocked version of the |ProcTableGLES| class.
@@ -362,7 +466,8 @@ class MockGLES final {
   static std::shared_ptr<MockGLES> Init(
       std::unique_ptr<MockGLESImpl> impl,
       const std::optional<std::vector<const char*>>& extensions = std::nullopt,
-      const char* version_string = "OpenGL ES 3.0");
+      const char* version_string = "OpenGL ES 3.0",
+      const char* renderer_string = "");
 
   /// @brief      Returns an initialized |MockGLES| instance.
   ///
@@ -372,7 +477,8 @@ class MockGLES final {
   static std::shared_ptr<MockGLES> Init(
       const std::optional<std::vector<const char*>>& extensions = std::nullopt,
       const char* version_string = "OpenGL ES 3.0",
-      ProcTableGLES::Resolver resolver = kMockResolverGLES);
+      ProcTableGLES::Resolver resolver = kMockResolverGLES,
+      const char* renderer_string = "");
 
   /// @brief      Returns a configured |ProcTableGLES| instance.
   const ProcTableGLES& GetProcTable() const { return proc_table_; }

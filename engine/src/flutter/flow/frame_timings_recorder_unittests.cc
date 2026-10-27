@@ -131,7 +131,7 @@ TEST(FrameTimingsRecorderTest, ThrowWhenRecordBuildBeforeVsync) {
   auto recorder = std::make_unique<FrameTimingsRecorder>();
 
   const auto build_start = fml::TimePoint::Now();
-  fml::Status status = recorder->RecordBuildStartImpl(build_start);
+  absl::Status status = recorder->RecordBuildStartImpl(build_start);
   EXPECT_FALSE(status.ok());
   EXPECT_EQ(status.message(), "Check failed: state_ == State::kVsync.");
 }
@@ -144,7 +144,7 @@ TEST(FrameTimingsRecorderTest, ThrowWhenRecordRasterBeforeBuildEnd) {
   recorder->RecordVsync(st, en);
 
   const auto raster_start = fml::TimePoint::Now();
-  fml::Status status = recorder->RecordRasterStartImpl(raster_start);
+  absl::Status status = recorder->RecordRasterStartImpl(raster_start);
   EXPECT_FALSE(status.ok());
   EXPECT_EQ(status.message(), "Check failed: state_ == State::kBuildEnd.");
 }

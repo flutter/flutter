@@ -125,8 +125,8 @@ class LocaleInfo implements Comparable<LocaleInfo> {
   }
 }
 
-/// Parse the data for a locale from a file, and store it in the [attributes]
-/// and [resources] keys.
+/// Parse the data for a locale from a file, and store it in
+/// [localeToResourceAttributes] and [localeToResources].
 void loadMatchingArbsIntoBundleMaps({
   required Directory directory,
   required RegExp filenamePattern,
@@ -220,18 +220,15 @@ GeneratorOptions parseArgs(List<String> rawArgs) {
     )
     ..addFlag(
       'widgets',
-      help:
-          'Whether to print the generated classes for the Widgets package only. Ignored when --overwrite is passed.',
+      help: 'Whether to print the generated classes for the Widgets package only. Ignored when --overwrite is passed.',
     )
     ..addFlag(
       'material',
-      help:
-          'Whether to print the generated classes for the Material package only. Ignored when --overwrite is passed.',
+      help: 'Whether to print the generated classes for the Material package only. Ignored when --overwrite is passed.',
     )
     ..addFlag(
       'cupertino',
-      help:
-          'Whether to print the generated classes for the Cupertino package only. Ignored when --overwrite is passed.',
+      help: 'Whether to print the generated classes for the Cupertino package only. Ignored when --overwrite is passed.',
     );
   final argslib.ArgResults args = argParser.parse(rawArgs);
   if (args.wasParsed('help') && args['help'] == true) {
@@ -369,12 +366,25 @@ String describeLocale(String tag) {
 }
 
 /// Writes the header of each class which corresponds to a locale.
-String generateClassDeclaration(LocaleInfo locale, String classNamePrefix, String superClass) {
+String generateClassDeclaration(
+  LocaleInfo locale,
+  String classNamePrefix,
+  String superClass, {
+  String? deprecatedReplacementPackage,
+}) {
   final String camelCaseName = locale.camelCase();
+  final deprecation = deprecatedReplacementPackage != null
+      ? '''
+@Deprecated(
+  'Use $classNamePrefix$camelCaseName from $deprecatedReplacementPackage instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
+'''
+      : '';
   return '''
 
 /// The translations for ${describeLocale(locale.originalString)} (`${locale.originalString}`).
-class $classNamePrefix$camelCaseName extends $superClass {''';
+${deprecation}class $classNamePrefix$camelCaseName extends $superClass {''';
 }
 
 /// Return the input string as a Dart-parseable string.

@@ -162,9 +162,8 @@ void main() {
         },
       );
       return MaterialApp(
-        theme: ThemeData.from(
-          colorScheme: const ColorScheme.light(),
-        ).copyWith(textButtonTheme: TextButtonThemeData(style: overallStyle)),
+        theme: ThemeData.from(colorScheme: const ColorScheme.light())
+            .copyWith(textButtonTheme: TextButtonThemeData(style: overallStyle)),
         home: Scaffold(
           body: Center(
             // If the TextButtonTheme widget is present, it's used

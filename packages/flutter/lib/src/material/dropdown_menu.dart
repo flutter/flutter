@@ -35,8 +35,10 @@ import 'theme_data.dart';
 /// current applied filter.
 ///
 /// Used by [DropdownMenu.filterCallback].
-typedef FilterCallback<T> =
-    List<DropdownMenuEntry<T>> Function(List<DropdownMenuEntry<T>> entries, String filter);
+typedef FilterCallback<T> = List<DropdownMenuEntry<T>> Function(
+  List<DropdownMenuEntry<T>> entries,
+  String filter,
+);
 
 /// A callback function that returns the index of the item that matches the
 /// current contents of a text field.
@@ -53,8 +55,10 @@ typedef SearchCallback<T> = int? Function(List<DropdownMenuEntry<T>> entries, St
 ///
 /// The `controller` is the [MenuController] that can be used to open and close
 /// the menu with and query the current state.
-typedef DropdownMenuDecorationBuilder =
-    InputDecoration Function(BuildContext context, MenuController controller);
+typedef DropdownMenuDecorationBuilder = InputDecoration Function(
+  BuildContext context,
+  MenuController controller,
+);
 
 const double _kMinimumWidth = 112.0;
 
@@ -838,9 +842,8 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final BuildContext? highlightContext = buttonItemKeys[currentHighlight!].currentContext;
       if (highlightContext != null) {
-        Scrollable.of(
-          highlightContext,
-        ).position.ensureVisible(highlightContext.findRenderObject()!);
+        Scrollable.of(highlightContext).position
+            .ensureVisible(highlightContext.findRenderObject()!);
       }
     }, debugLabel: 'DropdownMenu.scrollToHighlight');
   }
@@ -1503,7 +1506,7 @@ class _RenderDropdownMenuBody extends RenderBox
     with
         ContainerRenderObjectMixin<RenderBox, _DropdownMenuBodyParentData>,
         RenderBoxContainerDefaultsMixin<RenderBox, _DropdownMenuBodyParentData> {
-  _RenderDropdownMenuBody({double? width}) : _width = width;
+  _RenderDropdownMenuBody({this._width});
 
   double? get width => _width;
   double? _width;

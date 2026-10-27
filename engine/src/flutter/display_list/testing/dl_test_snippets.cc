@@ -90,10 +90,10 @@ std::vector<DisplayListInvocationGroup> CreateAllAttributesOps() {
   return {
       {"SetAntiAlias",
        {
-           {0, 8, 0, [](DlOpReceiver& r) { r.setAntiAlias(true); }},
+           {0, 8, 0, [](DlOpReceiver& r) { r.setAntiAlias(false); }},
 
            // Reset attribute to default as last entry
-           {0, 0, 0, [](DlOpReceiver& r) { r.setAntiAlias(false); }},
+           {0, 0, 0, [](DlOpReceiver& r) { r.setAntiAlias(true); }},
        }},
       {"SetInvertColors",
        {

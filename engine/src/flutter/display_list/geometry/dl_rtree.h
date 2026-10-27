@@ -36,7 +36,7 @@ class DlRTree : public SkRefCnt {
       struct {
         uint32_t index;
         uint32_t count;
-      } child;
+      } child{};
       int id;
     };
   };

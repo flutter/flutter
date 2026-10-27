@@ -92,6 +92,20 @@ static SkImageInfo getInfoIncludingExif(SkCodec* codec) {
     // Prefer premul over unpremul (this produces better filtering in general)
     info = info.makeAlphaType(kPremul_SkAlphaType);
   }
+  if (kOpaque_SkAlphaType == info.alphaType()) {
+    // `SkCodec::getInfo` reports the alpha type of the first frame only, so a
+    // later frame with alpha fails with `kInvalidConversion` when decoded into
+    // an opaque bitmap. See https://github.com/flutter/flutter/issues/85831.
+    const int frame_count = codec->getFrameCount();
+    for (int i = 1; i < frame_count; i++) {
+      SkCodec::FrameInfo frame_info = {};
+      if (codec->getFrameInfo(i, &frame_info) &&
+          frame_info.fAlphaType != kOpaque_SkAlphaType) {
+        info = info.makeAlphaType(kPremul_SkAlphaType);
+        break;
+      }
+    }
+  }
   return info;
 }
 

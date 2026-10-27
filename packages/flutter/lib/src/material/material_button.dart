@@ -4,6 +4,8 @@
 
 /// @docImport 'elevated_button.dart';
 /// @docImport 'elevated_button_theme.dart';
+/// @docImport 'filled_button.dart';
+/// @docImport 'filled_button_theme.dart';
 /// @docImport 'icon_button.dart';
 /// @docImport 'outlined_button.dart';
 /// @docImport 'outlined_button_theme.dart';

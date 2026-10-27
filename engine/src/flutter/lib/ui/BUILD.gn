@@ -308,6 +308,18 @@ if (enable_unittests) {
 
       deps += [ "//flutter/testing:opengl" ]
     }
+
+    if (impeller_enable_opengles) {
+      sources += [ "compositing/scene_impeller_gles_unittests.cc" ]
+
+      deps += [
+        "//flutter/impeller/entity:entity_shaders",
+        "//flutter/impeller/entity:framebuffer_blend_entity_shaders",
+        "//flutter/impeller/entity:modern_entity_shaders",
+        "//flutter/impeller/renderer/backend/gles:mock_gles",
+        "//flutter/shell/gpu:gpu_surface_gl",
+      ]
+    }
   }
 
   source_set("display_list_deferred_image_unittests") {

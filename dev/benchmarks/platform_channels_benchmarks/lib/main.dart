@@ -131,7 +131,10 @@ Future<void> _runTest({
   required int numMessages,
 }) async {
   print('running $name');
-  resetChannel.send(true);
+  // The native handlers for 'dev.flutter.echo.reset' in AppDelegate.m and
+  // MainActivity.kt do not invoke the reply callback, so awaiting this Future
+  // would deadlock the benchmark.
+  unawaited(resetChannel.send(true));
   // Prime test.
   await test(1);
   printer.addResult(

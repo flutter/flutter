@@ -18,6 +18,7 @@ import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fake_build_command.dart';
 import '../../src/fakes.dart';
 import '../../src/package_config.dart';
 import '../../src/test_build_system.dart';
@@ -36,7 +37,7 @@ void main() {
 
   late MemoryFileSystem fileSystem;
   late FakeProcessManager processManager;
-  late Logger logger;
+  late BufferLogger logger;
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();
@@ -75,24 +76,11 @@ void main() {
   }
 
   BuildCommand makeBuildCommand() {
-    return BuildCommand(
-      androidSdk: FakeAndroidSdk(),
+    return createFakeBuildCommand(
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      featureFlags: TestFeatureFlags(isLinuxEnabled: true),
       fileSystem: fileSystem,
       logger: logger,
-      osUtils: FakeOperatingSystemUtils(),
-      config: FakeConfig(),
-      platform: FakePlatform(),
-      fileSystemUtils: FakeFileSystemUtils(),
-      terminal: FakeTerminal(),
-      plistParser: FakePlistParser(),
-      processUtils: FakeProcessUtils(),
-      processManager: FakeProcessManager.any(),
-      templateRenderer: FakeTemplateRenderer(),
-      xcode: FakeXcode(),
-      artifacts: FakeArtifacts(),
-      cache: FakeCache(),
-      flutterVersion: FakeFlutterVersion(),
     );
   }
 
@@ -106,12 +94,11 @@ void main() {
       ]);
       setUpMockProjectFilesForBuild();
 
-      await createTestCommandRunner(
-        command,
-      ).run(const <String>['build', 'linux', '--no-pub', '--flavor', 'apple']);
+      await createTestCommandRunner(command)
+          .run(const <String>['build', 'linux', '--no-pub', '--flavor', 'apple']);
 
       expect(processManager.hasRemainingExpectations, isFalse);
-      expect(testLogger.statusText, contains('✓ Built build/linux/x64/apple/release/bundle'));
+      expect(logger.statusText, contains('✓ Built build/linux/x64/apple/release/bundle'));
     },
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,

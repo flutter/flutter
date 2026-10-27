@@ -86,7 +86,7 @@ Future<String> gitRevision({
 }
 
 /// Wrapper function to run a subprocess checking exit code and printing stderr and stdout.
-/// [executable] is a string with the script/binary to execute, [args] is the list of flags/arguments
+/// [command] is the script/binary to execute followed by its flags/arguments,
 /// and [workingDirectory] is as string to the working directory where the subprocess will be run.
 Future<void> runProcessWithValidations(
   List<String> command,
@@ -140,7 +140,7 @@ Future<String> getBranchName({
 }
 
 /// Updates the footer of the api documentation with the correct branch and versions.
-/// [footerPath] is the path to the location of the footer js file and [version] is a
+/// [footerFile] is the footer js file and [version] is a
 /// string with the version calculated by the flutter tool.
 Future<void> createFooter(
   File footerFile,

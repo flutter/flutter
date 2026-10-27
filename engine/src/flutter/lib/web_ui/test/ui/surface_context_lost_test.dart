@@ -42,8 +42,6 @@ void testMain() {
       final OffscreenSurface surface = surfaceProvider.createSurface();
       await surface.initialized;
 
-      await surface.setSize(const BitmapSize(10, 10));
-
       // Draw a red square.
       final ui.Picture redPicture = drawPicture((ui.Canvas canvas) {
         canvas.drawRect(
@@ -51,9 +49,10 @@ void testMain() {
           ui.Paint()..color = const ui.Color(0xFFFF0000),
         );
       });
-      List<DomImageBitmap> bitmaps = await surface.rasterizeToImageBitmaps(<ui.Picture>[
-        redPicture,
-      ]);
+      List<DomImageBitmap> bitmaps = await surface.rasterizeToImageBitmaps(
+        const BitmapSize(10, 10),
+        <ui.Picture>[redPicture],
+      );
       expect(bitmaps, hasLength(1));
       await expectBitmapColor(bitmaps.single, const ui.Color(0xFFFF0000));
 
@@ -69,7 +68,9 @@ void testMain() {
           ui.Paint()..color = const ui.Color(0xFF0000FF),
         );
       });
-      bitmaps = await surface.rasterizeToImageBitmaps(<ui.Picture>[bluePicture]);
+      bitmaps = await surface.rasterizeToImageBitmaps(const BitmapSize(10, 10), <ui.Picture>[
+        bluePicture,
+      ]);
       expect(bitmaps, hasLength(1));
       await expectBitmapColor(bitmaps.single, const ui.Color(0xFF0000FF));
     }, skip: isFirefox || isSafari || !browserSupportsOffscreenCanvas);

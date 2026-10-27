@@ -33,3 +33,26 @@ technically anything could be used.  Using the `SaveScreenshot()` function will
 automatically update the `GoldenDigest::Instance()` which will make sure that it
 is included in the generated `digest.json`. If that function isn't used the
 `GoldenDigest` should be updated manually.
+
+## Shader coverage
+
+Debug builds of `impeller_golden_tests` can check which shaders the tests draw
+with. Both flags make the executable exit with an error in any other build.
+
+- `--shader-report` prints the pipeline variants that a `ContentContext` warmed
+  at startup but that no test drew with, along with the options the same
+  pipeline was drawn with instead.
+- `--fail-on-unused-shaders` fails the run if a shader that a `ContentContext`
+  created a pipeline for was never drawn with, with any options, on any backend.
+  A shader is a pipeline label plus its specialization constants. Like a failed
+  test, this stops the digest from being written.
+
+Neither flag is passed by `run_tests.py`, so run the executable directly:
+
+```sh
+out/host_debug_unopt_arm64/impeller_golden_tests --working_dir=/tmp/goldens \
+    --shader-report --fail-on-unused-shaders
+```
+
+To fix an unused shader, add a golden test that draws with it, or stop creating
+it.

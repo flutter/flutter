@@ -4,6 +4,7 @@
 
 import 'package:unified_analytics/unified_analytics.dart';
 
+import '../artifacts.dart';
 import '../base/file_system.dart';
 import '../build_system/build_system.dart';
 import '../build_system/build_targets.dart';
@@ -33,5 +34,13 @@ class BuildTargetsImpl extends BuildTargets {
     FileSystem fileSystem,
     List<WebCompilerConfig> compileConfigs,
     Analytics analytics,
-  ) => WebServiceWorker(fileSystem, compileConfigs, analytics);
+    Artifacts artifacts, {
+    required String engineRevision,
+  }) => WebServiceWorker(
+    fileSystem,
+    compileConfigs,
+    analytics,
+    artifacts,
+    engineRevision: engineRevision,
+  );
 }

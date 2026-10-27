@@ -45,7 +45,9 @@ namespace impeller {
 
 class TestImpellerContext : public impeller::Context {
  public:
-  TestImpellerContext() : impeller::Context(impeller::Flags{}) {}
+  TestImpellerContext()
+      : impeller::Context(impeller::Flags{}),
+        allocator_(std::make_shared<TestImpellerAllocator>()) {}
 
   BackendType GetBackendType() const override { return BackendType::kMetal; }
 
@@ -58,7 +60,11 @@ class TestImpellerContext : public impeller::Context {
   }
 
   std::shared_ptr<Allocator> GetResourceAllocator() const override {
-    return std::make_shared<TestImpellerAllocator>();
+    return allocator_;
+  }
+
+  std::shared_ptr<TestImpellerTexture> GetLastCreatedTexture() const {
+    return allocator_->last_created_texture();
   }
 
   std::shared_ptr<ShaderLibrary> GetShaderLibrary() const override {
@@ -121,6 +127,7 @@ class TestImpellerContext : public impeller::Context {
   };
   std::vector<PendingTask> tasks_;
   std::shared_ptr<const Capabilities> capabilities_;
+  std::shared_ptr<TestImpellerAllocator> allocator_;
   bool did_dispose_ = false;
 };
 
@@ -403,9 +410,10 @@ TEST_F(ImageDecoderFixtureTest, ImpellerUploadToSharedNoGpu) {
 
   ASSERT_EQ(no_gpu_access_context->command_buffer_count_, 0ul);
   ASSERT_EQ(result.second, "");
-  EXPECT_EQ(no_gpu_access_context->DidDisposeResources(), true);
-  EXPECT_EQ(result.first->asImpellerImage()
-                ->GetImpellerTexture(no_gpu_access_context)
+  ASSERT_NE(result.first, nullptr);
+  EXPECT_EQ(result.first->GetSize(), DlISize::MakeWH(10, 10));
+  ASSERT_NE(no_gpu_access_context->GetLastCreatedTexture(), nullptr);
+  EXPECT_EQ(no_gpu_access_context->GetLastCreatedTexture()
                 ->GetTextureDescriptor()
                 .storage_mode,
             impeller::StorageMode::kHostVisible);
@@ -912,13 +920,21 @@ TEST(ImageDecoderTest, VerifySimpleDecoding) {
   EXPECT_EQ(result_2->image_info.size.height, 2);
 
   // If the destination size is larger than the max texture size the image
-  // is scaled down.
+  // is scaled down, keeping its aspect ratio.
   auto result_3 = ImageDecoderImpeller::DecompressTexture(
       descriptor.get(), {.target_width = 60, .target_height = 20}, {10, 10},
       /*supports_wide_gamut=*/false, capabilities, allocator);
   ASSERT_TRUE(result_3.ok());
   EXPECT_EQ(result_3->image_info.size.width, 10);
-  EXPECT_EQ(result_3->image_info.size.height, 10);
+  EXPECT_EQ(result_3->image_info.size.height, 3);
+
+  // Same for a tall destination size.
+  auto result_tall = ImageDecoderImpeller::DecompressTexture(
+      descriptor.get(), {.target_width = 20, .target_height = 60}, {10, 10},
+      /*supports_wide_gamut=*/false, capabilities, allocator);
+  ASSERT_TRUE(result_tall.ok());
+  EXPECT_EQ(result_tall->image_info.size.width, 3);
+  EXPECT_EQ(result_tall->image_info.size.height, 10);
 
   // CPU resize is forced.
   auto result_4 = ImageDecoderImpeller::DecompressTexture(

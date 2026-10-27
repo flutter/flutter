@@ -44,9 +44,9 @@ class _NavBarExampleState extends State<NavBarExample> {
               const Text('You have pushed the button this many times:'),
               Text(
                 '$_count',
-                style: CupertinoTheme.of(
-                  context,
-                ).textTheme.navLargeTitleTextStyle,
+                style: CupertinoTheme.of(context)
+                    .textTheme
+                    .navLargeTitleTextStyle,
               ),
               const Spacer(),
               Padding(

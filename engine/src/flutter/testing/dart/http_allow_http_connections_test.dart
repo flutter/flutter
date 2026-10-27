@@ -20,7 +20,7 @@ void main() {
   test('We can ban HTTP explicitly.', () async {
     final String host = await getLocalHostIP();
     await bindServerAndTest(host, (HttpClient httpClient, Uri uri) async {
-      asyncExpectThrows<UnsupportedError>(
+      await asyncExpectThrows<UnsupportedError>(
         () async => runZoned(
           () => httpClient.getUrl(uri),
           zoneValues: <dynamic, dynamic>{#flutter.io.allow_http: false},

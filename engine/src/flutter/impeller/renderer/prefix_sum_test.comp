@@ -2,12 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-layout(local_size_x_id = 0) in;
+// The whole sum is computed by one workgroup, so the workgroup size is the
+// largest input. 128 invocations is the portable minimum every device supports.
+layout(local_size_x = 128) in;
 layout(std430) buffer;
 
 #include <impeller/prefix_sum.glsl>
 
-#define BLOCK_SIZE 1024
+#define BLOCK_SIZE 128
 
 layout(binding = 0) readonly buffer InputData {
   uint count;

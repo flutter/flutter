@@ -13,7 +13,7 @@ void main() {
 }
 
 void testMain() {
-  test('services are initalized separately from UI', () async {
+  test('services are initialized separately from UI', () async {
     final JsFlutterConfiguration? config = await bootstrapAndExtractConfig();
 
     expect(findGlassPane(), isNull);

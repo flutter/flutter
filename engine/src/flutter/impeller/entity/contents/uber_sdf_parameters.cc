@@ -3,6 +3,9 @@
 // found in the LICENSE file.
 
 #include "impeller/entity/contents/uber_sdf_parameters.h"
+#include "fml/logging.h"
+#include "impeller/geometry/round_superellipse.h"
+#include "impeller/geometry/round_superellipse_param.h"
 
 namespace impeller {
 
@@ -73,12 +76,19 @@ UberSDFParameters UberSDFParameters::MakeRoundedRect(
                        radii.bottom_left.width, radii.top_left.width)};
 }
 
-UberSDFParameters UberSDFParameters::MakeRoundedSuperellipse(
+std::optional<UberSDFParameters> UberSDFParameters::MakeRoundedSuperellipse(
     Color color,
-    const Rect& bounds,
-    const RoundSuperellipseParam& round_superellipse_params,
+    const RoundSuperellipse& round_superellipse,
     std::optional<StrokeParameters> stroke) {
-  FML_DCHECK(round_superellipse_params.all_corners_same);
+  // UberSDF only supports RSEs with symmetric circular radii.
+  if (!(round_superellipse.GetRadii().AreAllCornersCircular() &&
+        round_superellipse.GetRadii().AreAllCornersSame())) {
+    return std::nullopt;
+  }
+  auto bounds = round_superellipse.GetBounds();
+  auto round_superellipse_params = RoundSuperellipseParam::MakeBoundsRadii(
+      bounds, round_superellipse.GetRadii());
+
   Point center = bounds.GetCenter();
 
   RoundSuperellipseParam::Quadrant top_right =
@@ -93,13 +103,10 @@ UberSDFParameters UberSDFParameters::MakeRoundedSuperellipse(
       .size = size,
       .stroke = stroke,
       .superellipse_degree = Point(top_right.top.se_n, top_right.right.se_n),
-      .superellipse_semi_axis = Point(top_right.top.se_a, top_right.right.se_a),
       .angle_span = Point(top_right.top.circle_max_angle.radians,
                           top_right.right.circle_max_angle.radians),
-      .octant_offset_c = top_right.top.se_a - top_right.right.se_a,
       .circle_center_top = top_right.top.circle_center,
       .circle_center_right = top_right.right.circle_center,
-      .superellipse_scale = top_right.signed_scale.Abs(),
       .radii = Vector4(top_right.top.circle_radius,
                        top_right.right.circle_radius, 0.0f, 0.0f)};
 }

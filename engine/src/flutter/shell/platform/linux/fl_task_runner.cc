@@ -6,7 +6,6 @@
 #include "flutter/shell/platform/linux/fl_engine_private.h"
 
 static constexpr int kMicrosecondsPerNanosecond = 1000;
-static constexpr int kMillisecondsPerMicrosecond = 1000;
 
 struct _FlTaskRunner {
   GObject parent_instance;
@@ -16,7 +15,8 @@ struct _FlTaskRunner {
   GMutex mutex;
   GCond cond;
 
-  guint timeout_source_id;
+  GSource* timeout_source;
+
   GList /*<FlTaskRunnerTask>*/* pending_tasks;
 };
 
@@ -70,26 +70,33 @@ static void fl_task_runner_process_expired_tasks_locked(FlTaskRunner* self) {
 
 static void fl_task_runner_tasks_did_change_locked(FlTaskRunner* self);
 
-// Invoked from a timeout source. Removes and executes expired tasks
+// Invoked from the timeout source. Removes and executes expired tasks
 // and reschedules timeout if needed.
 static gboolean fl_task_runner_on_expired_timeout(gpointer data) {
-  FlTaskRunner* self = FL_TASK_RUNNER(data);
+  // Keep the runner alive until the mutex is released, in case a task drops
+  // the last reference.
+  g_autoptr(FlTaskRunner) self = FL_TASK_RUNNER(g_object_ref(data));
 
   g_autoptr(GMutexLocker) locker = g_mutex_locker_new(&self->mutex);
   (void)locker;  // unused variable
 
-  g_object_ref(self);
-
-  self->timeout_source_id = 0;
   fl_task_runner_process_expired_tasks_locked(self);
 
   // reschedule timeout
   fl_task_runner_tasks_did_change_locked(self);
 
-  g_object_unref(self);
-
-  return G_SOURCE_REMOVE;
+  return G_SOURCE_CONTINUE;
 }
+
+static gboolean timeout_source_dispatch(GSource* source,
+                                        GSourceFunc callback,
+                                        gpointer user_data) {
+  return callback(user_data);
+}
+
+static GSourceFuncs timeout_source_funcs = {
+    .dispatch = timeout_source_dispatch,
+};
 
 // Returns the absolute time of next expired task (in microseconds, based on
 // g_get_monotonic_time). If no task is scheduled returns G_MAXINT64.
@@ -106,21 +113,30 @@ static gint64 fl_task_runner_next_task_expiration_time_locked(
 }
 
 static void fl_task_runner_tasks_did_change_locked(FlTaskRunner* self) {
-  // Reschedule timeout
-  if (self->timeout_source_id != 0) {
-    g_source_remove(self->timeout_source_id);
-    self->timeout_source_id = 0;
+  if (self->timeout_source == nullptr) {
+    return;
   }
+
+  // Ready time uses the same clock as g_get_monotonic_time, -1 disables it.
   gint64 min_time = fl_task_runner_next_task_expiration_time_locked(self);
-  if (min_time != G_MAXINT64) {
-    gint64 remaining = MAX(min_time - g_get_monotonic_time(), 0);
-    self->timeout_source_id =
-        g_timeout_add(remaining / kMillisecondsPerMicrosecond + 1,
-                      fl_task_runner_on_expired_timeout, self);
-  }
+  g_source_set_ready_time(self->timeout_source,
+                          min_time != G_MAXINT64 ? min_time : -1);
 }
 
-void fl_task_runner_dispose(GObject* object) {
+static void fl_task_runner_dispose(GObject* object) {
+  FlTaskRunner* self = FL_TASK_RUNNER(object);
+
+  g_mutex_lock(&self->mutex);
+  if (self->timeout_source != nullptr) {
+    g_source_destroy(self->timeout_source);
+    g_clear_pointer(&self->timeout_source, g_source_unref);
+  }
+  g_mutex_unlock(&self->mutex);
+
+  G_OBJECT_CLASS(fl_task_runner_parent_class)->dispose(object);
+}
+
+static void fl_task_runner_finalize(GObject* object) {
   FlTaskRunner* self = FL_TASK_RUNNER(object);
 
   g_weak_ref_clear(&self->engine);
@@ -128,20 +144,24 @@ void fl_task_runner_dispose(GObject* object) {
   g_cond_clear(&self->cond);
 
   g_list_free_full(self->pending_tasks, g_free);
-  if (self->timeout_source_id != 0) {
-    g_source_remove(self->timeout_source_id);
-  }
 
-  G_OBJECT_CLASS(fl_task_runner_parent_class)->dispose(object);
+  G_OBJECT_CLASS(fl_task_runner_parent_class)->finalize(object);
 }
 
 static void fl_task_runner_class_init(FlTaskRunnerClass* klass) {
   G_OBJECT_CLASS(klass)->dispose = fl_task_runner_dispose;
+  G_OBJECT_CLASS(klass)->finalize = fl_task_runner_finalize;
 }
 
 static void fl_task_runner_init(FlTaskRunner* self) {
   g_mutex_init(&self->mutex);
   g_cond_init(&self->cond);
+
+  self->timeout_source = g_source_new(&timeout_source_funcs, sizeof(GSource));
+  g_source_set_name(self->timeout_source, "FlTaskRunner");
+  g_source_set_callback(self->timeout_source, fl_task_runner_on_expired_timeout,
+                        self, nullptr);
+  g_source_attach(self->timeout_source, nullptr);
 }
 
 FlTaskRunner* fl_task_runner_new(FlEngine* engine) {

@@ -18,8 +18,10 @@ void main() {
 ///
 /// The [animationStatus] parameter indicates the current state of the menu
 /// animation, which can be used to adjust the appearance of the menu panel.
-typedef MenuPanelBuilder =
-    Widget Function(BuildContext context, AnimationStatus animationStatus);
+typedef MenuPanelBuilder = Widget Function(
+  BuildContext context,
+  AnimationStatus animationStatus,
+);
 
 /// Signature for the function that builds a [Menu]'s anchor button.
 ///
@@ -27,12 +29,11 @@ typedef MenuPanelBuilder =
 ///
 /// The [animationStatus] indicates the current state of the menu animation,
 /// which can be used to adjust the appearance of the menu panel.
-typedef MenuButtonBuilder =
-    Widget Function(
-      BuildContext context,
-      MenuController controller,
-      AnimationStatus animationStatus,
-    );
+typedef MenuButtonBuilder = Widget Function(
+  BuildContext context,
+  MenuController controller,
+  AnimationStatus animationStatus,
+);
 
 class RawMenuAnchorSubmenuAnimationExample extends StatelessWidget {
   const RawMenuAnchorSubmenuAnimationExample({super.key});

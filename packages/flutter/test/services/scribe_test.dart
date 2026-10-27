@@ -23,7 +23,7 @@ void main() {
     // When a MissingPluginException is thrown, it is caught and a null response
     // is returned.
     expect(response, isNull);
-  }, skip: kIsWeb); // [intended]
+  });
 
   for (final returnValue in <bool?>[false, true, null]) {
     test('Scribe.isStylusHandwritingAvailable calls through to platform channel', () async {

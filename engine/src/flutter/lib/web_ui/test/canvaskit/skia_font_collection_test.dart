@@ -55,9 +55,8 @@ void testMain() {
 
     test('logs a warning if one of the registered fonts is invalid', () async {
       mockHttpFetchResponseFactory = (String url) async {
-        final ByteBuffer bogusData = Uint8List.fromList(
-          'this is not valid font data'.codeUnits,
-        ).buffer;
+        final ByteBuffer bogusData = Uint8List.fromList('this is not valid font data'.codeUnits)
+            .buffer;
         return MockHttpFetchResponse(
           status: 200,
           url: url,

@@ -7,6 +7,7 @@ import 'package:ui/src/engine/util.dart';
 import 'package:ui/ui.dart' as ui;
 
 import '../hot_restart_cache_handler.dart' show registerElementForCleanup;
+import '../viewport_fit.dart';
 import 'embedding_strategy.dart';
 
 /// An [EmbeddingStrategy] that takes over the whole web page.
@@ -68,35 +69,98 @@ class FullPageEmbeddingStrategy implements EmbeddingStrategy {
 
   // Sets a meta viewport tag appropriate for Flutter Web in full screen.
   void _applyViewportMeta() {
-    for (final DomElement viewportMeta in domDocument.head!.querySelectorAll(
-      'meta[name="viewport"]',
-    )) {
-      assert(() {
-        // Filter out the meta tag that the engine placed on the page. This is
-        // to avoid UI flicker during hot restart. Hot restart will clean up the
-        // old meta tag synchronously with the first post-restart frame.
-        if (!viewportMeta.hasAttribute('flt-viewport')) {
-          printWarning(
-            'Found an existing <meta name="viewport"> tag. Flutter Web uses its own viewport '
-            'configuration for better compatibility with Flutter. This tag will be replaced.',
-          );
-        }
-        return true;
-      }());
+    final List<DomElement> existingMetas = domDocument.head!
+        .querySelectorAll('meta[name="viewport"]')
+        .toList();
+
+    // Carry the `viewport-fit` of the tags that are about to be removed over to
+    // the tag that replaces them.
+    //
+    // `viewport-fit` is how an app tells the browser that it wants to draw
+    // under display cutouts and rounded corners, and it is also what makes the
+    // browser report non-zero `env(safe-area-inset-*)` values, which back
+    // `ui.FlutterView.viewPadding`. Dropping it would leave apps with no way to
+    // opt into a full-bleed layout, and would make `SafeArea` a no-op.
+    // See https://github.com/flutter/flutter/issues/84833.
+    //
+    // The assignment is unconditional, so that the last tag on the page wins,
+    // including when it declares no `viewport-fit` at all. That is how the
+    // browser resolves several viewport meta tags: each one is parsed into a
+    // fresh set of viewport arguments that replaces the previous one, so the
+    // descriptors that the last tag omits go back to their defaults.
+    //
+    // This also preserves the value across hot restarts, because the tags being
+    // read include the `flt-viewport` tag written by the previous run of the
+    // engine.
+    ViewportFit? viewportFit;
+    for (final viewportMeta in existingMetas) {
+      viewportFit = readViewportFit(viewportMeta.getAttribute('content'));
+    }
+
+    // These viewport settings are chosen to be accessibility-friendly, notably,
+    // `user-scalable=no` is not used to comply with WCAG 2 rules.
+    final String content = <String>[
+      'width=device-width',
+      'initial-scale=1.0',
+      'maximum-scale=5.0',
+      if (viewportFit != null) viewportFit.descriptor,
+    ].join(', ');
+
+    assert(() {
+      _warnAboutDroppedDescriptors(existingMetas, content);
+      return true;
+    }());
+
+    for (final viewportMeta in existingMetas) {
       viewportMeta.remove();
     }
 
-    // The meta viewport is always removed by the for method above, so we don't
-    // need to do anything else here, other than create it again.
-    // These viewport settings are chosen to be accessibility-friendly, notably,
-    // `user-scalable=no` is not used to comply with WCAG 2 rules.
     final DomHTMLMetaElement viewportMeta = createDomHTMLMetaElement()
       ..setAttribute('flt-viewport', '')
       ..name = 'viewport'
-      ..content = 'width=device-width, initial-scale=1.0, maximum-scale=5.0';
+      ..content = content;
 
     domDocument.head!.append(viewportMeta);
 
+    // This must remain the first `registerElementForCleanup` call of the boot
+    // sequence. The first call is what sweeps the elements registered by the
+    // previous run of the app off the page, and the tags read above are among
+    // them.
     registerElementForCleanup(viewportMeta);
+  }
+
+  // Warns about each tag in [existingMetas] that says something the tag the
+  // engine is about to write, whose `content` is [content], does not.
+  //
+  // A page that only declares descriptors the engine writes anyway — which is
+  // what the `flutter create` web template suggests, so that an app can opt
+  // into a full-bleed layout — loses nothing by being replaced, and warning
+  // about it would be telling developers off for following our own advice.
+  static void _warnAboutDroppedDescriptors(List<DomElement> existingMetas, String content) {
+    final Map<String, String> written = parseViewportContent(content);
+    for (final viewportMeta in existingMetas) {
+      // Skip the tag that the engine placed on the page on a previous run. It
+      // is still here because hot restart cleans the old tag up synchronously
+      // with the first post-restart frame.
+      if (viewportMeta.hasAttribute('flt-viewport')) {
+        continue;
+      }
+      final List<String> dropped =
+          (parseViewportContent(viewportMeta.getAttribute('content')).entries
+                .where(
+                  (MapEntry<String, String> descriptor) =>
+                      written[descriptor.key] != descriptor.value,
+                )
+                .map((MapEntry<String, String> descriptor) => descriptor.key)
+                .toList())
+            ..sort();
+      if (dropped.isNotEmpty) {
+        printWarning(
+          'Found an existing <meta name="viewport"> tag. Flutter Web uses its own viewport '
+          'configuration for better compatibility with Flutter, so ${dropped.join(', ')} '
+          'will be ignored. Its `viewport-fit`, if any, is preserved.',
+        );
+      }
+    }
   }
 }

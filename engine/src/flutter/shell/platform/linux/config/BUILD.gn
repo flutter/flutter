@@ -22,6 +22,14 @@ _pkg_configs = [
     name = "epoxy"
     package = "epoxy"
   },
+  {
+    name = "wayland_client"
+    package = "wayland-client"
+  },
+  {
+    name = "wayland_egl"
+    package = "wayland-egl"
+  },
 ]
 
 foreach(pkg, _pkg_configs) {

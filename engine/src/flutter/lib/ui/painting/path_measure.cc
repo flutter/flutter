@@ -62,7 +62,7 @@ tonic::Float32List CanvasPathMeasure::getPosTan(int contour_index,
     return posTan;
   }
 
-  SkPoint pos;
+  SkPoint pos{};
   SkVector tan;
   float fdistance = SafeNarrow(distance);
   bool success = measures_[contour_index]->getPosTan(fdistance, &pos, &tan);

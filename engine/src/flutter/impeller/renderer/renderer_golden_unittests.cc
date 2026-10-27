@@ -86,7 +86,7 @@ TEST_P(RendererGoldenTest, BabysFirstTriangle) {
     pass.SetPipeline(pipeline);
     pass.SetVertexBuffer(vertex_buffer);
 
-    FS::FragInfo frag_info;
+    FS::FragInfo frag_info{};
     frag_info.time = 0.0f;
     FS::BindFragInfo(pass, host_buffer->EmplaceUniform(frag_info));
 
@@ -482,7 +482,7 @@ static void DrawManuallyMippedTextureGolden(RendererGoldenTest& test,
     frame_info.mvp = Matrix();
     VS::BindFrameInfo(pass, host_buffer->EmplaceUniform(frame_info));
 
-    FS::FragInfo frag_info;
+    FS::FragInfo frag_info{};
     frag_info.lod = lod;
     FS::BindFragInfo(pass, host_buffer->EmplaceUniform(frag_info));
 

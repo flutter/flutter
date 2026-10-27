@@ -92,7 +92,7 @@ class GoldenPlaygroundTest
 
   IRect GetWindowBounds() const;
 
-  [[nodiscard]] fml::Status SetCapabilities(
+  [[nodiscard]] absl::Status SetCapabilities(
       const std::shared_ptr<Capabilities>& capabilities);
 
   RuntimeStageBackend GetRuntimeStageBackend() const;

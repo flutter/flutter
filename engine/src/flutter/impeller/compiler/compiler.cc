@@ -14,6 +14,7 @@
 #include <utility>
 
 #include "flutter/fml/paths.h"
+#include "flutter/third_party/re2/re2/re2.h"
 #include "impeller/base/allocation.h"
 #include "impeller/compiler/compiler_backend.h"
 #include "impeller/compiler/constants.h"
@@ -397,6 +398,65 @@ void CanonicalizeUniformBlockInstanceNamesForGL(
   }
 }
 
+/// Strips C-style single-line (//...) and multi-line (/*...*/) comments from
+/// the GLSL shader source.
+static std::string StripComments(std::string_view source) {
+  std::string result(source);
+  static const re2::LazyRE2 kCommentPattern = {R"(//[^\n]*|/\*[\s\S]*?\*/)"};
+  re2::RE2::GlobalReplace(&result, *kCommentPattern, "");
+  return result;
+}
+
+/// Checks if the fragment shader source contains multiple return statements or
+/// an early return within the `main()` function.
+static bool CheckHasMultipleReturnsInMain(std::string_view source) {
+  std::string clean_source = StripComments(source);
+
+  // Match the declaration of main(...) {
+  static const re2::LazyRE2 kMainPattern = {R"((\bmain\s*\([^)]*\)\s*\{))"};
+  re2::StringPiece match;
+  if (!re2::RE2::PartialMatch(clean_source, *kMainPattern, &match)) {
+    return false;
+  }
+
+  size_t main_offset = match.data() - clean_source.data();
+  size_t open_brace = clean_source.find('{', main_offset);
+  if (open_brace == std::string::npos) {
+    return false;
+  }
+
+  // Find the matching closing brace for main().
+  int brace_depth = 1;
+  size_t pos = open_brace + 1;
+  while (pos < clean_source.size() && brace_depth > 0) {
+    char c = clean_source[pos];
+    if (c == '{') {
+      brace_depth++;
+    } else if (c == '}') {
+      brace_depth--;
+    }
+    pos++;
+  }
+
+  size_t main_body_len =
+      (pos > open_brace + 1) ? (pos - 1) - (open_brace + 1) : 0;
+  re2::StringPiece main_body(clean_source.data() + open_brace + 1,
+                             main_body_len);
+
+  static const re2::LazyRE2 kReturnPattern = {R"(\breturn\b)"};
+  return re2::RE2::PartialMatch(main_body, *kReturnPattern);
+}
+
+static bool CheckHasSamplers(const CompilerBackend& sl_compiler) {
+  if (!sl_compiler.GetCompiler()) {
+    return false;
+  }
+  auto resources = sl_compiler.GetCompiler()->get_shader_resources();
+  return !resources.sampled_images.empty() ||
+         !resources.separate_samplers.empty() ||
+         !resources.separate_images.empty();
+}
+
 }  // namespace
 
 Compiler::Compiler(const std::shared_ptr<const fml::Mapping>& source_mapping,
@@ -622,6 +682,22 @@ Compiler::Compiler(const std::shared_ptr<const fml::Mapping>& source_mapping,
     return;
   }
 
+  std::string source_str(
+      reinterpret_cast<const char*>(source_mapping->GetMapping()),
+      source_mapping->GetSize());
+  if (source_options.type == SourceType::kFragmentShader &&
+      CheckHasSamplers(sl_compiler) &&
+      CheckHasMultipleReturnsInMain(source_str)) {
+    COMPILER_WARNING(warning_stream_)
+        << "Fragment shader uses texture samplers alongside multiple 'return' "
+           "statements in `main()`. "
+        << "This has the potential to cause compilation errors during shader "
+           "compilation on Windows. \n"
+        << "To avoid crashes on Windows, consider removing multiple 'return;' "
+           "statements in `main()`."
+        << "See https://github.com/flutter/flutter/issues/190809 for details.";
+  }
+
   is_valid_ = true;
 }
 
@@ -700,6 +776,10 @@ std::string Compiler::GetSourcePrefix() const {
 
 std::string Compiler::GetErrorMessages() const {
   return error_stream_.str();
+}
+
+std::string Compiler::GetWarningMessages() const {
+  return warning_stream_.str();
 }
 
 std::string Compiler::GetVerboseErrorMessages() const {

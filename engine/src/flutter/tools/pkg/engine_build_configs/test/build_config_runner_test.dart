@@ -810,6 +810,170 @@ void main() {
     }
   });
 
+  test('GlobalBuildRunner merges Swift commands into compile_commands.json', () async {
+    final io.Directory emptyDir = io.Directory.systemTemp.createTempSync(
+      'build_config_runner.test',
+    );
+    try {
+      final srcDir = io.Directory(path.join(emptyDir.path, 'src'));
+      final outDir = io.Directory(path.join(srcDir.path, 'out', 'build_name'))
+        ..createSync(recursive: true);
+      final file = io.File(path.join(outDir.path, 'compile_commands.json'));
+      const gnDatabase = '''
+[
+  {
+    "file": "../../flutter/assets/asset_manager.cc",
+    "directory": "/src/out/build_name",
+    "command": "../../flutter/buildtools/mac-arm64/clang/bin/clang++ -c ../../flutter/assets/asset_manager.cc"
+  }
+]
+''';
+      file.writeAsStringSync(gnDatabase, flush: true);
+
+      const swiftDatabase = '''
+[
+  {
+    "file": "../../flutter/bar.swift",
+    "directory": "/src/out/build_name",
+    "command": "python3 ../../build/toolchain/darwin/swiftc.py -module-name Bar ../../flutter/bar.swift"
+  }
+]
+''';
+
+      final commandLog = <FakeCommandLogEntry>[];
+      final Build targetBuild = buildConfig.builds[0];
+      final buildRunner = BuildRunner(
+        platform: FakePlatform(operatingSystem: Platform.linux, numberOfProcessors: 32),
+        processRunner: ProcessRunner(
+          processManager: _fakeProcessManager(
+            commandLog: commandLog,
+            ninjaResult: io.ProcessResult(1, 0, swiftDatabase, ''),
+          ),
+        ),
+        abi: ffi.Abi.linuxX64,
+        engineSrcDir: srcDir,
+        build: targetBuild,
+        runNinja: false,
+        runGenerators: false,
+        runTests: false,
+      );
+      await buildRunner.run((RunnerEvent event) {});
+
+      // Verify only the Swift rule is queried: an unrestricted compdb also
+      // describes link, copy, and phony edges, which shadow the real compile
+      // command for the files they name.
+      final FakeCommandLogEntry compdbEntry = commandLog.firstWhere(
+        (FakeCommandLogEntry entry) => entry.command.contains('compdb'),
+      );
+      expect(compdbEntry.command.sublist(1), equals(<String>['-t', 'compdb', 'swift']));
+
+      // Verify GN's own database is left as GN wrote it. Anything merged into
+      // it is discarded the next time the build files are regenerated.
+      expect(file.readAsStringSync(), equals(gnDatabase));
+
+      final lspFile = io.File(path.join(outDir.path, 'lsp', 'compile_commands.json'));
+      final json = convert.jsonDecode(lspFile.readAsStringSync()) as List<dynamic>;
+      expect(json.length, equals(2));
+      // Verify GN's entry survives untouched alongside the appended Swift one.
+      expect(convert.jsonDecode(gnDatabase), equals(<dynamic>[json[0]]));
+      final swiftEntry = json[1] as Map<String, dynamic>;
+      expect(swiftEntry['file'], equals('/src/flutter/bar.swift'));
+      expect(swiftEntry['command'], startsWith('swiftc '));
+    } finally {
+      emptyDir.deleteSync(recursive: true);
+    }
+  });
+
+  test('GlobalBuildRunner post-processes compile_commands.json when only ninja runs', () async {
+    final io.Directory emptyDir = io.Directory.systemTemp.createTempSync(
+      'build_config_runner.test',
+    );
+    try {
+      final srcDir = io.Directory(path.join(emptyDir.path, 'src'));
+      final outDir = io.Directory(path.join(srcDir.path, 'out', 'build_name'))
+        ..createSync(recursive: true);
+      final file = io.File(path.join(outDir.path, 'compile_commands.json'));
+      file.writeAsStringSync('''
+[
+  {
+    "file": "../../flutter/assets/asset_manager.cc",
+    "directory": "/src/out/build_name",
+    "command": "../../flutter/buildtools/mac-arm64/reclient/rewrapper --cfg=x ../../flutter/buildtools/mac-arm64/clang/bin/clang++ -c ../../flutter/assets/asset_manager.cc"
+  }
+]
+''', flush: true);
+
+      final Build targetBuild = buildConfig.builds[0];
+      final buildRunner = BuildRunner(
+        platform: FakePlatform(operatingSystem: Platform.linux, numberOfProcessors: 32),
+        processRunner: ProcessRunner(processManager: _fakeProcessManager(failUnknown: false)),
+        abi: ffi.Abi.linuxX64,
+        engineSrcDir: srcDir,
+        build: targetBuild,
+        runGn: false,
+        runGenerators: false,
+        runTests: false,
+      );
+      await buildRunner.run((RunnerEvent event) {});
+
+      // Ninja regenerates the build files on its own whenever they are stale,
+      // which restores GN's raw database. Verify the post-processing runs even
+      // though this build skipped the GN step.
+      expect(file.readAsStringSync(), isNot(contains('rewrapper')));
+      expect(io.File(path.join(outDir.path, 'lsp', 'compile_commands.json')).existsSync(), isTrue);
+    } finally {
+      emptyDir.deleteSync(recursive: true);
+    }
+  });
+
+  test('GlobalBuildRunner post-processes compile_commands.json after ninja', () async {
+    final io.Directory emptyDir = io.Directory.systemTemp.createTempSync(
+      'build_config_runner.test',
+    );
+    try {
+      final srcDir = io.Directory(path.join(emptyDir.path, 'src'));
+      final outDir = io.Directory(path.join(srcDir.path, 'out', 'build_name'))
+        ..createSync(recursive: true);
+      io.File(path.join(outDir.path, 'compile_commands.json')).writeAsStringSync('[\n]\n');
+
+      final commandLog = <FakeCommandLogEntry>[];
+      final Build targetBuild = buildConfig.builds[0];
+      final buildRunner = BuildRunner(
+        platform: FakePlatform(operatingSystem: Platform.linux, numberOfProcessors: 32),
+        processRunner: ProcessRunner(
+          processManager: _fakeProcessManager(commandLog: commandLog, failUnknown: false),
+        ),
+        abi: ffi.Abi.linuxX64,
+        engineSrcDir: srcDir,
+        build: targetBuild,
+        runGenerators: false,
+        runTests: false,
+      );
+      await buildRunner.run((RunnerEvent event) {});
+
+      // Ninja regenerates the build files at the start of its run, and that
+      // rewrites GN's compile_commands.json. Verify the post-processing runs
+      // after ninja, or its output is discarded before anything reads it.
+      final int gnIndex = commandLog.indexWhere(
+        (FakeCommandLogEntry entry) => entry.command.first.endsWith('gn'),
+      );
+      final int compdbIndex = commandLog.indexWhere(
+        (FakeCommandLogEntry entry) => entry.command.contains('compdb'),
+      );
+      final int ninjaIndex = commandLog.indexWhere(
+        (FakeCommandLogEntry entry) =>
+            entry.command.first.endsWith('ninja') && !entry.command.contains('compdb'),
+      );
+      expect(gnIndex, isNonNegative);
+      expect(ninjaIndex, isNonNegative);
+      expect(compdbIndex, isNonNegative);
+      expect(gnIndex, lessThan(ninjaIndex));
+      expect(ninjaIndex, lessThan(compdbIndex));
+    } finally {
+      emptyDir.deleteSync(recursive: true);
+    }
+  });
+
   test('Bootstrap collects reproxy status before shutting down reproxy', () async {
     final Build targetBuild = buildConfig.builds[0];
     final commandLog = <FakeCommandLogEntry>[];

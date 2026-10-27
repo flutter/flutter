@@ -156,16 +156,13 @@ void main() {
         },
       );
 
-      testWithoutContext(
-        'should not create a help text longer than outputPreferences.wrapColumn without ansi support',
-        () {
-          _testMessageLength(
-            stdoutSupportsAnsi: false,
-            wrapColumn: OutputPreferences.kDefaultTerminalColumns,
-            maxTestLineLength: OutputPreferences.kDefaultTerminalColumns,
-          );
-        },
-      );
+      testWithoutContext('should not create a help text longer than outputPreferences.wrapColumn without ansi support', () {
+        _testMessageLength(
+          stdoutSupportsAnsi: false,
+          wrapColumn: OutputPreferences.kDefaultTerminalColumns,
+          maxTestLineLength: OutputPreferences.kDefaultTerminalColumns,
+        );
+      });
 
       testWithoutContext(
         'should not create a help text longer than outputPreferences.wrapColumn with ansi support',

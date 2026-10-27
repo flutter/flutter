@@ -1,0 +1,21 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Applied to Skia's targets only, via skia_target_default_configs in
+# //build/config/BUILDCONFIG.gn.
+config("warnings") {
+  cflags = []
+
+  if (is_fuchsia && is_clang) {
+    # Dead declarations in Skia that only warn against the libc++ headers
+    # bundled in the Fuchsia toolchain.
+    #
+    # Remove once fixed upstream in Skia.
+    # TODO(cbracken): https://github.com/flutter/flutter/issues/192609
+    cflags += [
+      "-Wno-unused-private-field",
+      "-Wno-unused-variable",
+    ]
+  }
+}

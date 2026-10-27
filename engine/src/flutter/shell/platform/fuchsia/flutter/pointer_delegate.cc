@@ -8,6 +8,7 @@
 #include <zircon/status.h>
 #include <zircon/types.h>
 
+#include <cmath>
 #include <limits>
 
 #include "flutter/fml/logging.h"
@@ -172,8 +173,8 @@ uint64_t PackFuchsiaDeviceIdAndPointerId(uint32_t fuchsia_device_id,
 // TODO(fxbug.dev/87074): Let PointerDataPacketConverter synthesize events.
 //
 // Flutter gestures expect a gesture to start within the logical view space, and
-// is not tolerant of floating point drift. This function coerces just the DOWN
-// event's coordinate to start within the logical view.
+// is not tolerant of floating point drift. This function coerces the ADD and
+// synthesized DOWN events' coordinates to start within the logical view.
 std::pair<flutter::PointerData, std::optional<flutter::PointerData>>
 CreateTouchDraft(const fup_TouchEvent& event,
                  const fup_ViewParameters& view_parameters) {
@@ -199,15 +200,15 @@ CreateTouchDraft(const fup_TouchEvent& event,
 
   // Match Flutter pointer's state machine with synthesized events.
   if (ptr.change == flutter::PointerData::Change::kAdd) {
+    // Ensure gesture recognition and policy region matching: ADD and DOWN start
+    // in the logical view space.
+    auto [x, y] =
+        ClampToViewSpace(ptr.physical_x, ptr.physical_y, view_parameters);
+    ptr.physical_x = x;
+    ptr.physical_y = y;
     flutter::PointerData down;
     memcpy(&down, &ptr, sizeof(flutter::PointerData));
     down.change = flutter::PointerData::Change::kDown;
-    {  // Ensure gesture recognition: DOWN starts in the logical view space.
-      auto [x, y] =
-          ClampToViewSpace(down.physical_x, down.physical_y, view_parameters);
-      down.physical_x = x;
-      down.physical_y = y;
-    }
     return {std::move(ptr), std::move(down)};
   } else if (ptr.change == flutter::PointerData::Change::kRemove) {
     flutter::PointerData up;
@@ -340,8 +341,11 @@ void InsertIntoBuffer(
 
 PointerDelegate::PointerDelegate(
     fuchsia::ui::pointer::TouchSourceHandle touch_source,
-    fuchsia::ui::pointer::MouseSourceHandle mouse_source)
-    : touch_source_(touch_source.Bind()), mouse_source_(mouse_source.Bind()) {
+    fuchsia::ui::pointer::MouseSourceHandle mouse_source,
+    bool intercept_all_input)
+    : touch_source_(touch_source.Bind()),
+      intercept_all_input_(intercept_all_input),
+      mouse_source_(mouse_source.Bind()) {
   if (touch_source_) {
     touch_source_.set_error_handler([](zx_status_t status) {
       FML_LOG(ERROR) << "TouchSource channel error: << "
@@ -355,6 +359,98 @@ PointerDelegate::PointerDelegate(
     });
   }
 }
+
+void PointerDelegate::SetGestureResponsePolicy(GestureResponsePolicy policy) {
+  policy_ = std::move(policy);
+}
+
+void PointerDelegate::RemoveActiveInteraction(
+    const fuchsia::ui::pointer::TouchInteractionId& ixn) {
+  for (size_t i = 0; i < active_interactions_count_; ++i) {
+    if (fidl::Equals(active_interactions_[i].id, ixn)) {
+      active_interactions_[i] =
+          active_interactions_[active_interactions_count_ - 1];
+      --active_interactions_count_;
+      return;
+    }
+  }
+}
+
+fup_TouchResponseType PointerDelegate::EvaluatePolicy(
+    const fuchsia::ui::pointer::TouchInteractionId& ixn,
+    fuchsia::ui::pointer::EventPhase phase,
+    float logical_x,
+    float logical_y) {
+  FML_DCHECK(policy_.has_value());
+  ActiveInteraction* active = nullptr;
+  for (size_t i = 0; i < active_interactions_count_; ++i) {
+    if (fidl::Equals(active_interactions_[i].id, ixn)) {
+      active = &active_interactions_[i];
+      break;
+    }
+  }
+
+  if (phase == fup_EventPhase::ADD || active == nullptr) {
+    if (active == nullptr) {
+      if (active_interactions_count_ < kMaxActiveInteractions) {
+        active = &active_interactions_[active_interactions_count_++];
+      } else {
+        active = &active_interactions_[0];
+      }
+    }
+    active->id = ixn;
+    active->start_x = logical_x;
+    active->start_y = logical_y;
+    active->committed = false;
+  }
+
+  const float match_x = active->start_x;
+  const float match_y = active->start_y;
+  const float displacement =
+      std::hypot(logical_x - match_x, logical_y - match_y);
+
+  fup_TouchResponseType target_response = policy_->default_response;
+  float touch_slop = policy_->default_touch_slop;
+  fup_TouchResponseType defer_response = policy_->default_defer_response;
+  fup_TouchResponseType uncommitted_end_response = fup_TouchResponseType::NO;
+
+  for (size_t i = 0; i < policy_->regions.size(); ++i) {
+    const auto& region = policy_->regions[i];
+    if (region.Contains(match_x, match_y)) {
+      target_response = region.response;
+      touch_slop = region.touch_slop;
+      defer_response = region.defer_response;
+      for (size_t j = i + 1; j < policy_->regions.size(); ++j) {
+        const auto& fallback = policy_->regions[j];
+        if (fallback.touch_slop <= 0.f && fallback.Contains(match_x, match_y)) {
+          uncommitted_end_response = fallback.response;
+          break;
+        }
+      }
+      break;
+    }
+  }
+
+  if (touch_slop <= 0.f || displacement > touch_slop) {
+    active->committed = true;
+  }
+
+  fup_TouchResponseType result = target_response;
+  if (!active->committed) {
+    if (phase == fup_EventPhase::REMOVE || phase == fup_EventPhase::CANCEL) {
+      result = uncommitted_end_response;
+    } else {
+      result = defer_response;
+    }
+  }
+
+  if (phase == fup_EventPhase::REMOVE || phase == fup_EventPhase::CANCEL) {
+    RemoveActiveInteraction(ixn);
+  }
+
+  return result;
+}
+
 // Core logic of this class.
 // Aim to keep state management in this function.
 void PointerDelegate::WatchLoop(
@@ -386,13 +482,21 @@ void PointerDelegate::WatchLoop(
 
         FML_DCHECK(touch_view_parameters_.has_value()) << "API guarantee";
         auto events = CreateTouchDraft(event, touch_view_parameters_.value());
+        const float logical_x = static_cast<float>(events.first.physical_x);
+        const float logical_y = static_cast<float>(events.first.physical_y);
         if (touch_buffer_.count(ixn) > 0) {
           InsertIntoBuffer(std::move(events), &touch_buffer_[ixn]);
         } else {
           InsertIntoBuffer(std::move(events), &to_client);
         }
-        // For this simple client, always claim we want the gesture.
-        response.set_response_type(fup_TouchResponseType::YES);
+        if (intercept_all_input_ || !policy_.has_value()) {
+          // For this simple client (or before a gesture-response policy has
+          // been set), always claim we want the gesture.
+          response.set_response_type(fup_TouchResponseType::YES);
+        } else {
+          response.set_response_type(
+              EvaluatePolicy(ixn, sample.phase(), logical_x, logical_y));
+        }
       }
       if (event.has_interaction_result()) {
         const auto& result = event.interaction_result();

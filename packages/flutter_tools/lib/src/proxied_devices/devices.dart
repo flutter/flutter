@@ -8,6 +8,7 @@ import 'dart:typed_data';
 import 'package:meta/meta.dart';
 
 import '../application_package.dart';
+import '../artifacts.dart';
 import '../base/dds.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
@@ -42,14 +43,11 @@ T _cast<T>(Object? object) {
 class ProxiedDevices extends PollingDeviceDiscovery {
   ProxiedDevices(
     this.connection, {
-    bool deltaFileTransfer = true,
-    bool enableDdsProxy = false,
+    this._deltaFileTransfer = true,
+    this._enableDdsProxy = false,
     required this.logger,
-    FileTransfer fileTransfer = const FileTransfer(),
-  }) : _deltaFileTransfer = deltaFileTransfer,
-       _enableDdsProxy = enableDdsProxy,
-       _fileTransfer = fileTransfer,
-       super('Proxied devices');
+    this._fileTransfer = const FileTransfer(),
+  }) : super('Proxied devices');
 
   /// [DaemonConnection] used to communicate with the daemon.
   final DaemonConnection connection;
@@ -176,36 +174,27 @@ class ProxiedDevice extends Device {
   ProxiedDevice(
     this.connection,
     String id, {
-    bool deltaFileTransfer = true,
-    bool enableDdsProxy = false,
+    this._deltaFileTransfer = true,
+    this._enableDdsProxy = false,
     required super.category,
     required super.platformType,
-    required TargetPlatform targetPlatform,
-    required CpuArch cpuArch,
+    required this._targetPlatform,
+    required this._cpuArch,
     required super.ephemeral,
     required this.isConnected,
     required this.connectionInterface,
     required this.name,
-    required bool isLocalEmulator,
-    required String? emulatorId,
-    required String sdkNameAndVersion,
+    required this._isLocalEmulator,
+    required this._emulatorId,
+    required this._sdkNameAndVersion,
     required this.supportsHotReload,
     required this.supportsHotRestart,
     required this.supportsFlutterExit,
     required this.supportsScreenshot,
-    required bool supportsHardwareRendering,
+    required this._supportsHardwareRendering,
     required super.logger,
-    FileTransfer fileTransfer = const FileTransfer(),
-  }) : _deltaFileTransfer = deltaFileTransfer,
-       _enableDdsProxy = enableDdsProxy,
-       _isLocalEmulator = isLocalEmulator,
-       _emulatorId = emulatorId,
-       _sdkNameAndVersion = sdkNameAndVersion,
-       _supportsHardwareRendering = supportsHardwareRendering,
-       _targetPlatform = targetPlatform,
-       _cpuArch = cpuArch,
-       _logger = logger,
-       _fileTransfer = fileTransfer,
+    this._fileTransfer = const FileTransfer(),
+  }) : _logger = logger,
        super(id);
 
   /// [DaemonConnection] used to communicate with the daemon.
@@ -597,8 +586,11 @@ class _ProxiedForwardedPort extends ForwardedPort {
   }
 }
 
-typedef CreateSocketServer =
-    Future<ServerSocket> Function(Logger logger, int? hostPort, bool? ipv6);
+typedef CreateSocketServer = Future<ServerSocket> Function(
+  Logger logger,
+  int? hostPort,
+  bool? ipv6,
+);
 
 /// A [DevicePortForwarder] for a proxied device.
 ///
@@ -611,12 +603,10 @@ typedef CreateSocketServer =
 class ProxiedPortForwarder extends DevicePortForwarder {
   ProxiedPortForwarder(
     this.connection, {
-    String? deviceId,
-    required Logger logger,
-    @visibleForTesting CreateSocketServer createSocketServer = _defaultCreateServerSocket,
-  }) : _logger = logger,
-       _deviceId = deviceId,
-       _createSocketServer = createSocketServer;
+    this._deviceId,
+    required this._logger,
+    @visibleForTesting this._createSocketServer = _defaultCreateServerSocket,
+  });
 
   final String? _deviceId;
 
@@ -702,25 +692,30 @@ class ProxiedPortForwarder extends DevicePortForwarder {
             },
           ),
         );
-        debounceDataStream(socket).listen((Uint8List data) {
-          unawaited(
-            connection
-                .sendRequest('proxy.write', <String, Object>{'id': id}, data)
-                .then(
-                  (Object? obj) => obj,
-                  onError: (Object error, StackTrace stackTrace) {
-                    // Log the error, but proceed normally. Network failure should not
-                    // crash the tool. If this is critical, the place where the connection
-                    // is being used would crash.
-                    _logger.printWarning('Write to remote proxy error: $error');
-                    _logger.printTrace(
-                      'Write to remote proxy error: $error, stack trace: $stackTrace',
-                    );
-                    return null;
-                  },
-                ),
-          );
-        });
+        debounceDataStream(socket).listen(
+          (Uint8List data) {
+            unawaited(
+              connection
+                  .sendRequest('proxy.write', <String, Object>{'id': id}, data)
+                  .then(
+                    (Object? obj) => obj,
+                    onError: (Object error, StackTrace stackTrace) {
+                      // Log the error, but proceed normally. Network failure should not
+                      // crash the tool. If this is critical, the place where the connection
+                      // is being used would crash.
+                      _logger.printWarning('Write to remote proxy error: $error');
+                      _logger.printTrace(
+                        'Write to remote proxy error: $error, stack trace: $stackTrace',
+                      );
+                      return null;
+                    },
+                  ),
+            );
+          },
+          onError: (Object error, StackTrace stackTrace) {
+            _logger.printTrace('Socket error: $error\n$stackTrace');
+          },
+        );
         _connectedSockets.add(socket);
 
         unawaited(
@@ -817,12 +812,10 @@ class ProxiedDartDevelopmentService
     this.connection,
     this.deviceId, {
     required this.logger,
-    required ProxiedPortForwarder proxiedPortForwarder,
-    required ProxiedPortForwarder devicePortForwarder,
+    required this._proxiedPortForwarder,
+    required this._devicePortForwarder,
     @visibleForTesting DartDevelopmentService? localDds,
-  }) : _proxiedPortForwarder = proxiedPortForwarder,
-       _devicePortForwarder = devicePortForwarder,
-       _localDds = localDds ?? DartDevelopmentService(logger: logger);
+  }) : _localDds = localDds ?? DartDevelopmentService(logger: logger);
 
   final String deviceId;
 
@@ -863,6 +856,7 @@ class ProxiedDartDevelopmentService
   @override
   Future<void> startDartDevelopmentService(
     Uri vmServiceUri, {
+    required Artifacts artifacts,
     String? appName,
     FlutterDevice? device,
     int? ddsPort,
@@ -884,6 +878,7 @@ class ProxiedDartDevelopmentService
       _ddsStartedLocally = true;
       await _localDds.startDartDevelopmentService(
         vmServiceUri,
+        artifacts: artifacts,
         appName: appName,
         ddsPort: ddsPort,
         ipv6: ipv6,

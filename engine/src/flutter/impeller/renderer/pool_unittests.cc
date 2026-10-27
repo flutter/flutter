@@ -25,7 +25,7 @@ class Foobar {
   void SetIsReset(bool is_reset) { is_reset_ = is_reset; }
 
  private:
-  size_t size_;
+  size_t size_ = 0;
   bool is_reset_ = false;
 };
 }  // namespace

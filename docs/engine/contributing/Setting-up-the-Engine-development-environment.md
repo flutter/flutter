@@ -100,6 +100,14 @@ gclient sync
 
 ## Editor autocomplete support
 
+Building with `et` writes two compilation databases into the build directory:
+
+* `src/out/<config>/compile_commands.json` is GN's own database, covering C,
+  C++ and Objective-C++. GN rewrites it whenever the build files are
+  regenerated.
+* `src/out/<config>/lsp/compile_commands.json` includes additional targets,
+  including Swift. This is the one that should be used by editors and LSPs.
+
 ### Xcode [Objective-C++]
 
 On Mac, you can simply use Xcode (e.g., `open out/host_debug_unopt/flutter_engine.xcodeproj`).
@@ -108,7 +116,7 @@ On Mac, you can simply use Xcode (e.g., `open out/host_debug_unopt/flutter_engin
 
 VSCode can provide some IDE features using the [C/C++ extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode.cpptools). It will provide basic support on install without needing any additional configuration. There will probably be some issues, like header not found errors and incorrect jump to definitions.
 
-Intellisense can also use our `compile_commands.json` for more robust functionality. Either symlink `src/out/compile_commands.json` to the project root at `src` or provide an absolute path to it in the `c_cpp_properties.json` config file. See ["compile commands" in the c_cpp_properties.json reference](https://code.visualstudio.com/docs/cpp/c-cpp-properties-schema-reference). This will likely resolve the basic issues mentioned above.
+Intellisense can also use our `compile_commands.json` for more robust functionality. Either symlink `src/out/<configuration>/lsp/compile_commands.json` to the project root at `src` or provide an absolute path to it in the `c_cpp_properties.json` config file. See ["compile commands" in the c_cpp_properties.json reference](https://code.visualstudio.com/docs/cpp/c-cpp-properties-schema-reference). This will likely resolve the basic issues mentioned above.
 
 The easiest way to do this is create a [multi-root workspace](https://code.visualstudio.com/docs/editor/workspaces/workspaces#_multiroot-workspaces) that includes the Flutter SDK. For example, something like this:
 
@@ -134,7 +142,7 @@ Then, install the [`clangd` extension](https://marketplace.visualstudio.com/item
     ],
     "clangd.path": "engine/src/flutter/buildtools/mac-arm64/clang/bin/clangd",
     "clangd.arguments": [
-        "--compile-commands-dir=engine/src/out/host_debug_unopt_arm64"
+        "--compile-commands-dir=engine/src/out/host_debug_unopt_arm64/lsp"
     ],
     "clang-format.executable": "engine/src/flutter/buildtools/mac-arm64/clang/bin/clang-format"
 }
@@ -153,7 +161,7 @@ For adding IDE support to the Java code in the engine with VSCode, see ["Using V
 
 ### Zed Editor
 
-[Zed](https://zed.dev/) can be used to edit C++ code in the Engine. To enable analysis and auto-completion, symlink `src/out/compile_commands.json` to the project root at `src`.
+[Zed](https://zed.dev/) can be used to edit C++ code in the Engine. To enable analysis and auto-completion, symlink `src/out/<configuration>/lsp/compile_commands.json` to the project root at `src`.
 
 ### cquery/ccls (multiple editors) [C/C++/Objective-C++]
 
@@ -165,9 +173,9 @@ To set up:
 1. Install cquery
     1. `brew install cquery` or `brew install ccls` on osx; or
     1. [Build from source](https://github.com/cquery-project/cquery/wiki/Getting-started)
-1. Generate compile_commands.json which our GN tool already does such as via `src/flutter/tools/gn --ios --unoptimized`
+1. Generate compile_commands.json, which `et build` does as part of any build.
 1. Install an editor extension such as [VSCode-cquery](https://marketplace.visualstudio.com/items?itemName=cquery-project.cquery) or [vscode-ccls](https://marketplace.visualstudio.com/items?itemName=ccls-project.ccls)
-    1. VSCode-query and vscode-ccls requires the compile_commands.json to be at the project root. Copy or symlink `src/out/compile_commands.json` to `src/` or `src/flutter` depending on which folder you want to open.
+    1. VSCode-query and vscode-ccls requires the compile_commands.json to be at the project root. Copy or symlink `src/out/<configuration>/lsp/compile_commands.json` to `src/` or `src/flutter` depending on which folder you want to open.
     1. Follow [Setting up the extension](https://github.com/cquery-project/cquery/wiki/Visual-Studio-Code#setting-up-the-extension) to configure VSCode-query.
 
 ![](https://media.giphy.com/media/xjIrToRDVvMPvjkBcl/giphy.gif)

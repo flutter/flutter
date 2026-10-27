@@ -258,7 +258,7 @@ class DiffContext {
   struct Readback {
     // Index of rects_ entry that this readback belongs to. Used to
     // determine if subtree has any readback
-    size_t position;
+    size_t position = 0;
 
     // Paint region of the filter performing readback, in screen coordinates.
     DlIRect paint_rect;

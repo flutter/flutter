@@ -167,6 +167,8 @@ template("embedder_source_set") {
 
     if (embedder_enable_vulkan) {
       sources += [
+        "embedder_external_texture_vulkan.cc",
+        "embedder_external_texture_vulkan.h",
         "embedder_surface_vulkan.cc",
         "embedder_surface_vulkan.h",
       ]
@@ -176,6 +178,7 @@ template("embedder_source_set") {
           "embedder_surface_vulkan_impeller.cc",
           "embedder_surface_vulkan_impeller.h",
         ]
+        deps += [ "//flutter/impeller/display_list" ]
       }
 
       deps += [
@@ -184,7 +187,8 @@ template("embedder_source_set") {
       ]
     }
 
-    # Depend on 'icudtl.dat.S' to avoid dynamic lookups of engine library symbols.
+    # Depend on 'icudtl.dat.S' to avoid dynamic lookups of engine library
+    # symbols.
     if (is_android) {
       deps += [ "//flutter/shell/platform/android:icudtl_asm" ]
       sources += [ "$root_build_dir/gen/flutter/shell/platform/android/flutter/third_party/icu/flutter/icudtl.dat.S" ]
@@ -257,6 +261,8 @@ test_fixtures("fixtures") {
     "fixtures/gradient_metal.png",
     "fixtures/external_texture_impeller.png",
     "fixtures/external_texture_metal.png",
+    "fixtures/external_texture_nv12.png",
+    "fixtures/texture.nv12",
     "fixtures/gradient_xform.png",
     "fixtures/scene_without_custom_compositor.png",
     "fixtures/scene_without_custom_compositor_with_xform.png",
@@ -577,7 +583,8 @@ group("flutter_engine") {
       ":flutter_engine_library",
     ]
 
-    # For the Mac, the dylib is packaged in a framework with the appropriate headers.
+    # For the Mac, the dylib is packaged in a framework with the appropriate
+    # headers.
     if (is_mac && !embedder_for_target) {
       deps += [ ":flutter_embedder_framework" ]
     }

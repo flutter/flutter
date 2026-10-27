@@ -50,7 +50,21 @@ void main() {
         matchesGoldenFile('stretch_effect_covers_full_viewport.png'),
       );
     },
-    // Skips this test when fragment shaders are not used.
+    // [intended] Skips this test when fragment shaders are not used.
     skip: !shaderSupported,
   );
+
+  testWidgets('StretchEffect does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox.shrink(
+            child: StretchEffect(axis: Axis.vertical, child: Placeholder()),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(StretchEffect)), Size.zero);
+  });
 }

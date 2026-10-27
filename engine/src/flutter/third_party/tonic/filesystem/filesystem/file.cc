@@ -21,6 +21,10 @@
 
 #if defined(OS_WIN)
 #include <BaseTsd.h>
+#include <io.h>
+#include <windows.h>
+
+#include "tonic/filesystem/filesystem/windows_utils.h"
 typedef SSIZE_T ssize_t;
 #endif
 
@@ -84,7 +88,12 @@ std::pair<uint8_t*, intptr_t> ReadFileDescriptorToBytes(int fd) {
 }
 
 bool ReadFileToString(const std::string& path, std::string* result) {
+#if defined(OS_WIN)
+  std::wstring wide_path = Utf8PathToWide(path);
+  Descriptor fd(_wopen(wide_path.c_str(), O_RDONLY));
+#else
   Descriptor fd(open(path.c_str(), O_RDONLY));
+#endif
   return ReadFileDescriptor(fd.get(), result);
 }
 
@@ -94,7 +103,12 @@ bool ReadFileDescriptorToString(int fd, std::string* result) {
 
 std::pair<uint8_t*, intptr_t> ReadFileToBytes(const std::string& path) {
   std::pair<uint8_t*, intptr_t> failure_pair{nullptr, -1};
+#if defined(OS_WIN)
+  std::wstring wide_path = Utf8PathToWide(path);
+  Descriptor fd(_wopen(wide_path.c_str(), O_RDONLY | BINARY_MODE));
+#else
   Descriptor fd(open(path.c_str(), O_RDONLY | BINARY_MODE));
+#endif
   if (!fd.is_valid())
     return failure_pair;
   return ReadFileDescriptorToBytes(fd.get());

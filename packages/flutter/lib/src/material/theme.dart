@@ -59,7 +59,21 @@ class Theme extends StatelessWidget {
   /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
 
-  static final ThemeData _kFallbackTheme = ThemeData.fallback();
+  static ThemeData? _cachedFallbackTheme;
+
+  /// The theme [Theme.of] returns when there is no [Theme] ancestor.
+  ///
+  /// The fallback is cached because constructing a [ThemeData] is expensive,
+  /// but it is rebuilt whenever [defaultTargetPlatform] no longer matches the
+  /// platform it was built for (for example under a `TargetPlatformVariant` or
+  /// after a platform override), so a theme-less subtree adapts to the current
+  /// platform the same way a [MaterialApp] would.
+  static ThemeData get _fallbackTheme {
+    if (_cachedFallbackTheme?.platform != defaultTargetPlatform) {
+      _cachedFallbackTheme = ThemeData.fallback();
+    }
+    return _cachedFallbackTheme!;
+  }
 
   /// The data from the closest [Theme] instance that encloses the given
   /// context.
@@ -132,10 +146,9 @@ class Theme extends StatelessWidget {
     final ThemeData theme =
         inheritedTheme?.theme.data ??
         (inheritedCupertinoTheme != null
-            ? CupertinoBasedMaterialThemeData(
-                themeData: inheritedCupertinoTheme.theme.data,
-              ).materialTheme
-            : _kFallbackTheme);
+            ? CupertinoBasedMaterialThemeData(themeData: inheritedCupertinoTheme.theme.data)
+                  .materialTheme
+            : _fallbackTheme);
     return ThemeData.localize(theme, theme.typography.geometryThemeFor(category));
   }
 

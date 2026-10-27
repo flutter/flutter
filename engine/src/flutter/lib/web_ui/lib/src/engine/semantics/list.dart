@@ -42,3 +42,46 @@ class SemanticListItem extends SemanticRole {
   @override
   bool focusAsRouteDefault() => focusable?.focusAsRouteDefault() ?? false;
 }
+
+/// Indicates a listbox container.
+///
+/// Uses aria listbox role to convey this semantic information to the element.
+class SemanticListBox extends SemanticRole {
+  SemanticListBox(SemanticsObject semanticsObject)
+    : super.withBasics(
+        EngineSemanticsRole.listBox,
+        semanticsObject,
+        preferredLabelRepresentation: LabelRepresentation.ariaLabel,
+      ) {
+    setAriaRole('listbox');
+  }
+
+  @override
+  void update() {
+    super.update();
+    if (!semanticsObject.hasLabel) {
+      setAttribute('aria-label', 'Options');
+    }
+  }
+
+  @override
+  bool focusAsRouteDefault() => focusable?.focusAsRouteDefault() ?? false;
+}
+
+/// Indicates a selectable option inside a listbox.
+///
+/// Uses aria option role to convey this semantic information to the element.
+class SemanticOption extends SemanticRole {
+  SemanticOption(SemanticsObject semanticsObject)
+    : super.withBasics(
+        EngineSemanticsRole.option,
+        semanticsObject,
+        preferredLabelRepresentation: LabelRepresentation.ariaLabel,
+      ) {
+    setAriaRole('option');
+    addTappable();
+  }
+
+  @override
+  bool focusAsRouteDefault() => focusable?.focusAsRouteDefault() ?? false;
+}

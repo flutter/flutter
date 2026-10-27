@@ -156,7 +156,7 @@ void PointerDataPacketConverter::ConvertPointerData(
       }
       case PointerData::Change::kHover: {
         auto iter = states_.find(pointer_data.device);
-        PointerState state;
+        PointerState state{};
         if (iter == states_.end()) {
           // Synthesizes add event if the pointer is not previously added.
           PointerData synthesized_add_event = pointer_data;
@@ -179,7 +179,7 @@ void PointerDataPacketConverter::ConvertPointerData(
       }
       case PointerData::Change::kDown: {
         auto iter = states_.find(pointer_data.device);
-        PointerState state;
+        PointerState state{};
         if (iter == states_.end()) {
           // Synthesizes a add event if the pointer is not previously added.
           PointerData synthesized_add_event = pointer_data;
@@ -253,7 +253,7 @@ void PointerDataPacketConverter::ConvertPointerData(
       case PointerData::Change::kPanZoomStart: {
         // Makes sure we have an existing pointer
         auto iter = states_.find(pointer_data.device);
-        PointerState state;
+        PointerState state{};
         if (iter == states_.end()) {
           // Synthesizes add event if the pointer is not previously added.
           PointerData synthesized_add_event = pointer_data;
@@ -344,7 +344,7 @@ void PointerDataPacketConverter::ConvertPointerData(
       case PointerData::SignalKind::kScale: {
         // Makes sure we have an existing pointer
         auto iter = states_.find(pointer_data.device);
-        PointerState state;
+        PointerState state{};
 
         if (iter == states_.end()) {
           // Synthesizes a add event if the pointer is not previously added.
@@ -397,7 +397,7 @@ void PointerDataPacketConverter::ConvertPointerData(
 
 PointerState PointerDataPacketConverter::EnsurePointerState(
     PointerData pointer_data) {
-  PointerState state;
+  PointerState state{};
   state.pointer_identifier = 0;
   state.is_down = false;
   state.is_pan_zoom_active = false;

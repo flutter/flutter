@@ -52,47 +52,39 @@ void main() {
   });
 
   group('adaptiveMagnifierControllerBuilder', () {
-    testWidgets(
-      'should return a TextEditingMagnifier on Android',
-      (WidgetTester tester) async {
-        await tester.pumpWidget(const MaterialApp(home: Placeholder()));
+    testWidgets('should return a TextEditingMagnifier on Android', (WidgetTester tester) async {
+      await tester.pumpWidget(const MaterialApp(home: Placeholder()));
 
-        final BuildContext context = tester.firstElement(find.byType(Placeholder));
+      final BuildContext context = tester.firstElement(find.byType(Placeholder));
 
-        final magnifierPositioner = ValueNotifier<MagnifierInfo>(MagnifierInfo.empty);
-        addTearDown(magnifierPositioner.dispose);
+      final magnifierPositioner = ValueNotifier<MagnifierInfo>(MagnifierInfo.empty);
+      addTearDown(magnifierPositioner.dispose);
 
-        final Widget? builtWidget = TextMagnifier.adaptiveMagnifierConfiguration.magnifierBuilder(
-          context,
-          MagnifierController(),
-          magnifierPositioner,
-        );
+      final Widget? builtWidget = TextMagnifier.adaptiveMagnifierConfiguration.magnifierBuilder(
+        context,
+        MagnifierController(),
+        magnifierPositioner,
+      );
 
-        expect(builtWidget, isA<TextMagnifier>());
-      },
-      variant: TargetPlatformVariant.only(TargetPlatform.android),
-    );
+      expect(builtWidget, isA<TextMagnifier>());
+    }, variant: TargetPlatformVariant.only(TargetPlatform.android));
 
-    testWidgets(
-      'should return a CupertinoMagnifier on iOS',
-      (WidgetTester tester) async {
-        await tester.pumpWidget(const MaterialApp(home: Placeholder()));
+    testWidgets('should return a CupertinoMagnifier on iOS', (WidgetTester tester) async {
+      await tester.pumpWidget(const MaterialApp(home: Placeholder()));
 
-        final BuildContext context = tester.firstElement(find.byType(Placeholder));
+      final BuildContext context = tester.firstElement(find.byType(Placeholder));
 
-        final magnifierPositioner = ValueNotifier<MagnifierInfo>(MagnifierInfo.empty);
-        addTearDown(magnifierPositioner.dispose);
+      final magnifierPositioner = ValueNotifier<MagnifierInfo>(MagnifierInfo.empty);
+      addTearDown(magnifierPositioner.dispose);
 
-        final Widget? builtWidget = TextMagnifier.adaptiveMagnifierConfiguration.magnifierBuilder(
-          context,
-          MagnifierController(),
-          magnifierPositioner,
-        );
+      final Widget? builtWidget = TextMagnifier.adaptiveMagnifierConfiguration.magnifierBuilder(
+        context,
+        MagnifierController(),
+        magnifierPositioner,
+      );
 
-        expect(builtWidget, isA<CupertinoTextMagnifier>());
-      },
-      variant: TargetPlatformVariant.only(TargetPlatform.iOS),
-    );
+      expect(builtWidget, isA<CupertinoTextMagnifier>());
+    }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
 
     testWidgets(
       'should return null on all platforms not Android, iOS',

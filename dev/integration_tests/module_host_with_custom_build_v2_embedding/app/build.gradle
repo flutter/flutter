@@ -34,6 +34,12 @@ android {
             initWith release
             matchingFallbacks += 'release'
         }
+        // Debuggable, but consumes the module's release variant, so it gets release Flutter
+        // artifacts.
+        qa {
+            initWith debug
+            matchingFallbacks += 'release'
+        }
     }
     // Test flavors.
     flavorDimensions += "version"

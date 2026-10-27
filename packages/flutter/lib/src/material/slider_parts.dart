@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 /// @docImport 'color_scheme.dart';
+/// @docImport 'range_slider.dart';
 /// @docImport 'slider.dart';
 /// @docImport 'text_theme.dart';
 library;

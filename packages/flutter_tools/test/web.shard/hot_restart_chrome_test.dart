@@ -5,10 +5,96 @@
 @Tags(<String>['flutter-test-driver'])
 library;
 
-import '../src/common.dart';
+import 'dart:async';
 
-import 'test_data/hot_restart_chrome_test_common.dart';
+import 'package:file/file.dart';
+import 'package:flutter_tools/src/web/web_device.dart' show GoogleChromeDevice;
+
+import '../integration.shard/test_data/hot_reload_project.dart';
+import '../integration.shard/test_driver.dart';
+import '../integration.shard/test_utils.dart';
+import '../src/common.dart';
+import 'test_data/hot_reload_index_html_samples.dart';
+
+Future<void> testAll() async {
+  await _testProject(HotReloadProject()); // default
+  await _testProject(
+    HotReloadProject(constApp: true),
+    name: 'Default) (with `const MyApp()`)',
+  ); // runApp(const MyApp());
+  await _testProject(
+    HotReloadProject(indexHtml: indexHtmlFlutterJsCallback),
+    name: 'flutter.js (callback)',
+  );
+  await _testProject(
+    HotReloadProject(indexHtml: indexHtmlFlutterJsPromisesFull),
+    name: 'flutter.js (promises)',
+  );
+  await _testProject(
+    HotReloadProject(indexHtml: indexHtmlFlutterJsPromisesShort),
+    name: 'flutter.js (promises, short)',
+  );
+  await _testProject(
+    HotReloadProject(indexHtml: indexHtmlFlutterJsLoad),
+    name: 'flutter.js (load)',
+  );
+  await _testProject(HotReloadProject(indexHtml: indexHtmlNoFlutterJs), name: 'No flutter.js');
+  await _testProject(
+    HotReloadProject(indexHtml: indexHtmlWithFlutterBootstrapScriptTag),
+    name: 'Using flutter_bootstrap.js script tag',
+  );
+  await _testProject(
+    HotReloadProject(indexHtml: indexHtmlWithInlinedFlutterBootstrapScript),
+    name: 'Using inlined flutter_bootstrap.js',
+  );
+}
+
+Future<void> _testProject(HotReloadProject project, {String name = 'Default'}) async {
+  late Directory tempDir;
+  late FlutterRunTestDriver flutter;
+
+  final testName = 'Hot restart (index.html: $name)';
+
+  setUp(() async {
+    tempDir = createResolvedTempDirectorySync('hot_restart_test.');
+    await project.setUpIn(tempDir);
+    flutter = FlutterRunTestDriver(tempDir);
+  });
+
+  tearDown(() async {
+    await flutter.stop();
+    await flutter.done;
+    tryToDelete(tempDir);
+  });
+
+  testWithoutContext(
+    '$testName: hot restart works without error and newly added code executes',
+    () async {
+      await flutter.run(
+        device: GoogleChromeDevice.kChromeDeviceId,
+        additionalCommandArgs: <String>['--verbose', '--no-web-resources-cdn'],
+      );
+      // hot restart works without error
+      await flutter.hotRestart();
+
+      final completer = Completer<void>();
+      final StreamSubscription<String> subscription = flutter.stdout.listen((String line) {
+        printOnFailure(line);
+        if (!completer.isCompleted && line.contains('(((((RELOAD WORKED)))))')) {
+          completer.complete();
+        }
+      });
+      project.uncommentHotReloadPrint();
+      try {
+        await flutter.hotRestart();
+        await completer.future.timeout(const Duration(seconds: 15));
+      } finally {
+        await subscription.cancel();
+      }
+    },
+  );
+}
 
 void main() async {
-  await testAll(useDDCLibraryBundleFormat: true);
+  await testAll();
 }

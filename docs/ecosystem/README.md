@@ -2,6 +2,7 @@ This is an index of team-facing documentation for the [flutter/packages reposito
 
 - [Contributing to Plugins and Packages](contributing/README.md)
 - [Flutter migrate](../wiki_archive/Flutter-migrate.md)
+- [Material 3 Expressive component migration checklist](material_ui/Material-3-Expressive-component-migration-checklist.md)
 - [Package migration to 1.0.0](Package-migration-to-1.0.0.md)
 - [Plugin Tests](testing/Plugin-Tests.md)
 - [Plugins and Packages repository structure](Plugins-and-Packages-repository-structure.md)

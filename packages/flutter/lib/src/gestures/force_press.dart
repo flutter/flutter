@@ -90,8 +90,11 @@ typedef GestureForcePressEndCallback = void Function(ForcePressDetails details);
 /// Signature used by [ForcePressGestureRecognizer] for interpolating the raw
 /// device pressure to a value in the range `[0, 1]` given the device's pressure
 /// min and pressure max.
-typedef GestureForceInterpolation =
-    double Function(double pressureMin, double pressureMax, double pressure);
+typedef GestureForceInterpolation = double Function(
+  double pressureMin,
+  double pressureMax,
+  double pressure,
+);
 
 /// Recognizes a force press on devices that have force sensors.
 ///

@@ -7,7 +7,6 @@
 
 #include <cstddef>
 
-#include "fml/status.h"
 #include "impeller/core/formats.h"
 #include "impeller/core/resource_binder.h"
 #include "impeller/core/shader_types.h"
@@ -15,6 +14,7 @@
 #include "impeller/renderer/command.h"
 #include "impeller/renderer/command_buffer.h"
 #include "impeller/renderer/render_target.h"
+#include "third_party/abseil-cpp/absl/status/status.h"
 
 namespace impeller {
 
@@ -169,7 +169,7 @@ class RenderPass : public ResourceBinder {
   virtual bool SetIndexBuffer(BufferView index_buffer, IndexType index_type);
 
   /// Record the currently pending command.
-  virtual fml::Status Draw();
+  virtual absl::Status Draw();
 
   // |ResourceBinder|
   virtual bool BindResource(ShaderStage stage,

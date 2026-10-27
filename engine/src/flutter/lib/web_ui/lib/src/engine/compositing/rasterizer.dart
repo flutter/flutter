@@ -76,7 +76,7 @@ abstract class ViewRasterizer {
     // `devicePixelRatio` is `2.200000047683716`, so when the physical size is
     // computed by multiplying the logical size by the device pixel ratio, the
     // result is slightly imprecise as well. Nevertheless, the number should
-    // be close to an integer, so round the frame size to be more precice.
+    // be close to an integer, so round the frame size to be more precise.
     final bitmapSize = BitmapSize.fromSize(frameSize);
 
     currentFrameSize = bitmapSize;
@@ -92,8 +92,8 @@ abstract class ViewRasterizer {
 
   /// Do some initialization to prepare to draw a frame.
   ///
-  /// For example, in the [OffscreenCanvasRasterizer], this ensures the backing
-  /// [OffscreenCanvas] is the correct size to draw the frame.
+  /// For example, in the [MultiSurfaceRasterizer], this ensures the base
+  /// canvas is the correct size to draw the frame.
   Future<void> prepareToDraw();
 
   /// Rasterizes the given [pictures] into the [displayCanvases].

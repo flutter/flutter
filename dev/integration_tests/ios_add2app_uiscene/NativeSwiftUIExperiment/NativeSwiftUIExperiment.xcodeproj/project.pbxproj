@@ -29,6 +29,7 @@
 		004E2C25B02E5C8091BDDA34 /* Pods-NativeSwiftUIExperiment.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NativeSwiftUIExperiment.release.xcconfig"; path = "Target Support Files/Pods-NativeSwiftUIExperiment/Pods-NativeSwiftUIExperiment.release.xcconfig"; sourceTree = "<group>"; };
 		03FE462B080E3A5DA0F8E380 /* Pods-NativeSwiftUIExperiment-NativeSwiftUIExperimentUITests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NativeSwiftUIExperiment-NativeSwiftUIExperimentUITests.release.xcconfig"; path = "Target Support Files/Pods-NativeSwiftUIExperiment-NativeSwiftUIExperimentUITests/Pods-NativeSwiftUIExperiment-NativeSwiftUIExperimentUITests.release.xcconfig"; sourceTree = "<group>"; };
 		3A6B97C8420FF2942440AAD6 /* Pods-NativeSwiftUIExperimentTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NativeSwiftUIExperimentTests.release.xcconfig"; path = "Target Support Files/Pods-NativeSwiftUIExperimentTests/Pods-NativeSwiftUIExperimentTests.release.xcconfig"; sourceTree = "<group>"; };
+		5D74C949B8443BEF86E79287 /* NativeSwiftUIExperiment.entitlements */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.entitlements; path = NativeSwiftUIExperiment.entitlements; sourceTree = "<group>"; };
 		67398A34BD2DEF2BBE88904A /* Pods_NativeSwiftUIExperiment_NativeSwiftUIExperimentUITests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_NativeSwiftUIExperiment_NativeSwiftUIExperimentUITests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		7831F3282E8E1F8800BBDDC3 /* NativeSwiftUIExperiment.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NativeSwiftUIExperiment.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		7831F33F2E8E1F8A00BBDDC3 /* NativeSwiftUIExperimentUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = NativeSwiftUIExperimentUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -89,6 +90,7 @@
 				78D658752E95923600CAC372 /* Assets.xcassets */,
 				78D658762E95923600CAC372 /* ContentView.swift */,
 				78D658772E95923600CAC372 /* NativeSwiftUIExperimentApp.swift */,
+				5D74C949B8443BEF86E79287 /* NativeSwiftUIExperiment.entitlements */,
 			);
 			path = NativeSwiftUIExperiment;
 			sourceTree = "<group>";
@@ -420,6 +422,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = NativeSwiftUIExperiment/NativeSwiftUIExperiment.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_PREVIEWS = YES;
@@ -434,7 +437,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = dev.flutter.devicelab.NativeSwiftUIExperiment;
+				PRODUCT_BUNDLE_IDENTIFIER = com.google.experimental0.dev;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -448,6 +451,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = NativeSwiftUIExperiment/NativeSwiftUIExperiment.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_PREVIEWS = YES;
@@ -462,7 +466,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = dev.flutter.devicelab.NativeSwiftUIExperiment;
+				PRODUCT_BUNDLE_IDENTIFIER = com.google.experimental0.dev;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;

@@ -6,7 +6,9 @@ import 'dart:async';
 import 'dart:io' hide Directory, File;
 
 import 'package:dwds/dwds.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/asset.dart';
+import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/net.dart';
@@ -14,33 +16,38 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/tools/shader_compiler.dart';
 import 'package:flutter_tools/src/compile.dart';
+import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/isolated/devfs_web.dart';
+import 'package:flutter_tools/src/version.dart';
 import 'package:flutter_tools/src/web/chrome.dart';
 import 'package:flutter_tools/src/web/compile.dart';
 import 'package:flutter_tools/src/web/devfs_config.dart';
 import 'package:package_config/package_config.dart';
+import 'package:process/process.dart';
 import 'package:test/fake.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
+import 'fakes.dart';
+
 /// Helper function to create a [WebDevFS] with sensible testbed defaults.
 WebDevFS createWebDevFS({
+  Artifacts? artifacts,
   String packagesFilePath = '.dart_tool/package_config.json',
   UrlTunneller? urlTunneller,
   bool useSseForDebugProxy = false,
   bool useSseForDebugBackend = false,
   bool useSseForInjectedClient = false,
   BuildInfo buildInfo = BuildInfo.debug,
+  Config? config,
   bool enableDwds = false,
   DartDevelopmentServiceConfiguration ddsConfig = const DartDevelopmentServiceConfiguration(),
   Uri? entrypoint,
   ExpressionCompiler? expressionCompiler,
   ChromiumLauncher? chromiumLauncher,
   bool nativeNullAssertions = true,
-  bool ddcModuleSystem = false,
-  bool canaryFeatures = false,
   WebDevServerConfig webDevServerConfig = const WebDevServerConfig(),
   WebRendererMode webRenderer = WebRendererMode.canvaskit,
   bool isWasm = false,
@@ -49,8 +56,11 @@ WebDevFS createWebDevFS({
   bool useDwdsWebSocketConnection = false,
   bool webCrossOriginIsolation = false,
   FileSystem? fileSystem,
+  FlutterVersion? flutterVersion,
   Logger? logger,
   Platform? platform,
+  ProcessManager? processManager,
+  ToolContext? toolContext,
   bool testMode = true,
   Map<String, String> webDefines = const <String, String>{},
 }) {
@@ -67,8 +77,6 @@ WebDevFS createWebDevFS({
     expressionCompiler: expressionCompiler,
     chromiumLauncher: chromiumLauncher,
     nativeNullAssertions: nativeNullAssertions,
-    ddcModuleSystem: ddcModuleSystem,
-    canaryFeatures: canaryFeatures,
     webDevServerConfig: webDevServerConfig,
     webRenderer: webRenderer,
     isWasm: isWasm,
@@ -76,9 +84,17 @@ WebDevFS createWebDevFS({
     rootDirectory: rootDirectory ?? globals.fs.currentDirectory,
     useDwdsWebSocketConnection: useDwdsWebSocketConnection,
     webCrossOriginIsolation: webCrossOriginIsolation,
-    fileSystem: fileSystem ?? globals.fs,
-    logger: logger ?? globals.logger,
-    platform: platform ?? globals.platform,
+    toolContext:
+        toolContext ??
+        FakeToolContext(
+          artifacts: artifacts ?? globals.artifacts!,
+          config: config ?? globals.config,
+          fs: fileSystem ?? globals.fs,
+          flutterVersion: flutterVersion ?? globals.flutterVersion,
+          logger: logger ?? globals.logger,
+          platform: platform ?? globals.platform,
+          processManager: processManager ?? globals.processManager,
+        ),
     testMode: testMode,
     webDefines: webDefines,
   );

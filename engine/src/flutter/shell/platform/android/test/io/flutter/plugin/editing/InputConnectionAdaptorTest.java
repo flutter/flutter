@@ -63,7 +63,6 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.robolectric.Shadows;
 import org.robolectric.annotation.Config;
 import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
@@ -99,7 +98,7 @@ public class InputConnectionAdaptorTest {
   public void setUp() {
     MockitoAnnotations.openMocks(this);
     contentResolver = ctx.getContentResolver();
-    shadowContentResolver = Shadows.shadowOf(contentResolver);
+    shadowContentResolver = Shadow.extract(contentResolver);
   }
 
   @Test

@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// #region body
 // This example demonstrates showing a custom context menu only when some
 // narrowly defined text is selected.
 
@@ -77,7 +78,8 @@ class _EditableTextToolbarBuilderExampleAppState
                       // Here we add an "Email" button to the default TextField
                       // context menu for the current platform, but only if an email
                       // address is currently selected.
-                      final TextEditingValue value = editableTextState.textEditingValue;
+                      final TextEditingValue value =
+                          editableTextState.textEditingValue;
                       if (_isValidEmail(
                         value.selection.textInside(value.text),
                       )) {
@@ -115,3 +117,4 @@ bool _isValidEmail(String text) {
     r'(?<topLevelDomain>[a-zA-Z0-9]+)',
   ).hasMatch(text);
 }
+// #endregion body

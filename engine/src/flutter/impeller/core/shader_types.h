@@ -368,8 +368,8 @@ enum class VertexInputRate {
 };
 
 struct ShaderStageBufferLayout {
-  size_t stride;
-  size_t binding;
+  size_t stride = 0;
+  size_t binding = 0;
   /// The rate at which this binding advances during a draw. Defaults to
   /// per-vertex; an instanced draw reads per-instance bindings once per
   /// instance.

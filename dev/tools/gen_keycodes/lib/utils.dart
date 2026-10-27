@@ -12,9 +12,11 @@ import 'constants.dart';
 
 /// The location of the Flutter root directory, based on the known location of
 /// this script.
-final Directory flutterRoot = Directory(
-  path.dirname(Platform.script.toFilePath()),
-).parent.parent.parent.parent;
+final Directory flutterRoot = Directory(path.dirname(Platform.script.toFilePath()))
+    .parent
+    .parent
+    .parent
+    .parent;
 String get dataRoot => testDataRoot ?? _dataRoot;
 String _dataRoot = path.join(flutterRoot.path, 'dev', 'tools', 'gen_keycodes', 'data');
 

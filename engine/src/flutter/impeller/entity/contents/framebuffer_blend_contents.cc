@@ -124,7 +124,7 @@ bool FramebufferBlendContents::Render(const ContentContext& renderer,
   }
 
   VS::FrameInfo frame_info;
-  FS::FragInfo frag_info;
+  FS::FragInfo frag_info{};
 
   auto src_sampler_descriptor = src_snapshot->sampler_descriptor;
   if (renderer.GetDeviceCapabilities().SupportsDecalSamplerAddressMode()) {

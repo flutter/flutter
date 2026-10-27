@@ -4,6 +4,7 @@
 
 import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
+
 import '../../gallery_localizations.dart';
 import 'material_demo_types.dart';
 
@@ -149,9 +150,8 @@ class _NavigationDestinationView extends StatelessWidget {
           child: IconTheme(
             data: const IconThemeData(color: Colors.white, size: 80),
             child: Semantics(
-              label: GalleryLocalizations.of(
-                context,
-              )!.bottomNavigationContentPlaceholder(item.label!),
+              label: GalleryLocalizations.of(context)!
+                  .bottomNavigationContentPlaceholder(item.label!),
               child: item.icon,
             ),
           ),

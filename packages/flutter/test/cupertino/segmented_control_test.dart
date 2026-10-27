@@ -20,9 +20,8 @@ import '../widgets/semantics_tester.dart';
 
 RenderBox getRenderSegmentedControl(WidgetTester tester) {
   return tester.allRenderObjects.firstWhere((RenderObject currentObject) {
-        return currentObject.toStringShort().contains('_RenderSegmentedControl');
-      })
-      as RenderBox;
+    return currentObject.toStringShort().contains('_RenderSegmentedControl');
+  }) as RenderBox;
 }
 
 StatefulBuilder setupSimpleSegmentedControl() {

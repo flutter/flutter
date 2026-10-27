@@ -61,10 +61,10 @@ class RadialGradientContents final : public ColorSourceContents {
 
   const Geometry* geometry_ = nullptr;
   Point center_;
-  Scalar radius_;
+  Scalar radius_ = 0.0f;
   std::vector<Color> colors_;
   std::vector<Scalar> stops_;
-  Entity::TileMode tile_mode_;
+  Entity::TileMode tile_mode_ = Entity::TileMode::kClamp;
   Color decal_border_color_ = Color::BlackTransparent();
 
   RadialGradientContents(const RadialGradientContents&) = delete;

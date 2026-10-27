@@ -90,6 +90,7 @@ impeller_component("impeller_unittests") {
       "fixtures",
       "geometry:geometry_unittests",
       "playground",
+      "playground:pipeline_variant_recorder_unittests",
       "renderer:renderer_unittests",
       "typographer:typographer_unittests",
     ]

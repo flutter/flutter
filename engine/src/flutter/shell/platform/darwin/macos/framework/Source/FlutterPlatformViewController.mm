@@ -92,7 +92,16 @@
     NSMutableDictionary<NSString*, id>* args = [call arguments];
     if ([args objectForKey:@"id"]) {
       int64_t viewId = [args[@"id"] longLongValue];
-      NSString* viewType = [NSString stringWithUTF8String:([args[@"viewType"] UTF8String])];
+      // A missing argument arrives as nil and an explicit Dart null as NSNull, neither of which is
+      // a usable factory key.
+      NSString* viewType = args[@"viewType"];
+      if (![viewType isKindOfClass:[NSString class]]) {
+        result([FlutterError
+            errorWithCode:@"unknown_view"
+                  message:@"'viewType' argument must be a string to create a platform view."
+                  details:nil]);
+        return;
+      }
 
       id creationArgs = nil;
       NSObject<FlutterPlatformViewFactory>* factory = _platformViewFactories[viewType];

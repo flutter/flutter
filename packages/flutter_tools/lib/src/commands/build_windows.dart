@@ -6,12 +6,15 @@ import 'package:meta/meta.dart';
 
 import '../base/analyze_size.dart';
 import '../base/common.dart';
+import '../base/file_system.dart';
+import '../base/logger.dart';
 import '../base/os.dart';
+import '../base/platform.dart';
 import '../build_info.dart';
-import '../cache.dart';
+import '../build_system/build_system.dart';
+import '../context/tool_context.dart';
 import '../features.dart';
-import '../globals.dart' as globals;
-import '../runner/flutter_command.dart' show FlutterCommandResult;
+import '../runner/flutter_command.dart';
 import '../windows/build_windows.dart';
 import '../windows/visual_studio.dart';
 import 'build.dart';
@@ -19,26 +22,29 @@ import 'build.dart';
 /// A command to build a windows desktop target through a build shell script.
 class BuildWindowsCommand extends BuildSubCommand {
   BuildWindowsCommand({
-    required super.logger,
-    required OperatingSystemUtils operatingSystemUtils,
-    bool verboseHelp = false,
-  }) : _operatingSystemUtils = operatingSystemUtils,
-       super(verboseHelp: verboseHelp) {
-    addCommonDesktopBuildOptions(verboseHelp: verboseHelp);
-    usesFlavorOption();
-    argParser.addFlag(
-      'config-only',
-      help: 'Update the project configuration without performing a build.',
-    );
+    required this.buildSystem,
+    required ToolContext super.toolContext,
+    required super.verboseHelp,
+    required this._featureFlags,
+    required this._visualStudio,
+  }) : super(logger: toolContext.logger, outputPreferences: toolContext.outputPreferences) {
+    registerOptionBundles(const <OptionBundle>[DesktopBuildOptionsBundle()]);
   }
 
-  final OperatingSystemUtils _operatingSystemUtils;
+  final BuildSystem buildSystem;
+  final FeatureFlags _featureFlags;
+
+  @visibleForTesting
+  FeatureFlags get featureFlags => _featureFlags;
+
+  @override
+  ToolContext get toolContext => super.toolContext!;
 
   @override
   final name = 'windows';
 
   @override
-  bool get hidden => !featureFlags.isWindowsEnabled || !globals.platform.isWindows;
+  bool get hidden => !_featureFlags.isWindowsEnabled || !toolContext.platform.isWindows;
 
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => <DevelopmentArtifact>{
@@ -48,24 +54,30 @@ class BuildWindowsCommand extends BuildSubCommand {
   @override
   String get description => 'Build a Windows desktop application.';
 
-  @visibleForTesting
-  VisualStudio? visualStudioOverride;
+  final VisualStudio _visualStudio;
 
-  bool get configOnly => boolArg('config-only');
+  bool get configOnly => getValue(DesktopBuildOptionsBundle.configOnly);
 
   @override
   Future<FlutterCommandResult> runCommand() async {
+    final ToolContext(
+      :FileSystem fs,
+      :Logger logger,
+      :OperatingSystemUtils os,
+      :Platform platform,
+    ) = toolContext;
+
     final BuildInfo buildInfo = await getBuildInfo();
-    if (!featureFlags.isWindowsEnabled) {
+    if (!_featureFlags.isWindowsEnabled) {
       throwToolExit(
         '"build windows" is not currently supported. To enable, run "flutter config --enable-windows-desktop".',
       );
     }
-    if (!globals.platform.isWindows) {
+    if (!platform.isWindows) {
       throwToolExit('"build windows" only supported on Windows hosts.');
     }
 
-    final defaultTargetPlatform = (_operatingSystemUtils.hostPlatform == HostPlatform.windows_arm64)
+    final defaultTargetPlatform = (os.hostPlatform == HostPlatform.windows_arm64)
         ? 'windows-arm64'
         : 'windows-x64';
     final targetPlatform = TargetPlatform.fromName(defaultTargetPlatform);
@@ -74,11 +86,13 @@ class BuildWindowsCommand extends BuildSubCommand {
       project.windows,
       buildInfo,
       targetPlatform,
+      analytics: analytics,
       target: targetFile,
-      visualStudioOverride: visualStudioOverride,
+      toolContext: toolContext,
+      visualStudioOverride: _visualStudio,
       sizeAnalyzer: SizeAnalyzer(
-        fileSystem: globals.fs,
-        logger: globals.logger,
+        fileSystem: fs,
+        logger: logger,
         appFilenamePattern: 'app.so',
         analytics: analytics,
       ),

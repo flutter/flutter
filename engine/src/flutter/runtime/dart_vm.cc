@@ -79,7 +79,7 @@ static std::string DartFileRecorderArgs(const std::string& path) {
 
 // "Microtask" is included in all argument strings below, but "Microtask" stream
 // events will only be recorded by the VM's timeline recorders when
-// |Switch::ProfileMicrotasks| is set.
+// |Switch::kProfileMicrotasks| is set.
 
 [[maybe_unused]]
 static const char* kDartDefaultTraceStreamsArgs[]{
@@ -116,7 +116,7 @@ bool DartFileModifiedCallback(const char* source_url, int64_t since_ms) {
   }
 
   const char* path = source_url + kFileUriPrefixLength;
-  struct stat info;
+  struct stat info{};
   if (stat(path, &info) < 0) {
     return true;
   }

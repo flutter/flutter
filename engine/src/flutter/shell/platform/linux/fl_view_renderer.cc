@@ -107,3 +107,30 @@ void fl_view_renderer_notify_frame(FlViewRenderer* self) {
     g_signal_emit(self, fl_view_renderer_signals[SIGNAL_FIRST_FRAME], 0);
   }
 }
+
+gboolean fl_view_renderer_resize_to_frame(FlViewRenderer* self,
+                                          size_t frame_width,
+                                          size_t frame_height) {
+  g_return_val_if_fail(FL_IS_VIEW_RENDERER(self), FALSE);
+
+  GtkWidget* widget = GTK_WIDGET(self);
+  GtkAllocation allocation;
+  gtk_widget_get_allocation(widget, &allocation);
+  gint scale_factor = gtk_widget_get_scale_factor(widget);
+  size_t width = allocation.width * scale_factor;
+  size_t height = allocation.height * scale_factor;
+  gboolean frame_size_matches = width == frame_width && height == frame_height;
+  if (frame_size_matches) {
+    return FALSE;
+  }
+
+  gtk_widget_set_size_request(widget, frame_width / scale_factor,
+                              frame_height / scale_factor);
+  GtkWidget* toplevel = gtk_widget_get_toplevel(widget);
+  if (GTK_IS_WINDOW(toplevel)) {
+    // Resize to smallest size, so that the window will shrink to fit the new
+    // size of the render area.
+    gtk_window_resize(GTK_WINDOW(toplevel), 1, 1);
+  }
+  return TRUE;
+}

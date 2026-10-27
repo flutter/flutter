@@ -2,9 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
+
+import 'route_tester.dart';
+import 'test_page_tester.dart';
 
 void main() {
   testWidgets('Restoration Smoke Test', (WidgetTester tester) async {
@@ -1076,13 +1079,13 @@ void main() {
         .withIgnoredAll(), // leaking by design because of exception
     (WidgetTester tester) async {
       await tester.pumpWidget(
-        MaterialApp(
+        TestWidgetsApp(
           restorationScopeId: 'material_app',
           initialRoute: '/',
           routes: <String, WidgetBuilder>{'/': (BuildContext context) => Container()},
           onGenerateInitialRoutes: (String initialRoute) {
-            return <MaterialPageRoute<void>>[
-              MaterialPageRoute<void>(builder: (BuildContext context) => Container()),
+            return <TestRoute<void>>[
+              TestRoute<void>(maintainState: true, builder: (BuildContext context) => Container()),
             ];
           },
         ),
@@ -1100,7 +1103,8 @@ void main() {
 
 @pragma('vm:entry-point')
 Route<void> _routeBuilder(BuildContext context, Object? arguments) {
-  return MaterialPageRoute<void>(
+  return TestRoute<void>(
+    maintainState: true,
     builder: (BuildContext context) {
       return RouteWidget(name: arguments! as String);
     },
@@ -1109,7 +1113,8 @@ Route<void> _routeBuilder(BuildContext context, Object? arguments) {
 
 @pragma('vm:entry-point')
 Route<void> _routeFutureBuilder(BuildContext context, Object? arguments) {
-  return MaterialPageRoute<void>(
+  return TestRoute<void>(
+    maintainState: true,
     builder: (BuildContext context) {
       return const RouteFutureWidget();
     },
@@ -1188,12 +1193,22 @@ class PagedTestNavigatorState extends State<PagedTestNavigator> with Restoration
           : _routes.value.split(',').map((String name) {
               if (name.startsWith('r-')) {
                 name = name.substring(2);
-                return TestPage(name: name, restorationId: name, key: ValueKey<String>(name));
+                return TestPage<void>(
+                  name: name,
+                  restorationId: name,
+                  key: ValueKey<String>(name),
+                  child: RouteWidget(name: name),
+                );
               }
-              return TestPage(name: name, key: ValueKey<String>(name));
+              return TestPage<void>(
+                name: name,
+                key: ValueKey<String>(name),
+                child: RouteWidget(name: name),
+              );
             }).toList(),
       onGenerateRoute: (RouteSettings settings) {
-        return MaterialPageRoute<int>(
+        return TestRoute<int>(
+          maintainState: true,
           settings: settings,
           builder: (BuildContext context) {
             return RouteWidget(name: settings.name!, arguments: settings.arguments);
@@ -1218,20 +1233,6 @@ class PagedTestNavigatorState extends State<PagedTestNavigator> with Restoration
   }
 }
 
-class TestPage extends Page<void> {
-  const TestPage({super.key, required String super.name, super.restorationId});
-
-  @override
-  Route<void> createRoute(BuildContext context) {
-    return MaterialPageRoute<void>(
-      settings: this,
-      builder: (BuildContext context) {
-        return RouteWidget(name: name!);
-      },
-    );
-  }
-}
-
 class TestWidget extends StatelessWidget {
   const TestWidget({super.key, this.restorationId = 'app'});
 
@@ -1249,8 +1250,11 @@ class TestWidget extends StatelessWidget {
             initialRoute: 'home',
             restorationScopeId: 'app',
             onGenerateRoute: (RouteSettings settings) {
-              return MaterialPageRoute<int>(
+              return TestRoute<int>(
+                maintainState: true,
                 settings: settings,
+                transitionDuration: const Duration(milliseconds: 300),
+                reverseTransitionDuration: const Duration(milliseconds: 300),
                 builder: (BuildContext context) {
                   return RouteWidget(name: settings.name!, arguments: settings.arguments);
                 },

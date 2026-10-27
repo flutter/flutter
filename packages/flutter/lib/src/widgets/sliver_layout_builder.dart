@@ -8,8 +8,10 @@ import 'framework.dart';
 import 'layout_builder.dart';
 
 /// The signature of the [SliverLayoutBuilder] builder function.
-typedef SliverLayoutWidgetBuilder =
-    Widget Function(BuildContext context, SliverConstraints constraints);
+typedef SliverLayoutWidgetBuilder = Widget Function(
+  BuildContext context,
+  SliverConstraints constraints,
+);
 
 /// Builds a sliver widget tree that can depend on its own [SliverConstraints].
 ///

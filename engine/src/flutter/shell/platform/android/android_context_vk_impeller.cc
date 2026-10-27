@@ -50,22 +50,29 @@ static std::shared_ptr<impeller::Context> CreateImpellerContext(
   settings.enable_gpu_tracing = p_settings.enable_gpu_tracing;
   settings.enable_surface_control = p_settings.enable_surface_control;
   settings.flags = p_settings.impeller_flags;
+  // Android can fall back to OpenGLES, so drivers that are known to have
+  // issues with Vulkan are rejected as soon as the physical device is
+  // identified, before the (expensive) remainder of Vulkan setup runs.
+  auto selection = impeller::ContextVK::SelectDevice(std::move(settings));
+  if (!selection.ok()) {
+    return nullptr;
+  }
+  if (selection->driver_info->IsKnownBadDriver()) {
+    FML_LOG(INFO)
+        << "Known bad Vulkan driver encountered, falling back to OpenGLES.";
+    return nullptr;
+  }
 
-  auto context = impeller::ContextVK::Create(std::move(settings));
+  auto context = selection->CreateContext();
 
   if (!p_settings.quiet) {
     if (context && impeller::CapabilitiesVK::Cast(*context->GetCapabilities())
                        .AreValidationsEnabled()) {
       FML_LOG(IMPORTANT) << "Using the Impeller rendering backend (Vulkan with "
                             "Validation Layers).";
-    } else {
+    } else if (context) {
       FML_LOG(IMPORTANT) << "Using the Impeller rendering backend (Vulkan).";
     }
-  }
-  if (context && context->GetDriverInfo()->IsKnownBadDriver()) {
-    FML_LOG(INFO)
-        << "Known bad Vulkan driver encountered, falling back to OpenGLES.";
-    return nullptr;
   }
 
   return context;

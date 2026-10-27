@@ -11,6 +11,9 @@
 
 namespace impeller {
 
+// cppcoreguidelines-pro-type-member-init doesn't understand that the
+// anonymous struct and `e` share storage in the union below.
+// NOLINTBEGIN(cppcoreguidelines-pro-type-member-init)
 struct Quaternion {
   union {
     struct {
@@ -86,6 +89,7 @@ struct Quaternion {
     return x != o.x || y != o.y || z != o.z || w != o.w;
   }
 };
+// NOLINTEND(cppcoreguidelines-pro-type-member-init)
 
 }  // namespace impeller
 

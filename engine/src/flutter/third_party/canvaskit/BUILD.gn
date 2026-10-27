@@ -138,6 +138,9 @@ template("skwasm_toolchain") {
       skia_use_no_png_encode = true
       skia_use_libpng_encode = false
 
+      # Always use thread local strike caches, since we use workers for multithreading
+      skia_enable_threadlocal_strikecache = true
+
       # skwasm is multithreaded
       wasm_use_workers = true
       wasm_prioritize_size = true
@@ -199,6 +202,23 @@ copy("wimp_group") {
   if (is_debug) {
     if (!wasm_use_dwarf) {
       sources += [ "$root_out_dir/skwasm/wimp.wasm.map" ]
+    }
+  }
+  outputs = [ "$root_out_dir/flutter_web_sdk/canvaskit/{{source_file_part}}" ]
+}
+
+copy("wimp_heavy_group") {
+  visibility = [ "//flutter/web_sdk:*" ]
+  public_deps = [ "//flutter/skwasm:wimp_heavy(:skwasm_heavy)" ]
+
+  sources = [
+    "$root_out_dir/skwasm_heavy/wimp_heavy.js",
+    "$root_out_dir/skwasm_heavy/wimp_heavy.js.symbols",
+    "$root_out_dir/skwasm_heavy/wimp_heavy.wasm",
+  ]
+  if (is_debug) {
+    if (!wasm_use_dwarf) {
+      sources += [ "$root_out_dir/skwasm_heavy/wimp_heavy.wasm.map" ]
     }
   }
   outputs = [ "$root_out_dir/flutter_web_sdk/canvaskit/{{source_file_part}}" ]

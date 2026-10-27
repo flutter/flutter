@@ -5,7 +5,6 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
-import 'package:process/process.dart';
 
 import '../base/error_handling_io.dart';
 import '../base/file_system.dart';
@@ -14,15 +13,17 @@ import '../base/logger.dart';
 import '../base/process.dart';
 import '../base/template.dart';
 import '../base/utils.dart';
+import '../base/version.dart';
 import '../build_info.dart';
+import '../context/tool_context.dart';
 import '../convert.dart';
 import '../device.dart';
 import '../macos/xcode.dart';
 import '../project.dart';
 import 'application_package.dart';
+import 'device_support.dart';
 import 'lldb.dart';
 import 'xcode_debug.dart';
-import 'xcodeproj.dart';
 
 /// Provides methods for launching and debugging apps on physical iOS CoreDevices.
 ///
@@ -35,30 +36,28 @@ import 'xcodeproj.dart';
 /// - [launchAppWithXcodeDebugger]: Uses Xcode automation to install, launch, and debug the app.
 class IOSCoreDeviceLauncher {
   IOSCoreDeviceLauncher({
-    required IOSCoreDeviceControl coreDeviceControl,
-    required Logger logger,
-    required XcodeDebug xcodeDebug,
-    required FileSystem fileSystem,
-    required ProcessUtils processUtils,
-    required XcodeProjectInterpreter xcodeProjectInterpreter,
+    required this._coreDeviceControl,
+    required Version? deviceVersion,
+    required this._toolContext,
+    required Xcode xcode,
+    required this._xcodeDebug,
     @visibleForTesting LLDB? lldb,
-  }) : _coreDeviceControl = coreDeviceControl,
-       _logger = logger,
-       _xcodeDebug = xcodeDebug,
-       _fileSystem = fileSystem,
-       _lldb =
-           lldb ??
-           LLDB(
-             logger: logger,
-             processUtils: processUtils,
-             xcodeProjectInterpreter: xcodeProjectInterpreter,
-           );
+  }) {
+    final ToolContext(:Logger logger, :ProcessUtils processUtils) = _toolContext;
+    _lldb =
+        lldb ??
+        LLDB(
+          logger: logger,
+          processUtils: processUtils,
+          xcode: xcode,
+          deviceVersion: deviceVersion,
+        );
+  }
 
   final IOSCoreDeviceControl _coreDeviceControl;
-  final Logger _logger;
+  final ToolContext _toolContext;
   final XcodeDebug _xcodeDebug;
-  final FileSystem _fileSystem;
-  final LLDB _lldb;
+  late final LLDB _lldb;
 
   /// Contains a stream that devicectl sends logs to.
   final coreDeviceLogForwarder = IOSCoreDeviceLogForwarder();
@@ -101,6 +100,7 @@ class IOSCoreDeviceLauncher {
   /// Requires Xcode 16+.
   Future<bool> launchAppWithLLDBDebugger({
     required String deviceId,
+    required IOSDeviceSupport deviceSupport,
     required String bundlePath,
     required String bundleId,
     required List<String> launchArguments,
@@ -150,12 +150,22 @@ class IOSCoreDeviceLauncher {
       return false;
     }
 
+    // Kill LLDB and devicectl if the CLI shuts down so they do not hang in the background.
+    shutdownHooks.addShutdownHook(() async {
+      try {
+        await stopApp(deviceId: deviceId, processId: processId);
+      } on Exception {
+        // ignore any failures
+      }
+    });
+
     // Start LLDB and attach to the device process.
     final bool attachStatus = await _lldb.attachAndStart(
       deviceId: deviceId,
       appProcessId: processId,
       lldbLogForwarder: lldbLogForwarder,
       mode: mode,
+      deviceSupport: deviceSupport,
     );
 
     // If it fails to attach with lldb, kill the launched process so it doesn't stay hanging.
@@ -203,25 +213,26 @@ class IOSCoreDeviceLauncher {
     String? mainPath,
     @visibleForTesting Duration? discoveryTimeout,
   }) async {
+    final ToolContext(:FileSystem fs, :Logger logger) = _toolContext;
     XcodeDebugProject? debugProject;
 
     if (package is PrebuiltIOSApp) {
       debugProject = await _xcodeDebug.createXcodeProjectWithCustomBundle(
         package.deviceBundlePath,
         templateRenderer: templateRenderer,
-        verboseLogging: _logger.isVerbose,
+        verboseLogging: logger.isVerbose,
       );
     } else if (package is BuildableIOSApp) {
       final IosProject project = package.project;
-      final Directory bundle = _fileSystem.directory(package.deviceBundlePath);
+      final Directory bundle = fs.directory(package.deviceBundlePath);
       final Directory? xcodeWorkspace = project.xcodeWorkspace;
       if (xcodeWorkspace == null) {
-        _logger.printTrace('Unable to get Xcode workspace.');
+        logger.printTrace('Unable to get Xcode workspace.');
         return false;
       }
       final String? scheme = await project.schemeForBuildInfo(
         debuggingOptions.buildInfo,
-        logger: _logger,
+        logger: logger,
       );
       if (scheme == null) {
         return false;
@@ -235,6 +246,7 @@ class IOSCoreDeviceLauncher {
         project: project.parent,
         buildInfo: debuggingOptions.buildInfo,
         configurationBuildDir: bundle.parent.absolute.path,
+        toolContext: _toolContext,
       );
 
       debugProject = XcodeDebugProject(
@@ -243,12 +255,12 @@ class IOSCoreDeviceLauncher {
         xcodeWorkspace: xcodeWorkspace,
         hostAppProjectName: project.hostAppProjectName,
         expectedConfigurationBuildDir: bundle.parent.absolute.path,
-        verboseLogging: _logger.isVerbose,
+        verboseLogging: logger.isVerbose,
       );
     } else {
       // This should not happen. Currently, only PrebuiltIOSApp and
       // BuildableIOSApp extend from IOSApp.
-      _logger.printTrace('IOSApp type ${package.runtimeType} is not recognized.');
+      logger.printTrace('IOSApp type ${package.runtimeType} is not recognized.');
       return false;
     }
 
@@ -336,20 +348,10 @@ class IOSCoreDeviceLogForwarder {
 /// `devicectl` (CoreDevice Device Control) is an Xcode CLI tool used for
 /// interacting with CoreDevices.
 class IOSCoreDeviceControl {
-  IOSCoreDeviceControl({
-    required Logger logger,
-    required ProcessManager processManager,
-    required Xcode xcode,
-    required FileSystem fileSystem,
-  }) : _logger = logger,
-       _processUtils = ProcessUtils(logger: logger, processManager: processManager),
-       _xcode = xcode,
-       _fileSystem = fileSystem;
+  IOSCoreDeviceControl({required this._toolContext, required this._xcode});
 
-  final Logger _logger;
-  final ProcessUtils _processUtils;
+  final ToolContext _toolContext;
   final Xcode _xcode;
-  final FileSystem _fileSystem;
 
   /// When the `--timeout` flag is used with `devicectl`, it must be at
   /// least 5 seconds. If lower than 5 seconds, `devicectl` will error and not
@@ -388,21 +390,22 @@ class IOSCoreDeviceControl {
     Duration timeout = const Duration(seconds: _minimumTimeoutInSeconds),
     Completer<void>? cancelCompleter,
   }) async {
+    final ToolContext(:FileSystem fs, :Logger logger, :ProcessUtils processUtils) = _toolContext;
     if (!_xcode.isDevicectlInstalled) {
-      _logger.printTrace('devicectl is not installed.');
+      logger.printTrace('devicectl is not installed.');
       return const <Object?>[];
     }
 
     var validTimeout = timeout;
     if (timeout.inSeconds < _minimumTimeoutInSeconds) {
-      _logger.printWarning(
+      logger.printWarning(
         'Timeout of ${timeout.inSeconds} seconds is below the minimum timeout value '
         'for devicectl. Changing the timeout to the minimum value of $_minimumTimeoutInSeconds.',
       );
       validTimeout = const Duration(seconds: _minimumTimeoutInSeconds);
     }
 
-    final Directory tempDirectory = _fileSystem.systemTempDirectory.createTempSync('core_devices.');
+    final Directory tempDirectory = fs.systemTempDirectory.createTempSync('core_devices.');
     final File output = tempDirectory.childFile('core_device_list.json');
     output.createSync();
 
@@ -419,7 +422,7 @@ class IOSCoreDeviceControl {
 
     Process? process;
     try {
-      process = await _processUtils.start(command);
+      process = await processUtils.start(command);
 
       final Future<void> cancelFuture = cancelCompleter?.future ?? Completer<void>().future;
       final Future<dynamic> firstCompleted = Future.any<dynamic>(<Future<dynamic>>[
@@ -438,8 +441,8 @@ class IOSCoreDeviceControl {
       final String stderr = await utf8.decodeStream(process.stderr);
 
       var isToolPossiblyShutdown = false;
-      if (_fileSystem is ErrorHandlingFileSystem) {
-        final FileSystem delegate = _fileSystem.fileSystem;
+      if (fs is ErrorHandlingFileSystem) {
+        final FileSystem delegate = fs.fileSystem;
         if (delegate is LocalFileSystem) {
           isToolPossiblyShutdown = delegate.disposed;
         }
@@ -450,23 +453,23 @@ class IOSCoreDeviceControl {
       }
 
       if (exitCode != 0) {
-        _logger.printTrace('devicectl exited with a non-zero exit code: $exitCode');
-        _logger.printTrace('devicectl stdout:\n$stdout');
-        _logger.printTrace('devicectl stderr:\n$stderr');
+        logger.printTrace('devicectl exited with a non-zero exit code: $exitCode');
+        logger.printTrace('devicectl stdout:\n$stdout');
+        logger.printTrace('devicectl stderr:\n$stderr');
         return const <Object?>[];
       }
 
       if (!output.existsSync()) {
-        _logger.printTrace('After running the command ${command.join(' ')} the file');
-        _logger.printTrace('${output.path} was expected to exist, but it did not.');
-        _logger.printTrace('The process exited with code $exitCode and');
-        _logger.printTrace('Stdout:\n\n${stdout.trim()}\n');
-        _logger.printTrace('Stderr:\n\n${stderr.trim()}');
+        logger.printTrace('After running the command ${command.join(' ')} the file');
+        logger.printTrace('${output.path} was expected to exist, but it did not.');
+        logger.printTrace('The process exited with code $exitCode and');
+        logger.printTrace('Stdout:\n\n${stdout.trim()}\n');
+        logger.printTrace('Stderr:\n\n${stderr.trim()}');
         throw StateError('Expected the file ${output.path} to exist but it did not');
       }
 
       final String stringOutput = output.readAsStringSync();
-      _logger.printTrace(stringOutput);
+      logger.printTrace(stringOutput);
 
       final Object? decodeResult = (json.decode(stringOutput) as Map<String, Object?>)['result'];
       if (decodeResult is Map<String, Object?>) {
@@ -475,16 +478,16 @@ class IOSCoreDeviceControl {
           return decodeDevices;
         }
       }
-      _logger.printTrace('devicectl returned unexpected JSON response: $stringOutput');
+      logger.printTrace('devicectl returned unexpected JSON response: $stringOutput');
       return const <Object?>[];
     } on ProcessException catch (e) {
-      _logger.printTrace('Error executing devicectl: $e');
+      logger.printTrace('Error executing devicectl: $e');
       return const <Object?>[];
     } on FileSystemException catch (e) {
-      _logger.printTrace('Error reading devicectl output: $e');
+      logger.printTrace('Error reading devicectl output: $e');
       return const <Object?>[];
     } on FormatException {
-      _logger.printTrace('devicectl returned non-JSON response.');
+      logger.printTrace('devicectl returned non-JSON response.');
       return const <Object?>[];
     } finally {
       process?.kill();
@@ -501,10 +504,11 @@ class IOSCoreDeviceControl {
       cancelCompleter: cancelCompleter,
     );
 
+    final Logger logger = _toolContext.logger;
     return <IOSCoreDevice>[
       for (final Object? deviceObject in coreDeviceObjects)
         if (deviceObject is Map<String, Object?>)
-          IOSCoreDevice.fromBetaJson(deviceObject, logger: _logger),
+          IOSCoreDevice.fromBetaJson(deviceObject, logger: logger),
     ];
   }
 
@@ -512,12 +516,13 @@ class IOSCoreDeviceControl {
   /// If [bundleId] is provided, it will only return apps matching the bundle
   /// identifier exactly.
   Future<List<Object?>> _listInstalledApps({required String deviceId, String? bundleId}) async {
+    final ToolContext(:FileSystem fs, :Logger logger, :ProcessUtils processUtils) = _toolContext;
     if (!_xcode.isDevicectlInstalled) {
-      _logger.printError('devicectl is not installed.');
+      logger.printError('devicectl is not installed.');
       return <Object?>[];
     }
 
-    final Directory tempDirectory = _fileSystem.systemTempDirectory.createTempSync('core_devices.');
+    final Directory tempDirectory = fs.systemTempDirectory.createTempSync('core_devices.');
     final File output = tempDirectory.childFile('core_device_app_list.json');
     output.createSync();
 
@@ -536,7 +541,7 @@ class IOSCoreDeviceControl {
     ];
 
     try {
-      await _processUtils.run(command, throwOnError: true);
+      await processUtils.run(command, throwOnError: true);
 
       final String stringOutput = output.readAsStringSync();
 
@@ -548,15 +553,15 @@ class IOSCoreDeviceControl {
             return decodeApps;
           }
         }
-        _logger.printError('devicectl returned unexpected JSON response: $stringOutput');
+        logger.printError('devicectl returned unexpected JSON response: $stringOutput');
         return <Object?>[];
       } on FormatException {
         // We failed to parse the devicectl output, or it returned junk.
-        _logger.printError('devicectl returned non-JSON response: $stringOutput');
+        logger.printError('devicectl returned non-JSON response: $stringOutput');
         return <Object?>[];
       }
     } on ProcessException catch (err) {
-      _logger.printError('Error executing devicectl: $err');
+      logger.printError('Error executing devicectl: $err');
       return <Object?>[];
     } finally {
       tempDirectory.deleteSync(recursive: true);
@@ -590,12 +595,13 @@ class IOSCoreDeviceControl {
     required String deviceId,
     required String bundlePath,
   }) async {
+    final ToolContext(:FileSystem fs, :Logger logger, :ProcessUtils processUtils) = _toolContext;
     if (!_xcode.isDevicectlInstalled) {
-      _logger.printTrace('devicectl is not installed.');
+      logger.printTrace('devicectl is not installed.');
       return (false, null);
     }
 
-    final Directory tempDirectory = _fileSystem.systemTempDirectory.createTempSync('core_devices.');
+    final Directory tempDirectory = fs.systemTempDirectory.createTempSync('core_devices.');
     final File output = tempDirectory.childFile('install_results.json');
     output.createSync();
 
@@ -613,7 +619,7 @@ class IOSCoreDeviceControl {
     ];
 
     try {
-      await _processUtils.run(command, throwOnError: true);
+      await processUtils.run(command, throwOnError: true);
       final String stringOutput = output.readAsStringSync();
 
       try {
@@ -625,15 +631,15 @@ class IOSCoreDeviceControl {
             return (success, result);
           }
         }
-        _logger.printTrace('devicectl returned unexpected JSON response: $stringOutput');
+        logger.printTrace('devicectl returned unexpected JSON response: $stringOutput');
         return (false, null);
       } on FormatException {
         // We failed to parse the devicectl output, or it returned junk.
-        _logger.printTrace('devicectl returned non-JSON response: $stringOutput');
+        logger.printTrace('devicectl returned non-JSON response: $stringOutput');
         return (false, null);
       }
     } on ProcessException catch (err) {
-      _logger.printTrace('Error executing devicectl: $err');
+      logger.printTrace('Error executing devicectl: $err');
       return (false, null);
     } finally {
       tempDirectory.deleteSync(recursive: true);
@@ -643,12 +649,13 @@ class IOSCoreDeviceControl {
   /// Uninstalls the app from the device. Will succeed even if the app is not
   /// currently installed on the device.
   Future<bool> uninstallApp({required String deviceId, required String bundleId}) async {
+    final ToolContext(:FileSystem fs, :Logger logger, :ProcessUtils processUtils) = _toolContext;
     if (!_xcode.isDevicectlInstalled) {
-      _logger.printError('devicectl is not installed.');
+      logger.printError('devicectl is not installed.');
       return false;
     }
 
-    final Directory tempDirectory = _fileSystem.systemTempDirectory.createTempSync('core_devices.');
+    final Directory tempDirectory = fs.systemTempDirectory.createTempSync('core_devices.');
     final File output = tempDirectory.childFile('uninstall_results.json');
     output.createSync();
 
@@ -666,7 +673,7 @@ class IOSCoreDeviceControl {
     ];
 
     try {
-      await _processUtils.run(command, throwOnError: true);
+      await processUtils.run(command, throwOnError: true);
       final String stringOutput = output.readAsStringSync();
 
       try {
@@ -674,15 +681,15 @@ class IOSCoreDeviceControl {
         if (decodeResult is Map<String, Object?> && decodeResult['outcome'] == 'success') {
           return true;
         }
-        _logger.printError('devicectl returned unexpected JSON response: $stringOutput');
+        logger.printError('devicectl returned unexpected JSON response: $stringOutput');
         return false;
       } on FormatException {
         // We failed to parse the devicectl output, or it returned junk.
-        _logger.printError('devicectl returned non-JSON response: $stringOutput');
+        logger.printError('devicectl returned non-JSON response: $stringOutput');
         return false;
       }
     } on ProcessException catch (err) {
-      _logger.printError('Error executing devicectl: $err');
+      logger.printError('Error executing devicectl: $err');
       return false;
     } finally {
       tempDirectory.deleteSync(recursive: true);
@@ -717,6 +724,7 @@ class IOSCoreDeviceControl {
       'launch',
       '--device',
       deviceId,
+      '--terminate-existing',
       if (startStopped) '--start-stopped',
       if (attachToConsole) ...<String>[
         '--console',
@@ -741,12 +749,13 @@ class IOSCoreDeviceControl {
     List<String> launchArguments = const <String>[],
     bool startStopped = false,
   }) async {
+    final ToolContext(:FileSystem fs, :Logger logger, :ProcessUtils processUtils) = _toolContext;
     if (!_xcode.isDevicectlInstalled) {
-      _logger.printTrace('devicectl is not installed.');
+      logger.printTrace('devicectl is not installed.');
       return null;
     }
 
-    final Directory tempDirectory = _fileSystem.systemTempDirectory.createTempSync('core_devices.');
+    final Directory tempDirectory = fs.systemTempDirectory.createTempSync('core_devices.');
     final File output = tempDirectory.childFile('launch_results.json')..createSync();
 
     final List<String> command = _launchAppCommand(
@@ -758,7 +767,7 @@ class IOSCoreDeviceControl {
     );
 
     try {
-      await _processUtils.run(command, throwOnError: true);
+      await processUtils.run(command, throwOnError: true);
       final String stringOutput = output.readAsStringSync();
 
       try {
@@ -766,17 +775,17 @@ class IOSCoreDeviceControl {
           json.decode(stringOutput) as Map<String, Object?>,
         );
         if (result.outcome == null) {
-          _logger.printTrace('devicectl returned unexpected JSON response: $stringOutput');
+          logger.printTrace('devicectl returned unexpected JSON response: $stringOutput');
           return null;
         }
         return result;
       } on FormatException {
         // We failed to parse the devicectl output, or it returned junk.
-        _logger.printTrace('devicectl returned non-JSON response: $stringOutput');
+        logger.printTrace('devicectl returned non-JSON response: $stringOutput');
         return null;
       }
     } on ProcessException catch (err) {
-      _logger.printTrace('Error executing devicectl: $err');
+      logger.printTrace('Error executing devicectl: $err');
       return null;
     } finally {
       tempDirectory.deleteSync(recursive: true);
@@ -795,12 +804,13 @@ class IOSCoreDeviceControl {
     List<String> launchArguments = const <String>[],
     bool startStopped = false,
   }) async {
+    final ToolContext(:Logger logger, :ProcessUtils processUtils) = _toolContext;
     if (!_xcode.isDevicectlInstalled) {
-      _logger.printTrace('devicectl is not installed.');
+      logger.printTrace('devicectl is not installed.');
       return false;
     }
     if (coreDeviceLogForwarder.isRunning) {
-      _logger.printTrace(
+      logger.printTrace(
         'A launch process is already running. It must be stopped before starting a new one.',
       );
       return false;
@@ -817,7 +827,7 @@ class IOSCoreDeviceControl {
     );
 
     try {
-      final Process launchProcess = await _processUtils.start(command);
+      final Process launchProcess = await processUtils.start(command);
       coreDeviceLogForwarder.launchProcess = launchProcess;
 
       final StreamSubscription<String> stdoutSubscription = launchProcess.stdout
@@ -829,7 +839,7 @@ class IOSCoreDeviceControl {
             if (launchCompleter.isCompleted && !_ignoreLog(line)) {
               coreDeviceLogForwarder.addLog(line);
             } else {
-              _logger.printTrace(line);
+              logger.printTrace(line);
             }
 
             if (line.contains('Waiting for the application to terminate')) {
@@ -846,14 +856,14 @@ class IOSCoreDeviceControl {
             if (launchCompleter.isCompleted && !_ignoreLog(line)) {
               coreDeviceLogForwarder.addLog(line);
             } else {
-              _logger.printTrace(line);
+              logger.printTrace(line);
             }
           });
 
       unawaited(
         launchProcess.exitCode
             .then((int status) async {
-              _logger.printTrace('lldb exited with code $status');
+              logger.printTrace('devicectl exited with code $status');
               await stdoutSubscription.cancel();
               await stderrSubscription.cancel();
             })
@@ -871,7 +881,7 @@ class IOSCoreDeviceControl {
       shutdownHooks.addShutdownHook(() => launchProcess.kill());
       return await launchCompleter.future;
     } on ProcessException catch (err) {
-      _logger.printTrace('Error executing devicectl: $err');
+      logger.printTrace('Error executing devicectl: $err');
       return false;
     }
   }
@@ -882,12 +892,13 @@ class IOSCoreDeviceControl {
 
   /// Terminate the [processId] on the device using `devicectl`.
   Future<bool> terminateProcess({required String deviceId, required int processId}) async {
+    final ToolContext(:FileSystem fs, :Logger logger, :ProcessUtils processUtils) = _toolContext;
     if (!_xcode.isDevicectlInstalled) {
-      _logger.printTrace('devicectl is not installed.');
+      logger.printTrace('devicectl is not installed.');
       return false;
     }
 
-    final Directory tempDirectory = _fileSystem.systemTempDirectory.createTempSync('core_devices.');
+    final Directory tempDirectory = fs.systemTempDirectory.createTempSync('core_devices.');
     final File output = tempDirectory.childFile('terminate_results.json');
     output.createSync();
 
@@ -907,7 +918,7 @@ class IOSCoreDeviceControl {
     ];
 
     try {
-      await _processUtils.run(command, throwOnError: true);
+      await processUtils.run(command, throwOnError: true);
       final String stringOutput = output.readAsStringSync();
 
       try {
@@ -915,18 +926,18 @@ class IOSCoreDeviceControl {
         if (decodeResult is Map<String, Object?> && decodeResult['outcome'] == 'success') {
           return true;
         }
-        _logger.printTrace('devicectl returned unexpected JSON response: $stringOutput');
+        logger.printTrace('devicectl returned unexpected JSON response: $stringOutput');
         return false;
       } on FormatException {
         // We failed to parse the devicectl output, or it returned junk.
-        _logger.printTrace('devicectl returned non-JSON response: $stringOutput');
+        logger.printTrace('devicectl returned non-JSON response: $stringOutput');
         return false;
       } on TypeError {
-        _logger.printTrace('devicectl returned unexpected JSON response: $stringOutput');
+        logger.printTrace('devicectl returned unexpected JSON response: $stringOutput');
         return false;
       }
     } on ProcessException catch (err) {
-      _logger.printTrace('Error executing devicectl: $err');
+      logger.printTrace('Error executing devicectl: $err');
       return false;
     } finally {
       tempDirectory.deleteSync(recursive: true);
@@ -934,12 +945,13 @@ class IOSCoreDeviceControl {
   }
 
   Future<List<Object?>> _listRunningProcesses({required String deviceId}) async {
+    final ToolContext(:FileSystem fs, :Logger logger, :ProcessUtils processUtils) = _toolContext;
     if (!_xcode.isDevicectlInstalled) {
-      _logger.printTrace('devicectl is not installed.');
+      logger.printTrace('devicectl is not installed.');
       return <Object?>[];
     }
 
-    final Directory tempDirectory = _fileSystem.systemTempDirectory.createTempSync('core_devices.');
+    final Directory tempDirectory = fs.systemTempDirectory.createTempSync('core_devices.');
     final File output = tempDirectory.childFile('core_device_process_list.json')..createSync();
 
     final command = <String>[
@@ -955,7 +967,7 @@ class IOSCoreDeviceControl {
     ];
 
     try {
-      await _processUtils.run(command, throwOnError: true);
+      await processUtils.run(command, throwOnError: true);
 
       final String stringOutput = output.readAsStringSync();
 
@@ -965,18 +977,18 @@ class IOSCoreDeviceControl {
         }) {
           return decodedProcesses;
         }
-        _logger.printTrace('devicectl returned unexpected JSON response: $stringOutput');
+        logger.printTrace('devicectl returned unexpected JSON response: $stringOutput');
         return <Object?>[];
       } on FormatException {
         // We failed to parse the devicectl output, or it returned junk.
-        _logger.printTrace('devicectl returned non-JSON response: $stringOutput');
+        logger.printTrace('devicectl returned non-JSON response: $stringOutput');
         return <Object?>[];
       }
     } on ProcessException catch (err) {
-      _logger.printTrace('Error executing devicectl: $err');
+      logger.printTrace('Error executing devicectl: $err');
       return <Object?>[];
     } on FileSystemException catch (err) {
-      _logger.printTrace('Error reading output file: $err');
+      logger.printTrace('Error reading output file: $err');
       return <Object?>[];
     } finally {
       tempDirectory.deleteSync(recursive: true);
@@ -996,12 +1008,13 @@ class IOSCoreDeviceControl {
   ///
   /// Returns true if successfully able to take screenshot.
   Future<bool> takeScreenshot({required String deviceId, required String destination}) async {
+    final ToolContext(:FileSystem fs, :Logger logger, :ProcessUtils processUtils) = _toolContext;
     if (!_xcode.isDevicectlInstalled) {
-      _logger.printError('devicectl is not installed.');
+      logger.printError('devicectl is not installed.');
       return false;
     }
 
-    final Directory tempDirectory = _fileSystem.systemTempDirectory.createTempSync('core_devices.');
+    final Directory tempDirectory = fs.systemTempDirectory.createTempSync('core_devices.');
     final File output = tempDirectory.childFile('screenshot_results.json');
     output.createSync();
 
@@ -1020,7 +1033,7 @@ class IOSCoreDeviceControl {
     ];
 
     try {
-      await _processUtils.run(command, throwOnError: true);
+      await processUtils.run(command, throwOnError: true);
       final String stringOutput = output.readAsStringSync();
 
       try {
@@ -1031,10 +1044,10 @@ class IOSCoreDeviceControl {
             return true;
           }
         }
-        _logger.printError('devicectl returned unexpected JSON response: $stringOutput');
+        logger.printError('devicectl returned unexpected JSON response: $stringOutput');
         return false;
       } on FormatException {
-        _logger.printError('devicectl returned non-JSON response: $stringOutput');
+        logger.printError('devicectl returned non-JSON response: $stringOutput');
         return false;
       }
     } finally {

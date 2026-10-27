@@ -24,10 +24,18 @@ import '../material_localizations.dart';
 // dart format off
 
 /// The translations for Afrikaans (`af`).
+@Deprecated(
+  'Use MaterialLocalizationAf from package:material_ui/material_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class MaterialLocalizationAf extends GlobalMaterialLocalizations {
   /// Create an instance of the translation bundle for Afrikaans.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  @Deprecated(
+    'Use MaterialLocalizationAf from package:material_ui/material_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const MaterialLocalizationAf({
     super.localeName = 'af',
     required super.fullYearFormat,
@@ -520,10 +528,18 @@ class MaterialLocalizationAf extends GlobalMaterialLocalizations {
 }
 
 /// The translations for Amharic (`am`).
+@Deprecated(
+  'Use MaterialLocalizationAm from package:material_ui/material_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class MaterialLocalizationAm extends GlobalMaterialLocalizations {
   /// Create an instance of the translation bundle for Amharic.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  @Deprecated(
+    'Use MaterialLocalizationAm from package:material_ui/material_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const MaterialLocalizationAm({
     super.localeName = 'am',
     required super.fullYearFormat,
@@ -1016,10 +1032,18 @@ class MaterialLocalizationAm extends GlobalMaterialLocalizations {
 }
 
 /// The translations for Arabic (`ar`).
+@Deprecated(
+  'Use MaterialLocalizationAr from package:material_ui/material_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class MaterialLocalizationAr extends GlobalMaterialLocalizations {
   /// Create an instance of the translation bundle for Arabic.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  @Deprecated(
+    'Use MaterialLocalizationAr from package:material_ui/material_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const MaterialLocalizationAr({
     super.localeName = 'ar',
     required super.fullYearFormat,
@@ -1512,10 +1536,18 @@ class MaterialLocalizationAr extends GlobalMaterialLocalizations {
 }
 
 /// The translations for Assamese (`as`).
+@Deprecated(
+  'Use MaterialLocalizationAs from package:material_ui/material_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class MaterialLocalizationAs extends GlobalMaterialLocalizations {
   /// Create an instance of the translation bundle for Assamese.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  @Deprecated(
+    'Use MaterialLocalizationAs from package:material_ui/material_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const MaterialLocalizationAs({
     super.localeName = 'as',
     required super.fullYearFormat,
@@ -2008,10 +2040,18 @@ class MaterialLocalizationAs extends GlobalMaterialLocalizations {
 }
 
 /// The translations for Azerbaijani (`az`).
+@Deprecated(
+  'Use MaterialLocalizationAz from package:material_ui/material_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class MaterialLocalizationAz extends GlobalMaterialLocalizations {
   /// Create an instance of the translation bundle for Azerbaijani.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  @Deprecated(
+    'Use MaterialLocalizationAz from package:material_ui/material_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const MaterialLocalizationAz({
     super.localeName = 'az',
     required super.fullYearFormat,
@@ -2504,10 +2544,18 @@ class MaterialLocalizationAz extends GlobalMaterialLocalizations {
 }
 
 /// The translations for Belarusian (`be`).
+@Deprecated(
+  'Use MaterialLocalizationBe from package:material_ui/material_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class MaterialLocalizationBe extends GlobalMaterialLocalizations {
   /// Create an instance of the translation bundle for Belarusian.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  @Deprecated(
+    'Use MaterialLocalizationBe from package:material_ui/material_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const MaterialLocalizationBe({
     super.localeName = 'be',
     required super.fullYearFormat,
@@ -3000,10 +3048,18 @@ class MaterialLocalizationBe extends GlobalMaterialLocalizations {
 }
 
 /// The translations for Bulgarian (`bg`).
+@Deprecated(
+  'Use MaterialLocalizationBg from package:material_ui/material_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class MaterialLocalizationBg extends GlobalMaterialLocalizations {
   /// Create an instance of the translation bundle for Bulgarian.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  @Deprecated(
+    'Use MaterialLocalizationBg from package:material_ui/material_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const MaterialLocalizationBg({
     super.localeName = 'bg',
     required super.fullYearFormat,
@@ -3496,10 +3552,18 @@ class MaterialLocalizationBg extends GlobalMaterialLocalizations {
 }
 
 /// The translations for Bengali Bangla (`bn`).
+@Deprecated(
+  'Use MaterialLocalizationBn from package:material_ui/material_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class MaterialLocalizationBn extends GlobalMaterialLocalizations {
   /// Create an instance of the translation bundle for Bengali Bangla.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  @Deprecated(
+    'Use MaterialLocalizationBn from package:material_ui/material_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const MaterialLocalizationBn({
     super.localeName = 'bn',
     required super.fullYearFormat,
@@ -3992,10 +4056,18 @@ class MaterialLocalizationBn extends GlobalMaterialLocalizations {
 }
 
 /// The translations for Tibetan (`bo`).
+@Deprecated(
+  'Use MaterialLocalizationBo from package:material_ui/material_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class MaterialLocalizationBo extends GlobalMaterialLocalizations {
   /// Create an instance of the translation bundle for Tibetan.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  @Deprecated(
+    'Use MaterialLocalizationBo from package:material_ui/material_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const MaterialLocalizationBo({
     super.localeName = 'bo',
     required super.fullYearFormat,
@@ -4488,10 +4560,18 @@ class MaterialLocalizationBo extends GlobalMaterialLocalizations {
 }
 
 /// The translations for Bosnian (`bs`).
+@Deprecated(
+  'Use MaterialLocalizationBs from package:material_ui/material_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class MaterialLocalizationBs extends GlobalMaterialLocalizations {
   /// Create an instance of the translation bundle for Bosnian.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  @Deprecated(
+    'Use MaterialLocalizationBs from package:material_ui/material_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const MaterialLocalizationBs({
     super.localeName = 'bs',
     required super.fullYearFormat,
@@ -4984,10 +5064,18 @@ class MaterialLocalizationBs extends GlobalMaterialLocalizations {
 }
 
 /// The translations for Catalan Valencian (`ca`).
+@Deprecated(
+  'Use MaterialLocalizationCa from package:material_ui/material_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class MaterialLocalizationCa extends GlobalMaterialLocalizations {
   /// Create an instance of the translation bundle for Catalan Valencian.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  @Deprecated(
+    'Use MaterialLocalizationCa from package:material_ui/material_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const MaterialLocalizationCa({
     super.localeName = 'ca',
     required super.fullYearFormat,
@@ -5480,10 +5568,18 @@ class MaterialLocalizationCa extends GlobalMaterialLocalizations {
 }
 
 /// The translations for Czech (`cs`).
+@Deprecated(
+  'Use MaterialLocalizationCs from package:material_ui/material_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class MaterialLocalizationCs extends GlobalMaterialLocalizations {
   /// Create an instance of the translation bundle for Czech.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  @Deprecated(
+    'Use MaterialLocalizationCs from package:material_ui/material_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const MaterialLocalizationCs({
     super.localeName = 'cs',
     required super.fullYearFormat,
@@ -5976,10 +6072,18 @@ class MaterialLocalizationCs extends GlobalMaterialLocalizations {
 }
 
 /// The translations for Welsh (`cy`).
+@Deprecated(
+  'Use MaterialLocalizationCy from package:material_ui/material_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class MaterialLocalizationCy extends GlobalMaterialLocalizations {
   /// Create an instance of the translation bundle for Welsh.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  @Deprecated(
+    'Use MaterialLocalizationCy from package:material_ui/material_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const MaterialLocalizationCy({
     super.localeName = 'cy',
     required super.fullYearFormat,
@@ -6472,10 +6576,18 @@ class MaterialLocalizationCy extends GlobalMaterialLocalizations {
 }
 
 /// The translations for Danish (`da`).
+@Deprecated(
+  'Use MaterialLocalizationDa from package:material_ui/material_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class MaterialLocalizationDa extends GlobalMaterialLocalizations {
   /// Create an instance of the translation bundle for Danish.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  @Deprecated(
+    'Use MaterialLocalizationDa from package:material_ui/material_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const MaterialLocalizationDa({
     super.localeName = 'da',
     required super.fullYearFormat,
@@ -6968,10 +7080,18 @@ class MaterialLocalizationDa extends GlobalMaterialLocalizations {
 }
 
 /// The translations for German (`de`).
+@Deprecated(
+  'Use MaterialLocalizationDe from package:material_ui/material_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class MaterialLocalizationDe extends GlobalMaterialLocalizations {
   /// Create an instance of the translation bundle for German.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  @Deprecated(
+    'Use MaterialLocalizationDe from package:material_ui/material_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const MaterialLocalizationDe({
     super.localeName = 'de',
     required super.fullYearFormat,
@@ -7464,10 +7584,18 @@ class MaterialLocalizationDe extends GlobalMaterialLocalizations {
 }
 
 /// The translations for German, as used in Switzerland (`de_CH`).
+@Deprecated(
+  'Use MaterialLocalizationDeCh from package:material_ui/material_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class MaterialLocalizationDeCh extends MaterialLocalizationDe {
   /// Create an instance of the translation bundle for German, as used in Switzerland.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  @Deprecated(
+    'Use MaterialLocalizationDeCh from package:material_ui/material_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const MaterialLocalizationDeCh({
     super.localeName = 'de_CH',
     required super.fullYearFormat,
@@ -7528,10 +7656,18 @@ class MaterialLocalizationDeCh extends MaterialLocalizationDe {
 }
 
 /// The translations for Modern Greek (`el`).
+@Deprecated(
+  'Use MaterialLocalizationEl from package:material_ui/material_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class MaterialLocalizationEl extends GlobalMaterialLocalizations {
   /// Create an instance of the translation bundle for Modern Greek.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  @Deprecated(
+    'Use MaterialLocalizationEl from package:material_ui/material_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const MaterialLocalizationEl({
     super.localeName = 'el',
     required super.fullYearFormat,
@@ -8024,10 +8160,18 @@ class MaterialLocalizationEl extends GlobalMaterialLocalizations {
 }
 
 /// The translations for English (`en`).
+@Deprecated(
+  'Use MaterialLocalizationEn from package:material_ui/material_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class MaterialLocalizationEn extends GlobalMaterialLocalizations {
   /// Create an instance of the translation bundle for English.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  @Deprecated(
+    'Use MaterialLocalizationEn from package:material_ui/material_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const MaterialLocalizationEn({
     super.localeName = 'en',
     required super.fullYearFormat,
@@ -8520,10 +8664,18 @@ class MaterialLocalizationEn extends GlobalMaterialLocalizations {
 }
 
 /// The translations for English, as used in Australia (`en_AU`).
+@Deprecated(
+  'Use MaterialLocalizationEnAu from package:material_ui/material_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class MaterialLocalizationEnAu extends MaterialLocalizationEn {
   /// Create an instance of the translation bundle for English, as used in Australia.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  @Deprecated(
+    'Use MaterialLocalizationEnAu from package:material_ui/material_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const MaterialLocalizationEnAu({
     super.localeName = 'en_AU',
     required super.fullYearFormat,
@@ -8617,10 +8769,18 @@ class MaterialLocalizationEnAu extends MaterialLocalizationEn {
 }
 
 /// The translations for English, as used in Canada (`en_CA`).
+@Deprecated(
+  'Use MaterialLocalizationEnCa from package:material_ui/material_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class MaterialLocalizationEnCa extends MaterialLocalizationEn {
   /// Create an instance of the translation bundle for English, as used in Canada.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  @Deprecated(
+    'Use MaterialLocalizationEnCa from package:material_ui/material_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const MaterialLocalizationEnCa({
     super.localeName = 'en_CA',
     required super.fullYearFormat,
@@ -8639,10 +8799,18 @@ class MaterialLocalizationEnCa extends MaterialLocalizationEn {
 }
 
 /// The translations for English, as used in the United Kingdom (`en_GB`).
+@Deprecated(
+  'Use MaterialLocalizationEnGb from package:material_ui/material_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class MaterialLocalizationEnGb extends MaterialLocalizationEn {
   /// Create an instance of the translation bundle for English, as used in the United Kingdom.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  @Deprecated(
+    'Use MaterialLocalizationEnGb from package:material_ui/material_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const MaterialLocalizationEnGb({
     super.localeName = 'en_GB',
     required super.fullYearFormat,
@@ -8739,10 +8907,18 @@ class MaterialLocalizationEnGb extends MaterialLocalizationEn {
 }
 
 /// The translations for English, as used in Ireland (`en_IE`).
+@Deprecated(
+  'Use MaterialLocalizationEnIe from package:material_ui/material_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class MaterialLocalizationEnIe extends MaterialLocalizationEn {
   /// Create an instance of the translation bundle for English, as used in Ireland.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  @Deprecated(
+    'Use MaterialLocalizationEnIe from package:material_ui/material_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const MaterialLocalizationEnIe({
     super.localeName = 'en_IE',
     required super.fullYearFormat,
@@ -8839,10 +9015,18 @@ class MaterialLocalizationEnIe extends MaterialLocalizationEn {
 }
 
 /// The translations for English, as used in India (`en_IN`).
+@Deprecated(
+  'Use MaterialLocalizationEnIn from package:material_ui/material_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class MaterialLocalizationEnIn extends MaterialLocalizationEn {
   /// Create an instance of the translation bundle for English, as used in India.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  @Deprecated(
+    'Use MaterialLocalizationEnIn from package:material_ui/material_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const MaterialLocalizationEnIn({
     super.localeName = 'en_IN',
     required super.fullYearFormat,
@@ -8936,10 +9120,18 @@ class MaterialLocalizationEnIn extends MaterialLocalizationEn {
 }
 
 /// The translations for English, as used in New Zealand (`en_NZ`).
+@Deprecated(
+  'Use MaterialLocalizationEnNz from package:material_ui/material_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class MaterialLocalizationEnNz extends MaterialLocalizationEn {
   /// Create an instance of the translation bundle for English, as used in New Zealand.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  @Deprecated(
+    'Use MaterialLocalizationEnNz from package:material_ui/material_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const MaterialLocalizationEnNz({
     super.localeName = 'en_NZ',
     required super.fullYearFormat,
@@ -9033,10 +9225,18 @@ class MaterialLocalizationEnNz extends MaterialLocalizationEn {
 }
 
 /// The translations for English, as used in Singapore (`en_SG`).
+@Deprecated(
+  'Use MaterialLocalizationEnSg from package:material_ui/material_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class MaterialLocalizationEnSg extends MaterialLocalizationEn {
   /// Create an instance of the translation bundle for English, as used in Singapore.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  @Deprecated(
+    'Use MaterialLocalizationEnSg from package:material_ui/material_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const MaterialLocalizationEnSg({
     super.localeName = 'en_SG',
     required super.fullYearFormat,
@@ -9130,10 +9330,18 @@ class MaterialLocalizationEnSg extends MaterialLocalizationEn {
 }
 
 /// The translations for English, as used in South Africa (`en_ZA`).
+@Deprecated(
+  'Use MaterialLocalizationEnZa from package:material_ui/material_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class MaterialLocalizationEnZa extends MaterialLocalizationEn {
   /// Create an instance of the translation bundle for English, as used in South Africa.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  @Deprecated(
+    'Use MaterialLocalizationEnZa from package:material_ui/material_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const MaterialLocalizationEnZa({
     super.localeName = 'en_ZA',
     required super.fullYearFormat,
@@ -9230,10 +9438,18 @@ class MaterialLocalizationEnZa extends MaterialLocalizationEn {
 }
 
 /// The translations for Spanish Castilian (`es`).
+@Deprecated(
+  'Use MaterialLocalizationEs from package:material_ui/material_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class MaterialLocalizationEs extends GlobalMaterialLocalizations {
   /// Create an instance of the translation bundle for Spanish Castilian.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  @Deprecated(
+    'Use MaterialLocalizationEs from package:material_ui/material_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const MaterialLocalizationEs({
     super.localeName = 'es',
     required super.fullYearFormat,
@@ -9726,10 +9942,18 @@ class MaterialLocalizationEs extends GlobalMaterialLocalizations {
 }
 
 /// The translations for Spanish Castilian, as used in Latin America and the Caribbean (`es_419`).
+@Deprecated(
+  'Use MaterialLocalizationEs419 from package:material_ui/material_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class MaterialLocalizationEs419 extends MaterialLocalizationEs {
   /// Create an instance of the translation bundle for Spanish Castilian, as used in Latin America and the Caribbean.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  @Deprecated(
+    'Use MaterialLocalizationEs419 from package:material_ui/material_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const MaterialLocalizationEs419({
     super.localeName = 'es_419',
     required super.fullYearFormat,
@@ -9916,10 +10140,18 @@ class MaterialLocalizationEs419 extends MaterialLocalizationEs {
 }
 
 /// The translations for Spanish Castilian, as used in Argentina (`es_AR`).
+@Deprecated(
+  'Use MaterialLocalizationEsAr from package:material_ui/material_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class MaterialLocalizationEsAr extends MaterialLocalizationEs {
   /// Create an instance of the translation bundle for Spanish Castilian, as used in Argentina.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  @Deprecated(
+    'Use MaterialLocalizationEsAr from package:material_ui/material_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const MaterialLocalizationEsAr({
     super.localeName = 'es_AR',
     required super.fullYearFormat,
@@ -10106,10 +10338,18 @@ class MaterialLocalizationEsAr extends MaterialLocalizationEs {
 }
 
 /// The translations for Spanish Castilian, as used in Bolivia (`es_BO`).
+@Deprecated(
+  'Use MaterialLocalizationEsBo from package:material_ui/material_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class MaterialLocalizationEsBo extends MaterialLocalizationEs {
   /// Create an instance of the translation bundle for Spanish Castilian, as used in Bolivia.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  @Deprecated(
+    'Use MaterialLocalizationEsBo from package:material_ui/material_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const MaterialLocalizationEsBo({
     super.localeName = 'es_BO',
     required super.fullYearFormat,
@@ -10296,10 +10536,18 @@ class MaterialLocalizationEsBo extends MaterialLocalizationEs {
 }
 
 /// The translations for Spanish Castilian, as used in Chile (`es_CL`).
+@Deprecated(
+  'Use MaterialLocalizationEsCl from package:material_ui/material_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class MaterialLocalizationEsCl extends MaterialLocalizationEs {
   /// Create an instance of the translation bundle for Spanish Castilian, as used in Chile.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  @Deprecated(
+    'Use MaterialLocalizationEsCl from package:material_ui/material_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const MaterialLocalizationEsCl({
     super.localeName = 'es_CL',
     required super.fullYearFormat,
@@ -10486,10 +10734,18 @@ class MaterialLocalizationEsCl extends MaterialLocalizationEs {
 }
 
 /// The translations for Spanish Castilian, as used in Colombia (`es_CO`).
+@Deprecated(
+  'Use MaterialLocalizationEsCo from package:material_ui/material_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class MaterialLocalizationEsCo extends MaterialLocalizationEs {
   /// Create an instance of the translation bundle for Spanish Castilian, as used in Colombia.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  @Deprecated(
+    'Use MaterialLocalizationEsCo from package:material_ui/material_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const MaterialLocalizationEsCo({
     super.localeName = 'es_CO',
     required super.fullYearFormat,
@@ -10676,10 +10932,18 @@ class MaterialLocalizationEsCo extends MaterialLocalizationEs {
 }
 
 /// The translations for Spanish Castilian, as used in Costa Rica (`es_CR`).
+@Deprecated(
+  'Use MaterialLocalizationEsCr from package:material_ui/material_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class MaterialLocalizationEsCr extends MaterialLocalizationEs {
   /// Create an instance of the translation bundle for Spanish Castilian, as used in Costa Rica.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  @Deprecated(
+    'Use MaterialLocalizationEsCr from package:material_ui/material_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const MaterialLocalizationEsCr({
     super.localeName = 'es_CR',
     required super.fullYearFormat,
@@ -10866,10 +11130,18 @@ class MaterialLocalizationEsCr extends MaterialLocalizationEs {
 }
 
 /// The translations for Spanish Castilian, as used in the Dominican Republic (`es_DO`).
+@Deprecated(
+  'Use MaterialLocalizationEsDo from package:material_ui/material_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class MaterialLocalizationEsDo extends MaterialLocalizationEs {
   /// Create an instance of the translation bundle for Spanish Castilian, as used in the Dominican Republic.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  @Deprecated(
+    'Use MaterialLocalizationEsDo from package:material_ui/material_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const MaterialLocalizationEsDo({
     super.localeName = 'es_DO',
     required super.fullYearFormat,
@@ -11056,10 +11328,18 @@ class MaterialLocalizationEsDo extends MaterialLocalizationEs {
 }
 
 /// The translations for Spanish Castilian, as used in Ecuador (`es_EC`).
+@Deprecated(
+  'Use MaterialLocalizationEsEc from package:material_ui/material_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class MaterialLocalizationEsEc extends MaterialLocalizationEs {
   /// Create an instance of the translation bundle for Spanish Castilian, as used in Ecuador.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  @Deprecated(
+    'Use MaterialLocalizationEsEc from package:material_ui/material_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const MaterialLocalizationEsEc({
     super.localeName = 'es_EC',
     required super.fullYearFormat,
@@ -11246,10 +11526,18 @@ class MaterialLocalizationEsEc extends MaterialLocalizationEs {
 }
 
 /// The translations for Spanish Castilian, as used in Guatemala (`es_GT`).
+@Deprecated(
+  'Use MaterialLocalizationEsGt from package:material_ui/material_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class MaterialLocalizationEsGt extends MaterialLocalizationEs {
   /// Create an instance of the translation bundle for Spanish Castilian, as used in Guatemala.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  @Deprecated(
+    'Use MaterialLocalizationEsGt from package:material_ui/material_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const MaterialLocalizationEsGt({
     super.localeName = 'es_GT',
     required super.fullYearFormat,
@@ -11436,10 +11724,18 @@ class MaterialLocalizationEsGt extends MaterialLocalizationEs {
 }
 
 /// The translations for Spanish Castilian, as used in Honduras (`es_HN`).
+@Deprecated(
+  'Use MaterialLocalizationEsHn from package:material_ui/material_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class MaterialLocalizationEsHn extends MaterialLocalizationEs {
   /// Create an instance of the translation bundle for Spanish Castilian, as used in Honduras.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  @Deprecated(
+    'Use MaterialLocalizationEsHn from package:material_ui/material_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const MaterialLocalizationEsHn({
     super.localeName = 'es_HN',
     required super.fullYearFormat,
@@ -11626,10 +11922,18 @@ class MaterialLocalizationEsHn extends MaterialLocalizationEs {
 }
 
 /// The translations for Spanish Castilian, as used in Mexico (`es_MX`).
+@Deprecated(
+  'Use MaterialLocalizationEsMx from package:material_ui/material_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class MaterialLocalizationEsMx extends MaterialLocalizationEs {
   /// Create an instance of the translation bundle for Spanish Castilian, as used in Mexico.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  @Deprecated(
+    'Use MaterialLocalizationEsMx from package:material_ui/material_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const MaterialLocalizationEsMx({
     super.localeName = 'es_MX',
     required super.fullYearFormat,
@@ -11816,10 +12120,18 @@ class MaterialLocalizationEsMx extends MaterialLocalizationEs {
 }
 
 /// The translations for Spanish Castilian, as used in Nicaragua (`es_NI`).
+@Deprecated(
+  'Use MaterialLocalizationEsNi from package:material_ui/material_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class MaterialLocalizationEsNi extends MaterialLocalizationEs {
   /// Create an instance of the translation bundle for Spanish Castilian, as used in Nicaragua.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  @Deprecated(
+    'Use MaterialLocalizationEsNi from package:material_ui/material_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const MaterialLocalizationEsNi({
     super.localeName = 'es_NI',
     required super.fullYearFormat,
@@ -12006,10 +12318,18 @@ class MaterialLocalizationEsNi extends MaterialLocalizationEs {
 }
 
 /// The translations for Spanish Castilian, as used in Panama (`es_PA`).
+@Deprecated(
+  'Use MaterialLocalizationEsPa from package:material_ui/material_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class MaterialLocalizationEsPa extends MaterialLocalizationEs {
   /// Create an instance of the translation bundle for Spanish Castilian, as used in Panama.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  @Deprecated(
+    'Use MaterialLocalizationEsPa from package:material_ui/material_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const MaterialLocalizationEsPa({
     super.localeName = 'es_PA',
     required super.fullYearFormat,
@@ -12196,10 +12516,18 @@ class MaterialLocalizationEsPa extends MaterialLocalizationEs {
 }
 
 /// The translations for Spanish Castilian, as used in Peru (`es_PE`).
+@Deprecated(
+  'Use MaterialLocalizationEsPe from package:material_ui/material_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class MaterialLocalizationEsPe extends MaterialLocalizationEs {
   /// Create an instance of the translation bundle for Spanish Castilian, as used in Peru.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  @Deprecated(
+    'Use MaterialLocalizationEsPe from package:material_ui/material_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const MaterialLocalizationEsPe({
     super.localeName = 'es_PE',
     required super.fullYearFormat,
@@ -12386,10 +12714,18 @@ class MaterialLocalizationEsPe extends MaterialLocalizationEs {
 }
 
 /// The translations for Spanish Castilian, as used in Puerto Rico (`es_PR`).
+@Deprecated(
+  'Use MaterialLocalizationEsPr from package:material_ui/material_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class MaterialLocalizationEsPr extends MaterialLocalizationEs {
   /// Create an instance of the translation bundle for Spanish Castilian, as used in Puerto Rico.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  @Deprecated(
+    'Use MaterialLocalizationEsPr from package:material_ui/material_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const MaterialLocalizationEsPr({
     super.localeName = 'es_PR',
     required super.fullYearFormat,
@@ -12576,10 +12912,18 @@ class MaterialLocalizationEsPr extends MaterialLocalizationEs {
 }
 
 /// The translations for Spanish Castilian, as used in Paraguay (`es_PY`).
+@Deprecated(
+  'Use MaterialLocalizationEsPy from package:material_ui/material_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class MaterialLocalizationEsPy extends MaterialLocalizationEs {
   /// Create an instance of the translation bundle for Spanish Castilian, as used in Paraguay.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  @Deprecated(
+    'Use MaterialLocalizationEsPy from package:material_ui/material_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const MaterialLocalizationEsPy({
     super.localeName = 'es_PY',
     required super.fullYearFormat,
@@ -12766,10 +13110,18 @@ class MaterialLocalizationEsPy extends MaterialLocalizationEs {
 }
 
 /// The translations for Spanish Castilian, as used in El Salvador (`es_SV`).
+@Deprecated(
+  'Use MaterialLocalizationEsSv from package:material_ui/material_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class MaterialLocalizationEsSv extends MaterialLocalizationEs {
   /// Create an instance of the translation bundle for Spanish Castilian, as used in El Salvador.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  @Deprecated(
+    'Use MaterialLocalizationEsSv from package:material_ui/material_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const MaterialLocalizationEsSv({
     super.localeName = 'es_SV',
     required super.fullYearFormat,
@@ -12956,10 +13308,18 @@ class MaterialLocalizationEsSv extends MaterialLocalizationEs {
 }
 
 /// The translations for Spanish Castilian, as used in the United States (`es_US`).
+@Deprecated(
+  'Use MaterialLocalizationEsUs from package:material_ui/material_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class MaterialLocalizationEsUs extends MaterialLocalizationEs {
   /// Create an instance of the translation bundle for Spanish Castilian, as used in the United States.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  @Deprecated(
+    'Use MaterialLocalizationEsUs from package:material_ui/material_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const MaterialLocalizationEsUs({
     super.localeName = 'es_US',
     required super.fullYearFormat,
@@ -13149,10 +13509,18 @@ class MaterialLocalizationEsUs extends MaterialLocalizationEs {
 }
 
 /// The translations for Spanish Castilian, as used in Uruguay (`es_UY`).
+@Deprecated(
+  'Use MaterialLocalizationEsUy from package:material_ui/material_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class MaterialLocalizationEsUy extends MaterialLocalizationEs {
   /// Create an instance of the translation bundle for Spanish Castilian, as used in Uruguay.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  @Deprecated(
+    'Use MaterialLocalizationEsUy from package:material_ui/material_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const MaterialLocalizationEsUy({
     super.localeName = 'es_UY',
     required super.fullYearFormat,
@@ -13339,10 +13707,18 @@ class MaterialLocalizationEsUy extends MaterialLocalizationEs {
 }
 
 /// The translations for Spanish Castilian, as used in Venezuela (`es_VE`).
+@Deprecated(
+  'Use MaterialLocalizationEsVe from package:material_ui/material_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class MaterialLocalizationEsVe extends MaterialLocalizationEs {
   /// Create an instance of the translation bundle for Spanish Castilian, as used in Venezuela.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  @Deprecated(
+    'Use MaterialLocalizationEsVe from package:material_ui/material_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const MaterialLocalizationEsVe({
     super.localeName = 'es_VE',
     required super.fullYearFormat,
@@ -13529,10 +13905,18 @@ class MaterialLocalizationEsVe extends MaterialLocalizationEs {
 }
 
 /// The translations for Estonian (`et`).
+@Deprecated(
+  'Use MaterialLocalizationEt from package:material_ui/material_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class MaterialLocalizationEt extends GlobalMaterialLocalizations {
   /// Create an instance of the translation bundle for Estonian.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  @Deprecated(
+    'Use MaterialLocalizationEt from package:material_ui/material_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const MaterialLocalizationEt({
     super.localeName = 'et',
     required super.fullYearFormat,
@@ -14025,10 +14409,18 @@ class MaterialLocalizationEt extends GlobalMaterialLocalizations {
 }
 
 /// The translations for Basque (`eu`).
+@Deprecated(
+  'Use MaterialLocalizationEu from package:material_ui/material_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class MaterialLocalizationEu extends GlobalMaterialLocalizations {
   /// Create an instance of the translation bundle for Basque.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  @Deprecated(
+    'Use MaterialLocalizationEu from package:material_ui/material_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const MaterialLocalizationEu({
     super.localeName = 'eu',
     required super.fullYearFormat,
@@ -14521,10 +14913,18 @@ class MaterialLocalizationEu extends GlobalMaterialLocalizations {
 }
 
 /// The translations for Persian (`fa`).
+@Deprecated(
+  'Use MaterialLocalizationFa from package:material_ui/material_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class MaterialLocalizationFa extends GlobalMaterialLocalizations {
   /// Create an instance of the translation bundle for Persian.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  @Deprecated(
+    'Use MaterialLocalizationFa from package:material_ui/material_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const MaterialLocalizationFa({
     super.localeName = 'fa',
     required super.fullYearFormat,
@@ -15017,10 +15417,18 @@ class MaterialLocalizationFa extends GlobalMaterialLocalizations {
 }
 
 /// The translations for Finnish (`fi`).
+@Deprecated(
+  'Use MaterialLocalizationFi from package:material_ui/material_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class MaterialLocalizationFi extends GlobalMaterialLocalizations {
   /// Create an instance of the translation bundle for Finnish.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  @Deprecated(
+    'Use MaterialLocalizationFi from package:material_ui/material_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const MaterialLocalizationFi({
     super.localeName = 'fi',
     required super.fullYearFormat,
@@ -15513,10 +15921,18 @@ class MaterialLocalizationFi extends GlobalMaterialLocalizations {
 }
 
 /// The translations for Filipino Pilipino (`fil`).
+@Deprecated(
+  'Use MaterialLocalizationFil from package:material_ui/material_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class MaterialLocalizationFil extends GlobalMaterialLocalizations {
   /// Create an instance of the translation bundle for Filipino Pilipino.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  @Deprecated(
+    'Use MaterialLocalizationFil from package:material_ui/material_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const MaterialLocalizationFil({
     super.localeName = 'fil',
     required super.fullYearFormat,
@@ -16009,10 +16425,18 @@ class MaterialLocalizationFil extends GlobalMaterialLocalizations {
 }
 
 /// The translations for French (`fr`).
+@Deprecated(
+  'Use MaterialLocalizationFr from package:material_ui/material_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class MaterialLocalizationFr extends GlobalMaterialLocalizations {
   /// Create an instance of the translation bundle for French.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  @Deprecated(
+    'Use MaterialLocalizationFr from package:material_ui/material_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const MaterialLocalizationFr({
     super.localeName = 'fr',
     required super.fullYearFormat,
@@ -16505,10 +16929,18 @@ class MaterialLocalizationFr extends GlobalMaterialLocalizations {
 }
 
 /// The translations for French, as used in Canada (`fr_CA`).
+@Deprecated(
+  'Use MaterialLocalizationFrCa from package:material_ui/material_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class MaterialLocalizationFrCa extends MaterialLocalizationFr {
   /// Create an instance of the translation bundle for French, as used in Canada.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  @Deprecated(
+    'Use MaterialLocalizationFrCa from package:material_ui/material_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const MaterialLocalizationFrCa({
     super.localeName = 'fr_CA',
     required super.fullYearFormat,
@@ -16662,10 +17094,18 @@ class MaterialLocalizationFrCa extends MaterialLocalizationFr {
 }
 
 /// The translations for Irish (`ga`).
+@Deprecated(
+  'Use MaterialLocalizationGa from package:material_ui/material_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class MaterialLocalizationGa extends GlobalMaterialLocalizations {
   /// Create an instance of the translation bundle for Irish.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  @Deprecated(
+    'Use MaterialLocalizationGa from package:material_ui/material_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const MaterialLocalizationGa({
     super.localeName = 'ga',
     required super.fullYearFormat,
@@ -17158,10 +17598,18 @@ class MaterialLocalizationGa extends GlobalMaterialLocalizations {
 }
 
 /// The translations for Galician (`gl`).
+@Deprecated(
+  'Use MaterialLocalizationGl from package:material_ui/material_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class MaterialLocalizationGl extends GlobalMaterialLocalizations {
   /// Create an instance of the translation bundle for Galician.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  @Deprecated(
+    'Use MaterialLocalizationGl from package:material_ui/material_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const MaterialLocalizationGl({
     super.localeName = 'gl',
     required super.fullYearFormat,
@@ -17654,10 +18102,18 @@ class MaterialLocalizationGl extends GlobalMaterialLocalizations {
 }
 
 /// The translations for Swiss German Alemannic Alsatian (`gsw`).
+@Deprecated(
+  'Use MaterialLocalizationGsw from package:material_ui/material_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class MaterialLocalizationGsw extends GlobalMaterialLocalizations {
   /// Create an instance of the translation bundle for Swiss German Alemannic Alsatian.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  @Deprecated(
+    'Use MaterialLocalizationGsw from package:material_ui/material_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const MaterialLocalizationGsw({
     super.localeName = 'gsw',
     required super.fullYearFormat,
@@ -18150,10 +18606,18 @@ class MaterialLocalizationGsw extends GlobalMaterialLocalizations {
 }
 
 /// The translations for Gujarati (`gu`).
+@Deprecated(
+  'Use MaterialLocalizationGu from package:material_ui/material_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class MaterialLocalizationGu extends GlobalMaterialLocalizations {
   /// Create an instance of the translation bundle for Gujarati.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  @Deprecated(
+    'Use MaterialLocalizationGu from package:material_ui/material_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const MaterialLocalizationGu({
     super.localeName = 'gu',
     required super.fullYearFormat,
@@ -18646,10 +19110,18 @@ class MaterialLocalizationGu extends GlobalMaterialLocalizations {
 }
 
 /// The translations for Hebrew (`he`).
+@Deprecated(
+  'Use MaterialLocalizationHe from package:material_ui/material_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class MaterialLocalizationHe extends GlobalMaterialLocalizations {
   /// Create an instance of the translation bundle for Hebrew.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  @Deprecated(
+    'Use MaterialLocalizationHe from package:material_ui/material_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const MaterialLocalizationHe({
     super.localeName = 'he',
     required super.fullYearFormat,
@@ -19142,10 +19614,18 @@ class MaterialLocalizationHe extends GlobalMaterialLocalizations {
 }
 
 /// The translations for Hindi (`hi`).
+@Deprecated(
+  'Use MaterialLocalizationHi from package:material_ui/material_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class MaterialLocalizationHi extends GlobalMaterialLocalizations {
   /// Create an instance of the translation bundle for Hindi.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  @Deprecated(
+    'Use MaterialLocalizationHi from package:material_ui/material_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const MaterialLocalizationHi({
     super.localeName = 'hi',
     required super.fullYearFormat,
@@ -19638,10 +20118,18 @@ class MaterialLocalizationHi extends GlobalMaterialLocalizations {
 }
 
 /// The translations for Croatian (`hr`).
+@Deprecated(
+  'Use MaterialLocalizationHr from package:material_ui/material_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class MaterialLocalizationHr extends GlobalMaterialLocalizations {
   /// Create an instance of the translation bundle for Croatian.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  @Deprecated(
+    'Use MaterialLocalizationHr from package:material_ui/material_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const MaterialLocalizationHr({
     super.localeName = 'hr',
     required super.fullYearFormat,
@@ -20134,10 +20622,18 @@ class MaterialLocalizationHr extends GlobalMaterialLocalizations {
 }
 
 /// The translations for Hungarian (`hu`).
+@Deprecated(
+  'Use MaterialLocalizationHu from package:material_ui/material_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class MaterialLocalizationHu extends GlobalMaterialLocalizations {
   /// Create an instance of the translation bundle for Hungarian.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  @Deprecated(
+    'Use MaterialLocalizationHu from package:material_ui/material_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const MaterialLocalizationHu({
     super.localeName = 'hu',
     required super.fullYearFormat,
@@ -20630,10 +21126,18 @@ class MaterialLocalizationHu extends GlobalMaterialLocalizations {
 }
 
 /// The translations for Armenian (`hy`).
+@Deprecated(
+  'Use MaterialLocalizationHy from package:material_ui/material_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class MaterialLocalizationHy extends GlobalMaterialLocalizations {
   /// Create an instance of the translation bundle for Armenian.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  @Deprecated(
+    'Use MaterialLocalizationHy from package:material_ui/material_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const MaterialLocalizationHy({
     super.localeName = 'hy',
     required super.fullYearFormat,
@@ -21126,10 +21630,18 @@ class MaterialLocalizationHy extends GlobalMaterialLocalizations {
 }
 
 /// The translations for Indonesian (`id`).
+@Deprecated(
+  'Use MaterialLocalizationId from package:material_ui/material_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class MaterialLocalizationId extends GlobalMaterialLocalizations {
   /// Create an instance of the translation bundle for Indonesian.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  @Deprecated(
+    'Use MaterialLocalizationId from package:material_ui/material_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const MaterialLocalizationId({
     super.localeName = 'id',
     required super.fullYearFormat,
@@ -21622,10 +22134,18 @@ class MaterialLocalizationId extends GlobalMaterialLocalizations {
 }
 
 /// The translations for Icelandic (`is`).
+@Deprecated(
+  'Use MaterialLocalizationIs from package:material_ui/material_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class MaterialLocalizationIs extends GlobalMaterialLocalizations {
   /// Create an instance of the translation bundle for Icelandic.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  @Deprecated(
+    'Use MaterialLocalizationIs from package:material_ui/material_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const MaterialLocalizationIs({
     super.localeName = 'is',
     required super.fullYearFormat,
@@ -22118,10 +22638,18 @@ class MaterialLocalizationIs extends GlobalMaterialLocalizations {
 }
 
 /// The translations for Italian (`it`).
+@Deprecated(
+  'Use MaterialLocalizationIt from package:material_ui/material_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class MaterialLocalizationIt extends GlobalMaterialLocalizations {
   /// Create an instance of the translation bundle for Italian.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  @Deprecated(
+    'Use MaterialLocalizationIt from package:material_ui/material_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const MaterialLocalizationIt({
     super.localeName = 'it',
     required super.fullYearFormat,
@@ -22614,10 +23142,18 @@ class MaterialLocalizationIt extends GlobalMaterialLocalizations {
 }
 
 /// The translations for Japanese (`ja`).
+@Deprecated(
+  'Use MaterialLocalizationJa from package:material_ui/material_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class MaterialLocalizationJa extends GlobalMaterialLocalizations {
   /// Create an instance of the translation bundle for Japanese.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  @Deprecated(
+    'Use MaterialLocalizationJa from package:material_ui/material_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const MaterialLocalizationJa({
     super.localeName = 'ja',
     required super.fullYearFormat,
@@ -23110,10 +23646,18 @@ class MaterialLocalizationJa extends GlobalMaterialLocalizations {
 }
 
 /// The translations for Georgian (`ka`).
+@Deprecated(
+  'Use MaterialLocalizationKa from package:material_ui/material_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class MaterialLocalizationKa extends GlobalMaterialLocalizations {
   /// Create an instance of the translation bundle for Georgian.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  @Deprecated(
+    'Use MaterialLocalizationKa from package:material_ui/material_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const MaterialLocalizationKa({
     super.localeName = 'ka',
     required super.fullYearFormat,
@@ -23606,10 +24150,18 @@ class MaterialLocalizationKa extends GlobalMaterialLocalizations {
 }
 
 /// The translations for Kazakh (`kk`).
+@Deprecated(
+  'Use MaterialLocalizationKk from package:material_ui/material_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class MaterialLocalizationKk extends GlobalMaterialLocalizations {
   /// Create an instance of the translation bundle for Kazakh.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  @Deprecated(
+    'Use MaterialLocalizationKk from package:material_ui/material_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const MaterialLocalizationKk({
     super.localeName = 'kk',
     required super.fullYearFormat,
@@ -24102,10 +24654,18 @@ class MaterialLocalizationKk extends GlobalMaterialLocalizations {
 }
 
 /// The translations for Khmer Central Khmer (`km`).
+@Deprecated(
+  'Use MaterialLocalizationKm from package:material_ui/material_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class MaterialLocalizationKm extends GlobalMaterialLocalizations {
   /// Create an instance of the translation bundle for Khmer Central Khmer.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  @Deprecated(
+    'Use MaterialLocalizationKm from package:material_ui/material_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const MaterialLocalizationKm({
     super.localeName = 'km',
     required super.fullYearFormat,
@@ -24598,10 +25158,18 @@ class MaterialLocalizationKm extends GlobalMaterialLocalizations {
 }
 
 /// The translations for Kannada (`kn`).
+@Deprecated(
+  'Use MaterialLocalizationKn from package:material_ui/material_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class MaterialLocalizationKn extends GlobalMaterialLocalizations {
   /// Create an instance of the translation bundle for Kannada.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  @Deprecated(
+    'Use MaterialLocalizationKn from package:material_ui/material_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const MaterialLocalizationKn({
     super.localeName = 'kn',
     required super.fullYearFormat,
@@ -25094,10 +25662,18 @@ class MaterialLocalizationKn extends GlobalMaterialLocalizations {
 }
 
 /// The translations for Korean (`ko`).
+@Deprecated(
+  'Use MaterialLocalizationKo from package:material_ui/material_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class MaterialLocalizationKo extends GlobalMaterialLocalizations {
   /// Create an instance of the translation bundle for Korean.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  @Deprecated(
+    'Use MaterialLocalizationKo from package:material_ui/material_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const MaterialLocalizationKo({
     super.localeName = 'ko',
     required super.fullYearFormat,
@@ -25590,10 +26166,18 @@ class MaterialLocalizationKo extends GlobalMaterialLocalizations {
 }
 
 /// The translations for Kirghiz Kyrgyz (`ky`).
+@Deprecated(
+  'Use MaterialLocalizationKy from package:material_ui/material_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class MaterialLocalizationKy extends GlobalMaterialLocalizations {
   /// Create an instance of the translation bundle for Kirghiz Kyrgyz.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  @Deprecated(
+    'Use MaterialLocalizationKy from package:material_ui/material_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const MaterialLocalizationKy({
     super.localeName = 'ky',
     required super.fullYearFormat,
@@ -26086,10 +26670,18 @@ class MaterialLocalizationKy extends GlobalMaterialLocalizations {
 }
 
 /// The translations for Lao (`lo`).
+@Deprecated(
+  'Use MaterialLocalizationLo from package:material_ui/material_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class MaterialLocalizationLo extends GlobalMaterialLocalizations {
   /// Create an instance of the translation bundle for Lao.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  @Deprecated(
+    'Use MaterialLocalizationLo from package:material_ui/material_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const MaterialLocalizationLo({
     super.localeName = 'lo',
     required super.fullYearFormat,
@@ -26582,10 +27174,18 @@ class MaterialLocalizationLo extends GlobalMaterialLocalizations {
 }
 
 /// The translations for Lithuanian (`lt`).
+@Deprecated(
+  'Use MaterialLocalizationLt from package:material_ui/material_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class MaterialLocalizationLt extends GlobalMaterialLocalizations {
   /// Create an instance of the translation bundle for Lithuanian.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  @Deprecated(
+    'Use MaterialLocalizationLt from package:material_ui/material_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const MaterialLocalizationLt({
     super.localeName = 'lt',
     required super.fullYearFormat,
@@ -27078,10 +27678,18 @@ class MaterialLocalizationLt extends GlobalMaterialLocalizations {
 }
 
 /// The translations for Latvian (`lv`).
+@Deprecated(
+  'Use MaterialLocalizationLv from package:material_ui/material_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class MaterialLocalizationLv extends GlobalMaterialLocalizations {
   /// Create an instance of the translation bundle for Latvian.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  @Deprecated(
+    'Use MaterialLocalizationLv from package:material_ui/material_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const MaterialLocalizationLv({
     super.localeName = 'lv',
     required super.fullYearFormat,
@@ -27574,10 +28182,18 @@ class MaterialLocalizationLv extends GlobalMaterialLocalizations {
 }
 
 /// The translations for Macedonian (`mk`).
+@Deprecated(
+  'Use MaterialLocalizationMk from package:material_ui/material_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class MaterialLocalizationMk extends GlobalMaterialLocalizations {
   /// Create an instance of the translation bundle for Macedonian.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  @Deprecated(
+    'Use MaterialLocalizationMk from package:material_ui/material_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const MaterialLocalizationMk({
     super.localeName = 'mk',
     required super.fullYearFormat,
@@ -28070,10 +28686,18 @@ class MaterialLocalizationMk extends GlobalMaterialLocalizations {
 }
 
 /// The translations for Malayalam (`ml`).
+@Deprecated(
+  'Use MaterialLocalizationMl from package:material_ui/material_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class MaterialLocalizationMl extends GlobalMaterialLocalizations {
   /// Create an instance of the translation bundle for Malayalam.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  @Deprecated(
+    'Use MaterialLocalizationMl from package:material_ui/material_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const MaterialLocalizationMl({
     super.localeName = 'ml',
     required super.fullYearFormat,
@@ -28566,10 +29190,18 @@ class MaterialLocalizationMl extends GlobalMaterialLocalizations {
 }
 
 /// The translations for Mongolian (`mn`).
+@Deprecated(
+  'Use MaterialLocalizationMn from package:material_ui/material_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class MaterialLocalizationMn extends GlobalMaterialLocalizations {
   /// Create an instance of the translation bundle for Mongolian.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  @Deprecated(
+    'Use MaterialLocalizationMn from package:material_ui/material_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const MaterialLocalizationMn({
     super.localeName = 'mn',
     required super.fullYearFormat,
@@ -29062,10 +29694,18 @@ class MaterialLocalizationMn extends GlobalMaterialLocalizations {
 }
 
 /// The translations for Marathi (`mr`).
+@Deprecated(
+  'Use MaterialLocalizationMr from package:material_ui/material_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class MaterialLocalizationMr extends GlobalMaterialLocalizations {
   /// Create an instance of the translation bundle for Marathi.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  @Deprecated(
+    'Use MaterialLocalizationMr from package:material_ui/material_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const MaterialLocalizationMr({
     super.localeName = 'mr',
     required super.fullYearFormat,
@@ -29558,10 +30198,18 @@ class MaterialLocalizationMr extends GlobalMaterialLocalizations {
 }
 
 /// The translations for Malay (`ms`).
+@Deprecated(
+  'Use MaterialLocalizationMs from package:material_ui/material_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class MaterialLocalizationMs extends GlobalMaterialLocalizations {
   /// Create an instance of the translation bundle for Malay.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  @Deprecated(
+    'Use MaterialLocalizationMs from package:material_ui/material_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const MaterialLocalizationMs({
     super.localeName = 'ms',
     required super.fullYearFormat,
@@ -30054,10 +30702,18 @@ class MaterialLocalizationMs extends GlobalMaterialLocalizations {
 }
 
 /// The translations for Burmese (`my`).
+@Deprecated(
+  'Use MaterialLocalizationMy from package:material_ui/material_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class MaterialLocalizationMy extends GlobalMaterialLocalizations {
   /// Create an instance of the translation bundle for Burmese.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  @Deprecated(
+    'Use MaterialLocalizationMy from package:material_ui/material_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const MaterialLocalizationMy({
     super.localeName = 'my',
     required super.fullYearFormat,
@@ -30550,10 +31206,18 @@ class MaterialLocalizationMy extends GlobalMaterialLocalizations {
 }
 
 /// The translations for Norwegian Bokmål (`nb`).
+@Deprecated(
+  'Use MaterialLocalizationNb from package:material_ui/material_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class MaterialLocalizationNb extends GlobalMaterialLocalizations {
   /// Create an instance of the translation bundle for Norwegian Bokmål.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  @Deprecated(
+    'Use MaterialLocalizationNb from package:material_ui/material_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const MaterialLocalizationNb({
     super.localeName = 'nb',
     required super.fullYearFormat,
@@ -31046,10 +31710,18 @@ class MaterialLocalizationNb extends GlobalMaterialLocalizations {
 }
 
 /// The translations for Nepali (`ne`).
+@Deprecated(
+  'Use MaterialLocalizationNe from package:material_ui/material_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class MaterialLocalizationNe extends GlobalMaterialLocalizations {
   /// Create an instance of the translation bundle for Nepali.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  @Deprecated(
+    'Use MaterialLocalizationNe from package:material_ui/material_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const MaterialLocalizationNe({
     super.localeName = 'ne',
     required super.fullYearFormat,
@@ -31542,10 +32214,18 @@ class MaterialLocalizationNe extends GlobalMaterialLocalizations {
 }
 
 /// The translations for Dutch Flemish (`nl`).
+@Deprecated(
+  'Use MaterialLocalizationNl from package:material_ui/material_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class MaterialLocalizationNl extends GlobalMaterialLocalizations {
   /// Create an instance of the translation bundle for Dutch Flemish.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  @Deprecated(
+    'Use MaterialLocalizationNl from package:material_ui/material_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const MaterialLocalizationNl({
     super.localeName = 'nl',
     required super.fullYearFormat,
@@ -32038,10 +32718,18 @@ class MaterialLocalizationNl extends GlobalMaterialLocalizations {
 }
 
 /// The translations for Norwegian (`no`).
+@Deprecated(
+  'Use MaterialLocalizationNo from package:material_ui/material_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class MaterialLocalizationNo extends GlobalMaterialLocalizations {
   /// Create an instance of the translation bundle for Norwegian.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  @Deprecated(
+    'Use MaterialLocalizationNo from package:material_ui/material_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const MaterialLocalizationNo({
     super.localeName = 'no',
     required super.fullYearFormat,
@@ -32534,10 +33222,18 @@ class MaterialLocalizationNo extends GlobalMaterialLocalizations {
 }
 
 /// The translations for Oriya (`or`).
+@Deprecated(
+  'Use MaterialLocalizationOr from package:material_ui/material_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class MaterialLocalizationOr extends GlobalMaterialLocalizations {
   /// Create an instance of the translation bundle for Oriya.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  @Deprecated(
+    'Use MaterialLocalizationOr from package:material_ui/material_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const MaterialLocalizationOr({
     super.localeName = 'or',
     required super.fullYearFormat,
@@ -33030,10 +33726,18 @@ class MaterialLocalizationOr extends GlobalMaterialLocalizations {
 }
 
 /// The translations for Panjabi Punjabi (`pa`).
+@Deprecated(
+  'Use MaterialLocalizationPa from package:material_ui/material_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class MaterialLocalizationPa extends GlobalMaterialLocalizations {
   /// Create an instance of the translation bundle for Panjabi Punjabi.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  @Deprecated(
+    'Use MaterialLocalizationPa from package:material_ui/material_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const MaterialLocalizationPa({
     super.localeName = 'pa',
     required super.fullYearFormat,
@@ -33526,10 +34230,18 @@ class MaterialLocalizationPa extends GlobalMaterialLocalizations {
 }
 
 /// The translations for Polish (`pl`).
+@Deprecated(
+  'Use MaterialLocalizationPl from package:material_ui/material_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class MaterialLocalizationPl extends GlobalMaterialLocalizations {
   /// Create an instance of the translation bundle for Polish.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  @Deprecated(
+    'Use MaterialLocalizationPl from package:material_ui/material_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const MaterialLocalizationPl({
     super.localeName = 'pl',
     required super.fullYearFormat,
@@ -34022,10 +34734,18 @@ class MaterialLocalizationPl extends GlobalMaterialLocalizations {
 }
 
 /// The translations for Pushto Pashto (`ps`).
+@Deprecated(
+  'Use MaterialLocalizationPs from package:material_ui/material_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class MaterialLocalizationPs extends GlobalMaterialLocalizations {
   /// Create an instance of the translation bundle for Pushto Pashto.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  @Deprecated(
+    'Use MaterialLocalizationPs from package:material_ui/material_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const MaterialLocalizationPs({
     super.localeName = 'ps',
     required super.fullYearFormat,
@@ -34518,10 +35238,18 @@ class MaterialLocalizationPs extends GlobalMaterialLocalizations {
 }
 
 /// The translations for Portuguese (`pt`).
+@Deprecated(
+  'Use MaterialLocalizationPt from package:material_ui/material_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class MaterialLocalizationPt extends GlobalMaterialLocalizations {
   /// Create an instance of the translation bundle for Portuguese.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  @Deprecated(
+    'Use MaterialLocalizationPt from package:material_ui/material_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const MaterialLocalizationPt({
     super.localeName = 'pt',
     required super.fullYearFormat,
@@ -35014,10 +35742,18 @@ class MaterialLocalizationPt extends GlobalMaterialLocalizations {
 }
 
 /// The translations for Portuguese, as used in Portugal (`pt_PT`).
+@Deprecated(
+  'Use MaterialLocalizationPtPt from package:material_ui/material_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class MaterialLocalizationPtPt extends MaterialLocalizationPt {
   /// Create an instance of the translation bundle for Portuguese, as used in Portugal.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  @Deprecated(
+    'Use MaterialLocalizationPtPt from package:material_ui/material_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const MaterialLocalizationPtPt({
     super.localeName = 'pt_PT',
     required super.fullYearFormat,
@@ -35195,10 +35931,18 @@ class MaterialLocalizationPtPt extends MaterialLocalizationPt {
 }
 
 /// The translations for Romanian Moldavian Moldovan (`ro`).
+@Deprecated(
+  'Use MaterialLocalizationRo from package:material_ui/material_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class MaterialLocalizationRo extends GlobalMaterialLocalizations {
   /// Create an instance of the translation bundle for Romanian Moldavian Moldovan.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  @Deprecated(
+    'Use MaterialLocalizationRo from package:material_ui/material_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const MaterialLocalizationRo({
     super.localeName = 'ro',
     required super.fullYearFormat,
@@ -35691,10 +36435,18 @@ class MaterialLocalizationRo extends GlobalMaterialLocalizations {
 }
 
 /// The translations for Russian (`ru`).
+@Deprecated(
+  'Use MaterialLocalizationRu from package:material_ui/material_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class MaterialLocalizationRu extends GlobalMaterialLocalizations {
   /// Create an instance of the translation bundle for Russian.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  @Deprecated(
+    'Use MaterialLocalizationRu from package:material_ui/material_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const MaterialLocalizationRu({
     super.localeName = 'ru',
     required super.fullYearFormat,
@@ -36187,10 +36939,18 @@ class MaterialLocalizationRu extends GlobalMaterialLocalizations {
 }
 
 /// The translations for Sinhala Sinhalese (`si`).
+@Deprecated(
+  'Use MaterialLocalizationSi from package:material_ui/material_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class MaterialLocalizationSi extends GlobalMaterialLocalizations {
   /// Create an instance of the translation bundle for Sinhala Sinhalese.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  @Deprecated(
+    'Use MaterialLocalizationSi from package:material_ui/material_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const MaterialLocalizationSi({
     super.localeName = 'si',
     required super.fullYearFormat,
@@ -36683,10 +37443,18 @@ class MaterialLocalizationSi extends GlobalMaterialLocalizations {
 }
 
 /// The translations for Slovak (`sk`).
+@Deprecated(
+  'Use MaterialLocalizationSk from package:material_ui/material_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class MaterialLocalizationSk extends GlobalMaterialLocalizations {
   /// Create an instance of the translation bundle for Slovak.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  @Deprecated(
+    'Use MaterialLocalizationSk from package:material_ui/material_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const MaterialLocalizationSk({
     super.localeName = 'sk',
     required super.fullYearFormat,
@@ -37179,10 +37947,18 @@ class MaterialLocalizationSk extends GlobalMaterialLocalizations {
 }
 
 /// The translations for Slovenian (`sl`).
+@Deprecated(
+  'Use MaterialLocalizationSl from package:material_ui/material_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class MaterialLocalizationSl extends GlobalMaterialLocalizations {
   /// Create an instance of the translation bundle for Slovenian.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  @Deprecated(
+    'Use MaterialLocalizationSl from package:material_ui/material_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const MaterialLocalizationSl({
     super.localeName = 'sl',
     required super.fullYearFormat,
@@ -37675,10 +38451,18 @@ class MaterialLocalizationSl extends GlobalMaterialLocalizations {
 }
 
 /// The translations for Albanian (`sq`).
+@Deprecated(
+  'Use MaterialLocalizationSq from package:material_ui/material_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class MaterialLocalizationSq extends GlobalMaterialLocalizations {
   /// Create an instance of the translation bundle for Albanian.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  @Deprecated(
+    'Use MaterialLocalizationSq from package:material_ui/material_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const MaterialLocalizationSq({
     super.localeName = 'sq',
     required super.fullYearFormat,
@@ -38171,10 +38955,18 @@ class MaterialLocalizationSq extends GlobalMaterialLocalizations {
 }
 
 /// The translations for Serbian (`sr`).
+@Deprecated(
+  'Use MaterialLocalizationSr from package:material_ui/material_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class MaterialLocalizationSr extends GlobalMaterialLocalizations {
   /// Create an instance of the translation bundle for Serbian.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  @Deprecated(
+    'Use MaterialLocalizationSr from package:material_ui/material_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const MaterialLocalizationSr({
     super.localeName = 'sr',
     required super.fullYearFormat,
@@ -38667,10 +39459,18 @@ class MaterialLocalizationSr extends GlobalMaterialLocalizations {
 }
 
 /// The translations for Serbian, using the Cyrillic script (`sr_Cyrl`).
+@Deprecated(
+  'Use MaterialLocalizationSrCyrl from package:material_ui/material_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class MaterialLocalizationSrCyrl extends MaterialLocalizationSr {
   /// Create an instance of the translation bundle for Serbian, using the Cyrillic script.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  @Deprecated(
+    'Use MaterialLocalizationSrCyrl from package:material_ui/material_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const MaterialLocalizationSrCyrl({
     super.localeName = 'sr_Cyrl',
     required super.fullYearFormat,
@@ -38686,10 +39486,18 @@ class MaterialLocalizationSrCyrl extends MaterialLocalizationSr {
 }
 
 /// The translations for Serbian, using the Latin script (`sr_Latn`).
+@Deprecated(
+  'Use MaterialLocalizationSrLatn from package:material_ui/material_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class MaterialLocalizationSrLatn extends MaterialLocalizationSr {
   /// Create an instance of the translation bundle for Serbian, using the Latin script.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  @Deprecated(
+    'Use MaterialLocalizationSrLatn from package:material_ui/material_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const MaterialLocalizationSrLatn({
     super.localeName = 'sr_Latn',
     required super.fullYearFormat,
@@ -39020,10 +39828,18 @@ class MaterialLocalizationSrLatn extends MaterialLocalizationSr {
 }
 
 /// The translations for Swedish (`sv`).
+@Deprecated(
+  'Use MaterialLocalizationSv from package:material_ui/material_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class MaterialLocalizationSv extends GlobalMaterialLocalizations {
   /// Create an instance of the translation bundle for Swedish.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  @Deprecated(
+    'Use MaterialLocalizationSv from package:material_ui/material_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const MaterialLocalizationSv({
     super.localeName = 'sv',
     required super.fullYearFormat,
@@ -39516,10 +40332,18 @@ class MaterialLocalizationSv extends GlobalMaterialLocalizations {
 }
 
 /// The translations for Swahili (`sw`).
+@Deprecated(
+  'Use MaterialLocalizationSw from package:material_ui/material_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class MaterialLocalizationSw extends GlobalMaterialLocalizations {
   /// Create an instance of the translation bundle for Swahili.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  @Deprecated(
+    'Use MaterialLocalizationSw from package:material_ui/material_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const MaterialLocalizationSw({
     super.localeName = 'sw',
     required super.fullYearFormat,
@@ -40012,10 +40836,18 @@ class MaterialLocalizationSw extends GlobalMaterialLocalizations {
 }
 
 /// The translations for Tamil (`ta`).
+@Deprecated(
+  'Use MaterialLocalizationTa from package:material_ui/material_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class MaterialLocalizationTa extends GlobalMaterialLocalizations {
   /// Create an instance of the translation bundle for Tamil.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  @Deprecated(
+    'Use MaterialLocalizationTa from package:material_ui/material_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const MaterialLocalizationTa({
     super.localeName = 'ta',
     required super.fullYearFormat,
@@ -40508,10 +41340,18 @@ class MaterialLocalizationTa extends GlobalMaterialLocalizations {
 }
 
 /// The translations for Telugu (`te`).
+@Deprecated(
+  'Use MaterialLocalizationTe from package:material_ui/material_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class MaterialLocalizationTe extends GlobalMaterialLocalizations {
   /// Create an instance of the translation bundle for Telugu.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  @Deprecated(
+    'Use MaterialLocalizationTe from package:material_ui/material_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const MaterialLocalizationTe({
     super.localeName = 'te',
     required super.fullYearFormat,
@@ -41004,10 +41844,18 @@ class MaterialLocalizationTe extends GlobalMaterialLocalizations {
 }
 
 /// The translations for Thai (`th`).
+@Deprecated(
+  'Use MaterialLocalizationTh from package:material_ui/material_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class MaterialLocalizationTh extends GlobalMaterialLocalizations {
   /// Create an instance of the translation bundle for Thai.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  @Deprecated(
+    'Use MaterialLocalizationTh from package:material_ui/material_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const MaterialLocalizationTh({
     super.localeName = 'th',
     required super.fullYearFormat,
@@ -41500,10 +42348,18 @@ class MaterialLocalizationTh extends GlobalMaterialLocalizations {
 }
 
 /// The translations for Tagalog (`tl`).
+@Deprecated(
+  'Use MaterialLocalizationTl from package:material_ui/material_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class MaterialLocalizationTl extends GlobalMaterialLocalizations {
   /// Create an instance of the translation bundle for Tagalog.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  @Deprecated(
+    'Use MaterialLocalizationTl from package:material_ui/material_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const MaterialLocalizationTl({
     super.localeName = 'tl',
     required super.fullYearFormat,
@@ -41996,10 +42852,18 @@ class MaterialLocalizationTl extends GlobalMaterialLocalizations {
 }
 
 /// The translations for Turkish (`tr`).
+@Deprecated(
+  'Use MaterialLocalizationTr from package:material_ui/material_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class MaterialLocalizationTr extends GlobalMaterialLocalizations {
   /// Create an instance of the translation bundle for Turkish.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  @Deprecated(
+    'Use MaterialLocalizationTr from package:material_ui/material_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const MaterialLocalizationTr({
     super.localeName = 'tr',
     required super.fullYearFormat,
@@ -42492,10 +43356,18 @@ class MaterialLocalizationTr extends GlobalMaterialLocalizations {
 }
 
 /// The translations for Uighur Uyghur (`ug`).
+@Deprecated(
+  'Use MaterialLocalizationUg from package:material_ui/material_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class MaterialLocalizationUg extends GlobalMaterialLocalizations {
   /// Create an instance of the translation bundle for Uighur Uyghur.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  @Deprecated(
+    'Use MaterialLocalizationUg from package:material_ui/material_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const MaterialLocalizationUg({
     super.localeName = 'ug',
     required super.fullYearFormat,
@@ -42988,10 +43860,18 @@ class MaterialLocalizationUg extends GlobalMaterialLocalizations {
 }
 
 /// The translations for Ukrainian (`uk`).
+@Deprecated(
+  'Use MaterialLocalizationUk from package:material_ui/material_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class MaterialLocalizationUk extends GlobalMaterialLocalizations {
   /// Create an instance of the translation bundle for Ukrainian.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  @Deprecated(
+    'Use MaterialLocalizationUk from package:material_ui/material_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const MaterialLocalizationUk({
     super.localeName = 'uk',
     required super.fullYearFormat,
@@ -43484,10 +44364,18 @@ class MaterialLocalizationUk extends GlobalMaterialLocalizations {
 }
 
 /// The translations for Urdu (`ur`).
+@Deprecated(
+  'Use MaterialLocalizationUr from package:material_ui/material_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class MaterialLocalizationUr extends GlobalMaterialLocalizations {
   /// Create an instance of the translation bundle for Urdu.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  @Deprecated(
+    'Use MaterialLocalizationUr from package:material_ui/material_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const MaterialLocalizationUr({
     super.localeName = 'ur',
     required super.fullYearFormat,
@@ -43980,10 +44868,18 @@ class MaterialLocalizationUr extends GlobalMaterialLocalizations {
 }
 
 /// The translations for Uzbek (`uz`).
+@Deprecated(
+  'Use MaterialLocalizationUz from package:material_ui/material_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class MaterialLocalizationUz extends GlobalMaterialLocalizations {
   /// Create an instance of the translation bundle for Uzbek.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  @Deprecated(
+    'Use MaterialLocalizationUz from package:material_ui/material_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const MaterialLocalizationUz({
     super.localeName = 'uz',
     required super.fullYearFormat,
@@ -44476,10 +45372,18 @@ class MaterialLocalizationUz extends GlobalMaterialLocalizations {
 }
 
 /// The translations for Vietnamese (`vi`).
+@Deprecated(
+  'Use MaterialLocalizationVi from package:material_ui/material_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class MaterialLocalizationVi extends GlobalMaterialLocalizations {
   /// Create an instance of the translation bundle for Vietnamese.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  @Deprecated(
+    'Use MaterialLocalizationVi from package:material_ui/material_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const MaterialLocalizationVi({
     super.localeName = 'vi',
     required super.fullYearFormat,
@@ -44972,10 +45876,18 @@ class MaterialLocalizationVi extends GlobalMaterialLocalizations {
 }
 
 /// The translations for Chinese (`zh`).
+@Deprecated(
+  'Use MaterialLocalizationZh from package:material_ui/material_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class MaterialLocalizationZh extends GlobalMaterialLocalizations {
   /// Create an instance of the translation bundle for Chinese.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  @Deprecated(
+    'Use MaterialLocalizationZh from package:material_ui/material_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const MaterialLocalizationZh({
     super.localeName = 'zh',
     required super.fullYearFormat,
@@ -45468,10 +46380,18 @@ class MaterialLocalizationZh extends GlobalMaterialLocalizations {
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hans`).
+@Deprecated(
+  'Use MaterialLocalizationZhHans from package:material_ui/material_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class MaterialLocalizationZhHans extends MaterialLocalizationZh {
   /// Create an instance of the translation bundle for Chinese, using the Han script.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  @Deprecated(
+    'Use MaterialLocalizationZhHans from package:material_ui/material_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const MaterialLocalizationZhHans({
     super.localeName = 'zh_Hans',
     required super.fullYearFormat,
@@ -45487,10 +46407,18 @@ class MaterialLocalizationZhHans extends MaterialLocalizationZh {
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hant`).
+@Deprecated(
+  'Use MaterialLocalizationZhHant from package:material_ui/material_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class MaterialLocalizationZhHant extends MaterialLocalizationZh {
   /// Create an instance of the translation bundle for Chinese, using the Han script.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  @Deprecated(
+    'Use MaterialLocalizationZhHant from package:material_ui/material_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const MaterialLocalizationZhHant({
     super.localeName = 'zh_Hant',
     required super.fullYearFormat,
@@ -45860,10 +46788,18 @@ class MaterialLocalizationZhHant extends MaterialLocalizationZh {
 }
 
 /// The translations for Chinese, as used in Hong Kong, using the Han script (`zh_Hant_HK`).
+@Deprecated(
+  'Use MaterialLocalizationZhHantHk from package:material_ui/material_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class MaterialLocalizationZhHantHk extends MaterialLocalizationZhHant {
   /// Create an instance of the translation bundle for Chinese, as used in Hong Kong, using the Han script.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  @Deprecated(
+    'Use MaterialLocalizationZhHantHk from package:material_ui/material_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const MaterialLocalizationZhHantHk({
     super.localeName = 'zh_Hant_HK',
     required super.fullYearFormat,
@@ -45879,10 +46815,18 @@ class MaterialLocalizationZhHantHk extends MaterialLocalizationZhHant {
 }
 
 /// The translations for Chinese, as used in Taiwan, using the Han script (`zh_Hant_TW`).
+@Deprecated(
+  'Use MaterialLocalizationZhHantTw from package:material_ui/material_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class MaterialLocalizationZhHantTw extends MaterialLocalizationZhHant {
   /// Create an instance of the translation bundle for Chinese, as used in Taiwan, using the Han script.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  @Deprecated(
+    'Use MaterialLocalizationZhHantTw from package:material_ui/material_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const MaterialLocalizationZhHantTw({
     super.localeName = 'zh_Hant_TW',
     required super.fullYearFormat,
@@ -46009,10 +46953,18 @@ class MaterialLocalizationZhHantTw extends MaterialLocalizationZhHant {
 }
 
 /// The translations for Zulu (`zu`).
+@Deprecated(
+  'Use MaterialLocalizationZu from package:material_ui/material_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class MaterialLocalizationZu extends GlobalMaterialLocalizations {
   /// Create an instance of the translation bundle for Zulu.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  @Deprecated(
+    'Use MaterialLocalizationZu from package:material_ui/material_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const MaterialLocalizationZu({
     super.localeName = 'zu',
     required super.fullYearFormat,
@@ -46515,6 +47467,10 @@ class MaterialLocalizationZu extends GlobalMaterialLocalizations {
 /// See also:
 ///
 ///  * [getMaterialTranslation], whose documentation describes these values.
+@Deprecated(
+  'Use kMaterialSupportedLanguages from package:material_ui/material_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 final Set<String> kMaterialSupportedLanguages = HashSet<String>.from(const <String>[
   'af', // Afrikaans
   'am', // Amharic
@@ -46696,6 +47652,10 @@ final Set<String> kMaterialSupportedLanguages = HashSet<String>.from(const <Stri
 ///
 /// Generally speaking, this method is only intended to be used by
 /// [GlobalMaterialLocalizations.delegate].
+@Deprecated(
+  'Use getMaterialTranslation from package:material_ui/material_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 GlobalMaterialLocalizations? getMaterialTranslation(
   Locale locale,
   intl.DateFormat fullYearFormat,

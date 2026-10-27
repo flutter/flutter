@@ -205,7 +205,7 @@ void GoldenPlaygroundTest::SetUp() {
       switches.flags.use_sdfs = true;
       [[fallthrough]];
     case PlaygroundBackend::kMetal:
-      if (!DoesSupportWideGamutTests()) {
+      if (switches.enable_wide_gamut && !DoesSupportWideGamutTests()) {
         GTEST_SKIP()
             << "This metal device doesn't support wide gamut golden tests.";
       }
@@ -415,7 +415,7 @@ void GoldenPlaygroundTest::GoldenPlaygroundTest::SetWindowSize(ISize size) {
   pimpl_->window_size = size;
 }
 
-fml::Status GoldenPlaygroundTest::SetCapabilities(
+absl::Status GoldenPlaygroundTest::SetCapabilities(
     const std::shared_ptr<Capabilities>& capabilities) {
   return pimpl_->screenshotter->GetPlayground().SetCapabilities(capabilities);
 }

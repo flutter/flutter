@@ -10,15 +10,16 @@ import 'package:yaml/yaml.dart';
 import '../base/common.dart';
 import '../base/file_system.dart' as fs show File, FileSystem;
 import '../base/logger.dart' show Logger;
-import '../base/os.dart';
 import 'devfs_proxy.dart';
 
 const webDevServerConfigFilePath = 'web_dev_config.yaml';
 
-/// Represents the default value for the web dev server.
-///
-/// Maps to `localhost` and/or `127.0.0.1`.
+/// Hostname value that opts in to serving on all IPv4 interfaces.
 const webDevAnyHostDefault = 'any';
+
+/// Default hostname for the web dev server.
+const webDevServerDefaultHost = 'localhost';
+
 const _kLogEntryPrefix = '[WebDevServer]';
 const _kServer = 'server';
 const _kName = 'name';
@@ -47,7 +48,7 @@ T? _validateType<T>({required Object? value, required String fieldName}) {
 class WebDevServerConfig {
   const WebDevServerConfig({
     this.headers = const <String, String>{},
-    this.host = webDevAnyHostDefault,
+    this.host = webDevServerDefaultHost,
     this.port = 0,
     this.https,
     this.proxy = const <ProxyRule>[],
@@ -106,7 +107,7 @@ class WebDevServerConfig {
 
     return WebDevServerConfig(
       headers: headers,
-      host: host ?? webDevAnyHostDefault,
+      host: host ?? webDevServerDefaultHost,
       port: port ?? 0,
       https: https == null ? null : HttpsConfig.fromYaml(https),
       proxy: proxyRules,
@@ -257,16 +258,12 @@ HttpsConfig:
   }
 }
 
-/// Finds a free port or validates the provided port is within the valid range
-Future<int> resolvePort(int? port, OperatingSystemUtils os) async {
-  if (port == null) {
-    return os.findFreePort();
-  }
+/// Throws a [ToolExit] if [port] is outside the valid TCP range (0 to 65535).
+void validatePort(int port) {
   if (port < 0 || port > 65535) {
     throwToolExit('''
 Invalid port: $port
 Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
 ''');
   }
-  return port;
 }

@@ -25,6 +25,7 @@
 ^flutter/third_party/angle/tools/.*
 ^flutter/third_party/angle/util/.*
 ^flutter/third_party/benchmark/.*
+^flutter/third_party/cpython3/.*
 ^flutter/third_party/dart/pkg/.*
 ^flutter/third_party/dart/third_party/binary_size/.*
 ^flutter/third_party/dart/third_party/binaryen/.*

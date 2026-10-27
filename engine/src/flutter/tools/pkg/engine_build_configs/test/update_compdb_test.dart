@@ -28,7 +28,7 @@ void main() {
   }
 ]
 ''';
-      expect(updateCompilationDatabase(input), equals(expected));
+      expect(updateCompilationDatabase(input, '[]'), equals(expected));
       expect(stripCompilerWrappers(input), equals(expected));
     });
 
@@ -51,7 +51,7 @@ void main() {
   }
 ]
 ''';
-      expect(updateCompilationDatabase(input), equals(expected));
+      expect(updateCompilationDatabase(input, '[]'), equals(expected));
       expect(stripCompilerWrappers(input), equals(expected));
     });
 
@@ -74,7 +74,7 @@ void main() {
   }
 ]
 ''';
-      expect(updateCompilationDatabase(input), equals(expected));
+      expect(updateCompilationDatabase(input, '[]'), equals(expected));
       expect(stripCompilerWrappers(input), equals(expected));
     });
 
@@ -88,7 +88,7 @@ void main() {
   }
 ]
 ''';
-      expect(updateCompilationDatabase(input), equals(input));
+      expect(updateCompilationDatabase(input, '[]'), equals(input));
       expect(stripCompilerWrappers(input), equals(input));
     });
   });
@@ -104,7 +104,7 @@ void main() {
   }
 ]
 ''';
-      expect(updateCompilationDatabase(input), equals(input));
+      expect(updateCompilationDatabase(input, '[]'), equals(input));
       expect(stripCompilerWrappers(input), equals(input));
       expect(expandSwiftcCommands(input), equals(input));
     });
@@ -119,7 +119,7 @@ void main() {
   }
 ]
 ''';
-      final String output = updateCompilationDatabase(input);
+      final String output = expandSwiftcCommands(input);
       final json = convert.jsonDecode(output) as List<dynamic>;
       expect(json.length, equals(1));
       final entry = json[0] as Map<String, dynamic>;
@@ -146,7 +146,7 @@ void main() {
   }
 ]
 ''';
-      final String output = updateCompilationDatabase(input);
+      final String output = expandSwiftcCommands(input);
       final json = convert.jsonDecode(output) as List<dynamic>;
       final entry = json[0] as Map<String, dynamic>;
       final List<String> args = splitShellWords(entry['command'] as String);
@@ -176,7 +176,7 @@ void main() {
   }
 ]
 ''';
-      final String output = updateCompilationDatabase(input);
+      final String output = expandSwiftcCommands(input);
       final json = convert.jsonDecode(output) as List<dynamic>;
       final entry = json[0] as Map<String, dynamic>;
       final List<String> args = splitShellWords(entry['command'] as String);
@@ -211,7 +211,7 @@ void main() {
   }
 ]
 ''';
-      final String output = updateCompilationDatabase(input);
+      final String output = expandSwiftcCommands(input);
       final json = convert.jsonDecode(output) as List<dynamic>;
       final entry = json[0] as Map<String, dynamic>;
       final List<String> args = splitShellWords(entry['command'] as String);
@@ -241,7 +241,7 @@ void main() {
   }
 ]
 ''';
-      final String output = updateCompilationDatabase(input);
+      final String output = expandSwiftcCommands(input);
       final json = convert.jsonDecode(output) as List<dynamic>;
       final entry = json[0] as Map<String, dynamic>;
       final command = entry['command'] as String;
@@ -273,7 +273,7 @@ void main() {
   }
 ]
 ''';
-      final String output = updateCompilationDatabase(input);
+      final String output = expandSwiftcCommands(input);
       final json = convert.jsonDecode(output) as List<dynamic>;
       expect(json.length, equals(2));
       final entry1 = json[0] as Map<String, dynamic>;
@@ -281,6 +281,56 @@ void main() {
       expect(entry1['file'], equals('/flutter/bar.swift'));
       expect(entry2['file'], equals('/flutter/baz.swift'));
       expect(entry1['command'], equals(entry2['command']));
+    });
+  });
+
+  group('updateCompilationDatabase', () {
+    const gnDatabase = r'''
+[
+  {
+    "file": "../../flutter/foo.cc",
+    "directory": "/out/config",
+    "command": "../../clang/bin/clang++ -c ../../flutter/foo.cc"
+  }
+]
+''';
+    const swiftDatabase = r'''
+[
+  {
+    "file": "../../flutter/bar.swift",
+    "directory": "/out/config",
+    "command": "python3 ../../flutter/tools/swiftc.py -module-name Bar ../../flutter/bar.swift"
+  }
+]
+''';
+
+    test("appends the Swift entries to GN's database", () {
+      final String output = updateCompilationDatabase(gnDatabase, swiftDatabase);
+      final json = convert.jsonDecode(output) as List<dynamic>;
+      expect(json.length, equals(2));
+      // Verify GN's entries survive untouched, since they are the ones clangd
+      // already relies on.
+      expect(convert.jsonDecode(gnDatabase), equals(<dynamic>[json[0]]));
+      final swiftEntry = json[1] as Map<String, dynamic>;
+      expect(swiftEntry['file'], equals('/flutter/bar.swift'));
+      expect(swiftEntry['command'], startsWith('swiftc '));
+    });
+
+    test("leaves GN's database untouched when there are no Swift targets", () {
+      expect(updateCompilationDatabase(gnDatabase, '[\n]\n'), equals(gnDatabase));
+      expect(updateCompilationDatabase(gnDatabase, ''), equals(gnDatabase));
+    });
+
+    test('appends to a database whose final entry carries a trailing comma', () {
+      // GN has emitted a trailing comma before the closing bracket.
+      final String trailingComma = gnDatabase.replaceFirst('  }\n]', '  },\n]');
+      final String output = updateCompilationDatabase(trailingComma, swiftDatabase);
+      expect(convert.jsonDecode(output), hasLength(2));
+    });
+
+    test('appends to an empty database', () {
+      final String output = updateCompilationDatabase('[\n]\n', swiftDatabase);
+      expect(convert.jsonDecode(output), hasLength(1));
     });
   });
 

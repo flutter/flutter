@@ -60,19 +60,20 @@ FenceWaiterVK::~FenceWaiterVK() {
   Terminate();
 }
 
-fml::Status FenceWaiterVK::AddFence(
+absl::Status FenceWaiterVK::AddFence(
     vk::UniqueFence fence,
-    const std::function<fml::Status(vk::Fence)>& submit_callback,
+    const std::function<absl::Status(vk::Fence)>& submit_callback,
     fml::closure completion_callback) {
   if (!fence || !submit_callback || !completion_callback) {
-    return fml::Status(fml::StatusCode::kInvalidArgument, "Invalid arguments");
+    return absl::Status(absl::StatusCode::kInvalidArgument,
+                        "Invalid arguments");
   }
   {
     // Maintain the invariant that terminate_ is accessed only under the lock.
     std::scoped_lock lock(wait_set_mutex_);
     if (terminate_) {
-      return fml::Status(fml::StatusCode::kCancelled,
-                         "Fence waiter is terminated");
+      return absl::Status(absl::StatusCode::kCancelled,
+                          "Fence waiter is terminated");
     }
     auto submit_status = submit_callback(fence.get());
     if (!submit_status.ok()) {
@@ -82,7 +83,7 @@ fml::Status FenceWaiterVK::AddFence(
         WaitSetEntry::Create(std::move(fence), std::move(completion_callback)));
   }
   wait_set_cv_.notify_one();
-  return fml::Status();
+  return absl::OkStatus();
 }
 
 static std::vector<vk::Fence> GetFencesForWaitSet(const WaitSet& set) {

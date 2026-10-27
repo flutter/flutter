@@ -114,54 +114,46 @@ void main() {
   );
 
   // Regression test for https://github.com/flutter/flutter/issues/179102.
-  testWidgets(
-    'Test DraggableScrollableSheet respects max bounds',
-    (WidgetTester tester) async {
-      await tester.pumpWidget(
-        const example.DraggableScrollableSheetExampleApp(),
-      );
+  testWidgets('Test DraggableScrollableSheet respects max bounds', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const example.DraggableScrollableSheetExampleApp());
 
-      final Finder grabberFinder = find.byType(example.Grabber);
-      expect(grabberFinder, findsOneWidget);
+    final Finder grabberFinder = find.byType(example.Grabber);
+    expect(grabberFinder, findsOneWidget);
 
-      // Drag far up to exceed max bounds (1.0).
-      await tester.drag(grabberFinder, const Offset(0.0, -1000.0));
-      await tester.pump();
+    // Drag far up to exceed max bounds (1.0).
+    await tester.drag(grabberFinder, const Offset(0.0, -1000.0));
+    await tester.pump();
 
-      final DraggableScrollableSheet draggableSheet = tester.widget(
-        find.byType(DraggableScrollableSheet),
-      );
+    final DraggableScrollableSheet draggableSheet = tester.widget(
+      find.byType(DraggableScrollableSheet),
+    );
 
-      // Verify that the sheet is clamped to max (1.0).
-      expect(draggableSheet.initialChildSize, 1.0);
-    },
-    variant: TargetPlatformVariant.desktop(),
-  );
+    // Verify that the sheet is clamped to max (1.0).
+    expect(draggableSheet.initialChildSize, 1.0);
+  }, variant: TargetPlatformVariant.desktop());
 
   // Regression test for https://github.com/flutter/flutter/issues/179102.
-  testWidgets(
-    'Test DraggableScrollableSheet respects min bounds',
-    (WidgetTester tester) async {
-      await tester.pumpWidget(
-        const example.DraggableScrollableSheetExampleApp(),
-      );
+  testWidgets('Test DraggableScrollableSheet respects min bounds', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const example.DraggableScrollableSheetExampleApp());
 
-      final Finder grabberFinder = find.byType(example.Grabber);
-      expect(grabberFinder, findsOneWidget);
+    final Finder grabberFinder = find.byType(example.Grabber);
+    expect(grabberFinder, findsOneWidget);
 
-      // Drag far down to exceed min bounds (0.25).
-      await tester.drag(grabberFinder, const Offset(0.0, 1000.0));
-      await tester.pump();
+    // Drag far down to exceed min bounds (0.25).
+    await tester.drag(grabberFinder, const Offset(0.0, 1000.0));
+    await tester.pump();
 
-      final DraggableScrollableSheet draggableSheet = tester.widget(
-        find.byType(DraggableScrollableSheet),
-      );
+    final DraggableScrollableSheet draggableSheet = tester.widget(
+      find.byType(DraggableScrollableSheet),
+    );
 
-      // Verify that the sheet is clamped to min (0.25).
-      expect(draggableSheet.initialChildSize, 0.25);
-    },
-    variant: TargetPlatformVariant.desktop(),
-  );
+    // Verify that the sheet is clamped to min (0.25).
+    expect(draggableSheet.initialChildSize, 0.25);
+  }, variant: TargetPlatformVariant.desktop());
 
   testWidgets('DraggableScrollableSheet does not crash at zero area', (
     WidgetTester tester,

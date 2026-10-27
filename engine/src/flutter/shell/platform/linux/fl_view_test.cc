@@ -8,6 +8,7 @@
 
 #include "flutter/shell/platform/embedder/test_utils/proc_table_replacement.h"
 #include "flutter/shell/platform/linux/fl_engine_private.h"
+#include "flutter/shell/platform/linux/fl_renderable.h"
 #include "flutter/shell/platform/linux/fl_text_input_handler.h"
 #include "flutter/shell/platform/linux/fl_view_private.h"
 #include "flutter/shell/platform/linux/testing/fl_test.h"
@@ -39,9 +40,8 @@ TEST_F(FlViewTest, StateUpdateDoesNotHappenInInit) {
   FlView* view = fl_view_new(project);
   // Check that creating a view doesn't try to query the window state in
   // initialization, causing a critical log to be issued.
-  EXPECT_EQ(
-      flutter::testing::fl_get_received_gtk_log_levels() & G_LOG_LEVEL_CRITICAL,
-      (GLogLevelFlags)0x0);
+  EXPECT_FALSE(
+      flutter::testing::fl_has_received_gtk_log_level(G_LOG_LEVEL_CRITICAL));
 
   (void)view;
 }
@@ -65,6 +65,18 @@ TEST_F(FlViewTest, DisposeClearsTextInputWidget) {
   g_object_unref(view);
 
   EXPECT_EQ(fl_text_input_handler_get_widget(handler), nullptr);
+}
+
+TEST_F(FlViewTest, PresentLayersAfterDestroy) {
+  // Create a view and destroy it.
+  FlView* view = fl_view_new(project);
+  g_object_ref_sink(view);
+  fl_gtk_widget_destroy(GTK_WIDGET(view));
+
+  // Present a frame on a destroyed widget.
+  fl_renderable_present_layers(FL_RENDERABLE(view), nullptr, 0);
+
+  g_object_unref(view);
 }
 
 // FIXME(robert-ancell): Disabling this test as it requires the FlView

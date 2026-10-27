@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:math' as math;
 import 'dart:typed_data';
 
 import 'package:meta/meta.dart';
@@ -68,6 +69,7 @@ class EngineFlutterView implements ui.FlutterView {
     // The embeddingStrategy will take care of cleaning up the rootElement on
     // hot restart.
     embeddingStrategy.attachViewRoot(dom.rootElement);
+    _addAccessibilityPlaceholder();
     pointerBinding = PointerBinding(this);
     _resizeSubscription = onResize.listen(_handleBrowserResize);
     _globalHtmlAttributes.applyAttributes(
@@ -99,6 +101,23 @@ class EngineFlutterView implements ui.FlutterView {
   /// Whether this [EngineFlutterView] has been disposed or not.
   bool isDisposed = false;
 
+  /// Whether this view asked for a placeholder to enable accessibility.
+  ///
+  /// False when semantics was already enabled at the time the view was
+  /// created, as there is nothing left to enable.
+  bool _hasAccessibilityPlaceholder = false;
+
+  void _addAccessibilityPlaceholder() {
+    final EngineSemantics engineSemantics = EngineSemantics.instance;
+    if (engineSemantics.semanticsEnabled) {
+      return;
+    }
+    // Where the placeholder ends up is decided by the semantics helper, which
+    // puts it inside the view on mobile and on the page on desktop.
+    engineSemantics.semanticsHelper.addPlaceholderForView(dom.rootElement);
+    _hasAccessibilityPlaceholder = true;
+  }
+
   /// Disposes of the [EngineFlutterView] instance and undoes all of its DOM
   /// tree and any event listeners.
   @mustCallSuper
@@ -110,6 +129,10 @@ class EngineFlutterView implements ui.FlutterView {
     _resizeSubscription.cancel();
     dimensionsProvider.close();
     pointerBinding.dispose();
+    if (_hasAccessibilityPlaceholder) {
+      EngineSemantics.instance.semanticsHelper.removePlaceholderForView(dom.rootElement);
+      _hasAccessibilityPlaceholder = false;
+    }
     dom.rootElement.remove();
     // TODO(harryterkelsen): What should we do about this in multi-view?
     renderer.clearFragmentProgramCache();
@@ -251,9 +274,11 @@ class EngineFlutterView implements ui.FlutterView {
     return physicalSizeOverride ?? dimensionsProvider.computePhysicalSize();
   }
 
-  /// Forces the view to recompute its physical size. Useful for tests.
+  /// Forces the view to recompute its physical size and safe area. Useful for
+  /// tests.
   void debugForceResize() {
     _physicalSize = _computePhysicalSize();
+    _viewPadding = dimensionsProvider.computeSafeAreaInsets();
   }
 
   @override
@@ -261,13 +286,25 @@ class EngineFlutterView implements ui.FlutterView {
   ViewPadding _viewInsets = ui.ViewPadding.zero as ViewPadding;
 
   @override
-  ViewPadding get viewPadding => _viewConfiguration.viewPadding;
+  ViewPadding get viewPadding => _viewPadding ??= dimensionsProvider.computeSafeAreaInsets();
 
+  /// Lazily populated, and recomputed every time the view is resized (which
+  /// includes device rotations).
+  ///
+  /// A resize is the only trigger, so a change to the safe area that leaves the
+  /// size of the viewport alone isn't picked up. On iOS that happens while the
+  /// status bar is taller than usual, e.g. during a call.
+  ViewPadding? _viewPadding;
+
+  // The web platform has no notion of system gesture areas: `env()` describes
+  // the parts of the viewport obstructed by the device, not the parts of it
+  // that the system reserves for its own gestures, and browsers don't expose
+  // the latter. So this stays zero.
   @override
   ViewPadding get systemGestureInsets => _viewConfiguration.systemGestureInsets;
 
   @override
-  ViewPadding get padding => _viewConfiguration.padding;
+  ViewPadding get padding => viewPadding.minus(viewInsets);
 
   @override
   ui.GestureSettings get gestureSettings => _viewConfiguration.gestureSettings;
@@ -312,16 +349,28 @@ class EngineFlutterView implements ui.FlutterView {
   /// presence. This allows the framework to correctly shrink its content using
   /// `resizeToAvoidBottomInset`. When the keyboard is dismissed, `_physicalSize`
   /// is updated to the actual new physical size of the window.
+  ///
+  /// The keyboard can only make the viewport shorter than the full screen size,
+  /// so a viewport that is taller than the preserved `_physicalSize` means the
+  /// preserved size isn't the full screen size. This happens when
+  /// `_physicalSize` was measured while the keyboard was already up, e.g. for
+  /// an input inside an iframe, which Flutter's text editing doesn't know
+  /// about. In that case `_physicalSize` is updated even though the text
+  /// editing is still active.
   void _handleBrowserResize(ui.Size? _) {
     StyleManager.scaleSemanticsHost(dom.semanticsHost, devicePixelRatio);
     final ui.Size newPhysicalSize = _computePhysicalSize();
-    if (_shouldPreservePhysicalSizeOnResize && !_isRotation(newPhysicalSize)) {
-      _computeOnScreenKeyboardInsets(true);
-    } else {
+    final bool isEditingOnMobile =
+        _shouldPreservePhysicalSizeOnResize && !_isRotation(newPhysicalSize);
+    if (!isEditingOnMobile || newPhysicalSize.height > physicalSize.height) {
       _physicalSize = newPhysicalSize;
-      // When physical size changes this value has to be recalculated.
-      _computeOnScreenKeyboardInsets(false);
+      // The safe area moves with the size of the view, e.g. when the device is
+      // rotated, so it has to be recalculated too.
+      _viewPadding = dimensionsProvider.computeSafeAreaInsets();
     }
+    // The insets are relative to the physical size, so they have to be
+    // recalculated on every resize, whether the physical size changed or not.
+    _computeOnScreenKeyboardInsets(isEditingOnMobile);
     platformDispatcher.invokeOnMetricsChanged();
   }
 
@@ -675,14 +724,17 @@ final class EngineFlutterWindow extends EngineFlutterView implements ui.Singleto
           final String path;
           if (uriString != null) {
             final Uri uri = Uri.parse(uriString);
-            // Need to remove scheme and authority.
-            path = Uri.decodeComponent(
-              Uri(
-                path: uri.path.isEmpty ? '/' : uri.path,
-                queryParameters: uri.queryParametersAll.isEmpty ? null : uri.queryParametersAll,
-                fragment: uri.fragment.isEmpty ? null : uri.fragment,
-              ).toString(),
-            );
+            // Need to remove scheme and authority while preserving the
+            // percent-encoding of the path, query, and fragment exactly as
+            // reported by the framework. Decoding the URL here would make the
+            // browser's address bar diverge from the route the app is on
+            // (e.g. `/a%2Fb` would turn into `/a/b`), so a refresh or a
+            // shared link would no longer round-trip to the same route.
+            // See https://github.com/flutter/flutter/issues/180373.
+            path =
+                '${uri.path.isEmpty ? '/' : uri.path}'
+                '${uri.hasQuery ? '?${uri.query}' : ''}'
+                '${uri.hasFragment ? '#${uri.fragment}' : ''}';
           } else {
             path = arguments.tryString('location')!;
           }
@@ -744,6 +796,21 @@ class ViewPadding implements ui.ViewPadding {
 
   /// Returns true if all padding values are non-negative.
   bool get isNonNegative => left >= 0.0 && top >= 0.0 && right >= 0.0 && bottom >= 0.0;
+
+  /// Returns what is left of this padding after subtracting [insets] from it,
+  /// clamped so that no side ever becomes negative.
+  ///
+  /// This is the relationship that [ui.FlutterView.padding] has with
+  /// [ui.FlutterView.viewPadding] and [ui.FlutterView.viewInsets] on the other
+  /// platforms: an area that is already obstructed by system UI, such as the
+  /// on-screen keyboard, is no longer reported as safe area padding, because
+  /// the app is avoiding it anyway.
+  ViewPadding minus(ViewPadding insets) => ViewPadding(
+    left: math.max(0.0, left - insets.left),
+    top: math.max(0.0, top - insets.top),
+    right: math.max(0.0, right - insets.right),
+    bottom: math.max(0.0, bottom - insets.bottom),
+  );
 }
 
 class ViewConstraints implements ui.ViewConstraints {

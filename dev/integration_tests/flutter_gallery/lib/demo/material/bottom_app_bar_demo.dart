@@ -373,9 +373,8 @@ class _DemoBottomAppBar extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.search, semanticLabel: 'show search action'),
             onPressed: () {
-              ScaffoldMessenger.of(
-                context,
-              ).showSnackBar(const SnackBar(content: Text('This is a dummy search action.')));
+              ScaffoldMessenger.of(context)
+                  .showSnackBar(const SnackBar(content: Text('This is a dummy search action.')));
             },
           ),
           IconButton(
@@ -384,9 +383,8 @@ class _DemoBottomAppBar extends StatelessWidget {
               semanticLabel: 'Show menu actions',
             ),
             onPressed: () {
-              ScaffoldMessenger.of(
-                context,
-              ).showSnackBar(const SnackBar(content: Text('This is a dummy menu action.')));
+              ScaffoldMessenger.of(context)
+                  .showSnackBar(const SnackBar(content: Text('This is a dummy menu action.')));
             },
           ),
         ],

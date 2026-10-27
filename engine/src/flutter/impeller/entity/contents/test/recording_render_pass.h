@@ -43,7 +43,7 @@ class RecordingRenderPass : public RenderPass {
   bool SetVertexBuffer(VertexBuffer buffer) override;
 
   // |RenderPass|
-  fml::Status Draw() override;
+  absl::Status Draw() override;
 
   bool BindResource(ShaderStage stage,
                     DescriptorType type,

@@ -70,6 +70,9 @@ void ShaderMaskLayer::Paint(PaintContext& context) const {
   PaintChildren(context);
 
   DlPaint dl_paint;
+  // Set AA to false to preserve historical behavior. See
+  // https://github.com/flutter/flutter/pull/193939
+  dl_paint.setAntiAlias(false);
   dl_paint.setBlendMode(blend_mode_);
   if (color_source_) {
     dl_paint.setColorSource(color_source_.get());

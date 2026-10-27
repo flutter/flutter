@@ -131,61 +131,58 @@ void main() {
     expect(fakeProcessManager, hasNoRemainingExpectations);
   });
 
-  testWithoutContext(
-    'incremental compile sends correct package URI for pub workspace member package located under root lib/',
-    () async {
-      final packageConfig = PackageConfig(<Package>[
-        Package(
-          'root',
-          Uri.parse('file:///workspace/'),
-          packageUriRoot: Uri.parse('file:///workspace/lib/'),
-        ),
-        Package(
-          'member',
-          Uri.parse('file:///workspace/lib/member/'),
-          packageUriRoot: Uri.parse('file:///workspace/lib/member/lib/'),
-        ),
-      ]);
+  testWithoutContext('incremental compile sends correct package URI for pub workspace member package located under root lib/', () async {
+    final packageConfig = PackageConfig(<Package>[
+      Package(
+        'root',
+        Uri.parse('file:///workspace/'),
+        packageUriRoot: Uri.parse('file:///workspace/lib/'),
+      ),
+      Package(
+        'member',
+        Uri.parse('file:///workspace/lib/member/'),
+        packageUriRoot: Uri.parse('file:///workspace/lib/member/lib/'),
+      ),
+    ]);
 
-      fakeProcessManager.addCommand(
-        FakeCommand(
-          command: const <String>[
-            ...frontendServerCommand,
-            '--initialize-from-dill',
-            expectedCachePath,
-            '--verbosity=error',
-          ],
-          stdout: 'result abc\nline1\nline2\nabc\nabc /path/to/main.dart.dill 0',
-          stdin: frontendServerStdIn,
-        ),
-      );
+    fakeProcessManager.addCommand(
+      FakeCommand(
+        command: const <String>[
+          ...frontendServerCommand,
+          '--initialize-from-dill',
+          expectedCachePath,
+          '--verbosity=error',
+        ],
+        stdout: 'result abc\nline1\nline2\nabc\nabc /path/to/main.dart.dill 0',
+        stdin: frontendServerStdIn,
+      ),
+    );
 
-      await generator.recompile(
-        Uri.parse('file:///workspace/lib/main.dart'),
-        null,
-        outputPath: '/build/',
-        packageConfig: packageConfig,
-        fs: MemoryFileSystem(),
-        projectRootPath: '',
-      );
-      expect(frontendServerStdIn.getAndClear(), 'compile package:root/main.dart\n');
+    await generator.recompile(
+      Uri.parse('file:///workspace/lib/main.dart'),
+      null,
+      outputPath: '/build/',
+      packageConfig: packageConfig,
+      fs: MemoryFileSystem(),
+      projectRootPath: '',
+    );
+    expect(frontendServerStdIn.getAndClear(), 'compile package:root/main.dart\n');
 
-      await _accept(generator, frontendServerStdIn, '');
-      await _reject(generatorStdoutHandler, generator, frontendServerStdIn, '', '');
+    await _accept(generator, frontendServerStdIn, '');
+    await _reject(generatorStdoutHandler, generator, frontendServerStdIn, '', '');
 
-      await _recompile(
-        generatorStdoutHandler,
-        generator,
-        frontendServerStdIn,
-        'result abc\nline1\nline2\nabc\nabc /path/to/main.dart.dill 0\n',
-        mainUri: Uri.parse('file:///workspace/lib/main.dart'),
-        expectedMainUri: 'package:root/main.dart',
-        updatedUris: <Uri>[Uri.parse('file:///workspace/lib/member/lib/foo.dart')],
-        expectedUpdatedUris: <String>['package:member/foo.dart'],
-        packageConfig: packageConfig,
-      );
-    },
-  );
+    await _recompile(
+      generatorStdoutHandler,
+      generator,
+      frontendServerStdIn,
+      'result abc\nline1\nline2\nabc\nabc /path/to/main.dart.dill 0\n',
+      mainUri: Uri.parse('file:///workspace/lib/main.dart'),
+      expectedMainUri: 'package:root/main.dart',
+      updatedUris: <Uri>[Uri.parse('file:///workspace/lib/member/lib/foo.dart')],
+      expectedUpdatedUris: <String>['package:member/foo.dart'],
+      packageConfig: packageConfig,
+    );
+  });
 
   testWithoutContext('incremental compile single dart compile with filesystem scheme', () async {
     fakeProcessManager.addCommand(
@@ -216,6 +213,68 @@ void main() {
     expect(frontendServerStdIn.getAndClear(), 'compile scheme:///main.dart\n');
     expect(testLogger.errorText, equals('line1\nline2\n'));
     expect(output?.outputFilename, equals('/path/to/main.dart.dill'));
+    expect(fakeProcessManager, hasNoRemainingExpectations);
+  });
+
+  testWithoutContext('DDC compile forwards compiler diagnostics to stderr', () async {
+    final ddcGenerator = DefaultResidentCompiler(
+      'sdkroot',
+      buildInfo: BuildInfo.debug,
+      logger: testLogger,
+      processManager: fakeProcessManager,
+      artifacts: Artifacts.test(),
+      platform: FakePlatform(),
+      fileSystem: MemoryFileSystem.test(),
+      shutdownHooks: FakeShutdownHooks(),
+      config: Config.test(),
+      targetModel: TargetModel.dartdevc,
+    );
+    const webDartRuntime = 'Artifact.engineDartAotRuntime.TargetPlatform.web_javascript';
+    const webFrontendServer =
+        'Artifact.frontendServerSnapshotForEngineDartSdk'
+        '.TargetPlatform.web_javascript';
+    fakeProcessManager.addCommand(
+      FakeCommand(
+        command: const <String>[
+          webDartRuntime,
+          webFrontendServer,
+          '--sdk-root',
+          'sdkroot/',
+          '--incremental',
+          '--target=dartdevc',
+          '--experimental-emit-debug-metadata',
+          '--output-dill',
+          '/build/',
+          '--packages',
+          '.dart_tool/package_config.json',
+          '-Ddart.vm.profile=false',
+          '-Ddart.vm.product=false',
+          '--enable-asserts',
+          '--track-creation-locations',
+          '--initialize-from-dill',
+          'build/471e67e273aac2e3e05542afef95ef7f.cache.dill.track.dill',
+          '--verbosity=error',
+        ],
+        stdout: 'result abc\nline1\nline2\nabc\nabc /path/to/main.dart.dill 2',
+        stderr: 'compiler stderr',
+        stdin: frontendServerStdIn,
+      ),
+    );
+
+    await ddcGenerator.recompile(
+      Uri.parse('/path/to/main.dart'),
+      null /* invalidatedFiles */,
+      outputPath: '/build/',
+      packageConfig: PackageConfig.empty,
+      fs: MemoryFileSystem(),
+      projectRootPath: '',
+    );
+
+    expect(testLogger.statusText, isEmpty);
+    // The stdout and stderr streams are read independently, so their relative
+    // order is not guaranteed.
+    expect(testLogger.errorText, contains('line1\nline2\n'));
+    expect(testLogger.errorText, contains('compiler stderr\n'));
     expect(fakeProcessManager, hasNoRemainingExpectations);
   });
 

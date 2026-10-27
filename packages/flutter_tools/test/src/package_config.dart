@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:convert';
+
 import 'package:collection/collection.dart';
 import 'package:file/file.dart';
 

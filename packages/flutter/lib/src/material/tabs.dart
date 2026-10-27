@@ -348,8 +348,11 @@ class _TabStyle extends AnimatedWidget {
   }
 }
 
-typedef _LayoutCallback =
-    void Function(List<double> xOffsets, TextDirection textDirection, double width);
+typedef _LayoutCallback = void Function(
+  List<double> xOffsets,
+  TextDirection textDirection,
+  double width,
+);
 
 class _TabLabelBarRenderer extends RenderFlex {
   _TabLabelBarRenderer({
@@ -2136,9 +2139,8 @@ class _TabBarState extends State<TabBar> {
 
     if (widget.isScrollable) {
       final EdgeInsetsGeometry? effectivePadding = effectiveTabAlignment == TabAlignment.startOffset
-          ? const EdgeInsetsDirectional.only(
-              start: _kStartOffset,
-            ).add(widget.padding ?? EdgeInsets.zero)
+          ? const EdgeInsetsDirectional.only(start: _kStartOffset)
+                .add(widget.padding ?? EdgeInsets.zero)
           : widget.padding;
 
       tabBar = ScrollConfiguration(
@@ -2187,9 +2189,8 @@ class _TabBarState extends State<TabBar> {
     return Material(
       type: MaterialType.transparency,
       child: MediaQuery(
-        data: MediaQuery.of(
-          context,
-        ).copyWith(textScaler: widget.textScaler ?? tabBarTheme.textScaler),
+        data: MediaQuery.of(context)
+            .copyWith(textScaler: widget.textScaler ?? tabBarTheme.textScaler),
         child: tabBar,
       ),
     );

@@ -14,11 +14,7 @@ export 'package:test/test.dart' hide isInstanceOf, test;
 /// A fake implementation of a vm_service that mocks the JSON-RPC request
 /// and response structure.
 class FakeVmServiceHost {
-  FakeVmServiceHost({
-    required List<VmServiceExpectation> requests,
-    Uri? httpAddress,
-    Uri? wsAddress,
-  }) : _requests = requests {
+  FakeVmServiceHost({required this._requests, Uri? httpAddress, Uri? wsAddress}) {
     _vmService = FlutterVmService(
       vm_service.VmService(_input.stream, _output.add),
       httpAddress: httpAddress,

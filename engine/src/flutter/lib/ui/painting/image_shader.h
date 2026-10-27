@@ -41,7 +41,7 @@ class ImageShader : public Shader {
   ImageShader();
 
   sk_sp<const DlImage> image_;
-  bool sampling_is_locked_;
+  bool sampling_is_locked_ = false;
 
   std::shared_ptr<DlColorSource> cached_shader_;
 };

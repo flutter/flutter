@@ -39,6 +39,18 @@ void fl_touch_manager_handle_touch_event(FlTouchManager* manager,
                                          GdkEventTouch* event,
                                          gint scale_factor);
 
+/**
+ * fl_touch_manager_cancel_input:
+ * @manager: an #FlTouchManager.
+ * @event_time: time event occurred in milliseconds.
+ *
+ * Handle touch events no longer being delivered to this view, e.g. because the
+ * window system took the touch to move or resize the window, or the view was
+ * hidden. Any touch points in contact with the screen are cancelled, as their
+ * end events will never arrive.
+ */
+void fl_touch_manager_cancel_input(FlTouchManager* manager, guint event_time);
+
 G_END_DECLS
 
 #endif  // FLUTTER_SHELL_PLATFORM_LINUX_FL_TOUCH_MANAGER_H_

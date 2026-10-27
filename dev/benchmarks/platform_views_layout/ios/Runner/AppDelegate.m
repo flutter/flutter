@@ -10,18 +10,20 @@
 
 - (BOOL)application:(UIApplication *)application
     didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
-  [GeneratedPluginRegistrant registerWithRegistry:self];
-
-   NSObject<FlutterPluginRegistrar>* registrar =
-      [self registrarForPlugin:@"benchmarks/platform_views_layout/DummyPlatformViewPlugin"];
-
-  DummyPlatformViewFactory* dummyPlatformViewFactory = [[DummyPlatformViewFactory alloc] init];
-  [registrar registerViewFactory:dummyPlatformViewFactory
-                                withId:@"benchmarks/platform_views_layout/DummyPlatformView"
-      gestureRecognizersBlockingPolicy:FlutterPlatformViewGestureRecognizersBlockingPolicyEager];
-
   // Override point for customization after application launch.
   return [super application:application didFinishLaunchingWithOptions:launchOptions];
+}
+
+- (void)didInitializeImplicitFlutterEngine:(NSObject<FlutterImplicitEngineBridge> *)engineBridge {
+  [GeneratedPluginRegistrant registerWithRegistry:engineBridge.pluginRegistry];
+
+  NSObject<FlutterPluginRegistrar> *registrar =
+      [engineBridge.pluginRegistry registrarForPlugin:@"benchmarks/platform_views_layout/DummyPlatformViewPlugin"];
+
+  DummyPlatformViewFactory *dummyPlatformViewFactory = [[DummyPlatformViewFactory alloc] init];
+  [registrar registerViewFactory:dummyPlatformViewFactory
+                          withId:@"benchmarks/platform_views_layout/DummyPlatformView"
+      gestureRecognizersBlockingPolicy:FlutterPlatformViewGestureRecognizersBlockingPolicyEager];
 }
 
 @end

@@ -14,9 +14,14 @@
 #include <algorithm>
 #include <cerrno>
 #include <cstring>
+#include <filesystem>
 #include <functional>
 #include <list>
 #include <memory>
+#include <string_view>
+
+#include "tonic/common/log.h"
+#include "tonic/filesystem/filesystem/windows_utils.h"
 
 namespace filesystem {
 namespace {
@@ -181,9 +186,19 @@ std::string SimplifyPath(std::string path) {
 }
 
 std::string AbsolutePath(const std::string& path) {
-  char absPath[MAX_PATH];
-  _fullpath(absPath, path.c_str(), MAX_PATH);
-  return std::string(absPath);
+  std::error_code ec;
+  std::filesystem::path p(std::u8string_view(
+      reinterpret_cast<const char8_t*>(path.data()), path.size()));
+  std::filesystem::path abs_path = std::filesystem::absolute(p, ec);
+  if (ec) {
+    tonic::Log("Failed to resolve absolute path for '%s': %s", path.c_str(),
+               ec.message().c_str());
+    return std::string();
+  }
+  abs_path = abs_path.lexically_normal();
+  std::u8string u8_str = abs_path.u8string();
+  return std::string(reinterpret_cast<const char*>(u8_str.data()),
+                     u8_str.size());
 }
 
 std::string GetDirectoryName(const std::string& path) {
@@ -204,17 +219,30 @@ std::string GetBaseName(const std::string& path) {
 }
 
 std::string GetAbsoluteFilePath(const std::string& path) {
+  std::wstring wide_path = Utf8PathToWide(path);
   HANDLE file =
-      CreateFileA(path.c_str(), FILE_READ_ATTRIBUTES,
+      CreateFileW(wide_path.c_str(), FILE_READ_ATTRIBUTES,
                   FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE, NULL,
                   OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, NULL);
   if (file == INVALID_HANDLE_VALUE) {
     return std::string();
   }
-  char buffer[MAX_PATH];
+  wchar_t buffer[MAX_PATH];
   DWORD ret =
-      GetFinalPathNameByHandleA(file, buffer, MAX_PATH, FILE_NAME_NORMALIZED);
-  if (ret == 0 || ret > MAX_PATH) {
+      GetFinalPathNameByHandleW(file, buffer, MAX_PATH, FILE_NAME_NORMALIZED);
+  std::wstring wide_result;
+  if (ret > 0 && ret < MAX_PATH) {
+    wide_result.assign(buffer, ret);
+  } else if (ret >= MAX_PATH) {
+    std::vector<wchar_t> dyn_buffer(ret);
+    DWORD dyn_ret = GetFinalPathNameByHandleW(file, dyn_buffer.data(), ret,
+                                              FILE_NAME_NORMALIZED);
+    if (dyn_ret > 0 && dyn_ret < ret) {
+      wide_result.assign(dyn_buffer.data(), dyn_ret);
+    }
+  }
+
+  if (wide_result.empty()) {
     std::string result;
     if (GetLastError() == ERROR_ACCESS_DENIED) {
       // In sandboxed apps, GetFinalPathNameByHandle requires the app to
@@ -231,10 +259,21 @@ std::string GetAbsoluteFilePath(const std::string& path) {
     CloseHandle(file);
     return result;
   }
-  std::string result(buffer);
-  result.erase(0, strlen("\\\\?\\"));
+  // GetFinalPathNameByHandleW with FILE_NAME_NORMALIZED returns paths with
+  // either a "\\?\UNC\server\share" prefix for network shares or a "\\?\"
+  // prefix for local drive paths (e.g. "\\?\C:\..."). We normalize network
+  // paths to standard UNC format ("\\server\share") and strip the "\\?\" prefix
+  // for standard local paths.
+  constexpr std::wstring_view kUncPrefix = L"\\\\?\\UNC\\";
+  constexpr std::wstring_view kLongPathPrefix = L"\\\\?\\";
+  if (wide_result.starts_with(kUncPrefix)) {
+    wide_result.erase(0, kUncPrefix.size());
+    wide_result = L"\\\\" + wide_result;
+  } else if (wide_result.starts_with(kLongPathPrefix)) {
+    wide_result.erase(0, kLongPathPrefix.size());
+  }
   CloseHandle(file);
-  return result;
+  return WidePathToUtf8(wide_result);
 }
 
 }  // namespace filesystem

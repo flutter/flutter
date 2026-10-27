@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:ui';
+
 import 'package:flutter/material.dart';
 
 /// Flutter code sample for [RefreshIndicator.noSpinner].

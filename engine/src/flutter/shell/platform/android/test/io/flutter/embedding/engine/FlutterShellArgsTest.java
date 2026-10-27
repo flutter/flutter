@@ -2,14 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-package test.io.flutter.embedding.engine;
+package io.flutter.embedding.engine;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import android.content.Intent;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
-import io.flutter.embedding.engine.FlutterShellArgs;
 import java.util.Arrays;
 import java.util.HashSet;
 import org.junit.Test;

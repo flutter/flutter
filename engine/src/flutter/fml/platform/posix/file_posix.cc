@@ -144,7 +144,7 @@ bool IsDirectory(const fml::UniqueFD& base_directory, const char* path) {
 }
 
 bool IsFile(const std::string& path) {
-  struct stat buf;
+  struct stat buf{};
   if (stat(path.c_str(), &buf) != 0) {
     return false;
   }

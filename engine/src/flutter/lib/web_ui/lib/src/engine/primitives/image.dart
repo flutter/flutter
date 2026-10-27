@@ -249,12 +249,9 @@ class EngineImage implements ui.Image, StackTraceDebugger {
         canvas.drawImage(cloneImage, ui.Offset.zero, ui.Paint());
         final ui.Picture picture = recorder.endRecording();
 
-        await renderer.pictureToImageSurface.setSize(
-          BitmapSize(cloneImage.width, cloneImage.height),
-        );
-
         final List<DomImageBitmap> bitmaps =
             await (renderer.pictureToImageSurface as OffscreenSurface).rasterizeToImageBitmaps(
+              BitmapSize(cloneImage.width, cloneImage.height),
               <ui.Picture>[picture],
             );
         final DomImageBitmap bitmap = bitmaps.single;

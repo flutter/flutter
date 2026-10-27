@@ -84,7 +84,7 @@ struct FlutterDesktopWindowControllerState {
 // to all of the controller-based functionality.
 struct FlutterDesktopWindow {
   // The GLFW window that (indirectly) owns this state object.
-  GLFWwindow* window;
+  GLFWwindow* window = nullptr;
 
   // Whether or not to track mouse movements to send kHover events.
   bool hover_tracking_enabled = true;
@@ -117,7 +117,7 @@ using FlutterDesktopMessengerReferenceOwner =
 // Struct for storing state of a Flutter engine instance.
 struct FlutterDesktopEngineState {
   // The handle to the Flutter engine instance.
-  FLUTTER_API_SYMBOL(FlutterEngine) flutter_engine;
+  FLUTTER_API_SYMBOL(FlutterEngine) flutter_engine = nullptr;
 
   // The event loop for the main thread that allows for delayed task execution.
   std::unique_ptr<flutter::EventLoop> event_loop;
@@ -197,7 +197,7 @@ struct FlutterDesktopMessenger {
 
  private:
   // The engine that backs this messenger.
-  FlutterDesktopEngineState* engine_;
+  FlutterDesktopEngineState* engine_ = nullptr;
   std::atomic<int32_t> ref_count_ = 0;
   std::mutex mutex_;
 };

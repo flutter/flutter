@@ -96,8 +96,9 @@ template("impellerc") {
     pool = "//build/toolchain:toolchain_pool"
     shader_bundle = defined(invoker.shader_bundle)
 
-    # When single_invocation is true, impellerc will be invoked exactly once. When it's
-    # false, impellerc be invoked for each of the source file entries (invoker.shaders).
+    # When single_invocation is true, impellerc will be invoked exactly once.
+    # When it's false, impellerc be invoked for each of the source file entries
+    # (invoker.shaders).
     single_invocation = shader_bundle
 
     if (defined(invoker.intermediates_subdir)) {
@@ -245,6 +246,7 @@ template("impellerc_reflect") {
       "The target that specifies the ImpellerC invocation to reflect must be defined.")
 
   reflect_config = "reflect_$target_name"
+
   config(reflect_config) {
     include_dirs = [ get_path_info(
             get_label_info("//flutter/impeller:impeller", "target_gen_dir"),

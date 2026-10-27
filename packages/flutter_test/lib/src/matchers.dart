@@ -2,7 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter_test/flutter_test.dart' as flutter_test;
+///
 /// @docImport '_goldens_io.dart';
+/// @docImport 'window.dart';
 library;
 
 import 'dart:convert' show LineSplitter;
@@ -1562,9 +1565,8 @@ class _EqualsIgnoringHashCodes extends Matcher {
 
   static Iterable<String> _normalize(Object value, {bool expected = true}) {
     if (value is String) {
-      return LineSplitter.split(
-        value,
-      ).map<String>((dynamic item) => _normalizeString(item.toString()));
+      return LineSplitter.split(value)
+          .map<String>((dynamic item) => _normalizeString(item.toString()));
     }
     if (value is Iterable<String>) {
       return value.map<String>((dynamic item) => _normalizeString(item.toString()));
@@ -2563,8 +2565,7 @@ class _MatchesReferenceImage extends AsyncMatcher {
   @override
   Future<String?> matchAsync(dynamic item) async {
     Future<ui.Image> imageFuture;
-    final bool
-    disposeImage; // set to true if the matcher created and owns the image and must therefore dispose it.
+    final bool disposeImage; // set to true if the matcher created and owns the image and must therefore dispose it.
     if (item is Future<ui.Image>) {
       imageFuture = item;
       disposeImage = false;

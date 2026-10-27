@@ -59,12 +59,12 @@ class SolidRRectLikeBlurContents : public SolidBlurContents {
     // Frag info
     Point center;
     Point adjust;
-    Scalar minEdge;
-    Scalar r1;
-    Scalar exponent;
-    Scalar sInv;
-    Scalar exponentInv;
-    Scalar scale;
+    Scalar minEdge = 0.0f;
+    Scalar r1 = 0.0f;
+    Scalar exponent = 0.0f;
+    Scalar sInv = 0.0f;
+    Scalar exponentInv = 0.0f;
+    Scalar scale = 0.0f;
   };
 
   SolidRRectLikeBlurContents();
@@ -87,7 +87,7 @@ class SolidRRectLikeBlurContents : public SolidBlurContents {
                                   Scalar radius);
 
   Rect rect_;
-  Scalar corner_radius_;
+  Scalar corner_radius_ = 0.0f;
   Sigma sigma_;
   Color color_;
 

@@ -102,13 +102,24 @@ static std::optional<QueueIndexVK> PickQueue(const vk::PhysicalDevice& device,
   return std::nullopt;
 }
 
-std::shared_ptr<ContextVK> ContextVK::Create(Settings settings) {
+std::shared_ptr<ContextVK> ContextVK::DeviceSelection::CreateContext() {
+  if (!device_holder) {
+    return nullptr;
+  }
   auto context = std::shared_ptr<ContextVK>(new ContextVK(settings.flags));
-  context->Setup(std::move(settings));
+  context->Setup(std::move(*this));
   if (!context->IsValid()) {
     return nullptr;
   }
   return context;
+}
+
+std::shared_ptr<ContextVK> ContextVK::Create(Settings settings) {
+  auto selection = SelectDevice(std::move(settings));
+  if (!selection.ok()) {
+    return nullptr;
+  }
+  return selection->CreateContext();
 }
 
 // static
@@ -144,17 +155,16 @@ Context::BackendType ContextVK::GetBackendType() const {
 /* version 2.0.0 */
 static constexpr uint32_t kImpellerEngineVersion =
     VK_MAKE_API_VERSION(0, 2, 0, 0);
+static constexpr uint32_t kImpellerVulkanApiVersion = VK_API_VERSION_1_1;
 
-void ContextVK::Setup(Settings settings) {
-  TRACE_EVENT0("impeller", "ContextVK::Setup");
+absl::StatusOr<ContextVK::DeviceSelection> ContextVK::SelectDevice(
+    Settings settings) {
+  TRACE_EVENT0("impeller", "ContextVK::SelectDevice");
 
   if (!settings.proc_address_callback) {
     VALIDATION_LOG << "Missing proc address callback.";
-    return;
+    return absl::InvalidArgumentError("Missing proc address callback.");
   }
-
-  raster_message_loop_ = fml::ConcurrentMessageLoop::Create(
-      ChooseThreadCountForWorkers(std::thread::hardware_concurrency()));
 
   auto& dispatcher = VULKAN_HPP_DEFAULT_DISPATCHER;
   dispatcher.init(settings.proc_address_callback);
@@ -175,7 +185,7 @@ void ContextVK::Setup(Settings settings) {
 
   if (!caps->IsValid()) {
     VALIDATION_LOG << "Could not determine device capabilities.";
-    return;
+    return absl::InternalError("Could not determine device capabilities.");
   }
 
   gHasValidationLayers = caps->AreValidationsEnabled();
@@ -185,7 +195,7 @@ void ContextVK::Setup(Settings settings) {
 
   if (!enabled_layers.has_value() || !enabled_extensions.has_value()) {
     VALIDATION_LOG << "Device has insufficient capabilities.";
-    return;
+    return absl::InternalError("Device has insufficient capabilities.");
   }
 
   vk::InstanceCreateFlags instance_flags = {};
@@ -220,7 +230,7 @@ void ContextVK::Setup(Settings settings) {
   //
   // variant, major, minor, patch
   application_info.setApplicationVersion(VK_API_VERSION_1_0);
-  application_info.setApiVersion(VK_API_VERSION_1_1);
+  application_info.setApiVersion(kImpellerVulkanApiVersion);
   application_info.setEngineVersion(kImpellerEngineVersion);
   application_info.setPEngineName("Impeller");
   application_info.setPApplicationName("Impeller");
@@ -251,7 +261,7 @@ void ContextVK::Setup(Settings settings) {
     if (instance.result != vk::Result::eSuccess) {
       VALIDATION_LOG << "Could not create Vulkan instance: "
                      << vk::to_string(instance.result);
-      return;
+      return absl::InternalError("Could not create Vulkan instance.");
     }
     device_holder->instance = std::move(instance.value);
   } else {
@@ -271,7 +281,7 @@ void ContextVK::Setup(Settings settings) {
 
   if (!debug_report->IsValid()) {
     VALIDATION_LOG << "Could not set up debug report.";
-    return;
+    return absl::InternalError("Could not set up debug report.");
   }
 
   //----------------------------------------------------------------------------
@@ -282,12 +292,33 @@ void ContextVK::Setup(Settings settings) {
         PickPhysicalDevice(*caps, device_holder->instance.get());
     if (!physical_device.has_value()) {
       VALIDATION_LOG << "No valid Vulkan device found.";
-      return;
+      return absl::NotFoundError("No valid Vulkan device found.");
     }
     device_holder->physical_device = physical_device.value();
   } else {
     device_holder->physical_device = settings.embedder_data->physical_device;
   }
+
+  auto driver_info =
+      std::make_unique<DriverInfoVK>(device_holder->physical_device);
+
+  return DeviceSelection{
+      .settings = std::move(settings),
+      .caps = std::move(caps),
+      .device_holder = std::move(device_holder),
+      .debug_report = std::move(debug_report),
+      .driver_info = std::move(driver_info),
+  };
+}
+
+void ContextVK::Setup(DeviceSelection selection) {
+  TRACE_EVENT0("impeller", "ContextVK::Setup");
+
+  Settings settings = std::move(selection.settings);
+  auto caps = std::move(selection.caps);
+  auto device_holder = std::move(selection.device_holder);
+  auto debug_report = std::move(selection.debug_report);
+  auto driver_info = std::move(selection.driver_info);
 
   //----------------------------------------------------------------------------
   /// Pick device queues.
@@ -368,7 +399,7 @@ void ContextVK::Setup(Settings settings) {
   ///
   auto allocator = std::shared_ptr<AllocatorVK>(new AllocatorVK(
       weak_from_this(),                //
-      application_info.apiVersion,     //
+      kImpellerVulkanApiVersion,       //
       device_holder->physical_device,  //
       device_holder,                   //
       device_holder->instance.get(),   //
@@ -381,8 +412,11 @@ void ContextVK::Setup(Settings settings) {
   }
 
   //----------------------------------------------------------------------------
-  /// Setup the pipeline library.
+  /// Setup the worker threads and the pipeline library.
   ///
+  raster_message_loop_ = fml::ConcurrentMessageLoop::Create(
+      ChooseThreadCountForWorkers(std::thread::hardware_concurrency()));
+
   auto pipeline_library = std::shared_ptr<PipelineLibraryVK>(
       new PipelineLibraryVK(device_holder,                         //
                             caps,                                  //
@@ -457,21 +491,15 @@ void ContextVK::Setup(Settings settings) {
     return;
   }
 
-  VkPhysicalDeviceProperties physical_device_properties;
-  dispatcher.vkGetPhysicalDeviceProperties(device_holder->physical_device,
-                                           &physical_device_properties);
-
   //----------------------------------------------------------------------------
   /// All done!
   ///
 
   // Apply workarounds for broken drivers.
-  auto driver_info =
-      std::make_unique<DriverInfoVK>(device_holder->physical_device);
   workarounds_ = GetWorkaroundsFromDriverInfo(*driver_info);
   caps->ApplyWorkarounds(workarounds_);
-  sampler_library->ApplyWorkarounds(workarounds_);
 
+  device_name_ = driver_info->GetDriverName();
   device_holder_ = std::move(device_holder);
   idle_waiter_vk_ = std::make_shared<IdleWaiterVK>(device_holder_);
   driver_info_ = std::move(driver_info);
@@ -488,7 +516,6 @@ void ContextVK::Setup(Settings settings) {
   resource_manager_ = std::move(resource_manager);
   command_pool_recycler_ = std::move(command_pool_recycler);
   descriptor_pool_recycler_ = std::move(descriptor_pool_recycler);
-  device_name_ = std::string(physical_device_properties.deviceName);
   command_queue_vk_ = std::make_shared<CommandQueueVK>(weak_from_this());
   should_enable_surface_control_ = settings.enable_surface_control;
   should_batch_cmd_buffers_ = !workarounds_.batch_submit_command_buffer_timeout;

@@ -55,62 +55,59 @@ void main() {
     expect(original.normalizedGrowthDirection, equals(GrowthDirection.forward));
   });
 
-  test(
-    'SliverConstraints normalizedGrowthDirection is inferred from AxisDirection and GrowthDirection',
-    () {
-      const a = SliverConstraints(
-        axisDirection: AxisDirection.down,
-        growthDirection: GrowthDirection.forward,
-        userScrollDirection: ScrollDirection.idle,
-        scrollOffset: 0.0,
-        precedingScrollExtent: 0.0,
-        overlap: 0.0,
-        remainingPaintExtent: 0.0,
-        crossAxisExtent: 0.0,
-        crossAxisDirection: AxisDirection.right,
-        viewportMainAxisExtent: 0.0,
-        cacheOrigin: 0.0,
-        remainingCacheExtent: 0.0,
-      );
+  test('SliverConstraints normalizedGrowthDirection is inferred from AxisDirection and GrowthDirection', () {
+    const a = SliverConstraints(
+      axisDirection: AxisDirection.down,
+      growthDirection: GrowthDirection.forward,
+      userScrollDirection: ScrollDirection.idle,
+      scrollOffset: 0.0,
+      precedingScrollExtent: 0.0,
+      overlap: 0.0,
+      remainingPaintExtent: 0.0,
+      crossAxisExtent: 0.0,
+      crossAxisDirection: AxisDirection.right,
+      viewportMainAxisExtent: 0.0,
+      cacheOrigin: 0.0,
+      remainingCacheExtent: 0.0,
+    );
 
-      final SliverConstraints c = a.copyWith(
-        axisDirection: AxisDirection.up,
-        growthDirection: GrowthDirection.reverse,
-        userScrollDirection: ScrollDirection.forward,
-        scrollOffset: 10.0,
-        overlap: 20.0,
-        remainingPaintExtent: 30.0,
-        crossAxisExtent: 40.0,
-        viewportMainAxisExtent: 30.0,
-      );
-      const d = SliverConstraints(
-        axisDirection: AxisDirection.up,
-        growthDirection: GrowthDirection.reverse,
-        userScrollDirection: ScrollDirection.forward,
-        scrollOffset: 10.0,
-        precedingScrollExtent: 0.0,
-        overlap: 20.0,
-        remainingPaintExtent: 30.0,
-        crossAxisExtent: 40.0,
-        crossAxisDirection: AxisDirection.right,
-        viewportMainAxisExtent: 30.0,
-        cacheOrigin: 0.0,
-        remainingCacheExtent: 0.0,
-      );
-      expect(c, equals(d));
-      expect(c.normalizedGrowthDirection, equals(GrowthDirection.forward));
-      expect(d.normalizedGrowthDirection, equals(GrowthDirection.forward));
+    final SliverConstraints c = a.copyWith(
+      axisDirection: AxisDirection.up,
+      growthDirection: GrowthDirection.reverse,
+      userScrollDirection: ScrollDirection.forward,
+      scrollOffset: 10.0,
+      overlap: 20.0,
+      remainingPaintExtent: 30.0,
+      crossAxisExtent: 40.0,
+      viewportMainAxisExtent: 30.0,
+    );
+    const d = SliverConstraints(
+      axisDirection: AxisDirection.up,
+      growthDirection: GrowthDirection.reverse,
+      userScrollDirection: ScrollDirection.forward,
+      scrollOffset: 10.0,
+      precedingScrollExtent: 0.0,
+      overlap: 20.0,
+      remainingPaintExtent: 30.0,
+      crossAxisExtent: 40.0,
+      crossAxisDirection: AxisDirection.right,
+      viewportMainAxisExtent: 30.0,
+      cacheOrigin: 0.0,
+      remainingCacheExtent: 0.0,
+    );
+    expect(c, equals(d));
+    expect(c.normalizedGrowthDirection, equals(GrowthDirection.forward));
+    expect(d.normalizedGrowthDirection, equals(GrowthDirection.forward));
 
-      final SliverConstraints e = d.copyWith(axisDirection: AxisDirection.right);
-      expect(e.normalizedGrowthDirection, equals(GrowthDirection.reverse));
+    final SliverConstraints e = d.copyWith(axisDirection: AxisDirection.right);
+    expect(e.normalizedGrowthDirection, equals(GrowthDirection.reverse));
 
-      final SliverConstraints f = d.copyWith(axisDirection: AxisDirection.left);
-      expect(f.normalizedGrowthDirection, equals(GrowthDirection.forward));
+    final SliverConstraints f = d.copyWith(axisDirection: AxisDirection.left);
+    expect(f.normalizedGrowthDirection, equals(GrowthDirection.forward));
 
-      final SliverConstraints g = d.copyWith(growthDirection: GrowthDirection.forward);
-      expect(g.normalizedGrowthDirection, equals(GrowthDirection.reverse));
-    },
-  );
+    final SliverConstraints g = d.copyWith(growthDirection: GrowthDirection.forward);
+    expect(g.normalizedGrowthDirection, equals(GrowthDirection.reverse));
+  });
 
   test('SliverGeometry with no arguments is valid', () {
     expect(SliverGeometry.zero.debugAssertIsValid(), isTrue);

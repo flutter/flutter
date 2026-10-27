@@ -629,7 +629,7 @@ TEST(FlutterKeyboardManagerUnittests, ShouldNotHoldStrongReferenceToDelegate) {
 
   NSDictionary* pressingRecords = [tester.manager getPressedState];
   EXPECT_EQ([pressingRecords count], 1u);
-  EXPECT_EQ(pressingRecords[@(kPhysicalKeyA)], @(kLogicalKeyA));
+  EXPECT_EQ([pressingRecords[@(kPhysicalKeyA)] unsignedLongLongValue], kLogicalKeyA);
 
   return true;
 }
@@ -652,7 +652,7 @@ TEST(FlutterKeyboardManagerUnittests, ShouldNotHoldStrongReferenceToDelegate) {
   id decoded = [[FlutterStandardMethodCodec sharedInstance] decodeEnvelope:encodedResult];
 
   EXPECT_EQ([decoded count], 1u);
-  EXPECT_EQ(decoded[@(kPhysicalKeyA)], @(kLogicalKeyA));
+  EXPECT_EQ([decoded[@(kPhysicalKeyA)] unsignedLongLongValue], kLogicalKeyA);
 
   return true;
 }

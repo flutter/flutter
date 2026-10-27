@@ -14,7 +14,7 @@ void main() {
   final client = MockHttpClient();
 
   testWidgets('Headers', (WidgetTester tester) async {
-    HttpOverrides.runZoned<Future<void>>(
+    await HttpOverrides.runZoned<Future<void>>(
       () async {
         await tester.pumpWidget(
           Image.network(
@@ -71,9 +71,8 @@ class MockHttpClientResponse extends Fake implements HttpClientResponse {
     void Function()? onDone,
     bool? cancelOnError,
   }) {
-    return Stream<List<int>>.fromIterable(<List<int>>[
-      kTransparentImage,
-    ]).listen(onData, onDone: onDone, onError: onError, cancelOnError: cancelOnError);
+    return Stream<List<int>>.fromIterable(<List<int>>[kTransparentImage])
+        .listen(onData, onDone: onDone, onError: onError, cancelOnError: cancelOnError);
   }
 }
 

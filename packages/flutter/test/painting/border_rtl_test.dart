@@ -961,9 +961,8 @@ void main() {
     );
     expect(
       (Canvas canvas) {
-        const BorderDirectional(
-          end: BorderSide(width: 10.0, color: Color(0xFF00FF00)),
-        ).paint(canvas, const Rect.fromLTRB(10.0, 20.0, 30.0, 40.0));
+        const BorderDirectional(end: BorderSide(width: 10.0, color: Color(0xFF00FF00)))
+            .paint(canvas, const Rect.fromLTRB(10.0, 20.0, 30.0, 40.0));
       },
       paintsAssertion, // no TextDirection
     );

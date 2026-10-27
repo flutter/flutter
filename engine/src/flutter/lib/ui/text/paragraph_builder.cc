@@ -90,6 +90,11 @@ const int kPSHeightIndex = 9;
 const int kPSStrutStyleIndex = 10;
 const int kPSEllipsisIndex = 11;
 const int kPSLocaleIndex = 12;
+// render_soft_hyphens is the first field whose mask bit and encode slot differ:
+// it claims the next free mask bit (13), but stores its value in the next free
+// encode slot (7), since slots 7-12 are reused only as mask-bit positions.
+const int kPSRenderSoftHyphensIndex = 13;
+const int kPSRenderSoftHyphensEncodeIndex = 7;
 
 const int kPSTextAlignMask = 1 << kPSTextAlignIndex;
 const int kPSTextDirectionMask = 1 << kPSTextDirectionIndex;
@@ -103,6 +108,7 @@ const int kPSTextHeightBehaviorMask = 1 << kPSTextHeightBehaviorIndex;
 const int kPSStrutStyleMask = 1 << kPSStrutStyleIndex;
 const int kPSEllipsisMask = 1 << kPSEllipsisIndex;
 const int kPSLocaleMask = 1 << kPSLocaleIndex;
+const int kPSRenderSoftHyphensMask = 1 << kPSRenderSoftHyphensIndex;
 
 // TextShadows decoding
 
@@ -272,6 +278,12 @@ ParagraphBuilder::ParagraphBuilder(
 
     if (mask & kPSMaxLinesMask) {
       style.max_lines = encoded[kPSMaxLinesIndex];
+    }
+
+    if (mask & kPSRenderSoftHyphensMask) {
+      // Hyphens.manual (0) renders the soft hyphen glyph; Hyphens.hidden (1)
+      // suppresses it.
+      style.render_soft_hyphens = encoded[kPSRenderSoftHyphensEncodeIndex] == 0;
     }
   }
 

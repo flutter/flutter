@@ -28,13 +28,13 @@ class SnapshotControllerSkia : public SnapshotController {
       SnapshotPixelFormat pixel_format) override;
 
   void MakeImpellerSnapshot(
-      sk_sp<DisplayList> display_list,
+      SnapshotDelegate::SnapshotDisplayListProvider provider,
       DlISize picture_size,
       std::function<void(const std::shared_ptr<impeller::Texture>&)> callback,
       SnapshotPixelFormat pixel_format) override;
 
   std::shared_ptr<impeller::Texture> MakeImpellerSnapshotSync(
-      sk_sp<DisplayList> display_list,
+      SnapshotDelegate::SnapshotDisplayListProvider provider,
       DlISize size,
       SnapshotPixelFormat pixel_format) override;
 
