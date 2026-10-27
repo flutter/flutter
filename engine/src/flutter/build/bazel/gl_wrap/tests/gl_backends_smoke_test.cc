@@ -115,9 +115,13 @@ TEST(GlBackendsSmokeTest, AngleRendersWithSwiftShader) {
 }
 
 TEST(GlBackendsSmokeTest, SwiftShaderOpensAsVulkanDriver) {
-  // A bare name: found through the executable's $ORIGIN rpath, as
-  // //flutter/vulkan/procs opens it.
+  // A bare name: found through the executable's $ORIGIN rpath (a Mac's
+  // @loader_path), as //flutter/vulkan/procs opens it.
+#if defined(__APPLE__)
+  void* library = dlopen("libvk_swiftshader.dylib", RTLD_NOW | RTLD_LOCAL);
+#else
   void* library = dlopen("libvk_swiftshader.so", RTLD_NOW | RTLD_LOCAL);
+#endif
   ASSERT_NE(library, nullptr) << dlerror();
   // vkGetInstanceProcAddr, as //flutter/vulkan/procs resolves it (through
   // the ICD entry point, vk_icdGetInstanceProcAddr, the driver would take
