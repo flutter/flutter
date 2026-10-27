@@ -13,16 +13,22 @@ writes (`solid_fill.vert.h`, the pipeline's vertex and fragment shader
 structs) in a library. The converter (tools/gn_to_bazel) emits the
 invocations; the template's body lives here, as rules.
 
-The expansion is the one shaders.gni produces on a Linux host:
-`impeller_enable_opengles` and `impeller_enable_vulkan` on, Metal off, so
-three backends -- GLES 2 (`gles`), GLES 3 (`gles3`, language version 300)
-and Vulkan (`vk`) -- with the Vulkan reflection library the one dependents
-see (`!impeller_enable_metal`), and the GLES intermediates under
-subdirectories (`impeller_enable_vulkan`). The target names are GN's, so
-that `gn desc` and the generated tree read alike:
+The expansion is the one shaders.gni produces for the platform:
+`impeller_enable_opengles` and `impeller_enable_vulkan` on everywhere, so
+GLES 2 (`gles`), GLES 3 (`gles3`, language version 300) and Vulkan (`vk`),
+and on the Apple platforms Metal besides (`mtl`: `impeller_enable_metal`,
+research/20 M4). Where Metal is off, the Vulkan reflection library is the
+one dependents see and its intermediates sit in the target's directory;
+where it is on, Metal's reflection is the public one ("Metal reflectors
+generate a superset of information", shaders_vk.gni) and Vulkan's moves
+under `vk/` -- the same rule instance writes either layout, choosing by
+platform at analysis time, which is why the outputs are declared rather
+than predeclared. The GLES intermediates are under subdirectories either
+way. The target names are GN's, so that `gn desc` and the generated tree
+read alike:
 
   impellerc_<backend>_<name>       the per-shader impellerc runs
-  genlib_<backend>_<name>          the .shar archive
+  genlib_<backend>_<name>          the .shar archive (Metal: the .metallib)
   gen_blob_embed_<backend>_<name>  xxd.py
   embed_<backend>_<name>           the embedded blob, a library
   reflect_<backend>_<name>         the reflection headers and sources
@@ -30,9 +36,14 @@ that `gn desc` and the generated tree read alike:
   <name>                           the group over the backends
 
 Generated headers are included by their path under GN's `gen/flutter`
-(`impeller/entity/solid_fill.vert.h`, `impeller/entity/vk/entity_shaders_vk.h`);
-//engine/src/flutter:config's `includes` spans the output tree, which is
-where they land.
+(`impeller/entity/solid_fill.vert.h`, `impeller/entity/vk/entity_shaders_vk.h`,
+`impeller/entity/mtl/entity_shaders.h`); //engine/src/flutter:config's
+`includes` spans the output tree, which is where they land.
+
+Metal's library is Xcode's `metal` compiler over impellerc's `.metal`
+sources (impeller/tools/metal_library.py: `xcrun -sdk macosx metal`), the
+one tool of the pipeline that is not the build's own -- the same Xcode
+`@macos_sdk` is a view of; DEVELOPER_DIR reaches it through --action_env.
 
 Shaders `#include` the shader library (`<impeller/types.glsl>`, the files
 GN copies in //flutter/impeller/compiler/shader_lib) and files beside them
@@ -54,10 +65,14 @@ _SHADER_LIB = [
     "//engine/src/flutter/impeller/compiler/shader_lib/impeller",
 ]
 
-# One entry per backend shaders.gni enables on a Linux host.
+# The Apple platforms, where shaders.gni's impeller_enable_metal holds.
+_APPLE = "@platforms//os:macos"
+
+# One entry per backend shaders.gni enables.
 #   tag:        GN's target-name prefix and the group's name.
-#   subdir:     impellerc's intermediates_subdir ("" for Vulkan: without
-#               Metal, shaders_vk.gni keeps them in the target's directory).
+#   subdir:     impellerc's intermediates_subdir ("" for Vulkan without
+#               Metal: shaders_vk.gni keeps them in the target's directory;
+#               `vk` with it; "" for Metal).
 #   extension:  sl_file_extension.
 #   flags:      shader_target_flags.
 #   defines:    the --define= macros.
@@ -67,7 +82,10 @@ _SHADER_LIB = [
 #   embed:      the embedded blob's header and source, without extension.
 #   opengles:   whether enable_opengles, gles_exclusions,
 #               gles_language_version and require_framebuffer_fetch apply.
-#   reflect:    whether the group exposes the reflection library.
+#   reflect:    whether the group exposes the reflection library: a bool, or
+#               a select over the platform (Vulkan's only where Metal is off).
+#   metal:      the Metal backend: Apple platforms only, the library by
+#               Xcode's metal compiler, no .shar.
 _BACKENDS = [
     struct(
         tag = "gles",
@@ -97,7 +115,10 @@ _BACKENDS = [
     ),
     struct(
         tag = "vk",
-        subdir = "",
+        subdir = select({
+            _APPLE: "vk",
+            "//conditions:default": "",
+        }),
         extension = "vkspv",
         flags = ["--vulkan"],
         defines = ["IMPELLER_TARGET_VULKAN"],
@@ -105,10 +126,29 @@ _BACKENDS = [
         symbol = "%s_shaders_vk",
         embed = "vk/%s_shaders_vk",
         opengles = False,
-        reflect = True,
+        reflect = select({
+            _APPLE: False,
+            "//conditions:default": True,
+        }),
         mnemonic = "ImpellercVulkan",
     ),
+    struct(
+        tag = "mtl",
+        subdir = "",
+        extension = "metal",
+        flags = ["--metal-desktop"],
+        defines = ["IMPELLER_TARGET_METAL", "IMPELLER_TARGET_METAL_DESKTOP"],
+        version = None,
+        symbol = "%s_shaders",
+        embed = "mtl/%s_shaders",
+        opengles = False,
+        reflect = True,
+        mnemonic = "ImpellercMetal",
+    ),
 ]
+
+# The backends by tag, and the ones a target is on the Apple platforms alone.
+_METAL_TAGS = ["mtl"]
 
 def _impellerc_compile_impl(ctx):
     shader_lib = ctx.files._shader_lib
@@ -118,13 +158,17 @@ def _impellerc_compile_impl(ctx):
     # .../compiler/shader_lib, the parent of the copies' directories.
     shader_lib_dir = shader_lib[0].dirname.rsplit("/", 1)[0]
     shaders = ctx.files.srcs
-    counts = [len(ctx.outputs.sl), len(ctx.outputs.reflection_headers), len(ctx.outputs.reflection_sources)]
-    if counts != [len(shaders)] * 3:
-        fail("%s: one sl, header and source output per shader" % ctx.label)
-    for i, shader in enumerate(shaders):
-        sl = ctx.outputs.sl[i]
-        header = ctx.outputs.reflection_headers[i]
-        source = ctx.outputs.reflection_sources[i]
+    prefix = ctx.attr.subdir + "/" if ctx.attr.subdir else ""
+    sls = []
+    headers = []
+    sources = []
+    for shader in shaders:
+        # GN's {{source_file_part}} under the intermediates subdirectory,
+        # which the platform chooses (Vulkan's `vk/` where Metal is on).
+        stem = prefix + shader.basename
+        sl = ctx.actions.declare_file(stem + "." + ctx.attr.extension)
+        header = ctx.actions.declare_file(stem + ".h")
+        source = ctx.actions.declare_file(stem + ".cc")
 
         # impellerc writes these beside the declared outputs; GN leaves them
         # undeclared, a sandbox wants to know.
@@ -140,6 +184,11 @@ def _impellerc_compile_impl(ctx):
         ]
         if ctx.attr.gles_language_version:
             arguments.append("--gles-language-version=%d" % ctx.attr.gles_language_version)
+        if ctx.attr.metal:
+            # shaders_mtl.gni: the invoker's metal_version, "1.2" otherwise.
+            arguments.append("--metal-version=" + (ctx.attr.metal_version or "1.2"))
+        if ctx.attr.use_half_textures:
+            arguments.append("--use-half-textures")
         if ctx.attr.require_framebuffer_fetch:
             arguments.append("--require-framebuffer-fetch")
         arguments += [
@@ -159,11 +208,22 @@ def _impellerc_compile_impl(ctx):
             mnemonic = ctx.attr.mnemonic,
             progress_message = "impellerc %{input}",
         )
-    return [DefaultInfo(files = depset(ctx.outputs.sl))]
+        sls.append(sl)
+        headers.append(header)
+        sources.append(source)
+    return [
+        DefaultInfo(files = depset(sls)),
+        OutputGroupInfo(
+            sl = depset(sls),
+            reflection_headers = depset(headers),
+            reflection_sources = depset(sources),
+        ),
+    ]
 
 impellerc_compile = rule(
     implementation = _impellerc_compile_impl,
-    doc = "GN's impellerc() template for one backend: one impellerc run per shader. The target's files are the compiled shaders.",
+    doc = "GN's impellerc() template for one backend: one impellerc run per shader. The target's files are the compiled shaders " +
+          "(`<subdir>/<file>.<extension>`); the output groups `reflection_headers` and `reflection_sources` are the reflection state.",
     attrs = {
         "srcs": attr.label_list(
             allow_files = True,
@@ -174,21 +234,16 @@ impellerc_compile = rule(
             allow_files = True,
             doc = "Files the shaders may `#include` beside themselves.",
         ),
-        "sl": attr.output_list(
-            mandatory = True,
-            doc = "The compiled shader of each source, in order (`<subdir>/<file>.<extension>`).",
+        "subdir": attr.string(
+            doc = "GN's intermediates_subdir: where the outputs go under the package, if anywhere. Selectable by platform.",
         ),
-        "reflection_headers": attr.output_list(
+        "extension": attr.string(
             mandatory = True,
-            doc = "The reflection header of each source, in order.",
-        ),
-        "reflection_sources": attr.output_list(
-            mandatory = True,
-            doc = "The reflection source of each source, in order.",
+            doc = "GN's sl_file_extension (`vkspv`, `gles`, `metal`).",
         ),
         "flags": attr.string_list(
             mandatory = True,
-            doc = "GN's `shader_target_flags` (`--vulkan`, `--opengl-es`).",
+            doc = "GN's `shader_target_flags` (`--vulkan`, `--opengl-es`, `--metal-desktop`).",
         ),
         "defines": attr.string_list(
             doc = "GN's `defines`: impellerc's --define= macros.",
@@ -196,6 +251,13 @@ impellerc_compile = rule(
         "gles_language_version": attr.int(
             doc = "--gles-language-version, 0 for none.",
         ),
+        "metal": attr.bool(
+            doc = "The Metal backend (shaders_mtl.gni): --metal-version is passed, the invoker's or 1.2.",
+        ),
+        "metal_version": attr.string(
+            doc = "GN's metal_version, when the invoker sets it (a select() over the platform in the generated files, None off Apple).",
+        ),
+        "use_half_textures": attr.bool(),
         "require_framebuffer_fetch": attr.bool(),
         "entry_point_prefix": attr.string(
             mandatory = True,
@@ -252,6 +314,81 @@ shader_archive = rule(
             cfg = "exec",
         ),
     },
+)
+
+def _metal_library_impl(ctx):
+    out = ctx.actions.declare_file("shaders/" + ctx.attr.library_name + ".metallib")
+    depfile = ctx.actions.declare_file("mtl/" + ctx.attr.library_name + ".depfile")
+    outputs = [out, depfile]
+
+    # metal_library.py's arguments as metal_library.gni orders them.
+    arguments = [
+        "--output=" + out.path,
+        "--depfile=" + depfile.path,
+        "--metal-version=" + (ctx.attr.metal_version or "1.2"),
+    ]
+    if ctx.attr.debug:
+        arguments.append("--debug")
+    else:
+        # `metal` writes the symbols beside the library (-frecord-sources
+        # in debug keeps them inside).
+        outputs.append(ctx.actions.declare_file("shaders/" + ctx.attr.library_name + ".metallibsym"))
+    arguments.append("--platform=" + ctx.attr.platform)
+    for source in ctx.files.srcs:
+        arguments += ["--source", source.path]
+    args = ctx.actions.args()
+    args.add("-B")
+    args.add(ctx.file._script)
+    args.add_all(arguments)
+    ctx.actions.run(
+        executable = ctx.executable._python,
+        arguments = [args],
+        inputs = depset([ctx.file._script] + ctx.files.srcs),
+        tools = ctx.attr._python_runtime[DefaultInfo].files,
+        outputs = outputs,
+        mnemonic = "MetalLibrary",
+        progress_message = "metal %{output}",
+        # The script runs Xcode's `xcrun metal`: the shell's PATH, and
+        # DEVELOPER_DIR when --action_env passes it, as for the SDK.
+        use_default_shell_env = True,
+        env = {
+            "PYTHONDONTWRITEBYTECODE": "1",
+            "PYTHONHASHSEED": "0",
+        },
+    )
+    return [DefaultInfo(files = depset([out]))]
+
+metal_library = rule(
+    implementation = _metal_library_impl,
+    doc = "GN's metal_library() template (impeller/tools/metal_library.gni): impellerc's .metal sources compiled into one " +
+          ".metallib by Xcode's metal compiler (metal_library.py: `xcrun -sdk macosx metal`), under shaders/ as GN's root_out_dir has it. " +
+          "The target's file is the library.",
+    attrs = {
+        "srcs": attr.label_list(
+            allow_files = [".metal"],
+            mandatory = True,
+            doc = "The Metal sources (the Metal impellerc target's files).",
+        ),
+        "library_name": attr.string(
+            mandatory = True,
+            doc = "GN's `name`: the library is shaders/<name>.metallib.",
+        ),
+        "metal_version": attr.string(
+            doc = "GN's `metal_version` (-std=macos-metal<version>), 1.2 when unset.",
+        ),
+        "platform": attr.string(
+            default = "mac",
+            values = ["mac", "ios", "ios-simulator"],
+            doc = "metal_library.py's --platform: the SDK.",
+        ),
+        "debug": attr.bool(
+            doc = "GN's impeller_debug: -g and -frecord-sources; otherwise the symbols go to a .metallibsym beside the library.",
+        ),
+        "_script": attr.label(
+            default = "//engine/src/flutter/impeller/tools:metal_library.py",
+            allow_single_file = True,
+        ),
+    } | PYTHON_ATTRS,
 )
 
 def _embed_blob_impl(ctx):
@@ -327,8 +464,10 @@ def impeller_shaders(
         is always 300).
       vulkan_language_version: GN's `vulkan_language_version`, which only
         malioc reads; accepted.
-      metal_version: Metal's; accepted (no Metal backend here).
-      use_half_textures: Metal's; accepted.
+      metal_version: the Metal language version for the Metal backend's
+        impellerc and the metal compiler (GN's default "1.2"); the
+        generated files pass a select() over the platform, None elsewhere.
+      use_half_textures: --use-half-textures for the Metal backend.
       require_framebuffer_fetch: --require-framebuffer-fetch for GLES.
       gles_exclusions: shaders not compiled for GLES.
       vulkan_exclusions: shaders not compiled for Vulkan.
@@ -337,8 +476,22 @@ def impeller_shaders(
         defines the whole set under one condition (or not at all).
       **kwargs: `testonly`, `visibility` for the group.
     """
-    _unused = (analyze, vulkan_language_version, metal_version, use_half_textures)  # buildifier: disable=unused-variable
+    _unused = (analyze, vulkan_language_version)  # buildifier: disable=unused-variable
     testonly = kwargs.get("testonly")
+
+    # The Apple platforms alone: the Metal backend's targets.
+    apple_only = select({
+        _APPLE: [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    })
+
+    # impeller_debug (impeller/tools/args.gni): the debug and profile
+    # runtime modes.
+    impeller_debug = select({
+        "//engine/src/flutter/common:runtime_mode_release": False,
+        "//engine/src/flutter/common:runtime_mode_jit_release": False,
+        "//conditions:default": True,
+    })
 
     # What a shader may #include beside itself.
     includes = native.glob(["**/*.glsl"], allow_empty = True)
@@ -353,21 +506,19 @@ def impeller_shaders(
 
     backends = []
     gles2_backends = []
+    metal_backends = []
     for backend in _BACKENDS:
         if backend.opengles and not enable_opengles:
             continue
+        metal = backend.tag in _METAL_TAGS
         exclusions = gles_exclusions if backend.opengles else vulkan_exclusions
         backend_shaders = [shader for shader in shaders if shader not in exclusions]
         tag = backend.tag + "_" + name
-        prefix = backend.subdir + "/" if backend.subdir else ""
         compatible_with = target_compatible_with
         if backend.tag == "gles":
             compatible_with = (target_compatible_with or []) + not_web
-
-        # GN's {{source_file_part}}.
-        stems = [prefix + shader.rsplit("/", 1)[-1] for shader in backend_shaders]
-        reflection_headers = [stem + ".h" for stem in stems]
-        reflection_sources = [stem + ".cc" for stem in stems]
+        if metal:
+            compatible_with = (target_compatible_with or []) + apple_only
         version = backend.version
         if version == None and backend.opengles and gles_language_version != None:
             version = gles_language_version
@@ -375,12 +526,18 @@ def impeller_shaders(
             name = "impellerc_" + tag,
             srcs = backend_shaders,
             includes = includes,
-            sl = [stem + "." + backend.extension for stem in stems],
-            reflection_headers = reflection_headers,
-            reflection_sources = reflection_sources,
+            subdir = backend.subdir,
+            extension = backend.extension,
             flags = backend.flags,
             defines = backend.defines,
             gles_language_version = version or 0,
+            # shaders_mtl.gni alone passes metal_version on (the invoker's,
+            # or 1.2, which the rule supplies): a select() over the
+            # platform in the generated files, with None off Apple, which
+            # Bazel reads as the attribute's default.
+            metal = metal,
+            metal_version = metal_version if metal else None,
+            use_half_textures = use_half_textures and metal,
             require_framebuffer_fetch = require_framebuffer_fetch and backend.opengles,
             entry_point_prefix = entry_point_prefix,
             mnemonic = backend.mnemonic,
@@ -388,15 +545,36 @@ def impeller_shaders(
             target_compatible_with = compatible_with,
             visibility = ["//visibility:private"],
         )
-        shader_archive(
-            name = "genlib_" + tag,
-            srcs = [":impellerc_" + tag],
-            out = "genlib_" + tag + ".shar",
-            entry_point_prefix = entry_point_prefix,
-            testonly = testonly,
-            target_compatible_with = compatible_with,
-            visibility = ["//visibility:private"],
-        )
+        for group in ["reflection_headers", "reflection_sources"]:
+            native.filegroup(
+                name = "impellerc_" + tag + "_" + group,
+                srcs = [":impellerc_" + tag],
+                output_group = group,
+                testonly = testonly,
+                target_compatible_with = compatible_with,
+                visibility = ["//visibility:private"],
+            )
+        if metal:
+            metal_library(
+                name = "genlib_" + tag,
+                srcs = [":impellerc_" + tag],
+                library_name = library_name,
+                metal_version = metal_version,
+                debug = impeller_debug,
+                testonly = testonly,
+                target_compatible_with = compatible_with,
+                visibility = ["//visibility:private"],
+            )
+        else:
+            shader_archive(
+                name = "genlib_" + tag,
+                srcs = [":impellerc_" + tag],
+                out = "genlib_" + tag + ".shar",
+                entry_point_prefix = entry_point_prefix,
+                testonly = testonly,
+                target_compatible_with = compatible_with,
+                visibility = ["//visibility:private"],
+            )
         embed = backend.embed % library_name
         embed_blob(
             name = "gen_blob_embed_" + tag,
@@ -427,8 +605,8 @@ def impeller_shaders(
         # GN's impellerc_reflect: engine code (it depends on impeller/core).
         cc_library(
             name = "reflect_" + tag,
-            srcs = reflection_sources,
-            hdrs = reflection_headers,
+            srcs = [":impellerc_" + tag + "_reflection_sources"],
+            hdrs = [":impellerc_" + tag + "_reflection_headers"],
             copts = FLUTTER_COPTS,
             local_defines = FLUTTER_LOCAL_DEFINES,
             deps = [
@@ -440,14 +618,28 @@ def impeller_shaders(
             target_compatible_with = compatible_with,
             alwayslink = True,
         )
+
+        # The reflection library in the group where the backend's is the
+        # public one: never (GLES), always (Metal), or off Apple (Vulkan's,
+        # a select).
+        reflect = backend.reflect
+        if type(reflect) == type(True):
+            reflect = [":reflect_" + tag] if reflect else []
+        else:
+            reflect = select({
+                _APPLE: [],
+                "//conditions:default": [":reflect_" + tag],
+            })
         cc_library(
             name = tag,
-            deps = [":embed_" + tag] + ([":reflect_" + tag] if backend.reflect else []),
+            deps = [":embed_" + tag] + reflect,
             testonly = testonly,
             target_compatible_with = compatible_with,
         )
         if backend.tag == "gles":
             gles2_backends.append(":" + tag)
+        elif metal:
+            metal_backends.append(":" + tag)
         else:
             backends.append(":" + tag)
 
@@ -456,6 +648,9 @@ def impeller_shaders(
         deps = backends + select({
             "@platforms//os:emscripten": [],
             "//conditions:default": gles2_backends,
+        }) + select({
+            _APPLE: metal_backends,
+            "//conditions:default": [],
         }),
         target_compatible_with = target_compatible_with,
         **kwargs
@@ -486,6 +681,8 @@ def _impellerc_run_impl(ctx):
     common = ["--include=" + shader_lib_dir] + ctx.attr.flags
     if ctx.attr.gles_language_version:
         common.append("--gles-language-version=%d" % ctx.attr.gles_language_version)
+    if ctx.attr.metal_version:
+        common.append("--metal-version=" + ctx.attr.metal_version)
     if ctx.attr.use_half_textures:
         common.append("--use-half-textures")
     if ctx.attr.require_framebuffer_fetch:
@@ -587,6 +784,9 @@ impellerc_run = rule(
         "gles_language_version": attr.int(
             doc = "--gles-language-version, 0 for none.",
         ),
+        "metal_version": attr.string(
+            doc = "--metal-version, empty for none.",
+        ),
         "use_half_textures": attr.bool(),
         "require_framebuffer_fetch": attr.bool(),
         "has_entry_point_prefix": attr.bool(
@@ -651,7 +851,8 @@ def impellerc(
         converter's $(src ...) tokens.
       shader_bundle_output: the bundle's file name.
       gles_language_version: --gles-language-version.
-      metal_version: Metal's; accepted (no Metal here).
+      metal_version: --metal-version (compiler.gni passes it wherever the
+        invoker sets it; GN asserts an Apple platform).
       use_half_textures: --use-half-textures.
       require_framebuffer_fetch: --require-framebuffer-fetch.
       entry_point_prefix: --entry-point-prefix, when set.
@@ -659,7 +860,6 @@ def impellerc(
       mnemonic: GN's `mnemonic`, the action's.
       **kwargs: `testonly`, `visibility`, `target_compatible_with`.
     """
-    _unused = metal_version  # buildifier: disable=unused-variable
     prefix = intermediates_subdir + "/" if intermediates_subdir else ""
     if shader_bundle != None:
         if not shader_bundle_output:
@@ -680,6 +880,7 @@ def impellerc(
         flags = shader_target_flags,
         defines = defines,
         gles_language_version = gles_language_version or 0,
+        metal_version = metal_version,
         use_half_textures = use_half_textures,
         require_framebuffer_fetch = require_framebuffer_fetch,
         has_entry_point_prefix = entry_point_prefix != None,

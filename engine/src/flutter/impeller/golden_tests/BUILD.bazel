@@ -3,7 +3,7 @@
 # found in the LICENSE file.
 
 # Generated from //flutter/impeller/golden_tests/BUILD.gn by gn_to_bazel; do not edit.
-# Dependencies left out, their packages not converted yet (a platform the migration has not reached): //flutter/impeller/renderer/backend/metal:metal, //flutter/third_party/angle:libEGL, //flutter/third_party/angle:libGLESv2.
+# Dependencies left out, their packages not converted yet (a platform the migration has not reached): //flutter/third_party/angle:libEGL, //flutter/third_party/angle:libGLESv2.
 
 load("@bazel_skylib//lib:selects.bzl", "selects")
 load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
@@ -142,6 +142,7 @@ flutter_objc_library(
         "//engine/src/flutter/impeller:impeller_public_config",
         "//engine/src/flutter/impeller/display_list",
         "//engine/src/flutter/impeller/playground",
+        "//engine/src/flutter/impeller/renderer/backend/metal",
         "//engine/src/flutter/impeller/renderer/backend/vulkan",
         "//engine/src/flutter/impeller/testing:metal_screenshot",
         "//engine/src/flutter/impeller/testing:screenshot",
@@ -185,6 +186,7 @@ cc_library(
         "//engine/src/flutter/impeller:impeller_public_config",
         "//engine/src/flutter/impeller/display_list",
         "//engine/src/flutter/impeller/playground",
+        "//engine/src/flutter/impeller/renderer/backend/metal",
         "//engine/src/flutter/impeller/renderer/backend/vulkan",
         "//engine/src/flutter/impeller/testing:metal_screenshot",
         "//engine/src/flutter/impeller/testing:screenshot",
