@@ -3531,6 +3531,77 @@ source_set("x") {
       expect(output, isNot(contains('flutter_objc_library')));
     });
 
+    test('a source_set of Swift sources is a flutter_swift_library', () async {
+      // darwin/common's InternalFlutterSwiftCommon: Swift sources behind a
+      // bridging header, `public` headers, a local config with the Swift
+      // flags (-enable-testing under the unit tests) and darwin_sdk.gni's
+      // Swift library directories as lib_dirs -- which the rule carries, so
+      // the listing goes; the config's cc_library form drops both too. A
+      // C++ target listing the config takes neither.
+      final String output = await convert('''
+config("config") {
+  lib_dirs = mac_swift_lib_paths
+  swiftflags = []
+  if (enable_unittests) {
+    swiftflags += [ "-enable-testing" ]
+  }
+}
+source_set("bindings") {
+  sources = [ "bindings.h", "bindings.mm" ]
+  configs += [ ":config" ]
+}
+source_set("Module") {
+  configs += [ ":config" ]
+  bridge_header = "Module-Bridging-Header.h"
+  sources = [ "a.swift", "b.swift" ]
+  public = [ "public.h" ]
+  deps = [ ":bindings" ]
+}
+''', assumptions: generationAssumptions());
+      expect(
+        output,
+        contains(
+          'flutter_swift_library(\n'
+          '    name = "Module",\n'
+          '    srcs = [\n'
+          '        "a.swift",\n'
+          '        "b.swift",\n'
+          '    ],\n'
+          '    hdrs = ["public.h"],\n'
+          '    bridge_header = "Module-Bridging-Header.h",\n'
+          '    swiftflags = select({\n'
+          '        "//engine/src/flutter/testing:unittests_enabled": [\n'
+          '            "-enable-testing",  # enable_unittests\n'
+          '        ],\n'
+          '        "//conditions:default": [],\n'
+          '    }),\n'
+          '    deps = [\n'
+          '        ":bindings",\n'
+          '        "//engine/src:include_root",\n'
+          '    ],\n'
+          ')\n',
+        ),
+      );
+      expect(
+        output,
+        contains('load("//build_defs/cc:swift_library.bzl", "flutter_swift_library")'),
+      );
+      expect(output, contains('cc_library(\n    name = "config",\n)\n'));
+      expect(output, isNot(contains('mac_swift_lib_paths')));
+      expect(output, isNot(contains('MACOS_SWIFT_LIBRARY_DIRS')));
+      // The Swift target's alone: the config's cc_library form and the
+      // Objective-C target listing the config carry none.
+      expect('swiftflags'.allMatches(output).length, 1);
+      await expectLater(
+        convert('''
+config("config") {
+  lib_dirs = [ "/usr/local/lib" ]
+}
+'''),
+        throwsGnError(line: 2, message: 'lib_dirs holds'),
+      );
+    });
+
     test('Objective-C sources under is_mac make a macOS library', () async {
       // fml: .mm under is_mac || is_ios (is_ios a constant), with
       // config.gni's macOS flags; the library is compatible on macOS alone

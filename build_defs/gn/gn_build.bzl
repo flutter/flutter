@@ -70,6 +70,7 @@ def _gn_build_impl(ctx):
     root_target_dir = ctx.attr.root_target_dir.strip("/")
 
     outputs = {}
+    install_names = {}
     for product, gn_path in ctx.attr.outs.items():
         if not gn_path:
             # A product the GN build does not make in this configuration
@@ -78,6 +79,10 @@ def _gn_build_impl(ctx):
             continue
         f = ctx.actions.declare_file(paths.join(name, product))
         outputs[f] = gn_path
+        if product in ctx.attr.install_names:
+            install_names[f.path] = ctx.attr.install_names[product]
+    if install_names and not ctx.file.install_name_tool:
+        fail("%s: install_names needs install_name_tool" % ctx.label)
     archives = {}
     for file_name, label in ctx.attr.archives.items():
         archives[ctx.actions.declare_file(paths.join(name, file_name))] = label
@@ -90,7 +95,7 @@ def _gn_build_impl(ctx):
         files = [ctx.file.build_file.path],
     ))
 
-    params = struct(
+    params = dict(
         scratch = scratch,
         gn = ctx.file._gn.path,
         ninja = ctx.file._ninja.path,
@@ -105,8 +110,13 @@ def _gn_build_impl(ctx):
         archive_boundaries = ctx.attr.archive_boundaries,
         compile_commands = compile_commands.path,
     )
+    if install_names:
+        # Only where asked, so that a build without keeps its parameters
+        # (and its cache entries) as they were.
+        params["install_names"] = install_names
+        params["install_name_tool"] = ctx.file.install_name_tool.path
     params_file = ctx.actions.declare_file(name + ".params.json")
-    ctx.actions.write(params_file, json.encode_indent(params))
+    ctx.actions.write(params_file, json.encode_indent(struct(**params)))
 
     all_outputs = list(outputs.keys()) + list(archives.keys()) + [compile_commands]
     ctx.actions.run(
@@ -115,7 +125,7 @@ def _gn_build_impl(ctx):
         arguments = ["-B", ctx.file._script.path, params_file.path],
         inputs = depset([ctx.file._script, params_file, ctx.file.build_file], transitive = tree_inputs),
         tools = depset(
-            [ctx.file._gn, ctx.file._ninja, ctx.file.ar],
+            [ctx.file._gn, ctx.file._ninja, ctx.file.ar] + ctx.files.install_name_tool,
             transitive = [ctx.attr._python_runtime[DefaultInfo].files],
         ),
         outputs = all_outputs,
@@ -212,6 +222,18 @@ _gn_build = rule(
             mandatory = True,
             doc = "The archiver, from the same toolchain as the GN build.",
         ),
+        "install_names": attr.string_dict(
+            doc = "Products that are Mach-O dynamic libraries whose install name is rewritten on the " +
+                  "copy (the product's name to the new install name): GN's mac toolchain gives a " +
+                  "shared library `./lib<name>.dylib`, which dyld resolves against the working directory " +
+                  "-- GN's build directory, where its tests run -- whereas Bazel runs tests from the " +
+                  "runfiles root with the libraries beside the binary, which `@rpath/lib<name>.dylib` " +
+                  "finds through the binary's @loader_path rpath (cc_toolchain_config.bzl's Mac link flags).",
+        ),
+        "install_name_tool": attr.label(
+            allow_single_file = True,
+            doc = "llvm-install-name-tool, from the same toolchain as the GN build; needed with install_names.",
+        ),
         "env": attr.string_dict(
             doc = "Environment variables for the wrapped build, besides PATH and Python's: what " +
                   "its scripts read (ANGLE's commit id, for one).",
@@ -255,7 +277,8 @@ def gn_build(name, outs = [], out_paths = None, archives = {}, visibility = None
       archives: archive file name -> GN library label (see the module docstring).
       visibility: visibility of the build target and the product targets.
       **kwargs: the attributes of the underlying rule (`build_file`, `root_target_dir`,
-        `ninja_target`, `tree`, `gn_args`, `archive_boundaries`, `ar`, `env`).
+        `ninja_target`, `tree`, `gn_args`, `archive_boundaries`, `ar`, `env`,
+        `install_names`, `install_name_tool`).
     """
     for out in outs:
         if "/" in out:

@@ -14,10 +14,11 @@ named here so that the action's key carries it. The Dart wrap
 """
 
 load("@macos_sdk//:sdk.bzl", "MACOS_PLATFORM_PATH", "MACOS_SDK_PATH", "XCODE_DEVELOPER_DIR")
+load("//build_defs/cc:apple.bzl", "MACOS_DEPLOYMENT_TARGET")
 
 MACOS_TARGET_GN_ARGS = {
     "ios_use_simulator": "false",
-    "mac_deployment_target": '"12.0.0"',
+    "mac_deployment_target": '"%s"' % MACOS_DEPLOYMENT_TARGET,
     "mac_host_toolchain_path": '"%s/Toolchains/XcodeDefault.xctoolchain"' % XCODE_DEVELOPER_DIR,
     "mac_platform_path": '"%s"' % MACOS_PLATFORM_PATH,
     "mac_sdk_path": '"%s"' % MACOS_SDK_PATH,

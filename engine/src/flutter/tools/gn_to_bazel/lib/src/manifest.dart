@@ -115,6 +115,11 @@ const List<ConvertedFile> convertedFiles = <ConvertedFile>[
       '//flutter/lib/gpu:gpu_unittests',
       '//flutter/impeller/renderer/backend/vulkan:vulkan_android_apk_unittests',
       '//flutter/impeller/toolkit/android:apk_unittests',
+      // The darwin frameworks' suites, skipped in their file (the Apple
+      // test phase: XCTest, OCMock and the Testing framework from the
+      // platform's Developer directory).
+      '//flutter/shell/platform/darwin/common:framework_common_unittests',
+      '//flutter/shell/platform/darwin/common:framework_common_swift_unittests',
     ],
     appendix: r'''
 load("@rules_cc//cc:defs.bzl", "cc_library")
@@ -1065,6 +1070,31 @@ filegroup(
   // The platform shells, by OS: the Android group (its symbols archive; the
   // Java targets are skipped in its file) and the Linux one. What the root
   // group reaches through //flutter/sky.
+  // The darwin packages the shell's Metal test fixtures and the embedder's
+  // Mac build reach (research/20 §9): the Metal/Impeller context, and
+  // what the Flutter frameworks share -- the channels and codecs, the
+  // tracing bindings, and the Swift module behind them
+  // (InternalFlutterSwiftCommon, a flutter_swift_library). Their unit
+  // tests wait for the Apple test phase: the Objective-C suite links
+  // OCMock and XCTest from the platform's Developer directory
+  // (`:test_config`), the Swift suite the Testing framework.
+  ConvertedFile('//flutter/shell/platform/darwin/graphics', condition: 'is_mac'),
+  ConvertedFile(
+    '//flutter/shell/platform/darwin/common',
+    condition: 'is_mac',
+    skip: <String, String>{
+      'framework_common_unittests': "OCMock and XCTest from the platform's Developer directory (test_config): the Apple test phase",
+      'framework_common_swift_unittests':
+          "the Testing framework from the platform's Developer directory: the Apple test phase",
+      'test_utils_swift': 'a helper of framework_common_swift_unittests: the Apple test phase',
+      'swift_testing_main': "the Testing framework's runner: the Apple test phase",
+      // Their configs: the platform's Developer directory (XCTest, Testing)
+      // by a machine path, which only the skipped suites list.
+      'test_config':
+          "the platform's Developer directory for the suites above: the Apple test phase",
+      'swift_testing_config': "the Testing framework's search path and rpath: the Apple test phase",
+    },
+  ),
   ConvertedFile(
     '//flutter/shell/platform',
     filesGroups: <String>{'platform'},

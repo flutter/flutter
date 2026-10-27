@@ -232,6 +232,20 @@ def _make_archives(params, gn, gn_switches, out_dir):
             os.unlink(output)
         # D: deterministic (zeroed uids and timestamps); c: create; s: index.
         _run([os.path.abspath(params["ar"]), "rcsD", os.path.abspath(output), "@" + response], cwd=out_dir)
+        # The archive holds every object: an archiver that quietly skipped
+        # them (an 8-byte `!<arch>` with 404 objects listed, the Mac's T11)
+        # would leave a link to fail far from here.
+        listing = subprocess.run(
+            [os.path.abspath(params["ar"]), "t", os.path.abspath(output)],
+            cwd=out_dir, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        members = [m for m in listing.stdout.decode(errors="replace").splitlines() if m]
+        if listing.returncode != 0 or len(members) != len(objects):
+            missing = [o for o in objects if not os.path.exists(os.path.join(out_dir, o))]
+            raise SystemExit(
+                "gn_build: %s holds %d members for %d objects of %s (ar t exit %d; %d of the objects "
+                "do not exist: %s)" % (
+                    os.path.basename(output), len(members), len(objects), label, listing.returncode,
+                    len(missing), " ".join(missing[:5])))
         _log("  %s: %d objects from %s" % (os.path.basename(output), len(objects), label))
 
 
@@ -288,6 +302,11 @@ def main(argv):
 
     for output, path in params["outputs"].items():
         _copy_output(os.path.join(out_dir, path), output)
+        install_name = params.get("install_names", {}).get(output)
+        if install_name:
+            # A dynamic library's install name, rewritten on the copy (see
+            # gn_build.bzl's install_names).
+            _run([params["install_name_tool"], "-id", install_name, output])
     _make_archives(params, gn, gn_switches, out_dir)
 
     if params.get("compile_commands"):

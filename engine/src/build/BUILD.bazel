@@ -30,6 +30,14 @@ exports_files([
     "android/gyp/javac.py",
 ])
 
+# GN's Swift tool (build/toolchain/mac/BUILD.gn's tool("swift")): the script
+# and the protocol list it passes the compiler, which flutter_swift_library
+# (build_defs/cc/swift_library.bzl) runs as GN does.
+exports_files([
+    "toolchain/darwin/swift_const_gather_protocols.json",
+    "toolchain/darwin/swiftc.py",
+])
+
 # What the scripts of android/gyp import (their util/ package, jar.py,
 # md5_check.py), for the actions that run them.
 filegroup(
