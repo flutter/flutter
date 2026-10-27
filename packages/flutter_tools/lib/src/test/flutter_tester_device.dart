@@ -9,12 +9,13 @@ import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 import 'package:stream_channel/stream_channel.dart';
 
+import '../artifacts.dart';
 import '../base/dds.dart';
-import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/utils.dart';
+import '../context/tool_context.dart';
 import '../device.dart';
 import '../native_assets.dart';
 import '../project.dart';
@@ -27,10 +28,7 @@ import 'test_device.dart';
 class FlutterTesterTestDevice extends TestDevice {
   FlutterTesterTestDevice({
     required this.id,
-    required this.platform,
-    required this.fileSystem,
-    required this.processManager,
-    required this.logger,
+    required super.toolContext,
     required this.flutterTesterBinPath,
     required this.debuggingOptions,
     required this.enableVmService,
@@ -49,10 +47,6 @@ class FlutterTesterTestDevice extends TestDevice {
 
   /// Used for logging to identify the test that is currently being executed.
   final int id;
-  final Platform platform;
-  final FileSystem fileSystem;
-  final ProcessManager processManager;
-  final Logger logger;
   final String flutterTesterBinPath;
   final DebuggingOptions debuggingOptions;
   final bool enableVmService;
@@ -65,7 +59,7 @@ class FlutterTesterTestDevice extends TestDevice {
   final FontConfigManager fontConfigManager;
   final TestCompilerNativeAssetsBuilder? nativeAssetsBuilder;
 
-  late final _ddsLauncher = DartDevelopmentService(logger: logger);
+  late final _ddsLauncher = DartDevelopmentService(logger: toolContext.logger);
   final Completer<Uri?> _gotProcessVmServiceUri;
   final _exitCode = Completer<int>();
 
@@ -82,6 +76,13 @@ class FlutterTesterTestDevice extends TestDevice {
     assert(!_exitCode.isCompleted);
     assert(_process == null);
     assert(_server == null);
+
+    final ToolContext(
+      :Artifacts artifacts,
+      :Logger logger,
+      :Platform platform,
+      :ProcessManager processManager,
+    ) = toolContext;
 
     // Prepare our WebSocket server to talk to the engine subprocess.
     // Let the server choose an unused port.
@@ -141,7 +142,7 @@ class FlutterTesterTestDevice extends TestDevice {
       'UNIT_TEST_ASSETS': ?testAssetDirectory,
       if (platform.isWindows && nativeAssetsBuilder != null && flutterProject != null)
         'PATH':
-            '${nativeAssetsBuilder!.windowsBuildDirectory(flutterProject!)};${platform.environment['PATH']}',
+            '${nativeAssetsBuilder!.windowsBuildDirectory(flutterProject!, toolContext: toolContext)};${platform.environment['PATH']}',
     };
 
     logger.printTrace(
@@ -179,6 +180,7 @@ class FlutterTesterTestDevice extends TestDevice {
           logger.printTrace('test $id: Starting Dart Development Service');
           await _ddsLauncher.startDartDevelopmentServiceFromDebuggingOptions(
             detectedUri,
+            artifacts: artifacts,
             appName:
                 'Kind: Flutter - Device: flutter tester - '
                 'Package: ${flutterProject?.manifest.appName ?? 'unknown'}',
@@ -229,6 +231,7 @@ class FlutterTesterTestDevice extends TestDevice {
 
   @override
   Future<void> kill() async {
+    final Logger logger = toolContext.logger;
     logger.printTrace('test $id: Terminating flutter_tester process');
     _process?.kill(io.ProcessSignal.sigkill);
 
@@ -245,7 +248,7 @@ class FlutterTesterTestDevice extends TestDevice {
     final int exitCode = await _exitCode.future;
 
     // On Windows, the [exitCode] and the terminating signal have no correlation.
-    if (platform.isWindows) {
+    if (toolContext.platform.isWindows) {
       return;
     }
 
@@ -265,7 +268,12 @@ class FlutterTesterTestDevice extends TestDevice {
     CompileExpression? compileExpression,
     required Logger logger,
   }) {
-    return connectToVmService(httpUri, compileExpression: compileExpression, logger: logger);
+    return connectToVmService(
+      httpUri,
+      compileExpression: compileExpression,
+      flutterVersion: toolContext.flutterVersion,
+      logger: logger,
+    );
   }
 
   /// Binds an [HttpServer] serving from `host` on `port`.
@@ -301,6 +309,7 @@ class FlutterTesterTestDevice extends TestDevice {
     required Process process,
     required Future<void> Function(Uri uri) reportVmServiceUri,
   }) {
+    final Logger logger = toolContext.logger;
     for (final stream in <Stream<List<int>>>[process.stderr, process.stdout]) {
       stream
           .transform(utf8LineDecoder)
