@@ -2009,13 +2009,7 @@ abstract class _NumProperty<T extends num> extends DiagnosticsProperty<T> {
 
   @override
   Map<String, Object?> toJsonMap(DiagnosticsSerializationDelegate delegate) {
-    final Map<String, Object?> json = super.toJsonMap(delegate);
-    if (unit != null) {
-      json['unit'] = unit;
-    }
-
-    json['numberToString'] = numberToString();
-    return json;
+    return {...super.toJsonMap(delegate), 'unit': ?unit, 'numberToString': numberToString()};
   }
 
   /// Optional unit the [value] is measured in.
@@ -2188,15 +2182,7 @@ class FlagProperty extends DiagnosticsProperty<bool> {
 
   @override
   Map<String, Object?> toJsonMap(DiagnosticsSerializationDelegate delegate) {
-    final Map<String, Object?> json = super.toJsonMap(delegate);
-    if (ifTrue != null) {
-      json['ifTrue'] = ifTrue;
-    }
-    if (ifFalse != null) {
-      json['ifFalse'] = ifFalse;
-    }
-
-    return json;
+    return {...super.toJsonMap(delegate), 'ifTrue': ?ifTrue, 'ifFalse': ?ifFalse};
   }
 
   /// Description to use if the property [value] is true.
@@ -2315,11 +2301,10 @@ class IterableProperty<T> extends DiagnosticsProperty<Iterable<T>> {
 
   @override
   Map<String, Object?> toJsonMap(DiagnosticsSerializationDelegate delegate) {
-    final Map<String, Object?> json = super.toJsonMap(delegate);
-    if (value != null) {
-      json['values'] = value!.map<String>((T value) => value.toString()).toList();
-    }
-    return json;
+    return {
+      ...super.toJsonMap(delegate),
+      'values': ?value?.map<String>((T value) => value.toString()).toList(),
+    };
   }
 }
 
@@ -2428,14 +2413,8 @@ class ObjectFlagProperty<T> extends DiagnosticsProperty<T> {
 
   @override
   DiagnosticLevel get level {
-    if (value != null) {
-      if (ifPresent == null) {
-        return DiagnosticLevel.hidden;
-      }
-    } else {
-      if (ifNull == null) {
-        return DiagnosticLevel.hidden;
-      }
+    if ((value != null && ifPresent == null) || (value != null && ifNull == null)) {
+      return DiagnosticLevel.hidden;
     }
 
     return super.level;
@@ -2443,11 +2422,7 @@ class ObjectFlagProperty<T> extends DiagnosticsProperty<T> {
 
   @override
   Map<String, Object?> toJsonMap(DiagnosticsSerializationDelegate delegate) {
-    final Map<String, Object?> json = super.toJsonMap(delegate);
-    if (ifPresent != null) {
-      json['ifPresent'] = ifPresent;
-    }
-    return json;
+    return {...super.toJsonMap(delegate), 'ifPresent': ?ifPresent};
   }
 }
 
@@ -2534,8 +2509,6 @@ class FlagsSummary<T> extends DiagnosticsProperty<Map<String, T?>> {
   //
   // For a non-null value, its description is its key.
   //
-  // For a null value, it is omitted unless `includeEmpty` is true and
-  // [ifEntryNull] contains a corresponding description.
   Iterable<String> _formattedValues() {
     return value.entries
         .where((MapEntry<String, T?> entry) => entry.value != null)
