@@ -3,7 +3,6 @@
 # found in the LICENSE file.
 
 # Generated from //flutter/shell/platform/common/BUILD.gn by gn_to_bazel; do not edit.
-# Not converted: common_cpp_accessibility.
 
 load("@rules_cc//cc:defs.bzl", "cc_library")
 load("//build_defs/cc:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
@@ -108,6 +107,34 @@ cc_library(
         "//engine/src:include_root",
         "//engine/src/flutter:config",
         "//engine/src/flutter/common:flutter_config",
+    ],
+    alwayslink = True,
+)
+
+cc_library(
+    name = "common_cpp_accessibility",
+    srcs = [
+        "accessibility_bridge.cc",
+        "alert_platform_node_delegate.cc",
+        "flutter_platform_node_delegate.cc",
+    ],
+    hdrs = [
+        "accessibility_bridge.h",
+        "alert_platform_node_delegate.h",
+        "flutter_platform_node_delegate.h",
+    ],
+    copts = FLUTTER_COPTS,
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    target_compatible_with = select({
+        "@platforms//os:macos": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        "//engine/src:include_root",
+        "//engine/src/flutter/fml",
+        "//engine/src/flutter/shell/platform/embedder:embedder_as_internal_library",
+        "//engine/src/flutter/third_party/accessibility",
+        "//engine/src/flutter/third_party/accessibility:accessibility_config",
     ],
     alwayslink = True,
 )

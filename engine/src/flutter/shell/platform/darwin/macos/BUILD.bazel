@@ -1,0 +1,761 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Generated from //flutter/shell/platform/darwin/macos/BUILD.gn by gn_to_bazel; do not edit.
+# Not converted: flutter_desktop_darwin_swift_unittests, flutter_desktop_darwin_unittests, flutter_framework, _generate_symlinks_and_verify_framework_module.
+
+load("@bazel_skylib//lib:selects.bzl", "selects")
+load("@rules_cc//cc:defs.bzl", "cc_library")
+load("//build_defs/cc:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES", "MACOS_CFLAGS_OBJC")
+load("//build_defs/cc:objc_library.bzl", "flutter_objc_library")
+load("//build_defs/cc:shared_library.bzl", "flutter_shared_library")
+load("//build_defs/cc:swift_library.bzl", "flutter_swift_library")
+load("//build_defs/dist:framework.bzl", "framework_symlinks")
+load("//build_defs/dist:zip_bundle.bzl", "zip_bundle")
+load("//build_defs/gn:gn_action.bzl", "gn_action", "gn_copy", "gn_generated_file")
+load("//build_defs/testing:testing.bzl", "flutter_test_fixtures")
+
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "macos_gpu_configuration",
+    target_compatible_with = select({
+        "@platforms//os:macos": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        "//engine/src/flutter/shell/gpu:gpu_surface_gl",  # invoker.enable_gl
+        "//engine/src/flutter/shell/gpu:gpu_surface_metal",  # invoker.enable_metal
+        "//engine/src/flutter/shell/gpu:gpu_surface_software",  # invoker.enable_software
+    ],
+)
+
+cc_library(
+    name = "macos_gpu_configuration_config",
+    defines = [
+        "SHELL_ENABLE_SOFTWARE",  # invoker.enable_software
+        "SHELL_ENABLE_GL",  # invoker.enable_gl
+        "SHELL_ENABLE_METAL",  # invoker.enable_metal
+    ],
+    target_compatible_with = select({
+        "@platforms//os:macos": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+)
+
+filegroup(
+    name = "macos",
+    target_compatible_with = select({
+        "@platforms//os:macos": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+)
+
+flutter_swift_library(
+    name = "InternalFlutterSwift",
+    srcs = [
+        "framework/Source/FlutterRunLoop.swift",
+        "framework/Source/ResizeSynchronizer.swift",
+    ],
+    hdrs = [
+        "framework/Headers/FlutterAppDelegate.h",
+        "framework/Headers/FlutterAppLifecycleDelegate.h",
+        "framework/Headers/FlutterEngine.h",
+        "framework/Headers/FlutterMacOS.h",
+        "framework/Headers/FlutterPlatformViews.h",
+        "framework/Headers/FlutterPluginMacOS.h",
+        "framework/Headers/FlutterPluginRegistrarMacOS.h",
+        "framework/Headers/FlutterViewController.h",
+        "//engine/src/flutter/shell/platform/darwin/common:framework/Headers/FlutterBinaryMessenger.h",
+        "//engine/src/flutter/shell/platform/darwin/common:framework/Headers/FlutterChannels.h",
+        "//engine/src/flutter/shell/platform/darwin/common:framework/Headers/FlutterCodecs.h",
+        "//engine/src/flutter/shell/platform/darwin/common:framework/Headers/FlutterDartProject.h",
+        "//engine/src/flutter/shell/platform/darwin/common:framework/Headers/FlutterHourFormat.h",
+        "//engine/src/flutter/shell/platform/darwin/common:framework/Headers/FlutterMacros.h",
+        "//engine/src/flutter/shell/platform/darwin/common:framework/Headers/FlutterTexture.h",
+    ],
+    bridge_header = "InternalFlutterSwift-Bridging-Header.h",
+    includes = [
+        # do not sort
+        "framework/Headers",
+        "framework",  # For module.modulemap
+    ],
+    swiftflags = select({
+        ":when_is_mac_and_enable_unittests": [
+            "-enable-testing",  # is_ios && enable_ios_unittests || (is_mac && enable_unittests)
+        ],
+        "//conditions:default": [],
+    }),
+    target_compatible_with = select({
+        "@platforms//os:macos": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        "//engine/src:include_root",
+        "//engine/src/flutter/shell/platform/darwin/common:config",
+        "//engine/src/flutter/shell/platform/darwin/common:framework_common",
+        "//engine/src/flutter/shell/platform/darwin/common:framework_relative_headers",
+    ],
+)
+
+# The Objective-C(++) sources of flutter_framework_source, which cc_library takes none of
+# (build_defs/cc/objc_library.bzl); flutter_framework_source links them in on the Apple
+# platforms.
+flutter_objc_library(
+    name = "flutter_framework_source_objc",
+    srcs = [
+        "framework/Source/AccessibilityBridgeMac.mm",
+        "framework/Source/FlutterAppDelegate.mm",
+        "framework/Source/FlutterAppLifecycleDelegate.mm",
+        "framework/Source/FlutterChannelKeyResponder.mm",
+        "framework/Source/FlutterCompositor.mm",
+        "framework/Source/FlutterDartProject.mm",
+        "framework/Source/FlutterDisplayLink.mm",
+        "framework/Source/FlutterEmbedderKeyResponder.mm",
+        "framework/Source/FlutterEngine.mm",
+        "framework/Source/FlutterExternalTexture.mm",
+        "framework/Source/FlutterKeyboardLayout.mm",
+        "framework/Source/FlutterKeyboardManager.mm",
+        "framework/Source/FlutterMenuPlugin.mm",
+        "framework/Source/FlutterMouseCursorPlugin.mm",
+        "framework/Source/FlutterMutatorView.mm",
+        "framework/Source/FlutterPlatformNodeDelegateMac.mm",
+        "framework/Source/FlutterPlatformViewController.mm",
+        "framework/Source/FlutterRenderer.mm",
+        "framework/Source/FlutterSurface.mm",
+        "framework/Source/FlutterSurfaceManager.mm",
+        "framework/Source/FlutterTextInputPlugin.mm",
+        "framework/Source/FlutterTextInputSemanticsObject.mm",
+        "framework/Source/FlutterTextureRegistrar.mm",
+        "framework/Source/FlutterTimeConverter.mm",
+        "framework/Source/FlutterVSyncWaiter.mm",
+        "framework/Source/FlutterView.mm",
+        "framework/Source/FlutterViewController.mm",
+        "framework/Source/FlutterViewEngineProvider.mm",
+        "framework/Source/FlutterWindowController.mm",
+        "framework/Source/KeyCodeMap.g.mm",
+    ],
+    hdrs = [
+        "framework/Headers/FlutterAppDelegate.h",
+        "framework/Headers/FlutterAppLifecycleDelegate.h",
+        "framework/Headers/FlutterEngine.h",
+        "framework/Headers/FlutterMacOS.h",
+        "framework/Headers/FlutterPlatformViews.h",
+        "framework/Headers/FlutterPluginMacOS.h",
+        "framework/Headers/FlutterPluginRegistrarMacOS.h",
+        "framework/Headers/FlutterViewController.h",
+        "framework/Source/AccessibilityBridgeMac.h",
+        "framework/Source/FlutterChannelKeyResponder.h",
+        "framework/Source/FlutterCompositor.h",
+        "framework/Source/FlutterDartProject_Internal.h",
+        "framework/Source/FlutterDisplayLink.h",
+        "framework/Source/FlutterEmbedderKeyResponder.h",
+        "framework/Source/FlutterEngine_Internal.h",
+        "framework/Source/FlutterExternalTexture.h",
+        "framework/Source/FlutterKeyPrimaryResponder.h",
+        "framework/Source/FlutterKeyboardLayout.h",
+        "framework/Source/FlutterKeyboardManager.h",
+        "framework/Source/FlutterMenuPlugin.h",
+        "framework/Source/FlutterMenuPlugin_Internal.h",
+        "framework/Source/FlutterMouseCursorPlugin.h",
+        "framework/Source/FlutterMutatorView.h",
+        "framework/Source/FlutterPlatformNodeDelegateMac.h",
+        "framework/Source/FlutterPlatformViewController.h",
+        "framework/Source/FlutterRenderer.h",
+        "framework/Source/FlutterSurface.h",
+        "framework/Source/FlutterSurfaceManager.h",
+        "framework/Source/FlutterTextInputPlugin.h",
+        "framework/Source/FlutterTextInputSemanticsObject.h",
+        "framework/Source/FlutterTextureRegistrar.h",
+        "framework/Source/FlutterTimeConverter.h",
+        "framework/Source/FlutterVSyncWaiter.h",
+        "framework/Source/FlutterView.h",
+        "framework/Source/FlutterViewController_Internal.h",
+        "framework/Source/FlutterViewEngineProvider.h",
+        "framework/Source/FlutterViewProvider.h",
+        "framework/Source/FlutterView_Internal.h",
+        "framework/Source/FlutterWindowController.h",
+    ],
+    copts = FLUTTER_COPTS + select({
+        "//engine/src/flutter/shell:enable_vulkan": [
+            "-Wno-redundant-parens",  # from :macos_gpu_configuration
+        ],
+        "//conditions:default": [],
+    }) + [
+        "-Wno-unguarded-availability",  # from :macos_gpu_configuration
+    ] + select({
+        ":when_impeller_enable_opengles_and_is_mac": [
+            "-Wno-unguarded-availability",  # from :macos_gpu_configuration
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_impeller_enable_opengles_and_impeller_enable_vulkan": [
+            "-Wno-redundant-parens",  # from :macos_gpu_configuration
+            "-Wno-c++98-compat-extra-semi",  # from :macos_gpu_configuration
+            "-Wno-deprecated-copy",  # from :macos_gpu_configuration
+            "-Wno-implicit-fallthrough",  # from :macos_gpu_configuration
+            "-Wno-nullability-completeness",  # from :macos_gpu_configuration
+            "-Wno-suggest-destructor-override",  # from :macos_gpu_configuration
+            "-Wno-suggest-override",  # from :macos_gpu_configuration
+            "-Wno-unused-private-field",  # from :macos_gpu_configuration
+            "-Wno-unused-variable",  # from :macos_gpu_configuration
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_impeller_enable_metal_and_is_mac": [
+            "-Wno-unguarded-availability",  # from :macos_gpu_configuration
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_impeller_enable_metal_and_impeller_enable_vulkan": [
+            "-Wno-redundant-parens",  # from :macos_gpu_configuration
+            "-Wno-c++98-compat-extra-semi",  # from :macos_gpu_configuration
+            "-Wno-deprecated-copy",  # from :macos_gpu_configuration
+            "-Wno-implicit-fallthrough",  # from :macos_gpu_configuration
+            "-Wno-nullability-completeness",  # from :macos_gpu_configuration
+            "-Wno-suggest-destructor-override",  # from :macos_gpu_configuration
+            "-Wno-suggest-override",  # from :macos_gpu_configuration
+            "-Wno-unused-private-field",  # from :macos_gpu_configuration
+            "-Wno-unused-variable",  # from :macos_gpu_configuration
+        ],
+        "//conditions:default": [],
+    }) + MACOS_CFLAGS_OBJC,
+    local_defines = FLUTTER_LOCAL_DEFINES + [
+        "FLUTTER_FRAMEWORK",
+        "FLUTTER_ENGINE_NO_PROTOTYPES",
+    ],
+    target_compatible_with = select({
+        "@platforms//os:macos": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        ":InternalFlutterSwift",
+        ":macos_gpu_configuration",
+        "//engine/src:include_root",
+        "//engine/src/flutter:config",
+        "//engine/src/flutter/flow",
+        "//engine/src/flutter/fml",
+        "//engine/src/flutter/shell/platform/common:common_cpp_accessibility",
+        "//engine/src/flutter/shell/platform/common:common_cpp_core",
+        "//engine/src/flutter/shell/platform/common:common_cpp_enums",
+        "//engine/src/flutter/shell/platform/common:common_cpp_input",
+        "//engine/src/flutter/shell/platform/common:common_cpp_isolate_scope",
+        "//engine/src/flutter/shell/platform/common:common_cpp_switches",
+        "//engine/src/flutter/shell/platform/darwin/common:availability_version_check",
+        "//engine/src/flutter/shell/platform/darwin/common:framework_common",
+        "//engine/src/flutter/shell/platform/darwin/graphics",
+        "//engine/src/flutter/shell/platform/embedder:embedder_as_internal_library",
+        "@skia",
+    ],
+    alwayslink = True,
+)
+
+cc_library(
+    name = "flutter_framework_source",
+    hdrs = [
+        "framework/Headers/FlutterAppDelegate.h",
+        "framework/Headers/FlutterAppLifecycleDelegate.h",
+        "framework/Headers/FlutterEngine.h",
+        "framework/Headers/FlutterMacOS.h",
+        "framework/Headers/FlutterPlatformViews.h",
+        "framework/Headers/FlutterPluginMacOS.h",
+        "framework/Headers/FlutterPluginRegistrarMacOS.h",
+        "framework/Headers/FlutterViewController.h",
+        "framework/Source/AccessibilityBridgeMac.h",
+        "framework/Source/FlutterChannelKeyResponder.h",
+        "framework/Source/FlutterCompositor.h",
+        "framework/Source/FlutterDartProject_Internal.h",
+        "framework/Source/FlutterDisplayLink.h",
+        "framework/Source/FlutterEmbedderKeyResponder.h",
+        "framework/Source/FlutterEngine_Internal.h",
+        "framework/Source/FlutterExternalTexture.h",
+        "framework/Source/FlutterKeyPrimaryResponder.h",
+        "framework/Source/FlutterKeyboardLayout.h",
+        "framework/Source/FlutterKeyboardManager.h",
+        "framework/Source/FlutterMenuPlugin.h",
+        "framework/Source/FlutterMenuPlugin_Internal.h",
+        "framework/Source/FlutterMouseCursorPlugin.h",
+        "framework/Source/FlutterMutatorView.h",
+        "framework/Source/FlutterPlatformNodeDelegateMac.h",
+        "framework/Source/FlutterPlatformViewController.h",
+        "framework/Source/FlutterRenderer.h",
+        "framework/Source/FlutterSurface.h",
+        "framework/Source/FlutterSurfaceManager.h",
+        "framework/Source/FlutterTextInputPlugin.h",
+        "framework/Source/FlutterTextInputSemanticsObject.h",
+        "framework/Source/FlutterTextureRegistrar.h",
+        "framework/Source/FlutterTimeConverter.h",
+        "framework/Source/FlutterVSyncWaiter.h",
+        "framework/Source/FlutterView.h",
+        "framework/Source/FlutterViewController_Internal.h",
+        "framework/Source/FlutterViewEngineProvider.h",
+        "framework/Source/FlutterViewProvider.h",
+        "framework/Source/FlutterView_Internal.h",
+        "framework/Source/FlutterWindowController.h",
+    ],
+    copts = FLUTTER_COPTS + [
+        "-Wno-unguarded-availability",  # from :macos_gpu_configuration
+    ] + select({
+        "//engine/src/flutter/shell:enable_vulkan": [
+            "-Wno-redundant-parens",  # from :macos_gpu_configuration
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_impeller_enable_opengles_and_is_mac": [
+            "-Wno-unguarded-availability",  # from :macos_gpu_configuration
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_impeller_enable_opengles_and_impeller_enable_vulkan": [
+            "-Wno-redundant-parens",  # from :macos_gpu_configuration
+            "-Wno-c++98-compat-extra-semi",  # from :macos_gpu_configuration
+            "-Wno-deprecated-copy",  # from :macos_gpu_configuration
+            "-Wno-implicit-fallthrough",  # from :macos_gpu_configuration
+            "-Wno-nullability-completeness",  # from :macos_gpu_configuration
+            "-Wno-suggest-destructor-override",  # from :macos_gpu_configuration
+            "-Wno-suggest-override",  # from :macos_gpu_configuration
+            "-Wno-unused-private-field",  # from :macos_gpu_configuration
+            "-Wno-unused-variable",  # from :macos_gpu_configuration
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_impeller_enable_metal_and_is_mac": [
+            "-Wno-unguarded-availability",  # from :macos_gpu_configuration
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_impeller_enable_metal_and_impeller_enable_vulkan": [
+            "-Wno-redundant-parens",  # from :macos_gpu_configuration
+            "-Wno-c++98-compat-extra-semi",  # from :macos_gpu_configuration
+            "-Wno-deprecated-copy",  # from :macos_gpu_configuration
+            "-Wno-implicit-fallthrough",  # from :macos_gpu_configuration
+            "-Wno-nullability-completeness",  # from :macos_gpu_configuration
+            "-Wno-suggest-destructor-override",  # from :macos_gpu_configuration
+            "-Wno-suggest-override",  # from :macos_gpu_configuration
+            "-Wno-unused-private-field",  # from :macos_gpu_configuration
+            "-Wno-unused-variable",  # from :macos_gpu_configuration
+        ],
+        "//conditions:default": [],
+    }),
+    linkopts = [
+        "-framework",
+        "Carbon",
+        "-framework",
+        "Cocoa",
+        "-framework",
+        "CoreVideo",
+        "-framework",
+        "IOSurface",
+        "-framework",
+        "Metal",
+        "-framework",
+        "QuartzCore",
+    ],
+    local_defines = FLUTTER_LOCAL_DEFINES + [
+        "FLUTTER_FRAMEWORK",
+        "FLUTTER_ENGINE_NO_PROTOTYPES",
+    ],
+    target_compatible_with = select({
+        "@platforms//os:macos": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        ":InternalFlutterSwift",
+        ":flutter_framework_source_objc",
+        ":macos_gpu_configuration",
+        "//engine/src:include_root",
+        "//engine/src/flutter:config",
+        "//engine/src/flutter/flow",
+        "//engine/src/flutter/fml",
+        "//engine/src/flutter/shell/platform/common:common_cpp_accessibility",
+        "//engine/src/flutter/shell/platform/common:common_cpp_core",
+        "//engine/src/flutter/shell/platform/common:common_cpp_enums",
+        "//engine/src/flutter/shell/platform/common:common_cpp_input",
+        "//engine/src/flutter/shell/platform/common:common_cpp_isolate_scope",
+        "//engine/src/flutter/shell/platform/common:common_cpp_switches",
+        "//engine/src/flutter/shell/platform/darwin/common:availability_version_check",
+        "//engine/src/flutter/shell/platform/darwin/common:framework_common",
+        "//engine/src/flutter/shell/platform/darwin/graphics",
+        "//engine/src/flutter/shell/platform/embedder:embedder_as_internal_library",
+        "@skia",
+    ],
+    alwayslink = True,
+)
+
+flutter_shared_library(
+    name = "flutter_framework_dylib",
+    linkopts = [
+        "-Wl,-install_name,@rpath/FlutterMacOS.framework/Versions/A/FlutterMacOS",
+        "-fapplication-extension",
+    ],
+    output_name = "FlutterMacOS",
+    target_compatible_with = select({
+        "@platforms//os:macos": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        ":flutter_framework_source",
+        "//engine/src/flutter/build/bazel/toolchains:cxx_runtime",
+    ],
+)
+
+flutter_test_fixtures(
+    name = "flutter_desktop_darwin_fixtures",
+    dart_main = "framework/Source/fixtures/flutter_desktop_test.dart",
+    fixtures = ["@icu//:common/icudtl.dat"],
+    target_compatible_with = select({
+        "@platforms//os:macos": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+)
+
+gn_copy(
+    name = "copy_dylib",
+    srcs = [":flutter_framework_dylib"],
+    outs = ["FlutterMacOS.framework/Versions/A/FlutterMacOS"],
+    outputs = ["$root_out_dir/FlutterMacOS.framework/Versions/A/FlutterMacOS"],
+    target_compatible_with = select({
+        "@platforms//os:macos": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [":flutter_framework_dylib"],
+)
+
+gn_action(
+    name = "copy_framework_info_plist",
+    srcs = ["framework/Info.plist"],
+    args = [
+        "--source",
+        "$(execpath :framework/Info.plist)",
+        "--destination",
+        "$(built FlutterMacOS.framework/Versions/A/Resources/Info.plist)",
+        "--buildmode",
+    ] + select({
+        "//engine/src/flutter/common:runtime_mode_debug": ["debug"],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/common:runtime_mode_profile": ["profile"],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/common:runtime_mode_release": ["release"],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/common:runtime_mode_jit_release": ["jit_release"],
+        "//conditions:default": [],
+    }),
+    build_outputs = ["FlutterMacOS.framework/Versions/A/Resources/Info.plist"],
+    script = "//engine/src/flutter/build:copy_info_plist.py",
+    target_compatible_with = select({
+        "@platforms//os:macos": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+)
+
+gn_copy(
+    name = "copy_framework_module_map",
+    srcs = ["framework/module.modulemap"],
+    outputs = ["$root_out_dir/FlutterMacOS.framework/Versions/A/Modules/module.modulemap"],
+    target_compatible_with = select({
+        "@platforms//os:macos": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+)
+
+# Copy privacy manifest. This file is required by Apple for third-party SDKs.
+# See https://developer.apple.com/documentation/bundleresources/privacy_manifest_files
+gn_copy(
+    name = "copy_framework_privacy_manifest",
+    srcs = ["framework/PrivacyInfo.xcprivacy"],
+    outputs = ["$root_out_dir/FlutterMacOS.framework/Versions/A/Resources/PrivacyInfo.xcprivacy"],
+    target_compatible_with = select({
+        "@platforms//os:macos": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+)
+
+gn_action(
+    name = "copy_framework_headers",
+    srcs = [
+        "framework/Headers/FlutterAppDelegate.h",
+        "framework/Headers/FlutterAppLifecycleDelegate.h",
+        "framework/Headers/FlutterEngine.h",
+        "framework/Headers/FlutterMacOS.h",
+        "framework/Headers/FlutterPlatformViews.h",
+        "framework/Headers/FlutterPluginMacOS.h",
+        "framework/Headers/FlutterPluginRegistrarMacOS.h",
+        "framework/Headers/FlutterViewController.h",
+        "//engine/src/flutter/shell/platform/darwin/common:framework/Headers/FlutterBinaryMessenger.h",
+        "//engine/src/flutter/shell/platform/darwin/common:framework/Headers/FlutterChannels.h",
+        "//engine/src/flutter/shell/platform/darwin/common:framework/Headers/FlutterCodecs.h",
+        "//engine/src/flutter/shell/platform/darwin/common:framework/Headers/FlutterDartProject.h",
+        "//engine/src/flutter/shell/platform/darwin/common:framework/Headers/FlutterHourFormat.h",
+        "//engine/src/flutter/shell/platform/darwin/common:framework/Headers/FlutterMacros.h",
+        "//engine/src/flutter/shell/platform/darwin/common:framework/Headers/FlutterTexture.h",
+    ],
+    args = [
+        "--location",
+        "$(built FlutterMacOS.framework/Versions/A/Headers)",
+        "--headers",
+        "$(execpath :framework/Headers/FlutterAppDelegate.h)",
+        "$(execpath :framework/Headers/FlutterAppLifecycleDelegate.h)",
+        "$(execpath :framework/Headers/FlutterEngine.h)",
+        "$(execpath :framework/Headers/FlutterMacOS.h)",
+        "$(execpath :framework/Headers/FlutterPlatformViews.h)",
+        "$(execpath :framework/Headers/FlutterPluginMacOS.h)",
+        "$(execpath :framework/Headers/FlutterPluginRegistrarMacOS.h)",
+        "$(execpath :framework/Headers/FlutterViewController.h)",
+        "$(execpath //engine/src/flutter/shell/platform/darwin/common:framework/Headers/FlutterMacros.h)",
+        "$(execpath //engine/src/flutter/shell/platform/darwin/common:framework/Headers/FlutterBinaryMessenger.h)",
+        "$(execpath //engine/src/flutter/shell/platform/darwin/common:framework/Headers/FlutterChannels.h)",
+        "$(execpath //engine/src/flutter/shell/platform/darwin/common:framework/Headers/FlutterCodecs.h)",
+        "$(execpath //engine/src/flutter/shell/platform/darwin/common:framework/Headers/FlutterHourFormat.h)",
+        "$(execpath //engine/src/flutter/shell/platform/darwin/common:framework/Headers/FlutterTexture.h)",
+        "$(execpath //engine/src/flutter/shell/platform/darwin/common:framework/Headers/FlutterDartProject.h)",
+    ],
+    build_outputs = [
+        "FlutterMacOS.framework/Versions/A/Headers/FlutterAppDelegate.h",
+        "FlutterMacOS.framework/Versions/A/Headers/FlutterAppLifecycleDelegate.h",
+        "FlutterMacOS.framework/Versions/A/Headers/FlutterEngine.h",
+        "FlutterMacOS.framework/Versions/A/Headers/FlutterMacOS.h",
+        "FlutterMacOS.framework/Versions/A/Headers/FlutterPlatformViews.h",
+        "FlutterMacOS.framework/Versions/A/Headers/FlutterPluginMacOS.h",
+        "FlutterMacOS.framework/Versions/A/Headers/FlutterPluginRegistrarMacOS.h",
+        "FlutterMacOS.framework/Versions/A/Headers/FlutterViewController.h",
+        "FlutterMacOS.framework/Versions/A/Headers/FlutterMacros.h",
+        "FlutterMacOS.framework/Versions/A/Headers/FlutterBinaryMessenger.h",
+        "FlutterMacOS.framework/Versions/A/Headers/FlutterChannels.h",
+        "FlutterMacOS.framework/Versions/A/Headers/FlutterCodecs.h",
+        "FlutterMacOS.framework/Versions/A/Headers/FlutterHourFormat.h",
+        "FlutterMacOS.framework/Versions/A/Headers/FlutterTexture.h",
+        "FlutterMacOS.framework/Versions/A/Headers/FlutterDartProject.h",
+    ],
+    script = "//engine/src/flutter/sky:tools/install_framework_headers.py",
+    target_compatible_with = select({
+        "@platforms//os:macos": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+)
+
+gn_copy(
+    name = "copy_framework_icu",
+    srcs = ["@icu//:flutter/icudtl.dat"],
+    outputs = ["$root_out_dir/FlutterMacOS.framework/Versions/A/Resources/{{source_file_part}}"],
+    target_compatible_with = select({
+        "@platforms//os:macos": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+)
+
+gn_copy(
+    name = "copy_license",
+    srcs = ["//engine/src:LICENSE"],
+    outputs = ["$root_out_dir/LICENSE"],
+    target_compatible_with = select({
+        "@platforms//os:macos": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+)
+
+framework_symlinks(
+    name = "_generate_symlinks",
+    args = [
+        "--framework",
+        "FlutterMacOS.framework",
+        "--version",
+        "A",
+        "--contents",
+        "FlutterMacOS",
+        "Resources",
+        "Headers",
+        "Modules",
+        "--stamp",
+        "FlutterMacOS.stamp",
+    ],
+    target_compatible_with = select({
+        "@platforms//os:macos": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        ":copy_dylib",
+        ":copy_framework_headers",
+        ":copy_framework_icu",
+        ":copy_framework_info_plist",
+        ":copy_framework_module_map",
+        ":copy_framework_privacy_manifest",
+        ":copy_license",
+    ],
+)
+
+filegroup(
+    name = "universal_flutter_framework",
+    srcs = [":_generate_symlinks"],
+    target_compatible_with = select({
+        "@platforms//os:macos": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+)
+
+# `full_target_platform_name == "darwin-arm64" && flutter_runtime_mode == "profile"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_full_target_platform_name_darwin_arm64_and_flutter_runtime_mode_profile",
+    match_all = [
+        "//engine/src/flutter/common:platform_darwin_arm64",
+        "//engine/src/flutter/common:runtime_mode_profile",
+    ],
+)
+
+# `full_target_platform_name == "darwin-arm64" && flutter_runtime_mode == "release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_full_target_platform_name_darwin_arm64_and_flutter_runtime_mode_release",
+    match_all = [
+        "//engine/src/flutter/common:platform_darwin_arm64",
+        "//engine/src/flutter/common:runtime_mode_release",
+    ],
+)
+
+# `full_target_platform_name == "darwin-arm64" && flutter_runtime_mode == "jit_release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_full_target_platform_name_darwin_arm64_and_flutter_runtime_mode_jit_release",
+    match_all = [
+        "//engine/src/flutter/common:platform_darwin_arm64",
+        "//engine/src/flutter/common:runtime_mode_jit_release",
+    ],
+)
+
+# `full_target_platform_name == "darwin-x64" && flutter_runtime_mode == "profile"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_full_target_platform_name_darwin_x64_and_flutter_runtime_mode_profile",
+    match_all = [
+        "//engine/src/flutter/common:platform_darwin_x64",
+        "//engine/src/flutter/common:runtime_mode_profile",
+    ],
+)
+
+# `full_target_platform_name == "darwin-x64" && flutter_runtime_mode == "release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_full_target_platform_name_darwin_x64_and_flutter_runtime_mode_release",
+    match_all = [
+        "//engine/src/flutter/common:platform_darwin_x64",
+        "//engine/src/flutter/common:runtime_mode_release",
+    ],
+)
+
+# `full_target_platform_name == "darwin-x64" && flutter_runtime_mode == "jit_release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_full_target_platform_name_darwin_x64_and_flutter_runtime_mode_jit_release",
+    match_all = [
+        "//engine/src/flutter/common:platform_darwin_x64",
+        "//engine/src/flutter/common:runtime_mode_jit_release",
+    ],
+)
+
+# `flutter_runtime_mode == "debug" && full_target_platform_name == "linux-x64"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_flutter_runtime_mode_debug_and_full_target_platform_name_linux_x64",
+    match_all = [
+        "//engine/src/flutter/common:runtime_mode_debug",
+        "//engine/src/flutter/common:platform_linux_x64",
+    ],
+)
+
+# `flutter_runtime_mode == "debug" && full_target_platform_name == "darwin-arm64"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_flutter_runtime_mode_debug_and_full_target_platform_name_darwin_arm64",
+    match_all = [
+        "//engine/src/flutter/common:runtime_mode_debug",
+        "//engine/src/flutter/common:platform_darwin_arm64",
+    ],
+)
+
+# `flutter_runtime_mode == "debug" && full_target_platform_name == "darwin-x64"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_flutter_runtime_mode_debug_and_full_target_platform_name_darwin_x64",
+    match_all = [
+        "//engine/src/flutter/common:runtime_mode_debug",
+        "//engine/src/flutter/common:platform_darwin_x64",
+    ],
+)
+
+zip_bundle(
+    name = "zip_macos_flutter_framework",
+    files = {"FlutterMacOS.framework": ":_generate_symlinks"},
+    output = select({
+        ":when_full_target_platform_name_darwin_arm64_and_flutter_runtime_mode_profile": "darwin-arm64-profile/FlutterMacOS.framework.zip",
+        ":when_full_target_platform_name_darwin_arm64_and_flutter_runtime_mode_release": "darwin-arm64-release/FlutterMacOS.framework.zip",
+        ":when_full_target_platform_name_darwin_arm64_and_flutter_runtime_mode_jit_release": "darwin-arm64-jit_release/FlutterMacOS.framework.zip",
+        ":when_full_target_platform_name_darwin_x64_and_flutter_runtime_mode_profile": "darwin-x64-profile/FlutterMacOS.framework.zip",
+        ":when_full_target_platform_name_darwin_x64_and_flutter_runtime_mode_release": "darwin-x64-release/FlutterMacOS.framework.zip",
+        ":when_full_target_platform_name_darwin_x64_and_flutter_runtime_mode_jit_release": "darwin-x64-jit_release/FlutterMacOS.framework.zip",
+        ":when_flutter_runtime_mode_debug_and_full_target_platform_name_linux_x64": "linux-x64/FlutterMacOS.framework.zip",
+        ":when_flutter_runtime_mode_debug_and_full_target_platform_name_darwin_arm64": "darwin-arm64/FlutterMacOS.framework.zip",
+        ":when_flutter_runtime_mode_debug_and_full_target_platform_name_darwin_x64": "darwin-x64/FlutterMacOS.framework.zip",
+        "//conditions:default": None,
+    }),
+    sources = {"FlutterMacOS.framework": "FlutterMacOS.framework"},
+    target_compatible_with = select({
+        "@platforms//os:macos": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        ":_generate_symlinks",
+        ":macos_framework_without_entitlement_config",
+    ],
+)
+
+gn_generated_file(
+    name = "macos_framework_without_entitlement_config",
+    out = "framework_without_entitlements.txt",
+    content = ["FlutterMacOS.framework.zip/Versions/A/FlutterMacOS"],
+    outputs = ["$root_gen_dir/flutter/shell/platform/darwin/macos/framework_without_entitlements.txt"],
+    target_compatible_with = select({
+        "@platforms//os:macos": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [":_generate_symlinks"],
+)
+
+# `is_mac && enable_unittests`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_is_mac_and_enable_unittests",
+    match_all = [
+        "@platforms//os:macos",
+        "//engine/src/flutter/testing:unittests_enabled",
+    ],
+)
+
+# `impeller_enable_opengles && is_mac`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_impeller_enable_opengles_and_is_mac",
+    match_all = [
+        "//engine/src/flutter/impeller/tools:opengles",
+        "@platforms//os:macos",
+    ],
+)
+
+# `impeller_enable_opengles && impeller_enable_vulkan`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_impeller_enable_opengles_and_impeller_enable_vulkan",
+    match_all = [
+        "//engine/src/flutter/impeller/tools:opengles",
+        "//engine/src/flutter/impeller/tools:vulkan",
+    ],
+)
+
+# `impeller_enable_metal && is_mac`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_impeller_enable_metal_and_is_mac",
+    match_all = [
+        "//engine/src/flutter/impeller/tools:metal",
+        "@platforms//os:macos",
+    ],
+)
+
+# `impeller_enable_metal && impeller_enable_vulkan`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_impeller_enable_metal_and_impeller_enable_vulkan",
+    match_all = [
+        "//engine/src/flutter/impeller/tools:metal",
+        "//engine/src/flutter/impeller/tools:vulkan",
+    ],
+)
