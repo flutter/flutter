@@ -13,6 +13,7 @@ import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
+import '../../src/fakes.dart';
 
 void main() {
   const kWhichSysctlCommand = FakeCommand(command: <String>['which', 'sysctl']);
@@ -29,7 +30,7 @@ void main() {
       final xcode = Xcode.test(
         processManager: processManager,
         xcodeProjectInterpreter: XcodeProjectInterpreter.test(
-          processManager: processManager,
+          toolContext: FakeToolContext.macosHost(processManager: processManager),
           version: null,
         ),
       );
@@ -57,7 +58,7 @@ void main() {
       final xcode = Xcode.test(
         processManager: processManager,
         xcodeProjectInterpreter: XcodeProjectInterpreter.test(
-          processManager: processManager,
+          toolContext: FakeToolContext.macosHost(processManager: processManager),
           version: null,
         ),
       );
@@ -77,7 +78,7 @@ void main() {
       final xcode = Xcode.test(
         processManager: processManager,
         xcodeProjectInterpreter: XcodeProjectInterpreter.test(
-          processManager: processManager,
+          toolContext: FakeToolContext.macosHost(processManager: processManager),
           version: Version(7, 0, 1),
         ),
       );
@@ -113,7 +114,7 @@ void main() {
       final xcode = Xcode.test(
         processManager: processManager,
         xcodeProjectInterpreter: XcodeProjectInterpreter.test(
-          processManager: processManager,
+          toolContext: FakeToolContext.macosHost(processManager: processManager),
           version: Version(15, 4, null),
         ),
       );
@@ -154,7 +155,9 @@ void main() {
       ]);
       final xcode = Xcode.test(
         processManager: processManager,
-        xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
+        xcodeProjectInterpreter: XcodeProjectInterpreter.test(
+          toolContext: FakeToolContext.macosHost(processManager: processManager),
+        ),
       );
       final validator = XcodeValidator(
         xcode: xcode,
@@ -184,7 +187,9 @@ void main() {
       ]);
       final xcode = Xcode.test(
         processManager: processManager,
-        xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
+        xcodeProjectInterpreter: XcodeProjectInterpreter.test(
+          toolContext: FakeToolContext.macosHost(processManager: processManager),
+        ),
       );
       final validator = XcodeValidator(
         xcode: xcode,
@@ -214,7 +219,9 @@ void main() {
       ]);
       final xcode = Xcode.test(
         processManager: processManager,
-        xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
+        xcodeProjectInterpreter: XcodeProjectInterpreter.test(
+          toolContext: FakeToolContext.macosHost(processManager: processManager),
+        ),
       );
       final validator = XcodeValidator(
         xcode: xcode,
@@ -245,7 +252,9 @@ void main() {
       ]);
       final xcode = Xcode.test(
         processManager: processManager,
-        xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
+        xcodeProjectInterpreter: XcodeProjectInterpreter.test(
+          toolContext: FakeToolContext.macosHost(processManager: processManager),
+        ),
       );
       final validator = XcodeValidator(
         xcode: xcode,
@@ -281,7 +290,9 @@ void main() {
         ]);
         final xcode = Xcode.test(
           processManager: processManager,
-          xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
+          xcodeProjectInterpreter: XcodeProjectInterpreter.test(
+            toolContext: FakeToolContext.macosHost(processManager: processManager),
+          ),
         );
         final simulatorUtils = FakeIOSSimulatorUtils(
           runtimes: <IOSSimulatorRuntime>[
@@ -318,7 +329,9 @@ void main() {
       ]);
       final xcode = Xcode.test(
         processManager: processManager,
-        xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
+        xcodeProjectInterpreter: XcodeProjectInterpreter.test(
+          toolContext: FakeToolContext.macosHost(processManager: processManager),
+        ),
       );
       final simulatorUtils = FakeIOSSimulatorUtils(
         runtimes: <IOSSimulatorRuntime>[
