@@ -5,9 +5,10 @@
 # Smoke tests for the hermetic toolchains: the first targets the Bazel build
 # compiles, and a quick check that a toolchain change still matches GN.
 
-load("@rules_cc//cc:defs.bzl", "cc_test")
+load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
 load("//build_defs/cc:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES", "MACOS_CFLAGS_OBJCC")
 load("//build_defs/cc:objc_library.bzl", "flutter_objc_library")
+load("//build_defs/cc:swift_library.bzl", "flutter_swift_library")
 
 cc_test(
     name = "cc_toolchain_smoke_test",
@@ -59,6 +60,57 @@ cc_test(
     deps = [
         ":macos_objc_smoke",
         "//engine/src:include_root",
+        "@googletest//:gtest_main",
+    ],
+)
+
+# flutter_swift_library's test (build_defs/cc/swift_library.bzl): a Swift
+# module compiled through GN's swiftc.py, calling C through its bridging
+# header, reached from Objective-C++ through its generated header -- the
+# shape of darwin/common's InternalFlutterSwiftCommon.
+cc_library(
+    name = "macos_swift_smoke_c",
+    srcs = ["macos_swift_smoke_c.c"],
+    hdrs = ["macos_swift_smoke_c.h"],
+    copts = FLUTTER_COPTS,
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    target_compatible_with = ["@platforms//os:macos"],
+    deps = ["//engine/src:include_root"],
+)
+
+flutter_swift_library(
+    name = "MacosSwiftSmoke",
+    srcs = ["MacosSwiftSmoke.swift"],
+    bridge_header = "macos_swift_smoke_bridging.h",
+    target_compatible_with = ["@platforms//os:macos"],
+    deps = [":macos_swift_smoke_c"],
+)
+
+flutter_objc_library(
+    name = "macos_swift_smoke_test_objc",
+    testonly = True,
+    srcs = ["macos_swift_smoke_test.mm"],
+    copts = FLUTTER_COPTS + MACOS_CFLAGS_OBJCC,
+    linkopts = [
+        "-framework",
+        "Foundation",
+    ],
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    target_compatible_with = ["@platforms//os:macos"],
+    deps = [
+        ":MacosSwiftSmoke",
+        "//engine/src:include_root",
+        "@googletest//:gtest",
+    ],
+    alwayslink = True,
+)
+
+cc_test(
+    name = "macos_swift_smoke_test",
+    size = "small",
+    target_compatible_with = ["@platforms//os:macos"],
+    deps = [
+        ":macos_swift_smoke_test_objc",
         "@googletest//:gtest_main",
     ],
 )

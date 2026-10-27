@@ -3,7 +3,6 @@
 # found in the LICENSE file.
 
 # Generated from //flutter/shell/common/BUILD.gn by gn_to_bazel; do not edit.
-# Dependencies left out, their packages not converted yet (a platform the migration has not reached): //flutter/shell/platform/darwin/graphics:graphics.
 
 load("@bazel_skylib//lib:selects.bzl", "selects")
 load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
@@ -551,6 +550,11 @@ flutter_objc_library(
         ],
         "//conditions:default": [],
     }) + select({
+        "//engine/src/flutter/shell:test_enable_metal": [
+            "//engine/src/flutter/shell/platform/darwin/graphics",  # test_enable_metal
+        ],
+        "//conditions:default": [],
+    }) + select({
         "//engine/src/flutter/impeller/tools:metal": [
             "//engine/src/flutter/impeller",  # impeller_supports_rendering
         ],
@@ -777,6 +781,12 @@ cc_library(
         ],
         "//conditions:default": [],
     }) + select({
+        "//engine/src/flutter/shell:test_enable_metal": [
+            ":shell_test_fixture_sources_objc",
+            "//engine/src/flutter/shell/platform/darwin/graphics",  # test_enable_metal
+        ],
+        "//conditions:default": [],
+    }) + select({
         "//engine/src/flutter/impeller/tools:metal": [
             "//engine/src/flutter/impeller",  # impeller_supports_rendering
         ],
@@ -786,9 +796,6 @@ cc_library(
         "//engine/src/flutter/impeller/tools:vulkan": [
             "//engine/src/flutter/impeller",  # impeller_supports_rendering
         ],
-        "//conditions:default": [],
-    }) + select({
-        "//engine/src/flutter/shell:test_enable_metal": [":shell_test_fixture_sources_objc"],
         "//conditions:default": [],
     }),
     alwayslink = True,
