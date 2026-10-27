@@ -3,7 +3,6 @@
 # found in the LICENSE file.
 
 # Generated from //flutter/shell/platform/embedder/BUILD.gn by gn_to_bazel; do not edit.
-# Dependencies left out, their packages not converted yet (a platform the migration has not reached): //flutter/shell/platform/darwin/graphics:graphics.
 
 load("@bazel_skylib//lib:selects.bzl", "selects")
 load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library")
@@ -349,6 +348,11 @@ flutter_objc_library(
         ],
         "//conditions:default": [],
     }) + select({
+        "//engine/src/flutter/shell:enable_metal": [
+            "//engine/src/flutter/shell/platform/darwin/graphics",  # embedder_enable_metal
+        ],
+        "//conditions:default": [],
+    }) + select({
         ":when_shell_enable_vulkan_and_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan": [
             "//engine/src/flutter/impeller/display_list",  # embedder_enable_vulkan && impeller_supports_rendering
         ],
@@ -676,6 +680,12 @@ cc_library(
         ],
         "//conditions:default": [],
     }) + select({
+        "//engine/src/flutter/shell:enable_metal": [
+            ":embedder_objc",
+            "//engine/src/flutter/shell/platform/darwin/graphics",  # embedder_enable_metal
+        ],
+        "//conditions:default": [],
+    }) + select({
         ":when_shell_enable_vulkan_and_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan": [
             "//engine/src/flutter/impeller/display_list",  # embedder_enable_vulkan && impeller_supports_rendering
         ],
@@ -685,9 +695,6 @@ cc_library(
             "//engine/src/flutter/flutter_vma:flutter_skia_vma",  # embedder_enable_vulkan
             "//engine/src/flutter/vulkan/procs",  # embedder_enable_vulkan
         ],
-        "//conditions:default": [],
-    }) + select({
-        "//engine/src/flutter/shell:enable_metal": [":embedder_objc"],
         "//conditions:default": [],
     }),
     alwayslink = True,
@@ -959,6 +966,11 @@ flutter_objc_library(
     }) + select({
         ":when_shell_enable_metal_and_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan": [
             "//engine/src/flutter/impeller/renderer/backend/metal",  # embedder_enable_metal && impeller_supports_rendering
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/shell:enable_metal": [
+            "//engine/src/flutter/shell/platform/darwin/graphics",  # embedder_enable_metal
         ],
         "//conditions:default": [],
     }) + select({
@@ -1290,6 +1302,12 @@ cc_library(
         ],
         "//conditions:default": [],
     }) + select({
+        "//engine/src/flutter/shell:enable_metal": [
+            ":embedder_as_internal_library_objc",
+            "//engine/src/flutter/shell/platform/darwin/graphics",  # embedder_enable_metal
+        ],
+        "//conditions:default": [],
+    }) + select({
         ":when_shell_enable_vulkan_and_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan": [
             "//engine/src/flutter/impeller/display_list",  # embedder_enable_vulkan && impeller_supports_rendering
         ],
@@ -1299,9 +1317,6 @@ cc_library(
             "//engine/src/flutter/flutter_vma:flutter_skia_vma",  # embedder_enable_vulkan
             "//engine/src/flutter/vulkan/procs",  # embedder_enable_vulkan
         ],
-        "//conditions:default": [],
-    }) + select({
-        "//engine/src/flutter/shell:enable_metal": [":embedder_as_internal_library_objc"],
         "//conditions:default": [],
     }),
     alwayslink = True,

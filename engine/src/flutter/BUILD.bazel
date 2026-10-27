@@ -4,8 +4,8 @@
 
 # Generated from //flutter/BUILD.gn by gn_to_bazel; do not edit.
 # Not converted: config, export_dynamic_symbols, export_dynamic_test_symbols.
-# Dependencies left out, having no Bazel counterpart yet: //flutter/build/dart:dart_sdk, //flutter/build/dart/test:gen_dartcli_call, //flutter/build/dart/test:gen_executable_call, //flutter/lib/gpu:gpu_unittests, //flutter/impeller/renderer/backend/vulkan:vulkan_android_apk_unittests, //flutter/impeller/toolkit/android:apk_unittests.
-# Dependencies left out, their packages not converted yet (a platform the migration has not reached): //flutter/shell/platform/darwin/common:availability_version_check_unittests, //flutter/shell/platform/darwin/common:framework_common_swift_unittests, //flutter/shell/platform/darwin/common:framework_common_unittests, //flutter/shell/platform/darwin/macos:flutter_desktop_darwin_swift_unittests, //flutter/shell/platform/darwin/macos:flutter_desktop_darwin_unittests, //flutter/third_party/accessibility:accessibility_unittests, //flutter/third_party/spring_animation:spring_animation_unittests.
+# Dependencies left out, having no Bazel counterpart yet: //flutter/build/dart:dart_sdk, //flutter/build/dart/test:gen_dartcli_call, //flutter/build/dart/test:gen_executable_call, //flutter/lib/gpu:gpu_unittests, //flutter/impeller/renderer/backend/vulkan:vulkan_android_apk_unittests, //flutter/impeller/toolkit/android:apk_unittests, //flutter/shell/platform/darwin/common:framework_common_unittests, //flutter/shell/platform/darwin/common:framework_common_swift_unittests.
+# Dependencies left out, their packages not converted yet (a platform the migration has not reached): //flutter/shell/platform/darwin/macos:flutter_desktop_darwin_swift_unittests, //flutter/shell/platform/darwin/macos:flutter_desktop_darwin_unittests, //flutter/third_party/accessibility:accessibility_unittests, //flutter/third_party/spring_animation:spring_animation_unittests.
 
 load("@bazel_skylib//lib:selects.bzl", "selects")
 load("@rules_cc//cc:defs.bzl", "cc_library")
@@ -131,6 +131,7 @@ filegroup(
     }) + select({
         ":when_enable_unittests_and_is_mac": [
             "//engine/src/flutter/impeller/golden_tests:impeller_golden_tests",  # enable_unittests && is_mac
+            "//engine/src/flutter/shell/platform/darwin/common:availability_version_check_unittests",  # enable_unittests && is_mac
         ],
         "//conditions:default": [],
     }) + select({

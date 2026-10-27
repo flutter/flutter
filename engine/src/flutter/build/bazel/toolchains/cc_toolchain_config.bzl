@@ -40,6 +40,7 @@ load(
     "tool",
 )
 load("@rules_cc//cc/common:cc_common.bzl", "cc_common")
+load("//build_defs/cc:apple.bzl", "MACOS_DEPLOYMENT_TARGET")
 load("//build_defs/cc:copts.bzl", "ANDROID_TOOLCHAIN_WARNING_FLAGS", "MACOS_TOOLCHAIN_WARNING_FLAGS", "TOOLCHAIN_WARNING_FLAGS")
 
 # Flags GN passes to every C and C++ compile on Linux
@@ -827,8 +828,8 @@ flutter_cc_toolchain_config = rule(
                   "the macOS SDK view's marker (@macos_sdk//:view; -isysroot, with the deployment target).",
         ),
         "deployment_target": attr.string(
-            default = "12.0.0",
-            doc = "macOS: -mmacosx-version-min (GN's mac_deployment_target, which tools/gn sets to 12.0.0).",
+            default = MACOS_DEPLOYMENT_TARGET,
+            doc = "macOS: -mmacosx-version-min (GN's mac_deployment_target, which tools/gn sets to 12.0.0; //build_defs/cc:apple.bzl).",
         ),
         "cxx_include_markers": attr.label_list(
             mandatory = True,

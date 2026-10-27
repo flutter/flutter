@@ -718,6 +718,8 @@ final class _Emitter {
     switch (target.rule) {
       case 'static_library' when _isCompleteStaticLibrary(target):
         _convertCompleteStaticLibrary(target);
+      case 'source_set' when _isSwiftTarget(target):
+        _convertSwiftTarget(target);
       case 'source_set':
       case 'static_library':
         _convertCcTarget(target, 'cc_library', library: true);
@@ -2770,6 +2772,197 @@ final class _Emitter {
   /// executable with an `output_name` of its own (`_font-subset`, producing
   /// `font-subset`) is named and aliased the same way, since a cc_binary's
   /// file is its name.
+  /// A `source_set()` whose sources are Swift: GN compiles it as one module
+  /// through its `tool("swift")` (build/toolchain/darwin/swiftc.py).
+  static bool _isSwiftTarget(GnTarget target) {
+    final GnVariable? sources = target.variables['sources'];
+    if (sources == null) {
+      return false;
+    }
+    final items = <GnValue>[for (final GnAssignment a in sources.assignments) ...a.items];
+    return items.isNotEmpty &&
+        items.every((GnValue v) => v is GnStringValue && v.value.endsWith('.swift'));
+  }
+
+  /// A Swift source_set as a `flutter_swift_library`
+  /// (build_defs/cc/swift_library.bzl): its sources, its bridging header,
+  /// its `public` headers, its dependencies, and the `swiftflags` of the
+  /// target and of its local configs -- the one compile setting GN hands a
+  /// Swift compile besides the include directories (its `tool("swift")`
+  /// takes `{{swiftflags}}` and `{{include_dirs}}`; cflags, defines and the
+  /// rest apply to no Swift compile). A config's `lib_dirs` is darwin_sdk.gni's
+  /// Swift library directories or nothing (the rule carries them); its link
+  /// flags go to whatever links the module, as a cc_library's would.
+  void _convertSwiftTarget(GnTarget target) {
+    _use('//build_defs/cc:swift_library.bzl', 'flutter_swift_library');
+    final rule = _Rule('flutter_swift_library', target.name, target.comments);
+    final configVariables = <GnVariable>[];
+    for (final GnVariable variable in target.variables.values) {
+      switch (variable.name) {
+        case 'sources':
+          _filesInto(rule.list('srcs'), variable);
+        case 'public':
+          _filesInto(rule.list('hdrs'), variable);
+        case 'deps':
+        case 'public_deps':
+          _depsInto(rule, variable, target);
+        case 'bridge_header':
+          final String? file = _singleString(variable);
+          if (file == null) {
+            throw GnError(variable.assignments.first.location, 'bridge_header has no value');
+          }
+          rule.scalars['bridge_header'] =
+              '"${_filePath(file, variable.assignments.first.location)}"';
+        case 'module_name':
+          _scalar(rule, 'module_name', variable);
+        case 'swiftflags':
+          _swiftFlagsInto(rule, variable, Condition.always);
+        case 'include_dirs':
+          _includeDirsInto(rule, variable, Condition.always);
+        case 'lib_dirs':
+          _requireSwiftLibraryDirs(variable);
+        case 'libs':
+        case 'frameworks':
+        case 'ldflags':
+          _linkFlagsInto(rule, variable);
+        case 'configs':
+        case 'public_configs':
+        case 'all_dependent_configs':
+          configVariables.add(variable);
+        case 'testonly':
+          _scalar(rule, 'testonly', variable);
+        default:
+          if (_ignoredVariables.contains(variable.name) ||
+              variable.forwarded ||
+              _isHelperVariable(variable)) {
+            break;
+          }
+          throw GnError(
+            variable.assignments.first.location,
+            'variable ${variable.name} of a Swift target is not converted yet',
+          );
+      }
+    }
+    for (final variable in configVariables) {
+      for (final GnAssignment assignment in variable.assignments) {
+        if (assignment.op == '-=') {
+          throw GnError(
+            assignment.location,
+            'removing a config from a Swift target is not supported',
+          );
+        }
+        for (final _Element element in _elements(assignment, withComments: true)) {
+          final String config = _string(element);
+          final GnTarget? local = config.startsWith(':') ? localConfigs[config.substring(1)] : null;
+          if (local != null) {
+            _swiftConfigInto(rule, local, element.condition);
+            continue;
+          }
+          final ConfigEffect? effect = configEffects[config] ?? configEffects[_gnLabel(config)];
+          switch (effect) {
+            case ConfigDependency(:final String label):
+              // The config's defines and include directories, for the
+              // bridging header's imports; its compiler flags apply to no
+              // Swift compile.
+              rule.list('deps').addUnique(element.condition, _item(label, element));
+            case ConfigWarningSet() || ConfigImplied() || ConfigToolchain() || ConfigCopts():
+              // C and C++ compiler settings: nothing of a Swift compile.
+              break;
+            case null:
+              throw GnError(assignment.location, 'config $config has no Bazel mapping');
+          }
+        }
+      }
+    }
+    // GN's default include dirs (BUILDCONFIG.gn) and what the file leaves
+    // implicit, as for a compiled target: the bridging header's imports.
+    if (layout.isMain) {
+      rule.list('deps').addUnique(Condition.always, _Item(_localLabel(defaultIncludeDirsLabel)));
+    }
+    for (final String dep in implicitDeps) {
+      rule.list('deps').addUnique(Condition.always, _Item(_localLabel(dep)));
+    }
+    rules.add(rule);
+  }
+
+  /// A local config applied to a Swift target: its `swiftflags` and
+  /// include directories under [under], its link flags, its own configs
+  /// the same way; see [_convertSwiftTarget] for the rest.
+  void _swiftConfigInto(_Rule rule, GnTarget config, Condition under) {
+    for (final GnVariable variable in config.variables.values) {
+      switch (variable.name) {
+        case final String name when !_configVariables.contains(name):
+          // A local of the config block (see _convertConfig).
+          break;
+        case 'swiftflags':
+          _swiftFlagsInto(rule, variable, under);
+        case 'include_dirs':
+          _includeDirsInto(rule, variable, under);
+        case 'lib_dirs':
+          _requireSwiftLibraryDirs(variable);
+        case 'libs' || 'frameworks' || 'ldflags':
+          _linkFlagsInto(rule, variable, under: under);
+        case 'configs':
+          _forEachItem(variable, into: rule.list('deps'), (_Element e) {
+            final String nested = _string(e);
+            final GnTarget? local = nested.startsWith(':')
+                ? localConfigs[nested.substring(1)]
+                : null;
+            if (local == null) {
+              throw GnError(
+                e.assignment.location,
+                'config $nested of ${config.name} on a Swift target is not converted yet',
+              );
+            }
+            _swiftConfigInto(rule, local, under.and(e.condition));
+          });
+        case 'cflags' || 'cflags_c' || 'cflags_cc' || 'cflags_objc' || 'cflags_objcc' || 'defines':
+          // GN hands a Swift compile neither (its tool("swift") takes the
+          // swiftflags and the include directories alone).
+          break;
+        case 'visibility':
+          break;
+        default:
+          if (variable.forwarded) {
+            break;
+          }
+          _requireEmpty(
+            variable,
+            why:
+                'config variable ${variable.name} of ${config.name} cannot be applied to '
+                'the Swift target ${rule.name}; convert it by hand',
+          );
+      }
+    }
+  }
+
+  /// `swiftflags` of a Swift target or of a config applied to it, each
+  /// under its own condition and [under].
+  void _swiftFlagsInto(_Rule rule, GnVariable variable, Condition under) {
+    _forEachItem(variable, into: rule.list('swiftflags'), (_Element e) {
+      rule.list('swiftflags').add(under.and(e.condition), _flagItem(e));
+    });
+  }
+
+  /// `lib_dirs`: nothing, or darwin_sdk.gni's Swift library directories
+  /// (swiftLibraryDirsVariable), which flutter_swift_library's objects carry
+  /// as link flags wherever they link, so the listing is dropped. Any other
+  /// library search path is not converted.
+  void _requireSwiftLibraryDirs(GnVariable variable) {
+    for (final GnAssignment assignment in variable.assignments) {
+      for (final GnValue item in assignment.items) {
+        if (item is GnReference && item.name == swiftLibraryDirsVariable) {
+          continue;
+        }
+        throw GnError(
+          assignment.location,
+          "lib_dirs holds $item; only darwin_sdk.gni's $swiftLibraryDirsVariable (which "
+          'flutter_swift_library carries) or nothing is converted',
+        );
+      }
+    }
+  }
+
   void _convertCcTarget(
     GnTarget target,
     String kind, {
@@ -2958,7 +3151,10 @@ final class _Emitter {
             _scalar(rule, 'testonly', variable);
           }
         case 'lib_dirs':
-          _requireEmpty(variable);
+          _requireSwiftLibraryDirs(variable);
+        case 'swiftflags':
+          // Flags of a Swift compile, of which a C/C++ target has none.
+          break;
         case 'inputs':
           // Files the link reads besides its objects: the version script
           // ldflags names (the Android shell's android_exports.lst), which
@@ -3583,6 +3779,13 @@ final class _Emitter {
         case 'visibility':
           // Local configs are only ever used by their own package.
           break;
+        case 'lib_dirs':
+          // The Swift library directories or nothing (see
+          // _requireSwiftLibraryDirs); a Swift target listing the config
+          // takes its swiftflags (_swiftConfigInto), a C/C++ one none.
+          _requireSwiftLibraryDirs(variable);
+        case 'swiftflags':
+          break;
         case 'configs':
           // A config's own configs apply wherever it applies: dependencies.
           _labelsInto(rule.list('deps'), variable, target);
@@ -3656,6 +3859,12 @@ final class _Emitter {
           _linkFlagsInto(rule, variable, under: use.condition);
           continue;
         case 'visibility':
+          continue;
+        case 'lib_dirs':
+          _requireSwiftLibraryDirs(variable);
+          continue;
+        case 'swiftflags':
+          // Flags of a Swift compile, of which this target has none.
           continue;
         case 'configs':
           // The config's own configs apply to the target along with it.

@@ -1,0 +1,322 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Generated from //flutter/shell/platform/darwin/common/BUILD.gn by gn_to_bazel; do not edit.
+# Not converted: test_config, swift_testing_config, test_utils_swift, swift_testing_main, framework_common_swift_unittests, framework_common_unittests.
+
+load("@bazel_skylib//lib:selects.bzl", "selects")
+load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
+load("//build_defs/cc:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES", "MACOS_CFLAGS_OBJC")
+load("//build_defs/cc:objc_library.bzl", "flutter_objc_library")
+load("//build_defs/cc:swift_library.bzl", "flutter_swift_library")
+load("//build_defs/testing:testing.bzl", "flutter_test_fixtures")
+
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "config",
+    includes = ["."],
+    target_compatible_with = select({
+        "@platforms//os:macos": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+)
+
+# The Objective-C(++) sources of common, which cc_library takes none of
+# (build_defs/cc/objc_library.bzl); common links them in on the Apple
+# platforms.
+flutter_objc_library(
+    name = "common_objc",
+    srcs = [
+        "buffer_conversions.mm",
+        "command_line.mm",
+    ],
+    hdrs = [
+        "buffer_conversions.h",
+        "command_line.h",
+    ],
+    copts = FLUTTER_COPTS + MACOS_CFLAGS_OBJC,
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    target_compatible_with = select({
+        "@platforms//os:macos": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        ":availability_version_check",
+        "//engine/src:include_root",
+        "//engine/src/flutter:config",
+        "//engine/src/flutter/fml",
+    ],
+    alwayslink = True,
+)
+
+cc_library(
+    name = "common",
+    hdrs = [
+        "buffer_conversions.h",
+        "command_line.h",
+    ],
+    copts = FLUTTER_COPTS,
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    target_compatible_with = select({
+        "@platforms//os:macos": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        ":availability_version_check",
+        ":common_objc",
+        "//engine/src:include_root",
+        "//engine/src/flutter:config",
+        "//engine/src/flutter/fml",
+    ],
+    alwayslink = True,
+)
+
+# Provides an implementation for _availability_version_check.
+#
+# This is required due to an upstream compiler builtin (runtime) change
+# that marked this function as weakly-linked via __attribute__((weak import))
+# As such, no linking failure occurs when the function is unavailable at
+# link time. Since the symbol is no longer linked in, App Store review blocks
+# publishing due to relying on a private symbol. Instead we link in our own
+# implementation, which provides the exact implementation used in clang prior
+# to the upstream change.
+#
+# See: Upstream clang change: https://reviews.llvm.org/D150397
+# See: https://github.com/flutter/flutter/issues/133777
+cc_library(
+    name = "availability_version_check",
+    srcs = ["availability_version_check.cc"],
+    copts = FLUTTER_COPTS,
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    target_compatible_with = select({
+        "@platforms//os:macos": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        "//engine/src:include_root",
+        "//engine/src/flutter:config",
+        "//engine/src/flutter/fml",
+    ],
+    alwayslink = True,
+)
+
+flutter_test_fixtures(
+    name = "availability_version_check_fixtures",
+    target_compatible_with = select({
+        "@platforms//os:macos": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+)
+
+cc_test(
+    name = "availability_version_check_unittests",
+    size = "small",
+    srcs = ["availability_version_check_unittests.cc"],
+    copts = FLUTTER_COPTS + [
+        "-Wno-inconsistent-missing-override",  # from //flutter/testing
+        "-Wno-unguarded-availability",  # from //flutter/testing
+    ],
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    target_compatible_with = select({
+        "@platforms//os:macos": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        ":availability_version_check",
+        ":availability_version_check_fixtures",
+        "//engine/src:include_root",
+        "//engine/src/flutter:config",
+        "//engine/src/flutter/fml",
+        "//engine/src/flutter/testing",
+    ],
+)
+
+# Shared framework headers end up in the same folder as platform-specific
+# framework headers when consumed by clients, so the include paths assume they
+# are next to each other.
+cc_library(
+    name = "framework_relative_headers",
+    includes = ["framework/Headers"],
+    target_compatible_with = select({
+        "@platforms//os:macos": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+)
+
+# The Objective-C(++) sources of flutter_engine_bindings, which cc_library takes none of
+# (build_defs/cc/objc_library.bzl); flutter_engine_bindings links them in on the Apple
+# platforms.
+flutter_objc_library(
+    name = "flutter_engine_bindings_objc",
+    srcs = ["framework/Source/FlutterTracing.mm"],
+    hdrs = [
+        "framework/Headers/FlutterMacros.h",
+        "framework/Source/FlutterTracing.h",
+    ],
+    copts = FLUTTER_COPTS + MACOS_CFLAGS_OBJC,
+    includes = ["."],
+    local_defines = FLUTTER_LOCAL_DEFINES + ["FLUTTER_FRAMEWORK"],
+    target_compatible_with = select({
+        "@platforms//os:macos": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        ":framework_relative_headers",
+        "//engine/src:include_root",
+        "//engine/src/flutter:config",
+        "//engine/src/flutter/fml",
+    ],
+    alwayslink = True,
+)
+
+cc_library(
+    name = "flutter_engine_bindings",
+    hdrs = [
+        "framework/Headers/FlutterMacros.h",
+        "framework/Source/FlutterTracing.h",
+    ],
+    copts = FLUTTER_COPTS,
+    includes = ["."],
+    local_defines = FLUTTER_LOCAL_DEFINES + ["FLUTTER_FRAMEWORK"],
+    target_compatible_with = select({
+        "@platforms//os:macos": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        ":flutter_engine_bindings_objc",
+        ":framework_relative_headers",
+        "//engine/src:include_root",
+        "//engine/src/flutter:config",
+        "//engine/src/flutter/fml",
+    ],
+    alwayslink = True,
+)
+
+flutter_swift_library(
+    name = "InternalFlutterSwiftCommon",
+    srcs = [
+        "framework/Source/Logger.swift",
+        "framework/Source/Tracing+TraceScope.swift",
+    ],
+    hdrs = [
+        "framework/Headers/FlutterBinaryMessenger.h",
+        "framework/Headers/FlutterChannels.h",
+        "framework/Headers/FlutterCodecs.h",
+        "framework/Headers/FlutterDartProject.h",
+        "framework/Headers/FlutterHourFormat.h",
+        "framework/Headers/FlutterMacros.h",
+        "framework/Headers/FlutterTexture.h",
+    ],
+    bridge_header = "InternalFlutterSwiftCommon-Bridging-Header.h",
+    includes = ["."],
+    swiftflags = select({
+        ":when_is_mac_and_enable_unittests": [
+            "-enable-testing",  # is_ios && enable_ios_unittests || (is_mac && enable_unittests)
+        ],
+        "//conditions:default": [],
+    }),
+    target_compatible_with = select({
+        "@platforms//os:macos": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        ":flutter_engine_bindings",
+        "//engine/src:include_root",
+    ],
+)
+
+# The Objective-C(++) sources of framework_common, which cc_library takes none of
+# (build_defs/cc/objc_library.bzl); framework_common links them in on the Apple
+# platforms.
+flutter_objc_library(
+    name = "framework_common_objc",
+    srcs = [
+        "framework/Source/FlutterBinaryMessengerRelay.mm",
+        "framework/Source/FlutterChannels.mm",
+        "framework/Source/FlutterCodecs.mm",
+        "framework/Source/FlutterHourFormat.mm",
+        "framework/Source/FlutterNSBundleUtils.mm",
+        "framework/Source/FlutterStandardCodec.mm",
+    ],
+    hdrs = [
+        "framework/Headers/FlutterBinaryMessenger.h",
+        "framework/Headers/FlutterChannels.h",
+        "framework/Headers/FlutterCodecs.h",
+        "framework/Headers/FlutterDartProject.h",
+        "framework/Headers/FlutterHourFormat.h",
+        "framework/Headers/FlutterMacros.h",
+        "framework/Headers/FlutterTexture.h",
+        "framework/Source/FlutterNSBundleUtils.h",
+        "framework/Source/FlutterStandardCodec_Internal.h",
+    ],
+    copts = FLUTTER_COPTS + MACOS_CFLAGS_OBJC,
+    local_defines = FLUTTER_LOCAL_DEFINES + ["FLUTTER_FRAMEWORK"],
+    target_compatible_with = select({
+        "@platforms//os:macos": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        ":InternalFlutterSwiftCommon",
+        ":flutter_engine_bindings",
+        ":framework_relative_headers",
+        "//engine/src:include_root",
+        "//engine/src/flutter:config",
+        "//engine/src/flutter/fml",
+    ],
+    alwayslink = True,
+)
+
+# Framework code shared between iOS and macOS.
+cc_library(
+    name = "framework_common",
+    srcs = [
+        "framework/Source/FlutterNSBundleUtils.h",
+        "framework/Source/FlutterStandardCodecHelper.cc",
+        "framework/Source/FlutterStandardCodec_Internal.h",
+    ],
+    hdrs = [
+        "framework/Headers/FlutterBinaryMessenger.h",
+        "framework/Headers/FlutterChannels.h",
+        "framework/Headers/FlutterCodecs.h",
+        "framework/Headers/FlutterDartProject.h",
+        "framework/Headers/FlutterHourFormat.h",
+        "framework/Headers/FlutterMacros.h",
+        "framework/Headers/FlutterTexture.h",
+        "framework/Source/FlutterNSBundleUtils.h",
+    ],
+    copts = FLUTTER_COPTS,
+    local_defines = FLUTTER_LOCAL_DEFINES + ["FLUTTER_FRAMEWORK"],
+    target_compatible_with = select({
+        "@platforms//os:macos": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        ":InternalFlutterSwiftCommon",
+        ":flutter_engine_bindings",
+        ":framework_common_objc",
+        ":framework_relative_headers",
+        "//engine/src:include_root",
+        "//engine/src/flutter:config",
+        "//engine/src/flutter/fml",
+    ],
+    alwayslink = True,
+)
+
+flutter_test_fixtures(
+    name = "framework_common_fixtures",
+    target_compatible_with = select({
+        "@platforms//os:macos": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+)
+
+# `is_mac && enable_unittests`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_is_mac_and_enable_unittests",
+    match_all = [
+        "@platforms//os:macos",
+        "//engine/src/flutter/testing:unittests_enabled",
+    ],
+)

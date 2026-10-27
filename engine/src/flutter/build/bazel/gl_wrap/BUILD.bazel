@@ -162,6 +162,23 @@ gn_build(
     # holds no git state, as with dart_wrap's SDK hash.
     env = {"ANGLE_UPSTREAM_HASH": _ANGLE_REVISION[:12]},
     gn_args = _GN_ARGS,
+    # The loader's install name on a Mac: GN's mac toolchain gives a shared
+    # library `./libvulkan.dylib`, which dyld resolves against the working
+    # directory -- GN's build directory, where run_tests.py runs the suites
+    # -- and ANGLE's facade links the loader directly there (below); Bazel
+    # runs a test from the runfiles root with the loader beside the binary,
+    # which `@rpath/libvulkan.dylib` finds through the binary's
+    # @loader_path rpath (the Mac's T11: `Library not loaded:
+    # ./libvulkan.dylib`). SwiftShader sets its own (`@rpath/...`, its
+    # ldflags), and the layer is opened by the path its manifest names.
+    install_name_tool = select({
+        "@platforms//os:macos": HOST_CLANG + "//:bin/llvm-install-name-tool",
+        "//conditions:default": None,
+    }),
+    install_names = select({
+        "@platforms//os:macos": {"libvulkan.dylib": "@rpath/libvulkan.dylib"},
+        "//conditions:default": {},
+    }),
     ninja_target = "gl_wrap",
     out_paths = {"VkLayer_khronos_validation.json": "vulkan-data/VkLayer_khronos_validation.json"} | select({
         "@platforms//os:macos": {library: "" for library in _LINUX_LIBRARIES},

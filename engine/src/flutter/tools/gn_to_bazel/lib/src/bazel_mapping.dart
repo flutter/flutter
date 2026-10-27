@@ -1446,7 +1446,22 @@ const Set<String> knownExternalVariables = <String>{
   // Dart wrap's flags (conditionSettings).
   'dart_dynamic_modules',
   'dart_disable_secure_socket',
+  // //build/config/darwin/darwin_sdk.gni (known): the Xcode SDK's paths,
+  // which the darwin packages' configs read -- the Swift libraries'
+  // directories (a reference constant flutter_swift_library supplies) and
+  // the platform's path (a constant of @macos_sdk); the testing deployment
+  // target is assumed.
+  'mac_swift_lib_paths',
+  'mac_platform_path',
+  'mac_testing_deployment_target',
 };
+
+/// darwin_sdk.gni's mac_swift_lib_paths: the one GN variable `lib_dirs` may
+/// hold -- the SDK's and the toolchain's Swift library directories, which
+/// flutter_swift_library's objects carry as link flags
+/// (build_defs/cc/swift_library.bzl's MACOS_SWIFT_LIBRARY_DIRS), so the
+/// emitter drops the listing.
+const String swiftLibraryDirsVariable = 'mac_swift_lib_paths';
 
 /// A Starlark constant the Bazel side keeps for a GN variable the converter
 /// does not evaluate: the symbol and the `.bzl` file that defines it.
@@ -1584,6 +1599,12 @@ const Map<String, DirectorySource> directorySources = <String, DirectorySource>{
 /// Starlark constants for GN references that have a Bazel-side value.
 const Map<String, ReferenceConstant> referenceConstants = <String, ReferenceConstant>{
   'flutter_cflags_objc': ReferenceConstant(_coptsBzl, 'FLUTTER_CFLAGS_OBJC'),
+  // darwin_sdk.gni's paths of the host's Xcode (see knownExternalVariables).
+  swiftLibraryDirsVariable: ReferenceConstant(
+    '//build_defs/cc:swift_library.bzl',
+    'MACOS_SWIFT_LIBRARY_DIRS',
+  ),
+  'mac_platform_path': ReferenceConstant('@macos_sdk//:sdk.bzl', 'MACOS_PLATFORM_PATH'),
   'flutter_cflags_objcc': ReferenceConstant(_coptsBzl, 'FLUTTER_CFLAGS_OBJCC'),
   'feature_defines_list': ReferenceConstant(_coptsBzl, 'FLUTTER_FEATURE_DEFINES'),
   'engine_version': ReferenceConstant(_versionBzl, 'ENGINE_VERSION'),
@@ -2163,6 +2184,9 @@ const ImportPolicy engineImportPolicy = ImportPolicy(
     // flutter.js's source list (flutter_js_source_list), which its copy and
     // the web SDK's archive read.
     '//flutter/lib/web_ui/flutter_js/sources.gni',
+    // The Flutter frameworks' shared headers (framework_common_headers), a
+    // list the darwin packages' targets read.
+    '//flutter/shell/platform/darwin/common/framework_common.gni',
   },
   known: <String>{
     // The Dart package templates (dart_pkg); sky_engine writes its action
@@ -2227,6 +2251,13 @@ const ImportPolicy engineImportPolicy = ImportPolicy(
     '//build/toolchain/wasm.gni',
     '//flutter/third_party/flatbuffers/flatbuffers.gni',
     '//flutter/tools/fuchsia/gn-sdk/src/gn_configs.gni',
+    // The Xcode SDK's paths (mac_sdk_path, mac_platform_path,
+    // mac_swift_lib_paths, ...), which it asks xcrun for (build/mac/
+    // darwin_sdk.py): assumed, as [darwinSdkAssumptions] has them -- the
+    // Swift library directories are flutter_swift_library's to supply,
+    // the rest reach the generated files from @macos_sdk where a rule
+    // needs them.
+    '//build/config/darwin/darwin_sdk.gni',
   },
 );
 
@@ -2279,6 +2310,9 @@ Assumptions generationAssumptions() {
     // BUILDCONFIG.gn's `is_ios || is_mac`, which the scope does not
     // evaluate and so spells here.
     'is_apple': const GnConditionValue(isMac),
+    // darwin_sdk.gni's mac_testing_deployment_target (its default), read
+    // by darwin/common's test configs.
+    'mac_testing_deployment_target': const GnStringValue('14.0'),
     'is_component_build': const GnBoolValue(false),
     'is_fuchsia': const GnBoolValue(false),
     'is_ios': const GnBoolValue(false),
@@ -2440,6 +2474,7 @@ Assumptions linuxHostAssumptions() {
     'enable_ios_unittests': GnBoolValue(false),
     'is_linux': GnBoolValue(true),
     'is_mac': GnBoolValue(false),
+    'mac_testing_deployment_target': GnStringValue('14.0'),
     // BUILDCONFIG.gn's default; tools/gn sets it only for the Dart SDK's
     // own configuration (the wrap's args).
     'is_minimal_linux': GnBoolValue(false),
