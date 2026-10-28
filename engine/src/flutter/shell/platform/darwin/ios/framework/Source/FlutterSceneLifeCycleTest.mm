@@ -696,7 +696,7 @@ FLUTTER_ASSERT_ARC
 
   [delegate registerSceneLifeCycleWithFlutterEngine:mockEngine scene:mockScene];
   [delegate registerSceneLifeCycleWithFlutterEngine:mockEngine2 scene:mockScene];
-  XCTAssertEqual([delegate searchFlutterEnginesWithinScene:mockScene].count, 2.0);
+  XCTAssertEqual([delegate searchFlutterEnginesWithinScene:mockScene].count, 2U);
 
   [delegate scene:mockScene willConnectToSession:session options:options];
   OCMVerify(times(1), [mockLifecycleDelegate scene:mockScene
@@ -1536,7 +1536,7 @@ FLUTTER_ASSERT_ARC
     // An engine registered with the scene by the developer.
     id registeredEngine = OCMClassMock([FlutterEngine class]);
     [delegate registerSceneLifeCycleWithFlutterEngine:registeredEngine scene:mockScene];
-    XCTAssertEqual([delegate searchFlutterEnginesWithinScene:mockScene].count, 2.0);
+    XCTAssertEqual([delegate searchFlutterEnginesWithinScene:mockScene].count, 2U);
 
     id geometry = OCMClassMock([UIWindowSceneGeometry class]);
     [delegate windowScene:mockScene didUpdateEffectiveGeometry:geometry];

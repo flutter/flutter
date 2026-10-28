@@ -513,7 +513,8 @@ static BOOL _sceneWillConnectFallbackCalled = NO;
 #pragma mark - Responding to geometry changes
 
 - (void)windowScene:(UIWindowScene*)windowScene
-    didUpdateEffectiveGeometry:(UIWindowSceneGeometry*)previousEffectiveGeometry {
+    didUpdateEffectiveGeometry:(UIWindowSceneGeometry*)previousEffectiveGeometry
+    API_AVAILABLE(ios(26.0)) {
   // The scene may have moved to a different screen. Unlike `viewDidLayoutSubviews`, this is called
   // even if the Flutter view's size did not change (e.g. a fixed-size view in an add-to-app host).
   // `updateDisplays` skips the update if the display information has not changed.
