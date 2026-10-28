@@ -1281,6 +1281,17 @@ const Map<String, Map<String, List<String>>> unreadMetadata = <String, Map<Strin
 /// the rest carry none (lib/snapshot's snapshot libraries and actions).
 const Set<String> unreadMetadataPackages = <String>{'//flutter/lib/snapshot'};
 
+/// Targets of the hand-written Bazel packages that a builder's ninja targets
+/// may name (ci/builders/*.json), by GN directory, with the file-level
+/// condition each exists under (null for always): the builders' installs
+/// resolve ninja targets against the converted files' targets, and these
+/// stand in for a package the converter does not generate. lib/snapshot's
+/// create_macos_gen_snapshots is the Mac's gen_snapshot builders' one
+/// target (ci/host_debug_gen_snapshot and its kin).
+const Map<String, Map<String, String?>> handWrittenNinjaTargets = <String, Map<String, String?>>{
+  '//flutter/lib/snapshot': <String, String?>{'create_macos_gen_snapshots': 'is_mac'},
+};
+
 /// Files of the machine that builds, which GN's files name by absolute
 /// path (a Mac's `/System/Library/Fonts/Apple Color Emoji.ttc`, the text
 /// tests' fixture under `host_os == "mac"`): each is a file of the
