@@ -1,0 +1,99 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Privileged half of the code freeze check.
+#
+# Runs after `freeze.yml` fails and leaves an explanatory comment on the pull
+# request. The artifact produced by `freeze.yml` is UNTRUSTED (a pull request
+# can modify that workflow), so the PR number is only used after binding it to
+# the triggering run's head commit, and the comment text is fixed.
+
+name: Material and Cupertino Code Freeze Comment
+
+on:
+  workflow_run:
+    workflows: [Material and Cupertino Code Freeze]
+    types: [completed]
+
+permissions:
+  contents: read
+
+jobs:
+  comment:
+    name: Comment on frozen changes
+    runs-on: ubuntu-latest
+    # Only a failed check can need a comment, so passing runs never allocate a runner.
+    if: >-
+      github.repository == 'flutter/flutter' &&
+      github.event.workflow_run.conclusion == 'failure' &&
+      github.event.workflow_run.event == 'pull_request' &&
+      github.event.workflow_run.path == '.github/workflows/freeze.yml'
+    permissions:
+      actions: read
+      pull-requests: write
+    steps:
+      - name: Download freeze metadata
+        id: download
+        # The check may have failed for a reason other than frozen changes, in
+        # which case there is no artifact.
+        continue-on-error: true
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: freeze-metadata
+          path: ${{ runner.temp }}/freeze-metadata
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ github.token }}
+
+      - name: Comment on frozen changes
+        if: steps.download.outcome == 'success'
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        env:
+          METADATA_PATH: ${{ runner.temp }}/freeze-metadata/metadata.json
+        with:
+          github-token: ${{ github.token }}
+          script: |
+            const fs = require('fs');
+            const run = context.payload.workflow_run;
+            const metadata = JSON.parse(fs.readFileSync(process.env.METADATA_PATH, 'utf8'));
+            const prNumberString = String(metadata.pr_number ?? '');
+            if (!/^[1-9][0-9]*$/.test(prNumberString)) {
+              core.setFailed('Artifact contains an invalid PR number.');
+              return;
+            }
+            const issueNumber = Number(prNumberString);
+
+            // Bind the artifact to the pull request that actually triggered the run.
+            const { data: pr } = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: issueNumber,
+            });
+            if (pr.head.sha !== run.head_sha || pr.head.repo?.full_name !== run.head_repository?.full_name) {
+              core.notice(`PR #${issueNumber} has changed since the check ran; skipping.`);
+              return;
+            }
+            if (pr.labels.some(label => label.name === 'override code freeze')) {
+              core.notice(`PR #${issueNumber} has the 'override code freeze' label; skipping.`);
+              return;
+            }
+
+            const comments = await github.paginate(github.rest.issues.listComments, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issueNumber,
+            });
+            const issueUrl = 'https://github.com/flutter/flutter/issues/188444';
+            const alreadyCommented = comments.some(comment =>
+              comment.body && comment.body.includes(issueUrl)
+            );
+            if (!alreadyCommented) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issueNumber,
+                body: 'This pull request contains changes to Material or Cupertino, which are currently frozen in this repository.\n\n' +
+                  'Changes should be made in `material_ui` and/or `cupertino_ui` in the [flutter/packages](https://github.com/flutter/packages) repository.\n\n' +
+                  'Please refer to https://github.com/flutter/flutter/issues/188444 for instructions.',
+              });
+            }

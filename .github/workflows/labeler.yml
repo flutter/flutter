@@ -2,21 +2,71 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+# Privileged half of the pull request labeler.
+#
+# Runs after `labeler-trigger.yml` completes. The artifact produced by that
+# workflow is UNTRUSTED (a pull request can modify the trigger workflow), so the
+# PR number is only used after binding it to the triggering run's head commit.
+# The label configuration is read from the default branch, not the PR.
+
 name: "Pull Request Labeler"
 on:
-- pull_request_target
+  workflow_run:
+    workflows: [Pull Request Labeler Trigger]
+    types: [completed]
 
 # Declare default permissions as read only.
 permissions: read-all
 
 jobs:
   triage:
-    if: ${{ github.repository == 'flutter/flutter' }}
+    if: >-
+      github.repository == 'flutter/flutter' &&
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'pull_request' &&
+      github.event.workflow_run.path == '.github/workflows/labeler-trigger.yml'
     permissions:
+      actions: read
+      contents: read
       pull-requests: write
     runs-on: ubuntu-latest
     steps:
+    - name: Download labeler metadata
+      uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+      with:
+        name: labeler-metadata
+        path: ${{ runner.temp }}/labeler-metadata
+        run-id: ${{ github.event.workflow_run.id }}
+        github-token: ${{ github.token }}
+
+    - name: Validate PR
+      id: validate
+      env:
+        GH_TOKEN: ${{ github.token }}
+        REPO: ${{ github.repository }}
+        RUN_HEAD_REPO: ${{ github.event.workflow_run.head_repository.full_name }}
+        RUN_HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+      run: |
+        set -euo pipefail
+        PR_NUMBER=$(jq -r '.pr_number // empty' "$RUNNER_TEMP/labeler-metadata/metadata.json")
+        if ! [[ "$PR_NUMBER" =~ ^[1-9][0-9]*$ ]]; then
+          echo "::error::Artifact contains an invalid PR number."
+          exit 1
+        fi
+
+        # Bind the artifact to the pull request that actually triggered the run.
+        gh api "repos/$REPO/pulls/$PR_NUMBER" > "$RUNNER_TEMP/pr.json"
+        if [ "$(jq -r '.head.sha' "$RUNNER_TEMP/pr.json")" != "$RUN_HEAD_SHA" ] ||
+           [ "$(jq -r '.head.repo.full_name // empty' "$RUNNER_TEMP/pr.json")" != "$RUN_HEAD_REPO" ]; then
+          # Most likely a newer push; its own run will label the PR.
+          echo "::notice::PR #$PR_NUMBER has changed since the trigger ran; skipping."
+          exit 0
+        fi
+        echo "pr_number=$PR_NUMBER" >> "$GITHUB_OUTPUT"
+
     # Source available at https://github.com/actions/labeler/blob/main/README.md
     - uses: actions/labeler@bf12e9b00b37c5c0ca2b87b79b2daf7891dbda13
+      if: steps.validate.outputs.pr_number != ''
       with:
+        pr-number: ${{ steps.validate.outputs.pr_number }}
         sync-labels: true

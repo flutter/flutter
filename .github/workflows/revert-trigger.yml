@@ -1,0 +1,42 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Unprivileged half of the revert automation.
+#
+# This workflow runs on `pull_request` with a read-only token and no access to
+# secrets. When the `revert` label is applied, it records the pull request
+# number in a `revert-metadata` artifact. The privileged `revert.yml` workflow
+# consumes that artifact via `workflow_run`, validates the request, and either
+# performs the revert or comments on the pull request explaining why it can't.
+
+name: Revert Trigger
+
+on:
+  pull_request:
+    types: [labeled]
+
+permissions:
+  contents: read
+
+jobs:
+  record:
+    name: Record revert request
+    runs-on: ubuntu-latest
+    # Evaluated before a runner is allocated, so other labels cost nothing.
+    if: github.event.label.name == 'revert'
+    steps:
+      - name: Record PR number
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          mkdir -p revert-metadata
+          jq -n --arg pr "$PR_NUMBER" '{pr_number: $pr}' > revert-metadata/metadata.json
+
+      - name: Upload revert metadata
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: revert-metadata
+          path: revert-metadata/
+          retention-days: 1
+          if-no-files-found: error

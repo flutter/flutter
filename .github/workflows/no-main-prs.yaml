@@ -2,58 +2,50 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+# Unprivileged half of the "no PRs on main" check.
+#
+# This workflow runs on `pull_request` with a read-only token and no access to
+# secrets. It fails the check for PRs targeting `main` and uploads a
+# `no-main-metadata` artifact so that the privileged `no-main-prs-comment.yaml`
+# workflow can leave an explanatory comment on the pull request.
+
 name: No PRs on main
 
 on:
-  # Safe because this workflow does not check out code or run arbitrary scripts.
-  # It only checks the PR target branch and comments/fails if targeting main.
-  pull_request_target: # zizmor: ignore[dangerous-triggers]
+  pull_request:
     types: [opened, synchronize, reopened, edited]
 
-permissions: read-all
+permissions:
+  contents: read
 
 jobs:
   reject-main-prs:
     runs-on: ubuntu-latest
-    if: ${{ github.repository == 'flutter/flutter' }}
+    # Gating at the job level means PRs that don't target `main` never allocate
+    # a runner. (A trigger-level `branches` filter is not used so that
+    # retargeting a PR from `main` to `master` produces a new, skipped run
+    # rather than leaving the previous failed run as the latest result.)
+    if: ${{ github.repository == 'flutter/flutter' && github.base_ref == 'main' }}
     permissions:
       contents: read
-      pull-requests: write
 
     steps:
-      - name: Comment on PRs targeting main
-        if: github.base_ref == 'main'
-        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+      - name: Record PR targeting main
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          mkdir -p no-main-metadata
+          jq -n --arg pr "$PR_NUMBER" '{pr_number: $pr}' > no-main-metadata/metadata.json
+
+      - name: Upload metadata
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          github-token: ${{ github.token }}
-          script: |
-            const issueNumber = context.issue.number;
-            const comments = await github.paginate(github.rest.issues.listComments, {
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: issueNumber,
-            });
-            const docUrl = 'https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/changing-the-base-branch-of-a-pull-request';
-            const alreadyCommented = comments.some(comment =>
-              comment.body && comment.body.includes(docUrl)
-            );
-            if (!alreadyCommented) {
-              await github.rest.issues.createComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: issueNumber,
-                body: 'This pull request targets the `main` branch, but the primary branch for this repository is `master`.\n\n' +
-                  'Please change the base branch of this pull request to `master`.\n\n' +
-                  `See: ${docUrl}`,
-              });
-            }
+          name: no-main-metadata
+          path: no-main-metadata/
+          retention-days: 1
+          if-no-files-found: error
 
       - name: Check base branch
-        env:
-          # Explicitly fallback to an empty string if it doesn't exist
-          TARGET_BRANCH: ${{ github.base_ref || ''}}
         run: |
-          if [ "$TARGET_BRANCH" = "main" ]; then
-            echo "::error::Do not open PRs on \`main\`. The primary branch is \`master\`. You can change the base branch of this PR to \`master\`. See: https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/changing-the-base-branch-of-a-pull-request"
-            exit 1
-          fi
+          echo "::error::Do not open PRs on \`main\`. The primary branch is \`master\`. You can change the base branch of this PR to \`master\`. See: https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/changing-the-base-branch-of-a-pull-request"
+          exit 1

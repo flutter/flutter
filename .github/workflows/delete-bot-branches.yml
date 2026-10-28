@@ -2,33 +2,94 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+# Privileged half of the bot branch cleanup.
+#
+# Runs after `delete-bot-branches-trigger.yml` completes. The artifact produced
+# by that workflow is UNTRUSTED (a pull request can modify the trigger
+# workflow), so the PR number is only used after binding it to the triggering
+# run's head commit, and the branch to delete is read from the GitHub API and
+# re-checked against the same conditions as the trigger.
+
 name: Delete Bot Branches
 
 on:
-  pull_request_target:
-    types: [closed]
-    branches:
-      - master
-      - 'flutter-*-candidate*'
+  workflow_run:
+    workflows: [Delete Bot Branches Trigger]
+    types: [completed]
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   delete-branch:
     runs-on: ubuntu-latest
-    if: |
-      github.event.pull_request.head.repo != null &&
-      github.event.pull_request.head.repo.owner.login == 'flutteractionsbot' &&
-      github.event.pull_request.head.ref != 'master' &&
-      github.event.pull_request.head.ref != 'main'
+    # Runs where every job was skipped (i.e. a non-bot PR) conclude as
+    # `skipped`, so this check avoids allocating a runner for them.
+    if: >-
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'pull_request' &&
+      github.event.workflow_run.path == '.github/workflows/delete-bot-branches-trigger.yml'
+    permissions:
+      actions: read
+      contents: read
+      pull-requests: read
     steps:
+      - name: Download metadata
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: delete-branch-metadata
+          path: ${{ runner.temp }}/delete-branch-metadata
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ github.token }}
+
+      - name: Validate PR
+        id: validate
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          RUN_HEAD_REPO: ${{ github.event.workflow_run.head_repository.full_name }}
+          RUN_HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          set -euo pipefail
+          PR_NUMBER=$(jq -r '.pr_number // empty' "$RUNNER_TEMP/delete-branch-metadata/metadata.json")
+          if ! [[ "$PR_NUMBER" =~ ^[1-9][0-9]*$ ]]; then
+            echo "::error::Artifact contains an invalid PR number."
+            exit 1
+          fi
+
+          gh api "repos/$REPO/pulls/$PR_NUMBER" > "$RUNNER_TEMP/pr.json"
+          PR="$RUNNER_TEMP/pr.json"
+
+          # Bind the artifact to the pull request that actually triggered the run.
+          if [ "$(jq -r '.head.sha' "$PR")" != "$RUN_HEAD_SHA" ] ||
+             [ "$(jq -r '.head.repo.full_name // empty' "$PR")" != "$RUN_HEAD_REPO" ]; then
+            echo "::error::PR #$PR_NUMBER does not match the triggering workflow run."
+            exit 1
+          fi
+
+          # Re-check the trigger conditions against the API.
+          STATE=$(jq -r '.state' "$PR")
+          OWNER=$(jq -r '.head.repo.owner.login // empty' "$PR")
+          NAME=$(jq -r '.head.repo.name // empty' "$PR")
+          BRANCH=$(jq -r '.head.ref' "$PR")
+          if [ "$STATE" != "closed" ] || [ "$OWNER" != "flutteractionsbot" ] ||
+             [ "$BRANCH" = "master" ] || [ "$BRANCH" = "main" ]; then
+            echo "::error::PR #$PR_NUMBER is not a closed flutteractionsbot PR."
+            exit 1
+          fi
+
+          {
+            echo "repo_owner=$OWNER"
+            echo "repo_name=$NAME"
+            echo "branch_name=$BRANCH"
+          } >> "$GITHUB_OUTPUT"
+
       - name: Delete branch
         env:
           GH_TOKEN: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
-          REPO_OWNER: ${{ github.event.pull_request.head.repo.owner.login }}
-          REPO_NAME: ${{ github.event.pull_request.head.repo.name }}
-          BRANCH_NAME: ${{ github.event.pull_request.head.ref }}
+          REPO_OWNER: ${{ steps.validate.outputs.repo_owner }}
+          REPO_NAME: ${{ steps.validate.outputs.repo_name }}
+          BRANCH_NAME: ${{ steps.validate.outputs.branch_name }}
         run: |
           echo "Deleting branch $BRANCH_NAME from $REPO_OWNER/$REPO_NAME..."
           gh api -X DELETE "/repos/$REPO_OWNER/$REPO_NAME/git/refs/heads/$BRANCH_NAME"

@@ -1,10 +1,22 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Privileged half of the revert automation.
+#
+# Runs after `revert-trigger.yml` completes. The artifact produced by that
+# workflow is UNTRUSTED (a pull request can modify the trigger workflow), so it
+# only carries the PR number, which is bound to the triggering run's head
+# commit before use. Everything else (label, merged state, revert reason, merge
+# commit, etc.) is read from the GitHub API here, and the request is either
+# reverted or answered with a comment explaining why it can't be.
+
 name: Revert PR
 
 on:
-  pull_request_target:
-    # Safe because we only checkout the trusted 'master' branch from the flutteractionsbot/flutter repository
-    # to execute reverts of merged pull request commits. It does not execute arbitrary user-controlled code.
-    types: [labeled] # zizmor: ignore[dangerous-triggers]
+  workflow_run:
+    workflows: [Revert Trigger]
+    types: [completed]
 
 permissions:
   contents: read
@@ -13,56 +25,112 @@ jobs:
   revert:
     name: Revert PR
     runs-on: ubuntu-latest
-    if: github.event.label.name == 'revert'
+    # Runs where every job was skipped (i.e. a non-revert label) conclude as
+    # `skipped`, so this check avoids allocating a runner for them.
+    if: >-
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'pull_request' &&
+      github.event.workflow_run.path == '.github/workflows/revert-trigger.yml'
+    permissions:
+      actions: read
+      contents: read
+      issues: read
+      pull-requests: read
     steps:
-      - name: Handle Not Merged PR
-        if: github.event.pull_request.merged != true
-        run: |
-          gh pr comment "$PR_NUMBER" -R flutter/flutter -b "Only merged pull requests can be reverted."
-          gh pr edit "$PR_NUMBER" -R "$REPO" --remove-label "revert"
+      - name: Download revert metadata
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: revert-metadata
+          path: ${{ runner.temp }}/revert-metadata
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ github.token }}
 
-          # Cancel the workflow and poll the API with a 5-minute safety timeout to prevent infinite runner hanging
-          gh run cancel ${{ github.run_id }} || true
-          for i in {1..60}; do
-            echo "Waiting for cancellation signal... [$i/60]"
-            sleep 5
-          done
-          echo "Cancellation signal timeout reached. Forcing failure."
-          exit 1
+      - name: Validate revert request
+        id: validate
         env:
-          GH_TOKEN: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
-          PR_NUMBER: ${{ github.event.pull_request.number }}
+          GH_TOKEN: ${{ github.token }}
           REPO: ${{ github.repository }}
-
-      - name: Verify Reason and Fetch PR Details
+          RUN_HEAD_REPO: ${{ github.event.workflow_run.head_repository.full_name }}
+          RUN_HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
         run: |
-          # Fetch body, comments, and reviews in a single consolidated API call
-          gh pr view "$PR_NUMBER" -R "$REPO" --json body,comments,reviews > pr_details.json
+          set -euo pipefail
+          METADATA="$RUNNER_TEMP/revert-metadata/metadata.json"
+          WORK="$RUNNER_TEMP/revert"
+          mkdir -p "$WORK"
 
-          # Parse the revert reason case-insensitively and robustly, while allowing the latest "revert" reason to win.
-          jq -r '.comments // [] | .[] | .body | select(test("^reason for revert:"; "i")) | sub("^reason for revert:\\s*"; ""; "i")' pr_details.json | tail -n 1 > reason.txt
-
-          if [ ! -s reason.txt ]; then
-            gh pr comment "$PR_NUMBER" -R flutter/flutter -b "A reason for requesting a revert of $REPO/$PR_NUMBER could not be found or the reason was not properly formatted. Begin a comment with **'Reason for revert:'** to tell the bot why this issue is being reverted."
-            gh pr edit "$PR_NUMBER" -R "$REPO" --remove-label "revert"
+          PR_NUMBER=$(jq -r '.pr_number // empty' "$METADATA")
+          if ! [[ "$PR_NUMBER" =~ ^[1-9][0-9]*$ ]]; then
+            echo "::error::Artifact contains an invalid PR number."
             exit 1
           fi
 
-          # Extract reviewer and original body with null safety to avoid subsequent API requests
-          REVIEWER=$(jq -r '[.reviews // [] | .[] | select(.state == "APPROVED")] | .[0].author.login' pr_details.json)
-          if [ -z "$REVIEWER" ] || [ "$REVIEWER" = "null" ]; then
-            echo "None" > reviewer.txt
-          else
-            echo "@$REVIEWER" > reviewer.txt
+          # Bind the artifact to the pull request that actually triggered the run.
+          gh api "repos/$REPO/pulls/$PR_NUMBER" > "$WORK/pr.json"
+          if [ "$(jq -r '.head.sha' "$WORK/pr.json")" != "$RUN_HEAD_SHA" ] ||
+             [ "$(jq -r '.head.repo.full_name // empty' "$WORK/pr.json")" != "$RUN_HEAD_REPO" ]; then
+            echo "::error::PR #$PR_NUMBER does not match the triggering workflow run."
+            exit 1
           fi
 
-          jq -r '.body // ""' pr_details.json > original_body.txt
+          # Ignore stale requests (e.g. re-runs after the label was removed).
+          if ! jq -e '.labels | any(.name == "revert")' "$WORK/pr.json" > /dev/null; then
+            echo "::notice::PR #$PR_NUMBER no longer has the revert label; nothing to do."
+            echo "action=none" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          echo "pr_number=$PR_NUMBER" >> "$GITHUB_OUTPUT"
+
+          if [ "$(jq -r '.merged' "$WORK/pr.json")" != "true" ]; then
+            echo "Only merged pull requests can be reverted." > "$WORK/error_message.txt"
+            echo "action=report_error" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          # Fetch comments and reviews in a single consolidated API call.
+          gh pr view "$PR_NUMBER" -R "$REPO" --json comments,reviews > "$WORK/pr_details.json"
+
+          # Parse the revert reason case-insensitively, allowing the latest "revert" reason to win.
+          jq -r '.comments // [] | .[] | .body | select(test("^reason for revert:"; "i")) | sub("^reason for revert:\\s*"; ""; "i")' "$WORK/pr_details.json" | tail -n 1 > "$WORK/reason.txt"
+          if [ ! -s "$WORK/reason.txt" ]; then
+            echo "A reason for requesting a revert of $REPO/$PR_NUMBER could not be found or the reason was not properly formatted. Begin a comment with **'Reason for revert:'** to tell the bot why this issue is being reverted." > "$WORK/error_message.txt"
+            echo "action=report_error" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          REVIEWER=$(jq -r '[.reviews // [] | .[] | select(.state == "APPROVED")] | .[0].author.login' "$WORK/pr_details.json")
+          if [ -z "$REVIEWER" ] || [ "$REVIEWER" = "null" ]; then
+            echo "None" > "$WORK/reviewer.txt"
+          else
+            echo "@$REVIEWER" > "$WORK/reviewer.txt"
+          fi
+
+          MERGE_COMMIT=$(jq -r '.merge_commit_sha' "$WORK/pr.json")
+          if ! [[ "$MERGE_COMMIT" =~ ^[0-9a-f]{40}$ ]]; then
+            echo "::error::PR #$PR_NUMBER has an invalid merge commit."
+            exit 1
+          fi
+          echo "merge_commit=$MERGE_COMMIT" >> "$GITHUB_OUTPUT"
+
+          # Free-form display text. Written to files so it is never evaluated.
+          jq -r '.title' "$WORK/pr.json" > "$WORK/title.txt"
+          jq -r '.user.login' "$WORK/pr.json" > "$WORK/author.txt"
+          jq -r '.body // ""' "$WORK/pr.json" > "$WORK/original_body.txt"
+
+          echo "action=revert" >> "$GITHUB_OUTPUT"
+
+      - name: Report error
+        if: steps.validate.outputs.action == 'report_error'
         env:
           GH_TOKEN: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
-          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_NUMBER: ${{ steps.validate.outputs.pr_number }}
           REPO: ${{ github.repository }}
+        run: |
+          gh pr comment "$PR_NUMBER" -R "$REPO" --body-file "$RUNNER_TEMP/revert/error_message.txt"
+          gh pr edit "$PR_NUMBER" -R "$REPO" --remove-label "revert"
 
       - name: Checkout Fork
+        if: steps.validate.outputs.action == 'revert'
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
         with:
           repository: flutteractionsbot/flutter
@@ -73,6 +141,7 @@ jobs:
           persist-credentials: false
 
       - name: Configure git
+        if: steps.validate.outputs.action == 'revert'
         run: |
           gh auth setup-git
           git config --global user.name "flutteractionsbot"
@@ -81,6 +150,7 @@ jobs:
           GH_TOKEN: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
 
       - name: Prepare working folder
+        if: steps.validate.outputs.action == 'revert'
         working-directory: ./flutter
         run: |
           git remote add upstream https://github.com/flutter/flutter.git
@@ -88,39 +158,43 @@ jobs:
           git checkout -b "revert-$PR_NUMBER-$(date +%s)" upstream/master
         env:
           GH_TOKEN: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
-          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_NUMBER: ${{ steps.validate.outputs.pr_number }}
 
       - name: Revert Commit
+        if: steps.validate.outputs.action == 'revert'
         working-directory: ./flutter
         run: |
           if ! git revert "$MERGE_COMMIT" --no-edit; then
-            gh pr comment "$PR_NUMBER" -R flutter/flutter -b "Failed to revert commit $MERGE_COMMIT cleanly. Please resolve conflicts manually."
+            gh pr comment "$PR_NUMBER" -R "$REPO" -b "Failed to revert commit $MERGE_COMMIT cleanly. Please resolve conflicts manually."
             gh pr edit "$PR_NUMBER" -R "$REPO" --remove-label "revert"
             exit 1
           fi
         env:
           GH_TOKEN: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
-          MERGE_COMMIT: ${{ github.event.pull_request.merge_commit_sha }}
-          PR_NUMBER: ${{ github.event.pull_request.number }}
+          MERGE_COMMIT: ${{ steps.validate.outputs.merge_commit }}
+          PR_NUMBER: ${{ steps.validate.outputs.pr_number }}
           REPO: ${{ github.repository }}
 
       - name: Push and Create PR
+        if: steps.validate.outputs.action == 'revert'
         working-directory: ./flutter
         run: |
+          WORK="$RUNNER_TEMP/revert"
           BRANCH_NAME=$(git branch --show-current)
-          REVIEWER_NAME=$(cat ../reviewer.txt)
-          REVIEW_LINE="Reviewed By: $REVIEWER_NAME"
+          PR_TITLE=$(cat "$WORK/title.txt")
+          ORIGINAL_AUTHOR=$(cat "$WORK/author.txt")
+          REVIEW_LINE="Reviewed By: $(cat "$WORK/reviewer.txt")"
 
           git push origin "$BRANCH_NAME"
 
-          PR_LINK="https://github.com/flutter/flutter/pull/$PR_NUMBER"
+          PR_LINK="https://github.com/$REPO/pull/$PR_NUMBER"
 
           {
             echo "Reverts: [$PR_TITLE]($PR_LINK)"
             echo ""
             echo "Initiated by: @$INITIATOR"
             echo ""
-            echo "Reason for reverting: $(cat ../reason.txt)"
+            echo "Reason for reverting: $(cat "$WORK/reason.txt")"
             echo ""
             echo "Original PR Author: @$ORIGINAL_AUTHOR"
             echo ""
@@ -128,22 +202,21 @@ jobs:
             echo ""
             echo "The original PR description is provided below:"
             echo ""
-            cat ../original_body.txt
-          } > ../pr_body.txt
+            cat "$WORK/original_body.txt"
+          } > "$WORK/pr_body.txt"
 
           NEW_PR_URL=$(gh pr create \
             --title "Revert: $PR_TITLE" \
-            --body-file ../pr_body.txt \
-            --repo flutter/flutter \
+            --body-file "$WORK/pr_body.txt" \
+            --repo "$REPO" \
             --base master \
             --head "flutteractionsbot:$BRANCH_NAME")
 
-          gh pr comment "$PR_NUMBER" -R flutter/flutter -b "Successfully created revert PR: $NEW_PR_URL"
+          gh pr comment "$PR_NUMBER" -R "$REPO" -b "Successfully created revert PR: $NEW_PR_URL"
           gh pr edit "$PR_NUMBER" -R "$REPO" --remove-label "revert"
         env:
           GH_TOKEN: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
-          INITIATOR: ${{ github.event.sender.login }}
-          ORIGINAL_AUTHOR: ${{ github.event.pull_request.user.login }}
-          PR_NUMBER: ${{ github.event.pull_request.number }}
-          PR_TITLE: ${{ github.event.pull_request.title }}
+          # The user who applied the label (the actor of the triggering run).
+          INITIATOR: ${{ github.event.workflow_run.actor.login }}
+          PR_NUMBER: ${{ steps.validate.outputs.pr_number }}
           REPO: ${{ github.repository }}
