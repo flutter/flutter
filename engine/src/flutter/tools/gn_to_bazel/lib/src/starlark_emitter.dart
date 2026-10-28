@@ -3141,7 +3141,13 @@ final class _Emitter {
               ? localConfigs[config.substring(1)]
               : _remoteConfig(config);
           if (known != null) {
-            _swiftConfigInto(rule, known, element.condition, applied);
+            _swiftConfigInto(
+              rule,
+              known,
+              element.condition,
+              applied,
+              package: config.startsWith(':') ? null : _gnPackageOf(_gnLabel(config)),
+            );
             continue;
           }
           final ConfigEffect? effect = configEffects[config] ?? configEffects[_gnLabel(config)];
@@ -3185,7 +3191,14 @@ final class _Emitter {
     return forwarded.configOf(_gnLabel(config));
   }
 
-  void _swiftConfigInto(_Rule rule, GnTarget config, Condition under, Set<GnTarget> applied) {
+  void _swiftConfigInto(
+    _Rule rule,
+    GnTarget config,
+    Condition under,
+    Set<GnTarget> applied, {
+    bool linkFlags = true,
+    String? package,
+  }) {
     if (!applied.add(config)) {
       return;
     }
@@ -3198,6 +3211,10 @@ final class _Emitter {
           _swiftFlagsInto(rule, variable, under);
         case 'include_dirs':
           _includeDirsInto(rule, variable, under);
+        case 'lib_dirs' || 'framework_dirs' || 'libs' || 'frameworks' || 'ldflags' when !linkFlags:
+          // The executable's own conversion carries them (an executable's
+          // Swift companion, _splitSwiftSources).
+          break;
         case 'lib_dirs':
           _libraryDirsInto(rule, variable, under);
         case 'framework_dirs':
@@ -3206,17 +3223,29 @@ final class _Emitter {
           _linkFlagsInto(rule, variable, under: under);
         case 'configs':
           _forEachItem(variable, into: rule.list('deps'), (_Element e) {
+            // A config's own configs: of its file -- this one, or the
+            // remote config's ([package]: test_config's `:config` is
+            // darwin/common's, wherever test_config is listed).
             final String nested = _string(e);
-            final GnTarget? local = nested.startsWith(':')
-                ? localConfigs[nested.substring(1)]
-                : null;
-            if (local == null) {
+            final GnTarget? known = nested.startsWith(':')
+                ? (package == null
+                      ? localConfigs[nested.substring(1)]
+                      : forwarded.configOf('$package$nested'))
+                : _remoteConfig(nested);
+            if (known == null) {
               throw GnError(
                 e.assignment.location,
                 'config $nested of ${config.name} on a Swift target is not converted yet',
               );
             }
-            _swiftConfigInto(rule, local, under.and(e.condition), applied);
+            _swiftConfigInto(
+              rule,
+              known,
+              under.and(e.condition),
+              applied,
+              linkFlags: linkFlags,
+              package: nested.startsWith(':') ? package : _gnPackageOf(_gnLabel(nested)),
+            );
           });
         case 'cflags' || 'cflags_c' || 'cflags_cc' || 'cflags_objc' || 'cflags_objcc' || 'defines':
           // GN hands a Swift compile neither (its tool("swift") takes the
@@ -3605,6 +3634,7 @@ final class _Emitter {
       rule.list('deps').addUnique(Condition.always, _Item(_localLabel(cxxRuntimeLabel)));
     }
     _splitObjcSources(rule, target, name: name, library: library, test: kind == 'cc_test');
+    _splitSwiftSources(rule, target, name: name, library: library, test: kind == 'cc_test');
     rules.add(rule);
     if (name != target.name) {
       // GN's name for the library or executable, for dependents and the
@@ -3795,6 +3825,125 @@ final class _Emitter {
         rule.fixedCompatibility = true;
       }
     }
+  }
+
+  /// The Swift sources of an executable (`.swift`, which no cc rule
+  /// compiles): a `flutter_swift_library` beside it, `<name>_swift`, the
+  /// module named after GN's target as GN's tool("swift") names an
+  /// executable's module, with the target's dependencies (the modules the
+  /// sources import reach the compile through them: swift_library.bzl's
+  /// aspect), the target's own swiftflags and the Swift side of its configs
+  /// -- swiftflags and include directories; the link flags are the
+  /// executable's own, through the configs' libraries --, alwayslink as a
+  /// binary's own objects are (a Swift Testing suite's tests are found
+  /// through their metadata, which nothing refers to), testonly as the
+  /// target is, and of the Apple platforms; the executable links it. An
+  /// executable's alone: a source_set of Swift sources is a
+  /// flutter_swift_library itself ([_convertSwiftTarget]), and a library
+  /// mixing Swift with other sources is not converted.
+  void _splitSwiftSources(
+    _Rule rule,
+    GnTarget target, {
+    required String name,
+    required bool library,
+    required bool test,
+  }) {
+    final _ListAttribute? srcs = rule.lists['srcs'];
+    if (srcs == null) {
+      return;
+    }
+    bool isSwift(_Item item) => item.quoted && item.text.endsWith('.swift');
+    final swift = <(Condition, _Item)>[
+      for (final (Condition, _Item) entry in srcs.sequence)
+        if (isSwift(entry.$2)) entry,
+    ];
+    if (swift.isEmpty) {
+      return;
+    }
+    if (library) {
+      throw GnError(
+        target.location,
+        'Swift sources beside other sources in a library (${target.name}) are not converted yet',
+      );
+    }
+    srcs.always.removeWhere(isSwift);
+    for (final Condition under in srcs.conditional.keys.toList()) {
+      srcs.conditional[under]!.removeWhere(isSwift);
+      if (srcs.conditional[under]!.isEmpty) {
+        srcs.conditional.remove(under);
+      }
+    }
+    srcs.sequence.removeWhere(((Condition, _Item) entry) => isSwift(entry.$2));
+
+    _use('//build_defs/cc:swift_library.bzl', 'flutter_swift_library');
+    final companion = _Rule('flutter_swift_library', '${name}_swift', <String>[
+      '# The Swift sources of $name, as the module GN compiles them into',
+      '# (build_defs/cc/swift_library.bzl); $name links them in.',
+    ]);
+    companion.fixedCompatibility = true;
+    for (final (Condition under, _Item item) in swift) {
+      companion.list('srcs').addUnique(under, item);
+    }
+    companion.scalars['module_name'] = '"${target.name}"';
+    final GnVariable? swiftflags = target.variables['swiftflags'];
+    if (swiftflags != null) {
+      _swiftFlagsInto(companion, swiftflags, Condition.always);
+    }
+    final applied = <GnTarget>{};
+    for (final variableName in const <String>[
+      'configs',
+      'public_configs',
+      'all_dependent_configs',
+    ]) {
+      final GnVariable? variable = target.variables[variableName];
+      if (variable == null) {
+        continue;
+      }
+      for (final GnAssignment assignment in variable.assignments) {
+        if (assignment.op == '-=') {
+          // The warning sets and the toolchain's configs: C and C++
+          // compiler settings, nothing of a Swift compile.
+          continue;
+        }
+        for (final _Element element in _elements(assignment, withComments: true)) {
+          final String config = _string(element);
+          final GnTarget? known = config.startsWith(':')
+              ? localConfigs[config.substring(1)]
+              : _remoteConfig(config);
+          if (known != null) {
+            _swiftConfigInto(
+              companion,
+              known,
+              element.condition,
+              applied,
+              linkFlags: false,
+              package: config.startsWith(':') ? null : _gnPackageOf(_gnLabel(config)),
+            );
+          }
+        }
+      }
+    }
+    final _ListAttribute? deps = rule.lists['deps'];
+    if (deps != null) {
+      _copyList(deps, companion.list('deps'), unique: true);
+    }
+    if (layout.isMain) {
+      companion
+          .list('deps')
+          .addUnique(Condition.always, _Item(_localLabel(defaultIncludeDirsLabel)));
+    }
+    for (final String dep in implicitDeps) {
+      companion.list('deps').addUnique(Condition.always, _Item(_localLabel(dep)));
+    }
+    if (test) {
+      companion.scalars['testonly'] = 'True';
+    }
+    final Condition compatible = target.condition.and(applePlatforms);
+    if (compatible != Condition.always) {
+      companion.scalars['target_compatible_with'] = _compatibilityOf(compatible, target);
+    }
+    rule.list('deps').addUnique(Condition.always, _Item(':${companion.name}'));
+    rules.add(companion);
   }
 
   /// Copies [from]'s items into [to] under their conditions, in order.
@@ -4064,6 +4213,7 @@ final class _Emitter {
       gnPackage: gnPackage,
       localConfigs: localConfigs,
       forwarded: forwarded.flagsOf,
+      remoteConfig: forwarded.configOf,
     ).toSet();
     if (derived.length != actual.length || !derived.containsAll(actual)) {
       throw GnError(
@@ -4084,6 +4234,9 @@ final class _Emitter {
 
   /// A GN label as written in this file, as `//dir:name`.
   String _gnLabel(String value) => absoluteGnLabel(value, package: gnPackage, implicitName: true);
+
+  /// The package of an absolute GN label (`//dir` of `//dir:name`).
+  static String _gnPackageOf(String label) => label.substring(0, label.indexOf(':'));
 
   /// config("x") becomes a header-only library carrying the defines, include
   /// directories and link flags, which dependents list in deps; Bazel
@@ -4299,7 +4452,9 @@ final class _Emitter {
           if (e.value is! GnStringValue || !_rawString(e).contains(rebasedPathMarker)) {
             linkopts.add(
               under.and(e.condition),
-              e.value is GnStringValue ? _item(_tokenizerEscaped(_string(e)), e) : _flagItem(e),
+              e.value is GnStringValue
+                  ? _item(_tokenizerEscaped(_string(e)), e)
+                  : _flagValueItem(_withoutExecutableRelativePrefix(e.value), e),
             );
             return;
           }
@@ -4467,6 +4622,30 @@ final class _Emitter {
       default:
         throw GnError(element.assignment.location, 'unexpected flag value $value');
     }
+  }
+
+  /// An rpath relative to the executable, of a directory outside the tree:
+  /// `-Wl,-rpath,@executable_path/$_platform_framework_path`, where the
+  /// path was rebased against GN's build directory (darwin/common's
+  /// swift_testing_config, for the Testing framework). In GN's layout the
+  /// executable sits in that directory, so the rpath names the platform's
+  /// Frameworks directory itself; Bazel's executable sits elsewhere, and
+  /// the directory is named as it is -- the `@executable_path/` (or
+  /// `@loader_path/`) before the constant goes. Anything else is itself.
+  static GnValue _withoutExecutableRelativePrefix(GnValue value) {
+    if (value case GnExpandedString(:final List<GnValue> parts)
+        when parts.length >= 2 && parts[0] is GnStringValue && parts[1] is GnReference) {
+      final String head = (parts[0] as GnStringValue).value;
+      for (final prefix in const <String>['@executable_path/', '@loader_path/']) {
+        if (head.endsWith(prefix)) {
+          return GnExpandedString(<GnValue>[
+            GnStringValue(head.substring(0, head.length - prefix.length)),
+            ...parts.sublist(1),
+          ]);
+        }
+      }
+    }
+    return value;
   }
 
   /// [value] with [prefix] before it: a directory as the flag that names it
@@ -5204,7 +5383,9 @@ final class _Emitter {
     });
   }
 
-  /// What Bazel compiles from `srcs`.
+  /// What Bazel compiles from `srcs` -- and what GN compiles that a
+  /// companion rule takes from there: Objective-C (_splitObjcSources) and
+  /// Swift (_splitSwiftSources).
   static const Set<String> _sourceExtensions = <String>{
     '.c',
     '.cc',
@@ -5214,6 +5395,7 @@ final class _Emitter {
     '.C',
     '.m',
     '.mm',
+    '.swift',
     '.S',
     '.s',
     '.asm',
@@ -5273,6 +5455,35 @@ final class _Emitter {
               flag: flag.flag,
             ));
           }
+        }
+        // A config of another converted file (the macOS shell's Swift
+        // suite lists darwin/common's test configs), read through the
+        // resolver: a dependency on its library (its defines, include
+        // directories and link flags, as a local public listing's), its
+        // compiler flags inlined and, listed publicly, handed on.
+        final GnTarget? remote = local == null ? _remoteConfig(config) : null;
+        if (remote != null) {
+          if (assignment.op == '-=') {
+            throw GnError(assignment.location, 'removing config $config is not supported');
+          }
+          _inlineConfig(rule, remote, assignment, flagsOnly: true);
+          if (!private) {
+            for (final ForwardedFlag flag in flagsOfConfig(remote)) {
+              propagatedFlags.add((
+                condition: assignment.condition.and(flag.condition),
+                flag: flag.flag,
+              ));
+            }
+          }
+          final String label = bazelLabel(
+            config,
+            package: gnPackage,
+            location: assignment.location,
+          );
+          rule
+              .list(private && rule.kind == 'cc_library' ? 'implementation_deps' : 'deps')
+              .addUnique(assignment.condition, _item(_localLabel(label), element));
+          continue;
         }
         final ConfigEffect? effect = config.startsWith(':')
             ? ConfigDependency(config)

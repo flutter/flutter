@@ -146,6 +146,7 @@ final class DependencyResolver {
           gnPackage: directory,
           localConfigs: localConfigs,
           forwarded: flagsOf,
+          remoteConfig: configOf,
         )) {
           if (!flags.contains(flag)) {
             flags.add(flag);
@@ -238,6 +239,7 @@ List<ForwardedFlag> publicFlagsOf(
   required String gnPackage,
   required Map<String, GnTarget> localConfigs,
   required List<ForwardedFlag> Function(String label) forwarded,
+  GnTarget? Function(String label)? remoteConfig,
 }) {
   final flags = <ForwardedFlag>[];
   for (final name in <String>['public_configs', 'all_dependent_configs']) {
@@ -253,6 +255,17 @@ List<ForwardedFlag> publicFlagsOf(
           continue;
         }
         for (final ForwardedFlag flag in flagsOfConfig(local)) {
+          flags.add((condition: item.condition.and(flag.condition), flag: flag.flag));
+        }
+        continue;
+      }
+      // A config of another converted file ([remoteConfig]: the resolver's
+      // configOf): its flags, as a local config's.
+      final GnTarget? remote = remoteConfig?.call(
+        absoluteGnLabel(config, package: gnPackage, implicitName: true),
+      );
+      if (remote != null) {
+        for (final ForwardedFlag flag in flagsOfConfig(remote)) {
           flags.add((condition: item.condition.and(flag.condition), flag: flag.flag));
         }
         continue;

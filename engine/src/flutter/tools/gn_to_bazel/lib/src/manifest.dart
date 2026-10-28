@@ -1131,25 +1131,18 @@ filegroup(
   // Mac build reach (research/20 §9): the Metal/Impeller context, and
   // what the Flutter frameworks share -- the channels and codecs, the
   // tracing bindings, and the Swift module behind them
-  // (InternalFlutterSwiftCommon, a flutter_swift_library). `test_config`
-  // (the Xcode platform's Developer directories through mac_platform_path:
-  // compile flags on the listing targets, link flags on the config's
-  // library), test_utils_swift and the Objective-C suite (gtest over
-  // OCMock, @ocmock) convert; the Swift suite waits for the Testing
-  // framework (research/20 §12).
+  // (InternalFlutterSwiftCommon, a flutter_swift_library), and their
+  // tests: `test_config` (the Xcode platform's Developer directories
+  // through mac_platform_path: compile flags on the listing targets, link
+  // flags on the config's library), the Objective-C suite (gtest over
+  // OCMock, @ocmock), and the Swift Testing suite -- swift_testing_main's
+  // `@main` over the Testing framework (swift_testing_config: its search
+  // path and an rpath to the platform's Frameworks directory, which the
+  // emitter names outright where GN had it relative to the executable),
+  // an executable of Swift sources, which is a flutter_swift_library the
+  // cc_test links (research/20 §12).
   ConvertedFile('//flutter/shell/platform/darwin/graphics', condition: 'is_mac'),
-  ConvertedFile(
-    '//flutter/shell/platform/darwin/common',
-    condition: 'is_mac',
-    skip: <String, String>{
-      'framework_common_swift_unittests':
-          "the Testing framework from the platform's Developer directory: the Apple test phase",
-      'swift_testing_main': "the Testing framework's runner: the Apple test phase",
-      // Its config: the platform's framework directory rebased against the
-      // build directory, for an rpath relative to the executable.
-      'swift_testing_config': "the Testing framework's search path and rpath: the Apple test phase",
-    },
-  ),
+  ConvertedFile('//flutter/shell/platform/darwin/common', condition: 'is_mac'),
   // The macOS shell: FlutterMacOS.framework (the Objective-C++ sources, the
   // Swift run loop and resize synchronizer, the dylib, the copies into the
   // bundle, package_framework.py's symlinks, the xcframework, the archive and
@@ -1157,10 +1150,9 @@ filegroup(
   // shell/platform:platform and darwin) and `universal_flutter_framework`
   // are groups of things to build over the packaging actions, which nothing
   // links. Its Objective-C suite (gtest over OCMock and the fixtures' Dart
-  // entry point) converts; the Swift suite waits for the Testing framework;
-  // the umbrella-import check links against the assembled bundle in the
-  // build directory (`-F$root_out_dir`), which a cc rule cannot name yet
-  // (research/20 §11).
+  // entry point) and its Swift Testing suite convert; the umbrella-import
+  // check links against the assembled bundle in the build directory
+  // (`-F$root_out_dir`), which a cc rule cannot name yet (research/20 §11).
   ConvertedFile(
     '//flutter/shell/platform/darwin/macos',
     condition: 'is_mac',
@@ -1172,8 +1164,6 @@ filegroup(
     // is the bot's own CPU on every builder of mac_host_engine.json).
     assume: macHostAssumptions,
     skip: <String, String>{
-      'flutter_desktop_darwin_swift_unittests':
-          "the Testing framework from the platform's Developer directory: the Apple test phase",
       '_generate_symlinks_and_verify_framework_module':
           r'a shared library linked against the assembled FlutterMacOS.framework in the build directory '
           r'(-F$root_out_dir, frameworks = ["FlutterMacOS.framework"]): a verification target that '

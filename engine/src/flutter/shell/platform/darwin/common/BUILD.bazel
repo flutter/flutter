@@ -3,7 +3,6 @@
 # found in the LICENSE file.
 
 # Generated from //flutter/shell/platform/darwin/common/BUILD.gn by gn_to_bazel; do not edit.
-# Not converted: swift_testing_config, swift_testing_main, framework_common_swift_unittests.
 
 load("@bazel_skylib//lib:selects.bzl", "selects")
 load("@macos_sdk//:sdk.bzl", "MACOS_PLATFORM_PATH")
@@ -36,6 +35,20 @@ cc_library(
         "//conditions:default": ["@platforms//:incompatible"],
     }),
     deps = [":config"],
+)
+
+cc_library(
+    name = "swift_testing_config",
+    linkopts = [
+        "-F" + MACOS_PLATFORM_PATH + "/Developer/Library/Frameworks",
+        "-Wl,-rpath," + MACOS_PLATFORM_PATH + "/Developer/Library/Frameworks",
+        "-framework",
+        "Testing",
+    ],
+    target_compatible_with = select({
+        "@platforms//os:macos": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
 )
 
 # The Objective-C(++) sources of common, which cc_library takes none of
@@ -359,6 +372,107 @@ flutter_swift_library(
     }),
     deps = [
         ":framework_common",
+        "//engine/src:include_root",
+    ],
+)
+
+# Implements a main entry point for Swift Testing tests.
+# To build a Swift Testing executable, add this target to `deps`.
+flutter_swift_library(
+    name = "swift_testing_main",
+    testonly = True,
+    srcs = [
+        "SwiftTestingMain.swift",
+        "SwiftTestingRunner.swift",
+    ],
+    includes = ["."],
+    linkopts = [
+        "-mmacosx-version-min=14.0",  # !(is_ios) && is_mac
+        "-F" + MACOS_PLATFORM_PATH + "/Developer/Library/Frameworks",
+        "-L" + MACOS_PLATFORM_PATH + "/Developer/usr/lib",
+        "-F" + MACOS_PLATFORM_PATH + "/Developer/Library/Frameworks",
+        "-Wl,-rpath," + MACOS_PLATFORM_PATH + "/Developer/Library/Frameworks",
+        "-framework",
+        "Testing",
+    ],
+    swiftflags = select({
+        ":when_is_mac_and_enable_unittests": [
+            "-enable-testing",  # is_ios && enable_ios_unittests || (is_mac && enable_unittests)
+        ],
+        "//conditions:default": [],
+    }) + [
+        "-F" + MACOS_PLATFORM_PATH + "/Developer/Library/Frameworks",
+        "-I" + MACOS_PLATFORM_PATH + "/Developer/usr/lib",
+    ],
+    target_compatible_with = select({
+        "@platforms//os:macos": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = ["//engine/src:include_root"],
+)
+
+# The Swift sources of framework_common_swift_unittests, as the module GN compiles them into
+# (build_defs/cc/swift_library.bzl); framework_common_swift_unittests links them in.
+flutter_swift_library(
+    name = "framework_common_swift_unittests_swift",
+    testonly = True,
+    srcs = [
+        "framework/Source/LoggerTests.swift",
+        "framework/Source/TracingTests.swift",
+    ],
+    includes = ["."],
+    module_name = "framework_common_swift_unittests",
+    swiftflags = select({
+        ":when_is_mac_and_enable_unittests": [
+            "-enable-testing",  # is_ios && enable_ios_unittests || (is_mac && enable_unittests)
+        ],
+        "//conditions:default": [],
+    }) + [
+        "-F" + MACOS_PLATFORM_PATH + "/Developer/Library/Frameworks",
+        "-I" + MACOS_PLATFORM_PATH + "/Developer/usr/lib",
+    ],
+    target_compatible_with = select({
+        "@platforms//os:macos": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        ":config",
+        ":framework_common",
+        ":swift_testing_config",
+        ":swift_testing_main",
+        ":test_config",
+        ":test_utils_swift",
+        "//engine/src:include_root",
+    ],
+)
+
+cc_test(
+    name = "framework_common_swift_unittests",
+    size = "small",
+    # Add platform frameworks directory to search path for test frameworks.
+    # Add platform lib to search path for test libraries/Swift modules.
+    copts = FLUTTER_COPTS + [
+        "-fvisibility=default",  # from :swift_testing_main
+        "-F" + MACOS_PLATFORM_PATH + "/Developer/Library/Frameworks",  # from :swift_testing_main
+        "-I" + MACOS_PLATFORM_PATH + "/Developer/usr/lib",  # from :swift_testing_main
+        "-fvisibility=default",
+        "-F" + MACOS_PLATFORM_PATH + "/Developer/Library/Frameworks",
+        "-I" + MACOS_PLATFORM_PATH + "/Developer/usr/lib",
+        "-mmacosx-version-min=14.0",  # from :swift_testing_main
+    ],
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    target_compatible_with = select({
+        "@platforms//os:macos": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        ":config",
+        ":framework_common",
+        ":framework_common_swift_unittests_swift",
+        ":swift_testing_config",
+        ":swift_testing_main",
+        ":test_config",
+        ":test_utils_swift",
         "//engine/src:include_root",
     ],
 )
