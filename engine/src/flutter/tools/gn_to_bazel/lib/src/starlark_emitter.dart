@@ -3461,7 +3461,10 @@ final class _Emitter {
         case 'sources':
           _sourcesInto(rule, variable, target, splitHeaders: library && !explicitPublic);
         case 'public':
-          _filesInto(rule.list('hdrs'), variable);
+          // A library's public headers; a binary's (the iOS shell's dylib
+          // lists the framework's) are sources of it, as cc_binary takes
+          // headers -- and its Objective-C companion's hdrs, below.
+          _filesInto(rule.list(library ? 'hdrs' : 'srcs'), variable);
         case 'deps':
         case 'public_deps':
           // Both are Bazel deps: GN's include paths make every header of

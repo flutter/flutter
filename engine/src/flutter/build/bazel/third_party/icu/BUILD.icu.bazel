@@ -239,11 +239,13 @@ filegroup(
     srcs = [
         "BUILD.gn",
         # The data files GN copies by target OS: the host's (common/), the
-        # engine's trimmed one (flutter/), Android's.
+        # engine's trimmed one (flutter/), Android's, iOS's (the Mac's T26:
+        # the Dart wrap's iOS build names it).
         "android/icudtl.dat",
         "common/icudtl.dat",
         "config.gni",
         "flutter/icudtl.dat",
+        "ios/icudtl.dat",
         "sources.gni",
     ] + glob([
         "source/common/**",
