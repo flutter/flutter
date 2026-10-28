@@ -128,10 +128,21 @@ use_repo(engine_version, "engine_version")
 pub = use_extension("//build_defs/dart:pub.bzl", "pub")
 use_repo(pub, "pub", "pub_workspace")
 
-# The Flutter SDK's cache artifacts the framework's tests read through
-# FLUTTER_ROOT (the Material fonts; build_defs/repositories/flutter_sdk_cache.bzl).
+# The Flutter SDK's cache artifacts the framework's and the tool's tests read
+# through FLUTTER_ROOT (the Material fonts, the Gradle wrapper and, on a Mac
+# host, the iOS USB dependencies; build_defs/repositories/flutter_sdk_cache.bzl).
 flutter_sdk_cache = use_extension("//build_defs/repositories:flutter_sdk_cache.bzl", "flutter_sdk_cache")
-use_repo(flutter_sdk_cache, "gradle_wrapper", "material_fonts")
+use_repo(
+    flutter_sdk_cache,
+    "gradle_wrapper",
+    "ios_usb_ios_deploy",
+    "ios_usb_libimobiledevice",
+    "ios_usb_libimobiledeviceglue",
+    "ios_usb_libplist",
+    "ios_usb_libusbmuxd",
+    "ios_usb_openssl",
+    "material_fonts",
+)
 
 # The browsers the web tests drive, at the versions the web engine's
 # lib/web_ui/dev/package_lock.yaml pins (build_defs/repositories/browsers.bzl):
