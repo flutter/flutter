@@ -1127,3 +1127,17 @@ selects.config_setting_group(
         "//engine/src/flutter/build/bazel:ios_simulator_disabled",
     ],
 )
+
+# What GN has no words for; maintained in the converter's manifest
+# (tools/gn_to_bazel/lib/src/manifest.dart).
+
+# The iOS embedding's XCTest project (testing/ios/IosUnitTests, which
+# xcodebuild builds: run_tests.py --type objc) compiles FlutterChannelsTest.m
+# -- a source no GN target lists -- out of the tree, with the framework's
+# headers directory as a header search path.
+exports_files(["framework/Source/FlutterChannelsTest.m"])
+
+filegroup(
+    name = "framework_headers",
+    srcs = glob(["framework/Headers/*.h"]),
+)
