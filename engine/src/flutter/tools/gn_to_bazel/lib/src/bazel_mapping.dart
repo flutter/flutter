@@ -2982,8 +2982,13 @@ Assumptions linuxHostAssumptions() {
     'build_engine_artifacts': GnBoolValue(true),
     // tools/gn's --prebuilt-dart-sdk, which every host builder passes and
     // `et` defaults to: the engine's Dart tooling comes from the prebuilt
-    // SDK under flutter/prebuilts (host_debug_no_prebuilt_dart_sdk is the
-    // one config that builds it, from the Dart tree).
+    // SDK under flutter/prebuilts. The one build without it
+    // (host_debug_no_prebuilt_dart_sdk, --no-prebuilt-dart-sdk) is the Dart
+    // wrap's flutter_prebuilt_dart_sdk setting (build/bazel/dart_wrap), which the
+    // hand-written files that stand for the GN sites reading the argument
+    // select on -- the wrap builds the SDK, flutter_frontend_server takes
+    // its snapshot -- so the generated files assume the prebuilt (the
+    // archives and the web SDK are built by no builder without it).
     'flutter_prebuilt_dart_sdk': GnBoolValue(true),
     'prebuilt_dart_sdk': GnStringValue('//flutter/prebuilts/linux-x64/dart-sdk'),
     'host_prebuilt_dart_sdk': GnStringValue('//flutter/prebuilts/linux-x64/dart-sdk'),

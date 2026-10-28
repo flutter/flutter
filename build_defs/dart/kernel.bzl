@@ -18,7 +18,11 @@ Dart build's: an AOT snapshot runs only on the runtime it was built for,
 and the wrapped build (an unoptimized VM in a fastbuild) would make the
 compiler several times slower than GN's for the same output. The prebuilt
 SDK is pinned to the same Dart revision as the tree, so the kernel it emits
-is the one the engine's VM reads.
+is the one the engine's VM reads. The one build without the prebuilt SDK
+(tools/gn --no-prebuilt-dart-sdk; the dart_wrap package's flutter_prebuilt_dart_sdk
+setting off, in the host's own build) runs the wrapped build's: both tools
+come through that package's engine_dartaotruntime and engine_frontend_server,
+which choose.
 
 The compiler records each source's URI in the kernel, and a source given by
 path gets `file://` plus its absolute path -- GN's checkout path, or here
@@ -30,8 +34,6 @@ property of the tree instead: sources are compiled as
 `org-dartlang-root:///engine/src/flutter/...` on every machine, and tests
 look it up by that URI through flutter::testing::GetSourceUri.
 """
-
-load("@host_platform//:host.bzl", "HOST_DART_SDK")
 
 SOURCE_URI_SCHEME = "org-dartlang-root"
 
@@ -156,14 +158,17 @@ def compile_to_kernel(ctx, main, out, srcs, package_config, platform, args = [],
 
 # The frontend server and its runtime, for a rule that calls compile_to_kernel.
 KERNEL_TOOL_ATTRS = {
+    # In the target configuration, where the wrapped Dart build is: the
+    # build without the prebuilt SDK takes both from it, and an exec
+    # configuration dependency would build the SDK a second time.
     "_dartaotruntime": attr.label(
-        default = HOST_DART_SDK + "//:dartaotruntime",
+        default = "//engine/src/flutter/build/bazel/dart_wrap:engine_dartaotruntime",
         allow_single_file = True,
         executable = True,
-        cfg = "exec",
+        cfg = "target",
     ),
     "_frontend_server": attr.label(
-        default = HOST_DART_SDK + "//:frontend_server",
+        default = "//engine/src/flutter/build/bazel/dart_wrap:engine_frontend_server",
         allow_single_file = True,
     ),
 }
