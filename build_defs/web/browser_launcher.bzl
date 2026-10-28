@@ -61,7 +61,7 @@ for it by absolute path (GTK's settings), as the host's own would.
 
     browser_launcher(
         name = "chrome",
-        browser = "@chrome//:chrome-linux64/chrome",
+        browser = "@chrome//:executable",
         browser_files = ["@chrome"],
     )
     display_launcher(name = "Xvfb")
@@ -230,9 +230,9 @@ browser_launcher = rule(
         "browser": attr.label(allow_single_file = True, mandatory = True, doc = "The browser's executable."),
         "browser_files": attr.label_list(allow_files = True, doc = "The browser's directory, whole."),
         "libraries": attr.label(
-            default = "//build_defs/web:browser_libraries",
+            default = "//build_defs/web:browser_libraries_for_os",
             providers = [BrowserLibrariesInfo],
-            doc = "The libraries (a browser_libraries, through the label flag: the runtime sysroot's by default, or the host's, nothing).",
+            doc = "The libraries (a browser_libraries: on Linux the label flag's -- the runtime sysroot's by default, or the host's, nothing -- and the host's on a Mac).",
         ),
         "policies": attr.string(
             doc = "Firefox's enterprise policies (distribution/policies.json beside the script), as felt writes them.",
@@ -289,7 +289,7 @@ display_launcher = rule(
           "the build's X server on the build's libraries, or the host's under the host's libraries.",
     attrs = {
         "libraries": attr.label(
-            default = "//build_defs/web:browser_libraries",
+            default = "//build_defs/web:browser_libraries_for_os",
             providers = [BrowserLibrariesInfo],
             doc = "The libraries, and the X server among them (a browser_libraries, through the label flag).",
         ),

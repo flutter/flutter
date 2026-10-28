@@ -146,7 +146,7 @@ web_ui_host_page(
 # and Edge's suites need other hosts and are left out.
 browser_launcher(
     name = "chrome",
-    browser = "@chrome//:chrome-linux64/chrome",
+    browser = "@chrome//:executable",
     browser_files = ["@chrome"],
 )
 
