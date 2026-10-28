@@ -183,9 +183,7 @@ Future<int> run(List<String> arguments) async {
         skipTargets: skip,
         tree: tree,
         importPolicy: engineImportPolicy,
-        condition: manifest?.condition == null
-            ? Condition.always
-            : ConditionVariable(manifest!.condition!),
+        condition: fileConditionOf(manifest?.condition),
         targetConditions: <String, Condition>{
           for (final MapEntry<String, String> entry
               in (manifest?.targetConditions ?? const <String, String>{}).entries)

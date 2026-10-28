@@ -8828,7 +8828,7 @@ flutter_dart_tests(
           skipTargets: file.skip.keys.toSet(),
           tree: tree,
           importPolicy: engineImportPolicy,
-          condition: file.condition == null ? Condition.always : ConditionVariable(file.condition!),
+          condition: file.fileCondition,
           targetConditions: <String, Condition>{
             for (final MapEntry<String, String> entry in file.targetConditions.entries)
               entry.key: ConditionVariable(entry.value),

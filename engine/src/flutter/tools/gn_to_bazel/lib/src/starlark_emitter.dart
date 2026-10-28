@@ -98,10 +98,13 @@ final class _Element {
 
   /// A comment for the item's line: GN's suffix comment, and the condition
   /// the assumptions resolved (`defined()` tests, which templates use to
-  /// forward optional variables, say nothing and are left out).
+  /// forward optional variables, say nothing and are left out; a condition
+  /// repeated -- a file's `if (is_ios)` inside the manifest's is_ios -- is
+  /// said once).
   String? get note {
     final List<String> conditions = assignment.sourceConditions
         .where((String c) => !c.startsWith('defined(') && !c.startsWith('!(defined('))
+        .toSet()
         .toList();
     final parts = <String>[
       for (final String suffix in comments.suffix) _uncomment(suffix),
