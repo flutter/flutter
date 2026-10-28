@@ -8621,7 +8621,7 @@ test_suite(
         'mac_ios_engine.json':
             '''
 {"builds": [
-  ${build('ci/ios_debug_sim_extension_safe', '--ios --runtime-mode debug --simulator --simulator-cpu=arm64 --no-lto --darwin-extension-safe', <String>[])},
+  ${build('ci/ios_debug_sim_extension_safe', '--ios --runtime-mode debug --simulator --simulator-cpu=arm64 --no-lto --darwin-extension-safe', <String>[], tests: runTests('Tests for ios_debug_sim_extension_safe', 'objc'))},
   ${build('ci/ios_release', '--target-dir ci/ios_release --ios --runtime-mode release --xcode-symlinks', <String>['flutter/lib/snapshot:generate_snapshot_bins', 'flutter/shell/platform/darwin/ios:flutter_framework'])}
 ]}''',
         // The developer's: the web build from either host is one build;
@@ -8756,6 +8756,18 @@ test_suite(
 '''),
       );
       expect(buildFile, isNot(contains('txt_unittests (engine)')));
+      // The objc type: the iOS embedding's XCTest run (testing/ios).
+      expect(
+        buildFile,
+        contains('''
+# ci/ios_debug_sim_extension_safe's tests: run_tests.py --type objc.
+test_suite(
+    name = "ios_debug_sim_extension_safe_tests",
+    tags = ["manual"],
+    tests = ["//engine/src/flutter/testing/ios:ios_unit_tests"],
+)
+'''),
+      );
     });
   });
 

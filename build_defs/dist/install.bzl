@@ -193,7 +193,8 @@ _install = rule(
         ),
         "build_directory_name": attr.string(
             mandatory = True,
-            doc = "GN's name for the build directory of this configuration, up to the mode (host_debug, host_release, wasm_release, ...).",
+            doc = "GN's name for the build directory of this configuration, up to the mode and the iOS simulator's `_sim` " +
+                  "(host_debug, host_release, wasm_release, ios_debug_sim, ...).",
         ),
         "build_directory_cpu": attr.string(
             doc = "The CPU suffix of GN's name for the build directory, after _unopt (`_arm64`, or nothing).",

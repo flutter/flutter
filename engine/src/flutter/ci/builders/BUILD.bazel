@@ -1657,9 +1657,12 @@ install(
 )
 
 # ci/ios_debug_unopt_sim_arm64's tests: run_tests.py --type objc.
-# Not run, no Bazel test yet: the objc type.
 # Other steps, scripts of the checkout: Scenario App Integration Tests.
-# Nothing to run.
+test_suite(
+    name = "ios_debug_unopt_sim_arm64_tests",
+    tags = ["manual"],
+    tests = ["//engine/src/flutter/testing/ios:ios_unit_tests"],
+)
 
 # mac_unopt.json: ci/ios_debug_unopt_sim_arm64_extension_safe
 #   bazel run --config=ios_debug_unopt_sim_arm64_extension_safe :ios_debug_unopt_sim_arm64_extension_safe
@@ -1676,9 +1679,12 @@ install(
 )
 
 # ci/ios_debug_unopt_sim_arm64_extension_safe's tests: run_tests.py --type objc.
-# Not run, no Bazel test yet: the objc type.
 # Other steps, scripts of the checkout: Scenario App Integration Tests.
-# Nothing to run.
+test_suite(
+    name = "ios_debug_unopt_sim_arm64_extension_safe_tests",
+    tags = ["manual"],
+    tests = ["//engine/src/flutter/testing/ios:ios_unit_tests"],
+)
 
 # local_engine.json: macos/ios_debug
 #   ninja's default target, everything: bazel build --config=ios_debug //engine/src/flutter:local_engine

@@ -4,7 +4,9 @@
 
 # The test rules: testing.bzl (the engine's C++ and Dart test macros, as
 # run_tests.py runs them: gtest-parallel, the Dart tests on flutter_tester,
-# the benchmarks) and checkout_script_test.bzl (a checkout script run as a
-# test over the checkout-shaped runfiles tree, or the checkout itself).
+# the benchmarks), checkout_script_test.bzl (a checkout script run as a
+# test over the checkout-shaped runfiles tree, or the checkout itself) and
+# ios_xctest.bzl (an Xcode project's XCTest run on an iOS simulator against
+# the build directory: run_tests.py --type objc).
 
 package(default_visibility = ["//visibility:public"])

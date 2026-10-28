@@ -332,7 +332,10 @@ const String ltoSetting = '//engine/src/flutter/build/bazel:lto';
 /// `java` the Android embedding's Robolectric tests (run_java_tests: Gradle in
 /// shell/platform/android/test_runner over the build's flutter.jar; the
 /// Bazel suite runs the same classes under an Android configuration,
-/// build_defs/java/robolectric.bzl). `engine` is [runTestsEngineSuites],
+/// build_defs/java/robolectric.bzl), `objc` the iOS embedding's XCTest run
+/// (run_objc_tests: xcodebuild over testing/ios/IosUnitTests on a simulator,
+/// against the build's libios_test_flutter.dylib and Flutter.framework;
+/// build_defs/testing/ios_xctest.bzl). `engine` is [runTestsEngineSuites],
 /// resolved among the converted targets.
 const Map<String, List<String>> runTestsTypeSuites = <String, List<String>>{
   'dart': <String>[
@@ -345,6 +348,7 @@ const Map<String, List<String>> runTestsTypeSuites = <String, List<String>>{
   'font-subset': <String>['//engine/src/flutter/tools/font_subset:font_subset_test'],
   'impeller': <String>['//engine/src/flutter/impeller:impeller_unittests'],
   'java': <String>['//engine/src/flutter/shell/platform/android:java_tests'],
+  'objc': <String>['//engine/src/flutter/testing/ios:ios_unit_tests'],
 };
 
 /// The test steps that run a script of the checkout (not run_tests.py, not
