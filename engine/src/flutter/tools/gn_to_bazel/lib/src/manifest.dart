@@ -17,6 +17,18 @@ import 'bazel_mapping.dart';
 import 'gn_eval.dart';
 import 'mirrored_lists.dart';
 
+/// A manifest's file condition ([ConvertedFile.condition]) as a
+/// [Condition]: always for null, the variable, or the disjunction of the
+/// variables around `||` (`is_ios || is_mac`).
+Condition fileConditionOf(String? condition) {
+  if (condition == null) {
+    return Condition.always;
+  }
+  return Condition.disjunction(<Condition>[
+    for (final String name in condition.split('||')) ConditionVariable(name.trim()),
+  ]);
+}
+
 /// One generated file.
 final class ConvertedFile {
   const ConvertedFile(
@@ -58,8 +70,14 @@ final class ConvertedFile {
   /// of the file's own says so: impeller's Android toolkit, which only an
   /// `if (is_android)` dependency names. The file is evaluated as if inside
   /// that block, so its targets are incompatible elsewhere and a wildcard
-  /// build of the tree skips them.
+  /// build of the tree skips them. A disjunction of variables, written
+  /// `is_ios || is_mac`, for a file both Apple shells reach (darwin/common);
+  /// [fileCondition] reads it.
   final String? condition;
+
+  /// [condition] as a [Condition]: always for null, the variable, or the
+  /// disjunction of the variables around `||`.
+  Condition get fileCondition => fileConditionOf(condition);
 
   /// GN labels (`//dir:name`) the file's groups depend on that have no Bazel
   /// counterpart yet -- targets of files not converted, or skipped in theirs
@@ -1153,11 +1171,15 @@ filegroup(
   // path and an rpath to the platform's Frameworks directory, which the
   // emitter names outright where GN had it relative to the executable),
   // an executable of Swift sources, which is a flutter_swift_library the
-  // cc_test links (research/20 §12).
-  ConvertedFile('//flutter/shell/platform/darwin/graphics', condition: 'is_mac'),
+  // cc_test links (research/20 §12). Both files are the two Apple shells'
+  // (`assert(is_mac || is_ios)`): under iOS since the iOS port's converter
+  // flip (research/21 I2), where the test configs take the iPhone
+  // platform's directories and the Swift triple of the device or the
+  // simulator, and the suites stay macOS's (GN's enable_unittests).
+  ConvertedFile('//flutter/shell/platform/darwin/graphics', condition: 'is_ios || is_mac'),
   ConvertedFile(
     '//flutter/shell/platform/darwin/common',
-    condition: 'is_mac',
+    condition: 'is_ios || is_mac',
     // The Objective-C suite includes the iOS embedding's task queue header,
     // a file no target of a macOS build owns: GN's check passes over it, a
     // sandboxed compile needs it. (Listed in GN's sources it would be the
