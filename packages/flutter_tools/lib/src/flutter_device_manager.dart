@@ -16,6 +16,7 @@ import 'base/platform.dart';
 import 'base/user_messages.dart';
 import 'build_system/build_system.dart';
 import 'build_system/build_targets.dart';
+import 'context/apple_context.dart';
 import 'context/tool_context.dart';
 import 'custom_devices/custom_device.dart';
 import 'device.dart';
@@ -43,6 +44,7 @@ class FlutterDeviceManager extends DeviceManager {
     required Analytics analytics,
     required AndroidSdk? Function() androidSdkBuilder,
     required AndroidWorkflow androidWorkflow,
+    required AppleContext appleContext,
     required BuildSystem buildSystem,
     required BuildTargets buildTargets,
     required ExtensionBuildManager extensionBuildManager,
@@ -88,7 +90,13 @@ class FlutterDeviceManager extends DeviceManager {
         buildTargets: buildTargets,
         nativeAssetsBuilder: nativeAssetsBuilder,
       ),
-      MacOSDevices(macOSWorkflow: macOSWorkflow, toolContext: toolContext),
+      MacOSDevices(
+        analytics: analytics,
+        appleContext: appleContext,
+        featureFlags: featureFlags,
+        macOSWorkflow: macOSWorkflow,
+        toolContext: toolContext,
+      ),
       MacOSDesignedForIPadDevices(iosWorkflow: iosWorkflow, toolContext: toolContext),
       LinuxDevices(analytics: analytics, featureFlags: featureFlags, toolContext: toolContext),
       WindowsDevices(

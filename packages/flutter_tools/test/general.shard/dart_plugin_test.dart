@@ -1523,6 +1523,9 @@ void createFakeDartPlugins(
 
 class FakeFlutterManifest extends Fake implements FlutterManifest {
   @override
+  Logger get logger => BufferLogger.test();
+
+  @override
   Set<String> dependencies = <String>{};
 
   @override
