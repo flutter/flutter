@@ -1083,6 +1083,48 @@ void main() {
       expect(paintingContext.canvas.drawnRectPaint!.color, isSameColorAs(selectionColor));
     });
 
+    test('repeated paints keep a single leader for each selection handle', () {
+      // Regression test for https://github.com/flutter/flutter/issues/140543.
+      final registrar = TestSelectionRegistrar();
+      final paragraph = RenderParagraph(
+        const TextSpan(text: '1234567'),
+        textDirection: TextDirection.ltr,
+        registrar: registrar,
+      );
+      layout(paragraph);
+      final startLink = LayerLink();
+      final endLink = LayerLink();
+      final Selectable selectable = registrar.selectables.single;
+      selectable.dispatchSelectionEvent(const SelectAllSelectionEvent());
+      selectable.pushHandleLayers(startLink, endLink);
+
+      final root = ContainerLayer()..attach(Object());
+      final context = PaintingContext(root, paragraph.paintBounds);
+      paragraph.paint(context, Offset.zero);
+      final LeaderLayer startLeader = startLink.leader!;
+      final LeaderLayer endLeader = endLink.leader!;
+      expect(startLeader.attached, isTrue);
+      expect(endLeader.attached, isTrue);
+
+      paragraph.paint(context, Offset.zero);
+      expect(startLink.leader, same(startLeader));
+      expect(endLink.leader, same(endLeader));
+
+      // Finish the second paint's recording before rebuilding the layer tree.
+      context.addLayer(ContainerLayer());
+
+      root.removeAllChildren();
+      paragraph.paint(context, Offset.zero);
+      expect(startLink.leader, isNot(same(startLeader)));
+      expect(endLink.leader, isNot(same(endLeader)));
+
+      selectable.pushHandleLayers(null, null);
+      root.removeAllChildren();
+      root.detach();
+      expect(startLink.leader, isNull);
+      expect(endLink.leader, isNull);
+    });
+
     // Regression test for https://github.com/flutter/flutter/issues/182776.
     test('paints selection highlights outside fade layer and handles after text', () async {
       final registrar = TestSelectionRegistrar();
