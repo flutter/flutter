@@ -143,7 +143,7 @@ aot_assembly_snapshot = rule(
     },
 )
 
-def flutter_snapshot(name, main_dart, dart_srcs = None, package_config = None, product = False, visibility = None, testonly = None, **kwargs):
+def flutter_snapshot(name, main_dart, dart_srcs = None, dart_packages = {}, package_config = None, product = False, visibility = None, testonly = None, **kwargs):
     """GN's flutter_snapshot(): see the file's docstring.
 
     Args:
@@ -152,6 +152,10 @@ def flutter_snapshot(name, main_dart, dart_srcs = None, package_config = None, p
       dart_srcs: the Dart sources the entry point imports; by default every
         `.dart` file under the entry point's directory, when that is in this
         package.
+      dart_packages: packages it imports from synced trees, each mapped to
+        its path under the source root (dart_kernel's package_trees; the
+        scenario app's package:vector_math) -- what the frontend server's
+        depfile tells GN after the fact, declared here.
       package_config: the package configuration (GN's package_config); the
         engine's by default.
       product: GN's `product`: -Ddart.vm.product=true whatever the mode
@@ -170,6 +174,7 @@ def flutter_snapshot(name, main_dart, dart_srcs = None, package_config = None, p
         name = kernel,
         main = main_dart,
         srcs = dart_srcs,
+        package_trees = dart_packages,
         out = "kernel_blob.bin",
         product = product,
         args = select({mode: ["--aot", "--tfa"] for mode in _AOT_MODES} | {"//conditions:default": ["--no-link-platform"]}) +

@@ -369,6 +369,12 @@ const Map<String, Map<String, String>> templateAttributeOverrides = <String, Map
     'dart_packages':
         '{"@vector_math//:dart_sources": "engine/src/flutter/third_party/pkg/vector_math"}',
   },
+  // The iOS scenario app's platform_view.dart and locale_initialization.dart
+  // import package:vector_math (the Mac's T29).
+  '//flutter/testing/ios_scenario_app:ios_scenario_app_snapshot': <String, String>{
+    'dart_packages':
+        '{"@vector_math//:dart_sources": "engine/src/flutter/third_party/pkg/vector_math"}',
+  },
 };
 
 /// GN labels with a Bazel home that is not the mechanical translation.
