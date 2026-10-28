@@ -58,6 +58,13 @@ Future<int> run(List<String> arguments) async {
   final String root = p.canonicalize(options.option('root')!);
   final String gn = p.join(root, 'flutter/third_party/gn/gn');
   final String outDir = p.join(root, options.option('out'));
+  // GN spells the build directory's paths by its real location (an out
+  // directory reached through a symbolic link is described under its
+  // target), so the normalization below uses that.
+  final String outDirectory = p.relative(
+    Directory(outDir).existsSync() ? Directory(outDir).resolveSymbolicLinksSync() : outDir,
+    from: root,
+  );
   // The out directory's own arguments, and what BUILDCONFIG.gn derives from
   // them (outDirectoryAssumptions), over the Linux host build's; --assume
   // on top.
@@ -179,11 +186,17 @@ Future<int> run(List<String> arguments) async {
         localTargets: <String, GnTarget>{for (final GnTarget t in evaluation.targets) t.name: t},
         nestedElsewhere: nestedElsewhere,
         referenceValues: referenceValues,
-        outDir: options.option('out')!,
+        outDir: outDirectory,
       );
     }
     for (final String label in described.keys) {
-      // GN's `_`-prefixed targets are the internals of template expansions.
+      // GN's `_`-prefixed targets are the internals of template expansions;
+      // a label with a toolchain suffix is another toolchain's instance of
+      // a target compared under the default one (the host toolchain's fml
+      // in an iOS build, for gen_snapshot).
+      if (label.contains('(')) {
+        continue;
+      }
       if (!seen.contains(label) && !label.substring(label.indexOf(':') + 1).startsWith('_')) {
         _report(label, 'is in the GN build but the converter did not evaluate it');
         differences++;
@@ -289,6 +302,12 @@ int _compare(
   final undecided = <String>[];
   final undecidedValues = <String>{};
   final notes = <String>[];
+  // A value built on a reference constant the oracle has no value for (the
+  // Xcode SDK paths of @macos_sdk, which GN computes at generation time):
+  // its tail after the reference, which a GN value of the same tail
+  // matches (`$mac_platform_path/Developer/usr/lib` against
+  // `//flutter/prebuilts/Platforms/MacOSX.platform/Developer/usr/lib`).
+  final referenceTails = <String>{};
   void check(
     String what,
     Set<String> ours,
@@ -298,7 +317,15 @@ int _compare(
   }) {
     final Set<String> missing = subset
         ? const <String>{}
-        : theirs.difference(ours).difference(undecidedValues).difference(notOurs);
+        : theirs
+              .difference(ours)
+              .difference(undecidedValues)
+              .difference(notOurs)
+              .where(
+                (String t) =>
+                    !referenceTails.any((String tail) => tail.isNotEmpty && t.endsWith(tail)),
+              )
+              .toSet();
     final Set<String> extra = ours.difference(theirs);
     if (missing.isEmpty && extra.isEmpty) {
       return;
@@ -336,6 +363,26 @@ int _compare(
         continue;
       }
       for (final GnValue item in a.items) {
+        if (item is GnReference && referenceValues[item.name] == null) {
+          notes.add('$variable: ${item.name} is a constant of the Bazel build (not compared)');
+          referenceTails.add('');
+          continue;
+        }
+        if (item is GnExpandedString &&
+            item.parts.first is GnReference &&
+            referenceValues[(item.parts.first as GnReference).name] == null &&
+            item.parts.skip(1).every((GnValue part) => part is GnStringValue)) {
+          final String tail = item.parts
+              .skip(1)
+              .map((GnValue part) => (part as GnStringValue).value)
+              .join();
+          notes.add(
+            '$variable: ${(item.parts.first as GnReference).name}$tail is built on a constant of '
+            'the Bazel build (matched by its tail)',
+          );
+          referenceTails.add(tail);
+          continue;
+        }
         final Iterable<String> values = switch (item) {
           GnStringValue(:final String value) => <String>[value],
           GnReference(:final String name) => referenceValues[name] ?? const <String>[],
@@ -367,8 +414,11 @@ int _compare(
     return result;
   }
 
-  // GN's generated-file directory is the converter's `//@gen` root.
+  // GN's generated-file directory is the converter's `//@gen` root, and the
+  // build directory itself its `//@out` root (a copy's source under
+  // `$root_out_dir`: the dylib the Apple frameworks copy into the bundle).
   final String gnGenDir = p.posix.normalize('//$outDir/gen');
+  final String gnOutDir = p.posix.normalize('//$outDir');
   String path(String value) {
     final String absolute = _absolutePath(value, gnPackage);
     if (absolute == gnGenDir) {
@@ -376,6 +426,9 @@ int _compare(
     }
     if (absolute.startsWith('$gnGenDir/')) {
       return p.posix.normalize('$genDirRoot/${absolute.substring(gnGenDir.length + 1)}');
+    }
+    if (absolute.startsWith('$gnOutDir/')) {
+      return p.posix.normalize('$buildDirRoot/${absolute.substring(gnOutDir.length + 1)}');
     }
     return absolute;
   }
@@ -478,8 +531,9 @@ int _compare(
     // A define may embed a generated file's path (the embedder's JIT
     // snapshot setup); GN's out-directory spelling of it is the converter's
     // `//@gen` root, as for paths.
-    String defineText(String value) =>
-        value.replaceAll('$gnGenDir/', '${p.posix.normalize(genDirRoot)}/');
+    String defineText(String value) => value
+        .replaceAll('$gnGenDir/', '${p.posix.normalize(genDirRoot)}/')
+        .replaceAll('$gnOutDir/', '${p.posix.normalize(buildDirRoot)}/');
     check(
       'defines',
       flattened('defines', (String s) => s),
