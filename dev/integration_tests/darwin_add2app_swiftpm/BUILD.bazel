@@ -1,0 +1,19 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# The add-to-app Swift Package Manager test projects (iOSNativeProject,
+# MacOSNativeProject), which flutter_tools' swift_package_manager_add2app_test
+# copies into a project of its own and builds with xcodebuild.
+
+load("//build_defs/dart:flutter_project.bzl", "FLUTTER_PROJECT_GENERATED")
+
+package(default_visibility = ["//visibility:public"])
+
+filegroup(
+    name = "project",
+    srcs = glob(
+        ["**"],
+        exclude = FLUTTER_PROJECT_GENERATED + ["BUILD.bazel"],
+    ),
+)

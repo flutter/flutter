@@ -131,6 +131,14 @@ write_file(
     content = ["bazel"],
 )
 
+# The iOS engine artifacts' (IOSEngineArtifacts: the stamp is named
+# ios-sdk), for the apple shard's facsimile on a Mac.
+write_file(
+    name = "ios_sdk_stamp",
+    out = "ios-sdk.stamp",
+    content = ["bazel"],
+)
+
 # The Android gen_snapshot artifacts' (AndroidGenSnapshotArtifacts: the
 # stamp is named android-sdk), for the tests that run `flutter build apk`.
 write_file(
