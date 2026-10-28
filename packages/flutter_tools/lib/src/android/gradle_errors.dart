@@ -1001,18 +1001,26 @@ final legacyVariantApiErrorHandler = GradleHandledError(
         Java? java,
       }) async {
         final Logger logger = toolContext.logger;
-        logger.printBox('''
+        logger.printBox(
+          '''
 ${logger.terminal.warningMark} A Gradle build script, in the app or in one of its plugins, uses an
 Android Gradle Plugin API that does not exist when `android.newDsl` is enabled:
 ${line.trim()}
 Gradle names the build script under "* Where:" above.
 
-To fix this, migrate the build script to the variant API (`androidComponents.onVariants`).
-For instructions, see: $kAgpVariantApiDocsUrl
-
-To build until the script is migrated, add `android.newDsl=false` to android/gradle.properties.
+To build now, add this line to android/gradle.properties:
+android.newDsl=false
+Do not add the comment "# This newDsl flag was added..." above it. Flutter removes
+an `android.newDsl=false` line that has that comment.
 Android Gradle Plugin 10.0 removes this option.
-For details, see: $kOptOutOfNewDslDocsUrl''', title: _boxTitle);
+For details, see: $kOptOutOfNewDslDocsUrl
+
+If the build script is in a plugin, file an issue with that plugin asking it to
+support `android.newDsl`.
+If the build script is in your app, migrate it to the variant API
+(`androidComponents.onVariants`). For instructions, see: $kAgpVariantApiDocsUrl''',
+          title: _boxTitle,
+        );
 
         return GradleBuildStatus.exit;
       },
@@ -1038,14 +1046,22 @@ final kotlinAndroidPluginWithNewDslErrorHandler = GradleHandledError(
       }) async {
         final Logger logger = toolContext.logger;
         logger.printBox('''
-${logger.terminal.warningMark} The kotlin-android plugin does not support `android.newDsl=true`.
+${logger.terminal.warningMark} The kotlin-android plugin, applied by the app or by one of its plugins,
+does not support `android.newDsl=true`.
+Gradle names the build script under "* Where:" above.
 
-To fix this, remove the kotlin-android plugin and set `android.builtInKotlin=true` in android/gradle.properties.
-For instructions, see: $kMigrateToBuiltInKotlinDocsUrl
-
-To build until then, add `android.newDsl=false` to android/gradle.properties.
+To build now, add this line to android/gradle.properties:
+android.newDsl=false
+Do not add the comment "# This newDsl flag was added..." above it. Flutter removes
+an `android.newDsl=false` line that has that comment.
 Android Gradle Plugin 10.0 removes this option.
-For details, see: $kOptOutOfNewDslDocsUrl''', title: _boxTitle);
+For details, see: $kOptOutOfNewDslDocsUrl
+
+If a plugin applies kotlin-android, file an issue with that plugin asking it to
+support built-in Kotlin.
+If your app applies it, remove the kotlin-android plugin and set
+`android.builtInKotlin=true` in android/gradle.properties.
+For instructions, see: $kMigrateToBuiltInKotlinDocsUrl''', title: _boxTitle);
 
         return GradleBuildStatus.exit;
       },

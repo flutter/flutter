@@ -878,6 +878,92 @@ class AndroidProject extends FlutterProjectPlatform {
     return false;
   }
 
+  /// Matches a use of an Android Gradle Plugin API that does not exist when
+  /// `android.newDsl` is enabled: the legacy variant API and the extension
+  /// types that it belongs to.
+  static final _legacyNewDslApiPattern = RegExp(
+    r'\b(?:applicationVariants|libraryVariants|testVariants|unitTestVariants|'
+    r'variantFilter|BaseExtension|LibraryExtension|AppExtension)\b',
+  );
+
+  /// Matches a `kotlin-android` plugin use in any build file: a quoted
+  /// `kotlin-android` or `org.jetbrains.kotlin.android` plugin ID,
+  /// `kotlin("android")`, or a version catalog alias whose name contains
+  /// `kotlin` followed by `android`.
+  static final _anyKotlinAndroidPluginPattern = RegExp(
+    r'''['"](?:kotlin-android|org\.jetbrains\.kotlin\.android)['"]'''
+    r'''|\bkotlin\s*\(\s*"android"\s*\)'''
+    r'''|\balias\s*\(\s*libs\.plugins\.[\w.]*kotlin[\w.]*android[\w.]*\s*\)''',
+  );
+
+  /// The Gradle build files that keep the project from building with
+  /// `android.newDsl` enabled, as paths.
+  ///
+  /// The app module's build file and the `android/build.gradle(.kts)` file of
+  /// each Android plugin listed in `.flutter-plugins-dependencies` are scanned.
+  /// A file blocks the new DSL when it uses the legacy variant API
+  /// (`applicationVariants`, `libraryVariants`, `testVariants`,
+  /// `unitTestVariants`, `variantFilter`), the `BaseExtension`,
+  /// `LibraryExtension` or `AppExtension` types, or applies the
+  /// `kotlin-android` plugin.
+  ///
+  /// Returns null when the plugin list is missing or cannot be read, because
+  /// then the project's plugins are unknown.
+  ///
+  /// This is a text scan, so it misses code that is not in these files, such as
+  /// `buildSrc`, convention plugins and included builds. The Gradle error
+  /// handlers in `gradle_errors.dart` cover those cases.
+  List<String>? get newDslBlockingBuildFiles {
+    final File dependenciesFile = parent.flutterPluginsDependenciesFile;
+    final buildFiles = <File>[if (appGradleFile.existsSync()) appGradleFile];
+    try {
+      if (!dependenciesFile.existsSync()) {
+        return null;
+      }
+      final Object? decoded = json.decode(dependenciesFile.readAsStringSync());
+      final Object? plugins = decoded is Map<String, Object?> ? decoded['plugins'] : null;
+      final Object? androidPlugins = plugins is Map<String, Object?>
+          ? plugins[AndroidPlugin.kConfigKey]
+          : null;
+      if (androidPlugins != null && androidPlugins is! List<Object?>) {
+        return null;
+      }
+      for (final Object? plugin in androidPlugins as List<Object?>? ?? const <Object?>[]) {
+        final Object? path = plugin is Map<String, Object?> ? plugin['path'] : null;
+        if (path is! String) {
+          return null;
+        }
+        final Directory pluginAndroidDir = hostAppGradleRoot.fileSystem
+            .directory(path)
+            .childDirectory('android');
+        final File buildFile = getGroovyOrKotlin(pluginAndroidDir, 'build.gradle');
+        if (buildFile.existsSync()) {
+          buildFiles.add(buildFile);
+        }
+      }
+      final blocking = <String>[];
+      for (final buildFile in buildFiles) {
+        final String contents = _withoutComments(buildFile.readAsStringSync());
+        if (_legacyNewDslApiPattern.hasMatch(contents) ||
+            _anyKotlinAndroidPluginPattern.hasMatch(contents)) {
+          blocking.add(buildFile.path);
+        }
+      }
+      return blocking;
+    } on FormatException {
+      return null;
+    } on FileSystemException {
+      return null;
+    }
+  }
+
+  /// Removes `/* */` block comments and `//` line comments, so that code that
+  /// is commented out does not count. Strings are not parsed, so a `//` in a
+  /// string, as in a URL, also starts a comment; this can only hide a match
+  /// later on the same line.
+  static String _withoutComments(String contents) =>
+      contents.replaceAll(RegExp(r'/\*[\s\S]*?\*/'), '').replaceAll(RegExp(r'//[^\n]*'), '');
+
   /// True, if the app project is using Kotlin.
   bool get isKotlin {
     if (appliesKotlinAndroidPlugin) {

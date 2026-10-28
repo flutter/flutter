@@ -1681,6 +1681,11 @@ An exception occurred applying plugin request [id: 'dev.flutter.flutter-gradle-p
       expect(testLogger.statusText, contains(kAgpVariantApiDocsUrl));
       expect(testLogger.statusText, contains('android.newDsl=false'));
       expect(testLogger.statusText, contains(kOptOutOfNewDslDocsUrl));
+      expect(
+        testLogger.statusText,
+        contains('Do not add the comment "# This newDsl flag was added..."'),
+      );
+      expect(testLogger.statusText, contains('file an issue with that plugin'));
     });
   });
 
@@ -1724,6 +1729,11 @@ An exception occurred applying plugin request [id: 'org.jetbrains.kotlin.android
       expect(testLogger.statusText, contains(kMigrateToBuiltInKotlinDocsUrl));
       expect(testLogger.statusText, contains('android.newDsl=false'));
       expect(testLogger.statusText, contains(kOptOutOfNewDslDocsUrl));
+      expect(
+        testLogger.statusText,
+        contains('Do not add the comment "# This newDsl flag was added..."'),
+      );
+      expect(testLogger.statusText, contains('file an issue with that plugin'));
     });
   });
 }

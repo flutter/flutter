@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:meta/meta.dart';
+
 import '../../base/file_system.dart';
 import '../../base/project_migrator.dart';
 import '../../project.dart';
@@ -9,7 +11,10 @@ import '../gradle_errors.dart';
 import 'disable_new_dsl_migration.dart';
 
 /// The comment the app and module templates write above `android.newDsl=false`.
-const String _templateMarker = '# This newDsl flag was added by the Flutter template';
+///
+/// A test checks that the templates still write this comment.
+@visibleForTesting
+const String kNewDslTemplateMarker = '# This newDsl flag was added by the Flutter template';
 
 /// The comment [DisableNewDslMigration] writes above `android.newDsl=false`.
 const String _migratorMarker = '# This newDsl flag was added automatically by Flutter migrator';
@@ -19,8 +24,10 @@ const String _migratorMarker = '# This newDsl flag was added automatically by Fl
 final RegExp _newDslFalseRegex = RegExp(r'^\s*android\.newDsl(?:\s*[=:]\s*|\s+)false\s*$');
 
 /// Removes the `android.newDsl=false` opt-out that Flutter wrote to
-/// `gradle.properties`, in projects for which
-/// [usesBuiltInKotlinWithoutKotlinAndroidPlugin] is true.
+/// `gradle.properties`, in projects for which [isReadyForNewDsl] is true: the
+/// project uses built-in Kotlin, and a scan of the app's and every Android
+/// plugin's build file finds no legacy variant API and no `kotlin-android`
+/// plugin.
 ///
 /// Only a Flutter marker comment immediately followed by an
 /// `android.newDsl=false` line is removed. An opt-out without a marker, or with
@@ -45,7 +52,14 @@ class RemoveNewDslOptOutMigration extends ProjectMigrator {
       logger.printError('Failed to read gradle.properties during migration: $e');
       return;
     }
-    if (!usesBuiltInKotlinWithoutKotlinAndroidPlugin(_project, contents)) {
+    if (!isReadyForNewDsl(_project, contents)) {
+      final List<String>? blocking = _project.newDslBlockingBuildFiles;
+      if (blocking != null && blocking.isNotEmpty) {
+        logger.printTrace(
+          'Keeping the android.newDsl=false opt-out, because these build files '
+          'block the new DSL: ${blocking.join(', ')}',
+        );
+      }
       return;
     }
     processFileLines(_gradlePropertiesFile);
@@ -57,7 +71,7 @@ class RemoveNewDslOptOutMigration extends ProjectMigrator {
     final kept = <String>[];
     for (var i = 0; i < lines.length; i++) {
       final String marker = lines[i].trim();
-      if ((marker == _templateMarker || marker == _migratorMarker) &&
+      if ((marker == kNewDslTemplateMarker || marker == _migratorMarker) &&
           i + 1 < lines.length &&
           _newDslFalseRegex.hasMatch(lines[i + 1])) {
         i++;
@@ -70,10 +84,12 @@ class RemoveNewDslOptOutMigration extends ProjectMigrator {
     }
     logger.printWarning(
       'Removed the android.newDsl=false opt-out that Flutter added to '
-      '${_gradlePropertiesFile.path}, because the project uses built-in Kotlin. '
+      '${_gradlePropertiesFile.path}, because the project uses built-in Kotlin '
+      'and neither the app nor its plugins use an API that the new DSL removes. '
       'The Android Gradle Plugin builds this project with android.newDsl enabled. '
-      'To keep the opt-out, add android.newDsl=false without the Flutter comment '
-      'above it; Flutter removes the pair with the comment on every build. '
+      'If the build fails, add android.newDsl=false back without the comment '
+      '"$kNewDslTemplateMarker" or "$_migratorMarker" above it. '
+      'Flutter removes the line again if it has either comment. '
       'For details, see $kOptOutOfNewDslDocsUrl',
     );
     return kept.join('\n');

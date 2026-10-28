@@ -1090,6 +1090,115 @@ plugins {
         },
       );
 
+      group('newDslBlockingBuildFiles', () {
+        const migratedPlugin = '''
+plugins { id("com.android.library") }
+android { namespace = "a" }
+''';
+
+        void writePlugins(FlutterProject project, Map<String, String> pluginBuildFiles) {
+          final plugins = <Map<String, Object?>>[];
+          for (final MapEntry<String, String> entry in pluginBuildFiles.entries) {
+            final Directory pluginDir = globals.fs.directory('/pub/${entry.key}');
+            pluginDir.childDirectory('android').childFile('build.gradle')
+              ..createSync(recursive: true)
+              ..writeAsStringSync(entry.value);
+            plugins.add(<String, Object?>{'name': entry.key, 'path': pluginDir.path});
+          }
+          project.flutterPluginsDependenciesFile.writeAsStringSync(
+            json.encode(<String, Object?>{
+              'plugins': <String, Object?>{'android': plugins},
+            }),
+          );
+        }
+
+        void addPlainApp(FlutterProject project) {
+          addAndroidGradleFile(
+            project.directory,
+            gradleFileContent: () => 'plugins { id "com.android.application" }\n',
+          );
+        }
+
+        _testInMemory('is null without a plugin list', () async {
+          final FlutterProject project = await someProject();
+          addPlainApp(project);
+          expect(project.flutterPluginsDependenciesFile.existsSync(), isFalse);
+
+          expect(project.android.newDslBlockingBuildFiles, isNull);
+        });
+
+        _testInMemory('is null for a malformed plugin list', () async {
+          final FlutterProject project = await someProject();
+          addPlainApp(project);
+          project.flutterPluginsDependenciesFile.writeAsStringSync('{');
+
+          expect(project.android.newDslBlockingBuildFiles, isNull);
+        });
+
+        _testInMemory('is empty for migrated plugins', () async {
+          final FlutterProject project = await someProject();
+          addPlainApp(project);
+          writePlugins(project, <String, String>{'good': migratedPlugin});
+
+          expect(project.android.newDslBlockingBuildFiles, isEmpty);
+        });
+
+        for (final MapEntry<String, String> entry in <String, String>{
+          'libraryVariants': 'android.libraryVariants.all { v -> }',
+          'applicationVariants': 'android { applicationVariants.all {} }',
+          'testVariants': 'android.testVariants.all {}',
+          'variantFilter': 'android { variantFilter { } }',
+          'BaseExtension': 'project.extensions.getByType(com.android.build.gradle.BaseExtension)',
+          'LibraryExtension': 'val a = extensions.getByType<LibraryExtension>()',
+          'AppExtension': 'import com.android.build.gradle.AppExtension',
+          'apply plugin kotlin-android': "apply plugin: 'kotlin-android'",
+          'id org.jetbrains.kotlin.android': 'plugins { id "org.jetbrains.kotlin.android" }',
+          'kotlin("android")': 'plugins { kotlin("android") }',
+          'a catalog alias': 'plugins { alias(libs.plugins.my.kotlin.android.plugin) }',
+        }.entries) {
+          _testInMemory('reports a plugin that uses ${entry.key}', () async {
+            final FlutterProject project = await someProject();
+            addPlainApp(project);
+            writePlugins(project, <String, String>{
+              'good': migratedPlugin,
+              'bad': '$migratedPlugin${entry.value}\n',
+            });
+
+            expect(project.android.newDslBlockingBuildFiles, <String>[
+              globals.fs.path.join('/pub/bad', 'android', 'build.gradle'),
+            ]);
+          });
+        }
+
+        _testInMemory('reports the app build file', () async {
+          final FlutterProject project = await someProject();
+          addAndroidGradleFile(
+            project.directory,
+            gradleFileContent: () => 'android.applicationVariants.all { }\n',
+          );
+          writePlugins(project, <String, String>{});
+
+          expect(project.android.newDslBlockingBuildFiles, <String>[
+            project.android.appGradleFile.path,
+          ]);
+        });
+
+        _testInMemory('ignores commented-out code', () async {
+          final FlutterProject project = await someProject();
+          addPlainApp(project);
+          writePlugins(project, <String, String>{
+            'commented':
+                '''
+$migratedPlugin
+// android.libraryVariants.all {}
+/* apply plugin: 'kotlin-android' */
+''',
+          });
+
+          expect(project.android.newDslBlockingBuildFiles, isEmpty);
+        });
+      });
+
       testUsingContext(
         'kotlin-android declared with apply false is not applied',
         () async {

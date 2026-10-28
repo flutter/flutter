@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io' as io;
+
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_studio.dart';
@@ -742,8 +744,56 @@ android.useAndroidX=true
 android.builtInKotlin=true
 ''');
           expect(bufferLogger.warningText, contains('Removed the android.newDsl=false opt-out'));
-          expect(bufferLogger.warningText, contains('without the Flutter comment'));
+          expect(bufferLogger.warningText, contains('without the comment'));
+          expect(bufferLogger.warningText, contains(kNewDslTemplateMarker));
           expect(bufferLogger.warningText, contains(kOptOutOfNewDslDocsUrl));
+        });
+
+        testUsingContext('keeps the opt-out when a build file blocks the new DSL', () async {
+          project.newDslBlockingBuildFiles = <String>['/plugin/android/build.gradle'];
+          const contents = 'android.builtInKotlin=true\n$templatePair\n';
+          topLevelGradlePropertiesFile.writeAsStringSync(contents);
+
+          await runMigrators();
+
+          expect(topLevelGradlePropertiesFile.readAsStringSync(), contents);
+          expect(bufferLogger.warningText, isEmpty);
+          expect(bufferLogger.traceText, contains('/plugin/android/build.gradle'));
+        });
+
+        testUsingContext('keeps the opt-out when the plugin list is unknown', () async {
+          project.newDslBlockingBuildFiles = null;
+          const contents = 'android.builtInKotlin=true\n$templatePair\n';
+          topLevelGradlePropertiesFile.writeAsStringSync(contents);
+
+          await runMigrators();
+
+          expect(topLevelGradlePropertiesFile.readAsStringSync(), contents);
+        });
+
+        testUsingContext('adds the opt-out when a build file blocks the new DSL', () async {
+          project.newDslBlockingBuildFiles = <String>['/plugin/android/build.gradle'];
+          topLevelGradlePropertiesFile.writeAsStringSync('android.builtInKotlin=true\n');
+
+          await runMigrators();
+
+          expect(
+            topLevelGradlePropertiesFile.readAsStringSync(),
+            'android.builtInKotlin=true\n$migratorPair\n',
+          );
+        });
+
+        testWithoutContext('the templates write the marker that the migration removes', () {
+          final templates = io.Directory('templates');
+          for (final path in <String>[
+            'app/android.tmpl/gradle.properties.tmpl',
+            'module/android/gradle/gradle.properties.tmpl',
+          ]) {
+            final List<String> lines = io.File('${templates.path}/$path').readAsLinesSync();
+            final int marker = lines.indexOf(kNewDslTemplateMarker);
+            expect(marker, isNot(-1), reason: path);
+            expect(lines[marker + 1], 'android.newDsl=false', reason: path);
+          }
         });
 
         testUsingContext('removes the migrator-written opt-out', () async {
@@ -1344,6 +1394,9 @@ class FakeAndroidProject extends Fake implements AndroidProject {
 
   @override
   bool get appliesKotlinAndroidPlugin => kotlinAndroidPlugin;
+
+  @override
+  List<String>? newDslBlockingBuildFiles = <String>[];
 }
 
 class FakeKotlinDslAndroidProject extends FakeAndroidProject {
