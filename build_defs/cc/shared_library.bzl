@@ -26,9 +26,16 @@ The converter emits it for every shared_library():
 As GN's mac toolchain names no install name (its solink tool links with
 `-o ./lib<name>.dylib` and nothing else), neither does this: a dylib's
 install name is the path the link names.
+
+A GN target that lists a shared_library in its deps links against the
+library (the iOS shell's test library, ios_test_flutter, against OCMock's
+dylib). Bazel's C++ rules take no cc_binary in deps, so the macro also
+declares `<name>_import`, a cc_import of the platform's library, which the
+converter names for such a dependency: the link takes the dylib, and it
+is among the dependent's runfiles.
 """
 
-load("@rules_cc//cc:defs.bzl", "cc_binary")
+load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_import")
 
 _APPLE = [
     "@platforms//os:ios",
@@ -74,6 +81,13 @@ def flutter_shared_library(name, output_name, target_compatible_with = [], visib
         } | {
             "//conditions:default": ":lib%s.so" % output_name,
         }),
+        visibility = visibility,
+        testonly = testonly,
+    )
+    cc_import(
+        name = name + "_import",
+        shared_library = ":" + name,
+        target_compatible_with = target_compatible_with,
         visibility = visibility,
         testonly = testonly,
     )

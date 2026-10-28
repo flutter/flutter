@@ -775,6 +775,18 @@ selects.config_setting_group(
     ],
 )
 
+# testing.gni's enable_ios_unittests: `is_ios && flutter_runtime_mode ==
+# "debug"` -- the iOS embedding's XCTest suite (shell/platform/darwin/ios's
+# ios_test_flutter), built in the debug runtime mode alone ("we compile
+# with --enable-tests, which impacts exported symbols").
+selects.config_setting_group(
+    name = "ios_unittests_enabled",
+    match_all = [
+        "@platforms//os:ios",
+        "//engine/src/flutter/common:runtime_mode_debug",
+    ],
+)
+
 # The goldens and other resources testing/run_tests.py hands suites with
 # --golden-dir (flow_unittests).
 filegroup(
