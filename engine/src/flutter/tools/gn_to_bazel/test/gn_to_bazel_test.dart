@@ -56,6 +56,7 @@ Future<String> convert(
   String? appendix,
   OutputLayout layout = const OutputLayout.main(),
   Map<String, Condition> targetConditions = const <String, Condition>{},
+  Set<String> linkedStaticLibraries = const <String>{},
 }) async {
   return emitBuildFile(
     await evaluate(
@@ -70,6 +71,7 @@ Future<String> convert(
     skipTargets: skip,
     appendix: appendix,
     layout: layout,
+    linkedStaticLibraries: linkedStaticLibraries,
   );
 }
 
@@ -3830,6 +3832,77 @@ config("c") {
 }
 '''),
         throwsGnError(line: 2, message: 'framework_dirs names'),
+      );
+    });
+
+    test('a complete static library is an archive, or the library its dependents link', () async {
+      // The Impeller SDK's libimpeller.a is an artifact (cc_static_library,
+      // named after output_name with GN's name an alias); OCMock's `ocmock`
+      // is what the Objective-C suites list in deps, which no cc rule could
+      // do with the archive: a cc_library of its dependencies
+      // (linkedStaticLibraries). OCMock's source_set removes the toolchain's
+      // hidden visibility (a default config) and the warning set.
+      const gn = '''
+config("ocmock_config") {
+  include_dirs = [ "Source" ]
+}
+source_set("ocmock_src") {
+  configs -= [
+    "//build/config/compiler:chromium_code",
+    "//build/config/gcc:symbol_visibility_hidden",
+    "//build/config:symbol_visibility_hidden",
+  ]
+  all_dependent_configs = [ ":ocmock_config" ]
+  cflags = [ "-fvisibility=default" ]
+  sources = [ "Source/OCMock/OCMockObject.m" ]
+  frameworks = [ "Foundation.framework" ]
+}
+static_library("ocmock") {
+  complete_static_lib = true
+  public_deps = [ ":ocmock_src" ]
+}
+static_library("libimpeller") {
+  complete_static_lib = true
+  output_name = "impeller"
+  deps = [ ":ocmock_src" ]
+}
+''';
+      final String output = await convert(gn, linkedStaticLibraries: <String>{'ocmock'});
+      expect(
+        output,
+        contains(
+          'cc_library(\n'
+          '    name = "ocmock",\n'
+          '    deps = [":ocmock_src"],\n'
+          ')\n',
+        ),
+      );
+      expect(
+        output,
+        contains(
+          'cc_static_library(\n'
+          '    name = "impeller",\n'
+          '    deps = [":ocmock_src"],\n'
+          ')\n'
+          '\n'
+          'alias(\n'
+          '    name = "libimpeller",\n'
+          '    actual = ":impeller",\n'
+          ')\n',
+        ),
+      );
+      expect(
+        output,
+        contains(
+          '        "-fvisibility=default",  # configs -= //build/config/gcc:symbol_visibility_hidden\n'
+          '        "-U_LIBCPP_DISABLE_VISIBILITY_ANNOTATIONS",  # configs -= //build/config/gcc:symbol_visibility_hidden\n',
+        ),
+      );
+      // Without the manifest's word, the archive.
+      expect(await convert(gn), contains('cc_static_library(\n    name = "ocmock",\n'));
+      await expectLater(
+        convert(gn, linkedStaticLibraries: <String>{'ocmock_src'}),
+        throwsGnError(line: 0, message: 'linkedStaticLibraries names ocmock_src'),
       );
     });
 
@@ -8366,6 +8439,7 @@ flutter_dart_tests(
           tree: tree,
           unconvertedDeps: file.unconvertedDeps,
           filesGroups: file.filesGroups,
+          linkedStaticLibraries: file.linkedStaticLibraries,
         );
         expect(output, File(p.join(directory, 'BUILD.bazel')).readAsStringSync());
         // Every skip in the manifest names a target that exists.

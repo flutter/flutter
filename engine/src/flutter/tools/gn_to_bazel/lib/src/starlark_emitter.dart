@@ -411,6 +411,7 @@ String emitBuildFile(
   DependencyResolver? forwardedFlags,
   List<String> unconvertedDeps = const <String>[],
   Set<String> filesGroups = const <String>{},
+  Set<String> linkedStaticLibraries = const <String>{},
 }) {
   final DependencyResolver forwarded =
       forwardedFlags ??
@@ -449,6 +450,16 @@ String emitBuildFile(
       throw GnError(
         GnLocation(evaluation.file, 0, 0),
         'filesGroups names $name, which is not a group of the file',
+      );
+    }
+  }
+  emitter.linkedStaticLibraries.addAll(linkedStaticLibraries);
+  for (final name in linkedStaticLibraries) {
+    final GnTarget? target = emitter.localTargets[name];
+    if (target == null || !_Emitter._isCompleteStaticLibrary(target)) {
+      throw GnError(
+        GnLocation(evaluation.file, 0, 0),
+        'linkedStaticLibraries names $name, which is not a complete static library of the file',
       );
     }
   }
@@ -599,6 +610,10 @@ final class _Emitter {
   /// Groups of the file that are groups of things to build, never linked
   /// against (the manifest's filesGroups): filegroups.
   final Set<String> filesGroups = <String>{};
+
+  /// The complete static libraries other targets link (the manifest's
+  /// linkedStaticLibraries): cc_libraries of their dependencies.
+  final Set<String> linkedStaticLibraries = <String>{};
 
   /// The local configs some target of the file lists (whose compiler flags
   /// are therefore inlined there).
@@ -980,6 +995,9 @@ final class _Emitter {
   }
 
   static bool _isCompleteStaticLibrary(GnTarget target) {
+    if (target.rule != 'static_library') {
+      return false;
+    }
     final List<GnValue>? complete = target.variables['complete_static_lib']?.unconditionalItems;
     return complete != null && complete.length == 1 && complete.single == const GnBoolValue(true);
   }
@@ -992,15 +1010,26 @@ final class _Emitter {
   /// `output_name` with an alias under the GN name, like a shared
   /// library's), behind `--experimental_cc_static_library` in Bazel 8
   /// (.bazelrc). Nothing compiles in it, so GN's configs and flags on it
-  /// have nothing to apply to and are not written.
+  /// have nothing to apply to and are not written. One that other targets
+  /// link rather than ship (the manifest's linkedStaticLibraries: OCMock's
+  /// `ocmock`, which the Objective-C suites list in deps) is a `cc_library`
+  /// of its dependencies under GN's name: dependents link the same objects
+  /// -- every one, since those suites link with -ObjC, as GN's complete
+  /// archive would give them -- where cc_static_library's archive is an
+  /// artifact no cc rule can depend on.
   void _convertCompleteStaticLibrary(GnTarget target) {
-    _use('@rules_cc//cc:cc_static_library.bzl', 'cc_static_library');
+    final bool linked = linkedStaticLibraries.contains(target.name);
     final List<GnValue>? outputName = target.variables['output_name']?.unconditionalItems;
     final String name =
-        outputName != null && outputName.length == 1 && outputName.single is GnStringValue
+        !linked &&
+            outputName != null &&
+            outputName.length == 1 &&
+            outputName.single is GnStringValue
         ? (outputName.single as GnStringValue).value
         : target.name;
-    final rule = _Rule('cc_static_library', name, target.comments);
+    final kind = linked ? 'cc_library' : 'cc_static_library';
+    _use(linked ? '@rules_cc//cc:defs.bzl' : '@rules_cc//cc:cc_static_library.bzl', kind);
+    final rule = _Rule(kind, name, target.comments);
     for (final GnVariable variable in target.variables.values) {
       switch (variable.name) {
         case 'deps':
