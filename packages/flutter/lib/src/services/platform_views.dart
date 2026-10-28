@@ -571,6 +571,9 @@ enum _AndroidViewState { waitingForSize, creating, created, disposed }
 class _AndroidMotionEventConverter {
   _AndroidMotionEventConverter();
 
+  // Must match TOOL_TYPE_BITS in the engine's AndroidTouchProcessor.java.
+  static const int _kAndroidToolTypeBits = 3;
+
   final Map<int, AndroidPointerCoords> pointerPositions = <int, AndroidPointerCoords>{};
   final Map<int, AndroidPointerProperties> pointerProperties = <int, AndroidPointerProperties>{};
   final Set<int> usedAndroidPointerIds = <int>{};
@@ -583,7 +586,11 @@ class _AndroidMotionEventConverter {
     if (pointerProperties.isEmpty) {
       downTimeMillis = event.timeStamp.inMilliseconds;
     }
-    var androidPointerId = 0;
+    // The engine's AndroidTouchProcessor.uniquePointerIdByType packs the native Android pointer id
+    // into `device` as `(pointerId << _kAndroidToolTypeBits) | toolType`. Using the native id keeps
+    // ids and pointer order in sync with the original MotionEvent. The loop below is a fallback for
+    // synthetic events (e.g. tests) whose `device` is 0 for every pointer.
+    var androidPointerId = event.device >= 0 ? event.device >> _kAndroidToolTypeBits : 0;
     while (usedAndroidPointerIds.contains(androidPointerId)) {
       androidPointerId++;
     }
