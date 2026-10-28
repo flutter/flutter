@@ -16,10 +16,15 @@ import 'package:path/path.dart' as p;
 /// For every target of each file, what the converter evaluates (sources,
 /// public headers, dependencies, and the defines of configs) is compared
 /// with `gn desc <out> <label> --format=json`, GN's resolved view of the
-/// same target in that out directory. The assumptions default to the Linux
-/// host build; pass `--assume` for what distinguishes the out directory
-/// (`is_debug=true` for host_debug_unopt). A difference is a converter bug
-/// or a GN construct it reads wrongly; the exit code is 1 when there is one.
+/// same target in that out directory. The assumptions are the out
+/// directory's: its arguments (`gn args --list`: is_debug, the Skia,
+/// Impeller and shell arguments, use_ios_simulator) and what BUILDCONFIG.gn
+/// and config.gni derive from its target and host (the OS predicates, the
+/// toolchains, the platform names; outDirectoryAssumptions), over the Linux
+/// host build's for the rest; `--assume` overrides any of them. So the tool
+/// reads a Mac host or an iOS simulator directory on a Mac as it reads a
+/// Linux host one. A difference is a converter bug or a GN construct it
+/// reads wrongly; the exit code is 1 when there is one.
 ///
 /// This is the oracle for a new conversion: the generated BUILD.bazel is
 /// right when this agrees and Bazel builds it.
@@ -53,13 +58,17 @@ Future<int> run(List<String> arguments) async {
   final String root = p.canonicalize(options.option('root')!);
   final String gn = p.join(root, 'flutter/third_party/gn/gn');
   final String outDir = p.join(root, options.option('out'));
-  final Assumptions assumptions = linuxHostAssumptions().withValues(<String, GnValue>{
+  // The out directory's own arguments, and what BUILDCONFIG.gn derives from
+  // them (outDirectoryAssumptions), over the Linux host build's; --assume
+  // on top.
+  final Map<String, GnValue> args = await _gnArgs(gn, outDir);
+  final Assumptions assumptions = outDirectoryAssumptions(args).withValues(<String, GnValue>{
     for (final String spec in options.multiOption('assume'))
       spec.substring(0, spec.indexOf('=')): Assumptions.parseValue(
         spec.substring(spec.indexOf('=') + 1),
       ),
   });
-  final Map<String, List<String>> referenceValues = _referenceValues(await _gnArgs(gn, outDir));
+  final Map<String, List<String>> referenceValues = _referenceValues(args);
   final tree = GnSourceTree(root, gnBinary: gn);
 
   var differences = 0;

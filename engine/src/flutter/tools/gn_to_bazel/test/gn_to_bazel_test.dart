@@ -669,6 +669,89 @@ source_set("x") {
       );
     });
 
+    test("an out directory's assumptions follow its arguments and what GN derives from them", () {
+      // The oracle's reading of a GN out directory: the directory's own
+      // arguments (gn args --list) over the Linux host build's, with the
+      // OS predicates, toolchains, platform names and testing.gni's
+      // predicates as BUILDCONFIG.gn and config.gni derive them from the
+      // target and the host -- an iOS simulator build on an arm64 Mac here.
+      final Assumptions ios = outDirectoryAssumptions(const <String, GnValue>{
+        'host_os': GnStringValue('mac'),
+        'host_cpu': GnStringValue('arm64'),
+        'target_os': GnStringValue('ios'),
+        'target_cpu': GnStringValue('arm64'),
+        'use_ios_simulator': GnBoolValue(true),
+        'is_debug': GnBoolValue(true),
+        'flutter_runtime_mode': GnStringValue('debug'),
+        'skia_use_gl': GnBoolValue(false),
+        'skia_use_metal': GnBoolValue(true),
+        'impeller_enable_metal': GnBoolValue(true),
+        'impeller_enable_opengles': GnBoolValue(false),
+        'impeller_enable_vulkan': GnBoolValue(false),
+        'disable_vma_stl_shared_mutex': GnBoolValue(true),
+      });
+      expect(ios['is_ios'], const GnBoolValue(true));
+      expect(ios['is_mac'], const GnBoolValue(false));
+      expect(ios['is_linux'], const GnBoolValue(false));
+      expect(ios['is_apple'], const GnBoolValue(true));
+      expect(ios['current_os'], const GnStringValue('ios'));
+      expect(ios['current_cpu'], const GnStringValue('arm64'));
+      expect(ios['host_toolchain'], const GnStringValue('//build/toolchain/mac:clang_arm64'));
+      expect(
+        ios['default_toolchain'],
+        const GnStringValue('//build/toolchain/mac:ios_clang_arm_sim'),
+      );
+      expect(
+        ios['current_toolchain'],
+        const GnStringValue('//build/toolchain/mac:ios_clang_arm_sim'),
+      );
+      expect(ios['use_ios_simulator'], const GnBoolValue(true));
+      expect(ios['is_debug'], const GnBoolValue(true));
+      // testing.gni: no host-toolchain suites on iOS, the iOS suite in debug.
+      expect(ios['enable_unittests'], const GnBoolValue(false));
+      expect(ios['enable_ios_unittests'], const GnBoolValue(true));
+      // config.gni: no engine artifacts outside the host toolchain on iOS;
+      // the host's prebuilt SDK; the names.
+      expect(ios['build_engine_artifacts'], const GnBoolValue(false));
+      expect(
+        ios['prebuilt_dart_sdk'],
+        const GnStringValue('//flutter/prebuilts/macos-arm64/dart-sdk'),
+      );
+      expect(ios['full_platform_name'], const GnStringValue('darwin-arm64'));
+      expect(ios['full_target_platform_name'], const GnStringValue('ios-arm64'));
+      // The directory's arguments take the Linux values' place.
+      expect(ios['skia_use_gl'], const GnBoolValue(false));
+      expect(ios['impeller_enable_metal'], const GnBoolValue(true));
+      expect(ios['disable_vma_stl_shared_mutex'], const GnBoolValue(true));
+      // The runtime mode is the directory's too.
+      expect(ios['flutter_runtime_mode'], const GnStringValue('debug'));
+
+      // A Mac's host build: the host toolchain is the default one.
+      final Assumptions mac = outDirectoryAssumptions(const <String, GnValue>{
+        'host_os': GnStringValue('mac'),
+        'host_cpu': GnStringValue('arm64'),
+        'target_os': GnStringValue('mac'),
+        'target_cpu': GnStringValue('arm64'),
+      });
+      expect(mac['default_toolchain'], const GnStringValue('//build/toolchain/mac:clang_arm64'));
+      expect(mac['enable_unittests'], const GnBoolValue(true));
+      expect(mac['build_engine_artifacts'], const GnBoolValue(true));
+      expect(mac['platform_name'], const GnStringValue('darwin'));
+      expect(mac['is_mac'], const GnBoolValue(true));
+
+      // The Linux host's own directory reads as the Linux assumptions.
+      final Assumptions linux = outDirectoryAssumptions(const <String, GnValue>{
+        'host_os': GnStringValue('linux'),
+        'host_cpu': GnStringValue('x64'),
+        'target_os': GnStringValue(''),
+        'target_cpu': GnStringValue(''),
+      });
+      final Assumptions host = linuxHostAssumptions();
+      for (final String name in host.names) {
+        expect(linux[name], host[name], reason: name);
+      }
+    });
+
     test('the generation scope is the host scope less what GN derives from the target', () {
       // Every value generationAssumptions fixes is the host's; what it
       // leaves open is exactly the target (its OS, CPU, toolchains and
