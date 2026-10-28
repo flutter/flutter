@@ -6,6 +6,8 @@
 #include "flutter/shell/platform/linux/testing/linux_test.h"
 #include "gtest/gtest.h"
 
+#include <thread>
+
 #include "flutter/shell/platform/embedder/test_utils/proc_table_replacement.h"
 #include "flutter/shell/platform/linux/fl_engine_private.h"
 #include "flutter/shell/platform/linux/fl_framebuffer.h"
@@ -58,6 +60,59 @@ TEST_F(FlEngineTest, VulkanRejectsExplicitlyDisabledImpeller) {
   EXPECT_STREQ(error->message, "The Vulkan renderer requires Impeller");
 }
 #endif
+
+TEST_F(FlEngineTest, VsyncCallbackUsesMainContextAndReturnsBaton) {
+  VsyncCallback vsync_callback = nullptr;
+  void* callback_user_data = nullptr;
+  auto* expected_engine =
+      reinterpret_cast<FLUTTER_API_SYMBOL(FlutterEngine)>(1);
+  fl_engine_get_embedder_api(engine)->Initialize = MOCK_ENGINE_PROC(
+      Initialize, ([&](size_t version, const FlutterRendererConfig* config,
+                       const FlutterProjectArgs* args, void* user_data,
+                       FLUTTER_API_SYMBOL(FlutterEngine)* engine_out) {
+        vsync_callback = args->vsync_callback;
+        callback_user_data = user_data;
+        *engine_out = expected_engine;
+        return kSuccess;
+      }));
+  fl_engine_get_embedder_api(engine)->RunInitialized =
+      MOCK_ENGINE_PROC(RunInitialized, ([](auto engine) { return kSuccess; }));
+  fl_engine_get_embedder_api(engine)->Shutdown =
+      MOCK_ENGINE_PROC(Shutdown, ([](auto engine) { return kSuccess; }));
+
+  bool delivered = false;
+  GThread* delivery_thread = nullptr;
+  intptr_t delivered_baton = 0;
+  uint64_t frame_start_ns = 0;
+  uint64_t frame_target_ns = 0;
+  fl_engine_get_embedder_api(engine)->OnVsync = MOCK_ENGINE_PROC(
+      OnVsync,
+      ([&](auto engine, intptr_t baton, uint64_t start, uint64_t target) {
+        EXPECT_EQ(engine, expected_engine);
+        delivery_thread = g_thread_self();
+        delivered_baton = baton;
+        frame_start_ns = start;
+        frame_target_ns = target;
+        delivered = true;
+        return kSuccess;
+      }));
+
+  StartEngine();
+  ASSERT_NE(vsync_callback, nullptr);
+  g_autoptr(FlMockRenderable) renderable = fl_mock_renderable_new();
+  fl_engine_set_implicit_view(engine, FL_RENDERABLE(renderable));
+  std::thread worker([&] { vsync_callback(callback_user_data, 0x1234); });
+  worker.join();
+  EXPECT_FALSE(delivered);
+
+  while (!delivered) {
+    g_main_context_iteration(nullptr, TRUE);
+  }
+  EXPECT_EQ(delivery_thread, g_thread_self());
+  EXPECT_EQ(delivered_baton, 0x1234);
+  EXPECT_GT(frame_start_ns, 0u);
+  EXPECT_GT(frame_target_ns, frame_start_ns);
+}
 
 // Checks notifying display updates works.
 TEST_F(FlEngineTest, NotifyDisplayUpdate) {

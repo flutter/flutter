@@ -115,6 +115,134 @@ struct _FlEngine {
   GDestroyNotify platform_message_handler_destroy_notify;
 };
 
+struct VsyncRequest {
+  FlEngine* engine;
+  GtkWidget* widget;
+  intptr_t baton;
+  guint tick_callback_id;
+  gulong unmap_handler_id;
+  gboolean delivered;
+};
+
+static void fl_engine_deliver_vsync(FlEngine* self,
+                                    intptr_t baton,
+                                    uint64_t frame_start_ns,
+                                    uint64_t frame_target_ns) {
+  if (self->engine == nullptr) {
+    return;
+  }
+  FlutterEngineResult result = self->embedder_api.OnVsync(
+      self->engine, baton, frame_start_ns, frame_target_ns);
+  if (result != kSuccess) {
+    g_warning("Failed to deliver Flutter vsync: %d", result);
+  }
+}
+
+static void fl_engine_complete_vsync(VsyncRequest* request,
+                                     uint64_t frame_start_ns,
+                                     uint64_t frame_target_ns) {
+  if (request->delivered) {
+    return;
+  }
+  request->delivered = TRUE;
+  fl_engine_deliver_vsync(request->engine, request->baton, frame_start_ns,
+                          frame_target_ns);
+}
+
+static gboolean fl_engine_frame_tick(GtkWidget* widget,
+                                     GdkFrameClock* frame_clock,
+                                     gpointer user_data) {
+  auto* request = static_cast<VsyncRequest*>(user_data);
+  const gint64 frame_time_us = gdk_frame_clock_get_frame_time(frame_clock);
+  uint64_t interval_ns = 16666667;
+  GdkFrameTimings* timings = gdk_frame_clock_get_current_timings(frame_clock);
+  if (timings != nullptr) {
+    const gint64 refresh_interval_us =
+        gdk_frame_timings_get_refresh_interval(timings);
+    if (refresh_interval_us > 0) {
+      interval_ns = static_cast<uint64_t>(refresh_interval_us) * 1000;
+    }
+  }
+  const uint64_t start_ns = static_cast<uint64_t>(frame_time_us) * 1000;
+  fl_engine_complete_vsync(request, start_ns, start_ns + interval_ns);
+  return G_SOURCE_REMOVE;
+}
+
+static gboolean fl_engine_vsync_timeout(gpointer user_data) {
+  auto* request = static_cast<VsyncRequest*>(user_data);
+  const uint64_t start_ns =
+      static_cast<uint64_t>(g_get_monotonic_time()) * 1000;
+  fl_engine_complete_vsync(request, start_ns, start_ns + 16666667);
+  return G_SOURCE_REMOVE;
+}
+
+static void fl_engine_vsync_request_free(gpointer user_data) {
+  auto* request = static_cast<VsyncRequest*>(user_data);
+  // A widget can disappear between scheduling and its next clock tick. Return
+  // that baton before releasing the engine so shutdown cannot strand it.
+  if (!request->delivered) {
+    const uint64_t start_ns =
+        static_cast<uint64_t>(g_get_monotonic_time()) * 1000;
+    fl_engine_complete_vsync(request, start_ns, start_ns + 16666667);
+  }
+  if (request->widget != nullptr && request->unmap_handler_id != 0) {
+    g_signal_handler_disconnect(request->widget, request->unmap_handler_id);
+  }
+  g_clear_object(&request->widget);
+  g_object_unref(request->engine);
+  g_free(request);
+}
+
+static gboolean fl_engine_schedule_vsync(gpointer user_data) {
+  auto* request = static_cast<VsyncRequest*>(user_data);
+  if (request->widget != nullptr && gtk_widget_get_mapped(request->widget)) {
+    request->unmap_handler_id = g_signal_connect(
+        request->widget, "unmap",
+        G_CALLBACK(+[](GtkWidget* widget, gpointer user_data) {
+          auto* request = static_cast<VsyncRequest*>(user_data);
+          const uint64_t start_ns =
+              static_cast<uint64_t>(g_get_monotonic_time()) * 1000;
+          fl_engine_complete_vsync(request, start_ns, start_ns + 16666667);
+          if (request->tick_callback_id != 0) {
+            gtk_widget_remove_tick_callback(widget, request->tick_callback_id);
+          }
+        }),
+        request);
+    request->tick_callback_id =
+        gtk_widget_add_tick_callback(request->widget, fl_engine_frame_tick,
+                                     request, fl_engine_vsync_request_free);
+  } else {
+    g_timeout_add_full(G_PRIORITY_HIGH, 16, fl_engine_vsync_timeout, request,
+                       fl_engine_vsync_request_free);
+  }
+  return G_SOURCE_REMOVE;
+}
+
+static FlRenderable* get_renderable(FlEngine* self, int64_t view_id);
+
+static void fl_engine_vsync_callback(void* user_data, intptr_t baton) {
+  auto* self = FL_ENGINE(user_data);
+  auto* request = g_new0(VsyncRequest, 1);
+  request->engine = FL_ENGINE(g_object_ref(self));
+  // The implicit view is the primary presentation clock for this engine.
+  FlRenderable* renderable =
+      get_renderable(self, flutter::kFlutterImplicitViewId);
+  if (renderable != nullptr && GTK_IS_WIDGET(renderable)) {
+    request->widget = GTK_WIDGET(renderable);
+  } else {
+    g_clear_object(&renderable);
+  }
+  request->baton = baton;
+  // g_main_context_invoke may run synchronously on the calling engine thread
+  // when it can acquire the context. Attach a source to guarantee delivery from
+  // the GTK main loop, as required by FlutterEngineOnVsync.
+  GSource* source = g_idle_source_new();
+  g_source_set_priority(source, G_PRIORITY_HIGH);
+  g_source_set_callback(source, fl_engine_schedule_vsync, request, nullptr);
+  g_source_attach(source, g_main_context_default());
+  g_source_unref(source);
+}
+
 G_DEFINE_QUARK(fl_engine_error_quark, fl_engine_error)
 
 static void fl_engine_plugin_registry_iface_init(
@@ -955,6 +1083,7 @@ gboolean fl_engine_start(FlEngine* self, GError** error) {
   args.command_line_argv =
       reinterpret_cast<const char* const*>(command_line_args->pdata);
   args.platform_message_callback = fl_engine_platform_message_cb;
+  args.vsync_callback = fl_engine_vsync_callback;
   args.update_semantics_callback2 = fl_engine_update_semantics_cb;
   args.custom_task_runners = &custom_task_runners;
   args.shutdown_dart_vm_when_done = true;
