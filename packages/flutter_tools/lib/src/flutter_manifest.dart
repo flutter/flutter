@@ -30,7 +30,7 @@ class PluginPlatformConfig {
 
 /// A wrapper around the `flutter` section in the `pubspec.yaml` file.
 class FlutterManifest {
-  FlutterManifest._({required this.logger});
+  FlutterManifest._({required this._logger});
 
   /// Returns an empty manifest.
   factory FlutterManifest.empty({required Logger logger}) = FlutterManifest._;
@@ -83,7 +83,7 @@ class FlutterManifest {
     List<DeferredComponent>? deferredComponents,
     bool removeDependencies = false,
   }) {
-    final copy = FlutterManifest._(logger: logger);
+    final copy = FlutterManifest._(logger: _logger);
     copy._descriptor = <String, Object?>{..._descriptor};
     if (removeDependencies) {
       // Remove the non-Flutter SDK dependencies if they're going to be added back later.
@@ -126,8 +126,10 @@ class FlutterManifest {
     return copy;
   }
 
+  final Logger _logger;
+
   /// The logger associated with this manifest.
-  final Logger logger;
+  Logger get logger => _logger;
 
   /// A map representation of the entire `pubspec.yaml` file.
   var _descriptor = <String, Object?>{};
@@ -179,7 +181,7 @@ class FlutterManifest {
       version = Version.parse(verStr);
     } on Exception {
       if (!_hasShowInvalidVersionMsg) {
-        logger.printStatus(_invalidVersionSettingHintMessage(verStr), emphasis: true);
+        _logger.printStatus(_invalidVersionSettingHintMessage(verStr), emphasis: true);
         _hasShowInvalidVersionMsg = true;
       }
     }
@@ -300,7 +302,7 @@ class FlutterManifest {
     }
     for (final Object? component in deferredComponents) {
       if (component is! YamlMap) {
-        logger.printError('Expected deferred component manifest to be a map.');
+        _logger.printError('Expected deferred component manifest to be a map.');
         continue;
       }
       components.add(
@@ -401,11 +403,11 @@ class FlutterManifest {
       final fontFiles = fontFamily['fonts'] as YamlList?;
       final familyName = fontFamily['family'] as String?;
       if (familyName == null) {
-        logger.printWarning('Warning: Missing family name for font.', emphasis: true);
+        _logger.printWarning('Warning: Missing family name for font.', emphasis: true);
         continue;
       }
       if (fontFiles == null) {
-        logger.printWarning('Warning: No fonts specified for font $familyName', emphasis: true);
+        _logger.printWarning('Warning: No fonts specified for font $familyName', emphasis: true);
         continue;
       }
 
@@ -413,7 +415,7 @@ class FlutterManifest {
       for (final Map<Object?, Object?> fontFile in fontFiles.cast<Map<Object?, Object?>>()) {
         final asset = fontFile['asset'] as String?;
         if (asset == null) {
-          logger.printWarning('Warning: Missing asset in fonts for $familyName', emphasis: true);
+          _logger.printWarning('Warning: Missing asset in fonts for $familyName', emphasis: true);
           continue;
         }
 

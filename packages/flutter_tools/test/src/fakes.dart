@@ -1451,16 +1451,7 @@ class FakeToolContext extends Fake implements ToolContext {
 
   @override
   late final FlutterProjectFactory projectFactory =
-      _projectFactory ??
-      FlutterProjectFactory(
-        config: config,
-        featureFlags: TestFeatureFlags(),
-        fileSystem: fs,
-        logger: logger,
-        plistParser: FakePlistParser(),
-        xcode: FakeXcode(),
-        xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-      );
+      _projectFactory ?? FlutterProjectFactory(fileSystem: fs, logger: logger, config: config);
 
   @override
   late final ShutdownHooks shutdownHooks = _shutdownHooks ?? ShutdownHooks();

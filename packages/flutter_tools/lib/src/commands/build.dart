@@ -161,7 +161,6 @@ class BuildCommand extends FlutterCommand {
     );
     _addSubcommand(
       BuildMacosCommand(
-        appleContext: appleContext,
         buildSystem: buildSystem,
         featureFlags: featureFlags,
         toolContext: toolContext,

@@ -35,7 +35,6 @@ import 'cache.dart';
 import 'custom_devices/custom_devices_config.dart';
 import 'device.dart';
 import 'doctor.dart';
-import 'features.dart';
 import 'git.dart';
 import 'ios/ios_workflow.dart';
 import 'ios/plist_parser.dart';
@@ -271,15 +270,7 @@ CocoaPods? get cocoaPods => context.get<CocoaPods>();
 
 FlutterProjectFactory get projectFactory {
   return context.get<FlutterProjectFactory>() ??
-      FlutterProjectFactory(
-        config: config,
-        featureFlags: featureFlags,
-        fileSystem: fs,
-        logger: logger,
-        plistParser: plistParser,
-        xcode: xcode,
-        xcodeProjectInterpreter: xcodeProjectInterpreter,
-      );
+      FlutterProjectFactory(logger: logger, fileSystem: fs, config: config);
 }
 
 CustomDevicesConfig get customDevicesConfig => context.get<CustomDevicesConfig>()!;
