@@ -22,21 +22,21 @@ import 'framework.dart';
 import 'lookup_boundary.dart';
 import 'media_query.dart';
 
-// The view [View] and [RawView] actually use: in debug mode, normalized once,
-// for rendering, for MediaQuery, for focus, and for the identity-based lookups
-// all of those rely on. Engine views are normalized even when the widget is
-// constructed before the binding is.
-FlutterView _normalizeViewForOverrides(FlutterView view, RenderView? deprecatedRenderView) {
-  final FlutterView normalized = kDebugMode ? debugViewWithMetricsOverrides(view) : view;
+// Whether [renderView], if there is one, renders into the view that [View] and
+// [RawView] keep for [view], which is the one [debugViewWithMetricsOverrides]
+// returns. That is the same object every time it is asked about the same view,
+// so asking again here is the same as reading the field, which an initializer
+// list assert cannot do. Only ever called from an assert.
+bool _debugRenderViewRendersInto(RenderView? renderView, FlutterView view) {
   assert(
-    deprecatedRenderView == null || identical(deprecatedRenderView.flutterView, normalized),
+    renderView == null || identical(renderView.flutterView, debugViewWithMetricsOverrides(view)),
     'A RenderView passed to View or RawView must render into the FlutterView '
     'passed alongside it. Both are normalized by debugViewWithMetricsOverrides '
     'and then compared by identity, so a view that merely compares == to the '
     "RenderView's — a test double with an operator == of its own, say — is not "
     'the same view for this purpose.',
   );
-  return normalized;
+  return true;
 }
 
 /// Bootstraps a render tree that is rendered into the provided [FlutterView].
@@ -111,15 +111,15 @@ class View extends StatefulWidget {
     )
     RenderView? deprecatedDoNotUseWillBeRemovedWithoutNoticeRenderView,
     required this.child,
-  }) : view = _normalizeViewForOverrides(
-         view,
-         deprecatedDoNotUseWillBeRemovedWithoutNoticeRenderView,
-       ),
+  }) : view = kDebugMode ? debugViewWithMetricsOverrides(view) : view,
        _deprecatedPipelineOwner = deprecatedDoNotUseWillBeRemovedWithoutNoticePipelineOwner,
        _deprecatedRenderView = deprecatedDoNotUseWillBeRemovedWithoutNoticeRenderView,
        assert(
          (deprecatedDoNotUseWillBeRemovedWithoutNoticePipelineOwner == null) ==
              (deprecatedDoNotUseWillBeRemovedWithoutNoticeRenderView == null),
+       ),
+       assert(
+         _debugRenderViewRendersInto(deprecatedDoNotUseWillBeRemovedWithoutNoticeRenderView, view),
        );
 
   /// The [FlutterView] into which [child] is drawn.
@@ -372,15 +372,15 @@ class RawView extends StatelessWidget {
     )
     RenderView? deprecatedDoNotUseWillBeRemovedWithoutNoticeRenderView,
     required this.child,
-  }) : view = _normalizeViewForOverrides(
-         view,
-         deprecatedDoNotUseWillBeRemovedWithoutNoticeRenderView,
-       ),
+  }) : view = kDebugMode ? debugViewWithMetricsOverrides(view) : view,
        _deprecatedPipelineOwner = deprecatedDoNotUseWillBeRemovedWithoutNoticePipelineOwner,
        _deprecatedRenderView = deprecatedDoNotUseWillBeRemovedWithoutNoticeRenderView,
        assert(
          (deprecatedDoNotUseWillBeRemovedWithoutNoticePipelineOwner == null) ==
              (deprecatedDoNotUseWillBeRemovedWithoutNoticeRenderView == null),
+       ),
+       assert(
+         _debugRenderViewRendersInto(deprecatedDoNotUseWillBeRemovedWithoutNoticeRenderView, view),
        );
 
   /// The [FlutterView] into which [child] is drawn.
