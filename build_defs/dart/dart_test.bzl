@@ -388,12 +388,13 @@ mkdir -p "$root/bin/cache"
             # of them (an Xcode project the tool migrates), their trees
             # copied with the links followed.
             writable = "".join([
-                # The real file first, the link removed, the copy made:
-                # BSD cp (a Mac's) has no --remove-destination. A directory
-                # is copied beside itself (cp -RL: the links followed, as
-                # BSD and GNU cp both have it) and moved into place.
-                ("if [ -L \"$root/{f}\" ]; then real=\"$(readlink -f \"$root/{f}\")\" && rm -f \"$root/{f}\" && cp \"$real\" \"$root/{f}\" && chmod u+w \"$root/{f}\"; " +
-                 "elif [ -d \"$root/{f}\" ]; then cp -RL \"$root/{f}\" \"$root/{f}.writable\" && rm -rf \"$root/{f}\" && mv \"$root/{f}.writable\" \"$root/{f}\" && chmod -R u+w \"$root/{f}\"; fi\n").format(f = f)
+                # A directory -- or a link to one, the facsimile's engine
+                # directories -- is copied beside itself (cp -RL: the links
+                # followed, as BSD and GNU cp both have it) and moved into
+                # place; a file's real copy is made first, the link removed,
+                # the copy made: BSD cp (a Mac's) has no --remove-destination.
+                ("if [ -d \"$root/{f}\" ]; then cp -RL \"$root/{f}\" \"$root/{f}.writable\" && rm -rf \"$root/{f}\" && mv \"$root/{f}.writable\" \"$root/{f}\" && chmod -R u+w \"$root/{f}\"; " +
+                 "elif [ -L \"$root/{f}\" ]; then real=\"$(readlink -f \"$root/{f}\")\" && rm -f \"$root/{f}\" && cp \"$real\" \"$root/{f}\" && chmod u+w \"$root/{f}\"; fi\n").format(f = f)
                 for f in ctx.attr.writable
             ]),
             dart = dart[0].short_path,
