@@ -4,6 +4,7 @@
 
 #include "flutter/shell/platform/linux/fl_vulkan_manager.h"
 #include "flutter/shell/platform/linux/fl_linux_gtk4_debug.h"
+#include "flutter/shell/platform/linux/fl_vulkan_queue_sync.h"
 
 #include <dlfcn.h>
 #define VK_NO_PROTOTYPES
@@ -12,9 +13,7 @@
 #include <cmath>
 #include <cstring>
 #include <limits>
-#include <map>
 #include <memory>
-#include <mutex>
 #include <vector>
 
 namespace {
@@ -54,38 +53,6 @@ Loader& loader() {
   return value;
 }
 
-struct QueueFunctions {
-  PFN_vkQueueSubmit submit;
-  PFN_vkQueueWaitIdle wait_idle;
-};
-std::mutex queue_mutex;
-std::map<VkQueue, QueueFunctions> queues;
-std::map<VkDevice, PFN_vkDeviceWaitIdle> device_wait_functions;
-
-VKAPI_ATTR VkResult VKAPI_CALL device_wait_idle(VkDevice device) {
-  std::lock_guard<std::mutex> lock(queue_mutex);
-  auto it = device_wait_functions.find(device);
-  return it == device_wait_functions.end() ? VK_ERROR_INITIALIZATION_FAILED
-                                           : it->second(device);
-}
-
-VKAPI_ATTR VkResult VKAPI_CALL queue_submit(VkQueue queue,
-                                            uint32_t count,
-                                            const VkSubmitInfo* submits,
-                                            VkFence fence) {
-  std::lock_guard<std::mutex> lock(queue_mutex);
-  auto it = queues.find(queue);
-  return it == queues.end() ? VK_ERROR_INITIALIZATION_FAILED
-                            : it->second.submit(queue, count, submits, fence);
-}
-
-VKAPI_ATTR VkResult VKAPI_CALL queue_wait_idle(VkQueue queue) {
-  std::lock_guard<std::mutex> lock(queue_mutex);
-  auto it = queues.find(queue);
-  return it == queues.end() ? VK_ERROR_INITIALIZATION_FAILED
-                            : it->second.wait_idle(queue);
-}
-
 VKAPI_ATTR PFN_vkVoidFunction VKAPI_CALL instance_proc(VkInstance instance,
                                                        const char* name);
 VKAPI_ATTR PFN_vkVoidFunction VKAPI_CALL device_proc(VkDevice device,
@@ -99,13 +66,13 @@ PFN_vkVoidFunction intercept(const char* name) {
     return reinterpret_cast<PFN_vkVoidFunction>(device_proc);
   }
   if (strcmp(name, "vkDeviceWaitIdle") == 0) {
-    return reinterpret_cast<PFN_vkVoidFunction>(device_wait_idle);
+    return reinterpret_cast<PFN_vkVoidFunction>(fl_vulkan_device_wait_idle);
   }
   if (strcmp(name, "vkQueueSubmit") == 0) {
-    return reinterpret_cast<PFN_vkVoidFunction>(queue_submit);
+    return reinterpret_cast<PFN_vkVoidFunction>(fl_vulkan_queue_submit);
   }
   if (strcmp(name, "vkQueueWaitIdle") == 0) {
-    return reinterpret_cast<PFN_vkVoidFunction>(queue_wait_idle);
+    return reinterpret_cast<PFN_vkVoidFunction>(fl_vulkan_queue_wait_idle);
   }
   return nullptr;
 }
@@ -171,15 +138,11 @@ struct State {
 #undef DECLARE
   ~State() {
     if (device != VK_NULL_HANDLE) {
-      queue_wait_idle(queue);
+      fl_vulkan_queue_wait_idle(queue);
       if (command_pool != VK_NULL_HANDLE) {
         DestroyCommandPool(device, command_pool, nullptr);
       }
-      {
-        std::lock_guard<std::mutex> lock(queue_mutex);
-        queues.erase(queue);
-        device_wait_functions.erase(device);
-      }
+      fl_vulkan_queue_sync_unregister(device, queue);
       DestroyDevice(device, nullptr);
     }
     if (instance != VK_NULL_HANDLE) {
@@ -402,17 +365,14 @@ bool initialize(State& state, GError** error) {
   auto get_queue = reinterpret_cast<PFN_vkGetDeviceQueue>(
       loader().device_proc(state.device, "vkGetDeviceQueue"));
   get_queue(state.device, state.queue_family, 0, &state.queue);
-  {
-    std::lock_guard<std::mutex> lock(queue_mutex);
-    device_wait_functions[state.device] =
-        reinterpret_cast<PFN_vkDeviceWaitIdle>(
-            loader().device_proc(state.device, "vkDeviceWaitIdle"));
-    queues[state.queue] = {
-        reinterpret_cast<PFN_vkQueueSubmit>(
-            loader().device_proc(state.device, "vkQueueSubmit")),
-        reinterpret_cast<PFN_vkQueueWaitIdle>(
-            loader().device_proc(state.device, "vkQueueWaitIdle"))};
-  }
+  fl_vulkan_queue_sync_register(
+      state.device, state.queue,
+      reinterpret_cast<PFN_vkQueueSubmit>(
+          loader().device_proc(state.device, "vkQueueSubmit")),
+      reinterpret_cast<PFN_vkQueueWaitIdle>(
+          loader().device_proc(state.device, "vkQueueWaitIdle")),
+      reinterpret_cast<PFN_vkDeviceWaitIdle>(
+          loader().device_proc(state.device, "vkDeviceWaitIdle")));
   GetPhysicalDeviceMemoryProperties(state.physical_device,
                                     &state.memory_properties);
   VkCommandPoolCreateInfo pool = {VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO};
@@ -643,8 +603,8 @@ GBytes* fl_vulkan_backing_store_read_pixels(const FlutterBackingStore* store,
     VkSubmitInfo submit = {VK_STRUCTURE_TYPE_SUBMIT_INFO};
     submit.commandBufferCount = 1;
     submit.pCommandBuffers = &command;
-    if (!check(queue_submit(s.queue, 1, &submit, fence), "vkQueueSubmit",
-               error))
+    if (!check(fl_vulkan_queue_submit(s.queue, 1, &submit, fence),
+               "vkQueueSubmit", error))
       return false;
     // The fence also establishes transfer-write visibility to coherent host
     // memory. Never release a pending command buffer, even on device loss.
@@ -687,7 +647,7 @@ std::shared_ptr<flutter::FlVulkanSnapshot> fl_vulkan_backing_store_snapshot(
                                                 s.max_image_dimension,
                                                 s.memory_properties,
                                                 loader().device_proc,
-                                                queue_submit};
+                                                fl_vulkan_queue_submit};
   return flutter::FlVulkanSnapshot::Create(context, frame->image, frame->width,
                                            frame->height, error);
 }
@@ -704,5 +664,5 @@ flutter::FlVulkanDeviceContext fl_vulkan_manager_get_device_context(
           s.max_image_dimension,
           s.memory_properties,
           loader().device_proc,
-          queue_submit};
+          fl_vulkan_queue_submit};
 }
