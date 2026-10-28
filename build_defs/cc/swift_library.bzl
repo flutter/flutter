@@ -90,6 +90,51 @@ _MODULE_OUTPUT_SUFFIXES = [
     ".swiftsourceinfo",
 ]
 
+SwiftModuleInfo = provider(
+    doc = "The Swift modules a target brings to a Swift compile that depends on it: GN's {{module_dirs}} " +
+          "(`-I<dir>` per module directory, computed over the dependencies) and the module files themselves.",
+    fields = {
+        "directories": "depset of strings: the directories holding a <module>.swiftmodule, as -I takes them.",
+        "files": "depset of Files: the modules' files (the compile's inputs).",
+    },
+)
+
+def _swift_modules_aspect_impl(target, ctx):
+    # A module's own directory and files, and those of its dependencies --
+    # through a C++ library in between (darwin/common's framework_common
+    # carries InternalFlutterSwiftCommon as a public dependency, and
+    # test_utils_swift imports the module through it), as GN computes a
+    # Swift compile's module search path over the whole dependency graph.
+    transitive = [
+        dep[SwiftModuleInfo]
+        for attribute in ["deps", "implementation_deps"]
+        for dep in getattr(ctx.rule.attr, attribute, [])
+        if SwiftModuleInfo in dep
+    ]
+    if _OwnSwiftModuleInfo in target:
+        own = target[_OwnSwiftModuleInfo]
+        return [SwiftModuleInfo(
+            directories = depset([own.directory], transitive = [m.directories for m in transitive]),
+            files = depset(own.files, transitive = [m.files for m in transitive]),
+        )]
+    return [SwiftModuleInfo(
+        directories = depset(transitive = [m.directories for m in transitive]),
+        files = depset(transitive = [m.files for m in transitive]),
+    )]
+
+# What a flutter_swift_library says of its own module; the aspect gathers
+# these over the dependencies into SwiftModuleInfo.
+_OwnSwiftModuleInfo = provider(
+    doc = "A flutter_swift_library's module: its directory and files.",
+    fields = {"directory": "string", "files": "list of Files"},
+)
+
+_swift_modules_aspect = aspect(
+    implementation = _swift_modules_aspect_impl,
+    attr_aspects = ["deps", "implementation_deps"],
+    doc = "Gathers the Swift modules among a target's dependencies (SwiftModuleInfo).",
+)
+
 def _expand(ctx, attribute, flags):
     """The strings of `swiftflags` and `linkopts` as cc_library reads its flags.
 
@@ -160,6 +205,14 @@ def _flutter_swift_library_impl(ctx):
         depset(transitive = [compilation.quote_includes, compilation.includes, compilation.system_includes]),
         before_each = "-I",
     )
+
+    # GN's {{module_dirs}}: the directories of the Swift modules among the
+    # dependencies (the aspect's SwiftModuleInfo), where `import <Module>`
+    # finds <Module>.swiftmodule.
+    modules = [dep[SwiftModuleInfo] for dep in ctx.attr.deps if SwiftModuleInfo in dep]
+    module_directories = depset(transitive = [m.directories for m in modules])
+    module_inputs = depset(transitive = [m.files for m in modules])
+    args.add_all(module_directories, before_each = "-I")
     args.add_all(compilation.framework_includes, before_each = "-F")
     args.add_all(compilation.defines, before_each = "-D")
     args.add_all(compilation.local_defines, before_each = "-D")
@@ -183,7 +236,7 @@ def _flutter_swift_library_impl(ctx):
         arguments = [args],
         inputs = depset(
             [ctx.file._script, ctx.file._const_gather_protocols] + ctx.files.srcs + ctx.files.bridge_header + ctx.files.hdrs,
-            transitive = [compilation.headers],
+            transitive = [compilation.headers, module_inputs],
         ),
         tools = ctx.attr._python_runtime[DefaultInfo].files,
         outputs = [header, depfile] + objects + module_files,
@@ -229,6 +282,7 @@ def _flutter_swift_library_impl(ctx):
         DefaultInfo(files = depset([header] + objects)),
         CcInfo(compilation_context = compilation_context, linking_context = linking_context),
         OutputGroupInfo(swiftmodule = depset(module_files)),
+        _OwnSwiftModuleInfo(directory = target_out_dir, files = module_files),
     ]
 
 flutter_swift_library = rule(
@@ -256,7 +310,10 @@ flutter_swift_library = rule(
         "linkopts": attr.string_list(doc = "Link flags for whatever links the module in (GN's frameworks, libs, ldflags)."),
         "deps": attr.label_list(
             providers = [CcInfo],
-            doc = "What the bridging header imports; their headers, include directories and defines reach the compile.",
+            aspects = [_swift_modules_aspect],
+            doc = "What the bridging header imports (their headers, include directories and defines reach the " +
+                  "compile) and the Swift modules the sources import, directly or through a C++ library " +
+                  "(the aspect gathers them: GN's {{module_dirs}}).",
         ),
         "alwayslink": attr.bool(
             default = True,

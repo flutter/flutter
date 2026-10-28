@@ -104,17 +104,39 @@ zip_bundle(
 # (tools/gn_to_bazel/lib/src/manifest.dart).
 
 # run_tests.py --type font-subset: `python3 test.py --variant <build
-# directory>` from this directory, against the binary and the archive at
-# their places in the build directory.
+# directory>` from this directory (`--target-cpu arm64` when the directory's
+# name says so), against the binary and the archive at their places in the
+# build directory -- the archive under zip_archives/<platform>-<cpu>/, as
+# test.py's platform_to_path spells the host and the CPU it is given.
 checkout_script_test(
     name = "font_subset_test",
-    build_directory = {
-        ":font-subset": "",
-        ":font_subset": "zip_archives/linux-x64",
-    },
+    build_directory = select({
+        ":when_is_mac_and_target_cpu_arm64": {
+            ":font-subset": "",
+            ":font_subset": "zip_archives/darwin-arm64",
+        },
+        ":when_is_mac_and_target_cpu_x64": {
+            ":font-subset": "",
+            ":font_subset": "zip_archives/darwin-x64",
+        },
+        "//engine/src/flutter/common:platform_linux_arm64": {
+            ":font-subset": "",
+            ":font_subset": "zip_archives/linux-arm64",
+        },
+        "//conditions:default": {
+            ":font-subset": "",
+            ":font_subset": "zip_archives/linux-x64",
+        },
+    }),
     script = "test.py",
     script_args = [
         "--variant",
         "{variant}",
-    ],
+    ] + select({
+        "@platforms//cpu:aarch64": [
+            "--target-cpu",
+            "arm64",
+        ],
+        "//conditions:default": [],
+    }),
 )
