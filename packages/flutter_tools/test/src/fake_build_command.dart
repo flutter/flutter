@@ -134,7 +134,7 @@ BuildCommand createFakeBuildCommand({
     toolContext:
         toolContext ??
         FakeToolContext(
-          artifacts: artifacts ?? FakeArtifacts(),
+          artifacts: artifacts,
           cache: cache ?? FakeCache(),
           config: config ?? FakeConfig(),
           fs: fs,
@@ -179,6 +179,11 @@ class FakeIOSApplicationPackageFactory extends Fake implements ApplicationPackag
     if (!project.ios.exists) {
       return null;
     }
-    return BuildableIOSApp(project.ios, 'com.example.test', 'Runner');
+    return BuildableIOSApp(
+      project.ios,
+      'com.example.test',
+      'Runner',
+      toolContext: FakeToolContext(fs: fileSystem),
+    );
   }
 }
