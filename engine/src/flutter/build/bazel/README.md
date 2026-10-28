@@ -555,13 +555,58 @@ the GN root and build directory in
 (a regular GN build directory: `gn args`, `ninja -t ...` and
 `compile_commands.json` all work there).
 
-Known limits: a Mac host is wired (research/20, M3) but not yet run -- the
-Mac agent's next task; zlib and BoringSSL
+Known limits: zlib and BoringSSL
 have no Bazel targets yet and stay inside `libcommon_embedder_dart_io.a`;
 `bootstrap_compile_platform.exe`, which the prebuilt SDK's `dart compile exe`
 produces, embeds the absolute path of the build directory (as the GN build's
 does), so it differs between sandboxed runs; and the Dart version script
 looks for `git` on `PATH` at `gn gen` time (and copes without it).
+
+### The Dart SDK from source: `--no-prebuilt-dart-sdk`
+
+Every builder but one runs on the prebuilt Dart SDK of DEPS
+(`flutter/prebuilts/<host>/dart-sdk`, GN's `flutter_prebuilt_dart_sdk`). The
+one -- linux_unopt.json's `ci/host_debug_no_prebuilt_dart_sdk`, the Dart
+roll's check that the engine builds against the Dart tree it syncs --
+passes `tools/gn --no-prebuilt-dart-sdk`; under Bazel that is the wrap's
+setting:
+
+```sh
+bazelisk build --config=host_debug_no_prebuilt_dart_sdk //engine/src/flutter:flutter
+# or, on any host build:
+bazelisk build --//engine/src/flutter/build/bazel/dart_wrap:flutter_prebuilt_dart_sdk=false ...
+```
+
+With the setting off, in the host's own build (`dart_sdk_from_source`), the
+wrap's GN root adds `create_sdk` and kernel-service's `frontend_server_aot`
+(`dart_wrap/BUILD.gn`'s `flutter_build_dart_sdk`, with tools/gn's
+`dart_include_wasm_opt = false`), its tree gains what the SDK's build reads
+beyond the engine's Dart targets (`@dart//:sdk_build_tree`: binaryen, the
+prebuilt DevTools app, devtools_shared, dev_compiler's web entry point, the
+root's LICENSE and README, DEPS), and three more products come out:
+`dartaotruntime` (the SDK's `bin/`), `frontend_server_aot_product.dart.snapshot`
+(the SDK's own, from `bin/snapshots/`) and `frontend_server_aot.dart.snapshot`
+(the release-mode one GN's `flutter_frontend_server` copies into the build
+directory, which `flutter_frontend_server:frontend_server` exports). The
+kernel compiles run the first two through `dart_wrap:engine_dartaotruntime`
+and `:engine_frontend_server` (an AOT runtime loads only a snapshot of its
+own build: the release snapshot on the product runtime fails with "the
+snapshot requires 'release ...' but the VM has 'product ...'"). GN runs the
+frontend server from source on the Dart tree's own prebuilt VM instead
+(`flutter_frontend_server.gni`'s `prebuilt_dart_action`); the built pair is
+the same check of the roll with the compiler compiled once. A cross build
+keeps the prebuilt SDK whatever the setting says (the built SDK would be
+the target's, which no build-time tool could run).
+
+Cost: the SDK alone is a 19-minute GN build on 24 cores (5,256 steps, 685
+MB); the root group under the configuration takes about 35 minutes with
+the wrap on the critical path. Left as they are: the archives' dart-sdk zip
+and the web SDK's compilers (no builder builds them without the prebuilt;
+the generated files keep `flutter_prebuilt_dart_sdk` assumed on), the
+`dart-sdk/` tree of `local_engine.json`'s facsimile (the prebuilt's; the
+built tree as a directory product of `gn_build` is research/22's N2), and
+the `dart_test`/`dart_binary` rules and the package tests, which run on the
+prebuilt SDK (the builder runs no tests).
 
 ## The Dart platform, the core snapshot and the test fixtures
 
@@ -585,7 +630,9 @@ rules in `dart/`:
 3. `flutter_test_fixtures(dart_main = ...)` (testing/testing.bzl) compiles a
    test's Dart entry point to `assets/kernel_blob.bin` with `dart_kernel`: the
    prebuilt SDK's `dartaotruntime` running its `frontend_server_aot.dart.snapshot`
-   (`@dart_sdk_linux_x64`, GN's `host_prebuilt_dart_sdk`) against the
+   (`@dart_sdk_linux_x64`, GN's `host_prebuilt_dart_sdk`; the built SDK's
+   own pair without the prebuilt, through `dart_wrap:engine_dartaotruntime`
+   and `:engine_frontend_server`) against the
    platform and the engine's package configuration. `dart_snapshot_kernel`
    and `dart_snapshot_aot` have macros of their own. In the profile and
    release modes (testing.gni's `is_aot_test`) the kernel is compiled with
