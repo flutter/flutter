@@ -22,4 +22,6 @@ exports_files([
     "assemble_bundle.py",
     # zip_bundle.bzl's wrapper of build/zip.py.
     "zip_bundle.py",
+    # universal.bzl's layout of several builds for the recipe's generators.
+    "universal.py",
 ])
