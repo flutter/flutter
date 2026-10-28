@@ -40,8 +40,26 @@ the execution root, so xcframework.py assembles each bundle in a scratch
 directory from what the deps place under it (files copied by content, the
 symlink outputs made again as links) before the script runs; the
 xcframework is a directory output, its relative links inside it.
+
+framework_module_check is GN's umbrella-import check of a framework (the
+macOS shell's `_generate_symlinks_and_verify_framework_module`, the iOS
+shell's `copy_and_verify_framework_module`): a shared_library of one
+Objective-C file that imports the framework's umbrella header
+(`#import <FlutterMacOS/FlutterMacOS.h>`) with `-F$root_out_dir`, linked
+against the framework with `-Xlinker -fatal_warnings` -- a build that
+fails when the module map, the headers or the links of the assembled
+bundle are wrong; nothing ships from it. The rule assembles the bundle the
+deps place into a directory output (assemble_bundle.py), compiles the
+sources through the C++ toolchain's Objective-C action with `-F` naming
+that directory's parent, and links the dynamic library against the
+framework the same way; the converter writes the call from GN's
+shared_library when its flags name the build directory as a framework
+search path (tools/gn_to_bazel).
 """
 
+load("@rules_cc//cc:find_cc_toolchain.bzl", "find_cc_toolchain", "use_cc_toolchain")
+load("@rules_cc//cc/common:cc_common.bzl", "cc_common")
+load("@rules_cc//cc/common:cc_info.bzl", "CcInfo")
 load("//build_defs/gn:build_directory.bzl", "BuildDirectoryInfo", "build_directory_aspect", "collected_build_directory_entries")
 load("//build_defs/gn:gn_action.bzl", "PYTHON_ATTRS", "run_python")
 
@@ -239,4 +257,109 @@ xcframework = rule(
             allow_single_file = True,
         ),
     } | PYTHON_ATTRS,
+)
+
+def _framework_module_check_impl(ctx):
+    framework = ctx.attr.framework
+    if not framework.endswith(".framework"):
+        fail("%s: framework names a bundle, <name>.framework; got %r" % (ctx.label, framework))
+    bundle_name = framework[:-len(".framework")]
+
+    # The bundle, assembled from what the deps place under it in the build
+    # directory, as a directory output named as the bundle is, so that -F
+    # on its parent finds <name>.framework.
+    assembled = ctx.actions.declare_directory("_framework_check/%s/%s" % (ctx.label.name, framework))
+    placed = {}
+    for dep in ctx.attr.deps:
+        for file, path in collected_build_directory_entries(dep):
+            placed[path] = file
+    entries = sorted([
+        (path[len(framework) + 1:], file)
+        for path, file in placed.items()
+        if path.startswith(framework + "/")
+    ])
+    if not entries:
+        fail("%s: nothing among the deps places files under %s in the build directory" % (ctx.label, framework))
+    args = ctx.actions.args()
+    args.use_param_file("@%s", use_always = True)
+    args.set_param_file_format("multiline")
+    args.add("--out", assembled.path)
+    for path, file in entries:
+        args.add("--entry", "%s=%s" % (file.path, path))
+    run_python(
+        ctx,
+        script = ctx.file._assembler,
+        arguments = [args],
+        inputs = [file for _, file in entries],
+        outputs = [assembled],
+        mnemonic = "AssembleFramework",
+        progress_message = "Assembling %s for %%{label}" % framework,
+    )
+
+    # The compile and the link, through the toolchain as a cc rule's: GN's
+    # cflags_objc and ldflags with the search path, the framework among
+    # the link's frameworks.
+    cc_toolchain = find_cc_toolchain(ctx)
+    feature_configuration = cc_common.configure_features(
+        ctx = ctx,
+        cc_toolchain = cc_toolchain,
+        language = "objc",
+        requested_features = ctx.features,
+        unsupported_features = ctx.disabled_features,
+    )
+    search_path = "-F" + assembled.dirname
+    _, compilation_outputs = cc_common.compile(
+        actions = ctx.actions,
+        feature_configuration = feature_configuration,
+        cc_toolchain = cc_toolchain,
+        name = ctx.label.name,
+        srcs = ctx.files.srcs,
+        user_compile_flags = [search_path] + [ctx.expand_make_variables("copts", flag, {}) for flag in ctx.attr.copts],
+        local_defines = ctx.attr.local_defines,
+        compilation_contexts = [dep[CcInfo].compilation_context for dep in ctx.attr.deps if CcInfo in dep],
+        additional_inputs = [assembled],
+        language = "objc",
+    )
+    linking_outputs = cc_common.link(
+        actions = ctx.actions,
+        feature_configuration = feature_configuration,
+        cc_toolchain = cc_toolchain,
+        name = ctx.label.name,
+        compilation_outputs = compilation_outputs,
+        output_type = "dynamic_library",
+        user_link_flags = [search_path, "-framework", bundle_name] +
+                          [ctx.expand_make_variables("linkopts", flag, {}) for flag in ctx.attr.linkopts],
+        additional_inputs = [assembled],
+    )
+    library = linking_outputs.library_to_link.dynamic_library
+    return [DefaultInfo(files = depset([library]))]
+
+framework_module_check = rule(
+    implementation = _framework_module_check_impl,
+    doc = "GN's umbrella-import check of a framework: the bundle the deps place, assembled, and a dynamic library " +
+          "of the sources compiled and linked against it with -F (see the file's docstring). Nothing ships from it.",
+    attrs = {
+        "srcs": attr.label_list(
+            allow_files = [".m", ".mm"],
+            mandatory = True,
+            doc = "The Objective-C sources that import the framework's umbrella header.",
+        ),
+        "framework": attr.string(
+            mandatory = True,
+            doc = "The bundle, <name>.framework, as GN's `frameworks` names it; the deps place it in the build directory.",
+        ),
+        "deps": attr.label_list(
+            aspects = [build_directory_aspect],
+            doc = "GN's deps: the copies and links whose closures place the bundle's files in the build directory.",
+        ),
+        "copts": attr.string_list(doc = "GN's cflags_objc, less the search path the rule sets."),
+        "local_defines": attr.string_list(doc = "Defines of the compile."),
+        "linkopts": attr.string_list(doc = "GN's ldflags, less the search path and the framework the rule sets."),
+        "_assembler": attr.label(
+            default = "//build_defs/dist:assemble_bundle.py",
+            allow_single_file = True,
+        ),
+    } | PYTHON_ATTRS,
+    fragments = ["cpp"],
+    toolchains = use_cc_toolchain(),
 )

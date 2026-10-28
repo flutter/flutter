@@ -16,8 +16,10 @@ package(default_visibility = ["//visibility:public"])
 exports_files([
     # local_engine.bzl's assembly of a directory.
     "assemble_directory.py",
-    # framework.bzl's assembly of a bundle for sky/tools/create_xcframework.py.
+    # framework.bzl's assembly of a bundle for sky/tools/create_xcframework.py,
+    # and of one for the umbrella-import check (framework_module_check).
     "xcframework.py",
+    "assemble_bundle.py",
     # zip_bundle.bzl's wrapper of build/zip.py.
     "zip_bundle.py",
 ])
