@@ -682,7 +682,16 @@ exports_files([
   // files cannot be loaded for target_os == "wasm") and finds the header
   // through the source root; Bazel's headers-only @dart//:dart_api_headers
   // loads anywhere, so it is listed in every configuration.
-  ConvertedFile('//flutter/fml', implicitDeps: <String>['@dart//:dart_api_headers']),
+  ConvertedFile(
+    '//flutter/fml',
+    implicitDeps: <String>['@dart//:dart_api_headers'],
+    appendix: '''
+# A Windows header the accessibility tests include on every platform
+# (third_party/accessibility's accessibility_unittests lists it), which only
+# the Windows build's string_conversion declares.
+exports_files(["platform/win/wstring_conversion.h"])
+''',
+  ),
   // The web build's wasm toolchains as platforms carrying their arguments as
   // flags (skwasm's two, CanvasKit's three), and the copies that place each
   // module's outputs in the web SDK's directory (flutter_web_sdk/canvaskit),
@@ -857,6 +866,7 @@ in_configuration(
     name = "flutter_gtk_profile",
     runtime_mode = "profile",
     target = "//engine/src/flutter/shell/platform/linux:flutter_gtk",
+    target_compatible_with = ["@platforms//os:linux"],
 )
 
 bundle_directory(
@@ -865,6 +875,7 @@ bundle_directory(
         ":artifacts_profile",
         ":flutter_gtk_profile",
     ],
+    target_compatible_with = ["@platforms//os:linux"],
 )
 
 in_configuration(
@@ -877,6 +888,7 @@ in_configuration(
     name = "flutter_gtk_release",
     runtime_mode = "release",
     target = "//engine/src/flutter/shell/platform/linux:flutter_gtk",
+    target_compatible_with = ["@platforms//os:linux"],
 )
 
 bundle_directory(
@@ -885,6 +897,7 @@ bundle_directory(
         ":artifacts_release",
         ":flutter_gtk_release",
     ],
+    target_compatible_with = ["@platforms//os:linux"],
 )
 
 in_configuration(
@@ -907,7 +920,13 @@ bundle_directory(
 # artifacts as a repository (android_engine_maven) -- the engine built for
 # arm, arm64 and x64 in debug, profile and release, the Android builders'
 # configurations, through in_configuration.
-android_engine_artifacts(name = "android_engine")
+# The Linux host's for now: the JDK overlay (@openjdk) lays out a Linux
+# JDK, not a Mac's bundle (Contents/Home), so the jars' actions do not
+# analyze on a Mac (the Mac's T14).
+android_engine_artifacts(
+    name = "android_engine",
+    target_compatible_with = ["@platforms//os:linux"],
+)
 ''',
   ),
   // font-subset, the SDK's font subsetting tool (run_tests.py --type
@@ -1697,12 +1716,71 @@ _BACKEND_PLATFORMS = {
   // shell/platform/common above) -- so a Mac's for now. Its include
   // directory is the tree's root, which the root's config carries
   // (includeDirLibraries).
+  // The root file's accessibility_unittests lists the subpackages' test
+  // sources (`ax/ax_tree_unittest.cc`, ...), which no target of theirs
+  // names: a file another package's target lists must be exported by the
+  // package that owns it, so each subpackage's appendix exports its test
+  // files (the Mac's T14 found the first of them).
   ConvertedFile('//flutter/third_party/accessibility', condition: 'is_mac'),
-  ConvertedFile('//flutter/third_party/accessibility/ax', condition: 'is_mac'),
+  ConvertedFile(
+    '//flutter/third_party/accessibility/ax',
+    condition: 'is_mac',
+    appendix: '''
+# The tests' sources, which the root package's accessibility_unittests lists.
+exports_files([
+    "ax_enum_util_unittest.cc",
+    "ax_event_generator_unittest.cc",
+    "ax_node_data_unittest.cc",
+    "ax_node_position_unittest.cc",
+    "ax_range_unittest.cc",
+    "ax_role_properties_unittest.cc",
+    "ax_table_info_unittest.cc",
+    "ax_tree_unittest.cc",
+    "platform/ax_platform_node_base_unittest.cc",
+    "platform/ax_platform_node_mac_unittest.h",
+    "platform/ax_platform_node_mac_unittest.mm",
+    "platform/ax_platform_node_unittest.cc",
+    "platform/ax_platform_node_unittest.h",
+    "platform/ax_unique_id_unittest.cc",
+    "platform/test_ax_node_wrapper.cc",
+    "platform/test_ax_node_wrapper.h",
+    "test_ax_node_helper.cc",
+    "test_ax_node_helper.h",
+    "test_ax_tree_manager.cc",
+    "test_ax_tree_manager.h",
+])
+''',
+  ),
   ConvertedFile('//flutter/third_party/accessibility/ax_build', condition: 'is_mac'),
-  ConvertedFile('//flutter/third_party/accessibility/base', condition: 'is_mac'),
+  ConvertedFile(
+    '//flutter/third_party/accessibility/base',
+    condition: 'is_mac',
+    appendix: '''
+# The tests' sources, which the root package's accessibility_unittests lists.
+exports_files([
+    "logging_unittests.cc",
+    "string_utils_unittest.cc",
+])
+''',
+  ),
   ConvertedFile('//flutter/third_party/accessibility/base/numerics', condition: 'is_mac'),
-  ConvertedFile('//flutter/third_party/accessibility/gfx', condition: 'is_mac'),
+  ConvertedFile(
+    '//flutter/third_party/accessibility/gfx',
+    condition: 'is_mac',
+    appendix: '''
+# The tests' sources, which the root package's accessibility_unittests lists.
+exports_files([
+    "geometry/insets_unittest.cc",
+    "geometry/point_unittest.cc",
+    "geometry/rect_unittest.cc",
+    "geometry/size_unittest.cc",
+    "geometry/vector2d_unittest.cc",
+    "range/range_unittest.cc",
+    "test/gfx_util.cc",
+    "test/gfx_util.h",
+])
+''',
+  ),
 ];
 
 /// The files generated into `@skia` at fetch time: the engine's GN for Skia

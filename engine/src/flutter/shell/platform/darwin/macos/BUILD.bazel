@@ -147,6 +147,8 @@ flutter_objc_library(
         "framework/Headers/FlutterPluginRegistrarMacOS.h",
         "framework/Headers/FlutterViewController.h",
         "framework/Source/AccessibilityBridgeMac.h",
+        "framework/Source/FlutterAppDelegate_Internal.h",
+        "framework/Source/FlutterAppLifecycleDelegate_Internal.h",
         "framework/Source/FlutterChannelKeyResponder.h",
         "framework/Source/FlutterCompositor.h",
         "framework/Source/FlutterDartProject_Internal.h",
@@ -177,6 +179,8 @@ flutter_objc_library(
         "framework/Source/FlutterViewProvider.h",
         "framework/Source/FlutterView_Internal.h",
         "framework/Source/FlutterWindowController.h",
+        "framework/Source/KeyCodeMap_Internal.h",
+        "framework/Source/NSView+ClipsToBounds.h",
     ],
     copts = FLUTTER_COPTS + select({
         "//engine/src/flutter/shell:enable_vulkan": [
@@ -264,6 +268,8 @@ cc_library(
         "framework/Headers/FlutterPluginRegistrarMacOS.h",
         "framework/Headers/FlutterViewController.h",
         "framework/Source/AccessibilityBridgeMac.h",
+        "framework/Source/FlutterAppDelegate_Internal.h",
+        "framework/Source/FlutterAppLifecycleDelegate_Internal.h",
         "framework/Source/FlutterChannelKeyResponder.h",
         "framework/Source/FlutterCompositor.h",
         "framework/Source/FlutterDartProject_Internal.h",
@@ -294,6 +300,8 @@ cc_library(
         "framework/Source/FlutterViewProvider.h",
         "framework/Source/FlutterView_Internal.h",
         "framework/Source/FlutterWindowController.h",
+        "framework/Source/KeyCodeMap_Internal.h",
+        "framework/Source/NSView+ClipsToBounds.h",
     ],
     copts = FLUTTER_COPTS + [
         "-Wno-unguarded-availability",  # from :macos_gpu_configuration

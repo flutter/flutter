@@ -166,3 +166,30 @@ cc_library(
     ],
     alwayslink = True,
 )
+
+# What GN has no words for; maintained in the converter's manifest
+# (tools/gn_to_bazel/lib/src/manifest.dart).
+
+# The tests' sources, which the root package's accessibility_unittests lists.
+exports_files([
+    "ax_enum_util_unittest.cc",
+    "ax_event_generator_unittest.cc",
+    "ax_node_data_unittest.cc",
+    "ax_node_position_unittest.cc",
+    "ax_range_unittest.cc",
+    "ax_role_properties_unittest.cc",
+    "ax_table_info_unittest.cc",
+    "ax_tree_unittest.cc",
+    "platform/ax_platform_node_base_unittest.cc",
+    "platform/ax_platform_node_mac_unittest.h",
+    "platform/ax_platform_node_mac_unittest.mm",
+    "platform/ax_platform_node_unittest.cc",
+    "platform/ax_platform_node_unittest.h",
+    "platform/ax_unique_id_unittest.cc",
+    "platform/test_ax_node_wrapper.cc",
+    "platform/test_ax_node_wrapper.h",
+    "test_ax_node_helper.cc",
+    "test_ax_node_helper.h",
+    "test_ax_tree_manager.cc",
+    "test_ax_tree_manager.h",
+])

@@ -43,3 +43,12 @@ cc_library(
     ],
     alwayslink = True,
 )
+
+# What GN has no words for; maintained in the converter's manifest
+# (tools/gn_to_bazel/lib/src/manifest.dart).
+
+# The tests' sources, which the root package's accessibility_unittests lists.
+exports_files([
+    "logging_unittests.cc",
+    "string_utils_unittest.cc",
+])

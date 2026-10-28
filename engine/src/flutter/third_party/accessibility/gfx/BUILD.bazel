@@ -112,3 +112,18 @@ cc_library(
     ],
     alwayslink = True,
 )
+
+# What GN has no words for; maintained in the converter's manifest
+# (tools/gn_to_bazel/lib/src/manifest.dart).
+
+# The tests' sources, which the root package's accessibility_unittests lists.
+exports_files([
+    "geometry/insets_unittest.cc",
+    "geometry/point_unittest.cc",
+    "geometry/rect_unittest.cc",
+    "geometry/size_unittest.cc",
+    "geometry/vector2d_unittest.cc",
+    "range/range_unittest.cc",
+    "test/gfx_util.cc",
+    "test/gfx_util.h",
+])

@@ -637,6 +637,28 @@ def _impl(ctx):
                 ),
             ],
         ),
+        # A target's defines on its Objective-C(++) compiles. Bazel's own
+        # preprocessor_defines feature (a legacy one it appends when a
+        # toolchain defines none) names the C and C++ actions alone, so an
+        # .mm compiled embedder.h without FLUTTER_API_SYMBOL_PREFIX and
+        # FLUTTER_FRAMEWORK (the Mac's T14). The C and C++ actions keep the
+        # legacy feature, so their command lines stay as they are everywhere.
+        feature(
+            name = "objc_preprocessor_defines",
+            enabled = True,
+            flag_sets = [
+                flag_set(
+                    actions = [ACTION_NAMES.objc_compile, ACTION_NAMES.objcpp_compile],
+                    flag_groups = [
+                        flag_group(
+                            flags = ["-D%{preprocessor_defines}"],
+                            iterate_over = "preprocessor_defines",
+                            expand_if_available = "preprocessor_defines",
+                        ),
+                    ],
+                ),
+            ],
+        ),
     ] if mac else []) + [
         # Capabilities Bazel asks about.
         feature(name = "supports_pic", enabled = True),
