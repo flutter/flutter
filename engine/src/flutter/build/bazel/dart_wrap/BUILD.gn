@@ -20,7 +20,10 @@
 # libraries are the target's; in the host's own build the two toolchains
 # are one and the outputs sit in the build root. gen_snapshot is also
 # built for the target itself: artifacts.zip ships that one (build/archives:
-# "a target-platform-specific binary"), the arm64 build's for arm64 hosts.
+# "a target-platform-specific binary"), the arm64 build's for arm64 hosts --
+# but not for iOS, where no engine artifact is built (common/config.gni's
+# build_engine_artifacts is false outside the host toolchain there) and the
+# host's universal gen_snapshot is the build's only one.
 
 import("//flutter/third_party/dart/runtime/runtime_args.gni")
 
@@ -31,23 +34,26 @@ group("dart_wrap") {
     "//flutter/third_party/dart/runtime:libdart_jit",
     "//flutter/third_party/dart/runtime/bin:common_embedder_dart_io",
     "//flutter/third_party/dart/runtime/bin:elf_loader",
-    "//flutter/third_party/dart/runtime/bin:gen_snapshot",
     "//flutter/third_party/dart/runtime/bin:gen_snapshot($host_toolchain)",
     "//flutter/third_party/dart/runtime/bin:native_assets_api",
     "//flutter/third_party/dart/third_party/double-conversion/src:libdouble_conversion",
     "//flutter/third_party/dart/third_party/perfetto:libprotozero",
     "//flutter/third_party/dart/utils:bootstrap_compile_platform.exe($host_toolchain)",
   ]
+  if (!is_ios) {
+    deps += [ "//flutter/third_party/dart/runtime/bin:gen_snapshot" ]
+  }
 
   # The analyze_snapshot tool is a 64-bit target's (runtime_args.gni): the
   # host toolchain's, which lib/snapshot's generate_snapshot_bins and the
   # Android shell's archive name, and -- where the engine artifacts are
-  # built (common/config.gni's build_engine_artifacts: never Android) --
-  # the target's own, which the root group lists: an aarch64 binary in the
-  # Linux arm64 cross build, the same file as the host's in the host's own.
+  # built (common/config.gni's build_engine_artifacts: never Android or
+  # iOS) -- the target's own, which the root group lists: an aarch64 binary
+  # in the Linux arm64 cross build, the same file as the host's in the
+  # host's own.
   if (build_analyze_snapshot) {
     deps += [ "//flutter/third_party/dart/runtime/bin:analyze_snapshot($host_toolchain)" ]
-    if (!is_android) {
+    if (!is_android && !is_ios) {
       deps += [ "//flutter/third_party/dart/runtime/bin:analyze_snapshot" ]
     }
   }
