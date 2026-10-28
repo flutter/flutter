@@ -351,7 +351,7 @@ export FLUTTER_ROOT="$root"
 # /var is /private/var there): the tool resolves the paths it watches
 # (PreviewDetector) and a test compares them with the path it created.
 # Linux's tests get no TMPDIR and use the sandbox's own /tmp.
-if [ -n "${TMPDIR:-}" ] && [ -d "$TMPDIR" ]; then export TMPDIR="$(cd "$TMPDIR" && pwd -P)"; fi
+if [ -n "${{TMPDIR:-}}" ] && [ -d "$TMPDIR" ]; then export TMPDIR="$(cd "$TMPDIR" && pwd -P)"; fi
 # The SDK cache's directory, for a tool under test that writes there
 # (Cache.lock opens bin/cache/lockfile); what tests read of it is laid
 # in by `cache` and `cache_files`.
