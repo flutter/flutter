@@ -27,6 +27,9 @@ cc_library(
         "@platforms//os:macos": [
             "-Wno-unguarded-availability",  # from ../../:interop_base
         ],
+        "@platforms//os:ios": [
+            "-Wno-unguarded-availability",  # from ../../:interop_base
+        ],
         "//conditions:default": [],
     }) + select({
         "//engine/src/flutter/impeller/tools:vulkan": [

@@ -78,6 +78,9 @@ cc_library(
         "@platforms//os:macos": [
             "-Wno-unguarded-availability",  # from //flutter/skia
         ],
+        "@platforms//os:ios": [
+            "-Wno-unguarded-availability",  # from //flutter/skia
+        ],
         "//conditions:default": [],
     }),
     # Current versions of libcxx have deprecated some of the UTF-16 string
@@ -117,6 +120,9 @@ cc_binary(
         "@platforms//os:macos": [
             "-Wno-unguarded-availability",  # from :compiler_lib
         ],
+        "@platforms//os:ios": [
+            "-Wno-unguarded-availability",  # from :compiler_lib
+        ],
         "//conditions:default": [],
     }),
     local_defines = FLUTTER_LOCAL_DEFINES,
@@ -152,6 +158,9 @@ cc_library(
         "-Wno-inconsistent-missing-override",  # from //flutter/testing:testing_lib
     ] + select({
         "@platforms//os:macos": [
+            "-Wno-unguarded-availability",  # from :compiler_lib
+        ],
+        "@platforms//os:ios": [
             "-Wno-unguarded-availability",  # from :compiler_lib
         ],
         "//conditions:default": [],

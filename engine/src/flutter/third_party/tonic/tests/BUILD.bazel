@@ -35,6 +35,9 @@ flutter_cc_test(
         "@platforms//os:macos": [
             "-Wno-unguarded-availability",  # from //flutter/runtime:runtime
         ],
+        "@platforms//os:ios": [
+            "-Wno-unguarded-availability",  # from //flutter/runtime:runtime
+        ],
         "//conditions:default": [],
     }),
     local_defines = FLUTTER_LOCAL_DEFINES,

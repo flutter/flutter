@@ -135,6 +135,16 @@ config_setting(
     ],
 )
 
+# `!use_ios_simulator` for the denied term of a conjunction: a device, or
+# not iOS at all (GN reads the predicate under is_ios alone).
+selects.config_setting_group(
+    name = "ios_simulator_disabled",
+    match_any = [
+        ":ios_device_enabled",
+        ":not_ios",
+    ],
+)
+
 # GN's `current_toolchain == host_toolchain`, which the engine's files test
 # for "the host's own build" (testing.gni's enable_unittests, the shell's
 # tester, glfw's shell), read in Bazel's terms: the target OS is one a host

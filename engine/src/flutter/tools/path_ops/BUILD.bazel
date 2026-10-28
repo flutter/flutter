@@ -19,6 +19,9 @@ flutter_shared_library(
         "@platforms//os:macos": [
             "-Wno-unguarded-availability",  # from //flutter/skia
         ],
+        "@platforms//os:ios": [
+            "-Wno-unguarded-availability",  # from //flutter/skia
+        ],
         "//conditions:default": [],
     }),
     local_defines = FLUTTER_LOCAL_DEFINES,
