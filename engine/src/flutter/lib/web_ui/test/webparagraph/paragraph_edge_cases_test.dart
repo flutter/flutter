@@ -918,5 +918,94 @@ Future<void> testMain() async {
       final ui.Paragraph interiorRlm = layoutText('a\u200F\nb');
       expect(interiorRlm.numberOfLines, 2);
     });
+
+    for (final (String name, String character) in <(String, String)>[
+      ('soft hyphen', '\u00AD'),
+      ('zero width space', '\u200B'),
+      ('right-to-left mark', '\u200F'),
+    ]) {
+      test('Layout handles a paragraph containing only a $name', () {
+        // A paragraph whose text consists solely of characters without clusters produces only the
+        // trailing EmptyCluster and must lay out with empty-paragraph metrics instead of throwing
+        // on lines.first.
+        final emptyBuilder = ui.ParagraphBuilder(ahemStyle);
+        final ui.Paragraph emptyParagraph = emptyBuilder.build()
+          ..layout(const ui.ParagraphConstraints(width: 100));
+
+        final builder = ui.ParagraphBuilder(ahemStyle)..addText(character);
+        final ui.Paragraph paragraph = builder.build();
+
+        expect(() => paragraph.layout(const ui.ParagraphConstraints(width: 100)), returnsNormally);
+        expect(paragraph.numberOfLines, 0);
+        expect(paragraph.height, emptyParagraph.height);
+        expect(paragraph.alphabeticBaseline, emptyParagraph.alphabeticBaseline);
+        expect(paragraph.ideographicBaseline, emptyParagraph.ideographicBaseline);
+        expect(paragraph.maxIntrinsicWidth, 0);
+        expect(paragraph.minIntrinsicWidth, 0);
+        expect(paragraph.getPositionForOffset(ui.Offset.zero), const ui.TextPosition(offset: 0));
+        expect(paragraph.getLineNumberAt(0), isNull);
+        expect(paragraph.getGlyphInfoAt(0), isNull);
+      });
+    }
+
+    for (final (String name, String character) in <(String, String)>[
+      ('left-to-right mark', '\u200E'),
+      ('right-to-left mark', '\u200F'),
+    ]) {
+      test('Soft line break before a $name after a zero width space wraps the line', () {
+        // A soft break opportunity after U+200B (LB8) lands on the immediately following
+        // directional mark, which has no cluster of its own. Line wrapping must still detect the
+        // soft break before the next visible cluster.
+        final builder = ui.ParagraphBuilder(ahemStyle)..addText('ab\u200B${character}cd');
+        final ui.Paragraph paragraph = builder.build()
+          ..layout(const ui.ParagraphConstraints(width: 35));
+
+        expect(paragraph.numberOfLines, 2);
+        expect(
+          paragraph.getLineBoundary(const ui.TextPosition(offset: 0)),
+          const ui.TextRange(start: 0, end: 4),
+        );
+        expect(
+          paragraph.getLineBoundary(const ui.TextPosition(offset: 4)),
+          const ui.TextRange(start: 4, end: 6),
+        );
+      });
+    }
+
+    test('Soft line break and getLineBoundary handle clusterless characters after spaces', () {
+      // When trailing spaces are followed by characters that have no cluster of their own, soft
+      // wrapping must still detect the break after the spaces and the line's text range must cover
+      // the unmapped code units.
+      final wrappedBuilder = ui.ParagraphBuilder(ahemStyle)..addText('ab \u200F\u200Fcd');
+      final ui.Paragraph wrapped = wrappedBuilder.build()
+        ..layout(const ui.ParagraphConstraints(width: 30));
+
+      expect(wrapped.numberOfLines, 2);
+      expect(wrapped.getLineNumberAt(3), 0);
+      expect(wrapped.getLineNumberAt(4), 0);
+      expect(
+        wrapped.getLineBoundary(const ui.TextPosition(offset: 3)),
+        const ui.TextRange(start: 0, end: 5),
+      );
+      expect(
+        wrapped.getLineBoundary(const ui.TextPosition(offset: 4)),
+        const ui.TextRange(start: 0, end: 5),
+      );
+      expect(
+        wrapped.getLineBoundary(const ui.TextPosition(offset: 5)),
+        const ui.TextRange(start: 5, end: 7),
+      );
+
+      final trailingBuilder = ui.ParagraphBuilder(ahemStyle)..addText('ab \u200B');
+      final ui.Paragraph trailing = trailingBuilder.build()
+        ..layout(const ui.ParagraphConstraints(width: 100));
+
+      expect(trailing.numberOfLines, 1);
+      expect(trailing.getLineNumberAt(3), 0);
+      expect(
+        trailing.getLineBoundary(const ui.TextPosition(offset: 3)),
+        const ui.TextRange(start: 0, end: 4),
+      );
+    });
   });
 }
