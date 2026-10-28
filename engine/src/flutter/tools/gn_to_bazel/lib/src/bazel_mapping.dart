@@ -562,9 +562,6 @@ const Map<String, String> toolchainPlatforms = <String, String>{
 const Map<String, Set<String>> actionDirectoryOutputs = <String, Set<String>>{
   '//flutter/shell/platform/android:gen_android_javadoc': <String>{'javadocs'},
   '//flutter/sky/dist:sky_engine': <String>{'dist/packages/sky_engine'},
-  // create_xcframework.py's bundle (xcodebuild -create-xcframework), at
-  // the build root.
-  '//flutter/shell/platform/darwin/macos:flutter_framework': <String>{'FlutterMacOS.xcframework'},
 };
 
 /// Programs an action runs, which GN names by their absolute paths
@@ -1752,6 +1749,12 @@ enum TemplateArgumentKind {
   /// "$root_gen_dir/dart-pkg/sky_engine/lib/ui_web/"`), passed on as such
   /// for the rule to place its outputs by (BuildDirectoryInfo).
   buildPath,
+
+  /// An action's `args` as gn_action takes them: each `rebase_path()`
+  /// result a path token (`$(built FlutterMacOS.framework)`, `$(built .)`),
+  /// for a rule that reads the arguments GN's script would (the
+  /// xcframework's bundle and location).
+  actionArgs,
 }
 
 /// One argument of a known template: the macro attribute it becomes and how.
@@ -2210,6 +2213,23 @@ const Map<String, TemplateMapping> scriptMappings = <String, TemplateMapping>{
     'framework_symlinks',
     <String, TemplateArgument>{
       'args': TemplateArgument('args', TemplateArgumentKind.strings),
+      'deps': TemplateArgument('deps', TemplateArgumentKind.labels),
+      'script': TemplateArgument('script', TemplateArgumentKind.ignored),
+      'outputs': TemplateArgument('outputs', TemplateArgumentKind.ignored),
+    },
+    files: true,
+  ),
+  // create_xcframework.py (the macOS shell's `action("flutter_framework")`)
+  // runs `xcrun xcodebuild -create-xcframework` over the assembled bundle:
+  // the rule lays the bundle out from what the deps place in the build
+  // directory (a sandbox holds links, not the bundle) and declares the
+  // xcframework, a directory, from the arguments' `--name` and
+  // `--location`; GN's `outputs` go unread.
+  '//flutter/sky/tools/create_xcframework.py': TemplateMapping(
+    '//build_defs/dist:framework.bzl',
+    'xcframework',
+    <String, TemplateArgument>{
+      'args': TemplateArgument('args', TemplateArgumentKind.actionArgs),
       'deps': TemplateArgument('deps', TemplateArgumentKind.labels),
       'script': TemplateArgument('script', TemplateArgumentKind.ignored),
       'outputs': TemplateArgument('outputs', TemplateArgumentKind.ignored),

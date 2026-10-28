@@ -31,9 +31,18 @@ writes the call from GN's action, which it knows by its script
 (scriptMappings); the copies that fill the bundle are the `deps`, whose
 places in the build directory (BuildDirectoryInfo) an archive's directory
 entry over the bundle gathers (zip_bundle.bzl) and an install lays out.
+
+xcframework is GN's other framework action, sky/tools/create_xcframework.py
+(`xcrun xcodebuild -create-xcframework -framework <bundle> -output
+<location>/<name>.xcframework`), mapped the same way: xcodebuild wants the
+bundle as a directory, and in a sandbox the bundle's files are links into
+the execution root, so xcframework.py assembles each bundle in a scratch
+directory from what the deps place under it (files copied by content, the
+symlink outputs made again as links) before the script runs; the
+xcframework is a directory output, its relative links inside it.
 """
 
-load("//build_defs/gn:build_directory.bzl", "BuildDirectoryInfo", "build_directory_aspect")
+load("//build_defs/gn:build_directory.bzl", "BuildDirectoryInfo", "build_directory_aspect", "collected_build_directory_entries")
 load("//build_defs/gn:gn_action.bzl", "PYTHON_ATTRS", "run_python")
 
 def _parsed_arguments(ctx):
@@ -121,6 +130,113 @@ framework_symlinks = rule(
             default = "//engine/src/build:config/mac/package_framework.py",
             allow_single_file = True,
             doc = "GN's script.",
+        ),
+    } | PYTHON_ATTRS,
+)
+
+def _built_path(token):
+    """The build-directory path a `$(built PATH)` token names, or None for any other argument."""
+    if token.startswith("$(built ") and token.endswith(")"):
+        path = token[len("$(built "):-1]
+        return "" if path == "." else path
+    return None
+
+def _xcframework_impl(ctx):
+    # GN's `args`: --frameworks <bundle>... --name <name> --location <dir>,
+    # the bundles and the directory as path tokens (the converter's
+    # actionArgs).
+    frameworks = []
+    name = None
+    location = None
+    option = None
+    for arg in ctx.attr.args:
+        if arg.startswith("--"):
+            option = arg
+            continue
+        if option == "--frameworks":
+            path = _built_path(arg)
+            if path == None:
+                fail("%s: --frameworks takes bundles of the build directory; got %r" % (ctx.label, arg))
+            frameworks.append(path)
+        elif option == "--name":
+            name = arg
+        elif option == "--location":
+            location = _built_path(arg)
+            if location == None:
+                fail("%s: --location takes a directory of the build directory; got %r" % (ctx.label, arg))
+        else:
+            fail("%s: create_xcframework.py takes --frameworks, --name and --location; got %r in %s" % (ctx.label, arg, ctx.attr.args))
+    if not frameworks or not name or location == None:
+        fail("%s: --frameworks, --name and --location are required; got %s" % (ctx.label, ctx.attr.args))
+
+    # The xcframework: a directory at <location>/<name>.xcframework of the
+    # build directory, declared under the package at the same path.
+    bundle_path = (location + "/" if location else "") + name + ".xcframework"
+    output = ctx.actions.declare_directory(bundle_path)
+
+    # Each framework bundle's files: what the deps' closures place under
+    # it in the build directory, by their paths below it.
+    placed = {}
+    for dep in ctx.attr.deps:
+        for file, path in collected_build_directory_entries(dep):
+            placed[path] = file
+    args = ctx.actions.args()
+    args.use_param_file("@%s", use_always = True)
+    args.set_param_file_format("multiline")
+    args.add("--script", ctx.file.script)
+    args.add("--name", name)
+    args.add("--location", output.dirname)
+    inputs = [ctx.file.script]
+    for framework in frameworks:
+        entries = sorted([
+            (path[len(framework) + 1:], file)
+            for path, file in placed.items()
+            if path.startswith(framework + "/")
+        ])
+        if not entries:
+            fail("%s: nothing among the deps places files under %s in the build directory" % (ctx.label, framework))
+        args.add("--framework", framework.split("/")[-1])
+        for path, file in entries:
+            args.add("--entry", "%s=%s" % (file.path, path))
+            inputs.append(file)
+    run_python(
+        ctx,
+        script = ctx.file._wrapper,
+        arguments = [args],
+        inputs = inputs,
+        outputs = [output],
+        mnemonic = "XCFramework",
+        progress_message = "Creating %s.xcframework for %%{label}" % name,
+    )
+    return [
+        DefaultInfo(files = depset([output])),
+        BuildDirectoryInfo(entries = depset([(output, bundle_path)])),
+    ]
+
+xcframework = rule(
+    implementation = _xcframework_impl,
+    doc = "An xcframework over framework bundles of the build directory, by sky/tools/create_xcframework.py " +
+          "(xcrun xcodebuild -create-xcframework) with GN's arguments; the bundles are assembled for it from " +
+          "what the deps place (xcframework.py).",
+    attrs = {
+        "args": attr.string_list(
+            mandatory = True,
+            doc = "The script's arguments as GN's action has them, the paths as gn_action's tokens: " +
+                  "--frameworks $(built <bundle>)..., --name <name>, --location $(built <dir>).",
+        ),
+        "deps": attr.label_list(
+            aspects = [build_directory_aspect],
+            doc = "GN's deps: the groups over the bundles' copies and links, whose closures place the bundles' " +
+                  "files in the build directory.",
+        ),
+        "script": attr.label(
+            default = "//engine/src/flutter/sky:tools/create_xcframework.py",
+            allow_single_file = True,
+            doc = "GN's script.",
+        ),
+        "_wrapper": attr.label(
+            default = "//build_defs/dist:xcframework.py",
+            allow_single_file = True,
         ),
     } | PYTHON_ATTRS,
 )
