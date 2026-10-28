@@ -57,6 +57,7 @@ Future<String> convert(
   OutputLayout layout = const OutputLayout.main(),
   Map<String, Condition> targetConditions = const <String, Condition>{},
   Set<String> linkedStaticLibraries = const <String>{},
+  Map<String, List<String>> extraSources = const <String, List<String>>{},
 }) async {
   return emitBuildFile(
     await evaluate(
@@ -72,6 +73,7 @@ Future<String> convert(
     appendix: appendix,
     layout: layout,
     linkedStaticLibraries: linkedStaticLibraries,
+    extraSources: extraSources,
   );
 }
 
@@ -4239,6 +4241,80 @@ executable("x_unittests") {
       expect(
         output,
         contains('    alwayslink = True,\n)\n\ncc_test(\n    name = "x_unittests",\n'),
+      );
+    });
+
+    test('a file a compile reads beyond GN sources is a source of the rule', () async {
+      // darwin/common's Objective-C suite includes the iOS embedding's task
+      // queue header, which no target of a macOS build owns: GN's check
+      // passes over it (listed in GN's sources it would be the suite's own,
+      // an error for the iOS targets that include it -- the Mac's T22), a
+      // sandboxed compile must be given it. The manifest's extraSources
+      // puts it in the rule's srcs, and in the Objective-C companion's hdrs
+      // as a binary's headers go.
+      const gn = '''
+import("//flutter/testing/testing.gni")
+executable("x_unittests") {
+  testonly = true
+  sources = [ "a_unittests.cc", "a_utils.h" ]
+  if (is_mac) {
+    sources += [ "b_unittests.mm" ]
+  }
+  deps = [ "//flutter/testing" ]
+}
+''';
+      final String output = await convert(
+        gn,
+        assumptions: generationAssumptions(),
+        extraSources: <String, List<String>>{
+          'x_unittests': <String>[
+            '//engine/src/flutter/shell/platform/darwin:ios/flutter_task_queue_dispatch.h',
+            'c_utils.h',
+          ],
+        },
+      );
+      expect(
+        output,
+        contains(
+          'cc_test(\n'
+          '    name = "x_unittests",\n'
+          '    size = "small",\n'
+          '    srcs = [\n'
+          '        "a_unittests.cc",\n'
+          '        "a_utils.h",\n'
+          '        "c_utils.h",\n'
+          '        "//engine/src/flutter/shell/platform/darwin:ios/flutter_task_queue_dispatch.h",\n'
+          '    ],\n',
+        ),
+      );
+      expect(
+        output,
+        contains(
+          '    name = "x_unittests_objc",\n'
+          '    testonly = True,\n'
+          '    srcs = select({\n'
+          '        "@platforms//os:macos": [\n'
+          '            "b_unittests.mm",  # is_mac\n'
+          '        ],\n'
+          '        "//conditions:default": [],\n'
+          '    }),\n'
+          '    hdrs = [\n'
+          '        "a_utils.h",\n'
+          '        "c_utils.h",\n'
+          '        "//engine/src/flutter/shell/platform/darwin:ios/flutter_task_queue_dispatch.h",\n'
+          '    ],\n',
+        ),
+      );
+      // The name must be a target of the file.
+      await expectLater(
+        convert(
+          gn,
+          assumptions: generationAssumptions(),
+          extraSources: <String, List<String>>{
+            'y_unittests': <String>['c_utils.h'],
+          },
+        ),
+        throwsGnError(line: 0, message: 'extraSources names y_unittests'),
       );
     });
 
@@ -8669,6 +8745,7 @@ flutter_dart_tests(
           unconvertedDeps: file.unconvertedDeps,
           filesGroups: file.filesGroups,
           linkedStaticLibraries: file.linkedStaticLibraries,
+          extraSources: file.extraSources,
         );
         expect(output, File(p.join(directory, 'BUILD.bazel')).readAsStringSync());
         // Every skip in the manifest names a target that exists.

@@ -412,6 +412,7 @@ String emitBuildFile(
   List<String> unconvertedDeps = const <String>[],
   Set<String> filesGroups = const <String>{},
   Set<String> linkedStaticLibraries = const <String>{},
+  Map<String, List<String>> extraSources = const <String, List<String>>{},
 }) {
   final DependencyResolver forwarded =
       forwardedFlags ??
@@ -450,6 +451,15 @@ String emitBuildFile(
       throw GnError(
         GnLocation(evaluation.file, 0, 0),
         'filesGroups names $name, which is not a group of the file',
+      );
+    }
+  }
+  emitter.extraSources.addAll(extraSources);
+  for (final String name in extraSources.keys) {
+    if (!emitter.localTargets.containsKey(name)) {
+      throw GnError(
+        GnLocation(evaluation.file, 0, 0),
+        'extraSources names $name, which is not a target of the file',
       );
     }
   }
@@ -614,6 +624,10 @@ final class _Emitter {
   /// The complete static libraries other targets link (the manifest's
   /// linkedStaticLibraries): cc_libraries of their dependencies.
   final Set<String> linkedStaticLibraries = <String>{};
+
+  /// Files a target's compiles read that GN's check does not have it list
+  /// (the manifest's extraSources), by target name.
+  final Map<String, List<String>> extraSources = <String, List<String>>{};
 
   /// The local configs some target of the file lists (whose compiler flags
   /// are therefore inlined there).
@@ -3636,6 +3650,13 @@ final class _Emitter {
       // GN's default deps link the C++ runtime into every shared library;
       // Bazel's link_extra_libs reaches executables only.
       rule.list('deps').addUnique(Condition.always, _Item(_localLabel(cxxRuntimeLabel)));
+    }
+    // What the compiles read beyond GN's sources (the manifest's
+    // extraSources, labels or package-relative paths): sources of the rule,
+    // which the companions below take the headers of as a binary's.
+    for (final String extra in extraSources[target.name] ?? const <String>[]) {
+      final bool isLabel = extra.startsWith('//') || extra.startsWith(':') || extra.startsWith('@');
+      rule.list('srcs').addUnique(Condition.always, _Item(isLabel ? _localLabel(extra) : extra));
     }
     _splitObjcSources(rule, target, name: name, library: library, test: kind == 'cc_test');
     _splitSwiftSources(rule, target, name: name, library: library, test: kind == 'cc_test');
