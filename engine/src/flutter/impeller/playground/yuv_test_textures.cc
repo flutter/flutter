@@ -11,7 +11,6 @@
 #include <utility>
 #include <vector>
 
-#include "flutter/fml/status.h"
 #include "impeller/core/allocator.h"
 #include "impeller/core/device_buffer.h"
 #include "impeller/core/formats.h"
@@ -135,7 +134,7 @@ absl::StatusOr<TestYUVTextures> CreateTestYUVTextures(
   if (!blit_pass->EncodeCommands()) {
     return absl::InternalError("Could not encode the YUV plane uploads.");
   }
-  fml::Status submit_status = context.GetCommandQueue()->Submit({cmd_buffer});
+  absl::Status submit_status = context.GetCommandQueue()->Submit({cmd_buffer});
   if (!submit_status.ok()) {
     return absl::InternalError("Could not submit the YUV plane uploads: " +
                                std::string(submit_status.message()));

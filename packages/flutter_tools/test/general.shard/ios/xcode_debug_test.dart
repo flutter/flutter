@@ -20,6 +20,7 @@ import 'package:xml/xml.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
+import '../../src/fakes.dart';
 
 void main() {
   group('Debug project through Xcode', () {
@@ -1449,7 +1450,7 @@ Xcode setupXcode({
       .createSync(recursive: true);
 
   final xcodeProjectInterpreter = XcodeProjectInterpreter.test(
-    processManager: FakeProcessManager.any(),
+    toolContext: FakeToolContext.macosHost(processManager: FakeProcessManager.any()),
     version: Version(14, 0, 0),
   );
 

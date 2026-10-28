@@ -53,6 +53,7 @@ class MacOSDesignedForIPadDevice extends DesktopDevice {
            ((Set<(int, String)> ignoredServices) => MDnsVmServiceDiscovery(
              logger: toolContext.logger,
              analytics: globals.analytics,
+             platform: toolContext.platform,
              ignoredServices: ignoredServices,
            )),
        _vmServiceConnector =
@@ -171,7 +172,7 @@ class MacOSDesignedForIPadDevice extends DesktopDevice {
     final FlutterProject project = toolContext.projectFactory.fromDirectory(
       toolContext.fs.currentDirectory,
     );
-    await project.ios.ensureReadyForPlatformSpecificTooling();
+    await project.ios.ensureReadyForPlatformSpecificTooling(toolContext: toolContext);
     final XcodeDebugProject debugProject = await _xcodeDebug.createXcodeProjectWithCustomBundle(
       toolContext.fs.path.absolute(package.deviceBundlePath),
       templateRenderer: globals.templateRenderer,
@@ -311,7 +312,11 @@ class MacOSDesignedForIPadDevice extends DesktopDevice {
     final FlutterProject project = toolContext.projectFactory.fromDirectory(
       toolContext.fs.currentDirectory,
     );
-    final BuildableIOSApp? app = await BuildableIOSApp.fromProject(project.ios, buildInfo);
+    final BuildableIOSApp? app = await BuildableIOSApp.fromProject(
+      project.ios,
+      buildInfo,
+      toolContext: toolContext,
+    );
     if (app == null) {
       throwToolExit('Unable to find an iOS application to build for $name.');
     }
@@ -329,6 +334,7 @@ class MacOSDesignedForIPadDevice extends DesktopDevice {
       targetOverride: mainPath,
       activeArch: CpuArch.arm64,
       destination: _destination,
+      toolContext: toolContext,
     );
     if (!result.success) {
       await diagnoseXcodeBuildFailure(

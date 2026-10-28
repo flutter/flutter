@@ -10,6 +10,7 @@ import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/template.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/ios/application_package.dart';
 import 'package:flutter_tools/src/ios/ios_workflow.dart';
@@ -419,7 +420,7 @@ class FakeMacIOSProject extends Fake implements IosProject {
   FakeMacIOSProject(this.fs);
   final FileSystem fs;
   @override
-  Future<void> ensureReadyForPlatformSpecificTooling() async {}
+  Future<void> ensureReadyForPlatformSpecificTooling({required ToolContext toolContext}) async {}
   @override
   File get lldbInitFile => fs.file('/ios/Flutter/ephemeral/flutter_lldbinit');
 }

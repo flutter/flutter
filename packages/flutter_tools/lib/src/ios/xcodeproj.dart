@@ -4,12 +4,11 @@
 
 import 'dart:async';
 
-import 'package:file/memory.dart';
 import 'package:meta/meta.dart';
-import 'package:process/process.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../base/common.dart';
+import '../base/config.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
@@ -20,6 +19,7 @@ import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../base/version.dart';
 import '../build_info.dart';
+import '../context/tool_context.dart';
 import '../macos/swift_package_manager.dart';
 import '../plugins.dart';
 import '../xcode_project.dart';
@@ -41,42 +41,14 @@ final _localSwiftPackageReferenceExpr = RegExp(
 
 /// Interpreter of Xcode projects.
 class XcodeProjectInterpreter {
-  factory XcodeProjectInterpreter({
-    required Platform platform,
-    required ProcessManager processManager,
-    required Logger logger,
-    required FileSystem fileSystem,
-    required Analytics analytics,
-  }) {
-    return XcodeProjectInterpreter._(
-      platform: platform,
-      processManager: processManager,
-      logger: logger,
-      fileSystem: fileSystem,
-      analytics: analytics,
-    );
-  }
+  XcodeProjectInterpreter({required this._analytics, required this._toolContext});
 
   XcodeProjectInterpreter._({
-    required Platform platform,
-    required ProcessManager processManager,
-    required Logger logger,
-    required FileSystem fileSystem,
     required this._analytics,
-    Version? version,
+    required this._toolContext,
+    this._version,
     this._build,
-  }) : _platform = platform,
-       _fileSystem = fileSystem,
-       _logger = logger,
-       _processUtils = ProcessUtils(logger: logger, processManager: processManager),
-       _operatingSystemUtils = OperatingSystemUtils(
-         fileSystem: fileSystem,
-         logger: logger,
-         platform: platform,
-         processManager: processManager,
-       ),
-       _version = version,
-       _versionText = version?.toString();
+  }) : _versionText = _version?.toString();
 
   /// Create an [XcodeProjectInterpreter] for testing.
   ///
@@ -85,41 +57,32 @@ class XcodeProjectInterpreter {
   /// test [Analytics], and test [Terminal].
   /// Set [version] to null to simulate Xcode not being installed.
   factory XcodeProjectInterpreter.test({
-    required ProcessManager processManager,
+    required ToolContext toolContext,
     Version? version = const Version.withText(1000, 0, 0, '1000.0.0'),
     String? build = '13C100',
     Analytics? analytics,
   }) {
-    final Platform platform = FakePlatform(
-      operatingSystem: 'macos',
-      environment: <String, String>{},
-    );
     return XcodeProjectInterpreter._(
-      fileSystem: MemoryFileSystem.test(),
-      platform: platform,
-      processManager: processManager,
-      logger: BufferLogger.test(),
-      version: version,
-      build: build,
       analytics: analytics ?? const NoOpAnalytics(),
+      build: build,
+      toolContext: toolContext,
+      version: version,
     );
   }
 
-  final Platform _platform;
-  final FileSystem _fileSystem;
-  final ProcessUtils _processUtils;
-  final OperatingSystemUtils _operatingSystemUtils;
-  final Logger _logger;
   final Analytics _analytics;
+  final ToolContext _toolContext;
   static final _versionRegex = RegExp(r'Xcode ([0-9.]+).*Build version (\w+)');
 
   void _updateVersion() {
-    if (!_platform.isMacOS || !_fileSystem.file('/usr/bin/xcodebuild').existsSync()) {
+    final ToolContext(fs: FileSystem fileSystem, :Platform platform, :ProcessUtils processUtils) =
+        _toolContext;
+    if (!platform.isMacOS || !fileSystem.file('/usr/bin/xcodebuild').existsSync()) {
       return;
     }
     try {
       if (_versionText == null) {
-        final RunResult result = _processUtils.runSync(<String>[
+        final RunResult result = processUtils.runSync(<String>[
           ...xcrunCommand(),
           'xcodebuild',
           '-version',
@@ -179,7 +142,7 @@ class XcodeProjectInterpreter {
   /// to run outside the x86 Rosetta translation, which may cause crashes.
   List<String> xcrunCommand() {
     final xcrunCommand = <String>[];
-    if (_operatingSystemUtils.hostPlatform == HostPlatform.darwin_arm64) {
+    if (_toolContext.os.hostPlatform == HostPlatform.darwin_arm64) {
       // Force Xcode commands to run outside Rosetta.
       xcrunCommand.addAll(<String>['/usr/bin/arch', '-arm64e']);
     }
@@ -247,44 +210,55 @@ class XcodeProjectInterpreter {
     required XcodeProjectBuildContext buildContext,
     Duration timeout = const Duration(minutes: 1),
   }) async {
-    final Status status = _logger.startSpinner();
-    final String? scheme = buildContext.scheme;
-    final String? configuration = buildContext.configuration;
-    final String? target = buildContext.target;
-    final String? deviceId = buildContext.deviceId;
-    final String buildDir = switch (buildContext.sdk) {
-      XcodeSdk.MacOSX => getMacOSBuildDirectory(),
-      XcodeSdk.IPhoneOS || XcodeSdk.IPhoneSimulator => getIosBuildDirectory(),
-      XcodeSdk.WatchOS || XcodeSdk.WatchSimulator => getIosBuildDirectory(),
+    final ToolContext(
+      :Config config,
+      fs: FileSystem fileSystem,
+      :Logger logger,
+      :Platform platform,
+      :ProcessUtils processUtils,
+    ) = _toolContext;
+    final Status status = logger.startSpinner();
+    final XcodeProjectBuildContext(
+      :String? configuration,
+      :String? deviceId,
+      :String? scheme,
+      :XcodeSdk sdk,
+      :String? target,
+    ) = buildContext;
+    final String buildDir = switch (sdk) {
+      XcodeSdk.MacOSX => getMacOSBuildDirectory(config: config, fileSystem: fileSystem),
+      XcodeSdk.IPhoneOS ||
+      XcodeSdk.IPhoneSimulator => getIosBuildDirectory(config: config, fileSystem: fileSystem),
+      XcodeSdk.WatchOS ||
+      XcodeSdk.WatchSimulator => getIosBuildDirectory(config: config, fileSystem: fileSystem),
     };
     final List<String> xcodebuildCommandArgs = await fetchDependenciesAndGenerateXcodebuildArgs(
       xcodeProject,
-      _fileSystem.directory(buildDir),
+      fileSystem.directory(buildDir),
     );
     final String projectPath = xcodeProject.xcodeProject.path;
     final showBuildSettingsCommand = <String>[
       ...xcodebuildCommandArgs,
       '-project',
-      _fileSystem.path.absolute(projectPath),
+      fileSystem.path.absolute(projectPath),
       if (scheme != null) ...<String>['-scheme', scheme],
       if (configuration != null) ...<String>['-configuration', configuration],
       if (target != null) ...<String>['-target', target],
-      if (buildContext.sdk == XcodeSdk.IPhoneSimulator) ...<String>[
+      if (sdk == XcodeSdk.IPhoneSimulator) ...<String>[
         '-sdk',
         XcodeSdk.IPhoneSimulator.platformName,
       ],
       '-destination',
-      buildContext.destination ??
-          (deviceId != null ? 'id=$deviceId' : buildContext.sdk.genericPlatform),
+      buildContext.destination ?? (deviceId != null ? 'id=$deviceId' : sdk.genericPlatform),
       '-showBuildSettings',
-      'BUILD_DIR=${_fileSystem.path.absolute(buildDir)}',
-      ...environmentVariablesAsXcodeBuildSettings(_platform),
+      'BUILD_DIR=${fileSystem.path.absolute(buildDir)}',
+      ...environmentVariablesAsXcodeBuildSettings(platform),
     ];
     try {
       // showBuildSettings is reported to occasionally timeout. Here, we give it
       // a lot of wiggle room (locally on Flutter Gallery, this takes ~1s).
       // When there is a timeout, we retry once.
-      final RunResult result = await _processUtils.run(
+      final RunResult result = await processUtils.run(
         showBuildSettingsCommand,
         throwOnError: true,
         workingDirectory: projectPath,
@@ -295,7 +269,7 @@ class XcodeProjectInterpreter {
       return parseXcodeBuildSettings(out);
     } on Exception catch (error) {
       if (error is ProcessException && error.toString().contains('timed out')) {
-        final String eventType = switch (buildContext.sdk) {
+        final String eventType = switch (sdk) {
           XcodeSdk.MacOSX => 'macos',
           XcodeSdk.IPhoneOS || XcodeSdk.IPhoneSimulator => 'ios',
           XcodeSdk.WatchOS || XcodeSdk.WatchSimulator => 'watchos',
@@ -308,7 +282,7 @@ class XcodeProjectInterpreter {
           ),
         );
       }
-      _logger.printTrace('Unexpected failure to get Xcode build settings: $error.');
+      logger.printTrace('Unexpected failure to get Xcode build settings: $error.');
       return const <String, String>{};
     } finally {
       status.stop();
@@ -326,8 +300,16 @@ class XcodeProjectInterpreter {
       // No plugins.
       return null;
     }
-    final Status status = _logger.startSpinner();
-    final String buildDirectory = _fileSystem.path.absolute(getIosBuildDirectory());
+    final ToolContext(
+      :Config config,
+      fs: FileSystem fileSystem,
+      :Logger logger,
+      :ProcessUtils processUtils,
+    ) = _toolContext;
+    final Status status = logger.startSpinner();
+    final String buildDirectory = fileSystem.path.absolute(
+      getIosBuildDirectory(config: config, fileSystem: fileSystem),
+    );
     final showBuildSettingsCommand = <String>[
       ...xcrunCommand(),
       'xcodebuild',
@@ -344,7 +326,7 @@ class XcodeProjectInterpreter {
       // showBuildSettings is reported to occasionally timeout. Here, we give it
       // a lot of wiggle room (locally on Flutter Gallery, this takes ~1s).
       // When there is a timeout, we retry once.
-      final RunResult result = await _processUtils.run(
+      final RunResult result = await processUtils.run(
         showBuildSettingsCommand,
         throwOnError: true,
         workingDirectory: podXcodeProject.path,
@@ -365,7 +347,7 @@ class XcodeProjectInterpreter {
           ),
         );
       }
-      _logger.printTrace('Unexpected failure to get Pod Xcode project build settings: $error.');
+      logger.printTrace('Unexpected failure to get Pod Xcode project build settings: $error.');
       return null;
     } finally {
       status.stop();
@@ -379,12 +361,14 @@ class XcodeProjectInterpreter {
     required Directory buildDirectory,
     bool verbose = false,
   }) async {
-    final String projectPath = _fileSystem.currentDirectory.path;
+    final ToolContext(fs: FileSystem fileSystem, :Platform platform, :ProcessUtils processUtils) =
+        _toolContext;
+    final String projectPath = fileSystem.currentDirectory.path;
     final List<String> xcodebuildCommandArgs = await fetchDependenciesAndGenerateXcodebuildArgs(
       xcodeProject,
       buildDirectory,
     );
-    await _processUtils.run(<String>[
+    await processUtils.run(<String>[
       ...xcodebuildCommandArgs,
       '-workspace',
       workspacePath,
@@ -392,7 +376,7 @@ class XcodeProjectInterpreter {
       scheme,
       if (!verbose) '-quiet',
       'clean',
-      ...environmentVariablesAsXcodeBuildSettings(_platform),
+      ...environmentVariablesAsXcodeBuildSettings(platform),
     ], workingDirectory: projectPath);
   }
 
@@ -401,6 +385,7 @@ class XcodeProjectInterpreter {
     XcodeBasedProject xcodeProject, {
     required Directory buildDirectory,
   }) async {
+    final ToolContext(:Logger logger, :ProcessUtils processUtils) = _toolContext;
     await xcodeProject.prefetchSwiftPackages(
       xcodebuildProjectCommandArguments: _xcodebuildProjectCommandArguments(
         buildDirectory,
@@ -408,8 +393,8 @@ class XcodeProjectInterpreter {
         // commands run, packages should already be resolved, downloaded, updated, and validated.
         skipPackageValidation: false,
       ),
-      processUtils: _processUtils,
-      logger: _logger,
+      processUtils: processUtils,
+      logger: logger,
     );
   }
 
@@ -425,12 +410,13 @@ class XcodeProjectInterpreter {
     // The exit code returned by 'xcodebuild -list' when the project is corrupted.
     const corruptedProjectExitCode = 74;
     bool allowedFailures(int c) => c == missingProjectExitCode || c == corruptedProjectExitCode;
+    final ToolContext(:Logger logger, :ProcessUtils processUtils) = _toolContext;
     try {
       final List<String> xcodebuildCommandArgs = await fetchDependenciesAndGenerateXcodebuildArgs(
         xcodeProject,
         buildDirectory,
       );
-      final RunResult result = await _processUtils.run(
+      final RunResult result = await processUtils.run(
         <String>[
           ...xcodebuildCommandArgs,
           '-list',
@@ -446,7 +432,7 @@ class XcodeProjectInterpreter {
       }
       return XcodeProjectInfo.fromXcodeBuildOutput(
         result.toString(),
-        _logger,
+        logger,
         ignoredSchemes: await _ignoredSwiftPackageSchemes(xcodeProject, buildDirectory),
       );
     } on ProcessException catch (exception) {
@@ -480,7 +466,7 @@ class XcodeProjectInterpreter {
         ignoredSchemes.add(plugin.name.replaceAll('_', '-'));
       }
     } on Object catch (error) {
-      _logger.printTrace('Failed to get plugins while filtering Xcode schemes: $error');
+      _toolContext.logger.printTrace('Failed to get plugins while filtering Xcode schemes: $error');
     }
     return ignoredSchemes;
   }
@@ -503,7 +489,7 @@ class XcodeProjectInterpreter {
     try {
       contents = pbxprojFile.readAsStringSync();
     } on FileSystemException catch (error) {
-      _logger.printTrace(
+      _toolContext.logger.printTrace(
         'Failed to read ${pbxprojFile.path} while filtering Xcode schemes: $error',
       );
       return const <String>{};
@@ -530,10 +516,11 @@ class XcodeProjectInterpreter {
     if (!schemeDirectory.existsSync()) {
       return const <String>{};
     }
+    final FileSystem fileSystem = _toolContext.fs;
     final schemes = <String>{};
     for (final File schemeFile in schemeDirectory.listSync().whereType<File>()) {
-      if (_fileSystem.path.extension(schemeFile.path) == '.xcscheme') {
-        schemes.add(_fileSystem.path.basenameWithoutExtension(schemeFile.path));
+      if (fileSystem.path.extension(schemeFile.path) == '.xcscheme') {
+        schemes.add(fileSystem.path.basenameWithoutExtension(schemeFile.path));
       }
     }
     return schemes;

@@ -4,6 +4,9 @@
 
 import 'package:meta/meta.dart';
 
+import 'build.dart';
+import 'json_utils.dart';
+
 /// A description of the kind of workflow the device supports.
 enum Category {
   /// Web browser target workflow.
@@ -45,6 +48,7 @@ class TargetDevice {
     required this.category,
     required this.id,
     required this.name,
+    this.buildTarget,
     this.ephemeral = true,
     this.isSupported = true,
     this.sdkNameAndVersion,
@@ -54,15 +58,21 @@ class TargetDevice {
   /// Deserializes a [TargetDevice] from a JSON-serializable map.
   factory TargetDevice.fromJson(Map<String, Object?> json) {
     return TargetDevice(
-      category: Category.fromString(json[categoryKey] as String? ?? '') ?? Category.desktop,
-      id: json[idKey] as String? ?? '',
-      name: json[nameKey] as String? ?? '',
-      ephemeral: json[ephemeralKey] as bool? ?? true,
-      isSupported: json[isSupportedKey] as bool? ?? true,
-      sdkNameAndVersion: json[sdkNameAndVersionKey] as String?,
-      targetPlatform: json[targetPlatformKey] as String?,
+      category:
+          Category.fromString(json.optionalField<String>(categoryKey, defaultValue: '')) ??
+          Category.desktop,
+      id: json.optionalField<String>(idKey, defaultValue: ''),
+      name: json.optionalField<String>(nameKey, defaultValue: ''),
+      buildTarget: json.nullableField<String>(buildTargetKey),
+      ephemeral: json.optionalField<bool>(ephemeralKey, defaultValue: true),
+      isSupported: json.optionalField<bool>(isSupportedKey, defaultValue: true),
+      sdkNameAndVersion: json.nullableField<String>(sdkNameAndVersionKey),
+      targetPlatform: json.nullableField<String>(targetPlatformKey),
     );
   }
+
+  /// Map key for [buildTarget].
+  static const String buildTargetKey = 'buildTarget';
 
   /// Map key for [category].
   static const String categoryKey = 'category';
@@ -105,6 +115,12 @@ class TargetDevice {
   /// Display name of the device.
   final String name;
 
+  /// The [ExtensionBuildTarget.name] of the extension build target used to
+  /// build an application for this device during `flutter run`.
+  ///
+  /// Must match [ExtensionBuildTarget.isValidName].
+  final String? buildTarget;
+
   /// Whether the device is ephemeral.
   ///
   /// Ephemeral devices are targets that can dynamically connect and disconnect
@@ -129,6 +145,7 @@ class TargetDevice {
     categoryKey: category.value,
     idKey: id,
     nameKey: name,
+    buildTargetKey: ?buildTarget,
     ephemeralKey: ephemeral,
     isSupportedKey: isSupported,
     sdkNameAndVersionKey: ?sdkNameAndVersion,
@@ -139,7 +156,8 @@ class TargetDevice {
   String toString() =>
       'TargetDevice(id: $id, name: $name, category: $category, '
       'targetPlatform: $targetPlatform, sdkNameAndVersion: $sdkNameAndVersion, '
-      'ephemeral: $ephemeral, isSupported: $isSupported)';
+      'ephemeral: $ephemeral, isSupported: $isSupported, '
+      'buildTarget: $buildTarget)';
 
   @override
   bool operator ==(Object other) {
@@ -148,6 +166,7 @@ class TargetDevice {
             other.category == category &&
             other.id == id &&
             other.name == name &&
+            other.buildTarget == buildTarget &&
             other.ephemeral == ephemeral &&
             other.isSupported == isSupported &&
             other.sdkNameAndVersion == sdkNameAndVersion &&
@@ -155,6 +174,71 @@ class TargetDevice {
   }
 
   @override
-  int get hashCode =>
-      Object.hash(category, id, name, ephemeral, isSupported, sdkNameAndVersion, targetPlatform);
+  int get hashCode => Object.hash(
+    category,
+    id,
+    name,
+    buildTarget,
+    ephemeral,
+    isSupported,
+    sdkNameAndVersion,
+    targetPlatform,
+  );
+}
+
+/// Debugging and build mode options passed when launching an application on a
+/// tool extension target device.
+@immutable
+class ExtensionDebuggingOptions {
+  const ExtensionDebuggingOptions({required this.buildMode, required this.debuggingEnabled});
+
+  /// Deserializes [ExtensionDebuggingOptions] from a JSON-serializable map.
+  ///
+  /// Throws a [FormatException] if required fields are missing or invalid.
+  factory ExtensionDebuggingOptions.fromJson(Map<String, Object?> json) {
+    final BuildMode buildMode = _parseBuildMode(json.requiredField<String>(buildModeKey), json);
+    final bool debuggingEnabled = json.requiredField<bool>(debuggingEnabledKey);
+    return ExtensionDebuggingOptions(buildMode: buildMode, debuggingEnabled: debuggingEnabled);
+  }
+
+  static BuildMode _parseBuildMode(String modeName, Map<String, Object?> json) {
+    try {
+      return BuildMode.fromCliName(modeName);
+    } on ArgumentError catch (e) {
+      throw FormatException('Invalid "$buildModeKey": ${e.message}', json);
+    }
+  }
+
+  /// Map key for [buildMode].
+  static const String buildModeKey = 'buildMode';
+
+  /// Map key for [debuggingEnabled].
+  static const String debuggingEnabledKey = 'debuggingEnabled';
+
+  /// The compilation mode for the application launch.
+  final BuildMode buildMode;
+
+  /// Whether debugging and VM Service discovery are enabled for this launch.
+  final bool debuggingEnabled;
+
+  /// Serializes the debugging options to a JSON-serializable map.
+  Map<String, Object?> toMap() => <String, Object?>{
+    buildModeKey: buildMode.cliName,
+    debuggingEnabledKey: debuggingEnabled,
+  };
+
+  @override
+  String toString() =>
+      'ExtensionDebuggingOptions(buildMode: $buildMode, debuggingEnabled: $debuggingEnabled)';
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is ExtensionDebuggingOptions &&
+            other.buildMode == buildMode &&
+            other.debuggingEnabled == debuggingEnabled);
+  }
+
+  @override
+  int get hashCode => Object.hash(buildMode, debuggingEnabled);
 }
