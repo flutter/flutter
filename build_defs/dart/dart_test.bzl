@@ -535,7 +535,7 @@ dart_test = rule(
         ),
         "browser_driver": attr.label(
             allow_single_file = True,
-            doc = "The browser's WebDriver executable (a browser_launcher of `@chrome//:chromedriver-linux64/chromedriver`, " +
+            doc = "The browser's WebDriver executable (a browser_launcher of `@chrome//:chromedriver`, " +
                   "or the executable); its directory goes first on PATH, where the web-server device's tests spawn `chromedriver`.",
         ),
         "tools": attr.label_list(
