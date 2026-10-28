@@ -3342,6 +3342,15 @@ final class _Evaluator {
         continue;
       }
       if (variable.isList) {
+        // A local holding an external variable by name per case
+        // (darwin/common's `_platform_path`: ios_platform_path under
+        // is_ios, mac_platform_path under is_mac), each case the string of
+        // its reference; a local holding one reference is [_expand]'s
+        // ([_heldReference]).
+        final List<_Value>? references = _heldReferenceCases(variable, node);
+        if (references != null && references.length > 1) {
+          conditional[name] = references;
+        }
         continue;
       }
       final _Expression items = _scalarItems(variable, node.location);
@@ -3399,6 +3408,35 @@ final class _Evaluator {
       return first;
     }
     return null;
+  }
+
+  /// The references a local list [variable] holds, one per assignment
+  /// (`_platform_path = ios_platform_path` under is_ios, `=
+  /// mac_platform_path` under is_mac -- which the evaluator records as a
+  /// `+=` under the other branch's condition, the branches exclusive),
+  /// each as the one-part string of its reference under the assignment's
+  /// condition; null when any assignment is not one bare reference, or
+  /// two share a condition (a list of two references, not a case each).
+  List<_Value>? _heldReferenceCases(GnVariable variable, GnNode node) {
+    final cases = <_Value>[];
+    final conditions = <Condition>{};
+    for (final GnAssignment a in variable.assignments) {
+      if (a.op == '-=' ||
+          a.items.length != 1 ||
+          a.items.single is! GnReference ||
+          !conditions.add(a.condition)) {
+        return null;
+      }
+      cases.add(
+        _Value(
+          GnExpandedString(List<GnValue>.unmodifiable(<GnValue>[a.items.single])),
+          _comments(node),
+          condition: a.condition,
+          sourceConditions: a.sourceConditions,
+        ),
+      );
+    }
+    return cases;
   }
 
   /// The external variable a local [name] holds as a bare reference
