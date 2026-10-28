@@ -1644,11 +1644,13 @@ test_suite(
 
 # mac_unopt.json: ci/ios_debug_unopt_sim_arm64
 #   bazel run --config=ios_debug_unopt_sim_arm64 :ios_debug_unopt_sim_arm64
-# Not built, no Bazel counterpart yet: flutter/testing/ios_scenario_app.
 install(
     name = "ios_debug_unopt_sim_arm64",
     testonly = True,
-    contents = ["//engine/src/flutter/shell/platform/darwin/ios:ios_test_flutter"],
+    contents = [
+        "//engine/src/flutter/shell/platform/darwin/ios:ios_test_flutter",
+        "//engine/src/flutter/testing/ios_scenario_app:ios_scenario_app",
+    ],
     directory = "ci/ios_debug_unopt_sim_arm64",
     target_compatible_with = select({
         "//engine/src/flutter/build/bazel:host_os_is_mac": [],
@@ -1657,20 +1659,25 @@ install(
 )
 
 # ci/ios_debug_unopt_sim_arm64's tests: run_tests.py --type objc.
-# Other steps, scripts of the checkout: Scenario App Integration Tests.
+# ci/ios_debug_unopt_sim_arm64's steps that run a script of the checkout, as Bazel tests: //engine/src/flutter/testing/ios_scenario_app:ios_scenario_tests.
 test_suite(
     name = "ios_debug_unopt_sim_arm64_tests",
     tags = ["manual"],
-    tests = ["//engine/src/flutter/testing/ios:ios_unit_tests"],
+    tests = [
+        "//engine/src/flutter/testing/ios:ios_unit_tests",
+        "//engine/src/flutter/testing/ios_scenario_app:ios_scenario_tests",
+    ],
 )
 
 # mac_unopt.json: ci/ios_debug_unopt_sim_arm64_extension_safe
 #   bazel run --config=ios_debug_unopt_sim_arm64_extension_safe :ios_debug_unopt_sim_arm64_extension_safe
-# Not built, no Bazel counterpart yet: flutter/testing/ios_scenario_app.
 install(
     name = "ios_debug_unopt_sim_arm64_extension_safe",
     testonly = True,
-    contents = ["//engine/src/flutter/shell/platform/darwin/ios:ios_test_flutter"],
+    contents = [
+        "//engine/src/flutter/shell/platform/darwin/ios:ios_test_flutter",
+        "//engine/src/flutter/testing/ios_scenario_app:ios_scenario_app",
+    ],
     directory = "ci/ios_debug_unopt_sim_arm64_extension_safe",
     target_compatible_with = select({
         "//engine/src/flutter/build/bazel:host_os_is_mac": [],
@@ -1679,11 +1686,14 @@ install(
 )
 
 # ci/ios_debug_unopt_sim_arm64_extension_safe's tests: run_tests.py --type objc.
-# Other steps, scripts of the checkout: Scenario App Integration Tests.
+# ci/ios_debug_unopt_sim_arm64_extension_safe's steps that run a script of the checkout, as Bazel tests: //engine/src/flutter/testing/ios_scenario_app:ios_scenario_tests.
 test_suite(
     name = "ios_debug_unopt_sim_arm64_extension_safe_tests",
     tags = ["manual"],
-    tests = ["//engine/src/flutter/testing/ios:ios_unit_tests"],
+    tests = [
+        "//engine/src/flutter/testing/ios:ios_unit_tests",
+        "//engine/src/flutter/testing/ios_scenario_app:ios_scenario_tests",
+    ],
 )
 
 # local_engine.json: macos/ios_debug

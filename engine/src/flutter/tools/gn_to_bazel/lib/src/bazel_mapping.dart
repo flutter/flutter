@@ -1171,6 +1171,10 @@ final Map<String, String> conditionSettings = Map<String, String>.unmodifiable(<
   // testing.gni's enable_ios_unittests (`is_ios && flutter_runtime_mode ==
   // "debug"`): the iOS embedding's XCTest suite.
   'enable_ios_unittests': '//engine/src/flutter/testing:ios_unittests_enabled',
+  // testing/rules/runtime_mode.gni's is_aot (`flutter_runtime_mode ==
+  // "profile" || flutter_runtime_mode == "release"`, the AOT modes of the
+  // Android and iOS test apps): the groups in //flutter/testing's appendix.
+  'is_aot': '//engine/src/flutter/testing:aot_enabled',
   // impeller/tools/args.gni's backend arguments: flags whose defaults GN
   // derives from the platform (impeller/tools/BUILD.bazel).
   'impeller_enable_metal': '//engine/src/flutter/impeller/tools:metal',
@@ -1238,6 +1242,8 @@ final Map<String, String> negatedSettings = Map<String, String>.unmodifiable(<St
   'is_wasm': '//engine/src/flutter/build/bazel:not_wasm',
   'is_win': '//engine/src/flutter/build/bazel:not_win',
   'is_asan': '//engine/src/flutter/build/bazel:asan_disabled',
+  // The JIT modes (debug, jit_release).
+  'is_aot': '//engine/src/flutter/testing:aot_disabled',
   // Not the simulator: a device, or not iOS at all.
   'use_ios_simulator': '//engine/src/flutter/build/bazel:ios_simulator_disabled',
   'ios_use_simulator': '//engine/src/flutter/build/bazel:ios_simulator_disabled',
@@ -1574,6 +1580,8 @@ const Set<String> knownExternalVariables = <String>{
   'embedder_for_target',
   // //flutter/testing/testing.gni (iOS only; assumed off)
   'enable_ios_unittests',
+  // //flutter/testing/rules/runtime_mode.gni (a setting; see conditionSettings)
+  'is_aot',
   'feature_defines_list',
   'flutter_cflags_objc',
   'flutter_cflags_objcc',
@@ -1688,6 +1696,14 @@ const Map<String, String> buildOutputLabels = <String, String>{
   '//@out/clang_x64/gen_snapshot': '//engine/src/flutter/build/bazel/dart_wrap:gen_snapshot_host',
   '//@out/clang_x64/analyze_snapshot':
       '//engine/src/flutter/build/bazel/dart_wrap:analyze_snapshot_host',
+  // The iOS scenario app's AOT assembly (flutter_snapshot, a template whose
+  // output the converter cannot enumerate): GN writes it under the `ios/`
+  // subdirectory of the app's gen dir -- the ios package's own directory,
+  // where the app's package cannot declare a file -- so the macro declares
+  // it as `<name>.snapshot_assembly.S` of the app's package, and the ios
+  // package's App.framework dylib names it through this row.
+  '//@gen/flutter/testing/ios_scenario_app/ios/snapshot_assembly.S':
+      '//engine/src/flutter/testing/ios_scenario_app:ios_scenario_app_snapshot.snapshot_assembly.S',
   // The Android shell's assembly of icudtl.dat (bin_to_assembly, a template
   // whose output the converter cannot enumerate), which the embedder's
   // Android sources name by path ([buildOutputCompilerInputs] has what its
@@ -2084,6 +2100,37 @@ const Map<String, TemplateMapping> templateMappings = <String, TemplateMapping>{
     },
     files: true,
   ),
+  // build/dart/internal/flutter_snapshot.gni's flutter_snapshot: a Flutter
+  // app's kernel (flutter_frontend_server) and its gen_snapshot snapshot --
+  // the JIT application snapshot, or the AOT assembly on iOS -- as the
+  // macro's `_<name>_kernel`, `_<name>_jit_snapshot`/`_<name>_aot_snapshot`
+  // and the `_<name>_snapshot` alias (build_defs/dart/flutter_snapshot.bzl).
+  'flutter_snapshot': TemplateMapping(
+    '//build_defs/dart:flutter_snapshot.bzl',
+    'flutter_snapshot',
+    <String, TemplateArgument>{
+      'main_dart': TemplateArgument('main_dart', TemplateArgumentKind.file),
+      'package_config': TemplateArgument('package_config', TemplateArgumentKind.file),
+      'product': TemplateArgument('product', TemplateArgumentKind.scalar),
+      'testonly': TemplateArgument('testonly', TemplateArgumentKind.scalar),
+    },
+    files: true,
+  ),
+  // The Dart tree's copy_tree (build/dart/copy_tree.gni): a directory's
+  // files into the build directory, as a gn_copy placing each at its path
+  // under `dest` (build_defs/gn/gn_action.bzl's gn_copy_tree).
+  'copy_tree': TemplateMapping(
+    '//build_defs/gn:gn_action.bzl',
+    'gn_copy_tree',
+    <String, TemplateArgument>{
+      'source': TemplateArgument('source', TemplateArgumentKind.scalar),
+      'dest': TemplateArgument('dest', TemplateArgumentKind.buildPath),
+      'exclude': TemplateArgument('exclude', TemplateArgumentKind.scalar),
+      'visibility': TemplateArgument('visibility', TemplateArgumentKind.ignored),
+      'testonly': TemplateArgument('testonly', TemplateArgumentKind.scalar),
+    },
+    files: true,
+  ),
   // build/secondary/flutter/third_party/flatbuffers/flatbuffers.gni: flatc
   // over the schemas, the generated headers as a library.
   'flatbuffers': TemplateMapping(
@@ -2459,9 +2506,12 @@ const ImportPolicy engineImportPolicy = ImportPolicy(
     '//build/config/android/config.gni',
     // The bin_to_assembly template (templateMappings).
     '//flutter/build/bin_to_obj.gni',
-    // The Dart tree's copy_trees template, which the root file imports
-    // without invoking.
+    // The Dart tree's copy_tree and copy_trees templates: copy_tree in
+    // templateMappings (the iOS scenario app's project), copy_trees imported
+    // by the root file without invoking.
     '//flutter/third_party/dart/build/dart/copy_tree.gni',
+    // testing/rules/runtime_mode.gni: is_aot (a setting; conditionSettings).
+    '//flutter/testing/rules/runtime_mode.gni',
     // gen_snapshot.gni: the gen_snapshot templates of the AOT archives, whose
     // invocations are skipped.
     '//flutter/lib/snapshot/gen_snapshot.gni',
