@@ -1044,11 +1044,16 @@ Directory _getIosFlutterFrameworkPlatformDirectory(
   String engineDirectory,
   EnvironmentType? environmentType,
   FileSystem fileSystem,
-  Platform hostPlatform,
-) {
-  final Directory xcframeworkDirectory = fileSystem
-      .directory(engineDirectory)
-      .childDirectory(Artifact.flutterXcframework.getFileName(hostPlatform));
+  Platform hostPlatform, {
+  String? xcframeworkPath,
+}) {
+  // The xcframework sits at the engine directory's root, or where a Bazel
+  // build's manifest places it (LocalEngineLayout).
+  final Directory xcframeworkDirectory = xcframeworkPath != null
+      ? fileSystem.directory(xcframeworkPath)
+      : fileSystem
+            .directory(engineDirectory)
+            .childDirectory(Artifact.flutterXcframework.getFileName(hostPlatform));
 
   if (!xcframeworkDirectory.existsSync()) {
     throwToolExit(
@@ -1078,13 +1083,15 @@ String _getIosFrameworkPath(
   String engineDirectory,
   EnvironmentType? environmentType,
   FileSystem fileSystem,
-  Platform hostPlatform,
-) {
+  Platform hostPlatform, {
+  String? xcframeworkPath,
+}) {
   final Directory platformDir = _getIosFlutterFrameworkPlatformDirectory(
     engineDirectory,
     environmentType,
     fileSystem,
     hostPlatform,
+    xcframeworkPath: xcframeworkPath,
   );
   return platformDir.childDirectory(Artifact.flutterFramework.getFileName(hostPlatform)).path;
 }
@@ -1094,13 +1101,15 @@ String _getIosFrameworkDsymPath(
   String engineDirectory,
   EnvironmentType? environmentType,
   FileSystem fileSystem,
-  Platform hostPlatform,
-) {
+  Platform hostPlatform, {
+  String? xcframeworkPath,
+}) {
   final Directory platformDir = _getIosFlutterFrameworkPlatformDirectory(
     engineDirectory,
     environmentType,
     fileSystem,
     hostPlatform,
+    xcframeworkPath: xcframeworkPath,
   );
   return platformDir
       .childDirectory('dSYMs')
@@ -1117,11 +1126,16 @@ String _getIosFrameworkDsymPath(
 Directory _getMacOSFrameworkPlatformDirectory(
   String engineDirectory,
   FileSystem fileSystem,
-  Platform hostPlatform,
-) {
-  final Directory xcframeworkDirectory = fileSystem
-      .directory(engineDirectory)
-      .childDirectory(Artifact.flutterMacOSXcframework.getFileName(hostPlatform));
+  Platform hostPlatform, {
+  String? xcframeworkPath,
+}) {
+  // The xcframework sits at the engine directory's root, or where a Bazel
+  // build's manifest places it (LocalEngineLayout).
+  final Directory xcframeworkDirectory = xcframeworkPath != null
+      ? fileSystem.directory(xcframeworkPath)
+      : fileSystem
+            .directory(engineDirectory)
+            .childDirectory(Artifact.flutterMacOSXcframework.getFileName(hostPlatform));
 
   if (!xcframeworkDirectory.existsSync()) {
     throwToolExit(
@@ -1145,12 +1159,14 @@ Directory _getMacOSFrameworkPlatformDirectory(
 String _getMacOSFrameworkPath(
   String engineDirectory,
   FileSystem fileSystem,
-  Platform hostPlatform,
-) {
+  Platform hostPlatform, {
+  String? xcframeworkPath,
+}) {
   final Directory platformDirectory = _getMacOSFrameworkPlatformDirectory(
     engineDirectory,
     fileSystem,
     hostPlatform,
+    xcframeworkPath: xcframeworkPath,
   );
   return platformDirectory
       .childDirectory(Artifact.flutterMacOSFramework.getFileName(hostPlatform))
@@ -1161,12 +1177,14 @@ String _getMacOSFrameworkPath(
 String _getMacOSFrameworkDsymPath(
   String engineDirectory,
   FileSystem fileSystem,
-  Platform hostPlatform,
-) {
+  Platform hostPlatform, {
+  String? xcframeworkPath,
+}) {
   final Directory platformDirectory = _getMacOSFrameworkPlatformDirectory(
     engineDirectory,
     fileSystem,
     hostPlatform,
+    xcframeworkPath: xcframeworkPath,
   );
   return platformDirectory
       .childDirectory('dSYMs')
@@ -1290,12 +1308,17 @@ class CachedLocalEngineArtifacts implements Artifacts {
           'lib',
           artifactFileName!,
         ]);
+      // The frameworks inside the xcframeworks, which a Bazel build's
+      // manifest places (the xcframework is one entry).
       case Artifact.flutterFramework:
         return _getIosFrameworkPath(
           localEngineInfo.targetOutPath,
           environmentType,
           fs,
           hostPlatform,
+          xcframeworkPath: _target.resolve(<String>[
+            Artifact.flutterXcframework.getFileName(hostPlatform),
+          ]),
         );
       case Artifact.flutterFrameworkDsym:
         return _getIosFrameworkDsymPath(
@@ -1303,11 +1326,28 @@ class CachedLocalEngineArtifacts implements Artifacts {
           environmentType,
           fs,
           hostPlatform,
+          xcframeworkPath: _target.resolve(<String>[
+            Artifact.flutterXcframework.getFileName(hostPlatform),
+          ]),
         );
       case Artifact.flutterMacOSFramework:
-        return _getMacOSFrameworkPath(localEngineInfo.targetOutPath, fs, hostPlatform);
+        return _getMacOSFrameworkPath(
+          localEngineInfo.targetOutPath,
+          fs,
+          hostPlatform,
+          xcframeworkPath: _target.resolve(<String>[
+            Artifact.flutterMacOSXcframework.getFileName(hostPlatform),
+          ]),
+        );
       case Artifact.flutterMacOSFrameworkDsym:
-        return _getMacOSFrameworkDsymPath(localEngineInfo.targetOutPath, fs, hostPlatform);
+        return _getMacOSFrameworkDsymPath(
+          localEngineInfo.targetOutPath,
+          fs,
+          hostPlatform,
+          xcframeworkPath: _target.resolve(<String>[
+            Artifact.flutterMacOSXcframework.getFileName(hostPlatform),
+          ]),
+        );
       case Artifact.flutterPatchedSdkPath:
         // When using local engine always use [BuildMode.debug] regardless of
         // what was specified in [mode] argument because local engine will
