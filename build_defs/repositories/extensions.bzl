@@ -405,6 +405,15 @@ _SOURCE_REPOSITORIES = {
         gn_build_files = ["engine/src/flutter/build/secondary/third_party/shaderc_flutter/BUILD.gn"],
         gn_repository = "@shaderc=//flutter/third_party/shaderc",
     ),
+    # OCMock, which the Objective-C suites link on a Mac; the engine's GN
+    # file for it sits in the secondary tree.
+    "ocmock": struct(
+        path = "engine/src/flutter/third_party/ocmock",
+        build_file = None,
+        gn_build_files = ["engine/src/flutter/build/secondary/flutter/third_party/ocmock/BUILD.gn"],
+        gn_repository = "@ocmock=//flutter/third_party/ocmock",
+        gn_secondary_dir = "engine/src/flutter/build/secondary/flutter/third_party/ocmock",
+    ),
     "wuffs": struct(
         path = "engine/src/flutter/third_party/wuffs",
         build_file = None,

@@ -3,10 +3,11 @@
 # found in the LICENSE file.
 
 # Generated from //flutter/shell/platform/darwin/macos/BUILD.gn by gn_to_bazel; do not edit.
-# Not converted: flutter_desktop_darwin_swift_unittests, flutter_desktop_darwin_unittests, _generate_symlinks_and_verify_framework_module.
+# Not converted: flutter_desktop_darwin_swift_unittests, _generate_symlinks_and_verify_framework_module.
 
 load("@bazel_skylib//lib:selects.bzl", "selects")
-load("@rules_cc//cc:defs.bzl", "cc_library")
+load("@macos_sdk//:sdk.bzl", "MACOS_PLATFORM_PATH")
+load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
 load("//build_defs/cc:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES", "MACOS_CFLAGS_OBJC")
 load("//build_defs/cc:objc_library.bzl", "flutter_objc_library")
 load("//build_defs/cc:shared_library.bzl", "flutter_shared_library")
@@ -417,6 +418,143 @@ flutter_test_fixtures(
         "@platforms//os:macos": [],
         "//conditions:default": ["@platforms//:incompatible"],
     }),
+)
+
+# The Objective-C(++) sources of flutter_desktop_darwin_unittests, which cc_library takes none of
+# (build_defs/cc/objc_library.bzl); flutter_desktop_darwin_unittests links them in on the Apple
+# platforms.
+flutter_objc_library(
+    name = "flutter_desktop_darwin_unittests_objc",
+    testonly = True,
+    srcs = [
+        "framework/Source/AccessibilityBridgeMacTest.mm",
+        "framework/Source/FlutterAppDelegateTest.mm",
+        "framework/Source/FlutterAppLifecycleDelegateTest.mm",
+        "framework/Source/FlutterChannelKeyResponderTest.mm",
+        "framework/Source/FlutterDisplayLinkTest.mm",
+        "framework/Source/FlutterEmbedderExternalTextureTest.mm",
+        "framework/Source/FlutterEmbedderKeyResponderTest.mm",
+        "framework/Source/FlutterEngineTest.mm",
+        "framework/Source/FlutterEngineTestUtils.mm",
+        "framework/Source/FlutterKeyboardManagerTest.mm",
+        "framework/Source/FlutterMenuPluginTest.mm",
+        "framework/Source/FlutterMutatorViewTest.mm",
+        "framework/Source/FlutterPlatformNodeDelegateMacTest.mm",
+        "framework/Source/FlutterPlatformViewControllerTest.mm",
+        "framework/Source/FlutterSurfaceManagerTest.mm",
+        "framework/Source/FlutterTextInputPluginTest.mm",
+        "framework/Source/FlutterTextInputSemanticsObjectTest.mm",
+        "framework/Source/FlutterVSyncWaiterTest.mm",
+        "framework/Source/FlutterViewControllerTest.mm",
+        "framework/Source/FlutterViewControllerTestUtils.mm",
+        "framework/Source/FlutterViewEngineProviderTest.mm",
+        "framework/Source/FlutterViewTest.mm",
+        "framework/Source/FlutterWindowControllerTest.mm",
+        "framework/Source/KeyCodeMapTest.mm",
+        "framework/Source/TestFlutterPlatformView.mm",
+    ],
+    hdrs = [
+        "framework/Source/FlutterEngineTestUtils.h",
+        "framework/Source/FlutterViewControllerTestUtils.h",
+        "framework/Source/TestFlutterPlatformView.h",
+    ],
+    copts = FLUTTER_COPTS + [
+        "-fvisibility=default",  # from //flutter/shell/platform/darwin/common:test_utils_swift
+        "-F" + MACOS_PLATFORM_PATH + "/Developer/Library/Frameworks",  # from //flutter/shell/platform/darwin/common:test_utils_swift
+        "-I" + MACOS_PLATFORM_PATH + "/Developer/usr/lib",  # from //flutter/shell/platform/darwin/common:test_utils_swift
+        "-Wno-inconsistent-missing-override",  # from //flutter/testing
+        "-mmacosx-version-min=14.0",  # from //flutter/shell/platform/darwin/common:test_utils_swift
+        "-Wno-unguarded-availability",  # from //flutter/shell/platform/darwin/graphics
+    ] + select({
+        "//engine/src/flutter/shell:enable_vulkan": [
+            "-Wno-redundant-parens",  # from //flutter/testing:dart
+        ],
+        "//conditions:default": [],
+    }) + MACOS_CFLAGS_OBJC,
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    target_compatible_with = select({
+        "@platforms//os:macos": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        ":flutter_desktop_darwin_fixtures",
+        ":flutter_framework_source",
+        "//engine/src:include_root",
+        "//engine/src/flutter/common",
+        "//engine/src/flutter/fml",
+        "//engine/src/flutter/shell/platform/common:common_cpp_accessibility",
+        "//engine/src/flutter/shell/platform/common:common_cpp_core",
+        "//engine/src/flutter/shell/platform/common:common_cpp_enums",
+        "//engine/src/flutter/shell/platform/common:common_cpp_isolate_scope",
+        "//engine/src/flutter/shell/platform/darwin/common:framework_common",
+        "//engine/src/flutter/shell/platform/darwin/common:test_utils_swift",
+        "//engine/src/flutter/shell/platform/darwin/graphics",
+        "//engine/src/flutter/shell/platform/embedder:embedder_as_internal_library",
+        "//engine/src/flutter/shell/platform/embedder:embedder_test_utils",
+        "//engine/src/flutter/testing",
+        "//engine/src/flutter/testing:autoreleasepool_test",
+        "//engine/src/flutter/testing:dart",
+        "//engine/src/flutter/testing:skia",
+        "//engine/src/flutter/testing:testing_lib",
+        "@ocmock",
+    ],
+    alwayslink = True,
+)
+
+cc_test(
+    name = "flutter_desktop_darwin_unittests",
+    size = "large",
+    srcs = [
+        "framework/Source/FlutterEngineTestUtils.h",
+        "framework/Source/FlutterViewControllerTestUtils.h",
+        "framework/Source/TestFlutterPlatformView.h",
+    ],
+    args = [
+        "--gtest_repeat=2",
+        "--gtest_shuffle",
+    ],
+    copts = FLUTTER_COPTS + [
+        "-fvisibility=default",  # from //flutter/shell/platform/darwin/common:test_utils_swift
+        "-F" + MACOS_PLATFORM_PATH + "/Developer/Library/Frameworks",  # from //flutter/shell/platform/darwin/common:test_utils_swift
+        "-I" + MACOS_PLATFORM_PATH + "/Developer/usr/lib",  # from //flutter/shell/platform/darwin/common:test_utils_swift
+        "-Wno-inconsistent-missing-override",  # from //flutter/testing
+        "-mmacosx-version-min=14.0",  # from //flutter/shell/platform/darwin/common:test_utils_swift
+        "-Wno-unguarded-availability",  # from //flutter/shell/platform/darwin/graphics
+    ] + select({
+        "//engine/src/flutter/shell:enable_vulkan": [
+            "-Wno-redundant-parens",  # from //flutter/testing:dart
+        ],
+        "//conditions:default": [],
+    }),
+    linkopts = ["-ObjC"],
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    target_compatible_with = select({
+        "@platforms//os:macos": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        ":flutter_desktop_darwin_fixtures",
+        ":flutter_desktop_darwin_unittests_objc",
+        ":flutter_framework_source",
+        "//engine/src:include_root",
+        "//engine/src/flutter/common",
+        "//engine/src/flutter/fml",
+        "//engine/src/flutter/shell/platform/common:common_cpp_accessibility",
+        "//engine/src/flutter/shell/platform/common:common_cpp_core",
+        "//engine/src/flutter/shell/platform/common:common_cpp_enums",
+        "//engine/src/flutter/shell/platform/common:common_cpp_isolate_scope",
+        "//engine/src/flutter/shell/platform/darwin/common:framework_common",
+        "//engine/src/flutter/shell/platform/darwin/common:test_utils_swift",
+        "//engine/src/flutter/shell/platform/darwin/graphics",
+        "//engine/src/flutter/shell/platform/embedder:embedder_as_internal_library",
+        "//engine/src/flutter/shell/platform/embedder:embedder_test_utils",
+        "//engine/src/flutter/testing",
+        "//engine/src/flutter/testing:autoreleasepool_test",
+        "//engine/src/flutter/testing:dart",
+        "//engine/src/flutter/testing:skia",
+        "//engine/src/flutter/testing:testing_lib",
+        "@ocmock",
+    ],
 )
 
 gn_copy(

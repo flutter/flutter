@@ -3,7 +3,7 @@
 # found in the LICENSE file.
 
 # Generated from //flutter/shell/platform/darwin/common/BUILD.gn by gn_to_bazel; do not edit.
-# Not converted: swift_testing_config, swift_testing_main, framework_common_swift_unittests, framework_common_unittests.
+# Not converted: swift_testing_config, swift_testing_main, framework_common_swift_unittests.
 
 load("@bazel_skylib//lib:selects.bzl", "selects")
 load("@macos_sdk//:sdk.bzl", "MACOS_PLATFORM_PATH")
@@ -360,6 +360,82 @@ flutter_swift_library(
     deps = [
         ":framework_common",
         "//engine/src:include_root",
+    ],
+)
+
+# The Objective-C(++) sources of framework_common_unittests, which cc_library takes none of
+# (build_defs/cc/objc_library.bzl); framework_common_unittests links them in on the Apple
+# platforms.
+flutter_objc_library(
+    name = "framework_common_unittests_objc",
+    testonly = True,
+    srcs = [
+        "framework/Source/FlutterBinaryMessengerRelayTest.mm",
+        "framework/Source/FlutterTestUtils.mm",
+        "framework/Source/flutter_codecs_unittest.mm",
+        "framework/Source/flutter_standard_codec_unittest.mm",
+    ],
+    copts = FLUTTER_COPTS + [
+        "-Wno-inconsistent-missing-override",  # from //flutter/testing
+        "-fvisibility=default",
+        "-F" + MACOS_PLATFORM_PATH + "/Developer/Library/Frameworks",
+        "-I" + MACOS_PLATFORM_PATH + "/Developer/usr/lib",
+        "-Wno-unguarded-availability",  # from //flutter/testing
+        "-mmacosx-version-min=14.0",  # !(is_ios) && is_mac
+    ] + MACOS_CFLAGS_OBJC,
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    target_compatible_with = select({
+        "@platforms//os:macos": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        ":config",
+        ":framework_common",
+        ":framework_common_fixtures",
+        "//engine/src:include_root",
+        "//engine/src/flutter:config",
+        "//engine/src/flutter/build/bazel/dart_wrap:libdart_jit",
+        "//engine/src/flutter/testing",
+        "@ocmock",
+    ],
+    alwayslink = True,
+)
+
+# Unit tests for channels.
+cc_test(
+    name = "framework_common_unittests",
+    size = "small",
+    # Add platform frameworks directory to search path for test frameworks.
+    # Add platform lib to search path for test libraries/Swift modules.
+    copts = FLUTTER_COPTS + [
+        "-Wno-inconsistent-missing-override",  # from //flutter/testing
+        "-fvisibility=default",
+        "-F" + MACOS_PLATFORM_PATH + "/Developer/Library/Frameworks",
+        "-I" + MACOS_PLATFORM_PATH + "/Developer/usr/lib",
+        "-Wno-unguarded-availability",  # from //flutter/testing
+        "-mmacosx-version-min=14.0",  # !(is_ios) && is_mac
+    ],
+    linkopts = [
+        "-ObjC",
+        "-mmacosx-version-min=14.0",  # !(is_ios) && is_mac
+        "-F" + MACOS_PLATFORM_PATH + "/Developer/Library/Frameworks",
+        "-L" + MACOS_PLATFORM_PATH + "/Developer/usr/lib",
+    ],
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    target_compatible_with = select({
+        "@platforms//os:macos": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        ":config",
+        ":framework_common",
+        ":framework_common_fixtures",
+        ":framework_common_unittests_objc",
+        "//engine/src:include_root",
+        "//engine/src/flutter:config",
+        "//engine/src/flutter/build/bazel/dart_wrap:libdart_jit",
+        "//engine/src/flutter/testing",
+        "@ocmock",
     ],
 )
 
