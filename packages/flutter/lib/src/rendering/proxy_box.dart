@@ -702,11 +702,12 @@ class RenderIntrinsicWidth extends RenderProxyBox {
     if (child == null) {
       return 0.0;
     }
-    if (!width.isFinite) {
-      width = getMaxIntrinsicWidth(double.infinity);
+    var intrinsicWidth = width;
+    if (!intrinsicWidth.isFinite) {
+      intrinsicWidth = getMaxIntrinsicWidth(double.infinity);
     }
-    assert(width.isFinite);
-    final double height = child!.getMinIntrinsicHeight(width);
+    assert(intrinsicWidth.isFinite);
+    final double height = child!.getMinIntrinsicHeight(intrinsicWidth);
     return _applyStep(height, _stepHeight);
   }
 
@@ -715,11 +716,12 @@ class RenderIntrinsicWidth extends RenderProxyBox {
     if (child == null) {
       return 0.0;
     }
-    if (!width.isFinite) {
-      width = getMaxIntrinsicWidth(double.infinity);
+    var intrinsicWidth = width;
+    if (!intrinsicWidth.isFinite) {
+      intrinsicWidth = getMaxIntrinsicWidth(double.infinity);
     }
-    assert(width.isFinite);
-    final double height = child!.getMaxIntrinsicHeight(width);
+    assert(intrinsicWidth.isFinite);
+    final double height = child!.getMaxIntrinsicHeight(intrinsicWidth);
     return _applyStep(height, _stepHeight);
   }
 
@@ -803,11 +805,12 @@ class RenderIntrinsicHeight extends RenderProxyBox {
     if (child == null) {
       return 0.0;
     }
-    if (!height.isFinite) {
-      height = child!.getMaxIntrinsicHeight(double.infinity);
+    var intrinsicHeight = height;
+    if (!intrinsicHeight.isFinite) {
+      intrinsicHeight = child!.getMaxIntrinsicHeight(double.infinity);
     }
-    assert(height.isFinite);
-    return child!.getMinIntrinsicWidth(height);
+    assert(intrinsicHeight.isFinite);
+    return child!.getMinIntrinsicWidth(intrinsicHeight);
   }
 
   @override
@@ -815,11 +818,12 @@ class RenderIntrinsicHeight extends RenderProxyBox {
     if (child == null) {
       return 0.0;
     }
-    if (!height.isFinite) {
-      height = child!.getMaxIntrinsicHeight(double.infinity);
+    var intrinsicHeight = height;
+    if (!intrinsicHeight.isFinite) {
+      intrinsicHeight = child!.getMaxIntrinsicHeight(double.infinity);
     }
-    assert(height.isFinite);
-    return child!.getMaxIntrinsicWidth(height);
+    assert(intrinsicHeight.isFinite);
+    return child!.getMaxIntrinsicWidth(intrinsicHeight);
   }
 
   @override

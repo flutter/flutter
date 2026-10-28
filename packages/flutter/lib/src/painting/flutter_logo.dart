@@ -329,7 +329,8 @@ class _FlutterLogoPainter extends BoxPainter {
 
   @override
   void paint(Canvas canvas, Offset offset, ImageConfiguration configuration) {
-    offset += _config.margin.topLeft;
+    var effectiveOffset = offset;
+    effectiveOffset += _config.margin.topLeft;
     final Size canvasSize = _config.margin.deflateSize(configuration.size!);
     if (canvasSize.isEmpty) {
       return;
@@ -341,11 +342,14 @@ class _FlutterLogoPainter extends BoxPainter {
     };
     final FittedSizes fittedSize = applyBoxFit(BoxFit.contain, logoSize, canvasSize);
     assert(fittedSize.source == logoSize);
-    final Rect rect = Alignment.center.inscribe(fittedSize.destination, offset & canvasSize);
+    final Rect rect = Alignment.center.inscribe(
+      fittedSize.destination,
+      effectiveOffset & canvasSize,
+    );
     final double centerSquareHeight = canvasSize.shortestSide;
     final centerSquare = Rect.fromLTWH(
-      offset.dx + (canvasSize.width - centerSquareHeight) / 2.0,
-      offset.dy + (canvasSize.height - centerSquareHeight) / 2.0,
+      effectiveOffset.dx + (canvasSize.width - centerSquareHeight) / 2.0,
+      effectiveOffset.dy + (canvasSize.height - centerSquareHeight) / 2.0,
       centerSquareHeight,
       centerSquareHeight,
     );
@@ -371,7 +375,7 @@ class _FlutterLogoPainter extends BoxPainter {
 
     if (_config._opacity < 1.0) {
       canvas.saveLayer(
-        offset & canvasSize,
+        effectiveOffset & canvasSize,
         Paint()
           ..colorFilter = ColorFilter.mode(
             const Color(0xFFFFFFFF).withValues(alpha: _config._opacity),

@@ -1128,7 +1128,8 @@ class ContainerLayer extends Layer {
     return scene;
   }
 
-  bool _debugUltimatePreviousSiblingOf(Layer child, {Layer? equals}) {
+  bool _debugUltimatePreviousSiblingOf(Layer childParam, {Layer? equals}) {
+    var child = childParam;
     assert(child.attached == attached);
     while (child.previousSibling != null) {
       assert(child.previousSibling != child);
@@ -1139,13 +1140,14 @@ class ContainerLayer extends Layer {
   }
 
   bool _debugUltimateNextSiblingOf(Layer child, {Layer? equals}) {
-    assert(child.attached == attached);
-    while (child._nextSibling != null) {
-      assert(child._nextSibling != child);
-      child = child._nextSibling!;
-      assert(child.attached == attached);
+    var currentChild = child;
+    assert(currentChild.attached == attached);
+    while (currentChild._nextSibling != null) {
+      assert(currentChild._nextSibling != currentChild);
+      currentChild = currentChild._nextSibling!;
+      assert(currentChild.attached == attached);
     }
-    return child == equals;
+    return currentChild == equals;
   }
 
   @override
