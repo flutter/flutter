@@ -2617,6 +2617,7 @@ flutter_cc_test(
 flutter_shared_library(
     name = "flutter_engine_library",
     additional_linker_inputs = [":embedder_exports.lst"],
+    interface_deps = ["//engine/src/flutter:config"],
     linkopts = select({
         ":when_is_mac_and_not_embedder_for_target": [
             "-Wl,-install_name,@rpath/FlutterEmbedder.framework/Versions/A/FlutterEmbedder",  # is_mac && !embedder_for_target

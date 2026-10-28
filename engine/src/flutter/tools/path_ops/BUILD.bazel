@@ -24,6 +24,7 @@ flutter_shared_library(
         ],
         "//conditions:default": [],
     }),
+    interface_deps = ["//engine/src/flutter:config"],
     local_defines = FLUTTER_LOCAL_DEFINES,
     output_name = "path_ops",
     deps = [

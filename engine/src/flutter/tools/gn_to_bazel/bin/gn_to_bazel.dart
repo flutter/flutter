@@ -218,6 +218,7 @@ Future<int> run(List<String> arguments) async {
         filesGroups: manifest?.filesGroups ?? const <String>{},
         linkedStaticLibraries: manifest?.linkedStaticLibraries ?? const <String>{},
         extraSources: manifest?.extraSources ?? const <String, List<String>>{},
+        interfaceDeps: manifest?.interfaceDeps ?? const <String, List<String>>{},
       );
       if (buildifier != null) {
         output = await _format(buildifier, output);

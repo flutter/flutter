@@ -12,6 +12,11 @@ load("//build_defs/testing:ios_xctest.bzl", "ios_xctest")
 
 package(default_visibility = ["//visibility:public"])
 
+# The test app's delegate header, which the embedding's XCTest suite
+# includes (FlutterViewControllerTest.mm; the manifest's extraSources for
+# shell/platform/darwin/ios:ios_test_flutter).
+exports_files(["IosUnitTests/App/AppDelegate.h"])
+
 # A simulator build of the debug runtime mode: the one that builds the
 # XCTest library (ios_test_flutter, under enable_ios_unittests), and the
 # one a simulator runs (run_tests.py's --ios-variant names a `_sim` build).

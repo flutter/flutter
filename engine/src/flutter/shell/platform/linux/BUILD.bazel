@@ -51,6 +51,7 @@ cc_library(
 
 flutter_shared_library(
     name = "flutter_linux_glfw",
+    interface_deps = ["//engine/src/flutter:config"],
     linkopts = ["-Wl,--no-fatal-warnings"],
     output_name = "flutter_linux_glfw",
     target_compatible_with = select({
@@ -452,6 +453,7 @@ flutter_display_test(
 
 flutter_shared_library(
     name = "flutter_linux_gtk",
+    interface_deps = ["//engine/src/flutter:config"],
     linkopts = ["-Wl,-rpath,$$ORIGIN"],
     output_name = "flutter_linux_gtk",
     target_compatible_with = select({
