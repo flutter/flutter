@@ -686,15 +686,39 @@ def _display_test_impl(ctx):
         # The wrapper starts a D-Bus session bus for the binary unless the
         # environment has one (see xvfb_run.sh).
         env["FLUTTER_TEST_SESSION_BUS"] = "1"
+    if ctx.target_platform_has_constraint(ctx.attr._macos[platform_common.ConstraintValueInfo]):
+        # run_tests.py's metal_validation_env on a Mac, beside the Vulkan
+        # one: Metal's shader validation, and the API validation layer on
+        # Apple silicon (is_aarm64).
+        env |= _METAL_VALIDATION_ENV
+        if ctx.target_platform_has_constraint(ctx.attr._aarch64[platform_common.ConstraintValueInfo]):
+            env |= _METAL_VALIDATION_ENV_ARM64
     return [
         DefaultInfo(executable = launcher, runfiles = runfiles),
         RunEnvironmentInfo(environment = env),
     ]
 
+# testing/run_tests.py's metal_validation_env: "Diagnosing Metal programming
+# issues early" (developer.apple.com) -- every shader validation check, and
+# on Apple silicon the API validation layer (METAL_DEVICE_WRAPPER_TYPE) with
+# its errors reported rather than fatal (METAL_DEBUG_ERROR_MODE=0).
+_METAL_VALIDATION_ENV = {
+    "MTL_SHADER_VALIDATION": "1",
+    "MTL_SHADER_VALIDATION_GLOBAL_MEMORY": "1",
+    "MTL_SHADER_VALIDATION_THREADGROUP_MEMORY": "1",
+    "MTL_SHADER_VALIDATION_TEXTURE_USAGE": "1",
+}
+
+_METAL_VALIDATION_ENV_ARM64 = {
+    "METAL_DEBUG_ERROR_MODE": "0",
+    "METAL_DEVICE_WRAPPER_TYPE": "1",
+}
+
 _display_test = rule(
     implementation = _display_test_impl,
     test = True,
-    doc = "Runs a test binary under a display (testing/xvfb_run.sh): the suite's own Xvfb unless DISPLAY is set.",
+    doc = "Runs a test binary under a display (testing/xvfb_run.sh): the suite's own Xvfb unless DISPLAY is set; " +
+          "on a Mac as it is, with the Metal validation environment.",
     attrs = {
         "binary": attr.label(
             mandatory = True,
@@ -726,6 +750,8 @@ _display_test = rule(
             default = "//engine/src/flutter/testing:xvfb_run.sh",
             allow_single_file = True,
         ),
+        "_macos": attr.label(default = "@platforms//os:macos"),
+        "_aarch64": attr.label(default = "@platforms//cpu:aarch64"),
     } | _GTEST_PARALLEL_ATTRS | SANITIZER_ATTRS,
 )
 
@@ -736,7 +762,9 @@ def flutter_display_test(name, size = None, timeout = None, shard_count = None, 
     is a cc_binary (`<name>_binary`, in this package, so that the GPU test
     backends copied beside it are found) and the test target runs it
     through testing/xvfb_run.sh, which uses the environment's DISPLAY or
-    starts an Xvfb of its own.
+    starts an Xvfb of its own -- or, on a Mac, runs the binary as it is
+    (run_tests.py does the same there) with the Metal validation
+    environment beside the Vulkan one.
 
     Args:
       name: name of the test; the binary is `<name>_binary`.

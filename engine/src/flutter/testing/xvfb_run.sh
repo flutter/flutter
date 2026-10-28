@@ -121,6 +121,15 @@ if [[ -n "${DISPLAY:-}" ]]; then
   exec "$@"
 fi
 
+# A Mac has no X server and needs none: run_tests.py runs the Impeller
+# suites there as they are (the window server is the logged-in session's,
+# on a bot as on a desk), with the Metal validation environment the rule
+# sets (testing.bzl). The session bus above is GTK's, which no Mac suite
+# asks for.
+if [[ "$(uname -s)" == Darwin ]]; then
+  exec "$@"
+fi
+
 if ! command -v Xvfb >/dev/null 2>&1; then
   echo "xvfb_run.sh: no DISPLAY in the environment and no Xvfb on the PATH;" >&2
   echo "the suite opens a window and needs an X server (install xvfb, or run" >&2
