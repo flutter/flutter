@@ -92,7 +92,9 @@ Future<void> buildLinux(
   final String buildModeName = buildInfo.mode.cliName;
   final Directory platformBuildDirectory = fs
       .directory(linuxProject.parent.directory.path)
-      .childDirectory(getLinuxBuildDirectory(targetPlatform, buildInfo.flavor));
+      .childDirectory(
+        getLinuxBuildDirectory(targetPlatform, flavor: buildInfo.flavor, toolContext: toolContext),
+      );
   final Directory buildDirectory = platformBuildDirectory.childDirectory(buildModeName);
   try {
     await _runCmake(
@@ -140,7 +142,15 @@ Future<void> buildLinux(
       aotSnapshot: codeSizeFile,
       // This analysis is only supported for release builds.
       outputDirectory: fs.directory(
-        fs.path.join(getLinuxBuildDirectory(targetPlatform, buildInfo.flavor), 'release', 'bundle'),
+        fs.path.join(
+          getLinuxBuildDirectory(
+            targetPlatform,
+            flavor: buildInfo.flavor,
+            toolContext: toolContext,
+          ),
+          'release',
+          'bundle',
+        ),
       ),
       precompilerTrace: precompilerTrace,
       type: 'linux',

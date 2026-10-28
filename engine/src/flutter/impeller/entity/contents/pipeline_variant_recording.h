@@ -44,7 +44,7 @@ class GenericRenderPipelineHandle;
 ///
 struct RecordedPipelineVariant {
   /// The descriptor the variant's pipeline was created with. This is what
-  /// `PipelineLibrary::GetPipelineUseCounts` is keyed by.
+  /// `PipelineLibrary::GetPipelineUsage` is keyed by.
   PipelineDescriptor descriptor;
   ContentContextOptions options;
   /// True if the variant was created ahead of time (warmed) by the
