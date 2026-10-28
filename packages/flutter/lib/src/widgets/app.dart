@@ -1500,7 +1500,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
 
   void _updateRouting({WidgetsApp? oldWidget}) {
     if (_usesRouterWithDelegates || _usesRouterWithConfig) {
-      assert(!_usesNavigator);
+      assert(!_usesNavigator && !(_usesRouterWithDelegates && _usesRouterWithConfig));
       _clearNavigatorResource();
       if (_usesRouterWithDelegates &&
           widget.routeInformationProvider == null &&
@@ -1524,8 +1524,8 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
       }
       assert(_navigator != null);
     } else {
-      assert(widget.builder != null || _usesRouterWithConfig);
-      assert(!_usesRouterWithDelegates && !_usesNavigator);
+      assert(widget.builder != null);
+      assert(!_usesRouterWithDelegates && !_usesNavigator && !_usesRouterWithConfig);
       _clearRouterResource();
       _clearNavigatorResource();
     }
