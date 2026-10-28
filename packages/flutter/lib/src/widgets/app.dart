@@ -467,6 +467,7 @@ class WidgetsApp extends StatefulWidget {
   ///
   /// See also:
   ///
+  ///  * [WidgetsApp.new], which configures a [Navigator] instead of a [Router].
   ///  * [Router], which describes each of these delegates, how they are
   ///    chained together, and the asynchrony involved.
   ///  * [RouterConfig], which bundles the delegates into a single object.
