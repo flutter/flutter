@@ -352,53 +352,62 @@ int _compare(
       return const <String>{};
     }
     final result = <String>{};
+    // The values of one item: a string's itself, a reference's its known
+    // values, an expansion's the parts joined. A reference the oracle has
+    // no value for (a constant of the Bazel build) yields none; an
+    // expansion built on one is matched by its literal tail instead
+    // (referenceTails), and a bare one is noted and not compared.
+    Iterable<String> valuesOf(String variable, GnValue item) {
+      if (item is GnReference && referenceValues[item.name] == null) {
+        notes.add('$variable: ${item.name} is a constant of the Bazel build (not compared)');
+        return const <String>[];
+      }
+      if (item is GnExpandedString &&
+          item.parts.first is GnReference &&
+          referenceValues[(item.parts.first as GnReference).name] == null &&
+          item.parts.skip(1).every((GnValue part) => part is GnStringValue)) {
+        final String tail = item.parts
+            .skip(1)
+            .map((GnValue part) => (part as GnStringValue).value)
+            .join();
+        notes.add(
+          '$variable: ${(item.parts.first as GnReference).name}$tail is built on a constant of '
+          'the Bazel build (matched by its tail)',
+        );
+        referenceTails.add(tail);
+        return const <String>[];
+      }
+      return switch (item) {
+        GnStringValue(:final String value) => <String>[value],
+        GnReference(:final String name) => referenceValues[name] ?? const <String>[],
+        GnExpandedString(:final List<GnValue> parts) => <String>[
+          parts
+              .map(
+                (GnValue part) => switch (part) {
+                  GnReference(:final String name) => referenceValues[name]?.join() ?? '',
+                  _ => (part as GnStringValue).value,
+                },
+              )
+              .join(),
+        ],
+        _ => const <String>[],
+      };
+    }
+
     for (final GnAssignment a in v.assignments) {
       if (!a.isUnconditional) {
+        // The branch's values are in the generated select(): GN having one
+        // of them is not the converter lacking it, whether a string or a
+        // value built on a constant of the Bazel build (the iOS platform's
+        // Developer/usr/lib under use_ios_simulator).
         undecided.add('$variable under ${a.condition}');
         for (final GnValue item in a.items) {
-          if (item is GnStringValue) {
-            undecidedValues.add(normalize(item.value));
-          }
+          undecidedValues.addAll(valuesOf(variable, item).map(normalize));
         }
         continue;
       }
       for (final GnValue item in a.items) {
-        if (item is GnReference && referenceValues[item.name] == null) {
-          notes.add('$variable: ${item.name} is a constant of the Bazel build (not compared)');
-          referenceTails.add('');
-          continue;
-        }
-        if (item is GnExpandedString &&
-            item.parts.first is GnReference &&
-            referenceValues[(item.parts.first as GnReference).name] == null &&
-            item.parts.skip(1).every((GnValue part) => part is GnStringValue)) {
-          final String tail = item.parts
-              .skip(1)
-              .map((GnValue part) => (part as GnStringValue).value)
-              .join();
-          notes.add(
-            '$variable: ${(item.parts.first as GnReference).name}$tail is built on a constant of '
-            'the Bazel build (matched by its tail)',
-          );
-          referenceTails.add(tail);
-          continue;
-        }
-        final Iterable<String> values = switch (item) {
-          GnStringValue(:final String value) => <String>[value],
-          GnReference(:final String name) => referenceValues[name] ?? const <String>[],
-          GnExpandedString(:final List<GnValue> parts) => <String>[
-            parts
-                .map(
-                  (GnValue part) => switch (part) {
-                    GnReference(:final String name) => referenceValues[name]?.join() ?? '',
-                    _ => (part as GnStringValue).value,
-                  },
-                )
-                .join(),
-          ],
-          _ => const <String>[],
-        };
-        for (final value in values) {
+        for (final String value in valuesOf(variable, item)) {
           switch (a.op) {
             case '-=':
               result.remove(normalize(value));
