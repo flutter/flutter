@@ -14,12 +14,15 @@ import '../base/file_system.dart';
 import '../base/fingerprint.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
+import '../base/os.dart';
+import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/project_migrator.dart';
 import '../base/utils.dart';
 import '../base/version.dart';
 import '../build_info.dart';
 import '../cache.dart';
+import '../context/tool_context.dart';
 import '../darwin/darwin.dart';
 import '../device.dart';
 import '../features.dart';
@@ -120,7 +123,10 @@ Future<XcodeBuildResult> buildXcodeProject({
   bool configOnly = false,
   XcodeBuildAction buildAction = XcodeBuildAction.build,
   bool disablePortPublication = false,
+  required ToolContext toolContext,
 }) async {
+  final ToolContext(:Config config, :FileSystem fs, :OperatingSystemUtils os, :Platform platform) =
+      toolContext;
   if (!upgradePbxProjWithFlutterAssets(app.project, globals.logger)) {
     return XcodeBuildResult(success: false);
   }
@@ -261,15 +267,24 @@ Future<XcodeBuildResult> buildXcodeProject({
     );
   }
 
+  final Logger logger = toolContext.logger;
   final FlutterManifest manifest = app.project.parent.manifest;
-  final String? buildName = parsedBuildName(manifest: manifest, buildInfo: buildInfo);
+  final String? buildName = parsedBuildName(
+    manifest: manifest,
+    logger: logger,
+    buildInfo: buildInfo,
+  );
   final bool buildNameIsMissing = buildName == null || buildName.isEmpty;
 
   if (buildNameIsMissing) {
     globals.printStatus('Warning: Missing build name (CFBundleShortVersionString).');
   }
 
-  final String? buildNumber = parsedBuildNumber(manifest: manifest, buildInfo: buildInfo);
+  final String? buildNumber = parsedBuildNumber(
+    manifest: manifest,
+    logger: logger,
+    buildInfo: buildInfo,
+  );
   final bool buildNumberIsMissing = buildNumber == null || buildNumber.isEmpty;
 
   if (buildNumberIsMissing) {
@@ -282,7 +297,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     );
   }
 
-  final String buildDirectoryPath = getIosBuildDirectory();
+  final String buildDirectoryPath = getIosBuildDirectory(config: config, fileSystem: fs);
 
   final Map<String, String> buildSettings =
       await app.project.buildSettingsForBuildInfo(
@@ -355,6 +370,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     project: project,
     targetOverride: targetOverride,
     buildInfo: buildInfo,
+    toolContext: toolContext,
     printWarnings: true,
   );
   if (app.project.usesSwiftPackageManager) {
@@ -367,7 +383,14 @@ Future<XcodeBuildResult> buildXcodeProject({
       );
     }
   }
-  await processPodsIfNeeded(project.ios, buildDirectoryPath, buildInfo.mode);
+  await processPodsIfNeeded(
+    project.ios,
+    buildDirectoryPath,
+    buildInfo.mode,
+    cocoaPods: globals.cocoaPods,
+    templateRenderer: globals.templateRenderer,
+    toolContext: toolContext,
+  );
   if (configOnly) {
     return XcodeBuildResult(success: true);
   }
@@ -446,7 +469,11 @@ Future<XcodeBuildResult> buildXcodeProject({
     if (!hasWatchCompanion) {
       // ONLY_ACTIVE_ARCH specifies whether the product includes only code for
       // the native architecture.
-      final onlyActiveArch = activeArch == CpuArch.fromHostPlatform(getCurrentHostPlatform());
+      final onlyActiveArch =
+          activeArch ==
+          CpuArch.fromHostPlatform(
+            getCurrentHostPlatform(operatingSystemUtils: os, platform: platform),
+          );
 
       buildCommands.add('ONLY_ACTIVE_ARCH=${onlyActiveArch ? 'YES' : 'NO'}');
       buildCommands.add('ARCHS=${activeArch.darwinArchName}');
