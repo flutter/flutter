@@ -3,7 +3,6 @@
 # found in the LICENSE file.
 
 # Generated from //flutter/shell/platform/darwin/macos/BUILD.gn by gn_to_bazel; do not edit.
-# Not converted: _generate_symlinks_and_verify_framework_module.
 
 load("@bazel_skylib//lib:selects.bzl", "selects")
 load("@macos_sdk//:sdk.bzl", "MACOS_PLATFORM_PATH")
@@ -12,7 +11,7 @@ load("//build_defs/cc:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES", "MAC
 load("//build_defs/cc:objc_library.bzl", "flutter_objc_library")
 load("//build_defs/cc:shared_library.bzl", "flutter_shared_library")
 load("//build_defs/cc:swift_library.bzl", "flutter_swift_library")
-load("//build_defs/dist:framework.bzl", "framework_symlinks", "xcframework")
+load("//build_defs/dist:framework.bzl", "framework_module_check", "framework_symlinks", "xcframework")
 load("//build_defs/dist:zip_bundle.bzl", "zip_bundle")
 load("//build_defs/gn:gn_action.bzl", "gn_action", "gn_copy", "gn_generated_file")
 load("//build_defs/testing:testing.bzl", "flutter_test_fixtures")
@@ -798,7 +797,10 @@ framework_symlinks(
 
 filegroup(
     name = "universal_flutter_framework",
-    srcs = [":_generate_symlinks"],
+    srcs = [
+        ":_generate_symlinks",
+        ":_generate_symlinks_and_verify_framework_module",
+    ],
     target_compatible_with = select({
         "@platforms//os:macos": [],
         "//conditions:default": ["@platforms//:incompatible"],
@@ -934,6 +936,22 @@ gn_generated_file(
     out = "framework_without_entitlements.txt",
     content = ["FlutterMacOS.framework.zip/Versions/A/FlutterMacOS"],
     outputs = ["$root_gen_dir/flutter/shell/platform/darwin/macos/framework_without_entitlements.txt"],
+    target_compatible_with = select({
+        "@platforms//os:macos": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [":_generate_symlinks"],
+)
+
+framework_module_check(
+    name = "_generate_symlinks_and_verify_framework_module",
+    srcs = ["framework/Source/FlutterUmbrellaImportTests.m"],
+    framework = "FlutterMacOS.framework",
+    linkopts = [
+        "-fapplication-extension",
+        "-Xlinker",
+        "-fatal_warnings",
+    ],
     target_compatible_with = select({
         "@platforms//os:macos": [],
         "//conditions:default": ["@platforms//:incompatible"],
