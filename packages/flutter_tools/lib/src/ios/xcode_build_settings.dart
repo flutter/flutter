@@ -221,22 +221,26 @@ Future<List<String>> _xcodeBuildSettingsLines({
 
   final LocalEngineInfo? localEngineInfo = artifacts.localEngineInfo;
   if (localEngineInfo != null) {
-    final String engineOutPath = localEngineInfo.targetOutPath;
-    xcodeBuildSettings.add('FLUTTER_ENGINE=${fs.path.dirname(fs.path.dirname(engineOutPath))}');
-
-    final String localEngineName = localEngineInfo.localTargetName;
-    xcodeBuildSettings.add('LOCAL_ENGINE=$localEngineName');
-
-    final String localEngineHostName = localEngineInfo.localHostName;
-    xcodeBuildSettings.add('LOCAL_ENGINE_HOST=$localEngineHostName');
+    // What the Xcode build phases hand back to the tool (xcode_backend.dart
+    // passes them on as --local-engine-src-path, --local-engine and
+    // --local-engine-host): GN's source directory and build names, or, for
+    // a Bazel build directory, its path alone -- the manifest in it is the
+    // layout, and no out/<name> holds it.
+    final Map<String, String> reentrant = localEngineInfo.toReentrantBuildEnvironment(
+      fileSystem: fs,
+    );
+    for (final MapEntry<String, String> variable in reentrant.entries) {
+      xcodeBuildSettings.add('${variable.key}=${variable.value}');
+    }
 
     // Tell Xcode not to build universal binaries for local engines, which are
     // single-architecture.
     //
     // This assumes that local engine binary paths are consistent with
     // the conventions uses in the engine: 32-bit iOS engines are built to
-    // paths ending in _arm, 64-bit builds are not.
-
+    // paths ending in _arm, 64-bit builds are not. A Bazel build's name is
+    // GN's for the configuration (its manifest's), so the convention holds.
+    final String localEngineName = localEngineInfo.localTargetName;
     String arch;
     if (useMacOSConfig) {
       if (localEngineName.contains('_arm64')) {

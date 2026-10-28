@@ -2123,6 +2123,91 @@ PODS:
     );
 
     testUsingContext(
+      "writes GN's local engine as its source directory and build names",
+      () async {
+        const BuildInfo buildInfo = BuildInfo.debug;
+        final FlutterProject project = FlutterProject.fromDirectoryTest(
+          fs.directory('path/to/project'),
+        );
+        await updateGeneratedXcodeProperties(
+          project: project,
+          buildInfo: buildInfo,
+          toolContext: createToolContext(
+            artifacts: Artifacts.testLocalEngine(
+              localEngine: '/engine/src/out/ios_debug_sim_unopt',
+              localEngineHost: '/engine/src/out/host_debug_unopt',
+              fileSystem: fs,
+            ),
+          ),
+        );
+
+        final String contents = fs
+            .file('path/to/project/ios/Flutter/Generated.xcconfig')
+            .readAsStringSync();
+        expect(contents, contains('FLUTTER_ENGINE=/engine/src\n'));
+        expect(contents, contains('LOCAL_ENGINE=ios_debug_sim_unopt\n'));
+        expect(contents, contains('LOCAL_ENGINE_HOST=host_debug_unopt\n'));
+        expect(contents, contains('ARCHS=x86_64\n'));
+      },
+      overrides: <Type, Generator>{
+        Platform: () => macOS,
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+      },
+    );
+
+    testUsingContext(
+      "writes a Bazel local engine as its directory, with the manifest's name deciding the architecture",
+      () async {
+        // A Bazel build directory holds local_engine.json (the layout the
+        // tool reads) under bazel-out, not under an out/<name>: the Xcode
+        // build phases get its path alone, which xcode_backend.dart hands
+        // back as --local-engine, and no FLUTTER_ENGINE (the Mac's T30).
+        const target =
+            '/checkout/engine/src/out/bazel-out/ios_sim_arm64_debug-dbg/bin/engine/src/flutter';
+        const host =
+            '/checkout/engine/src/out/bazel-out/macos_arm64_debug-dbg/bin/engine/src/flutter';
+        for (final (String directory, String name) in <(String, String)>[
+          (target, 'ios_debug_sim_unopt_arm64'),
+          (host, 'host_debug_unopt_arm64'),
+        ]) {
+          fs.directory(directory).createSync(recursive: true);
+          fs
+              .file(fs.path.join(directory, 'local_engine.json'))
+              .writeAsStringSync('{"name": "$name", "entries": {}}');
+        }
+        const BuildInfo buildInfo = BuildInfo.debug;
+        final FlutterProject project = FlutterProject.fromDirectoryTest(
+          fs.directory('path/to/project'),
+        );
+        await updateGeneratedXcodeProperties(
+          project: project,
+          buildInfo: buildInfo,
+          toolContext: createToolContext(
+            artifacts: Artifacts.testLocalEngine(
+              localEngine: target,
+              localEngineHost: host,
+              fileSystem: fs,
+            ),
+          ),
+        );
+
+        final String contents = fs
+            .file('path/to/project/ios/Flutter/Generated.xcconfig')
+            .readAsStringSync();
+        expect(contents, isNot(contains('FLUTTER_ENGINE=')));
+        expect(contents, contains('LOCAL_ENGINE=$target\n'));
+        expect(contents, contains('LOCAL_ENGINE_HOST=$host\n'));
+        expect(contents, contains('ARCHS=arm64\n'));
+      },
+      overrides: <Type, Generator>{
+        Platform: () => macOS,
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+      },
+    );
+
+    testUsingContext(
       'sets ARCHS=x86_64 when x64 local host engine is set',
       () async {
         const BuildInfo buildInfo = BuildInfo.debug;
