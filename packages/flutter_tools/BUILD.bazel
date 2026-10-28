@@ -687,6 +687,9 @@ dart_package_tests(
     unsandboxed = _INTEGRATION_APPLE,
     writable = [
         "pubspec.lock",
+        # ios_content_validation_test plants a stray ._Info.plist in the
+        # cache's Flutter.xcframework and removes it again.
+        "bin/cache/artifacts/engine/ios",
         "dev/integration_tests/flutter_gallery/ios",
         "dev/integration_tests/flutter_gallery/macos",
         "dev/integration_tests/spell_check",
