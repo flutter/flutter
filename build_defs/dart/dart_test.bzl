@@ -384,11 +384,16 @@ mkdir -p "$root/bin/cache"
                           ("export PATH=\"$root/%s:$PATH\"\n" % paths.dirname(ctx.file.browser_driver.short_path) if ctx.file.browser_driver else ""),
             # Files the tool rewrites in place (pub touches the workspace's
             # lock), copied over their symlinks into the writable runfiles
-            # tree so that the source stays as it is.
+            # tree so that the source stays as it is -- or whole directories
+            # of them (an Xcode project the tool migrates), their trees
+            # copied with the links followed.
             writable = "".join([
                 # The real file first, the link removed, the copy made:
-                # BSD cp (a Mac's) has no --remove-destination.
-                ("if [ -L \"$root/{f}\" ]; then real=\"$(readlink -f \"$root/{f}\")\" && rm -f \"$root/{f}\" && cp \"$real\" \"$root/{f}\" && chmod u+w \"$root/{f}\"; fi\n").format(f = f)
+                # BSD cp (a Mac's) has no --remove-destination. A directory
+                # is copied beside itself (cp -RL: the links followed, as
+                # BSD and GNU cp both have it) and moved into place.
+                ("if [ -L \"$root/{f}\" ]; then real=\"$(readlink -f \"$root/{f}\")\" && rm -f \"$root/{f}\" && cp \"$real\" \"$root/{f}\" && chmod u+w \"$root/{f}\"; " +
+                 "elif [ -d \"$root/{f}\" ]; then cp -RL \"$root/{f}\" \"$root/{f}.writable\" && rm -rf \"$root/{f}\" && mv \"$root/{f}.writable\" \"$root/{f}\" && chmod -R u+w \"$root/{f}\"; fi\n").format(f = f)
                 for f in ctx.attr.writable
             ]),
             dart = dart[0].short_path,
@@ -555,7 +560,8 @@ dart_test = rule(
         "writable": attr.string_list(
             doc = "Paths under FLUTTER_ROOT the tool under test rewrites in place (`pubspec.lock`: pub " +
                   "touches the workspace's lock when it resolves a member), copied over their runfiles " +
-                  "symlinks when the test starts so that the sources stay as they are -- which also " +
+                  "symlinks when the test starts so that the sources stay as they are -- a file, or a whole " +
+                  "directory (an Xcode project the tool migrates), its links followed -- which also " +
                   "serves a script that resolves its own symlink to find FLUTTER_ROOT (xcode_backend.sh).",
         ),
         "compile_args": attr.string_list(
@@ -595,7 +601,7 @@ dart_test = rule(
     } | KERNEL_TOOL_ATTRS,
 )
 
-def dart_tests(name, tests, size = "medium", tags = [], network = False, large = [], sizes = {}, flaky = [], cases = {}, runner_args = [], **kwargs):
+def dart_tests(name, tests, size = "medium", tags = [], network = False, large = [], sizes = {}, flaky = [], cases = {}, unsandboxed = [], runner_args = [], **kwargs):
     """One dart_test per test file, and a test_suite of them.
 
     Args:
@@ -616,6 +622,9 @@ def dart_tests(name, tests, size = "medium", tags = [], network = False, large =
         (`dart test --name`), for a file whose other cases want what the
         host cannot give (the apk cases of two native-asset files: Android's
         artifacts, SDK and Gradle); the rest run whole.
+      unsandboxed: test files run outside Bazel's sandbox (`no-sandbox`): the
+        tool's Apple builds run xcodebuild, which runs sandbox-exec itself,
+        and a sandbox inside the sandbox is refused.
       runner_args: further runner arguments for every file.
       **kwargs: dart_test's attributes, the same for every file.
     """
@@ -627,7 +636,7 @@ def dart_tests(name, tests, size = "medium", tags = [], network = False, large =
             name = test_name,
             test = test,
             size = sizes.get(test, "large" if test in large else size),
-            tags = test_tags,
+            tags = test_tags + (["no-sandbox"] if test in unsandboxed else []),
             flaky = test in flaky,
             runner_args = runner_args + (["--name=" + cases[test]] if test in cases else []),
             **kwargs
@@ -670,8 +679,8 @@ def dart_package_tests(
         none compiles each test from scratch.
       compile_args: further frontend server arguments, for the prelude and
         the tests alike.
-      **kwargs: dart_tests' other arguments (size, large, sizes, flaky, cases, tags, network,
-        runner_args, deps, cache, cache_files, sdk_files, sdk_trees, writable, pub_cache,
+      **kwargs: dart_tests' other arguments (size, large, sizes, flaky, cases, unsandboxed, tags,
+        network, runner_args, deps, cache, cache_files, sdk_files, sdk_trees, writable, pub_cache,
         browser, browser_files, browser_driver, tools, display).
     """
     workspace_packages = {":sources": package} | packages
