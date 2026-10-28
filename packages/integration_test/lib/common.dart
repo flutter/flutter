@@ -234,29 +234,6 @@ enum WebDriverMouseButton {
   final int w3cButton;
 }
 
-/// The kind of pointer action represented by a [WebDriverPointerAction].
-enum WebDriverPointerActionType {
-  /// Moves the pointer to a position.
-  ///
-  /// See [WebDriverPointerAction.move].
-  move,
-
-  /// Presses a mouse button.
-  ///
-  /// See [WebDriverPointerAction.down].
-  down,
-
-  /// Releases a mouse button.
-  ///
-  /// See [WebDriverPointerAction.up].
-  up,
-
-  /// Pauses for a duration before the next action.
-  ///
-  /// See [WebDriverPointerAction.pause].
-  pause,
-}
-
 /// A single step in a WebDriver pointer action sequence.
 ///
 /// Pass a list of [WebDriverPointerAction]s to
@@ -264,8 +241,99 @@ enum WebDriverPointerActionType {
 /// sequence of real browser mouse actions (such as hovers, clicks, or drags)
 /// through WebDriver.
 ///
+/// Create actions with the [WebDriverPointerAction.move],
+/// [WebDriverPointerAction.down], [WebDriverPointerAction.up], and
+/// [WebDriverPointerAction.pause] constructors. Each kind of action is a
+/// subclass ([WebDriverPointerMove], [WebDriverPointerDown],
+/// [WebDriverPointerUp], and [WebDriverPointerPause]), so code that consumes
+/// actions can use an exhaustive `switch`:
+///
+/// ```dart
+/// String describe(WebDriverPointerAction action) {
+///   return switch (action) {
+///     WebDriverPointerMove(:final double x, :final double y) => 'move to ($x, $y)',
+///     WebDriverPointerDown(:final WebDriverMouseButton button) => 'press $button',
+///     WebDriverPointerUp(:final WebDriverMouseButton button) => 'release $button',
+///     WebDriverPointerPause(:final Duration duration) => 'wait $duration',
+///   };
+/// }
+/// ```
+///
 /// See: https://www.w3.org/TR/webdriver/#actions
-final class WebDriverPointerAction {
+sealed class WebDriverPointerAction {
+  /// Abstract const constructor. This constructor enables subclasses to
+  /// provide const constructors so that they can be used in const
+  /// expressions.
+  const WebDriverPointerAction();
+
+  /// Creates a pointer action that moves the mouse to ([x], [y]).
+  ///
+  /// See [WebDriverPointerMove.new].
+  const factory WebDriverPointerAction.move(double x, double y, {Duration duration}) =
+      WebDriverPointerMove;
+
+  /// Creates a pointer action that presses [button], which defaults to
+  /// [WebDriverMouseButton.primary].
+  ///
+  /// See [WebDriverPointerDown.new].
+  const factory WebDriverPointerAction.down({WebDriverMouseButton button}) = WebDriverPointerDown;
+
+  /// Creates a pointer action that releases [button], which defaults to
+  /// [WebDriverMouseButton.primary].
+  ///
+  /// See [WebDriverPointerUp.new].
+  const factory WebDriverPointerAction.up({WebDriverMouseButton button}) = WebDriverPointerUp;
+
+  /// Creates a pointer action that waits for [duration].
+  ///
+  /// See [WebDriverPointerPause.new].
+  const factory WebDriverPointerAction.pause(Duration duration) = WebDriverPointerPause;
+
+  /// Deserializes a [WebDriverPointerAction] from the JSON map produced by
+  /// [toJson].
+  ///
+  /// Throws a [FormatException] if [json] has an unknown `type` or is missing
+  /// or has mistyped fields for that type.
+  factory WebDriverPointerAction.fromJson(Map<String, Object?> json) {
+    return switch (json['type']) {
+      'pointerMove' => switch (json) {
+        {'x': final num x, 'y': final num y, 'duration': final num duration} =>
+          WebDriverPointerMove(
+            x.toDouble(),
+            y.toDouble(),
+            duration: Duration(milliseconds: duration.toInt()),
+          ),
+        _ => throw FormatException('Invalid pointerMove WebDriverPointerAction JSON: $json'),
+      },
+      'pointerDown' => WebDriverPointerDown(button: _buttonFromJson(json['button'])),
+      'pointerUp' => WebDriverPointerUp(button: _buttonFromJson(json['button'])),
+      'pause' => switch (json) {
+        {'duration': final num duration} => WebDriverPointerPause(
+          Duration(milliseconds: duration.toInt()),
+        ),
+        _ => throw FormatException('Invalid pause WebDriverPointerAction JSON: $json'),
+      },
+      _ => throw FormatException('Unknown WebDriverPointerAction type in JSON: $json'),
+    };
+  }
+
+  static WebDriverMouseButton _buttonFromJson(Object? value) {
+    return switch (value) {
+      0 => WebDriverMouseButton.primary,
+      1 => WebDriverMouseButton.middle,
+      2 => WebDriverMouseButton.secondary,
+      _ => throw FormatException('Invalid WebDriverMouseButton value: $value'),
+    };
+  }
+
+  /// Serializes this action to a JSON-compatible map.
+  Map<String, Object?> toJson();
+}
+
+/// A [WebDriverPointerAction] that moves the mouse to ([x], [y]).
+///
+/// Usually created with [WebDriverPointerAction.move].
+final class WebDriverPointerMove extends WebDriverPointerAction {
   /// Creates a pointer action that moves the mouse to ([x], [y]).
   ///
   /// With a non-zero [duration], the mouse moves to ([x], [y]) over
@@ -284,143 +352,136 @@ final class WebDriverPointerAction {
   /// on the host driver, they are in CSS pixels relative to the top-left
   /// corner of the browser viewport.
   /// {@endtemplate}
-  const WebDriverPointerAction.move(
-    double this.x,
-    double this.y, {
-    Duration this.duration = Duration.zero,
-  }) : type = WebDriverPointerActionType.move,
-       button = null;
+  const WebDriverPointerMove(this.x, this.y, {this.duration = Duration.zero});
 
-  /// Creates a pointer action that presses [button].
-  const WebDriverPointerAction.down({
-    WebDriverMouseButton this.button = WebDriverMouseButton.primary,
-  }) : type = WebDriverPointerActionType.down,
-       x = null,
-       y = null,
-       duration = null;
-
-  /// Creates a pointer action that releases [button].
-  const WebDriverPointerAction.up({WebDriverMouseButton this.button = WebDriverMouseButton.primary})
-    : type = WebDriverPointerActionType.up,
-      x = null,
-      y = null,
-      duration = null;
-
-  /// Creates a pointer action that waits for [duration].
-  const WebDriverPointerAction.pause(Duration this.duration)
-    : type = WebDriverPointerActionType.pause,
-      x = null,
-      y = null,
-      button = null;
-
-  /// Deserializes a [WebDriverPointerAction] from the JSON map produced by
-  /// [toJson].
-  ///
-  /// Throws a [FormatException] if [json] has an unknown `type` or is missing
-  /// or has mistyped fields for that type.
-  factory WebDriverPointerAction.fromJson(Map<String, Object?> json) {
-    return switch (json['type']) {
-      'pointerMove' => switch (json) {
-        {'x': final num x, 'y': final num y, 'duration': final num duration} =>
-          WebDriverPointerAction.move(
-            x.toDouble(),
-            y.toDouble(),
-            duration: Duration(milliseconds: duration.toInt()),
-          ),
-        _ => throw FormatException('Invalid pointerMove WebDriverPointerAction JSON: $json'),
-      },
-      'pointerDown' => WebDriverPointerAction.down(button: _buttonFromJson(json['button'])),
-      'pointerUp' => WebDriverPointerAction.up(button: _buttonFromJson(json['button'])),
-      'pause' => switch (json) {
-        {'duration': final num duration} => WebDriverPointerAction.pause(
-          Duration(milliseconds: duration.toInt()),
-        ),
-        _ => throw FormatException('Invalid pause WebDriverPointerAction JSON: $json'),
-      },
-      _ => throw FormatException('Unknown WebDriverPointerAction type in JSON: $json'),
-    };
-  }
-
-  static WebDriverMouseButton _buttonFromJson(Object? value) {
-    return switch (value) {
-      0 => WebDriverMouseButton.primary,
-      1 => WebDriverMouseButton.middle,
-      2 => WebDriverMouseButton.secondary,
-      _ => throw FormatException('Invalid WebDriverMouseButton value: $value'),
-    };
-  }
-
-  /// The kind of pointer action.
-  final WebDriverPointerActionType type;
-
-  /// Target horizontal coordinate for a [WebDriverPointerActionType.move]
-  /// action, or null for other action types.
+  /// Target horizontal coordinate.
   ///
   /// {@macro flutter.integration_test.WebDriverPointerAction.coordinates}
-  final double? x;
+  final double x;
 
-  /// Target vertical coordinate for a [WebDriverPointerActionType.move]
-  /// action, or null for other action types.
+  /// Target vertical coordinate.
   ///
   /// {@macro flutter.integration_test.WebDriverPointerAction.coordinates}
-  final double? y;
+  final double y;
 
-  /// Duration of a [WebDriverPointerActionType.move] or
-  /// [WebDriverPointerActionType.pause] action, or null for button actions.
-  final Duration? duration;
+  /// How long the move to ([x], [y]) takes.
+  final Duration duration;
 
-  /// Mouse button for a [WebDriverPointerActionType.down] or
-  /// [WebDriverPointerActionType.up] action, or null for other action types.
-  final WebDriverMouseButton? button;
-
-  /// Serializes this action to a JSON-compatible map.
+  @override
   Map<String, Object?> toJson() {
-    return switch (type) {
-      WebDriverPointerActionType.move => <String, Object?>{
-        'type': 'pointerMove',
-        'x': x,
-        'y': y,
-        'duration': duration!.inMilliseconds,
-      },
-      WebDriverPointerActionType.down => <String, Object?>{
-        'type': 'pointerDown',
-        'button': button!.w3cButton,
-      },
-      WebDriverPointerActionType.up => <String, Object?>{
-        'type': 'pointerUp',
-        'button': button!.w3cButton,
-      },
-      WebDriverPointerActionType.pause => <String, Object?>{
-        'type': 'pause',
-        'duration': duration!.inMilliseconds,
-      },
+    return <String, Object?>{
+      'type': 'pointerMove',
+      'x': x,
+      'y': y,
+      'duration': duration.inMilliseconds,
     };
   }
 
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes, common.dart stays dependency-free (no package:meta).
   bool operator ==(Object other) {
-    return other is WebDriverPointerAction &&
-        other.type == type &&
+    return other is WebDriverPointerMove &&
         other.x == x &&
         other.y == y &&
-        other.duration == duration &&
-        other.button == button;
+        other.duration == duration;
   }
 
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes, common.dart stays dependency-free (no package:meta).
-  int get hashCode => Object.hash(type, x, y, duration, button);
+  int get hashCode => Object.hash(WebDriverPointerMove, x, y, duration);
 
   @override
-  String toString() {
-    return switch (type) {
-      WebDriverPointerActionType.move => 'WebDriverPointerAction.move($x, $y, duration: $duration)',
-      WebDriverPointerActionType.down => 'WebDriverPointerAction.down(button: $button)',
-      WebDriverPointerActionType.up => 'WebDriverPointerAction.up(button: $button)',
-      WebDriverPointerActionType.pause => 'WebDriverPointerAction.pause($duration)',
-    };
+  String toString() => 'WebDriverPointerAction.move($x, $y, duration: $duration)';
+}
+
+/// A [WebDriverPointerAction] that presses a mouse [button].
+///
+/// Usually created with [WebDriverPointerAction.down].
+final class WebDriverPointerDown extends WebDriverPointerAction {
+  /// Creates a pointer action that presses [button].
+  const WebDriverPointerDown({this.button = WebDriverMouseButton.primary});
+
+  /// The mouse button to press.
+  final WebDriverMouseButton button;
+
+  @override
+  Map<String, Object?> toJson() {
+    return <String, Object?>{'type': 'pointerDown', 'button': button.w3cButton};
   }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes, common.dart stays dependency-free (no package:meta).
+  bool operator ==(Object other) {
+    return other is WebDriverPointerDown && other.button == button;
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes, common.dart stays dependency-free (no package:meta).
+  int get hashCode => Object.hash(WebDriverPointerDown, button);
+
+  @override
+  String toString() => 'WebDriverPointerAction.down(button: $button)';
+}
+
+/// A [WebDriverPointerAction] that releases a mouse [button].
+///
+/// Usually created with [WebDriverPointerAction.up].
+final class WebDriverPointerUp extends WebDriverPointerAction {
+  /// Creates a pointer action that releases [button].
+  const WebDriverPointerUp({this.button = WebDriverMouseButton.primary});
+
+  /// The mouse button to release.
+  final WebDriverMouseButton button;
+
+  @override
+  Map<String, Object?> toJson() {
+    return <String, Object?>{'type': 'pointerUp', 'button': button.w3cButton};
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes, common.dart stays dependency-free (no package:meta).
+  bool operator ==(Object other) {
+    return other is WebDriverPointerUp && other.button == button;
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes, common.dart stays dependency-free (no package:meta).
+  int get hashCode => Object.hash(WebDriverPointerUp, button);
+
+  @override
+  String toString() => 'WebDriverPointerAction.up(button: $button)';
+}
+
+/// A [WebDriverPointerAction] that waits for [duration] before the next
+/// action.
+///
+/// Usually created with [WebDriverPointerAction.pause].
+final class WebDriverPointerPause extends WebDriverPointerAction {
+  /// Creates a pointer action that waits for [duration].
+  ///
+  /// [duration] is truncated to whole milliseconds.
+  const WebDriverPointerPause(this.duration);
+
+  /// How long to wait.
+  final Duration duration;
+
+  @override
+  Map<String, Object?> toJson() {
+    return <String, Object?>{'type': 'pause', 'duration': duration.inMilliseconds};
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes, common.dart stays dependency-free (no package:meta).
+  bool operator ==(Object other) {
+    return other is WebDriverPointerPause && other.duration == duration;
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes, common.dart stays dependency-free (no package:meta).
+  int get hashCode => Object.hash(WebDriverPointerPause, duration);
+
+  @override
+  String toString() => 'WebDriverPointerAction.pause($duration)';
 }
 
 /// Types of different WebDriver commands that can be used in web integration

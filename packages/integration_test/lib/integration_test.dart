@@ -203,7 +203,7 @@ https://docs.flutter.dev/testing/integration-tests
   /// position in [view], such as the one returned by [WidgetTester.getCenter].
   /// If [view] is null, the implicit view is used. During a move with a
   /// non-zero `duration`, the browser dispatches intermediate `pointermove`
-  /// events along the way. See [WebDriverPointerAction.move].
+  /// events along the way. See [WebDriverPointerMove].
   ///
   /// Mouse buttons pressed with [WebDriverPointerAction.down] remain pressed
   /// across calls until released with [WebDriverPointerAction.up], so a test
@@ -278,15 +278,18 @@ https://docs.flutter.dev/testing/integration-tests
       throw ArgumentError.value(actions, 'actions', 'must not be empty');
     }
     for (final action in actions) {
-      if (action.type == WebDriverPointerActionType.move &&
-          (!action.x!.isFinite || !action.y!.isFinite)) {
+      if (action case WebDriverPointerMove(:final double x, :final double y)
+          when !x.isFinite || !y.isFinite) {
         throw ArgumentError.value(
           action,
           'actions',
           'move coordinates must be finite positions in the view',
         );
       }
-      if (action.duration != null && action.duration!.isNegative) {
+      if (action
+          case WebDriverPointerMove(:final Duration duration) ||
+              WebDriverPointerPause(:final Duration duration)
+          when duration.isNegative) {
         throw ArgumentError.value(action, 'actions', 'duration must not be negative');
       }
     }
@@ -299,23 +302,23 @@ https://docs.flutter.dev/testing/integration-tests
     final Offset origin = driver_actions.viewportOrigin(targetView);
     final viewportActions = <WebDriverPointerAction>[
       for (final WebDriverPointerAction action in actions)
-        if (action.type == WebDriverPointerActionType.move)
-          _toViewportMove(action, origin)
-        else
-          action,
+        switch (action) {
+          WebDriverPointerMove() => _toViewportMove(action, origin),
+          WebDriverPointerDown() || WebDriverPointerUp() || WebDriverPointerPause() => action,
+        },
     ];
     await callbackManager.pointerActions(viewportActions);
   }
 
-  static WebDriverPointerAction _toViewportMove(WebDriverPointerAction action, Offset origin) {
-    final double x = action.x! + origin.dx;
-    final double y = action.y! + origin.dy;
+  static WebDriverPointerMove _toViewportMove(WebDriverPointerMove action, Offset origin) {
+    final double x = action.x + origin.dx;
+    final double y = action.y + origin.dy;
     // Non-finite coordinates cannot be encoded for the driver and would leave
     // the command waiting for a reply forever.
     if (!x.isFinite || !y.isFinite) {
       throw ArgumentError.value(action, 'actions', 'resulting viewport position must be finite');
     }
-    return WebDriverPointerAction.move(x, y, duration: action.duration!);
+    return WebDriverPointerMove(x, y, duration: action.duration);
   }
 
   /// Web only. Performs a real browser pointer click at [position] using

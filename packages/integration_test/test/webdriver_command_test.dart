@@ -151,6 +151,45 @@ void main() {
       );
       expect(pauseZero.toString(), 'WebDriverPointerAction.pause(0:00:00.000000)');
     });
+
+    test('constructors create the matching subtype with non-nullable fields', () {
+      String describe(WebDriverPointerAction action) {
+        return switch (action) {
+          WebDriverPointerMove(:final double x, :final double y, :final Duration duration) =>
+            'move $x,$y ${duration.inMilliseconds}',
+          WebDriverPointerDown(:final WebDriverMouseButton button) => 'down ${button.w3cButton}',
+          WebDriverPointerUp(:final WebDriverMouseButton button) => 'up ${button.w3cButton}',
+          WebDriverPointerPause(:final Duration duration) => 'pause ${duration.inMilliseconds}',
+        };
+      }
+
+      expect(const WebDriverPointerAction.move(1, 2), isA<WebDriverPointerMove>());
+      expect(const WebDriverPointerAction.down(), isA<WebDriverPointerDown>());
+      expect(const WebDriverPointerAction.up(), isA<WebDriverPointerUp>());
+      expect(const WebDriverPointerAction.pause(Duration.zero), isA<WebDriverPointerPause>());
+
+      expect(describe(const WebDriverPointerAction.move(1, 2)), 'move 1.0,2.0 0');
+      expect(
+        describe(const WebDriverPointerAction.move(1, 2, duration: Duration(milliseconds: 7))),
+        'move 1.0,2.0 7',
+      );
+      expect(describe(const WebDriverPointerAction.down()), 'down 0');
+      expect(
+        describe(const WebDriverPointerAction.up(button: WebDriverMouseButton.secondary)),
+        'up 2',
+      );
+      expect(describe(const WebDriverPointerAction.pause(Duration(milliseconds: 9))), 'pause 9');
+
+      // The factory constructors and the subtype constructors are
+      // interchangeable.
+      expect(const WebDriverPointerAction.move(1, 2), const WebDriverPointerMove(1, 2));
+      expect(const WebDriverPointerAction.down(), const WebDriverPointerDown());
+      expect(const WebDriverPointerAction.up(), const WebDriverPointerUp());
+      expect(
+        const WebDriverPointerAction.pause(Duration.zero),
+        const WebDriverPointerPause(Duration.zero),
+      );
+    });
   });
 
   group('WebDriverCommand.pointerActions', () {

@@ -269,16 +269,16 @@ class _W3cMouse {
           'parameters': <String, Object?>{'pointerType': 'mouse'},
           'actions': <Map<String, Object?>>[
             for (final WebDriverPointerAction action in actions)
-              ...switch (action.type) {
-                WebDriverPointerActionType.move => _move(action),
-                WebDriverPointerActionType.down => <Map<String, Object?>>[
-                  <String, Object?>{'type': 'pointerDown', 'button': action.button!.w3cButton},
+              ...switch (action) {
+                WebDriverPointerMove() => _move(action),
+                WebDriverPointerDown(:final WebDriverMouseButton button) => <Map<String, Object?>>[
+                  <String, Object?>{'type': 'pointerDown', 'button': button.w3cButton},
                 ],
-                WebDriverPointerActionType.up => <Map<String, Object?>>[
-                  <String, Object?>{'type': 'pointerUp', 'button': action.button!.w3cButton},
+                WebDriverPointerUp(:final WebDriverMouseButton button) => <Map<String, Object?>>[
+                  <String, Object?>{'type': 'pointerUp', 'button': button.w3cButton},
                 ],
-                WebDriverPointerActionType.pause => <Map<String, Object?>>[
-                  <String, Object?>{'type': 'pause', 'duration': action.duration!.inMilliseconds},
+                WebDriverPointerPause(:final Duration duration) => <Map<String, Object?>>[
+                  <String, Object?>{'type': 'pause', 'duration': duration.inMilliseconds},
                 ],
               },
           ],
@@ -287,12 +287,12 @@ class _W3cMouse {
     };
   }
 
-  List<Map<String, Object?>> _move(WebDriverPointerAction action) {
+  List<Map<String, Object?>> _move(WebDriverPointerMove action) {
     final ({int x, int y})? start = _position;
     // W3C positions are integers. Round the target before interpolating, so
     // that the steps lie on the same pixel grid as the target.
-    final ({int x, int y}) target = (x: action.x!.round(), y: action.y!.round());
-    final int milliseconds = action.duration!.inMilliseconds;
+    final ({int x, int y}) target = (x: action.x.round(), y: action.y.round());
+    final int milliseconds = action.duration.inMilliseconds;
     _position = target;
     if (milliseconds == 0 || start == null) {
       return <Map<String, Object?>>[_pointerMove(target.x, target.y, milliseconds)];
