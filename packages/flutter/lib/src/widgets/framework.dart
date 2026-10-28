@@ -1326,9 +1326,11 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   ///   void initState() {
   ///     super.initState();
   ///     _subscription = widget.counts.listen((int count) {
-  ///       setState(() {
-  ///         _count = count;
-  ///       });
+  ///       if (mounted) {
+  ///         setState(() {
+  ///           _count = count;
+  ///         });
+  ///       }
   ///     });
   ///   }
   ///
