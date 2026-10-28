@@ -77,4 +77,28 @@ void main() {
       }
     }
   });
+
+  test('PersistentHashMap - bit 31 and compressed bitmap popcount', () {
+    // Place index 31 (1 << 31) first so occupiedIndices has bit 31 set during
+    // every subsequent _CompressedNode.put call while below the 16-entry
+    // _FullNode inflation threshold, then cross inflation with bit 31 occupied.
+    const compressedIndices = <int>[31, 0, 1, 2, 5, 7, 11, 13, 15, 17, 19, 23, 25, 29, 30];
+    var map = const PersistentHashMap<_MockKey, int>.empty();
+    for (final index in compressedIndices) {
+      map = map.put(_MockKey(hashCode: index, payload: 'k$index'), index * 10);
+    }
+    for (final index in compressedIndices) {
+      expect(map[_MockKey(hashCode: index, payload: 'k$index')], equals(index * 10));
+    }
+    expect(map[const _MockKey(hashCode: 28, payload: 'missing')], isNull);
+
+    const inflationIndices = <int>[3, 4];
+    for (final index in inflationIndices) {
+      map = map.put(_MockKey(hashCode: index, payload: 'k$index'), index * 10);
+    }
+    for (final index in <int>[...compressedIndices, ...inflationIndices]) {
+      expect(map[_MockKey(hashCode: index, payload: 'k$index')], equals(index * 10));
+    }
+    expect(map[const _MockKey(hashCode: 28, payload: 'missing')], isNull);
+  });
 }
