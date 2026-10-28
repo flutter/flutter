@@ -1419,6 +1419,7 @@ in_configuration(
     name = "flutter_gtk_profile",
     runtime_mode = "profile",
     target = "//engine/src/flutter/shell/platform/linux:flutter_gtk",
+    target_compatible_with = ["@platforms//os:linux"],
 )
 
 bundle_directory(
@@ -1427,6 +1428,7 @@ bundle_directory(
         ":artifacts_profile",
         ":flutter_gtk_profile",
     ],
+    target_compatible_with = ["@platforms//os:linux"],
 )
 
 in_configuration(
@@ -1439,6 +1441,7 @@ in_configuration(
     name = "flutter_gtk_release",
     runtime_mode = "release",
     target = "//engine/src/flutter/shell/platform/linux:flutter_gtk",
+    target_compatible_with = ["@platforms//os:linux"],
 )
 
 bundle_directory(
@@ -1447,6 +1450,7 @@ bundle_directory(
         ":artifacts_release",
         ":flutter_gtk_release",
     ],
+    target_compatible_with = ["@platforms//os:linux"],
 )
 
 in_configuration(
@@ -1469,4 +1473,10 @@ bundle_directory(
 # artifacts as a repository (android_engine_maven) -- the engine built for
 # arm, arm64 and x64 in debug, profile and release, the Android builders'
 # configurations, through in_configuration.
-android_engine_artifacts(name = "android_engine")
+# The Linux host's for now: the JDK overlay (@openjdk) lays out a Linux
+# JDK, not a Mac's bundle (Contents/Home), so the jars' actions do not
+# analyze on a Mac (the Mac's T14).
+android_engine_artifacts(
+    name = "android_engine",
+    target_compatible_with = ["@platforms//os:linux"],
+)

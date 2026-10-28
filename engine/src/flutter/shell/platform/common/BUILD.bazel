@@ -234,7 +234,7 @@ flutter_test_fixtures(
 
 flutter_cc_test(
     name = "common_cpp_unittests",
-    size = "small",
+    size = "medium",
     srcs = [
         "engine_switches_unittests.cc",
         "incoming_message_dispatcher_unittests.cc",

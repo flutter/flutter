@@ -327,8 +327,10 @@ gn_build(
         # The Linux sysroots, for the Linux and Android targets' host tools
         # (a Mac's Xcode SDK is named in the GN args instead): the x64
         # host's and the arm64 cross build's (sysroot.gni asserts the
-        # target CPU's exists; the host's own build does not read it).
-        "@platforms//os:macos": {},
+        # target CPU's exists; the host's own build does not read it). By
+        # the host: a Mac building for Android has no Linux sysroot to
+        # offer and no use for one (the Mac's T14).
+        "//engine/src/flutter/build/bazel:host_os_is_mac": {},
         "//conditions:default": {
             "@sysroot_linux_x64//:build_tree": "build/linux/debian_bullseye_amd64-sysroot",
             "@sysroot_linux_arm64//:build_tree": "build/linux/debian_bullseye_arm64-sysroot",
@@ -475,12 +477,14 @@ cc_library(
     deps = ["@dart//:dart_api_headers"],
 )
 
-# //flutter/third_party/dart/third_party/double-conversion/src:libdouble_conversion.
-# Only linked, never included, by the engine.
+# //flutter/third_party/dart/third_party/double-conversion/src:libdouble_conversion,
+# with its headers: the accessibility tree's string_utils.cc includes
+# double-conversion.h by its path under the Dart tree.
 # buildifier: disable=no-hdrs-no-alwayslink
 cc_library(
     name = "libdouble_conversion",
     srcs = [":libdouble_conversion.a"],
+    deps = ["@dart//:double_conversion_headers"],
 )
 
 # //flutter/third_party/dart/third_party/perfetto:libprotozero. Only linked,

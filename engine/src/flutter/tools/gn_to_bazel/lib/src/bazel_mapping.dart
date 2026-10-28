@@ -72,6 +72,9 @@ const Map<String, String> testSizes = <String, String>{
   // 24 s alone (46 renders through the software and GPU backends); timed
   // out at small's 60 s on a machine running the other suites.
   'display_list_rendertests': 'medium',
+  // 91 s on a Mac (504 tests: the accessibility bridge's there), where
+  // small's 60 s stopped it at 364 (the Mac's T14).
+  'common_cpp_unittests': 'medium',
   // 56 tests, each initializing a git repository and committing to it:
   // ~2 s a test, 54 of them inside small's 60 s on a machine building the
   // GPU backends at the same time.
