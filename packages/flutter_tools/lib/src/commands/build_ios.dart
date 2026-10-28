@@ -18,6 +18,7 @@ import '../base/logger.dart';
 import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
+import '../base/template.dart';
 import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../base/version.dart';
@@ -45,6 +46,7 @@ class BuildIOSCommand extends _BuildIOSSubCommand {
   BuildIOSCommand({
     required super.appleContext,
     required super.buildSystem,
+    required super.templateRenderer,
     required super.toolContext,
     required super.verboseHelp,
   }) {
@@ -122,6 +124,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
   BuildIOSArchiveCommand({
     required super.appleContext,
     required super.buildSystem,
+    required super.templateRenderer,
     required super.toolContext,
     required super.verboseHelp,
   }) {
@@ -906,6 +909,7 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
   _BuildIOSSubCommand({
     required this._appleContext,
     required this._buildSystem,
+    required this._templateRenderer,
     required ToolContext super.toolContext,
     required super.verboseHelp,
   }) : super(logger: toolContext.logger) {
@@ -926,6 +930,7 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
 
   final AppleContext _appleContext;
   final BuildSystem _buildSystem;
+  final TemplateRenderer _templateRenderer;
 
   @visibleForTesting
   AppleContext get appleContext => _appleContext;
@@ -1028,6 +1033,7 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
       app: app,
       buildInfo: buildInfo,
       plistParser: plistParser,
+      templateRenderer: _templateRenderer,
       toolContext: toolContext,
       xcodeProjectInterpreter: xcodeProjectInterpreter,
       targetOverride: targetFile,

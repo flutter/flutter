@@ -329,6 +329,7 @@ void main() {
       final bool supported = BuildIOSArchiveCommand(
         appleContext: FakeAppleContext(),
         buildSystem: FakeBuildSystem(),
+        templateRenderer: FakeTemplateRenderer(),
         toolContext: FakeToolContext(logger: BufferLogger.test()),
         verboseHelp: false,
       ).supported;

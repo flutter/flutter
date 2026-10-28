@@ -19,6 +19,7 @@ import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/project_migrator.dart';
+import '../base/template.dart';
 import '../base/utils.dart';
 import '../base/version.dart';
 import '../build_info.dart';
@@ -120,6 +121,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   required BuildInfo buildInfo,
   required CocoaPods cocoaPods,
   required PlistParser plistParser,
+  required TemplateRenderer templateRenderer,
   required ToolContext toolContext,
   required Xcode xcode,
   required XcodeProjectInterpreter xcodeProjectInterpreter,
@@ -280,7 +282,6 @@ Future<XcodeBuildResult> buildXcodeProject({
     );
   }
 
-  final Logger logger = toolContext.logger;
   final FlutterManifest manifest = app.project.parent.manifest;
   final String? buildName = parsedBuildName(
     manifest: manifest,
@@ -393,8 +394,8 @@ Future<XcodeBuildResult> buildXcodeProject({
     project.ios,
     buildDirectoryPath,
     buildInfo.mode,
-    cocoaPods: globals.cocoaPods,
-    templateRenderer: globals.templateRenderer,
+    cocoaPods: cocoaPods,
+    templateRenderer: templateRenderer,
     toolContext: toolContext,
   );
   if (configOnly) {

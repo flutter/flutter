@@ -322,6 +322,7 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
         analytics: globals.analytics,
         cocoaPods: globals.cocoaPods!,
         plistParser: globals.plistParser,
+        templateRenderer: globals.templateRenderer,
         toolContext: const GlobalToolContext(),
         xcode: globals.xcode!,
         xcodeProjectInterpreter: globals.xcodeProjectInterpreter!,

@@ -17,6 +17,7 @@ import '../base/logger.dart';
 import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
+import '../base/template.dart';
 import '../base/utils.dart';
 import '../base/version.dart';
 import '../build_info.dart';
@@ -73,6 +74,7 @@ class IOSSimulatorUtils {
     required this._analytics,
     required this._cocoaPods,
     required this._plistParser,
+    required this._templateRenderer,
     required this._toolContext,
     required this._xcode,
     required this._xcodeProjectInterpreter,
@@ -87,6 +89,7 @@ class IOSSimulatorUtils {
   final Analytics _analytics;
   final CocoaPods _cocoaPods;
   final PlistParser _plistParser;
+  final TemplateRenderer _templateRenderer;
   final ToolContext _toolContext;
 
   Future<List<IOSSimulator>> getAttachedDevices() async {
@@ -118,6 +121,7 @@ class IOSSimulatorUtils {
             plistParser: _plistParser,
             simControl: _simControl,
             simulatorCategory: device.category,
+            templateRenderer: _templateRenderer,
             toolContext: _toolContext,
             xcode: _xcode,
             xcodeProjectInterpreter: _xcodeProjectInterpreter,
@@ -389,6 +393,7 @@ class IOSSimulator extends Device {
     required this._plistParser,
     required this._simControl,
     required this.simulatorCategory,
+    required this._templateRenderer,
     required ToolContext super.toolContext,
     required this._xcode,
     required this._xcodeProjectInterpreter,
@@ -410,6 +415,7 @@ class IOSSimulator extends Device {
   final Analytics _analytics;
   final CocoaPods _cocoaPods;
   final PlistParser _plistParser;
+  final TemplateRenderer _templateRenderer;
   final Xcode _xcode;
   final XcodeProjectInterpreter _xcodeProjectInterpreter;
 
@@ -621,6 +627,7 @@ class IOSSimulator extends Device {
       app: app,
       buildInfo: buildInfo,
       plistParser: _plistParser,
+      templateRenderer: _templateRenderer,
       toolContext: toolContext,
       xcodeProjectInterpreter: _xcodeProjectInterpreter,
       targetOverride: mainPath,

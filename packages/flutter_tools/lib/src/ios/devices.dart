@@ -558,6 +558,7 @@ class IOSDevice extends Device {
         app: package as BuildableIOSApp,
         buildInfo: debuggingOptions.buildInfo,
         plistParser: _plistParser,
+        templateRenderer: _templateRenderer,
         toolContext: toolContext,
         xcodeProjectInterpreter: _xcodeProjectInterpreter,
         targetOverride: mainPath,

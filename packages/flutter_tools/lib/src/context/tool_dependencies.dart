@@ -523,6 +523,7 @@ class ToolDependencies {
           analytics: finalAnalytics,
           cocoaPods: finalCocoaPods,
           plistParser: finalPlistParser,
+          templateRenderer: templateRenderer,
           toolContext: finalToolContext,
           xcode: finalXcode,
           xcodeProjectInterpreter: finalXcodeProjectInterpreter,
