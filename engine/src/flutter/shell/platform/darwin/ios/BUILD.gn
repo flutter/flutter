@@ -92,6 +92,8 @@ source_set("flutter_framework_source") {
   ]
 
   sources = [
+    "flutter_task_queue_dispatch.h",
+    "framework/Source/FlutterAppDelegate+Test.h",
     "framework/Source/FlutterAppDelegate.mm",
     "framework/Source/FlutterAppDelegate_Internal.h",
     "framework/Source/FlutterCallbackCache.mm",
@@ -109,6 +111,7 @@ source_set("flutter_framework_source") {
     "framework/Source/FlutterEngineGroup.mm",
     "framework/Source/FlutterEngine_Internal.h",
     "framework/Source/FlutterHeadlessDartRunner.mm",
+    "framework/Source/FlutterIndirectScribbleDelegate.h",
     "framework/Source/FlutterKeyPrimaryResponder.h",
     "framework/Source/FlutterKeySecondaryResponder.h",
     "framework/Source/FlutterKeyboardManager.h",
@@ -124,6 +127,7 @@ source_set("flutter_framework_source") {
     "framework/Source/FlutterPlatformViewsController.mm",
     "framework/Source/FlutterPlatformViews_Internal.h",
     "framework/Source/FlutterPluginAppLifeCycleDelegate.mm",
+    "framework/Source/FlutterPluginAppLifeCycleDelegate_internal.h",
     "framework/Source/FlutterRestorationPlugin.h",
     "framework/Source/FlutterRestorationPlugin.mm",
     "framework/Source/FlutterSceneDelegate.mm",
@@ -151,6 +155,7 @@ source_set("flutter_framework_source") {
     "framework/Source/FlutterViewController.mm",
     "framework/Source/FlutterViewController_Internal.h",
     "framework/Source/FlutterViewResponder.h",
+    "framework/Source/IOKit.h",
     "framework/Source/KeyCodeMap.g.mm",
     "framework/Source/KeyCodeMap_Internal.h",
     "framework/Source/SemanticsObject+UIFocusSystem.mm",
@@ -162,6 +167,7 @@ source_set("flutter_framework_source") {
     "framework/Source/UIViewController+FlutterScreenAndSceneIfLoaded.mm",
     "framework/Source/accessibility_bridge.h",
     "framework/Source/accessibility_bridge.mm",
+    "framework/Source/accessibility_bridge_ios.h",
     "framework/Source/overlay_layer_pool.h",
     "framework/Source/overlay_layer_pool.mm",
     "framework/Source/platform_message_response_darwin.h",
