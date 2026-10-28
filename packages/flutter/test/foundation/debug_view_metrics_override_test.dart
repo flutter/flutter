@@ -1229,6 +1229,33 @@ void main() {
       expect(textScaleFactorChanged, 2);
     });
 
+    test('once per group when several entries are cleared together', () {
+      // The dart:ui callbacks are not per view, so clearing two entries that
+      // both override the view metrics is one change to the framework, not one
+      // per entry.
+      final fake = _TwoViewPlatformDispatcher();
+      final ui.PlatformDispatcher wrapped = debugApplyViewMetricsOverrides(fake);
+      debugSetViewMetricsOverride(1, const DebugViewMetricsOverride(devicePixelRatio: 3.0));
+      debugSetViewMetricsOverride(
+        2,
+        const DebugViewMetricsOverride(
+          devicePixelRatio: 2.0,
+          textScaling: <ui.Offset>[ui.Offset(1, 2)],
+        ),
+      );
+      var metricsChanged = 0;
+      var textScaleFactorChanged = 0;
+      var brightnessChanged = 0;
+      wrapped.onMetricsChanged = () => metricsChanged += 1;
+      wrapped.onTextScaleFactorChanged = () => textScaleFactorChanged += 1;
+      wrapped.onPlatformBrightnessChanged = () => brightnessChanged += 1;
+
+      debugClearViewMetricsOverrides();
+      expect(metricsChanged, 1);
+      expect(textScaleFactorChanged, 1);
+      expect(brightnessChanged, 0);
+    });
+
     test('through onPlatformConfigurationChanged as well, once', () {
       // dart:ui reports everything in its platform configuration through the
       // umbrella notification first, and then through the callback for the

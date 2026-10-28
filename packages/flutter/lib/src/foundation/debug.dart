@@ -1062,8 +1062,9 @@ bool debugSetViewMetricsOverride(int viewId, DebugViewMetricsOverride? override)
     }
     changed = true;
     _debugNotifyViewMetricsOverrideChanged(
-      previous ?? const DebugViewMetricsOverride(),
-      next ?? const DebugViewMetricsOverride(),
+      (previous ?? const DebugViewMetricsOverride())._changesFrom(
+        next ?? const DebugViewMetricsOverride(),
+      ),
     );
     return true;
   }());
@@ -1083,9 +1084,13 @@ bool debugClearViewMetricsOverrides() {
     final List<DebugViewMetricsOverride> removed = _viewMetricsOverrides.values.toList();
     _viewMetricsOverrides.clear();
     changed = true;
+    // Announced once for all of them: the dart:ui callbacks are not per view,
+    // so a group that several entries changed is one change to the framework.
+    _Changes changes = _noChanges;
     for (final override in removed) {
-      _debugNotifyViewMetricsOverrideChanged(override, const DebugViewMetricsOverride());
+      changes = _eitherChanged(changes, override._changesFrom(const DebugViewMetricsOverride()));
     }
+    _debugNotifyViewMetricsOverrideChanged(changes);
     return true;
   }());
   return changed;
@@ -1154,24 +1159,20 @@ ui.FlutterView debugViewWithMetricsOverrides(ui.FlutterView view) {
   return result;
 }
 
-// Invokes the dart:ui callbacks that announce the metrics that differ between
-// [before] and [after] on every wrapped dispatcher, so that the framework
-// re-reads them as it would after a platform change: the platform
-// configuration first when a platform-wide setting changed, then the callback
-// of each group that changed, in the order dart:ui uses. alwaysUse24HourFormat
-// has no callback of its own and rides onMetricsChanged, the one notification
-// the framework treats as "re-read everything about this view".
+// Invokes the dart:ui callbacks that announce the groups [changes] marks as
+// changed on every wrapped dispatcher, so that the framework re-reads them as
+// it would after a platform change: the platform configuration first when a
+// platform-wide setting changed, then the callback of each group that changed,
+// in the order dart:ui uses. alwaysUse24HourFormat has no callback of its own
+// and rides onMetricsChanged, the one notification the framework treats as
+// "re-read everything about this view".
 //
 // Like the engine, this does not let one callback's failure cancel the ones
 // after it, or the framework would be left reading a metric it was never told
 // to re-read. The callbacks run in the caller's zone, as they do when a
 // TestPlatformDispatcher test value is set.
 @pragma('vm:notify-debugger-on-exception')
-void _debugNotifyViewMetricsOverrideChanged(
-  DebugViewMetricsOverride before,
-  DebugViewMetricsOverride after,
-) {
-  final _Changes changes = before._changesFrom(after);
+void _debugNotifyViewMetricsOverrideChanged(_Changes changes) {
   final bool platformConfiguration =
       changes.textScaling ||
       changes.platformBrightness ||
@@ -1294,6 +1295,24 @@ typedef _Changes = ({
   bool accessibilityFeatures,
   bool alwaysUse24HourFormat,
 });
+
+const _Changes _noChanges = (
+  viewMetrics: false,
+  textScaling: false,
+  platformBrightness: false,
+  accessibilityFeatures: false,
+  alwaysUse24HourFormat: false,
+);
+
+// The groups that differ in [a] or in [b]: what several changes amount to when
+// they are announced together.
+_Changes _eitherChanged(_Changes a, _Changes b) => (
+  viewMetrics: a.viewMetrics || b.viewMetrics,
+  textScaling: a.textScaling || b.textScaling,
+  platformBrightness: a.platformBrightness || b.platformBrightness,
+  accessibilityFeatures: a.accessibilityFeatures || b.accessibilityFeatures,
+  alwaysUse24HourFormat: a.alwaysUse24HourFormat || b.alwaysUse24HourFormat,
+);
 
 // What [DebugViewMetricsOverride.fromJson] builds for the paddings, because
 // [ui.ViewPadding] cannot be constructed outside `dart:ui`.
