@@ -83,6 +83,11 @@ class ThrowingObserver with WidgetsBindingObserver {
   }
 
   @override
+  void didChange24HourFormat() {
+    throw Exception('Intentional test exception from observer');
+  }
+
+  @override
   void didChangeLocales(List<Locale>? locales) {
     throw Exception('Intentional test exception from observer');
   }
@@ -195,6 +200,11 @@ class LoggingObserver with WidgetsBindingObserver {
   @override
   void didChangeAccessibilityFeatures() {
     log.add('didChangeAccessibilityFeatures');
+  }
+
+  @override
+  void didChange24HourFormat() {
+    log.add('didChange24HourFormat');
   }
 
   @override
@@ -1029,6 +1039,29 @@ void main() {
 
       WidgetsBinding.instance.handleAccessibilityFeaturesChanged();
       expect(log, contains('didChangeAccessibilityFeatures'));
+      expect(errors, hasLength(1));
+    });
+
+    testWidgets('didChange24HourFormat', (WidgetTester tester) async {
+      final log = <String>[];
+      final errors = <FlutterErrorDetails>[];
+      final FlutterExceptionHandler? oldHandler = FlutterError.onError;
+      FlutterError.onError = (FlutterErrorDetails details) => errors.add(details);
+      addTearDown(() {
+        FlutterError.onError = oldHandler;
+      });
+
+      final throwingObserver = ThrowingObserver();
+      final loggingObserver = LoggingObserver(log);
+      WidgetsBinding.instance.addObserver(throwingObserver);
+      WidgetsBinding.instance.addObserver(loggingObserver);
+      addTearDown(() {
+        WidgetsBinding.instance.removeObserver(throwingObserver);
+        WidgetsBinding.instance.removeObserver(loggingObserver);
+      });
+
+      WidgetsBinding.instance.handlePlatformConfigurationChanged();
+      expect(log, contains('didChange24HourFormat'));
       expect(errors, hasLength(1));
     });
 

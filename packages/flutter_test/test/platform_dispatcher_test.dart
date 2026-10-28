@@ -214,20 +214,20 @@ void main() {
   );
 
   testWidgets(
-    'TestPlatformDispatcher sends platform configuration change when alwaysUse24HourFormatTestValue is updated',
+    'TestPlatformDispatcher sends 24-hour format change when alwaysUse24HourFormatTestValue is updated',
     (WidgetTester tester) async {
       addTearDown(tester.platformDispatcher.clearAlwaysUse24HourTestValue);
       final observer = TestObserver();
       retrieveTestBinding(tester).addObserver(observer);
       addTearDown(() => retrieveTestBinding(tester).removeObserver(observer));
 
-      expect(observer.platformConfigurationChanged, isFalse);
+      expect(observer.didChange24HourFormatCalled, isFalse);
       retrieveTestBinding(tester).platformDispatcher.alwaysUse24HourFormatTestValue = true;
-      expect(observer.platformConfigurationChanged, isTrue);
+      expect(observer.didChange24HourFormatCalled, isTrue);
 
-      observer.platformConfigurationChanged = false;
+      observer.didChange24HourFormatCalled = false;
       retrieveTestBinding(tester).platformDispatcher.clearAlwaysUse24HourTestValue();
-      expect(observer.platformConfigurationChanged, isTrue);
+      expect(observer.didChange24HourFormatCalled, isTrue);
     },
   );
 
@@ -662,7 +662,7 @@ void main() {
 
 class TestObserver with WidgetsBindingObserver {
   List<Locale>? locales;
-  bool platformConfigurationChanged = false;
+  bool didChange24HourFormatCalled = false;
 
   @override
   void didChangeLocales(List<Locale>? locales) {
@@ -670,8 +670,8 @@ class TestObserver with WidgetsBindingObserver {
   }
 
   @override
-  void didChangePlatformConfiguration() {
-    platformConfigurationChanged = true;
+  void didChange24HourFormat() {
+    didChange24HourFormatCalled = true;
   }
 }
 

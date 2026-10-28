@@ -410,17 +410,19 @@ abstract mixin class WidgetsBindingObserver {
   /// [dart:ui.PlatformDispatcher.onAccessibilityFeaturesChanged].
   void didChangeAccessibilityFeatures() {}
 
-  /// Called when the platform configuration changes.
-  ///
-  /// This notifies when system-wide user preferences on the [PlatformDispatcher]
-  /// change. Specifically, this callback notifies for configuration changes that
-  /// do not have dedicated observer methods, including:
-  ///
-  /// * [PlatformDispatcher.alwaysUse24HourFormat]
+  /// Called when the system tells the app that the user's 24-hour format
+  /// preference has changed. For example, if the user changes the clock
+  /// format settings in the operating system.
   ///
   /// This method exposes notifications from
-  /// [dart:ui.PlatformDispatcher.onPlatformConfigurationChanged].
-  void didChangePlatformConfiguration() {}
+  /// [dart:ui.PlatformDispatcher.onPlatformConfigurationChanged] for changes to
+  /// [PlatformDispatcher.alwaysUse24HourFormat].
+  ///
+  /// See also:
+  ///
+  ///  * [MediaQuery.alwaysUse24HourFormatOf], which provides a similar service with
+  ///    less boilerplate.
+  void didChange24HourFormat() {}
 }
 
 /// The glue between the widgets layer and the Flutter engine.
@@ -1010,7 +1012,7 @@ mixin WidgetsBinding
     super.handlePlatformConfigurationChanged();
     for (final observer in List<WidgetsBindingObserver>.of(_observers)) {
       try {
-        observer.didChangePlatformConfiguration();
+        observer.didChange24HourFormat();
       } catch (exception, stack) {
         FlutterError.reportError(
           FlutterErrorDetails(
@@ -1018,7 +1020,7 @@ mixin WidgetsBinding
             stack: stack,
             library: 'widgets library',
             context: ErrorDescription(
-              'while dispatching notifications for WidgetsBindingObserver.didChangePlatformConfiguration',
+              'while dispatching notifications for WidgetsBindingObserver.didChange24HourFormat',
             ),
           ),
         );
