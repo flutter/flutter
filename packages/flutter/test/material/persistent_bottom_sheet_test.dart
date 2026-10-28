@@ -429,6 +429,8 @@ void main() {
     WidgetTester tester,
   ) async {
     final scaffoldKey = GlobalKey<ScaffoldState>();
+    final sheetController = DraggableScrollableController();
+    addTearDown(sheetController.dispose);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -442,6 +444,7 @@ void main() {
 
     scaffoldKey.currentState!.showBottomSheet((BuildContext context) {
       return DraggableScrollableSheet(
+        controller: sheetController,
         expand: false,
         builder: (_, ScrollController controller) {
           return ListView(
@@ -473,7 +476,8 @@ void main() {
     await tester.drag(find.text('Two'), const Offset(0.0, -600.0));
     await tester.pumpAndSettle();
 
-    expect(find.text('Two'), findsOneWidget);
+    expect(sheetController.size, 1);
+    expect(tester.state<ScrollableState>(find.byType(Scrollable)).position.pixels, greaterThan(0));
     expect(find.byType(FloatingActionButton), findsOneWidget);
     expect(find.byType(FloatingActionButton).hitTestable(), findsNothing);
   });

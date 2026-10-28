@@ -18,6 +18,7 @@ import 'dart:math' as math;
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/rendering.dart' show ScrollDirection;
 
 import 'basic.dart';
 import 'binding.dart';
@@ -905,12 +906,36 @@ class _DraggableScrollableSheetScrollPosition extends ScrollPositionWithSingleCo
 
   @override
   void applyUserOffset(double delta) {
-    if (!listShouldScroll &&
-        (!(extent.isAtMin || extent.isAtMax) ||
-            (extent.isAtMin && delta < 0) ||
-            (extent.isAtMax && delta > 0))) {
-      extent.addPixelDelta(-delta, context.notificationContext!);
-    } else {
+    final ScrollActivity? dragActivity = activity;
+    // Downward drags return the list to the start before shrinking the sheet.
+    if (delta > 0 && pixels > minScrollExtent && !extent.isAtMin) {
+      updateUserScrollDirection(ScrollDirection.forward);
+      if (!identical(activity, dragActivity)) {
+        return;
+      }
+      final double scrollDelta = physics.applyPhysicsToUserOffset(this, delta);
+      final double oldPixels = pixels;
+      setPixels(math.max(minScrollExtent, pixels - scrollDelta));
+      if (!identical(activity, dragActivity) || pixels > minScrollExtent) {
+        return;
+      }
+      delta = scrollDelta - (oldPixels - pixels);
+    }
+
+    // Resize within the sheet's limits, then scroll with any remaining delta.
+    final double sizeDelta = clampDouble(
+      -delta,
+      extent.sizeToPixels(extent.minSize) - extent.currentPixels,
+      extent.sizeToPixels(extent.maxSize) - extent.currentPixels,
+    );
+    if (sizeDelta != 0) {
+      extent.addPixelDelta(sizeDelta, context.notificationContext!);
+      if (!identical(activity, dragActivity)) {
+        return;
+      }
+      delta += sizeDelta;
+    }
+    if (delta != 0) {
       super.applyUserOffset(delta);
     }
   }
