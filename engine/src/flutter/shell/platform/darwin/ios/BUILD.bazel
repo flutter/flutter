@@ -579,15 +579,8 @@ flutter_swift_library(
         ],
         "//conditions:default": [],
     }),
-    swiftflags = select({
-        ":when_is_ios_and_enable_ios_unittests": [
-            "-enable-testing",  # is_ios && enable_ios_unittests || (is_mac && enable_unittests)
-        ],
-        ":when_is_mac_and_enable_unittests": [
-            "-enable-testing",  # is_ios && enable_ios_unittests || (is_mac && enable_unittests)
-        ],
-        "//conditions:default": [],
-    }) + [
+    swiftflags = [
+        "-enable-testing",  # is_ios && enable_ios_unittests || (is_mac && enable_unittests)
         "-target",  # is_ios
     ] + select({
         ":when_is_ios_and_current_cpu_arm64_and_use_ios_simulator": [

@@ -857,6 +857,47 @@ source_set("x") {
       expect(Condition.disjunction(<Condition>[a, both]), a);
     });
 
+    test('a disjunction narrows the alternatives said beside a conjunction, and the dual', () {
+      // display_list/testing lists a dependency under `is_mac` and again
+      // under `(is_mac || is_ios) && impeller_enable_metal`: once, under
+      // `is_mac || (is_ios && impeller_enable_metal)`.
+      const a = ConditionVariable('a');
+      const b = ConditionVariable('b');
+      const c = ConditionVariable('c');
+      final Condition abAndC = Condition.conjunction(<Condition>[
+        Condition.disjunction(const <Condition>[a, b]),
+        c,
+      ]);
+      expect(
+        Condition.disjunction(<Condition>[a, abAndC]),
+        Condition.disjunction(<Condition>[
+          a,
+          Condition.conjunction(const <Condition>[b, c]),
+        ]),
+      );
+      // Every alternative said beside it: the conjunction goes.
+      expect(
+        Condition.disjunction(<Condition>[a, b, abAndC]),
+        Condition.disjunction(const <Condition>[a, b]),
+      );
+      // The dual: `a && ((a && b) || c)` is `a && (b || c)`.
+      final Condition abOrC = Condition.disjunction(<Condition>[
+        Condition.conjunction(const <Condition>[a, b]),
+        c,
+      ]);
+      expect(
+        Condition.conjunction(<Condition>[a, abOrC]),
+        Condition.conjunction(<Condition>[
+          a,
+          Condition.disjunction(const <Condition>[b, c]),
+        ]),
+      );
+      expect(
+        Condition.conjunction(<Condition>[a, b, abOrC]),
+        Condition.conjunction(const <Condition>[a, b]),
+      );
+    });
+
     test('a conjunction takes a disjunction once whatever the order of its terms', () {
       // GN's `is_ios || is_mac` (fml's Objective-C sources) beside the
       // converter's is_apple, `is_mac || is_ios` in the other order: one
@@ -4627,6 +4668,62 @@ source_set("x") {
           '    }),\n',
         ),
       );
+    });
+
+    test('a dependency listed under two overlapping conditions is listed once, under their disjunction', () async {
+      // display_list/testing's surface provider: metal_screenshot under
+      // is_mac and again under `(is_mac || is_ios) && impeller_enable_metal`.
+      // A Mac with Metal matches both branches, and Bazel rejects the
+      // duplicate; the two conditions exclude each other nowhere, so the
+      // item goes under `is_mac || (is_ios && impeller_enable_metal)`: the
+      // macOS key beside the conjunction's group. A copy under an exclusive
+      // condition (is_ios beside is_mac) stays in its own select().
+      final String output = await convert('''
+import("//flutter/impeller/tools/impeller.gni")
+source_set("x") {
+  sources = [ "a.cc" ]
+  deps = [ "//flutter/fml" ]
+  if (is_mac) {
+    deps += [ "//flutter/testing:metal" ]
+  }
+  if (is_mac || is_ios) {
+    if (impeller_enable_metal) {
+      deps += [ "//flutter/testing:metal" ]
+    }
+  }
+  if (is_ios) {
+    deps += [ "//flutter/testing:skia" ]
+  }
+  if (is_mac) {
+    deps += [ "//flutter/testing:skia" ]
+  }
+}
+''', assumptions: Assumptions(const <String, GnValue>{}));
+      expect(
+        output,
+        contains(
+          '    ] + select({\n'
+          '        ":when_is_ios_and_impeller_enable_metal": [\n'
+          '            "//engine/src/flutter/testing:metal",  # is_mac || is_ios && impeller_enable_metal\n'
+          '        ],\n'
+          '        "@platforms//os:macos": [\n'
+          '            "//engine/src/flutter/testing:metal",  # is_mac || is_ios && impeller_enable_metal\n'
+          '        ],\n'
+          '        "//conditions:default": [],\n'
+          '    }) + select({\n'
+          '        "@platforms//os:ios": [\n'
+          '            "//engine/src/flutter/testing:skia",  # is_ios\n'
+          '        ],\n'
+          '        "//conditions:default": [],\n'
+          '    }) + select({\n'
+          '        "@platforms//os:macos": [\n'
+          '            "//engine/src/flutter/testing:skia",  # is_mac\n'
+          '        ],\n'
+          '        "//conditions:default": [],\n'
+          '    }),\n',
+        ),
+      );
+      expect(output, contains('name = "when_is_ios_and_impeller_enable_metal"'));
     });
 
     test("an ordered attribute keeps GN's interleaving of conditional appends", () async {
