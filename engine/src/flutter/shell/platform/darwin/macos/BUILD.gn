@@ -221,9 +221,11 @@ executable("flutter_desktop_darwin_unittests") {
   ldflags = [ "-ObjC" ]
 
   # In the debug runtime mode the VM finds its snapshot by symbol name
-  # (kDartVmSnapshotData, from //flutter/lib/snapshot); the exported symbols
-  # keep it through the link's dead stripping, as in the other tests that
-  # boot the VM from the embedded snapshot.
+  # (kDartSnapshotData and kDartSnapshotText, //flutter/lib/snapshot's); the
+  # exported symbols keep them through the link's dead stripping, and the
+  # dependency defines them in every runtime mode (the AOT modes' libdart
+  # does not reach them) -- as in the other tests that boot the VM from the
+  # embedded snapshot.
   configs += [ "//flutter:export_dynamic_symbols" ]
 
   sources = [
@@ -262,6 +264,7 @@ executable("flutter_desktop_darwin_unittests") {
     ":flutter_framework_source",
     "//flutter/common",
     "//flutter/fml",
+    "//flutter/lib/snapshot",
     "//flutter/shell/platform/common:common_cpp_accessibility",
     "//flutter/shell/platform/common:common_cpp_core",
     "//flutter/shell/platform/common:common_cpp_enums",
