@@ -408,7 +408,6 @@ class FlutterEmbedderNative {
   // Frame Scheduling & Memory
   bool ScheduleFrame();
   bool NotifyLowMemoryWarning();
-  jobject GetBitmap(JNIEnv* env);
 
   // Deferred Components
   bool LoadDartDeferredLibrary(int32_t loading_unit_id,

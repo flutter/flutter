@@ -1701,15 +1701,6 @@ public class FlutterJNI {
         viewId, x, y, width, height, viewWidth, viewHeight, mutatorsStack);
   }
 
-  @UiThread
-  public Bitmap getBitmap() {
-    ensureRunningOnMainThread();
-    ensureAttachedToNative();
-    return nativeGetBitmap(nativeShellHolderId);
-  }
-
-  private native Bitmap nativeGetBitmap(long nativeShellHolderId);
-
   /**
    * Notifies the Dart VM of a low memory event, or that the application is in a state such that now
    * is an appropriate time to free resources, such as going to the background.

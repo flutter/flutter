@@ -250,9 +250,6 @@ const std::vector<JNINativeMethod> kFlutterJniMethods = {
     MakeJniMethod("nativeUpdateRefreshRate",
                   "(F)V",
                   reinterpret_cast<void*>(&JniDelegate::UpdateRefreshRate)),
-    MakeJniMethod("nativeGetBitmap",
-                  "(J)Landroid/graphics/Bitmap;",
-                  reinterpret_cast<void*>(&JniDelegate::GetBitmap)),
     MakeJniMethod(
         "nativeIsSurfaceControlEnabled",
         "(J)Z",
@@ -900,16 +897,6 @@ void JniDelegate::UpdateRefreshRate(JNIEnv* env,
 #if FLUTTER_HAS_ANDROID_VSYNC_WAITER
   AndroidVsyncWaiter::UpdateRefreshRate(refresh_rate_fps);
 #endif
-}
-
-jobject JniDelegate::GetBitmap(JNIEnv* env,
-                               jobject jcaller,
-                               jlong shell_holder) {
-  auto* embedder = ToEmbedder(shell_holder);
-  if (!embedder) {
-    return nullptr;
-  }
-  return embedder->GetBitmap(env);
 }
 
 jboolean JniDelegate::ShouldDisableAHB(JNIEnv* env, jobject jcaller) {

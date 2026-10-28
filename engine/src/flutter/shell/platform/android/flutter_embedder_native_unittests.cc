@@ -38,9 +38,9 @@ constexpr intptr_t kTestVsyncBaton = 0x42;
 // Synthetic engine IDs for tests.
 constexpr int64_t kTestPrimaryEngineId = 101;
 constexpr int64_t kTestSpawnedEngineId = 202;
-// Expected count of native methods registered on FlutterJNI (42 FlutterJNI
+// Expected count of native methods registered on FlutterJNI (41 FlutterJNI
 // native declarations plus nativeShouldDisableAHB).
-constexpr size_t kExpectedFlutterJniNativeMethodCount = 43;
+constexpr size_t kExpectedFlutterJniNativeMethodCount = 42;
 // Android API levels for testing.
 constexpr int32_t kTestApiLevel27 = 27;
 constexpr int32_t kTestApiLevel33 = 33;

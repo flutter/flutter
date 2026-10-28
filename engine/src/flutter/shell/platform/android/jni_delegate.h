@@ -252,8 +252,6 @@ class JniDelegate {
                                 jclass clazz,
                                 jfloat refresh_rate_fps);
 
-  static jobject GetBitmap(JNIEnv* env, jobject jcaller, jlong shell_holder);
-
   static jboolean ShouldDisableAHB(JNIEnv* env, jobject jcaller);
 
   static void CleanupMessageData(JNIEnv* env,

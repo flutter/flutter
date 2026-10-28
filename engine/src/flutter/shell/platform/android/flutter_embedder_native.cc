@@ -2219,11 +2219,6 @@ bool FlutterEmbedderNative::NotifyLowMemoryWarning() {
   return proc_table_.NotifyLowMemoryWarning(engine_) == kSuccess;
 }
 
-jobject FlutterEmbedderNative::GetBitmap(JNIEnv* env) {
-  (void)env;
-  return nullptr;
-}
-
 bool FlutterEmbedderNative::LoadDartDeferredLibrary(
     int32_t loading_unit_id,
     const std::vector<std::string>& search_paths) {

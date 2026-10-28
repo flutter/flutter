@@ -17,6 +17,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
@@ -25,12 +27,15 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.robolectric.shadows.ShadowLooper.shadowMainLooper;
 
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
 import android.hardware.SyncFence;
 import android.media.Image;
 import android.media.ImageReader;
+import android.os.Handler;
+import android.view.PixelCopy;
 import android.view.Surface;
 import androidx.test.ext.junit.rules.ActivityScenarioRule;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -1131,5 +1136,130 @@ public class FlutterRendererTest {
     when(image.getFence()).thenReturn(fence);
     producer.waitOnFence(image);
     verify(fence, times(1)).close();
+  }
+
+  @Test
+  public void getBitmap_returnsNullWhenSurfaceIsNullOrInvalid() {
+    // Arbitrary valid surface dimensions in physical pixels for testing.
+    final int testSurfaceWidth = 100;
+    final int testSurfaceHeight = 50;
+
+    FlutterRenderer flutterRenderer = engineRule.getFlutterEngine().getRenderer();
+    assertNull(flutterRenderer.getBitmap());
+
+    Surface fakeSurface = mock(Surface.class);
+    when(fakeSurface.isValid()).thenReturn(false);
+    flutterRenderer.startRenderingToSurface(fakeSurface, false);
+    flutterRenderer.surfaceChanged(testSurfaceWidth, testSurfaceHeight);
+    assertNull(flutterRenderer.getBitmap());
+
+    when(fakeSurface.isValid()).thenReturn(true);
+    flutterRenderer.stopRenderingToSurface();
+    assertNull(flutterRenderer.getBitmap());
+  }
+
+  @Test
+  public void getBitmap_returnsNullWhenDimensionsAreZero() {
+    FlutterRenderer flutterRenderer = engineRule.getFlutterEngine().getRenderer();
+    Surface fakeSurface = mock(Surface.class);
+    when(fakeSurface.isValid()).thenReturn(true);
+
+    flutterRenderer.startRenderingToSurface(fakeSurface, false);
+    assertNull(flutterRenderer.getBitmap());
+  }
+
+  @Test
+  public void getBitmap_returnsBitmapOnPixelCopySuccess() {
+    // Arbitrary valid surface dimensions and device pixel ratio for testing.
+    final int testSurfaceWidth = 100;
+    final int testSurfaceHeight = 50;
+    final int testViewportWidth = 200;
+    final int testViewportHeight = 150;
+    final float testDevicePixelRatio = 2.0f;
+    // Argument indices for requestPixelCopy(Surface, Bitmap, OnPixelCopyFinishedListener, Handler).
+    final int listenerArgIndex = 2;
+    final int handlerArgIndex = 3;
+
+    FlutterRenderer flutterRenderer = spy(engineRule.getFlutterEngine().getRenderer());
+    Surface fakeSurface = mock(Surface.class);
+    when(fakeSurface.isValid()).thenReturn(true);
+
+    doAnswer(
+            invocation -> {
+              PixelCopy.OnPixelCopyFinishedListener listener =
+                  invocation.getArgument(listenerArgIndex);
+              Handler handler = invocation.getArgument(handlerArgIndex);
+              handler.post(() -> listener.onPixelCopyFinished(PixelCopy.SUCCESS));
+              return null;
+            })
+        .when(flutterRenderer)
+        .requestPixelCopy(
+            eq(fakeSurface),
+            any(Bitmap.class),
+            any(PixelCopy.OnPixelCopyFinishedListener.class),
+            any(Handler.class));
+
+    flutterRenderer.startRenderingToSurface(fakeSurface, false);
+    flutterRenderer.surfaceChanged(testSurfaceWidth, testSurfaceHeight);
+
+    Bitmap bitmap = flutterRenderer.getBitmap();
+    assertNotNull(bitmap);
+    assertEquals(testSurfaceWidth, bitmap.getWidth());
+    assertEquals(testSurfaceHeight, bitmap.getHeight());
+    assertEquals(Bitmap.Config.ARGB_8888, bitmap.getConfig());
+
+    FlutterRenderer.ViewportMetrics metrics = new FlutterRenderer.ViewportMetrics();
+    metrics.width = testViewportWidth;
+    metrics.height = testViewportHeight;
+    metrics.devicePixelRatio = testDevicePixelRatio;
+    flutterRenderer.setViewportMetrics(metrics);
+
+    Bitmap viewportBitmap = flutterRenderer.getBitmap();
+    assertNotNull(viewportBitmap);
+    assertEquals(testViewportWidth, viewportBitmap.getWidth());
+    assertEquals(testViewportHeight, viewportBitmap.getHeight());
+  }
+
+  @Test
+  public void getBitmap_returnsNullOnPixelCopyErrorOrException() {
+    // Arbitrary valid surface dimensions in physical pixels for testing.
+    final int testSurfaceWidth = 100;
+    final int testSurfaceHeight = 50;
+    // Argument indices for requestPixelCopy(Surface, Bitmap, OnPixelCopyFinishedListener, Handler).
+    final int listenerArgIndex = 2;
+    final int handlerArgIndex = 3;
+
+    FlutterRenderer flutterRenderer = spy(engineRule.getFlutterEngine().getRenderer());
+    Surface fakeSurface = mock(Surface.class);
+    when(fakeSurface.isValid()).thenReturn(true);
+    flutterRenderer.startRenderingToSurface(fakeSurface, false);
+    flutterRenderer.surfaceChanged(testSurfaceWidth, testSurfaceHeight);
+
+    doAnswer(
+            invocation -> {
+              PixelCopy.OnPixelCopyFinishedListener listener =
+                  invocation.getArgument(listenerArgIndex);
+              Handler handler = invocation.getArgument(handlerArgIndex);
+              handler.post(() -> listener.onPixelCopyFinished(PixelCopy.ERROR_SOURCE_NO_DATA));
+              return null;
+            })
+        .when(flutterRenderer)
+        .requestPixelCopy(
+            eq(fakeSurface),
+            any(Bitmap.class),
+            any(PixelCopy.OnPixelCopyFinishedListener.class),
+            any(Handler.class));
+
+    assertNull(flutterRenderer.getBitmap());
+
+    doThrow(new IllegalArgumentException("No frame queued"))
+        .when(flutterRenderer)
+        .requestPixelCopy(
+            eq(fakeSurface),
+            any(Bitmap.class),
+            any(PixelCopy.OnPixelCopyFinishedListener.class),
+            any(Handler.class));
+
+    assertNull(flutterRenderer.getBitmap());
   }
 }
