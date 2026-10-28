@@ -822,6 +822,7 @@ class CreateCommand extends FlutterCommand with CreateBase, ExtensionArgParserMi
           iosPlatform: includeIos || includeDarwin,
           linuxPlatform: includeLinux,
           macOSPlatform: includeMacos || includeDarwin,
+          plistParser: appleContext.plistParser,
           templateRenderer: templateRenderer,
           windowsPlatform: includeWindows,
           webPlatform: includeWeb,

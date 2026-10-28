@@ -1287,6 +1287,7 @@ abstract class FlutterCommand extends Command<void> {
       deprecationBehavior: deprecationBehavior,
       featureFlags: featureFlags,
       gradleUtils: globals.gradleUtils,
+      plistParser: globals.plistParser,
       releaseMode: releaseMode,
       pubspecCache: pubspecCache,
       packageGraph: packageGraph,

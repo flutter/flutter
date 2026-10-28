@@ -713,9 +713,9 @@ abstract class IosAssetBundle extends Target {
           .copySync(dsymOutputBinary.path);
     }
 
-    final FlutterProject flutterProject = FlutterProject.fromDirectory(
+    // TODO(bkonyi): Inject FlutterProjectFactory through Environment.
+    final FlutterProject flutterProject = globals.projectFactory.fromDirectory(
       environment.projectDir,
-      logger: environment.logger,
     );
     final String? flavor = await flutterProject.ios.parseFlavorFromConfiguration(environment);
 

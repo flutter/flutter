@@ -856,9 +856,20 @@ void main() {
         FileSystemUtils: () => FileSystemUtils(fileSystem: fileSystem, platform: macosPlatform),
         XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
         FlutterProjectFactory: () => FlutterProjectFactory(
+          config: FakeConfig(),
           fileSystem: fileSystem,
           logger: BufferLogger.test(),
-          config: FakeConfig(),
+          plistParser: PlistParser(
+            fileSystem: fileSystem,
+            logger: BufferLogger.test(),
+            processManager: FakeProcessManager.list(<FakeCommand>[
+              plutilCommand,
+              plutilCommand,
+              plutilCommand,
+              plutilCommand,
+            ]),
+          ),
+          xcodeProjectInterpreter: FakeXcodeProjectInterpreterWithBuildSettings(),
         ),
         PlistParser: () => PlistParser(
           fileSystem: fileSystem,

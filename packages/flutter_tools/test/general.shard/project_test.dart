@@ -437,8 +437,6 @@ dependencies:
           FileSystem: () => MemoryFileSystem.test(),
           ProcessManager: () => FakeProcessManager.any(),
           FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
-          FlutterProjectFactory: () =>
-              FlutterProjectFactory(logger: logger, fileSystem: globals.fs, config: globals.config),
         },
       );
       testUsingContext(
@@ -454,8 +452,6 @@ dependencies:
           FileSystem: () => MemoryFileSystem.test(),
           ProcessManager: () => FakeProcessManager.any(),
           FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
-          FlutterProjectFactory: () =>
-              FlutterProjectFactory(logger: logger, fileSystem: globals.fs, config: globals.config),
         },
       );
       testUsingContext(
@@ -473,8 +469,6 @@ dependencies:
           FileSystem: () => MemoryFileSystem.test(),
           ProcessManager: () => FakeProcessManager.any(),
           FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
-          FlutterProjectFactory: () =>
-              FlutterProjectFactory(logger: logger, fileSystem: globals.fs, config: globals.config),
         },
       );
       _testInMemory('creates Android library in module', () async {
@@ -968,9 +962,10 @@ dependencies {
           toolContext: FakeToolContext.macosHost(processManager: FakeProcessManager.any()),
         );
         flutterProjectFactory = FlutterProjectFactory(
-          logger: logger,
-          fileSystem: fs,
           config: FakeConfig(),
+          fileSystem: fs,
+          logger: logger,
+          xcodeProjectInterpreter: xcodeProjectInterpreter,
         );
       });
 
@@ -1215,9 +1210,11 @@ android {
         testPlistUtils = FakePlistParser();
         xcodeProjectInterpreter = FakeXcodeProjectInterpreter();
         flutterProjectFactory = FlutterProjectFactory(
+          config: FakeConfig(),
           fileSystem: fs,
           logger: logger,
-          config: FakeConfig(),
+          plistParser: testPlistUtils,
+          xcodeProjectInterpreter: xcodeProjectInterpreter,
         );
       });
 
@@ -2390,9 +2387,11 @@ resolution: workspace
       testPlistParser = FakePlistParser();
       mockXcodeProjectInterpreter = FakeXcodeProjectInterpreter();
       flutterProjectFactory = FlutterProjectFactory(
+        config: FakeConfig(),
         fileSystem: fs,
         logger: logger,
-        config: FakeConfig(),
+        plistParser: testPlistParser,
+        xcodeProjectInterpreter: mockXcodeProjectInterpreter,
       );
       const buildContext = XcodeProjectBuildContext(scheme: 'Runner');
       mockXcodeProjectInterpreter.buildSettingsByBuildContext[buildContext] = <String, String>{
@@ -2699,6 +2698,7 @@ Future<void> regeneratePlatformSpecificTooling(
     cocoaPods: globals.cocoaPods,
     featureFlags: featureFlags,
     gradleUtils: globals.gradleUtils,
+    plistParser: FakePlistParser(),
     releaseMode: releaseMode,
     templateRenderer: globals.templateRenderer,
   );
@@ -2721,7 +2721,7 @@ Future<FlutterProject> someProject({
   androidDirectory
       .childFile('AndroidManifest.xml')
       .writeAsStringSync(androidManifestOverride ?? '<manifest></manifest>');
-  return FlutterProject.fromDirectory(directory, logger: globals.logger);
+  return const DelegatingToolContext().projectFactory.fromDirectory(directory);
 }
 
 Future<FlutterProject> projectWithPluginDependency() async {
@@ -2746,7 +2746,7 @@ dev_dependencies:
   final Directory androidDirectory = directory.childDirectory('android')
     ..createSync(recursive: true);
   androidDirectory.childFile('AndroidManifest.xml').writeAsStringSync('<manifest></manifest>');
-  return FlutterProject.fromDirectory(directory, logger: globals.logger);
+  return const DelegatingToolContext().projectFactory.fromDirectory(directory);
 }
 
 Future<FlutterProject> aPluginProject({bool legacy = true, bool includeAndroidMain = false}) async {
@@ -2794,7 +2794,7 @@ import io.flutter.embedding.engine.plugins.FlutterPlugin;
 class MyPlugin extends FluttPlugin { /* ... */ }
 ''');
   }
-  return FlutterProject.fromDirectory(directory, logger: globals.logger);
+  return const DelegatingToolContext().projectFactory.fromDirectory(directory);
 }
 
 Future<FlutterProject> aModuleProject() async {
@@ -2806,7 +2806,7 @@ flutter:
   module:
     androidPackage: com.example
 ''');
-  return FlutterProject.fromDirectory(directory, logger: globals.logger);
+  return const DelegatingToolContext().projectFactory.fromDirectory(directory);
 }
 
 FakeCommand createKgpVersionCommand(String kgpV, {String? gradlewPath}) {
@@ -2898,11 +2898,6 @@ void _testInMemory(
         osUtils: globals.os,
         platform: globals.platform,
         artifacts: <ArtifactSet>[],
-      ),
-      FlutterProjectFactory: () => FlutterProjectFactory(
-        fileSystem: testFileSystem,
-        logger: globals.logger,
-        config: globals.config,
       ),
       Pub: ThrowingPub.new,
     },

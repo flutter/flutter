@@ -130,10 +130,8 @@ void main() {
           artifacts: artifacts,
         );
         setUpIOSProject(fileSystem);
-        final FlutterProject flutterProject = FlutterProject.fromDirectory(
-          fileSystem.currentDirectory,
-          logger: logger,
-        );
+        final FlutterProject flutterProject = const DelegatingToolContext().projectFactory
+            .fromDirectory(fileSystem.currentDirectory);
         final buildableIOSApp = BuildableIOSApp(
           flutterProject.ios,
           'flutter',
@@ -194,10 +192,8 @@ void main() {
           artifacts: artifacts,
         );
         setUpIOSProject(fileSystem);
-        final FlutterProject flutterProject = FlutterProject.fromDirectory(
-          fileSystem.currentDirectory,
-          logger: logger,
-        );
+        final FlutterProject flutterProject = const DelegatingToolContext().projectFactory
+            .fromDirectory(fileSystem.currentDirectory);
         final buildableIOSApp = BuildableIOSApp(
           flutterProject.ios,
           'flutter',
@@ -237,10 +233,8 @@ void main() {
           analytics: fakeExactAnalytics,
         );
         setUpIOSProject(fileSystem);
-        final FlutterProject flutterProject = FlutterProject.fromDirectory(
-          fileSystem.currentDirectory,
-          logger: logger,
-        );
+        final FlutterProject flutterProject = const DelegatingToolContext().projectFactory
+            .fromDirectory(fileSystem.currentDirectory);
         final buildableIOSApp = BuildableIOSApp(
           flutterProject.ios,
           'flutter',
@@ -327,10 +321,8 @@ void main() {
           os: FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_x64),
         );
         setUpIOSProject(fileSystem);
-        final FlutterProject flutterProject = FlutterProject.fromDirectory(
-          fileSystem.currentDirectory,
-          logger: logger,
-        );
+        final FlutterProject flutterProject = const DelegatingToolContext().projectFactory
+            .fromDirectory(fileSystem.currentDirectory);
         final buildableIOSApp = BuildableIOSApp(
           flutterProject.ios,
           'flutter',
@@ -462,10 +454,8 @@ void main() {
             os: FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_x64),
           );
           setUpIOSProject(fileSystem);
-          final FlutterProject flutterProject = FlutterProject.fromDirectory(
-            fileSystem.currentDirectory,
-            logger: logger,
-          );
+          final FlutterProject flutterProject = const DelegatingToolContext().projectFactory
+              .fromDirectory(fileSystem.currentDirectory);
           final buildableIOSApp = BuildableIOSApp(
             flutterProject.ios,
             'flutter',
@@ -571,10 +561,8 @@ void main() {
             os: FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_x64),
           );
           setUpIOSProject(fileSystem);
-          final FlutterProject flutterProject = FlutterProject.fromDirectory(
-            fileSystem.currentDirectory,
-            logger: logger,
-          );
+          final FlutterProject flutterProject = const DelegatingToolContext().projectFactory
+              .fromDirectory(fileSystem.currentDirectory);
           final buildableIOSApp = BuildableIOSApp(
             flutterProject.ios,
             'flutter',
@@ -655,10 +643,8 @@ void main() {
           analytics: fakeExactAnalytics,
         );
         setUpIOSProject(fileSystem);
-        final FlutterProject flutterProject = FlutterProject.fromDirectory(
-          fileSystem.currentDirectory,
-          logger: logger,
-        );
+        final FlutterProject flutterProject = const DelegatingToolContext().projectFactory
+            .fromDirectory(fileSystem.currentDirectory);
         final buildableIOSApp = BuildableIOSApp(
           flutterProject.ios,
           'flutter',
@@ -784,10 +770,8 @@ void main() {
             analytics: fakeExactAnalytics,
           );
           setUpIOSProject(fileSystem);
-          final FlutterProject flutterProject = FlutterProject.fromDirectory(
-            fileSystem.currentDirectory,
-            logger: logger,
-          );
+          final FlutterProject flutterProject = const DelegatingToolContext().projectFactory
+              .fromDirectory(fileSystem.currentDirectory);
           final buildableIOSApp = BuildableIOSApp(
             flutterProject.ios,
             'flutter',
@@ -843,10 +827,8 @@ void main() {
             analytics: fakeExactAnalytics,
           );
           setUpIOSProject(fileSystem);
-          final FlutterProject flutterProject = FlutterProject.fromDirectory(
-            fileSystem.currentDirectory,
-            logger: logger,
-          );
+          final FlutterProject flutterProject = const DelegatingToolContext().projectFactory
+              .fromDirectory(fileSystem.currentDirectory);
           final buildableIOSApp = BuildableIOSApp(
             flutterProject.ios,
             'flutter',
@@ -899,10 +881,8 @@ void main() {
             coreDeviceControl: FakeIOSCoreDeviceControl(launchSuccess: false),
           );
           setUpIOSProject(fileSystem);
-          final FlutterProject flutterProject = FlutterProject.fromDirectory(
-            fileSystem.currentDirectory,
-            logger: logger,
-          );
+          final FlutterProject flutterProject = const DelegatingToolContext().projectFactory
+              .fromDirectory(fileSystem.currentDirectory);
           final buildableIOSApp = BuildableIOSApp(
             flutterProject.ios,
             'flutter',
@@ -951,10 +931,8 @@ void main() {
             analytics: fakeExactAnalytics,
           );
           setUpIOSProject(fileSystem);
-          final FlutterProject flutterProject = FlutterProject.fromDirectory(
-            fileSystem.currentDirectory,
-            logger: logger,
-          );
+          final FlutterProject flutterProject = const DelegatingToolContext().projectFactory
+              .fromDirectory(fileSystem.currentDirectory);
           final buildableIOSApp = BuildableIOSApp(
             flutterProject.ios,
             'flutter',
@@ -1022,10 +1000,8 @@ void main() {
           );
 
           setUpIOSProject(fileSystem);
-          final FlutterProject flutterProject = FlutterProject.fromDirectory(
-            fileSystem.currentDirectory,
-            logger: logger,
-          );
+          final FlutterProject flutterProject = const DelegatingToolContext().projectFactory
+              .fromDirectory(fileSystem.currentDirectory);
           final buildableIOSApp = BuildableIOSApp(
             flutterProject.ios,
             'flutter',
@@ -1103,10 +1079,8 @@ void main() {
           );
 
           setUpIOSProject(fileSystem);
-          final FlutterProject flutterProject = FlutterProject.fromDirectory(
-            fileSystem.currentDirectory,
-            logger: logger,
-          );
+          final FlutterProject flutterProject = const DelegatingToolContext().projectFactory
+              .fromDirectory(fileSystem.currentDirectory);
           final buildableIOSApp = BuildableIOSApp(
             flutterProject.ios,
             'flutter',
@@ -1205,10 +1179,8 @@ void main() {
             );
 
             setUpIOSProject(fileSystem, scheme: flavor);
-            final FlutterProject flutterProject = FlutterProject.fromDirectory(
-              fileSystem.currentDirectory,
-              logger: logger,
-            );
+            final FlutterProject flutterProject = const DelegatingToolContext().projectFactory
+                .fromDirectory(fileSystem.currentDirectory);
             final buildableIOSApp = BuildableIOSApp(
               flutterProject.ios,
               'flutter',
@@ -1292,10 +1264,8 @@ void main() {
           );
 
           setUpIOSProject(fileSystem);
-          final FlutterProject flutterProject = FlutterProject.fromDirectory(
-            fileSystem.currentDirectory,
-            logger: logger,
-          );
+          final FlutterProject flutterProject = const DelegatingToolContext().projectFactory
+              .fromDirectory(fileSystem.currentDirectory);
           final buildableIOSApp = BuildableIOSApp(
             flutterProject.ios,
             'flutter',
@@ -1374,10 +1344,8 @@ void main() {
             coreDeviceControl: FakeIOSCoreDeviceControl(),
           );
           setUpIOSProject(fileSystem);
-          final FlutterProject flutterProject = FlutterProject.fromDirectory(
-            fileSystem.currentDirectory,
-            logger: logger,
-          );
+          final FlutterProject flutterProject = const DelegatingToolContext().projectFactory
+              .fromDirectory(fileSystem.currentDirectory);
           final buildableIOSApp = BuildableIOSApp(
             flutterProject.ios,
             'flutter',
@@ -1431,10 +1399,8 @@ void main() {
             coreDeviceControl: FakeIOSCoreDeviceControl(),
           );
           setUpIOSProject(fileSystem, createWorkspace: false);
-          final FlutterProject flutterProject = FlutterProject.fromDirectory(
-            fileSystem.currentDirectory,
-            logger: logger,
-          );
+          final FlutterProject flutterProject = const DelegatingToolContext().projectFactory
+              .fromDirectory(fileSystem.currentDirectory);
           final buildableIOSApp = BuildableIOSApp(
             flutterProject.ios,
             'flutter',
@@ -1489,10 +1455,8 @@ void main() {
             coreDeviceControl: FakeIOSCoreDeviceControl(),
           );
           setUpIOSProject(fileSystem);
-          final FlutterProject flutterProject = FlutterProject.fromDirectory(
-            fileSystem.currentDirectory,
-            logger: logger,
-          );
+          final FlutterProject flutterProject = const DelegatingToolContext().projectFactory
+              .fromDirectory(fileSystem.currentDirectory);
           final buildableIOSApp = BuildableIOSApp(
             flutterProject.ios,
             'flutter',

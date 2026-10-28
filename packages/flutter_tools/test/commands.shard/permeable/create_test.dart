@@ -12,6 +12,7 @@ import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/android/gradle_utils.dart'
     show
+        GradleUtils,
         templateAndroidGradlePluginVersion,
         templateAndroidGradlePluginVersionForModule,
         templateDefaultGradleVersion;
@@ -22,6 +23,7 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/net.dart';
+import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/template.dart';
 import 'package:flutter_tools/src/base/version.dart' as software;
@@ -38,6 +40,7 @@ import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/flutter_project_metadata.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/isolated/mustache_template.dart';
+import 'package:flutter_tools/src/macos/cocoapods.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:pub_semver/pub_semver.dart';
@@ -1104,7 +1107,9 @@ void main() {
 
     await runner.run(<String>['create', '--template=module', '--no-pub', projectDir.path]);
 
-    final FlutterProject project = FlutterProject.fromDirectory(projectDir, logger: globals.logger);
+    final FlutterProject project = const DelegatingToolContext().projectFactory.fromDirectory(
+      projectDir,
+    );
     expect(project.usesAndroidX, true);
   });
 
@@ -2019,9 +2024,8 @@ void main() {
         'com.example',
         tmpProjectDir,
       ]);
-      FlutterProject project = FlutterProject.fromDirectory(
+      FlutterProject project = const DelegatingToolContext().projectFactory.fromDirectory(
         globals.fs.directory(tmpProjectDir),
-        logger: globals.logger,
       );
       expect(
         await project.ios.productBundleIdentifier(BuildInfo.debug),
@@ -2048,9 +2052,8 @@ void main() {
         'abc^*.1#@',
         tmpProjectDir,
       ]);
-      project = FlutterProject.fromDirectory(
+      project = const DelegatingToolContext().projectFactory.fromDirectory(
         globals.fs.directory(tmpProjectDir),
-        logger: globals.logger,
       );
       expect(await project.ios.productBundleIdentifier(BuildInfo.debug), 'abc.1.testAbc');
       expect(project.android.applicationId, 'abc.u1.test_abc');
@@ -2064,9 +2067,8 @@ void main() {
         '#+^%',
         tmpProjectDir,
       ]);
-      project = FlutterProject.fromDirectory(
+      project = const DelegatingToolContext().projectFactory.fromDirectory(
         globals.fs.directory(tmpProjectDir),
-        logger: globals.logger,
       );
       expect(await project.ios.productBundleIdentifier(BuildInfo.debug), 'flutterProject.untitled');
       expect(project.android.applicationId, 'flutter_project.untitled');
@@ -2216,9 +2218,8 @@ void main() {
       ], <String>[]);
       projectDir.childDirectory('.ios').deleteSync(recursive: true);
       await _createProject(projectDir, <String>[], <String>[]);
-      final FlutterProject project = FlutterProject.fromDirectory(
+      final FlutterProject project = const DelegatingToolContext().projectFactory.fromDirectory(
         projectDir,
-        logger: globals.logger,
       );
       expect(
         await project.ios.productBundleIdentifier(BuildInfo.debug),
@@ -2266,7 +2267,9 @@ void main() {
     ], <String>[]);
     projectDir.childDirectory('ios').deleteSync(recursive: true);
     await _createProject(projectDir, <String>['--no-pub'], <String>[]);
-    final FlutterProject project = FlutterProject.fromDirectory(projectDir, logger: globals.logger);
+    final FlutterProject project = const DelegatingToolContext().projectFactory.fromDirectory(
+      projectDir,
+    );
     expect(
       await project.ios.productBundleIdentifier(BuildInfo.debug),
       'com.bar.foo.flutterProject',
@@ -2303,9 +2306,8 @@ void main() {
           'ios/Classes/FlutterProjectPlugin.swift',
         ],
       );
-      final FlutterProject project = FlutterProject.fromDirectory(
+      final FlutterProject project = const DelegatingToolContext().projectFactory.fromDirectory(
         projectDir,
-        logger: globals.logger,
       );
       expect(
         await project.example.ios.productBundleIdentifier(BuildInfo.debug),
@@ -2348,9 +2350,8 @@ void main() {
           'ios/Classes/FlutterProjectPlugin.swift',
         ],
       );
-      final FlutterProject project = FlutterProject.fromDirectory(
+      final FlutterProject project = const DelegatingToolContext().projectFactory.fromDirectory(
         projectDir,
-        logger: globals.logger,
       );
       expect(
         await project.example.ios.productBundleIdentifier(BuildInfo.debug),
@@ -5369,25 +5370,50 @@ CreateCommand createCreateCommand({
   ToolContext? toolContext,
   bool verboseHelp = false,
 }) {
+  final ToolContext resolvedToolContext =
+      toolContext ??
+      FakeToolContext(
+        fs: globals.fs,
+        logger: globals.logger,
+        platform: globals.platform,
+        processManager: globals.processManager,
+        cache: globals.cache,
+        flutterVersion: globals.flutterVersion,
+      );
+  final ToolContext(
+    :Cache cache,
+    :FileSystem fs,
+    :Logger logger,
+    :OperatingSystemUtils os,
+    :Platform platform,
+    :ProcessManager processManager,
+  ) = resolvedToolContext;
   return CreateCommand(
-    androidContext: androidContext ?? FakeAndroidContext(javaBuilder: () => globals.java),
-    appleContext: appleContext ?? FakeAppleContext(),
-    templateRenderer: templateRenderer ?? const MustacheTemplateRenderer(),
-    toolContext:
-        toolContext ??
-        FakeToolContext(
-          fs: globals.fs,
-          logger: globals.logger,
-          platform: globals.platform,
-          processManager: globals.processManager,
-          cache: globals.cache,
-          flutterVersion: globals.flutterVersion,
-          projectFactory: FlutterProjectFactory(
-            fileSystem: globals.fs,
-            logger: globals.logger,
-            config: globals.config,
+    androidContext:
+        androidContext ??
+        FakeAndroidContext(
+          gradleUtils: GradleUtils(
+            cache: cache,
+            logger: logger,
+            operatingSystemUtils: os,
+            platform: platform,
+          ),
+          javaBuilder: () => globals.java,
+        ),
+    appleContext:
+        appleContext ??
+        FakeAppleContext(
+          cocoaPods: CocoaPods(
+            analytics: const NoOpAnalytics(),
+            fileSystem: fs,
+            logger: logger,
+            platform: platform,
+            processManager: processManager,
+            xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
           ),
         ),
+    templateRenderer: templateRenderer ?? const MustacheTemplateRenderer(),
+    toolContext: resolvedToolContext,
     extensionTemplateManager: extensionTemplateManager,
     net:
         net ??
