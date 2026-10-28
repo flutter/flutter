@@ -11,8 +11,6 @@ library;
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:meta/meta.dart';
-
 /// A callback to use with [integrationDriver].
 ///
 /// The callback receives the name of screenshot passed to `binding.takeScreenshot(<name>)`,
@@ -248,7 +246,6 @@ enum WebDriverMouseButton {
 /// [WebDriverPointerAction.pause] constructors.
 ///
 /// See: https://www.w3.org/TR/webdriver/#actions
-@immutable
 sealed class WebDriverPointerAction {
   const WebDriverPointerAction._();
 
@@ -356,6 +353,7 @@ final class WebDriverPointerMove extends WebDriverPointerAction {
   }
 
   @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes, common.dart stays dependency-free (no package:meta).
   bool operator ==(Object other) {
     return other is WebDriverPointerMove &&
         other.x == x &&
@@ -364,6 +362,7 @@ final class WebDriverPointerMove extends WebDriverPointerAction {
   }
 
   @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes, common.dart stays dependency-free (no package:meta).
   int get hashCode => Object.hash(WebDriverPointerMove, x, y, duration);
 
   @override
@@ -386,11 +385,13 @@ final class WebDriverPointerDown extends WebDriverPointerAction {
   }
 
   @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes, common.dart stays dependency-free (no package:meta).
   bool operator ==(Object other) {
     return other is WebDriverPointerDown && other.button == button;
   }
 
   @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes, common.dart stays dependency-free (no package:meta).
   int get hashCode => Object.hash(WebDriverPointerDown, button);
 
   @override
@@ -413,11 +414,13 @@ final class WebDriverPointerUp extends WebDriverPointerAction {
   }
 
   @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes, common.dart stays dependency-free (no package:meta).
   bool operator ==(Object other) {
     return other is WebDriverPointerUp && other.button == button;
   }
 
   @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes, common.dart stays dependency-free (no package:meta).
   int get hashCode => Object.hash(WebDriverPointerUp, button);
 
   @override
@@ -443,11 +446,13 @@ final class WebDriverPointerPause extends WebDriverPointerAction {
   }
 
   @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes, common.dart stays dependency-free (no package:meta).
   bool operator ==(Object other) {
     return other is WebDriverPointerPause && other.duration == duration;
   }
 
   @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes, common.dart stays dependency-free (no package:meta).
   int get hashCode => Object.hash(WebDriverPointerPause, duration);
 
   @override

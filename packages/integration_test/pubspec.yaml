@@ -14,7 +14,6 @@ dependencies:
     sdk: flutter
   flutter_test:
     sdk: flutter
-  meta: any
   path: any
   vm_service: any
 
@@ -33,4 +32,4 @@ flutter:
       ios:
         pluginClass: IntegrationTestPlugin
 
-# PUBSPEC CHECKSUM: mmfuqa
+# PUBSPEC CHECKSUM: 768bse
