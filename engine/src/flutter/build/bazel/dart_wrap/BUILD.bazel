@@ -11,10 +11,11 @@
 # Mac of either CPU since the macOS port, research/20 M3): its clang, its
 # cpython3 and its prebuilt Dart SDK go into the GN tree at the paths GN's
 # host_os/host_cpu name them by. The targets are the host's own, Linux
-# arm64, Android's ABIs and the Mac's two CPUs (the GN args select() on the
-# platform). On a Mac the GN build takes the SDK, the platform and the
-# toolchain of the host's Xcode from @macos_sdk (the same Xcode the Bazel
-# toolchain's sysroot comes from) rather than running xcrun itself.
+# arm64, Android's ABIs, the Mac's two CPUs and iOS's device and simulator
+# (the GN args select() on the platform). On a Mac the GN build takes the
+# SDKs, the platforms and the toolchain of the host's Xcode from @macos_sdk
+# (the same Xcode the Bazel toolchain's sysroot comes from) rather than
+# running xcrun itself.
 
 load("@bazel_skylib//lib:selects.bzl", "selects")
 load("@bazel_skylib//rules:common_settings.bzl", "bool_flag")
@@ -30,7 +31,13 @@ load(
 )
 load("@rules_cc//cc:defs.bzl", "cc_library")
 load("//build_defs/gn:gn_build.bzl", "gn_build")
-load("//build_defs/gn:macos_args.bzl", "MACOS_TARGET_GN_ARGS")
+load(
+    "//build_defs/gn:macos_args.bzl",
+    "IOS_DEVICE_GN_ARGS",
+    "IOS_SIMULATOR_GN_ARGS",
+    "IOS_TARGET_GN_ARGS",
+    "MACOS_TARGET_GN_ARGS",
+)
 load("//build_defs/repositories:deps.lock.bzl", "GIT_DEPS")
 
 package(default_visibility = ["//visibility:public"])
@@ -132,6 +139,47 @@ config_setting(
     ],
 )
 
+# The iOS platforms (build/bazel/toolchains:ios_arm64, :ios_sim_arm64,
+# :ios_sim_x64), by CPU the same way.
+config_setting(
+    name = "ios_arm64",
+    constraint_values = [
+        "@platforms//os:ios",
+        "@platforms//cpu:aarch64",
+    ],
+)
+
+config_setting(
+    name = "ios_x64",
+    constraint_values = [
+        "@platforms//os:ios",
+        "@platforms//cpu:x86_64",
+    ],
+)
+
+# The Apple platforms, for the facades' frameworks and libraries (Dart's
+# runtime/bin/BUILD.gn and runtime/vm/BUILD.gn list them under `is_mac ||
+# is_ios`).
+selects.config_setting_group(
+    name = "apple",
+    match_any = [
+        "@platforms//os:ios",
+        "@platforms//os:macos",
+    ],
+)
+
+# tools/gn's dart_force_simulator: a debug build for an arm64 device gets a
+# VM with the simulator in it, so that it can interpret where the device
+# forbids JIT code.
+selects.config_setting_group(
+    name = "ios_device_arm64_debug",
+    match_all = [
+        "//engine/src/flutter/build/bazel:ios_device_enabled",
+        "@platforms//cpu:aarch64",
+        "//engine/src/flutter/common:runtime_mode_debug",
+    ],
+)
+
 # The 64-bit Android ABIs, for the VM's compressed pointers.
 selects.config_setting_group(
     name = "android_64",
@@ -157,8 +205,9 @@ selects.config_setting_group(
     ],
 )
 
-# An Android target built on a Mac (mac_android_* in ci/builders): the
-# universal gen_snapshot's halves come from the Mac toolchains.
+# An Android target built on a Mac (mac_android_* in ci/builders), or an
+# iOS one: the universal gen_snapshot's halves come from the Mac toolchains,
+# neither of them the default toolchain.
 selects.config_setting_group(
     name = "android_from_mac",
     match_all = [
@@ -167,11 +216,23 @@ selects.config_setting_group(
     ],
 )
 
+selects.config_setting_group(
+    name = "target_from_mac_toolchains",
+    match_any = [
+        ":android_from_mac",
+        "@platforms//os:ios",
+    ],
+)
+
 filegroup(
     name = "prebuilt_dart_sdk",
     srcs = select({
         ":macos_arm64": ["@dart_sdk_macos_arm64//:all_files"],
         ":macos_x64": ["@dart_sdk_macos_x64//:all_files"],
+        # An iOS target ships no SDK (build_engine_artifacts is false there);
+        # the host's serves the build-time tools.
+        ":ios_arm64": [HOST_DART_SDK + "//:all_files"],
+        ":ios_x64": [HOST_DART_SDK + "//:all_files"],
         "@platforms//cpu:aarch64": ["@dart_sdk_linux_arm64//:all_files"],
         "//conditions:default": [HOST_DART_SDK + "//:all_files"],
     }),
@@ -207,10 +268,20 @@ _GN_ARGS = {
     # where the VM's libraries are built against the NDK's sysroot and, on
     # the 64-bit ABIs, with compressed pointers (tools/gn: android x64 and
     # arm64); mac for the macOS platforms, with what tools/gn sets on a Mac
-    # and the host's Xcode (//build_defs/gn:macos_args.bzl); Linux otherwise.
+    # and the host's Xcode (//build_defs/gn:macos_args.bzl); ios for the iOS
+    # platforms (tools/gn --ios), with the iPhone SDKs besides and the
+    # environment's flags below; Linux otherwise.
     "@platforms//os:android": {"target_os": '"android"'},
+    "@platforms//os:ios": IOS_TARGET_GN_ARGS,
     "@platforms//os:macos": MACOS_TARGET_GN_ARGS,
     "//conditions:default": {"target_os": '"linux"'},
+}) | select({
+    "//engine/src/flutter/build/bazel:ios_simulator_enabled": IOS_SIMULATOR_GN_ARGS,
+    "//engine/src/flutter/build/bazel:ios_device_enabled": IOS_DEVICE_GN_ARGS,
+    "//conditions:default": {},
+}) | select({
+    ":ios_device_arm64_debug": {"dart_force_simulator": "true"},
+    "//conditions:default": {},
 }) | select({
     ":android_64": {"dart_use_compressed_pointers": "true"},
     "//conditions:default": {},
@@ -340,7 +411,7 @@ gn_build(
             "gen_snapshot_mac_arm64": "clang_arm64/gen_snapshot",
             "gen_snapshot_mac_x64": "gen_snapshot_host_targeting_host",
         },
-        ":android_from_mac": {
+        ":target_from_mac_toolchains": {
             "gen_snapshot_mac_arm64": "clang_arm64/gen_snapshot",
             "gen_snapshot_mac_x64": "clang_x64/gen_snapshot",
         },
@@ -351,8 +422,14 @@ gn_build(
     }) | select({
         # The target's own analyze_snapshot is built where the engine
         # artifacts are (common/config.gni's build_engine_artifacts), never
-        # for Android (BUILD.gn).
+        # for Android (BUILD.gn); nor is the target's own gen_snapshot for
+        # iOS, where no engine artifact is built (the host's universal
+        # gen_snapshot is the iOS build's only one).
         "@platforms//os:android": {"analyze_snapshot": ""},
+        "@platforms//os:ios": {
+            "analyze_snapshot": "",
+            "gen_snapshot": "",
+        },
         "//conditions:default": {},
     }),
     root_target_dir = "flutter/build/bazel/dart_wrap",
@@ -407,9 +484,9 @@ gn_build(
 # ---------------------------------------------------------------------------
 
 # runtime/vm/BUILD.gn's libdart_vm_config, the VM's public config: objc on
-# a Mac (and iOS), besides dl and pthread.
+# the Apple platforms, besides dl and pthread.
 _VM_MAC_LINKOPTS = select({
-    "@platforms//os:macos": ["-lobjc"],
+    ":apple": ["-lobjc"],
     "//conditions:default": [],
 })
 
@@ -449,14 +526,14 @@ cc_library(
 )
 
 # //flutter/third_party/dart/runtime/bin:libdart_builtin -- shared by the
-# dart:io glue and the ELF loader. On a Mac its GN target names
-# Security.framework (runtime/bin/BUILD.gn's build_libdart_builtin).
+# dart:io glue and the ELF loader. On the Apple platforms its GN target
+# names Security.framework (runtime/bin/BUILD.gn's build_libdart_builtin).
 # buildifier: disable=no-hdrs-no-alwayslink
 cc_library(
     name = "libdart_builtin",
     srcs = [":libdart_builtin.a"],
     linkopts = ["-ldl"] + select({
-        "@platforms//os:macos": [
+        ":apple": [
             "-framework",
             "Security",
         ],
@@ -466,16 +543,16 @@ cc_library(
 )
 
 # //flutter/third_party/dart/runtime/bin:common_embedder_dart_io -- dart:io
-# for embedders, on BoringSSL and zlib. On a Mac its GN target (the dart_io
-# template) names CoreFoundation, Security, Foundation and CoreServices;
-# without them a Mac's flutter_tester link fails on dart:io's symbols (the
-# Mac's T9 finding).
+# for embedders, on BoringSSL and zlib. On the Apple platforms its GN target
+# (the dart_io template) names CoreFoundation, Security, Foundation and
+# CoreServices; without them a Mac's flutter_tester link fails on dart:io's
+# symbols (the Mac's T9 finding).
 # buildifier: disable=no-hdrs-no-alwayslink
 cc_library(
     name = "common_embedder_dart_io",
     srcs = [":libcommon_embedder_dart_io.a"],
     linkopts = ["-ldl"] + select({
-        "@platforms//os:macos": [
+        ":apple": [
             "-framework",
             "CoreFoundation",
             "-framework",
