@@ -486,31 +486,61 @@ void main() {
         ),
       );
     });
-  });
 
-  // Regression test for https://github.com/flutter/flutter/issues/71227
-  testWidgets('AnimatedSize with zero duration does not throw when the child size changes', (
-    WidgetTester tester,
-  ) async {
-    Widget build(double size) {
-      return Center(
-        child: AnimatedSize(
-          duration: Duration.zero,
-          child: SizedBox.square(dimension: size),
-        ),
-      );
-    }
+    // Regression test for https://github.com/flutter/flutter/issues/71227
+    testWidgets('AnimatedSize with zero duration does not throw when the child size changes', (
+      WidgetTester tester,
+    ) async {
+      Widget build(double size) {
+        return Center(
+          child: AnimatedSize(
+            duration: Duration.zero,
+            child: SizedBox.square(dimension: size),
+          ),
+        );
+      }
 
-    await tester.pumpWidget(build(100.0));
-    expect(tester.getSize(find.byType(AnimatedSize)), const Size.square(100.0));
+      await tester.pumpWidget(build(100.0));
+      expect(tester.getSize(find.byType(AnimatedSize)), const Size.square(100.0));
 
-    await tester.pumpWidget(build(200.0));
-    expect(tester.takeException(), isNull);
-    expect(tester.getSize(find.byType(AnimatedSize)), const Size.square(200.0));
+      await tester.pumpWidget(build(200.0));
+      expect(tester.takeException(), isNull);
+      expect(tester.getSize(find.byType(AnimatedSize)), const Size.square(200.0));
 
-    await tester.pumpWidget(build(50.0));
-    expect(tester.takeException(), isNull);
-    expect(tester.getSize(find.byType(AnimatedSize)), const Size.square(50.0));
+      await tester.pumpWidget(build(50.0));
+      expect(tester.takeException(), isNull);
+      expect(tester.getSize(find.byType(AnimatedSize)), const Size.square(50.0));
+    });
+
+    // Regression test for https://github.com/flutter/flutter/issues/71227
+    testWidgets(
+      'AnimatedSize with zero duration does not throw when re-laid out with the same child size',
+      (WidgetTester tester) async {
+        Widget build(double maxWidth) {
+          return Center(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(maxWidth: maxWidth),
+              child: const AnimatedSize(
+                duration: Duration.zero,
+                child: SizedBox.square(dimension: 100.0),
+              ),
+            ),
+          );
+        }
+
+        await tester.pumpWidget(build(300.0));
+        final RenderAnimatedSize box = tester.renderObject(find.byType(AnimatedSize));
+        expect(box.state, RenderAnimatedSizeState.stable);
+        expect(box.debugController!.value, 0.0);
+
+        // New constraints trigger a relayout, but the child is still 100x100, so
+        // the render object resumes (and synchronously completes) the animation.
+        await tester.pumpWidget(build(400.0));
+        expect(tester.takeException(), isNull);
+        expect(box.debugController!.value, 1.0);
+        expect(tester.getSize(find.byType(AnimatedSize)), const Size.square(100.0));
+      },
+    );
   });
 
   testWidgets('AnimatedSize does not crash at zero size', (WidgetTester tester) async {
