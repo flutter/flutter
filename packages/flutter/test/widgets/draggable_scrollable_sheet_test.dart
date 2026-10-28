@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
@@ -22,6 +23,10 @@ void main() {
     List<double>? snapSizes,
     Duration? snapAnimationDuration,
     double? itemExtent,
+    double? cacheExtent,
+    ScrollPhysics? physics,
+    IndexedWidgetBuilder? itemBuilder,
+    MediaQueryData mediaQueryData = const MediaQueryData(),
     Key? containerKey,
     Key? stackKey,
     NotificationListenerCallback<ScrollNotification>? onScrollNotification,
@@ -33,7 +38,7 @@ void main() {
     return Directionality(
       textDirection: TextDirection.ltr,
       child: MediaQuery(
-        data: const MediaQueryData(),
+        data: mediaQueryData,
         child: Stack(
           key: stackKey,
           children: <Widget>[
@@ -58,9 +63,13 @@ void main() {
                         color: const Color(0xFFABCDEF),
                         child: ListView.builder(
                           controller: ignoreController ? null : scrollController,
+                          physics: physics,
+                          cacheExtent: cacheExtent,
                           itemExtent: itemExtent,
                           itemCount: itemCount,
-                          itemBuilder: (BuildContext context, int index) => Text('Item $index'),
+                          itemBuilder:
+                              itemBuilder ??
+                              (BuildContext context, int index) => Text('Item $index'),
                         ),
                       ),
                     ),
@@ -69,6 +78,54 @@ void main() {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget buildKeyboardSheet({
+    required DraggableScrollableController controller,
+    FocusNode? focusNode,
+    int focusIndex = 4,
+  }) {
+    final textControllers = List<TextEditingController>.generate(
+      20,
+      (int index) => TextEditingController(),
+    );
+    final focusNodes = List<FocusNode>.generate(
+      20,
+      (int index) => index == focusIndex && focusNode != null ? focusNode : FocusNode(),
+    );
+    addTearDown(() {
+      for (final textController in textControllers) {
+        textController.dispose();
+      }
+      for (final node in focusNodes) {
+        if (node != focusNode) {
+          node.dispose();
+        }
+      }
+    });
+
+    return TestWidgetsApp(
+      home: Builder(
+        builder: (BuildContext context) => Padding(
+          padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(context).bottom),
+          child: boilerplateWidget(
+            null,
+            controller: controller,
+            itemCount: textControllers.length,
+            itemExtent: 50,
+            mediaQueryData: MediaQuery.of(context),
+            itemBuilder: (BuildContext context, int index) => EditableText(
+              key: ValueKey<int>(index),
+              controller: textControllers[index],
+              focusNode: focusNodes[index],
+              style: const TextStyle(fontSize: 16, color: Color(0xFF000000)),
+              cursorColor: const Color(0xFF000000),
+              backgroundCursorColor: const Color(0xFF808080),
+            ),
+          ),
         ),
       ),
     );
@@ -244,7 +301,13 @@ void main() {
         expect(find.text('Item 21'), findsOneWidget);
         expect(find.text('Item 36'), findsOneWidget);
 
-        await tester.dragFrom(const Offset(20, 20), const Offset(0, 325));
+        // Returning the list and shrinking the sheet need separate updates.
+        final TestGesture gesture = await tester.startGesture(const Offset(20, 20));
+        for (var i = 0; i < 20; i += 1) {
+          await gesture.moveBy(const Offset(0, 325 / 20));
+          await tester.pump();
+        }
+        await gesture.up();
         await tester.pumpAndSettle();
         await tester.tap(find.text('TapHere'));
         expect(taps, 2);
@@ -318,7 +381,9 @@ void main() {
 
     testWidgets('Can be flung up and then back down', (WidgetTester tester) async {
       var taps = 0;
-      await tester.pumpWidget(boilerplateWidget(() => taps++));
+      final controller = DraggableScrollableController();
+      addTearDown(controller.dispose);
+      await tester.pumpWidget(boilerplateWidget(() => taps++, controller: controller));
 
       expect(find.text('TapHere'), findsOneWidget);
       await tester.tap(find.text('TapHere'));
@@ -342,18 +407,19 @@ void main() {
         await tester.fling(find.text('Item 70'), const Offset(0, 200), 2000);
       }
       await tester.pumpAndSettle();
+      // The remaining fling velocity shrinks the sheet once the list returns.
+      expect(controller.size, lessThan(1));
       expect(find.text('TapHere'), findsOneWidget);
-      await tester.tap(find.text('TapHere'), warnIfMissed: false);
-      expect(taps, 1);
+      await tester.tap(find.text('TapHere'));
+      expect(taps, 2);
       expect(find.text('Item 1'), findsOneWidget);
-      expect(find.text('Item 21'), findsOneWidget);
       expect(find.text('Item 70'), findsNothing);
 
       await tester.fling(find.text('Item 1'), const Offset(0, 200), 2000);
       await tester.pumpAndSettle();
       expect(find.text('TapHere'), findsOneWidget);
       await tester.tap(find.text('TapHere'));
-      expect(taps, 2);
+      expect(taps, 3);
       expect(find.text('Item 1'), findsOneWidget);
       expect(find.text('Item 21'), findsNothing);
       expect(find.text('Item 70'), findsNothing);
@@ -698,7 +764,13 @@ void main() {
       closeTo(.8, precisionErrorTolerance),
     );
 
-    await tester.drag(find.text('Item 1'), Offset(0, .2 * screenHeight));
+    // The upward drag preserves its remainder by scrolling the list. Return
+    // to the start so that the next drag exercises the sheet's size changes.
+    final ScrollPosition position = tester.state<ScrollableState>(find.byType(Scrollable)).position;
+    expect(position.pixels, greaterThan(0));
+    position.jumpTo(0);
+    await tester.pumpAndSettle();
+    await tester.drag(find.byKey(containerKey), Offset(0, .2 * screenHeight));
 
     // Pump the same widget but with snapping enabled.
     await tester.pumpWidget(
@@ -882,7 +954,8 @@ void main() {
     final types = <Type>[
       ScrollStartNotification,
       UserScrollNotification,
-      ...List<Type>.filled(5, ScrollUpdateNotification),
+      // The drag reaching maxChildSize also scrolls its remaining distance.
+      ...List<Type>.filled(6, ScrollUpdateNotification),
       ScrollEndNotification,
       UserScrollNotification,
     ];
@@ -1969,4 +2042,1261 @@ void main() {
       expect(lastExtent, 1.0);
     },
   );
+
+  testWidgets('The sheet can expand after the keyboard reveals a text field', (
+    WidgetTester tester,
+  ) async {
+    // Regression test for https://github.com/flutter/flutter/issues/94942.
+    tester.view.devicePixelRatio = 1;
+    tester.view.physicalSize = const Size(400, 600);
+    addTearDown(tester.view.reset);
+    final controller = DraggableScrollableController();
+    addTearDown(controller.dispose);
+    await tester.pumpWidget(buildKeyboardSheet(controller: controller));
+    final ScrollController scrollController = tester
+        .widget<ListView>(find.byType(ListView))
+        .controller!;
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey<int>(4)));
+    await tester.pumpAndSettle();
+    tester.view.viewInsets = const FakeViewPadding(bottom: 200);
+    await tester.pumpAndSettle();
+
+    // Focusing the field retains the normal fractional sheet size and scrolls
+    // the field into view. That offset must not prevent the next upward drag.
+    expect(controller.size, 0.5);
+    final double revealedOffset = scrollController.offset;
+    expect(revealedOffset, greaterThan(0));
+    await tester.drag(find.byType(ListView), const Offset(0, -60));
+    await tester.pumpAndSettle();
+    expect(controller.size, greaterThan(0.5));
+    expect(scrollController.offset, closeTo(revealedOffset, precisionErrorTolerance));
+  }, variant: TargetPlatformVariant.all());
+
+  for (final keepFocus in <bool>[true, false]) {
+    testWidgets('Hiding the keyboard keeps the sheet responsive with keepFocus=$keepFocus', (
+      WidgetTester tester,
+    ) async {
+      tester.view.devicePixelRatio = 1;
+      tester.view.physicalSize = const Size(400, 600);
+      addTearDown(tester.view.reset);
+      final controller = DraggableScrollableController();
+      final focusNode = FocusNode();
+      addTearDown(controller.dispose);
+      addTearDown(focusNode.dispose);
+      await tester.pumpWidget(buildKeyboardSheet(controller: controller, focusNode: focusNode));
+      final ScrollController scrollController = tester
+          .widget<ListView>(find.byType(ListView))
+          .controller!;
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey<int>(4)));
+      tester.view.viewInsets = const FakeViewPadding(bottom: 200);
+      await tester.pumpAndSettle();
+      expect(focusNode.hasFocus, isTrue);
+      expect(scrollController.offset, greaterThan(0));
+
+      await tester.drag(find.byType(ListView), const Offset(0, -60));
+      await tester.pumpAndSettle();
+      final double expandedSize = controller.size;
+      final double revealedOffset = scrollController.offset;
+      final double heightWithKeyboard = tester.getSize(find.byType(ListView)).height;
+      expect(expandedSize, greaterThan(0.5));
+
+      tester.testTextInput.hide();
+      if (!keepFocus) {
+        focusNode.unfocus();
+      }
+      // Keyboard metrics arrive over several frames on mobile platforms.
+      // The fractional sheet size must stay fixed while its pixel height grows.
+      for (final inset in <double>[160, 120, 80, 40, 0]) {
+        tester.view.viewInsets = FakeViewPadding(bottom: inset);
+        await tester.pump(const Duration(milliseconds: 16));
+        await tester.pump();
+        expect(controller.size, closeTo(expandedSize, precisionErrorTolerance));
+        expect(
+          tester.getSize(find.byType(ListView)).height,
+          closeTo(expandedSize * (600 - inset), precisionErrorTolerance),
+        );
+        expect(scrollController.offset, closeTo(revealedOffset, precisionErrorTolerance));
+      }
+      await tester.pumpAndSettle();
+      expect(focusNode.hasFocus, keepFocus);
+      expect(tester.testTextInput.isVisible, isFalse);
+      expect(tester.getSize(find.byType(ListView)).height, greaterThan(heightWithKeyboard));
+
+      // A downward drag must first move the list back toward its beginning,
+      // rather than immediately shrinking the partially expanded sheet.
+      final position = scrollController.position as ScrollPositionWithSingleContext;
+      final Drag drag = position.drag(DragStartDetails(), () {});
+      drag.update(
+        DragUpdateDetails(
+          delta: Offset(0, revealedOffset / 2),
+          primaryDelta: revealedOffset / 2,
+          globalPosition: Offset.zero,
+        ),
+      );
+      drag.end(DragEndDetails(primaryVelocity: 0));
+      await tester.pumpAndSettle();
+      expect(controller.size, closeTo(expandedSize, precisionErrorTolerance));
+      expect(scrollController.offset, closeTo(revealedOffset / 2, precisionErrorTolerance));
+
+      // Once the list reaches its beginning, both resizing directions still work.
+      scrollController.jumpTo(0);
+      await tester.pump();
+      await tester.drag(find.byType(ListView), const Offset(0, 60));
+      await tester.pumpAndSettle();
+      expect(controller.size, lessThan(expandedSize));
+      expect(scrollController.offset, 0);
+      final double shrunkenSize = controller.size;
+      await tester.drag(find.byType(ListView), const Offset(0, -60));
+      await tester.pumpAndSettle();
+      expect(controller.size, greaterThan(shrunkenSize));
+      expect(scrollController.offset, 0);
+    }, variant: TargetPlatformVariant.all());
+  }
+
+  testWidgets('Hiding the keyboard at the list end corrects its offset without getting stuck', (
+    WidgetTester tester,
+  ) async {
+    tester.view.devicePixelRatio = 1;
+    tester.view.physicalSize = const Size(400, 600);
+    addTearDown(tester.view.reset);
+    final controller = DraggableScrollableController();
+    final focusNode = FocusNode();
+    addTearDown(controller.dispose);
+    addTearDown(focusNode.dispose);
+    await tester.pumpWidget(
+      buildKeyboardSheet(controller: controller, focusNode: focusNode, focusIndex: 19),
+    );
+    final ScrollController scrollController = tester
+        .widget<ListView>(find.byType(ListView))
+        .controller!;
+    await tester.pumpAndSettle();
+    scrollController.jumpTo(scrollController.position.maxScrollExtent);
+    await tester.pump();
+    await tester.tap(find.byKey(const ValueKey<int>(19)));
+    tester.view.viewInsets = const FakeViewPadding(bottom: 200);
+    await tester.pumpAndSettle();
+    await tester.drag(find.byType(ListView), const Offset(0, -60));
+    await tester.pumpAndSettle();
+    final double expandedSize = controller.size;
+    expect(expandedSize, greaterThan(0.5));
+
+    tester.testTextInput.hide();
+    for (final inset in <double>[160, 120, 80, 40, 0]) {
+      tester.view.viewInsets = FakeViewPadding(bottom: inset);
+      await tester.pump(const Duration(milliseconds: 16));
+      await tester.pump();
+      expect(controller.size, closeTo(expandedSize, precisionErrorTolerance));
+    }
+    await tester.pumpAndSettle();
+    expect(focusNode.hasFocus, isTrue);
+    expect(
+      scrollController.offset,
+      closeTo(scrollController.position.maxScrollExtent, precisionErrorTolerance),
+    );
+    final Rect viewport = tester.getRect(find.byType(ListView));
+    final Rect lastField = tester.getRect(find.byKey(const ValueKey<int>(19)));
+    expect(lastField.bottom, closeTo(viewport.bottom, precisionErrorTolerance));
+
+    await tester.drag(find.byType(ListView), const Offset(0, 60));
+    await tester.pumpAndSettle();
+    expect(controller.size, closeTo(expandedSize, precisionErrorTolerance));
+    expect(scrollController.offset, lessThan(scrollController.position.maxScrollExtent));
+    await tester.drag(find.byType(ListView), const Offset(0, -60));
+    await tester.pumpAndSettle();
+    expect(controller.size, greaterThan(expandedSize));
+    expect(scrollController.offset, lessThanOrEqualTo(scrollController.position.maxScrollExtent));
+  }, variant: TargetPlatformVariant.all());
+
+  testWidgets('The sheet can expand after ensureVisible scrolls its contents', (
+    WidgetTester tester,
+  ) async {
+    final controller = DraggableScrollableController();
+    addTearDown(controller.dispose);
+    await tester.pumpWidget(
+      boilerplateWidget(
+        null,
+        itemExtent: 50,
+        itemCount: 40,
+        cacheExtent: 1000,
+        controller: controller,
+      ),
+    );
+    final ScrollController scrollController = tester
+        .widget<ListView>(find.byType(ListView))
+        .controller!;
+    await Scrollable.ensureVisible(tester.element(find.text('Item 8', skipOffstage: false)));
+    await tester.pumpAndSettle();
+    expect(controller.size, 0.5);
+    expect(scrollController.offset, 400);
+    await tester.drag(find.byType(ListView), const Offset(0, -80));
+    await tester.pumpAndSettle();
+    expect(controller.size, greaterThan(0.5));
+    expect(scrollController.offset, 400);
+  });
+
+  for (final animate in <bool>[false, true]) {
+    testWidgets('An upward drag expands the sheet after a list ${animate ? 'animation' : 'jump'}', (
+      WidgetTester tester,
+    ) async {
+      final controller = DraggableScrollableController();
+      addTearDown(controller.dispose);
+      await tester.pumpWidget(
+        boilerplateWidget(null, itemExtent: 50, itemCount: 40, controller: controller),
+      );
+      final ScrollController scrollController = tester
+          .widget<ListView>(find.byType(ListView))
+          .controller!;
+      if (animate) {
+        final Future<void> scrolling = scrollController.animateTo(
+          110,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.linear,
+        );
+        await tester.pumpAndSettle();
+        await scrolling;
+      } else {
+        scrollController.jumpTo(110);
+        await tester.pumpAndSettle();
+      }
+      expect(controller.size, 0.5);
+      expect(scrollController.offset, 110);
+      await tester.drag(find.byType(ListView), const Offset(0, -80));
+      await tester.pumpAndSettle();
+      expect(controller.size, greaterThan(0.5));
+      expect(scrollController.offset, 110);
+    });
+  }
+
+  testWidgets('Downward drags return the list before shrinking the sheet', (
+    WidgetTester tester,
+  ) async {
+    final controller = DraggableScrollableController();
+    addTearDown(controller.dispose);
+    await tester.pumpWidget(
+      boilerplateWidget(null, itemExtent: 50, itemCount: 40, controller: controller),
+    );
+    final ScrollController scrollController = tester
+        .widget<ListView>(find.byType(ListView))
+        .controller!;
+    scrollController.jumpTo(110);
+    await tester.pumpAndSettle();
+    await tester.drag(find.byType(ListView), const Offset(0, 60));
+    await tester.pumpAndSettle();
+    expect(scrollController.offset, inExclusiveRange(0, 110));
+    expect(controller.size, 0.5);
+  });
+
+  testWidgets('A fully expanded sheet scrolls the list on upward drags', (
+    WidgetTester tester,
+  ) async {
+    final controller = DraggableScrollableController();
+    addTearDown(controller.dispose);
+    await tester.pumpWidget(
+      boilerplateWidget(
+        null,
+        itemExtent: 50,
+        itemCount: 40,
+        controller: controller,
+        initialChildSize: 1,
+      ),
+    );
+    final ScrollController scrollController = tester
+        .widget<ListView>(find.byType(ListView))
+        .controller!;
+    scrollController.jumpTo(110);
+    await tester.pumpAndSettle();
+    await tester.drag(find.byType(ListView), const Offset(0, -80));
+    await tester.pumpAndSettle();
+    expect(controller.size, 1);
+    expect(scrollController.offset, greaterThan(110));
+  });
+
+  testWidgets('Reaching maxChildSize allows subsequent drags to scroll the list', (
+    WidgetTester tester,
+  ) async {
+    final controller = DraggableScrollableController();
+    addTearDown(controller.dispose);
+    await tester.pumpWidget(
+      boilerplateWidget(
+        null,
+        itemExtent: 50,
+        itemCount: 40,
+        controller: controller,
+        initialChildSize: 0.7,
+        maxChildSize: 0.8,
+      ),
+    );
+    final ScrollController scrollController = tester
+        .widget<ListView>(find.byType(ListView))
+        .controller!;
+    scrollController.jumpTo(110);
+    await tester.pumpAndSettle();
+    await tester.drag(find.byType(ListView), const Offset(0, -120));
+    await tester.pumpAndSettle();
+    expect(controller.size, 0.8);
+    final double offset = scrollController.offset;
+    await tester.drag(find.byType(ListView), const Offset(0, -60));
+    await tester.pumpAndSettle();
+    expect(controller.size, 0.8);
+    expect(scrollController.offset, greaterThan(offset));
+  });
+
+  testWidgets('A sheet at its minimum can expand with an already scrolled list', (
+    WidgetTester tester,
+  ) async {
+    final controller = DraggableScrollableController();
+    addTearDown(controller.dispose);
+    await tester.pumpWidget(
+      boilerplateWidget(
+        null,
+        itemExtent: 50,
+        itemCount: 40,
+        controller: controller,
+        initialChildSize: 0.25,
+      ),
+    );
+    final ScrollController scrollController = tester
+        .widget<ListView>(find.byType(ListView))
+        .controller!;
+    scrollController.jumpTo(110);
+    await tester.pumpAndSettle();
+    await tester.drag(find.byType(ListView), const Offset(0, -60));
+    await tester.pumpAndSettle();
+    expect(controller.size, greaterThan(0.25));
+    expect(scrollController.offset, 110);
+  });
+
+  testWidgets('Upward drags still snap the sheet with an already scrolled list', (
+    WidgetTester tester,
+  ) async {
+    final controller = DraggableScrollableController();
+    addTearDown(controller.dispose);
+    await tester.pumpWidget(
+      boilerplateWidget(null, itemExtent: 50, itemCount: 40, controller: controller, snap: true),
+    );
+    final ScrollController scrollController = tester
+        .widget<ListView>(find.byType(ListView))
+        .controller!;
+    scrollController.jumpTo(110);
+    await tester.pumpAndSettle();
+    await tester.drag(find.byType(ListView), const Offset(0, -200));
+    await tester.pumpAndSettle();
+    expect(controller.size, 1);
+    expect(scrollController.offset, greaterThanOrEqualTo(110));
+  });
+
+  for (final scenario in <({String name, ScrollPhysics physics})>[
+    (name: 'clamping', physics: const ClampingScrollPhysics()),
+    (name: 'bouncing', physics: const BouncingScrollPhysics()),
+    (
+      name: 'bouncing fast',
+      physics: const BouncingScrollPhysics(decelerationRate: ScrollDecelerationRate.fast),
+    ),
+  ]) {
+    for (final snap in <bool>[false, true]) {
+      testWidgets(
+        'A downward list fling continues into the sheet with ${scenario.name} and snap=$snap',
+        (WidgetTester tester) async {
+          final controller = DraggableScrollableController();
+          addTearDown(controller.dispose);
+          var overscrolledWhileResizable = false;
+          await tester.pumpWidget(
+            boilerplateWidget(
+              null,
+              controller: controller,
+              initialChildSize: 0.6,
+              itemExtent: 50,
+              physics: scenario.physics,
+              snap: snap,
+              snapSizes: const <double>[0.5, 0.75],
+              onScrollNotification: (ScrollNotification notification) {
+                if (controller.size > 0.25 &&
+                    notification.metrics.pixels < notification.metrics.minScrollExtent) {
+                  overscrolledWhileResizable = true;
+                }
+                return false;
+              },
+            ),
+          );
+          final ScrollController scrollController = tester
+              .widget<ListView>(find.byType(ListView))
+              .controller!;
+          scrollController.jumpTo(80);
+          final position = scrollController.position as ScrollPositionWithSingleContext;
+          final Drag drag = position.drag(DragStartDetails(), () {});
+          drag.update(
+            DragUpdateDetails(
+              delta: const Offset(0, -30),
+              primaryDelta: -30,
+              globalPosition: Offset.zero,
+            ),
+          );
+          await tester.pump();
+          drag.update(
+            DragUpdateDetails(
+              delta: const Offset(0, 10),
+              primaryDelta: 10,
+              globalPosition: Offset.zero,
+            ),
+          );
+          final double sizeBeforeFling = controller.size;
+          expect(sizeBeforeFling, inExclusiveRange(0.6, 0.75));
+          expect(scrollController.offset, greaterThan(position.minScrollExtent));
+          drag.end(
+            DragEndDetails(
+              primaryVelocity: 1500,
+              velocity: const Velocity(pixelsPerSecond: Offset(0, 1500)),
+            ),
+          );
+          await tester.pumpAndSettle();
+
+          expect(controller.size, snap ? 0.5 : lessThan(sizeBeforeFling));
+          expect(
+            scrollController.offset,
+            closeTo(position.minScrollExtent, precisionErrorTolerance),
+          );
+          expect(overscrolledWhileResizable, isFalse);
+        },
+      );
+    }
+  }
+
+  for (final velocity in <double>[1, 1500]) {
+    testWidgets('A stopped downward list fling still snaps with velocity $velocity', (
+      WidgetTester tester,
+    ) async {
+      final controller = DraggableScrollableController();
+      addTearDown(controller.dispose);
+      await tester.pumpWidget(
+        boilerplateWidget(
+          null,
+          controller: controller,
+          initialChildSize: 0.6,
+          itemExtent: 50,
+          physics: const ClampingScrollPhysics(),
+          snap: true,
+          snapSizes: const <double>[0.5, 0.75],
+        ),
+      );
+      final ScrollController scrollController = tester
+          .widget<ListView>(find.byType(ListView))
+          .controller!;
+      scrollController.jumpTo(80);
+      final position = scrollController.position as ScrollPositionWithSingleContext;
+      final Drag drag = position.drag(DragStartDetails(), () {});
+      drag.update(
+        DragUpdateDetails(
+          delta: const Offset(0, -30),
+          primaryDelta: -30,
+          globalPosition: Offset.zero,
+        ),
+      );
+      await tester.pump();
+      drag.update(
+        DragUpdateDetails(
+          delta: const Offset(0, 10),
+          primaryDelta: 10,
+          globalPosition: Offset.zero,
+        ),
+      );
+      drag.end(
+        DragEndDetails(
+          primaryVelocity: velocity,
+          velocity: Velocity(pixelsPerSecond: Offset(0, velocity)),
+        ),
+      );
+      await tester.pump();
+      // The low velocity creates no list simulation. The other simulation has
+      // completed by this frame, so its remaining velocity is also zero.
+      await tester.pump(const Duration(seconds: 2));
+      await tester.pumpAndSettle();
+
+      expect(controller.size, 0.75);
+      expect(scrollController.offset, closeTo(velocity == 1 ? 70 : 0, precisionErrorTolerance));
+    });
+  }
+
+  testWidgets('A downward fling returns to a negative minScrollExtent before shrinking', (
+    WidgetTester tester,
+  ) async {
+    final controller = DraggableScrollableController();
+    addTearDown(controller.dispose);
+    const Key centerKey = ValueKey<String>('center');
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: DraggableScrollableSheet(
+          controller: controller,
+          builder: (BuildContext context, ScrollController scroll) => CustomScrollView(
+            controller: scroll,
+            physics: const ClampingScrollPhysics(),
+            center: centerKey,
+            slivers: const <Widget>[
+              SliverToBoxAdapter(child: SizedBox(height: 200)),
+              SliverToBoxAdapter(key: centerKey, child: SizedBox(height: 2000)),
+            ],
+          ),
+        ),
+      ),
+    );
+    final ScrollController scrollController = tester
+        .widget<CustomScrollView>(find.byType(CustomScrollView))
+        .controller!;
+    final position = scrollController.position as ScrollPositionWithSingleContext;
+    expect(position.minScrollExtent, -200);
+    final Drag drag = position.drag(DragStartDetails(), () {});
+    drag.update(
+      DragUpdateDetails(
+        delta: const Offset(0, -30),
+        primaryDelta: -30,
+        globalPosition: Offset.zero,
+      ),
+    );
+    await tester.pump();
+    drag.update(
+      DragUpdateDetails(delta: const Offset(0, 10), primaryDelta: 10, globalPosition: Offset.zero),
+    );
+    final double sizeBeforeFling = controller.size;
+    expect(position.pixels, -10);
+    drag.end(
+      DragEndDetails(
+        primaryVelocity: 2000,
+        velocity: const Velocity(pixelsPerSecond: Offset(0, 2000)),
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 16));
+    expect(controller.size, sizeBeforeFling);
+    expect(position.pixels, inExclusiveRange(position.minScrollExtent, -10));
+    await tester.pumpAndSettle();
+    expect(controller.size, lessThan(sizeBeforeFling));
+    expect(position.pixels, position.minScrollExtent);
+  });
+
+  testWidgets('A scroll notification can cancel the downward ballistic handoff', (
+    WidgetTester tester,
+  ) async {
+    final controller = DraggableScrollableController();
+    addTearDown(controller.dispose);
+    var cancelAtStart = false;
+    await tester.pumpWidget(
+      boilerplateWidget(
+        null,
+        controller: controller,
+        initialChildSize: 0.6,
+        itemExtent: 50,
+        physics: const ClampingScrollPhysics(),
+        onScrollNotification: (ScrollNotification notification) {
+          if (cancelAtStart &&
+              notification is ScrollUpdateNotification &&
+              notification.metrics.pixels == notification.metrics.minScrollExtent) {
+            cancelAtStart = false;
+            controller.jumpTo(0.7);
+          }
+          return false;
+        },
+      ),
+    );
+    final ScrollController scrollController = tester
+        .widget<ListView>(find.byType(ListView))
+        .controller!;
+    scrollController.jumpTo(40);
+    final position = scrollController.position as ScrollPositionWithSingleContext;
+    final Drag drag = position.drag(DragStartDetails(), () {});
+    drag.update(
+      DragUpdateDetails(
+        delta: const Offset(0, -30),
+        primaryDelta: -30,
+        globalPosition: Offset.zero,
+      ),
+    );
+    await tester.pump();
+    cancelAtStart = true;
+    drag.end(
+      DragEndDetails(
+        primaryVelocity: 1500,
+        velocity: const Velocity(pixelsPerSecond: Offset(0, 1500)),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(cancelAtStart, isFalse);
+    expect(controller.size, 0.7);
+    expect(scrollController.offset, position.minScrollExtent);
+  });
+
+  testWidgets('NeverScrollableScrollPhysics prevents dragging an already scrolled sheet', (
+    WidgetTester tester,
+  ) async {
+    final controller = DraggableScrollableController();
+    addTearDown(controller.dispose);
+    await tester.pumpWidget(
+      boilerplateWidget(
+        null,
+        itemExtent: 50,
+        itemCount: 40,
+        controller: controller,
+        physics: const NeverScrollableScrollPhysics(),
+      ),
+    );
+    final ScrollController scrollController = tester
+        .widget<ListView>(find.byType(ListView))
+        .controller!;
+    scrollController.jumpTo(110);
+    await tester.pumpAndSettle();
+    await tester.drag(find.byType(ListView), const Offset(0, -80));
+    await tester.pumpAndSettle();
+    expect(controller.size, 0.5);
+    expect(scrollController.offset, 110);
+  });
+
+  testWidgets('A fixed-size sheet can still scroll an already moved list', (
+    WidgetTester tester,
+  ) async {
+    final controller = DraggableScrollableController();
+    addTearDown(controller.dispose);
+    await tester.pumpWidget(
+      boilerplateWidget(
+        null,
+        itemExtent: 50,
+        itemCount: 40,
+        controller: controller,
+        minChildSize: 0.5,
+        maxChildSize: 0.5,
+      ),
+    );
+    final ScrollController scrollController = tester
+        .widget<ListView>(find.byType(ListView))
+        .controller!;
+    scrollController.jumpTo(110);
+    await tester.pumpAndSettle();
+    await tester.drag(find.byType(ListView), const Offset(0, -80));
+    await tester.pumpAndSettle();
+    expect(controller.size, 0.5);
+    expect(scrollController.offset, greaterThan(110));
+  });
+
+  for (final scenario in <({double firstDelta, double lastDelta, double size})>[
+    (firstDelta: -58, lastDelta: 500, size: 0.1),
+    (firstDelta: -38, lastDelta: -500, size: 0.6),
+  ]) {
+    testWidgets('User drags reach exact extent ${scenario.size}', (WidgetTester tester) async {
+      tester.view.devicePixelRatio = 1;
+      tester.view.physicalSize = const Size(800, 600);
+      addTearDown(tester.view.reset);
+      final controller = DraggableScrollableController();
+      addTearDown(controller.dispose);
+      final notifications = <DraggableScrollableNotification>[];
+      await tester.pumpWidget(
+        boilerplateWidget(
+          null,
+          itemExtent: 50,
+          itemCount: 40,
+          controller: controller,
+          minChildSize: 0.1,
+          maxChildSize: 0.6,
+          physics: const ClampingScrollPhysics(),
+          onDraggableScrollableNotification: (DraggableScrollableNotification notification) {
+            notifications.add(notification);
+            return false;
+          },
+        ),
+      );
+      final ScrollController scrollController = tester
+          .widget<ListView>(find.byType(ListView))
+          .controller!;
+      expect(controller.size, 0.5);
+      final position = scrollController.position as ScrollPositionWithSingleContext;
+      final Drag drag = position.drag(DragStartDetails(), () {});
+      drag.update(
+        DragUpdateDetails(
+          delta: Offset(0, scenario.firstDelta),
+          primaryDelta: scenario.firstDelta,
+          globalPosition: Offset.zero,
+        ),
+      );
+      await tester.pump();
+      notifications.clear();
+      drag.update(
+        DragUpdateDetails(
+          delta: Offset(0, scenario.lastDelta),
+          primaryDelta: scenario.lastDelta,
+          globalPosition: Offset.zero,
+        ),
+      );
+      await tester.pump();
+
+      expect(controller.size, scenario.size);
+      expect(notifications, hasLength(1));
+      final DraggableScrollableNotification notification = notifications.single;
+      expect(notification.extent, scenario.size);
+      expect(
+        notification.extent,
+        scenario.lastDelta > 0 ? notification.minExtent : notification.maxExtent,
+      );
+      drag.end(DragEndDetails(primaryVelocity: 0));
+      await tester.pumpAndSettle();
+    });
+  }
+
+  for (final scenario in <({String name, ScrollPhysics physics})>[
+    (
+      name: 'clamping',
+      physics: const ClampingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
+    ),
+    (
+      name: 'bouncing',
+      physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
+    ),
+    (
+      name: 'bouncing fast',
+      physics: const BouncingScrollPhysics(
+        decelerationRate: ScrollDecelerationRate.fast,
+        parent: AlwaysScrollableScrollPhysics(),
+      ),
+    ),
+  ]) {
+    testWidgets('A short list can expand and shrink with ${scenario.name}', (
+      WidgetTester tester,
+    ) async {
+      final controller = DraggableScrollableController();
+      addTearDown(controller.dispose);
+      await tester.pumpWidget(
+        boilerplateWidget(
+          null,
+          itemExtent: 50,
+          controller: controller,
+          itemCount: 1,
+          physics: scenario.physics,
+        ),
+      );
+      final ScrollController scrollController = tester
+          .widget<ListView>(find.byType(ListView))
+          .controller!;
+      expect(scrollController.position.maxScrollExtent, 0);
+      await tester.drag(find.byType(ListView), const Offset(0, -500));
+      await tester.pumpAndSettle();
+      expect(controller.size, 1);
+      expect(scrollController.offset, closeTo(0, precisionErrorTolerance));
+
+      await tester.drag(find.byType(ListView), const Offset(0, 500));
+      await tester.pumpAndSettle();
+      expect(controller.size, 0.25);
+      expect(scrollController.offset, closeTo(0, precisionErrorTolerance));
+    });
+  }
+
+  for (final ScrollDecelerationRate rate in ScrollDecelerationRate.values) {
+    for (final atStart in <bool>[true, false]) {
+      testWidgets('A drag can resume from ${atStart ? 'start' : 'end'} overscroll with $rate', (
+        WidgetTester tester,
+      ) async {
+        final controller = DraggableScrollableController();
+        addTearDown(controller.dispose);
+        await tester.pumpWidget(
+          boilerplateWidget(
+            null,
+            itemExtent: 50,
+            controller: controller,
+            itemCount: 8,
+            physics: BouncingScrollPhysics(decelerationRate: rate),
+          ),
+        );
+        final ScrollController scrollController = tester
+            .widget<ListView>(find.byType(ListView))
+            .controller!;
+        final position = scrollController.position as ScrollPositionWithSingleContext;
+        final double boundary = atStart ? position.minScrollExtent : position.maxScrollExtent;
+        scrollController.jumpTo(boundary + (atStart ? -40 : 40));
+        final Drag drag = position.drag(DragStartDetails(), () {});
+        expect(position.outOfRange, isTrue);
+        final double delta = atStart ? -20 : 20;
+        drag.update(
+          DragUpdateDetails(
+            delta: Offset(0, delta),
+            primaryDelta: delta,
+            globalPosition: Offset.zero,
+          ),
+        );
+        await tester.pump();
+        expect(controller.pixels, closeTo(atStart ? 320 : 300, precisionErrorTolerance));
+        drag.end(DragEndDetails(primaryVelocity: 0));
+        await tester.pumpAndSettle();
+        expect(position.outOfRange, isFalse);
+        expect(position.pixels, closeTo(atStart ? 0 : 100, precisionErrorTolerance));
+
+        final Drag nextDrag = position.drag(DragStartDetails(), () {});
+        final double nextDelta = atStart ? 40 : 200;
+        nextDrag.update(
+          DragUpdateDetails(
+            delta: Offset(0, nextDelta),
+            primaryDelta: nextDelta,
+            globalPosition: Offset.zero,
+          ),
+        );
+        await tester.pump();
+        expect(controller.pixels, closeTo(atStart ? 280 : 300, precisionErrorTolerance));
+        expect(position.pixels, closeTo(atStart ? 0 : -100, precisionErrorTolerance));
+        nextDrag.end(DragEndDetails(primaryVelocity: 0));
+        await tester.pumpAndSettle();
+        expect(position.pixels, closeTo(0, precisionErrorTolerance));
+      });
+    }
+  }
+
+  for (final scenario in <({String name, ScrollPhysics physics, double? expectedOffset})>[
+    (name: 'bouncing', physics: const BouncingScrollPhysics(), expectedOffset: null),
+    (
+      name: 'bouncing fast',
+      physics: const BouncingScrollPhysics(decelerationRate: ScrollDecelerationRate.fast),
+      expectedOffset: -60,
+    ),
+    (
+      name: 'piecewise resistance',
+      physics: const _OverscrollResistancePhysics(parent: BouncingScrollPhysics()),
+      expectedOffset: -20,
+    ),
+  ]) {
+    testWidgets(
+      'A drag from end overscroll waits for another update to shrink with ${scenario.name}',
+      (WidgetTester tester) async {
+        tester.view.devicePixelRatio = 1;
+        tester.view.physicalSize = const Size(800, 600);
+        addTearDown(tester.view.reset);
+        final controller = DraggableScrollableController();
+        addTearDown(controller.dispose);
+        await tester.pumpWidget(
+          boilerplateWidget(
+            null,
+            itemExtent: 50,
+            controller: controller,
+            itemCount: 8,
+            physics: scenario.physics,
+          ),
+        );
+        final ScrollController scrollController = tester
+            .widget<ListView>(find.byType(ListView))
+            .controller!;
+        final position = scrollController.position as ScrollPositionWithSingleContext;
+        scrollController.jumpTo(position.maxScrollExtent + 40);
+        final Drag drag = position.drag(DragStartDetails(), () {});
+        expect(position.outOfRange, isTrue);
+        final double oldHeight = controller.pixels;
+        expect(position.pixels, 140);
+        expect(oldHeight, 300);
+        const double delta = 200;
+        drag.update(
+          DragUpdateDetails(
+            delta: const Offset(0, delta),
+            primaryDelta: delta,
+            globalPosition: Offset.zero,
+          ),
+        );
+        await tester.pump();
+        expect(position.pixels, lessThan(position.minScrollExtent));
+        expect(controller.pixels, oldHeight);
+        if (scenario.expectedOffset case final double expectedOffset) {
+          expect(position.pixels, closeTo(expectedOffset, precisionErrorTolerance));
+        }
+        final double overscroll = position.pixels;
+        drag.update(
+          DragUpdateDetails(
+            delta: const Offset(0, 20),
+            primaryDelta: 20,
+            globalPosition: Offset.zero,
+          ),
+        );
+        await tester.pump();
+        expect(controller.pixels, closeTo(oldHeight - 20, precisionErrorTolerance));
+        expect(position.pixels, overscroll);
+        drag.end(DragEndDetails(primaryVelocity: 0));
+        await tester.pumpAndSettle();
+        expect(position.pixels, closeTo(0, precisionErrorTolerance));
+      },
+    );
+  }
+
+  for (final physics in <ScrollPhysics>[
+    const ClampingScrollPhysics(),
+    const BouncingScrollPhysics(),
+  ]) {
+    for (final initialOffset in <double>[0, 110]) {
+      testWidgets('Upward drag preserves its remainder from $initialOffset with $physics', (
+        WidgetTester tester,
+      ) async {
+        final controller = DraggableScrollableController();
+        addTearDown(controller.dispose);
+        await tester.pumpWidget(
+          boilerplateWidget(
+            null,
+            itemExtent: 50,
+            itemCount: 40,
+            controller: controller,
+            initialChildSize: 0.7,
+            maxChildSize: 0.8,
+            physics: physics,
+          ),
+        );
+        final ScrollController scrollController = tester
+            .widget<ListView>(find.byType(ListView))
+            .controller!;
+        scrollController.jumpTo(initialOffset);
+        await tester.pumpAndSettle();
+        final position = scrollController.position as ScrollPositionWithSingleContext;
+        final Drag drag = position.drag(DragStartDetails(), () {});
+        drag.update(
+          DragUpdateDetails(
+            delta: const Offset(0, -100),
+            primaryDelta: -100,
+            globalPosition: Offset.zero,
+          ),
+        );
+        await tester.pump();
+        expect(controller.size, 0.8);
+        expect(scrollController.offset, closeTo(initialOffset + 40, precisionErrorTolerance));
+        drag.end(DragEndDetails(primaryVelocity: 0));
+        await tester.pumpAndSettle();
+      });
+    }
+
+    for (final initialOffset in <double>[40, 100]) {
+      testWidgets(
+        'Downward list drags wait for another update to shrink from $initialOffset with $physics',
+        (WidgetTester tester) async {
+          final controller = DraggableScrollableController();
+          addTearDown(controller.dispose);
+          await tester.pumpWidget(
+            boilerplateWidget(
+              null,
+              itemExtent: 50,
+              itemCount: 40,
+              controller: controller,
+              physics: physics,
+            ),
+          );
+          final ScrollController scrollController = tester
+              .widget<ListView>(find.byType(ListView))
+              .controller!;
+          scrollController.jumpTo(initialOffset);
+          await tester.pumpAndSettle();
+          final double initialHeight = controller.pixels;
+          final position = scrollController.position as ScrollPositionWithSingleContext;
+          final Drag drag = position.drag(DragStartDetails(), () {});
+          drag.update(
+            DragUpdateDetails(
+              delta: const Offset(0, 100),
+              primaryDelta: 100,
+              globalPosition: Offset.zero,
+            ),
+          );
+          await tester.pump();
+          final double expectedOffset = physics is BouncingScrollPhysics ? initialOffset - 100 : 0;
+          expect(scrollController.offset, closeTo(expectedOffset, precisionErrorTolerance));
+          expect(controller.pixels, initialHeight);
+          drag.update(
+            DragUpdateDetails(
+              delta: const Offset(0, 20),
+              primaryDelta: 20,
+              globalPosition: Offset.zero,
+            ),
+          );
+          await tester.pump();
+          expect(controller.pixels, closeTo(initialHeight - 20, precisionErrorTolerance));
+          expect(scrollController.offset, closeTo(expectedOffset, precisionErrorTolerance));
+          drag.end(DragEndDetails(primaryVelocity: 0));
+          await tester.pumpAndSettle();
+          expect(scrollController.offset, closeTo(0, precisionErrorTolerance));
+        },
+      );
+    }
+  }
+
+  for (final scenario in <({double factor, double initialOffset, double offset})>[
+    (factor: 0, initialOffset: 40, offset: 40),
+    (factor: 0.5, initialOffset: 110, offset: 60),
+    (factor: 0.5, initialOffset: 50, offset: 0),
+    (factor: 0.5, initialOffset: 40, offset: 0),
+    (factor: 2, initialOffset: 110, offset: 0),
+  ]) {
+    testWidgets(
+      'Downward drags respect ${scenario.factor}x physics from ${scenario.initialOffset}',
+      (WidgetTester tester) async {
+        final controller = DraggableScrollableController();
+        addTearDown(controller.dispose);
+        await tester.pumpWidget(
+          boilerplateWidget(
+            null,
+            itemExtent: 50,
+            itemCount: 40,
+            controller: controller,
+            physics: _ScaledScrollPhysics(scenario.factor, parent: const ClampingScrollPhysics()),
+          ),
+        );
+        final ScrollController scrollController = tester
+            .widget<ListView>(find.byType(ListView))
+            .controller!;
+        scrollController.jumpTo(scenario.initialOffset);
+        await tester.pumpAndSettle();
+        final position = scrollController.position as ScrollPositionWithSingleContext;
+        final Drag drag = position.drag(DragStartDetails(), () {});
+        drag.update(
+          DragUpdateDetails(
+            delta: const Offset(0, 100),
+            primaryDelta: 100,
+            globalPosition: Offset.zero,
+          ),
+        );
+        await tester.pump();
+        expect(scrollController.offset, closeTo(scenario.offset, precisionErrorTolerance));
+        expect(controller.pixels, closeTo(300, precisionErrorTolerance));
+        drag.end(DragEndDetails(primaryVelocity: 0));
+        await tester.pumpAndSettle();
+      },
+    );
+  }
+
+  for (final factor in <double>[0.5, 2]) {
+    testWidgets('A large downward list update applies ${factor}x physics without resizing', (
+      WidgetTester tester,
+    ) async {
+      final controller = DraggableScrollableController();
+      addTearDown(controller.dispose);
+      await tester.pumpWidget(
+        boilerplateWidget(
+          null,
+          itemExtent: 50,
+          itemCount: 40,
+          controller: controller,
+          physics: _ScaledScrollPhysics(factor, parent: const BouncingScrollPhysics()),
+        ),
+      );
+      final ScrollController scrollController = tester
+          .widget<ListView>(find.byType(ListView))
+          .controller!;
+      scrollController.jumpTo(40);
+      await tester.pumpAndSettle();
+      final position = scrollController.position as ScrollPositionWithSingleContext;
+      final Drag drag = position.drag(DragStartDetails(), () {});
+      drag.update(
+        DragUpdateDetails(
+          delta: const Offset(0, 400),
+          primaryDelta: 400,
+          globalPosition: Offset.zero,
+        ),
+      );
+      await tester.pump();
+
+      // The entire update belongs to the list, even when it passes its start.
+      expect(controller.size, 0.5);
+      expect(scrollController.offset, closeTo(40 - 400 * factor, precisionErrorTolerance));
+      drag.end(DragEndDetails(primaryVelocity: 0));
+      await tester.pumpAndSettle();
+      expect(controller.size, 0.5);
+      expect(scrollController.offset, closeTo(0, precisionErrorTolerance));
+    });
+  }
+
+  testWidgets('A resize notification can cancel the remaining upward drag', (
+    WidgetTester tester,
+  ) async {
+    final controller = DraggableScrollableController();
+    addTearDown(controller.dispose);
+    var cancelDrag = true;
+    await tester.pumpWidget(
+      boilerplateWidget(
+        null,
+        itemExtent: 50,
+        itemCount: 40,
+        controller: controller,
+        initialChildSize: 0.7,
+        maxChildSize: 0.8,
+        onDraggableScrollableNotification: (DraggableScrollableNotification notification) {
+          if (cancelDrag && notification.extent == 0.8) {
+            cancelDrag = false;
+            controller.jumpTo(0.6);
+          }
+          return false;
+        },
+      ),
+    );
+    final ScrollController scrollController = tester
+        .widget<ListView>(find.byType(ListView))
+        .controller!;
+    scrollController.jumpTo(110);
+    await tester.pumpAndSettle();
+    final position = scrollController.position as ScrollPositionWithSingleContext;
+    final Drag drag = position.drag(DragStartDetails(), () {});
+    drag.update(
+      DragUpdateDetails(
+        delta: const Offset(0, -100),
+        primaryDelta: -100,
+        globalPosition: Offset.zero,
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(cancelDrag, isFalse);
+    expect(controller.size, 0.6);
+    expect(scrollController.offset, 110);
+  });
+
+  for (final notificationType in <Type>[UserScrollNotification, ScrollUpdateNotification]) {
+    testWidgets('A $notificationType can interrupt a downward list drag', (
+      WidgetTester tester,
+    ) async {
+      final controller = DraggableScrollableController();
+      addTearDown(controller.dispose);
+      late final ScrollController scrollController;
+      var cancelDrag = false;
+      await tester.pumpWidget(
+        boilerplateWidget(
+          null,
+          itemExtent: 50,
+          itemCount: 40,
+          controller: controller,
+          physics: const ClampingScrollPhysics(),
+          onScrollNotification: (ScrollNotification notification) {
+            if (cancelDrag && notification.runtimeType == notificationType) {
+              cancelDrag = false;
+              scrollController.jumpTo(25);
+            }
+            return false;
+          },
+        ),
+      );
+      scrollController = tester.widget<ListView>(find.byType(ListView)).controller!;
+      scrollController.jumpTo(110);
+      await tester.pumpAndSettle();
+      cancelDrag = true;
+      final position = scrollController.position as ScrollPositionWithSingleContext;
+      final Drag drag = position.drag(DragStartDetails(), () {});
+      drag.update(
+        DragUpdateDetails(
+          delta: const Offset(0, 100),
+          primaryDelta: 100,
+          globalPosition: Offset.zero,
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(cancelDrag, isFalse);
+      expect(controller.size, 0.5);
+      expect(scrollController.offset, 25);
+    });
+  }
+
+  testWidgets('Mouse wheel scrolling retains its normal list offsets', (WidgetTester tester) async {
+    final controller = DraggableScrollableController();
+    addTearDown(controller.dispose);
+    await tester.pumpWidget(
+      boilerplateWidget(null, itemExtent: 50, itemCount: 40, controller: controller),
+    );
+    final ScrollController scrollController = tester
+        .widget<ListView>(find.byType(ListView))
+        .controller!;
+    scrollController.jumpTo(110);
+    await tester.pumpAndSettle();
+    await tester.sendEventToBinding(
+      PointerScrollEvent(
+        position: tester.getCenter(find.byType(ListView)),
+        scrollDelta: const Offset(0, 40),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(controller.size, 0.5);
+    expect(scrollController.offset, 150);
+  });
+
+  testWidgets('A list offset survives programmatic sheet resizing', (WidgetTester tester) async {
+    final controller = DraggableScrollableController();
+    addTearDown(controller.dispose);
+    await tester.pumpWidget(
+      boilerplateWidget(
+        null,
+        itemExtent: 50,
+        itemCount: 40,
+        controller: controller,
+        initialChildSize: 1,
+      ),
+    );
+    final ScrollController scrollController = tester
+        .widget<ListView>(find.byType(ListView))
+        .controller!;
+    scrollController.jumpTo(110);
+    controller.jumpTo(0.5);
+    await tester.pumpAndSettle();
+    expect(controller.size, 0.5);
+    expect(scrollController.offset, 110);
+    final Future<void> resizing = controller.animateTo(
+      0.7,
+      duration: const Duration(milliseconds: 200),
+      curve: Curves.linear,
+    );
+    await tester.pumpAndSettle();
+    await resizing;
+    expect(controller.size, 0.7);
+    expect(scrollController.offset, 110);
+  });
+
+  testWidgets('A trackpad gesture can expand an already scrolled sheet', (
+    WidgetTester tester,
+  ) async {
+    final controller = DraggableScrollableController();
+    addTearDown(controller.dispose);
+    await tester.pumpWidget(
+      boilerplateWidget(null, itemExtent: 50, itemCount: 40, controller: controller),
+    );
+    final ScrollController scrollController = tester
+        .widget<ListView>(find.byType(ListView))
+        .controller!;
+    scrollController.jumpTo(110);
+    await tester.pumpAndSettle();
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.trackpad);
+    final Offset center = tester.getCenter(find.byType(ListView));
+    await gesture.panZoomStart(center);
+    await tester.pump();
+    await gesture.panZoomUpdate(center, pan: const Offset(0, -80));
+    await tester.pump();
+    await gesture.panZoomEnd();
+    await tester.pumpAndSettle();
+    expect(controller.size, greaterThan(0.5));
+    expect(scrollController.offset, 110);
+  });
+}
+
+class _ScaledScrollPhysics extends ScrollPhysics {
+  const _ScaledScrollPhysics(this.factor, {super.parent});
+
+  final double factor;
+
+  @override
+  _ScaledScrollPhysics applyTo(ScrollPhysics? ancestor) {
+    return _ScaledScrollPhysics(factor, parent: buildParent(ancestor));
+  }
+
+  @override
+  double applyPhysicsToUserOffset(ScrollMetrics position, double offset) {
+    return super.applyPhysicsToUserOffset(position, offset) * factor;
+  }
+}
+
+class _OverscrollResistancePhysics extends ScrollPhysics {
+  const _OverscrollResistancePhysics({super.parent});
+
+  @override
+  _OverscrollResistancePhysics applyTo(ScrollPhysics? ancestor) {
+    return _OverscrollResistancePhysics(parent: buildParent(ancestor));
+  }
+
+  @override
+  double applyPhysicsToUserOffset(ScrollMetrics position, double offset) {
+    if (position.pixels > position.maxScrollExtent && offset > 0) {
+      final double overscroll = position.pixels - position.maxScrollExtent;
+      final double offsetToBoundary = overscroll * 2;
+      if (offset <= offsetToBoundary) {
+        return offset / 2;
+      }
+      return overscroll + offset - offsetToBoundary;
+    }
+    return super.applyPhysicsToUserOffset(position, offset);
+  }
 }
