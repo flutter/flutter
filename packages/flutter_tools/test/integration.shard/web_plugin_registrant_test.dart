@@ -286,23 +286,24 @@ void main() {
 }
 
 Future<void> _createProject(Directory dir, List<String> createArgs) async {
+  final FileSystem fileSystem = globals.fs;
   final command = CreateCommand(
     androidContext: FakeAndroidContext(),
     appleContext: FakeAppleContext(),
     templateRenderer: const MustacheTemplateRenderer(),
     toolContext: FakeToolContext(
-      fs: globals.fs,
+      fs: fileSystem,
       logger: globals.logger,
       platform: globals.platform,
       processManager: globals.processManager,
       cache: Cache.test(
-        rootOverride: globals.fs.directory('../..'),
+        rootOverride: fileSystem.directory('../..'),
         flutterRoot: '../..',
-        fileSystem: globals.fs,
+        fileSystem: fileSystem,
         processManager: globals.processManager,
       ),
       flutterVersion: FakeFlutterVersion(),
-      projectFactory: FlutterProjectFactory(fileSystem: globals.fs, logger: globals.logger),
+      projectFactory: FlutterProjectFactory(fileSystem: fileSystem, logger: globals.logger),
     ),
   );
   final CommandRunner<void> runner = createTestCommandRunner(command);

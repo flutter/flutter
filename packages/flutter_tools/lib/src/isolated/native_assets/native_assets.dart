@@ -10,16 +10,17 @@ import 'package:hooks/hooks.dart';
 import 'package:hooks_runner/hooks_runner.dart';
 import 'package:logging/logging.dart' as logging;
 import 'package:package_config/package_config_types.dart';
+import 'package:process/process.dart';
 
 import '../../base/common.dart';
 import '../../base/error_handling_io.dart';
 import '../../base/file_system.dart';
 import '../../base/logger.dart';
 import '../../base/platform.dart';
+import '../../base/process.dart';
 import '../../build_info.dart';
 import '../../build_system/exceptions.dart';
 import '../../features.dart';
-import '../../globals.dart' as globals;
 import 'android/native_assets.dart';
 import 'dart_hook_result.dart';
 import 'ios/native_assets.dart';
@@ -82,11 +83,12 @@ Future<DartHooksResult> runFlutterSpecificHooks({
   required TargetPlatform targetPlatform,
   required Uri projectUri,
   required FileSystem fileSystem,
+  required Logger logger,
   required BuildCodeAssetsOptions? buildCodeAssets,
   required bool buildDataAssets,
   required File? recordedUsesFile,
 }) async {
-  if (!await _hookRunRequired(buildRunner)) {
+  if (!await _hookRunRequired(buildRunner, logger: logger)) {
     return DartHooksResult.empty();
   }
 
@@ -98,6 +100,7 @@ Future<DartHooksResult> runFlutterSpecificHooks({
     targetPlatform: targetPlatform,
     projectUri: projectUri,
     fileSystem: fileSystem,
+    logger: logger,
     buildCodeAssets: buildCodeAssets,
     buildDataAssets: buildDataAssets,
   );
@@ -115,6 +118,7 @@ Future<DartHooksResult> runFlutterSpecificHooks({
       targetPlatform: targetPlatform,
       projectUri: projectUri,
       fileSystem: fileSystem,
+      logger: logger,
       buildCodeAssets: buildCodeAssets,
       buildDataAssets: buildDataAssets,
       buildResults: results,
@@ -154,10 +158,11 @@ runFlutterSpecificBuildHooks({
   required TargetPlatform targetPlatform,
   required Uri projectUri,
   required FileSystem fileSystem,
+  required Logger logger,
   required BuildCodeAssetsOptions? buildCodeAssets,
   required bool buildDataAssets,
 }) async {
-  if (!await _hookRunRequired(buildRunner)) {
+  if (!await _hookRunRequired(buildRunner, logger: logger)) {
     return (results: const <String, Map<String, Object?>>{}, buildResult: DartHooksResult.empty());
   }
 
@@ -179,7 +184,7 @@ runFlutterSpecificBuildHooks({
   final String targetString = targets
       .map((AssetBuildTarget target) => target.targetString)
       .join(', ');
-  globals.logger.printTrace('Running build hooks for $targetString.');
+  logger.printTrace('Running build hooks for $targetString.');
 
   final results = <String, Map<String, Object?>>{};
   final dependencies = <Uri>{};
@@ -204,7 +209,7 @@ runFlutterSpecificBuildHooks({
     );
   }
   _checkForDuplicateAssets(codeAssets: codeAssets, dataAssets: dataAssets, targets: targets);
-  globals.logger.printTrace('Running build hooks for $targetString done.');
+  logger.printTrace('Running build hooks for $targetString done.');
   return (
     results: results,
     buildResult: DartHooksResult(
@@ -293,6 +298,7 @@ Future<DartHooksResult> runFlutterSpecificLinkHooks({
   required TargetPlatform targetPlatform,
   required Uri projectUri,
   required FileSystem fileSystem,
+  required Logger logger,
   required BuildCodeAssetsOptions? buildCodeAssets,
   required bool buildDataAssets,
   required SerializedBuildResults buildResults,
@@ -318,7 +324,7 @@ Future<DartHooksResult> runFlutterSpecificLinkHooks({
   final String targetString = targets
       .map((AssetBuildTarget target) => target.targetString)
       .join(', ');
-  globals.logger.printTrace('Running link hooks for $targetString.');
+  logger.printTrace('Running link hooks for $targetString.');
 
   final codeAssets = <FlutterCodeAsset>[];
   final dataAssets = <DataAsset>[];
@@ -358,7 +364,7 @@ Future<DartHooksResult> runFlutterSpecificLinkHooks({
 
   _checkForDuplicateAssets(codeAssets: codeAssets, dataAssets: dataAssets, targets: targets);
 
-  globals.logger.printTrace('Running link hooks for $targetString done.');
+  logger.printTrace('Running link hooks for $targetString done.');
 
   return DartHooksResult(
     buildStart: buildStart,
@@ -487,6 +493,8 @@ Future<List<File>> installCodeAssets({
   required TargetPlatform targetPlatform,
   required Uri projectUri,
   required FileSystem fileSystem,
+  required Logger logger,
+  required ProcessManager processManager,
   required Uri nativeAssetsFileUri,
   required Uri targetUri,
 }) async {
@@ -496,7 +504,13 @@ Future<List<File>> installCodeAssets({
 
   final String? codesignIdentity = environmentDefines[kCodesignIdentity];
   final Map<FlutterCodeAsset, FlutterCodeAssetTargetLocation> assetTargetLocations =
-      assetTargetLocationsForOS(targetOS, dartHookResult.codeAssets, flutterTester, targetUri);
+      assetTargetLocationsForOS(
+        targetOS,
+        dartHookResult.codeAssets,
+        flutterTester,
+        targetUri,
+        logger: logger,
+      );
   final List<File> installedFiles = await _copyNativeCodeAssetsForOS(
     targetOS,
     targetUri,
@@ -505,9 +519,11 @@ Future<List<File>> installCodeAssets({
     assetTargetLocations,
     codesignIdentity,
     flutterTester,
+    logger: logger,
+    processManager: processManager,
   );
   final manifest = NativeAssetsManifest.fromTargetLocations(assetTargetLocations);
-  await _writeNativeAssetsJson(manifest, nativeAssetsFileUri, fileSystem);
+  await _writeNativeAssetsJson(manifest, nativeAssetsFileUri, fileSystem, logger: logger);
   return <File>[fileSystem.file(nativeAssetsFileUri), ...installedFiles];
 }
 
@@ -543,6 +559,7 @@ class FlutterNativeAssetsBuildRunnerImpl implements FlutterNativeAssetsBuildRunn
     this.fileSystem,
     this.logger,
     this.platform,
+    this.processManager,
     this.runPackageName,
     this.pubspecPath, {
     required this.includeDevDependencies,
@@ -555,6 +572,7 @@ class FlutterNativeAssetsBuildRunnerImpl implements FlutterNativeAssetsBuildRunn
   final FileSystem fileSystem;
   final Logger logger;
   final Platform platform;
+  final ProcessManager processManager;
   final String runPackageName;
 
   /// Include the dev dependencies of [runPackageName].
@@ -645,15 +663,18 @@ class FlutterNativeAssetsBuildRunnerImpl implements FlutterNativeAssetsBuildRunn
   }
 
   @override
-  Future<void> setCCompilerConfig(CodeAssetTarget target) async => target.setCCompilerConfig();
+  Future<void> setCCompilerConfig(CodeAssetTarget target) async => target.setCCompilerConfig(
+    processUtils: ProcessUtils(processManager: processManager, logger: logger),
+  );
 }
 
 Future<Uri> _writeNativeAssetsJson(
   NativeAssetsManifest manifest,
   Uri nativeAssetsJsonUri,
-  FileSystem fileSystem,
-) async {
-  globals.logger.printTrace('Writing native assets json to $nativeAssetsJsonUri.');
+  FileSystem fileSystem, {
+  required Logger logger,
+}) async {
+  logger.printTrace('Writing native assets json to $nativeAssetsJsonUri.');
   final String nativeAssetsDartContents = manifest.toJsonString();
   final File nativeAssetsFile = fileSystem.file(nativeAssetsJsonUri);
   final Directory parentDirectory = nativeAssetsFile.parent;
@@ -661,7 +682,7 @@ Future<Uri> _writeNativeAssetsJson(
     await parentDirectory.create(recursive: true);
   }
   await nativeAssetsFile.writeAsString(nativeAssetsDartContents);
-  globals.logger.printTrace('Writing ${nativeAssetsFile.path} done.');
+  logger.printTrace('Writing ${nativeAssetsFile.path} done.');
   return nativeAssetsFile.uri;
 }
 
@@ -680,12 +701,13 @@ bool _nativeAssetsLinkingEnabled(BuildMode buildMode) {
   }
 }
 
-Future<bool> _hookRunRequired(FlutterNativeAssetsBuildRunner buildRunner) async {
+Future<bool> _hookRunRequired(
+  FlutterNativeAssetsBuildRunner buildRunner, {
+  required Logger logger,
+}) async {
   final List<String> packagesWithNativeAssets = await buildRunner.packagesWithNativeAssets();
   if (packagesWithNativeAssets.isEmpty) {
-    globals.logger.printTrace(
-      'No packages with native assets. Skipping native assets compilation.',
-    );
+    logger.printTrace('No packages with native assets. Skipping native assets compilation.');
     return false;
   }
 
@@ -708,13 +730,12 @@ Future<void> ensureNoNativeAssetsOrOsIsSupported(
   Uri workingDirectory,
   String os,
   FileSystem fileSystem,
-  FlutterNativeAssetsBuildRunner buildRunner,
-) async {
+  FlutterNativeAssetsBuildRunner buildRunner, {
+  required Logger logger,
+}) async {
   final List<String> packagesWithNativeAssets = await buildRunner.packagesWithNativeAssets();
   if (packagesWithNativeAssets.isEmpty) {
-    globals.logger.printTrace(
-      'No packages with native assets. Skipping native assets compilation.',
-    );
+    logger.printTrace('No packages with native assets. Skipping native assets compilation.');
     return;
   }
   final String packageNames = packagesWithNativeAssets.join(' ');
@@ -747,13 +768,14 @@ Map<FlutterCodeAsset, FlutterCodeAssetTargetLocation> assetTargetLocationsForOS(
   OS targetOS,
   List<FlutterCodeAsset> codeAssets,
   bool flutterTester,
-  Uri buildUri,
-) {
+  Uri buildUri, {
+  required Logger logger,
+}) {
   final Uri? absolutePath = flutterTester ? buildUri : null;
   return switch (targetOS) {
     OS.windows || OS.linux => _assetTargetLocationsWindowsLinux(codeAssets, absolutePath),
-    OS.macOS => assetTargetLocationsMacOS(codeAssets, absolutePath),
-    OS.iOS => assetTargetLocationsIOS(codeAssets),
+    OS.macOS => assetTargetLocationsMacOS(codeAssets, absolutePath, logger: logger),
+    OS.iOS => assetTargetLocationsIOS(codeAssets, logger: logger),
     OS.android => assetTargetLocationsAndroid(codeAssets),
     _ => throw UnimplementedError('This should be unreachable.'),
   };
@@ -766,8 +788,10 @@ Future<List<File>> _copyNativeCodeAssetsForOS(
   FileSystem fileSystem,
   Map<FlutterCodeAsset, FlutterCodeAssetTargetLocation> assetTargetLocations,
   String? codesignIdentity,
-  bool flutterTester,
-) async {
+  bool flutterTester, {
+  required Logger logger,
+  required ProcessManager processManager,
+}) async {
   // We only have to copy code assets that are bundled within the app.
   // If a code asset that use a linking mode of [LookupInProcess],
   // [LookupInExecutable] or [DynamicLoadingSystem] do not have anything to
@@ -790,7 +814,8 @@ Future<List<File>> _copyNativeCodeAssetsForOS(
     return const <File>[];
   }
 
-  globals.logger.printTrace('Copying native assets to ${targetUri.toFilePath()}.');
+  logger.printTrace('Copying native assets to ${targetUri.toFilePath()}.');
+  final processUtils = ProcessUtils(processManager: processManager, logger: logger);
   final List<File> installedFiles;
   switch (targetOS) {
     case OS.windows:
@@ -810,6 +835,7 @@ Future<List<File>> _copyNativeCodeAssetsForOS(
           codesignIdentity,
           buildMode,
           fileSystem,
+          processUtils: processUtils,
         );
       } else {
         installedFiles = await copyNativeCodeAssetsMacOS(
@@ -818,6 +844,8 @@ Future<List<File>> _copyNativeCodeAssetsForOS(
           codesignIdentity,
           buildMode,
           fileSystem,
+          logger: logger,
+          processUtils: processUtils,
         );
       }
     case OS.iOS:
@@ -827,6 +855,8 @@ Future<List<File>> _copyNativeCodeAssetsForOS(
         codesignIdentity,
         buildMode,
         fileSystem,
+        logger: logger,
+        processUtils: processUtils,
       );
     case OS.android:
       assert(codesignIdentity == null);
@@ -838,7 +868,7 @@ Future<List<File>> _copyNativeCodeAssetsForOS(
     default:
       throw StateError('This should be unreachable.');
   }
-  globals.logger.printTrace('Copying native assets done.');
+  logger.printTrace('Copying native assets done.');
   return installedFiles;
 }
 

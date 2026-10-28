@@ -120,6 +120,23 @@ BuildCommand createFakeBuildCommand({
   }
   final OperatingSystemUtils resolvedOsUtils = effectiveOsUtils ?? FakeOperatingSystemUtils();
 
+  final ToolContext resolvedToolContext =
+      toolContext ??
+      FakeToolContext(
+        artifacts: artifacts,
+        cache: cache ?? FakeCache(),
+        config: config ?? FakeConfig(),
+        fs: fs,
+        flutterVersion: flutterVersion ?? FakeFlutterVersion(),
+        logger: resolvedLogger,
+        os: resolvedOsUtils,
+        platform: resolvedPlatform,
+        processManager: resolvedProcessManager,
+        processUtils:
+            processUtils ??
+            ProcessUtils(processManager: resolvedProcessManager, logger: resolvedLogger),
+        terminal: terminal ?? FakeTerminal(),
+      );
   final command = BuildCommand(
     androidBuilder: androidBuilder ?? FakeAndroidBuilder(),
     androidContext: FakeAndroidContext(androidSdk: androidSdk),
@@ -131,27 +148,12 @@ BuildCommand createFakeBuildCommand({
     buildSystem: buildSystem ?? FakeBuildSystem(),
     featureFlags: effectiveFeatureFlags ?? TestFeatureFlags(),
     templateRenderer: templateRenderer ?? FakeTemplateRenderer(),
-    toolContext:
-        toolContext ??
-        FakeToolContext(
-          artifacts: artifacts,
-          cache: cache ?? FakeCache(),
-          config: config ?? FakeConfig(),
-          fs: fs,
-          flutterVersion: flutterVersion ?? FakeFlutterVersion(),
-          logger: resolvedLogger,
-          os: resolvedOsUtils,
-          platform: resolvedPlatform,
-          processManager: resolvedProcessManager,
-          processUtils:
-              processUtils ??
-              ProcessUtils(processManager: resolvedProcessManager, logger: resolvedLogger),
-          terminal: terminal ?? FakeTerminal(),
-        ),
+    toolContext: resolvedToolContext,
     verboseHelp: verboseHelp,
   );
   final ApplicationPackageFactory packageFactory =
-      applicationPackageFactory ?? FakeIOSApplicationPackageFactory(fileSystem: fs);
+      applicationPackageFactory ??
+      FakeIOSApplicationPackageFactory(toolContext: resolvedToolContext);
   command.applicationPackages = packageFactory;
   for (final Command<void> subcommand in command.subcommands.values) {
     if (subcommand is FlutterCommand) {
@@ -162,9 +164,9 @@ BuildCommand createFakeBuildCommand({
 }
 
 class FakeIOSApplicationPackageFactory extends Fake implements ApplicationPackageFactory {
-  FakeIOSApplicationPackageFactory({required this.fileSystem});
+  FakeIOSApplicationPackageFactory({required this.toolContext});
 
-  final FileSystem fileSystem;
+  final ToolContext toolContext;
 
   @override
   Future<ApplicationPackage?> getPackageForPlatform(
@@ -175,15 +177,12 @@ class FakeIOSApplicationPackageFactory extends Fake implements ApplicationPackag
     if (platform != TargetPlatform.ios) {
       return null;
     }
-    final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
+    final FlutterProject project = FlutterProject.fromDirectoryTest(
+      toolContext.fs.currentDirectory,
+    );
     if (!project.ios.exists) {
       return null;
     }
-    return BuildableIOSApp(
-      project.ios,
-      'com.example.test',
-      'Runner',
-      toolContext: FakeToolContext(fs: fileSystem),
-    );
+    return BuildableIOSApp(project.ios, 'com.example.test', 'Runner', toolContext: toolContext);
   }
 }

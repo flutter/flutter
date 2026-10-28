@@ -620,6 +620,7 @@ class ToolDependencies {
           androidWorkflow: finalAndroidWorkflow,
           buildSystem: finalBuildSystem,
           buildTargets: finalBuildTargets,
+          extensionBuildManager: extensionBuildManager,
           extensionManager: extensionManager,
           featureFlags: finalFeatureFlags,
           iosSimulatorUtils: finalIOSSimulatorUtils,

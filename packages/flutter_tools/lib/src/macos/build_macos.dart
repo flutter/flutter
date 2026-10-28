@@ -83,9 +83,8 @@ final _filteredOutput = RegExp(
 Future<void> buildMacOS({
   required FlutterProject flutterProject,
   required BuildInfo buildInfo,
-  required String flutterRoot,
-  required bool verboseLogging,
   String? targetOverride,
+  required bool verboseLogging,
   bool configOnly = false,
   SizeAnalyzer? sizeAnalyzer,
   bool usingCISystem = false,
@@ -215,7 +214,9 @@ Future<void> buildMacOS({
     flutterProject.macos,
     buildDirectoryPath,
     buildInfo.mode,
-    flutterRoot: flutterRoot,
+    cocoaPods: globals.cocoaPods,
+    templateRenderer: globals.templateRenderer,
+    toolContext: toolContext,
   );
   // If the xcfilelists do not exist, create empty version.
   if (!flutterProject.macos.inputFileList.existsSync()) {
