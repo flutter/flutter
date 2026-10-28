@@ -133,8 +133,8 @@ flutter_display_test(
         "//conditions:default": ["@platforms//:incompatible"],
     }),
     deps = [
-        ":impeller_public_config",
         ":impeller_unittesting",
+        "//engine/src/flutter/impeller:impeller_public_config",
         "//engine/src/flutter/impeller/base:base_unittests",
         "//engine/src/flutter/impeller/compiler:compiler_unittests",
         "//engine/src/flutter/impeller/core:allocator_unittests",
@@ -216,7 +216,7 @@ flutter_display_test(
         "//conditions:default": ["@platforms//:incompatible"],
     }),
     deps = [
-        ":impeller_public_config",
+        "//engine/src/flutter/impeller:impeller_public_config",
         "//engine/src/flutter/impeller/renderer:renderer_dart_unittests",
         "//engine/src/flutter/testing",
     ],

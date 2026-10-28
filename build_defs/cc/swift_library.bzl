@@ -160,10 +160,19 @@ def _flutter_swift_library_impl(ctx):
     module = ctx.attr.module_name or ctx.label.name
 
     # The outputs, as GN's tool("swift") lays them: the header under the
-    # package's generated directory (GN's target_gen_dir), the rest under a
-    # directory of the target's (GN's $target_out_dir/$label_name).
-    header = ctx.actions.declare_file(paths.join(module, module + ".h"))
+    # package's generated directory (GN's target_gen_dir:
+    # <module>/<module>.h, the path the Objective-C imports spell), the
+    # rest under a directory of the target's (GN's $target_out_dir/
+    # $label_name). Bazel's gen and out trees are one, so a module named
+    # for another target of the package -- an executable's companion
+    # (the converter's <name>_swift), whose module is the executable's
+    # name -- would put its header's directory where that target's output
+    # goes; such a header, which nothing imports, sits with the module's
+    # other files instead (the Mac's T19).
     out_dir = "_swift/" + ctx.label.name
+    header = ctx.actions.declare_file(
+        paths.join(module, module + ".h") if module == ctx.label.name else paths.join(out_dir, module + ".h"),
+    )
     objects = [
         ctx.actions.declare_file(paths.join(out_dir, paths.replace_extension(src.basename, ".o")))
         for src in ctx.files.srcs
@@ -198,8 +207,10 @@ def _flutter_swift_library_impl(ctx):
     args.add("--depfile-path", depfile)
     args.add("--src-dir", _GN_SOURCE_ROOT)
     args.add("--gen-dir", paths.join(ctx.bin_dir.path, _GN_SOURCE_ROOT))
-    if ctx.file.bridge_header:
-        args.add("-import-objc-header", ctx.file.bridge_header)
+
+    # swiftc.py requires the option (GN's tool passes {{bridge_header}},
+    # empty for a module without one, and the script skips an empty value).
+    args.add("-import-objc-header", ctx.file.bridge_header or "")
     args.add_all(includes, before_each = "-I")
     args.add_all(
         depset(transitive = [compilation.quote_includes, compilation.includes, compilation.system_includes]),

@@ -3138,10 +3138,12 @@ final class _Emitter {
           // through the resolver: its settings apply here as a local
           // config's do -- the include directory as a dependency on the
           // library spanning it (genDirIncludeTargets), the swiftflags as
-          // they are.
+          // they are. A config the tables map (a toolchain's) is theirs.
+          final bool mapped =
+              configEffects.containsKey(config) || configEffects.containsKey(_gnLabel(config));
           final GnTarget? known = config.startsWith(':')
               ? localConfigs[config.substring(1)]
-              : _remoteConfig(config);
+              : (mapped ? null : _remoteConfig(config));
           if (known != null) {
             _swiftConfigInto(
               rule,
@@ -4002,9 +4004,11 @@ final class _Emitter {
         }
         for (final _Element element in _elements(assignment, withComments: true)) {
           final String config = _string(element);
+          final bool mapped =
+              configEffects.containsKey(config) || configEffects.containsKey(_gnLabel(config));
           final GnTarget? known = config.startsWith(':')
               ? localConfigs[config.substring(1)]
-              : _remoteConfig(config);
+              : (mapped ? null : _remoteConfig(config));
           if (known != null) {
             _swiftConfigInto(
               companion,
@@ -5555,8 +5559,13 @@ final class _Emitter {
         // suite lists darwin/common's test configs), read through the
         // resolver: a dependency on its library (its defines, include
         // directories and link flags, as a local public listing's), its
-        // compiler flags inlined and, listed publicly, handed on.
-        final GnTarget? remote = local == null ? _remoteConfig(config) : null;
+        // compiler flags inlined and, listed publicly, handed on. The
+        // tables come first: a toolchain config (//build/config/...) has
+        // its mapping there, and its file is not one the converter reads
+        // (the Mac's T19: build/config/compiler's is_posix).
+        final bool mapped =
+            configEffects.containsKey(config) || configEffects.containsKey(_gnLabel(config));
+        final GnTarget? remote = local == null && !mapped ? _remoteConfig(config) : null;
         if (remote != null) {
           if (assignment.op == '-=') {
             throw GnError(assignment.location, 'removing config $config is not supported');
