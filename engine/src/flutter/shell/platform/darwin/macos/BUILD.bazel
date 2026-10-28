@@ -3,7 +3,7 @@
 # found in the LICENSE file.
 
 # Generated from //flutter/shell/platform/darwin/macos/BUILD.gn by gn_to_bazel; do not edit.
-# Not converted: flutter_desktop_darwin_swift_unittests, flutter_desktop_darwin_unittests, flutter_framework, _generate_symlinks_and_verify_framework_module.
+# Not converted: flutter_desktop_darwin_swift_unittests, flutter_desktop_darwin_unittests, _generate_symlinks_and_verify_framework_module.
 
 load("@bazel_skylib//lib:selects.bzl", "selects")
 load("@rules_cc//cc:defs.bzl", "cc_library")
@@ -11,7 +11,7 @@ load("//build_defs/cc:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES", "MAC
 load("//build_defs/cc:objc_library.bzl", "flutter_objc_library")
 load("//build_defs/cc:shared_library.bzl", "flutter_shared_library")
 load("//build_defs/cc:swift_library.bzl", "flutter_swift_library")
-load("//build_defs/dist:framework.bzl", "framework_symlinks")
+load("//build_defs/dist:framework.bzl", "framework_symlinks", "xcframework")
 load("//build_defs/dist:zip_bundle.bzl", "zip_bundle")
 load("//build_defs/gn:gn_action.bzl", "gn_action", "gn_copy", "gn_generated_file")
 load("//build_defs/testing:testing.bzl", "flutter_test_fixtures")
@@ -46,6 +46,7 @@ cc_library(
 
 filegroup(
     name = "macos",
+    srcs = [":flutter_framework"],
     target_compatible_with = select({
         "@platforms//os:macos": [],
         "//conditions:default": ["@platforms//:incompatible"],
@@ -594,6 +595,23 @@ filegroup(
         "@platforms//os:macos": [],
         "//conditions:default": ["@platforms//:incompatible"],
     }),
+)
+
+xcframework(
+    name = "flutter_framework",
+    args = [
+        "--frameworks",
+        "$(built FlutterMacOS.framework)",
+        "--name",
+        "FlutterMacOS",
+        "--location",
+        "$(built .)",
+    ],
+    target_compatible_with = select({
+        "@platforms//os:macos": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [":universal_flutter_framework"],
 )
 
 # `full_target_platform_name == "darwin-arm64" && flutter_runtime_mode == "profile"`, for the select()s of this file.
