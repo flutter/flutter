@@ -274,6 +274,18 @@ abstract class BaseTapGestureRecognizer extends PrimaryPointerGestureRecognizer 
 
   @override
   void addAllowedPointer(PointerDownEvent event) {
+    // Recover from a stale pointer sequence left unresolved (e.g. a native
+    // platform dialog swallows the pointer up/cancel events, leaving this
+    // recognizer stuck tracking an old pointer id). When a new pointer down
+    // arrives on a different id, force-resolve the stale one so the state
+    // machine transitions back to [GestureRecognizerState.ready] and accepts
+    // the new pointer normally.
+    if (state != GestureRecognizerState.ready && _down != null && _down!.pointer != event.pointer) {
+      resolve(GestureDisposition.rejected);
+      stopTrackingPointer(_down!.pointer);
+      _reset();
+    }
+
     if (state == GestureRecognizerState.ready) {
       // If there is no result in the previous gesture arena,
       // we ignore them and prepare to accept a new pointer.
