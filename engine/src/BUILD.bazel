@@ -27,8 +27,13 @@ cc_library(
 )
 
 # The engine's AUTHORS, which sky/packages/sky_engine copies into the
-# sky_engine package (copy("copy_sky_engine_authors"): `//AUTHORS`).
-exports_files(["AUTHORS"])
+# sky_engine package (copy("copy_sky_engine_authors"): `//AUTHORS`), and its
+# LICENSE, which the macOS shell copies beside FlutterMacOS.framework
+# (copy("copy_license"): `//LICENSE`).
+exports_files([
+    "AUTHORS",
+    "LICENSE",
+])
 
 # GN's root files: the dotfile and the build_overrides it names. Inputs of
 # the rules that wrap a GN build of part of this tree.

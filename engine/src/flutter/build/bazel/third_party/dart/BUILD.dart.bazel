@@ -41,6 +41,16 @@ cc_library(
     ],
 )
 
+# third_party/double-conversion's headers, as the engine includes them
+# ("third_party/dart/third_party/double-conversion/src/double-conversion.h",
+# from the accessibility tree's string_utils.cc): the wrap's libdouble_conversion
+# facade carries them (dart_wrap/BUILD.bazel).
+cc_library(
+    name = "double_conversion_headers",
+    hdrs = glob(["third_party/double-conversion/src/*.h"]),
+    include_prefix = "third_party/dart",
+)
+
 # runtime/BUILD.gn's config("dart_config"), which the engine's dart:io glue
 # (//flutter/lib/io) lists privately: the defines it resolves to under the
 # host configurations tools/gn writes (DEBUG under --dart-debug, the wrap's

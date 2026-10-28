@@ -118,7 +118,7 @@ engine_maven_repository = rule(
     },
 )
 
-def android_engine_artifacts(name, cpus = CPUS, modes = MODES):
+def android_engine_artifacts(name, cpus = CPUS, modes = MODES, target_compatible_with = None):
     """The engine's Android artifacts for the tests' SDK facsimile: gen_snapshot per CPU and AOT mode, the embedding as a Maven repository.
 
     Declares, for each CPU and mode, the embedding's and the ABI's jars and
@@ -134,8 +134,11 @@ def android_engine_artifacts(name, cpus = CPUS, modes = MODES):
       name: the prefix of every target.
       cpus: the CPUs (CPUS).
       modes: the runtime modes (MODES).
+      target_compatible_with: the constraints every target is compatible with,
+        if any (the Linux host's: the JDK overlay knows no macOS bundle layout yet).
     """
     maven = []
+    compatibility = {"target_compatible_with": target_compatible_with} if target_compatible_with else {}
     for cpu, spec in cpus.items():
         for mode in modes:
             prefix = "%s_%s_%s" % (name, cpu, mode)
@@ -157,6 +160,7 @@ def android_engine_artifacts(name, cpus = CPUS, modes = MODES):
                 platform = spec.platform,
                 runtime_mode = mode,
                 stripped = "false",
+                **compatibility
             )
             for suffix, target in targets.items():
                 in_configuration(
@@ -174,10 +178,12 @@ def android_engine_artifacts(name, cpus = CPUS, modes = MODES):
                 bundle_directory(
                     name = prefix + "_gen_snapshot",
                     bundles = [":" + prefix + "_gen_snapshot_zip"],
+                    **compatibility
                 )
     engine_maven_repository(
         name = name + "_maven",
         srcs = maven,
+        **compatibility
     )
 
 def _android_build_tools_impl(ctx):
