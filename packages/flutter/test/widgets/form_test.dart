@@ -2179,12 +2179,6 @@ void main() {
   });
 }
 
-class _PlatformAnnounceScenario {
-  _PlatformAnnounceScenario({required this.supportsAnnounce, required this.testName});
-  final bool supportsAnnounce;
-  final String testName;
-}
-
 class _ExternallyValuedFormField extends FormField<String> {
   _ExternallyValuedFormField({super.key, required this.value, super.validator})
     : super(
@@ -2201,4 +2195,10 @@ class _ExternallyValuedFormField extends FormField<String> {
 class _ExternallyValuedFormFieldState extends FormFieldState<String> {
   @override
   String get value => (widget as _ExternallyValuedFormField).value.value;
+}
+
+class _PlatformAnnounceScenario {
+  _PlatformAnnounceScenario({required this.supportsAnnounce, required this.testName});
+  final bool supportsAnnounce;
+  final String testName;
 }
