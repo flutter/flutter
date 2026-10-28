@@ -3835,6 +3835,136 @@ config("c") {
       );
     });
 
+    test(
+      'a Swift Testing suite: the config with the rebased platform path, the Swift executable',
+      () async {
+        // darwin/common's swift_testing_config rebases the platform's
+        // Frameworks directory against root_out_dir for a -F and an rpath
+        // relative to the executable: a directory outside the tree is itself
+        // wherever it is named, so the -F takes the constant and the rpath
+        // drops its `@executable_path/` (GN's executable sat in the directory
+        // the path was rebased against). An executable of Swift sources is a
+        // flutter_swift_library the cc_test links, with the module named after
+        // GN's target, the Swift side of its configs and its dependencies.
+        const commonGn = r'''
+config("test_config") {
+  _platform_path = mac_platform_path
+  swiftflags = [ "-F$_platform_path/Developer/Library/Frameworks" ]
+  include_dirs = [ "$_platform_path/Developer/usr/lib" ]
+}
+config("swift_testing_config") {
+  _platform_path = mac_platform_path
+  _platform_framework_path =
+      rebase_path("$_platform_path/Developer/Library/Frameworks", root_out_dir)
+  ldflags = [
+    "-F$_platform_framework_path",
+    "-Wl,-rpath,@executable_path/$_platform_framework_path",
+  ]
+  frameworks = [ "Testing.framework" ]
+}
+source_set("swift_testing_main") {
+  testonly = true
+  public_configs = [ ":test_config", ":swift_testing_config" ]
+  sources = [ "SwiftTestingMain.swift" ]
+}
+executable("common_swift_unittests") {
+  testonly = true
+  public_configs = [ ":test_config", ":swift_testing_config" ]
+  sources = [ "LoggerTests.swift" ]
+  deps = [ ":swift_testing_main" ]
+}
+''';
+        final String output = await convert(commonGn, gnPackage: '//flutter/common');
+        expect(
+          output,
+          contains(
+            'cc_library(\n'
+            '    name = "swift_testing_config",\n'
+            '    linkopts = [\n'
+            '        "-F" + MACOS_PLATFORM_PATH + "/Developer/Library/Frameworks",\n'
+            '        "-Wl,-rpath," + MACOS_PLATFORM_PATH + "/Developer/Library/Frameworks",\n'
+            '        "-framework",\n'
+            '        "Testing",\n'
+            '    ],\n'
+            ')\n',
+          ),
+        );
+        expect(
+          output,
+          contains(
+            'flutter_swift_library(\n'
+            '    name = "common_swift_unittests_swift",\n'
+            '    testonly = True,\n'
+            '    srcs = ["LoggerTests.swift"],\n'
+            '    module_name = "common_swift_unittests",\n'
+            '    swiftflags = [\n'
+            '        "-F" + MACOS_PLATFORM_PATH + "/Developer/Library/Frameworks",\n'
+            '        "-I" + MACOS_PLATFORM_PATH + "/Developer/usr/lib",\n'
+            '    ],\n'
+            '    target_compatible_with = select({\n'
+            '        "@platforms//os:macos": [],\n'
+            '        "//conditions:default": ["@platforms//:incompatible"],\n'
+            '    }),\n'
+            '    deps = [\n'
+            '        ":swift_testing_config",\n'
+            '        ":swift_testing_main",\n'
+            '        ":test_config",\n'
+            '        "//engine/src:include_root",\n'
+            '    ],\n'
+            ')\n',
+          ),
+        );
+        expect(
+          output,
+          contains(
+            'cc_test(\n'
+            '    name = "common_swift_unittests",\n'
+            '    size = "small",\n',
+          ),
+        );
+        expect(output, contains('        ":common_swift_unittests_swift",\n'));
+        expect(output, isNot(contains('textual_hdrs')));
+        // The same configs listed by a suite of another file: a dependency on
+        // each config's library, the flags inlined, the nested `:config` of
+        // the remote file resolved in its own package.
+        final GnSourceTree tree = sourceTree(<String, String>{
+          'flutter/common/BUILD.gn': commonGn,
+          'flutter/example/BUILD.gn': '''
+executable("other_swift_unittests") {
+  testonly = true
+  public_configs = [
+    "//flutter/common:test_config",
+    "//flutter/common:swift_testing_config",
+  ]
+  sources = [ "OtherTests.swift" ]
+  deps = [ "//flutter/common:swift_testing_main" ]
+}
+''',
+        });
+        final String user = emitBuildFile(
+          evaluateIn(tree, '//flutter/example/BUILD.gn'),
+          gnPackage: '//flutter/example',
+          tree: tree,
+        );
+        expect(
+          user,
+          contains(
+            '    deps = [\n'
+            '        "//engine/src:include_root",\n'
+            '        "//engine/src/flutter/common:swift_testing_config",\n'
+            '        "//engine/src/flutter/common:swift_testing_main",\n'
+            '        "//engine/src/flutter/common:test_config",\n'
+            '    ],\n',
+          ),
+        );
+        expect(user, contains('    module_name = "other_swift_unittests",\n'));
+        expect(
+          user,
+          contains('        "-I" + MACOS_PLATFORM_PATH + "/Developer/usr/lib",\n    ],\n'),
+        );
+      },
+    );
+
     test('a complete static library is an archive, or the library its dependents link', () async {
       // The Impeller SDK's libimpeller.a is an artifact (cc_static_library,
       // named after output_name with GN's name an alias); OCMock's `ocmock`

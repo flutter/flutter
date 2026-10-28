@@ -3,7 +3,7 @@
 # found in the LICENSE file.
 
 # Generated from //flutter/shell/platform/darwin/macos/BUILD.gn by gn_to_bazel; do not edit.
-# Not converted: flutter_desktop_darwin_swift_unittests, _generate_symlinks_and_verify_framework_module.
+# Not converted: _generate_symlinks_and_verify_framework_module.
 
 load("@bazel_skylib//lib:selects.bzl", "selects")
 load("@macos_sdk//:sdk.bzl", "MACOS_PLATFORM_PATH")
@@ -418,6 +418,68 @@ flutter_test_fixtures(
         "@platforms//os:macos": [],
         "//conditions:default": ["@platforms//:incompatible"],
     }),
+)
+
+# The Swift sources of flutter_desktop_darwin_swift_unittests, as the module GN compiles them into
+# (build_defs/cc/swift_library.bzl); flutter_desktop_darwin_swift_unittests links them in.
+flutter_swift_library(
+    name = "flutter_desktop_darwin_swift_unittests_swift",
+    testonly = True,
+    srcs = ["framework/Source/ResizeSynchronizerTests.swift"],
+    module_name = "flutter_desktop_darwin_swift_unittests",
+    swiftflags = select({
+        ":when_is_mac_and_enable_unittests": [
+            "-enable-testing",  # is_ios && enable_ios_unittests || (is_mac && enable_unittests)
+        ],
+        "//conditions:default": [],
+    }) + [
+        "-F" + MACOS_PLATFORM_PATH + "/Developer/Library/Frameworks",
+        "-I" + MACOS_PLATFORM_PATH + "/Developer/usr/lib",
+    ],
+    target_compatible_with = select({
+        "@platforms//os:macos": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        ":flutter_framework_source",
+        "//engine/src:include_root",
+        "//engine/src/flutter/shell/platform/darwin/common:config",
+        "//engine/src/flutter/shell/platform/darwin/common:swift_testing_config",
+        "//engine/src/flutter/shell/platform/darwin/common:swift_testing_main",
+        "//engine/src/flutter/shell/platform/darwin/common:test_config",
+        "//engine/src/flutter/shell/platform/darwin/common:test_utils_swift",
+    ],
+)
+
+cc_test(
+    name = "flutter_desktop_darwin_swift_unittests",
+    size = "small",
+    # Add platform frameworks directory to search path for test frameworks.
+    # Add platform lib to search path for test libraries/Swift modules.
+    copts = FLUTTER_COPTS + [
+        "-fvisibility=default",  # from //flutter/shell/platform/darwin/common:swift_testing_main
+        "-F" + MACOS_PLATFORM_PATH + "/Developer/Library/Frameworks",  # from //flutter/shell/platform/darwin/common:swift_testing_main
+        "-I" + MACOS_PLATFORM_PATH + "/Developer/usr/lib",  # from //flutter/shell/platform/darwin/common:swift_testing_main
+        "-fvisibility=default",
+        "-F" + MACOS_PLATFORM_PATH + "/Developer/Library/Frameworks",
+        "-I" + MACOS_PLATFORM_PATH + "/Developer/usr/lib",
+        "-mmacosx-version-min=14.0",  # from //flutter/shell/platform/darwin/common:swift_testing_main
+    ],
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    target_compatible_with = select({
+        "@platforms//os:macos": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        ":flutter_desktop_darwin_swift_unittests_swift",
+        ":flutter_framework_source",
+        "//engine/src:include_root",
+        "//engine/src/flutter/shell/platform/darwin/common:config",
+        "//engine/src/flutter/shell/platform/darwin/common:swift_testing_config",
+        "//engine/src/flutter/shell/platform/darwin/common:swift_testing_main",
+        "//engine/src/flutter/shell/platform/darwin/common:test_config",
+        "//engine/src/flutter/shell/platform/darwin/common:test_utils_swift",
+    ],
 )
 
 # The Objective-C(++) sources of flutter_desktop_darwin_unittests, which cc_library takes none of
