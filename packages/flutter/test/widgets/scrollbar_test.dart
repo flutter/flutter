@@ -4337,6 +4337,53 @@ The provided ScrollController cannot be shared by multiple ScrollView widgets.''
     );
   });
 
+  testWidgets('RawScrollbar notifies subclasses when a thumb press loses the gesture arena', (
+    WidgetTester tester,
+  ) async {
+    final controller = ScrollController();
+    addTearDown(controller.dispose);
+    final key = GlobalKey<_ThumbPressScrollbarState>();
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: _ThumbPressScrollbar(
+            key: key,
+            controller: controller,
+            child: SingleChildScrollView(
+              controller: controller,
+              child: const SizedBox(width: 4000.0, height: 4000.0),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // Touch the padded thumb hit area outside the track, then release before
+    // the thumb drag can win against the scrollable's drag recognizer.
+    final TestGesture press = await tester.startGesture(const Offset(790.0, 5.0));
+    expect(key.currentState!.presses, 1);
+    await press.up();
+    await tester.pumpAndSettle();
+    expect(key.currentState!.cancellations, 1);
+    expect(key.currentState!.ends, 0);
+    expect(controller.offset, 0.0);
+    expect(controller.position.isScrollingNotifier.value, isFalse);
+
+    // The canceled hold must not interfere with the next thumb drag.
+    final TestGesture drag = await tester.startGesture(const Offset(797.0, 5.0));
+    await drag.moveBy(const Offset(0.0, 50.0));
+    await tester.pump();
+    await drag.up();
+    await tester.pumpAndSettle();
+    expect(key.currentState!.presses, 2);
+    expect(key.currentState!.cancellations, 1);
+    expect(key.currentState!.ends, 1);
+    expect(controller.offset, greaterThan(0.0));
+  });
+
   testWidgets('RawScrollbar.mouseCursor clears dragged state when thumb drag is cancelled', (
     WidgetTester tester,
   ) async {
@@ -4399,4 +4446,36 @@ The provided ScrollController cannot be shared by multiple ScrollView widgets.''
     await tester.pump();
     expect(scrollbarCursor(), SystemMouseCursors.grab);
   });
+}
+
+class _ThumbPressScrollbar extends RawScrollbar {
+  const _ThumbPressScrollbar({super.key, required super.controller, required super.child})
+    : super(thumbVisibility: true);
+
+  @override
+  RawScrollbarState<RawScrollbar> createState() => _ThumbPressScrollbarState();
+}
+
+class _ThumbPressScrollbarState extends RawScrollbarState<_ThumbPressScrollbar> {
+  int presses = 0;
+  int cancellations = 0;
+  int ends = 0;
+
+  @override
+  void handleThumbPress() {
+    super.handleThumbPress();
+    presses += 1;
+  }
+
+  @override
+  void handleThumbPressCancel() {
+    super.handleThumbPressCancel();
+    cancellations += 1;
+  }
+
+  @override
+  void handleThumbPressEnd(Offset localPosition, Velocity velocity) {
+    super.handleThumbPressEnd(localPosition, velocity);
+    ends += 1;
+  }
 }
