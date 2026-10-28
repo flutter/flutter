@@ -101,6 +101,41 @@ config_setting(
     flag_values = {":dart_disable_secure_socket": "False"},
 )
 
+# tools/gn's --no-prebuilt-dart-sdk: common/config.gni's
+# flutter_prebuilt_dart_sdk off, the engine built with a Dart SDK compiled
+# from the synced Dart tree instead of the prebuilt one of DEPS -- the Dart
+# roll's check that the engine builds against the tree it syncs (ci/builders'
+# linux_unopt host_debug_no_prebuilt_dart_sdk, which runs no tests and
+# ships nothing). On, as every other builder has it.
+bool_flag(
+    name = "flutter_prebuilt_dart_sdk",
+    build_setting_default = True,
+)
+
+config_setting(
+    name = "flutter_prebuilt_dart_sdk_enabled",
+    flag_values = {":flutter_prebuilt_dart_sdk": "True"},
+)
+
+config_setting(
+    name = "flutter_prebuilt_dart_sdk_disabled",
+    flag_values = {":flutter_prebuilt_dart_sdk": "False"},
+)
+
+# The build that compiles the SDK: the host's own with the flag off. GN
+# would build the SDK of whatever target the flag is set for, and run the
+# frontend server from source on the Dart tree's own prebuilt VM
+# (flutter_frontend_server.gni's prebuilt_dart_action); here the tools the
+# kernel compiles run are the built SDK's, which only the host's own build
+# can run, so a cross build keeps the prebuilt SDK whatever the flag says.
+selects.config_setting_group(
+    name = "dart_sdk_from_source",
+    match_all = [
+        ":flutter_prebuilt_dart_sdk_disabled",
+        ":host_own",
+    ],
+)
+
 # GN's prebuilt_dart_sdk outside the host toolchain (common/config.gni): the
 # prebuilt SDK of the *target* -- the host's own for the host's build,
 # linux-arm64's for the Linux arm64 cross build, the Mac's for the macOS
@@ -333,6 +368,18 @@ _GN_ARGS = {
 }) | select({
     ":dart_disable_secure_socket_enabled": {"dart_disable_secure_socket": "true"},
     "//conditions:default": {},
+}) | select({
+    # The SDK from the Dart tree (BUILD.gn's flutter_build_dart_sdk), in the
+    # host's own build without the prebuilt SDK, as tools/gn configures it
+    # there: without wasm-opt ("it doesn't build properly with our gn
+    # configuration"). tools/gn's dart_platform_sdk no GN file declares any
+    # more (gn gen runs with --fail-on-unused-args here), and full_dart_sdk
+    # is the engine root's, outside this graph.
+    ":dart_sdk_from_source": {
+        "dart_include_wasm_opt": "false",
+        "flutter_build_dart_sdk": "true",
+    },
+    "//conditions:default": {},
 })
 
 gn_build(
@@ -356,6 +403,21 @@ gn_build(
         # toolchain builds it for the target; nothing elsewhere.
         "gen_snapshot_mac_arm64",
         "gen_snapshot_mac_x64",
+        # The SDK compiled from the Dart tree (BUILD.gn's
+        # flutter_build_dart_sdk; tools/gn --no-prebuilt-dart-sdk), in the
+        # host's own build with :flutter_prebuilt_dart_sdk off; nothing
+        # otherwise (out_paths). The AOT runtime of the SDK's bin/ and the
+        # product frontend server snapshot its bin/snapshots carries, built
+        # for each other (kernel-service's frontend_server_aot_product): what
+        # the kernel compiles run, through :engine_dartaotruntime and
+        # :engine_frontend_server below. And kernel-service's
+        # frontend_server_aot, the release-mode snapshot GN's
+        # flutter_frontend_server copies into the build directory (the one
+        # the artifacts would ship); it runs on the release runtime, which
+        # the SDK does not carry.
+        "dartaotruntime",
+        "frontend_server_aot.dart.snapshot",
+        "frontend_server_aot_product.dart.snapshot",
     ],
     ar = HOST_CLANG + "//:bin/llvm-ar",
     # Dependencies the Bazel side builds itself (the facades depend on them).
@@ -431,6 +493,18 @@ gn_build(
             "gen_snapshot": "",
         },
         "//conditions:default": {},
+    }) | select({
+        # The built SDK's files: the AOT runtime where create_sdk lays the
+        # SDK out ($root_out_dir/dart-sdk); the two frontend server
+        # snapshots where kernel-service writes them (the build root, from
+        # where GN's flutter_frontend_server copies the release one and
+        # create_sdk the product one).
+        ":dart_sdk_from_source": {"dartaotruntime": "dart-sdk/bin/dartaotruntime"},
+        "//conditions:default": {
+            "dartaotruntime": "",
+            "frontend_server_aot.dart.snapshot": "",
+            "frontend_server_aot_product.dart.snapshot": "",
+        },
     }),
     root_target_dir = "flutter/build/bazel/dart_wrap",
     # The GN source root: the engine's build configuration, the trees GN
@@ -461,6 +535,12 @@ gn_build(
             "@cpu_features//:build_tree": "flutter/third_party/cpu_features",
         },
         "//conditions:default": {},
+    }) | select({
+        # What the SDK's build reads beyond the engine's Dart targets
+        # (BUILD.dart.bazel's sdk_build_tree: the trees its layout copies
+        # in, wasm-opt's sources, the GN files the Dart root reaches).
+        ":dart_sdk_from_source": {"@dart//:sdk_build_tree": "flutter/third_party/dart"},
+        "//conditions:default": {},
     }) | {
         HOST_CLANG + "//:all_files": "flutter/buildtools/%s/clang" % HOST_BUILDTOOLS,
         "@cpython3//:runtime": "flutter/buildtools/%s/cpython3" % HOST_BUILDTOOLS,
@@ -473,6 +553,37 @@ gn_build(
         "@llvm_libc//:build_tree": "flutter/third_party/llvm_libc",
         "@zlib//:build_tree": "flutter/third_party/zlib",
     },
+)
+
+# The tools the engine's kernel compiles run (build_defs/dart/kernel.bzl's
+# KERNEL_TOOL_ATTRS): the prebuilt SDK's AOT runtime and frontend server
+# snapshot (GN's host_prebuilt_dart_sdk: flutter_frontend_server.gni with
+# flutter_prebuilt_dart_sdk), or the built SDK's own pair in the host's
+# build without it -- its product runtime and the product snapshot its
+# bin/snapshots carries, which an AOT runtime accepts only from its own
+# build (the release-mode frontend_server_aot.dart.snapshot GN's
+# flutter_frontend_server copies would not load on it: "the snapshot
+# requires 'release ...' but the VM has 'product ...'"). GN runs the
+# frontend server from source on the Dart tree's own prebuilt VM there
+# (prebuilt_dart_action); running the built snapshot on the built runtime
+# instead is the same check of the roll with the compiler compiled once
+# rather than per kernel. Taken in the target configuration (a kernel's
+# `cfg = "target"` tool), where the wrapped build is: an exec-configuration
+# dependency would build the SDK a second time.
+alias(
+    name = "engine_dartaotruntime",
+    actual = select({
+        ":dart_sdk_from_source": ":dartaotruntime",
+        "//conditions:default": HOST_DART_SDK + "//:dartaotruntime",
+    }),
+)
+
+alias(
+    name = "engine_frontend_server",
+    actual = select({
+        ":dart_sdk_from_source": ":frontend_server_aot_product.dart.snapshot",
+        "//conditions:default": HOST_DART_SDK + "//:frontend_server",
+    }),
 )
 
 # ---------------------------------------------------------------------------

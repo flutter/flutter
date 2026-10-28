@@ -207,11 +207,15 @@ const Map<String, GnFlag> gnFlags = <String, GnFlag>{
   '--target-dir': GnFlag(GnFlagEffect.buildDirectory, takesValue: true),
   '--prebuilt-dart-sdk': GnFlag(
     GnFlagEffect.assumed,
-    note: 'flutter_prebuilt_dart_sdk is true in every generated file',
+    note: "the default: the Dart wrap's flutter_prebuilt_dart_sdk setting is on",
   ),
+  // common/config.gni's flutter_prebuilt_dart_sdk off: the Dart wrap's
+  // setting (build/bazel/dart_wrap), under which the host's own build
+  // compiles the Dart SDK from the synced tree and runs the kernel compiles
+  // with its frontend server (ci/host_debug_no_prebuilt_dart_sdk).
   '--no-prebuilt-dart-sdk': GnFlag(
-    GnFlagEffect.unsupported,
-    note: 'the generated files assume the prebuilt Dart SDK',
+    GnFlagEffect.setting,
+    bazelFlag: '--//engine/src/flutter/build/bazel/dart_wrap:flutter_prebuilt_dart_sdk=false',
   ),
   // tools/gn: LTO is on unless --no-lto, and off in unoptimized builds.
   // Whether the Bazel build can follow is the platform's (BuilderBuild.of).
