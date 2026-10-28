@@ -89,6 +89,7 @@ use_repo(
     "macos_sdk",
     "ninja",
     "node_preamble",
+    "ocmock",
     "openjdk",
     "process",
     "process_runner",
