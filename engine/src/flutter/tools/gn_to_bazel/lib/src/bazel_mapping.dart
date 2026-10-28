@@ -1048,6 +1048,15 @@ const Map<String, ConfigEffect> configEffects = <String, ConfigEffect>{
     removalCopts: <String>['-fvisibility=default', '-U_LIBCPP_DISABLE_VISIBILITY_ANNOTATIONS'],
   ),
   '//build/config:symbol_visibility_hidden': ConfigImplied(),
+  // //build/config/ios:ios_application_extension: -fapplication-extension
+  // on the Objective-C compiles and the link (the iOS embedding is built
+  // app-extension-safe): the flag inlined on the listing target's compiles
+  // (every source of it, where GN gives it to the Objective-C ones -- the
+  // targets are Objective-C), the link's through the library's linkopts.
+  '//build/config/ios:ios_application_extension': ConfigDependency(
+    '//engine/src/flutter/build/bazel:ios_application_extension',
+    copts: <String>['-fapplication-extension'],
+  ),
   '//build/config/compiler:rtti': ConfigCopts(<(Condition, List<String>)>[]),
   // ANGLE's configs (build/bazel/gl_wrap builds ANGLE; the overlay @angle
   // carries its headers and this define-only config).
@@ -1138,6 +1147,10 @@ final Map<String, String> conditionSettings = Map<String, String>.unmodifiable(<
   'is_wasm': '@platforms//os:emscripten',
   'is_win': '@platforms//os:windows',
   'is_debug': '//engine/src/flutter/build/bazel:unoptimized',
+  // BUILDCONFIG.gn's is_asan (tools/gn --asan): the build-wide flag the
+  // toolchains' asan feature selects on; the iOS shell copies clang's ASan
+  // runtime beside the framework under it.
+  'is_asan': '//engine/src/flutter/build/bazel:asan_enabled',
   // darwin_sdk.gni's use_ios_simulator (tools/gn --simulator; ios_use_simulator
   // is Skia's alias): the iOS platforms' environment constraint
   // (build/bazel:ios_environment), which holds on iOS alone -- as GN reads
@@ -1221,6 +1234,7 @@ final Map<String, String> negatedSettings = Map<String, String>.unmodifiable(<St
   'is_qnx': '//engine/src/flutter/build/bazel:not_qnx',
   'is_wasm': '//engine/src/flutter/build/bazel:not_wasm',
   'is_win': '//engine/src/flutter/build/bazel:not_win',
+  'is_asan': '//engine/src/flutter/build/bazel:asan_disabled',
   // Not the simulator: a device, or not iOS at all.
   'use_ios_simulator': '//engine/src/flutter/build/bazel:ios_simulator_disabled',
   'ios_use_simulator': '//engine/src/flutter/build/bazel:ios_simulator_disabled',
@@ -1514,6 +1528,7 @@ const Set<String> knownExternalVariables = <String>{
   'host_toolchain',
   'is_android',
   'is_apple',
+  'is_asan',
   'is_clang',
   'is_component_build',
   'is_debug',
@@ -2452,6 +2467,10 @@ const ImportPolicy engineImportPolicy = ImportPolicy(
     // Declares use_clang_type_profiler, enable_lto, enable_coverage and
     // stripped_symbols; the embedder imports it and reads none of them.
     '//build/toolchain/clang.gni',
+    // Declares buildtools_path (assumed: tools/gn's //flutter/buildtools)
+    // and concurrent_toolchain_jobs; the iOS shell imports it for the
+    // ASan runtime's path under buildtools.
+    '//build/toolchain/toolchain.gni',
     // Declares disable_vma_stl_shared_mutex (above).
     '//flutter/flutter_vma/config.gni',
     // Declares enable_vulkan_validation_layers; nothing converted reads it.
@@ -2570,6 +2589,10 @@ Assumptions generationAssumptions() {
     ..._iosSdkAssumptions,
     'is_component_build': const GnBoolValue(false),
     'is_fuchsia': const GnBoolValue(false),
+    // build/toolchain/toolchain.gni's buildtools_path, as tools/gn passes
+    // it (the clang, gn and ninja under flutter/buildtools/<host>): read
+    // by the iOS shell for the ASan runtime's path.
+    'buildtools_path': const GnStringValue('//flutter/buildtools'),
     // testing.gni: `is_ios && flutter_runtime_mode == "debug"` -- the
     // XCTest suites of the iOS embedding (ios_test_flutter, run through a
     // simulator by run_tests.py), which the iOS port's test phase takes up
@@ -2740,6 +2763,7 @@ Assumptions linuxHostAssumptions() {
     // is_clang, dart_src: build invariants (gn_eval's buildInvariants).
     'is_component_build': GnBoolValue(false),
     'is_fuchsia': GnBoolValue(false),
+    'buildtools_path': GnStringValue('//flutter/buildtools'),
     'is_ios': GnBoolValue(false),
     'enable_ios_unittests': GnBoolValue(false),
     'is_linux': GnBoolValue(true),

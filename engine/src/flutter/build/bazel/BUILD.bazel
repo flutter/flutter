@@ -11,6 +11,7 @@
 load("@bazel_skylib//lib:selects.bzl", "selects")
 load("@bazel_skylib//rules:common_settings.bzl", "bool_flag", "string_flag")
 load("@host_platform//:host.bzl", "HOST_CPU_CONSTRAINT", "HOST_OS")
+load("@rules_cc//cc:defs.bzl", "cc_library")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -269,6 +270,11 @@ config_setting(
     flag_values = {":asan": "True"},
 )
 
+config_setting(
+    name = "asan_disabled",
+    flag_values = {":asan": "False"},
+)
+
 # GN's embedder_for_target (shell/platform/embedder/embedder.gni; tools/gn
 # --embedder-for-target): the embedder API's shared library and header are
 # built for the target as well as for the host, for embedders of their own
@@ -330,4 +336,15 @@ config_setting(
 config_setting(
     name = "stripped_disabled",
     flag_values = {":stripped": "False"},
+)
+
+# //build/config/ios:ios_application_extension: the iOS embedding is built
+# app-extension-safe (-fapplication-extension on its Objective-C compiles
+# and its links). A GN config of flags alone, which the converter inlines
+# as copts on the target listing it and carries through this library's
+# linkopts to its link (configEffects).
+cc_library(
+    name = "ios_application_extension",
+    linkopts = ["-fapplication-extension"],
+    target_compatible_with = ["@platforms//os:ios"],
 )
