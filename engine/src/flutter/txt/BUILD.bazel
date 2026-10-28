@@ -31,6 +31,9 @@ flutter_objc_library(
         "@platforms//os:macos": [
             "src/txt/platform_mac.mm",  # is_mac || is_ios
         ],
+        "@platforms//os:ios": [
+            "src/txt/platform_mac.mm",  # is_mac || is_ios
+        ],
         "//conditions:default": [],
     }),
     hdrs = [
@@ -59,15 +62,21 @@ flutter_objc_library(
         "@platforms//os:macos": [
             "src/txt/platform_mac.h",  # is_mac || is_ios
         ],
+        "@platforms//os:ios": [
+            "src/txt/platform_mac.h",  # is_mac || is_ios
+        ],
         "//conditions:default": [],
     }),
     copts = FLUTTER_COPTS + select({
         "@platforms//os:macos": [
             "-Wno-unguarded-availability",  # from //flutter/display_list
         ],
+        "@platforms//os:ios": [
+            "-Wno-unguarded-availability",  # from //flutter/display_list
+        ],
         "//conditions:default": [],
     }) + select({
-        ":when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan_and_is_mac": [
+        ":when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan_and_is_mac_or_is_ios": [
             "-Wno-unguarded-availability",  # from //flutter/impeller/display_list
         ],
         "//conditions:default": [],
@@ -75,6 +84,7 @@ flutter_objc_library(
     local_defines = FLUTTER_LOCAL_DEFINES,
     target_compatible_with = select({
         "@platforms//os:macos": [],
+        "@platforms//os:ios": [],
         "//conditions:default": ["@platforms//:incompatible"],
     }),
     deps = [
@@ -134,6 +144,7 @@ cc_library(
         "//conditions:default": [],
     }) + select({
         "@platforms//os:macos": [],
+        "@platforms//os:ios": [],
         "@platforms//os:android": [],
         "@platforms//os:linux": [],
         "//conditions:default": [
@@ -166,15 +177,21 @@ cc_library(
         "@platforms//os:macos": [
             "src/txt/platform_mac.h",  # is_mac || is_ios
         ],
+        "@platforms//os:ios": [
+            "src/txt/platform_mac.h",  # is_mac || is_ios
+        ],
         "//conditions:default": [],
     }),
     copts = FLUTTER_COPTS + select({
         "@platforms//os:macos": [
             "-Wno-unguarded-availability",  # from //flutter/display_list
         ],
+        "@platforms//os:ios": [
+            "-Wno-unguarded-availability",  # from //flutter/display_list
+        ],
         "//conditions:default": [],
     }) + select({
-        ":when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan_and_is_mac": [
+        ":when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan_and_is_mac_or_is_ios": [
             "-Wno-unguarded-availability",  # from //flutter/impeller/display_list
         ],
         "//conditions:default": [],
@@ -212,6 +229,7 @@ cc_library(
         "//conditions:default": [],
     }) + select({
         "@platforms//os:macos": [":txt_objc"],
+        "@platforms//os:ios": [":txt_objc"],
         "//conditions:default": [],
     }),
     alwayslink = True,
@@ -250,6 +268,9 @@ cc_test(
         "@platforms//os:macos": [
             "-Wno-unguarded-availability",  # from :txt
         ],
+        "@platforms//os:ios": [
+            "-Wno-unguarded-availability",  # from :txt
+        ],
         "//conditions:default": [],
     }),
     data = ["@icu//:icudata"],
@@ -286,6 +307,9 @@ flutter_cc_test(
         "@platforms//os:macos": [
             "tests/platform_mac_tests.cc",  # is_mac || is_ios
         ],
+        "@platforms//os:ios": [
+            "tests/platform_mac_tests.cc",  # is_mac || is_ios
+        ],
         "//conditions:default": [],
     }),
     args = ["--icu-data-file-path=../+synced_deps+icu/common/icudtl.dat"],
@@ -293,6 +317,9 @@ flutter_cc_test(
         "-Wno-inconsistent-missing-override",  # from //flutter/testing:skia
     ] + select({
         "@platforms//os:macos": [
+            "-Wno-unguarded-availability",  # from :txt
+        ],
+        "@platforms//os:ios": [
             "-Wno-unguarded-availability",  # from :txt
         ],
         "//conditions:default": [],
@@ -326,12 +353,21 @@ selects.config_setting_group(
     ],
 )
 
-# `(impeller_enable_metal || impeller_enable_opengles || impeller_enable_vulkan) && is_mac`, for the select()s of this file.
+# `is_mac || is_ios`, for the select()s of this file.
 selects.config_setting_group(
-    name = "when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan_and_is_mac",
+    name = "when_is_mac_or_is_ios",
+    match_any = [
+        "@platforms//os:macos",
+        "@platforms//os:ios",
+    ],
+)
+
+# `(impeller_enable_metal || impeller_enable_opengles || impeller_enable_vulkan) && (is_mac || is_ios)`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan_and_is_mac_or_is_ios",
     match_all = [
         ":when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan",
-        "@platforms//os:macos",
+        ":when_is_mac_or_is_ios",
     ],
 )
 

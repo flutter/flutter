@@ -12,6 +12,9 @@ filegroup(
         "@platforms//os:macos": [
             "//engine/src/flutter/shell/platform/darwin",  # is_mac || is_ios
         ],
+        "@platforms//os:ios": [
+            "//engine/src/flutter/shell/platform/darwin",  # is_mac || is_ios
+        ],
         "//conditions:default": [],
     }) + select({
         "@platforms//os:android": [

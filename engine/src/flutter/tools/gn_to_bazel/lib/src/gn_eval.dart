@@ -105,6 +105,13 @@ sealed class Condition {
         if (term == always || terms.contains(term)) {
           continue;
         }
+        // A disjunction already there in another order (GN's `is_ios ||
+        // is_mac` beside the converter's `is_mac || is_ios`, is_apple) is
+        // the same term.
+        if (term is ConditionOr &&
+            terms.any((Condition t) => t is ConditionOr && _sameTermSet(t.terms, term.terms))) {
+          continue;
+        }
         if (terms.contains(term.negated)) {
           return never;
         }
@@ -469,6 +476,10 @@ bool _sameTerms(List<Condition> a, List<Condition> b) {
   return true;
 }
 
+/// Whether [a] and [b] hold the same terms in any order.
+bool _sameTermSet(List<Condition> a, List<Condition> b) =>
+    a.length == b.length && a.every(b.contains) && b.every(a.contains);
+
 /// One alternative of a family of mutually exclusive ones (`is_mac` of the
 /// OS predicates; `"wasm"` of `target_os`), asserted or denied.
 final class _Alternative {
@@ -638,6 +649,37 @@ final class GnCasedValue extends GnValue {
 
   @override
   String toString() => '{$variable: $values}';
+}
+
+/// An assumption with a value per case of a predicate: darwin_sdk.gni's
+/// `ios_platform_path`, the iPhoneSimulator platform's path under
+/// `use_ios_simulator` and the iPhoneOS platform's otherwise (each a
+/// reference the Bazel side holds as a constant), or `darwin_target_sim`,
+/// `-simulator` or nothing. Read, it is the two values, each under its
+/// condition, as a variable the evaluator defined under `if (predicate)`
+/// and its `else` would be -- so that a local holding it, or a string
+/// expanding it, has a case per branch.
+final class GnPredicateCases extends GnValue {
+  const GnPredicateCases(this.predicate, {required this.whenTrue, required this.whenFalse});
+
+  /// The predicate (a boolean variable the Bazel side has a setting for).
+  final String predicate;
+
+  /// The value where [predicate] holds: a [GnStringValue] or a
+  /// [GnReference].
+  final GnValue whenTrue;
+
+  /// The value where it does not.
+  final GnValue whenFalse;
+
+  /// The values, each under its condition.
+  List<(Condition, GnValue)> get cases => <(Condition, GnValue)>[
+    (ConditionVariable(predicate), whenTrue),
+    (ConditionVariable(predicate).negated, whenFalse),
+  ];
+
+  @override
+  String toString() => '{$predicate: $whenTrue, !$predicate: $whenFalse}';
 }
 
 /// directory other than the build directory, or of `exec_script()`. It may
@@ -1593,6 +1635,17 @@ final class _Value {
   final GnItemComments comments;
   final Condition condition;
   final List<String> sourceConditions;
+}
+
+/// One combination of the cases of the variables a string expands
+/// (`_expandExpression`): the conjunction of the cases' conditions, their
+/// GN sources, and the value each variable takes in it.
+final class _Combination {
+  const _Combination(this.condition, this.sourceConditions, this.bound);
+
+  final Condition condition;
+  final List<String> sourceConditions;
+  final Map<String, GnValue> bound;
 }
 
 /// The value of an expression while it is evaluated.
@@ -3067,6 +3120,17 @@ final class _Evaluator {
           ),
       ], isList: false);
     }
+    if (assumed is GnPredicateCases) {
+      // A reference per case reads as an external variable does (a list of
+      // the reference, see below), so that a local holding it is a list of
+      // one reference per case ([_heldReferenceCases]); strings read as a
+      // cased scalar.
+      final references = assumed.whenTrue is GnReference;
+      return _Expression(<_Value>[
+        for (final (Condition condition, GnValue value) in assumed.cases)
+          _Value(value, _comments(node), condition: condition),
+      ], isList: references);
+    }
     if (assumed != null) {
       return _Expression.scalar(assumed);
     }
@@ -3339,6 +3403,20 @@ final class _Evaluator {
               ),
           ];
         }
+        // ... as has one with a value per case of a predicate
+        // (`"$darwin_target_sim"`, `-simulator` under use_ios_simulator): a
+        // reference's case is the one-part string of the reference, as a
+        // local holding it would read ([_heldReferenceCases]).
+        if (assumptions[name] case final GnPredicateCases cases) {
+          conditional[name] = <_Value>[
+            for (final (Condition condition, GnValue value) in cases.cases)
+              _Value(
+                value is GnReference ? GnExpandedString(<GnValue>[value]) : value,
+                _comments(node),
+                condition: condition,
+              ),
+          ];
+        }
         continue;
       }
       if (variable.isList) {
@@ -3361,28 +3439,44 @@ final class _Evaluator {
     if (conditional.isEmpty) {
       return _Expression(<_Value>[_Value(_expand(node, scope), _comments(node))], isList: false);
     }
-    if (conditional.length > 1) {
-      throw GnError(
-        node.location,
-        'more than one variable with conditional values in one string: ${node.raw}',
-      );
-    }
-    final MapEntry<String, List<_Value>> only = conditional.entries.single;
-    final values = <_Value>[];
-    for (final _Value item in only.value) {
-      if (item.value is! GnStringValue && item.value is! GnExpandedString) {
-        throw GnError(node.location, 'expansion of ${only.key}, which is ${item.value}');
+    // One value per combination of the variables' cases (the Swift target
+    // triple, `"$darwin_target_arch-apple-ios$ios_testing_deployment_target$darwin_target_sim"`:
+    // the CPU's cases by the simulator's), each under the conjunction of
+    // its cases' conditions; a combination that cannot hold is left out.
+    var combinations = <_Combination>[
+      const _Combination(Condition.always, <String>[], <String, GnValue>{}),
+    ];
+    for (final MapEntry<String, List<_Value>> entry in conditional.entries) {
+      final next = <_Combination>[];
+      for (final sofar in combinations) {
+        for (final _Value item in entry.value) {
+          if (item.value is! GnStringValue && item.value is! GnExpandedString) {
+            throw GnError(node.location, 'expansion of ${entry.key}, which is ${item.value}');
+          }
+          final Condition when = sofar.condition.and(item.condition);
+          if (when == Condition.never) {
+            continue;
+          }
+          next.add(
+            _Combination(
+              when,
+              <String>[...sofar.sourceConditions, ...item.sourceConditions],
+              <String, GnValue>{...sofar.bound, entry.key: item.value},
+            ),
+          );
+        }
       }
-      values.add(
-        _Value(
-          _expand(node, scope, bound: <String, GnValue>{only.key: item.value}),
-          _comments(node),
-          condition: item.condition,
-          sourceConditions: item.sourceConditions,
-        ),
-      );
+      combinations = next;
     }
-    return _Expression(values, isList: false);
+    return _Expression(<_Value>[
+      for (final _Combination combination in combinations)
+        _Value(
+          _expand(node, scope, bound: combination.bound),
+          _comments(node),
+          condition: combination.condition,
+          sourceConditions: combination.sourceConditions,
+        ),
+    ], isList: false);
   }
 
   /// The [GnExpandedString] a local scalar [name] holds unconditionally,
