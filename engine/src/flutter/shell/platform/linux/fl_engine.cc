@@ -153,6 +153,9 @@ static gboolean fl_engine_frame_tick(GtkWidget* widget,
                                      GdkFrameClock* frame_clock,
                                      gpointer user_data) {
   auto* request = static_cast<VsyncRequest*>(user_data);
+  if (request->delivered) {
+    return G_SOURCE_REMOVE;
+  }
   const gint64 frame_time_us = gdk_frame_clock_get_frame_time(frame_clock);
   uint64_t interval_ns = 16666667;
   GdkFrameTimings* timings = gdk_frame_clock_get_current_timings(frame_clock);
@@ -165,7 +168,11 @@ static gboolean fl_engine_frame_tick(GtkWidget* widget,
   }
   const uint64_t start_ns = static_cast<uint64_t>(frame_time_us) * 1000;
   fl_engine_complete_vsync(request, start_ns, start_ns + interval_ns);
-  return G_SOURCE_REMOVE;
+  // Keep GTK updating until the next tick, allowing the engine's next request
+  // to overlap this callback. Removing the last callback immediately ends
+  // updating; adding it again resets GTK's animation-clock phase each frame.
+  // If animation stops, this callback removes itself after one idle tick.
+  return G_SOURCE_CONTINUE;
 }
 
 static gboolean fl_engine_vsync_timeout(gpointer user_data) {

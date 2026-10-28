@@ -167,7 +167,12 @@ GTK frame-clock scheduling now returns Flutter vsync batons on the GTK main
 context. For the primary view, frame start and refresh interval come from its
 `GdkFrameClock`; an unmapped view uses a 16 ms timer. Multiwindow engines still
 need per-view clock selection, and runtime refresh-rate changes need focused
-coverage.
+coverage. A delivered tick callback remains registered for one extra tick so a
+following animation request can overlap it. This keeps GTK updating continuously
+instead of ending and restarting its animation-clock phase for every Flutter
+frame. With no following request, it removes itself after that idle tick;
+unmapping removes it immediately without delivering the baton again. Mapped
+GTK4 regression tests cover continuity, idle removal and both unmap cases.
 
 Before presenting Vulkan backing images, the embedder submits an empty marker
 submission to Impeller's graphics queue and waits for its fence. This preserves
@@ -176,9 +181,13 @@ that also waits unrelated queues. If fence creation or submission fails, it fall
 back to the device idle path. GTK's snapshot/readback fence still completes the
 subsequent copy before source-image reuse.
 
-The remaining pacing work is to make frame publication asynchronous with a
-bounded in-flight snapshot queue, then measure compositor presentation feedback
-alongside Flutter's engine timings. Snapshot export allocations are pooled;
+Measure actual compositor presentation feedback alongside Flutter's engine
+timings before changing publication synchronization. A high raster-finish FPS
+can include frames superseded before presentation. Verify clock continuity
+with optimized-engine, repeated comparisons at equal actual render area and
+report CPU/GPU activity, memory and measurement overhead. An asynchronous
+bounded in-flight snapshot queue remains a separate experiment requiring an
+explicit producer-completion and ownership contract. Snapshot export allocations are pooled;
 plugin upload/readback and the embedder marker fence remain separate reuse
 opportunities. Benchmark
 frame intervals and missed deadlines, including p95/p99, alongside CPU/GPU time

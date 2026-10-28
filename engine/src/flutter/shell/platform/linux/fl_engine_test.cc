@@ -7,6 +7,9 @@
 #include "gtest/gtest.h"
 
 #include <thread>
+#include <vector>
+
+#include <gtk/gtk.h>
 
 #include "flutter/shell/platform/embedder/test_utils/proc_table_replacement.h"
 #include "flutter/shell/platform/linux/fl_engine_private.h"
@@ -113,6 +116,119 @@ TEST_F(FlEngineTest, VsyncCallbackUsesMainContextAndReturnsBaton) {
   EXPECT_GT(frame_start_ns, 0u);
   EXPECT_GT(frame_target_ns, frame_start_ns);
 }
+
+#if FLUTTER_LINUX_GTK4
+// A mapped renderable without a renderer, for exercising GTK's real tick
+// lifecycle independently of GPU drivers and Flutter frame production.
+struct FlVsyncTestWidget {
+  GtkBox parent_instance;
+};
+struct FlVsyncTestWidgetClass {
+  GtkBoxClass parent_class;
+};
+G_DEFINE_TYPE_WITH_CODE(FlVsyncTestWidget,
+                        fl_vsync_test_widget,
+                        GTK_TYPE_BOX,
+                        G_IMPLEMENT_INTERFACE(fl_renderable_get_type(),
+                                              nullptr))
+static void fl_vsync_test_widget_class_init(FlVsyncTestWidgetClass*) {}
+static void fl_vsync_test_widget_init(FlVsyncTestWidget*) {}
+
+class FlEngineVsyncTest : public flutter::testing::LinuxTest {
+ protected:
+  void SetUp() override {
+    fl_engine_get_embedder_api(engine)->Initialize = MOCK_ENGINE_PROC(
+        Initialize, ([this](size_t, const FlutterRendererConfig*,
+                            const FlutterProjectArgs* args, void* user_data,
+                            FLUTTER_API_SYMBOL(FlutterEngine)* engine_out) {
+          callback = args->vsync_callback;
+          callback_data = user_data;
+          *engine_out = reinterpret_cast<FLUTTER_API_SYMBOL(FlutterEngine)>(1);
+          return kSuccess;
+        }));
+    fl_engine_get_embedder_api(engine)->RunInitialized =
+        MOCK_ENGINE_PROC(RunInitialized, ([](auto) { return kSuccess; }));
+    fl_engine_get_embedder_api(engine)->Shutdown =
+        MOCK_ENGINE_PROC(Shutdown, ([](auto) { return kSuccess; }));
+    fl_engine_get_embedder_api(engine)->OnVsync = MOCK_ENGINE_PROC(
+        OnVsync,
+        ([this](auto, intptr_t baton, uint64_t start, uint64_t target) {
+          EXPECT_GT(target, start);
+          batons.push_back(baton);
+          return kSuccess;
+        }));
+    StartEngine();
+    window = GTK_WINDOW(gtk_window_new());
+    widget = GTK_WIDGET(g_object_new(fl_vsync_test_widget_get_type(), nullptr));
+    gtk_window_set_child(window, widget);
+    gtk_window_present(window);
+    ASSERT_TRUE(gtk_widget_get_mapped(widget));
+    clock = gtk_widget_get_frame_clock(widget);
+    ASSERT_NE(clock, nullptr);
+    fl_engine_set_implicit_view(engine, FL_RENDERABLE(widget));
+  }
+
+  void TearDown() override {
+    gtk_window_destroy(window);
+    LinuxTest::TearDown();
+  }
+
+  void Request(intptr_t baton) {
+    callback(callback_data, baton);
+    // The request source has higher priority than GTK's frame dispatch.
+    for (int i = 0; i < 100; i++) {
+      g_main_context_iteration(nullptr, FALSE);
+      if (TickHandler() != 0) {
+        return;
+      }
+    }
+    FAIL() << "Vsync tick callback was not scheduled";
+  }
+  gulong TickHandler() {
+    return g_signal_handler_find(clock, G_SIGNAL_MATCH_DATA, 0, 0, nullptr,
+                                 nullptr, widget);
+  }
+  void Tick() { g_signal_emit_by_name(clock, "update"); }
+  flutter::testing::MockEpoxy epoxy;
+  VsyncCallback callback = nullptr;
+  void* callback_data = nullptr;
+  GtkWindow* window = nullptr;
+  GtkWidget* widget = nullptr;
+  GdkFrameClock* clock = nullptr;
+  std::vector<intptr_t> batons;
+};
+
+TEST_F(FlEngineVsyncTest, KeepsClockUpdatingBetweenAnimationRequests) {
+  Request(1);
+  const gulong handler = TickHandler();
+  ASSERT_NE(handler, 0u);
+  Tick();
+  EXPECT_EQ(batons, std::vector<intptr_t>({1}));
+  EXPECT_EQ(TickHandler(), handler);
+  Request(2);
+  Tick();
+  EXPECT_EQ(batons, std::vector<intptr_t>({1, 2}));
+  EXPECT_EQ(TickHandler(), handler);
+  // No new request: stop updating after one idle tick, without redelivery.
+  Tick();
+  EXPECT_EQ(batons, std::vector<intptr_t>({1, 2}));
+  EXPECT_EQ(TickHandler(), 0u);
+}
+
+TEST_F(FlEngineVsyncTest, UnmapReturnsPendingBatonExactlyOnce) {
+  Request(1);
+  gtk_widget_set_visible(GTK_WIDGET(window), FALSE);
+  EXPECT_EQ(batons, std::vector<intptr_t>({1}));
+}
+
+TEST_F(FlEngineVsyncTest, UnmapReleasesRetainedTickWithoutRedelivery) {
+  Request(1);
+  Tick();
+  EXPECT_EQ(batons, std::vector<intptr_t>({1}));
+  gtk_widget_set_visible(GTK_WIDGET(window), FALSE);
+  EXPECT_EQ(batons, std::vector<intptr_t>({1}));
+}
+#endif  // FLUTTER_LINUX_GTK4
 
 // Checks notifying display updates works.
 TEST_F(FlEngineTest, NotifyDisplayUpdate) {
