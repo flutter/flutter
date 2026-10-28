@@ -83,6 +83,9 @@ flutter_swift_library(
         "framework",  # For module.modulemap
     ],
     swiftflags = select({
+        ":when_is_ios_and_enable_ios_unittests": [
+            "-enable-testing",  # is_ios && enable_ios_unittests || (is_mac && enable_unittests)
+        ],
         ":when_is_mac_and_enable_unittests": [
             "-enable-testing",  # is_ios && enable_ios_unittests || (is_mac && enable_unittests)
         ],
@@ -427,6 +430,9 @@ flutter_swift_library(
     srcs = ["framework/Source/ResizeSynchronizerTests.swift"],
     module_name = "flutter_desktop_darwin_swift_unittests",
     swiftflags = select({
+        ":when_is_ios_and_enable_ios_unittests": [
+            "-enable-testing",  # is_ios && enable_ios_unittests || (is_mac && enable_unittests)
+        ],
         ":when_is_mac_and_enable_unittests": [
             "-enable-testing",  # is_ios && enable_ios_unittests || (is_mac && enable_unittests)
         ],
@@ -955,6 +961,15 @@ framework_module_check(
         "//conditions:default": ["@platforms//:incompatible"],
     }),
     deps = [":_generate_symlinks"],
+)
+
+# `is_ios && enable_ios_unittests`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_is_ios_and_enable_ios_unittests",
+    match_all = [
+        "@platforms//os:ios",
+        "//engine/src/flutter/testing:ios_unittests_enabled",
+    ],
 )
 
 # `is_mac && enable_unittests`, for the select()s of this file.

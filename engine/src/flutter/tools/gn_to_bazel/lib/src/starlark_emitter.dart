@@ -3095,7 +3095,7 @@ final class _Emitter {
           _filesInto(rule.list('hdrs'), variable);
         case 'deps':
         case 'public_deps':
-          _depsInto(rule, variable, target);
+          _depsInto(rule, variable, target, links: true);
         case 'bridge_header':
           final String? file = _singleString(variable);
           if (file == null) {
@@ -3476,7 +3476,7 @@ final class _Emitter {
           // compiles that cannot find the headers their dependencies'
           // headers include. The defines dependents gain this way are what
           // the parity check against GN measures.
-          _depsInto(rule, variable, target);
+          _depsInto(rule, variable, target, links: true);
           _propagatedFlagsInto(rule, variable);
           if (variable.name == 'public_deps') {
             _forwardedFlagsInto(propagated, variable, target);
@@ -4908,7 +4908,33 @@ final class _Emitter {
   /// as sources: in GN a dependency on an action only orders it before the
   /// compile, the files being on disk; in Bazel the compile's inputs must
   /// name them.
-  bool _isLocalAction(String gnLabel) => _localRule(gnLabel) == 'action';
+  bool _isLocalAction(String gnLabel) =>
+      _localRule(gnLabel) == 'action' && !_isLocalFilesAction(gnLabel);
+
+  /// Whether a `:name` label names an action of this file whose script the
+  /// tables map to a macro of files (TemplateMapping.files: the xcframework
+  /// over the assembled bundle, which the iOS shell's test library lists
+  /// in deps so that the framework is built with it): data of a binary, as
+  /// a copy() is, not a source.
+  bool _isLocalFilesAction(String gnLabel) {
+    if (!gnLabel.startsWith(':')) {
+      return false;
+    }
+    final GnTarget? local = localTargets[_localName(gnLabel)];
+    if (local == null || local.rule != 'action') {
+      return false;
+    }
+    final List<GnValue>? scriptItems = local.variables['script']?.unconditionalItems;
+    if (scriptItems == null || scriptItems.length != 1 || scriptItems.single is! GnStringValue) {
+      return false;
+    }
+    final String script = (scriptItems.single as GnStringValue).value;
+    final TemplateMapping? byScript =
+        scriptMappings[script.startsWith('//')
+            ? script
+            : _normalized('$gnPackage/$script', local.location)];
+    return byScript?.files ?? false;
+  }
 
   /// GN's `copy()` targets of this file, whose products a dependent reads
   /// at run time (the Linux shell's suite reads the compiled GSettings
@@ -4921,6 +4947,7 @@ final class _Emitter {
   /// runfiles.
   bool _isLocalData(String gnLabel) {
     return _isLocalWasmLink(gnLabel) ||
+        _isLocalFilesAction(gnLabel) ||
         _isFilesRule(_localRule(gnLabel) ?? _ruleElsewhere(gnLabel)) ||
         _isFilesGroup(gnLabel);
   }
@@ -5055,7 +5082,12 @@ final class _Emitter {
     for (final ConvertedFile file in convertedFiles) file.gnPackage,
   };
 
-  void _depsInto(_Rule rule, GnVariable variable, GnTarget target) {
+  /// GN's `deps`/`public_deps` into [rule]'s lists: actions of this file
+  /// as sources, copies and files as data, the rest as deps. With
+  /// [links], a dependency on a shared_library is the library's cc_import
+  /// (a compiled target links against it); a group's dependency on one is
+  /// the library itself, a thing to build.
+  void _depsInto(_Rule rule, GnVariable variable, GnTarget target, {bool links = false}) {
     _forEachItem(variable, into: rule.list('deps'), (_Element e) {
       final String gnLabel = _string(e);
       if (_isUnconvertedDep(target, gnLabel) ||
@@ -5068,7 +5100,16 @@ final class _Emitter {
           : _isLocalData(gnLabel)
           ? 'data'
           : 'deps';
-      rule.list(list).addUnique(e.condition, _item(_localLabel(label), e));
+      // A dependency on a shared_library links against it: the macro's
+      // cc_import of the library (flutter_shared_library's `<name>_import`),
+      // as Bazel's C++ rules take no cc_binary in deps.
+      final bool sharedLibrary =
+          links &&
+          list == 'deps' &&
+          (_localRule(gnLabel) ?? _ruleElsewhere(gnLabel)) == 'shared_library';
+      rule
+          .list(list)
+          .addUnique(e.condition, _item(_localLabel(sharedLibrary ? '${label}_import' : label), e));
       _rootIncludeViewsInto(rule.list(list), label, e.condition);
     });
   }
