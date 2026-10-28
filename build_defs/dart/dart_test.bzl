@@ -386,7 +386,9 @@ mkdir -p "$root/bin/cache"
             # lock), copied over their symlinks into the writable runfiles
             # tree so that the source stays as it is.
             writable = "".join([
-                ("if [ -L \"$root/{f}\" ]; then cp --remove-destination \"$(readlink -f \"$root/{f}\")\" \"$root/{f}\" && chmod u+w \"$root/{f}\"; fi\n").format(f = f)
+                # The real file first, the link removed, the copy made:
+                # BSD cp (a Mac's) has no --remove-destination.
+                ("if [ -L \"$root/{f}\" ]; then real=\"$(readlink -f \"$root/{f}\")\" && rm -f \"$root/{f}\" && cp \"$real\" \"$root/{f}\" && chmod u+w \"$root/{f}\"; fi\n").format(f = f)
                 for f in ctx.attr.writable
             ]),
             dart = dart[0].short_path,
