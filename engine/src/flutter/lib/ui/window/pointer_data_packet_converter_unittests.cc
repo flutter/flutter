@@ -909,25 +909,25 @@ TEST(PointerDataPacketConverterTest, IgnoresNonFinitePositions) {
 
   // The non-finite move is dropped, and the non-finite up and remove use the
   // last position of the pointer, so no hover is synthesized.
-  ASSERT_EQ(result.size(), (size_t)5);
-  ASSERT_EQ(result[0].change, PointerData::Change::kAdd);
-  ASSERT_EQ(result[1].change, PointerData::Change::kDown);
+  ASSERT_EQ(result.size(), 5u);
+  EXPECT_EQ(result[0].change, PointerData::Change::kAdd);
+  EXPECT_EQ(result[1].change, PointerData::Change::kDown);
 
-  ASSERT_EQ(result[2].change, PointerData::Change::kMove);
-  ASSERT_EQ(result[2].physical_x, 3.0);
-  ASSERT_EQ(result[2].physical_y, 4.0);
-  ASSERT_EQ(result[2].physical_delta_x, 2.0);
-  ASSERT_EQ(result[2].physical_delta_y, 3.0);
+  EXPECT_EQ(result[2].change, PointerData::Change::kMove);
+  EXPECT_EQ(result[2].physical_x, 3.0);
+  EXPECT_EQ(result[2].physical_y, 4.0);
+  EXPECT_EQ(result[2].physical_delta_x, 2.0);
+  EXPECT_EQ(result[2].physical_delta_y, 3.0);
 
-  ASSERT_EQ(result[3].change, PointerData::Change::kUp);
-  ASSERT_EQ(result[3].synthesized, 0);
-  ASSERT_EQ(result[3].physical_x, 3.0);
-  ASSERT_EQ(result[3].physical_y, 4.0);
+  EXPECT_EQ(result[3].change, PointerData::Change::kUp);
+  EXPECT_EQ(result[3].synthesized, 0);
+  EXPECT_EQ(result[3].physical_x, 3.0);
+  EXPECT_EQ(result[3].physical_y, 4.0);
 
-  ASSERT_EQ(result[4].change, PointerData::Change::kRemove);
-  ASSERT_EQ(result[4].synthesized, 0);
-  ASSERT_EQ(result[4].physical_x, 3.0);
-  ASSERT_EQ(result[4].physical_y, 4.0);
+  EXPECT_EQ(result[4].change, PointerData::Change::kRemove);
+  EXPECT_EQ(result[4].synthesized, 0);
+  EXPECT_EQ(result[4].physical_x, 3.0);
+  EXPECT_EQ(result[4].physical_y, 4.0);
 }
 
 TEST(PointerDataPacketConverterTest, IgnoresGestureWithNonFiniteDown) {
@@ -955,7 +955,7 @@ TEST(PointerDataPacketConverterTest, IgnoresGestureWithNonFiniteDown) {
   UnpackPointerPacket(result, std::move(converted_packet));
 
   // Without a down, the rest of the gesture is dropped too.
-  ASSERT_EQ(result.size(), (size_t)0);
+  EXPECT_EQ(result.size(), 0u);
 }
 
 TEST(PointerDataPacketConverterTest,
@@ -980,7 +980,7 @@ TEST(PointerDataPacketConverterTest,
   UnpackPointerPacket(result, std::move(converted_packet));
 
   // Without a pan/zoom start, the rest of the gesture is dropped too.
-  ASSERT_EQ(result.size(), (size_t)0);
+  EXPECT_EQ(result.size(), 0u);
 }
 
 TEST(PointerDataPacketConverterTest,
@@ -1016,15 +1016,15 @@ TEST(PointerDataPacketConverterTest,
 
   // Only the first gesture and the remove get through. As for any remove at a
   // new position, a hover is synthesized before it.
-  ASSERT_EQ(result.size(), (size_t)5);
-  ASSERT_EQ(result[0].change, PointerData::Change::kAdd);
-  ASSERT_EQ(result[0].synthesized, 1);
-  ASSERT_EQ(result[1].change, PointerData::Change::kDown);
-  ASSERT_EQ(result[2].change, PointerData::Change::kCancel);
-  ASSERT_EQ(result[3].change, PointerData::Change::kHover);
-  ASSERT_EQ(result[3].synthesized, 1);
-  ASSERT_EQ(result[4].change, PointerData::Change::kRemove);
-  ASSERT_EQ(result[4].synthesized, 0);
+  ASSERT_EQ(result.size(), 5u);
+  EXPECT_EQ(result[0].change, PointerData::Change::kAdd);
+  EXPECT_EQ(result[0].synthesized, 1);
+  EXPECT_EQ(result[1].change, PointerData::Change::kDown);
+  EXPECT_EQ(result[2].change, PointerData::Change::kCancel);
+  EXPECT_EQ(result[3].change, PointerData::Change::kHover);
+  EXPECT_EQ(result[3].synthesized, 1);
+  EXPECT_EQ(result[4].change, PointerData::Change::kRemove);
+  EXPECT_EQ(result[4].synthesized, 0);
 }
 
 TEST(PointerDataPacketConverterTest,
@@ -1056,11 +1056,11 @@ TEST(PointerDataPacketConverterTest,
 
   // The second gesture doesn't start at the stale position of the first one;
   // it is dropped.
-  ASSERT_EQ(result.size(), (size_t)3);
-  ASSERT_EQ(result[0].change, PointerData::Change::kAdd);
-  ASSERT_EQ(result[0].synthesized, 1);
-  ASSERT_EQ(result[1].change, PointerData::Change::kPanZoomStart);
-  ASSERT_EQ(result[2].change, PointerData::Change::kPanZoomEnd);
+  ASSERT_EQ(result.size(), 3u);
+  EXPECT_EQ(result[0].change, PointerData::Change::kAdd);
+  EXPECT_EQ(result[0].synthesized, 1);
+  EXPECT_EQ(result[1].change, PointerData::Change::kPanZoomStart);
+  EXPECT_EQ(result[2].change, PointerData::Change::kPanZoomEnd);
 }
 
 TEST(PointerDataPacketConverterTest, IgnoresNonFinitePanZoomUpdate) {
@@ -1091,18 +1091,18 @@ TEST(PointerDataPacketConverterTest, IgnoresNonFinitePanZoomUpdate) {
 
   // The non-finite update is dropped, so the next update's pan delta is
   // computed from the last valid pan.
-  ASSERT_EQ(result.size(), (size_t)5);
-  ASSERT_EQ(result[0].change, PointerData::Change::kAdd);
-  ASSERT_EQ(result[1].change, PointerData::Change::kPanZoomStart);
-  ASSERT_EQ(result[2].change, PointerData::Change::kPanZoomUpdate);
-  ASSERT_EQ(result[2].pan_delta_x, 2.0);
-  ASSERT_EQ(result[2].pan_delta_y, 2.0);
-  ASSERT_EQ(result[3].change, PointerData::Change::kPanZoomUpdate);
-  ASSERT_EQ(result[3].pan_x, 5.0);
-  ASSERT_EQ(result[3].pan_y, 5.0);
-  ASSERT_EQ(result[3].pan_delta_x, 3.0);
-  ASSERT_EQ(result[3].pan_delta_y, 3.0);
-  ASSERT_EQ(result[4].change, PointerData::Change::kPanZoomEnd);
+  ASSERT_EQ(result.size(), 5u);
+  EXPECT_EQ(result[0].change, PointerData::Change::kAdd);
+  EXPECT_EQ(result[1].change, PointerData::Change::kPanZoomStart);
+  EXPECT_EQ(result[2].change, PointerData::Change::kPanZoomUpdate);
+  EXPECT_EQ(result[2].pan_delta_x, 2.0);
+  EXPECT_EQ(result[2].pan_delta_y, 2.0);
+  EXPECT_EQ(result[3].change, PointerData::Change::kPanZoomUpdate);
+  EXPECT_EQ(result[3].pan_x, 5.0);
+  EXPECT_EQ(result[3].pan_y, 5.0);
+  EXPECT_EQ(result[3].pan_delta_x, 3.0);
+  EXPECT_EQ(result[3].pan_delta_y, 3.0);
+  EXPECT_EQ(result[4].change, PointerData::Change::kPanZoomEnd);
 }
 
 }  // namespace testing
