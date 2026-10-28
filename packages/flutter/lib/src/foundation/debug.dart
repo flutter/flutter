@@ -681,14 +681,14 @@ class DebugViewMetricsOverride with Diagnosticable {
   // completeness guard failure rather than as a metric that only sometimes
   // takes effect. The paddings are reduced to their edges because
   // ui.ViewPadding has no == of its own.
-  (double?, ui.Size?, _Edges?, _Edges?, _Edges?, _Edges?, bool?) get _viewMetrics => (
-    devicePixelRatio,
-    physicalSize,
-    _edges(padding),
-    _edges(viewPadding),
-    _edges(viewInsets),
-    _edges(systemGestureInsets),
-    alwaysUse24HourFormat,
+  _ViewMetrics get _viewMetrics => (
+    devicePixelRatio: devicePixelRatio,
+    physicalSize: physicalSize,
+    padding: _edges(padding),
+    viewPadding: _edges(viewPadding),
+    viewInsets: _edges(viewInsets),
+    systemGestureInsets: _edges(systemGestureInsets),
+    alwaysUse24HourFormat: alwaysUse24HourFormat,
   );
 
   static _Edges? _edges(ui.ViewPadding? padding) =>
@@ -696,19 +696,18 @@ class DebugViewMetricsOverride with Diagnosticable {
 
   // The flags dart:ui delivers through
   // PlatformDispatcher.onAccessibilityFeaturesChanged.
-  (bool?, bool?, bool?, bool?, bool?, bool?, bool?, bool?, bool?, bool?, bool?)
-  get _accessibilityFeatures => (
-    accessibleNavigation,
-    invertColors,
-    disableAnimations,
-    boldText,
-    reduceMotion,
-    highContrast,
-    onOffSwitchLabels,
-    supportsAnnounce,
-    autoPlayAnimatedImages,
-    autoPlayVideos,
-    deterministicCursor,
+  _AccessibilityFlags get _accessibilityFeatures => (
+    accessibleNavigation: accessibleNavigation,
+    invertColors: invertColors,
+    disableAnimations: disableAnimations,
+    boldText: boldText,
+    reduceMotion: reduceMotion,
+    highContrast: highContrast,
+    onOffSwitchLabels: onOffSwitchLabels,
+    supportsAnnounce: supportsAnnounce,
+    autoPlayAnimatedImages: autoPlayAnimatedImages,
+    autoPlayVideos: autoPlayVideos,
+    deterministicCursor: deterministicCursor,
   );
 
   // Which of the groups dart:ui announces separately differ between this
@@ -1286,8 +1285,37 @@ enum DebugViewMetric {
 // right, bottom.
 typedef _Edges = (double, double, double, double);
 
+// The metrics dart:ui announces through PlatformDispatcher.onMetricsChanged,
+// plus alwaysUse24HourFormat. See [DebugViewMetricsOverride._viewMetrics].
+typedef _ViewMetrics = ({
+  double? devicePixelRatio,
+  ui.Size? physicalSize,
+  _Edges? padding,
+  _Edges? viewPadding,
+  _Edges? viewInsets,
+  _Edges? systemGestureInsets,
+  bool? alwaysUse24HourFormat,
+});
+
+// The flags dart:ui announces through
+// PlatformDispatcher.onAccessibilityFeaturesChanged. See
+// [DebugViewMetricsOverride._accessibilityFeatures].
+typedef _AccessibilityFlags = ({
+  bool? accessibleNavigation,
+  bool? invertColors,
+  bool? disableAnimations,
+  bool? boldText,
+  bool? reduceMotion,
+  bool? highContrast,
+  bool? onOffSwitchLabels,
+  bool? supportsAnnounce,
+  bool? autoPlayAnimatedImages,
+  bool? autoPlayVideos,
+  bool? deterministicCursor,
+});
+
 // Which of the groups dart:ui announces separately differ between two
-// overrides; see [DebugViewMetricsOverride._changesFrom].
+// overrides. See [DebugViewMetricsOverride._changesFrom].
 typedef _Changes = ({
   bool viewMetrics,
   bool textScaling,
