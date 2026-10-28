@@ -397,8 +397,11 @@ source_set("version") {
 
     test('expands a local holding a bare external reference', () async {
       // darwin/common's test_config: `_platform_path = mac_platform_path`
-      // under is_mac (the is_ios branch is dead), read by cflags and
-      // include_dirs.
+      // under is_mac, read by cflags and include_dirs. Under is_ios the
+      // local holds ios_platform_path, which the generation scope assumes
+      // as a reference per case of use_ios_simulator (darwin_sdk.gni picks
+      // the iPhoneSimulator or the iPhoneOS platform's path by it): a value
+      // per case, each the string around its reference.
       final GnFileEvaluation evaluation = await evaluate(r'''
 config("test_config") {
   if (is_ios) {
@@ -411,19 +414,80 @@ config("test_config") {
 }
 ''', assumptions: generationAssumptions());
       final GnTarget config = evaluation.targets.single;
-      expect(config.variables['cflags']!.unconditionalItems, <GnValue>[
-        const GnExpandedString(<GnValue>[
-          GnStringValue('-F'),
-          GnReference('mac_platform_path'),
-          GnStringValue('/Developer/Library/Frameworks'),
-        ]),
-      ]);
-      expect(config.variables['include_dirs']!.unconditionalItems, <GnValue>[
-        const GnExpandedString(<GnValue>[
-          GnReference('mac_platform_path'),
-          GnStringValue('/Developer/usr/lib'),
-        ]),
-      ]);
+      expect(
+        config.variables['cflags']!.liveItems.map(
+          (GnListItem item) => '${item.condition}: ${item.value}',
+        ),
+        <String>[
+          r'is_ios && use_ios_simulator: "-F$ios_simulator_platform_path/Developer/Library/Frameworks"',
+          r'is_ios && !use_ios_simulator: "-F$ios_device_platform_path/Developer/Library/Frameworks"',
+          r'is_mac: "-F$mac_platform_path/Developer/Library/Frameworks"',
+        ],
+      );
+      expect(
+        config.variables['include_dirs']!.liveItems.map(
+          (GnListItem item) => '${item.condition}: ${item.value}',
+        ),
+        <String>[
+          r'is_ios && use_ios_simulator: "$ios_simulator_platform_path/Developer/usr/lib"',
+          r'is_ios && !use_ios_simulator: "$ios_device_platform_path/Developer/usr/lib"',
+          r'is_mac: "$mac_platform_path/Developer/usr/lib"',
+        ],
+      );
+    });
+
+    test('expands a string of two cased variables into their combinations', () async {
+      // darwin/common's Swift target triple,
+      // `"$darwin_target_arch-apple-ios$ios_testing_deployment_target$darwin_target_sim"`:
+      // the CPU's name (darwin_sdk.gni: x86_64 for x64) by the simulator's
+      // suffix, each combination under the conjunction of its cases.
+      final GnFileEvaluation evaluation = await evaluate(r'''
+config("test_config") {
+  if (is_ios) {
+    swiftflags = [
+      "-target",
+      "$darwin_target_arch-apple-ios$ios_testing_deployment_target$darwin_target_sim",
+    ]
+  }
+}
+''', assumptions: generationAssumptions());
+      final GnTarget config = evaluation.targets.single;
+      expect(
+        config.variables['swiftflags']!.liveItems.map(
+          (GnListItem item) => '${item.condition}: ${item.value}',
+        ),
+        <String>[
+          'is_ios: "-target"',
+          'is_ios && current_cpu == "arm64" && use_ios_simulator: "arm64-apple-ios15.0-simulator"',
+          'is_ios && current_cpu == "arm64" && !use_ios_simulator: "arm64-apple-ios15.0"',
+          'is_ios && current_cpu == "x64" && use_ios_simulator: "x86_64-apple-ios15.0-simulator"',
+          'is_ios && current_cpu == "x64" && !use_ios_simulator: "x86_64-apple-ios15.0"',
+        ],
+      );
+      // A predicate's cases read outright, and `is_apple` (BUILDCONFIG.gn's
+      // `is_ios || is_mac`) as the two conditions.
+      final GnFileEvaluation direct = await evaluate(r'''
+source_set("x") {
+  sources = [ "x.cc" ]
+  if (is_apple) {
+    sources += [ "apple.cc" ]
+  }
+  defines = [ "SIM=$darwin_target_sim" ]
+}
+''', assumptions: generationAssumptions());
+      final GnTarget x = direct.targets.single;
+      expect(
+        x.variables['sources']!.liveItems.map(
+          (GnListItem item) => '${item.condition}: ${item.value}',
+        ),
+        <String>['true: "x.cc"', 'is_ios || is_mac: "apple.cc"'],
+      );
+      expect(
+        x.variables['defines']!.liveItems.map(
+          (GnListItem item) => '${item.condition}: ${item.value}',
+        ),
+        <String>['use_ios_simulator: "SIM=-simulator"', '!use_ios_simulator: "SIM="'],
+      );
     });
 
     test('expands a local holding a reference per case', () async {
@@ -569,14 +633,18 @@ source_set("x") {
 
     test("an OS name's comparison the assumptions deny is decided", () async {
       // `target_os != "win"` where is_win is false (the generation scope),
-      // `full_target_platform_name == "ios-arm64"` where is_ios is;
+      // `full_target_platform_name == "windows-x64"` the same;
       // `target_os == "wasm"` stays open there, as `target_os != "android"`
-      // does since the Android platform (skcms's condition).
+      // does since the Android platform (skcms's condition), and
+      // `full_target_platform_name == "ios-arm64"` since the iOS port.
       final GnFileEvaluation evaluation = await evaluate('''
 source_set("x") {
   sources = [ "x.cc" ]
   if (target_os != "win") {
     sources += [ "not_win.cc" ]
+  }
+  if (full_target_platform_name == "windows-x64") {
+    sources += [ "win.cc" ]
   }
   if (full_target_platform_name == "ios-arm64") {
     sources += [ "ios.cc" ]
@@ -593,6 +661,7 @@ source_set("x") {
         <String>[
           '[true] = ["x.cc"]',
           '[true] += ["not_win.cc"]',
+          '[full_target_platform_name == "ios-arm64"] += ["ios.cc"]',
           '[target_os == "wasm"] += ["wasm.cc"]',
         ],
       );
@@ -651,8 +720,10 @@ source_set("x") {
         'impeller_enable_opengles',
         'impeller_enable_vulkan',
         'is_android',
-        // The macOS port (research/20): is_mac is the macOS platform's
-        // (iOS is not built yet; is_apple is its formula, above).
+        // The macOS port (research/20) and the iOS port (research/21):
+        // is_mac and is_ios are the Apple platforms' (is_apple is their
+        // formula, above).
+        'is_ios',
         'is_linux',
         'is_mac',
         'is_wasm',
@@ -698,6 +769,29 @@ source_set("x") {
         Condition.disjunction(const <Condition>[a, b]),
       );
       expect(Condition.disjunction(<Condition>[a, both]), a);
+    });
+
+    test('a conjunction takes a disjunction once whatever the order of its terms', () {
+      // GN's `is_ios || is_mac` (fml's Objective-C sources) beside the
+      // converter's is_apple, `is_mac || is_ios` in the other order: one
+      // term, not a group of the two spellings.
+      const a = ConditionVariable('a');
+      const b = ConditionVariable('b');
+      const c = ConditionVariable('c');
+      final Condition ab = Condition.disjunction(const <Condition>[a, b]);
+      final Condition ba = Condition.disjunction(const <Condition>[b, a]);
+      expect(Condition.conjunction(<Condition>[ab, ba]), ab);
+      expect(
+        Condition.conjunction(<Condition>[c, ab, ba]),
+        Condition.conjunction(<Condition>[c, ab]),
+      );
+      expect(
+        Condition.conjunction(<Condition>[
+          ab,
+          Condition.disjunction(const <Condition>[b, c]),
+        ]),
+        isNot(ab),
+      );
     });
 
     test(
@@ -3933,6 +4027,7 @@ executable("common_swift_unittests") {
             '        "-I" + MACOS_PLATFORM_PATH + "/Developer/usr/lib",\n'
             '    ],\n'
             '    target_compatible_with = select({\n'
+            '        "@platforms//os:ios": [],\n'
             '        "@platforms//os:macos": [],\n'
             '        "//conditions:default": ["@platforms//:incompatible"],\n'
             '    }),\n'
@@ -6991,8 +7086,10 @@ executable("tool") {
           '[flutter_runtime_mode == "release"] "tool_product"',
         ],
       );
-      await expectLater(
-        evaluate(r'''
+      // Two conditional variables in one string: a value per combination
+      // of their cases, each under the conjunction; a combination that
+      // cannot hold (`a` set in the release branch, `b` not) is left out.
+      final GnFileEvaluation two = await evaluate(r'''
 executable("tool") {
   a = ""
   b = ""
@@ -7003,11 +7100,14 @@ executable("tool") {
   output_name = "tool$a$b"
   sources = [ "a.cc" ]
 }
-'''),
-        throwsGnError(
-          line: 8,
-          message: 'more than one variable with conditional values in one string',
-        ),
+''');
+      final GnTarget tool = two.targets.single;
+      expect(
+        tool.variables['output_name']!.cases(tool.location).map((GnScalarCase c) => '$c'),
+        <String>[
+          '[flutter_runtime_mode != "release"] "tool"',
+          '[flutter_runtime_mode == "release"] "toolxy"',
+        ],
       );
     });
 

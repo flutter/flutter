@@ -26,9 +26,12 @@ cc_library(
         "@platforms//os:macos": [
             "-Wno-unguarded-availability",  # from //flutter/skia
         ],
+        "@platforms//os:ios": [
+            "-Wno-unguarded-availability",  # from //flutter/skia
+        ],
         "//conditions:default": [],
     }) + select({
-        ":when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan_and_is_mac": [
+        ":when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan_and_is_mac_or_is_ios": [
             "-Wno-unguarded-availability",  # from //flutter/impeller/display_list
         ],
         "//conditions:default": [],
@@ -59,10 +62,12 @@ cc_library(
     name = "surface_provider_config",
     defines = select({
         "@platforms//os:android": [],
+        "@platforms//os:ios": [],
         "//conditions:default": [
             "ENABLE_SOFTWARE_BENCHMARKS",  # surface_provider_include_software
         ],
     }) + select({
+        "@platforms//os:ios": [],
         "@platforms//os:macos": [],
         "//engine/src/flutter/impeller/tools:vulkan": [],
         "//conditions:default": [
@@ -70,6 +75,9 @@ cc_library(
         ],
     }) + select({
         "@platforms//os:macos": [
+            "ENABLE_METAL_BENCHMARKS",  # surface_provider_include_metal
+        ],
+        "@platforms//os:ios": [
             "ENABLE_METAL_BENCHMARKS",  # surface_provider_include_metal
         ],
         "//conditions:default": [],
@@ -86,6 +94,9 @@ flutter_objc_library(
         "@platforms//os:macos": [
             "skia/dl_test_surface_provider_skia_metal.mm",  # surface_provider_include_metal
         ],
+        "@platforms//os:ios": [
+            "skia/dl_test_surface_provider_skia_metal.mm",  # surface_provider_include_metal
+        ],
         "//conditions:default": [],
     }),
     hdrs = [
@@ -93,10 +104,12 @@ flutter_objc_library(
         "skia/dl_test_surface_instance_skia.h",
     ] + select({
         "@platforms//os:android": [],
+        "@platforms//os:ios": [],
         "//conditions:default": [
             "skia/dl_test_surface_software.h",  # surface_provider_include_software
         ],
     }) + select({
+        "@platforms//os:ios": [],
         "@platforms//os:macos": [],
         "//engine/src/flutter/impeller/tools:vulkan": [],
         "//conditions:default": [
@@ -106,9 +119,12 @@ flutter_objc_library(
         "@platforms//os:macos": [
             "skia/dl_test_surface_provider_skia_metal.h",  # surface_provider_include_metal
         ],
+        "@platforms//os:ios": [
+            "skia/dl_test_surface_provider_skia_metal.h",  # surface_provider_include_metal
+        ],
         "//conditions:default": [],
     }) + select({
-        ":when_is_mac_and_impeller_enable_metal": [
+        ":when_is_mac_or_is_ios_and_impeller_enable_metal": [
             "impeller/dl_test_surface_instance_impeller.h",  # surface_provider_include_metal && impeller_enable_metal
             "impeller/dl_test_surface_provider_impeller.h",  # surface_provider_include_metal && impeller_enable_metal
             "impeller/dl_test_surface_provider_impeller_metal.h",  # surface_provider_include_metal && impeller_enable_metal
@@ -126,14 +142,17 @@ flutter_objc_library(
         "@platforms//os:macos": [
             "-Wno-unguarded-availability",  # from //flutter/testing:testing_lib
         ],
+        "@platforms//os:ios": [
+            "-Wno-unguarded-availability",  # from //flutter/testing:testing_lib
+        ],
         "//conditions:default": [],
     }) + select({
-        ":when_is_mac_and_impeller_enable_metal": [
+        ":when_is_mac_or_is_ios_and_impeller_enable_metal": [
             "-Wno-unguarded-availability",  # from //flutter/impeller/display_list
         ],
         "//conditions:default": [],
     }) + select({
-        ":when_is_mac_and_shell_enable_metal": [
+        ":when_is_mac_or_is_ios_and_shell_enable_metal": [
             "-Wno-unguarded-availability",  # from //flutter/testing:metal
         ],
         "//conditions:default": [],
@@ -141,6 +160,7 @@ flutter_objc_library(
     local_defines = FLUTTER_LOCAL_DEFINES,
     target_compatible_with = select({
         "@platforms//os:macos": [],
+        "@platforms//os:ios": [],
         "//conditions:default": ["@platforms//:incompatible"],
     }),
     deps = [
@@ -151,20 +171,29 @@ flutter_objc_library(
     ] + select({
         "@platforms//os:macos": [
             "//engine/src/flutter/impeller/testing:metal_screenshot",  # is_mac
-            "//engine/src/flutter/testing:metal",  # surface_provider_include_metal
         ],
         "//conditions:default": [],
     }) + select({
+        "@platforms//os:ios": [],
         "@platforms//os:macos": [],
         "//engine/src/flutter/impeller/tools:vulkan": [],
         "//conditions:default": [
             "//engine/src/flutter/testing:opengl",  # surface_provider_include_gl
         ],
     }) + select({
-        ":when_is_mac_and_impeller_enable_metal": [
+        ":when_is_mac_or_is_ios_and_impeller_enable_metal": [
             "//engine/src/flutter/impeller/display_list",  # surface_provider_include_metal && impeller_enable_metal
             "//engine/src/flutter/impeller/playground",  # surface_provider_include_metal && impeller_enable_metal
+            "//engine/src/flutter/impeller/testing:metal_screenshot",  # surface_provider_include_metal && impeller_enable_metal
             "//engine/src/flutter/impeller/testing:screenshot",  # surface_provider_include_metal && impeller_enable_metal
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "@platforms//os:macos": [
+            "//engine/src/flutter/testing:metal",  # surface_provider_include_metal
+        ],
+        "@platforms//os:ios": [
+            "//engine/src/flutter/testing:metal",  # surface_provider_include_metal
         ],
         "//conditions:default": [],
     }),
@@ -179,11 +208,13 @@ cc_library(
         "skia/dl_test_surface_instance_skia.cc",
     ] + select({
         "@platforms//os:android": [],
+        "@platforms//os:ios": [],
         "//conditions:default": [
             "skia/dl_test_surface_provider_skia_software.cc",  # surface_provider_include_software
             "skia/dl_test_surface_software.cc",  # surface_provider_include_software
         ],
     }) + select({
+        "@platforms//os:ios": [],
         "@platforms//os:macos": [],
         "//engine/src/flutter/impeller/tools:vulkan": [],
         "//conditions:default": [
@@ -191,7 +222,7 @@ cc_library(
             "dl_test_surface_provider_gl.cc",  # surface_provider_include_gl
         ],
     }) + select({
-        ":when_is_mac_and_impeller_enable_metal": [
+        ":when_is_mac_or_is_ios_and_impeller_enable_metal": [
             "impeller/dl_test_surface_instance_impeller.cc",  # surface_provider_include_metal && impeller_enable_metal
             "impeller/dl_test_surface_provider_impeller.cc",  # surface_provider_include_metal && impeller_enable_metal
             "impeller/dl_test_surface_provider_impeller_metal.cc",  # surface_provider_include_metal && impeller_enable_metal
@@ -203,10 +234,12 @@ cc_library(
         "skia/dl_test_surface_instance_skia.h",
     ] + select({
         "@platforms//os:android": [],
+        "@platforms//os:ios": [],
         "//conditions:default": [
             "skia/dl_test_surface_software.h",  # surface_provider_include_software
         ],
     }) + select({
+        "@platforms//os:ios": [],
         "@platforms//os:macos": [],
         "//engine/src/flutter/impeller/tools:vulkan": [],
         "//conditions:default": [
@@ -216,9 +249,12 @@ cc_library(
         "@platforms//os:macos": [
             "skia/dl_test_surface_provider_skia_metal.h",  # surface_provider_include_metal
         ],
+        "@platforms//os:ios": [
+            "skia/dl_test_surface_provider_skia_metal.h",  # surface_provider_include_metal
+        ],
         "//conditions:default": [],
     }) + select({
-        ":when_is_mac_and_impeller_enable_metal": [
+        ":when_is_mac_or_is_ios_and_impeller_enable_metal": [
             "impeller/dl_test_surface_instance_impeller.h",  # surface_provider_include_metal && impeller_enable_metal
             "impeller/dl_test_surface_provider_impeller.h",  # surface_provider_include_metal && impeller_enable_metal
             "impeller/dl_test_surface_provider_impeller_metal.h",  # surface_provider_include_metal && impeller_enable_metal
@@ -236,14 +272,17 @@ cc_library(
         "@platforms//os:macos": [
             "-Wno-unguarded-availability",  # from //flutter/testing:testing_lib
         ],
+        "@platforms//os:ios": [
+            "-Wno-unguarded-availability",  # from //flutter/testing:testing_lib
+        ],
         "//conditions:default": [],
     }) + select({
-        ":when_is_mac_and_impeller_enable_metal": [
+        ":when_is_mac_or_is_ios_and_impeller_enable_metal": [
             "-Wno-unguarded-availability",  # from //flutter/impeller/display_list
         ],
         "//conditions:default": [],
     }) + select({
-        ":when_is_mac_and_shell_enable_metal": [
+        ":when_is_mac_or_is_ios_and_shell_enable_metal": [
             "-Wno-unguarded-availability",  # from //flutter/testing:metal
         ],
         "//conditions:default": [],
@@ -264,22 +303,32 @@ cc_library(
         "//engine/src/flutter/testing:testing_lib",
     ] + select({
         "@platforms//os:macos": [
-            ":display_list_surface_provider_objc",
             "//engine/src/flutter/impeller/testing:metal_screenshot",  # is_mac
-            "//engine/src/flutter/testing:metal",  # surface_provider_include_metal
         ],
         "//conditions:default": [],
     }) + select({
+        "@platforms//os:ios": [],
         "@platforms//os:macos": [],
         "//engine/src/flutter/impeller/tools:vulkan": [],
         "//conditions:default": [
             "//engine/src/flutter/testing:opengl",  # surface_provider_include_gl
         ],
     }) + select({
-        ":when_is_mac_and_impeller_enable_metal": [
+        ":when_is_mac_or_is_ios_and_impeller_enable_metal": [
             "//engine/src/flutter/impeller/display_list",  # surface_provider_include_metal && impeller_enable_metal
             "//engine/src/flutter/impeller/playground",  # surface_provider_include_metal && impeller_enable_metal
+            "//engine/src/flutter/impeller/testing:metal_screenshot",  # surface_provider_include_metal && impeller_enable_metal
             "//engine/src/flutter/impeller/testing:screenshot",  # surface_provider_include_metal && impeller_enable_metal
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "@platforms//os:macos": [
+            ":display_list_surface_provider_objc",
+            "//engine/src/flutter/testing:metal",  # surface_provider_include_metal
+        ],
+        "@platforms//os:ios": [
+            ":display_list_surface_provider_objc",
+            "//engine/src/flutter/testing:metal",  # surface_provider_include_metal
         ],
         "//conditions:default": [],
     }),
@@ -296,29 +345,38 @@ selects.config_setting_group(
     ],
 )
 
-# `(impeller_enable_metal || impeller_enable_opengles || impeller_enable_vulkan) && is_mac`, for the select()s of this file.
+# `is_mac || is_ios`, for the select()s of this file.
 selects.config_setting_group(
-    name = "when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan_and_is_mac",
-    match_all = [
-        ":when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan",
+    name = "when_is_mac_or_is_ios",
+    match_any = [
         "@platforms//os:macos",
+        "@platforms//os:ios",
     ],
 )
 
-# `is_mac && impeller_enable_metal`, for the select()s of this file.
+# `(impeller_enable_metal || impeller_enable_opengles || impeller_enable_vulkan) && (is_mac || is_ios)`, for the select()s of this file.
 selects.config_setting_group(
-    name = "when_is_mac_and_impeller_enable_metal",
+    name = "when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan_and_is_mac_or_is_ios",
     match_all = [
-        "@platforms//os:macos",
+        ":when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan",
+        ":when_is_mac_or_is_ios",
+    ],
+)
+
+# `(is_mac || is_ios) && impeller_enable_metal`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_is_mac_or_is_ios_and_impeller_enable_metal",
+    match_all = [
+        ":when_is_mac_or_is_ios",
         "//engine/src/flutter/impeller/tools:metal",
     ],
 )
 
-# `is_mac && shell_enable_metal`, for the select()s of this file.
+# `(is_mac || is_ios) && shell_enable_metal`, for the select()s of this file.
 selects.config_setting_group(
-    name = "when_is_mac_and_shell_enable_metal",
+    name = "when_is_mac_or_is_ios_and_shell_enable_metal",
     match_all = [
-        "@platforms//os:macos",
+        ":when_is_mac_or_is_ios",
         "//engine/src/flutter/shell:enable_metal",
     ],
 )

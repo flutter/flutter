@@ -93,6 +93,9 @@ cc_library(
         "@platforms//os:macos": [
             "-Wno-unguarded-availability",  # from //flutter/testing:testing_lib
         ],
+        "@platforms//os:ios": [
+            "-Wno-unguarded-availability",  # from //flutter/testing:testing_lib
+        ],
         "//conditions:default": [],
     }),
     # Informs run_all_unittests to perform impeller specific initialization

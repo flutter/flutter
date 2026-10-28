@@ -50,7 +50,7 @@ cc_library(
         # via SafeNarrow.
         "-Wimplicit-float-conversion",
     ] + FLUTTER_COPTS + select({
-        ":when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan_and_is_mac": [
+        ":when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan_and_is_mac_or_is_ios": [
             "-Wno-unguarded-availability",  # from //flutter/impeller
         ],
         "//conditions:default": [],
@@ -69,6 +69,9 @@ cc_library(
         "//conditions:default": [],
     }) + select({
         "@platforms//os:macos": [
+            "-Wno-unguarded-availability",  # from //flutter/impeller/display_list:skia_conversions
+        ],
+        "@platforms//os:ios": [
             "-Wno-unguarded-availability",  # from //flutter/impeller/display_list:skia_conversions
         ],
         "//conditions:default": [],
@@ -117,12 +120,21 @@ selects.config_setting_group(
     ],
 )
 
-# `(impeller_enable_metal || impeller_enable_opengles || impeller_enable_vulkan) && is_mac`, for the select()s of this file.
+# `is_mac || is_ios`, for the select()s of this file.
 selects.config_setting_group(
-    name = "when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan_and_is_mac",
+    name = "when_is_mac_or_is_ios",
+    match_any = [
+        "@platforms//os:macos",
+        "@platforms//os:ios",
+    ],
+)
+
+# `(impeller_enable_metal || impeller_enable_opengles || impeller_enable_vulkan) && (is_mac || is_ios)`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan_and_is_mac_or_is_ios",
     match_all = [
         ":when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan",
-        "@platforms//os:macos",
+        ":when_is_mac_or_is_ios",
     ],
 )
 

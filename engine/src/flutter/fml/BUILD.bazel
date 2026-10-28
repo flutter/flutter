@@ -6,7 +6,7 @@
 
 load("@bazel_skylib//lib:selects.bzl", "selects")
 load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
-load("//build_defs/cc:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES", "MACOS_CFLAGS_OBJC")
+load("//build_defs/cc:copts.bzl", "FLUTTER_CFLAGS_OBJC", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES", "MACOS_CFLAGS_OBJC")
 load("//build_defs/cc:objc_library.bzl", "flutter_objc_library")
 load("//build_defs/testing:testing.bzl", "flutter_cc_test", "flutter_test_fixtures")
 
@@ -18,6 +18,13 @@ package(default_visibility = ["//visibility:public"])
 flutter_objc_library(
     name = "fml_objc",
     srcs = select({
+        "@platforms//os:ios": [
+            "platform/darwin/concurrent_message_loop_factory.mm",  # is_ios || is_mac
+            "platform/darwin/message_loop_darwin.mm",  # is_ios || is_mac
+            "platform/darwin/paths_darwin.mm",  # is_ios || is_mac
+            "platform/darwin/platform_version.mm",  # is_ios || is_mac
+            "platform/darwin/string_range_sanitization.mm",  # is_ios || is_mac
+        ],
         "@platforms//os:macos": [
             "platform/darwin/concurrent_message_loop_factory.mm",  # is_ios || is_mac
             "platform/darwin/message_loop_darwin.mm",  # is_ios || is_mac
@@ -92,6 +99,13 @@ flutter_objc_library(
             "icu_util.h",  # target_os != "wasm"
         ],
     }) + select({
+        "@platforms//os:ios": [
+            "platform/darwin/cf_utils.h",  # is_ios || is_mac
+            "platform/darwin/message_loop_darwin.h",  # is_ios || is_mac
+            "platform/darwin/platform_version.h",  # is_ios || is_mac
+            "platform/darwin/scoped_nsautorelease_pool.h",  # is_ios || is_mac
+            "platform/darwin/string_range_sanitization.h",  # is_ios || is_mac
+        ],
         "@platforms//os:macos": [
             "platform/darwin/cf_utils.h",  # is_ios || is_mac
             "platform/darwin/message_loop_darwin.h",  # is_ios || is_mac
@@ -121,9 +135,13 @@ flutter_objc_library(
     copts = FLUTTER_COPTS + select({
         "@platforms//os:macos": MACOS_CFLAGS_OBJC,
         "//conditions:default": [],
+    }) + select({
+        "@platforms//os:ios": FLUTTER_CFLAGS_OBJC,
+        "//conditions:default": [],
     }),
     local_defines = FLUTTER_LOCAL_DEFINES,
     target_compatible_with = select({
+        "@platforms//os:ios": [],
         "@platforms//os:macos": [],
         "//conditions:default": ["@platforms//:incompatible"],
     }),
@@ -215,12 +233,17 @@ cc_library(
             "icu_util.cc",  # target_os != "wasm"
         ],
     }) + select({
+        "@platforms//os:ios": [
+            "platform/darwin/cf_utils.cc",  # is_ios || is_mac
+            "platform/darwin/scoped_nsautorelease_pool.cc",  # is_ios || is_mac
+        ],
         "@platforms//os:macos": [
             "platform/darwin/cf_utils.cc",  # is_ios || is_mac
             "platform/darwin/scoped_nsautorelease_pool.cc",  # is_ios || is_mac
         ],
         "//conditions:default": [],
     }) + select({
+        "@platforms//os:ios": [],
         "@platforms//os:macos": [],
         "//conditions:default": [
             "concurrent_message_loop_factory.cc",  # !(is_ios || is_mac)
@@ -309,6 +332,13 @@ cc_library(
             "icu_util.h",  # target_os != "wasm"
         ],
     }) + select({
+        "@platforms//os:ios": [
+            "platform/darwin/cf_utils.h",  # is_ios || is_mac
+            "platform/darwin/message_loop_darwin.h",  # is_ios || is_mac
+            "platform/darwin/platform_version.h",  # is_ios || is_mac
+            "platform/darwin/scoped_nsautorelease_pool.h",  # is_ios || is_mac
+            "platform/darwin/string_range_sanitization.h",  # is_ios || is_mac
+        ],
         "@platforms//os:macos": [
             "platform/darwin/cf_utils.h",  # is_ios || is_mac
             "platform/darwin/message_loop_darwin.h",  # is_ios || is_mac
@@ -342,6 +372,10 @@ cc_library(
         ],
         "//conditions:default": [],
     }) + select({
+        "@platforms//os:ios": [
+            "-framework",
+            "Foundation",  # is_ios || is_mac
+        ],
         "@platforms//os:macos": [
             "-framework",
             "Foundation",  # is_ios || is_mac
@@ -372,6 +406,7 @@ cc_library(
         ],
         "//conditions:default": [],
     }) + select({
+        "@platforms//os:ios": [":fml_objc"],
         "@platforms//os:macos": [":fml_objc"],
         "//conditions:default": [],
     }),
@@ -469,12 +504,21 @@ cc_test(
     ],
 )
 
-# `enable_unittests && is_mac`, for the select()s of this file.
+# `is_mac || is_ios`, for the select()s of this file.
 selects.config_setting_group(
-    name = "when_enable_unittests_and_is_mac",
+    name = "when_is_mac_or_is_ios",
+    match_any = [
+        "@platforms//os:macos",
+        "@platforms//os:ios",
+    ],
+)
+
+# `enable_unittests && (is_mac || is_ios)`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_enable_unittests_and_is_mac_or_is_ios",
     match_all = [
         "//engine/src/flutter/testing:unittests_enabled",
-        "@platforms//os:macos",
+        ":when_is_mac_or_is_ios",
     ],
 )
 
@@ -489,6 +533,10 @@ flutter_objc_library(
             "platform/darwin/cf_utils_unittests.mm",  # is_mac || is_ios
             "platform/darwin/string_range_sanitization_unittests.mm",  # is_mac || is_ios
         ],
+        "@platforms//os:ios": [
+            "platform/darwin/cf_utils_unittests.mm",  # is_mac || is_ios
+            "platform/darwin/string_range_sanitization_unittests.mm",  # is_mac || is_ios
+        ],
         "//conditions:default": [],
     }),
     hdrs = ["time/chrono_timestamp_provider.h"],
@@ -497,10 +545,13 @@ flutter_objc_library(
     ] + select({
         "@platforms//os:macos": MACOS_CFLAGS_OBJC,
         "//conditions:default": [],
+    }) + select({
+        "@platforms//os:ios": FLUTTER_CFLAGS_OBJC,
+        "//conditions:default": [],
     }),
     local_defines = FLUTTER_LOCAL_DEFINES,
     target_compatible_with = select({
-        ":when_enable_unittests_and_is_mac": [],
+        ":when_enable_unittests_and_is_mac_or_is_ios": [],
         "//conditions:default": ["@platforms//:incompatible"],
     }),
     deps = [
@@ -572,6 +623,7 @@ flutter_cc_test(
         "@dart//:dart_api_headers",
     ] + select({
         "@platforms//os:macos": [":fml_unittests_objc"],
+        "@platforms//os:ios": [":fml_unittests_objc"],
         "//conditions:default": [],
     }),
 )

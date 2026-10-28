@@ -83,6 +83,8 @@ zip_bundle(
         "//engine/src/flutter/common:platform_android_riscv64": "android-riscv64/font-subset.zip",
         "//engine/src/flutter/common:platform_android_x64": "android-x64/font-subset.zip",
         "//engine/src/flutter/common:platform_android_x86": "android-x86/font-subset.zip",
+        "//engine/src/flutter/common:platform_ios_arm64": "ios-arm64/font-subset.zip",
+        "//engine/src/flutter/common:platform_ios_x64": "ios-x64/font-subset.zip",
         "//engine/src/flutter/common:platform_linux_arm64": "linux-arm64/font-subset.zip",
         "//engine/src/flutter/common:platform_linux_x64": "linux-x64/font-subset.zip",
         "//engine/src/flutter/common:platform_wasm_wasm": "wasm-wasm/font-subset.zip",

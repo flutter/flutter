@@ -209,9 +209,12 @@ cc_library(
         "@platforms//os:macos": [
             "-Wno-unguarded-availability",  # from //flutter/flow
         ],
+        "@platforms//os:ios": [
+            "-Wno-unguarded-availability",  # from //flutter/flow
+        ],
         "//conditions:default": [],
     }) + select({
-        ":when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan_and_is_mac": [
+        ":when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan_and_is_mac_or_is_ios": [
             "-Wno-unguarded-availability",  # from //flutter/impeller
         ],
         "//conditions:default": [],
@@ -316,6 +319,9 @@ cc_test(
         "@platforms//os:macos": [
             "-Wno-unguarded-availability",  # from :ui
         ],
+        "@platforms//os:ios": [
+            "-Wno-unguarded-availability",  # from :ui
+        ],
         "//conditions:default": [],
     }),
     data = ["@icu//:icudata"],
@@ -389,9 +395,12 @@ flutter_cc_test(
         "@platforms//os:macos": [
             "-Wno-unguarded-availability",  # from :ui
         ],
+        "@platforms//os:ios": [
+            "-Wno-unguarded-availability",  # from :ui
+        ],
         "//conditions:default": [],
     }) + select({
-        ":when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan_and_is_mac": [
+        ":when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan_and_is_mac_or_is_ios": [
             "-Wno-unguarded-availability",  # from :ui_testing_mocks
         ],
         "//conditions:default": [],
@@ -422,12 +431,12 @@ flutter_cc_test(
         ],
         "//conditions:default": [],
     }) + select({
-        ":when_test_enable_vulkan_and_is_mac": [
+        ":when_test_enable_vulkan_and_is_mac_or_is_ios": [
             "-Wno-unguarded-availability",  # from //flutter/shell/common:shell_test_fixture_sources
         ],
         "//conditions:default": [],
     }) + select({
-        ":when_test_enable_metal_and_is_mac": [
+        ":when_test_enable_metal_and_is_mac_or_is_ios": [
             "-Wno-unguarded-availability",  # from //flutter/shell/common:shell_test_fixture_sources
         ],
         "//conditions:default": [],
@@ -491,9 +500,12 @@ cc_library(
         "@platforms//os:macos": [
             "-Wno-unguarded-availability",  # from :ui
         ],
+        "@platforms//os:ios": [
+            "-Wno-unguarded-availability",  # from :ui
+        ],
         "//conditions:default": [],
     }) + select({
-        ":when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan_and_is_mac": [
+        ":when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan_and_is_mac_or_is_ios": [
             "-Wno-unguarded-availability",  # from :ui_testing_mocks
         ],
         "//conditions:default": [],
@@ -554,30 +566,39 @@ selects.config_setting_group(
     ],
 )
 
-# `(impeller_enable_metal || impeller_enable_opengles || impeller_enable_vulkan) && is_mac`, for the select()s of this file.
+# `is_mac || is_ios`, for the select()s of this file.
 selects.config_setting_group(
-    name = "when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan_and_is_mac",
+    name = "when_is_mac_or_is_ios",
+    match_any = [
+        "@platforms//os:macos",
+        "@platforms//os:ios",
+    ],
+)
+
+# `(impeller_enable_metal || impeller_enable_opengles || impeller_enable_vulkan) && (is_mac || is_ios)`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan_and_is_mac_or_is_ios",
     match_all = [
         ":when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan",
-        "@platforms//os:macos",
+        ":when_is_mac_or_is_ios",
     ],
 )
 
-# `test_enable_vulkan && is_mac`, for the select()s of this file.
+# `test_enable_vulkan && (is_mac || is_ios)`, for the select()s of this file.
 selects.config_setting_group(
-    name = "when_test_enable_vulkan_and_is_mac",
+    name = "when_test_enable_vulkan_and_is_mac_or_is_ios",
     match_all = [
         "//engine/src/flutter/shell:test_enable_vulkan",
-        "@platforms//os:macos",
+        ":when_is_mac_or_is_ios",
     ],
 )
 
-# `test_enable_metal && is_mac`, for the select()s of this file.
+# `test_enable_metal && (is_mac || is_ios)`, for the select()s of this file.
 selects.config_setting_group(
-    name = "when_test_enable_metal_and_is_mac",
+    name = "when_test_enable_metal_and_is_mac_or_is_ios",
     match_all = [
         "//engine/src/flutter/shell:test_enable_metal",
-        "@platforms//os:macos",
+        ":when_is_mac_or_is_ios",
     ],
 )
 

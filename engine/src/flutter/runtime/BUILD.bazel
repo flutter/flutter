@@ -19,6 +19,9 @@ cc_library(
         "@platforms//os:macos": [
             "-Wno-unguarded-availability",  # from //flutter/skia
         ],
+        "@platforms//os:ios": [
+            "-Wno-unguarded-availability",  # from //flutter/skia
+        ],
         "//conditions:default": [],
     }),
     local_defines = FLUTTER_LOCAL_DEFINES + select({
@@ -101,7 +104,13 @@ cc_library(
         "runtime_delegate.cc",
         "service_protocol.cc",
         "skia_concurrent_executor.cc",
-    ],
+    ] + select({
+        ":when_is_ios_and_flutter_runtime_mode_debug": [
+            # These contain references to private APIs and this TU must only be compiled in debug runtime modes.
+            "ptrace_check.cc",  # is_ios && (flutter_runtime_mode == "debug")
+        ],
+        "//conditions:default": [],
+    }),
     hdrs = [
         "dart_isolate.h",
         "dart_isolate_group_data.h",
@@ -129,6 +138,9 @@ cc_library(
         "//conditions:default": [],
     }) + select({
         "@platforms//os:macos": [
+            "-Wno-unguarded-availability",  # from //flutter/lib/ui
+        ],
+        "@platforms//os:ios": [
             "-Wno-unguarded-availability",  # from //flutter/lib/ui
         ],
         "//conditions:default": [],
@@ -203,6 +215,9 @@ flutter_cc_test(
         "@platforms//os:macos": [
             "-Wno-unguarded-availability",  # from :runtime
         ],
+        "@platforms//os:ios": [
+            "-Wno-unguarded-availability",  # from :runtime
+        ],
         "//conditions:default": [],
     }) + select({
         "//engine/src/flutter/shell:test_enable_vulkan": [
@@ -218,12 +233,12 @@ flutter_cc_test(
         ],
         "//conditions:default": [],
     }) + select({
-        ":when_test_enable_vulkan_and_is_mac": [
+        ":when_test_enable_vulkan_and_is_mac_or_is_ios": [
             "-Wno-unguarded-availability",  # from //flutter/shell/common:shell_test_fixture_sources
         ],
         "//conditions:default": [],
     }) + select({
-        ":when_test_enable_metal_and_is_mac": [
+        ":when_test_enable_metal_and_is_mac_or_is_ios": [
             "-Wno-unguarded-availability",  # from //flutter/shell/common:shell_test_fixture_sources
         ],
         "//conditions:default": [],
@@ -273,6 +288,9 @@ flutter_cc_test(
         "@platforms//os:macos": [
             "-Wno-unguarded-availability",  # from //flutter/testing
         ],
+        "@platforms//os:ios": [
+            "-Wno-unguarded-availability",  # from //flutter/testing
+        ],
         "//conditions:default": [],
     }) + select({
         "//engine/src/flutter/shell:enable_vulkan": [
@@ -316,6 +334,9 @@ flutter_cc_test(
         "@platforms//os:macos": [
             "-Wno-unguarded-availability",  # from //flutter/testing
         ],
+        "@platforms//os:ios": [
+            "-Wno-unguarded-availability",  # from //flutter/testing
+        ],
         "//conditions:default": [],
     }) + select({
         "//engine/src/flutter/shell:enable_vulkan": [
@@ -340,20 +361,38 @@ flutter_cc_test(
     ],
 )
 
-# `test_enable_vulkan && is_mac`, for the select()s of this file.
+# `is_ios && flutter_runtime_mode == "debug"`, for the select()s of this file.
 selects.config_setting_group(
-    name = "when_test_enable_vulkan_and_is_mac",
+    name = "when_is_ios_and_flutter_runtime_mode_debug",
     match_all = [
-        "//engine/src/flutter/shell:test_enable_vulkan",
-        "@platforms//os:macos",
+        "@platforms//os:ios",
+        "//engine/src/flutter/common:runtime_mode_debug",
     ],
 )
 
-# `test_enable_metal && is_mac`, for the select()s of this file.
+# `is_mac || is_ios`, for the select()s of this file.
 selects.config_setting_group(
-    name = "when_test_enable_metal_and_is_mac",
+    name = "when_is_mac_or_is_ios",
+    match_any = [
+        "@platforms//os:macos",
+        "@platforms//os:ios",
+    ],
+)
+
+# `test_enable_vulkan && (is_mac || is_ios)`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_test_enable_vulkan_and_is_mac_or_is_ios",
+    match_all = [
+        "//engine/src/flutter/shell:test_enable_vulkan",
+        ":when_is_mac_or_is_ios",
+    ],
+)
+
+# `test_enable_metal && (is_mac || is_ios)`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_test_enable_metal_and_is_mac_or_is_ios",
     match_all = [
         "//engine/src/flutter/shell:test_enable_metal",
-        "@platforms//os:macos",
+        ":when_is_mac_or_is_ios",
     ],
 )

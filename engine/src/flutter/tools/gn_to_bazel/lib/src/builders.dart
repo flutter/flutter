@@ -1332,6 +1332,9 @@ bool fileHolds(String? condition, BuilderBuild build) {
     'is_android' => android,
     'is_wasm' => wasm,
     'is_mac' || 'is_apple' => mac,
+    // No builder builds for iOS yet (research/21: I2 brings the iOS
+    // shell's builders and their platforms).
+    'is_ios' => false,
     'is_linux' => !android && !wasm && !mac,
     _ => true,
   };

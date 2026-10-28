@@ -15,6 +15,7 @@ impeller_shaders(
     enable_opengles = False,
     library_name = "compute",
     metal_version = select({
+        "@platforms//os:ios": "2.4",
         "@platforms//os:macos": "2.1",
         "//conditions:default": None,
     }),
@@ -156,6 +157,9 @@ cc_library(
         "@platforms//os:macos": [
             "-Wno-unguarded-availability",  # from ../playground:playground_test
         ],
+        "@platforms//os:ios": [
+            "-Wno-unguarded-availability",  # from ../playground:playground_test
+        ],
         "//conditions:default": [],
     }),
     local_defines = FLUTTER_LOCAL_DEFINES,
@@ -211,6 +215,9 @@ cc_library(
         "@platforms//os:macos": [
             "-Wno-unguarded-availability",  # from ../playground:playground_test
         ],
+        "@platforms//os:ios": [
+            "-Wno-unguarded-availability",  # from ../playground:playground_test
+        ],
         "//conditions:default": [],
     }),
     local_defines = FLUTTER_LOCAL_DEFINES + [
@@ -247,6 +254,9 @@ cc_library(
         "-Wno-inconsistent-missing-override",  # from ../playground:playground_test
     ] + select({
         "@platforms//os:macos": [
+            "-Wno-unguarded-availability",  # from ../playground:playground_test
+        ],
+        "@platforms//os:ios": [
             "-Wno-unguarded-availability",  # from ../playground:playground_test
         ],
         "//conditions:default": [],

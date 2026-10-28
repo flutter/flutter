@@ -25,6 +25,9 @@ cc_library(
         "@platforms//os:macos": [
             "-Wno-unguarded-availability",  # from //flutter/impeller/display_list
         ],
+        "@platforms//os:ios": [
+            "-Wno-unguarded-availability",  # from //flutter/impeller/display_list
+        ],
         "//conditions:default": [],
     }),
     local_defines = FLUTTER_LOCAL_DEFINES,
@@ -72,6 +75,9 @@ cc_library(
         "-Wno-inconsistent-missing-override",  # from //flutter/impeller/playground:playground_test
     ] + select({
         "@platforms//os:macos": [
+            "-Wno-unguarded-availability",  # from //flutter/impeller/playground:playground_test
+        ],
+        "@platforms//os:ios": [
             "-Wno-unguarded-availability",  # from //flutter/impeller/playground:playground_test
         ],
         "//conditions:default": [],
