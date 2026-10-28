@@ -114,3 +114,16 @@ selects.config_setting_group(
         "//engine/src/flutter/build/bazel:not_wasm",
     ],
 )
+
+# shaders_gles.gni's `impeller_enable_metal || impeller_enable_vulkan`: where
+# either holds, the GLES backends' intermediates go under gles/ and gles3/
+# and their reflection stays private ("Metal reflectors generate a superset
+# of information"; Vulkan's stands in where Metal is off); where neither
+# does -- the web -- the GLES 3 reflection is the one dependents see.
+selects.config_setting_group(
+    name = "metal_or_vulkan",
+    match_any = [
+        ":metal",
+        ":vulkan",
+    ],
+)
