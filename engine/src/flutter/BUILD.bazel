@@ -5,7 +5,6 @@
 # Generated from //flutter/BUILD.gn by gn_to_bazel; do not edit.
 # Not converted: config, export_dynamic_symbols, export_dynamic_test_symbols.
 # Dependencies left out, having no Bazel counterpart yet: //flutter/build/dart:dart_sdk, //flutter/build/dart/test:gen_dartcli_call, //flutter/build/dart/test:gen_executable_call, //flutter/lib/gpu:gpu_unittests, //flutter/impeller/renderer/backend/vulkan:vulkan_android_apk_unittests, //flutter/impeller/toolkit/android:apk_unittests, //flutter/shell/platform/darwin/common:framework_common_unittests, //flutter/shell/platform/darwin/common:framework_common_swift_unittests, //flutter/shell/platform/darwin/macos:flutter_desktop_darwin_unittests, //flutter/shell/platform/darwin/macos:flutter_desktop_darwin_swift_unittests.
-# Dependencies left out, their packages not converted yet (a platform the migration has not reached): //flutter/testing/ios_scenario_app:ios_scenario_app.
 
 load("@bazel_skylib//lib:selects.bzl", "selects")
 load("@rules_cc//cc:defs.bzl", "cc_library")
@@ -67,6 +66,11 @@ filegroup(
         ],
         "@platforms//os:android": [
             "//engine/src/flutter/impeller/toolkit/interop:sdk",  # is_mac || is_linux || is_win || is_android || is_qnx
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_flutter_runtime_mode_debug_or_flutter_runtime_mode_profile_and_is_ios": [
+            "//engine/src/flutter/testing/ios_scenario_app",  # flutter_runtime_mode == "debug" || (flutter_runtime_mode == "profile") && is_ios
         ],
         "//conditions:default": [],
     }) + select({
@@ -170,6 +174,24 @@ filegroup(
     srcs = [
         "//engine/src/flutter/lib/gpu/dist",
         "//engine/src/flutter/sky/dist",
+    ],
+)
+
+# `flutter_runtime_mode == "debug" || flutter_runtime_mode == "profile"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_flutter_runtime_mode_debug_or_flutter_runtime_mode_profile",
+    match_any = [
+        "//engine/src/flutter/common:runtime_mode_debug",
+        "//engine/src/flutter/common:runtime_mode_profile",
+    ],
+)
+
+# `(flutter_runtime_mode == "debug" || flutter_runtime_mode == "profile") && is_ios`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_flutter_runtime_mode_debug_or_flutter_runtime_mode_profile_and_is_ios",
+    match_all = [
+        ":when_flutter_runtime_mode_debug_or_flutter_runtime_mode_profile",
+        "@platforms//os:ios",
     ],
 )
 

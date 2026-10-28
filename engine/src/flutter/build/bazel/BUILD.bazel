@@ -42,6 +42,17 @@ selects.config_setting_group(
     ],
 )
 
+# `is_debug && flutter_runtime_mode == "debug"`: an unoptimized build of the
+# debug runtime mode, where flutter_snapshot's JIT application snapshot
+# enables asserts (build/dart/internal/flutter_snapshot.gni).
+selects.config_setting_group(
+    name = "unoptimized_debug",
+    match_all = [
+        ":unoptimized",
+        "//engine/src/flutter/common:runtime_mode_debug",
+    ],
+)
+
 # The complements of BUILDCONFIG.gn's OS predicates. `!is_wasm` on its own
 # is a select() with the wasm key empty, but inside a conjunction
 # (`impeller_enable_opengles && !is_wasm`) a config_setting_group needs a
