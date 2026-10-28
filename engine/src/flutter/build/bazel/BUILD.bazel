@@ -97,6 +97,44 @@ _CPU_CONSTRAINTS = {
     for cpu in _CPU_CONSTRAINTS
 ]
 
+# iOS's environment, a device or the simulator: GN's use_ios_simulator
+# (darwin_sdk.gni; tools/gn's --simulator), which picks the SDK, the
+# deployment-target flag and the Dart VM's configuration. A constraint of
+# the iOS platforms (build/bazel/toolchains: ios_arm64 is a device's,
+# ios_sim_arm64 and ios_sim_x64 the simulator's), so that the toolchains
+# resolve by it; the settings are what the converter maps
+# `use_ios_simulator` to.
+constraint_setting(
+    name = "ios_environment",
+    default_constraint_value = ":ios_device",
+)
+
+constraint_value(
+    name = "ios_device",
+    constraint_setting = ":ios_environment",
+)
+
+constraint_value(
+    name = "ios_simulator",
+    constraint_setting = ":ios_environment",
+)
+
+config_setting(
+    name = "ios_simulator_enabled",
+    constraint_values = [
+        "@platforms//os:ios",
+        ":ios_simulator",
+    ],
+)
+
+config_setting(
+    name = "ios_device_enabled",
+    constraint_values = [
+        "@platforms//os:ios",
+        ":ios_device",
+    ],
+)
+
 # GN's `current_toolchain == host_toolchain`, which the engine's files test
 # for "the host's own build" (testing.gni's enable_unittests, the shell's
 # tester, glfw's shell), read in Bazel's terms: the target OS is one a host

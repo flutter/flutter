@@ -13,3 +13,8 @@ it from here.
 """
 
 MACOS_DEPLOYMENT_TARGET = "12.0.0"
+
+# darwin_sdk.gni's ios_deployment_target, for the iOS toolchains
+# (-miphoneos-version-min / -mios-simulator-version-min) and the Swift
+# compiles' triple.
+IOS_DEPLOYMENT_TARGET = "15.0"

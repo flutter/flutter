@@ -182,6 +182,17 @@ register_toolchains(
     "//engine/src/flutter/build/bazel/toolchains:macos_x64_clang_toolchain",
     "//engine/src/flutter/build/bazel/toolchains:macos_x64_on_arm64_clang_toolchain",
     "//engine/src/flutter/build/bazel/toolchains:macos_arm64_on_x64_clang_toolchain",
+    # iOS (build/toolchain/mac's ios_clang_arm, ios_clang_arm_sim and
+    # ios_clang_x64_sim): a device or the simulator, selected through the
+    # platforms (//engine/src/flutter/build/bazel/toolchains:ios_arm64,
+    # ios_sim_arm64, ios_sim_x64), from either Mac; matched only on a macOS
+    # host.
+    "//engine/src/flutter/build/bazel/toolchains:ios_arm64_clang_toolchain",
+    "//engine/src/flutter/build/bazel/toolchains:ios_arm64_on_x64_clang_toolchain",
+    "//engine/src/flutter/build/bazel/toolchains:ios_sim_arm64_clang_toolchain",
+    "//engine/src/flutter/build/bazel/toolchains:ios_sim_arm64_on_x64_clang_toolchain",
+    "//engine/src/flutter/build/bazel/toolchains:ios_sim_x64_clang_toolchain",
+    "//engine/src/flutter/build/bazel/toolchains:ios_sim_x64_on_arm64_clang_toolchain",
 )
 
 # The Fuchsia Bazel SDK rules (the rules_fuchsia spike, metric 0.7) are a
