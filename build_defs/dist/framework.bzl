@@ -46,13 +46,14 @@ macOS shell's `_generate_symlinks_and_verify_framework_module`, the iOS
 shell's `copy_and_verify_framework_module`): a shared_library of one
 Objective-C file that imports the framework's umbrella header
 (`#import <FlutterMacOS/FlutterMacOS.h>`) with `-F$root_out_dir`, linked
-against the framework with `-Xlinker -fatal_warnings` -- a build that
-fails when the module map, the headers or the links of the assembled
-bundle are wrong; nothing ships from it. The rule assembles the bundle the
-deps place into a directory output (assemble_bundle.py), compiles the
-sources through the C++ toolchain's Objective-C action with `-F` naming
-that directory's parent, and links the dynamic library against the
-framework the same way; the converter writes the call from GN's
+with `-Xlinker -fatal_warnings` -- against the framework where GN's
+`frameworks` names it (macOS), against nothing where the check compiles
+alone (iOS) -- a build that fails when the module map, the headers or the
+links of the assembled bundle are wrong; nothing ships from it. The rule
+assembles the bundle the deps place into a directory output
+(assemble_bundle.py), compiles the sources through the C++ toolchain's
+Objective-C action with `-F` naming that directory's parent, and links the
+dynamic library the same way; the converter writes the call from GN's
 shared_library when its flags name the build directory as a framework
 search path (tools/gn_to_bazel).
 """
@@ -260,7 +261,23 @@ xcframework = rule(
 )
 
 def _framework_module_check_impl(ctx):
+    placed = {}
+    for dep in ctx.attr.deps:
+        for file, path in collected_build_directory_entries(dep):
+            placed[path] = file
+
+    # The bundle: GN's `frameworks` where the check links it (the macOS
+    # shell's), else the one bundle the deps place (the iOS shell's check
+    # compiles against the bundle and links nothing of it).
     framework = ctx.attr.framework
+    if not framework:
+        bundles = {path.split("/")[0]: None for path in placed if path.split("/")[0].endswith(".framework")}
+        if len(bundles) != 1:
+            fail("%s: the deps place %s in the build directory; one <name>.framework is needed (or `framework`)" % (
+                ctx.label,
+                sorted(bundles.keys()) or "no bundle",
+            ))
+        framework = bundles.keys()[0]
     if not framework.endswith(".framework"):
         fail("%s: framework names a bundle, <name>.framework; got %r" % (ctx.label, framework))
     bundle_name = framework[:-len(".framework")]
@@ -269,10 +286,6 @@ def _framework_module_check_impl(ctx):
     # directory, as a directory output named as the bundle is, so that -F
     # on its parent finds <name>.framework.
     assembled = ctx.actions.declare_directory("_framework_check/%s/%s" % (ctx.label.name, framework))
-    placed = {}
-    for dep in ctx.attr.deps:
-        for file, path in collected_build_directory_entries(dep):
-            placed[path] = file
     entries = sorted([
         (path[len(framework) + 1:], file)
         for path, file in placed.items()
@@ -327,7 +340,7 @@ def _framework_module_check_impl(ctx):
         name = ctx.label.name,
         compilation_outputs = compilation_outputs,
         output_type = "dynamic_library",
-        user_link_flags = [search_path, "-framework", bundle_name] +
+        user_link_flags = [search_path] + (["-framework", bundle_name] if ctx.attr.framework else []) +
                           [ctx.expand_make_variables("linkopts", flag, {}) for flag in ctx.attr.linkopts],
         additional_inputs = [assembled],
     )
@@ -345,8 +358,9 @@ framework_module_check = rule(
             doc = "The Objective-C sources that import the framework's umbrella header.",
         ),
         "framework": attr.string(
-            mandatory = True,
-            doc = "The bundle, <name>.framework, as GN's `frameworks` names it; the deps place it in the build directory.",
+            doc = "The bundle, <name>.framework, as GN's `frameworks` names it where the check links the framework " +
+                  "(the macOS shell's); empty where it does not (the iOS shell's), and the one bundle the deps place " +
+                  "in the build directory is the one compiled against.",
         ),
         "deps": attr.label_list(
             aspects = [build_directory_aspect],
