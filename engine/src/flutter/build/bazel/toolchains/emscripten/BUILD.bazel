@@ -7,6 +7,11 @@
 # toolchain is registered in the root MODULE.bazel; wasm_module (wasm.bzl)
 # selects it through the platform below.
 
+load(
+    "@host_platform//:host.bzl",
+    "HOST_CPU_CONSTRAINT",
+    "HOST_OS_CONSTRAINT",
+)
 load("@rules_cc//cc:defs.bzl", "cc_toolchain")
 load("//build_defs/config:platforms.bzl", "runtime_mode_platforms")
 load(":emscripten_cc_toolchain_config.bzl", "emscripten_cc_toolchain_config")
@@ -94,11 +99,17 @@ cc_toolchain(
 
 filegroup(name = "empty")
 
+# The toolchain runs on the host that synced the SDK (@emsdk is
+# prebuilts/emsdk, which gclient's hook fills for this machine; @cpython3 and
+# the esbuild beside it are the host's too), so its execution platform is
+# the host's -- a Linux x64 or an Apple-silicon Mac alike (the Mac's T41:
+# the web SDK in the tool tests' facsimile could not build there with the
+# Linux x64 constraints spelled out).
 toolchain(
     name = "wasm32_emscripten_toolchain",
     exec_compatible_with = [
-        "@platforms//os:linux",
-        "@platforms//cpu:x86_64",
+        HOST_OS_CONSTRAINT,
+        HOST_CPU_CONSTRAINT,
     ],
     target_compatible_with = [
         "@platforms//os:emscripten",
