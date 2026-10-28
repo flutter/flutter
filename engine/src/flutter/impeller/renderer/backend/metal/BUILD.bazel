@@ -6,10 +6,28 @@
 
 load("@bazel_skylib//lib:selects.bzl", "selects")
 load("@rules_cc//cc:defs.bzl", "cc_library")
-load("//build_defs/cc:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES", "MACOS_CFLAGS_OBJC")
+load("//build_defs/cc:copts.bzl", "FLUTTER_CFLAGS_OBJC", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES", "MACOS_CFLAGS_OBJC")
 load("//build_defs/cc:objc_library.bzl", "flutter_objc_library")
 
 package(default_visibility = ["//visibility:public"])
+
+# `is_ios || is_mac`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_is_ios_or_is_mac",
+    match_any = [
+        "@platforms//os:ios",
+        "@platforms//os:macos",
+    ],
+)
+
+# `impeller_enable_metal && (is_ios || is_mac)`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_impeller_enable_metal_and_is_ios_or_is_mac",
+    match_all = [
+        "//engine/src/flutter/impeller/tools:metal",
+        ":when_is_ios_or_is_mac",
+    ],
+)
 
 # The Objective-C(++) sources of metal, which cc_library takes none of
 # (build_defs/cc/objc_library.bzl); metal links them in on the Apple
@@ -69,10 +87,16 @@ flutter_objc_library(
     ],
     copts = [
         "-Wthread-safety-analysis",  # is_clang
-    ] + FLUTTER_COPTS + MACOS_CFLAGS_OBJC,
+    ] + FLUTTER_COPTS + select({
+        "@platforms//os:macos": MACOS_CFLAGS_OBJC,
+        "//conditions:default": [],
+    }) + select({
+        "@platforms//os:ios": FLUTTER_CFLAGS_OBJC,
+        "//conditions:default": [],
+    }),
     local_defines = FLUTTER_LOCAL_DEFINES,
     target_compatible_with = select({
-        "@platforms//os:macos": [],
+        ":when_impeller_enable_metal_and_is_ios_or_is_mac": [],
         "//conditions:default": ["@platforms//:incompatible"],
     }),
     deps = [
@@ -126,7 +150,7 @@ cc_library(
     ],
     local_defines = FLUTTER_LOCAL_DEFINES,
     target_compatible_with = select({
-        "@platforms//os:macos": [],
+        "//engine/src/flutter/impeller/tools:metal": [],
         "//conditions:default": ["@platforms//:incompatible"],
     }),
     deps = [
@@ -141,12 +165,13 @@ cc_library(
     alwayslink = True,
 )
 
-# `is_mac && enable_unittests`, for the select()s of this file.
+# `impeller_enable_metal && enable_unittests && (is_ios || is_mac)`, for the select()s of this file.
 selects.config_setting_group(
-    name = "when_is_mac_and_enable_unittests",
+    name = "when_impeller_enable_metal_and_enable_unittests_and_is_ios_or_is_mac",
     match_all = [
-        "@platforms//os:macos",
+        "//engine/src/flutter/impeller/tools:metal",
         "//engine/src/flutter/testing:unittests_enabled",
+        ":when_is_ios_or_is_mac",
     ],
 )
 
@@ -166,11 +191,24 @@ flutter_objc_library(
         "-Wthread-safety-analysis",  # is_clang
     ] + FLUTTER_COPTS + [
         "-Wno-inconsistent-missing-override",  # from //flutter/impeller/playground:playground_test
-        "-Wno-unguarded-availability",  # from //flutter/impeller/playground:playground_test
-    ] + MACOS_CFLAGS_OBJC,
+    ] + select({
+        "@platforms//os:macos": [
+            "-Wno-unguarded-availability",  # from //flutter/impeller/playground:playground_test
+        ],
+        "@platforms//os:ios": [
+            "-Wno-unguarded-availability",  # from //flutter/impeller/playground:playground_test
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "@platforms//os:macos": MACOS_CFLAGS_OBJC,
+        "//conditions:default": [],
+    }) + select({
+        "@platforms//os:ios": FLUTTER_CFLAGS_OBJC,
+        "//conditions:default": [],
+    }),
     local_defines = FLUTTER_LOCAL_DEFINES,
     target_compatible_with = select({
-        ":when_is_mac_and_enable_unittests": [],
+        ":when_impeller_enable_metal_and_enable_unittests_and_is_ios_or_is_mac": [],
         "//conditions:default": ["@platforms//:incompatible"],
     }),
     deps = [
@@ -191,8 +229,15 @@ cc_library(
         "-Wthread-safety-analysis",  # is_clang
     ] + FLUTTER_COPTS + [
         "-Wno-inconsistent-missing-override",  # from //flutter/impeller/playground:playground_test
-        "-Wno-unguarded-availability",  # from //flutter/impeller/playground:playground_test
-    ],
+    ] + select({
+        "@platforms//os:macos": [
+            "-Wno-unguarded-availability",  # from //flutter/impeller/playground:playground_test
+        ],
+        "@platforms//os:ios": [
+            "-Wno-unguarded-availability",  # from //flutter/impeller/playground:playground_test
+        ],
+        "//conditions:default": [],
+    }),
     linkopts = [
         "-framework",
         "AppKit",
@@ -201,7 +246,7 @@ cc_library(
     ],
     local_defines = FLUTTER_LOCAL_DEFINES,
     target_compatible_with = select({
-        ":when_is_mac_and_enable_unittests": [],
+        ":when_impeller_enable_metal_and_enable_unittests": [],
         "//conditions:default": ["@platforms//:incompatible"],
     }),
     deps = [
@@ -213,4 +258,13 @@ cc_library(
         "//engine/src/flutter/testing:testing_lib",
     ],
     alwayslink = True,
+)
+
+# `impeller_enable_metal && enable_unittests`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_impeller_enable_metal_and_enable_unittests",
+    match_all = [
+        "//engine/src/flutter/impeller/tools:metal",
+        "//engine/src/flutter/testing:unittests_enabled",
+    ],
 )

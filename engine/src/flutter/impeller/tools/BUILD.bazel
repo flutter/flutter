@@ -103,3 +103,14 @@ selects.config_setting_group(
         "vulkan",
     ]
 ]
+
+# The GLES 2 shaders' setting: GLES on and not the web (shaders.gni: "wasm
+# builds only use GLES3, no need to build GLES2 shaders"), for
+# impeller_shaders' GLES 2 backend.
+selects.config_setting_group(
+    name = "opengles_gles2",
+    match_all = [
+        ":opengles",
+        "//engine/src/flutter/build/bazel:not_wasm",
+    ],
+)

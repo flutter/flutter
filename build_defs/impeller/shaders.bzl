@@ -13,19 +13,23 @@ writes (`solid_fill.vert.h`, the pipeline's vertex and fragment shader
 structs) in a library. The converter (tools/gn_to_bazel) emits the
 invocations; the template's body lives here, as rules.
 
-The expansion is the one shaders.gni produces for the platform:
-`impeller_enable_opengles` and `impeller_enable_vulkan` on everywhere, so
-GLES 2 (`gles`), GLES 3 (`gles3`, language version 300) and Vulkan (`vk`),
-and on the Apple platforms Metal besides (`mtl`: `impeller_enable_metal`,
-research/20 M4). Where Metal is off, the Vulkan reflection library is the
-one dependents see and its intermediates sit in the target's directory;
-where it is on, Metal's reflection is the public one ("Metal reflectors
-generate a superset of information", shaders_vk.gni) and Vulkan's moves
-under `vk/` -- the same rule instance writes either layout, choosing by
-platform at analysis time, which is why the outputs are declared rather
-than predeclared. The GLES intermediates are under subdirectories either
-way. The target names are GN's, so that `gn desc` and the generated tree
-read alike:
+The expansion is the one shaders.gni produces for the platform, each
+backend under its setting (//engine/src/flutter/impeller/tools: args.gni's
+impeller_enable_* as GN's formulas over the platform, or overridden): GLES 2
+(`gles`; not on the web), GLES 3 (`gles3`, language version 300) and Vulkan
+(`vk`) on the desktops, Android and the web, Metal (`mtl`) on the Apple
+platforms -- iOS has Metal alone (research/20 M4, research/21). A backend's
+targets are incompatible where its setting is off, and the group lists the
+backends the setting admits. Where Metal is off, the Vulkan reflection
+library is the one dependents see and its intermediates sit in the target's
+directory; where it is on, Metal's reflection is the public one ("Metal
+reflectors generate a superset of information", shaders_vk.gni) and
+Vulkan's moves under `vk/` -- the same rule instance writes either layout,
+choosing by platform at analysis time, which is why the outputs are
+declared rather than predeclared. The GLES intermediates are under
+subdirectories either way. Metal's impellerc flags are iOS's
+(`--metal-ios`) or the desktop's (shaders_mtl.gni). The target names are
+GN's, so that `gn desc` and the generated tree read alike:
 
   impellerc_<backend>_<name>       the per-shader impellerc runs
   genlib_<backend>_<name>          the .shar archive (Metal: the .metallib)
@@ -65,8 +69,13 @@ _SHADER_LIB = [
     "//engine/src/flutter/impeller/compiler/shader_lib/impeller",
 ]
 
-# The Apple platforms, where shaders.gni's impeller_enable_metal holds.
-_APPLE = "@platforms//os:macos"
+# args.gni's impeller_enable_metal, impeller_enable_opengles and
+# impeller_enable_vulkan (impeller/tools: GN's formulas over the platform,
+# or a build's override), and GLES 2's "GLES and not the web".
+_METAL = "//engine/src/flutter/impeller/tools:metal"
+_OPENGLES = "//engine/src/flutter/impeller/tools:opengles"
+_OPENGLES_GLES2 = "//engine/src/flutter/impeller/tools:opengles_gles2"
+_VULKAN = "//engine/src/flutter/impeller/tools:vulkan"
 
 # One entry per backend shaders.gni enables.
 #   tag:        GN's target-name prefix and the group's name.
@@ -84,8 +93,11 @@ _APPLE = "@platforms//os:macos"
 #               gles_language_version and require_framebuffer_fetch apply.
 #   reflect:    whether the group exposes the reflection library: a bool, or
 #               a select over the platform (Vulkan's only where Metal is off).
-#   metal:      the Metal backend: Apple platforms only, the library by
-#               Xcode's metal compiler, no .shar.
+#   setting:    the config_setting under which shaders.gni builds the backend
+#               (its targets are incompatible elsewhere, the group leaves
+#               them out).
+#   metal:      the Metal backend: where impeller_enable_metal holds, the
+#               library by Xcode's metal compiler, no .shar.
 _BACKENDS = [
     struct(
         tag = "gles",
@@ -98,6 +110,7 @@ _BACKENDS = [
         embed = "gles/%s_shaders_gles",
         opengles = True,
         reflect = False,
+        setting = _OPENGLES_GLES2,
         mnemonic = "ImpellercGles2",
     ),
     struct(
@@ -111,12 +124,13 @@ _BACKENDS = [
         embed = "gles3/%s_shaders_gles",
         opengles = True,
         reflect = False,
+        setting = _OPENGLES,
         mnemonic = "ImpellercGles3",
     ),
     struct(
         tag = "vk",
         subdir = select({
-            _APPLE: "vk",
+            _METAL: "vk",
             "//conditions:default": "",
         }),
         extension = "vkspv",
@@ -127,27 +141,37 @@ _BACKENDS = [
         embed = "vk/%s_shaders_vk",
         opengles = False,
         reflect = select({
-            _APPLE: False,
+            _METAL: False,
             "//conditions:default": True,
         }),
+        setting = _VULKAN,
         mnemonic = "ImpellercVulkan",
     ),
     struct(
         tag = "mtl",
         subdir = "",
         extension = "metal",
-        flags = ["--metal-desktop"],
-        defines = ["IMPELLER_TARGET_METAL", "IMPELLER_TARGET_METAL_DESKTOP"],
+        # shaders_mtl.gni: iOS's Metal or the desktop's.
+        flags = select({
+            "@platforms//os:ios": ["--metal-ios"],
+            "//conditions:default": ["--metal-desktop"],
+        }),
+        defines = select({
+            "@platforms//os:ios": ["IMPELLER_TARGET_METAL", "IMPELLER_TARGET_METAL_IOS"],
+            "//conditions:default": ["IMPELLER_TARGET_METAL", "IMPELLER_TARGET_METAL_DESKTOP"],
+        }),
         version = None,
         symbol = "%s_shaders",
         embed = "mtl/%s_shaders",
         opengles = False,
         reflect = True,
+        setting = _METAL,
         mnemonic = "ImpellercMetal",
     ),
 ]
 
-# The backends by tag, and the ones a target is on the Apple platforms alone.
+# The Metal backend's tag: the one whose library Xcode's metal compiler
+# builds.
 _METAL_TAGS = ["mtl"]
 
 def _impellerc_compile_impl(ctx):
@@ -479,12 +503,6 @@ def impeller_shaders(
     _unused = (analyze, vulkan_language_version)  # buildifier: disable=unused-variable
     testonly = kwargs.get("testonly")
 
-    # The Apple platforms alone: the Metal backend's targets.
-    apple_only = select({
-        _APPLE: [],
-        "//conditions:default": ["@platforms//:incompatible"],
-    })
-
     # impeller_debug (impeller/tools/args.gni): the debug and profile
     # runtime modes.
     impeller_debug = select({
@@ -496,17 +514,10 @@ def impeller_shaders(
     # What a shader may #include beside itself.
     includes = native.glob(["**/*.glsl"], allow_empty = True)
 
-    # shaders.gni: "wasm builds only use GLES3, no need to build GLES2
-    # shaders" -- the GLES 2 backend's targets are incompatible with the web
-    # platform and the group lists them everywhere else.
-    not_web = select({
-        "@platforms//os:emscripten": ["@platforms//:incompatible"],
-        "//conditions:default": [],
-    })
-
-    backends = []
-    gles2_backends = []
-    metal_backends = []
+    # The group's dependencies: each backend where its setting holds
+    # (shaders.gni's `if (impeller_enable_*)` around each, and GLES 2's
+    # `!is_wasm`).
+    group_deps = []
     for backend in _BACKENDS:
         if backend.opengles and not enable_opengles:
             continue
@@ -514,11 +525,12 @@ def impeller_shaders(
         exclusions = gles_exclusions if backend.opengles else vulkan_exclusions
         backend_shaders = [shader for shader in shaders if shader not in exclusions]
         tag = backend.tag + "_" + name
-        compatible_with = target_compatible_with
-        if backend.tag == "gles":
-            compatible_with = (target_compatible_with or []) + not_web
-        if metal:
-            compatible_with = (target_compatible_with or []) + apple_only
+
+        # The backend's targets exist where shaders.gni builds the backend.
+        compatible_with = (target_compatible_with or []) + select({
+            backend.setting: [],
+            "//conditions:default": ["@platforms//:incompatible"],
+        })
         version = backend.version
         if version == None and backend.opengles and gles_language_version != None:
             version = gles_language_version
@@ -628,14 +640,14 @@ def impeller_shaders(
         )
 
         # The reflection library in the group where the backend's is the
-        # public one: never (GLES), always (Metal), or off Apple (Vulkan's,
-        # a select).
+        # public one: never (GLES), always (Metal), or where Metal is off
+        # (Vulkan's, a select).
         reflect = backend.reflect
         if type(reflect) == type(True):
             reflect = [":reflect_" + tag] if reflect else []
         else:
             reflect = select({
-                _APPLE: [],
+                _METAL: [],
                 "//conditions:default": [":reflect_" + tag],
             })
         cc_library(
@@ -644,22 +656,17 @@ def impeller_shaders(
             testonly = testonly,
             target_compatible_with = compatible_with,
         )
-        if backend.tag == "gles":
-            gles2_backends.append(":" + tag)
-        elif metal:
-            metal_backends.append(":" + tag)
-        else:
-            backends.append(":" + tag)
+        group_deps.append(select({
+            backend.setting: [":" + tag],
+            "//conditions:default": [],
+        }))
 
+    deps = []
+    for group_dep in group_deps:
+        deps += group_dep
     cc_library(
         name = name,
-        deps = backends + select({
-            "@platforms//os:emscripten": [],
-            "//conditions:default": gles2_backends,
-        }) + select({
-            _APPLE: metal_backends,
-            "//conditions:default": [],
-        }),
+        deps = deps,
         target_compatible_with = target_compatible_with,
         **kwargs
     )
