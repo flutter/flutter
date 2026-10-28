@@ -32,15 +32,45 @@ under `--//build_defs/web:browser_libraries=//build_defs/web:host_libraries`.
 """
 
 # The Chrome version lib/web_ui/dev/package_lock.yaml named when this was
-# pinned, and the sha256s of linux64's chrome-linux64.zip and
-# chromedriver-linux64.zip at that version. A roll changes the lock; update
-# all three together.
+# pinned, and per host -- the Linux x64 and the Apple-silicon Mac builds
+# of Chrome for Testing (chrome-for-testing-public lays them out as
+# <version>/<platform>/chrome-<platform>.zip and chromedriver-<platform>.zip)
+# -- the sha256s of the two archives at that version, the directory each
+# unpacks to, and the browser's executable inside it (an app bundle on a
+# Mac). A roll changes the lock; update the version and every sha256
+# together (sha256sum of the archives). Another host fails the fetch with
+# the URLs to pin.
 _CHROME_VERSION = "145.0.7632.117"
-_CHROME_SHA256 = "b373fbc7cc71922082febe41fe413e02bb6c4ae31b6b6626ddb2c764289ef15d"
-_CHROMEDRIVER_SHA256 = "7f397fa71614b2d97dcb06a87f3297c91725042803654d6c7fedcd10387a5df8"
 
-_CHROME_URL = "https://storage.googleapis.com/chrome-for-testing-public/%s/linux64/chrome-linux64.zip"
-_CHROMEDRIVER_URL = "https://storage.googleapis.com/chrome-for-testing-public/%s/linux64/chromedriver-linux64.zip"
+_CHROME_URL = "https://storage.googleapis.com/chrome-for-testing-public/%s/%s/%s.zip"
+
+_CHROME_BUILDS = {
+    "linux_x64": struct(
+        platform = "linux64",
+        chrome_sha256 = "b373fbc7cc71922082febe41fe413e02bb6c4ae31b6b6626ddb2c764289ef15d",
+        chromedriver_sha256 = "7f397fa71614b2d97dcb06a87f3297c91725042803654d6c7fedcd10387a5df8",
+        executable = "chrome-linux64/chrome",
+    ),
+    "mac_arm64": struct(
+        platform = "mac-arm64",
+        chrome_sha256 = "cced377de50a37287f7f69337bbad5d9f12505bf6b03f7d40a627cc8061f7f59",
+        chromedriver_sha256 = "25d09ebbca90628b480e95e0d1541818f8e7646d0b77fa81c6258fc13c0613d0",
+        executable = "chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing",
+    ),
+}
+
+def _host_key(rctx):
+    """The host as _CHROME_BUILDS keys it (linux_x64, mac_arm64, ...)."""
+    name = rctx.os.name.lower()
+    if name.startswith("linux"):
+        os = "linux"
+    elif name.startswith("mac"):
+        os = "mac"
+    else:
+        os = name
+    arch = rctx.os.arch.lower()
+    cpu = "x64" if arch in ("amd64", "x86_64", "x64") else ("arm64" if arch in ("aarch64", "arm64") else arch)
+    return "%s_%s" % (os, cpu)
 
 # The Firefox version the lock named when this was pinned, and the sha256 of
 # linux-x86_64's firefox-<version>.tar.xz.
@@ -68,41 +98,69 @@ def _locked_version(rctx, browser):
 
 def _chrome_impl(rctx):
     named = _locked_version(rctx, "chrome")
+    host = _host_key(rctx)
+    build = _CHROME_BUILDS.get(host)
+    if build == None:
+        fail(("browsers.bzl pins Chrome for Testing for %s; this host is %s: add its build to _CHROME_BUILDS " +
+              "(sha256sum of %s and %s).") % (
+            ", ".join(sorted(_CHROME_BUILDS.keys())),
+            host,
+            _CHROME_URL % (named, "<platform>", "chrome-<platform>"),
+            _CHROME_URL % (named, "<platform>", "chromedriver-<platform>"),
+        ))
+    chrome_url = _CHROME_URL % (named, build.platform, "chrome-" + build.platform)
+    chromedriver_url = _CHROME_URL % (named, build.platform, "chromedriver-" + build.platform)
     if named != _CHROME_VERSION:
-        fail(("lib/web_ui/dev/package_lock.yaml names Chrome %s, but %s pins %s: update _CHROME_VERSION, " +
-              "_CHROME_SHA256 and _CHROMEDRIVER_SHA256 (sha256sum of %s and %s).") % (
+        fail(("lib/web_ui/dev/package_lock.yaml names Chrome %s, but %s pins %s: update _CHROME_VERSION and " +
+              "every sha256 of _CHROME_BUILDS (sha256sum of %s and %s, and the other hosts' archives).") % (
             named,
             "build_defs/repositories/browsers.bzl",
             _CHROME_VERSION,
-            _CHROME_URL % named,
-            _CHROMEDRIVER_URL % named,
+            chrome_url,
+            chromedriver_url,
         ))
     rctx.download_and_extract(
-        url = _CHROME_URL % named,
-        sha256 = _CHROME_SHA256,
+        url = chrome_url,
+        sha256 = build.chrome_sha256,
         type = "zip",
     )
     rctx.download_and_extract(
-        url = _CHROMEDRIVER_URL % named,
-        sha256 = _CHROMEDRIVER_SHA256,
+        url = chromedriver_url,
+        sha256 = build.chromedriver_sha256,
         type = "zip",
     )
-    rctx.file("BUILD.bazel", """# Chrome for Testing %s and its chromedriver, the browser lib/web_ui/dev/package_lock.yaml pins (browsers.bzl).
+    rctx.file("BUILD.bazel", """# Chrome for Testing {version} ({platform}) and its chromedriver, the browser lib/web_ui/dev/package_lock.yaml pins (browsers.bzl).
 
 package(default_visibility = ["//visibility:public"])
 
 # The browser's directory whole: the executable loads its libraries,
-# resources and locales from beside itself.
+# resources and locales from beside itself (an app bundle on a Mac).
 filegroup(
     name = "chrome",
-    srcs = glob(["chrome-linux64/**"]),
+    srcs = glob(["chrome-{platform}/**"]),
 )
 
 exports_files([
-    "chrome-linux64/chrome",
-    "chromedriver-linux64/chromedriver",
+    "{executable}",
+    "chromedriver-{platform}/chromedriver",
 ])
-""" % named)
+
+# The executables under one name per host (the paths differ: chrome under
+# chrome-linux64/, the Mac's inside its app bundle).
+alias(
+    name = "executable",
+    actual = "{executable}",
+)
+
+alias(
+    name = "chromedriver",
+    actual = "chromedriver-{platform}/chromedriver",
+)
+""".format(
+        version = named,
+        platform = build.platform,
+        executable = build.executable,
+    ))
 
 chrome = repository_rule(
     implementation = _chrome_impl,

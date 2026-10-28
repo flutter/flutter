@@ -29,6 +29,17 @@ label_flag(
     build_setting_default = ":sysroot_libraries",
 )
 
+# What the launchers take by default: the flag on Linux, the host's
+# libraries elsewhere (a Mac's browser loads the system's frameworks; the
+# Debian runtime sysroot is Linux's, and a Mac never fetches it).
+alias(
+    name = "browser_libraries_for_os",
+    actual = select({
+        "@platforms//os:linux": ":browser_libraries",
+        "//conditions:default": ":host_libraries",
+    }),
+)
+
 browser_libraries(
     name = "sysroot_libraries",
     directories = ["@sysroot_linux_x64_runtime//:libraries"],

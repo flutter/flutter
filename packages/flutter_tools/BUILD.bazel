@@ -435,13 +435,13 @@ pub_cache(
 # --//build_defs/web:browser_libraries selects the host's).
 browser_launcher(
     name = "chrome",
-    browser = "@chrome//:chrome-linux64/chrome",
+    browser = "@chrome//:executable",
     browser_files = ["@chrome//:chrome"],
 )
 
 browser_launcher(
     name = "chromedriver",
-    browser = "@chrome//:chromedriver-linux64/chromedriver",
+    browser = "@chrome//:chromedriver",
 )
 
 # The integration shard's files that build or run for the Linux desktop:
