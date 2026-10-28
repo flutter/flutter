@@ -1099,24 +1099,23 @@ filegroup(
   // Mac build reach (research/20 §9): the Metal/Impeller context, and
   // what the Flutter frameworks share -- the channels and codecs, the
   // tracing bindings, and the Swift module behind them
-  // (InternalFlutterSwiftCommon, a flutter_swift_library). Their unit
-  // tests wait for the Apple test phase: the Objective-C suite links
-  // OCMock and XCTest from the platform's Developer directory
-  // (`:test_config`), the Swift suite the Testing framework.
+  // (InternalFlutterSwiftCommon, a flutter_swift_library). `test_config`
+  // (the Xcode platform's Developer directories through mac_platform_path:
+  // compile flags on the listing targets, link flags on the config's
+  // library) and test_utils_swift convert; the Objective-C suite waits for
+  // OCMock's repository, the Swift suite for the Testing framework
+  // (research/20 §12).
   ConvertedFile('//flutter/shell/platform/darwin/graphics', condition: 'is_mac'),
   ConvertedFile(
     '//flutter/shell/platform/darwin/common',
     condition: 'is_mac',
     skip: <String, String>{
-      'framework_common_unittests': "OCMock and XCTest from the platform's Developer directory (test_config): the Apple test phase",
+      'framework_common_unittests': 'OCMock (//flutter/third_party/ocmock): the Apple test phase',
       'framework_common_swift_unittests':
           "the Testing framework from the platform's Developer directory: the Apple test phase",
-      'test_utils_swift': 'a helper of framework_common_swift_unittests: the Apple test phase',
       'swift_testing_main': "the Testing framework's runner: the Apple test phase",
-      // Their configs: the platform's Developer directory (XCTest, Testing)
-      // by a machine path, which only the skipped suites list.
-      'test_config':
-          "the platform's Developer directory for the suites above: the Apple test phase",
+      // Its config: the platform's framework directory rebased against the
+      // build directory, for an rpath relative to the executable.
       'swift_testing_config': "the Testing framework's search path and rpath: the Apple test phase",
     },
   ),

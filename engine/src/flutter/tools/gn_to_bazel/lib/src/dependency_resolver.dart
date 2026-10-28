@@ -48,8 +48,11 @@ import 'gn_ast.dart';
 import 'gn_eval.dart';
 import 'manifest.dart';
 
-/// A compiler flag a target hands its dependents, and when.
-typedef ForwardedFlag = ({Condition condition, String flag});
+/// A compiler flag a target hands its dependents, and when: a string, or a
+/// string around references the Bazel side holds as constants
+/// ([GnExpandedString]; darwin/common's test_config names the Xcode
+/// platform's directories through `mac_platform_path`).
+typedef ForwardedFlag = ({Condition condition, GnValue flag});
 
 /// Resolves what other GN files say about their targets: the flags a target
 /// (`//dir:name`) hands its dependents, and the target itself.
@@ -259,7 +262,7 @@ List<ForwardedFlag> publicFlagsOf(
           configEffects[absoluteGnLabel(config, package: gnPackage, implicitName: true)];
       if (effect is ConfigDependency) {
         for (final String flag in effect.copts) {
-          flags.add((condition: item.condition, flag: flag));
+          flags.add((condition: item.condition, flag: GnStringValue(flag)));
         }
       }
     }
@@ -281,15 +284,41 @@ List<ForwardedFlag> publicFlagsOf(
 
 /// The compiler flags of [config], each under the condition it is set
 /// -- `-std=` aside: GN's compiler config sets the standard after every
-/// target's flags, so a target's never takes effect.
+/// target's flags, so a target's never takes effect. An include directory
+/// outside the tree, named around a constant (test_config's
+/// `$mac_platform_path/Developer/usr/lib`), is a compile flag too, `-I<dir>`
+/// (the emitter's _includeDirsInto): Bazel's `includes` cannot carry it.
 List<ForwardedFlag> flagsOfConfig(GnTarget config) {
-  return <ForwardedFlag>[
-    for (final GnVariable variable in config.variables.values)
-      if (flagVariables.contains(variable.name))
-        for (final GnListItem item in withoutSystemIncludeDirs(variable.liveItems))
-          if (item.value case GnStringValue(:final String value) when !value.startsWith('-std='))
-            (condition: item.condition, flag: value),
-  ];
+  final flags = <ForwardedFlag>[];
+  for (final GnVariable variable in config.variables.values) {
+    if (flagVariables.contains(variable.name)) {
+      for (final GnListItem item in withoutSystemIncludeDirs(variable.liveItems)) {
+        switch (item.value) {
+          case GnStringValue(:final String value) when !value.startsWith('-std='):
+          case GnExpandedString():
+            flags.add((condition: item.condition, flag: item.value));
+          default:
+            break;
+        }
+      }
+    } else if (variable.name == 'include_dirs') {
+      for (final GnListItem item in variable.liveItems) {
+        if (item.value case GnExpandedString(:final List<GnValue> parts)) {
+          final GnValue first = parts.first;
+          flags.add((
+            condition: item.condition,
+            flag: GnExpandedString(<GnValue>[
+              if (first is GnStringValue)
+                GnStringValue('-I${first.value}')
+              else ...<GnValue>[const GnStringValue('-I'), first],
+              ...parts.sublist(1),
+            ]),
+          ));
+        }
+      }
+    }
+  }
+  return flags;
 }
 
 /// [items] less the `-isystem <dir>` pairs whose directory is a

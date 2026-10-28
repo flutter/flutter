@@ -3,9 +3,10 @@
 # found in the LICENSE file.
 
 # Generated from //flutter/shell/platform/darwin/common/BUILD.gn by gn_to_bazel; do not edit.
-# Not converted: test_config, swift_testing_config, test_utils_swift, swift_testing_main, framework_common_swift_unittests, framework_common_unittests.
+# Not converted: swift_testing_config, swift_testing_main, framework_common_swift_unittests, framework_common_unittests.
 
 load("@bazel_skylib//lib:selects.bzl", "selects")
+load("@macos_sdk//:sdk.bzl", "MACOS_PLATFORM_PATH")
 load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
 load("//build_defs/cc:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES", "MACOS_CFLAGS_OBJC")
 load("//build_defs/cc:objc_library.bzl", "flutter_objc_library")
@@ -21,6 +22,20 @@ cc_library(
         "@platforms//os:macos": [],
         "//conditions:default": ["@platforms//:incompatible"],
     }),
+)
+
+cc_library(
+    name = "test_config",
+    linkopts = [
+        "-mmacosx-version-min=14.0",  # !(is_ios) && is_mac
+        "-F" + MACOS_PLATFORM_PATH + "/Developer/Library/Frameworks",
+        "-L" + MACOS_PLATFORM_PATH + "/Developer/usr/lib",
+    ],
+    target_compatible_with = select({
+        "@platforms//os:macos": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [":config"],
 )
 
 # The Objective-C(++) sources of common, which cc_library takes none of
@@ -315,6 +330,37 @@ flutter_test_fixtures(
         "@platforms//os:macos": [],
         "//conditions:default": ["@platforms//:incompatible"],
     }),
+)
+
+# Utilities written in Swift, for use in unit tests.
+flutter_swift_library(
+    name = "test_utils_swift",
+    testonly = True,
+    srcs = ["framework/Source/LoggerTestUtils.swift"],
+    bridge_header = "InternalFlutterSwiftCommon-Bridging-Header.h",
+    includes = ["."],
+    linkopts = [
+        "-mmacosx-version-min=14.0",  # !(is_ios) && is_mac
+        "-F" + MACOS_PLATFORM_PATH + "/Developer/Library/Frameworks",
+        "-L" + MACOS_PLATFORM_PATH + "/Developer/usr/lib",
+    ],
+    swiftflags = select({
+        ":when_is_mac_and_enable_unittests": [
+            "-enable-testing",  # is_ios && enable_ios_unittests || (is_mac && enable_unittests)
+        ],
+        "//conditions:default": [],
+    }) + [
+        "-F" + MACOS_PLATFORM_PATH + "/Developer/Library/Frameworks",
+        "-I" + MACOS_PLATFORM_PATH + "/Developer/usr/lib",
+    ],
+    target_compatible_with = select({
+        "@platforms//os:macos": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        ":framework_common",
+        "//engine/src:include_root",
+    ],
 )
 
 # `is_mac && enable_unittests`, for the select()s of this file.

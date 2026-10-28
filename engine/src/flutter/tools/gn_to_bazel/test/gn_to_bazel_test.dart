@@ -391,6 +391,37 @@ source_set("version") {
       ]);
     });
 
+    test('expands a local holding a bare external reference', () async {
+      // darwin/common's test_config: `_platform_path = mac_platform_path`
+      // under is_mac (the is_ios branch is dead), read by cflags and
+      // include_dirs.
+      final GnFileEvaluation evaluation = await evaluate(r'''
+config("test_config") {
+  if (is_ios) {
+    _platform_path = ios_platform_path
+  } else if (is_mac) {
+    _platform_path = mac_platform_path
+  }
+  cflags = [ "-F$_platform_path/Developer/Library/Frameworks" ]
+  include_dirs = [ "$_platform_path/Developer/usr/lib" ]
+}
+''', assumptions: generationAssumptions());
+      final GnTarget config = evaluation.targets.single;
+      expect(config.variables['cflags']!.unconditionalItems, <GnValue>[
+        const GnExpandedString(<GnValue>[
+          GnStringValue('-F'),
+          GnReference('mac_platform_path'),
+          GnStringValue('/Developer/Library/Frameworks'),
+        ]),
+      ]);
+      expect(config.variables['include_dirs']!.unconditionalItems, <GnValue>[
+        const GnExpandedString(<GnValue>[
+          GnReference('mac_platform_path'),
+          GnStringValue('/Developer/usr/lib'),
+        ]),
+      ]);
+    });
+
     test('follows boolean variables, decided or not', () async {
       final GnFileEvaluation evaluation = await evaluate('''
 use_swiftshader = enable_unittests && shell_enable_gl
@@ -3655,6 +3686,153 @@ config("config") {
       );
     });
 
+    test("a config's directories outside the tree are flags around the constant", () async {
+      // darwin/common's test_config: the Xcode platform's Developer
+      // directories through mac_platform_path (a constant of @macos_sdk),
+      // read from a local. GN hands compiles `-I` for include_dirs and the
+      // cflags; links get lib_dirs as `-L` and framework_dirs as `-F` among
+      // the ldflags. Bazel's `includes` name directories of the tree alone,
+      // so the include directory is a compile flag: on the targets that
+      // list the config (inlined, publicly or privately), forwarded to the
+      // dependents of a public listing, on a Swift module's swiftflags; the
+      // link flags sit on the config's library and on whatever inlines it.
+      const commonGn = r'''
+config("test_config") {
+  _platform_path = mac_platform_path
+  cflags = [
+    "-fvisibility=default",
+    "-F$_platform_path/Developer/Library/Frameworks",
+  ]
+  swiftflags = [ "-F$_platform_path/Developer/Library/Frameworks" ]
+  include_dirs = [ "$_platform_path/Developer/usr/lib" ]
+  framework_dirs = [ "$_platform_path/Developer/Library/Frameworks" ]
+  lib_dirs = [ "$_platform_path/Developer/usr/lib" ]
+}
+source_set("helper") {
+  sources = [ "helper.cc" ]
+  public_configs = [ ":test_config" ]
+}
+source_set("utils_swift") {
+  testonly = true
+  public_configs = [ ":test_config" ]
+  sources = [ "utils.swift" ]
+}
+executable("common_unittests") {
+  testonly = true
+  sources = [ "common_unittests.cc" ]
+  configs += [ ":test_config" ]
+  deps = [ ":helper" ]
+}
+''';
+      final String output = await convert(commonGn);
+      expect(output, contains('load("@macos_sdk//:sdk.bzl", "MACOS_PLATFORM_PATH")'));
+      // The config's library: the link flags; the compile flags are the
+      // listing targets'.
+      expect(
+        output,
+        contains(
+          'cc_library(\n'
+          '    name = "test_config",\n'
+          '    linkopts = [\n'
+          '        "-F" + MACOS_PLATFORM_PATH + "/Developer/Library/Frameworks",\n'
+          '        "-L" + MACOS_PLATFORM_PATH + "/Developer/usr/lib",\n'
+          '    ],\n'
+          ')\n',
+        ),
+      );
+      // A public listing: the flags inlined, the library a dependency.
+      expect(
+        output,
+        contains(
+          '    name = "helper",\n'
+          '    srcs = ["helper.cc"],\n'
+          '    copts = CHROMIUM_CODE_COPTS + [\n'
+          '        "-fvisibility=default",\n'
+          '        "-F" + MACOS_PLATFORM_PATH + "/Developer/Library/Frameworks",\n'
+          '        "-I" + MACOS_PLATFORM_PATH + "/Developer/usr/lib",\n'
+          '    ],\n'
+          '    local_defines = FLUTTER_LOCAL_DEFINES,\n'
+          '    deps = [\n'
+          '        ":test_config",\n',
+        ),
+      );
+      // A private listing inlines everything: the compile flags, the link
+      // flags.
+      expect(
+        output,
+        contains(
+          '    name = "common_unittests",\n'
+          '    size = "small",\n'
+          '    srcs = ["common_unittests.cc"],\n'
+          '    copts = CHROMIUM_CODE_COPTS + [\n'
+          '        "-fvisibility=default",\n'
+          '        "-F" + MACOS_PLATFORM_PATH + "/Developer/Library/Frameworks",\n'
+          '        "-I" + MACOS_PLATFORM_PATH + "/Developer/usr/lib",\n'
+          '    ],\n'
+          '    linkopts = [\n'
+          '        "-F" + MACOS_PLATFORM_PATH + "/Developer/Library/Frameworks",\n'
+          '        "-L" + MACOS_PLATFORM_PATH + "/Developer/usr/lib",\n'
+          '    ],\n',
+        ),
+      );
+      // A Swift module: the swiftflags and the include directory as -I
+      // (GN's swift tool takes {{include_dirs}}), the link flags.
+      expect(
+        output,
+        contains(
+          '    name = "utils_swift",\n'
+          '    testonly = True,\n'
+          '    srcs = ["utils.swift"],\n'
+          '    linkopts = [\n'
+          '        "-F" + MACOS_PLATFORM_PATH + "/Developer/Library/Frameworks",\n'
+          '        "-L" + MACOS_PLATFORM_PATH + "/Developer/usr/lib",\n'
+          '    ],\n'
+          '    swiftflags = [\n'
+          '        "-F" + MACOS_PLATFORM_PATH + "/Developer/Library/Frameworks",\n'
+          '        "-I" + MACOS_PLATFORM_PATH + "/Developer/usr/lib",\n'
+          '    ],\n',
+        ),
+      );
+      // A dependent of the public listing, in another file: the compile
+      // flags forwarded through the resolver, the expression among them.
+      final GnSourceTree tree = sourceTree(<String, String>{
+        'flutter/common/BUILD.gn': commonGn,
+        'flutter/example/BUILD.gn': '''
+executable("other_unittests") {
+  testonly = true
+  sources = [ "other_unittests.cc" ]
+  deps = [ "//flutter/common:helper" ]
+}
+''',
+      });
+      final String user = emitBuildFile(
+        evaluateIn(tree, '//flutter/example/BUILD.gn'),
+        gnPackage: '//flutter/example',
+        tree: tree,
+      );
+      expect(
+        user,
+        contains(
+          '    copts = CHROMIUM_CODE_COPTS + [\n'
+          '        "-fvisibility=default",  # from //flutter/common:helper\n'
+          '        "-F" + MACOS_PLATFORM_PATH + "/Developer/Library/Frameworks",  # from //flutter/common:helper\n'
+          '        "-I" + MACOS_PLATFORM_PATH + "/Developer/usr/lib",  # from //flutter/common:helper\n'
+          '    ],\n',
+        ),
+      );
+      expect(user, contains('load("@macos_sdk//:sdk.bzl", "MACOS_PLATFORM_PATH")'));
+      // A framework directory of the tree waits for a rule that takes the
+      // bundle as a link input.
+      await expectLater(
+        convert(r'''
+config("c") {
+  framework_dirs = [ "$root_out_dir" ]
+}
+'''),
+        throwsGnError(line: 2, message: 'framework_dirs names'),
+      );
+    });
+
     test('Objective-C sources under is_mac make a macOS library', () async {
       // fml: .mm under is_mac || is_ios (is_ios a constant), with
       // config.gni's macOS flags; the library is compatible on macOS alone
@@ -5557,7 +5735,7 @@ source_set("b") {
         );
       }
       expect(resolver.flagsOf('//flutter/third_party/quiet:quiet'), <ForwardedFlag>[
-        (condition: Condition.always, flag: '-Wno-shadow'),
+        (condition: Condition.always, flag: const GnStringValue('-Wno-shadow')),
       ]);
       expect(resolver.flagsOf('//flutter/nowhere:nothing'), isEmpty);
       expect(DependencyResolver.none().flagsOf('//flutter/third_party/quiet:quiet'), isEmpty);
