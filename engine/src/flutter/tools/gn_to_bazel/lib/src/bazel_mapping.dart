@@ -2803,6 +2803,122 @@ const Map<String, ({bool host, bool web, bool mac, bool ios})> perTargetOsArgume
 /// [generationAssumptions], a subset. Everything not fixed here stays a
 /// select(): `is_debug`, the runtime mode and slimpeller in particular,
 /// which are Bazel flags.
+/// The assumptions of one GN out directory, for the oracle
+/// (tool/gn_desc_diff.dart): [linuxHostAssumptions] overlaid with the
+/// directory's own arguments -- every name the Linux assumptions fix that
+/// `gn args --list` reports takes the directory's value (is_debug, the
+/// Skia, Impeller and shell arguments, use_ios_simulator, the deployment
+/// targets; the runtime mode stays a select, as it is not fixed there) --
+/// and with what BUILDCONFIG.gn, common/config.gni and testing.gni derive
+/// from target_os, target_cpu, host_os and host_cpu: the OS predicates, the
+/// toolchain labels, the platform and prebuilt SDK names, enable_unittests,
+/// enable_ios_unittests, build_engine_artifacts, use_flutter_cxx -- and
+/// with the directory's values of the settings the generated files select
+/// on (is_debug, use_ios_simulator, the backends) and of the runtime mode,
+/// so that the comparison covers the branch the directory builds. So the
+/// oracle reads an iOS simulator or a Mac host directory as it reads a
+/// Linux one.
+Assumptions outDirectoryAssumptions(Map<String, GnValue> args) {
+  final Assumptions base = linuxHostAssumptions();
+  // The directory decides what the generated files select on, too: the
+  // settings (is_debug, use_ios_simulator, the backends) and the runtime
+  // mode, so that the comparison covers the branch the directory builds.
+  final values = <String, GnValue>{
+    for (final String name in <String>{
+      ...base.names,
+      ...conditionSettings.keys,
+      'is_debug',
+      'flutter_runtime_mode',
+    })
+      if (args[name] != null) name: args[name]!,
+  };
+  String string(String name, String fallback) {
+    final GnValue? value = args[name];
+    return value is GnStringValue && value.value.isNotEmpty ? value.value : fallback;
+  }
+
+  bool flag(String name, bool fallback) {
+    final GnValue? value = args[name];
+    return value is GnBoolValue ? value.value : fallback;
+  }
+
+  final String hostOs = string('host_os', 'linux');
+  final String hostCpu = string('host_cpu', 'x64');
+  final String targetOs = string('target_os', hostOs);
+  final String targetCpu = string('target_cpu', hostCpu);
+  final isLinux = targetOs == 'linux';
+  final isMac = targetOs == 'mac';
+  final isIos = targetOs == 'ios';
+  final isAndroid = targetOs == 'android';
+  final isWin = targetOs == 'win';
+  final isWasm = targetOs == 'wasm';
+  final bool simulator = flag('use_ios_simulator', false);
+  final hostToolchain = '//build/toolchain/$hostOs:clang_$hostCpu';
+  final defaultToolchain = isIos
+      ? (simulator
+            ? (targetCpu == 'arm64'
+                  ? '//build/toolchain/mac:ios_clang_arm_sim'
+                  : '//build/toolchain/mac:ios_clang_x64_sim')
+            : '//build/toolchain/mac:ios_clang_arm')
+      : isWasm
+      ? '//build/toolchain/wasm'
+      : '//build/toolchain/$targetOs:clang_$targetCpu';
+  final hostBuild = defaultToolchain == hostToolchain;
+  final String runtimeMode = string('flutter_runtime_mode', 'debug');
+  String osName(String os) => switch (os) {
+    'mac' => 'macos',
+    'win' => 'windows',
+    _ => os,
+  };
+  String platformName(String os) => switch (os) {
+    'mac' => 'darwin',
+    'win' => 'windows',
+    _ => os,
+  };
+  final hostPrebuilts = '//flutter/prebuilts/${osName(hostOs)}-$hostCpu';
+  final targetPrebuilts = '//flutter/prebuilts/${osName(targetOs)}-$targetCpu';
+  // config.gni: the host's SDK for the host's own build and the cross
+  // builds whose target runs no SDK (Android, iOS, wasm).
+  final bool hostSdk = hostBuild || isAndroid || isIos || isWasm;
+  values.addAll(<String, GnValue>{
+    'current_cpu': GnStringValue(targetCpu),
+    'current_os': GnStringValue(targetOs),
+    'target_cpu': GnStringValue(targetCpu),
+    'target_os': GnStringValue(targetOs),
+    'host_cpu': GnStringValue(hostCpu),
+    'host_os': GnStringValue(hostOs),
+    'current_toolchain': GnStringValue(defaultToolchain),
+    'default_toolchain': GnStringValue(defaultToolchain),
+    'host_toolchain': GnStringValue(hostToolchain),
+    'is_android': GnBoolValue(isAndroid),
+    'is_apple': GnBoolValue(isMac || isIos),
+    'is_ios': GnBoolValue(isIos),
+    'is_linux': GnBoolValue(isLinux),
+    'is_mac': GnBoolValue(isMac),
+    'is_wasm': GnBoolValue(isWasm),
+    'is_win': GnBoolValue(isWin),
+    // BUILDCONFIG.gn's use_flutter_cxx.
+    'use_flutter_cxx': GnBoolValue(isLinux || isAndroid || isMac || isIos),
+    // testing.gni, and its iOS suite.
+    'enable_unittests': GnBoolValue(hostBuild || isMac),
+    'enable_ios_unittests': GnBoolValue(isIos && runtimeMode == 'debug'),
+    // config.gni.
+    'build_engine_artifacts': GnBoolValue(
+      flag('flutter_build_engine_artifacts', true) &&
+          !isAndroid &&
+          (hostBuild || (isLinux && targetCpu != 'arm') || isMac || isWin),
+    ),
+    'platform_name': GnStringValue(platformName(hostOs)),
+    'full_platform_name': GnStringValue('${platformName(hostOs)}-$hostCpu'),
+    'target_platform_name': GnStringValue(platformName(targetOs)),
+    'full_target_platform_name': GnStringValue('${platformName(targetOs)}-$targetCpu'),
+    'host_prebuilt_dart_sdk': GnStringValue('$hostPrebuilts/dart-sdk'),
+    'target_prebuilt_dart_sdk': GnStringValue('$targetPrebuilts/dart-sdk'),
+    'prebuilt_dart_sdk': GnStringValue('${hostSdk ? hostPrebuilts : targetPrebuilts}/dart-sdk'),
+  });
+  return base.withValues(values);
+}
+
 Assumptions linuxHostAssumptions() {
   return Assumptions(const <String, GnValue>{
     // //build/config/BUILDCONFIG.gn
