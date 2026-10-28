@@ -16,18 +16,20 @@ invocations; the template's body lives here, as rules.
 The expansion is the one shaders.gni produces for the platform, each
 backend under its setting (//engine/src/flutter/impeller/tools: args.gni's
 impeller_enable_* as GN's formulas over the platform, or overridden): GLES 2
-(`gles`; not on the web), GLES 3 (`gles3`, language version 300) and Vulkan
-(`vk`) on the desktops, Android and the web, Metal (`mtl`) on the Apple
-platforms -- iOS has Metal alone (research/20 M4, research/21). A backend's
-targets are incompatible where its setting is off, and the group lists the
-backends the setting admits. Where Metal is off, the Vulkan reflection
-library is the one dependents see and its intermediates sit in the target's
-directory; where it is on, Metal's reflection is the public one ("Metal
-reflectors generate a superset of information", shaders_vk.gni) and
-Vulkan's moves under `vk/` -- the same rule instance writes either layout,
-choosing by platform at analysis time, which is why the outputs are
-declared rather than predeclared. The GLES intermediates are under
-subdirectories either way. Metal's impellerc flags are iOS's
+(`gles`; not on the web), GLES 3 (`gles3`, language version 300) on the
+desktops, Android and the web, Vulkan (`vk`) on the desktops and Android,
+Metal (`mtl`) on the Apple platforms -- iOS has Metal alone (research/20
+M4, research/21). A backend's targets are incompatible where its setting is
+off, and the group lists the backends the setting admits. One backend's
+reflection library is the one dependents see, and its intermediates sit in
+the target's directory while the others' go under subdirectories: Metal's
+where Metal is on ("Metal reflectors generate a superset of information",
+shaders_vk.gni; Vulkan's moves under `vk/`), else Vulkan's where Vulkan is
+on (the GLES backends' under `gles/` and `gles3/`, shaders_gles.gni), else
+the GLES backends' -- the web, GLES 3 alone -- in the target's directory.
+The same rule instance writes either layout, choosing by platform at
+analysis time, which is why the outputs are declared rather than
+predeclared. Metal's impellerc flags are iOS's
 (`--metal-ios`) or the desktop's (shaders_mtl.gni). The target names are
 GN's, so that `gn desc` and the generated tree read alike:
 
@@ -73,15 +75,19 @@ _SHADER_LIB = [
 # impeller_enable_vulkan (impeller/tools: GN's formulas over the platform,
 # or a build's override), and GLES 2's "GLES and not the web".
 _METAL = "//engine/src/flutter/impeller/tools:metal"
+_METAL_OR_VULKAN = "//engine/src/flutter/impeller/tools:metal_or_vulkan"
 _OPENGLES = "//engine/src/flutter/impeller/tools:opengles"
 _OPENGLES_GLES2 = "//engine/src/flutter/impeller/tools:opengles_gles2"
 _VULKAN = "//engine/src/flutter/impeller/tools:vulkan"
 
 # One entry per backend shaders.gni enables.
 #   tag:        GN's target-name prefix and the group's name.
-#   subdir:     impellerc's intermediates_subdir ("" for Vulkan without
-#               Metal: shaders_vk.gni keeps them in the target's directory;
-#               `vk` with it; "" for Metal).
+#   subdir:     impellerc's intermediates_subdir where the backend's
+#               reflection is private (private_under, below), "" where it
+#               is the public one: the GLES backends' gles/ and gles3/
+#               under Metal or Vulkan, Vulkan's vk/ under Metal, never
+#               Metal's (shaders_gles.gni, shaders_vk.gni keep the public
+#               one's in the target's directory).
 #   extension:  sl_file_extension.
 #   flags:      shader_target_flags.
 #   defines:    the --define= macros.
@@ -91,8 +97,14 @@ _VULKAN = "//engine/src/flutter/impeller/tools:vulkan"
 #   embed:      the embedded blob's header and source, without extension.
 #   opengles:   whether enable_opengles, gles_exclusions,
 #               gles_language_version and require_framebuffer_fetch apply.
-#   reflect:    whether the group exposes the reflection library: a bool, or
-#               a select over the platform (Vulkan's only where Metal is off).
+#   private_under: the settings under which another backend's reflection
+#               is the public one and this backend's stays private, its
+#               intermediates under `subdir`: Metal or Vulkan for the GLES
+#               backends (shaders_gles.gni: "Metal reflectors generate a
+#               superset of information"), Metal for Vulkan's
+#               (shaders_vk.gni), none for Metal's. Where none of them
+#               holds -- the web, with GLES alone -- the group exposes this
+#               backend's reflection library.
 #   setting:    the config_setting under which shaders.gni builds the backend
 #               (its targets are incompatible elsewhere, the group leaves
 #               them out).
@@ -109,7 +121,7 @@ _BACKENDS = [
         symbol = "%s_shaders_gles",
         embed = "gles/%s_shaders_gles",
         opengles = True,
-        reflect = False,
+        private_under = [_METAL_OR_VULKAN],
         setting = _OPENGLES_GLES2,
         mnemonic = "ImpellercGles2",
     ),
@@ -123,16 +135,13 @@ _BACKENDS = [
         symbol = "%s_shaders_gles3",
         embed = "gles3/%s_shaders_gles",
         opengles = True,
-        reflect = False,
+        private_under = [_METAL_OR_VULKAN],
         setting = _OPENGLES,
         mnemonic = "ImpellercGles3",
     ),
     struct(
         tag = "vk",
-        subdir = select({
-            _METAL: "vk",
-            "//conditions:default": "",
-        }),
+        subdir = "vk",
         extension = "vkspv",
         flags = ["--vulkan"],
         defines = ["IMPELLER_TARGET_VULKAN"],
@@ -140,10 +149,7 @@ _BACKENDS = [
         symbol = "%s_shaders_vk",
         embed = "vk/%s_shaders_vk",
         opengles = False,
-        reflect = select({
-            _METAL: False,
-            "//conditions:default": True,
-        }),
+        private_under = [_METAL],
         setting = _VULKAN,
         mnemonic = "ImpellercVulkan",
     ),
@@ -164,7 +170,7 @@ _BACKENDS = [
         symbol = "%s_shaders",
         embed = "mtl/%s_shaders",
         opengles = False,
-        reflect = True,
+        private_under = [],
         setting = _METAL,
         mnemonic = "ImpellercMetal",
     ),
@@ -534,11 +540,17 @@ def impeller_shaders(
         version = backend.version
         if version == None and backend.opengles and gles_language_version != None:
             version = gles_language_version
+
+        # The intermediates' subdirectory where the backend's reflection is
+        # private, the package's directory where it is the public one.
+        subdir = backend.subdir
+        if backend.private_under and subdir:
+            subdir = select(dict([(setting, subdir) for setting in backend.private_under] + [("//conditions:default", "")]))
         impellerc_compile(
             name = "impellerc_" + tag,
             srcs = backend_shaders,
             includes = includes,
-            subdir = backend.subdir,
+            subdir = subdir,
             extension = backend.extension,
             flags = backend.flags,
             defines = backend.defines,
@@ -640,16 +652,11 @@ def impeller_shaders(
         )
 
         # The reflection library in the group where the backend's is the
-        # public one: never (GLES), always (Metal), or where Metal is off
-        # (Vulkan's, a select).
-        reflect = backend.reflect
-        if type(reflect) == type(True):
-            reflect = [":reflect_" + tag] if reflect else []
-        else:
-            reflect = select({
-                _METAL: [],
-                "//conditions:default": [":reflect_" + tag],
-            })
+        # public one: always (Metal), where Metal is off (Vulkan's), where
+        # neither Metal nor Vulkan is on (the GLES backends': the web).
+        reflect = [":reflect_" + tag]
+        if backend.private_under:
+            reflect = select(dict([(setting, []) for setting in backend.private_under] + [("//conditions:default", reflect)]))
         cc_library(
             name = tag,
             deps = [":embed_" + tag] + reflect,
