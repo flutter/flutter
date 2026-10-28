@@ -128,6 +128,15 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)sendDeepLinkToFramework:(NSURL*)url completionHandler:(void (^)(BOOL success))completion;
 
 - (void)onStatusBarTap;
+
+/**
+ * Sends display information for the screen that the view controller's view is on, if it differs
+ * from the display last sent to the framework.
+ *
+ * If the view isn't in a window, keeps the last display sent. If no display has been sent yet,
+ * sends `UIScreen.mainScreen` as a best-effort initial display.
+ */
+- (void)updateDisplays;
 @end
 
 @interface FlutterImplicitEngineBridgeImpl : NSObject <FlutterImplicitEngineBridge>
