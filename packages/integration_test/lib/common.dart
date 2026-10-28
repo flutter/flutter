@@ -11,6 +11,8 @@ library;
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:meta/meta.dart';
+
 /// A callback to use with [integrationDriver].
 ///
 /// The callback receives the name of screenshot passed to `binding.takeScreenshot(<name>)`,
@@ -246,33 +248,23 @@ enum WebDriverMouseButton {
 /// [WebDriverPointerAction.pause] constructors.
 ///
 /// See: https://www.w3.org/TR/webdriver/#actions
+@immutable
 sealed class WebDriverPointerAction {
-  /// Abstract const constructor. This constructor enables subclasses to
-  /// provide const constructors so that they can be used in const
-  /// expressions.
-  const WebDriverPointerAction();
+  const WebDriverPointerAction._();
 
   /// Creates a pointer action that moves the mouse to ([x], [y]).
-  ///
-  /// See [WebDriverPointerMove.new].
   const factory WebDriverPointerAction.move(double x, double y, {Duration duration}) =
       WebDriverPointerMove;
 
   /// Creates a pointer action that presses [button], which defaults to
   /// [WebDriverMouseButton.primary].
-  ///
-  /// See [WebDriverPointerDown.new].
   const factory WebDriverPointerAction.down({WebDriverMouseButton button}) = WebDriverPointerDown;
 
   /// Creates a pointer action that releases [button], which defaults to
   /// [WebDriverMouseButton.primary].
-  ///
-  /// See [WebDriverPointerUp.new].
   const factory WebDriverPointerAction.up({WebDriverMouseButton button}) = WebDriverPointerUp;
 
   /// Creates a pointer action that waits for [duration].
-  ///
-  /// See [WebDriverPointerPause.new].
   const factory WebDriverPointerAction.pause(Duration duration) = WebDriverPointerPause;
 
   /// Deserializes a [WebDriverPointerAction] from the JSON map produced by
@@ -338,7 +330,7 @@ final class WebDriverPointerMove extends WebDriverPointerAction {
   /// on the host driver, they are in CSS pixels relative to the top-left
   /// corner of the browser viewport.
   /// {@endtemplate}
-  const WebDriverPointerMove(this.x, this.y, {this.duration = Duration.zero});
+  const WebDriverPointerMove(this.x, this.y, {this.duration = Duration.zero}) : super._();
 
   /// Target horizontal coordinate.
   ///
@@ -364,7 +356,6 @@ final class WebDriverPointerMove extends WebDriverPointerAction {
   }
 
   @override
-  // ignore: avoid_equals_and_hash_code_on_mutable_classes, common.dart stays dependency-free (no package:meta).
   bool operator ==(Object other) {
     return other is WebDriverPointerMove &&
         other.x == x &&
@@ -373,7 +364,6 @@ final class WebDriverPointerMove extends WebDriverPointerAction {
   }
 
   @override
-  // ignore: avoid_equals_and_hash_code_on_mutable_classes, common.dart stays dependency-free (no package:meta).
   int get hashCode => Object.hash(WebDriverPointerMove, x, y, duration);
 
   @override
@@ -385,7 +375,7 @@ final class WebDriverPointerMove extends WebDriverPointerAction {
 /// Usually created with [WebDriverPointerAction.down].
 final class WebDriverPointerDown extends WebDriverPointerAction {
   /// Creates a pointer action that presses [button].
-  const WebDriverPointerDown({this.button = WebDriverMouseButton.primary});
+  const WebDriverPointerDown({this.button = WebDriverMouseButton.primary}) : super._();
 
   /// The mouse button to press.
   final WebDriverMouseButton button;
@@ -396,13 +386,11 @@ final class WebDriverPointerDown extends WebDriverPointerAction {
   }
 
   @override
-  // ignore: avoid_equals_and_hash_code_on_mutable_classes, common.dart stays dependency-free (no package:meta).
   bool operator ==(Object other) {
     return other is WebDriverPointerDown && other.button == button;
   }
 
   @override
-  // ignore: avoid_equals_and_hash_code_on_mutable_classes, common.dart stays dependency-free (no package:meta).
   int get hashCode => Object.hash(WebDriverPointerDown, button);
 
   @override
@@ -414,7 +402,7 @@ final class WebDriverPointerDown extends WebDriverPointerAction {
 /// Usually created with [WebDriverPointerAction.up].
 final class WebDriverPointerUp extends WebDriverPointerAction {
   /// Creates a pointer action that releases [button].
-  const WebDriverPointerUp({this.button = WebDriverMouseButton.primary});
+  const WebDriverPointerUp({this.button = WebDriverMouseButton.primary}) : super._();
 
   /// The mouse button to release.
   final WebDriverMouseButton button;
@@ -425,13 +413,11 @@ final class WebDriverPointerUp extends WebDriverPointerAction {
   }
 
   @override
-  // ignore: avoid_equals_and_hash_code_on_mutable_classes, common.dart stays dependency-free (no package:meta).
   bool operator ==(Object other) {
     return other is WebDriverPointerUp && other.button == button;
   }
 
   @override
-  // ignore: avoid_equals_and_hash_code_on_mutable_classes, common.dart stays dependency-free (no package:meta).
   int get hashCode => Object.hash(WebDriverPointerUp, button);
 
   @override
@@ -446,7 +432,7 @@ final class WebDriverPointerPause extends WebDriverPointerAction {
   /// Creates a pointer action that waits for [duration].
   ///
   /// [duration] is truncated to whole milliseconds.
-  const WebDriverPointerPause(this.duration);
+  const WebDriverPointerPause(this.duration) : super._();
 
   /// How long to wait.
   final Duration duration;
@@ -457,13 +443,11 @@ final class WebDriverPointerPause extends WebDriverPointerAction {
   }
 
   @override
-  // ignore: avoid_equals_and_hash_code_on_mutable_classes, common.dart stays dependency-free (no package:meta).
   bool operator ==(Object other) {
     return other is WebDriverPointerPause && other.duration == duration;
   }
 
   @override
-  // ignore: avoid_equals_and_hash_code_on_mutable_classes, common.dart stays dependency-free (no package:meta).
   int get hashCode => Object.hash(WebDriverPointerPause, duration);
 
   @override
