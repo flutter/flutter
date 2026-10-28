@@ -45,10 +45,10 @@ TEST(CpuAffinity, NoLittleCores) {
   }
   auto tracker = CPUSpeedTracker(speeds);
 
-  ASSERT_TRUE(tracker.IsValid());
-  ASSERT_EQ(tracker.GetIndices(CpuAffinity::kNotEfficiency).size(), 8u);
-  ASSERT_EQ(tracker.GetIndices(CpuAffinity::kEfficiency).size(), 6u);
-  ASSERT_EQ(tracker.GetIndices(CpuAffinity::kPerformance).size(), 2u);
+  EXPECT_TRUE(tracker.IsValid());
+  EXPECT_EQ(tracker.GetIndices(CpuAffinity::kNotEfficiency).size(), 8u);
+  EXPECT_EQ(tracker.GetIndices(CpuAffinity::kEfficiency).size(), 6u);
+  EXPECT_EQ(tracker.GetIndices(CpuAffinity::kPerformance).size(), 2u);
 }
 
 TEST(CpuAffinity, LittleCoresByCapacity) {
@@ -58,10 +58,11 @@ TEST(CpuAffinity, LittleCoresByCapacity) {
       CpuIndexAndSpeed{.index = 2, .speed = 3302400, .capacity = 1024}};
   auto tracker = CPUSpeedTracker(speeds);
 
-  ASSERT_TRUE(tracker.IsValid());
+  EXPECT_TRUE(tracker.IsValid());
+  // The size check guards the indexing below.
   ASSERT_EQ(tracker.GetIndices(CpuAffinity::kNotEfficiency).size(), 2u);
-  ASSERT_EQ(tracker.GetIndices(CpuAffinity::kNotEfficiency)[0], 1u);
-  ASSERT_EQ(tracker.GetIndices(CpuAffinity::kNotEfficiency)[1], 2u);
+  EXPECT_EQ(tracker.GetIndices(CpuAffinity::kNotEfficiency)[0], 1u);
+  EXPECT_EQ(tracker.GetIndices(CpuAffinity::kNotEfficiency)[1], 2u);
 }
 
 TEST(CpuAffinity, CapacitiesThatSayNothing) {
@@ -78,9 +79,9 @@ TEST(CpuAffinity, CapacitiesThatSayNothing) {
     }
     auto tracker = CPUSpeedTracker(speeds);
 
-    ASSERT_TRUE(tracker.IsValid());
+    EXPECT_TRUE(tracker.IsValid());
     ASSERT_EQ(tracker.GetIndices(CpuAffinity::kNotEfficiency).size(), 2u);
-    ASSERT_EQ(tracker.GetIndices(CpuAffinity::kNotEfficiency)[0], 1u);
+    EXPECT_EQ(tracker.GetIndices(CpuAffinity::kNotEfficiency)[0], 1u);
   }
 }
 
