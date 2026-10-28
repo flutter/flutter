@@ -100,7 +100,7 @@ dependencies:
   dds_service_extensions: 2.1.0
   devtools_shared: 13.1.0
   dtd: 4.0.0
-  extension_discovery: 2.1.0
+  extension_discovery: 2.1.1
   fixnum: 1.1.1
   frontend_server_client: 4.2.0
   glob: 2.2.0
@@ -139,4 +139,4 @@ dartdoc:
   # Exclude this package from the hosted API docs.
   nodoc: true
 
-# PUBSPEC CHECKSUM: if4lag
+# PUBSPEC CHECKSUM: 43stjn
