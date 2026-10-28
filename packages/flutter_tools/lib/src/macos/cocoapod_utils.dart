@@ -2,16 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../base/config.dart';
 import '../base/file_system.dart';
 import '../base/fingerprint.dart';
 import '../base/logger.dart';
-import '../base/process.dart';
 import '../base/template.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../context/tool_context.dart';
 import '../darwin/darwin.dart';
+import '../features.dart';
 import '../flutter_plugins.dart';
 import '../plugins.dart';
 import '../project.dart';
@@ -30,13 +29,7 @@ Future<void> processPodsIfNeeded(
   bool forceCocoaPodsOnly = false,
   bool forceSwiftPM = false,
 }) async {
-  final ToolContext(
-    :Cache cache,
-    :Config config,
-    :FileSystem fs,
-    :Logger logger,
-    :ProcessUtils processUtils,
-  ) = toolContext;
+  final ToolContext(:Cache cache, :FileSystem fs, :Logger logger) = toolContext;
   final FlutterProject project = xcodeProject.parent;
 
   // When using Swift Package Manager, the Podfile may not exist so if there
@@ -49,6 +42,9 @@ Future<void> processPodsIfNeeded(
   // Ensure that the plugin list is up to date, since hasPlugins relies on it.
   await refreshPluginsList(
     project,
+    cocoaPods: cocoaPods,
+    featureFlags: featureFlags,
+    toolContext: toolContext,
     iosPlatform: project.ios.existsSync(),
     macOSPlatform: project.macos.existsSync(),
     forceCocoaPodsOnly: forceCocoaPodsOnly,
@@ -76,11 +72,8 @@ Future<void> processPodsIfNeeded(
 
     // Generate an empty Swift Package Manager manifest to invalidate fingerprinter
     final swiftPackageManager = SwiftPackageManager(
-      fileSystem: fs,
       templateRenderer: templateRenderer,
-      processUtils: processUtils,
-      config: config,
-      logger: logger,
+      toolContext: toolContext,
     );
     final FlutterDarwinPlatform platform = xcodeProject is IosProject
         ? FlutterDarwinPlatform.ios

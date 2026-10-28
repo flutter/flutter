@@ -7,9 +7,7 @@ import 'dart:convert';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
-import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/flutter_manifest.dart';
@@ -31,6 +29,7 @@ void main() {
     late MemoryFileSystem fs;
     late FakeCocoaPods cocoaPods;
     late BufferLogger logger;
+    late FakeToolContext toolContext;
 
     // Adds basic properties to the flutterProject and its subprojects.
     void setUpProject(
@@ -88,6 +87,7 @@ void main() {
       fs = MemoryFileSystem.test();
       cocoaPods = FakeCocoaPods();
       logger = BufferLogger.test();
+      toolContext = FakeToolContext(fs: fs, logger: logger);
     });
 
     group('for iOS', () {
@@ -104,15 +104,7 @@ void main() {
               BuildMode.debug,
               cocoaPods: cocoaPods,
               templateRenderer: const MustacheTemplateRenderer(),
-              toolContext: DelegatingToolContext(
-                config: Config.test(),
-                fs: fs,
-                logger: logger,
-                processUtils: ProcessUtils(
-                  processManager: FakeProcessManager.empty(),
-                  logger: logger,
-                ),
-              ),
+              toolContext: toolContext,
             );
             expect(cocoaPods.processedPods, isTrue);
           },
@@ -138,15 +130,7 @@ void main() {
               BuildMode.debug,
               cocoaPods: cocoaPods,
               templateRenderer: const MustacheTemplateRenderer(),
-              toolContext: DelegatingToolContext(
-                config: Config.test(),
-                fs: fs,
-                logger: logger,
-                processUtils: ProcessUtils(
-                  processManager: FakeProcessManager.empty(),
-                  logger: logger,
-                ),
-              ),
+              toolContext: toolContext,
             );
             expect(cocoaPods.processedPods, isTrue);
           },
@@ -171,15 +155,7 @@ void main() {
               BuildMode.debug,
               cocoaPods: cocoaPods,
               templateRenderer: const MustacheTemplateRenderer(),
-              toolContext: DelegatingToolContext(
-                config: Config.test(),
-                fs: fs,
-                logger: logger,
-                processUtils: ProcessUtils(
-                  processManager: FakeProcessManager.empty(),
-                  logger: logger,
-                ),
-              ),
+              toolContext: toolContext,
             );
             expect(cocoaPods.processedPods, isFalse);
           },
@@ -203,15 +179,7 @@ void main() {
               BuildMode.debug,
               cocoaPods: cocoaPods,
               templateRenderer: const MustacheTemplateRenderer(),
-              toolContext: DelegatingToolContext(
-                config: Config.test(),
-                fs: fs,
-                logger: logger,
-                processUtils: ProcessUtils(
-                  processManager: FakeProcessManager.empty(),
-                  logger: logger,
-                ),
-              ),
+              toolContext: toolContext,
             );
             expect(cocoaPods.processedPods, isFalse);
           },
@@ -239,15 +207,7 @@ void main() {
               BuildMode.debug,
               cocoaPods: cocoaPods,
               templateRenderer: const MustacheTemplateRenderer(),
-              toolContext: DelegatingToolContext(
-                config: Config.test(),
-                fs: fs,
-                logger: logger,
-                processUtils: ProcessUtils(
-                  processManager: FakeProcessManager.empty(),
-                  logger: logger,
-                ),
-              ),
+              toolContext: toolContext,
             );
             expect(cocoaPods.processedPods, isTrue);
           },
@@ -272,15 +232,7 @@ void main() {
               BuildMode.debug,
               cocoaPods: cocoaPods,
               templateRenderer: const MustacheTemplateRenderer(),
-              toolContext: DelegatingToolContext(
-                config: Config.test(),
-                fs: fs,
-                logger: logger,
-                processUtils: ProcessUtils(
-                  processManager: FakeProcessManager.empty(),
-                  logger: logger,
-                ),
-              ),
+              toolContext: toolContext,
             );
             expect(cocoaPods.processedPods, isFalse);
           },
@@ -306,15 +258,7 @@ void main() {
               BuildMode.debug,
               cocoaPods: cocoaPods,
               templateRenderer: const MustacheTemplateRenderer(),
-              toolContext: DelegatingToolContext(
-                config: Config.test(),
-                fs: fs,
-                logger: logger,
-                processUtils: ProcessUtils(
-                  processManager: FakeProcessManager.empty(),
-                  logger: logger,
-                ),
-              ),
+              toolContext: toolContext,
               forceCocoaPodsOnly: true,
             );
             expect(cocoaPods.processedPods, isTrue);
@@ -349,15 +293,7 @@ void main() {
               BuildMode.debug,
               cocoaPods: cocoaPods,
               templateRenderer: const MustacheTemplateRenderer(),
-              toolContext: DelegatingToolContext(
-                config: Config.test(),
-                fs: fs,
-                logger: logger,
-                processUtils: ProcessUtils(
-                  processManager: FakeProcessManager.empty(),
-                  logger: logger,
-                ),
-              ),
+              toolContext: toolContext,
               forceSwiftPM: true,
             );
 
@@ -395,15 +331,7 @@ void main() {
               BuildMode.debug,
               cocoaPods: cocoaPods,
               templateRenderer: const MustacheTemplateRenderer(),
-              toolContext: DelegatingToolContext(
-                config: Config.test(),
-                fs: fs,
-                logger: logger,
-                processUtils: ProcessUtils(
-                  processManager: FakeProcessManager.empty(),
-                  logger: logger,
-                ),
-              ),
+              toolContext: toolContext,
             );
             expect(cocoaPods.processedPods, isTrue);
           },
@@ -429,15 +357,7 @@ void main() {
               BuildMode.debug,
               cocoaPods: cocoaPods,
               templateRenderer: const MustacheTemplateRenderer(),
-              toolContext: DelegatingToolContext(
-                config: Config.test(),
-                fs: fs,
-                logger: logger,
-                processUtils: ProcessUtils(
-                  processManager: FakeProcessManager.empty(),
-                  logger: logger,
-                ),
-              ),
+              toolContext: toolContext,
             );
             expect(cocoaPods.processedPods, isTrue);
           },
@@ -462,15 +382,7 @@ void main() {
               BuildMode.debug,
               cocoaPods: cocoaPods,
               templateRenderer: const MustacheTemplateRenderer(),
-              toolContext: DelegatingToolContext(
-                config: Config.test(),
-                fs: fs,
-                logger: logger,
-                processUtils: ProcessUtils(
-                  processManager: FakeProcessManager.empty(),
-                  logger: logger,
-                ),
-              ),
+              toolContext: toolContext,
             );
             expect(cocoaPods.processedPods, isFalse);
           },
@@ -494,15 +406,7 @@ void main() {
               BuildMode.debug,
               cocoaPods: cocoaPods,
               templateRenderer: const MustacheTemplateRenderer(),
-              toolContext: DelegatingToolContext(
-                config: Config.test(),
-                fs: fs,
-                logger: logger,
-                processUtils: ProcessUtils(
-                  processManager: FakeProcessManager.empty(),
-                  logger: logger,
-                ),
-              ),
+              toolContext: toolContext,
             );
             expect(cocoaPods.processedPods, isFalse);
           },
@@ -530,15 +434,7 @@ void main() {
               BuildMode.debug,
               cocoaPods: cocoaPods,
               templateRenderer: const MustacheTemplateRenderer(),
-              toolContext: DelegatingToolContext(
-                config: Config.test(),
-                fs: fs,
-                logger: logger,
-                processUtils: ProcessUtils(
-                  processManager: FakeProcessManager.empty(),
-                  logger: logger,
-                ),
-              ),
+              toolContext: toolContext,
             );
             expect(cocoaPods.processedPods, isTrue);
           },
@@ -563,15 +459,7 @@ void main() {
               BuildMode.debug,
               cocoaPods: cocoaPods,
               templateRenderer: const MustacheTemplateRenderer(),
-              toolContext: DelegatingToolContext(
-                config: Config.test(),
-                fs: fs,
-                logger: logger,
-                processUtils: ProcessUtils(
-                  processManager: FakeProcessManager.empty(),
-                  logger: logger,
-                ),
-              ),
+              toolContext: toolContext,
             );
             expect(cocoaPods.processedPods, isFalse);
           },
@@ -598,15 +486,7 @@ void main() {
               BuildMode.debug,
               cocoaPods: cocoaPods,
               templateRenderer: const MustacheTemplateRenderer(),
-              toolContext: DelegatingToolContext(
-                config: Config.test(),
-                fs: fs,
-                logger: logger,
-                processUtils: ProcessUtils(
-                  processManager: FakeProcessManager.empty(),
-                  logger: logger,
-                ),
-              ),
+              toolContext: toolContext,
               forceCocoaPodsOnly: true,
             );
             expect(cocoaPods.processedPods, isTrue);

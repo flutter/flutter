@@ -267,8 +267,8 @@ class AssembleCommand extends FlutterCommand {
     final ToolContext(
       :Artifacts artifacts,
       :Cache cache,
-      :FlutterVersion flutterVersion,
       :FileSystem fs,
+      :FlutterVersion flutterVersion,
       :Logger logger,
       :Platform platform,
       :ProcessManager processManager,

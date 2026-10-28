@@ -189,6 +189,7 @@ class DarwinDependencyManagement {
     final List<Plugin> filteredPlugins = resolvePluginImplementationsForPlatform(
       plugins,
       platform.pluginConfigKey,
+      logger: logger,
       quiet: true,
     );
     for (final plugin in filteredPlugins) {

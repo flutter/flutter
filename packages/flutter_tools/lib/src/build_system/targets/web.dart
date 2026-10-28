@@ -14,12 +14,14 @@ import '../../base/common.dart';
 import '../../base/file_system.dart';
 import '../../base/logger.dart';
 import '../../base/process.dart';
+import '../../base/template.dart';
 import '../../build_info.dart';
 import '../../convert.dart';
 import '../../dart/language_version.dart';
 import '../../dart/package_map.dart';
 import '../../features.dart';
 import '../../flutter_plugins.dart';
+import '../../isolated/mustache_template.dart';
 import '../../isolated/native_assets/dart_hook_result.dart';
 import '../../project.dart';
 import '../../web/bootstrap.dart';
@@ -48,7 +50,9 @@ const String _kLegacyWebDeprecationWarning =
 /// Generates an entry point for a web target.
 // Keep this in sync with build_runner/resident_web_runner.dart
 class WebEntrypointTarget extends Target {
-  const WebEntrypointTarget();
+  const WebEntrypointTarget({this.templateRenderer = const MustacheTemplateRenderer()});
+
+  final TemplateRenderer templateRenderer;
 
   @override
   String get name => 'web_entrypoint';
@@ -103,6 +107,8 @@ class WebEntrypointTarget extends Target {
     await injectBuildTimePluginFilesForWebPlatform(
       flutterProject,
       destination: environment.buildDir,
+      logger: environment.logger,
+      templateRenderer: templateRenderer,
     );
     // The below works because `injectBuildTimePluginFiles` is configured to write
     // the web_plugin_registrant.dart file alongside the generated main.dart

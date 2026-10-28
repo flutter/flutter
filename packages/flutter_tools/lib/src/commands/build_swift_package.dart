@@ -533,6 +533,7 @@ class FlutterPluginRegistrantSwiftPackage {
     required Directory sourceDirectory,
     required List<Plugin> plugins,
   }) async {
+    final Logger logger = _utils.toolContext.logger;
     ErrorHandlingFileSystem.deleteIfExists(
       sourceDirectory.childDirectory(kPluginSwiftPackageName),
       recursive: true,
@@ -545,6 +546,7 @@ class FlutterPluginRegistrantSwiftPackage {
         await writeIOSPluginRegistrant(
           _utils.project,
           plugins,
+          logger: logger,
           swiftPluginRegistrant: swiftFile,
           templateRenderer: _utils.templateRenderer,
         );
@@ -552,6 +554,7 @@ class FlutterPluginRegistrantSwiftPackage {
         await writeMacOSPluginRegistrant(
           _utils.project,
           plugins,
+          logger: logger,
           pluginRegistrantImplementation: swiftFile,
           templateRenderer: _utils.templateRenderer,
           // The registrant needs to be public to be accessible in the app, since it's within a
@@ -1516,6 +1519,7 @@ class CocoaPodPluginDependencies {
         await writeIOSPluginRegistrant(
           _utils.project,
           [],
+          logger: logger,
           templateRenderer: _utils.templateRenderer,
         );
       }

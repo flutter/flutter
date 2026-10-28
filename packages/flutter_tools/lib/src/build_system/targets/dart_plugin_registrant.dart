@@ -6,9 +6,11 @@ import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 
 import '../../base/file_system.dart';
+import '../../base/template.dart';
 import '../../build_info.dart';
 import '../../dart/package_map.dart';
 import '../../flutter_plugins.dart';
+import '../../isolated/mustache_template.dart';
 import '../../project.dart';
 import '../build_system.dart';
 
@@ -16,15 +18,19 @@ import '../build_system.dart';
 /// based on the current dependency map in `pubspec.lock`.
 class DartPluginRegistrantTarget extends Target {
   /// Construct a [DartPluginRegistrantTarget].
-  const DartPluginRegistrantTarget() : _project = null;
+  const DartPluginRegistrantTarget({this.templateRenderer = const MustacheTemplateRenderer()})
+    : _project = null;
 
-  /// Construct a [DartPluginRegistrantTarget].
-  ///
-  /// If `project` is unset, a [FlutterProject] based on environment is used.
+  /// Construct a [DartPluginRegistrantTarget] that uses [project] instead of
+  /// resolving a [FlutterProject] from the build [Environment].
   @visibleForTesting
-  const DartPluginRegistrantTarget.test(FlutterProject project) : _project = project;
+  const DartPluginRegistrantTarget.test(
+    FlutterProject project, {
+    this.templateRenderer = const MustacheTemplateRenderer(),
+  }) : _project = project;
 
   final FlutterProject? _project;
+  final TemplateRenderer templateRenderer;
 
   @override
   Future<void> build(Environment environment) async {
@@ -44,6 +50,8 @@ class DartPluginRegistrantTarget extends Target {
       packageConfig,
       mainFile,
       flutterRoot: environment.flutterRootDir.path,
+      logger: environment.logger,
+      templateRenderer: templateRenderer,
     );
   }
 
