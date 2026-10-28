@@ -3,6 +3,7 @@
 # found in the LICENSE file.
 
 # Generated from //flutter/shell/platform/darwin/BUILD.gn by gn_to_bazel; do not edit.
+# Dependencies left out, their packages not converted yet (a platform the migration has not reached): //flutter/shell/platform/darwin/ios:flutter_framework.
 
 package(default_visibility = ["//visibility:public"])
 

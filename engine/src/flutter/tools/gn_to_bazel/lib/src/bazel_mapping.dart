@@ -1138,6 +1138,12 @@ final Map<String, String> conditionSettings = Map<String, String>.unmodifiable(<
   'is_wasm': '@platforms//os:emscripten',
   'is_win': '@platforms//os:windows',
   'is_debug': '//engine/src/flutter/build/bazel:unoptimized',
+  // darwin_sdk.gni's use_ios_simulator (tools/gn --simulator; ios_use_simulator
+  // is Skia's alias): the iOS platforms' environment constraint
+  // (build/bazel:ios_environment), which holds on iOS alone -- as GN reads
+  // it: the engine's files test it under is_ios.
+  'use_ios_simulator': '//engine/src/flutter/build/bazel:ios_simulator_enabled',
+  'ios_use_simulator': '//engine/src/flutter/build/bazel:ios_simulator_enabled',
   'slimpeller': '//engine/src/flutter/common:slimpeller_enabled',
   // GN's `current_toolchain == host_toolchain` with neither toolchain
   // assumed (gn_eval's hostToolchainPredicate): the OSes a host runs.
@@ -1215,6 +1221,9 @@ final Map<String, String> negatedSettings = Map<String, String>.unmodifiable(<St
   'is_qnx': '//engine/src/flutter/build/bazel:not_qnx',
   'is_wasm': '//engine/src/flutter/build/bazel:not_wasm',
   'is_win': '//engine/src/flutter/build/bazel:not_win',
+  // Not the simulator: a device, or not iOS at all.
+  'use_ios_simulator': '//engine/src/flutter/build/bazel:ios_simulator_disabled',
+  'ios_use_simulator': '//engine/src/flutter/build/bazel:ios_simulator_disabled',
   // The host's own build, denied: the OSes only a target runs.
   'is_host_toolchain': '//engine/src/flutter/build/bazel:not_host_toolchain',
   'use_flutter_cxx': '//engine/src/flutter/build/bazel:not_flutter_cxx',
@@ -1595,14 +1604,30 @@ const Set<String> knownExternalVariables = <String>{
   'mac_swift_lib_paths',
   'mac_platform_path',
   'mac_testing_deployment_target',
+  // ... and iOS's: the Swift library directories (flutter_swift_library's
+  // to supply, as the Mac's), the simulator predicate (and Skia's alias of
+  // it; conditionSettings), and the platform and SDK paths per
+  // environment -- ios_platform_path and ios_sdk_path are assumed as a
+  // reference per case of use_ios_simulator (generationAssumptions), each
+  // a constant of @macos_sdk.
+  'ios_swift_lib_paths',
+  'use_ios_simulator',
+  'ios_use_simulator',
+  'ios_simulator_platform_path',
+  'ios_device_platform_path',
+  'ios_simulator_sdk_path',
+  'ios_device_sdk_path',
 };
 
-/// darwin_sdk.gni's mac_swift_lib_paths: the one GN variable `lib_dirs` may
-/// hold -- the SDK's and the toolchain's Swift library directories, which
-/// flutter_swift_library's objects carry as link flags
-/// (build_defs/cc/swift_library.bzl's MACOS_SWIFT_LIBRARY_DIRS), so the
-/// emitter drops the listing.
-const String swiftLibraryDirsVariable = 'mac_swift_lib_paths';
+/// darwin_sdk.gni's mac_swift_lib_paths and ios_swift_lib_paths: the GN
+/// variables `lib_dirs` may hold -- the SDK's and the toolchain's Swift
+/// library directories, which flutter_swift_library's objects carry as link
+/// flags (build_defs/cc/swift_library.bzl's MACOS_SWIFT_LIBRARY_DIRS, and
+/// iOS's per environment), so the emitter drops the listing.
+const Set<String> swiftLibraryDirsVariables = <String>{
+  'mac_swift_lib_paths',
+  'ios_swift_lib_paths',
+};
 
 /// A Starlark constant the Bazel side keeps for a GN variable the converter
 /// does not evaluate: the symbol and the `.bzl` file that defines it.
@@ -1741,11 +1766,18 @@ const Map<String, DirectorySource> directorySources = <String, DirectorySource>{
 const Map<String, ReferenceConstant> referenceConstants = <String, ReferenceConstant>{
   'flutter_cflags_objc': ReferenceConstant(_coptsBzl, 'FLUTTER_CFLAGS_OBJC'),
   // darwin_sdk.gni's paths of the host's Xcode (see knownExternalVariables).
-  swiftLibraryDirsVariable: ReferenceConstant(
+  'mac_swift_lib_paths': ReferenceConstant(
     '//build_defs/cc:swift_library.bzl',
     'MACOS_SWIFT_LIBRARY_DIRS',
   ),
   'mac_platform_path': ReferenceConstant('@macos_sdk//:sdk.bzl', 'MACOS_PLATFORM_PATH'),
+  'ios_simulator_platform_path': ReferenceConstant(
+    '@macos_sdk//:sdk.bzl',
+    'IPHONESIMULATOR_PLATFORM_PATH',
+  ),
+  'ios_device_platform_path': ReferenceConstant('@macos_sdk//:sdk.bzl', 'IPHONEOS_PLATFORM_PATH'),
+  'ios_simulator_sdk_path': ReferenceConstant('@macos_sdk//:sdk.bzl', 'IPHONESIMULATOR_SDK_PATH'),
+  'ios_device_sdk_path': ReferenceConstant('@macos_sdk//:sdk.bzl', 'IPHONEOS_SDK_PATH'),
   'flutter_cflags_objcc': ReferenceConstant(_coptsBzl, 'FLUTTER_CFLAGS_OBJCC'),
   'feature_defines_list': ReferenceConstant(_coptsBzl, 'FLUTTER_FEATURE_DEFINES'),
   'engine_version': ReferenceConstant(_versionBzl, 'ENGINE_VERSION'),
@@ -2477,12 +2509,44 @@ const GnCasedValue _skiaGlStandard = GnCasedValue('target_os', <String, String>{
 /// passes the same or none, and as a formula over the OS where the two
 /// builds differ ([perTargetOsArguments]).
 /// The Apple platforms as a condition: BUILDCONFIG.gn's `is_apple`
-/// (`is_ios || is_mac`), which is is_mac while iOS is not built
-/// ([generationAssumptions] keeps is_ios false). Where a thing exists on the
+/// (`is_ios || is_mac`), both conditions since the iOS port's converter
+/// flip (10-27; is_mac's since the macOS port). Where a thing exists on the
 /// Apple platforms alone whatever its listing says -- an Objective-C
 /// compile, which GN's other toolchains have no tool for and skip -- this is
 /// its compatibility.
-const Condition applePlatforms = ConditionVariable('is_mac');
+final Condition applePlatforms = const ConditionVariable('is_ios')
+    .or(const ConditionVariable('is_mac'));
+
+/// darwin_sdk.gni's iOS arguments and derivations, as the generation scope
+/// (and the host's, for the tests' invariant) assumes them: the deployment
+/// targets (declare_args defaults tools/gn leaves alone); the paths of the
+/// iOS platform and SDK in use -- the simulator's or the device's by
+/// use_ios_simulator, each a constant of @macos_sdk (referenceConstants);
+/// and the Swift target triple's parts, the CPU's name (`x86_64` for x64)
+/// and `-simulator` on the simulator.
+const Map<String, GnValue> _iosSdkAssumptions = <String, GnValue>{
+  'ios_deployment_target': GnStringValue('15.0'),
+  'ios_testing_deployment_target': GnStringValue('15.0'),
+  'ios_platform_path': GnPredicateCases(
+    'use_ios_simulator',
+    whenTrue: GnReference('ios_simulator_platform_path'),
+    whenFalse: GnReference('ios_device_platform_path'),
+  ),
+  'ios_sdk_path': GnPredicateCases(
+    'use_ios_simulator',
+    whenTrue: GnReference('ios_simulator_sdk_path'),
+    whenFalse: GnReference('ios_device_sdk_path'),
+  ),
+  'darwin_target_arch': GnCasedValue('current_cpu', <String, String>{
+    'arm64': 'arm64',
+    'x64': 'x86_64',
+  }),
+  'darwin_target_sim': GnPredicateCases(
+    'use_ios_simulator',
+    whenTrue: GnStringValue('-simulator'),
+    whenFalse: GnStringValue(''),
+  ),
+};
 
 Assumptions generationAssumptions() {
   const isWasm = ConditionVariable('is_wasm');
@@ -2492,19 +2556,24 @@ Assumptions generationAssumptions() {
     'host_cpu': const GnStringValue('x64'),
     'host_os': const GnStringValue('linux'),
     // Not here: is_mac, a condition since the macOS port (10-26,
-    // research/20): the macOS platform selects its branches, as Android's
-    // and the web's do theirs. iOS is not built yet, so is_ios stays a
-    // constant and `is_mac || is_ios` reads as is_mac -- as does is_apple,
-    // BUILDCONFIG.gn's `is_ios || is_mac`, which the scope does not
-    // evaluate and so spells here ([applePlatforms]).
-    'is_apple': const GnConditionValue(applePlatforms),
+    // research/20), and is_ios since the iOS port's (10-27, research/21):
+    // the macOS and iOS platforms select their branches, as Android's and
+    // the web's do theirs. is_apple is BUILDCONFIG.gn's `is_ios || is_mac`,
+    // which the scope does not evaluate and so spells here
+    // ([applePlatforms]).
+    'is_apple': GnConditionValue(applePlatforms),
     // darwin_sdk.gni's mac_testing_deployment_target (its default), read
-    // by darwin/common's test configs.
+    // by darwin/common's test configs; iOS's deployment targets the same
+    // (its declare_args defaults, which tools/gn leaves alone).
     'mac_testing_deployment_target': const GnStringValue('14.0'),
+    ..._iosSdkAssumptions,
     'is_component_build': const GnBoolValue(false),
     'is_fuchsia': const GnBoolValue(false),
-    'is_ios': const GnBoolValue(false),
-    // testing.gni: `is_ios && flutter_runtime_mode == "debug"`.
+    // testing.gni: `is_ios && flutter_runtime_mode == "debug"` -- the
+    // XCTest suites of the iOS embedding (ios_test_flutter, run through a
+    // simulator by run_tests.py), which the iOS port's test phase takes up
+    // (research/21 §3, I3); until then the iOS builds have no unit tests,
+    // as the device and release builds have none in GN.
     'enable_ios_unittests': const GnBoolValue(false),
     'is_minimal_linux': const GnBoolValue(false),
     'is_official_build': const GnBoolValue(true),
@@ -2663,6 +2732,7 @@ Assumptions linuxHostAssumptions() {
     'is_linux': GnBoolValue(true),
     'is_mac': GnBoolValue(false),
     'mac_testing_deployment_target': GnStringValue('14.0'),
+    ..._iosSdkAssumptions,
     // BUILDCONFIG.gn's default; tools/gn sets it only for the Dart SDK's
     // own configuration (the wrap's args).
     'is_minimal_linux': GnBoolValue(false),

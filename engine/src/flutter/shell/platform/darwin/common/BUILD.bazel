@@ -27,8 +27,8 @@ cc_library(
     name = "test_config",
     linkopts = [
         "-mmacosx-version-min=14.0",  # !(is_ios) && is_mac
-        "-F" + MACOS_PLATFORM_PATH + "/Developer/Library/Frameworks",
-        "-L" + MACOS_PLATFORM_PATH + "/Developer/usr/lib",
+        "-F" + MACOS_PLATFORM_PATH + "/Developer/Library/Frameworks",  # !(is_ios) && is_mac
+        "-L" + MACOS_PLATFORM_PATH + "/Developer/usr/lib",  # !(is_ios) && is_mac
     ],
     target_compatible_with = select({
         "@platforms//os:macos": [],
@@ -40,8 +40,8 @@ cc_library(
 cc_library(
     name = "swift_testing_config",
     linkopts = [
-        "-F" + MACOS_PLATFORM_PATH + "/Developer/Library/Frameworks",
-        "-Wl,-rpath," + MACOS_PLATFORM_PATH + "/Developer/Library/Frameworks",
+        "-F" + MACOS_PLATFORM_PATH + "/Developer/Library/Frameworks",  # !(is_ios) && is_mac
+        "-Wl,-rpath," + MACOS_PLATFORM_PATH + "/Developer/Library/Frameworks",  # !(is_ios) && is_mac
         "-framework",
         "Testing",
     ],
@@ -354,8 +354,8 @@ flutter_swift_library(
     includes = ["."],
     linkopts = [
         "-mmacosx-version-min=14.0",  # !(is_ios) && is_mac
-        "-F" + MACOS_PLATFORM_PATH + "/Developer/Library/Frameworks",
-        "-L" + MACOS_PLATFORM_PATH + "/Developer/usr/lib",
+        "-F" + MACOS_PLATFORM_PATH + "/Developer/Library/Frameworks",  # !(is_ios) && is_mac
+        "-L" + MACOS_PLATFORM_PATH + "/Developer/usr/lib",  # !(is_ios) && is_mac
     ],
     swiftflags = select({
         ":when_is_mac_and_enable_unittests": [
@@ -363,8 +363,8 @@ flutter_swift_library(
         ],
         "//conditions:default": [],
     }) + [
-        "-F" + MACOS_PLATFORM_PATH + "/Developer/Library/Frameworks",
-        "-I" + MACOS_PLATFORM_PATH + "/Developer/usr/lib",
+        "-F" + MACOS_PLATFORM_PATH + "/Developer/Library/Frameworks",  # !(is_ios) && is_mac
+        "-I" + MACOS_PLATFORM_PATH + "/Developer/usr/lib",  # !(is_ios) && is_mac
     ],
     target_compatible_with = select({
         "@platforms//os:macos": [],
@@ -388,10 +388,10 @@ flutter_swift_library(
     includes = ["."],
     linkopts = [
         "-mmacosx-version-min=14.0",  # !(is_ios) && is_mac
-        "-F" + MACOS_PLATFORM_PATH + "/Developer/Library/Frameworks",
-        "-L" + MACOS_PLATFORM_PATH + "/Developer/usr/lib",
-        "-F" + MACOS_PLATFORM_PATH + "/Developer/Library/Frameworks",
-        "-Wl,-rpath," + MACOS_PLATFORM_PATH + "/Developer/Library/Frameworks",
+        "-F" + MACOS_PLATFORM_PATH + "/Developer/Library/Frameworks",  # !(is_ios) && is_mac
+        "-L" + MACOS_PLATFORM_PATH + "/Developer/usr/lib",  # !(is_ios) && is_mac
+        "-F" + MACOS_PLATFORM_PATH + "/Developer/Library/Frameworks",  # !(is_ios) && is_mac
+        "-Wl,-rpath," + MACOS_PLATFORM_PATH + "/Developer/Library/Frameworks",  # !(is_ios) && is_mac
         "-framework",
         "Testing",
     ],
@@ -401,8 +401,8 @@ flutter_swift_library(
         ],
         "//conditions:default": [],
     }) + [
-        "-F" + MACOS_PLATFORM_PATH + "/Developer/Library/Frameworks",
-        "-I" + MACOS_PLATFORM_PATH + "/Developer/usr/lib",
+        "-F" + MACOS_PLATFORM_PATH + "/Developer/Library/Frameworks",  # !(is_ios) && is_mac
+        "-I" + MACOS_PLATFORM_PATH + "/Developer/usr/lib",  # !(is_ios) && is_mac
     ],
     target_compatible_with = select({
         "@platforms//os:macos": [],
@@ -428,8 +428,8 @@ flutter_swift_library(
         ],
         "//conditions:default": [],
     }) + [
-        "-F" + MACOS_PLATFORM_PATH + "/Developer/Library/Frameworks",
-        "-I" + MACOS_PLATFORM_PATH + "/Developer/usr/lib",
+        "-F" + MACOS_PLATFORM_PATH + "/Developer/Library/Frameworks",  # !(is_ios) && is_mac
+        "-I" + MACOS_PLATFORM_PATH + "/Developer/usr/lib",  # !(is_ios) && is_mac
     ],
     target_compatible_with = select({
         "@platforms//os:macos": [],
@@ -453,12 +453,10 @@ cc_test(
     # Add platform lib to search path for test libraries/Swift modules.
     copts = FLUTTER_COPTS + [
         "-fvisibility=default",  # from :swift_testing_main
+        "-fvisibility=default",
+        "-mmacosx-version-min=14.0",  # from :swift_testing_main
         "-F" + MACOS_PLATFORM_PATH + "/Developer/Library/Frameworks",  # from :swift_testing_main
         "-I" + MACOS_PLATFORM_PATH + "/Developer/usr/lib",  # from :swift_testing_main
-        "-fvisibility=default",
-        "-F" + MACOS_PLATFORM_PATH + "/Developer/Library/Frameworks",
-        "-I" + MACOS_PLATFORM_PATH + "/Developer/usr/lib",
-        "-mmacosx-version-min=14.0",  # from :swift_testing_main
     ],
     local_defines = FLUTTER_LOCAL_DEFINES,
     target_compatible_with = select({
@@ -496,10 +494,10 @@ flutter_objc_library(
     copts = FLUTTER_COPTS + [
         "-Wno-inconsistent-missing-override",  # from //flutter/testing
         "-fvisibility=default",
-        "-F" + MACOS_PLATFORM_PATH + "/Developer/Library/Frameworks",
-        "-I" + MACOS_PLATFORM_PATH + "/Developer/usr/lib",
         "-Wno-unguarded-availability",  # from //flutter/testing
         "-mmacosx-version-min=14.0",  # !(is_ios) && is_mac
+        "-F" + MACOS_PLATFORM_PATH + "/Developer/Library/Frameworks",  # !(is_ios) && is_mac
+        "-I" + MACOS_PLATFORM_PATH + "/Developer/usr/lib",  # !(is_ios) && is_mac
     ] + MACOS_CFLAGS_OBJC,
     local_defines = FLUTTER_LOCAL_DEFINES,
     target_compatible_with = select({
@@ -532,16 +530,16 @@ cc_test(
     copts = FLUTTER_COPTS + [
         "-Wno-inconsistent-missing-override",  # from //flutter/testing
         "-fvisibility=default",
-        "-F" + MACOS_PLATFORM_PATH + "/Developer/Library/Frameworks",
-        "-I" + MACOS_PLATFORM_PATH + "/Developer/usr/lib",
         "-Wno-unguarded-availability",  # from //flutter/testing
         "-mmacosx-version-min=14.0",  # !(is_ios) && is_mac
+        "-F" + MACOS_PLATFORM_PATH + "/Developer/Library/Frameworks",  # !(is_ios) && is_mac
+        "-I" + MACOS_PLATFORM_PATH + "/Developer/usr/lib",  # !(is_ios) && is_mac
     ],
     linkopts = [
         "-ObjC",
         "-mmacosx-version-min=14.0",  # !(is_ios) && is_mac
-        "-F" + MACOS_PLATFORM_PATH + "/Developer/Library/Frameworks",
-        "-L" + MACOS_PLATFORM_PATH + "/Developer/usr/lib",
+        "-F" + MACOS_PLATFORM_PATH + "/Developer/Library/Frameworks",  # !(is_ios) && is_mac
+        "-L" + MACOS_PLATFORM_PATH + "/Developer/usr/lib",  # !(is_ios) && is_mac
     ],
     local_defines = FLUTTER_LOCAL_DEFINES,
     target_compatible_with = select({

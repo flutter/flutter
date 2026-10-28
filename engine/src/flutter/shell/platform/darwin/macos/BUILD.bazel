@@ -190,7 +190,7 @@ flutter_objc_library(
     }) + [
         "-Wno-unguarded-availability",  # from :macos_gpu_configuration
     ] + select({
-        ":when_impeller_enable_opengles_and_is_mac": [
+        ":when_impeller_enable_opengles_and_is_mac_or_is_ios": [
             "-Wno-unguarded-availability",  # from :macos_gpu_configuration
         ],
         "//conditions:default": [],
@@ -208,7 +208,7 @@ flutter_objc_library(
         ],
         "//conditions:default": [],
     }) + select({
-        ":when_impeller_enable_metal_and_is_mac": [
+        ":when_impeller_enable_metal_and_is_mac_or_is_ios": [
             "-Wno-unguarded-availability",  # from :macos_gpu_configuration
         ],
         "//conditions:default": [],
@@ -311,7 +311,7 @@ cc_library(
         ],
         "//conditions:default": [],
     }) + select({
-        ":when_impeller_enable_opengles_and_is_mac": [
+        ":when_impeller_enable_opengles_and_is_mac_or_is_ios": [
             "-Wno-unguarded-availability",  # from :macos_gpu_configuration
         ],
         "//conditions:default": [],
@@ -329,7 +329,7 @@ cc_library(
         ],
         "//conditions:default": [],
     }) + select({
-        ":when_impeller_enable_metal_and_is_mac": [
+        ":when_impeller_enable_metal_and_is_mac_or_is_ios": [
             "-Wno-unguarded-availability",  # from :macos_gpu_configuration
         ],
         "//conditions:default": [],
@@ -432,8 +432,8 @@ flutter_swift_library(
         ],
         "//conditions:default": [],
     }) + [
-        "-F" + MACOS_PLATFORM_PATH + "/Developer/Library/Frameworks",
-        "-I" + MACOS_PLATFORM_PATH + "/Developer/usr/lib",
+        "-F" + MACOS_PLATFORM_PATH + "/Developer/Library/Frameworks",  # !(is_ios) && is_mac
+        "-I" + MACOS_PLATFORM_PATH + "/Developer/usr/lib",  # !(is_ios) && is_mac
     ],
     target_compatible_with = select({
         "@platforms//os:macos": [],
@@ -457,12 +457,10 @@ cc_test(
     # Add platform lib to search path for test libraries/Swift modules.
     copts = FLUTTER_COPTS + [
         "-fvisibility=default",  # from //flutter/shell/platform/darwin/common:swift_testing_main
+        "-fvisibility=default",
+        "-mmacosx-version-min=14.0",  # from //flutter/shell/platform/darwin/common:swift_testing_main
         "-F" + MACOS_PLATFORM_PATH + "/Developer/Library/Frameworks",  # from //flutter/shell/platform/darwin/common:swift_testing_main
         "-I" + MACOS_PLATFORM_PATH + "/Developer/usr/lib",  # from //flutter/shell/platform/darwin/common:swift_testing_main
-        "-fvisibility=default",
-        "-F" + MACOS_PLATFORM_PATH + "/Developer/Library/Frameworks",
-        "-I" + MACOS_PLATFORM_PATH + "/Developer/usr/lib",
-        "-mmacosx-version-min=14.0",  # from //flutter/shell/platform/darwin/common:swift_testing_main
     ],
     local_defines = FLUTTER_LOCAL_DEFINES,
     target_compatible_with = select({
@@ -521,10 +519,10 @@ flutter_objc_library(
     ],
     copts = FLUTTER_COPTS + [
         "-fvisibility=default",  # from //flutter/shell/platform/darwin/common:test_utils_swift
-        "-F" + MACOS_PLATFORM_PATH + "/Developer/Library/Frameworks",  # from //flutter/shell/platform/darwin/common:test_utils_swift
-        "-I" + MACOS_PLATFORM_PATH + "/Developer/usr/lib",  # from //flutter/shell/platform/darwin/common:test_utils_swift
         "-Wno-inconsistent-missing-override",  # from //flutter/testing
         "-mmacosx-version-min=14.0",  # from //flutter/shell/platform/darwin/common:test_utils_swift
+        "-F" + MACOS_PLATFORM_PATH + "/Developer/Library/Frameworks",  # from //flutter/shell/platform/darwin/common:test_utils_swift
+        "-I" + MACOS_PLATFORM_PATH + "/Developer/usr/lib",  # from //flutter/shell/platform/darwin/common:test_utils_swift
         "-Wno-unguarded-availability",  # from //flutter/shell/platform/darwin/graphics
     ] + select({
         "//engine/src/flutter/shell:enable_vulkan": [
@@ -576,10 +574,10 @@ cc_test(
     ],
     copts = FLUTTER_COPTS + [
         "-fvisibility=default",  # from //flutter/shell/platform/darwin/common:test_utils_swift
-        "-F" + MACOS_PLATFORM_PATH + "/Developer/Library/Frameworks",  # from //flutter/shell/platform/darwin/common:test_utils_swift
-        "-I" + MACOS_PLATFORM_PATH + "/Developer/usr/lib",  # from //flutter/shell/platform/darwin/common:test_utils_swift
         "-Wno-inconsistent-missing-override",  # from //flutter/testing
         "-mmacosx-version-min=14.0",  # from //flutter/shell/platform/darwin/common:test_utils_swift
+        "-F" + MACOS_PLATFORM_PATH + "/Developer/Library/Frameworks",  # from //flutter/shell/platform/darwin/common:test_utils_swift
+        "-I" + MACOS_PLATFORM_PATH + "/Developer/usr/lib",  # from //flutter/shell/platform/darwin/common:test_utils_swift
         "-Wno-unguarded-availability",  # from //flutter/shell/platform/darwin/graphics
     ] + select({
         "//engine/src/flutter/shell:enable_vulkan": [
@@ -968,12 +966,21 @@ selects.config_setting_group(
     ],
 )
 
-# `impeller_enable_opengles && is_mac`, for the select()s of this file.
+# `is_mac || is_ios`, for the select()s of this file.
 selects.config_setting_group(
-    name = "when_impeller_enable_opengles_and_is_mac",
+    name = "when_is_mac_or_is_ios",
+    match_any = [
+        "@platforms//os:macos",
+        "@platforms//os:ios",
+    ],
+)
+
+# `impeller_enable_opengles && (is_mac || is_ios)`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_impeller_enable_opengles_and_is_mac_or_is_ios",
     match_all = [
         "//engine/src/flutter/impeller/tools:opengles",
-        "@platforms//os:macos",
+        ":when_is_mac_or_is_ios",
     ],
 )
 
@@ -986,12 +993,12 @@ selects.config_setting_group(
     ],
 )
 
-# `impeller_enable_metal && is_mac`, for the select()s of this file.
+# `impeller_enable_metal && (is_mac || is_ios)`, for the select()s of this file.
 selects.config_setting_group(
-    name = "when_impeller_enable_metal_and_is_mac",
+    name = "when_impeller_enable_metal_and_is_mac_or_is_ios",
     match_all = [
         "//engine/src/flutter/impeller/tools:metal",
-        "@platforms//os:macos",
+        ":when_is_mac_or_is_ios",
     ],
 )
 

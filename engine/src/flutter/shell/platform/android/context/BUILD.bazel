@@ -17,6 +17,9 @@ cc_library(
         "@platforms//os:macos": [
             "-Wno-unguarded-availability",  # from //flutter/skia
         ],
+        "@platforms//os:ios": [
+            "-Wno-unguarded-availability",  # from //flutter/skia
+        ],
         "//conditions:default": [],
     }) + select({
         "//engine/src/flutter/shell:enable_vulkan": [

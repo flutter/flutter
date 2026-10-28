@@ -67,6 +67,9 @@ cc_library(
         "@platforms//os:macos": [
             "-Wno-unguarded-availability",  # from //flutter/flutter_vma:flutter_skia_vma
         ],
+        "@platforms//os:ios": [
+            "-Wno-unguarded-availability",  # from //flutter/flutter_vma:flutter_skia_vma
+        ],
         "//conditions:default": [],
     }),
     local_defines = FLUTTER_LOCAL_DEFINES,

@@ -39,6 +39,9 @@ cc_library(
         "@platforms//os:macos": [
             "-Wno-unguarded-availability",  # from //flutter/flow
         ],
+        "@platforms//os:ios": [
+            "-Wno-unguarded-availability",  # from //flutter/flow
+        ],
         "//conditions:default": [],
     }),
     local_defines = FLUTTER_LOCAL_DEFINES,
@@ -82,9 +85,12 @@ flutter_cc_test(
         "@platforms//os:macos": [
             "-Wno-unguarded-availability",  # from //flutter/flow
         ],
+        "@platforms//os:ios": [
+            "-Wno-unguarded-availability",  # from //flutter/flow
+        ],
         "//conditions:default": [],
     }) + select({
-        ":when_impeller_enable_opengles_and_is_mac": [
+        ":when_impeller_enable_opengles_and_is_mac_or_is_ios": [
             "-Wno-unguarded-availability",  # from //flutter/shell/gpu:gpu_surface_gl
         ],
         "//conditions:default": [],
@@ -119,12 +125,21 @@ flutter_cc_test(
     ],
 )
 
-# `impeller_enable_opengles && is_mac`, for the select()s of this file.
+# `is_mac || is_ios`, for the select()s of this file.
 selects.config_setting_group(
-    name = "when_impeller_enable_opengles_and_is_mac",
+    name = "when_is_mac_or_is_ios",
+    match_any = [
+        "@platforms//os:macos",
+        "@platforms//os:ios",
+    ],
+)
+
+# `impeller_enable_opengles && (is_mac || is_ios)`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_impeller_enable_opengles_and_is_mac_or_is_ios",
     match_all = [
         "//engine/src/flutter/impeller/tools:opengles",
-        "@platforms//os:macos",
+        ":when_is_mac_or_is_ios",
     ],
 )
 

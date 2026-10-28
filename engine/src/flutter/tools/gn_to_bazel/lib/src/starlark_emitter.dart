@@ -5378,7 +5378,7 @@ final class _Emitter {
   }
 
   /// `lib_dirs`: darwin_sdk.gni's Swift library directories
-  /// (swiftLibraryDirsVariable), which flutter_swift_library's objects
+  /// (swiftLibraryDirsVariables), which flutter_swift_library's objects
   /// carry as link flags wherever they link, so that listing is dropped;
   /// a directory outside the tree around a constant (test_config's
   /// `$mac_platform_path/Developer/usr/lib`) is the `-L<dir>` GN puts among
@@ -5388,14 +5388,15 @@ final class _Emitter {
     final _ListAttribute linkopts = rule.list('linkopts');
     _forEachItem(variable, into: linkopts, (_Element e) {
       final GnValue item = e.value;
-      if (item is GnReference && item.name == swiftLibraryDirsVariable) {
+      if (item is GnReference && swiftLibraryDirsVariables.contains(item.name)) {
         return;
       }
       if (item is! GnExpandedString) {
         throw GnError(
           e.assignment.location,
-          "lib_dirs holds $item; only darwin_sdk.gni's $swiftLibraryDirsVariable (which "
-          'flutter_swift_library carries), a directory around a constant, or nothing is converted',
+          "lib_dirs holds $item; only darwin_sdk.gni's ${swiftLibraryDirsVariables.join(' or ')} "
+          '(which flutter_swift_library carries), a directory around a constant, or nothing is '
+          'converted',
         );
       }
       linkopts.add(under.and(e.condition), _flagValueItem(_prefixed('-L', item), e));

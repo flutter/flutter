@@ -7,7 +7,7 @@
 load("@bazel_skylib//lib:selects.bzl", "selects")
 load("@rules_cc//cc:cc_static_library.bzl", "cc_static_library")
 load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library")
-load("//build_defs/cc:copts.bzl", "CHROMIUM_CODE_COPTS", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES", "MACOS_CFLAGS_OBJC")
+load("//build_defs/cc:copts.bzl", "CHROMIUM_CODE_COPTS", "FLUTTER_CFLAGS_OBJC", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES", "MACOS_CFLAGS_OBJC")
 load("//build_defs/cc:objc_library.bzl", "flutter_objc_library")
 load("//build_defs/cc:shared_library.bzl", "flutter_shared_library")
 load("//build_defs/dist:zip_bundle.bzl", "zip_bundle")
@@ -100,6 +100,9 @@ cc_library(
         "@platforms//os:macos": [
             "-Wno-unguarded-availability",  # from ../../display_list
         ],
+        "@platforms//os:ios": [
+            "-Wno-unguarded-availability",  # from ../../display_list
+        ],
         "//conditions:default": [],
     }) + select({
         "//engine/src/flutter/impeller/tools:vulkan": [
@@ -142,6 +145,9 @@ cc_library(
         "@platforms//os:macos": [
             "-Wno-unguarded-availability",  # from :interop_base
         ],
+        "@platforms//os:ios": [
+            "-Wno-unguarded-availability",  # from :interop_base
+        ],
         "//conditions:default": [],
     }) + select({
         "//engine/src/flutter/impeller/tools:vulkan": [
@@ -157,7 +163,7 @@ cc_library(
         ],
         "//conditions:default": [],
     }) + select({
-        ":when_impeller_enable_metal_and_is_mac": [
+        ":when_impeller_enable_metal_and_is_mac_or_is_ios": [
             "-Wno-unguarded-availability",  # from backend
         ],
         "//conditions:default": [],
@@ -175,7 +181,7 @@ cc_library(
         ],
         "//conditions:default": [],
     }) + select({
-        ":when_impeller_enable_opengles_and_is_mac": [
+        ":when_impeller_enable_opengles_and_is_mac_or_is_ios": [
             "-Wno-unguarded-availability",  # from backend
         ],
         "//conditions:default": [],
@@ -193,7 +199,7 @@ cc_library(
         ],
         "//conditions:default": [],
     }) + select({
-        ":when_impeller_enable_vulkan_and_is_mac": [
+        ":when_impeller_enable_vulkan_and_is_mac_or_is_ios": [
             "-Wno-unguarded-availability",  # from backend
         ],
         "//conditions:default": [],
@@ -242,6 +248,9 @@ cc_binary(
         "@platforms//os:macos": [
             "-Wno-unguarded-availability",  # from :interop
         ],
+        "@platforms//os:ios": [
+            "-Wno-unguarded-availability",  # from :interop
+        ],
         "//conditions:default": [],
     }) + select({
         "//engine/src/flutter/impeller/tools:vulkan": [
@@ -257,7 +266,7 @@ cc_binary(
         ],
         "//conditions:default": [],
     }) + select({
-        ":when_impeller_enable_metal_and_is_mac": [
+        ":when_impeller_enable_metal_and_is_mac_or_is_ios": [
             "-Wno-unguarded-availability",  # from :interop
         ],
         "//conditions:default": [],
@@ -275,7 +284,7 @@ cc_binary(
         ],
         "//conditions:default": [],
     }) + select({
-        ":when_impeller_enable_opengles_and_is_mac": [
+        ":when_impeller_enable_opengles_and_is_mac_or_is_ios": [
             "-Wno-unguarded-availability",  # from :interop
         ],
         "//conditions:default": [],
@@ -293,7 +302,7 @@ cc_binary(
         ],
         "//conditions:default": [],
     }) + select({
-        ":when_impeller_enable_vulkan_and_is_mac": [
+        ":when_impeller_enable_vulkan_and_is_mac_or_is_ios": [
             "-Wno-unguarded-availability",  # from :interop
         ],
         "//conditions:default": [],
@@ -324,6 +333,9 @@ flutter_objc_library(
         "@platforms//os:macos": [
             "-Wno-unguarded-availability",  # from :interop
         ],
+        "@platforms//os:ios": [
+            "-Wno-unguarded-availability",  # from :interop
+        ],
         "//conditions:default": [],
     }) + select({
         "//engine/src/flutter/impeller/tools:vulkan": [
@@ -339,7 +351,7 @@ flutter_objc_library(
         ],
         "//conditions:default": [],
     }) + select({
-        ":when_impeller_enable_metal_and_is_mac": [
+        ":when_impeller_enable_metal_and_is_mac_or_is_ios": [
             "-Wno-unguarded-availability",  # from :interop
         ],
         "//conditions:default": [],
@@ -357,7 +369,7 @@ flutter_objc_library(
         ],
         "//conditions:default": [],
     }) + select({
-        ":when_impeller_enable_opengles_and_is_mac": [
+        ":when_impeller_enable_opengles_and_is_mac_or_is_ios": [
             "-Wno-unguarded-availability",  # from :interop
         ],
         "//conditions:default": [],
@@ -375,16 +387,20 @@ flutter_objc_library(
         ],
         "//conditions:default": [],
     }) + select({
-        ":when_impeller_enable_vulkan_and_is_mac": [
+        ":when_impeller_enable_vulkan_and_is_mac_or_is_ios": [
             "-Wno-unguarded-availability",  # from :interop
         ],
         "//conditions:default": [],
     }) + select({
         "@platforms//os:macos": MACOS_CFLAGS_OBJC,
         "//conditions:default": [],
+    }) + select({
+        "@platforms//os:ios": FLUTTER_CFLAGS_OBJC,
+        "//conditions:default": [],
     }),
     local_defines = FLUTTER_LOCAL_DEFINES,
     target_compatible_with = select({
+        "@platforms//os:ios": [],
         "@platforms//os:macos": [],
         "//conditions:default": ["@platforms//:incompatible"],
     }),
@@ -405,6 +421,9 @@ cc_binary(
         "@platforms//os:macos": [
             "-Wno-unguarded-availability",  # from :interop
         ],
+        "@platforms//os:ios": [
+            "-Wno-unguarded-availability",  # from :interop
+        ],
         "//conditions:default": [],
     }) + select({
         "//engine/src/flutter/impeller/tools:vulkan": [
@@ -420,7 +439,7 @@ cc_binary(
         ],
         "//conditions:default": [],
     }) + select({
-        ":when_impeller_enable_metal_and_is_mac": [
+        ":when_impeller_enable_metal_and_is_mac_or_is_ios": [
             "-Wno-unguarded-availability",  # from :interop
         ],
         "//conditions:default": [],
@@ -438,7 +457,7 @@ cc_binary(
         ],
         "//conditions:default": [],
     }) + select({
-        ":when_impeller_enable_opengles_and_is_mac": [
+        ":when_impeller_enable_opengles_and_is_mac_or_is_ios": [
             "-Wno-unguarded-availability",  # from :interop
         ],
         "//conditions:default": [],
@@ -456,7 +475,7 @@ cc_binary(
         ],
         "//conditions:default": [],
     }) + select({
-        ":when_impeller_enable_vulkan_and_is_mac": [
+        ":when_impeller_enable_vulkan_and_is_mac_or_is_ios": [
             "-Wno-unguarded-availability",  # from :interop
         ],
         "//conditions:default": [],
@@ -467,6 +486,7 @@ cc_binary(
     ],
     local_defines = FLUTTER_LOCAL_DEFINES,
     target_compatible_with = select({
+        "@platforms//os:ios": [],
         "@platforms//os:macos": [],
         "//conditions:default": ["@platforms//:incompatible"],
     }),
@@ -493,6 +513,9 @@ cc_binary(
         "@platforms//os:macos": [
             "-Wno-unguarded-availability",  # from :interop
         ],
+        "@platforms//os:ios": [
+            "-Wno-unguarded-availability",  # from :interop
+        ],
         "//conditions:default": [],
     }) + select({
         "//engine/src/flutter/impeller/tools:vulkan": [
@@ -508,7 +531,7 @@ cc_binary(
         ],
         "//conditions:default": [],
     }) + select({
-        ":when_impeller_enable_metal_and_is_mac": [
+        ":when_impeller_enable_metal_and_is_mac_or_is_ios": [
             "-Wno-unguarded-availability",  # from :interop
         ],
         "//conditions:default": [],
@@ -526,7 +549,7 @@ cc_binary(
         ],
         "//conditions:default": [],
     }) + select({
-        ":when_impeller_enable_opengles_and_is_mac": [
+        ":when_impeller_enable_opengles_and_is_mac_or_is_ios": [
             "-Wno-unguarded-availability",  # from :interop
         ],
         "//conditions:default": [],
@@ -544,7 +567,7 @@ cc_binary(
         ],
         "//conditions:default": [],
     }) + select({
-        ":when_impeller_enable_vulkan_and_is_mac": [
+        ":when_impeller_enable_vulkan_and_is_mac_or_is_ios": [
             "-Wno-unguarded-availability",  # from :interop
         ],
         "//conditions:default": [],
@@ -600,6 +623,9 @@ cc_library(
         "@platforms//os:macos": [
             "-Wno-unguarded-availability",  # from :interop
         ],
+        "@platforms//os:ios": [
+            "-Wno-unguarded-availability",  # from :interop
+        ],
         "//conditions:default": [],
     }) + select({
         "//engine/src/flutter/impeller/tools:vulkan": [
@@ -615,7 +641,7 @@ cc_library(
         ],
         "//conditions:default": [],
     }) + select({
-        ":when_impeller_enable_metal_and_is_mac": [
+        ":when_impeller_enable_metal_and_is_mac_or_is_ios": [
             "-Wno-unguarded-availability",  # from :interop
         ],
         "//conditions:default": [],
@@ -633,7 +659,7 @@ cc_library(
         ],
         "//conditions:default": [],
     }) + select({
-        ":when_impeller_enable_opengles_and_is_mac": [
+        ":when_impeller_enable_opengles_and_is_mac_or_is_ios": [
             "-Wno-unguarded-availability",  # from :interop
         ],
         "//conditions:default": [],
@@ -651,7 +677,7 @@ cc_library(
         ],
         "//conditions:default": [],
     }) + select({
-        ":when_impeller_enable_vulkan_and_is_mac": [
+        ":when_impeller_enable_vulkan_and_is_mac_or_is_ios": [
             "-Wno-unguarded-availability",  # from :interop
         ],
         "//conditions:default": [],
@@ -741,6 +767,8 @@ zip_bundle(
         "//engine/src/flutter/common:platform_android_riscv64": "android-riscv64/impeller_sdk.zip",
         "//engine/src/flutter/common:platform_android_x64": "android-x64/impeller_sdk.zip",
         "//engine/src/flutter/common:platform_android_x86": "android-x86/impeller_sdk.zip",
+        "//engine/src/flutter/common:platform_ios_arm64": "ios-arm64/impeller_sdk.zip",
+        "//engine/src/flutter/common:platform_ios_x64": "ios-x64/impeller_sdk.zip",
         "//engine/src/flutter/common:platform_linux_arm64": "linux-arm64/impeller_sdk.zip",
         "//engine/src/flutter/common:platform_linux_x64": "linux-x64/impeller_sdk.zip",
         "//engine/src/flutter/common:platform_wasm_wasm": "wasm-wasm/impeller_sdk.zip",
@@ -776,12 +804,21 @@ zip_bundle(
     }),
 )
 
-# `impeller_enable_metal && is_mac`, for the select()s of this file.
+# `is_mac || is_ios`, for the select()s of this file.
 selects.config_setting_group(
-    name = "when_impeller_enable_metal_and_is_mac",
+    name = "when_is_mac_or_is_ios",
+    match_any = [
+        "@platforms//os:macos",
+        "@platforms//os:ios",
+    ],
+)
+
+# `impeller_enable_metal && (is_mac || is_ios)`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_impeller_enable_metal_and_is_mac_or_is_ios",
     match_all = [
         "//engine/src/flutter/impeller/tools:metal",
-        "@platforms//os:macos",
+        ":when_is_mac_or_is_ios",
     ],
 )
 
@@ -794,12 +831,12 @@ selects.config_setting_group(
     ],
 )
 
-# `impeller_enable_opengles && is_mac`, for the select()s of this file.
+# `impeller_enable_opengles && (is_mac || is_ios)`, for the select()s of this file.
 selects.config_setting_group(
-    name = "when_impeller_enable_opengles_and_is_mac",
+    name = "when_impeller_enable_opengles_and_is_mac_or_is_ios",
     match_all = [
         "//engine/src/flutter/impeller/tools:opengles",
-        "@platforms//os:macos",
+        ":when_is_mac_or_is_ios",
     ],
 )
 
@@ -812,11 +849,11 @@ selects.config_setting_group(
     ],
 )
 
-# `impeller_enable_vulkan && is_mac`, for the select()s of this file.
+# `impeller_enable_vulkan && (is_mac || is_ios)`, for the select()s of this file.
 selects.config_setting_group(
-    name = "when_impeller_enable_vulkan_and_is_mac",
+    name = "when_impeller_enable_vulkan_and_is_mac_or_is_ios",
     match_all = [
         "//engine/src/flutter/impeller/tools:vulkan",
-        "@platforms//os:macos",
+        ":when_is_mac_or_is_ios",
     ],
 )

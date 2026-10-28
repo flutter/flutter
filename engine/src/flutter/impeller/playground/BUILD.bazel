@@ -6,18 +6,27 @@
 
 load("@bazel_skylib//lib:selects.bzl", "selects")
 load("@rules_cc//cc:defs.bzl", "cc_library")
-load("//build_defs/cc:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES", "MACOS_CFLAGS_OBJC")
+load("//build_defs/cc:copts.bzl", "FLUTTER_CFLAGS_OBJC", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES", "MACOS_CFLAGS_OBJC")
 load("//build_defs/cc:objc_library.bzl", "flutter_objc_library")
 
 package(default_visibility = ["//visibility:public"])
 
-# `enable_unittests && impeller_enable_metal && is_mac`, for the select()s of this file.
+# `is_ios || is_mac`, for the select()s of this file.
 selects.config_setting_group(
-    name = "when_enable_unittests_and_impeller_enable_metal_and_is_mac",
+    name = "when_is_ios_or_is_mac",
+    match_any = [
+        "@platforms//os:ios",
+        "@platforms//os:macos",
+    ],
+)
+
+# `enable_unittests && impeller_enable_metal && (is_ios || is_mac)`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_enable_unittests_and_impeller_enable_metal_and_is_ios_or_is_mac",
     match_all = [
         "//engine/src/flutter/testing:unittests_enabled",
         "//engine/src/flutter/impeller/tools:metal",
-        "@platforms//os:macos",
+        ":when_is_ios_or_is_mac",
     ],
 )
 
@@ -62,6 +71,9 @@ flutter_objc_library(
         "@platforms//os:macos": [
             "-Wno-unguarded-availability",  # from ../entity
         ],
+        "@platforms//os:ios": [
+            "-Wno-unguarded-availability",  # from ../entity
+        ],
         "//conditions:default": [],
     }) + select({
         "//engine/src/flutter/impeller/tools:vulkan": [
@@ -79,10 +91,13 @@ flutter_objc_library(
     }) + select({
         "@platforms//os:macos": MACOS_CFLAGS_OBJC,
         "//conditions:default": [],
+    }) + select({
+        "@platforms//os:ios": FLUTTER_CFLAGS_OBJC,
+        "//conditions:default": [],
     }),
     local_defines = FLUTTER_LOCAL_DEFINES,
     target_compatible_with = select({
-        ":when_enable_unittests_and_impeller_enable_metal_and_is_mac": [],
+        ":when_enable_unittests_and_impeller_enable_metal_and_is_ios_or_is_mac": [],
         "//conditions:default": ["@platforms//:incompatible"],
     }),
     deps = [
@@ -175,6 +190,9 @@ cc_library(
         "-Wno-inconsistent-missing-override",  # from //flutter/testing:testing_lib
     ] + select({
         "@platforms//os:macos": [
+            "-Wno-unguarded-availability",  # from ../entity
+        ],
+        "@platforms//os:ios": [
             "-Wno-unguarded-availability",  # from ../entity
         ],
         "//conditions:default": [],
@@ -270,6 +288,9 @@ cc_library(
         "-Wno-inconsistent-missing-override",  # from :playground
     ] + select({
         "@platforms//os:macos": [
+            "-Wno-unguarded-availability",  # from :playground
+        ],
+        "@platforms//os:ios": [
             "-Wno-unguarded-availability",  # from :playground
         ],
         "//conditions:default": [],

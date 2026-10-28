@@ -83,6 +83,9 @@ cc_library(
         "@platforms//os:macos": [
             "-Wno-unguarded-availability",  # from //flutter/display_list
         ],
+        "@platforms//os:ios": [
+            "-Wno-unguarded-availability",  # from //flutter/display_list
+        ],
         "//conditions:default": [],
     }),
     local_defines = FLUTTER_LOCAL_DEFINES,
@@ -142,6 +145,9 @@ cc_library(
         "@platforms//os:macos": [
             "-Wno-unguarded-availability",  # from :testing_lib
         ],
+        "@platforms//os:ios": [
+            "-Wno-unguarded-availability",  # from :testing_lib
+        ],
         "//conditions:default": [],
     }) + select({
         "//engine/src/flutter/shell:enable_vulkan": [
@@ -175,6 +181,9 @@ cc_library(
         "-Wno-inconsistent-missing-override",  # from :testing_lib
     ] + select({
         "@platforms//os:macos": [
+            "-Wno-unguarded-availability",  # from :testing_lib
+        ],
+        "@platforms//os:ios": [
             "-Wno-unguarded-availability",  # from :testing_lib
         ],
         "//conditions:default": [],
@@ -218,6 +227,9 @@ cc_library(
         "@platforms//os:macos": [
             "-Wno-unguarded-availability",  # from :dart
         ],
+        "@platforms//os:ios": [
+            "-Wno-unguarded-availability",  # from :dart
+        ],
         "//conditions:default": [],
     }) + select({
         "//engine/src/flutter/shell:enable_vulkan": [
@@ -247,6 +259,7 @@ cc_library(
     hdrs = ["autoreleasepool_test.h"],
     target_compatible_with = select({
         "@platforms//os:macos": [],
+        "@platforms//os:ios": [],
         "//conditions:default": ["@platforms//:incompatible"],
     }),
     deps = [
@@ -284,6 +297,9 @@ cc_library(
         "-Wno-shadow",  # from //flutter/third_party/swiftshader:swiftshader_config
     ] + select({
         "@platforms//os:macos": [
+            "-Wno-unguarded-availability",  # from :skia
+        ],
+        "@platforms//os:ios": [
             "-Wno-unguarded-availability",  # from :skia
         ],
         "//conditions:default": [],
@@ -328,11 +344,20 @@ flutter_test_fixtures(
     }),
 )
 
-# `is_mac && shell_enable_metal`, for the select()s of this file.
+# `is_mac || is_ios`, for the select()s of this file.
 selects.config_setting_group(
-    name = "when_is_mac_and_shell_enable_metal",
-    match_all = [
+    name = "when_is_mac_or_is_ios",
+    match_any = [
         "@platforms//os:macos",
+        "@platforms//os:ios",
+    ],
+)
+
+# `(is_mac || is_ios) && shell_enable_metal`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_is_mac_or_is_ios_and_shell_enable_metal",
+    match_all = [
+        ":when_is_mac_or_is_ios",
         "//engine/src/flutter/shell:enable_metal",
     ],
 )
@@ -370,17 +395,20 @@ flutter_objc_library(
         ],
         "//conditions:default": [],
     }) + select({
-        ":when_shell_enable_metal_and_is_mac": [
+        ":when_shell_enable_metal_and_is_mac_or_is_ios": [
             "-Wno-unguarded-availability",  # from :skia
         ],
         "//conditions:default": [],
     }) + select({
-        "//engine/src/flutter/shell:enable_metal": MACOS_CFLAGS_OBJC,
+        ":when_shell_enable_metal_and_is_mac": MACOS_CFLAGS_OBJC,
+        "//conditions:default": [],
+    }) + select({
+        ":when_shell_enable_metal_and_not_is_mac": FLUTTER_CFLAGS_OBJC,
         "//conditions:default": [],
     }),
     local_defines = FLUTTER_LOCAL_DEFINES,
     target_compatible_with = select({
-        ":when_is_mac_and_shell_enable_metal": [],
+        ":when_is_mac_or_is_ios_and_shell_enable_metal": [],
         "//conditions:default": ["@platforms//:incompatible"],
     }),
     deps = ["//engine/src:include_root"] + select({
@@ -420,7 +448,7 @@ cc_library(
         ],
         "//conditions:default": [],
     }) + select({
-        ":when_shell_enable_metal_and_is_mac": [
+        ":when_shell_enable_metal_and_is_mac_or_is_ios": [
             "-Wno-unguarded-availability",  # from :skia
         ],
         "//conditions:default": [],
@@ -428,6 +456,7 @@ cc_library(
     local_defines = FLUTTER_LOCAL_DEFINES,
     target_compatible_with = select({
         "@platforms//os:macos": [],
+        "@platforms//os:ios": [],
         "//conditions:default": ["@platforms//:incompatible"],
     }),
     deps = ["//engine/src:include_root"] + select({
@@ -459,6 +488,10 @@ cc_library(
         ],
     }),
     local_defines = FLUTTER_LOCAL_DEFINES,
+    target_compatible_with = select({
+        "@platforms//os:ios": ["@platforms//:incompatible"],
+        "//conditions:default": [],
+    }),
     deps = [
         "//engine/src:include_root",
         "//engine/src/flutter/build/bazel/gl_wrap:swiftshader",
@@ -507,6 +540,9 @@ cc_library(
         "@platforms//os:macos": [
             "-Wno-unguarded-availability",  # from :skia
         ],
+        "@platforms//os:ios": [
+            "-Wno-unguarded-availability",  # from :skia
+        ],
         "//conditions:default": [],
     }),
     implementation_deps = ["@angle//:gl_prototypes"],
@@ -533,13 +569,22 @@ selects.config_setting_group(
     ],
 )
 
-# `enable_unittests && test_enable_metal && is_mac`, for the select()s of this file.
+# `is_ios || is_mac`, for the select()s of this file.
 selects.config_setting_group(
-    name = "when_enable_unittests_and_test_enable_metal_and_is_mac",
+    name = "when_is_ios_or_is_mac",
+    match_any = [
+        "@platforms//os:ios",
+        "@platforms//os:macos",
+    ],
+)
+
+# `enable_unittests && test_enable_metal && (is_ios || is_mac)`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_enable_unittests_and_test_enable_metal_and_is_ios_or_is_mac",
     match_all = [
         "//engine/src/flutter/testing:unittests_enabled",
         "//engine/src/flutter/shell:test_enable_metal",
-        "@platforms//os:macos",
+        ":when_is_ios_or_is_mac",
     ],
 )
 
@@ -561,7 +606,7 @@ flutter_objc_library(
         ],
         "//conditions:default": [],
     }) + select({
-        ":when_test_enable_metal_and_shell_enable_metal_and_is_mac": [
+        ":when_test_enable_metal_and_shell_enable_metal_and_is_mac_or_is_ios": [
             "-Wno-unguarded-availability",  # from :metal
         ],
         "//conditions:default": [],
@@ -574,7 +619,7 @@ flutter_objc_library(
     }),
     local_defines = FLUTTER_LOCAL_DEFINES,
     target_compatible_with = select({
-        ":when_enable_unittests_and_test_enable_metal_and_is_mac": [],
+        ":when_enable_unittests_and_test_enable_metal_and_is_ios_or_is_mac": [],
         "//conditions:default": ["@platforms//:incompatible"],
     }),
     deps = [
@@ -602,7 +647,7 @@ flutter_cc_test(
         ],
         "//conditions:default": [],
     }) + select({
-        ":when_test_enable_metal_and_shell_enable_metal_and_is_mac": [
+        ":when_test_enable_metal_and_shell_enable_metal_and_is_mac_or_is_ios": [
             "-Wno-unguarded-availability",  # from :metal
         ],
         "//conditions:default": [],
@@ -637,12 +682,30 @@ selects.config_setting_group(
     ],
 )
 
+# `shell_enable_metal && (is_mac || is_ios)`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_shell_enable_metal_and_is_mac_or_is_ios",
+    match_all = [
+        "//engine/src/flutter/shell:enable_metal",
+        ":when_is_mac_or_is_ios",
+    ],
+)
+
 # `shell_enable_metal && is_mac`, for the select()s of this file.
 selects.config_setting_group(
     name = "when_shell_enable_metal_and_is_mac",
     match_all = [
         "//engine/src/flutter/shell:enable_metal",
         "@platforms//os:macos",
+    ],
+)
+
+# `shell_enable_metal && !is_mac`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_shell_enable_metal_and_not_is_mac",
+    match_all = [
+        "//engine/src/flutter/shell:enable_metal",
+        "//engine/src/flutter/build/bazel:not_mac",
     ],
 )
 
@@ -655,13 +718,13 @@ selects.config_setting_group(
     ],
 )
 
-# `test_enable_metal && shell_enable_metal && is_mac`, for the select()s of this file.
+# `test_enable_metal && shell_enable_metal && (is_mac || is_ios)`, for the select()s of this file.
 selects.config_setting_group(
-    name = "when_test_enable_metal_and_shell_enable_metal_and_is_mac",
+    name = "when_test_enable_metal_and_shell_enable_metal_and_is_mac_or_is_ios",
     match_all = [
         "//engine/src/flutter/shell:test_enable_metal",
         "//engine/src/flutter/shell:enable_metal",
-        "@platforms//os:macos",
+        ":when_is_mac_or_is_ios",
     ],
 )
 

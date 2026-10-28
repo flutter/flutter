@@ -561,6 +561,14 @@ def impeller_shaders(
                 library_name = library_name,
                 metal_version = metal_version,
                 debug = impeller_debug,
+                # metal_library.gni's --platform: the simulator's or a
+                # device's SDK under is_ios (use_ios_simulator), the Mac's
+                # otherwise.
+                platform = select({
+                    "//engine/src/flutter/build/bazel:ios_simulator_enabled": "ios-simulator",
+                    "@platforms//os:ios": "ios",
+                    "//conditions:default": "mac",
+                }),
                 testonly = testonly,
                 target_compatible_with = compatible_with,
                 visibility = ["//visibility:private"],
