@@ -5641,11 +5641,11 @@ base class UniformFloatSlot extends UniformType {
 
   /// Set the float value of the bound uniform.
   void set(double val) {
-    _shader.setFloat(_shaderIndex, val);
+    _shader._setFloat(_shaderIndex, val);
   }
 
-  /// VisibleForTesting: This is the index one would use with
-  /// [FragmentShader.setFloat] for this uniform.
+  /// VisibleForTesting: This is the index of this uniform in the shader's
+  /// float uniform buffer.
   int get shaderIndex {
     return _shaderIndex;
   }
@@ -5978,8 +5978,9 @@ base class ImageSamplerSlot {
 /// Instances of this class can be obtained from the
 /// [FragmentProgram.fragmentShader] method. The float uniforms list is
 /// initialized to the size expected by the shader and is zero-filled. Uniforms
-/// of float type can then be set by calling [setFloat]. Sampler uniforms are
-/// set by calling [setImageSampler].
+/// of float type can then be set by name with [getUniformFloat],
+/// [getUniformVec2], [getUniformVec3], [getUniformVec4], and related methods.
+/// Sampler uniforms are set by calling [setImageSampler].
 ///
 /// A [FragmentShader] can be re-used, and this is an efficient way to avoid
 /// allocating and re-initializing the uniform buffer and samplers. However,
@@ -6022,12 +6023,17 @@ base class FragmentShader extends Shader {
 
   /// Sets the float uniform at [index] to [value].
   ///
-  /// All uniforms defined in a fragment shader that are not samplers must be
-  /// set through this method. This includes floats and vec2, vec3, and vec4.
-  /// The correct index for each uniform is determined by the order of the
-  /// uniforms as defined in the fragment program, ignoring any samplers. For
-  /// data types that are composed of multiple floats such as a vec4, more than
-  /// one call to [setFloat] is required.
+  /// Deprecated: Prefer setting uniforms by name with [getUniformFloat],
+  /// [getUniformVec2], [getUniformVec3], [getUniformVec4], [getUniformMat2],
+  /// [getUniformMat3], [getUniformMat4], or their array counterparts such as
+  /// [getUniformFloatArray]. Those methods don't require manually computing
+  /// the index of each uniform and are robust to changes in the order or
+  /// layout of uniforms in the fragment program.
+  ///
+  /// The index for each uniform is determined by the order of the uniforms as
+  /// defined in the fragment program, ignoring any samplers. For data types
+  /// that are composed of multiple floats such as a vec4, more than one call
+  /// to [setFloat] is required.
   ///
   /// For example, given the following uniforms in a fragment program:
   ///
@@ -6038,32 +6044,42 @@ base class FragmentShader extends Shader {
   /// uniform vec4 uColor;
   /// ```
   ///
-  /// Then the corresponding Dart code to correctly initialize these uniforms
-  /// is:
+  /// `uScale` is at index 0, `uMagnitude` occupies indices 1 and 2, and
+  /// `uColor` occupies indices 3 through 6. The `sampler2D` uniform is not
+  /// counted; it is set separately with [setImageSampler], with the index
+  /// starting over at 0.
+  ///
+  /// Rather than calling [setFloat] with each of those indices, the uniforms
+  /// can be initialized by name:
   ///
   /// ```dart
   /// void updateShader(ui.FragmentShader shader, Color color, ui.Image image) {
-  ///   shader.setFloat(0, 23);  // uScale
-  ///   shader.setFloat(1, 114); // uMagnitude x
-  ///   shader.setFloat(2, 83);  // uMagnitude y
+  ///   shader.getUniformFloat('uScale').set(23);
+  ///   shader.getUniformVec2('uMagnitude').set(114, 83);
   ///
   ///   // Convert color to premultiplied opacity.
-  ///   shader.setFloat(3, color.r * color.a); // uColor r
-  ///   shader.setFloat(4, color.g * color.a); // uColor g
-  ///   shader.setFloat(5, color.b * color.a); // uColor b
-  ///   shader.setFloat(6, color.a);           // uColor a
+  ///   shader.getUniformVec4('uColor').set(
+  ///     color.r * color.a,
+  ///     color.g * color.a,
+  ///     color.b * color.a,
+  ///     color.a,
+  ///   );
   ///
   ///   // initialize sampler uniform.
   ///   shader.setImageSampler(0, image);
   /// }
   /// ```
   ///
-  /// Note how the indexes used does not count the `sampler2D` uniform. This
-  /// uniform will be set separately with [setImageSampler], with the index starting
-  /// over at 0.
-  ///
   /// Any float uniforms that are left uninitialized will default to `0`.
+  @Deprecated(
+    'Use getUniformFloat, getUniformVec2, getUniformVec3, getUniformVec4, or a related method '
+    'to set uniforms by name instead.',
+  )
   void setFloat(int index, double value) {
+    _setFloat(index, value);
+  }
+
+  void _setFloat(int index, double value) {
     assert(!debugDisposed, 'Tried to accesss uniforms on a disposed Shader: $this');
     _floats[index] = value;
   }
