@@ -138,8 +138,14 @@ Future<int> run(List<String> arguments) async {
   final packageConditions = <String, String?>{};
   for (final MapEntry<String, Map<String, String?>> package in handWrittenNinjaTargets.entries) {
     convertedTargets[package.key] = package.value.keys.toSet();
-    // One condition per package here: the targets' common one.
-    packageConditions[package.key] = package.value.values.toSet().single;
+    // One condition per package here: the disjunction of its targets'
+    // (null, always, when any target has none) -- the package exists for a
+    // build when any of its targets does; no builder names a target of
+    // such a package outside the target's own platform.
+    final Set<String?> conditions = package.value.values.toSet();
+    packageConditions[package.key] = conditions.contains(null)
+        ? null
+        : conditions.cast<String>().join(' || ');
   }
   for (final input in inputs) {
     final String file = p.canonicalize(input);

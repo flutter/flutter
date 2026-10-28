@@ -1362,9 +1362,14 @@ const Set<String> unreadMetadataPackages = <String>{'//flutter/lib/snapshot'};
 /// resolve ninja targets against the converted files' targets, and these
 /// stand in for a package the converter does not generate. lib/snapshot's
 /// create_macos_gen_snapshots is the Mac's gen_snapshot builders' one
-/// target (ci/host_debug_gen_snapshot and its kin).
+/// target (ci/host_debug_gen_snapshot and its kin); generate_snapshot_bins
+/// the iOS builders' (with the framework), the filegroup over the core
+/// snapshot and the host's gen_snapshot.
 const Map<String, Map<String, String?>> handWrittenNinjaTargets = <String, Map<String, String?>>{
-  '//flutter/lib/snapshot': <String, String?>{'create_macos_gen_snapshots': 'is_mac'},
+  '//flutter/lib/snapshot': <String, String?>{
+    'create_macos_gen_snapshots': 'is_mac',
+    'generate_snapshot_bins': null,
+  },
 };
 
 /// Files of the machine that builds, which GN's files name by absolute

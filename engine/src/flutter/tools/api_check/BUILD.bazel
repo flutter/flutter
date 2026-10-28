@@ -28,7 +28,7 @@ dart_package_test(
         "//engine/src/flutter/shell/platform/android:io/flutter/embedding/engine/systemchannels/LifecycleChannel.java",
         "//engine/src/flutter/shell/platform/android:io/flutter/view/AccessibilityBridge.java",
         "//engine/src/flutter/shell/platform/common:app_lifecycle_state.h",
-        "//engine/src/flutter/shell/platform/darwin:ios/framework/Source/AccessibilityFeatures.swift",
+        "//engine/src/flutter/shell/platform/darwin/ios:framework/Source/AccessibilityFeatures.swift",
         "//engine/src/flutter/shell/platform/embedder:embedder.h",
     ],
     deps = ["//engine/src/flutter/tools/pkg/engine_repo_tools:dart_sources"],

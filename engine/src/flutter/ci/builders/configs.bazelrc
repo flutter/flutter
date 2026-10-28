@@ -268,6 +268,10 @@ build:mac_android_release_x64 --compilation_mode=opt --//engine/src/flutter/comm
 #   --runtime-mode debug --prebuilt-dart-sdk --no-lto --target-dir ci/host_debug_clang_tidy --rbe --no-goma --xcode-symlinks
 build:mac_host_debug_clang_tidy --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=debug --platforms=//engine/src/flutter/build/bazel/toolchains:macos_x64_debug
 
+# mac_clang_tidy.json: ci/ios_debug_sim_clang_tidy
+#   --ios --runtime-mode debug --simulator --no-lto --target-dir ci/ios_debug_sim_clang_tidy --rbe --no-goma --xcode-symlinks
+build:ios_debug_sim_clang_tidy --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=debug --platforms=//engine/src/flutter/build/bazel/toolchains:ios_sim_x64_debug
+
 # mac_host_engine.json: ci/host_debug_framework
 #   --target-dir ci/host_debug_framework --runtime-mode debug --no-lto --prebuilt-dart-sdk --build-embedder-examples --use-glfw-swiftshader --rbe --no-goma --xcode-symlinks
 build:host_debug_framework --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=debug --platforms=//engine/src/flutter/build/bazel/toolchains:macos_x64_debug
@@ -340,6 +344,62 @@ build:mac_release_framework_arm64 --compilation_mode=opt --//engine/src/flutter/
 #   --target-dir ci/mac_release_gen_snapshot_arm64 --mac --mac-cpu arm64 --runtime-mode release --no-lto --prebuilt-dart-sdk --rbe --no-goma --xcode-symlinks --use-glfw-swiftshader
 build:mac_release_gen_snapshot_arm64 --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=release --platforms=//engine/src/flutter/build/bazel/toolchains:macos_arm64_release
 
+# mac_ios_engine.json: ci/ios_debug_sim
+#   --target-dir ci/ios_debug_sim --ios --runtime-mode debug --simulator --no-lto --rbe --no-goma --xcode-symlinks
+build:ci_ios_debug_sim --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=debug --platforms=//engine/src/flutter/build/bazel/toolchains:ios_sim_x64_debug
+
+# mac_ios_engine.json: ci/ios_debug_sim_arm64
+#   --target-dir ci/ios_debug_sim_arm64 --ios --runtime-mode debug --simulator --simulator-cpu=arm64 --no-lto --rbe --no-goma --xcode-symlinks
+build:ios_debug_sim_arm64 --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=debug --platforms=//engine/src/flutter/build/bazel/toolchains:ios_sim_arm64_debug
+
+# mac_ios_engine.json: ci/ios_debug
+#   --target-dir ci/ios_debug --ios --runtime-mode debug --rbe --no-goma --xcode-symlinks
+build:ci_ios_debug --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=debug --platforms=//engine/src/flutter/build/bazel/toolchains:ios_arm64_debug --//engine/src/flutter/build/bazel:lto
+
+# mac_ios_engine.json: ci/ios_profile
+#   --target-dir ci/ios_profile --ios --runtime-mode profile --rbe --no-goma --xcode-symlinks
+build:ci_ios_profile --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=profile --platforms=//engine/src/flutter/build/bazel/toolchains:ios_arm64_profile --//engine/src/flutter/build/bazel:lto
+
+# mac_ios_engine.json: ci/ios_release
+#   --target-dir ci/ios_release --ios --runtime-mode release --rbe --no-goma --xcode-symlinks
+build:ci_ios_release --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=release --platforms=//engine/src/flutter/build/bazel/toolchains:ios_arm64_release --//engine/src/flutter/build/bazel:lto
+
+# mac_ios_engine.json: ci/ios_debug_sim_extension_safe
+#   --target-dir ci/ios_debug_sim_extension_safe --ios --runtime-mode debug --simulator --no-lto --darwin-extension-safe --rbe --no-goma --xcode-symlinks
+build:ios_debug_sim_extension_safe --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=debug --platforms=//engine/src/flutter/build/bazel/toolchains:ios_sim_x64_debug
+
+# mac_ios_engine.json: ci/ios_debug_sim_arm64_extension_safe
+#   --target-dir ci/ios_debug_sim_arm64_extension_safe --ios --runtime-mode debug --simulator --simulator-cpu=arm64 --no-lto --darwin-extension-safe --rbe --no-goma --xcode-symlinks
+build:ios_debug_sim_arm64_extension_safe --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=debug --platforms=//engine/src/flutter/build/bazel/toolchains:ios_sim_arm64_debug
+
+# mac_ios_engine.json: ci/ios_debug_extension_safe
+#   --target-dir ci/ios_debug_extension_safe --ios --runtime-mode debug --darwin-extension-safe --rbe --no-goma --xcode-symlinks
+build:ios_debug_extension_safe --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=debug --platforms=//engine/src/flutter/build/bazel/toolchains:ios_arm64_debug --//engine/src/flutter/build/bazel:lto
+
+# mac_ios_engine.json: ci/ios_profile_extension_safe
+#   --target-dir ci/ios_profile_extension_safe --ios --runtime-mode profile --darwin-extension-safe --rbe --no-goma --xcode-symlinks
+build:ios_profile_extension_safe --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=profile --platforms=//engine/src/flutter/build/bazel/toolchains:ios_arm64_profile --//engine/src/flutter/build/bazel:lto
+
+# mac_ios_engine.json: ci/ios_release_extension_safe
+#   --target-dir ci/ios_release_extension_safe --ios --runtime-mode release --darwin-extension-safe --rbe --no-goma --xcode-symlinks
+build:ios_release_extension_safe --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=release --platforms=//engine/src/flutter/build/bazel/toolchains:ios_arm64_release --//engine/src/flutter/build/bazel:lto
+
+# mac_ios_engine_ddm.json: ci/ios_debug_sim_ddm
+#   --target-dir ci/ios_debug_sim_ddm --ios --runtime-mode debug --simulator --no-lto --rbe --no-goma --xcode-symlinks --gn-args=dart_dynamic_modules=true
+build:ios_debug_sim_ddm --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=debug --platforms=//engine/src/flutter/build/bazel/toolchains:ios_sim_x64_debug --//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules
+
+# mac_ios_engine_ddm.json: ci/ios_debug_sim_arm64_ddm
+#   --target-dir ci/ios_debug_sim_arm64_ddm --ios --runtime-mode debug --simulator --simulator-cpu=arm64 --no-lto --rbe --no-goma --xcode-symlinks --gn-args=dart_dynamic_modules=true
+build:ios_debug_sim_arm64_ddm --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=debug --platforms=//engine/src/flutter/build/bazel/toolchains:ios_sim_arm64_debug --//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules
+
+# mac_ios_engine_ddm.json: ci/ios_debug_ddm
+#   --target-dir ci/ios_debug_ddm --ios --runtime-mode debug --rbe --no-goma --xcode-symlinks --gn-args=dart_dynamic_modules=true
+build:ios_debug_ddm --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=debug --platforms=//engine/src/flutter/build/bazel/toolchains:ios_arm64_debug --//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules --//engine/src/flutter/build/bazel:lto
+
+# mac_ios_engine_ddm.json: ci/ios_release_ddm
+#   --target-dir ci/ios_release_ddm --ios --runtime-mode release --rbe --no-goma --xcode-symlinks --gn-args=dart_dynamic_modules=true
+build:ios_release_ddm --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=release --platforms=//engine/src/flutter/build/bazel/toolchains:ios_arm64_release --//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules --//engine/src/flutter/build/bazel:lto
+
 # mac_unopt.json: ci/host_debug_arm64_tests
 #   --target-dir ci/host_debug_arm64_tests --runtime-mode debug --mac-cpu arm64 --no-lto --prebuilt-dart-sdk --build-embedder-examples --use-glfw-swiftshader --rbe --no-goma --xcode-symlinks
 build:host_debug_arm64_tests --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=debug --platforms=//engine/src/flutter/build/bazel/toolchains:macos_arm64_debug
@@ -363,6 +423,38 @@ build:mac_release_arm64_tests --compilation_mode=opt --//engine/src/flutter/comm
 # mac_unopt.json: ci/host_debug_unopt_arm64
 #   --target-dir ci/host_debug_unopt_arm64 --runtime-mode debug --unoptimized --no-lto --prebuilt-dart-sdk --mac-cpu arm64 --rbe --no-goma --xcode-symlinks --use-glfw-swiftshader
 build:host_debug_unopt_arm64 --compilation_mode=dbg --//engine/src/flutter/common:runtime_mode=debug --platforms=//engine/src/flutter/build/bazel/toolchains:macos_arm64_debug
+
+# mac_unopt.json: ci/ios_debug_unopt_sim_arm64
+#   --ios --runtime-mode debug --simulator --unoptimized --no-lto --simulator-cpu arm64 --rbe --no-goma --xcode-symlinks --target-dir ci/ios_debug_unopt_sim_arm64
+build:ios_debug_unopt_sim_arm64 --compilation_mode=dbg --//engine/src/flutter/common:runtime_mode=debug --platforms=//engine/src/flutter/build/bazel/toolchains:ios_sim_arm64_debug
+
+# mac_unopt.json: ci/ios_debug_unopt_sim_arm64_extension_safe
+#   --ios --runtime-mode debug --simulator --unoptimized --no-lto --simulator-cpu arm64 --darwin-extension-safe --rbe --no-goma --xcode-symlinks --target-dir ci/ios_debug_unopt_sim_arm64_extension_safe
+build:ios_debug_unopt_sim_arm64_extension_safe --compilation_mode=dbg --//engine/src/flutter/common:runtime_mode=debug --platforms=//engine/src/flutter/build/bazel/toolchains:ios_sim_arm64_debug
+
+# local_engine.json: macos/ios_debug
+#   --ios --runtime-mode debug --no-stripped --no-lto --xcode-symlinks --rbe --no-goma
+build:ios_debug --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=debug --platforms=//engine/src/flutter/build/bazel/toolchains:ios_arm64_debug --//engine/src/flutter/build/bazel:stripped=false
+
+# local_engine.json: macos/ios_debug_unopt
+#   --ios --runtime-mode debug --unoptimized --no-stripped --no-lto --xcode-symlinks --rbe --no-goma
+build:ios_debug_unopt --compilation_mode=dbg --//engine/src/flutter/common:runtime_mode=debug --platforms=//engine/src/flutter/build/bazel/toolchains:ios_arm64_debug --//engine/src/flutter/build/bazel:stripped=false
+
+# local_engine.json: macos/ios_profile
+#   --ios --runtime-mode profile --no-stripped --no-lto --xcode-symlinks --rbe --no-goma
+build:ios_profile --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=profile --platforms=//engine/src/flutter/build/bazel/toolchains:ios_arm64_profile --//engine/src/flutter/build/bazel:stripped=false
+
+# local_engine.json: macos/ios_release
+#   --ios --runtime-mode release --no-stripped --no-lto --xcode-symlinks --rbe --no-goma
+build:ios_release --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=release --platforms=//engine/src/flutter/build/bazel/toolchains:ios_arm64_release --//engine/src/flutter/build/bazel:stripped=false
+
+# local_engine.json: macos/ios_debug_sim
+#   --ios --simulator --runtime-mode debug --no-stripped --no-lto --xcode-symlinks --rbe --no-goma
+build:ios_debug_sim --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=debug --platforms=//engine/src/flutter/build/bazel/toolchains:ios_sim_x64_debug --//engine/src/flutter/build/bazel:stripped=false
+
+# local_engine.json: macos/ios_debug_sim_unopt_arm64
+#   --ios --simulator --simulator-cpu=arm64 --runtime-mode debug --unoptimized --no-stripped --no-lto --xcode-symlinks --rbe --no-goma
+build:ios_debug_sim_unopt_arm64 --compilation_mode=dbg --//engine/src/flutter/common:runtime_mode=debug --platforms=//engine/src/flutter/build/bazel/toolchains:ios_sim_arm64_debug --//engine/src/flutter/build/bazel:stripped=false
 
 # local_engine.json: macos/android_debug_arm64
 #   --runtime-mode debug --android --android-cpu=arm64 --no-stripped --no-lto --xcode-symlinks --rbe --no-goma
@@ -439,26 +531,3 @@ build:mac_host_release --compilation_mode=opt --//engine/src/flutter/common:runt
 #   linux_web_engine_test.json: web_tests/test_bundles/dart2js-canvaskit-ui -- no tools/gn step: not a build
 #   linux_web_engine_test.json: web_tests/test_bundles/dart2wasm-canvaskit-engine -- no tools/gn step: not a build
 #   linux_web_engine_test.json: web_tests/test_bundles/fallbacks -- no tools/gn step: not a build
-#   mac_clang_tidy.json: ci/ios_debug_sim_clang_tidy -- a platform the Bazel build has none for yet (--ios)
-#   mac_ios_engine.json: ci/ios_debug_sim -- a platform the Bazel build has none for yet (--ios)
-#   mac_ios_engine.json: ci/ios_debug_sim_arm64 -- a platform the Bazel build has none for yet (--ios)
-#   mac_ios_engine.json: ci/ios_debug -- a platform the Bazel build has none for yet (--ios)
-#   mac_ios_engine.json: ci/ios_profile -- a platform the Bazel build has none for yet (--ios)
-#   mac_ios_engine.json: ci/ios_release -- a platform the Bazel build has none for yet (--ios)
-#   mac_ios_engine.json: ci/ios_debug_sim_extension_safe -- a platform the Bazel build has none for yet (--ios)
-#   mac_ios_engine.json: ci/ios_debug_sim_arm64_extension_safe -- a platform the Bazel build has none for yet (--ios)
-#   mac_ios_engine.json: ci/ios_debug_extension_safe -- a platform the Bazel build has none for yet (--ios)
-#   mac_ios_engine.json: ci/ios_profile_extension_safe -- a platform the Bazel build has none for yet (--ios)
-#   mac_ios_engine.json: ci/ios_release_extension_safe -- a platform the Bazel build has none for yet (--ios)
-#   mac_ios_engine_ddm.json: ci/ios_debug_sim_ddm -- a platform the Bazel build has none for yet (--ios)
-#   mac_ios_engine_ddm.json: ci/ios_debug_sim_arm64_ddm -- a platform the Bazel build has none for yet (--ios)
-#   mac_ios_engine_ddm.json: ci/ios_debug_ddm -- a platform the Bazel build has none for yet (--ios)
-#   mac_ios_engine_ddm.json: ci/ios_release_ddm -- a platform the Bazel build has none for yet (--ios)
-#   mac_unopt.json: ci/ios_debug_unopt_sim_arm64 -- a platform the Bazel build has none for yet (--ios)
-#   mac_unopt.json: ci/ios_debug_unopt_sim_arm64_extension_safe -- a platform the Bazel build has none for yet (--ios)
-#   local_engine.json: macos/ios_debug -- a platform the Bazel build has none for yet (--ios)
-#   local_engine.json: macos/ios_debug_unopt -- a platform the Bazel build has none for yet (--ios)
-#   local_engine.json: macos/ios_profile -- a platform the Bazel build has none for yet (--ios)
-#   local_engine.json: macos/ios_release -- a platform the Bazel build has none for yet (--ios)
-#   local_engine.json: macos/ios_debug_sim -- a platform the Bazel build has none for yet (--ios)
-#   local_engine.json: macos/ios_debug_sim_unopt_arm64 -- a platform the Bazel build has none for yet (--ios)
