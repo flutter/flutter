@@ -4,6 +4,7 @@
 
 import 'dart:ui';
 
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class _NoImplicitViewPlatformDispatcher extends TestPlatformDispatcher {
@@ -24,9 +25,48 @@ class _NoImplicitViewTestBinding extends AutomatedTestWidgetsFlutterBinding {
 void main() {
   final binding = _NoImplicitViewTestBinding();
 
-  testWidgets('testWidgets supports an application without an implicit view', (
+  testWidgets('testWidgets renders and handles gestures without an implicit view', (
     WidgetTester tester,
   ) async {
     expect(binding.platformDispatcher.implicitView, isNull);
+    expect(binding.renderViews, isEmpty);
+
+    final TestFlutterView view = tester.platformDispatcher.views.first;
+    var taps = 0;
+    var longPresses = 0;
+    await tester.pumpWidget(
+      View(
+        view: view,
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                GestureDetector(onTap: () => taps += 1, child: const Text('tap target')),
+                GestureDetector(
+                  onLongPress: () => longPresses += 1,
+                  child: const Text('long press target'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+      wrapWithView: false,
+    );
+    expect(binding.renderViews, hasLength(1));
+    await tester.tap(find.text('tap target'));
+    await tester.longPress(find.text('long press target'));
+    expect(taps, 1);
+    expect(longPresses, 1);
+  });
+
+  testWidgets('the previous multi-view tree is unmounted after a test', (
+    WidgetTester tester,
+  ) async {
+    expect(find.text('tap target'), findsNothing);
+    expect(find.text('long press target'), findsNothing);
+    expect(binding.renderViews, isEmpty);
   });
 }

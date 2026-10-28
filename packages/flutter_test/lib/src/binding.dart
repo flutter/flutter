@@ -2115,7 +2115,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// unmounted and pumped at the end of the test body, before teardowns run.
   ///
   /// This is an exceptional hook called inside `_runTestBody` right after
-  /// the widget tree is replaced with `_postTestMessage` and pumped. Almost all
+  /// the widget tree is reset by `_resetTestTree` and pumped. Almost all
   /// invariant checks belong in `_verifyInvariants` instead of here.
   ///
   /// Use this method only for rare, specialized checks that strictly depend on
