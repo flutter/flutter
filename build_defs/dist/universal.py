@@ -70,6 +70,45 @@ def _copy(source, destination):
   shutil.copymode(source, destination)
 
 
+def _relink_frameworks(root):
+  """Makes a versioned framework bundle's directory links again where a copy stands in for one.
+
+  As assemble_directory.py does: a directory output's links to directories
+  reach a sandbox as directories (Bazel lists a tree artifact's files through
+  them), and the recipe's scripts want the bundle's links (sky_utils'
+  _regenerate_symlinks bails out when the top-level binary is a link, which
+  it still is). Versions/Current becomes the link to the one version, each
+  top-level copy of a version's item the link to it under Versions/Current.
+  """
+  for directory, subdirectories, _ in os.walk(root):
+    if not directory.endswith('.framework'):
+      continue
+    versions = os.path.join(directory, 'Versions')
+    if not os.path.isdir(versions) or os.path.islink(versions):
+      continue
+    current = os.path.join(versions, 'Current')
+    if os.path.islink(current):
+      version = os.readlink(current)
+    else:
+      names = [n for n in os.listdir(versions) if n != 'Current']
+      if len(names) != 1:
+        continue
+      version = names[0]
+      if os.path.lexists(current):
+        shutil.rmtree(current)
+      os.symlink(version, current)
+    for item in os.listdir(os.path.join(versions, version)):
+      top = os.path.join(directory, item)
+      if not os.path.lexists(top) or os.path.islink(top):
+        continue
+      if os.path.isdir(top):
+        shutil.rmtree(top)
+      else:
+        os.remove(top)
+      os.symlink(os.path.join('Versions', 'Current', item), top)
+    subdirectories[:] = []
+
+
 def main(argv):
   args = _expanded(argv[1:])
   script = None
@@ -109,6 +148,7 @@ def main(argv):
       os.makedirs(root)
       for source, path in entries:
         _copy(source, os.path.join(root, path))
+      _relink_frameworks(root)
       directories[key] = root
     for name, key in aliases:
       os.symlink(directories[key], os.path.join(scratch, name))
