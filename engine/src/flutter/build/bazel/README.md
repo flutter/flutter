@@ -1669,6 +1669,51 @@ above it (`shell/platform/linux/public`), so each header lands at
 `flutter_linux/<name>` as in GN. A copy of another shape is an error, to be
 read when one appears.
 
+### The recipe's universal Apple archives: `apple_universal`
+
+CI's Mac builders build each CPU, platform and mode in a directory of its
+own and join them outside GN (the `generators` tasks of
+`ci/builders/mac_host_engine.json` and `mac_ios_engine.json`):
+`sky/tools/create_macos_framework.py` lipos the arm64 and the x64 build's
+`FlutterMacOS.framework` into one and makes `FlutterMacOS.xcframework` of it
+(its dSYM alongside, stripped, in release); `create_macos_gen_snapshots.py`
+gathers the two builds' universal `gen_snapshot_arm64` and
+`gen_snapshot_x64`; `create_ios_framework.py` lipos the two simulator
+builds' `Flutter.framework` -- the debug ones whatever the mode -- and makes
+`Flutter.xcframework` of the device's and the simulator's, the
+extension-safe pair the same, with the device build's `gen_snapshot_arm64`.
+The recipe uploads them as `darwin-x64[-<mode>]/framework.zip` and
+`gen_snapshot.zip` and `ios[-<mode>]/artifacts.zip`, which `flutter precache
+--macos|--ios` unpacks.
+
+Under Bazel each is one target (`build_defs/dist/universal.bzl`'s
+`apple_universal`, declared in `//engine/src/flutter/build/archives`): a
+split transition builds `deps` once per platform of `builds` -- the
+platform's child for the current runtime mode (`macos_arm64` under
+`--config=host_release` is `macos_arm64_release`), or the mode a name carries
+(`ios_sim_x64_debug`) -- each build is laid out in a scratch directory as the
+part of its build directory the script reads (`FlutterMacOS.framework/` with
+the bundle's links, `universal/gen_snapshot_<cpu>`), the recipe's own script
+runs over them with `{build:<key>}` and `{dst}` expanded, and the outputs
+named are kept:
+
+    bazel build --config=mac_release_arm64 //engine/src/flutter/build/archives:universal_macos_framework
+    bazel build --config=mac_release_arm64 //engine/src/flutter/build/archives:universal_macos_gen_snapshots
+    bazel build --config=mac_release_arm64 //engine/src/flutter/build/archives:universal_ios_framework
+
+(a Mac host's configuration of the mode wanted: the targets live in the
+host's configuration and the split sends their builds to the Mac's two CPUs
+or to the device and simulators; under an iOS `--config` they are
+incompatible). `:macos_framework`, `:macos_gen_snapshot` and `:ios_artifacts` are the
+recipe's archives over them (`zip_archives/darwin-x64-release/framework.zip`,
+...: the recipe's names, whatever the Mac), and the tests' SDK facsimile on a
+Mac host lays their contents as the tool's cache does
+(`host_engine_*_directory`, `ios_engine_*_directory`). A Mac of either CPU
+builds both slices (the macOS toolchains cross-build); `lipo`, `strip` and
+`xcrun xcodebuild -create-xcframework` are Xcode's, `dsymutil` the checkout's
+(`flutter/buildtools/mac-<cpu>/clang`). Linux skips the targets as
+incompatible.
+
 ## The build directory: `install`
 
 What consumes an engine build reads a directory laid out as GN's
@@ -2139,9 +2184,12 @@ simulator's of `--simulator-cpu` (`ios_sim_x64` unless given,
 file reads it, the framework is app-extension-safe in every build -- so the
 `_extension_safe` builds are their counterparts under another name. Their
 installs lay `generate_snapshot_bins` and the framework, as their ninja
-targets say; the xcframework over the device and simulator builds together
-is the recipe's (`create_ios_framework.py`), as the Mac's universal
-framework is.
+targets say; the xcframework over the device and simulator builds together,
+the recipe's `create_ios_framework.py` step, is a target of its own under
+Bazel (`//engine/src/flutter/build/archives:universal_ios_framework`, a
+split transition over the three builds), as the Mac's universal framework is
+(`:universal_macos_framework`; "The recipe's universal Apple archives"
+above).
 A Mac build's install and suite are compatible with macOS alone, as their
 contents are, so a wildcard build on Linux skips them; its `engine` tests
 are the Mac's list in `run_tests.py` (`runTestsEngineSuitesMac`: the common
