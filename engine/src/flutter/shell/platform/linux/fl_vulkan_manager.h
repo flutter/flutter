@@ -8,6 +8,7 @@
 #include <glib-object.h>
 
 #include "flutter/shell/platform/embedder/embedder.h"
+#include "flutter/shell/platform/linux/fl_vulkan_snapshot.h"
 
 G_BEGIN_DECLS
 
@@ -39,5 +40,15 @@ GBytes* fl_vulkan_backing_store_read_pixels(
     GError** error);
 
 G_END_DECLS
+
+// Internal device lease, empty before initialization.
+flutter::FlVulkanDeviceContext fl_vulkan_manager_get_device_context(
+    FlVulkanManager* self);
+
+// Raster thread: returns a completed immutable GPU snapshot when the device
+// supports DMA-BUF export, or nullptr to select the readback fallback.
+std::shared_ptr<flutter::FlVulkanSnapshot> fl_vulkan_backing_store_snapshot(
+    const FlutterBackingStore* backing_store,
+    GError** error);
 
 #endif  // FLUTTER_SHELL_PLATFORM_LINUX_FL_VULKAN_MANAGER_H_

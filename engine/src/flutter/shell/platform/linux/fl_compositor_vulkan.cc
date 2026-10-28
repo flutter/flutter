@@ -6,6 +6,7 @@
 
 #include <cmath>
 
+#include "flutter/shell/platform/linux/fl_linux_gtk4_debug.h"
 #include "flutter/shell/platform/linux/fl_vulkan_manager.h"
 
 struct _FlCompositorVulkan {
@@ -13,6 +14,10 @@ struct _FlCompositorVulkan {
   FlTaskRunner* task_runner;
   GMutex frame_mutex;
   GBytes* pixels;
+  std::shared_ptr<flutter::FlVulkanSnapshot>* snapshot;
+  GdkTexture* texture;
+  gboolean dmabuf_disabled;
+  gint last_path;  // 0: none, 1: DMA-BUF, 2: readback.
   size_t width;
   size_t height;
 };
@@ -50,12 +55,46 @@ static gboolean present_layers(FlCompositor* compositor,
   if (count == 0) {
     g_autoptr(GMutexLocker) lock = g_mutex_locker_new(&self->frame_mutex);
     g_clear_pointer(&self->pixels, g_bytes_unref);
+    self->snapshot->reset();
+    g_clear_object(&self->texture);
     if (self->width > 0 && self->height > 0) {
       const size_t length = self->width * self->height * 4;
       self->pixels = g_bytes_new_take(g_malloc0(length), length);
     }
     fl_task_runner_stop_wait(self->task_runner);
     return TRUE;
+  }
+  bool try_export;
+  {
+    g_autoptr(GMutexLocker) lock = g_mutex_locker_new(&self->frame_mutex);
+    try_export = !self->dmabuf_disabled;
+  }
+  // A normal Flutter scene is a single backing store. Copy it on the GPU to a
+  // separate immutable allocation so engine caching cannot overwrite GTK's
+  // current frame. Multi-layer scenes retain the composition fallback below.
+  if (try_export && count == 1 && layers[0]->offset.x == 0 &&
+      layers[0]->offset.y == 0) {
+    g_autoptr(GError) error = nullptr;
+    auto snapshot =
+        fl_vulkan_backing_store_snapshot(layers[0]->backing_store, &error);
+    if (snapshot && snapshot->descriptor().width == layers[0]->size.width &&
+        snapshot->descriptor().height == layers[0]->size.height) {
+      g_autoptr(GMutexLocker) lock = g_mutex_locker_new(&self->frame_mutex);
+      g_clear_pointer(&self->pixels, g_bytes_unref);
+      g_clear_object(&self->texture);
+      *self->snapshot = std::move(snapshot);
+      self->width = width;
+      self->height = height;
+      fl_task_runner_stop_wait(self->task_runner);
+      return TRUE;
+    }
+    if (!snapshot) {
+      g_autoptr(GMutexLocker) lock = g_mutex_locker_new(&self->frame_mutex);
+      self->dmabuf_disabled = TRUE;
+      flutter_linux_gtk4_dbg(
+          "vulkan-presentation", "path=readback reason=%s",
+          error ? error->message : "DMA-BUF export unavailable");
+    }
   }
   // Composite immutable readbacks in layer order. Cairo's native ARGB32 layout
   // differs from Vulkan RGBA8; convert explicitly rather than assuming
@@ -113,6 +152,8 @@ static gboolean present_layers(FlCompositor* compositor,
                     cairo_image_surface_get_stride(surface) * height);
     g_autoptr(GMutexLocker) lock = g_mutex_locker_new(&self->frame_mutex);
     g_clear_pointer(&self->pixels, g_bytes_unref);
+    self->snapshot->reset();
+    g_clear_object(&self->texture);
     self->pixels = g_bytes_ref(pixels);
     self->width = width;
     self->height = height;
@@ -134,7 +175,7 @@ static void get_frame_size(FlCompositor* compositor,
 }
 
 static GdkTexture* acquire_texture(FlCompositor* compositor,
-                                   FlGdkSurface*,
+                                   FlGdkSurface* surface,
                                    GdkGLContext*,
                                    size_t width,
                                    size_t height,
@@ -151,20 +192,53 @@ static GdkTexture* acquire_texture(FlCompositor* compositor,
       g_mutex_lock(&self->frame_mutex);
     }
   }
-  if (self->pixels == nullptr)
-    return nullptr;
-  return gdk_memory_texture_new(self->width, self->height, GDK_MEMORY_DEFAULT,
-                                self->pixels, self->width * 4);
+  if (self->texture != nullptr)
+    return GDK_TEXTURE(g_object_ref(self->texture));
+  if (*self->snapshot) {
+    bool imported = false;
+    g_autoptr(GError) error = nullptr;
+    self->texture =
+        (*self->snapshot)
+            ->CreateTexture(
+                surface ? gdk_surface_get_display(surface) : nullptr, &imported,
+                &error);
+    if (!imported)
+      self->dmabuf_disabled = TRUE;
+    if (self->last_path != (imported ? 1 : 2)) {
+      flutter_linux_gtk4_dbg("vulkan-presentation", "path=%s reason=%s",
+                             imported ? "dmabuf" : "readback",
+                             error      ? error->message
+                             : imported ? "export-import"
+                                        : "GTK import unavailable");
+      self->last_path = imported ? 1 : 2;
+    }
+    if (self->texture)
+      self->snapshot->reset();
+  } else if (self->pixels) {
+    self->texture =
+        gdk_memory_texture_new(self->width, self->height, GDK_MEMORY_DEFAULT,
+                               self->pixels, self->width * 4);
+    if (self->last_path != 2) {
+      flutter_linux_gtk4_dbg(
+          "vulkan-presentation",
+          "path=readback reason=composition-or-export-disabled");
+      self->last_path = 2;
+    }
+  }
+  return self->texture ? GDK_TEXTURE(g_object_ref(self->texture)) : nullptr;
 }
 
 static void dispose(GObject* object) {
   auto* self = FL_COMPOSITOR_VULKAN(object);
   g_clear_object(&self->task_runner);
   g_clear_pointer(&self->pixels, g_bytes_unref);
+  g_clear_object(&self->texture);
+  self->snapshot->reset();
   G_OBJECT_CLASS(fl_compositor_vulkan_parent_class)->dispose(object);
 }
 
 static void finalize(GObject* object) {
+  delete FL_COMPOSITOR_VULKAN(object)->snapshot;
   g_mutex_clear(&FL_COMPOSITOR_VULKAN(object)->frame_mutex);
   G_OBJECT_CLASS(fl_compositor_vulkan_parent_class)->finalize(object);
 }
@@ -179,6 +253,10 @@ static void fl_compositor_vulkan_class_init(FlCompositorVulkanClass* klass) {
 
 static void fl_compositor_vulkan_init(FlCompositorVulkan* self) {
   g_mutex_init(&self->frame_mutex);
+  self->snapshot = new std::shared_ptr<flutter::FlVulkanSnapshot>();
+  self->dmabuf_disabled =
+      g_strcmp0(g_getenv("FLUTTER_GTK4_ENABLE_DMABUF"), "0") == 0 ||
+      !fl_gtk_runtime_supports_dmabuf_textures();
 }
 
 FlCompositorVulkan* fl_compositor_vulkan_new(FlTaskRunner* task_runner) {

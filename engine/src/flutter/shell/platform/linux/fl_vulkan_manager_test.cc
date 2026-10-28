@@ -236,3 +236,80 @@ TEST_F(FlVulkanIntegrationTest, ComposeLayersAndClearFrame) {
   gdk_texture_download(texture, reinterpret_cast<guchar*>(pixels), 8 * 4);
   EXPECT_EQ(pixels[3 * 8 + 2], 0xff0000ffu);
 }
+
+TEST_F(FlVulkanIntegrationTest, ExportSnapshotSurvivesReuseAndEngineTeardown) {
+  auto store = Create(17, 13);
+  Clear(&store, 1, 0, 0);
+  g_autoptr(GError) error = nullptr;
+  auto snapshot = fl_vulkan_backing_store_snapshot(&store, &error);
+  if (!snapshot) {
+    fl_vulkan_manager_collect_backing_store(&store);
+    ASSERT_STRNE(g_getenv("FLUTTER_TEST_VULKAN_DMABUF"), "1")
+        << (error ? error->message : "DMA-BUF unavailable");
+    GTEST_SKIP() << "ICD cannot export a host-accessible DMA-BUF";
+  }
+  EXPECT_GE(snapshot->descriptor().planes[0].fd, 0);
+  EXPECT_GE(snapshot->descriptor().planes[0].stride, 17u * 4);
+  EXPECT_EQ(snapshot->descriptor().modifier, 0u);
+  // Reuse and destroy the source before GTK even acquires the previous frame.
+  Clear(&store, 0, 0, 1);
+  auto blue = fl_vulkan_backing_store_snapshot(&store, &error);
+  ASSERT_NE(blue, nullptr) << (error ? error->message : "");
+  fl_vulkan_manager_collect_backing_store(&store);
+  g_clear_object(&manager);
+  bool imported = true;
+  // No display forces import rejection and exercises immutable fallback.
+  g_autoptr(GdkTexture) red_texture =
+      snapshot->CreateTexture(nullptr, &imported, &error);
+  ASSERT_NE(red_texture, nullptr) << (error ? error->message : "");
+  EXPECT_FALSE(imported);
+  g_autoptr(GdkTexture) blue_texture =
+      blue->CreateTexture(nullptr, &imported, &error);
+  ASSERT_NE(blue_texture, nullptr);
+  snapshot.reset();
+  blue.reset();
+  uint32_t pixels[17 * 13];
+  gdk_texture_download(red_texture, reinterpret_cast<guchar*>(pixels), 17 * 4);
+  for (auto pixel : pixels)
+    EXPECT_EQ(pixel, 0xffff0000u);
+  gdk_texture_download(blue_texture, reinterpret_cast<guchar*>(pixels), 17 * 4);
+  for (auto pixel : pixels)
+    EXPECT_EQ(pixel, 0xff0000ffu);
+}
+
+TEST_F(FlVulkanIntegrationTest, SingleLayerSnapshotIsCachedAndCleared) {
+  g_autoptr(FlCompositorVulkan) compositor =
+      fl_compositor_vulkan_new(fl_engine_get_task_runner(engine));
+  auto store = Create(17, 13);
+  Clear(&store, 0, 1, 0);
+  FlutterLayer layer = {};
+  layer.type = kFlutterLayerContentTypeBackingStore;
+  layer.backing_store = &store;
+  layer.size = {17, 13};
+  const FlutterLayer* layers[] = {&layer};
+  ASSERT_TRUE(
+      fl_compositor_present_layers(FL_COMPOSITOR(compositor), layers, 1));
+  Clear(&store, 1, 0, 0);
+  fl_vulkan_manager_collect_backing_store(&store);
+  auto* klass = FL_COMPOSITOR_GET_CLASS(compositor);
+  g_autoptr(GdkTexture) texture = klass->acquire_texture(
+      FL_COMPOSITOR(compositor), nullptr, nullptr, 17, 13, FALSE);
+  ASSERT_NE(texture, nullptr);
+  g_autoptr(GdkTexture) cached = klass->acquire_texture(
+      FL_COMPOSITOR(compositor), nullptr, nullptr, 17, 13, FALSE);
+  EXPECT_EQ(cached, texture);
+  ASSERT_TRUE(
+      fl_compositor_present_layers(FL_COMPOSITOR(compositor), nullptr, 0));
+  g_autoptr(GdkTexture) cleared = klass->acquire_texture(
+      FL_COMPOSITOR(compositor), nullptr, nullptr, 17, 13, FALSE);
+  ASSERT_NE(cleared, nullptr);
+  uint32_t pixels[17 * 13];
+  gdk_texture_download(cleared, reinterpret_cast<guchar*>(pixels), 17 * 4);
+  for (auto pixel : pixels)
+    EXPECT_EQ(pixel, 0u);
+  g_clear_object(&compositor);
+  g_clear_object(&manager);
+  gdk_texture_download(texture, reinterpret_cast<guchar*>(pixels), 17 * 4);
+  for (auto pixel : pixels)
+    EXPECT_EQ(pixel, 0xff00ff00u);
+}

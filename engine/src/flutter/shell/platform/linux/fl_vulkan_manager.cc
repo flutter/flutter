@@ -128,7 +128,6 @@ VKAPI_ATTR PFN_vkVoidFunction VKAPI_CALL device_proc(VkDevice device,
 // feature chain from the extension list supplied in the embedder configuration.
 const char* instance_extensions[] = {VK_KHR_SURFACE_EXTENSION_NAME,
                                      "VK_KHR_wayland_surface"};
-const char* device_extensions[] = {VK_KHR_SWAPCHAIN_EXTENSION_NAME};
 
 #define DEVICE_FUNCTIONS(F)      \
   F(DestroyDevice)               \
@@ -162,8 +161,11 @@ struct State {
   VkDevice device = VK_NULL_HANDLE;
   VkQueue queue = VK_NULL_HANDLE;
   uint32_t queue_family = 0;
+  uint32_t max_image_dimension = 0;
   VkPhysicalDeviceMemoryProperties memory_properties = {};
   VkCommandPool command_pool = VK_NULL_HANDLE;
+  std::vector<const char*> extensions = {VK_KHR_SWAPCHAIN_EXTENSION_NAME};
+  bool supports_export = false;
 #define DECLARE(name) PFN_vk##name name = nullptr;
   DEVICE_FUNCTIONS(DECLARE)
 #undef DECLARE
@@ -244,6 +246,8 @@ bool initialize(State& state, GError** error) {
   INSTANCE(GetPhysicalDeviceFeatures2);
   INSTANCE(GetPhysicalDeviceMemoryProperties);
   INSTANCE(CreateDevice);
+  INSTANCE(EnumerateDeviceExtensionProperties);
+  INSTANCE(GetPhysicalDeviceExternalBufferProperties);
   uint32_t count = 0;
   if (!check(EnumeratePhysicalDevices(state.instance, &count, nullptr),
              "vkEnumeratePhysicalDevices", error)) {
@@ -263,6 +267,21 @@ bool initialize(State& state, GError** error) {
     if (properties.apiVersion < VK_API_VERSION_1_1) {
       continue;
     }
+    uint32_t extension_count = 0;
+    if (EnumerateDeviceExtensionProperties(physical, nullptr, &extension_count,
+                                           nullptr) != VK_SUCCESS)
+      continue;
+    std::vector<VkExtensionProperties> available(extension_count);
+    if (EnumerateDeviceExtensionProperties(physical, nullptr, &extension_count,
+                                           available.data()) != VK_SUCCESS)
+      continue;
+    bool swapchain = false;
+    for (const auto& extension : available) {
+      swapchain |=
+          strcmp(extension.extensionName, VK_KHR_SWAPCHAIN_EXTENSION_NAME) == 0;
+    }
+    if (!swapchain)
+      continue;
     uint32_t families = 0;
     GetPhysicalDeviceQueueFamilyProperties(physical, &families, nullptr);
     std::vector<VkQueueFamilyProperties> queue_properties(families);
@@ -290,8 +309,50 @@ bool initialize(State& state, GError** error) {
                         "No Vulkan 1.1 graphics/compute device available");
     return false;
   }
+  uint32_t extension_count = 0;
+  if (!check(EnumerateDeviceExtensionProperties(state.physical_device, nullptr,
+                                                &extension_count, nullptr),
+             "vkEnumerateDeviceExtensionProperties", error))
+    return false;
+  std::vector<VkExtensionProperties> available(extension_count);
+  if (!check(EnumerateDeviceExtensionProperties(state.physical_device, nullptr,
+                                                &extension_count,
+                                                available.data()),
+             "vkEnumerateDeviceExtensionProperties", error))
+    return false;
+  const char* export_extensions[] = {
+      VK_KHR_EXTERNAL_MEMORY_FD_EXTENSION_NAME,
+      VK_EXT_EXTERNAL_MEMORY_DMA_BUF_EXTENSION_NAME,
+      VK_EXT_QUEUE_FAMILY_FOREIGN_EXTENSION_NAME};
+  bool can_export = true;
+  for (const auto* required : export_extensions) {
+    bool found = false;
+    for (const auto& extension : available) {
+      found |= strcmp(extension.extensionName, required) == 0;
+    }
+    can_export &= found;
+  }
+  if (can_export) {
+    VkPhysicalDeviceExternalBufferInfo info = {
+        VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_EXTERNAL_BUFFER_INFO};
+    info.usage = VK_BUFFER_USAGE_TRANSFER_DST_BIT;
+    info.handleType = VK_EXTERNAL_MEMORY_HANDLE_TYPE_DMA_BUF_BIT_EXT;
+    VkExternalBufferProperties properties = {
+        VK_STRUCTURE_TYPE_EXTERNAL_BUFFER_PROPERTIES};
+    GetPhysicalDeviceExternalBufferProperties(state.physical_device, &info,
+                                              &properties);
+    state.supports_export =
+        (properties.externalMemoryProperties.externalMemoryFeatures &
+         VK_EXTERNAL_MEMORY_FEATURE_EXPORTABLE_BIT) != 0;
+    if (state.supports_export) {
+      state.extensions.insert(state.extensions.end(),
+                              std::begin(export_extensions),
+                              std::end(export_extensions));
+    }
+  }
   VkPhysicalDeviceProperties selected_properties;
   GetPhysicalDeviceProperties(state.physical_device, &selected_properties);
+  state.max_image_dimension = selected_properties.limits.maxImageDimension2D;
   flutter_linux_gtk4_dbg(
       "vulkan-device", "name=%s type=%u api=%u", selected_properties.deviceName,
       selected_properties.deviceType, selected_properties.apiVersion);
@@ -325,8 +386,8 @@ bool initialize(State& state, GError** error) {
   device_info.pEnabledFeatures = &enabled;
   device_info.queueCreateInfoCount = 1;
   device_info.pQueueCreateInfos = &queue_info;
-  device_info.enabledExtensionCount = G_N_ELEMENTS(device_extensions);
-  device_info.ppEnabledExtensionNames = device_extensions;
+  device_info.enabledExtensionCount = state.extensions.size();
+  device_info.ppEnabledExtensionNames = state.extensions.data();
   if (!check(CreateDevice(state.physical_device, &device_info, nullptr,
                           &state.device),
              "vkCreateDevice", error)) {
@@ -411,8 +472,8 @@ gboolean fl_vulkan_manager_initialize(FlVulkanManager* self,
   config->queue_family_index = state.queue_family;
   config->enabled_instance_extension_count = G_N_ELEMENTS(instance_extensions);
   config->enabled_instance_extensions = instance_extensions;
-  config->enabled_device_extension_count = G_N_ELEMENTS(device_extensions);
-  config->enabled_device_extensions = device_extensions;
+  config->enabled_device_extension_count = state.extensions.size();
+  config->enabled_device_extensions = state.extensions.data();
   config->get_instance_proc_address_callback =
       [](void*, FlutterVulkanInstanceHandle instance,
          const char* name) -> void* {
@@ -438,8 +499,9 @@ gboolean fl_vulkan_manager_create_backing_store(
   const double width = config->size.width;
   const double height = config->size.height;
   if (!*self->state || !std::isfinite(width) || !std::isfinite(height) ||
-      width < 1 || height < 1 || width > INT32_MAX || height > INT32_MAX ||
-      width != floor(width) || height != floor(height) ||
+      width < 1 || height < 1 || width > (*self->state)->max_image_dimension ||
+      height > (*self->state)->max_image_dimension || width != floor(width) ||
+      height != floor(height) ||
       width * height > std::numeric_limits<size_t>::max() / 4) {
     return FALSE;
   }
@@ -609,4 +671,38 @@ GBytes* fl_vulkan_backing_store_read_pixels(const FlutterBackingStore* store,
   *width = frame->width;
   *height = frame->height;
   return bytes;
+}
+
+std::shared_ptr<flutter::FlVulkanSnapshot> fl_vulkan_backing_store_snapshot(
+    const FlutterBackingStore* store,
+    GError** error) {
+  auto* frame = static_cast<Frame*>(store->vulkan.user_data);
+  auto& s = *frame->state;
+  if (!s.supports_export)
+    return nullptr;
+  flutter::FlVulkanSnapshot::Context context = {frame->state,
+                                                s.device,
+                                                s.queue,
+                                                s.queue_family,
+                                                s.max_image_dimension,
+                                                s.memory_properties,
+                                                loader().device_proc,
+                                                queue_submit};
+  return flutter::FlVulkanSnapshot::Create(context, frame->image, frame->width,
+                                           frame->height, error);
+}
+
+flutter::FlVulkanDeviceContext fl_vulkan_manager_get_device_context(
+    FlVulkanManager* self) {
+  if (!*self->state)
+    return {};
+  auto& s = **self->state;
+  return {*self->state,
+          s.device,
+          s.queue,
+          s.queue_family,
+          s.max_image_dimension,
+          s.memory_properties,
+          loader().device_proc,
+          queue_submit};
 }
