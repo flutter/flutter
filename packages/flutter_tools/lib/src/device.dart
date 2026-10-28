@@ -15,6 +15,7 @@ import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
+import 'context/tool_context.dart';
 import 'devfs.dart';
 import 'device_port_forwarder.dart';
 import 'device_vm_service_discovery_for_attach.dart';
@@ -456,12 +457,16 @@ abstract class DeviceDiscovery {
 /// A [DeviceDiscovery] implementation that uses polling to discover device adds
 /// and removals.
 abstract class PollingDeviceDiscovery extends DeviceDiscovery {
-  PollingDeviceDiscovery(this.name);
+  PollingDeviceDiscovery(this.name, {this._toolContext});
 
   static const _pollingInterval = Duration(seconds: 4);
   static const _pollingTimeout = Duration(seconds: 30);
 
   final String name;
+  final ToolContext? _toolContext;
+
+  @protected
+  ToolContext get toolContext => _toolContext!;
 
   @protected
   @visibleForTesting
@@ -598,13 +603,23 @@ String getNameForDeviceConnectionInterface(DeviceConnectionInterface connectionI
 abstract class Device {
   Device(
     this.id, {
-    required Logger logger,
+    required this.logger,
+    this._toolContext,
     required this.category,
     required this.platformType,
     required this.ephemeral,
   }) : dds = DartDevelopmentService(logger: logger);
 
   final String id;
+
+  /// The [Logger] used by this device.
+  @protected
+  final Logger logger;
+
+  final ToolContext? _toolContext;
+
+  @protected
+  ToolContext get toolContext => _toolContext!;
 
   /// The [Category] for this device type.
   final Category? category;

@@ -430,6 +430,39 @@ TEST_F(WindowsTest, IsNotPlatformThread) {
   EXPECT_FALSE(result);
 }
 
+// Verify the plugin registrar reports the platform thread correctly.
+TEST_F(WindowsTest, PluginRegistrarIsPlatformThread) {
+  auto& context = GetContext();
+  WindowsConfigBuilder builder(context);
+  EnginePtr engine{builder.RunHeadless()};
+  ASSERT_NE(engine, nullptr);
+
+  FlutterDesktopPluginRegistrarRef registrar =
+      FlutterDesktopEngineGetPluginRegistrar(engine.get(), "foo_bar");
+
+  EXPECT_TRUE(FlutterDesktopPluginRegistrarIsPlatformThread(registrar));
+}
+
+// Verify the plugin registrar reports a background thread as not the platform
+// thread.
+TEST_F(WindowsTest, PluginRegistrarIsNotPlatformThread) {
+  auto& context = GetContext();
+  WindowsConfigBuilder builder(context);
+  EnginePtr engine{builder.RunHeadless()};
+  ASSERT_NE(engine, nullptr);
+
+  FlutterDesktopPluginRegistrarRef registrar =
+      FlutterDesktopEngineGetPluginRegistrar(engine.get(), "foo_bar");
+
+  bool result = true;
+  std::thread background([&]() {
+    result = FlutterDesktopPluginRegistrarIsPlatformThread(registrar);
+  });
+  background.join();
+
+  EXPECT_FALSE(result);
+}
+
 // Verify a task can be posted to the platform thread while on the platform
 // thread.
 TEST_F(WindowsTest, PostPlatformThreadTaskFromPlatformThread) {
@@ -570,6 +603,81 @@ TEST_F(WindowsTest, PostPlatformThreadTaskNotCancelledWhenRun) {
 
   EXPECT_TRUE(captures.callback_called);
   EXPECT_FALSE(captures.cancel_called);
+}
+
+// Verify a task can be posted by the plugin registrar to the platform thread
+// while on the platform thread, and that its cancel callback is not invoked.
+TEST_F(WindowsTest, PluginRegistrarPostPlatformThreadTaskFromPlatformThread) {
+  auto& context = GetContext();
+  WindowsConfigBuilder builder(context);
+  EnginePtr engine{builder.RunHeadless()};
+  ASSERT_NE(engine, nullptr);
+
+  FlutterDesktopPluginRegistrarRef registrar =
+      FlutterDesktopEngineGetPluginRegistrar(engine.get(), "foo_bar");
+
+  struct Captures {
+    std::thread::id thread_id;
+    bool done = false;
+    bool cancel_called = false;
+  } captures;
+
+  FlutterDesktopPluginRegistrarPostPlatformThreadTask(
+      registrar,
+      [](void* user_data) {
+        auto captures = static_cast<Captures*>(user_data);
+        captures->thread_id = std::this_thread::get_id();
+        captures->done = true;
+      },
+      [](void* user_data) {
+        static_cast<Captures*>(user_data)->cancel_called = true;
+      },
+      &captures);
+
+  while (!captures.done) {
+    PumpMessage();
+  }
+
+  // Ensures that the cancel callback is not called,
+  // in case the engine was shut down after running the task.
+  engine.reset();
+
+  EXPECT_EQ(captures.thread_id, std::this_thread::get_id());
+  EXPECT_FALSE(captures.cancel_called);
+}
+
+// Verify that destroying the engine after posting a task by the plugin
+// registrar invokes the cancel callback instead of the task callback.
+TEST_F(WindowsTest, PluginRegistrarPostPlatformThreadTaskCancelledOnDestroy) {
+  auto& context = GetContext();
+  WindowsConfigBuilder builder(context);
+  EnginePtr engine{builder.RunHeadless()};
+  ASSERT_NE(engine, nullptr);
+
+  FlutterDesktopPluginRegistrarRef registrar =
+      FlutterDesktopEngineGetPluginRegistrar(engine.get(), "foo_bar");
+
+  struct Captures {
+    bool callback_called = false;
+    bool cancel_called = false;
+  } captures;
+
+  FlutterDesktopPluginRegistrarPostPlatformThreadTask(
+      registrar,
+      [](void* user_data) {
+        static_cast<Captures*>(user_data)->callback_called = true;
+      },
+      [](void* user_data) {
+        static_cast<Captures*>(user_data)->cancel_called = true;
+      },
+      &captures);
+
+  // Destroy the engine before the task has a chance to run. The registrar is
+  // owned by the engine and must not be used afterwards.
+  engine.reset();
+
+  EXPECT_FALSE(captures.callback_called);
+  EXPECT_TRUE(captures.cancel_called);
 }
 
 // Implicit view has the implicit view ID.
