@@ -2219,6 +2219,51 @@ void main() {
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('dropping above the list next to an item outside the cache extent does not crash', (
+    WidgetTester tester,
+  ) async {
+    // Regression scenario from https://github.com/flutter/flutter/pull/191669#issuecomment-5925784487.
+    const itemHeight = 300.0;
+    final controller = ScrollController(initialScrollOffset: 3 * itemHeight + 280);
+    addTearDown(controller.dispose);
+    final reorders = <(int, int)>[];
+
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: CustomScrollView(
+          controller: controller,
+          slivers: <Widget>[
+            SliverReorderableList(
+              itemCount: 10,
+              onReorderItem: (int oldIndex, int newIndex) => reorders.add((oldIndex, newIndex)),
+              itemBuilder: (BuildContext context, int index) => ReorderableDragStartListener(
+                key: ValueKey<int>(index),
+                index: index,
+                child: SizedBox(height: itemHeight, child: Text('item $index')),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    expect(find.text('item 2', skipOffstage: false), findsNothing);
+    expect(tester.getTopLeft(find.text('item 3')).dy, -280);
+
+    final TestGesture drag = await tester.startGesture(
+      tester.getTopLeft(find.text('item 4')) + const Offset(10, 10),
+    );
+    await tester.pump();
+    await drag.moveBy(const Offset(0, -20));
+    await tester.pump();
+    await drag.moveTo(const Offset(10, -260));
+    await drag.up();
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+    expect(reorders, <(int, int)>[(4, 3)]);
+  });
 }
 
 class TestList extends StatelessWidget {
