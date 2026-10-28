@@ -45,12 +45,12 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
   final XcodeBasedProject _xcodeProject;
   final FlutterDarwinPlatform _platform;
   final BuildInfo _buildInfo;
-  final XcodeProjectInterpreter _xcodeProjectInterpreter;
-  final File _xcodeProjectInfoFile;
-  final PlistParser _plistParser;
   final Analytics _analytics;
+  final PlistParser _plistParser;
   final bool _reportCrashes;
   final ToolContext _toolContext;
+  final XcodeProjectInterpreter _xcodeProjectInterpreter;
+  final File _xcodeProjectInfoFile;
 
   /// New identifier for FlutterGeneratedPluginSwiftPackage PBXBuildFile.
   static const _flutterPluginsSwiftPackageBuildFileIdentifier = '78A318202AECB46A00862997';
@@ -177,6 +177,7 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
       :OperatingSystemUtils os,
       platform: Platform hostPlatform,
     ) = _toolContext;
+
     Status? migrationStatus;
     SchemeInfo? schemeInfo;
     var optionalOnly = false;

@@ -6051,12 +6051,12 @@ class FakeSwiftPackageManagerIntegrationMigration extends SwiftPackageManagerInt
     super.project,
     super.platform,
     super.buildInfo, {
-    required super.plistParser,
-    required super.toolContext,
-    required super.xcodeProjectInterpreter,
     super.analytics = const NoOpAnalytics(),
+    required super.plistParser,
     super.reportCrashes = true,
+    required super.toolContext,
     this.validateBackup = false,
+    required super.xcodeProjectInterpreter,
   }) : _xcodeProject = project;
 
   final XcodeBasedProject _xcodeProject;
