@@ -23,6 +23,7 @@ import 'package:flutter_tools/src/flutter_manifest.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
+import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:meta/meta.dart';
 import 'package:test/fake.dart';
@@ -2544,6 +2545,32 @@ resolution: workspace
           FlutterProjectFactory: () => flutterProjectFactory,
         },
       );
+    });
+
+    testWithoutContext('FlutterProjectFactory lazily evaluates featureFlagsBuilder', () {
+      final fs = MemoryFileSystem.test();
+      final Directory projectDir = fs.directory('app');
+      projectDir.childFile('pubspec.yaml')
+        ..createSync(recursive: true)
+        ..writeAsStringSync(validPubspec);
+      projectDir.childDirectory('ios').createSync(recursive: true);
+      var featureFlagsBuilderCalls = 0;
+      final factory = FlutterProjectFactory(
+        fileSystem: fs,
+        logger: BufferLogger.test(),
+        featureFlagsBuilder: () {
+          featureFlagsBuilderCalls++;
+          return TestFeatureFlags(isSwiftPackageManagerEnabled: true);
+        },
+        xcode: Xcode.test(
+          toolContext: FakeToolContext.macosHost(processManager: FakeProcessManager.any()),
+        ),
+      );
+      expect(featureFlagsBuilderCalls, 0);
+
+      final FlutterProject project = factory.fromDirectory(projectDir);
+      expect(featureFlagsBuilderCalls, 1);
+      expect(project.ios.usesSwiftPackageManager, isTrue);
     });
   });
 }

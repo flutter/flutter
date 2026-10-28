@@ -64,6 +64,7 @@ class FlutterProjectFactory {
     required this._logger,
     this._config,
     this._featureFlags,
+    this._featureFlagsBuilder,
     this._plistParser,
     this._xcode,
     this._xcodeBuilder,
@@ -73,6 +74,7 @@ class FlutterProjectFactory {
 
   final Config? _config;
   final FeatureFlags? _featureFlags;
+  final FeatureFlags Function()? _featureFlagsBuilder;
   final FileSystem _fileSystem;
   final Logger _logger;
   final PlistParser? _plistParser;
@@ -91,6 +93,7 @@ class FlutterProjectFactory {
     final Directory? buildDirectory = config != null
         ? directory.childDirectory(getBuildDirectory(config, directory.fileSystem))
         : null;
+    final FeatureFlags? resolvedFeatureFlags = _featureFlags ?? _featureFlagsBuilder?.call();
     final Xcode? resolvedXcode = _xcode ?? _xcodeBuilder?.call();
     final XcodeProjectInterpreter? resolvedXcodeProjectInterpreter =
         _xcodeProjectInterpreter ?? _xcodeProjectInterpreterBuilder?.call();
@@ -111,7 +114,7 @@ class FlutterProjectFactory {
         manifest,
         exampleManifest,
         buildDirectory: buildDirectory,
-        featureFlags: _featureFlags,
+        featureFlags: resolvedFeatureFlags,
         plistParser: _plistParser,
         projectFactory: this,
         xcode: resolvedXcode,
@@ -134,7 +137,7 @@ class FlutterProjectFactory {
         manifest,
         exampleManifest,
         buildDirectory: buildDirectory,
-        featureFlags: _featureFlags,
+        featureFlags: resolvedFeatureFlags,
         plistParser: _plistParser,
         projectFactory: this,
         xcode: resolvedXcode,

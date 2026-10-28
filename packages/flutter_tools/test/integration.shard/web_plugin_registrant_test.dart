@@ -9,6 +9,7 @@ import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/create.dart';
@@ -286,24 +287,27 @@ void main() {
 }
 
 Future<void> _createProject(Directory dir, List<String> createArgs) async {
-  final FileSystem fileSystem = globals.fs;
+  final FileSystem fs = dir.fileSystem;
+  final logger = BufferLogger.test();
   final command = CreateCommand(
     androidContext: FakeAndroidContext(),
     appleContext: FakeAppleContext(),
     templateRenderer: const MustacheTemplateRenderer(),
     toolContext: FakeToolContext(
-      fs: fileSystem,
-      logger: globals.logger,
-      platform: globals.platform,
-      processManager: globals.processManager,
+      fs: fs,
+      logger: logger,
+      platform: platform,
+      processManager: processManager,
       cache: Cache.test(
-        rootOverride: fileSystem.directory('../..'),
+        rootOverride: fs.directory('../..'),
         flutterRoot: '../..',
-        fileSystem: fileSystem,
-        processManager: globals.processManager,
+        fileSystem: fs,
+        logger: logger,
+        platform: platform,
+        processManager: processManager,
       ),
       flutterVersion: FakeFlutterVersion(),
-      projectFactory: FlutterProjectFactory(fileSystem: fileSystem, logger: globals.logger),
+      projectFactory: FlutterProjectFactory(fileSystem: fs, logger: logger),
     ),
   );
   final CommandRunner<void> runner = createTestCommandRunner(command);
