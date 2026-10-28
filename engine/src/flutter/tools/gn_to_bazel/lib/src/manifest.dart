@@ -416,6 +416,11 @@ filegroup(
 #   bazel build --config=host_debug //engine/src/flutter:local_engine
 #   flutter build apk --local-engine=$PWD/engine/src/out/bazel-out/android_arm64_debug-opt/bin/engine/src/flutter \
 #       --local-engine-host=$PWD/engine/src/out/bazel-out/linux_x64_debug-opt/bin/engine/src/flutter
+#   bazel build --config=host_debug_unopt_arm64 //engine/src/flutter:local_engine      (on a Mac)
+#   bazel build --config=ios_debug_unopt_sim_arm64 //engine/src/flutter:local_engine
+#   flutter build ios --simulator --debug \
+#       --local-engine=$PWD/engine/src/out/bazel-out/ios_sim_arm64_debug-dbg/bin/engine/src/flutter \
+#       --local-engine-host=$PWD/engine/src/out/bazel-out/macos_arm64_debug-dbg/bin/engine/src/flutter
 #
 # Not here: GN's own bookkeeping -- args.gn (nothing in the tree reads it:
 # testing/run_tests.py defines an is_asan() over it that nothing calls; a
@@ -470,10 +475,11 @@ local_engine(
     name = "local_engine",
     # The root group is testonly (GN's `testonly = true`).
     testonly = True,
-    # The host build's assembled directories; an Android build has neither
-    # (its contents are the root group's).
+    # The host build's assembled directories; an Android or iOS build has
+    # neither (its contents are the root group's).
     assemble = select({
         "@platforms//os:android": [],
+        "@platforms//os:ios": [],
         "//conditions:default": [
             "gen/dart-pkg/sky_engine",
             "shader_lib",
@@ -485,8 +491,16 @@ local_engine(
         # //:default depends on //flutter alone): the Android shell with its
         # jars and archives, the host gen_snapshot, the snapshots, the
         # Impeller SDK, the embedder archive. The Maven tree and the dist
-        # archives are not in it; the builders name them as targets.
+        # archives are not in it; the builders name them as targets. An iOS
+        # build's is the root group too: Flutter.framework and
+        # Flutter.xcframework, the host's universal gen_snapshot halves and
+        # the snapshots (generate_snapshot_bins), the scenario app in debug
+        # and profile -- what the flutter tool reads of an iOS engine
+        # (Flutter.xcframework, gen_snapshot_arm64, flutter_patched_sdk, the
+        # isolate snapshots), with its host tools from the Mac's host build
+        # (--local-engine-host).
         "@platforms//os:android": [":flutter"],
+        "@platforms//os:ios": [":flutter"],
         # A Mac's host build lays FlutterMacOS.framework and its xcframework
         # at the build root besides (shell/platform/darwin/macos's `macos`
         # group, what the root reaches through shell/platform:platform).
@@ -501,6 +515,8 @@ local_engine(
         # root (android/icudtl.dat; @icu's filegroup selects it), as GN's
         # icudata group lays it.
         "@platforms//os:android": {"@icu//:icudata": ""},
+        # ICU's data is inside Flutter.framework on iOS.
+        "@platforms//os:ios": {},
         "@platforms//os:macos": _LOCAL_ENGINE_HOST_FILES,
         # A Linux host's adds the GTK embedding's library (its headers are
         # a tree below).
@@ -511,6 +527,7 @@ local_engine(
     # The trees: the Dart SDK, and on Linux the GTK headers, at their paths.
     trees = select({
         "@platforms//os:android": [],
+        "@platforms//os:ios": [],
         "@platforms//os:macos": _LOCAL_ENGINE_HOST_TREES,
         "//conditions:default": _LOCAL_ENGINE_HOST_TREES + [
             "//engine/src/flutter/shell/platform/linux:flutter_gtk_publish_headers_linux",
