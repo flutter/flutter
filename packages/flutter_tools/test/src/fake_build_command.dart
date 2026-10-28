@@ -184,7 +184,6 @@ BuildCommand createFakeBuildCommand({
       applicationPackageFactory ??
       FakeIOSApplicationPackageFactory(
         fileSystem: fs,
-        logger: targetLogger,
         projectFactory: targetToolContext.projectFactory,
       );
   command.applicationPackages = packageFactory;
@@ -197,14 +196,9 @@ BuildCommand createFakeBuildCommand({
 }
 
 class FakeIOSApplicationPackageFactory extends Fake implements ApplicationPackageFactory {
-  FakeIOSApplicationPackageFactory({
-    required this.fileSystem,
-    required this.logger,
-    this.projectFactory,
-  });
+  FakeIOSApplicationPackageFactory({required this.fileSystem, this.projectFactory});
 
   final FileSystem fileSystem;
-  final Logger logger;
   final FlutterProjectFactory? projectFactory;
 
   @override
@@ -226,7 +220,7 @@ class FakeIOSApplicationPackageFactory extends Fake implements ApplicationPackag
       project.ios,
       'com.example.test',
       'Runner',
-      toolContext: FakeToolContext(fs: fileSystem, logger: logger),
+      toolContext: FakeToolContext(fs: fileSystem),
     );
   }
 }

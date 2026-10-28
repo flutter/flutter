@@ -13,6 +13,8 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/process.dart';
+import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
@@ -113,6 +115,8 @@ void main() {
           fs: fs,
           logger: logger,
           processManager: fakeProcessManager,
+          processUtils: ProcessUtils(processManager: fakeProcessManager, logger: logger),
+          userMessages: UserMessages(),
         ),
 
         // ignore: avoid_redundant_argument_values
@@ -191,6 +195,8 @@ void main() {
           fs: fs,
           logger: logger,
           processManager: fakeProcessManager,
+          processUtils: ProcessUtils(processManager: fakeProcessManager, logger: logger),
+          userMessages: UserMessages(),
         ),
       );
       expect(androidApk, isNotNull);
@@ -242,6 +248,8 @@ void main() {
           fs: fs,
           logger: logger,
           processManager: fakeProcessManager,
+          processUtils: ProcessUtils(processManager: fakeProcessManager, logger: logger),
+          userMessages: UserMessages(),
         ),
       );
 
@@ -294,6 +302,8 @@ void main() {
             fs: fs,
             logger: logger,
             processManager: fakeProcessManager,
+            processUtils: ProcessUtils(processManager: fakeProcessManager, logger: logger),
+            userMessages: UserMessages(),
           ),
         );
 
@@ -306,7 +316,7 @@ void main() {
       'Licenses not available, platform and buildtools available, apk exists',
       () async {
         const aaptPath = 'aaptPath';
-        final File apkFile = fs.file('app-debug.apk');
+        final File apkFile = globals.fs.file('app-debug.apk');
         final sdkVersion = FakeAndroidSdkVersion();
         sdkVersion.aaptPath = aaptPath;
         sdk.latestVersion = sdkVersion;
@@ -350,7 +360,7 @@ void main() {
 
       await ApplicationPackageFactory.instance!.getPackageForPlatform(
         TargetPlatform.android_arm,
-        applicationBinary: fs.file('app-debug.apk'),
+        applicationBinary: globals.fs.file('app-debug.apk'),
       );
       expect(fakeProcessManager, hasNoRemainingExpectations);
     }, overrides: overrides);
@@ -372,7 +382,11 @@ void main() {
       final AndroidApk? androidApk = AndroidApk.fromApk(
         fs.file(''),
         androidSdk: sdk,
-        toolContext: FakeToolContext(logger: logger, processManager: fakeProcessManager),
+        toolContext: FakeToolContext(
+          logger: logger,
+          processManager: fakeProcessManager,
+          processUtils: ProcessUtils(processManager: fakeProcessManager, logger: logger),
+        ),
       );
 
       expect(androidApk, isNull);
@@ -440,6 +454,8 @@ void main() {
           fs: fs,
           logger: logger,
           processManager: fakeProcessManager,
+          processUtils: ProcessUtils(processManager: fakeProcessManager, logger: logger),
+          userMessages: UserMessages(),
         ),
       );
       expect(androidApk, isNotNull);
@@ -515,6 +531,8 @@ void main() {
             fs: fs,
             logger: logger,
             processManager: fakeProcessManager,
+            processUtils: ProcessUtils(processManager: fakeProcessManager, logger: logger),
+            userMessages: UserMessages(),
           ),
         );
         expect(androidApk, isNotNull);

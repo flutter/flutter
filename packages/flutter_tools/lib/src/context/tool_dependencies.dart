@@ -651,6 +651,7 @@ class ToolDependencies {
           appleContext: appleContext,
           buildSystem: finalBuildSystem,
           buildTargets: finalBuildTargets,
+          extensionBuildManager: extensionBuildManager,
           extensionManager: extensionManager,
           featureFlags: finalFeatureFlags,
           iosSimulatorUtils: finalIOSSimulatorUtils,

@@ -719,6 +719,9 @@ class FlutterProject {
     }
     await refreshPluginsList(
       this,
+      cocoaPods: globals.cocoaPods,
+      featureFlags: featureFlags,
+      toolContext: toolContext,
       iosPlatform: iosPlatform,
       macOSPlatform: macOSPlatform,
       pubspecCache: pubspecCache,
@@ -749,12 +752,17 @@ class FlutterProject {
     }
     await injectPlugins(
       this,
+      analytics: globals.analytics,
       androidPlatform: androidPlatform,
+      cocoaPods: globals.cocoaPods,
+      featureFlags: featureFlags,
       iosPlatform: iosPlatform,
       linuxPlatform: linuxPlatform,
       macOSPlatform: macOSPlatform,
-      windowsPlatform: windowsPlatform,
       releaseMode: releaseMode,
+      templateRenderer: globals.templateRenderer,
+      toolContext: toolContext,
+      windowsPlatform: windowsPlatform,
       pubspecCache: pubspecCache,
       packageGraph: packageGraph,
       packageConfig: packageConfig,
@@ -1498,7 +1506,12 @@ class WebProject extends FlutterProjectPlatform {
   Future<void> ensureReadyForPlatformSpecificTooling() async {
     /// Create .dart_tool/dartpad/web_plugin_registrant.dart.
     /// See: https://github.com/dart-lang/dart-services/pull/874
-    await injectBuildTimePluginFilesForWebPlatform(parent, destination: dartpadToolDirectory);
+    await injectBuildTimePluginFilesForWebPlatform(
+      parent,
+      destination: dartpadToolDirectory,
+      logger: globals.logger,
+      templateRenderer: globals.templateRenderer,
+    );
   }
 }
 

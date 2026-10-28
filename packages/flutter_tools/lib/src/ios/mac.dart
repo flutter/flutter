@@ -262,15 +262,24 @@ Future<XcodeBuildResult> buildXcodeProject({
     );
   }
 
+  final Logger logger = toolContext.logger;
   final FlutterManifest manifest = app.project.parent.manifest;
-  final String? buildName = parsedBuildName(manifest: manifest, buildInfo: buildInfo);
+  final String? buildName = parsedBuildName(
+    manifest: manifest,
+    logger: logger,
+    buildInfo: buildInfo,
+  );
   final bool buildNameIsMissing = buildName == null || buildName.isEmpty;
 
   if (buildNameIsMissing) {
     globals.printStatus('Warning: Missing build name (CFBundleShortVersionString).');
   }
 
-  final String? buildNumber = parsedBuildNumber(manifest: manifest, buildInfo: buildInfo);
+  final String? buildNumber = parsedBuildNumber(
+    manifest: manifest,
+    logger: logger,
+    buildInfo: buildInfo,
+  );
   final bool buildNumberIsMissing = buildNumber == null || buildNumber.isEmpty;
 
   if (buildNumberIsMissing) {
@@ -369,7 +378,14 @@ Future<XcodeBuildResult> buildXcodeProject({
       );
     }
   }
-  await processPodsIfNeeded(project.ios, buildDirectoryPath, buildInfo.mode);
+  await processPodsIfNeeded(
+    project.ios,
+    buildDirectoryPath,
+    buildInfo.mode,
+    cocoaPods: globals.cocoaPods,
+    templateRenderer: globals.templateRenderer,
+    toolContext: toolContext,
+  );
   if (configOnly) {
     return XcodeBuildResult(success: true);
   }

@@ -227,7 +227,14 @@ Future<void> buildMacOS({
     }
   }
 
-  await processPodsIfNeeded(flutterProject.macos, buildDirectoryPath, buildInfo.mode);
+  await processPodsIfNeeded(
+    flutterProject.macos,
+    buildDirectoryPath,
+    buildInfo.mode,
+    cocoaPods: globals.cocoaPods,
+    templateRenderer: globals.templateRenderer,
+    toolContext: toolContext,
+  );
   // If the xcfilelists do not exist, create empty version.
   if (!flutterProject.macos.inputFileList.existsSync()) {
     flutterProject.macos.inputFileList.createSync(recursive: true);

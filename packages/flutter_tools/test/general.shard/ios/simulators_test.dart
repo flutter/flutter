@@ -718,7 +718,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
             app: await BuildableIOSApp.fromProject(
               mockIosProject,
               null,
-              toolContext: FakeToolContext(fs: fileSystem, logger: logger),
+              toolContext: FakeToolContext(fs: fileSystem),
             ),
           );
 
@@ -774,7 +774,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
             app: await BuildableIOSApp.fromProject(
               mockIosProject,
               null,
-              toolContext: FakeToolContext(fs: fileSystem, logger: logger),
+              toolContext: FakeToolContext(fs: fileSystem),
             ),
           );
 
@@ -843,7 +843,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
             app: await BuildableIOSApp.fromProject(
               mockIosProject,
               null,
-              toolContext: FakeToolContext(fs: fileSystem, logger: logger),
+              toolContext: FakeToolContext(fs: fileSystem),
             ),
           );
 
@@ -938,7 +938,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
             app: await BuildableIOSApp.fromProject(
               mockIosProject,
               null,
-              toolContext: FakeToolContext(fs: fileSystem, logger: logger),
+              toolContext: FakeToolContext(fs: fileSystem),
             ),
           );
 
@@ -1012,7 +1012,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
             app: await BuildableIOSApp.fromProject(
               mockIosProject,
               null,
-              toolContext: FakeToolContext(fs: fileSystem, logger: logger),
+              toolContext: FakeToolContext(fs: fileSystem),
             ),
           );
 
@@ -1089,7 +1089,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
             app: await BuildableIOSApp.fromProject(
               mockIosProject,
               null,
-              toolContext: FakeToolContext(fs: fileSystem, logger: logger),
+              toolContext: FakeToolContext(fs: fileSystem),
             ),
           );
 
