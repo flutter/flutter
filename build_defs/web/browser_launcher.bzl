@@ -191,6 +191,13 @@ def _package_path(ctx):
     """The script's directory under the runfiles root: <package>/<name>."""
     return "%s/%s" % (ctx.label.package, ctx.label.name) if ctx.label.package else ctx.label.name
 
+# The script lines that find the runfiles root (`root`): the tree beside the
+# script under `bazel run`, else the one the script's own package path
+# leads up from (a test's runfiles, where felt and the tool run it by the
+# path the test exports). `here` is the script's directory.
+_RUNFILES_ROOT = """if [ -d "$0.runfiles/_main" ]; then root="$(cd "$0.runfiles/_main" && pwd)"; else root="${{here%/{package_path}}}"; fi
+"""
+
 def _browser_launcher_impl(ctx):
     browser = ctx.file.browser
     libraries = ctx.attr.libraries[BrowserLibrariesInfo]
@@ -204,17 +211,25 @@ def _browser_launcher_impl(ctx):
         runfiles_files.append(policies)
 
     # The script finds the runfiles root from its own place in it: felt and
-    # the tool run it by the path the test exports, <root>/<package>/<name>/<basename>.
+    # the tool run it by the path the test exports,
+    # <root>/<package>/<name>/<basename>; under `bazel run` the tree sits
+    # beside the script instead (<script>.runfiles/_main). The browser is
+    # exec'd by its real path: a Mac's Chrome reaches its helpers and
+    # frameworks through the app bundle, and the seatbelt sandbox refuses
+    # them when the bundle is entered through runfiles' symbolic links (the
+    # Mac's T42); on Linux the real directory holds the same files the
+    # symlinks do.
     ctx.actions.write(script, """#!/bin/bash
 # {label}: {browser}, its system libraries from {libraries}.
 here="$(cd "$(dirname "$0")" && pwd)"
-root="${{here%/{package_path}}}"
-{exports}exec "$root/{browser}" "$@"
+{root}browser="$root/{browser}"
+browser="$(readlink -f "$browser" 2>/dev/null || echo "$browser")"
+{exports}exec "$browser" "$@"
 """.format(
+        root = _RUNFILES_ROOT.format(package_path = _package_path(ctx)),
         label = ctx.label,
         browser = browser.short_path,
         libraries = "the host" if not libraries.directories else ", ".join([f.short_path for f in libraries.directories]),
-        package_path = _package_path(ctx),
         exports = "".join([line + "\n" for line in _library_exports(libraries)]),
     ), is_executable = True)
     return [DefaultInfo(
@@ -270,11 +285,10 @@ def _display_launcher_impl(ctx):
     ctx.actions.write(script, """#!/bin/bash
 # {label}: Xvfb, {source}.
 here="$(cd "$(dirname "$0")" && pwd)"
-root="${{here%/{package_path}}}"
-{body}""".format(
+{root}{body}""".format(
+        root = _RUNFILES_ROOT.format(package_path = _package_path(ctx)),
         label = ctx.label,
         source = "the sysroot's" if libraries.xvfb else "the host's",
-        package_path = _package_path(ctx),
         body = body,
     ), is_executable = True)
     return [DefaultInfo(
