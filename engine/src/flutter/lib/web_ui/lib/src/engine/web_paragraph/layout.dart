@@ -193,7 +193,9 @@ class TextLayout {
   void wrapText(double width) {
     lines.clear();
 
-    if (paragraph.text.isEmpty) {
+    // A paragraph that is empty or contains only characters without clusters has only the
+    // trailing EmptyCluster and produces no lines.
+    if (allClusters.length == 1) {
       // Empty text still has to have some metrics
       paragraph.width = width;
       paragraph.maxIntrinsicWidth = 0;
@@ -282,7 +284,9 @@ class TextLayout {
         hardlineClusterRange.isNotEmpty && hardlineClusterRange.end == allClusters.length - 1;
     final allTextRange = ui.TextRange(
       start: contentTextRange.start,
-      end: includesTrailingNewline ? hardlineTextRange.end : whitespaceTextRange.end,
+      // Use hardlineTextRange.start rather than whitespaceTextRange.end so unmapped clusterless
+      // characters following trailing spaces are included in this line's text range.
+      end: includesTrailingNewline ? hardlineTextRange.end : hardlineTextRange.start,
     );
     // TODO(jlavrova): Should we use a TextLineBuilder pattern instead?
     final line = TextLine(
@@ -601,6 +605,12 @@ class TextLayout {
   }
 
   void _calculatePaintBounds() {
+    if (lines.isEmpty) {
+      // A non-empty paragraph containing only clusterless characters has no lines to paint.
+      paragraph.paintBounds = ui.Rect.zero;
+      return;
+    }
+
     double left = double.infinity;
     double top = double.infinity;
     double right = double.negativeInfinity;

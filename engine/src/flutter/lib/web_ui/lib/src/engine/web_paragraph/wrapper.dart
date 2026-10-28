@@ -31,8 +31,17 @@ class TextWrapper {
   double get height => _height;
   double _height = 0.0;
 
-  bool _isSoftLineBreak(WebCluster cluster) {
-    return _layout.codeUnitFlags.hasFlag(cluster.start, CodeUnitFlag.softLineBreak);
+  bool _isSoftLineBreak(int index) {
+    // A soft break after a clusterless character (such as U+200B or U+00AD) may land on a
+    // subsequent clusterless code unit (such as U+200E or U+200F) before the next cluster starts.
+    final int end = _layout.allClusters[index].start;
+    final int start = index > 0 ? _layout.allClusters[index - 1].end : end;
+    for (var i = start; i <= end; ++i) {
+      if (_layout.codeUnitFlags.hasFlag(i, CodeUnitFlag.softLineBreak)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   bool _isHardLineBreak(WebCluster cluster) {
@@ -71,7 +80,7 @@ class TextWrapper {
         } else {
           continue;
         }
-      } else if (_isSoftLineBreak(cluster) && line.isNotEmpty) {
+      } else if (_isSoftLineBreak(index) && line.isNotEmpty) {
         // Mark the potential line break and then continue with the current cluster as usual
         if (line.hasLeadingWhitespaces) {
           // There is one case when we have to ignore this soft line break: if we only had whitespaces so far -
