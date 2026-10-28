@@ -3250,6 +3250,10 @@ final class _Evaluator {
       final List<String>? listed = value == null && held == null
           ? _heldStringList(name, scope)
           : null;
+      // A local holding an external variable by name: the reference.
+      final GnReference? reference = value == null && held == null && listed == null
+          ? _heldReference(name, scope)
+          : null;
       if (value != null) {
         literal.write(value);
       } else if (listed != null) {
@@ -3266,12 +3270,12 @@ final class _Evaluator {
             parts.add(part);
           }
         }
-      } else if (settings.externalVariables.contains(name)) {
+      } else if (reference != null || settings.externalVariables.contains(name)) {
         if (literal.isNotEmpty) {
           parts.add(GnStringValue(literal.toString()));
           literal.clear();
         }
-        parts.add(GnReference(name));
+        parts.add(reference ?? GnReference(name));
       } else {
         throw GnError(node.location, 'string expansion of \$$name is not supported: ${node.raw}');
       }
@@ -3380,6 +3384,33 @@ final class _Evaluator {
       return first;
     }
     return null;
+  }
+
+  /// The external variable a local [name] holds as a bare reference
+  /// (darwin/common's `_platform_path = mac_platform_path`, read as
+  /// `"$_platform_path/..."`), or null. An external variable is read as a
+  /// list of one reference ([_identifier]: the `.gni` flag lists), so the
+  /// local is a list here; a string expansion of it is the reference itself,
+  /// which the Bazel side holds as a constant -- a string one, where the
+  /// expression the emitter writes around it (`"-F" + CONSTANT + "/..."`)
+  /// makes sense; a list constant would fail there, loudly.
+  GnReference? _heldReference(String name, _Scope? scope) {
+    final GnVariable? variable = scope?.lookup(name);
+    if (variable == null || !variable.isList) {
+      return null;
+    }
+    GnReference? held;
+    for (final GnAssignment a in variable.assignments) {
+      if (a.op != '=' || a.items.length != 1) {
+        return null;
+      }
+      final GnValue item = a.items.single;
+      if (item is! GnReference || (held != null && item != held)) {
+        return null;
+      }
+      held = item;
+    }
+    return held;
   }
 
   /// The strings of [name] when it is a local list variable of plain

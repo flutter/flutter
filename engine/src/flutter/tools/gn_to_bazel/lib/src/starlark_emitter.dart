@@ -46,6 +46,11 @@ final class _Item {
   final List<String> before;
 
   String get starlark => quoted ? '"${text.replaceAll(r'\', r'\\').replaceAll('"', r'\"')}"' : text;
+
+  /// This item with [comment] on its line, when given; itself otherwise.
+  _Item withComment(String? comment) => comment == null
+      ? this
+      : _Item(text, quoted: quoted, expression: expression, comment: comment, before: before);
 }
 
 /// A copy's dependency edge into a wasm toolchain of its file
@@ -3057,7 +3062,9 @@ final class _Emitter {
         case 'include_dirs':
           _includeDirsInto(rule, variable, Condition.always);
         case 'lib_dirs':
-          _requireSwiftLibraryDirs(variable);
+          _libraryDirsInto(rule, variable, Condition.always);
+        case 'framework_dirs':
+          _frameworkDirsInto(rule, variable, Condition.always);
         case 'libs':
         case 'frameworks':
         case 'ldflags':
@@ -3080,6 +3087,11 @@ final class _Emitter {
           );
       }
     }
+    // GN applies a config once however many times it is reached (`gn help
+    // configs`: "if a config appears more than once, only the first
+    // occurrence will be used" -- test_utils_swift lists `:config` and
+    // `:test_config`, whose configs name `:config` again).
+    final applied = <GnTarget>{};
     for (final variable in configVariables) {
       for (final GnAssignment assignment in variable.assignments) {
         if (assignment.op == '-=') {
@@ -3100,7 +3112,7 @@ final class _Emitter {
               ? localConfigs[config.substring(1)]
               : _remoteConfig(config);
           if (known != null) {
-            _swiftConfigInto(rule, known, element.condition);
+            _swiftConfigInto(rule, known, element.condition, applied);
             continue;
           }
           final ConfigEffect? effect = configEffects[config] ?? configEffects[_gnLabel(config)];
@@ -3144,7 +3156,10 @@ final class _Emitter {
     return forwarded.configOf(_gnLabel(config));
   }
 
-  void _swiftConfigInto(_Rule rule, GnTarget config, Condition under) {
+  void _swiftConfigInto(_Rule rule, GnTarget config, Condition under, Set<GnTarget> applied) {
+    if (!applied.add(config)) {
+      return;
+    }
     for (final GnVariable variable in config.variables.values) {
       switch (variable.name) {
         case final String name when !_configVariables.contains(name):
@@ -3155,7 +3170,9 @@ final class _Emitter {
         case 'include_dirs':
           _includeDirsInto(rule, variable, under);
         case 'lib_dirs':
-          _requireSwiftLibraryDirs(variable);
+          _libraryDirsInto(rule, variable, under);
+        case 'framework_dirs':
+          _frameworkDirsInto(rule, variable, under);
         case 'libs' || 'frameworks' || 'ldflags':
           _linkFlagsInto(rule, variable, under: under);
         case 'configs':
@@ -3170,7 +3187,7 @@ final class _Emitter {
                 'config $nested of ${config.name} on a Swift target is not converted yet',
               );
             }
-            _swiftConfigInto(rule, local, under.and(e.condition));
+            _swiftConfigInto(rule, local, under.and(e.condition), applied);
           });
         case 'cflags' || 'cflags_c' || 'cflags_cc' || 'cflags_objc' || 'cflags_objcc' || 'defines':
           // GN hands a Swift compile neither (its tool("swift") takes the
@@ -3198,25 +3215,6 @@ final class _Emitter {
     _forEachItem(variable, into: rule.list('swiftflags'), (_Element e) {
       rule.list('swiftflags').add(under.and(e.condition), _flagItem(e));
     });
-  }
-
-  /// `lib_dirs`: nothing, or darwin_sdk.gni's Swift library directories
-  /// (swiftLibraryDirsVariable), which flutter_swift_library's objects carry
-  /// as link flags wherever they link, so the listing is dropped. Any other
-  /// library search path is not converted.
-  void _requireSwiftLibraryDirs(GnVariable variable) {
-    for (final GnAssignment assignment in variable.assignments) {
-      for (final GnValue item in assignment.items) {
-        if (item is GnReference && item.name == swiftLibraryDirsVariable) {
-          continue;
-        }
-        throw GnError(
-          assignment.location,
-          "lib_dirs holds $item; only darwin_sdk.gni's $swiftLibraryDirsVariable (which "
-          'flutter_swift_library carries) or nothing is converted',
-        );
-      }
-    }
   }
 
   void _convertCcTarget(
@@ -3413,7 +3411,9 @@ final class _Emitter {
             _scalar(rule, 'testonly', variable);
           }
         case 'lib_dirs':
-          _requireSwiftLibraryDirs(variable);
+          _libraryDirsInto(rule, variable, Condition.always);
+        case 'framework_dirs':
+          _frameworkDirsInto(rule, variable, Condition.always);
         case 'swiftflags':
           // Flags of a Swift compile, of which a C/C++ target has none.
           break;
@@ -3984,9 +3984,14 @@ final class _Emitter {
         if (under == Condition.never) {
           continue;
         }
-        rule
-            .list('copts')
-            .addUnique(under, _Item(_tokenizerEscaped(flag.flag), comment: 'from ${_string(e)}'));
+        final _Item item = switch (flag.flag) {
+          GnStringValue(:final String value) => _Item(
+            _tokenizerEscaped(value),
+            comment: 'from ${_string(e)}',
+          ),
+          _ => _flagValueItem(flag.flag, e, comment: 'from ${_string(e)}'),
+        };
+        rule.list('copts').addUnique(under, item);
       }
     });
   }
@@ -4032,7 +4037,7 @@ final class _Emitter {
   static String _describe(Set<ForwardedFlag> flags) {
     return <String>[
       for (final ForwardedFlag f in flags)
-        if (f.condition == Condition.always) f.flag else '${f.flag} under `${f.condition}`',
+        if (f.condition == Condition.always) '${f.flag}' else '${f.flag} under `${f.condition}`',
     ].toString();
   }
 
@@ -4061,7 +4066,19 @@ final class _Emitter {
         case 'defines':
           _stringsInto(rule.list('defines'), variable, defines: true);
         case 'include_dirs':
-          _includeDirsInto(rule, variable, Condition.always);
+          // A directory outside the tree is a compile flag (see
+          // _includeDirsInto), carried as the cflags are: by the targets of
+          // this file that list the config.
+          if (variable.liveItems.any((GnListItem i) => i.value is GnExpandedString) &&
+              !locallyUsedConfigs.contains(target.name)) {
+            throw GnError(
+              variable.assignments.first.location,
+              'include_dirs of ${target.name} names a directory outside the tree, a compile '
+              'flag Bazel cannot propagate, and no target of this file lists the config; '
+              'convert it by hand',
+            );
+          }
+          _includeDirsInto(rule, variable, Condition.always, treeOnly: true);
         case 'libs':
         case 'frameworks':
         case 'ldflags':
@@ -4070,10 +4087,13 @@ final class _Emitter {
           // Local configs are only ever used by their own package.
           break;
         case 'lib_dirs':
-          // The Swift library directories or nothing (see
-          // _requireSwiftLibraryDirs); a Swift target listing the config
-          // takes its swiftflags (_swiftConfigInto), a C/C++ one none.
-          _requireSwiftLibraryDirs(variable);
+          // The Swift library directories (dropped: flutter_swift_library
+          // carries them), or a directory outside the tree as a link flag
+          // (see _libraryDirsInto); a Swift target listing the config takes
+          // its swiftflags (_swiftConfigInto), a C/C++ one none.
+          _libraryDirsInto(rule, variable, Condition.always);
+        case 'framework_dirs':
+          _frameworkDirsInto(rule, variable, Condition.always);
         case 'swiftflags':
           break;
         case 'configs':
@@ -4132,6 +4152,13 @@ final class _Emitter {
         _compilerFlagsInto(rule, variable, use.condition);
         continue;
       }
+      if (variable.name == 'include_dirs') {
+        // A directory outside the tree is a compile flag like the cflags
+        // (see _includeDirsInto): inlined whichever way the config is
+        // listed; the directories of the tree only with the rest.
+        _includeDirsInto(rule, variable, use.condition, flagsOnly: flagsOnly);
+        continue;
+      }
       if (flagsOnly) {
         continue;
       }
@@ -4142,16 +4169,16 @@ final class _Emitter {
           continue;
         case 'defines':
           attribute = 'local_defines';
-        case 'include_dirs':
-          _includeDirsInto(rule, variable, use.condition);
-          continue;
         case 'libs' || 'frameworks' || 'ldflags':
           _linkFlagsInto(rule, variable, under: use.condition);
           continue;
         case 'visibility':
           continue;
         case 'lib_dirs':
-          _requireSwiftLibraryDirs(variable);
+          _libraryDirsInto(rule, variable, use.condition);
+          continue;
+        case 'framework_dirs':
+          _frameworkDirsInto(rule, variable, use.condition);
           continue;
         case 'swiftflags':
           // Flags of a Swift compile, of which this target has none.
@@ -4372,12 +4399,18 @@ final class _Emitter {
     );
   }
 
-  _Item _flagItem(_Element element) {
-    switch (element.value) {
-      case GnStringValue(:final String value):
-        return _item(_tokenizerEscaped(value), element);
+  _Item _flagItem(_Element element) => _flagValueItem(element.value, element);
+
+  /// A flag [value] as an item: a string escaped for Bazel's tokenizer, a
+  /// reference its constant, a string around references an expression.
+  /// [element] is the listing the flag comes from (its comments; the
+  /// condition the Objective-C constant is chosen under).
+  _Item _flagValueItem(GnValue value, _Element element, {String? comment}) {
+    switch (value) {
+      case GnStringValue(value: final String text):
+        return _item(_tokenizerEscaped(text), element).withComment(comment);
       case GnReference(:final String name):
-        return _item(_constant(name, element), element, quoted: false);
+        return _item(_constant(name, element), element, quoted: false).withComment(comment);
       case GnExpandedString(:final List<GnValue> parts):
         // `"X=\"$engine_version\""` as `"X=\\\"" + ENGINE_VERSION + "\\\""`; the
         // constant's value is taken as it is.
@@ -4389,10 +4422,30 @@ final class _Emitter {
               },
             )
             .join(' + ');
-        return _item(text, element, quoted: false, expression: true);
+        return _item(text, element, quoted: false, expression: true).withComment(comment);
       default:
-        throw GnError(element.assignment.location, 'unexpected flag value ${element.value}');
+        throw GnError(element.assignment.location, 'unexpected flag value $value');
     }
+  }
+
+  /// [value] with [prefix] before it: a directory as the flag that names it
+  /// (`-I`, `-F`, `-L` before an absolute path or a string around a
+  /// constant).
+  static GnValue _prefixed(String prefix, GnValue value) {
+    return switch (value) {
+      GnStringValue(value: final String text) => GnStringValue('$prefix$text'),
+      GnReference() => GnExpandedString(<GnValue>[GnStringValue(prefix), value]),
+      GnExpandedString(:final List<GnValue> parts) when parts.first is GnStringValue =>
+        GnExpandedString(<GnValue>[
+          GnStringValue('$prefix${(parts.first as GnStringValue).value}'),
+          ...parts.sublist(1),
+        ]),
+      GnExpandedString(:final List<GnValue> parts) => GnExpandedString(<GnValue>[
+        GnStringValue(prefix),
+        ...parts,
+      ]),
+      _ => throw ArgumentError.value(value, 'value', 'not a string'),
+    };
   }
 
   /// A string for an attribute Bazel reads with Make-variable substitution
@@ -4899,9 +4952,37 @@ final class _Emitter {
   /// [genDirIncludeTargets]), and a source directory outside this package
   /// is a dependency on the library that carries it when
   /// [includeDirLibraries] names one; [under] is the condition of the
-  /// config that carries them, when they are inlined.
-  void _includeDirsInto(_Rule rule, GnVariable variable, Condition under) {
+  /// config that carries them, when they are inlined. A directory outside
+  /// the tree, named around a constant (darwin/common's test_config:
+  /// `$mac_platform_path/Developer/usr/lib`), is the compile flag GN makes
+  /// of every include directory, `-I<dir>` -- `copts`, or `swiftflags` on a
+  /// Swift module (GN's swift tool takes `{{include_dirs}}` too) -- since
+  /// Bazel's `includes` name directories of the tree alone. [flagsOnly]
+  /// takes those alone: a public config's directories of the tree reach
+  /// the listing target through the dependency on the config's library;
+  /// [treeOnly] the directories of the tree alone: a config's library,
+  /// whose flags the listing targets carry.
+  void _includeDirsInto(
+    _Rule rule,
+    GnVariable variable,
+    Condition under, {
+    bool flagsOnly = false,
+    bool treeOnly = false,
+  }) {
     _forEachItem(variable, into: rule.list('includes'), (_Element e) {
+      if (e.value is GnExpandedString) {
+        if (treeOnly) {
+          return;
+        }
+        final attribute = rule.kind == 'flutter_swift_library' ? 'swiftflags' : 'copts';
+        rule
+            .list(attribute)
+            .add(under.and(e.condition), _flagValueItem(_prefixed('-I', e.value), e));
+        return;
+      }
+      if (flagsOnly) {
+        return;
+      }
       final String path = _string(e);
       final String? ancestor = _genDirIncludeTarget(path);
       if (ancestor != null) {
@@ -4925,6 +5006,59 @@ final class _Emitter {
       rule
           .list('includes')
           .addUnique(under.and(e.condition), _item(_filePath(path, e.assignment.location), e));
+    });
+  }
+
+  /// `framework_dirs`: GN's link tools take them as `-F<dir>` among the
+  /// ldflags (`framework_dir_switch`; compiles never see them, which is why
+  /// a config spells a compile-side `-F` out in cflags), so each is a
+  /// `linkopts` entry; [under] is the condition of the config that carries
+  /// them. A directory outside the tree, around a constant
+  /// (`$mac_platform_path/Developer/Library/Frameworks`) or absolute, is
+  /// what is converted; one of the tree or the build directory (the
+  /// umbrella-import check's `$root_out_dir`) waits for a rule that takes
+  /// the bundle as a link input.
+  void _frameworkDirsInto(_Rule rule, GnVariable variable, Condition under) {
+    final _ListAttribute linkopts = rule.list('linkopts');
+    _forEachItem(variable, into: linkopts, (_Element e) {
+      // A GN path (`//...`) is the tree's or the build directory's; a
+      // system-absolute one has a single slash.
+      final bool outside =
+          e.value is GnExpandedString ||
+          (_string(e).startsWith('/') && !_string(e).startsWith('//'));
+      if (!outside) {
+        throw GnError(
+          e.assignment.location,
+          'framework_dirs names ${_string(e)}, a directory of the tree or the build '
+          'directory: only a directory outside them (around a constant, or absolute) is converted',
+        );
+      }
+      linkopts.add(under.and(e.condition), _flagValueItem(_prefixed('-F', e.value), e));
+    });
+  }
+
+  /// `lib_dirs`: darwin_sdk.gni's Swift library directories
+  /// (swiftLibraryDirsVariable), which flutter_swift_library's objects
+  /// carry as link flags wherever they link, so that listing is dropped;
+  /// a directory outside the tree around a constant (test_config's
+  /// `$mac_platform_path/Developer/usr/lib`) is the `-L<dir>` GN puts among
+  /// the ldflags, a `linkopts` entry under [under]. Any other library
+  /// search path is not converted.
+  void _libraryDirsInto(_Rule rule, GnVariable variable, Condition under) {
+    final _ListAttribute linkopts = rule.list('linkopts');
+    _forEachItem(variable, into: linkopts, (_Element e) {
+      final GnValue item = e.value;
+      if (item is GnReference && item.name == swiftLibraryDirsVariable) {
+        return;
+      }
+      if (item is! GnExpandedString) {
+        throw GnError(
+          e.assignment.location,
+          "lib_dirs holds $item; only darwin_sdk.gni's $swiftLibraryDirsVariable (which "
+          'flutter_swift_library carries), a directory around a constant, or nothing is converted',
+        );
+      }
+      linkopts.add(under.and(e.condition), _flagValueItem(_prefixed('-L', item), e));
     });
   }
 
@@ -5132,7 +5266,7 @@ final class _Emitter {
             if (!private) {
               // Listed publicly, the config's flags reach dependents too.
               for (final flag in copts) {
-                propagatedFlags.add((condition: assignment.condition, flag: flag));
+                propagatedFlags.add((condition: assignment.condition, flag: GnStringValue(flag)));
               }
             }
           case ConfigImplied():
