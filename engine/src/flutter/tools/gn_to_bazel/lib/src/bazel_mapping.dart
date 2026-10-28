@@ -2551,6 +2551,7 @@ const Map<String, GnValue> _iosSdkAssumptions = <String, GnValue>{
 Assumptions generationAssumptions() {
   const isWasm = ConditionVariable('is_wasm');
   const isMac = ConditionVariable('is_mac');
+  const isIos = ConditionVariable('is_ios');
   return Assumptions(<String, GnValue>{
     'default_library_type': const GnStringValue('static_library'),
     'host_cpu': const GnStringValue('x64'),
@@ -2643,26 +2644,31 @@ Assumptions generationAssumptions() {
     'skia_icu_bidi_third_party_dir': const GnStringValue(
       '//flutter/third_party/canvaskit/icu_bidi',
     ),
-    // The arguments tools/gn passes differently for the web and for a Mac
-    // (research/12, research/20): the host's value elsewhere.
-    for (final MapEntry<String, ({bool host, bool web, bool mac})> argument
+    // The arguments tools/gn passes differently for the web, for a Mac and
+    // for iOS (research/12, research/20, research/21): the host's value
+    // elsewhere.
+    for (final MapEntry<String, ({bool host, bool web, bool mac, bool ios})> argument
         in perTargetOsArguments.entries)
-      argument.key: GnConditionValue(_perOsCondition(argument.value, isWasm: isWasm, isMac: isMac)),
+      argument.key: GnConditionValue(
+        _perOsCondition(argument.value, isWasm: isWasm, isMac: isMac, isIos: isIos),
+      ),
   });
 }
 
-/// `(is_wasm && web) || (is_mac && mac) || (!is_wasm && !is_mac && host)`,
-/// with the constants folded: the OS condition under which an argument of
-/// [perTargetOsArguments] holds.
+/// `(is_wasm && web) || (is_mac && mac) || (is_ios && ios) || (!is_wasm &&
+/// !is_mac && !is_ios && host)`, with the constants folded: the OS condition
+/// under which an argument of [perTargetOsArguments] holds.
 Condition _perOsCondition(
-  ({bool host, bool web, bool mac}) value, {
+  ({bool host, bool web, bool mac, bool ios}) value, {
   required Condition isWasm,
   required Condition isMac,
+  required Condition isIos,
 }) {
   final holds = <Condition>[
     if (value.web) isWasm,
     if (value.mac) isMac,
-    if (value.host) isWasm.negated.and(isMac.negated),
+    if (value.ios) isIos,
+    if (value.host) isWasm.negated.and(isMac.negated).and(isIos.negated),
   ];
   if (holds.isEmpty) {
     return Condition.never;
@@ -2678,28 +2684,35 @@ Condition _perOsCondition(
 /// builds say, with no flag (NEED_DECISION D4, design A). The arguments the
 /// six wasm toolchains set per variant (`skia_use_icu`, the codec decoders,
 /// ...) are not here: those are the variants' flags. An Android or Fuchsia
-/// build takes the host's values, as tools/gn gives them.
-const Map<String, ({bool host, bool web, bool mac})> perTargetOsArguments =
-    <String, ({bool host, bool web, bool mac})>{
-      'skia_use_vulkan': (host: true, web: false, mac: false),
-      'skia_use_expat': (host: true, web: false, mac: true),
-      'skia_use_libjpeg_turbo_encode': (host: true, web: false, mac: true),
-      'skia_use_no_jpeg_encode': (host: false, web: true, mac: false),
-      'skia_use_libwebp_encode': (host: true, web: false, mac: true),
-      'skia_use_no_webp_encode': (host: false, web: true, mac: false),
-      'skia_enable_skottie': (host: true, web: false, mac: true),
-      'skia_enable_fontmgr_custom_directory': (host: true, web: false, mac: true),
+/// build takes the host's values, as tools/gn gives them; an iOS build
+/// (tools/gn --ios, from a Mac) the host's but for what its branches set.
+const Map<String, ({bool host, bool web, bool mac, bool ios})> perTargetOsArguments =
+    <String, ({bool host, bool web, bool mac, bool ios})>{
+      // Vulkan everywhere but the Apple targets (`target_os not in ['ios',
+      // 'mac']`).
+      'skia_use_vulkan': (host: true, web: false, mac: false, ios: false),
+      'skia_use_expat': (host: true, web: false, mac: true, ios: true),
+      'skia_use_libjpeg_turbo_encode': (host: true, web: false, mac: true, ios: true),
+      'skia_use_no_jpeg_encode': (host: false, web: true, mac: false, ios: false),
+      'skia_use_libwebp_encode': (host: true, web: false, mac: true, ios: true),
+      'skia_use_no_webp_encode': (host: false, web: true, mac: false, ios: false),
+      'skia_enable_skottie': (host: true, web: false, mac: true, ios: true),
+      'skia_enable_fontmgr_custom_directory': (host: true, web: false, mac: true, ios: true),
       // CanvasKit's WebGL binding (canvaskit.gni's default is off; tools/gn
       // turns it on for the web), read by the module's file alone.
-      'skia_canvaskit_enable_webgl': (host: false, web: true, mac: false),
-      // tools/gn on a Mac (`sys.platform == 'darwin'` and a Mac target):
+      'skia_canvaskit_enable_webgl': (host: false, web: true, mac: false, ios: false),
+      // tools/gn on a Mac (`sys.platform == 'darwin'` and an Apple target):
       // Skia's Metal, and deprecated API calls allowed (OpenGL's); Vulkan is
-      // not turned on for the Apple targets (`target_os not in ['ios',
-      // 'mac']`), so skia_use_vma stays skia.gni's default there. The
-      // shell's backends (shell_enable_*) and fontconfig are settings, not
-      // here: //flutter/shell's groups by platform, txt's flag.
-      'allow_deprecated_api_calls': (host: false, web: false, mac: true),
-      'skia_use_metal': (host: false, web: false, mac: true),
+      // not turned on for the Apple targets, so skia_use_vma stays skia.gni's
+      // default there. The shell's backends (shell_enable_*) and fontconfig
+      // are settings, not here: //flutter/shell's groups by platform, txt's
+      // flag.
+      'allow_deprecated_api_calls': (host: false, web: false, mac: true, ios: true),
+      'skia_use_metal': (host: false, web: false, mac: true, ios: true),
+      // iOS alone (tools/gn's `target_os == 'ios'` branch): no OpenGL in
+      // Skia (skia.gni's default is on). VMA without std::shared_mutex,
+      // which the same branch sets, is flutter_vma's setting by platform.
+      'skia_use_gl': (host: true, web: true, mac: true, ios: false),
     };
 
 /// Which assumptions describe the Linux x64 host build (the values
