@@ -195,8 +195,10 @@ def ios_clang_toolchain(name, exec_cpu, target_cpu, environment, clang, cxx_head
     GN's ios_clang_arm (a device, arm64), ios_clang_arm_sim and
     ios_clang_x64_sim (the simulator): the Mac's clang over the iPhoneOS or
     iPhoneSimulator SDK, with iOS's flags (cc_toolchain_config.bzl, os =
-    "ios"). Every target of it is incompatible off macOS, as the macOS
-    toolchains' are.
+    "ios"). Every target of it is compatible with iOS alone (the target
+    platform's OS, which the toolchain's own files are configured for --
+    not the Mac's, which is the execution platform's: the Mac's T24), and
+    the toolchain executes on a Mac alone.
 
     Args:
       name: the toolchain's name.
@@ -219,7 +221,7 @@ def ios_clang_toolchain(name, exec_cpu, target_cpu, environment, clang, cxx_head
             clang + "//:compiler_files",
             env.sdk,
         ],
-        target_compatible_with = _MACOS,
+        target_compatible_with = _IOS,
     )
     native.filegroup(
         name = name + "_linker_files",
@@ -227,7 +229,7 @@ def ios_clang_toolchain(name, exec_cpu, target_cpu, environment, clang, cxx_head
             clang + "//:linker_files",
             env.sdk,
         ],
-        target_compatible_with = _MACOS,
+        target_compatible_with = _IOS,
     )
     native.filegroup(
         name = name + "_all_files",
@@ -236,7 +238,7 @@ def ios_clang_toolchain(name, exec_cpu, target_cpu, environment, clang, cxx_head
             ":" + name + "_linker_files",
             clang + "//:all_files",
         ],
-        target_compatible_with = _MACOS,
+        target_compatible_with = _IOS,
     )
     flutter_cc_toolchain_config(
         name = name + "_config",
@@ -265,7 +267,7 @@ def ios_clang_toolchain(name, exec_cpu, target_cpu, environment, clang, cxx_head
         resource_include_marker = clang + "//:resource_include_marker",
         strip = clang + "//:bin/llvm-strip",
         sysroot_marker = env.sdk_marker,
-        target_compatible_with = _MACOS,
+        target_compatible_with = _IOS,
         target_cpu = target.legacy_cpu,
         # The Mach-O link forms, as the macOS toolchains take them from
         # this name.
@@ -283,7 +285,7 @@ def ios_clang_toolchain(name, exec_cpu, target_cpu, environment, clang, cxx_head
         objcopy_files = clang + "//:objcopy_files",
         strip_files = clang + "//:strip_files",
         supports_param_files = True,
-        target_compatible_with = _MACOS,
+        target_compatible_with = _IOS,
         toolchain_config = ":" + name + "_config",
         toolchain_identifier = name,
     )
