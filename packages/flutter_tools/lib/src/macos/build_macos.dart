@@ -14,6 +14,7 @@ import '../base/os.dart' show HostPlatform, OperatingSystemUtils;
 import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/project_migrator.dart';
+import '../base/template.dart';
 import '../base/terminal.dart';
 import '../base/user_messages.dart';
 import '../base/utils.dart';
@@ -92,6 +93,7 @@ Future<void> buildMacOS({
   required BuildInfo buildInfo,
   required FeatureFlags featureFlags,
   required FlutterProject flutterProject,
+  required TemplateRenderer templateRenderer,
   required ToolContext toolContext,
   required bool verboseLogging,
   bool configOnly = false,
@@ -231,8 +233,8 @@ Future<void> buildMacOS({
     flutterProject.macos,
     buildDirectoryPath,
     buildInfo.mode,
-    cocoaPods: globals.cocoaPods,
-    templateRenderer: globals.templateRenderer,
+    cocoaPods: cocoaPods,
+    templateRenderer: templateRenderer,
     toolContext: toolContext,
   );
   // If the xcfilelists do not exist, create empty version.

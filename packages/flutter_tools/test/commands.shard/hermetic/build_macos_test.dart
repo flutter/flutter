@@ -757,6 +757,7 @@ STDERR STUFF
       appleContext: FakeAppleContext(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       featureFlags: TestFeatureFlags(),
+      templateRenderer: FakeTemplateRenderer(),
       toolContext: FakeToolContext(),
       verboseHelp: false,
     ).supported;
@@ -774,6 +775,7 @@ STDERR STUFF
           appleContext: FakeAppleContext(),
           buildSystem: TestBuildSystem.all(BuildResult(success: true)),
           featureFlags: TestFeatureFlags(),
+          templateRenderer: FakeTemplateRenderer(),
           toolContext: FakeToolContext(platform: macosPlatform),
           verboseHelp: false,
         ).hidden,
@@ -794,6 +796,7 @@ STDERR STUFF
           appleContext: FakeAppleContext(),
           buildSystem: TestBuildSystem.all(BuildResult(success: true)),
           featureFlags: TestFeatureFlags(isMacOSEnabled: true),
+          templateRenderer: FakeTemplateRenderer(),
           toolContext: FakeToolContext(platform: macosPlatform),
           verboseHelp: false,
         ).hidden,

@@ -9,6 +9,7 @@ import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/os.dart';
+import '../base/template.dart';
 import '../build_info.dart';
 import '../context/apple_context.dart';
 import '../context/tool_context.dart';
@@ -26,12 +27,14 @@ class MacOSDevice extends DesktopDevice {
     required this._analytics,
     required this._appleContext,
     required this._featureFlags,
+    required this._templateRenderer,
     required super.toolContext,
   }) : super('macos', platformType: PlatformType.macos, ephemeral: false);
 
   final Analytics _analytics;
   final AppleContext _appleContext;
   final FeatureFlags _featureFlags;
+  final TemplateRenderer _templateRenderer;
 
   @override
   Future<bool> isSupported() async => true;
@@ -76,6 +79,7 @@ class MacOSDevice extends DesktopDevice {
       featureFlags: _featureFlags,
       flutterProject: projectFactory.fromDirectory(fs.currentDirectory),
       targetOverride: mainPath,
+      templateRenderer: _templateRenderer,
       toolContext: toolContext,
       usingCISystem: usingCISystem,
       verboseLogging: logger.isVerbose,
@@ -113,6 +117,7 @@ class MacOSDevices extends PollingDeviceDiscovery {
     required this._appleContext,
     required this._featureFlags,
     required this._macOSWorkflow,
+    required this._templateRenderer,
     required ToolContext super.toolContext,
   }) : super('macOS devices');
 
@@ -120,6 +125,7 @@ class MacOSDevices extends PollingDeviceDiscovery {
   final AppleContext _appleContext;
   final FeatureFlags _featureFlags;
   final MacOSWorkflow _macOSWorkflow;
+  final TemplateRenderer _templateRenderer;
 
   @override
   bool get supportsPlatform => toolContext.platform.isMacOS;
@@ -140,6 +146,7 @@ class MacOSDevices extends PollingDeviceDiscovery {
         analytics: _analytics,
         appleContext: _appleContext,
         featureFlags: _featureFlags,
+        templateRenderer: _templateRenderer,
         toolContext: toolContext,
       ),
     ];

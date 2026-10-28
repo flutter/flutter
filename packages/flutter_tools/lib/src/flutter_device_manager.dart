@@ -13,6 +13,7 @@ import 'base/config.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'base/platform.dart';
+import 'base/template.dart';
 import 'base/user_messages.dart';
 import 'build_system/build_system.dart';
 import 'build_system/build_targets.dart';
@@ -53,6 +54,7 @@ class FlutterDeviceManager extends DeviceManager {
     required IOSSimulatorUtils iosSimulatorUtils,
     required IOSWorkflow iosWorkflow,
     required MacOSWorkflow macOSWorkflow,
+    required TemplateRenderer templateRenderer,
     required ToolContext toolContext,
     required WindowsWorkflow windowsWorkflow,
     required XCDevice xcDevice,
@@ -95,6 +97,7 @@ class FlutterDeviceManager extends DeviceManager {
         appleContext: appleContext,
         featureFlags: featureFlags,
         macOSWorkflow: macOSWorkflow,
+        templateRenderer: templateRenderer,
         toolContext: toolContext,
       ),
       MacOSDesignedForIPadDevices(iosWorkflow: iosWorkflow, toolContext: toolContext),

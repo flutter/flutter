@@ -657,6 +657,7 @@ class ToolDependencies {
           iosSimulatorUtils: finalIOSSimulatorUtils,
           iosWorkflow: finalIOSWorkflow,
           macOSWorkflow: finalMacOSWorkflow,
+          templateRenderer: templateRenderer,
           toolContext: finalToolContext,
           windowsWorkflow: finalWindowsWorkflow,
           xcDevice: finalXCDevice,

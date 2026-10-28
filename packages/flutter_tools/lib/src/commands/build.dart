@@ -164,6 +164,7 @@ class BuildCommand extends FlutterCommand {
         appleContext: appleContext,
         buildSystem: buildSystem,
         featureFlags: featureFlags,
+        templateRenderer: templateRenderer,
         toolContext: toolContext,
         verboseHelp: verboseHelp,
       ),
