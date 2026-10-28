@@ -41,6 +41,7 @@ final class ConvertedFile {
     this.filesGroups = const <String>{},
     this.linkedStaticLibraries = const <String>{},
     this.extraSources = const <String, List<String>>{},
+    this.interfaceDeps = const <String, List<String>>{},
     this.assume = const <String, GnValue>{},
     this.targetConditions = const <String, String>{},
   });
@@ -116,6 +117,16 @@ final class ConvertedFile {
   /// check, and an error for every other target that includes it (the Mac's
   /// T21: the iOS build's check).
   final Map<String, List<String>> extraSources;
+
+  /// What a shared library's dependents include beyond what GN hands them
+  /// (its public_deps, public_configs and the all-dependent configs that
+  /// reach it, which the converter renders as `interface_deps` of the
+  /// library's `<name>_import`): headers found through an all-dependent
+  /// config's include directory, which GN's check does not follow (OCMock's
+  /// `<OCMock/OCMock.h>` under Source/, ocmock_src's), as a library of the
+  /// headers written in the appendix. By the shared library's name, as
+  /// Bazel labels.
+  final Map<String, List<String>> interfaceDeps;
 
   /// Assumptions for this file over the generation's (gn_eval's
   /// Assumptions.withValues): a platform whose branches of the file are
@@ -1303,6 +1314,18 @@ filegroup(
     '//flutter/shell/platform/darwin/ios',
     condition: 'is_ios',
     filesGroups: <String>{'universal_flutter_framework'},
+    // Headers GN's check would not let the targets own: the embedding's
+    // task queue header, which darwin/common's macOS suite includes (listed
+    // in the framework's sources it is the framework's in GN's eyes, an
+    // error for that suite on an iOS out directory: the Mac's T28), and the
+    // XCTest project's AppDelegate.h (testing/ios, no GN file), which
+    // FlutterViewControllerTest.mm includes. A sandboxed compile needs both.
+    extraSources: <String, List<String>>{
+      'flutter_framework_source': <String>['flutter_task_queue_dispatch.h'],
+      'ios_test_flutter': <String>[
+        '//engine/src/flutter/testing/ios:IosUnitTests/App/AppDelegate.h',
+      ],
+    },
     appendix: '''
 # The embedding's AccessibilityFeatures, which api_check's tests read (the
 # enum mirrors dart:ui's), and its task queue header, which darwin/common's
@@ -2200,6 +2223,15 @@ cc_library(
     '//flutter/third_party/ocmock',
     condition: 'is_ios || is_mac',
     linkedStaticLibraries: <String>{'ocmock'},
+    // A dependent of the dylib (ios_test_flutter) includes `<OCMock/OCMock.h>`
+    // through ocmock_src's all-dependent config (the Source include
+    // directory), which reaches it as `interface_deps` of ocmock_shared's
+    // cc_import; the header files themselves are ocmock_src's, a private
+    // dependency of the dylib, so the headers library below joins the
+    // interface (the Mac's T28).
+    interfaceDeps: <String, List<String>>{
+      'ocmock_shared': <String>['@ocmock//:ocmock_headers'],
+    },
     appendix: '''
 # The headers as the iOS embedding's XCTest project reads them out of the
 # checkout (testing/ios/IosUnitTests: `<OCMock/OCMock.h>` under the Source
@@ -2207,6 +2239,15 @@ cc_library(
 filegroup(
     name = "headers",
     srcs = glob(["Source/OCMock/*.h"]),
+)
+
+# The headers as a dependent of the dylib includes them (ios_test_flutter:
+# `<OCMock/OCMock.h>` under the Source include directory of ocmock_src's
+# all-dependent config), for ocmock_shared's interface.
+cc_library(
+    name = "ocmock_headers",
+    hdrs = glob(["Source/OCMock/*.h"]),
+    includes = ["Source"],
 )
 ''',
   ),
