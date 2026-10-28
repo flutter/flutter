@@ -52,10 +52,6 @@ static fml::jni::ScopedJavaGlobalRef<jclass>* g_hardware_buffer_class = nullptr;
 
 static fml::jni::ScopedJavaGlobalRef<jclass>* g_java_long_class = nullptr;
 
-static fml::jni::ScopedJavaGlobalRef<jclass>* g_bitmap_class = nullptr;
-
-static fml::jni::ScopedJavaGlobalRef<jclass>* g_bitmap_config_class = nullptr;
-
 // Called By Native
 
 static jmethodID g_flutter_callback_info_constructor = nullptr;
@@ -152,12 +148,6 @@ static jmethodID g_request_dart_deferred_library_method = nullptr;
 static jmethodID g_overlay_surface_id_method = nullptr;
 
 static jmethodID g_overlay_surface_surface_method = nullptr;
-
-static jmethodID g_bitmap_create_bitmap_method = nullptr;
-
-static jmethodID g_bitmap_copy_pixels_from_buffer_method = nullptr;
-
-static jmethodID g_bitmap_config_value_of = nullptr;
 
 // Mutators
 static fml::jni::ScopedJavaGlobalRef<jclass>* g_mutators_stack_class = nullptr;
@@ -444,39 +434,6 @@ static bool IsSurfaceControlEnabled(JNIEnv* env,
                                     jobject jcaller,
                                     jlong shell_holder) {
   return ANDROID_SHELL_HOLDER->IsSurfaceControlEnabled();
-}
-
-static jobject GetBitmap(JNIEnv* env, jobject jcaller, jlong shell_holder) {
-  auto screenshot = ANDROID_SHELL_HOLDER->Screenshot(
-      Rasterizer::ScreenshotType::UncompressedImage, false);
-  if (screenshot.data == nullptr) {
-    return nullptr;
-  }
-
-  jstring argb = env->NewStringUTF("ARGB_8888");
-  if (argb == nullptr) {
-    return nullptr;
-  }
-
-  jobject bitmap_config = env->CallStaticObjectMethod(
-      g_bitmap_config_class->obj(), g_bitmap_config_value_of, argb);
-  if (bitmap_config == nullptr) {
-    return nullptr;
-  }
-
-  auto bitmap = env->CallStaticObjectMethod(
-      g_bitmap_class->obj(), g_bitmap_create_bitmap_method,
-      screenshot.frame_size.width, screenshot.frame_size.height, bitmap_config);
-
-  fml::jni::ScopedJavaLocalRef<jobject> buffer(
-      env,
-      env->NewDirectByteBuffer(const_cast<uint8_t*>(screenshot.data->bytes()),
-                               screenshot.data->size()));
-
-  env->CallVoidMethod(bitmap, g_bitmap_copy_pixels_from_buffer_method,
-                      buffer.obj());
-
-  return bitmap;
 }
 
 static void DispatchPlatformMessage(JNIEnv* env,
@@ -814,11 +771,6 @@ bool RegisterApi(JNIEnv* env) {
 
       // Start of methods from FlutterView
       {
-          .name = "nativeGetBitmap",
-          .signature = "(J)Landroid/graphics/Bitmap;",
-          .fnPtr = reinterpret_cast<void*>(&GetBitmap),
-      },
-      {
           .name = "nativeSurfaceCreated",
           .signature = "(JLandroid/view/Surface;)V",
           .fnPtr = reinterpret_cast<void*>(&SurfaceCreated),
@@ -1006,43 +958,6 @@ bool RegisterApi(JNIEnv* env) {
   if (g_overlay_surface_surface_method == nullptr) {
     FML_LOG(ERROR)
         << "Could not locate FlutterOverlaySurface#getSurface() method";
-    return false;
-  }
-
-  g_bitmap_class = new fml::jni::ScopedJavaGlobalRef<jclass>(
-      env, env->FindClass("android/graphics/Bitmap"));
-  if (g_bitmap_class->is_null()) {
-    FML_LOG(ERROR) << "Could not locate Bitmap Class";
-    return false;
-  }
-
-  g_bitmap_create_bitmap_method = env->GetStaticMethodID(
-      g_bitmap_class->obj(), "createBitmap",
-      "(IILandroid/graphics/Bitmap$Config;)Landroid/graphics/Bitmap;");
-  if (g_bitmap_create_bitmap_method == nullptr) {
-    FML_LOG(ERROR) << "Could not locate Bitmap.createBitmap method";
-    return false;
-  }
-
-  g_bitmap_copy_pixels_from_buffer_method = env->GetMethodID(
-      g_bitmap_class->obj(), "copyPixelsFromBuffer", "(Ljava/nio/Buffer;)V");
-  if (g_bitmap_copy_pixels_from_buffer_method == nullptr) {
-    FML_LOG(ERROR) << "Could not locate Bitmap.copyPixelsFromBuffer method";
-    return false;
-  }
-
-  g_bitmap_config_class = new fml::jni::ScopedJavaGlobalRef<jclass>(
-      env, env->FindClass("android/graphics/Bitmap$Config"));
-  if (g_bitmap_config_class->is_null()) {
-    FML_LOG(ERROR) << "Could not locate Bitmap.Config Class";
-    return false;
-  }
-
-  g_bitmap_config_value_of = env->GetStaticMethodID(
-      g_bitmap_config_class->obj(), "valueOf",
-      "(Ljava/lang/String;)Landroid/graphics/Bitmap$Config;");
-  if (g_bitmap_config_value_of == nullptr) {
-    FML_LOG(ERROR) << "Could not locate Bitmap.Config.valueOf method";
     return false;
   }
 

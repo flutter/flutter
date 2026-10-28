@@ -94,9 +94,6 @@ class AndroidShellHolder {
 
   bool IsSurfaceControlEnabled();
 
-  Rasterizer::Screenshot Screenshot(Rasterizer::ScreenshotType type,
-                                    bool base64_encode);
-
   void NotifyLowMemoryWarning();
 
   const std::shared_ptr<PlatformMessageHandler>& GetPlatformMessageHandler()

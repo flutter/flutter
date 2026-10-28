@@ -304,15 +304,6 @@ void AndroidShellHolder::Launch(
   shell_->RunEngine(std::move(config.value()));
 }
 
-Rasterizer::Screenshot AndroidShellHolder::Screenshot(
-    Rasterizer::ScreenshotType type,
-    bool base64_encode) {
-  if (!IsValid()) {
-    return {nullptr, DlISize(), "", Rasterizer::ScreenshotFormat::kUnknown};
-  }
-  return shell_->Screenshot(type, base64_encode);
-}
-
 fml::WeakPtr<PlatformViewAndroid> AndroidShellHolder::GetPlatformView() {
   FML_DCHECK(platform_view_);
   return platform_view_;
