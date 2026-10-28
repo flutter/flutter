@@ -502,6 +502,29 @@ void main() {
     expect(find.text('1'), findsNothing);
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/130069
+  testWidgets('SliverGridDelegateWithMaxCrossAxisExtent lays out with zero cross axis extent', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox(
+            width: 0.0,
+            height: 100.0,
+            child: GridView.extent(
+              maxCrossAxisExtent: 200.0,
+              children: const <Widget>[SizedBox(), SizedBox(), SizedBox()],
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(tester.takeException(), isNull);
+    expect(tester.getSize(find.byType(GridView)), const Size(0.0, 100.0));
+  });
+
   testWidgets('GridView in unbounded context', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
@@ -1011,28 +1034,5 @@ void main() {
         ),
       ),
     );
-  });
-
-  // Regression test for https://github.com/flutter/flutter/issues/130069
-  testWidgets('SliverGridDelegateWithMaxCrossAxisExtent lays out with zero cross axis extent', (
-    WidgetTester tester,
-  ) async {
-    await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: Center(
-          child: SizedBox(
-            width: 0.0,
-            height: 100.0,
-            child: GridView.extent(
-              maxCrossAxisExtent: 200.0,
-              children: const <Widget>[SizedBox(), SizedBox(), SizedBox()],
-            ),
-          ),
-        ),
-      ),
-    );
-    expect(tester.takeException(), isNull);
-    expect(tester.getSize(find.byType(GridView)), const Size(0.0, 100.0));
   });
 }
