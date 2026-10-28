@@ -20,6 +20,7 @@ load("//build_defs/android:build_tools.bzl", "android_build_tools")
 load("//build_defs/dart:dart_test.bzl", "dart_package_tests", "dart_vm_kernel")
 load("//build_defs/dart:pub.bzl", "PUB_WORKSPACE_PACKAGES", "pub_cache", "pub_package_config")
 load("//build_defs/desktop:build_tools.bzl", "linux_build_tools")
+load("//build_defs/repositories:flutter_sdk_cache.bzl", "IOS_USB_ARTIFACTS", "ios_usb_repository")
 load("//build_defs/web:browser_launcher.bzl", "browser_launcher", "display_launcher")
 
 package(default_visibility = ["//visibility:public"])
@@ -229,6 +230,25 @@ _HOST_SDK_STAMP = {
     "//bin/internal:linux_sdk_stamp": "linux-sdk.stamp",
 }
 
+# The iOS USB dependencies (IosUsbArtifacts: libimobiledevice, libusbmuxd,
+# libplist, openssl, libimobiledeviceglue, ios-deploy), universal artifacts
+# the tool checks on every host. On Linux it skips their download and writes
+# their stamps and empty directories itself (the facsimile's directories are
+# the sandbox's, writable); on a Mac it would download them -- and its
+# "[1/6] iOS USB Artifact" progress lines break a debug adapter's protocol
+# (integration.shard/debug_adapter) -- so there the facsimile lays the
+# archives bin/internal/<name>.version pins (flutter_sdk_cache.bzl) with
+# their stamps.
+_IOS_USB_STAMPS = {
+    "//bin/internal:" + artifact.replace("-", "_") + "_stamp": artifact + ".stamp"
+    for artifact in IOS_USB_ARTIFACTS
+} if HOST_OS == "mac" else {}
+
+_IOS_USB_CACHE = {
+    "@" + ios_usb_repository(artifact) + "//:files": "artifacts/" + artifact
+    for artifact in IOS_USB_ARTIFACTS
+} if HOST_OS == "mac" else {}
+
 _TOOL_CACHE_FILES = _PUB_CACHE_FILES | {
     ":flutter_tools_snapshot": "flutter_tools.snapshot",
     "//engine/src/flutter/build/archives:host_engine_directory": "artifacts/engine/" + _HOST_ENGINE,
@@ -241,12 +261,12 @@ _TOOL_CACHE_FILES = _PUB_CACHE_FILES | {
     "//bin/internal:font_subset_stamp": "font-subset.stamp",
     "//bin/internal:material_fonts_stamp": "material_fonts.stamp",
     "//bin/internal:gradle_wrapper_stamp": "gradle_wrapper.stamp",
-} | _HOST_SDK_STAMP
+} | _HOST_SDK_STAMP | _IOS_USB_STAMPS
 
 _TOOL_CACHE = _PUB_CACHE | {
     "@material_fonts//:fonts": "artifacts/material_fonts",
     "//engine/src/flutter/lib/gpu:dart_sources": "pkg/flutter_gpu",
-}
+} | _IOS_USB_CACHE
 
 _TOOL_SDK_FILES = {
     ":flutter_launcher": "bin/flutter",
