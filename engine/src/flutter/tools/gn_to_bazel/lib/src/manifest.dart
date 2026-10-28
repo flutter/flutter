@@ -1150,9 +1150,10 @@ filegroup(
   // shell/platform:platform and darwin) and `universal_flutter_framework`
   // are groups of things to build over the packaging actions, which nothing
   // links. Its Objective-C suite (gtest over OCMock and the fixtures' Dart
-  // entry point) and its Swift Testing suite convert; the umbrella-import
-  // check links against the assembled bundle in the build directory
-  // (`-F$root_out_dir`), which a cc rule cannot name yet (research/20 §11).
+  // entry point) and its Swift Testing suite convert, and so does the
+  // umbrella-import check, which links against the bundle assembled in the
+  // build directory (`-F$root_out_dir`): framework_module_check assembles
+  // the bundle for its own compile and link.
   ConvertedFile(
     '//flutter/shell/platform/darwin/macos',
     condition: 'is_mac',
@@ -1163,12 +1164,6 @@ filegroup(
     // macOS shell is built for the Mac that builds it (tools/gn's --mac-cpu
     // is the bot's own CPU on every builder of mac_host_engine.json).
     assume: macHostAssumptions,
-    skip: <String, String>{
-      '_generate_symlinks_and_verify_framework_module':
-          r'a shared library linked against the assembled FlutterMacOS.framework in the build directory '
-          r'(-F$root_out_dir, frameworks = ["FlutterMacOS.framework"]): a verification target that '
-          'ships nothing, for a rule that takes the bundle as a link input (research/20 §11)',
-    },
   ),
   // The darwin platforms' group: `macos` on a Mac (under
   // enable_desktop_embeddings), the iOS framework on iOS; what
