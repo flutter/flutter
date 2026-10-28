@@ -64,6 +64,7 @@ class BuildSwiftPackage extends BuildSubCommand {
   BuildSwiftPackage({
     required this._analytics,
     required this._buildSystem,
+    required this._cocoaPods,
     required this._codesign,
     required this._featureFlags,
     required this._templateRenderer,
@@ -118,6 +119,7 @@ class BuildSwiftPackage extends BuildSubCommand {
   final TemplateRenderer _templateRenderer;
   final FeatureFlags _featureFlags;
   final DarwinAddToAppCodesigning _codesign;
+  final CocoaPods _cocoaPods;
 
   @override
   ToolContext get toolContext => super.toolContext!;
@@ -207,6 +209,7 @@ class BuildSwiftPackage extends BuildSubCommand {
   late BuildSwiftPackageUtils utils = BuildSwiftPackageUtils(
     analytics: _analytics,
     buildSystem: _buildSystem,
+    cocoaPods: _cocoaPods,
     flutterRoot: Cache.flutterRoot!,
     project: project,
     templateRenderer: _templateRenderer,
@@ -249,22 +252,17 @@ class BuildSwiftPackage extends BuildSubCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final FileSystem fileSystem = toolContext.fs;
+    final FileSystem fs = toolContext.fs;
     final String outputArgument =
         getValue(_output) ??
-        fileSystem.path.join(
-          fileSystem.currentDirectory.path,
-          'build',
-          _targetPlatform.name,
-          'SwiftPackages',
-        );
+        fs.path.join(fs.currentDirectory.path, 'build', _targetPlatform.name, 'SwiftPackages');
 
     if (outputArgument.isEmpty) {
       throwToolExit('Please provide a value for --output.');
     }
 
-    final Directory outputDirectory = fileSystem.directory(
-      fileSystem.path.absolute(fileSystem.path.normalize(outputArgument)),
+    final Directory outputDirectory = fs.directory(
+      fs.path.absolute(fs.path.normalize(outputArgument)),
     );
     final Directory cacheDirectory = outputDirectory.childDirectory('.cache')
       ..createSync(recursive: true);
@@ -1584,6 +1582,9 @@ class CocoaPodPluginDependencies {
       xcodeProject,
       _targetPlatform.buildDirectory(config: config, fileSystem: fileSystem),
       buildInfo.mode,
+      cocoaPods: _utils.cocoaPods,
+      templateRenderer: _utils.templateRenderer,
+      toolContext: _utils.toolContext,
       // Normal module builds (like when running "flutter build ios" with a module), do not support
       // SwiftPM. Since "flutter build swift-package" builds Swift packages and CocoaPods
       // separately, we need to force SwiftPM to be enabled so that CocoaPods will skip processing
@@ -1591,7 +1592,6 @@ class CocoaPodPluginDependencies {
       // `swift_package_manager_enabled` to be set to true in .flutter-plugins-dependencies, which
       // podhelper.rb then uses to skip processing SwiftPM-compatible pods.
       forceSwiftPM: true,
-      toolContext: _utils.toolContext,
     );
   }
 
@@ -2166,6 +2166,7 @@ class BuildSwiftPackageUtils {
   BuildSwiftPackageUtils({
     required this.analytics,
     required this.buildSystem,
+    required this.cocoaPods,
     required this.flutterRoot,
     required this.project,
     required this.templateRenderer,
@@ -2175,6 +2176,7 @@ class BuildSwiftPackageUtils {
 
   final Analytics analytics;
   final BuildSystem buildSystem;
+  final CocoaPods cocoaPods;
   final String flutterRoot;
   final FlutterProject project;
   final TemplateRenderer templateRenderer;

@@ -13,6 +13,7 @@ import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
+import '../base/template.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
 import '../build_system/targets/ios.dart';
@@ -37,10 +38,10 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
     required this._appleContext,
     required this._buildSystem,
     required this.codesign,
+    required this.templateRenderer,
     required ToolContext super.toolContext,
     required super.verboseHelp,
-  }) : _toolContext = toolContext,
-       super(logger: toolContext.logger) {
+  }) : super(logger: toolContext.logger) {
     registerOptionBundle(const DarwinAddToAppOptionsBundle());
     argParser.addDescriptors(const <OptionDescriptor<Object?>>[
       debugMode,
@@ -107,10 +108,10 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
   );
 
   final DarwinAddToAppCodesigning codesign;
+  final TemplateRenderer templateRenderer;
 
   final AppleContext _appleContext;
   final BuildSystem _buildSystem;
-  final ToolContext _toolContext;
 
   AppleContext get appleContext => _appleContext;
 
@@ -119,16 +120,16 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
 
   @protected
   @override
-  ToolContext get toolContext => _toolContext;
+  ToolContext get toolContext => super.toolContext!;
 
   @protected
-  Cache get cache => _toolContext.cache;
+  Cache get cache => toolContext.cache;
 
   @protected
-  Platform get platform => _toolContext.platform;
+  Platform get platform => toolContext.platform;
 
   @protected
-  FlutterVersion get flutterVersion => _toolContext.flutterVersion;
+  FlutterVersion get flutterVersion => toolContext.flutterVersion;
 
   Future<List<BuildInfo>> getBuildInfos() async {
     return <BuildInfo>[
@@ -294,7 +295,7 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
     Directory hostAppRoot,
     PlistParser plistParser,
   ) async {
-    final ToolContext(:FileSystem fs, :Logger logger) = _toolContext;
+    final ToolContext(:FileSystem fs, :Logger logger) = toolContext;
 
     final File projectFile = hostAppRoot
         .childDirectory('Pods')
@@ -466,6 +467,7 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
     required super.appleContext,
     required super.buildSystem,
     required super.codesign,
+    required super.templateRenderer,
     required super.toolContext,
     required super.verboseHelp,
   }) {
@@ -612,8 +614,10 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
           project.ios,
           getIosBuildDirectory(config: config, fileSystem: fs),
           buildInfo.mode,
-          forceCocoaPodsOnly: true,
+          cocoaPods: appleContext.cocoaPods,
+          templateRenderer: templateRenderer,
           toolContext: toolContext,
+          forceCocoaPodsOnly: true,
         );
         if (hasPlugins(project)) {
           await _producePlugins(

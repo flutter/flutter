@@ -604,7 +604,7 @@ String getNameForDeviceConnectionInterface(DeviceConnectionInterface connectionI
 abstract class Device {
   Device(
     this.id, {
-    required Logger logger,
+    required this.logger,
     this._toolContext,
     required this.category,
     required this.platformType,
@@ -612,6 +612,11 @@ abstract class Device {
   }) : dds = DartDevelopmentService(logger: logger);
 
   final String id;
+
+  /// The [Logger] used by this device.
+  @protected
+  final Logger logger;
+
   final ToolContext? _toolContext;
 
   @protected
