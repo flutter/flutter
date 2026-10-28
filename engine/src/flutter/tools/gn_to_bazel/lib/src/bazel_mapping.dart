@@ -1168,6 +1168,9 @@ final Map<String, String> conditionSettings = Map<String, String>.unmodifiable(<
   // || is_mac`, read in Bazel terms (the group in //flutter/testing's
   // appendix).
   'enable_unittests': '//engine/src/flutter/testing:unittests_enabled',
+  // testing.gni's enable_ios_unittests (`is_ios && flutter_runtime_mode ==
+  // "debug"`): the iOS embedding's XCTest suite.
+  'enable_ios_unittests': '//engine/src/flutter/testing:ios_unittests_enabled',
   // impeller/tools/args.gni's backend arguments: flags whose defaults GN
   // derives from the platform (impeller/tools/BUILD.bazel).
   'impeller_enable_metal': '//engine/src/flutter/impeller/tools:metal',
@@ -2598,12 +2601,6 @@ Assumptions generationAssumptions() {
     // it (the clang, gn and ninja under flutter/buildtools/<host>): read
     // by the iOS shell for the ASan runtime's path.
     'buildtools_path': const GnStringValue('//flutter/buildtools'),
-    // testing.gni: `is_ios && flutter_runtime_mode == "debug"` -- the
-    // XCTest suites of the iOS embedding (ios_test_flutter, run through a
-    // simulator by run_tests.py), which the iOS port's test phase takes up
-    // (research/21 §3, I3); until then the iOS builds have no unit tests,
-    // as the device and release builds have none in GN.
-    'enable_ios_unittests': const GnBoolValue(false),
     'is_minimal_linux': const GnBoolValue(false),
     'is_official_build': const GnBoolValue(true),
     // tools/gn's --wasm-use-dwarf (DWARF rather than source maps for a

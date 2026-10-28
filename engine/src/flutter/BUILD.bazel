@@ -88,6 +88,11 @@ filegroup(
         ],
         "//conditions:default": [],
     }) + select({
+        "//engine/src/flutter/testing:ios_unittests_enabled": [
+            "//engine/src/flutter/shell/platform/darwin/ios:ios_test_flutter",  # enable_ios_unittests
+        ],
+        "//conditions:default": [],
+    }) + select({
         "//engine/src/flutter/testing:unittests_enabled": [
             "//engine/src/flutter/assets:assets_unittests",  # enable_unittests
             "//engine/src/flutter/display_list:display_list_rendertests",  # enable_unittests

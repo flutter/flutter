@@ -333,6 +333,9 @@ flutter_swift_library(
     bridge_header = "InternalFlutterSwiftCommon-Bridging-Header.h",
     includes = ["."],
     swiftflags = select({
+        ":when_is_ios_and_enable_ios_unittests": [
+            "-enable-testing",  # is_ios && enable_ios_unittests || (is_mac && enable_unittests)
+        ],
         ":when_is_mac_and_enable_unittests": [
             "-enable-testing",  # is_ios && enable_ios_unittests || (is_mac && enable_unittests)
         ],
@@ -501,6 +504,9 @@ flutter_swift_library(
         "//conditions:default": [],
     }),
     swiftflags = select({
+        ":when_is_ios_and_enable_ios_unittests": [
+            "-enable-testing",  # is_ios && enable_ios_unittests || (is_mac && enable_unittests)
+        ],
         ":when_is_mac_and_enable_unittests": [
             "-enable-testing",  # is_ios && enable_ios_unittests || (is_mac && enable_unittests)
         ],
@@ -662,6 +668,9 @@ flutter_swift_library(
         "Testing",
     ],
     swiftflags = select({
+        ":when_is_ios_and_enable_ios_unittests": [
+            "-enable-testing",  # is_ios && enable_ios_unittests || (is_mac && enable_unittests)
+        ],
         ":when_is_mac_and_enable_unittests": [
             "-enable-testing",  # is_ios && enable_ios_unittests || (is_mac && enable_unittests)
         ],
@@ -742,6 +751,9 @@ flutter_swift_library(
     includes = ["."],
     module_name = "framework_common_swift_unittests",
     swiftflags = select({
+        ":when_is_ios_and_enable_ios_unittests": [
+            "-enable-testing",  # is_ios && enable_ios_unittests || (is_mac && enable_unittests)
+        ],
         ":when_is_mac_and_enable_unittests": [
             "-enable-testing",  # is_ios && enable_ios_unittests || (is_mac && enable_unittests)
         ],
@@ -1055,6 +1067,15 @@ selects.config_setting_group(
     match_all = [
         "@platforms//os:ios",
         "//engine/src/flutter/build/bazel:ios_simulator_disabled",
+    ],
+)
+
+# `is_ios && enable_ios_unittests`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_is_ios_and_enable_ios_unittests",
+    match_all = [
+        "@platforms//os:ios",
+        "//engine/src/flutter/testing:ios_unittests_enabled",
     ],
 )
 

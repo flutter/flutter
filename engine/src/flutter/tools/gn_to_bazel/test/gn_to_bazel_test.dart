@@ -713,6 +713,9 @@ source_set("x") {
         // A setting (build/bazel:embedder_for_target); off on the host.
         'embedder_for_target',
         'enable_backtrace',
+        // The iOS embedding's XCTest suite's condition, a setting (testing's
+        // ios_unittests_enabled); off on the host.
+        'enable_ios_unittests',
         'enable_unittests',
         'full_target_platform_name',
         'host_toolchain',
