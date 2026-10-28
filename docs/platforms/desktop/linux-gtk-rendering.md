@@ -164,6 +164,12 @@ attempts DMA-BUF by default. Debug logs identify the selected presentation path.
 The export completes before publication and stays alive until GTK releases it,
 so engine backing-store reuse cannot overwrite a displayed frame.
 
+GTK frame callbacks now schedule Flutter vsync from the primary view's GTK frame
+clock, with a timer fallback when the view is unmapped. Vulkan rendering waits
+on a marker fence in Impeller's graphics queue before handing the frame to the
+compositor; fence setup failures retain the device-idle safety path. Multiple
+Flutter views still need per-view display-clock selection.
+
 This route makes one GPU copy and waits for completion. It avoids CPU pixel
 processing and GTK upload when import succeeds, but is not zero-copy rendering.
 The optional graphics-offload wrapper can consume the exported texture; actual
@@ -173,7 +179,10 @@ their existing RGBA callback. GL-only plugins require the OpenGL renderer.
 
 See [Vulkan architecture and validation](../../../engine/src/flutter/shell/platform/linux/testing/VULKAN.md)
 and the [compute investigation](../../../engine/src/flutter/shell/platform/linux/testing/COMPUTE.md).
-Performance comparisons for the new Vulkan path are still required.
+A local profile comparison now records GTK3 OpenGL, GTK4 OpenGL and GTK4
+Vulkan frame timings, CPU use, DRM GPU activity and memory in the sibling plans
+repository. It measures engine completion rather than compositor presentation;
+more workloads and Wayland presentation feedback remain follow-up work.
 
 Renderer names alone do not guarantee a path. The runtime API, EGL extensions,
 format/modifier acceptance, and frame size must all pass the compositor's

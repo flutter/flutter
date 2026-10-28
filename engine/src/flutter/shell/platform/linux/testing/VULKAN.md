@@ -20,8 +20,12 @@ project or engine switches. This is not a new framework context override.
   There are no mandatory Vulkan library imports and no newer GTK API dependency.
 - Both Vulkan procedure resolvers are intercepted, including resolver pointers
   returned by other resolvers. Queue submission, queue waits and device waits
-  share a lock, including across multiple engines. Device feature enablement
-  matches the Impeller capability chain for the advertised extensions.
+  share a per-device lock in `fl_vulkan_queue_sync`. Registry lookup uses a short
+  separate lock; no driver call holds it. An idle wait on one engine therefore
+  does not serialize submissions on another engine's device. All users must retain
+  a device lease through the operation; unregister follows the final lease release.
+  Device feature enablement matches the Impeller capability chain for the
+  advertised extensions.
 - `embedder_render_target_vulkan_impeller` wraps compositor images as Impeller
   attachments with MSAA and depth/stencil transients. The shared embedder waits
   for Vulkan completion before invoking its compositor presentation callback.
@@ -145,6 +149,37 @@ catch flips and channel swaps. Run GL and Vulkan GTK presentation separately.
 Retain reports, logs, hashes and screenshots in the sibling plans repository
 under `gtk4/test-results/`; keep generated evidence out of the Flutter source
 repository. Performance benchmarking and the memory comparison remain separate.
+
+## Frame pacing follow-up
+
+GTK frame-clock scheduling now returns Flutter vsync batons on the GTK main
+context. For the primary view, frame start and refresh interval come from its
+`GdkFrameClock`; an unmapped view uses a 16 ms timer. Multiwindow engines still
+need per-view clock selection, and runtime refresh-rate changes need focused
+coverage.
+
+Before presenting Vulkan backing images, the embedder submits an empty marker
+submission to Impeller's graphics queue and waits for its fence. This preserves
+host completion for Vulkan compositor clients while avoiding a device-wide idle
+that also waits unrelated queues. If fence creation or submission fails, it falls
+back to the device idle path. GTK's snapshot/readback fence still completes the
+subsequent copy before source-image reuse.
+
+The remaining pacing work is to make frame publication asynchronous with a
+bounded in-flight snapshot queue, then measure compositor presentation feedback
+alongside Flutter's engine timings. Pool snapshot/upload allocations after
+consumer release, with correct foreign-queue ownership reacquisition. Benchmark
+frame intervals and missed deadlines, including p95/p99, alongside CPU/GPU time
+and memory; cover multiple windows, refresh rates and resize. A GTK texture
+capture does not prove compositor presentation.
+
+The queue synchronization tests use blocked fake driver calls to verify both
+cross-device progress and same-device exclusion without a GPU. An engine test
+checks that vsync batons return on the GTK main context. Real-driver tests cover
+pixels and image lifetime. The frame-fence benchmark compares GTK3 OpenGL,
+GTK4 OpenGL and GTK4 Vulkan under the same Wayland session; its reports live in
+the sibling plans repository. These are engine/compositor timing samples, not
+input-to-photon or scanout measurements.
 
 ## Upstream work
 
