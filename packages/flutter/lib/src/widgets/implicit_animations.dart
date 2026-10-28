@@ -312,7 +312,7 @@ abstract class ImplicitlyAnimatedWidget extends StatefulWidget {
   /// even when that setting is active.
   ///
   /// Changing this value on an existing widget affects animations started
-  /// afterwards. An animation that is already running keeps the duration it
+  /// afterwards. An animation that is already running keeps the behavior it
   /// started with.
   ///
   /// See also:

@@ -315,7 +315,7 @@ class AnimationController extends Animation<double>
   /// [AnimationController.unbounded] constructor.
   ///
   /// Changing this value affects animations started afterwards. An animation
-  /// that is already running keeps the duration it started with.
+  /// that is already running keeps the behavior it started with.
   AnimationBehavior animationBehavior;
 
   /// Returns an [Animation<double>] for this animation controller, so that a

@@ -1084,6 +1084,21 @@ void main() {
       debugSemanticsDisableAnimations = null;
       controller.dispose();
     });
+
+    test('changing animationBehavior does not affect a running animation', () {
+      debugSemanticsDisableAnimations = true;
+      addTearDown(() => debugSemanticsDisableAnimations = null);
+      final controller = AnimationController(vsync: const TestVSync());
+      addTearDown(controller.dispose);
+
+      controller.animateTo(1.0, duration: const Duration(milliseconds: 100));
+      tick(Duration.zero);
+      controller.animationBehavior = AnimationBehavior.preserve;
+      // Still runs at 5% of 100ms, because the scale was captured at start.
+      tick(const Duration(milliseconds: 6));
+      expect(controller.value, 1.0);
+      expect(controller.status, AnimationStatus.completed);
+    });
   });
 
   test('AnimationController methods assert _ticker is not null', () {
