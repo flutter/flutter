@@ -285,9 +285,8 @@ class Table extends RenderObjectWidget {
   /// The style to use when painting the boundary and interior divisions of the table.
   ///
   /// A [TableBorderPainter] skips the inner borders inside cells that span
-  /// several columns or rows. So does a [TableBorder] created by one of its
-  /// own constructors, but a subclass of the deprecated [TableBorder] is
-  /// painted without taking spans into account.
+  /// several columns or rows. Any other [TableBorder] is painted without
+  /// taking spans into account.
   final TableBorder? border;
 
   /// How cells that do not explicitly specify a vertical alignment are aligned vertically.

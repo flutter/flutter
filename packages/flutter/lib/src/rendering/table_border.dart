@@ -19,8 +19,7 @@ import 'table.dart';
 ///
 /// Deprecated in favor of [TableBorderPainter], which also skips the inner
 /// borders inside cells that span several columns or rows. A [TableBorder]
-/// created by one of its own constructors is still painted that way, but a
-/// subclass of [TableBorder] is painted without taking spans into account.
+/// is painted without taking spans into account.
 @Deprecated(
   'Use TableBorderPainter instead, which also skips the inner borders inside spanning cells. '
   'This feature was deprecated after v3.50.0-0.2.pre.',

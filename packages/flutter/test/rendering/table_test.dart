@@ -1079,6 +1079,14 @@ void main() {
       Rect.fromLTRB(200.0, 50.0, 300.0, 50.0),
     ];
 
+    // The inner borders of the table above when they are painted without
+    // taking the span into account.
+    const unspannedInnerBorders = <Rect>[
+      Rect.fromLTRB(100.0, 0.0, 100.0, 100.0),
+      Rect.fromLTRB(200.0, 0.0, 200.0, 100.0),
+      Rect.fromLTRB(0.0, 50.0, 300.0, 50.0),
+    ];
+
     const inside = BorderSide();
 
     test('TableBorderPainter skips the inner borders inside a span', () {
@@ -1106,33 +1114,19 @@ void main() {
       );
     });
 
-    test('a TableBorder paints spans like a TableBorderPainter', () {
-      final RenderTable table = spanningTable(const TableBorder.symmetric(inside: inside));
+    test('a TableBorder is painted without spans', () {
       expect(
-        _innerBorderSegments(table),
-        unorderedEquals(
-          _innerBorderSegments(spanningTable(const TableBorderPainter.symmetric(inside: inside))),
-        ),
+        _innerBorderSegments(spanningTable(const TableBorder.symmetric(inside: inside))),
+        unorderedEquals(unspannedInnerBorders),
       );
-
-      // Without inner sides, the new border paints no inner borders.
-      table.border = const TableBorder.symmetric(outside: BorderSide());
-      expect(_innerBorderSegments(table), isEmpty);
     });
 
-    test('a TableBorder subclass is painted without spans', () {
+    test('a TableBorder subclass is painted with its own paint method', () {
       final log = <String>[];
       final RenderTable table = spanningTable(_LegacyTableBorder(log));
       final List<Rect> segments = _innerBorderSegments(table);
       expect(log, <String>['paint']);
-      expect(
-        segments,
-        unorderedEquals(const <Rect>[
-          Rect.fromLTRB(100.0, 0.0, 100.0, 100.0),
-          Rect.fromLTRB(200.0, 0.0, 200.0, 100.0),
-          Rect.fromLTRB(0.0, 50.0, 300.0, 50.0),
-        ]),
-      );
+      expect(segments, unorderedEquals(unspannedInnerBorders));
     });
 
     test('RenderTable passes the spans and the text direction to a TableBorderPainter', () {
