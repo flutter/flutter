@@ -3,14 +3,18 @@
 // found in the LICENSE file.
 
 import 'package:process/process.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
+import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/os.dart';
 import '../build_info.dart';
+import '../context/apple_context.dart';
 import '../context/tool_context.dart';
 import '../desktop_device.dart';
 import '../device.dart';
+import '../features.dart';
 import '../project.dart';
 import 'application_package.dart';
 import 'build_macos.dart';
@@ -18,8 +22,16 @@ import 'macos_workflow.dart';
 
 /// A device that represents a desktop MacOS target.
 class MacOSDevice extends DesktopDevice {
-  MacOSDevice({required super.toolContext})
-    : super('macos', platformType: PlatformType.macos, ephemeral: false);
+  MacOSDevice({
+    required this._analytics,
+    required this._appleContext,
+    required this._featureFlags,
+    required super.toolContext,
+  }) : super('macos', platformType: PlatformType.macos, ephemeral: false);
+
+  final Analytics _analytics;
+  final AppleContext _appleContext;
+  final FeatureFlags _featureFlags;
 
   @override
   Future<bool> isSupported() async => true;
@@ -55,13 +67,18 @@ class MacOSDevice extends DesktopDevice {
     String? mainPath,
     bool usingCISystem = false,
   }) async {
+    final ToolContext(:FileSystem fs, :Logger logger, :FlutterProjectFactory projectFactory) =
+        toolContext;
     await buildMacOS(
-      flutterProject: FlutterProject.current(),
+      analytics: _analytics,
+      appleContext: _appleContext,
       buildInfo: buildInfo,
+      featureFlags: _featureFlags,
+      flutterProject: projectFactory.fromDirectory(fs.currentDirectory),
       targetOverride: mainPath,
-      verboseLogging: toolContext.logger.isVerbose,
-      usingCISystem: usingCISystem,
       toolContext: toolContext,
+      usingCISystem: usingCISystem,
+      verboseLogging: logger.isVerbose,
     );
   }
 
@@ -91,9 +108,17 @@ class MacOSDevice extends DesktopDevice {
 }
 
 class MacOSDevices extends PollingDeviceDiscovery {
-  MacOSDevices({required this._macOSWorkflow, required ToolContext super.toolContext})
-    : super('macOS devices');
+  MacOSDevices({
+    required this._analytics,
+    required this._appleContext,
+    required this._featureFlags,
+    required this._macOSWorkflow,
+    required ToolContext super.toolContext,
+  }) : super('macOS devices');
 
+  final Analytics _analytics;
+  final AppleContext _appleContext;
+  final FeatureFlags _featureFlags;
   final MacOSWorkflow _macOSWorkflow;
 
   @override
@@ -110,7 +135,14 @@ class MacOSDevices extends PollingDeviceDiscovery {
     if (!canListAnything) {
       return const <Device>[];
     }
-    return <Device>[MacOSDevice(toolContext: toolContext)];
+    return <Device>[
+      MacOSDevice(
+        analytics: _analytics,
+        appleContext: _appleContext,
+        featureFlags: _featureFlags,
+        toolContext: toolContext,
+      ),
+    ];
   }
 
   @override
