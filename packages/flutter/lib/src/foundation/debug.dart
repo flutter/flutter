@@ -1369,14 +1369,11 @@ class _ViewPadding implements ui.ViewPadding {
 }
 
 // The wrapper of each wrapped dispatcher, keyed by the dispatcher so that the
-// wrapper cannot outlive it. In an application that is one dispatcher, the
-// engine's; there are more when a binding supplies a dispatcher of its own and
-// wraps it, and in tests that wrap fakes. A change of an override is announced
-// on every one of them, so that it reaches whichever dispatcher the framework
-// registered its callbacks on. An Expando cannot be enumerated, so the wrappers
-// are also kept in a list, weakly; dead references are pruned whenever one is
-// added, which bounds the list by the number of live wrappers plus the ones
-// that died since.
+// wrapper cannot outlive it. An application has one dispatcher, the engine's.
+// A binding that supplies and wraps a dispatcher of its own adds another, as
+// do tests that wrap fakes. A change of an override is announced on every one
+// of them, so that it reaches whichever dispatcher the framework registered
+// its callbacks on. The list is what makes that possible.
 final Expando<_DebugViewMetricsPlatformDispatcher> _debugDispatcherWrappers =
     Expando<_DebugViewMetricsPlatformDispatcher>();
 final List<WeakReference<_DebugViewMetricsPlatformDispatcher>> _debugWrappedDispatchers =
