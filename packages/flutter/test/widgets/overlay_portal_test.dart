@@ -3117,6 +3117,24 @@ void main() {
         scrollController.jumpTo(0.0);
         _PaintOrder.paintOrder.clear();
         await tester.pump();
+        // The overlay child is attached but has never been laid out. The
+        // kept-alive item is offstage, so the finder must not skip offstage.
+        expect(
+          tester
+              .renderObject<RenderBox>(
+                find.byKey(_KeepAliveOverlayPortalItem.overlayKey, skipOffstage: false),
+              )
+              .attached,
+          isTrue,
+        );
+        expect(
+          tester
+              .renderObject<RenderBox>(
+                find.byKey(_KeepAliveOverlayPortalItem.overlayKey, skipOffstage: false),
+              )
+              .hasSize,
+          isFalse,
+        );
         expect(tester.takeException(), isNull);
         expect(_PaintOrder.paintOrder, isEmpty);
         if (semantics != null) {
