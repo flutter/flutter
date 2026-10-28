@@ -6,6 +6,8 @@
 
 #include <cmath>
 
+#include "flutter/fml/trace_event.h"
+
 #include "flutter/shell/platform/linux/fl_linux_gtk4_debug.h"
 #include "flutter/shell/platform/linux/fl_vulkan_manager.h"
 
@@ -29,6 +31,7 @@ G_DEFINE_TYPE(FlCompositorVulkan,
 static gboolean present_layers(FlCompositor* compositor,
                                const FlutterLayer** layers,
                                size_t count) {
+  TRACE_EVENT0("flutter", "VulkanPresentLayers");
   auto* self = FL_COMPOSITOR_VULKAN(compositor);
   size_t width = 0;
   size_t height = 0;
@@ -183,9 +186,11 @@ static GdkTexture* acquire_texture(FlCompositor* compositor,
                                    size_t width,
                                    size_t height,
                                    gboolean wait_for_frame) {
+  TRACE_EVENT0("flutter", "VulkanAcquireTexture");
   auto* self = FL_COMPOSITOR_VULKAN(compositor);
   g_autoptr(GMutexLocker) lock = g_mutex_locker_new(&self->frame_mutex);
   if (wait_for_frame) {
+    TRACE_EVENT0("flutter", "VulkanAcquireFrameWait");
     const gint64 deadline =
         g_get_monotonic_time() + kCompositorRenderTimeoutMicroseconds;
     while ((self->width != width || self->height != height) &&

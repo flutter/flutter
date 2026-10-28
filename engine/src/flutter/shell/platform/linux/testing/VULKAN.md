@@ -238,6 +238,18 @@ separate allocation/copy work from the retained host completion wait. Pooling
 removes repeated resource creation; it does not remove the GPU copy or make
 publication asynchronous.
 
+For pacing investigations, the Embedder timeline stream also contains
+`VulkanGraphicsCompletion` (marker fence creation, submission and host wait),
+`VulkanGraphicsFenceWait` (the wait itself), `VulkanPresentLayers` (snapshot or
+readback publication), and `VulkanAcquireTexture` (GTK-side frame acquisition
+and texture import). `VulkanAcquireFrameWait` identifies size-dependent frame
+waiting within acquisition. These are CPU-side scopes, not GPU timestamps;
+parent and child durations overlap and must not be added. Collect through the
+Dart VM service in a diagnostic run and verify the timeline buffer covers the
+measured frame window. Keep tracing disabled for primary throughput comparisons.
+Engine raster completion and these scopes do not establish compositor scanout;
+use actual presentation feedback separately.
+
 `FlVulkanSnapshotPoolTest` uses a driver stand-in to check steady-state resource
 counts, retained leases, pool exhaustion/recovery, unready DMA-BUFs, resize,
 failed completion and cleanup outside the texture-release callback. The real

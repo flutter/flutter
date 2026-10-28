@@ -9,6 +9,7 @@
 #include <utility>
 
 #include "flutter/common/constants.h"
+#include "flutter/fml/trace_event.h"
 #include "flutter/shell/platform/embedder/embedder_layers.h"
 #include "flutter/shell/platform/embedder/embedder_render_target.h"
 #include "third_party/skia/include/gpu/ganesh/GrDirectContext.h"
@@ -33,6 +34,7 @@ static bool WaitForVulkanGraphicsQueue(
                            impeller::Context::BackendType::kVulkan) {
     return true;
   }
+  TRACE_EVENT0("flutter", "VulkanGraphicsCompletion");
   auto& context = impeller::ContextVK::Cast(*aiks_context->GetContext());
   auto [fence_result, fence] = context.GetDevice().createFenceUnique({});
   if (fence_result != impeller::vk::Result::eSuccess) {
@@ -42,6 +44,7 @@ static bool WaitForVulkanGraphicsQueue(
       impeller::vk::Result::eSuccess) {
     return false;
   }
+  TRACE_EVENT0("flutter", "VulkanGraphicsFenceWait");
   return context.GetDevice().waitForFences(
              *fence, true, std::numeric_limits<uint64_t>::max()) ==
          impeller::vk::Result::eSuccess;
