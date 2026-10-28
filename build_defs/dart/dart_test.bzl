@@ -45,6 +45,35 @@ load("//build_defs/dart:pub.bzl", "PubCacheInfo", "PubPackageConfigInfo", "pub_p
 # Where test_core's precompiled mode looks for the package configuration.
 _PACKAGE_CONFIG = ".dart_tool/package_config.json"
 
+# The launcher's shell function for `writable` (see the attribute): a path
+# of the runfiles tree made writable. Its runfiles links are made again from
+# the manifest beside the tree (`<test>.runfiles/MANIFEST`: `_main/<path>
+# <target>` per file, a directory output as one entry), which an unsandboxed
+# test's real runfiles tree needs -- the last run's copies stand there --,
+# then a directory (or a link to one: a directory output of the build) is
+# copied beside itself with the links followed (cp -RL, as BSD and GNU cp
+# both have it) and moved into place, and a file's real copy is made first,
+# the link removed, the copy made (BSD cp has no --remove-destination).
+_WRITABLE_FUNCTION = """writable_path() {
+  local f="$1" manifest="$root/../MANIFEST" rel target
+  if [ -f "$manifest" ]; then
+    rm -rf "$root/$f"
+    while IFS=' ' read -r rel target; do
+      rel="${rel#_main/}"
+      if [ -n "$target" ]; then
+        mkdir -p "$(dirname "$root/$rel")" && ln -sfn "$target" "$root/$rel"
+      fi
+    done < <(awk -v p="_main/$f" '$1 == p || index($1, p "/") == 1' "$manifest")
+  fi
+  if [ -d "$root/$f" ]; then
+    cp -RL "$root/$f" "$root/$f.writable" && rm -rf "$root/$f" && mv "$root/$f.writable" "$root/$f" && chmod -R u+w "$root/$f"
+  elif [ -L "$root/$f" ]; then
+    local real
+    real="$(readlink -f "$root/$f")" && rm -f "$root/$f" && cp "$real" "$root/$f" && chmod u+w "$root/$f"
+  fi
+}
+"""
+
 ToolEnvironmentInfo = provider(
     doc = "What a test exports for the programs it runs (dart_test's `tools`): variables naming directories of the runfiles, and others.",
     fields = {
@@ -386,15 +415,14 @@ mkdir -p "$root/bin/cache"
             # lock), copied over their symlinks into the writable runfiles
             # tree so that the source stays as it is -- or whole directories
             # of them (an Xcode project the tool migrates), their trees
-            # copied with the links followed.
-            writable = "".join([
-                # A directory -- or a link to one, the facsimile's engine
-                # directories -- is copied beside itself (cp -RL: the links
-                # followed, as BSD and GNU cp both have it) and moved into
-                # place; a file's real copy is made first, the link removed,
-                # the copy made: BSD cp (a Mac's) has no --remove-destination.
-                ("if [ -d \"$root/{f}\" ]; then cp -RL \"$root/{f}\" \"$root/{f}.writable\" && rm -rf \"$root/{f}\" && mv \"$root/{f}.writable\" \"$root/{f}\" && chmod -R u+w \"$root/{f}\"; " +
-                 "elif [ -L \"$root/{f}\" ]; then real=\"$(readlink -f \"$root/{f}\")\" && rm -f \"$root/{f}\" && cp \"$real\" \"$root/{f}\" && chmod u+w \"$root/{f}\"; fi\n").format(f = f)
+            # copied with the links followed. An unsandboxed test runs in
+            # the real runfiles tree, where the last run's copies would
+            # stand: each path's links are made again from the runfiles
+            # manifest first (every file of the tree, or a directory output
+            # as one entry), so that a run starts from the sources as they
+            # are.
+            writable = (_WRITABLE_FUNCTION if ctx.attr.writable else "") + "".join([
+                "writable_path \"{f}\"\n".format(f = f)
                 for f in ctx.attr.writable
             ]),
             dart = dart[0].short_path,
