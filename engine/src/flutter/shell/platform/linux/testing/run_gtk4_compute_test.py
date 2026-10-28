@@ -30,7 +30,21 @@ def main():
       help='Require a GTK widget snapshot from the compute_snapshot.h runner helper'
   )
   parser.add_argument('--display-backend', choices=['x11', 'wayland'], default='x11')
+  parser.add_argument(
+      '--vulkan-presentation',
+      choices=['dmabuf', 'readback'],
+      help='Require the observed Vulkan presentation path'
+  )
+  parser.add_argument(
+      '--pixel-buffer-texture',
+      action='store_true',
+      help='Verify a native RGBA plugin texture after compute dispatch'
+  )
   args = parser.parse_args()
+  if args.pixel_buffer_texture and not (args.dispatch and args.gtk_snapshot):
+    parser.error('--pixel-buffer-texture requires --dispatch and --gtk-snapshot')
+  if args.vulkan_presentation and args.flutter_renderer != 'vulkan':
+    parser.error('--vulkan-presentation requires --flutter-renderer vulkan')
   binary = args.binary.resolve(strict=True)
   expected_engine = (args.engine_dir / 'libflutter_linux_gtk4.so').resolve(strict=True)
   args.output = args.output.resolve()
@@ -53,7 +67,7 @@ def main():
     env.update(
         COMPUTE_PROBE_OUTPUT=str(result_path),
         GTK_A11Y='none',
-        GDK_DEBUG='no-portals',
+        GDK_DEBUG=','.join(filter(None, [env.get('GDK_DEBUG'), 'no-portals'])),
         GIO_USE_VFS='local',
         FLUTTER_LINUX_GTK_DEBUG='1',
         GDK_BACKEND=args.display_backend,
@@ -69,6 +83,8 @@ def main():
     try:
       with log_path.open('w') as log:
         command = ['dbus-run-session', '--', str(binary)]
+        if args.pixel_buffer_texture:
+          command.append('--pixel-buffer-texture')
         if args.display_backend == 'x11':
           command = ['xvfb-run', '-a', *command]
         app = subprocess.Popen(
@@ -159,19 +175,42 @@ def main():
                 for line in log_path.read_text().splitlines()
                 if line.startswith('COMPUTE_GTK_RENDERER ')
             ]
+            capture_lines = [
+                line.partition('COMPUTE_GTK_CAPTURE_RENDERER ')[2]
+                for line in log_path.read_text().splitlines()
+                if line.startswith('COMPUTE_GTK_CAPTURE_RENDERER ')
+            ]
+            report['gtk_capture_method'] = 'surfaceless-renderer'
+            report['gsk_capture_renderer'] = capture_lines[-1] if capture_lines else None
             report['gsk_renderer_observed'] = renderer_lines[-1] if renderer_lines else None
+            report['passed'] = report['passed'] and bool(capture_lines) and (
+                report['gsk_capture_renderer'] == report['gsk_renderer_observed']
+            )
             expected_class = {'gl': 'gl', 'vulkan': 'vulkan', 'cairo': 'cairo'}[args.gsk_renderer]
             report['passed'] = report['passed'] and bool(renderer_lines) and (
                 expected_class in renderer_lines[-1].lower()
             )
             report['gtk_pixels_rgba'] = samples
             report['gtk_snapshot'] = str(snapshot_path)
-            report['passed'] = report['passed'] and all(
-                pixel == (0, 255, 0, 255) for pixel in samples
-            )
+            expected_samples = [(0, 255, 0, 255)] * 5
+            if args.pixel_buffer_texture:
+              expected_samples = [(255, 0, 0, 255), (0, 255, 0, 255), (0, 0, 255, 255),
+                                  (255, 255, 255, 255), (255, 255, 255, 255)]
+              report['passed'
+                    ] = report['passed'] and probe.get('pixel_buffer_texture_tested') is True
+            report['passed'] = report['passed'] and samples == expected_samples
             quit_path.touch()
             report['clean_exit'] = app.wait(timeout=10) == 0
             report['passed'] = report['passed'] and report['clean_exit']
+          presentation_lines = [
+              line for line in log_path.read_text().splitlines()
+              if 'event=vulkan-presentation ' in line
+          ]
+          report['vulkan_presentation_diagnostics'] = presentation_lines
+          if args.vulkan_presentation:
+            report['passed'] = report['passed'] and bool(presentation_lines) and (
+                f'path={args.vulkan_presentation} ' in presentation_lines[-1]
+            )
         finally:
           if app.poll() is None:
             os.killpg(app.pid, signal.SIGTERM)

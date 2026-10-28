@@ -9,6 +9,7 @@ import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/widgets.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_gpu/gpu.dart' as gpu;
 import 'package:vector_math/vector_math.dart' show Vector4;
 
@@ -16,7 +17,7 @@ import 'package:vector_math/vector_math.dart' show Vector4;
 // writes initially zero vertices, then a render pass consumes them. CPU-generated
 // vertices cannot make this pass. Displaying the image also exercises the GTK
 // embedder's backing stores; the native runner can snapshot the GTK widget.
-Future<void> main() async {
+Future<void> main(List<String> arguments) async {
   WidgetsFlutterBinding.ensureInitialized();
   final report = <String, Object?>{'pid': pid, 'dispatch_tested': false};
   try {
@@ -89,12 +90,14 @@ Future<void> main() async {
     report['pixels_rgba'] = samples;
     report['dispatch_tested'] = true;
     report['compute_pixels_passed'] = samples.every((pixel) => pixel == 0x00ff00ff);
-    runApp(
-      Directionality(
-        textDirection: ui.TextDirection.ltr,
-        child: RawImage(image: image, fit: BoxFit.fill),
-      ),
-    );
+    Widget content = RawImage(image: image, fit: BoxFit.fill);
+    if (arguments.contains('--pixel-buffer-texture')) {
+      final id = await const MethodChannel('compute-probe/pixels').invokeMethod<int>('register');
+      if (id == null || id < 0) throw StateError('Pixel-buffer texture registration failed');
+      content = Texture(textureId: id, filterQuality: FilterQuality.none);
+      report['pixel_buffer_texture_tested'] = true;
+    }
+    runApp(Directionality(textDirection: ui.TextDirection.ltr, child: content));
     final frame = Completer<void>();
     WidgetsBinding.instance.addPostFrameCallback((_) => frame.complete());
     await frame.future;

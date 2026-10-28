@@ -62,17 +62,32 @@ inline void watch_compute_snapshot(GtkWidget* view) {
         }
         graphene_rect_t bounds = GRAPHENE_RECT_INIT(
             0, 0, static_cast<float>(width), static_cast<float>(height));
+        // GTK 4.22's renderer omits nodes already assigned to an offload
+        // subsurface of its own window, even in render_texture(). Capture the
+        // same scene with the same renderer class, without that surface
+        // association. This checks imported pixels, not compositor scanout.
+        g_autoptr(GskRenderer) capture =
+            GSK_RENDERER(g_object_new(G_OBJECT_TYPE(renderer), nullptr));
+        g_autoptr(GError) error = nullptr;
+        if (!gsk_renderer_realize(capture, nullptr, &error)) {
+          g_printerr("COMPUTE_CAPTURE_ERROR %s\n", error->message);
+          gsk_render_node_unref(node);
+          return G_SOURCE_REMOVE;
+        }
         g_autoptr(GdkTexture) texture =
-            gsk_renderer_render_texture(renderer, node, &bounds);
+            gsk_renderer_render_texture(capture, node, &bounds);
         gsk_render_node_unref(node);
         if (!texture) {
+          gsk_renderer_unrealize(capture);
           return G_SOURCE_CONTINUE;
         }
+        g_printerr("COMPUTE_GTK_CAPTURE_RENDERER %s\n",
+                   G_OBJECT_TYPE_NAME(capture));
+        const bool saved = gdk_texture_save_to_png(
+            texture, g_getenv("COMPUTE_PROBE_SNAPSHOT"));
+        gsk_renderer_unrealize(capture);
         g_printerr("\nCOMPUTE_GTK_RENDERER %s\n", G_OBJECT_TYPE_NAME(renderer));
-        return gdk_texture_save_to_png(texture,
-                                       g_getenv("COMPUTE_PROBE_SNAPSHOT"))
-                   ? G_SOURCE_REMOVE
-                   : G_SOURCE_CONTINUE;
+        return saved ? G_SOURCE_REMOVE : G_SOURCE_CONTINUE;
       },
       g_object_ref(view), g_object_unref);
 }
