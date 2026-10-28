@@ -185,8 +185,7 @@ build:android_debug_test --compilation_mode=opt --//engine/src/flutter/common:ru
 
 # linux_unopt.json: ci/host_debug_no_prebuilt_dart_sdk
 #   --target-dir ci/host_debug --runtime-mode debug --no-prebuilt-dart-sdk --build-embedder-examples --no-lto --rbe --no-goma
-# No configuration: the Bazel build cannot express
-#   --no-prebuilt-dart-sdk (the generated files assume the prebuilt Dart SDK)
+build:host_debug_no_prebuilt_dart_sdk --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=debug --platforms=//engine/src/flutter/build/bazel/toolchains:linux_x64_debug --//engine/src/flutter/build/bazel/dart_wrap:flutter_prebuilt_dart_sdk=false
 
 # linux_web_engine_build.json: ci/wasm_release
 #   --web --runtime-mode=release --no-rbe --no-goma
