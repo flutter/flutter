@@ -8,13 +8,16 @@
 # manifest flutter_tools reads instead of an install; assembled_directory
 # and bundle_directory, the directories the tests' SDK facsimile lays),
 # framework.bzl (a macOS framework bundle's symlinks, GN's
-# package_framework.py action).
+# package_framework.py action, and the xcframework over bundles, GN's
+# create_xcframework.py action).
 
 package(default_visibility = ["//visibility:public"])
 
 exports_files([
     # local_engine.bzl's assembly of a directory.
     "assemble_directory.py",
+    # framework.bzl's assembly of a bundle for sky/tools/create_xcframework.py.
+    "xcframework.py",
     # zip_bundle.bzl's wrapper of build/zip.py.
     "zip_bundle.py",
 ])

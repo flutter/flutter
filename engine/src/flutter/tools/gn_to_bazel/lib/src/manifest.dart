@@ -1129,9 +1129,6 @@ filegroup(
           r'a shared library linked against the assembled FlutterMacOS.framework in the build directory '
           r'(-F$root_out_dir, frameworks = ["FlutterMacOS.framework"]): a verification target that '
           'ships nothing, for a rule that takes the bundle as a link input (research/20 §11)',
-      'flutter_framework':
-          'create_xcframework.py over the assembled bundle (xcodebuild -create-xcframework): a rule '
-          'that lays the bundle out for it, links and all, is next (research/20 §11)',
     },
   ),
   // The darwin platforms' group: `macos` on a Mac (under

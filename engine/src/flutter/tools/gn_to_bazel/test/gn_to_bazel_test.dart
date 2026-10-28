@@ -5827,10 +5827,27 @@ zip_bundle("framework_archive") {
     },
   ]
 }
+
+action("engine_xcframework") {
+  script = "//flutter/sky/tools/create_xcframework.py"
+  outputs = [ "$root_out_dir/Engine.xcframework" ]
+  args = [
+    "--frameworks",
+    rebase_path(_framework_dir),
+    "--name",
+    "Engine",
+    "--location",
+    rebase_path(root_out_dir),
+  ]
+  deps = [ ":generate_symlinks" ]
+}
 ''',
           templates: <String>{'zip_bundle'},
         );
-        expect(output, contains('load("//build_defs/dist:framework.bzl", "framework_symlinks")'));
+        expect(
+          output,
+          contains('load("//build_defs/dist:framework.bzl", "framework_symlinks", "xcframework")'),
+        );
         expect(
           output,
           contains('''
@@ -5885,6 +5902,25 @@ zip_bundle(
 '''),
         );
         expect(output, isNot(contains('package_framework.py')));
+        // The xcframework over the bundle: the rule reads GN's arguments
+        // with the bundle and the location as path tokens.
+        expect(
+          output,
+          contains(r'''
+xcframework(
+    name = "engine_xcframework",
+    args = [
+        "--frameworks",
+        "$(built Engine.framework)",
+        "--name",
+        "Engine",
+        "--location",
+        "$(built .)",
+    ],
+    deps = [":generate_symlinks"],
+)
+'''),
+        );
       },
     );
 
