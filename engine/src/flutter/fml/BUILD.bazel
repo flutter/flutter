@@ -584,3 +584,11 @@ selects.config_setting_group(
         "//engine/src/flutter/build/bazel:not_wasm",
     ],
 )
+
+# What GN has no words for; maintained in the converter's manifest
+# (tools/gn_to_bazel/lib/src/manifest.dart).
+
+# A Windows header the accessibility tests include on every platform
+# (third_party/accessibility's accessibility_unittests lists it), which only
+# the Windows build's string_conversion declares.
+exports_files(["platform/win/wstring_conversion.h"])

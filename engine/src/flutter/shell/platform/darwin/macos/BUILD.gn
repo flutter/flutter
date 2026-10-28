@@ -80,7 +80,9 @@ source_set("flutter_framework_source") {
     "framework/Source/AccessibilityBridgeMac.h",
     "framework/Source/AccessibilityBridgeMac.mm",
     "framework/Source/FlutterAppDelegate.mm",
+    "framework/Source/FlutterAppDelegate_Internal.h",
     "framework/Source/FlutterAppLifecycleDelegate.mm",
+    "framework/Source/FlutterAppLifecycleDelegate_Internal.h",
     "framework/Source/FlutterChannelKeyResponder.h",
     "framework/Source/FlutterChannelKeyResponder.mm",
     "framework/Source/FlutterCompositor.h",
@@ -138,6 +140,8 @@ source_set("flutter_framework_source") {
     "framework/Source/FlutterWindowController.h",
     "framework/Source/FlutterWindowController.mm",
     "framework/Source/KeyCodeMap.g.mm",
+    "framework/Source/KeyCodeMap_Internal.h",
+    "framework/Source/NSView+ClipsToBounds.h",
   ]
 
   sources += _flutter_framework_headers
