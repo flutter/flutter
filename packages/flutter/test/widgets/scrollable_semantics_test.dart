@@ -927,6 +927,65 @@ void main() {
 
     semantics.dispose();
   });
+
+  for (final Axis axis in Axis.values) {
+    for (final reverse in <bool>[false, true]) {
+      for (final TextDirection textDirection in TextDirection.values) {
+        testWidgets('semantics scrolling respects $axis, reverse=$reverse, $textDirection', (
+          WidgetTester tester,
+        ) async {
+          final semantics = SemanticsTester(tester);
+          final controller = ScrollController();
+          addTearDown(controller.dispose);
+          final reversed =
+              reverse != (axis == Axis.horizontal && textDirection == TextDirection.rtl);
+          final SemanticsAction action = switch (axis) {
+            Axis.vertical => reversed ? SemanticsAction.scrollDown : SemanticsAction.scrollUp,
+            Axis.horizontal => reversed ? SemanticsAction.scrollRight : SemanticsAction.scrollLeft,
+          };
+          await tester.pumpWidget(
+            Directionality(
+              textDirection: textDirection,
+              child: ListView(
+                controller: controller,
+                scrollDirection: axis,
+                reverse: reverse,
+                itemExtent: 100.0,
+                children: List<Widget>.generate(20, (int i) => Text('$i')),
+              ),
+            ),
+          );
+          final SemanticsNode scrollable = findNodeWithAction(
+            tester.binding.pipelineOwner.semanticsOwner!.rootSemanticsNode!,
+            action,
+          )!;
+          tester.binding.pipelineOwner.semanticsOwner!.performAction(scrollable.id, action);
+          await tester.pump();
+          expect(controller.offset, 0.0);
+          await tester.pump(const Duration(milliseconds: 50));
+          final double expectedOffset = controller.position.viewportDimension * 0.8;
+          expect(controller.offset, greaterThan(0.0));
+          expect(controller.offset, lessThan(expectedOffset));
+          await tester.pumpAndSettle();
+          expect(controller.offset, expectedOffset);
+          final SemanticsAction oppositeAction = switch (action) {
+            SemanticsAction.scrollUp => SemanticsAction.scrollDown,
+            SemanticsAction.scrollDown => SemanticsAction.scrollUp,
+            SemanticsAction.scrollLeft => SemanticsAction.scrollRight,
+            _ => SemanticsAction.scrollLeft,
+          };
+          tester.binding.pipelineOwner.semanticsOwner!.performAction(scrollable.id, oppositeAction);
+          await tester.pump();
+          await tester.pump(const Duration(milliseconds: 50));
+          expect(controller.offset, greaterThan(0.0));
+          expect(controller.offset, lessThan(expectedOffset));
+          await tester.pumpAndSettle();
+          expect(controller.offset, 0.0);
+          semantics.dispose();
+        });
+      }
+    }
+  }
 }
 
 SemanticsNode? findNodeWithAction(SemanticsNode node, SemanticsAction action) {

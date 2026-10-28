@@ -777,10 +777,11 @@ class ScrollableState extends State<Scrollable>
     if (delta == 0.0 || !position.hasPixels || !position.hasContentDimensions) {
       return;
     }
-    // The delta describes the drag the assistive technology asked for, which
-    // moves the content in the opposite direction of the scroll offset.
+    // Convert the physical drag direction to the scroll position's axis,
+    // just as ScrollDragController does for pointer-driven scrolling.
+    final double scrollDelta = axisDirectionIsReversed(axisDirection) ? delta : -delta;
     position.moveTo(
-      position.pixels - delta,
+      position.pixels + scrollDelta,
       duration: _kSemanticScrollDuration,
       curve: _kSemanticScrollCurve,
     );
