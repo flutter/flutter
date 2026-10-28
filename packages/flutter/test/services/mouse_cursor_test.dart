@@ -188,6 +188,10 @@ class _TestMouseCursorSession extends MouseCursorSession {
 
   @override
   void dispose() {
+    assert(
+      disposeCallCount == 0,
+      'The session for device $device was disposed ${disposeCallCount + 1} times, but a session should be disposed at most once.',
+    );
     disposeCallCount += 1;
     _log.add('dispose ${cursor.debugDescription} (device $device)');
   }
