@@ -268,6 +268,19 @@ _TOOL_CACHE = _PUB_CACHE | {
     "//engine/src/flutter/lib/gpu:dart_sources": "pkg/flutter_gpu",
 } | _IOS_USB_CACHE
 
+# The apple shard's facsimile adds the iOS engine artifacts on a Mac host
+# (`flutter precache --ios`: artifacts/engine/ios{,-profile,-release} --
+# Flutter.xcframework over the device and simulator builds, the extension-
+# safe one, gen_snapshot_arm64 -- and the ios-sdk stamp), which only its
+# tests ask the tool for (DevelopmentArtifact.iOS): the device and both
+# simulator builds of the engine per mode, hours the first time.
+_APPLE_CACHE_FILES = _TOOL_CACHE_FILES | ({
+    "//engine/src/flutter/build/archives:ios_engine_directory": "artifacts/engine/ios",
+    "//engine/src/flutter/build/archives:ios_engine_profile_directory": "artifacts/engine/ios-profile",
+    "//engine/src/flutter/build/archives:ios_engine_release_directory": "artifacts/engine/ios-release",
+    "//bin/internal:ios_sdk_stamp": "ios-sdk.stamp",
+} if HOST_OS == "mac" else {})
+
 _TOOL_SDK_FILES = {
     ":flutter_launcher": "bin/flutter",
     ":dart_launcher": "bin/dart",
@@ -463,10 +476,9 @@ _INTEGRATION_EXCLUDED = [
 # The integration shard's files that build for macOS or iOS through the tool
 # (`flutter build macos|ios`, Xcode, Swift Package Manager, CocoaPods): a
 # shard of their own, the apple shard below, compatible with a Mac host
-# alone (NEED_DECISION Q31) -- the macOS ones now, from the facsimile's
-# universal FlutterMacOS.xcframework and gen_snapshots; the iOS ones once
-# the facsimile carries the iOS engine artifacts. On Linux each would only
-# report itself skipped (`skip: !platform.isMacOS`).
+# alone (NEED_DECISION Q31), from the facsimile's universal
+# FlutterMacOS.xcframework and gen_snapshots and its iOS engine artifacts.
+# On Linux each would only report itself skipped (`skip: !platform.isMacOS`).
 _INTEGRATION_APPLE_MACOS = [
     "test/integration.shard/build_macos_arm64_only_test.dart",
     "test/integration.shard/build_macos_config_only_test.dart",
@@ -639,23 +651,28 @@ dart_package_tests(
     writable = ["pubspec.lock"],
 )
 
-# The apple shard: the integration shard's files that build for macOS
-# through the tool (_INTEGRATION_APPLE_MACOS; the iOS ones to come), on a
-# Mac host -- the Linux desktop shard's counterpart. Each runs xcodebuild,
-# which runs sandbox-exec itself and is refused inside Bazel's sandbox:
-# unsandboxed, in the real runfiles tree. The gallery's macOS project is
-# copied writable there first: the tool migrates it in place
-# (Runner.xcscheme, Podfile, GeneratedPluginRegistrant.swift) and builds into
-# it. CocoaPods (`pod install`: the gallery has a Podfile), Xcode and the
-# network (the pod specs, pub) are the host's. Declared on every host,
-# compatible with macOS alone: a Linux analysis still checks it.
+# The apple shard: the integration shard's files that build for macOS and
+# iOS through the tool (_INTEGRATION_APPLE), on a Mac host -- the Linux
+# desktop shard's counterpart. Each runs xcodebuild, which runs sandbox-exec
+# itself and is refused inside Bazel's sandbox: unsandboxed, in the real
+# runfiles tree. The projects the tool migrates and builds in place are
+# copied writable there first (the gallery's macos/ and ios/: Runner.xcscheme,
+# Podfile, GeneratedPluginRegistrant; spell_check's iOS app delegate, which
+# uiscene_migration_test migrates); the add-to-app Swift package projects
+# are copied by the test itself. CocoaPods (`pod install`: the gallery has
+# a Podfile), Xcode, the simulators and the network (the pod specs, pub) are
+# the host's. Declared on every host, compatible with macOS alone: a Linux
+# analysis still checks it.
 dart_package_tests(
     name = "apple_shard",
     size = "enormous",
     srcs = _HARNESS,
     cache = _TOOL_CACHE,
-    cache_files = _TOOL_CACHE_FILES,
-    data = glob(["test/integration.shard/test_data/**"]) + _SDK_PACKAGES + _TOOL_DATA + _INTEGRATION_PROJECTS,
+    cache_files = _APPLE_CACHE_FILES,
+    data = glob(["test/integration.shard/test_data/**"]) + _SDK_PACKAGES + _TOOL_DATA + _INTEGRATION_PROJECTS + [
+        "//dev/integration_tests/darwin_add2app_swiftpm:project",
+        "//dev/integration_tests/spell_check:project",
+    ],
     imports = _IMPORTS,
     network = True,
     package = "flutter_tools",
@@ -666,11 +683,13 @@ dart_package_tests(
     # The tool, xcodebuild's compiles and gen_snapshot at once.
     tags = ["cpu:4"],
     target_compatible_with = ["@platforms//os:macos"],
-    tests = _INTEGRATION_APPLE_MACOS,
-    unsandboxed = _INTEGRATION_APPLE_MACOS,
+    tests = _INTEGRATION_APPLE,
+    unsandboxed = _INTEGRATION_APPLE,
     writable = [
         "pubspec.lock",
+        "dev/integration_tests/flutter_gallery/ios",
         "dev/integration_tests/flutter_gallery/macos",
+        "dev/integration_tests/spell_check",
     ] + _APPLE_SCRIPTS,
 )
 

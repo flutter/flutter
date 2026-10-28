@@ -1089,6 +1089,135 @@ zip_bundle(
     ]
 ]
 
+# The iOS counterpart: ios[-<mode>]/artifacts.zip is the Mac iOS builders'
+# generator (ci/builders/mac_ios_engine.json: create_ios_framework.py over
+# the device build of the mode and the two simulator builds -- the debug
+# ones whatever the mode --, the simulators' Flutter.framework lipo'd, the
+# xcframework over the device's and the simulator's, the extension-safe pair
+# the same (under Bazel the same builds: no GN file reads
+# darwin_extension_safe, build/bazel/README.md), the device build's
+# universal gen_snapshot_arm64; dSYM and stripped in release), unpacked by
+# `flutter precache --ios` as artifacts/engine/ios[-<mode>]. One target
+# over the three builds, and the archive; the directories for the
+# facsimile on a Mac host (the apple shard).
+apple_universal(
+    name = "universal_ios_framework",
+    aliases = {
+        "arm64_extension_safe": "arm64",
+        "sim_arm64_extension_safe": "sim_arm64",
+        "sim_x64_extension_safe": "sim_x64",
+    },
+    args = [
+        "--dst",
+        "{dst}",
+        "--arm64-out-dir",
+        "{build:arm64}",
+        "--simulator-x64-out-dir",
+        "{build:sim_x64}",
+        "--simulator-arm64-out-dir",
+        "{build:sim_arm64}",
+    ] + select({
+        "//engine/src/flutter/common:runtime_mode_release": [
+            "--dsym",
+            "--strip",
+        ],
+        "//conditions:default": [],
+    }),
+    builds = {
+        "arm64": "ios_arm64",
+        "sim_arm64": "ios_sim_arm64_debug",
+        "sim_x64": "ios_sim_x64_debug",
+    },
+    directories = [
+        "Flutter.xcframework",
+        "extension_safe/Flutter.xcframework",
+    ],
+    files = ["gen_snapshot_arm64"],
+    script = "//engine/src/flutter/sky:tools/create_ios_framework.py",
+    script_deps = [
+        "//engine/src/flutter/sky:tools/create_xcframework.py",
+        "//engine/src/flutter/sky:tools/sky_utils.py",
+    ],
+    stage = [
+        "Flutter.framework",
+        "universal",
+    ],
+    target_compatible_with = select({
+        "@platforms//os:macos": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        "//engine/src/flutter/lib/snapshot:create_macos_gen_snapshots",
+        "//engine/src/flutter/shell/platform/darwin/ios:universal_flutter_framework",
+    ],
+)
+
+_IOS_DIRECTORY = {
+    "debug": "ios",
+    "profile": "ios-profile",
+    "release": "ios-release",
+    "jit_release": "ios-jit_release",
+}
+
+zip_bundle(
+    name = "ios_artifacts",
+    files = {
+        "Flutter.xcframework": ":universal_ios_framework",
+        "extension_safe/Flutter.xcframework": ":universal_ios_framework",
+        "gen_snapshot_arm64": ":universal_ios_framework",
+    },
+    output = select({
+        "//engine/src/flutter/common:runtime_mode_" + mode: directory + "/artifacts.zip"
+        for mode, directory in _IOS_DIRECTORY.items()
+    }),
+    sources = {
+        "Flutter.xcframework": "universal_ios_framework/Flutter.xcframework",
+        "extension_safe/Flutter.xcframework": "universal_ios_framework/extension_safe/Flutter.xcframework",
+        "gen_snapshot_arm64": "universal_ios_framework/gen_snapshot_arm64",
+    },
+    target_compatible_with = select({
+        "@platforms//os:macos": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+)
+
+bundle_directory(
+    name = "ios_engine_directory",
+    bundles = [":ios_artifacts"],
+    target_compatible_with = select({
+        "@platforms//os:macos": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+)
+
+[
+    in_configuration(
+        name = "ios_artifacts_" + mode,
+        runtime_mode = mode,
+        target = ":ios_artifacts",
+        target_compatible_with = ["@platforms//os:macos"],
+    )
+    for mode in [
+        "profile",
+        "release",
+    ]
+]
+
+[
+    bundle_directory(
+        name = "ios_engine_%s_directory" % mode,
+        bundles = [":ios_artifacts_" + mode],
+        target_compatible_with = select({
+            "@platforms//os:macos": [],
+            "//conditions:default": ["@platforms//:incompatible"],
+        }),
+    )
+    for mode in [
+        "profile",
+        "release",
+    ]
+]
+
 in_configuration(
     name = "artifacts_profile",
     runtime_mode = "profile",
