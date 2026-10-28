@@ -92,7 +92,6 @@ source_set("flutter_framework_source") {
   ]
 
   sources = [
-    "flutter_task_queue_dispatch.h",
     "framework/Source/FlutterAppDelegate+Test.h",
     "framework/Source/FlutterAppDelegate.mm",
     "framework/Source/FlutterAppDelegate_Internal.h",
@@ -306,9 +305,11 @@ if (enable_ios_unittests) {
       "framework/Source/FlutterChannelKeyResponderTest.mm",
       "framework/Source/FlutterDartProjectTest.mm",
       "framework/Source/FlutterEmbedderKeyResponderTest.mm",
+      "framework/Source/FlutterEngine+Test.h",
       "framework/Source/FlutterEngineGroupTest.mm",
       "framework/Source/FlutterEnginePlatformViewTest.mm",
       "framework/Source/FlutterEngineTest.mm",
+      "framework/Source/FlutterFMLTaskRunners+FML.h",
       "framework/Source/FlutterFakeKeyEvents.h",
       "framework/Source/FlutterFakeKeyEvents.mm",
       "framework/Source/FlutterKeyboardManagerTest.mm",
@@ -319,7 +320,9 @@ if (enable_ios_unittests) {
       "framework/Source/FlutterPlatformViewsTestHelper.mm",
       "framework/Source/FlutterPluginAppLifeCycleDelegateTest.mm",
       "framework/Source/FlutterRestorationPluginTest.mm",
+      "framework/Source/FlutterSceneDelegate+Test.h",
       "framework/Source/FlutterSceneDelegateTest.m",
+      "framework/Source/FlutterSceneLifeCycle+Test.h",
       "framework/Source/FlutterSceneLifeCycleTest.mm",
       "framework/Source/FlutterSharedApplicationTest.mm",
       "framework/Source/FlutterShellTest.mm",

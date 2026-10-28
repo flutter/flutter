@@ -216,6 +216,7 @@ cc_library(
 
 flutter_shared_library(
     name = "shared_library",
+    interface_deps = ["//engine/src/flutter/impeller:impeller_public_config"],
     output_name = "impeller",
     deps = [
         ":interop",

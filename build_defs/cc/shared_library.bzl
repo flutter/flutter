@@ -30,19 +30,24 @@ install name is the path the link names.
 A GN target that lists a shared_library in its deps links against the
 library (the iOS shell's test library, ios_test_flutter, against OCMock's
 dylib). Bazel's C++ rules take no cc_binary in deps, so the macro also
-declares `<name>_import`, a cc_import of the platform's library, which the
-converter names for such a dependency: the link takes the dylib, and it
-is among the dependent's runfiles.
+declares `<name>_import`, which the converter names for such a dependency:
+a cc_library over a cc_import of the platform's library (the link takes the
+dylib, and it is among the dependent's runfiles) and over `interface_deps`
+-- what GN hands a dependent of the shared library: its public_deps, its
+public_configs and the all-dependent configs that reach it (OCMock's
+`Source` include directory, ocmock_src's all_dependent_config, through
+ocmock_shared), which the converter lists; a cc_import carries no headers
+or include directories of its own.
 """
 
-load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_import")
+load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_import", "cc_library")
 
 _APPLE = [
     "@platforms//os:ios",
     "@platforms//os:macos",
 ]
 
-def flutter_shared_library(name, output_name, target_compatible_with = [], visibility = None, testonly = None, **kwargs):
+def flutter_shared_library(name, output_name, target_compatible_with = [], visibility = None, testonly = None, interface_deps = [], **kwargs):
     """GN's shared_library(): see the file's docstring.
 
     Args:
@@ -53,6 +58,9 @@ def flutter_shared_library(name, output_name, target_compatible_with = [], visib
         platform family each library is for.
       visibility: visibility of the alias and the libraries.
       testonly: whether the libraries are testonly.
+      interface_deps: what a dependent of the library gets from it besides
+        the dylib (GN's public_deps, public_configs and the all-dependent
+        configs reaching it): dependencies of `<name>_import`.
       **kwargs: cc_binary's attributes (srcs, deps, copts, linkopts, ...).
     """
     files = {
@@ -85,8 +93,15 @@ def flutter_shared_library(name, output_name, target_compatible_with = [], visib
         testonly = testonly,
     )
     cc_import(
-        name = name + "_import",
+        name = name + "_import_library",
         shared_library = ":" + name,
+        target_compatible_with = target_compatible_with,
+        visibility = ["//visibility:private"],
+        testonly = testonly,
+    )
+    cc_library(
+        name = name + "_import",
+        deps = [":" + name + "_import_library"] + interface_deps,
         target_compatible_with = target_compatible_with,
         visibility = visibility,
         testonly = testonly,
