@@ -5,9 +5,9 @@
 // This file is run as part of a reduced test set in CI on Mac and Windows
 // machines.
 @Tags(<String>['reduced-test-set'])
-@TestOn('!chrome')
 library;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -80,7 +80,9 @@ void main() {
       ),
     );
     await expectLater(find.byType(ColorFiltered), matchesGoldenFile('color_filter_sepia.png'));
-  });
+    // Skipped on web: text with no color renders black on the web engine but
+    // white on native platforms, so the golden diverges.
+  }, skip: kIsWeb);
 
   testWidgets('ColorFilter.saturation', (WidgetTester tester) async {
     await tester.pumpWidget(
