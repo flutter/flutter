@@ -259,20 +259,21 @@ List<ForwardedFlag> publicFlagsOf(
         }
         continue;
       }
+      final ConfigEffect? effect =
+          configEffects[config] ??
+          configEffects[absoluteGnLabel(config, package: gnPackage, implicitName: true)];
       // A config of another converted file ([remoteConfig]: the resolver's
-      // configOf): its flags, as a local config's.
-      final GnTarget? remote = remoteConfig?.call(
-        absoluteGnLabel(config, package: gnPackage, implicitName: true),
-      );
+      // configOf), when the tables do not map it: its flags, as a local
+      // config's.
+      final GnTarget? remote = effect == null
+          ? remoteConfig?.call(absoluteGnLabel(config, package: gnPackage, implicitName: true))
+          : null;
       if (remote != null) {
         for (final ForwardedFlag flag in flagsOfConfig(remote)) {
           flags.add((condition: item.condition.and(flag.condition), flag: flag.flag));
         }
         continue;
       }
-      final ConfigEffect? effect =
-          configEffects[config] ??
-          configEffects[absoluteGnLabel(config, package: gnPackage, implicitName: true)];
       if (effect is ConfigDependency) {
         for (final String flag in effect.copts) {
           flags.add((condition: item.condition, flag: GnStringValue(flag)));
