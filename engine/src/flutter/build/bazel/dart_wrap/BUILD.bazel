@@ -157,6 +157,16 @@ selects.config_setting_group(
     ],
 )
 
+# An Android target built on a Mac (mac_android_* in ci/builders): the
+# universal gen_snapshot's halves come from the Mac toolchains.
+selects.config_setting_group(
+    name = "android_from_mac",
+    match_all = [
+        "@platforms//os:android",
+        "//engine/src/flutter/build/bazel:host_os_is_mac",
+    ],
+)
+
 filegroup(
     name = "prebuilt_dart_sdk",
     srcs = select({
@@ -270,6 +280,11 @@ gn_build(
         "bootstrap_compile_platform.exe",
         "gen_snapshot",
         "gen_snapshot_host",
+        # A Mac host's two halves of the universal gen_snapshot (BUILD.gn:
+        # lib/snapshot's build_mac_gen_snapshot): the tool as each Mac
+        # toolchain builds it for the target; nothing elsewhere.
+        "gen_snapshot_mac_arm64",
+        "gen_snapshot_mac_x64",
     ],
     ar = HOST_CLANG + "//:bin/llvm-ar",
     # Dependencies the Bazel side builds itself (the facades depend on them).
@@ -310,6 +325,29 @@ gn_build(
             "analyze_snapshot_host": "",
         },
         "//conditions:default": {},
+    }) | select({
+        # The universal gen_snapshot's halves on a Mac host: the toolchain
+        # of the target's own CPU builds gen_snapshot_host_targeting_host at
+        # the root (it is the default toolchain), the other Mac toolchain
+        # gen_snapshot under its directory; for an Android target both are
+        # under theirs (one of them the host's gen_snapshot_host, the same
+        # file under two names). Not a product on a Linux host.
+        ":macos_arm64": {
+            "gen_snapshot_mac_arm64": "gen_snapshot_host_targeting_host",
+            "gen_snapshot_mac_x64": "clang_x64/gen_snapshot",
+        },
+        ":macos_x64": {
+            "gen_snapshot_mac_arm64": "clang_arm64/gen_snapshot",
+            "gen_snapshot_mac_x64": "gen_snapshot_host_targeting_host",
+        },
+        ":android_from_mac": {
+            "gen_snapshot_mac_arm64": "clang_arm64/gen_snapshot",
+            "gen_snapshot_mac_x64": "clang_x64/gen_snapshot",
+        },
+        "//conditions:default": {
+            "gen_snapshot_mac_arm64": "",
+            "gen_snapshot_mac_x64": "",
+        },
     }) | select({
         # The target's own analyze_snapshot is built where the engine
         # artifacts are (common/config.gni's build_engine_artifacts), never

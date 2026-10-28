@@ -1172,8 +1172,10 @@ exports_files(["ios/framework/Source/AccessibilityFeatures.swift"])
     appendix: '''
 # The scripts of other packages' actions: sky/dist's copy of the assembled
 # sky_engine package for release, the macOS shell's framework headers and
-# its xcframework (shell/platform/darwin/macos).
+# its xcframework (shell/platform/darwin/macos), lib/snapshot's universal
+# gen_snapshot (lipo).
 exports_files([
+    "tools/create_macos_binary.py",
     "tools/create_xcframework.py",
     "tools/dist_dart_pkg.py",
     "tools/install_framework_headers.py",
