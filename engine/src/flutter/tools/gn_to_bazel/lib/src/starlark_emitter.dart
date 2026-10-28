@@ -2105,8 +2105,10 @@ final class _Emitter {
     if (copy == null || copy.rule != 'copy') {
       throw GnError(location, '$gnLabel is not a copy() the converter can read');
     }
-    final List<GnValue>? outputs = copy.variables['outputs']?.unconditionalItems;
-    final List<GnValue>? sources = copy.variables['sources']?.unconditionalItems;
+    // Unconditional within the copy: a file evaluated under a condition
+    // (shell/platform/linux under is_linux) has every list under it.
+    final List<GnValue>? outputs = copy.variables['outputs']?.itemsWithin(copy.condition);
+    final List<GnValue>? sources = copy.variables['sources']?.itemsWithin(copy.condition);
     const prefix = '$buildDirRoot/';
     const suffix = '/{{source_file_part}}';
     final GnValue? output = outputs?.singleOrNull;
