@@ -8,7 +8,6 @@
 #include <array>
 #include <bit>
 #include <functional>
-#include <iomanip>
 #include <set>
 #include <sstream>
 #include <string_view>
@@ -19,6 +18,7 @@
 #include "impeller/core/formats.h"
 #include "impeller/geometry/color.h"
 #include "third_party/abseil-cpp/absl/strings/str_cat.h"
+#include "third_party/abseil-cpp/absl/strings/str_format.h"
 
 namespace impeller {
 
@@ -485,10 +485,11 @@ size_t PipelineVariantRecorder::PrintUnusedShaders(std::ostream& out) const {
     return 0u;
   }
 
-  out << "  " << unused.size()
-      << " shaders were created by a ContentContext but never drawn with, "
-         "with\n  any options, on any backend (SC = specialization "
-         "constants):\n\n";
+  out << absl::StreamFormat(
+      "  %zu shaders were created by a ContentContext but never drawn with, "
+      "with\n  any options, on any backend (SC = specialization "
+      "constants):\n\n",
+      unused.size());
   std::vector<std::string> names;
   size_t width = 0u;
   for (const UnusedShader& shader : unused) {
@@ -507,8 +508,8 @@ size_t PipelineVariantRecorder::PrintUnusedShaders(std::ostream& out) const {
       backends += backends.empty() ? "" : ", ";
       backends += backend;
     }
-    out << "    " << std::left << std::setw(static_cast<int>(width)) << names[i]
-        << "  [" << backends << "]\n";
+    out << absl::StreamFormat("    %-*s  [%s]\n", static_cast<int>(width),
+                              names[i], backends);
   }
   out << "\n  Add a golden test that draws with each of them, or stop creating "
          "them.\n\n";
@@ -603,9 +604,10 @@ void PipelineVariantRecorder::PrintReport(std::ostream& out,
   out << "Impeller pipeline variant usage\n";
   out << std::string(kRuleWidth, '=') << "\n";
 
-  out << "  " << run_info.tests_run << " tests run, " << run_info.tests_skipped
-      << " skipped, " << run_info.tests_failed << " failed, filter '"
-      << (run_info.gtest_filter.empty() ? "*" : run_info.gtest_filter) << "'\n";
+  out << absl::StreamFormat(
+      "  %d tests run, %d skipped, %d failed, filter '%s'\n",
+      run_info.tests_run, run_info.tests_skipped, run_info.tests_failed,
+      run_info.gtest_filter.empty() ? "*" : run_info.gtest_filter);
   // Unlike the run details above, these make the whole report meaningless and
   // are not otherwise visible, so they are called out.
 #if FLUTTER_RUNTIME_MODE != FLUTTER_RUNTIME_MODE_DEBUG && \
@@ -670,15 +672,15 @@ void PipelineVariantRecorder::ReportPrinter::PrintBackend(
 
   out << "\n" << std::string(kRuleWidth, '-') << "\n";
   out << backend << "\n";
-  out << "  " << entries.size() << " variants: " << warmed << " warmed ("
-      << warmed_and_drawn << " drawn) | " << lazy_not_drawn
-      << " created lazily, never drawn\n";
-  out << "  Draws covered by warmed variants: "
-      << WithThousandsSeparators(warmed_draws) << " of "
-      << WithThousandsSeparators(total_draws) << " (" << std::fixed
-      << std::setprecision(1)
-      << (total_draws == 0u ? 0.0 : 100.0 * warmed_draws / total_draws)
-      << "%)\n";
+  out << absl::StreamFormat(
+      "  %zu variants: %zu warmed (%zu drawn) | %zu created lazily, never "
+      "drawn\n",
+      entries.size(), warmed, warmed_and_drawn, lazy_not_drawn);
+  out << absl::StreamFormat(
+      "  Draws covered by warmed variants: %s of %s (%.1f%%)\n",
+      WithThousandsSeparators(warmed_draws),
+      WithThousandsSeparators(total_draws),
+      total_draws == 0u ? 0.0 : 100.0 * warmed_draws / total_draws);
   if (common != 0u) {
     for (const auto& [identity, entry] : entries) {
       if (entry.options.has_value()) {
@@ -699,8 +701,9 @@ void PipelineVariantRecorder::ReportPrinter::PrintWarmedNotDrawn(
     const std::vector<const Entry*>& warmed,
     const BackendEntries& entries,
     uint32_t mask) {
-  out << "\n  WARMED BUT NEVER DRAWN (" << warmed.size()
-      << ") - candidates to stop warming\n";
+  out << absl::StreamFormat(
+      "\n  WARMED BUT NEVER DRAWN (%zu) - candidates to stop warming\n",
+      warmed.size());
   if (warmed.empty()) {
     out << "    (none)\n";
     return;
@@ -767,20 +770,23 @@ void PipelineVariantRecorder::ReportPrinter::PrintWarmedNotDrawn(
     std::sort(changes.begin(), changes.end(), [](const auto& a, const auto& b) {
       return std::tie(b.second, a.first) < std::tie(a.second, b.first);
     });
-    out << "    Likely cause: " << (warmed.size() - without_twin) << " of "
-        << warmed.size() << " were drawn, but only with other options:\n";
+    out << absl::StreamFormat(
+        "    Likely cause: %zu of %zu were drawn, but only with other "
+        "options:\n",
+        warmed.size() - without_twin, warmed.size());
     for (size_t i = 0; i < changes.size() && i < kMaxLikelyCauses; i++) {
-      out << "      " << std::right << std::setw(6) << changes[i].second << "  "
-          << changes[i].first << "\n";
+      out << absl::StreamFormat("      %6zu  %s\n", changes[i].second,
+                                changes[i].first);
     }
     if (changes.size() > kMaxLikelyCauses) {
-      out << "      ... " << (changes.size() - kMaxLikelyCauses)
-          << " other changes\n";
+      out << absl::StreamFormat("      ... %zu other changes\n",
+                                changes.size() - kMaxLikelyCauses);
     }
   }
   if (without_twin > 0u) {
-    out << "    " << without_twin << " of " << warmed.size()
-        << " were never drawn with any options.\n";
+    out << absl::StreamFormat(
+        "    %zu of %zu were never drawn with any options.\n", without_twin,
+        warmed.size());
   }
 
   size_t width = 0u;
@@ -814,8 +820,8 @@ void PipelineVariantRecorder::ReportPrinter::PrintWarmedNotDrawn(
                               WithThousandsSeparators(twin.drawn->draw_count),
                               " draws)");
     }
-    out << "      " << std::left << std::setw(static_cast<int>(width))
-        << Name(entry) << "  " << drawn_as << "\n";
+    out << absl::StreamFormat("      %-*s  %s\n", static_cast<int>(width),
+                              Name(entry), drawn_as);
   }
 }
 
@@ -824,9 +830,9 @@ void PipelineVariantRecorder::ReportPrinter::PrintCrossBackend(
     const std::map<std::string, BackendEntries>& backends) {
   out << "\n" << std::string(kRuleWidth, '-') << "\n";
   if (backends.size() < 2u) {
-    out << "Cross-backend comparison skipped: only "
-        << (backends.empty() ? "no backend" : backends.begin()->first)
-        << " ran.\n\n";
+    out << absl::StreamFormat(
+        "Cross-backend comparison skipped: only %s ran.\n\n",
+        backends.empty() ? "no backend" : backends.begin()->first);
     return;
   }
 
@@ -876,8 +882,9 @@ void PipelineVariantRecorder::ReportPrinter::PrintCrossBackend(
               return Before(a->example, b->example);
             });
 
-  out << "WARMED ON EVERY BACKEND IT APPEARS ON, DRAWN ON NONE ("
-      << unanimous.size() << ")\n";
+  out << absl::StreamFormat(
+      "WARMED ON EVERY BACKEND IT APPEARS ON, DRAWN ON NONE (%zu)\n",
+      unanimous.size());
   if (unanimous.empty()) {
     out << "  (none)\n";
   }
@@ -897,9 +904,10 @@ void PipelineVariantRecorder::ReportPrinter::PrintCrossBackend(
   if (partial > 0u) {
     // Warmup is capability gated (SSBO, framebuffer fetch, decal sampling,
     // GLES-only shaders), so these are per-backend decisions.
-    out << "  (" << partial
-        << " more never-drawn variants are warmed on only some backends;\n"
-           "  warmup is capability gated, so decide those per backend.)\n";
+    out << absl::StreamFormat(
+        "  (%zu more never-drawn variants are warmed on only some backends;\n"
+        "  warmup is capability gated, so decide those per backend.)\n",
+        partial);
   }
   out << "\n";
 }

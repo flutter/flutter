@@ -4,8 +4,7 @@
 
 #include "impeller/playground/widgets.h"
 
-#include <iomanip>
-#include <sstream>
+#include "third_party/abseil-cpp/absl/strings/str_format.h"
 
 namespace impeller {
 
@@ -37,14 +36,12 @@ Point DrawPlaygroundPoint(PlaygroundPoint& point) {
         ImColor(point.color.red, point.color.green, point.color.blue,
                 (hovering || point.dragging) ? 0.6f : 0.3f));
     if (hovering || point.dragging) {
-      std::stringstream label;
-      label << std::fixed << std::setprecision(3) << "x:" << point.position.x
-            << " y:" << point.position.y;
       ImGui::GetBackgroundDrawList()->AddText(
           {point.position.x - point.radius,
            point.position.y + point.radius + 10},
           ImColor(point.color.red, point.color.green, point.color.blue, 1.0f),
-          label.str().c_str());
+          absl::StrFormat("x:%.3f y:%.3f", point.position.x, point.position.y)
+              .c_str());
     }
     point.prev_mouse_pos = mouse_pos;
   }

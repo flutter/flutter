@@ -36,6 +36,7 @@ impeller_component("base") {
   public_deps = [
     "//third_party/abseil-cpp/absl/status:statusor",
     "//third_party/abseil-cpp/absl/strings",
+    "//third_party/abseil-cpp/absl/strings:str_format",
   ]
 }
 

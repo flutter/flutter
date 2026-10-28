@@ -4,12 +4,12 @@
 
 #include "impeller/core/formats.h"
 
-#include <iomanip>
 #include <sstream>
 
 #include "impeller/base/validation.h"
 #include "impeller/core/texture.h"
 #include "third_party/abseil-cpp/absl/strings/str_cat.h"
+#include "third_party/abseil-cpp/absl/strings/str_format.h"
 
 namespace impeller {
 
@@ -143,11 +143,8 @@ std::string ColorAttachmentToString(const ColorAttachment& color) {
 }
 
 std::string DepthAttachmentToString(const DepthAttachment& depth) {
-  std::stringstream stream;
-  stream << AttachmentToString(depth) << ",";
-  stream << "ClearDepth=" << std::fixed << std::setprecision(2)
-         << depth.clear_depth;
-  return stream.str();
+  return absl::StrFormat("%s,ClearDepth=%.2f", AttachmentToString(depth),
+                         depth.clear_depth);
 }
 
 std::string StencilAttachmentToString(const StencilAttachment& stencil) {
