@@ -27,6 +27,7 @@ final class ConvertedFile {
     this.condition,
     this.unconvertedDeps = const <String>[],
     this.filesGroups = const <String>{},
+    this.linkedStaticLibraries = const <String>{},
     this.assume = const <String, GnValue>{},
     this.targetConditions = const <String, String>{},
   });
@@ -76,6 +77,14 @@ final class ConvertedFile {
   /// dependencies to link, as GN's groups do, with its actions and copies
   /// as sources and data.
   final Set<String> filesGroups;
+
+  /// The file's complete static libraries (`static_library` with
+  /// `complete_static_lib`) that other targets link rather than ship: a
+  /// `cc_library` forwarding the dependencies, which links the same objects
+  /// (OCMock's `ocmock`, linked by the Objective-C suites with -ObjC), where
+  /// the default is Bazel's `cc_static_library`, the archive as an artifact
+  /// (the Impeller SDK's libimpeller.a), which no cc rule can depend on.
+  final Set<String> linkedStaticLibraries;
 
   /// Assumptions for this file over the generation's (gn_eval's
   /// Assumptions.withValues): a platform whose branches of the file are
@@ -1102,15 +1111,14 @@ filegroup(
   // (InternalFlutterSwiftCommon, a flutter_swift_library). `test_config`
   // (the Xcode platform's Developer directories through mac_platform_path:
   // compile flags on the listing targets, link flags on the config's
-  // library) and test_utils_swift convert; the Objective-C suite waits for
-  // OCMock's repository, the Swift suite for the Testing framework
-  // (research/20 §12).
+  // library), test_utils_swift and the Objective-C suite (gtest over
+  // OCMock, @ocmock) convert; the Swift suite waits for the Testing
+  // framework (research/20 §12).
   ConvertedFile('//flutter/shell/platform/darwin/graphics', condition: 'is_mac'),
   ConvertedFile(
     '//flutter/shell/platform/darwin/common',
     condition: 'is_mac',
     skip: <String, String>{
-      'framework_common_unittests': 'OCMock (//flutter/third_party/ocmock): the Apple test phase',
       'framework_common_swift_unittests':
           "the Testing framework from the platform's Developer directory: the Apple test phase",
       'swift_testing_main': "the Testing framework's runner: the Apple test phase",
@@ -1125,9 +1133,11 @@ filegroup(
   // its without-entitlements list). `macos` (what the root reaches through
   // shell/platform:platform and darwin) and `universal_flutter_framework`
   // are groups of things to build over the packaging actions, which nothing
-  // links. Its two suites wait for the Apple test phase; the umbrella-import
-  // check links against the assembled bundle in the build directory
-  // (`-F$root_out_dir`), which a cc rule cannot name yet (research/20 §11).
+  // links. Its Objective-C suite (gtest over OCMock and the fixtures' Dart
+  // entry point) converts; the Swift suite waits for the Testing framework;
+  // the umbrella-import check links against the assembled bundle in the
+  // build directory (`-F$root_out_dir`), which a cc rule cannot name yet
+  // (research/20 §11).
   ConvertedFile(
     '//flutter/shell/platform/darwin/macos',
     condition: 'is_mac',
@@ -1139,8 +1149,6 @@ filegroup(
     // is the bot's own CPU on every builder of mac_host_engine.json).
     assume: macHostAssumptions,
     skip: <String, String>{
-      'flutter_desktop_darwin_unittests':
-          "OCMock and the fixtures' Dart entry point, run as a test: the Apple test phase",
       'flutter_desktop_darwin_swift_unittests':
           "the Testing framework from the platform's Developer directory: the Apple test phase",
       '_generate_symlinks_and_verify_framework_module':
@@ -1966,6 +1974,17 @@ cc_library(
     textual_hdrs = ["src/dsp/cpu.c"],
 )
 ''',
+  ),
+  // OCMock, the Objective-C suites' mocks (framework_common_unittests,
+  // flutter_desktop_darwin_unittests), a Mac's: `ocmock_src` an
+  // Objective-C source_set with the `Source` directory as an all-dependent
+  // config and the visibility config removed, `ocmock` the complete archive
+  // of it that the suites link -- a cc_library of its dependencies here
+  // (linkedStaticLibraries) --, `ocmock_shared` its dylib.
+  ConvertedFile(
+    '//flutter/third_party/ocmock',
+    condition: 'is_mac',
+    linkedStaticLibraries: <String>{'ocmock'},
   ),
   ConvertedFile(
     '//flutter/third_party/wuffs',

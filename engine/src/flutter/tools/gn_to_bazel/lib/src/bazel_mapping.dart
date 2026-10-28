@@ -75,6 +75,9 @@ const Map<String, String> testSizes = <String, String>{
   // 91 s on a Mac (504 tests: the accessibility bridge's there), where
   // small's 60 s stopped it at 364 (the Mac's T14).
   'common_cpp_unittests': 'medium',
+  // The macOS shell's suite: 29 files of engine runs over the fixtures,
+  // each test twice and shuffled (testRuns), on a Mac.
+  'flutter_desktop_darwin_unittests': 'large',
   // 56 tests, each initializing a git repository and committing to it:
   // ~2 s a test, 54 of them inside small's 60 s on a machine building the
   // GPU backends at the same time.
@@ -227,6 +230,16 @@ const Map<String, TestRun> testRuns = <String, TestRun>{
     args: <String>[],
     data: <String>[],
     runnerArgs: <String>['--timeout=90'],
+  ),
+  // run_tests.py (macOS) runs the macOS shell's suite whole, every test
+  // twice and shuffled (shuffle_flags): "flutter_desktop_darwin_unittests
+  // uses global state that isn't handled correctly by gtest-parallel"
+  // (flutter/flutter#104789). It skips the suite on host_debug builds for
+  // flakiness (flutter/flutter#127441); Bazel runs it in every
+  // configuration -- the flakiness is the suite's to fix.
+  '//flutter/shell/platform/darwin/macos:flutter_desktop_darwin_unittests': TestRun(
+    args: <String>['--gtest_repeat=2', '--gtest_shuffle'],
+    data: <String>[],
   ),
   // run_tests.py (Linux) passes txt_unittests ICU's data file; the suite's
   // main (txt_run_all_unittests.cc) reads no such flag, so the argument is
@@ -409,6 +422,9 @@ const Map<String, String> labelOverrides = <String, String>{
   '//flutter/third_party/libpng': '@libpng',
   '//flutter/third_party/libwebp': '@libwebp',
   '//flutter/third_party/wuffs': '@wuffs',
+  // OCMock (a Mac's; the Objective-C suites' mocks), engine GN in the
+  // secondary tree over the synced tree.
+  '//flutter/third_party/ocmock': '@ocmock',
   '//third_party/libpng': '@libpng',
   // The shader compiler's dependencies (research/08): engine GN in the
   // secondary tree over synced trees (inja, json, SPIRV-Cross, flatbuffers)
@@ -494,6 +510,7 @@ const Map<String, String> labelRepositoryPrefixes = <String, String>{
   '//flutter/third_party/libpng/': '@libpng//',
   '//flutter/third_party/libwebp/': '@libwebp//',
   '//flutter/third_party/wuffs/': '@wuffs//',
+  '//flutter/third_party/ocmock/': '@ocmock//',
   '//flutter/third_party/inja/': '@inja//',
   '//flutter/third_party/brotli/': '@brotli//',
   '//flutter/third_party/json/': '@json//',
@@ -996,6 +1013,16 @@ const Map<String, ConfigEffect> configEffects = <String, ConfigEffect>{
   // the toolchain's; the Vulkan validation layer removes it and lists
   // :rtti, which is empty outside Windows (/GR): -frtti turns it back on.
   '//build/config/compiler:no_rtti': ConfigToolchain(removalCopts: <String>['-frtti']),
+  // //build/config/gcc:symbol_visibility_hidden, a default config whose
+  // -fvisibility=hidden and _LIBCPP_DISABLE_VISIBILITY_ANNOTATIONS are the
+  // toolchain's; OCMock removes it (its classes are mocked across the
+  // suite's objects): visibility back to default, the define undone.
+  // //build/config:symbol_visibility_hidden is empty ("present because this
+  // is also present in other buildroots").
+  '//build/config/gcc:symbol_visibility_hidden': ConfigToolchain(
+    removalCopts: <String>['-fvisibility=default', '-U_LIBCPP_DISABLE_VISIBILITY_ANNOTATIONS'],
+  ),
+  '//build/config:symbol_visibility_hidden': ConfigImplied(),
   '//build/config/compiler:rtti': ConfigCopts(<(Condition, List<String>)>[]),
   // ANGLE's configs (build/bazel/gl_wrap builds ANGLE; the overlay @angle
   // carries its headers and this define-only config).
