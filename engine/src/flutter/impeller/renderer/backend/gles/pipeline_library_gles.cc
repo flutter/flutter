@@ -4,6 +4,7 @@
 
 #include "impeller/renderer/backend/gles/pipeline_library_gles.h"
 
+#include <algorithm>
 #include <sstream>
 #include <string>
 
@@ -15,12 +16,32 @@
 
 namespace impeller {
 
+static size_t GetMaxActiveCompileJobsForReactor(
+    const std::shared_ptr<ReactorGLES>& reactor) {
+  if (!reactor || !reactor->GetProcTable().GetCapabilities()) {
+    return 1;
+  }
+  return PipelineLibraryGLES::GetMaxActiveCompileJobs(
+      *reactor->GetProcTable().GetCapabilities());
+}
+
 PipelineLibraryGLES::PipelineLibraryGLES(
     std::shared_ptr<ReactorGLES> reactor,
     std::shared_ptr<fml::BasicTaskRunner> io_task_runner)
-    : reactor_(std::move(reactor)),
-      compile_queue_(
-          PipelineCompileQueueGLES::Create(std::move(io_task_runner))) {}
+    : reactor_(std::move(reactor)) {
+  compile_queue_ = PipelineCompileQueueGLES::Create(
+      std::move(io_task_runner), GetMaxActiveCompileJobsForReactor(reactor_));
+}
+
+size_t PipelineLibraryGLES::GetMaxActiveCompileJobs(
+    const CapabilitiesGLES& capabilities) {
+  int32_t threads = capabilities.GetMaxShaderCompilerThreads();
+  if (threads < 0) {
+    // -1 means the implementation-dependent maximum.
+    return PipelineCompileQueueGLES::kDefaultMaxActiveJobs;
+  }
+  return std::max<size_t>(static_cast<size_t>(threads), 1);
+}
 
 static std::string GetShaderInfoLog(const ProcTableGLES& gl, GLuint shader) {
   GLint log_length = 0;
@@ -438,7 +459,11 @@ void PipelineLibraryGLES::RemovePipelinesWithEntryPoint(
   PipelineMap::iterator it = pipelines_.begin();
   while (it != pipelines_.end()) {
     const PipelineDescriptor& desc = it->first;
-    if (desc.GetEntrypointForStage(function->GetStage())->IsEqual(*function)) {
+    // Pipelines without an entry point for the function's stage, such as every
+    // render pipeline when a compute function is removed, never use it.
+    const std::shared_ptr<const ShaderFunction> entrypoint =
+        desc.GetEntrypointForStage(function->GetStage());
+    if (entrypoint && entrypoint->IsEqual(*function)) {
       const std::shared_ptr<const ShaderFunction>& vert_function =
           desc.GetEntrypointForStage(ShaderStage::kVertex);
       const std::shared_ptr<const ShaderFunction>& frag_function =
