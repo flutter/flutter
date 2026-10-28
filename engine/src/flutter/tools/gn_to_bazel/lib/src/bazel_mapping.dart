@@ -2823,6 +2823,10 @@ Assumptions outDirectoryAssumptions(Map<String, GnValue> args) {
   // The directory decides what the generated files select on, too: the
   // settings (is_debug, use_ios_simulator, the backends) and the runtime
   // mode, so that the comparison covers the branch the directory builds.
+  // An empty string is GN's "unset" for an argument a .gni computes when
+  // args.gn leaves it (darwin_sdk.gni's SDK paths, which exec_script fills
+  // in): the base value (a reference constant) stands.
+  bool unset(GnValue? value) => value == null || (value is GnStringValue && value.value.isEmpty);
   final values = <String, GnValue>{
     for (final String name in <String>{
       ...base.names,
@@ -2830,7 +2834,7 @@ Assumptions outDirectoryAssumptions(Map<String, GnValue> args) {
       'is_debug',
       'flutter_runtime_mode',
     })
-      if (args[name] != null) name: args[name]!,
+      if (!unset(args[name])) name: args[name]!,
   };
   String string(String name, String fallback) {
     final GnValue? value = args[name];
