@@ -62,7 +62,7 @@ base class ExtensionBuildManager {
               );
               return (connection, ExtensionBuildTarget.listFromJson(result));
             } on Object catch (e) {
-              _logger.printTrace('Failed to query build targets from extension: $e');
+              _logger.printWarning('Failed to query build targets from extension: $e');
               return (connection, const <ExtensionBuildTarget>[]);
             }
           }),
@@ -71,9 +71,6 @@ base class ExtensionBuildManager {
     for (final (ExtensionConnection connection, List<ExtensionBuildTarget> targetList)
         in connectionTargets) {
       for (final target in targetList) {
-        if (target.name.isEmpty) {
-          continue;
-        }
         if (_targetToConnection.containsKey(target.name)) {
           // TODO(bkonyi): Include conflicting extension names once extension manifest metadata is wired into ExtensionConnection.
           _logger.printWarning('Skipping duplicate build target "${target.name}" from extension.');
@@ -88,15 +85,24 @@ base class ExtensionBuildManager {
     return targets;
   }
 
-  /// Triggers a custom build for the given [targetName] by routing to the active extension.
+  /// Triggers a custom `flutter build` target for the given [targetName] by routing to the active extension.
   Future<ExtensionBuildResult> build({
     required BuildMode buildMode,
+    required Uri flutterRoot,
     required String mainPath,
+    required Uri outputDir,
     required Uri projectRoot,
+    required Map<String, String> resolvedArtifacts,
     required String targetName,
   }) async {
     if (!projectRoot.hasAbsolutePath) {
       throw ArgumentError.value(projectRoot, 'projectRoot', 'Must be an absolute path.');
+    }
+    if (!outputDir.hasAbsolutePath) {
+      throw ArgumentError.value(outputDir, 'outputDir', 'Must be an absolute path.');
+    }
+    if (!flutterRoot.hasAbsolutePath) {
+      throw ArgumentError.value(flutterRoot, 'flutterRoot', 'Must be an absolute path.');
     }
     if (!_featureFlags.isToolExtensionsEnabled) {
       return const ExtensionBuildResult(
@@ -132,8 +138,11 @@ base class ExtensionBuildManager {
         BuildService.buildMethod,
         params: <String, Object?>{
           BuildService.buildModeParam: buildMode.cliName,
+          BuildService.flutterRootParam: flutterRoot.toString(),
           BuildService.mainPathParam: mainPath,
+          BuildService.outputDirParam: outputDir.toString(),
           BuildService.projectRootParam: projectRoot.toString(),
+          BuildService.resolvedArtifactsParam: resolvedArtifacts,
           BuildService.targetNameParam: targetName,
         },
         // TODO(bkonyi): Support heartbeat / liveness monitoring for long-running RPCs,
