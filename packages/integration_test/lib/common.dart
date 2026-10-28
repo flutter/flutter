@@ -11,9 +11,6 @@ library;
 import 'dart:async';
 import 'dart:convert';
 
-// Examples can assume:
-// import 'package:integration_test/common.dart';
-
 /// A callback to use with [integrationDriver].
 ///
 /// The callback receives the name of screenshot passed to `binding.takeScreenshot(<name>)`,
@@ -246,21 +243,7 @@ enum WebDriverMouseButton {
 ///
 /// Create actions with the [WebDriverPointerAction.move],
 /// [WebDriverPointerAction.down], [WebDriverPointerAction.up], and
-/// [WebDriverPointerAction.pause] constructors. Each kind of action is a
-/// subclass ([WebDriverPointerMove], [WebDriverPointerDown],
-/// [WebDriverPointerUp], and [WebDriverPointerPause]), so code that consumes
-/// actions can use an exhaustive `switch`:
-///
-/// ```dart
-/// String describe(WebDriverPointerAction action) {
-///   return switch (action) {
-///     WebDriverPointerMove(:final double x, :final double y) => 'move to ($x, $y)',
-///     WebDriverPointerDown(:final WebDriverMouseButton button) => 'press $button',
-///     WebDriverPointerUp(:final WebDriverMouseButton button) => 'release $button',
-///     WebDriverPointerPause(:final Duration duration) => 'wait $duration',
-///   };
-/// }
-/// ```
+/// [WebDriverPointerAction.pause] constructors.
 ///
 /// See: https://www.w3.org/TR/webdriver/#actions
 sealed class WebDriverPointerAction {
