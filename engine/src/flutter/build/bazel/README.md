@@ -1862,6 +1862,22 @@ builds an AOT snapshot with the Bazel `gen_snapshot` the same way. `et build
 --backend bazel` with no targets, for a developer's configuration, builds
 this target and prints the directory to pass.
 
+The directory can also go by its name: `--local-engine=host_debug_unopt`
+(or `--local-engine-host=...`) looks under `engine/src/out/<name>` first,
+as always, and then among the Bazel configurations' directories under
+`engine/src/out/bazel-out/*/bin/engine/src/flutter` for the one whose
+`local_engine.json` carries that name -- GN's name for the configuration's
+build directory, which `local_engine` writes -- so after `bazel build
+--config=android_debug_arm64 //engine/src/flutter:local_engine` and the host
+build's, `flutter build apk --local-engine=android_debug_arm64
+--local-engine-host=host_debug_unopt` needs no paths. Two Bazel
+configurations carrying one name (a stale directory left by another
+`.bazelrc`) are reported as such, with both paths. On a Mac the same holds
+for `host_debug_unopt_arm64` and the iOS builds (`ios_debug_sim_unopt_arm64`:
+`flutter build ios --simulator --local-engine=ios_debug_sim_unopt_arm64
+--local-engine-host=host_debug_unopt_arm64`), whose `Flutter.xcframework`
+and `FlutterMacOS.xcframework` the tool finds through the manifest too.
+
 Two paths of the tool read GN's layout by name until commit 320, and read a
 manifest directory now. The Gradle plugin took `-Plocal-engine-out` as
 `<engine>/src/out/<name>`, deriving the ABI and the mode from the name and
