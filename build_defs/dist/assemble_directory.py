@@ -11,12 +11,51 @@ each `--directory <source>=<path>` has its contents copied under <path>
 output-tree files are read-only and a tree artifact is one unit. A file
 that is a symlink output of the build (a framework bundle's
 `Versions/Current -> A`, framework.bzl: a relative target, where the
-sandbox's own input links are absolute) is made again as the link it is.
+sandbox's own input links are absolute) is made again as the link it is --
+also when the sandbox's absolute link leads to it (a link inside a
+directory output, an xcframework's framework: the sandbox stages the
+directory's entries one by one, each as a link to the output tree's).
 """
 
 import argparse
 import os
 import shutil
+
+
+def build_link(source):
+  """The relative target of the build's own link at `source`, if it is one; else None."""
+  if not os.path.islink(source):
+    return None
+  target = os.readlink(source)
+  if not os.path.isabs(target):
+    return target
+  # The sandbox's link to the output tree's file: the build's own link, if
+  # the file there is one.
+  if os.path.islink(target) and not os.path.isabs(os.readlink(target)):
+    return os.readlink(target)
+  return None
+
+
+def copy_file(source, destination):
+  link = build_link(source)
+  if link is not None:
+    if os.path.lexists(destination):
+      os.remove(destination)
+    os.symlink(link, destination)
+    return
+  shutil.copyfile(source, destination)
+  shutil.copymode(source, destination)
+
+
+def copy_tree(source, destination):
+  os.makedirs(destination, exist_ok=True)
+  for name in sorted(os.listdir(source)):
+    entry = os.path.join(source, name)
+    target = os.path.join(destination, name)
+    if build_link(entry) is None and os.path.isdir(entry):
+      copy_tree(entry, target)
+    else:
+      copy_file(entry, target)
 
 
 def main():
@@ -33,18 +72,12 @@ def main():
   for entry in options.directory:
     source, path = entry.split('=', 1)
     destination = os.path.normpath(os.path.join(options.output, path))
-    shutil.copytree(source, destination, dirs_exist_ok=True)
+    copy_tree(source, destination)
   for entry in options.file:
     source, path = entry.split('=', 1)
     destination = os.path.join(options.output, path)
     os.makedirs(os.path.dirname(destination), exist_ok=True)
-    if os.path.islink(source) and not os.path.isabs(os.readlink(source)):
-      if os.path.lexists(destination):
-        os.remove(destination)
-      os.symlink(os.readlink(source), destination)
-      continue
-    shutil.copyfile(source, destination)
-    shutil.copymode(source, destination)
+    copy_file(source, destination)
 
 
 if __name__ == '__main__':

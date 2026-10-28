@@ -912,8 +912,10 @@ exports_files(
     // (hostOsCases: the .dylib names of the host's libraries).
     assume: hostOsCases,
     appendix: '''
+load("@bazel_skylib//lib:selects.bzl", "selects")
 load("//build_defs/android:build_tools.bzl", "android_engine_artifacts")
 load("//build_defs/dist:local_engine.bzl", "bundle_directory")
+load("//build_defs/dist:zip_bundle.bzl", "zip_bundle")
 load("//build_defs/config:configuration.bzl", "in_configuration")
 
 # The GN file, for the wrapped GN builds that read //flutter/build
@@ -927,16 +929,15 @@ filegroup(
 # The host's development artifacts unpacked as the flutter tool's cache lays
 # them, for the tests' SDK facsimile (a dart_test's cache_files; what
 # `flutter precache` downloads for the host): bin/cache/artifacts/engine/<host>
-# is artifacts.zip and font-subset.zip unpacked together -- and on Linux the
-# debug desktop embedding's archive, the GTK shell's, which `flutter precache
-# --linux` adds (a Mac's desktop embedding, FlutterMacOS.framework, is the
-# recipe's universal xcframework, which no single build makes: the Mac's
-# facsimile carries the host tools alone) -- <host>-profile and
-# <host>-release the other modes' (gen_snapshot and the embedding, built
-# under that mode's configuration: in_configuration), common/ the patched
-# SDK's debug and product archives. The directories exist for the Linux and
-# Mac hosts (the Mac's T43); elsewhere they are incompatible rather than
-# failing the package's analysis.
+# is artifacts.zip and font-subset.zip unpacked together -- and the debug
+# desktop embedding's archives, which `flutter precache --linux|--macos`
+# adds: on Linux the GTK shell's, on a Mac the framework's and the
+# gen_snapshots' below -- <host>-profile and <host>-release the other
+# modes' (gen_snapshot and the embedding, built under that mode's
+# configuration: in_configuration), common/ the patched SDK's debug and
+# product archives. The directories exist for the Linux and Mac hosts (the
+# Mac's T43); elsewhere they are incompatible rather than failing the
+# package's analysis.
 bundle_directory(
     name = "host_engine_directory",
     bundles = [
@@ -944,6 +945,11 @@ bundle_directory(
         "//engine/src/flutter/tools/font_subset:font_subset",
     ] + select({
         "@platforms//os:linux": ["//engine/src/flutter/shell/platform/linux:flutter_gtk"],
+        "@platforms//os:macos": [":macos_framework"],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/common:platform_darwin_arm64": [":macos_gen_snapshot_arm64"],
+        "//engine/src/flutter/common:platform_darwin_x64": [":macos_gen_snapshot_x64"],
         "//conditions:default": [],
     }),
     target_compatible_with = select({
@@ -952,6 +958,108 @@ bundle_directory(
         "//conditions:default": ["@platforms//:incompatible"],
     }),
 )
+
+# The recipe's other Mac archives, which the cache unpacks into the same
+# darwin-x64* directories: framework.zip (FlutterMacOS.xcframework) and
+# gen_snapshot.zip (gen_snapshot_arm64 and gen_snapshot_x64) are the Mac
+# builders' generators, not GN targets (ci/builders/mac_host_engine.json:
+# create_macos_framework.py lipos an arm64 and an x64 build's frameworks
+# into one xcframework, create_macos_gen_snapshots.py gathers the two
+# builds' universal gen_snapshots). For the facsimile on a Mac host, one
+# build's: its xcframework -- the build's CPU's slice alone, where the
+# recipe's has both -- and its universal gen_snapshot, named for the
+# build's target CPU (lib/snapshot's create_macos_gen_snapshots). Enough for
+# a build of the host's architecture (`flutter build macos` in debug, or
+# with FLUTTER_MACOS_ARM64_ONLY); a universal one wants the other CPU's
+# configuration too (NEED_DECISION Q31). The archives are named as
+# artifacts.zip's directory is, darwin-<cpu>[-<mode>].
+_MAC_BUILDS = [
+    (cpu, mode)
+    for cpu in [
+        "arm64",
+        "x64",
+    ]
+    for mode in [
+        "debug",
+        "profile",
+        "release",
+        "jit_release",
+    ]
+]
+
+[
+    selects.config_setting_group(
+        name = "mac_%s_%s" % (cpu, mode),
+        match_all = [
+            "//engine/src/flutter/common:platform_darwin_" + cpu,
+            "//engine/src/flutter/common:runtime_mode_" + mode,
+        ],
+    )
+    for cpu, mode in _MAC_BUILDS
+]
+
+_MAC_DIRECTORY = {
+    (cpu, mode): "darwin-%s%s" % (
+        cpu,
+        "" if mode == "debug" else "-" + mode,
+    )
+    for cpu, mode in _MAC_BUILDS
+}
+
+zip_bundle(
+    name = "macos_framework",
+    files = {"FlutterMacOS.xcframework": "//engine/src/flutter/shell/platform/darwin/macos:flutter_framework"},
+    output = select({
+        ":mac_%s_%s" % (cpu, mode): _MAC_DIRECTORY[(cpu, mode)] + "/framework.zip"
+        for cpu, mode in _MAC_BUILDS
+    } | {"//conditions:default": None}),
+    target_compatible_with = select({
+        "@platforms//os:macos": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+)
+
+[
+    zip_bundle(
+        name = "macos_gen_snapshot_" + cpu,
+        files = {"gen_snapshot_" + cpu: "//engine/src/flutter/lib/snapshot:create_macos_gen_snapshots"},
+        output = select({
+            ":mac_%s_%s" % (cpu, mode): _MAC_DIRECTORY[(cpu, mode)] + "/gen_snapshot.zip"
+            for mode in [
+                "debug",
+                "profile",
+                "release",
+                "jit_release",
+            ]
+        } | {"//conditions:default": None}),
+        target_compatible_with = select({
+            "//engine/src/flutter/common:platform_darwin_" + cpu: [],
+            "//conditions:default": ["@platforms//:incompatible"],
+        }),
+    )
+    for cpu in [
+        "arm64",
+        "x64",
+    ]
+]
+
+[
+    in_configuration(
+        name = "%s_%s" % (bundle, mode),
+        runtime_mode = mode,
+        target = ":" + bundle,
+        target_compatible_with = ["@platforms//os:macos"],
+    )
+    for bundle in [
+        "macos_framework",
+        "macos_gen_snapshot_arm64",
+        "macos_gen_snapshot_x64",
+    ]
+    for mode in [
+        "profile",
+        "release",
+    ]
+]
 
 in_configuration(
     name = "artifacts_profile",
@@ -970,6 +1078,11 @@ bundle_directory(
     name = "host_engine_profile_directory",
     bundles = [":artifacts_profile"] + select({
         "@platforms//os:linux": [":flutter_gtk_profile"],
+        "@platforms//os:macos": [":macos_framework_profile"],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/common:platform_darwin_arm64": [":macos_gen_snapshot_arm64_profile"],
+        "//engine/src/flutter/common:platform_darwin_x64": [":macos_gen_snapshot_x64_profile"],
         "//conditions:default": [],
     }),
     target_compatible_with = select({
@@ -996,6 +1109,11 @@ bundle_directory(
     name = "host_engine_release_directory",
     bundles = [":artifacts_release"] + select({
         "@platforms//os:linux": [":flutter_gtk_release"],
+        "@platforms//os:macos": [":macos_framework_release"],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/common:platform_darwin_arm64": [":macos_gen_snapshot_arm64_release"],
+        "//engine/src/flutter/common:platform_darwin_x64": [":macos_gen_snapshot_x64_release"],
         "//conditions:default": [],
     }),
     target_compatible_with = select({
