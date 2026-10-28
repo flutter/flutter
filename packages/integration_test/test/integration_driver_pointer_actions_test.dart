@@ -17,61 +17,57 @@ import 'package:webdriver/async_io.dart' show MoveTargetOutOfBoundsException, We
 
 void main() {
   group('integrationDriver handling webDriverPointerActions', () {
-    test(
-      'sends one W3C perform-actions request with rounded viewport moves, durations, and pauses',
-      () async {
-        final app = _FakeApp(
-          sequences: const <List<WebDriverPointerAction>>[
-            <WebDriverPointerAction>[
-              WebDriverPointerAction.move(10.4, 20.6, duration: Duration(milliseconds: 300)),
-              WebDriverPointerAction.down(),
-              WebDriverPointerAction.move(50, 60),
-              WebDriverPointerAction.up(),
-              WebDriverPointerAction.pause(Duration(milliseconds: 100)),
-            ],
+    test('sends one W3C perform-actions request with rounded viewport moves, timed moves subdivided into steps, and pauses', () async {
+      final app = _FakeApp(
+        sequences: const <List<WebDriverPointerAction>>[
+          <WebDriverPointerAction>[
+            // The first move has no known start position, so it is sent as is.
+            WebDriverPointerAction.move(10.4, 20.6, duration: Duration(milliseconds: 300)),
+            WebDriverPointerAction.down(),
+            // Moves from (10, 21) to (50, 61) in ceil(50 / 16) = 4 steps.
+            WebDriverPointerAction.move(50.4, 60.6, duration: Duration(milliseconds: 50)),
+            WebDriverPointerAction.up(),
+            WebDriverPointerAction.pause(Duration(milliseconds: 100)),
           ],
-        );
-        final webDriver = _FakeWebDriver();
+        ],
+      );
+      final webDriver = _FakeWebDriver();
 
-        await _runIntegrationDriver(_FakeWebFlutterDriver(app, webDriver));
+      await _runIntegrationDriver(_FakeWebFlutterDriver(app, webDriver));
 
-        expect(webDriver.postRequests, <Map<String, Object?>>[
-          <String, Object?>{
-            'command': 'actions',
-            'params': <String, Object?>{
-              'actions': <Map<String, Object?>>[
-                <String, Object?>{
-                  'type': 'pointer',
-                  'id': 'integration_test_mouse',
-                  'parameters': <String, Object?>{'pointerType': 'mouse'},
-                  'actions': <Map<String, Object?>>[
-                    <String, Object?>{
-                      'type': 'pointerMove',
-                      'origin': 'viewport',
-                      'x': 10,
-                      'y': 21,
-                      'duration': 300,
-                    },
-                    <String, Object?>{'type': 'pointerDown', 'button': 0},
-                    <String, Object?>{
-                      'type': 'pointerMove',
-                      'origin': 'viewport',
-                      'x': 50,
-                      'y': 60,
-                      'duration': 0,
-                    },
-                    <String, Object?>{'type': 'pointerUp', 'button': 0},
-                    <String, Object?>{'type': 'pause', 'duration': 100},
-                  ],
-                },
-              ],
-            },
+      expect(webDriver.postRequests, <Map<String, Object?>>[
+        <String, Object?>{
+          'command': 'actions',
+          'params': <String, Object?>{
+            'actions': <Map<String, Object?>>[
+              <String, Object?>{
+                'type': 'pointer',
+                'id': 'integration_test_mouse',
+                'parameters': <String, Object?>{'pointerType': 'mouse'},
+                'actions': <Map<String, Object?>>[
+                  <String, Object?>{
+                    'type': 'pointerMove',
+                    'origin': 'viewport',
+                    'x': 10,
+                    'y': 21,
+                    'duration': 300,
+                  },
+                  <String, Object?>{'type': 'pointerDown', 'button': 0},
+                  _pointerMove(20, 31, 12),
+                  _pointerMove(30, 41, 13),
+                  _pointerMove(40, 51, 12),
+                  _pointerMove(50, 61, 13),
+                  <String, Object?>{'type': 'pointerUp', 'button': 0},
+                  <String, Object?>{'type': 'pause', 'duration': 100},
+                ],
+              },
+            ],
           },
-        ]);
-        expect(webDriver.deleteRequests, isEmpty);
-        expect(app.replies, <String>['complete']);
-      },
-    );
+        },
+      ]);
+      expect(webDriver.deleteRequests, isEmpty);
+      expect(app.replies, <String>['complete']);
+    });
 
     test(
       'performs multiple sequences in order and accepts integer or double move coordinates',
@@ -147,6 +143,107 @@ void main() {
         expect(app.replies, <String>['complete', 'complete']);
       },
     );
+
+    test('subdivides a timed move starting from the last move of an earlier request', () async {
+      final app = _FakeApp(
+        sequences: const <List<WebDriverPointerAction>>[
+          <WebDriverPointerAction>[WebDriverPointerAction.move(0, 0)],
+          <WebDriverPointerAction>[
+            WebDriverPointerAction.down(),
+            WebDriverPointerAction.move(100, 0, duration: Duration(milliseconds: 32)),
+            WebDriverPointerAction.up(),
+          ],
+        ],
+      );
+      final webDriver = _FakeWebDriver();
+
+      await _runIntegrationDriver(_FakeWebFlutterDriver(app, webDriver));
+
+      expect(webDriver.postRequests, <Map<String, Object?>>[
+        _performActionsRequest(<Map<String, Object?>>[_pointerMove(0, 0, 0)]),
+        _performActionsRequest(<Map<String, Object?>>[
+          <String, Object?>{'type': 'pointerDown', 'button': 0},
+          _pointerMove(50, 0, 16),
+          _pointerMove(100, 0, 16),
+          <String, Object?>{'type': 'pointerUp', 'button': 0},
+        ]),
+      ]);
+      expect(app.replies, <String>['complete', 'complete']);
+    });
+
+    test('subdivides a timed move into at most one step per 16 ms and per pixel', () async {
+      const cases =
+          <
+            ({
+              String description,
+              (double, double) start,
+              (double, double) target,
+              int milliseconds,
+              List<(int, int, int)> steps,
+            })
+          >[
+            (
+              description: 'step count capped by distance',
+              start: (0, 0),
+              target: (3, 0),
+              milliseconds: 300,
+              steps: <(int, int, int)>[(1, 0, 100), (2, 0, 100), (3, 0, 100)],
+            ),
+            (
+              description: 'zero distance',
+              start: (5, 5),
+              target: (5, 5),
+              milliseconds: 300,
+              steps: <(int, int, int)>[(5, 5, 300)],
+            ),
+            (
+              description: 'duration shorter than one step',
+              start: (0, 0),
+              target: (100, 0),
+              milliseconds: 10,
+              steps: <(int, int, int)>[(100, 0, 10)],
+            ),
+            (
+              description: 'diagonal move toward the origin',
+              start: (100, 100),
+              target: (68, 84),
+              milliseconds: 32,
+              steps: <(int, int, int)>[(84, 92, 16), (68, 84, 16)],
+            ),
+            (
+              description: 'half-pixel step position rounds half away from zero',
+              start: (10, 0),
+              target: (7, 0),
+              milliseconds: 32,
+              steps: <(int, int, int)>[(9, 0, 16), (7, 0, 16)],
+            ),
+          ];
+
+      for (final testCase in cases) {
+        final app = _FakeApp(
+          sequences: <List<WebDriverPointerAction>>[
+            <WebDriverPointerAction>[
+              WebDriverPointerAction.move(testCase.start.$1, testCase.start.$2),
+              WebDriverPointerAction.move(
+                testCase.target.$1,
+                testCase.target.$2,
+                duration: Duration(milliseconds: testCase.milliseconds),
+              ),
+            ],
+          ],
+        );
+        final webDriver = _FakeWebDriver();
+
+        await _runIntegrationDriver(_FakeWebFlutterDriver(app, webDriver));
+
+        expect(webDriver.postRequests, <Map<String, Object?>>[
+          _performActionsRequest(<Map<String, Object?>>[
+            _pointerMove(testCase.start.$1.round(), testCase.start.$2.round(), 0),
+            for (final (int x, int y, int duration) in testCase.steps) _pointerMove(x, y, duration),
+          ]),
+        ], reason: testCase.description);
+      }
+    });
 
     test('fails in the app and throws StateError if the driver is not a WebFlutterDriver', () async {
       final app = _FakeApp(
@@ -282,6 +379,35 @@ Future<void> _runIntegrationDriver(FlutterDriver driver) async {
 
 class _DriverClosed implements Exception {
   const _DriverClosed();
+}
+
+/// The W3C perform-actions request [integrationDriver] posts for a pointer
+/// action sequence that it serialized to [actions].
+Map<String, Object?> _performActionsRequest(List<Map<String, Object?>> actions) {
+  return <String, Object?>{
+    'command': 'actions',
+    'params': <String, Object?>{
+      'actions': <Map<String, Object?>>[
+        <String, Object?>{
+          'type': 'pointer',
+          'id': 'integration_test_mouse',
+          'parameters': <String, Object?>{'pointerType': 'mouse'},
+          'actions': actions,
+        },
+      ],
+    },
+  };
+}
+
+/// A serialized W3C `pointerMove` action to viewport position ([x], [y]).
+Map<String, Object?> _pointerMove(int x, int y, int duration) {
+  return <String, Object?>{
+    'type': 'pointerMove',
+    'origin': 'viewport',
+    'x': x,
+    'y': y,
+    'duration': duration,
+  };
 }
 
 /// Plays the in-browser test, which asks [integrationDriver] for pointer
