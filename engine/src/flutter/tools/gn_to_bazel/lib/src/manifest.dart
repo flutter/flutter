@@ -1064,6 +1064,18 @@ selects.config_setting_group(
     ],
 )
 
+# testing.gni's enable_ios_unittests: `is_ios && flutter_runtime_mode ==
+# "debug"` -- the iOS embedding's XCTest suite (shell/platform/darwin/ios's
+# ios_test_flutter), built in the debug runtime mode alone ("we compile
+# with --enable-tests, which impacts exported symbols").
+selects.config_setting_group(
+    name = "ios_unittests_enabled",
+    match_all = [
+        "@platforms//os:ios",
+        "//engine/src/flutter/common:runtime_mode_debug",
+    ],
+)
+
 # The goldens and other resources testing/run_tests.py hands suites with
 # --golden-dir (flow_unittests).
 filegroup(
@@ -2066,14 +2078,15 @@ cc_library(
 ''',
   ),
   // OCMock, the Objective-C suites' mocks (framework_common_unittests,
-  // flutter_desktop_darwin_unittests), a Mac's: `ocmock_src` an
+  // flutter_desktop_darwin_unittests, and iOS's ios_test_flutter, which
+  // links the dylib): `ocmock_src` an
   // Objective-C source_set with the `Source` directory as an all-dependent
   // config and the visibility config removed, `ocmock` the complete archive
   // of it that the suites link -- a cc_library of its dependencies here
   // (linkedStaticLibraries) --, `ocmock_shared` its dylib.
   ConvertedFile(
     '//flutter/third_party/ocmock',
-    condition: 'is_mac',
+    condition: 'is_ios || is_mac',
     linkedStaticLibraries: <String>{'ocmock'},
   ),
   ConvertedFile(
