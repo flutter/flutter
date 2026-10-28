@@ -180,9 +180,9 @@ void main() {
     });
 
     testWithoutContext('uses the designated dds port', () async {
+      await flutterRun.run(withDebugger: true);
       final int ddsPort = await getFreePort();
 
-      await flutterRun.run(withDebugger: true);
       await flutterAttach.attach(
         flutterRun.vmServicePort!,
         additionalCommandArgs: <String>['--dds-port=$ddsPort'],

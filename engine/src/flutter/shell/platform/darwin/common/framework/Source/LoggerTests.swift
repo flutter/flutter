@@ -7,7 +7,10 @@ import Foundation
 import Testing
 @testable import test_utils_swift
 
-@Suite struct LoggerTests {
+// Several tests mutate shared `Logger` singleton properties (`outputWriter`, `logLevel`).
+// Even though those mutations are all lock-guarded and thread-safe, we serialize the tests to keep
+// them from racing each other.
+@Suite(.serialized) struct LoggerTests {
 
   @Test func testInitialization() {
     let writer = StringOutputWriter()
