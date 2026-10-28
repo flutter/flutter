@@ -20,7 +20,6 @@
 #include "flutter/fml/memory/ref_ptr.h"
 #include "flutter/fml/memory/thread_checker.h"
 #include "flutter/fml/memory/weak_ptr.h"
-#include "flutter/fml/status.h"
 #include "flutter/fml/synchronization/sync_switch.h"
 #include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/fml/thread.h"
@@ -121,7 +120,6 @@ class Shell final : public PlatformView::Delegate,
   using CreateCallback = std::function<std::unique_ptr<T>(Shell&)>;
   typedef std::function<std::unique_ptr<Engine>(
       Engine::Delegate& delegate,
-      const PointerDataDispatcherMaker& dispatcher_maker,
       DartVM& vm,
       fml::RefPtr<const DartSnapshot> isolate_snapshot,
       TaskRunners task_runners,
@@ -306,6 +304,11 @@ class Shell final : public PlatformView::Delegate,
   void NotifyLowMemoryWarning() const;
 
   //----------------------------------------------------------------------------
+  /// @brief      Clears any cached render targets and textures on the
+  ///             rasterizer.
+  void ClearRenderTargetCache() const;
+
+  //----------------------------------------------------------------------------
   /// @brief      Used by embedders to flush the microtask queue. Required
   ///             when running with merged platform and UI threads, in which
   ///             case the embedder is responsible for flushing the microtask
@@ -474,7 +477,7 @@ class Shell final : public PlatformView::Delegate,
   const fml::RefPtr<fml::RasterThreadMerger> parent_raster_thread_merger_;
   std::shared_ptr<ResourceCacheLimitCalculator>
       resource_cache_limit_calculator_;
-  size_t resource_cache_limit_;
+  size_t resource_cache_limit_ = 0;
   const Settings settings_;
   DartVMRef vm_;
   mutable std::mutex time_recorder_mutex_;
@@ -752,6 +755,9 @@ class Shell final : public PlatformView::Delegate,
   // |Engine::Delegate|
   void RequestViewFocusChange(const ViewFocusChangeRequest& request) override;
 
+  // |Engine::Delegate|
+  void OnEngineResetInternalState() override;
+
   // |Rasterizer::Delegate|
   void OnFrameRasterized(const FrameTiming&) override;
 
@@ -834,6 +840,14 @@ class Shell final : public PlatformView::Delegate,
   bool OnServiceProtocolGetPipelineUsage(
       const ServiceProtocol::Handler::ServiceProtocolMap& params,
       rapidjson::Document* response);
+
+  // Creates the "pipelines" array of a `_flutter.getPipelineUsage` response,
+  // with one entry per pipeline in `pipeline_library`: its label, its
+  // specialization constants, the number of times it was bound, and whether it
+  // was created eagerly.
+  static rapidjson::Value MakePipelineUsageJson(
+      const impeller::PipelineLibrary& pipeline_library,
+      rapidjson::Document::AllocatorType& allocator);
 
   // Send a system font change notification.
   void SendFontChangeNotification();

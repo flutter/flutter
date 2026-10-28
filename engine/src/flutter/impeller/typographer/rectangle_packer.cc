@@ -43,7 +43,7 @@ class SkylineRectanglePacker final : public RectanglePacker {
 
   std::vector<SkylineSegment> skyline_;
 
-  int32_t area_so_far_;
+  int32_t area_so_far_ = 0;
 
   // Can a width x height rectangle fit in the free space represented by
   // the skyline segments >= 'skyline_index'? If so, return true and fill in
@@ -129,7 +129,7 @@ void SkylineRectanglePacker::AddSkylineLevel(size_t skyline_index,
                                              int y,
                                              int p_width,
                                              int p_height) {
-  SkylineSegment newSegment;
+  SkylineSegment newSegment{};
   newSegment.x_ = x;
   newSegment.y_ = y + p_height;
   newSegment.width_ = p_width;

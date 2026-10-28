@@ -144,7 +144,7 @@ class ColorFilterAtlasContents final : public Contents {
   // The referenced geometry is also stack allocated and will be de-allocated
   // after the contents are.
   AtlasGeometry* geometry_ = nullptr;
-  ColorMatrix matrix_;
+  ColorMatrix matrix_{};
   Scalar alpha_ = 1.0;
 
   ColorFilterAtlasContents(const ColorFilterAtlasContents&) = delete;

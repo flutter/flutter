@@ -22,6 +22,7 @@ import '../experimental/extension_manager.dart';
 import '../features.dart';
 import '../ios/code_signing.dart';
 import '../ios/plist_parser.dart';
+import '../reporting/unified_analytics.dart';
 import '../runner/flutter_command.dart';
 import '../runner/flutter_command_runner.dart';
 
@@ -114,6 +115,9 @@ class ConfigCommand extends FlutterCommand with ExtensionArgParserMixin {
   }
 
   Future<ExtensionConfiguration?> get _activeExtensionConfig async {
+    if (!featureFlags.isToolExtensionsEnabled) {
+      return null;
+    }
     if (_extensionManager case final extensionManager?) {
       await extensionManager.ensureInitialized();
       final List<ConfigurationExtension> extensions = extensionManager.configurationExtensions;
@@ -235,9 +239,14 @@ class ConfigCommand extends FlutterCommand with ExtensionArgParserMixin {
 
     if (argResults!.wasParsed('analytics')) {
       final bool value = boolArg('analytics');
-      logger.printStatus('Analytics reporting ${value ? 'enabled' : 'disabled'}.');
+      if (isDashAnalyticsSuppressionRequested(_toolContext.platform.environment)) {
+        // `analytics` is a no-op, so `setTelemetry` would silently do nothing.
+        logger.printWarning(dashSuppressedTelemetryChangeMessage(enable: value));
+      } else {
+        logger.printStatus('Analytics reporting ${value ? 'enabled' : 'disabled'}.');
 
-      await analytics.setTelemetry(value);
+        await analytics.setTelemetry(value);
+      }
     }
 
     if (argResults!.wasParsed('android-sdk')) {
@@ -357,8 +366,7 @@ class ConfigCommand extends FlutterCommand with ExtensionArgParserMixin {
   Future<String> get settingsText async {
     final Config config = _toolContext.config;
     final featuresByName = <String, Feature>{
-      for (final feature in featureFlags.allFeatures)
-        if (feature.configSetting case final configSetting?) configSetting: feature,
+      for (final feature in featureFlags.allFeatures) ?feature.configSetting: feature,
     };
     final String channel = _toolContext.flutterVersion.channel;
     final keys = <String>{

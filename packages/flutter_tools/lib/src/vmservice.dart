@@ -15,10 +15,8 @@ import 'base/context.dart';
 import 'base/io.dart' as io;
 import 'base/logger.dart';
 import 'base/utils.dart';
-import 'cache.dart';
 import 'convert.dart';
 import 'device.dart';
-import 'globals.dart' as globals;
 import 'project.dart';
 import 'version.dart';
 
@@ -43,6 +41,11 @@ const kFlutterMemoryInfoServiceName = 'flutterMemoryInfo';
 
 /// The error response code from an unrecoverable compilation failure.
 const kIsolateReloadBarred = 1005;
+
+/// Used to build RegExp instances which can detect the VM service message.
+final kVMServiceMessageRegExp = RegExp(
+  r'The Dart VM service is listening on ((http|//)[a-zA-Z0-9:/=_\-\.\[\]]+)',
+);
 
 /// Override `WebSocketConnector` in [context] to use a different constructor
 /// for [io.WebSocket]s (used by tests).
@@ -161,6 +164,7 @@ typedef VMServiceConnector = Future<FlutterVmService> Function(
   Restart? restart,
   CompileExpression? compileExpression,
   FlutterProject? flutterProject,
+  FlutterVersion? flutterVersion,
   PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
   io.CompressionOptions compression,
   Device? device,
@@ -177,6 +181,7 @@ Future<vm_service.VmService> setUpVmService({
   CompileExpression? compileExpression,
   Device? device,
   FlutterProject? flutterProject,
+  FlutterVersion? flutterVersion,
   PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
   required vm_service.VmService vmService,
 }) async {
@@ -214,22 +219,21 @@ Future<vm_service.VmService> setUpVmService({
     registrationRequests.add(vmService.registerService(kHotRestartServiceName, kFlutterToolAlias));
   }
 
-  vmService.registerServiceCallback(kFlutterVersionServiceName, (
-    Map<String, Object?> params,
-  ) async {
-    final FlutterVersion version =
-        context.get<FlutterVersion>() ??
-        FlutterVersion(fs: globals.fs, flutterRoot: Cache.flutterRoot!, git: globals.git);
-    final Map<String, Object> versionJson = version.toJson();
-    versionJson['frameworkRevisionShort'] = version.frameworkRevisionShort;
-    versionJson['engineRevisionShort'] = version.engineRevisionShort;
-    return <String, Object>{
-      'result': <String, Object>{kResultType: kResultTypeSuccess, ...versionJson},
-    };
-  });
-  registrationRequests.add(
-    vmService.registerService(kFlutterVersionServiceName, kFlutterToolAlias),
-  );
+  if (flutterVersion != null) {
+    vmService.registerServiceCallback(kFlutterVersionServiceName, (
+      Map<String, Object?> params,
+    ) async {
+      final Map<String, Object> versionJson = flutterVersion.toJson();
+      versionJson['frameworkRevisionShort'] = flutterVersion.frameworkRevisionShort;
+      versionJson['engineRevisionShort'] = flutterVersion.engineRevisionShort;
+      return <String, Object>{
+        'result': <String, Object>{kResultType: kResultTypeSuccess, ...versionJson},
+      };
+    });
+    registrationRequests.add(
+      vmService.registerService(kFlutterVersionServiceName, kFlutterToolAlias),
+    );
+  }
 
   if (compileExpression != null) {
     vmService.registerServiceCallback(kCompileExpressionServiceName, (
@@ -343,6 +347,7 @@ Future<FlutterVmService> connectToVmService(
   Restart? restart,
   CompileExpression? compileExpression,
   FlutterProject? flutterProject,
+  FlutterVersion? flutterVersion,
   PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
   io.CompressionOptions compression = io.CompressionOptions.compressionDefault,
   Device? device,
@@ -357,6 +362,7 @@ Future<FlutterVmService> connectToVmService(
     compression: compression,
     device: device,
     flutterProject: flutterProject,
+    flutterVersion: flutterVersion,
     printStructuredErrorLogMethod: printStructuredErrorLogMethod,
     logger: logger,
   );
@@ -372,11 +378,54 @@ Future<vm_service.VmService> createVmServiceDelegate(
     compression: compression,
     logger: logger,
   );
+  // Guard against unhandled socket errors on the WebSocket's `done` future.
+  // When a socket reset or low-level connection reset occurs, `channel.done`
+  // can complete with an unhandled SocketException or WebSocketException.
+  unawaited(
+    channel.done.handleError((Object error, StackTrace stackTrace) {
+      logger.printTrace('VM service WebSocket done error: $error\n$stackTrace');
+    }),
+  );
+  // Guard the incoming stream from raising unhandled socket errors into the Zone.
+  // vm_service.VmService's inStream.listen does not provide an onError callback,
+  // so any stream errors (such as SocketException on connection reset) must be handled here.
+  final Stream<Object?> inStream = channel.handleError((Object error, StackTrace stackTrace) {
+    logger.printTrace('VM service WebSocket error: $error\n$stackTrace');
+  });
+  void handleWriteError(Object error, StackTrace stackTrace) {
+    logger.printTrace('Failed to send VM service message: $error\n$stackTrace');
+    try {
+      unawaited(channel.close().handleError((Object _, StackTrace _) {}));
+    } on Exception {
+      // Ignore errors while closing a failed channel.
+    } on StateError {
+      // Ignore errors while closing a failed channel.
+    }
+  }
+
   return vm_service.VmService(
-    channel,
-    channel.add,
+    inStream,
+    (String message) {
+      try {
+        channel.add(message);
+      } on Exception catch (error, stackTrace) {
+        handleWriteError(error, stackTrace);
+      } on StateError catch (error, stackTrace) {
+        handleWriteError(error, stackTrace);
+      }
+    },
     disposeHandler: () async {
-      await channel.close();
+      void logCloseError(Object error, StackTrace stackTrace) {
+        logger.printTrace('Error closing VM service channel: $error\n$stackTrace');
+      }
+
+      try {
+        await channel.close();
+      } on Exception catch (error, stackTrace) {
+        logCloseError(error, stackTrace);
+      } on StateError catch (error, stackTrace) {
+        logCloseError(error, stackTrace);
+      }
     },
   );
 }
@@ -387,6 +436,7 @@ Future<FlutterVmService> _connect(
   Restart? restart,
   CompileExpression? compileExpression,
   FlutterProject? flutterProject,
+  FlutterVersion? flutterVersion,
   PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
   io.CompressionOptions compression = io.CompressionOptions.compressionDefault,
   Device? device,
@@ -405,6 +455,7 @@ Future<FlutterVmService> _connect(
     compileExpression: compileExpression,
     device: device,
     flutterProject: flutterProject,
+    flutterVersion: flutterVersion,
     printStructuredErrorLogMethod: printStructuredErrorLogMethod,
     vmService: delegateService,
   );
@@ -477,12 +528,12 @@ class FlutterVmService {
   /// Calls [vm_service.VmService.getVM]. However, in the case that an [vm_service.RPCError]
   /// is thrown due to the service being disconnected, the error is discarded
   /// and null is returned.
-  Future<vm_service.VM?> getVmGuarded() async {
+  Future<vm_service.VM?> getVmGuarded({required Logger logger}) async {
     try {
       return await service.getVM();
     } on vm_service.RPCError catch (err) {
       if (err.isConnectionDisposedException) {
-        globals.printTrace('VmService.getVm call failed: $err');
+        logger.printTrace('VmService.getVm call failed: $err');
         return null;
       }
       rethrow;
@@ -508,7 +559,7 @@ class FlutterVmService {
     }
   }
 
-  /// Set the asset directory for the an attached Flutter view.
+  /// Set the asset directory for an attached Flutter view.
   Future<void> setAssetDirectory({
     required Uri assetsDirectory,
     required String? viewId,
@@ -853,6 +904,61 @@ class FlutterVmService {
         return;
       }
       rethrow;
+    }
+  }
+
+  /// Waits for the UI isolate of the first [FlutterView] to be created and
+  /// reach the `PauseStart` state.
+  Future<void> waitForUIIsolatePaused() async {
+    try {
+      await service.streamListen(vm_service.EventStreams.kDebug);
+    } on vm_service.RPCError {
+      // Do nothing, since the tool is already subscribed.
+    }
+
+    final isolatePaused = Completer<void>();
+    final pausedIsolateIds = <String>{};
+    String? targetIsolateId;
+    final StreamSubscription<vm_service.Event> debugEvents = service.onDebugEvent.listen((
+      vm_service.Event event,
+    ) {
+      if (event case vm_service.Event(
+        kind: vm_service.EventKind.kPauseStart,
+        isolate: vm_service.IsolateRef(id: final String eventIsolateId),
+      )) {
+        pausedIsolateIds.add(eventIsolateId);
+        if (eventIsolateId == targetIsolateId && !isolatePaused.isCompleted) {
+          isolatePaused.complete();
+        }
+      }
+    });
+
+    try {
+      // getFlutterViews() polls until the engine registers a view, which only
+      // happens once the root isolate is created. It returns an empty list only
+      // if the VM service disconnects.
+      final List<FlutterView> flutterViews = await getFlutterViews();
+      final String? isolateId = flutterViews.firstOrNull?.uiIsolate?.id;
+      if (isolateId == null) {
+        return;
+      }
+      targetIsolateId = isolateId;
+      final vm_service.Isolate? isolate = await getIsolateOrNull(isolateId);
+      if (isolate == null ||
+          isolate.pauseEvent?.kind == vm_service.EventKind.kPauseStart ||
+          pausedIsolateIds.contains(isolateId)) {
+        return;
+      }
+      // VmService.dispose() completes service.onDone without closing its
+      // broadcast event StreamControllers (such as onDebugEvent), so race
+      // isolatePaused.future against service.onDone only when waiting is needed.
+      await Future.any(<Future<void>>[isolatePaused.future, service.onDone]);
+    } on vm_service.RPCError catch (e) {
+      if (!e.isConnectionDisposedException) {
+        rethrow;
+      }
+    } finally {
+      await debugEvents.cancel();
     }
   }
 

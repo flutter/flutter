@@ -5,7 +5,7 @@
 #ifndef FLUTTER_LIB_UI_PAINTING_IMAGE_ENCODING_H_
 #define FLUTTER_LIB_UI_PAINTING_IMAGE_ENCODING_H_
 
-#include "fml/status_or.h"
+#include "third_party/abseil-cpp/absl/status/statusor.h"
 #include "third_party/skia/include/core/SkImage.h"
 #include "third_party/tonic/dart_library_natives.h"
 
@@ -26,8 +26,8 @@ Dart_Handle EncodeImage(CanvasImage* canvas_image,
                         int format,
                         Dart_Handle callback_handle);
 
-fml::StatusOr<sk_sp<SkData>> EncodeImage(const sk_sp<SkImage>& raster_image,
-                                         ImageByteFormat format);
+absl::StatusOr<sk_sp<SkData>> EncodeImage(const sk_sp<SkImage>& raster_image,
+                                          ImageByteFormat format);
 
 }  // namespace flutter
 

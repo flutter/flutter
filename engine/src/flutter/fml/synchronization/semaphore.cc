@@ -116,8 +116,9 @@ namespace fml {
 
 class PlatformSemaphore {
  public:
-  explicit PlatformSemaphore(uint32_t count)
-      : valid_(::sem_init(&sem_, 0 /* not shared */, count) == 0) {}
+  explicit PlatformSemaphore(uint32_t count) {
+    valid_ = ::sem_init(&sem_, 0 /* not shared */, count) == 0;
+  }
 
   ~PlatformSemaphore() {
     if (valid_) {
@@ -158,8 +159,8 @@ class PlatformSemaphore {
   }
 
  private:
-  bool valid_;
-  sem_t sem_;
+  bool valid_ = false;
+  sem_t sem_ = {};
 
   FML_DISALLOW_COPY_AND_ASSIGN(PlatformSemaphore);
 };
