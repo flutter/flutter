@@ -44,13 +44,19 @@ def _builds_transition_impl(settings, attr):
     # (`ios_sim_x64_debug`: the iOS recipe joins a profile or release
     # device build with the debug simulator builds) -- the mode's flag set
     # alongside, as in_configuration does, for the execution configuration
-    # the build's tools come from.
+    # the build's tools come from. A build of the current mode keeps the
+    # current compilation mode; one of a carried mode is built optimized,
+    # as the builders build it (ci/builders: every mode but an --unoptimized
+    # debug is -c opt), and so once, whichever mode's artifact wants it.
     mode = settings[RUNTIME_MODE_FLAG]
+    compilation_mode = settings["//command_line_option:compilation_mode"]
     configurations = {}
     for key, platform in attr.builds.items():
         base = runtime_mode_platform_base(platform)
-        build_mode = platform[len(base) + 1:] if base != platform else mode
+        carried = base != platform
+        build_mode = platform[len(base) + 1:] if carried else mode
         configurations[key] = {
+            "//command_line_option:compilation_mode": "opt" if carried else compilation_mode,
             "//command_line_option:platforms": ["%s:%s" % (_TOOLCHAINS, runtime_mode_platform_name(base, build_mode))],
             RUNTIME_MODE_FLAG: build_mode,
         }
@@ -58,8 +64,12 @@ def _builds_transition_impl(settings, attr):
 
 _builds_transition = transition(
     implementation = _builds_transition_impl,
-    inputs = [RUNTIME_MODE_FLAG],
+    inputs = [
+        "//command_line_option:compilation_mode",
+        RUNTIME_MODE_FLAG,
+    ],
     outputs = [
+        "//command_line_option:compilation_mode",
         "//command_line_option:platforms",
         RUNTIME_MODE_FLAG,
     ],
@@ -150,8 +160,9 @@ apple_universal = rule(
             mandatory = True,
             doc = "The builds the script joins: a key the script's arguments name (`{build:arm64}`) mapped to " +
                   "a platform's base name in //engine/src/flutter/build/bazel/toolchains (`macos_arm64`, " +
-                  "`ios_sim_x64`), whose child for the current runtime mode is built -- or to a mode's own " +
-                  "(`ios_sim_x64_debug`), built as named whatever the current mode.",
+                  "`ios_sim_x64`), whose child for the current runtime mode is built in the current compilation " +
+                  "mode -- or to a mode's own (`ios_sim_x64_debug`), built as named and optimized (-c opt, the " +
+                  "builders' way) whatever the current mode, so once for every mode's artifact.",
         ),
         "deps": attr.label_list(
             mandatory = True,
