@@ -546,12 +546,15 @@ flutter_objc_library(
         ":flutter_framework_source",
         "//engine/src:include_root",
         # In the debug runtime mode the VM finds its snapshot by symbol name
-        # (kDartVmSnapshotData, from //flutter/lib/snapshot); the exported symbols
-        # keep it through the link's dead stripping, as in the other tests that
-        # boot the VM from the embedded snapshot.
+        # (kDartSnapshotData and kDartSnapshotText, //flutter/lib/snapshot's); the
+        # exported symbols keep them through the link's dead stripping, and the
+        # dependency defines them in every runtime mode (the AOT modes' libdart
+        # does not reach them) -- as in the other tests that boot the VM from the
+        # embedded snapshot.
         "//engine/src/flutter:export_dynamic_symbols",
         "//engine/src/flutter/common",
         "//engine/src/flutter/fml",
+        "//engine/src/flutter/lib/snapshot",
         "//engine/src/flutter/shell/platform/common:common_cpp_accessibility",
         "//engine/src/flutter/shell/platform/common:common_cpp_core",
         "//engine/src/flutter/shell/platform/common:common_cpp_enums",
@@ -608,12 +611,15 @@ cc_test(
         ":flutter_framework_source",
         "//engine/src:include_root",
         # In the debug runtime mode the VM finds its snapshot by symbol name
-        # (kDartVmSnapshotData, from //flutter/lib/snapshot); the exported symbols
-        # keep it through the link's dead stripping, as in the other tests that
-        # boot the VM from the embedded snapshot.
+        # (kDartSnapshotData and kDartSnapshotText, //flutter/lib/snapshot's); the
+        # exported symbols keep them through the link's dead stripping, and the
+        # dependency defines them in every runtime mode (the AOT modes' libdart
+        # does not reach them) -- as in the other tests that boot the VM from the
+        # embedded snapshot.
         "//engine/src/flutter:export_dynamic_symbols",
         "//engine/src/flutter/common",
         "//engine/src/flutter/fml",
+        "//engine/src/flutter/lib/snapshot",
         "//engine/src/flutter/shell/platform/common:common_cpp_accessibility",
         "//engine/src/flutter/shell/platform/common:common_cpp_core",
         "//engine/src/flutter/shell/platform/common:common_cpp_enums",
