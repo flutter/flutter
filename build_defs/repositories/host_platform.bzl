@@ -12,16 +12,16 @@ says "the host's own CPU" (build/bazel's host_toolchain group, GN's
 `current_toolchain == host_toolchain`) -- comes from this repository, which
 the synced_deps extension lays from what it sees of the machine:
 
-    load("@host_platform//:host.bzl", "HOST_CPU_CONSTRAINT", "HOST_DART_SDK")
+    load("@host_platform//:host.bzl", "HOST_CPU_CONSTRAINT", "HOST_DART_SDK", "HOST_PLATFORM")
 
 Linux x64 and arm64, macOS x64 and arm64, Windows x64, as DEPS packages
 them.
 """
 
 _OSES = {
-    "linux": struct(gn = "linux", prebuilts = "linux", buildtools = "linux", constraint = "@platforms//os:linux"),
-    "mac": struct(gn = "mac", prebuilts = "macos", buildtools = "mac", constraint = "@platforms//os:macos"),
-    "windows": struct(gn = "win", prebuilts = "windows", buildtools = "windows", constraint = "@platforms//os:windows"),
+    "linux": struct(gn = "linux", prebuilts = "linux", buildtools = "linux", platform = "linux", constraint = "@platforms//os:linux"),
+    "mac": struct(gn = "mac", prebuilts = "macos", buildtools = "mac", platform = "macos", constraint = "@platforms//os:macos"),
+    "windows": struct(gn = "win", prebuilts = "windows", buildtools = "windows", platform = "windows", constraint = "@platforms//os:windows"),
 }
 
 _CPUS = {
@@ -73,6 +73,10 @@ def host_platform_values(os_name, arch):
         # (synced_deps' names).
         "HOST_DART_SDK": "@dart_sdk_" + prebuilts.replace("-", "_"),
         "HOST_CLANG": "@clang_%s_%s" % (os, cpu),
+        # The host's platform among the engine's (build/bazel/toolchains:
+        # linux_x64, macos_arm64, ...), the base of its runtime modes'
+        # (build_defs/config/platforms.bzl).
+        "HOST_PLATFORM": "%s_%s" % (spec.platform, cpu),
     }
 
 def _host_platform_impl(rctx):

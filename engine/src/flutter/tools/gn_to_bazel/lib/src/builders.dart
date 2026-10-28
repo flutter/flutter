@@ -139,10 +139,20 @@ final class GnFlag {
 
 /// The Bazel platforms a build's flags select: `--web` the wasm platform
 /// (build/bazel/toolchains/emscripten), `--target-os=linux --linux-cpu=arm64`
-/// the Linux arm64 cross build (build/bazel/toolchains).
+/// the Linux arm64 cross build (build/bazel/toolchains), and the Linux
+/// host's own for a host build on Linux. Each is the base of its runtime
+/// modes' platforms (`<platform>_<mode>`, build_defs/config/platforms.bzl:
+/// the mode as a platform flag, so that every mode's outputs have a
+/// directory of their own, as GN's build directories are per mode); a
+/// configuration names the mode's platform ([runtimeModePlatform]).
 const String wasmPlatform =
     '//engine/src/flutter/build/bazel/toolchains/emscripten:wasm32_emscripten';
 const String linuxArm64Platform = '//engine/src/flutter/build/bazel/toolchains:linux_arm64';
+const String linuxX64Platform = '//engine/src/flutter/build/bazel/toolchains:linux_x64';
+
+/// The platform of [platform]'s runtime [mode]: `<platform>_<mode>`
+/// (platforms.bzl's runtime_mode_platforms).
+String runtimeModePlatform(String platform, String mode) => '${platform}_$mode';
 
 /// The Android platforms by tools/gn's `--android-cpu` (all but x86, which
 /// has none yet).
@@ -623,9 +633,21 @@ final class BuilderBuild {
       settings.add('--$strippedSetting=false');
     }
     flags.add(unoptimized ? '--compilation_mode=dbg' : '--compilation_mode=opt');
-    flags.add('--$runtimeModeSetting=${runtimeMode ?? 'debug'}');
-    if (platform != null) {
-      flags.add(platform);
+    // The runtime mode twice: on the command line, for the execution
+    // configuration the build's tools are built in (gen_snapshot in the
+    // Dart wrap: GN builds its host tools in the build's mode), and as the
+    // target platform's own flag -- the mode's platform, whose name is the
+    // output directory's (platforms.bzl); a Linux host build, which named no
+    // platform (Bazel's host platform), names the host's for the same
+    // reason. A build the Bazel build has no platform for (otherPlatform)
+    // names none, as before.
+    final String mode = runtimeMode ?? 'debug';
+    flags.add('--$runtimeModeSetting=$mode');
+    final String? base = platform == null
+        ? (otherPlatform == null && host == BuilderHost.linux ? linuxX64Platform : null)
+        : platform.substring('--platforms='.length);
+    if (base != null) {
+      flags.add('--platforms=${runtimeModePlatform(base, mode)}');
     }
     flags.addAll(settings);
     // The tests: run_tests.py's types, the test executables a step runs

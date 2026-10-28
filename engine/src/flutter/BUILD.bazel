@@ -440,18 +440,19 @@ filegroup(
 # resolves through the manifest), the Android archives and the javadoc under
 # zip_archives/, ICU's data file for the target. The Maven tree and the
 # dist archives are the builders' targets, not the default's, as under GN.
-# A cross build's directory is named after its platform
-# (bazel-out/android_arm64-opt/; the root .bazelrc's
-# --experimental_platform_in_output_dir), so that it and the host build it
-# pairs with are both on disk:
+# A build's directory is named after its platform and runtime mode
+# (bazel-out/android_arm64_debug-opt/, linux_x64_debug-opt/; the root
+# .bazelrc's --experimental_platform_in_output_dir over the per-mode
+# platforms of build_defs/config/platforms.bzl), so that a cross build, the
+# host build it pairs with, and the other modes of either are all on disk:
 #
 #   bazel build //engine/src/flutter:local_engine
 #   flutter test --local-engine=$PWD/engine/src/out/bazel-bin/engine/src/flutter \
 #       --local-engine-host=$PWD/engine/src/out/bazel-bin/engine/src/flutter
 #   bazel build --config=android_debug_arm64 //engine/src/flutter:local_engine
 #   bazel build --config=host_debug //engine/src/flutter:local_engine
-#   flutter build apk --local-engine=$PWD/engine/src/out/bazel-out/android_arm64-opt/bin/engine/src/flutter \
-#       --local-engine-host=$PWD/engine/src/out/bazel-out/k8-opt/bin/engine/src/flutter
+#   flutter build apk --local-engine=$PWD/engine/src/out/bazel-out/android_arm64_debug-opt/bin/engine/src/flutter \
+#       --local-engine-host=$PWD/engine/src/out/bazel-out/linux_x64_debug-opt/bin/engine/src/flutter
 #
 # Not here: GN's own bookkeeping -- args.gn (nothing in the tree reads it:
 # testing/run_tests.py defines an is_asan() over it that nothing calls; a
