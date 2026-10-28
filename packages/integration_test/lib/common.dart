@@ -11,6 +11,9 @@ library;
 import 'dart:async';
 import 'dart:convert';
 
+// Examples can assume:
+// import 'package:integration_test/common.dart';
+
 /// A callback to use with [integrationDriver].
 ///
 /// The callback receives the name of screenshot passed to `binding.takeScreenshot(<name>)`,
