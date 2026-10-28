@@ -63,6 +63,7 @@ void main() {
         'Ninja',
         '-DCMAKE_BUILD_TYPE=${sentenceCase(buildMode)}',
         '-DFLUTTER_TARGET_PLATFORM=linux-x64',
+        '-DLINUX_GTK_VARIANT=gtk3',
         '/linux',
       ],
       workingDirectory: '/build/linux/x64/$flavor/$buildMode',

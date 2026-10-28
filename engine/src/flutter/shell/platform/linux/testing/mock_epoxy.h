@@ -24,6 +24,15 @@ class MockEpoxy {
               (EGLDisplay dpy, const char* extension));
   MOCK_METHOD(bool, epoxy_is_desktop_gl, ());
   MOCK_METHOD(int, epoxy_gl_version, ());
+  MOCK_METHOD(void,
+              eglCreateImageKHR,
+              (EGLDisplay dpy,
+               EGLContext ctx,
+               EGLenum target,
+               EGLClientBuffer buffer,
+               const EGLint* attrib_list));
+  MOCK_METHOD(EGLBoolean, eglDestroyImageKHR, (EGLDisplay dpy, EGLImage image));
+  MOCK_METHOD(const char*, eglQueryString, (EGLDisplay dpy, EGLint name));
   MOCK_METHOD(EGLSyncKHR,
               eglCreateSyncKHR,
               (EGLDisplay dpy, EGLenum type, const EGLint* attrib_list));

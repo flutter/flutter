@@ -35,6 +35,7 @@ FlDisplayMonitor* fl_display_monitor_new(FlEngine* engine, GdkDisplay* display);
  * @monitor: an #FlDisplayMonitor.
  *
  * Start monitoring for display changes.
+ * Repeated calls refresh the display information without adding subscriptions.
  */
 void fl_display_monitor_start(FlDisplayMonitor* monitor);
 

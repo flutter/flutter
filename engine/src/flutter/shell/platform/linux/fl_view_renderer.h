@@ -84,17 +84,8 @@ void fl_view_renderer_present_layers(FlViewRenderer* renderer,
 void fl_view_renderer_notify_frame(FlViewRenderer* renderer);
 
 /**
- * fl_view_renderer_resize_to_frame:
- * @renderer: an #FlViewRenderer.
- * @frame_width: the width of the current frame in pixels.
- * @frame_height: the height of the current frame in pixels.
- *
- * Requests the view (and its toplevel window) to be resized to fit the frame
- * when the widget size does not match it. Called from the GTK thread when
- * Flutter controls the view size.
- *
- * Returns: %TRUE if a resize was requested, %FALSE if the widget already
- * matches the frame size.
+ * Requests the view to resize to the current frame size when it differs from
+ * the widget allocation. Returns TRUE when a resize was requested.
  */
 gboolean fl_view_renderer_resize_to_frame(FlViewRenderer* renderer,
                                           size_t frame_width,

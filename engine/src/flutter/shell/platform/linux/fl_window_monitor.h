@@ -44,6 +44,23 @@ FlWindowMonitor* fl_window_monitor_new(
     void (*on_close)(void),
     void (*on_destroy)(void));
 
+#if FLUTTER_LINUX_GTK4
+typedef struct _FlPopoverMonitor FlPopoverMonitor;
+
+/**
+ * fl_popover_monitor_new:
+ * @popover: the popover being monitored.
+ * @on_closed: the function to call when the popover is dismissed.
+ *
+ * Helper class to allow the Flutter framework to monitor a #GtkPopover using
+ * FFI. The callback is called in the isolate this class was created with.
+ *
+ * Returns: a new #FlPopoverMonitor.
+ */
+FlPopoverMonitor* fl_popover_monitor_new(GtkPopover* popover,
+                                         void (*on_closed)(void));
+#endif
+
 G_END_DECLS
 
 #endif  // FLUTTER_SHELL_PLATFORM_LINUX_FL_WINDOW_MONITOR_H_
