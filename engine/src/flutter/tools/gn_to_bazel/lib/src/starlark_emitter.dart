@@ -1675,6 +1675,8 @@ final class _Emitter {
           _scalar(rule, argument.attribute, variable);
         case TemplateArgumentKind.strings:
           _stringsInto(rule.list(argument.attribute), variable);
+        case TemplateArgumentKind.actionArgs:
+          _argsInto(rule, variable, target);
         case TemplateArgumentKind.pathStrings:
           _pathStringsInto(rule, argument, variable);
         case TemplateArgumentKind.scope:
@@ -3728,9 +3730,14 @@ final class _Emitter {
       companion.scalars['target_compatible_with'] = _compatibilityOf(compatible, target);
     }
     rules.add(companion);
-    // A binary whose every compiled source went to the companion has
-    // nothing to link elsewhere (GN's ninja would link it from no
-    // objects): it is of the Apple platforms too, within its own condition.
+    // An executable whose every compiled source is Objective-C, listed
+    // outright (the Impeller SDK's Metal example), has nothing to link
+    // elsewhere -- GN's ninja would link it from no objects -- so it is of
+    // the Apple platforms too, within its own condition. A test is not:
+    // gtest's main links it with no source of its own, as GN builds
+    // testing_unittests on Linux (its one .mm under test_enable_metal);
+    // nor is a target whose Objective-C is conditional, which elsewhere is
+    // a binary of its other sources, or of none.
     bool compiles(_Item item) {
       final int dot = item.text.lastIndexOf('.');
       return !item.quoted || dot < 0 || !_headerExtensions.contains(item.text.substring(dot));
@@ -3740,7 +3747,7 @@ final class _Emitter {
         srcs.always.any(compiles) ||
         srcs.conditional.values.any((List<_Item> items) => items.any(compiles)) ||
         srcs.sequence.any(((Condition, _Item) entry) => compiles(entry.$2));
-    if (!library && !othersRemain) {
+    if (!library && !test && listed == Condition.always && !othersRemain) {
       final Condition owner = target.condition.and(applePlatforms);
       if (owner != Condition.always) {
         rule.scalars['target_compatible_with'] = _compatibilityOf(owner, target);

@@ -593,15 +593,6 @@ flutter_objc_library(
     alwayslink = True,
 )
 
-# `enable_unittests && is_mac`, for the select()s of this file.
-selects.config_setting_group(
-    name = "when_enable_unittests_and_is_mac",
-    match_all = [
-        "//engine/src/flutter/testing:unittests_enabled",
-        "@platforms//os:macos",
-    ],
-)
-
 flutter_cc_test(
     name = "testing_unittests",
     size = "small",
@@ -618,7 +609,7 @@ flutter_cc_test(
     }),
     local_defines = FLUTTER_LOCAL_DEFINES,
     target_compatible_with = select({
-        ":when_enable_unittests_and_is_mac": [],
+        "//engine/src/flutter/testing:unittests_enabled": [],
         "//conditions:default": ["@platforms//:incompatible"],
     }),
     deps = [
