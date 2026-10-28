@@ -235,10 +235,20 @@ assembled_directory = rule(
     },
 )
 
+# What the flutter tool's cache deletes after unpacking an archive
+# (Cache._denylistedBasenames): the code-signing lists a Mac's archives
+# carry for the recipe (entitlements.txt, without_entitlements.txt,
+# unsigned_binaries.txt), which every archive has at its root -- artifacts.zip's
+# and font-subset's would otherwise collide there (the Mac's T44).
+_CACHE_DENYLISTED_BASENAMES = ["entitlements.txt", "without_entitlements.txt", "unsigned_binaries.txt"]
+
 def _bundle_directory_impl(ctx):
     placed = {}
     for bundle in ctx.attr.bundles:
         for file, path in bundle[ZipBundleInfo].entries:
+            if path.rsplit("/", 1)[-1] in _CACHE_DENYLISTED_BASENAMES:
+                continue
+
             # The same file in two archives (gen_snapshot is in a mode's
             # artifacts.zip and its desktop embedding's) lands once, as does
             # a bundle's license readme from two of its configurations (the
@@ -255,7 +265,8 @@ bundle_directory = rule(
     implementation = _bundle_directory_impl,
     doc = "The files of some zip_bundles laid as one directory, each at its path in its archive, as " +
           "the flutter tool's cache unpacks the archives it downloads (`bin/cache/artifacts/engine/linux-x64` " +
-          "is linux-x64/artifacts.zip and font-subset.zip unpacked together): the SDK cache the tests' " +
+          "is linux-x64/artifacts.zip and font-subset.zip unpacked together, less the code-signing lists " +
+          "the cache deletes): the SDK cache the tests' " +
           "facsimile lays from the build instead of a download (dart_test's `cache_files`).",
     attrs = PYTHON_ATTRS | {
         "bundles": attr.label_list(
