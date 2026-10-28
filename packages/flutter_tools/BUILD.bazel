@@ -341,17 +341,9 @@ dart_package_tests(
 
 # The commands shard's permeable half: commands against the real file
 # system and the real pub, on the same SDK facsimile with the tool itself in
-# it (create_test and icon_tree_shaker_test run it).
-#
-# icon_tree_shaker_test builds for the host's desktop -- Linux on Linux,
-# macOS on a Mac, where it wants FlutterMacOS.xcframework and gen_snapshot_x64
-# in the cache's darwin-x64-release, which the facsimile does not lay yet:
-# left out of a Mac host's shard with the integration shard's Apple builds
-# (_INTEGRATION_APPLE below; NEED_DECISION Q31).
-_PERMEABLE_APPLE = [
-    "test/commands.shard/permeable/icon_tree_shaker_test.dart",
-] if HOST_OS == "mac" else []
-
+# it (create_test and icon_tree_shaker_test run it; the latter builds for
+# the host's desktop -- on a Mac a release App.framework for both CPUs, from
+# the facsimile's universal FlutterMacOS.xcframework and gen_snapshots).
 dart_package_tests(
     name = "commands_shard_permeable",
     srcs = _HARNESS,
@@ -385,7 +377,7 @@ dart_package_tests(
             # (WidgetPreviewCommand's constructor); upstream reverted the
             # latter in #193968. Restore it on the next rebase.
             "test/commands.shard/permeable/widget_preview/widget_preview_test.dart",
-        ] + _PERMEABLE_APPLE,
+        ],
     ),
 )
 
@@ -469,27 +461,31 @@ _INTEGRATION_EXCLUDED = [
 ]
 
 # The integration shard's files that build for macOS or iOS through the tool
-# (`flutter build macos|ios`, Xcode, Swift Package Manager, CocoaPods) --
-# skipped on Linux, run on a Mac, where they want what the facsimile does not
-# lay yet: FlutterMacOS.xcframework and gen_snapshot in the cache's
-# darwin-x64* directories, the iOS engine artifacts in its ios* ones, the
-# gallery's Xcode project writable, and xcodebuild outside Bazel's sandbox
-# (it runs sandbox-exec itself, which a sandbox refuses). An Apple shard to
-# come (NEED_DECISION Q31); left out of a Mac host's shard meanwhile.
-_INTEGRATION_APPLE = [
-    "test/integration.shard/build_ios_config_only_test.dart",
+# (`flutter build macos|ios`, Xcode, Swift Package Manager, CocoaPods): a
+# shard of their own, the apple shard below, compatible with a Mac host
+# alone (NEED_DECISION Q31) -- the macOS ones now, from the facsimile's
+# universal FlutterMacOS.xcframework and gen_snapshots; the iOS ones once
+# the facsimile carries the iOS engine artifacts. On Linux each would only
+# report itself skipped (`skip: !platform.isMacOS`).
+_INTEGRATION_APPLE_MACOS = [
     "test/integration.shard/build_macos_arm64_only_test.dart",
     "test/integration.shard/build_macos_config_only_test.dart",
+    "test/integration.shard/macos_content_validation_test.dart",
+]
+
+_INTEGRATION_APPLE_IOS = [
+    "test/integration.shard/build_ios_config_only_test.dart",
     "test/integration.shard/build_without_xcworkspace_test.dart",
     "test/integration.shard/ios_content_validation_test.dart",
     "test/integration.shard/lldb_init_test.dart",
-    "test/integration.shard/macos_content_validation_test.dart",
     "test/integration.shard/swift_package_manager_add2app_test.dart",
     "test/integration.shard/swift_package_manager_create_app_test.dart",
     "test/integration.shard/swift_package_manager_create_plugin_test.dart",
     "test/integration.shard/swift_package_manager_test.dart",
     "test/integration.shard/uiscene_migration_test.dart",
-] if HOST_OS == "mac" else []
+]
+
+_INTEGRATION_APPLE = _INTEGRATION_APPLE_MACOS + _INTEGRATION_APPLE_IOS
 
 # The SDK's Xcode build-phase scripts resolve their own symlink first
 # (xcode_backend.sh's follow_links) and take FLUTTER_ROOT from where it
@@ -641,6 +637,41 @@ dart_package_tests(
     tools = [":linux_build_tools"],
     # pub touches the workspace's lock when it resolves a member.
     writable = ["pubspec.lock"],
+)
+
+# The apple shard: the integration shard's files that build for macOS
+# through the tool (_INTEGRATION_APPLE_MACOS; the iOS ones to come), on a
+# Mac host -- the Linux desktop shard's counterpart. Each runs xcodebuild,
+# which runs sandbox-exec itself and is refused inside Bazel's sandbox:
+# unsandboxed, in the real runfiles tree. The gallery's macOS project is
+# copied writable there first: the tool migrates it in place
+# (Runner.xcscheme, Podfile, GeneratedPluginRegistrant.swift) and builds into
+# it. CocoaPods (`pod install`: the gallery has a Podfile), Xcode and the
+# network (the pod specs, pub) are the host's. Declared on every host,
+# compatible with macOS alone: a Linux analysis still checks it.
+dart_package_tests(
+    name = "apple_shard",
+    size = "enormous",
+    srcs = _HARNESS,
+    cache = _TOOL_CACHE,
+    cache_files = _TOOL_CACHE_FILES,
+    data = glob(["test/integration.shard/test_data/**"]) + _SDK_PACKAGES + _TOOL_DATA + _INTEGRATION_PROJECTS,
+    imports = _IMPORTS,
+    network = True,
+    package = "flutter_tools",
+    packages = _PACKAGES,
+    pub_cache = ":workspace_pub_cache",
+    sdk_files = _TOOL_SDK_FILES,
+    sdk_trees = {"@pub_workspace//:pubspecs": ""},
+    # The tool, xcodebuild's compiles and gen_snapshot at once.
+    tags = ["cpu:4"],
+    target_compatible_with = ["@platforms//os:macos"],
+    tests = _INTEGRATION_APPLE_MACOS,
+    unsandboxed = _INTEGRATION_APPLE_MACOS,
+    writable = [
+        "pubspec.lock",
+        "dev/integration_tests/flutter_gallery/macos",
+    ] + _APPLE_SCRIPTS,
 )
 
 # What `flutter build apk` needs of the build and the machine

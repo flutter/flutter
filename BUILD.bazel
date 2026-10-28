@@ -97,6 +97,19 @@ test_suite(
     tests = ["//packages/flutter_tools:android_shard"],
 )
 
+# flutter_tools' Apple tests: `flutter build macos` (and iOS, to come)
+# through the tool on a Mac host, with the universal FlutterMacOS.xcframework
+# and gen_snapshots from the build -- the macOS shell and the Dart wrap for
+# both CPUs in three modes, an hour or two the first time -- Xcode and
+# CocoaPods from the host, outside Bazel's sandbox (xcodebuild runs
+# sandbox-exec itself), and the network (the pod specs, pub). A suite of its
+# own for that; compatible with macOS alone, skipped elsewhere
+# (packages/flutter_tools/BUILD.bazel's apple_shard; NEED_DECISION Q31).
+test_suite(
+    name = "apple_tool_tests",
+    tests = ["//packages/flutter_tools:apple_shard"],
+)
+
 # The pure-Dart packages' tests (package:test's runner on the VM).
 test_suite(
     name = "dart_tests",
