@@ -9,23 +9,36 @@
 # the Dart targets below and their dependencies are loaded.
 #
 # The list is every //flutter/third_party/dart target the engine's GN build
-# files depend on, besides create_sdk and kernel-service:frontend_server_aot
-# (the engine's flutter_frontend_server builds that one only without the
-# prebuilt SDK; with it, GN copies the SDK's snapshot, as the Bazel build
-# takes it from @dart_sdk_linux_x64). The tools that run at build time --
-# gen_snapshot, analyze_snapshot, bootstrap_compile_platform -- are the host
-# toolchain's, as //flutter/lib/snapshot names them: in a cross build (the
-# Linux arm64 one, target_cpu = "arm64") GN writes them under clang_x64/,
-# built for the host and emitting the target's snapshots, while the
-# libraries are the target's; in the host's own build the two toolchains
-# are one and the outputs sit in the build root. gen_snapshot is also
-# built for the target itself: artifacts.zip ships that one (build/archives:
-# "a target-platform-specific binary"), the arm64 build's for arm64 hosts --
-# but not for iOS, where no engine artifact is built (common/config.gni's
-# build_engine_artifacts is false outside the host toolchain there) and the
-# host's universal gen_snapshot is the build's only one.
+# files depend on, besides create_sdk and kernel-service:frontend_server_aot,
+# which it depends on under flutter_build_dart_sdk alone (below). The tools
+# that run at build time -- gen_snapshot, analyze_snapshot,
+# bootstrap_compile_platform -- are the host toolchain's, as
+# //flutter/lib/snapshot names them: in a cross build (the Linux arm64 one,
+# target_cpu = "arm64") GN writes them under clang_x64/, built for the host
+# and emitting the target's snapshots, while the libraries are the target's;
+# in the host's own build the two toolchains are one and the outputs sit in
+# the build root. gen_snapshot is also built for the target itself:
+# artifacts.zip ships that one (build/archives: "a target-platform-specific
+# binary"), the arm64 build's for arm64 hosts -- but not for iOS, where no
+# engine artifact is built (common/config.gni's build_engine_artifacts is
+# false outside the host toolchain there) and the host's universal
+# gen_snapshot is the build's only one.
 
 import("//flutter/third_party/dart/runtime/runtime_args.gni")
+
+declare_args() {
+  # The engine's build without the prebuilt Dart SDK (tools/gn
+  # --no-prebuilt-dart-sdk: common/config.gni's flutter_prebuilt_dart_sdk
+  # off, the Dart roll's check that the engine builds with an SDK compiled
+  # from the synced Dart tree). The Bazel build sets it for the host's own
+  # build when its //flutter/build/bazel/dart_wrap:prebuilt_dart_sdk setting
+  # is off, and takes the SDK's AOT runtime and the frontend server snapshot
+  # from this build instead of from the prebuilt SDK: GN's
+  # flutter_frontend_server:frontend_server copies kernel-service's
+  # frontend_server_aot.dart.snapshot, and build/dart:dart_sdk is create_sdk,
+  # the SDK assembled at $root_out_dir/dart-sdk.
+  flutter_build_dart_sdk = false
+}
 
 group("dart_wrap") {
   deps = [
@@ -42,6 +55,16 @@ group("dart_wrap") {
   ]
   if (!is_ios) {
     deps += [ "//flutter/third_party/dart/runtime/bin:gen_snapshot" ]
+  }
+
+  # The SDK compiled from the Dart tree, in the host's own build without the
+  # prebuilt SDK (above): what GN's build/dart:dart_sdk and
+  # flutter_frontend_server:frontend_server depend on there.
+  if (flutter_build_dart_sdk) {
+    deps += [
+      "//flutter/third_party/dart:create_sdk",
+      "//flutter/third_party/dart/utils/kernel-service:frontend_server_aot",
+    ]
   }
 
   # The analyze_snapshot tool is a 64-bit target's (runtime_args.gni): the
