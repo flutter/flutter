@@ -2499,11 +2499,16 @@ final class _Evaluator {
         // rebase_path(x, root_build_dir): the path of x as the build runs
         // it. Kept as a marked absolute path inside the string, which the
         // emitter turns into the action rule's path tokens; any other
-        // destination is unknowable here.
+        // destination is unknowable here. root_out_dir is root_build_dir
+        // in the default toolchain, the one the converter reads.
         if (args.isNotEmpty &&
             args.length <= 2 &&
             (args.length == 1 ||
-                (args[1] is GnIdentifier && (args[1] as GnIdentifier).name == 'root_build_dir') ||
+                (args[1] is GnIdentifier &&
+                    const <String>{
+                      'root_build_dir',
+                      'root_out_dir',
+                    }.contains((args[1] as GnIdentifier).name)) ||
                 (args[1] is GnLiteral &&
                     (args[1] as GnLiteral).stringValue == r'$root_build_dir'))) {
           final _Expression what = _expression(args[0], scope);
@@ -2867,6 +2872,16 @@ final class _Evaluator {
         return GnStringValue(
           '$rebasedPathMarker${_absolutePath(_unmarkedPath(path), node)}$rebasedPathMarker',
         );
+      // A path that starts with a reference is one outside the tree (the
+      // Xcode platform's directory through mac_platform_path:
+      // darwin/common's swift_testing_config rebases
+      // `$_platform_path/Developer/Library/Frameworks` against root_out_dir
+      // for its -F and rpath). Rebased against the build directory it is a
+      // relative path only GN's layout can read; what names it (a search
+      // path, an rpath) means the directory itself, which is the same from
+      // anywhere, so the string stays as it is, unmarked.
+      case GnExpandedString(:final List<GnValue> parts) when parts.first is GnReference:
+        return value;
       case GnExpandedString(:final List<GnValue> parts):
         final GnValue first = parts.first;
         final String head = first is GnStringValue ? first.value : '';
