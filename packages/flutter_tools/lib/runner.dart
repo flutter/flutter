@@ -25,7 +25,6 @@ import 'src/context_runner.dart';
 import 'src/device.dart';
 import 'src/doctor.dart';
 import 'src/emulator.dart';
-import 'src/experimental/extension_discovery.dart';
 import 'src/features.dart';
 import 'src/globals.dart' as globals;
 import 'src/reporting/crash_reporting.dart';
@@ -39,7 +38,6 @@ Future<int> run(
   List<String> args,
   List<FlutterCommand> Function(ToolDependencies toolDependencies) commands, {
   required ShutdownHooks shutdownHooks,
-  List<ExtensionEntryPoint> extensionEntryPoints = const <ExtensionEntryPoint>[],
   String? flutterVersion,
   bool muteCommandLogging = false,
   Map<Type, Generator>? overrides,
@@ -81,7 +79,6 @@ Future<int> run(
       deviceManager: globals.deviceManager,
       doctor: globals.doctor,
       emulatorManager: emulatorManager,
-      extensionEntryPoints: extensionEntryPoints,
       featureFlags: featureFlags,
       flutterVersion: globals.flutterVersion,
       fs: globals.fs,
