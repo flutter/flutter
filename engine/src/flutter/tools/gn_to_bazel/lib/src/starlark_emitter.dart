@@ -792,6 +792,8 @@ final class _Emitter {
               : 'cc_binary',
           library: false,
         );
+      case 'shared_library' when _isFrameworkModuleCheck(target):
+        _convertFrameworkModuleCheck(target);
       case 'shared_library':
         _convertCcTarget(target, 'cc_binary', library: false, shared: true);
       case 'config':
@@ -3641,6 +3643,99 @@ final class _Emitter {
       // command line.
       rules.add(_Rule('alias', target.name, const <String>[])..scalars['actual'] = '":$name"');
     }
+  }
+
+  /// The flag GN's umbrella-import check of a framework puts on its compile
+  /// and its link: the build directory as a framework search path
+  /// (`-F` + `rebase_path("$root_out_dir")`, which the evaluator marks as
+  /// the build directory's root).
+  static const String _buildDirectorySearchPath =
+      '-F$rebasedPathMarker$buildDirRoot$rebasedPathMarker';
+
+  /// Whether [target], a shared_library, is GN's umbrella-import check of a
+  /// framework (the macOS shell's `_generate_symlinks_and_verify_framework_module`,
+  /// the iOS shell's `copy_and_verify_framework_module`): a link against a
+  /// framework the build assembles in the build directory, found through
+  /// `-F$root_out_dir` -- a directory no cc rule can name, which
+  /// framework_module_check (build_defs/dist/framework.bzl) assembles for
+  /// its own compile and link.
+  static bool _isFrameworkModuleCheck(GnTarget target) {
+    return target.variables['ldflags']?.liveItems.any(
+          (GnListItem item) => item.value == const GnStringValue(_buildDirectorySearchPath),
+        ) ??
+        false;
+  }
+
+  /// The umbrella-import check as a framework_module_check: the sources,
+  /// the framework (`frameworks`' one entry, which the deps place), the
+  /// flags less the search path the rule sets, the deps.
+  void _convertFrameworkModuleCheck(GnTarget target) {
+    _use('//build_defs/dist:framework.bzl', 'framework_module_check');
+    final rule = _Rule('framework_module_check', target.name, target.comments);
+    final configVariables = <GnVariable>[];
+    for (final GnVariable variable in target.variables.values) {
+      switch (variable.name) {
+        case 'sources':
+          _filesInto(rule.list('srcs'), variable);
+        case 'deps':
+        case 'public_deps':
+          // The copies and links that place the bundle: the rule's deps
+          // (a cc rule would take the actions among them as sources).
+          _labelsInto(rule.list('deps'), variable, target);
+        case 'frameworks':
+          final List<GnValue>? frameworks = variable.unconditionalItems;
+          if (frameworks == null || frameworks.length != 1 || frameworks.single is! GnStringValue) {
+            throw GnError(
+              variable.assignments.first.location,
+              'the umbrella-import check ${target.name} must name one framework',
+            );
+          }
+          rule.scalars['framework'] = '"${(frameworks.single as GnStringValue).value}"';
+        case 'cflags_objc' || 'cflags_objcc' || 'cflags':
+          _forEachItem(variable, into: rule.list('copts'), (_Element e) {
+            if (e.value != const GnStringValue(_buildDirectorySearchPath)) {
+              rule.list('copts').add(e.condition, _flagItem(e));
+            }
+          });
+        case 'ldflags':
+          _forEachItem(variable, into: rule.list('linkopts'), (_Element e) {
+            if (e.value != const GnStringValue(_buildDirectorySearchPath)) {
+              rule.list('linkopts').add(e.condition, _flagItem(e));
+            }
+          });
+        case 'defines':
+          _stringsInto(rule.list('local_defines'), variable, defines: true);
+        case 'configs':
+        case 'public_configs':
+          configVariables.add(variable);
+        case 'visibility':
+          break;
+        default:
+          if (_ignoredVariables.contains(variable.name) ||
+              variable.forwarded ||
+              _isHelperVariable(variable)) {
+            break;
+          }
+          throw GnError(
+            variable.assignments.first.location,
+            'variable ${variable.name} of the umbrella-import check ${target.name} is not converted yet',
+          );
+      }
+    }
+    if (!rule.scalars.containsKey('framework')) {
+      throw GnError(target.location, 'the umbrella-import check ${target.name} names no framework');
+    }
+    for (final variable in configVariables) {
+      _configsInto(
+        rule,
+        variable,
+        target,
+        chromiumCode: true,
+        publicConfigs: const <String>{},
+        propagatedFlags: <ForwardedFlag>[],
+      );
+    }
+    rules.add(rule);
   }
 
   /// The pseudo-attribute a target's `cflags_objc` and `cflags_objcc`

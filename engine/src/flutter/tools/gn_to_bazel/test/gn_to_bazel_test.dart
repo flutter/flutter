@@ -3965,6 +3965,56 @@ executable("other_swift_unittests") {
       },
     );
 
+    test("a framework's umbrella-import check is a framework_module_check", () async {
+      // The macOS shell's _generate_symlinks_and_verify_framework_module: a
+      // shared library of one Objective-C file linked against the bundle
+      // assembled in the build directory, found through -F$root_out_dir --
+      // a directory no cc rule can name; the rule assembles the bundle the
+      // deps place and sets the search path itself, so the flag goes and
+      // the rest of the flags stay.
+      final String output = await convert(r'''
+copy("copy_headers") {
+  sources = [ "Foo.h" ]
+  outputs = [ "$root_out_dir/Foo.framework/Headers/{{source_file_part}}" ]
+}
+shared_library("verify_framework_module") {
+  framework_search_path = rebase_path("$root_out_dir")
+  visibility = [ ":*" ]
+  cflags_objc = [ "-F$framework_search_path" ]
+  ldflags = [
+    "-F$framework_search_path",
+    "-fapplication-extension",
+    "-Xlinker",
+    "-fatal_warnings",
+  ]
+  frameworks = [ "Foo.framework" ]
+  sources = [ "UmbrellaImportTests.m" ]
+  deps = [ ":copy_headers" ]
+}
+''');
+      expect(
+        output,
+        contains(
+          'framework_module_check(\n'
+          '    name = "verify_framework_module",\n'
+          '    srcs = ["UmbrellaImportTests.m"],\n'
+          '    framework = "Foo.framework",\n'
+          '    linkopts = [\n'
+          '        "-fapplication-extension",\n'
+          '        "-Xlinker",\n'
+          '        "-fatal_warnings",\n'
+          '    ],\n'
+          '    deps = [":copy_headers"],\n'
+          ')\n',
+        ),
+      );
+      expect(output, contains('load("//build_defs/dist:framework.bzl", "framework_module_check")'));
+      expect(
+        output,
+        isNot(contains('flutter_shared_library(\n    name = "verify_framework_module"')),
+      );
+    });
+
     test('a complete static library is an archive, or the library its dependents link', () async {
       // The Impeller SDK's libimpeller.a is an artifact (cc_static_library,
       // named after output_name with GN's name an alias); OCMock's `ocmock`
