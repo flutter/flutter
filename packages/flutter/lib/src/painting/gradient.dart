@@ -1170,8 +1170,8 @@ class SweepGradient extends Gradient {
     );
     return SweepGradient(
       center: AlignmentGeometry.lerp(a.center, b.center, t)!,
-      startAngle: math.max(0.0, ui.lerpDouble(a.startAngle, b.startAngle, t)!),
-      endAngle: math.max(0.0, ui.lerpDouble(a.endAngle, b.endAngle, t)!),
+      startAngle: ui.lerpDouble(a.startAngle, b.startAngle, t)!,
+      endAngle: ui.lerpDouble(a.endAngle, b.endAngle, t)!,
       colors: interpolated.colors,
       stops: interpolated.stops,
       tileMode: t < 0.5 ? a.tileMode : b.tileMode, // TODO(ianh): interpolate tile mode
