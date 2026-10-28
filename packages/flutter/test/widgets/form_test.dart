@@ -235,6 +235,41 @@ void main() {
     });
   }
 
+  testWidgets('validation uses an overridden value getter before didChange', (
+    WidgetTester tester,
+  ) async {
+    final value = ValueNotifier<String>('valid');
+    addTearDown(value.dispose);
+    final key = GlobalKey<FormFieldState<String>>();
+    final validatedValues = <String?>[];
+    await tester.pumpWidget(
+      _ExternallyValuedFormField(
+        key: key,
+        value: value,
+        validator: (String? value) {
+          validatedValues.add(value);
+          return value == 'valid' ? null : 'Invalid value';
+        },
+      ),
+    );
+
+    final FormFieldState<String> state = key.currentState!;
+    expect(state.isValid, isTrue);
+    expect(state.validate(), isTrue);
+    expect(validatedValues, <String?>['valid', 'valid']);
+
+    value.value = 'invalid';
+    expect(state.isValid, isFalse);
+    expect(state.hasError, isFalse);
+    expect(state.validate(), isFalse);
+    expect(state.errorText, 'Invalid value');
+    expect(validatedValues, <String?>['valid', 'valid', 'invalid', 'invalid']);
+
+    value.value = 'valid';
+    expect(state.validate(), isTrue);
+    expect(state.hasError, isFalse);
+  });
+
   testWidgets('isValid returns true when a field is valid', (WidgetTester tester) async {
     final fieldKey1 = GlobalKey<FormFieldState<String>>();
     final fieldKey2 = GlobalKey<FormFieldState<String>>();
@@ -2148,4 +2183,22 @@ class _PlatformAnnounceScenario {
   _PlatformAnnounceScenario({required this.supportsAnnounce, required this.testName});
   final bool supportsAnnounce;
   final String testName;
+}
+
+class _ExternallyValuedFormField extends FormField<String> {
+  _ExternallyValuedFormField({super.key, required this.value, super.validator})
+    : super(
+        initialValue: 'cached',
+        builder: (FormFieldState<String> state) => const SizedBox.shrink(),
+      );
+
+  final ValueListenable<String> value;
+
+  @override
+  FormFieldState<String> createState() => _ExternallyValuedFormFieldState();
+}
+
+class _ExternallyValuedFormFieldState extends FormFieldState<String> {
+  @override
+  String get value => (widget as _ExternallyValuedFormField).value.value;
 }
