@@ -730,13 +730,6 @@ void main() {
       final ui.PlatformDispatcher wrapped = debugApplyViewMetricsOverrides(dispatcher);
       expect(debugViewWithMetricsOverrides(raw), same(wrapped.view(id: 1)));
     });
-
-    test('leaves a view that implements no dispatcher or id alone', () {
-      final view = _DispatcherlessView();
-      expect(debugViewWithMetricsOverrides(view), same(view));
-      final idless = _IdlessView(ui.PlatformDispatcher.instance);
-      expect(debugViewWithMetricsOverrides(idless), same(idless));
-    });
   });
 
   group('the wrapper delegates when nothing is overridden', () {
@@ -1601,19 +1594,4 @@ class _NoAccessibilityFeatures implements ui.AccessibilityFeatures {
   @override
   dynamic noSuchMethod(Invocation invocation) =>
       throw UnimplementedError('${invocation.memberName} is not needed by these tests.');
-}
-
-/// A view that implements neither [ui.FlutterView.platformDispatcher] nor
-/// [ui.FlutterView.viewId], as a rendering-layer test double might.
-class _DispatcherlessView extends Fake implements ui.FlutterView {
-  @override
-  double get devicePixelRatio => 1.0;
-}
-
-/// A view that reports a dispatcher but no id.
-class _IdlessView extends Fake implements ui.FlutterView {
-  _IdlessView(this.platformDispatcher);
-
-  @override
-  final ui.PlatformDispatcher platformDispatcher;
 }

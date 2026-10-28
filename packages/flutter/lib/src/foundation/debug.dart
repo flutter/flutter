@@ -1127,25 +1127,16 @@ ui.PlatformDispatcher debugApplyViewMetricsOverrides(ui.PlatformDispatcher dispa
 ///
 /// Engine views are normalized even before the binding wraps their
 /// dispatcher, because a [View] can be constructed before [runWidget]. A view
-/// that already applies its override, a view of a dispatcher that was never
+/// that already applies its override and a view of a dispatcher that was never
 /// wrapped (a [TestFlutterView], say, which applies its own test values over
-/// the wrapper), and a view that reports no dispatcher or id at all are
-/// returned unchanged, as is every view outside of debug mode (in profile or
-/// release mode).
+/// the wrapper) are returned unchanged, as is every view outside of debug mode
+/// (in profile or release mode). The decision is made from the view's
+/// [ui.FlutterView.platformDispatcher], which a test double handed to
+/// [RenderView], [View] or [MediaQueryData.fromView] therefore has to implement.
 ui.FlutterView debugViewWithMetricsOverrides(ui.FlutterView view) {
   var result = view;
   assert(() {
     if (view is _DebugViewMetricsFlutterView) {
-      return true;
-    }
-    // A partial test double (one that extends Fake, or has a noSuchMethod of
-    // its own) may not implement these. Such a view is not an engine view, and
-    // is left alone.
-    final ui.PlatformDispatcher? dispatcher = _debugReadIfImplemented(
-      () => view.platformDispatcher,
-    );
-    final int? viewId = _debugReadIfImplemented(() => view.viewId);
-    if (dispatcher == null || viewId == null) {
       return true;
     }
     // An engine view is normalized even before the binding wraps the engine's
@@ -1153,6 +1144,7 @@ ui.FlutterView debugViewWithMetricsOverrides(ui.FlutterView view) {
     // view the binding vends later. Any other dispatcher has to have been
     // wrapped already: a view of a dispatcher nobody wrapped is one nobody asked
     // to apply overrides.
+    final ui.PlatformDispatcher dispatcher = view.platformDispatcher;
     if (identical(dispatcher, ui.PlatformDispatcher.instance) ||
         _debugDispatcherWrappers[dispatcher] != null) {
       result = _debugWrapView(view);
@@ -1160,21 +1152,6 @@ ui.FlutterView debugViewWithMetricsOverrides(ui.FlutterView view) {
     return true;
   }());
   return result;
-}
-
-// Reads one non-nullable member of a dart:ui object that an incomplete test
-// double may not implement, and reports "not implemented" as null: `Fake`
-// answers with an UnimplementedError, a noSuchMethod of the double's own with a
-// NoSuchMethodError. [read] must do nothing but read the member, or its own
-// failures would be misattributed.
-T? _debugReadIfImplemented<T extends Object>(T Function() read) {
-  try {
-    return read();
-  } on NoSuchMethodError {
-    return null;
-  } on UnimplementedError {
-    return null;
-  }
 }
 
 // Invokes the dart:ui callbacks that announce the metrics that differ between
