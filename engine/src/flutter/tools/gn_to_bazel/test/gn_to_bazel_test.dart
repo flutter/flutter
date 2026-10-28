@@ -731,8 +731,6 @@ source_set("x") {
         'shell_enable_metal',
         'shell_enable_software',
         'shell_enable_vulkan',
-        // skia.gni's default gives both builds' values: a derivation.
-        'skia_use_gl',
         // The wasm toolchains set these per variant: the web build's
         // settings (webVariantArguments).
         'skia_use_icu',
