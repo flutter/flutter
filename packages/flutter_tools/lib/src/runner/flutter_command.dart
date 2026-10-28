@@ -1259,31 +1259,6 @@ abstract class FlutterCommand extends Command<void> {
   /// - <https://github.com/flutter/flutter/issues/162649>.
   @protected
   @nonVirtual
-  Future<void> regeneratePlatformSpecificTooling(
-    FlutterProject project, {
-    required bool releaseMode,
-    DeprecationBehavior deprecationBehavior = DeprecationBehavior.none,
-    PackageConfig? packageConfig,
-    PackageGraph? packageGraph,
-    PubspecCache? pubspecCache,
-  }) async {
-    await project.regeneratePlatformSpecificTooling(
-      toolContext: toolContext!,
-      analytics: _analytics,
-      cocoaPods: globals.cocoaPods,
-      deprecationBehavior: deprecationBehavior,
-      featureFlags: featureFlags,
-      gradleUtils: globals.gradleUtils,
-      packageConfig: packageConfig,
-      packageGraph: packageGraph,
-      pubspecCache: pubspecCache,
-      releaseMode: releaseMode,
-      templateRenderer: globals.templateRenderer,
-    );
-  }
-
-  @protected
-  @nonVirtual
   Future<void> regeneratePlatformSpecificToolingIfApplicable(
     FlutterProject project, {
     required bool releaseMode,
@@ -1292,6 +1267,32 @@ abstract class FlutterCommand extends Command<void> {
       return;
     }
     await regeneratePlatformSpecificTooling(project, releaseMode: releaseMode);
+  }
+
+  /// Runs [FlutterProject.regeneratePlatformSpecificTooling] for [project] using
+  /// this command's dependencies.
+  @protected
+  Future<void> regeneratePlatformSpecificTooling(
+    FlutterProject project, {
+    DeprecationBehavior deprecationBehavior = DeprecationBehavior.none,
+    required bool releaseMode,
+    PubspecCache? pubspecCache,
+    PackageGraph? packageGraph,
+    PackageConfig? packageConfig,
+  }) {
+    return project.regeneratePlatformSpecificTooling(
+      toolContext: toolContext!,
+      analytics: _analytics,
+      cocoaPods: globals.cocoaPods,
+      deprecationBehavior: deprecationBehavior,
+      featureFlags: featureFlags,
+      gradleUtils: globals.gradleUtils,
+      releaseMode: releaseMode,
+      pubspecCache: pubspecCache,
+      packageGraph: packageGraph,
+      packageConfig: packageConfig,
+      templateRenderer: globals.templateRenderer,
+    );
   }
 
   /// The set of development artifacts required for this command.

@@ -61,12 +61,13 @@ class BundleBuilder {
       :Cache cache,
       :Config config,
       :FileSystem fs,
+      :FlutterProjectFactory projectFactory,
       :FlutterVersion flutterVersion,
       :Logger logger,
       platform: Platform hostPlatform,
       :ProcessManager processManager,
     ) = _toolContext;
-    project ??= FlutterProject.current(fs, logger: logger);
+    project ??= projectFactory.fromDirectory(fs.currentDirectory);
     mainPath ??= defaultMainPath(fs);
     depfilePath ??= defaultDepfilePath(config: config, fileSystem: fs);
     assetDirPath ??= getAssetBuildDirectory(config, fs);

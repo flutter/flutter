@@ -238,7 +238,7 @@ List<FlutterCommand> generateCommands({
   AnalyzeCommand(
     allProjectValidators: <ProjectValidator>[
       GeneralInfoProjectValidator(
-        java: toolDependencies.androidContext.java,
+        androidContext: toolDependencies.androidContext,
         logger: toolDependencies.toolContext.logger,
         processManager: toolDependencies.toolContext.processManager,
       ),

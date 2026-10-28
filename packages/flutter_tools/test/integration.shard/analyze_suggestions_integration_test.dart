@@ -33,7 +33,7 @@ void main() {
       final command = AnalyzeCommand(
         allProjectValidators: <ProjectValidator>[
           GeneralInfoProjectValidator(
-            java: globals.java,
+            androidContext: FakeAndroidContext(java: globals.java),
             logger: loggerTest,
             processManager: globals.processManager,
           ),

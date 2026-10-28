@@ -813,6 +813,7 @@ class CreateCommand extends FlutterCommand with CreateBase, ExtensionArgParserMi
         const ignoreReleaseModeSinceItsNotABuildAndHopeItWorks = false;
         await project.ensureReadyForPlatformSpecificTooling(
           toolContext: toolContext,
+          releaseMode: ignoreReleaseModeSinceItsNotABuildAndHopeItWorks,
           analytics: analytics,
           androidPlatform: includeAndroid,
           cocoaPods: appleContext.cocoaPods,
@@ -824,7 +825,6 @@ class CreateCommand extends FlutterCommand with CreateBase, ExtensionArgParserMi
           templateRenderer: templateRenderer,
           windowsPlatform: includeWindows,
           webPlatform: includeWeb,
-          releaseMode: ignoreReleaseModeSinceItsNotABuildAndHopeItWorks,
         );
       }
     }

@@ -6,7 +6,6 @@ import 'android/android_sdk.dart';
 import 'android/application_package.dart';
 import 'application_package.dart';
 import 'base/file_system.dart';
-import 'base/logger.dart';
 import 'build_info.dart';
 import 'context/tool_context.dart';
 import 'ios/application_package.dart';
@@ -30,12 +29,12 @@ class FlutterApplicationPackageFactory extends ApplicationPackageFactory {
     BuildInfo? buildInfo,
     File? applicationBinary,
   }) async {
-    final ToolContext(:FileSystem fs, :Logger logger) = _toolContext;
+    final ToolContext(:FileSystem fs, :FlutterProjectFactory projectFactory) = _toolContext;
     switch (platform.os) {
       case .android:
         if (applicationBinary == null) {
           return AndroidApk.fromAndroidProject(
-            FlutterProject.current(fs, logger: logger).android,
+            projectFactory.fromDirectory(fs.currentDirectory).android,
             androidSdk: _androidSdk,
             buildInfo: buildInfo,
             toolContext: _toolContext,
@@ -49,7 +48,7 @@ class FlutterApplicationPackageFactory extends ApplicationPackageFactory {
       case .ios:
         return applicationBinary == null
             ? await IOSApp.fromIosProject(
-                FlutterProject.current(fs, logger: logger).ios,
+                projectFactory.fromDirectory(fs.currentDirectory).ios,
                 buildInfo,
                 toolContext: _toolContext,
               )
@@ -59,12 +58,12 @@ class FlutterApplicationPackageFactory extends ApplicationPackageFactory {
       case .macos:
         return applicationBinary == null
             ? MacOSApp.fromMacOSProject(
-                FlutterProject.current(fs, logger: logger).macos,
+                projectFactory.fromDirectory(fs.currentDirectory).macos,
                 toolContext: _toolContext,
               )
             : MacOSApp.fromPrebuiltApp(applicationBinary);
       case .web:
-        final FlutterProject project = FlutterProject.current(fs, logger: logger);
+        final FlutterProject project = projectFactory.fromDirectory(fs.currentDirectory);
         if (!project.web.existsSync()) {
           return null;
         }
@@ -72,14 +71,14 @@ class FlutterApplicationPackageFactory extends ApplicationPackageFactory {
       case .linux:
         return applicationBinary == null
             ? LinuxApp.fromLinuxProject(
-                FlutterProject.current(fs, logger: logger).linux,
+                projectFactory.fromDirectory(fs.currentDirectory).linux,
                 toolContext: _toolContext,
               )
             : LinuxApp.fromPrebuiltApp(applicationBinary);
       case .windows:
         return applicationBinary == null
             ? WindowsApp.fromWindowsProject(
-                FlutterProject.current(fs, logger: logger).windows,
+                projectFactory.fromDirectory(fs.currentDirectory).windows,
                 toolContext: _toolContext,
               )
             : WindowsApp.fromPrebuiltApp(applicationBinary);

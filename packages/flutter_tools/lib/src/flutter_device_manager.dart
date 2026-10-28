@@ -120,6 +120,7 @@ class FlutterDeviceManager extends DeviceManager {
       ),
     ];
   }
+
   @override
   late final List<DeviceDiscovery> deviceDiscoverers;
 }

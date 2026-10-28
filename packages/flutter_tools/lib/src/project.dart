@@ -204,10 +204,13 @@ class FlutterProject {
 
   /// Returns a [FlutterProject] view of the given directory or a ToolExit error,
   /// if `pubspec.yaml` or `example/pubspec.yaml` is invalid.
+  ///
+  /// When [config] is omitted, [FlutterProject.buildDirectory] defaults to
+  /// `<directory>/build`.
   static FlutterProject fromDirectory(
     Directory directory, {
-    Config? config,
     required Logger logger,
+    Config? config,
   }) {
     if (config != null) {
       return FlutterProjectFactory(
@@ -233,7 +236,10 @@ class FlutterProject {
 
   /// Returns a [FlutterProject] view of the current directory or a ToolExit error,
   /// if `pubspec.yaml` or `example/pubspec.yaml` is invalid.
-  static FlutterProject current(FileSystem fileSystem, {Config? config, required Logger logger}) =>
+  ///
+  /// When [config] is omitted, [FlutterProject.buildDirectory] defaults to
+  /// `<currentDirectory>/build`.
+  static FlutterProject current(FileSystem fileSystem, {required Logger logger, Config? config}) =>
       FlutterProject.fromDirectory(fileSystem.currentDirectory, config: config, logger: logger);
 
   /// Create a [FlutterProject] and bypass the project caching.

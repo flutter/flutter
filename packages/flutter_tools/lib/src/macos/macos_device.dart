@@ -56,9 +56,10 @@ class MacOSDevice extends DesktopDevice {
     String? mainPath,
     bool usingCISystem = false,
   }) async {
-    final ToolContext(:FileSystem fs, :Logger logger) = toolContext;
+    final ToolContext(:FileSystem fs, :FlutterProjectFactory projectFactory, :Logger logger) =
+        toolContext;
     await buildMacOS(
-      flutterProject: FlutterProject.current(fs, logger: logger),
+      flutterProject: projectFactory.fromDirectory(fs.currentDirectory),
       buildInfo: buildInfo,
       targetOverride: mainPath,
       verboseLogging: logger.isVerbose,

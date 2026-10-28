@@ -526,6 +526,7 @@ class IOSDevice extends Device {
   }) async {
     final ToolContext(
       :FileSystem fs,
+      :FlutterProjectFactory projectFactory,
       :Logger logger,
       shutdownHooks: ShutdownHooks defaultShutdownHooks,
     ) = toolContext;
@@ -835,7 +836,7 @@ class IOSDevice extends Device {
         // This is to prevent confusion if the project is later ran via Xcode
         // rather than the Flutter CLI.
         await updateGeneratedXcodeProperties(
-          project: FlutterProject.current(fs, logger: logger),
+          project: projectFactory.fromDirectory(fs.currentDirectory),
           buildInfo: debuggingOptions.buildInfo,
           targetOverride: mainPath,
           toolContext: toolContext,

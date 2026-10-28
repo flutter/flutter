@@ -4,11 +4,11 @@
 
 import 'package:process/process.dart';
 
-import 'android/java.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'base/platform.dart';
 import 'cache.dart';
+import 'context/android_context.dart';
 import 'context/tool_context.dart';
 import 'flutter_manifest.dart';
 import 'git.dart';
@@ -114,12 +114,12 @@ class VariableDumpMachineProjectValidator extends MachineProjectValidator {
 /// Specific info from different platforms should be written in their own ProjectValidator.
 class GeneralInfoProjectValidator extends ProjectValidator {
   const GeneralInfoProjectValidator({
-    required this.java,
+    required this.androidContext,
     required this.logger,
     required this.processManager,
   });
 
-  final Java? java;
+  final AndroidContext androidContext;
   final Logger logger;
   final ProcessManager processManager;
 
@@ -148,7 +148,7 @@ class GeneralInfoProjectValidator extends ProjectValidator {
     }
     result.add(
       await project.android.validateJavaAndGradleAgpVersions(
-        java: java,
+        java: androidContext.java,
         logger: logger,
         processManager: processManager,
       ),

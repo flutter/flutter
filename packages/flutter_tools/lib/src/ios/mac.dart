@@ -125,13 +125,18 @@ Future<XcodeBuildResult> buildXcodeProject({
   bool disablePortPublication = false,
   required ToolContext toolContext,
 }) async {
-  final ToolContext(:Config config, :FileSystem fs, :OperatingSystemUtils os, :Platform platform) =
-      toolContext;
+  final ToolContext(
+    :Config config,
+    :FileSystem fs,
+    :FlutterProjectFactory projectFactory,
+    :OperatingSystemUtils os,
+    :Platform platform,
+  ) = toolContext;
   if (!upgradePbxProjWithFlutterAssets(app.project, globals.logger)) {
     return XcodeBuildResult(success: false);
   }
 
-  final FlutterProject project = FlutterProject.current(globals.fs, logger: globals.logger);
+  final FlutterProject project = projectFactory.fromDirectory(fs.currentDirectory);
   const FlutterDarwinPlatform darwinPlatform = FlutterDarwinPlatform.ios;
   final migrators = <ProjectMigrator>[
     RemoveFrameworkLinkAndEmbeddingMigration(app.project, globals.logger, globals.analytics),
