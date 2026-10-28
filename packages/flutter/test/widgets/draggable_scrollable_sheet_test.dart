@@ -698,7 +698,13 @@ void main() {
       closeTo(.8, precisionErrorTolerance),
     );
 
-    await tester.drag(find.text('Item 1'), Offset(0, .2 * screenHeight));
+    // The upward drag preserves its remainder by scrolling the list. Return
+    // to the start so that the next drag exercises the sheet's size changes.
+    final ScrollPosition position = tester.state<ScrollableState>(find.byType(Scrollable)).position;
+    expect(position.pixels, greaterThan(0));
+    position.jumpTo(0);
+    await tester.pumpAndSettle();
+    await tester.drag(find.byKey(containerKey), Offset(0, .2 * screenHeight));
 
     // Pump the same widget but with snapping enabled.
     await tester.pumpWidget(
@@ -882,7 +888,8 @@ void main() {
     final types = <Type>[
       ScrollStartNotification,
       UserScrollNotification,
-      ...List<Type>.filled(5, ScrollUpdateNotification),
+      // The drag reaching maxChildSize also scrolls its remaining distance.
+      ...List<Type>.filled(6, ScrollUpdateNotification),
       ScrollEndNotification,
       UserScrollNotification,
     ];
