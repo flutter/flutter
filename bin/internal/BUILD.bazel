@@ -121,6 +121,14 @@ write_file(
     content = ["bazel"],
 )
 
+# A Mac host's counterpart (MacOSEngineArtifacts: the stamp is named
+# macos-sdk), for the facsimile on a Mac.
+write_file(
+    name = "macos_sdk_stamp",
+    out = "macos-sdk.stamp",
+    content = ["bazel"],
+)
+
 # The Android gen_snapshot artifacts' (AndroidGenSnapshotArtifacts: the
 # stamp is named android-sdk), for the tests that run `flutter build apk`.
 write_file(
