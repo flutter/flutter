@@ -2084,34 +2084,38 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/125997.
-  testWidgets('Looping ListWheelScrollView can read selectedItem during its first layout', (
-    WidgetTester tester,
-  ) async {
-    final controller = FixedExtentScrollController(initialItem: 7);
-    addTearDown(controller.dispose);
-    final selectedItems = <int>[];
-    await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: ListWheelScrollView.useDelegate(
-          controller: controller,
-          itemExtent: 100.0,
-          childDelegate: ListWheelChildLoopingListDelegate(
-            children: List<Widget>.generate(
-              10,
-              (int index) => LayoutBuilder(
-                builder: (BuildContext context, BoxConstraints constraints) {
-                  selectedItems.add(controller.selectedItem);
-                  return const SizedBox.shrink();
-                },
+  for (final initialItem in <int>[7, -3]) {
+    testWidgets(
+      'Looping ListWheelScrollView can read selectedItem during its first layout (initialItem: $initialItem)',
+      (WidgetTester tester) async {
+        final controller = FixedExtentScrollController(initialItem: initialItem);
+        addTearDown(controller.dispose);
+        final selectedItems = <int>[];
+        await tester.pumpWidget(
+          Directionality(
+            textDirection: TextDirection.ltr,
+            child: ListWheelScrollView.useDelegate(
+              controller: controller,
+              itemExtent: 100.0,
+              childDelegate: ListWheelChildLoopingListDelegate(
+                children: List<Widget>.generate(
+                  10,
+                  (int index) => LayoutBuilder(
+                    builder: (BuildContext context, BoxConstraints constraints) {
+                      selectedItems.add(controller.selectedItem);
+                      return const SizedBox.shrink();
+                    },
+                  ),
+                ),
               ),
             ),
           ),
-        ),
-      ),
+        );
+        expect(tester.takeException(), isNull);
+        expect(selectedItems, isNotEmpty);
+        expect(selectedItems, everyElement(initialItem));
+        expect(controller.selectedItem, initialItem);
+      },
     );
-    expect(tester.takeException(), isNull);
-    expect(selectedItems, isNotEmpty);
-    expect(selectedItems, everyElement(7));
-  });
+  }
 }

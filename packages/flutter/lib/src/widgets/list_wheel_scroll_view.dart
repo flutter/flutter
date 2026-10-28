@@ -407,8 +407,12 @@ class _FixedExtentScrollPosition extends ScrollPositionWithSingleContext
 
   @override
   int get itemIndex {
-    // The viewport can build children, and so query this, before it applies
-    // the content dimensions.
+    // RenderListWheelViewport applies the content dimensions after it lays out
+    // its children when the child delegate has no childCount (looping and
+    // unbounded builder delegates). A child built during that layout, such as
+    // an Image through ScrollAwareImageProvider, can read this before the
+    // scroll extents exist. With no extents there is nothing to clamp to, so
+    // return the item nearest to the current offset.
     if (!hasContentDimensions) {
       return (pixels / itemExtent).round();
     }
