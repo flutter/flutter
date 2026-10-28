@@ -63,7 +63,9 @@ class ScrollAwareImageProvider<T extends Object> extends ImageProvider<T> {
   /// been resolved.
   final DisposableBuildContext context;
 
-  /// The wrapped image provider to delegate [obtainKey] and [loadImage] to.
+  /// The wrapped image provider to delegate [createStream], [obtainKey],
+  /// [loadImage], and (once this provider decides to load)
+  /// [resolveStreamForKey] to.
   final ImageProvider<T> imageProvider;
 
   @override
