@@ -12,7 +12,6 @@ import 'package:meta/meta.dart';
 import '../artifacts.dart';
 import '../build_info.dart';
 import '../device.dart';
-import '../globals.dart' as globals;
 import '../resident_runner.dart';
 import '../vmservice.dart';
 import 'io.dart' as io;
@@ -67,6 +66,7 @@ class DartDevelopmentService with DartDevelopmentServiceLocalOperationsMixin {
   @override
   Future<void> startDartDevelopmentService(
     Uri vmServiceUri, {
+    required Artifacts artifacts,
     String? appName,
     int? ddsPort,
     bool? disableServiceAuthCodes,
@@ -104,7 +104,7 @@ class DartDevelopmentService with DartDevelopmentServiceLocalOperationsMixin {
         serveDevTools: enableDevTools,
         devToolsServerAddress: devToolsServerAddress,
         google3WorkspaceRoot: google3WorkspaceRoot,
-        dartExecutable: globals.artifacts!.getArtifactPath(Artifact.engineDartBinary),
+        dartExecutable: artifacts.getArtifactPath(Artifact.engineDartBinary),
       );
       unawaited(_ddsInstance!.done.whenComplete(completeFuture));
     } on DartDevelopmentServiceException catch (e) {
@@ -136,6 +136,7 @@ mixin DartDevelopmentServiceLocalOperationsMixin {
 
   Future<void> startDartDevelopmentService(
     Uri vmServiceUri, {
+    required Artifacts artifacts,
     String? appName,
     int? ddsPort,
     bool? disableServiceAuthCodes,
@@ -150,10 +151,12 @@ mixin DartDevelopmentServiceLocalOperationsMixin {
   /// from a [DebuggingOptions] instance.
   Future<void> startDartDevelopmentServiceFromDebuggingOptions(
     Uri vmServiceUri, {
-    String? appName,
+    required Artifacts artifacts,
     required DebuggingOptions debuggingOptions,
+    String? appName,
   }) => startDartDevelopmentService(
     vmServiceUri,
+    artifacts: artifacts,
     appName: appName,
     ddsPort: debuggingOptions.ddsPort,
     disableServiceAuthCodes: debuggingOptions.disableServiceAuthCodes,
