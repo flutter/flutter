@@ -125,16 +125,18 @@ void main() {
   });
 
   test('--backend bazel refuses a build the Bazel build has no configuration for', () async {
+    // A GN argument the Bazel build has no flag for (tools/gn's --gn-args:
+    // builders.dart's gnArguments names the few the builder files pass).
     final builder = TestBuilderConfig();
     builder.addBuild(
-      name: 'ci/host_debug_no_prebuilt_dart_sdk',
+      name: 'ci/host_debug_experimental',
       dimension: TestDroneDimension.linux,
       enableLto: false,
-      targetDir: 'ci/host_debug_no_prebuilt_dart_sdk',
+      targetDir: 'ci/host_debug_experimental',
     );
     final Map<String, Object?> json = builder.buildJson();
     final build = (json['builds']! as List<Object?>).single! as Map<String, Object?>;
-    (build['gn']! as List<Object?>).add('--no-prebuilt-dart-sdk');
+    (build['gn']! as List<Object?>).add('--gn-args=dart_use_tcmalloc=true');
     final configs = {
       'linux_unopt': BuilderConfig.fromJson(map: json, path: 'ci/builders/linux_unopt.json'),
     };
@@ -146,7 +148,7 @@ void main() {
     final int result = await runner.run(<String>[
       'lint',
       '--config',
-      'ci/host_debug_no_prebuilt_dart_sdk',
+      'ci/host_debug_experimental',
       '--backend',
       'bazel',
     ]);
@@ -156,7 +158,7 @@ void main() {
     expect(testEnv.processHistory, isEmpty);
     expect(
       testEnv.testLogs.map((r) => r.message).join(),
-      contains('cannot express ci/host_debug_no_prebuilt_dart_sdk'),
+      contains('cannot express ci/host_debug_experimental'),
     );
   });
 }
