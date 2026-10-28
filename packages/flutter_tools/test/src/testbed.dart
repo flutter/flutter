@@ -20,6 +20,7 @@ import 'package:flutter_tools/src/context_runner.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/flutter_cache.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:flutter_tools/src/persistent_tool_state.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:unified_analytics/unified_analytics.dart';
@@ -52,9 +53,11 @@ final _testbedDefaults = <Type, Generator>{
   Analytics: () => const NoOpAnalytics(),
   FlutterVersion: () => FakeFlutterVersion(), // prevent requirement to mock git for test runner.
   Signals: () => FakeSignals(), // prevent registering actual signal handlers.
+  PlistParser: () => FakePlistParser(),
   Pub: () => const ThrowingPub(), // prevent accidental invocations of pub.
   BotDetector: () => const FakeBotDetector(true),
   Cache: () => FlutterCache(
+    flutterRoot: '',
     fileSystem: globals.fs,
     logger: globals.logger,
     platform: globals.platform,
@@ -162,14 +165,10 @@ class TestBed {
                 },
           ),
           body: () async {
-            // Cache the original flutter root to restore after the test case.
-            final String originalFlutterRoot = globals.cache.flutterRoot;
-            globals.cache.flutterRoot = '';
             if (_setup != null) {
               await _setup.call();
             }
             await test();
-            globals.cache.flutterRoot = originalFlutterRoot;
             for (final MapEntry<Timer, StackTrace> entry in timers.entries) {
               if (entry.key.isActive) {
                 throw StateError('A Timer was active at the end of a test: ${entry.value}');
