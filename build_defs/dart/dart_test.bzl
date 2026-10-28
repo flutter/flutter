@@ -346,6 +346,12 @@ root="$PWD"
 # FLUTTER_ROOT before deriving it from the script's path): the runfiles
 # tree, whose layout is the repository's.
 export FLUTTER_ROOT="$root"
+# The temporary directory with its symbolic links resolved, where the host
+# names one (a Mac's Bazel passes TMPDIR through: /var/folders/..., and
+# /var is /private/var there): the tool resolves the paths it watches
+# (PreviewDetector) and a test compares them with the path it created.
+# Linux's tests get no TMPDIR and use the sandbox's own /tmp.
+if [ -n "${TMPDIR:-}" ] && [ -d "$TMPDIR" ]; then export TMPDIR="$(cd "$TMPDIR" && pwd -P)"; fi
 # The SDK cache's directory, for a tool under test that writes there
 # (Cache.lock opens bin/cache/lockfile); what tests read of it is laid
 # in by `cache` and `cache_files`.
