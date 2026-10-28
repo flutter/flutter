@@ -13,7 +13,10 @@ Objective-C header for the Objective-C that imports the Swift
 build without -fmodules), one object file per source, the swiftmodule and
 its companions, and a depfile. This rule runs the same script with the same
 arguments -- build/config/darwin's compiler config's `-sdk`, `-target
-<arch>-apple-macos<deployment target>` and `-swift-version 5`; the compiler
+<arch>-apple-macos<deployment target>` (or `-apple-ios<deployment
+target>[-simulator]`: the SDK, the triple and the Swift libraries'
+directories follow the target platform, macOS or iOS on a device or the
+simulator) and `-swift-version 5`; the compiler
 config's `-Onone` in an unoptimized build and `-O` in an optimized one,
 `-g` (GN's symbols config on Apple); `--whole-module-optimization`
 (swift_whole_module_optimization is is_official_build, true in every
@@ -26,7 +29,8 @@ the objects archived, `alwayslink` as a source_set's objects are
 (-force_load on a Mac), with `-L` for the SDK's and the toolchain's Swift
 libraries (GN's `lib_dirs = mac_swift_lib_paths`, darwin_sdk.gni) so that
 the objects' autolink entries (swiftCore and the rest) resolve in whatever
-links them.
+links them; an iOS target's the same with darwin_sdk.gni's
+ios_swift_lib_paths.
 
 The bridging header's imports are the deps' headers: their include
 directories go to swiftc.py as `-I` (which it hands to both Swift and its
@@ -34,8 +38,8 @@ clang importer) and their defines as `-D`. The Swift compiler is Xcode's,
 through /usr/bin/swiftc and xcode-select or DEVELOPER_DIR (--action_env),
 as `metal` is for the shaders; the SDK is named by its path (@macos_sdk's,
 the same Xcode the toolchain's sysroot comes from), so the action's key
-carries it and an Xcode change recompiles. Off macOS the toolchains have
-no Swift and the converter marks the target incompatible.
+carries it and an Xcode change recompiles. Off the Apple platforms the
+toolchains have no Swift and the converter marks the target incompatible.
 
 The converter emits one for a GN source_set whose sources are `.swift`
 (`bridge_header`, `swiftflags` and `public` as attributes):
@@ -52,11 +56,17 @@ The converter emits one for a GN source_set whose sources are `.swift`
 """
 
 load("@bazel_skylib//lib:paths.bzl", "paths")
-load("@macos_sdk//:sdk.bzl", "MACOS_SDK_PATH", "XCODE_DEVELOPER_DIR")
+load(
+    "@macos_sdk//:sdk.bzl",
+    "IPHONEOS_SDK_PATH",
+    "IPHONESIMULATOR_SDK_PATH",
+    "MACOS_SDK_PATH",
+    "XCODE_DEVELOPER_DIR",
+)
 load("@rules_cc//cc:find_cc_toolchain.bzl", "find_cc_toolchain", "use_cc_toolchain")
 load("@rules_cc//cc/common:cc_common.bzl", "cc_common")
 load("@rules_cc//cc/common:cc_info.bzl", "CcInfo")
-load(":apple.bzl", "MACOS_DEPLOYMENT_TARGET")
+load(":apple.bzl", "IOS_DEPLOYMENT_TARGET", "MACOS_DEPLOYMENT_TARGET")
 
 # The toolchain of the host's Xcode (darwin_sdk.gni's mac_host_toolchain_path:
 # the Swift libraries' second directory, and swiftc.py's Testing plugin).
@@ -68,6 +78,46 @@ MACOS_SWIFT_LIBRARY_DIRS = [
     MACOS_SDK_PATH + "/usr/lib/swift",
     _XCODE_TOOLCHAIN + "/usr/lib/swift/macosx",
 ]
+
+# ... and ios_swift_lib_paths, per environment (the SDK's directory and the
+# toolchain's iphoneos or iphonesimulator one).
+IOS_SWIFT_LIBRARY_DIRS = [
+    IPHONEOS_SDK_PATH + "/usr/lib/swift",
+    _XCODE_TOOLCHAIN + "/usr/lib/swift/iphoneos",
+]
+
+IOS_SIMULATOR_SWIFT_LIBRARY_DIRS = [
+    IPHONESIMULATOR_SDK_PATH + "/usr/lib/swift",
+    _XCODE_TOOLCHAIN + "/usr/lib/swift/iphonesimulator",
+]
+
+def _apple_platform(ctx):
+    """The Apple platform a target is built for: build/config/darwin's compiler config as swiftc sees it.
+
+    The SDK (`-sdk`), the target triple (`-target`: darwin_sdk.gni's
+    `$darwin_target_arch-apple-$os$deployment_target$darwin_target_sim`) and
+    the Swift libraries' directories, from the target platform's constraints:
+    macOS, or iOS on a device or the simulator (build/bazel:ios_environment),
+    on arm64 or x86_64.
+    """
+    arch = "arm64" if ctx.target_platform_has_constraint(ctx.attr._aarch64[platform_common.ConstraintValueInfo]) else "x86_64"
+    if ctx.target_platform_has_constraint(ctx.attr._ios[platform_common.ConstraintValueInfo]):
+        if ctx.target_platform_has_constraint(ctx.attr._ios_simulator[platform_common.ConstraintValueInfo]):
+            return struct(
+                sdk = IPHONESIMULATOR_SDK_PATH,
+                target = "%s-apple-ios%s-simulator" % (arch, IOS_DEPLOYMENT_TARGET),
+                library_dirs = IOS_SIMULATOR_SWIFT_LIBRARY_DIRS,
+            )
+        return struct(
+            sdk = IPHONEOS_SDK_PATH,
+            target = "%s-apple-ios%s" % (arch, IOS_DEPLOYMENT_TARGET),
+            library_dirs = IOS_SWIFT_LIBRARY_DIRS,
+        )
+    return struct(
+        sdk = MACOS_SDK_PATH,
+        target = "%s-apple-macos%s" % (arch, MACOS_DEPLOYMENT_TARGET),
+        library_dirs = MACOS_SWIFT_LIBRARY_DIRS,
+    )
 
 # GN's source root (`//` in its labels), under the repository's root: the
 # directory swiftc.py makes the generated header's imports relative to
@@ -227,8 +277,9 @@ def _flutter_swift_library_impl(ctx):
     args.add_all(compilation.framework_includes, before_each = "-F")
     args.add_all(compilation.defines, before_each = "-D")
     args.add_all(compilation.local_defines, before_each = "-D")
-    args.add("-sdk", MACOS_SDK_PATH)
-    args.add("-target", cc_toolchain.target_gnu_system_name + MACOS_DEPLOYMENT_TARGET)
+    apple = _apple_platform(ctx)
+    args.add("-sdk", apple.sdk)
+    args.add("-target", apple.target)
     args.add("-swift-version", "5")
     args.add_all(_expand(ctx, "swiftflags", ctx.attr.swiftflags))
     args.add_all(ctx.files.srcs)
@@ -285,7 +336,7 @@ def _flutter_swift_library_impl(ctx):
         ),
         name = ctx.label.name,
         linking_contexts = [dep.linking_context for dep in deps],
-        user_link_flags = ["-L" + directory for directory in MACOS_SWIFT_LIBRARY_DIRS] + _expand(ctx, "linkopts", ctx.attr.linkopts),
+        user_link_flags = ["-L" + directory for directory in apple.library_dirs] + _expand(ctx, "linkopts", ctx.attr.linkopts),
         alwayslink = ctx.attr.alwayslink,
         disallow_dynamic_library = True,
     )
@@ -345,6 +396,10 @@ flutter_swift_library = rule(
             cfg = "exec",
         ),
         "_python_runtime": attr.label(default = "@cpython3//:runtime"),
+        # The target platform's constraints _apple_platform reads.
+        "_ios": attr.label(default = "@platforms//os:ios"),
+        "_ios_simulator": attr.label(default = "//engine/src/flutter/build/bazel:ios_simulator"),
+        "_aarch64": attr.label(default = "@platforms//cpu:aarch64"),
     },
     fragments = ["cpp"],
     toolchains = use_cc_toolchain(),
