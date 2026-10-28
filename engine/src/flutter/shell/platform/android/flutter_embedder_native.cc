@@ -248,6 +248,12 @@ constexpr EGLint kEglClientVersion2 = 2;
 
 // 1x1 pixel dimension for offscreen Pbuffer surfaces.
 constexpr EGLint kEglPbufferDimension = 1;
+
+// Minimum valid non-negative dimension/stride clamp for software surface copy.
+constexpr int32_t kMinSurfaceDimension = 0;
+
+// Return code 0 indicating ANativeWindow_lock succeeded.
+constexpr int32_t kANativeWindowSuccess = 0;
 #endif
 
 FlutterEngineProcTable ResolveProcTable(
@@ -356,17 +362,6 @@ bool NoOpPresent(void* user_data) {
 uint32_t NoOpFboCallback(void* user_data) {
   (void)user_data;
   return 0;
-}
-
-bool NoOpSoftwarePresent(void* user_data,
-                         const void* allocation,
-                         size_t row_bytes,
-                         size_t height) {
-  (void)user_data;
-  (void)allocation;
-  (void)row_bytes;
-  (void)height;
-  return true;
 }
 
 void PlatformMessageResponseCallbackTrampoline(const uint8_t* data,
@@ -936,14 +931,19 @@ FlutterEmbedderNative::FlutterEmbedderNative(
 
   AndroidSurfaceManager::Callbacks surface_callbacks;
   surface_callbacks.on_window_created = [this](void* window) {
-    if (!is_using_mock_proc_table_ && native_window_ != nullptr &&
-        native_window_ != window) {
+    void* old_window = nullptr;
+    {
+      std::lock_guard<std::mutex> window_lock(native_window_mutex_);
+      old_window = native_window_;
+      native_window_ = window;
+    }
+    if (!is_using_mock_proc_table_ && old_window != nullptr &&
+        old_window != window) {
       DestroyAndroidWindowSurface();
 #if FML_OS_ANDROID
-      ANativeWindow_release(static_cast<ANativeWindow*>(native_window_));
+      ANativeWindow_release(static_cast<ANativeWindow*>(old_window));
 #endif
     }
-    native_window_ = window;
     if (!is_using_mock_proc_table_ && window != nullptr) {
 #if FLUTTER_HAS_ANDROID_SURFACE_CONTROL
       if (surface_control_) {
@@ -970,12 +970,14 @@ FlutterEmbedderNative::FlutterEmbedderNative(
     ScheduleFrame();
   };
   surface_callbacks.on_window_changed = [this](void* window) {
-    // View ID 0 represents the default implicit Android FlutterView.
-    constexpr int64_t kAndroidImplicitViewId = 0;
     // Zero width and height passed when clearing the detached onscreen window.
     constexpr int32_t kDetachedWindowDimension = 0;
-    void* old_window = native_window_;
-    native_window_ = window;
+    void* old_window = nullptr;
+    {
+      std::lock_guard<std::mutex> window_lock(native_window_mutex_);
+      old_window = native_window_;
+      native_window_ = window;
+    }
     if (!is_using_mock_proc_table_) {
       if (window != nullptr) {
 #if FLUTTER_HAS_ANDROID_SURFACE_CONTROL
@@ -1029,8 +1031,12 @@ FlutterEmbedderNative::FlutterEmbedderNative(
     }
   };
   surface_callbacks.on_window_destroyed = [this]() {
-    void* old_window = native_window_;
-    native_window_ = nullptr;
+    void* old_window = nullptr;
+    {
+      std::lock_guard<std::mutex> window_lock(native_window_mutex_);
+      old_window = native_window_;
+      native_window_ = nullptr;
+    }
     if (!is_using_mock_proc_table_) {
 #if FLUTTER_HAS_ANDROID_PLATFORM_VIEWS_CONTROLLER
       if (platform_views_controller_) {
@@ -1069,8 +1075,14 @@ FlutterEmbedderNative::FlutterEmbedderNative(
 #endif
 #if FLUTTER_HAS_ANDROID_PLATFORM_VIEWS_CONTROLLER
       if (platform_views_controller_) {
+        void* current_window = nullptr;
+        {
+          std::lock_guard<std::mutex> window_lock(native_window_mutex_);
+          current_window = native_window_;
+        }
         platform_views_controller_->SetOnscreenWindow(
-            0, static_cast<ANativeWindow*>(native_window_), width, height);
+            kAndroidImplicitViewId, static_cast<ANativeWindow*>(current_window),
+            width, height);
       }
 #endif
     }
@@ -1152,12 +1164,18 @@ void FlutterEmbedderNative::Detach() {
     ReleaseAllTextures();
     DestroyAndroidOverlayEGLSurfaces();
     TeardownAndroidEGL();
+    {
+      std::lock_guard<std::mutex> window_lock(native_window_mutex_);
 #if FML_OS_ANDROID
-    if (native_window_ != nullptr) {
-      ANativeWindow_release(static_cast<ANativeWindow*>(native_window_));
+      if (native_window_ != nullptr) {
+        ANativeWindow_release(static_cast<ANativeWindow*>(native_window_));
+      }
+#endif
       native_window_ = nullptr;
     }
-#endif
+  } else {
+    std::lock_guard<std::mutex> window_lock(native_window_mutex_);
+    native_window_ = nullptr;
   }
   if (jvm_invoker_) {
     jvm_invoker_->Detach();
@@ -1212,8 +1230,13 @@ bool FlutterEmbedderNative::RunBundleAndSnapshotFromLibrary(
 #endif
     if (rendering_api != AndroidRenderingAPI::kImpellerVulkan) {
       InitializeAndroidEGL();
-      if (native_window_ != nullptr && egl_window_surface_ == nullptr) {
-        CreateOrUpdateAndroidWindowSurface(native_window_);
+      void* current_window = nullptr;
+      {
+        std::lock_guard<std::mutex> window_lock(native_window_mutex_);
+        current_window = native_window_;
+      }
+      if (current_window != nullptr && egl_window_surface_ == nullptr) {
+        CreateOrUpdateAndroidWindowSurface(current_window);
       }
     }
   }
@@ -1282,10 +1305,8 @@ bool FlutterEmbedderNative::RunBundleAndSnapshotFromLibrary(
     renderer_config.software.struct_size =
         sizeof(FlutterSoftwareRendererConfig);
     renderer_config.software.surface_present_callback =
-        is_using_mock_proc_table_
-            ? &NoOpSoftwarePresent
-            : [](void* user_data, const void* allocation, size_t row_bytes,
-                 size_t height) -> bool {
+        [](void* user_data, const void* allocation, size_t row_bytes,
+           size_t height) -> bool {
       return user_data != nullptr &&
              static_cast<FlutterEmbedderNative*>(user_data)
                  ->PresentAndroidSoftware(allocation, row_bytes, height);
@@ -1450,7 +1471,12 @@ bool FlutterEmbedderNative::RunBundleAndSnapshotFromLibrary(
   }
   TRACE_EVENT0("flutter", "FlutterEmbedderNative::Initialize[C-API]");
 
-  if (!is_using_mock_proc_table_ && native_window_ != nullptr) {
+  void* current_window = nullptr;
+  {
+    std::lock_guard<std::mutex> window_lock(native_window_mutex_);
+    current_window = native_window_;
+  }
+  if (!is_using_mock_proc_table_ && current_window != nullptr) {
     ScheduleFrame();
   }
 
@@ -1881,15 +1907,18 @@ bool FlutterEmbedderNative::DispatchPlatformMessage(const std::string& channel,
   if (response_id > 0 &&
       proc_table_.PlatformMessageCreateResponseHandle != nullptr) {
     auto* payload = new ResponsePayload();
-    payload->callback = [this, response_id](const uint8_t* data, size_t size) {
-      if (!jvm_invoker_) {
+    auto alive = alive_flag_;
+    auto jvm_invoker = jvm_invoker_;
+    payload->callback = [alive, jvm_invoker, response_id](const uint8_t* data,
+                                                          size_t size) {
+      if (!alive || !alive->load() || !jvm_invoker) {
         return;
       }
       if (data == nullptr) {
-        jvm_invoker_->InvokePlatformMessageEmptyResponseCallback(response_id);
+        jvm_invoker->InvokePlatformMessageEmptyResponseCallback(response_id);
       } else {
         const uint8_t* non_null_bytes = (size == 0) ? &kEmptyByte : data;
-        jvm_invoker_->InvokePlatformMessageResponseCallback(
+        jvm_invoker->InvokePlatformMessageResponseCallback(
             response_id, non_null_bytes, size);
       }
     };
@@ -2338,10 +2367,8 @@ bool FlutterEmbedderNative::ResolveRendererConfig(
     config_out->type = kSoftware;
     config_out->software.struct_size = sizeof(FlutterSoftwareRendererConfig);
     config_out->software.surface_present_callback =
-        is_using_mock_proc_table_
-            ? &NoOpSoftwarePresent
-            : [](void* user_data, const void* allocation, size_t row_bytes,
-                 size_t height) -> bool {
+        [](void* user_data, const void* allocation, size_t row_bytes,
+           size_t height) -> bool {
       return user_data != nullptr &&
              static_cast<FlutterEmbedderNative*>(user_data)
                  ->PresentAndroidSoftware(allocation, row_bytes, height);
@@ -2406,8 +2433,13 @@ bool FlutterEmbedderNative::ResolveRendererConfig(
       // Vulkan autoselection fell back to OpenGL ES on the raster thread;
       // initialize our real EGL context and fall through to kOpenGL setup.
       InitializeAndroidEGL();
-      if (native_window_ != nullptr && egl_window_surface_ == nullptr) {
-        CreateOrUpdateAndroidWindowSurface(native_window_);
+      void* current_window = nullptr;
+      {
+        std::lock_guard<std::mutex> window_lock(native_window_mutex_);
+        current_window = native_window_;
+      }
+      if (current_window != nullptr && egl_window_surface_ == nullptr) {
+        CreateOrUpdateAndroidWindowSurface(current_window);
       }
     }
 #endif
@@ -2415,8 +2447,13 @@ bool FlutterEmbedderNative::ResolveRendererConfig(
 
   if (!is_using_mock_proc_table_ && egl_display_ == nullptr) {
     InitializeAndroidEGL();
-    if (native_window_ != nullptr && egl_window_surface_ == nullptr) {
-      CreateOrUpdateAndroidWindowSurface(native_window_);
+    void* current_window = nullptr;
+    {
+      std::lock_guard<std::mutex> window_lock(native_window_mutex_);
+      current_window = native_window_;
+    }
+    if (current_window != nullptr && egl_window_surface_ == nullptr) {
+      CreateOrUpdateAndroidWindowSurface(current_window);
     }
   }
 
@@ -3518,38 +3555,52 @@ void FlutterEmbedderNative::DestroyAndroidOverlayEGLSurfaces() {
 bool FlutterEmbedderNative::PresentAndroidSoftware(const void* allocation,
                                                    size_t row_bytes,
                                                    size_t height) {
-#if FML_OS_ANDROID
-  if (native_window_ == nullptr || allocation == nullptr || row_bytes == 0 ||
-      height == 0) {
+  if (!alive_flag_ || !alive_flag_->load() || allocation == nullptr ||
+      row_bytes == 0 || height == 0) {
     return true;
   }
-  auto* window = static_cast<ANativeWindow*>(native_window_);
-  size_t width_pixels = row_bytes / kBytesPerRgbaPixel;
-  ANativeWindow_setBuffersGeometry(window, static_cast<int32_t>(width_pixels),
-                                   static_cast<int32_t>(height),
-                                   WINDOW_FORMAT_RGBA_8888);
-  ANativeWindow_Buffer buffer{};
-  if (ANativeWindow_lock(window, &buffer, nullptr) == 0) {
-    auto* dst = static_cast<uint8_t*>(buffer.bits);
-    const auto* src = static_cast<const uint8_t*>(allocation);
-    size_t dst_row_bytes =
-        static_cast<size_t>(std::max(0, buffer.stride)) * kBytesPerRgbaPixel;
-    size_t copy_bytes = std::min(row_bytes, dst_row_bytes);
-    size_t copy_rows =
-        std::min(height, static_cast<size_t>(std::max(0, buffer.height)));
-    for (size_t y = 0; y < copy_rows; ++y) {
-      std::memcpy(dst + y * dst_row_bytes, src + y * row_bytes, copy_bytes);
+  bool presented = false;
+  {
+    std::lock_guard<std::mutex> lock(native_window_mutex_);
+    if (native_window_ == nullptr) {
+      return true;
     }
-    ANativeWindow_unlockAndPost(window);
+#if FML_OS_ANDROID
+    if (!is_using_mock_proc_table_) {
+      auto* window = static_cast<ANativeWindow*>(native_window_);
+      size_t width_pixels = row_bytes / kBytesPerRgbaPixel;
+      ANativeWindow_setBuffersGeometry(
+          window, static_cast<int32_t>(width_pixels),
+          static_cast<int32_t>(height), WINDOW_FORMAT_RGBA_8888);
+      ANativeWindow_Buffer buffer{};
+      if (ANativeWindow_lock(window, &buffer, nullptr) ==
+          kANativeWindowSuccess) {
+        auto* dst = static_cast<uint8_t*>(buffer.bits);
+        const auto* src = static_cast<const uint8_t*>(allocation);
+        size_t dst_row_bytes =
+            static_cast<size_t>(std::max(kMinSurfaceDimension, buffer.stride)) *
+            kBytesPerRgbaPixel;
+        size_t copy_bytes = std::min(row_bytes, dst_row_bytes);
+        size_t copy_rows = std::min(
+            height,
+            static_cast<size_t>(std::max(kMinSurfaceDimension, buffer.height)));
+        for (size_t y = 0; y < copy_rows; ++y) {
+          std::memcpy(dst + y * dst_row_bytes, src + y * row_bytes, copy_bytes);
+        }
+        ANativeWindow_unlockAndPost(window);
+        presented = true;
+      }
+    } else {
+      presented = true;
+    }
+#else
+    presented = true;
+#endif
+  }
+  if (presented) {
     NotifyFirstFramePresented();
   }
   return true;
-#else
-  (void)allocation;
-  (void)row_bytes;
-  (void)height;
-  return true;
-#endif
 }
 
 void FlutterEmbedderNative::NotifyFirstFramePresented() {
@@ -3561,9 +3612,10 @@ void FlutterEmbedderNative::NotifyFirstFramePresented() {
       task_runners_ ? task_runners_->GetPlatformTaskRunner() : nullptr;
   if (platform_runner && !platform_runner->RunsTasksOnCurrentThread()) {
     auto alive = alive_flag_;
-    platform_runner->PostTask([this, alive]() {
-      if (alive && alive->load() && jvm_invoker_) {
-        jvm_invoker_->OnFirstFrame();
+    auto jvm_invoker = jvm_invoker_;
+    platform_runner->PostTask([alive, jvm_invoker]() {
+      if (alive && alive->load() && jvm_invoker) {
+        jvm_invoker->OnFirstFrame();
       }
     });
     return;

@@ -538,6 +538,7 @@ class FlutterEmbedderNative {
   FlutterCustomAssetResolver custom_asset_resolver_{};
   FlutterImageDecoderRegistration image_decoder_registration_{};
 
+  mutable std::mutex native_window_mutex_;
   void* native_window_ = nullptr;
   size_t surface_width_ = 0;
   size_t surface_height_ = 0;

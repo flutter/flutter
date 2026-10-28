@@ -8,6 +8,7 @@
 #include <cstring>
 #include <memory>
 #include <string>
+#include <thread>
 #include <vector>
 
 #include "flutter/common/vulkan_driver_info.h"
@@ -135,6 +136,7 @@ struct MockProcTableState {
   std::vector<uint8_t> last_response_payload;
   FlutterDataCallback last_response_data_callback = nullptr;
   void* last_response_user_data = nullptr;
+  bool defer_response_callback = false;
 
   // Captured deferred library fields.
   intptr_t last_deferred_loading_unit_id = 0;
@@ -329,7 +331,8 @@ FlutterEngineProcTable BuildMockProcTable(MockProcTableState* state) {
          FlutterPlatformMessageResponseHandle* response) {
         if (g_mock_state != nullptr) {
           g_mock_state->release_response_handle_count++;
-          if (g_mock_state->last_response_data_callback != nullptr) {
+          if (!g_mock_state->defer_response_callback &&
+              g_mock_state->last_response_data_callback != nullptr) {
             auto callback = g_mock_state->last_response_data_callback;
             void* callback_user_data = g_mock_state->last_response_user_data;
             g_mock_state->last_response_data_callback = nullptr;
@@ -950,6 +953,90 @@ TEST_F(FlutterEmbedderNativeTest,
   embedder.SurfaceDestroyed();
   EXPECT_EQ(mock_state_->notify_low_memory_warning_count,
             kExpectedLowMemoryWarningsAfterDestroy);
+}
+
+TEST_F(FlutterEmbedderNativeTest,
+       PlatformMessageResponseCallbackAfterEmbedderDestroyedDoesNotCrash) {
+  mock_state_->defer_response_callback = true;
+
+  // Poison byte value used to overwrite freed FlutterEmbedderNative storage
+  // so any dangling `this` dereference deterministically faults.
+  constexpr int kFreedMemoryPoisonByte = 0xA5;
+
+  alignas(FlutterEmbedderNative)
+      uint8_t storage[sizeof(FlutterEmbedderNative)]{};
+  auto* embedder = new (storage) FlutterEmbedderNative(&proc_table_);
+  embedder->SetEngineForTesting(
+      reinterpret_cast<FLUTTER_API_SYMBOL(FlutterEngine)>(kFakeEngineAddress));
+
+  const std::vector<uint8_t> request = {0x10, 0x20};
+  EXPECT_TRUE(embedder->DispatchPlatformMessage(
+      "flutter/platform", request.data(), request.size(), kTestResponseId));
+  ASSERT_NE(mock_state_->last_response_data_callback, nullptr);
+  ASSERT_NE(mock_state_->last_response_user_data, nullptr);
+
+  FlutterDataCallback captured_callback =
+      mock_state_->last_response_data_callback;
+  void* captured_user_data = mock_state_->last_response_user_data;
+  mock_state_->last_response_data_callback = nullptr;
+  mock_state_->last_response_user_data = nullptr;
+
+  // Destroy the embedder and poison its backing memory to simulate a response
+  // callback queued on the main Looper running after nativeDestroy.
+  embedder->~FlutterEmbedderNative();
+  std::memset(storage, kFreedMemoryPoisonByte, sizeof(storage));
+
+  const std::vector<uint8_t> response = {0x30, 0x40};
+  captured_callback(response.data(), response.size(), captured_user_data);
+}
+
+TEST_F(FlutterEmbedderNativeTest,
+       SoftwarePresentConcurrentWithSurfaceLifecycleIsThreadSafe) {
+  AndroidVMArgs vm_args;
+  vm_args.api_level = kTestApiLevel33;
+  vm_args.enable_software_rendering = true;
+  AndroidVMInit::SetGlobalVMArgs(vm_args);
+
+  FlutterEmbedderNative embedder(&proc_table_);
+  embedder.SetEngineForTesting(
+      reinterpret_cast<FLUTTER_API_SYMBOL(FlutterEngine)>(kFakeEngineAddress));
+
+  FlutterRendererConfig resolved_config{};
+  ASSERT_TRUE(FlutterEmbedderNative::OnResolveRendererConfigCallback(
+      &embedder, &resolved_config));
+  ASSERT_EQ(resolved_config.type, kSoftware);
+  ASSERT_NE(resolved_config.software.surface_present_callback, nullptr);
+
+  // Dimensions and iteration count for concurrent software present stress test.
+  constexpr size_t kSoftwareTestWidth = 16;
+  constexpr size_t kSoftwareTestHeight = 16;
+  constexpr size_t kBytesPerPixel = 4;
+  constexpr size_t kSoftwareRowBytes = kSoftwareTestWidth * kBytesPerPixel;
+  constexpr int kLifecycleIterations = 100;
+  constexpr uintptr_t kFakeSurfaceAddress1 = 0x2001;
+  constexpr uintptr_t kFakeSurfaceAddress2 = 0x2002;
+
+  std::vector<uint8_t> pixels(kSoftwareRowBytes * kSoftwareTestHeight, 0xFF);
+  std::atomic<bool> stop_raster{false};
+
+  std::thread raster_thread([&]() {
+    while (!stop_raster.load(std::memory_order_relaxed)) {
+      EXPECT_TRUE(resolved_config.software.surface_present_callback(
+          &embedder, pixels.data(), kSoftwareRowBytes, kSoftwareTestHeight));
+    }
+  });
+
+  auto surface_1 = reinterpret_cast<jobject>(kFakeSurfaceAddress1);
+  auto surface_2 = reinterpret_cast<jobject>(kFakeSurfaceAddress2);
+  for (int i = 0; i < kLifecycleIterations; ++i) {
+    embedder.SurfaceCreated(nullptr, surface_1);
+    embedder.SurfaceChanged(kSoftwareTestWidth, kSoftwareTestHeight);
+    embedder.SurfaceWindowChanged(nullptr, surface_2);
+    embedder.SurfaceDestroyed();
+  }
+
+  stop_raster.store(true, std::memory_order_relaxed);
+  raster_thread.join();
 }
 
 }  // namespace testing
