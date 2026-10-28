@@ -119,6 +119,13 @@ flutter_gpu_test_backends(
 flutter_display_test(
     name = "impeller_unittests",
     size = "large",
+    args = select({
+        "//engine/src/flutter/build/bazel:host_os_is_mac": [
+            "--gtest_filter=-*OpenGLES:*OpenGLESSDF",
+            "--enable_vulkan_validation",
+        ],
+        "//conditions:default": [],
+    }),
     data = [":gpu_test_backends"],
     shard_count = 16,
     target_compatible_with = select({
@@ -188,10 +195,21 @@ flutter_display_test(
 flutter_display_test(
     name = "impeller_dart_unittests",
     size = "small",
-    args = [
-        "--enable_vulkan_validation",
-        "--gtest_filter=*Metal",
-    ],
+    args = select({
+        "//engine/src/flutter/build/bazel:host_os_is_linux": [
+            "--enable_vulkan_validation",
+            "--gtest_filter=*Metal",
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/build/bazel:host_os_is_mac": [
+            "--gtest_repeat=2",
+            "--gtest_shuffle",
+            "--enable_vulkan_validation",
+            "--gtest_filter=*Metal",
+        ],
+        "//conditions:default": [],
+    }),
     data = [":gpu_test_backends"],
     target_compatible_with = select({
         ":when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan_and_enable_unittests": [],
