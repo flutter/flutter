@@ -333,6 +333,29 @@ void main() {
             () => ResizeImage(rawImage, width: 10, policy: ResizeImagePolicy.cover),
             throwsAssertionError,
           );
+          expect(
+            () => ResizeImage(rawImage, height: 10, policy: ResizeImagePolicy.cover),
+            throwsAssertionError,
+          );
+        });
+
+        test('useLogicalSize scales the box by devicePixelRatio', () async {
+          // Source image is 50x50. 10x20 logical pixels at 2x is a 20x40 box;
+          // covering it with a square image gives 40x40.
+          final rawImage = MemoryImage(Uint8List.fromList(kBlueSquarePng));
+          final resizedImage = ResizeImage(
+            rawImage,
+            width: 10,
+            height: 20,
+            policy: ResizeImagePolicy.cover,
+            useLogicalSize: true,
+          );
+          const config = ImageConfiguration(devicePixelRatio: 2.0);
+          final Size resizedImageSize = await _resolveAndGetSize(
+            resizedImage,
+            configuration: config,
+          );
+          expect(resizedImageSize, const Size(40, 40));
         });
       });
 
