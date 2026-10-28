@@ -203,8 +203,9 @@ https://docs.flutter.dev/testing/integration-tests
   /// Each [WebDriverPointerAction.move] position in [actions] is a logical
   /// position in [view], such as the one returned by [WidgetTester.getCenter].
   /// If [view] is null, the implicit view is used. A move with a non-zero
-  /// `duration` is animated by the browser with intermediate `pointermove`
-  /// events along the way.
+  /// `duration` moves the mouse in steps from its previous position, so the
+  /// browser dispatches intermediate `pointermove` events along the way. See
+  /// [WebDriverPointerAction.move].
   ///
   /// Mouse buttons pressed with [WebDriverPointerAction.down] remain pressed
   /// across calls until released with [WebDriverPointerAction.up], so a test

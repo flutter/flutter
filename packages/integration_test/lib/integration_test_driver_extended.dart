@@ -11,6 +11,7 @@ library;
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math' as math;
 
 import 'package:flutter_driver/flutter_driver.dart';
 import 'package:path/path.dart' as path;
@@ -99,6 +100,7 @@ Future<void> integrationDriver({
   String jsonResponse = await driver.requestData(DriverTestMessage.pending().toString());
 
   final onScreenshotResults = <String, bool>{};
+  final mouse = _W3cMouse();
 
   Response response = Response.fromJson(jsonResponse);
 
@@ -145,7 +147,7 @@ Future<void> integrationDriver({
               (json! as Map<Object?, Object?>).cast<String, Object?>(),
             ),
         ];
-        await driver.webDriver.postRequest('actions', _w3cPointerActionsRequest(actions));
+        await driver.webDriver.postRequest('actions', mouse.actionsRequest(actions));
       } catch (_) {
         try {
           await driver.webDriver.deleteRequest('actions');
@@ -226,29 +228,76 @@ Future<void> integrationDriver({
   }
 }
 
-Map<String, Object?> _w3cPointerActionsRequest(List<WebDriverPointerAction> actions) {
-  return <String, Object?>{
-    'actions': <Map<String, Object?>>[
-      <String, Object?>{
-        'type': 'pointer',
-        'id': 'integration_test_mouse',
-        'parameters': <String, Object?>{'pointerType': 'mouse'},
-        'actions': <Map<String, Object?>>[
-          for (final WebDriverPointerAction action in actions)
-            if (action.type == WebDriverPointerActionType.move)
-              <String, Object?>{
-                'type': 'pointerMove',
-                'origin': 'viewport',
-                'x': action.x!.round(),
-                'y': action.y!.round(),
-                'duration': action.duration!.inMilliseconds,
-              }
-            else
-              action.toJson(),
-        ],
-      },
-    ],
-  };
+/// About one frame at 60 Hz, the time between interpolated mouse moves.
+const int _w3cMouseMoveStepMilliseconds = 16;
+
+/// Builds W3C perform-actions requests for the WebDriver mouse, remembering
+/// where the previous request left the mouse.
+///
+/// ChromeDriver performs a W3C `pointerMove` with a non-zero duration by
+/// dispatching a single `mousemove` at the end of the move instead of moving
+/// the mouse gradually as the W3C spec describes. To make every browser see
+/// intermediate events, each timed move is split into straight-line steps of
+/// about [_w3cMouseMoveStepMilliseconds] each, starting from the last position
+/// the mouse was moved to. The first move, whose start position is unknown, is
+/// not split.
+class _W3cMouse {
+  /// The rounded viewport position of the last move, or null before any move.
+  (int, int)? _position;
+
+  /// Returns the request body that performs [actions].
+  Map<String, Object?> actionsRequest(List<WebDriverPointerAction> actions) {
+    return <String, Object?>{
+      'actions': <Map<String, Object?>>[
+        <String, Object?>{
+          'type': 'pointer',
+          'id': 'integration_test_mouse',
+          'parameters': <String, Object?>{'pointerType': 'mouse'},
+          'actions': <Map<String, Object?>>[
+            for (final WebDriverPointerAction action in actions)
+              if (action.type == WebDriverPointerActionType.move)
+                ..._move(action)
+              else
+                action.toJson(),
+          ],
+        },
+      ],
+    };
+  }
+
+  List<Map<String, Object?>> _move(WebDriverPointerAction action) {
+    final (int, int)? start = _position;
+    final (int, int) target = (action.x!.round(), action.y!.round());
+    final int milliseconds = action.duration!.inMilliseconds;
+    _position = target;
+    if (milliseconds == 0 || start == null) {
+      return <Map<String, Object?>>[_pointerMove(target.$1, target.$2, milliseconds)];
+    }
+    final int dx = target.$1 - start.$1;
+    final int dy = target.$2 - start.$2;
+    final int steps = math.max(
+      1,
+      math.min((milliseconds / _w3cMouseMoveStepMilliseconds).ceil(), math.max(dx.abs(), dy.abs())),
+    );
+    return <Map<String, Object?>>[
+      for (int i = 1; i <= steps; i++)
+        _pointerMove(
+          (start.$1 + dx * i / steps).round(),
+          (start.$2 + dy * i / steps).round(),
+          milliseconds * i ~/ steps - milliseconds * (i - 1) ~/ steps,
+        ),
+    ];
+  }
+
+  static Map<String, Object?> _pointerMove(int x, int y, int milliseconds) {
+    return <String, Object?>{
+      'type': 'pointerMove',
+      'origin': 'viewport',
+      'x': x,
+      'y': y,
+      'duration': milliseconds,
+    };
+  }
 }
 
 const JsonEncoder _prettyEncoder = JsonEncoder.withIndent('  ');

@@ -268,8 +268,11 @@ enum WebDriverPointerActionType {
 final class WebDriverPointerAction {
   /// Creates a pointer action that moves the mouse to ([x], [y]).
   ///
-  /// With a non-zero [duration], the browser animates the move over [duration]
-  /// and dispatches intermediate `pointermove` events along the way.
+  /// With a non-zero [duration], the driver moves the mouse over [duration] in
+  /// steps of about one frame each, along a straight line from the previous
+  /// mouse position, so the browser dispatches intermediate `pointermove`
+  /// events along the way. If the mouse hasn't been moved yet in this test
+  /// run, it moves straight to ([x], [y]).
   ///
   /// When passed to
   /// [IntegrationTestWidgetsFlutterBinding.webDriverPointerActions], [x] and
