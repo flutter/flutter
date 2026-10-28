@@ -2,7 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-"""The macOS SDK of the host's Xcode as a repository (`@macos_sdk`), for the macOS toolchains.
+"""The SDKs of the host's Xcode as a repository (`@macos_sdk`): macOS, and iOS's device and simulator ones.
 
 GN finds the SDK through `xcrun` (build/config/darwin/darwin_sdk.gni) and,
 under tools/gn's --xcode-symlinks, reaches it through a symlink in
@@ -32,6 +32,17 @@ nothing else reads it.
 `sdk.bzl` records what was found (MACOS_SDK_PATH, MACOS_SDK_VERSION,
 MACOS_PLATFORM_PATH, XCODE_DEVELOPER_DIR), for messages and for rules that
 need the platform's own frameworks (XCTest, under the platform path).
+
+The iOS toolchains read the same Xcode's iPhoneOS and iPhoneSimulator SDKs
+(GN: darwin_sdk.gni's ios_device_sdk_path and ios_simulator_sdk_path, from
+build/mac/darwin_sdk.py): laid as views the same way, `iPhoneOS.sdk/` and
+`iPhoneSimulator.sdk/`, as `:ios_sdk`/`:ios_view` and
+`:ios_simulator_sdk`/`:ios_simulator_view`, with IPHONEOS_SDK_PATH,
+IPHONEOS_PLATFORM_PATH, IPHONESIMULATOR_SDK_PATH,
+IPHONESIMULATOR_PLATFORM_PATH and IOS_SDK_VERSION in sdk.bzl. A Mac whose
+Xcode has no iOS platform (the command-line tools alone) gets empty ones:
+the iOS toolchains fail to find their sysroot there, nothing else reads
+them. The repository keeps its name from the first SDK it held.
 """
 
 # Frameworks left out of the view, each for a reason.
@@ -41,40 +52,51 @@ _EXCLUDED_FRAMEWORKS = {
     "Ruby.framework": "symlink cycle",
 }
 
-# The entries of the view that are the toolchain's inputs: what the
-# compiler and the linker read of an SDK.
+# The entries of a view that are the toolchain's inputs: what the
+# compiler and the linker read of an SDK (under the view's name).
 _SDK_INPUTS = [
-    "MacOSX.sdk/SDKSettings.json",
-    "MacOSX.sdk/SDKSettings.plist",
-    "MacOSX.sdk/usr/include",
-    "MacOSX.sdk/usr/lib",
-    "MacOSX.sdk/System/Library/Frameworks",
-    "MacOSX.sdk/System/Library/SubFrameworks",
+    "SDKSettings.json",
+    "SDKSettings.plist",
+    "usr/include",
+    "usr/lib",
+    "System/Library/Frameworks",
+    "System/Library/SubFrameworks",
 ]
 
-def _xcrun(rctx, environment, arguments):
-    result = rctx.execute(["/usr/bin/xcrun", "--sdk", "macosx"] + arguments, environment = environment)
+# The SDKs: xcrun's name, the view's directory, the names of the
+# filegroups and of the constants.
+_SDKS = [
+    struct(xcrun = "macosx", view = "MacOSX.sdk", group = "", constant = "MACOS", required = True),
+    struct(xcrun = "iphoneos", view = "iPhoneOS.sdk", group = "ios_", constant = "IPHONEOS", required = False),
+    struct(xcrun = "iphonesimulator", view = "iPhoneSimulator.sdk", group = "ios_simulator_", constant = "IPHONESIMULATOR", required = False),
+]
+
+def _xcrun(rctx, environment, sdk, arguments, required = True):
+    result = rctx.execute(["/usr/bin/xcrun", "--sdk", sdk] + arguments, environment = environment)
     if result.return_code != 0:
-        fail("macos_sdk: `xcrun --sdk macosx %s` failed (is Xcode installed and selected?):\n%s" % (
+        if not required:
+            return None
+        fail("macos_sdk: `xcrun --sdk %s %s` failed (is Xcode installed and selected?):\n%s" % (
+            sdk,
             " ".join(arguments),
             result.stderr,
         ))
     return result.stdout.strip()
 
-def _lay_view(rctx, sdk):
-    """Lays MacOSX.sdk/: the SDK's entries symlinked, the frameworks one by one."""
-    rctx.file("MacOSX.sdk/.view", "")
+def _lay_view(rctx, sdk, view):
+    """Lays <view>/: the SDK's entries symlinked, the frameworks one by one."""
+    rctx.file(view + "/.view", "")
     for entry in sdk.readdir():
         if entry.basename != "System":
-            rctx.symlink(entry, "MacOSX.sdk/" + entry.basename)
+            rctx.symlink(entry, view + "/" + entry.basename)
     library = sdk.get_child("System", "Library")
     for entry in library.readdir():
         if entry.basename != "Frameworks":
-            rctx.symlink(entry, "MacOSX.sdk/System/Library/" + entry.basename)
-    rctx.file("MacOSX.sdk/System/Library/Frameworks/.view", "")
+            rctx.symlink(entry, view + "/System/Library/" + entry.basename)
+    rctx.file(view + "/System/Library/Frameworks/.view", "")
     for framework in library.get_child("Frameworks").readdir():
         if framework.basename not in _EXCLUDED_FRAMEWORKS:
-            rctx.symlink(framework, "MacOSX.sdk/System/Library/Frameworks/" + framework.basename)
+            rctx.symlink(framework, view + "/System/Library/Frameworks/" + framework.basename)
 
 def _macos_sdk_impl(rctx):
     developer_dir = rctx.getenv("DEVELOPER_DIR", "")
@@ -83,8 +105,13 @@ def _macos_sdk_impl(rctx):
         "MACOS_SDK_VERSION": "",
         "MACOS_PLATFORM_PATH": "",
         "XCODE_DEVELOPER_DIR": "",
+        "IPHONEOS_SDK_PATH": "",
+        "IPHONEOS_PLATFORM_PATH": "",
+        "IPHONESIMULATOR_SDK_PATH": "",
+        "IPHONESIMULATOR_PLATFORM_PATH": "",
+        "IOS_SDK_VERSION": "",
     }
-    inputs = []
+    inputs = {sdk.group: [] for sdk in _SDKS}
     if rctx.os.name.lower().startswith("mac"):
         environment = {"DEVELOPER_DIR": developer_dir} if developer_dir else {}
         if not developer_dir:
@@ -93,38 +120,55 @@ def _macos_sdk_impl(rctx):
             link = rctx.path("/var/db/xcode_select_link")
             if link.exists:
                 rctx.watch(link)
-        sdk_path = _xcrun(rctx, environment, ["--show-sdk-path"])
-        sdk = rctx.path(sdk_path).realpath
-        if not sdk.exists or not sdk.is_dir:
-            fail("macos_sdk: %s (from xcrun) is not a directory" % sdk_path)
-        found["MACOS_SDK_PATH"] = str(sdk)
-        found["MACOS_SDK_VERSION"] = _xcrun(rctx, environment, ["--show-sdk-version"])
-        found["MACOS_PLATFORM_PATH"] = _xcrun(rctx, environment, ["--show-sdk-platform-path"])
-        found["XCODE_DEVELOPER_DIR"] = found["MACOS_PLATFORM_PATH"].split("/Platforms/")[0]
-        version_plist = rctx.path(found["XCODE_DEVELOPER_DIR"]).get_child("..", "version.plist")
-        if version_plist.exists:
-            rctx.watch(version_plist)
-        rctx.watch(sdk.get_child("SDKSettings.json"))
-        _lay_view(rctx, sdk)
-        inputs = [path for path in _SDK_INPUTS if rctx.path(path).exists]
+        for spec in _SDKS:
+            sdk_path = _xcrun(rctx, environment, spec.xcrun, ["--show-sdk-path"], required = spec.required)
+            if sdk_path == None:
+                continue
+            sdk = rctx.path(sdk_path).realpath
+            if not sdk.exists or not sdk.is_dir:
+                fail("macos_sdk: %s (from xcrun --sdk %s) is not a directory" % (sdk_path, spec.xcrun))
+            found[spec.constant + "_SDK_PATH"] = str(sdk)
+            found[spec.constant + "_PLATFORM_PATH"] = _xcrun(rctx, environment, spec.xcrun, ["--show-sdk-platform-path"])
+            version = _xcrun(rctx, environment, spec.xcrun, ["--show-sdk-version"])
+            if spec.xcrun == "macosx":
+                found["MACOS_SDK_VERSION"] = version
+                found["XCODE_DEVELOPER_DIR"] = found["MACOS_PLATFORM_PATH"].split("/Platforms/")[0]
+                version_plist = rctx.path(found["XCODE_DEVELOPER_DIR"]).get_child("..", "version.plist")
+                if version_plist.exists:
+                    rctx.watch(version_plist)
+            else:
+                found["IOS_SDK_VERSION"] = version
+            rctx.watch(sdk.get_child("SDKSettings.json"))
+            _lay_view(rctx, sdk, spec.view)
+            inputs[spec.group] = [spec.view + "/" + path for path in _SDK_INPUTS if rctx.path(spec.view + "/" + path).exists]
 
-    rctx.file("BUILD.bazel", """# The macOS SDK of the host's Xcode (build_defs/repositories/macos_sdk.bzl).
-package(default_visibility = ["//visibility:public"])
-
-# What a compile or link reads of the SDK, as directory inputs: the
-# toolchain's -isysroot is their parent, MacOSX.sdk.
+    groups = []
+    for spec in _SDKS:
+        groups.append("""
+# What a compile or link reads of the %s SDK, as directory inputs: the
+# toolchain's -isysroot is their parent, %s.
 filegroup(
-    name = "sdk",
+    name = "%ssdk",
     srcs = %s,
 )
 
 # A file at the view's root, whose directory the toolchain takes as the
 # sysroot (cc_toolchain_config.bzl's sysroot_marker).
 filegroup(
-    name = "view",
+    name = "%sview",
     srcs = %s,
 )
-""" % (repr(inputs), repr(["MacOSX.sdk/.view"] if inputs else [])))
+""" % (
+            spec.xcrun,
+            spec.view,
+            spec.group,
+            repr(inputs[spec.group]),
+            spec.group,
+            repr([spec.view + "/.view"] if inputs[spec.group] else []),
+        ))
+    rctx.file("BUILD.bazel", """# The SDKs of the host's Xcode (build_defs/repositories/macos_sdk.bzl).
+package(default_visibility = ["//visibility:public"])
+""" + "".join(groups))
     rctx.file("sdk.bzl", "".join([
         "%s = %r\n" % (name, value)
         for name, value in found.items()
@@ -132,6 +176,7 @@ filegroup(
 
 macos_sdk = repository_rule(
     implementation = _macos_sdk_impl,
-    doc = "A view of the macOS SDK of the host's Xcode, from `xcrun --sdk macosx` (empty off macOS); see the file's docstring.",
+    doc = "Views of the host's Xcode's SDKs -- macOS, and iOS's device and simulator ones when the Xcode has them " +
+          "-- from `xcrun --sdk <name>` (empty off macOS); see the file's docstring.",
     local = True,
 )

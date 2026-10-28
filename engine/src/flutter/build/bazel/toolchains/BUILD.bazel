@@ -24,7 +24,7 @@ load(
     "LINUX_ARM64_LINK_FLAGS",
     "flutter_cc_toolchain_config",
 )
-load(":macos_toolchain.bzl", "macos_clang_toolchain")
+load(":macos_toolchain.bzl", "ios_clang_toolchain", "macos_clang_toolchain")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -845,6 +845,94 @@ macos_clang_toolchain(
     clang = "@clang_mac_x64",
     exec_cpu = "x64",
     target_cpu = "arm64",
+)
+
+# ---------------------------------------------------------------------------
+# iOS: GN's //build/toolchain/mac:ios_clang_arm (a device), ios_clang_arm_sim
+# and ios_clang_x64_sim (the simulator; tools/gn --ios [--simulator
+# [--simulator-cpu <cpu>]]): the Mac's clang over the iPhoneOS or
+# iPhoneSimulator SDK of its Xcode (@macos_sdk's ios_view and
+# ios_simulator_view), `--target=<cpu>-apple-darwin -arch <cpu>` and
+# -miphoneos-version-min / -mios-simulator-version-min=15.0
+# (cc_toolchain_config.bzl, os = "ios"). The platforms name the CPU and the
+# environment (build/bazel:ios_environment), which the toolchains resolve
+# by; a Mac of either CPU builds for each. Incompatible off macOS
+# (macos_toolchain.bzl).
+# ---------------------------------------------------------------------------
+
+runtime_mode_platforms(
+    name = "ios_arm64",
+    constraint_values = [
+        "@platforms//os:ios",
+        "@platforms//cpu:aarch64",
+        "//engine/src/flutter/build/bazel:ios_device",
+    ],
+)
+
+runtime_mode_platforms(
+    name = "ios_sim_arm64",
+    constraint_values = [
+        "@platforms//os:ios",
+        "@platforms//cpu:aarch64",
+        "//engine/src/flutter/build/bazel:ios_simulator",
+    ],
+)
+
+runtime_mode_platforms(
+    name = "ios_sim_x64",
+    constraint_values = [
+        "@platforms//os:ios",
+        "@platforms//cpu:x86_64",
+        "//engine/src/flutter/build/bazel:ios_simulator",
+    ],
+)
+
+ios_clang_toolchain(
+    name = "ios_arm64_clang",
+    clang = "@clang_mac_arm64",
+    environment = "device",
+    exec_cpu = "arm64",
+    target_cpu = "arm64",
+)
+
+ios_clang_toolchain(
+    name = "ios_arm64_on_x64_clang",
+    clang = "@clang_mac_x64",
+    environment = "device",
+    exec_cpu = "x64",
+    target_cpu = "arm64",
+)
+
+ios_clang_toolchain(
+    name = "ios_sim_arm64_clang",
+    clang = "@clang_mac_arm64",
+    environment = "simulator",
+    exec_cpu = "arm64",
+    target_cpu = "arm64",
+)
+
+ios_clang_toolchain(
+    name = "ios_sim_arm64_on_x64_clang",
+    clang = "@clang_mac_x64",
+    environment = "simulator",
+    exec_cpu = "x64",
+    target_cpu = "arm64",
+)
+
+ios_clang_toolchain(
+    name = "ios_sim_x64_clang",
+    clang = "@clang_mac_x64",
+    environment = "simulator",
+    exec_cpu = "x64",
+    target_cpu = "x64",
+)
+
+ios_clang_toolchain(
+    name = "ios_sim_x64_on_arm64_clang",
+    clang = "@clang_mac_arm64",
+    environment = "simulator",
+    exec_cpu = "arm64",
+    target_cpu = "x64",
 )
 
 filegroup(
