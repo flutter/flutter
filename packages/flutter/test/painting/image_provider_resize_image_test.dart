@@ -21,6 +21,20 @@ void main() {
   });
 
   group('ResizeImage', () {
+    test('fails to decode when a given width or height is 0', () async {
+      final image = MemoryImage(Uint8List.fromList(kBlueSquarePng));
+      for (final policy in <ResizeImagePolicy>[ResizeImagePolicy.exact, ResizeImagePolicy.fit]) {
+        // The constructor accepts 0. The failure occurs at decode time.
+        for (final resizedImage in <ResizeImage>[
+          ResizeImage(image, width: 0, policy: policy),
+          ResizeImage(image, height: 0, policy: policy),
+        ]) {
+          expect(await _resolveAndGetError(resizedImage), isAssertionError);
+          PaintingBinding.instance.imageCache.clear();
+        }
+      }
+    });
+
     group('equality and hashCode', () {
       test('Two identical instances should be equal and have same hashCode', () {
         final bytes = Uint8List.fromList(kTransparentImage);
@@ -521,9 +535,30 @@ void main() {
           );
           await _expectImageSize(resizedImage, const Size(50, 50));
         });
+
+        test('does not derive a side of 0 for a very thin image', () async {
+          final rawImage = MemoryImage(await _createPng(4000, 1));
+          await _expectImageSize(
+            ResizeImage(rawImage, width: 100, policy: ResizeImagePolicy.fit),
+            const Size(100, 1),
+          );
+          final tallImage = MemoryImage(await _createPng(1, 4000));
+          await _expectImageSize(
+            ResizeImage(tallImage, height: 100, policy: ResizeImagePolicy.fit),
+            const Size(1, 100),
+          );
+        });
       });
 
       group('with policy=fit and allowResize=true', () {
+        test('does not derive a side of 0 for a very thin image', () async {
+          final rawImage = MemoryImage(await _createPng(4000, 1));
+          await _expectImageSize(
+            ResizeImage(rawImage, width: 100, policy: ResizeImagePolicy.fit, allowUpscaling: true),
+            const Size(100, 1),
+          );
+        });
+
         test('constrains square image to bounded portrait rect', () async {
           final rawImage = MemoryImage(Uint8List.fromList(kBlueSquarePng));
           await _expectImageSize(rawImage, const Size(50, 50));
@@ -833,6 +868,18 @@ void main() {
   });
 }
 
+Future<Uint8List> _createPng(int width, int height) async {
+  final recorder = ui.PictureRecorder();
+  ui.Canvas(recorder).drawRect(
+    ui.Rect.fromLTWH(0, 0, width.toDouble(), height.toDouble()),
+    ui.Paint()..color = const ui.Color(0xFF0000FF),
+  );
+  final ui.Image image = await recorder.endRecording().toImage(width, height);
+  final ByteData? data = await image.toByteData(format: ui.ImageByteFormat.png);
+  image.dispose();
+  return data!.buffer.asUint8List();
+}
+
 Future<void> _expectImageSize(ImageProvider<Object> imageProvider, Size size) async {
   final Size actualSize = await _resolveAndGetSize(imageProvider);
   expect(actualSize, size);
@@ -850,6 +897,19 @@ Future<Size> _resolveAndGetSize(
     completer.complete(Size(width.toDouble(), height.toDouble()));
   });
   stream.addListener(listener);
+  return completer.future;
+}
+
+Future<Object> _resolveAndGetError(ImageProvider imageProvider) {
+  final completer = Completer<Object>();
+  imageProvider
+      .resolve(ImageConfiguration.empty)
+      .addListener(
+        ImageStreamListener(
+          (ImageInfo image, bool synchronousCall) => completer.complete(image),
+          onError: (Object error, StackTrace? stackTrace) => completer.complete(error),
+        ),
+      );
   return completer.future;
 }
 

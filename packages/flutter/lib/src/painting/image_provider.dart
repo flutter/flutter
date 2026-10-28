@@ -1439,6 +1439,8 @@ class ResizeImage extends ImageProvider<ResizeImageKey> {
 
               return ui.TargetImageSize(width: targetWidth, height: targetHeight);
             case ResizeImagePolicy.fit:
+              // A very thin image can derive a side of 0, which cannot be decoded.
+              // Clamp only the derived sides, so that a given side of 0 still fails.
               final double aspectRatio = intrinsicWidth / intrinsicHeight;
               final int maxWidth = effectiveWidth ?? intrinsicWidth;
               final int maxHeight = effectiveHeight ?? intrinsicHeight;
@@ -1447,25 +1449,25 @@ class ResizeImage extends ImageProvider<ResizeImageKey> {
 
               if (targetWidth > maxWidth) {
                 targetWidth = maxWidth;
-                targetHeight = targetWidth ~/ aspectRatio;
+                targetHeight = math.max(1, targetWidth ~/ aspectRatio);
               }
 
               if (targetHeight > maxHeight) {
                 targetHeight = maxHeight;
-                targetWidth = (targetHeight * aspectRatio).floor();
+                targetWidth = math.max(1, (targetHeight * aspectRatio).floor());
               }
 
               if (allowUpscaling) {
                 if (effectiveWidth == null) {
                   assert(effectiveHeight != null);
                   targetHeight = effectiveHeight!;
-                  targetWidth = (targetHeight * aspectRatio).floor();
+                  targetWidth = math.max(1, (targetHeight * aspectRatio).floor());
                 } else if (effectiveHeight == null) {
                   targetWidth = effectiveWidth;
-                  targetHeight = targetWidth ~/ aspectRatio;
+                  targetHeight = math.max(1, targetWidth ~/ aspectRatio);
                 } else {
-                  final int derivedMaxWidth = (maxHeight * aspectRatio).floor();
-                  final int derivedMaxHeight = maxWidth ~/ aspectRatio;
+                  final int derivedMaxWidth = math.max(1, (maxHeight * aspectRatio).floor());
+                  final int derivedMaxHeight = math.max(1, maxWidth ~/ aspectRatio);
                   targetWidth = math.min(maxWidth, derivedMaxWidth);
                   targetHeight = math.min(maxHeight, derivedMaxHeight);
                 }
