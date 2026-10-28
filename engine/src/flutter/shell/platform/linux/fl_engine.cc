@@ -20,6 +20,9 @@
 #include "flutter/shell/platform/linux/fl_keyboard_handler.h"
 #include "flutter/shell/platform/linux/fl_opengl_manager.h"
 #include "flutter/shell/platform/linux/fl_pixel_buffer_texture_private.h"
+#if FLUTTER_LINUX_GTK4
+#include "flutter/shell/platform/linux/fl_pixel_buffer_texture_vulkan.h"  // nogncheck
+#endif
 #include "flutter/shell/platform/linux/fl_platform_handler.h"
 #include "flutter/shell/platform/linux/fl_plugin_registrar_private.h"
 #include "flutter/shell/platform/linux/fl_settings_handler.h"
@@ -489,6 +492,32 @@ static bool fl_engine_gl_external_texture_frame_callback(
   return true;
 }
 
+#if FLUTTER_LINUX_GTK4
+static bool fl_engine_vulkan_external_texture_frame_callback(
+    void* user_data,
+    int64_t texture_id,
+    size_t width,
+    size_t height,
+    FlutterVulkanExternalTexture* output) {
+  auto* self = FL_ENGINE(user_data);
+  if (!self->texture_registrar || width > UINT32_MAX || height > UINT32_MAX)
+    return false;
+  g_autoptr(FlTexture) texture =
+      fl_texture_registrar_ref_texture(self->texture_registrar, texture_id);
+  if (!texture || !FL_IS_PIXEL_BUFFER_TEXTURE(texture))
+    return false;
+  g_autoptr(GError) error = nullptr;
+  if (!fl_pixel_buffer_texture_populate_vulkan(FL_PIXEL_BUFFER_TEXTURE(texture),
+                                               self->vulkan_manager, width,
+                                               height, output, &error)) {
+    g_warning("Vulkan pixel-buffer texture failed: %s",
+              error ? error->message : "invalid pixel buffer");
+    return false;
+  }
+  return true;
+}
+#endif
+
 // Called by the engine to determine if it is on the GTK thread.
 static bool fl_engine_runs_task_on_current_thread(void* user_data) {
   FlEngine* self = static_cast<FlEngine*>(user_data);
@@ -880,6 +909,8 @@ gboolean fl_engine_start(FlEngine* self, GError** error) {
                                       error)) {
       return FALSE;
     }
+    config.vulkan.external_texture_frame_callback =
+        fl_engine_vulkan_external_texture_frame_callback;
 #endif
   }
 
@@ -1624,12 +1655,6 @@ gboolean fl_engine_mark_texture_frame_available(FlEngine* self,
 gboolean fl_engine_register_external_texture(FlEngine* self,
                                              int64_t texture_id) {
   g_return_val_if_fail(FL_IS_ENGINE(self), FALSE);
-  if (self->renderer_type == kVulkan) {
-    g_warning(
-        "Linux OpenGL and pixel-buffer plugin textures are unavailable with "
-        "Vulkan");
-    return FALSE;
-  }
   return self->embedder_api.RegisterExternalTexture(self->engine, texture_id) ==
          kSuccess;
 }

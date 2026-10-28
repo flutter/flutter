@@ -7,6 +7,7 @@
 
 #include "flutter/shell/platform/linux/fl_compositor_vulkan.h"
 #include "flutter/shell/platform/linux/fl_engine_private.h"
+#include "flutter/shell/platform/linux/fl_pixel_buffer_texture_vulkan.h"
 #include "flutter/shell/platform/linux/fl_vulkan_manager.h"
 #include "flutter/shell/platform/linux/testing/linux_test.h"
 
@@ -312,4 +313,45 @@ TEST_F(FlVulkanIntegrationTest, SingleLayerSnapshotIsCachedAndCleared) {
   gdk_texture_download(texture, reinterpret_cast<guchar*>(pixels), 17 * 4);
   for (auto pixel : pixels)
     EXPECT_EQ(pixel, 0xff00ff00u);
+}
+
+struct TestVulkanPixels {
+  FlPixelBufferTexture parent;
+};
+struct TestVulkanPixelsClass {
+  FlPixelBufferTextureClass parent;
+};
+G_DEFINE_TYPE(TestVulkanPixels,
+              test_vulkan_pixels,
+              fl_pixel_buffer_texture_get_type())
+static void test_vulkan_pixels_class_init(TestVulkanPixelsClass* klass) {
+  FL_PIXEL_BUFFER_TEXTURE_CLASS(klass)->copy_pixels =
+      [](FlPixelBufferTexture*, const uint8_t** bytes, uint32_t* width,
+         uint32_t* height, GError**) -> gboolean {
+    static const uint8_t pixels[] = {255, 0, 0,   255, 0,   255, 0,   255,
+                                     0,   0, 255, 255, 255, 255, 255, 255};
+    *bytes = pixels;
+    *width = 2;
+    *height = 2;
+    return TRUE;
+  };
+}
+static void test_vulkan_pixels_init(TestVulkanPixels*) {}
+
+TEST_F(FlVulkanIntegrationTest, PixelBufferUploadRetainsDeviceUntilRelease) {
+  g_autoptr(FlPixelBufferTexture) texture = FL_PIXEL_BUFFER_TEXTURE(
+      g_object_new(test_vulkan_pixels_get_type(), nullptr));
+  FlutterVulkanExternalTexture external = {};
+  g_autoptr(GError) error = nullptr;
+  ASSERT_TRUE(fl_pixel_buffer_texture_populate_vulkan(texture, manager, 100,
+                                                      100, &external, &error))
+      << (error ? error->message : "");
+  EXPECT_EQ(external.width, 2u);
+  EXPECT_EQ(external.height, 2u);
+  EXPECT_EQ(external.format, uint32_t(VK_FORMAT_R8G8B8A8_UNORM));
+  EXPECT_NE(external.image, 0u);
+  ASSERT_NE(external.destruction_callback, nullptr);
+  g_clear_object(&texture);
+  g_clear_object(&manager);
+  external.destruction_callback(external.user_data);
 }
