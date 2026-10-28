@@ -173,7 +173,6 @@ final class _FailingAndConflictingBuildService extends BuildService {
       artifacts: <ExtensionArtifact>{ExtensionArtifact('unsupported-artifact')},
     ),
     _TestBuildTarget(description: 'Conflicting bundle target.', name: 'bundle'),
-    _TestBuildTarget(description: 'Empty target name that should be skipped.', name: ''),
   ];
 
   @override
@@ -199,6 +198,33 @@ void _failingBuildExtensionEntryPoint(SendPort sendPort) {
   ToolExtensionEntryPoint.run(
     sendPort,
     <ToolExtensionService>[_FailingAndConflictingBuildService()],
+    supportedPlatforms: const <String>{'linux'},
+  );
+}
+
+final class _InvalidTargetBuildService extends ToolExtensionService {
+  @override
+  String get namespace => BuildService.serviceNamespace;
+
+  @override
+  Future<Map<String, ExtensionRpcHandler>> initialize() async {
+    return <String, ExtensionRpcHandler>{
+      'getBuildTargets': (_) async => <Map<String, Object?>>[
+        <String, Object?>{
+          'description': 'Target with invalid name',
+          'name': 'Invalid-Name',
+          'outputDir': '{OUTPUT_DIR}',
+          'targetPlatform': 'linux-x64',
+        },
+      ],
+    };
+  }
+}
+
+void _invalidTargetBuildExtensionEntryPoint(SendPort sendPort) {
+  ToolExtensionEntryPoint.run(
+    sendPort,
+    <ToolExtensionService>[_InvalidTargetBuildService()],
     supportedPlatforms: const <String>{'linux'},
   );
 }
@@ -636,7 +662,8 @@ void main() {
         expect(
           logger.warningText,
           contains(
-            'Skipping duplicate build target "shared-target" from extension "unknown_extension".',
+            'Skipping duplicate build target "shared-target" from extension "unknown_extension" '
+            '(already registered by extension "unknown_extension").',
           ),
         );
 
@@ -659,7 +686,8 @@ void main() {
         expect(
           logger.warningText,
           contains(
-            'Skipping duplicate assemble target "shared-assemble-target" from extension "unknown_extension".',
+            'Skipping duplicate assemble target "shared-assemble-target" from extension "unknown_extension" '
+            '(already registered by extension "unknown_extension").',
           ),
         );
 
@@ -674,6 +702,36 @@ void main() {
           targetName: 'shared-assemble-target',
         );
         expect(assembleResult.success, isTrue);
+
+        await manager.dispose();
+      },
+    );
+
+    testWithoutContext(
+      'ExtensionBuildManager logs warning when extension returns invalid build target name',
+      () async {
+        final logger = BufferLogger.test();
+        final featureFlags = TestFeatureFlags(isToolExtensionsEnabled: true);
+        final manager = ExtensionManager(
+          hostPlatform: HostPlatform.linux_x64,
+          logger: logger,
+          entryPoints: <ExtensionEntryPoint>[_invalidTargetBuildExtensionEntryPoint],
+          featureFlags: featureFlags,
+        );
+        final buildManager = ExtensionBuildManager(
+          extensionManager: manager,
+          featureFlags: featureFlags,
+          logger: logger,
+        );
+
+        final List<ExtensionBuildTarget> targets = await buildManager.getBuildTargets();
+        expect(targets, isEmpty);
+        expect(
+          logger.warningText,
+          contains(
+            'Failed to query build targets from extension "unknown_extension": FormatException: Invalid "name" field: "Invalid-Name".',
+          ),
+        );
 
         await manager.dispose();
       },
@@ -860,7 +918,7 @@ void main() {
       'ExtensionBuildSubCommand forwards flutterRoot, outputDir, and resolvedArtifacts in build parameters',
       () async {
         final fakeBuildManager = _RecordingExtensionBuildManager();
-        const target = ExtensionBuildTarget(
+        final target = ExtensionBuildTarget(
           description: 'Custom hermetic build target.',
           name: 'custom-hermetic-build',
           outputDir:
@@ -899,7 +957,7 @@ void main() {
 
     testWithoutContext('ExtensionBuildSubCommand resolves {OUTPUT_DIR} using custom build-dir from Config', () async {
       final buildManager = _RecordingExtensionBuildManager();
-      const target = ExtensionBuildTarget(
+      final target = ExtensionBuildTarget(
         description: 'Custom hermetic build target.',
         name: 'custom-hermetic-build',
         outputDir:
@@ -926,7 +984,7 @@ void main() {
       'ExtensionBuildSubCommand throws ToolExit when outputDir contains unsupported placeholder',
       () async {
         final buildManager = _RecordingExtensionBuildManager();
-        const target = ExtensionBuildTarget(
+        final target = ExtensionBuildTarget(
           description: 'Custom hermetic build target.',
           name: 'custom-hermetic-build',
           outputDir: '${BuiltInPlaceholders.buildDir}/custom',
@@ -997,11 +1055,10 @@ void main() {
         expect(
           testLogger.warningText,
           contains(
-            'Skipping custom build target "bundle" because a subcommand with that name already exists.',
+            'Skipping custom build target "bundle" from extension "unknown_extension" because a subcommand with that name already exists.',
           ),
         );
         expect(command.subcommands['bundle'], isA<BuildBundleCommand>());
-        expect(command.subcommands.containsKey(''), isFalse);
 
         final assembleCommand = AssembleCommand(
           buildSystem: TestBuildSystem.all(BuildResult(success: true), (
@@ -1033,7 +1090,7 @@ void main() {
         expect(
           testLogger.warningText,
           contains(
-            'Skipping custom assemble target "copy_assets" because a target with that name already exists.',
+            'Skipping custom assemble target "copy_assets" from extension "unknown_extension" because a target with that name already exists.',
           ),
         );
 
@@ -1048,7 +1105,7 @@ void main() {
           ]),
           throwsToolExit(
             message:
-                'Target "non-existent-dep" required by "unknown-dep-assemble-target" not found. '
+                'Target "non-existent-dep" required by "unknown-dep-assemble-target" from extension "unknown_extension" not found. '
                 'It might not be registered.',
           ),
         );

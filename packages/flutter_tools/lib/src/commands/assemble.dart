@@ -239,9 +239,13 @@ class AssembleCommand extends FlutterCommand {
         when argumentResults.rest.any((String targetName) => !targetMap.containsKey(targetName))) {
       for (final ExtensionAssembleTarget target
           in await extensionBuildManager.getAssembleTargets()) {
+        final String? extensionName = extensionBuildManager.extensionNameForAssembleTarget(
+          target.name,
+        );
+        final fromExtension = extensionName != null ? ' from extension "$extensionName"' : '';
         if (targetMap.containsKey(target.name)) {
           _toolContext.logger.printWarning(
-            'Skipping custom assemble target "${target.name}" because a target with that name already exists.',
+            'Skipping custom assemble target "${target.name}"$fromExtension because a target with that name already exists.',
           );
           continue;
         }
@@ -252,7 +256,7 @@ class AssembleCommand extends FlutterCommand {
             final Target? dependency = targetMap[dependencyName];
             if (dependency == null) {
               throwToolExit(
-                'Target "$dependencyName" required by "${target.name}" not found. It might not be registered.',
+                'Target "$dependencyName" required by "${target.name}"$fromExtension not found. It might not be registered.',
               );
             }
             return dependency;

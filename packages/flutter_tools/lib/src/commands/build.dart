@@ -106,6 +106,7 @@ class BuildCommand extends FlutterCommand {
         appleContext: appleContext,
         buildSystem: buildSystem,
         codesign: codesign,
+        templateRenderer: templateRenderer,
         toolContext: toolContext,
         verboseHelp: verboseHelp,
       ),
@@ -115,6 +116,7 @@ class BuildCommand extends FlutterCommand {
         appleContext: appleContext,
         buildSystem: buildSystem,
         codesign: codesign,
+        templateRenderer: templateRenderer,
         toolContext: toolContext,
         verboseHelp: verboseHelp,
       ),
@@ -123,6 +125,7 @@ class BuildCommand extends FlutterCommand {
       BuildSwiftPackage(
         analytics: analytics,
         buildSystem: buildSystem,
+        cocoaPods: appleContext.cocoaPods,
         codesign: codesign,
         featureFlags: featureFlags,
         templateRenderer: templateRenderer,
@@ -200,8 +203,12 @@ class BuildCommand extends FlutterCommand {
             ),
           );
         } else {
+          final String? extensionName = extensionBuildManager.extensionNameForBuildTarget(
+            target.name,
+          );
+          final fromExtension = extensionName != null ? ' from extension "$extensionName"' : '';
           toolContext.logger.printWarning(
-            'Skipping custom build target "${target.name}" because a subcommand with that name already exists.',
+            'Skipping custom build target "${target.name}"$fromExtension because a subcommand with that name already exists.',
           );
         }
       }

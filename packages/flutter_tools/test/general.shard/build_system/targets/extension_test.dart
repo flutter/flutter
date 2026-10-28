@@ -423,6 +423,57 @@ void main() {
     },
   );
 
+  testWithoutContext('ExtensionTarget throws ToolExit when same artifact is requested for multiple platforms or modes', () async {
+    final ExtensionTarget conflictingPlatformTarget = _createTarget(
+      inputs: const <ExtensionSource>[
+        ExtensionSource.artifact(BuiltInArtifacts.genSnapshot),
+        ExtensionSource.artifact(BuiltInArtifacts.genSnapshot, platform: 'linux-arm64'),
+      ],
+    );
+
+    await expectLater(
+      () => conflictingPlatformTarget.build(environment),
+      throwsToolExit(
+        message:
+            'Assemble target "custom-target" requested artifact "genSnapshot" '
+            'for multiple target platforms or build modes.',
+      ),
+    );
+
+    final ExtensionTarget conflictingModeTarget = _createTarget(
+      inputs: const <ExtensionSource>[
+        ExtensionSource.artifact(BuiltInArtifacts.genSnapshot),
+        ExtensionSource.artifact(BuiltInArtifacts.genSnapshot, mode: .release),
+      ],
+    );
+
+    await expectLater(
+      () => conflictingModeTarget.build(environment),
+      throwsToolExit(
+        message:
+            'Assemble target "custom-target" requested artifact "genSnapshot" '
+            'for multiple target platforms or build modes.',
+      ),
+    );
+
+    final buildManager = FakeExtensionBuildManager();
+    final ExtensionTarget matchingDuplicateArtifactTarget = _createTarget(
+      buildManager: buildManager,
+      inputs: const <ExtensionSource>[
+        ExtensionSource.artifact(BuiltInArtifacts.genSnapshot),
+        ExtensionSource.artifact(BuiltInArtifacts.genSnapshot, platform: 'linux-x64', mode: .debug),
+      ],
+    );
+
+    await matchingDuplicateArtifactTarget.build(environment);
+    expect(
+      buildManager.invokedResolvedArtifacts,
+      equals(<String, String>{
+        'genSnapshot': 'Artifact.genSnapshot.TargetPlatform.linux_x64.debug',
+      }),
+    );
+  });
+
   testWithoutContext(
     'ExtensionTarget supports custom targetPlatform on target and artifact sources',
     () async {
@@ -537,7 +588,7 @@ void main() {
         buildOutputDir: buildOutputDir,
         fileSystem: fileSystem,
         projectDir: projectDir,
-        target: const ExtensionBuildTarget(
+        target: ExtensionBuildTarget(
           description: 'description',
           name: 'custom-target',
           outputDir: '{OUTPUT_DIR}/custom/{BUILD_MODE}',
@@ -558,7 +609,7 @@ void main() {
             buildOutputDir: buildOutputDir,
             fileSystem: fileSystem,
             projectDir: projectDir,
-            target: const ExtensionBuildTarget(
+            target: ExtensionBuildTarget(
               description: 'description',
               name: 'custom-target',
               outputDir: '{BUILD_DIR}/custom-out',
@@ -574,19 +625,19 @@ void main() {
   });
 
   testWithoutContext('BuiltInArtifacts, BuiltInHostArtifacts, Linux artifacts, and BuiltInTargets match host definitions', () {
-    const buildTarget = ExtensionBuildTarget(
+    final buildTarget = ExtensionBuildTarget(
       description: 'Contract check build target',
       name: 'contract-build-target',
       outputDir: '{OUTPUT_DIR}/contract-build',
       targetPlatform: 'linux-x64',
-      artifacts: <ExtensionArtifact>{
+      artifacts: const <ExtensionArtifact>{
         BuiltInArtifacts.flutterPatchedSdkPath,
         BuiltInArtifacts.genSnapshot,
         BuiltInArtifacts.icuData,
         ExtensionArtifact('linuxDesktopPath'),
         ExtensionArtifact('linuxHeaders'),
       },
-      hostArtifacts: <ExtensionHostArtifact>{
+      hostArtifacts: const <ExtensionHostArtifact>{
         BuiltInHostArtifacts.impellerc,
         BuiltInHostArtifacts.libtessellator,
       },

@@ -207,15 +207,17 @@ Map<String, String> resolveExtensionBuildTargetArtifacts({
 /// Resolves all engine and host artifact inputs declared on [target] using
 /// [artifacts] and [buildMode].
 ///
-/// Throws a [ToolExit] if any requested artifact name is invalid or unsupported.
+/// Throws a [ToolExit] if any requested artifact name is invalid or unsupported,
+/// or if the same artifact is requested for multiple target platforms or build
+/// modes.
 // TODO(bkonyi): Download required artifacts on demand if not already cached.
 Map<String, String> resolveExtensionAssembleTargetArtifacts({
   required Artifacts artifacts,
   required BuildMode buildMode,
   required ExtensionAssembleTarget target,
 }) {
-  final TargetPlatform? targetPlatform = _tryResolveTargetPlatform(target.targetPlatform);
   final resolvedArtifacts = <String, String>{};
+  final requestedArtifactConfigs = <String, (String platform, BuildMode mode)>{};
   for (final ExtensionSource input in target.inputs) {
     switch (input) {
       case ExtensionPatternSource():
@@ -225,10 +227,21 @@ Map<String, String> resolveExtensionAssembleTargetArtifacts({
         :final String? platform,
         :final BuildMode? mode,
       ):
+        final String resolvedPlatform = platform ?? target.targetPlatform;
+        final BuildMode resolvedMode = mode ?? buildMode;
+        if (requestedArtifactConfigs[artifact.name]
+            case (final String existingPlatform, final BuildMode existingMode)
+            when existingPlatform != resolvedPlatform || existingMode != resolvedMode) {
+          throwToolExit(
+            'Assemble target "${target.name}" requested artifact "${artifact.name}" '
+            'for multiple target platforms or build modes.',
+          );
+        }
+        requestedArtifactConfigs[artifact.name] = (resolvedPlatform, resolvedMode);
         resolvedArtifacts[artifact.name] = artifacts.getArtifactPath(
           _resolveArtifact(artifact),
-          platform: platform != null ? _tryResolveTargetPlatform(platform) : targetPlatform,
-          mode: mode ?? buildMode,
+          platform: _tryResolveTargetPlatform(resolvedPlatform),
+          mode: resolvedMode,
         );
       case ExtensionHostArtifactSource(:final ExtensionHostArtifact artifact):
         final HostArtifact hostArtifact = _resolveHostArtifact(artifact);
@@ -245,7 +258,12 @@ TargetPlatform? _tryResolveTargetPlatform(String platformName) {
   try {
     return TargetPlatform.fromName(platformName);
   } on Exception {
-    // Custom extension target platforms do not map to a built-in TargetPlatform.
+    // Out-of-tree extension target platforms do not map to a built-in
+    // TargetPlatform, so Artifacts.getArtifactPath and Source.artifact receive
+    // platform: null (falling back to the host platform in CachedArtifacts)
+    // unless an explicit built-in platform override is provided.
+    // TODO(bkonyi): Support custom extension-provided artifact resolution for
+    // out-of-tree target platforms via ExtensionArtifactManager.
     return null;
   }
 }
