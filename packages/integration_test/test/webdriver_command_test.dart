@@ -93,13 +93,63 @@ void main() {
     test('fromJson throws FormatException on unknown type or malformed fields', () {
       for (final invalid in const <Map<String, Object?>>[
         <String, Object?>{},
+        <String, Object?>{'type': null},
         <String, Object?>{'type': 'wheel'},
         <String, Object?>{'type': 'pointerMove', 'x': 10},
+        <String, Object?>{'type': 'pointerMove', 'x': 10, 'y': 20},
+        <String, Object?>{'type': 'pointerMove', 'x': '10', 'y': 20, 'duration': 0},
+        <String, Object?>{'type': 'pointerMove', 'x': 10, 'y': null, 'duration': 0},
+        <String, Object?>{'type': 'pointerMove', 'x': 10, 'y': 20, 'duration': '0'},
+        <String, Object?>{'type': 'pointerDown'},
+        <String, Object?>{'type': 'pointerDown', 'button': -1},
         <String, Object?>{'type': 'pointerDown', 'button': 99},
+        <String, Object?>{'type': 'pointerDown', 'button': 1.5},
+        <String, Object?>{'type': 'pointerDown', 'button': 'primary'},
+        <String, Object?>{'type': 'pointerUp'},
+        <String, Object?>{'type': 'pointerUp', 'button': 3},
+        <String, Object?>{'type': 'pointerUp', 'button': 'secondary'},
         <String, Object?>{'type': 'pause'},
+        <String, Object?>{'type': 'pause', 'duration': null},
+        <String, Object?>{'type': 'pause', 'duration': '100'},
       ]) {
         expect(() => WebDriverPointerAction.fromJson(invalid), throwsFormatException);
       }
+    });
+
+    test('equality, hashCode, and toString distinguish action types and fields', () {
+      const moveA = WebDriverPointerAction.move(10, 20);
+      const moveDifferentX = WebDriverPointerAction.move(11, 20);
+      const moveDifferentY = WebDriverPointerAction.move(10, 21);
+      const moveDifferentDuration = WebDriverPointerAction.move(
+        10,
+        20,
+        duration: Duration(milliseconds: 50),
+      );
+      const downPrimary = WebDriverPointerAction.down();
+      const downSecondary = WebDriverPointerAction.down(button: WebDriverMouseButton.secondary);
+      const upPrimary = WebDriverPointerAction.up();
+      const pauseZero = WebDriverPointerAction.pause(Duration.zero);
+
+      expect(moveA, isNot(moveDifferentX));
+      expect(moveA, isNot(moveDifferentY));
+      expect(moveA, isNot(moveDifferentDuration));
+      expect(downPrimary, isNot(downSecondary));
+      expect(downPrimary, isNot(upPrimary));
+      expect(const WebDriverPointerAction.move(0, 0), isNot(pauseZero));
+
+      expect(
+        moveDifferentDuration.toString(),
+        'WebDriverPointerAction.move(10.0, 20.0, duration: 0:00:00.050000)',
+      );
+      expect(
+        downSecondary.toString(),
+        'WebDriverPointerAction.down(button: WebDriverMouseButton.secondary)',
+      );
+      expect(
+        upPrimary.toString(),
+        'WebDriverPointerAction.up(button: WebDriverMouseButton.primary)',
+      );
+      expect(pauseZero.toString(), 'WebDriverPointerAction.pause(0:00:00.000000)');
     });
   });
 
@@ -118,6 +168,25 @@ void main() {
           <String, Object?>{'type': 'pointerMove', 'x': 12.5, 'y': 34.25, 'duration': 250},
           <String, Object?>{'type': 'pointerDown', 'button': 0},
           <String, Object?>{'type': 'pointerUp', 'button': 0},
+        ],
+      });
+    });
+
+    test('snapshots the action list at construction time', () {
+      final actions = <WebDriverPointerAction>[
+        const WebDriverPointerAction.move(1, 2),
+        const WebDriverPointerAction.down(),
+      ];
+      final command = WebDriverCommand.pointerActions(actions);
+
+      actions
+        ..clear()
+        ..add(const WebDriverPointerAction.up(button: WebDriverMouseButton.secondary));
+
+      expect(command.values, <String, dynamic>{
+        'actions': <Map<String, Object?>>[
+          <String, Object?>{'type': 'pointerMove', 'x': 1.0, 'y': 2.0, 'duration': 0},
+          <String, Object?>{'type': 'pointerDown', 'button': 0},
         ],
       });
     });
@@ -233,6 +302,44 @@ void main() {
       ]) {
         await expectLater(() => binding.webDriverClick(position), throwsArgumentError);
       }
+    },
+  );
+
+  testWidgets(
+    'webDriverPointerActions validates all actions in a sequence before invoking callbackManager',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(const SizedBox.expand());
+
+      // A valid leading action followed by a malformed trailing action must still
+      // fail fast with ArgumentError rather than reaching callbackManager
+      // (which throws UnsupportedError off the web).
+      for (final sequenceWithTrailingInvalidAction in const <List<WebDriverPointerAction>>[
+        <WebDriverPointerAction>[
+          WebDriverPointerAction.move(10, 20),
+          WebDriverPointerAction.down(),
+          WebDriverPointerAction.move(10, double.nan),
+        ],
+        <WebDriverPointerAction>[
+          WebDriverPointerAction.move(10, 20),
+          WebDriverPointerAction.down(),
+          WebDriverPointerAction.pause(Duration(milliseconds: -5)),
+        ],
+      ]) {
+        await expectLater(
+          () =>
+              binding.webDriverPointerActions(sequenceWithTrailingInvalidAction, view: tester.view),
+          throwsArgumentError,
+        );
+      }
+
+      // Finite zero and negative coordinates with an explicit view pass argument
+      // validation and reach callbackManager.
+      await expectLater(
+        () => binding.webDriverPointerActions(const <WebDriverPointerAction>[
+          WebDriverPointerAction.move(-10, 0),
+        ], view: tester.view),
+        throwsUnsupportedError,
+      );
     },
   );
 }

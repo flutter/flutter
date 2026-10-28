@@ -243,6 +243,28 @@ void main() {
         expect(webDriver.deleteRequests, <String>['actions']);
       },
     );
+
+    test('releases actions, fails the command in the app, and throws FormatException without posting when action JSON is malformed', () async {
+      final app = _FakeApp(
+        rawSequences: const <List<Map<String, Object?>>>[
+          <Map<String, Object?>>[
+            <String, Object?>{'type': 'pointerMove', 'x': 'bad', 'y': 20, 'duration': 0},
+          ],
+        ],
+      );
+      final webDriver = _FakeWebDriver();
+
+      await expectLater(
+        integrationDriver(
+          driver: _FakeWebFlutterDriver(app, webDriver),
+          responseDataCallback: null,
+        ),
+        throwsFormatException,
+      );
+      expect(webDriver.postRequests, isEmpty);
+      expect(webDriver.deleteRequests, <String>['actions']);
+      expect(app.replies, <String>['error']);
+    });
   });
 }
 
