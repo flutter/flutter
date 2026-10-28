@@ -195,9 +195,7 @@ final class DependencyResolver {
           importPolicy: engineImportPolicy,
           // The file's own condition (the Android shell's is_android), as
           // its conversion evaluates it.
-          condition: manifest?.condition == null
-              ? Condition.always
-              : ConditionVariable(manifest!.condition!),
+          condition: fileConditionOf(manifest?.condition),
           targetConditions: <String, Condition>{
             for (final MapEntry<String, String> entry
                 in (manifest?.targetConditions ?? const <String, String>{}).entries)

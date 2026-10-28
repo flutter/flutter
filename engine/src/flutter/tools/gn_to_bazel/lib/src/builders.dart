@@ -1319,23 +1319,30 @@ String? _ninjaTargetLabel(
 }
 
 /// Whether a converted file's [condition] (the manifest's
-/// `ConvertedFile.condition`: `is_android`, or null for a file GN always
-/// reads) holds for [build]: the OS predicates against the build's platform;
-/// any other condition is taken to hold.
+/// `ConvertedFile.condition`: `is_android`, a disjunction such as `is_ios
+/// || is_mac`, or null for a file GN always reads) holds for [build]: the
+/// OS predicates against the build's platform; any other condition is
+/// taken to hold.
 bool fileHolds(String? condition, BuilderBuild build) {
+  if (condition == null) {
+    return true;
+  }
   final String? platform = build.platform;
   final bool android = androidPlatforms.values.any((String p) => platform == '--platforms=$p');
   final bool mac = macosPlatforms.values.any((String p) => platform == '--platforms=$p');
   final wasm = platform == '--platforms=$wasmPlatform';
-  return switch (condition) {
-    null => true,
-    'is_android' => android,
-    'is_wasm' => wasm,
-    'is_mac' || 'is_apple' => mac,
-    // No builder builds for iOS yet (research/21: I2 brings the iOS
-    // shell's builders and their platforms).
-    'is_ios' => false,
-    'is_linux' => !android && !wasm && !mac,
-    _ => true,
-  };
+  return condition
+      .split('||')
+      .any(
+        (String variable) => switch (variable.trim()) {
+          'is_android' => android,
+          'is_wasm' => wasm,
+          'is_mac' || 'is_apple' => mac,
+          // No builder builds for iOS yet (research/21: I2 brings the iOS
+          // shell's builders and their platforms).
+          'is_ios' => false,
+          'is_linux' => !android && !wasm && !mac,
+          _ => true,
+        },
+      );
 }
