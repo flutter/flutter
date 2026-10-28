@@ -136,6 +136,19 @@ config_setting(
     ],
 )
 
+# The iOS device's arm64 build, tools/gn's default --ios-cpu: a
+# specialization of @platforms//cpu:aarch64 for the build directory's name
+# (build_defs/config/checkout_view.bzl), which names the simulator's arm64
+# build and not the device's.
+config_setting(
+    name = "ios_device_arm64",
+    constraint_values = [
+        "@platforms//os:ios",
+        "@platforms//cpu:aarch64",
+        ":ios_device",
+    ],
+)
+
 # `!use_ios_simulator` for the denied term of a conjunction: a device, or
 # not iOS at all (GN reads the predicate under is_ios alone).
 selects.config_setting_group(
