@@ -431,6 +431,20 @@ targets:
     properties:
       config_name: linux_unopt
 
+  # Runs a select set of Impeller tests with Vulkan synchronization validation.
+  # See https://github.com/flutter/flutter/issues/195502.
+  - name: Linux linux_impeller_sync_validation
+    # New targets must start in bringup.
+    # TODO(https://github.com/flutter/flutter/issues/195502): Remove bringup
+    # once the target is proven stable.
+    bringup: true
+    recipe: engine_v2/engine_v2
+    timeout: 60
+    enabled_branches:
+      - master
+    properties:
+      config_name: linux_impeller_sync_validation
+
   - name: Linux mac_android_aot_engine
     recipe: engine_v2/engine_v2
     timeout: 240

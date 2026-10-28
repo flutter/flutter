@@ -1,0 +1,48 @@
+{
+    "builds": [
+        {
+            "archives": [],
+            "drone_dimensions": [
+                "device_type=none",
+                "os=Linux"
+            ],
+            "gclient_variables": {
+                "download_android_deps": false,
+                "use_rbe": true
+            },
+            "gn": [
+                "--runtime-mode",
+                "debug",
+                "--unoptimized",
+                "--prebuilt-dart-sdk",
+                "--target-dir",
+                "ci/host_debug_unopt_impeller_sync_validation",
+                "--rbe",
+                "--no-goma",
+                "--use-glfw-swiftshader"
+            ],
+            "name": "ci/host_debug_unopt_impeller_sync_validation",
+            "description": "Builds a debug mode unopt Linux engine with swiftshader. Runs a select set of Impeller unit tests with Vulkan synchronization validation enabled.",
+            "ninja": {
+                "config": "ci/host_debug_unopt_impeller_sync_validation",
+                "targets": [
+                    "flutter/impeller:impeller_unittests"
+                ]
+            },
+            "tests": [
+                {
+                    "language": "python3",
+                    "name": "Impeller Vulkan synchronization validation tests",
+                    "script": "flutter/testing/run_tests.py",
+                    "parameters": [
+                        "--variant",
+                        "ci/host_debug_unopt_impeller_sync_validation",
+                        "--type",
+                        "impeller-vulkan-sync-validation",
+                        "--engine-capture-core-dump"
+                    ]
+                }
+            ]
+        }
+    ]
+}
