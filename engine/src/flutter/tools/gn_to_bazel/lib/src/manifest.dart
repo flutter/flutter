@@ -28,6 +28,7 @@ final class ConvertedFile {
     this.unconvertedDeps = const <String>[],
     this.filesGroups = const <String>{},
     this.linkedStaticLibraries = const <String>{},
+    this.extraSources = const <String, List<String>>{},
     this.assume = const <String, GnValue>{},
     this.targetConditions = const <String, String>{},
   });
@@ -85,6 +86,18 @@ final class ConvertedFile {
   /// the default is Bazel's `cc_static_library`, the archive as an artifact
   /// (the Impeller SDK's libimpeller.a), which no cc rule can depend on.
   final Set<String> linkedStaticLibraries;
+
+  /// Files a target's compiles read that GN's check does not have it list
+  /// -- a header of a directory no target of the build owns, which GN's
+  /// check passes over and a sandboxed compile must be given (the
+  /// Objective-C suite of darwin/common includes the iOS embedding's
+  /// flutter_task_queue_dispatch.h) -- by target name, as Bazel labels or
+  /// package-relative paths: `srcs` of the rule (and `hdrs` of its
+  /// Objective-C companion, as a binary's headers are). Listing such a file
+  /// in GN's `sources` instead would make it the target's own in GN's
+  /// check, and an error for every other target that includes it (the Mac's
+  /// T21: the iOS build's check).
+  final Map<String, List<String>> extraSources;
 
   /// Assumptions for this file over the generation's (gn_eval's
   /// Assumptions.withValues): a platform whose branches of the file are
@@ -1142,7 +1155,20 @@ filegroup(
   // an executable of Swift sources, which is a flutter_swift_library the
   // cc_test links (research/20 §12).
   ConvertedFile('//flutter/shell/platform/darwin/graphics', condition: 'is_mac'),
-  ConvertedFile('//flutter/shell/platform/darwin/common', condition: 'is_mac'),
+  ConvertedFile(
+    '//flutter/shell/platform/darwin/common',
+    condition: 'is_mac',
+    // The Objective-C suite includes the iOS embedding's task queue header,
+    // a file no target of a macOS build owns: GN's check passes over it, a
+    // sandboxed compile needs it. (Listed in GN's sources it would be the
+    // suite's own in the check, an error for the iOS targets that include
+    // it: the Mac's T21/T22.)
+    extraSources: <String, List<String>>{
+      'framework_common_unittests': <String>[
+        '//engine/src/flutter/shell/platform/darwin:ios/flutter_task_queue_dispatch.h',
+      ],
+    },
+  ),
   // The macOS shell: FlutterMacOS.framework (the Objective-C++ sources, the
   // Swift run loop and resize synchronizer, the dylib, the copies into the
   // bundle, package_framework.py's symlinks, the xcframework, the archive and

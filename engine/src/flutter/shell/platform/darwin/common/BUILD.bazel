@@ -303,7 +303,6 @@ flutter_objc_library(
 cc_library(
     name = "framework_common",
     srcs = [
-        "framework/Source/FlutterBinaryMessengerRelay.h",
         "framework/Source/FlutterNSBundleUtils.h",
         "framework/Source/FlutterStandardCodecHelper.cc",
         "framework/Source/FlutterStandardCodecHelper.h",
@@ -317,6 +316,7 @@ cc_library(
         "framework/Headers/FlutterHourFormat.h",
         "framework/Headers/FlutterMacros.h",
         "framework/Headers/FlutterTexture.h",
+        "framework/Source/FlutterBinaryMessengerRelay.h",
         "framework/Source/FlutterNSBundleUtils.h",
     ],
     copts = FLUTTER_COPTS,
@@ -490,7 +490,6 @@ flutter_objc_library(
         "framework/Source/flutter_standard_codec_unittest.mm",
     ],
     hdrs = [
-        "framework/Source/FlutterBinaryMessengerRelay.h",
         "framework/Source/FlutterTestUtils.h",
         "//engine/src/flutter/shell/platform/darwin:ios/flutter_task_queue_dispatch.h",
     ],
@@ -525,7 +524,6 @@ cc_test(
     name = "framework_common_unittests",
     size = "small",
     srcs = [
-        "framework/Source/FlutterBinaryMessengerRelay.h",
         "framework/Source/FlutterTestUtils.h",
         "//engine/src/flutter/shell/platform/darwin:ios/flutter_task_queue_dispatch.h",
     ],

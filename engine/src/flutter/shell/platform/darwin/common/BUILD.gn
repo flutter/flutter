@@ -182,7 +182,6 @@ source_set("framework_common") {
   cflags_objcc = flutter_cflags_objcc
 
   sources = [
-    "framework/Source/FlutterBinaryMessengerRelay.h",
     "framework/Source/FlutterBinaryMessengerRelay.mm",
     "framework/Source/FlutterChannels.mm",
     "framework/Source/FlutterCodecs.mm",
@@ -197,7 +196,10 @@ source_set("framework_common") {
 
   public = framework_common_headers
 
-  public += [ "framework/Source/FlutterNSBundleUtils.h" ]
+  public += [
+    "framework/Source/FlutterBinaryMessengerRelay.h",
+    "framework/Source/FlutterNSBundleUtils.h",
+  ]
 
   defines = [ "FLUTTER_FRAMEWORK" ]
 
@@ -274,8 +276,6 @@ executable("framework_common_unittests") {
   ldflags = [ "-ObjC" ]
 
   sources = [
-    "../ios/flutter_task_queue_dispatch.h",
-    "framework/Source/FlutterBinaryMessengerRelay.h",
     "framework/Source/FlutterBinaryMessengerRelayTest.mm",
     "framework/Source/FlutterTestUtils.h",
     "framework/Source/FlutterTestUtils.mm",
