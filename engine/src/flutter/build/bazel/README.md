@@ -97,16 +97,12 @@ Against GN's `out/linux_debug_arm64`, `install_diff.py` finds the archives'
 entry lists identical (`dart-sdk`'s 1,057 files among them), and
 `flutter_embedder.h` and the frontend snapshot byte-identical; the binaries
 differ as the host's do, by compile flags (and by GN's `--strip-all`, which
-the install reproduces: see the install section). One cost to know about:
-`--platforms` on the command line does not enter the output directory's
-name, so the host's and the arm64 build's files of one compilation mode
-share `bazel-out/k8-opt` (and `k8-fastbuild`), and switching between the
-two rebuilds the tree -- from the disk cache when it holds the other
-build's actions (2 to 6 minutes for an arm64 install after a host build),
-from the compilers otherwise (20 minutes for the host's archives after an
-arm64 build). Bazel's `--experimental_platform_in_output_dir` would give
-each platform its own directory at the price of a one-time rebuild of
-everything; not turned on.
+the install reproduces: see the install section). Its outputs live in
+`bazel-out/linux_arm64_<mode>-opt/`, apart from the host's
+`linux_x64_<mode>-opt/` (the root `.bazelrc`'s
+`--experimental_platform_in_output_dir` over the per-mode platforms of
+`build_defs/config/platforms.bzl`; see the local engine section below), so
+switching between the two rebuilds nothing.
 
 `cc_toolchain_config.bzl` reproduces GN's toolchain-wide flags (warnings,
 visibility, `-std=c++20`, `-fno-exceptions -fno-rtti`, the linker hardening
@@ -1851,12 +1847,29 @@ output directory was named for the host CPU, the same as the host's own
 building one overwrote the other's manifest and the outputs whose paths
 they share -- an Android engine and the host engine it pairs with could
 not both be on disk. The root `.bazelrc` sets
-`--experimental_platform_in_output_dir`: `bazel-out/android_arm64-opt/`,
-`wasm32_emscripten-opt/`, `linux_arm64-opt/`, with the host's directories
-unchanged (`k8-opt`, `k8-dbg`, `k8-fastbuild` and the exec
-configurations), so nothing of the host build moved; the cross builds were
-rebuilt once (`android_debug_arm64`'s `local_engine`: 2,454 s, 15,150
-actions, the wrapped Dart SDK's GN build the critical path).
+`--experimental_platform_in_output_dir`, which names the directory after
+the target platform; and since Bazel names a top-level configuration's
+directory from the platform and the compilation mode alone -- the engine's
+runtime mode, a Starlark flag, enters the name only through a transition's
+hash -- the platforms are per runtime mode (`build_defs/config/platforms.bzl`:
+`runtime_mode_platforms` declares `android_arm64` and `android_arm64_debug`,
+`_profile`, `_release`, `_jit_release`, each child carrying
+`--//engine/src/flutter/common:runtime_mode=<mode>` as a platform flag, as
+Bazel 8.8 allows; the host has `linux_x64` and its modes the same way). The
+builders' configurations name the mode's platform, so every build has a
+directory of its own, as GN has a build directory per mode:
+`bazel-out/android_arm64_profile-opt/` beside `android_arm64_release-opt/`,
+`linux_x64_debug-opt/` beside `linux_x64_release-opt/`,
+`wasm32_emscripten_release-opt/`. A build that names no platform
+(`bazel test //...`) keeps Bazel's host platform and `k8-fastbuild`; the
+exec configurations keep `k8-opt-exec`. The configurations also set the
+mode flag on the command line: a platform's flags apply where the platform
+is the target's, and the tools a build runs (gen_snapshot in the Dart wrap,
+impellerc) are built in the execution configuration, on the host's modeless
+platform, so the mode reaches them from the command line, as GN builds its
+host tools in the build's mode. `in_configuration` (configuration.bzl)
+moves between the modes of one platform by name, and from Bazel's host
+platform to the host's mode platform (`@host_platform`'s `HOST_PLATFORM`).
 
 ```sh
 bazel build --config=android_debug_arm64 //engine/src/flutter:local_engine
