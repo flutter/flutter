@@ -85,9 +85,9 @@ class Plugin {
       appDependencies: appDependencies,
     );
     switch (result) {
-      case ParseResultPass(value: final plugin):
+      case ParseResultPass(value: final Plugin plugin):
         return plugin;
-      case ParseResultFail(errors: final errors):
+      case ParseResultFail(errors: final List<String> errors):
         throwToolExit('Invalid plugin specification $name.\n${errors.join('\n')}');
     }
   }
@@ -399,7 +399,7 @@ class Plugin {
       isDevDependency: false,
     );
     return switch (result) {
-      ParseResultFail(:final errors) => errors,
+      ParseResultFail(:final List<String> errors) => errors,
       ParseResultPass() => const <String>[],
     };
   }
