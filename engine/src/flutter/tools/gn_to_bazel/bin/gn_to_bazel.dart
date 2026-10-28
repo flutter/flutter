@@ -213,6 +213,7 @@ Future<int> run(List<String> arguments) async {
         unconvertedDeps: manifest?.unconvertedDeps ?? const <String>[],
         filesGroups: manifest?.filesGroups ?? const <String>{},
         linkedStaticLibraries: manifest?.linkedStaticLibraries ?? const <String>{},
+        extraSources: manifest?.extraSources ?? const <String, List<String>>{},
       );
       if (buildifier != null) {
         output = await _format(buildifier, output);
