@@ -32,9 +32,6 @@ import 'features.dart';
 import 'flutter_manifest.dart';
 import 'flutter_plugins.dart';
 import 'globals.dart' as globals;
-import 'ios/plist_parser.dart';
-import 'ios/xcodeproj.dart';
-import 'macos/xcode.dart';
 import 'migrations/analysis_options_migration.dart';
 import 'package_graph.dart';
 import 'platform_plugins.dart';
@@ -58,27 +55,11 @@ enum SupportedPlatform {
 }
 
 class FlutterProjectFactory {
-  FlutterProjectFactory({
-    required this._fileSystem,
-    required this._logger,
-    this._config,
-    this._featureFlags,
-    this._plistParser,
-    this._xcode,
-    this._xcodeBuilder,
-    this._xcodeProjectInterpreter,
-    this._xcodeProjectInterpreterBuilder,
-  });
+  FlutterProjectFactory({required this._logger, required this._fileSystem, this._config});
 
-  final Config? _config;
-  final FeatureFlags? _featureFlags;
-  final FileSystem _fileSystem;
   final Logger _logger;
-  final PlistParser? _plistParser;
-  final Xcode? _xcode;
-  final Xcode? Function()? _xcodeBuilder;
-  final XcodeProjectInterpreter? _xcodeProjectInterpreter;
-  final XcodeProjectInterpreter? Function()? _xcodeProjectInterpreterBuilder;
+  final FileSystem _fileSystem;
+  final Config? _config;
 
   @visibleForTesting
   final projects = <String, FlutterProject>{};
@@ -90,9 +71,6 @@ class FlutterProjectFactory {
     final Directory? buildDirectory = config != null
         ? directory.childDirectory(getBuildDirectory(config, directory.fileSystem))
         : null;
-    final Xcode? resolvedXcode = _xcode ?? _xcodeBuilder?.call();
-    final XcodeProjectInterpreter? resolvedXcodeProjectInterpreter =
-        _xcodeProjectInterpreter ?? _xcodeProjectInterpreterBuilder?.call();
     final File pubspec = directory.childFile(bundle.defaultManifestPath);
     if (!pubspec.existsSync()) {
       final FlutterManifest manifest = FlutterProject._readManifest(
@@ -105,17 +83,7 @@ class FlutterProjectFactory {
         logger: _logger,
         fileSystem: _fileSystem,
       );
-      return FlutterProject(
-        directory,
-        manifest,
-        exampleManifest,
-        buildDirectory: buildDirectory,
-        featureFlags: _featureFlags,
-        plistParser: _plistParser,
-        projectFactory: this,
-        xcode: resolvedXcode,
-        xcodeProjectInterpreter: resolvedXcodeProjectInterpreter,
-      );
+      return FlutterProject(directory, manifest, exampleManifest, buildDirectory: buildDirectory);
     }
     return projects.putIfAbsent(directory.path, () {
       final FlutterManifest manifest = FlutterProject._readManifest(
@@ -133,11 +101,7 @@ class FlutterProjectFactory {
         manifest,
         exampleManifest,
         buildDirectory: buildDirectory,
-        featureFlags: _featureFlags,
-        plistParser: _plistParser,
         projectFactory: this,
-        xcode: resolvedXcode,
-        xcodeProjectInterpreter: resolvedXcodeProjectInterpreter,
       );
     });
   }
@@ -164,20 +128,12 @@ class FlutterProject {
     FlutterManifest manifest,
     this._exampleManifest, {
     this._buildDirectory,
-    this._featureFlags,
-    this._plistParser,
     this._projectFactory,
-    this._xcode,
-    this._xcodeProjectInterpreter,
   }) {
     _setManifest(manifest);
   }
 
-  final FeatureFlags? _featureFlags;
-  final PlistParser? _plistParser;
   final FlutterProjectFactory? _projectFactory;
-  final Xcode? _xcode;
-  final XcodeProjectInterpreter? _xcodeProjectInterpreter;
 
   FlutterProject? _workspaceRoot;
   bool _searchedForWorkspaceRoot = false;
@@ -254,15 +210,15 @@ class FlutterProject {
     Directory? buildDirectory,
   ]) {
     final FileSystem fileSystem = directory.fileSystem;
-    final Logger manifestLogger = logger ?? BufferLogger.test();
+    logger ??= BufferLogger.test();
     final FlutterManifest manifest = FlutterProject._readManifest(
       directory.childFile(bundle.defaultManifestPath).path,
-      logger: manifestLogger,
+      logger: logger,
       fileSystem: fileSystem,
     );
     final FlutterManifest exampleManifest = FlutterProject._readManifest(
       FlutterProject._exampleDirectory(directory).childFile(bundle.defaultManifestPath).path,
-      logger: manifestLogger,
+      logger: logger,
       fileSystem: fileSystem,
     );
     return FlutterProject(
@@ -450,13 +406,7 @@ class FlutterProject {
   }
 
   /// The iOS sub project of this project.
-  late final ios = IosProject.fromFlutter(
-    this,
-    featureFlags: _featureFlags,
-    plistParser: _plistParser,
-    xcode: _xcode,
-    xcodeProjectInterpreter: _xcodeProjectInterpreter,
-  );
+  late final ios = IosProject.fromFlutter(this);
 
   /// The Android sub project of this project.
   late final android = AndroidProject._(this);
@@ -465,12 +415,7 @@ class FlutterProject {
   late final web = WebProject._(this);
 
   /// The MacOS sub project of this project.
-  late final macos = MacOSProject.fromFlutter(
-    this,
-    featureFlags: _featureFlags,
-    xcode: _xcode,
-    xcodeProjectInterpreter: _xcodeProjectInterpreter,
-  );
+  late final macos = MacOSProject.fromFlutter(this);
 
   /// The Linux sub project of this project.
   late final linux = LinuxProject.fromFlutter(this);
@@ -535,11 +480,6 @@ class FlutterProject {
     _exampleDirectory(directory),
     _exampleManifest,
     FlutterManifest.empty(logger: _manifest.logger),
-    featureFlags: _featureFlags,
-    plistParser: _plistParser,
-    projectFactory: _projectFactory,
-    xcode: _xcode,
-    xcodeProjectInterpreter: _xcodeProjectInterpreter,
   );
 
   /// The generated scaffolding project for hosting widget previews from this
@@ -732,11 +672,7 @@ class FlutterProject {
       await android.ensureReadyForPlatformSpecificTooling(deprecationBehavior: deprecationBehavior);
     }
     if (iosPlatform) {
-      await ios.ensureReadyForPlatformSpecificTooling(
-        plistParser: _plistParser ?? globals.plistParser,
-        templateRenderer: globals.templateRenderer,
-        toolContext: toolContext,
-      );
+      await ios.ensureReadyForPlatformSpecificTooling(toolContext: toolContext);
     }
     if (linuxPlatform) {
       await linux.ensureReadyForPlatformSpecificTooling();
