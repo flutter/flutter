@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:isolate';
 
+import 'package:flutter_tools_core/flutter_tools_core.dart';
 import 'package:json_rpc_2/json_rpc_2.dart' as json_rpc;
 import 'package:stream_channel/isolate_channel.dart';
 
@@ -18,6 +19,28 @@ import 'service.dart';
 class ToolExtensionEntryPoint {
   /// The reserved JSON-RPC method name used to query extension capabilities.
   static const String getCapabilitiesMethod = 'extension.getCapabilities';
+
+  static const _reservedMethods = <String>{
+    getCapabilitiesMethod,
+    ToolExtensionService.logNotificationMethod,
+  };
+
+  /// Standard `main(List<String> args, Object? message)` adapter for spawning
+  /// an extension isolate via [Isolate.spawnUri].
+  static Future<void> runMain(
+    List<String> _,
+    Object? message,
+    FutureOr<void> Function(SendPort sendPort) entryPoint,
+  ) async {
+    if (message is! SendPort) {
+      throw ArgumentError.value(
+        message,
+        'message',
+        'Expected a SendPort when spawning a tool extension isolate.',
+      );
+    }
+    await entryPoint(message);
+  }
 
   /// Entrypoint function to serve [services] over the Isolate [sendPort].
   ///
@@ -40,7 +63,7 @@ class ToolExtensionEntryPoint {
       final Map<String, ExtensionRpcHandler> handlers = await service.initialize();
       handlers.forEach((String method, ExtensionRpcHandler handler) {
         final fullMethod = '${service.namespace}.$method';
-        if (fullMethod == getCapabilitiesMethod) {
+        if (_reservedMethods.contains(fullMethod)) {
           throw StateError('Reserved RPC method registered: "$fullMethod"');
         }
         if (rpcHandlers.containsKey(fullMethod)) {
@@ -53,7 +76,7 @@ class ToolExtensionEntryPoint {
 
     final capabilities = ToolExtensionCapabilities(
       extensionName: extensionName,
-      supportedPlatforms: supportedPlatforms ?? const <String>{'linux', 'macos', 'windows'},
+      supportedPlatforms: supportedPlatforms ?? ExtensionPackageConfig.defaultSupportedPlatforms,
       services: services.map((ToolExtensionService s) => s.namespace).toList(),
     );
 

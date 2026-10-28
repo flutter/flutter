@@ -5,23 +5,24 @@
 import 'dart:io';
 
 import 'package:flutter_tools_core/flutter_tools_core.dart';
-import 'package:flutter_tools_extension/flutter_tools_extension.dart';
+import 'package:flutter_tools_extension/testing.dart';
 import 'package:flutter_tools_extension_linux_prototype/src/build.dart';
 import 'package:flutter_tools_extension_linux_prototype/src/device.dart';
 import 'package:test/test.dart';
 
-const int _invalidParamsErrorCode = -32602;
+const _invalidParamsErrorCode = -32602;
 
 Matcher _throwsInvalidParams(String message) => throwsA(
-  isA<Exception>()
-      .having((Exception e) => e.toString(), 'code', contains('$_invalidParamsErrorCode'))
-      .having((Exception e) => e.toString(), 'message', contains(message)),
+  isA<RpcException>()
+      .having((RpcException e) => e.code, 'code', _invalidParamsErrorCode)
+      .having((RpcException e) => e.message, 'message', contains(message)),
 );
 
 void main() {
   group('LinuxDeviceService', () {
     test('getDevices returns prototype custom linux device', () async {
-      final service = LinuxDeviceService();
+      final ExtensionDependencies dependencies = createTestDependencies();
+      final service = LinuxDeviceService(dependencies: dependencies);
       final List<TargetDevice> devices = await service.getDevices();
 
       expect(devices, hasLength(1));
@@ -37,15 +38,17 @@ void main() {
     });
 
     test('isSupportedForProject checks for linux/ directory and matching deviceId', () async {
-      final Directory tempDir = Directory.systemTemp.createTempSync('linux_device_test.');
-      addTearDown(() => tempDir.deleteSync(recursive: true));
+      final ExtensionDependencies dependencies = createTestDependencies();
+      final ExtensionDirectory projectDir = dependencies.fileSystem.directory(
+        Uri.parse('file:///project/'),
+      )..createSync(recursive: true);
 
       final project = ExtensionFlutterProject(
         appName: 'test_app',
-        buildDirectory: tempDir.uri.resolve('build/'),
-        directory: Uri.directory(tempDir.path),
+        buildDirectory: projectDir.childDirectory('build').uri,
+        directory: projectDir.uri,
       );
-      final service = LinuxDeviceService();
+      final service = LinuxDeviceService(dependencies: dependencies);
 
       expect(
         await service.isSupportedForProject(
@@ -55,7 +58,7 @@ void main() {
         isFalse,
       );
 
-      Directory.fromUri(tempDir.uri.resolve('linux')).createSync();
+      projectDir.childDirectory('linux').createSync();
       expect(
         await service.isSupportedForProject(
           deviceId: LinuxDeviceService.customLinuxDeviceId,
@@ -71,18 +74,20 @@ void main() {
     });
 
     test('initialize registers RPC handlers and validates parameters', () async {
-      final Directory tempDir = Directory.systemTemp.createTempSync('linux_device_rpc_test.');
-      addTearDown(() => tempDir.deleteSync(recursive: true));
-      Directory.fromUri(tempDir.uri.resolve('linux')).createSync();
+      final ExtensionDependencies dependencies = createTestDependencies();
+      final ExtensionDirectory projectDir = dependencies.fileSystem.directory(
+        Uri.parse('file:///project/'),
+      )..createSync(recursive: true);
+      projectDir.childDirectory('linux').createSync();
 
-      final service = LinuxDeviceService();
+      final service = LinuxDeviceService(dependencies: dependencies);
       final Map<String, ExtensionRpcHandler> handlers = await service.initialize();
       final ExtensionRpcHandler isSupportedHandler = handlers['isSupportedForProject']!;
 
       final project = ExtensionFlutterProject(
         appName: 'test_app',
-        buildDirectory: tempDir.uri.resolve('build/'),
-        directory: tempDir.uri,
+        buildDirectory: projectDir.childDirectory('build').uri,
+        directory: projectDir.uri,
       );
       expect(
         await isSupportedHandler(<String, Object?>{
@@ -111,7 +116,7 @@ void main() {
                 DeviceService.projectParam: <String, Object?>{
                   ExtensionFlutterProject.appNameKey: 'test_app',
                   ExtensionFlutterProject.buildDirectoryKey: 'relative/build/',
-                  ExtensionFlutterProject.directoryKey: tempDir.uri.toString(),
+                  ExtensionFlutterProject.directoryKey: projectDir.uri.toString(),
                 },
               },
               'Invalid "${ExtensionFlutterProject.buildDirectoryKey}": expected trailing-slash-terminated absolute file: URI.',
@@ -122,7 +127,7 @@ void main() {
                 DeviceService.projectParam: <String, Object?>{
                   ExtensionFlutterProject.appNameKey: 'test_app',
                   ExtensionFlutterProject.buildDirectoryKey: 'https://example.com/build/',
-                  ExtensionFlutterProject.directoryKey: tempDir.uri.toString(),
+                  ExtensionFlutterProject.directoryKey: projectDir.uri.toString(),
                 },
               },
               'Invalid "${ExtensionFlutterProject.buildDirectoryKey}": expected trailing-slash-terminated absolute file: URI.',
@@ -132,24 +137,18 @@ void main() {
                 DeviceService.deviceIdParam: LinuxDeviceService.customLinuxDeviceId,
                 DeviceService.projectParam: <String, Object?>{
                   ExtensionFlutterProject.appNameKey: 'test_app',
-                  ExtensionFlutterProject.buildDirectoryKey: tempDir.uri
-                      .resolve('build/')
+                  ExtensionFlutterProject.buildDirectoryKey: projectDir
+                      .childDirectory('build')
+                      .uri
                       .toString(),
-                  ExtensionFlutterProject.directoryKey: tempDir.uri.toString(),
+                  ExtensionFlutterProject.directoryKey: projectDir.uri.toString(),
                   ExtensionFlutterProject.isModuleKey: 'not_a_bool',
                 },
               },
               'Invalid "${ExtensionFlutterProject.isModuleKey}": expected bool, got String.',
             ),
           ]) {
-        await expectLater(
-          isSupportedHandler(invalidParams),
-          throwsA(
-            isA<Exception>()
-                .having((Exception e) => e.toString(), 'code', contains('-32602'))
-                .having((Exception e) => e.toString(), 'message', contains(expectedMessage)),
-          ),
-        );
+        await expectLater(isSupportedHandler(invalidParams), _throwsInvalidParams(expectedMessage));
       }
 
       final ExtensionRpcHandler launchAppHandler = handlers['launchApp']!;
@@ -238,7 +237,7 @@ exec sleep 30
 ''');
       await Process.run('chmod', <String>['+x', scriptFile.path]);
 
-      final service = LinuxDeviceService();
+      final service = LinuxDeviceService(dependencies: ExtensionDependencies.bootstrap());
       addTearDown(service.shutdown);
 
       final bool launched = await service.launchApp(
