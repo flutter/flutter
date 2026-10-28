@@ -7,6 +7,7 @@
 # platform, registered in the root MODULE.bazel.
 
 load("@rules_cc//cc:defs.bzl", "cc_library", "cc_toolchain")
+load("//build_defs/config:platforms.bzl", "runtime_mode_platforms")
 load(
     ":cc_toolchain_config.bzl",
     "ANDROID_ARM64_API26_COMPILE_FLAGS",
@@ -46,6 +47,21 @@ cc_library(
 # ---------------------------------------------------------------------------
 # linux-x64
 # ---------------------------------------------------------------------------
+
+# The host's own platform, the same constraints as Bazel's host platform
+# (@platforms//host on a Linux x64 machine): what the builders'
+# configurations name for a host build, in a runtime mode
+# (`--platforms=...:linux_x64_release`, build_defs/config/platforms.bzl),
+# so that each mode's outputs have a directory of their own
+# (bazel-out/linux_x64_release-opt/). A build that names no platform
+# (`bazel test //...`) stays on Bazel's host platform, in bazel-out/k8-*/.
+runtime_mode_platforms(
+    name = "linux_x64",
+    constraint_values = [
+        "@platforms//os:linux",
+        "@platforms//cpu:x86_64",
+    ],
+)
 
 # The headers every C++ compile needs because the toolchain replaces the
 # standard library include paths (-nostdinc++).
@@ -153,7 +169,7 @@ toolchain(
 # host toolchain.
 # ---------------------------------------------------------------------------
 
-platform(
+runtime_mode_platforms(
     name = "linux_arm64",
     constraint_values = [
         "@platforms//os:linux",
@@ -255,7 +271,7 @@ toolchain(
 # cross build's do.
 # ---------------------------------------------------------------------------
 
-platform(
+runtime_mode_platforms(
     name = "android_arm64",
     constraint_values = [
         "@platforms//os:android",
@@ -386,7 +402,7 @@ constraint_value(
     constraint_setting = ":android_api_level",
 )
 
-platform(
+runtime_mode_platforms(
     name = "android_arm64_api26",
     constraint_values = [
         "@platforms//os:android",
@@ -489,7 +505,7 @@ toolchain(
 # CPU.
 # ---------------------------------------------------------------------------
 
-platform(
+runtime_mode_platforms(
     name = "android_x64",
     constraint_values = [
         "@platforms//os:android",
@@ -587,7 +603,7 @@ toolchain(
 # and GN's allowance of deprecated API calls on riscv64.
 # ---------------------------------------------------------------------------
 
-platform(
+runtime_mode_platforms(
     name = "android_riscv64",
     constraint_values = [
         "@platforms//os:android",
@@ -686,7 +702,7 @@ toolchain(
 # it carries no CPU suffix (android_debug).
 # ---------------------------------------------------------------------------
 
-platform(
+runtime_mode_platforms(
     name = "android_arm",
     constraint_values = [
         "@platforms//os:android",
@@ -787,7 +803,7 @@ toolchain(
 # Incompatible off macOS (macos_toolchain.bzl).
 # ---------------------------------------------------------------------------
 
-platform(
+runtime_mode_platforms(
     name = "macos_arm64",
     constraint_values = [
         "@platforms//os:macos",
@@ -795,7 +811,7 @@ platform(
     ],
 )
 
-platform(
+runtime_mode_platforms(
     name = "macos_x64",
     constraint_values = [
         "@platforms//os:macos",

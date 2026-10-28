@@ -7795,31 +7795,31 @@ cc_library(
         contains('''
 # linux_arm_host_engine.json: ci/linux_debug_arm64
 #   --target-dir ci/linux_debug_arm64 --runtime-mode debug --target-os=linux --linux-cpu=arm64 --prebuilt-dart-sdk --no-lto --rbe --no-goma
-build:linux_debug_arm64 --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=debug --platforms=//engine/src/flutter/build/bazel/toolchains:linux_arm64
+build:linux_debug_arm64 --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=debug --platforms=//engine/src/flutter/build/bazel/toolchains:linux_arm64_debug
 
 # linux_host_engine.json: ci/host_debug
 #   --target-dir ci/host_debug --runtime-mode debug --prebuilt-dart-sdk --no-lto --rbe --no-goma
-build:ci_host_debug --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=debug
+build:ci_host_debug --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=debug --platforms=//engine/src/flutter/build/bazel/toolchains:linux_x64_debug
 
 # linux_host_engine.json: ci/host_release
 #   --target-dir ci/host_release --runtime-mode=release --prebuilt-dart-sdk --no-lto
-build:host_release --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=release
+build:host_release --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=release --platforms=//engine/src/flutter/build/bazel/toolchains:linux_x64_release
 
 # linux_host_engine.json: ci/host_debug_test
 #   --target-dir ci/host_debug_test --runtime-mode debug --prebuilt-dart-sdk --no-lto
-build:host_debug_test --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=debug
+build:host_debug_test --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=debug --platforms=//engine/src/flutter/build/bazel/toolchains:linux_x64_debug
 
 # linux_host_engine.json: ci/host_debug_unopt
 #   --runtime-mode debug --unoptimized --asan --dart-debug
-build:ci_host_debug_unopt --compilation_mode=dbg --//engine/src/flutter/common:runtime_mode=debug --//engine/src/flutter/build/bazel:asan --test_timeout=240,1200,3600,14400 --//engine/src/flutter/build/bazel/dart_wrap:dart_debug
+build:ci_host_debug_unopt --compilation_mode=dbg --//engine/src/flutter/common:runtime_mode=debug --platforms=//engine/src/flutter/build/bazel/toolchains:linux_x64_debug --//engine/src/flutter/build/bazel:asan --test_timeout=240,1200,3600,14400 --//engine/src/flutter/build/bazel/dart_wrap:dart_debug
 
 # linux_host_engine.json: ci/host_profile_lto
 #   --runtime-mode profile --prebuilt-dart-sdk
-build:host_profile_lto --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=profile --//engine/src/flutter/build/bazel:lto
+build:host_profile_lto --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=profile --platforms=//engine/src/flutter/build/bazel/toolchains:linux_x64_profile --//engine/src/flutter/build/bazel:lto
 
 # linux_host_engine.json: ci/android_debug
 #   --android --no-lto
-build:android_debug --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=debug --platforms=//engine/src/flutter/build/bazel/toolchains:android_arm --//engine/src/flutter/build/bazel:stripped=false
+build:android_debug --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=debug --platforms=//engine/src/flutter/build/bazel/toolchains:android_arm_debug --//engine/src/flutter/build/bazel:stripped=false
 
 # linux_host_engine.json: ci/android_debug_x86
 #   --android --android-cpu=x86 --no-lto
@@ -7828,15 +7828,15 @@ build:android_debug --compilation_mode=opt --//engine/src/flutter/common:runtime
 
 # linux_host_engine.json: ci/android_debug_arm64
 #   --target-dir ci/android_debug_arm64 --android --android-cpu=arm64 --no-lto --rbe --no-goma
-build:android_debug_arm64 --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=debug --platforms=//engine/src/flutter/build/bazel/toolchains:android_arm64 --//engine/src/flutter/build/bazel:stripped=false
+build:android_debug_arm64 --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=debug --platforms=//engine/src/flutter/build/bazel/toolchains:android_arm64_debug --//engine/src/flutter/build/bazel:stripped=false
 
 # linux_host_engine.json: ci/host_release_licenses
 #   --target-dir ci/host_release_licenses --runtime-mode release --no-lto --rbe --no-goma
-build:host_release_licenses --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=release
+build:host_release_licenses --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=release --platforms=//engine/src/flutter/build/bazel/toolchains:linux_x64_release
 
 # linux_web_engine_build.json: ci/wasm_release
 #   --web --runtime-mode=release --no-rbe --no-goma
-build:wasm_release --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=release --platforms=//engine/src/flutter/build/bazel/toolchains/emscripten:wasm32_emscripten
+build:wasm_release --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=release --platforms=//engine/src/flutter/build/bazel/toolchains/emscripten:wasm32_emscripten_release
 
 # linux_web_engine_build.json: ci/wasm_profile
 #   --web --runtime-mode=profile --no-lto
@@ -7845,11 +7845,11 @@ build:wasm_release --compilation_mode=opt --//engine/src/flutter/common:runtime_
 
 # local_engine.json: linux/host_debug
 #   --runtime-mode debug --no-stripped --no-lto --rbe --no-goma
-build:host_debug --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=debug --//engine/src/flutter/build/bazel:stripped=false
+build:host_debug --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=debug --platforms=//engine/src/flutter/build/bazel/toolchains:linux_x64_debug --//engine/src/flutter/build/bazel:stripped=false
 
 # local_engine.json: linux/host_debug_unopt
 #   --runtime-mode debug --unopt --no-stripped --no-lto
-build:host_debug_unopt --compilation_mode=dbg --//engine/src/flutter/common:runtime_mode=debug --//engine/src/flutter/build/bazel:stripped=false
+build:host_debug_unopt --compilation_mode=dbg --//engine/src/flutter/common:runtime_mode=debug --platforms=//engine/src/flutter/build/bazel/toolchains:linux_x64_debug --//engine/src/flutter/build/bazel:stripped=false
 
 # local_engine.json: linux/wasm_release
 #   --web --runtime-mode=release --no-rbe --no-goma
@@ -7857,7 +7857,7 @@ build:host_debug_unopt --compilation_mode=dbg --//engine/src/flutter/common:runt
 
 # local_engine.json: linux/wasm_debug_unopt
 #   --web --runtime-mode=debug --unoptimized --no-rbe --no-goma
-build:wasm_debug_unopt --compilation_mode=dbg --//engine/src/flutter/common:runtime_mode=debug --platforms=//engine/src/flutter/build/bazel/toolchains/emscripten:wasm32_emscripten
+build:wasm_debug_unopt --compilation_mode=dbg --//engine/src/flutter/common:runtime_mode=debug --platforms=//engine/src/flutter/build/bazel/toolchains/emscripten:wasm32_emscripten_debug
 
 # local_engine.json: linux/android_debug_arm64
 #   --runtime-mode debug --android --android-cpu=arm64 --no-stripped --no-lto --rbe --no-goma
@@ -7865,11 +7865,11 @@ build:wasm_debug_unopt --compilation_mode=dbg --//engine/src/flutter/common:runt
 
 # mac_host_engine.json: ci/mac_host
 #   --runtime-mode debug --no-lto
-build:mac_host --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=debug --platforms=//engine/src/flutter/build/bazel/toolchains:macos_x64
+build:mac_host --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=debug --platforms=//engine/src/flutter/build/bazel/toolchains:macos_x64_debug
 
 # local_engine.json: macos/host_debug
 #   --runtime-mode debug --no-stripped --no-lto --xcode-symlinks
-build:mac_host_debug --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=debug --platforms=//engine/src/flutter/build/bazel/toolchains:macos_x64 --//engine/src/flutter/build/bazel:stripped=false
+build:mac_host_debug --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=debug --platforms=//engine/src/flutter/build/bazel/toolchains:macos_x64_debug --//engine/src/flutter/build/bazel:stripped=false
 '''),
       );
       // Two builds of one name with different flags cannot share it.
@@ -8028,7 +8028,7 @@ install(
 
 # linux_web_engine_build.json: ci/wasm_profile
 #   no configuration (configs.bazelrc); the flags would be:
-#   --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=profile --platforms=//engine/src/flutter/build/bazel/toolchains/emscripten:wasm32_emscripten
+#   --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=profile --platforms=//engine/src/flutter/build/bazel/toolchains/emscripten:wasm32_emscripten_profile
 install(
     name = "wasm_profile",
 '''),
@@ -8067,7 +8067,7 @@ install(
         contains('''
 # linux_host_engine.json: ci/android_debug_x86
 #   no configuration (configs.bazelrc); the flags would be:
-#   --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=debug --//engine/src/flutter/build/bazel:stripped=false
+#   --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=debug --platforms=//engine/src/flutter/build/bazel/toolchains:linux_x64_debug --//engine/src/flutter/build/bazel:stripped=false
 # Not built, no Bazel counterpart yet: flutter.
 # Nothing to install.
 '''),
@@ -8262,19 +8262,19 @@ test_suite(
         contains('''
 # mac_android_aot_engine.json: ci/android_profile
 #   --target-dir ci/android_profile --runtime-mode profile --android --xcode-symlinks
-build:mac_android_profile --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=profile --platforms=//engine/src/flutter/build/bazel/toolchains:android_arm --//engine/src/flutter/build/bazel:lto --//engine/src/flutter/build/bazel:stripped=false
+build:mac_android_profile --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=profile --platforms=//engine/src/flutter/build/bazel/toolchains:android_arm_profile --//engine/src/flutter/build/bazel:lto --//engine/src/flutter/build/bazel:stripped=false
 
 # mac_host_engine.json: ci/host_debug
 #   --target-dir ci/host_debug --runtime-mode debug --no-lto --xcode-symlinks
-build:ci_mac_host_debug --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=debug --platforms=//engine/src/flutter/build/bazel/toolchains:macos_x64
+build:ci_mac_host_debug --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=debug --platforms=//engine/src/flutter/build/bazel/toolchains:macos_x64_debug
 
 # mac_host_engine.json: ci/mac_debug_arm64
 #   --target-dir ci/mac_debug_arm64 --mac --mac-cpu arm64 --runtime-mode debug --no-lto --xcode-symlinks
-build:mac_debug_arm64 --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=debug --platforms=//engine/src/flutter/build/bazel/toolchains:macos_arm64
+build:mac_debug_arm64 --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=debug --platforms=//engine/src/flutter/build/bazel/toolchains:macos_arm64_debug
 
 # mac_host_engine.json: ci/host_debug_unopt_arm64
 #   --target-dir ci/host_debug_unopt_arm64 --runtime-mode debug --unoptimized --no-lto --mac-cpu arm64 --xcode-symlinks
-build:host_debug_unopt_arm64 --compilation_mode=dbg --//engine/src/flutter/common:runtime_mode=debug --platforms=//engine/src/flutter/build/bazel/toolchains:macos_arm64
+build:host_debug_unopt_arm64 --compilation_mode=dbg --//engine/src/flutter/common:runtime_mode=debug --platforms=//engine/src/flutter/build/bazel/toolchains:macos_arm64_debug
 
 # local_engine.json: macos/wasm_release
 #   --web --runtime-mode=release --no-rbe --no-goma
@@ -8282,7 +8282,7 @@ build:host_debug_unopt_arm64 --compilation_mode=dbg --//engine/src/flutter/commo
 
 # local_engine.json: macos/host_debug
 #   --runtime-mode debug --no-stripped --no-lto --xcode-symlinks
-build:mac_host_debug --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=debug --platforms=//engine/src/flutter/build/bazel/toolchains:macos_x64 --//engine/src/flutter/build/bazel:stripped=false
+build:mac_host_debug --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=debug --platforms=//engine/src/flutter/build/bazel/toolchains:macos_x64_debug --//engine/src/flutter/build/bazel:stripped=false
 '''),
       );
       expect(
