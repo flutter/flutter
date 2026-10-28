@@ -214,6 +214,8 @@ Future<void> buildMacOS({
     flutterProject.macos,
     buildDirectoryPath,
     buildInfo.mode,
+    cocoaPods: globals.cocoaPods,
+    templateRenderer: globals.templateRenderer,
     toolContext: toolContext,
   );
   // If the xcfilelists do not exist, create empty version.

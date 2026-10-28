@@ -38,6 +38,7 @@ class BuildMacOSFrameworkCommand extends BuildFrameworkCommand {
     required super.appleContext,
     required super.buildSystem,
     required super.codesign,
+    required super.templateRenderer,
     required super.toolContext,
     required super.verboseHelp,
   });
@@ -144,8 +145,10 @@ class BuildMacOSFrameworkCommand extends BuildFrameworkCommand {
           project.macos,
           getMacOSBuildDirectory(config: config, fileSystem: fs),
           buildInfo.mode,
-          forceCocoaPodsOnly: true,
+          cocoaPods: appleContext.cocoaPods,
+          templateRenderer: templateRenderer,
           toolContext: toolContext,
+          forceCocoaPodsOnly: true,
         );
         if (hasPlugins(project)) {
           await _producePlugins(
