@@ -2,12 +2,14 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-# The SDK's version pins; the Bazel build reads the Material fonts' and the
-# Gradle wrapper's to fetch what the framework's and the tool's tests read of
-# the SDK cache (build_defs/repositories/flutter_sdk_cache.bzl).
+# The SDK's version pins; the Bazel build reads the Material fonts', the
+# Gradle wrapper's and the iOS USB dependencies' to fetch what the framework's
+# and the tool's tests read of the SDK cache
+# (build_defs/repositories/flutter_sdk_cache.bzl).
 
 load("@bazel_skylib//rules:copy_file.bzl", "copy_file")
 load("@bazel_skylib//rules:write_file.bzl", "write_file")
+load("//build_defs/repositories:flutter_sdk_cache.bzl", "IOS_USB_ARTIFACTS")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -16,7 +18,7 @@ exports_files([
     "material_fonts.version",
     # flutter_tools' script_test reads it (see //bin:BUILD.bazel).
     "shared.bat",
-])
+] + [artifact + ".version" for artifact in IOS_USB_ARTIFACTS])
 
 # The scripts and version pins, whole: dev/tools' tests copy the
 # engine-version scripts into a temporary checkout and run them with a mock
@@ -154,3 +156,16 @@ copy_file(
     src = "gradle_wrapper.version",
     out = "gradle_wrapper.stamp",
 )
+
+# The iOS USB dependencies' (IosUsbArtifacts; universal, so the tool checks
+# them on every host, and downloads them on a Mac -- where the facsimile lays
+# them): the version file again, one stamp each (ios-deploy's is
+# ios-deploy.stamp, from :ios_deploy_stamp).
+[
+    copy_file(
+        name = artifact.replace("-", "_") + "_stamp",
+        src = artifact + ".version",
+        out = artifact + ".stamp",
+    )
+    for artifact in IOS_USB_ARTIFACTS
+]
