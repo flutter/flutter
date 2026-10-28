@@ -121,9 +121,15 @@ final class TestRun {
     required this.data,
     this.env = const <String, String>{},
     this.runnerArgs = const <String>[],
+    this.macArgs,
   });
 
   final List<String> args;
+
+  /// The arguments run_tests.py passes on a macOS host, where they differ
+  /// from [args] (a Linux host's): a select() on the host's setting
+  /// (host_os_is_mac). Null where the hosts agree.
+  final List<String>? macArgs;
 
   /// Bazel labels of the files and filegroups the arguments name.
   final List<String> data;
@@ -193,9 +199,28 @@ const Map<String, TestRun> testRuns = <String, TestRun>{
   ),
   // run_tests.py: the Flutter GPU suite runs with Vulkan validation and,
   // for now, the Metal variants alone (flutter/flutter#145036, #142642),
-  // which a Linux host skips.
+  // which a Linux host skips; a Mac runs it with the shuffle flags too.
   '//flutter/impeller:impeller_dart_unittests': TestRun(
     args: <String>['--enable_vulkan_validation', '--gtest_filter=*Metal'],
+    macArgs: <String>[
+      '--gtest_repeat=2',
+      '--gtest_shuffle',
+      '--enable_vulkan_validation',
+      '--gtest_filter=*Metal',
+    ],
+    data: <String>[],
+  ),
+  // run_tests.py (macOS) runs impeller_unittests without the OpenGLES
+  // variants ("covered in the golden tests") and with Vulkan validation,
+  // under the Metal validation environment (flutter_display_test sets it
+  // on a Mac) -- through gtest-parallel there, where a Linux host runs the
+  // binary whole: the Bazel test runs it whole on both for now (the
+  // per-process isolation and --repeat=2 of the Mac's run are a
+  // divergence on record, research/20 §12). The second, interactive run of
+  // the ColorWheel test under --enable_playground is not a Bazel test yet.
+  '//flutter/impeller:impeller_unittests': TestRun(
+    args: <String>[],
+    macArgs: <String>['--gtest_filter=-*OpenGLES:*OpenGLESSDF', '--enable_vulkan_validation'],
     data: <String>[],
   ),
   // The embedder suite's JIT snapshot tests read the core snapshot's four

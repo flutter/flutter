@@ -3312,8 +3312,20 @@ final class _Emitter {
       }
       final TestRun? run = benchmark ?? testRuns[gnLabel];
       if (run != null) {
-        for (final String arg in run.args) {
-          rule.list('args').addUnique(Condition.always, _Item(arg));
+        // The arguments by host where the hosts differ (macArgs): a Linux
+        // host's under its setting, a Mac's under its own.
+        final List<String>? macArgs = run.macArgs;
+        if (macArgs == null) {
+          for (final String arg in run.args) {
+            rule.list('args').addUnique(Condition.always, _Item(arg));
+          }
+        } else {
+          for (final String arg in run.args) {
+            rule.list('args').add(const ConditionComparison('host_os', true, 'linux'), _Item(arg));
+          }
+          for (final String arg in macArgs) {
+            rule.list('args').add(const ConditionComparison('host_os', true, 'mac'), _Item(arg));
+          }
         }
         if (run.runnerArgs.isNotEmpty) {
           if (!gtestParallel) {

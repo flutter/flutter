@@ -4767,8 +4767,9 @@ executable("flow_unittests") {
 
     test('a suite that opens a window becomes a flutter_display_test', () async {
       // impeller_dart_unittests (displayTests): cc_test's attributes, the GPU
-      // backends beside the binary and run_tests.py's arguments, on the
-      // macro that runs the binary under a display.
+      // backends beside the binary and run_tests.py's arguments -- by host,
+      // since a Mac adds the shuffle flags (macArgs) -- on the macro that
+      // runs the binary under a display.
       final GnFileEvaluation evaluation = await evaluate('''
 executable("impeller_dart_unittests") {
   testonly = true
@@ -4791,10 +4792,21 @@ executable("impeller_dart_unittests") {
 flutter_display_test(
     name = "impeller_dart_unittests",
     size = "small",
-    args = [
-        "--enable_vulkan_validation",
-        "--gtest_filter=*Metal",
-    ],
+    args = select({
+        "//engine/src/flutter/build/bazel:host_os_is_linux": [
+            "--enable_vulkan_validation",
+            "--gtest_filter=*Metal",
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/build/bazel:host_os_is_mac": [
+            "--gtest_repeat=2",
+            "--gtest_shuffle",
+            "--enable_vulkan_validation",
+            "--gtest_filter=*Metal",
+        ],
+        "//conditions:default": [],
+    }),
     data = [":gpu_test_backends"],
     deps = [
         "//engine/src/flutter/impeller/renderer:renderer_dart_unittests",
@@ -4808,7 +4820,8 @@ flutter_display_test(
 
     test("a sharded suite gets shard_count; run_tests.py's Linux run has no arguments", () async {
       // impeller_unittests (testShardCounts): the whole suite as Linux CI runs
-      // it, split into shards the display test's wrapper hands to gtest.
+      // it, split into shards the display test's wrapper hands to gtest; a
+      // Mac's arguments under the host's setting (macArgs).
       final GnFileEvaluation evaluation = await evaluate('''
 executable("impeller_unittests") {
   testonly = true
@@ -4825,6 +4838,13 @@ executable("impeller_unittests") {
 flutter_display_test(
     name = "impeller_unittests",
     size = "large",
+    args = select({
+        "//engine/src/flutter/build/bazel:host_os_is_mac": [
+            "--gtest_filter=-*OpenGLES:*OpenGLESSDF",
+            "--enable_vulkan_validation",
+        ],
+        "//conditions:default": [],
+    }),
     data = [":gpu_test_backends"],
     shard_count = 16,
     deps = [
@@ -4834,7 +4854,7 @@ flutter_display_test(
 )
 '''),
       );
-      expect(output, isNot(contains('args')));
+      expect(output, isNot(contains('host_os_is_linux')));
     });
 
     test(r"wasm_lib becomes a wasm_module; a rebase_path() among its ldflags is the file's $(execpath)", () {
