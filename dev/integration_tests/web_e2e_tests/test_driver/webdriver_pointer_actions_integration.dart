@@ -7,6 +7,7 @@ import 'dart:ui_web' as ui_web;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:integration_test/common.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:web/web.dart' as web;
 import 'package:web_e2e_tests/webdriver_pointer_actions_main.dart' as app;
