@@ -244,6 +244,15 @@ void main() {
       expect(TableBorderPainter.lerp(null, null, 0.5), isNull);
     });
 
+    test('scale and lerp keep the border radius', () {
+      final a = TableBorderPainter.all(borderRadius: BorderRadius.circular(4.0));
+      final b = TableBorderPainter.all(borderRadius: BorderRadius.circular(12.0));
+      expect(b.scale(0.5).borderRadius, BorderRadius.circular(6.0));
+      expect(TableBorderPainter.lerp(a, b, 0.5)!.borderRadius, BorderRadius.circular(8.0));
+      expect(TableBorderPainter.lerp(null, b, 0.5)!.borderRadius, BorderRadius.circular(6.0));
+      expect(TableBorderPainter.lerp(b, null, 0.5)!.borderRadius, BorderRadius.circular(6.0));
+    });
+
     test('toString', () {
       final none = BorderSide.none.toString();
       final zeroRadius = BorderRadius.zero.toString();
