@@ -3748,9 +3748,9 @@ final class _Emitter {
           );
       }
     }
-    if (!rule.scalars.containsKey('framework')) {
-      throw GnError(target.location, 'the umbrella-import check ${target.name} names no framework');
-    }
+    // No `frameworks` (the iOS shell's check compiles against the bundle
+    // and links nothing of it): the rule takes the one bundle the deps
+    // place.
     for (final variable in configVariables) {
       _configsInto(
         rule,

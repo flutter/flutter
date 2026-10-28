@@ -1272,7 +1272,6 @@ install(
 #   ninja's default target, everything: bazel build --config=host_debug_arm64_tests //engine/src/flutter:local_engine
 
 # ci/host_debug_arm64_tests's tests: run_tests.py --type dart,dart-host,engine,font-subset.
-# Not run, no Bazel test yet: spring_animation_unittests (engine).
 test_suite(
     name = "host_debug_arm64_tests_tests",
     tags = ["manual"],
@@ -1312,6 +1311,7 @@ test_suite(
         "//engine/src/flutter/testing/dart/vm_service",
         "//engine/src/flutter/testing/smoke_test_failure",
         "//engine/src/flutter/third_party/accessibility:accessibility_unittests",
+        "//engine/src/flutter/third_party/spring_animation:spring_animation_unittests",
         "//engine/src/flutter/third_party/tonic/tests:tonic_unittests",
         "//engine/src/flutter/tools/font_subset:font_subset_test",
     ],
@@ -1321,7 +1321,6 @@ test_suite(
 #   ninja's default target, everything: bazel build --config=host_profile_arm64_tests //engine/src/flutter:local_engine
 
 # ci/host_profile_arm64_tests's tests: run_tests.py --type dart,dart-host,engine.
-# Not run, no Bazel test yet: spring_animation_unittests (engine).
 test_suite(
     name = "host_profile_arm64_tests_tests",
     tags = ["manual"],
@@ -1361,6 +1360,7 @@ test_suite(
         "//engine/src/flutter/testing/dart/vm_service",
         "//engine/src/flutter/testing/smoke_test_failure",
         "//engine/src/flutter/third_party/accessibility:accessibility_unittests",
+        "//engine/src/flutter/third_party/spring_animation:spring_animation_unittests",
         "//engine/src/flutter/third_party/tonic/tests:tonic_unittests",
     ],
 )
@@ -1369,7 +1369,6 @@ test_suite(
 #   ninja's default target, everything: bazel build --config=host_release_arm64_tests //engine/src/flutter:local_engine
 
 # ci/host_release_arm64_tests's tests: run_tests.py --type dart,dart-host,engine.
-# Not run, no Bazel test yet: spring_animation_unittests (engine).
 test_suite(
     name = "host_release_arm64_tests_tests",
     tags = ["manual"],
@@ -1409,6 +1408,7 @@ test_suite(
         "//engine/src/flutter/testing/dart/vm_service",
         "//engine/src/flutter/testing/smoke_test_failure",
         "//engine/src/flutter/third_party/accessibility:accessibility_unittests",
+        "//engine/src/flutter/third_party/spring_animation:spring_animation_unittests",
         "//engine/src/flutter/third_party/tonic/tests:tonic_unittests",
     ],
 )
@@ -1446,7 +1446,7 @@ test_suite(
 #   ninja's default target, everything: bazel build --config=host_debug_unopt_arm64 //engine/src/flutter:local_engine
 
 # ci/host_debug_unopt_arm64's tests: run_tests.py --type dart,dart-host,engine,impeller-golden.
-# Not run, no Bazel test yet: spring_animation_unittests (engine), the impeller-golden type.
+# Not run, no Bazel test yet: the impeller-golden type.
 # ci/host_debug_unopt_arm64's steps that run a script of the checkout, as Bazel tests: //engine/src/flutter:gn_test.
 test_suite(
     name = "host_debug_unopt_arm64_tests",
@@ -1488,6 +1488,7 @@ test_suite(
         "//engine/src/flutter/testing/dart/vm_service",
         "//engine/src/flutter/testing/smoke_test_failure",
         "//engine/src/flutter/third_party/accessibility:accessibility_unittests",
+        "//engine/src/flutter/third_party/spring_animation:spring_animation_unittests",
         "//engine/src/flutter/third_party/tonic/tests:tonic_unittests",
     ],
 )

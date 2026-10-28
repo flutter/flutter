@@ -1182,6 +1182,30 @@ filegroup(
   // platform's directories and the Swift triple of the device or the
   // simulator, and the suites stay macOS's (GN's enable_unittests).
   ConvertedFile('//flutter/shell/platform/darwin/graphics', condition: 'is_ios || is_mac'),
+  // The iOS shell (research/21 I2): Flutter.framework -- the dylib
+  // (create_flutter_framework_dylib, app-extension-safe), its copies into
+  // the bundle (the headers through install_framework_headers.py, the
+  // Info.plist, the module map, the privacy manifest, icudtl.dat), the
+  // umbrella-import check against the assembled bundle, the xcframework
+  // over the one framework -- and the Swift module behind it
+  // (InternalFlutterSwift). Device or simulator by the platform; the XCTest
+  // suite (ios_test_flutter, under enable_ios_unittests) is the test
+  // phase's (I3).
+  ConvertedFile(
+    '//flutter/shell/platform/darwin/ios',
+    condition: 'is_ios',
+    filesGroups: <String>{'universal_flutter_framework'},
+    skip: <String, String>{
+      'copy_asan_runtime_dylib':
+          "clang's ASan runtime for iOS from the host's toolchain directory "
+          r'($buildtools_path/mac-$host_cpu/clang/lib/clang/24/lib/darwin, a file of '
+          '@clang_mac_<host cpu>), copied beside the framework in an is_asan build: a '
+          'per-host label the converter has no mapping for yet (research/21).',
+    },
+  ),
+  // The iOS embedding's spring animation (and its macOS unit test): under
+  // the file's own `is_ios || is_mac`.
+  ConvertedFile('//flutter/third_party/spring_animation'),
   ConvertedFile(
     '//flutter/shell/platform/darwin/common',
     condition: 'is_ios || is_mac',
@@ -1224,7 +1248,7 @@ filegroup(
   // build (the root's family).
   ConvertedFile(
     '//flutter/shell/platform/darwin',
-    condition: 'is_mac',
+    condition: 'is_ios || is_mac',
     filesGroups: <String>{'darwin'},
     appendix: '''
 # The iOS embedding's AccessibilityFeatures, which api_check's tests read
