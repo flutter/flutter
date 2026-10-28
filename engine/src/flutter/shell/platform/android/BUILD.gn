@@ -375,6 +375,7 @@ android_java_sources = [
   "io/flutter/plugin/platform/SingleViewWindowManager.java",
   "io/flutter/plugin/platform/SurfaceProducerPlatformViewRenderTarget.java",
   "io/flutter/plugin/platform/SurfaceTexturePlatformViewRenderTarget.java",
+  "io/flutter/plugin/platform/ViewTreeOwners.java",
   "io/flutter/plugin/platform/VirtualDisplayController.java",
   "io/flutter/plugin/platform/WindowManagerHandler.java",
   "io/flutter/plugin/text/ProcessTextPlugin.java",

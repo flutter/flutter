@@ -25,7 +25,31 @@
     "url": "https://maven.google.com/androidx/lifecycle/lifecycle-runtime/2.8.0/lifecycle-runtime-2.7.0.aar",
     "out_file_name": "androidx_lifecycle_runtime.aar",
     "maven_dependency": "androidx.lifecycle:lifecycle-runtime:2.7.0",
-    "provides": ["androidx.lifecycle.LifecycleRegistry"]
+    "provides": [
+      "androidx.lifecycle.LifecycleRegistry",
+      "androidx.lifecycle.ViewTreeLifecycleOwner"
+    ]
+  },
+  {
+    "url": "https://maven.google.com/androidx/lifecycle/lifecycle-viewmodel/2.7.0/lifecycle-viewmodel-2.7.0.aar",
+    "out_file_name": "androidx_lifecycle_viewmodel.aar",
+    "maven_dependency": "androidx.lifecycle:lifecycle-viewmodel:2.7.0",
+    "provides": [
+      "androidx.lifecycle.ViewModelStore",
+      "androidx.lifecycle.ViewModelStoreOwner",
+      "androidx.lifecycle.ViewTreeViewModelStoreOwner"
+    ]
+  },
+  {
+    "url": "https://maven.google.com/androidx/savedstate/savedstate/1.2.1/savedstate-1.2.1.aar",
+    "out_file_name": "androidx_savedstate.aar",
+    "maven_dependency": "androidx.savedstate:savedstate:1.2.1",
+    "provides": [
+      "androidx.savedstate.SavedStateRegistry",
+      "androidx.savedstate.SavedStateRegistryController",
+      "androidx.savedstate.SavedStateRegistryOwner",
+      "androidx.savedstate.ViewTreeSavedStateRegistryOwner"
+    ]
   },
   {
     "url": "https://maven.google.com/androidx/fragment/fragment/1.7.1/fragment-1.7.1.aar",

@@ -617,7 +617,11 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
               if (hasFocus) {
                 platformViewsChannel.invokeViewFocused(request.viewId);
               }
-            });
+            },
+            // The virtual display is a separate window, so copy the androidx view-tree owners the
+            // host installed above the FlutterView (for example a ComposeView needs them). They
+            // are read from whichever FlutterView is attached when a presentation is created.
+            () -> ViewTreeOwners.findFrom(flutterView));
 
     if (vdController == null) {
       throw new IllegalStateException(

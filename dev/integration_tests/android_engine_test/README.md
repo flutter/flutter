@@ -35,6 +35,10 @@ on an Android device or emulator.
 - [`platform_view/hybrid_composition_platform_view`](#platform_viewhybrid_composition_platform_view)
 - [`platform_view/texture_layer_hybrid_composition_platform_view`](#platform_viewtexture_layer_hybrid_composition_platform_view)
 - [`platform_view/virtual_display_platform_view`](#platform_viewvirtual_display_platform_view)
+- [`platform_view/compose_hybrid_composition_platform_view`](#platform_viewcompose_hybrid_composition_platform_view)
+- [`platform_view/compose_texture_layer_hybrid_composition_platform_view`](#platform_viewcompose_texture_layer_hybrid_composition_platform_view)
+- [`platform_view/compose_virtual_display_platform_view`](#platform_viewcompose_virtual_display_platform_view)
+- [`hcpp/compose_platform_view`](#hcppcompose_platform_view)
 - [`platform_view_tap_color_change`](#platform_view_tap_color_change)
 - [`system_ui_mode_transitions`](#system_ui_mode_transitions)
 
@@ -130,6 +134,66 @@ $ flutter run lib/platform_view/virtual_display_platform_view_main.dart
 
 # Run the test
 $ flutter drive lib/platform_view/virtual_display_platform_view_main.dart
+```
+
+### `platform_view/compose_hybrid_composition_platform_view`
+
+This app embeds a Jetpack Compose `ComposeView` (displaying a two-row red and
+blue layout using `rememberSaveable`) inside a [Hybrid Composition](../../../docs/platforms/android/Android-Platform-Views.md#hybrid-composition)
+platform view. Tapping the platform view natively triggers Compose state
+recomposition that swaps the top and bottom row colors.
+
+```sh
+# Run the app
+$ flutter run lib/platform_view/compose_hybrid_composition_platform_view_main.dart
+
+# Run the test
+$ flutter drive lib/platform_view/compose_hybrid_composition_platform_view_main.dart
+```
+
+### `platform_view/compose_texture_layer_hybrid_composition_platform_view`
+
+This app embeds a Jetpack Compose `ComposeView` (displaying a two-row red and
+blue layout using `rememberSaveable`) inside a [Texture Layer Hybrid Composition](../../../docs/platforms/android/Android-Platform-Views.md#texture-layer-hybrid-composition)
+platform view. Tapping the platform view natively triggers Compose state
+recomposition that swaps the top and bottom row colors.
+
+```sh
+# Run the app
+$ flutter run lib/platform_view/compose_texture_layer_hybrid_composition_platform_view_main.dart
+
+# Run the test
+$ flutter drive lib/platform_view/compose_texture_layer_hybrid_composition_platform_view_main.dart
+```
+
+### `platform_view/compose_virtual_display_platform_view`
+
+This app embeds a Jetpack Compose `ComposeView` (displaying a two-row red and
+blue layout using `rememberSaveable`) inside a [Virtual Display](../../../docs/platforms/android/Android-Platform-Views.md#virtual-display)
+platform view (`SingleViewPresentation`). Tapping the platform view natively
+triggers Compose state recomposition that swaps the top and bottom row colors.
+
+```sh
+# Run the app
+$ flutter run lib/platform_view/compose_virtual_display_platform_view_main.dart
+
+# Run the test
+$ flutter drive lib/platform_view/compose_virtual_display_platform_view_main.dart
+```
+
+### `hcpp/compose_platform_view`
+
+This app embeds a Jetpack Compose `ComposeView` (displaying a two-row red and
+blue layout using `rememberSaveable`) inside a Hybrid Composition++ (HCPP)
+platform view. Tapping the platform view natively triggers Compose state
+recomposition that swaps the top and bottom row colors.
+
+```sh
+# Run the app
+$ flutter run lib/hcpp/compose_platform_view_main.dart
+
+# Run the test
+$ flutter drive lib/hcpp/compose_platform_view_main.dart
 ```
 
 ### `platform_view_tap_color_change`

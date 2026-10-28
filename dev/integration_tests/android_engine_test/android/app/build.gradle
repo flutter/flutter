@@ -4,6 +4,7 @@
 
 plugins {
     id "com.android.application"
+    id "org.jetbrains.kotlin.plugin.compose"
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id "dev.flutter.flutter-gradle-plugin"
 }
@@ -13,6 +14,9 @@ android {
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
+    buildFeatures {
+        compose = true
+    }
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
@@ -47,4 +51,11 @@ kotlin {
 
 flutter {
     source = "../.."
+}
+
+dependencies {
+    implementation platform("androidx.compose:compose-bom:2024.04.01")
+    implementation "androidx.compose.ui:ui"
+    implementation "androidx.compose.foundation:foundation"
+    implementation "androidx.lifecycle:lifecycle-viewmodel:2.7.0"
 }
