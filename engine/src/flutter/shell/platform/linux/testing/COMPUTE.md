@@ -6,9 +6,9 @@ Investigated at `655f44114e4` with Flutter GPU compute PR
 GTK4 now has an experimental opt-in Impeller Vulkan backend selected with
 `FLUTTER_LINUX_RENDERER=vulkan`. Enable Flutter GPU as well to use compute.
 The default remains OpenGL ES; `GSK_RENDERER=vulkan` alone changes GTK
-presentation and does not enable compute. The Vulkan path currently presents
-through CPU readback, so functional compute support does not imply faster
-rendering or graphics offload. See [Vulkan setup and tests](VULKAN.md).
+presentation and does not enable compute. The Vulkan path can present via DMA-BUF with a readback fallback. Functional
+compute and native presentation support do not by themselves prove better
+rendering performance. See [Vulkan setup and tests](VULKAN.md).
 
 The capability-only probe below remains useful for the GLES regression. For an
 actual dispatch, use `fixtures/compute_dispatch.dart`, include the engine's

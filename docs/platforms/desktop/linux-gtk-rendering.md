@@ -156,16 +156,24 @@ selecting GLES. Flutter GPU must also be enabled to use its compute API.
 
 `GSK_RENDERER=vulkan` alone still selects only GTK presentation. DMA-BUF and
 graphics offload do not change Flutter's backend. The Vulkan implementation owns
-its device/queue independently of GTK and currently presents through CPU
-readback and `GdkMemoryTexture`. It does not use the GL context-sharing,
-EGL DMA-BUF export, or direct Wayland EGL subsurface paths above. An offload
-wrapper can fall back to ordinary GTK composition, but cannot remove these CPU
-copies. GL and pixel-buffer plugin textures are rejected on this experimental
-backend. Keep GLES for applications requiring those plugin contracts.
+its device/queue independently of GTK. A single origin-aligned Flutter layer is
+copied on the GPU into an immutable linear DMA-BUF and imported by GTK 4.14 or
+newer. Export/import capability failures and multi-layer scenes use readback.
+`FLUTTER_GTK4_ENABLE_DMABUF=0` forces readback; unlike the OpenGL path, Vulkan
+attempts DMA-BUF by default. Debug logs identify the selected presentation path.
+The export completes before publication and stays alive until GTK releases it,
+so engine backing-store reuse cannot overwrite a displayed frame.
+
+This route makes one GPU copy and waits for completion. It avoids CPU pixel
+processing and GTK upload when import succeeds, but is not zero-copy rendering.
+The optional graphics-offload wrapper can consume the exported texture; actual
+compositor handoff must still be verified. It uses neither EGL export nor the
+Wayland EGL path above. Pixel-buffer plugins use a Vulkan upload and work with
+their existing RGBA callback. GL-only plugins require the OpenGL renderer.
 
 See [Vulkan architecture and validation](../../../engine/src/flutter/shell/platform/linux/testing/VULKAN.md)
 and the [compute investigation](../../../engine/src/flutter/shell/platform/linux/testing/COMPUTE.md).
-No rendering-performance improvement is claimed for the readback implementation.
+Performance comparisons for the new Vulkan path are still required.
 
 Renderer names alone do not guarantee a path. The runtime API, EGL extensions,
 format/modifier acceptance, and frame size must all pass the compositor's

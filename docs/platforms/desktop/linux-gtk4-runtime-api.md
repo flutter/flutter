@@ -115,9 +115,13 @@ keeps its own capability checks. See [rendering paths](linux-gtk-rendering.md#gt
 The experimental `FLUTTER_LINUX_RENDERER=vulkan` path does not add optional
 GTK/GDK Vulkan bindings. `fl_vulkan_manager` loads `libvulkan.so.1` on demand
 and resolves Vulkan entry points through the loader, keeping Vulkan out of the
-mandatory dynamic imports. It owns its device independently of GTK; GTK receives
-baseline `GdkMemoryTexture` snapshots. Existing graphics-offload and DMA-BUF
-capability checks do not imply Vulkan image export support. Vulkan loader/device
+mandatory dynamic imports. It owns its device independently of GTK. The Vulkan
+snapshot helper uses the existing GTK 4.14 DMA-BUF wrappers after negotiating
+Vulkan external-memory FD, DMA-BUF and foreign-queue support and exportable buffer
+properties. A failed import uses a baseline `GdkMemoryTexture` from the same
+immutable snapshot. Older GTK and unsupported devices retain readback rendering.
+No new optional GTK symbols are required. Pixel-buffer plugin uploads use Vulkan
+without creating a Flutter GL context. Vulkan loader/device
 failure fails an explicit Vulkan startup request; it does not disable the
 OpenGL default. See [Vulkan validation](../../../engine/src/flutter/shell/platform/linux/testing/VULKAN.md).
 
