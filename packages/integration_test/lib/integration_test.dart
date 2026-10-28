@@ -210,18 +210,30 @@ https://docs.flutter.dev/testing/integration-tests
   /// can split a drag across multiple calls to assert on intermediate state.
   ///
   /// ```dart
-  /// final Offset start = tester.getCenter(find.byKey(dragHandleKey));
-  /// final Offset end = start + const Offset(200, 0);
-  /// await binding.webDriverPointerActions(<WebDriverPointerAction>[
-  ///   WebDriverPointerAction.move(start.dx, start.dy),
-  ///   const WebDriverPointerAction.down(),
-  ///   WebDriverPointerAction.move(
-  ///     end.dx,
-  ///     end.dy,
-  ///     duration: const Duration(milliseconds: 300),
-  ///   ),
-  ///   const WebDriverPointerAction.up(),
-  /// ]);
+  /// import 'package:flutter/widgets.dart';
+  /// import 'package:flutter_test/flutter_test.dart';
+  /// import 'package:integration_test/common.dart';
+  /// import 'package:integration_test/integration_test.dart';
+  ///
+  /// void main() {
+  ///   testWidgets('splits a drag across multiple calls', (WidgetTester tester) async {
+  ///     final IntegrationTestWidgetsFlutterBinding binding =
+  ///         IntegrationTestWidgetsFlutterBinding.ensureInitialized();
+  ///     const Key dragHandleKey = Key('drag-handle');
+  ///     final Offset start = tester.getCenter(find.byKey(dragHandleKey));
+  ///     final Offset end = start + const Offset(200, 0);
+  ///     await binding.webDriverPointerActions(<WebDriverPointerAction>[
+  ///       WebDriverPointerAction.move(start.dx, start.dy),
+  ///       const WebDriverPointerAction.down(),
+  ///       WebDriverPointerAction.move(
+  ///         end.dx,
+  ///         end.dy,
+  ///         duration: const Duration(milliseconds: 300),
+  ///       ),
+  ///       const WebDriverPointerAction.up(),
+  ///     ]);
+  ///   });
+  /// }
   /// ```
   ///
   /// Unlike [WidgetTester] gesture helpers, which dispatch synthetic pointer
