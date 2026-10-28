@@ -104,6 +104,19 @@ final class _TestDeviceService extends DeviceService {
   }) async {
     return deviceId == 'test-device-1' && project.appName == 'supported_app';
   }
+
+  @override
+  Future<bool> launchApp({
+    required ExtensionDebuggingOptions debuggingOptions,
+    required String deviceId,
+    required Uri executableUri,
+  }) async => false;
+
+  @override
+  Future<Uri?> getVmServiceUri({required String deviceId}) async => null;
+
+  @override
+  Future<bool> stopApp({required String deviceId}) async => false;
 }
 
 final class _TestBuildTarget extends BuildTarget {

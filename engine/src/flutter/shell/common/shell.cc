@@ -2235,15 +2235,38 @@ bool Shell::OnServiceProtocolSetAssetBundlePath(
   return false;
 }
 
+rapidjson::Value Shell::MakePipelineUsageJson(
+    const impeller::PipelineLibrary& pipeline_library,
+    rapidjson::Document::AllocatorType& allocator) {
+  rapidjson::Value pipelines(rapidjson::kArrayType);
+  for (const auto& [desc, usage] : pipeline_library.GetPipelineUsage()) {
+    std::string_view label = desc.GetLabel();
+    rapidjson::Value label_json(label.data(), label.length(), allocator);
+    rapidjson::Value constants_json(rapidjson::kArrayType);
+    for (impeller::Scalar constant : desc.GetSpecializationConstants()) {
+      constants_json.PushBack(constant, allocator);
+    }
+
+    rapidjson::Value pipeline_json(rapidjson::kObjectType);
+    pipeline_json.AddMember("label", label_json, allocator);
+    pipeline_json.AddMember("constants", constants_json, allocator);
+    pipeline_json.AddMember("count", usage.count, allocator);
+    pipeline_json.AddMember("eagerly_created", usage.eagerly_created,
+                            allocator);
+    pipelines.PushBack(pipeline_json, allocator);
+  }
+  return pipelines;
+}
+
 bool Shell::OnServiceProtocolGetPipelineUsage(
     const ServiceProtocol::Handler::ServiceProtocolMap& params,
     rapidjson::Document* response) {
   FML_DCHECK(task_runners_.GetIOTaskRunner()->RunsTasksOnCurrentThread());
 
   response->SetObject();
+  response->AddMember("type", "GetPipelineUsage", response->GetAllocator());
 
   auto context = io_manager_->GetImpellerContext();
-
   if (!context) {
     FML_DLOG(ERROR) << "Pipeline usage profiling only available in Impeller";
     ServiceProtocolFailureError(
@@ -2251,20 +2274,9 @@ bool Shell::OnServiceProtocolGetPipelineUsage(
     return false;
   }
 
-  auto use_counts = context->GetPipelineLibrary()->GetPipelineUseCounts();
-
-  rapidjson::Value pipelines_json(rapidjson::kObjectType);
-
-  for (const auto& pipelineCount : use_counts) {
-    std::string_view pipeline_name = pipelineCount.first.GetLabel();
-    rapidjson::Value pipeline_key(pipeline_name.data(), pipeline_name.length(),
-                                  response->GetAllocator());
-
-    pipelines_json.AddMember(pipeline_key, pipelineCount.second,
-                             response->GetAllocator());
-  }
-
-  response->AddMember("Usages", pipelines_json, response->GetAllocator());
+  rapidjson::Value pipelines = MakePipelineUsageJson(
+      *context->GetPipelineLibrary(), response->GetAllocator());
+  response->AddMember("pipelines", pipelines, response->GetAllocator());
   return true;
 }
 

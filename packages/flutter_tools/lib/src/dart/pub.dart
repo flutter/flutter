@@ -685,11 +685,22 @@ class _DefaultPub implements Pub {
       /// We only want to inform about existing caches on first run of a freshly
       /// downloaded Flutter SDK. Therefore it is conditioned on the existence
       /// of the .pub-preload-cache dir.
-      final Iterable<String> cacheFiles = preloadCacheDir
+      // Pass archive names relative to the preload cache directory. Absolute
+      // paths can exceed the Windows command line length limit when FLUTTER_ROOT
+      // is deeply nested. See https://github.com/flutter/flutter/issues/194570.
+      final List<String> cacheFiles = preloadCacheDir
           .listSync()
-          .map((FileSystemEntity f) => f.path)
-          .where((String path) => path.endsWith('.tar.gz'));
-      _processManager.runSync(<String>[..._pubCommand, 'cache', 'preload', ...cacheFiles]);
+          .map((FileSystemEntity f) => _fileSystem.path.basename(f.path))
+          .where((String path) => path.endsWith('.tar.gz'))
+          .toList();
+      if (cacheFiles.isNotEmpty) {
+        _processManager.runSync(<String>[
+          ..._pubCommand,
+          'cache',
+          'preload',
+          ...cacheFiles,
+        ], workingDirectory: preloadCacheDir.path);
+      }
       _tryDeleteDirectory(preloadCacheDir, _logger);
     }
   }
