@@ -25,7 +25,7 @@ dependencies:
   collection: 1.19.1
   completion: 1.0.2
   coverage: 1.15.1
-  crypto: 3.0.7
+  crypto: 3.0.8
   ffi: 2.2.0
   file: 7.0.1
   flutter_tools_core:
@@ -65,8 +65,8 @@ dependencies:
   http_multi_server: 3.2.3
   convert: 3.1.2
   async: 2.13.1
-  unified_analytics: 8.2.0
-  pubspec_parse: 1.6.0
+  unified_analytics: 8.3.0
+  pubspec_parse: 1.7.0
 
   graphs: 2.3.2
   hooks_runner: 1.6.4
@@ -100,7 +100,7 @@ dependencies:
   dds_service_extensions: 2.1.0
   devtools_shared: 13.1.0
   dtd: 4.0.0
-  extension_discovery: 2.1.0
+  extension_discovery: 2.1.1
   fixnum: 1.1.1
   frontend_server_client: 4.2.0
   glob: 2.2.0
@@ -123,7 +123,7 @@ dependencies:
   typed_data: 1.4.0
   vm_service_interface: 2.0.1
   watcher: 1.2.1
-  web: 1.1.1
+  web: 1.1.2
   web_socket: 1.0.1
   yaml_edit: 2.2.4
 
@@ -139,4 +139,4 @@ dartdoc:
   # Exclude this package from the hosted API docs.
   nodoc: true
 
-# PUBSPEC CHECKSUM: c3ugn0
+# PUBSPEC CHECKSUM: 43stjn
