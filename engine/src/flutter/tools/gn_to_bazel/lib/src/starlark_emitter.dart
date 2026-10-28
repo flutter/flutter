@@ -202,7 +202,13 @@ final class _ListAttribute {
   /// likewise, takes the place of its conditional copies (fml's Dart API
   /// headers, listed by GN outside the web build and by the manifest
   /// everywhere), and an item under a weaker condition the place of its
-  /// copies under conditions implying it.
+  /// copies under conditions implying it. Copies under conditions that
+  /// merely overlap -- neither implies the other, both can hold
+  /// (display_list/testing lists metal_screenshot under `is_mac` and again
+  /// under `(is_mac || is_ios) && impeller_enable_metal`: a Mac with Metal
+  /// matches both select()s) -- become one item under the disjunction of
+  /// their conditions; copies under conditions that exclude each other
+  /// (`is_mac`, `is_ios`) stay where GN put them.
   void addUnique(Condition condition, _Item item) {
     bool same(_Item existing) => existing.text == item.text;
     if (always.any(same)) {
@@ -221,7 +227,30 @@ final class _ListAttribute {
         }
       }
       _displace(same, (Condition when) => when != condition && _implies(when, condition));
+      final overlapping = <Condition>[
+        for (final MapEntry<Condition, List<_Item>> entry in conditional.entries)
+          if (entry.key != condition &&
+              entry.value.any(same) &&
+              entry.key.and(condition) != Condition.never)
+            entry.key,
+      ];
+      if (overlapping.isNotEmpty) {
+        final Condition merged = Condition.disjunction(<Condition>[condition, ...overlapping]);
+        _displace(same, overlapping.contains);
+        if (merged == Condition.always) {
+          _displace(same, (Condition when) => true);
+          always.add(item);
+          sequence.add((merged, item));
+          return;
+        }
+        _addConditional(merged, item, same);
+        return;
+      }
     }
+    _addConditional(condition, item, same);
+  }
+
+  void _addConditional(Condition condition, _Item item, bool Function(_Item) same) {
     final List<_Item> bucket = conditional.putIfAbsent(condition, () => <_Item>[]);
     if (bucket.any(same)) {
       return;

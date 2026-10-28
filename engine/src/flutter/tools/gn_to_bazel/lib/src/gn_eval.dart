@@ -201,6 +201,29 @@ sealed class Condition {
         }
         terms[i] = replacement;
         reduced = true;
+        continue;
+      }
+      // The dual of the disjunction's narrowing: a conjunction among the
+      // alternatives loses the terms asserted beside it (`a && ((a && b) ||
+      // c)` is `a && (b || c)`).
+      final narrowed = <Condition>[
+        for (final Condition t in term.terms)
+          if (t is ConditionAnd)
+            conjunction(<Condition>[
+              for (final Condition conjunct in t.terms)
+                if (!others.contains(conjunct)) conjunct,
+            ])
+          else
+            t,
+      ];
+      if (!_sameTerms(narrowed, term.terms)) {
+        final Condition rebuilt = disjunction(narrowed);
+        if (rebuilt == always) {
+          terms.removeAt(i);
+        } else {
+          terms[i] = rebuilt;
+        }
+        return conjunction(terms);
       }
     }
     if (reduced) {
@@ -256,7 +279,12 @@ sealed class Condition {
     // `a || b`), beside one of its terms goes altogether (`a || (a && b)` is
     // `a`), and one with every term denied beside it holds always (`(a &&
     // b) || !a || !b`: a target defined in both branches of an `if` on a
-    // conjunction, skcms's arch() template).
+    // conjunction, skcms's arch() template). A disjunction among the
+    // conjunction's terms loses the alternatives said beside it (`a || ((a
+    // || b) && c)` is `a || (b && c)`: a dependency listed under `is_mac`
+    // and again under `(is_mac || is_ios) && impeller_enable_metal`); the
+    // reduced conjunction may fall under the rules above, so a reduction
+    // starts over.
     for (var i = 0; i < terms.length; i++) {
       final Condition term = terms[i];
       if (term is! ConditionAnd) {
@@ -283,6 +311,26 @@ sealed class Condition {
           continue;
         }
         terms[i] = reduced;
+        continue;
+      }
+      final narrowed = <Condition>[
+        for (final Condition t in term.terms)
+          if (t is ConditionOr)
+            disjunction(<Condition>[
+              for (final Condition alternative in t.terms)
+                if (!others.contains(alternative)) alternative,
+            ])
+          else
+            t,
+      ];
+      if (!_sameTerms(narrowed, term.terms)) {
+        final Condition rebuilt = conjunction(narrowed);
+        if (rebuilt == never) {
+          terms.removeAt(i);
+        } else {
+          terms[i] = rebuilt;
+        }
+        return disjunction(terms);
       }
     }
     return switch (terms.length) {

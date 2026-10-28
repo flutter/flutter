@@ -220,6 +220,12 @@ executable("flutter_desktop_darwin_unittests") {
   cflags_objcc = flutter_cflags_objcc
   ldflags = [ "-ObjC" ]
 
+  # In the debug runtime mode the VM finds its snapshot by symbol name
+  # (kDartVmSnapshotData, from //flutter/lib/snapshot); the exported symbols
+  # keep it through the link's dead stripping, as in the other tests that
+  # boot the VM from the embedded snapshot.
+  configs += [ "//flutter:export_dynamic_symbols" ]
+
   sources = [
     "framework/Source/AccessibilityBridgeMacTest.mm",
     "framework/Source/FlutterAppDelegateTest.mm",
