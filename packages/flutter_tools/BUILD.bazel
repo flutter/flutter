@@ -342,6 +342,16 @@ dart_package_tests(
 # The commands shard's permeable half: commands against the real file
 # system and the real pub, on the same SDK facsimile with the tool itself in
 # it (create_test and icon_tree_shaker_test run it).
+#
+# icon_tree_shaker_test builds for the host's desktop -- Linux on Linux,
+# macOS on a Mac, where it wants FlutterMacOS.xcframework and gen_snapshot_x64
+# in the cache's darwin-x64-release, which the facsimile does not lay yet:
+# left out of a Mac host's shard with the integration shard's Apple builds
+# (_INTEGRATION_APPLE below; NEED_DECISION Q31).
+_PERMEABLE_APPLE = [
+    "test/commands.shard/permeable/icon_tree_shaker_test.dart",
+] if HOST_OS == "mac" else []
+
 dart_package_tests(
     name = "commands_shard_permeable",
     srcs = _HARNESS,
@@ -375,7 +385,7 @@ dart_package_tests(
             # (WidgetPreviewCommand's constructor); upstream reverted the
             # latter in #193968. Restore it on the next rebase.
             "test/commands.shard/permeable/widget_preview/widget_preview_test.dart",
-        ],
+        ] + _PERMEABLE_APPLE,
     ),
 )
 
@@ -441,7 +451,8 @@ _INTEGRATION_ANDROID = [
 
 # The integration shard's files a Linux host cannot run from the facsimile.
 _INTEGRATION_EXCLUDED = [
-    # macOS and iOS frameworks only: declares no test on Linux.
+    # macOS and iOS frameworks only: declares no test on Linux (and builds
+    # them with Xcode on a Mac: _INTEGRATION_APPLE).
     "test/integration.shard/isolated/native_assets_flutter_build_framework_test.dart",
     # Tests of the repository's own scripts and resolution: bin/dart's
     # bootstrap (the facsimile's launcher has none), the pub workspace's
@@ -456,6 +467,40 @@ _INTEGRATION_EXCLUDED = [
     "test/integration.shard/widget_preview_legacy_test.dart",
     "test/integration.shard/widget_preview_pubspec_test.dart",
 ]
+
+# The integration shard's files that build for macOS or iOS through the tool
+# (`flutter build macos|ios`, Xcode, Swift Package Manager, CocoaPods) --
+# skipped on Linux, run on a Mac, where they want what the facsimile does not
+# lay yet: FlutterMacOS.xcframework and gen_snapshot in the cache's
+# darwin-x64* directories, the iOS engine artifacts in its ios* ones, the
+# gallery's Xcode project writable, and xcodebuild outside Bazel's sandbox
+# (it runs sandbox-exec itself, which a sandbox refuses). An Apple shard to
+# come (NEED_DECISION Q31); left out of a Mac host's shard meanwhile.
+_INTEGRATION_APPLE = [
+    "test/integration.shard/build_ios_config_only_test.dart",
+    "test/integration.shard/build_macos_arm64_only_test.dart",
+    "test/integration.shard/build_macos_config_only_test.dart",
+    "test/integration.shard/build_without_xcworkspace_test.dart",
+    "test/integration.shard/ios_content_validation_test.dart",
+    "test/integration.shard/lldb_init_test.dart",
+    "test/integration.shard/macos_content_validation_test.dart",
+    "test/integration.shard/swift_package_manager_add2app_test.dart",
+    "test/integration.shard/swift_package_manager_create_app_test.dart",
+    "test/integration.shard/swift_package_manager_create_plugin_test.dart",
+    "test/integration.shard/swift_package_manager_test.dart",
+    "test/integration.shard/uiscene_migration_test.dart",
+] if HOST_OS == "mac" else []
+
+# The SDK's Xcode build-phase scripts resolve their own symlink first
+# (xcode_backend.sh's follow_links) and take FLUTTER_ROOT from where it
+# leads -- in the facsimile, the checkout, whose bin/dart bootstraps the
+# tool and writes bin/cache there (refused by the sandbox; macos_assemble_test
+# and xcode_backend_test on a Mac). Real copies in the facsimile stop the
+# walk there (`writable`, which copies a file over its link).
+_APPLE_SCRIPTS = [
+    "packages/flutter_tools/bin/macos_assemble.sh",
+    "packages/flutter_tools/bin/xcode_backend.sh",
+] if HOST_OS == "mac" else []
 
 # The integration shard's tests run pub in workspace members (hello_world,
 # dev/automated_tests), and pub resolves a member against the whole
@@ -551,10 +596,10 @@ dart_package_tests(
     tags = ["cpu:4"],
     tests = glob(
         ["test/integration.shard/**/*_test.dart"],
-        exclude = _INTEGRATION_EXCLUDED + _INTEGRATION_DESKTOP + _INTEGRATION_ANDROID,
+        exclude = _INTEGRATION_EXCLUDED + _INTEGRATION_DESKTOP + _INTEGRATION_ANDROID + _INTEGRATION_APPLE,
     ),
     # pub touches the workspace's lock when it resolves a member.
-    writable = ["pubspec.lock"],
+    writable = ["pubspec.lock"] + _APPLE_SCRIPTS,
 )
 
 # What `flutter build linux` runs, from the build (//build_defs/desktop:build_tools.bzl):

@@ -555,7 +555,8 @@ dart_test = rule(
         "writable": attr.string_list(
             doc = "Paths under FLUTTER_ROOT the tool under test rewrites in place (`pubspec.lock`: pub " +
                   "touches the workspace's lock when it resolves a member), copied over their runfiles " +
-                  "symlinks when the test starts so that the sources stay as they are.",
+                  "symlinks when the test starts so that the sources stay as they are -- which also " +
+                  "serves a script that resolves its own symlink to find FLUTTER_ROOT (xcode_backend.sh).",
         ),
         "compile_args": attr.string_list(
             doc = "Further frontend server arguments for the compile.",
