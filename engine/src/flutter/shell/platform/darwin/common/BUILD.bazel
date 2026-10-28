@@ -889,7 +889,7 @@ flutter_objc_library(
     ],
     hdrs = [
         "framework/Source/FlutterTestUtils.h",
-        "//engine/src/flutter/shell/platform/darwin:ios/flutter_task_queue_dispatch.h",
+        "//engine/src/flutter/shell/platform/darwin/ios:flutter_task_queue_dispatch.h",
     ],
     copts = FLUTTER_COPTS + [
         "-Wno-inconsistent-missing-override",  # from //flutter/testing
@@ -945,7 +945,7 @@ cc_test(
     size = "small",
     srcs = [
         "framework/Source/FlutterTestUtils.h",
-        "//engine/src/flutter/shell/platform/darwin:ios/flutter_task_queue_dispatch.h",
+        "//engine/src/flutter/shell/platform/darwin/ios:flutter_task_queue_dispatch.h",
     ],
     # Add platform frameworks directory to search path for test frameworks.
     # Add platform lib to search path for test libraries/Swift modules.

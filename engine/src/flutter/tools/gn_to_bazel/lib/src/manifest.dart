@@ -1195,6 +1195,15 @@ filegroup(
     '//flutter/shell/platform/darwin/ios',
     condition: 'is_ios',
     filesGroups: <String>{'universal_flutter_framework'},
+    appendix: '''
+# The embedding's AccessibilityFeatures, which api_check's tests read (the
+# enum mirrors dart:ui's), and its task queue header, which darwin/common's
+# Objective-C suite includes (the manifest's extraSources).
+exports_files([
+    "flutter_task_queue_dispatch.h",
+    "framework/Source/AccessibilityFeatures.swift",
+])
+''',
     skip: <String, String>{
       'copy_asan_runtime_dylib':
           "clang's ASan runtime for iOS from the host's toolchain directory "
@@ -1216,7 +1225,7 @@ filegroup(
     // it: the Mac's T21/T22.)
     extraSources: <String, List<String>>{
       'framework_common_unittests': <String>[
-        '//engine/src/flutter/shell/platform/darwin:ios/flutter_task_queue_dispatch.h',
+        '//engine/src/flutter/shell/platform/darwin/ios:flutter_task_queue_dispatch.h',
       ],
     },
   ),
@@ -1250,16 +1259,6 @@ filegroup(
     '//flutter/shell/platform/darwin',
     condition: 'is_ios || is_mac',
     filesGroups: <String>{'darwin'},
-    appendix: '''
-# The iOS embedding's AccessibilityFeatures, which api_check's tests read
-# (the enum mirrors dart:ui's), and its task queue header, which
-# darwin/common's Objective-C suite lists among its sources: files of this
-# package until shell/platform/darwin/ios has a build file of its own.
-exports_files([
-    "ios/flutter_task_queue_dispatch.h",
-    "ios/framework/Source/AccessibilityFeatures.swift",
-])
-''',
   ),
   ConvertedFile('//flutter/shell/platform', filesGroups: <String>{'platform'}),
   ConvertedFile(
