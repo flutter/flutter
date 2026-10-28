@@ -362,11 +362,34 @@ the CPU built for, and a Mac's own build needs no `--platforms`. Every
 target of theirs is `target_compatible_with` macOS, so a wildcard build on
 Linux skips them without fetching a clang the checkout there has not.
 
+The iOS toolchains are GN's `ios_clang_arm` (a device), `ios_clang_arm_sim`
+and `ios_clang_x64_sim` (the simulator; `tools/gn --ios [--simulator
+[--simulator-cpu <cpu>]]`) the same way (`toolchains/macos_toolchain.bzl`'s
+`ios_clang_toolchain`; `cc_toolchain_config.bzl` under `os = "ios"`: the
+Mac's flags less the desktop's stack protector, search paths, rpaths and
+`-pie`, `-Os` when optimized): the same clang over the iPhoneOS or
+iPhoneSimulator SDK of the host's Xcode, `--target=<cpu>-apple-darwin -arch
+<cpu>` and `-miphoneos-version-min=15.0` or `-mios-simulator-version-min=15.0`
+(`build_defs/cc/apple.bzl`'s `IOS_DEPLOYMENT_TARGET`). The platforms
+`toolchains:ios_arm64` (a device), `:ios_sim_arm64` and `:ios_sim_x64` carry
+the environment as a constraint of their own (`build/bazel:ios_environment`,
+`ios_device` or `ios_simulator`: GN's `use_ios_simulator`, which the
+toolchains resolve by and the generated files select on through
+`ios_simulator_enabled`), each with its runtime modes; six toolchains, from
+either Mac; their files are compatible with iOS, and a Mac runs a
+simulator build's binary under `xcrun simctl spawn`
+(`toolchains/tests:ios_cc_toolchain_smoke`). The Swift rule picks the SDK,
+the triple (`<arch>-apple-ios15.0[-simulator]`) and the Swift libraries'
+directories from the same constraints.
+
 `@macos_sdk` (`build_defs/repositories/macos_sdk.bzl`) runs `xcrun --sdk
 macosx` and lays a *view* of the SDK it names -- `MacOSX.sdk/` with the
 SDK's entries symlinked, `System/Library/Frameworks` as a directory of the
 frameworks' symlinks without `Ruby.framework`, which holds the SDK's one
-symlink cycle. The toolchain passes the view as `-isysroot` (GN's and
+symlink cycle -- and the same for the iPhoneOS and iPhoneSimulator SDKs
+(`iPhoneOS.sdk/`, `iPhoneSimulator.sdk/`; `:ios_sdk`, `:ios_simulator_sdk`
+and their `_view` markers; `IPHONEOS_*`, `IPHONESIMULATOR_*` and
+`IOS_SDK_VERSION` in `sdk.bzl`), optional on a Mac without them. The toolchain passes the view as `-isysroot` (GN's and
 Apple's spelling; a `sysroot` feature of the toolchain's own replaces
 Bazel's `--sysroot=`), and its `usr/include`, `usr/lib`, `Frameworks`,
 `SubFrameworks` and `SDKSettings.*` are directory inputs of every compile
@@ -430,10 +453,23 @@ which derives from it) is a platform condition, rendered as `select()`s on
 darwin branches of every converted file are in the generated BUILD files
 (fml's `platform/darwin/`, the shell's `//flutter/shell/platform/darwin`
 dependency, Skia's Metal backend when its repository converts on a Mac);
-`is_ios` stays a constant until iOS is built, so `is_mac || is_ios` reads
-as `is_mac`. The arguments tools/gn passes for a Mac alone
-(`allow_deprecated_api_calls`, `skia_use_metal`) are formulas over the OS
-beside the web's (`perTargetOsArguments`). A GN target's `.m` and `.mm`
+`is_ios` the same since the iOS port (`@platforms//os:ios`; `is_apple` is
+`is_ios || is_mac`), with what the iOS branches read given a Bazel-side
+meaning: `use_ios_simulator` is the platforms' environment setting,
+`ios_platform_path` and `ios_sdk_path` a `@macos_sdk` constant per
+environment (a reference per case of the predicate, `GnPredicateCases`),
+`darwin_target_arch` and `darwin_target_sim` the Swift triple's parts (a
+string that expands several conditional variables is a value per
+combination), the deployment targets `15.0`. The arguments tools/gn passes
+for a Mac or for iOS alone (`allow_deprecated_api_calls`, `skia_use_metal`;
+iOS's `skia_use_gl` off, no Vulkan) are formulas over the OS beside the
+web's (`perTargetOsArguments`). The files both Apple shells reach
+(darwin/common, darwin/graphics, the darwin group) are converted under
+`is_ios || is_mac` (a manifest condition may be a disjunction), the Metal
+backends under `impeller_enable_metal`, and the iOS shell itself
+(`shell/platform/darwin/ios`: Flutter.framework for a device or the
+simulator, its xcframework) under `is_ios`; Impeller's shaders macro builds
+each backend under its setting (iOS has Metal alone, with `--metal-ios`). A GN target's `.m` and `.mm`
 sources go to a `flutter_objc_library` beside its `cc_library` or test,
 `<name>_objc` -- the same headers, flags, defines and dependencies, the
 target's `cflags_objc`/`cflags_objcc` (one list, `MACOS_CFLAGS_OBJC`
@@ -2032,9 +2068,17 @@ on an Apple-silicon Mac builds; `ci/host_debug_unopt_arm64` and
 `mac_debug_arm64`, `mac_profile_arm64`, `mac_release_arm64`,
 `mac_release_arm64_tests`, and the `_framework` and `_gen_snapshot` builds
 of each mode for either CPU (`host_debug_framework`,
-`mac_debug_gen_snapshot_arm64`, ...). The iOS builds (seventeen, with
-`--simulator`, `--simulator-cpu` and `--darwin-extension-safe` among their
-flags) are listed at the end as a platform the Bazel build has none for yet.
+`mac_debug_gen_snapshot_arm64`, ...). The iOS builds have configurations
+too: `--ios` is the device platform (`ios_arm64`), `--simulator` the
+simulator's of `--simulator-cpu` (`ios_sim_x64` unless given,
+`ios_sim_arm64`), each with its mode (`ci_ios_debug`, `ios_debug_sim_arm64`,
+`ios_release`, ...); `--darwin-extension-safe` is taken as given -- no GN
+file reads it, the framework is app-extension-safe in every build -- so the
+`_extension_safe` builds are their counterparts under another name. Their
+installs lay `generate_snapshot_bins` and the framework, as their ninja
+targets say; the xcframework over the device and simulator builds together
+is the recipe's (`create_ios_framework.py`), as the Mac's universal
+framework is.
 A Mac build's install and suite are compatible with macOS alone, as their
 contents are, so a wildcard build on Linux skips them; its `engine` tests
 are the Mac's list in `run_tests.py` (`runTestsEngineSuitesMac`: the common
