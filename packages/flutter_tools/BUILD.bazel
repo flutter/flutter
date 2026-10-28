@@ -10,7 +10,12 @@
 #   bazel test //packages/flutter_tools:general_shard
 
 load("@bazel_skylib//rules:write_file.bzl", "write_file")
-load("@host_platform//:host.bzl", "HOST_DART_SDK")
+load(
+    "@host_platform//:host.bzl",
+    "HOST_CPU",
+    "HOST_DART_SDK",
+    "HOST_OS",
+)
 load("//build_defs/android:build_tools.bzl", "android_build_tools")
 load("//build_defs/dart:dart_test.bzl", "dart_package_tests", "dart_vm_kernel")
 load("//build_defs/dart:pub.bzl", "PUB_WORKSPACE_PACKAGES", "pub_cache", "pub_package_config")
@@ -210,20 +215,33 @@ write_file(
 # the three runtime modes, and the web SDK's), the stamps Cache.updateAll
 # checks before it would download, the Material fonts and the flutter_gpu
 # package (the tool checks the directories exist).
+# The cache names the host's engine directory as the tool's
+# getNameForHostPlatform does on Linux (linux-x64, linux-arm64) and, on a
+# Mac of either CPU, darwin-x64 (flutter_cache.dart: `darwin-$arch/
+# artifacts.zip` unpacks into darwin-x64 -- "until darwin artifacts are
+# universal and moved out of darwin-x64", artifacts.dart); the desktop
+# stamp is the host's SDK's (linux-sdk, macos-sdk).
+_HOST_ENGINE = "darwin-x64" if HOST_OS == "mac" else HOST_OS + "-" + HOST_CPU
+
+_HOST_SDK_STAMP = {
+    "//bin/internal:macos_sdk_stamp": "macos-sdk.stamp",
+} if HOST_OS == "mac" else {
+    "//bin/internal:linux_sdk_stamp": "linux-sdk.stamp",
+}
+
 _TOOL_CACHE_FILES = _PUB_CACHE_FILES | {
     ":flutter_tools_snapshot": "flutter_tools.snapshot",
-    "//engine/src/flutter/build/archives:host_engine_directory": "artifacts/engine/linux-x64",
-    "//engine/src/flutter/build/archives:host_engine_profile_directory": "artifacts/engine/linux-x64-profile",
-    "//engine/src/flutter/build/archives:host_engine_release_directory": "artifacts/engine/linux-x64-release",
+    "//engine/src/flutter/build/archives:host_engine_directory": "artifacts/engine/" + _HOST_ENGINE,
+    "//engine/src/flutter/build/archives:host_engine_profile_directory": "artifacts/engine/" + _HOST_ENGINE + "-profile",
+    "//engine/src/flutter/build/archives:host_engine_release_directory": "artifacts/engine/" + _HOST_ENGINE + "-release",
     "//engine/src/flutter/build/archives:common_engine_directory": "artifacts/engine/common",
     "//engine/src/flutter/web_sdk:web_sdk_directory": "flutter_web_sdk",
     "//bin/internal:flutter_sdk_stamp": "flutter_sdk.stamp",
     "//bin/internal:flutter_web_sdk_stamp": "flutter_web_sdk.stamp",
     "//bin/internal:font_subset_stamp": "font-subset.stamp",
-    "//bin/internal:linux_sdk_stamp": "linux-sdk.stamp",
     "//bin/internal:material_fonts_stamp": "material_fonts.stamp",
     "//bin/internal:gradle_wrapper_stamp": "gradle_wrapper.stamp",
-}
+} | _HOST_SDK_STAMP
 
 _TOOL_CACHE = _PUB_CACHE | {
     "@material_fonts//:fonts": "artifacts/material_fonts",
