@@ -1240,6 +1240,18 @@ exports_files([
         '//engine/src/flutter/shell/platform/darwin/ios:flutter_task_queue_dispatch.h',
       ],
     },
+    appendix: '''
+# The iOS embedding's XCTest project (testing/ios/IosUnitTests, which
+# xcodebuild builds: run_tests.py --type objc) compiles FlutterChannelsTest.m
+# -- a source no GN target lists -- out of the tree, with the framework's
+# headers directory as a header search path.
+exports_files(["framework/Source/FlutterChannelsTest.m"])
+
+filegroup(
+    name = "framework_headers",
+    srcs = glob(["framework/Headers/*.h"]),
+)
+''',
   ),
   // The macOS shell: FlutterMacOS.framework (the Objective-C++ sources, the
   // Swift run loop and resize synchronizer, the dylib, the copies into the
@@ -2088,6 +2100,15 @@ cc_library(
     '//flutter/third_party/ocmock',
     condition: 'is_ios || is_mac',
     linkedStaticLibraries: <String>{'ocmock'},
+    appendix: '''
+# The headers as the iOS embedding's XCTest project reads them out of the
+# checkout (testing/ios/IosUnitTests: `<OCMock/OCMock.h>` under the Source
+# directory as a system header path).
+filegroup(
+    name = "headers",
+    srcs = glob(["Source/OCMock/*.h"]),
+)
+''',
   ),
   ConvertedFile(
     '//flutter/third_party/wuffs',
@@ -2554,6 +2575,9 @@ const Set<String> handWrittenPackages = <String>{
   'engine/src/flutter/testing/dart/vm_service',
   // run_tests.py's smoke test (fail_test.dart), the same shape.
   'engine/src/flutter/testing/smoke_test_failure',
+  // The iOS embedding's XCTest project, which xcodebuild builds and runs on
+  // a simulator (run_tests.py --type objc): a directory with no GN file.
+  'engine/src/flutter/testing/ios',
   // The Linux embeddings' system libraries: GN's foreach over pkg_config()
   // templates, each an exec_script of pkg-config against the sysroot, whose
   // answers the file holds.

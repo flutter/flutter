@@ -29,14 +29,17 @@ ENGINE_SRC = "engine/src"
 
 # GN's build directory names (tools/gn's get_out_dir): what is built for --
 # `host` for the host's own build, `wasm` for --web, `linux` for the Linux
-# arm64 cross build (--target-os=linux), `android` for --android -- then the
-# runtime mode, then `_unopt` when not optimized, then the CPU when not the
-# target's default (`_arm64`, `_x64`; Android's default is arm, Linux's the
-# host's): `host_debug_unopt`, `wasm_release`, `linux_debug_arm64`,
-# `android_debug_unopt_arm64`.
+# arm64 cross build (--target-os=linux), `android` for --android, `ios` for
+# --ios -- then the runtime mode, then `_sim` for the iOS simulator, then
+# `_unopt` when not optimized, then the CPU when not the target's default
+# (`_arm64`, `_x64`; Android's default is arm, Linux's the host's, the iOS
+# device's arm64 and the simulator's x64): `host_debug_unopt`,
+# `wasm_release`, `linux_debug_arm64`, `android_debug_unopt_arm64`,
+# `ios_debug`, `ios_debug_sim_unopt_arm64`.
 BUILD_DIRECTORY_TARGETS = {
     "@platforms//os:emscripten": "wasm",
     "@platforms//os:android": "android",
+    "@platforms//os:ios": "ios",
     "//engine/src/flutter/common:platform_linux_arm64": "linux",
     "//conditions:default": "host",
 }
@@ -48,18 +51,26 @@ BUILD_DIRECTORY_MODES = {
     "//conditions:default": "debug",
 }
 
+BUILD_DIRECTORY_ENVIRONMENTS = {
+    "//engine/src/flutter/build/bazel:ios_simulator_enabled": "_sim",
+    "//conditions:default": "",
+}
+
 BUILD_DIRECTORY_CPUS = {
     "@platforms//cpu:aarch64": "_arm64",
     "@platforms//cpu:riscv64": "_riscv64",
     "//engine/src/flutter/common:platform_android_x64": "_x64",
     "//engine/src/flutter/common:platform_android_x86": "_x86",
+    # arm64 is the iOS device's default CPU (tools/gn's --ios-cpu), unnamed;
+    # the simulator's is x64, so its arm64 build is named.
+    "//engine/src/flutter/build/bazel:ios_device_arm64": "",
     "//conditions:default": "",
 }
 
 def build_directory_attrs():
     """The rule attributes a macro sets for the build directory's name: `build_directory_name`, `optimized` and `build_directory_cpu`."""
     return {
-        "build_directory_name": select(BUILD_DIRECTORY_TARGETS) + "_" + select(BUILD_DIRECTORY_MODES),
+        "build_directory_name": select(BUILD_DIRECTORY_TARGETS) + "_" + select(BUILD_DIRECTORY_MODES) + select(BUILD_DIRECTORY_ENVIRONMENTS),
         "build_directory_cpu": select(BUILD_DIRECTORY_CPUS),
         "optimized": select({
             "//engine/src/flutter/build/bazel:optimized": True,
@@ -75,7 +86,8 @@ BUILD_DIRECTORY_ATTRS = {
     ),
     "build_directory_name": attr.string(
         mandatory = True,
-        doc = "GN's name for the build directory of this configuration, up to the mode (host_debug, host_release, wasm_release, ...): build_directory_attrs().",
+        doc = "GN's name for the build directory of this configuration, up to the mode and the iOS simulator's `_sim` " +
+              "(host_debug, host_release, wasm_release, ios_debug_sim, ...): build_directory_attrs().",
     ),
     "build_directory_cpu": attr.string(
         doc = "The CPU suffix of GN's name for the build directory, after _unopt (`_arm64`, or nothing): build_directory_attrs().",
