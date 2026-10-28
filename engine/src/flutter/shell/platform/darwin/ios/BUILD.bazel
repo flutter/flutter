@@ -695,10 +695,15 @@ flutter_objc_library(
         "platform_view_ios_test.mm",
     ],
     hdrs = [
+        "framework/Source/FlutterEngine+Test.h",
+        "framework/Source/FlutterFMLTaskRunners+FML.h",
         "framework/Source/FlutterFakeKeyEvents.h",
         "framework/Source/FlutterPlatformViewsTestHelper.h",
+        "framework/Source/FlutterSceneDelegate+Test.h",
+        "framework/Source/FlutterSceneLifeCycle+Test.h",
         "framework/Source/FlutterTouchInterceptingView+Test.h",
         "framework/Source/SemanticsObjectTestMocks.h",
+        "//engine/src/flutter/testing/ios:IosUnitTests/App/AppDelegate.h",
     ],
     copts = ["-fvisibility=default"] + FLUTTER_COPTS + [
         "-fvisibility=default",  # from //flutter/shell/platform/darwin/common:test_utils_swift
@@ -792,10 +797,15 @@ flutter_shared_library(
     name = "ios_test_flutter",
     testonly = True,
     srcs = [
+        "framework/Source/FlutterEngine+Test.h",
+        "framework/Source/FlutterFMLTaskRunners+FML.h",
         "framework/Source/FlutterFakeKeyEvents.h",
         "framework/Source/FlutterPlatformViewsTestHelper.h",
+        "framework/Source/FlutterSceneDelegate+Test.h",
+        "framework/Source/FlutterSceneLifeCycle+Test.h",
         "framework/Source/FlutterTouchInterceptingView+Test.h",
         "framework/Source/SemanticsObjectTestMocks.h",
+        "//engine/src/flutter/testing/ios:IosUnitTests/App/AppDelegate.h",
     ],
     # Add platform frameworks directory to search path for test frameworks.
     # Add platform lib to search path for test libraries/Swift modules.
@@ -848,6 +858,10 @@ flutter_shared_library(
         "//conditions:default": [],
     }),
     data = [":flutter_framework"],
+    interface_deps = [
+        ":ios_gpu_configuration_config",
+        "//engine/src/flutter:config",
+    ],
     linkopts = [
         "-Wl,-install_name,@rpath/Frameworks/libios_test_flutter.dylib",
         "-framework",
@@ -980,6 +994,7 @@ flutter_shared_library(
     copts = FLUTTER_COPTS + [
         "-fapplication-extension",  # from //build/config/ios:ios_application_extension
     ],
+    interface_deps = ["//engine/src/flutter:config"],
     linkopts = ["-Wl,-install_name,@rpath/Flutter.framework/Flutter"],
     local_defines = FLUTTER_LOCAL_DEFINES,
     output_name = "Flutter",

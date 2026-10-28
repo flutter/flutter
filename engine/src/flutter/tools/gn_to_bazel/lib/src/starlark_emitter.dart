@@ -342,6 +342,7 @@ final class _Rule {
     'hdrs',
     'deps',
     'implementation_deps',
+    'interface_deps',
     'data',
     'tools',
     'fixtures',
@@ -416,6 +417,7 @@ String emitBuildFile(
   Set<String> filesGroups = const <String>{},
   Set<String> linkedStaticLibraries = const <String>{},
   Map<String, List<String>> extraSources = const <String, List<String>>{},
+  Map<String, List<String>> interfaceDeps = const <String, List<String>>{},
 }) {
   final DependencyResolver forwarded =
       forwardedFlags ??
@@ -463,6 +465,15 @@ String emitBuildFile(
       throw GnError(
         GnLocation(evaluation.file, 0, 0),
         'extraSources names $name, which is not a target of the file',
+      );
+    }
+  }
+  emitter.interfaceDeps.addAll(interfaceDeps);
+  for (final String name in interfaceDeps.keys) {
+    if (emitter.localTargets[name]?.rule != 'shared_library') {
+      throw GnError(
+        GnLocation(evaluation.file, 0, 0),
+        'interfaceDeps names $name, which is not a shared_library of the file',
       );
     }
   }
@@ -631,6 +642,10 @@ final class _Emitter {
   /// Files a target's compiles read that GN's check does not have it list
   /// (the manifest's extraSources), by target name.
   final Map<String, List<String>> extraSources = <String, List<String>>{};
+
+  /// Libraries a shared library's dependents get besides what GN hands them
+  /// (the manifest's interfaceDeps), by the shared library's name.
+  final Map<String, List<String>> interfaceDeps = <String, List<String>>{};
 
   /// The local configs some target of the file lists (whose compiler flags
   /// are therefore inlined there).
@@ -1192,6 +1207,54 @@ final class _Emitter {
       }
     }
     rules.add(rule);
+  }
+
+  /// What a dependent of the shared library [target] gets from it in GN --
+  /// its `public_deps`, its `public_configs` and the `all_dependent_configs`
+  /// that reach it -- as the macro's `interface_deps`: the dependencies of
+  /// the `<name>_import` library a compiled target links the dylib through
+  /// (flutter_shared_library), since a cc_import carries no headers or
+  /// include directories of its own (ios_test_flutter includes OCMock's
+  /// headers through ocmock_src's all-dependent config: the Mac's T28).
+  /// Private deps stay out, as GN keeps their headers from dependents'
+  /// checks; the rule's own `deps`, which carry them, link the library.
+  void _sharedLibraryInterfaceInto(_Rule rule, GnTarget target, Set<String> publicConfigs) {
+    final interface = _Rule(rule.kind, rule.name, const <String>[]);
+    final GnVariable? publicDeps = target.variables['public_deps'];
+    if (publicDeps != null) {
+      _depsInto(interface, publicDeps, target, links: true);
+    }
+    final unused = <ForwardedFlag>[];
+    for (final name in <String>['public_configs', 'all_dependent_configs']) {
+      final GnVariable? variable = target.variables[name];
+      if (variable != null) {
+        _configsInto(
+          interface,
+          variable,
+          target,
+          chromiumCode: true,
+          publicConfigs: publicConfigs,
+          propagatedFlags: unused,
+        );
+      }
+    }
+    _inheritedConfigsInto(interface, target);
+    for (final String label in interfaceDeps[target.name] ?? const <String>[]) {
+      interface.list('deps').addUnique(Condition.always, _Item(_localLabel(label)));
+    }
+    final _ListAttribute? collected = interface.lists['deps'];
+    if (collected == null || collected.isEmpty) {
+      return;
+    }
+    final _ListAttribute into = rule.list('interface_deps');
+    for (final _Item item in collected.always) {
+      into.addUnique(Condition.always, item);
+    }
+    for (final MapEntry<Condition, List<_Item>> entry in collected.conditional.entries) {
+      for (final _Item item in entry.value) {
+        into.addUnique(entry.key, item);
+      }
+    }
   }
 
   /// The configs [target] inherits through `all_dependent_configs` as
@@ -3572,6 +3635,10 @@ final class _Emitter {
     // when the feature is on).
     _inheritedConfigsInto(rule, target);
 
+    if (shared) {
+      _sharedLibraryInterfaceInto(rule, target, publicConfigs);
+    }
+
     // A header-only library compiles nothing: GN ignores its flags and
     // defines (they apply to no compile and propagate to no one), and so
     // does the generated rule. Its private configs stay, as
@@ -3661,10 +3728,17 @@ final class _Emitter {
     }
     // What the compiles read beyond GN's sources (the manifest's
     // extraSources, labels or package-relative paths): sources of the rule,
-    // which the companions below take the headers of as a binary's.
+    // which the companions below take the headers of as a binary's -- or a
+    // library's `hdrs`, where a header of GN's sources would be, with no
+    // `public` list, so that dependents' compiles see it too (the
+    // embedding's task queue header, which its suite's compiles include
+    // through platform_message_handler_ios.h).
     for (final String extra in extraSources[target.name] ?? const <String>[]) {
       final bool isLabel = extra.startsWith('//') || extra.startsWith(':') || extra.startsWith('@');
-      rule.list('srcs').addUnique(Condition.always, _Item(isLabel ? _localLabel(extra) : extra));
+      final bool header = library && !explicitPublic && _headerExtensions.any(extra.endsWith);
+      rule
+          .list(header ? 'hdrs' : 'srcs')
+          .addUnique(Condition.always, _Item(isLabel ? _localLabel(extra) : extra));
     }
     _splitObjcSources(rule, target, name: name, library: library, test: kind == 'cc_test');
     _splitSwiftSources(rule, target, name: name, library: library, test: kind == 'cc_test');
@@ -6045,6 +6119,7 @@ final class _Emitter {
     'hdrs',
     'deps',
     'implementation_deps',
+    'interface_deps',
     'data',
     'tags',
     'tools',

@@ -58,6 +58,7 @@ Future<String> convert(
   Map<String, Condition> targetConditions = const <String, Condition>{},
   Set<String> linkedStaticLibraries = const <String>{},
   Map<String, List<String>> extraSources = const <String, List<String>>{},
+  Map<String, List<String>> interfaceDeps = const <String, List<String>>{},
 }) async {
   return emitBuildFile(
     await evaluate(
@@ -74,6 +75,7 @@ Future<String> convert(
     layout: layout,
     linkedStaticLibraries: linkedStaticLibraries,
     extraSources: extraSources,
+    interfaceDeps: interfaceDeps,
   );
 }
 
@@ -4411,6 +4413,79 @@ executable("x_unittests") {
           },
         ),
         throwsGnError(line: 0, message: 'extraSources names y_unittests'),
+      );
+    });
+
+    test("a shared library's dependents get its interface through the import", () async {
+      // GN hands a dependent of a shared_library the library's public_deps,
+      // its public_configs and the all-dependent configs that reach it
+      // (ocmock_src's Source include directory through ocmock_shared); a
+      // compiled dependent links the dylib through the macro's
+      // `<name>_import`, a cc_library over the cc_import carrying those as
+      // `interface_deps`. The manifest's interfaceDeps adds what GN's check
+      // does not follow (a library of the headers the include directory
+      // finds).
+      const gn = '''
+config("src_config") {
+  include_dirs = [ "Source" ]
+}
+config("lib_config") {
+  defines = [ "LIB_PUBLIC" ]
+}
+source_set("src") {
+  sources = [ "Source/a.h", "Source/a.mm" ]
+  all_dependent_configs = [ ":src_config" ]
+}
+source_set("pub") {
+  sources = [ "pub.h", "pub.cc" ]
+}
+source_set("priv") {
+  sources = [ "priv.h", "priv.cc" ]
+}
+shared_library("lib") {
+  deps = [ ":priv", ":src" ]
+  public_deps = [ ":pub" ]
+  public_configs = [ ":lib_config" ]
+}
+executable("user") {
+  sources = [ "user.cc" ]
+  deps = [ ":lib" ]
+}
+''';
+      final String output = await convert(
+        gn,
+        assumptions: generationAssumptions(),
+        interfaceDeps: <String, List<String>>{
+          'lib': <String>['//engine/src/flutter/example:lib_headers'],
+        },
+      );
+      expect(
+        output,
+        contains(
+          'flutter_shared_library(\n'
+          '    name = "lib",\n'
+          '    interface_deps = [\n'
+          '        ":lib_config",\n'
+          '        ":lib_headers",\n'
+          '        ":pub",\n'
+          '        ":src_config",\n'
+          '    ],\n'
+          '    output_name = "lib",\n',
+        ),
+      );
+      // The dependent links the import, not the binary.
+      expect(output, contains('    deps = [\n        ":lib_import",\n'));
+      expect(output, isNot(contains('":priv",\n        ":src_config"')));
+      // The name must be a shared library of the file.
+      await expectLater(
+        convert(
+          gn,
+          assumptions: generationAssumptions(),
+          interfaceDeps: <String, List<String>>{
+            'pub': <String>['//engine/src/flutter/example:lib_headers'],
+          },
+        ),
+        throwsGnError(line: 0, message: 'interfaceDeps names pub'),
       );
     });
 
