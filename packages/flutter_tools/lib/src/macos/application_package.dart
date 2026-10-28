@@ -224,9 +224,8 @@ class BuildableMacOSApp extends MacOSApp {
     if (directory == null) {
       return null;
     }
-    final FileSystem fs = _toolContext.fs;
     final _BundleInfo? bundleInfo = MacOSApp._executableFromBundle(
-      fs.directory(directory),
+      _toolContext.fs.directory(directory),
       plistParser: _plistParser,
       toolContext: _toolContext,
     );

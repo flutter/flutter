@@ -677,6 +677,7 @@ void main() {
       os = FakeOperatingSystemUtils();
       testPlistParser = FakePlistParser();
       toolContext = FakeToolContext(
+        config: Config.test(),
         fs: fileSystem,
         logger: logger,
         os: os,
@@ -873,9 +874,10 @@ void main() {
       ) as BuildableIOSApp?;
 
       expect(iosApp, null);
+      expect(logger.errorText, isEmpty);
     });
 
-    testUsingContext('handles project paths with periods in app name', () async {
+    testWithoutContext('handles project paths with periods in app name', () async {
       final iosApp = BuildableIOSApp(
         IosProject.fromFlutter(FlutterProject.fromDirectoryTest(fileSystem.currentDirectory)),
         'com.foo.bar',
@@ -890,7 +892,7 @@ void main() {
         iosApp.builtInfoPlistPathAfterArchive,
         'build/ios/archive/Name.With.Dots.xcarchive/Products/Applications/Name.With.Dots.app/Info.plist',
       );
-    }, overrides: overrides);
+    });
 
     testWithoutContext('returns project app icon dirname', () async {
       final iosApp = BuildableIOSApp(
@@ -978,9 +980,9 @@ void main() {
       );
     }, overrides: overrides);
 
-    testUsingContext('returns project launch image dirname', () async {
+    testWithoutContext('returns project launch image dirname', () async {
       final iosApp = BuildableIOSApp(
-        IosProject.fromFlutter(FlutterProject.fromDirectory(fileSystem.currentDirectory)),
+        IosProject.fromFlutter(FlutterProject.fromDirectoryTest(fileSystem.currentDirectory)),
         'com.foo.bar',
         'Runner',
         toolContext: toolContext,
@@ -991,7 +993,7 @@ void main() {
         'LaunchImage.imageset',
       );
       expect(iosApp.projectLaunchImageDirName, fileSystem.path.join('ios', launchImageDirSuffix));
-    }, overrides: overrides);
+    });
 
     testUsingContext('returns template launch image dirname for Contents.json', () async {
       final iosApp = BuildableIOSApp(

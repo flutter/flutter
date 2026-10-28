@@ -35,11 +35,12 @@ class FlutterApplicationPackageFactory extends ApplicationPackageFactory {
     BuildInfo? buildInfo,
     File? applicationBinary,
   }) async {
+    final ToolContext(:FileSystem fs, :FlutterProjectFactory projectFactory) = _toolContext;
     switch (platform.os) {
       case .android:
         if (applicationBinary == null) {
           return AndroidApk.fromAndroidProject(
-            _currentProject().android,
+            projectFactory.fromDirectory(fs.currentDirectory).android,
             androidSdk: _androidSdk,
             buildInfo: buildInfo,
             toolContext: _toolContext,
@@ -53,7 +54,7 @@ class FlutterApplicationPackageFactory extends ApplicationPackageFactory {
       case .ios:
         return applicationBinary == null
             ? await IOSApp.fromIosProject(
-                _currentProject().ios,
+                projectFactory.fromDirectory(fs.currentDirectory).ios,
                 buildInfo,
                 toolContext: _toolContext,
               )
@@ -63,11 +64,11 @@ class FlutterApplicationPackageFactory extends ApplicationPackageFactory {
                 toolContext: _toolContext,
               );
       case .tester:
-        return FlutterTesterApp.fromCurrentDirectory(_toolContext.fs);
+        return FlutterTesterApp.fromCurrentDirectory(fs);
       case .macos:
         return applicationBinary == null
             ? MacOSApp.fromMacOSProject(
-                _currentProject().macos,
+                projectFactory.fromDirectory(fs.currentDirectory).macos,
                 plistParser: _plistParser,
                 toolContext: _toolContext,
               )
@@ -77,26 +78,27 @@ class FlutterApplicationPackageFactory extends ApplicationPackageFactory {
                 toolContext: _toolContext,
               );
       case .web:
-        final FlutterProject currentProject = _currentProject();
-        if (!currentProject.web.existsSync()) {
+        final FlutterProject project = projectFactory.fromDirectory(fs.currentDirectory);
+        if (!project.web.existsSync()) {
           return null;
         }
-        return WebApplicationPackage(currentProject);
+        return WebApplicationPackage(project);
       case .linux:
         return applicationBinary == null
-            ? LinuxApp.fromLinuxProject(_currentProject().linux, toolContext: _toolContext)
+            ? LinuxApp.fromLinuxProject(
+                projectFactory.fromDirectory(fs.currentDirectory).linux,
+                toolContext: _toolContext,
+              )
             : LinuxApp.fromPrebuiltApp(applicationBinary);
       case .windows:
         return applicationBinary == null
-            ? WindowsApp.fromWindowsProject(_currentProject().windows, toolContext: _toolContext)
+            ? WindowsApp.fromWindowsProject(
+                projectFactory.fromDirectory(fs.currentDirectory).windows,
+                toolContext: _toolContext,
+              )
             : WindowsApp.fromPrebuiltApp(applicationBinary, toolContext: _toolContext);
       case .fuchsia || .unsupported:
         TargetPlatform.throwUnsupportedTarget();
     }
-  }
-
-  FlutterProject _currentProject() {
-    final ToolContext(:FileSystem fs, :FlutterProjectFactory projectFactory) = _toolContext;
-    return projectFactory.fromDirectory(fs.currentDirectory);
   }
 }
