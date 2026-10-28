@@ -90,6 +90,19 @@ _MODULE_OUTPUT_SUFFIXES = [
     ".swiftsourceinfo",
 ]
 
+def _expand(ctx, attribute, flags):
+    """The strings of `swiftflags` and `linkopts` as cc_library reads its flags.
+
+    cc_library's `copts` and `linkopts` get Make-variable substitution, then
+    Bourne shell tokenization; the converter escapes GN's flags for that
+    reading, whatever rule takes them (objc_library.bzl's `_expand` is the
+    same).
+    """
+    result = []
+    for flag in flags:
+        result.extend(ctx.tokenize(ctx.expand_make_variables(attribute, flag, {})))
+    return result
+
 def _flutter_swift_library_impl(ctx):
     cc_toolchain = find_cc_toolchain(ctx)
     feature_configuration = cc_common.configure_features(
@@ -153,7 +166,7 @@ def _flutter_swift_library_impl(ctx):
     args.add("-sdk", MACOS_SDK_PATH)
     args.add("-target", cc_toolchain.target_gnu_system_name + MACOS_DEPLOYMENT_TARGET)
     args.add("-swift-version", "5")
-    args.add_all(ctx.attr.swiftflags)
+    args.add_all(_expand(ctx, "swiftflags", ctx.attr.swiftflags))
     args.add_all(ctx.files.srcs)
     args.add("--fix-generated-header")
     args.add("--whole-module-optimization")
@@ -208,7 +221,7 @@ def _flutter_swift_library_impl(ctx):
         ),
         name = ctx.label.name,
         linking_contexts = [dep.linking_context for dep in deps],
-        user_link_flags = ["-L" + directory for directory in MACOS_SWIFT_LIBRARY_DIRS] + ctx.attr.linkopts,
+        user_link_flags = ["-L" + directory for directory in MACOS_SWIFT_LIBRARY_DIRS] + _expand(ctx, "linkopts", ctx.attr.linkopts),
         alwayslink = ctx.attr.alwayslink,
         disallow_dynamic_library = True,
     )

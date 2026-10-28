@@ -40,8 +40,24 @@ load("@rules_cc//cc:find_cc_toolchain.bzl", "find_cc_toolchain", "use_cc_toolcha
 load("@rules_cc//cc/common:cc_common.bzl", "cc_common")
 load("@rules_cc//cc/common:cc_info.bzl", "CcInfo")
 
-def _expand(ctx, attribute, flags):
-    return [ctx.expand_make_variables(attribute, flag, {}) for flag in flags]
+def _expand(ctx, attribute, flags, single_token = False):
+    """The strings of a flag attribute as cc_library reads its own.
+
+    cc_library's `copts`, `linkopts`, `defines` and `local_defines` are
+    subject to Make-variable substitution and Bourne shell tokenization; the
+    converter escapes GN's strings for that reading (a define of a quoted
+    string is `X=\\"...\\"`), so this rule must read them the same way or
+    the compiler sees the backslashes (T15: embedder_metal_unittests.mm's
+    TEST_ISOLATE_SNAPSHOT_DATA). A define must be one token, as cc_library
+    insists.
+    """
+    result = []
+    for flag in flags:
+        tokens = ctx.tokenize(ctx.expand_make_variables(attribute, flag, {}))
+        if single_token and len(tokens) != 1:
+            fail("in %s of %s: %r is %d tokens, not one" % (attribute, ctx.label, flag, len(tokens)))
+        result.extend(tokens)
+    return result
 
 def _flutter_objc_library_impl(ctx):
     cc_toolchain = find_cc_toolchain(ctx)
@@ -71,8 +87,8 @@ def _flutter_objc_library_impl(ctx):
         public_hdrs = ctx.files.hdrs,
         textual_hdrs = ctx.files.textual_hdrs,
         includes = includes,
-        defines = ctx.attr.defines,
-        local_defines = _expand(ctx, "local_defines", ctx.attr.local_defines),
+        defines = _expand(ctx, "defines", ctx.attr.defines, single_token = True),
+        local_defines = _expand(ctx, "local_defines", ctx.attr.local_defines, single_token = True),
         user_compile_flags = _expand(ctx, "copts", ctx.attr.copts),
         compilation_contexts = [dep.compilation_context for dep in deps],
         additional_inputs = ctx.files.additional_compiler_inputs,
