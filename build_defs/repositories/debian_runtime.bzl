@@ -222,6 +222,11 @@ def _debian_runtime_extension_impl(mctx):
         llvm_ar = host["HOST_CLANG"] + "//:bin/llvm-ar",
     )
 
+    # Reproducible from the lock file and the host: nothing for
+    # MODULE.bazel.lock to record (which would otherwise hold the host's
+    # archiver, one entry per host OS).
+    return mctx.extension_metadata(reproducible = True)
+
 debian_runtime = module_extension(
     implementation = _debian_runtime_extension_impl,
     doc = "The browsers' runtime sysroot, from debian_runtime.lock.bzl.",
