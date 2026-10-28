@@ -104,6 +104,13 @@ _MAC_COMPILE_FLAGS = [
     "-fstack-protector-all",
 ] + _MAC_WARNING_COMPILE_FLAGS
 
+# iOS's (//build/config/compiler:compiler under is_ios): the Mac's without
+# the stack protector, which GN gives neither iOS nor the web.
+_IOS_COMPILE_FLAGS = [
+    "-no-canonical-prefixes",
+    "-fno-strict-aliasing",
+] + _MAC_WARNING_COMPILE_FLAGS
+
 # The architecture (//build/config/compiler:compiler), per target CPU:
 # x64's `-m64 -march=x86-64`, arm64's `--target=aarch64-linux-gnu` with the
 # define GN's compiler config adds beside it (the toolchain's `arch_copts`
@@ -139,6 +146,23 @@ MACOS_X64_COMPILE_FLAGS = [
 ]
 MACOS_ARM64_LINK_FLAGS = MACOS_ARM64_COMPILE_FLAGS
 MACOS_X64_LINK_FLAGS = MACOS_X64_COMPILE_FLAGS
+
+# iOS (the same config under is_ios): the darwin triple, for a device and
+# the simulator alike -- the environment is the sysroot's and the
+# deployment-target flag's (build/toolchain/mac's ios_clang_arm, _arm_sim
+# and _x64_sim: -miphoneos-version-min or -mios-simulator-version-min).
+IOS_ARM64_COMPILE_FLAGS = [
+    "--target=arm64-apple-darwin",
+    "-arch",
+    "arm64",
+]
+IOS_X64_COMPILE_FLAGS = [
+    "--target=x86_64-apple-darwin",
+    "-arch",
+    "x86_64",
+]
+IOS_ARM64_LINK_FLAGS = IOS_ARM64_COMPILE_FLAGS
+IOS_X64_LINK_FLAGS = IOS_X64_COMPILE_FLAGS
 
 # Defines GN passes to every compile on Linux (//build/config:feature_flags,
 # //build/config/compiler:compiler, //build/config/gcc:symbol_visibility_hidden,
@@ -251,6 +275,11 @@ _MAC_LINK_FLAGS = [
     "-Wl,-rpath,/usr/local/lib/.",
     "-Wl,-rpath,@loader_path/../../..",
 ]
+
+# iOS's links: the engine's own libc++ again; mac_dynamic_flags and
+# mac_executable_flags are the desktop's alone (BUILDCONFIG.gn gives them
+# under is_mac), so no search-path or rpath flags, no -pie.
+_IOS_LINK_FLAGS = ["-nostdlib++"]
 
 # Android's links (//build/config/compiler:compiler under is_android,
 # //build/config/android:runtime_library, build/toolchain/android/BUILD.gn):
@@ -368,6 +397,15 @@ _MAC_EXECUTABLE_LINK_FLAGS = [
     "@executable_path/Frameworks",
 ]
 
+# iOS's executables: the link tool's rpath alone (mac_executable_flags is
+# the desktop's).
+_IOS_EXECUTABLE_LINK_FLAGS = [
+    "-Xlinker",
+    "-rpath",
+    "-Xlinker",
+    "@executable_path/Frameworks",
+]
+
 # //build/config:debug, :release, //build/config/compiler:no_optimize,
 # :optimize, and the symbol configs BUILDCONFIG.gn picks by symbol_level:
 # :symbols (-g2) for an unoptimized build, :no_symbols (-g0) for an
@@ -391,6 +429,10 @@ _OPT_LINK_FLAGS = ["-Wl,-O2", "-Wl,--gc-sections"]
 _MAC_DBG_DEFINES = ["_DEBUG"]
 _MAC_OPT_COMPILE_FLAGS = ["-O2", "-g2", "-fno-ident", "-fdata-sections", "-ffunction-sections"]
 _MAC_OPT_LINK_FLAGS = ["-Wl,-dead_strip"]
+
+# iOS's optimized compiles favor size (//build/config/compiler:optimize
+# under is_ios: -Os); the rest as the Mac's.
+_IOS_OPT_COMPILE_FLAGS = ["-Os", "-g2", "-fno-ident", "-fdata-sections", "-ffunction-sections"]
 
 # ... and --as-needed, which GN leaves out under a sanitizer (functions the
 # sanitizers interpose can make the linker drop a library that is needed,
@@ -468,7 +510,12 @@ def _impl(ctx):
         cxx_include_flags.append("-I" + header.dirname)
 
     android = ctx.attr.os == "android"
-    mac = ctx.attr.os == "mac"
+    ios = ctx.attr.os == "ios"
+
+    # What the Apple platforms share: the SDK as -isysroot with the
+    # deployment target, Objective-C, the Mach-O link forms, archives in
+    # place of --start-lib.
+    mac = ctx.attr.os == "mac" or ios
 
     # Bazel passes this as --sysroot to compile and link actions (`sysroot`
     # legacy feature; on a Mac the feature below, -isysroot) and uses it to
@@ -497,16 +544,16 @@ def _impl(ctx):
             "%sysroot%/usr/include/" + ctx.file.crt_begin_so.dirname.split("/")[-2],
         ]
     elif mac:
-        compile_flags = _MAC_COMPILE_FLAGS + _defines(_MAC_DEFINES)
+        compile_flags = (_IOS_COMPILE_FLAGS if ios else _MAC_COMPILE_FLAGS) + _defines(_MAC_DEFINES)
         cxx_flags = cxx_flags + _MAC_STDLIB_FLAGS
         objcxx_flags = _MAC_OBJCXX_FLAGS
-        link_flags = _MAC_LINK_FLAGS
-        opt_compile_flags = _MAC_OPT_COMPILE_FLAGS
+        link_flags = _IOS_LINK_FLAGS if ios else _MAC_LINK_FLAGS
+        opt_compile_flags = _IOS_OPT_COMPILE_FLAGS if ios else _MAC_OPT_COMPILE_FLAGS
         opt_link_flags = _MAC_OPT_LINK_FLAGS
         dbg_defines = _MAC_DBG_DEFINES
         complete_link_flags = []
         nodeps_dynamic_library_link_flags = _MAC_NODEPS_DYNAMIC_LIBRARY_LINK_FLAGS
-        executable_link_flags = _MAC_EXECUTABLE_LINK_FLAGS
+        executable_link_flags = _IOS_EXECUTABLE_LINK_FLAGS if ios else _MAC_EXECUTABLE_LINK_FLAGS
         executable_link_libs = []
         dynamic_library_link_libs = []
 
@@ -629,7 +676,7 @@ def _impl(ctx):
                             flags = [
                                 "-isysroot",
                                 "%{sysroot}",
-                                "-mmacosx-version-min=" + ctx.attr.deployment_target,
+                                ctx.attr.deployment_target_flag + ctx.attr.deployment_target,
                             ],
                             expand_if_available = "sysroot",
                         ),
@@ -851,7 +898,14 @@ flutter_cc_toolchain_config = rule(
         ),
         "deployment_target": attr.string(
             default = MACOS_DEPLOYMENT_TARGET,
-            doc = "macOS: -mmacosx-version-min (GN's mac_deployment_target, which tools/gn sets to 12.0.0; //build_defs/cc:apple.bzl).",
+            doc = "The Apple platforms: the deployment target the sysroot feature passes with -isysroot (GN's " +
+                  "mac_deployment_target, 12.0.0, or ios_deployment_target, 15.0; //build_defs/cc:apple.bzl).",
+        ),
+        "deployment_target_flag": attr.string(
+            default = "-mmacosx-version-min=",
+            values = ["-mmacosx-version-min=", "-miphoneos-version-min=", "-mios-simulator-version-min="],
+            doc = "The flag that carries the deployment target: macOS's, an iOS device's or the simulator's " +
+                  "(build/toolchain/mac's sysroot_flags per toolchain).",
         ),
         "cxx_include_markers": attr.label_list(
             mandatory = True,
@@ -882,10 +936,12 @@ flutter_cc_toolchain_config = rule(
         ),
         "os": attr.string(
             default = "linux",
-            values = ["linux", "android", "mac"],
+            values = ["linux", "android", "mac", "ios"],
             doc = "The target OS, which picks GN's flag sets: linux (the host's and the arm64 cross " +
-                  "build's), android (the NDK sysroot, -nostdlib with the crt objects and libraries named) " +
-                  "or mac (the Xcode SDK as -isysroot, Objective-C, archives in place of --start-lib).",
+                  "build's), android (the NDK sysroot, -nostdlib with the crt objects and libraries named), " +
+                  "mac (the Xcode SDK as -isysroot, Objective-C, archives in place of --start-lib) or ios " +
+                  "(the Mac's less the desktop's stack protector, search paths, rpaths and -pie, -Os when " +
+                  "optimized; the iPhoneOS or iPhoneSimulator SDK as -isysroot with its deployment-target flag).",
         ),
         "crt_begin_so": attr.label(
             allow_single_file = True,
