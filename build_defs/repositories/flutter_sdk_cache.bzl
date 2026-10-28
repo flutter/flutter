@@ -18,7 +18,8 @@ and the fonts from this file's repository.
 names, as the tool does (flutter_cache.dart's MaterialFonts: the file is a
 path under storage.googleapis.com), verified against the sha256 pinned
 here. The version file is watched: a font roll that changes it fails the
-fetch until the pin follows.
+fetch until the pin follows. The Gradle wrapper and, for a Mac host, the
+six iOS USB dependencies follow the same pattern.
 """
 
 # The archive bin/internal/material_fonts.version named when this was
@@ -113,16 +114,121 @@ gradle_wrapper = repository_rule(
     doc = "The Gradle wrapper archive the flutter tool caches as bin/cache/artifacts/gradle_wrapper.",
 )
 
+# The iOS USB dependencies (flutter_cache.dart's IosUsbArtifacts), universal
+# artifacts the tool checks on every host and downloads on a Mac: each
+# bin/cache/artifacts/<name> is the archive flutter_infra_release/
+# ios-usb-dependencies/arm64_x86_64/<name>/<version>/<name>.zip, the version
+# from bin/internal/<name>.version. The tests' SDK facsimile on a Mac host
+# lays them (packages/flutter_tools/BUILD.bazel) so that the tool run from it
+# downloads nothing -- its "[1/6] iOS USB Artifact" progress lines reach
+# stdout ahead of a debug adapter's Content-Length headers. Pinned as the
+# fonts are: the version each file named when this was written, and the
+# archive's sha256; a roll changes the version file and fails the fetch until
+# the pin follows.
+_IOS_USB_ARTIFACTS = {
+    "libimobiledevice": (
+        "0bf0f9e941c85d06ce4b5909d7a61b3a4f2a6a05",
+        "366410275af4d7f68defcb98a3997c83863f3e31c0345490ce62159f92260b47",
+    ),
+    "libusbmuxd": (
+        "19d6bec393c9f9b31ccb090059f59268da32e281",
+        "0a1d11f950f8b140cbbd365768039028648018dcbe095f4eb6ba0366f3f0d605",
+    ),
+    "libplist": (
+        "cf5897a71ea412ea2aeb1e2f6b5ea74d4fabfd8c",
+        "fd4909cfa7ea4367732fe745ff9c794ed42c9f1bd4042a1e6ec4c9bcf08e2861",
+    ),
+    "openssl": (
+        "22dbb176deef7d9a80f5c94f57a4b518ea935f50",
+        "f760b25a2c72b4244bd3c1ea90e866239fa3376eff3c23fe1e70504bd4615719",
+    ),
+    "libimobiledeviceglue": (
+        "050ff3bf8fdab6ce53a2ddc6ae49b11b1c02a168",
+        "04d4fdea8ca09135ab27cc638adff0ee2693e61d72901a92ef71023f2f55dba6",
+    ),
+    "ios-deploy": (
+        "7a29ab0b6d611f2bf5de4b6f929a82a091866307",
+        "bdf617ac854a8db4902ef44d780688e98ef18ffc4d06db41af02f085c328c089",
+    ),
+}
+
+# The artifacts' names, in the tool's order (IosUsbArtifacts.artifactNames).
+IOS_USB_ARTIFACTS = _IOS_USB_ARTIFACTS.keys()
+
+def ios_usb_repository(artifact):
+    """The repository this extension declares for an iOS USB artifact (ios-deploy's is @ios_usb_ios_deploy)."""
+    return "ios_usb_" + artifact.replace("-", "_")
+
+def _ios_usb_artifact_impl(rctx):
+    artifact = rctx.attr.artifact
+    version_file = rctx.path(Label("//bin/internal:" + artifact + ".version"))
+    rctx.watch(version_file)
+    named = rctx.read(version_file).strip()
+    if named != rctx.attr.version:
+        fail(("bin/internal/%s.version names %s, but %s pins %s: update _IOS_USB_ARTIFACTS " +
+              "(sha256sum of %s%s).") % (
+            artifact,
+            named,
+            "build_defs/repositories/flutter_sdk_cache.bzl",
+            rctx.attr.version,
+            _STORAGE,
+            _ios_usb_archive(artifact, named),
+        ))
+    rctx.download_and_extract(
+        url = _STORAGE + _ios_usb_archive(artifact, named),
+        sha256 = rctx.attr.sha256,
+        type = "zip",
+    )
+    rctx.file("BUILD.bazel", """# The iOS USB dependency %s of bin/internal/%s.version (flutter_sdk_cache.bzl).
+
+package(default_visibility = ["//visibility:public"])
+
+filegroup(
+    name = "files",
+    srcs = glob(["**"], exclude = ["BUILD.bazel", "REPO.bazel"]),
+)
+""" % (artifact, artifact))
+
+def _ios_usb_archive(artifact, version):
+    return "flutter_infra_release/ios-usb-dependencies/arm64_x86_64/%s/%s/%s.zip" % (artifact, version, artifact)
+
+ios_usb_artifact = repository_rule(
+    implementation = _ios_usb_artifact_impl,
+    attrs = {
+        "artifact": attr.string(
+            mandatory = True,
+            doc = "The artifact's name (one of IosUsbArtifacts.artifactNames), which names its version file and its archive.",
+        ),
+        "version": attr.string(
+            mandatory = True,
+            doc = "The version bin/internal/<artifact>.version is expected to name.",
+        ),
+        "sha256": attr.string(
+            mandatory = True,
+            doc = "The archive's sha256.",
+        ),
+    },
+    doc = "An iOS USB dependency the flutter tool caches as bin/cache/artifacts/<artifact> on a Mac.",
+)
+
 def _flutter_sdk_cache_impl(mctx):
     material_fonts(name = "material_fonts")
     gradle_wrapper(name = "gradle_wrapper")
+    for artifact in IOS_USB_ARTIFACTS:
+        version, sha256 = _IOS_USB_ARTIFACTS[artifact]
+        ios_usb_artifact(
+            name = ios_usb_repository(artifact),
+            artifact = artifact,
+            version = version,
+            sha256 = sha256,
+        )
     root = mctx.modules[0] if mctx.modules else None
     if root != None and root.is_root:
         return mctx.extension_metadata(
             root_module_direct_deps = [
                 "gradle_wrapper",
                 "material_fonts",
-            ],
+            ] + [ios_usb_repository(artifact) for artifact in IOS_USB_ARTIFACTS],
             root_module_direct_dev_deps = [],
             reproducible = True,
         )
@@ -130,5 +236,5 @@ def _flutter_sdk_cache_impl(mctx):
 
 flutter_sdk_cache = module_extension(
     implementation = _flutter_sdk_cache_impl,
-    doc = "The Flutter SDK's cache artifacts the framework's and the tool's tests read (@material_fonts, @gradle_wrapper).",
+    doc = "The Flutter SDK's cache artifacts the framework's and the tool's tests read (@material_fonts, @gradle_wrapper, @ios_usb_<name>).",
 )
