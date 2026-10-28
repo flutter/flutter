@@ -39,16 +39,17 @@ Future<void> verifyMarkedNeedsLayoutDuringTransientCallbacksPhase(
   expect(await animation.future, isTrue);
 }
 
-// Registers the cached Roboto font as `family`, as an app does when it loads a
-// font at runtime. Text in `family` falls back to the test font until then,
-// and Roboto's line height differs from the test font's.
-Future<void> loadRobotoAs(String family) async {
+// Registers Ahem as `family`, as an app does when it loads a font at runtime.
+// Text in `family` falls back to the test font until then. Ahem's ascent is
+// 0.8 em and the test font's is 0.75 em, so the alphabetic baseline of text with
+// a font size of 20 moves from 15 to 16 once Ahem loads.
+Future<void> loadAhemAs(String family) async {
   const FileSystem fs = LocalFileSystem();
   const Platform platform = LocalPlatform();
   final Directory flutterRoot = fs.directory(platform.environment['FLUTTER_ROOT']);
 
   final File font = flutterRoot.childFile(
-    fs.path.join('bin', 'cache', 'artifacts', 'material_fonts', 'Roboto-Regular.ttf'),
+    fs.path.join('packages', 'flutter_tools', 'static', 'Ahem.ttf'),
   );
 
   final bytes = Future<ByteData>.value(font.readAsBytesSync().buffer.asByteData());
@@ -92,7 +93,7 @@ void main() {
 
   // Regression test for https://github.com/flutter/flutter/issues/195134.
   testWidgets(
-    'RenderParagraph intrinsics use a font registered after the first layout',
+    'RenderParagraph dry baseline uses a font registered after the first layout',
     (WidgetTester tester) async {
       await tester.pumpWidget(
         const Directionality(
@@ -100,27 +101,29 @@ void main() {
           child: Center(
             child: Text(
               'text widget',
-              style: TextStyle(fontFamily: 'RobotoForParagraph', fontSize: 20),
+              style: TextStyle(fontFamily: 'AhemForParagraph', fontSize: 20),
             ),
           ),
         ),
       );
       final RenderParagraph paragraph = tester.renderObject(find.text('text widget'));
-      final double heightBeforeFontLoads = paragraph.getMaxIntrinsicHeight(double.infinity);
-      expect(heightBeforeFontLoads, paragraph.size.height);
+      const constraints = BoxConstraints(maxWidth: 300);
+      expect(paragraph.getDryBaseline(constraints, TextBaseline.alphabetic), 15.0);
 
-      await tester.runAsync(() => loadRobotoAs('RobotoForParagraph'));
+      await tester.runAsync(() => loadAhemAs('AhemForParagraph'));
       await tester.pump();
 
-      expect(paragraph.size.height, isNot(heightBeforeFontLoads));
-      expect(paragraph.getMaxIntrinsicHeight(double.infinity), paragraph.size.height);
+      expect(
+        paragraph.getDryBaseline(constraints, TextBaseline.alphabetic),
+        moreOrLessEquals(16.0, epsilon: 0.001),
+      );
     },
     skip: isBrowser, // Loads a font file from the Flutter SDK.
   );
 
   // Regression test for https://github.com/flutter/flutter/issues/195134.
   testWidgets(
-    'RenderEditable intrinsics use a font registered after the first layout',
+    'RenderEditable dry baseline uses a font registered after the first layout',
     (WidgetTester tester) async {
       final controller = TextEditingController(text: 'text widget');
       addTearDown(controller.dispose);
@@ -136,7 +139,7 @@ void main() {
               child: EditableText(
                 controller: controller,
                 focusNode: focusNode,
-                style: const TextStyle(fontFamily: 'RobotoForEditable', fontSize: 20),
+                style: const TextStyle(fontFamily: 'AhemForEditable', fontSize: 20),
                 cursorColor: const Color(0xFF000000),
                 backgroundCursorColor: const Color(0xFF000000),
               ),
@@ -146,14 +149,16 @@ void main() {
       );
       final EditableTextState state = tester.state(find.byType(EditableText));
       final RenderEditable editable = state.renderEditable;
-      final double heightBeforeFontLoads = editable.getMaxIntrinsicHeight(300);
-      expect(heightBeforeFontLoads, editable.size.height);
+      const constraints = BoxConstraints(maxWidth: 300);
+      expect(editable.getDryBaseline(constraints, TextBaseline.alphabetic), 15.0);
 
-      await tester.runAsync(() => loadRobotoAs('RobotoForEditable'));
+      await tester.runAsync(() => loadAhemAs('AhemForEditable'));
       await tester.pump();
 
-      expect(editable.size.height, isNot(heightBeforeFontLoads));
-      expect(editable.getMaxIntrinsicHeight(300), editable.size.height);
+      expect(
+        editable.getDryBaseline(constraints, TextBaseline.alphabetic),
+        moreOrLessEquals(16.0, epsilon: 0.001),
+      );
     },
     skip: isBrowser, // Loads a font file from the Flutter SDK.
   );
