@@ -208,8 +208,8 @@ Map<String, String> resolveExtensionBuildTargetArtifacts({
 /// [artifacts] and [buildMode].
 ///
 /// Throws a [ToolExit] if any requested artifact name is invalid or unsupported,
-/// or if the same artifact is requested for multiple target platforms or build
-/// modes.
+/// or if the same artifact resolves to different paths across multiple target
+/// platforms or build modes.
 // TODO(bkonyi): Download required artifacts on demand if not already cached.
 Map<String, String> resolveExtensionAssembleTargetArtifacts({
   required Artifacts artifacts,
@@ -217,7 +217,6 @@ Map<String, String> resolveExtensionAssembleTargetArtifacts({
   required ExtensionAssembleTarget target,
 }) {
   final resolvedArtifacts = <String, String>{};
-  final requestedArtifactConfigs = <String, (String platform, BuildMode mode)>{};
   for (final ExtensionSource input in target.inputs) {
     switch (input) {
       case ExtensionPatternSource():
@@ -227,22 +226,19 @@ Map<String, String> resolveExtensionAssembleTargetArtifacts({
         :final String? platform,
         :final BuildMode? mode,
       ):
-        final String resolvedPlatform = platform ?? target.targetPlatform;
-        final BuildMode resolvedMode = mode ?? buildMode;
-        if (requestedArtifactConfigs[artifact.name]
-            case (final String existingPlatform, final BuildMode existingMode)
-            when existingPlatform != resolvedPlatform || existingMode != resolvedMode) {
+        final String path = artifacts.getArtifactPath(
+          _resolveArtifact(artifact),
+          platform: _tryResolveTargetPlatform(platform ?? target.targetPlatform),
+          mode: mode ?? buildMode,
+        );
+        final String? existingPath = resolvedArtifacts[artifact.name];
+        if (existingPath != null && existingPath != path) {
           throwToolExit(
             'Assemble target "${target.name}" requested artifact "${artifact.name}" '
             'for multiple target platforms or build modes.',
           );
         }
-        requestedArtifactConfigs[artifact.name] = (resolvedPlatform, resolvedMode);
-        resolvedArtifacts[artifact.name] = artifacts.getArtifactPath(
-          _resolveArtifact(artifact),
-          platform: _tryResolveTargetPlatform(resolvedPlatform),
-          mode: resolvedMode,
-        );
+        resolvedArtifacts[artifact.name] = path;
       case ExtensionHostArtifactSource(:final ExtensionHostArtifact artifact):
         final HostArtifact hostArtifact = _resolveHostArtifact(artifact);
         resolvedArtifacts[artifact.name] = artifacts.getHostArtifact(hostArtifact).path;
@@ -258,10 +254,12 @@ TargetPlatform? _tryResolveTargetPlatform(String platformName) {
   try {
     return TargetPlatform.fromName(platformName);
   } on Exception {
-    // Out-of-tree extension target platforms do not map to a built-in
-    // TargetPlatform, so Artifacts.getArtifactPath and Source.artifact receive
-    // platform: null (falling back to the host platform in CachedArtifacts)
-    // unless an explicit built-in platform override is provided.
+    // Out-of-tree extension target platforms don't map to a built-in
+    // TargetPlatform, so artifacts resolve with platform: null. CachedArtifacts
+    // then returns host artifacts: the android-arm profile gen_snapshot (in every
+    // mode) for genSnapshot, and the host's engine directory for icuData,
+    // linuxDesktopPath, and linuxHeaders. Extensions must set a built-in platform
+    // on the artifact source to get target-specific engine artifacts.
     // TODO(bkonyi): Support custom extension-provided artifact resolution for
     // out-of-tree target platforms via ExtensionArtifactManager.
     return null;

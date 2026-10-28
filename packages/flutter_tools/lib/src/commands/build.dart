@@ -203,12 +203,11 @@ class BuildCommand extends FlutterCommand {
             ),
           );
         } else {
-          final String? extensionName = extensionBuildManager.extensionNameForBuildTarget(
+          final String extensionName = extensionBuildManager.extensionNameForBuildTarget(
             target.name,
           );
-          final fromExtension = extensionName != null ? ' from extension "$extensionName"' : '';
           toolContext.logger.printWarning(
-            'Skipping custom build target "${target.name}"$fromExtension because a subcommand with that name already exists.',
+            'Skipping custom build target "${target.name}" from extension "$extensionName" because a subcommand with that name already exists.',
           );
         }
       }

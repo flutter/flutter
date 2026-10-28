@@ -423,56 +423,73 @@ void main() {
     },
   );
 
-  testWithoutContext('ExtensionTarget throws ToolExit when same artifact is requested for multiple platforms or modes', () async {
-    final ExtensionTarget conflictingPlatformTarget = _createTarget(
-      inputs: const <ExtensionSource>[
-        ExtensionSource.artifact(BuiltInArtifacts.genSnapshot),
-        ExtensionSource.artifact(BuiltInArtifacts.genSnapshot, platform: 'linux-arm64'),
-      ],
-    );
+  testWithoutContext(
+    'ExtensionTarget throws ToolExit when same artifact is requested for multiple platforms',
+    () async {
+      final ExtensionTarget conflictingPlatformTarget = _createTarget(
+        inputs: const <ExtensionSource>[
+          ExtensionSource.artifact(BuiltInArtifacts.genSnapshot),
+          ExtensionSource.artifact(BuiltInArtifacts.genSnapshot, platform: 'linux-arm64'),
+        ],
+      );
 
-    await expectLater(
-      () => conflictingPlatformTarget.build(environment),
-      throwsToolExit(
-        message:
-            'Assemble target "custom-target" requested artifact "genSnapshot" '
-            'for multiple target platforms or build modes.',
-      ),
-    );
+      await expectLater(
+        () => conflictingPlatformTarget.build(environment),
+        throwsToolExit(
+          message:
+              'Assemble target "custom-target" requested artifact "genSnapshot" '
+              'for multiple target platforms or build modes.',
+        ),
+      );
+    },
+  );
 
-    final ExtensionTarget conflictingModeTarget = _createTarget(
-      inputs: const <ExtensionSource>[
-        ExtensionSource.artifact(BuiltInArtifacts.genSnapshot),
-        ExtensionSource.artifact(BuiltInArtifacts.genSnapshot, mode: .release),
-      ],
-    );
+  testWithoutContext(
+    'ExtensionTarget throws ToolExit when same artifact is requested for multiple modes',
+    () async {
+      final ExtensionTarget conflictingModeTarget = _createTarget(
+        inputs: const <ExtensionSource>[
+          ExtensionSource.artifact(BuiltInArtifacts.genSnapshot),
+          ExtensionSource.artifact(BuiltInArtifacts.genSnapshot, mode: .release),
+        ],
+      );
 
-    await expectLater(
-      () => conflictingModeTarget.build(environment),
-      throwsToolExit(
-        message:
-            'Assemble target "custom-target" requested artifact "genSnapshot" '
-            'for multiple target platforms or build modes.',
-      ),
-    );
+      await expectLater(
+        () => conflictingModeTarget.build(environment),
+        throwsToolExit(
+          message:
+              'Assemble target "custom-target" requested artifact "genSnapshot" '
+              'for multiple target platforms or build modes.',
+        ),
+      );
+    },
+  );
 
-    final buildManager = FakeExtensionBuildManager();
-    final ExtensionTarget matchingDuplicateArtifactTarget = _createTarget(
-      buildManager: buildManager,
-      inputs: const <ExtensionSource>[
-        ExtensionSource.artifact(BuiltInArtifacts.genSnapshot),
-        ExtensionSource.artifact(BuiltInArtifacts.genSnapshot, platform: 'linux-x64', mode: .debug),
-      ],
-    );
+  testWithoutContext(
+    'ExtensionTarget allows duplicate artifact sources that resolve to the same path',
+    () async {
+      final buildManager = FakeExtensionBuildManager();
+      final ExtensionTarget matchingDuplicateArtifactTarget = _createTarget(
+        buildManager: buildManager,
+        inputs: const <ExtensionSource>[
+          ExtensionSource.artifact(BuiltInArtifacts.genSnapshot),
+          ExtensionSource.artifact(
+            BuiltInArtifacts.genSnapshot,
+            platform: 'linux-x64',
+            mode: .debug,
+          ),
+        ],
+      );
 
-    await matchingDuplicateArtifactTarget.build(environment);
-    expect(
-      buildManager.invokedResolvedArtifacts,
-      equals(<String, String>{
-        'genSnapshot': 'Artifact.genSnapshot.TargetPlatform.linux_x64.debug',
-      }),
-    );
-  });
+      await matchingDuplicateArtifactTarget.build(environment);
+      expect(
+        buildManager.invokedResolvedArtifacts,
+        equals(<String, String>{
+          'genSnapshot': 'Artifact.genSnapshot.TargetPlatform.linux_x64.debug',
+        }),
+      );
+    },
+  );
 
   testWithoutContext(
     'ExtensionTarget supports custom targetPlatform on target and artifact sources',

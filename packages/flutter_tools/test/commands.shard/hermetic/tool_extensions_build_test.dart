@@ -198,6 +198,7 @@ void _failingBuildExtensionEntryPoint(SendPort sendPort) {
   ToolExtensionEntryPoint.run(
     sendPort,
     <ToolExtensionService>[_FailingAndConflictingBuildService()],
+    extensionName: 'failing_extension',
     supportedPlatforms: const <String>{'linux'},
   );
 }
@@ -225,6 +226,7 @@ void _invalidTargetBuildExtensionEntryPoint(SendPort sendPort) {
   ToolExtensionEntryPoint.run(
     sendPort,
     <ToolExtensionService>[_InvalidTargetBuildService()],
+    extensionName: 'invalid_target_extension',
     supportedPlatforms: const <String>{'linux'},
   );
 }
@@ -248,6 +250,7 @@ void _firstDuplicateExtensionEntryPoint(SendPort sendPort) {
   ToolExtensionEntryPoint.run(
     sendPort,
     <ToolExtensionService>[_FirstDuplicateBuildService()],
+    extensionName: 'first_extension',
     supportedPlatforms: const <String>{'linux'},
   );
 }
@@ -278,6 +281,7 @@ void _secondDuplicateExtensionEntryPoint(SendPort sendPort) {
   ToolExtensionEntryPoint.run(
     sendPort,
     <ToolExtensionService>[_SecondDuplicateBuildService()],
+    extensionName: 'second_extension',
     supportedPlatforms: const <String>{'linux'},
   );
 }
@@ -662,8 +666,8 @@ void main() {
         expect(
           logger.warningText,
           contains(
-            'Skipping duplicate build target "shared-target" from extension "unknown_extension" '
-            '(already registered by extension "unknown_extension").',
+            'Skipping duplicate build target "shared-target" from extension "second_extension" '
+            '(already registered by extension "first_extension").',
           ),
         );
 
@@ -686,8 +690,8 @@ void main() {
         expect(
           logger.warningText,
           contains(
-            'Skipping duplicate assemble target "shared-assemble-target" from extension "unknown_extension" '
-            '(already registered by extension "unknown_extension").',
+            'Skipping duplicate assemble target "shared-assemble-target" from extension "second_extension" '
+            '(already registered by extension "first_extension").',
           ),
         );
 
@@ -729,7 +733,7 @@ void main() {
         expect(
           logger.warningText,
           contains(
-            'Failed to query build targets from extension "unknown_extension": FormatException: Invalid "name" field: "Invalid-Name".',
+            'Failed to query build targets from extension "invalid_target_extension": FormatException: Invalid "name" field: "Invalid-Name".',
           ),
         );
 
@@ -1055,7 +1059,7 @@ void main() {
         expect(
           testLogger.warningText,
           contains(
-            'Skipping custom build target "bundle" from extension "unknown_extension" because a subcommand with that name already exists.',
+            'Skipping custom build target "bundle" from extension "failing_extension" because a subcommand with that name already exists.',
           ),
         );
         expect(command.subcommands['bundle'], isA<BuildBundleCommand>());
@@ -1090,7 +1094,7 @@ void main() {
         expect(
           testLogger.warningText,
           contains(
-            'Skipping custom assemble target "copy_assets" from extension "unknown_extension" because a target with that name already exists.',
+            'Skipping custom assemble target "copy_assets" from extension "failing_extension" because a target with that name already exists.',
           ),
         );
 
@@ -1105,7 +1109,7 @@ void main() {
           ]),
           throwsToolExit(
             message:
-                'Target "non-existent-dep" required by "unknown-dep-assemble-target" from extension "unknown_extension" not found. '
+                'Target "non-existent-dep" required by "unknown-dep-assemble-target" from extension "failing_extension" not found. '
                 'It might not be registered.',
           ),
         );
