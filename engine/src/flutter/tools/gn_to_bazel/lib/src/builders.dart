@@ -368,6 +368,10 @@ const Map<String, String> checkoutScriptTests = <String, String>{
       '//engine/src/flutter/tools/pkg/engine_build_configs:check_build_configs',
   'flutter/shell/testing/vm_service/test.dart':
       '//engine/src/flutter/shell/testing/vm_service:service_protocol_test',
+  // The iOS scenario app's integration tests (xcodebuild over the project
+  // the build copies into the build directory, on a simulator).
+  'flutter/testing/ios_scenario_app/run_ios_tests.sh':
+      '//engine/src/flutter/testing/ios_scenario_app:ios_scenario_tests',
 };
 
 /// The executables run_tests.py's `engine` type runs on Linux

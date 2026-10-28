@@ -529,6 +529,40 @@ gn_copy = rule(
     },
 )
 
+def gn_copy_tree(name, source, dest, exclude = "", **kwargs):
+    """The Dart tree's copy_tree() (build/dart/copy_tree.gni): a directory's files into the build directory.
+
+    copy_tree.py copies `source` recursively to `dest`, leaving out every
+    file or directory whose name matches `exclude` (shutil.ignore_patterns:
+    one fnmatch pattern). Here it is a gn_copy of the directory's files as
+    they are, each placed at its path under `dest` (`{{source_target_relative}}`,
+    which build_directory.bzl expands against the package): the iOS
+    scenario app's Xcode project copied beside the build's App.framework.
+    The source is the package's own directory (`.`), the one form the
+    converted files use: a subdirectory would need its own relative paths.
+
+    Args:
+      name: GN's target name.
+      source: GN's `source`: `.`, this package's directory.
+      dest: GN's `dest`, a path under the build directory as GN wrote it
+        (`$root_out_dir/ios_scenario_app`).
+      exclude: GN's `exclude`, an fnmatch pattern over file and directory
+        names (`*.*framework`), or nothing.
+      **kwargs: gn_copy's other arguments (visibility, testonly, deps).
+    """
+    if source != ".":
+        fail("%s: gn_copy_tree copies this package's directory alone (source = \".\"), not %s" % (name, source))
+    excludes = []
+    if exclude:
+        # The pattern names any file or directory at any depth.
+        excludes = ["**/" + exclude, "**/" + exclude + "/**", exclude, exclude + "/**"]
+    gn_copy(
+        name = name,
+        srcs = native.glob(["**"], exclude = excludes),
+        outputs = [dest.rstrip("/") + "/{{source_target_relative}}"],
+        **kwargs
+    )
+
 def _gn_generated_file_impl(ctx):
     # GN's generated_file with `contents` and no output_conversion: a list
     # is written one element per line, each line ended.

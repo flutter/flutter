@@ -2497,8 +2497,8 @@ final class _Emitter {
           // gen dir: the file of the package, as a copy's.
           final List<GnValue>? files = target.rule == 'action'
               ? target.variables['outputs']?.liveItems.map((GnListItem i) => i.value).toList()
-              : target.variables['outputs']?.unconditionalItems;
-          final List<GnValue>? sources = target.variables['sources']?.unconditionalItems;
+              : target.variables['outputs']?.itemsWithin(target.condition);
+          final List<GnValue>? sources = target.variables['sources']?.itemsWithin(target.condition);
           if (files == null) {
             break;
           }
@@ -2974,7 +2974,7 @@ final class _Emitter {
       return;
     }
     final GnLocation location = variable.assignments.first.location;
-    final List<GnValue>? sources = target.variables['sources']?.unconditionalItems;
+    final List<GnValue>? sources = target.variables['sources']?.itemsWithin(target.condition);
     if (sources == null || sources.length != outputs.length) {
       throw GnError(
         location,
@@ -3036,7 +3036,7 @@ final class _Emitter {
       return;
     }
     final GnLocation location = variable.assignments.first.location;
-    final List<GnValue>? sources = target.variables['sources']?.unconditionalItems;
+    final List<GnValue>? sources = target.variables['sources']?.itemsWithin(target.condition);
     if (sources == null) {
       throw GnError(location, 'the sources of copy ${target.name} depend on a condition');
     }
