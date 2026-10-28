@@ -8,6 +8,7 @@ import '../base/analyze_size.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
+import '../base/template.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
 import '../context/apple_context.dart';
@@ -24,6 +25,7 @@ class BuildMacosCommand extends BuildSubCommand {
     required this.appleContext,
     required this.buildSystem,
     required this.featureFlags,
+    required this.templateRenderer,
     required ToolContext super.toolContext,
     required super.verboseHelp,
   }) : super(logger: toolContext.logger, outputPreferences: toolContext.outputPreferences) {
@@ -48,6 +50,9 @@ class BuildMacosCommand extends BuildSubCommand {
   /// Feature flags governing macOS desktop builds.
   @visibleForTesting
   final FeatureFlags featureFlags;
+
+  /// Renderer used for template generation during pod processing.
+  final TemplateRenderer templateRenderer;
 
   @override
   ToolContext get toolContext => super.toolContext!;
@@ -98,6 +103,7 @@ class BuildMacosCommand extends BuildSubCommand {
         analytics: analytics,
       ),
       targetOverride: targetFile,
+      templateRenderer: templateRenderer,
       toolContext: toolContext,
       usingCISystem: usingCISystem,
       verboseLogging: logger.isVerbose || globalResults?[FlutterGlobalOptions.kVerboseFlag] == true,
