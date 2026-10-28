@@ -13,6 +13,7 @@ package(default_visibility = ["//visibility:public"])
 
 flutter_snapshot(
     name = "ios_scenario_app_snapshot",
+    dart_packages = {"@vector_math//:dart_sources": "engine/src/flutter/third_party/pkg/vector_math"},
     main_dart = "lib/main.dart",
     target_compatible_with = select({
         "@platforms//os:ios": [],
