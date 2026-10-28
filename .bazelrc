@@ -11,13 +11,18 @@
 # leaves no trace outside directories that are already ignored.
 common --symlink_prefix=engine/src/out/bazel-
 
-# Name a cross build's output directory after its platform
-# (bazel-out/android_arm64-opt/, wasm32_emscripten-opt/, linux_arm64-opt/)
-# rather than the host CPU, which every platform shares (k8-opt/) -- the
-# host's own build keeps k8-<mode>. The flutter tool reads a build in place
-# through its local_engine.json (build_defs/dist/local_engine.bzl), and an
-# Android engine and the host engine it pairs with must both be on disk: in
-# one directory each build would overwrite the other's manifest and the
+# Name a build's output directory after its platform rather than the host
+# CPU, which every platform shares (k8-opt/). The platforms are per runtime
+# mode (build_defs/config/platforms.bzl: the builders' configurations name
+# `<platform>_<mode>`, the mode a platform flag), so each mode of each
+# platform has a directory of its own, as GN has a build directory per mode:
+# bazel-out/linux_x64_debug-opt/, linux_x64_release-opt/,
+# android_arm64_profile-opt/, wasm32_emscripten_release-opt/ -- a build that
+# names no platform keeps k8-<compilation mode>. The flutter tool reads a
+# build in place through its local_engine.json
+# (build_defs/dist/local_engine.bzl), and an Android engine and the host
+# engine it pairs with, or two modes of one engine, must all be on disk: in
+# one directory each build would overwrite the others' manifests and the
 # outputs whose paths they share.
 common --experimental_platform_in_output_dir
 

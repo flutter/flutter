@@ -857,7 +857,7 @@ test_suite(
 
 # linux_unopt.json: ci/host_debug_no_prebuilt_dart_sdk
 #   no configuration (configs.bazelrc); the flags would be:
-#   --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=debug
+#   --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=debug --platforms=//engine/src/flutter/build/bazel/toolchains:linux_x64_debug
 install(
     name = "host_debug_no_prebuilt_dart_sdk",
     testonly = True,
