@@ -10,7 +10,6 @@
 #include "display_list/effects/dl_color_filter.h"
 #include "display_list/effects/dl_color_source.h"
 #include "display_list/effects/dl_mask_filter.h"
-#include "display_list/effects/image_filters/dl_matrix_image_filter.h"
 #include "flutter/impeller/display_list/aiks_unittests.h"
 
 #include "flutter/display_list/dl_blend_mode.h"
@@ -245,82 +244,6 @@ TEST_P(AiksTest, ColorFilterBlend) {
     return builder.Build();
   };
   ASSERT_TRUE(OpenPlaygroundHere(callback));
-}
-
-// Draws every porter-duff blend mode, kClear through kModulate (one per
-// column), through each of the paths that render with the porter-duff blend
-// shader (one per row):
-//   1. An image with a blend color filter, which is drawn as an atlas.
-//   2. The same, with an image filter. This disables the atlas conversion, so
-//      the color filter is applied as a foreground blend instead.
-//   3. An atlas with a color per sprite.
-//   4. Textured vertices with a color per vertex.
-TEST_P(AiksTest, PorterDuffBlendShaderBlendModes) {
-  auto texture = CreateTextureForFixture("blend_mode_dst.png");
-  auto image = DlImageImpeller::Make(texture);
-  const DlRect source = DlRect::MakeSize(texture->GetSize());
-  // Translucent, so that no blend color filter with it is simplified away.
-  const DlColor color = DlColor::RGBA(0.9, 0.5, 0.0, 0.75);
-  constexpr int kBlendModeCount = static_cast<int>(DlBlendMode::kModulate) + 1;
-  constexpr Scalar kCellSize = 64;
-  constexpr Scalar kCellSpacing = 72;
-  auto cell = [&](int row, int column) {
-    return DlRect::MakeXYWH(8 + column * kCellSpacing, 8 + row * kCellSpacing,
-                            kCellSize, kCellSize);
-  };
-
-  DisplayListBuilder builder;
-  builder.Scale(GetContentScale().x, GetContentScale().y);
-  builder.DrawPaint(DlPaint(DlColor::kMidGrey()));
-
-  // The rows are drawn in order, with the vertices last: after a draw with an
-  // image color source, image draws that are not drawn as an atlas currently
-  // ignore their color filter.
-  for (int i = 0; i < kBlendModeCount; i++) {
-    DlPaint paint;
-    paint.setColorFilter(
-        DlColorFilter::MakeBlend(color, static_cast<DlBlendMode>(i)));
-    builder.DrawImageRect(image, source, cell(0, i), DlImageSampling::kLinear,
-                          &paint);
-  }
-
-  const DlMatrixImageFilter identity_filter(DlMatrix(),
-                                            DlImageSampling::kLinear);
-  for (int i = 0; i < kBlendModeCount; i++) {
-    DlPaint paint;
-    paint.setColorFilter(
-        DlColorFilter::MakeBlend(color, static_cast<DlBlendMode>(i)));
-    paint.setImageFilter(&identity_filter);
-    builder.DrawImageRect(image, source, cell(1, i), DlImageSampling::kLinear,
-                          &paint);
-  }
-
-  for (int i = 0; i < kBlendModeCount; i++) {
-    const RSTransform transform = RSTransform::Make(
-        cell(2, i).GetLeftTop(), kCellSize / source.GetWidth(), DlDegrees(0));
-    builder.DrawAtlas(image, &transform, &source, &color, /*count=*/1,
-                      static_cast<DlBlendMode>(i), DlImageSampling::kLinear,
-                      /*cullRect=*/nullptr);
-  }
-
-  const DlPoint texture_coordinates[] = {
-      source.GetLeftTop(), source.GetRightTop(), source.GetLeftBottom(),
-      source.GetRightBottom()};
-  const DlColor vertex_colors[] = {color, color, color, color};
-  DlPaint vertices_paint;
-  vertices_paint.setColorSource(DlColorSource::MakeImage(
-      image, DlTileMode::kClamp, DlTileMode::kClamp, DlImageSampling::kLinear));
-  for (int i = 0; i < kBlendModeCount; i++) {
-    const DlRect quad = cell(3, i);
-    const DlPoint positions[] = {quad.GetLeftTop(), quad.GetRightTop(),
-                                 quad.GetLeftBottom(), quad.GetRightBottom()};
-    builder.DrawVertices(
-        DlVertices::Make(DlVertexMode::kTriangleStrip, /*vertex_count=*/4,
-                         positions, texture_coordinates, vertex_colors),
-        static_cast<DlBlendMode>(i), vertices_paint);
-  }
-
-  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
 // Verification for: https://github.com/flutter/flutter/issues/155691
@@ -818,9 +741,9 @@ TEST_P(AiksTest, ForegroundPipelineBlendAppliesTransformCorrectly) {
 
 // Draws an image through a DlBlendColorFilter with the given Porter-Duff mode.
 // `Canvas::AttemptColorFilterOptimization` turns the draw into an AtlasContents
-// draw that selects the matching `PorterDuffBlend` pipeline variant without
-// inverting the mode, so each test exercises one specialization of that shader
-// on every backend.
+// draw with the `PorterDuffBlend` pipeline, which takes the mode, without
+// inverting it, as uniforms (see `SetPorterDuffCoefficients`). Each test
+// exercises the shader with one mode's coefficients on every backend.
 static void DrawImageWithPorterDuffBlendColorFilter(AiksTest* test,
                                                     DlBlendMode mode) {
   auto image = DlImageImpeller::Make(
@@ -840,9 +763,8 @@ static void DrawImageWithPorterDuffBlendColorFilter(AiksTest* test,
   ASSERT_TRUE(test->OpenPlaygroundHere(builder.Build()));
 }
 
-// One test per Porter-Duff mode that ContentContext builds a PorterDuffBlend
-// variant for. kDst is left out because DlBlendColorFilter::Make folds it to no
-// filter at all, and kScreen because the atlas path never selects it.
+// One test per Porter-Duff mode, kClear through kModulate. kDst is left out
+// because DlBlendColorFilter::Make folds it to no filter at all.
 #define PORTER_DUFF_BLEND_COLOR_FILTER_TEST(mode)                        \
   TEST_P(AiksTest, DrawImageWithPorterDuffBlendColorFilter##mode) {      \
     DrawImageWithPorterDuffBlendColorFilter(this, DlBlendMode::k##mode); \
