@@ -416,6 +416,45 @@ filegroup(
 # what each CI build of ci/builders/{linux,mac}_*.json builds, into its
 # --target-dir, under its `--config` (an `install` into GN's layout, which
 # the recipes read) -- are generated into ci/builders/BUILD.bazel.
+# What a host build lays out, a Linux host's and a Mac's alike: the targets
+# that place their own files (BuildDirectoryInfo) -- the sky_engine package
+# (gen/dart-pkg/sky_engine: the targets of sky/packages/sky_engine) and
+# impellerc's GLSL library, which GN's shader_lib group copies beside the
+# compiler (shader_lib/flutter/runtime_effect.glsl, shader_lib/impeller/
+# *.glsl; the flutter tool hands the directory to impellerc as --include
+# when it compiles a package's shaders) -- and the files by the directory
+# that holds them under the build root (a shared library by its GN target,
+# lib<name>.so or .dylib by the platform).
+_LOCAL_ENGINE_HOST_CONTENTS = [
+    "//engine/src/flutter/impeller/compiler/shader_lib/flutter",
+    "//engine/src/flutter/impeller/compiler/shader_lib/impeller",
+    "//engine/src/flutter/sky/packages/sky_engine",
+]
+
+_LOCAL_ENGINE_HOST_FILES = {
+    "//engine/src/flutter/build/bazel/dart_wrap:gen_snapshot": "",
+    "//engine/src/flutter/flutter_frontend_server:frontend_server": "gen",
+    "//engine/src/flutter/impeller/compiler:impellerc": "",
+    "//engine/src/flutter/impeller/tessellator:tessellator_shared": "",
+    "//engine/src/flutter/lib/snapshot:flutter_patched_sdk/platform_strong.dill": "flutter_patched_sdk",
+    "//engine/src/flutter/lib/snapshot:flutter_patched_sdk/vm_outline_strong.dill": "flutter_patched_sdk",
+    "//engine/src/flutter/lib/snapshot:isolate_snapshot.bin": "gen/flutter/lib/snapshot",
+    "//engine/src/flutter/lib/snapshot:isolate_snapshot_instructions.bin": "gen/flutter/lib/snapshot",
+    "//engine/src/flutter/lib/snapshot:vm_isolate_snapshot.bin": "gen/flutter/lib/snapshot",
+    "//engine/src/flutter/lib/snapshot:vm_snapshot_instructions.bin": "gen/flutter/lib/snapshot",
+    "//engine/src/flutter/shell/platform/embedder:copy_headers": "",
+    "//engine/src/flutter/shell/platform/embedder:flutter_engine_library": "",
+    "//engine/src/flutter/shell/testing:flutter_tester": "",
+    "//engine/src/flutter/tools/font_subset:font-subset": "",
+    "//engine/src/flutter/tools/path_ops:path_ops": "",
+    # copy("copy_icudata"): the full data file, where artifacts.zip
+    # carries the trimmed flutter/icudtl.dat.
+    "@icu//:icudata": "",
+}
+
+# The Dart SDK's tree, at its paths.
+_LOCAL_ENGINE_HOST_TREES = ["//engine/src/flutter/build/archives:dart_sdk_archive_dart-sdk"]
+
 local_engine(
     name = "local_engine",
     # The root group is testonly (GN's `testonly = true`).
@@ -437,17 +476,13 @@ local_engine(
         # Impeller SDK, the embedder archive. The Maven tree and the dist
         # archives are not in it; the builders name them as targets.
         "@platforms//os:android": [":flutter"],
-        # The sky_engine package (gen/dart-pkg/sky_engine): the targets of
-        # sky/packages/sky_engine place their own files (BuildDirectoryInfo).
-        # impellerc's GLSL library, which GN's shader_lib group copies beside
-        # the compiler (shader_lib/flutter/runtime_effect.glsl,
-        # shader_lib/impeller/*.glsl): the flutter tool hands the directory to
-        # impellerc as --include when it compiles a package's shaders.
-        "//conditions:default": [
-            "//engine/src/flutter/impeller/compiler/shader_lib/flutter",
-            "//engine/src/flutter/impeller/compiler/shader_lib/impeller",
-            "//engine/src/flutter/sky/packages/sky_engine",
+        # A Mac's host build lays FlutterMacOS.framework and its xcframework
+        # at the build root besides (shell/platform/darwin/macos's `macos`
+        # group, what the root reaches through shell/platform:platform).
+        "@platforms//os:macos": _LOCAL_ENGINE_HOST_CONTENTS + [
+            "//engine/src/flutter/shell/platform/darwin/macos:macos",
         ],
+        "//conditions:default": _LOCAL_ENGINE_HOST_CONTENTS,
     }),
     # The files by the directory that holds them, under the build root.
     files = select({
@@ -455,33 +490,18 @@ local_engine(
         # root (android/icudtl.dat; @icu's filegroup selects it), as GN's
         # icudata group lays it.
         "@platforms//os:android": {"@icu//:icudata": ""},
-        "//conditions:default": {
-            "//engine/src/flutter/build/bazel/dart_wrap:gen_snapshot": "",
-            "//engine/src/flutter/flutter_frontend_server:frontend_server": "gen",
-            "//engine/src/flutter/impeller/compiler:impellerc": "",
-            "//engine/src/flutter/impeller/tessellator:libtessellator.so": "",
-            "//engine/src/flutter/lib/snapshot:flutter_patched_sdk/platform_strong.dill": "flutter_patched_sdk",
-            "//engine/src/flutter/lib/snapshot:flutter_patched_sdk/vm_outline_strong.dill": "flutter_patched_sdk",
-            "//engine/src/flutter/lib/snapshot:isolate_snapshot.bin": "gen/flutter/lib/snapshot",
-            "//engine/src/flutter/lib/snapshot:isolate_snapshot_instructions.bin": "gen/flutter/lib/snapshot",
-            "//engine/src/flutter/lib/snapshot:vm_isolate_snapshot.bin": "gen/flutter/lib/snapshot",
-            "//engine/src/flutter/lib/snapshot:vm_snapshot_instructions.bin": "gen/flutter/lib/snapshot",
-            "//engine/src/flutter/shell/platform/embedder:copy_headers": "",
-            "//engine/src/flutter/shell/platform/embedder:libflutter_engine.so": "",
+        "@platforms//os:macos": _LOCAL_ENGINE_HOST_FILES,
+        # A Linux host's adds the GTK embedding's library (its headers are
+        # a tree below).
+        "//conditions:default": _LOCAL_ENGINE_HOST_FILES | {
             "//engine/src/flutter/shell/platform/linux:flutter_linux_gtk": "",
-            "//engine/src/flutter/shell/testing:flutter_tester": "",
-            "//engine/src/flutter/tools/font_subset:font-subset": "",
-            "//engine/src/flutter/tools/path_ops:libpath_ops.so": "",
-            # copy("copy_icudata"): the full data file, where artifacts.zip
-            # carries the trimmed flutter/icudtl.dat.
-            "@icu//:icudata": "",
         },
     }),
-    # The trees: the Dart SDK and the GTK headers, at their paths.
+    # The trees: the Dart SDK, and on Linux the GTK headers, at their paths.
     trees = select({
         "@platforms//os:android": [],
-        "//conditions:default": [
-            "//engine/src/flutter/build/archives:dart_sdk_archive_dart-sdk",
+        "@platforms//os:macos": _LOCAL_ENGINE_HOST_TREES,
+        "//conditions:default": _LOCAL_ENGINE_HOST_TREES + [
             "//engine/src/flutter/shell/platform/linux:flutter_gtk_publish_headers_linux",
         ],
     }),
@@ -1404,7 +1424,11 @@ exports_files(["README"] + glob(
   // The GTK shell (the Linux embedding) with its suite, which runs under a
   // display with GLib's criticals fatal as run_tests.py runs it; its
   // system libraries are //flutter/shell/platform/linux/config's.
-  ConvertedFile('//flutter/shell/platform/linux'),
+  // The file asserts is_linux: a Linux build's alone, as the darwin files
+  // are the Apple builds' (a Mac host build, or an Apple cross build from
+  // a Linux host, must not reach the GTK embedding or its sysroot's
+  // libraries: the Mac's T27).
+  ConvertedFile('//flutter/shell/platform/linux', condition: 'is_linux'),
   // The Android embedding's host-testable pieces (the JNI facade with its
   // mock, the native window, the context, the surfaces, the external view
   // embedder, the platform view delegate) with the three suites

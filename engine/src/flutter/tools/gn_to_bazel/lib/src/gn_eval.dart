@@ -869,10 +869,16 @@ final class GnVariable {
 
   /// The items of a list variable when every assignment is unconditional
   /// (the common case), or null if any is conditional.
-  List<GnValue>? get unconditionalItems {
+  List<GnValue>? get unconditionalItems => itemsWithin(Condition.always);
+
+  /// The items of a list variable when every assignment is unconditional
+  /// within [context] -- under a condition [context] implies: the target's
+  /// own, for a list of a file evaluated under a condition, whose every
+  /// assignment carries it -- or null if any is conditional beyond it.
+  List<GnValue>? itemsWithin(Condition context) {
     final items = <GnValue>[];
     for (final GnAssignment a in assignments) {
-      if (!a.isUnconditional) {
+      if (context.and(a.condition) != context) {
         return null;
       }
       switch (a.op) {
