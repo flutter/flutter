@@ -59,10 +59,18 @@ def _tree_entries(ctx):
     return entries, inputs
 
 def _resources(_os_name, _inputs_size):
-    # The wrapped build parallelizes on its own and should have the machine
-    # to itself: Bazel runs an action that asks for more than is available
-    # alone, once everything else has finished.
-    return {"cpu": 256, "memory": 32768}
+    # The wrapped build parallelizes on its own (gn_build.py runs ninja with
+    # a job per CPU). It is not declared as the whole machine: Bazel grants
+    # a request larger than what is free only once nothing else runs
+    # locally, and in a build with work to spare that moment never comes --
+    # the engine's test gate had the Dart SDK's build waiting an hour behind
+    # a dozen compiles, with every Dart test behind it (10-27). A wrapped
+    # build is the long pole of whatever needs it, so it is declared the way
+    # other wrapped builds are (rules_foreign_cc): one CPU, which is always
+    # granted, and the machine is oversubscribed for the minutes it runs.
+    # The memory keeps two wrapped builds from starting together on a small
+    # machine (Bazel's local memory is two thirds of the host's by default).
+    return {"cpu": 1, "memory": 8192}
 
 def _gn_build_impl(ctx):
     name = ctx.label.name
