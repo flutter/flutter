@@ -94,7 +94,9 @@ def _ios_xctest_impl(ctx):
         # app's, copied there with App.framework beside it): the build
         # directory is the view's copy, and xcodebuild is told the project.
         directory = build_directory
-        project_option = "-project %s " % _shell_quote("$FLUTTER_BUILD_DIRECTORY/" + ctx.attr.build_directory_project.strip("/"))
+
+        # The variable expands at run time; the path is quoted on its own.
+        project_option = '-project "$FLUTTER_BUILD_DIRECTORY/"%s ' % _shell_quote(ctx.attr.build_directory_project.strip("/"))
 
     # GN's build directory of the view: the engine targets' products at
     # their paths under it, each path once.
