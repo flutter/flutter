@@ -354,3 +354,69 @@ def bin_to_assembly(name, target_os = None, target_cpu = None, **kwargs):
         }),
         **kwargs
     )
+
+# ---------------------------------------------------------------------------
+# A Mac host's universal gen_snapshot.
+# ---------------------------------------------------------------------------
+
+def _macos_gen_snapshots_impl(ctx):
+    # lib/snapshot/BUILD.gn's build_mac_gen_snapshot pair and
+    # create_macos_gen_snapshots: each Mac toolchain's gen_snapshot for the
+    # target copied to artifacts_<cpu>/gen_snapshot<suffix> (cp.py), and the
+    # two joined by sky/tools/create_macos_binary.py (lipo) into
+    # universal/<name>, all three at the build root.
+    suffix = ctx.attr.suffix
+    halves = {}
+    for cpu, src in (("arm64", ctx.file.arm64), ("x64", ctx.file.x64)):
+        copy = ctx.actions.declare_file("artifacts_%s/gen_snapshot%s" % (cpu, suffix))
+        ctx.actions.symlink(output = copy, target_file = src, is_executable = True)
+        halves[cpu] = copy
+    universal = ctx.actions.declare_file("universal/" + (ctx.attr.universal_name or "gen_snapshot" + suffix))
+    args = ctx.actions.args()
+    args.add("--in-arm64", halves["arm64"])
+    args.add("--in-x64", halves["x64"])
+    args.add("--out", universal)
+    run_python(
+        ctx,
+        script = ctx.file._script,
+        arguments = [args],
+        inputs = halves.values(),
+        outputs = [universal],
+        mnemonic = "UniversalGenSnapshot",
+        progress_message = "Joining the Mac's gen_snapshots into %{output}",
+    )
+    return [
+        DefaultInfo(files = depset([universal])),
+        BuildDirectoryInfo(entries = depset(
+            [(copy, copy.short_path.split("/")[-2] + "/" + copy.basename) for copy in halves.values()] +
+            [(universal, "universal/" + universal.basename)],
+        )),
+    ]
+
+macos_gen_snapshots = rule(
+    implementation = _macos_gen_snapshots_impl,
+    doc = "lib/snapshot's create_macos_gen_snapshots: the two Mac toolchains' gen_snapshots for the target, " +
+          "copied under artifacts_<cpu>/ and joined by lipo (sky/tools/create_macos_binary.py) into universal/.",
+    attrs = {
+        "arm64": attr.label(
+            allow_single_file = True,
+            mandatory = True,
+            doc = "gen_snapshot as the arm64 Mac toolchain builds it for the target (the Dart wrap's gen_snapshot_mac_arm64).",
+        ),
+        "x64": attr.label(
+            allow_single_file = True,
+            mandatory = True,
+            doc = "gen_snapshot as the x64 Mac toolchain builds it for the target (the Dart wrap's gen_snapshot_mac_x64).",
+        ),
+        "suffix": attr.string(
+            doc = "gen_snapshot.gni's gen_snapshot_suffix on a Mac host: `_<target cpu>` (`_armv7` for arm).",
+        ),
+        "universal_name": attr.string(
+            doc = "The universal binary's name when not gen_snapshot<suffix>: gen_snapshot for an Android target.",
+        ),
+        "_script": attr.label(
+            default = "//engine/src/flutter/sky:tools/create_macos_binary.py",
+            allow_single_file = True,
+        ),
+    } | PYTHON_ATTRS,
+)

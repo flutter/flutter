@@ -129,12 +129,18 @@ Future<int> run(List<String> arguments) async {
   final files = <String>[];
   var failures = 0;
   // The targets each converted file defines (less the skipped), for the
-  // builder files' ninja targets.
+  // builder files' ninja targets -- and the hand-written packages' targets
+  // the builders name (handWrittenNinjaTargets).
   final convertedTargets = <String, Set<String>>{};
   final convertedTests = <String, Set<String>>{};
   // The condition a file is read under (the manifest's), by package: a
   // target of such a file exists in the builds the condition holds for.
   final packageConditions = <String, String?>{};
+  for (final MapEntry<String, Map<String, String?>> package in handWrittenNinjaTargets.entries) {
+    convertedTargets[package.key] = package.value.keys.toSet();
+    // One condition per package here: the targets' common one.
+    packageConditions[package.key] = package.value.values.toSet().single;
+  }
   for (final input in inputs) {
     final String file = p.canonicalize(input);
     if (!p.isWithin(root, file)) {

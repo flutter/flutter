@@ -14,7 +14,7 @@
 load("@bazel_skylib//lib:selects.bzl", "selects")
 load("@rules_cc//cc:defs.bzl", "cc_library")
 load("//build_defs/cc:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
-load("//build_defs/dart:snapshot.bzl", "bin_to_assembly", "compile_platform", "core_snapshot")
+load("//build_defs/dart:snapshot.bzl", "bin_to_assembly", "compile_platform", "core_snapshot", "macos_gen_snapshots")
 load("//build_defs/gn:gn_action.bzl", "gn_generated_file")
 
 package(default_visibility = ["//visibility:public"])
@@ -135,17 +135,49 @@ cc_library(
     alwayslink = True,
 )
 
+# The macOS and Android gen_snapshot of a Mac host (build_mac_gen_snapshot
+# x2 and action("create_macos_gen_snapshots")): the tool as each Mac
+# toolchain builds it for the target, from the Dart wrap, copied under
+# artifacts_<cpu>/ and joined by lipo into universal/gen_snapshot<suffix>
+# (gen_snapshot.gni: the suffix is the target CPU's, `_armv7` for arm;
+# an Android target's universal binary is plain gen_snapshot). A Mac's
+# alone: the wrap builds the halves on no other host.
+macos_gen_snapshots(
+    name = "create_macos_gen_snapshots",
+    arm64 = "//engine/src/flutter/build/bazel/dart_wrap:gen_snapshot_mac_arm64",
+    suffix = select({
+        "@platforms//cpu:aarch64": "_arm64",
+        "@platforms//cpu:armv7": "_armv7",
+        "@platforms//cpu:x86_64": "_x64",
+        "//conditions:default": "",
+    }),
+    target_compatible_with = select({
+        "//engine/src/flutter/build/bazel:host_os_is_mac": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    universal_name = select({
+        "@platforms//os:android": "gen_snapshot",
+        "//conditions:default": "",
+    }),
+    x64 = "//engine/src/flutter/build/bazel/dart_wrap:gen_snapshot_mac_x64",
+)
+
 # group("generate_snapshot_bins"): the core snapshot and the platform
-# kernels, and -- for a host that builds gen_snapshot directly (a Linux one,
-# for every target CPU GN names) -- the host's gen_snapshot for the target
-# and its analyze_snapshot (both the host toolchain's: GN names them with
-# ($host_toolchain)), the wrap's products. The root group lists it.
+# kernels, and gen_snapshot for the target -- on a Linux host (which builds
+# it directly, for every target CPU GN names) the host's gen_snapshot and
+# its analyze_snapshot (both the host toolchain's: GN names them with
+# ($host_toolchain)), the wrap's products; on a Mac the universal binary
+# above. The root group lists it.
 filegroup(
     name = "generate_snapshot_bins",
     srcs = [
         ":generate_snapshot_bin",
         ":kernel_platform_files",
-        "//engine/src/flutter/build/bazel/dart_wrap:analyze_snapshot_host",
-        "//engine/src/flutter/build/bazel/dart_wrap:gen_snapshot_host",
-    ],
+    ] + select({
+        "//engine/src/flutter/build/bazel:host_os_is_mac": [":create_macos_gen_snapshots"],
+        "//conditions:default": [
+            "//engine/src/flutter/build/bazel/dart_wrap:analyze_snapshot_host",
+            "//engine/src/flutter/build/bazel/dart_wrap:gen_snapshot_host",
+        ],
+    }),
 )

@@ -51,4 +51,29 @@ group("dart_wrap") {
       deps += [ "//flutter/third_party/dart/runtime/bin:analyze_snapshot" ]
     }
   }
+
+  # A Mac host's universal gen_snapshot (lib/snapshot's
+  # build_mac_gen_snapshot): the tool built by each of the two Mac
+  # toolchains, arm64's and x64's, for the target -- the toolchain of the
+  # target's own CPU builds gen_snapshot_host_targeting_host, as GN's file
+  # names it there, the other gen_snapshot -- which create_macos_binary.py
+  # joins with lipo. The outputs sit at the toolchain's place: the default
+  # toolchain's at the root, the other's under clang_<cpu>/.
+  if (host_os == "mac" &&
+      (target_os == "mac" || target_os == "ios" || target_os == "android")) {
+    foreach(host_cpu_name,
+            [
+              "arm64",
+              "x64",
+            ]) {
+      _toolchain = "//build/toolchain/mac:clang_$host_cpu_name"
+      if (target_os == "mac" && host_cpu_name == target_cpu) {
+        deps += [ "//flutter/third_party/dart/runtime/bin:gen_snapshot_host_targeting_host($_toolchain)" ]
+      } else {
+        deps += [
+          "//flutter/third_party/dart/runtime/bin:gen_snapshot($_toolchain)",
+        ]
+      }
+    }
+  }
 }
