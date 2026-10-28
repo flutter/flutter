@@ -1014,6 +1014,9 @@ install(
 # mac_clang_tidy.json: ci/host_debug_clang_tidy
 #   ninja's default target, everything: bazel build --config=mac_host_debug_clang_tidy //engine/src/flutter:local_engine
 
+# mac_clang_tidy.json: ci/ios_debug_sim_clang_tidy
+#   ninja's default target, everything: bazel build --config=ios_debug_sim_clang_tidy //engine/src/flutter:local_engine
+
 # mac_host_engine.json: ci/host_debug_framework
 #   bazel run --config=host_debug_framework :host_debug_framework
 install(
@@ -1268,6 +1271,152 @@ install(
     }),
 )
 
+# mac_ios_engine.json: ci/ios_debug_sim
+#   ninja's default target, everything: bazel build --config=ci_ios_debug_sim //engine/src/flutter:local_engine
+
+# mac_ios_engine.json: ci/ios_debug_sim_arm64
+#   ninja's default target, everything: bazel build --config=ios_debug_sim_arm64 //engine/src/flutter:local_engine
+
+# mac_ios_engine.json: ci/ios_debug
+#   bazel run --config=ci_ios_debug :ci_ios_debug
+install(
+    name = "ci_ios_debug",
+    testonly = True,
+    contents = [
+        "//engine/src/flutter/lib/snapshot:generate_snapshot_bins",
+        "//engine/src/flutter/shell/platform/darwin/ios:flutter_framework",
+    ],
+    directory = "ci/ios_debug",
+    target_compatible_with = select({
+        "//engine/src/flutter/build/bazel:host_os_is_mac": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+)
+
+# mac_ios_engine.json: ci/ios_profile
+#   bazel run --config=ci_ios_profile :ci_ios_profile
+install(
+    name = "ci_ios_profile",
+    testonly = True,
+    contents = [
+        "//engine/src/flutter/lib/snapshot:generate_snapshot_bins",
+        "//engine/src/flutter/shell/platform/darwin/ios:flutter_framework",
+    ],
+    directory = "ci/ios_profile",
+    target_compatible_with = select({
+        "//engine/src/flutter/build/bazel:host_os_is_mac": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+)
+
+# mac_ios_engine.json: ci/ios_release
+#   bazel run --config=ci_ios_release :ci_ios_release
+install(
+    name = "ci_ios_release",
+    testonly = True,
+    contents = [
+        "//engine/src/flutter/lib/snapshot:generate_snapshot_bins",
+        "//engine/src/flutter/shell/platform/darwin/ios:flutter_framework",
+    ],
+    directory = "ci/ios_release",
+    target_compatible_with = select({
+        "//engine/src/flutter/build/bazel:host_os_is_mac": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+)
+
+# mac_ios_engine.json: ci/ios_debug_sim_extension_safe
+#   ninja's default target, everything: bazel build --config=ios_debug_sim_extension_safe //engine/src/flutter:local_engine
+
+# mac_ios_engine.json: ci/ios_debug_sim_arm64_extension_safe
+#   ninja's default target, everything: bazel build --config=ios_debug_sim_arm64_extension_safe //engine/src/flutter:local_engine
+
+# mac_ios_engine.json: ci/ios_debug_extension_safe
+#   bazel run --config=ios_debug_extension_safe :ios_debug_extension_safe
+install(
+    name = "ios_debug_extension_safe",
+    testonly = True,
+    contents = [
+        "//engine/src/flutter/lib/snapshot:generate_snapshot_bins",
+        "//engine/src/flutter/shell/platform/darwin/ios:flutter_framework",
+    ],
+    directory = "ci/ios_debug_extension_safe",
+    target_compatible_with = select({
+        "//engine/src/flutter/build/bazel:host_os_is_mac": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+)
+
+# mac_ios_engine.json: ci/ios_profile_extension_safe
+#   bazel run --config=ios_profile_extension_safe :ios_profile_extension_safe
+install(
+    name = "ios_profile_extension_safe",
+    testonly = True,
+    contents = [
+        "//engine/src/flutter/lib/snapshot:generate_snapshot_bins",
+        "//engine/src/flutter/shell/platform/darwin/ios:flutter_framework",
+    ],
+    directory = "ci/ios_profile_extension_safe",
+    target_compatible_with = select({
+        "//engine/src/flutter/build/bazel:host_os_is_mac": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+)
+
+# mac_ios_engine.json: ci/ios_release_extension_safe
+#   bazel run --config=ios_release_extension_safe :ios_release_extension_safe
+install(
+    name = "ios_release_extension_safe",
+    testonly = True,
+    contents = [
+        "//engine/src/flutter/lib/snapshot:generate_snapshot_bins",
+        "//engine/src/flutter/shell/platform/darwin/ios:flutter_framework",
+    ],
+    directory = "ci/ios_release_extension_safe",
+    target_compatible_with = select({
+        "//engine/src/flutter/build/bazel:host_os_is_mac": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+)
+
+# mac_ios_engine_ddm.json: ci/ios_debug_sim_ddm
+#   ninja's default target, everything: bazel build --config=ios_debug_sim_ddm //engine/src/flutter:local_engine
+
+# mac_ios_engine_ddm.json: ci/ios_debug_sim_arm64_ddm
+#   ninja's default target, everything: bazel build --config=ios_debug_sim_arm64_ddm //engine/src/flutter:local_engine
+
+# mac_ios_engine_ddm.json: ci/ios_debug_ddm
+#   bazel run --config=ios_debug_ddm :ios_debug_ddm
+install(
+    name = "ios_debug_ddm",
+    testonly = True,
+    contents = [
+        "//engine/src/flutter/lib/snapshot:generate_snapshot_bins",
+        "//engine/src/flutter/shell/platform/darwin/ios:flutter_framework",
+    ],
+    directory = "ci/ios_debug_ddm",
+    target_compatible_with = select({
+        "//engine/src/flutter/build/bazel:host_os_is_mac": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+)
+
+# mac_ios_engine_ddm.json: ci/ios_release_ddm
+#   bazel run --config=ios_release_ddm :ios_release_ddm
+install(
+    name = "ios_release_ddm",
+    testonly = True,
+    contents = [
+        "//engine/src/flutter/lib/snapshot:generate_snapshot_bins",
+        "//engine/src/flutter/shell/platform/darwin/ios:flutter_framework",
+    ],
+    directory = "ci/ios_release_ddm",
+    target_compatible_with = select({
+        "//engine/src/flutter/build/bazel:host_os_is_mac": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+)
+
 # mac_unopt.json: ci/host_debug_arm64_tests
 #   ninja's default target, everything: bazel build --config=host_debug_arm64_tests //engine/src/flutter:local_engine
 
@@ -1492,6 +1641,44 @@ test_suite(
         "//engine/src/flutter/third_party/tonic/tests:tonic_unittests",
     ],
 )
+
+# mac_unopt.json: ci/ios_debug_unopt_sim_arm64
+#   bazel run --config=ios_debug_unopt_sim_arm64 :ios_debug_unopt_sim_arm64
+# Not built, no Bazel counterpart yet: flutter/testing/ios_scenario_app, flutter/shell/platform/darwin/ios:ios_test_flutter.
+# Nothing to install.
+
+# ci/ios_debug_unopt_sim_arm64's tests: run_tests.py --type objc.
+# Not run, no Bazel test yet: the objc type.
+# Other steps, scripts of the checkout: Scenario App Integration Tests.
+# Nothing to run.
+
+# mac_unopt.json: ci/ios_debug_unopt_sim_arm64_extension_safe
+#   bazel run --config=ios_debug_unopt_sim_arm64_extension_safe :ios_debug_unopt_sim_arm64_extension_safe
+# Not built, no Bazel counterpart yet: flutter/testing/ios_scenario_app, flutter/shell/platform/darwin/ios:ios_test_flutter.
+# Nothing to install.
+
+# ci/ios_debug_unopt_sim_arm64_extension_safe's tests: run_tests.py --type objc.
+# Not run, no Bazel test yet: the objc type.
+# Other steps, scripts of the checkout: Scenario App Integration Tests.
+# Nothing to run.
+
+# local_engine.json: macos/ios_debug
+#   ninja's default target, everything: bazel build --config=ios_debug //engine/src/flutter:local_engine
+
+# local_engine.json: macos/ios_debug_unopt
+#   ninja's default target, everything: bazel build --config=ios_debug_unopt //engine/src/flutter:local_engine
+
+# local_engine.json: macos/ios_profile
+#   ninja's default target, everything: bazel build --config=ios_profile //engine/src/flutter:local_engine
+
+# local_engine.json: macos/ios_release
+#   ninja's default target, everything: bazel build --config=ios_release //engine/src/flutter:local_engine
+
+# local_engine.json: macos/ios_debug_sim
+#   ninja's default target, everything: bazel build --config=ios_debug_sim //engine/src/flutter:local_engine
+
+# local_engine.json: macos/ios_debug_sim_unopt_arm64
+#   ninja's default target, everything: bazel build --config=ios_debug_sim_unopt_arm64 //engine/src/flutter:local_engine
 
 # local_engine.json: macos/android_debug_arm64
 #   ninja's default target, everything: bazel build --config=android_debug_arm64 //engine/src/flutter:local_engine

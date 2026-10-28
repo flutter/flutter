@@ -175,6 +175,18 @@ const Map<String, String> macosPlatforms = <String, String>{
 /// tools/gn's `--mac-cpu` default.
 const String defaultMacCpu = 'x64';
 
+/// The iOS platforms (build/bazel/toolchains: the iOS toolchains,
+/// research/21): a device's, and the simulator's by tools/gn's
+/// `--simulator-cpu` (x64 unless given).
+const String iosDevicePlatform = '//engine/src/flutter/build/bazel/toolchains:ios_arm64';
+const Map<String, String> iosSimulatorPlatforms = <String, String>{
+  'arm64': '//engine/src/flutter/build/bazel/toolchains:ios_sim_arm64',
+  'x64': '//engine/src/flutter/build/bazel/toolchains:ios_sim_x64',
+};
+
+/// tools/gn's `--simulator-cpu` default.
+const String defaultSimulatorCpu = 'x64';
+
 /// tools/gn's `--android-cpu` choices, and its default.
 const List<String> androidCpus = <String>['arm', 'x64', 'x86', 'arm64', 'riscv64'];
 const String defaultAndroidCpu = 'arm';
@@ -259,16 +271,20 @@ const Map<String, GnFlag> gnFlags = <String, GnFlag>{
   '--android-cpu': GnFlag(GnFlagEffect.target, takesValue: true),
   '--fuchsia': GnFlag(GnFlagEffect.otherPlatform),
   '--fuchsia-cpu': GnFlag(GnFlagEffect.otherPlatform, takesValue: true),
-  '--ios': GnFlag(GnFlagEffect.otherPlatform),
-  // iOS's qualifiers (the simulator and its CPU): the iOS build they are in
-  // is out of scope; alone they would be too.
-  '--simulator': GnFlag(GnFlagEffect.otherPlatform),
-  '--simulator-cpu': GnFlag(GnFlagEffect.otherPlatform, takesValue: true),
-  // darwin_extension_safe: the app-extension-safe form of the iOS
-  // framework, the Apple products' phase's (research/20, M4).
+  // iOS: --ios is target_os ios (a device, arm64), --simulator the
+  // simulator (--simulator-cpu its CPU, x64 unless given): the iOS
+  // platforms (research/21).
+  '--ios': GnFlag(GnFlagEffect.target),
+  '--simulator': GnFlag(GnFlagEffect.target),
+  '--simulator-cpu': GnFlag(GnFlagEffect.target, takesValue: true),
+  // darwin_extension_safe: tools/gn names the build directory
+  // `_extension_safe` and passes the argument, which no GN file reads (the
+  // iOS framework is built app-extension-safe always:
+  // //build/config/ios:ios_application_extension); the build is its
+  // counterpart's, under another configuration name.
   '--darwin-extension-safe': GnFlag(
-    GnFlagEffect.unsupported,
-    note: "the app-extension-safe framework: the Apple products' phase",
+    GnFlagEffect.assumed,
+    note: 'the iOS framework is app-extension-safe in every build; the same build under this name',
   ),
   // The Mac: --mac is target_os mac, --mac-cpu the CPU of a --mac build and
   // of a Mac's host build (tools/gn's get_target_cpu).
@@ -476,6 +492,8 @@ final class BuilderBuild {
     String? linuxCpu;
     String? androidCpu;
     String? macCpu;
+    var simulator = false;
+    String? simulatorCpu;
     var validationLayers = false;
     final List<String> gn = build.gn;
     for (var i = 0; i < gn.length; i++) {
@@ -519,6 +537,12 @@ final class BuilderBuild {
               targetOs = 'mac';
             case '--mac-cpu':
               macCpu = value;
+            case '--ios':
+              targetOs = 'ios';
+            case '--simulator':
+              simulator = true;
+            case '--simulator-cpu':
+              simulatorCpu = value;
             default:
               linuxCpu = value;
           }
@@ -602,6 +626,23 @@ final class BuilderBuild {
           '--mac-cpu=$cpu (the Bazel build has macOS ${macosPlatforms.keys.join(' and ')} '
           'platforms only)',
         );
+      }
+    } else if (targetOs == 'ios') {
+      // --ios: a device (arm64); --simulator the simulator of
+      // --simulator-cpu (x64 unless given).
+      if (simulator) {
+        final String cpu = simulatorCpu ?? defaultSimulatorCpu;
+        final String? simulatorPlatform = iosSimulatorPlatforms[cpu];
+        if (simulatorPlatform != null) {
+          platform = '--platforms=$simulatorPlatform';
+        } else {
+          unsupported.add(
+            '--simulator-cpu=$cpu (the Bazel build has iOS simulator '
+            '${iosSimulatorPlatforms.keys.join(' and ')} platforms only)',
+          );
+        }
+      } else {
+        platform = '--platforms=$iosDevicePlatform';
       }
     } else if (targetOs != null && targetOs != 'linux') {
       otherPlatform = '--target-os=$targetOs';
@@ -1330,6 +1371,9 @@ bool fileHolds(String? condition, BuilderBuild build) {
   final String? platform = build.platform;
   final bool android = androidPlatforms.values.any((String p) => platform == '--platforms=$p');
   final bool mac = macosPlatforms.values.any((String p) => platform == '--platforms=$p');
+  final bool ios =
+      platform == '--platforms=$iosDevicePlatform' ||
+      iosSimulatorPlatforms.values.any((String p) => platform == '--platforms=$p');
   final wasm = platform == '--platforms=$wasmPlatform';
   return condition
       .split('||')
@@ -1337,11 +1381,10 @@ bool fileHolds(String? condition, BuilderBuild build) {
         (String variable) => switch (variable.trim()) {
           'is_android' => android,
           'is_wasm' => wasm,
-          'is_mac' || 'is_apple' => mac,
-          // No builder builds for iOS yet (research/21: I2 brings the iOS
-          // shell's builders and their platforms).
-          'is_ios' => false,
-          'is_linux' => !android && !wasm && !mac,
+          'is_mac' => mac,
+          'is_ios' => ios,
+          'is_apple' => mac || ios,
+          'is_linux' => !android && !wasm && !mac && !ios,
           _ => true,
         },
       );

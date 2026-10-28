@@ -4361,7 +4361,7 @@ executable("x_unittests") {
         assumptions: generationAssumptions(),
         extraSources: <String, List<String>>{
           'x_unittests': <String>[
-            '//engine/src/flutter/shell/platform/darwin:ios/flutter_task_queue_dispatch.h',
+            '//engine/src/flutter/shell/platform/darwin/ios:flutter_task_queue_dispatch.h',
             'c_utils.h',
           ],
         },
@@ -4376,7 +4376,7 @@ executable("x_unittests") {
           '        "a_unittests.cc",\n'
           '        "a_utils.h",\n'
           '        "c_utils.h",\n'
-          '        "//engine/src/flutter/shell/platform/darwin:ios/flutter_task_queue_dispatch.h",\n'
+          '        "//engine/src/flutter/shell/platform/darwin/ios:flutter_task_queue_dispatch.h",\n'
           '    ],\n',
         ),
       );
@@ -4394,7 +4394,7 @@ executable("x_unittests") {
           '    hdrs = [\n'
           '        "a_utils.h",\n'
           '        "c_utils.h",\n'
-          '        "//engine/src/flutter/shell/platform/darwin:ios/flutter_task_queue_dispatch.h",\n'
+          '        "//engine/src/flutter/shell/platform/darwin/ios:flutter_task_queue_dispatch.h",\n'
           '    ],\n',
         ),
       );
@@ -8612,9 +8612,15 @@ test_suite(
 ]}''',
         'mac_android_aot_engine.json':
             '{"builds": [${build('ci/android_profile', '--target-dir ci/android_profile --runtime-mode profile --android --xcode-symlinks', <String>['flutter/lib/snapshot', 'flutter/shell/platform/android:gen_snapshot'])}]}',
-        // iOS is out of scope, --simulator and --darwin-extension-safe with it.
+        // iOS (research/21): --ios a device, --simulator the simulator of
+        // --simulator-cpu (x64 unless given); --darwin-extension-safe is
+        // the same build under another name.
         'mac_ios_engine.json':
-            '{"builds": [${build('ci/ios_debug_sim_extension_safe', '--ios --runtime-mode debug --simulator --simulator-cpu=arm64 --no-lto --darwin-extension-safe', <String>[])}]}',
+            '''
+{"builds": [
+  ${build('ci/ios_debug_sim_extension_safe', '--ios --runtime-mode debug --simulator --simulator-cpu=arm64 --no-lto --darwin-extension-safe', <String>[])},
+  ${build('ci/ios_release', '--target-dir ci/ios_release --ios --runtime-mode release --xcode-symlinks', <String>['flutter/lib/snapshot:generate_snapshot_bins', 'flutter/shell/platform/darwin/ios:flutter_framework'])}
+]}''',
         // The developer's: the web build from either host is one build;
         // macos/host_debug (--no-stripped) is the Mac's developer build,
         // from which CI's mac_host_debug differs, so CI's keeps its ci/.
@@ -8636,6 +8642,8 @@ test_suite(
         'ci/host_debug ci_mac_host_debug',
         'ci/mac_debug_arm64 mac_debug_arm64',
         'ci/host_debug_unopt_arm64 host_debug_unopt_arm64',
+        'ci/ios_debug_sim_extension_safe ios_debug_sim_extension_safe',
+        'ci/ios_release ios_release',
         'macos/wasm_release wasm_release',
         'macos/host_debug mac_host_debug',
       ]);
@@ -8659,6 +8667,14 @@ build:mac_debug_arm64 --compilation_mode=opt --//engine/src/flutter/common:runti
 #   --target-dir ci/host_debug_unopt_arm64 --runtime-mode debug --unoptimized --no-lto --mac-cpu arm64 --xcode-symlinks
 build:host_debug_unopt_arm64 --compilation_mode=dbg --//engine/src/flutter/common:runtime_mode=debug --platforms=//engine/src/flutter/build/bazel/toolchains:macos_arm64_debug
 
+# mac_ios_engine.json: ci/ios_debug_sim_extension_safe
+#   --ios --runtime-mode debug --simulator --simulator-cpu=arm64 --no-lto --darwin-extension-safe
+build:ios_debug_sim_extension_safe --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=debug --platforms=//engine/src/flutter/build/bazel/toolchains:ios_sim_arm64_debug
+
+# mac_ios_engine.json: ci/ios_release
+#   --target-dir ci/ios_release --ios --runtime-mode release --xcode-symlinks
+build:ios_release --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=release --platforms=//engine/src/flutter/build/bazel/toolchains:ios_arm64_release --//engine/src/flutter/build/bazel:lto
+
 # local_engine.json: macos/wasm_release
 #   --web --runtime-mode=release --no-rbe --no-goma
 # The same configuration as linux_web_engine_build.json's ci/wasm_release, above.
@@ -8667,13 +8683,6 @@ build:host_debug_unopt_arm64 --compilation_mode=dbg --//engine/src/flutter/commo
 #   --runtime-mode debug --no-stripped --no-lto --xcode-symlinks
 build:mac_host_debug --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=debug --platforms=//engine/src/flutter/build/bazel/toolchains:macos_x64_debug --//engine/src/flutter/build/bazel:stripped=false
 '''),
-      );
-      expect(
-        bazelrc,
-        contains(
-          '#   mac_ios_engine.json: ci/ios_debug_sim_extension_safe -- a platform the Bazel '
-          'build has none for yet (--ios)',
-        ),
       );
       // fileHolds: a file read under is_mac exists for the Mac's builds, a
       // Linux one not.

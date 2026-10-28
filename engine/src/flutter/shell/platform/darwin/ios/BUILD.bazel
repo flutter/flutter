@@ -498,7 +498,7 @@ cc_library(
 
 flutter_shared_library(
     name = "create_flutter_framework_dylib",
-    hdrs = [
+    srcs = [
         "framework/Headers/Flutter.h",
         "framework/Headers/FlutterAppDelegate.h",
         "framework/Headers/FlutterCallbackCache.h",
@@ -512,7 +512,11 @@ flutter_shared_library(
         "framework/Headers/FlutterSceneLifeCycle.h",
         "framework/Headers/FlutterViewController.h",
     ],
+    copts = FLUTTER_COPTS + [
+        "-fapplication-extension",  # from //build/config/ios:ios_application_extension
+    ],
     linkopts = ["-Wl,-install_name,@rpath/Flutter.framework/Flutter"],
+    local_defines = FLUTTER_LOCAL_DEFINES,
     output_name = "Flutter",
     target_compatible_with = select({
         "@platforms//os:ios": [],
@@ -520,6 +524,7 @@ flutter_shared_library(
     }),
     deps = [
         ":flutter_framework_source",
+        "//engine/src:include_root",
         "//engine/src/flutter:config",
         "//engine/src/flutter/build/bazel:ios_application_extension",
         "//engine/src/flutter/build/bazel/toolchains:cxx_runtime",
@@ -771,3 +776,14 @@ selects.config_setting_group(
         "//engine/src/flutter/impeller/tools:vulkan",
     ],
 )
+
+# What GN has no words for; maintained in the converter's manifest
+# (tools/gn_to_bazel/lib/src/manifest.dart).
+
+# The embedding's AccessibilityFeatures, which api_check's tests read (the
+# enum mirrors dart:ui's), and its task queue header, which darwin/common's
+# Objective-C suite includes (the manifest's extraSources).
+exports_files([
+    "flutter_task_queue_dispatch.h",
+    "framework/Source/AccessibilityFeatures.swift",
+])

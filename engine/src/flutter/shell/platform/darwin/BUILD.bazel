@@ -25,15 +25,3 @@ filegroup(
         "//conditions:default": ["@platforms//:incompatible"],
     }),
 )
-
-# What GN has no words for; maintained in the converter's manifest
-# (tools/gn_to_bazel/lib/src/manifest.dart).
-
-# The iOS embedding's AccessibilityFeatures, which api_check's tests read
-# (the enum mirrors dart:ui's), and its task queue header, which
-# darwin/common's Objective-C suite lists among its sources: files of this
-# package until shell/platform/darwin/ios has a build file of its own.
-exports_files([
-    "ios/flutter_task_queue_dispatch.h",
-    "ios/framework/Source/AccessibilityFeatures.swift",
-])
