@@ -848,7 +848,11 @@ while IFS= read -r line; do
   options+=("$line")
 done < <(sed -n 's|^// FlutterTesterOptions=||p' "$runfiles/{source}")
 cd "$runfiles/engine/src"
-command=("$runfiles/{tester}" "$@" "${{options[@]}}" \\
+# An array that may be empty is expanded as `${{a[@]+"${{a[@]}}"}}`: under
+# `set -u`, a Mac's /bin/bash (3.2) counts an empty array's expansion an
+# unbound variable, where 4.4 and later do not (the Mac's T17: every Dart
+# test failed on it).
+command=("$runfiles/{tester}" "$@" ${{options[@]+"${{options[@]}}"}} \\
   --use-test-fonts \\
   "--icu-data-file-path=$runfiles/{icu_data}" \\
   "--flutter-assets-dir=$runfiles/{assets_dir}" \\
@@ -870,7 +874,7 @@ if [[ "{must_fail}" != 1 ]]; then
   if [[ "$status" -ne 0 ]]; then
     exit "$status"
   fi
-  for string in "${{forbidden[@]}}"; do
+  for string in ${{forbidden[@]+"${{forbidden[@]}}"}}; do
     if grep -qF -- "$string" "$log"; then
       echo "flutter_tester_test: the output of {kernel} contained the forbidden string \\"$string\\":" >&2
       grep -F -- "$string" "$log" >&2

@@ -375,6 +375,11 @@ flutter_objc_library(
         "framework/Source/flutter_codecs_unittest.mm",
         "framework/Source/flutter_standard_codec_unittest.mm",
     ],
+    hdrs = [
+        "framework/Source/FlutterBinaryMessengerRelay.h",
+        "framework/Source/FlutterTestUtils.h",
+        "//engine/src/flutter/shell/platform/darwin:ios/flutter_task_queue_dispatch.h",
+    ],
     copts = FLUTTER_COPTS + [
         "-Wno-inconsistent-missing-override",  # from //flutter/testing
         "-fvisibility=default",
@@ -405,6 +410,11 @@ flutter_objc_library(
 cc_test(
     name = "framework_common_unittests",
     size = "small",
+    srcs = [
+        "framework/Source/FlutterBinaryMessengerRelay.h",
+        "framework/Source/FlutterTestUtils.h",
+        "//engine/src/flutter/shell/platform/darwin:ios/flutter_task_queue_dispatch.h",
+    ],
     # Add platform frameworks directory to search path for test frameworks.
     # Add platform lib to search path for test libraries/Swift modules.
     copts = FLUTTER_COPTS + [

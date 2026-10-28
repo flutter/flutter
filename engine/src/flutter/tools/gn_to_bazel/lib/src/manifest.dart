@@ -951,19 +951,41 @@ android_engine_artifacts(
 load("//build_defs/testing:checkout_script_test.bzl", "checkout_script_test")
 
 # run_tests.py --type font-subset: `python3 test.py --variant <build
-# directory>` from this directory, against the binary and the archive at
-# their places in the build directory.
+# directory>` from this directory (`--target-cpu arm64` when the directory's
+# name says so), against the binary and the archive at their places in the
+# build directory -- the archive under zip_archives/<platform>-<cpu>/, as
+# test.py's platform_to_path spells the host and the CPU it is given.
 checkout_script_test(
     name = "font_subset_test",
-    build_directory = {
-        ":font-subset": "",
-        ":font_subset": "zip_archives/linux-x64",
-    },
+    build_directory = select({
+        ":when_is_mac_and_target_cpu_arm64": {
+            ":font-subset": "",
+            ":font_subset": "zip_archives/darwin-arm64",
+        },
+        ":when_is_mac_and_target_cpu_x64": {
+            ":font-subset": "",
+            ":font_subset": "zip_archives/darwin-x64",
+        },
+        "//engine/src/flutter/common:platform_linux_arm64": {
+            ":font-subset": "",
+            ":font_subset": "zip_archives/linux-arm64",
+        },
+        "//conditions:default": {
+            ":font-subset": "",
+            ":font_subset": "zip_archives/linux-x64",
+        },
+    }),
     script = "test.py",
     script_args = [
         "--variant",
         "{variant}",
-    ],
+    ] + select({
+        "@platforms//cpu:aarch64": [
+            "--target-cpu",
+            "arm64",
+        ],
+        "//conditions:default": [],
+    }),
 )
 ''',
   ),
@@ -1168,9 +1190,13 @@ filegroup(
     filesGroups: <String>{'darwin'},
     appendix: '''
 # The iOS embedding's AccessibilityFeatures, which api_check's tests read
-# (the enum mirrors dart:ui's): a file of this package until
-# shell/platform/darwin/ios has a build file of its own.
-exports_files(["ios/framework/Source/AccessibilityFeatures.swift"])
+# (the enum mirrors dart:ui's), and its task queue header, which
+# darwin/common's Objective-C suite lists among its sources: files of this
+# package until shell/platform/darwin/ios has a build file of its own.
+exports_files([
+    "ios/flutter_task_queue_dispatch.h",
+    "ios/framework/Source/AccessibilityFeatures.swift",
+])
 ''',
   ),
   ConvertedFile('//flutter/shell/platform', filesGroups: <String>{'platform'}),

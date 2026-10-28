@@ -274,7 +274,10 @@ executable("framework_common_unittests") {
   ldflags = [ "-ObjC" ]
 
   sources = [
+    "../ios/flutter_task_queue_dispatch.h",
+    "framework/Source/FlutterBinaryMessengerRelay.h",
     "framework/Source/FlutterBinaryMessengerRelayTest.mm",
+    "framework/Source/FlutterTestUtils.h",
     "framework/Source/FlutterTestUtils.mm",
     "framework/Source/flutter_codecs_unittest.mm",
     "framework/Source/flutter_standard_codec_unittest.mm",
