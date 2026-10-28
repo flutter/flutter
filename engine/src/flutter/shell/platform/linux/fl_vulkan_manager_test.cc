@@ -9,6 +9,7 @@
 #include "flutter/shell/platform/linux/fl_engine_private.h"
 #include "flutter/shell/platform/linux/fl_pixel_buffer_texture_vulkan.h"
 #include "flutter/shell/platform/linux/fl_vulkan_manager.h"
+#include "flutter/shell/platform/linux/fl_vulkan_snapshot_pool.h"
 #include "flutter/shell/platform/linux/testing/linux_test.h"
 
 #define VK_NO_PROTOTYPES
@@ -33,6 +34,10 @@ class FlVulkanIntegrationTest : public flutter::testing::LinuxTest {
     g_autoptr(GError) error = nullptr;
     ASSERT_TRUE(fl_vulkan_manager_initialize(manager, &config, &error))
         << (error ? error->message : "");
+    VkPhysicalDeviceProperties properties = {};
+    proc<PFN_vkGetPhysicalDeviceProperties>("vkGetPhysicalDeviceProperties")(
+        static_cast<VkPhysicalDevice>(config.physical_device), &properties);
+    RecordProperty("vulkan_device", properties.deviceName);
   }
 
   ~FlVulkanIntegrationTest() override { g_clear_object(&manager); }
@@ -354,4 +359,53 @@ TEST_F(FlVulkanIntegrationTest, PixelBufferUploadRetainsDeviceUntilRelease) {
   g_clear_object(&texture);
   g_clear_object(&manager);
   external.destruction_callback(external.user_data);
+}
+
+TEST_F(FlVulkanIntegrationTest, ExportPoolReusePreservesEarlierPixels) {
+  auto store = Create(17, 13);
+  auto pool = flutter::FlVulkanSnapshotPool::Create(
+      fl_vulkan_manager_get_device_context(manager));
+  Clear(&store, 1, 0, 0);
+  g_autoptr(GError) error = nullptr;
+  auto red = flutter::FlVulkanSnapshot::Create(
+      pool, reinterpret_cast<VkImage>(store.vulkan.image->image), 17, 13,
+      &error);
+  if (!red) {
+    fl_vulkan_manager_collect_backing_store(&store);
+    ASSERT_STRNE(g_getenv("FLUTTER_TEST_VULKAN_DMABUF"), "1")
+        << (error ? error->message : "DMA-BUF unavailable");
+    GTEST_SKIP() << "ICD cannot export a host-accessible DMA-BUF";
+  }
+  bool imported = true;
+  g_autoptr(GdkTexture) red_texture =
+      red->CreateTexture(nullptr, &imported, &error);
+  ASSERT_NE(red_texture, nullptr);
+  const int fd = red->descriptor().planes[0].fd;
+  red.reset();
+  // The memory fallback copied the pixels, so the export slot is reusable even
+  // though the old memory texture remains alive. Exercise foreign reacquisition
+  // repeatedly and check earlier frames never change.
+  for (size_t i = 0; i < 20; i++) {
+    Clear(&store, 0, 0, 1);
+    auto blue = flutter::FlVulkanSnapshot::Create(
+        pool, reinterpret_cast<VkImage>(store.vulkan.image->image), 17, 13,
+        &error);
+    ASSERT_NE(blue, nullptr) << (error ? error->message : "");
+    EXPECT_EQ(blue->descriptor().planes[0].fd, fd);
+    g_autoptr(GdkTexture) blue_texture =
+        blue->CreateTexture(nullptr, &imported, &error);
+    ASSERT_NE(blue_texture, nullptr);
+    uint32_t pixels[17 * 13];
+    gdk_texture_download(blue_texture, reinterpret_cast<guchar*>(pixels),
+                         17 * 4);
+    for (auto pixel : pixels)
+      EXPECT_EQ(pixel, 0xff0000ffu);
+    gdk_texture_download(red_texture, reinterpret_cast<guchar*>(pixels),
+                         17 * 4);
+    for (auto pixel : pixels)
+      EXPECT_EQ(pixel, 0xffff0000u);
+  }
+  EXPECT_EQ(pool->stats().allocations, 1u);
+  EXPECT_EQ(pool->stats().reuses, 20u);
+  fl_vulkan_manager_collect_backing_store(&store);
 }

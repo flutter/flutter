@@ -88,7 +88,10 @@ static gboolean present_layers(FlCompositor* compositor,
       fl_task_runner_stop_wait(self->task_runner);
       return TRUE;
     }
-    if (!snapshot) {
+    // Retained GTK textures can temporarily occupy every pool slot. Fall back
+    // for this frame and retry export next frame rather than disabling it.
+    if (!snapshot &&
+        !g_error_matches(error, G_IO_ERROR, G_IO_ERROR_WOULD_BLOCK)) {
       g_autoptr(GMutexLocker) lock = g_mutex_locker_new(&self->frame_mutex);
       self->dmabuf_disabled = TRUE;
       flutter_linux_gtk4_dbg(

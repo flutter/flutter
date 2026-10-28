@@ -5,6 +5,7 @@
 #include "flutter/shell/platform/linux/fl_vulkan_manager.h"
 #include "flutter/shell/platform/linux/fl_linux_gtk4_debug.h"
 #include "flutter/shell/platform/linux/fl_vulkan_queue_sync.h"
+#include "flutter/shell/platform/linux/fl_vulkan_snapshot_pool.h"
 
 #include <dlfcn.h>
 #define VK_NO_PROTOTYPES
@@ -165,6 +166,7 @@ struct State {
 
 struct Frame {
   std::shared_ptr<State> state;
+  std::shared_ptr<flutter::FlVulkanSnapshotPool> snapshots;
   VkImage image = VK_NULL_HANDLE;
   VkDeviceMemory memory = VK_NULL_HANDLE;
   FlutterVulkanImage flutter_image = {};
@@ -388,12 +390,14 @@ bool initialize(State& state, GError** error) {
 struct _FlVulkanManager {
   GObject parent_instance;
   std::shared_ptr<State>* state;
+  std::shared_ptr<flutter::FlVulkanSnapshotPool>* snapshots;
 };
 
 G_DEFINE_TYPE(FlVulkanManager, fl_vulkan_manager, G_TYPE_OBJECT)
 
 static void fl_vulkan_manager_finalize(GObject* object) {
   auto* self = FL_VULKAN_MANAGER(object);
+  delete self->snapshots;
   delete self->state;
   G_OBJECT_CLASS(fl_vulkan_manager_parent_class)->finalize(object);
 }
@@ -404,6 +408,7 @@ static void fl_vulkan_manager_class_init(FlVulkanManagerClass* klass) {
 
 static void fl_vulkan_manager_init(FlVulkanManager* self) {
   self->state = new std::shared_ptr<State>();
+  self->snapshots = new std::shared_ptr<flutter::FlVulkanSnapshotPool>();
 }
 
 FlVulkanManager* fl_vulkan_manager_new() {
@@ -420,6 +425,10 @@ gboolean fl_vulkan_manager_initialize(FlVulkanManager* self,
       return FALSE;
     }
     *self->state = std::move(state);
+  }
+  if (!*self->snapshots) {
+    *self->snapshots = flutter::FlVulkanSnapshotPool::Create(
+        fl_vulkan_manager_get_device_context(self));
   }
   auto& state = **self->state;
   *config = {};
@@ -467,6 +476,7 @@ gboolean fl_vulkan_manager_create_backing_store(
   }
   auto frame = std::make_unique<Frame>();
   frame->state = *self->state;
+  frame->snapshots = *self->snapshots;
   frame->width = width;
   frame->height = height;
   auto& state = *frame->state;
@@ -640,16 +650,8 @@ std::shared_ptr<flutter::FlVulkanSnapshot> fl_vulkan_backing_store_snapshot(
   auto& s = *frame->state;
   if (!s.supports_export)
     return nullptr;
-  flutter::FlVulkanSnapshot::Context context = {frame->state,
-                                                s.device,
-                                                s.queue,
-                                                s.queue_family,
-                                                s.max_image_dimension,
-                                                s.memory_properties,
-                                                loader().device_proc,
-                                                fl_vulkan_queue_submit};
-  return flutter::FlVulkanSnapshot::Create(context, frame->image, frame->width,
-                                           frame->height, error);
+  return flutter::FlVulkanSnapshot::Create(frame->snapshots, frame->image,
+                                           frame->width, frame->height, error);
 }
 
 flutter::FlVulkanDeviceContext fl_vulkan_manager_get_device_context(
@@ -663,6 +665,6 @@ flutter::FlVulkanDeviceContext fl_vulkan_manager_get_device_context(
           s.queue_family,
           s.max_image_dimension,
           s.memory_properties,
-          loader().device_proc,
+          device_proc,
           fl_vulkan_queue_submit};
 }

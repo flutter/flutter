@@ -162,7 +162,9 @@ newer. Export/import capability failures and multi-layer scenes use readback.
 `FLUTTER_GTK4_ENABLE_DMABUF=0` forces readback; unlike the OpenGL path, Vulkan
 attempts DMA-BUF by default. Debug logs identify the selected presentation path.
 The export completes before publication and stays alive until GTK releases it,
-so engine backing-store reuse cannot overwrite a displayed frame.
+so engine backing-store reuse cannot overwrite a displayed frame. A bounded pool
+reuses export buffers and their command resources after texture release and
+reader-fence readiness; pool exhaustion uses readback for that frame.
 
 GTK frame callbacks now schedule Flutter vsync from the primary view's GTK frame
 clock, with a timer fallback when the view is unmapped. Vulkan rendering waits

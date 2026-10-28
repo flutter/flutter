@@ -261,6 +261,7 @@ source_set("flutter_linux_sources_gtk4") {
              "fl_vulkan_manager.h",
              "fl_vulkan_queue_sync.h",
              "fl_vulkan_snapshot.h",
+             "fl_vulkan_snapshot_pool.h",
              "fl_window_monitor.h",
              "fl_window_state_monitor.h",
            ]
@@ -370,6 +371,8 @@ source_set("flutter_linux_sources_gtk4") {
     "fl_vulkan_queue_sync.h",
     "fl_vulkan_snapshot.cc",
     "fl_vulkan_snapshot.h",
+    "fl_vulkan_snapshot_pool.cc",
+    "fl_vulkan_snapshot_pool.h",
     "fl_wayland_display.cc",
     "fl_window_monitor.cc",
     "fl_window_state_monitor.cc",
@@ -604,6 +607,7 @@ executable("flutter_linux_gtk4_unittests") {
     "fl_key_channel_responder_test.cc",
     "fl_vulkan_manager_test.cc",
     "fl_vulkan_queue_sync_test.cc",
+    "fl_vulkan_snapshot_pool_test.cc",
 
     # fl_key_embedder_responder_test.cc is GTK3-only (uses GDK_MOD2_MASK, etc.)
     "fl_key_mapping_test.cc",

@@ -36,6 +36,17 @@ project or engine switches. This is not a new framework context override.
   aligned, with DRM ABGR8888 describing RGBA bytes. The source image is restored
   to `GENERAL`. The buffer is released to `VK_QUEUE_FAMILY_FOREIGN_EXT`, and a
   fence completes before GTK can import it. No implicit producer fence is assumed.
+- `fl_vulkan_snapshot_pool` retains at most three export allocations per manager,
+  including their command pools, command buffers and fences. A slot is reusable
+  only after every snapshot/GTK texture lease releases (the
+  [GTK texture release contract](https://docs.gtk.org/gdk4/method.DmabufTextureBuilder.build.html))
+  and nonblocking
+  [DMA-BUF fence polling](https://docs.kernel.org/driver-api/dma-buf.html#implicit-fence-poll-support)
+  reports no outstanding implicit readers or writers. Reuse reacquires buffer
+  ownership from `VK_QUEUE_FAMILY_FOREIGN_EXT`. Idle allocations of obsolete sizes
+  are retired on the raster thread. A busy pool selects readback for that frame
+  and retries export later. Final cleanup runs on a GLib worker with its own
+  device lease, independently of engine teardown and GTK's release callback.
 - `fl_compositor_vulkan` publishes snapshots on the raster thread and imports
   them through the existing GTK 4.14 runtime bindings on the GTK thread. It caches
   the resulting texture. Unsupported exports and multi-layer scenes use readback
@@ -167,8 +178,9 @@ subsequent copy before source-image reuse.
 
 The remaining pacing work is to make frame publication asynchronous with a
 bounded in-flight snapshot queue, then measure compositor presentation feedback
-alongside Flutter's engine timings. Pool snapshot/upload allocations after
-consumer release, with correct foreign-queue ownership reacquisition. Benchmark
+alongside Flutter's engine timings. Snapshot export allocations are pooled;
+plugin upload/readback and the embedder marker fence remain separate reuse
+opportunities. Benchmark
 frame intervals and missed deadlines, including p95/p99, alongside CPU/GPU time
 and memory; cover multiple windows, refresh rates and resize. A GTK texture
 capture does not prove compositor presentation.
@@ -216,3 +228,19 @@ with a surfaceless renderer of the same class preserves the scene and pixels.
 This workaround is confined to the test fixture. An upstream search on
 2026-10-28 found no equivalent report/fix; recommend reporting this minimal GTK
 capture case. No GTK issue was filed and no GTK runtime patch is carried.
+
+## Snapshot resource reuse diagnostics
+
+With `FLUTTER_LINUX_GTK_DEBUG=1`, `vulkan-snapshot-pool` logs allocation counts
+and a final summary of allocations, reuse and pool exhaustion. Trace events
+`VulkanSnapshotAllocate`, `VulkanSnapshotCopy` and `VulkanSnapshotFenceWait`
+separate allocation/copy work from the retained host completion wait. Pooling
+removes repeated resource creation; it does not remove the GPU copy or make
+publication asynchronous.
+
+`FlVulkanSnapshotPoolTest` uses a driver stand-in to check steady-state resource
+counts, retained leases, pool exhaustion/recovery, unready DMA-BUFs, resize,
+failed completion and cleanup outside the texture-release callback. The real
+DMA-BUF integration test repeatedly reuses one allocation and checks that new
+blue pixels and retained red fallback pixels remain correct. Hardware exports
+can be made mandatory with `FLUTTER_TEST_VULKAN_DMABUF=1`.
