@@ -19128,6 +19128,46 @@ void main() {
   );
 
   testWidgets(
+    'Does not reveal obscured character indefinitely when the cursor is not blinking',
+    (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/pull/195022#pullrequestreview-3387006553.
+      // With showCursor: false there is no cursor timer to count the reveal
+      // down, so the character must not be revealed in the first place.
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: EditableText(
+            controller: controller,
+            backgroundCursorColor: const Color(0xFFF7F7F7),
+            focusNode: focusNode,
+            style: textStyle,
+            cursorColor: cursorColor,
+            obscureText: true,
+            showCursor: false,
+          ),
+        ),
+      );
+
+      await tester.tap(find.byType(EditableText));
+      await tester.showKeyboard(find.byType(EditableText));
+      await tester.idle();
+
+      tester.testTextInput.updateEditingValue(
+        const TextEditingValue(text: 'a', selection: TextSelection.collapsed(offset: 1)),
+      );
+      await tester.pump();
+      expect((findRenderEditable(tester).text! as TextSpan).text, '•');
+
+      await tester.pump(const Duration(seconds: 2));
+      expect((findRenderEditable(tester).text! as TextSpan).text, '•');
+    },
+    variant: const TargetPlatformVariant(<TargetPlatform>{
+      TargetPlatform.iOS,
+      TargetPlatform.android,
+      TargetPlatform.fuchsia,
+    }),
+  );
+
+  testWidgets(
     'context menu reappears after a non-fling scroll that keeps selection in view while semantics are disabled',
     (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/185052.

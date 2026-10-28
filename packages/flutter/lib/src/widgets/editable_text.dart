@@ -3755,10 +3755,14 @@ class EditableTextState extends State<EditableText>
       final TextEditingValue oldValue = _value;
       _formatAndSetValue(value, SelectionChangedCause.keyboard);
 
+      // The reveal is counted down by the cursor timer, so only reveal when the
+      // cursor is blinking; otherwise the character would stay revealed until
+      // the next edit.
       final bool revealObscuredInput =
           _hasInputConnection &&
           widget.obscureText &&
           WidgetsBinding.instance.platformDispatcher.brieflyShowPassword &&
+          _showBlinkingCursor &&
           value.text.length == oldValue.text.length + 1 &&
           _value.text.length == value.text.length;
 
