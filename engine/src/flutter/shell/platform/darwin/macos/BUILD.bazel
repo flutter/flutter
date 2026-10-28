@@ -545,6 +545,11 @@ flutter_objc_library(
         ":flutter_desktop_darwin_fixtures",
         ":flutter_framework_source",
         "//engine/src:include_root",
+        # In the debug runtime mode the VM finds its snapshot by symbol name
+        # (kDartVmSnapshotData, from //flutter/lib/snapshot); the exported symbols
+        # keep it through the link's dead stripping, as in the other tests that
+        # boot the VM from the embedded snapshot.
+        "//engine/src/flutter:export_dynamic_symbols",
         "//engine/src/flutter/common",
         "//engine/src/flutter/fml",
         "//engine/src/flutter/shell/platform/common:common_cpp_accessibility",
@@ -602,6 +607,11 @@ cc_test(
         ":flutter_desktop_darwin_unittests_objc",
         ":flutter_framework_source",
         "//engine/src:include_root",
+        # In the debug runtime mode the VM finds its snapshot by symbol name
+        # (kDartVmSnapshotData, from //flutter/lib/snapshot); the exported symbols
+        # keep it through the link's dead stripping, as in the other tests that
+        # boot the VM from the embedded snapshot.
+        "//engine/src/flutter:export_dynamic_symbols",
         "//engine/src/flutter/common",
         "//engine/src/flutter/fml",
         "//engine/src/flutter/shell/platform/common:common_cpp_accessibility",
