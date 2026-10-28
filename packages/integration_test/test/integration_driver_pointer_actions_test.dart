@@ -45,13 +45,7 @@ void main() {
                 'id': 'integration_test_mouse',
                 'parameters': <String, Object?>{'pointerType': 'mouse'},
                 'actions': <Map<String, Object?>>[
-                  <String, Object?>{
-                    'type': 'pointerMove',
-                    'origin': 'viewport',
-                    'x': 10,
-                    'y': 21,
-                    'duration': 300,
-                  },
+                  _pointerMove(10, 21, 300),
                   <String, Object?>{'type': 'pointerDown', 'button': 0},
                   _pointerMove(20, 31, 12),
                   _pointerMove(30, 41, 13),
@@ -93,52 +87,16 @@ void main() {
         await _runIntegrationDriver(_FakeWebFlutterDriver(app, webDriver));
 
         expect(webDriver.postRequests, <Map<String, Object?>>[
-          <String, Object?>{
-            'command': 'actions',
-            'params': <String, Object?>{
-              'actions': <Map<String, Object?>>[
-                <String, Object?>{
-                  'type': 'pointer',
-                  'id': 'integration_test_mouse',
-                  'parameters': <String, Object?>{'pointerType': 'mouse'},
-                  'actions': <Map<String, Object?>>[
-                    <String, Object?>{
-                      'type': 'pointerMove',
-                      'origin': 'viewport',
-                      'x': 30,
-                      'y': 40,
-                      'duration': 0,
-                    },
-                    <String, Object?>{'type': 'pointerDown', 'button': 0},
-                    <String, Object?>{'type': 'pointerUp', 'button': 0},
-                  ],
-                },
-              ],
-            },
-          },
-          <String, Object?>{
-            'command': 'actions',
-            'params': <String, Object?>{
-              'actions': <Map<String, Object?>>[
-                <String, Object?>{
-                  'type': 'pointer',
-                  'id': 'integration_test_mouse',
-                  'parameters': <String, Object?>{'pointerType': 'mouse'},
-                  'actions': <Map<String, Object?>>[
-                    <String, Object?>{
-                      'type': 'pointerMove',
-                      'origin': 'viewport',
-                      'x': 300,
-                      'y': 400,
-                      'duration': 0,
-                    },
-                    <String, Object?>{'type': 'pointerDown', 'button': 2},
-                    <String, Object?>{'type': 'pointerUp', 'button': 2},
-                  ],
-                },
-              ],
-            },
-          },
+          _performActionsRequest(<Map<String, Object?>>[
+            _pointerMove(30, 40, 0),
+            <String, Object?>{'type': 'pointerDown', 'button': 0},
+            <String, Object?>{'type': 'pointerUp', 'button': 0},
+          ]),
+          _performActionsRequest(<Map<String, Object?>>[
+            _pointerMove(300, 400, 0),
+            <String, Object?>{'type': 'pointerDown', 'button': 2},
+            <String, Object?>{'type': 'pointerUp', 'button': 2},
+          ]),
         ]);
         expect(app.replies, <String>['complete', 'complete']);
       },

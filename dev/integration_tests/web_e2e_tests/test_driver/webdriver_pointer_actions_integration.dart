@@ -55,6 +55,15 @@ void main() {
   final IntegrationTestWidgetsFlutterBinding binding =
       IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
+  /// Lets Flutter widgets react to the real pointer events until the end of
+  /// the current test.
+  void propagateDevicePointerEvents() {
+    binding.shouldPropagateDevicePointerEvents = true;
+    addTearDown(() {
+      binding.shouldPropagateDevicePointerEvents = false;
+    });
+  }
+
   Future<void> startApp(WidgetTester tester) async {
     app.main();
     await tester.pumpAndSettle();
@@ -91,10 +100,7 @@ void main() {
 
       // With device pointer events propagating, the same click presses the
       // button.
-      binding.shouldPropagateDevicePointerEvents = true;
-      addTearDown(() {
-        binding.shouldPropagateDevicePointerEvents = false;
-      });
+      propagateDevicePointerEvents();
       await binding.webDriverClick(tester.getCenter(button));
       await tester.pump();
 
@@ -116,10 +122,7 @@ void main() {
       expect(_isOnHostElement(buttonCenter), isFalse);
       expect(_isOnHostElement(buttonCenter + const Offset(300, 200)), isTrue);
 
-      binding.shouldPropagateDevicePointerEvents = true;
-      addTearDown(() {
-        binding.shouldPropagateDevicePointerEvents = false;
-      });
+      propagateDevicePointerEvents();
       await binding.webDriverClick(buttonCenter);
       await tester.pump();
 
@@ -132,26 +135,27 @@ void main() {
     'webDriverPointerActions animates a drag across intermediate pointer moves',
     (WidgetTester tester) async {
       await startApp(tester);
-      binding.shouldPropagateDevicePointerEvents = true;
-      addTearDown(() {
-        binding.shouldPropagateDevicePointerEvents = false;
-      });
+      propagateDevicePointerEvents();
 
-      final Offset a = tester.getCenter(find.byKey(app.panAreaKey)) - const Offset(100, 0);
-      final Offset b = a + const Offset(200, 0);
+      final Offset dragStart = tester.getCenter(find.byKey(app.panAreaKey)) - const Offset(100, 0);
+      final Offset dragEnd = dragStart + const Offset(200, 0);
 
       await binding.webDriverPointerActions(<WebDriverPointerAction>[
-        WebDriverPointerAction.move(a.dx, a.dy),
+        WebDriverPointerAction.move(dragStart.dx, dragStart.dy),
         const WebDriverPointerAction.down(),
-        WebDriverPointerAction.move(b.dx, b.dy, duration: const Duration(milliseconds: 300)),
+        WebDriverPointerAction.move(
+          dragEnd.dx,
+          dragEnd.dy,
+          duration: const Duration(milliseconds: 300),
+        ),
         const WebDriverPointerAction.up(),
       ]);
       await tester.pump();
 
       expect(app.panStarts, 1);
       expect(app.panUpdates.length, greaterThan(1));
-      expect(app.panUpdates.any((Offset p) => p.dx > a.dx && p.dx < b.dx), isTrue);
-      expect((app.panUpdates.last - b).distance, lessThanOrEqualTo(1.0));
+      expect(app.panUpdates.any((Offset p) => p.dx > dragStart.dx && p.dx < dragEnd.dx), isTrue);
+      expect((app.panUpdates.last - dragEnd).distance, lessThanOrEqualTo(1.0));
       expect(app.panEnds, 1);
       expect(app.iframeClicks, 0);
     },
@@ -161,18 +165,19 @@ void main() {
     'webDriverPointerActions keeps buttons pressed between calls for a split drag',
     (WidgetTester tester) async {
       await startApp(tester);
-      binding.shouldPropagateDevicePointerEvents = true;
-      addTearDown(() {
-        binding.shouldPropagateDevicePointerEvents = false;
-      });
+      propagateDevicePointerEvents();
 
-      final Offset a = tester.getCenter(find.byKey(app.panAreaKey)) - const Offset(50, 0);
-      final Offset b = a + const Offset(100, 0);
+      final Offset dragStart = tester.getCenter(find.byKey(app.panAreaKey)) - const Offset(50, 0);
+      final Offset dragEnd = dragStart + const Offset(100, 0);
 
       await binding.webDriverPointerActions(<WebDriverPointerAction>[
-        WebDriverPointerAction.move(a.dx, a.dy),
+        WebDriverPointerAction.move(dragStart.dx, dragStart.dy),
         const WebDriverPointerAction.down(),
-        WebDriverPointerAction.move(b.dx, b.dy, duration: const Duration(milliseconds: 100)),
+        WebDriverPointerAction.move(
+          dragEnd.dx,
+          dragEnd.dy,
+          duration: const Duration(milliseconds: 100),
+        ),
       ]);
       try {
         await tester.pump();
@@ -194,10 +199,7 @@ void main() {
     'webDriverPointerActions moves the pointer without pressing a button to hover',
     (WidgetTester tester) async {
       await startApp(tester);
-      binding.shouldPropagateDevicePointerEvents = true;
-      addTearDown(() {
-        binding.shouldPropagateDevicePointerEvents = false;
-      });
+      propagateDevicePointerEvents();
 
       final Offset iframeCenter = tester.getCenter(find.byType(HtmlElementView));
       await binding.webDriverPointerActions(<WebDriverPointerAction>[

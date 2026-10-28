@@ -268,18 +268,22 @@ enum WebDriverPointerActionType {
 final class WebDriverPointerAction {
   /// Creates a pointer action that moves the mouse to ([x], [y]).
   ///
-  /// With a non-zero [duration], the driver moves the mouse over [duration] in
-  /// steps of about one frame each, along a straight line from the previous
-  /// mouse position, so the browser dispatches intermediate `pointermove`
-  /// events along the way. If the mouse hasn't been moved yet in this test
-  /// run, it moves straight to ([x], [y]).
+  /// With a non-zero [duration], the mouse moves to ([x], [y]) over
+  /// [duration], and the browser dispatches intermediate `pointermove` events
+  /// along the way. [duration] is truncated to whole milliseconds. See
+  /// [integrationDriver] for how the host driver performs timed moves.
   ///
+  /// WebDriver positions the mouse at whole CSS pixels, so the host driver
+  /// rounds the viewport position to the nearest pixel.
+  ///
+  /// {@template flutter.integration_test.WebDriverPointerAction.coordinates}
   /// When passed to
-  /// [IntegrationTestWidgetsFlutterBinding.webDriverPointerActions], [x] and
-  /// [y] are logical positions in the target `FlutterView`. In
+  /// [IntegrationTestWidgetsFlutterBinding.webDriverPointerActions], move
+  /// positions are logical positions in the target `FlutterView`. In
   /// [WebDriverCommand.pointerActions], [CallbackManager.pointerActions], and
-  /// on the host driver, [x] and [y] are in CSS pixels relative to the
-  /// top-left corner of the browser viewport.
+  /// on the host driver, they are in CSS pixels relative to the top-left
+  /// corner of the browser viewport.
+  /// {@endtemplate}
   const WebDriverPointerAction.move(
     double this.x,
     double this.y, {
@@ -352,23 +356,13 @@ final class WebDriverPointerAction {
   /// Target horizontal coordinate for a [WebDriverPointerActionType.move]
   /// action, or null for other action types.
   ///
-  /// When passed to
-  /// [IntegrationTestWidgetsFlutterBinding.webDriverPointerActions], this is a
-  /// logical position in the target `FlutterView`. In
-  /// [WebDriverCommand.pointerActions], [CallbackManager.pointerActions], and
-  /// on the host driver, this is in CSS pixels relative to the top-left corner
-  /// of the browser viewport.
+  /// {@macro flutter.integration_test.WebDriverPointerAction.coordinates}
   final double? x;
 
   /// Target vertical coordinate for a [WebDriverPointerActionType.move]
   /// action, or null for other action types.
   ///
-  /// When passed to
-  /// [IntegrationTestWidgetsFlutterBinding.webDriverPointerActions], this is a
-  /// logical position in the target `FlutterView`. In
-  /// [WebDriverCommand.pointerActions], [CallbackManager.pointerActions], and
-  /// on the host driver, this is in CSS pixels relative to the top-left corner
-  /// of the browser viewport.
+  /// {@macro flutter.integration_test.WebDriverPointerAction.coordinates}
   final double? y;
 
   /// Duration of a [WebDriverPointerActionType.move] or

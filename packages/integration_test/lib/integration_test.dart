@@ -202,10 +202,9 @@ https://docs.flutter.dev/testing/integration-tests
   ///
   /// Each [WebDriverPointerAction.move] position in [actions] is a logical
   /// position in [view], such as the one returned by [WidgetTester.getCenter].
-  /// If [view] is null, the implicit view is used. A move with a non-zero
-  /// `duration` moves the mouse in steps from its previous position, so the
-  /// browser dispatches intermediate `pointermove` events along the way. See
-  /// [WebDriverPointerAction.move].
+  /// If [view] is null, the implicit view is used. During a move with a
+  /// non-zero `duration`, the browser dispatches intermediate `pointermove`
+  /// events along the way. See [WebDriverPointerAction.move].
   ///
   /// Mouse buttons pressed with [WebDriverPointerAction.down] remain pressed
   /// across calls until released with [WebDriverPointerAction.up], so a test
@@ -235,11 +234,12 @@ https://docs.flutter.dev/testing/integration-tests
   /// the returned future completes, so their effects can be asserted
   /// immediately after awaiting this method.
   ///
+  /// {@template flutter.integration_test.webDriverPointerActions.devicePointerEvents}
   /// This method does not modify [shouldPropagateDevicePointerEvents].
   /// Browser pointer events arrive in the test binding as
   /// [TestBindingEventSource.device] events, which the binding ignores by
-  /// default. To assert on Flutter widgets reacting to the pointer sequence
-  /// (for example a [GestureDetector] or [MouseRegion]), set
+  /// default. To assert on Flutter widgets reacting to them (for example a
+  /// [GestureDetector], a [MouseRegion], or a button's `onPressed`), set
   /// [shouldPropagateDevicePointerEvents] to true before calling this method,
   /// and [WidgetTester.pump] afterwards to process the resulting frame.
   ///
@@ -249,6 +249,7 @@ https://docs.flutter.dev/testing/integration-tests
   /// [shouldPropagateDevicePointerEvents]. To test raw pointer delivery, run
   /// the test with semantics disabled (for example, `semanticsEnabled: false`
   /// in [testWidgets]).
+  /// {@endtemplate}
   ///
   /// Only works on the web when tests are run via the `flutter drive` command
   /// with a driver that uses [integrationDriver] from
@@ -326,20 +327,7 @@ https://docs.flutter.dev/testing/integration-tests
   /// completes, so their effects can be asserted immediately after awaiting
   /// this method.
   ///
-  /// This method does not modify [shouldPropagateDevicePointerEvents].
-  /// Browser pointer events arrive in the test binding as
-  /// [TestBindingEventSource.device] events, which the binding ignores by
-  /// default. To assert on Flutter widgets reacting to the click (for example
-  /// a button's `onPressed`), set [shouldPropagateDevicePointerEvents] to true
-  /// before calling this method, and [WidgetTester.pump] afterwards to process
-  /// the resulting frame.
-  ///
-  /// When semantics are enabled, the browser may hit test the semantics DOM
-  /// node of a widget instead of the Flutter view, and the widget may then
-  /// react through a semantics action regardless of
-  /// [shouldPropagateDevicePointerEvents]. To test raw pointer delivery, run
-  /// the test with semantics disabled (for example, `semanticsEnabled: false`
-  /// in [testWidgets]).
+  /// {@macro flutter.integration_test.webDriverPointerActions.devicePointerEvents}
   ///
   /// Only works on the web when tests are run via the `flutter drive` command
   /// with a driver that uses [integrationDriver] from
