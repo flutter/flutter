@@ -424,6 +424,35 @@ config("test_config") {
       ]);
     });
 
+    test('expands a local holding a reference per case', () async {
+      // The same config with is_ios a condition too (the iOS port's
+      // reading): a value per case, each the string around its reference.
+      final GnFileEvaluation evaluation = await evaluate(
+        r'''
+config("test_config") {
+  if (is_ios) {
+    _platform_path = ios_platform_path
+  } else if (is_mac) {
+    _platform_path = mac_platform_path
+  }
+  cflags = [ "-F$_platform_path/Developer/Library/Frameworks" ]
+}
+''',
+        assumptions: Assumptions(const <String, GnValue>{}),
+        externalVariables: <String>{...knownExternalVariables, 'ios_platform_path'},
+      );
+      final GnTarget config = evaluation.targets.single;
+      expect(
+        config.variables['cflags']!.liveItems.map(
+          (GnListItem item) => '${item.condition}: ${item.value}',
+        ),
+        <String>[
+          r'is_ios: "-F$ios_platform_path/Developer/Library/Frameworks"',
+          r'is_mac: "-F$mac_platform_path/Developer/Library/Frameworks"',
+        ],
+      );
+    });
+
     test('follows boolean variables, decided or not', () async {
       final GnFileEvaluation evaluation = await evaluate('''
 use_swiftshader = enable_unittests && shell_enable_gl
