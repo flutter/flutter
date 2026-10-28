@@ -1096,6 +1096,26 @@ selects.config_setting_group(
     ],
 )
 
+# testing/rules/runtime_mode.gni's is_aot: `flutter_runtime_mode == "profile"
+# || flutter_runtime_mode == "release"`, the modes in which the Android and
+# iOS test apps are AOT-compiled (flutter_snapshot); and its denial, the
+# JIT modes.
+selects.config_setting_group(
+    name = "aot_enabled",
+    match_any = [
+        "//engine/src/flutter/common:runtime_mode_profile",
+        "//engine/src/flutter/common:runtime_mode_release",
+    ],
+)
+
+selects.config_setting_group(
+    name = "aot_disabled",
+    match_any = [
+        "//engine/src/flutter/common:runtime_mode_debug",
+        "//engine/src/flutter/common:runtime_mode_jit_release",
+    ],
+)
+
 # The goldens and other resources testing/run_tests.py hands suites with
 # --golden-dir (flow_unittests).
 filegroup(
@@ -1103,6 +1123,62 @@ filegroup(
     srcs = glob(["resources/**"]),
 )
 ''',
+  ),
+  // The iOS scenario app (the root group reaches it under `is_ios` in the
+  // debug and profile modes; mac_unopt's ios_debug_unopt_sim_arm64 builders
+  // name it): flutter_snapshot over lib/main.dart, the JIT snapshot files
+  // copied into App.framework/flutter_assets, and the `ios` package --
+  // App.framework's dylib (app_stub.c, or the AOT assembly), its Info.plist,
+  // the Xcode project copied into the build directory (copy_tree) beside
+  // Flutter.xcframework. The integration tests (run_ios_tests.sh:
+  // xcodebuild over the copied project on a simulator) are the appendix's
+  // ios_xctest, the builders' "Scenario App Integration Tests" step.
+  ConvertedFile(
+    '//flutter/testing/ios_scenario_app',
+    condition: 'is_ios',
+    filesGroups: <String>{'ios_scenario_app'},
+    appendix: r'''
+load("//build_defs/testing:ios_xctest.bzl", "ios_xctest")
+
+# run_ios_tests.sh (bin/run_ios_tests.dart): `xcodebuild -project
+# <build directory>/ios_scenario_app/Scenarios/Scenarios.xcodeproj -sdk
+# iphonesimulator -scheme Scenarios -destination <an iPhone SE (3rd
+# generation) simulator of the iOS 26.2 runtime> clean test
+# FLUTTER_ENGINE=<variant>`, after `defaults write com.apple.iphonesimulator
+# RotateWindowWhenSignaledByGuest -int 1` for the platform view rotation
+# test; the project embeds ../../Flutter.xcframework and App.framework out of
+# the build directory, which the view copies. The simulator's runtime and
+# device type can be overridden through the environment
+# (--test_env=IOS_SIMULATOR_RUNTIME=..., IOS_SIMULATOR_DEVICE_TYPE=...) where
+# Xcode has other runtimes installed.
+#
+#   bazel test --config=ios_debug_unopt_sim_arm64 //engine/src/flutter/testing/ios_scenario_app:ios_scenario_tests
+ios_xctest(
+    name = "ios_scenario_tests",
+    actions = [
+        "clean",
+        "test",
+    ],
+    build_directory_project = "ios_scenario_app/Scenarios/Scenarios.xcodeproj",
+    device_type = "com.apple.CoreSimulator.SimDeviceType.iPhone-SE-3rd-generation",
+    # The app's group reaches Flutter.xcframework through ios/BUILD.gn's.
+    engine = [":ios_scenario_app"],
+    result_bundle = "ios_scenario",
+    runtime = "com.apple.CoreSimulator.SimRuntime.iOS-26-2",
+    scheme = "Scenarios",
+    setup = ["defaults write com.apple.iphonesimulator RotateWindowWhenSignaledByGuest -int 1"],
+    simulator_name = "iPhone SE (3rd generation)",
+    target_compatible_with = select({
+        "//engine/src/flutter/build/bazel:ios_simulator_enabled": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+)
+''',
+  ),
+  ConvertedFile(
+    '//flutter/testing/ios_scenario_app/ios',
+    condition: 'is_ios',
+    filesGroups: <String>{'ios'},
   ),
   // Impeller's group, its own suite (impeller_unittests, which links every
   // suite source_set below) and the Flutter GPU one.

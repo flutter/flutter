@@ -72,19 +72,32 @@ def _shell_quote(word):
     return "'" + word.replace("'", "'\\''") + "'"
 
 def _ios_xctest_impl(ctx):
-    project = ctx.file.project
     package = ctx.label.package
-    xcodeproj = paths.dirname(project.short_path)
-    directory = paths.dirname(xcodeproj)
-    if project.basename != "project.pbxproj" or not xcodeproj.endswith(".xcodeproj"):
-        fail("%s: the project %s should be an .xcodeproj's project.pbxproj" % (ctx.label, project.short_path))
-    if directory != package and not directory.startswith(package + "/"):
-        fail("%s: the project %s should be a file of this package" % (ctx.label, project.short_path))
+    variant = build_directory_variant(ctx)
+    build_directory = paths.join(ENGINE_SRC, "out", variant)
+    if (ctx.file.project == None) == (not ctx.attr.build_directory_project):
+        fail("%s: one of project (a file of the tree) and build_directory_project (a path under the build directory)" % ctx.label)
+    if ctx.file.project != None:
+        # A project of the tree: its directory is the view's copy, where
+        # xcodebuild runs (it finds the one project there, as the script's
+        # cwd lets it).
+        project = ctx.file.project
+        xcodeproj = paths.dirname(project.short_path)
+        directory = paths.dirname(xcodeproj)
+        if project.basename != "project.pbxproj" or not xcodeproj.endswith(".xcodeproj"):
+            fail("%s: the project %s should be an .xcodeproj's project.pbxproj" % (ctx.label, project.short_path))
+        if directory != package and not directory.startswith(package + "/"):
+            fail("%s: the project %s should be a file of this package" % (ctx.label, project.short_path))
+        project_option = ""
+    else:
+        # A project the build lays into the build directory (the scenario
+        # app's, copied there with App.framework beside it): the build
+        # directory is the view's copy, and xcodebuild is told the project.
+        directory = build_directory
+        project_option = "-project %s " % _shell_quote("$FLUTTER_BUILD_DIRECTORY/" + ctx.attr.build_directory_project.strip("/"))
 
     # GN's build directory of the view: the engine targets' products at
     # their paths under it, each path once.
-    variant = build_directory_variant(ctx)
-    build_directory = paths.join(ENGINE_SRC, "out", variant)
     symlinks = {}
     placed = {}
     for target in ctx.attr.engine:
@@ -101,62 +114,69 @@ def _ios_xctest_impl(ctx):
 
     words = [
         "xcodebuild",
-        "-sdk",
+        project_option + "-sdk",
         "iphonesimulator",
         "-scheme",
         _shell_quote(ctx.attr.scheme),
         "-derivedDataPath",
         '"$TEST_TMPDIR/derived"',
         "-resultBundlePath",
-        '"$result/ios_embedding"',
+        '"$result/%s"' % ctx.attr.result_bundle,
         "-destination",
         '"id=$simulator"',
-    ] + [_shell_quote(arg) for arg in ctx.attr.xcodebuild_args] + [
-        "test",
+    ] + [_shell_quote(arg) for arg in ctx.attr.xcodebuild_args] + ctx.attr.actions + [
         "FLUTTER_ENGINE=" + _shell_quote(variant),
     ]
-    create = ["xcrun", "simctl", "create", _shell_quote(ctx.attr.simulator_name), _shell_quote(ctx.attr.device_type)]
-    if ctx.attr.runtime:
-        create.append(_shell_quote(ctx.attr.runtime))
-
-    launcher = ctx.actions.declare_file(ctx.label.name + ".launcher.sh")
-    ctx.actions.write(
-        output = launcher,
-        content = checkout_view_prologue(directory, build_directory) + """
+    if ctx.file.project != None:
+        copy_build_directory = """
 # The build directory as files, not the runfiles' symlinks to them: Xcode
 # copies the framework and the dylibs into the app and signs the copies.
 rm -f "$tree/{engine_src}/out"
 mkdir -p "$tree/{engine_src}/out"
 cp -RL "$root/{build_directory}" "$FLUTTER_BUILD_DIRECTORY"
+""".format(engine_src = ENGINE_SRC, build_directory = build_directory)
+    else:
+        copy_build_directory = ""
+
+    launcher = ctx.actions.declare_file(ctx.label.name + ".launcher.sh")
+    ctx.actions.write(
+        output = launcher,
+        content = checkout_view_prologue(directory, build_directory) + copy_build_directory + """
 chmod -R u+w "$FLUTTER_BUILD_DIRECTORY"
 # simctl's devices and xcodebuild's caches are the user's, under the real
 # home (the prologue's is under TEST_TMPDIR).
 export HOME="$(eval echo "~$(id -un)")"
-# A simulator left by a run that was killed, then this run's; deleted at
-# exit, as run_tests.py deletes its own.
+# The simulator: the rule's device type and runtime unless the environment
+# names others (--test_env=IOS_SIMULATOR_DEVICE_TYPE=..., IOS_SIMULATOR_RUNTIME=...;
+# an empty runtime is Xcode's default).
+device_type="${{IOS_SIMULATOR_DEVICE_TYPE:-{device_type}}}"
+runtime="${{IOS_SIMULATOR_RUNTIME-{runtime}}}"
+{setup}# A simulator left by a run that was killed, then this run's; deleted at
+# exit, as the script deletes its own.
 xcrun simctl delete {simulator_name} >/dev/null 2>&1 || true
-simulator="$({create})"
+simulator="$(xcrun simctl create {simulator_name} "$device_type" ${{runtime:+"$runtime"}})"
 trap 'xcrun simctl delete "$simulator" >/dev/null 2>&1 || true' EXIT
 result="$TEST_TMPDIR/result"
 mkdir -p "$result"
 status=0
 {xcodebuild} "$@" || status=$?
-if [ "$status" != 0 ] && [ -d "$result/ios_embedding.xcresult" ] && [ -n "${{TEST_UNDECLARED_OUTPUTS_DIR:-}}" ]; then
-  (cd "$result/ios_embedding.xcresult" && zip -qr "$TEST_UNDECLARED_OUTPUTS_DIR/ios_embedding.xcresult.zip" .)
+if [ "$status" != 0 ] && [ -d "$result/{result_bundle}.xcresult" ] && [ -n "${{TEST_UNDECLARED_OUTPUTS_DIR:-}}" ]; then
+  (cd "$result/{result_bundle}.xcresult" && zip -qr "$TEST_UNDECLARED_OUTPUTS_DIR/{result_bundle}.xcresult.zip" .)
 fi
 exit "$status"
 """.format(
-            engine_src = ENGINE_SRC,
-            build_directory = build_directory,
+            device_type = ctx.attr.device_type,
+            runtime = ctx.attr.runtime,
+            setup = "".join([line + "\n" for line in ctx.attr.setup]),
             simulator_name = _shell_quote(ctx.attr.simulator_name),
-            create = " ".join(create),
             xcodebuild = " ".join(words),
+            result_bundle = ctx.attr.result_bundle,
         ),
         is_executable = True,
     )
 
     runfiles = ctx.runfiles(
-        files = [project] + ctx.files.srcs + ctx.files.data,
+        files = ([ctx.file.project] if ctx.file.project != None else []) + ctx.files.srcs + ctx.files.data,
         symlinks = symlinks,
     )
     for target in ctx.attr.data + ctx.attr.engine:
@@ -174,13 +194,20 @@ _ios_xctest_test = rule(
     attrs = {
         "project": attr.label(
             allow_single_file = True,
-            mandatory = True,
-            doc = "The project's project.pbxproj, a file of this package; the .xcodeproj's directory is " +
-                  "xcodebuild's working directory and the view's writable copy.",
+            doc = "A project of the tree: its project.pbxproj, a file of this package; the .xcodeproj's directory " +
+                  "is xcodebuild's working directory and the view's writable copy.",
+        ),
+        "build_directory_project": attr.string(
+            doc = "A project the build lays into the build directory, as the .xcodeproj's path under it " +
+                  "(`ios_scenario_app/Scenarios/Scenarios.xcodeproj`); the build directory is the view's copy.",
         ),
         "scheme": attr.string(
             mandatory = True,
             doc = "The scheme xcodebuild tests.",
+        ),
+        "actions": attr.string_list(
+            default = ["test"],
+            doc = "xcodebuild's actions (`clean test` for the scenario app).",
         ),
         "srcs": attr.label_list(
             allow_files = True,
@@ -202,7 +229,11 @@ _ios_xctest_test = rule(
                   "each file goes at its path within the repository under it.",
         ),
         "xcodebuild_args": attr.string_list(
-            doc = "Further xcodebuild options, before the `test` action.",
+            doc = "Further xcodebuild options, before the actions.",
+        ),
+        "setup": attr.string_list(
+            doc = "Shell commands run before the simulator is created (the scenario app's `defaults write` " +
+                  "that lets simulators rotate for its rotation test).",
         ),
         "simulator_name": attr.string(
             default = SIMULATOR_NAME,
@@ -214,6 +245,10 @@ _ios_xctest_test = rule(
         ),
         "runtime": attr.string(
             doc = "The simulator's runtime (run_tests.py's --ios-runtime); Xcode's default when empty.",
+        ),
+        "result_bundle": attr.string(
+            default = "ios_embedding",
+            doc = "The xcresult bundle's name (run_tests.py's ios_embedding).",
         ),
         "env": attr.string_dict(
             doc = "Further environment variables for the run.",
@@ -233,21 +268,25 @@ _ios_xctest_test = rule(
     },
 )
 
-def ios_xctest(name, project, scheme, srcs = None, size = "large", tags = [], **kwargs):
+def ios_xctest(name, scheme, project = None, srcs = None, size = "large", tags = [], **kwargs):
     """An Xcode project's XCTest run on an iOS simulator, as run_tests.py --type objc runs it.
 
     Args:
       name: the target's name.
-      project: the project's project.pbxproj, a file of this package.
       scheme: the scheme xcodebuild tests.
-      srcs: the project directory's files; every file of the package by default.
+      project: a project of the tree: its project.pbxproj, a file of this
+        package; or none, with `build_directory_project` naming one the
+        build lays into the build directory.
+      srcs: the project directory's files; every file of the package by
+        default, for a project of the tree.
       size: large by default: xcodebuild builds the app and boots a simulator.
       tags: the test's tags; local and exclusive are added (see the file's docstring).
-      **kwargs: data, engine, tree, xcodebuild_args, simulator_name, device_type,
-        runtime, env, args and the test attributes.
+      **kwargs: build_directory_project, actions, data, engine, tree,
+        xcodebuild_args, setup, simulator_name, device_type, runtime,
+        result_bundle, env, args and the test attributes.
     """
     if srcs == None:
-        srcs = native.glob(["**"])
+        srcs = native.glob(["**"]) if project != None else []
     _ios_xctest_test(
         name = name,
         project = project,

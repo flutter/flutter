@@ -787,6 +787,26 @@ selects.config_setting_group(
     ],
 )
 
+# testing/rules/runtime_mode.gni's is_aot: `flutter_runtime_mode == "profile"
+# || flutter_runtime_mode == "release"`, the modes in which the Android and
+# iOS test apps are AOT-compiled (flutter_snapshot); and its denial, the
+# JIT modes.
+selects.config_setting_group(
+    name = "aot_enabled",
+    match_any = [
+        "//engine/src/flutter/common:runtime_mode_profile",
+        "//engine/src/flutter/common:runtime_mode_release",
+    ],
+)
+
+selects.config_setting_group(
+    name = "aot_disabled",
+    match_any = [
+        "//engine/src/flutter/common:runtime_mode_debug",
+        "//engine/src/flutter/common:runtime_mode_jit_release",
+    ],
+)
+
 # The goldens and other resources testing/run_tests.py hands suites with
 # --golden-dir (flow_unittests).
 filegroup(
