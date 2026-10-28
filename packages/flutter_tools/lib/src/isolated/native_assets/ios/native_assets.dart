@@ -5,6 +5,8 @@
 import 'package:code_assets/code_assets.dart';
 
 import '../../../base/file_system.dart';
+import '../../../base/logger.dart';
+import '../../../base/process.dart';
 import '../../../build_info.dart';
 import '../macos/native_assets_host.dart';
 import '../native_assets.dart';
@@ -34,14 +36,18 @@ Architecture getNativeIOSArchitecture(CpuArch cpuArch) {
 
 /// Groups native assets by their target framework path for iOS
 /// multi-architecture bundling.
-Map<Uri, List<FlutterCodeAsset>> fatAssetTargetLocationsIOS(List<FlutterCodeAsset> nativeAssets) {
-  return fatAssetTargetLocations(assetTargetLocationsIOS(nativeAssets));
+Map<Uri, List<FlutterCodeAsset>> fatAssetTargetLocationsIOS(
+  List<FlutterCodeAsset> nativeAssets, {
+  required Logger logger,
+}) {
+  return fatAssetTargetLocations(assetTargetLocationsIOS(nativeAssets, logger: logger));
 }
 
 Map<FlutterCodeAsset, FlutterCodeAssetTargetLocation> assetTargetLocationsIOS(
-  List<FlutterCodeAsset> nativeAssets,
-) {
-  return assetTargetLocationsApple(nativeAssets);
+  List<FlutterCodeAsset> nativeAssets, {
+  required Logger logger,
+}) {
+  return assetTargetLocationsApple(nativeAssets, logger: logger);
 }
 
 /// Copies native assets into a framework per dynamic library.
@@ -61,8 +67,10 @@ Future<List<File>> copyNativeCodeAssetsIOS(
   Map<Uri, List<FlutterCodeAsset>> assetTargetLocations,
   String? codesignIdentity,
   BuildMode buildMode,
-  FileSystem fileSystem,
-) async {
+  FileSystem fileSystem, {
+  required Logger logger,
+  required ProcessUtils processUtils,
+}) async {
   assert(assetTargetLocations.isNotEmpty);
   final installedFiles = <File>[];
   final oldToNewInstallNames = <String, String>{};
@@ -80,20 +88,23 @@ Future<List<File>> copyNativeCodeAssetsIOS(
     if (!frameworkDir.existsSync()) {
       await frameworkDir.create(recursive: true);
     }
-    await lipoDylibs(dylibFile, sources);
+    await lipoDylibs(dylibFile, sources, processUtils: processUtils);
     installedFiles.add(dylibFile);
 
     if (buildMode != BuildMode.debug) {
       final dsymPath = '${frameworkDir.path}.dSYM';
-      await dsymutilDylib(dylibFile, dsymPath);
-      await stripDylib(dylibFile);
+      await dsymutilDylib(dylibFile, dsymPath, processUtils: processUtils);
+      await stripDylib(dylibFile, logger: logger, processUtils: processUtils);
       installedFiles.addAll(
         fileSystem.directory(dsymPath).listSync(recursive: true).whereType<File>(),
       );
     }
 
     final String newInstallName = frameworkInstallName(target);
-    final Set<String> oldInstallNames = await getInstallNamesDylib(dylibFile);
+    final Set<String> oldInstallNames = await getInstallNamesDylib(
+      dylibFile,
+      processUtils: processUtils,
+    );
     for (final oldInstallName in oldInstallNames) {
       oldToNewInstallNames[oldInstallName] = newInstallName;
     }
@@ -108,8 +119,13 @@ Future<List<File>> copyNativeCodeAssetsIOS(
   }
 
   for (final (File dylibFile, String newInstallName, Directory frameworkDir) in dylibs) {
-    await setInstallNamesDylib(dylibFile, newInstallName, oldToNewInstallNames);
-    await codesignDylib(codesignIdentity, buildMode, frameworkDir);
+    await setInstallNamesDylib(
+      dylibFile,
+      newInstallName,
+      oldToNewInstallNames,
+      processUtils: processUtils,
+    );
+    await codesignDylib(codesignIdentity, buildMode, frameworkDir, processUtils: processUtils);
   }
   return installedFiles;
 }
