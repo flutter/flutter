@@ -19,10 +19,23 @@ void main() {
 Future<void> testMain() async {
   setUpUnitTests();
 
+  final warnings = <String>[];
+  late void Function(String) oldPrintWarning;
+
+  setUpAll(() {
+    oldPrintWarning = printWarning;
+    printWarning = warnings.add;
+  });
+
+  tearDownAll(() {
+    printWarning = oldPrintWarning;
+  });
+
   late FakeAssetScope testScope;
   setUp(() {
     mockHttpFetchResponseFactory = null;
     testScope = fakeAssetManager.pushAssetScope();
+    warnings.clear();
   });
 
   tearDown(() {
@@ -30,18 +43,28 @@ Future<void> testMain() async {
   });
 
   test('Loading valid font from data succeeds without family name', () async {
-    final FlutterFontCollection collection = renderer.fontCollection;
+    final collection = renderer.fontCollection as EngineFontCollection;
     final ByteBuffer ahemData = await httpFetchByteBuffer('/assets/fonts/ahem.ttf');
     expect(await collection.loadFontFromBytes(ahemData.asUint8List()), isTrue);
+
+    // The family name comes from the font itself.
+    final RegisteredFont registered = collection.debugRegisteredFonts.last;
+    expect(registered.family, 'Ahem');
+    expect(registered.typeface.familyName, 'Ahem');
+    expect(registered.bytes.length, ahemData.lengthInBytes);
   });
 
   test('Loading valid font from data succeeds with family name', () async {
-    final FlutterFontCollection collection = renderer.fontCollection;
+    final collection = renderer.fontCollection as EngineFontCollection;
     final ByteBuffer ahemData = await httpFetchByteBuffer('/assets/fonts/ahem.ttf');
     expect(
       await collection.loadFontFromBytes(ahemData.asUint8List(), fontFamily: 'FamilyName'),
       true,
     );
+
+    final RegisteredFont registered = collection.debugRegisteredFonts.last;
+    expect(registered.family, 'FamilyName');
+    expect(registered.typeface.familyName, 'Ahem');
   });
 
   test('Loading invalid font from data returns false', () async {
@@ -54,6 +77,13 @@ Future<void> testMain() async {
       ),
       false,
     );
+    expect(warnings, <String>['Failed to parse font family "FamilyName"']);
+  });
+
+  test('Loading asset fonts logs no warnings with the default asset manager', () async {
+    final FlutterFontCollection collection = renderer.fontCollection;
+    await collection.loadAssetFonts(await fetchFontManifest(fakeAssetManager));
+    expect(warnings, isEmpty);
   });
 
   test('Loading valid asset fonts succeeds', () async {
@@ -61,7 +91,8 @@ Future<void> testMain() async {
     testScope.setAssetPassthrough(robotoTestFontUrl);
     testScope.setAssetPassthrough(ahemFontUrl);
 
-    final FlutterFontCollection collection = renderer.fontCollection;
+    final collection = renderer.fontCollection as EngineFontCollection;
+    final int registeredBefore = collection.debugRegisteredFonts.length;
     final AssetFontsResult result = await collection.loadAssetFonts(
       FontManifest(<FontFamily>[
         FontFamily(robotoFontFamily, <FontAsset>[
@@ -73,6 +104,19 @@ Future<void> testMain() async {
     );
     expect(result.loadedFonts, <String>[robotoVariableFontUrl, robotoTestFontUrl, ahemFontUrl]);
     expect(result.fontFailures, isEmpty);
+    expect(warnings, isEmpty);
+
+    // Fonts are registered under the manifest family name, in manifest order.
+    final List<RegisteredFont> registered = collection.debugRegisteredFonts.sublist(
+      registeredBefore,
+    );
+    expect(registered.map((RegisteredFont font) => font.family), <String>[
+      robotoFontFamily,
+      robotoFontFamily,
+      ahemFontFamily,
+    ]);
+    final ByteBuffer ahemData = await httpFetchByteBuffer(ahemFontUrl);
+    expect(registered.last.bytes.length, ahemData.lengthInBytes);
   });
 
   test('Loading asset fonts reports when font not found', () async {
@@ -94,6 +138,7 @@ Future<void> testMain() async {
     expect(result.loadedFonts, <String>[robotoVariableFontUrl, robotoTestFontUrl]);
     expect(result.fontFailures, hasLength(1));
     expect(result.fontFailures[invalidFontUrl], isA<FontNotFoundError>());
+    expect(warnings, <String>['Font family Ahem not found (404) at $invalidFontUrl']);
   });
 
   test('Loading asset fonts reports when a font has invalid data', () async {
@@ -101,20 +146,7 @@ Future<void> testMain() async {
 
     testScope.setAssetPassthrough(robotoVariableFontUrl);
     testScope.setAssetPassthrough(robotoTestFontUrl);
-    testScope.setAssetPassthrough(invalidFontUrl);
-
-    mockHttpFetchResponseFactory = (String url) async {
-      if (url == invalidFontUrl) {
-        return MockHttpFetchResponse(
-          url: url,
-          status: 200,
-          payload: MockHttpFetchPayload(
-            byteBuffer: stringAsUtf8Data('this is invalid data').buffer,
-          ),
-        );
-      }
-      return null;
-    };
+    testScope.setAsset(invalidFontUrl, stringAsUtf8Data('this is invalid data'));
 
     final FlutterFontCollection collection = renderer.fontCollection;
     final AssetFontsResult result = await collection.loadAssetFonts(
@@ -129,6 +161,10 @@ Future<void> testMain() async {
     expect(result.loadedFonts, <String>[robotoVariableFontUrl, robotoTestFontUrl]);
     expect(result.fontFailures, hasLength(1));
     expect(result.fontFailures[invalidFontUrl], isA<FontInvalidDataError>());
+    expect(warnings, <String>[
+      'Failed to load font Ahem at $invalidFontUrl',
+      'Verify that $invalidFontUrl contains a valid font.',
+    ]);
   });
 
   test('Font manifest with numeric and string descriptor values parses correctly', () async {
