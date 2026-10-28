@@ -217,6 +217,15 @@ void main() {
               milliseconds: 32,
               steps: <(int, int, int)>[(9, 0, 16), (7, 0, 16)],
             ),
+            (
+              description: 'fractional start and target round before interpolating',
+              // Interpolates from (1, 0) to (4, 0), so the midpoint 2.5 rounds
+              // to 3, not to the unrounded midpoint 2.1 or a truncated 2.
+              start: (0.6, 0),
+              target: (3.6, 0),
+              milliseconds: 32,
+              steps: <(int, int, int)>[(3, 0, 16), (4, 0, 16)],
+            ),
           ];
 
       for (final testCase in cases) {
@@ -243,6 +252,72 @@ void main() {
           ]),
         ], reason: testCase.description);
       }
+    });
+
+    test('starts each timed move where the previous subdivided move ended, across pauses, downs, and ups', () async {
+      final app = _FakeApp(
+        sequences: const <List<WebDriverPointerAction>>[
+          <WebDriverPointerAction>[
+            WebDriverPointerAction.move(0, 0),
+            WebDriverPointerAction.down(),
+            WebDriverPointerAction.move(32, 0, duration: Duration(milliseconds: 32)),
+            WebDriverPointerAction.pause(Duration(milliseconds: 50)),
+            WebDriverPointerAction.up(),
+            WebDriverPointerAction.move(32, 32, duration: Duration(milliseconds: 32)),
+          ],
+        ],
+      );
+      final webDriver = _FakeWebDriver();
+
+      await _runIntegrationDriver(_FakeWebFlutterDriver(app, webDriver));
+
+      expect(webDriver.postRequests, <Map<String, Object?>>[
+        _performActionsRequest(<Map<String, Object?>>[
+          _pointerMove(0, 0, 0),
+          <String, Object?>{'type': 'pointerDown', 'button': 0},
+          _pointerMove(16, 0, 16),
+          _pointerMove(32, 0, 16),
+          <String, Object?>{'type': 'pause', 'duration': 50},
+          <String, Object?>{'type': 'pointerUp', 'button': 0},
+          _pointerMove(32, 16, 16),
+          _pointerMove(32, 32, 16),
+        ]),
+      ]);
+    });
+
+    test('does not split the first timed move of a later integrationDriver call', () async {
+      final firstWebDriver = _FakeWebDriver();
+      await _runIntegrationDriver(
+        _FakeWebFlutterDriver(
+          _FakeApp(
+            sequences: const <List<WebDriverPointerAction>>[
+              <WebDriverPointerAction>[WebDriverPointerAction.move(0, 0)],
+            ],
+          ),
+          firstWebDriver,
+        ),
+      );
+      final secondWebDriver = _FakeWebDriver();
+
+      await _runIntegrationDriver(
+        _FakeWebFlutterDriver(
+          _FakeApp(
+            sequences: const <List<WebDriverPointerAction>>[
+              <WebDriverPointerAction>[
+                WebDriverPointerAction.move(100, 0, duration: Duration(milliseconds: 32)),
+              ],
+            ],
+          ),
+          secondWebDriver,
+        ),
+      );
+
+      expect(firstWebDriver.postRequests, <Map<String, Object?>>[
+        _performActionsRequest(<Map<String, Object?>>[_pointerMove(0, 0, 0)]),
+      ]);
+      expect(secondWebDriver.postRequests, <Map<String, Object?>>[
+        _performActionsRequest(<Map<String, Object?>>[_pointerMove(100, 0, 32)]),
+      ]);
     });
 
     test('fails in the app and throws StateError if the driver is not a WebFlutterDriver', () async {
