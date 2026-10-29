@@ -38,8 +38,10 @@ static sk_sp<SkFontMgr> default_fontmgr() {
 }
 
 SKWASM_EXPORT SkTypeface* typeface_create(SkData* font_data) {
-  Skwasm::live_typeface_count++;
   auto typeface = default_fontmgr()->makeFromData(sk_ref_sp<SkData>(font_data));
+  if (typeface) {
+    Skwasm::live_typeface_count++;
+  }
   return typeface.release();
 }
 
