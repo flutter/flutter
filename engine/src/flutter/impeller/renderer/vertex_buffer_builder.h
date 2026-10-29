@@ -5,9 +5,9 @@
 #ifndef FLUTTER_IMPELLER_RENDERER_VERTEX_BUFFER_BUILDER_H_
 #define FLUTTER_IMPELLER_RENDERER_VERTEX_BUFFER_BUILDER_H_
 
-#include <format>
 #include <initializer_list>
 #include <memory>
+#include <string>
 #include <type_traits>
 #include <vector>
 
@@ -16,6 +16,7 @@
 #include "impeller/core/formats.h"
 #include "impeller/core/host_buffer.h"
 #include "impeller/core/vertex_buffer.h"
+#include "third_party/abseil-cpp/absl/strings/str_cat.h"
 
 namespace impeller {
 
@@ -137,7 +138,7 @@ class VertexBufferBuilder {
       return {};
     }
     if (!label_.empty()) {
-      buffer->SetLabel(std::format("{} Vertices", label_));
+      buffer->SetLabel(absl::StrCat(label_, " Vertices"));
     }
     return DeviceBuffer::AsBufferView(std::move(buffer));
   }
@@ -166,7 +167,7 @@ class VertexBufferBuilder {
       return {};
     }
     if (!label_.empty()) {
-      buffer->SetLabel(std::format("{} Indices", label_));
+      buffer->SetLabel(absl::StrCat(label_, " Indices"));
     }
     return DeviceBuffer::AsBufferView(std::move(buffer));
   }

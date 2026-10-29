@@ -33,6 +33,7 @@ void main() {
       analytics: const NoOpAnalytics(),
       appleContext: FakeAppleContext(),
       featureFlags: TestFeatureFlags(),
+      templateRenderer: FakeTemplateRenderer(),
       toolContext: FakeToolContext(),
     );
     final package = FakeMacOSApp();
@@ -57,6 +58,7 @@ void main() {
       analytics: const NoOpAnalytics(),
       appleContext: FakeAppleContext(),
       featureFlags: TestFeatureFlags(),
+      templateRenderer: FakeTemplateRenderer(),
       toolContext: FakeToolContext(
         processManager: FakeProcessManager.list(<FakeCommand>[
           FakeCommand(
@@ -92,6 +94,7 @@ void main() {
         appleContext: FakeAppleContext(),
         featureFlags: featureFlags,
         macOSWorkflow: MacOSWorkflow(featureFlags: featureFlags, platform: linux),
+        templateRenderer: FakeTemplateRenderer(),
         toolContext: FakeToolContext(platform: linux),
       ).devices(),
       isEmpty,
@@ -107,6 +110,7 @@ void main() {
         appleContext: FakeAppleContext(),
         featureFlags: featureFlags,
         macOSWorkflow: MacOSWorkflow(featureFlags: featureFlags, platform: macOS),
+        templateRenderer: FakeTemplateRenderer(),
         toolContext: FakeToolContext(platform: macOS),
       );
 
@@ -121,6 +125,7 @@ void main() {
       appleContext: FakeAppleContext(),
       featureFlags: featureFlags,
       macOSWorkflow: MacOSWorkflow(featureFlags: featureFlags, platform: macOS),
+      templateRenderer: FakeTemplateRenderer(),
       toolContext: FakeToolContext(platform: macOS),
     );
 
@@ -134,6 +139,7 @@ void main() {
       appleContext: FakeAppleContext(),
       featureFlags: featureFlags,
       macOSWorkflow: MacOSWorkflow(featureFlags: featureFlags, platform: macOS),
+      templateRenderer: FakeTemplateRenderer(),
       toolContext: FakeToolContext(platform: macOS),
     );
 
@@ -147,6 +153,7 @@ void main() {
       appleContext: FakeAppleContext(),
       featureFlags: featureFlags,
       macOSWorkflow: MacOSWorkflow(featureFlags: featureFlags, platform: macOS),
+      templateRenderer: FakeTemplateRenderer(),
       toolContext: FakeToolContext(platform: macOS),
     );
 
@@ -164,6 +171,7 @@ void main() {
       analytics: const NoOpAnalytics(),
       appleContext: FakeAppleContext(),
       featureFlags: TestFeatureFlags(),
+      templateRenderer: FakeTemplateRenderer(),
       toolContext: FakeToolContext(),
     );
 
@@ -181,6 +189,7 @@ void main() {
       analytics: const NoOpAnalytics(),
       appleContext: FakeAppleContext(),
       featureFlags: TestFeatureFlags(),
+      templateRenderer: FakeTemplateRenderer(),
       toolContext: FakeToolContext(os: fakeOperatingSystemUtils),
     );
 
@@ -194,6 +203,7 @@ void main() {
       analytics: const NoOpAnalytics(),
       appleContext: FakeAppleContext(),
       featureFlags: TestFeatureFlags(),
+      templateRenderer: FakeTemplateRenderer(),
       toolContext: FakeToolContext(os: fakeOperatingSystemUtils),
     );
 
@@ -206,6 +216,7 @@ void main() {
       analytics: const NoOpAnalytics(),
       appleContext: FakeAppleContext(),
       featureFlags: TestFeatureFlags(),
+      templateRenderer: FakeTemplateRenderer(),
       toolContext: FakeToolContext(fs: fileSystem),
     );
     fileSystem.file('pubspec.yaml').createSync();
@@ -220,6 +231,7 @@ void main() {
       analytics: const NoOpAnalytics(),
       appleContext: FakeAppleContext(),
       featureFlags: TestFeatureFlags(),
+      templateRenderer: FakeTemplateRenderer(),
       toolContext: FakeToolContext(),
     );
     const debugPath = 'debug/executable';
@@ -259,6 +271,7 @@ void main() {
           appleContext: FakeAppleContext(),
           featureFlags: featureFlags,
           macOSWorkflow: MacOSWorkflow(featureFlags: featureFlags, platform: macOS),
+          templateRenderer: FakeTemplateRenderer(),
           toolContext: FakeToolContext(
             fs: fileSystem,
             os: fakeOperatingSystemUtils,

@@ -9,6 +9,7 @@ import("//flutter/build/zip_bundle.gni")
 import("//flutter/shell/gpu/gpu.gni")
 import("//flutter/shell/platform/darwin/common/framework_common.gni")
 import("//flutter/shell/platform/glfw/config.gni")
+import("//flutter/testing/symbols/check_forbidden_native_symbols.gni")
 import("//flutter/testing/testing.gni")
 
 shell_gpu_configuration("macos_gpu_configuration") {
@@ -277,6 +278,13 @@ copy("copy_dylib") {
   deps = [ ":flutter_framework_dylib" ]
 }
 
+check_forbidden_native_symbols("check_native_symbols") {
+  visibility = [ ":*" ]
+  deps = [ ":copy_dylib" ]
+  _dylib_outputs = get_target_outputs(":copy_dylib")
+  library = _dylib_outputs[0]
+}
+
 action("copy_framework_info_plist") {
   script = "//flutter/build/copy_info_plist.py"
   visibility = [ ":*" ]
@@ -358,6 +366,7 @@ action("_generate_symlinks") {
     "$_flutter_framework_name.stamp",
   ]
   deps = [
+    ":check_native_symbols",
     ":copy_dylib",
     ":copy_framework_headers",
     ":copy_framework_icu",

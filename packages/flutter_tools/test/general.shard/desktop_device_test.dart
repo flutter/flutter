@@ -661,6 +661,7 @@ class FakeMacOSDevice extends MacOSDevice {
         analytics: const NoOpAnalytics(),
         appleContext: FakeAppleContext(),
         featureFlags: TestFeatureFlags(),
+        templateRenderer: FakeTemplateRenderer(),
       );
 
   @override
