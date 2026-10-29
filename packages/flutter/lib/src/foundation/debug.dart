@@ -1142,26 +1142,27 @@ ui.PlatformDispatcher debugApplyViewMetricsOverrides(ui.PlatformDispatcher dispa
 /// Returns the [ui.FlutterView] that applies the [debugViewMetricsOverrides]
 /// entry registered for [view]'s id.
 ///
-/// A view read straight from a wrapped [ui.PlatformDispatcher] — from
-/// [ui.PlatformDispatcher.instance] rather than from
-/// [BindingBase.platformDispatcher] — reports the metrics the platform
-/// reports. [RenderView], [View] and [MediaQueryData.fromView] pass the view
-/// they are handed through this, so that such a view renders and reports the
+/// A view read from the dispatcher that the binding wraps, which is
+/// [ui.PlatformDispatcher.instance] rather than
+/// [BindingBase.platformDispatcher], reports the platform's own metrics.
+/// [RenderView], [View] and [MediaQueryData.fromView] pass the view they are
+/// handed through this function, so that such a view renders and reports the
 /// same override as one read from the binding.
 ///
 /// Engine views are normalized even before the binding wraps their
 /// dispatcher, because a [View] can be constructed before [runWidget]. Only a
 /// view that its dispatcher itself reports for its id is normalized, along
 /// with the deprecated [ui.SingletonFlutterWindow], which stands for the
-/// implicit view. Every other view is returned unchanged: a view that already
-/// applies its override, a view of a dispatcher that was never wrapped (a
-/// [TestFlutterView], say, which applies its own test values over the
-/// wrapper), and a decorator or test double that only reports such a
-/// dispatcher and id. So is every view outside of debug mode (in profile or
-/// release mode). The decision reads the view's
-/// [ui.FlutterView.platformDispatcher] and [ui.FlutterView.viewId], which a
-/// test double handed to [RenderView], [View] or [MediaQueryData.fromView]
-/// therefore has to implement.
+/// implicit view. Every other view is returned unchanged. That includes a view
+/// that already applies its override and a view of a dispatcher that was never
+/// wrapped. A [TestFlutterView] is one such view, because it applies its own
+/// test values over the wrapper. It also includes a decorator or test double
+/// that only reports a wrapped dispatcher and an id. Outside of debug mode,
+/// every view is returned unchanged.
+///
+/// The decision reads the view's [ui.FlutterView.platformDispatcher] and
+/// [ui.FlutterView.viewId], so a test double handed to [RenderView], [View] or
+/// [MediaQueryData.fromView] has to implement both.
 ui.FlutterView debugViewWithMetricsOverrides(ui.FlutterView view) {
   var result = view;
   assert(() {
