@@ -6516,8 +6516,11 @@ final class _Emitter {
     final group = _Rule('selects.config_setting_group', name, <String>[
       '# `$condition`, for the select()s of this file.',
     ]);
+    // Two terms one setting answers for (`is_wasm && target_os == "wasm"`:
+    // both are the emscripten platform) are one member: config_setting_group
+    // refuses a setting named twice.
     for (final setting in settings) {
-      group.list(kind).always.add(_Item(setting));
+      group.list(kind).addUnique(Condition.always, _Item(setting));
     }
     rules.add(group);
     _conjunctionGroups[condition] = ':$name';
