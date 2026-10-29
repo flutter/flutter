@@ -2,9 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-@TestOn('!chrome')
-library;
-
 import 'dart:async';
 import 'dart:ui';
 
@@ -4386,21 +4383,25 @@ void main() {
     expect(controller.dispatchedPointerEvents[0], isA<PointerHoverEvent>());
   });
 
-  testWidgets('HtmlElementView can be instantiated', (WidgetTester tester) async {
-    late final Widget htmlElementView;
-    expect(() {
-      htmlElementView = const HtmlElementView(viewType: 'webview');
-    }, returnsNormally);
+  testWidgets(
+    'HtmlElementView can be instantiated',
+    (WidgetTester tester) async {
+      late final Widget htmlElementView;
+      expect(() {
+        htmlElementView = const HtmlElementView(viewType: 'webview');
+      }, returnsNormally);
 
-    await tester.pumpWidget(
-      Center(child: SizedBox(width: 100, height: 100, child: htmlElementView)),
-    );
-    await tester.pumpAndSettle();
+      await tester.pumpWidget(
+        Center(child: SizedBox(width: 100, height: 100, child: htmlElementView)),
+      );
+      await tester.pumpAndSettle();
 
-    // This file runs on non-web platforms, so we expect `HtmlElementView` to
-    // fail.
-    final dynamic exception = tester.takeException();
-    expect(exception, isUnimplementedError);
-    expect(exception.toString(), contains('HtmlElementView is only available on Flutter Web'));
-  });
+      // This file runs on non-web platforms, so we expect `HtmlElementView` to
+      // fail.
+      final dynamic exception = tester.takeException();
+      expect(exception, isUnimplementedError);
+      expect(exception.toString(), contains('HtmlElementView is only available on Flutter Web'));
+    },
+    skip: kIsWeb,
+  ); // [intended] HtmlElementView only throws UnimplementedError on non-web platforms.
 }
