@@ -3255,28 +3255,30 @@ final class _Evaluator {
       throw GnError(use, 'use of ${variable.name}, which has no value');
     }
     // A declared argument an assumption with cases stands in for
-    // (glfw_args.gni's glfw_vulkan_library by target_os): a value per case
-    // of the assumption's variable, as the assumption reads where nothing
-    // declares it ([_variableValue]) -- so that `"X=" + name` concatenates
-    // case by case and `name != ""` compares so ([_casesComparison]).
-    if (cases.any((GnScalarCase c) => c.value is GnCasedValue)) {
+    // (glfw_args.gni's glfw_vulkan_library by target_os; declare_args()
+    // assigns the assumption under each of its branches): the cases are
+    // the assumption's, a value per case of its variable, as the assumption
+    // reads where nothing declares it ([_variableValue]) and as a
+    // comparison of the argument reads it ([_casesComparison]) -- so that
+    // `"X=" + name` concatenates case by case.
+    final cased = <GnCasedValue>{
+      for (final GnScalarCase c in cases)
+        if (c.value is GnCasedValue) c.value as GnCasedValue,
+    };
+    if (cased.isNotEmpty) {
+      if (cased.length != 1 || cases.any((GnScalarCase c) => c.value is! GnCasedValue)) {
+        throw GnError(use, '${variable.name} mixes an assumption with cases and other values');
+      }
+      final GnCasedValue value = cased.single;
+      final GnScalarCase first = cases.first;
       return _Expression(<_Value>[
-        for (final GnScalarCase c in cases)
-          if (c.value case final GnCasedValue cased)
-            for (final MapEntry<String, String> entry in cased.values.entries)
-              _Value(
-                GnStringValue(entry.value),
-                c.assignment.commentsOf(0),
-                condition: c.condition.and(ConditionComparison(cased.variable, true, entry.key)),
-                sourceConditions: c.assignment.sourceConditions,
-              )
-          else
-            _Value(
-              c.value,
-              c.assignment.commentsOf(0),
-              condition: c.condition,
-              sourceConditions: c.assignment.sourceConditions,
-            ),
+        for (final MapEntry<String, String> entry in value.values.entries)
+          _Value(
+            GnStringValue(entry.value),
+            first.assignment.commentsOf(0),
+            condition: ConditionComparison(value.variable, true, entry.key),
+            sourceConditions: first.assignment.sourceConditions,
+          ),
       ], isList: false);
     }
     if (cases.length == 1 && cases.single.condition == Condition.always) {
