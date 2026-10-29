@@ -1335,6 +1335,15 @@ final class _Emitter {
           for (final String label in scriptInputs[_gnPath(script)] ?? const <String>[]) {
             rule.list('inputs').addUnique(Condition.always, _Item(_localLabel(label)));
           }
+          // What it reads outside its inputs, in the action's key.
+          final Map<String, String>? environment = scriptEnvironment[_gnPath(script)];
+          if (environment != null) {
+            final entries = <String>[
+              for (final MapEntry<String, String> entry in environment.entries)
+                '${_starlarkString(entry.key)}: ${_constantSymbol(entry.value)}',
+            ];
+            rule.scalars['env'] = '{${entries.join(', ')}}';
+          }
         case 'sources':
           _actionFilesInto(rule, 'srcs', variable);
         case 'inputs':
@@ -4925,6 +4934,15 @@ final class _Emitter {
           ? const ReferenceConstant(_coptsBzl, 'MACOS_CFLAGS_OBJC')
           : const ReferenceConstant(_coptsBzl, 'FLUTTER_CFLAGS_OBJC');
     }
+    _use(constant.file, constant.symbol);
+    return constant.symbol;
+  }
+
+  /// The Bazel-side constant for the GN reference [name] (the mapping's
+  /// [referenceConstants]) where no GN value stands behind it (a
+  /// [scriptEnvironment] entry): its symbol, its `.bzl` loaded.
+  String _constantSymbol(String name) {
+    final ReferenceConstant constant = referenceConstants[name]!;
     _use(constant.file, constant.symbol);
     return constant.symbol;
   }

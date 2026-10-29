@@ -6,6 +6,7 @@
 # Not converted: copy_asan_runtime_dylib.
 
 load("@bazel_skylib//lib:selects.bzl", "selects")
+load("@engine_version//:version.bzl", "ENGINE_VERSION")
 load("@macos_sdk//:sdk.bzl", "IPHONEOS_PLATFORM_PATH", "IPHONESIMULATOR_PLATFORM_PATH")
 load("@rules_cc//cc:defs.bzl", "cc_library")
 load("//build_defs/cc:copts.bzl", "FLUTTER_CFLAGS_OBJC", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
@@ -1041,6 +1042,7 @@ gn_action(
         "//conditions:default": [],
     }),
     build_outputs = ["Flutter.framework/Info.plist"],
+    env = {"FLUTTER_ENGINE_VERSION": ENGINE_VERSION},
     script = "//engine/src/flutter/build:copy_info_plist.py",
     target_compatible_with = select({
         "@platforms//os:ios": [],
