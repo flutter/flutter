@@ -254,6 +254,14 @@ static void fl_engine_vsync_callback(void* user_data, intptr_t baton) {
     g_clear_object(&renderable);
   }
   request->baton = baton;
+  // Requests already on the GTK dispatch thread can arm this frame's tick
+  // without another event-loop turn. Owning the context on an engine worker
+  // is insufficient: GTK operations must still run on the platform thread.
+  if (self->thread == g_thread_self() &&
+      g_main_context_is_owner(g_main_context_default())) {
+    fl_engine_schedule_vsync(request);
+    return;
+  }
   // g_main_context_invoke may run synchronously on the calling engine thread
   // when it can acquire the context. Attach a source to guarantee delivery from
   // the GTK main loop, as required by FlutterEngineOnVsync.

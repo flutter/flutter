@@ -164,7 +164,10 @@ repository. Performance benchmarking and the memory comparison remain separate.
 ## Frame pacing follow-up
 
 GTK frame-clock scheduling now returns Flutter vsync batons on the GTK main
-context. For the primary view, frame start and refresh interval come from its
+context. Requests already on that dispatch thread arm the tick immediately;
+worker requests are marshalled even if the worker can acquire the GLib context.
+This avoids an unnecessary main-loop turn without running GTK on engine workers.
+For the primary view, frame start and refresh interval come from its
 `GdkFrameClock`; an unmapped view uses a 16 ms timer. Multiwindow engines still
 need per-view clock selection, and runtime refresh-rate changes need focused
 coverage. Refresh intervals and candidate targets come from completed frame-clock

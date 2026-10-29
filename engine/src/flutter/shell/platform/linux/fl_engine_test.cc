@@ -104,7 +104,15 @@ TEST_F(FlEngineTest, VsyncCallbackUsesMainContextAndReturnsBaton) {
   ASSERT_NE(vsync_callback, nullptr);
   g_autoptr(FlMockRenderable) renderable = fl_mock_renderable_new();
   fl_engine_set_implicit_view(engine, FL_RENDERABLE(renderable));
-  std::thread worker([&] { vsync_callback(callback_user_data, 0x1234); });
+  std::thread worker([&] {
+    auto* context = g_main_context_default();
+    const gboolean acquired = g_main_context_acquire(context);
+    EXPECT_TRUE(acquired);
+    vsync_callback(callback_user_data, 0x1234);
+    if (acquired) {
+      g_main_context_release(context);
+    }
+  });
   worker.join();
   EXPECT_FALSE(delivered);
 
@@ -213,6 +221,17 @@ TEST_F(FlEngineVsyncTest, KeepsClockUpdatingBetweenAnimationRequests) {
   Tick();
   EXPECT_EQ(batons, std::vector<intptr_t>({1, 2}));
   EXPECT_EQ(TickHandler(), 0u);
+}
+
+TEST_F(FlEngineVsyncTest, PlatformDispatchArmsTickWithoutAnotherLoopTurn) {
+  auto* context = g_main_context_default();
+  ASSERT_TRUE(g_main_context_acquire(context));
+  callback(callback_data, 1);
+  EXPECT_NE(TickHandler(), 0u);
+  EXPECT_TRUE(batons.empty());
+  g_main_context_release(context);
+  Tick();
+  EXPECT_EQ(batons, std::vector<intptr_t>({1}));
 }
 
 TEST_F(FlEngineVsyncTest, UnmapReturnsPendingBatonExactlyOnce) {
