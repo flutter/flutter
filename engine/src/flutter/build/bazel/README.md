@@ -1056,6 +1056,8 @@ bazel test //packages/flutter_tools:commands_shard_hermetic //packages/flutter_t
 bazel test //packages/flutter_tools:integration_shard //packages/flutter_tools:web_shard   # the tool as a process
 bazel test //packages/flutter_tools:desktop_shard   # flutter build linux, flutter run -d linux: CMake, GTK and an X display from the build
 bazel test //:android_tool_tests                    # flutter build apk: the engine's Android artifacts, the SDK and the JDK from the build; Gradle from the network
+bazel test //:apple_tool_tests                      # a Mac host: flutter build macos|ios through Xcode, CocoaPods and Swift Package Manager against the facsimile's universal frameworks -- the cases that sign nothing
+bazel test //:apple_signed_tool_tests               # the files that sign for an iOS device, on a Mac with a development certificate (manual)
 bazel test //dev/bots:tests //dev/tools/gen_keycodes:tests
 ```
 
@@ -1073,8 +1075,11 @@ flutter_tools' general shard (271 files) and commands shard (the hermetic
 half whole, 67; the permeable half but for the one file that does not
 compile at this checkout, 10) and its integration shard where a Linux host
 can run it (73 of 117 files), its desktop shard (13 more) and its Android
-shard (25, with the network; one file is macOS's) and its web shard
-(18 files, on the pinned Chrome),
+shard (25, with the network; one file is macOS's), its web shard
+(18 files, on the pinned Chrome) and, on a Mac host, its apple shard (the
+13 files that build for macOS or iOS through Xcode: 6 whole and 2 in part
+without a signing identity, 7 whole with one -- "The recipe's universal
+Apple archives"),
 and the pure-Dart trees (dev/bots, devicelab, packages_autoroller,
 flutter_analyzer_plugin, snippets, gen_defaults, gen_keycodes,
 fuchsia_remote_debug_protocol). Left out by name: web-only and macOS-only
@@ -1713,6 +1718,24 @@ builds both slices (the macOS toolchains cross-build); `lipo`, `strip` and
 `xcrun xcodebuild -create-xcframework` are Xcode's, `dsymutil` the checkout's
 (`flutter/buildtools/mac-<cpu>/clang`). Linux skips the targets as
 incompatible.
+
+The tool's tests over these directories are the apple shard
+(`//:apple_tool_tests`; `packages/flutter_tools/BUILD.bazel`): the 13 files
+of the integration shard that build for macOS or iOS through the tool
+(`flutter build macos|ios`, Xcode, CocoaPods, Swift Package Manager), on a
+Mac host alone. They run unsandboxed (xcodebuild runs `sandbox-exec` itself,
+which the sandbox refuses), with the Xcode projects the tool migrates and
+the engine directories copied writable first (`writable`: APFS clones), and
+the host's Xcode, CocoaPods, simulators and network. Seven of the files
+build for an iOS *device* in some or all of their cases (`flutter build
+ios` without `--simulator`/`--no-codesign`, `flutter ipa`, an add-to-app
+project signed automatically), which wants an Apple development certificate
+and a provisioning profile in the keychain: those files are
+`//:apple_signed_tool_tests` (manual; targets `<file>_signed`), and the apple
+shard keeps the two files whose other cases sign nothing with `dart test
+--name` (`cases`). The host's TMPDIR reaches these tests as Bazel passes it
+(`/var/folders/...`, which the tool's tests expect); only the widget_preview
+watchers of the hermetic shard get it resolved (`resolved_tmpdir`).
 
 ## The build directory: `install`
 
