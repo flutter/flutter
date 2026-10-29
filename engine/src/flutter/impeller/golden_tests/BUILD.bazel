@@ -211,7 +211,7 @@ flutter_gpu_test_backends(
 
 flutter_display_test(
     name = "impeller_golden_tests",
-    size = "small",
+    size = "large",
     srcs = [
         "golden_tests.cc",
         "main.cc",
@@ -225,6 +225,7 @@ flutter_display_test(
     data = [":gpu_test_backends"],
     env = {"FLUTTER_TEST_TESTING_ASSETS_DIR": "engine/src/flutter/impeller/golden_tests/gen/flutter/testing/assets"},
     local_defines = FLUTTER_LOCAL_DEFINES,
+    shard_count = 8,
     target_compatible_with = select({
         ":when_is_mac_and_enable_unittests": [],
         "//conditions:default": ["@platforms//:incompatible"],
