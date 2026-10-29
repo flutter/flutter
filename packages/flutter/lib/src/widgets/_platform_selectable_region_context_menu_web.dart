@@ -39,11 +39,7 @@ typedef RegisterViewFactory = void Function(String, Object Function(int viewId),
 /// documentation.
 class PlatformSelectableRegionContextMenu extends StatefulWidget {
   /// See `_platform_selectable_region_context_menu_io.dart`.
-  PlatformSelectableRegionContextMenu({
-    required this.child,
-    required SelectionContainerDelegate client,
-    super.key,
-  }) : _client = client {
+  PlatformSelectableRegionContextMenu({required this.child, required this._client, super.key}) {
     if (_registeredViewType == null) {
       _register();
     }
