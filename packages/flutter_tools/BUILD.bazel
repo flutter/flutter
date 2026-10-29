@@ -690,9 +690,18 @@ dart_package_tests(
     unsandboxed = _INTEGRATION_APPLE,
     writable = [
         "pubspec.lock",
-        # ios_content_validation_test plants a stray ._Info.plist in the
-        # cache's Flutter.xcframework and removes it again.
+        # The engine directories as the cache unpacks them -- writable, their
+        # directories 0755: ios_content_validation_test plants a stray
+        # ._Info.plist in ios/Flutter.xcframework and removes it again, and
+        # the content validation tests check the frameworks' and dSYMs'
+        # modes (the build's directories are read-only). Clones on APFS,
+        # not copies.
+        "bin/cache/artifacts/engine/darwin-x64",
+        "bin/cache/artifacts/engine/darwin-x64-profile",
+        "bin/cache/artifacts/engine/darwin-x64-release",
         "bin/cache/artifacts/engine/ios",
+        "bin/cache/artifacts/engine/ios-profile",
+        "bin/cache/artifacts/engine/ios-release",
         "dev/integration_tests/flutter_gallery/ios",
         "dev/integration_tests/flutter_gallery/macos",
         "dev/integration_tests/spell_check",
