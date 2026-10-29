@@ -474,8 +474,10 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
     this._descendantsAreTraversable = true,
   }) {
     // Set it via the setter so that it does nothing on release builds.
-    // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
-    this.debugLabel = debugLabel;
+    assert(() {
+      this.debugLabel = debugLabel;
+      return true;
+    }());
 
     if (kFlutterMemoryAllocationsEnabled) {
       ChangeNotifier.maybeDispatchObjectCreation(this);

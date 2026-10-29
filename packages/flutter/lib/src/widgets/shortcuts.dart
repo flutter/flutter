@@ -1129,9 +1129,13 @@ class _ShortcutsState extends State<Shortcuts> {
 
   @override
   Widget build(BuildContext context) {
+    String? debugLabel;
+    assert(() {
+      debugLabel = widget.debugLabel != null ? '$Shortcuts: ${widget.debugLabel}' : '$Shortcuts';
+      return true;
+    }());
     return Focus(
-      // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
-      debugLabel: widget.debugLabel != null ? '$Shortcuts: ${widget.debugLabel}' : '$Shortcuts',
+      debugLabel: debugLabel,
       canRequestFocus: false,
       onKeyEvent: _handleOnKeyEvent,
       includeSemantics: widget.includeSemantics,

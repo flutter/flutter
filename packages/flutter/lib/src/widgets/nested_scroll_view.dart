@@ -1163,13 +1163,17 @@ class _NestedScrollController extends ScrollController {
     ScrollContext context,
     ScrollPosition? oldPosition,
   ) {
+    String? debugLabel;
+    assert(() {
+      debugLabel = this.debugLabel;
+      return true;
+    }());
     return _NestedScrollPosition(
       coordinator: coordinator,
       physics: physics,
       context: context,
       initialPixels: initialScrollOffset,
       oldPosition: oldPosition,
-      // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
       debugLabel: debugLabel,
     );
   }

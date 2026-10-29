@@ -550,6 +550,11 @@ class StrutStyle with Diagnosticable {
     }
 
     final double? effectiveHeight = height ?? other.height;
+    String? effectiveDebugLabel;
+    assert(() {
+      effectiveDebugLabel = debugLabel ?? other.debugLabel;
+      return true;
+    }());
 
     return StrutStyle(
       fontFamily: fontFamily ?? other.fontFamily,
@@ -560,8 +565,7 @@ class StrutStyle with Diagnosticable {
       fontWeight: fontWeight ?? other.fontWeight,
       fontStyle: fontStyle ?? other.fontStyle,
       forceStrutHeight: forceStrutHeight, // StrutStyle-unique property.
-      // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
-      debugLabel: debugLabel ?? other.debugLabel,
+      debugLabel: effectiveDebugLabel,
       leadingDistribution: effectiveHeight != null
           ? (leadingDistribution ?? other.leadingDistribution)
           : null,
@@ -580,6 +584,11 @@ class StrutStyle with Diagnosticable {
     if (other == null) {
       return this;
     }
+    String? effectiveDebugLabel;
+    assert(() {
+      effectiveDebugLabel = other.debugLabel ?? debugLabel;
+      return true;
+    }());
     return StrutStyle(
       fontFamily: other.fontFamily ?? fontFamily,
       fontFamilyFallback: other.fontFamilyFallback ?? fontFamilyFallback,
@@ -590,8 +599,7 @@ class StrutStyle with Diagnosticable {
       fontWeight: other.fontWeight ?? fontWeight,
       fontStyle: other.fontStyle ?? fontStyle,
       forceStrutHeight: other.forceStrutHeight ?? forceStrutHeight,
-      // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
-      debugLabel: other.debugLabel ?? debugLabel,
+      debugLabel: effectiveDebugLabel,
       package: other._package ?? _package,
     );
   }

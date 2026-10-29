@@ -3898,8 +3898,12 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     // TODO(jacobr): make this structured so clients can support clicks on
     // individual entries. For example, is this an iterable with arrows as
     // separators?
-    // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
-    return StringProperty(name, debugGetCreatorChain(10));
+    String? debugCreatorChain;
+    assert(() {
+      debugCreatorChain = debugGetCreatorChain(10);
+      return true;
+    }());
+    return StringProperty(name, debugCreatorChain);
   }
 
   // This is used to verify that Element objects move through life in an

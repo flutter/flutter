@@ -308,13 +308,17 @@ class FixedExtentScrollController extends ScrollController {
     ScrollContext context,
     ScrollPosition? oldPosition,
   ) {
+    String? debugLabel;
+    assert(() {
+      debugLabel = this.debugLabel;
+      return true;
+    }());
     return _FixedExtentScrollPosition(
       physics: physics,
       context: context,
       initialItem: initialItem,
       oldPosition: oldPosition,
       keepScrollOffset: keepScrollOffset,
-      // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
       debugLabel: debugLabel,
     );
   }
