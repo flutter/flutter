@@ -10,7 +10,7 @@
 #
 #   bazel test //dev/bots:tests
 
-load("@host_platform//:host.bzl", "HOST_DART_SDK")
+load("@host_platform//:host.bzl", "HOST_DART_SDK", "HOST_OS")
 load("//build_defs/dart:dart_test.bzl", "dart_package_tests")
 
 package(default_visibility = ["//visibility:public"])
@@ -32,7 +32,8 @@ filegroup(
 # test_ownership_validation_test walk up to the checkout's DEPS and read
 # .ci.yaml and every test directory, test_test runs test.dart itself over the
 # checkout. codesign_test is `@TestOn('mac-os')`, which the runner honours
-# by running nothing, and nothing run is a failure to Bazel.
+# by running nothing elsewhere, and nothing run is a failure to Bazel: it is
+# a Mac host's test (its codesign is a fake process manager's).
 dart_package_tests(
     name = "tests",
     srcs = glob(
@@ -54,10 +55,9 @@ dart_package_tests(
         exclude = [
             "test/analyze_test.dart",
             "test/ci_yaml_validation_test.dart",
-            "test/codesign_test.dart",
             "test/test_ownership_validation_test.dart",
             "test/test_test.dart",
-        ],
+        ] + ([] if HOST_OS == "mac" else ["test/codesign_test.dart"]),
     ),
     # flutter_tools' test harness: codesign_test, post_process_docs_test and
     # prepare_package_test import its fake_process_manager.dart.
