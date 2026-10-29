@@ -18,6 +18,10 @@ std::shared_ptr<YUVConversionVK> TextureSourceVK::GetYUVConversion() const {
   return nullptr;
 }
 
+vk::ImageView TextureSourceVK::GetBaseMipImageView() const {
+  return VK_NULL_HANDLE;
+}
+
 vk::ImageLayout TextureSourceVK::GetLayout() const {
   return layout_;
 }
@@ -29,7 +33,7 @@ vk::ImageLayout TextureSourceVK::SetLayoutWithoutEncoding(
   return old_layout;
 }
 
-fml::Status TextureSourceVK::SetLayout(const BarrierVK& barrier) const {
+absl::Status TextureSourceVK::SetLayout(const BarrierVK& barrier) const {
   const vk::ImageLayout old_layout =
       SetLayoutWithoutEncoding(barrier.new_layout);
   vk::ImageMemoryBarrier image_barrier;

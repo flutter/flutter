@@ -93,8 +93,11 @@ class _IVBuilderExampleState extends State<_IVBuilderExample> {
   }
 }
 
-typedef _CellBuilder =
-    Widget Function(BuildContext context, int row, int column);
+typedef _CellBuilder = Widget Function(
+  BuildContext context,
+  int row,
+  int column,
+);
 
 class _TableBuilder extends StatelessWidget {
   const _TableBuilder({

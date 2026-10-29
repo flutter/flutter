@@ -9,15 +9,15 @@
 #include <optional>
 
 #include "flutter/display_list/geometry/dl_path.h"
-#include "fml/status_or.h"
 #include "impeller/geometry/rational.h"
 #include "impeller/typographer/glyph.h"
 #include "impeller/typographer/glyph_atlas.h"
 #include "impeller/typographer/text_run.h"
+#include "third_party/abseil-cpp/absl/status/statusor.h"
 
 namespace impeller {
 
-using PathCreator = std::function<fml::StatusOr<flutter::DlPath>()>;
+using PathCreator = std::function<absl::StatusOr<flutter::DlPath>()>;
 
 //------------------------------------------------------------------------------
 /// @brief      Represents a collection of shaped text runs.
@@ -83,14 +83,7 @@ class TextFrame {
   ///             property.
   GlyphAtlas::Type GetAtlasType() const;
 
-  /// @brief If this text frame contains a single glyph (such as for an Icon),
-  ///        then return it, otherwise std::nullopt.
-  std::optional<Glyph> AsSingleGlyph() const;
-
-  /// @brief Return the font of the first glyph run.
-  const Font& GetFont() const;
-
-  fml::StatusOr<flutter::DlPath> GetPath() const;
+  absl::StatusOr<flutter::DlPath> GetPath() const;
 
   /// @brief Toggle the platform-specific contrast and gamma correction in the
   ///        fragment shader.
@@ -108,7 +101,7 @@ class TextFrame {
  private:
   std::vector<TextRun> runs_;
   Rect bounds_;
-  bool has_color_;
+  bool has_color_ = false;
   const PathCreator path_creator_;
   std::optional<bool> enable_gamma_correction_ = std::nullopt;
 };

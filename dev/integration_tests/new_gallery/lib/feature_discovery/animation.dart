@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'feature_discovery.dart';
+library;
+
 import 'package:flutter/material.dart';
 
 /// Animations class to compute animation values for overlay widgets.

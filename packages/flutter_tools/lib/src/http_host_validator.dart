@@ -4,6 +4,8 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools_core/flutter_tools_core.dart';
+
 import 'base/io.dart';
 import 'base/net.dart';
 import 'base/platform.dart';
@@ -23,13 +25,10 @@ const kPubDevOverride = 'PUB_HOSTED_URL'; // https://dart.dev/tools/pub/environm
 // Validator that checks all provided hosts are reachable and responsive
 class HttpHostValidator extends DoctorValidator {
   HttpHostValidator({
-    required Platform platform,
-    required FeatureFlags featureFlags,
-    required HttpClient httpClient,
-  }) : _platform = platform,
-       _featureFlags = featureFlags,
-       _httpClient = httpClient,
-       super('Network resources');
+    required this._platform,
+    required this._featureFlags,
+    required this._httpClient,
+  }) : super('Network resources');
 
   final Platform _platform;
   final FeatureFlags _featureFlags;

@@ -5,7 +5,7 @@
 import 'dart:async';
 import 'dart:math' as math;
 
-import 'package:dds/dap.dart' hide PidTracker;
+import 'package:dap_adapters/dap_adapters.dart' hide PidTracker;
 
 import '../base/io.dart';
 import '../cache.dart';
@@ -66,11 +66,26 @@ class FlutterTestDebugAdapter extends FlutterBaseDebugAdapter with TestAdapter {
 
     final processArgs = <String>[...toolArgs, ...?args.toolArgs, ?program, ...?args.args];
 
-    await launchAsProcess(executable: executable, processArgs: processArgs, env: args.env);
+    if (debug) {
+      waitingForDebugger = true;
+    }
+
+    try {
+      await launchAsProcess(executable: executable, processArgs: processArgs, env: args.env);
+    } catch (e) {
+      if (debug) {
+        waitingForDebugger = false;
+      }
+      rethrow;
+    }
 
     // Delay responding until the debugger is connected.
     if (debug) {
-      await debuggerInitialized;
+      try {
+        await Future.any<void>([debuggerInitialized, debuggerInitializationFailedCompleter.future]);
+      } finally {
+        waitingForDebugger = false;
+      }
     }
   }
 

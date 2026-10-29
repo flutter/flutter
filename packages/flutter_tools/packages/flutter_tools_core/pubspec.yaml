@@ -1,0 +1,15 @@
+name: flutter_tools_core
+description: Core shared data models, interfaces, and DTO contracts for Flutter tool extensions.
+resolution: workspace
+
+environment:
+  sdk: ^3.13.0-0
+
+dependencies:
+  collection: 1.19.1
+  meta: 1.19.0
+
+dev_dependencies:
+  test: 1.33.0
+
+# PUBSPEC CHECKSUM: 6d3rih

@@ -176,7 +176,8 @@ TEST(CommandBufferGLES, LaterCurrentSubmitDrainsPreviouslyDeferredWork) {
 TEST(CommandBufferGLES, BufferToTextureBlitCanBeSubmittedBeforeContextCurrent) {
   auto mock_gles_impl = std::make_unique<NiceMock<MockGLESImpl>>();
   auto& mock_gles_impl_ref = *mock_gles_impl;
-  auto mock_gles = MockGLES::Init(std::move(mock_gles_impl));
+  auto mock_gles = MockGLES::Init(std::move(mock_gles_impl), std::nullopt,
+                                  "OpenGL ES 3.2 v1.r18p0-01rel0", "Mali-G72");
   auto context = CreateFakeGLESContext();
   auto context_base = std::static_pointer_cast<Context>(context);
   auto worker = std::make_shared<ToggleWorker>(false);
@@ -190,6 +191,7 @@ TEST(CommandBufferGLES, BufferToTextureBlitCanBeSubmittedBeforeContextCurrent) {
         texture_generated = true;
         textures[0] = kTextureHandle;
       });
+  EXPECT_CALL(mock_gles_impl_ref, BindTexture(GL_TEXTURE_2D, 0u)).Times(1);
   EXPECT_CALL(mock_gles_impl_ref, BindTexture(GL_TEXTURE_2D, kTextureHandle))
       .Times(::testing::AtLeast(1));
   EXPECT_CALL(mock_gles_impl_ref,

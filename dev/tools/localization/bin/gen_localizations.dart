@@ -73,6 +73,8 @@ String generateArbBasedLocalizationSubclasses({
   required String factoryArguments,
   required String supportedLanguagesConstant,
   required String supportedLanguagesDocMacro,
+  String? deprecatedReplacementPackage,
+  Set<String>? generatedClassNames,
 }) {
   assert(generatedClassPrefix.isNotEmpty);
   assert(baseClass.isNotEmpty);
@@ -138,7 +140,15 @@ String generateArbBasedLocalizationSubclasses({
   final canonicalLocale = LocaleInfo.fromString('en');
   for (final languageName in languageCodes) {
     final languageLocale = LocaleInfo.fromString(languageName);
-    output.writeln(generateClassDeclaration(languageLocale, generatedClassPrefix, baseClass));
+    generatedClassNames?.add('$generatedClassPrefix${languageLocale.camelCase()}');
+    output.writeln(
+      generateClassDeclaration(
+        languageLocale,
+        generatedClassPrefix,
+        baseClass,
+        deprecatedReplacementPackage: deprecatedReplacementPackage,
+      ),
+    );
     output.writeln(generateConstructor(languageLocale));
 
     final Map<String, String> languageResources = localeToResources[languageLocale]!;
@@ -155,11 +165,13 @@ String generateArbBasedLocalizationSubclasses({
       // script default values before language default values.
       for (final String scriptCode in languageToScriptCodes[languageName]!) {
         final scriptBaseLocale = LocaleInfo.fromString('${languageName}_$scriptCode');
+        generatedClassNames?.add('$generatedClassPrefix${scriptBaseLocale.camelCase()}');
         output.writeln(
           generateClassDeclaration(
             scriptBaseLocale,
             generatedClassPrefix,
             '$generatedClassPrefix${languageLocale.camelCase()}',
+            deprecatedReplacementPackage: deprecatedReplacementPackage,
           ),
         );
         output.writeln(generateConstructorForCountrySubClass(scriptBaseLocale));
@@ -186,11 +198,13 @@ String generateArbBasedLocalizationSubclasses({
             continue;
           }
           countryCodeCount += 1;
+          generatedClassNames?.add('$generatedClassPrefix${locale.camelCase()}');
           output.writeln(
             generateClassDeclaration(
               locale,
               generatedClassPrefix,
               '$generatedClassPrefix${scriptBaseLocale.camelCase()}',
+              deprecatedReplacementPackage: deprecatedReplacementPackage,
             ),
           );
           output.writeln(generateConstructorForCountrySubClass(locale));
@@ -219,11 +233,13 @@ String generateArbBasedLocalizationSubclasses({
         }
         countryCodeCount += 1;
         final Map<String, String> localeResources = localeToResources[locale]!;
+        generatedClassNames?.add('$generatedClassPrefix${locale.camelCase()}');
         output.writeln(
           generateClassDeclaration(
             locale,
             generatedClassPrefix,
             '$generatedClassPrefix${languageLocale.camelCase()}',
+            deprecatedReplacementPackage: deprecatedReplacementPackage,
           ),
         );
         output.writeln(generateConstructorForCountrySubClass(locale));
@@ -263,6 +279,22 @@ String generateArbBasedLocalizationSubclasses({
 
   // Generate the factory function. Given a Locale it returns the corresponding
   // base class implementation.
+  final supportedLanguagesDeprecation = deprecatedReplacementPackage != null
+      ? '''
+@Deprecated(
+  'Use $supportedLanguagesConstant from $deprecatedReplacementPackage instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
+'''
+      : '';
+  final factoryDeprecation = deprecatedReplacementPackage != null
+      ? '''
+@Deprecated(
+  'Use $factoryName from $deprecatedReplacementPackage instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
+'''
+      : '';
   output.writeln('''
 
 /// The set of supported languages, as language code strings.
@@ -276,7 +308,7 @@ String generateArbBasedLocalizationSubclasses({
 /// See also:
 ///
 ///  * [$factoryName], whose documentation describes these values.
-final Set<String> $supportedLanguagesConstant = HashSet<String>.from(const <String>[
+${supportedLanguagesDeprecation}final Set<String> $supportedLanguagesConstant = HashSet<String>.from(const <String>[
 ${languageCodes.map<String>((String value) => "  '$value', // ${describeLocale(value)}").toList().join('\n')}
 ]);
 
@@ -294,7 +326,7 @@ $supportedLocales/// {@endtemplate}
 ///
 /// Generally speaking, this method is only intended to be used by
 /// [$baseClass.delegate].
-$factoryDeclaration
+$factoryDeprecation$factoryDeclaration
   switch (locale.languageCode) {''');
   for (final String language in languageToLocales.keys) {
     // Only one instance of the language.
@@ -650,6 +682,7 @@ void main(List<String> rawArgs) {
           supportedLanguagesDocMacro: widgetsSupportedLanguagesDocMacro,
         )
       : null;
+  final materialGeneratedClasses = <String>{};
   final String? materialLocalizations = options.writeToFile || !options.cupertinoOnly
       ? generateArbBasedLocalizationSubclasses(
           localeToResources: materialLocaleToResources,
@@ -664,8 +697,11 @@ void main(List<String> rawArgs) {
           factoryArguments: materialFactoryArguments,
           supportedLanguagesConstant: materialSupportedLanguagesConstant,
           supportedLanguagesDocMacro: materialSupportedLanguagesDocMacro,
+          deprecatedReplacementPackage: 'package:material_ui/material_ui.dart',
+          generatedClassNames: materialGeneratedClasses,
         )
       : null;
+  final cupertinoGeneratedClasses = <String>{};
   final String? cupertinoLocalizations = options.writeToFile || !options.materialOnly
       ? generateArbBasedLocalizationSubclasses(
           localeToResources: cupertinoLocaleToResources,
@@ -680,6 +716,8 @@ void main(List<String> rawArgs) {
           factoryArguments: cupertinoFactoryArguments,
           supportedLanguagesConstant: cupertinoSupportedLanguagesConstant,
           supportedLanguagesDocMacro: cupertinoSupportedLanguagesDocMacro,
+          deprecatedReplacementPackage: 'package:cupertino_ui/cupertino_ui.dart',
+          generatedClassNames: cupertinoGeneratedClasses,
         )
       : null;
 
@@ -696,6 +734,29 @@ void main(List<String> rawArgs) {
       path.join(directory.path, 'generated_cupertino_localizations.dart'),
     );
     cupertinoLocalizationsFile.writeAsStringSync(cupertinoLocalizations!, flush: true);
+
+    final fixDataDir = Directory(path.join(directory.parent.parent.path, 'fix_data'));
+    fixDataDir.createSync(recursive: true);
+    File(path.join(fixDataDir.path, 'fix_material_localizations.yaml')).writeAsStringSync(
+      generateLocalizationFixData(
+        baseClass: 'GlobalMaterialLocalizations',
+        supportedLanguagesConstant: materialSupportedLanguagesConstant,
+        factoryName: materialFactoryName,
+        generatedClassNames: materialGeneratedClasses,
+        replacementPackageUri: 'package:material_ui/material_ui.dart',
+      ),
+      flush: true,
+    );
+    File(path.join(fixDataDir.path, 'fix_cupertino_localizations.yaml')).writeAsStringSync(
+      generateLocalizationFixData(
+        baseClass: 'GlobalCupertinoLocalizations',
+        supportedLanguagesConstant: cupertinoSupportedLanguagesConstant,
+        factoryName: cupertinoFactoryName,
+        generatedClassNames: cupertinoGeneratedClasses,
+        replacementPackageUri: 'package:cupertino_ui/cupertino_ui.dart',
+      ),
+      flush: true,
+    );
   } else {
     if (options.cupertinoOnly) {
       stdout.write(cupertinoLocalizations);
@@ -709,4 +770,86 @@ void main(List<String> rawArgs) {
       stdout.write(cupertinoLocalizations);
     }
   }
+}
+
+String generateLocalizationFixData({
+  required String baseClass,
+  required String supportedLanguagesConstant,
+  required String factoryName,
+  required Set<String> generatedClassNames,
+  required String replacementPackageUri,
+}) {
+  final buffer = StringBuffer('''
+# Copyright 2014 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# THIS FILE IS GENERATED. DO NOT EDIT BY HAND.
+#
+# This file is generated by:
+#   dart dev/tools/localization/bin/gen_localizations.dart --overwrite
+
+# For details regarding the *Flutter Fix* feature, see
+# https://flutter.dev/to/flutter-fix
+
+# Every fix must be tested. See the
+# flutter/packages/flutter_localizations/test_fixes/README.md file for
+# instructions on testing these data driven fixes.
+
+# For documentation about this file format, see
+# https://dart.dev/go/data-driven-fixes.
+
+version: 1
+transforms:
+  - title: "Migrate to '$replacementPackageUri'"
+    date: 2026-09-17
+    element:
+      uris: ['flutter_localizations.dart']
+      class: '$baseClass'
+    changes:
+      - kind: 'replacedBy'
+        newElement:
+          uris: ['$replacementPackageUri']
+          class: '$baseClass'
+
+  - title: "Migrate to '$replacementPackageUri'"
+    date: 2026-09-17
+    element:
+      uris: ['flutter_localizations.dart']
+      variable: '$supportedLanguagesConstant'
+    changes:
+      - kind: 'replacedBy'
+        newElement:
+          uris: ['$replacementPackageUri']
+          variable: '$supportedLanguagesConstant'
+
+  - title: "Migrate to '$replacementPackageUri'"
+    date: 2026-09-17
+    element:
+      uris: ['flutter_localizations.dart']
+      function: '$factoryName'
+    changes:
+      - kind: 'replacedBy'
+        newElement:
+          uris: ['$replacementPackageUri']
+          function: '$factoryName'
+''');
+
+  for (final className in generatedClassNames) {
+    buffer.write('''
+
+  - title: "Migrate to '$replacementPackageUri'"
+    date: 2026-09-17
+    element:
+      uris: ['flutter_localizations.dart']
+      class: '$className'
+    changes:
+      - kind: 'replacedBy'
+        newElement:
+          uris: ['$replacementPackageUri']
+          class: '$className'
+''');
+  }
+
+  return buffer.toString();
 }

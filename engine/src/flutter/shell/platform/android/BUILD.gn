@@ -12,6 +12,7 @@ import("//flutter/lib/snapshot/gen_snapshot.gni")
 import("//flutter/shell/config.gni")
 import("//flutter/shell/gpu/gpu.gni")
 import("//flutter/shell/version/version.gni")
+import("//flutter/testing/symbols/check_forbidden_native_symbols.gni")
 import("//flutter/vulkan/config.gni")
 
 shell_gpu_configuration("android_gpu_configuration") {
@@ -43,6 +44,7 @@ executable("flutter_shell_native_unittests") {
   visibility = [ "*" ]
   testonly = true
   sources = [
+    "android_context_dynamic_impeller_unittests.cc",
     "android_context_gl_impeller_unittests.cc",
     "android_image_generator_unittests.cc",
     "android_shell_holder_unittests.cc",
@@ -56,6 +58,7 @@ executable("flutter_shell_native_unittests") {
     sources += [ "android_context_gl_unittests.cc" ]
   }
   public_configs = [ "//flutter:config" ]
+  defines = [ "TESTING" ]
   deps = [
     ":flutter_shell_native_src",
     "//flutter/fml",
@@ -66,9 +69,11 @@ executable("flutter_shell_native_unittests") {
   ]
 }
 
+_flutter_shell_native_output_name = "flutter"
+
 shared_library("flutter_shell_native") {
   inputs = [ "android_exports.lst" ]
-  output_name = "flutter"
+  output_name = _flutter_shell_native_output_name
   deps = [ ":flutter_shell_native_src" ]
   ldflags = [ "-Wl,--version-script=" +
               rebase_path("android_exports.lst", root_build_dir) ]
@@ -240,6 +245,7 @@ android_java_sources = [
   "io/flutter/embedding/android/FlutterTextureView.java",
   "io/flutter/embedding/android/FlutterView.java",
   "io/flutter/embedding/android/FlutterViewDelegate.java",
+  "io/flutter/embedding/android/IntentUtils.java",
   "io/flutter/embedding/android/KeyChannelResponder.java",
   "io/flutter/embedding/android/KeyData.java",
   "io/flutter/embedding/android/KeyEmbedderResponder.java",
@@ -253,7 +259,6 @@ android_java_sources = [
   "io/flutter/embedding/engine/FlutterEngine.java",
   "io/flutter/embedding/engine/FlutterEngineCache.java",
   "io/flutter/embedding/engine/FlutterEngineConnectionRegistry.java",
-  "io/flutter/embedding/engine/FlutterEngineFlags.java",
   "io/flutter/embedding/engine/FlutterEngineGroup.java",
   "io/flutter/embedding/engine/FlutterEngineGroupCache.java",
   "io/flutter/embedding/engine/FlutterJNI.java",
@@ -265,6 +270,8 @@ android_java_sources = [
   "io/flutter/embedding/engine/dart/PlatformTaskQueue.java",
   "io/flutter/embedding/engine/deferredcomponents/DeferredComponentManager.java",
   "io/flutter/embedding/engine/deferredcomponents/PlayStoreDeferredComponentManager.java",
+  "io/flutter/embedding/engine/flags/FlutterEngineFlags.java",
+  "io/flutter/embedding/engine/flags/FlutterEngineFlagsProvider.java",
   "io/flutter/embedding/engine/image/BitmapMetadataReader.java",
   "io/flutter/embedding/engine/image/ExifMetadataReader.java",
   "io/flutter/embedding/engine/image/FlutterImageDecoder.java",
@@ -357,6 +364,7 @@ android_java_sources = [
   "io/flutter/plugin/platform/PlatformPlugin.java",
   "io/flutter/plugin/platform/PlatformView.java",
   "io/flutter/plugin/platform/PlatformViewFactory.java",
+  "io/flutter/plugin/platform/PlatformViewGestureTracker.java",
   "io/flutter/plugin/platform/PlatformViewRegistry.java",
   "io/flutter/plugin/platform/PlatformViewRegistryImpl.java",
   "io/flutter/plugin/platform/PlatformViewRenderTarget.java",
@@ -390,9 +398,17 @@ android_java_sources = [
   "io/flutter/view/MenuRoleConfigurator.java",
   "io/flutter/view/ProgressBarRoleConfigurator.java",
   "io/flutter/view/RoleConfiguratorFactory.java",
+  "io/flutter/view/SliderRoleConfigurator.java",
   "io/flutter/view/TextureRegistry.java",
   "io/flutter/view/VsyncWaiter.java",
 ]
+
+if (flutter_runtime_mode == "release" ||
+    flutter_runtime_mode == "jit_release") {
+  android_java_sources += [ "release/io/flutter/embedding/engine/flags/FlutterEngineFlagsProviderImpl.java" ]
+} else {
+  android_java_sources += [ "debug/io/flutter/embedding/engine/flags/FlutterEngineFlagsProviderImpl.java" ]
+}
 
 embedding_dependencies_jars = [
   "//flutter/third_party/android_embedding_dependencies/lib/activity-1.8.1.jar",
@@ -437,7 +453,8 @@ action("check_imports") {
 
   stamp_file = "$root_out_dir/check_android_imports"
 
-  # File does not actually get created, but GN expects us to have an output here.
+  # File does not actually get created, but GN expects us to have an output
+  # here.
   outputs = [ stamp_file ]
 
   args = [
@@ -445,6 +462,12 @@ action("check_imports") {
            rebase_path(stamp_file, root_build_dir),
            "--files",
          ] + rebase_path(android_java_sources, root_build_dir)
+}
+
+check_forbidden_native_symbols("check_native_symbols") {
+  deps = [ ":flutter_shell_native" ]
+  _out_dir = get_label_info(":flutter_shell_native", "root_out_dir")
+  library = "$_out_dir/lib$_flutter_shell_native_output_name.so"
 }
 
 action("flutter_shell_java") {
@@ -555,6 +578,7 @@ action("android_jar") {
   ]
 
   deps = [
+    ":check_native_symbols",
     ":flutter_shell_java",
     ":flutter_shell_native",
     ":pom_content_hash_embedding",
@@ -702,11 +726,6 @@ action("pom_content_hash_embedding") {
   ]
 }
 
-# TODO(jsimmons): remove this placeholder when it is no longer used by the LUCI recipes
-group("robolectric_tests") {
-  deps = [ ":android_jar" ]
-}
-
 zip_bundle("android_symbols") {
   output = "$android_zip_archive_dir/symbols.zip"
   files = [
@@ -716,7 +735,10 @@ zip_bundle("android_symbols") {
     },
   ]
 
-  deps = [ ":flutter_shell_native" ]
+  deps = [
+    ":check_native_symbols",
+    ":flutter_shell_native",
+  ]
 }
 
 zip_bundle("flutter_jar_zip") {

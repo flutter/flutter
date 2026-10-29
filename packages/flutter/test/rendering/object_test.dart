@@ -567,13 +567,12 @@ void _testPaintingContextLayerReuse<L extends Layer>(_LayerTestPaintCallback pai
   expect(box.paintedLayers[0], same(box.paintedLayers[1]));
 }
 
-typedef _LayerTestPaintCallback =
-    Layer? Function(
-      PaintingContextCallback painter,
-      PaintingContext context,
-      Offset offset,
-      Layer? oldLayer,
-    );
+typedef _LayerTestPaintCallback = Layer? Function(
+  PaintingContextCallback painter,
+  PaintingContext context,
+  Offset offset,
+  Layer? oldLayer,
+);
 
 class _TestCustomLayerBox extends RenderBox {
   _TestCustomLayerBox(this.painter);

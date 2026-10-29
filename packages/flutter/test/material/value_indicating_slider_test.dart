@@ -324,9 +324,8 @@ Future<void> _buildValueIndicatorStaticSlider(
                 minScaleFactor: textScale,
                 maxScaleFactor: textScale,
                 child: SliderTheme(
-                  data: Theme.of(
-                    context,
-                  ).sliderTheme.copyWith(showValueIndicator: ShowValueIndicator.always),
+                  data: Theme.of(context).sliderTheme
+                      .copyWith(showValueIndicator: ShowValueIndicator.always),
                   child: Slider(
                     value: value,
                     label: value.toStringAsFixed(decimalCount),

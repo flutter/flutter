@@ -11,6 +11,7 @@ import("//flutter/common/config.gni")
 import("//flutter/shell/config.gni")
 import("//flutter/shell/gpu/gpu.gni")
 import("//flutter/shell/platform/darwin/common/framework_common.gni")
+import("//flutter/testing/symbols/check_forbidden_native_symbols.gni")
 import("//flutter/testing/testing.gni")
 
 _flutter_framework_dir = "$root_out_dir/Flutter.framework"
@@ -68,6 +69,7 @@ source_set("InternalFlutterSwift") {
     "framework/Source/KeyboardInsetManager.swift",
     "framework/Source/LaunchEngine.swift",
     "framework/Source/SplashScreenManager.swift",
+    "framework/Source/TranslateViewController.swift",
     "framework/Source/UIPressProxy.swift",
     "framework/Source/VSyncClient.swift",
   ]
@@ -405,13 +407,20 @@ copy("copy_dylib") {
   deps = [ ":create_flutter_framework_dylib" ]
 }
 
+check_forbidden_native_symbols("check_native_symbols") {
+  visibility = [ ":*" ]
+  deps = [ ":copy_dylib" ]
+  _dylib_outputs = get_target_outputs(":copy_dylib")
+  library = _dylib_outputs[0]
+}
+
 copy("copy_asan_runtime_dylib") {
   visibility = [ ":*" ]
 
   # TODO(cbracken): https://github.com/flutter/flutter/issues/186668
   # Eliminate clang toolchain hardcoding.
   _libclang_base_path =
-      "$buildtools_path/mac-${host_cpu}/clang/lib/clang/23/lib/darwin/"
+      "$buildtools_path/mac-${host_cpu}/clang/lib/clang/24/lib/darwin/"
 
   if (defined(use_ios_simulator) && use_ios_simulator) {
     _dylib_name = "libclang_rt.asan_iossim_dynamic.dylib"
@@ -510,6 +519,7 @@ shared_library("copy_and_verify_framework_module") {
 group("universal_flutter_framework") {
   visibility = [ ":*" ]
   deps = [
+    ":check_native_symbols",
     ":copy_and_verify_framework_module",
     ":copy_dylib",
     ":copy_framework_icu",

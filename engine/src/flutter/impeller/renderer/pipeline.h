@@ -13,7 +13,6 @@
 #include "impeller/renderer/compute_pipeline_descriptor.h"
 #include "impeller/renderer/context.h"
 #include "impeller/renderer/pipeline_builder.h"
-#include "impeller/renderer/pipeline_compile_queue.h"
 #include "impeller/renderer/pipeline_descriptor.h"
 #include "impeller/renderer/shader_stage_compatibility_checker.h"
 
@@ -29,6 +28,8 @@ template <typename T>
 struct PipelineFuture {
   std::optional<T> descriptor;
   std::shared_future<std::shared_ptr<Pipeline<T>>> future;
+  /// The library that is creating the pipeline, if any.
+  std::weak_ptr<PipelineLibrary> library;
 
   const std::shared_ptr<Pipeline<T>> Get() const { return future.get(); }
 
@@ -126,20 +127,13 @@ class GenericRenderPipelineHandle {
 
   virtual ~GenericRenderPipelineHandle() = default;
 
-  std::shared_ptr<Pipeline<PipelineDescriptor>> WaitAndGet(
-      PipelineCompileQueue* queue) {
-    if (did_wait_) {
-      return pipeline_;
-    }
-    did_wait_ = true;
-    if (pipeline_future_.IsValid()) {
-      if (queue != nullptr && pipeline_future_.descriptor.has_value()) {
-        queue->PerformJobEagerly(pipeline_future_.descriptor.value());
-      }
-      pipeline_ = pipeline_future_.Get();
-    }
-    return pipeline_;
-  }
+  //----------------------------------------------------------------------------
+  /// @brief      Waits for the pipeline to be created and returns it. If the
+  ///             pipeline creation is still pending, the library creating it is
+  ///             asked to perform it eagerly on the calling thread instead of
+  ///             idly waiting.
+  ///
+  std::shared_ptr<Pipeline<PipelineDescriptor>> WaitAndGet();
 
   std::optional<PipelineDescriptor> GetDescriptor() const {
     return pipeline_future_.descriptor;

@@ -133,5 +133,96 @@ void testMain() {
         region: const ui.Rect.fromLTRB(0, 0, 200, 200),
       );
     });
+
+    test('SceneBuilder.addPicture ignores already disposed picture', () async {
+      final recorder = ui.PictureRecorder();
+      final canvas = ui.Canvas(recorder, const ui.Rect.fromLTWH(0, 0, 100, 100));
+      canvas.drawRect(
+        const ui.Rect.fromLTWH(0, 0, 100, 100),
+        ui.Paint()..style = ui.PaintingStyle.fill,
+      );
+      final ui.Picture picture = recorder.endRecording();
+      picture.dispose();
+
+      final sb = LayerSceneBuilder();
+      sb.addPicture(const ui.Offset(10, 10), picture);
+      final LayerScene scene = sb.build();
+
+      // Rendering scene executes preroll, measure, and paint on LayerTree.
+      await expectLater(renderScene(scene), completes);
+
+      // scene.toImage flattens the LayerTree (preroll + flatten paint).
+      await expectLater(scene.toImage(200, 200), completes);
+    });
+
+    test('handles picture disposed after scene was built', () async {
+      final recorder = ui.PictureRecorder();
+      final canvas = ui.Canvas(recorder, const ui.Rect.fromLTWH(0, 0, 100, 100));
+      canvas.drawRect(
+        const ui.Rect.fromLTWH(0, 0, 100, 100),
+        ui.Paint()..style = ui.PaintingStyle.fill,
+      );
+      final ui.Picture picture = recorder.endRecording();
+
+      final sb = LayerSceneBuilder();
+      sb.addPicture(const ui.Offset(10, 10), picture);
+      final LayerScene scene = sb.build();
+
+      // Dispose the picture cloned into the layer tree.
+      final pictureLayer = scene.layerTree.rootLayer.debugLayers.single as PictureLayer;
+      pictureLayer.picture.dispose();
+      picture.dispose();
+
+      // Rendering scene executes preroll, measure, and paint on LayerTree.
+      await expectLater(renderScene(scene), completes);
+
+      // scene.toImage flattens the LayerTree (preroll + flatten paint).
+      await expectLater(scene.toImage(200, 200), completes);
+    });
+
+    // Regression test for https://github.com/flutter/flutter/issues/189178
+    test('Scene.toImage and Scene.toImageSync dispose the flattened picture', () async {
+      final recorder = ui.PictureRecorder();
+      final canvas = ui.Canvas(recorder, const ui.Rect.fromLTWH(0, 0, 100, 100));
+      canvas.drawRect(
+        const ui.Rect.fromLTWH(0, 0, 100, 100),
+        ui.Paint()..style = ui.PaintingStyle.fill,
+      );
+      final ui.Picture picture = recorder.endRecording();
+
+      final sb = LayerSceneBuilder();
+      sb.addPicture(ui.Offset.zero, picture);
+      final LayerScene scene = sb.build();
+
+      final created = <ui.Picture>[];
+      final disposed = <ui.Picture>[];
+      final ui.PictureEventCallback? oldOnCreate = ui.Picture.onCreate;
+      final ui.PictureEventCallback? oldOnDispose = ui.Picture.onDispose;
+      ui.Picture.onCreate = (ui.Picture createdPicture) {
+        created.add(createdPicture);
+        oldOnCreate?.call(createdPicture);
+      };
+      ui.Picture.onDispose = (ui.Picture disposedPicture) {
+        disposed.add(disposedPicture);
+        oldOnDispose?.call(disposedPicture);
+      };
+      try {
+        final ui.Image syncImage = scene.toImageSync(100, 100);
+        expect(created, hasLength(1));
+        expect(disposed, equals(created));
+        syncImage.dispose();
+
+        final ui.Image asyncImage = await scene.toImage(100, 100);
+        expect(created, hasLength(2));
+        expect(disposed, equals(created));
+        asyncImage.dispose();
+      } finally {
+        ui.Picture.onCreate = oldOnCreate;
+        ui.Picture.onDispose = oldOnDispose;
+      }
+
+      scene.dispose();
+      picture.dispose();
+    });
   });
 }

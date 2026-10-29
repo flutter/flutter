@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:math';
+
 import 'package:flutter/material.dart';
 
 // Color gradients.

@@ -156,17 +156,18 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
       });
       rethrow;
     } finally {
-      // ignore: unawaited_futures
-      chunkEvents.close().catchError((Object error, StackTrace stack) {
-        FlutterError.reportError(
-          FlutterErrorDetails(
-            exception: error,
-            stack: stack,
-            library: 'painting library',
-            context: ErrorDescription('while closing chunkEvents stream in NetworkImage.load'),
-          ),
-        );
-      });
+      unawaited(
+        chunkEvents.close().catchError((Object error, StackTrace stack) {
+          FlutterError.reportError(
+            FlutterErrorDetails(
+              exception: error,
+              stack: stack,
+              library: 'painting library',
+              context: ErrorDescription('while closing chunkEvents stream in NetworkImage.load'),
+            ),
+          );
+        }),
+      );
     }
   }
 

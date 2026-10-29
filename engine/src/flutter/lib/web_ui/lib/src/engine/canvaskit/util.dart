@@ -8,17 +8,6 @@ import 'package:ui/ui.dart' as ui;
 
 import 'canvaskit_api.dart';
 
-/// An error related to the CanvasKit rendering backend.
-class CanvasKitError extends Error {
-  CanvasKitError(this.message);
-
-  /// Describes this error.
-  final String message;
-
-  @override
-  String toString() => 'CanvasKitError: $message';
-}
-
 /// Creates a new color array.
 Float32List makeFreshSkColor(ui.Color color) {
   final result = Float32List(4);

@@ -306,7 +306,7 @@ class _PostFrameCallbacker extends SingleChildRenderObjectWidget {
 }
 
 class _RenderPostFrameCallbacker extends RenderProxyBox {
-  _RenderPostFrameCallbacker({FrameCallback? callback}) : _callback = callback;
+  _RenderPostFrameCallbacker({this._callback});
 
   FrameCallback? get callback => _callback;
   FrameCallback? _callback;

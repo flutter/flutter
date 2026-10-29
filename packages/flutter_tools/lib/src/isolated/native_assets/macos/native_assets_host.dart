@@ -5,15 +5,15 @@
 // Shared logic between iOS and macOS implementations of native assets.
 
 import 'package:code_assets/code_assets.dart';
-import 'package:hooks_runner/hooks_runner.dart';
 
 import '../../../base/common.dart';
 import '../../../base/file_system.dart';
+import '../../../base/logger.dart';
 import '../../../base/process.dart';
 import '../../../build_info.dart';
 import '../../../build_system/targets/darwin.dart';
-import '../../../globals.dart' as globals;
 import '../native_assets.dart';
+import '../native_assets_manifest.dart';
 
 /// Create an `Info.plist` in [target] for a framework with a single dylib.
 ///
@@ -64,8 +64,12 @@ Future<void> createInfoPlist(String name, Directory target, {String? minimumIOSV
 /// The dylibs must have different architectures. E.g. a dylib targeting
 /// arm64 ios simulator cannot be combined with a dylib targeting arm64
 /// ios device or macos arm64.
-Future<void> lipoDylibs(File target, List<File> sources) async {
-  final RunResult lipoResult = await globals.processUtils.run(<String>[
+Future<void> lipoDylibs(
+  File target,
+  List<File> sources, {
+  required ProcessUtils processUtils,
+}) async {
+  final RunResult lipoResult = await processUtils.run(<String>[
     'xcrun',
     'lipo',
     '-create',
@@ -93,9 +97,10 @@ Future<void> lipoDylibs(File target, List<File> sources) async {
 Future<void> setInstallNamesDylib(
   File dylibFile,
   String newInstallName,
-  Map<String, String> oldToNewInstallNames,
-) async {
-  final RunResult setInstallNamesResult = await globals.processUtils.run(<String>[
+  Map<String, String> oldToNewInstallNames, {
+  required ProcessUtils processUtils,
+}) async {
+  final RunResult setInstallNamesResult = await processUtils.run(<String>[
     'xcrun',
     'install_name_tool',
     '-id',
@@ -117,8 +122,11 @@ Future<void> setInstallNamesDylib(
   }
 }
 
-Future<Set<String>> getInstallNamesDylib(File dylibFile) async {
-  final RunResult installNameResult = await globals.processUtils.run(<String>[
+Future<Set<String>> getInstallNamesDylib(
+  File dylibFile, {
+  required ProcessUtils processUtils,
+}) async {
+  final RunResult installNameResult = await processUtils.run(<String>[
     'xcrun',
     'otool',
     '-D',
@@ -139,8 +147,12 @@ Future<Set<String>> getInstallNamesDylib(File dylibFile) async {
 }
 
 /// Creates a dSYM bundle for a dylib.
-Future<void> dsymutilDylib(File dylibFile, String dsymPath) async {
-  final RunResult result = await globals.processUtils.run(<String>[
+Future<void> dsymutilDylib(
+  File dylibFile,
+  String dsymPath, {
+  required ProcessUtils processUtils,
+}) async {
+  final RunResult result = await processUtils.run(<String>[
     'xcrun',
     'dsymutil',
     dylibFile.path,
@@ -155,8 +167,12 @@ Future<void> dsymutilDylib(File dylibFile, String dsymPath) async {
 /// Strips a dylib.
 ///
 /// This is useful for release builds to reduce binary size.
-Future<void> stripDylib(File dylibFile) async {
-  final RunResult result = await globals.processUtils.run(<String>[
+Future<void> stripDylib(
+  File dylibFile, {
+  required Logger logger,
+  required ProcessUtils processUtils,
+}) async {
+  final RunResult result = await processUtils.run(<String>[
     'xcrun',
     'strip',
     '-x', // Remove local symbols.
@@ -164,8 +180,8 @@ Future<void> stripDylib(File dylibFile) async {
     dylibFile.path,
   ]);
   if (result.exitCode != 0) {
-    globals.logger.printError(result.stdout);
-    globals.logger.printError(result.stderr);
+    logger.printError(result.stdout);
+    logger.printError(result.stderr);
     throwToolExit('strip failed with exit code ${result.exitCode}');
   }
 }
@@ -173,8 +189,9 @@ Future<void> stripDylib(File dylibFile) async {
 Future<void> codesignDylib(
   String? codesignIdentity,
   BuildMode buildMode,
-  FileSystemEntity target,
-) async {
+  FileSystemEntity target, {
+  required ProcessUtils processUtils,
+}) async {
   if (codesignIdentity == null || codesignIdentity.isEmpty) {
     codesignIdentity = '-';
   }
@@ -190,7 +207,7 @@ Future<void> codesignDylib(
     ],
     target.path,
   ];
-  final RunResult codesignResult = await globals.processUtils.run(codesignCommand);
+  final RunResult codesignResult = await processUtils.run(codesignCommand);
   if (codesignResult.exitCode != 0) {
     throwToolExit(
       'Failed to code sign binary: exit code: ${codesignResult.exitCode} '
@@ -205,10 +222,13 @@ Future<void> codesignDylib(
 ///
 /// If no XCode installation was found, [throwIfNotFound] controls whether this
 /// throws or returns `null`.
-Future<CCompilerConfig?> cCompilerConfigMacOS({required bool throwIfNotFound}) async {
-  final Uri? compiler = await _findXcrunBinary('clang', throwIfNotFound);
-  final Uri? archiver = await _findXcrunBinary('ar', throwIfNotFound);
-  final Uri? linker = await _findXcrunBinary('ld', throwIfNotFound);
+Future<CCompilerConfig?> cCompilerConfigMacOS({
+  required ProcessUtils processUtils,
+  required bool throwIfNotFound,
+}) async {
+  final Uri? compiler = await _findXcrunBinary('clang', throwIfNotFound, processUtils);
+  final Uri? archiver = await _findXcrunBinary('ar', throwIfNotFound, processUtils);
+  final Uri? linker = await _findXcrunBinary('ld', throwIfNotFound, processUtils);
 
   if (compiler == null || archiver == null || linker == null) {
     assert(!throwIfNotFound);
@@ -219,12 +239,12 @@ Future<CCompilerConfig?> cCompilerConfigMacOS({required bool throwIfNotFound}) a
 }
 
 /// Invokes `xcrun --find` to find the full path to [binaryName].
-Future<Uri?> _findXcrunBinary(String binaryName, bool throwIfNotFound) async {
-  final RunResult xcrunResult = await globals.processUtils.run(<String>[
-    'xcrun',
-    '--find',
-    binaryName,
-  ]);
+Future<Uri?> _findXcrunBinary(
+  String binaryName,
+  bool throwIfNotFound,
+  ProcessUtils processUtils,
+) async {
+  final RunResult xcrunResult = await processUtils.run(<String>['xcrun', '--find', binaryName]);
   if (xcrunResult.exitCode != 0) {
     if (throwIfNotFound) {
       throwToolExit('Failed to find $binaryName with xcrun:\n${xcrunResult.stderr}');
@@ -267,10 +287,7 @@ Uri frameworkUri(String fileName, Set<String> alreadyTakenNames) {
   if (isDylib && fileName.startsWith('lib')) {
     fileName = fileName.replaceFirst('lib', '');
   }
-  fileName = fileName.replaceAll(
-    RegExp(r'[^A-Za-z0-9._-]'),
-    '',
-  ); // Allow period chars in framework names, as per Apple's syntax rules (fixes issue https://github.com/dart-lang/native/issues/3268#issue-4152803855)
+  fileName = fileName.replaceAll(RegExp(r'[^A-Za-z0-9._-]'), ''); // Allow period chars in framework names, as per Apple's syntax rules (fixes issue https://github.com/dart-lang/native/issues/3268#issue-4152803855)
   if (alreadyTakenNames.contains(fileName)) {
     final prefixName = fileName;
     for (var i = 1; i < 1000; i++) {
@@ -286,6 +303,17 @@ Uri frameworkUri(String fileName, Set<String> alreadyTakenNames) {
   alreadyTakenNames.add(fileName);
   return Uri(path: '$fileName.framework/$fileName');
 }
+
+/// The install name stamped into the framework bundled at [frameworkUri], which
+/// is also the name it has to be loaded with at runtime.
+///
+/// `dlopen` recognizes a library it has already loaded by the name it is opened
+/// with, and only falls back to identifying the file on disk when that name
+/// matches no install name it knows. A rebuild replaces that file underneath a
+/// debug instance that is still running, so opening an asset by anything other
+/// than its install name maps a second copy of it into the process, and the two
+/// copies do not share the library's global state.
+String frameworkInstallName(Uri frameworkUri) => '@rpath/${frameworkUri.path}';
 
 Map<Architecture?, List<String>> parseOtoolArchitectureSections(String output) {
   // The output of `otool -D`, for example, looks like below. For each
@@ -336,8 +364,8 @@ Map<Architecture?, List<String>> parseOtoolArchitectureSections(String output) {
   return architectureSections;
 }
 
-/// Groups native assets by their target framework path for multi-architecture
-/// bundling.
+/// Computes the [FlutterCodeAssetTargetLocation] for each [FlutterCodeAsset] on
+/// Apple platforms (macOS and iOS).
 ///
 /// On macOS and iOS, architecture-specific binaries for the same Asset ID are
 /// combined into a single "fat" (universal) binary using `lipo`. This function
@@ -346,27 +374,46 @@ Map<Architecture?, List<String>> parseOtoolArchitectureSections(String output) {
 /// If different architectures for the same Asset ID have different framework
 /// names, a warning is issued, and the name of the first encountered
 /// architecture is used.
-Map<KernelAssetPath, List<FlutterCodeAsset>> fatAssetTargetLocations(
-  List<FlutterCodeAsset> nativeAssets,
-  KernelAsset Function(FlutterCodeAsset asset, Set<String> alreadyTakenNames)
-  targetLocationCallback,
-) {
-  final alreadyTakenNamesPerTarget = <Target, Set<String>>{};
-  final result = <KernelAssetPath, List<FlutterCodeAsset>>{};
-  final idToPath = <String, KernelAssetPath>{};
+Map<FlutterCodeAsset, FlutterCodeAssetTargetLocation> assetTargetLocationsApple(
+  List<FlutterCodeAsset> nativeAssets, {
+  required Logger logger,
+  Uri? absolutePath,
+}) {
+  final alreadyTakenNamesPerArch = <Architecture, Set<String>>{};
+  final idToLocation = <String, FlutterCodeAssetTargetLocation>{};
+  final result = <FlutterCodeAsset, FlutterCodeAssetTargetLocation>{};
+
   for (final asset in nativeAssets) {
-    // Use same target path for all assets with the same id.
     final String assetId = asset.codeAsset.id;
-    final KernelAssetPath? existingPath = idToPath[assetId];
-    final Set<String> alreadyTakenNames = alreadyTakenNamesPerTarget.putIfAbsent(
-      asset.target,
+    final FlutterCodeAssetTargetLocation? existingLocation = idToLocation[assetId];
+    final Set<String> alreadyTakenNames = alreadyTakenNamesPerArch.putIfAbsent(
+      asset.architecture,
       () => <String>{},
     );
-    final KernelAssetPath currentPath = targetLocationCallback(asset, alreadyTakenNames).path;
+    final FlutterCodeAssetTargetLocation currentLocation = targetLocationForCodeAsset(asset, (
+      FlutterCodeAsset asset,
+    ) {
+      final String fileName = asset.codeAsset.file!.pathSegments.last;
+      if (absolutePath != null) {
+        // Flutter tester needs full host paths.
+        return FlutterCodeAssetTargetLocation(
+          runtimePath: NativeAssetAbsolutePath.fromFileUri(absolutePath.resolve(fileName)),
+          bundlePath: Uri(path: fileName),
+        );
+      }
+      final Uri bundlePath = frameworkUri(fileName, alreadyTakenNames);
+      return FlutterCodeAssetTargetLocation(
+        runtimePath: NativeAssetAbsolutePath(frameworkInstallName(bundlePath)),
+        bundlePath: bundlePath,
+      );
+    });
 
-    if (existingPath != null && existingPath != currentPath) {
-      final String existingName = (existingPath as KernelAssetAbsolutePath).uri.pathSegments.first;
-      final String currentName = (currentPath as KernelAssetAbsolutePath).uri.pathSegments.first;
+    if (existingLocation != null &&
+        existingLocation.bundlePath != null &&
+        currentLocation.bundlePath != null &&
+        existingLocation.bundlePath != currentLocation.bundlePath) {
+      final String existingName = existingLocation.bundlePath!.pathSegments.first;
+      final String currentName = currentLocation.bundlePath!.pathSegments.first;
       printXcodeWarning(
         'Code asset "$assetId" has different framework names for '
         'different architectures. Picking "$existingName" and '
@@ -374,13 +421,28 @@ Map<KernelAssetPath, List<FlutterCodeAsset>> fatAssetTargetLocations(
         'package providing the asset. Please report this to the '
         'package maintainers and ensure the "build.dart" hook '
         'produces consistent filenames.',
+        logger: logger,
       );
     }
 
-    final KernelAssetPath path = existingPath ?? currentPath;
-    idToPath[assetId] = path;
-    result[path] ??= <FlutterCodeAsset>[];
-    result[path]!.add(asset);
+    final FlutterCodeAssetTargetLocation location = existingLocation ?? currentLocation;
+    idToLocation[assetId] = location;
+    result[asset] = location;
+  }
+  return result;
+}
+
+/// Groups bundled native assets by their target bundle [Uri] for universal
+/// binary (`lipo`) creation on macOS and iOS.
+Map<Uri, List<FlutterCodeAsset>> fatAssetTargetLocations(
+  Map<FlutterCodeAsset, FlutterCodeAssetTargetLocation> assetTargetLocations,
+) {
+  final result = <Uri, List<FlutterCodeAsset>>{};
+  for (final MapEntry<FlutterCodeAsset, FlutterCodeAssetTargetLocation>(key: asset, value: location)
+      in assetTargetLocations.entries) {
+    if (location.bundlePath case final Uri bundlePath) {
+      (result[bundlePath] ??= <FlutterCodeAsset>[]).add(asset);
+    }
   }
   return result;
 }

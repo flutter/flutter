@@ -172,8 +172,7 @@ class _SliverFloatingHeader extends SingleChildRenderObjectWidget {
 }
 
 class _RenderSliverFloatingHeader extends RenderSliverSingleBoxAdapter {
-  _RenderSliverFloatingHeader({TickerProvider? vsync, this.animationStyle, this.snapMode})
-    : _vsync = vsync;
+  _RenderSliverFloatingHeader({this._vsync, this.animationStyle, this.snapMode});
 
   late Animation<double> snapAnimation;
   AnimationController? snapController;

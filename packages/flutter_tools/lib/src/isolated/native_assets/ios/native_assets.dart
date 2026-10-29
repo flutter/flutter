@@ -3,15 +3,17 @@
 // found in the LICENSE file.
 
 import 'package:code_assets/code_assets.dart';
-import 'package:hooks_runner/hooks_runner.dart';
 
 import '../../../base/file_system.dart';
+import '../../../base/logger.dart';
+import '../../../base/process.dart';
 import '../../../build_info.dart';
 import '../macos/native_assets_host.dart';
 import '../native_assets.dart';
+import '../native_assets_manifest.dart';
 
 // TODO(dcharkes): Fetch minimum iOS version from somewhere. https://github.com/flutter/flutter/issues/145104
-const targetIOSVersion = 13;
+const targetIOSVersion = 15;
 
 IOSSdk getIOSSdk(EnvironmentType environmentType) {
   return switch (environmentType) {
@@ -34,47 +36,18 @@ Architecture getNativeIOSArchitecture(CpuArch cpuArch) {
 
 /// Groups native assets by their target framework path for iOS
 /// multi-architecture bundling.
-Map<KernelAssetPath, List<FlutterCodeAsset>> fatAssetTargetLocationsIOS(
-  List<FlutterCodeAsset> nativeAssets,
-) {
-  return fatAssetTargetLocations(
-    nativeAssets,
-    (FlutterCodeAsset asset, Set<String> alreadyTakenNames) =>
-        _targetLocationIOS(asset, alreadyTakenNames),
-  );
+Map<Uri, List<FlutterCodeAsset>> fatAssetTargetLocationsIOS(
+  List<FlutterCodeAsset> nativeAssets, {
+  required Logger logger,
+}) {
+  return fatAssetTargetLocations(assetTargetLocationsIOS(nativeAssets, logger: logger));
 }
 
-Map<FlutterCodeAsset, KernelAsset> assetTargetLocationsIOS(List<FlutterCodeAsset> nativeAssets) {
-  final alreadyTakenNames = <String>{};
-  final idToPath = <String, KernelAssetPath>{};
-  final result = <FlutterCodeAsset, KernelAsset>{};
-  for (final asset in nativeAssets) {
-    final String assetId = asset.codeAsset.id;
-    final KernelAssetPath path =
-        idToPath[assetId] ?? _targetLocationIOS(asset, alreadyTakenNames).path;
-    idToPath[assetId] = path;
-    result[asset] = KernelAsset(id: assetId, target: asset.target, path: path);
-  }
-  return result;
-}
-
-KernelAsset _targetLocationIOS(FlutterCodeAsset asset, Set<String> alreadyTakenNames) {
-  final LinkMode linkMode = asset.codeAsset.linkMode;
-  final KernelAssetPath kernelAssetPath;
-  switch (linkMode) {
-    case DynamicLoadingSystem _:
-      kernelAssetPath = KernelAssetSystemPath(linkMode.uri);
-    case LookupInExecutable _:
-      kernelAssetPath = KernelAssetInExecutable();
-    case LookupInProcess _:
-      kernelAssetPath = KernelAssetInProcess();
-    case DynamicLoadingBundled _:
-      final String fileName = asset.codeAsset.file!.pathSegments.last;
-      kernelAssetPath = KernelAssetAbsolutePath(frameworkUri(fileName, alreadyTakenNames));
-    default:
-      throw Exception('Unsupported asset link mode $linkMode in asset $asset');
-  }
-  return KernelAsset(id: asset.codeAsset.id, target: asset.target, path: kernelAssetPath);
+Map<FlutterCodeAsset, FlutterCodeAssetTargetLocation> assetTargetLocationsIOS(
+  List<FlutterCodeAsset> nativeAssets, {
+  required Logger logger,
+}) {
+  return assetTargetLocationsApple(nativeAssets, logger: logger);
 }
 
 /// Copies native assets into a framework per dynamic library.
@@ -91,19 +64,20 @@ KernelAsset _targetLocationIOS(FlutterCodeAsset asset, Set<String> alreadyTakenN
 /// in xcode_backend.dart.
 Future<List<File>> copyNativeCodeAssetsIOS(
   Uri targetUri,
-  Map<KernelAssetPath, List<FlutterCodeAsset>> assetTargetLocations,
+  Map<Uri, List<FlutterCodeAsset>> assetTargetLocations,
   String? codesignIdentity,
   BuildMode buildMode,
-  FileSystem fileSystem,
-) async {
+  FileSystem fileSystem, {
+  required Logger logger,
+  required ProcessUtils processUtils,
+}) async {
   assert(assetTargetLocations.isNotEmpty);
   final installedFiles = <File>[];
   final oldToNewInstallNames = <String, String>{};
   final dylibs = <(File, String, Directory)>[];
 
-  for (final MapEntry<KernelAssetPath, List<FlutterCodeAsset>> assetMapping
-      in assetTargetLocations.entries) {
-    final Uri target = (assetMapping.key as KernelAssetAbsolutePath).uri;
+  for (final MapEntry<Uri, List<FlutterCodeAsset>> assetMapping in assetTargetLocations.entries) {
+    final Uri target = assetMapping.key;
     final sources = <File>[
       for (final FlutterCodeAsset source in assetMapping.value)
         fileSystem.file(source.codeAsset.file),
@@ -114,21 +88,23 @@ Future<List<File>> copyNativeCodeAssetsIOS(
     if (!frameworkDir.existsSync()) {
       await frameworkDir.create(recursive: true);
     }
-    await lipoDylibs(dylibFile, sources);
+    await lipoDylibs(dylibFile, sources, processUtils: processUtils);
     installedFiles.add(dylibFile);
 
     if (buildMode != BuildMode.debug) {
       final dsymPath = '${frameworkDir.path}.dSYM';
-      await dsymutilDylib(dylibFile, dsymPath);
-      await stripDylib(dylibFile);
+      await dsymutilDylib(dylibFile, dsymPath, processUtils: processUtils);
+      await stripDylib(dylibFile, logger: logger, processUtils: processUtils);
       installedFiles.addAll(
         fileSystem.directory(dsymPath).listSync(recursive: true).whereType<File>(),
       );
     }
 
-    final String dylibFileName = dylibFile.basename;
-    final newInstallName = '@rpath/$dylibFileName.framework/$dylibFileName';
-    final Set<String> oldInstallNames = await getInstallNamesDylib(dylibFile);
+    final String newInstallName = frameworkInstallName(target);
+    final Set<String> oldInstallNames = await getInstallNamesDylib(
+      dylibFile,
+      processUtils: processUtils,
+    );
     for (final oldInstallName in oldInstallNames) {
       oldToNewInstallNames[oldInstallName] = newInstallName;
     }
@@ -143,8 +119,13 @@ Future<List<File>> copyNativeCodeAssetsIOS(
   }
 
   for (final (File dylibFile, String newInstallName, Directory frameworkDir) in dylibs) {
-    await setInstallNamesDylib(dylibFile, newInstallName, oldToNewInstallNames);
-    await codesignDylib(codesignIdentity, buildMode, frameworkDir);
+    await setInstallNamesDylib(
+      dylibFile,
+      newInstallName,
+      oldToNewInstallNames,
+      processUtils: processUtils,
+    );
+    await codesignDylib(codesignIdentity, buildMode, frameworkDir, processUtils: processUtils);
   }
   return installedFiles;
 }

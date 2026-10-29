@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:io';
+
 import 'package:path/path.dart' as path;
 
 /// Count the number of libraries that import globals.dart in lib and test.

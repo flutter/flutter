@@ -449,8 +449,7 @@ void main() {
       expect(
         find.byKey(const ValueKey<String>('barrier')),
         findsOneWidget,
-        reason:
-            'The route should not have been dismissed by tapping the barrier, as there was a onDismiss callback given.',
+        reason: 'The route should not have been dismissed by tapping the barrier, as there was a onDismiss callback given.',
       );
     });
 
@@ -904,8 +903,7 @@ void main() {
       expect(
         find.byKey(const ValueKey<String>('barrier')),
         findsOneWidget,
-        reason:
-            'The route should not have been dismissed by tapping the barrier, as there was a onDismiss callback given.',
+        reason: 'The route should not have been dismissed by tapping the barrier, as there was a onDismiss callback given.',
       );
     });
 

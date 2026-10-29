@@ -64,7 +64,7 @@ enum PerformanceOverlayOption {
 /// to true.
 class RenderPerformanceOverlay extends RenderBox {
   /// Creates a performance overlay render object.
-  RenderPerformanceOverlay({int optionsMask = 0}) : _optionsMask = optionsMask;
+  RenderPerformanceOverlay({this._optionsMask = 0});
 
   static final int _rasterizerMask =
       (1 << PerformanceOverlayOption.displayRasterizerStatistics.index) |

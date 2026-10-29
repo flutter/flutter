@@ -17,11 +17,9 @@ class UISceneMigration extends ProjectMigrator {
   UISceneMigration(
     IosProject project,
     super.logger, {
-    required bool isMigrationFeatureEnabled,
-    required PlistParser plistParser,
-  }) : _isMigrationFeatureEnabled = isMigrationFeatureEnabled,
-       _project = project,
-       _plistParser = plistParser;
+    required this._isMigrationFeatureEnabled,
+    required this._plistParser,
+  }) : _project = project;
 
   final bool _isMigrationFeatureEnabled;
   final PlistParser _plistParser;

@@ -2,36 +2,66 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:meta/meta.dart';
+
 import '../base/analyze_size.dart';
 import '../base/common.dart';
+import '../base/file_system.dart';
+import '../base/logger.dart';
+import '../base/template.dart';
 import '../build_info.dart';
-import '../cache.dart';
+import '../build_system/build_system.dart';
+import '../context/apple_context.dart';
+import '../context/tool_context.dart';
 import '../features.dart';
-import '../globals.dart' as globals;
 import '../macos/build_macos.dart';
-import '../runner/flutter_command.dart' show FlutterCommandResult;
+import '../runner/flutter_command.dart';
+import '../runner/flutter_command_runner.dart' show FlutterGlobalOptions;
 import 'build.dart';
 
 /// A command to build a macOS desktop target through a build shell script.
 class BuildMacosCommand extends BuildSubCommand {
-  BuildMacosCommand({required super.logger, required bool verboseHelp})
-    : super(verboseHelp: verboseHelp) {
-    addCommonDesktopBuildOptions(verboseHelp: verboseHelp);
-    usesFlavorOption();
-    argParser.addFlag(
-      'config-only',
-      help:
-          'Update the project configuration without performing a build. '
-          'This can be used in CI/CD process that create an archive to avoid '
-          'performing duplicate work.',
-    );
+  BuildMacosCommand({
+    required this.appleContext,
+    required this.buildSystem,
+    required this.featureFlags,
+    required this.templateRenderer,
+    required ToolContext super.toolContext,
+    required super.verboseHelp,
+  }) : super(logger: toolContext.logger, outputPreferences: toolContext.outputPreferences) {
+    registerOptionBundles(const <OptionBundle>[
+      CommonBuildOptionsBundle(),
+      BuildModeOptionsBundle(),
+      DartCompileOptionsBundle(),
+      AppleBuildOptionsBundle(),
+    ]);
+    argParser.addDescriptors(const <OptionDescriptor<Object?>>[
+      BuildInfoOptions.trackWidgetCreation,
+      AppleBuildOptionsBundle.configOnly,
+    ], verboseHelp: verboseHelp);
   }
+
+  /// Holds Apple-specific dependencies.
+  final AppleContext appleContext;
+
+  /// The build system used to execute targets.
+  final BuildSystem buildSystem;
+
+  /// Feature flags governing macOS desktop builds.
+  @visibleForTesting
+  final FeatureFlags featureFlags;
+
+  /// Renderer used for template generation during pod processing.
+  final TemplateRenderer templateRenderer;
+
+  @override
+  ToolContext get toolContext => super.toolContext!;
 
   @override
   final name = 'macos';
 
   @override
-  bool get hidden => !featureFlags.isMacOSEnabled || !globals.platform.isMacOS;
+  bool get hidden => !featureFlags.isMacOSEnabled || !toolContext.platform.isMacOS;
 
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => <DevelopmentArtifact>{
@@ -42,12 +72,13 @@ class BuildMacosCommand extends BuildSubCommand {
   String get description => 'Build a macOS desktop application.';
 
   @override
-  bool get supported => globals.platform.isMacOS;
+  bool get supported => toolContext.platform.isMacOS;
 
-  bool get configOnly => boolArg('config-only');
+  bool get configOnly => getValue(AppleBuildOptionsBundle.configOnly);
 
   @override
   Future<FlutterCommandResult> runCommand() async {
+    final ToolContext(:FileSystem fs, :Logger logger) = toolContext;
     final BuildInfo buildInfo = await getBuildInfo();
     if (!featureFlags.isMacOSEnabled) {
       throwToolExit(
@@ -59,18 +90,23 @@ class BuildMacosCommand extends BuildSubCommand {
     }
 
     await buildMacOS(
-      flutterProject: project,
+      analytics: analytics,
+      appleContext: appleContext,
       buildInfo: buildInfo,
-      targetOverride: targetFile,
-      verboseLogging: globals.logger.isVerbose,
       configOnly: configOnly,
+      featureFlags: featureFlags,
+      flutterProject: project,
       sizeAnalyzer: SizeAnalyzer(
-        fileSystem: globals.fs,
-        logger: globals.logger,
+        fileSystem: fs,
+        logger: logger,
         appFilenamePattern: 'App',
         analytics: analytics,
       ),
+      targetOverride: targetFile,
+      templateRenderer: templateRenderer,
+      toolContext: toolContext,
       usingCISystem: usingCISystem,
+      verboseLogging: logger.isVerbose || globalResults?[FlutterGlobalOptions.kVerboseFlag] == true,
     );
     return FlutterCommandResult.success();
   }

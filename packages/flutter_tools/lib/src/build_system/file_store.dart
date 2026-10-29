@@ -87,12 +87,10 @@ enum FileStoreStrategy {
 /// The format of the file store is subject to change and not part of its API.
 class FileStore {
   FileStore({
-    required File cacheFile,
-    required Logger logger,
-    FileStoreStrategy strategy = FileStoreStrategy.hash,
-  }) : _logger = logger,
-       _strategy = strategy,
-       _cacheFile = cacheFile;
+    required this._cacheFile,
+    required this._logger,
+    this._strategy = FileStoreStrategy.hash,
+  });
 
   final File _cacheFile;
   final Logger _logger;

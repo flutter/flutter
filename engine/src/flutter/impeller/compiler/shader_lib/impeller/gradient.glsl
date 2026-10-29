@@ -149,4 +149,50 @@ vec3 IPComputeFixedGradientValues(float t, float colors_length) {
   return vec3(lower_index, upper_index, scale);
 }
 
+float IPComputeLinearGradientT(vec2 positon,
+                               vec2 start,
+                               vec2 delta,
+                               float inv_gradient_length) {
+  return dot(positon - start, delta) * inv_gradient_length;
+}
+
+float IPComputeRadialGradientT(vec2 position,
+                               vec2 center,
+                               float inv_gradient_length) {
+  return length(position - center) * inv_gradient_length;
+}
+
+/// Samples a linear gradient from a 1D gradient ramp texture.
+vec4 IPSampleLinearGradient(sampler2D tex,
+                            vec2 start_point,
+                            vec2 end_point,
+                            vec2 pos,
+                            vec2 half_texel,
+                            float tile_mode,
+                            vec4 decal_border_color) {
+  vec2 start_to_end = end_point - start_point;
+  vec2 start_to_position = pos - start_point;
+  float start_to_end_squared = dot(start_to_end, start_to_end);
+
+  float t = start_to_end_squared == 0.0
+                ? 0.0
+                : IPComputeLinearGradientT(pos, start_point, start_to_end,
+                                           1.0 / start_to_end_squared);
+  return IPSampleLinearWithTileMode(tex, vec2(t, 0.5), half_texel, tile_mode,
+                                    decal_border_color);
+}
+
+/// Samples a radial gradient from a 1D gradient ramp texture.
+vec4 IPSampleRadialGradient(sampler2D tex,
+                            vec2 center,
+                            float radius,
+                            vec2 pos,
+                            vec2 half_texel,
+                            float tile_mode,
+                            vec4 decal_border_color) {
+  float t = IPComputeRadialGradientT(pos, center, 1.0 / radius);
+  return IPSampleLinearWithTileMode(tex, vec2(t, 0.5), half_texel, tile_mode,
+                                    decal_border_color);
+}
+
 #endif

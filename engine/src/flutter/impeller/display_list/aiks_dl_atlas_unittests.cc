@@ -38,7 +38,8 @@ CreateTestData(const AiksTest* test) {
   // Draws the image as four squares stiched together.
   auto atlas =
       DlImageImpeller::Make(test->CreateTextureForFixture("bay_bridge.jpg"));
-  auto size = atlas->GetImpellerTexture(test->GetContext())->GetSize();
+  ContentContext content_context(test->GetContext(), nullptr);
+  auto size = atlas->GetImpellerTexture(content_context)->GetSize();
   // Divide image into four quadrants.
   Scalar half_width = size.width / 2;
   Scalar half_height = size.height / 2;
@@ -119,7 +120,8 @@ TEST_P(AiksTest, DrawAtlasWithOpacity) {
 
 TEST_P(AiksTest, DrawAtlasNoColorFullSize) {
   auto atlas = DlImageImpeller::Make(CreateTextureForFixture("bay_bridge.jpg"));
-  auto size = atlas->GetImpellerTexture(GetContext())->GetSize();
+  ContentContext content_context(GetContext(), nullptr);
+  auto size = atlas->GetImpellerTexture(content_context)->GetSize();
   std::vector<DlRect> texture_coordinates = {
       DlRect::MakeLTRB(0, 0, size.width, size.height)};
   std::vector<RSTransform> transforms = {MakeTranslation(0, 0)};
@@ -189,15 +191,14 @@ TEST_P(AiksTest, DrawAtlasPlusWideGamut) {
 TEST_P(AiksTest, DlAtlasGeometryNoBlendRenamed) {
   auto [texture_coordinates, transforms, atlas] = CreateTestData(this);
 
-  DlAtlasGeometry geom(atlas->GetImpellerTexture(GetContext()),
-                       transforms.data(), texture_coordinates.data(), nullptr,
-                       transforms.size(), BlendMode::kSrcOver, {},
-                       std::nullopt);
+  ContentContext context(GetContext(), nullptr);
+  DlAtlasGeometry geom(atlas->GetImpellerTexture(context), transforms.data(),
+                       texture_coordinates.data(), nullptr, transforms.size(),
+                       BlendMode::kSrcOver, {}, std::nullopt);
 
   EXPECT_FALSE(geom.ShouldUseBlend());
   EXPECT_FALSE(geom.ShouldSkip());
 
-  ContentContext context(GetContext(), nullptr);
   auto vertex_buffer =
       geom.CreateSimpleVertexBuffer(context.GetTransientsDataBuffer());
 
@@ -213,15 +214,15 @@ TEST_P(AiksTest, DlAtlasGeometryBlend) {
   for (auto i = 0u; i < texture_coordinates.size(); i++) {
     colors.push_back(DlColor::ARGB(0.5, 1, 1, 1));
   }
-  DlAtlasGeometry geom(atlas->GetImpellerTexture(GetContext()),
-                       transforms.data(), texture_coordinates.data(),
-                       colors.data(), transforms.size(), BlendMode::kSrcOver,
-                       {}, std::nullopt);
+  ContentContext context(GetContext(), nullptr);
+  DlAtlasGeometry geom(atlas->GetImpellerTexture(context), transforms.data(),
+                       texture_coordinates.data(), colors.data(),
+                       transforms.size(), BlendMode::kSrcOver, {},
+                       std::nullopt);
 
   EXPECT_TRUE(geom.ShouldUseBlend());
   EXPECT_FALSE(geom.ShouldSkip());
 
-  ContentContext context(GetContext(), nullptr);
   auto vertex_buffer =
       geom.CreateBlendVertexBuffer(context.GetTransientsDataBuffer());
 
@@ -237,10 +238,10 @@ TEST_P(AiksTest, DlAtlasGeometryColorButNoBlend) {
   for (auto i = 0u; i < texture_coordinates.size(); i++) {
     colors.push_back(DlColor::ARGB(0.5, 1, 1, 1));
   }
-  DlAtlasGeometry geom(atlas->GetImpellerTexture(GetContext()),
-                       transforms.data(), texture_coordinates.data(),
-                       colors.data(), transforms.size(), BlendMode::kSrc, {},
-                       std::nullopt);
+  ContentContext context(GetContext(), nullptr);
+  DlAtlasGeometry geom(atlas->GetImpellerTexture(context), transforms.data(),
+                       texture_coordinates.data(), colors.data(),
+                       transforms.size(), BlendMode::kSrc, {}, std::nullopt);
 
   // Src blend mode means that colors would be ignored, even if provided.
   EXPECT_FALSE(geom.ShouldUseBlend());
@@ -255,10 +256,10 @@ TEST_P(AiksTest, DlAtlasGeometrySkip) {
   for (auto i = 0u; i < texture_coordinates.size(); i++) {
     colors.push_back(DlColor::ARGB(0.5, 1, 1, 1));
   }
-  DlAtlasGeometry geom(atlas->GetImpellerTexture(GetContext()),
-                       transforms.data(), texture_coordinates.data(),
-                       colors.data(), transforms.size(), BlendMode::kClear, {},
-                       std::nullopt);
+  ContentContext context(GetContext(), nullptr);
+  DlAtlasGeometry geom(atlas->GetImpellerTexture(context), transforms.data(),
+                       texture_coordinates.data(), colors.data(),
+                       transforms.size(), BlendMode::kClear, {}, std::nullopt);
   EXPECT_TRUE(geom.ShouldSkip());
 }
 

@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:io' as io;
+
 import 'package:path/path.dart' as pathlib;
 
 /// Contains various environment variables, such as common file paths and command-line options.

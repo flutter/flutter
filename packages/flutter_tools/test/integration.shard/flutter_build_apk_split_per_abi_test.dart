@@ -83,12 +83,15 @@ androidComponents {
 
 ''';
 
-// Check that `flutter build apk --split-per-abi` generates a versionCode equal to abiIndex * 1000 + buildNumber
+// Check that `flutter build apk --split-per-abi` sets versionCode to abiIndex * 1000 + buildNumber
+// (times 10000 with [usingCustomAppGradleFile]) and copies each per-ABI APK into flutter-apk.
+// [compatibilityModeOff] sets `android.compatibility.enableLegacyApi=false`.
 Future<void> _assertSplitPerAbiVersionCodes(
   int? buildNumber,
   Directory workingDirectory,
-  bool usingCustomAppGradleFile,
-) async {
+  bool usingCustomAppGradleFile, {
+  bool compatibilityModeOff = false,
+}) async {
   if (usingCustomAppGradleFile) {
     // Replace the app level build.gradle with one that modifies the version code.
     final File appBuildGradle = fileSystem
@@ -98,6 +101,17 @@ Future<void> _assertSplitPerAbiVersionCodes(
         .childFile('build.gradle.kts');
 
     await appBuildGradle.writeAsString(_appGradleWithVersionCodeModification);
+  }
+
+  if (compatibilityModeOff) {
+    final File gradleProperties = fileSystem
+        .directory(workingDirectory)
+        .childDirectory('android')
+        .childFile('gradle.properties');
+    await gradleProperties.writeAsString(
+      '\nandroid.compatibility.enableLegacyApi=false\n',
+      mode: FileMode.append,
+    );
   }
 
   final args = <String>[
@@ -177,8 +191,9 @@ Future<void> _assertSplitPerAbiVersionCodes(
     );
 
     final int actual = actualVersionCodes[abi]!;
-    final int expected =
-        (abiIndex * 1000) + ((buildNumber ?? 1) * (usingCustomAppGradleFile ? 10000 : 1));
+    // The custom app build file's onVariants runs after Flutter's and multiplies by 10000.
+    final int baseVersionCode = (abiIndex * 1000) + (buildNumber ?? 1);
+    final int expected = usingCustomAppGradleFile ? baseVersionCode * 10000 : baseVersionCode;
     expect(
       actual,
       expected,
@@ -187,6 +202,16 @@ Future<void> _assertSplitPerAbiVersionCodes(
           '${buildNumber != null ? "buildNumber=$buildNumber" : "no explicit build-number"} '
           'expected versionCode=$expected but got $actual.',
     );
+
+    // The Flutter tool reads the APKs from flutter-apk, under per-ABI names.
+    final File flutterApk = fileSystem
+        .directory(workingDirectory)
+        .childDirectory('build')
+        .childDirectory('app')
+        .childDirectory('outputs')
+        .childDirectory('flutter-apk')
+        .childFile('app-$abi-debug.apk');
+    expect(flutterApk, exists, reason: 'Expected the per-ABI APK at ${flutterApk.path}');
   }
 }
 
@@ -211,26 +236,22 @@ void main() {
   });
 
   // Check with no build-number
-  testWithoutContext(
-    'APK versionCodes after --split-per-abi (no explicit build-number) follow "(abiIndex * 1000) + 1"',
-    () async {
-      await _assertSplitPerAbiVersionCodes(null, appDir, false);
-    },
-  );
+  testWithoutContext('APK versionCodes after --split-per-abi (no explicit build-number) follow "(abiIndex * 1000) + 1"', () async {
+    await _assertSplitPerAbiVersionCodes(null, appDir, false);
+  });
 
   // Check with custom buildNumber=42
-  testWithoutContext(
-    'APK versionCodes after --split-per-abi with custom build-number=42 follow "(abiIndex * 1000) + 42"',
-    () async {
-      await _assertSplitPerAbiVersionCodes(42, appDir, false);
-    },
-  );
+  testWithoutContext('APK versionCodes after --split-per-abi with custom build-number=42 follow "(abiIndex * 1000) + 42"', () async {
+    await _assertSplitPerAbiVersionCodes(42, appDir, false);
+  });
 
   // Check with custom buildNumber=42 and custom gradle file which multiplies build number by 10000
-  testWithoutContext(
-    'APK versionCodes after --split-per-abi with custom build-number=42 and gradle file follow "(abiIndex * 1000) + (42 * 10000)"',
-    () async {
-      await _assertSplitPerAbiVersionCodes(42, appDir, true);
-    },
-  );
+  testWithoutContext('APK versionCodes after --split-per-abi with custom build-number=42 and gradle file follow "((abiIndex * 1000) + 42) * 10000"', () async {
+    await _assertSplitPerAbiVersionCodes(42, appDir, true);
+  });
+
+  // Check with custom buildNumber=42 and AGP's compatibility mode off
+  testWithoutContext('APK versionCodes after --split-per-abi with custom build-number=42 and enableLegacyApi=false follow "(abiIndex * 1000) + 42"', () async {
+    await _assertSplitPerAbiVersionCodes(42, appDir, false, compatibilityModeOff: true);
+  });
 }

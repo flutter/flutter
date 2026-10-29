@@ -160,9 +160,11 @@ void main() {
       /// [dartArch] is the architecture `dart --version` reports for the Dart
       /// SDK downloaded into the archive. [archiveArch] is the architecture
       /// expected in the archive filename, or null for x64, which is unadorned.
+      /// [precacheArgs] are appended to the `flutter precache` invocation.
       Map<String, List<ProcessResult>?> expectedCalls({
         required String dartArch,
         String? archiveArch,
+        List<String> precacheArgs = const <String>[],
       }) {
         final String createBase = path.join(tempDir.absolute.path, 'create_');
         final archPrefix = archiveArch == null ? '' : '${archiveArch}_';
@@ -194,7 +196,7 @@ void main() {
           if (platform.isWindows) '7za x ${path.join(tempDir.path, 'mingit.zip')}': null,
           '$flutter doctor': null,
           '$flutter update-packages': null,
-          '$flutter precache': null,
+          <String>['$flutter precache', ...precacheArgs].join(' '): null,
           '$flutter ide-config': null,
           '$flutter create --template=app ${createBase}app': null,
           '$flutter create --template=package ${createBase}package': null,
@@ -217,11 +219,13 @@ void main() {
 
       /// The environment expected on every [ArchiveCreator] subprocess.
       ///
-      /// This is the ambient environment, plus the archive's own pub cache.
-      Map<String, String> expectedEnvironment() {
+      /// This is the ambient environment, plus the archive's own pub cache,
+      /// plus the host architecture override when one was requested.
+      Map<String, String> expectedEnvironment({TargetArch? targetArch}) {
         return <String, String>{
           ...platform.environment,
           'PUB_CACHE': path.join(tempDir.path, '.pub-cache'),
+          if (targetArch != null) 'FLUTTER_HOST_ARCH': targetArch.name,
         };
       }
 
@@ -245,6 +249,95 @@ void main() {
         );
         await creator.initializeRepo();
         await creator.createArchive();
+      });
+
+      test('targetArch drives the precache arch and the tool environment', () async {
+        processManager.addCommands(
+          convertResults(
+            expectedCalls(dartArch: 'x64', precacheArgs: <String>['--host-arch=x64']),
+            environment: expectedEnvironment(targetArch: TargetArch.x64),
+          ),
+        );
+        creator = ArchiveCreator(
+          tempDir,
+          tempDir,
+          testRef,
+          Branch.beta,
+          fs: fs,
+          processManager: processManager,
+          subprocessOutput: false,
+          platform: platform,
+          httpReader: fakeHttpReader,
+          targetArch: TargetArch.x64,
+        );
+        await creator.initializeRepo();
+        await creator.createArchive();
+      });
+
+      test('targetArch names a non-x64 archive after the requested arch', () async {
+        processManager.addCommands(
+          convertResults(
+            expectedCalls(
+              dartArch: 'arm64',
+              archiveArch: 'arm64',
+              precacheArgs: <String>['--host-arch=arm64'],
+            ),
+            environment: expectedEnvironment(targetArch: TargetArch.arm64),
+          ),
+        );
+        creator = ArchiveCreator(
+          tempDir,
+          tempDir,
+          testRef,
+          Branch.beta,
+          fs: fs,
+          processManager: processManager,
+          subprocessOutput: false,
+          platform: platform,
+          httpReader: fakeHttpReader,
+          targetArch: TargetArch.arm64,
+        );
+        await creator.initializeRepo();
+        await creator.createArchive();
+      });
+
+      test('throws if the archived Dart SDK does not match targetArch', () async {
+        // The requested arch names the archive, but the arch published in the
+        // release metadata comes from the Dart SDK that was downloaded, so a
+        // disagreement has to fail the build rather than ship a mislabelled
+        // archive.
+        //
+        // The mismatch is caught in initializeRepo, so only the commands up to
+        // and including `dart --version` are ever run.
+        final Map<String, List<ProcessResult>?> calls = expectedCalls(dartArch: 'arm64');
+        final int callsBeforeThrow = calls.keys.toList().indexOf('$dart --version') + 1;
+        processManager.addCommands(
+          convertResults(
+            Map<String, List<ProcessResult>?>.fromEntries(calls.entries.take(callsBeforeThrow)),
+          ),
+        );
+        creator = ArchiveCreator(
+          tempDir,
+          tempDir,
+          testRef,
+          Branch.beta,
+          fs: fs,
+          processManager: processManager,
+          subprocessOutput: false,
+          platform: platform,
+          httpReader: fakeHttpReader,
+          targetArch: TargetArch.x64,
+        );
+        await expectLater(
+          creator.initializeRepo,
+          throwsA(
+            isA<PreparePackageException>().having(
+              (PreparePackageException error) => error.message,
+              'message',
+              contains('Requested an archive for x64, but the Dart SDK in the archive is arm64'),
+            ),
+          ),
+        );
       });
 
       test('throws when a command errors out', () async {
@@ -790,62 +883,57 @@ void main() {
         );
       });
 
-      test(
-        'publishArchive throws if forceUpload is false and artifact already exists on cloud storage',
-        () async {
-          final archiveName = platform.isLinux ? 'archive.tar.xz' : 'archive.zip';
-          final File outputFile = fs.file(path.join(tempDir.absolute.path, archiveName));
-          final publisher = ArchivePublisher(
-            tempDir,
-            testRef,
-            Branch.stable,
-            <String, String>{
-              'frameworkVersionFromGit': 'v1.2.3',
-              'dartSdkVersion': '3.2.1',
-              'dartTargetArch': 'x64',
-            },
-            outputFile,
-            false,
-            fs: fs,
-            processManager: processManager,
-            subprocessOutput: false,
-            platform: platform,
-          );
-          final calls = <String, List<ProcessResult>>{
-            // This process returns 0 because file already exists
-            '$gsutilCall -- stat $gsArchivePath': <ProcessResult>[ProcessResult(0, 0, '', '')],
-          };
-          processManager.addCommands(convertResults(calls));
-          expect(() async => publisher.publishArchive(), throwsException);
-        },
-      );
+      test('publishArchive throws if forceUpload is false and artifact already exists on cloud storage', () async {
+        final archiveName = platform.isLinux ? 'archive.tar.xz' : 'archive.zip';
+        final File outputFile = fs.file(path.join(tempDir.absolute.path, archiveName));
+        final publisher = ArchivePublisher(
+          tempDir,
+          testRef,
+          Branch.stable,
+          <String, String>{
+            'frameworkVersionFromGit': 'v1.2.3',
+            'dartSdkVersion': '3.2.1',
+            'dartTargetArch': 'x64',
+          },
+          outputFile,
+          false,
+          fs: fs,
+          processManager: processManager,
+          subprocessOutput: false,
+          platform: platform,
+        );
+        final calls = <String, List<ProcessResult>>{
+          // This process returns 0 because file already exists
+          '$gsutilCall -- stat $gsArchivePath': <ProcessResult>[ProcessResult(0, 0, '', '')],
+        };
+        processManager.addCommands(convertResults(calls));
+        expect(() async => publisher.publishArchive(), throwsException);
+      });
 
-      test(
-        'publishArchive does not throw if forceUpload is true and artifact already exists on cloud storage',
-        () async {
-          final archiveName = platform.isLinux ? 'archive.tar.xz' : 'archive.zip';
-          final File outputFile = fs.file(path.join(tempDir.absolute.path, archiveName));
-          final publisher = ArchivePublisher(
-            tempDir,
-            testRef,
-            Branch.stable,
-            <String, String>{
-              'frameworkVersionFromGit': 'v1.2.3',
-              'dartSdkVersion': '3.2.1',
-              'dartTargetArch': 'x64',
-            },
-            outputFile,
-            false,
-            fs: fs,
-            processManager: processManager,
-            subprocessOutput: false,
-            platform: platform,
-          );
-          final String archivePath = path.join(tempDir.absolute.path, archiveName);
-          final String jsonPath = path.join(tempDir.absolute.path, releasesName);
-          final gsJsonPath = 'gs://flutter_infra_release/releases/$releasesName';
-          final releasesJson =
-              '''
+      test('publishArchive does not throw if forceUpload is true and artifact already exists on cloud storage', () async {
+        final archiveName = platform.isLinux ? 'archive.tar.xz' : 'archive.zip';
+        final File outputFile = fs.file(path.join(tempDir.absolute.path, archiveName));
+        final publisher = ArchivePublisher(
+          tempDir,
+          testRef,
+          Branch.stable,
+          <String, String>{
+            'frameworkVersionFromGit': 'v1.2.3',
+            'dartSdkVersion': '3.2.1',
+            'dartTargetArch': 'x64',
+          },
+          outputFile,
+          false,
+          fs: fs,
+          processManager: processManager,
+          subprocessOutput: false,
+          platform: platform,
+        );
+        final String archivePath = path.join(tempDir.absolute.path, archiveName);
+        final String jsonPath = path.join(tempDir.absolute.path, releasesName);
+        final gsJsonPath = 'gs://flutter_infra_release/releases/$releasesName';
+        final releasesJson =
+            '''
 {
   "base_url": "https://storage.googleapis.com/flutter_infra_release/releases",
   "current_release": {
@@ -880,26 +968,25 @@ void main() {
   ]
 }
 ''';
-          fs.file(jsonPath).writeAsStringSync(releasesJson);
-          fs.file(fs.path.join(tempDir.path, 'downloaded.json')).createSync(recursive: true);
-          fs.file(fs.path.join(tempDir.path, 'downloaded.json')).writeAsStringSync(releasesJson);
-          fs.file(archivePath).writeAsStringSync('archive contents');
-          final calls = <String, List<ProcessResult>?>{
-            '$gsutilCall -- rm $gsArchivePath': null,
-            '$gsutilCall -- -h Content-Type:$archiveMime cp $archivePath $gsArchivePath': null,
-            '$gsutilCall -- stat $gsJsonPath': <ProcessResult>[
-              ProcessResult(0, 0, 'Generation: 12345', ''),
-            ],
-            '$gsutilCall -- cp $gsJsonPath#12345 ${fs.path.join(tempDir.path, "downloaded.json")}':
-                null,
-            '$gsutilCall -- -h x-goog-if-generation-match:12345 cp ${fs.path.join(tempDir.path, "upload.json")} $gsJsonPath':
-                null,
-          };
-          processManager.addCommands(convertResults(calls));
-          assert(tempDir.existsSync());
-          await publisher.publishArchive(true);
-        },
-      );
+        fs.file(jsonPath).writeAsStringSync(releasesJson);
+        fs.file(fs.path.join(tempDir.path, 'downloaded.json')).createSync(recursive: true);
+        fs.file(fs.path.join(tempDir.path, 'downloaded.json')).writeAsStringSync(releasesJson);
+        fs.file(archivePath).writeAsStringSync('archive contents');
+        final calls = <String, List<ProcessResult>?>{
+          '$gsutilCall -- rm $gsArchivePath': null,
+          '$gsutilCall -- -h Content-Type:$archiveMime cp $archivePath $gsArchivePath': null,
+          '$gsutilCall -- stat $gsJsonPath': <ProcessResult>[
+            ProcessResult(0, 0, 'Generation: 12345', ''),
+          ],
+          '$gsutilCall -- cp $gsJsonPath#12345 ${fs.path.join(tempDir.path, "downloaded.json")}':
+              null,
+          '$gsutilCall -- -h x-goog-if-generation-match:12345 cp ${fs.path.join(tempDir.path, "upload.json")} $gsJsonPath':
+              null,
+        };
+        processManager.addCommands(convertResults(calls));
+        assert(tempDir.existsSync());
+        await publisher.publishArchive(true);
+      });
     });
 
     group('transactionalUpdate', () {

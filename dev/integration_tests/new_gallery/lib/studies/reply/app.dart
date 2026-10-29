@@ -28,12 +28,11 @@ class ReplyApp extends StatefulWidget {
 
   static Route<void> createComposeRoute(RouteSettings settings) {
     return PageRouteBuilder<void>(
-      pageBuilder:
-          (
-            BuildContext context,
-            Animation<double> animation,
-            Animation<double> secondaryAnimation,
-          ) => const ComposePage(),
+      pageBuilder: (
+        BuildContext context,
+        Animation<double> animation,
+        Animation<double> secondaryAnimation,
+      ) => const ComposePage(),
       transitionsBuilder:
           (
             BuildContext context,

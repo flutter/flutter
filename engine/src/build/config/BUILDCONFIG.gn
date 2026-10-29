@@ -532,6 +532,10 @@ if (!is_component_build) {
   }
 }
 
+# Applied by Skia's skia_* target templates. See
+# //flutter/third_party/skia/gn/skia.gni.
+skia_target_default_configs = [ "//flutter/build/config/skia:warnings" ]
+
 # Test defaults.
 set_defaults("test") {
   if (is_android) {

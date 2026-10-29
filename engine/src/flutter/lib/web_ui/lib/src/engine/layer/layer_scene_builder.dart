@@ -4,14 +4,8 @@
 
 import 'dart:typed_data';
 
+import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
-
-import '../primitives/path.dart';
-import '../util.dart';
-import '../vector_math.dart';
-import 'layer.dart';
-import 'layer_painting.dart';
-import 'layer_tree.dart';
 
 // Warn about performance overlay on Web only once per page load.
 bool _webPerfOverlayWarned = false;
@@ -27,15 +21,27 @@ class LayerScene implements ui.Scene {
   }
 
   @override
-  Future<ui.Image> toImage(int width, int height) {
+  Future<ui.Image> toImage(int width, int height) async {
     final ui.Picture picture = layerTree.flatten(ui.Size(width.toDouble(), height.toDouble()));
-    return picture.toImage(width, height);
+    try {
+      return await picture.toImage(width, height);
+    } finally {
+      // The flattened picture is an implementation detail of this method and
+      // is never exposed to the caller, so it must be disposed here.
+      picture.dispose();
+    }
   }
 
   @override
   ui.Image toImageSync(int width, int height) {
     final ui.Picture picture = layerTree.flatten(ui.Size(width.toDouble(), height.toDouble()));
-    return picture.toImageSync(width, height);
+    try {
+      return picture.toImageSync(width, height);
+    } finally {
+      // The flattened picture is an implementation detail of this method and
+      // is never exposed to the caller, so it must be disposed here.
+      picture.dispose();
+    }
   }
 }
 
@@ -66,9 +72,13 @@ class LayerSceneBuilder implements ui.SceneBuilder {
     bool isComplexHint = false,
     bool willChangeHint = false,
   }) {
+    final layerPicture = picture as LayerPicture;
+    if (layerPicture.isDisposed) {
+      return;
+    }
     // Add a clone of the picture to the layer tree so that the original picture
     // can be disposed.
-    final LayerPicture clonedPicture = (picture as LayerPicture).clone();
+    final LayerPicture clonedPicture = layerPicture.clone();
     currentLayer.add(PictureLayer(clonedPicture, offset, isComplexHint, willChangeHint));
   }
 
@@ -176,9 +186,7 @@ class LayerSceneBuilder implements ui.SceneBuilder {
     ui.ImageFilterEngineLayer? oldLayer,
     ui.Offset offset = ui.Offset.zero,
   }) {
-    return pushLayer<ImageFilterEngineLayer>(
-      ImageFilterEngineLayer(filter as LayerImageFilter, offset),
-    );
+    return pushLayer<ImageFilterEngineLayer>(ImageFilterEngineLayer(filter, offset));
   }
 
   @override

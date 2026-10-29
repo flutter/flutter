@@ -50,7 +50,7 @@ class TimePickerThemeData with Diagnosticable {
     this.cancelButtonStyle,
     this.confirmButtonStyle,
     this.dayPeriodBorderSide,
-    Color? dayPeriodColor,
+    this._dayPeriodColor,
     this.dayPeriodShape,
     this.dayPeriodTextColor,
     this.dayPeriodTextStyle,
@@ -76,8 +76,7 @@ class TimePickerThemeData with Diagnosticable {
              (inputDecorationTheme is InputDecorationTheme ||
                  inputDecorationTheme is InputDecorationThemeData),
        ),
-       _inputDecorationTheme = inputDecorationTheme,
-       _dayPeriodColor = dayPeriodColor;
+       _inputDecorationTheme = inputDecorationTheme;
 
   /// The background color of a time picker.
   ///

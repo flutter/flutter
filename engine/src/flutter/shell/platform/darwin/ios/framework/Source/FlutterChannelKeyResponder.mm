@@ -31,20 +31,20 @@ typedef NS_OPTIONS(NSInteger, kKeyboardModifier) {
   kKeyboardModifierLeftCommand = 0x08,
   kKeyboardModifierRightCommand = 0x10,
   kKeyboardModifierNumericPad = 0x200000,
-  kKeyboardModifierMask = kKeyboardModifierAlphaShift |    //
-                          kKeyboardModifierShift |         //
-                          kKeyboardModifierLeftShift |     //
-                          kKeyboardModifierRightShift |    //
-                          kKeyboardModifierControl |       //
-                          kKeyboardModifierLeftControl |   //
-                          kKeyboardModifierRightControl |  //
-                          kKeyboardModifierOption |        //
-                          kKeyboardModifierLeftOption |    //
-                          kKeyboardModifierRightOption |   //
-                          kKeyboardModifierCommand |       //
-                          kKeyboardModifierLeftCommand |   //
-                          kKeyboardModifierRightCommand |  //
-                          kKeyboardModifierNumericPad,
+  kKeyboardModifierMask = kKeyboardModifierAlphaShift |  //
+      kKeyboardModifierShift |                           //
+      kKeyboardModifierLeftShift |                       //
+      kKeyboardModifierRightShift |                      //
+      kKeyboardModifierControl |                         //
+      kKeyboardModifierLeftControl |                     //
+      kKeyboardModifierRightControl |                    //
+      kKeyboardModifierOption |                          //
+      kKeyboardModifierLeftOption |                      //
+      kKeyboardModifierRightOption |                     //
+      kKeyboardModifierCommand |                         //
+      kKeyboardModifierLeftCommand |                     //
+      kKeyboardModifierRightCommand |                    //
+      kKeyboardModifierNumericPad,
 };
 
 /**

@@ -5,6 +5,7 @@
 /// @docImport 'color_scheme.dart';
 /// @docImport 'range_slider.dart';
 /// @docImport 'text_theme.dart';
+/// @docImport 'theme_data.dart';
 library;
 
 import 'dart:math' as math;
@@ -888,15 +889,14 @@ class RoundRangeSliderThumbShape extends RangeSliderThumbShape {
 /// thumb.
 ///
 /// Override [SliderThemeData.thumbSelector] for custom thumb selection.
-typedef RangeThumbSelector =
-    Thumb? Function(
-      TextDirection textDirection,
-      RangeValues values,
-      double tapValue,
-      Size thumbSize,
-      Size trackSize,
-      double dx,
-    );
+typedef RangeThumbSelector = Thumb? Function(
+  TextDirection textDirection,
+  RangeValues values,
+  double tapValue,
+  Size thumbSize,
+  Size trackSize,
+  double dx,
+);
 
 /// Object for representing range slider thumb values.
 ///

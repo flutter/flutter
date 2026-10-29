@@ -29,7 +29,7 @@ std::optional<CommandLine> CommandLineFromPlatform() {
   wchar_t* command_line = GetCommandLineW();
   int unicode_argc;
   std::unique_ptr<wchar_t*[], decltype(::LocalFree)*> unicode_argv(
-      CommandLineToArgvW(command_line, &unicode_argc), ::LocalFree);
+      CommandLineToArgvW(command_line, & unicode_argc), ::LocalFree);
   if (!unicode_argv) {
     return std::nullopt;
   }

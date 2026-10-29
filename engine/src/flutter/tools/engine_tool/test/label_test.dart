@@ -23,6 +23,26 @@ void main() {
       expect(() => Label.parse('//foo/bar:baz!'), throwsFormatException);
     });
 
+    test('parses a target name containing a dot', () {
+      expect(
+        Label.parse('//flutter/testing/dart:compile_gpu_test.dart'),
+        Label('//flutter/testing/dart', 'compile_gpu_test.dart'),
+      );
+    });
+
+    test('parses a package component containing a dot', () {
+      expect(
+        Label.parse('//flutter/third_party/swiftshader/third_party/llvm-16.0:swiftshader_llvm'),
+        Label('//flutter/third_party/swiftshader/third_party/llvm-16.0', 'swiftshader_llvm'),
+      );
+    });
+
+    test('rejects a component that is only dots', () {
+      expect(() => Label.parse('//foo/../bar'), throwsFormatException);
+      expect(() => Label.parse('//foo/./bar'), throwsFormatException);
+      expect(() => Label.parse('//foo/bar:.'), throwsFormatException);
+    });
+
     test('rejects ending with a slash', () {
       expect(() => Label.parse('//foo/bar/'), throwsFormatException);
       expect(() => Label.parse('//foo/bar:baz/'), throwsFormatException);

@@ -14,12 +14,15 @@ import '../base/file_system.dart';
 import '../base/fingerprint.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
+import '../base/os.dart';
+import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/project_migrator.dart';
 import '../base/utils.dart';
 import '../base/version.dart';
 import '../build_info.dart';
 import '../cache.dart';
+import '../context/tool_context.dart';
 import '../darwin/darwin.dart';
 import '../device.dart';
 import '../features.dart';
@@ -74,12 +77,11 @@ For more information, please visit:
 
 class IMobileDevice {
   IMobileDevice({
-    required Artifacts artifacts,
+    required this._artifacts,
     required Cache cache,
     required ProcessManager processManager,
     required Logger logger,
-  }) : _idevicesyslogPath = artifacts.getHostArtifact(HostArtifact.idevicesyslog).path,
-       _dyLdLibEntry = cache.dyLdLibEntry,
+  }) : _dyLdLibEntry = cache.dyLdLibEntry,
        _processUtils = ProcessUtils(logger: logger, processManager: processManager);
 
   /// Create an [IMobileDevice] for testing.
@@ -93,9 +95,11 @@ class IMobileDevice {
     );
   }
 
-  final String _idevicesyslogPath;
+  final Artifacts _artifacts;
   final MapEntry<String, String> _dyLdLibEntry;
   final ProcessUtils _processUtils;
+
+  String get _idevicesyslogPath => _artifacts.getHostArtifact(HostArtifact.idevicesyslog).path;
 
   /// Starts `idevicesyslog` and returns the running process.
   Future<Process> startLogger(String deviceID, bool isWirelesslyConnected) {
@@ -119,7 +123,10 @@ Future<XcodeBuildResult> buildXcodeProject({
   bool configOnly = false,
   XcodeBuildAction buildAction = XcodeBuildAction.build,
   bool disablePortPublication = false,
+  required ToolContext toolContext,
 }) async {
+  final ToolContext(:Config config, :FileSystem fs, :OperatingSystemUtils os, :Platform platform) =
+      toolContext;
   if (!upgradePbxProjWithFlutterAssets(app.project, globals.logger)) {
     return XcodeBuildResult(success: false);
   }
@@ -142,11 +149,11 @@ Future<XcodeBuildResult> buildXcodeProject({
       app.project,
       darwinPlatform,
       buildInfo,
-      xcodeProjectInterpreter: globals.xcodeProjectInterpreter!,
-      logger: globals.logger,
-      fileSystem: globals.fs,
+      analytics: globals.analytics,
       plistParser: globals.plistParser,
-      config: globals.config,
+      reportCrashes: !await globals.isRunningOnBot,
+      toolContext: toolContext,
+      xcodeProjectInterpreter: globals.xcodeProjectInterpreter!,
     ),
     SwiftPackageManagerGitignoreMigration(project, globals.logger),
     MetalAPIValidationMigrator.ios(app.project, globals.logger),
@@ -180,6 +187,8 @@ Future<XcodeBuildResult> buildXcodeProject({
     fileSystem: globals.fs,
     logger: globals.logger,
     cocoapods: globals.cocoaPods,
+    analytics: globals.analytics,
+    featureFlags: featureFlags,
   );
 
   await removeExtendedAttributesForProject(
@@ -253,15 +262,24 @@ Future<XcodeBuildResult> buildXcodeProject({
     );
   }
 
+  final Logger logger = toolContext.logger;
   final FlutterManifest manifest = app.project.parent.manifest;
-  final String? buildName = parsedBuildName(manifest: manifest, buildInfo: buildInfo);
+  final String? buildName = parsedBuildName(
+    manifest: manifest,
+    logger: logger,
+    buildInfo: buildInfo,
+  );
   final bool buildNameIsMissing = buildName == null || buildName.isEmpty;
 
   if (buildNameIsMissing) {
     globals.printStatus('Warning: Missing build name (CFBundleShortVersionString).');
   }
 
-  final String? buildNumber = parsedBuildNumber(manifest: manifest, buildInfo: buildInfo);
+  final String? buildNumber = parsedBuildNumber(
+    manifest: manifest,
+    logger: logger,
+    buildInfo: buildInfo,
+  );
   final bool buildNumberIsMissing = buildNumber == null || buildNumber.isEmpty;
 
   if (buildNumberIsMissing) {
@@ -274,7 +292,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     );
   }
 
-  final String buildDirectoryPath = getIosBuildDirectory();
+  final String buildDirectoryPath = getIosBuildDirectory(config: config, fileSystem: fs);
 
   final Map<String, String> buildSettings =
       await app.project.buildSettingsForBuildInfo(
@@ -303,7 +321,7 @@ Future<XcodeBuildResult> buildXcodeProject({
       .fetchDependenciesAndGenerateXcodebuildArgs(
         app.project,
         globals.fs.directory(buildDirectoryPath),
-        skipPackageUpdatesAndValidation: false,
+        skipPackageValidation: false,
       );
   final buildCommands = <String>[...xcodebuildCommandArgs, '-configuration', configuration];
 
@@ -347,6 +365,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     project: project,
     targetOverride: targetOverride,
     buildInfo: buildInfo,
+    toolContext: toolContext,
     printWarnings: true,
   );
   if (app.project.usesSwiftPackageManager) {
@@ -359,7 +378,14 @@ Future<XcodeBuildResult> buildXcodeProject({
       );
     }
   }
-  await processPodsIfNeeded(project.ios, buildDirectoryPath, buildInfo.mode);
+  await processPodsIfNeeded(
+    project.ios,
+    buildDirectoryPath,
+    buildInfo.mode,
+    cocoaPods: globals.cocoaPods,
+    templateRenderer: globals.templateRenderer,
+    toolContext: toolContext,
+  );
   if (configOnly) {
     return XcodeBuildResult(success: true);
   }
@@ -438,7 +464,11 @@ Future<XcodeBuildResult> buildXcodeProject({
     if (!hasWatchCompanion) {
       // ONLY_ACTIVE_ARCH specifies whether the product includes only code for
       // the native architecture.
-      final onlyActiveArch = activeArch == CpuArch.fromHostPlatform(getCurrentHostPlatform());
+      final onlyActiveArch =
+          activeArch ==
+          CpuArch.fromHostPlatform(
+            getCurrentHostPlatform(operatingSystemUtils: os, platform: platform),
+          );
 
       buildCommands.add('ONLY_ACTIVE_ARCH=${onlyActiveArch ? 'YES' : 'NO'}');
       buildCommands.add('ARCHS=${activeArch.darwinArchName}');
@@ -909,6 +939,7 @@ Future<void> diagnoseXcodeBuildFailure(
     platform: platform,
     logger: logger,
     fileSystem: fileSystem,
+    analytics: analytics,
     device: device,
   );
 
@@ -1084,16 +1115,15 @@ _XCResultIssueHandlingResult _handleXCResultIssue({
       hasProvisioningProfileIssue: false,
       duplicateModule: duplicateModule,
     );
-  } else if (message.toLowerCase().contains('not found')) {
-    final String? missingModule = _parseMissingModule(message);
-    if (missingModule != null) {
-      return _XCResultIssueHandlingResult(
-        requiresProvisioningProfile: false,
-        hasProvisioningProfileIssue: false,
-        missingModule: missingModule,
-      );
-    }
-  } else if (message.toLowerCase().contains('has been modified since')) {
+  } else if (message.toLowerCase().contains('not found') && _parseMissingModule(message) != null) {
+    return _XCResultIssueHandlingResult(
+      requiresProvisioningProfile: false,
+      hasProvisioningProfileIssue: false,
+      missingModule: _parseMissingModule(message),
+    );
+  } else if (message.toLowerCase().contains('has been modified since') ||
+      (message.toLowerCase().contains('module map file') &&
+          message.toLowerCase().contains('not found'))) {
     return _XCResultIssueHandlingResult(
       requiresProvisioningProfile: false,
       hasProvisioningProfileIssue: false,
@@ -1136,6 +1166,7 @@ Future<bool> _handleIssues(
   required FlutterDarwinPlatform platform,
   required Logger logger,
   required FileSystem fileSystem,
+  required Analytics analytics,
   Device? device,
 }) async {
   var requiresProvisioningProfile = false;
@@ -1226,6 +1257,11 @@ Future<bool> _handleIssues(
     final bool usesCocoapods = xcodeProject.podfile.existsSync();
     final bool usesSwiftPackageManager = xcodeProject.usesSwiftPackageManager;
     if (usesCocoapods && usesSwiftPackageManager) {
+      for (final module in duplicateModules) {
+        analytics.send(
+          Event.appleUsageEvent(workflow: 'duplicate-modules-build-failure', parameter: module),
+        );
+      }
       logger.printError(
         'Your project uses both CocoaPods and Swift Package Manager, which can '
         'cause the above error. It may be caused by there being both a CocoaPod '
@@ -1264,7 +1300,7 @@ Future<bool> _handleIssues(
   } else if (modifiedPrecompiledSource) {
     logger.printError(
       '════════════════════════════════════════════════════════════════════════════════\n'
-      'A precompiled file has been changed since last built. Please run "flutter clean" to clear '
+      'A precompiled file has been changed since last built. Please run "flutter clean --include-xcode-workspace" to clear '
       'the cache.\n'
       '════════════════════════════════════════════════════════════════════════════════',
     );
@@ -1532,7 +1568,7 @@ class _XCResultIssueHandlingResult {
   final String? missingModule;
 
   /// An issue indicates that a source file, such as a header in the Flutter framework, has
-  /// changed since last built. This requires "flutter clean" to resolve.
+  /// changed since last built. This requires "flutter clean --include-xcode-workspace" to resolve.
   final bool modifiedPrecompiledSource;
 
   final bool unableToFindArmDestination;

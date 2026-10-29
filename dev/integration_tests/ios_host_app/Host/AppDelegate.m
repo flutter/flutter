@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 #import "AppDelegate.h"
-#import "MainViewController.h"
 
 @interface AppDelegate ()
 
@@ -12,8 +11,6 @@
 static NSString *_kReloadChannelName = @"reload";
 
 @implementation AppDelegate {
-  MainViewController *_mainViewController;
-  UINavigationController *_navigationController;
   FlutterEngine *_engine;
   FlutterBasicMessageChannel *_reloadMessageChannel;
 }
@@ -28,26 +25,15 @@ static NSString *_kReloadChannelName = @"reload";
 
 - (BOOL)application:(UIApplication *)application
     didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
-  self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
-
-  _mainViewController = [[MainViewController alloc] init];
-  _navigationController = [[UINavigationController alloc]
-      initWithRootViewController:_mainViewController];
-
-  _navigationController.navigationBar.translucent = NO;
-
   _engine = [[FlutterEngine alloc] initWithName:@"test" project:nil];
   [_engine runWithEntrypoint:nil];
 
-  _reloadMessageChannel = [[FlutterBasicMessageChannel alloc]
-         initWithName:_kReloadChannelName
-      binaryMessenger:_engine.binaryMessenger
-                codec:[FlutterStringCodec sharedInstance]];
+  _reloadMessageChannel =
+      [[FlutterBasicMessageChannel alloc] initWithName:_kReloadChannelName
+                                       binaryMessenger:_engine.binaryMessenger
+                                                 codec:[FlutterStringCodec sharedInstance]];
 
-  self.window.rootViewController = _navigationController;
-  [self.window makeKeyAndVisible];
-
-  return YES;
+  return [super application:application didFinishLaunchingWithOptions:launchOptions];
 }
 
 @end

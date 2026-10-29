@@ -29,9 +29,9 @@ abstract class DeepLinkJsonFromManifestTask : DefaultTask() {
     @get:PathSensitive(PathSensitivity.RELATIVE)
     abstract val manifestFile: RegularFileProperty
 
-    // In the past for this task namespace was the ApplicationId.
+    // The resolved application ID for this variant.
     @get:Input
-    abstract val namespace: Property<String>
+    abstract val applicationId: Property<String>
 
     // Does not need to transform manifest at all but there does not appear to be another dsl
     // supported way to depend on the merged manifest.
@@ -46,7 +46,11 @@ abstract class DeepLinkJsonFromManifestTask : DefaultTask() {
         manifestFile.get().asFile.copyTo(updatedManifest.get().asFile, overwrite = true)
         logger.debug("DeepLinkJsonFromManifestTask: Unmodified manifest written.")
 
-        DeepLinkJsonFromManifestTaskHelper.createAppLinkSettingsFile(namespace.get(), manifestFile, deepLinkJson)
+        DeepLinkJsonFromManifestTaskHelper.createAppLinkSettingsFile(
+            applicationId.get(),
+            manifestFile,
+            deepLinkJson
+        )
         logger.debug("DeepLinkJsonFromManifestTask: appLinkSettings written to ${deepLinkJson.get().asFile.absolutePath}.")
     }
 }

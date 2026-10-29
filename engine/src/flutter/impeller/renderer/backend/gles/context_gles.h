@@ -50,6 +50,22 @@ class ContextGLES final : public Context,
   const std::shared_ptr<GpuSubmissionTracker>& GetMutableSubmissionTracker()
       const;
 
+  //----------------------------------------------------------------------------
+  /// @brief      Whether the origin of the default framebuffer (framebuffer 0)
+  ///             is the top-left of the window rather than OpenGL's usual
+  ///             bottom-left.
+  ///
+  ///             This is true for embedders whose window surface is created
+  ///             with an inverted Y axis, such as ANGLE's
+  ///             EGL_SURFACE_ORIENTATION_INVERT_Y_ANGLE. When true, render
+  ///             passes targeting wrapped framebuffers store their contents
+  ///             top-down so that a 1:1 blit into the default framebuffer
+  ///             needs no vertical flip.
+  ///
+  bool HasTopLeftDefaultFramebufferOrigin() const {
+    return top_left_default_framebuffer_origin_;
+  }
+
  private:
   std::shared_ptr<ReactorGLES> reactor_;
   std::shared_ptr<GpuSubmissionTracker> submission_tracker_ =
@@ -65,6 +81,7 @@ class ContextGLES final : public Context,
   // in order to satisfy the Context::GetCapabilities signature which returns
   // a reference.
   std::shared_ptr<const Capabilities> device_capabilities_;
+  bool top_left_default_framebuffer_origin_ = false;
   bool is_valid_ = false;
 
   ContextGLES(

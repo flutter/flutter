@@ -39,7 +39,9 @@ class FirefoxEnvironment implements BrowserEnvironment {
   }
 
   @override
-  Future<void> cleanup() async {}
+  Future<void> cleanup() async {
+    await Firefox._stopLinuxDisplay();
+  }
 
   @override
   final String name = 'Firefox';
@@ -63,13 +65,24 @@ class Firefox extends Browser {
     return Firefox._(
       BrowserProcess(() async {
         // Using a profile on opening will prevent popups related to profiles.
-        const profile = '''
+        final profile =
+            '''
 user_pref("browser.shell.checkDefaultBrowser", false);
 user_pref("dom.disable_open_during_load", false);
 user_pref("dom.max_script_run_time", 0);
 user_pref("trailhead.firstrun.branches", "nofirstrun-empty");
 user_pref("browser.aboutwelcome.enabled", false);
-''';
+// Ensure WebGL is enabled, using the hardware GPU when available and allowing
+// fallback to software rendering when no GPU is present.
+user_pref("webgl.force-enabled", true);
+user_pref("webgl.disabled", false);
+user_pref("webgl.disable-fail-if-major-performance-caveat", true);
+${isCi ? '''
+// GPU-less Linux CI containers require software WebRender and disabled content
+// sandboxes to initialize Mesa llvmpipe (swrast) in headless mode.
+user_pref("gfx.webrender.software", true);
+user_pref("security.sandbox.content.level", 0);
+''' : ''}''';
 
         final temporaryProfileDirectory = Directory(
           path.join(environment.webUiDartToolDir.path, 'firefox_profile'),
@@ -114,7 +127,23 @@ user_pref("browser.aboutwelcome.enabled", false);
           '--start-debugger-server $kDevtoolsPort',
         ];
 
-        final Process process = await Process.start(installation.executable, args);
+        final String? linuxDisplay = await _ensureLinuxDisplay();
+        final Process process = await Process.start(
+          installation.executable,
+          args,
+          environment: <String, String>{
+            ...Platform.environment,
+            if (linuxDisplay != null) 'DISPLAY': linuxDisplay,
+            if (!debug) 'MOZ_HEADLESS': '1',
+            if (isCi) ...<String, String>{
+              'LIBGL_ALWAYS_SOFTWARE': '1',
+              'MOZ_DISABLE_CONTENT_SANDBOX': '1',
+              'MOZ_DISABLE_GPU_SANDBOX': '1',
+              'MOZ_DISABLE_RDD_SANDBOX': '1',
+              'MOZ_DISABLE_SOCKET_PROCESS_SANDBOX': '1',
+            },
+          },
+        );
         process.stdout
             .transform<String>(const Utf8Decoder(allowMalformed: true))
             .listen((String string) => print('[Firefox:stdout] $string'));
@@ -139,6 +168,99 @@ user_pref("browser.aboutwelcome.enabled", false);
   }
 
   Firefox._(this._process, this.remoteDebuggerUrl);
+
+  static Process? _xvfbProcess;
+  static Future<String?>? _virtualDisplayFuture;
+
+  /// Creates a virtual X display on Linux when `DISPLAY` is unset so headless
+  /// Firefox can initialize WebGL.
+  static Future<String?> _ensureLinuxDisplay() {
+    if (!Platform.isLinux) {
+      return Future<String?>.value();
+    }
+    final String? existingDisplay = Platform.environment['DISPLAY'];
+    if (existingDisplay != null && existingDisplay.isNotEmpty) {
+      return Future<String?>.value(existingDisplay);
+    }
+    return _virtualDisplayFuture ??= _startXvfb();
+  }
+
+  static Future<String?> _startXvfb() async {
+    Process? process;
+    final stderrBuffer = StringBuffer();
+    try {
+      process = await Process.start('Xvfb', <String>[
+        '-displayfd',
+        '1',
+        '-screen',
+        '0',
+        '1280x800x24',
+        '-ac',
+        '-nolisten',
+        'tcp',
+      ]);
+      process.stderr
+          .transform<String>(const Utf8Decoder(allowMalformed: true))
+          .listen(stderrBuffer.write);
+      final displayCompleter = Completer<String>();
+      process.stdout
+          .transform<String>(const Utf8Decoder(allowMalformed: true))
+          .transform<String>(const LineSplitter())
+          .listen(
+            (String line) {
+              final String trimmed = line.trim();
+              if (trimmed.isNotEmpty && !displayCompleter.isCompleted) {
+                displayCompleter.complete(trimmed);
+              }
+            },
+            onError: (Object error, StackTrace stackTrace) {
+              if (!displayCompleter.isCompleted) {
+                displayCompleter.completeError(error, stackTrace);
+              }
+            },
+            onDone: () {
+              if (!displayCompleter.isCompleted) {
+                displayCompleter.completeError(
+                  StateError(
+                    'Xvfb exited before reporting a display number. stderr:\n$stderrBuffer',
+                  ),
+                );
+              }
+            },
+          );
+      final String displayNumber = await displayCompleter.future.timeout(
+        const Duration(seconds: 10),
+      );
+      _xvfbProcess = process;
+      unawaited(
+        process.exitCode.then((_) {
+          if (identical(_xvfbProcess, process)) {
+            _xvfbProcess = null;
+            _virtualDisplayFuture = null;
+          }
+        }),
+      );
+      return ':$displayNumber';
+    } on Object catch (error) {
+      print('[Firefox] Failed to start Xvfb: $error');
+      process?.kill();
+      _virtualDisplayFuture = null;
+      return null;
+    }
+  }
+
+  static Future<void> _stopLinuxDisplay() async {
+    if (_virtualDisplayFuture != null) {
+      await _virtualDisplayFuture;
+    }
+    final Process? process = _xvfbProcess;
+    _xvfbProcess = null;
+    _virtualDisplayFuture = null;
+    if (process != null) {
+      process.kill();
+      await process.exitCode;
+    }
+  }
 
   static Future<void> printActualVersion(BrowserInstallation installation) async {
     final ProcessResult result = await Process.run(installation.executable, ['--version']);

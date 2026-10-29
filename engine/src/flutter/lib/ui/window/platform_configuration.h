@@ -190,6 +190,18 @@ class PlatformConfigurationClient {
   virtual void SetNeedsReportTimings(bool value) = 0;
 
   //--------------------------------------------------------------------------
+  /// @brief      Resets the engine's internal caches.
+  ///
+  ///             This is primarily intended for test harnesses to ensure test
+  ///             isolation and prevent cached offscreen render targets or other
+  ///             transient engine state from leaking across consecutive tests.
+  ///
+  ///             Production applications should not invoke this method
+  ///             directly. Doing so can cause unnecessary texture
+  ///             reallocation churn and frame hitches.
+  virtual void ResetInternalState() = 0;
+
+  //--------------------------------------------------------------------------
   /// @brief      The embedder can specify data that the isolate can request
   ///             synchronously on launch. This accessor fetches that data.
   ///
@@ -662,6 +674,8 @@ class PlatformConfigurationNativeApi {
   static void SetSemanticsTreeEnabled(bool enabled);
 
   static void SetNeedsReportTimings(bool value);
+
+  static void ResetInternalState();
 
   static Dart_Handle GetPersistentIsolateData();
 

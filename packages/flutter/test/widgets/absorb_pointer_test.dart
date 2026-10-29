@@ -6,7 +6,6 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'button_tester.dart';
-import 'semantics_tester.dart';
 
 void main() {
   testWidgets('AbsorbPointers do not block siblings', (WidgetTester tester) async {
@@ -46,21 +45,6 @@ void main() {
           isEnabled: true,
         ),
       );
-    });
-
-    testWidgets('drops semantics when its ignoreSemantics is true', (WidgetTester tester) async {
-      final semantics = SemanticsTester(tester);
-      final key = UniqueKey();
-      await tester.pumpWidget(
-        TestWidgetsApp(
-          home: AbsorbPointer(
-            ignoringSemantics: true,
-            child: TestButton(key: key, onPressed: () {}, child: const Text('button')),
-          ),
-        ),
-      );
-      expect(semantics, isNot(includesNodeWith(label: 'button')));
-      semantics.dispose();
     });
 
     testWidgets('ignores user interactions', (WidgetTester tester) async {

@@ -50,12 +50,6 @@ class FilterContents : public Contents {
       BlurStyle mask_blur_style = BlurStyle::kNormal,
       const Geometry* mask_geometry = nullptr);
 
-  static std::shared_ptr<FilterContents> MakeBorderMaskBlur(
-      FilterInput::Ref input,
-      Sigma sigma_x,
-      Sigma sigma_y,
-      BlurStyle blur_style = BlurStyle::kNormal);
-
   static std::shared_ptr<FilterContents> MakeDirectionalMorphology(
       FilterInput::Ref input,
       Radius radius,
@@ -105,6 +99,29 @@ class FilterContents : public Contents {
   ///         difficult to encode the current transform of the layer into the
   ///         Entity being rendered.
   void SetEffectTransform(const Matrix& effect_transform);
+
+  /// @brief  Sets the transform used for transforming local canvas geometry
+  ///         (such as `DlBlurImageFilter::bounds_`) into subpass coordinates.
+  ///
+  ///         In subpass and backdrop filter rendering scenarios, the effect
+  ///         itself (such as blur sigma or matrix filter transformations)
+  ///         operates on the screen-space backdrop and typically only requires
+  ///         the scale and rotation of the canvas CTM (via
+  ///         `SetEffectTransform`) to avoid shifting or double-translating the
+  ///         effect.
+  ///
+  ///         However, local geometry defined in widget/canvas space (such as a
+  ///         bounded blur rectangle) requires the full current transformation
+  ///         matrix including translation to be mapped accurately to the
+  ///         backdrop texture space (e.g. when rendering bounded blurs inside
+  ///         scrolling views).
+  ///
+  /// @see    `SetEffectTransform`
+  void SetLocalToPassTransform(const Matrix& local_to_pass_transform);
+
+  const Matrix& GetLocalToPassTransform() const {
+    return local_to_pass_transform_;
+  }
 
   /// @brief  Create an Entity that renders this filter's output.
   std::optional<Entity> GetEntity(
@@ -228,6 +245,7 @@ class FilterContents : public Contents {
 
   FilterInput::Vector inputs_;
   Matrix effect_transform_ = Matrix();
+  Matrix local_to_pass_transform_ = Matrix();
 
   FilterContents(const FilterContents&) = delete;
 

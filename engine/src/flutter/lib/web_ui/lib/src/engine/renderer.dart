@@ -4,7 +4,6 @@
 
 import 'dart:async';
 import 'dart:js_interop';
-import 'dart:math' as math;
 import 'dart:typed_data';
 
 import 'package:meta/meta.dart';
@@ -99,14 +98,7 @@ abstract class Renderer {
 
   ui.Paint createPaint();
 
-  ui.Vertices createVertices(
-    ui.VertexMode mode,
-    List<ui.Offset> positions, {
-    List<ui.Offset>? textureCoordinates,
-    List<ui.Color>? colors,
-    List<int>? indices,
-  });
-  ui.Vertices createVerticesRaw(
+  BackendVertices createVertices(
     ui.VertexMode mode,
     Float32List positions, {
     Float32List? textureCoordinates,
@@ -118,63 +110,79 @@ abstract class Renderer {
   ui.Canvas createCanvas(ui.PictureRecorder recorder, [ui.Rect? cullRect]);
   ui.SceneBuilder createSceneBuilder();
 
-  ui.Gradient createLinearGradient(
-    ui.Offset from,
-    ui.Offset to,
-    List<ui.Color> colors, [
-    List<double>? colorStops,
-    ui.TileMode tileMode = ui.TileMode.clamp,
+  BackendGradient createGradientLinear(
+    Float32List endPoints,
+    Uint32List colors,
+    Float32List? colorStops,
+    ui.TileMode tileMode,
     Float32List? matrix4,
-  ]);
-  ui.Gradient createRadialGradient(
-    ui.Offset center,
-    double radius,
-    List<ui.Color> colors, [
-    List<double>? colorStops,
-    ui.TileMode tileMode = ui.TileMode.clamp,
-    Float32List? matrix4,
-  ]);
-  ui.Gradient createConicalGradient(
-    ui.Offset focal,
-    double focalRadius,
-    ui.Offset center,
-    double radius,
-    List<ui.Color> colors, [
-    List<double>? colorStops,
-    ui.TileMode tileMode = ui.TileMode.clamp,
-    Float32List? matrix,
-  ]);
-  ui.Gradient createSweepGradient(
-    ui.Offset center,
-    List<ui.Color> colors, [
-    List<double>? colorStops,
-    ui.TileMode tileMode = ui.TileMode.clamp,
-    double startAngle = 0.0,
-    double endAngle = math.pi * 2,
-    Float32List? matrix4,
-  ]);
+  );
 
-  ui.ImageFilter createBlurImageFilter({
-    double sigmaX = 0.0,
-    double sigmaY = 0.0,
-    ui.TileMode? tileMode,
-    ui.Rect? bounds,
+  BackendGradient createGradientRadial(
+    double centerX,
+    double centerY,
+    double radius,
+    Uint32List colors,
+    Float32List? colorStops,
+    ui.TileMode tileMode,
+    Float32List? matrix4,
+  );
+
+  BackendGradient createGradientConical(
+    double startX,
+    double startY,
+    double startRadius,
+    double endX,
+    double endY,
+    double endRadius,
+    Uint32List colors,
+    Float32List? colorStops,
+    ui.TileMode tileMode,
+    Float32List? matrix4,
+  );
+
+  BackendGradient createGradientSweep(
+    double centerX,
+    double centerY,
+    Uint32List colors,
+    Float32List? colorStops,
+    ui.TileMode tileMode,
+    double startAngle,
+    double endAngle,
+    Float32List? matrix4,
+  );
+
+  BackendImageFilter createBlurImageFilter({
+    required double sigmaX,
+    required double sigmaY,
+    required ui.TileMode tileMode,
   });
-  ui.ImageFilter createDilateImageFilter({double radiusX = 0.0, double radiusY = 0.0});
-  ui.ImageFilter createErodeImageFilter({double radiusX = 0.0, double radiusY = 0.0});
-  ui.ImageFilter createMatrixImageFilter(
-    Float64List matrix4, {
-    ui.FilterQuality filterQuality = ui.FilterQuality.low,
+  BackendImageFilter createDilateImageFilter({required double radiusX, required double radiusY});
+  BackendImageFilter createErodeImageFilter({required double radiusX, required double radiusY});
+  BackendImageFilter createMatrixImageFilter({
+    required Float64List matrix,
+    required ui.FilterQuality filterQuality,
   });
-  ui.ImageFilter composeImageFilters({
-    required ui.ImageFilter outer,
-    required ui.ImageFilter inner,
+  BackendImageFilter createComposeImageFilter({
+    required BackendImageFilter outer,
+    required BackendImageFilter inner,
   });
+  BackendImageFilter createColorFilterImageFilter({required BackendColorFilter filter});
+  BackendColorFilter createColorFilter(EngineColorFilter filter);
+  BackendMaskFilter createMaskFilter(EngineMaskFilter filter);
 
   bool get isMultiThreaded;
 
   /// Whether this renderer natively supports resizing/scaling animated images during decoding.
   bool get supportsResizingAnimatedImages;
+
+  /// Whether this renderer can decode images itself via [createAnimatedImage].
+  ///
+  /// When this is false, [createAnimatedImage] must not be called for any
+  /// image, animated or not, and callers must fall back to a browser-provided
+  /// decoder. Some backends (notably the Impeller-based skwasm variants) are
+  /// built without the builtin image codecs.
+  bool get supportsAnimatedImages;
 
   BackendAnimatedImage createAnimatedImage(Uint8List bytes, {int? targetWidth, int? targetHeight});
 
@@ -216,12 +224,18 @@ abstract class Renderer {
   }) async {
     var textureSource = object;
     final originalTextureSource = object;
-    final bool needsClone = !transferOwnership || (isMultiThreaded && !_isTransferable(object));
+    final bool isVideoFrame = object.isA<VideoFrame>();
+    // Although VideoFrame is transferable across threads, drawing directly from a
+    // VideoFrame to a WebGL texture can result in incorrect orientation due to EXIF
+    // metadata handling. Converting it to an ImageBitmap avoids this problem.
+    final bool needsClone =
+        isVideoFrame || !transferOwnership || (isMultiThreaded && !_isTransferable(object));
     if (needsClone) {
-      textureSource = (await createImageBitmap(
-        object,
-        bounds: (x: 0, y: 0, width: width, height: height),
-      )).toJSAnyShallow;
+      textureSource =
+          (await (isVideoFrame
+                  ? createImageBitmap(object)
+                  : createImageBitmap(object, bounds: (x: 0, y: 0, width: width, height: height))))
+              .toJSAnyShallow;
       if (transferOwnership) {
         if (originalTextureSource.isA<VideoFrame>()) {
           (originalTextureSource as VideoFrame).close();
@@ -254,7 +268,7 @@ abstract class Renderer {
   }
 
   bool _isTransferable(JSAny object) =>
-      object.isA<DomImageBitmap>() || object.isA<VideoFrame>() || object.isA<DomOffscreenCanvas>();
+      object.isA<DomImageBitmap>() || object.isA<DomOffscreenCanvas>() || object.isA<VideoFrame>();
 
   Future<ui.Codec> instantiateImageCodec(
     Uint8List list, {
@@ -321,12 +335,12 @@ abstract class Renderer {
     });
   }
 
-  ui.ImageShader createImageShader(
-    ui.Image image,
+  BackendImageShader createImageShader(
+    EngineImage image,
     ui.TileMode tmx,
     ui.TileMode tmy,
-    Float64List matrix4,
-    ui.FilterQuality? filterQuality,
+    Float64List? matrix4,
+    ui.FilterQuality filterQuality,
   );
 
   void clearFragmentProgramCache();
@@ -334,70 +348,7 @@ abstract class Renderer {
 
   BackendPathConstructors get pathConstructors;
 
-  ui.LineMetrics createLineMetrics({
-    required bool hardBreak,
-    required double ascent,
-    required double descent,
-    required double unscaledAscent,
-    required double height,
-    required double width,
-    required double left,
-    required double baseline,
-    required int lineNumber,
-  });
-
-  ui.TextStyle createTextStyle({
-    required ui.Color? color,
-    required ui.TextDecoration? decoration,
-    required ui.Color? decorationColor,
-    required ui.TextDecorationStyle? decorationStyle,
-    required double? decorationThickness,
-    required ui.FontWeight? fontWeight,
-    required ui.FontStyle? fontStyle,
-    required ui.TextBaseline? textBaseline,
-    required String? fontFamily,
-    required List<String>? fontFamilyFallback,
-    required double? fontSize,
-    required double? letterSpacing,
-    required double? wordSpacing,
-    required double? height,
-    required ui.TextLeadingDistribution? leadingDistribution,
-    required ui.Locale? locale,
-    required ui.Paint? background,
-    required ui.Paint? foreground,
-    required List<ui.Shadow>? shadows,
-    required List<ui.FontFeature>? fontFeatures,
-    required List<ui.FontVariation>? fontVariations,
-  });
-
-  ui.ParagraphStyle createParagraphStyle({
-    ui.TextAlign? textAlign,
-    ui.TextDirection? textDirection,
-    int? maxLines,
-    String? fontFamily,
-    double? fontSize,
-    double? height,
-    ui.TextHeightBehavior? textHeightBehavior,
-    ui.FontWeight? fontWeight,
-    ui.FontStyle? fontStyle,
-    ui.StrutStyle? strutStyle,
-    String? ellipsis,
-    ui.Locale? locale,
-  });
-
-  ui.StrutStyle createStrutStyle({
-    String? fontFamily,
-    List<String>? fontFamilyFallback,
-    double? fontSize,
-    double? height,
-    ui.TextLeadingDistribution? leadingDistribution,
-    double? leading,
-    ui.FontWeight? fontWeight,
-    ui.FontStyle? fontStyle,
-    bool? forceStrutHeight,
-  });
-
-  ui.ParagraphBuilder createParagraphBuilder(ui.ParagraphStyle style);
+  BackendParagraphBuilder createParagraphBuilder(EngineParagraphStyle style);
 
   WebParagraphPainter createWebParagraphPainter(WebParagraph paragraph);
 

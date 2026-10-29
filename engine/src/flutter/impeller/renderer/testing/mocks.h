@@ -12,6 +12,7 @@
 #include "impeller/core/texture.h"
 #include "impeller/renderer/command_buffer.h"
 #include "impeller/renderer/command_queue.h"
+#include "impeller/renderer/compute_pass.h"
 #include "impeller/renderer/context.h"
 #include "impeller/renderer/pipeline.h"
 #include "impeller/renderer/pipeline_library.h"
@@ -117,6 +118,45 @@ class MockRenderPass : public RenderPass {
   MOCK_METHOD(void, OnSetLabel, (std::string_view label), (override));
 };
 
+/// A compute pass whose recording calls tests can expect.
+class MockComputePass : public ComputePass {
+ public:
+  explicit MockComputePass(std::shared_ptr<const Context> context)
+      : ComputePass(std::move(context)) {}
+  MOCK_METHOD(bool, IsValid, (), (const, override));
+  MOCK_METHOD(void, SetCommandLabel, (std::string_view label), (override));
+  MOCK_METHOD(
+      void,
+      SetPipeline,
+      (const std::shared_ptr<Pipeline<ComputePipelineDescriptor>>& pipeline),
+      (override));
+  MOCK_METHOD(absl::Status,
+              Compute,
+              ((std::array<uint32_t, 3>)workgroup_count),
+              (override));
+  MOCK_METHOD(void, AddBufferMemoryBarrier, (), (override));
+  MOCK_METHOD(void, AddTextureMemoryBarrier, (), (override));
+  MOCK_METHOD(bool, EncodeCommands, (), (const, override));
+  MOCK_METHOD(void, OnSetLabel, (const std::string& label), (override));
+  MOCK_METHOD(bool,
+              BindResource,
+              (ShaderStage stage,
+               DescriptorType type,
+               const ShaderUniformSlot& slot,
+               const ShaderMetadata* metadata,
+               BufferView view),
+              (override));
+  MOCK_METHOD(bool,
+              BindResource,
+              (ShaderStage stage,
+               DescriptorType type,
+               const SampledImageSlot& slot,
+               const ShaderMetadata* metadata,
+               std::shared_ptr<const Texture> texture,
+               raw_ptr<const Sampler> sampler),
+              (override));
+};
+
 class MockPipelineLibrary : public PipelineLibrary {
  public:
   MOCK_METHOD(bool, IsValid, (), (const, override));
@@ -147,7 +187,7 @@ class MockCommandBuffer : public CommandBuffer {
   MOCK_METHOD(std::shared_ptr<BlitPass>, OnCreateBlitPass, (), (override));
   MOCK_METHOD(bool,
               OnSubmitCommands,
-              (bool block_on_schedule, CompletionCallback callback),
+              (CompletionCallback callback),
               (override));
   MOCK_METHOD(void, OnWaitUntilCompleted, (), (override));
   MOCK_METHOD(void, OnWaitUntilScheduled, (), (override));
@@ -208,6 +248,11 @@ class MockImpellerContext : public Context {
               (),
               (const, override));
 
+  MOCK_METHOD(void,
+              TrackPendingImageUpload,
+              (const std::shared_ptr<CommandBufferSchedulingReceipt>& receipt),
+              (override));
+
   MOCK_METHOD(RuntimeStageBackend,
               GetRuntimeStageBackend,
               (),
@@ -252,6 +297,8 @@ class MockCapabilities : public Capabilities {
   MOCK_METHOD(bool, SupportsPrimitiveRestart, (), (const override));
   MOCK_METHOD(bool, Supports32BitPrimitiveIndices, (), (const override));
   MOCK_METHOD(bool, SupportsManuallyMippedTextures, (), (const override));
+
+  MOCK_METHOD(bool, SupportsTextureArrays, (), (const override));
   MOCK_METHOD(bool, SupportsExtendedRangeFormats, (), (const override));
   MOCK_METHOD(bool, SupportsFramebufferRenderMipmap, (), (const override));
   MOCK_METHOD(bool,
@@ -266,15 +313,20 @@ class MockCapabilities : public Capabilities {
   MOCK_METHOD(uint32_t, GetMaxSamplerAnisotropy, (), (const override));
   MOCK_METHOD(size_t, GetMinimumUniformAlignment, (), (const override));
   MOCK_METHOD(bool, NeedsPartitionedHostBuffer, (), (const, override));
+  MOCK_METHOD(ComputeLimits, GetComputeLimits, (), (const, override));
 };
 
 class MockCommandQueue : public CommandQueue {
  public:
-  MOCK_METHOD(fml::Status,
+  MOCK_METHOD(absl::Status,
               Submit,
               (const std::vector<std::shared_ptr<CommandBuffer>>& buffers,
-               const CompletionCallback& cb,
-               bool block_on_schedule),
+               const CompletionCallback& cb),
+              (override));
+  MOCK_METHOD(SubmitResult,
+              SubmitWithReceipt,
+              (const std::shared_ptr<CommandBuffer>& buffer,
+               const CompletionCallback& cb),
               (override));
 };
 

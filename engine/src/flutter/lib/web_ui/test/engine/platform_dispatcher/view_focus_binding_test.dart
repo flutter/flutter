@@ -25,6 +25,8 @@ void testMain() {
     tearDown(() {
       EngineSemantics.instance.semanticsEnabled = false;
       endFakeTextEditing();
+      debugEmulateIosSafari = false;
+      debugViewFocusDocumentHasFocusOverride = null;
     });
 
     test('The view is focusable and reachable by keyboard when registered', () async {
@@ -75,6 +77,62 @@ void testMain() {
       expect(dispatchedViewFocusEvents[0].viewId, view.viewId);
       expect(dispatchedViewFocusEvents[0].state, ui.ViewFocusState.focused);
       expect(dispatchedViewFocusEvents[0].direction, ui.ViewFocusDirection.forward);
+    });
+
+    test('fires a focus event with undefined direction when a child is focused', () async {
+      final EngineFlutterView view = createAndRegisterView(dispatcher);
+      final DomElement button = createDomElement('button');
+
+      view.dom.rootElement.append(button);
+      button.focusWithoutScroll();
+
+      expect(dispatchedViewFocusEvents, hasLength(1));
+
+      expect(dispatchedViewFocusEvents[0].viewId, view.viewId);
+      expect(dispatchedViewFocusEvents[0].state, ui.ViewFocusState.focused);
+      expect(dispatchedViewFocusEvents[0].direction, ui.ViewFocusDirection.undefined);
+    });
+
+    test('fires a refocus event with undefined direction when child focus returns', () async {
+      final EngineFlutterView view = createAndRegisterView(dispatcher);
+      final DomElement button1 = createDomElement('button');
+      final DomElement button2 = createDomElement('button');
+
+      view.dom.rootElement.append(button1);
+      view.dom.rootElement.append(button2);
+
+      button1.focusWithoutScroll();
+      button1.blur();
+      await Future<void>.delayed(Duration.zero);
+      button2.focusWithoutScroll();
+
+      expect(dispatchedViewFocusEvents, hasLength(3));
+
+      expect(dispatchedViewFocusEvents[0].viewId, view.viewId);
+      expect(dispatchedViewFocusEvents[0].state, ui.ViewFocusState.focused);
+      expect(dispatchedViewFocusEvents[0].direction, ui.ViewFocusDirection.undefined);
+
+      expect(dispatchedViewFocusEvents[1].viewId, view.viewId);
+      expect(dispatchedViewFocusEvents[1].state, ui.ViewFocusState.unfocused);
+      expect(dispatchedViewFocusEvents[1].direction, ui.ViewFocusDirection.undefined);
+
+      expect(dispatchedViewFocusEvents[2].viewId, view.viewId);
+      expect(dispatchedViewFocusEvents[2].state, ui.ViewFocusState.focused);
+      expect(dispatchedViewFocusEvents[2].direction, ui.ViewFocusDirection.undefined);
+    });
+
+    test('fires a focus event with backward direction when shift tab focuses the root', () async {
+      final EngineFlutterView view = createAndRegisterView(dispatcher);
+
+      domDocument.body!.pressTabKey(shift: true);
+      view.dom.rootElement.focusWithoutScroll();
+      domDocument.body!.releaseTabKey();
+
+      expect(dispatchedViewFocusEvents, hasLength(1));
+
+      expect(dispatchedViewFocusEvents[0].viewId, view.viewId);
+      expect(dispatchedViewFocusEvents[0].state, ui.ViewFocusState.focused);
+      expect(dispatchedViewFocusEvents[0].direction, ui.ViewFocusDirection.backward);
     });
 
     test('fires a focus event - a view was unfocused', () async {
@@ -142,6 +200,34 @@ void testMain() {
       expect(dispatchedViewFocusEvents[2].viewId, view2.viewId);
       expect(dispatchedViewFocusEvents[2].state, ui.ViewFocusState.unfocused);
       expect(dispatchedViewFocusEvents[2].direction, ui.ViewFocusDirection.undefined);
+    });
+
+    test('fires a focus event - focus transitions between children of two views', () async {
+      final EngineFlutterView view1 = createAndRegisterView(dispatcher);
+      final EngineFlutterView view2 = createAndRegisterView(dispatcher);
+      final DomElement button1 = createDomElement('button');
+      final DomElement button2 = createDomElement('button');
+
+      view1.dom.rootElement.append(button1);
+      view2.dom.rootElement.append(button2);
+
+      button1.focusWithoutScroll();
+      button2.focusWithoutScroll();
+
+      expect(dispatchedViewFocusEvents, hasLength(2));
+
+      expect(dispatchedViewFocusEvents[0].viewId, view1.viewId);
+      expect(dispatchedViewFocusEvents[0].state, ui.ViewFocusState.focused);
+      expect(dispatchedViewFocusEvents[0].direction, ui.ViewFocusDirection.undefined);
+
+      expect(dispatchedViewFocusEvents[1].viewId, view2.viewId);
+      expect(dispatchedViewFocusEvents[1].state, ui.ViewFocusState.focused);
+      expect(dispatchedViewFocusEvents[1].direction, ui.ViewFocusDirection.undefined);
+
+      // The view that lost the focus becomes reachable by the keyboard again,
+      // and the view that gained it is taken out of the tab order.
+      expect(view1.dom.rootElement.getAttribute('tabindex'), '0');
+      expect(view2.dom.rootElement.getAttribute('tabindex'), '-1');
     });
 
     test('requestViewFocusChange focuses the view', () {
@@ -243,10 +329,11 @@ void testMain() {
 
       expect(dispatchedViewFocusEvents[0].viewId, view.viewId);
       expect(dispatchedViewFocusEvents[0].state, ui.ViewFocusState.focused);
-      expect(dispatchedViewFocusEvents[0].direction, ui.ViewFocusDirection.forward);
+      expect(dispatchedViewFocusEvents[0].direction, ui.ViewFocusDirection.undefined);
     });
 
     test('works even if focus is changed in the middle of a blur call', () {
+      debugViewFocusDocumentHasFocusOverride = true;
       final DomElement input1 = createDomElement('input');
       final DomElement input2 = createDomElement('input');
       final EngineFlutterView view = createAndRegisterView(dispatcher);
@@ -267,7 +354,7 @@ void testMain() {
 
       expect(dispatchedViewFocusEvents[0].viewId, view.viewId);
       expect(dispatchedViewFocusEvents[0].state, ui.ViewFocusState.focused);
-      expect(dispatchedViewFocusEvents[0].direction, ui.ViewFocusDirection.forward);
+      expect(dispatchedViewFocusEvents[0].direction, ui.ViewFocusDirection.undefined);
     });
 
     // On iOS a native caret/selection drag transiently blurs Flutter's active
@@ -286,17 +373,12 @@ void testMain() {
 
       debugEmulateIosSafari = true;
       debugViewFocusDocumentHasFocusOverride = true;
-      try {
-        // The null-relatedTarget focusout schedules the deferred report; the
-        // immediate refocus, as WebKit does mid-drag, cancels it.
-        input.blur();
-        input.focusWithoutScroll();
-        await Future<void>.delayed(const Duration(milliseconds: 150));
-        expect(dispatchedViewFocusEvents, isEmpty);
-      } finally {
-        debugEmulateIosSafari = false;
-        debugViewFocusDocumentHasFocusOverride = null;
-      }
+      // The null-relatedTarget focusout schedules the deferred report; the
+      // immediate refocus, as WebKit does mid-drag, cancels it.
+      input.blur();
+      input.focusWithoutScroll();
+      await Future<void>.delayed(const Duration(milliseconds: 150));
+      expect(dispatchedViewFocusEvents, isEmpty);
     });
 
     // A genuine blur (Done button, tap-away) never refocuses, so the deferred
@@ -312,19 +394,14 @@ void testMain() {
 
       debugEmulateIosSafari = true;
       debugViewFocusDocumentHasFocusOverride = true;
-      try {
-        input.blur();
-        await Future<void>.delayed(const Duration(milliseconds: 150));
-        final Iterable<ui.ViewFocusEvent> unfocused = dispatchedViewFocusEvents.where(
-          (ui.ViewFocusEvent e) => e.state == ui.ViewFocusState.unfocused,
-        );
-        expect(unfocused, hasLength(1));
-        expect(unfocused.single.viewId, view.viewId);
-        expect(unfocused.single.direction, ui.ViewFocusDirection.undefined);
-      } finally {
-        debugEmulateIosSafari = false;
-        debugViewFocusDocumentHasFocusOverride = null;
-      }
+      input.blur();
+      await Future<void>.delayed(const Duration(milliseconds: 150));
+      final Iterable<ui.ViewFocusEvent> unfocused = dispatchedViewFocusEvents.where(
+        (ui.ViewFocusEvent e) => e.state == ui.ViewFocusState.unfocused,
+      );
+      expect(unfocused, hasLength(1));
+      expect(unfocused.single.viewId, view.viewId);
+      expect(unfocused.single.direction, ui.ViewFocusDirection.undefined);
     });
 
     // The deferral is scoped to Flutter's text-editing element. A null-target
@@ -343,19 +420,14 @@ void testMain() {
       // pass because the headless browser reported the document unfocused,
       // which is a different branch than the one under test.
       debugViewFocusDocumentHasFocusOverride = true;
-      try {
-        other.blur();
-        // Not deferred: the unfocused event is present synchronously.
-        expect(
-          dispatchedViewFocusEvents.where(
-            (ui.ViewFocusEvent e) => e.state == ui.ViewFocusState.unfocused,
-          ),
-          hasLength(1),
-        );
-      } finally {
-        debugEmulateIosSafari = false;
-        debugViewFocusDocumentHasFocusOverride = null;
-      }
+      other.blur();
+      // Not deferred: the unfocused event is present synchronously.
+      expect(
+        dispatchedViewFocusEvents.where(
+          (ui.ViewFocusEvent e) => e.state == ui.ViewFocusState.unfocused,
+        ),
+        hasLength(1),
+      );
     });
 
     // The deferral requires the document to still have focus. When focus has
@@ -373,20 +445,15 @@ void testMain() {
 
       debugEmulateIosSafari = true;
       debugViewFocusDocumentHasFocusOverride = false;
-      try {
-        input.blur();
-        // Not deferred: with the document unfocused the unfocused event is
-        // present synchronously.
-        expect(
-          dispatchedViewFocusEvents.where(
-            (ui.ViewFocusEvent e) => e.state == ui.ViewFocusState.unfocused,
-          ),
-          hasLength(1),
-        );
-      } finally {
-        debugEmulateIosSafari = false;
-        debugViewFocusDocumentHasFocusOverride = null;
-      }
+      input.blur();
+      // Not deferred: with the document unfocused the unfocused event is
+      // present synchronously.
+      expect(
+        dispatchedViewFocusEvents.where(
+          (ui.ViewFocusEvent e) => e.state == ui.ViewFocusState.unfocused,
+        ),
+        hasLength(1),
+      );
     });
 
     // The deferral must key off the engine's editing state, not the
@@ -409,15 +476,10 @@ void testMain() {
 
       debugEmulateIosSafari = true;
       debugViewFocusDocumentHasFocusOverride = true;
-      try {
-        input.blur();
-        input.focusWithoutScroll();
-        await Future<void>.delayed(const Duration(milliseconds: 150));
-        expect(dispatchedViewFocusEvents, isEmpty);
-      } finally {
-        debugEmulateIosSafari = false;
-        debugViewFocusDocumentHasFocusOverride = null;
-      }
+      input.blur();
+      input.focusWithoutScroll();
+      await Future<void>.delayed(const Duration(milliseconds: 150));
+      expect(dispatchedViewFocusEvents, isEmpty);
     });
   });
 }

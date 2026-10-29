@@ -14,14 +14,11 @@ const maxLineWidth = 84;
 /// Encapsulates the help text construction and printing.
 class CommandHelp {
   CommandHelp({
-    required Logger logger,
-    required Terminal terminal,
-    required Platform platform,
-    required OutputPreferences outputPreferences,
-  }) : _logger = logger,
-       _terminal = terminal,
-       _platform = platform,
-       _outputPreferences = outputPreferences;
+    required this._logger,
+    required this._terminal,
+    required this._platform,
+    required this._outputPreferences,
+  });
 
   final Logger _logger;
 
@@ -166,14 +163,11 @@ class CommandHelpOption {
     this.key,
     this.description, {
     this.inParenthesis = '',
-    required Logger logger,
-    required Terminal terminal,
-    required Platform platform,
-    required OutputPreferences outputPreferences,
-  }) : _logger = logger,
-       _terminal = terminal,
-       _platform = platform,
-       _outputPreferences = outputPreferences;
+    required this._logger,
+    required this._terminal,
+    required this._platform,
+    required this._outputPreferences,
+  });
 
   final Logger _logger;
 

@@ -18,7 +18,7 @@ abstract class Vertices {
     List<Offset>? textureCoordinates,
     List<int>? indices,
   }) {
-    return engine.renderer.createVertices(
+    return engine.EngineVertices(
       mode,
       positions,
       textureCoordinates: textureCoordinates,
@@ -33,7 +33,7 @@ abstract class Vertices {
     Float32List? textureCoordinates,
     Uint16List? indices,
   }) {
-    return engine.renderer.createVerticesRaw(
+    return engine.EngineVertices.raw(
       mode,
       positions,
       textureCoordinates: textureCoordinates,

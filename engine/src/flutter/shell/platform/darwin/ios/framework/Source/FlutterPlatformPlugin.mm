@@ -156,6 +156,13 @@ static void SetStatusBarStyleForSharedApplication(UIStatusBarStyle style) {
   } else if ([method isEqualToString:@"LookUp.invoke"]) {
     [self showLookUpViewController:args];
     result(nil);
+  } else if ([method isEqualToString:@"Translate.invoke"]) {
+    if (@available(iOS 17.4, *)) {
+      [self showTranslateViewControllerForTerm:args];
+      result(nil);
+    } else {
+      result(FlutterMethodNotImplemented);
+    }
   } else if ([method isEqualToString:@"Share.invoke"]) {
     [self showShareViewController:args];
     result(nil);
@@ -203,7 +210,7 @@ static void SetStatusBarStyleForSharedApplication(UIStatusBarStyle style) {
     FlutterTextInputPlugin* _textInputPlugin = [self.engine textInputPlugin];
     UITextRange* range = _textInputPlugin.textInputView.selectedTextRange;
 
-    // firstRectForRange cannot be used here as it's current implementation does
+    // firstRectForRange cannot be used here as its current implementation does
     // not always return the full rect of the range.
     CGRect firstRect = [(FlutterTextInputView*)_textInputPlugin.textInputView
         caretRectForPosition:(FlutterTextPosition*)range.start];
@@ -444,6 +451,54 @@ static void SetStatusBarStyleForSharedApplication(UIStatusBarStyle style) {
   [engineViewController presentViewController:referenceLibraryViewController
                                      animated:YES
                                    completion:nil];
+}
+
+- (CGRect)popoverSourceRectForCurrentSelection {
+  FlutterTextInputPlugin* textInputPlugin = [self.engine textInputPlugin];
+  UITextRange* range = textInputPlugin.textInputView.selectedTextRange;
+  FlutterTextInputView* textInputView = (FlutterTextInputView*)textInputPlugin.textInputView;
+
+  // firstRectForRange cannot be used here as its current implementation does
+  // not always return the full rect of the range.
+  CGRect firstRect = [textInputView caretRectForPosition:range.start];
+  CGRect transformedFirstRect = [textInputView localRectFromFrameworkTransform:firstRect];
+  CGRect lastRect = [textInputView caretRectForPosition:range.end];
+  CGRect transformedLastRect = [textInputView localRectFromFrameworkTransform:lastRect];
+
+  // In case of RTL Language, get the minimum x coordinate too
+  return CGRectMake(fmin(transformedFirstRect.origin.x, transformedLastRect.origin.x),
+                    transformedFirstRect.origin.y,
+                    fabs(transformedLastRect.origin.x - transformedFirstRect.origin.x),
+                    transformedFirstRect.size.height);
+}
+
+- (void)showTranslateViewControllerForTerm:(NSString*)term {
+  if (@available(iOS 17.4, *)) {
+    if (term.length == 0) {
+      return;
+    }
+    UIViewController* flutterViewController = [self.engine viewController];
+    if (!flutterViewController) {
+      return;
+    }
+    FlutterTranslateViewController* translateViewController;
+
+    if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad) {
+      // On iPad, the translate screen is presented in a popover view, and requires a rect to use as
+      // source rect
+      CGRect popoverSourceRect = [self popoverSourceRectForCurrentSelection];
+      translateViewController =
+          [[FlutterTranslateViewController alloc] initWithTerm:term
+                                             popoverSourceRect:popoverSourceRect];
+    } else {
+      translateViewController = [[FlutterTranslateViewController alloc] initWithTerm:term];
+    }
+
+    translateViewController.view.frame = flutterViewController.view.bounds;
+    [flutterViewController addChildViewController:translateViewController];
+    [flutterViewController.view addSubview:translateViewController.view];
+    [translateViewController didMoveToParentViewController:flutterViewController];
+  }
 }
 
 - (UITextField*)textField {

@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'widget_tester.dart';
+library;
+
 import 'package:flutter/widgets.dart';
 
 /// A minimal [WidgetsApp] wrapper for use in widget tests.
@@ -68,6 +71,7 @@ class TestWidgetsApp extends StatelessWidget {
     this.home,
     this.initialRoute,
     this.onGenerateRoute,
+    this.onGenerateInitialRoutes,
     this.onUnknownRoute,
     this.navigatorObservers = const <NavigatorObserver>[],
     this.routes = const <String, WidgetBuilder>{},
@@ -142,6 +146,18 @@ class TestWidgetsApp extends StatelessWidget {
   ///
   ///  * [WidgetsApp.onGenerateRoute], the equivalent property in [WidgetsApp].
   final RouteFactory? onGenerateRoute;
+
+  /// The routes generator callback used for generating initial routes if
+  /// [initialRoute] is provided.
+  ///
+  /// If this property is not set, the underlying
+  /// [Navigator.onGenerateInitialRoutes] will default to
+  /// [Navigator.defaultGenerateInitialRoutes].
+  ///
+  /// See also:
+  ///
+  ///  * [WidgetsApp.onGenerateInitialRoutes], the equivalent property in [WidgetsApp].
+  final InitialRouteListFactory? onGenerateInitialRoutes;
 
   /// Called when [onGenerateRoute] fails to generate a route, except for the
   /// [initialRoute].
@@ -281,19 +297,17 @@ class TestWidgetsApp extends StatelessWidget {
   static PageRoute<T> _defaultPageRouteBuilder<T>(RouteSettings settings, WidgetBuilder builder) {
     return PageRouteBuilder<T>(
       settings: settings,
-      pageBuilder:
-          (
-            BuildContext context,
-            Animation<double> animation,
-            Animation<double> secondaryAnimation,
-          ) => builder(context),
-      transitionsBuilder:
-          (
-            BuildContext context,
-            Animation<double> animation,
-            Animation<double> secondaryAnimation,
-            Widget child,
-          ) => child,
+      pageBuilder: (
+        BuildContext context,
+        Animation<double> animation,
+        Animation<double> secondaryAnimation,
+      ) => builder(context),
+      transitionsBuilder: (
+        BuildContext context,
+        Animation<double> animation,
+        Animation<double> secondaryAnimation,
+        Widget child,
+      ) => child,
     );
   }
 
@@ -307,6 +321,7 @@ class TestWidgetsApp extends StatelessWidget {
       home: home,
       initialRoute: initialRoute,
       onGenerateRoute: onGenerateRoute,
+      onGenerateInitialRoutes: onGenerateInitialRoutes,
       onUnknownRoute: onUnknownRoute,
       routes: routes,
       pageRouteBuilder: pageRouteBuilder,

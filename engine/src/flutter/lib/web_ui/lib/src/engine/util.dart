@@ -67,8 +67,7 @@ TransformKind transformKindOf(List<double> matrix) {
   // If matrix contains scaling, rotation, z translation or
   // perspective transform, it is not considered simple.
   final bool isSimple2dTransform =
-      m[15] ==
-          1.0 && // start reading from the last element to eliminate range checks in subsequent reads.
+      m[15] == 1.0 && // start reading from the last element to eliminate range checks in subsequent reads.
       m[14] == 0.0 && // z translation is NOT simple
       // m[13] - y translation is simple
       // m[12] - x translation is simple

@@ -4,6 +4,7 @@
 
 import 'package:flutter_tools/src/localizations/gen_l10n_types.dart';
 import 'package:flutter_tools/src/localizations/message_parser.dart';
+
 import '../src/common.dart';
 
 void main() {

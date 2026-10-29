@@ -446,34 +446,31 @@ void testMain() {
       },
     );
 
-    test(
-      'monolithic font and split slice requested in the same batch in reverse order only download monolithic font',
-      () async {
-        fontFallbackManager.debugUserPreferredLanguage = 'ko';
-        final requestedUrls = <String>[];
-        mockHttpFetchResponseFactory = (String url) async {
-          requestedUrls.add(url);
-          return MockHttpFetchResponse(
-            url: url,
-            status: 200,
-            payload: MockHttpFetchPayload(byteBuffer: Uint8List(0).buffer),
-          );
-        };
+    test('monolithic font and split slice requested in the same batch in reverse order only download monolithic font', () async {
+      fontFallbackManager.debugUserPreferredLanguage = 'ko';
+      final requestedUrls = <String>[];
+      mockHttpFetchResponseFactory = (String url) async {
+        requestedUrls.add(url);
+        return MockHttpFetchResponse(
+          url: url,
+          status: 200,
+          payload: MockHttpFetchPayload(byteBuffer: Uint8List(0).buffer),
+        );
+      };
 
-        // 0x4E00 is standard CJK (triggers Noto Sans KR split slice, e.g., Noto Sans KR 0)
-        // 0x1100 is combining Jamo (triggers monolithic Noto Sans KR)
-        FallbackFontService.instance.addMissingCodePoints(<int>[0x4E00, 0x1100]);
-        await FallbackFontService.instance.waitForIdle();
+      // 0x4E00 is standard CJK (triggers Noto Sans KR split slice, e.g., Noto Sans KR 0)
+      // 0x1100 is combining Jamo (triggers monolithic Noto Sans KR)
+      FallbackFontService.instance.addMissingCodePoints(<int>[0x4E00, 0x1100]);
+      await FallbackFontService.instance.waitForIdle();
 
-        // Only the monolithic font should have been requested. No split slices should be requested.
-        expect(requestedUrls, hasLength(1));
-        expect(requestedUrls.single, isNot(contains('.0.woff2')));
-        expect(requestedUrls.single, isNot(contains('.1.woff2')));
+      // Only the monolithic font should have been requested. No split slices should be requested.
+      expect(requestedUrls, hasLength(1));
+      expect(requestedUrls.single, isNot(contains('.0.woff2')));
+      expect(requestedUrls.single, isNot(contains('.1.woff2')));
 
-        final List<String> loadedFamilies = mockRegistry.loadedFonts.keys.toList();
-        expect(loadedFamilies, contains('Noto Sans KR'));
-        expect(loadedFamilies, isNot(contains('Noto Sans KR 0')));
-      },
-    );
+      final List<String> loadedFamilies = mockRegistry.loadedFonts.keys.toList();
+      expect(loadedFamilies, contains('Noto Sans KR'));
+      expect(loadedFamilies, isNot(contains('Noto Sans KR 0')));
+    });
   });
 }

@@ -54,8 +54,7 @@ class _ResizingHeaderExampleState extends State<ResizingHeaderExample> {
                   minExtentPrototype: ListHeader(text: 'One'),
                   maxExtentPrototype: ListHeader(text: 'One\nTwo\nThree'),
                   child: ListHeader(
-                    text:
-                        'SliverResizingHeader\nWith Two Optional\nLines of Text',
+                    text: 'SliverResizingHeader\nWith Two Optional\nLines of Text',
                   ),
                 ),
                 ItemList(),

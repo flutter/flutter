@@ -52,6 +52,16 @@ class StyleManager {
     assert(semanticsHost.tagName.toLowerCase() == DomManager.semanticsHostTagName.toLowerCase());
     semanticsHost.style
       ..position = 'absolute'
+      // Anchor the host at the view origin. Without an explicit left/top, this
+      // position:absolute element falls back to its static position. On WebKit
+      // (all iOS browsers) that static position is flowed past the in-flow
+      // sibling hosts (flt-glass-pane, one viewport wide), offsetting every
+      // semantic element horizontally so taps on text fields land off the
+      // <input> and the keyboard never opens. Blink and Gecko resolve the same
+      // static position to 0, so this is a no-op there.
+      // See: https://github.com/flutter/flutter/issues/190483
+      ..left = '0'
+      ..top = '0'
       ..transformOrigin = '0 0 0';
     scaleSemanticsHost(semanticsHost, devicePixelRatio);
   }

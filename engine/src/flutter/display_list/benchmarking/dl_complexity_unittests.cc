@@ -77,7 +77,8 @@ TEST(DisplayListComplexity, NestedDisplayList) {
 
 TEST(DisplayListComplexity, AntiAliasing) {
   DisplayListBuilder builder_no_aa;
-  builder_no_aa.DrawLine(DlPoint(0, 0), DlPoint(100, 100), DlPaint());
+  builder_no_aa.DrawLine(DlPoint(0, 0), DlPoint(100, 100),
+                         DlPaint().setAntiAlias(false));
   auto display_list_no_aa = builder_no_aa.Build();
 
   DisplayListBuilder builder_aa;
@@ -95,12 +96,12 @@ TEST(DisplayListComplexity, AntiAliasing) {
 TEST(DisplayListComplexity, StrokeWidth) {
   DisplayListBuilder builder_stroke_0;
   builder_stroke_0.DrawLine(DlPoint(0, 0), DlPoint(100, 100),
-                            DlPaint().setStrokeWidth(0.0f));
+                            DlPaint().setAntiAlias(false).setStrokeWidth(0.0f));
   auto display_list_stroke_0 = builder_stroke_0.Build();
 
   DisplayListBuilder builder_stroke_1;
   builder_stroke_1.DrawLine(DlPoint(0, 0), DlPoint(100, 100),
-                            DlPaint().setStrokeWidth(1.0f));
+                            DlPaint().setAntiAlias(false).setStrokeWidth(1.0f));
   auto display_list_stroke_1 = builder_stroke_1.Build();
 
   auto calculators = AccumulatorCalculators();

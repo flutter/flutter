@@ -24,6 +24,11 @@ class TextInputModel {
   //
   // This method is typically used to update the TextInputModel's editing state
   // when the Flutter framework sends its latest text editing state.
+  //
+  // Returns false and leaves the model untouched if |selection| or
+  // |composing_range| does not fit within |text|. Either all three are applied
+  // or none are, so that the model never holds a range that indexes past the
+  // end of its own text.
   bool SetText(const std::string& text,
                const TextRange& selection = TextRange(0),
                const TextRange& composing_range = TextRange(0));

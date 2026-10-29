@@ -1,0 +1,7 @@
+presets:
+  passing:
+    plain_names:
+      - preset selected
+  filtered:
+    names:
+      - ^command option

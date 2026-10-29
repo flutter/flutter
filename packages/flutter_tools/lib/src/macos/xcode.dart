@@ -18,6 +18,7 @@ import '../base/user_messages.dart';
 import '../base/version.dart';
 import '../build_info.dart';
 import '../cache.dart';
+import '../context/tool_context.dart';
 import '../ios/xcodeproj.dart';
 import '../xcode_project.dart';
 
@@ -47,18 +48,14 @@ String getSDKNameForIOSEnvironmentType(EnvironmentType environmentType) {
 /// A utility class for interacting with Xcode command line tools.
 class Xcode {
   Xcode({
-    required Platform platform,
+    required this._platform,
     required ProcessManager processManager,
     required Logger logger,
-    required FileSystem fileSystem,
-    required XcodeProjectInterpreter xcodeProjectInterpreter,
+    required this._fileSystem,
+    required this._xcodeProjectInterpreter,
     required UserMessages userMessages,
-    String? flutterRoot,
-  }) : _platform = platform,
-       _fileSystem = fileSystem,
-       _xcodeProjectInterpreter = xcodeProjectInterpreter,
-       _userMessage = userMessages,
-       _flutterRoot = flutterRoot,
+    this._flutterRoot,
+  }) : _userMessage = userMessages,
        _processUtils = ProcessUtils(logger: logger, processManager: processManager),
        _logger = logger;
 
@@ -70,6 +67,7 @@ class Xcode {
   factory Xcode.test({
     required ProcessManager processManager,
     XcodeProjectInterpreter? xcodeProjectInterpreter,
+    ToolContext? toolContext,
     Platform? platform,
     FileSystem? fileSystem,
     String? flutterRoot,
@@ -85,7 +83,7 @@ class Xcode {
       flutterRoot: flutterRoot,
       logger: logger,
       xcodeProjectInterpreter:
-          xcodeProjectInterpreter ?? XcodeProjectInterpreter.test(processManager: processManager),
+          xcodeProjectInterpreter ?? XcodeProjectInterpreter.test(toolContext: toolContext!),
     );
   }
 
@@ -200,7 +198,7 @@ class Xcode {
   /// to run it. `devicectl` is made available in Xcode 15.
   bool get isDevicectlInstalled {
     if (_isDevicectlInstalled == null) {
-      if (currentVersion == null || currentVersion!.major < 15) {
+      if (currentVersion == null) {
         _isDevicectlInstalled = false;
         return _isDevicectlInstalled!;
       }
@@ -235,11 +233,11 @@ class Xcode {
   Future<List<String>> fetchDependenciesAndGenerateXcodebuildArgs(
     XcodeBasedProject xcodeProject,
     Directory buildDirectory, {
-    bool skipPackageUpdatesAndValidation = true,
+    bool skipPackageValidation = true,
   }) async => _xcodeProjectInterpreter.fetchDependenciesAndGenerateXcodebuildArgs(
     xcodeProject,
     buildDirectory,
-    skipPackageUpdatesAndValidation: skipPackageUpdatesAndValidation,
+    skipPackageValidation: skipPackageValidation,
   );
 
   Future<RunResult> cc(List<String> args) => _run('cc', args);
@@ -301,7 +299,11 @@ class Xcode {
   }
 }
 
-EnvironmentType? environmentTypeFromSdkroot(String sdkroot, FileSystem fileSystem) {
+/// Determines the iOS [EnvironmentType] from [sdkroot].
+///
+/// Throws a [ToolExit] for unrecognized or non-iOS SDK roots (e.g., `MacOSX.sdk`
+/// or `XROS.sdk`).
+EnvironmentType environmentTypeFromSdkroot(String sdkroot, FileSystem fileSystem) {
   // NOTE: If you modify this function, you should likely also update the equivalent implementation in
   // packages/flutter_tools/templates/add_to_app/darwin/Tools/FlutterToolHelper/FlutterToolHelper.swift.tmpl
 
@@ -310,6 +312,9 @@ EnvironmentType? environmentTypeFromSdkroot(String sdkroot, FileSystem fileSyste
   if (sdkName.contains('iphone')) {
     return sdkName.contains('simulator') ? EnvironmentType.simulator : EnvironmentType.physical;
   }
-  assert(false);
-  return null;
+  throwToolExit(
+    'Unsupported iOS SDK root "$sdkroot". Expected an iPhoneOS or iPhoneSimulator SDK. '
+    "Flutter only supports building the iOS Runner for iOS; check the target's Base SDK "
+    '(SDKROOT) and Supported Destinations in Xcode.',
+  );
 }

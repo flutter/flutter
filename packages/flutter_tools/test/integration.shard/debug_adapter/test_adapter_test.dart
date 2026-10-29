@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:dds/dap.dart';
+import 'package:dap_adapters/dap_adapters.dart';
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/cache.dart';
 
@@ -119,12 +119,22 @@ void main() {
 
     standardTests(toolArgs: toolArgs);
   });
+
+  group('fail fast', () {
+    test('launch fails if process exits early', () async {
+      await client.initialize();
+      expect(
+        client.launch(program: 'non_existent_file.dart', cwd: tempDir.path),
+        throwsA(isA<Response>().having((Response r) => r.success, 'success', isFalse)),
+      );
+    });
+  });
 }
 
 /// Matchers for the expected console output of [TestsProject].
 final _testsProjectExpectedOutput = <Object>[
   // First test
-  '✓ Flutter tests can pass',
+  matches(r'\d\d:\d\d \+1: ✓ Flutter tests can pass'),
   // Second test
   '══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════',
   'The following TestFailure was thrown running a test:',
@@ -133,7 +143,8 @@ final _testsProjectExpectedOutput = <Object>[
   '',
   'The test description was: can fail',
   '',
-  '✖ Flutter tests can fail',
+  matches(r'\d\d:\d\d \+1 -1: ✖ Flutter tests can fail'),
+  matches(r'\d\d:\d\d \+1 -1: Some tests failed.'),
   // Exit
   '',
   'Exited (1).',

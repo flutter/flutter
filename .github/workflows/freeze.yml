@@ -22,6 +22,9 @@ jobs:
     name: Check Code Freeze
     runs-on: ubuntu-latest
     if: ${{ github.repository == 'flutter/flutter' }}
+    permissions:
+      contents: read
+      pull-requests: write
 
     steps:
       - name: Check for changes in frozen folders
@@ -45,10 +48,37 @@ jobs:
               - 'packages/flutter/test_fixes/material/**'
               - 'packages/flutter/test_fixes/cupertino/**'
 
+      - name: Comment on frozen changes
+        if: github.event_name != 'merge_group' && steps.filter.outputs.frozen == 'true' && !contains(github.event.pull_request.labels.*.name, 'override code freeze')
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        with:
+          github-token: ${{ github.token }}
+          script: |
+            const issueNumber = context.issue.number;
+            const comments = await github.paginate(github.rest.issues.listComments, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issueNumber,
+            });
+            const issueUrl = 'https://github.com/flutter/flutter/issues/188444';
+            const alreadyCommented = comments.some(comment =>
+              comment.body && comment.body.includes(issueUrl)
+            );
+            if (!alreadyCommented) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issueNumber,
+                body: 'This pull request contains changes to Material or Cupertino, which are currently frozen in this repository.\n\n' +
+                  'Changes should be made in `material_ui` and/or `cupertino_ui` in the [flutter/packages](https://github.com/flutter/packages) repository.\n\n' +
+                  'Please refer to https://github.com/flutter/flutter/issues/188444 for instructions.',
+              });
+            }
+
       - name: Fail on frozen changes
         if: github.event_name != 'merge_group' && steps.filter.outputs.frozen == 'true' && !contains(github.event.pull_request.labels.*.name, 'override code freeze')
         run: |
           echo "Error: Code changes detected during the current code freeze."
-          echo "If this is a critical fix that must land, please file an issue for team-design."
-          echo "Info: https://github.com/flutter/flutter/issues/184093"
+          echo "Changes to Material and Cupertino should be made in material_ui and/or cupertino_ui in the flutter/packages repository."
+          echo "Info: https://github.com/flutter/flutter/issues/188444"
           exit 1

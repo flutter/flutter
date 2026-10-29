@@ -2975,9 +2975,8 @@ void main() {
     expect(find.byType(BackButton), findsNothing);
 
     // Push one entry that doesn't imply app bar dismissal.
-    ModalRoute.of(
-      key.currentContext!,
-    )!.addLocalHistoryEntry(LocalHistoryEntry(onRemove: () {}, impliesAppBarDismissal: false));
+    ModalRoute.of(key.currentContext!)!
+        .addLocalHistoryEntry(LocalHistoryEntry(onRemove: () {}, impliesAppBarDismissal: false));
     await tester.pump();
     expect(find.byType(BackButton), findsNothing);
 

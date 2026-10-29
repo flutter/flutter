@@ -129,15 +129,12 @@ class TabController extends ChangeNotifier {
   // Private constructor used by `_copyWith`. This allows a new TabController to
   // be created without having to create a new animationController.
   TabController._({
-    required int index,
-    required int previousIndex,
-    required AnimationController? animationController,
-    required Duration animationDuration,
+    required this._index,
+    required this._previousIndex,
+    required this._animationController,
+    required this._animationDuration,
     required this.length,
-  }) : _index = index,
-       _previousIndex = previousIndex,
-       _animationController = animationController,
-       _animationDuration = animationDuration {
+  }) {
     if (kFlutterMemoryAllocationsEnabled) {
       ChangeNotifier.maybeDispatchObjectCreation(this);
     }

@@ -39,6 +39,7 @@ final List<String> allowedExternalPackages = <String>[
   'leak_tracker',
   'leak_tracker_flutter_testing',
   'leak_tracker_testing',
+  'listen',
   'matcher',
   'material_color_utilities',
   'meta',

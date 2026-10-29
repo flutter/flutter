@@ -712,6 +712,9 @@ void DisplayListBuilder::RestoreLayer() {
       layer_op->options = layer_op->options.with_content_is_clipped();
       content_bounds = content_bounds.IntersectionOrEmpty(user_bounds);
     }
+    if (layer_op->type == DisplayListOpType::kSaveLayerBackdrop) {
+      content_bounds = content_bounds.Union(user_bounds);
+    }
   }
   layer_op->rect = content_bounds;
   layer_op->max_blend_mode = current_layer().max_blend_mode;

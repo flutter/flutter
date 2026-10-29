@@ -21,6 +21,20 @@ void main() {
   });
 
   group('ResizeImage', () {
+    test('fails to decode when a given width or height is 0', () async {
+      final image = MemoryImage(Uint8List.fromList(kBlueSquarePng));
+      for (final policy in <ResizeImagePolicy>[ResizeImagePolicy.exact, ResizeImagePolicy.fit]) {
+        // The constructor accepts 0. The failure occurs at decode time.
+        for (final resizedImage in <ResizeImage>[
+          ResizeImage(image, width: 0, policy: policy),
+          ResizeImage(image, height: 0, policy: policy),
+        ]) {
+          expect(await _resolveAndGetError(resizedImage), isAssertionError);
+          PaintingBinding.instance.imageCache.clear();
+        }
+      }
+    });
+
     group('equality and hashCode', () {
       test('Two identical instances should be equal and have same hashCode', () {
         final bytes = Uint8List.fromList(kTransparentImage);
@@ -100,6 +114,101 @@ void main() {
           configuration: resizeConfig,
         );
         expect(resizedImageSize, resizeDims);
+      });
+
+      // Regression test for https://github.com/flutter/flutter/issues/56239
+      test('useLogicalSize accounts for devicePixelRatio when decoding', () async {
+        // Source image is 50x50.
+        final bytes = Uint8List.fromList(kBlueSquarePng);
+        await _expectImageSize(MemoryImage(bytes), const Size(50, 50));
+
+        // Request 25x25 logical pixels on a 2x device with devicePixelRatio scaling.
+        // Should decode at 50x50 physical pixels (25 * 2).
+        final resizedImage = ResizeImage(
+          MemoryImage(bytes),
+          width: 25,
+          height: 25,
+          allowUpscaling: true,
+          useLogicalSize: true,
+        );
+        const config = ImageConfiguration(devicePixelRatio: 2.0);
+        final Size resizedImageSize = await _resolveAndGetSize(resizedImage, configuration: config);
+        expect(resizedImageSize, const Size(50, 50));
+      });
+
+      // Regression test for https://github.com/flutter/flutter/issues/56239
+      test('useLogicalSize does not upscale beyond intrinsic size by default', () async {
+        // Source image is 50x50, request 25x25 on a 3x device with devicePixelRatio scaling.
+        // Effective = 75x75, but allowUpscaling=false (default), so clamped to 50x50.
+        final bytes = Uint8List.fromList(kBlueSquarePng);
+        final resizedImage = ResizeImage(
+          MemoryImage(bytes),
+          width: 25,
+          height: 25,
+          useLogicalSize: true,
+        );
+        const config = ImageConfiguration(devicePixelRatio: 3.0);
+        final Size resizedImageSize = await _resolveAndGetSize(resizedImage, configuration: config);
+        expect(resizedImageSize, const Size(50, 50));
+      });
+
+      test('without useLogicalSize ignores devicePixelRatio', () async {
+        // Source image is 50x50, request 25x25 on a 2x device WITHOUT devicePixelRatio scaling.
+        // Should decode at exactly 25x25 (not 50x50).
+        final bytes = Uint8List.fromList(kBlueSquarePng);
+        final resizedImage = ResizeImage(MemoryImage(bytes), width: 25, height: 25);
+        const config = ImageConfiguration(devicePixelRatio: 2.0);
+        final Size resizedImageSize = await _resolveAndGetSize(resizedImage, configuration: config);
+        expect(resizedImageSize, const Size(25, 25));
+      });
+
+      test('produces equal keys when effective dimensions match across configurations', () async {
+        final bytes = Uint8List.fromList(kBlueSquarePng);
+        const config = ImageConfiguration(devicePixelRatio: 2.0);
+        final ResizeImageKey logicalKey = await ResizeImage(
+          MemoryImage(bytes),
+          width: 25,
+          height: 25,
+          useLogicalSize: true,
+        ).obtainKey(config);
+        final ResizeImageKey physicalKey = await ResizeImage(
+          MemoryImage(bytes),
+          width: 50,
+          height: 50,
+        ).obtainKey(config);
+        expect(logicalKey, physicalKey);
+        expect(logicalKey.hashCode, physicalKey.hashCode);
+      });
+
+      test('produces different keys when devicePixelRatio differs', () async {
+        final bytes = Uint8List.fromList(kBlueSquarePng);
+        final resizedImage = ResizeImage(
+          MemoryImage(bytes),
+          width: 25,
+          height: 25,
+          useLogicalSize: true,
+        );
+        final ResizeImageKey at1x = await resizedImage.obtainKey(
+          const ImageConfiguration(devicePixelRatio: 1.0),
+        );
+        final ResizeImageKey at2x = await resizedImage.obtainKey(
+          const ImageConfiguration(devicePixelRatio: 2.0),
+        );
+        expect(at1x, isNot(at2x));
+      });
+
+      test('useLogicalSize with policy=fit constrains by effective dimensions', () async {
+        final rawImage = MemoryImage(Uint8List.fromList(kBlueSquarePng));
+        final resizedImage = ResizeImage(
+          rawImage,
+          width: 12,
+          height: 25,
+          policy: ResizeImagePolicy.fit,
+          useLogicalSize: true,
+        );
+        const config = ImageConfiguration(devicePixelRatio: 2.0);
+        final Size resizedImageSize = await _resolveAndGetSize(resizedImage, configuration: config);
+        expect(resizedImageSize, const Size(24, 24));
       });
 
       test('refuses upscaling when allowUpscaling=false', () async {
@@ -284,9 +393,30 @@ void main() {
           );
           await _expectImageSize(resizedImage, const Size(50, 50));
         });
+
+        test('does not derive a side of 0 for a very thin image', () async {
+          final rawImage = MemoryImage(await _createPng(4000, 1));
+          await _expectImageSize(
+            ResizeImage(rawImage, width: 100, policy: ResizeImagePolicy.fit),
+            const Size(100, 1),
+          );
+          final tallImage = MemoryImage(await _createPng(1, 4000));
+          await _expectImageSize(
+            ResizeImage(tallImage, height: 100, policy: ResizeImagePolicy.fit),
+            const Size(1, 100),
+          );
+        });
       });
 
       group('with policy=fit and allowResize=true', () {
+        test('does not derive a side of 0 for a very thin image', () async {
+          final rawImage = MemoryImage(await _createPng(4000, 1));
+          await _expectImageSize(
+            ResizeImage(rawImage, width: 100, policy: ResizeImagePolicy.fit, allowUpscaling: true),
+            const Size(100, 1),
+          );
+        });
+
         test('constrains square image to bounded portrait rect', () async {
           final rawImage = MemoryImage(Uint8List.fromList(kBlueSquarePng));
           await _expectImageSize(rawImage, const Size(50, 50));
@@ -596,6 +726,18 @@ void main() {
   });
 }
 
+Future<Uint8List> _createPng(int width, int height) async {
+  final recorder = ui.PictureRecorder();
+  ui.Canvas(recorder).drawRect(
+    ui.Rect.fromLTWH(0, 0, width.toDouble(), height.toDouble()),
+    ui.Paint()..color = const ui.Color(0xFF0000FF),
+  );
+  final ui.Image image = await recorder.endRecording().toImage(width, height);
+  final ByteData? data = await image.toByteData(format: ui.ImageByteFormat.png);
+  image.dispose();
+  return data!.buffer.asUint8List();
+}
+
 Future<void> _expectImageSize(ImageProvider<Object> imageProvider, Size size) async {
   final Size actualSize = await _resolveAndGetSize(imageProvider);
   expect(actualSize, size);
@@ -613,6 +755,19 @@ Future<Size> _resolveAndGetSize(
     completer.complete(Size(width.toDouble(), height.toDouble()));
   });
   stream.addListener(listener);
+  return completer.future;
+}
+
+Future<Object> _resolveAndGetError(ImageProvider imageProvider) {
+  final completer = Completer<Object>();
+  imageProvider
+      .resolve(ImageConfiguration.empty)
+      .addListener(
+        ImageStreamListener(
+          (ImageInfo image, bool synchronousCall) => completer.complete(image),
+          onError: (Object error, StackTrace? stackTrace) => completer.complete(error),
+        ),
+      );
   return completer.future;
 }
 

@@ -173,6 +173,14 @@ bool DescriptionGLES::IsANGLE() const {
   return is_angle_;
 }
 
+const std::string& DescriptionGLES::GetRenderer() const {
+  return renderer_;
+}
+
+const std::string& DescriptionGLES::GetGlVersionString() const {
+  return gl_version_string_;
+}
+
 bool DescriptionGLES::HasExtension(const std::string& ext) const {
   return extensions_.find(ext) != extensions_.end();
 }

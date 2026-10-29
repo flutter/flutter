@@ -26,8 +26,8 @@ jobs:
         run: |
           # Use the GitHub CLI to check team membership
           # Returns 204 if member, 404 if not
-          if gh api orgs/flutter/teams/flutter-release-eng/memberships/$ACTOR --silent; then
-            echo "is_member=true" >> $GITHUB_OUTPUT
+          if gh api "orgs/flutter/teams/flutter-release-eng/memberships/$ACTOR" --silent; then
+            echo "is_member=true" >> "$GITHUB_OUTPUT"
           else
             echo "::error::User $ACTOR is not a member of flutter-release-eng."
             exit 1
@@ -71,11 +71,11 @@ jobs:
         env:
           VERSION: ${{ inputs.version }}
         run: |
-          echo "BRANCH_NAME=flutter-$VERSION-candidate.0" >> $GITHUB_ENV
+          echo "BRANCH_NAME=flutter-$VERSION-candidate.0" >> "$GITHUB_ENV"
 
       - name: Check if branch already exists
         run: |
-          if git ls-remote --exit-code --heads origin $BRANCH_NAME; then
+          if git ls-remote --exit-code --heads origin "$BRANCH_NAME"; then
             echo "Error: Branch $BRANCH_NAME already exists on remote."
             exit 1
           fi
@@ -85,7 +85,7 @@ jobs:
       - name: Create Branch and Version File
         run: |
           # Create and switch to the new branch locally
-          git checkout -b $BRANCH_NAME
+          git checkout -b "$BRANCH_NAME"
 
           # Create the version file
           mkdir -p bin/internal/
@@ -97,9 +97,11 @@ jobs:
 
       - name: Push new branch
         run: |
-          git push origin $BRANCH_NAME
-          echo "## Release Branch \`$BRANCH_NAME\` Cut Successfully" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "🔗 **View Branch** https://github.com/$GITHUB_REPOSITORY/tree/$BRANCH_NAME" >> $GITHUB_STEP_SUMMARY
+          git push origin "$BRANCH_NAME"
+          {
+            echo "## Release Branch \`$BRANCH_NAME\` Cut Successfully"
+            echo ""
+            echo "🔗 **View Branch** https://github.com/$GITHUB_REPOSITORY/tree/$BRANCH_NAME"
+          } >> "$GITHUB_STEP_SUMMARY"
         env:
           GH_TOKEN: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}

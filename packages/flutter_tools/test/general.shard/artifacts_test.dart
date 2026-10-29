@@ -235,32 +235,27 @@ void main() {
       },
     );
 
-    testWithoutContext('Precompiled web AMD module system artifact paths are correct', () {
+    testWithoutContext('Precompiled web DDC stable SDK artifact paths are correct', () {
       expect(
-        artifacts.getHostArtifact(HostArtifact.webPrecompiledAmdCanvaskitSdk).path,
-        'root/bin/cache/flutter_web_sdk/kernel/amd-canvaskit/dart_sdk.js',
+        artifacts.getHostArtifact(HostArtifact.webPrecompiledDDCStableSdk).path,
+        'root/bin/cache/flutter_web_sdk/kernel/ddc/stable/dart_sdk.js',
       );
       expect(
-        artifacts.getHostArtifact(HostArtifact.webPrecompiledAmdCanvaskitSdkSourcemaps).path,
-        'root/bin/cache/flutter_web_sdk/kernel/amd-canvaskit/dart_sdk.js.map',
+        artifacts.getHostArtifact(HostArtifact.webPrecompiledDDCStableSdkSourcemaps).path,
+        'root/bin/cache/flutter_web_sdk/kernel/ddc/stable/dart_sdk.js.map',
       );
     });
 
-    testWithoutContext(
-      'Precompiled web DDC library bundle module system artifact paths are correct',
-      () {
-        expect(
-          artifacts.getHostArtifact(HostArtifact.webPrecompiledDdcLibraryBundleCanvaskitSdk).path,
-          'root/bin/cache/flutter_web_sdk/kernel/ddcLibraryBundle-canvaskit/dart_sdk.js',
-        );
-        expect(
-          artifacts
-              .getHostArtifact(HostArtifact.webPrecompiledDdcLibraryBundleCanvaskitSdkSourcemaps)
-              .path,
-          'root/bin/cache/flutter_web_sdk/kernel/ddcLibraryBundle-canvaskit/dart_sdk.js.map',
-        );
-      },
-    );
+    testWithoutContext('Precompiled web DDC canary SDK artifact paths are correct', () {
+      expect(
+        artifacts.getHostArtifact(HostArtifact.webPrecompiledDDCCanarySdk).path,
+        'root/bin/cache/flutter_web_sdk/kernel/ddc/canary/dart_sdk.js',
+      );
+      expect(
+        artifacts.getHostArtifact(HostArtifact.webPrecompiledDDCCanarySdkSourcemaps).path,
+        'root/bin/cache/flutter_web_sdk/kernel/ddc/canary/dart_sdk.js.map',
+      );
+    });
 
     testWithoutContext('getEngineType', () {
       expect(artifacts.getEngineType(TargetPlatform.android_arm, BuildMode.debug), 'android-arm');
@@ -311,11 +306,13 @@ void main() {
             'out',
             'android_debug_unopt',
           ),
-          cache: cache,
-          fileSystem: fileSystem,
-          platform: platform,
-          processManager: processManager,
-          operatingSystemUtils: FakeOperatingSystemUtils(),
+          toolContext: FakeToolContext(
+            cache: cache,
+            fs: fileSystem,
+            os: FakeOperatingSystemUtils(),
+            platform: platform,
+            processManager: processManager,
+          ),
         ),
         webSdkPath: fileSystem.path.join(fileSystem.currentDirectory.path, 'out', 'wasm_release'),
         fileSystem: fileSystem,
@@ -693,11 +690,13 @@ void main() {
             'out',
             'android_debug_unopt',
           ),
-          cache: cache,
-          fileSystem: fileSystem,
-          platform: FakePlatform(operatingSystem: 'windows'),
-          processManager: FakeProcessManager.any(),
-          operatingSystemUtils: FakeOperatingSystemUtils(),
+          toolContext: FakeToolContext(
+            cache: cache,
+            fs: fileSystem,
+            os: FakeOperatingSystemUtils(),
+            platform: FakePlatform(operatingSystem: 'windows'),
+            processManager: FakeProcessManager.any(),
+          ),
         ),
         webSdkPath: fileSystem.path.join(fileSystem.currentDirectory.path, 'out', 'wasm_release'),
         fileSystem: fileSystem,
@@ -741,11 +740,13 @@ void main() {
             'out',
             'android_debug_unopt',
           ),
-          cache: cache,
-          fileSystem: fileSystem,
-          platform: FakePlatform(operatingSystem: 'windows'),
-          processManager: FakeProcessManager.any(),
-          operatingSystemUtils: FakeOperatingSystemUtils(),
+          toolContext: FakeToolContext(
+            cache: cache,
+            fs: fileSystem,
+            os: FakeOperatingSystemUtils(),
+            platform: FakePlatform(operatingSystem: 'windows'),
+            processManager: FakeProcessManager.any(),
+          ),
         ),
         webSdkPath: fileSystem.path.join(fileSystem.currentDirectory.path, 'out', 'wasm_release'),
         fileSystem: fileSystem,
@@ -779,11 +780,13 @@ void main() {
             'out',
             'android_debug_unopt',
           ),
-          cache: cache,
-          fileSystem: fileSystem,
-          platform: FakePlatform(operatingSystem: 'macos'),
-          processManager: FakeProcessManager.any(),
-          operatingSystemUtils: FakeOperatingSystemUtils(),
+          toolContext: FakeToolContext(
+            cache: cache,
+            fs: fileSystem,
+            os: FakeOperatingSystemUtils(),
+            platform: FakePlatform(operatingSystem: 'macos'),
+            processManager: FakeProcessManager.any(),
+          ),
         ),
         webSdkPath: fileSystem.path.join(fileSystem.currentDirectory.path, 'out', 'wasm_release'),
         fileSystem: fileSystem,
@@ -817,31 +820,25 @@ void main() {
       fileSystem = MemoryFileSystem.test();
     });
 
-    testUsingContext(
-      'determines the target device name from the path',
-      () {
-        localEngineInfo = LocalEngineInfo(
-          targetOutPath: fileSystem.path.join(
-            fileSystem.currentDirectory.path,
-            'out',
-            'android_debug_unopt',
-          ),
-          hostOutPath: fileSystem.path.join(
-            fileSystem.currentDirectory.path,
-            'out',
-            'host_debug_unopt',
-          ),
-        );
+    testWithoutContext('determines the target device name from the path', () {
+      localEngineInfo = LocalEngineInfo(
+        targetOutPath: fileSystem.path.join(
+          fileSystem.currentDirectory.path,
+          'out',
+          'android_debug_unopt',
+        ),
+        hostOutPath: fileSystem.path.join(
+          fileSystem.currentDirectory.path,
+          'out',
+          'host_debug_unopt',
+        ),
+        fileSystem: fileSystem,
+      );
 
-        expect(localEngineInfo.localTargetName, 'android_debug_unopt');
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
-        ProcessManager: () => FakeProcessManager.any(),
-      },
-    );
+      expect(localEngineInfo.localTargetName, 'android_debug_unopt');
+    });
 
-    testUsingContext(
+    testWithoutContext(
       'determines the target device name from the path when using a custom engine path',
       () {
         localEngineInfo = LocalEngineInfo(
@@ -855,14 +852,107 @@ void main() {
             'out',
             'host_debug_unopt',
           ),
+          fileSystem: fileSystem,
         );
 
         expect(localEngineInfo.localHostName, 'host_debug_unopt');
       },
-      overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
-        ProcessManager: () => FakeProcessManager.any(),
-      },
     );
+
+    testWithoutContext('determines engine names using the file system path style', () {
+      final windowsFileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
+      final localArtifacts = Artifacts.testLocalEngine(
+        localEngine: windowsFileSystem.path.join(
+          windowsFileSystem.currentDirectory.path,
+          'out',
+          'android_debug_unopt',
+        ),
+        localEngineHost: windowsFileSystem.path.join(
+          windowsFileSystem.currentDirectory.path,
+          'out',
+          'host_debug_unopt',
+        ),
+        fileSystem: windowsFileSystem,
+      );
+
+      expect(localArtifacts.localEngineInfo?.localTargetName, 'android_debug_unopt');
+      expect(localArtifacts.localEngineInfo?.localHostName, 'host_debug_unopt');
+    });
+
+    testWithoutContext('Artifacts.getLocalEngine constructs local engine artifacts', () {
+      final String targetEngine = fileSystem.path.join(
+        fileSystem.currentDirectory.path,
+        'out',
+        'android_debug_unopt',
+      );
+      final String hostEngine = fileSystem.path.join(
+        fileSystem.currentDirectory.path,
+        'out',
+        'host_debug_unopt',
+      );
+      final String webSdk = fileSystem.path.join(
+        fileSystem.currentDirectory.path,
+        'out',
+        'wasm_release',
+      );
+      final Artifacts localArtifacts = Artifacts.getLocalEngine(
+        EngineBuildPaths(targetEngine: targetEngine, hostEngine: hostEngine, webSdk: webSdk),
+        toolContext: FakeToolContext(fs: fileSystem),
+      );
+
+      expect(localArtifacts.usesLocalArtifacts, isTrue);
+      expect(localArtifacts.localEngineInfo?.localTargetName, 'android_debug_unopt');
+      expect(localArtifacts.localEngineInfo?.localHostName, 'host_debug_unopt');
+      expect(
+        localArtifacts.getArtifactPath(Artifact.icuData, platform: TargetPlatform.android_arm64),
+        fileSystem.path.join(targetEngine, 'icudtl.dat'),
+      );
+    });
+  });
+
+  group('DeferredArtifacts', () {
+    late Artifacts cached;
+    late Artifacts localEngine;
+
+    setUp(() {
+      final fileSystem = MemoryFileSystem.test();
+      cached = Artifacts.test(fileSystem: fileSystem);
+      localEngine = Artifacts.testLocalEngine(
+        localEngine: '/out/host_debug',
+        localEngineHost: '/out/host_debug',
+        fileSystem: fileSystem,
+      );
+    });
+
+    testWithoutContext('builds against the artifacts it was given', () {
+      final artifacts = DeferredArtifacts(cached);
+
+      expect(artifacts.usesLocalArtifacts, isFalse);
+      expect(
+        artifacts.getArtifactPath(Artifact.flutterTester),
+        cached.getArtifactPath(Artifact.flutterTester),
+      );
+    });
+
+    testWithoutContext('builds against the artifacts it is resolved to', () {
+      final artifacts = DeferredArtifacts(cached);
+
+      artifacts.resolve(localEngine);
+
+      expect(artifacts.usesLocalArtifacts, isTrue);
+      expect(artifacts.localEngineInfo?.targetOutPath, '/out/host_debug');
+      expect(
+        artifacts.getArtifactPath(Artifact.flutterTester),
+        localEngine.getArtifactPath(Artifact.flutterTester),
+      );
+    });
+
+    testWithoutContext('cannot be resolved twice', () {
+      final artifacts = DeferredArtifacts(cached);
+
+      artifacts.resolve(localEngine);
+
+      expect(() => artifacts.resolve(localEngine), throwsAssertionError);
+    });
   });
 }

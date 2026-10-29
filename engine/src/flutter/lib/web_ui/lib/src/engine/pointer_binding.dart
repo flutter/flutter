@@ -13,7 +13,7 @@ import 'package:ui/ui.dart' as ui;
 import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 import '../engine.dart' show registerHotRestartListener;
-import 'browser_detection.dart' show isIosSafari;
+import 'browser_detection.dart' show isIosSafari, isMacOS;
 import 'dom.dart';
 import 'platform_dispatcher.dart';
 import 'pointer_binding/event_position_helper.dart';
@@ -743,6 +743,24 @@ mixin _WheelEventListenerMixin on _BaseAdapter {
     // to pixels.
     double deltaX = event.deltaX;
     double deltaY = event.deltaY;
+
+    // When mouse input is received while shift is pressed (regardless of
+    // any other pressed keys), Mac automatically flips the axis. Other
+    // platforms do not do this, so we flip it back to normalize the input
+    // received by the framework. The keyboard+mouse-scroll mechanism is exposed
+    // in the ScrollBehavior of the framework so developers can customize the
+    // behavior.
+    // At time of change, Apple does not expose any other type of API or signal
+    // that the X/Y axes have been flipped.
+    //
+    // The same conversion happens on the native side, see:
+    // https://github.com/flutter/flutter/commit/be9ae4793d1e6aff6ad108200c4319fb1c82db96
+    if (isMacOS && kind == ui.PointerDeviceKind.mouse && event.getModifierState('Shift')) {
+      final temp = deltaX;
+      deltaX = deltaY;
+      deltaY = temp;
+    }
+
     switch (event.deltaMode.toInt()) {
       case domDeltaLine:
         _defaultScrollLineHeight ??= _computeDefaultScrollLineHeight();
@@ -752,7 +770,7 @@ mixin _WheelEventListenerMixin on _BaseAdapter {
         deltaX *= _view.physicalSize.width;
         deltaY *= _view.physicalSize.height;
       case domDeltaPixel:
-        if (ui_web.browser.operatingSystem == ui_web.OperatingSystem.macOs) {
+        if (isMacOS) {
           // Safari and Firefox seem to report delta in logical pixels while
           // Chrome uses physical pixels.
           deltaX *= _view.devicePixelRatio;
@@ -765,7 +783,7 @@ mixin _WheelEventListenerMixin on _BaseAdapter {
     final data = <ui.PointerData>[];
     final ui.Offset offset = computeEventOffsetToTarget(event, _view);
     var ignoreCtrlKey = false;
-    if (ui_web.browser.operatingSystem == ui_web.OperatingSystem.macOs) {
+    if (isMacOS) {
       ignoreCtrlKey =
           (_keyboardConverter?.keyIsPressed(kPhysicalControlLeft) ?? false) ||
           (_keyboardConverter?.keyIsPressed(kPhysicalControlRight) ?? false);
@@ -913,6 +931,9 @@ class _SanitizedDetails {
 class _ButtonSanitizer {
   int _pressedButtons = 0;
 
+  /// Whether any button of the pointer is currently pressed.
+  bool get isPressed => _pressedButtons != 0;
+
   /// Transform [DomPointerEvent.buttons] to Flutter's PointerEvent buttons.
   int _htmlButtonsToFlutterButtons(int buttons) {
     // Flutter's button definition conveniently matches that of JavaScript
@@ -947,7 +968,7 @@ class _ButtonSanitizer {
   _SanitizedDetails sanitizeMoveEvent({required int buttons}) {
     final int newPressedButtons = _htmlButtonsToFlutterButtons(buttons);
     // This could happen when the user clicks RMB then moves the mouse quickly.
-    // The brower sends a move event with `buttons:2` even though there's no
+    // The browser sends a move event with `buttons:2` even though there's no
     // buttons down yet.
     if (_pressedButtons == 0 && newPressedButtons != 0) {
       return _SanitizedDetails(change: ui.PointerChange.hover, buttons: _pressedButtons);
@@ -1077,6 +1098,55 @@ class _PointerAdapter extends _BaseAdapter with _WheelEventListenerMixin {
     );
   }
 
+  /// Captures the pointer of [event] to [_viewTarget] if the press landed on
+  /// Flutter content.
+  ///
+  /// While a pointer is captured, the browser sends all of its events to
+  /// [_viewTarget], even when the pointer moves over an `<iframe>` platform
+  /// view, so drags that start on Flutter content keep receiving move events.
+  /// The browser automatically releases the capture on `pointerup` and
+  /// `pointercancel`, so `releasePointerCapture` does not need to be called
+  /// manually. See https://w3c.github.io/pointerevents/#implicit-release-of-pointer-capture
+  /// See https://github.com/flutter/flutter/issues/141307
+  ///
+  /// Presses on platform view content, the text editing host and the semantics
+  /// host are not captured, so those elements keep receiving their own pointer
+  /// events.
+  void _capturePointerIfFlutterContent(DomPointerEvent event) {
+    // Only capture when `event.target` is the view root (`<flutter-view>`) or
+    // the glass pane (`_view.dom.platformViewsHost`, i.e. `<flt-glass-pane>`).
+    //
+    // Despite its field name, `platformViewsHost` (`<flt-glass-pane>`) is also
+    // the shadow host for the scene's `#shadow-root` (`renderingHost`). Events
+    // from Flutter content inside that shadow root (such as hit-test proxies in
+    // `<flt-scene-host>`) are retargeted by the browser across the shadow
+    // boundary to `<flt-glass-pane>`.
+    //
+    // By contrast, platform views (`<flt-platform-view>` and their inner DOM
+    // elements) are light-DOM children of `<flt-glass-pane>` projected via
+    // `<slot>`, so the browser does not retarget their events to
+    // `<flt-glass-pane>`—`event.target` remains the platform view element
+    // itself. Likewise, presses on text fields or semantics nodes have an
+    // `event.target` inside `textEditingHost` or `semanticsHost`. All of those
+    // satisfy `target != _viewTarget && target != _view.dom.platformViewsHost`
+    // and return early without capturing.
+    final DomEventTarget? target = event.target;
+    if (target != _viewTarget && target != _view.dom.platformViewsHost) {
+      return;
+    }
+    final double? pointerId = event.pointerId;
+    if (pointerId == null) {
+      return;
+    }
+    try {
+      _viewTarget.setPointerCapture(pointerId);
+    } catch (_) {
+      // Capture is best-effort. `setPointerCapture` throws if the pointer is
+      // not active (as with synthetic events) or the element is disconnected.
+      // The press itself has already been reported either way.
+    }
+  }
+
   @override
   void setup() {
     _addPointerEventListener(_viewTarget, 'pointerdown', (DomPointerEvent event) {
@@ -1098,6 +1168,7 @@ class _PointerAdapter extends _BaseAdapter with _WheelEventListenerMixin {
         _downTouchDevices.add(device);
       }
       _callback(event, pointerData);
+      _capturePointerIfFlutterContent(event);
 
       if (event.target == _viewTarget) {
         // Ensure smooth focus transitions between text fields within the Flutter view.
@@ -1116,16 +1187,12 @@ class _PointerAdapter extends _BaseAdapter with _WheelEventListenerMixin {
       }
     });
 
-    // Move event listeners should be added to `_globalTarget` instead of
-    // `_viewTarget`. This is because `_viewTarget` (the root) captures pointers
-    // by default, meaning a pointer that starts within `_viewTarget` continues
-    // sending move events to its listener even when dragged outside.
-    //
-    // In contrast, `_globalTarget` (a regular <div>) stops sending move events
-    // when the pointer moves outside its bounds and resumes them only when the
-    // pointer re-enters.
-    //
-    // For demonstration, see this fiddle: https://jsfiddle.net/ditman/7towxaqp
+    // Move event listeners are attached to `_globalTarget` rather than
+    // `_viewTarget`. When a pointer is captured to `_viewTarget` on pointerdown,
+    // its move events are routed to `_viewTarget` even over iframes and bubble
+    // to `_globalTarget`. Pointers that are not captured (hovers, and presses on
+    // platform views or the text editing host) must still be tracked, including
+    // outside of the view, which a listener on `_viewTarget` alone would miss.
     //
     // TODO(dkwingsmt): Investigate whether we can configure the behavior for
     // `_viewTarget`. https://github.com/flutter/flutter/issues/157968
@@ -1177,9 +1244,8 @@ class _PointerAdapter extends _BaseAdapter with _WheelEventListenerMixin {
       final int device = _getPointerId(event);
       if (_hasSanitizer(device)) {
         final pointerData = <ui.PointerData>[];
-        final _SanitizedDetails? details = _getSanitizer(
-          device,
-        ).sanitizeUpEvent(buttons: event.buttons?.toInt());
+        final _SanitizedDetails? details = _getSanitizer(device)
+            .sanitizeUpEvent(buttons: event.buttons?.toInt());
         _removePointerIfUnhoverable(event);
         if (details != null) {
           _convertEventsToPointerData(data: pointerData, event: event, details: details);
@@ -1200,6 +1266,35 @@ class _PointerAdapter extends _BaseAdapter with _WheelEventListenerMixin {
         _removePointerIfUnhoverable(event);
         _convertEventsToPointerData(data: pointerData, event: event, details: details);
         _callback(event, pointerData);
+      }
+    }, checkModifiers: false);
+
+    // The browser automatically releases pointer capture on `pointerup` and
+    // `pointercancel`, so `releasePointerCapture` never needs to be called
+    // explicitly. See
+    // https://w3c.github.io/pointerevents/#implicit-release-of-pointer-capture
+    //
+    // However, capture can also be taken away without a `pointerup` or a
+    // `pointercancel`, for example when the page calls `releasePointerCapture`
+    // or captures the pointer to another element, or, in some browsers, when
+    // the window loses focus. If buttons are still pressed, the press will
+    // never be released, so cancel it. The event bubbles, so ignore captures
+    // lost by descendants (such as platform view content); only the capture
+    // this adapter set on the view root matters.
+    _addPointerEventListener(_viewTarget, 'lostpointercapture', (DomPointerEvent event) {
+      if (event.target != _viewTarget) {
+        return;
+      }
+      final int device = _getPointerId(event);
+      if (_hasSanitizer(device)) {
+        final _ButtonSanitizer sanitizer = _getSanitizer(device);
+        if (sanitizer.isPressed) {
+          final pointerData = <ui.PointerData>[];
+          final _SanitizedDetails details = sanitizer.sanitizeCancelEvent();
+          _removePointerIfUnhoverable(event);
+          _convertEventsToPointerData(data: pointerData, event: event, details: details);
+          _callback(event, pointerData);
+        }
       }
     }, checkModifiers: false);
 

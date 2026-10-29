@@ -71,6 +71,11 @@ FlutterEngineResult FlutterEngineDeinitialize(FLUTTER_API_SYMBOL(FlutterEngine)
   return kSuccess;
 }
 
+FlutterEngineResult FlutterEngineScheduleFrame(FLUTTER_API_SYMBOL(FlutterEngine)
+                                                   engine) {
+  return kSuccess;
+}
+
 FlutterEngineResult FlutterEngineSendWindowMetricsEvent(
     FLUTTER_API_SYMBOL(FlutterEngine) engine,
     const FlutterWindowMetricsEvent* event) {
@@ -212,6 +217,7 @@ FlutterEngineResult FlutterEngineGetProcAddresses(
   table->Initialize = &FlutterEngineInitialize;
   table->Deinitialize = &FlutterEngineDeinitialize;
   table->RunInitialized = &FlutterEngineRunInitialized;
+  table->ScheduleFrame = &FlutterEngineScheduleFrame;
   table->SendWindowMetricsEvent = &FlutterEngineSendWindowMetricsEvent;
   table->SendPointerEvent = &FlutterEngineSendPointerEvent;
   table->SendKeyEvent = &FlutterEngineSendKeyEvent;

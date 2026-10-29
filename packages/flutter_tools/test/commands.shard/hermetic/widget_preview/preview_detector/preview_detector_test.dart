@@ -21,12 +21,11 @@ import 'projects/multipreview_project.dart';
 // directories for changes. This can be slow on heavily loaded machines and cause
 // flaky failures.
 
-typedef PreviewProjectBuilder =
-    Future<ProjectWithPreviews> Function({
-      required Directory projectRoot,
-      required List<String> pathsWithPreviews,
-      required List<String> pathsWithoutPreviews,
-    });
+typedef PreviewProjectBuilder = Future<ProjectWithPreviews> Function({
+  required Directory projectRoot,
+  required List<String> pathsWithPreviews,
+  required List<String> pathsWithoutPreviews,
+});
 
 void main() {
   initializeTestPreviewDetectorState();

@@ -238,6 +238,38 @@ public class FlutterMutatorViewTest {
     assertFalse(eventSent);
   }
 
+  @Test
+  public void onTouchEvent_delegatesToGestureTrackerAndRequestsUnbufferedOnMove() {
+    final AndroidTouchProcessor touchProcessor = mock(AndroidTouchProcessor.class);
+    final MotionEvent[] lastRequestedEvent = new MotionEvent[1];
+    final FlutterMutatorView view =
+        new FlutterMutatorView(ctx, 1.0f, touchProcessor) {
+          @Override
+          void requestUnbuffered(MotionEvent event) {
+            lastRequestedEvent[0] = event;
+          }
+        };
+
+    // Before Flutter wins the arena: touches are buffered.
+    final MotionEvent downEvent =
+        MotionEvent.obtain(100, 100, MotionEvent.ACTION_DOWN, 0.0f, 0.0f, 0);
+    view.onTouchEvent(downEvent);
+    assertTrue(view.isGestureActive());
+    assertEquals(100, view.getCurrentDownTime());
+    assertNull(lastRequestedEvent[0]);
+
+    // Matching gestureId sets flutterWonGesture.
+    view.onFlutterWonGesture(100);
+    assertTrue(view.getFlutterWonGesture());
+
+    // Subsequent move event triggers unbuffered dispatch.
+    final MotionEvent moveEvent =
+        MotionEvent.obtain(100, 101, MotionEvent.ACTION_MOVE, 10.0f, 10.0f, 0);
+    view.onTouchEvent(moveEvent);
+    assertEquals(moveEvent, lastRequestedEvent[0]);
+    assertFalse(view.getFlutterWonGesture());
+  }
+
   @Implements(ViewGroup.class)
   public static class ShadowViewGroup extends org.robolectric.shadows.ShadowViewGroup {
     @Implementation

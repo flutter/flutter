@@ -558,6 +558,10 @@ bool CapabilitiesVK::SupportsManuallyMippedTextures() const {
   return true;
 }
 
+bool CapabilitiesVK::SupportsTextureArrays() const {
+  return true;
+}
+
 void CapabilitiesVK::SetOffscreenFormat(PixelFormat pixel_format) const {
   default_color_format_ = pixel_format;
 }
@@ -808,6 +812,20 @@ size_t CapabilitiesVK::GetMinimumStorageBufferAlignment() const {
 
 bool CapabilitiesVK::NeedsPartitionedHostBuffer() const {
   return false;
+}
+
+ComputeLimits CapabilitiesVK::GetComputeLimits() const {
+  const vk::PhysicalDeviceLimits& limits = device_properties_.limits;
+  return ComputeLimits{
+      .max_workgroup_invocations = limits.maxComputeWorkGroupInvocations,
+      .max_workgroup_size = {limits.maxComputeWorkGroupSize[0],
+                             limits.maxComputeWorkGroupSize[1],
+                             limits.maxComputeWorkGroupSize[2]},
+      .max_workgroup_count = {limits.maxComputeWorkGroupCount[0],
+                              limits.maxComputeWorkGroupCount[1],
+                              limits.maxComputeWorkGroupCount[2]},
+      .max_shared_memory_size = limits.maxComputeSharedMemorySize,
+  };
 }
 
 bool CapabilitiesVK::HasExtension(RequiredCommonDeviceExtensionVK ext) const {

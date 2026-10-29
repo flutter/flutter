@@ -58,6 +58,10 @@ class SkiaGoldClient {
     required this.log,
   });
 
+  /// Monotonically increasing counter combined with process ID to ensure unique
+  /// temporary file names during atomic cache writes.
+  static int _tempFileCounter = 0;
+
   /// The file system to use for storing the local clone of the repository.
   ///
   /// This is useful in tests, where a local file system (the default) can be
@@ -402,7 +406,21 @@ class SkiaGoldClient {
   /// Flutter Gold dashboard.
   ///
   /// The provided image hash represents an expectation from Flutter Gold.
+  /// Baselines are cached on disk at `.dart_tool/flutter_goldens_cache/baselines`
+  /// to avoid redundant network requests across test runs.
   Future<List<int>> getImageBytes(String imageHash) async {
+    Directory? cacheDirectory;
+    if (platform.environment.containsKey(_kFlutterRootKey)) {
+      cacheDirectory = _flutterRoot
+          .childDirectory('.dart_tool')
+          .childDirectory('flutter_goldens_cache')
+          .childDirectory('baselines');
+      final File cachedFile = cacheDirectory.childFile('$imageHash.png');
+      if (cachedFile.existsSync()) {
+        return cachedFile.readAsBytes();
+      }
+    }
+
     final imageBytes = <int>[];
     final Uri requestForImage = Uri.parse(
       'https://flutter-gold.skia.org/img/images/$imageHash.png',
@@ -410,6 +428,38 @@ class SkiaGoldClient {
     final io.HttpClientRequest request = await httpClient.getUrl(requestForImage);
     final io.HttpClientResponse response = await request.close();
     await response.forEach((List<int> bytes) => imageBytes.addAll(bytes));
+
+    if (cacheDirectory != null && imageBytes.isNotEmpty) {
+      try {
+        if (!cacheDirectory.existsSync()) {
+          cacheDirectory.createSync(recursive: true);
+        }
+        final int pid = io.pid;
+        final int counter = _tempFileCounter;
+        _tempFileCounter += 1;
+        final File tempFile = cacheDirectory.childFile('$imageHash.png.tmp.${pid}_$counter');
+        await tempFile.writeAsBytes(imageBytes, flush: true);
+        final File targetFile = cacheDirectory.childFile('$imageHash.png');
+        try {
+          if (!targetFile.existsSync()) {
+            await tempFile.rename(targetFile.path);
+          }
+        } on FileSystemException {
+          if (!targetFile.existsSync()) {
+            rethrow;
+          }
+        } finally {
+          try {
+            if (tempFile.existsSync()) {
+              tempFile.deleteSync();
+            }
+          } catch (_) {}
+        }
+      } catch (_) {
+        // Caching is best-effort.
+      }
+    }
+
     return imageBytes;
   }
 
@@ -443,7 +493,7 @@ class SkiaGoldClient {
       'CI': 'luci',
       if (_isImpeller) 'impeller': 'swiftshader',
     };
-    if (_isBrowserTest) {
+    if (isBrowserTest) {
       keys['Browser'] = _browserKey;
       keys['Platform'] = '${keys['Platform']}-browser';
       if (webRenderer != null) {
@@ -482,12 +532,11 @@ class SkiaGoldClient {
     return <String>['--changelist', pullRequest, '--cis', 'buildbucket', '--jobid', jobId];
   }
 
-  bool get _isBrowserTest {
-    return platform.environment[_kTestBrowserKey] != null;
-  }
+  /// Whether this client is running tests for a browser.
+  bool get isBrowserTest => platform.environment[_kTestBrowserKey] != null;
 
   bool get _isBrowserSkiaTest {
-    return _isBrowserTest &&
+    return isBrowserTest &&
         switch (platform.environment[_kWebRendererKey]) {
           'canvaskit' || 'skwasm' => true,
           _ => false,
@@ -499,11 +548,11 @@ class SkiaGoldClient {
   }
 
   bool get _isImpeller {
-    return (platform.environment[_kImpellerKey] != null);
+    return platform.environment[_kImpellerKey] != null;
   }
 
   String get _browserKey {
-    assert(_isBrowserTest);
+    assert(isBrowserTest);
     return platform.environment[_kTestBrowserKey]!;
   }
 
@@ -512,10 +561,18 @@ class SkiaGoldClient {
   /// the image keys.
   String getTraceID(String testName) {
     final String? webRenderer = _webRendererValue;
+    final bool isLuci = platform.environment.containsKey('SWARMING_TASK_ID');
+    // On LUCI CI, web tests capture baselines on Linux ('linux-browser').
+    // When running browser tests locally on macOS/Windows, we normalize the
+    // platform to 'linux-browser' so that local tests query the canonical CI baselines.
+    // Native tests preserve platform.operatingSystem directly.
+    final String platformValue = isBrowserTest
+        ? (isLuci ? '${platform.operatingSystem}-browser' : 'linux-browser')
+        : platform.operatingSystem;
     final parameters = <String, Object?>{
-      if (_isBrowserTest) 'Browser': _browserKey,
+      if (isBrowserTest) 'Browser': _browserKey,
       'CI': 'luci',
-      'Platform': platform.operatingSystem,
+      'Platform': platformValue,
       'WebRenderer': ?webRenderer,
       if (_isImpeller) 'impeller': 'swiftshader',
       'name': testName,

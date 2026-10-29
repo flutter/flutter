@@ -13,6 +13,7 @@ import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
+import '../../src/fakes.dart';
 
 void main() {
   group('DarwinAddToAppCodesigning', () {
@@ -499,6 +500,18 @@ Available identities:
         buildMode: BuildMode.debug,
       );
       expect(fakeProcessManager, hasNoRemainingExpectations);
+    });
+
+    testWithoutContext('fromContexts constructor initializes dependencies', () {
+      final appleContext = FakeAppleContext(plistParser: FakePlistParser());
+      final toolContext = FakeToolContext(logger: BufferLogger.test());
+
+      final addtoAppCodesigning = DarwinAddToAppCodesigning.fromContexts(
+        appleContext: appleContext,
+        toolContext: toolContext,
+      );
+
+      expect(addtoAppCodesigning, isNotNull);
     });
   });
 }

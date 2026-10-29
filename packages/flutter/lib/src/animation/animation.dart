@@ -378,8 +378,7 @@ abstract class Animation<T> extends Listenable implements ValueListenable<T> {
 
 // An implementation of an animation that delegates to a value listenable with a fixed direction.
 class _ValueListenableDelegateAnimation<T> extends Animation<T> {
-  _ValueListenableDelegateAnimation(this._listenable, {ValueListenableTransformer<T>? transformer})
-    : _transformer = transformer;
+  _ValueListenableDelegateAnimation(this._listenable, {this._transformer});
 
   final ValueListenable<T> _listenable;
   final ValueListenableTransformer<T>? _transformer;

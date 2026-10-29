@@ -919,8 +919,11 @@ abstract class _AnimatedScrollViewState<T extends _AnimatedScrollView> extends S
 ///
 /// * [AnimatedRemovedItemBuilder], a builder that is for removing items with
 ///   animations instead of adding them.
-typedef AnimatedItemBuilder =
-    Widget Function(BuildContext context, int index, Animation<double> animation);
+typedef AnimatedItemBuilder = Widget Function(
+  BuildContext context,
+  int index,
+  Animation<double> animation,
+);
 
 /// Signature for the builder callback used in [AnimatedListState.removeItem] and
 /// [AnimatedGridState.removeItem] to animate their children after they have
@@ -934,8 +937,10 @@ typedef AnimatedItemBuilder =
 ///
 /// * [AnimatedItemBuilder], a builder that is for adding items with animations
 ///   instead of removing them.
-typedef AnimatedRemovedItemBuilder =
-    Widget Function(BuildContext context, Animation<double> animation);
+typedef AnimatedRemovedItemBuilder = Widget Function(
+  BuildContext context,
+  Animation<double> animation,
+);
 
 // The default insert/remove animation duration.
 const Duration _kDuration = Duration(milliseconds: 300);

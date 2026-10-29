@@ -7,8 +7,8 @@
 
 #include <functional>
 
-#include "fml/status.h"
 #include "impeller/renderer/command_buffer.h"
+#include "third_party/abseil-cpp/absl/status/status.h"
 
 namespace impeller {
 
@@ -17,6 +17,11 @@ namespace impeller {
 class CommandQueue {
  public:
   using CompletionCallback = std::function<void(CommandBuffer::Status)>;
+
+  struct SubmitResult {
+    absl::Status status;
+    std::shared_ptr<CommandBufferSchedulingReceipt> scheduling_receipt;
+  };
 
   CommandQueue();
 
@@ -35,14 +40,16 @@ class CommandQueue {
   ///        Only the Metal and Vulkan backends can give a status beyond
   ///        successful encoding. This callback may be called more than once and
   ///        potentially on a different thread.
-  ///
-  ///        If [block_on_schedule] is true, this function will not return until
-  ///        the command buffer has been scheduled. This only impacts the Metal
-  ///        backend.
-  virtual fml::Status Submit(
+  virtual absl::Status Submit(
       const std::vector<std::shared_ptr<CommandBuffer>>& buffers,
-      const CompletionCallback& completion_callback = {},
-      bool block_on_schedule = false);
+      const CompletionCallback& completion_callback = {});
+
+  /// Submit one command buffer without blocking on GPU scheduling and return a
+  /// scheduling receipt when supported by the backend. A successful submission
+  /// may have a null receipt when no lifecycle scheduling barrier is needed.
+  virtual SubmitResult SubmitWithReceipt(
+      const std::shared_ptr<CommandBuffer>& buffer,
+      const CompletionCallback& completion_callback = {});
 
  private:
   CommandQueue(const CommandQueue&) = delete;

@@ -4,14 +4,16 @@
 
 import 'dart:async';
 import 'dart:js_interop';
-import 'dart:math' as math;
 import 'dart:typed_data';
 
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
-bool get isWebParagraphEnabled => configuration.preferWebParagraph && browserSupportsWebParagraph;
+bool get isWebParagraphEnabled =>
+    !FlutterConfiguration.flutterWebUseSkwasm &&
+    configuration.preferWebParagraph &&
+    browserSupportsWebParagraph;
 
 class CanvasKitRenderer extends Renderer {
   static CanvasKitRenderer get instance => _instance;
@@ -73,28 +75,13 @@ class CanvasKitRenderer extends Renderer {
   ui.Paint createPaint() => CkPaint();
 
   @override
-  ui.Vertices createVertices(
-    ui.VertexMode mode,
-    List<ui.Offset> positions, {
-    List<ui.Offset>? textureCoordinates,
-    List<ui.Color>? colors,
-    List<int>? indices,
-  }) => CkVertices(
-    mode,
-    positions,
-    textureCoordinates: textureCoordinates,
-    colors: colors,
-    indices: indices,
-  );
-
-  @override
-  ui.Vertices createVerticesRaw(
+  BackendVertices createVertices(
     ui.VertexMode mode,
     Float32List positions, {
     Float32List? textureCoordinates,
     Int32List? colors,
     Uint16List? indices,
-  }) => CkVertices.raw(
+  }) => CkVertices(
     mode,
     positions,
     textureCoordinates: textureCoordinates,
@@ -107,47 +94,78 @@ class CanvasKitRenderer extends Renderer {
       CkCanvas(recorder, cullRect);
 
   @override
-  ui.Gradient createLinearGradient(
-    ui.Offset from,
-    ui.Offset to,
-    List<ui.Color> colors, [
-    List<double>? colorStops,
-    ui.TileMode tileMode = ui.TileMode.clamp,
+  BackendGradient createGradientLinear(
+    Float32List endPoints,
+    Uint32List colors,
+    Float32List? colorStops,
+    ui.TileMode tileMode,
     Float32List? matrix4,
-  ]) => CkGradientLinear(from, to, colors, colorStops, tileMode, matrix4);
+  ) {
+    return CkGradient.linear(endPoints, colors, colorStops, tileMode, matrix4);
+  }
 
   @override
-  ui.Gradient createRadialGradient(
-    ui.Offset center,
+  BackendGradient createGradientRadial(
+    double centerX,
+    double centerY,
     double radius,
-    List<ui.Color> colors, [
-    List<double>? colorStops,
-    ui.TileMode tileMode = ui.TileMode.clamp,
+    Uint32List colors,
+    Float32List? colorStops,
+    ui.TileMode tileMode,
     Float32List? matrix4,
-  ]) => CkGradientRadial(center, radius, colors, colorStops, tileMode, matrix4);
+  ) {
+    return CkGradient.radial(centerX, centerY, radius, colors, colorStops, tileMode, matrix4);
+  }
 
   @override
-  ui.Gradient createConicalGradient(
-    ui.Offset focal,
-    double focalRadius,
-    ui.Offset center,
-    double radius,
-    List<ui.Color> colors, [
-    List<double>? colorStops,
-    ui.TileMode tileMode = ui.TileMode.clamp,
-    Float32List? matrix,
-  ]) => CkGradientConical(focal, focalRadius, center, radius, colors, colorStops, tileMode, matrix);
+  BackendGradient createGradientConical(
+    double startX,
+    double startY,
+    double startRadius,
+    double endX,
+    double endY,
+    double endRadius,
+    Uint32List colors,
+    Float32List? colorStops,
+    ui.TileMode tileMode,
+    Float32List? matrix4,
+  ) {
+    return CkGradient.conical(
+      startX,
+      startY,
+      startRadius,
+      endX,
+      endY,
+      endRadius,
+      colors,
+      colorStops,
+      tileMode,
+      matrix4,
+    );
+  }
 
   @override
-  ui.Gradient createSweepGradient(
-    ui.Offset center,
-    List<ui.Color> colors, [
-    List<double>? colorStops,
-    ui.TileMode tileMode = ui.TileMode.clamp,
-    double startAngle = 0.0,
-    double endAngle = math.pi * 2,
+  BackendGradient createGradientSweep(
+    double centerX,
+    double centerY,
+    Uint32List colors,
+    Float32List? colorStops,
+    ui.TileMode tileMode,
+    double startAngle,
+    double endAngle,
     Float32List? matrix4,
-  ]) => CkGradientSweep(center, colors, colorStops, tileMode, startAngle, endAngle, matrix4);
+  ) {
+    return CkGradient.sweep(
+      centerX,
+      centerY,
+      colors,
+      colorStops,
+      tileMode,
+      startAngle,
+      endAngle,
+      matrix4,
+    );
+  }
 
   @override
   ui.PictureRecorder createPictureRecorder() => CkPictureRecorder();
@@ -156,46 +174,50 @@ class CanvasKitRenderer extends Renderer {
   ui.SceneBuilder createSceneBuilder() => LayerSceneBuilder();
 
   @override
-  ui.ImageFilter createBlurImageFilter({
-    double sigmaX = 0.0,
-    double sigmaY = 0.0,
-    ui.TileMode? tileMode,
-    ui.Rect? bounds,
-  }) =>
-      // TODO(dkwingsmt): `bounds` is currently not implemented in CanvasKit.
-      // Fall back to unbounded blur.
-      // https://github.com/flutter/flutter/issues/175899
-      CkImageFilter.blur(sigmaX: sigmaX, sigmaY: sigmaY, tileMode: tileMode);
-
-  @override
-  ui.ImageFilter createDilateImageFilter({double radiusX = 0.0, double radiusY = 0.0}) =>
-      CkImageFilter.dilate(radiusX: radiusX, radiusY: radiusY);
-
-  @override
-  ui.ImageFilter createErodeImageFilter({double radiusX = 0.0, double radiusY = 0.0}) =>
-      CkImageFilter.erode(radiusX: radiusX, radiusY: radiusY);
-
-  @override
-  ui.ImageFilter createMatrixImageFilter(
-    Float64List matrix4, {
-    ui.FilterQuality filterQuality = ui.FilterQuality.low,
-  }) => CkImageFilter.matrix(matrix: matrix4, filterQuality: filterQuality);
-
-  @override
-  ui.ImageFilter composeImageFilters({
-    required ui.ImageFilter outer,
-    required ui.ImageFilter inner,
+  BackendImageFilter createBlurImageFilter({
+    required double sigmaX,
+    required double sigmaY,
+    required ui.TileMode tileMode,
   }) {
-    if (outer is EngineColorFilter) {
-      final CkColorFilter colorFilter = createCkColorFilter(outer)!;
-      outer = CkColorFilterImageFilter(colorFilter: colorFilter);
-    }
-    if (inner is EngineColorFilter) {
-      final CkColorFilter colorFilter = createCkColorFilter(inner)!;
-      inner = CkColorFilterImageFilter(colorFilter: colorFilter);
-    }
-    return CkImageFilter.compose(outer: outer as CkImageFilter, inner: inner as CkImageFilter);
+    return CkBlurImageFilter(sigmaX: sigmaX, sigmaY: sigmaY, tileMode: tileMode);
   }
+
+  @override
+  BackendImageFilter createDilateImageFilter({required double radiusX, required double radiusY}) {
+    return CkDilateImageFilter(radiusX: radiusX, radiusY: radiusY);
+  }
+
+  @override
+  BackendImageFilter createErodeImageFilter({required double radiusX, required double radiusY}) {
+    return CkErodeImageFilter(radiusX: radiusX, radiusY: radiusY);
+  }
+
+  @override
+  BackendImageFilter createMatrixImageFilter({
+    required Float64List matrix,
+    required ui.FilterQuality filterQuality,
+  }) {
+    return CkMatrixImageFilter(matrix: matrix, filterQuality: filterQuality);
+  }
+
+  @override
+  BackendImageFilter createComposeImageFilter({
+    required BackendImageFilter outer,
+    required BackendImageFilter inner,
+  }) {
+    return CkComposeImageFilter(outer: outer, inner: inner);
+  }
+
+  @override
+  BackendImageFilter createColorFilterImageFilter({required BackendColorFilter filter}) {
+    return CkColorFilterImageFilter(filter as CkColorFilter);
+  }
+
+  @override
+  BackendColorFilter createColorFilter(EngineColorFilter filter) => CkColorFilter(filter);
+
+  @override
+  BackendMaskFilter createMaskFilter(EngineMaskFilter filter) => CkMaskFilter(filter);
 
   @override
   BackendAnimatedImage createAnimatedImage(Uint8List bytes, {int? targetWidth, int? targetHeight}) {
@@ -266,6 +288,9 @@ class CanvasKitRenderer extends Renderer {
   bool get supportsResizingAnimatedImages => false;
 
   @override
+  bool get supportsAnimatedImages => true;
+
+  @override
   BackendImage decodeBackendImageFromPixels(
     Uint8List pixels, {
     required int width,
@@ -295,170 +320,22 @@ class CanvasKitRenderer extends Renderer {
   }
 
   @override
-  ui.ImageShader createImageShader(
-    ui.Image image,
+  BackendImageShader createImageShader(
+    EngineImage image,
     ui.TileMode tmx,
     ui.TileMode tmy,
-    Float64List matrix4,
-    ui.FilterQuality? filterQuality,
-  ) => CkImageShader(image, tmx, tmy, matrix4, filterQuality);
+    Float64List? matrix4,
+    ui.FilterQuality filterQuality,
+  ) {
+    return CkImageShader(image.backendImage as CkImageDelegate, tmx, tmy, matrix4, filterQuality);
+  }
 
   @override
   CkPathConstructors pathConstructors = CkPathConstructors();
 
   @override
-  ui.TextStyle createTextStyle({
-    ui.Color? color,
-    ui.TextDecoration? decoration,
-    ui.Color? decorationColor,
-    ui.TextDecorationStyle? decorationStyle,
-    double? decorationThickness,
-    ui.FontWeight? fontWeight,
-    ui.FontStyle? fontStyle,
-    ui.TextBaseline? textBaseline,
-    String? fontFamily,
-    List<String>? fontFamilyFallback,
-    double? fontSize,
-    double? letterSpacing,
-    double? wordSpacing,
-    double? height,
-    ui.TextLeadingDistribution? leadingDistribution,
-    ui.Locale? locale,
-    ui.Paint? background,
-    ui.Paint? foreground,
-    List<ui.Shadow>? shadows,
-    List<ui.FontFeature>? fontFeatures,
-    List<ui.FontVariation>? fontVariations,
-  }) => isWebParagraphEnabled
-      ? WebTextStyle(
-          color: color,
-          decoration: decoration,
-          decorationColor: decorationColor,
-          decorationStyle: decorationStyle,
-          decorationThickness: decorationThickness,
-          fontWeight: fontWeight,
-          fontStyle: fontStyle,
-          textBaseline: textBaseline,
-          fontFamily: fontFamily,
-          fontFamilyFallback: fontFamilyFallback,
-          fontSize: fontSize,
-          letterSpacing: letterSpacing,
-          wordSpacing: wordSpacing,
-          height: height,
-          leadingDistribution: leadingDistribution,
-          locale: locale,
-          background: background as CkPaint?,
-          foreground: foreground as CkPaint?,
-          shadows: shadows,
-          fontFeatures: fontFeatures,
-          fontVariations: fontVariations,
-        )
-      : CkTextStyle(
-          color: color,
-          decoration: decoration,
-          decorationColor: decorationColor,
-          decorationStyle: decorationStyle,
-          decorationThickness: decorationThickness,
-          fontWeight: fontWeight,
-          fontStyle: fontStyle,
-          textBaseline: textBaseline,
-          fontFamily: fontFamily,
-          fontFamilyFallback: fontFamilyFallback,
-          fontSize: fontSize,
-          letterSpacing: letterSpacing,
-          wordSpacing: wordSpacing,
-          height: height,
-          leadingDistribution: leadingDistribution,
-          locale: locale,
-          background: background as CkPaint?,
-          foreground: foreground as CkPaint?,
-          shadows: shadows,
-          fontFeatures: fontFeatures,
-          fontVariations: fontVariations,
-        );
-
-  @override
-  ui.ParagraphStyle createParagraphStyle({
-    ui.TextAlign? textAlign,
-    ui.TextDirection? textDirection,
-    int? maxLines,
-    String? fontFamily,
-    double? fontSize,
-    double? height,
-    ui.TextHeightBehavior? textHeightBehavior,
-    ui.FontWeight? fontWeight,
-    ui.FontStyle? fontStyle,
-    ui.StrutStyle? strutStyle,
-    String? ellipsis,
-    ui.Locale? locale,
-  }) => isWebParagraphEnabled
-      ? WebParagraphStyle(
-          textAlign: textAlign,
-          textDirection: textDirection,
-          maxLines: maxLines,
-          fontFamily: fontFamily,
-          fontSize: fontSize,
-          height: height,
-          textHeightBehavior: textHeightBehavior,
-          fontWeight: fontWeight,
-          fontStyle: fontStyle,
-          strutStyle: strutStyle as WebStrutStyle?,
-          ellipsis: ellipsis,
-          locale: locale,
-        )
-      : CkParagraphStyle(
-          textAlign: textAlign,
-          textDirection: textDirection,
-          maxLines: maxLines,
-          fontFamily: fontFamily,
-          fontSize: fontSize,
-          height: height,
-          textHeightBehavior: textHeightBehavior,
-          fontWeight: fontWeight,
-          fontStyle: fontStyle,
-          strutStyle: strutStyle,
-          ellipsis: ellipsis,
-          locale: locale,
-        );
-
-  @override
-  ui.StrutStyle createStrutStyle({
-    String? fontFamily,
-    List<String>? fontFamilyFallback,
-    double? fontSize,
-    double? height,
-    ui.TextLeadingDistribution? leadingDistribution,
-    double? leading,
-    ui.FontWeight? fontWeight,
-    ui.FontStyle? fontStyle,
-    bool? forceStrutHeight,
-  }) => isWebParagraphEnabled
-      ? WebStrutStyle(
-          fontFamily: fontFamily,
-          fontFamilyFallback: fontFamilyFallback,
-          fontSize: fontSize,
-          height: height,
-          leadingDistribution: leadingDistribution,
-          leading: leading,
-          fontWeight: fontWeight,
-          fontStyle: fontStyle,
-          forceStrutHeight: forceStrutHeight,
-        )
-      : CkStrutStyle(
-          fontFamily: fontFamily,
-          fontFamilyFallback: fontFamilyFallback,
-          fontSize: fontSize,
-          height: height,
-          leadingDistribution: leadingDistribution,
-          leading: leading,
-          fontWeight: fontWeight,
-          fontStyle: fontStyle,
-          forceStrutHeight: forceStrutHeight,
-        );
-
-  @override
-  ui.ParagraphBuilder createParagraphBuilder(ui.ParagraphStyle style) =>
-      isWebParagraphEnabled ? WebParagraphBuilder(style) : CkParagraphBuilder(style);
+  BackendParagraphBuilder createParagraphBuilder(EngineParagraphStyle style) =>
+      CkParagraphBuilder(style);
 
   @override
   WebParagraphPainter createWebParagraphPainter(WebParagraph paragraph) =>
@@ -481,29 +358,6 @@ class CanvasKitRenderer extends Renderer {
       return CkFragmentProgram.fromBytes(assetKey, data.buffer.asUint8List());
     });
   }
-
-  @override
-  ui.LineMetrics createLineMetrics({
-    required bool hardBreak,
-    required double ascent,
-    required double descent,
-    required double unscaledAscent,
-    required double height,
-    required double width,
-    required double left,
-    required double baseline,
-    required int lineNumber,
-  }) => EngineLineMetrics(
-    hardBreak: hardBreak,
-    ascent: ascent,
-    descent: descent,
-    unscaledAscent: unscaledAscent,
-    height: height,
-    width: width,
-    left: left,
-    baseline: baseline,
-    lineNumber: lineNumber,
-  );
 
   @override
   void dumpDebugInfo() {

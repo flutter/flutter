@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+
 import 'shrine/app.dart';
 
 class ShrineDemo extends StatelessWidget {

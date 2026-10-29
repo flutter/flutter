@@ -7,6 +7,7 @@ package com.flutter.gradle
 import com.android.build.api.dsl.ApplicationExtension
 import com.android.build.api.dsl.BuildType
 import com.android.build.api.dsl.DynamicFeatureExtension
+import com.android.build.api.dsl.ExternalNativeBuild
 import com.android.build.api.dsl.LibraryExtension
 import com.android.build.api.dsl.Splits
 import com.android.build.api.dsl.TestExtension
@@ -36,6 +37,25 @@ class AgpCommonExtensionWrapper(
                 is LibraryExtension -> backingExtension.compileSdk = value
                 is DynamicFeatureExtension -> backingExtension.compileSdk = value
                 is TestExtension -> backingExtension.compileSdk = value
+                else -> throw IllegalArgumentException(unsupportedMessage())
+            }
+        }
+
+    var compileSdkPreview: String?
+        get() =
+            when (backingExtension) {
+                is ApplicationExtension -> backingExtension.compileSdkPreview
+                is LibraryExtension -> backingExtension.compileSdkPreview
+                is DynamicFeatureExtension -> backingExtension.compileSdkPreview
+                is TestExtension -> backingExtension.compileSdkPreview
+                else -> throw IllegalArgumentException(unsupportedMessage())
+            }
+        set(value) {
+            when (backingExtension) {
+                is ApplicationExtension -> backingExtension.compileSdkPreview = value
+                is LibraryExtension -> backingExtension.compileSdkPreview = value
+                is DynamicFeatureExtension -> backingExtension.compileSdkPreview = value
+                is TestExtension -> backingExtension.compileSdkPreview = value
                 else -> throw IllegalArgumentException(unsupportedMessage())
             }
         }
@@ -85,6 +105,16 @@ class AgpCommonExtensionWrapper(
                 is LibraryExtension -> backingExtension.buildTypes
                 is DynamicFeatureExtension -> backingExtension.buildTypes
                 is TestExtension -> backingExtension.buildTypes
+                else -> throw IllegalArgumentException(unsupportedMessage())
+            }
+
+    val externalNativeBuild: ExternalNativeBuild
+        get() =
+            when (backingExtension) {
+                is ApplicationExtension -> backingExtension.externalNativeBuild
+                is LibraryExtension -> backingExtension.externalNativeBuild
+                is DynamicFeatureExtension -> backingExtension.externalNativeBuild
+                is TestExtension -> backingExtension.externalNativeBuild
                 else -> throw IllegalArgumentException(unsupportedMessage())
             }
 

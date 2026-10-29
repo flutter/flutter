@@ -190,9 +190,8 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData.from(
-          colorScheme: const ColorScheme.light(),
-        ).copyWith(appBarTheme: _appBarTheme()),
+        theme: ThemeData.from(colorScheme: const ColorScheme.light())
+            .copyWith(appBarTheme: _appBarTheme()),
         home: Scaffold(
           appBar: AppBar(
             backgroundColor: color,
@@ -260,9 +259,8 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData.from(
-          colorScheme: const ColorScheme.light(),
-        ).copyWith(appBarTheme: _appBarTheme()),
+        theme: ThemeData.from(colorScheme: const ColorScheme.light())
+            .copyWith(appBarTheme: _appBarTheme()),
         home: Scaffold(
           appBar: AppBar(
             actions: <Widget>[IconButton(icon: const Icon(Icons.share), onPressed: () {})],

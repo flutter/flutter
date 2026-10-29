@@ -92,7 +92,7 @@ import Foundation
   // Ensures that the `FlutterRunLoop` for main thread is initialized. Only
   // needs to be called once and must be called on the main thread.
   @objc static func ensureMainLoopInitialized() {
-    assert(Thread.isMainThread, "Must be called on the main thread.")
+    precondition(Thread.isMainThread, "Must be called on the main thread.")
     if _mainRunLoop == nil {
       _mainRunLoop = FlutterRunLoop()
     }

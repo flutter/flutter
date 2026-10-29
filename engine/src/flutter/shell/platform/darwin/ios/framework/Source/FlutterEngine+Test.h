@@ -22,6 +22,7 @@ class ThreadHost;
 
 @property(readonly, nonatomic) FlutterEngineProcTable& embedderAPI;
 @property(readonly, nonatomic) BOOL enableEmbedderAPI;
+@property(readonly, nonatomic) BOOL allowHeadlessExecution;
 @property(nonatomic, readonly) NSMutableDictionary* pluginPublications;
 @property(nonatomic, strong) FlutterRestorationPlugin* restorationPlugin;
 
@@ -33,9 +34,11 @@ class ThreadHost;
 - (FlutterEngine*)spawnWithEntrypoint:(/*nullable*/ NSString*)entrypoint
                            libraryURI:(/*nullable*/ NSString*)libraryURI
                          initialRoute:(/*nullable*/ NSString*)initialRoute
-                       entrypointArgs:(/*nullable*/ NSArray<NSString*>*)entrypointArgs;
+                       entrypointArgs:(/*nullable*/ NSArray<NSString*>*)entrypointArgs
+    NS_SWIFT_UI_ACTOR;
 - (const flutter::ThreadHost&)threadHost;
 - (void)updateDisplays;
+- (void)sendDisplayWithScreenNativeSize:(CGSize)screenNativeSize scale:(CGFloat)scale;
 - (void)flutterTextInputView:(FlutterTextInputView*)textInputView
                performAction:(FlutterTextInputAction)action
                   withClient:(int)client;

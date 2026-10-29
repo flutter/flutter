@@ -203,26 +203,24 @@ void main() {
       expect(find.text('Item 36'), findsNothing);
     }, variant: TargetPlatformVariant.all());
 
-    testWidgets(
-      'Can be dragged down when list is shorter than full height',
-      (WidgetTester tester) async {
-        await tester.pumpWidget(boilerplateWidget(null, itemCount: 30, initialChildSize: .25));
+    testWidgets('Can be dragged down when list is shorter than full height', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(boilerplateWidget(null, itemCount: 30, initialChildSize: .25));
 
-        expect(find.text('Item 1').hitTestable(), findsOneWidget);
-        expect(find.text('Item 29').hitTestable(), findsNothing);
+      expect(find.text('Item 1').hitTestable(), findsOneWidget);
+      expect(find.text('Item 29').hitTestable(), findsNothing);
 
-        await tester.drag(find.text('Item 1'), const Offset(0, -325));
-        await tester.pumpAndSettle();
-        expect(find.text('Item 1').hitTestable(), findsOneWidget);
-        expect(find.text('Item 29').hitTestable(), findsOneWidget);
+      await tester.drag(find.text('Item 1'), const Offset(0, -325));
+      await tester.pumpAndSettle();
+      expect(find.text('Item 1').hitTestable(), findsOneWidget);
+      expect(find.text('Item 29').hitTestable(), findsOneWidget);
 
-        await tester.drag(find.text('Item 1'), const Offset(0, 325));
-        await tester.pumpAndSettle();
-        expect(find.text('Item 1').hitTestable(), findsOneWidget);
-        expect(find.text('Item 29').hitTestable(), findsNothing);
-      },
-      variant: TargetPlatformVariant.all(),
-    );
+      await tester.drag(find.text('Item 1'), const Offset(0, 325));
+      await tester.pumpAndSettle();
+      expect(find.text('Item 1').hitTestable(), findsOneWidget);
+      expect(find.text('Item 29').hitTestable(), findsNothing);
+    }, variant: TargetPlatformVariant.all());
 
     testWidgets(
       'Can be dragged up and cover its container and scroll in single motion, and then dragged back down',
@@ -772,23 +770,21 @@ void main() {
     );
   }, variant: TargetPlatformVariant.all());
 
-  testWidgets(
-    "Changing parameters with an un-listened controller doesn't throw",
-    (WidgetTester tester) async {
-      await tester.pumpWidget(
-        boilerplateWidget(
-          null,
-          snap: true,
-          // Will prevent the sheet's child from listening to the controller.
-          ignoreController: true,
-        ),
-      );
-      await tester.pumpAndSettle();
-      await tester.pumpWidget(boilerplateWidget(null, snap: true));
-      await tester.pumpAndSettle();
-    },
-    variant: TargetPlatformVariant.all(),
-  );
+  testWidgets("Changing parameters with an un-listened controller doesn't throw", (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      boilerplateWidget(
+        null,
+        snap: true,
+        // Will prevent the sheet's child from listening to the controller.
+        ignoreController: true,
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.pumpWidget(boilerplateWidget(null, snap: true));
+    await tester.pumpAndSettle();
+  }, variant: TargetPlatformVariant.all());
 
   testWidgets(
     'Transitioning between scrollable children sharing a scroll controller will not throw',

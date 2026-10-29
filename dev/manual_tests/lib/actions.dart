@@ -183,9 +183,9 @@ class UndoAction extends Action<UndoIntent> {
     if (buildContext == null) {
       return;
     }
-    final manager =
-        Actions.of(primaryFocus?.context ?? FocusDemo.appKey.currentContext!)
-            as UndoableActionDispatcher;
+    final manager = Actions.of(
+      primaryFocus?.context ?? FocusDemo.appKey.currentContext!,
+    ) as UndoableActionDispatcher;
     manager.undo();
   }
 }

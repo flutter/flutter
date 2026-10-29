@@ -9,28 +9,46 @@
 @implementation AppDelegate
 
 - (BOOL)application:(UIApplication *)application
-didFinishLaunchingWithOptions:(NSDictionary<UIApplicationLaunchOptionsKey, id> *)launchOptions {
-  [GeneratedPluginRegistrant registerWithRegistry:self];
-  NSObject<FlutterPluginRegistrar>* registrar = [self registrarForPlugin:@"Echo"];
-  FlutterBasicMessageChannel* reset = [[FlutterBasicMessageChannel alloc] initWithName:@"dev.flutter.echo.reset" binaryMessenger:registrar.messenger codec:FlutterStandardMessageCodec.sharedInstance];
-  [reset setMessageHandler:^(id  _Nullable message, FlutterReply  _Nonnull callback) {
+    didFinishLaunchingWithOptions:(NSDictionary<UIApplicationLaunchOptionsKey, id> *)launchOptions {
+  // Override point for customization after application launch.
+  return [super application:application didFinishLaunchingWithOptions:launchOptions];
+}
+
+- (void)didInitializeImplicitFlutterEngine:(NSObject<FlutterImplicitEngineBridge> *)engineBridge {
+  [GeneratedPluginRegistrant registerWithRegistry:engineBridge.pluginRegistry];
+
+  NSObject<FlutterPluginRegistrar> *registrar =
+      [engineBridge.pluginRegistry registrarForPlugin:@"Echo"];
+  FlutterBasicMessageChannel *reset =
+      [[FlutterBasicMessageChannel alloc] initWithName:@"dev.flutter.echo.reset"
+                                       binaryMessenger:registrar.messenger
+                                                 codec:FlutterStandardMessageCodec.sharedInstance];
+  [reset setMessageHandler:^(id _Nullable message, FlutterReply _Nonnull callback) {
     // noop
   }];
-  FlutterBasicMessageChannel* basicStandard = [[FlutterBasicMessageChannel alloc] initWithName:@"dev.flutter.echo.basic.standard" binaryMessenger:registrar.messenger codec:FlutterStandardMessageCodec.sharedInstance];
-  [basicStandard setMessageHandler:^(id  _Nullable message, FlutterReply  _Nonnull callback) {
+  FlutterBasicMessageChannel *basicStandard = [[FlutterBasicMessageChannel alloc]
+      initWithName:@"dev.flutter.echo.basic.standard"
+   binaryMessenger:registrar.messenger
+             codec:FlutterStandardMessageCodec.sharedInstance];
+  [basicStandard setMessageHandler:^(id _Nullable message, FlutterReply _Nonnull callback) {
     callback(message);
   }];
-  FlutterBasicMessageChannel* basicBinary = [[FlutterBasicMessageChannel alloc] initWithName:@"dev.flutter.echo.basic.binary" binaryMessenger:registrar.messenger codec:FlutterBinaryCodec.sharedInstance];
-  [basicBinary setMessageHandler:^(id  _Nullable message, FlutterReply  _Nonnull callback) {
+  FlutterBasicMessageChannel *basicBinary =
+      [[FlutterBasicMessageChannel alloc] initWithName:@"dev.flutter.echo.basic.binary"
+                                       binaryMessenger:registrar.messenger
+                                                 codec:FlutterBinaryCodec.sharedInstance];
+  [basicBinary setMessageHandler:^(id _Nullable message, FlutterReply _Nonnull callback) {
     callback(message);
   }];
-  NSObject<FlutterTaskQueue>* taskQueue = [registrar.messenger makeBackgroundTaskQueue];
-  FlutterBasicMessageChannel* background =
-  [[FlutterBasicMessageChannel alloc] initWithName:@"dev.flutter.echo.background.standard" binaryMessenger:registrar.messenger codec:FlutterStandardMessageCodec.sharedInstance taskQueue:taskQueue];
-  [background setMessageHandler:^(id  _Nullable message, FlutterReply  _Nonnull callback) {
+  NSObject<FlutterTaskQueue> *taskQueue = [registrar.messenger makeBackgroundTaskQueue];
+  FlutterBasicMessageChannel *background = [[FlutterBasicMessageChannel alloc]
+      initWithName:@"dev.flutter.echo.background.standard"
+   binaryMessenger:registrar.messenger
+             codec:FlutterStandardMessageCodec.sharedInstance
+         taskQueue:taskQueue];
+  [background setMessageHandler:^(id _Nullable message, FlutterReply _Nonnull callback) {
     callback(message);
   }];
-  return YES;
 }
 
 @end

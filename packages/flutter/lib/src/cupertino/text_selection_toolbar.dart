@@ -67,8 +67,12 @@ const Duration _kToolbarTransitionDuration = Duration(milliseconds: 125);
 ///   * [CupertinoTextSelectionToolbar.toolbarBuilder], which is of this type.
 ///   * [TextSelectionToolbar.toolbarBuilder], which is similar, but for an
 ///     Material-style toolbar.
-typedef CupertinoToolbarBuilder =
-    Widget Function(BuildContext context, Offset anchorAbove, Offset anchorBelow, Widget child);
+typedef CupertinoToolbarBuilder = Widget Function(
+  BuildContext context,
+  Offset anchorAbove,
+  Offset anchorBelow,
+  Widget child,
+);
 
 /// An iOS-style text selection toolbar.
 ///
@@ -195,13 +199,11 @@ class CupertinoTextSelectionToolbar extends StatelessWidget {
 // The anchor should be in global coordinates.
 class _CupertinoTextSelectionToolbarShape extends SingleChildRenderObjectWidget {
   const _CupertinoTextSelectionToolbarShape({
-    required Offset anchorAbove,
-    required Offset anchorBelow,
-    Color? shadowColor,
+    required this._anchorAbove,
+    required this._anchorBelow,
+    this._shadowColor,
     super.child,
-  }) : _anchorAbove = anchorAbove,
-       _anchorBelow = anchorBelow,
-       _shadowColor = shadowColor;
+  });
 
   final Offset _anchorAbove;
   final Offset _anchorBelow;
@@ -275,9 +277,8 @@ class _RenderCupertinoTextSelectionToolbarShape extends RenderShiftedBox {
   bool _isAbove(double childHeight) => anchorAbove.dy >= childHeight - _kToolbarArrowSize.height;
 
   BoxConstraints _constraintsForChild(BoxConstraints constraints) {
-    return BoxConstraints(
-      minWidth: _kToolbarArrowSize.width + _kToolbarBorderRadius.x * 2,
-    ).enforce(constraints.loosen());
+    return BoxConstraints(minWidth: _kToolbarArrowSize.width + _kToolbarBorderRadius.x * 2)
+        .enforce(constraints.loosen());
   }
 
   Offset _computeChildOffset(Size childSize) {
@@ -957,13 +958,10 @@ class _RenderCupertinoTextSelectionToolbarItems extends RenderBox
         ContainerRenderObjectMixin<RenderBox, ToolbarItemsParentData>,
         RenderBoxContainerDefaultsMixin<RenderBox, ToolbarItemsParentData> {
   _RenderCupertinoTextSelectionToolbarItems({
-    required Color dividerColor,
-    required double dividerWidth,
-    required int page,
-  }) : _dividerColor = dividerColor,
-       _dividerWidth = dividerWidth,
-       _page = page,
-       super();
+    required this._dividerColor,
+    required this._dividerWidth,
+    required this._page,
+  }) : super();
 
   final Map<_CupertinoTextSelectionToolbarItemsSlot, RenderBox> slottedChildren =
       <_CupertinoTextSelectionToolbarItemsSlot, RenderBox>{};

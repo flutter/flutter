@@ -95,17 +95,14 @@ void main() {
       expect(actual, 5);
     });
 
-    test(
-      'should be 5 when offset is 6 times greater than a specific item extent where the division will return more than 13 zero decimals',
-      () {
-        const itemExtentSpecificForAProblematicScreenSize = 411.42857142857144;
-        final int actual = testGetMaxChildIndexForScrollOffset(
-          itemExtentSpecificForAProblematicScreenSize * 6 + extraValueToHaveRoundingIssues,
-          itemExtentSpecificForAProblematicScreenSize,
-        );
-        expect(actual, 5);
-      },
-    );
+    test('should be 5 when offset is 6 times greater than a specific item extent where the division will return more than 13 zero decimals', () {
+      const itemExtentSpecificForAProblematicScreenSize = 411.42857142857144;
+      final int actual = testGetMaxChildIndexForScrollOffset(
+        itemExtentSpecificForAProblematicScreenSize * 6 + extraValueToHaveRoundingIssues,
+        itemExtentSpecificForAProblematicScreenSize,
+      );
+      expect(actual, 5);
+    });
 
     test('should be 0 when offset is a bit greater than item extent', () {
       final int actual = testGetMaxChildIndexForScrollOffset(
@@ -479,9 +476,8 @@ class TestRenderSliverBoxChildManager extends RenderSliverBoxChildManager {
 }
 
 class TestRenderSliverFixedExtentBoxAdaptor extends RenderSliverFixedExtentBoxAdaptor {
-  TestRenderSliverFixedExtentBoxAdaptor({required double itemExtent})
-    : _itemExtent = itemExtent,
-      super(childManager: TestRenderSliverBoxChildManager(children: <RenderBox>[]));
+  TestRenderSliverFixedExtentBoxAdaptor({required this._itemExtent})
+    : super(childManager: TestRenderSliverBoxChildManager(children: <RenderBox>[]));
 
   final double _itemExtent;
 

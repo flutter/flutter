@@ -21,6 +21,10 @@ TEST(StringConversion, Utf8ToWideStringUnicode) {
   EXPECT_EQ(Utf8ToWideString("\xe2\x98\x83"), L"\x2603");
 }
 
+TEST(StringConversion, Utf8ToWideStringUrl) {
+  EXPECT_EQ(Utf8ToWideString("https://flutter.dev"), L"https://flutter.dev");
+}
+
 TEST(StringConversion, WideStringToUtf8Empty) {
   EXPECT_EQ(WideStringToUtf8(L""), "");
 }
@@ -31,6 +35,10 @@ TEST(StringConversion, WideStringToUtf8Ascii) {
 
 TEST(StringConversion, WideStringToUtf8Unicode) {
   EXPECT_EQ(WideStringToUtf8(L"\x2603"), "\xe2\x98\x83");
+}
+
+TEST(StringConversion, WideStringToUtf8Url) {
+  EXPECT_EQ(WideStringToUtf8(L"https://flutter.dev"), "https://flutter.dev");
 }
 
 TEST(StringConversion, WideStringToUtf16Empty) {

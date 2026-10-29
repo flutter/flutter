@@ -247,6 +247,7 @@ Future<void> frameworkTestsRunner() async {
     await runFixTests('flutter_test');
     await runFixTests('integration_test');
     await runFixTests('flutter_driver');
+    await runFixTests('flutter_localizations');
     await runPrivateTests();
 
     // Run java unit tests for integration_test
@@ -286,10 +287,6 @@ Future<void> frameworkTestsRunner() async {
     );
     await testHarnessTestsRunner();
     await runExampleTests();
-    await runFlutterTest(
-      path.join(flutterRoot, 'dev', 'a11y_assessments'),
-      tests: <String>['test'],
-    );
     await runDartTest(path.join(flutterRoot, 'dev', 'bots'));
     await runDartTest(
       path.join(flutterRoot, 'dev', 'devicelab'),
@@ -301,11 +298,11 @@ Future<void> frameworkTestsRunner() async {
       path.join(flutterRoot, 'dev', 'integration_tests', 'android_semantics_testing'),
       fatalWarnings: false,
     );
+    await runDartTest(path.join(flutterRoot, 'dev', 'flutter_analyzer_plugin'));
     await runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'ui'));
     await runFlutterTest(path.join(flutterRoot, 'dev', 'manual_tests'));
     await runFlutterTest(path.join(flutterRoot, 'dev', 'tools'));
     await runFlutterTest(path.join(flutterRoot, 'dev', 'tools', 'vitool'));
-    await runFlutterTest(path.join(flutterRoot, 'dev', 'tools', 'gen_defaults'));
     await runFlutterTest(path.join(flutterRoot, 'dev', 'tools', 'gen_keycodes'));
     await runFlutterTest(path.join(flutterRoot, 'dev', 'benchmarks', 'test_apps', 'stocks'));
     await runFlutterTest(

@@ -80,6 +80,8 @@ FilterInput::~FilterInput() = default;
 
 void FilterInput::SetEffectTransform(const Matrix& matrix) {}
 
+void FilterInput::SetLocalToPassTransform(const Matrix& matrix) {}
+
 void FilterInput::SetRenderingMode(Entity::RenderingMode rendering_mode) {}
 
 }  // namespace impeller

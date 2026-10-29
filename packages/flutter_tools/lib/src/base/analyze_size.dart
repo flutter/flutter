@@ -17,14 +17,11 @@ import 'terminal.dart';
 /// A class to analyze APK and AOT snapshot and generate a breakdown of the data.
 class SizeAnalyzer {
   SizeAnalyzer({
-    required FileSystem fileSystem,
-    required Logger logger,
-    required Analytics analytics,
-    Pattern appFilenamePattern = 'libapp.so',
-  }) : _analytics = analytics,
-       _fileSystem = fileSystem,
-       _logger = logger,
-       _appFilenamePattern = appFilenamePattern;
+    required this._fileSystem,
+    required this._logger,
+    required this._analytics,
+    this._appFilenamePattern = 'libapp.so',
+  });
 
   final FileSystem _fileSystem;
   final Logger _logger;

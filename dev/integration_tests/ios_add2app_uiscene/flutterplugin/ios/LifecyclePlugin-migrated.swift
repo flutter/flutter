@@ -6,7 +6,8 @@ import Flutter
 import UIKit
 
 public class MyPlugin: NSObject, FlutterPlugin, FlutterSceneLifeCycleDelegate {
-  var events = [String]()
+  public static var instance: MyPlugin?
+  public var events = [String]()
 
   public static func register(with registrar: FlutterPluginRegistrar) {
     let channel = FlutterMethodChannel(
@@ -14,13 +15,13 @@ public class MyPlugin: NSObject, FlutterPlugin, FlutterSceneLifeCycleDelegate {
       binaryMessenger: registrar.messenger()
     )
     let instance = MyPlugin()
+    MyPlugin.instance = instance
     registrar.addMethodCallDelegate(instance, channel: channel)
     registrar.addApplicationDelegate(instance)
     registrar.addSceneDelegate(instance)
   }
 
-  public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult)
-  {
+  public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
     switch call.method {
     case "getLifecycleEvents":
       result(events.joined(separator: "\n"))
@@ -73,6 +74,7 @@ public class MyPlugin: NSObject, FlutterPlugin, FlutterSceneLifeCycleDelegate {
     options: [UIApplication.OpenURLOptionsKey: Any] = [:]
   ) -> Bool {
     events.append("applicationOpenURL")
+    events.append("url:\(url.absoluteString)")
     return true
   }
 
@@ -91,6 +93,10 @@ public class MyPlugin: NSObject, FlutterPlugin, FlutterSceneLifeCycleDelegate {
     restorationHandler: @escaping ([Any]) -> Void
   ) -> Bool {
     events.append("applicationContinueUserActivity")
+    if userActivity.activityType == NSUserActivityTypeBrowsingWeb,
+       let url = userActivity.webpageURL {
+      events.append("url:\(url.absoluteString)")
+    }
     return true
   }
 
@@ -102,6 +108,13 @@ public class MyPlugin: NSObject, FlutterPlugin, FlutterSceneLifeCycleDelegate {
     options connectionOptions: UIScene.ConnectionOptions?
   ) -> Bool {
     events.append("sceneWillConnect")
+    if let userActivity = connectionOptions?.userActivities.first(where: { $0.activityType == NSUserActivityTypeBrowsingWeb }),
+       let url = userActivity.webpageURL {
+      events.append("url:\(url.absoluteString)")
+    }
+    if let urlContext = connectionOptions?.urlContexts.first {
+      events.append("url:\(urlContext.url.absoluteString)")
+    }
     return true
   }
 
@@ -130,13 +143,18 @@ public class MyPlugin: NSObject, FlutterPlugin, FlutterSceneLifeCycleDelegate {
     openURLContexts URLContexts: Set<UIOpenURLContext>
   ) -> Bool {
     events.append("sceneOpenURLContexts")
+    if let url = URLContexts.first?.url {
+      events.append("url:\(url.absoluteString)")
+    }
     return true
   }
 
-  public func scene(_ scene: UIScene, continue userActivity: NSUserActivity)
-    -> Bool
-  {
+  public func scene(_ scene: UIScene, continue userActivity: NSUserActivity) -> Bool {
     events.append("sceneContinueUserActivity")
+    if userActivity.activityType == NSUserActivityTypeBrowsingWeb,
+       let url = userActivity.webpageURL {
+      events.append("url:\(url.absoluteString)")
+    }
     return true
   }
 

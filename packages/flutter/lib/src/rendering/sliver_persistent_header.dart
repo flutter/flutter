@@ -511,11 +511,11 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
   /// direction.
   RenderSliverFloatingPersistentHeader({
     super.child,
-    TickerProvider? vsync,
+    this._vsync,
     this.snapConfiguration,
     super.stretchConfiguration,
     required this.showOnScreenConfiguration,
-  }) : _vsync = vsync;
+  });
 
   AnimationController? _controller;
   late Animation<double> _animation;

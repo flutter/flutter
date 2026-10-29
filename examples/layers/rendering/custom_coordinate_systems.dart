@@ -6,6 +6,7 @@
 // system. Most of the guts of this examples are in src/sector_layout.dart.
 
 import 'package:flutter/rendering.dart';
+
 import 'src/binding.dart';
 import 'src/sector_layout.dart';
 

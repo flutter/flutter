@@ -318,9 +318,8 @@ void main() {
       const InputBorder border = InputBorder.none;
       await tester.pumpWidget(
         inputDatePickerField(
-          theme: ThemeData.from(
-            colorScheme: const ColorScheme.light(),
-          ).copyWith(inputDecorationTheme: const InputDecorationThemeData(border: border)),
+          theme: ThemeData.from(colorScheme: const ColorScheme.light())
+              .copyWith(inputDecorationTheme: const InputDecorationThemeData(border: border)),
         ),
       );
       await tester.pumpAndSettle();
