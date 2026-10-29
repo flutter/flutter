@@ -54,6 +54,9 @@ def _build_link(source):
 
 def _copy(source, destination):
   """Copies a file, or makes a link of the build's again; a directory with its contents."""
+  # The parent first: a bundle's top-level link (FlutterMacOS.framework/
+  # FlutterMacOS) sorts before the files under Versions/ (the Mac's T47).
+  os.makedirs(os.path.dirname(destination), exist_ok=True)
   link = _build_link(source)
   if link is not None:
     if os.path.lexists(destination):
@@ -65,7 +68,6 @@ def _copy(source, destination):
     for name in sorted(os.listdir(source)):
       _copy(os.path.join(source, name), os.path.join(destination, name))
     return
-  os.makedirs(os.path.dirname(destination), exist_ok=True)
   shutil.copyfile(source, destination)
   shutil.copymode(source, destination)
 
