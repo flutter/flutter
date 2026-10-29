@@ -4801,11 +4801,13 @@ class EditableTextState extends State<EditableText>
     _value = value;
     // Changes made by the keyboard can sometimes be "out of band" for listening
     // components, so always send those events, even if we didn't think it
-    // changed. Also, the user long pressing should always send a selection change
-    // as well.
+    // changed. Gesture-based selection updates must notify even when the
+    // selection remains unchanged, so the overlay can be recreated.
     if (selectionChanged ||
         (userInteraction &&
             (cause == SelectionChangedCause.longPress ||
+                cause == SelectionChangedCause.doubleTap ||
+                cause == SelectionChangedCause.forcePress ||
                 cause == SelectionChangedCause.keyboard))) {
       _handleSelectionChanged(_value.selection, cause);
       _bringIntoViewBySelectionState(oldTextSelection, value.selection, cause);
@@ -5215,10 +5217,12 @@ class EditableTextState extends State<EditableText>
     // Even if the value doesn't change, it may be necessary to focus and build
     // the selection overlay. For example, this happens when right clicking an
     // unfocused field that previously had a selection in the same spot.
-    // A long press must still notify listeners and recreate the selection
-    // overlay when the selection is unchanged (for example, after a dialog
-    // temporarily took focus away). _formatAndSetValue handles that case.
-    if (value == textEditingValue && cause != SelectionChangedCause.longPress) {
+    // Gesture-based selections must still recreate the selection overlay
+    // when the value is unchanged (for example, after focus was lost).
+    if (value == textEditingValue &&
+        cause != SelectionChangedCause.longPress &&
+        cause != SelectionChangedCause.doubleTap &&
+        cause != SelectionChangedCause.forcePress) {
       if (!widget.focusNode.hasFocus) {
         _flagInternalFocus();
         widget.focusNode.requestFocus();
