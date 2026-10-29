@@ -30,13 +30,14 @@ cc_library(
     copts = [
         "-Wthread-safety-analysis",  # is_clang
     ] + FLUTTER_COPTS,
-    linkopts = select({
-        "@platforms//os:android": [
-            "-lEGL",  # is_android
-        ],
-        "//conditions:default": [],
-    }),
+    linkopts = [
+        "-lEGL",  # is_android
+    ],
     local_defines = FLUTTER_LOCAL_DEFINES,
+    target_compatible_with = select({
+        "@platforms//os:android": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
     deps = [
         "//engine/src:include_root",
         "//engine/src/flutter/fml",
