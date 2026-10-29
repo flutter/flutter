@@ -6073,14 +6073,15 @@ base class FragmentShader extends Shader {
   /// Any float uniforms that are left uninitialized will default to `0`.
   @Deprecated(
     'Use getUniformFloat, getUniformVec2, getUniformVec3, getUniformVec4, or a related method '
-    'to set uniforms by name instead.',
+    'to set uniforms by name instead. '
+    'This feature was deprecated after v3.51.0-0.1.pre.',
   )
   void setFloat(int index, double value) {
     _setFloat(index, value);
   }
 
   void _setFloat(int index, double value) {
-    assert(!debugDisposed, 'Tried to accesss uniforms on a disposed Shader: $this');
+    assert(!debugDisposed, 'Tried to access uniforms on a disposed Shader: $this');
     _floats[index] = value;
   }
 
