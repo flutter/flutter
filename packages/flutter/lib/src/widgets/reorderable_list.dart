@@ -268,6 +268,11 @@ class ReorderableList extends StatefulWidget {
   ///
   /// The index parameter of the callback is the index of the selected item.
   ///
+  /// The list can be rebuilt from this callback, for example to change the
+  /// size of its items. While an item is being dragged, the proxy that follows
+  /// the pointer shows the widget most recently built for that item, and the
+  /// gap left in the list is resized to match it.
+  ///
   /// See also:
   ///
   ///   * [onReorderEnd], which is a called when the dragged item is dropped.
@@ -893,6 +898,58 @@ class SliverReorderableListState extends State<SliverReorderableList>
     }
   }
 
+  // Called when the dragged item is rebuilt, so the proxy shows the latest
+  // widget instead of the one captured when the drag started.
+  void _updateDragProxy(_ReorderableItemState item) {
+    final _DragInfo? dragInfo = _dragInfo;
+    if (dragInfo != null && dragInfo.index == item.index) {
+      dragInfo.child = item.widget.child;
+      dragInfo.capturedThemes = item.widget.capturedThemes;
+      // The item is updated while the sliver builds its children, which can
+      // happen during layout, so the overlay entry cannot be marked dirty here.
+      // The proxy therefore picks up the new child one frame after the list.
+      SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) {
+        if (!mounted || _dragInfo != dragInfo) {
+          return;
+        }
+        if (item.mounted) {
+          final itemRenderBox = item.context.findRenderObject()! as RenderBox;
+          dragInfo.itemLayoutConstraints = itemRenderBox.constraints;
+        }
+        _overlayEntry?.markNeedsBuild();
+      }, debugLabel: 'SliverReorderableList.updateDragProxy');
+    }
+  }
+
+  // Called after the proxy has been laid out at a size different from the
+  // dragged item's size, so the gap left in the list matches the proxy.
+  void _updateDragProxySize(_DragInfo dragInfo) {
+    setState(() {
+      _overlayEntry?.markNeedsBuild();
+      for (final _ReorderableItemState item in _items.values) {
+        if (item.index == dragInfo.index) {
+          item.rebuild();
+        } else {
+          item.updateForGap(dragInfo.index, _insertIndex!, dragInfo.itemExtent, false, _reverse);
+        }
+      }
+    });
+    if (_finalDropPosition != null) {
+      // The item is already animating to its drop position, which moves once
+      // the resized gap has been laid out.
+      SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) {
+        if (!mounted || _dragInfo != dragInfo) {
+          return;
+        }
+        final Offset? dropPosition = _dropPosition(dragInfo);
+        if (dropPosition != null && dropPosition != _finalDropPosition) {
+          _finalDropPosition = dropPosition;
+          _overlayEntry?.markNeedsBuild();
+        }
+      }, debugLabel: 'SliverReorderableList.updateDropPosition');
+    }
+  }
+
   Drag? _dragStart(Offset position) {
     assert(_dragInfo == null);
     final _ReorderableItemState item = _items[_dragIndex!]!;
@@ -944,38 +1001,55 @@ class SliverReorderableListState extends State<SliverReorderableList>
 
   void _dragEnd(_DragInfo item) {
     setState(() {
-      if (_insertIndex! - item.index == 1) {
-        // When returning to original position from below, _insertIndex equals
-        // item.index + 1 because insertion index is calculated with the dragged
-        // item still present. Use the actual target position for animation.
-        _finalDropPosition = _itemOffsetAt(_insertIndex! - 1);
-      } else if (_insertIndex == item.index) {
-        // No movement - animate to current position
-        _finalDropPosition = _itemOffsetAt(_insertIndex!);
-      } else if (_reverse) {
-        if (_insertIndex! >= _items.length) {
-          // Drop at the starting position of the last element and offset its own extent
-          _finalDropPosition =
-              _itemOffsetAt(_items.length - 1) - _extentOffset(item.itemExtent, _scrollDirection);
-        } else {
-          // Drop at the end of the current element occupying the insert position
-          _finalDropPosition =
-              _itemOffsetAt(_insertIndex!) +
-              _extentOffset(_itemExtentAt(_insertIndex!), _scrollDirection);
-        }
-      } else {
-        if (_insertIndex! == 0) {
-          // Drop at the starting position of the first element and offset its own extent
-          _finalDropPosition = _itemOffsetAt(0) - _extentOffset(item.itemExtent, _scrollDirection);
-        } else {
-          // Drop at the end of the previous element occupying the insert position
-          final int atIndex = _insertIndex! - 1;
-          _finalDropPosition =
-              _itemOffsetAt(atIndex) + _extentOffset(_itemExtentAt(atIndex), _scrollDirection);
-        }
-      }
+      // If the item that defines the drop position is no longer built, for
+      // example because it was scrolled out of view, settle in place.
+      _finalDropPosition = _dropPosition(item) ?? item.dragPosition - item.dragOffset;
     });
     widget.onReorderEnd?.call(_insertIndex!);
+  }
+
+  // Returns the global position the dragged item animates to when dropped, or
+  // null if an item it depends on is not currently built.
+  Offset? _dropPosition(_DragInfo item) {
+    final int insertIndex = _insertIndex!;
+    final Offset ownExtent = _extentOffset(item.itemExtent, _scrollDirection);
+    Offset? startOf(int index) => _items[index]?.targetGeometry().topLeft;
+    Offset? endOf(int index) {
+      final Rect? geometry = _items[index]?.targetGeometry();
+      if (geometry == null) {
+        return null;
+      }
+      return geometry.topLeft +
+          _extentOffset(_sizeExtent(geometry.size, _scrollDirection), _scrollDirection);
+    }
+
+    if (insertIndex - item.index == 1) {
+      // When returning to original position from below, _insertIndex equals
+      // item.index + 1 because insertion index is calculated with the dragged
+      // item still present. Use the actual target position for animation.
+      return startOf(insertIndex - 1);
+    } else if (insertIndex == item.index) {
+      // No movement - animate to current position
+      return startOf(insertIndex);
+    } else if (_reverse) {
+      if (insertIndex >= _items.length) {
+        // Drop at the starting position of the last element and offset its own extent
+        final Offset? start = startOf(_items.length - 1);
+        return start == null ? null : start - ownExtent;
+      } else {
+        // Drop at the end of the current element occupying the insert position
+        return endOf(insertIndex);
+      }
+    } else {
+      if (insertIndex == 0) {
+        // Drop at the starting position of the first element and offset its own extent
+        final Offset? start = startOf(0);
+        return start == null ? null : start - ownExtent;
+      } else {
+        // Drop at the end of the previous element occupying the insert position
+        return endOf(insertIndex - 1);
+      }
+    }
   }
 
   void _dropCompleted() {
@@ -1131,14 +1205,6 @@ class SliverReorderableListState extends State<SliverReorderableList>
     );
   }
 
-  Offset _itemOffsetAt(int index) {
-    return _items[index]!.targetGeometry().topLeft;
-  }
-
-  double _itemExtentAt(int index) {
-    return _sizeExtent(_items[index]!.targetGeometry().size, _scrollDirection);
-  }
-
   Widget _itemBuilder(BuildContext context, int index) {
     if (_dragInfo != null && index >= widget.itemCount) {
       return switch (_scrollDirection) {
@@ -1288,6 +1354,9 @@ class _ReorderableItemState extends State<_ReorderableItem> {
     if (oldWidget.index != widget.index) {
       _listState._unregisterItem(oldWidget.index, this);
       _listState._registerItem(this);
+    }
+    if (_dragging) {
+      _listState._updateDragProxy(this);
     }
   }
 
@@ -1609,6 +1678,18 @@ class _DragInfo extends Drag {
     onDropCompleted?.call();
   }
 
+  void _handleProxySizeChanged(Size size) {
+    // A cancellation or a new drag can replace this drag before the callback
+    // runs. Only update geometry for the drag that owns the proxy.
+    if (listState._dragInfo != this) {
+      return;
+    }
+    itemSize = size;
+    itemExtent = _sizeExtent(size, scrollDirection);
+    dragPosition = _adjustedDragOffset(_rawDragPosition);
+    listState._updateDragProxySize(this);
+  }
+
   Widget createProxy(BuildContext context) {
     return capturedThemes.wrap(
       _DragItemProxy(
@@ -1619,9 +1700,60 @@ class _DragInfo extends Drag {
         animation: _proxyAnimation!,
         position: dragPosition - dragOffset - _overlayOrigin(context),
         proxyDecorator: proxyDecorator,
-        child: child,
+        child: _DragProxySizeObserver(
+          size: itemSize,
+          onSizeChanged: _handleProxySizeChanged,
+          child: child,
+        ),
       ),
     );
+  }
+}
+
+// Reports when the proxy's child is laid out at a size other than [size], the
+// size the drag currently assumes for the item.
+class _DragProxySizeObserver extends SingleChildRenderObjectWidget {
+  const _DragProxySizeObserver({required this.size, required this.onSizeChanged, super.child});
+
+  final Size size;
+  final ValueChanged<Size> onSizeChanged;
+
+  @override
+  _RenderDragProxySizeObserver createRenderObject(BuildContext context) {
+    return _RenderDragProxySizeObserver(size: size, onSizeChanged: onSizeChanged);
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, _RenderDragProxySizeObserver renderObject) {
+    renderObject
+      ..expectedSize = size
+      ..onSizeChanged = onSizeChanged;
+  }
+}
+
+class _RenderDragProxySizeObserver extends RenderProxyBox {
+  _RenderDragProxySizeObserver({required Size size, required this.onSizeChanged})
+    : expectedSize = size;
+
+  Size expectedSize;
+  ValueChanged<Size> onSizeChanged;
+  bool _callbackScheduled = false;
+
+  @override
+  void performLayout() {
+    super.performLayout();
+    if (size == expectedSize || _callbackScheduled) {
+      return;
+    }
+    // The list cannot be rebuilt during layout, so report the new size once
+    // this frame is done.
+    _callbackScheduled = true;
+    SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) {
+      _callbackScheduled = false;
+      if (attached && hasSize && size != expectedSize) {
+        onSizeChanged(size);
+      }
+    }, debugLabel: 'SliverReorderableList.updateDragProxySize');
   }
 }
 

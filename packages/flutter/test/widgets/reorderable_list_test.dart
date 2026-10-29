@@ -2171,6 +2171,229 @@ void main() {
     );
     expect(tester.getSize(find.byType(ReorderableDelayedDragStartListener)), Size.zero);
   });
+
+  // Regression tests for https://github.com/flutter/flutter/issues/180750.
+  for (final (Axis axis, bool reverse, PointerDeviceKind kind, double targetExtent)
+      in <(Axis, bool, PointerDeviceKind, double)>[
+        (Axis.vertical, false, PointerDeviceKind.mouse, 50),
+        (Axis.vertical, true, PointerDeviceKind.mouse, 150),
+        (Axis.horizontal, false, PointerDeviceKind.touch, 150),
+        (Axis.horizontal, true, PointerDeviceKind.touch, 50),
+      ]) {
+    testWidgets(
+      'Drag proxy follows item rebuilds: $axis, reverse=$reverse, $kind, extent=$targetExtent',
+      (WidgetTester tester) async {
+        final extent = ValueNotifier<double>(100);
+        addTearDown(extent.dispose);
+        final items = <int>[0, 1, 2];
+        var dragStarts = 0;
+        await tester.pumpWidget(
+          TestWidgetsApp(
+            home: ValueListenableBuilder<double>(
+              valueListenable: extent,
+              builder: (BuildContext context, double value, Widget? child) {
+                return CustomScrollView(
+                  scrollDirection: axis,
+                  reverse: reverse,
+                  slivers: <Widget>[
+                    SliverReorderableList(
+                      itemCount: 3,
+                      onReorderItem: (int oldIndex, int newIndex) {
+                        items.insert(newIndex, items.removeAt(oldIndex));
+                      },
+                      onReorderStart: (int index) {
+                        dragStarts += 1;
+                        extent.value = targetExtent;
+                      },
+                      onReorderEnd: (int index) {
+                        extent.value = 100;
+                      },
+                      itemBuilder: (BuildContext context, int index) {
+                        final int item = items[index];
+                        return ReorderableDragStartListener(
+                          key: ValueKey<int>(item),
+                          index: index,
+                          child: SizedBox(
+                            key: ValueKey<String>('size-$item'),
+                            width: axis == Axis.horizontal ? value : null,
+                            height: axis == Axis.vertical ? value : null,
+                            child: StatefulBuilder(
+                              key: ValueKey<String>('content-$item'),
+                              builder: (BuildContext context, StateSetter setState) {
+                                return Text('$item: ${value.toStringAsFixed(1)}');
+                              },
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ],
+                );
+              },
+            ),
+          ),
+        );
+
+        final Finder item0 = find.byKey(const ValueKey<String>('size-0'));
+        final Finder item1 = find.byKey(const ValueKey<String>('size-1'));
+        final Finder content0 = find.byKey(const ValueKey<String>('content-0'));
+        final Finder scrollView = find.byType(CustomScrollView);
+
+        Offset alongAxis(double delta) {
+          final double signed = reverse ? -delta : delta;
+          return axis == Axis.vertical ? Offset(0, signed) : Offset(signed, 0);
+        }
+
+        double mainExtent(Finder finder) {
+          final Size size = tester.getSize(finder);
+          return axis == Axis.vertical ? size.height : size.width;
+        }
+
+        // Distance from the leading edge of the scroll view to the leading edge
+        // of the item found by finder.
+        double leadingDistance(Finder finder) {
+          final Rect bounds = tester.getRect(scrollView);
+          final Rect rect = tester.getRect(finder);
+          return switch ((axis, reverse)) {
+            (Axis.vertical, false) => rect.top - bounds.top,
+            (Axis.vertical, true) => bounds.bottom - rect.bottom,
+            (Axis.horizontal, false) => rect.left - bounds.left,
+            (Axis.horizontal, true) => bounds.right - rect.right,
+          };
+        }
+
+        final TestGesture drag = await tester.startGesture(tester.getCenter(item0), kind: kind);
+        await drag.moveBy(alongAxis(25));
+        await tester.pumpAndSettle();
+
+        // The proxy and the gap in front of item 1 use the size built from
+        // onReorderStart, not the size captured when the drag started.
+        expect(dragStarts, 1);
+        expect(mainExtent(item0), targetExtent);
+        expect(mainExtent(item1), targetExtent);
+        expect(leadingDistance(item1), targetExtent);
+
+        // Rebuilding again during the drag updates the same stateful child.
+        final State<StatefulWidget> proxyState = tester.state(content0);
+        extent.value = 80;
+        await tester.pumpAndSettle();
+        expect(tester.state(content0), same(proxyState));
+        expect(find.text('0: 80.0'), findsOneWidget);
+        expect(mainExtent(item0), 80);
+        expect(mainExtent(item1), 80);
+        expect(leadingDistance(item1), 80);
+
+        // Move to the last slot and release; onReorderEnd restores the size.
+        await drag.moveBy(alongAxis(240));
+        await tester.pumpAndSettle();
+        await drag.up();
+        // Frame 1 rebuilds the list from onReorderEnd, frame 2 rebuilds the
+        // proxy with the new child, frame 3 resizes the gap, and frame 4 moves
+        // the drop target. Check the proxy just before the 250ms drop
+        // animation ends, so it is close to the corrected drop target.
+        await tester.pump();
+        await tester.pump();
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 249));
+        expect(leadingDistance(item0), closeTo(200, 1));
+
+        await tester.pumpAndSettle();
+        expect(items, <int>[1, 2, 0]);
+        expect(mainExtent(item0), 100);
+        expect(tester.takeException(), isNull);
+      },
+    );
+  }
+
+  for (final buildProxyFirst in <bool>[false, true]) {
+    testWidgets(
+      'Pending drag proxy updates tolerate cancellation: buildProxyFirst=$buildProxyFirst',
+      (WidgetTester tester) async {
+        final listKey = GlobalKey<SliverReorderableListState>();
+        final extent = ValueNotifier<double>(100);
+        addTearDown(extent.dispose);
+        await tester.pumpWidget(
+          TestWidgetsApp(
+            home: ValueListenableBuilder<double>(
+              valueListenable: extent,
+              builder: (BuildContext context, double value, Widget? child) {
+                return CustomScrollView(
+                  slivers: <Widget>[
+                    SliverReorderableList(
+                      key: listKey,
+                      itemCount: 3,
+                      onReorderItem: (int oldIndex, int newIndex) {},
+                      itemBuilder: (BuildContext context, int index) {
+                        return ReorderableDragStartListener(
+                          key: ValueKey<int>(index),
+                          index: index,
+                          child: SizedBox(height: value, child: Text('item $index')),
+                        );
+                      },
+                    ),
+                  ],
+                );
+              },
+            ),
+          ),
+        );
+        final TestGesture drag = await tester.startGesture(tester.getCenter(find.text('item 0')));
+        await drag.moveBy(const Offset(0, 25));
+        if (buildProxyFirst) {
+          await tester.pumpAndSettle();
+        }
+        extent.value = 50;
+        // Cancel before the callbacks scheduled by this frame's proxy rebuild.
+        tester.binding.addPostFrameCallback((Duration timeStamp) {
+          listKey.currentState!.cancelReorder();
+        });
+        await tester.pumpAndSettle();
+        await drag.up();
+        await tester.pumpAndSettle();
+        expect(find.text('item 0'), findsOneWidget);
+        expect(tester.takeException(), isNull);
+      },
+    );
+  }
+
+  testWidgets('Dropping settles in place when the drop target is not built', (
+    WidgetTester tester,
+  ) async {
+    final listKey = GlobalKey<SliverReorderableListState>();
+    final controller = ScrollController();
+    addTearDown(controller.dispose);
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: CustomScrollView(
+          controller: controller,
+          cacheExtent: 0,
+          slivers: <Widget>[
+            SliverReorderableList(
+              key: listKey,
+              itemCount: 30,
+              onReorderItem: (int oldIndex, int newIndex) {},
+              itemBuilder: (BuildContext context, int index) {
+                return ReorderableDragStartListener(
+                  key: ValueKey<int>(index),
+                  index: index,
+                  child: SizedBox(height: 100, child: Text('item $index')),
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+    final TestGesture drag = await tester.startGesture(tester.getCenter(find.text('item 3')));
+    await drag.moveBy(const Offset(0, -150));
+    await tester.pumpAndSettle();
+    // Scroll the item that defines the drop position out of view.
+    controller.jumpTo(1000);
+    await tester.pump();
+    await drag.up();
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+  });
 }
 
 class TestList extends StatelessWidget {
