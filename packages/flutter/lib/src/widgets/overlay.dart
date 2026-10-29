@@ -1084,8 +1084,9 @@ mixin _RenderTheaterMixin on RenderBox {
     assert(!debugNeedsLayout);
     BaselineOffset baselineOffset = BaselineOffset.noBaseline;
     for (final RenderBox child in _childrenInPaintOrder()) {
-      // A kept-alive layout surrogate may leave its deferred child unlaid out.
-      if (child is _RenderDeferredLayoutBox && child.needsLayout) {
+      // Portal children are laid out after the theater and cannot contribute
+      // to its baseline during layout.
+      if (child is _RenderDeferredLayoutBox) {
         continue;
       }
       assert(!child.debugNeedsLayout);
@@ -1406,8 +1407,8 @@ class _RenderTheater extends RenderBox
 
     BaselineOffset baselineOffset = BaselineOffset.noBaseline;
     for (final RenderBox child in _childrenInPaintOrder()) {
-      // Match the actual baseline traversal when deferred layout is pending.
-      if (child is _RenderDeferredLayoutBox && child.needsLayout) {
+      // Match the actual baseline traversal by excluding portal children.
+      if (child is _RenderDeferredLayoutBox) {
         continue;
       }
       baselineOffset = baselineOffset.minOf(
@@ -1500,6 +1501,14 @@ class _RenderTheater extends RenderBox
     // Equivalent to BoxConstraints used by RenderStack for StackFit.expand.
     _nonPositionedChildConstraints = BoxConstraints.tight(size);
     for (final RenderBox child in _childrenInPaintOrder()) {
+      // Do not establish deferred layout before the surrogate has geometry.
+      // Already-sized children must still receive updated theater constraints.
+      if (child is _RenderDeferredLayoutBox &&
+          !child.hasSize &&
+          (!child._layoutSurrogate.hasSize ||
+              !child._layoutSurrogate.isReadyForInitialDeferredLayout)) {
+        continue;
+      }
       if (child != sizeDeterminingChild) {
         layoutChild(child, _nonPositionedChildConstraints);
       }
@@ -2557,12 +2566,13 @@ class _DeferredLayout extends SingleChildRenderObjectWidget {
 // `_layoutSurrogate` (which must be a descendant of this `RenderObject`'s
 // parent) through the parent `_RenderTheater` are known. To this end:
 //
-// 1. It's a relayout boundary, and calling `markNeedsLayout` on it or adding it
-//    to the `_RenderTheater` as a child never dirties its `_RenderTheater`.
-//    Once established as a relayout boundary, it is added to the
-//    `PipelineOwner`'s dirty list when marked as needing layout. Before its
-//    first layout, it can remain attached without being on the dirty list if
+// 1. Once established as a relayout boundary, it normally schedules its own
+//    layout rather than dirtying its `_RenderTheater`. Adding it to the theater
+//    does not itself require the theater to relayout. Before its first layout,
+//    it can remain attached without being on the dirty list if
 //    its layout surrogate is not laid out (for example, while kept alive).
+//    The theater skips its initial layout until the surrogate has a size and has
+//    completed local layout; the surrogate can then schedule deferred layout.
 //
 // 2. Its `layout` implementation is overridden such that `performLayout` does
 //    not lay out its child when it's called from `layout`, preventing the parent
@@ -2755,6 +2765,22 @@ final class _RenderDeferredLayoutBox extends RenderProxyBox
 // always kept in sync with both the surrogate and its parent theater.
 class _RenderLayoutSurrogateProxyBox extends RenderProxyBox {
   _RenderLayoutSurrogateProxyBox(this.overlayLocation);
+
+  // The theater must not initiate a deferred child's first layout while its
+  // surrogate is parked in a keep-alive bucket with pending layout.
+  // Track successful local layout separately from RenderObject's dirty flag,
+  // which is cleared even when performLayout throws. A failed layout must not make
+  // the surrogate eligible to initiate deferred layout.
+  bool get isReadyForInitialDeferredLayout => _isReadyForInitialDeferredLayout;
+
+  bool _isReadyForInitialDeferredLayout = false;
+
+  @override
+  void markNeedsLayout() {
+    _isReadyForInitialDeferredLayout = false;
+    super.markNeedsLayout();
+  }
+
   // This variable is set as soon as the _DeferredLayout widget creates it, and
   // it is only set to null when the _DeferredLayout widget is being removed
   // from the tree.
@@ -2805,7 +2831,10 @@ class _RenderLayoutSurrogateProxyBox extends RenderProxyBox {
 
   @override
   void performLayout() {
+    // Changed constraints can start layout without calling markNeedsLayout.
+    _isReadyForInitialDeferredLayout = false;
     super.performLayout();
+    _isReadyForInitialDeferredLayout = true;
     final _RenderDeferredLayoutBox? deferredChild = _deferredLayoutChild;
     if (deferredChild == null) {
       return;
