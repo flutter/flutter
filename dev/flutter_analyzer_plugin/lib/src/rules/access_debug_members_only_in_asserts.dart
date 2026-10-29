@@ -161,7 +161,7 @@ class _DebugMemberVisitor extends RecursiveAstVisitor<void> {
 
   @override
   void visitMethodDeclaration(MethodDeclaration node) {
-    if (node.name._isDebugOnlySymbol || node._isUnkeptToString) {
+    if (node.name._isDebugOnlySymbol || node._isStrippedToString) {
       return;
     }
     super.visitMethodDeclaration(node);
@@ -229,7 +229,7 @@ extension on MethodDeclaration {
   // Flutter strips `Object.toString` overrides in profile and release builds via
   // `--delete-tostring-package-uri=package:flutter`, unless opted out with a
   // `flutter:keep-to-string` or `flutter:keep-to-string-in-subtypes` pragma.
-  bool get _isUnkeptToString {
+  bool get _isStrippedToString {
     if (isStatic || name.lexeme != 'toString') {
       return false;
     }
