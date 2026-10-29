@@ -56,12 +56,16 @@ _CLONE_FLAG = "-c" if HOST_OS == "mac" else "--reflink=auto"
 # the manifest beside the tree (`<test>.runfiles/MANIFEST`: `_main/<path>
 # <target>` per file, a directory output as one entry), which an unsandboxed
 # test's real runfiles tree needs -- the last run's copies stand there --,
-# then a directory (or a link to one: a directory output of the build) is
-# copied beside itself with the links followed (cp -RL, as BSD and GNU cp
-# both have it) and moved into place, and a file's real copy is made first,
-# the link removed, the copy made (BSD cp has no --remove-destination).
+# then a directory is copied beside itself and moved into place: a runfiles
+# directory of links with the links followed (cp -RL, as BSD and GNU cp
+# both have it); a link to a directory output of the build with that link
+# alone followed (-H) and the directory's own links kept -- a framework
+# bundle's Versions/Current -> A, which codesign wants as links ("bundle
+# format is ambiguous" over their copies: the Mac's T50). A file's real copy
+# is made first, the link removed, the copy made (BSD cp has no
+# --remove-destination).
 _WRITABLE_FUNCTION = """writable_path() {
-  local f="$1" manifest="$root/../MANIFEST" rel target
+  local f="$1" manifest="$root/../MANIFEST" rel target follow
   if [ -f "$manifest" ]; then
     rm -rf "$root/$f"
     while IFS=' ' read -r rel target; do
@@ -72,7 +76,9 @@ _WRITABLE_FUNCTION = """writable_path() {
     done < <(awk -v p="_main/$f" '$1 == p || index($1, p "/") == 1' "$manifest")
   fi
   if [ -d "$root/$f" ]; then
-    cp @CLONE@ -RL "$root/$f" "$root/$f.writable" && rm -rf "$root/$f" && mv "$root/$f.writable" "$root/$f" && chmod -R u+w "$root/$f"
+    follow=-L
+    if [ -L "$root/$f" ]; then follow=-H; fi
+    cp @CLONE@ -R $follow "$root/$f" "$root/$f.writable" && rm -rf "$root/$f" && mv "$root/$f.writable" "$root/$f" && chmod -R u+w "$root/$f"
   elif [ -L "$root/$f" ]; then
     local real
     real="$(readlink -f "$root/$f")" && rm -f "$root/$f" && cp "$real" "$root/$f" && chmod u+w "$root/$f"
