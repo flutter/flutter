@@ -70,6 +70,9 @@ def _copy(source, destination):
     return
   shutil.copyfile(source, destination)
   shutil.copymode(source, destination)
+  # Writable: the build's outputs are read-only, and the recipe strips the
+  # fat binary in place (strip -x -S: "not writable" otherwise; the Mac's T47).
+  os.chmod(destination, os.stat(destination).st_mode | 0o200)
 
 
 def _relink_frameworks(root):
@@ -112,6 +115,12 @@ def _relink_frameworks(root):
 
 
 def main(argv):
+  # The action's environment has no PATH (run_python's is the interpreter's
+  # two variables), and dsymutil finds the lipo it joins a universal dSYM
+  # with by PATH alone ("error: lipo: No such file or directory", the Mac's
+  # T47): the system's, where Xcode's shims are.
+  if '/usr/bin' not in os.environ.get('PATH', '').split(':'):
+    os.environ['PATH'] = '/usr/bin:/bin:' + os.environ.get('PATH', '')
   args = _expanded(argv[1:])
   script = None
   builds = {}  # key -> [(file, path)]
