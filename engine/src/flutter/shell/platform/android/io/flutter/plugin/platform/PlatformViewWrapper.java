@@ -11,9 +11,11 @@ import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
+import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.ViewParent;
 import android.view.ViewTreeObserver;
 import android.view.accessibility.AccessibilityEvent;
@@ -40,10 +42,6 @@ import io.flutter.util.ViewUtils;
 public class PlatformViewWrapper extends FrameLayout {
   private static final String TAG = "PlatformViewWrapper";
 
-  private int prevLeft;
-  private int prevTop;
-  private int left;
-  private int top;
   private AndroidTouchProcessor touchProcessor;
   private PlatformViewRenderTarget renderTarget;
 
@@ -82,15 +80,41 @@ public class PlatformViewWrapper extends FrameLayout {
   }
 
   /**
-   * Sets the layout parameters for this view.
+   * Moves this view to the given position, in the parent's coordinate space.
    *
-   * @param params The new parameters.
+   * <p>Only the position of the wrapper changes, which never affects the content rendered into the
+   * {@link PlatformViewRenderTarget}. To avoid re-rendering the embedded view every frame while
+   * scrolling, this doesn't request a layout pass (which would also force this view's display list
+   * to be re-recorded). Instead, the view is translated directly, which only updates its {@code
+   * RenderNode} properties.
+   *
+   * <p>The layout params are kept in sync so that any later layout pass keeps the view at the same
+   * position.
+   *
+   * @param newLeft The new left position, in physical pixels.
+   * @param newTop The new top position, in physical pixels.
    */
-  public void setLayoutParams(@NonNull FrameLayout.LayoutParams params) {
-    super.setLayoutParams(params);
-
-    left = params.leftMargin;
-    top = params.topMargin;
+  public void setOffset(int newLeft, int newTop) {
+    final ViewGroup.LayoutParams params = getLayoutParams();
+    if (params instanceof FrameLayout.LayoutParams) {
+      final FrameLayout.LayoutParams frameParams = (FrameLayout.LayoutParams) params;
+      frameParams.leftMargin = newLeft;
+      frameParams.topMargin = newTop;
+      frameParams.gravity = Gravity.LEFT | Gravity.TOP;
+    }
+    // If the view hasn't been laid out yet, the initial layout pass will position the view using
+    // the layout params.
+    if (isLaidOut()) {
+      final int dx = newLeft - getLeft();
+      final int dy = newTop - getTop();
+      if (dx != 0 || dy != 0) {
+        offsetLeftAndRight(dx);
+        offsetTopAndBottom(dy);
+        // Notify ViewTreeObserver.OnScrollChangedListeners (e.g., PopupWindow, AdMob viewability)
+        // that this view moved without a layout pass, matching RecyclerView.dispatchOnScrolled.
+        onScrollChanged(getScrollX(), getScrollY(), getScrollX(), getScrollY());
+      }
+    }
   }
 
   public void resizeRenderTarget(int width, int height) {
@@ -229,26 +253,10 @@ public class PlatformViewWrapper extends FrameLayout {
       return super.onTouchEvent(event);
     }
     gestureTracker.onTouchEvent(event, this::requestUnbuffered);
+    // The parent transformed this event into this view's coordinate space using the view's current
+    // position, so the same position maps it back into the parent's (the FlutterView's) space.
     final Matrix screenMatrix = new Matrix();
-    switch (event.getAction()) {
-      case MotionEvent.ACTION_DOWN:
-        prevLeft = left;
-        prevTop = top;
-        screenMatrix.postTranslate(left, top);
-        break;
-      case MotionEvent.ACTION_MOVE:
-        // While the view is dragged, use the left and top positions as
-        // they were at the moment the touch event fired.
-        screenMatrix.postTranslate(prevLeft, prevTop);
-        prevLeft = left;
-        prevTop = top;
-        break;
-      case MotionEvent.ACTION_UP:
-      case MotionEvent.ACTION_CANCEL:
-      default:
-        screenMatrix.postTranslate(left, top);
-        break;
-    }
+    screenMatrix.postTranslate(getLeft(), getTop());
     return touchProcessor.onTouchEvent(event, screenMatrix);
   }
 
