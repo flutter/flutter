@@ -6,9 +6,10 @@
 # Dependencies left out, their packages not converted yet (a platform the migration has not reached): //flutter/third_party/angle:libEGL, //flutter/third_party/angle:libGLESv2.
 
 load("@bazel_skylib//lib:selects.bzl", "selects")
-load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
+load("@rules_cc//cc:defs.bzl", "cc_library")
 load("//build_defs/cc:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES", "MACOS_CFLAGS_OBJC")
 load("//build_defs/cc:objc_library.bzl", "flutter_objc_library")
+load("//build_defs/testing:testing.bzl", "flutter_display_test", "flutter_gpu_test_backends")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -197,18 +198,31 @@ cc_library(
     alwayslink = True,
 )
 
-cc_test(
+# SwiftShader, its ICD manifest and the Vulkan loader, next to the
+# suites below (GN: data_deps of //flutter/third_party/swiftshader and
+# ANGLE).
+flutter_gpu_test_backends(
+    name = "gpu_test_backends",
+    target_compatible_with = select({
+        ":when_is_mac_and_enable_unittests": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+)
+
+flutter_display_test(
     name = "impeller_golden_tests",
     size = "small",
     srcs = [
         "golden_tests.cc",
         "main.cc",
     ],
+    args = ["--working_dir=$$TEST_TMPDIR"],
     copts = [
         "-Wthread-safety-analysis",  # is_clang
     ] + FLUTTER_COPTS + [
         "-Wno-unguarded-availability",  # from //flutter/display_list
     ],
+    data = [":gpu_test_backends"],
     local_defines = FLUTTER_LOCAL_DEFINES,
     target_compatible_with = select({
         ":when_is_mac_and_enable_unittests": [],
