@@ -90,10 +90,13 @@ class PlatformSelectableRegionContextMenu extends StatefulWidget {
 
   static void _synchronizeDomSelection(web.HTMLElement element, SelectionContainerDelegate client) {
     // The innerText must contain the text in order to be selected by the browser.
-    element.innerText = client.getSelectedContent()?.plainText ?? '';
+    final String text = client.getSelectedContent()?.plainText ?? '';
+    element.innerText = text;
 
-    // Selecting a detached element throws, but there is nothing to copy anyway.
-    if (!element.isConnected) {
+    // Only update the browser's DOM selection for the active client when there
+    // is selected text to copy, and only if the element is attached to the DOM
+    // (selecting a detached element throws).
+    if (client != _activeClient || text.isEmpty || !element.isConnected) {
       return;
     }
 
@@ -211,6 +214,23 @@ class _PlatformSelectableRegionContextMenuState extends State<PlatformSelectable
     super.initState();
     _elementId = PlatformSelectableRegionContextMenu._nextElementId++;
     PlatformSelectableRegionContextMenu._clientsByElementId[_elementId] = widget._client;
+  }
+
+  @override
+  void didUpdateWidget(PlatformSelectableRegionContextMenu oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget._client != oldWidget._client) {
+      PlatformSelectableRegionContextMenu._clientsByElementId[_elementId] = widget._client;
+      final web.HTMLElement? element = PlatformSelectableRegionContextMenu._elementsByClient.remove(
+        oldWidget._client,
+      );
+      if (element != null) {
+        PlatformSelectableRegionContextMenu._elementsByClient[widget._client] = element;
+      }
+      if (PlatformSelectableRegionContextMenu._activeClient == oldWidget._client) {
+        PlatformSelectableRegionContextMenu._activeClient = widget._client;
+      }
+    }
   }
 
   @override
