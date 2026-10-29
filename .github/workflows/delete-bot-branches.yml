@@ -13,7 +13,10 @@
 name: Delete Bot Branches
 
 on:
-  workflow_run:
+  # Safe because this only consumes an artifact from the triggering run as
+  # untrusted data (validated and bound to the PR's head SHA); no PR code is
+  # checked out or executed.
+  workflow_run: # zizmor: ignore[dangerous-triggers]
     workflows: [Delete Bot Branches Trigger]
     types: [completed]
 

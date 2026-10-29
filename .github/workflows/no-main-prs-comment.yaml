@@ -12,7 +12,10 @@
 name: No PRs on main Comment
 
 on:
-  workflow_run:
+  # Safe because this only consumes an artifact from the triggering run as
+  # untrusted data (validated and bound to the PR's head SHA); no PR code is
+  # checked out or executed.
+  workflow_run: # zizmor: ignore[dangerous-triggers]
     workflows: [No PRs on main]
     types: [completed]
 
