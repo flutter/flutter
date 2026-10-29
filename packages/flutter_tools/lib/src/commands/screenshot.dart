@@ -62,9 +62,6 @@ class ScreenshotCommand extends FlutterCommand {
   FileSystem get fs => toolContext.fs;
 
   @override
-  ToolContext get toolContext => super.toolContext!;
-
-  @override
   String get name => 'screenshot';
 
   @override

@@ -8,6 +8,7 @@ import 'package:completion/completion.dart';
 import 'package:file/file.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
+import '../android/gradle_utils.dart';
 import '../artifacts.dart';
 import '../base/bot_detector.dart';
 import '../base/common.dart';
@@ -17,6 +18,7 @@ import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
+import '../base/template.dart';
 import '../base/terminal.dart';
 import '../base/time.dart';
 import '../base/user_messages.dart';
@@ -24,9 +26,13 @@ import '../base/utils.dart';
 import '../cache.dart';
 import '../context/tool_context.dart';
 import '../convert.dart';
+import '../device.dart';
+import '../doctor.dart';
 import '../experimental/extension_manager.dart';
 import '../features.dart';
-import '../globals.dart' as globals;
+import '../ios/plist_parser.dart';
+import '../isolated/mustache_template.dart';
+import '../macos/cocoapods.dart';
 import '../resident_runner.dart';
 import '../tester/flutter_tester.dart';
 import '../version.dart';
@@ -66,9 +72,15 @@ class FlutterCommandRunner extends CommandRunner<void> {
   FlutterCommandRunner({
     required ToolContext toolContext,
     this._analytics = const NoOpAnalytics(),
+    this._cocoaPods,
+    this._deviceManager,
+    this._doctor,
     this._extensionManager,
     bool verboseHelp = false,
     this._featureFlags,
+    this._gradleUtils,
+    this._plistParser,
+    this._templateRenderer = const MustacheTemplateRenderer(),
   }) : _toolContext = toolContext,
        _verboseHelp = verboseHelp,
        _argParser = ArgParser(
@@ -304,12 +316,36 @@ class FlutterCommandRunner extends CommandRunner<void> {
   }
 
   final Analytics _analytics;
+  final CocoaPods? _cocoaPods;
+  final DeviceManager? _deviceManager;
+  final Doctor? _doctor;
   final ExtensionManager? _extensionManager;
   final FeatureFlags? _featureFlags;
+  final GradleUtils? _gradleUtils;
+  final PlistParser? _plistParser;
+  final TemplateRenderer _templateRenderer;
   final ToolContext _toolContext;
 
   /// The [Analytics] instance.
   Analytics get analytics => _analytics;
+
+  /// The [CocoaPods] instance, if provided.
+  CocoaPods? get cocoaPods => _cocoaPods;
+
+  /// The [DeviceManager] instance, if provided.
+  DeviceManager? get deviceManager => _deviceManager;
+
+  /// The [Doctor] instance, if provided.
+  Doctor? get doctor => _doctor;
+
+  /// The [GradleUtils] instance, if provided.
+  GradleUtils? get gradleUtils => _gradleUtils;
+
+  /// The [PlistParser] instance, if provided.
+  PlistParser? get plistParser => _plistParser;
+
+  /// The [TemplateRenderer] instance.
+  TemplateRenderer get templateRenderer => _templateRenderer;
 
   /// The [ToolContext] instance.
   ToolContext get toolContext => _toolContext;
@@ -610,7 +646,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
         // See if the user specified a specific device.
         final specifiedDeviceId = topLevelResults[FlutterGlobalOptions.kDeviceIdOption] as String?;
         if (specifiedDeviceId != null) {
-          globals.deviceManager?.specifiedDeviceId = specifiedDeviceId;
+          _deviceManager?.specifiedDeviceId = specifiedDeviceId;
         }
 
         final bool topLevelMachineFlag =

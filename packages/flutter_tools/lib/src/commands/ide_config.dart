@@ -6,7 +6,6 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/template.dart';
-import '../context/tool_context.dart';
 import '../isolated/mustache_template.dart';
 import '../runner/flutter_command.dart';
 import '../template.dart';
@@ -39,9 +38,6 @@ class IdeConfigCommand extends FlutterCommand {
   }
 
   final TemplateRenderer _templateRenderer;
-
-  @override
-  ToolContext get toolContext => super.toolContext!;
 
   @override
   final name = 'ide-config';

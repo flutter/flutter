@@ -908,6 +908,7 @@ void main() {
             appleContext: FakeAppleContext(),
             buildSystem: globals.buildSystem,
             buildTargets: globals.buildTargets,
+            deviceManager: testDeviceManager,
             toolContext: const DelegatingToolContext(),
           ).requiredArtifacts,
           unorderedEquals(<DevelopmentArtifact>{
@@ -923,6 +924,7 @@ void main() {
             appleContext: FakeAppleContext(),
             buildSystem: globals.buildSystem,
             buildTargets: globals.buildTargets,
+            deviceManager: testDeviceManager,
             toolContext: const DelegatingToolContext(),
           ).requiredArtifacts,
           unorderedEquals(<DevelopmentArtifact>{
@@ -941,6 +943,7 @@ void main() {
             appleContext: FakeAppleContext(),
             buildSystem: globals.buildSystem,
             buildTargets: globals.buildTargets,
+            deviceManager: testDeviceManager,
             toolContext: const DelegatingToolContext(),
           ).requiredArtifacts,
           unorderedEquals(<DevelopmentArtifact>{
@@ -959,6 +962,7 @@ void main() {
             appleContext: FakeAppleContext(),
             buildSystem: globals.buildSystem,
             buildTargets: globals.buildTargets,
+            deviceManager: testDeviceManager,
             toolContext: const DelegatingToolContext(),
           ).requiredArtifacts,
           unorderedEquals(<DevelopmentArtifact>{

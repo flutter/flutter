@@ -910,7 +910,7 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
     required this._appleContext,
     required this._buildSystem,
     required this._templateRenderer,
-    required ToolContext super.toolContext,
+    required super.toolContext,
     required super.verboseHelp,
   }) : super(logger: toolContext.logger) {
     registerOptionBundles(const <OptionBundle>[
@@ -940,7 +940,7 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
 
   @visibleForTesting
   @override
-  ToolContext get toolContext => super.toolContext!;
+  ToolContext get toolContext => super.toolContext;
 
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => const <DevelopmentArtifact>{

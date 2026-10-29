@@ -1175,15 +1175,14 @@ class TestWebBuildCommand extends FlutterCommand {
   TestWebBuildCommand._({
     required BuildSystem buildSystem,
     required FeatureFlags featureFlags,
-    required ToolContext toolContext,
+    required super.toolContext,
     required bool verboseHelp,
   }) : webCommand = BuildWebCommand(
          buildSystem: buildSystem,
          featureFlags: featureFlags,
          toolContext: toolContext,
          verboseHelp: verboseHelp,
-       ),
-       super(toolContext: toolContext) {
+       ) {
     addSubcommand(webCommand);
   }
 

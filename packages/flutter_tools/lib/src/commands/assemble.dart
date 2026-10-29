@@ -102,7 +102,7 @@ class AssembleCommand extends FlutterCommand {
   AssembleCommand({
     required this._buildSystem,
     required this._featureFlags,
-    required ToolContext super.toolContext,
+    required super.toolContext,
     super.verboseHelp = false,
   }) {
     requiresPubspecYaml();
@@ -183,9 +183,6 @@ class AssembleCommand extends FlutterCommand {
 
   final BuildSystem _buildSystem;
   final FeatureFlags _featureFlags;
-
-  @override
-  ToolContext get toolContext => super.toolContext!;
 
   @override
   bool get hidden => !verboseHelp;

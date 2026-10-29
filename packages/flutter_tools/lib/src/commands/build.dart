@@ -222,9 +222,6 @@ class BuildCommand extends FlutterCommand {
   }
 
   @override
-  ToolContext get toolContext => super.toolContext!;
-
-  @override
   final String name = 'build';
 
   @override
@@ -248,7 +245,7 @@ abstract class BuildSubCommand extends FlutterCommand {
     required this.logger,
     required super.verboseHelp,
     super.outputPreferences,
-    super.toolContext,
+    required super.toolContext,
   }) {
     requiresPubspecYaml();
     CommonOptions.fatalWarnings.addTo(argParser, verboseHelp: verboseHelp);
@@ -266,13 +263,9 @@ class ExtensionBuildSubCommand extends BuildSubCommand {
   ExtensionBuildSubCommand({
     required this._buildManager,
     required this.target,
-    required ToolContext toolContext,
+    required super.toolContext,
     required super.verboseHelp,
-  }) : super(
-         logger: toolContext.logger,
-         outputPreferences: toolContext.outputPreferences,
-         toolContext: toolContext,
-       ) {
+  }) : super(logger: toolContext.logger) {
     registerOptionBundle(const BuildModeOptionsBundle());
     argParser.addDescriptors(const <OptionDescriptor<Object?>>[
       CommonOptions.target,
@@ -284,9 +277,6 @@ class ExtensionBuildSubCommand extends BuildSubCommand {
 
   /// The custom build target definition provided by the tool extension.
   final ExtensionBuildTarget target;
-
-  @override
-  ToolContext get toolContext => super.toolContext!;
 
   @override
   String get name => target.name;

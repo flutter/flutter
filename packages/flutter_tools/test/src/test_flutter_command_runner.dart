@@ -6,15 +6,21 @@ import 'dart:async';
 
 import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
+import 'package:flutter_tools/src/android/gradle_utils.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/template.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/create.dart';
 import 'package:flutter_tools/src/context/tool_context.dart';
+import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/features.dart';
+import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:flutter_tools/src/isolated/mustache_template.dart';
+import 'package:flutter_tools/src/macos/cocoapods.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
 import 'package:unified_analytics/unified_analytics.dart';
@@ -66,28 +72,35 @@ Future<String> createProject(
 class TestFlutterCommandRunner extends FlutterCommandRunner {
   TestFlutterCommandRunner({
     Analytics? analytics,
+    CocoaPods? cocoaPods,
+    DeviceManager? deviceManager,
+    Doctor? doctor,
     FeatureFlags? featureFlags,
+    GradleUtils? gradleUtils,
+    PlistParser? plistParser,
+    TemplateRenderer? templateRenderer,
     ToolContext? toolContext,
   }) : super(
-         analytics: analytics ?? _defaultAnalytics(),
-         featureFlags: featureFlags ?? _defaultFeatureFlags(),
+         analytics: analytics ?? _defaultFromContext<Analytics>() ?? const NoOpAnalytics(),
+         cocoaPods: cocoaPods ?? _defaultFromContext<CocoaPods>(),
+         deviceManager: deviceManager ?? _defaultFromContext<DeviceManager>(),
+         doctor: doctor ?? _defaultFromContext<Doctor>(),
+         featureFlags: featureFlags ?? _defaultFromContext<FeatureFlags>(),
+         gradleUtils: gradleUtils ?? _defaultFromContext<GradleUtils>(),
+         plistParser: plistParser ?? _defaultFromContext<PlistParser>(),
+         templateRenderer:
+             templateRenderer ??
+             _defaultFromContext<TemplateRenderer>() ??
+             const MustacheTemplateRenderer(),
          toolContext: toolContext ?? const DelegatingToolContext(),
        );
 
-  static Analytics _defaultAnalytics() {
-    try {
-      return context.get<Analytics>() ?? const NoOpAnalytics();
-    } on UnsupportedError {
-      return const NoOpAnalytics();
+  static T? _defaultFromContext<T>() {
+    if (Zone.current[contextKey] case final AppContext appContext
+        when appContext.runtimeType == AppContext) {
+      return appContext.get<T>();
     }
-  }
-
-  static FeatureFlags? _defaultFeatureFlags() {
-    try {
-      return context.get<FeatureFlags>();
-    } on UnsupportedError {
-      return null;
-    }
+    return null;
   }
 
   @override

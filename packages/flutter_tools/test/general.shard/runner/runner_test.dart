@@ -24,6 +24,7 @@ import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/devices.dart';
+import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/context/tool_dependencies.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/flutter_device_manager.dart';
@@ -1086,6 +1087,9 @@ void main() {
 }
 
 class ArtifactsRecordingFlutterCommand extends FlutterCommand {
+  ArtifactsRecordingFlutterCommand({ToolContext? toolContext})
+    : super(toolContext: toolContext ?? const DelegatingToolContext());
+
   Artifacts? artifacts;
   bool ran = false;
 
@@ -1098,12 +1102,15 @@ class ArtifactsRecordingFlutterCommand extends FlutterCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     ran = true;
-    artifacts = toolContext?.artifacts;
+    artifacts = toolContext.artifacts;
     return FlutterCommandResult.success();
   }
 }
 
 class _DeviceManagerRecordingFlutterCommand extends FlutterCommand {
+  _DeviceManagerRecordingFlutterCommand({ToolContext? toolContext})
+    : super(toolContext: toolContext ?? const DelegatingToolContext());
+
   DeviceManager? deviceManager;
 
   @override
@@ -1114,13 +1121,14 @@ class _DeviceManagerRecordingFlutterCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    deviceManager = globals.deviceManager;
+    deviceManager = super.runner?.deviceManager;
     return FlutterCommandResult.success();
   }
 }
 
 class CrashingFlutterCommand extends FlutterCommand {
-  CrashingFlutterCommand({this._asyncCrash = false, this._completer});
+  CrashingFlutterCommand({this._asyncCrash = false, this._completer, ToolContext? toolContext})
+    : super(toolContext: toolContext ?? const DelegatingToolContext());
 
   final bool _asyncCrash;
   final Completer<void>? _completer;
@@ -1152,6 +1160,9 @@ class CrashingFlutterCommand extends FlutterCommand {
 }
 
 class MultipleExceptionCrashingFlutterCommand extends FlutterCommand {
+  MultipleExceptionCrashingFlutterCommand({ToolContext? toolContext})
+    : super(toolContext: toolContext ?? const DelegatingToolContext());
+
   final _completer = Completer<void>();
 
   @override
@@ -1180,6 +1191,9 @@ class MultipleExceptionCrashingFlutterCommand extends FlutterCommand {
 }
 
 class _GitNotFoundFlutterCommand extends FlutterCommand {
+  _GitNotFoundFlutterCommand({ToolContext? toolContext})
+    : super(toolContext: toolContext ?? const DelegatingToolContext());
+
   @override
   String get description => '';
 

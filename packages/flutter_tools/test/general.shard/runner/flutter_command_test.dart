@@ -2252,6 +2252,9 @@ Use the "flutter config" command to enable feature flags.''',
 }
 
 class FakeDeprecatedCommand extends FlutterCommand {
+  FakeDeprecatedCommand({ToolContext? toolContext})
+    : super(toolContext: toolContext ?? const DelegatingToolContext());
+
   @override
   String get description => 'A fake command';
 
@@ -2268,7 +2271,8 @@ class FakeDeprecatedCommand extends FlutterCommand {
 }
 
 class FakeTargetCommand extends FlutterCommand {
-  FakeTargetCommand() {
+  FakeTargetCommand({ToolContext? toolContext})
+    : super(toolContext: toolContext ?? const DelegatingToolContext()) {
     CommonOptions.target.addTo(argParser);
   }
 
@@ -2288,7 +2292,8 @@ class FakeTargetCommand extends FlutterCommand {
 }
 
 class FakeDdsCommand extends FlutterCommand {
-  FakeDdsCommand() {
+  FakeDdsCommand({ToolContext? toolContext})
+    : super(toolContext: toolContext ?? const DelegatingToolContext()) {
     registerOptionBundle(const DdsAndDevToolsOptionsBundle(includeDevTools: false));
   }
 
@@ -2398,7 +2403,8 @@ class FakeFeature extends Feature {
 }
 
 class DummyFlutterCommandWithPub extends FlutterCommand {
-  DummyFlutterCommandWithPub() {
+  DummyFlutterCommandWithPub({ToolContext? toolContext})
+    : super(toolContext: toolContext ?? const DelegatingToolContext()) {
     CommonOptions.pub.addTo(argParser);
   }
 
@@ -2546,7 +2552,8 @@ class DummyAllBuildOptionsFlutterCommand extends DummyFlutterCommand {
 }
 
 class _DummyOverriddenArgParserCommand extends FlutterCommand {
-  _DummyOverriddenArgParserCommand() {
+  _DummyOverriddenArgParserCommand({ToolContext? toolContext})
+    : super(toolContext: toolContext ?? const DelegatingToolContext()) {
     registerOptionBundle(const FilesystemOptionsBundle());
     DebuggingOptionDescriptors.ipv6.addTo(argParser);
     final copy = ArgParser(

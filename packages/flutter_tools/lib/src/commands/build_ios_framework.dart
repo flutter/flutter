@@ -39,7 +39,7 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
     required this._buildSystem,
     required this.codesign,
     required this.templateRenderer,
-    required ToolContext super.toolContext,
+    required super.toolContext,
     required super.verboseHelp,
   }) : super(logger: toolContext.logger) {
     registerOptionBundle(const DarwinAddToAppOptionsBundle());
@@ -120,7 +120,7 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
 
   @protected
   @override
-  ToolContext get toolContext => super.toolContext!;
+  ToolContext get toolContext => super.toolContext;
 
   @protected
   Cache get cache => toolContext.cache;

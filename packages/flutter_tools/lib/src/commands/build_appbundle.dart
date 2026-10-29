@@ -30,9 +30,9 @@ class BuildAppBundleCommand extends BuildSubCommand {
     required this._androidContext,
     required this._buildSystem,
     required this._templateRenderer,
-    required ToolContext toolContext,
+    required super.toolContext,
     super.verboseHelp = false,
-  }) : super(logger: toolContext.logger, toolContext: toolContext) {
+  }) : super(logger: toolContext.logger) {
     registerOptionBundles(const <OptionBundle>[
       CommonBuildOptionsBundle(),
       BuildModeOptionsBundle(),
@@ -89,9 +89,6 @@ class BuildAppBundleCommand extends BuildSubCommand {
   /// The [BuildSystem] used for building the project.
   @visibleForTesting
   BuildSystem get buildSystem => _buildSystem;
-
-  @override
-  ToolContext get toolContext => super.toolContext!;
 
   @override
   final name = 'appbundle';

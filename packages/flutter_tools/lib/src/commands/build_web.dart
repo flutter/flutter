@@ -6,7 +6,6 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
-import '../context/tool_context.dart';
 import '../features.dart';
 import '../isolated/build_targets.dart';
 import '../runner/flutter_command.dart';
@@ -21,13 +20,9 @@ class BuildWebCommand extends BuildSubCommand {
   BuildWebCommand({
     required this.buildSystem,
     required this.featureFlags,
-    required ToolContext toolContext,
+    required super.toolContext,
     required super.verboseHelp,
-  }) : super(
-         logger: toolContext.logger,
-         outputPreferences: toolContext.outputPreferences,
-         toolContext: toolContext,
-       ) {
+  }) : super(logger: toolContext.logger, outputPreferences: toolContext.outputPreferences) {
     registerOptionBundles(const <OptionBundle>[
       CommonBuildOptionsBundle(),
       BuildModeOptionsBundle(),
@@ -38,9 +33,6 @@ class BuildWebCommand extends BuildSubCommand {
 
   final BuildSystem buildSystem;
   final FeatureFlags featureFlags;
-
-  @override
-  ToolContext get toolContext => super.toolContext!;
 
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => const <DevelopmentArtifact>{

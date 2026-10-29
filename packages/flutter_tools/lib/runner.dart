@@ -120,8 +120,13 @@ Future<int> run(
         final ToolContext(:Cache cache, :Logger logger) = toolDeps.toolContext;
         final runner = FlutterCommandRunner(
           analytics: toolDeps.analytics,
+          cocoaPods: toolDeps.appleContext.cocoaPods,
+          deviceManager: toolDeps.deviceManager,
+          doctor: toolDeps.doctor,
           extensionManager: toolDeps.extensionManager,
           featureFlags: featureFlags,
+          gradleUtils: toolDeps.androidContext.gradleUtils,
+          plistParser: toolDeps.appleContext.plistParser,
           toolContext: toolDeps.toolContext,
           verboseHelp: verboseHelp,
         );

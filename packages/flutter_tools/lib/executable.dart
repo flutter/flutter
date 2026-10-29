@@ -357,6 +357,7 @@ List<FlutterCommand> generateCommands({
       logger: logger,
       platform: platform,
       featureFlags: featureFlags,
+      toolContext: toolContext,
     ),
     RunCommand(
       appleContext: toolDependencies.appleContext,

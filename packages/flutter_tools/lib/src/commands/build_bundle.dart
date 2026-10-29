@@ -21,7 +21,7 @@ class BuildBundleCommand extends BuildSubCommand {
   BuildBundleCommand({
     required this.buildSystem,
     required this.featureFlags,
-    required ToolContext super.toolContext,
+    required super.toolContext,
     required super.verboseHelp,
     this._bundleBuilder,
   }) : super(logger: toolContext.logger) {
@@ -82,9 +82,6 @@ class BuildBundleCommand extends BuildSubCommand {
   final BuildSystem buildSystem;
   final BundleBuilder? _bundleBuilder;
   final FeatureFlags featureFlags;
-
-  @override
-  ToolContext get toolContext => super.toolContext!;
 
   @override
   final name = 'bundle';

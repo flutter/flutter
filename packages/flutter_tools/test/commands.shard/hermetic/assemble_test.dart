@@ -11,6 +11,7 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/assemble.dart';
+import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:unified_analytics/unified_analytics.dart';
@@ -615,7 +616,8 @@ void main() {
 }
 
 final class _StubCommand extends FlutterCommand {
-  _StubCommand({super.toolContext});
+  _StubCommand({ToolContext? toolContext})
+    : super(toolContext: toolContext ?? const DelegatingToolContext());
 
   @override
   String get description => 'This is a stub';

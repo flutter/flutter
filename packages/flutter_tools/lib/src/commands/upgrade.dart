@@ -28,7 +28,7 @@ const _flutterInstallDocs = 'https://flutter.dev/setup';
 
 class UpgradeCommand extends FlutterCommand {
   UpgradeCommand({
-    required ToolContext super.toolContext,
+    required super.toolContext,
     required super.verboseHelp,
     @visibleForTesting UpgradeCommandRunner? commandRunner,
   }) : _commandRunner = commandRunner ?? UpgradeCommandRunner(toolContext: toolContext) {
@@ -72,9 +72,6 @@ class UpgradeCommand extends FlutterCommand {
   }
 
   final UpgradeCommandRunner _commandRunner;
-
-  @override
-  ToolContext get toolContext => super.toolContext!;
 
   @override
   final name = 'upgrade';

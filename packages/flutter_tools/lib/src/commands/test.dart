@@ -77,7 +77,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     super.verboseHelp = false,
   }) : _testRunner =
            testRunner ??
-           FlutterTestRunner(templateRenderer: templateRenderer, toolContext: toolContext!) {
+           FlutterTestRunner(templateRenderer: templateRenderer, toolContext: toolContext) {
     requiresPubspecYaml();
     registerOptionBundles(const <OptionBundle>[
       DdsAndDevToolsOptionsBundle(includeDevTools: false),
@@ -376,9 +376,6 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         'Whether to uninstall the app after running integration tests. '
         'Set "--no-uninstall" to keep the app installed on the device.',
   );
-
-  @override
-  ToolContext get toolContext => super.toolContext!;
 
   /// The interface for starting and configuring the tester.
   final TestWrapper testWrapper;

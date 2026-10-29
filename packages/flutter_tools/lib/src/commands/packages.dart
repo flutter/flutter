@@ -157,12 +157,9 @@ class PackagesCommand extends FlutterCommand {
 }
 
 class PackagesTestCommand extends FlutterCommand {
-  PackagesTestCommand({required ToolContext super.toolContext}) {
+  PackagesTestCommand({required super.toolContext}) {
     requiresPubspecYaml();
   }
-
-  @override
-  ToolContext get toolContext => super.toolContext!;
 
   late final Pub _pub = _createPub(toolContext);
 
@@ -195,16 +192,13 @@ class PackagesForwardCommand extends FlutterCommand {
   PackagesForwardCommand(
     this._commandName,
     this._description, {
-    required ToolContext super.toolContext,
+    required super.toolContext,
     bool requiresPubspec = false,
   }) {
     if (requiresPubspec) {
       requiresPubspecYaml();
     }
   }
-
-  @override
-  ToolContext get toolContext => super.toolContext!;
 
   late final Pub _pub = _createPub(toolContext);
 
@@ -244,10 +238,7 @@ class PackagesForwardCommand extends FlutterCommand {
 }
 
 class PackagesPassthroughCommand extends FlutterCommand {
-  PackagesPassthroughCommand({required ToolContext super.toolContext});
-
-  @override
-  ToolContext get toolContext => super.toolContext!;
+  PackagesPassthroughCommand({required super.toolContext});
 
   @override
   ArgParser argParser = ArgParser.allowAnything();
@@ -283,11 +274,8 @@ class PackagesGetCommand extends FlutterCommand {
     this._description,
     this._context, {
     required this._buildSystem,
-    required ToolContext super.toolContext,
+    required super.toolContext,
   });
-
-  @override
-  ToolContext get toolContext => super.toolContext!;
 
   final BuildSystem _buildSystem;
 
