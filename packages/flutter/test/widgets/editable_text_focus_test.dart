@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'editable_text_utils.dart';
 
-SemanticsNode textFieldSemantics() {
+SemanticsNode _textFieldSemantics() {
   return find.semantics.byFlag(SemanticsFlag.isTextField).evaluate().single;
 }
 
@@ -50,7 +50,7 @@ void main() {
     focusNode.unfocus();
     await pumpFocusChange();
     expect(findRenderEditable(tester).hasFocus, isFalse);
-    expect(textFieldSemantics(), containsSemantics(isTextField: true, isFocused: false));
+    expect(_textFieldSemantics(), containsSemantics(isTextField: true, isFocused: false));
 
     // The selection is still valid, so focusing again doesn't change it.
     focusNode.requestFocus();
@@ -58,7 +58,7 @@ void main() {
     expect(controller.selection, const TextSelection.collapsed(offset: 5));
     expect(focusNode.hasFocus, isTrue);
     expect(findRenderEditable(tester).hasFocus, isTrue);
-    expect(textFieldSemantics(), containsSemantics(isTextField: true, isFocused: true));
+    expect(_textFieldSemantics(), containsSemantics(isTextField: true, isFocused: true));
 
     semantics.dispose();
   });
