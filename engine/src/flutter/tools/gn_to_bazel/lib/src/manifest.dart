@@ -1739,8 +1739,13 @@ exports_files([
 ''',
   ),
   ConvertedFile('//flutter/sky/packages', filesGroups: <String>{'packages'}),
-  ConvertedFile('//flutter/impeller/toolkit/egl'),
-  ConvertedFile('//flutter/impeller/toolkit/gles'),
+  // The EGL and GLES toolkits include the system's <EGL/egl.h> and
+  // <GLES3/gl3.h>, and only the Android shell and the GL-over-Vulkan
+  // trampoline below reach them in GN (both under is_android): the Debian
+  // sysroot happens to have the headers, the macOS SDK has not (the Mac's
+  // T53B), and GN builds neither on either host.
+  ConvertedFile('//flutter/impeller/toolkit/egl', condition: 'is_android'),
+  ConvertedFile('//flutter/impeller/toolkit/gles', condition: 'is_android'),
   // The GL-over-Vulkan trampoline: its header includes the Vulkan backend's
   // hardware-buffer texture source, a file that exists under is_android only,
   // and only the Android shell depends on it.
