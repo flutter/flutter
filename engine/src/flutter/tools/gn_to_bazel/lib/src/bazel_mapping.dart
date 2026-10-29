@@ -273,6 +273,17 @@ const Map<String, TestRun> testRuns = <String, TestRun>{
     args: <String>['--icu-data-file-path=../+synced_deps+icu/common/icudtl.dat'],
     data: <String>['@icu//:icudata'],
   ),
+  // run_tests.py --type impeller-golden (the Mac builders) runs the golden
+  // suite with a temporary directory for the PNGs and the digest it writes
+  // (`--working_dir=<temp_dir>`, under the Metal and Vulkan validation
+  // environments), then hands them to Skia Gold (goldctl: CI's step, which
+  // the Bazel test leaves to CI -- the local half is that every golden
+  // renders). The suite's main runs wordexp over the argument, so Bazel's
+  // test directory names itself (`$$` is Bazel's escape of `$` in args).
+  '//flutter/impeller/golden_tests:impeller_golden_tests': TestRun(
+    args: <String>[r'--working_dir=$$TEST_TMPDIR'],
+    data: <String>[],
+  ),
 };
 
 /// The benchmark executables testing/run_tests.py runs (`--type benchmarks`,
@@ -311,6 +322,8 @@ const TestRun _benchmarkRun = TestRun(
 const Set<String> displayTests = <String>{
   '//flutter/impeller:impeller_dart_unittests',
   '//flutter/impeller:impeller_unittests',
+  // The golden suite's playground (a Mac's; run_tests.py --type impeller-golden).
+  '//flutter/impeller/golden_tests:impeller_golden_tests',
   // GTK opens the display at initialization (gtk_init), before any test.
   '//flutter/shell/platform/linux:flutter_linux_unittests',
 };
@@ -342,6 +355,7 @@ const Set<String> sessionBusTests = <String>{
 const Set<String> gpuBackendTests = <String>{
   '//flutter/impeller:impeller_dart_unittests',
   '//flutter/impeller:impeller_unittests',
+  '//flutter/impeller/golden_tests:impeller_golden_tests',
   '//flutter/lib/ui:ui_unittests',
   '//flutter/runtime:runtime_unittests',
   '//flutter/shell/common:shell_unittests',

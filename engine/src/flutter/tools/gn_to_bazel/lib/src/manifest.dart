@@ -1841,7 +1841,21 @@ exports_files(["README"] + glob(
   // The GLFW shell (the desktop embedding's reference implementation on
   // Linux hosts) and its client wrapper, with their suites; the X11 config
   // it lists is //flutter/shell/platform/linux/config's (hand-written).
-  ConvertedFile('//flutter/shell/platform/glfw'),
+  // GN reaches the shell itself, its suite and its published headers under
+  // build_glfw_shell (config.gni: is_linux on the host toolchain by
+  // default), so they are a Linux build's here -- a Mac compiles the shell
+  // only with the flag, and its text_input_plugin.cc does not compile
+  // there as it stands (the Mac's T53B) -- while the headers and their
+  // config serve the client wrapper on every desktop host.
+  ConvertedFile(
+    '//flutter/shell/platform/glfw',
+    targetConditions: <String, String>{
+      'flutter_glfw': 'is_linux',
+      'flutter_glfw_fixtures': 'is_linux',
+      'flutter_glfw_unittests': 'is_linux',
+      'publish_headers_glfw': 'is_linux',
+    },
+  ),
   ConvertedFile('//flutter/shell/platform/glfw/client_wrapper'),
   // The GTK shell (the Linux embedding) with its suite, which runs under a
   // display with GLib's criticals fatal as run_tests.py runs it; its
