@@ -423,7 +423,15 @@ class DebugViewMetricsOverride with Diagnosticable {
   /// `<ui.Offset>[ui.Offset(1, 2)]` doubles them all.
   ///
   /// The unscaled sizes must be finite, greater than zero and increasing, and
-  /// the scaled sizes finite, non-negative and non-decreasing.
+  /// the scaled sizes finite, non-negative and non-decreasing. A table that
+  /// leaves its first point unscaled must leave every point unscaled, because
+  /// `dart:ui` scales no font size while it reports a
+  /// [ui.PlatformDispatcher.textScaleFactor] of 1.
+  ///
+  /// Text that is already laid out does not pick up a new table that keeps the
+  /// ratio of the first point until it lays out again for another reason,
+  /// because [SystemTextScaler]s with the same [TextScaler.textScaleFactor]
+  /// compare equal.
   final List<ui.Offset>? textScaling;
 
   /// Overrides [ui.PlatformDispatcher.platformBrightness].
@@ -979,7 +987,7 @@ class DebugViewMetricsOverride with Diagnosticable {
   // nothing is, stated once so that the JSON boundary and the direct one accept
   // the same tables: the ones that interpolate every font size to a finite,
   // non-negative one that does not shrink as the input grows, and whose first
-  // point yields a finite scale factor.
+  // point yields a finite scale factor, which is 1 only if no size is scaled.
   static String? _textScalingProblem(List<ui.Offset> points) {
     if (points.isEmpty) {
       return 'must have at least one point';
@@ -999,6 +1007,17 @@ class DebugViewMetricsOverride with Diagnosticable {
       if (i > 0 && point.dy < points[i - 1].dy) {
         return 'must have non-decreasing scaled font sizes, '
             'but point $i is $point after ${points[i - 1]}';
+      }
+    }
+    // dart:ui scales no font size while it reports a textScaleFactor of 1, and
+    // the framework relies on that, so a table that leaves its first point
+    // unscaled has to leave every point unscaled.
+    if (points.first.dy / points.first.dx == 1.0) {
+      for (var i = 1; i < points.length; i += 1) {
+        if (points[i].dy / points[i].dx != 1.0) {
+          return 'must leave every font size unscaled when it leaves the first one unscaled, '
+              'but point $i is ${points[i]}';
+        }
       }
     }
     return null;

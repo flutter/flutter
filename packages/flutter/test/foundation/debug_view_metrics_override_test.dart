@@ -73,8 +73,9 @@ final Map<String, DebugViewMetricsOverride Function(DebugViewMetricsOverride)> _
       'deterministicCursor': (DebugViewMetricsOverride o) => o.copyWith(deterministicCursor: false),
     };
 
-/// Tables that cannot be interpolated, or that would report a scale factor
-/// that is not a finite number, by what is wrong with each.
+/// Tables that cannot be interpolated, that would report a scale factor that is
+/// not a finite number, or that scale text while reporting no scaling at all, by
+/// what is wrong with each.
 ///
 /// Both gates, [DebugViewMetricsOverride.fromJson] and
 /// [debugSetViewMetricsOverride], have to reject every one of them.
@@ -90,6 +91,7 @@ const Map<String, List<ui.Offset>> _invalidTextScaling = <String, List<ui.Offset
   'repeated unscaled size': <ui.Offset>[ui.Offset(1, 1), ui.Offset(1, 2)],
   'decreasing unscaled size': <ui.Offset>[ui.Offset(2, 2), ui.Offset(1, 1)],
   'decreasing scaled size': <ui.Offset>[ui.Offset(1, 2), ui.Offset(2, 1)],
+  'scaling past an unscaled first point': <ui.Offset>[ui.Offset(8, 8), ui.Offset(24, 36)],
 };
 
 /// The edges of a [ui.ViewPadding], which has no `==` of its own and which
@@ -500,7 +502,7 @@ void main() {
       );
     });
 
-    test('rejects text scaling that cannot be interpolated', () {
+    test('rejects text scaling that cannot be applied', () {
       for (final MapEntry<String, List<ui.Offset>> entry in _invalidTextScaling.entries) {
         expect(
           () => DebugViewMetricsOverride.fromJson(<String, Object?>{
@@ -530,6 +532,17 @@ void main() {
           ],
         }).textScaling,
         const <ui.Offset>[ui.Offset(1, 2), ui.Offset(2, 2)],
+      );
+      // A table that leaves its first point unscaled is legal when it leaves
+      // every point unscaled.
+      expect(
+        DebugViewMetricsOverride.fromJson(const <String, Object?>{
+          'textScaling': <Object?>[
+            <Object?>[8, 8],
+            <Object?>[24, 24],
+          ],
+        }).textScaling,
+        const <ui.Offset>[ui.Offset(8, 8), ui.Offset(24, 24)],
       );
     });
   });
