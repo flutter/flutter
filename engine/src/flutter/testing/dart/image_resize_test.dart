@@ -116,7 +116,7 @@ void main() {
 
   test('pixels: resize height with constrained width - rounding', () async {
     final rect = BlackSquare.create(width: 3);
-    final Image resized = await rect.resize(targetWidth: 4);
+    final Image resized = await rect.resize(targetWidth: 4, allowUpscaling: true);
     expect(resized.width, 4);
     expect(resized.height, 3);
     resized.dispose();
