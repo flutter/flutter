@@ -38,11 +38,11 @@ import '../vmservice.dart';
 import '../web/chrome.dart';
 import '../web/compile.dart';
 import '../web/devfs_config.dart';
-import '../web/file_generators/flutter_service_worker_js.dart';
 import '../web/file_generators/main_dart.dart' as main_dart;
 import '../web/web_device.dart';
 import '../web/web_runner.dart';
 import 'devfs_web.dart';
+import 'mustache_template.dart';
 import 'web_expression_compiler.dart';
 
 /// Injectable factory to create a [ResidentWebRunner].
@@ -333,7 +333,6 @@ class ResidentWebRunner extends ResidentRunner {
             flutterProject,
             target,
             debuggingOptions.buildInfo,
-            ServiceWorkerStrategy.none,
             compilerConfigs: <WebCompilerConfig>[_compilerConfig],
             webDefines: _webDefines,
           );
@@ -493,7 +492,6 @@ class ResidentWebRunner extends ResidentRunner {
             flutterProject,
             target,
             debuggingOptions.buildInfo,
-            ServiceWorkerStrategy.none,
             compilerConfigs: <WebCompilerConfig>[_compilerConfig],
             webDefines: _webDefines,
           );
@@ -692,6 +690,8 @@ class ResidentWebRunner extends ResidentRunner {
       await injectBuildTimePluginFilesForWebPlatform(
         flutterProject,
         destination: _generatedEntrypointDirectory!,
+        logger: logger,
+        templateRenderer: const MustacheTemplateRenderer(),
       );
       // The below works because `injectBuildTimePluginFiles` is configured to write
       // the web_plugin_registrant.dart file alongside the generated main.dart
