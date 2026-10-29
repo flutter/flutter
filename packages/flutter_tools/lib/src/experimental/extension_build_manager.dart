@@ -71,9 +71,6 @@ base class ExtensionBuildManager {
     for (final (ExtensionConnection connection, List<ExtensionBuildTarget> targetList)
         in connectionTargets) {
       for (final target in targetList) {
-        if (target.name.isEmpty) {
-          continue;
-        }
         if (_targetToConnection.containsKey(target.name)) {
           // TODO(bkonyi): Include conflicting extension names once extension manifest metadata is wired into ExtensionConnection.
           _logger.printWarning('Skipping duplicate build target "${target.name}" from extension.');

@@ -114,7 +114,6 @@ void main() {
         expect(environment.defines, <String, String>{
           'TargetFile': 'lib/main.dart',
           'HasWebPlugins': 'true',
-          'ServiceWorkerStrategy': 'offline-first',
           'BuildMode': 'release',
           'DartDefines': 'Zm9vPWE=,RkxVVFRFUl9WRVJTSU9OPTAuMC4w,RkxVVFRFUl9DSEFOTkVMPW1hc3Rlcg==,RkxVVFRFUl9HSVRfVVJMPWh0dHBzOi8vZ2l0aHViLmNvbS9mbHV0dGVyL2ZsdXR0ZXIuZ2l0,RkxVVFRFUl9GUkFNRVdPUktfUkVWSVNJT049MTExMTE=,RkxVVFRFUl9FTkdJTkVfUkVWSVNJT049YWJjZGU=,RkxVVFRFUl9EQVJUX1ZFUlNJT049MTI=',
           'DartObfuscation': 'false',
@@ -359,7 +358,6 @@ void main() {
         expect(environment.defines, <String, String>{
           'TargetFile': 'lib/a.dart',
           'HasWebPlugins': 'true',
-          'ServiceWorkerStrategy': 'offline-first',
           'BuildMode': 'release',
           'DartDefines': 'RkxVVFRFUl9WRVJTSU9OPTAuMC4w,RkxVVFRFUl9DSEFOTkVMPW1hc3Rlcg==,RkxVVFRFUl9HSVRfVVJMPWh0dHBzOi8vZ2l0aHViLmNvbS9mbHV0dGVyL2ZsdXR0ZXIuZ2l0,RkxVVFRFUl9GUkFNRVdPUktfUkVWSVNJT049MTExMTE=,RkxVVFRFUl9FTkdJTkVfUkVWSVNJT049YWJjZGU=,RkxVVFRFUl9EQVJUX1ZFUlNJT049MTI=',
           'DartObfuscation': 'false',
@@ -396,7 +394,6 @@ void main() {
         expect(environment.defines, <String, String>{
           'TargetFile': 'lib/a.dart',
           'HasWebPlugins': 'true',
-          'ServiceWorkerStrategy': 'offline-first',
           'BuildMode': 'release',
           'DartDefines': 'RkxVVFRFUl9WRVJTSU9OPTAuMC4w,RkxVVFRFUl9DSEFOTkVMPW1hc3Rlcg==,RkxVVFRFUl9HSVRfVVJMPWh0dHBzOi8vZ2l0aHViLmNvbS9mbHV0dGVyL2ZsdXR0ZXIuZ2l0,RkxVVFRFUl9GUkFNRVdPUktfUkVWSVNJT049MTExMTE=,RkxVVFRFUl9FTkdJTkVfUkVWSVNJT049YWJjZGU=,RkxVVFRFUl9EQVJUX1ZFUlNJT049MTI=',
           'DartObfuscation': 'false',
@@ -453,7 +450,6 @@ void main() {
         expect(environment.defines, <String, String>{
           'TargetFile': 'lib/main.dart',
           'HasWebPlugins': 'true',
-          'ServiceWorkerStrategy': 'offline-first',
           'BuildMode': 'release',
           'DartDefines': 'RkxVVFRFUl9WRVJTSU9OPTAuMC4w,RkxVVFRFUl9DSEFOTkVMPW1hc3Rlcg==,RkxVVFRFUl9HSVRfVVJMPWh0dHBzOi8vZ2l0aHViLmNvbS9mbHV0dGVyL2ZsdXR0ZXIuZ2l0,RkxVVFRFUl9GUkFNRVdPUktfUkVWSVNJT049MTExMTE=,RkxVVFRFUl9FTkdJTkVfUkVWSVNJT049YWJjZGU=,RkxVVFRFUl9EQVJUX1ZFUlNJT049MTI=',
           'DartObfuscation': 'false',
@@ -917,6 +913,27 @@ void main() {
     expect(buildInfo.dartDefines, contains('FLUTTER_WEB_CANVASKIT_URL=abcdefg'));
   });
 
+  testWithoutContext('Rejects --pwa-strategy with migration message', () async {
+    final buildCommand = TestWebBuildCommand(
+      fileSystem: fileSystem,
+      platform: fakePlatform,
+      processManager: processManager,
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+    );
+    final CommandRunner<void> runner = createTestCommandRunner(buildCommand);
+
+    await expectLater(
+      runner.run(<String>['build', 'web', '--no-pub', '--pwa-strategy=none']),
+      throwsToolExit(
+        message:
+            'The "--pwa-strategy" option has been removed because Flutter no longer '
+            'generates or registers an offline caching service worker.\n'
+            'Remove "--pwa-strategy" from your build command. '
+            'See https://github.com/flutter/flutter/issues/156910 for more details.',
+      ),
+    );
+  });
+
   testWithoutContext('Rejects --base-href value that does not start with /', () async {
     final buildCommand = TestWebBuildCommand(
       fileSystem: fileSystem,
@@ -991,7 +1008,7 @@ void main() {
       expect(command.usage, isNot(contains(option)));
     }
 
-    // Deprecated options are always hidden.
+    // Removed options remain hidden so passing them produces a targeted ToolExit.
     expectHidden('pwa-strategy');
 
     // Verbose-only options are hidden in standard help output.
@@ -1041,7 +1058,7 @@ void main() {
       expect(command.usage, isNot(contains(option)));
     }
 
-    // Deprecated options remain hidden.
+    // Removed options remain hidden.
     expectHidden('pwa-strategy');
 
     // Verbose-only options become visible when verboseHelp is true.

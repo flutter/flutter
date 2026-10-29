@@ -63,6 +63,7 @@ class BuildHooks extends Target {
       targetPlatform: targetPlatform,
       projectUri: projectUri,
       fileSystem: fileSystem,
+      logger: environment.logger,
       buildCodeAssets: BuildCodeAssetsOptions(
         appBuildDirectory: _buildCodeAssetsDirectory(
           environment,
@@ -251,6 +252,7 @@ class LinkHooks extends Target {
         targetPlatform: targetPlatform,
         projectUri: projectUri,
         fileSystem: fileSystem,
+        logger: environment.logger,
         buildCodeAssets: BuildCodeAssetsOptions(
           appBuildDirectory: _buildCodeAssetsDirectory(
             environment,
@@ -368,6 +370,8 @@ class InstallCodeAssets extends Target {
       targetPlatform: targetPlatform,
       projectUri: projectUri,
       fileSystem: fileSystem,
+      logger: environment.logger,
+      processManager: environment.processManager,
       nativeAssetsFileUri: nativeAssetsFileUri,
       targetUri: targetUri,
     );
@@ -457,9 +461,10 @@ Future<FlutterNativeAssetsBuildRunner> createFlutterNativeAssetsBuildRunner(
     fileSystem,
     environment.logger,
     environment.platform,
+    environment.processManager,
     runPackageName,
-    includeDevDependencies: includeDevDependencies,
     pubspecPath,
+    includeDevDependencies: includeDevDependencies,
   );
 }
 

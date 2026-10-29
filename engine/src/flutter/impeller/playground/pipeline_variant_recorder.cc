@@ -350,7 +350,7 @@ void PipelineVariantRecorder::Harvest(
   if (!library) {
     return;
   }
-  const auto use_counts = library->GetPipelineUseCounts();
+  const PipelineUsageMap pipeline_usage = library->GetPipelineUsage();
   const std::string backend = BackendTypeToString(context.GetBackendType());
 
   Lock lock(mutex_);
@@ -377,11 +377,11 @@ void PipelineVariantRecorder::Harvest(
   }
 
   record.latest.clear();
-  for (const auto& [descriptor, count] : use_counts) {
-    if (count <= 0) {
+  for (const auto& [descriptor, usage] : pipeline_usage) {
+    if (usage.count <= 0) {
       continue;
     }
-    const uint64_t total = static_cast<uint64_t>(count);
+    const uint64_t total = static_cast<uint64_t>(usage.count);
     record.latest[descriptor] = total;
     auto known = record.known.find(descriptor);
     if (known == record.known.end()) {

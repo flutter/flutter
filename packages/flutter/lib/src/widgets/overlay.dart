@@ -1704,7 +1704,8 @@ class OverlayPortalController {
   int? _zOrderIndex;
   final String? _debugLabel;
 
-  static int _wallTime = kIsWeb
+  // TODO(kevmoo): Use double.minSafeInteger - 1 when the minimum Dart SDK is 3.15, https://github.com/flutter/flutter/issues/195202.
+  static int _wallTime = kIsWeb && !kIsWasm
       ? -9007199254740992 // -2^53
       : -1 << 63;
 

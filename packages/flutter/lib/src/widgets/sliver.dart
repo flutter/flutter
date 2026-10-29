@@ -1186,8 +1186,9 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement
       var lo = 0;
       var hi = 1;
       final adaptorWidget = widget as SliverMultiBoxAdaptorWidget;
-      const int max = kIsWeb
-          ? 9007199254740992 // max safe integer on JS (from 0 to this number x != x+1)
+      // TODO(kevmoo): Use double.maxSafeInteger + 1 when the minimum Dart SDK is 3.15, https://github.com/flutter/flutter/issues/195202.
+      const int max = kIsWeb && !kIsWasm
+          ? 9007199254740992 // max safe integer on JS + 1 (2^53)
           : ((1 << 63) - 1);
       while (_build(hi - 1, adaptorWidget) != null) {
         lo = hi - 1;

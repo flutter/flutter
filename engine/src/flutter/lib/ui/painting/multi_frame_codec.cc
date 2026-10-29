@@ -14,28 +14,33 @@
 #include "flutter/impeller/renderer/context.h"
 #include "flutter/lib/ui/painting/image_decoder_impeller.h"
 #endif  // IMPELLER_SUPPORTS_RENDERING
+#include "third_party/abseil-cpp/absl/strings/str_cat.h"
 #include "third_party/dart/runtime/include/dart_api.h"
 #include "third_party/skia/include/codec/SkCodecAnimation.h"
 #include "third_party/skia/include/core/SkImage.h"
 #include "third_party/skia/include/core/SkPixelRef.h"
+#include "third_party/skia/include/core/SkSamplingOptions.h"
 #include "third_party/skia/include/gpu/ganesh/SkImageGanesh.h"
 #include "third_party/tonic/logging/dart_invoke.h"
 
 namespace flutter {
 
-MultiFrameCodec::MultiFrameCodec(std::shared_ptr<ImageGenerator> generator)
-    : state_(new State(std::move(generator))) {}
+MultiFrameCodec::MultiFrameCodec(std::shared_ptr<ImageGenerator> generator,
+                                 SkISize target_size)
+    : state_(new State(std::move(generator), target_size)) {}
 
 MultiFrameCodec::~MultiFrameCodec() = default;
 
-MultiFrameCodec::State::State(std::shared_ptr<ImageGenerator> generator)
+MultiFrameCodec::State::State(std::shared_ptr<ImageGenerator> generator,
+                              SkISize target_size)
     : generator_(std::move(generator)),
       frameCount_(generator_->GetFrameCount()),
       repetitionCount_(generator_->GetPlayCount() ==
                                ImageGenerator::kInfinitePlayCount
                            ? -1
                            : generator_->GetPlayCount() - 1),
-      is_impeller_enabled_(UIDartState::Current()->IsImpellerEnabled()) {}
+      is_impeller_enabled_(UIDartState::Current()->IsImpellerEnabled()),
+      target_size_(target_size) {}
 
 static void InvokeNextFrameCallback(
     const fml::RefPtr<CanvasImage>& image,
@@ -53,6 +58,25 @@ static void InvokeNextFrameCallback(
   tonic::DartInvoke(callback->value(),
                     {tonic::ToDart(image), tonic::ToDart(duration),
                      tonic::ToDart(decode_error)});
+}
+
+// Resizes a fully composited frame to |target_size|. This uses the same
+// sampling as the resizing of single-frame images (`ResizeRasterImage` in
+// image_decoder_skia.cc and `ResizeOnCpu` in image_decoder_impeller.cc), so
+// `targetWidth` and `targetHeight` behave the same way for every image.
+static std::optional<SkBitmap> ResizeFrame(const SkBitmap& frame,
+                                           SkISize target_size) {
+  SkBitmap resized;
+  if (!resized.tryAllocPixels(frame.info().makeDimensions(target_size))) {
+    return std::nullopt;
+  }
+  if (!frame.pixmap().scalePixels(
+          resized.pixmap(),
+          SkSamplingOptions(SkFilterMode::kLinear, SkMipmapMode::kNone))) {
+    return std::nullopt;
+  }
+  resized.setImmutable();
+  return resized;
 }
 
 std::pair<sk_sp<DlImage>, std::string>
@@ -144,6 +168,39 @@ MultiFrameCodec::State::GetNextFrameImage(
     restoreBGColorRect_.reset();
   }
 
+  // Frames are decoded and composited at the intrinsic size of the image
+  // above, because frame rects, blending and disposal are all defined in the
+  // coordinate space of the full canvas, and `lastRequiredFrame_` must keep
+  // that size to be reused as a backdrop. Only the finished frame is resized
+  // to the size requested through `targetWidth` and `targetHeight` (e.g. by
+  // `cacheWidth`/`cacheHeight` or `ResizeImage` in the framework).
+  //
+  // See https://github.com/flutter/flutter/issues/90804.
+  SkISize target_size = target_size_;
+#if IMPELLER_SUPPORTS_RENDERING
+  if (is_impeller_enabled_ && impeller_context) {
+    // Like single-frame images (see ImageDecoderImpeller::DecompressTexture),
+    // never upload a frame larger than the maximum texture size. The Skia
+    // backend below limits the size when it creates the texture instead.
+    target_size = ImageDecoderImpeller::ClampToMaxTextureSize(
+        target_size,
+        impeller_context->GetResourceAllocator()->GetMaxTextureSizeSupported());
+  }
+#endif  // IMPELLER_SUPPORTS_RENDERING
+  if (bitmap.dimensions() != target_size) {
+    std::optional<SkBitmap> resized = ResizeFrame(bitmap, target_size);
+    if (!resized.has_value()) {
+      std::string decode_error =
+          absl::StrCat("Could not resize frame ", nextFrameIndex_, " to ",
+                       target_size.width(), "x", target_size.height());
+      FML_LOG(ERROR) << decode_error;
+      return std::make_pair(nullptr, decode_error);
+    }
+    // `lastRequiredFrame_` keeps sharing the full-size pixels.
+    bitmap = std::move(resized.value());
+    info = bitmap.info();
+  }
+
 #if IMPELLER_SUPPORTS_RENDERING
   if (is_impeller_enabled_) {
 #ifdef FML_OS_IOS
@@ -205,8 +262,12 @@ MultiFrameCodec::State::GetNextFrameImage(
             if (resourceContext) {
               SkPixmap pixmap(bitmap.info(), bitmap.pixelRef()->pixels(),
                               bitmap.pixelRef()->rowBytes());
+              // Like single-frame images (see UploadRasterImage in
+              // image_decoder_skia.cc), limit the texture to the maximum
+              // texture size.
               skImage = SkImages::CrossContextTextureFromPixmap(
-                  resourceContext.get(), pixmap, true);
+                  resourceContext.get(), pixmap, /*buildMips=*/true,
+                  /*limitToMaxTextureSize=*/true);
             } else {
               // Defer decoding until time of draw later on the raster thread.
               // Can happen when GL operations are currently forbidden such as

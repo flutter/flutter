@@ -106,6 +106,7 @@ class BuildCommand extends FlutterCommand {
         appleContext: appleContext,
         buildSystem: buildSystem,
         codesign: codesign,
+        templateRenderer: templateRenderer,
         toolContext: toolContext,
         verboseHelp: verboseHelp,
       ),
@@ -115,6 +116,7 @@ class BuildCommand extends FlutterCommand {
         appleContext: appleContext,
         buildSystem: buildSystem,
         codesign: codesign,
+        templateRenderer: templateRenderer,
         toolContext: toolContext,
         verboseHelp: verboseHelp,
       ),
@@ -123,6 +125,7 @@ class BuildCommand extends FlutterCommand {
       BuildSwiftPackage(
         analytics: analytics,
         buildSystem: buildSystem,
+        cocoaPods: appleContext.cocoaPods,
         codesign: codesign,
         featureFlags: featureFlags,
         templateRenderer: templateRenderer,

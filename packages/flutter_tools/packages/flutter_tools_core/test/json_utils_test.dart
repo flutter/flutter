@@ -316,6 +316,127 @@ void main() {
       });
     });
 
+    group('stringSet', () {
+      test('extracts unmodifiable set of unique strings', () {
+        const json = <String, Object?>{
+          fieldKey: <Object?>['a', 'b', 'a'],
+        };
+        final Set<String> result = json.stringSet(fieldKey);
+        expect(result, const <String>{'a', 'b'});
+        expect(() => result.add('c'), throwsUnsupportedError);
+      });
+
+      test('preserves whitespace and empty elements when rejectEmpty is false', () {
+        const json = <String, Object?>{
+          fieldKey: <Object?>[' a ', ''],
+        };
+        expect(json.stringSet(fieldKey), const <String>{' a ', ''});
+      });
+
+      test('returns empty set or defaultValue when key is missing or null', () {
+        const emptyJson = <String, Object?>{};
+        expect(emptyJson.stringSet(fieldKey), isEmpty);
+        expect(
+          emptyJson.stringSet(fieldKey, defaultValue: const <String>{'fallback'}),
+          const <String>{'fallback'},
+        );
+
+        const nullJson = <String, Object?>{fieldKey: null};
+        expect(nullJson.stringSet(fieldKey), isEmpty);
+        expect(nullJson.stringSet(fieldKey, defaultValue: const <String>{'linux'}), const <String>{
+          'linux',
+        });
+      });
+
+      test('throws FormatException when value is not an Iterable', () {
+        const json = <String, Object?>{fieldKey: 'not-a-list'};
+        expect(
+          () => json.stringSet(fieldKey),
+          throwsA(
+            isA<FormatException>().having(
+              (FormatException e) => e.message,
+              'message',
+              contains('Invalid "$fieldKey": expected Iterable<String>, got String.'),
+            ),
+          ),
+        );
+      });
+
+      test('throws FormatException when an element is not a String', () {
+        const json = <String, Object?>{
+          fieldKey: <Object?>['valid', 42],
+        };
+        expect(
+          () => json.stringSet(fieldKey),
+          throwsA(
+            isA<FormatException>().having(
+              (FormatException e) => e.message,
+              'message',
+              contains('Invalid "$fieldKey" element: expected String, got int.'),
+            ),
+          ),
+        );
+      });
+
+      test('trims elements and deduplicates when trim is true', () {
+        const json = <String, Object?>{
+          fieldKey: <Object?>[' a ', 'a', 'b\t', ''],
+        };
+        expect(json.stringSet(fieldKey, trim: true), const <String>{'a', 'b', ''});
+      });
+
+      test('preserves whitespace when rejectEmpty is true and trim is false', () {
+        const json = <String, Object?>{
+          fieldKey: <Object?>['  padded  ', '   '],
+        };
+        expect(json.stringSet(fieldKey, rejectEmpty: true), const <String>{'  padded  ', '   '});
+      });
+
+      test('throws FormatException on empty element when rejectEmpty is true', () {
+        const json = <String, Object?>{
+          fieldKey: <Object?>['valid', ''],
+        };
+        expect(
+          () => json.stringSet(fieldKey, rejectEmpty: true),
+          throwsA(
+            isA<FormatException>().having(
+              (FormatException e) => e.message,
+              'message',
+              contains('Invalid "$fieldKey" element: expected non-empty String, got "".'),
+            ),
+          ),
+        );
+      });
+
+      test('trims elements when rejectEmpty and trim are true', () {
+        const json = <String, Object?>{
+          fieldKey: <Object?>['  diagnostics  ', 'diagnostics', 'b\t'],
+        };
+        expect(json.stringSet(fieldKey, rejectEmpty: true, trim: true), const <String>{
+          'diagnostics',
+          'b',
+        });
+      });
+
+      test('throws FormatException on empty or whitespace-only element when rejectEmpty and trim are true', () {
+        for (final invalid in const <String>['', '   ', '\t\n']) {
+          final json = <String, Object?>{
+            fieldKey: <Object?>['valid', invalid],
+          };
+          expect(
+            () => json.stringSet(fieldKey, rejectEmpty: true, trim: true),
+            throwsA(
+              isA<FormatException>().having(
+                (FormatException e) => e.message,
+                'message',
+                contains('Invalid "$fieldKey" element: expected non-empty String, got "$invalid".'),
+              ),
+            ),
+          );
+        }
+      });
+    });
+
     test('parses real jsonDecode map and list structures', () {
       final decoded = jsonDecode(
         '{"name": "ext", "count": 3, "tags": ["one", "two"], '

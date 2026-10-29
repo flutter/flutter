@@ -4,11 +4,12 @@
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/dart/package_map.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/flutter_manifest.dart';
 import 'package:flutter_tools/src/flutter_plugins.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/isolated/mustache_template.dart';
 import 'package:flutter_tools/src/plugins.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:package_config/package_config.dart';
@@ -42,38 +43,42 @@ void main() {
     group('resolvePlatformImplementation', () {
       testWithoutContext('selects uncontested implementation from direct dependency', () async {
         final directDependencies = <String>{'url_launcher_linux', 'url_launcher_macos'};
-        final List<PluginInterfaceResolution> resolutions = resolvePlatformImplementation(<Plugin>[
-          Plugin.fromYaml(
-            'url_launcher_linux',
-            '',
-            YamlMap.wrap(<String, dynamic>{
-              'implements': 'url_launcher',
-              'platforms': <String, dynamic>{
-                'linux': <String, dynamic>{'dartPluginClass': 'UrlLauncherPluginLinux'},
-              },
-            }),
-            null,
-            <String>[],
-            fileSystem: fs,
-            isDevDependency: false,
-            appDependencies: directDependencies,
-          ),
-          Plugin.fromYaml(
-            'url_launcher_macos',
-            '',
-            YamlMap.wrap(<String, dynamic>{
-              'implements': 'url_launcher',
-              'platforms': <String, dynamic>{
-                'macos': <String, dynamic>{'dartPluginClass': 'UrlLauncherPluginMacOS'},
-              },
-            }),
-            null,
-            <String>[],
-            fileSystem: fs,
-            isDevDependency: false,
-            appDependencies: directDependencies,
-          ),
-        ], selectDartPluginsOnly: true);
+        final List<PluginInterfaceResolution> resolutions = resolvePlatformImplementation(
+          <Plugin>[
+            Plugin.fromYaml(
+              'url_launcher_linux',
+              '',
+              YamlMap.wrap(<String, dynamic>{
+                'implements': 'url_launcher',
+                'platforms': <String, dynamic>{
+                  'linux': <String, dynamic>{'dartPluginClass': 'UrlLauncherPluginLinux'},
+                },
+              }),
+              null,
+              <String>[],
+              fileSystem: fs,
+              isDevDependency: false,
+              appDependencies: directDependencies,
+            ),
+            Plugin.fromYaml(
+              'url_launcher_macos',
+              '',
+              YamlMap.wrap(<String, dynamic>{
+                'implements': 'url_launcher',
+                'platforms': <String, dynamic>{
+                  'macos': <String, dynamic>{'dartPluginClass': 'UrlLauncherPluginMacOS'},
+                },
+              }),
+              null,
+              <String>[],
+              fileSystem: fs,
+              isDevDependency: false,
+              appDependencies: directDependencies,
+            ),
+          ],
+          logger: BufferLogger.test(),
+          selectDartPluginsOnly: true,
+        );
 
         expect(resolutions.length, equals(2));
         expect(
@@ -98,41 +103,45 @@ void main() {
 
       testWithoutContext('selects uncontested implementation from direct dependency with additional native implementation', () async {
         final directDependencies = <String>{'url_launcher_linux', 'url_launcher_macos'};
-        final List<PluginInterfaceResolution> resolutions = resolvePlatformImplementation(<Plugin>[
-          // Following plugin is native only and is not resolved as a dart plugin:
-          Plugin.fromYaml(
-            'url_launcher_linux',
-            '',
-            YamlMap.wrap(<String, dynamic>{
-              'platforms': <String, dynamic>{
-                'linux': <String, dynamic>{
-                  'package': 'com.example.url_launcher',
-                  'pluginClass': 'UrlLauncherPluginLinux',
+        final List<PluginInterfaceResolution> resolutions = resolvePlatformImplementation(
+          <Plugin>[
+            // Following plugin is native only and is not resolved as a dart plugin:
+            Plugin.fromYaml(
+              'url_launcher_linux',
+              '',
+              YamlMap.wrap(<String, dynamic>{
+                'platforms': <String, dynamic>{
+                  'linux': <String, dynamic>{
+                    'package': 'com.example.url_launcher',
+                    'pluginClass': 'UrlLauncherPluginLinux',
+                  },
                 },
-              },
-            }),
-            null,
-            <String>[],
-            fileSystem: fs,
-            isDevDependency: false,
-            appDependencies: directDependencies,
-          ),
-          Plugin.fromYaml(
-            'url_launcher_macos',
-            '',
-            YamlMap.wrap(<String, dynamic>{
-              'implements': 'url_launcher',
-              'platforms': <String, dynamic>{
-                'macos': <String, dynamic>{'dartPluginClass': 'UrlLauncherPluginMacOS'},
-              },
-            }),
-            null,
-            <String>[],
-            fileSystem: fs,
-            isDevDependency: false,
-            appDependencies: directDependencies,
-          ),
-        ], selectDartPluginsOnly: true);
+              }),
+              null,
+              <String>[],
+              fileSystem: fs,
+              isDevDependency: false,
+              appDependencies: directDependencies,
+            ),
+            Plugin.fromYaml(
+              'url_launcher_macos',
+              '',
+              YamlMap.wrap(<String, dynamic>{
+                'implements': 'url_launcher',
+                'platforms': <String, dynamic>{
+                  'macos': <String, dynamic>{'dartPluginClass': 'UrlLauncherPluginMacOS'},
+                },
+              }),
+              null,
+              <String>[],
+              fileSystem: fs,
+              isDevDependency: false,
+              appDependencies: directDependencies,
+            ),
+          ],
+          logger: BufferLogger.test(),
+          selectDartPluginsOnly: true,
+        );
 
         expect(resolutions.length, equals(1));
         expect(
@@ -148,38 +157,42 @@ void main() {
 
       testWithoutContext('selects uncontested implementation from transitive dependency', () async {
         final directDependencies = <String>{'url_launcher_macos'};
-        final List<PluginInterfaceResolution> resolutions = resolvePlatformImplementation(<Plugin>[
-          Plugin.fromYaml(
-            'url_launcher_macos',
-            '',
-            YamlMap.wrap(<String, dynamic>{
-              'implements': 'url_launcher',
-              'platforms': <String, dynamic>{
-                'macos': <String, dynamic>{'dartPluginClass': 'UrlLauncherPluginMacOS'},
-              },
-            }),
-            null,
-            <String>[],
-            fileSystem: fs,
-            isDevDependency: false,
-            appDependencies: directDependencies,
-          ),
-          Plugin.fromYaml(
-            'transitive_dependency_plugin',
-            '',
-            YamlMap.wrap(<String, dynamic>{
-              'implements': 'url_launcher',
-              'platforms': <String, dynamic>{
-                'windows': <String, dynamic>{'dartPluginClass': 'UrlLauncherPluginWindows'},
-              },
-            }),
-            null,
-            <String>[],
-            fileSystem: fs,
-            isDevDependency: false,
-            appDependencies: directDependencies,
-          ),
-        ], selectDartPluginsOnly: true);
+        final List<PluginInterfaceResolution> resolutions = resolvePlatformImplementation(
+          <Plugin>[
+            Plugin.fromYaml(
+              'url_launcher_macos',
+              '',
+              YamlMap.wrap(<String, dynamic>{
+                'implements': 'url_launcher',
+                'platforms': <String, dynamic>{
+                  'macos': <String, dynamic>{'dartPluginClass': 'UrlLauncherPluginMacOS'},
+                },
+              }),
+              null,
+              <String>[],
+              fileSystem: fs,
+              isDevDependency: false,
+              appDependencies: directDependencies,
+            ),
+            Plugin.fromYaml(
+              'transitive_dependency_plugin',
+              '',
+              YamlMap.wrap(<String, dynamic>{
+                'implements': 'url_launcher',
+                'platforms': <String, dynamic>{
+                  'windows': <String, dynamic>{'dartPluginClass': 'UrlLauncherPluginWindows'},
+                },
+              }),
+              null,
+              <String>[],
+              fileSystem: fs,
+              isDevDependency: false,
+              appDependencies: directDependencies,
+            ),
+          ],
+          logger: BufferLogger.test(),
+          selectDartPluginsOnly: true,
+        );
 
         expect(resolutions.length, equals(2));
         expect(
@@ -205,23 +218,27 @@ void main() {
       testWithoutContext('selects inline implementation on mobile', () async {
         final directDependencies = <String>{};
 
-        final List<PluginInterfaceResolution> resolutions = resolvePlatformImplementation(<Plugin>[
-          Plugin.fromYaml(
-            'url_launcher',
-            '',
-            YamlMap.wrap(<String, dynamic>{
-              'platforms': <String, dynamic>{
-                'android': <String, dynamic>{'dartPluginClass': 'UrlLauncherAndroid'},
-                'ios': <String, dynamic>{'dartPluginClass': 'UrlLauncherIos'},
-              },
-            }),
-            null,
-            <String>[],
-            fileSystem: fs,
-            isDevDependency: false,
-            appDependencies: directDependencies,
-          ),
-        ], selectDartPluginsOnly: true);
+        final List<PluginInterfaceResolution> resolutions = resolvePlatformImplementation(
+          <Plugin>[
+            Plugin.fromYaml(
+              'url_launcher',
+              '',
+              YamlMap.wrap(<String, dynamic>{
+                'platforms': <String, dynamic>{
+                  'android': <String, dynamic>{'dartPluginClass': 'UrlLauncherAndroid'},
+                  'ios': <String, dynamic>{'dartPluginClass': 'UrlLauncherIos'},
+                },
+              }),
+              null,
+              <String>[],
+              fileSystem: fs,
+              isDevDependency: false,
+              appDependencies: directDependencies,
+            ),
+          ],
+          logger: BufferLogger.test(),
+          selectDartPluginsOnly: true,
+        );
         expect(resolutions.length, equals(2));
         expect(
           resolutions[0].toMap(),
@@ -248,24 +265,28 @@ void main() {
           'missing min Flutter SDK constraint', () async {
         final directDependencies = <String>{};
 
-        final List<PluginInterfaceResolution> resolutions = resolvePlatformImplementation(<Plugin>[
-          Plugin.fromYaml(
-            'url_launcher',
-            '',
-            YamlMap.wrap(<String, dynamic>{
-              'platforms': <String, dynamic>{
-                'linux': <String, dynamic>{'dartPluginClass': 'UrlLauncherLinux'},
-                'macos': <String, dynamic>{'dartPluginClass': 'UrlLauncherMacOS'},
-                'windows': <String, dynamic>{'dartPluginClass': 'UrlLauncherWindows'},
-              },
-            }),
-            null,
-            <String>[],
-            fileSystem: fs,
-            isDevDependency: false,
-            appDependencies: directDependencies,
-          ),
-        ], selectDartPluginsOnly: true);
+        final List<PluginInterfaceResolution> resolutions = resolvePlatformImplementation(
+          <Plugin>[
+            Plugin.fromYaml(
+              'url_launcher',
+              '',
+              YamlMap.wrap(<String, dynamic>{
+                'platforms': <String, dynamic>{
+                  'linux': <String, dynamic>{'dartPluginClass': 'UrlLauncherLinux'},
+                  'macos': <String, dynamic>{'dartPluginClass': 'UrlLauncherMacOS'},
+                  'windows': <String, dynamic>{'dartPluginClass': 'UrlLauncherWindows'},
+                },
+              }),
+              null,
+              <String>[],
+              fileSystem: fs,
+              isDevDependency: false,
+              appDependencies: directDependencies,
+            ),
+          ],
+          logger: BufferLogger.test(),
+          selectDartPluginsOnly: true,
+        );
         expect(resolutions.length, equals(0));
       });
 
@@ -274,24 +295,28 @@ void main() {
           'min Flutter SDK constraint < 2.11', () async {
         final directDependencies = <String>{};
 
-        final List<PluginInterfaceResolution> resolutions = resolvePlatformImplementation(<Plugin>[
-          Plugin.fromYaml(
-            'url_launcher',
-            '',
-            YamlMap.wrap(<String, dynamic>{
-              'platforms': <String, dynamic>{
-                'linux': <String, dynamic>{'dartPluginClass': 'UrlLauncherLinux'},
-                'macos': <String, dynamic>{'dartPluginClass': 'UrlLauncherMacOS'},
-                'windows': <String, dynamic>{'dartPluginClass': 'UrlLauncherWindows'},
-              },
-            }),
-            VersionConstraint.parse('>=2.10.0'),
-            <String>[],
-            fileSystem: fs,
-            isDevDependency: false,
-            appDependencies: directDependencies,
-          ),
-        ], selectDartPluginsOnly: true);
+        final List<PluginInterfaceResolution> resolutions = resolvePlatformImplementation(
+          <Plugin>[
+            Plugin.fromYaml(
+              'url_launcher',
+              '',
+              YamlMap.wrap(<String, dynamic>{
+                'platforms': <String, dynamic>{
+                  'linux': <String, dynamic>{'dartPluginClass': 'UrlLauncherLinux'},
+                  'macos': <String, dynamic>{'dartPluginClass': 'UrlLauncherMacOS'},
+                  'windows': <String, dynamic>{'dartPluginClass': 'UrlLauncherWindows'},
+                },
+              }),
+              VersionConstraint.parse('>=2.10.0'),
+              <String>[],
+              fileSystem: fs,
+              isDevDependency: false,
+              appDependencies: directDependencies,
+            ),
+          ],
+          logger: BufferLogger.test(),
+          selectDartPluginsOnly: true,
+        );
         expect(resolutions.length, equals(0));
       });
 
@@ -299,24 +324,28 @@ void main() {
           'min Flutter SDK requirement of at least 2.11', () async {
         final directDependencies = <String>{};
 
-        final List<PluginInterfaceResolution> resolutions = resolvePlatformImplementation(<Plugin>[
-          Plugin.fromYaml(
-            'url_launcher',
-            '',
-            YamlMap.wrap(<String, dynamic>{
-              'platforms': <String, dynamic>{
-                'linux': <String, dynamic>{'dartPluginClass': 'UrlLauncherLinux'},
-                'macos': <String, dynamic>{'dartPluginClass': 'UrlLauncherMacOS'},
-                'windows': <String, dynamic>{'dartPluginClass': 'UrlLauncherWindows'},
-              },
-            }),
-            VersionConstraint.parse('>=2.11.0'),
-            <String>[],
-            fileSystem: fs,
-            isDevDependency: false,
-            appDependencies: directDependencies,
-          ),
-        ], selectDartPluginsOnly: true);
+        final List<PluginInterfaceResolution> resolutions = resolvePlatformImplementation(
+          <Plugin>[
+            Plugin.fromYaml(
+              'url_launcher',
+              '',
+              YamlMap.wrap(<String, dynamic>{
+                'platforms': <String, dynamic>{
+                  'linux': <String, dynamic>{'dartPluginClass': 'UrlLauncherLinux'},
+                  'macos': <String, dynamic>{'dartPluginClass': 'UrlLauncherMacOS'},
+                  'windows': <String, dynamic>{'dartPluginClass': 'UrlLauncherWindows'},
+                },
+              }),
+              VersionConstraint.parse('>=2.11.0'),
+              <String>[],
+              fileSystem: fs,
+              isDevDependency: false,
+              appDependencies: directDependencies,
+            ),
+          ],
+          logger: BufferLogger.test(),
+          selectDartPluginsOnly: true,
+        );
         expect(resolutions.length, equals(3));
         expect(
           resolutions.map((PluginInterfaceResolution resolution) => resolution.toMap()),
@@ -346,70 +375,76 @@ void main() {
       testWithoutContext('selects default implementation', () async {
         final directDependencies = <String>{};
 
-        final List<PluginInterfaceResolution> resolutions = resolvePlatformImplementation(<Plugin>[
-          Plugin.fromYaml(
-            'url_launcher',
-            '',
-            YamlMap.wrap(<String, dynamic>{
-              'platforms': <String, dynamic>{
-                'linux': <String, dynamic>{'default_package': 'url_launcher_linux'},
-              },
-            }),
-            null,
-            <String>[],
-            fileSystem: fs,
-            isDevDependency: false,
-            appDependencies: directDependencies,
-          ),
-          // Include three possible implementations, one before and one after
-          // to ensure that the selection is working as intended, not just by
-          // coincidence of order.
-          Plugin.fromYaml(
-            'another_url_launcher_linux',
-            '',
-            YamlMap.wrap(<String, dynamic>{
-              'implements': 'url_launcher',
-              'platforms': <String, dynamic>{
-                'linux': <String, dynamic>{'dartPluginClass': 'UnofficialUrlLauncherPluginLinux'},
-              },
-            }),
-            null,
-            <String>[],
-            fileSystem: fs,
-            isDevDependency: false,
-            appDependencies: directDependencies,
-          ),
-          Plugin.fromYaml(
-            'url_launcher_linux',
-            '',
-            YamlMap.wrap(<String, dynamic>{
-              'implements': 'url_launcher',
-              'platforms': <String, dynamic>{
-                'linux': <String, dynamic>{'dartPluginClass': 'UrlLauncherPluginLinux'},
-              },
-            }),
-            null,
-            <String>[],
-            fileSystem: fs,
-            isDevDependency: false,
-            appDependencies: directDependencies,
-          ),
-          Plugin.fromYaml(
-            'yet_another_url_launcher_linux',
-            '',
-            YamlMap.wrap(<String, dynamic>{
-              'implements': 'url_launcher',
-              'platforms': <String, dynamic>{
-                'linux': <String, dynamic>{'dartPluginClass': 'UnofficialUrlLauncherPluginLinux2'},
-              },
-            }),
-            null,
-            <String>[],
-            fileSystem: fs,
-            isDevDependency: false,
-            appDependencies: directDependencies,
-          ),
-        ], selectDartPluginsOnly: true);
+        final List<PluginInterfaceResolution> resolutions = resolvePlatformImplementation(
+          <Plugin>[
+            Plugin.fromYaml(
+              'url_launcher',
+              '',
+              YamlMap.wrap(<String, dynamic>{
+                'platforms': <String, dynamic>{
+                  'linux': <String, dynamic>{'default_package': 'url_launcher_linux'},
+                },
+              }),
+              null,
+              <String>[],
+              fileSystem: fs,
+              isDevDependency: false,
+              appDependencies: directDependencies,
+            ),
+            // Include three possible implementations, one before and one after
+            // to ensure that the selection is working as intended, not just by
+            // coincidence of order.
+            Plugin.fromYaml(
+              'another_url_launcher_linux',
+              '',
+              YamlMap.wrap(<String, dynamic>{
+                'implements': 'url_launcher',
+                'platforms': <String, dynamic>{
+                  'linux': <String, dynamic>{'dartPluginClass': 'UnofficialUrlLauncherPluginLinux'},
+                },
+              }),
+              null,
+              <String>[],
+              fileSystem: fs,
+              isDevDependency: false,
+              appDependencies: directDependencies,
+            ),
+            Plugin.fromYaml(
+              'url_launcher_linux',
+              '',
+              YamlMap.wrap(<String, dynamic>{
+                'implements': 'url_launcher',
+                'platforms': <String, dynamic>{
+                  'linux': <String, dynamic>{'dartPluginClass': 'UrlLauncherPluginLinux'},
+                },
+              }),
+              null,
+              <String>[],
+              fileSystem: fs,
+              isDevDependency: false,
+              appDependencies: directDependencies,
+            ),
+            Plugin.fromYaml(
+              'yet_another_url_launcher_linux',
+              '',
+              YamlMap.wrap(<String, dynamic>{
+                'implements': 'url_launcher',
+                'platforms': <String, dynamic>{
+                  'linux': <String, dynamic>{
+                    'dartPluginClass': 'UnofficialUrlLauncherPluginLinux2',
+                  },
+                },
+              }),
+              null,
+              <String>[],
+              fileSystem: fs,
+              isDevDependency: false,
+              appDependencies: directDependencies,
+            ),
+          ],
+          logger: BufferLogger.test(),
+          selectDartPluginsOnly: true,
+        );
         expect(resolutions.length, equals(1));
         expect(
           resolutions[0].toMap(),
@@ -459,6 +494,7 @@ void main() {
                 appDependencies: directDependencies,
               ),
             ],
+            logger: BufferLogger.test(),
             selectDartPluginsOnly: true,
           );
           expect(resolutions.length, equals(1));
@@ -480,52 +516,56 @@ void main() {
           'url_launcher',
         };
 
-        final List<PluginInterfaceResolution> resolutions = resolvePlatformImplementation(<Plugin>[
-          Plugin.fromYaml(
-            'url_launcher',
-            '',
-            YamlMap.wrap(<String, dynamic>{
-              'platforms': <String, dynamic>{
-                'linux': <String, dynamic>{'default_package': 'url_launcher_linux'},
-              },
-            }),
-            null,
-            <String>[],
-            fileSystem: fs,
-            isDevDependency: false,
-            appDependencies: directDependencies,
-          ),
-          Plugin.fromYaml(
-            'url_launcher_linux',
-            '',
-            YamlMap.wrap(<String, dynamic>{
-              'implements': 'url_launcher',
-              'platforms': <String, dynamic>{
-                'linux': <String, dynamic>{'dartPluginClass': 'UrlLauncherPluginLinux'},
-              },
-            }),
-            null,
-            <String>[],
-            fileSystem: fs,
-            isDevDependency: false,
-            appDependencies: directDependencies,
-          ),
-          Plugin.fromYaml(
-            'user_selected_url_launcher_implementation',
-            '',
-            YamlMap.wrap(<String, dynamic>{
-              'implements': 'url_launcher',
-              'platforms': <String, dynamic>{
-                'linux': <String, dynamic>{'dartPluginClass': 'UrlLauncherPluginLinux'},
-              },
-            }),
-            null,
-            <String>[],
-            fileSystem: fs,
-            isDevDependency: false,
-            appDependencies: directDependencies,
-          ),
-        ], selectDartPluginsOnly: true);
+        final List<PluginInterfaceResolution> resolutions = resolvePlatformImplementation(
+          <Plugin>[
+            Plugin.fromYaml(
+              'url_launcher',
+              '',
+              YamlMap.wrap(<String, dynamic>{
+                'platforms': <String, dynamic>{
+                  'linux': <String, dynamic>{'default_package': 'url_launcher_linux'},
+                },
+              }),
+              null,
+              <String>[],
+              fileSystem: fs,
+              isDevDependency: false,
+              appDependencies: directDependencies,
+            ),
+            Plugin.fromYaml(
+              'url_launcher_linux',
+              '',
+              YamlMap.wrap(<String, dynamic>{
+                'implements': 'url_launcher',
+                'platforms': <String, dynamic>{
+                  'linux': <String, dynamic>{'dartPluginClass': 'UrlLauncherPluginLinux'},
+                },
+              }),
+              null,
+              <String>[],
+              fileSystem: fs,
+              isDevDependency: false,
+              appDependencies: directDependencies,
+            ),
+            Plugin.fromYaml(
+              'user_selected_url_launcher_implementation',
+              '',
+              YamlMap.wrap(<String, dynamic>{
+                'implements': 'url_launcher',
+                'platforms': <String, dynamic>{
+                  'linux': <String, dynamic>{'dartPluginClass': 'UrlLauncherPluginLinux'},
+                },
+              }),
+              null,
+              <String>[],
+              fileSystem: fs,
+              isDevDependency: false,
+              appDependencies: directDependencies,
+            ),
+          ],
+          logger: BufferLogger.test(),
+          selectDartPluginsOnly: true,
+        );
         expect(resolutions.length, equals(1));
         expect(
           resolutions[0].toMap(),
@@ -544,38 +584,42 @@ void main() {
           'url_launcher',
         };
 
-        final List<PluginInterfaceResolution> resolutions = resolvePlatformImplementation(<Plugin>[
-          Plugin.fromYaml(
-            'url_launcher',
-            '',
-            YamlMap.wrap(<String, dynamic>{
-              'platforms': <String, dynamic>{
-                'android': <String, dynamic>{'dartPluginClass': 'UrlLauncherAndroid'},
-                'ios': <String, dynamic>{'dartPluginClass': 'UrlLauncherIos'},
-              },
-            }),
-            null,
-            <String>[],
-            fileSystem: fs,
-            isDevDependency: false,
-            appDependencies: directDependencies,
-          ),
-          Plugin.fromYaml(
-            'user_selected_url_launcher_implementation',
-            '',
-            YamlMap.wrap(<String, dynamic>{
-              'implements': 'url_launcher',
-              'platforms': <String, dynamic>{
-                'android': <String, dynamic>{'dartPluginClass': 'UrlLauncherAndroid'},
-              },
-            }),
-            null,
-            <String>[],
-            fileSystem: fs,
-            isDevDependency: false,
-            appDependencies: directDependencies,
-          ),
-        ], selectDartPluginsOnly: true);
+        final List<PluginInterfaceResolution> resolutions = resolvePlatformImplementation(
+          <Plugin>[
+            Plugin.fromYaml(
+              'url_launcher',
+              '',
+              YamlMap.wrap(<String, dynamic>{
+                'platforms': <String, dynamic>{
+                  'android': <String, dynamic>{'dartPluginClass': 'UrlLauncherAndroid'},
+                  'ios': <String, dynamic>{'dartPluginClass': 'UrlLauncherIos'},
+                },
+              }),
+              null,
+              <String>[],
+              fileSystem: fs,
+              isDevDependency: false,
+              appDependencies: directDependencies,
+            ),
+            Plugin.fromYaml(
+              'user_selected_url_launcher_implementation',
+              '',
+              YamlMap.wrap(<String, dynamic>{
+                'implements': 'url_launcher',
+                'platforms': <String, dynamic>{
+                  'android': <String, dynamic>{'dartPluginClass': 'UrlLauncherAndroid'},
+                },
+              }),
+              null,
+              <String>[],
+              fileSystem: fs,
+              isDevDependency: false,
+              appDependencies: directDependencies,
+            ),
+          ],
+          logger: BufferLogger.test(),
+          selectDartPluginsOnly: true,
+        );
         expect(resolutions.length, equals(2));
         expect(
           resolutions[0].toMap(),
@@ -602,52 +646,56 @@ void main() {
         () async {
           final directDependencies = <String>{'url_launcher'};
           expect(() {
-            resolvePlatformImplementation(<Plugin>[
-              Plugin.fromYaml(
-                'url_launcher',
-                '',
-                YamlMap.wrap(<String, dynamic>{
-                  'platforms': <String, dynamic>{
-                    'linux': <String, dynamic>{'default_package': 'url_launcher_linux_1'},
-                  },
-                }),
-                null,
-                <String>[],
-                fileSystem: fs,
-                isDevDependency: false,
-                appDependencies: directDependencies,
-              ),
-              Plugin.fromYaml(
-                'url_launcher_linux_1',
-                '',
-                YamlMap.wrap(<String, dynamic>{
-                  'implements': 'url_launcher',
-                  'platforms': <String, dynamic>{
-                    'linux': <String, dynamic>{'default_package': 'url_launcher_linux_2'},
-                  },
-                }),
-                null,
-                <String>[],
-                fileSystem: fs,
-                isDevDependency: false,
-                appDependencies: directDependencies,
-              ),
-              Plugin.fromYaml(
-                'url_launcher_linux_2',
-                '',
-                YamlMap.wrap(<String, dynamic>{
-                  'implements': 'url_launcher',
-                  'platforms': <String, dynamic>{
-                    'linux': <String, dynamic>{'dartPluginClass': 'UrlLauncherPluginLinux'},
-                  },
-                }),
-                null,
-                <String>[],
-                fileSystem: fs,
-                isDevDependency: false,
-                appDependencies: directDependencies,
-              ),
-            ], selectDartPluginsOnly: true);
+            resolvePlatformImplementation(
+              <Plugin>[
+                Plugin.fromYaml(
+                  'url_launcher',
+                  '',
+                  YamlMap.wrap(<String, dynamic>{
+                    'platforms': <String, dynamic>{
+                      'linux': <String, dynamic>{'default_package': 'url_launcher_linux_1'},
+                    },
+                  }),
+                  null,
+                  <String>[],
+                  fileSystem: fs,
+                  isDevDependency: false,
+                  appDependencies: directDependencies,
+                ),
+                Plugin.fromYaml(
+                  'url_launcher_linux_1',
+                  '',
+                  YamlMap.wrap(<String, dynamic>{
+                    'implements': 'url_launcher',
+                    'platforms': <String, dynamic>{
+                      'linux': <String, dynamic>{'default_package': 'url_launcher_linux_2'},
+                    },
+                  }),
+                  null,
+                  <String>[],
+                  fileSystem: fs,
+                  isDevDependency: false,
+                  appDependencies: directDependencies,
+                ),
+                Plugin.fromYaml(
+                  'url_launcher_linux_2',
+                  '',
+                  YamlMap.wrap(<String, dynamic>{
+                    'implements': 'url_launcher',
+                    'platforms': <String, dynamic>{
+                      'linux': <String, dynamic>{'dartPluginClass': 'UrlLauncherPluginLinux'},
+                    },
+                  }),
+                  null,
+                  <String>[],
+                  fileSystem: fs,
+                  isDevDependency: false,
+                  appDependencies: directDependencies,
+                ),
+              ],
+              logger: testLogger,
+              selectDartPluginsOnly: true,
+            );
           }, throwsToolExit(message: 'Please resolve the plugin pubspec errors'));
 
           expect(
@@ -666,40 +714,44 @@ void main() {
         () async {
           final directDependencies = <String>{'url_launcher'};
           expect(() {
-            resolvePlatformImplementation(<Plugin>[
-              Plugin.fromYaml(
-                'url_launcher',
-                '',
-                YamlMap.wrap(<String, dynamic>{
-                  'platforms': <String, dynamic>{
-                    'linux': <String, dynamic>{
-                      'default_package': 'url_launcher_linux',
-                      'dartPluginClass': 'UrlLauncherPluginLinux',
+            resolvePlatformImplementation(
+              <Plugin>[
+                Plugin.fromYaml(
+                  'url_launcher',
+                  '',
+                  YamlMap.wrap(<String, dynamic>{
+                    'platforms': <String, dynamic>{
+                      'linux': <String, dynamic>{
+                        'default_package': 'url_launcher_linux',
+                        'dartPluginClass': 'UrlLauncherPluginLinux',
+                      },
                     },
-                  },
-                }),
-                null,
-                <String>[],
-                fileSystem: fs,
-                isDevDependency: false,
-                appDependencies: directDependencies,
-              ),
-              Plugin.fromYaml(
-                'url_launcher_linux',
-                '',
-                YamlMap.wrap(<String, dynamic>{
-                  'implements': 'url_launcher',
-                  'platforms': <String, dynamic>{
-                    'linux': <String, dynamic>{'dartPluginClass': 'UrlLauncherPluginLinux'},
-                  },
-                }),
-                null,
-                <String>[],
-                fileSystem: fs,
-                isDevDependency: false,
-                appDependencies: directDependencies,
-              ),
-            ], selectDartPluginsOnly: true);
+                  }),
+                  null,
+                  <String>[],
+                  fileSystem: fs,
+                  isDevDependency: false,
+                  appDependencies: directDependencies,
+                ),
+                Plugin.fromYaml(
+                  'url_launcher_linux',
+                  '',
+                  YamlMap.wrap(<String, dynamic>{
+                    'implements': 'url_launcher',
+                    'platforms': <String, dynamic>{
+                      'linux': <String, dynamic>{'dartPluginClass': 'UrlLauncherPluginLinux'},
+                    },
+                  }),
+                  null,
+                  <String>[],
+                  fileSystem: fs,
+                  isDevDependency: false,
+                  appDependencies: directDependencies,
+                ),
+              ],
+              logger: testLogger,
+              selectDartPluginsOnly: true,
+            );
           }, throwsToolExit(message: 'Please resolve the plugin pubspec errors'));
 
           expect(
@@ -747,6 +799,7 @@ void main() {
                 appDependencies: directDependencies,
               ),
             ],
+            logger: testLogger,
             selectDartPluginsOnly: true,
           );
 
@@ -798,6 +851,7 @@ void main() {
                 appDependencies: directDependencies,
               ),
             ],
+            logger: testLogger,
             selectDartPluginsOnly: true,
           );
 
@@ -840,6 +894,7 @@ void main() {
               appDependencies: directDependencies,
             ),
           ],
+          logger: testLogger,
           // Using nativeOrDart plugin selection.
           selectDartPluginsOnly: false,
         );
@@ -878,6 +933,7 @@ void main() {
                 appDependencies: directDependencies,
               ),
             ],
+            logger: testLogger,
             selectDartPluginsOnly: true,
           );
 
@@ -896,38 +952,42 @@ void main() {
       testUsingContext('provides error when user selected multiple implementations', () async {
         final directDependencies = <String>{'url_launcher_linux_1', 'url_launcher_linux_2'};
         expect(() {
-          resolvePlatformImplementation(<Plugin>[
-            Plugin.fromYaml(
-              'url_launcher_linux_1',
-              '',
-              YamlMap.wrap(<String, dynamic>{
-                'implements': 'url_launcher',
-                'platforms': <String, dynamic>{
-                  'linux': <String, dynamic>{'dartPluginClass': 'UrlLauncherPluginLinux'},
-                },
-              }),
-              null,
-              <String>[],
-              fileSystem: fs,
-              isDevDependency: false,
-              appDependencies: directDependencies,
-            ),
-            Plugin.fromYaml(
-              'url_launcher_linux_2',
-              '',
-              YamlMap.wrap(<String, dynamic>{
-                'implements': 'url_launcher',
-                'platforms': <String, dynamic>{
-                  'linux': <String, dynamic>{'dartPluginClass': 'UrlLauncherPluginLinux'},
-                },
-              }),
-              null,
-              <String>[],
-              fileSystem: fs,
-              isDevDependency: false,
-              appDependencies: directDependencies,
-            ),
-          ], selectDartPluginsOnly: true);
+          resolvePlatformImplementation(
+            <Plugin>[
+              Plugin.fromYaml(
+                'url_launcher_linux_1',
+                '',
+                YamlMap.wrap(<String, dynamic>{
+                  'implements': 'url_launcher',
+                  'platforms': <String, dynamic>{
+                    'linux': <String, dynamic>{'dartPluginClass': 'UrlLauncherPluginLinux'},
+                  },
+                }),
+                null,
+                <String>[],
+                fileSystem: fs,
+                isDevDependency: false,
+                appDependencies: directDependencies,
+              ),
+              Plugin.fromYaml(
+                'url_launcher_linux_2',
+                '',
+                YamlMap.wrap(<String, dynamic>{
+                  'implements': 'url_launcher',
+                  'platforms': <String, dynamic>{
+                    'linux': <String, dynamic>{'dartPluginClass': 'UrlLauncherPluginLinux'},
+                  },
+                }),
+                null,
+                <String>[],
+                fileSystem: fs,
+                isDevDependency: false,
+                appDependencies: directDependencies,
+              ),
+            ],
+            logger: testLogger,
+            selectDartPluginsOnly: true,
+          );
         }, throwsToolExit(message: 'Please resolve the plugin implementation selection errors'));
 
         expect(
@@ -948,68 +1008,72 @@ void main() {
           'url_launcher_windows_2',
         };
         expect(() {
-          resolvePlatformImplementation(<Plugin>[
-            Plugin.fromYaml(
-              'url_launcher_linux_1',
-              '',
-              YamlMap.wrap(<String, dynamic>{
-                'implements': 'url_launcher',
-                'platforms': <String, dynamic>{
-                  'linux': <String, dynamic>{'dartPluginClass': 'UrlLauncherPluginLinux'},
-                },
-              }),
-              null,
-              <String>[],
-              fileSystem: fs,
-              isDevDependency: false,
-              appDependencies: directDependencies,
-            ),
-            Plugin.fromYaml(
-              'url_launcher_linux_2',
-              '',
-              YamlMap.wrap(<String, dynamic>{
-                'implements': 'url_launcher',
-                'platforms': <String, dynamic>{
-                  'linux': <String, dynamic>{'dartPluginClass': 'UrlLauncherPluginLinux'},
-                },
-              }),
-              null,
-              <String>[],
-              fileSystem: fs,
-              isDevDependency: false,
-              appDependencies: directDependencies,
-            ),
-            Plugin.fromYaml(
-              'url_launcher_windows_1',
-              '',
-              YamlMap.wrap(<String, dynamic>{
-                'implements': 'url_launcher',
-                'platforms': <String, dynamic>{
-                  'windows': <String, dynamic>{'dartPluginClass': 'UrlLauncherPluginWindows1'},
-                },
-              }),
-              null,
-              <String>[],
-              fileSystem: fs,
-              isDevDependency: false,
-              appDependencies: directDependencies,
-            ),
-            Plugin.fromYaml(
-              'url_launcher_windows_2',
-              '',
-              YamlMap.wrap(<String, dynamic>{
-                'implements': 'url_launcher',
-                'platforms': <String, dynamic>{
-                  'windows': <String, dynamic>{'dartPluginClass': 'UrlLauncherPluginWindows2'},
-                },
-              }),
-              null,
-              <String>[],
-              fileSystem: fs,
-              isDevDependency: false,
-              appDependencies: directDependencies,
-            ),
-          ], selectDartPluginsOnly: true);
+          resolvePlatformImplementation(
+            <Plugin>[
+              Plugin.fromYaml(
+                'url_launcher_linux_1',
+                '',
+                YamlMap.wrap(<String, dynamic>{
+                  'implements': 'url_launcher',
+                  'platforms': <String, dynamic>{
+                    'linux': <String, dynamic>{'dartPluginClass': 'UrlLauncherPluginLinux'},
+                  },
+                }),
+                null,
+                <String>[],
+                fileSystem: fs,
+                isDevDependency: false,
+                appDependencies: directDependencies,
+              ),
+              Plugin.fromYaml(
+                'url_launcher_linux_2',
+                '',
+                YamlMap.wrap(<String, dynamic>{
+                  'implements': 'url_launcher',
+                  'platforms': <String, dynamic>{
+                    'linux': <String, dynamic>{'dartPluginClass': 'UrlLauncherPluginLinux'},
+                  },
+                }),
+                null,
+                <String>[],
+                fileSystem: fs,
+                isDevDependency: false,
+                appDependencies: directDependencies,
+              ),
+              Plugin.fromYaml(
+                'url_launcher_windows_1',
+                '',
+                YamlMap.wrap(<String, dynamic>{
+                  'implements': 'url_launcher',
+                  'platforms': <String, dynamic>{
+                    'windows': <String, dynamic>{'dartPluginClass': 'UrlLauncherPluginWindows1'},
+                  },
+                }),
+                null,
+                <String>[],
+                fileSystem: fs,
+                isDevDependency: false,
+                appDependencies: directDependencies,
+              ),
+              Plugin.fromYaml(
+                'url_launcher_windows_2',
+                '',
+                YamlMap.wrap(<String, dynamic>{
+                  'implements': 'url_launcher',
+                  'platforms': <String, dynamic>{
+                    'windows': <String, dynamic>{'dartPluginClass': 'UrlLauncherPluginWindows2'},
+                  },
+                }),
+                null,
+                <String>[],
+                fileSystem: fs,
+                isDevDependency: false,
+                appDependencies: directDependencies,
+              ),
+            ],
+            logger: testLogger,
+            selectDartPluginsOnly: true,
+          );
         }, throwsToolExit(message: 'Please resolve the plugin implementation selection errors'));
 
         expect(
@@ -1032,38 +1096,42 @@ void main() {
         () async {
           final directDependencies = <String>{};
           expect(() {
-            resolvePlatformImplementation(<Plugin>[
-              Plugin.fromYaml(
-                'url_launcher_linux_1',
-                '',
-                YamlMap.wrap(<String, dynamic>{
-                  'implements': 'url_launcher',
-                  'platforms': <String, dynamic>{
-                    'linux': <String, dynamic>{'dartPluginClass': 'UrlLauncherPluginLinux1'},
-                  },
-                }),
-                null,
-                <String>[],
-                fileSystem: fs,
-                isDevDependency: false,
-                appDependencies: directDependencies,
-              ),
-              Plugin.fromYaml(
-                'url_launcher_linux_2',
-                '',
-                YamlMap.wrap(<String, dynamic>{
-                  'implements': 'url_launcher',
-                  'platforms': <String, dynamic>{
-                    'linux': <String, dynamic>{'dartPluginClass': 'UrlLauncherPluginLinux2'},
-                  },
-                }),
-                null,
-                <String>[],
-                fileSystem: fs,
-                isDevDependency: false,
-                appDependencies: directDependencies,
-              ),
-            ], selectDartPluginsOnly: true);
+            resolvePlatformImplementation(
+              <Plugin>[
+                Plugin.fromYaml(
+                  'url_launcher_linux_1',
+                  '',
+                  YamlMap.wrap(<String, dynamic>{
+                    'implements': 'url_launcher',
+                    'platforms': <String, dynamic>{
+                      'linux': <String, dynamic>{'dartPluginClass': 'UrlLauncherPluginLinux1'},
+                    },
+                  }),
+                  null,
+                  <String>[],
+                  fileSystem: fs,
+                  isDevDependency: false,
+                  appDependencies: directDependencies,
+                ),
+                Plugin.fromYaml(
+                  'url_launcher_linux_2',
+                  '',
+                  YamlMap.wrap(<String, dynamic>{
+                    'implements': 'url_launcher',
+                    'platforms': <String, dynamic>{
+                      'linux': <String, dynamic>{'dartPluginClass': 'UrlLauncherPluginLinux2'},
+                    },
+                  }),
+                  null,
+                  <String>[],
+                  fileSystem: fs,
+                  isDevDependency: false,
+                  appDependencies: directDependencies,
+                ),
+              ],
+              logger: testLogger,
+              selectDartPluginsOnly: true,
+            );
           }, throwsToolExit(message: 'Please resolve the plugin implementation selection errors'));
 
           expect(
@@ -1144,10 +1212,16 @@ void main() {
 ''');
           final PackageConfig packageConfig = await loadPackageConfigWithLogging(
             flutterProject.directory.childDirectory('.dart_tool').childFile('package_config.json'),
-            logger: globals.logger,
+            logger: testLogger,
             throwOnError: false,
           );
-          await generateMainDartWithPluginRegistrant(flutterProject, packageConfig, mainFile);
+          await generateMainDartWithPluginRegistrant(
+            flutterProject,
+            packageConfig,
+            mainFile,
+            logger: testLogger,
+            templateRenderer: const MustacheTemplateRenderer(),
+          );
           expect(
             flutterProject.dartPluginRegistrant.readAsStringSync(),
             '//\n'
@@ -1263,11 +1337,17 @@ void main() {
           final File mainFile = libDir.childFile('main.dart')..writeAsStringSync('');
           final PackageConfig packageConfig = await loadPackageConfigWithLogging(
             flutterProject.directory.childDirectory('.dart_tool').childFile('package_config.json'),
-            logger: globals.logger,
+            logger: testLogger,
             throwOnError: false,
           );
           await expectLater(
-            generateMainDartWithPluginRegistrant(flutterProject, packageConfig, mainFile),
+            generateMainDartWithPluginRegistrant(
+              flutterProject,
+              packageConfig,
+              mainFile,
+              logger: testLogger,
+              templateRenderer: const MustacheTemplateRenderer(),
+            ),
             throwsToolExit(
               message:
                   'Invalid plugin specification url_launcher_macos.\n'
@@ -1301,11 +1381,17 @@ void main() {
           final File mainFile = libDir.childFile('main.dart')..writeAsStringSync('');
           final PackageConfig packageConfig = await loadPackageConfigWithLogging(
             flutterProject.directory.childDirectory('.dart_tool').childFile('package_config.json'),
-            logger: globals.logger,
+            logger: testLogger,
             throwOnError: false,
           );
           await expectLater(
-            generateMainDartWithPluginRegistrant(flutterProject, packageConfig, mainFile),
+            generateMainDartWithPluginRegistrant(
+              flutterProject,
+              packageConfig,
+              mainFile,
+              logger: testLogger,
+              templateRenderer: const MustacheTemplateRenderer(),
+            ),
             throwsToolExit(
               message:
                   'Invalid plugin specification url_launcher_macos.\n'
@@ -1334,10 +1420,16 @@ void main() {
           final File mainFile = libDir.childFile('main.dart')..writeAsStringSync('');
           final PackageConfig packageConfig = await loadPackageConfigWithLogging(
             flutterProject.directory.childDirectory('.dart_tool').childFile('package_config.json'),
-            logger: globals.logger,
+            logger: testLogger,
             throwOnError: false,
           );
-          await generateMainDartWithPluginRegistrant(flutterProject, packageConfig, mainFile);
+          await generateMainDartWithPluginRegistrant(
+            flutterProject,
+            packageConfig,
+            mainFile,
+            logger: testLogger,
+            templateRenderer: const MustacheTemplateRenderer(),
+          );
           expect(flutterProject.dartPluginRegistrant.existsSync(), isFalse);
         },
         overrides: <Type, Generator>{
@@ -1369,16 +1461,28 @@ void main() {
           final File mainFile = libDir.childFile('main.dart')..writeAsStringSync('');
           final PackageConfig packageConfig = await loadPackageConfigWithLogging(
             flutterProject.packageConfig,
-            logger: globals.logger,
+            logger: testLogger,
             throwOnError: false,
           );
-          await generateMainDartWithPluginRegistrant(flutterProject, packageConfig, mainFile);
+          await generateMainDartWithPluginRegistrant(
+            flutterProject,
+            packageConfig,
+            mainFile,
+            logger: testLogger,
+            templateRenderer: const MustacheTemplateRenderer(),
+          );
           expect(flutterProject.dartPluginRegistrant.existsSync(), isTrue);
 
           // No plugins.
           createFakeDartPlugins(flutterProject, flutterManifest, fs, <String, String>{});
 
-          await generateMainDartWithPluginRegistrant(flutterProject, packageConfig, mainFile);
+          await generateMainDartWithPluginRegistrant(
+            flutterProject,
+            packageConfig,
+            mainFile,
+            logger: testLogger,
+            templateRenderer: const MustacheTemplateRenderer(),
+          );
           expect(flutterProject.dartPluginRegistrant.existsSync(), isFalse);
         },
         overrides: <Type, Generator>{

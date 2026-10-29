@@ -3,6 +3,9 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:js_interop';
+import 'dart:ui';
+import 'dart:ui_web' as ui_web;
 
 import '../common.dart';
 
@@ -13,6 +16,34 @@ import '../common.dart';
 ///  * `_callback_io.dart`, which has the dart:io implementation
 CallbackManager get callbackManager => _singletonWebDriverCommandManager;
 
+/// Returns the top-left corner of the element that hosts [view], in CSS pixels
+/// relative to the top-left corner of the browser viewport.
+///
+/// Adding this to a logical position in [view] gives the viewport position
+/// that WebDriver pointer actions expect. Returns [Offset.zero] if [view] has
+/// no host element.
+Offset viewportOrigin(FlutterView view) {
+  final JSAny? hostElement = ui_web.views.getHostElement(view.viewId);
+  if (hostElement == null) {
+    return Offset.zero;
+  }
+  final _DOMRect rect = (hostElement as _Element).getBoundingClientRect();
+  return Offset(rect.left, rect.top);
+}
+
+/// A DOM `Element`.
+@JS()
+extension type _Element._(JSObject _) implements JSObject {
+  external _DOMRect getBoundingClientRect();
+}
+
+/// A DOM `DOMRect`.
+@JS()
+extension type _DOMRect._(JSObject _) implements JSObject {
+  external double get left;
+  external double get top;
+}
+
 /// WebDriverCommandManager singleton.
 final _WebCallbackManager _singletonWebDriverCommandManager = _WebCallbackManager();
 
@@ -21,8 +52,8 @@ final _WebCallbackManager _singletonWebDriverCommandManager = _WebCallbackManage
 /// Along with responding to callbacks from the driver side this calls enables
 /// usage of Web Driver commands by sending [WebDriverCommand]s to driver side.
 ///
-/// Tests can execute an Web Driver commands such as `screenshot` using browsers'
-/// WebDriver APIs.
+/// Tests can execute WebDriver commands such as `screenshot` or
+/// `pointerActions` using browsers' WebDriver APIs.
 ///
 /// See: https://www.w3.org/TR/webdriver/
 class _WebCallbackManager implements CallbackManager {
@@ -53,6 +84,16 @@ class _WebCallbackManager implements CallbackManager {
       'bytes': <int>[],
     };
   }
+
+  /// Performs a sequence of real pointer [actions] in the browser viewport
+  /// using the WebDriver actions API.
+  ///
+  /// Only works on Web when tests are run via the `flutter drive` command.
+  ///
+  /// See: https://www.w3.org/TR/webdriver/#actions
+  @override
+  Future<void> pointerActions(List<WebDriverPointerAction> actions) =>
+      _sendWebDriverCommand(WebDriverCommand.pointerActions(actions));
 
   @override
   Future<void> convertFlutterSurfaceToImage() async {
@@ -113,9 +154,9 @@ class _WebCallbackManager implements CallbackManager {
     if (message.isPending) {
       final WebDriverCommand command = await _webDriverCommandPipe.future;
       switch (command.type) {
-        case WebDriverCommandType.screenshot:
+        case WebDriverCommandType.screenshot || WebDriverCommandType.pointerActions:
           final data = Map<String, dynamic>.from(command.values);
-          data.addAll(WebDriverCommand.typeToMap(WebDriverCommandType.screenshot));
+          data.addAll(WebDriverCommand.typeToMap(command.type));
           response = <String, String>{'message': Response.webDriverCommand(data: data).toJson()};
         case WebDriverCommandType.noop:
           final data = <String, dynamic>{};

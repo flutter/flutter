@@ -373,6 +373,63 @@ void main() {
       }
     },
   );
+
+  test('Animated gif frames are resized to targetWidth and targetHeight', () async {
+    // Regression test for https://github.com/flutter/flutter/issues/90804
+    final Uint8List data = await _getSkiaResource('test640x479.gif').readAsBytes();
+    final ui.Codec codec = await ui.instantiateImageCodec(
+      data,
+      targetWidth: 160,
+      targetHeight: 120,
+    );
+    expect(codec.frameCount, 4);
+
+    // Decode two loops so that frames composited on top of a cached backdrop
+    // after the animation wraps around are covered as well.
+    for (var i = 0; i < codec.frameCount * 2; i++) {
+      final ui.FrameInfo frameInfo = await codec.getNextFrame();
+      expect(frameInfo.image.width, 160);
+      expect(frameInfo.image.height, 120);
+      frameInfo.image.dispose();
+    }
+    codec.dispose();
+  });
+
+  test('Animated webp frames are resized when only targetWidth is given', () async {
+    final Uint8List data = File(path.join('flutter', 'lib', 'ui', 'fixtures', 'heart.webp'))
+        .readAsBytesSync();
+    final ui.Codec codec = await ui.instantiateImageCodec(data, targetWidth: 100);
+    expect(codec.frameCount, 69);
+
+    for (var i = 0; i < codec.frameCount; i++) {
+      final ui.FrameInfo frameInfo = await codec.getNextFrame();
+      expect(frameInfo.image.width, 100);
+      expect(frameInfo.image.height, 100);
+      frameInfo.image.dispose();
+    }
+    codec.dispose();
+  });
+
+  test('instantiateImageCodecWithSize resizes animated images', () async {
+    // Regression test for https://github.com/flutter/flutter/issues/137668
+    final Uint8List data = File(path.join('flutter', 'lib', 'ui', 'fixtures', 'heart.webp'))
+        .readAsBytesSync();
+    final ui.ImmutableBuffer buffer = await ui.ImmutableBuffer.fromUint8List(data);
+    final ui.Codec codec = await ui.instantiateImageCodecWithSize(
+      buffer,
+      getTargetSize: (int intrinsicWidth, int intrinsicHeight) {
+        expect(intrinsicWidth, 500);
+        expect(intrinsicHeight, 500);
+        return const ui.TargetImageSize(width: 50, height: 50);
+      },
+    );
+
+    final ui.FrameInfo frameInfo = await codec.getNextFrame();
+    expect(frameInfo.image.width, 50);
+    expect(frameInfo.image.height, 50);
+    frameInfo.image.dispose();
+    codec.dispose();
+  });
 }
 
 /// Returns a File handle to a file in the skia/resources directory.

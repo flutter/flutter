@@ -68,7 +68,6 @@ abstract class Project {
     // Setup for different flutter web initializations
     writeFile(fileSystem.path.join(dir.path, 'web', 'index.html'), indexHtml);
     writeFile(fileSystem.path.join(dir.path, 'web', 'flutter.js'), '');
-    writeFile(fileSystem.path.join(dir.path, 'web', 'flutter_service_worker.js'), '');
     writePackageConfigFiles(directory: dir, mainLibName: name);
     await getPackages(dir.path);
   }

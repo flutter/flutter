@@ -7,18 +7,34 @@ outputs:
 runs:
   using: "composite"
   steps:
+    - name: Fetch upstream master (if not flutter/flutter)
+      if: github.repository != 'flutter/flutter' && !env.ACT
+      shell: bash
+      run: |
+        if ! git remote get-url upstream >/dev/null 2>&1; then
+          git remote add upstream https://github.com/flutter/flutter.git
+        fi
+        git fetch --no-tags upstream master:refs/remotes/upstream/master
+
     - name: Check Engine Changes
       id: check
       shell: bash
       env:
         EVENT_NAME: ${{ github.event_name }}
+        GITHUB_REPOSITORY: ${{ github.repository }}
         PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
         MERGE_GROUP_BASE_SHA: ${{ github.event.merge_group.base_sha }}
         PUSH_BEFORE_SHA: ${{ github.event.before }}
       run: |
         EMPTY_SHA="0000000000000000000000000000000000000000"
         if [ "$EVENT_NAME" = "pull_request" ]; then
-          BASE_REF="$PR_BASE_SHA"
+          if [ "$GITHUB_REPOSITORY" != "flutter/flutter" ] && \
+             git show-ref --verify --quiet refs/remotes/upstream/master && \
+             git merge-base --is-ancestor "$PR_BASE_SHA" refs/remotes/upstream/master 2>/dev/null; then
+            BASE_REF="refs/remotes/upstream/master"
+          else
+            BASE_REF="$PR_BASE_SHA"
+          fi
         elif [ "$EVENT_NAME" = "merge_group" ]; then
           BASE_REF="$MERGE_GROUP_BASE_SHA"
         elif [ "$EVENT_NAME" = "push" ] && [ -n "$PUSH_BEFORE_SHA" ] && [ "$PUSH_BEFORE_SHA" != "$EMPTY_SHA" ]; then

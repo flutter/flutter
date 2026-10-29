@@ -8,10 +8,10 @@ import 'package:code_assets/code_assets.dart';
 
 import '../../../base/common.dart';
 import '../../../base/file_system.dart';
+import '../../../base/logger.dart';
 import '../../../base/process.dart';
 import '../../../build_info.dart';
 import '../../../build_system/targets/darwin.dart';
-import '../../../globals.dart' as globals;
 import '../native_assets.dart';
 import '../native_assets_manifest.dart';
 
@@ -64,8 +64,12 @@ Future<void> createInfoPlist(String name, Directory target, {String? minimumIOSV
 /// The dylibs must have different architectures. E.g. a dylib targeting
 /// arm64 ios simulator cannot be combined with a dylib targeting arm64
 /// ios device or macos arm64.
-Future<void> lipoDylibs(File target, List<File> sources) async {
-  final RunResult lipoResult = await globals.processUtils.run(<String>[
+Future<void> lipoDylibs(
+  File target,
+  List<File> sources, {
+  required ProcessUtils processUtils,
+}) async {
+  final RunResult lipoResult = await processUtils.run(<String>[
     'xcrun',
     'lipo',
     '-create',
@@ -93,9 +97,10 @@ Future<void> lipoDylibs(File target, List<File> sources) async {
 Future<void> setInstallNamesDylib(
   File dylibFile,
   String newInstallName,
-  Map<String, String> oldToNewInstallNames,
-) async {
-  final RunResult setInstallNamesResult = await globals.processUtils.run(<String>[
+  Map<String, String> oldToNewInstallNames, {
+  required ProcessUtils processUtils,
+}) async {
+  final RunResult setInstallNamesResult = await processUtils.run(<String>[
     'xcrun',
     'install_name_tool',
     '-id',
@@ -117,8 +122,11 @@ Future<void> setInstallNamesDylib(
   }
 }
 
-Future<Set<String>> getInstallNamesDylib(File dylibFile) async {
-  final RunResult installNameResult = await globals.processUtils.run(<String>[
+Future<Set<String>> getInstallNamesDylib(
+  File dylibFile, {
+  required ProcessUtils processUtils,
+}) async {
+  final RunResult installNameResult = await processUtils.run(<String>[
     'xcrun',
     'otool',
     '-D',
@@ -139,8 +147,12 @@ Future<Set<String>> getInstallNamesDylib(File dylibFile) async {
 }
 
 /// Creates a dSYM bundle for a dylib.
-Future<void> dsymutilDylib(File dylibFile, String dsymPath) async {
-  final RunResult result = await globals.processUtils.run(<String>[
+Future<void> dsymutilDylib(
+  File dylibFile,
+  String dsymPath, {
+  required ProcessUtils processUtils,
+}) async {
+  final RunResult result = await processUtils.run(<String>[
     'xcrun',
     'dsymutil',
     dylibFile.path,
@@ -155,8 +167,12 @@ Future<void> dsymutilDylib(File dylibFile, String dsymPath) async {
 /// Strips a dylib.
 ///
 /// This is useful for release builds to reduce binary size.
-Future<void> stripDylib(File dylibFile) async {
-  final RunResult result = await globals.processUtils.run(<String>[
+Future<void> stripDylib(
+  File dylibFile, {
+  required Logger logger,
+  required ProcessUtils processUtils,
+}) async {
+  final RunResult result = await processUtils.run(<String>[
     'xcrun',
     'strip',
     '-x', // Remove local symbols.
@@ -164,8 +180,8 @@ Future<void> stripDylib(File dylibFile) async {
     dylibFile.path,
   ]);
   if (result.exitCode != 0) {
-    globals.logger.printError(result.stdout);
-    globals.logger.printError(result.stderr);
+    logger.printError(result.stdout);
+    logger.printError(result.stderr);
     throwToolExit('strip failed with exit code ${result.exitCode}');
   }
 }
@@ -173,8 +189,9 @@ Future<void> stripDylib(File dylibFile) async {
 Future<void> codesignDylib(
   String? codesignIdentity,
   BuildMode buildMode,
-  FileSystemEntity target,
-) async {
+  FileSystemEntity target, {
+  required ProcessUtils processUtils,
+}) async {
   if (codesignIdentity == null || codesignIdentity.isEmpty) {
     codesignIdentity = '-';
   }
@@ -190,7 +207,7 @@ Future<void> codesignDylib(
     ],
     target.path,
   ];
-  final RunResult codesignResult = await globals.processUtils.run(codesignCommand);
+  final RunResult codesignResult = await processUtils.run(codesignCommand);
   if (codesignResult.exitCode != 0) {
     throwToolExit(
       'Failed to code sign binary: exit code: ${codesignResult.exitCode} '
@@ -205,10 +222,13 @@ Future<void> codesignDylib(
 ///
 /// If no XCode installation was found, [throwIfNotFound] controls whether this
 /// throws or returns `null`.
-Future<CCompilerConfig?> cCompilerConfigMacOS({required bool throwIfNotFound}) async {
-  final Uri? compiler = await _findXcrunBinary('clang', throwIfNotFound);
-  final Uri? archiver = await _findXcrunBinary('ar', throwIfNotFound);
-  final Uri? linker = await _findXcrunBinary('ld', throwIfNotFound);
+Future<CCompilerConfig?> cCompilerConfigMacOS({
+  required ProcessUtils processUtils,
+  required bool throwIfNotFound,
+}) async {
+  final Uri? compiler = await _findXcrunBinary('clang', throwIfNotFound, processUtils);
+  final Uri? archiver = await _findXcrunBinary('ar', throwIfNotFound, processUtils);
+  final Uri? linker = await _findXcrunBinary('ld', throwIfNotFound, processUtils);
 
   if (compiler == null || archiver == null || linker == null) {
     assert(!throwIfNotFound);
@@ -219,12 +239,12 @@ Future<CCompilerConfig?> cCompilerConfigMacOS({required bool throwIfNotFound}) a
 }
 
 /// Invokes `xcrun --find` to find the full path to [binaryName].
-Future<Uri?> _findXcrunBinary(String binaryName, bool throwIfNotFound) async {
-  final RunResult xcrunResult = await globals.processUtils.run(<String>[
-    'xcrun',
-    '--find',
-    binaryName,
-  ]);
+Future<Uri?> _findXcrunBinary(
+  String binaryName,
+  bool throwIfNotFound,
+  ProcessUtils processUtils,
+) async {
+  final RunResult xcrunResult = await processUtils.run(<String>['xcrun', '--find', binaryName]);
   if (xcrunResult.exitCode != 0) {
     if (throwIfNotFound) {
       throwToolExit('Failed to find $binaryName with xcrun:\n${xcrunResult.stderr}');
@@ -356,6 +376,7 @@ Map<Architecture?, List<String>> parseOtoolArchitectureSections(String output) {
 /// architecture is used.
 Map<FlutterCodeAsset, FlutterCodeAssetTargetLocation> assetTargetLocationsApple(
   List<FlutterCodeAsset> nativeAssets, {
+  required Logger logger,
   Uri? absolutePath,
 }) {
   final alreadyTakenNamesPerArch = <Architecture, Set<String>>{};
@@ -400,6 +421,7 @@ Map<FlutterCodeAsset, FlutterCodeAssetTargetLocation> assetTargetLocationsApple(
         'package providing the asset. Please report this to the '
         'package maintainers and ensure the "build.dart" hook '
         'produces consistent filenames.',
+        logger: logger,
       );
     }
 

@@ -21,6 +21,7 @@ import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
+import '../../src/fakes.dart';
 
 const _doubleIndent = '        ';
 
@@ -41,10 +42,13 @@ void main() {
             final project = FakeXcodeProject(platform: platform.name, fileSystem: fs);
 
             final spm = SwiftPackageManager(
-              fileSystem: fs,
               templateRenderer: const MustacheTemplateRenderer(),
-              processUtils: ProcessUtils(processManager: processManager, logger: logger),
-              config: FakeConfig(),
+              toolContext: FakeToolContext(
+                config: FakeConfig(),
+                fs: fs,
+                logger: logger,
+                processUtils: ProcessUtils(processManager: processManager, logger: logger),
+              ),
             );
             await spm.generatePluginsSwiftPackage(<Plugin>[], platform, project);
 
@@ -62,10 +66,13 @@ void main() {
 ''');
 
             final spm = SwiftPackageManager(
-              fileSystem: fs,
               templateRenderer: const MustacheTemplateRenderer(),
-              processUtils: ProcessUtils(processManager: processManager, logger: logger),
-              config: FakeConfig(),
+              toolContext: FakeToolContext(
+                config: FakeConfig(),
+                fs: fs,
+                logger: logger,
+                processUtils: ProcessUtils(processManager: processManager, logger: logger),
+              ),
             );
             await spm.generatePluginsSwiftPackage(<Plugin>[], platform, project);
 
@@ -152,10 +159,13 @@ $_doubleIndent
 ''');
 
               final spm = SwiftPackageManager(
-                fileSystem: fs,
                 templateRenderer: const MustacheTemplateRenderer(),
-                processUtils: ProcessUtils(processManager: processManager, logger: logger),
-                config: FakeConfig(),
+                toolContext: FakeToolContext(
+                  config: FakeConfig(),
+                  fs: fs,
+                  logger: logger,
+                  processUtils: ProcessUtils(processManager: processManager, logger: logger),
+                ),
               );
               await spm.generatePluginsSwiftPackage(
                 <Plugin>[],
@@ -212,10 +222,13 @@ $_doubleIndent
                 .file('${validPlugin1.path}/${platform.name}/${validPlugin1.name}/Package.swift')
                 .createSync(recursive: true);
             final spm = SwiftPackageManager(
-              fileSystem: fs,
               templateRenderer: const MustacheTemplateRenderer(),
-              processUtils: ProcessUtils(processManager: processManager, logger: logger),
-              config: FakeConfig(),
+              toolContext: FakeToolContext(
+                config: FakeConfig(),
+                fs: fs,
+                logger: logger,
+                processUtils: ProcessUtils(processManager: processManager, logger: logger),
+              ),
             );
             await spm.generatePluginsSwiftPackage(<Plugin>[validPlugin1], platform, project);
 
@@ -301,10 +314,13 @@ let package = Package(
                 .createSync(recursive: true);
 
             final spm = SwiftPackageManager(
-              fileSystem: fs,
               templateRenderer: const MustacheTemplateRenderer(),
-              processUtils: ProcessUtils(processManager: processManager, logger: logger),
-              config: FakeConfig(),
+              toolContext: FakeToolContext(
+                config: FakeConfig(),
+                fs: fs,
+                logger: logger,
+                processUtils: ProcessUtils(processManager: processManager, logger: logger),
+              ),
             );
             await spm.generatePluginsSwiftPackage(
               <Plugin>[
@@ -479,10 +495,13 @@ let package = Package(
             ]);
 
             final spm = SwiftPackageManager(
-              fileSystem: fs,
               templateRenderer: const MustacheTemplateRenderer(),
-              processUtils: ProcessUtils(processManager: processManager, logger: logger),
-              config: FakeConfig(),
+              toolContext: FakeToolContext(
+                config: FakeConfig(),
+                fs: fs,
+                logger: logger,
+                processUtils: ProcessUtils(processManager: processManager, logger: logger),
+              ),
             );
             await spm.generatePluginsSwiftPackage(
               <Plugin>[validPlugin1, validPlugin2, validPlugin3],
@@ -599,10 +618,13 @@ let package = Package(
             ]);
 
             final spm = SwiftPackageManager(
-              fileSystem: fs,
               templateRenderer: const MustacheTemplateRenderer(),
-              processUtils: ProcessUtils(processManager: processManager, logger: logger),
-              config: FakeConfig(),
+              toolContext: FakeToolContext(
+                config: FakeConfig(),
+                fs: fs,
+                logger: logger,
+                processUtils: ProcessUtils(processManager: processManager, logger: logger),
+              ),
             );
             await spm.generatePluginsSwiftPackage(<Plugin>[validPlugin1], platform, project);
 
@@ -680,10 +702,13 @@ let package = Package(
               symlinkPath.createSync(recursive: true);
 
               final spm = SwiftPackageManager(
-                fileSystem: fs,
                 templateRenderer: const MustacheTemplateRenderer(),
-                processUtils: ProcessUtils(processManager: processManager, logger: logger),
-                config: FakeConfig(),
+                toolContext: FakeToolContext(
+                  config: FakeConfig(),
+                  fs: fs,
+                  logger: logger,
+                  processUtils: ProcessUtils(processManager: processManager, logger: logger),
+                ),
               );
               await spm.generatePluginsSwiftPackage(<Plugin>[validPlugin1], platform, project);
 
@@ -720,10 +745,13 @@ let package = Package(
               symlinkPath.createSync(recursive: true);
 
               final spm = SwiftPackageManager(
-                fileSystem: fs,
                 templateRenderer: const MustacheTemplateRenderer(),
-                processUtils: ProcessUtils(processManager: processManager, logger: logger),
-                config: FakeConfig(),
+                toolContext: FakeToolContext(
+                  config: FakeConfig(),
+                  fs: fs,
+                  logger: logger,
+                  processUtils: ProcessUtils(processManager: processManager, logger: logger),
+                ),
               );
               await spm.generatePluginsSwiftPackage(<Plugin>[validPlugin1], platform, project);
 
@@ -761,10 +789,13 @@ let package = Package(
               symlinkPath.createSync('/nonexistent/path');
 
               final spm = SwiftPackageManager(
-                fileSystem: fs,
                 templateRenderer: const MustacheTemplateRenderer(),
-                processUtils: ProcessUtils(processManager: processManager, logger: logger),
-                config: FakeConfig(),
+                toolContext: FakeToolContext(
+                  config: FakeConfig(),
+                  fs: fs,
+                  logger: logger,
+                  processUtils: ProcessUtils(processManager: processManager, logger: logger),
+                ),
               );
               await spm.generatePluginsSwiftPackage(<Plugin>[validPlugin1], platform, project);
 
@@ -813,10 +844,13 @@ let package = Package(
                   ..createSync('${validPlugin1.path}/${platform.name}/valid_plugin_1');
 
                 final spm = SwiftPackageManager(
-                  fileSystem: fs,
                   templateRenderer: const MustacheTemplateRenderer(),
-                  processUtils: ProcessUtils(processManager: processManager, logger: logger),
-                  config: FakeConfig(),
+                  toolContext: FakeToolContext(
+                    config: FakeConfig(),
+                    fs: fs,
+                    logger: logger,
+                    processUtils: ProcessUtils(processManager: processManager, logger: logger),
+                  ),
                 );
                 await spm.generatePluginsSwiftPackage(<Plugin>[validPlugin1], platform, project);
 
@@ -851,11 +885,13 @@ let package = Package(
             project = FakeXcodeProject(platform: platform.name, fileSystem: trackingFs);
 
             spm = SwiftPackageManager(
-              fileSystem: trackingFs,
               templateRenderer: const MustacheTemplateRenderer(),
-              processUtils: ProcessUtils(processManager: processManager, logger: logger),
-              config: FakeConfig(),
-              logger: logger,
+              toolContext: FakeToolContext(
+                config: FakeConfig(),
+                fs: trackingFs,
+                logger: logger,
+                processUtils: ProcessUtils(processManager: processManager, logger: logger),
+              ),
             );
           });
 

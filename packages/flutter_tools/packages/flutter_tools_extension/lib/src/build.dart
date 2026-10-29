@@ -75,6 +75,8 @@ abstract class BuildTarget {
   });
 
   /// The user-readable name of the target (exposed as `flutter build <name>`).
+  ///
+  /// Must match [ExtensionBuildTarget.isValidName].
   String get name;
 
   /// Description of what this target builds.

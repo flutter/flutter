@@ -16,7 +16,7 @@ const kBaseHrefPlaceholder = r'$FLUTTER_BASE_HREF';
 const kStaticAssetsUrlPlaceholder = r'$FLUTTER_STATIC_ASSETS_URL';
 
 const _kServiceWorkerDeprecationNotice =
-    "Flutter's service worker is deprecated and will be removed in a future Flutter release.";
+    "Flutter's service worker is deprecated and has been removed.";
 
 class WebTemplateWarning {
   WebTemplateWarning(this.warningText, this.lineNumber);
@@ -79,6 +79,22 @@ class WebTemplate {
         '$_kServiceWorkerDeprecationNotice See https://github.com/flutter/flutter/issues/156910 for more details.',
       ),
       ..._getWarningsForPattern(
+        '{{flutter_service_worker_version}}',
+        '$_kServiceWorkerDeprecationNotice See https://github.com/flutter/flutter/issues/156910 for more details.',
+      ),
+      ..._getWarningsForPattern(
+        'serviceWorkerUrl',
+        'Flutter\'s service worker loader has been removed and "serviceWorkerUrl" is ignored. '
+            'Register custom service workers directly using "navigator.serviceWorker.register(...)". '
+            'See https://github.com/flutter/flutter/issues/156910 for more details.',
+      ),
+      if (!_content.contains('{{flutter_service_worker_version}}') &&
+          !_content.contains('serviceWorkerUrl'))
+        ..._getWarningsForPattern(
+          'serviceWorkerSettings',
+          '$_kServiceWorkerDeprecationNotice See https://github.com/flutter/flutter/issues/156910 for more details.',
+        ),
+      ..._getWarningsForPattern(
         '_flutter.loader.loadEntrypoint(',
         '"FlutterLoader.loadEntrypoint" is deprecated. Use "FlutterLoader.load" instead. See https://docs.flutter.dev/platform-integration/web/initialization for more details.',
       ),
@@ -103,7 +119,6 @@ class WebTemplate {
   @useResult
   String withSubstitutions({
     required String baseHref,
-    required String? serviceWorkerVersion,
     required File flutterJsFile,
     String? buildConfig,
     String? flutterBootstrapJs,
@@ -121,28 +136,15 @@ class WebTemplate {
       newContent = newContent.replaceAll(kStaticAssetsUrlPlaceholder, staticAssetsUrl);
     }
 
-    if (serviceWorkerVersion != null) {
-      newContent = newContent
-          .replaceFirst(
-            // Support older `var` syntax as well as new `const` syntax
-            RegExp('(const|var) serviceWorkerVersion = null'),
-            'const serviceWorkerVersion = "$serviceWorkerVersion" /* $_kServiceWorkerDeprecationNotice */',
-          )
-          // This is for legacy index.html that still uses the old service
-          // worker loading mechanism.
-          .replaceFirst(
-            "navigator.serviceWorker.register('flutter_service_worker.js')",
-            "navigator.serviceWorker.register('flutter_service_worker.js?v=$serviceWorkerVersion') /* $_kServiceWorkerDeprecationNotice */",
-          );
-    }
     newContent = _applyVariableSubstitutions(newContent, logger, <String, String>{
       ...webDefines,
       'flutter_build_config': ?buildConfig,
       'flutter_bootstrap_js': ?flutterBootstrapJs,
       'flutter_js': flutterJsFile.readAsStringSync(),
-      'flutter_service_worker_version': serviceWorkerVersion != null
-          ? '"$serviceWorkerVersion" /* $_kServiceWorkerDeprecationNotice */'
-          : 'null /* $_kServiceWorkerDeprecationNotice */',
+      // TODO(kevmoo): Remove flutter_service_worker_version substitution and
+      // deprecation comment in 2027 H2
+      // (https://github.com/flutter/flutter/issues/156910).
+      'flutter_service_worker_version': 'null /* $_kServiceWorkerDeprecationNotice */',
     });
 
     return newContent;

@@ -21,6 +21,7 @@ import 'package:flutter_tools/src/darwin/darwin.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/isolated/mustache_template.dart';
+import 'package:flutter_tools/src/macos/cocoapods.dart';
 import 'package:flutter_tools/src/macos/swift_packages.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:flutter_tools/src/platform_plugins.dart';
@@ -36,6 +37,7 @@ import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
+import '../../src/package_config.dart';
 
 const _flutterAppPath = '/path/to/my_flutter_app';
 const _flutterRoot = '/path/to/flutter';
@@ -72,11 +74,13 @@ void main() {
     required FileSystem fs,
     required Logger logger,
     required ProcessManager processManager,
+    CocoaPods? cocoaPods,
     Platform? platform,
   }) {
     return BuildSwiftPackage(
       analytics: FakeAnalytics(),
       buildSystem: FakeBuildSystem(),
+      cocoaPods: cocoaPods ?? FakeCocoaPods(),
       codesign: FakeDarwinAddToAppCodesigning(),
       featureFlags: FakeFeatureFlags(),
       templateRenderer: const MustacheTemplateRenderer(),
@@ -1839,6 +1843,40 @@ let package = Package(
         )''');
         expect(processManager, hasNoRemainingExpectations);
       });
+
+      testUsingContext('processPods forwards injected cocoaPods', () async {
+        final fs = MemoryFileSystem.test();
+        final logger = BufferLogger.test();
+        final processManager = FakeProcessManager.empty();
+        final String? originalFlutterRoot = Cache.flutterRoot;
+        addTearDown(() => Cache.flutterRoot = originalFlutterRoot);
+        Cache.flutterRoot = _flutterRoot;
+        _createPodFingerprintFiles(fs: fs, platformName: 'ios');
+        final Directory appDir = fs.directory(_flutterAppPath)..createSync(recursive: true);
+        appDir.childFile('pubspec.yaml').writeAsStringSync('''
+name: my_app
+flutter:
+  module:
+    iosBundleIdentifier: com.example.my_app
+''');
+        writePackageConfigFiles(directory: appDir, mainLibName: 'my_app');
+        final FlutterProject project = FlutterProject.fromDirectoryTest(appDir);
+        final cocoaPods = _RecordingFakeCocoaPods();
+        final BuildSwiftPackageUtils testUtils = _createTestUtils(
+          fs: fs,
+          logger: logger,
+          processManager: processManager,
+          cocoaPods: cocoaPods,
+          project: project,
+        );
+        final cocoapodDependencies = CocoaPodPluginDependencies(
+          targetPlatform: .ios,
+          utils: testUtils,
+        );
+
+        await cocoapodDependencies.processPods(project.ios, BuildInfo.debug);
+        expect(cocoaPods.processPodsCalled, isTrue);
+      });
     });
 
     group('FlutterPluginSwiftDependencies', () {
@@ -3390,12 +3428,16 @@ BuildSwiftPackageUtils _createTestUtils({
   required ProcessManager processManager,
   bool isModule = false,
   BuildSystem? buildSystem,
+  CocoaPods? cocoaPods,
+  FlutterProject? project,
 }) {
   return BuildSwiftPackageUtils(
     analytics: FakeAnalytics(),
     buildSystem: buildSystem ?? FakeBuildSystem(),
+    cocoaPods: cocoaPods ?? FakeCocoaPods(),
     flutterRoot: _flutterRoot,
-    project: FakeFlutterProject(directory: fs.directory(_flutterAppPath), isModule: isModule),
+    project:
+        project ?? FakeFlutterProject(directory: fs.directory(_flutterAppPath), isModule: isModule),
     templateRenderer: const MustacheTemplateRenderer(),
     toolContext: FakeToolContext(
       artifacts: FakeArtifacts(_engineArtifactPath),
@@ -3706,3 +3748,17 @@ class CocoaPodPluginDependenciesSkipPodProcessing extends CocoaPodPluginDependen
 }
 
 class FakeDarwinAddToAppCodesigning extends Fake implements DarwinAddToAppCodesigning {}
+
+class _RecordingFakeCocoaPods extends Fake implements CocoaPods {
+  bool processPodsCalled = false;
+
+  @override
+  Future<bool> processPods({
+    required XcodeBasedProject xcodeProject,
+    required BuildMode buildMode,
+    bool dependenciesChanged = true,
+  }) async {
+    processPodsCalled = true;
+    return true;
+  }
+}

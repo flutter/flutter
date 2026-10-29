@@ -326,10 +326,10 @@ packages:
     dependency: transitive
     description:
       name: extension_discovery
-      sha256: de1fce715ab013cdfb00befc3bdf0914bea5e409c3a567b7f8f144bc061611a7
+      sha256: "45bcb4c7a1de1b9beb82b38a7157b0e5ef967081a744de9a92f1e29c343e7ac8"
       url: "https://pub.dev"
     source: hosted
-    version: "2.1.0"
+    version: "2.1.1"
   fake_async:
     dependency: "direct main"
     description:
