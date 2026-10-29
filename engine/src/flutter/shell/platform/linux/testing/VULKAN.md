@@ -167,7 +167,14 @@ GTK frame-clock scheduling now returns Flutter vsync batons on the GTK main
 context. For the primary view, frame start and refresh interval come from its
 `GdkFrameClock`; an unmapped view uses a 16 ms timer. Multiwindow engines still
 need per-view clock selection, and runtime refresh-rate changes need focused
-coverage. A delivered tick callback remains registered for one extra tick so a
+coverage. Refresh intervals and candidate targets come from completed frame-clock
+history (`gdk_frame_clock_get_refresh_info`), since the current frame's timing
+can still be incomplete during UPDATE. Missing/stale predictions use the
+reported refresh interval, or a conservative 60 Hz fallback. Pure timing tests
+cover 60/120/144 Hz, unit conversion and strictly future targets. GDK's predicted
+target is a scheduling hint, not measured compositor presentation.
+
+A delivered tick callback remains registered for one extra tick so a
 following animation request can overlap it. This keeps GTK updating continuously
 instead of ending and restarting its animation-clock phase for every Flutter
 frame. With no following request, it removes itself after that idle tick;

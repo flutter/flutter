@@ -28,6 +28,7 @@
 #include "flutter/shell/platform/linux/fl_settings_handler.h"
 #include "flutter/shell/platform/linux/fl_texture_gl_private.h"
 #include "flutter/shell/platform/linux/fl_texture_registrar_private.h"
+#include "flutter/shell/platform/linux/fl_vsync_timing.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_plugin_registry.h"
 
 // Unique number associated with platform tasks.
@@ -156,18 +157,9 @@ static gboolean fl_engine_frame_tick(GtkWidget* widget,
   if (request->delivered) {
     return G_SOURCE_REMOVE;
   }
-  const gint64 frame_time_us = gdk_frame_clock_get_frame_time(frame_clock);
-  uint64_t interval_ns = 16666667;
-  GdkFrameTimings* timings = gdk_frame_clock_get_current_timings(frame_clock);
-  if (timings != nullptr) {
-    const gint64 refresh_interval_us =
-        gdk_frame_timings_get_refresh_interval(timings);
-    if (refresh_interval_us > 0) {
-      interval_ns = static_cast<uint64_t>(refresh_interval_us) * 1000;
-    }
-  }
-  const uint64_t start_ns = static_cast<uint64_t>(frame_time_us) * 1000;
-  fl_engine_complete_vsync(request, start_ns, start_ns + interval_ns);
+  const FlVsyncTiming timing = fl_vsync_timing_for_clock(frame_clock);
+  fl_engine_complete_vsync(request, timing.frame_start_ns,
+                           timing.frame_target_ns);
   // Keep GTK updating until the next tick, allowing the engine's next request
   // to overlap this callback. Removing the last callback immediately ends
   // updating; adding it again resets GTK's animation-clock phase each frame.
