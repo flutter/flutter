@@ -742,6 +742,9 @@ class _FakePlatformDispatcher extends Fake implements PlatformDispatcher {
   VoidCallback? onPlatformBrightnessChanged;
 
   @override
+  VoidCallback? onAlwaysUse24HourFormatChanged;
+
+  @override
   double get textScaleFactor => 1.0;
 
   bool resetInternalStateCalled = false;

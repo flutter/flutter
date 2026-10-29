@@ -1075,10 +1075,16 @@ void main() {
       expect(log, contains('didChange24HourFormat'));
       expect(errors, hasLength(1));
 
-      // Observers should not be notified if alwaysUse24HourFormat has not changed.
       log.clear();
       errors.clear();
-      WidgetsBinding.instance.handlePlatformConfigurationChanged();
+      WidgetsBinding.instance.handleAlwaysUse24HourFormatChanged();
+      expect(log, contains('didChange24HourFormat'));
+      expect(errors, hasLength(1));
+
+      // Observers should not be notified if other platform configuration changes occur.
+      log.clear();
+      errors.clear();
+      WidgetsBinding.instance.handlePlatformBrightnessChanged();
       expect(log, isEmpty);
       expect(errors, isEmpty);
     });

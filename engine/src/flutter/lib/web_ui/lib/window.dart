@@ -66,6 +66,9 @@ abstract class SingletonFlutterWindow extends FlutterView {
   VoidCallback? get onSystemFontFamilyChanged;
   set onSystemFontFamilyChanged(VoidCallback? callback);
 
+  VoidCallback? get onAlwaysUse24HourFormatChanged;
+  set onAlwaysUse24HourFormatChanged(VoidCallback? callback);
+
   FrameCallback? get onBeginFrame;
   set onBeginFrame(FrameCallback? callback);
 

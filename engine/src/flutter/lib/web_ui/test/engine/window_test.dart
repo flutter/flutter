@@ -63,6 +63,23 @@ void testMain() {
     EnginePlatformDispatcher.instance.invokeOnPlatformBrightnessChanged();
   });
 
+  test('onAlwaysUse24HourFormatChanged preserves the zone', () {
+    final Zone innerZone = Zone.current.fork();
+
+    innerZone.runGuarded(() {
+      void callback() {
+        expect(Zone.current, innerZone);
+      }
+
+      myWindow.onAlwaysUse24HourFormatChanged = callback;
+
+      // Test that the getter returns the exact same callback, e.g. it doesn't wrap it.
+      expect(myWindow.onAlwaysUse24HourFormatChanged, same(callback));
+    });
+
+    EnginePlatformDispatcher.instance.invokeOnAlwaysUse24HourFormatChanged();
+  });
+
   test('onMetricsChanged preserves the zone', () {
     final Zone innerZone = Zone.current.fork();
 

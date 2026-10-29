@@ -1485,8 +1485,10 @@ void hooksTests() async {
     late Zone innerZone;
     late Zone runZoneTextScaleFactor;
     late Zone runZonePlatformBrightness;
+    late Zone runZoneAlwaysUse24HourFormat;
     late double? textScaleFactor;
     late Brightness? platformBrightness;
+    late bool? alwaysUse24HourFormat;
 
     runZoned(() {
       innerZone = Zone.current;
@@ -1497,6 +1499,10 @@ void hooksTests() async {
       window.onPlatformBrightnessChanged = () {
         runZonePlatformBrightness = Zone.current;
         platformBrightness = window.platformBrightness;
+      };
+      window.onAlwaysUse24HourFormatChanged = () {
+        runZoneAlwaysUse24HourFormat = Zone.current;
+        alwaysUse24HourFormat = window.alwaysUse24HourFormat;
       };
     });
 
@@ -1521,6 +1527,19 @@ void hooksTests() async {
     );
     expectIdentical(runZonePlatformBrightness, innerZone);
     expectEquals(platformBrightness, Brightness.dark);
+
+    textScaleFactor = null;
+    platformBrightness = null;
+    alwaysUse24HourFormat = null;
+
+    window.onAlwaysUse24HourFormatChanged!();
+    _callHook(
+      '_updateUserSettingsData',
+      1,
+      '{"textScaleFactor": 0.5, "platformBrightness": "dark", "alwaysUse24HourFormat": false}',
+    );
+    expectIdentical(runZoneAlwaysUse24HourFormat, innerZone);
+    expectEquals(alwaysUse24HourFormat, false);
   });
 
   await test('onFrameDataChanged preserves callback zone', () {
