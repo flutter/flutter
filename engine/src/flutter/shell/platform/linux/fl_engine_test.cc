@@ -228,6 +228,43 @@ TEST_F(FlEngineVsyncTest, UnmapReleasesRetainedTickWithoutRedelivery) {
   gtk_widget_set_visible(GTK_WIDGET(window), FALSE);
   EXPECT_EQ(batons, std::vector<intptr_t>({1}));
 }
+
+TEST_F(FlEngineVsyncTest, StalledMappedClockReturnsBatonAndRemovesTick) {
+  Request(1);
+  const gulong handler = TickHandler();
+  ASSERT_NE(handler, 0u);
+  // Let GTK's main loop run, but prevent this widget from receiving ticks.
+  g_signal_handler_block(clock, handler);
+  const gint64 deadline = g_get_monotonic_time() + G_USEC_PER_SEC;
+  while (batons.empty() && g_get_monotonic_time() < deadline) {
+    g_main_context_iteration(nullptr, FALSE);
+    g_usleep(1000);
+  }
+  EXPECT_EQ(batons, std::vector<intptr_t>({1}));
+  EXPECT_EQ(TickHandler(), 0u);
+  Tick();
+  EXPECT_EQ(batons, std::vector<intptr_t>({1}));
+}
+
+TEST_F(FlEngineVsyncTest, DeliveredBatonCancelsStalledClockGuard) {
+  Request(1);
+  const gulong handler = TickHandler();
+  Tick();
+  EXPECT_EQ(batons, std::vector<intptr_t>({1}));
+  ASSERT_EQ(TickHandler(), handler);
+  g_signal_handler_block(clock, handler);
+  const gint64 deadline = g_get_monotonic_time() + 150000;
+  while (g_get_monotonic_time() < deadline) {
+    g_main_context_iteration(nullptr, FALSE);
+    g_usleep(1000);
+  }
+  // The guard must not remove the retained tick or deliver a second baton.
+  EXPECT_EQ(batons, std::vector<intptr_t>({1}));
+  EXPECT_EQ(TickHandler(), handler);
+  g_signal_handler_unblock(clock, handler);
+  Tick();
+  EXPECT_EQ(TickHandler(), 0u);
+}
 #endif  // FLUTTER_LINUX_GTK4
 
 // Checks notifying display updates works.

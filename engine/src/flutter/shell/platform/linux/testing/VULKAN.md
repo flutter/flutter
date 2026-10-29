@@ -180,6 +180,11 @@ instead of ending and restarting its animation-clock phase for every Flutter
 frame. With no following request, it removes itself after that idle tick;
 unmapping removes it immediately without delivering the baton again. Mapped
 GTK4 regression tests cover continuity, idle removal and both unmap cases.
+A mapped request also has a progress guard: after four refresh intervals (at
+least 20 ms) without a tick, remove the callback and return its baton using the
+conservative wall-time fallback. Normal delivery or unmapping cancels the guard.
+It is armed only for pending requests, not a permanent timer. This handles
+first-frame and occluded/frozen-clock stalls without claiming a presentation.
 
 Before presenting Vulkan backing images, the embedder submits an empty marker
 submission to Impeller's graphics queue and waits for its fence. This preserves

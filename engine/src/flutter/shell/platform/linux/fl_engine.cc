@@ -121,6 +121,7 @@ struct VsyncRequest {
   GtkWidget* widget;
   intptr_t baton;
   guint tick_callback_id;
+  guint watchdog_source_id;
   gulong unmap_handler_id;
   gboolean delivered;
 };
@@ -146,6 +147,7 @@ static void fl_engine_complete_vsync(VsyncRequest* request,
     return;
   }
   request->delivered = TRUE;
+  g_clear_handle_id(&request->watchdog_source_id, g_source_remove);
   fl_engine_deliver_vsync(request->engine, request->baton, frame_start_ns,
                           frame_target_ns);
 }
@@ -172,6 +174,16 @@ static gboolean fl_engine_vsync_timeout(gpointer user_data) {
   const uint64_t start_ns =
       static_cast<uint64_t>(g_get_monotonic_time()) * 1000;
   fl_engine_complete_vsync(request, start_ns, start_ns + 16666667);
+  return G_SOURCE_REMOVE;
+}
+
+static gboolean fl_engine_vsync_watchdog(gpointer user_data) {
+  auto* request = static_cast<VsyncRequest*>(user_data);
+  request->watchdog_source_id = 0;
+  // Removing the tick runs its destroy notifier, which returns an undelivered
+  // baton on wall time. A mapped but occluded/frozen clock may never tick.
+  // Do not access request after removal: the notifier owns and frees it.
+  gtk_widget_remove_tick_callback(request->widget, request->tick_callback_id);
   return G_SOURCE_REMOVE;
 }
 
@@ -210,6 +222,16 @@ static gboolean fl_engine_schedule_vsync(gpointer user_data) {
     request->tick_callback_id =
         gtk_widget_add_tick_callback(request->widget, fl_engine_frame_tick,
                                      request, fl_engine_vsync_request_free);
+    GdkFrameClock* clock = gtk_widget_get_frame_clock(request->widget);
+    const gint64 interval_us =
+        clock ? fl_vsync_timing_for_clock(clock).refresh_interval_us : 16667;
+    // Give normal frame-clock scheduling four refresh intervals. This is a
+    // progress guard, not a second continuous vsync timer.
+    const guint timeout_ms =
+        static_cast<guint>(MAX((interval_us * 4 + 999) / 1000, 20));
+    request->watchdog_source_id =
+        g_timeout_add_full(G_PRIORITY_HIGH, timeout_ms,
+                           fl_engine_vsync_watchdog, request, nullptr);
   } else {
     g_timeout_add_full(G_PRIORITY_HIGH, 16, fl_engine_vsync_timeout, request,
                        fl_engine_vsync_request_free);
