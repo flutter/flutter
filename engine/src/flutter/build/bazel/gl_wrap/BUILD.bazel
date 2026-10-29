@@ -120,6 +120,12 @@ _MACOS_LIBRARIES = [
     "libvk_swiftshader.dylib",
     "libvulkan.dylib",
     "libVkLayer_khronos_validation.dylib",
+    # ANGLE's shared libraries, a Mac's alone (BUILD.gn): the Impeller
+    # playground opens libGLESv2.dylib by name for its OpenGLES variants
+    # there (the golden suite's), found through DYLD_LIBRARY_PATH at the
+    # suite's copies (testing/xvfb_run.sh).
+    "libEGL.dylib",
+    "libGLESv2.dylib",
 ]
 
 _MANIFESTS = [
