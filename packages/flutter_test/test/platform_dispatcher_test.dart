@@ -426,6 +426,8 @@ void main() {
   testWidgets('TestPlatformDispatcher has a working scaleFontSize implementation', (
     WidgetTester tester,
   ) async {
+    // The fake implements textScaleFactor but not scaleFontSize. The test
+    // dispatcher still scales text with it, linearly.
     expect(
       TestPlatformDispatcher(
         platformDispatcher: _FakePlatformDispatcher(
@@ -735,9 +737,6 @@ class _FakePlatformDispatcher extends Fake implements PlatformDispatcher {
 
   @override
   double get textScaleFactor => 1.0;
-
-  @override
-  double scaleFontSize(double unscaledFontSize) => unscaledFontSize * textScaleFactor;
 
   bool resetInternalStateCalled = false;
 
