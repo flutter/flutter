@@ -54,27 +54,18 @@ cc_library(
     hdrs = ["system_utils.h"],
     copts = FLUTTER_COPTS,
     cxxopts = ["-Wno-deprecated-declarations"],
-    implementation_deps = ["//engine/src/flutter/shell/platform/common:desktop_library_implementation"] + select({
-        "@platforms//os:linux": [
-            "//engine/src/flutter/shell/platform/linux/config:x11",  # is_linux
-        ],
-        "//conditions:default": [],
-    }),
-    linkopts = select({
-        "@platforms//os:linux": [
-            "-lGL",  # is_linux
-        ],
-        "//conditions:default": [],
-    }) + select({
-        "@platforms//os:macos": [
-            "-framework",
-            "CoreVideo",  # !(is_linux) && is_mac
-            "-framework",
-            "IOKit",  # !(is_linux) && is_mac
-        ],
-        "//conditions:default": [],
-    }),
+    implementation_deps = [
+        "//engine/src/flutter/shell/platform/common:desktop_library_implementation",
+        "//engine/src/flutter/shell/platform/linux/config:x11",  # is_linux
+    ],
+    linkopts = [
+        "-lGL",  # is_linux
+    ],
     local_defines = FLUTTER_LOCAL_DEFINES,
+    target_compatible_with = select({
+        "@platforms//os:linux": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
     deps = [
         ":flutter_glfw_headers",
         "//engine/src:include_root",
@@ -92,6 +83,10 @@ cc_library(
 
 flutter_test_fixtures(
     name = "flutter_glfw_fixtures",
+    target_compatible_with = select({
+        "@platforms//os:linux": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
 )
 
 flutter_cc_test(
@@ -100,16 +95,12 @@ flutter_cc_test(
     srcs = ["system_utils_test.cc"],
     copts = FLUTTER_COPTS + [
         "-Wno-inconsistent-missing-override",  # from //flutter/testing
-    ] + select({
-        "@platforms//os:macos": [
-            "-Wno-unguarded-availability",  # from //flutter/testing
-        ],
-        "@platforms//os:ios": [
-            "-Wno-unguarded-availability",  # from //flutter/testing
-        ],
-        "//conditions:default": [],
-    }),
+    ],
     local_defines = FLUTTER_LOCAL_DEFINES,
+    target_compatible_with = select({
+        "@platforms//os:linux": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
     deps = [
         ":flutter_glfw",
         ":flutter_glfw_fixtures",
@@ -123,6 +114,10 @@ gn_copy(
     name = "publish_headers_glfw",
     srcs = ["public/flutter_glfw.h"],
     outputs = ["$root_out_dir/{{source_file_part}}"],
+    target_compatible_with = select({
+        "@platforms//os:linux": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
     # The GLFW header assumes the presence of the common headers.
     deps = ["//engine/src/flutter/shell/platform/common:publish_headers"],
 )
