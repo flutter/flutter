@@ -19,6 +19,7 @@ import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/net.dart';
+import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/project_migrator.dart';
 import '../base/terminal.dart';
@@ -30,7 +31,6 @@ import '../context/android_context.dart';
 import '../context/tool_context.dart';
 import '../convert.dart';
 import '../flutter_manifest.dart';
-import '../globals.dart' as globals;
 import '../project.dart';
 import 'android_builder.dart';
 import 'android_sdk.dart';
@@ -104,7 +104,8 @@ Directory getBundleDirectory(FlutterProject project) {
 }
 
 @visibleForTesting
-final apkAnalyzerBinaryName = globals.platform.isWindows ? 'apkanalyzer.bat' : 'apkanalyzer';
+String apkAnalyzerBinaryName(Platform platform) =>
+    platform.isWindows ? 'apkanalyzer.bat' : 'apkanalyzer';
 
 /// The directory where the repo is generated.
 /// Only applicable to AARs.
@@ -290,10 +291,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
   }) async {
     final ToolContext(:Logger logger, :ProcessUtils processUtils) = _toolContext;
     final bool usesAndroidX = isAppUsingAndroidX(project.android.hostAppGradleRoot);
-    final String? agpVersion = gradle.getAgpVersion(
-      project.android.hostAppGradleRoot,
-      globals.logger,
-    );
+    final String? agpVersion = gradle.getAgpVersion(project.android.hostAppGradleRoot, logger);
     if (usesAndroidX) {
       _analytics.send(
         Event.flutterBuildInfo(
@@ -525,7 +523,7 @@ To fix this, you can either:
         logger,
         project: project.android,
         androidStudio: _androidStudio,
-        java: globals.java,
+        java: _java,
       ),
       MinSdkVersionMigration(project.android, logger),
       MultidexRemovalMigration(project.android, logger),
@@ -757,7 +755,8 @@ To fix this, you can either:
     String aabPath,
     Iterable<CpuArch> targetArchs,
   ) async {
-    final ToolContext(:Logger logger, :ProcessUtils processUtils) = _toolContext;
+    final ToolContext(:Logger logger, :Platform platform, :ProcessUtils processUtils) =
+        _toolContext;
     if (_androidSdk == null) {
       logger.printTrace(
         'Failed to find android sdk when checking final appbundle for debug symbols.',
@@ -771,7 +770,7 @@ To fix this, you can either:
       );
       return false;
     }
-    final String? apkAnalyzerPath = androidSdk.getCmdlineToolsPath(apkAnalyzerBinaryName);
+    final String? apkAnalyzerPath = androidSdk.getCmdlineToolsPath(apkAnalyzerBinaryName(platform));
     if (apkAnalyzerPath == null) {
       logger.printTrace(
         'Failed to find apkanalyzer when checking final appbundle for debug symbols.',
@@ -1048,11 +1047,12 @@ To fix this, you can either:
     String buildVariant, {
     required FlutterProject project,
   }) async {
+    final ToolContext(:FileSystem fs, :Logger logger) = _toolContext;
     final String taskName = _getOutputAppLinkSettingsTaskFor(buildVariant);
     final Directory directory = await project.buildDirectory
         .childDirectory('deeplink_data')
         .create(recursive: true);
-    final String outputPath = globals.fs.path.join(
+    final String outputPath = fs.path.join(
       directory.absolute.path,
       'app-link-settings-$buildVariant.json',
     );
@@ -1080,7 +1080,7 @@ To fix this, you can either:
         gradleExecutablePath: _gradleUtils.getExecutable(project),
       );
     } on Error catch (error) {
-      _toolContext.logger.printError(error.toString());
+      logger.printError(error.toString());
     }
 
     if (exitCode != 0) {

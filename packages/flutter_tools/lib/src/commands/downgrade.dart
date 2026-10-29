@@ -8,6 +8,7 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
+import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/terminal.dart';
 import '../cache.dart';
@@ -79,6 +80,7 @@ class DowngradeCommand extends FlutterCommand {
       :Git git,
       :Logger logger,
       :PersistentToolState persistentToolState,
+      :Platform platform,
       :Stdio stdio,
       :Terminal terminal,
     ) = toolContext;
@@ -90,7 +92,14 @@ class DowngradeCommand extends FlutterCommand {
     String workingDirectory = cache.flutterRoot;
     if (argResults!.wasParsed('working-directory')) {
       workingDirectory = stringArg('working-directory')!;
-      flutterVersion = FlutterVersion(fs: fs, flutterRoot: workingDirectory, git: git);
+      flutterVersion = FlutterVersion(
+        cache: cache,
+        fs: fs,
+        flutterRoot: workingDirectory,
+        git: git,
+        logger: logger,
+        platform: platform,
+      );
     }
 
     final String currentChannel = flutterVersion.channel;
@@ -174,7 +183,7 @@ class DowngradeCommand extends FlutterCommand {
         'Error: $error',
       );
     }
-    await FlutterVersion.resetFlutterVersionFreshnessCheck();
+    await FlutterVersion.resetFlutterVersionFreshnessCheck(cache);
     logger.printStatus('Success');
     return FlutterCommandResult.success();
   }

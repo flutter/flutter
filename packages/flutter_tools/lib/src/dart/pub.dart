@@ -122,6 +122,7 @@ abstract class Pub {
     if (stdio != null) {
       return _DefaultPub.test(
         botDetector: botDetector,
+        cache: cache,
         fileSystem: fileSystem,
         flutterRoot: cache.flutterRoot,
         logger: logger,
@@ -132,6 +133,7 @@ abstract class Pub {
     }
     return _DefaultPub(
       botDetector: botDetector,
+      cache: cache,
       fileSystem: fileSystem,
       flutterRoot: cache.flutterRoot,
       logger: logger,
@@ -150,7 +152,26 @@ abstract class Pub {
     required Platform platform,
     required ProcessManager processManager,
     required Stdio stdio,
-  }) = _DefaultPub.test;
+    Cache? cache,
+  }) {
+    return _DefaultPub.test(
+      botDetector: botDetector,
+      cache:
+          cache ??
+          Cache.test(
+            fileSystem: fileSystem,
+            logger: logger,
+            platform: platform,
+            processManager: processManager,
+          ),
+      fileSystem: fileSystem,
+      flutterRoot: flutterRoot,
+      logger: logger,
+      platform: platform,
+      processManager: processManager,
+      stdio: stdio,
+    );
+  }
 
   /// Runs `pub get` for [project].
   ///
@@ -224,6 +245,7 @@ abstract class Pub {
 class _DefaultPub implements Pub {
   _DefaultPub({
     required this._botDetector,
+    required this._cache,
     required this._fileSystem,
     required this._flutterRoot,
     required Logger logger,
@@ -240,6 +262,7 @@ class _DefaultPub implements Pub {
   @visibleForTesting
   _DefaultPub.test({
     required this._botDetector,
+    required this._cache,
     required this._fileSystem,
     required this._flutterRoot,
     required Logger logger,
@@ -258,6 +281,7 @@ class _DefaultPub implements Pub {
   final ProcessUtils _processUtils;
   final Platform _platform;
   final BotDetector _botDetector;
+  final Cache _cache;
   final ProcessManager _processManager;
   final Stdio? _stdio;
   final String _flutterRoot;
@@ -325,9 +349,11 @@ class _DefaultPub implements Pub {
     if (packageConfigFile.existsSync()) {
       final File lastVersion = packageConfigFile.parent.childFile('version');
       final versionFromFile = FlutterVersion(
+        cache: _cache,
         flutterRoot: _flutterRoot,
         fs: _fileSystem,
         git: _git,
+        logger: _logger,
         platform: _platform,
       );
 
@@ -749,9 +775,11 @@ class _DefaultPub implements Pub {
       _fileSystem.path.join(packageConfig.parent.path, 'version'),
     );
     final versionFromFile = FlutterVersion(
+      cache: _cache,
       flutterRoot: _flutterRoot,
       fs: _fileSystem,
       git: _git,
+      logger: _logger,
       platform: _platform,
     );
     lastVersion.writeAsStringSync(versionFromFile.frameworkVersion);

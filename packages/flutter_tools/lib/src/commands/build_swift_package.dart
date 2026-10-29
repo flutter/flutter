@@ -1228,6 +1228,7 @@ class AppFrameworkAndNativeAssetsDependencies {
       :Logger logger,
       platform: Platform hostPlatform,
       :ProcessManager processManager,
+      :FlutterProjectFactory projectFactory,
     ) = _utils.toolContext;
     final environment = Environment(
       projectDir: fileSystem.currentDirectory,
@@ -1249,6 +1250,8 @@ class AppFrameworkAndNativeAssetsDependencies {
       processManager: processManager,
       platform: hostPlatform,
       analytics: _utils.analytics,
+      projectFactory: projectFactory,
+      xcode: _utils.xcode,
       engineVersion: artifacts.usesLocalArtifacts ? null : flutterVersion.engineRevision,
       generateDartPluginRegistry: true,
     );

@@ -462,6 +462,7 @@ class PackagesGetCommand extends FlutterCommand {
             processManager: processManager,
             platform: platform,
             analytics: analytics,
+            projectFactory: projectFactory,
             projectDir: project.directory,
             packageConfigPath: packageConfigPath(),
             generateDartPluginRegistry: true,

@@ -4,6 +4,7 @@
 
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config_types.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../asset.dart';
 import '../base/common.dart';
@@ -68,6 +69,7 @@ const _kIntegrationTestDirectory = 'integration_test';
 /// - https://flutter.dev/to/integration-testing
 class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
   TestCommand({
+    Analytics analytics = const NoOpAnalytics(),
     required TemplateRenderer templateRenderer,
     required super.toolContext,
     this.nativeAssetsBuilder,
@@ -77,7 +79,11 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     super.verboseHelp = false,
   }) : _testRunner =
            testRunner ??
-           FlutterTestRunner(templateRenderer: templateRenderer, toolContext: toolContext) {
+           FlutterTestRunner(
+             analytics: analytics,
+             templateRenderer: templateRenderer,
+             toolContext: toolContext,
+           ) {
     requiresPubspecYaml();
     registerOptionBundles(const <OptionBundle>[
       DdsAndDevToolsOptionsBundle(includeDevTools: false),

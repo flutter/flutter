@@ -20,7 +20,6 @@ import '../cache.dart';
 import '../compile.dart' show kDdcCanaryFeatures;
 import '../context/tool_context.dart';
 import '../flutter_plugins.dart';
-import '../globals.dart' as globals;
 import '../platform_plugins.dart';
 import '../plugins.dart';
 import '../project.dart';
@@ -81,6 +80,7 @@ class WebBuilder {
       :Logger logger,
       :Platform platform,
       :ProcessManager processManager,
+      :FlutterProjectFactory projectFactory,
       :Terminal terminal,
     ) = _toolContext;
     if (serviceWorkerStrategy != null) {
@@ -145,6 +145,7 @@ class WebBuilder {
           processManager: processManager,
           platform: platform,
           analytics: _analytics,
+          projectFactory: projectFactory,
           cacheDir: cache.getRoot(),
           engineVersion: artifacts.usesLocalArtifacts ? null : flutterVersion.engineRevision,
           flutterRootDir: fileSystem.directory(cache.flutterRoot),
@@ -344,12 +345,12 @@ void sendDdcCompileAnalytics({
   required bool? deprecatedJsInterop,
   required String command,
   required bool succeeded,
-  Analytics? analytics,
+  required Analytics analytics,
 }) {
   if (deprecatedJsInterop == null) {
     return;
   }
-  (analytics ?? globals.analytics).send(
+  analytics.send(
     Event.flutterBuildInfo(
       label: 'web-compile',
       buildType: 'web',
