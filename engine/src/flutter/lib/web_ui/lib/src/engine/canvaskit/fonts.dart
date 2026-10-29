@@ -17,6 +17,9 @@ class CkTypeface implements BackendTypeface {
 
   @override
   final String familyName;
+
+  @override
+  void dispose() {}
 }
 
 /// The CanvasKit font registry behind [EngineFontCollection].

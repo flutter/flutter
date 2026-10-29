@@ -50,7 +50,7 @@ Future<void> testMain() async {
     // The family name comes from the font itself.
     final RegisteredFont registered = collection.debugRegisteredFonts.last;
     expect(registered.family, 'Ahem');
-    expect(registered.typeface.familyName, 'Ahem');
+    expect(registered.typefaceFamilyName, 'Ahem');
     expect(registered.bytes.length, ahemData.lengthInBytes);
   });
 
@@ -64,7 +64,7 @@ Future<void> testMain() async {
 
     final RegisteredFont registered = collection.debugRegisteredFonts.last;
     expect(registered.family, 'FamilyName');
-    expect(registered.typeface.familyName, 'Ahem');
+    expect(registered.typefaceFamilyName, 'Ahem');
   });
 
   test('Loading invalid font from data returns false', () async {

@@ -21,7 +21,7 @@ String get _robotoUrl =>
 
 /// A font that has been parsed and registered with the backend.
 class RegisteredFont {
-  RegisteredFont(this.bytes, this.family, this.typeface);
+  RegisteredFont(this.bytes, this.family, this.typefaceFamilyName);
 
   /// The byte data for this font.
   final Uint8List bytes;
@@ -29,8 +29,8 @@ class RegisteredFont {
   /// The font family name this font is registered under.
   final String family;
 
-  /// The typeface parsed from [bytes].
-  final BackendTypeface typeface;
+  /// The family name embedded in the parsed typeface.
+  final String typefaceFamilyName;
 }
 
 /// Manages the fonts used by the CanvasKit and Skwasm backends.
@@ -61,12 +61,23 @@ class EngineFontCollection implements FlutterFontCollection {
     _fallbackRegistry = registry!;
   }
 
-  final List<RegisteredFont> _registeredFonts = <RegisteredFont>[];
+  /// When assertions are enabled, stores fonts that have been parsed and
+  /// registered, in registration order.
+  final List<RegisteredFont> _debugRegisteredFonts = <RegisteredFont>[];
 
   /// Fonts that have been parsed and registered, in registration order.
   @visibleForTesting
-  List<RegisteredFont> get debugRegisteredFonts =>
-      List<RegisteredFont>.unmodifiable(_registeredFonts);
+  List<RegisteredFont> get debugRegisteredFonts {
+    List<RegisteredFont>? result;
+    assert(() {
+      result = List<RegisteredFont>.unmodifiable(_debugRegisteredFonts);
+      return true;
+    }());
+    if (result != null) {
+      return result!;
+    }
+    throw StateError('debugRegisteredFonts is only available when asserts are enabled.');
+  }
 
   @override
   Future<bool> loadFontFromBytes(Uint8List list, {String? fontFamily}) async {
@@ -163,13 +174,20 @@ class EngineFontCollection implements FlutterFontCollection {
   }
 
   void _register(Uint8List bytes, String family, BackendTypeface typeface) {
-    _registeredFonts.add(RegisteredFont(bytes, family, typeface));
     _backend.registerTypeface(typeface, family);
+    assert(() {
+      _debugRegisteredFonts.add(RegisteredFont(bytes, family, typeface.familyName));
+      return true;
+    }());
+    typeface.dispose();
   }
 
   @override
   void clear() {
-    _registeredFonts.clear();
+    assert(() {
+      _debugRegisteredFonts.clear();
+      return true;
+    }());
     _backend.clear();
   }
 

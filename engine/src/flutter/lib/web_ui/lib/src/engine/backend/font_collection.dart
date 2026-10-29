@@ -8,6 +8,9 @@ import 'dart:typed_data';
 abstract class BackendTypeface {
   /// The family name embedded in the font data.
   String get familyName;
+
+  /// Disposes the native resources held by this typeface.
+  void dispose();
 }
 
 /// Backend-specific font registry behind `EngineFontCollection`.
