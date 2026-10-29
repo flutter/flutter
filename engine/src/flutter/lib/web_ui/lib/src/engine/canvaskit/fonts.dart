@@ -7,21 +7,16 @@ import 'dart:typed_data';
 import 'package:ui/src/engine.dart';
 
 class CkTypeface implements BackendTypeface {
-  CkTypeface(this.bytes, this.skiaObject) {
-    // This is a hack which causes Skia to cache the decoded font.
-    SkFont(skiaObject).getGlyphBounds(<int>[0], null, null);
-  }
+  CkTypeface(this.bytes, this.familyName);
 
-  /// The font data [skiaObject] was parsed from.
+  /// The font data for this typeface.
   ///
-  /// CanvasKit's `TypefaceFontProvider.registerFont` parses the font again from
+  /// CanvasKit's `TypefaceFontProvider.registerFont` parses the font from
   /// bytes; it has no API to register an existing `SkTypeface`.
   final Uint8List bytes;
 
-  final SkTypeface skiaObject;
-
   @override
-  String get familyName => skiaObject.getFamilyName();
+  final String familyName;
 }
 
 /// The CanvasKit font registry behind [EngineFontCollection].
@@ -61,7 +56,9 @@ class CkFontCollection implements BackendFontCollection {
     if (typeface == null) {
       return null;
     }
-    return CkTypeface(bytes, typeface);
+    final String familyName = typeface.getFamilyName();
+    typeface.delete();
+    return CkTypeface(bytes, familyName);
   }
 
   @override
