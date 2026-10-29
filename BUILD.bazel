@@ -22,6 +22,9 @@ exports_files([
     # the SDK facsimile its tests run from must hold (one file each).
     "dev/README.md",
     "examples/README.md",
+    # The repository's license, which the tool's cache copies into the iOS
+    # engine directories (the facsimile's ios_engine_*_directory).
+    "LICENSE",
 ])
 
 # The repository's Dart and framework tests that Bazel compiles and runs

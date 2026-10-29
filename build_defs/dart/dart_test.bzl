@@ -33,7 +33,7 @@ runfiles tree's root, so a file the test reads is at its repository path.
 """
 
 load("@bazel_skylib//lib:paths.bzl", "paths")
-load("@host_platform//:host.bzl", "HOST_DART_SDK")
+load("@host_platform//:host.bzl", "HOST_DART_SDK", "HOST_OS")
 load(
     "//build_defs/dart:kernel.bzl",
     "KERNEL_TOOL_ATTRS",
@@ -44,6 +44,12 @@ load("//build_defs/dart:pub.bzl", "PubCacheInfo", "PubPackageConfigInfo", "pub_p
 
 # Where test_core's precompiled mode looks for the package configuration.
 _PACKAGE_CONFIG = ".dart_tool/package_config.json"
+
+# How the launcher copies a writable directory cheaply: a Mac's cp clones
+# the files on APFS (-c: copy-on-write, no space until written -- the
+# engine directories are a gigabyte each), GNU cp reflinks where the file
+# system can (--reflink=auto) and copies elsewhere.
+_CLONE_FLAG = "-c" if HOST_OS == "mac" else "--reflink=auto"
 
 # The launcher's shell function for `writable` (see the attribute): a path
 # of the runfiles tree made writable. Its runfiles links are made again from
@@ -66,7 +72,7 @@ _WRITABLE_FUNCTION = """writable_path() {
     done < <(awk -v p="_main/$f" '$1 == p || index($1, p "/") == 1' "$manifest")
   fi
   if [ -d "$root/$f" ]; then
-    cp -RL "$root/$f" "$root/$f.writable" && rm -rf "$root/$f" && mv "$root/$f.writable" "$root/$f" && chmod -R u+w "$root/$f"
+    cp @CLONE@ -RL "$root/$f" "$root/$f.writable" && rm -rf "$root/$f" && mv "$root/$f.writable" "$root/$f" && chmod -R u+w "$root/$f"
   elif [ -L "$root/$f" ]; then
     local real
     real="$(readlink -f "$root/$f")" && rm -f "$root/$f" && cp "$real" "$root/$f" && chmod u+w "$root/$f"
@@ -398,10 +404,14 @@ mkdir -p "$root/bin/cache"
             pub_cache_env = "export PUB_CACHE=\"$root/.pub-cache\"\n" if ctx.attr.pub_cache else "",
             # When the facsimile holds the tool (sdk_files): the SDK's bin on
             # PATH, as a developer's shell has it (integration tests run
-            # `flutter` by name), and a home of the test's own for the tool's
+            # `flutter` by name) -- and on a Mac, after it, where the host's
+            # CocoaPods is (`pod`, which the tool's Apple builds run: a brew
+            # install's /opt/homebrew/bin on Apple silicon or /usr/local/bin
+            # on Intel, a gem install's /usr/local/bin; Bazel's test PATH has
+            # neither) -- and a home of the test's own for the tool's
             # settings and analytics (`flutter config --enable-...` writes
             # them there; the developer's are not read).
-            tool_env = ("export PATH=\"$root/bin:$PATH\"\n" +
+            tool_env = ("export PATH=\"$root/bin:$PATH%s\"\n" % (":/opt/homebrew/bin:/usr/local/bin" if HOST_OS == "mac" else "") +
                         "export HOME=\"${TEST_TMPDIR:-$(mktemp -d)}/home\"\n" +
                         "mkdir -p \"$HOME\"\n") if [p for p in ctx.attr.sdk_files.values() if p.startswith("bin/")] else "",
             # The browser the test drives, by the variable the tool and the web
@@ -421,7 +431,7 @@ mkdir -p "$root/bin/cache"
             # manifest first (every file of the tree, or a directory output
             # as one entry), so that a run starts from the sources as they
             # are.
-            writable = (_WRITABLE_FUNCTION if ctx.attr.writable else "") + "".join([
+            writable = (_WRITABLE_FUNCTION.replace("@CLONE@", _CLONE_FLAG) if ctx.attr.writable else "") + "".join([
                 "writable_path \"{f}\"\n".format(f = f)
                 for f in ctx.attr.writable
             ]),
