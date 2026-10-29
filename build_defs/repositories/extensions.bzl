@@ -458,10 +458,14 @@ _TOOL_REPOSITORIES = {
     ),
     # The JDK (DEPS: flutter/java/openjdk/${platform}), whose javac and jar
     # the Android embedding's build runs (shell/platform/android/BUILD.gn,
-    # through build/android/gyp/javac.py).
+    # through build/android/gyp/javac.py). The Mac's package is a bundle
+    # with the JDK under Contents/Home/ (GN's BUILD file spells the paths
+    # out per host): there the repository is that directory, so that the
+    # overlay's paths hold on every host.
     "openjdk": struct(
         path = "engine/src/flutter/third_party/java/openjdk",
         build_file = _OVERLAYS + ":openjdk/BUILD.openjdk.bazel",
+        mac_subdir = "Contents/Home",
     ),
     # The Android embedding's compile-time dependencies (DEPS:
     # flutter/android/embedding_bundle, under download_android_deps): the
@@ -611,7 +615,7 @@ def _cipd_pin(path):
         fail("synced_deps: %s installs %d CIPD packages; exactly one is supported" % (path, len(packages)))
     return packages[0]
 
-def _download_cipd_package(name, package_template, version, platform, build_file):
+def _download_cipd_package(name, package_template, version, platform, build_file, strip_prefix = ""):
     package = package_template.replace("${platform}", platform)
     cipd_package(
         name = name,
@@ -619,6 +623,7 @@ def _download_cipd_package(name, package_template, version, platform, build_file
         version = version,
         sha256 = _CIPD_SHA256.get((package, version), ""),
         build_file = build_file,
+        strip_prefix = strip_prefix,
     )
 
 def _sysroot_repositories(mctx, fetch):
@@ -672,10 +677,14 @@ def _synced_deps_impl(mctx):
     for name, spec in _TOOL_REPOSITORIES.items():
         path = spec.path.format(host_prebuilts = host["HOST_PREBUILTS"])
         pin = _cipd_pin(path)
+
+        # A package whose root is a directory inside it on a Mac (the JDK
+        # bundle's Contents/Home/): the repository is that directory.
+        subdir = getattr(spec, "mac_subdir", "") if host["HOST_OS"] == "mac" else ""
         if fetch:
-            _download_cipd_package(name, pin["package"], pin["version"], platform, spec.build_file)
+            _download_cipd_package(name, pin["package"], pin["version"], platform, spec.build_file, strip_prefix = subdir)
         else:
-            synced_repository(name = name, path = path, build_file = spec.build_file)
+            synced_repository(name = name, path = path + ("/" + subdir if subdir else ""), build_file = spec.build_file)
 
     for name, spec in _DOWNLOADED_TOOL_REPOSITORIES.items():
         _download_cipd_package(name, spec.package, spec.version, platform, spec.build_file)
