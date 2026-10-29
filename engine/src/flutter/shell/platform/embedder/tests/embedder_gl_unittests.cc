@@ -61,7 +61,7 @@ class ResourceReleaseTestContext final : public EmbedderTestContextGL {
  public:
   explicit ResourceReleaseTestContext(std::string assets_path)
       : EmbedderTestContextGL(std::move(assets_path)) {
-    auto& config = GetRendererConfig().open_gl;
+    FlutterOpenGLRendererConfig& config = GetRendererConfig().open_gl;
     make_resource_ = config.make_resource_current;
     clear_current_ = config.clear_current;
     config.make_resource_current = [](void* data) {
@@ -71,7 +71,7 @@ class ResourceReleaseTestContext final : public EmbedderTestContextGL {
       if (current) {
         std::scoped_lock lock(self->mutex_);
         self->resource_thread_ = std::this_thread::get_id();
-        self->resource_current = true;
+        self->resource_current.store(true);
       }
       return current;
     };
@@ -81,8 +81,8 @@ class ResourceReleaseTestContext final : public EmbedderTestContextGL {
       const bool cleared = self->clear_current_(data);
       std::scoped_lock lock(self->mutex_);
       if (cleared && self->resource_thread_ == std::this_thread::get_id()) {
-        self->resource_current = false;
-        self->resource_released = true;
+        self->resource_current.store(false);
+        self->resource_released.store(true);
       }
       return cleared;
     };
@@ -106,11 +106,11 @@ TEST_F(EmbedderTest, ShutdownReleasesOpenGLResourceContextOnItsThread) {
   builder.SetSurface(DlISize(1, 1));
   auto engine = builder.LaunchEngine();
   ASSERT_TRUE(engine.is_valid());
-  ASSERT_TRUE(context.resource_current);
-  ASSERT_FALSE(context.resource_released);
+  ASSERT_TRUE(context.resource_current.load());
+  ASSERT_FALSE(context.resource_released.load());
   engine.reset();
-  EXPECT_TRUE(context.resource_released);
-  EXPECT_FALSE(context.resource_current);
+  EXPECT_TRUE(context.resource_released.load());
+  EXPECT_FALSE(context.resource_current.load());
 }
 
 //------------------------------------------------------------------------------
