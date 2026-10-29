@@ -89,6 +89,8 @@ const Map<String, String> testSizes = <String, String>{
   // rendering through SwiftShader with validation on: 3,266 s serial on the
   // host, sharded (testShardCounts).
   'impeller_unittests': 'large',
+  // The golden suite's 2,967 renders on a Mac, in eight shards (testShardCounts).
+  'impeller_golden_tests': 'large',
   // Under gtest-parallel (gtestParallelSuites: a process per test, twice,
   // eight workers): 559 tests, 48 s beside the other suites, against
   // small's 60 s.
@@ -108,6 +110,9 @@ const Map<String, String> testSizes = <String, String>{
 const Map<String, int> testShardCounts = <String, int>{
   // 3,266 s serial; sixteen shards of ~3.5 min on a 24-core host.
   'impeller_unittests': 16,
+  // 2,967 goldens over five backends on a Mac, some 10 a second (the Mac's
+  // T53D: 630 in 60 s): eight shards of a minute or so.
+  'impeller_golden_tests': 8,
 };
 
 /// How a suite is run: the arguments testing/run_tests.py passes it, the
