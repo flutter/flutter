@@ -11,8 +11,13 @@
 # through these same public_deps. The real target's own objects (the
 # allocator's implementation, on fml) are not built here: the facade for
 # ANGLE depends on //engine/src/flutter/flutter_vma, Bazel's build of them.
+# The shared libraries the wrap links itself (ANGLE's libGLESv2.dylib on a
+# Mac) need a definition of vma* all the same: flutter_vma.cc beside this
+# file is the allocator's implementation without fml, which the archive
+# boundary on this target keeps out of libangle.a.
 
-group("flutter_vma") {
+source_set("flutter_vma") {
+  sources = [ "flutter_vma.cc" ]
   public_deps = [
     "//flutter/third_party/vulkan-deps/vulkan-headers/src:vulkan_headers",
     "//flutter/third_party/vulkan_memory_allocator",
