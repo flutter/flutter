@@ -40,8 +40,6 @@ import 'json_utils.dart';
 /// - `build_targets` (`List<String>`, optional): Lowercase kebab-case
 ///   subcommand target names contributed to `flutter build` (e.g.
 ///   `'custom-target'`).
-/// - `templates` (`List<String>`, optional): Lowercase kebab-case template
-///   names contributed to `flutter create -t` (e.g. `'custom-app'`).
 /// - `target_platforms` (`List<String>`, optional): Custom target platform
 ///   identifiers supported for `flutter create --platforms=<platform>`. Each
 ///   entry must be a lowercase snake_case identifier starting with a letter and
@@ -64,8 +62,6 @@ import 'json_utils.dart';
 ///   - build
 /// build_targets:
 ///   - custom-target
-/// templates:
-///   - custom-app
 /// target_platforms:
 ///   - custom_os
 /// ```
@@ -78,14 +74,12 @@ final class ExtensionPackageConfig {
     Iterable<String> hostPlatforms = const <String>{},
     Iterable<String> services = const <String>{},
     Iterable<String> targetPlatforms = const <String>{},
-    Iterable<String> templates = const <String>{},
   }) : entrypoint = _validateEntrypoint(entrypoint ?? 'bin/$name.dart'),
        hostPlatforms = Set<String>.unmodifiable(
          hostPlatforms.map((String p) => p.trim().toLowerCase()),
        ),
        services = Set<String>.unmodifiable(services.map((String s) => s.trim())),
        buildTargets = Set<String>.unmodifiable(buildTargets.map((String t) => t.trim())),
-       templates = Set<String>.unmodifiable(templates.map((String t) => t.trim())),
        targetPlatforms = _validateTargetPlatforms(targetPlatforms);
 
   /// Parses an [ExtensionPackageConfig] from a decoded YAML or JSON [json] map.
@@ -114,7 +108,6 @@ final class ExtensionPackageConfig {
       hostPlatforms: json.stringSet(hostPlatformsKey, rejectEmpty: true, trim: true),
       services: json.stringSet(servicesKey, rejectEmpty: true, trim: true),
       buildTargets: json.stringSet(buildTargetsKey, rejectEmpty: true, trim: true),
-      templates: json.stringSet(templatesKey, rejectEmpty: true, trim: true),
       targetPlatforms: json.stringSet(targetPlatformsKey, rejectEmpty: true, trim: true),
     );
   }
@@ -133,9 +126,6 @@ final class ExtensionPackageConfig {
 
   /// Map key for [buildTargets].
   static const String buildTargetsKey = 'build_targets';
-
-  /// Map key for [templates].
-  static const String templatesKey = 'templates';
 
   /// Map key for [targetPlatforms].
   static const String targetPlatformsKey = 'target_platforms';
@@ -159,9 +149,6 @@ final class ExtensionPackageConfig {
   /// Custom build target names provided by this extension.
   final Set<String> buildTargets;
 
-  /// Custom project template names provided by this extension.
-  final Set<String> templates;
-
   /// Custom target platform names provided by this extension for `--platforms`.
   final Set<String> targetPlatforms;
 
@@ -181,7 +168,6 @@ final class ExtensionPackageConfig {
       hostPlatformsKey: hostPlatforms.toList(),
       servicesKey: services.toList(),
       buildTargetsKey: buildTargets.toList(),
-      templatesKey: templates.toList(),
       targetPlatformsKey: targetPlatforms.toList(),
     };
   }
@@ -240,7 +226,6 @@ final class ExtensionPackageConfig {
         _stringSetEquality.equals(other.hostPlatforms, hostPlatforms) &&
         _stringSetEquality.equals(other.services, services) &&
         _stringSetEquality.equals(other.buildTargets, buildTargets) &&
-        _stringSetEquality.equals(other.templates, templates) &&
         _stringSetEquality.equals(other.targetPlatforms, targetPlatforms);
   }
 
@@ -251,7 +236,6 @@ final class ExtensionPackageConfig {
     _stringSetEquality.hash(hostPlatforms),
     _stringSetEquality.hash(services),
     _stringSetEquality.hash(buildTargets),
-    _stringSetEquality.hash(templates),
     _stringSetEquality.hash(targetPlatforms),
   );
 
@@ -263,6 +247,5 @@ final class ExtensionPackageConfig {
       'hostPlatforms: $hostPlatforms, '
       'services: $services, '
       'buildTargets: $buildTargets, '
-      'templates: $templates, '
       'targetPlatforms: $targetPlatforms)';
 }

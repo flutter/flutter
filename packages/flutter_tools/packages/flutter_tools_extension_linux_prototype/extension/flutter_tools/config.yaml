@@ -15,7 +15,5 @@ services:
   - clean
 build_targets:
   - custom-linux
-templates:
-  - custom-linux-app
 target_platforms:
   - custom_linux

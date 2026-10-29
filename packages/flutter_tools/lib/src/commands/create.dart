@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:args/args.dart';
-import 'package:flutter_tools_core/flutter_tools_core.dart';
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 import 'package:unified_analytics/unified_analytics.dart';
@@ -29,8 +27,6 @@ import '../context/tool_context.dart';
 import '../convert.dart';
 import '../dart/pub.dart';
 import '../darwin/darwin.dart';
-import '../experimental/extension_arg_parser.dart';
-import '../experimental/templates.dart';
 import '../features.dart';
 import '../flutter_manifest.dart';
 import '../flutter_project_metadata.dart';
@@ -38,7 +34,6 @@ import '../ios/code_signing.dart';
 import '../macos/swift_packages.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart';
-import '../template.dart';
 import 'create_base.dart';
 
 const kPlatformHelp =
@@ -48,36 +43,18 @@ const kPlatformHelp =
     'When adding platforms to a plugin project, the pubspec.yaml will be updated with the requested platform. '
     'Adding desktop platforms requires the corresponding desktop config setting to be enabled.';
 
-class CreateCommand extends FlutterCommand with CreateBase, ExtensionArgParserMixin {
+class CreateCommand extends FlutterCommand with CreateBase {
   CreateCommand({
     required this.androidContext,
     required this.appleContext,
     required this.templateRenderer,
     required super.toolContext,
-    this.extensionTemplateManager,
     this.net,
     this.pub,
     super.verboseHelp = false,
-  });
-
-  final AndroidContext androidContext;
-  final AppleContext appleContext;
-  final ExtensionTemplateManager? extensionTemplateManager;
-  final Net? net;
-  final Pub? pub;
-
-  @override
-  final TemplateRenderer templateRenderer;
-
-  @override
-  ArgParser createBaseArgParser() {
-    final parser = ArgParser(
-      usageLineLength: toolContext.outputPreferences.wrapText
-          ? toolContext.outputPreferences.wrapColumn
-          : null,
-    );
-    addPubOptions(parser: parser);
-    parser.addFlag(
+  }) {
+    addPubOptions(parser: argParser);
+    argParser.addFlag(
       'with-driver-test',
       help:
           '(deprecated) Historically, this added a flutter_driver dependency and generated a '
@@ -85,25 +62,25 @@ class CreateCommand extends FlutterCommand with CreateBase, ExtensionArgParserMi
           '"integration_test" package: https://pub.dev/packages/integration_test',
       hide: !verboseHelp,
     );
-    parser.addFlag('overwrite', help: 'When performing operations, overwrite existing files.');
-    parser.addOption(
+    argParser.addFlag('overwrite', help: 'When performing operations, overwrite existing files.');
+    argParser.addOption(
       'description',
       defaultsTo: 'A new Flutter project.',
       help: 'The description to use for your new Flutter project. This string ends up in the pubspec.yaml file.',
     );
-    parser.addOption(
+    argParser.addOption(
       'org',
       defaultsTo: 'com.example',
       help:
           'The organization responsible for your new Flutter project, in reverse domain name notation. '
           'This string is used in Java package names and as prefix in the iOS bundle identifier.',
     );
-    parser.addOption(
+    argParser.addOption(
       'project-name',
       help:
           'The project name for this new Flutter project. This must be a valid dart package name.',
     );
-    parser.addOption(
+    argParser.addOption(
       'ios-language',
       abbr: 'i',
       defaultsTo: 'swift',
@@ -114,28 +91,28 @@ class CreateCommand extends FlutterCommand with CreateBase, ExtensionArgParserMi
           'This flag will be removed in a future version of Flutter.',
       hide: !verboseHelp,
     );
-    parser.addOption(
+    argParser.addOption(
       'android-language',
       abbr: 'a',
       defaultsTo: 'kotlin',
       allowed: <String>['java', 'kotlin'],
       help: 'The language to use for Android-specific code, either Kotlin (recommended) or Java (legacy).',
     );
-    parser.addFlag(
+    argParser.addFlag(
       'skip-name-checks',
       help:
           'Allow the creation of applications and plugins with invalid names. '
           'This is only intended to enable testing of the tool itself.',
       hide: !verboseHelp,
     );
-    parser.addFlag(
+    argParser.addFlag(
       'implementation-tests',
       help:
           'Include implementation tests that verify the template functions correctly. '
           'This is only intended to enable testing of the tool itself.',
       hide: !verboseHelp,
     );
-    parser.addOption(
+    argParser.addOption(
       'initial-create-revision',
       help:
           'The Flutter SDK git commit hash to store in .migrate_config. This parameter is used by the tool '
@@ -143,33 +120,30 @@ class CreateCommand extends FlutterCommand with CreateBase, ExtensionArgParserMi
       hide: !verboseHelp,
     );
 
-    final Map<String, String> platformsAllowedHelp = {
+    final platformsAllowedHelp = <String, String>{
       for (final String p in kAllCreatePlatforms) p: '',
     };
     platformsAllowedHelp['darwin'] =
         'A shared platform for iOS and macOS. (only supported for plugins)';
     addPlatformsOptions(
-      parser: parser,
+      parser: argParser,
       customHelp: kPlatformHelp,
       allowedHelp: platformsAllowedHelp,
     );
 
     final List<ParsedFlutterTemplateType> enabledTemplates =
-        ParsedFlutterTemplateType.enabledValues(featureFlags, extensionTemplateManager: null);
-    final bool isToolExtensionEnabled = featureFlags.isToolExtensionsEnabled;
-    parser.addOption(
+        ParsedFlutterTemplateType.enabledValues(featureFlags);
+    argParser.addOption(
       'template',
       abbr: 't',
-      allowed: isToolExtensionEnabled
-          ? null
-          : enabledTemplates.map((ParsedFlutterTemplateType t) => t.cliName),
+      allowed: enabledTemplates.map((ParsedFlutterTemplateType t) => t.cliName),
       help: 'Specify the type of project to create.',
       valueHelp: 'type',
       allowedHelp: <String, String>{
         for (final ParsedFlutterTemplateType t in enabledTemplates) t.cliName: t.helpText,
       },
     );
-    parser.addOption(
+    argParser.addOption(
       'sample',
       abbr: 's',
       help:
@@ -180,14 +154,14 @@ class CreateCommand extends FlutterCommand with CreateBase, ExtensionArgParserMi
       valueHelp: 'id',
       hide: !verboseHelp,
     );
-    parser.addFlag(
+    argParser.addFlag(
       'empty',
       abbr: 'e',
       help:
           'Specifies creating using an application template with a main.dart that is minimal, '
           'including no comments, as a starting point for a new application. Implies "--template=app".',
     );
-    parser.addOption(
+    argParser.addOption(
       'list-samples',
       help:
           'Specifies a JSON output file for a listing of Flutter code samples '
@@ -195,73 +169,15 @@ class CreateCommand extends FlutterCommand with CreateBase, ExtensionArgParserMi
       valueHelp: 'path',
       hide: !verboseHelp,
     );
-    return parser;
   }
 
-  @override
-  Future<void> initializeDynamicOptions() async {
-    final ExtensionTemplateManager? manager = extensionTemplateManager;
-    if (manager != null) {
-      try {
-        await manager.getProjectTemplates();
-        if (manager.cachedTemplates.isNotEmpty) {
-          rebuildDynamicArgParser();
-        }
-      } on Object catch (e) {
-        toolContext.logger.printTrace('Failed to initialize dynamic templates: $e');
-      }
-    }
-  }
+  final AndroidContext androidContext;
+  final AppleContext appleContext;
+  final Net? net;
+  final Pub? pub;
 
   @override
-  ArgParser buildDynamicArgParser(ArgParser dynamicParser) {
-    final ExtensionTemplateManager? manager = extensionTemplateManager;
-    final List<ProjectTemplate> projectTemplates =
-        manager?.cachedTemplates ?? const <ProjectTemplate>[];
-    if (projectTemplates.isEmpty) {
-      return dynamicParser;
-    }
-    return ExtensionArgParserMixin.cloneParser(
-      baseArgParser,
-      optionCloner: (ArgParser newParser, Option opt) {
-        if (opt.name != 'template') {
-          ExtensionArgParserMixin.copyOption(newParser, opt);
-          return;
-        }
-        final Map<String, String>? allowedHelp = opt.allowedHelp != null
-            ? Map<String, String>.of(opt.allowedHelp!)
-            : null;
-        final List<String>? allowed = opt.allowed != null ? List<String>.of(opt.allowed!) : null;
-        if (allowedHelp != null) {
-          for (final template in projectTemplates) {
-            if (!template.hidden) {
-              allowedHelp[template.name] =
-                  'Generate a project using the ${template.name} template.';
-            }
-          }
-        }
-        if (allowed != null) {
-          for (final template in projectTemplates) {
-            if (!allowed.contains(template.name)) {
-              allowed.add(template.name);
-            }
-          }
-        }
-        newParser.addOption(
-          opt.name,
-          abbr: opt.abbr,
-          aliases: opt.aliases,
-          allowed: allowed,
-          allowedHelp: allowedHelp,
-          defaultsTo: opt.defaultsTo as String?,
-          help: opt.help,
-          hide: opt.hide,
-          mandatory: opt.mandatory,
-          valueHelp: opt.valueHelp,
-        );
-      },
-    );
-  }
+  final TemplateRenderer templateRenderer;
 
   @override
   final name = 'create';
@@ -359,12 +275,10 @@ class CreateCommand extends FlutterCommand with CreateBase, ExtensionArgParserMi
     if (templateArgument != null) {
       final ParsedFlutterTemplateType? parsedTemplate = ParsedFlutterTemplateType.fromCliName(
         templateArgument,
-        extensionTemplateManager: extensionTemplateManager,
       );
       if (parsedTemplate == null) {
         final Iterable<String> enabledTemplateNames = ParsedFlutterTemplateType.enabledValues(
           featureFlags,
-          extensionTemplateManager: extensionTemplateManager,
         ).map((ParsedFlutterTemplateType t) => t.cliName);
         throwToolExit(
           'Expected one of ${enabledTemplateNames.join(', ')} '
@@ -381,16 +295,12 @@ class CreateCommand extends FlutterCommand with CreateBase, ExtensionArgParserMi
           );
         case FlutterTemplateType():
           template = parsedTemplate;
-        case ExtensionProjectTemplateType():
-          template = parsedTemplate;
       }
     }
     // If the project directory exists and isn't empty, then try to determine the template
     // type from the project directory.
     if (projectDir.existsSync() && projectDir.listSync().isNotEmpty) {
-      detectedProjectType = determineTemplateType(
-        extensionTemplateManager: extensionTemplateManager,
-      );
+      detectedProjectType = determineTemplateType();
       if (detectedProjectType == null && metadataExists) {
         // We can only be definitive that this is the wrong type if the .metadata file
         // exists and contains a type that we don't understand, or doesn't contain a type.
@@ -441,14 +351,6 @@ class CreateCommand extends FlutterCommand with CreateBase, ExtensionArgParserMi
     final String? sampleArgument = stringArg('sample');
     final bool emptyArgument = boolArg('empty');
 
-    final ExtensionTemplateManager? manager = extensionTemplateManager;
-    if (manager != null) {
-      try {
-        await manager.getProjectTemplates();
-      } on Object catch (e) {
-        toolContext.logger.printTrace('Failed to retrieve project templates: $e');
-      }
-    }
     final ParsedFlutterTemplateType template = _getProjectType(projectDir);
 
     if (template == FlutterTemplateType.pluginFfi) {
@@ -696,92 +598,6 @@ class CreateCommand extends FlutterCommand with CreateBase, ExtensionArgParserMi
           projectType: template as FlutterTemplateType,
         );
         pubContext = PubContext.createPackage;
-      // Handle custom templates provided by tool extensions.
-      case ExtensionProjectTemplateType():
-        final ExtensionTemplateManager? manager = extensionTemplateManager;
-        if (manager == null) {
-          throwToolExit('ExtensionTemplateManager is not available.');
-        }
-        // Resolve the custom template by name from the cached templates.
-        ProjectTemplate? customTemplate;
-        for (final ProjectTemplate t in manager.cachedTemplates) {
-          if (t.name == template.cliName) {
-            customTemplate = t;
-            break;
-          }
-        }
-        if (customTemplate == null) {
-          throwToolExit('Custom template not found in manager: ${template.cliName}');
-        }
-        // Resolve the absolute path to the template directory.
-        final Directory templateDir = manager.resolveTemplateDirectory(customTemplate.templatePath);
-        if (!templateDir.existsSync()) {
-          throwToolExit('Custom template source directory does not exist: ${templateDir.path}');
-        }
-
-        // Request the extension to generate template parameters based on the host context.
-        final Map<String, Object?> renderedParameters = await manager.generateTemplateParameters(
-          customTemplate.name,
-          templateContext,
-        );
-
-        // Resolve all dependency templates.
-        final templateSources = <Directory>[];
-        final imageSources = <Directory>[];
-        for (final String depName in customTemplate.templateDependencies) {
-          final Directory internalDir = templatePathProvider.directoryInPackage(depName, fs);
-          if (internalDir.existsSync()) {
-            templateSources.add(internalDir);
-            final Directory imageDir = await templatePathProvider.imageDirectory(
-              depName,
-              fs,
-              logger,
-            );
-            if (imageDir.existsSync()) {
-              imageSources.add(imageDir);
-            }
-          } else {
-            ProjectTemplate? depTemplate;
-            for (final ProjectTemplate cached in manager.cachedTemplates) {
-              if (cached.name == depName) {
-                depTemplate = cached;
-                break;
-              }
-            }
-            if (depTemplate != null) {
-              final Directory depDir = manager.resolveTemplateDirectory(depTemplate.templatePath);
-              if (!depDir.existsSync()) {
-                throwToolExit(
-                  'Custom template dependency "$depName" source directory does not exist: ${depDir.path}',
-                );
-              }
-              templateSources.add(depDir);
-            } else {
-              throwToolExit(
-                'Template dependency "$depName" not found in internal templates or active extensions.',
-              );
-            }
-          }
-        }
-        templateSources.add(templateDir);
-
-        final Template t = await Template.fromDirectories(
-          templateSources,
-          imageSourceDirectories: imageSources,
-          fileSystem: fs,
-          logger: logger,
-          templateRenderer: templateRenderer,
-        );
-
-        // Render the template into the project directory.
-        generatedFileCount += t.render(
-          relativeDir,
-          renderedParameters,
-          overwriteExisting: overwrite,
-          printStatusWhenWriting: !creatingNewProject,
-        );
-
-        pubContext = PubContext.create;
       case RemovedFlutterTemplateType():
         throwToolExit('Unsupported template type: ${template.cliName}');
     }

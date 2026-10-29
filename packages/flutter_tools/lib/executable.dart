@@ -10,7 +10,6 @@ import 'runner.dart' as runner;
 import 'src/android/android_workflow.dart' as android_workflow;
 import 'src/android/gradle.dart';
 import 'src/base/context.dart';
-import 'src/base/file_system.dart';
 import 'src/base/io.dart';
 import 'src/base/logger.dart';
 import 'src/base/platform.dart';
@@ -55,8 +54,6 @@ import 'src/context/tool_context.dart';
 import 'src/context/tool_dependencies.dart';
 import 'src/devtools_launcher.dart';
 import 'src/experimental/extension_discovery.dart';
-import 'src/experimental/extension_manager.dart';
-import 'src/experimental/templates.dart';
 import 'src/features.dart';
 import 'src/globals.dart' as globals;
 // Files in `isolated` are intentionally excluded from google3 tooling.
@@ -114,26 +111,11 @@ Future<void> main(List<String> args) async {
 
   await runner.run(
     args,
-    (ToolDependencies toolDependencies) {
-      final ToolDependencies(
-        :ExtensionManager? extensionManager,
-        :FeatureFlags featureFlags,
-        toolContext: ToolContext(:FileSystem fs, :Logger logger),
-      ) = toolDependencies;
-      final ExtensionManager manager = extensionManager!;
-      final templateManager = ExtensionTemplateManager(
-        extensionManager: manager,
-        featureFlags: featureFlags,
-        fileSystem: fs,
-        logger: logger,
-      );
-      return generateCommands(
-        toolDependencies: toolDependencies,
-        verboseHelp: verboseHelp,
-        verbose: verbose,
-        extensionTemplateManager: templateManager,
-      );
-    },
+    (ToolDependencies toolDependencies) => generateCommands(
+      toolDependencies: toolDependencies,
+      verboseHelp: verboseHelp,
+      verbose: verbose,
+    ),
     extensionEntryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
     verbose: verbose,
     muteCommandLogging: muteCommandLogging,
@@ -233,7 +215,6 @@ List<FlutterCommand> generateCommands({
   required ToolDependencies toolDependencies,
   required bool verbose,
   required bool verboseHelp,
-  ExtensionTemplateManager? extensionTemplateManager,
 }) => <FlutterCommand>[
   AnalyzeCommand(
     allProjectValidators: <ProjectValidator>[
@@ -298,7 +279,6 @@ List<FlutterCommand> generateCommands({
     appleContext: toolDependencies.appleContext,
     templateRenderer: const MustacheTemplateRenderer(),
     toolContext: toolDependencies.toolContext,
-    extensionTemplateManager: extensionTemplateManager,
     verboseHelp: verboseHelp,
   ),
   DaemonCommand(
