@@ -594,6 +594,22 @@ const Map<String, List<String>> scriptInputs = <String, List<String>>{
   '//build/android/gyp/create_flutter_jar.py': <String>['//engine/src/build:android_gyp_scripts'],
 };
 
+/// What an action's script reads outside its inputs, by the script's GN
+/// path: each value as the GN reference whose Bazel-side constant
+/// ([referenceConstants]) holds it, under the name of the environment
+/// variable that carries it to the action (gn_action's `env`). The script's
+/// result depends on the value, so the value belongs in the action's key:
+/// the action reruns when it changes, where its cached result would be
+/// stale. copy_info_plist.py writes the checkout's `git rev-parse HEAD`
+/// into the framework's Info.plist (the FlutterEngine key, which the tool's
+/// content validation tests compare with engine_stamp.json's); that is
+/// version.gni's engine_version.
+const Map<String, Map<String, String>> scriptEnvironment = <String, Map<String, String>>{
+  '//flutter/build/copy_info_plist.py': <String, String>{
+    'FLUTTER_ENGINE_VERSION': 'engine_version',
+  },
+};
+
 /// The platform a GN toolchain on an action's dependency edge stands for
 /// (`deps += [ "//third_party/vulkan_validation_layers($apilevel26_toolchain)" ]`):
 /// the dependency is built for it (gn_action's platform_deps, through a
