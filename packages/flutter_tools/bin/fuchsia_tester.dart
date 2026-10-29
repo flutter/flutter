@@ -171,7 +171,10 @@ Future<void> run(List<String> args) async {
       ),
     );
     final debuggingOptions = DebuggingOptions.enabled(buildInfo);
-    final testRunner = FlutterTestRunner(toolContext: dependencies.toolContext);
+    final testRunner = FlutterTestRunner(
+      templateRenderer: const MustacheTemplateRenderer(),
+      toolContext: dependencies.toolContext,
+    );
     exitCode = await testRunner.runTests(
       const TestWrapper(),
       tests.keys.map(Uri.file).toList(),

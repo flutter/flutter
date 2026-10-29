@@ -10,6 +10,8 @@ import '../base/analyze_size.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
+import '../base/os.dart';
+import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/project_migrator.dart';
 import '../base/terminal.dart';
@@ -21,6 +23,7 @@ import '../cmake.dart';
 import '../cmake_project.dart';
 import '../context/tool_context.dart';
 import '../convert.dart';
+import '../features.dart';
 import '../flutter_plugins.dart';
 import '../migrations/cmake_custom_command_migration.dart';
 import '../migrations/cmake_native_assets_migration.dart';
@@ -53,6 +56,8 @@ Future<void> buildLinux(
     :FileSystem fs,
     :FileSystemUtils fileSystemUtils,
     :Logger logger,
+    :OperatingSystemUtils os,
+    :Platform platform,
     :AnsiTerminal terminal,
   ) = toolContext;
   target ??= 'lib/main.dart';
@@ -86,7 +91,7 @@ Future<void> buildLinux(
   }
   writeGeneratedCmakeConfig(Cache.flutterRoot!, linuxProject, buildInfo, environmentConfig, logger);
 
-  createPluginSymlinks(linuxProject.parent);
+  createPluginSymlinks(linuxProject.parent, featureFlags: featureFlags, os: os, platform: platform);
 
   final Status status = logger.startProgress('Building Linux application...');
   final String buildModeName = buildInfo.mode.cliName;
