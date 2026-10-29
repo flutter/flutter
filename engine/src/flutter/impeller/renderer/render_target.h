@@ -38,9 +38,9 @@ struct RenderTargetConfig {
 class RenderTarget final {
  public:
   struct AttachmentConfig {
-    StorageMode storage_mode;
-    LoadAction load_action;
-    StoreAction store_action;
+    StorageMode storage_mode = StorageMode::kHostVisible;
+    LoadAction load_action = LoadAction::kDontCare;
+    StoreAction store_action = StoreAction::kDontCare;
     Color clear_color;
   };
 
@@ -195,6 +195,9 @@ class RenderTargetAllocator {
   ///
   ///        This may be used to deallocate any unused textures.
   virtual void End();
+
+  /// @brief Drop all cached render target textures immediately.
+  virtual void Clear() {}
 
  private:
   std::shared_ptr<Allocator> allocator_;

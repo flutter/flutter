@@ -80,6 +80,7 @@ void main() {
       'LAYOUT',
       'UPDATING COMPOSITING BITS',
       'PAINT',
+      'COMPOSITING',
       'FINALIZE TREE',
     ]);
     debugProfileBuildsEnabled = false;
@@ -93,6 +94,7 @@ void main() {
       'LAYOUT',
       'UPDATING COMPOSITING BITS',
       'PAINT',
+      'COMPOSITING',
       'FINALIZE TREE',
     ]);
     debugProfileLayoutsEnabled = false;
@@ -106,6 +108,7 @@ void main() {
       'LAYOUT',
       'UPDATING COMPOSITING BITS',
       'PAINT',
+      'COMPOSITING',
       'FINALIZE TREE',
     ]);
     debugProfilePaintsEnabled = false;

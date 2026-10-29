@@ -1,8 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <baseline version="1.0">
-    <file name="dev/a11y_assessments/android/app/src/main/kotlin/com/example/a11y_assessments/MainActivity.kt">
-        <error line="1" column="9" source="standard:package-name" />
-    </file>
     <file name="dev/benchmarks/platform_channels_benchmarks/android/app/src/main/kotlin/com/example/platform_channels_benchmarks/MainActivity.kt">
         <error line="5" column="9" source="standard:package-name" />
     </file>

@@ -76,6 +76,7 @@ ThemeData _baseTheme({
         minimumSize: const Size(defaultButtonHeight, defaultButtonHeight),
         fixedSize: const Size(defaultButtonHeight, defaultButtonHeight),
         iconSize: defaultIconSize,
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
       ),
     ),
     outlinedButtonTheme: OutlinedButtonThemeData(
@@ -114,13 +115,6 @@ ThemeData _baseTheme({
         borderRadius: BorderRadius.all(kCardRadius),
       ),
       collapsedShape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.all(kCardRadius),
-      ),
-    ),
-    listTileTheme: ListTileThemeData(
-      dense: true,
-      tileColor: backgroundColor.brighten(),
-      shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.all(kCardRadius),
       ),
     ),

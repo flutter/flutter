@@ -1818,7 +1818,7 @@ void main() {
 
       Animation<Color?> modalBarrierAnimation;
       modalBarrierAnimation = tester.widget<AnimatedModalBarrier>(animatedModalBarrier).color;
-      expect(modalBarrierAnimation.value, _white.withOpacity(0));
+      expect(modalBarrierAnimation.value, _white.withValues(alpha: 0.0));
 
       await tester.pump(const Duration(milliseconds: 25));
       modalBarrierAnimation = tester.widget<AnimatedModalBarrier>(animatedModalBarrier).color;

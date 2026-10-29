@@ -613,4 +613,193 @@ void main() {
       throwsToolExit(message: 'Invalid "android" plugin specification.'),
     );
   });
+
+  testWithoutContext('Plugin parsing reports all errors across platforms at once', () {
+    final fileSystem = MemoryFileSystem.test();
+    const pluginYamlRaw =
+        'platforms:\n'
+        ' android:\n'
+        ' ios:\n'
+        '  pluginClass: IosClass\n'
+        '  dartFileName: src/ios_class.dart\n'
+        ' linux:\n'
+        '  dartPluginClass: LinuxClass\n'
+        '  dartFileName: ../invalid_path.dart\n'
+        ' web:\n'
+        '  pluginClass: "Invalid Class"\n';
+
+    final pluginYaml = loadYaml(pluginYamlRaw) as YamlMap;
+    expect(
+      () => Plugin.fromYaml(
+        _kTestPluginName,
+        _kTestPluginPath,
+        pluginYaml,
+        null,
+        const <String>[],
+        isDevDependency: false,
+        fileSystem: fileSystem,
+      ),
+      throwsToolExit(
+        message:
+            'Invalid plugin specification $_kTestPluginName.\n'
+            'Invalid "android" plugin specification.\n'
+            '"dartFileName" cannot be specified without "dartPluginClass" in iOS platform of plugin "$_kTestPluginName"\n'
+            'The plugin `$_kTestPluginName` has an invalid `dartFileName` for platform `linux` in pubspec.yaml.\n'
+            'Invalid "web" plugin specification: the "pluginClass" field must be a valid identifier, optionally with dot-separated segments.\n'
+            'The plugin `$_kTestPluginName` is missing the required field `fileName` in pubspec.yaml',
+      ),
+    );
+  });
+
+  testWithoutContext('Plugin parsing allows an empty web platform key', () {
+    final fileSystem = MemoryFileSystem.test();
+    const pluginYamlRaw =
+        'platforms:\n'
+        ' android:\n'
+        '  ffiPlugin: true\n'
+        ' web:\n';
+
+    final pluginYaml = loadYaml(pluginYamlRaw) as YamlMap;
+    final plugin = Plugin.fromYaml(
+      _kTestPluginName,
+      _kTestPluginPath,
+      pluginYaml,
+      null,
+      const <String>[],
+      isDevDependency: false,
+      fileSystem: fileSystem,
+    );
+
+    expect(plugin.platforms.keys, contains(AndroidPlugin.kConfigKey));
+    expect(plugin.platforms.keys, isNot(contains(WebPlugin.kConfigKey)));
+    expect(Plugin.validatePluginYaml(pluginYaml, packageName: _kTestPluginName), isEmpty);
+  });
+
+  testWithoutContext('Plugin parsing rejects non-string implements, non-bool flags, and non-string supportedVariants', () {
+    final fileSystem = MemoryFileSystem.test();
+    const pluginYamlRaw =
+        'implements: 123\n'
+        'platforms:\n'
+        ' android:\n'
+        '  ffiPlugin: "true"\n'
+        ' ios:\n'
+        '  pluginClass: IosClass\n'
+        '  sharedDarwinSource: "yes"\n'
+        ' windows:\n'
+        '  pluginClass: WinClass\n'
+        '  supportedVariants:\n'
+        '   - 1\n';
+
+    final pluginYaml = loadYaml(pluginYamlRaw) as YamlMap;
+    expect(
+      () => Plugin.fromYaml(
+        _kTestPluginName,
+        _kTestPluginPath,
+        pluginYaml,
+        null,
+        const <String>[],
+        isDevDependency: false,
+        fileSystem: fileSystem,
+      ),
+      throwsToolExit(
+        message:
+            'Invalid plugin specification $_kTestPluginName.\n'
+            'Invalid "android" plugin specification: the "ffiPlugin" field must be a boolean.\n'
+            'Invalid "ios" plugin specification: the "sharedDarwinSource" field must be a boolean.\n'
+            'Invalid "windows" plugin specification: the "supportedVariants" field must be a list of strings.\n'
+            'Invalid "implements" specification.',
+      ),
+    );
+  });
+
+  testWithoutContext('Plugin parsing rejects invalid dartPluginClass next to default_package', () {
+    final fileSystem = MemoryFileSystem.test();
+    const pluginYamlRaw =
+        'platforms:\n'
+        ' linux:\n'
+        '  default_package: some_package\n'
+        '  dartPluginClass: "Invalid Class"\n';
+
+    final pluginYaml = loadYaml(pluginYamlRaw) as YamlMap;
+    expect(
+      () => Plugin.fromYaml(
+        _kTestPluginName,
+        _kTestPluginPath,
+        pluginYaml,
+        null,
+        const <String>[],
+        isDevDependency: false,
+        fileSystem: fileSystem,
+      ),
+      throwsToolExit(
+        message:
+            'Invalid plugin specification $_kTestPluginName.\n'
+            'Invalid "linux" plugin specification: the "dartPluginClass" field must be a valid identifier, optionally with dot-separated segments.',
+      ),
+    );
+  });
+
+  testWithoutContext(
+    'Plugin parsing rejects sharedDarwinSource without pluginClass or ffiPlugin',
+    () {
+      final fileSystem = MemoryFileSystem.test();
+      const pluginYamlRaw =
+          'platforms:\n'
+          ' ios:\n'
+          '  sharedDarwinSource: true\n'
+          ' macos:\n'
+          '  dartPluginClass: MacOSClass\n'
+          '  sharedDarwinSource: true\n';
+
+      final pluginYaml = loadYaml(pluginYamlRaw) as YamlMap;
+      expect(
+        () => Plugin.fromYaml(
+          _kTestPluginName,
+          _kTestPluginPath,
+          pluginYaml,
+          null,
+          const <String>[],
+          isDevDependency: false,
+          fileSystem: fileSystem,
+        ),
+        throwsToolExit(
+          message:
+              'Invalid plugin specification $_kTestPluginName.\n'
+              'Invalid "ios" plugin specification: "sharedDarwinSource" cannot be specified without "pluginClass" or "ffiPlugin".\n'
+              'Invalid "macos" plugin specification: "sharedDarwinSource" cannot be specified without "pluginClass" or "ffiPlugin".',
+        ),
+      );
+    },
+  );
+
+  testWithoutContext('Plugin parsing allows sharedDarwinSource with ffiPlugin', () {
+    final fileSystem = MemoryFileSystem.test();
+    const pluginYamlRaw =
+        'platforms:\n'
+        ' ios:\n'
+        '  ffiPlugin: true\n'
+        '  sharedDarwinSource: true\n'
+        ' macos:\n'
+        '  ffiPlugin: true\n'
+        '  sharedDarwinSource: true\n';
+
+    final pluginYaml = loadYaml(pluginYamlRaw) as YamlMap;
+    final plugin = Plugin.fromYaml(
+      _kTestPluginName,
+      _kTestPluginPath,
+      pluginYaml,
+      null,
+      const <String>[],
+      isDevDependency: false,
+      fileSystem: fileSystem,
+    );
+
+    final iosPlugin = plugin.platforms[IOSPlugin.kConfigKey]! as IOSPlugin;
+    final macOSPlugin = plugin.platforms[MacOSPlugin.kConfigKey]! as MacOSPlugin;
+
+    expect(iosPlugin.ffiPlugin, isTrue);
+    expect(iosPlugin.sharedDarwinSource, isTrue);
+    expect(macOSPlugin.ffiPlugin, isTrue);
+    expect(macOSPlugin.sharedDarwinSource, isTrue);
+  });
 }

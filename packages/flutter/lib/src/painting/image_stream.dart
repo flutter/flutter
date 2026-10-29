@@ -1061,7 +1061,13 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
     if (!hasListeners) {
       return;
     }
-    assert(_nextFrame != null);
+    // A listener can be re-added after this callback was scheduled (for
+    // example when TickerMode toggles during a route transition). That
+    // restarts decoding in addListener, which discards _nextFrame. The
+    // in-flight decode schedules a new callback when it completes.
+    if (_nextFrame == null) {
+      return;
+    }
     if (_isFirstFrame() || _hasFrameDurationPassed(timestamp)) {
       _emitFrame(
         ImageInfo(image: _nextFrame!.image.clone(), scale: _scale, debugLabel: debugLabel),

@@ -16,6 +16,7 @@ import androidx.annotation.Nullable;
 import androidx.lifecycle.Lifecycle;
 import io.flutter.Log;
 import io.flutter.embedding.android.ExclusiveAppComponent;
+import io.flutter.embedding.engine.flags.FlutterEngineFlagsProviderImpl;
 import io.flutter.embedding.engine.loader.FlutterLoader;
 import io.flutter.embedding.engine.plugins.FlutterPlugin;
 import io.flutter.embedding.engine.plugins.PluginRegistry;
@@ -328,18 +329,11 @@ import java.util.Set;
 
   private void attachToActivityInternal(@NonNull Activity activity, @NonNull Lifecycle lifecycle) {
     this.activityPluginBinding = new FlutterEngineActivityPluginBinding(activity, lifecycle);
-    final Intent intent = activity.getIntent();
 
     boolean useSoftwareRendering =
-        intent != null
-            // TODO(camsim99): Migrate to IntentUtils.safeGetBooleanExtra()
-            ? intent.getBooleanExtra(FlutterShellArgs.ARG_KEY_ENABLE_SOFTWARE_RENDERING, false)
-            : false;
-
-    if (!useSoftwareRendering) {
-      // Check manifest for software rendering configuration.
-      useSoftwareRendering = flutterLoader.getSofwareRenderingEnabledViaManifest();
-    }
+        flutterLoader.getSofwareRenderingEnabledViaManifest()
+            || FlutterEngineFlagsProviderImpl.INSTANCE.isSoftwareRenderingEnabled(
+                activity.getIntent());
 
     flutterEngine.getPlatformViewsController().setSoftwareRendering(useSoftwareRendering);
 

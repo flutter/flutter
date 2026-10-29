@@ -32,8 +32,14 @@ source_set("gpu") {
 
   if (!is_fuchsia) {
     sources = [
+      "binding_set.cc",
+      "binding_set.h",
       "command_buffer.cc",
       "command_buffer.h",
+      "compute_pass.cc",
+      "compute_pass.h",
+      "compute_pipeline.cc",
+      "compute_pipeline.h",
       "context.cc",
       "context.h",
       "device_buffer.cc",
@@ -63,6 +69,7 @@ source_set("gpu") {
     "//flutter/impeller/shader_bundle:shader_bundle_flatbuffers",
     "//flutter/lib/ui",
     "//flutter/third_party/tonic",
+    "//third_party/abseil-cpp/absl/container:flat_hash_map",
     "//third_party/abseil-cpp/absl/status",
     "//third_party/abseil-cpp/absl/status:statusor",
     "//third_party/abseil-cpp/absl/strings",
@@ -87,7 +94,9 @@ if (enable_unittests && !is_fuchsia) {
     testonly = true
 
     sources = [
+      "binding_set_unittests.cc",
       "command_buffer_unittests.cc",
+      "compute_pass_unittests.cc",
       "render_pass_unittests.cc",
       "render_pipeline_unittests.cc",
       "shader_library_unittests.cc",

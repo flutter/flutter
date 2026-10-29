@@ -8,6 +8,7 @@ import 'dart:typed_data';
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/application_package.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/dds.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -120,6 +121,43 @@ void main() {
       fakeSocket.controller.add(Uint8List.fromList(<int>[1, 2, 3]));
       await pumpEventQueue();
     });
+
+    testWithoutContext(
+      'handles socket reset error on forwarded socket without uncaught zone errors',
+      () async {
+        final fakeServerSocket = FakeServerSocket(200);
+        final portForwarder = ProxiedPortForwarder(
+          FakeDaemonConnection(
+            handledRequests: <String, Object?>{
+              'proxy.connect': '1', // id
+            },
+          ),
+          logger: bufferLogger,
+          createSocketServer: (Logger logger, int? hostPort, bool? ipv6) async => fakeServerSocket,
+        );
+        final int result = await portForwarder.forward(100);
+        expect(result, 200);
+
+        final fakeSocket = FakeSocket();
+        fakeServerSocket.controller.add(fakeSocket);
+
+        // Emit a socket reset error on the socket.
+        fakeSocket.controller.addError(
+          const SocketException(
+            'Error event raised in event handler : error condition has been reset',
+            port: 0,
+          ),
+        );
+        await pumpEventQueue();
+
+        expect(
+          bufferLogger.traceText,
+          contains(
+            'Socket error: SocketException: Error event raised in event handler : error condition has been reset, port = 0',
+          ),
+        );
+      },
+    );
 
     testWithoutContext('forwards the port from the remote end with device id', () async {
       final fakeServerSocket = FakeServerSocket(400);
@@ -649,6 +687,7 @@ void main() {
 
       final Future<void> startFuture = dds.startDartDevelopmentService(
         Uri.parse('http://127.0.0.1:100/fake'),
+        artifacts: Artifacts.test(),
         appName: 'Test App',
         disableServiceAuthCodes: true,
         ddsPort: 150,
@@ -710,6 +749,7 @@ void main() {
 
         final Future<void> startFuture = dds.startDartDevelopmentService(
           Uri.parse('http://127.0.0.1:100/fake'),
+          artifacts: Artifacts.test(),
           appName: 'Test App',
           disableServiceAuthCodes: true,
           ddsPort: 150,
@@ -771,6 +811,7 @@ void main() {
         expect(localDds.startCalled, false);
         await dds.startDartDevelopmentService(
           Uri.parse('http://127.0.0.1:100/fake'),
+          artifacts: Artifacts.test(),
           appName: 'Test App',
           disableServiceAuthCodes: true,
           ddsPort: 150,
@@ -814,6 +855,7 @@ void main() {
 
         final Future<void> startFuture = dds.startDartDevelopmentService(
           Uri.parse('http://127.0.0.1:100/fake'),
+          artifacts: Artifacts.test(),
           appName: 'Test App',
           disableServiceAuthCodes: true,
           ddsPort: 150,
@@ -868,6 +910,7 @@ void main() {
 
       final Future<void> startFuture = dds.startDartDevelopmentService(
         Uri.parse('http://127.0.0.1:100/fake'),
+        artifacts: Artifacts.test(),
         enableDevTools: true,
       );
 
@@ -914,6 +957,7 @@ void main() {
 
       final Future<void> startFuture = dds.startDartDevelopmentService(
         Uri.parse('http://127.0.0.1:100/fake'),
+        artifacts: Artifacts.test(),
         enableDevTools: true,
       );
 
@@ -1350,6 +1394,7 @@ class FakeDartDevelopmentService extends Fake implements DartDevelopmentService 
   @override
   Future<void> startDartDevelopmentService(
     Uri vmServiceUri, {
+    Artifacts? artifacts,
     String? appName = 'Fake App',
     FlutterDevice? device,
     int? ddsPort,

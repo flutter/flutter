@@ -18,6 +18,7 @@ import '../base/user_messages.dart';
 import '../base/version.dart';
 import '../build_info.dart';
 import '../cache.dart';
+import '../context/tool_context.dart';
 import '../ios/xcodeproj.dart';
 import '../xcode_project.dart';
 
@@ -66,6 +67,7 @@ class Xcode {
   factory Xcode.test({
     required ProcessManager processManager,
     XcodeProjectInterpreter? xcodeProjectInterpreter,
+    ToolContext? toolContext,
     Platform? platform,
     FileSystem? fileSystem,
     String? flutterRoot,
@@ -81,7 +83,7 @@ class Xcode {
       flutterRoot: flutterRoot,
       logger: logger,
       xcodeProjectInterpreter:
-          xcodeProjectInterpreter ?? XcodeProjectInterpreter.test(processManager: processManager),
+          xcodeProjectInterpreter ?? XcodeProjectInterpreter.test(toolContext: toolContext!),
     );
   }
 
@@ -297,7 +299,11 @@ class Xcode {
   }
 }
 
-EnvironmentType? environmentTypeFromSdkroot(String sdkroot, FileSystem fileSystem) {
+/// Determines the iOS [EnvironmentType] from [sdkroot].
+///
+/// Throws a [ToolExit] for unrecognized or non-iOS SDK roots (e.g., `MacOSX.sdk`
+/// or `XROS.sdk`).
+EnvironmentType environmentTypeFromSdkroot(String sdkroot, FileSystem fileSystem) {
   // NOTE: If you modify this function, you should likely also update the equivalent implementation in
   // packages/flutter_tools/templates/add_to_app/darwin/Tools/FlutterToolHelper/FlutterToolHelper.swift.tmpl
 
@@ -306,6 +312,9 @@ EnvironmentType? environmentTypeFromSdkroot(String sdkroot, FileSystem fileSyste
   if (sdkName.contains('iphone')) {
     return sdkName.contains('simulator') ? EnvironmentType.simulator : EnvironmentType.physical;
   }
-  assert(false);
-  return null;
+  throwToolExit(
+    'Unsupported iOS SDK root "$sdkroot". Expected an iPhoneOS or iPhoneSimulator SDK. '
+    "Flutter only supports building the iOS Runner for iOS; check the target's Base SDK "
+    '(SDKROOT) and Supported Destinations in Xcode.',
+  );
 }

@@ -596,7 +596,7 @@ class LinearGradient extends Gradient {
     return LinearGradient(
       begin: begin,
       end: end,
-      colors: <Color>[for (final Color color in colors) color.withOpacity(opacity)],
+      colors: <Color>[for (final Color color in colors) color.withValues(alpha: opacity)],
       stops: stops,
       tileMode: tileMode,
       transform: transform,

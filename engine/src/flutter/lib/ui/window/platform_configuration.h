@@ -190,6 +190,18 @@ class PlatformConfigurationClient {
   virtual void SetNeedsReportTimings(bool value) = 0;
 
   //--------------------------------------------------------------------------
+  /// @brief      Resets the engine's internal caches.
+  ///
+  ///             This is primarily intended for test harnesses to ensure test
+  ///             isolation and prevent cached offscreen render targets or other
+  ///             transient engine state from leaking across consecutive tests.
+  ///
+  ///             Production applications should not invoke this method
+  ///             directly. Doing so can cause unnecessary texture
+  ///             reallocation churn and frame hitches.
+  virtual void ResetInternalState() = 0;
+
+  //--------------------------------------------------------------------------
   /// @brief      The embedder can specify data that the isolate can request
   ///             synchronously on launch. This accessor fetches that data.
   ///
@@ -550,34 +562,6 @@ class PlatformConfiguration final {
   void ReportTimings(std::vector<int64_t> timings);
 
   //----------------------------------------------------------------------------
-  /// @brief      Notifies the framework that a texture has a new frame
-  ///             available.
-  ///
-  ///             This is called when the platform marks a texture as having new
-  ///             content via `MarkTextureFrameAvailable`. The framework uses
-  ///             this to mark the corresponding texture render object as
-  ///             needing paint, ensuring the view containing the texture is
-  ///             recomposited even if no other render objects are dirty.
-  ///
-  ///             This method calls the `::_notifyTextureFrameAvailable` method
-  ///             in `hooks.dart`.
-  ///
-  /// @param[in]  texture_id  The ID of the texture that has a new frame.
-  ///
-  /// @note       Must be called on the UI task runner.
-  ///
-  void NotifyTextureFrameAvailable(int64_t texture_id);
-
-  //----------------------------------------------------------------------------
-  /// @brief      Notifies the framework that all views should be marked dirty.
-  ///
-  ///             This is called when the engine needs to force full re-render
-  ///             of all views on the next frame, for example during lifecycle
-  ///             events.
-  ///
-  void MarkAllViewsNeedRender();
-
-  //----------------------------------------------------------------------------
   /// @brief      Retrieves the viewport metrics with the given ID managed by
   ///             the `PlatformConfiguration`.
   ///
@@ -633,8 +617,6 @@ class PlatformConfiguration final {
   tonic::DartPersistentValue begin_frame_;
   tonic::DartPersistentValue draw_frame_;
   tonic::DartPersistentValue report_timings_;
-  tonic::DartPersistentValue notify_texture_frame_available_;
-  tonic::DartPersistentValue mark_all_views_need_render_;
 
   uint64_t last_frame_number_ = 0;
   int64_t last_microseconds_ = 0;
@@ -692,6 +674,8 @@ class PlatformConfigurationNativeApi {
   static void SetSemanticsTreeEnabled(bool enabled);
 
   static void SetNeedsReportTimings(bool value);
+
+  static void ResetInternalState();
 
   static Dart_Handle GetPersistentIsolateData();
 

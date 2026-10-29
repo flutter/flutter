@@ -60,7 +60,6 @@ class FakeAndroidViewController implements AndroidViewController {
     this.viewId, {
     this.requiresSize = false,
     this.requiresViewComposition = false,
-    this.textureId = 0,
   });
 
   bool disposed = false;
@@ -126,7 +125,7 @@ class FakeAndroidViewController implements AndroidViewController {
   }
 
   @override
-  int? textureId;
+  int get textureId => 0;
 
   @override
   bool get awaitingCreation => !_createCalledSuccessfully;

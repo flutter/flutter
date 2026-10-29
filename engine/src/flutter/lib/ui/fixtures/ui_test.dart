@@ -528,6 +528,17 @@ void platformMessagePortResponseTest() async {
   }
 }
 
+/// Responds to a port that has already been closed, simulating an isolate
+/// that exits before the platform replies.
+@pragma('vm:entry-point')
+void platformMessagePortResponseClosedPortTest() {
+  final receivePort = ReceivePort();
+  final int nativePort = receivePort.sendPort.nativePort;
+  receivePort.close();
+  _callPlatformMessageResponseDartPort(nativePort);
+  _finishCallResponse(true);
+}
+
 @pragma('vm:entry-point')
 void platformMessageResponseTest() {
   _callPlatformMessageResponseDart((ByteData? result) {
@@ -681,6 +692,31 @@ Future<void> toByteDataRetryOverflows() async {
     }
   }
   _validateNotNull(result);
+}
+
+@pragma('vm:external-name', 'SceneToImageResult')
+external void _sceneToImageResult(int width, int height, String? error);
+
+/// Reproduction from https://github.com/flutter/flutter/issues/192365: a
+/// `Scene.toImage` while the view has no window surface (on Android, before
+/// `SurfaceView.surfaceCreated`).
+@pragma('vm:entry-point')
+Future<void> sceneToImageWithoutSurface() async {
+  final PictureRecorder recorder = PictureRecorder();
+  Canvas(recorder)
+      .drawRect(const Rect.fromLTWH(0, 0, 8, 8), Paint()..color = const Color(0xFF2ADEC3));
+  final Picture picture = recorder.endRecording();
+  final Scene scene = (SceneBuilder()..addPicture(Offset.zero, picture)).build();
+  try {
+    final Image image = await scene.toImage(8, 8);
+    _sceneToImageResult(image.width, image.height, null);
+    image.dispose();
+  } catch (error) {
+    _sceneToImageResult(0, 0, error.toString());
+  } finally {
+    scene.dispose();
+    picture.dispose();
+  }
 }
 
 @pragma('vm:entry-point')
@@ -1528,42 +1564,6 @@ void hooksTests() async {
     expectEquals(display.size, const Size(800, 600));
     expectEquals(display.devicePixelRatio, 1.5);
     expectEquals(display.refreshRate, 65);
-  });
-
-  await test('onTextureFrameAvailable preserves callback zone', () {
-    late Zone innerZone;
-    late Zone runZone;
-    late int receivedTextureId;
-
-    runZoned(() {
-      innerZone = Zone.current;
-      PlatformDispatcher.instance.onTextureFrameAvailable = (int textureId) {
-        runZone = Zone.current;
-        receivedTextureId = textureId;
-      };
-    });
-
-    _callHook('_notifyTextureFrameAvailable', 1, 1234);
-    expectIdentical(runZone, innerZone);
-    expectEquals(receivedTextureId, 1234);
-  });
-
-  await test('onMarkAllViewsNeedRender preserves callback zone', () {
-    late Zone innerZone;
-    late Zone runZone;
-    bool called = false;
-
-    runZoned(() {
-      innerZone = Zone.current;
-      PlatformDispatcher.instance.onMarkAllViewsNeedRender = () {
-        runZone = Zone.current;
-        called = true;
-      };
-    });
-
-    _callHook('_markAllViewsNeedRender', 0);
-    expectIdentical(runZone, innerZone);
-    expectEquals(called, true);
   });
 
   await test('_futureize handles callbacker sync error', () async {

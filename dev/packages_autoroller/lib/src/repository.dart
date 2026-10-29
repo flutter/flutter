@@ -51,7 +51,7 @@ final class Remote {
 /// have the git checkout present on disk, depending on what commands were
 /// previously run; and
 /// 2. The need to provide overrides for integration tests (in particular
-/// the ability to mark a [Repository] instance as a [localUpstream] made
+/// the ability to mark a [Repository] instance as a `localUpstream` made
 /// integration tests more hermetic, at the cost of complexity in the
 /// implementation).
 ///
@@ -249,7 +249,7 @@ abstract class Repository {
     return revisionHash;
   }
 
-  /// Push [commit] to the release channel [branch].
+  /// Push [commit] to the release channel `branch`.
   Future<void> pushRef({
     required String fromRef,
     required String remote,

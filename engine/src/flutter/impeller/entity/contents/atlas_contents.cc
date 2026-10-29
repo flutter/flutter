@@ -194,7 +194,7 @@ bool AtlasContents::Render(const ContentContext& renderer,
 
     VS::BindFrameInfo(pass, data_host_buffer.EmplaceUniform(frame_info));
 
-    FS::FragInfo frag_info;
+    FS::FragInfo frag_info{};
     frag_info.alpha = alpha_;
     FS::BindFragInfo(pass, data_host_buffer.EmplaceUniform((frag_info)));
     FS::BindTextureSampler(pass, geometry_->GetAtlas(), dst_sampler);
@@ -259,7 +259,7 @@ bool AtlasContents::Render(const ContentContext& renderer,
   FS::BindTextureSampler(pass, geometry_->GetAtlas(), dst_sampler);
 
   VUS::FrameInfo frame_info;
-  FS::FragInfo frag_info;
+  FS::FragInfo frag_info{};
 
   frame_info.mvp = entity.GetShaderTransform(pass);
 

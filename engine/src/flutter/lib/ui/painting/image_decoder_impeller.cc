@@ -4,8 +4,9 @@
 
 #include "flutter/lib/ui/painting/image_decoder_impeller.h"
 
-#include <format>
+#include <cmath>
 #include <memory>
+#include <string>
 
 #include "flutter/fml/closure.h"
 #include "flutter/fml/make_copyable.h"
@@ -20,6 +21,7 @@
 #include "impeller/core/texture_descriptor.h"
 #include "impeller/display_list/skia_conversions.h"
 #include "impeller/geometry/size.h"
+#include "third_party/abseil-cpp/absl/strings/str_cat.h"
 #include "third_party/skia/include/core/SkAlphaType.h"
 #include "third_party/skia/include/core/SkBitmap.h"
 #include "third_party/skia/include/core/SkColorSpace.h"
@@ -76,14 +78,26 @@ bool IsWideGamut(const SkColorSpace* color_space) {
   return area > kSrgbGamutArea;
 }
 
+bool IsHdr(const SkColorSpace* color_space) {
+  if (!color_space || color_space->isSRGB()) {
+    return false;
+  }
+  skcms_TransferFunction fn;
+  color_space->transferFn(&fn);
+  skcms_TFType type = skcms_TransferFunction_getType(&fn);
+  return type == skcms_TFType_PQ || type == skcms_TFType_PQish ||
+         type == skcms_TFType_HLG || type == skcms_TFType_HLGish ||
+         type == skcms_TFType_HLGinvish;
+}
+
 absl::StatusOr<ImageDecoderImpeller::ImageInfo> ToImageInfo(
     const SkImageInfo& sk_image_format) {
   const std::optional<impeller::PixelFormat> pixel_format =
       ImageDecoderImpeller::ToPixelFormat(sk_image_format.colorType());
   if (!pixel_format.has_value()) {
-    std::string decode_error(
-        std::format("Codec pixel format is not supported (SkColorType={})",
-                    static_cast<int>(sk_image_format.colorType())));
+    std::string decode_error =
+        absl::StrCat("Codec pixel format is not supported (SkColorType=",
+                     static_cast<int>(sk_image_format.colorType()), ")");
     return absl::InvalidArgumentError(decode_error);
   }
   return {{
@@ -121,8 +135,10 @@ absl::StatusOr<SkImageInfo> CreateImageInfo(
     const SkISize& decode_size,
     bool supports_wide_gamut,
     ImageDecoder::TargetPixelFormat target_format) {
-  const bool is_wide_gamut =
-      supports_wide_gamut ? IsWideGamut(base_image_info.colorSpace()) : false;
+  const SkColorSpace* color_space = base_image_info.colorSpace();
+  const bool is_hdr = IsHdr(color_space);
+  const bool is_extended_range =
+      supports_wide_gamut && (IsWideGamut(color_space) || is_hdr);
   SkAlphaType alpha_type =
       ChooseCompatibleAlphaType(base_image_info.alphaType());
   if (target_format != ImageDecoder::TargetPixelFormat::kDontCare) {
@@ -135,12 +151,13 @@ absl::StatusOr<SkImageInfo> CreateImageInfo(
         .makeColorType(target_skia_color_type.value())
         .makeAlphaType(alpha_type)
         .makeColorSpace(SkColorSpace::MakeSRGB());
-  } else if (is_wide_gamut) {
-    // Use 10-bit for opaque images (less memory: 4 bytes vs 8 bytes per pixel).
-    // Use F16 for images with alpha channel.
-    SkColorType color_type = alpha_type == SkAlphaType::kOpaque_SkAlphaType
-                                 ? kBGR_101010x_XR_SkColorType
-                                 : kRGBA_F16_SkColorType;
+  } else if (is_extended_range) {
+    // Use 10-bit for opaque SDR images (less memory: 4 bytes vs 8 bytes per
+    // pixel). Use F16 for HDR images or images with alpha channel.
+    SkColorType color_type =
+        (!is_hdr && alpha_type == SkAlphaType::kOpaque_SkAlphaType)
+            ? kBGR_101010x_XR_SkColorType
+            : kRGBA_F16_SkColorType;
     return base_image_info.makeWH(decode_size.width(), decode_size.height())
         .makeColorType(color_type)
         .makeAlphaType(alpha_type)
@@ -329,6 +346,25 @@ ImageDecoderImpeller::ImageDecoderImpeller(
 
 ImageDecoderImpeller::~ImageDecoderImpeller() = default;
 
+// static
+SkISize ImageDecoderImpeller::ClampToMaxTextureSize(
+    SkISize target_size,
+    impeller::ISize max_texture_size) {
+  if (target_size.width() <= max_texture_size.width &&
+      target_size.height() <= max_texture_size.height) {
+    return target_size;
+  }
+  // Shrink both sides by the same factor so the aspect ratio is kept, but
+  // never below one pixel.
+  const double scale = std::min(static_cast<double>(max_texture_size.width) /
+                                    std::max(target_size.width(), 1),
+                                static_cast<double>(max_texture_size.height) /
+                                    std::max(target_size.height(), 1));
+  return SkISize::Make(
+      std::max(1, static_cast<int>(std::lround(target_size.width() * scale))),
+      std::max(1, static_cast<int>(std::lround(target_size.height() * scale))));
+}
+
 absl::StatusOr<ImageDecoderImpeller::DecompressResult>
 ImageDecoderImpeller::DecompressTexture(
     ImageDescriptor* descriptor,
@@ -346,11 +382,9 @@ ImageDecoderImpeller::DecompressTexture(
 
   const SkISize source_size = SkISize::Make(descriptor->image_info().width,
                                             descriptor->image_info().height);
-  const SkISize target_size =
-      SkISize::Make(std::min(max_texture_size.width,
-                             static_cast<int64_t>(options.target_width)),
-                    std::min(max_texture_size.height,
-                             static_cast<int64_t>(options.target_height)));
+  const SkISize target_size = ClampToMaxTextureSize(
+      SkISize::Make(options.target_width, options.target_height),
+      max_texture_size);
 
   // Fast path for when the input requires no decompressing or conversion.
   if (!descriptor->is_compressed() && source_size == target_size &&
@@ -397,8 +431,8 @@ ImageDecoderImpeller::DecompressTexture(
 
   if (!ToPixelFormat(image_info.value().colorType()).has_value()) {
     std::string decode_error =
-        std::format("Codec pixel format is not supported (SkColorType={})",
-                    static_cast<int>(image_info.value().colorType()));
+        absl::StrCat("Codec pixel format is not supported (SkColorType=",
+                     static_cast<int>(image_info.value().colorType()), ")");
     FML_DLOG(ERROR) << decode_error;
     return absl::InvalidArgumentError(decode_error);
   }
@@ -477,8 +511,7 @@ ImageDecoderImpeller::UnsafeUploadTextureToPrivate(
   }
 
   dest_texture->SetLabel(
-      std::format("ui.Image({})", static_cast<const void*>(dest_texture.get()))
-          .c_str());
+      absl::StrCat("ui.Image(0x", absl::Hex(dest_texture.get()), ")"));
 
   auto command_buffer = context->CreateCommandBuffer();
   if (!command_buffer) {
@@ -632,9 +665,9 @@ ImageDecoderImpeller::UploadTextureToStorage(
   const auto image_info = bitmap->info();
   const auto pixel_format = ToPixelFormat(image_info.colorType());
   if (!pixel_format) {
-    std::string decode_error(
-        std::format("Unsupported pixel format (SkColorType={})",
-                    static_cast<int>(image_info.colorType())));
+    std::string decode_error =
+        absl::StrCat("Unsupported pixel format (SkColorType=",
+                     static_cast<int>(image_info.colorType()), ")");
     FML_DLOG(ERROR) << decode_error;
     return std::make_pair(nullptr, decode_error);
   }
@@ -665,9 +698,7 @@ ImageDecoderImpeller::UploadTextureToStorage(
     return std::make_pair(nullptr, decode_error);
   }
 
-  texture->SetLabel(
-      std::format("ui.Image({})", static_cast<const void*>(texture.get()))
-          .c_str());
+  texture->SetLabel(absl::StrCat("ui.Image(0x", absl::Hex(texture.get()), ")"));
 
   context->DisposeThreadLocalCachedResources();
 

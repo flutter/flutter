@@ -43,4 +43,16 @@ ContentContext& AiksContext::GetContentContext() const {
   return *content_context_;
 }
 
+void AiksContext::ClearRenderTargetCache() const {
+  if (content_context_) {
+    content_context_->ClearRenderTargetCache();
+  }
+}
+
+void AiksContext::ClearCachedTextures() const {
+  if (content_context_) {
+    content_context_->ClearCachedTextures();
+  }
+}
+
 }  // namespace impeller

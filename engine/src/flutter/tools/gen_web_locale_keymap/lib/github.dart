@@ -102,7 +102,7 @@ Future<String> _tryCached(
   } catch (exception) {
     print('Error writing GitHub cache. Details: $exception');
   } finally {
-    sink?.close();
+    await sink?.close();
   }
   return result;
 }

@@ -144,10 +144,13 @@ base class ExtensionTemplateManager extends TemplateService {
     for (final connection in connections) {
       try {
         final Object? result = await connection
-            .sendRequest(TemplateService.generateTemplateParametersMethod, <String, Object?>{
-              'templateName': templateName,
-              'toolParameters': toolParameters,
-            })
+            .sendRequest(
+              TemplateService.generateTemplateParametersMethod,
+              params: <String, Object?>{
+                'templateName': templateName,
+                'toolParameters': toolParameters,
+              },
+            )
             .timeout(_kRpcTimeout);
         if (result is Map) {
           return result.cast<String, Object?>();
