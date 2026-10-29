@@ -5583,9 +5583,9 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
   _SemanticsParentData? parentData;
   _SemanticsGeometry? geometry;
 
-  // A geometry update received while this branch was excluded or blocked.
-  // Requeue it when parent data is restored, including for render objects
-  // that do not form semantics nodes but transform or clip their children.
+  /// A geometry update received while this branch was excluded or blocked.
+  /// Requeue it when parent data is restored, including for render objects
+  /// that do not form semantics nodes but transform or clip their children.
   bool _geometryUpdateDeferred = false;
 
   final _SemanticsConfigurationProvider configProvider;
