@@ -625,6 +625,23 @@ public class FlutterJNI {
   }
 
   /**
+   * Call this method when a view is about to start rendering with this engine, so that the parts of
+   * rendering that don't need a {@link Surface}, such as compiling pipelines, can start before
+   * {@link #onSurfaceCreated(Surface)} is called.
+   *
+   * <p>This method returns without waiting for that work, and does nothing once rendering has been
+   * warmed up or a {@link Surface} has been created.
+   */
+  @UiThread
+  public void prewarmRendering() {
+    ensureRunningOnMainThread();
+    ensureAttachedToNative();
+    nativePrewarmRendering(nativeShellHolderId);
+  }
+
+  private native void nativePrewarmRendering(long nativeShellHolderId);
+
+  /**
    * Call this method when a {@link Surface} has been created onto which you would like Flutter to
    * paint.
    *
