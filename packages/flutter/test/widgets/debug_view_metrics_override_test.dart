@@ -276,6 +276,65 @@ void main() {
       expect(data.textScaler.scale(14.0), 14.0);
     });
 
+    testWidgets('scales text with every point of an overridden text scaling table', (
+      WidgetTester tester,
+    ) async {
+      // A table of more than one point is not a factor, and only the
+      // platform's scaleFontSize applies it. It reaches text only if the test
+      // dispatcher asks the dispatcher it wraps instead of multiplying by the
+      // factor it reports.
+      debugSetViewMetricsOverride(
+        tester.view.viewId,
+        const DebugViewMetricsOverride(
+          textScaling: <ui.Offset>[ui.Offset(8, 16), ui.Offset(30, 38), ui.Offset(100, 100)],
+        ),
+      );
+      late MediaQueryData data;
+      await tester.pumpWidget(
+        _capture(
+          (MediaQueryData value) => data = value,
+          child: const Directionality(
+            textDirection: TextDirection.ltr,
+            child: Center(child: Text('A', style: TextStyle(fontSize: 30))),
+          ),
+        ),
+      );
+
+      expect(data.textScaler.textScaleFactor, 2.0);
+      expect(data.textScaler.scale(8), 16.0);
+      expect(data.textScaler.scale(19), 27.0);
+      expect(data.textScaler.scale(30), 38.0);
+      expect(data.textScaler.scale(200), 200.0);
+      // The test font is as tall as the size it is laid out at.
+      expect(tester.getSize(find.text('A')).height, 38.0);
+
+      debugClearViewMetricsOverrides();
+    });
+
+    test('a text scaling table replaces the platform curve even at the same factor', () {
+      // The platform reports a factor of 2 and scales by 2x + 5. The table
+      // reports the same factor and scales differently.
+      final ui.PlatformDispatcher wrapped = debugApplyViewMetricsOverrides(
+        _CurvedTextScalingPlatformDispatcher(),
+      );
+      final ui.FlutterView view = wrapped.implicitView!;
+      expect(wrapped.scaleFontSize(10), 25.0);
+      expect(view.platformDispatcher.scaleFontSize(10), 25.0);
+
+      debugSetViewMetricsOverride(
+        view.viewId,
+        const DebugViewMetricsOverride(
+          textScaling: <ui.Offset>[ui.Offset(8, 16), ui.Offset(30, 38), ui.Offset(100, 100)],
+        ),
+      );
+      expect(wrapped.textScaleFactor, 2.0);
+      expect(wrapped.scaleFontSize(30), 38.0);
+      expect(view.platformDispatcher.scaleFontSize(30), 38.0);
+
+      debugClearViewMetricsOverrides();
+      expect(wrapped.scaleFontSize(10), 25.0);
+    });
+
     testWidgets('reports an overridden brightness and 24 hour format', (WidgetTester tester) async {
       late MediaQueryData data;
       await tester.pumpWidget(_capture((MediaQueryData value) => data = value));
