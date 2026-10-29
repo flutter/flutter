@@ -2129,6 +2129,50 @@ void main() {
       expect(tester.getTopLeft(find.byType(Placeholder)).dx, 0.0);
       expect(tester.getBottomRight(find.byType(Placeholder)).dx, 390.0);
     });
+
+    testWidgets('useSafeArea does not subtract the opposite safe area', (WidgetTester tester) async {
+      tester.view.devicePixelRatio = 1;
+      tester.view.physicalSize = const Size(951, 669);
+      tester.view.padding = const FakeViewPadding(right: 80);
+      addTearDown(tester.view.reset);
+      await tester.pumpWidget(
+        MaterialApp(
+          builder: (BuildContext context, Widget? child) => MediaQuery(
+            data: MediaQuery.of(context).copyWith(
+              displayFeatures: const <DisplayFeature>[
+                DisplayFeature(
+                  bounds: Rect.fromLTWH(455.5, 0, 40, 669),
+                  type: DisplayFeatureType.hinge,
+                  state: DisplayFeatureState.postureHalfOpened,
+                ),
+              ],
+            ),
+            child: child!,
+          ),
+          home: Builder(
+            builder: (BuildContext context) => Scaffold(
+              body: Align(
+                alignment: Alignment.topLeft,
+                child: ElevatedButton(
+                  onPressed: () => showModalBottomSheet<void>(
+                    context: context,
+                    useSafeArea: true,
+                    anchorPoint: const Offset(100, 669),
+                    builder: (_) => const SizedBox(height: 200, child: Placeholder()),
+                  ),
+                  child: const Text('open'),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.tap(find.text('open'));
+      await tester.pumpAndSettle();
+      // The left sub-screen does not touch the right safe area, so the
+      // sheet keeps the full sub-screen width of 455.5.
+      expect(tester.getSize(find.byType(Placeholder)).width, 455.5);
+    });
   });
 
   group('constraints', () {
