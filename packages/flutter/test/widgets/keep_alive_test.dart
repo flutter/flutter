@@ -211,7 +211,7 @@ void main() {
       tester.binding.renderView.toStringDeep(minLevel: DiagnosticLevel.info, wrapWidth: 600),
       equalsIgnoringHashCodes(
         '_ReusableRenderView#00000\n'
-        ' │ debug mode enabled - ${Platform.operatingSystem}\n'
+        ' │ debug mode enabled - ${kIsWeb ? 'Web' : Platform.operatingSystem}\n'
         ' │ view size: Size(2400.0, 1800.0) (in physical pixels)\n'
         ' │ device pixel ratio: 3.0 (physical pixels per logical pixel)\n'
         ' │ configuration: BoxConstraints(w=800.0, h=600.0) at 3.0x (in logical pixels)\n'
@@ -364,7 +364,7 @@ void main() {
       tester.binding.renderView.toStringDeep(minLevel: DiagnosticLevel.info, wrapWidth: 600),
       equalsIgnoringHashCodes(
         '_ReusableRenderView#00000\n'
-        ' │ debug mode enabled - ${Platform.operatingSystem}\n'
+        ' │ debug mode enabled - ${kIsWeb ? 'Web' : Platform.operatingSystem}\n'
         ' │ view size: Size(2400.0, 1800.0) (in physical pixels)\n'
         ' │ device pixel ratio: 3.0 (physical pixels per logical pixel)\n'
         ' │ configuration: BoxConstraints(w=800.0, h=600.0) at 3.0x (in logical pixels)\n'
@@ -549,5 +549,5 @@ void main() {
         '                               preferredSize: Size(Infinity, Infinity)\n',
       ),
     );
-  }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/87876
+  });
 }

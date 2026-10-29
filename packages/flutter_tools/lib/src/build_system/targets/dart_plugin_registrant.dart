@@ -6,9 +6,11 @@ import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 
 import '../../base/file_system.dart';
+import '../../base/template.dart';
 import '../../build_info.dart';
 import '../../dart/package_map.dart';
 import '../../flutter_plugins.dart';
+import '../../isolated/mustache_template.dart';
 import '../../project.dart';
 import '../build_system.dart';
 
@@ -16,15 +18,19 @@ import '../build_system.dart';
 /// based on the current dependency map in `pubspec.lock`.
 class DartPluginRegistrantTarget extends Target {
   /// Construct a [DartPluginRegistrantTarget].
-  const DartPluginRegistrantTarget() : _project = null;
+  const DartPluginRegistrantTarget({this.templateRenderer = const MustacheTemplateRenderer()})
+    : _project = null;
 
-  /// Construct a [DartPluginRegistrantTarget].
-  ///
-  /// If `project` is unset, a [FlutterProject] based on environment is used.
+  /// Construct a [DartPluginRegistrantTarget] that uses [project] instead of
+  /// resolving a [FlutterProject] from the build [Environment].
   @visibleForTesting
-  const DartPluginRegistrantTarget.test(FlutterProject project) : _project = project;
+  const DartPluginRegistrantTarget.test(
+    FlutterProject project, {
+    this.templateRenderer = const MustacheTemplateRenderer(),
+  }) : _project = project;
 
   final FlutterProject? _project;
+  final TemplateRenderer templateRenderer;
 
   @override
   Future<void> build(Environment environment) async {
@@ -39,7 +45,13 @@ class DartPluginRegistrantTarget extends Target {
         environment.defines[kTargetFile] ?? environment.fileSystem.path.join('lib', 'main.dart');
     final File mainFile = environment.fileSystem.file(targetFilePath);
 
-    await generateMainDartWithPluginRegistrant(project, packageConfig, mainFile);
+    await generateMainDartWithPluginRegistrant(
+      project,
+      packageConfig,
+      mainFile,
+      logger: environment.logger,
+      templateRenderer: templateRenderer,
+    );
   }
 
   @override
@@ -56,9 +68,10 @@ class DartPluginRegistrantTarget extends Target {
     // code should just do the right thing on every platform.
     // Failing that, consider throwing if `targetPlatform` isn't set and finding
     // all violations, as it's not consistently set here.
-    return targetPlatform == TargetPlatform.fuchsia_arm64 ||
-        targetPlatform == TargetPlatform.fuchsia_x64 ||
-        targetPlatform == TargetPlatform.web_javascript;
+    return switch (targetPlatform?.os) {
+      .fuchsia || .web => true,
+      _ => false,
+    };
   }
 
   @override

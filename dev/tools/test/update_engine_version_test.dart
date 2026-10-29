@@ -12,6 +12,8 @@ import 'package:file/local.dart';
 import 'package:platform/platform.dart';
 import 'package:test/test.dart';
 
+import 'temp_git_repo_utils.dart';
+
 //////////////////////////////////////////////////////////////////////
 //                                                                  //
 //  ✨ THINKING OF MOVING/REFACTORING THIS FILE? READ ME FIRST! ✨  //
@@ -85,7 +87,7 @@ void main() {
       forcePowershell: usePowershellOnPosix,
     );
 
-    environment = <String, String>{};
+    environment = <String, String>{...kDisableGitAutoMaintenanceEnvironment};
 
     if (const LocalPlatform().isWindows || usePowershellOnPosix) {
       // Copy a minimal set of environment variables needed to run the update_engine_version script in PowerShell.
@@ -116,12 +118,9 @@ void main() {
     }
   });
 
-  tearDown(() {
+  tearDown(() async {
     // Git adds a lot of files, we don't want to test for them.
-    final Directory gitDir = testRoot.root.childDirectory('.git');
-    if (gitDir.existsSync()) {
-      gitDir.deleteSync(recursive: true);
-    }
+    await deleteTempDirectory(testRoot.root.childDirectory('.git'));
 
     // Take a snapshot of files we expect to be created or otherwise exist.
     //
@@ -156,7 +155,7 @@ void main() {
     );
 
     // Now do cleanup so even if the next step fails, we still deleted tmp.
-    tmpDir.deleteSync(recursive: true);
+    await deleteTempDirectory(tmpDir);
 
     final Set<String> unexpectedFiles = currentFiles.difference(expectedFiles);
     if (unexpectedFiles.isNotEmpty) {
@@ -286,8 +285,8 @@ void main() {
       expect(engineStamp, isNot(equals(externalHead)));
     });
 
-    tearDown(() {
-      externalGit.deleteSync(recursive: true);
+    tearDown(() async {
+      await deleteTempDirectory(externalGit);
     });
   });
 
@@ -578,8 +577,8 @@ final class _FlutterRootUnderTest {
   /// `bin/internal/update_engine_version.{sh|ps1}`.
   ///
   /// This file contains a shell script that conditionally writes, on execution:
-  /// - [binInternalEngineVersion]
-  /// - [binInternalEngineRealm]
+  /// - [binCacheEngineStamp]
+  /// - [binCacheEngineRealm]
   final File binInternalUpdateEngineVersion;
 
   /// `bin/internal/content_aware_hash.{sh|ps1}`.

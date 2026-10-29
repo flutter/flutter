@@ -6,7 +6,6 @@ import '../runner/options/common_options.dart';
 import '../runner/options/option_bundle.dart';
 import '../runner/options/option_descriptor.dart';
 import '../web_template.dart';
-import 'file_generators/flutter_service_worker_js.dart';
 import 'web_constants.dart';
 
 /// Typed option descriptors specific to Flutter Web compilation.
@@ -48,21 +47,20 @@ abstract final class WebOptions {
         'When this is set, it will replace all $kStaticAssetsUrlPlaceholder in web/index.html for the given value.',
   );
 
-  static const pwaStrategy = EnumOptionDescriptor<ServiceWorkerStrategy>(
-    name: 'pwa-strategy',
-    hide: true,
-    help:
-        'This option is deprecated and will be removed in a future Flutter release.\n'
-        'The caching strategy to be used by the PWA service worker.',
-    values: ServiceWorkerStrategy.values,
-  );
-
   static const webResourcesCdn = FlagOptionDescriptor(
     name: 'web-resources-cdn',
     defaultsTo: true,
     help:
         'Use WebAssembly, CanvasKit, and other web resources from a content delivery network (CDN).\n'
         'Set to "--no-web-resources-cdn" to embed all web resources locally in the built app.',
+  );
+
+  static const pwaStrategy = StringOptionDescriptor(
+    name: 'pwa-strategy',
+    help:
+        'Removed. Flutter no longer generates or registers an offline caching service worker by default. '
+        'Remove "--pwa-strategy" from your build command.',
+    hide: true,
   );
 
   static const optimizationLevel = StringOptionDescriptor(
@@ -316,6 +314,21 @@ abstract final class WebOptions {
         'and this flag can be used to override the default. To disable this for the '
         'skwasm renderer, use "--no-cross-origin-isolation".',
   );
+
+  static const deprecatedJsInterop = NullableFlagOptionDescriptor(
+    name: 'deprecated-js-interop',
+    help:
+        'Whether to allow the deprecated JS interop libraries (such as '
+        '"dart:html", "dart:js", and "dart:js_util") when compiling to '
+        'JavaScript.\n'
+        'With "--no-deprecated-js-interop", importing these libraries is a '
+        'compile-time error and conditional imports on them resolve to false. '
+        'Use this to find code that still needs to migrate to "package:web" '
+        'and "dart:js_interop".\n'
+        'If not specified, the Dart compiler default is used. '
+        'Has no effect when compiling to WebAssembly.',
+    verboseOnly: true,
+  );
 }
 
 /// A bundle encapsulating general Flutter Web options and flags.
@@ -355,6 +368,7 @@ class WebJsOptionsBundle extends OptionBundle {
     WebOptions.minifyJs,
     WebOptions.noFrequencyBasedMinification,
     CommonOptions.nativeNullAssertions,
+    WebOptions.deprecatedJsInterop,
   ];
 }
 
@@ -384,5 +398,30 @@ class WebOptionsBundle extends OptionBundle {
     WebCoreOptionsBundle(),
     WebJsOptionsBundle(),
     WebWasmOptionsBundle(),
+  ];
+}
+
+/// A bundle encapsulating web development server and browser debugging options.
+class WebServerOptionsBundle extends OptionBundle {
+  const WebServerOptionsBundle();
+
+  @override
+  List<OptionDescriptor<Object?>> get descriptors => const <OptionDescriptor<Object?>>[
+    WebOptions.webHeader,
+    WebOptions.webHostname,
+    WebOptions.webPort,
+    WebOptions.webTlsCertPath,
+    WebOptions.webTlsCertKeyPath,
+    WebOptions.webServerDebugProtocol,
+    WebOptions.webServerDebugBackendProtocol,
+    WebOptions.webServerDebugInjectedClientProtocol,
+    WebOptions.webAllowExposeUrl,
+    WebOptions.webRunHeadless,
+    WebOptions.webBrowserDebugPort,
+    WebOptions.webEnableExpressionEvaluation,
+    WebOptions.webLaunchUrl,
+    WebOptions.webBrowserFlags,
+    WebOptions.crossOriginIsolation,
+    WebOptions.baseHref,
   ];
 }

@@ -32,6 +32,36 @@ docs/releases/Hotfix-Documentation-Best-Practices.md
 
 ## Flutter 3.47 Changes
 
+### [3.47.8](https://github.com/flutter/flutter/releases/tag/3.47.8)
+#### Security advisory [GHSA-frr6-h895-5pxp](https://github.com/dart-lang/sdk/security/advisories/GHSA-frr6-h895-5pxp):
+- [dart/568000](https://dart-review.googlesource.com/c/sdk/+/568000) Updates BoringSSL in the Dart runtime (3.13.7) to block compromised eMudhra intermediate CA certificates.
+- [dart/64696](https://github.com/dart-lang/sdk/pull/64696) Updates `dart:io` on Android 14+ to use the updatable Conscrypt APEX root certificate store.
+- Developers shipping Android, Windows, or Linux applications should upgrade to Flutter 3.47.8 and rebuild their apps.
+---
+- [flutter/190235](https://github.com/flutter/flutter/issues/190235) When running flutter pub get or building desktop apps with existing or broken plugin symlink entries, flutter_tools no longer crashes with a PathExistsException.
+- [flutter/192934](https://github.com/flutter/flutter/issues/192934) When dumping the focus tree or layer tree from flutter run on any platform before the UI isolate finishes initializing or after teardown, flutter_tools crashed with a null check operator exception.
+
+### [3.47.7](https://github.com/flutter/flutter/releases/tag/3.47.7)
+- [flutter/182604](https://github.com/flutter/flutter/issues/182604) When an OverlayPortal is displayed on iOS, accessibility frames are shrunk by the device pixel ratio and anchored to the top-left, so VoiceOver focus and XCUITest taps miss the visible controls.
+- [flutter/100946](https://github.com/flutter/flutter/issues/100946) When using VoiceOver on iOS with a ReorderableListView, Semantics focus is incorrectly shifted to the top left of the screen.
+
+### [3.47.6](https://github.com/flutter/flutter/releases/tag/3.47.6)
+- [flutter/192513](https://github.com/flutter/flutter/issues/192513) Fixed an issue that caused Windows production apps to hang.
+
+### [3.47.5](https://github.com/flutter/flutter/releases/tag/3.47.5)
+- [flutter/190307](https://github.com/flutter/flutter/issues/190307) When debugging on physical iOS 27 devices, app occasionally crashes.
+- [flutter/191242](https://github.com/flutter/flutter/issues/191242) When re-expanding a preview group in the Widget Previewer, previews crash due to a type error in scroll restoration.
+- [flutter/189507](https://github.com/flutter/flutter/pull/189507) When Dart Development Service encounters a startup failure, flutter_tools crashes with an unhandled FormatException.
+
+### [3.47.4](https://github.com/flutter/flutter/releases/tag/3.47.4)
+- [flutter/191899](https://github.com/flutter/flutter/issues/191899) When Windows Smart App Control or security policies block binary execution on Windows, gracefully handle the error with an actionable message instead of crashing.
+- [flutter/192120](https://github.com/flutter/flutter/pull/192120) Fixes missing preview reload timing analytics in LspPreviewDetector across all platforms.
+- [flutter/181560](https://github.com/flutter/flutter/issues/181560) When building iOS and macOS app, SwiftPM migration warnings and errors are not tracked in analytics.
+- [flutter/191964](https://github.com/flutter/flutter/pull/191964) On iOS, apps bundling native assets fail App Store submission when native libraries are compiled with deployment targets above iOS 13.
+- [flutter/189284](https://github.com/flutter/flutter/issues/189284) When debugging with Xcode 27, the app may launch to a white screen and hang for multiple minutes.
+- [flutter/190465](https://github.com/flutter/flutter/issues/190465) When running WebAssembly dry-run builds on Web, remove redundant experiment flag warning that dropped telemetry error findings.
+- [flutter/191898](https://github.com/flutter/flutter/issues/191898) When remote test processes emit plain-text error output on all platforms, prevent flutter_tools from crashing with an unhandled FormatException.
+
 ### [3.47.3](https://github.com/flutter/flutter/releases/tag/3.47.3)
 - [flutter/191045](https://github.com/flutter/flutter/issues/191045) When calling Actions.handler on all platforms, null was always returned.
 - [flutter/181315](https://github.com/flutter/flutter/issues/181315) When using Impeller on Android devices with B-Series PowerVR GPUs, visual oddities and performance drops can be experienced.

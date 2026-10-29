@@ -9,20 +9,18 @@ import '../application_package.dart';
 import '../base/common.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
+import '../build_info.dart';
+import '../context/tool_context.dart';
 import '../device.dart';
-import '../globals.dart' as globals;
 import '../runner/flutter_command.dart';
 
 /// Show log output for running Flutter apps.
 class LogsCommand extends FlutterCommand {
-  /// Creates a new [LogsCommand].
-  ///
-  /// If [toolContext] is omitted, ambient fallbacks from [globals] will be used.
   LogsCommand({
+    required ToolContext super.toolContext,
     ApplicationPackageFactory? applicationPackageFactory,
     ProcessSignal? sigint,
     ProcessSignal? sigterm,
-    super.toolContext,
   }) : _sigint = sigint ?? ProcessSignal.sigint,
        _sigterm = sigterm ?? ProcessSignal.sigterm {
     applicationPackages = applicationPackageFactory;
@@ -32,13 +30,15 @@ class LogsCommand extends FlutterCommand {
       abbr: 'c',
       help: 'Clear log history before reading from logs.',
     );
-    usesDeviceTimeoutOption();
-    usesDeviceConnectionOption();
-    usesAdbLogFilteringOption(hide: false);
+    registerOptionBundle(const DeviceDiscoveryOptionsBundle());
+    DebuggingOptionDescriptors.adbLogFiltering.addTo(argParser, hideOverride: false);
   }
 
   final ProcessSignal _sigint;
   final ProcessSignal _sigterm;
+
+  @override
+  ToolContext get toolContext => super.toolContext!;
 
   @override
   final name = 'logs';
@@ -68,15 +68,16 @@ class LogsCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final Logger logger = toolContext?.logger ?? globals.logger;
+    final Logger logger = toolContext.logger;
     final Device cachedDevice = device!;
     if (boolArg('clear')) {
       cachedDevice.clearLogs();
     }
 
-    final ApplicationPackage? app = await applicationPackages?.getPackageForPlatform(
-      await cachedDevice.targetPlatform,
-    );
+    final TargetPlatform targetPlatform = await cachedDevice.targetPlatform;
+    final ApplicationPackage? app = targetPlatform == .unsupported
+        ? null
+        : await applicationPackages?.getPackageForPlatform(targetPlatform);
 
     final bool filtering =
         argParser.options.containsKey('adb-log-filtering') && boolArg('adb-log-filtering');

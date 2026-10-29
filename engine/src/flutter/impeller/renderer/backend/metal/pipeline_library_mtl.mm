@@ -115,8 +115,11 @@ PipelineFuture<PipelineDescriptor> PipelineLibraryMTL::GetPipeline(
     PipelineDescriptor descriptor,
     bool async,
     bool threadsafe) {
-  if (auto found = pipelines_.find(descriptor); found != pipelines_.end()) {
-    return found->second;
+  {
+    Lock lock(pipelines_mutex_);
+    if (auto found = pipelines_.find(descriptor); found != pipelines_.end()) {
+      return found->second;
+    }
   }
 
   if (!IsValid()) {
@@ -127,9 +130,16 @@ PipelineFuture<PipelineDescriptor> PipelineLibraryMTL::GetPipeline(
 
   auto promise = std::make_shared<
       std::promise<std::shared_ptr<Pipeline<PipelineDescriptor>>>>();
-  auto pipeline_future =
-      PipelineFuture<PipelineDescriptor>{descriptor, promise->get_future()};
-  pipelines_[descriptor] = pipeline_future;
+  auto pipeline_future = PipelineFuture<PipelineDescriptor>{
+      descriptor, promise->get_future(), weak_from_this()};
+  {
+    Lock lock(pipelines_mutex_);
+    auto [found, inserted] =
+        pipelines_.try_emplace(descriptor, pipeline_future);
+    if (!inserted) {
+      return found->second;
+    }
+  }
   auto weak_this = weak_from_this();
 
   auto get_pipeline_descriptor =
@@ -205,9 +215,12 @@ PipelineFuture<PipelineDescriptor> PipelineLibraryMTL::GetPipeline(
 PipelineFuture<ComputePipelineDescriptor> PipelineLibraryMTL::GetPipeline(
     ComputePipelineDescriptor descriptor,
     bool async) {
-  if (auto found = compute_pipelines_.find(descriptor);
-      found != compute_pipelines_.end()) {
-    return found->second;
+  {
+    Lock lock(pipelines_mutex_);
+    if (auto found = compute_pipelines_.find(descriptor);
+        found != compute_pipelines_.end()) {
+      return found->second;
+    }
   }
 
   if (!IsValid()) {
@@ -221,8 +234,16 @@ PipelineFuture<ComputePipelineDescriptor> PipelineLibraryMTL::GetPipeline(
       std::promise<std::shared_ptr<Pipeline<ComputePipelineDescriptor>>>>();
   auto pipeline_future = PipelineFuture<ComputePipelineDescriptor>{
       descriptor, promise->get_future()};
-  compute_pipelines_[descriptor] = pipeline_future;
+  {
+    Lock lock(pipelines_mutex_);
+    auto [found, inserted] =
+        compute_pipelines_.try_emplace(descriptor, pipeline_future);
+    if (!inserted) {
+      return found->second;
+    }
+  }
   auto weak_this = weak_from_this();
+  const MTLSize max_threads_per_threadgroup = device_.maxThreadsPerThreadgroup;
 
   auto completion_handler =
       ^(id<MTLComputePipelineState> _Nullable compute_pipeline_state,
@@ -231,6 +252,21 @@ PipelineFuture<ComputePipelineDescriptor> PipelineLibraryMTL::GetPipeline(
         if (error != nil) {
           VALIDATION_LOG << "Could not create compute pipeline: "
                          << error.localizedDescription.UTF8String;
+          promise->set_value(nullptr);
+          return;
+        }
+
+        // Metal supplies the threadgroup size at dispatch and aborts if it
+        // exceeds the device or pipeline limit, so check the shader's declared
+        // size here. The pipeline's total limit can be below the device's, for
+        // example when the shader uses many registers.
+        if (absl::Status status = descriptor.ValidateWorkgroupSize(
+                {static_cast<uint32_t>(max_threads_per_threadgroup.width),
+                 static_cast<uint32_t>(max_threads_per_threadgroup.height),
+                 static_cast<uint32_t>(max_threads_per_threadgroup.depth)},
+                compute_pipeline_state.maxTotalThreadsPerThreadgroup);
+            !status.ok()) {
+          VALIDATION_LOG << status.message();
           promise->set_value(nullptr);
           return;
         }
@@ -260,15 +296,26 @@ PipelineFuture<ComputePipelineDescriptor> PipelineLibraryMTL::GetPipeline(
 
 // |PipelineLibrary|
 bool PipelineLibraryMTL::HasPipeline(const PipelineDescriptor& descriptor) {
+  Lock lock(pipelines_mutex_);
   return pipelines_.find(descriptor) != pipelines_.end();
 }
 
 // |PipelineLibrary|
 void PipelineLibraryMTL::RemovePipelinesWithEntryPoint(
     std::shared_ptr<const ShaderFunction> function) {
+  Lock lock(pipelines_mutex_);
+  // Skip pipelines without an entry point for the function's stage: render
+  // pipelines have none for the compute stage. Compute pipelines are cached
+  // separately.
   fml::erase_if(pipelines_, [&](auto item) {
-    return item->first.GetEntrypointForStage(function->GetStage())
-        ->IsEqual(*function);
+    const std::shared_ptr<const ShaderFunction> entrypoint =
+        item->first.GetEntrypointForStage(function->GetStage());
+    return entrypoint && entrypoint->IsEqual(*function);
+  });
+  fml::erase_if(compute_pipelines_, [&](auto item) {
+    const std::shared_ptr<const ShaderFunction> entrypoint =
+        item->first.GetStageEntrypoint();
+    return entrypoint && entrypoint->IsEqual(*function);
   });
 }
 

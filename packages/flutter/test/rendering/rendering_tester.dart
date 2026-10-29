@@ -90,11 +90,6 @@ class TestRenderingFlutterBinding extends BindingBase
       onSemanticsOwnerDisposed: () {
         renderView.clearSemantics();
       },
-      onFlushedPaint: (bool isDirty) {
-        if (isDirty) {
-          renderView.markNeedsCompositeFrame();
-        }
-      },
     );
   }
 
@@ -207,9 +202,7 @@ class TestRenderingFlutterBinding extends BindingBase
         return;
       }
       for (final RenderView renderView in renderViews) {
-        if (renderView.needsCompositeFrame) {
-          renderView.compositeFrame();
-        }
+        renderView.compositeFrame();
       }
       if (phase == EnginePhase.composite) {
         return;
