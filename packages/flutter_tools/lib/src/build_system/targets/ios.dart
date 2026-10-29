@@ -46,7 +46,7 @@ abstract class AotAssemblyBase extends Target {
     final snapshotter = AOTSnapshotter(
       fileSystem: environment.fileSystem,
       logger: environment.logger,
-      xcode: globals.xcode!,
+      xcode: globals.xcode,
       artifacts: environment.artifacts,
       processManager: environment.processManager,
     );
@@ -79,7 +79,7 @@ abstract class AotAssemblyBase extends Target {
       throw Exception('aot_assembly is only supported for iOS applications.');
     }
 
-    final EnvironmentType? environmentType = environmentTypeFromSdkroot(
+    final EnvironmentType environmentType = environmentTypeFromSdkroot(
       sdkRoot,
       environment.fileSystem,
     );
@@ -277,7 +277,7 @@ abstract class UnpackIOS extends UnpackDarwin {
     }
 
     // Copy Flutter framework.
-    final EnvironmentType? environmentType = environmentTypeFromSdkroot(
+    final EnvironmentType environmentType = environmentTypeFromSdkroot(
       sdkRoot,
       environment.fileSystem,
     );
@@ -531,7 +531,7 @@ class DebugIosLLDBInit extends Target {
     if (sdkRoot == null) {
       throw MissingDefineException(kSdkRoot, name);
     }
-    final EnvironmentType? environmentType = environmentTypeFromSdkroot(
+    final EnvironmentType environmentType = environmentTypeFromSdkroot(
       sdkRoot,
       environment.fileSystem,
     );
@@ -600,6 +600,7 @@ class DebugIosLLDBInit extends Target {
           'ensure debug mode works, please complete instructions found in '
           '"Embed a Flutter module in your iOS app > Use CocoaPods > Set LLDB Init File" '
           'section of https://docs.flutter.dev/to/ios-add-to-app-embed-setup.',
+          logger: environment.logger,
         );
       }
     }
@@ -855,6 +856,7 @@ Future<void> _updateMinimumOSVersion(File infoPlist, Environment environment) as
   if (result.exitCode != 0) {
     printXcodeWarning(
       'Failed to update MinimumOSVersion in ${infoPlist.path}. This may cause AppStore validation failures. Please file an issue at https://github.com/flutter/flutter/issues/new/choose',
+      logger: environment.logger,
     );
   }
 }
@@ -886,7 +888,7 @@ Future<void> _createStubAppFramework(
   static const int Moo = 88;
   ''');
 
-    final EnvironmentType? environmentType = environmentTypeFromSdkroot(sdkRoot, fileSystem);
+    final EnvironmentType environmentType = environmentTypeFromSdkroot(sdkRoot, fileSystem);
 
     await globals.xcode!.clang(<String>[
       '-x',

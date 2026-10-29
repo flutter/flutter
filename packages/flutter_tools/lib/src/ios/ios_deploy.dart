@@ -15,6 +15,7 @@ import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/utils.dart';
 import '../cache.dart';
+import '../context/tool_context.dart';
 import '../device.dart';
 import 'code_signing.dart';
 
@@ -26,22 +27,11 @@ const deviceLockedErrorMessage = 'the device was not, or could not be, unlocked'
 const unknownAppLaunchError = 'Error 0xe8000022';
 
 class IOSDeploy {
-  IOSDeploy({
-    required this._artifacts,
-    required this._cache,
-    required Logger logger,
-    required this._platform,
-    required ProcessManager processManager,
-  }) : _processUtils = ProcessUtils(processManager: processManager, logger: logger),
-       _logger = logger;
+  IOSDeploy({required this._toolContext});
 
-  final Artifacts _artifacts;
-  final Cache _cache;
-  final Logger _logger;
-  final Platform _platform;
-  final ProcessUtils _processUtils;
+  final ToolContext _toolContext;
 
-  String get _binaryPath => _artifacts.getHostArtifact(HostArtifact.iosDeploy).path;
+  String get _binaryPath => _toolContext.artifacts.getHostArtifact(HostArtifact.iosDeploy).path;
 
   Map<String, String> get iosDeployEnv {
     // Push /usr/bin to the front of PATH to pick up default system python, package 'six'.
@@ -50,9 +40,10 @@ class IOSDeploy {
     // Python script that uses package 'six'. LLDB.framework relies on the
     // python at the front of the path, which may not include package 'six'.
     // Ensure that we pick up the system install of python, which includes it.
-    final environment = Map<String, String>.of(_platform.environment);
+    final ToolContext(:Cache cache, :Platform platform) = _toolContext;
+    final environment = Map<String, String>.of(platform.environment);
     environment['PATH'] = '/usr/bin:${environment['PATH']}';
-    environment.addEntries(<MapEntry<String, String>>[_cache.dyLdLibEntry]);
+    environment.addEntries(<MapEntry<String, String>>[cache.dyLdLibEntry]);
     return environment;
   }
 
@@ -69,7 +60,7 @@ class IOSDeploy {
       bundleId,
     ];
 
-    return _processUtils.stream(
+    return _toolContext.processUtils.stream(
       launchCommand,
       mapFunction: _monitorFailure,
       trace: true,
@@ -99,7 +90,7 @@ class IOSDeploy {
       if (launchArguments.isNotEmpty) ...<String>['--args', launchArguments.join(' ')],
     ];
 
-    return _processUtils.stream(
+    return _toolContext.processUtils.stream(
       launchCommand,
       mapFunction: _monitorFailure,
       trace: true,
@@ -139,10 +130,11 @@ class IOSDeploy {
       if (interfaceType != DeviceConnectionInterface.wireless) '--no-wifi',
       if (launchArguments.isNotEmpty) ...<String>['--args', launchArguments.join(' ')],
     ];
+    final ToolContext(:Logger logger, :ProcessUtils processUtils) = _toolContext;
     return IOSDeployDebugger(
       launchCommand: launchCommand,
-      logger: _logger,
-      processUtils: _processUtils,
+      logger: logger,
+      processUtils: processUtils,
       iosDeployEnv: iosDeployEnv,
     );
   }
@@ -172,7 +164,7 @@ class IOSDeploy {
       if (launchArguments.isNotEmpty) ...<String>['--args', launchArguments.join(' ')],
     ];
 
-    return _processUtils.stream(
+    return _toolContext.processUtils.stream(
       launchCommand,
       mapFunction: _monitorFailure,
       trace: true,
@@ -191,20 +183,21 @@ class IOSDeploy {
       '--bundle_id',
       bundleId,
     ];
-    final RunResult result = await _processUtils.run(launchCommand, environment: iosDeployEnv);
+    final ToolContext(:Logger logger, :ProcessUtils processUtils) = _toolContext;
+    final RunResult result = await processUtils.run(launchCommand, environment: iosDeployEnv);
     // Device successfully connected, but app not installed.
     if (result.exitCode == 255) {
-      _logger.printTrace('$bundleId not installed on $deviceId');
+      logger.printTrace('$bundleId not installed on $deviceId');
       return false;
     }
     if (result.exitCode != 0) {
-      _logger.printTrace('App install check failed: ${result.stderr}');
+      logger.printTrace('App install check failed: ${result.stderr}');
       return false;
     }
     return true;
   }
 
-  String _monitorFailure(String stdout) => _monitorIOSDeployFailure(stdout, _logger);
+  String _monitorFailure(String stdout) => _monitorIOSDeployFailure(stdout, _toolContext.logger);
 }
 
 /// lldb attach state flow.

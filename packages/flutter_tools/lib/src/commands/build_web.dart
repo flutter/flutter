@@ -5,8 +5,10 @@
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../build_info.dart';
+import '../build_system/build_system.dart';
+import '../context/tool_context.dart';
 import '../features.dart';
-import '../globals.dart' as globals;
+import '../isolated/build_targets.dart';
 import '../runner/flutter_command.dart';
 import '../web/compile.dart';
 import '../web/content_hash.dart';
@@ -16,7 +18,16 @@ import '../web_template.dart';
 import 'build.dart';
 
 class BuildWebCommand extends BuildSubCommand {
-  BuildWebCommand({required super.logger, required this._fileSystem, required super.verboseHelp}) {
+  BuildWebCommand({
+    required this.buildSystem,
+    required this.featureFlags,
+    required ToolContext toolContext,
+    required super.verboseHelp,
+  }) : super(
+         logger: toolContext.logger,
+         outputPreferences: toolContext.outputPreferences,
+         toolContext: toolContext,
+       ) {
     registerOptionBundles(const <OptionBundle>[
       CommonBuildOptionsBundle(),
       BuildModeOptionsBundle(),
@@ -25,7 +36,11 @@ class BuildWebCommand extends BuildSubCommand {
     ]);
   }
 
-  final FileSystem _fileSystem;
+  final BuildSystem buildSystem;
+  final FeatureFlags featureFlags;
+
+  @override
+  ToolContext get toolContext => super.toolContext!;
 
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => const <DevelopmentArtifact>{
@@ -46,6 +61,15 @@ class BuildWebCommand extends BuildSubCommand {
     if (!featureFlags.isWebEnabled) {
       throwToolExit(
         '"build web" is not currently supported. To enable, run "flutter config --enable-web".',
+      );
+    }
+
+    if (getValue(WebOptions.pwaStrategy) != null) {
+      throwToolExit(
+        'The "--${WebOptions.pwaStrategy.name}" option has been removed because '
+        'Flutter no longer generates or registers an offline caching service worker.\n'
+        'Remove "--${WebOptions.pwaStrategy.name}" from your build command. '
+        'See https://github.com/flutter/flutter/issues/156910 for more details.',
       );
     }
 
@@ -78,6 +102,7 @@ class BuildWebCommand extends BuildSubCommand {
     }
     final bool? minifyJs = getValue(WebOptions.minifyJs);
     final bool? minifyWasm = getValue(WebOptions.minifyWasm);
+    final bool? deprecatedJsInterop = getValue(WebOptions.deprecatedJsInterop);
 
     final List<WebCompilerConfig> compilerConfigs;
 
@@ -87,7 +112,7 @@ class BuildWebCommand extends BuildSubCommand {
           'Do not attempt to set a web renderer when using "--${FlutterOptions.kWebWasmFlag}"',
         );
       }
-      globals.logger.printBox(title: 'New feature', '''
+      logger.printBox(title: 'New feature', '''
   WebAssembly compilation is new. Understand the details before deploying to production.
   $kWasmMoreInfo''');
 
@@ -109,6 +134,7 @@ class BuildWebCommand extends BuildSubCommand {
           optimizationLevel: jsOptimizationLevel,
           sourceMaps: sourceMaps,
           webContentHash: webContentHash,
+          deprecatedJsInterop: deprecatedJsInterop,
         ),
       ];
     } else {
@@ -122,6 +148,7 @@ class BuildWebCommand extends BuildSubCommand {
           optimizationLevel: jsOptimizationLevel,
           sourceMaps: sourceMaps,
           webContentHash: webContentHash,
+          deprecatedJsInterop: deprecatedJsInterop,
           renderer: webRenderer,
         ),
 
@@ -134,6 +161,8 @@ class BuildWebCommand extends BuildSubCommand {
             minify: minifyWasm,
             enableWasmDeferredLoading: getValue(WebOptions.enableWasmDeferredLoading),
             dryRun: true,
+            // dart2js already reports deprecated JS interop imports as errors.
+            omitDeprecatedJsInteropFindings: deprecatedJsInterop == false,
           ),
       ];
     }
@@ -159,7 +188,7 @@ class BuildWebCommand extends BuildSubCommand {
         'To configure this project for the web, run flutter create . --platforms web',
       );
     }
-    final File indexHtmlFile = _fileSystem.file(project.web.indexFile.path);
+    final File indexHtmlFile = toolContext.fs.file(project.web.indexFile.path);
     if (indexHtmlFile.existsSync()) {
       final String indexHtmlContent = indexHtmlFile.readAsStringSync();
       if (!indexHtmlContent.contains(kBaseHrefPlaceholder) && baseHref != null) {
@@ -182,18 +211,15 @@ class BuildWebCommand extends BuildSubCommand {
     final Map<String, String> webDefines = extractWebDefines();
 
     final webBuilder = WebBuilder(
-      logger: globals.logger,
-      processManager: globals.processManager,
-      buildSystem: globals.buildSystem,
-      fileSystem: globals.fs,
-      flutterVersion: globals.flutterVersion,
-      analytics: globals.analytics,
+      analytics: analytics,
+      buildSystem: buildSystem,
+      buildTargets: const BuildTargetsImpl(),
+      toolContext: toolContext,
     );
     await webBuilder.buildWeb(
       project,
       targetFile,
       buildInfo,
-      getValue(WebOptions.pwaStrategy),
       compilerConfigs: compilerConfigs,
       baseHref: baseHref,
       staticAssetsUrl: staticAssetsUrl,

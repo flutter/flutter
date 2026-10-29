@@ -62,6 +62,7 @@ class BuildHooks extends Target {
       targetPlatform: targetPlatform,
       projectUri: projectUri,
       fileSystem: fileSystem,
+      logger: environment.logger,
       buildCodeAssets: BuildCodeAssetsOptions(appBuildDirectory: environment.outputDir),
       buildDataAssets: true,
     );
@@ -222,6 +223,7 @@ class LinkHooks extends Target {
         targetPlatform: targetPlatform,
         projectUri: projectUri,
         fileSystem: fileSystem,
+        logger: environment.logger,
         buildCodeAssets: BuildCodeAssetsOptions(appBuildDirectory: environment.outputDir),
         buildDataAssets: true,
         buildResults: buildResults,
@@ -316,10 +318,9 @@ class InstallCodeAssets extends Target {
     final Uri nativeAssetsFileUri = environment.buildDir.childFile(nativeAssetsFilename).uri;
 
     Uri targetUri = environment.outputDir.childDirectory('native_assets').uri;
-    final String osName = targetPlatform.osName;
-    if (osName == 'linux' || osName == 'windows') {
+    if (targetPlatform.os case .linux || .windows) {
       // Avoid needing migration for CMake files, keep old directory structure.
-      targetUri = targetUri.resolve('$osName/');
+      targetUri = targetUri.resolve('${targetPlatform.osName}/');
     }
 
     final List<File> installedFiles = await installCodeAssets(
@@ -328,6 +329,8 @@ class InstallCodeAssets extends Target {
       targetPlatform: targetPlatform,
       projectUri: projectUri,
       fileSystem: fileSystem,
+      logger: environment.logger,
+      processManager: environment.processManager,
       nativeAssetsFileUri: nativeAssetsFileUri,
       targetUri: targetUri,
     );
@@ -410,15 +413,33 @@ Future<FlutterNativeAssetsBuildRunner> createFlutterNativeAssetsBuildRunner(
   final BuildMode buildMode = buildModeEnvironment == null
       ? BuildMode.debug
       : BuildMode.fromCliName(buildModeEnvironment);
-  final bool includeDevDependencies = !buildMode.isRelease;
+  final bool includeDevDependencies = !buildMode.isRelease || _isTestTarget(environment);
   return FlutterNativeAssetsBuildRunnerImpl(
     environment.packageConfigPath,
     packageConfig,
     fileSystem,
     environment.logger,
     environment.platform,
+    environment.processManager,
     runPackageName,
-    includeDevDependencies: includeDevDependencies,
     pubspecPath,
+    includeDevDependencies: includeDevDependencies,
   );
+}
+
+bool _isTestTarget(Environment environment) {
+  final String? targetFile = environment.defines[kTargetFile];
+  if (targetFile == null) {
+    return false;
+  }
+  final String absoluteTargetPath = environment.fileSystem.path.isAbsolute(targetFile)
+      ? targetFile
+      : environment.fileSystem.path.join(environment.projectDir.path, targetFile);
+  final String relativePath = environment.fileSystem.path.relative(
+    environment.fileSystem.path.normalize(absoluteTargetPath),
+    from: environment.projectDir.path,
+  );
+  final List<String> parts = environment.fileSystem.path.split(relativePath);
+  return parts.isNotEmpty &&
+      const <String>{'integration_test', 'test_driver', 'test'}.contains(parts.first);
 }

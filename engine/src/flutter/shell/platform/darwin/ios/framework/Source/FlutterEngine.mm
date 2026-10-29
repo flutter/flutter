@@ -67,7 +67,7 @@ static void IOSPlatformThreadConfigSetter(const fml::Thread::ThreadConfig& confi
     case fml::Thread::ThreadPriority::kDisplay: {
       pthread_set_qos_class_self_np(QOS_CLASS_USER_INTERACTIVE, 0);
       [[NSThread currentThread] setThreadPriority:1.0];
-      sched_param param;
+      sched_param param{};
       int policy;
       pthread_t thread = pthread_self();
       if (!pthread_getschedparam(thread, &policy, &param)) {
@@ -205,6 +205,11 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
 
   FlutterFMLTaskRunner* _platformTaskRunnerWrapper;
   FlutterFMLTaskRunner* _rasterTaskRunnerWrapper;
+
+  // The display information last sent to the framework by `updateDisplays`.
+  BOOL _hasSentDisplays;
+  CGSize _lastSentScreenNativeSize;
+  CGFloat _lastSentScreenScale;
 }
 
 - (int64_t)engineIdentifier {
@@ -288,6 +293,10 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
 
   self.sceneLifeCycleDelegate = [[FlutterEnginePluginSceneLifeCycleDelegate alloc] init];
 
+  if (!FlutterSharedApplication.application.supportsMultipleScenes) {
+    [FlutterPluginSceneLifeCycleDelegate registerEngineForSingleScene:self];
+  }
+
   return self;
 }
 
@@ -332,11 +341,6 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
 }
 
 - (void)setUpLifecycleNotifications:(NSNotificationCenter*)center {
-  // If the application is not available, use the scene for lifecycle notifications if available.
-  [center addObserver:self
-             selector:@selector(sceneWillConnect:)
-                 name:UISceneWillConnectNotification
-               object:nil];
   if (!FlutterSharedApplication.isAvailable) {
     [center addObserver:self
                selector:@selector(sceneWillEnterForeground:)
@@ -356,26 +360,6 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
              selector:@selector(applicationDidEnterBackground:)
                  name:UIApplicationDidEnterBackgroundNotification
                object:nil];
-}
-
-- (void)sceneWillConnect:(NSNotification*)notification API_AVAILABLE(ios(13.0)) {
-  if (self.viewController && ![self.viewController shouldHandleSceneNotification:notification]) {
-    return;
-  }
-  UIScene* scene = notification.object;
-  if (!FlutterSharedApplication.application.supportsMultipleScenes) {
-    // Since there is only one scene, we can assume that the FlutterEngine is within this scene and
-    // register it to the scene.
-    // The FlutterEngine needs to be registered with the scene when the scene connects in order for
-    // plugins to receive the `scene:willConnectToSession:options` event.
-    // If we want to support multi-window on iPad later, we may need to add a way for deveopers to
-    // register their FlutterEngine to the scene manually during this event.
-    FlutterPluginSceneLifeCycleDelegate* sceneLifeCycleDelegate =
-        [FlutterPluginSceneLifeCycleDelegate fromScene:scene];
-    if (sceneLifeCycleDelegate != nil) {
-      return [sceneLifeCycleDelegate engine:self receivedConnectNotificationFor:scene];
-    }
-  }
 }
 
 - (void)recreatePlatformViewsController {
@@ -428,7 +412,15 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
   if (!self.platformView) {
     return;
   }
+  auto vsync_waiter = _shell->GetVsyncWaiter().lock();
+  auto vsync_waiter_ios = std::static_pointer_cast<flutter::VsyncWaiterIOS>(vsync_waiter);
+  if (vsync_waiter_ios) {
+    vsync_waiter_ios->SetDispatchingEvent(true);
+  }
   self.platformView->DispatchPointerDataPacket(std::move(packet));
+  if (vsync_waiter_ios) {
+    vsync_waiter_ios->SetDispatchingEvent(false);
+  }
 }
 
 - (BOOL)platformViewShouldAcceptTouchAtTouchBeganLocation:(flutter::PointData)location
@@ -514,7 +506,7 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
   }
   const char* character = event.character;
 
-  flutter::KeyData key_data;
+  flutter::KeyData key_data{};
   key_data.Clear();
   key_data.timestamp = (uint64_t)event.timestamp;
   switch (event.type) {
@@ -845,6 +837,8 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
 - (void)adoptShell:(std::unique_ptr<flutter::Shell>)shell {
   FML_DCHECK(shell);
   _shell = std::move(shell);
+  // A new shell has not received any display information yet.
+  _hasSentDisplays = NO;
   _platformTaskRunnerWrapper = [[FlutterFMLTaskRunner alloc]
       initWithTaskRunner:_shell->GetTaskRunners().GetPlatformTaskRunner()];
   _rasterTaskRunnerWrapper = [[FlutterFMLTaskRunner alloc]
@@ -1038,13 +1032,37 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
     // Tests may do this.
     return;
   }
+  // Prefer the screen that the view is on. Fallback to main screen if not available (e.g. the
+  // Flutter view hasn't been added to any screen).
+  UIScreen* screen = self.viewController.viewIfLoaded.window.windowScene.screen;
+  if (!screen) {
+    if (_hasSentDisplays) {
+      // Keep the last reported display, rather than regressing to a guess.
+      return;
+    }
+    // The framework can read the display information as soon as the isolate launches, before any
+    // view is on screen (e.g. a headless or pre-warmed engine). Use `UIScreen.mainScreen` as a
+    // best-effort guess until the view is in a window.
+    screen = UIScreen.mainScreen;
+  }
+  CGSize screen_size = screen.nativeBounds.size;
+  CGFloat scale = screen.scale;
+  if (_hasSentDisplays && CGSizeEqualToSize(screen_size, _lastSentScreenNativeSize) &&
+      scale == _lastSentScreenScale) {
+    return;
+  }
+  _hasSentDisplays = YES;
+  _lastSentScreenNativeSize = screen_size;
+  _lastSentScreenScale = scale;
+  [self sendDisplayWithScreenNativeSize:screen_size scale:scale];
+}
+
+- (void)sendDisplayWithScreenNativeSize:(CGSize)screenNativeSize scale:(CGFloat)scale {
   auto vsync_waiter = _shell->GetVsyncWaiter().lock();
   auto vsync_waiter_ios = std::static_pointer_cast<flutter::VsyncWaiterIOS>(vsync_waiter);
   std::vector<std::unique_ptr<flutter::Display>> displays;
-  auto screen_size = UIScreen.mainScreen.nativeBounds.size;
-  auto scale = UIScreen.mainScreen.scale;
   displays.push_back(std::make_unique<flutter::VariableRefreshRateDisplay>(
-      0, vsync_waiter_ios, screen_size.width, screen_size.height, scale));
+      0, vsync_waiter_ios, screenNativeSize.width, screenNativeSize.height, scale));
   _shell->OnDisplayUpdates(std::move(displays));
 }
 
@@ -1329,6 +1347,14 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
 
     [self.platformViewsChannel invokeMethod:@"viewFocused" arguments:@(platform_view_id)];
   });
+}
+
+- (void)flutterTextInputView:(FlutterTextInputView*)textInputView
+    didRestoreFirstResponderWithTextInputClient:(int)client
+                                         result:(FlutterResult)callback {
+  [self.textInputChannel invokeMethod:@"TextInputClient.onFocusReceived"
+                            arguments:@[ @(client) ]
+                               result:callback];
 }
 
 #pragma mark - Undo Manager Delegate

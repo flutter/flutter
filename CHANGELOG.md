@@ -32,6 +32,22 @@ docs/releases/Hotfix-Documentation-Best-Practices.md
 
 ## Flutter 3.47 Changes
 
+### [3.47.8](https://github.com/flutter/flutter/releases/tag/3.47.8)
+#### Security advisory [GHSA-frr6-h895-5pxp](https://github.com/dart-lang/sdk/security/advisories/GHSA-frr6-h895-5pxp):
+- [dart/568000](https://dart-review.googlesource.com/c/sdk/+/568000) Updates BoringSSL in the Dart runtime (3.13.7) to block compromised eMudhra intermediate CA certificates.
+- [dart/64696](https://github.com/dart-lang/sdk/pull/64696) Updates `dart:io` on Android 14+ to use the updatable Conscrypt APEX root certificate store.
+- Developers shipping Android, Windows, or Linux applications should upgrade to Flutter 3.47.8 and rebuild their apps.
+---
+- [flutter/190235](https://github.com/flutter/flutter/issues/190235) When running flutter pub get or building desktop apps with existing or broken plugin symlink entries, flutter_tools no longer crashes with a PathExistsException.
+- [flutter/192934](https://github.com/flutter/flutter/issues/192934) When dumping the focus tree or layer tree from flutter run on any platform before the UI isolate finishes initializing or after teardown, flutter_tools crashed with a null check operator exception.
+
+### [3.47.7](https://github.com/flutter/flutter/releases/tag/3.47.7)
+- [flutter/182604](https://github.com/flutter/flutter/issues/182604) When an OverlayPortal is displayed on iOS, accessibility frames are shrunk by the device pixel ratio and anchored to the top-left, so VoiceOver focus and XCUITest taps miss the visible controls.
+- [flutter/100946](https://github.com/flutter/flutter/issues/100946) When using VoiceOver on iOS with a ReorderableListView, Semantics focus is incorrectly shifted to the top left of the screen.
+
+### [3.47.6](https://github.com/flutter/flutter/releases/tag/3.47.6)
+- [flutter/192513](https://github.com/flutter/flutter/issues/192513) Fixed an issue that caused Windows production apps to hang.
+
 ### [3.47.5](https://github.com/flutter/flutter/releases/tag/3.47.5)
 - [flutter/190307](https://github.com/flutter/flutter/issues/190307) When debugging on physical iOS 27 devices, app occasionally crashes.
 - [flutter/191242](https://github.com/flutter/flutter/issues/191242) When re-expanding a preview group in the Widget Previewer, previews crash due to a type error in scroll restoration.
