@@ -1500,9 +1500,9 @@ void hooksTests() async {
         runZonePlatformBrightness = Zone.current;
         platformBrightness = window.platformBrightness;
       };
-      window.onAlwaysUse24HourFormatChanged = () {
+      PlatformDispatcher.instance.onAlwaysUse24HourFormatChanged = () {
         runZoneAlwaysUse24HourFormat = Zone.current;
-        alwaysUse24HourFormat = window.alwaysUse24HourFormat;
+        alwaysUse24HourFormat = PlatformDispatcher.instance.alwaysUse24HourFormat;
       };
     });
 
@@ -1532,7 +1532,7 @@ void hooksTests() async {
     platformBrightness = null;
     alwaysUse24HourFormat = null;
 
-    window.onAlwaysUse24HourFormatChanged!();
+    PlatformDispatcher.instance.onAlwaysUse24HourFormatChanged!();
     _callHook(
       '_updateUserSettingsData',
       1,

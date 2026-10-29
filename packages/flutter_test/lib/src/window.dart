@@ -2080,22 +2080,6 @@ class TestWindow implements SingletonFlutterWindow {
     platformDispatcher.onPlatformBrightnessChanged = callback;
   }
 
-  @Deprecated(
-    'Use WidgetTester.platformDispatcher.onAlwaysUse24HourFormatChanged instead. '
-    'Deprecated to prepare for the upcoming multi-window support. '
-    'This feature was deprecated after v3.9.0-0.1.pre.',
-  )
-  @override
-  VoidCallback? get onAlwaysUse24HourFormatChanged => platformDispatcher.onAlwaysUse24HourFormatChanged;
-  @Deprecated(
-    'Use WidgetTester.platformDispatcher.onAlwaysUse24HourFormatChanged instead. '
-    'Deprecated to prepare for the upcoming multi-window support. '
-    'This feature was deprecated after v3.9.0-0.1.pre.',
-  )
-  @override
-  set onAlwaysUse24HourFormatChanged(VoidCallback? callback) {
-    platformDispatcher.onAlwaysUse24HourFormatChanged = callback;
-  }
 
   @Deprecated(
     'Use WidgetTester.platformDispatcher.alwaysUse24HourFormat instead. '

@@ -518,14 +518,6 @@ final class EngineFlutterWindow extends EngineFlutterView implements ui.Singleto
   }
 
   @override
-  ui.VoidCallback? get onAlwaysUse24HourFormatChanged =>
-      platformDispatcher.onAlwaysUse24HourFormatChanged;
-  @override
-  set onAlwaysUse24HourFormatChanged(ui.VoidCallback? callback) {
-    platformDispatcher.onAlwaysUse24HourFormatChanged = callback;
-  }
-
-  @override
   ui.FrameCallback? get onBeginFrame => platformDispatcher.onBeginFrame;
   @override
   set onBeginFrame(ui.FrameCallback? callback) {

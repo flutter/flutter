@@ -71,10 +71,10 @@ void testMain() {
         expect(Zone.current, innerZone);
       }
 
-      myWindow.onAlwaysUse24HourFormatChanged = callback;
+      EnginePlatformDispatcher.instance.onAlwaysUse24HourFormatChanged = callback;
 
       // Test that the getter returns the exact same callback, e.g. it doesn't wrap it.
-      expect(myWindow.onAlwaysUse24HourFormatChanged, same(callback));
+      expect(EnginePlatformDispatcher.instance.onAlwaysUse24HourFormatChanged, same(callback));
     });
 
     EnginePlatformDispatcher.instance.invokeOnAlwaysUse24HourFormatChanged();
