@@ -141,66 +141,79 @@ void main() {
     );
   }
 
-  testWidgets(
-    'Long press reopens the context menu after the field loses focus',
-    (WidgetTester tester) async {
-      // Regression test for https://github.com/flutter/flutter/issues/195408.
-      final controller = TextEditingController(text: 'Hello world');
-      addTearDown(controller.dispose);
-      final focusNode = FocusNode();
-      addTearDown(focusNode.dispose);
-      final editableTextKey = GlobalKey<EditableTextState>();
-      final delegate = FakeTextSelectionGestureDetectorBuilderDelegate(
-        editableTextKey: editableTextKey,
-        forcePressEnabled: false,
-        selectionEnabled: true,
-      );
-      final provider = TextSelectionGestureDetectorBuilder(delegate: delegate);
+  for (final bool restoreFocusBeforeGesture in <bool>[false, true]) {
+    testWidgets(
+      'Long press reopens the context menu after focus loss '
+      '(focus restored before gesture: $restoreFocusBeforeGesture)',
+      (WidgetTester tester) async {
+        // Regression test for https://github.com/flutter/flutter/issues/195408.
+        final controller = TextEditingController(text: 'Hello world');
+        addTearDown(controller.dispose);
+        final focusNode = FocusNode();
+        addTearDown(focusNode.dispose);
+        final editableTextKey = GlobalKey<EditableTextState>();
+        final delegate = FakeTextSelectionGestureDetectorBuilderDelegate(
+          editableTextKey: editableTextKey,
+          forcePressEnabled: false,
+          selectionEnabled: true,
+        );
+        final provider = TextSelectionGestureDetectorBuilder(delegate: delegate);
 
-      await tester.pumpWidget(
-        TestWidgetsApp(
-          home: provider.buildGestureDetector(
-            behavior: HitTestBehavior.translucent,
-            child: EditableText(
-              key: editableTextKey,
-              controller: controller,
-              focusNode: focusNode,
-              style: const TextStyle(),
-              backgroundCursorColor: _white,
-              cursorColor: _white,
-              selectionControls: testTextSelectionHandleControls,
-              contextMenuBuilder: (BuildContext context, EditableTextState state) {
-                return const Text('Context menu', textDirection: TextDirection.ltr);
-              },
+        await tester.pumpWidget(
+          TestWidgetsApp(
+            home: provider.buildGestureDetector(
+              behavior: HitTestBehavior.translucent,
+              child: EditableText(
+                key: editableTextKey,
+                controller: controller,
+                focusNode: focusNode,
+                style: const TextStyle(),
+                backgroundCursorColor: _white,
+                cursorColor: _white,
+                selectionControls: testTextSelectionHandleControls,
+                contextMenuBuilder: (BuildContext context, EditableTextState state) {
+                  return const Text('Context menu', textDirection: TextDirection.ltr);
+                },
+              ),
             ),
           ),
-        ),
-      );
+        );
 
-      final Offset position = textOffsetToPosition(tester, 1);
-      await tester.longPressAt(position);
-      await tester.pumpAndSettle();
-      const selection = TextSelection(baseOffset: 0, extentOffset: 5);
-      expect(controller.selection, selection);
-      expect(find.text('Context menu'), findsOneWidget);
+        final Offset position = textOffsetToPosition(tester, 1);
+        await tester.longPressAt(position);
+        await tester.pumpAndSettle();
+        const selection = TextSelection(baseOffset: 0, extentOffset: 5);
+        expect(controller.selection, selection);
+        expect(find.text('Context menu'), findsOneWidget);
 
-      // Losing focus disposes the selection overlay but preserves the word.
-      // The next long press must restore focus without a manual request.
-      focusNode.unfocus();
-      await tester.pumpAndSettle();
-      expect(focusNode.hasFocus, isFalse);
-      expect(controller.selection, selection);
-      expect(find.text('Context menu'), findsNothing);
+        // Losing focus disposes the selection overlay but preserves the word.
+        // Cover both an unfocused field and one that has regained focus.
+        focusNode.unfocus();
+        await tester.pumpAndSettle();
+        expect(focusNode.hasFocus, isFalse);
+        expect(controller.selection, selection);
+        expect(find.text('Context menu'), findsNothing);
 
-      await tester.longPressAt(position);
-      await tester.pumpAndSettle();
-      expect(focusNode.hasFocus, isTrue);
-      expect(controller.selection, selection);
-      expect(find.text('Context menu'), findsOneWidget);
-    },
-    variant: TargetPlatformVariant.only(TargetPlatform.android),
-    skip: kIsWeb, // [intended] web uses native browser context menus.
-  );
+        if (restoreFocusBeforeGesture) {
+          // The original issue occurs after dialog dismissal has restored focus
+          // before the next long press. The unfocused case does not catch it.
+          focusNode.requestFocus();
+          await tester.pumpAndSettle();
+          expect(focusNode.hasFocus, isTrue);
+          expect(controller.selection, selection);
+          expect(find.text('Context menu'), findsNothing);
+        }
+
+        await tester.longPressAt(position);
+        await tester.pumpAndSettle();
+        expect(focusNode.hasFocus, isTrue);
+        expect(controller.selection, selection);
+        expect(find.text('Context menu'), findsOneWidget);
+      },
+      variant: TargetPlatformVariant.only(TargetPlatform.android),
+      skip: kIsWeb, // [intended] web uses native browser context menus.
+    );
+  }
 
   for (final SelectionChangedCause cause in <SelectionChangedCause>[
     SelectionChangedCause.doubleTap,
