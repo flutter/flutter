@@ -8,7 +8,6 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/ios/application_package.dart';
@@ -361,30 +360,28 @@ IOSDevice setUpIOSDevice({
     processManager: FakeProcessManager.any(),
   );
   final FileSystem testFileSystem = fileSystem ?? MemoryFileSystem.test();
+  final toolContext = FakeToolContext(
+    artifacts: artifacts,
+    cache: cache,
+    fs: testFileSystem,
+    logger: logger,
+    platform: platform,
+    processManager: processManager,
+  );
   return IOSDevice(
     '1234',
     name: 'iPhone 1',
-    logger: logger,
-    fileSystem: testFileSystem,
-    fileSystemUtils: FileSystemUtils(fileSystem: testFileSystem, platform: platform),
-    processUtils: ProcessUtils(processManager: processManager, logger: logger),
-    xcode: null,
+    toolContext: toolContext,
+    xcode: FakeXcode(),
     sdkVersion: '13.3',
     cpuArch: .arm64,
-    platform: platform,
     iMobileDevice: IMobileDevice(
       logger: logger,
       processManager: processManager,
       artifacts: artifacts,
       cache: cache,
     ),
-    iosDeploy: IOSDeploy(
-      logger: logger,
-      platform: platform,
-      processManager: processManager,
-      artifacts: artifacts,
-      cache: cache,
-    ),
+    iosDeploy: IOSDeploy(toolContext: toolContext),
     analytics: FakeAnalytics(),
     coreDeviceControl: FakeIOSCoreDeviceControl(),
     coreDeviceLauncher: FakeIOSCoreDeviceLauncher(),
@@ -395,6 +392,7 @@ IOSDevice setUpIOSDevice({
     isPaired: true,
     devModeEnabled: true,
     isCoreDevice: isCoreDevice,
+    templateRenderer: FakeTemplateRenderer(),
   );
 }
 
