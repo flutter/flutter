@@ -147,6 +147,10 @@ gn_build(
     # copy of their objects would collide in a test binary -- and the C++
     # runtime.
     archive_boundaries = [
+        # The allocator's implementation the stub compiles for the wrap's own
+        # shared libraries (stubs/flutter/flutter_vma): the facade's users
+        # link the engine's (//engine/src/flutter/flutter_vma).
+        "//flutter/flutter_vma",
         "//flutter/third_party/libcxx",
         "//flutter/third_party/libcxxabi",
         "//flutter/third_party/llvm_libc",
