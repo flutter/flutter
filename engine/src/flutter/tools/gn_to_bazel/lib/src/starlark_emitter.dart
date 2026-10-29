@@ -3497,6 +3497,9 @@ final class _Emitter {
         if (run.env.isNotEmpty) {
           rule.scalars['env'] = _stringDictText(run.env);
         }
+        if (run.flaky) {
+          rule.scalars['flaky'] = 'True';
+        }
       }
       if (display && gtestParallel) {
         rule.scalars['gtest_parallel'] = 'True';
