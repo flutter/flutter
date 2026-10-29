@@ -189,51 +189,65 @@ void main() {
     );
   });
 
-  testWidgets('ListBody reports intrinsic heights along its main axis', (
-    WidgetTester tester,
-  ) async {
-    final GlobalKey vertical = GlobalKey();
-    final GlobalKey horizontal = GlobalKey();
-    await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: Column(
-          children: <Widget>[
-            SizedBox(
-              width: 200.0,
-              height: 300.0,
-              child: SingleChildScrollView(
-                child: ListBody(key: vertical, children: children),
+  testWidgets(
+    'ListBody intrinsic height is the sum of its children when vertical and the tallest child when horizontal, and the reverse for width',
+    (WidgetTester tester) async {
+      const sizedChildren = <Widget>[
+        SizedBox(width: 30.0, height: 20.0),
+        SizedBox(width: 10.0, height: 40.0),
+        SizedBox(width: 60.0, height: 10.0),
+      ];
+      const vertical = Key('vertical');
+      const horizontal = Key('horizontal');
+      await tester.pumpWidget(
+        const Directionality(
+          textDirection: TextDirection.ltr,
+          child: Column(
+            children: <Widget>[
+              SizedBox(
+                width: 200.0,
+                height: 300.0,
+                child: SingleChildScrollView(
+                  child: ListBody(key: vertical, children: sizedChildren),
+                ),
               ),
-            ),
-            SizedBox(
-              width: 300.0,
-              height: 150.0,
-              child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: ListBody(key: horizontal, mainAxis: Axis.horizontal, children: children),
+              SizedBox(
+                width: 300.0,
+                height: 150.0,
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: ListBody(
+                    key: horizontal,
+                    mainAxis: Axis.horizontal,
+                    children: sizedChildren,
+                  ),
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
-      ),
-    );
+      );
 
-    final RenderBox verticalBox = tester.renderObject(find.byKey(vertical));
-    expect(verticalBox.getMinIntrinsicHeight(200.0), 600.0);
-    expect(verticalBox.getMaxIntrinsicHeight(200.0), 600.0);
+      final RenderBox verticalBox = tester.renderObject(find.byKey(vertical));
+      expect(verticalBox.getMinIntrinsicHeight(200.0), 70.0);
+      expect(verticalBox.getMaxIntrinsicHeight(200.0), 70.0);
+      expect(verticalBox.getMinIntrinsicWidth(300.0), 60.0);
+      expect(verticalBox.getMaxIntrinsicWidth(300.0), 60.0);
 
-    final RenderBox horizontalBox = tester.renderObject(find.byKey(horizontal));
-    expect(horizontalBox.getMinIntrinsicHeight(800.0), 150.0);
-    expect(horizontalBox.getMaxIntrinsicHeight(800.0), 150.0);
-  });
+      final RenderBox horizontalBox = tester.renderObject(find.byKey(horizontal));
+      expect(horizontalBox.getMinIntrinsicHeight(800.0), 40.0);
+      expect(horizontalBox.getMaxIntrinsicHeight(800.0), 40.0);
+      expect(horizontalBox.getMinIntrinsicWidth(150.0), 100.0);
+      expect(horizontalBox.getMaxIntrinsicWidth(150.0), 100.0);
+    },
+  );
 
   testWidgets('Horizontal ListBody in IntrinsicHeight takes its tallest child height', (
     WidgetTester tester,
   ) async {
-    final GlobalKey intrinsic = GlobalKey();
+    const intrinsic = Key('intrinsic');
     await tester.pumpWidget(
-      Directionality(
+      const Directionality(
         textDirection: TextDirection.ltr,
         child: Align(
           alignment: Alignment.topLeft,
@@ -243,7 +257,7 @@ void main() {
               key: intrinsic,
               child: ListBody(
                 mainAxis: Axis.horizontal,
-                children: const <Widget>[
+                children: <Widget>[
                   SizedBox(width: 10.0, height: 20.0),
                   SizedBox(width: 10.0, height: 40.0),
                   SizedBox(width: 10.0, height: 10.0),
