@@ -5364,6 +5364,7 @@ CreateCommand createCreateCommand({
           processManager: globals.processManager,
           cache: globals.cache,
           flutterVersion: globals.flutterVersion,
+          projectFactory: FlutterProjectFactory(fileSystem: globals.fs, logger: globals.logger),
         ),
     extensionTemplateManager: extensionTemplateManager,
     net:

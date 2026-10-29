@@ -61,131 +61,97 @@ BuildCommand createFakeBuildCommand({
   Xcode? xcode,
   XcodeProjectInterpreter? xcodeProjectInterpreter,
 }) {
-  var resolvedFileSystem = fileSystem;
-  if (resolvedFileSystem == null) {
+  var effectiveFileSystem = fileSystem;
+  if (effectiveFileSystem == null) {
     try {
-      resolvedFileSystem = context.get<FileSystem>();
+      effectiveFileSystem = context.get<FileSystem>();
     } on Object {
       // testWithoutContext or not provided.
     }
   }
-  final FileSystem fs = resolvedFileSystem ?? MemoryFileSystem.test();
+  final FileSystem fs = effectiveFileSystem ?? MemoryFileSystem.test();
 
-  var resolvedPlatform = platform;
-  if (resolvedPlatform == null) {
+  var effectivePlatform = platform;
+  if (effectivePlatform == null) {
     try {
-      resolvedPlatform = context.get<Platform>();
+      effectivePlatform = context.get<Platform>();
     } on Object {
       // testWithoutContext or not provided.
     }
   }
-  final Platform targetPlatform = resolvedPlatform ?? FakePlatform();
+  final Platform resolvedPlatform = effectivePlatform ?? FakePlatform();
 
-  var resolvedFeatureFlags = featureFlags;
-  if (resolvedFeatureFlags == null) {
+  var effectiveFeatureFlags = featureFlags;
+  if (effectiveFeatureFlags == null) {
     try {
-      resolvedFeatureFlags = context.get<FeatureFlags>();
-    } on Object {
-      // testWithoutContext or not provided.
-    }
-  }
-
-  var resolvedLogger = logger;
-  if (resolvedLogger == null) {
-    try {
-      resolvedLogger = context.get<Logger>();
-    } on Object {
-      // testWithoutContext or not provided.
-    }
-  }
-  final Logger targetLogger = resolvedLogger ?? BufferLogger.test();
-
-  var resolvedProcessManager = processManager;
-  if (resolvedProcessManager == null) {
-    try {
-      resolvedProcessManager = context.get<ProcessManager>();
-    } on Object {
-      // testWithoutContext or not provided.
-    }
-  }
-  final ProcessManager targetProcessManager = resolvedProcessManager ?? FakeProcessManager.any();
-
-  var resolvedOsUtils = osUtils;
-  if (resolvedOsUtils == null) {
-    try {
-      resolvedOsUtils = context.get<OperatingSystemUtils>();
-    } on Object {
-      // testWithoutContext or not provided.
-    }
-  }
-  final OperatingSystemUtils targetOsUtils = resolvedOsUtils ?? FakeOperatingSystemUtils();
-
-  var resolvedPlistParser = plistParser;
-  if (resolvedPlistParser == null) {
-    try {
-      resolvedPlistParser = context.get<PlistParser>();
+      effectiveFeatureFlags = context.get<FeatureFlags>();
     } on Object {
       // testWithoutContext or not provided.
     }
   }
 
-  var resolvedXcodeProjectInterpreter = xcodeProjectInterpreter;
-  if (resolvedXcodeProjectInterpreter == null) {
+  var effectiveLogger = logger;
+  if (effectiveLogger == null) {
     try {
-      resolvedXcodeProjectInterpreter = context.get<XcodeProjectInterpreter>();
+      effectiveLogger = context.get<Logger>();
     } on Object {
       // testWithoutContext or not provided.
     }
   }
+  final Logger resolvedLogger = effectiveLogger ?? BufferLogger.test();
 
-  final FeatureFlags targetFeatureFlags = resolvedFeatureFlags ?? TestFeatureFlags();
-  final appleCtx = FakeAppleContext(
-    plistParser: resolvedPlistParser ?? FakePlistParser(),
-    xcode: xcode ?? FakeXcode(),
-    xcodeProjectInterpreter: resolvedXcodeProjectInterpreter,
-  );
-  final ToolContext targetToolContext =
-      toolContext ??
-      FakeToolContext(
-        artifacts: artifacts ?? FakeArtifacts(),
-        cache: cache ?? FakeCache(),
-        config: config ?? FakeConfig(),
-        fs: fs,
-        flutterVersion: flutterVersion ?? FakeFlutterVersion(),
-        logger: targetLogger,
-        os: targetOsUtils,
-        platform: targetPlatform,
-        processManager: targetProcessManager,
-        processUtils:
-            processUtils ??
-            ProcessUtils(processManager: targetProcessManager, logger: targetLogger),
-        projectFactory: FlutterProjectFactory(
-          config: config ?? FakeConfig(),
-          featureFlags: targetFeatureFlags,
-          fileSystem: fs,
-          logger: targetLogger,
-          plistParser: appleCtx.plistParser,
-          xcode: appleCtx.xcode,
-          xcodeProjectInterpreter: appleCtx.xcodeProjectInterpreter,
-        ),
-        terminal: terminal ?? FakeTerminal(),
-      );
+  var effectiveProcessManager = processManager;
+  if (effectiveProcessManager == null) {
+    try {
+      effectiveProcessManager = context.get<ProcessManager>();
+    } on Object {
+      // testWithoutContext or not provided.
+    }
+  }
+  final ProcessManager resolvedProcessManager = effectiveProcessManager ?? FakeProcessManager.any();
+
+  var effectiveOsUtils = osUtils;
+  if (effectiveOsUtils == null) {
+    try {
+      effectiveOsUtils = context.get<OperatingSystemUtils>();
+    } on Object {
+      // testWithoutContext or not provided.
+    }
+  }
+  final OperatingSystemUtils resolvedOsUtils = effectiveOsUtils ?? FakeOperatingSystemUtils();
+
   final command = BuildCommand(
     androidBuilder: androidBuilder ?? FakeAndroidBuilder(),
     androidContext: FakeAndroidContext(androidSdk: androidSdk),
-    appleContext: appleCtx,
+    appleContext: FakeAppleContext(
+      plistParser: plistParser ?? FakePlistParser(),
+      xcode: xcode ?? FakeXcode(),
+      xcodeProjectInterpreter: xcodeProjectInterpreter,
+    ),
     buildSystem: buildSystem ?? FakeBuildSystem(),
-    featureFlags: targetFeatureFlags,
+    featureFlags: effectiveFeatureFlags ?? TestFeatureFlags(),
     templateRenderer: templateRenderer ?? FakeTemplateRenderer(),
-    toolContext: targetToolContext,
+    toolContext:
+        toolContext ??
+        FakeToolContext(
+          artifacts: artifacts,
+          cache: cache ?? FakeCache(),
+          config: config ?? FakeConfig(),
+          fs: fs,
+          flutterVersion: flutterVersion ?? FakeFlutterVersion(),
+          logger: resolvedLogger,
+          os: resolvedOsUtils,
+          platform: resolvedPlatform,
+          processManager: resolvedProcessManager,
+          processUtils:
+              processUtils ??
+              ProcessUtils(processManager: resolvedProcessManager, logger: resolvedLogger),
+          terminal: terminal ?? FakeTerminal(),
+        ),
     verboseHelp: verboseHelp,
   );
   final ApplicationPackageFactory packageFactory =
-      applicationPackageFactory ??
-      FakeIOSApplicationPackageFactory(
-        fileSystem: fs,
-        projectFactory: targetToolContext.projectFactory,
-      );
+      applicationPackageFactory ?? FakeIOSApplicationPackageFactory(fileSystem: fs);
   command.applicationPackages = packageFactory;
   for (final Command<void> subcommand in command.subcommands.values) {
     if (subcommand is FlutterCommand) {
@@ -196,10 +162,9 @@ BuildCommand createFakeBuildCommand({
 }
 
 class FakeIOSApplicationPackageFactory extends Fake implements ApplicationPackageFactory {
-  FakeIOSApplicationPackageFactory({required this.fileSystem, this.projectFactory});
+  FakeIOSApplicationPackageFactory({required this.fileSystem});
 
   final FileSystem fileSystem;
-  final FlutterProjectFactory? projectFactory;
 
   @override
   Future<ApplicationPackage?> getPackageForPlatform(
@@ -210,9 +175,7 @@ class FakeIOSApplicationPackageFactory extends Fake implements ApplicationPackag
     if (platform != TargetPlatform.ios) {
       return null;
     }
-    final FlutterProject project =
-        projectFactory?.fromDirectory(fileSystem.currentDirectory) ??
-        FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
+    final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
     if (!project.ios.exists) {
       return null;
     }
