@@ -4391,6 +4391,7 @@ class EditableTextState extends State<EditableText>
   }
 
   bool _showToolbarOnScreenScheduled = false;
+  bool _handleContextMenuOnScrollScheduled = false;
   void _handleContextMenuOnScroll(ScrollNotification notification) {
     if (_webContextMenuEnabled) {
       return;
@@ -4415,6 +4416,39 @@ class EditableTextState extends State<EditableText>
           _selectionOverlay!.toolbarIsVisible &&
           !_selectionOverlay!.spellCheckToolbarIsVisible;
       if (!toolbarIsVisible) {
+        return;
+      }
+      // A scroll notification can be dispatched from inside layout (e.g.
+      // when the scroll position updates its dimensions while
+      // RenderEditable is laying out), in which case the selection
+      // geometry below cannot be read yet: the text layout is mid-update
+      // and reading it throws (see
+      // https://github.com/flutter/flutter/issues/195335). Defer the
+      // handling to the end of the frame instead.
+      switch (SchedulerBinding.instance.schedulerPhase) {
+        case SchedulerPhase.transientCallbacks:
+        case SchedulerPhase.midFrameMicrotasks:
+        case SchedulerPhase.persistentCallbacks:
+          if (!_handleContextMenuOnScrollScheduled) {
+            _handleContextMenuOnScrollScheduled = true;
+            SchedulerBinding.instance.addPostFrameCallback((_) {
+              _handleContextMenuOnScrollScheduled = false;
+              if (mounted) {
+                _handleContextMenuOnScroll(notification);
+              }
+            }, debugLabel: 'EditableText.handleContextMenuOnScroll');
+          }
+          return;
+        case SchedulerPhase.idle:
+        case SchedulerPhase.postFrameCallbacks:
+          break;
+      }
+      // If the selection is no longer valid (e.g. the text was cleared
+      // while the toolbar was showing), there is no geometry to keep on
+      // screen: hide the toolbar instead of reading the selection's
+      // boxes, which throws for an invalid selection.
+      if (!_value.selection.isValid) {
+        _selectionOverlay?.hideToolbar();
         return;
       }
       final List<TextBox> selectionBoxes = renderEditable.getBoxesForSelection(_value.selection);
