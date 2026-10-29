@@ -152,7 +152,7 @@ Future<void> buildMacOS({
       buildInfo,
       analytics: analytics,
       plistParser: plistParser,
-      reportCrashes: !(botDetector.isRunningOnBot),
+      reportCrashes: !botDetector.isRunningOnBot,
       toolContext: toolContext,
       xcodeProjectInterpreter: xcodeProjectInterpreter,
     ),
