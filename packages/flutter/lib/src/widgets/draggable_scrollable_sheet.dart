@@ -919,7 +919,12 @@ class _DraggableScrollableSheetScrollPosition extends ScrollPositionWithSingleCo
       if (!identical(activity, dragActivity) || pixels > minScrollExtent) {
         return;
       }
-      delta = scrollDelta - (oldPixels - pixels);
+      // Keep the remaining user offset unscaled for resizing and scrolling.
+      final double consumedScrollDelta = oldPixels - pixels;
+      final double consumedUserDelta = scrollDelta == 0
+          ? 0
+          : delta * (consumedScrollDelta / scrollDelta);
+      delta -= consumedUserDelta;
     }
 
     // Resize within the sheet's limits, then scroll with any remaining delta.

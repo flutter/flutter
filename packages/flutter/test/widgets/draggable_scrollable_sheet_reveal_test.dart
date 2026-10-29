@@ -585,9 +585,11 @@ void main() {
   }
 
   for (final scenario in <({double factor, double initialOffset, double offset, double height})>[
+    (factor: 0, initialOffset: 40, offset: 40, height: 300),
     (factor: 0.5, initialOffset: 110, offset: 60, height: 300),
-    (factor: 0.5, initialOffset: 40, offset: 0, height: 290),
-    (factor: 2, initialOffset: 110, offset: 0, height: 210),
+    (factor: 0.5, initialOffset: 50, offset: 0, height: 300),
+    (factor: 0.5, initialOffset: 40, offset: 0, height: 280),
+    (factor: 2, initialOffset: 110, offset: 0, height: 255),
   ]) {
     testWidgets(
       'Downward drags respect ${scenario.factor}x physics from ${scenario.initialOffset}',
@@ -622,6 +624,47 @@ void main() {
         await tester.pumpAndSettle();
       },
     );
+  }
+
+  for (final factor in <double>[0.5, 2]) {
+    testWidgets('A downward drag across both boundaries applies ${factor}x physics once', (
+      WidgetTester tester,
+    ) async {
+      final controller = DraggableScrollableController();
+      addTearDown(controller.dispose);
+      late ScrollController scrollController;
+      await tester.pumpWidget(
+        buildSheet(
+          controller: controller,
+          physics: _ScaledScrollPhysics(factor, parent: const BouncingScrollPhysics()),
+          onScrollController: (ScrollController value) {
+            scrollController = value;
+          },
+        ),
+      );
+      scrollController.jumpTo(40);
+      await tester.pumpAndSettle();
+      final position = scrollController.position as ScrollPositionWithSingleContext;
+      final Drag drag = position.drag(DragStartDetails(), () {});
+      drag.update(
+        DragUpdateDetails(
+          delta: const Offset(0, 400),
+          primaryDelta: 400,
+          globalPosition: Offset.zero,
+        ),
+      );
+      await tester.pump();
+
+      // The list consumes 40 / factor of the gesture, then the sheet consumes
+      // 150 logical pixels. Only the remaining raw offset gets scroll physics.
+      expect(controller.size, 0.25);
+      final double remainingDrag = 400 - 40 / factor - 150;
+      expect(scrollController.offset, closeTo(-remainingDrag * factor, precisionErrorTolerance));
+      drag.end(DragEndDetails(primaryVelocity: 0));
+      await tester.pumpAndSettle();
+      expect(controller.size, 0.25);
+      expect(scrollController.offset, closeTo(0, precisionErrorTolerance));
+    });
   }
 
   testWidgets('A resize notification can cancel the remaining upward drag', (
