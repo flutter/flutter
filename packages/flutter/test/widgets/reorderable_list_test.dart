@@ -2162,7 +2162,7 @@ void main() {
   ) async {
     // Drags item 0 by localDelta in the list's own coordinates with the whole
     // app, overlay included, scaled by scale, and returns the resulting order.
-    Future<List<int>> dragFirstItem(double scale, double localDelta) async {
+    Future<List<int>> dragFirstItem(double localDelta, {required double scale}) async {
       final items = List<int>.generate(8, (int index) => index);
       await tester.pumpWidget(
         Transform.scale(
@@ -2176,23 +2176,27 @@ void main() {
       final Offset start = tester.getCenter(find.text('item 0'));
       final TestGesture drag = await tester.startGesture(start);
       await tester.pump(kPressTimeout);
-      final Offset pointer = start + Offset(0, localDelta * scale);
-      await drag.moveTo(pointer);
+      final Offset pointerPosition = start + Offset(0, localDelta * scale);
+      await drag.moveTo(pointerPosition);
       await tester.pump(kPressTimeout);
 
-      // The proxy keeps the grabbed point under the pointer.
-      expect(tester.getCenter(find.text('item 0')).dx, moreOrLessEquals(pointer.dx));
-      expect(tester.getCenter(find.text('item 0')).dy, moreOrLessEquals(pointer.dy));
+      // The drag started at the center of item 0, so the center of the proxy
+      // must stay exactly under the pointer at any scale.
+      final Offset proxyCenter = tester.getCenter(find.text('item 0'));
+      expect(proxyCenter.dx, moreOrLessEquals(pointerPosition.dx));
+      expect(proxyCenter.dy, moreOrLessEquals(pointerPosition.dy));
 
       await drag.up();
       await tester.pumpAndSettle();
       return items;
     }
 
-    final List<int> unscaled = await dragFirstItem(1.0, 250);
+    // Without a scale, the drag moves item 0 down the list.
+    final List<int> unscaled = await dragFirstItem(250, scale: 1.0);
     expect(unscaled, isNot(List<int>.generate(8, (int index) => index)));
-    expect(await dragFirstItem(0.5, 250), unscaled);
-    expect(await dragFirstItem(1.5, 250), unscaled);
+    // The same local drag must give the same order at any scale.
+    expect(await dragFirstItem(250, scale: 0.5), unscaled);
+    expect(await dragFirstItem(250, scale: 1.5), unscaled);
   });
 
   testWidgets('ReorderableDelayedDragStartListener does not crash at zero area', (

@@ -1045,7 +1045,6 @@ class SliverReorderableListState extends State<SliverReorderableList>
 
   void _dragUpdateItems() {
     assert(_dragInfo != null);
-    final double gapExtent = _dragInfo!.itemExtent;
     final double proxyItemStart = _offsetExtent(
       _dragInfo!.dragPosition - _dragInfo!.dragOffset,
       _scrollDirection,
@@ -1118,7 +1117,7 @@ class SliverReorderableListState extends State<SliverReorderableList>
         if (item.index == _dragIndex! || !item.mounted) {
           continue;
         }
-        item.updateForGap(_dragIndex!, newIndex, gapExtent, true, _reverse);
+        item.updateForGap(_dragIndex!, newIndex, _dragInfo!.itemExtent, true, _reverse);
       }
     }
   }
