@@ -1177,7 +1177,9 @@ stay felt's, read from the YAML by suite name at run time. `--check`
 compares the two files as it compares the generated BUILD files. One macro
 call, `web_ui_tests(name = "tests", config = FELT_CONFIG, browsers =
 {...})`, declares everything above: the suites whose run configuration
-names one of the browsers given (Chrome's and Firefox's here; Safari's and
+names one of the browsers given (Chrome's on every host and Firefox's on a
+Linux host, where CI runs them -- felt on a Mac would run them on a Firefox
+from Mozilla's disk image, which no repository mounts yet; Safari's and
 Edge's need other hosts), the bundles those suites run, one test per file
 and suite -- the test sets' files are globbed from their directories, so a
 new test file is a new target with no edit -- and the suites per browser
