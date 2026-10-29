@@ -123,6 +123,16 @@ class SemanticScrollable extends SemanticRole {
     });
     if (!_canScroll) {
       _cleanUp();
+      semanticsObject.owner.addOneTimePostUpdateCallback(() {
+        // The node can no longer scroll, e.g. because its content shrank
+        // until it fit inside the viewport. The DOM scroll offset and the
+        // scroll adjustments derived from it must be reset, otherwise the
+        // children stay shifted by the stale offset and no longer line up
+        // with the painted content.
+        _resetScrollOffsets();
+        semanticsObject.recomputePositionAndSize();
+        semanticsObject.updateChildrenPositionAndSize();
+      });
       return;
     }
     if (_scrollOverflowElement == null) {
@@ -232,12 +242,22 @@ class SemanticScrollable extends SemanticRole {
         ..transform = 'translate(0px,0px)'
         ..width = '0px'
         ..height = '0px';
-      element.scrollLeft = 0.0;
-      element.scrollTop = 0.0;
-      semanticsObject
-        ..verticalScrollAdjustment = 0.0
-        ..horizontalScrollAdjustment = 0.0;
+      _resetScrollOffsets();
     }
+  }
+
+  /// Resets the browser's scroll offset of this object's [element] and the
+  /// scroll adjustments applied to the positions of its children.
+  ///
+  /// Called when the object can no longer scroll, e.g. because its content
+  /// shrank until it fit inside the viewport.
+  void _resetScrollOffsets() {
+    element.scrollLeft = 0.0;
+    element.scrollTop = 0.0;
+    _previousDomScrollPosition = 0;
+    semanticsObject
+      ..verticalScrollAdjustment = 0.0
+      ..horizontalScrollAdjustment = 0.0;
   }
 
   void _updateCssOverflow() {
