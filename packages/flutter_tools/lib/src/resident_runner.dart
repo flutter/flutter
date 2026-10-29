@@ -156,8 +156,13 @@ class FlutterDevice {
     PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
     required DebuggingOptions debuggingOptions,
   }) async {
-    final ToolContext(:FileSystem fs, :Logger logger, :FlutterProjectFactory projectFactory) =
-        _toolContext;
+    final ToolContext(
+      :Artifacts artifacts,
+      :FlutterVersion flutterVersion,
+      :FileSystem fs,
+      :Logger logger,
+      :FlutterProjectFactory projectFactory,
+    ) = _toolContext;
     this.vmServiceUri ??= Future<Uri>.value(vmServiceUri);
     // FYI, this message is used as a sentinel in tests.
     logger.printTrace('Connecting to service protocol: $vmServiceUri');
@@ -215,6 +220,7 @@ class FlutterDevice {
         try {
           await device!.dds.startDartDevelopmentServiceFromDebuggingOptions(
             vmServiceUri,
+            artifacts: artifacts,
             debuggingOptions: debuggingOptions,
             appName:
                 'Kind: Flutter - Device: ${device!.displayName} - '
@@ -268,6 +274,7 @@ class FlutterDevice {
           restart: restart,
           compileExpression: compileExpression,
           flutterProject: projectFactory.fromDirectory(fs.currentDirectory),
+          flutterVersion: flutterVersion,
           printStructuredErrorLogMethod: printStructuredErrorLogMethod,
           device: device,
           logger: logger,

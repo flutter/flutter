@@ -3,14 +3,10 @@
 // found in the LICENSE file.
 
 import 'package:meta/meta.dart';
-import 'package:process/process.dart';
 
-import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
-import '../base/platform.dart';
-import '../base/terminal.dart';
 import '../context/tool_context.dart';
 import '../project.dart';
 import '../project_validator.dart';
@@ -240,13 +236,11 @@ class AnalyzeCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final Artifacts artifacts = toolContext.artifacts;
-    final FileSystem fileSystem = toolContext.fs;
-    final Logger logger = toolContext.logger;
-    final Platform platform = toolContext.platform;
-    final ProcessManager processManager = toolContext.processManager;
-    final FlutterProjectFactory projectFactory = toolContext.projectFactory;
-    final Terminal terminal = toolContext.terminal;
+    final ToolContext(
+      fs: FileSystem fileSystem,
+      :Logger logger,
+      :FlutterProjectFactory projectFactory,
+    ) = toolContext;
 
     if (boolArg('android')) {
       final AndroidAnalyzeOption option;
@@ -354,10 +348,7 @@ class AnalyzeCommand extends FlutterCommand {
       }
       return ValidateProject(
         allProjectValidators: _allProjectValidators,
-        fileSystem: fileSystem,
-        logger: logger,
-        processManager: processManager,
-        projectFactory: projectFactory,
+        toolContext: toolContext,
         userPath: directoryPath,
         machine: outputMachineFormat,
       ).run();
@@ -365,26 +356,16 @@ class AnalyzeCommand extends FlutterCommand {
       await AnalyzeContinuously(
         argResults!,
         runner!.getRepoPackages(),
-        artifacts: artifacts,
-        fileSystem: fileSystem,
-        logger: logger,
-        platform: platform,
-        processManager: processManager,
-        shutdownHooks: toolContext.shutdownHooks,
+        analytics: analytics,
         suppressAnalytics: _suppressAnalytics,
-        terminal: terminal,
+        toolContext: toolContext,
       ).analyze();
     } else {
       await AnalyzeOnce(
         argResults!,
         runner!.getRepoPackages(),
-        artifacts: artifacts,
-        fileSystem: fileSystem,
-        logger: logger,
-        platform: platform,
-        processManager: processManager,
         suppressAnalytics: _suppressAnalytics,
-        terminal: terminal,
+        toolContext: toolContext,
         workingDirectory: workingDirectory,
       ).analyze();
     }

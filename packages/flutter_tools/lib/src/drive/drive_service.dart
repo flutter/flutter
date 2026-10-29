@@ -11,6 +11,7 @@ import 'package:unified_analytics/unified_analytics.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../application_package.dart';
+import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/dds.dart';
 import '../base/logger.dart';
@@ -22,6 +23,7 @@ import '../build_system/build_targets.dart';
 import '../context/tool_context.dart';
 import '../device.dart';
 import '../resident_runner.dart';
+import '../version.dart';
 import '../vmservice.dart';
 import 'web_driver_service.dart';
 
@@ -55,15 +57,11 @@ class FlutterDriverFactory {
         toolContext: _toolContext,
       );
     }
-    final ToolContext(:Logger logger, :Platform platform, :ProcessUtils processUtils) =
-        _toolContext;
     return FlutterDriverService(
       applicationPackageFactory: _applicationPackageFactory,
       dartSdkPath: _dartSdkPath,
       devtoolsLauncher: _devtoolsLauncher,
-      logger: logger,
-      platform: platform,
-      processUtils: processUtils,
+      toolContext: _toolContext,
     );
   }
 }
@@ -104,6 +102,11 @@ class DriveTestSpecification {
 
 /// An interface for the `flutter driver` integration test operations.
 abstract class DriverService {
+  DriverService({required this.toolContext});
+
+  @protected
+  final ToolContext toolContext;
+
   /// Install and launch the application for the provided [device].
   Future<void> start(
     BuildInfo buildInfo,
@@ -138,9 +141,7 @@ class FlutterDriverService extends DriverService {
     required this._applicationPackageFactory,
     required this._dartSdkPath,
     required this._devtoolsLauncher,
-    required this._logger,
-    required this._platform,
-    required this._processUtils,
+    required super.toolContext,
     @visibleForTesting this._logFlushDelay = const Duration(milliseconds: 500),
     @visibleForTesting this._vmServiceConnector = connectToVmService,
   });
@@ -148,12 +149,9 @@ class FlutterDriverService extends DriverService {
   static const _kLaunchAttempts = 3;
 
   final ApplicationPackageFactory _applicationPackageFactory;
-  final Logger _logger;
-  final Platform _platform;
-  final ProcessUtils _processUtils;
   final String _dartSdkPath;
-  final VMServiceConnector _vmServiceConnector;
   final DevtoolsLauncher _devtoolsLauncher;
+  final VMServiceConnector _vmServiceConnector;
   final Duration _logFlushDelay;
 
   Device? _device;
@@ -207,7 +205,7 @@ class FlutterDriverService extends DriverService {
       // On attempts past 1, assume the application is built correctly and re-use it.
       attempt += 1;
       prebuiltApplication = true;
-      _logger.printError('Application failed to start on attempt: $attempt');
+      toolContext.logger.printError('Application failed to start on attempt: $attempt');
     }
     if (result == null || !result.started) {
       throwToolExit('Application failed to start. Will not run test. Quitting.', exitCode: 1);
@@ -221,6 +219,8 @@ class FlutterDriverService extends DriverService {
     Device device,
     DebuggingOptions debuggingOptions,
   ) async {
+    final ToolContext(:Artifacts artifacts, :FlutterVersion flutterVersion, :Logger logger) =
+        toolContext;
     Uri uri;
     if (vmServiceUri.scheme == 'ws') {
       final List<String> segments = vmServiceUri.pathSegments.toList();
@@ -233,13 +233,14 @@ class FlutterDriverService extends DriverService {
     _device = device;
 
     final DeviceLogReader logReader = await device.getLogReader(app: _applicationPackage);
-    logReader.logLines.listen(_logger.printStatus);
+    logReader.logLines.listen(logger.printStatus);
 
     try {
       if (debuggingOptions.enableDds) {
         try {
           await device.dds.startDartDevelopmentServiceFromDebuggingOptions(
             uri,
+            artifacts: artifacts,
             appName:
                 'Kind: Flutter - Device: ${device.displayName} - '
                 'Package: ${_applicationPackage?.name}',
@@ -252,7 +253,12 @@ class FlutterDriverService extends DriverService {
           // This can be ignored to continue to use the existing remote DDS instance.
         }
       }
-      _vmService = await _vmServiceConnector(uri, device: _device, logger: _logger);
+      _vmService = await _vmServiceConnector(
+        uri,
+        device: _device,
+        flutterVersion: flutterVersion,
+        logger: logger,
+      );
       await logReader.provideVmService(_vmService);
     } catch (error) {
       // Allow time for buffered/async log messages (e.g. engine crash logs) to arrive and flush.
@@ -263,6 +269,7 @@ class FlutterDriverService extends DriverService {
 
   @override
   Future<int> startTest(String testFile, DriveTestSpecification spec) async {
+    final ToolContext(:Platform platform, :ProcessUtils processUtils) = toolContext;
     final String? profileMemory = spec.profileMemory;
     if (profileMemory != null) {
       unawaited(
@@ -275,9 +282,9 @@ class FlutterDriverService extends DriverService {
       await _devtoolsLauncher.processStart;
     }
     try {
-      final int result = await _processUtils.stream(
+      final int result = await processUtils.stream(
         <String>[_dartSdkPath, ...spec.arguments, testFile],
-        environment: <String, String>{..._platform.environment, 'VM_SERVICE_URL': _vmServiceUri},
+        environment: <String, String>{...platform.environment, 'VM_SERVICE_URL': _vmServiceUri},
       );
       return result;
     } finally {
@@ -289,14 +296,15 @@ class FlutterDriverService extends DriverService {
 
   @override
   Future<void> stop({String? userIdentifier}) async {
+    final Logger logger = toolContext.logger;
     // If the application package is available, stop and uninstall.
     final ApplicationPackage? package = _applicationPackage;
     if (package != null) {
       if (!await _device!.stopApp(package, userIdentifier: userIdentifier)) {
-        _logger.printError('Failed to stop app');
+        logger.printError('Failed to stop app');
       }
       if (!await _device!.uninstallApp(package, userIdentifier: userIdentifier)) {
-        _logger.printError('Failed to uninstall app');
+        logger.printError('Failed to uninstall app');
       }
     } else if (_device!.supportsFlutterExit) {
       // Otherwise use the VM Service URI to stop the app as a best effort approach.
@@ -308,7 +316,7 @@ class FlutterDriverService extends DriverService {
       });
       unawaited(_vmService.flutterExit(isolateId: isolateRef.id!));
     } else {
-      _logger.printTrace('No application package for $_device, leaving app running');
+      logger.printTrace('No application package for $_device, leaving app running');
     }
     await _device!.dispose();
   }
