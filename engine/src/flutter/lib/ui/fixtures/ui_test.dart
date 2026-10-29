@@ -719,8 +719,8 @@ Future<void> sceneToImageWithoutSurface() async {
   }
 }
 
-@pragma('vm:external-name', 'ClearGLContext')
-external void _clearGLContext();
+@pragma('vm:external-name', 'ClearCurrentGLContext')
+external void _clearCurrentGLContext();
 @pragma('vm:external-name', 'ToByteDataResult')
 external void _toByteDataResult(int length, String? error);
 
@@ -736,7 +736,7 @@ Future<void> imageToByteDataWithoutSurface() async {
   final Image image = await picture.toImage(8, 8);
   // `Picture.toImage` leaves its offscreen context current on the raster
   // thread. Clear it, like tearing down the window surface does.
-  _clearGLContext();
+  _clearCurrentGLContext();
   try {
     final ByteData? data = await image.toByteData();
     _toByteDataResult(data?.lengthInBytes ?? 0, null);

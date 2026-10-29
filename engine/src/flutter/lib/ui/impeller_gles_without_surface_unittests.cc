@@ -349,7 +349,7 @@ TEST_F(ShellTest, ImageToByteDataWithoutSurfaceOnImpellerGLES) {
   // Deliberately no PlatformViewNotifyCreated(): the rasterizer has no
   // surface.
 
-  AddNativeCallback("ClearGLContext",
+  AddNativeCallback("ClearCurrentGLContext",
                     CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
                       fml::AutoResetWaitableEvent cleared;
                       task_runners.GetRasterTaskRunner()->PostTask([&] {
