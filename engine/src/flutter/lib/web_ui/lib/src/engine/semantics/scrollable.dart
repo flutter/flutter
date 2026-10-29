@@ -124,6 +124,10 @@ class SemanticScrollable extends SemanticRole {
     if (!_canScroll) {
       _cleanUp();
       semanticsObject.owner.addOneTimePostUpdateCallback(() {
+        if (isDisposed) {
+          return;
+        }
+
         // The node can no longer scroll, e.g. because its content shrank
         // until it fit inside the viewport. The DOM scroll offset and the
         // scroll adjustments derived from it must be reset, otherwise the
