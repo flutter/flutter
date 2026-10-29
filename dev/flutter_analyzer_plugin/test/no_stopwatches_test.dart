@@ -7,11 +7,10 @@ import 'package:analyzer_testing/analysis_rule/analysis_rule.dart';
 import 'package:analyzer_testing/package_config_file_builder.dart';
 import 'package:analyzer_testing/src/analysis_rule/pub_package_resolution.dart';
 import 'package:flutter_analyzer_plugin/src/rules/no_stopwatches.dart';
-import 'package:test_reflective_loader/test_reflective_loader.dart';
+import 'package:test/test.dart';
 
 import 'package_mixins/external_stopwatches_mixin.dart';
 
-@reflectiveTest
 class NoStopwatchesTest extends AnalysisRuleTest with ExternalStopwatchesPackage {
   @override
   void setUp() {
@@ -23,8 +22,9 @@ class NoStopwatchesTest extends AnalysisRuleTest with ExternalStopwatchesPackage
 
   @override
   String get analysisRule => NoStopwatches.code.name;
+}
 
-  static const String source = '''
+const String _source = '''
 // Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
@@ -97,26 +97,29 @@ void testStopwatchIgnore(Stopwatch stopwatch) {
 }
 ''';
 
-  // ignore: unreachable_from_main, non_constant_identifier_names
-  Future<void> test_no_stopwatches() async {
-    await assertDiagnostics(source, <ExpectedDiagnostic>[
-      lint(696, 9),
-      lint(781, 9),
-      lint(970, 15),
-      lint(1207, 19),
-      lint(1390, 22),
-      lint(1615, 30),
-      lint(1845, 27),
-      lint(2028, 9),
-      lint(2162, 17),
-      lint(2316, 15),
-      lint(2513, 17),
-    ]);
-  }
-}
-
 void main() {
-  defineReflectiveSuite(() {
-    defineReflectiveTests(NoStopwatchesTest);
+  late NoStopwatchesTest testSuite;
+
+  setUp(() {
+    testSuite = NoStopwatchesTest();
+    testSuite.setUp();
+  });
+
+  tearDown(() => testSuite.tearDown());
+
+  test('no stopwatches', () async {
+    await testSuite.assertDiagnostics(_source, <ExpectedDiagnostic>[
+      testSuite.lint(696, 9),
+      testSuite.lint(781, 9),
+      testSuite.lint(970, 15),
+      testSuite.lint(1207, 19),
+      testSuite.lint(1390, 22),
+      testSuite.lint(1615, 30),
+      testSuite.lint(1845, 27),
+      testSuite.lint(2028, 9),
+      testSuite.lint(2162, 17),
+      testSuite.lint(2316, 15),
+      testSuite.lint(2513, 17),
+    ]);
   });
 }

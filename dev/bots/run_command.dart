@@ -79,7 +79,7 @@ class CommandResult {
 /// running process.
 ///
 /// `outputListener` is called for every line of standard output from the
-/// process, and is given the [Process] object. This can be used to interrupt
+/// process, and is given the [io.Process] object. This can be used to interrupt
 /// an indefinitely running process, for example, by waiting until the process
 /// emits certain output.
 ///
@@ -227,7 +227,7 @@ String? _discoverBestNdkPath() {
 /// false, calls foundError (which does not terminate execution!).
 ///
 /// `outputListener` is called for every line of standard output from the
-/// process, and is given the [Process] object. This can be used to interrupt
+/// process, and is given the [io.Process] object. This can be used to interrupt
 /// an indefinitely running process, for example, by waiting until the process
 /// emits certain output.
 ///

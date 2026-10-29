@@ -2206,10 +2206,10 @@ abstract class RenderBox extends RenderObject {
   /// Called from [computeDryLayout] or [computeDryBaseline] within an assert if
   /// the given [RenderBox] subclass does not support calculating a dry layout.
   ///
-  /// When asserts are enabled and [debugCheckingIntrinsics] is not true, this
-  /// method will either throw the provided [FlutterError] or it will create and
-  /// throw a [FlutterError] with the provided `reason`. Otherwise, it will
-  /// return true.
+  /// When asserts are enabled and [RenderObject.debugCheckingIntrinsics] is not
+  /// true, this method will either throw the provided [FlutterError] or it will
+  /// create and throw a [FlutterError] with the provided `reason`. Otherwise,
+  /// it will return true.
   ///
   /// One of the arguments has to be provided.
   ///

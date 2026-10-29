@@ -65,7 +65,7 @@ Future<void> flutterPackagesRunner() async {
 ///
 /// The `filesystem` parameter specified filesystem to read the packages version file from.
 /// The `packagesVersionFile` parameter allows specifying an alternative path for the
-/// packages version file, when null [flutterPackagesVersionFile] is used.
+/// packages version file, when null `flutterPackagesVersionFile` is used.
 Future<String> getFlutterPackagesVersion({
   fs.FileSystem fileSystem = const LocalFileSystem(),
   String? packagesVersionFile,

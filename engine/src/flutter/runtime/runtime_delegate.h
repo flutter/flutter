@@ -71,6 +71,8 @@ class RuntimeDelegate {
   virtual void RequestViewFocusChange(
       const ViewFocusChangeRequest& request) = 0;
 
+  virtual void ResetInternalState() = 0;
+
  protected:
   virtual ~RuntimeDelegate();
 };

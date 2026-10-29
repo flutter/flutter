@@ -82,7 +82,7 @@ final List<String> flutterTestArgs = <String>[];
 
 /// Whether execution should be simulated for debugging purposes.
 ///
-/// When `true`, calls to [runCommand] print to [io.stdout] instead of running
+/// When `true`, calls to [runCommand] print to [stdout] instead of running
 /// the process. This is useful for determining what an invocation of `test.dart`
 /// _might_ due if not invoked with `--dry-run`, or otherwise determine what the
 /// different test shards and sub-shards are configured as.
@@ -315,34 +315,6 @@ void _printLoudly(String message) {
     stdout.writeln('\r\x1B[2K$reset${message.trimRight()}');
   } else {
     stdout.writeln(message);
-  }
-}
-
-// THE FOLLOWING CODE IS A VIOLATION OF OUR STYLE GUIDE
-// BECAUSE IT INTRODUCES A VERY FLAKY RACE CONDITION
-// https://github.com/flutter/flutter/blob/main/docs/contributing/Style-guide-for-Flutter-repo.md#never-check-if-a-port-is-available-before-using-it-never-add-timeouts-and-other-race-conditions
-// DO NOT USE THE FOLLOWING FUNCTIONS
-// DO NOT WRITE CODE LIKE THE FOLLOWING FUNCTIONS
-// https://github.com/flutter/flutter/issues/109474
-
-int _portCounter = 8080;
-
-/// Finds the next available local port.
-Future<int> findAvailablePortAndPossiblyCauseFlakyTests() async {
-  while (!await _isPortAvailable(_portCounter)) {
-    _portCounter += 1;
-  }
-  return _portCounter++;
-}
-
-Future<bool> _isPortAvailable(int port) async {
-  try {
-    final RawSocket socket = await RawSocket.connect('localhost', port);
-    socket.shutdown(SocketDirection.both);
-    await socket.close();
-    return false;
-  } on SocketException {
-    return true;
   }
 }
 

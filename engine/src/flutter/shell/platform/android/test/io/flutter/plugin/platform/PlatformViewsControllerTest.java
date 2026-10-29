@@ -4,11 +4,10 @@
 
 package io.flutter.plugin.platform;
 
-import static android.os.Looper.getMainLooper;
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
-import static org.robolectric.Shadows.shadowOf;
+import static org.robolectric.shadows.ShadowLooper.shadowMainLooper;
 
 import android.app.Presentation;
 import android.content.Context;
@@ -1519,7 +1518,7 @@ public class PlatformViewsControllerTest {
     platformViewsController.onBeginFrame();
     platformViewsController.onEndFrame();
 
-    shadowOf(getMainLooper()).idle();
+    shadowMainLooper().idle();
     verify(overlayImageView, times(1)).detachFromRenderer();
   }
 
@@ -2120,6 +2119,51 @@ public class PlatformViewsControllerTest {
         MotionEvent.obtain(100, 101, MotionEvent.ACTION_MOVE, 0.0f, 0.0f, 0);
     wrapper.onTouchEvent(moveEvent);
     assertFalse(wrapper.getFlutterWonGesture());
+  }
+
+  @Test
+  @Config(shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
+  public void offset_updatesViewWrapperOffsetWithoutRequestingLayout() {
+    final PlatformViewsController platformViewsController = new PlatformViewsController();
+    final int platformViewId = 0;
+
+    final PlatformViewFactory viewFactory = mock(PlatformViewFactory.class);
+    final PlatformView platformView = mock(PlatformView.class);
+    final View androidView = new View(ApplicationProvider.getApplicationContext());
+    when(platformView.getView()).thenReturn(androidView);
+    when(viewFactory.create(any(), eq(platformViewId), any())).thenReturn(platformView);
+    platformViewsController.getRegistry().registerViewFactory("testType", viewFactory);
+
+    final FlutterJNI jni = new FlutterJNI();
+    jni.attachToNative();
+    platformViewsController.setFlutterJNI(jni);
+    attach(jni, platformViewsController);
+
+    createPlatformView(
+        jni, platformViewsController, platformViewId, "testType", /* hybrid=*/ false);
+
+    final PlatformViewWrapper wrapper = platformViewsController.getViewWrapper(platformViewId);
+    assertNotNull(wrapper);
+    final View parent = (View) wrapper.getParent();
+    parent.measure(
+        View.MeasureSpec.makeMeasureSpec(100, View.MeasureSpec.EXACTLY),
+        View.MeasureSpec.makeMeasureSpec(100, View.MeasureSpec.EXACTLY));
+    parent.layout(0, 0, 100, 100);
+    assertFalse(wrapper.isLayoutRequested());
+
+    final Map<String, Object> offsetArgs = new HashMap<>();
+    offsetArgs.put("id", platformViewId);
+    offsetArgs.put("top", 20.0);
+    offsetArgs.put("left", 10.0);
+    jni.handlePlatformMessage(
+        "flutter/platform_views",
+        encodeMethodCall(new MethodCall("offset", offsetArgs)),
+        /*replyId=*/ 0,
+        /*messageData=*/ 0);
+
+    assertFalse(wrapper.isLayoutRequested());
+    assertEquals(10, wrapper.getLeft());
+    assertEquals(20, wrapper.getTop());
   }
 
   private static ByteBuffer encodeMethodCall(MethodCall call) {

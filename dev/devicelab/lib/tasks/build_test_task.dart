@@ -10,9 +10,9 @@ import '../framework/devices.dart';
 import '../framework/task_result.dart';
 import '../framework/utils.dart';
 
-/// [Task] for defining build-test separation.
+/// `Task` for defining build-test separation.
 ///
-/// Using this [Task] allows DeviceLab capacity to only be spent on the [test].
+/// Using this `Task` allows DeviceLab capacity to only be spent on the [test].
 abstract class BuildTestTask {
   BuildTestTask(this.args, {this.workingDirectory, this.runFlutterClean = true}) {
     final ArgResults argResults = argParser.parse(args);

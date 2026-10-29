@@ -24,6 +24,17 @@ bool SupportsNormalOffscreenMSAA(const impeller::Context& context) {
          !capabilities->SupportsImplicitResolvingMSAA();
 }
 
+bool SupportsCompute(const impeller::Context& context) {
+  switch (context.GetBackendType()) {
+    case impeller::Context::BackendType::kMetal:
+    case impeller::Context::BackendType::kVulkan:
+      return true;
+    case impeller::Context::BackendType::kOpenGLES:
+      return false;
+  }
+  return false;
+}
+
 IMPLEMENT_WRAPPERTYPEINFO(flutter_gpu, Context);
 
 std::shared_ptr<impeller::Context> Context::default_context_;
@@ -135,6 +146,69 @@ extern int InternalFlutterGpu_Context_GetMinimumUniformByteAlignment(
   return wrapper->GetContext().GetCapabilities()->GetMinimumUniformAlignment();
 }
 
+extern int InternalFlutterGpu_Context_GetMinimumStorageBufferAlignment(
+    flutter::gpu::Context* wrapper) {
+  return wrapper->GetContext()
+      .GetCapabilities()
+      ->GetMinimumStorageBufferAlignment();
+}
+
+extern bool InternalFlutterGpu_Context_GetSupportsCompute(
+    flutter::gpu::Context* wrapper) {
+  return flutter::gpu::SupportsCompute(wrapper->GetContext());
+}
+
+// The compute limits are zero wherever Flutter GPU does not support compute,
+// whatever the backend reports.
+
+extern uint32_t
+InternalFlutterGpu_Context_GetMaximumComputeWorkgroupInvocations(
+    flutter::gpu::Context* wrapper) {
+  const impeller::Context& context = wrapper->GetContext();
+  if (!flutter::gpu::SupportsCompute(context)) {
+    return 0u;
+  }
+  return context.GetCapabilities()
+      ->GetComputeLimits()
+      .max_workgroup_invocations;
+}
+
+extern uint32_t InternalFlutterGpu_Context_GetMaximumComputeWorkgroupSize(
+    flutter::gpu::Context* wrapper,
+    int dimension) {
+  const impeller::Context& context = wrapper->GetContext();
+  if (!flutter::gpu::SupportsCompute(context) || dimension < 0 ||
+      dimension > 2) {
+    return 0u;
+  }
+  return context.GetCapabilities()
+      ->GetComputeLimits()
+      .max_workgroup_size[dimension];
+}
+
+extern uint32_t InternalFlutterGpu_Context_GetMaximumComputeWorkgroupCount(
+    flutter::gpu::Context* wrapper,
+    int dimension) {
+  const impeller::Context& context = wrapper->GetContext();
+  if (!flutter::gpu::SupportsCompute(context) || dimension < 0 ||
+      dimension > 2) {
+    return 0u;
+  }
+  return context.GetCapabilities()
+      ->GetComputeLimits()
+      .max_workgroup_count[dimension];
+}
+
+extern int64_t InternalFlutterGpu_Context_GetMaximumComputeSharedMemorySize(
+    flutter::gpu::Context* wrapper) {
+  const impeller::Context& context = wrapper->GetContext();
+  if (!flutter::gpu::SupportsCompute(context)) {
+    return 0;
+  }
+  return static_cast<int64_t>(
+      context.GetCapabilities()->GetComputeLimits().max_shared_memory_size);
+}
+
 extern bool InternalFlutterGpu_Context_GetSupportsOffscreenMSAA(
     flutter::gpu::Context* wrapper) {
   return flutter::gpu::SupportsNormalOffscreenMSAA(wrapper->GetContext());
@@ -152,6 +226,19 @@ extern bool InternalFlutterGpu_Context_GetSupportsManuallyMippedTextures(
   return wrapper->GetContext()
       .GetCapabilities()
       ->SupportsManuallyMippedTextures();
+}
+
+extern bool InternalFlutterGpu_Context_GetSupportsTextureArrays(
+    flutter::gpu::Context* wrapper) {
+  // TODO(bdero): Shader bundles do not carry an OpenGL ES 3.0 shader variant
+  // yet, so user shaders cannot sample 2D array textures on the GLES backend
+  // even when the context itself supports them. Once the bundle format gains
+  // an ES 3.0 variant, gate on the context capability alone.
+  if (wrapper->GetContext().GetBackendType() ==
+      impeller::Context::BackendType::kOpenGLES) {
+    return false;
+  }
+  return wrapper->GetContext().GetCapabilities()->SupportsTextureArrays();
 }
 
 extern int InternalFlutterGpu_Context_GetMaxSamplerAnisotropy(

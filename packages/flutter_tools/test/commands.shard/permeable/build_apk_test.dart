@@ -1107,7 +1107,7 @@ Future<BuildApkCommand> runBuildApkCommand(
           ),
     ),
     buildSystem: context.get<BuildSystem>() ?? TestBuildSystem.all(BuildResult(success: true)),
-    toolContext: DelegatingToolContext(),
+    toolContext: const DelegatingToolContext(),
   );
   final CommandRunner<void> runner = createTestCommandRunner(command);
   await runner.run(<String>[

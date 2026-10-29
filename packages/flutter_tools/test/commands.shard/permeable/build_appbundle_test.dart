@@ -16,6 +16,7 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build_appbundle.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/isolated/mustache_template.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
@@ -211,6 +212,7 @@ void main() {
         androidBuilder: FakeAndroidBuilder(),
         androidContext: FakeAndroidContext(),
         buildSystem: globals.buildSystem,
+        templateRenderer: const MustacheTemplateRenderer(),
         toolContext: FakeToolContext(logger: BufferLogger.test()),
       );
       expect(command.aliases, contains('aab'));
@@ -308,6 +310,7 @@ void main() {
               commandPath: 'create',
               result: 'success',
               commandHasTerminal: false,
+              hostArch: globals.os.hostPlatform.cliName,
               maxRss: processInfo.maxRss,
             ),
           ),
@@ -654,6 +657,7 @@ Future<BuildAppBundleCommand> runBuildAppBundleCommand(
       androidSdk: globals.androidSdk ?? FakeAndroidSdk(globals.fs.directory('android-sdk')),
     ),
     buildSystem: globals.buildSystem,
+    templateRenderer: const MustacheTemplateRenderer(),
     toolContext: FakeToolContext(
       fs: globals.fs,
       logger: globals.logger,

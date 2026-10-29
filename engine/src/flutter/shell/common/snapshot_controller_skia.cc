@@ -71,7 +71,7 @@ sk_sp<SkImage> SnapshotControllerSkia::MakeSkiaSnapshotSync(
 }
 
 void SnapshotControllerSkia::MakeImpellerSnapshot(
-    sk_sp<DisplayList> display_list,
+    SnapshotDelegate::SnapshotDisplayListProvider provider,
     DlISize picture_size,
     std::function<void(const std::shared_ptr<impeller::Texture>&)> callback,
     SnapshotPixelFormat pixel_format) {
@@ -80,7 +80,7 @@ void SnapshotControllerSkia::MakeImpellerSnapshot(
 
 std::shared_ptr<impeller::Texture>
 SnapshotControllerSkia::MakeImpellerSnapshotSync(
-    sk_sp<DisplayList> display_list,
+    SnapshotDelegate::SnapshotDisplayListProvider provider,
     DlISize size,
     SnapshotPixelFormat pixel_format) {
   FML_UNREACHABLE();

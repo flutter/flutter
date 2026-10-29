@@ -3,105 +3,94 @@
 // found in the LICENSE file.
 
 import 'package:flutter_analyzer_plugin/src/flutter_analysis_rule.dart';
-import 'package:test_reflective_loader/test_reflective_loader.dart';
+import 'package:test/test.dart';
 
 void main() {
-  defineReflectiveSuite(() {
-    defineReflectiveTests(FlutterAnalysisRuleTest);
-  });
-}
-
-@reflectiveTest
-class FlutterAnalysisRuleTest {
-  void _assertTrue(bool value, String message) {
-    if (!value) {
-      throw StateError('Expected true for: $message');
-    }
-  }
-
-  void _assertFalse(bool value, String message) {
-    if (value) {
-      throw StateError('Expected false for: $message');
-    }
-  }
-
-  // ignore: non_constant_identifier_names
-  void test_materialImplementationFiles() {
-    _assertTrue(
+  test('material implementation files', () {
+    expect(
       FlutterAnalysisRule.isReadOnly('packages/flutter/lib/src/material/button.dart'),
-      'Material button implementation',
+      isTrue,
+      reason: 'Material button implementation',
     );
-    _assertTrue(
+    expect(
       FlutterAnalysisRule.isReadOnly('packages/flutter/lib/src/material/popup_menu.dart'),
-      'Material popup_menu implementation',
+      isTrue,
+      reason: 'Material popup_menu implementation',
     );
-    _assertTrue(
+    expect(
       FlutterAnalysisRule.isReadOnly('packages/flutter/lib/material.dart'),
-      'Material umbrella library',
+      isTrue,
+      reason: 'Material umbrella library',
     );
-  }
+  });
 
-  // ignore: non_constant_identifier_names
-  void test_materialTestFiles() {
-    _assertTrue(
+  test('material test files', () {
+    expect(
       FlutterAnalysisRule.isReadOnly('packages/flutter/test/material/button_test.dart'),
-      'Material button test',
+      isTrue,
+      reason: 'Material button test',
     );
-    _assertTrue(
+    expect(
       FlutterAnalysisRule.isReadOnly('packages/flutter/test/material/theme_data_test.dart'),
-      'Material theme_data test',
+      isTrue,
+      reason: 'Material theme_data test',
     );
-  }
+  });
 
-  // ignore: non_constant_identifier_names
-  void test_cupertinoImplementationFiles() {
-    _assertTrue(
+  test('cupertino implementation files', () {
+    expect(
       FlutterAnalysisRule.isReadOnly('packages/flutter/lib/src/cupertino/button.dart'),
-      'Cupertino button implementation',
+      isTrue,
+      reason: 'Cupertino button implementation',
     );
-    _assertTrue(
+    expect(
       FlutterAnalysisRule.isReadOnly('packages/flutter/lib/cupertino.dart'),
-      'Cupertino umbrella library',
+      isTrue,
+      reason: 'Cupertino umbrella library',
     );
-  }
+  });
 
-  // ignore: non_constant_identifier_names
-  void test_cupertinoTestFiles() {
-    _assertTrue(
+  test('cupertino test files', () {
+    expect(
       FlutterAnalysisRule.isReadOnly('packages/flutter/test/cupertino/button_test.dart'),
-      'Cupertino button test',
+      isTrue,
+      reason: 'Cupertino button test',
     );
-  }
+  });
 
-  // ignore: non_constant_identifier_names
-  void test_nonMaterialCupertinoFrameworkFiles() {
-    _assertFalse(
+  test('non-Material/Cupertino framework files', () {
+    expect(
       FlutterAnalysisRule.isReadOnly('packages/flutter/lib/src/widgets/framework.dart'),
-      'Widgets framework file',
+      isFalse,
+      reason: 'Widgets framework file',
     );
-    _assertFalse(
+    expect(
       FlutterAnalysisRule.isReadOnly('packages/flutter/test/widgets/framework_test.dart'),
-      'Widgets framework test',
+      isFalse,
+      reason: 'Widgets framework test',
     );
-    _assertFalse(
+    expect(
       FlutterAnalysisRule.isReadOnly('packages/flutter/lib/src/rendering/box.dart'),
-      'Rendering box file',
+      isFalse,
+      reason: 'Rendering box file',
     );
-    _assertFalse(
+    expect(
       FlutterAnalysisRule.isReadOnly('packages/flutter_tools/lib/src/runner.dart'),
-      'Flutter tools runner file',
+      isFalse,
+      reason: 'Flutter tools runner file',
     );
-  }
+  });
 
-  // ignore: non_constant_identifier_names
-  void test_inMemoryTestFiles() {
-    _assertFalse(
+  test('in-memory test files', () {
+    expect(
       FlutterAnalysisRule.isReadOnly('/home/test/lib/test.dart'),
-      'In-memory test lib file',
+      isFalse,
+      reason: 'In-memory test lib file',
     );
-    _assertFalse(
+    expect(
       FlutterAnalysisRule.isReadOnly('/home/test/test/test.dart'),
-      'In-memory test test file',
+      isFalse,
+      reason: 'In-memory test test file',
     );
-  }
+  });
 }

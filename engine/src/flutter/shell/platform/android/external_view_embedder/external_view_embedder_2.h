@@ -122,7 +122,7 @@ class AndroidExternalViewEmbedder2 final : public ExternalViewEmbedder {
 
   // The pixel ratio used to determinate the size of a platform view layer
   // relative to the device layout system.
-  double device_pixel_ratio_;
+  double device_pixel_ratio_ = 0.0;
 
   // The order of composition. Each entry contains a unique id for the platform
   // view.

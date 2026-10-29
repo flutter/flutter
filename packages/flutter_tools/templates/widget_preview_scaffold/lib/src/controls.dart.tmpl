@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
+import 'package:material_ui/material_ui.dart';
 
 import 'theme/theme.dart';
 import 'widget_preview_scaffold_controller.dart';
@@ -113,14 +113,16 @@ class ZoomControls extends StatelessWidget {
                   alpha: 0.38,
                 ),
               ),
-              SizedBox(
-                width: 100,
-                height: defaultButtonHeight,
-                child: Slider(
-                  min: _minScale,
-                  max: _maxScale,
-                  value: scale.clamp(_minScale, _maxScale),
-                  onChanged: _setScale,
+              Flexible(
+                child: SizedBox(
+                  width: 100,
+                  height: defaultButtonHeight,
+                  child: Slider(
+                    min: _minScale,
+                    max: _maxScale,
+                    value: scale.clamp(_minScale, _maxScale),
+                    onChanged: _setScale,
+                  ),
                 ),
               ),
               IconButton(
@@ -218,6 +220,7 @@ class LayoutTypeSelector extends StatelessWidget {
         valueListenable: controller.layoutTypeListenable,
         builder: (context, selectedLayout, _) {
           return Row(
+            mainAxisSize: MainAxisSize.min,
             children: [
               IconButton(
                 style: theme.iconButtonTheme.style,
@@ -458,7 +461,15 @@ class _PreviewSearchControlsState extends State<PreviewSearchControls> {
                     size: defaultIconSize,
                     color: Colors.black54,
                   ),
+                  prefixIconConstraints: const BoxConstraints(
+                    minWidth: defaultButtonHeight,
+                    minHeight: defaultButtonHeight,
+                  ),
                   suffixIcon: _SearchClearButton(controller: widget.controller),
+                  suffixIconConstraints: const BoxConstraints(
+                    minWidth: defaultButtonHeight,
+                    minHeight: defaultButtonHeight,
+                  ),
                 ),
               ),
             ),

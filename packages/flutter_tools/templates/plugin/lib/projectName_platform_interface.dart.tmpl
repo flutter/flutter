@@ -1,6 +1,6 @@
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
-import '{{projectName}}_method_channel.dart';
+import '{{projectName}}_pigeon.dart';
 
 abstract class {{pluginDartClass}}Platform extends PlatformInterface {
   /// Constructs a {{pluginDartClass}}Platform.
@@ -8,11 +8,11 @@ abstract class {{pluginDartClass}}Platform extends PlatformInterface {
 
   static final Object _token = Object();
 
-  static {{pluginDartClass}}Platform _instance = MethodChannel{{pluginDartClass}}();
+  static {{pluginDartClass}}Platform _instance = Pigeon{{pluginDartClass}}();
 
-  /// The default instance of [{{pluginDartClass}}Platform] to use.
+  /// The instance of [{{pluginDartClass}}Platform] to use.
   ///
-  /// Defaults to [MethodChannel{{pluginDartClass}}].
+  /// Defaults to [Pigeon{{pluginDartClass}}].
   static {{pluginDartClass}}Platform get instance => _instance;
 
   /// Platform-specific implementations should set this with their own

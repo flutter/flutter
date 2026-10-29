@@ -175,6 +175,18 @@ vk::ImageView TextureVK::GetImageView() const {
   return source_->GetImageView();
 }
 
+vk::ImageView TextureVK::GetSampledImageView() const {
+  // Mip levels this driver generated cannot be trusted, so sample through a
+  // view that stops at the base level. The view only exists on drivers with
+  // that defect.
+  if (mipmap_generated_) {
+    if (vk::ImageView base_mip = source_->GetBaseMipImageView()) {
+      return base_mip;
+    }
+  }
+  return source_->GetImageView();
+}
+
 std::shared_ptr<const TextureSourceVK> TextureVK::GetTextureSource() const {
   return source_;
 }
