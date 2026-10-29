@@ -13,6 +13,7 @@ import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
+import '../base/template.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
 import '../build_system/targets/ios.dart';
@@ -37,6 +38,7 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
     required this._appleContext,
     required this._buildSystem,
     required this.codesign,
+    required this.templateRenderer,
     required ToolContext super.toolContext,
     required super.verboseHelp,
   }) : super(logger: toolContext.logger) {
@@ -106,6 +108,7 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
   );
 
   final DarwinAddToAppCodesigning codesign;
+  final TemplateRenderer templateRenderer;
 
   final AppleContext _appleContext;
   final BuildSystem _buildSystem;
@@ -464,6 +467,7 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
     required super.appleContext,
     required super.buildSystem,
     required super.codesign,
+    required super.templateRenderer,
     required super.toolContext,
     required super.verboseHelp,
   }) {
@@ -611,7 +615,9 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
           project.ios,
           getIosBuildDirectory(config: config, fileSystem: fs),
           buildInfo.mode,
-          flutterRoot: cache.flutterRoot,
+          cocoaPods: appleContext.cocoaPods,
+          templateRenderer: templateRenderer,
+          toolContext: toolContext,
           forceCocoaPodsOnly: true,
         );
         if (hasPlugins(project)) {

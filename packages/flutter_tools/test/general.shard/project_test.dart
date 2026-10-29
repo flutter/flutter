@@ -23,6 +23,7 @@ import 'package:flutter_tools/src/flutter_manifest.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
+import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:meta/meta.dart';
 import 'package:test/fake.dart';
@@ -414,8 +415,6 @@ dependencies:
           FileSystem: () => MemoryFileSystem.test(),
           ProcessManager: () => FakeProcessManager.any(),
           FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
-          FlutterProjectFactory: () =>
-              FlutterProjectFactory(logger: logger, fileSystem: globals.fs),
         },
       );
       testUsingContext(
@@ -431,8 +430,6 @@ dependencies:
           FileSystem: () => MemoryFileSystem.test(),
           ProcessManager: () => FakeProcessManager.any(),
           FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
-          FlutterProjectFactory: () =>
-              FlutterProjectFactory(logger: logger, fileSystem: globals.fs),
         },
       );
       testUsingContext(
@@ -450,8 +447,6 @@ dependencies:
           FileSystem: () => MemoryFileSystem.test(),
           ProcessManager: () => FakeProcessManager.any(),
           FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
-          FlutterProjectFactory: () =>
-              FlutterProjectFactory(logger: logger, fileSystem: globals.fs),
         },
       );
       _testInMemory('creates Android library in module', () async {
@@ -917,7 +912,11 @@ dependencies {
         xcodeProjectInterpreter = XcodeProjectInterpreter.test(
           toolContext: FakeToolContext.macosHost(processManager: FakeProcessManager.any()),
         );
-        flutterProjectFactory = FlutterProjectFactory(logger: logger, fileSystem: fs);
+        flutterProjectFactory = FlutterProjectFactory(
+          fileSystem: fs,
+          logger: logger,
+          xcodeProjectInterpreter: xcodeProjectInterpreter,
+        );
       });
 
       _testInMemory('default host app language', () async {
@@ -1160,7 +1159,12 @@ android {
         fs = MemoryFileSystem.test();
         testPlistUtils = FakePlistParser();
         xcodeProjectInterpreter = FakeXcodeProjectInterpreter();
-        flutterProjectFactory = FlutterProjectFactory(fileSystem: fs, logger: logger);
+        flutterProjectFactory = FlutterProjectFactory(
+          fileSystem: fs,
+          logger: logger,
+          plistParser: testPlistUtils,
+          xcodeProjectInterpreter: xcodeProjectInterpreter,
+        );
       });
 
       void testWithMocks(String description, Future<void> Function() testMethod) {
@@ -2270,7 +2274,12 @@ resolution: workspace
       fs = MemoryFileSystem.test();
       testPlistParser = FakePlistParser();
       mockXcodeProjectInterpreter = FakeXcodeProjectInterpreter();
-      flutterProjectFactory = FlutterProjectFactory(fileSystem: fs, logger: logger);
+      flutterProjectFactory = FlutterProjectFactory(
+        fileSystem: fs,
+        logger: logger,
+        plistParser: testPlistParser,
+        xcodeProjectInterpreter: mockXcodeProjectInterpreter,
+      );
       const buildContext = XcodeProjectBuildContext(scheme: 'Runner');
       mockXcodeProjectInterpreter.buildSettingsByBuildContext[buildContext] = <String, String>{
         IosProject.kProductBundleIdKey: 'io.flutter.someProject',
@@ -2536,6 +2545,32 @@ resolution: workspace
           FlutterProjectFactory: () => flutterProjectFactory,
         },
       );
+    });
+
+    testWithoutContext('FlutterProjectFactory lazily evaluates featureFlagsBuilder', () {
+      final fs = MemoryFileSystem.test();
+      final Directory projectDir = fs.directory('app');
+      projectDir.childFile('pubspec.yaml')
+        ..createSync(recursive: true)
+        ..writeAsStringSync(validPubspec);
+      projectDir.childDirectory('ios').createSync(recursive: true);
+      var featureFlagsBuilderCalls = 0;
+      final factory = FlutterProjectFactory(
+        fileSystem: fs,
+        logger: BufferLogger.test(),
+        featureFlagsBuilder: () {
+          featureFlagsBuilderCalls++;
+          return TestFeatureFlags(isSwiftPackageManagerEnabled: true);
+        },
+        xcode: Xcode.test(
+          toolContext: FakeToolContext.macosHost(processManager: FakeProcessManager.any()),
+        ),
+      );
+      expect(featureFlagsBuilderCalls, 0);
+
+      final FlutterProject project = factory.fromDirectory(projectDir);
+      expect(featureFlagsBuilderCalls, 1);
+      expect(project.ios.usesSwiftPackageManager, isTrue);
     });
   });
 }

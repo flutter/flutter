@@ -8,9 +8,10 @@ import '../base/analyze_size.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
+import '../base/template.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
-import '../cache.dart';
+import '../context/apple_context.dart';
 import '../context/tool_context.dart';
 import '../features.dart';
 import '../macos/build_macos.dart';
@@ -21,8 +22,10 @@ import 'build.dart';
 /// A command to build a macOS desktop target through a build shell script.
 class BuildMacosCommand extends BuildSubCommand {
   BuildMacosCommand({
+    required this.appleContext,
     required this.buildSystem,
     required this.featureFlags,
+    required this.templateRenderer,
     required ToolContext super.toolContext,
     required super.verboseHelp,
   }) : super(logger: toolContext.logger, outputPreferences: toolContext.outputPreferences) {
@@ -38,12 +41,18 @@ class BuildMacosCommand extends BuildSubCommand {
     ], verboseHelp: verboseHelp);
   }
 
+  /// Holds Apple-specific dependencies.
+  final AppleContext appleContext;
+
   /// The build system used to execute targets.
   final BuildSystem buildSystem;
 
   /// Feature flags governing macOS desktop builds.
   @visibleForTesting
   final FeatureFlags featureFlags;
+
+  /// Renderer used for template generation during pod processing.
+  final TemplateRenderer templateRenderer;
 
   @override
   ToolContext get toolContext => super.toolContext!;
@@ -69,8 +78,7 @@ class BuildMacosCommand extends BuildSubCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final ToolContext(:Cache cache, :FileSystem fs, :Logger logger) = toolContext;
-
+    final ToolContext(:FileSystem fs, :Logger logger) = toolContext;
     final BuildInfo buildInfo = await getBuildInfo();
     if (!featureFlags.isMacOSEnabled) {
       throwToolExit(
@@ -82,20 +90,23 @@ class BuildMacosCommand extends BuildSubCommand {
     }
 
     await buildMacOS(
-      flutterProject: project,
+      analytics: analytics,
+      appleContext: appleContext,
       buildInfo: buildInfo,
-      flutterRoot: cache.flutterRoot,
-      targetOverride: targetFile,
-      verboseLogging: logger.isVerbose || globalResults?[FlutterGlobalOptions.kVerboseFlag] == true,
       configOnly: configOnly,
+      featureFlags: featureFlags,
+      flutterProject: project,
       sizeAnalyzer: SizeAnalyzer(
         fileSystem: fs,
         logger: logger,
         appFilenamePattern: 'App',
         analytics: analytics,
       ),
-      usingCISystem: usingCISystem,
+      targetOverride: targetFile,
+      templateRenderer: templateRenderer,
       toolContext: toolContext,
+      usingCISystem: usingCISystem,
+      verboseLogging: logger.isVerbose || globalResults?[FlutterGlobalOptions.kVerboseFlag] == true,
     );
     return FlutterCommandResult.success();
   }

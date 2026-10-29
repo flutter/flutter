@@ -181,7 +181,7 @@ void main() {
       xcode: effectiveXcode,
       xcodeProjectInterpreter: effectiveXcodeProjectInterpreter,
       artifacts: FakeArtifacts(),
-      cache: FakeCache(),
+      cache: FakeCache(flutterRoot: '/'),
       flutterVersion: FakeFlutterVersion(),
     );
   }

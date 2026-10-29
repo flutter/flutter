@@ -1334,6 +1334,9 @@ class FakeFlutterProject extends Fake implements FlutterProject {
 
 class FakeFlutterManifest extends Fake implements FlutterManifest {
   @override
+  Logger get logger => BufferLogger.test();
+
+  @override
   late final dependencies = <String>{};
 
   @override

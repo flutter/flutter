@@ -6,12 +6,12 @@ import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/config.dart';
 import '../base/file_system.dart';
+import '../base/logger.dart';
 import '../base/os.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../context/tool_context.dart';
 import '../flutter_manifest.dart';
-import '../globals.dart' as globals;
 import '../project.dart';
 import 'xcodeproj.dart';
 
@@ -129,18 +129,26 @@ void _updateGeneratedEnvironmentVariablesScript({
 }
 
 /// Build name parsed and validated from build info and manifest. Used for CFBundleShortVersionString.
-String? parsedBuildName({required FlutterManifest manifest, BuildInfo? buildInfo}) {
+String? parsedBuildName({
+  required FlutterManifest manifest,
+  required Logger logger,
+  BuildInfo? buildInfo,
+}) {
   final String? buildNameToParse = buildInfo?.buildName ?? manifest.buildName;
-  return validatedBuildNameForPlatform(TargetPlatform.ios, buildNameToParse, globals.logger);
+  return validatedBuildNameForPlatform(TargetPlatform.ios, buildNameToParse, logger);
 }
 
 /// Build number parsed and validated from build info and manifest. Used for CFBundleVersion.
-String? parsedBuildNumber({required FlutterManifest manifest, BuildInfo? buildInfo}) {
+String? parsedBuildNumber({
+  required FlutterManifest manifest,
+  required Logger logger,
+  BuildInfo? buildInfo,
+}) {
   String? buildNumberToParse = buildInfo?.buildNumber ?? manifest.buildNumber;
   final String? buildNumber = validatedBuildNumberForPlatform(
     TargetPlatform.ios,
     buildNumberToParse,
-    globals.logger,
+    logger,
   );
   if (buildNumber != null && buildNumber.isNotEmpty) {
     return buildNumber;
@@ -148,7 +156,7 @@ String? parsedBuildNumber({required FlutterManifest manifest, BuildInfo? buildIn
   // Drop back to parsing build name if build number is not present. Build number is optional in the manifest, but
   // FLUTTER_BUILD_NUMBER is required as the backing value for the required CFBundleVersion.
   buildNumberToParse = buildInfo?.buildName ?? manifest.buildName;
-  return validatedBuildNumberForPlatform(TargetPlatform.ios, buildNumberToParse, globals.logger);
+  return validatedBuildNumberForPlatform(TargetPlatform.ios, buildNumberToParse, logger);
 }
 
 /// List of lines of build settings. Example: 'FLUTTER_BUILD_DIR=build'
@@ -162,8 +170,13 @@ Future<List<String>> _xcodeBuildSettingsLines({
   String? buildDirOverride,
   String? configurationBuildDir,
 }) async {
-  final ToolContext(:Artifacts artifacts, :Cache cache, :Config config, :FileSystem fs) =
-      toolContext;
+  final ToolContext(
+    :Artifacts artifacts,
+    :Cache cache,
+    :Config config,
+    :FileSystem fs,
+    :Logger logger,
+  ) = toolContext;
   final xcodeBuildSettings = <String>[];
 
   final String flutterRoot = fs.path.normalize(cache.flutterRoot);
@@ -192,11 +205,11 @@ Future<List<String>> _xcodeBuildSettingsLines({
   xcodeBuildSettings.add('FLUTTER_BUILD_DIR=${buildDirOverride ?? getBuildDirectory(config, fs)}');
 
   final String buildName =
-      parsedBuildName(manifest: project.manifest, buildInfo: buildInfo) ?? '1.0.0';
+      parsedBuildName(manifest: project.manifest, logger: logger, buildInfo: buildInfo) ?? '1.0.0';
   xcodeBuildSettings.add('FLUTTER_BUILD_NAME=$buildName');
 
   final String buildNumber =
-      parsedBuildNumber(manifest: project.manifest, buildInfo: buildInfo) ?? '1';
+      parsedBuildNumber(manifest: project.manifest, logger: logger, buildInfo: buildInfo) ?? '1';
   xcodeBuildSettings.add('FLUTTER_BUILD_NUMBER=$buildNumber');
 
   // CoreDevices in debug and profile mode are launched, but not built, via Xcode.
