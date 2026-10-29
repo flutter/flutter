@@ -123,6 +123,19 @@ void Rasterizer::Teardown() {
     auto context_switch = surface_->MakeRenderContextCurrent();
     if (context_switch->GetResult()) {
       compositor_context_->OnGrContextDestroyed();
+#if IMPELLER_SUPPORTS_RENDERING
+      // The AiksContext may outlive `surface_` (e.g. when shared across surface
+      // recreations and snapshots on Android/Embedder). Explicitly purge its
+      // transient caches and flush command buffers while the render context is
+      // still current so GPU textures are freed immediately on teardown.
+      if (auto aiks_context = surface_->GetAiksContext()) {
+        aiks_context->ClearRenderTargetCache();
+        aiks_context->ClearCachedTextures();
+        if (auto context = aiks_context->GetContext()) {
+          (void)context->FlushCommandBuffers();
+        }
+      }
+#endif  // IMPELLER_SUPPORTS_RENDERING
 #if !SLIMPELLER
       if (auto* context = surface_->GetContext()) {
         context->purgeUnlockedResources(GrPurgeResourceOptions::kAllResources);
@@ -186,6 +199,12 @@ void Rasterizer::ClearRenderTargetCache() const {
     if (context_switch->GetResult()) {
       aiks_context->ClearRenderTargetCache();
       aiks_context->ClearCachedTextures();
+      // On OpenGL ES, dropping TextureGLES references only schedules their
+      // handles for collection in ReactorGLES. Flush command buffers while the
+      // context is current so the reactor deletes the GL textures immediately.
+      if (auto context = aiks_context->GetContext()) {
+        (void)context->FlushCommandBuffers();
+      }
     }
     return;
   }

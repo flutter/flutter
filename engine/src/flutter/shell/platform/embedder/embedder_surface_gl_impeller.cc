@@ -142,9 +142,9 @@ bool EmbedderSurfaceGLImpeller::IsValid() const {
 // |GPUSurfaceGLDelegate|
 std::unique_ptr<GLContextResult>
 EmbedderSurfaceGLImpeller::GLContextMakeCurrent() {
-  worker_->SetReactionsAllowedOnCurrentThread(true);
-  return std::make_unique<GLContextDefaultResult>(
-      gl_dispatch_table_.gl_make_current_callback());
+  bool status = gl_dispatch_table_.gl_make_current_callback();
+  worker_->SetReactionsAllowedOnCurrentThread(status);
+  return std::make_unique<GLContextDefaultResult>(status);
 }
 
 // |GPUSurfaceGLDelegate|
@@ -223,10 +223,9 @@ std::unique_ptr<Surface> EmbedderSurfaceGLImpeller::CreateGPUSurface() {
   }
 
   return std::make_unique<GPUSurfaceGLImpeller>(
-      this,                     // GPU surface GL delegate
-      aiks_context_,            // AiksContext
-      !external_view_embedder_  // render to surface
-  );
+      /*delegate=*/this,
+      /*aiks_context=*/aiks_context_,
+      /*render_to_surface=*/!external_view_embedder_);
 }
 
 // |EmbedderSurface|

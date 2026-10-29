@@ -134,7 +134,22 @@ std::shared_ptr<impeller::Texture> DoMakeRasterSnapshot(
   if (!display_list) {
     return nullptr;
   }
-  return DoMakeRasterSnapshot(display_list, size, aiks_context, pixel_format);
+  std::shared_ptr<impeller::Texture> texture =
+      DoMakeRasterSnapshot(display_list, size, aiks_context, pixel_format);
+  if (snapshot_context.pbuffer_surface) {
+    // When rendering a snapshot via a temporary offscreen snapshot surface (no
+    // active onscreen surface), reset transient host buffers and purge any
+    // cached subpass render targets while the snapshot context is still current
+    // so the shared AiksContext does not retain transient GPU allocations while
+    // headless or backgrounded.
+    aiks_context->GetContentContext().ResetTransientsBuffers();
+    aiks_context->ClearRenderTargetCache();
+    aiks_context->ClearCachedTextures();
+    if (auto context = aiks_context->GetContext()) {
+      (void)context->FlushCommandBuffers();
+    }
+  }
+  return texture;
 }
 
 std::shared_ptr<impeller::Texture> DoMakeRasterSnapshot(
