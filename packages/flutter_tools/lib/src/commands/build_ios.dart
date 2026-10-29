@@ -1030,6 +1030,7 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
           usingCISystem &&
           xcodeBuildAction == XcodeBuildAction.build &&
           await disablePortPublication,
+      toolContext: _toolContext,
     );
     xcodeBuildResult = result;
 

@@ -4,7 +4,6 @@
 
 #include "impeller/renderer/blit_pass.h"
 
-#include <format>
 #include <memory>
 #include <utility>
 
@@ -40,21 +39,22 @@ bool BlitPass::AddCopy(std::shared_ptr<Texture> source,
 
   if (source->GetTextureDescriptor().sample_count !=
       destination->GetTextureDescriptor().sample_count) {
-    VALIDATION_LOG << std::format(
-        "The source sample count ({}) must match the destination sample count "
-        "({}) for blits.",
-        static_cast<int>(source->GetTextureDescriptor().sample_count),
-        static_cast<int>(destination->GetTextureDescriptor().sample_count));
+    VALIDATION_LOG
+        << "The source sample count ("
+        << static_cast<int>(source->GetTextureDescriptor().sample_count)
+        << ") must match the destination sample count ("
+        << static_cast<int>(destination->GetTextureDescriptor().sample_count)
+        << ") for blits.";
     return false;
   }
   if (source->GetTextureDescriptor().format !=
       destination->GetTextureDescriptor().format) {
-    VALIDATION_LOG << std::format(
-        "The source pixel format ({}) must match the destination pixel format "
-        "({}) "
-        "for blits.",
-        PixelFormatToString(source->GetTextureDescriptor().format),
-        PixelFormatToString(destination->GetTextureDescriptor().format));
+    VALIDATION_LOG << "The source pixel format ("
+                   << PixelFormatToString(source->GetTextureDescriptor().format)
+                   << ") must match the destination pixel format ("
+                   << PixelFormatToString(
+                          destination->GetTextureDescriptor().format)
+                   << ") for blits.";
     return false;
   }
 

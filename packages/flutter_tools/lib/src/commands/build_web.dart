@@ -2,22 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:process/process.dart';
-
-import '../artifacts.dart';
 import '../base/common.dart';
-import '../base/config.dart';
 import '../base/file_system.dart';
-import '../base/platform.dart';
-import '../base/terminal.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
-import '../cache.dart';
 import '../context/tool_context.dart';
 import '../features.dart';
 import '../isolated/build_targets.dart';
 import '../runner/flutter_command.dart';
-import '../version.dart';
 import '../web/compile.dart';
 import '../web/content_hash.dart';
 import '../web/web_constants.dart';
@@ -69,6 +61,15 @@ class BuildWebCommand extends BuildSubCommand {
     if (!featureFlags.isWebEnabled) {
       throwToolExit(
         '"build web" is not currently supported. To enable, run "flutter config --enable-web".',
+      );
+    }
+
+    if (getValue(WebOptions.pwaStrategy) != null) {
+      throwToolExit(
+        'The "--${WebOptions.pwaStrategy.name}" option has been removed because '
+        'Flutter no longer generates or registers an offline caching service worker.\n'
+        'Remove "--${WebOptions.pwaStrategy.name}" from your build command. '
+        'See https://github.com/flutter/flutter/issues/156910 for more details.',
       );
     }
 
@@ -209,35 +210,16 @@ class BuildWebCommand extends BuildSubCommand {
 
     final Map<String, String> webDefines = extractWebDefines();
 
-    final ToolContext(
-      :Artifacts artifacts,
-      :Cache cache,
-      :Config config,
-      :FileSystem fs,
-      :FlutterVersion flutterVersion,
-      :Platform platform,
-      :ProcessManager processManager,
-      :Terminal terminal,
-    ) = toolContext;
     final webBuilder = WebBuilder(
-      logger: logger,
-      processManager: processManager,
-      buildSystem: buildSystem,
-      fileSystem: fs,
-      flutterVersion: flutterVersion,
       analytics: analytics,
-      artifacts: artifacts,
+      buildSystem: buildSystem,
       buildTargets: const BuildTargetsImpl(),
-      cache: cache,
-      config: config,
-      platform: platform,
-      terminal: terminal,
+      toolContext: toolContext,
     );
     await webBuilder.buildWeb(
       project,
       targetFile,
       buildInfo,
-      getValue(WebOptions.pwaStrategy),
       compilerConfigs: compilerConfigs,
       baseHref: baseHref,
       staticAssetsUrl: staticAssetsUrl,

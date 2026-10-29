@@ -2,9 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io' as io;
+
+import 'package:args/args.dart';
 import 'package:flutter_devicelab/framework/task_result.dart';
 import 'package:flutter_devicelab/tasks/web_benchmarks.dart';
 import 'package:flutter_devicelab/tasks/web_benchmarks_comparison.dart';
+import 'package:path/path.dart' as path;
 
 import '../common.dart';
 
@@ -483,6 +487,166 @@ zero.average                                                      0.0       2.2 
       );
     });
   });
+
+  group('buildBenchmarkArgParser', () {
+    test('defines all CLI flags', () {
+      final ArgParser parser = buildBenchmarkArgParser();
+      expect(
+        parser.options.keys,
+        containsAll(<String>[
+          'help',
+          'benchmark',
+          'smoke-test',
+          'filter',
+          'baseline',
+          'results-file',
+          'renderer',
+          'regression-threshold',
+          'clean',
+          'no-build',
+          'local-engine-src-path',
+          'local-web-sdk',
+          'verbose',
+        ]),
+      );
+    });
+  });
+
+  // These tests only cover invocations that are rejected before any benchmark
+  // is built or run.
+  group('runBenchmarkCli', () {
+    late io.Directory tempDir;
+
+    setUp(() {
+      tempDir = io.Directory.systemTemp.createTempSync('run_local_web_benchmark_test.');
+    });
+
+    tearDown(() {
+      tempDir.deleteSync(recursive: true);
+    });
+
+    test('--help exits with code 0', () async {
+      expect(await runBenchmarkCli(<String>['--help']), 0);
+    });
+
+    test('unknown flag exits with code 2', () async {
+      expect(await runBenchmarkCli(<String>['--invalid-flag']), 2);
+    });
+
+    test('unsupported --renderer exits with code 2', () async {
+      expect(await runBenchmarkCli(<String>['--renderer=invalid_renderer']), 2);
+    });
+
+    test('--benchmark and --smoke-test together exit with code 2', () async {
+      expect(await runBenchmarkCli(<String>['--benchmark=draw_rect', '--smoke-test']), 2);
+    });
+
+    test('--benchmark and --filter together exit with code 2', () async {
+      expect(await runBenchmarkCli(<String>['--benchmark=draw_rect', '--filter=draw']), 2);
+    });
+
+    test('--smoke-test and --filter together exit with code 2', () async {
+      expect(await runBenchmarkCli(<String>['--smoke-test', '--filter=draw']), 2);
+    });
+
+    test('empty --benchmark exits with code 2', () async {
+      expect(await runBenchmarkCli(<String>['--benchmark=,']), 2);
+    });
+
+    test('invalid --filter regular expression exits with code 2', () async {
+      expect(await runBenchmarkCli(<String>['--filter=[']), 2);
+    });
+
+    test('identical --baseline and --results-file paths exit with code 2', () async {
+      final file = io.File(path.join(tempDir.path, 'file.json'))..writeAsStringSync('{}');
+      addTearDown(file.deleteSync);
+      expect(
+        await runBenchmarkCli(<String>['--baseline=${file.path}', '--results-file=${file.path}']),
+        2,
+      );
+    });
+
+    test('--clean or --local-web-sdk with --no-build exits with code 2', () async {
+      // The missing baseline makes the run stop before anything is built even
+      // if the conflict is not detected, so the conflict is identified by its
+      // error message rather than by the exit code alone.
+      final String missingBaseline = path.join(tempDir.path, 'missing.json');
+      const cases = <String, String>{
+        '--clean': 'Cannot use --clean and --no-build together.',
+        '--local-web-sdk=wasm_release': 'Cannot use --local-web-sdk and --no-build together.',
+      };
+      for (final MapEntry<String, String>(key: String flag, value: String message)
+          in cases.entries) {
+        final stderr = _RecordingStdout();
+        final int exitCode = await io.IOOverrides.runZoned(
+          () => runBenchmarkCli(<String>[flag, '--no-build', '--baseline=$missingBaseline']),
+          stderr: () => stderr,
+        );
+        expect(exitCode, 2, reason: flag);
+        expect(stderr.output.toString().trim(), message, reason: flag);
+      }
+    });
+
+    test('--local-engine-src-path without --local-web-sdk exits with code 2', () async {
+      expect(await runBenchmarkCli(<String>['--local-engine-src-path=/some/path']), 2);
+    });
+
+    test('--regression-threshold without --baseline exits with code 2', () async {
+      expect(await runBenchmarkCli(<String>['--regression-threshold=0.1']), 2);
+    });
+
+    test(
+      'negative, NaN, infinite, or non-numeric --regression-threshold exits with code 2',
+      () async {
+        final baselineFile = io.File(path.join(tempDir.path, 'baseline.json'))
+          ..writeAsStringSync('{}');
+        addTearDown(baselineFile.deleteSync);
+        for (final value in <String>['-0.1', 'NaN', 'Infinity', 'abc']) {
+          expect(
+            await runBenchmarkCli(<String>[
+              '--regression-threshold=$value',
+              '--baseline=${baselineFile.path}',
+            ]),
+            2,
+            reason: value,
+          );
+        }
+      },
+    );
+
+    test('missing --baseline file exits with code 2', () async {
+      final String baselinePath = path.join(tempDir.path, 'missing.json');
+      expect(await runBenchmarkCli(<String>['--baseline=$baselinePath']), 2);
+    });
+
+    test('--baseline file that is not a JSON object exits with code 2', () async {
+      final baselineFile = io.File(path.join(tempDir.path, 'baseline.json'));
+      addTearDown(baselineFile.deleteSync);
+      for (final contents in <String>['not json', '[1, 2]']) {
+        baselineFile.writeAsStringSync(contents);
+        expect(
+          await runBenchmarkCli(<String>['--baseline=${baselineFile.path}']),
+          2,
+          reason: contents,
+        );
+      }
+    });
+  });
+}
+
+/// An [io.Stdout] that records everything written to it with [write] or
+/// [writeln] in [output].
+class _RecordingStdout implements io.Stdout {
+  final StringBuffer output = StringBuffer();
+
+  @override
+  void write(Object? object) => output.write(object);
+
+  @override
+  void writeln([Object? object = '']) => output.writeln(object);
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
 /// Matches the exception thrown when target benchmarks and a filter pattern are

@@ -261,7 +261,7 @@ static std::optional<Entity> AdvancedBlend(
   if (!command_buffer) {
     return std::nullopt;
   }
-  fml::StatusOr<RenderTarget> render_target =
+  absl::StatusOr<RenderTarget> render_target =
       renderer.MakeSubpass("Advanced Blend Filter",         //
                            ISize(render_target_size),       //
                            command_buffer,                  //
@@ -647,7 +647,7 @@ static std::optional<Entity> PipelineBlend(
     return std::nullopt;
   }
 
-  fml::StatusOr<RenderTarget> render_target =
+  absl::StatusOr<RenderTarget> render_target =
       renderer.MakeSubpass("Pipeline Blend Filter",            //
                            ISize(subpass_coverage.GetSize()),  //
                            command_buffer,                     //
@@ -886,7 +886,7 @@ std::optional<Entity> BlendFilterContents::CreateFramebufferAdvancedBlend(
     }
   }
 
-  fml::StatusOr<RenderTarget> render_target =
+  absl::StatusOr<RenderTarget> render_target =
       renderer.MakeSubpass("FramebufferBlend",                //
                            dst_snapshot->texture->GetSize(),  //
                            cmd_buffer,                        //

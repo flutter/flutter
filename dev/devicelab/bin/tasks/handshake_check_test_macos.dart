@@ -4,10 +4,11 @@
 
 import 'package:flutter_devicelab/framework/devices.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
-import 'package:flutter_devicelab/tasks/new_gallery.dart';
+import 'package:flutter_devicelab/tasks/handshake_check.dart';
 
 Future<void> main() async {
-  deviceOperatingSystem = DeviceOperatingSystem.ios;
-
-  await task(NewGalleryPerfTest(enableImpeller: false).run);
+  await task(() async {
+    deviceOperatingSystem = DeviceOperatingSystem.macos;
+    return createHandshakeCheckTask()();
+  });
 }

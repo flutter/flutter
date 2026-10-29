@@ -118,7 +118,8 @@ static BOOL _sceneWillConnectFallbackCalled = NO;
     return _enginesForSingleScene.allObjects ?: @[];
   }
 
-  NSMutableSet<FlutterEngine*>* result = [NSMutableSet set];
+  // Use an ordered set to dedupe engines while keeping a deterministic order.
+  NSMutableOrderedSet<FlutterEngine*>* result = [NSMutableOrderedSet orderedSet];
   NSArray<FlutterViewController*>* flutterViewControllers =
       [self searchFlutterViewControllersWithinScene:scene];
   for (FlutterViewController* flutterViewController in flutterViewControllers) {
@@ -136,7 +137,7 @@ static BOOL _sceneWillConnectFallbackCalled = NO;
   for (FlutterEngine* engine in self.legacyDeveloperManagedEngines.allObjects) {
     [result addObject:engine];
   }
-  return result.allObjects;
+  return result.array;
 }
 
 - (instancetype)init {

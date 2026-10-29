@@ -414,6 +414,42 @@ FLUTTER_ASSERT_ARC
   [mockApplication stopMocking];
 }
 
+- (void)testSearchFlutterEnginesMultiSceneOrdersByPriorityAndDeduplicates {
+  id mockApplication = OCMClassMock([UIApplication class]);
+  OCMStub([mockApplication sharedApplication]).andReturn(mockApplication);
+  OCMStub([mockApplication supportsMultipleScenes]).andReturn(YES);
+
+  FlutterPluginSceneLifeCycleDelegate* delegate =
+      [[FlutterPluginSceneLifeCycleDelegate alloc] init];
+
+  id mockScene = OCMClassMock([UIWindowScene class]);
+  id mockWindow = OCMClassMock([UIWindow class]);
+  id mockFlutterVC = OCMClassMock([FlutterViewController class]);
+  id vcEngine = OCMClassMock([FlutterEngine class]);
+  id devEngine = OCMClassMock([FlutterEngine class]);
+  id legacyEngine = OCMClassMock([FlutterEngine class]);
+
+  OCMStub([mockScene windows]).andReturn(@[ mockWindow ]);
+  OCMStub([mockWindow rootViewController]).andReturn(mockFlutterVC);
+  OCMStub([mockFlutterVC engine]).andReturn(vcEngine);
+
+  // Register in reverse priority order, and register some engines more than once, to verify that
+  // the result is ordered by priority and each engine appears once at its highest priority.
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+  [delegate registerSceneLifeCycleWithFlutterEngine:legacyEngine];
+  [delegate registerSceneLifeCycleWithFlutterEngine:devEngine];
+  [delegate registerSceneLifeCycleWithFlutterEngine:vcEngine];
+#pragma GCC diagnostic pop
+  [delegate registerSceneLifeCycleWithFlutterEngine:devEngine scene:mockScene];
+  [delegate registerSceneLifeCycleWithFlutterEngine:vcEngine scene:mockScene];
+
+  NSArray<FlutterEngine*>* engines = [delegate searchFlutterEnginesWithinScene:mockScene];
+  XCTAssertEqualObjects(engines, (@[ vcEngine, devEngine, legacyEngine ]));
+
+  [mockApplication stopMocking];
+}
+
 - (void)testSearchFlutterEnginesMultiSceneFiltersByScene {
   id mockApplication = OCMClassMock([UIApplication class]);
   OCMStub([mockApplication sharedApplication]).andReturn(mockApplication);

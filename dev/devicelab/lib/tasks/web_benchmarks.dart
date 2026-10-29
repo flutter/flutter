@@ -16,6 +16,7 @@ import 'package:shelf_static/shelf_static.dart';
 import '../framework/browser.dart';
 import '../framework/task_result.dart';
 import '../framework/utils.dart';
+import 'web_benchmarks_comparison.dart';
 
 /// The port at which the local benchmark server is served.
 const int benchmarkServerPort = 9999;
@@ -61,6 +62,10 @@ Future<TaskResult> runWebBenchmark(
   List<String>? targetBenchmarks,
   String? filterPattern,
   bool? clean,
+  bool? noBuild,
+  String? localWebSdk,
+  String? localEngineSrcPath,
+  bool? verbose,
   Map<String, String>? environment,
 }) async {
   environment ??= io.Platform.environment;
@@ -76,10 +81,15 @@ Future<TaskResult> runWebBenchmark(
     return TaskResult.failure(e.toString());
   }
 
-  final bool effectiveClean = clean ?? environment['BENCHMARK_CLEAN']?.toLowerCase() != 'false';
+  final bool effectiveNoBuild = noBuild ?? false;
+  final bool effectiveVerbose = verbose ?? false;
+  final bool effectiveClean =
+      !effectiveNoBuild && (clean ?? environment['BENCHMARK_CLEAN']?.toLowerCase() != 'false');
 
-  // Reduce logging level. Otherwise, package:webkit_inspection_protocol is way too spammy.
-  Logger.root.level = Level.INFO;
+  if (!effectiveVerbose) {
+    // Reduce logging level. Otherwise, package:webkit_inspection_protocol is way too spammy.
+    Logger.root.level = Level.INFO;
+  }
   final String macrobenchmarksDirectory = path.join(
     flutterDirectory.path,
     'dev',
@@ -274,7 +284,7 @@ Future<TaskResult> runWebBenchmark(
         // Wait for the app to load in DDC's Chrome instance before trying to
         // connect the debugger.
         await ddcAppReady.future;
-      } else {
+      } else if (!effectiveNoBuild) {
         await evalFlutter(
           'build',
           options: <String>[
@@ -284,6 +294,8 @@ Future<TaskResult> runWebBenchmark(
             '--dart-define=FLUTTER_WEB_ENABLE_PROFILING=true',
             '--${benchmarkOptions.buildMode}',
             '--no-web-resources-cdn',
+            if (localWebSdk != null) '--local-web-sdk=$localWebSdk',
+            if (localEngineSrcPath != null) '--local-engine-src-path=$localEngineSrcPath',
             '-t',
             'lib/web_benchmarks.dart',
           ],
@@ -722,4 +734,351 @@ Future<TaskResult> runWebBenchmarkFromArgs(
     filterPattern: filterPattern,
     clean: clean,
   );
+}
+
+/// Builds the argument parser for the standalone local web benchmark runner
+/// (`bin/run_local_web_benchmark.dart`).
+ArgParser buildBenchmarkArgParser() {
+  return ArgParser()
+    ..addFlag('help', abbr: 'h', negatable: false, help: 'Print this help message.')
+    ..addMultiOption(
+      'benchmark',
+      help:
+          'Target benchmark names to run (comma-separated or multiple flags). '
+          'Cannot be combined with --smoke-test or --filter.',
+    )
+    ..addFlag(
+      'smoke-test',
+      negatable: false,
+      help:
+          'Run the curated fast smoke-test benchmarks (${kSmokeTestBenchmarks.join(', ')}). '
+          'Cannot be combined with --benchmark or --filter.',
+    )
+    ..addOption(
+      'filter',
+      help:
+          'Regex pattern to filter benchmark names. '
+          'Cannot be combined with --benchmark or --smoke-test.',
+    )
+    ..addOption('baseline', help: 'Path to a baseline JSON results file to compare against.')
+    ..addOption('results-file', help: 'Path where the JSON benchmark results will be written.')
+    ..addOption(
+      'renderer',
+      allowed: <String>['canvaskit', 'skwasm', 'skwasm_st'],
+      defaultsTo: 'canvaskit',
+      help: 'Web renderer to use.',
+    )
+    ..addOption(
+      'regression-threshold',
+      help:
+          'Percentage regression threshold (e.g. 5.0 for 5%). Requires --baseline. '
+          'Fails with exit code 1 if exceeded.',
+    )
+    ..addFlag(
+      'clean',
+      negatable: false,
+      help: 'Run flutter clean before compiling (defaults to false for fast local iteration).',
+    )
+    ..addFlag(
+      'no-build',
+      negatable: false,
+      help:
+          'Skip compilation and reuse the existing build artifacts. '
+          'Cannot be combined with --clean or --local-web-sdk.',
+    )
+    ..addOption(
+      'local-engine-src-path',
+      help: 'Path to a local engine src directory. Requires --local-web-sdk.',
+    )
+    ..addOption(
+      'local-web-sdk',
+      help: 'Local engine web SDK build to compile against (e.g. wasm_release).',
+    )
+    ..addFlag('verbose', abbr: 'v', negatable: false, help: 'Enable verbose logging.');
+}
+
+/// Runs the standalone local web benchmark CLI with [rawArgs] and returns the
+/// process exit code:
+///
+///  * 0: success.
+///  * 1: one or more metrics exceeded `--regression-threshold`.
+///  * 2: usage error (invalid or conflicting flags, unreadable or invalid
+///    baseline, no build for the requested renderer with `--no-build`,
+///    unwritable results file, or no metrics to compare).
+///  * 3: benchmark or infrastructure failure.
+Future<int> runBenchmarkCli(List<String> rawArgs) async {
+  void printError(String message) => io.stderr.writeln(message);
+
+  final ArgParser parser = buildBenchmarkArgParser();
+  final ArgResults args;
+  try {
+    args = parser.parse(rawArgs);
+  } on ArgParserException catch (e) {
+    printError('${e.message}\n\nUsage:\n${parser.usage}');
+    return 2;
+  }
+
+  if (args['help'] as bool) {
+    print('Usage:\n${parser.usage}');
+    return 0;
+  }
+
+  final smokeTest = args['smoke-test'] as bool;
+  final List<String>? benchmarks = _parseTargetBenchmarks(args['benchmark'] as List<String>);
+  if (args.wasParsed('benchmark') && benchmarks == null) {
+    printError('--benchmark cannot be empty.');
+    return 2;
+  }
+  if (benchmarks != null && smokeTest) {
+    printError('Cannot use --benchmark and --smoke-test together.');
+    return 2;
+  }
+  final List<String>? targetBenchmarks = smokeTest ? kSmokeTestBenchmarks : benchmarks;
+  final filterPattern = args['filter'] as String?;
+  try {
+    // Validate the selectors upfront so that mistakes are reported before
+    // anything is built.
+    BenchmarkFilter.parse(targetBenchmarks: targetBenchmarks, filterPattern: filterPattern);
+  } on Exception catch (e) {
+    printError('$e');
+    return 2;
+  }
+
+  // Resolve user-provided paths against the original working directory, since
+  // the working directory is switched to dev/devicelab before running.
+  final String initialCwd = io.Directory.current.path;
+  String? absolutePath(String? value) => value == null ? null : path.absolute(value);
+  final String? baselinePath = absolutePath(args['baseline'] as String?);
+  final String? resultsPath = absolutePath(args['results-file'] as String?);
+  final String? localEngineSrcPath = absolutePath(args['local-engine-src-path'] as String?);
+  final localWebSdk = args['local-web-sdk'] as String?;
+
+  if (baselinePath != null &&
+      resultsPath != null &&
+      path.canonicalize(baselinePath) == path.canonicalize(resultsPath)) {
+    printError('--baseline and --results-file cannot be the same file.');
+    return 2;
+  }
+
+  final noBuild = args['no-build'] as bool;
+  final clean = args['clean'] as bool;
+  if (clean && noBuild) {
+    printError('Cannot use --clean and --no-build together.');
+    return 2;
+  }
+
+  if (localEngineSrcPath != null && localWebSdk == null) {
+    printError('--local-engine-src-path requires --local-web-sdk.');
+    return 2;
+  }
+  if (noBuild && localWebSdk != null) {
+    printError('Cannot use --local-web-sdk and --no-build together.');
+    return 2;
+  }
+
+  final regressionThresholdArg = args['regression-threshold'] as String?;
+  double? regressionThreshold;
+  if (regressionThresholdArg != null) {
+    if (baselinePath == null) {
+      printError('--regression-threshold requires --baseline.');
+      return 2;
+    }
+    regressionThreshold = double.tryParse(regressionThresholdArg);
+    if (regressionThreshold == null || regressionThreshold < 0 || !regressionThreshold.isFinite) {
+      printError('--regression-threshold must be a non-negative number.');
+      return 2;
+    }
+  }
+
+  Map<String, dynamic>? baseline;
+  if (baselinePath != null) {
+    try {
+      final Object? decoded = json.decode(io.File(baselinePath).readAsStringSync());
+      if (decoded is! Map<String, dynamic>) {
+        throw const FormatException('Expected a JSON object mapping metric names to values.');
+      }
+      baseline = decoded;
+    } on Exception catch (e) {
+      printError('Failed to read baseline file $baselinePath: $e');
+      return 2;
+    }
+  }
+
+  final String flutterRoot;
+  final String? scriptFlutterRoot = _findFlutterRootFromScript();
+  if (scriptFlutterRoot != null) {
+    flutterRoot = scriptFlutterRoot;
+  } else if (io.Directory(path.join(initialCwd, 'dev', 'devicelab')).existsSync()) {
+    flutterRoot = initialCwd;
+  } else {
+    flutterRoot = flutterDirectory.path;
+  }
+  if (!io.Directory(path.join(flutterRoot, 'dev', 'devicelab')).existsSync()) {
+    printError(
+      'Could not locate the Flutter repository root (expected $flutterRoot/dev/devicelab).',
+    );
+    return 2;
+  }
+
+  final renderer = args['renderer'] as String;
+  final bool useWasm = renderer == 'skwasm' || renderer == 'skwasm_st';
+  if (noBuild) {
+    // A wasm build also emits main.dart.js, so check the compile target
+    // recorded in the build config rather than which artifacts exist.
+    final bootstrapFile = io.File(
+      path.join(
+        flutterRoot,
+        'dev',
+        'benchmarks',
+        'macrobenchmarks',
+        'build',
+        'web',
+        'flutter_bootstrap.js',
+      ),
+    );
+    final bool hasBuild = bootstrapFile.existsSync();
+    final bool isWasmBuild =
+        hasBuild && bootstrapFile.readAsStringSync().contains('"compileTarget":"dart2wasm"');
+    if (!hasBuild || isWasmBuild != useWasm) {
+      printError(
+        'No build for renderer "$renderer" was found in ${bootstrapFile.parent.path}. '
+        'Run without --no-build to build it.',
+      );
+      return 2;
+    }
+  }
+
+  final verbose = args['verbose'] as bool;
+  StreamSubscription<LogRecord>? logSubscription;
+  if (verbose) {
+    Logger.root.level = Level.ALL;
+    logSubscription = Logger.root.onRecord.listen((LogRecord record) {
+      print('[${record.level.name}] ${record.loggerName}: ${record.message}');
+      if (record.error != null) {
+        print(record.error);
+      }
+      if (record.stackTrace != null) {
+        print(record.stackTrace);
+      }
+    });
+  }
+
+  try {
+    // runWebBenchmark locates the macrobenchmarks app relative to
+    // dev/devicelab (see flutterDirectory, which reads io.Directory.current).
+    final String devicelabDirectory = path.join(flutterRoot, 'dev', 'devicelab');
+    io.Directory.current = devicelabDirectory;
+    cd(devicelabDirectory);
+
+    final TaskResult taskResult;
+    try {
+      taskResult = await runWebBenchmark(
+        (
+          useWasm: useWasm,
+          forceSingleThreadedSkwasm: renderer == 'skwasm_st',
+          useDdc: false,
+          withHotReload: false,
+          buildMode: 'profile',
+        ),
+        clean: clean,
+        noBuild: noBuild,
+        localWebSdk: localWebSdk,
+        localEngineSrcPath: localEngineSrcPath,
+        targetBenchmarks: targetBenchmarks,
+        filterPattern: filterPattern,
+        verbose: verbose,
+        // The selectors were validated above without the environment, so
+        // ignore BENCHMARK_TARGETS and BENCHMARK_FILTER here too.
+        environment: const <String, String>{},
+      );
+    } catch (e, s) {
+      printError('Benchmark run failed: $e\n$s');
+      return 3;
+    }
+    if (!taskResult.succeeded) {
+      printError('Benchmark run failed: ${taskResult.message}');
+      return 3;
+    }
+    final Map<String, dynamic>? data = taskResult.data;
+    if (data == null || data.isEmpty) {
+      printError('Benchmark run completed without reporting any metrics.');
+      return 3;
+    }
+
+    if (resultsPath != null) {
+      try {
+        final resultsFile = io.File(resultsPath);
+        resultsFile.parent.createSync(recursive: true);
+        resultsFile.writeAsStringSync(json.encode(data));
+      } on io.FileSystemException catch (e) {
+        printError('Failed to write results file $resultsPath: $e');
+        return 2;
+      }
+    }
+
+    if (baseline == null) {
+      final List<String> metricKeys =
+          data.keys.where((String key) => key.endsWith('.average') && data[key] is num).toList()
+            ..sort();
+      for (final key in metricKeys) {
+        print('$key: ${data[key]}');
+      }
+      return 0;
+    }
+
+    // Only compare the metrics present in both the current run and the
+    // baseline, since either may have run a different set of benchmarks.
+    final BenchmarkComparison comparison;
+    try {
+      comparison = compareResults(
+        current: data,
+        baseline: baseline,
+        regressionThreshold: regressionThreshold,
+      );
+    } on FormatException catch (e) {
+      printError('Invalid metric values for comparison: ${e.message}');
+      return 2;
+    }
+
+    if (comparison.metrics.isEmpty) {
+      printError('The current results and the baseline have no metrics in common.');
+      return 2;
+    }
+
+    print(formatAnsiSummaryTable(comparison, enableAnsi: io.stdout.supportsAnsiEscapes));
+    if (comparison.hasRegressions) {
+      printError(
+        'FAILED: 1 or more metrics exceeded the regression threshold of $regressionThreshold%.',
+      );
+      return 1;
+    }
+    return 0;
+  } finally {
+    io.Directory.current = initialCwd;
+    cd(initialCwd);
+    await logSubscription?.cancel();
+    if (verbose) {
+      Logger.root.level = Level.INFO;
+    }
+  }
+}
+
+/// Returns the root of the Flutter checkout that contains the running script,
+/// or null if the script is not a file inside a Flutter checkout.
+String? _findFlutterRootFromScript() {
+  final Uri script = io.Platform.script;
+  if (!script.isScheme('file')) {
+    return null;
+  }
+  String candidate = path.dirname(script.toFilePath());
+  while (true) {
+    if (io.Directory(path.join(candidate, 'dev', 'devicelab')).existsSync()) {
+      return candidate;
+    }
+    final String parent = path.dirname(candidate);
+    if (parent == candidate) {
+      return null;
+    }
+    candidate = parent;
+  }
 }
