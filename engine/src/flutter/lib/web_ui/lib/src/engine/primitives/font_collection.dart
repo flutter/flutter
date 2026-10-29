@@ -15,7 +15,9 @@ import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 // Roboto font. The API reference is here:
 // https://developers.google.com/fonts/docs/developer_api
 String get _robotoUrl =>
-    '${configuration.fontFallbackBaseUrl}roboto/v32/KFOmCnqEu92Fr1Me4GZLCzYlKw.woff2';
+    Uri.parse(configuration.fontFallbackBaseUrl)
+        .resolve('roboto/v32/KFOmCnqEu92Fr1Me4GZLCzYlKw.woff2')
+        .toString();
 
 /// A font that has been parsed and registered with the backend.
 class RegisteredFont {
@@ -93,7 +95,7 @@ class EngineFontCollection implements FlutterFontCollection {
     // We need a default fallback font in order to avoid crashing while laying
     // out text with an unregistered font. We chose Roboto to match Android.
     if (!hasRoboto) {
-      pendingDownloads.add(_downloadFont(_robotoUrl, 'Roboto'));
+      pendingDownloads.add(_downloadFontFromUrl(_robotoUrl, 'Roboto'));
     }
 
     final loadedFonts = <String>[];
@@ -124,13 +126,30 @@ class EngineFontCollection implements FlutterFontCollection {
     return AssetFontsResult(loadedFonts, fontFailures);
   }
 
-  Future<_FontDownloadResult> _downloadFont(String asset, String family) async {
+  Future<_FontDownloadResult> _downloadFont(String asset, String family) {
     final String url = ui_web.assetManager.getAssetUrl(asset);
+    return _fetchFont(
+      asset: asset,
+      url: url,
+      family: family,
+      fetch: () async => await ui_web.assetManager.loadAsset(asset) as HttpFetchResponse,
+    );
+  }
 
+  Future<_FontDownloadResult> _downloadFontFromUrl(String url, String family) {
+    return _fetchFont(asset: url, url: url, family: family, fetch: () => httpFetch(url));
+  }
+
+  Future<_FontDownloadResult> _fetchFont({
+    required String asset,
+    required String url,
+    required String family,
+    required Future<HttpFetchResponse> Function() fetch,
+  }) async {
     // Try to get the font leniently. Do not crash the app when failing to
     // fetch the font in the spirit of "gradual degradation of functionality".
     try {
-      final response = await ui_web.assetManager.loadAsset(asset) as HttpFetchResponse;
+      final HttpFetchResponse response = await fetch();
       if (!response.hasPayload) {
         printWarning('Font family $family not found (404) at $url');
         return _FailedFontDownload(asset, FontNotFoundError(url));
