@@ -19,7 +19,7 @@ import 'proxy_box.dart';
 /// The hit-test regions collected for a single [PlatformViewRenderBox].
 ///
 /// One group is created for every non-empty platform view encountered during
-/// the paint-order walk in [computeHitTestRegions].
+/// the child-order walk in [computeHitTestRegions].
 ///
 /// * `viewId` is the [PlatformViewController.viewId] of the platform view, so
 ///   the engine can tell which platform view the regions sit on top of.
@@ -31,9 +31,10 @@ import 'proxy_box.dart';
 ///   overlap a platform view and accept pointer events.
 typedef _PlatformViewHitTestGroup = ({int viewId, Rect platformViewRect, List<Rect> rects});
 
-/// Walks the render tree rooted at [root] in (approximate) paint order and
-/// encodes the bounding rectangles of render objects that paint on top of one
-/// or more [PlatformViewRenderBox] instances and claim pointer events.
+/// Walks the render tree rooted at [root] in child order (an approximation of
+/// paint order; see below) and encodes the bounding rectangles of render
+/// objects that paint on top of one or more [PlatformViewRenderBox] instances
+/// and claim pointer events.
 ///
 /// The rectangles are in [root]'s coordinate space, which is physical pixels
 /// when [root] is a [RenderView].
@@ -90,7 +91,8 @@ typedef _PlatformViewHitTestGroup = ({int viewId, Rect platformViewRect, List<Re
 ///
 /// The groups are flattened into a single [Float64List] so the payload can be
 /// handed to the engine without allocating an object per rectangle. Groups
-/// appear in paint order, and each group is encoded as:
+/// appear in the order the walk visits their platform views, and each group is
+/// encoded as:
 ///
 /// ```csv
 /// [viewId, rectCount, left0, top0, right0, bottom0, ..., leftN, topN, rightN, bottomN]
