@@ -9,6 +9,9 @@
 
 filegroup(
     name = "stubs",
-    srcs = glob(["**/BUILD.gn"]),
+    srcs = glob([
+        "**/BUILD.gn",
+        "**/*.cc",
+    ]),
     visibility = ["//engine/src/flutter/build/bazel/gl_wrap:__pkg__"],
 )
