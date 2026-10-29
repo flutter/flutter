@@ -7,6 +7,7 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/android/application_package.dart';
 import 'package:flutter_tools/src/application_package.dart';
+import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -109,11 +110,14 @@ void main() {
       final AndroidApk? androidApk = await AndroidApk.fromAndroidProject(
         project.android,
         androidSdk: sdk,
-        processManager: fakeProcessManager,
-        userMessages: UserMessages(),
-        processUtils: ProcessUtils(processManager: fakeProcessManager, logger: logger),
-        logger: logger,
-        fileSystem: fs,
+        toolContext: FakeToolContext(
+          config: Config.test(),
+          fs: fs,
+          logger: logger,
+          processManager: fakeProcessManager,
+          processUtils: ProcessUtils(processManager: fakeProcessManager, logger: logger),
+          userMessages: UserMessages(),
+        ),
 
         // ignore: avoid_redundant_argument_values
       );
@@ -180,16 +184,19 @@ void main() {
       final AndroidApk? androidApk = await AndroidApk.fromAndroidProject(
         project.android,
         androidSdk: sdk,
-        processManager: fakeProcessManager,
-        userMessages: UserMessages(),
-        processUtils: ProcessUtils(processManager: fakeProcessManager, logger: logger),
-        logger: logger,
-        fileSystem: fs,
         buildInfo: const BuildInfo(
           BuildMode.debug,
           null,
           treeShakeIcons: false,
           packageConfigPath: '.dart_tool/package_config.json',
+        ),
+        toolContext: FakeToolContext(
+          config: Config.test(),
+          fs: fs,
+          logger: logger,
+          processManager: fakeProcessManager,
+          processUtils: ProcessUtils(processManager: fakeProcessManager, logger: logger),
+          userMessages: UserMessages(),
         ),
       );
       expect(androidApk, isNotNull);
@@ -230,16 +237,19 @@ void main() {
       final AndroidApk? androidApk = await AndroidApk.fromAndroidProject(
         project.android,
         androidSdk: sdk,
-        processManager: fakeProcessManager,
-        userMessages: UserMessages(),
-        processUtils: ProcessUtils(processManager: fakeProcessManager, logger: logger),
-        logger: logger,
-        fileSystem: fs,
         buildInfo: const BuildInfo(
           BuildMode.debug,
           null,
           treeShakeIcons: false,
           packageConfigPath: '.dart_tool/package_config.json',
+        ),
+        toolContext: FakeToolContext(
+          config: Config.test(),
+          fs: fs,
+          logger: logger,
+          processManager: fakeProcessManager,
+          processUtils: ProcessUtils(processManager: fakeProcessManager, logger: logger),
+          userMessages: UserMessages(),
         ),
       );
 
@@ -281,16 +291,19 @@ void main() {
         final AndroidApk? androidApk = await AndroidApk.fromAndroidProject(
           project.android,
           androidSdk: sdk,
-          processManager: fakeProcessManager,
-          userMessages: UserMessages(),
-          processUtils: ProcessUtils(processManager: fakeProcessManager, logger: logger),
-          logger: logger,
-          fileSystem: fs,
           buildInfo: const BuildInfo(
             BuildMode.debug,
             null,
             treeShakeIcons: false,
             packageConfigPath: '.dart_tool/package_config.json',
+          ),
+          toolContext: FakeToolContext(
+            config: Config.test(),
+            fs: fs,
+            logger: logger,
+            processManager: fakeProcessManager,
+            processUtils: ProcessUtils(processManager: fakeProcessManager, logger: logger),
+            userMessages: UserMessages(),
           ),
         );
 
@@ -368,11 +381,12 @@ void main() {
       final Logger logger = BufferLogger.test();
       final AndroidApk? androidApk = AndroidApk.fromApk(
         fs.file(''),
-        processManager: fakeProcessManager,
-        logger: logger,
-        userMessages: UserMessages(),
         androidSdk: sdk,
-        processUtils: ProcessUtils(processManager: fakeProcessManager, logger: logger),
+        toolContext: FakeToolContext(
+          logger: logger,
+          processManager: fakeProcessManager,
+          processUtils: ProcessUtils(processManager: fakeProcessManager, logger: logger),
+        ),
       );
 
       expect(androidApk, isNull);
@@ -435,11 +449,14 @@ void main() {
       final AndroidApk? androidApk = await AndroidApk.fromAndroidProject(
         project.android,
         androidSdk: sdk,
-        processManager: fakeProcessManager,
-        userMessages: UserMessages(),
-        processUtils: ProcessUtils(processManager: fakeProcessManager, logger: logger),
-        logger: logger,
-        fileSystem: fs,
+        toolContext: FakeToolContext(
+          config: Config.test(),
+          fs: fs,
+          logger: logger,
+          processManager: fakeProcessManager,
+          processUtils: ProcessUtils(processManager: fakeProcessManager, logger: logger),
+          userMessages: UserMessages(),
+        ),
       );
       expect(androidApk, isNotNull);
       expect(androidApk!.id, 'io.flutter.examples.hello_world');
@@ -509,11 +526,14 @@ void main() {
         final AndroidApk? androidApk = await AndroidApk.fromAndroidProject(
           project.android,
           androidSdk: sdk,
-          processManager: fakeProcessManager,
-          userMessages: UserMessages(),
-          processUtils: ProcessUtils(processManager: fakeProcessManager, logger: logger),
-          logger: logger,
-          fileSystem: fs,
+          toolContext: FakeToolContext(
+            config: Config.test(),
+            fs: fs,
+            logger: logger,
+            processManager: fakeProcessManager,
+            processUtils: ProcessUtils(processManager: fakeProcessManager, logger: logger),
+            userMessages: UserMessages(),
+          ),
         );
         expect(androidApk, isNotNull);
         expect(androidApk!.id, 'io.flutter.examples.hello_world');
@@ -642,17 +662,21 @@ void main() {
   group('PrebuiltIOSApp', () {
     late FakeOperatingSystemUtils os;
     late FakePlistParser testPlistParser;
+    late MemoryFileSystem fileSystem;
+    late FakeToolContext toolContext;
 
     final overrides = <Type, Generator>{
-      FileSystem: () => MemoryFileSystem.test(),
+      FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
       PlistParser: () => testPlistParser,
       OperatingSystemUtils: () => os,
     };
 
     setUp(() {
+      fileSystem = MemoryFileSystem.test();
       os = FakeOperatingSystemUtils();
       testPlistParser = FakePlistParser();
+      toolContext = FakeToolContext(fs: fileSystem, os: os);
     });
 
     testUsingContext('Error on non-existing file', () {
@@ -760,45 +784,49 @@ void main() {
     }, overrides: overrides);
 
     testUsingContext('returns null when there is no ios or .ios directory', () async {
-      globals.fs.file('pubspec.yaml').createSync();
+      fileSystem.file('pubspec.yaml').createSync();
       final iosApp = await IOSApp.fromIosProject(
-        FlutterProject.fromDirectory(globals.fs.currentDirectory).ios,
+        FlutterProject.fromDirectory(fileSystem.currentDirectory).ios,
         null,
+        toolContext: toolContext,
       ) as BuildableIOSApp?;
 
       expect(iosApp, null);
     }, overrides: overrides);
 
     testUsingContext('returns null when there is no Runner.xcodeproj', () async {
-      globals.fs.file('pubspec.yaml').createSync();
-      globals.fs.file('ios/FooBar.xcodeproj').createSync(recursive: true);
+      fileSystem.file('pubspec.yaml').createSync();
+      fileSystem.file('ios/FooBar.xcodeproj').createSync(recursive: true);
       final iosApp = await IOSApp.fromIosProject(
-        FlutterProject.fromDirectory(globals.fs.currentDirectory).ios,
+        FlutterProject.fromDirectory(fileSystem.currentDirectory).ios,
         null,
+        toolContext: toolContext,
       ) as BuildableIOSApp?;
 
       expect(iosApp, null);
     }, overrides: overrides);
 
     testUsingContext('returns null when there is no Runner.xcodeproj/project.pbxproj', () async {
-      globals.fs.file('pubspec.yaml').createSync();
-      globals.fs.file('ios/Runner.xcodeproj').createSync(recursive: true);
+      fileSystem.file('pubspec.yaml').createSync();
+      fileSystem.file('ios/Runner.xcodeproj').createSync(recursive: true);
       final iosApp = await IOSApp.fromIosProject(
-        FlutterProject.fromDirectory(globals.fs.currentDirectory).ios,
+        FlutterProject.fromDirectory(fileSystem.currentDirectory).ios,
         null,
+        toolContext: toolContext,
       ) as BuildableIOSApp?;
 
       expect(iosApp, null);
     }, overrides: overrides);
 
     testUsingContext('returns null when there with no product identifier', () async {
-      globals.fs.file('pubspec.yaml').createSync();
-      final Directory project = globals.fs.directory('ios/Runner.xcodeproj')
+      fileSystem.file('pubspec.yaml').createSync();
+      final Directory project = fileSystem.directory('ios/Runner.xcodeproj')
         ..createSync(recursive: true);
       project.childFile('project.pbxproj').createSync();
       final iosApp = await IOSApp.fromIosProject(
-        FlutterProject.fromDirectory(globals.fs.currentDirectory).ios,
+        FlutterProject.fromDirectory(fileSystem.currentDirectory).ios,
         null,
+        toolContext: toolContext,
       ) as BuildableIOSApp?;
 
       expect(iosApp, null);
@@ -806,9 +834,10 @@ void main() {
 
     testUsingContext('handles project paths with periods in app name', () async {
       final iosApp = BuildableIOSApp(
-        IosProject.fromFlutter(FlutterProject.fromDirectory(globals.fs.currentDirectory)),
+        IosProject.fromFlutter(FlutterProject.fromDirectory(fileSystem.currentDirectory)),
         'com.foo.bar',
         'Name.With.Dots',
+        toolContext: toolContext,
       );
       expect(iosApp.name, 'Name.With.Dots');
       expect(iosApp.archiveBundleOutputPath, 'build/ios/archive/Name.With.Dots.xcarchive');
@@ -822,32 +851,34 @@ void main() {
 
     testUsingContext('returns project app icon dirname', () async {
       final iosApp = BuildableIOSApp(
-        IosProject.fromFlutter(FlutterProject.fromDirectory(globals.fs.currentDirectory)),
+        IosProject.fromFlutter(FlutterProject.fromDirectory(fileSystem.currentDirectory)),
         'com.foo.bar',
         'Runner',
+        toolContext: toolContext,
       );
-      final String iconDirSuffix = globals.fs.path.join(
+      final String iconDirSuffix = fileSystem.path.join(
         'Runner',
         'Assets.xcassets',
         'AppIcon.appiconset',
       );
-      expect(iosApp.projectAppIconDirName, globals.fs.path.join('ios', iconDirSuffix));
+      expect(iosApp.projectAppIconDirName, fileSystem.path.join('ios', iconDirSuffix));
     }, overrides: overrides);
 
     testUsingContext('returns template app icon dirname for Contents.json', () async {
       final iosApp = BuildableIOSApp(
-        IosProject.fromFlutter(FlutterProject.fromDirectory(globals.fs.currentDirectory)),
+        IosProject.fromFlutter(FlutterProject.fromDirectory(fileSystem.currentDirectory)),
         'com.foo.bar',
         'Runner',
+        toolContext: toolContext,
       );
-      final String iconDirSuffix = globals.fs.path.join(
+      final String iconDirSuffix = fileSystem.path.join(
         'Runner',
         'Assets.xcassets',
         'AppIcon.appiconset',
       );
       expect(
         iosApp.templateAppIconDirNameForContentsJson,
-        globals.fs.path.join(
+        fileSystem.path.join(
           Cache.flutterRoot!,
           'packages',
           'flutter_tools',
@@ -860,13 +891,13 @@ void main() {
     }, overrides: overrides);
 
     testUsingContext('returns template app icon dirname for images', () async {
-      final String toolsDir = globals.fs.path.join(Cache.flutterRoot!, 'packages', 'flutter_tools');
-      final String packageConfigPath = globals.fs.path.join(
+      final String toolsDir = fileSystem.path.join(Cache.flutterRoot!, 'packages', 'flutter_tools');
+      final String packageConfigPath = fileSystem.path.join(
         toolsDir,
         '.dart_tool',
         'package_config.json',
       );
-      globals.fs.file(packageConfigPath)
+      fileSystem.file(packageConfigPath)
         ..createSync(recursive: true)
         ..writeAsStringSync('''
 {
@@ -882,18 +913,19 @@ void main() {
 }
 ''');
       final iosApp = BuildableIOSApp(
-        IosProject.fromFlutter(FlutterProject.fromDirectory(globals.fs.currentDirectory)),
+        IosProject.fromFlutter(FlutterProject.fromDirectory(fileSystem.currentDirectory)),
         'com.foo.bar',
         'Runner',
+        toolContext: toolContext,
       );
-      final String iconDirSuffix = globals.fs.path.join(
+      final String iconDirSuffix = fileSystem.path.join(
         'Runner',
         'Assets.xcassets',
         'AppIcon.appiconset',
       );
       expect(
         await iosApp.templateAppIconDirNameForImages,
-        globals.fs.path.absolute(
+        fileSystem.path.absolute(
           'flutter_template_images',
           'templates',
           'app',
@@ -905,32 +937,34 @@ void main() {
 
     testUsingContext('returns project launch image dirname', () async {
       final iosApp = BuildableIOSApp(
-        IosProject.fromFlutter(FlutterProject.fromDirectory(globals.fs.currentDirectory)),
+        IosProject.fromFlutter(FlutterProject.fromDirectory(fileSystem.currentDirectory)),
         'com.foo.bar',
         'Runner',
+        toolContext: toolContext,
       );
-      final String launchImageDirSuffix = globals.fs.path.join(
+      final String launchImageDirSuffix = fileSystem.path.join(
         'Runner',
         'Assets.xcassets',
         'LaunchImage.imageset',
       );
-      expect(iosApp.projectLaunchImageDirName, globals.fs.path.join('ios', launchImageDirSuffix));
+      expect(iosApp.projectLaunchImageDirName, fileSystem.path.join('ios', launchImageDirSuffix));
     }, overrides: overrides);
 
     testUsingContext('returns template launch image dirname for Contents.json', () async {
       final iosApp = BuildableIOSApp(
-        IosProject.fromFlutter(FlutterProject.fromDirectory(globals.fs.currentDirectory)),
+        IosProject.fromFlutter(FlutterProject.fromDirectory(fileSystem.currentDirectory)),
         'com.foo.bar',
         'Runner',
+        toolContext: toolContext,
       );
-      final String launchImageDirSuffix = globals.fs.path.join(
+      final String launchImageDirSuffix = fileSystem.path.join(
         'Runner',
         'Assets.xcassets',
         'LaunchImage.imageset',
       );
       expect(
         iosApp.templateLaunchImageDirNameForContentsJson,
-        globals.fs.path.join(
+        fileSystem.path.join(
           Cache.flutterRoot!,
           'packages',
           'flutter_tools',
@@ -943,13 +977,13 @@ void main() {
     }, overrides: overrides);
 
     testUsingContext('returns template launch image dirname for images', () async {
-      final String toolsDir = globals.fs.path.join(Cache.flutterRoot!, 'packages', 'flutter_tools');
-      final String packageConfigPath = globals.fs.path.join(
+      final String toolsDir = fileSystem.path.join(Cache.flutterRoot!, 'packages', 'flutter_tools');
+      final String packageConfigPath = fileSystem.path.join(
         toolsDir,
         '.dart_tool',
         'package_config.json',
       );
-      globals.fs.file(packageConfigPath)
+      fileSystem.file(packageConfigPath)
         ..createSync(recursive: true)
         ..writeAsStringSync('''
 {
@@ -965,18 +999,19 @@ void main() {
 }
 ''');
       final iosApp = BuildableIOSApp(
-        IosProject.fromFlutter(FlutterProject.fromDirectory(globals.fs.currentDirectory)),
+        IosProject.fromFlutter(FlutterProject.fromDirectory(fileSystem.currentDirectory)),
         'com.foo.bar',
         'Runner',
+        toolContext: toolContext,
       );
-      final String launchImageDirSuffix = globals.fs.path.join(
+      final String launchImageDirSuffix = fileSystem.path.join(
         'Runner',
         'Assets.xcassets',
         'LaunchImage.imageset',
       );
       expect(
         await iosApp.templateLaunchImageDirNameForImages,
-        globals.fs.path.absolute(
+        fileSystem.path.absolute(
           'flutter_template_images',
           'templates',
           'app',

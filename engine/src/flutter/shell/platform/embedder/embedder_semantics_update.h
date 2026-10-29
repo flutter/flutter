@@ -25,7 +25,7 @@ class EmbedderSemanticsUpdate {
   FlutterSemanticsUpdate* get() { return &update_; }
 
  private:
-  FlutterSemanticsUpdate update_;
+  FlutterSemanticsUpdate update_{};
   std::vector<FlutterSemanticsNode> nodes_;
   std::vector<FlutterSemanticsCustomAction> actions_;
 
@@ -62,7 +62,7 @@ class EmbedderSemanticsUpdate2 {
   // must remain valid for the duration of the semantics update callback.
   // They are automatically cleaned up when |EmbedderSemanticsUpdate2| is
   // destroyed.
-  FlutterSemanticsUpdate2 update_;
+  FlutterSemanticsUpdate2 update_{};
   std::vector<FlutterSemanticsNode2> nodes_;
   std::vector<FlutterSemanticsNode2*> node_pointers_;
   std::vector<FlutterSemanticsCustomAction2> actions_;

@@ -38,9 +38,9 @@ struct RenderTargetConfig {
 class RenderTarget final {
  public:
   struct AttachmentConfig {
-    StorageMode storage_mode;
-    LoadAction load_action;
-    StoreAction store_action;
+    StorageMode storage_mode = StorageMode::kHostVisible;
+    LoadAction load_action = LoadAction::kDontCare;
+    StoreAction store_action = StoreAction::kDontCare;
     Color clear_color;
   };
 

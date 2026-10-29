@@ -37,7 +37,7 @@ class ThreadHandle {
 #if defined(FML_OS_WIN)
   HANDLE thread_;
 #else
-  pthread_t thread_;
+  pthread_t thread_ = {};
 #endif
 };
 

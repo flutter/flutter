@@ -7,7 +7,6 @@ import 'dart:typed_data';
 
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
-import 'package:process/process.dart';
 import 'package:stream_channel/stream_channel.dart';
 import 'package:test_core/src/platform.dart'; // ignore: implementation_imports
 import 'package:vm_service/vm_service.dart';
@@ -19,6 +18,7 @@ import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
+import '../base/template.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../compile.dart';
@@ -28,6 +28,7 @@ import '../dart/language_version.dart';
 import '../device.dart';
 import '../native_assets.dart';
 import '../project.dart';
+import '../version.dart';
 import '../vmservice.dart';
 import 'flutter_tester_device.dart';
 import 'font_config_manager.dart';
@@ -58,6 +59,7 @@ FlutterPlatform installHook({
   required BuildInfo buildInfo,
   required DebuggingOptions debuggingOptions,
   required String flutterTesterBinPath,
+  required TemplateRenderer templateRenderer,
   required ToolContext toolContext,
   bool enableVmService = false,
   FlutterProject? flutterProject,
@@ -92,6 +94,7 @@ FlutterPlatform installHook({
     buildInfo: buildInfo,
     debuggingOptions: debuggingOptions,
     flutterTesterBinPath: flutterTesterBinPath,
+    templateRenderer: templateRenderer,
     toolContext: toolContext,
     enableVmService: enableVmService,
     flutterProject: flutterProject,
@@ -302,6 +305,7 @@ class FlutterPlatform extends PlatformPlugin {
     required this.buildInfo,
     required this.debuggingOptions,
     required this.flutterTesterBinPath,
+    required this._templateRenderer,
     required this._toolContext,
     this.enableVmService,
     this.flutterProject,
@@ -325,6 +329,7 @@ class FlutterPlatform extends PlatformPlugin {
           TestCompiler(
             buildInfo,
             flutterProject,
+            templateRenderer: _templateRenderer,
             toolContext: _toolContext,
             testTimeRecorder: testTimeRecorder,
           ),
@@ -333,6 +338,7 @@ class FlutterPlatform extends PlatformPlugin {
     );
   }
 
+  final TemplateRenderer _templateRenderer;
   final ToolContext _toolContext;
 
   final String flutterTesterBinPath;
@@ -362,7 +368,7 @@ class FlutterPlatform extends PlatformPlugin {
 
   final String? integrationTestUserIdentifier;
 
-  final _fontConfigManager = FontConfigManager();
+  late final _fontConfigManager = FontConfigManager(toolContext: _toolContext);
 
   /// The test compiler produces dill files for each test main.
   ///
@@ -480,24 +486,16 @@ class FlutterPlatform extends PlatformPlugin {
     if (_isIntegrationTest) {
       return IntegrationTestTestDevice(
         id: ourTestCount,
-        debuggingOptions: debuggingOptions,
         device: integrationTestDevice!,
+        debuggingOptions: debuggingOptions,
         userIdentifier: integrationTestUserIdentifier,
         compileExpression: _compileExpressionService,
+        toolContext: _toolContext,
       );
     }
-    final ToolContext(
-      :FileSystem fs,
-      :Logger logger,
-      :Platform platform,
-      :ProcessManager processManager,
-    ) = _toolContext;
     return FlutterTesterTestDevice(
       id: ourTestCount,
-      platform: platform,
-      fileSystem: fs,
-      processManager: processManager,
-      logger: logger,
+      toolContext: _toolContext,
       flutterTesterBinPath: flutterTesterBinPath,
       enableVmService: enableVmService!,
       machine: machine,
@@ -529,9 +527,14 @@ class FlutterPlatform extends PlatformPlugin {
   static const _kExtension = 'ext.$_kEventName';
 
   Future<void> _listenToVmServiceForGoldens({required Uri uri, required String testPath}) async {
-    final ToolContext(:Logger logger, :Platform platform) = _toolContext;
+    final ToolContext(:FlutterVersion flutterVersion, :Logger logger, :Platform platform) =
+        _toolContext;
     final goldensBaseUri = Uri.file(testPath, windows: platform.isWindows);
-    final FlutterVmService vmService = await connectToVmService(uri, logger: logger);
+    final FlutterVmService vmService = await connectToVmService(
+      uri,
+      flutterVersion: flutterVersion,
+      logger: logger,
+    );
     final IsolateRef testAppIsolate = await vmService.findExtensionIsolate(_kExtension);
     await vmService.service.streamListen(_kEventName);
     vmService.service.onEvent(_kEventName).listen((Event e) async {
@@ -630,6 +633,7 @@ class FlutterPlatform extends PlatformPlugin {
           compiler ??= TestCompiler(
             debuggingOptions.buildInfo,
             flutterProject,
+            templateRenderer: _templateRenderer,
             toolContext: _toolContext,
             precompiledDillPath: precompiledDillPath,
             testTimeRecorder: testTimeRecorder,
@@ -658,6 +662,7 @@ class FlutterPlatform extends PlatformPlugin {
           compiler ??= TestCompiler(
             debuggingOptions.buildInfo,
             flutterProject,
+            templateRenderer: _templateRenderer,
             toolContext: _toolContext,
             testTimeRecorder: testTimeRecorder,
           );

@@ -92,6 +92,18 @@ abstract class OptionDescriptor<T> {
     return target != null && target.options.contains(name);
   }
 
+  /// Checks if this specific [OptionDescriptor] is registered on [parser].
+  bool isRegisteredOnParser(ArgParser parser) {
+    final ArgParserRegistry? registry = _parserRegistry[parser];
+    if (registry != null) {
+      return identical(registry[name], this);
+    }
+    // Support subclasses (such as Google3's HasOverriddenArgParser) that replace
+    // argParser with an imperative copy of the base ArgParser after descriptor
+    // registration.
+    return parser.options[name]?.help == help;
+  }
+
   /// Checks if this option was explicitly parsed (alias for [wasProvided]).
   bool wasParsed(ArgResults? results, {ArgResults? globalResults}) =>
       wasProvided(results, globalResults: globalResults);

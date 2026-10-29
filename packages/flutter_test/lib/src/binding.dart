@@ -7,6 +7,8 @@
 
 /// @docImport 'dart:io';
 ///
+/// @docImport 'package:flutter_driver/flutter_driver.dart' as flutter_driver;
+///
 /// @docImport 'controller.dart';
 /// @docImport 'test_pointer.dart';
 /// @docImport 'widget_tester.dart';

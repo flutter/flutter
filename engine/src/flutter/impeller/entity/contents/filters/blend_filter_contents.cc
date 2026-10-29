@@ -261,7 +261,7 @@ static std::optional<Entity> AdvancedBlend(
   if (!command_buffer) {
     return std::nullopt;
   }
-  fml::StatusOr<RenderTarget> render_target =
+  absl::StatusOr<RenderTarget> render_target =
       renderer.MakeSubpass("Advanced Blend Filter",         //
                            ISize(render_target_size),       //
                            command_buffer,                  //
@@ -589,7 +589,7 @@ static std::optional<Entity> PipelineBlend(
                        Matrix::MakeTranslation(-subpass_coverage.GetOrigin()) *
                        input->transform;
 
-      FS::FragInfo frag_info;
+      FS::FragInfo frag_info{};
       frag_info.alpha =
           absorb_opacity == ColorFilterContents::AbsorbOpacity::kYes
               ? input->opacity
@@ -647,7 +647,7 @@ static std::optional<Entity> PipelineBlend(
     return std::nullopt;
   }
 
-  fml::StatusOr<RenderTarget> render_target =
+  absl::StatusOr<RenderTarget> render_target =
       renderer.MakeSubpass("Pipeline Blend Filter",            //
                            ISize(subpass_coverage.GetSize()),  //
                            command_buffer,                     //
@@ -718,7 +718,7 @@ std::optional<Entity> BlendFilterContents::CreateFramebufferAdvancedBlend(
       VS::FrameInfo frame_info;
       frame_info.mvp = Matrix::MakeOrthographic(ISize(1, 1));
 
-      FS::FragInfo frag_info;
+      FS::FragInfo frag_info{};
       frag_info.alpha = 1.0;
 
       std::array<VS::PerVertexData, 4> vertices = {
@@ -841,7 +841,7 @@ std::optional<Entity> BlendFilterContents::CreateFramebufferAdvancedBlend(
       }
 
       VS::FrameInfo frame_info;
-      FS::FragInfo frag_info;
+      FS::FragInfo frag_info{};
 
       raw_ptr<const Sampler> src_sampler =
           renderer.GetContext()->GetSamplerLibrary()->GetSampler(
@@ -886,7 +886,7 @@ std::optional<Entity> BlendFilterContents::CreateFramebufferAdvancedBlend(
     }
   }
 
-  fml::StatusOr<RenderTarget> render_target =
+  absl::StatusOr<RenderTarget> render_target =
       renderer.MakeSubpass("FramebufferBlend",                //
                            dst_snapshot->texture->GetSize(),  //
                            cmd_buffer,                        //

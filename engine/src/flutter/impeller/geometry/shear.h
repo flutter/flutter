@@ -9,6 +9,9 @@
 
 namespace impeller {
 
+// cppcoreguidelines-pro-type-member-init doesn't understand that the
+// anonymous struct and `e` share storage in the union below.
+// NOLINTBEGIN(cppcoreguidelines-pro-type-member-init)
 struct Shear {
   union {
     struct {
@@ -27,6 +30,7 @@ struct Shear {
     return xy == o.xy && xz == o.xz && yz == o.yz;
   }
 };
+// NOLINTEND(cppcoreguidelines-pro-type-member-init)
 
 }  // namespace impeller
 

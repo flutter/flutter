@@ -222,7 +222,6 @@
 /dev/devicelab/bin/tasks/native_assets_ios.dart @dcharkes @flutter/ios
 /dev/devicelab/bin/tasks/native_platform_view_ui_tests_ios.dart @hellohuanlin @flutter/ios
 /dev/devicelab/bin/tasks/new_gallery_ios__transition_perf.dart @jtmcdole @flutter/engine
-/dev/devicelab/bin/tasks/new_gallery_skia_ios__transition_perf.dart @jtmcdole @flutter/engine
 /dev/devicelab/bin/tasks/platform_channel_sample_test_ios.dart @hellohuanlin @flutter/engine
 /dev/devicelab/bin/tasks/platform_channel_sample_test_swift.dart @hellohuanlin @flutter/engine
 /dev/devicelab/bin/tasks/platform_channels_benchmarks_ios.dart @gaaclarke @flutter/engine
@@ -280,6 +279,11 @@
 /dev/devicelab/bin/tasks/gradle_plugin_bundle_test.dart @gmackall @flutter/plugin
 /dev/devicelab/bin/tasks/gradle_plugin_fat_apk_test.dart @gmackall @flutter/plugin
 /dev/devicelab/bin/tasks/gradle_plugin_light_apk_test.dart @gmackall @flutter/plugin
+/dev/devicelab/bin/tasks/handshake_check_test_android.dart @vashworth @flutter/android
+/dev/devicelab/bin/tasks/handshake_check_test_ios.dart @vashworth @flutter/ios
+/dev/devicelab/bin/tasks/handshake_check_test_linux.dart @vashworth @flutter/desktop
+/dev/devicelab/bin/tasks/handshake_check_test_macos.dart @vashworth @flutter/desktop
+/dev/devicelab/bin/tasks/handshake_check_test_windows.dart @vashworth @flutter/desktop
 /dev/devicelab/bin/tasks/hello_world_impeller_ios_sdfs.dart @gaaclarke @flutter/engine
 /dev/devicelab/bin/tasks/hello_world_impeller_linux.dart @gaaclarke @flutter/desktop
 /dev/devicelab/bin/tasks/hello_world_impeller_macos_sdfs.dart @b-luk @flutter/desktop
