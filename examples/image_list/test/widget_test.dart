@@ -10,6 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:image_list/main.dart';
 
 // 1x1 transparent PNG payload used to satisfy NetworkImage decoding synchronously.
+// dart format off
 const List<int> _transparentPng = <int>[
   0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 0x00, 0x00, 0x00, 0x0D,
   0x49, 0x48, 0x44, 0x52, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01,
@@ -18,6 +19,7 @@ const List<int> _transparentPng = <int>[
   0x05, 0x00, 0x01, 0x0D, 0x0A, 0x2D, 0xB4, 0x00, 0x00, 0x00, 0x00, 0x49,
   0x45, 0x4E, 0x44, 0xAE, 0x42, 0x60, 0x82,
 ];
+// dart format on
 
 /// Mocks HTTP network requests for Image.network to prevent dangling socket
 /// timers in the test binding, ensuring clean widget teardown.
@@ -57,18 +59,16 @@ class _FakeHttpClientResponse extends Fake implements HttpClientResponse {
     void Function()? onDone,
     bool? cancelOnError,
   }) {
-    return Stream<List<int>>.value(_transparentPng).listen(
-      onData,
-      onError: onError,
-      onDone: onDone,
-      cancelOnError: cancelOnError,
-    );
+    return Stream<List<int>>.value(
+      _transparentPng,
+    ).listen(onData, onError: onError, onDone: onDone, cancelOnError: cancelOnError);
   }
 }
 
 void main() {
   testWidgets('MyHomePage disposes AnimationControllers properly', (WidgetTester tester) async {
     HttpOverrides.global = _FakeHttpOverrides();
+    addTearDown(() => HttpOverrides.global = null);
 
     await tester.pumpWidget(const MyApp(8080));
 

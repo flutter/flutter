@@ -156,10 +156,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     super.initState();
     _controllers = <AnimationController>[
       for (int i = 0; i < images; i++)
-        AnimationController(
-          duration: const Duration(milliseconds: 3600),
-          vsync: this,
-        )..repeat(),
+        AnimationController(duration: const Duration(milliseconds: 3600), vsync: this)..repeat(),
     ];
   }
 
