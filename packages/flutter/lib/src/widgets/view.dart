@@ -150,6 +150,16 @@ class View extends StatefulWidget {
   /// is best practice to use [MediaQuery.maybeOf] instead, which will ensure
   /// that the `context` is informed when the view properties change.
   ///
+  /// {@template flutter.widgets.View.debugViewMetricsOverrides}
+  /// In debug mode, a view that [PlatformDispatcher.instance] reports is used
+  /// through a wrapper that applies [debugViewMetricsOverrides], and this method
+  /// returns the wrapper. It is not identical to the view that
+  /// [PlatformDispatcher.instance] reports, and its
+  /// [FlutterView.platformDispatcher] is not identical to
+  /// [PlatformDispatcher.instance]. Compare views by [FlutterView.viewId]
+  /// instead.
+  /// {@endtemplate}
+  ///
   /// See also:
   ///
   ///  * [View.of], which throws instead of returning null if no [FlutterView]
@@ -170,6 +180,8 @@ class View extends StatefulWidget {
   /// prefer using the access methods on [MediaQuery], such as
   /// [MediaQuery.sizeOf], which will ensure that the `context` is informed when
   /// the view properties change.
+  ///
+  /// {@macro flutter.widgets.View.debugViewMetricsOverrides}
   ///
   /// See also:
   ///
