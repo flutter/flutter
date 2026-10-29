@@ -18,12 +18,12 @@ import '../base/logger.dart';
 import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
+import '../base/template.dart';
 import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../base/version.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
-import '../cache.dart';
 import '../context/apple_context.dart';
 import '../context/tool_context.dart';
 import '../convert.dart';
@@ -33,6 +33,8 @@ import '../ios/application_package.dart';
 import '../ios/code_signing.dart';
 import '../ios/mac.dart';
 import '../ios/plist_parser.dart';
+import '../ios/xcodeproj.dart';
+import '../macos/cocoapods.dart';
 import '../macos/xcode.dart';
 import '../runner/flutter_command.dart';
 import '../runner/flutter_command_runner.dart';
@@ -44,6 +46,7 @@ class BuildIOSCommand extends _BuildIOSSubCommand {
   BuildIOSCommand({
     required super.appleContext,
     required super.buildSystem,
+    required super.templateRenderer,
     required super.toolContext,
     required super.verboseHelp,
   }) {
@@ -121,6 +124,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
   BuildIOSArchiveCommand({
     required super.appleContext,
     required super.buildSystem,
+    required super.templateRenderer,
     required super.toolContext,
     required super.verboseHelp,
   }) {
@@ -905,6 +909,7 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
   _BuildIOSSubCommand({
     required this._appleContext,
     required this._buildSystem,
+    required this._templateRenderer,
     required ToolContext super.toolContext,
     required super.verboseHelp,
   }) : super(logger: toolContext.logger) {
@@ -925,6 +930,7 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
 
   final AppleContext _appleContext;
   final BuildSystem _buildSystem;
+  final TemplateRenderer _templateRenderer;
 
   @visibleForTesting
   AppleContext get appleContext => _appleContext;
@@ -975,15 +981,20 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
   Future<FlutterCommandResult> runCommand() async {
     final ToolContext(
       :Artifacts artifacts,
-      :Cache cache,
       fileSystemUtils: FileSystemUtils fsUtils,
       :FileSystem fs,
       :Logger logger,
       :OperatingSystemUtils os,
       :Platform platform,
+      :ProcessUtils processUtils,
       :Terminal terminal,
     ) = toolContext;
-    final AppleContext(:PlistParser plistParser) = _appleContext;
+    final AppleContext(
+      :CocoaPods cocoaPods,
+      :PlistParser plistParser,
+      :Xcode xcode,
+      :XcodeProjectInterpreter xcodeProjectInterpreter,
+    ) = _appleContext;
 
     defaultBuildMode = environmentType == EnvironmentType.simulator
         ? BuildMode.debug
@@ -1018,8 +1029,15 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
         globalResults?[FlutterGlobalOptions.kDeviceIdOption] as String? ??
         platform.environment['FLUTTER_DEVICE_ID'];
     final XcodeBuildResult result = await buildXcodeProject(
+      analytics: analytics,
       app: app,
       buildInfo: buildInfo,
+      cocoaPods: cocoaPods,
+      plistParser: plistParser,
+      templateRenderer: _templateRenderer,
+      toolContext: toolContext,
+      xcode: xcode,
+      xcodeProjectInterpreter: xcodeProjectInterpreter,
       targetOverride: targetFile,
       environmentType: environmentType,
       codesign: shouldCodesign,
@@ -1030,7 +1048,8 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
           usingCISystem &&
           xcodeBuildAction == XcodeBuildAction.build &&
           await disablePortPublication,
-      toolContext: toolContext,
+      verboseLogging:
+          logger.isVerbose || (globalResults?[FlutterGlobalOptions.kVerboseFlag] == true),
     );
     xcodeBuildResult = result;
 
@@ -1042,6 +1061,8 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
         logger: logger,
         platform: FlutterDarwinPlatform.ios,
         project: app.project.parent,
+        processUtils: processUtils,
+        xcode: xcode,
       );
       final presentParticiple = xcodeBuildAction == XcodeBuildAction.build
           ? 'building'

@@ -320,9 +320,12 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
       HotRunnerConfig: () => HotRunnerConfig(),
       IOSSimulatorUtils: () => IOSSimulatorUtils(
         analytics: globals.analytics,
+        cocoaPods: globals.cocoaPods!,
         plistParser: globals.plistParser,
+        templateRenderer: globals.templateRenderer,
         toolContext: const GlobalToolContext(),
         xcode: globals.xcode!,
+        xcodeProjectInterpreter: globals.xcodeProjectInterpreter!,
       ),
       IOSWorkflow: () => IOSWorkflow(
         featureFlags: featureFlags,
@@ -403,15 +406,18 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
       ),
       XCDevice: () => XCDevice(
         analytics: globals.analytics,
+        cocoaPods: globals.cocoaPods!,
         iproxy: IProxy(
           artifacts: globals.artifacts!,
           logger: globals.logger,
           processManager: globals.processManager,
           dyLdLibEntry: globals.cache.dyLdLibEntry,
         ),
+        plistParser: globals.plistParser,
         templateRenderer: globals.templateRenderer,
         toolContext: const GlobalToolContext(),
         xcode: globals.xcode!,
+        xcodeProjectInterpreter: globals.xcodeProjectInterpreter!,
       ),
       XcodeProjectInterpreter: () => XcodeProjectInterpreter(
         analytics: globals.analytics,

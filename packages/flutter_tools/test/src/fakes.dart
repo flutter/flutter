@@ -1305,6 +1305,7 @@ class FakeToolContext extends Fake implements ToolContext {
     this._cache,
     this._config,
     this._customDevicesConfig,
+    this._fileSystemUtils,
     this._flutterVersion,
     this._fs,
     this._git,
@@ -1362,6 +1363,7 @@ class FakeToolContext extends Fake implements ToolContext {
   final Cache? _cache;
   final Config? _config;
   final CustomDevicesConfig? _customDevicesConfig;
+  final FileSystemUtils? _fileSystemUtils;
   final FlutterVersion? _flutterVersion;
   final FileSystem? _fs;
   final Git? _git;
@@ -1493,7 +1495,8 @@ class FakeToolContext extends Fake implements ToolContext {
   late final UserMessages userMessages = _userMessages ?? UserMessages();
 
   @override
-  FileSystemUtils get fileSystemUtils => FileSystemUtils(fileSystem: fs, platform: platform);
+  late final FileSystemUtils fileSystemUtils =
+      _fileSystemUtils ?? FileSystemUtils(fileSystem: fs, platform: platform);
 }
 
 /// A [ToolContext] that dynamically delegates to [globals] for use in [testUsingContext].
