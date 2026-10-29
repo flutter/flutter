@@ -58,7 +58,7 @@ class FlutterDeviceManager extends DeviceManager {
     required ToolContext toolContext,
     required WindowsWorkflow windowsWorkflow,
     required XCDevice xcDevice,
-  }) : super(logger: toolContext.logger) {
+  }) : super(fileSystem: toolContext.fs, logger: toolContext.logger) {
     final ToolContext(
       :Artifacts artifacts,
       :Cache cache,

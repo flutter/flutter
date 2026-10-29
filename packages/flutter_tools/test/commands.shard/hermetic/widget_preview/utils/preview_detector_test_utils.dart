@@ -72,7 +72,7 @@ void testPreviewDetector(
     },
     overrides: {
       FlutterProjectFactory: () =>
-          FlutterProjectFactory(fileSystem: _fs, logger: BufferLogger.test()),
+          FlutterProjectFactory(fileSystem: _fs, logger: BufferLogger.test(), config: FakeConfig()),
     },
   );
 }
@@ -82,7 +82,10 @@ PreviewDetector createTestPreviewDetector() {
     throw StateError('$initializeTestPreviewDetectorState was not called!');
   }
   _projectRoot = _fs.systemTempDirectory.createTempSync('root');
-  final FlutterProject project = FlutterProject.fromDirectory(_projectRoot!);
+  final FlutterProject project = FlutterProject.fromDirectory(
+    _projectRoot!,
+    logger: BufferLogger.test(),
+  );
 
   final String sdkPath = _fs.path.join(getFlutterRoot(), 'bin', 'cache', 'dart-sdk');
   final Artifacts artifacts = FakeArtifacts(sdkPath: sdkPath);
@@ -113,7 +116,7 @@ PreviewManifest createPreviewManifest() {
   }
   return PreviewManifest(
     logger: BufferLogger.test(),
-    rootProject: FlutterProject.fromDirectory(_projectRoot!),
+    rootProject: FlutterProject.fromDirectory(_projectRoot!, logger: BufferLogger.test()),
     fs: _fs,
     cache: Cache.test(processManager: FakeProcessManager.any()),
   );

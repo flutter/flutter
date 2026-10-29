@@ -910,7 +910,9 @@ void main() {
 
     testUsingContext('returns template app icon dirname for Contents.json', () async {
       final iosApp = BuildableIOSApp(
-        IosProject.fromFlutter(FlutterProject.fromDirectory(fileSystem.currentDirectory)),
+        IosProject.fromFlutter(
+          FlutterProject.fromDirectory(fileSystem.currentDirectory, logger: testLogger),
+        ),
         'com.foo.bar',
         'Runner',
         toolContext: toolContext,
@@ -957,7 +959,9 @@ void main() {
 }
 ''');
       final iosApp = BuildableIOSApp(
-        IosProject.fromFlutter(FlutterProject.fromDirectory(fileSystem.currentDirectory)),
+        IosProject.fromFlutter(
+          FlutterProject.fromDirectory(fileSystem.currentDirectory, logger: testLogger),
+        ),
         'com.foo.bar',
         'Runner',
         toolContext: toolContext,
@@ -996,7 +1000,9 @@ void main() {
 
     testUsingContext('returns template launch image dirname for Contents.json', () async {
       final iosApp = BuildableIOSApp(
-        IosProject.fromFlutter(FlutterProject.fromDirectory(fileSystem.currentDirectory)),
+        IosProject.fromFlutter(
+          FlutterProject.fromDirectory(fileSystem.currentDirectory, logger: testLogger),
+        ),
         'com.foo.bar',
         'Runner',
         toolContext: toolContext,
@@ -1043,7 +1049,9 @@ void main() {
 }
 ''');
       final iosApp = BuildableIOSApp(
-        IosProject.fromFlutter(FlutterProject.fromDirectory(fileSystem.currentDirectory)),
+        IosProject.fromFlutter(
+          FlutterProject.fromDirectory(fileSystem.currentDirectory, logger: testLogger),
+        ),
         'com.foo.bar',
         'Runner',
         toolContext: toolContext,
@@ -1360,7 +1368,7 @@ flutter:
   module:
     androidPackage: com.example
 ''');
-  return FlutterProject.fromDirectory(directory);
+  return FlutterProject.fromDirectory(directory, logger: globals.logger);
 }
 
 const String _aaptDataWithActivityAlias = '''

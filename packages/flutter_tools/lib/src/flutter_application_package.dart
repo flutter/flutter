@@ -29,6 +29,11 @@ class FlutterApplicationPackageFactory extends ApplicationPackageFactory {
   final PlistParser _plistParser;
   final ToolContext _toolContext;
 
+  FlutterProject _currentProject() {
+    final ToolContext(:FileSystem fs, :FlutterProjectFactory projectFactory) = _toolContext;
+    return projectFactory.fromDirectory(fs.currentDirectory);
+  }
+
   @override
   Future<ApplicationPackage?> getPackageForPlatform(
     TargetPlatform platform, {
@@ -93,10 +98,5 @@ class FlutterApplicationPackageFactory extends ApplicationPackageFactory {
       case .fuchsia || .unsupported:
         TargetPlatform.throwUnsupportedTarget();
     }
-  }
-
-  FlutterProject _currentProject() {
-    final ToolContext(:FileSystem fs, :FlutterProjectFactory projectFactory) = _toolContext;
-    return projectFactory.fromDirectory(fs.currentDirectory);
   }
 }
