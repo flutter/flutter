@@ -258,6 +258,13 @@ def _bundle_directory_impl(ctx):
                     fail("%s: %s places %s at %s, where %s already is" % (ctx.label, bundle.label, file.path, path, placed[path].path))
                 continue
             placed[path] = file
+    for target, path in ctx.attr.files.items():
+        files = target[DefaultInfo].files.to_list()
+        if len(files) != 1:
+            fail("%s: files: %s should be one file" % (ctx.label, target.label))
+        if path in placed:
+            fail("%s: files places %s at %s, where %s already is" % (ctx.label, files[0].path, path, placed[path].path))
+        placed[path] = files[0]
     placements = [(file, file.path, path) for path, file in placed.items()]
     return [DefaultInfo(files = depset([_assemble_directory(ctx, ctx.label.name, placements)]))]
 
@@ -266,13 +273,19 @@ bundle_directory = rule(
     doc = "The files of some zip_bundles laid as one directory, each at its path in its archive, as " +
           "the flutter tool's cache unpacks the archives it downloads (`bin/cache/artifacts/engine/linux-x64` " +
           "is linux-x64/artifacts.zip and font-subset.zip unpacked together, less the code-signing lists " +
-          "the cache deletes): the SDK cache the tests' " +
+          "the cache deletes), and the files the cache writes beside them: the SDK cache the tests' " +
           "facsimile lays from the build instead of a download (dart_test's `cache_files`).",
     attrs = PYTHON_ATTRS | {
         "bundles": attr.label_list(
             mandatory = True,
             providers = [ZipBundleInfo],
             doc = "The zip_bundles; an entry path two of them place different files at is an error.",
+        ),
+        "files": attr.label_keyed_string_dict(
+            allow_files = True,
+            doc = "Files the cache writes into the directory besides the archives' contents, each to its " +
+                  "path there: the repository's LICENSE the tool copies into the iOS engine directories " +
+                  "after unpacking (EngineCachedArtifact.updateInner, getLicenseDirs).",
         ),
         "_assemble": attr.label(
             default = "//build_defs/dist:assemble_directory.py",
