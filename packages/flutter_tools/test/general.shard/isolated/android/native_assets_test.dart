@@ -8,6 +8,7 @@ import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/android/gradle_utils.dart';
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -15,7 +16,6 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/targets/native_assets.dart';
 import 'package:flutter_tools/src/features.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/isolated/native_assets/dart_hook_result.dart';
 import 'package:flutter_tools/src/isolated/native_assets/native_assets.dart';
 
@@ -100,6 +100,7 @@ void main() {
           targetPlatform: TargetPlatform.android_arm64,
           projectUri: projectUri,
           fileSystem: fileSystem,
+          logger: logger,
           buildRunner: buildRunner,
           buildCodeAssets: const BuildCodeAssetsOptions(appBuildDirectory: null),
           buildDataAssets: true,
@@ -111,11 +112,15 @@ void main() {
           targetPlatform: TargetPlatform.android_arm64,
           projectUri: projectUri,
           fileSystem: fileSystem,
+          logger: logger,
+          processManager: processManager,
           nativeAssetsFileUri: nonFlutterTesterAssetUri,
-          targetUri: projectUri.resolve('${getBuildDirectory()}/native_assets/android/'),
+          targetUri: projectUri.resolve(
+            '${getBuildDirectory(Config.test(), fileSystem)}/native_assets/android/',
+          ),
         );
         expect(
-          (globals.logger as BufferLogger).traceText,
+          logger.traceText,
           stringContainsInOrder(<String>[
             'Running build hooks for android_arm64.',
             'Running build hooks for android_arm64 done.',
@@ -149,15 +154,13 @@ void main() {
         targetPlatform: TargetPlatform.android_x64,
         projectUri: projectUri,
         fileSystem: fileSystem,
+        logger: logger,
         buildRunner: _BuildRunnerWithoutNdk(),
         buildCodeAssets: const BuildCodeAssetsOptions(appBuildDirectory: null),
         buildDataAssets: true,
         recordedUsesFile: null,
       );
-      expect(
-        (globals.logger as BufferLogger).traceText,
-        isNot(contains('Running build hooks for ')),
-      );
+      expect(logger.traceText, isNot(contains('Running build hooks for ')));
     },
   );
 
@@ -177,6 +180,7 @@ void main() {
           targetPlatform: TargetPlatform.android_arm64,
           projectUri: projectUri,
           fileSystem: fileSystem,
+          logger: logger,
           buildRunner: _BuildRunnerWithoutNdk(packagesWithNativeAssetsResult: <String>['bar']),
           buildCodeAssets: const BuildCodeAssetsOptions(appBuildDirectory: null),
           buildDataAssets: true,
