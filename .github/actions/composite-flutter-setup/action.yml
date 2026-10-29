@@ -49,7 +49,9 @@ runs:
         shell: bash
         if: github.repository != 'flutter/flutter' && !env.ACT
         run: |
-          git remote add upstream https://github.com/flutter/flutter.git
+          if ! git remote get-url upstream >/dev/null 2>&1; then
+            git remote add upstream https://github.com/flutter/flutter.git
+          fi
           git fetch --all --tags
 
       # If running locally; install the JDK - Github runners have everything on them

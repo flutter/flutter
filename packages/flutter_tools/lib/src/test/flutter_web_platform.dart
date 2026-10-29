@@ -23,6 +23,7 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
+import '../base/template.dart';
 import '../base/time.dart';
 import '../build_info.dart';
 import '../cache.dart';
@@ -88,6 +89,7 @@ class FlutterWebPlatform extends PlatformPlugin {
     required this.webRenderer,
     required this.useWasm,
     required this.crossOriginIsolation,
+    required TemplateRenderer templateRenderer,
     required this._toolContext,
     TestTimeRecorder? testTimeRecorder,
   }) {
@@ -118,6 +120,7 @@ class FlutterWebPlatform extends PlatformPlugin {
       compilerFactory: () => TestCompiler(
         buildInfo,
         flutterProject,
+        templateRenderer: templateRenderer,
         toolContext: _toolContext,
         testTimeRecorder: testTimeRecorder,
       ),
@@ -171,6 +174,7 @@ class FlutterWebPlatform extends PlatformPlugin {
     required bool crossOriginIsolation,
     required FlutterProject flutterProject,
     required String flutterTesterBinPath,
+    required TemplateRenderer templateRenderer,
     required ToolContext toolContext,
     required bool useWasm,
     required WebMemoryFS webMemoryFS,
@@ -211,6 +215,7 @@ class FlutterWebPlatform extends PlatformPlugin {
       testHostDartJs: testHostDartJs,
       buildDirectory: buildDirectory,
       chromiumLauncher: chromiumLauncher,
+      templateRenderer: templateRenderer,
       toolContext: toolContext,
       webRenderer: webRenderer,
       useWasm: useWasm,
@@ -271,14 +276,10 @@ class FlutterWebPlatform extends PlatformPlugin {
   File get _dartSdkSourcemaps =>
       _fileSystem.file(_artifacts.getHostArtifact(kDDCSdkSourcemapsArtifactMap[webRenderer]!));
 
-  File _canvasKitFile(String relativePath) {
-    final String canvasKitPath = _fileSystem.path.join(
-      _artifacts.getHostArtifact(HostArtifact.flutterWebSdk).path,
-      'canvaskit',
-    );
-    final File canvasKitFile = _fileSystem.file(_fileSystem.path.join(canvasKitPath, relativePath));
-    return canvasKitFile;
-  }
+  String get _canvasKitPath => _fileSystem.path.join(
+    _artifacts.getHostArtifact(HostArtifact.flutterWebSdk).path,
+    'canvaskit',
+  );
 
   Future<shelf.Response> _handleTestRequest(shelf.Request request) async {
     if (request.url.path.endsWith('main.dart.browser_test.dart.js')) {
@@ -470,13 +471,19 @@ window.\$dartLoader.loader.nextAttempt();
   /// Serves a local build of CanvasKit, replacing the CDN build, which can
   /// cause test flakiness due to reliance on network.
   shelf.Response _localCanvasKitHandler(shelf.Request request) {
-    final String fullPath = _fileSystem.path.fromUri(request.url);
-    if (!fullPath.startsWith('canvaskit/')) {
+    final List<String> pathSegments = request.url.pathSegments;
+    final String canvasKitPath = _canvasKitPath;
+    final String filePath = _fileSystem.path.joinAll(<String>[
+      canvasKitPath,
+      ...pathSegments.skip(1),
+    ]);
+    if (pathSegments.firstOrNull != 'canvaskit' ||
+        !_fileSystem.path.isWithin(canvasKitPath, filePath) ||
+        !_fileSystem.isFileSync(filePath)) {
       return shelf.Response.notFound('Not a CanvasKit file request');
     }
 
-    final String relativePath = fullPath.replaceFirst('canvaskit/', '');
-    final String extension = _fileSystem.path.extension(relativePath);
+    final String extension = _fileSystem.path.extension(filePath);
     String contentType;
     switch (extension) {
       case '.js':
@@ -489,7 +496,7 @@ window.\$dartLoader.loader.nextAttempt();
         return shelf.Response.internalServerError(body: error);
     }
 
-    final File canvasKitFile = _canvasKitFile(relativePath);
+    final File canvasKitFile = _fileSystem.file(filePath);
     return shelf.Response.ok(
       canvasKitFile.openRead(),
       headers: <String, Object>{

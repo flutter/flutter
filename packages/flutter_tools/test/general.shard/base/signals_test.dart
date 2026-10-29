@@ -7,11 +7,12 @@ import 'dart:io' as io;
 
 import 'package:flutter_tools/src/base/exit.dart';
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/signals.dart';
 import 'package:test/fake.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
-import '../../src/context.dart';
 import '../../src/fakes.dart';
 
 void main() {
@@ -159,9 +160,11 @@ void main() {
       expect(errList, isEmpty);
     });
 
-    testUsingContext('all handlers for exiting signals are run before exit', () async {
+    testWithoutContext('all handlers for exiting signals are run before exit', () async {
       final signals = Signals.test(
+        analytics: const NoOpAnalytics(),
         exitSignals: <ProcessSignal>[signalUnderTest],
+        logger: BufferLogger.test(),
         shutdownHooks: shutdownHooks,
       );
       final completer = Completer<void>();
@@ -196,9 +199,11 @@ void main() {
       expect(shutdownHooks.isShuttingDown, isTrue);
     });
 
-    testUsingContext('ShutdownHooks run before exiting', () async {
+    testWithoutContext('ShutdownHooks run before exiting', () async {
       final signals = Signals.test(
+        analytics: const NoOpAnalytics(),
         exitSignals: <ProcessSignal>[signalUnderTest],
+        logger: BufferLogger.test(),
         shutdownHooks: shutdownHooks,
       );
       final completer = Completer<void>();
@@ -215,7 +220,78 @@ void main() {
       await completer.future;
       expect(shutdownHooks.isShuttingDown, isTrue);
     });
+
+    testWithoutContext('unconfigured Signals.test exits cleanly on exiting signal', () async {
+      final signals = Signals.test(
+        exitSignals: <ProcessSignal>[signalUnderTest],
+        shutdownHooks: shutdownHooks,
+      );
+      final completer = Completer<void>();
+
+      setExitFunctionForTests((int exitCode) {
+        expect(exitCode, 0);
+        restoreExitFunction();
+        completer.complete();
+      });
+
+      signals.addHandler(signalUnderTest, (ProcessSignal s) {});
+
+      fakeSignal.controller.add(fakeSignal);
+      await completer.future;
+      expect(shutdownHooks.isShuttingDown, isFalse);
+    });
+
+    testWithoutContext(
+      'configured Signals.test logs analytics consent and closes analytics',
+      () async {
+        final analytics = FakeAnalytics();
+        final logger = BufferLogger.test();
+        final signals = Signals.test(
+          analytics: analytics,
+          exitSignals: <ProcessSignal>[signalUnderTest],
+          logger: logger,
+          shutdownHooks: shutdownHooks,
+        );
+        final completer = Completer<void>();
+
+        setExitFunctionForTests((int exitCode) {
+          expect(exitCode, 0);
+          restoreExitFunction();
+          completer.complete();
+        });
+
+        signals.addHandler(signalUnderTest, (ProcessSignal s) {});
+
+        fakeSignal.controller.add(fakeSignal);
+        await completer.future;
+        expect(shutdownHooks.isShuttingDown, isTrue);
+        expect(logger.statusText, contains('fake consent message'));
+        expect(analytics.didShowMessage, isTrue);
+        expect(analytics.didClose, isTrue);
+      },
+    );
   });
+}
+
+class FakeAnalytics extends Fake implements Analytics {
+  bool didShowMessage = false;
+  bool didClose = false;
+
+  @override
+  bool get shouldShowMessage => true;
+
+  @override
+  String get getConsentMessage => 'fake consent message';
+
+  @override
+  void clientShowedMessage() {
+    didShowMessage = true;
+  }
+
+  @override
+  Future<void> close({int delayDuration = 0}) async {
+    didClose = true;
+  }
 }
 
 class FakeProcessSignal extends Fake implements io.ProcessSignal {
