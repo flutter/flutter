@@ -743,6 +743,25 @@ void main() {
       final ui.PlatformDispatcher wrapped = debugApplyViewMetricsOverrides(dispatcher);
       expect(debugViewWithMetricsOverrides(raw), same(wrapped.view(id: 1)));
     });
+
+    test('leaves a view that only reports a wrapped dispatcher and an id alone', () {
+      // A decorator around an engine view, or a test double, belongs to the
+      // code that made it. Wrapping it would change what View.of returns, and
+      // its type, in debug mode only.
+      final ui.FlutterView raw = ui.PlatformDispatcher.instance.implicitView!;
+      final decorator = _DecoratedView(raw);
+      expect(debugViewWithMetricsOverrides(decorator), same(decorator));
+      final unregistered = _DecoratedView(raw, 12345);
+      expect(debugViewWithMetricsOverrides(unregistered), same(unregistered));
+    });
+
+    test('normalizes the deprecated window to the implicit view the binding vends', () {
+      final ui.SingletonFlutterWindow window = ui.window;
+      expect(
+        debugViewWithMetricsOverrides(window),
+        same(debugApplyViewMetricsOverrides(ui.PlatformDispatcher.instance).implicitView),
+      );
+    });
   });
 
   group('the wrapper delegates when nothing is overridden', () {
@@ -1634,4 +1653,19 @@ class _NoAccessibilityFeatures implements ui.AccessibilityFeatures {
   @override
   dynamic noSuchMethod(Invocation invocation) =>
       throw UnimplementedError('${invocation.memberName} is not needed by these tests.');
+}
+
+/// A decorator around another view, the way app code might wrap one, that
+/// reports the view's dispatcher and, unless told otherwise, its id.
+class _DecoratedView extends Fake implements ui.FlutterView {
+  _DecoratedView(this._view, [this._viewId]);
+
+  final ui.FlutterView _view;
+  final int? _viewId;
+
+  @override
+  int get viewId => _viewId ?? _view.viewId;
+
+  @override
+  ui.PlatformDispatcher get platformDispatcher => _view.platformDispatcher;
 }

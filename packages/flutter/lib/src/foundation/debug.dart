@@ -43,6 +43,7 @@ import 'dart:ui'
         Scene,
         SemanticsActionEventCallback,
         SemanticsUpdate,
+        SingletonFlutterWindow,
         Size,
         TimingsCallback,
         ViewConstraints,
@@ -1149,13 +1150,18 @@ ui.PlatformDispatcher debugApplyViewMetricsOverrides(ui.PlatformDispatcher dispa
 /// same override as one read from the binding.
 ///
 /// Engine views are normalized even before the binding wraps their
-/// dispatcher, because a [View] can be constructed before [runWidget]. A view
-/// that already applies its override and a view of a dispatcher that was never
-/// wrapped (a [TestFlutterView], say, which applies its own test values over
-/// the wrapper) are returned unchanged, as is every view outside of debug mode
-/// (in profile or release mode). The decision is made from the view's
-/// [ui.FlutterView.platformDispatcher], which a test double handed to
-/// [RenderView], [View] or [MediaQueryData.fromView] therefore has to implement.
+/// dispatcher, because a [View] can be constructed before [runWidget]. Only a
+/// view that its dispatcher itself reports for its id is normalized, along
+/// with the deprecated [ui.SingletonFlutterWindow], which stands for the
+/// implicit view. Every other view is returned unchanged: a view that already
+/// applies its override, a view of a dispatcher that was never wrapped (a
+/// [TestFlutterView], say, which applies its own test values over the
+/// wrapper), and a decorator or test double that only reports such a
+/// dispatcher and id. So is every view outside of debug mode (in profile or
+/// release mode). The decision reads the view's
+/// [ui.FlutterView.platformDispatcher] and [ui.FlutterView.viewId], which a
+/// test double handed to [RenderView], [View] or [MediaQueryData.fromView]
+/// therefore has to implement.
 ui.FlutterView debugViewWithMetricsOverrides(ui.FlutterView view) {
   var result = view;
   assert(() {
@@ -1170,7 +1176,15 @@ ui.FlutterView debugViewWithMetricsOverrides(ui.FlutterView view) {
     final ui.PlatformDispatcher dispatcher = view.platformDispatcher;
     if (identical(dispatcher, ui.PlatformDispatcher.instance) ||
         _debugDispatcherWrappers[dispatcher] != null) {
-      result = _debugWrapView(view);
+      // Only the view the dispatcher itself reports for the id stands for that
+      // view. A decorator or a test double that merely reports the same
+      // dispatcher and id belongs to the code that made it, and wrapping it
+      // would change what View.of returns in debug mode only.
+      final ui.FlutterView? registered = dispatcher.view(id: view.viewId);
+      if (registered != null &&
+          (identical(registered, view) || view is ui.SingletonFlutterWindow)) {
+        result = _debugWrapView(registered);
+      }
     }
     return true;
   }());
