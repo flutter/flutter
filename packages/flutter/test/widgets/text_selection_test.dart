@@ -170,6 +170,7 @@ void main() {
                 style: const TextStyle(),
                 backgroundCursorColor: _white,
                 cursorColor: _white,
+                rendererIgnoresPointer: true, // Outer gesture detector handles pointer input.
                 selectionControls: testTextSelectionHandleControls,
                 contextMenuBuilder: (BuildContext context, EditableTextState state) {
                   return const Text('Context menu', textDirection: TextDirection.ltr);
