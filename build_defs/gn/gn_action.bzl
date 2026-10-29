@@ -217,7 +217,7 @@ def _src_path(ctx, path):
 def _gen_path(ctx, path):
     return ctx.bin_dir.path + "/" + _src_path(ctx, path)
 
-def run_python(ctx, script, arguments, inputs, outputs, mnemonic, progress_message, tools = []):
+def run_python(ctx, script, arguments, inputs, outputs, mnemonic, progress_message, tools = [], env = {}):
     """Runs a Python script with the checkout's hermetic interpreter.
 
     For rules whose attrs include PYTHON_ATTRS. The script runs from the
@@ -233,6 +233,7 @@ def run_python(ctx, script, arguments, inputs, outputs, mnemonic, progress_messa
       progress_message: the action's progress message.
       tools: the programs the script runs, with the files they load (the
         interpreter is added).
+      env: environment variables for the script, beside the interpreter's.
     """
     args = ctx.actions.args()
 
@@ -253,7 +254,7 @@ def run_python(ctx, script, arguments, inputs, outputs, mnemonic, progress_messa
         env = {
             "PYTHONDONTWRITEBYTECODE": "1",
             "PYTHONHASHSEED": "0",
-        },
+        } | env,
     )
 
 # The attributes run_python needs: the interpreter and its runtime files.
@@ -350,6 +351,7 @@ def _gn_action_impl(ctx):
         mnemonic = "GnAction",
         progress_message = "GN action %{label}",
         tools = ctx.files.tools,
+        env = ctx.attr.env,
     )
 
     # The outputs are under GN's $target_gen_dir: gen/<GN package>/. An
@@ -457,6 +459,11 @@ gn_action = rule(
         ),
         "args": attr.string_list(
             doc = "GN's `args`, with paths as $(execpath LABEL), $(src PATH), $(gen PATH) and $(built PATH) tokens.",
+        ),
+        "env": attr.string_dict(
+            doc = "Environment variables for the script. Also what puts in the action's key a value the script " +
+                  "reads outside its inputs (copy_info_plist.py's `git rev-parse HEAD`, as FLUTTER_ENGINE_VERSION): " +
+                  "the action reruns when the value changes, where its cached result would be stale.",
         ),
     } | PYTHON_ATTRS,
 )

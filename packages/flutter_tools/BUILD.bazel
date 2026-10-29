@@ -364,6 +364,11 @@ dart_package_tests(
     package = "flutter_tools",
     packages = _PACKAGES,
     pub_cache = ":framework_pub_cache",
+    # The widget_preview tests watch a project they create under TMPDIR and
+    # compare the watcher's paths with their own, which a Mac's symlinked
+    # TMPDIR (/var/folders, /private/var there) tells apart: theirs is
+    # resolved (dart_test's resolved_tmpdir).
+    resolved_tmpdir = glob(["test/commands.shard/hermetic/widget_preview/**/*_test.dart"]),
     tests = glob(["test/commands.shard/hermetic/**/*_test.dart"]),
 )
 
@@ -515,21 +520,39 @@ _INTEGRATION_APPLE_IOS = [
 _INTEGRATION_APPLE = _INTEGRATION_APPLE_MACOS + _INTEGRATION_APPLE_IOS
 
 # The Apple builds that sign for an iOS device: `flutter build ios` without
-# --no-codesign or --simulator, an add-to-app project's `xcodebuild -sdk
-# iphoneos` with automatic signing. They want an Apple development
-# certificate in the host's keychain and a provisioning profile for the
-# app -- a CI Mac's, not every developer's ("No valid code signing
-# certificates were found", the Mac's T50) -- so they are a shard of their
-# own (apple_signed_shard, manual: run by name on a Mac so provisioned).
+# --no-codesign or --simulator (--config-only included), `flutter ipa`, an
+# add-to-app project's `xcodebuild -sdk iphoneos` with automatic signing.
+# They want an Apple development certificate in the host's keychain and a
+# provisioning profile for the app -- a CI Mac's, not every developer's
+# ("No valid code signing certificates were found", the Mac's T50 and T51)
+# -- so they are a shard of their own (apple_signed_shard, manual: run by
+# name on a Mac so provisioned). Two files sign in some of their cases only:
+# the apple shard runs their other cases (_INTEGRATION_APPLE_UNSIGNED_CASES),
+# the signed shard the files whole.
 _INTEGRATION_APPLE_SIGNED = [
+    "test/integration.shard/ios_content_validation_test.dart",
     "test/integration.shard/lldb_init_test.dart",
     "test/integration.shard/swift_package_manager_add2app_test.dart",
     "test/integration.shard/swift_package_manager_create_app_test.dart",
     "test/integration.shard/swift_package_manager_create_plugin_test.dart",
+    "test/integration.shard/swift_package_manager_test.dart",
     "test/integration.shard/uiscene_migration_test.dart",
 ]
 
-_INTEGRATION_APPLE_UNSIGNED = [test for test in _INTEGRATION_APPLE if test not in _INTEGRATION_APPLE_SIGNED]
+# The cases of two signing files that run on any Mac (`dart test --name`):
+# ios_content_validation_test's but for its archive (`flutter ipa`);
+# swift_package_manager_test's macOS cases -- its iOS ones build for a
+# device (three of its CocoaPods framework cases would pass too).
+_INTEGRATION_APPLE_UNSIGNED_CASES = {
+    "test/integration.shard/ios_content_validation_test.dart": "^iOS app validation (?!archive$)",
+    "test/integration.shard/swift_package_manager_test.dart": "macos|macOS",
+}
+
+_INTEGRATION_APPLE_UNSIGNED = [
+    test
+    for test in _INTEGRATION_APPLE
+    if test not in _INTEGRATION_APPLE_SIGNED or test in _INTEGRATION_APPLE_UNSIGNED_CASES
+]
 
 # The SDK's Xcode build-phase scripts resolve their own symlink first
 # (xcode_backend.sh's follow_links) and take FLUTTER_ROOT from where it
@@ -728,6 +751,7 @@ dart_package_tests(
     srcs = _HARNESS,
     cache = _TOOL_CACHE,
     cache_files = _APPLE_CACHE_FILES,
+    cases = _INTEGRATION_APPLE_UNSIGNED_CASES,
     data = _APPLE_DATA,
     imports = _IMPORTS,
     network = True,
@@ -758,6 +782,9 @@ dart_package_tests(
     pub_cache = ":workspace_pub_cache",
     sdk_files = _TOOL_SDK_FILES,
     sdk_trees = {"@pub_workspace//:pubspecs": ""},
+    # Its targets are the files' names with `_signed`: two of the files have
+    # targets in the apple shard too, for their cases that sign nothing.
+    suffix = "_signed",
     tags = [
         "cpu:4",
         "manual",

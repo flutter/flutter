@@ -5,6 +5,7 @@
 # Generated from //flutter/shell/platform/darwin/macos/BUILD.gn by gn_to_bazel; do not edit.
 
 load("@bazel_skylib//lib:selects.bzl", "selects")
+load("@engine_version//:version.bzl", "ENGINE_VERSION")
 load("@macos_sdk//:sdk.bzl", "MACOS_PLATFORM_PATH")
 load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
 load("//build_defs/cc:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES", "MACOS_CFLAGS_OBJC")
@@ -673,6 +674,7 @@ gn_action(
         "//conditions:default": [],
     }),
     build_outputs = ["FlutterMacOS.framework/Versions/A/Resources/Info.plist"],
+    env = {"FLUTTER_ENGINE_VERSION": ENGINE_VERSION},
     script = "//engine/src/flutter/build:copy_info_plist.py",
     target_compatible_with = select({
         "@platforms//os:macos": [],
