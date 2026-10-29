@@ -8,6 +8,7 @@
 # sources from here), and its unit tests (test/, felt's suites). No GN build
 # file of its own: hand-written.
 
+load("@host_platform//:host.bzl", "HOST_OS")
 load("//build_defs/dart:dart_test.bzl", "dart_vm_kernel")
 load("//build_defs/dart:pub.bzl", "pub_package_config")
 load("//build_defs/web:browser_launcher.bzl", "browser_launcher", "display_launcher")
@@ -142,14 +143,23 @@ web_ui_host_page(
 # The browsers this host runs felt's suites on, each through a launcher that
 # gives it the build's system libraries (browser_launcher.bzl;
 # --//build_defs/web:browser_libraries selects the host's instead): the
-# pinned Chrome and Firefox (build_defs/repositories/browsers.bzl). Safari's
-# and Edge's suites need other hosts and are left out.
+# pinned Chrome on every host, and on a Linux host the pinned Firefox
+# (build_defs/repositories/browsers.bzl), where CI runs the Firefox suites;
+# felt on a Mac would run them on a Firefox from Mozilla's disk image, which
+# no repository mounts yet. Safari's and Edge's suites need other hosts and
+# are left out.
 browser_launcher(
     name = "chrome",
     browser = "@chrome//:executable",
     browser_files = ["@chrome"],
 )
 
+# Firefox's launcher and the X display felt gives it (headless Firefox
+# initializes WebGL only on one): felt starts Xvfb by name, so a script of
+# that name first on the tests' PATH runs the build's X server on the
+# build's libraries -- or the host's, under the host's libraries. Both are a
+# Linux host's targets (compatible with Linux alone: a Mac's wildcard build
+# skips them without fetching the Linux Firefox).
 browser_launcher(
     name = "firefox",
     browser = "@firefox//:firefox/firefox",
@@ -162,17 +172,18 @@ browser_launcher(
   }
 }
 """,
+    target_compatible_with = ["@platforms//os:linux"],
 )
 
-# The X display felt gives Firefox (headless Firefox initializes WebGL only
-# on one): felt starts Xvfb by name, so a script of that name first on the
-# tests' PATH runs the build's X server on the build's libraries -- or the
-# host's, under the host's libraries.
-display_launcher(name = "Xvfb")
+display_launcher(
+    name = "Xvfb",
+    target_compatible_with = ["@platforms//os:linux"],
+)
 
 # Each browser's launcher, the variable felt finds it through, the
 # environment it needs inside Bazel's sandbox (its own sandbox does not
-# start within another), and the programs felt starts for it.
+# start within another), and the programs felt starts for it -- Firefox's on
+# a Linux host alone (web_ui_tests declares a suite for the browsers named).
 _BROWSERS = {
     "chrome": {
         "browser": ":chrome",
@@ -180,6 +191,7 @@ _BROWSERS = {
         "files": [],
         "variable": "CHROME_EXECUTABLE",
     },
+} | ({
     "firefox": {
         "browser": ":firefox",
         "env": {
@@ -192,7 +204,7 @@ _BROWSERS = {
         "tools": [":Xvfb"],
         "variable": "FIREFOX_EXECUTABLE",
     },
-}
+} if HOST_OS == "linux" else {})
 
 # The web engine's unit tests: felt_config.yaml's suites (FELT_CONFIG, which
 # tools/gn_to_bazel generates from it), one web_ui_test per test file and
