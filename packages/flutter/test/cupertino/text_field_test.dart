@@ -7020,6 +7020,80 @@ void main() {
     skip: isContextMenuProvidedByPlatform,
   );
 
+  testWidgets('dragging selection handles across each other preserves the selection endpoints', (
+    WidgetTester tester,
+  ) async {
+    // Regression test for https://github.com/flutter/flutter/issues/193270.
+    final controller = TextEditingController(text: 'abc d efghi');
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: CupertinoTextField(
+            controller: controller,
+            dragStartBehavior: DragStartBehavior.down,
+            selectionControls: CupertinoTextSelectionHandleControls(),
+          ),
+        ),
+      ),
+    );
+
+    Future<void> selectD() async {
+      final Offset dPosition = textOffsetToPosition(tester, 4);
+
+      await tester.tapAt(dPosition);
+      await tester.pump(const Duration(milliseconds: 50));
+      await tester.tapAt(dPosition);
+      await tester.pumpAndSettle();
+
+      expect(controller.selection, const TextSelection(baseOffset: 4, extentOffset: 5));
+
+      final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+      expect(state.selectionOverlay?.handlesAreVisible, isTrue);
+    }
+
+    final RenderEditable renderEditable = findRenderEditable(tester);
+
+    // Select "d" and drag the start handle past the end handle.
+    await selectD();
+
+    List<TextSelectionPoint> endpoints = globalize(
+      renderEditable.getEndpointsForSelection(controller.selection),
+      renderEditable,
+    );
+    expect(endpoints, hasLength(2));
+
+    final TestGesture startHandleGesture = await tester.startGesture(endpoints.first.point);
+    await tester.pump();
+    await startHandleGesture.moveTo(textOffsetToPosition(tester, 9));
+    await tester.pump();
+    await startHandleGesture.up();
+    await tester.pumpAndSettle();
+
+    // The selection should extend from the original end offset (5) to offset 9.
+    expect(controller.selection, const TextSelection(baseOffset: 5, extentOffset: 9));
+
+    // Select "d" again and drag the end handle past the start handle.
+    await selectD();
+
+    endpoints = globalize(
+      renderEditable.getEndpointsForSelection(controller.selection),
+      renderEditable,
+    );
+    expect(endpoints, hasLength(2));
+
+    final TestGesture endHandleGesture = await tester.startGesture(endpoints.last.point);
+    await tester.pump();
+    await endHandleGesture.moveTo(textOffsetToPosition(tester, 0));
+    await tester.pump();
+    await endHandleGesture.up();
+    await tester.pumpAndSettle();
+
+    // The selection should extend from offset 4 back to offset 0.
+    expect(controller.selection, const TextSelection(baseOffset: 4, extentOffset: 0));
+  }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
+
   group('textAlignVertical position', () {
     group('simple case', () {
       testWidgets('align top (default)', (WidgetTester tester) async {
