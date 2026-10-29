@@ -738,4 +738,68 @@ void main() {
       ),
     );
   });
+
+  testWithoutContext(
+    'Plugin parsing rejects sharedDarwinSource without pluginClass or ffiPlugin',
+    () {
+      final fileSystem = MemoryFileSystem.test();
+      const pluginYamlRaw =
+          'platforms:\n'
+          ' ios:\n'
+          '  sharedDarwinSource: true\n'
+          ' macos:\n'
+          '  dartPluginClass: MacOSClass\n'
+          '  sharedDarwinSource: true\n';
+
+      final pluginYaml = loadYaml(pluginYamlRaw) as YamlMap;
+      expect(
+        () => Plugin.fromYaml(
+          _kTestPluginName,
+          _kTestPluginPath,
+          pluginYaml,
+          null,
+          const <String>[],
+          isDevDependency: false,
+          fileSystem: fileSystem,
+        ),
+        throwsToolExit(
+          message:
+              'Invalid plugin specification $_kTestPluginName.\n'
+              'Invalid "ios" plugin specification: "sharedDarwinSource" cannot be specified without "pluginClass" or "ffiPlugin".\n'
+              'Invalid "macos" plugin specification: "sharedDarwinSource" cannot be specified without "pluginClass" or "ffiPlugin".',
+        ),
+      );
+    },
+  );
+
+  testWithoutContext('Plugin parsing allows sharedDarwinSource with ffiPlugin', () {
+    final fileSystem = MemoryFileSystem.test();
+    const pluginYamlRaw =
+        'platforms:\n'
+        ' ios:\n'
+        '  ffiPlugin: true\n'
+        '  sharedDarwinSource: true\n'
+        ' macos:\n'
+        '  ffiPlugin: true\n'
+        '  sharedDarwinSource: true\n';
+
+    final pluginYaml = loadYaml(pluginYamlRaw) as YamlMap;
+    final plugin = Plugin.fromYaml(
+      _kTestPluginName,
+      _kTestPluginPath,
+      pluginYaml,
+      null,
+      const <String>[],
+      isDevDependency: false,
+      fileSystem: fileSystem,
+    );
+
+    final iosPlugin = plugin.platforms[IOSPlugin.kConfigKey]! as IOSPlugin;
+    final macOSPlugin = plugin.platforms[MacOSPlugin.kConfigKey]! as MacOSPlugin;
+
+    expect(iosPlugin.ffiPlugin, isTrue);
+    expect(iosPlugin.sharedDarwinSource, isTrue);
+    expect(macOSPlugin.ffiPlugin, isTrue);
+    expect(macOSPlugin.sharedDarwinSource, isTrue);
+  });
 }

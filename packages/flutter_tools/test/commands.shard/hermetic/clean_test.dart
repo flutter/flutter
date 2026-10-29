@@ -785,7 +785,12 @@ CleanCommand createCleanCommand({
       stdio: FakeStdio(),
     ),
     verbose: verbose,
-    xcode: xcode ?? Xcode.test(processManager: resolvedProcessManager),
+    xcode:
+        xcode ??
+        Xcode.test(
+          processManager: resolvedProcessManager,
+          toolContext: FakeToolContext.macosHost(processManager: resolvedProcessManager),
+        ),
     xcodeProjectInterpreter: xcodeProjectInterpreter ?? FakeXcodeProjectInterpreter(),
   );
 }

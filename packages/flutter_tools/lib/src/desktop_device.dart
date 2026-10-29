@@ -88,7 +88,7 @@ abstract class DesktopDevice extends Device {
     String? mainPath,
     String? route,
     required DebuggingOptions debuggingOptions,
-    Map<String, dynamic> platformArgs = const <String, dynamic>{},
+    Map<String, Object?> platformArgs = const <String, Object>{},
     bool prebuiltApplication = false,
     String? userIdentifier,
   }) async {

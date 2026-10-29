@@ -256,8 +256,8 @@ class IOSPlugin extends PluginPlatform implements NativePlugin, DartPlugin, Darw
   /// Parses the iOS plugin configuration from the given [yaml].
   ///
   /// Returns `null` as the parsed value if [yaml] does not declare a valid
-  /// iOS plugin (none of `pluginClass`, `dartPluginClass`, `ffiPlugin: true`,
-  /// or `sharedDarwinSource: true`).
+  /// iOS plugin (none of `pluginClass`, `dartPluginClass`, or
+  /// `ffiPlugin: true`).
   static ParseResult<IOSPlugin?> parseFromYaml(String name, YamlMap yaml) {
     final parser = PluginYamlParser(yaml, pluginName: name, configKey: kConfigKey);
     return (
@@ -265,24 +265,31 @@ class IOSPlugin extends PluginPlatform implements NativePlugin, DartPlugin, Darw
       parser.flag(kFfiPlugin),
       parser.flag(kSharedDarwinSource),
       parser.parseDartPluginFields(displayName: 'iOS'),
-    ).map((
+    ).flatMap((
       String? pluginClass,
       bool ffiPlugin,
       bool sharedDarwinSource,
       ({String dartPluginClass, String dartFileName})? dartPluginFields,
     ) {
-      if (pluginClass != null || ffiPlugin || sharedDarwinSource || dartPluginFields != null) {
-        return IOSPlugin(
-          name: name,
-          classPrefix: '',
-          pluginClass: pluginClass,
-          dartPluginClass: dartPluginFields?.dartPluginClass,
-          dartFileName: dartPluginFields?.dartFileName,
-          ffiPlugin: ffiPlugin,
-          sharedDarwinSource: sharedDarwinSource,
+      if (sharedDarwinSource && pluginClass == null && !ffiPlugin) {
+        return parser.invalid(
+          '"$kSharedDarwinSource" cannot be specified without "$kPluginClass" or "$kFfiPlugin".',
         );
       }
-      return null;
+      if (pluginClass != null || ffiPlugin || dartPluginFields != null) {
+        return .pass(
+          IOSPlugin(
+            name: name,
+            classPrefix: '',
+            pluginClass: pluginClass,
+            dartPluginClass: dartPluginFields?.dartPluginClass,
+            dartFileName: dartPluginFields?.dartFileName,
+            ffiPlugin: ffiPlugin,
+            sharedDarwinSource: sharedDarwinSource,
+          ),
+        );
+      }
+      return .pass(null);
     });
   }
 
@@ -347,8 +354,8 @@ class MacOSPlugin extends PluginPlatform implements NativePlugin, DartPlugin, Da
   /// Parses the macOS plugin configuration from the given [yaml].
   ///
   /// Returns `null` as the parsed value if [yaml] does not declare a valid
-  /// macOS plugin (none of `pluginClass`, `dartPluginClass`,
-  /// `ffiPlugin: true`, or `sharedDarwinSource: true`).
+  /// macOS plugin (none of `pluginClass`, `dartPluginClass`, or
+  /// `ffiPlugin: true`).
   static ParseResult<MacOSPlugin?> parseFromYaml(String name, YamlMap yaml) {
     final parser = PluginYamlParser(yaml, pluginName: name, configKey: kConfigKey);
     return (
@@ -356,23 +363,30 @@ class MacOSPlugin extends PluginPlatform implements NativePlugin, DartPlugin, Da
       parser.flag(kFfiPlugin),
       parser.flag(kSharedDarwinSource),
       parser.parseDartPluginFields(displayName: 'macOS'),
-    ).map((
+    ).flatMap((
       String? pluginClass,
       bool ffiPlugin,
       bool sharedDarwinSource,
       ({String dartPluginClass, String dartFileName})? dartPluginFields,
     ) {
-      if (pluginClass != null || ffiPlugin || sharedDarwinSource || dartPluginFields != null) {
-        return MacOSPlugin(
-          name: name,
-          pluginClass: pluginClass,
-          dartPluginClass: dartPluginFields?.dartPluginClass,
-          dartFileName: dartPluginFields?.dartFileName,
-          ffiPlugin: ffiPlugin,
-          sharedDarwinSource: sharedDarwinSource,
+      if (sharedDarwinSource && pluginClass == null && !ffiPlugin) {
+        return parser.invalid(
+          '"$kSharedDarwinSource" cannot be specified without "$kPluginClass" or "$kFfiPlugin".',
         );
       }
-      return null;
+      if (pluginClass != null || ffiPlugin || dartPluginFields != null) {
+        return .pass(
+          MacOSPlugin(
+            name: name,
+            pluginClass: pluginClass,
+            dartPluginClass: dartPluginFields?.dartPluginClass,
+            dartFileName: dartPluginFields?.dartFileName,
+            ffiPlugin: ffiPlugin,
+            sharedDarwinSource: sharedDarwinSource,
+          ),
+        );
+      }
+      return .pass(null);
     });
   }
 

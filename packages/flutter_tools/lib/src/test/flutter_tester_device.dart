@@ -142,7 +142,7 @@ class FlutterTesterTestDevice extends TestDevice {
       'UNIT_TEST_ASSETS': ?testAssetDirectory,
       if (platform.isWindows && nativeAssetsBuilder != null && flutterProject != null)
         'PATH':
-            '${nativeAssetsBuilder!.windowsBuildDirectory(flutterProject!)};${platform.environment['PATH']}',
+            '${nativeAssetsBuilder!.windowsBuildDirectory(flutterProject!, toolContext: toolContext)};${platform.environment['PATH']}',
     };
 
     logger.printTrace(
