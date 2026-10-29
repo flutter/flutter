@@ -13,8 +13,11 @@ filegroup(
         "lib/**",
         # The package is a plugin: when a project that depends on it resolves,
         # flutter_tools reads the Android embedding's main class
-        # (platform_plugins.dart) to write the plugin registrant.
+        # (platform_plugins.dart) to write the plugin registrant, and an iOS
+        # app's CocoaPods and Swift Package Manager builds read its podspec
+        # and Swift package (a plugin's example app depends on it).
         "android/**",
+        "ios/**",
     ]) + ["pubspec.yaml"],
 )
 

@@ -1860,9 +1860,14 @@ zip_bundle(
     }),
 )
 
+# The cache copies the repository's LICENSE into each iOS directory after
+# unpacking (EngineCachedArtifact.updateInner over getLicenseDirs) and
+# checks it is there before it trusts the directory (isUpToDateInner): the
+# facsimile lays it too.
 bundle_directory(
     name = "ios_engine_directory",
     bundles = [":ios_artifacts"],
+    files = {"//:LICENSE": "LICENSE"},
     target_compatible_with = select({
         "@platforms//os:macos": [],
         "//conditions:default": ["@platforms//:incompatible"],
@@ -1886,6 +1891,7 @@ bundle_directory(
     bundle_directory(
         name = "ios_engine_%s_directory" % mode,
         bundles = [":ios_artifacts_" + mode],
+        files = {"//:LICENSE": "LICENSE"},
         target_compatible_with = select({
             "@platforms//os:macos": [],
             "//conditions:default": ["@platforms//:incompatible"],
