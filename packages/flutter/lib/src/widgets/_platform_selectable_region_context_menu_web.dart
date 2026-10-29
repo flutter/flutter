@@ -89,14 +89,22 @@ class PlatformSelectableRegionContextMenu extends StatefulWidget {
       <SelectionContainerDelegate, web.HTMLElement>{};
 
   static void _synchronizeDomSelection(web.HTMLElement element, SelectionContainerDelegate client) {
+    if (client != _activeClient) {
+      return;
+    }
+
     // The innerText must contain the text in order to be selected by the browser.
     final String text = client.getSelectedContent()?.plainText ?? '';
     element.innerText = text;
 
-    // Only update the browser's DOM selection for the active client when there
-    // is selected text to copy, and only if the element is attached to the DOM
-    // (selecting a detached element throws).
-    if (client != _activeClient || text.isEmpty || !element.isConnected) {
+    // Only update the browser's DOM selection if the element is attached to the
+    // DOM (selecting a detached element throws).
+    if (!element.isConnected) {
+      return;
+    }
+
+    if (text.isEmpty) {
+      web.window.getSelection()?.removeAllRanges();
       return;
     }
 
@@ -175,12 +183,13 @@ class PlatformSelectableRegionContextMenu extends StatefulWidget {
       // otherwise announce the text.
       htmlElement.setAttribute('aria-hidden', 'true');
 
-      // Keep track of this element by the States element ID.
+      // Keep track of this element by the State's element ID.
       final creationParams = params as Map<Object?, Object?>?;
       final elementId = creationParams?['elementId'] as int?;
       final SelectionContainerDelegate? client = _clientsByElementId[elementId];
       if (client != null) {
         _elementsByClient[client] = htmlElement;
+        _synchronizeDomSelection(htmlElement, client);
       }
 
       htmlElement.addEventListener(
@@ -237,9 +246,6 @@ class _PlatformSelectableRegionContextMenuState extends State<PlatformSelectable
   void dispose() {
     PlatformSelectableRegionContextMenu._clientsByElementId.remove(_elementId);
     PlatformSelectableRegionContextMenu._elementsByClient.remove(widget._client);
-    if (PlatformSelectableRegionContextMenu._activeClient == widget._client) {
-      PlatformSelectableRegionContextMenu._activeClient = null;
-    }
     super.dispose();
   }
 

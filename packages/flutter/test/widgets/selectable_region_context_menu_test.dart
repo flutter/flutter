@@ -330,13 +330,24 @@ void main() {
 
     focusNode.requestFocus();
     await tester.pump();
-    tester.state<SelectableRegionState>(find.byType(SelectableRegion)).selectAll();
+    final SelectableRegionState state = tester.state<SelectableRegionState>(
+      find.byType(SelectableRegion),
+    );
+    state.selectAll();
     await tester.pump();
 
     // No copy event or right click has occurred, but the selection should've
     // been updated.
     expect(hiddenElement.innerText, 'eager text');
     expect(web.window.getSelection()?.toString().trim(), 'eager text');
+
+    // Clearing the selection should also clear the hidden element and remove
+    // the DOM selection range so Edit > Copy does not stay enabled.
+    state.clearSelection();
+    await tester.pump();
+    expect(hiddenElement.innerText, isEmpty);
+    expect(web.window.getSelection()?.toString(), isEmpty);
+    expect(web.window.getSelection()?.rangeCount, 0);
   }, variant: _browserContextMenuEnabledVariants);
 
   // Regression test for https://github.com/flutter/flutter/issues/189575.
@@ -632,6 +643,10 @@ void main() {
     await BrowserContextMenu.enableContextMenu();
     addTearDown(BrowserContextMenu.enableContextMenu);
 
+    final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
+    final focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
+
     late StateSetter rebuild;
     await tester.pumpWidget(
       TestWidgetsApp(
@@ -639,6 +654,7 @@ void main() {
           builder: (BuildContext context, StateSetter setState) {
             rebuild = setState;
             return SelectableRegion(
+              focusNode: focusNode,
               selectionControls: testTextSelectionHandleControls,
               child: const Text('How are you?'),
             );
@@ -646,6 +662,12 @@ void main() {
         ),
       ),
     );
+
+    focusNode.requestFocus();
+    await tester.pump();
+    tester.state<SelectableRegionState>(find.byType(SelectableRegion)).selectAll();
+    await tester.pump();
+    expect(PlatformSelectableRegionContextMenu.debugActiveClient, isNotNull);
 
     await BrowserContextMenu.disableContextMenu();
     rebuild(() {});
@@ -656,6 +678,10 @@ void main() {
     rebuild(() {});
     await tester.pump();
     expect(tester.takeException(), isNull);
+    expect(PlatformSelectableRegionContextMenu.debugActiveClient, isNotNull);
+    final remountedElement =
+        fakePlatformViewRegistry.getViewById(currentViewId + 2) as web.HTMLElement;
+    expect(remountedElement.innerText, 'How are you?');
 
     await BrowserContextMenu.disableContextMenu();
     rebuild(() {});

@@ -518,7 +518,8 @@ class SelectableRegionState extends State<SelectableRegion>
         oldWidget.focusNode!.removeListener(_handleFocusChanged);
       }
       _focusNode.addListener(_handleFocusChanged);
-      if (_focusNode.hasFocus != oldWidget.focusNode?.hasFocus) {
+      if (_focusNode.hasFocus != oldWidget.focusNode?.hasFocus ||
+          _focusNode.hasPrimaryFocus != oldWidget.focusNode?.hasPrimaryFocus) {
         _handleFocusChanged();
       }
     }
@@ -1594,6 +1595,9 @@ class SelectableRegionState extends State<SelectableRegion>
     _adjustingSelectionEnd = null;
     _selectable?.dispatchSelectionEvent(const ClearSelectionEvent());
     _updateSelectedContentIfNeeded();
+    if (_webContextMenuEnabled) {
+      PlatformSelectableRegionContextMenu.synchronizeSelection(_selectionDelegate);
+    }
   }
 
   Future<void> _copy() async {
