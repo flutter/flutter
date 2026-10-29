@@ -1082,8 +1082,9 @@ without a signing identity, 7 whole with one -- "The recipe's universal
 Apple archives"),
 and the pure-Dart trees (dev/bots, devicelab, packages_autoroller,
 flutter_analyzer_plugin, snippets, gen_defaults, gen_keycodes,
-fuchsia_remote_debug_protocol). Left out by name: web-only and macOS-only
-files (`@TestOn`, which a BUILD file cannot read), tests of the repository
+fuchsia_remote_debug_protocol). Left out by name: web-only files and, on a
+Linux host, the one macOS-only file (`@TestOn`, which a BUILD file cannot
+read; dev/bots' codesign_test runs on a Mac host), tests of the repository
 itself (git on the checkout), and what needs the engine in its other
 runtime modes or a device. The compile's defines for
 the SDK version are fixed words (`-DFLUTTER_VERSION=bazel`...), so a kernel
