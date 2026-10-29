@@ -15,24 +15,32 @@ namespace fml {
 /// The CPU Affinity provides a hint to the operating system on which cores a
 /// particular thread should be scheduled on. The operating system may or may
 /// not honor these requests.
+///
+/// The performance and efficiency cores here are the groups of cores with the
+/// highest and the lowest cpuinfo_max_freq on the device. They are not the
+/// industry's core types: on a chip with two prime and six performance cores,
+/// the two prime cores are the performance cores here, and the six performance
+/// cores are the efficiency cores.
 enum class CpuAffinity {
-  /// @brief Request CPU affinity for the performance cores.
-  ///
-  ///        Generally speaking, only the UI and Raster thread should
-  ///        use this option.
+  /// @brief Request affinity for the performance cores: those with the highest
+  ///        cpuinfo_max_freq.
   kPerformance,
 
-  /// @brief Request CPU affinity for the efficiency cores.
+  /// @brief Request affinity for the efficiency cores: those with the lowest
+  ///        cpuinfo_max_freq.
   kEfficiency,
 
-  /// @brief Request affinity for all non-performance cores.
+  /// @brief Request affinity for every core except the performance cores.
   kNotPerformance,
 
-  /// @brief Request affinity for all non-efficiency cores.
+  /// @brief Request affinity for every core except the little cores.
   ///
-  ///        On a device without little cores, that is every core. See
-  ///        CPUSpeedTracker.
-  kNotEfficiency,
+  ///        The efficiency cores count as little cores unless the kernel's
+  ///        cpu_capacity values rule that out: every core reports one, they
+  ///        are not all equal, and none is below half of the highest. Then
+  ///        the device has no little cores, and this is every core, the
+  ///        efficiency cores included.
+  kNotLittle,
 };
 
 /// @brief Request count of efficiency cores.
@@ -68,13 +76,6 @@ struct CpuIndexAndSpeed {
 /// @brief A class that computes the correct CPU indices for a requested CPU
 ///        affinity.
 ///
-///        Efficiency cores are those with the lowest speed. A device without
-///        little cores has a slowest group too: on two prime and six
-///        performance cores, the non-efficiency set would be the two prime
-///        cores alone. When every CPU reports a capacity and none is below
-///        half of the fastest, the device has no little cores, and the
-///        non-efficiency set is every core.
-///
 /// @note  This is visible for testing.
 class CPUSpeedTracker {
  public:
@@ -98,7 +99,7 @@ class CPUSpeedTracker {
   std::vector<size_t> efficiency_;
   std::vector<size_t> performance_;
   std::vector<size_t> not_performance_;
-  std::vector<size_t> not_efficiency_;
+  std::vector<size_t> not_little_;
 };
 
 /// @note Visible for testing.

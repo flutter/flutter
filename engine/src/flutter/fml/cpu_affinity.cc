@@ -85,15 +85,16 @@ CPUSpeedTracker::CPUSpeedTracker(std::vector<CpuIndexAndSpeed> data)
     if (data.speed == min_speed_value) {
       efficiency_.push_back(data.index);
     } else {
-      not_efficiency_.push_back(data.index);
+      not_little_.push_back(data.index);
     }
   }
-  // The slowest cores are not little ones: excluding them would leave the
-  // fastest group alone, which may be as few as one or two cores.
+  // Without little cores, the efficiency cores are full-size ones: excluding
+  // them would leave the performance cores alone, which may be as few as one
+  // or two.
   if (HasNoLittleCores(cpu_speeds_)) {
-    not_efficiency_.clear();
+    not_little_.clear();
     for (const auto& data : cpu_speeds_) {
-      not_efficiency_.push_back(data.index);
+      not_little_.push_back(data.index);
     }
   }
 
@@ -113,8 +114,8 @@ const std::vector<size_t>& CPUSpeedTracker::GetIndices(
       return efficiency_;
     case CpuAffinity::kNotPerformance:
       return not_performance_;
-    case CpuAffinity::kNotEfficiency:
-      return not_efficiency_;
+    case CpuAffinity::kNotLittle:
+      return not_little_;
   }
 }
 
