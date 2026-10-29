@@ -23,6 +23,16 @@ group("gl_wrap") {
     "//third_party/vulkan_validation_layers:VkLayer_khronos_validation",
     "//third_party/vulkan_validation_layers:vulkan_gen_json_files",
   ]
+  if (is_mac) {
+    # ANGLE's shared libraries: the Impeller playground on a Mac opens
+    # libGLESv2.dylib by name for its OpenGLES variants (use_angle,
+    # playground_impl_gles.cc), where the other hosts link ANGLE in; the
+    # golden suite depends on both in the engine's GN build.
+    deps += [
+      "//flutter/third_party/angle:libEGL",
+      "//flutter/third_party/angle:libGLESv2",
+    ]
+  }
 }
 
 # The objects of this group's closure, minus the archive boundaries, make

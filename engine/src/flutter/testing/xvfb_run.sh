@@ -125,8 +125,16 @@ fi
 # suites there as they are (the window server is the logged-in session's,
 # on a bot as on a desk), with the Metal validation environment the rule
 # sets (testing.bzl). The session bus above is GTK's, which no Mac suite
-# asks for.
+# asks for. The GPU test backends' directory goes on DYLD_LIBRARY_PATH
+# (FLUTTER_TEST_LIBRARY_PATH, relative to the runfiles root the test runs
+# from): the playground opens ANGLE's libGLESv2.dylib by its leaf name,
+# which dyld finds there -- under run_tests.py in the working directory,
+# GN's build directory. Exported here rather than by the rule because dyld
+# strips DYLD_* from the environment of /bin/bash, a protected binary.
 if [[ "$(uname -s)" == Darwin ]]; then
+  if [[ -n "${FLUTTER_TEST_LIBRARY_PATH:-}" ]]; then
+    export DYLD_LIBRARY_PATH="$PWD/$FLUTTER_TEST_LIBRARY_PATH${DYLD_LIBRARY_PATH:+:$DYLD_LIBRARY_PATH}"
+  fi
   exec "$@"
 fi
 

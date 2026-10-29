@@ -600,6 +600,7 @@ cc_test(
         ],
         "//conditions:default": [],
     }),
+    flaky = True,
     linkopts = ["-ObjC"],
     local_defines = FLUTTER_LOCAL_DEFINES,
     target_compatible_with = select({

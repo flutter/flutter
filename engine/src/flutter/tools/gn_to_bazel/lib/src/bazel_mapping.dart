@@ -122,9 +122,14 @@ final class TestRun {
     this.env = const <String, String>{},
     this.runnerArgs = const <String>[],
     this.macArgs,
+    this.flaky = false,
   });
 
   final List<String> args;
+
+  /// Whether Bazel retries the suite (the test's `flaky`): a suite CI
+  /// itself treats as flaky, with the issue on record.
+  final bool flaky;
 
   /// The arguments run_tests.py passes on a macOS host, where they differ
   /// from [args] (a Linux host's): a select() on the host's setting
@@ -261,10 +266,14 @@ const Map<String, TestRun> testRuns = <String, TestRun>{
   // uses global state that isn't handled correctly by gtest-parallel"
   // (flutter/flutter#104789). It skips the suite on host_debug builds for
   // flakiness (flutter/flutter#127441); Bazel runs it in every
-  // configuration -- the flakiness is the suite's to fix.
+  // configuration and retries it (`flaky`): the shuffled second pass
+  // depends on the order it draws (the Mac's T53C: 235/235, then
+  // FlutterTextInputSemanticsObjectTest after an engine shutdown) -- the
+  // flakiness is the suite's to fix.
   '//flutter/shell/platform/darwin/macos:flutter_desktop_darwin_unittests': TestRun(
     args: <String>['--gtest_repeat=2', '--gtest_shuffle'],
     data: <String>[],
+    flaky: true,
   ),
   // run_tests.py (Linux) passes txt_unittests ICU's data file; the suite's
   // main (txt_run_all_unittests.cc) reads no such flag, so the argument is
