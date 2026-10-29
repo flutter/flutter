@@ -5003,10 +5003,15 @@ class EditableTextState extends State<EditableText>
       }
     } else {
       WidgetsBinding.instance.removeObserver(this);
-      setState(() {
-        _currentPromptRectRange = null;
-      });
     }
+    setState(() {
+      // Rebuild on focus gain too: build() passes _hasFocus to RenderEditable,
+      // and a focus gain with an already valid selection triggers no other
+      // rebuild.
+      if (!_hasFocus) {
+        _currentPromptRectRange = null;
+      }
+    });
     updateKeepAlive();
   }
 
