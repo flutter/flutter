@@ -292,6 +292,18 @@ const Map<String, TestRun> testRuns = <String, TestRun>{
   '//flutter/impeller/golden_tests:impeller_golden_tests': TestRun(
     args: <String>[r'--working_dir=$$TEST_TMPDIR'],
     data: <String>[],
+    // The Mac harness (golden_playground_test_mac.cc) points the Vulkan
+    // loader at SwiftShader's manifest in the build directory, which it
+    // derives from the testing assets' path as GN lays it -- four parents
+    // up from gen/flutter/testing/assets -- over the rule's own setting.
+    // Under Bazel the manifest sits beside the binary, in the suite's
+    // package: the assets' path is named under GN's layout there (the
+    // suite reads nothing from it), so that the derivation lands on the
+    // package and the manifest the rule names.
+    env: <String, String>{
+      'FLUTTER_TEST_TESTING_ASSETS_DIR':
+          'engine/src/flutter/impeller/golden_tests/gen/flutter/testing/assets',
+    },
   ),
 };
 
@@ -2618,6 +2630,27 @@ const GnCasedValue _skiaGlStandard = GnCasedValue('target_os', <String, String>{
   'wasm': 'webgl',
 });
 
+/// glfw_args.gni's glfw_vulkan_library as tools/gn's --use-glfw-swiftshader
+/// sets it (every builder that runs the Impeller suites passes the flag;
+/// builders.dart assumes it): the name GLFW opens the Vulkan loader by --
+/// libvulkan.so.1 on a Linux host, GLFW's own default there, and
+/// libvulkan.dylib on a Mac, where GLFW would otherwise open
+/// libvulkan.1.dylib, a Vulkan SDK's (the Mac's T53D: the golden suite's
+/// Vulkan variants find no Vulkan). Empty for the other targets, as GN
+/// builds nothing of GLFW for them. The values carry their quotes, as
+/// tools/gn passes them (`\\"libvulkan.dylib\\"`): the define is a C string.
+/// GLFW's file is converted under this when its repository is fetched;
+/// impeller/BUILD.gn reads the argument too, for the backends it adds to
+/// its suite, and keeps the empty default (the suites carry the backends
+/// as data: gpuBackendTests).
+const GnCasedValue _glfwVulkanLibrary = GnCasedValue('target_os', <String, String>{
+  'android': '',
+  'ios': '',
+  'linux': '"libvulkan.so.1"',
+  'mac': '"libvulkan.dylib"',
+  'wasm': '',
+});
+
 /// The assumptions the checked-in files are generated under: the Linux x64
 /// host's ([linuxHostAssumptions]) less everything GN derives from the
 /// target -- the target OS and CPU, the toolchains, the names of the target,
@@ -2743,6 +2776,7 @@ Assumptions generationAssumptions() {
     // codecs), which stay derivations. skia_gl_standard is tools/gn's, per
     // target OS (_skiaGlStandard).
     'skia_gl_standard': _skiaGlStandard,
+    'glfw_vulkan_library': _glfwVulkanLibrary,
     'skia_enable_pdf': const GnBoolValue(false),
     'skia_use_dng_sdk': const GnBoolValue(false),
     'skia_use_vma': const GnBoolValue(false),
@@ -3053,6 +3087,9 @@ Assumptions linuxHostAssumptions() {
     // --enable-fontconfig, which is a Bazel flag (conditionSettings).
     'skia_enable_pdf': GnBoolValue(false),
     'skia_gl_standard': GnStringValue(''),
+    // tools/gn's --use-glfw-swiftshader on a Linux host (the host test
+    // builders pass it): GLFW opens the loader by this name (_glfwVulkanLibrary).
+    'glfw_vulkan_library': GnStringValue('"libvulkan.so.1"'),
     'skia_use_dng_sdk': GnBoolValue(false),
     'skia_use_expat': GnBoolValue(true),
     'skia_use_gl': GnBoolValue(true),

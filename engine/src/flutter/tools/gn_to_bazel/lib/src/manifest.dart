@@ -1505,7 +1505,14 @@ ios_xctest(
   ),
   // Impeller's group, its own suite (impeller_unittests, which links every
   // suite source_set below) and the Flutter GPU one.
-  ConvertedFile('//flutter/impeller'),
+  ConvertedFile(
+    '//flutter/impeller',
+    // The backends tools/gn's --use-glfw-swiftshader adds to the suite's
+    // deps (SwiftShader, the loader, the validation layers; the generation
+    // assumes the flag for GLFW's sake) are the suites' data here
+    // (gpuBackendTests): the file keeps the argument's empty default.
+    assume: <String, GnValue>{'glfw_vulkan_library': GnStringValue('')},
+  ),
   // The per-component suites (base_unittests, geometry_unittests, ...) are
   // source_sets GN links into the one impeller_unittests binary above, and
   // shell/profiling's into shell_unittests; they ran as binaries of their

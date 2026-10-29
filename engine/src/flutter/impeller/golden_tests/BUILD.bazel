@@ -223,6 +223,7 @@ flutter_display_test(
         "-Wno-unguarded-availability",  # from //flutter/display_list
     ],
     data = [":gpu_test_backends"],
+    env = {"FLUTTER_TEST_TESTING_ASSETS_DIR": "engine/src/flutter/impeller/golden_tests/gen/flutter/testing/assets"},
     local_defines = FLUTTER_LOCAL_DEFINES,
     target_compatible_with = select({
         ":when_is_mac_and_enable_unittests": [],
