@@ -621,7 +621,9 @@ display_launcher(name = "Xvfb")
 # The desktop shard: the integration shard's files that build or run a
 # Linux desktop app (_INTEGRATION_DESKTOP), each on a display of its own,
 # with the build tools first on PATH and the built app's libraries from
-# the runtime sysroot.
+# the runtime sysroot. A Linux host's alone (the GTK embedding, an X
+# display, the Linux CMake and sysroot), as the apple shard below is a
+# Mac's: //:tool_tests skips it elsewhere.
 dart_package_tests(
     name = "desktop_shard",
     size = "large",
@@ -645,6 +647,7 @@ dart_package_tests(
     sdk_trees = {"@pub_workspace//:pubspecs": ""},
     # The tool, CMake and ninja's compiles, and the app at once.
     tags = ["cpu:4"],
+    target_compatible_with = ["@platforms//os:linux"],
     tests = _INTEGRATION_DESKTOP,
     tools = [":linux_build_tools"],
     # pub touches the workspace's lock when it resolves a member.
