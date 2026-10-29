@@ -2394,6 +2394,50 @@ void main() {
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('Reversed list animates to the drop target after scrolling', (
+    WidgetTester tester,
+  ) async {
+    final controller = ScrollController(initialScrollOffset: 1000);
+    addTearDown(controller.dispose);
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: CustomScrollView(
+          controller: controller,
+          reverse: true,
+          slivers: <Widget>[
+            SliverReorderableList(
+              itemCount: 30,
+              onReorderItem: (int oldIndex, int newIndex) {},
+              itemBuilder: (BuildContext context, int index) {
+                return ReorderableDragStartListener(
+                  key: ValueKey<int>(index),
+                  index: index,
+                  child: SizedBox(height: 100, child: Text('item $index')),
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+
+    // Only some items are built, so the number of built items is smaller
+    // than the index the item is dropped at.
+    final Rect target = tester.getRect(find.text('item 13'));
+    final TestGesture drag = await tester.startGesture(tester.getCenter(find.text('item 12')));
+    // Move item 12 past item 13, so it is dropped in item 13's slot.
+    await drag.moveBy(const Offset(0, -20));
+    await drag.moveBy(const Offset(0, -210));
+    await tester.pumpAndSettle();
+    await drag.up();
+    await tester.pump();
+    // Check the proxy just before the 250ms drop animation ends.
+    await tester.pump(const Duration(milliseconds: 249));
+    expect(tester.getRect(find.text('item 12')).top, closeTo(target.top, 1));
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+  });
 }
 
 class TestList extends StatelessWidget {

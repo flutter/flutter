@@ -913,8 +913,10 @@ class SliverReorderableListState extends State<SliverReorderableList>
           return;
         }
         if (item.mounted) {
-          final itemRenderBox = item.context.findRenderObject()! as RenderBox;
-          dragInfo.itemLayoutConstraints = itemRenderBox.constraints;
+          final RenderObject? renderObject = item.context.findRenderObject();
+          if (renderObject is RenderBox) {
+            dragInfo.itemLayoutConstraints = renderObject.constraints;
+          }
         }
         _overlayEntry?.markNeedsBuild();
       }, debugLabel: 'SliverReorderableList.updateDragProxy');
@@ -1032,9 +1034,9 @@ class SliverReorderableListState extends State<SliverReorderableList>
       // No movement - animate to current position
       return startOf(insertIndex);
     } else if (_reverse) {
-      if (insertIndex >= _items.length) {
+      if (insertIndex >= widget.itemCount) {
         // Drop at the starting position of the last element and offset its own extent
-        final Offset? start = startOf(_items.length - 1);
+        final Offset? start = startOf(widget.itemCount - 1);
         return start == null ? null : start - ownExtent;
       } else {
         // Drop at the end of the current element occupying the insert position
