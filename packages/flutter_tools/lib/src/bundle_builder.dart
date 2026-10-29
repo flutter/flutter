@@ -95,6 +95,7 @@ class BundleBuilder {
       processManager: processManager,
       analytics: _analytics,
       platform: hostPlatform,
+      projectFactory: projectFactory,
       generateDartPluginRegistry: true,
     );
     final Target target = buildInfo.mode == BuildMode.debug

@@ -26,6 +26,7 @@ import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/doctor_validator.dart';
+import 'package:flutter_tools/src/experimental/extension_manager.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:flutter_tools/src/ios/simulators.dart';
@@ -324,8 +325,12 @@ class FakeAndroidLicenseValidator extends Fake implements AndroidLicenseValidato
 class _ContextFakeDoctor extends Doctor {
   _ContextFakeDoctor(Logger logger, {super.clock = const SystemClock()})
     : super(
+        analytics: globals.analytics,
         cache: Cache.test(processManager: FakeProcessManager.any()),
         logger: logger,
+        outputPreferences: globals.outputPreferences,
+        validatorsProviderBuilder: ({ExtensionManager? extensionManager}) =>
+            context.get<DoctorValidatorsProvider>()!,
       );
 
   // True for testing.

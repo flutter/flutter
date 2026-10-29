@@ -14,7 +14,6 @@ import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/git.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/version.dart';
 import 'package:meta/meta.dart';
 import 'package:test/fake.dart';
@@ -312,10 +311,13 @@ void main() {
           ]);
 
           final flutterVersion = FlutterVersion(
+            cache: cache,
             clock: _testClock,
             fs: fs,
             flutterRoot: flutterRoot,
             git: git,
+            logger: testLogger,
+            platform: FakePlatform(),
           );
           await flutterVersion.checkFlutterVersionFreshness();
           expect(flutterVersion.channel, channel);
@@ -498,11 +500,14 @@ void main() {
           ]);
 
           final flutterVersion = FlutterVersion(
+            cache: cache,
             clock: _testClock,
             fs: fs,
             flutterRoot: flutterRoot,
             fetchTags: true,
             git: git,
+            logger: testLogger,
+            platform: FakePlatform(),
           );
           await flutterVersion.checkFlutterVersionFreshness();
 
@@ -599,10 +604,13 @@ void main() {
           ]);
 
           final flutterVersion = FlutterVersion(
+            cache: cache,
             clock: _testClock,
             fs: fs,
             flutterRoot: flutterRoot,
             git: git,
+            logger: testLogger,
+            platform: FakePlatform(),
           );
           await flutterVersion.checkFlutterVersionFreshness();
 
@@ -1057,10 +1065,13 @@ void main() {
 
     final fs = MemoryFileSystem.test();
     final flutterVersion = FlutterVersion(
+      cache: cache,
       clock: _testClock,
       fs: fs,
       flutterRoot: '/path/to/flutter',
       git: git,
+      logger: testLogger,
+      platform: FakePlatform(),
     );
     expect(flutterVersion.channel, '[user-branch]');
     expect(flutterVersion.getVersionString(), 'feature-branch/1234abcd');
@@ -1141,10 +1152,13 @@ void main() {
     final Directory flutterRoot = fs.directory('/path/to/flutter');
     flutterRoot.childDirectory('bin').childDirectory('cache').createSync(recursive: true);
     final flutterVersion = FlutterVersion(
+      cache: cache,
       clock: _testClock,
       fs: fs,
       flutterRoot: flutterRoot.path,
       git: git,
+      logger: testLogger,
+      platform: FakePlatform(),
     );
 
     final File versionFile = fs.file('/path/to/flutter/bin/cache/flutter.version.json');
@@ -1187,10 +1201,13 @@ void main() {
     };
     cacheDir.childFile('flutter.version.json').writeAsStringSync(jsonEncode(versionJson));
     final flutterVersion = FlutterVersion(
+      cache: cache,
       clock: _testClock,
       fs: fs,
       flutterRoot: flutterRoot.path,
       git: git,
+      logger: testLogger,
+      platform: FakePlatform(),
     );
     expect(flutterVersion.channel, 'stable');
     expect(flutterVersion.getVersionString(), 'stable/1.2.3');
@@ -1225,10 +1242,13 @@ void main() {
       cacheDir.childFile('flutter.version.json').writeAsStringSync(jsonEncode(versionJson));
       expect(legacyVersionFile.existsSync(), isFalse);
       final flutterVersion = FlutterVersion(
+        cache: cache,
         clock: _testClock,
         fs: fs,
         flutterRoot: flutterRoot.path,
         git: git,
+        logger: testLogger,
+        platform: FakePlatform(),
       );
       flutterVersion.ensureVersionFile();
       expect(legacyVersionFile.existsSync(), isTrue);
@@ -1292,10 +1312,13 @@ void main() {
       ]);
 
       final flutterVersion = FlutterVersion(
+        cache: cache,
         clock: _testClock,
         fs: fs,
         flutterRoot: flutterRoot.path,
         git: git,
+        logger: testLogger,
+        platform: FakePlatform(),
       );
       expect(flutterVersion.engineCommitDate, isNull);
       expect(flutterVersion.toJson(), isNot(contains('engineCommitDate')));
@@ -1380,10 +1403,13 @@ void main() {
     // version file exists in a malformed state
     expect(versionFile.existsSync(), isTrue);
     final flutterVersion = FlutterVersion(
+      cache: cache,
       clock: _testClock,
       fs: fs,
       flutterRoot: flutterRoot.path,
       git: git,
+      logger: testLogger,
+      platform: FakePlatform(),
     );
 
     // version file was deleted because it couldn't be parsed
@@ -1403,10 +1429,19 @@ void main() {
       final File legacyVersionFile = flutterRoot.childFile('version');
 
       final flutterVersion = FlutterVersion(
+        cache: cache,
         clock: _testClock,
         fs: fs,
         flutterRoot: flutterRoot.path,
-        git: Git(currentPlatform: FakePlatform(), runProcessWith: globals.processUtils),
+        git: Git(
+          currentPlatform: FakePlatform(),
+          runProcessWith: ProcessUtils(
+            processManager: FakeProcessManager.any(),
+            logger: testLogger,
+          ),
+        ),
+        logger: testLogger,
+        platform: FakePlatform(),
       );
       flutterVersion.ensureVersionFile();
 
@@ -1428,10 +1463,19 @@ void main() {
       final File legacyVersionFile = flutterRoot.childFile('version');
 
       final flutterVersion = FlutterVersion(
+        cache: cache,
         clock: _testClock,
         fs: fs,
         flutterRoot: flutterRoot.path,
-        git: Git(currentPlatform: FakePlatform(), runProcessWith: globals.processUtils),
+        git: Git(
+          currentPlatform: FakePlatform(),
+          runProcessWith: ProcessUtils(
+            processManager: FakeProcessManager.any(),
+            logger: testLogger,
+          ),
+        ),
+        logger: testLogger,
+        platform: FakePlatform(),
       );
       flutterVersion.ensureVersionFile();
 
@@ -1522,16 +1566,25 @@ void main() {
     expect(GitTagVersion.parse('10.20.30-0-g$hash').frameworkVersionFor(hash), '10.20.30');
     expect(testLogger.traceText, '');
     expect(
-      GitTagVersion.parse('v1.2.3+hotfix.1-4-g$hash').frameworkVersionFor(hash),
+      GitTagVersion.parse('v1.2.3+hotfix.1-4-g$hash', logger: testLogger).frameworkVersionFor(hash),
       '0.0.0-unknown',
     );
-    expect(GitTagVersion.parse('x1.2.3-4-g$hash').frameworkVersionFor(hash), '0.0.0-unknown');
     expect(
-      GitTagVersion.parse('1.0.0-unknown-0-g$hash').frameworkVersionFor(hash),
+      GitTagVersion.parse('x1.2.3-4-g$hash', logger: testLogger).frameworkVersionFor(hash),
       '0.0.0-unknown',
     );
-    expect(GitTagVersion.parse('beta-1-g$hash').frameworkVersionFor(hash), '0.0.0-unknown');
-    expect(GitTagVersion.parse('1.2.3-4-gx$hash').frameworkVersionFor(hash), '0.0.0-unknown');
+    expect(
+      GitTagVersion.parse('1.0.0-unknown-0-g$hash', logger: testLogger).frameworkVersionFor(hash),
+      '0.0.0-unknown',
+    );
+    expect(
+      GitTagVersion.parse('beta-1-g$hash', logger: testLogger).frameworkVersionFor(hash),
+      '0.0.0-unknown',
+    );
+    expect(
+      GitTagVersion.parse('1.2.3-4-gx$hash', logger: testLogger).frameworkVersionFor(hash),
+      '0.0.0-unknown',
+    );
     expect(testLogger.statusText, '');
     expect(testLogger.errorText, '');
     expect(
@@ -1821,7 +1874,14 @@ void main() {
         );
 
         // No git commands should be run because cache is not suspicious
-        final version = FlutterVersion(fs: fs, git: git, flutterRoot: flutterRoot);
+        final version = FlutterVersion(
+          cache: cache,
+          fs: fs,
+          git: git,
+          flutterRoot: flutterRoot,
+          logger: testLogger,
+          platform: FakePlatform(),
+        );
 
         expect(version.frameworkRevision, 'REVISION_A');
         expect(processManager, hasNoRemainingExpectations);
@@ -1874,7 +1934,14 @@ void main() {
           ),
         );
 
-        final version = FlutterVersion(fs: fs, git: git, flutterRoot: flutterRoot);
+        final version = FlutterVersion(
+          cache: cache,
+          fs: fs,
+          git: git,
+          flutterRoot: flutterRoot,
+          logger: testLogger,
+          platform: FakePlatform(),
+        );
 
         expect(version.channel, 'master');
         expect(processManager, hasNoRemainingExpectations);
@@ -1911,7 +1978,14 @@ void main() {
         );
 
         // No git commands should be run
-        final version = FlutterVersion(fs: fs, git: git, flutterRoot: flutterRoot);
+        final version = FlutterVersion(
+          cache: cache,
+          fs: fs,
+          git: git,
+          flutterRoot: flutterRoot,
+          logger: testLogger,
+          platform: FakePlatform(),
+        );
 
         expect(version.frameworkRevision, 'REVISION_A');
         expect(version.channel, 'master');
@@ -1949,7 +2023,14 @@ void main() {
         );
 
         // No git commands should be run
-        final version = FlutterVersion(fs: fs, git: git, flutterRoot: flutterRoot);
+        final version = FlutterVersion(
+          cache: cache,
+          fs: fs,
+          git: git,
+          flutterRoot: flutterRoot,
+          logger: testLogger,
+          platform: FakePlatform(),
+        );
 
         expect(version.frameworkRevision, 'REVISION_A');
         expect(version.channel, 'master');
@@ -1988,7 +2069,14 @@ void main() {
         );
 
         // No git commands should be run because repositoryUrl matches FLUTTER_GIT_URL
-        final version = FlutterVersion(fs: fs, git: git, flutterRoot: flutterRoot);
+        final version = FlutterVersion(
+          cache: cache,
+          fs: fs,
+          git: git,
+          flutterRoot: flutterRoot,
+          logger: testLogger,
+          platform: FakePlatform(environment: const <String, String>{'FLUTTER_GIT_URL': customUrl}),
+        );
 
         expect(version.frameworkRevision, 'REVISION_A');
         expect(version.channel, 'master');
@@ -2071,7 +2159,14 @@ void main() {
           ),
         );
 
-        FlutterVersion(fs: fs, git: localGit, flutterRoot: flutterRoot);
+        FlutterVersion(
+          cache: cache,
+          fs: fs,
+          git: localGit,
+          flutterRoot: flutterRoot,
+          logger: testLogger,
+          platform: platform,
+        );
 
         expect(processManager, hasNoRemainingExpectations);
       },

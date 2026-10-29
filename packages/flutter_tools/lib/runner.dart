@@ -28,6 +28,7 @@ import 'src/device.dart';
 import 'src/doctor.dart';
 import 'src/emulator.dart';
 import 'src/experimental/extension_discovery.dart';
+import 'src/experimental/extension_manager.dart';
 import 'src/features.dart';
 import 'src/globals.dart' as globals;
 import 'src/reporting/crash_reporting.dart';
@@ -118,8 +119,18 @@ Future<int> run(
       overrides: <Type, Generator>{DeviceManager: () => toolDeps.deviceManager},
       body: () async {
         final ToolContext(:Cache cache, :Logger logger) = toolDeps.toolContext;
+        DoctorValidatorsProvider createDoctorValidatorsProvider({
+          ExtensionManager? extensionManager,
+        }) => DoctorValidatorsProvider.create(
+          appleContext: toolDeps.appleContext,
+          deviceManager: toolDeps.deviceManager,
+          extensionManager: extensionManager,
+          featureFlags: toolDeps.featureFlags,
+          toolContext: toolDeps.toolContext,
+        );
         final runner = FlutterCommandRunner(
           analytics: toolDeps.analytics,
+          deviceManager: toolDeps.deviceManager,
           extensionManager: toolDeps.extensionManager,
           featureFlags: featureFlags,
           toolContext: toolDeps.toolContext,
@@ -216,6 +227,7 @@ Future<int> run(
                 getVersion,
                 shutdownHooks,
                 cache: cache,
+                doctorValidatorsProviderBuilder: createDoctorValidatorsProvider,
                 usingLocalEngine: usingLocalEngine,
                 analytics: toolDeps.analytics,
                 featureFlags: featureFlags,
@@ -238,6 +250,7 @@ Future<int> run(
               getVersion,
               shutdownHooks,
               cache: cache,
+              doctorValidatorsProviderBuilder: createDoctorValidatorsProvider,
               usingLocalEngine: usingLocalEngine,
               analytics: toolDeps.analytics,
               featureFlags: featureFlags,
@@ -266,6 +279,7 @@ Future<int> _handleToolError(
   String Function() getFlutterVersion,
   ShutdownHooks shutdownHooks, {
   required Cache cache,
+  required DoctorValidatorsProviderBuilder doctorValidatorsProviderBuilder,
   required bool usingLocalEngine,
   required Analytics analytics,
   required FeatureFlags featureFlags,
@@ -280,6 +294,7 @@ Future<int> _handleToolError(
     getFlutterVersion,
     shutdownHooks,
     cache: cache,
+    doctorValidatorsProviderBuilder: doctorValidatorsProviderBuilder,
     usingLocalEngine: usingLocalEngine,
     analytics: analytics,
     featureFlags: featureFlags,
@@ -296,6 +311,7 @@ Future<int> _handleToolErrorImpl(
   String Function() getFlutterVersion,
   ShutdownHooks shutdownHooks, {
   required Cache cache,
+  required DoctorValidatorsProviderBuilder doctorValidatorsProviderBuilder,
   required bool usingLocalEngine,
   required Analytics analytics,
   required FeatureFlags featureFlags,
@@ -396,7 +412,17 @@ Future<int> _handleToolErrorImpl(
         verbose: true /* Capture flutter doctor -v */,
       );
 
-      final doctorText = DoctorText(doctorLogger, cache: cache, clock: globals.systemClock);
+      final doctorText = DoctorText(
+        doctorLogger,
+        doctor: Doctor(
+          analytics: analytics,
+          cache: cache,
+          clock: globals.systemClock,
+          logger: doctorLogger,
+          outputPreferences: globals.outputPreferences,
+          validatorsProviderBuilder: doctorValidatorsProviderBuilder,
+        ),
+      );
 
       final details = CrashDetails(
         command: _crashCommand(args),

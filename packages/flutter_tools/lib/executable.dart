@@ -259,6 +259,7 @@ List<FlutterCommand> generateCommands({
       featureFlags: toolDependencies.featureFlags,
       toolContext: toolContext,
       verboseHelp: verboseHelp,
+      xcode: toolDependencies.appleContext.xcode,
     ),
     AttachCommand(
       buildSystem: toolDependencies.buildSystem,
@@ -371,6 +372,7 @@ List<FlutterCommand> generateCommands({
     ScreenshotCommand(toolContext: toolContext),
     ShellCompletionCommand(toolContext: toolContext),
     TestCommand(
+      analytics: toolDependencies.analytics,
       templateRenderer: const MustacheTemplateRenderer(),
       toolContext: toolContext,
       verboseHelp: verboseHelp,
