@@ -1896,7 +1896,10 @@ exports_files([
 # through Gradle in test_runner/): compiled against this build's flutter.jar,
 # android.jar and the pinned Maven test dependencies, and run one class per
 # target under Robolectric on the engine's JDK (build_defs/java/robolectric.bzl;
-# NEED_DECISION D12). Under an Android configuration, as flutter.jar is.
+# NEED_DECISION D12). Under an Android configuration, as flutter.jar is --
+# and incompatible with any other outright, so that a wildcard build on a
+# host of another OS analyzes nothing of theirs (the Maven test
+# dependencies are a 1.9 GB fetch).
 java_classes(
     name = "java_tests_classes",
     # The tests and their helpers, as Gradle's source set takes the directory.
@@ -1907,6 +1910,10 @@ java_classes(
         "@android_tools//:sdk/build-tools/37.0.0/core-lambda-stubs.jar",
         "@maven_android_tests//:jars",
     ],
+    target_compatible_with = select({
+        "@platforms//os:android": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
 )
 
 # What AGP's unit tests hand Robolectric (includeAndroidResources): the
@@ -1921,6 +1928,10 @@ android_test_apk(
     library_resources = ["@maven_android_tests//:aar_resources"],
     manifest = "test_runner/src/main/AndroidManifest.xml",
     namespace = "io.flutter.app.test",
+    target_compatible_with = select({
+        "@platforms//os:android": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
 )
 
 robolectric_tests(
@@ -1938,6 +1949,10 @@ robolectric_tests(
         "@maven_android_tests//:jars",
         "@android_tools//:sdk/platforms/android-37.0/android.jar",
     ],
+    target_compatible_with = select({
+        "@platforms//os:android": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
     tests = glob(["test/**/*Test.java"]),  # buildifier: disable=bad-recursive-glob
 )
 ''',
