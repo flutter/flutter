@@ -22,10 +22,16 @@ load("@rules_cc//cc:defs.bzl", "cc_library")
 
 package(default_visibility = ["//visibility:public"])
 
+# The Linux embedding's alone (GN declares the configs under is_linux): a
+# wildcard build on a Mac skips them without fetching the arm64 sysroot
+# that gtk's select names there (the Mac's T53).
+_LINUX = ["@platforms//os:linux"]
+
 # pkg-config x11: [[], [], ["X11"], []]
 cc_library(
     name = "x11",
     linkopts = ["-lX11"],
+    target_compatible_with = _LINUX,
 )
 
 # pkg-config gtk+-3.0: [[<twenty include directories under the sysroot>], [],
@@ -46,6 +52,7 @@ cc_library(
         "-lgobject-2.0",
         "-lglib-2.0",
     ],
+    target_compatible_with = _LINUX,
     # The target CPU's sysroot: the two directories under its multiarch
     # library directory hold glibconfig.h and dbus-arch-deps.h, which differ
     # between the architectures (the arm64 cross build is
@@ -60,18 +67,21 @@ cc_library(
 cc_library(
     name = "egl",
     linkopts = ["-lEGL"],
+    target_compatible_with = _LINUX,
 )
 
 # pkg-config epoxy: [[], [], ["epoxy"], []]
 cc_library(
     name = "epoxy",
     linkopts = ["-lepoxy"],
+    target_compatible_with = _LINUX,
 )
 
 # pkg-config wayland-client: [[], [], ["wayland-client"], []]
 cc_library(
     name = "wayland_client",
     linkopts = ["-lwayland-client"],
+    target_compatible_with = _LINUX,
 )
 
 # pkg-config wayland-egl: [[], [], ["wayland-egl", "wayland-client"], []]
@@ -81,4 +91,5 @@ cc_library(
         "-lwayland-egl",
         "-lwayland-client",
     ],
+    target_compatible_with = _LINUX,
 )
