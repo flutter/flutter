@@ -131,6 +131,31 @@ void main() {
     expect(fakeProcessManager, hasNoRemainingExpectations);
   });
 
+  testWithoutContext(
+    'incremental compile exits the tool when dartaotruntime cannot be run',
+    () async {
+      // Regression test for https://github.com/flutter/flutter/issues/193518.
+      fakeProcessManager.excludedExecutables.add('Artifact.engineDartAotRuntime');
+
+      await expectLater(
+        asyncGuard(
+          () => generator.recompile(
+            Uri.parse('/path/to/main.dart'),
+            null,
+            outputPath: '/build/',
+            packageConfig: PackageConfig.empty,
+            fs: MemoryFileSystem(),
+            projectRootPath: '',
+          ),
+        ),
+        throwsToolExit(
+          message: 'Unable to find dartaotruntime binary at Artifact.engineDartAotRuntime',
+        ),
+      );
+      expect(fakeProcessManager, hasNoRemainingExpectations);
+    },
+  );
+
   testWithoutContext('incremental compile sends correct package URI for pub workspace member package located under root lib/', () async {
     final packageConfig = PackageConfig(<Package>[
       Package(
