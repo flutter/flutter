@@ -637,4 +637,91 @@ void main() {
     );
     expect(tester.getSize(find.byType(SelectionArea)), Size.zero);
   });
+
+  group('rebuilding Text.rich with WidgetSpans while a selection is active', () {
+    // Text interleaved with WidgetSpans whose children are themselves `Text`
+    // widgets (e.g. markdown bullets or inline "pills" in a chat message).
+    InlineSpan message(String streamed) => TextSpan(
+      children: <InlineSpan>[
+        const TextSpan(text: 'Start '),
+        const WidgetSpan(child: Text('pill0')),
+        const TextSpan(text: ' a '),
+        const WidgetSpan(child: Text('pill1')),
+        const TextSpan(text: ' b '),
+        const WidgetSpan(child: Text('pill2')),
+        TextSpan(text: ' end$streamed'),
+      ],
+    );
+
+    Future<List<FlutterErrorDetails>> run(
+      WidgetTester tester,
+      Future<void> Function() select,
+    ) async {
+      final errors = <FlutterErrorDetails>[];
+      final FlutterExceptionHandler? originalOnError = FlutterError.onError;
+      FlutterError.onError = errors.add;
+      try {
+        var streamed = '';
+        var showMessage = true;
+        late StateSetter setState;
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: SelectionArea(
+                child: StatefulBuilder(
+                  builder: (BuildContext context, StateSetter s) {
+                    setState = s;
+                    return Column(
+                      children: <Widget>[if (showMessage) Text.rich(message(streamed))],
+                    );
+                  },
+                ),
+              ),
+            ),
+          ),
+        );
+
+        // 1. Select the whole message (selection starts in the first text fragment).
+        await select();
+        await tester.pump(const Duration(seconds: 1));
+
+        // 2. The message text changes while the selection is active (streaming).
+        setState(() => streamed = ' more');
+        await tester.pump();
+
+        // 3. The message is removed (e.g. chat cleared / navigated away).
+        setState(() => showMessage = false);
+        await tester.pump();
+      } finally {
+        FlutterError.onError = originalOnError;
+      }
+      return errors;
+    }
+
+    testWidgets('select all, then rebuild Text.rich with WidgetSpans', (WidgetTester tester) async {
+      final List<FlutterErrorDetails> errors = await run(tester, () async {
+        tester
+            .state<SelectableRegionState>(find.byType(SelectableRegion))
+            .selectAll(SelectionChangedCause.keyboard);
+      });
+      expect(errors, isEmpty);
+    });
+
+    testWidgets('mouse drag selection, then rebuild Text.rich with WidgetSpans', (
+      WidgetTester tester,
+    ) async {
+      final List<FlutterErrorDetails> errors = await run(tester, () async {
+        final Rect rect = tester.getRect(find.byType(RichText).first);
+        final TestGesture gesture = await tester.startGesture(
+          rect.topLeft + const Offset(1, 5),
+          kind: PointerDeviceKind.mouse,
+        );
+        await tester.pump();
+        await gesture.moveTo(tester.getCenter(find.text('pill2')));
+        await tester.pump();
+        await gesture.up();
+      });
+      expect(errors, isEmpty);
+    });
+  });
 }
