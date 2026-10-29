@@ -228,6 +228,10 @@ void main() {
       observer.didChange24HourFormatCalled = false;
       retrieveTestBinding(tester).platformDispatcher.clearAlwaysUse24HourTestValue();
       expect(observer.didChange24HourFormatCalled, isTrue);
+
+      observer.didChange24HourFormatCalled = false;
+      retrieveTestBinding(tester).platformDispatcher.onPlatformConfigurationChanged?.call();
+      expect(observer.didChange24HourFormatCalled, isFalse);
     },
   );
 

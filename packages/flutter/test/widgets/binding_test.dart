@@ -310,6 +310,12 @@ class RentrantObserver implements WidgetsBindingObserver {
   }
 
   @override
+  void didChange24HourFormat() {
+    assert(active);
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
   void didHaveMemoryPressure() {
     assert(active);
     WidgetsBinding.instance.addObserver(this);
@@ -399,6 +405,8 @@ void main() {
     WidgetsBinding.instance.handlePlatformBrightnessChanged();
     WidgetsBinding.instance.handleTextScaleFactorChanged();
     WidgetsBinding.instance.handleMemoryPressure();
+    tester.platformDispatcher.alwaysUse24HourFormatTestValue =
+        !tester.platformDispatcher.alwaysUse24HourFormat;
     await WidgetsBinding.instance.handlePopRoute();
     await WidgetsBinding.instance.handlePushRoute('/');
     await WidgetsBinding.instance.handleRequestAppExit();
@@ -412,6 +420,7 @@ void main() {
     await tester.idle();
     expect(observer.removeSelf(), greaterThan(1));
     expect(observer.removeSelf(), 0);
+    tester.platformDispatcher.clearAlwaysUse24HourTestValue();
   });
 
   testWidgets('didHaveMemoryPressure callback', (WidgetTester tester) async {
@@ -1043,6 +1052,7 @@ void main() {
     });
 
     testWidgets('didChange24HourFormat', (WidgetTester tester) async {
+      addTearDown(tester.platformDispatcher.clearAlwaysUse24HourTestValue);
       final log = <String>[];
       final errors = <FlutterErrorDetails>[];
       final FlutterExceptionHandler? oldHandler = FlutterError.onError;
@@ -1060,9 +1070,17 @@ void main() {
         WidgetsBinding.instance.removeObserver(loggingObserver);
       });
 
-      WidgetsBinding.instance.handlePlatformConfigurationChanged();
+      tester.platformDispatcher.alwaysUse24HourFormatTestValue =
+          !tester.platformDispatcher.alwaysUse24HourFormat;
       expect(log, contains('didChange24HourFormat'));
       expect(errors, hasLength(1));
+
+      // Observers should not be notified if alwaysUse24HourFormat has not changed.
+      log.clear();
+      errors.clear();
+      WidgetsBinding.instance.handlePlatformConfigurationChanged();
+      expect(log, isEmpty);
+      expect(errors, isEmpty);
     });
 
     testWidgets('didChangeLocales', (WidgetTester tester) async {

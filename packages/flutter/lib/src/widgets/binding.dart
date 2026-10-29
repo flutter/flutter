@@ -501,6 +501,7 @@ mixin WidgetsBinding
     }());
     platformMenuDelegate = DefaultPlatformMenuDelegate();
     _windowingOwner = createWindowingOwner();
+    _alwaysUse24HourFormat = platformDispatcher.alwaysUse24HourFormat;
   }
 
   /// The current [WidgetsBinding], if one has been created.
@@ -1007,9 +1008,16 @@ mixin WidgetsBinding
     }
   }
 
+  bool? _alwaysUse24HourFormat;
+
   @override
   void handlePlatformConfigurationChanged() {
     super.handlePlatformConfigurationChanged();
+    final bool currentAlwaysUse24HourFormat = platformDispatcher.alwaysUse24HourFormat;
+    if (_alwaysUse24HourFormat == currentAlwaysUse24HourFormat) {
+      return;
+    }
+    _alwaysUse24HourFormat = currentAlwaysUse24HourFormat;
     for (final observer in List<WidgetsBindingObserver>.of(_observers)) {
       try {
         observer.didChange24HourFormat();
