@@ -8,16 +8,14 @@ import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
 import 'runner.dart' as runner;
-import 'src/android/android_workflow.dart' as android_workflow;
 import 'src/android/gradle.dart';
 import 'src/base/context.dart';
 import 'src/base/file_system.dart';
 import 'src/base/io.dart';
 import 'src/base/logger.dart';
 import 'src/base/platform.dart';
-import 'src/base/template.dart';
+import 'src/base/signals.dart';
 import 'src/base/terminal.dart';
-import 'src/build_system/build_targets.dart';
 import 'src/build_system/targets/hook_runner_native.dart' show FlutterHookRunnerNative;
 import 'src/cache.dart';
 import 'src/commands/analyze.dart';
@@ -53,12 +51,10 @@ import 'src/commands/upgrade.dart';
 import 'src/commands/widget_preview.dart';
 import 'src/context/tool_context.dart';
 import 'src/context/tool_dependencies.dart';
-import 'src/devtools_launcher.dart';
 import 'src/experimental/extension_discovery.dart';
 import 'src/experimental/extension_manager.dart';
 import 'src/experimental/templates.dart';
 import 'src/features.dart';
-import 'src/globals.dart' as globals;
 // Files in `isolated` are intentionally excluded from google3 tooling.
 import 'src/hook_runner.dart' show FlutterHookRunner;
 import 'src/isolated/build_targets.dart';
@@ -66,9 +62,7 @@ import 'src/isolated/mustache_template.dart';
 import 'src/isolated/native_assets/test/native_assets.dart';
 import 'src/isolated/resident_web_runner.dart';
 import 'src/native_assets.dart';
-import 'src/pre_run_validator.dart';
 import 'src/project_validator.dart';
-import 'src/resident_runner.dart';
 import 'src/runner/flutter_command.dart';
 import 'src/runner/flutter_command_runner.dart';
 import 'src/web/web_runner.dart';
@@ -126,57 +120,41 @@ Future<void> main(List<String> args) async {
         extensionTemplateManager: templateManager,
       );
     },
+    buildTargets: const BuildTargetsImpl(),
     extensionEntryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
-    verbose: verbose,
+    loggerBuilder:
+        ({
+          required OutputPreferences outputPreferences,
+          required Platform platform,
+          required Stdio stdio,
+          required AnsiTerminal terminal,
+        }) {
+          final loggerFactory = LoggerFactory(
+            outputPreferences: outputPreferences,
+            terminal: terminal,
+            stdio: stdio,
+          );
+          return loggerFactory.createLogger(
+            daemon: daemon,
+            machine: runMachine,
+            verbose: verbose && !muteCommandLogging,
+            prefixedErrors: prefixedErrors,
+            windows: platform.isWindows,
+            widgetPreviews: widgetPreviews,
+          );
+        },
     muteCommandLogging: muteCommandLogging,
-    verboseHelp: verboseHelp,
+    nativeAssetsBuilder: const TestCompilerNativeAssetsBuilderImpl(),
     overrides: <Type, Generator>{
       FlutterHookRunner: () => FlutterHookRunnerNative(),
       // The web runner is not supported in google3 because it depends
       // on dwds.
       WebRunnerFactory: () => DwdsWebRunnerFactory(),
-      // The mustache dependency is different in google3
-      TemplateRenderer: () => const MustacheTemplateRenderer(),
-      // The devtools launcher is not supported in google3 because it depends on
-      // devtools source code.
-      DevtoolsLauncher: () => DevtoolsServerLauncher(
-        processManager: globals.processManager,
-        artifacts: globals.artifacts!,
-        logger: globals.logger,
-        botDetector: globals.botDetector,
-      ),
-      BuildTargets: () => const BuildTargetsImpl(),
-      Logger: () {
-        final loggerFactory = LoggerFactory(
-          outputPreferences: globals.outputPreferences,
-          terminal: globals.terminal,
-          stdio: globals.stdio,
-        );
-        return loggerFactory.createLogger(
-          daemon: daemon,
-          machine: runMachine,
-          verbose: verbose && !muteCommandLogging,
-          prefixedErrors: prefixedErrors,
-          windows: globals.platform.isWindows,
-          widgetPreviews: widgetPreviews,
-        );
-      },
-      AnsiTerminal: () {
-        return AnsiTerminal(
-          stdio: globals.stdio,
-          platform: globals.platform,
-          now: DateTime.now(),
-          // So that we don't animate anything before calling applyFeatureFlags, default
-          // the animations to disabled in real apps.
-          defaultCliAnimationEnabled: false,
-          shutdownHooks: globals.shutdownHooks,
-        );
-        // runner.run calls "terminal.applyFeatureFlags()"
-      },
-      PreRunValidator: () => PreRunValidator(fileSystem: globals.fs, cache: globals.cache),
-      TestCompilerNativeAssetsBuilder: () => const TestCompilerNativeAssetsBuilderImpl(),
     },
-    shutdownHooks: globals.shutdownHooks,
+    shutdownHooks: LocalSignals.instance.shutdownHooks,
+    templateRenderer: const MustacheTemplateRenderer(),
+    verbose: verbose,
+    verboseHelp: verboseHelp,
   );
 }
 
@@ -201,24 +179,11 @@ String? findCommandName(List<String> args, {ToolContext? toolContext}) {
 }
 
 class _FallbackToolContext implements ToolContext {
-  _FallbackToolContext() : _outputPreferences = null;
-
-  final OutputPreferences? _outputPreferences;
+  @override
+  final OutputPreferences outputPreferences = OutputPreferences.test();
 
   @override
-  OutputPreferences get outputPreferences {
-    if (_outputPreferences != null) {
-      return _outputPreferences;
-    }
-    try {
-      return globals.outputPreferences;
-    } on Object catch (_) {
-      return OutputPreferences.test();
-    }
-  }
-
-  @override
-  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+  Object? noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
 List<FlutterCommand> generateCommands({
@@ -227,7 +192,7 @@ List<FlutterCommand> generateCommands({
   required bool verboseHelp,
   ExtensionTemplateManager? extensionTemplateManager,
 }) {
-  final ToolContext toolContext = toolDependencies.toolContext;
+  final ToolDependencies(:FeatureFlags featureFlags, :ToolContext toolContext) = toolDependencies;
   final ToolContext(
     :Cache cache,
     :Logger logger,
@@ -255,8 +220,9 @@ List<FlutterCommand> generateCommands({
       verboseHelp: verboseHelp,
     ),
     AssembleCommand(
+      androidContext: toolDependencies.androidContext,
       buildSystem: toolDependencies.buildSystem,
-      featureFlags: toolDependencies.featureFlags,
+      featureFlags: featureFlags,
       toolContext: toolContext,
       verboseHelp: verboseHelp,
       xcode: toolDependencies.appleContext.xcode,
@@ -278,7 +244,7 @@ List<FlutterCommand> generateCommands({
       appleContext: toolDependencies.appleContext,
       buildSystem: toolDependencies.buildSystem,
       extensionBuildManager: toolDependencies.extensionBuildManager,
-      featureFlags: toolDependencies.featureFlags,
+      featureFlags: featureFlags,
       templateRenderer: const MustacheTemplateRenderer(),
       toolContext: toolContext,
       verboseHelp: verboseHelp,
@@ -309,7 +275,7 @@ List<FlutterCommand> generateCommands({
     ),
     DaemonCommand(
       androidContext: toolDependencies.androidContext,
-      androidWorkflow: android_workflow.androidWorkflow,
+      androidWorkflow: toolDependencies.androidWorkflow,
       buildSystem: toolDependencies.buildSystem,
       buildTargets: toolDependencies.buildTargets,
       deviceManager: toolDependencies.deviceManager,
@@ -366,7 +332,7 @@ List<FlutterCommand> generateCommands({
       buildTargets: toolDependencies.buildTargets,
       toolContext: toolContext,
       androidContext: toolDependencies.androidContext,
-      androidWorkflow: android_workflow.androidWorkflow,
+      androidWorkflow: toolDependencies.androidWorkflow,
       deviceManager: toolDependencies.deviceManager,
       verboseHelp: verboseHelp,
     ),

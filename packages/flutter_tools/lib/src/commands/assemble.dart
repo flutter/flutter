@@ -24,6 +24,7 @@ import '../build_system/targets/linux.dart';
 import '../build_system/targets/macos.dart';
 import '../build_system/targets/windows.dart';
 import '../cache.dart';
+import '../context/android_context.dart';
 import '../context/tool_context.dart';
 import '../convert.dart';
 import '../features.dart';
@@ -31,6 +32,7 @@ import '../macos/xcode.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart';
 import '../version.dart';
+import '../windows/visual_studio.dart';
 
 /// All currently implemented targets.
 var _kDefaultTargets = <Target>[
@@ -104,8 +106,9 @@ class AssembleCommand extends FlutterCommand {
     required this._buildSystem,
     required this._featureFlags,
     required super.toolContext,
-    this._xcode,
+    this._androidContext,
     super.verboseHelp = false,
+    this._xcode,
   }) {
     requiresPubspecYaml();
     argParser.addDescriptors(const <OptionDescriptor<Object?>>[
@@ -183,6 +186,7 @@ class AssembleCommand extends FlutterCommand {
     help: 'The maximum number of concurrent tasks the build system will run.',
   );
 
+  final AndroidContext? _androidContext;
   final BuildSystem _buildSystem;
   final FeatureFlags _featureFlags;
   final Xcode? _xcode;
@@ -310,8 +314,10 @@ class AssembleCommand extends FlutterCommand {
       logger: logger,
       processManager: processManager,
       analytics: analytics,
+      androidSdkBuilder: () => _androidContext?.androidSdk,
       platform: platform,
       projectFactory: projectFactory,
+      visualStudio: VisualStudio(toolContext: toolContext),
       xcode: _xcode,
       engineVersion: artifacts.usesLocalArtifacts ? null : flutterVersion.engineRevision,
       generateDartPluginRegistry: true,

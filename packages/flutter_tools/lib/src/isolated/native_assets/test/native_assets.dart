@@ -18,6 +18,7 @@ import '../../../cache.dart';
 import '../../../context/tool_context.dart';
 import '../../../native_assets.dart';
 import '../../../project.dart';
+import '../../../windows/visual_studio.dart';
 import '../dart_hook_result.dart';
 import '../native_assets.dart';
 
@@ -106,8 +107,9 @@ Future<TestCompilerNativeAssetsBuildResult> testCompilerBuildNativeAssets(
     processManager,
     runPackageName,
     pubspecPath,
-    includeDevDependencies: true,
     flutterRoot: cache.flutterRoot,
+    includeDevDependencies: true,
+    visualStudio: VisualStudio(toolContext: toolContext),
   );
 
   if (!platform.isMacOS && !platform.isLinux && !platform.isWindows) {

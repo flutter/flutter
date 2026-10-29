@@ -10,6 +10,7 @@ import 'package:pool/pool.dart';
 import 'package:process/process.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
+import '../android/android_sdk.dart';
 import '../artifacts.dart';
 import '../base/config.dart';
 import '../base/error_handling_io.dart';
@@ -22,6 +23,7 @@ import '../cache.dart';
 import '../convert.dart';
 import '../macos/xcode.dart';
 import '../project.dart';
+import '../windows/visual_studio.dart';
 import 'depfile.dart';
 import 'exceptions.dart';
 import 'file_store.dart';
@@ -348,6 +350,9 @@ class Environment {
     required Platform platform,
     required Analytics analytics,
     required FlutterProjectFactory projectFactory,
+    AndroidSdk? androidSdk,
+    AndroidSdk? Function()? androidSdkBuilder,
+    VisualStudio? visualStudio,
     Xcode? xcode,
     String? engineVersion,
     required bool generateDartPluginRegistry,
@@ -392,6 +397,9 @@ class Environment {
       platform: platform,
       analytics: analytics,
       projectFactory: projectFactory,
+      androidSdk: androidSdk,
+      androidSdkBuilder: androidSdkBuilder,
+      visualStudio: visualStudio,
       xcode: xcode,
       engineVersion: engineVersion,
       inputs: inputs,
@@ -417,6 +425,8 @@ class Environment {
     Platform? platform,
     Analytics? analytics,
     FlutterProjectFactory? projectFactory,
+    AndroidSdk? androidSdk,
+    VisualStudio? visualStudio,
     Xcode? xcode,
     bool generateDartPluginRegistry = false,
     required FileSystem fileSystem,
@@ -448,6 +458,8 @@ class Environment {
             logger: logger,
             xcode: xcode,
           ),
+      androidSdk: androidSdk,
+      visualStudio: visualStudio,
       xcode: xcode,
       engineVersion: engineVersion,
       generateDartPluginRegistry: generateDartPluginRegistry,
@@ -470,6 +482,9 @@ class Environment {
     required this.artifacts,
     required this.analytics,
     required this.projectFactory,
+    this._androidSdk,
+    this._androidSdkBuilder,
+    this.visualStudio,
     this.xcode,
     this.engineVersion,
     required this.inputs,
@@ -477,8 +492,10 @@ class Environment {
   });
 
   Environment copyWith({
+    AndroidSdk? androidSdk,
     Directory? outputDir,
     FlutterProjectFactory? projectFactory,
+    VisualStudio? visualStudio,
     Xcode? xcode,
   }) {
     return Environment._(
@@ -497,6 +514,9 @@ class Environment {
       platform: platform,
       analytics: analytics,
       projectFactory: projectFactory ?? this.projectFactory,
+      androidSdk: androidSdk ?? _androidSdk,
+      androidSdkBuilder: _androidSdkBuilder,
+      visualStudio: visualStudio ?? this.visualStudio,
       xcode: xcode ?? this.xcode,
       engineVersion: engineVersion,
       inputs: inputs,
@@ -593,6 +613,12 @@ class Environment {
   final Analytics analytics;
 
   final FlutterProjectFactory projectFactory;
+
+  final AndroidSdk? _androidSdk;
+  final AndroidSdk? Function()? _androidSdkBuilder;
+  late final AndroidSdk? androidSdk = _androidSdk ?? _androidSdkBuilder?.call();
+
+  final VisualStudio? visualStudio;
 
   final Xcode? xcode;
 

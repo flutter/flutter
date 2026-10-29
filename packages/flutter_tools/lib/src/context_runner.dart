@@ -77,8 +77,8 @@ import 'windows/visual_studio_validator.dart';
 import 'windows/windows_workflow.dart';
 
 /// A [ToolContext] that delegates to [globals] for legacy callers.
-class GlobalToolContext implements ToolContext {
-  const GlobalToolContext();
+class _GlobalToolContext implements ToolContext {
+  const _GlobalToolContext();
 
   @override
   Artifacts get artifacts => globals.artifacts!;
@@ -191,7 +191,7 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
         androidStudio: globals.androidStudio,
         gradleUtils: globals.gradleUtils!,
         java: globals.java,
-        toolContext: const GlobalToolContext(),
+        toolContext: const _GlobalToolContext(),
       ),
       AndroidLicenseValidator: () => AndroidLicenseValidator(
         platform: globals.platform,
@@ -202,10 +202,10 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
         logger: globals.logger,
         stdio: globals.stdio,
       ),
-      AndroidSdk: () => AndroidSdk.locateAndroidSdk(toolContext: const GlobalToolContext()),
+      AndroidSdk: () => AndroidSdk.locateAndroidSdk(toolContext: const _GlobalToolContext()),
       AndroidStudio: () => AndroidStudio.latestValid(
         plistParser: globals.plistParser,
-        toolContext: const GlobalToolContext(),
+        toolContext: const _GlobalToolContext(),
       ),
       AndroidValidator: () => AndroidValidator(
         java: globals.java,
@@ -221,7 +221,7 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
       ApplicationPackageFactory: () => FlutterApplicationPackageFactory(
         androidSdk: globals.androidSdk,
         plistParser: globals.plistParser,
-        toolContext: const GlobalToolContext(),
+        toolContext: const _GlobalToolContext(),
       ),
       Artifacts: () => CachedArtifacts(
         fileSystem: globals.fs,
@@ -252,7 +252,7 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
       ),
       CocoaPods: () => CocoaPods(
         analytics: globals.analytics,
-        toolContext: const GlobalToolContext(),
+        toolContext: const _GlobalToolContext(),
         xcodeProjectInterpreter: globals.xcodeProjectInterpreter!,
       ),
       CocoaPodsValidator: () => CocoaPodsValidator(globals.cocoaPods!, globals.userMessages),
@@ -293,7 +293,7 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
         androidWorkflow: androidWorkflow!,
         iosWorkflow: globals.iosWorkflow,
         javaBuilder: () => globals.java,
-        toolContext: const GlobalToolContext(),
+        toolContext: const _GlobalToolContext(),
         xcode: globals.xcode,
         androidSdkBuilder: () => globals.androidSdk,
       ),
@@ -334,7 +334,7 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
         cocoaPods: globals.cocoaPods!,
         plistParser: globals.plistParser,
         templateRenderer: globals.templateRenderer,
-        toolContext: const GlobalToolContext(),
+        toolContext: const _GlobalToolContext(),
         xcode: globals.xcode!,
         xcodeProjectInterpreter: globals.xcodeProjectInterpreter!,
       ),
@@ -399,20 +399,20 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
       ),
       ProcessUtils: () =>
           ProcessUtils(processManager: globals.processManager, logger: globals.logger),
-      Pub: () => Pub(toolContext: const GlobalToolContext()),
+      Pub: () => Pub(toolContext: const _GlobalToolContext()),
       Stdio: () => Stdio(),
       SystemClock: () => const SystemClock(),
       TemplatePathProvider: () => TemplatePathProvider(flutterRoot: globals.cache.flutterRoot),
       UserMessages: () => UserMessages(),
       VisualStudioValidator: () => VisualStudioValidator(
         userMessages: globals.userMessages,
-        visualStudio: VisualStudio(toolContext: const GlobalToolContext()),
+        visualStudio: VisualStudio(toolContext: const _GlobalToolContext()),
       ),
       WebWorkflow: () => WebWorkflow(featureFlags: featureFlags, platform: globals.platform),
       WindowsWorkflow: () =>
           WindowsWorkflow(featureFlags: featureFlags, platform: globals.platform),
       Xcode: () => Xcode(
-        toolContext: const GlobalToolContext(),
+        toolContext: const _GlobalToolContext(),
         xcodeProjectInterpreter: globals.xcodeProjectInterpreter!,
       ),
       XCDevice: () => XCDevice(
@@ -426,13 +426,13 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
         ),
         plistParser: globals.plistParser,
         templateRenderer: globals.templateRenderer,
-        toolContext: const GlobalToolContext(),
+        toolContext: const _GlobalToolContext(),
         xcode: globals.xcode!,
         xcodeProjectInterpreter: globals.xcodeProjectInterpreter!,
       ),
       XcodeProjectInterpreter: () => XcodeProjectInterpreter(
         analytics: globals.analytics,
-        toolContext: const GlobalToolContext(),
+        toolContext: const _GlobalToolContext(),
       ),
     },
   );
@@ -454,6 +454,6 @@ DoctorValidatorsProvider _createDoctorValidatorsProvider({ExtensionManager? exte
     extensionManager: extensionManager,
     featureFlags: featureFlags,
     httpClientFactory: globals.httpClientFactory,
-    toolContext: const GlobalToolContext(),
+    toolContext: const _GlobalToolContext(),
   );
 }

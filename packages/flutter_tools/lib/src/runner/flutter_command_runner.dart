@@ -6,7 +6,6 @@ import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:completion/completion.dart';
 import 'package:file/file.dart';
-import 'package:meta/meta.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../android/gradle_utils.dart';
@@ -79,6 +78,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
     bool verboseHelp = false,
     this._featureFlags,
     this._gradleUtils,
+    this._gradleUtilsBuilder,
     this._plistParser,
     this._templateRenderer,
   }) : _toolContext = toolContext,
@@ -322,6 +322,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
   final ExtensionManager? _extensionManager;
   final FeatureFlags? _featureFlags;
   final GradleUtils? _gradleUtils;
+  final GradleUtils? Function()? _gradleUtilsBuilder;
   final PlistParser? _plistParser;
   final TemplateRenderer? _templateRenderer;
   final ToolContext _toolContext;
@@ -339,7 +340,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
   Doctor? get doctor => _doctor;
 
   /// The [GradleUtils] instance, if provided.
-  GradleUtils? get gradleUtils => _gradleUtils;
+  late final GradleUtils? gradleUtils = _gradleUtils ?? _gradleUtilsBuilder?.call();
 
   /// The [PlistParser] instance, if provided.
   PlistParser? get plistParser => _plistParser;

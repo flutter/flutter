@@ -10,31 +10,65 @@ import 'package:intl/intl_standalone.dart' as intl_standalone;
 import 'package:process/process.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
+import 'src/android/android_sdk.dart';
+import 'src/android/android_studio.dart';
 import 'src/android/android_workflow.dart';
+import 'src/android/gradle_utils.dart';
+import 'src/android/java.dart';
+import 'src/artifacts.dart';
 import 'src/base/async_guard.dart';
+import 'src/base/bot_detector.dart';
 import 'src/base/common.dart';
+import 'src/base/config.dart';
 import 'src/base/context.dart';
 import 'src/base/error_handling_io.dart';
 import 'src/base/exit.dart';
 import 'src/base/file_system.dart';
 import 'src/base/io.dart';
 import 'src/base/logger.dart';
+import 'src/base/net.dart';
+import 'src/base/os.dart';
+import 'src/base/platform.dart';
 import 'src/base/process.dart';
+import 'src/base/signals.dart';
+import 'src/base/template.dart';
+import 'src/base/terminal.dart';
+import 'src/base/time.dart';
+import 'src/base/user_messages.dart';
+import 'src/build_system/build_system.dart';
+import 'src/build_system/build_targets.dart';
 import 'src/cache.dart';
+import 'src/context/apple_context.dart';
 import 'src/context/tool_context.dart';
 import 'src/context/tool_dependencies.dart';
 import 'src/context_runner.dart';
+import 'src/custom_devices/custom_devices_config.dart';
 import 'src/device.dart';
 import 'src/doctor.dart';
 import 'src/emulator.dart';
 import 'src/experimental/extension_discovery.dart';
 import 'src/experimental/extension_manager.dart';
 import 'src/features.dart';
-import 'src/globals.dart' as globals;
+import 'src/git.dart';
+import 'src/ios/ios_workflow.dart';
+import 'src/ios/plist_parser.dart';
+import 'src/ios/simulators.dart';
+import 'src/ios/xcodeproj.dart';
+import 'src/macos/cocoapods.dart';
+import 'src/macos/cocoapods_validator.dart';
+import 'src/macos/macos_workflow.dart';
+import 'src/macos/xcdevice.dart';
+import 'src/macos/xcode.dart';
+import 'src/native_assets.dart';
+import 'src/persistent_tool_state.dart';
+import 'src/pre_run_validator.dart';
+import 'src/project.dart';
 import 'src/reporting/crash_reporting.dart';
 import 'src/reporting/unified_analytics.dart';
 import 'src/runner/flutter_command.dart';
 import 'src/runner/flutter_command_runner.dart';
+import 'src/runner/local_engine.dart';
+import 'src/version.dart';
 import 'src/windows/windows_workflow.dart';
 
 /// Runs the Flutter tool with support for the specified list of [commands].
@@ -42,11 +76,21 @@ Future<int> run(
   List<String> args,
   List<FlutterCommand> Function(ToolDependencies toolDependencies) commands, {
   required ShutdownHooks shutdownHooks,
+  BuildTargets? buildTargets,
   List<ExtensionEntryPoint> extensionEntryPoints = const <ExtensionEntryPoint>[],
   String? flutterVersion,
+  Logger Function({
+    required OutputPreferences outputPreferences,
+    required Platform platform,
+    required Stdio stdio,
+    required AnsiTerminal terminal,
+  })?
+  loggerBuilder,
   bool muteCommandLogging = false,
+  TestCompilerNativeAssetsBuilder? nativeAssetsBuilder,
   Map<Type, Generator>? overrides,
   bool? reportCrashes,
+  TemplateRenderer? templateRenderer,
   bool verbose = false,
   bool verboseHelp = false,
 }) async {
@@ -63,82 +107,173 @@ Future<int> run(
   final bool usingLocalEngine = args.any((a) => a.startsWith('--local-engine'));
 
   return runInContext<int>(() async {
-    globals.terminal.applyFeatureFlags(featureFlags);
-
-    reportCrashes ??= !await globals.isRunningOnBot;
+    final DoctorValidatorsProvider? overriddenDoctorValidatorsProvider = context
+        .resolveOverride<DoctorValidatorsProvider>();
+    final HttpClientFactory? httpClientFactory = context.resolveOverride<HttpClientFactory>();
     final ToolDependencies toolDeps = await ToolDependencies.bootstrap(
-      analytics: globals.analytics,
-      androidSdkBuilder: () => globals.androidSdk,
-      androidStudioBuilder: () => globals.androidStudio,
-      androidWorkflow: androidWorkflow,
-      artifacts: globals.artifacts,
-      botDetector: globals.botDetector,
-      buildSystem: globals.buildSystem,
-      buildTargets: globals.buildTargets,
-      cache: globals.cache,
-      cocoaPods: globals.cocoaPods,
-      cocoapodsValidator: globals.cocoapodsValidator,
-      config: globals.config,
-      crashReporter: globals.crashReporter,
-      customDevicesConfig: globals.customDevicesConfig,
-      deviceManager: globals.deviceManager,
-      doctor: globals.doctor,
-      emulatorManager: emulatorManager,
+      analytics: context.resolveOverride<Analytics>(),
+      androidSdkBuilder: context.hasOverride(AndroidSdk)
+          ? () => context.resolveOverride<AndroidSdk>()
+          : null,
+      androidStudioBuilder: context.hasOverride(AndroidStudio)
+          ? () => context.resolveOverride<AndroidStudio>()
+          : null,
+      androidWorkflow: context.resolveOverride<AndroidWorkflow>(),
+      artifacts: context.resolveOverride<Artifacts>(),
+      botDetector: context.resolveOverride<BotDetector>(),
+      buildSystem: context.resolveOverride<BuildSystem>(),
+      buildTargets: buildTargets ?? context.resolveOverride<BuildTargets>(),
+      cache: context.resolveOverride<Cache>(),
+      cocoaPods: context.resolveOverride<CocoaPods>(),
+      cocoapodsValidator: context.resolveOverride<CocoaPodsValidator>(),
+      config: context.resolveOverride<Config>(),
+      crashReporter: context.resolveOverride<CrashReporter>(),
+      customDevicesConfig: context.resolveOverride<CustomDevicesConfig>(),
+      deviceManager: context.resolveOverride<DeviceManager>(),
+      doctor: context.resolveOverride<Doctor>(),
+      doctorValidatorsProvider: overriddenDoctorValidatorsProvider,
+      emulatorManager: context.resolveOverride<EmulatorManager>(),
       extensionEntryPoints: extensionEntryPoints,
-      featureFlags: featureFlags,
-      flutterVersion: globals.flutterVersion,
-      fs: globals.fs,
-      git: globals.git,
-      gradleUtilsBuilder: () => globals.gradleUtils!,
-      iosSimulatorUtils: globals.iosSimulatorUtils,
-      iosWorkflow: globals.iosWorkflow,
-      javaBuilder: () => globals.java,
-      localEngineLocator: globals.localEngineLocator,
-      logger: globals.logger,
-      nativeAssetsBuilder: globals.nativeAssetsBuilder,
-      outputPreferences: globals.outputPreferences,
-      persistentToolState: globals.persistentToolState,
-      platform: globals.platform,
-      plistParser: globals.plistParser,
-      preRunValidator: globals.preRunValidator,
-      processInfo: globals.processInfo,
-      processManager: globals.processManager,
-      projectFactory: globals.projectFactory,
+      featureFlags: context.resolveOverride<FeatureFlags>(),
+      flutterVersion: context.resolveOverride<FlutterVersion>(),
+      fs: context.resolveOverride<FileSystem>(),
+      git: context.resolveOverride<Git>(),
+      gradleUtilsBuilder: context.hasOverride(GradleUtils)
+          ? () => context.resolveOverride<GradleUtils>()!
+          : null,
+      httpClientFactory: httpClientFactory,
+      iosSimulatorUtils: context.resolveOverride<IOSSimulatorUtils>(),
+      iosWorkflow: context.resolveOverride<IOSWorkflow>(),
+      javaBuilder: context.hasOverride(Java) ? () => context.resolveOverride<Java>() : null,
+      localEngineLocator: context.resolveOverride<LocalEngineLocator>(),
+      logger: context.resolveOverride<Logger>(),
+      loggerBuilder: loggerBuilder,
+      macOSWorkflow: context.resolveOverride<MacOSWorkflow>(),
+      nativeAssetsBuilder:
+          nativeAssetsBuilder ?? context.resolveOverride<TestCompilerNativeAssetsBuilder>(),
+      os: context.resolveOverride<OperatingSystemUtils>(),
+      outputPreferences: context.resolveOverride<OutputPreferences>(),
+      persistentToolState: context.resolveOverride<PersistentToolState>(),
+      platform: context.resolveOverride<Platform>(),
+      plistParser: context.resolveOverride<PlistParser>(),
+      preRunValidator: context.resolveOverride<PreRunValidator>(),
+      processInfo: context.resolveOverride<ProcessInfo>(),
+      processManager: context.resolveOverride<ProcessManager>(),
+      projectFactory: context.resolveOverride<FlutterProjectFactory>(),
       shutdownHooks: shutdownHooks,
-      stdio: globals.stdio,
-      systemClock: globals.systemClock,
-      templateRenderer: globals.templateRenderer,
-      terminal: globals.terminal,
-      userMessages: globals.userMessages,
-      windowsWorkflow: windowsWorkflow,
-      xcdevice: globals.xcdevice,
-      xcode: globals.xcode,
-      xcodeProjectInterpreter: globals.xcodeProjectInterpreter,
+      signals: context.resolveOverride<Signals>(),
+      stdio: context.resolveOverride<Stdio>(),
+      systemClock: context.resolveOverride<SystemClock>(),
+      templateRenderer: templateRenderer ?? context.resolveOverride<TemplateRenderer>()!,
+      terminal: context.resolveOverride<AnsiTerminal>(),
+      userMessages: context.resolveOverride<UserMessages>(),
+      windowsWorkflow: context.resolveOverride<WindowsWorkflow>(),
+      xcdevice: context.resolveOverride<XCDevice>(),
+      xcode: context.resolveOverride<Xcode>(),
+      xcodeProjectInterpreter: context.resolveOverride<XcodeProjectInterpreter>(),
     );
-    return context.run<int>(
-      overrides: <Type, Generator>{DeviceManager: () => toolDeps.deviceManager},
-      body: () async {
-        final ToolContext(:Cache cache, :Logger logger) = toolDeps.toolContext;
-        DoctorValidatorsProvider createDoctorValidatorsProvider({
-          ExtensionManager? extensionManager,
-        }) => DoctorValidatorsProvider.create(
-          appleContext: toolDeps.appleContext,
-          deviceManager: toolDeps.deviceManager,
+    final ToolDependencies(
+      :Analytics analytics,
+      :AppleContext appleContext,
+      :BuildSystem buildSystem,
+      buildTargets: BuildTargets resolvedBuildTargets,
+      :CrashReporter crashReporter,
+      :DeviceManager deviceManager,
+      :Doctor doctor,
+      :EmulatorManager emulatorManager,
+      :ExtensionManager? extensionManager,
+      :FeatureFlags featureFlags,
+      templateRenderer: TemplateRenderer resolvedTemplateRenderer,
+      :ToolContext toolContext,
+    ) = toolDeps;
+    final ToolContext(
+      :Artifacts artifacts,
+      :BotDetector botDetector,
+      :Cache cache,
+      :Config config,
+      :CustomDevicesConfig customDevicesConfig,
+      flutterVersion: FlutterVersion resolvedFlutterVersion,
+      :FileSystem fs,
+      :Git git,
+      :LocalEngineLocator localEngineLocator,
+      :Logger logger,
+      :OperatingSystemUtils os,
+      :OutputPreferences outputPreferences,
+      :PersistentToolState persistentToolState,
+      :Platform platform,
+      :PreRunValidator preRunValidator,
+      :ProcessInfo processInfo,
+      :ProcessManager processManager,
+      :ProcessUtils processUtils,
+      :FlutterProjectFactory projectFactory,
+      :Signals signals,
+      :Stdio stdio,
+      :SystemClock systemClock,
+      :AnsiTerminal terminal,
+      :UserMessages userMessages,
+    ) = toolContext;
+    reportCrashes ??= !await botDetector.isRunningOnBot;
+    DoctorValidatorsProvider createDoctorValidatorsProvider({ExtensionManager? extensionManager}) =>
+        overriddenDoctorValidatorsProvider ??
+        DoctorValidatorsProvider.create(
+          appleContext: appleContext,
+          deviceManager: deviceManager,
           extensionManager: extensionManager,
-          featureFlags: toolDeps.featureFlags,
-          toolContext: toolDeps.toolContext,
-        );
-        final runner = FlutterCommandRunner(
-          analytics: toolDeps.analytics,
-          cocoaPods: toolDeps.appleContext.cocoaPods,
-          deviceManager: toolDeps.deviceManager,
-          doctor: toolDeps.doctor,
-          extensionManager: toolDeps.extensionManager,
           featureFlags: featureFlags,
-          gradleUtils: toolDeps.androidContext.gradleUtils,
-          plistParser: toolDeps.appleContext.plistParser,
-          templateRenderer: toolDeps.templateRenderer,
-          toolContext: toolDeps.toolContext,
+          httpClientFactory: httpClientFactory,
+          toolContext: toolContext,
+        );
+    return context.run<int>(
+      overrides: <Type, Generator>{
+        Analytics: () => analytics,
+        Artifacts: () => artifacts,
+        BotDetector: () => botDetector,
+        BuildSystem: () => buildSystem,
+        BuildTargets: () => resolvedBuildTargets,
+        Cache: () => cache,
+        Config: () => config,
+        CrashReporter: () => crashReporter,
+        CustomDevicesConfig: () => customDevicesConfig,
+        DeviceManager: () => deviceManager,
+        Doctor: () => doctor,
+        DoctorValidatorsProvider: createDoctorValidatorsProvider,
+        EmulatorManager: () => emulatorManager,
+        FeatureFlags: () => featureFlags,
+        FileSystem: () => fs,
+        FlutterProjectFactory: () => projectFactory,
+        FlutterVersion: () => resolvedFlutterVersion,
+        Git: () => git,
+        LocalEngineLocator: () => localEngineLocator,
+        Logger: () => logger,
+        OperatingSystemUtils: () => os,
+        OutputPreferences: () => outputPreferences,
+        PersistentToolState: () => persistentToolState,
+        Platform: () => platform,
+        PlistParser: () => appleContext.plistParser,
+        PreRunValidator: () => preRunValidator,
+        ProcessInfo: () => processInfo,
+        ProcessManager: () => processManager,
+        ProcessUtils: () => processUtils,
+        ShutdownHooks: () => shutdownHooks,
+        Signals: () => signals,
+        Stdio: () => stdio,
+        SystemClock: () => systemClock,
+        TemplateRenderer: () => resolvedTemplateRenderer,
+        AnsiTerminal: () => terminal,
+        UserMessages: () => userMessages,
+      },
+      body: () async {
+        final runner = FlutterCommandRunner(
+          analytics: analytics,
+          cocoaPods: appleContext.cocoaPods,
+          deviceManager: deviceManager,
+          doctor: doctor,
+          extensionManager: extensionManager,
+          featureFlags: featureFlags,
+          gradleUtilsBuilder: () => toolDeps.androidContext.gradleUtils,
+          plistParser: appleContext.plistParser,
+          templateRenderer: resolvedTemplateRenderer,
+          toolContext: toolContext,
           verboseHelp: verboseHelp,
         );
         commands(toolDeps).forEach(runner.addCommand);
@@ -152,7 +287,7 @@ Future<int> run(
         );
 
         String getVersion() =>
-            flutterVersion ?? globals.flutterVersion.getVersionString(redactUnknownBranches: true);
+            flutterVersion ?? resolvedFlutterVersion.getVersionString(redactUnknownBranches: true);
         Object? firstError;
         StackTrace? firstStackTrace;
         return runZonedGuarded<Future<int>>(
@@ -167,38 +302,36 @@ Future<int> run(
               }
 
               // When analytics are suppressed by DASH__SUPPRESS_ANALYTICS,
-              // `globals.analytics` is a no-op and `setTelemetry` would
+              // `analytics` is a no-op and `setTelemetry` would
               // silently do nothing, so warn rather than report a change that
               // was not persisted.
-              final bool dashSuppressed = isDashAnalyticsSuppressionRequested(
-                globals.platform.environment,
-              );
+              final bool dashSuppressed = isDashAnalyticsSuppressionRequested(platform.environment);
 
               if (args.contains('--disable-analytics')) {
                 if (dashSuppressed) {
-                  globals.printWarning(dashSuppressedTelemetryChangeMessage(enable: false));
+                  logger.printWarning(dashSuppressedTelemetryChangeMessage(enable: false));
                 } else {
-                  if (globals.analytics.telemetryEnabled) {
-                    globals.analytics.send(Event.analyticsCollectionEnabled(status: false));
+                  if (analytics.telemetryEnabled) {
+                    analytics.send(Event.analyticsCollectionEnabled(status: false));
                     // Before disabling analytics, we need to close the client to make
                     // sure the above collection event is sent.
-                    await globals.analytics.close();
+                    await analytics.close();
                   }
-                  await globals.analytics.setTelemetry(false);
-                  globals.printStatus('Analytics reporting disabled.');
+                  await analytics.setTelemetry(false);
+                  logger.printStatus('Analytics reporting disabled.');
                 }
               }
 
               if (args.contains('--enable-analytics')) {
                 if (dashSuppressed) {
-                  globals.printWarning(dashSuppressedTelemetryChangeMessage(enable: true));
+                  logger.printWarning(dashSuppressedTelemetryChangeMessage(enable: true));
                 } else {
-                  final bool alreadyEnabled = globals.analytics.telemetryEnabled;
-                  await globals.analytics.setTelemetry(true);
+                  final bool alreadyEnabled = analytics.telemetryEnabled;
+                  await analytics.setTelemetry(true);
                   if (!alreadyEnabled) {
-                    globals.analytics.send(Event.analyticsCollectionEnabled(status: true));
+                    analytics.send(Event.analyticsCollectionEnabled(status: true));
                   }
-                  globals.printStatus('Analytics reporting enabled.');
+                  logger.printStatus('Analytics reporting enabled.');
                 }
               }
 
@@ -209,7 +342,7 @@ Future<int> run(
               if (firstError == null) {
                 return await exitWithHooks(
                   0,
-                  analytics: toolDeps.analytics,
+                  analytics: analytics,
                   logger: logger,
                   shutdownHooks: shutdownHooks,
                 );
@@ -231,12 +364,12 @@ Future<int> run(
                 reportCrashes!,
                 getVersion,
                 shutdownHooks,
-                cache: cache,
+                analytics: analytics,
+                crashReporter: crashReporter,
                 doctorValidatorsProviderBuilder: createDoctorValidatorsProvider,
-                usingLocalEngine: usingLocalEngine,
-                analytics: toolDeps.analytics,
                 featureFlags: featureFlags,
-                logger: logger,
+                toolContext: toolContext,
+                usingLocalEngine: usingLocalEngine,
               );
             }
           },
@@ -254,12 +387,12 @@ Future<int> run(
               reportCrashes!,
               getVersion,
               shutdownHooks,
-              cache: cache,
+              analytics: analytics,
+              crashReporter: crashReporter,
               doctorValidatorsProviderBuilder: createDoctorValidatorsProvider,
-              usingLocalEngine: usingLocalEngine,
-              analytics: toolDeps.analytics,
               featureFlags: featureFlags,
-              logger: logger,
+              toolContext: toolContext,
+              usingLocalEngine: usingLocalEngine,
             );
           },
         )!;
@@ -283,12 +416,12 @@ Future<int> _handleToolError(
   bool reportCrashes,
   String Function() getFlutterVersion,
   ShutdownHooks shutdownHooks, {
-  required Cache cache,
-  required DoctorValidatorsProviderBuilder doctorValidatorsProviderBuilder,
-  required bool usingLocalEngine,
   required Analytics analytics,
+  required CrashReporter crashReporter,
+  required DoctorValidatorsProviderBuilder doctorValidatorsProviderBuilder,
   required FeatureFlags featureFlags,
-  required Logger logger,
+  required ToolContext toolContext,
+  required bool usingLocalEngine,
 }) async {
   return _alreadyHandlingToolError ??= _handleToolErrorImpl(
     error,
@@ -298,12 +431,12 @@ Future<int> _handleToolError(
     reportCrashes,
     getFlutterVersion,
     shutdownHooks,
-    cache: cache,
-    doctorValidatorsProviderBuilder: doctorValidatorsProviderBuilder,
-    usingLocalEngine: usingLocalEngine,
     analytics: analytics,
+    crashReporter: crashReporter,
+    doctorValidatorsProviderBuilder: doctorValidatorsProviderBuilder,
     featureFlags: featureFlags,
-    logger: logger,
+    toolContext: toolContext,
+    usingLocalEngine: usingLocalEngine,
   );
 }
 
@@ -315,13 +448,25 @@ Future<int> _handleToolErrorImpl(
   bool reportCrashes,
   String Function() getFlutterVersion,
   ShutdownHooks shutdownHooks, {
-  required Cache cache,
-  required DoctorValidatorsProviderBuilder doctorValidatorsProviderBuilder,
-  required bool usingLocalEngine,
   required Analytics analytics,
+  required CrashReporter crashReporter,
+  required DoctorValidatorsProviderBuilder doctorValidatorsProviderBuilder,
   required FeatureFlags featureFlags,
-  required Logger logger,
+  required ToolContext toolContext,
+  required bool usingLocalEngine,
 }) async {
+  final ToolContext(
+    :Cache cache,
+    :Logger logger,
+    :OperatingSystemUtils os,
+    :OutputPreferences outputPreferences,
+    :Platform platform,
+    :ProcessManager processManager,
+    :Stdio stdio,
+    :SystemClock systemClock,
+    :AnsiTerminal terminal,
+    :UserMessages userMessages,
+  ) = toolContext;
   if (error is UsageException) {
     logger.printError('${error.message}\n');
     logger.printError(
@@ -355,8 +500,7 @@ Future<int> _handleToolErrorImpl(
         shutdownHooks: shutdownHooks,
       );
     }
-  } else if (error is ProcessException &&
-      _isErrorDueToGitMissing(error, globals.processManager, logger)) {
+  } else if (error is ProcessException && _isErrorDueToGitMissing(error, processManager, logger)) {
     logger.printError('${error.message}\n');
     logger.printError(
       'An error was encountered when trying to run git.\n'
@@ -367,17 +511,17 @@ Future<int> _handleToolErrorImpl(
     return exitWithHooks(1, analytics: analytics, logger: logger, shutdownHooks: shutdownHooks);
   } else {
     // We've crashed; emit a log report.
-    globals.stdio.stderrWrite('\n');
+    stdio.stderrWrite('\n');
     if (!reportCrashes) {
       // Print the stack trace on the bots - don't write a crash report.
-      globals.stdio.stderrWrite('$error\n');
-      globals.stdio.stderrWrite('$stackTrace\n');
+      stdio.stderrWrite('$error\n');
+      stdio.stderrWrite('$stackTrace\n');
 
       final String featureFlagsEnabled = allConfigurableFeatures
           .where(featureFlags.isEnabled)
           .map((Feature f) => f.configSetting)
           .join(', ');
-      globals.stdio.stderrWrite('Feature flags enabled: $featureFlagsEnabled\n');
+      stdio.stderrWrite('Feature flags enabled: $featureFlagsEnabled\n');
       return exitWithHooks(1, analytics: analytics, logger: logger, shutdownHooks: shutdownHooks);
     }
 
@@ -390,9 +534,9 @@ Future<int> _handleToolErrorImpl(
       await asyncGuard(
         () async {
           final crashReportSender = CrashReportSender(
-            platform: globals.platform,
+            platform: platform,
             logger: logger,
-            operatingSystemUtils: globals.os,
+            operatingSystemUtils: os,
             analytics: analytics,
           );
           await crashReportSender.sendReport(
@@ -402,7 +546,7 @@ Future<int> _handleToolErrorImpl(
             command: args.join(' '),
           );
         },
-        onError: (dynamic error) {
+        onError: (Object error) {
           logger.printError('Error sending crash report: $error');
         },
       );
@@ -412,8 +556,8 @@ Future<int> _handleToolErrorImpl(
 
     try {
       final doctorLogger = BufferLogger(
-        terminal: globals.terminal,
-        outputPreferences: globals.outputPreferences,
+        terminal: terminal,
+        outputPreferences: outputPreferences,
         verbose: true /* Capture flutter doctor -v */,
       );
 
@@ -422,9 +566,9 @@ Future<int> _handleToolErrorImpl(
         doctor: Doctor(
           analytics: analytics,
           cache: cache,
-          clock: globals.systemClock,
+          clock: systemClock,
           logger: doctorLogger,
-          outputPreferences: globals.outputPreferences,
+          outputPreferences: outputPreferences,
           validatorsProviderBuilder: doctorValidatorsProviderBuilder,
         ),
       );
@@ -435,8 +579,8 @@ Future<int> _handleToolErrorImpl(
         stackTrace: stackTrace!,
         doctorText: doctorText,
       );
-      final File file = await _createLocalCrashReport(details);
-      await globals.crashReporter!.informUser(details, file);
+      final File file = await _createLocalCrashReport(details, toolContext: toolContext);
+      await crashReporter.informUser(details, file);
 
       return await exitWithHooks(
         1,
@@ -447,9 +591,9 @@ Future<int> _handleToolErrorImpl(
       // This catch catches all exceptions to ensure the message below is printed.
       // ignore: avoid_catches_without_on_clauses
     } catch (error, st) {
-      globals.stdio.stderrWrite(
+      stdio.stderrWrite(
         'Unable to generate crash report due to secondary error: $error\n$st\n'
-        '${globals.userMessages.flutterToolBugInstructions}\n',
+        '${userMessages.flutterToolBugInstructions}\n',
       );
       // Any exception thrown here (including one thrown by `_exit()`) will
       // get caught by our zone's `onError` handler. In order to avoid an
@@ -462,14 +606,24 @@ Future<int> _handleToolErrorImpl(
 
 String _crashCommand(List<String> args) => 'flutter ${args.join(' ')}';
 
-String _crashException(dynamic error) => '${error.runtimeType}: $error';
+String _crashException(Object error) => '${error.runtimeType}: $error';
 
 /// Saves the crash report to a local file.
-Future<File> _createLocalCrashReport(CrashDetails details) async {
+Future<File> _createLocalCrashReport(
+  CrashDetails details, {
+  required ToolContext toolContext,
+}) async {
+  final ToolContext(
+    :FileSystem fs,
+    :Logger logger,
+    :Platform platform,
+    :UserMessages userMessages,
+  ) = toolContext;
+  final fsUtils = FileSystemUtils(fileSystem: fs, platform: platform);
   final buffer = StringBuffer();
 
   buffer.writeln('Flutter crash report.');
-  buffer.writeln('${globals.userMessages.flutterToolBugInstructions}\n');
+  buffer.writeln('${userMessages.flutterToolBugInstructions}\n');
 
   buffer.writeln('## command\n');
   buffer.writeln('${details.command}\n');
@@ -484,16 +638,16 @@ Future<File> _createLocalCrashReport(CrashDetails details) async {
   late File crashFile;
   ErrorHandlingFileSystem.noExitOnFailure(() {
     try {
-      crashFile = globals.fsUtils.getUniqueFile(globals.fs.currentDirectory, 'flutter', 'log');
+      crashFile = fsUtils.getUniqueFile(fs.currentDirectory, 'flutter', 'log');
       crashFile.writeAsStringSync(buffer.toString());
-    } on FileSystemException catch (_) {
+    } on FileSystemException {
       // Fallback to the system temporary directory.
       try {
-        crashFile = globals.fsUtils.getUniqueFile(globals.fs.systemTempDirectory, 'flutter', 'log');
+        crashFile = fsUtils.getUniqueFile(fs.systemTempDirectory, 'flutter', 'log');
         crashFile.writeAsStringSync(buffer.toString());
       } on FileSystemException catch (e) {
-        globals.printError('Could not write crash report to disk: $e');
-        globals.printError(buffer.toString());
+        logger.printError('Could not write crash report to disk: $e');
+        logger.printError(buffer.toString());
 
         rethrow;
       }

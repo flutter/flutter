@@ -22,6 +22,7 @@ import '../base/error_handling_io.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
+import '../base/net.dart';
 import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
@@ -101,6 +102,7 @@ class ToolDependencies {
     required this.featureFlags,
     required this.templateRenderer,
     required this.toolContext,
+    this.androidWorkflow,
     this.extensionBuildManager,
     this.extensionCleanManager,
     this.extensionManager,
@@ -111,6 +113,9 @@ class ToolDependencies {
 
   /// Sub-context containing Android-specific platform services.
   final AndroidContext androidContext;
+
+  /// Evaluates host readiness and toolchain requirements for Android workflows.
+  final AndroidWorkflow? androidWorkflow;
 
   /// Sub-context containing Apple platform services.
   final AppleContext appleContext;
@@ -179,6 +184,7 @@ class ToolDependencies {
     CustomDevicesConfig? customDevicesConfig,
     DeviceManager? deviceManager,
     Doctor? doctor,
+    DoctorValidatorsProvider? doctorValidatorsProvider,
     EmulatorManager? emulatorManager,
     List<ExtensionEntryPoint> extensionEntryPoints = const <ExtensionEntryPoint>[],
     FeatureFlags? featureFlags,
@@ -187,14 +193,23 @@ class ToolDependencies {
     Git? git,
     GradleUtils? gradleUtils,
     GradleUtils Function()? gradleUtilsBuilder,
+    HttpClientFactory? httpClientFactory,
     IOSSimulatorUtils? iosSimulatorUtils,
     IOSWorkflow? iosWorkflow,
     Java? java,
     Java? Function()? javaBuilder,
     LocalEngineLocator? localEngineLocator,
     Logger? logger,
+    Logger Function({
+      required OutputPreferences outputPreferences,
+      required Platform platform,
+      required Stdio stdio,
+      required AnsiTerminal terminal,
+    })?
+    loggerBuilder,
     MacOSWorkflow? macOSWorkflow,
     TestCompilerNativeAssetsBuilder? nativeAssetsBuilder,
+    OperatingSystemUtils? os,
     OutputPreferences? outputPreferences,
     PersistentToolState? persistentToolState,
     Platform? platform,
@@ -204,6 +219,7 @@ class ToolDependencies {
     ProcessManager? processManager,
     FlutterProjectFactory? projectFactory,
     ShutdownHooks? shutdownHooks,
+    Signals? signals,
     Stdio? stdio,
     SystemClock? systemClock,
     AnsiTerminal? terminal,
@@ -235,6 +251,7 @@ class ToolDependencies {
     final SystemClock finalSystemClock = systemClock ?? const SystemClock();
     final UserMessages finalUserMessages = userMessages ?? UserMessages();
     final ShutdownHooks finalShutdownHooks = shutdownHooks ?? ShutdownHooks();
+    final Signals finalSignals = signals ?? LocalSignals.instance;
     final Stdio finalStdio = stdio ?? Stdio();
 
     // 2. Terminal and Preferences
@@ -244,6 +261,9 @@ class ToolDependencies {
           stdio: finalStdio,
           platform: finalPlatform,
           now: finalSystemClock.now(),
+          // So that we don't animate anything before calling applyFeatureFlags, default
+          // the animations to disabled in real apps.
+          defaultCliAnimationEnabled: false,
           shutdownHooks: finalShutdownHooks,
         );
 
@@ -258,26 +278,29 @@ class ToolDependencies {
     // 3. Logger
     final Logger finalLogger =
         logger ??
-        (finalPlatform.isWindows
-            ? WindowsStdoutLogger(
-                terminal: finalTerminal,
-                stdio: finalStdio,
+        (loggerBuilder != null
+            ? loggerBuilder(
                 outputPreferences: finalOutputPreferences,
+                platform: finalPlatform,
+                stdio: finalStdio,
+                terminal: finalTerminal,
               )
-            : StdoutLogger(
-                terminal: finalTerminal,
-                stdio: finalStdio,
-                outputPreferences: finalOutputPreferences,
-              ));
+            : (finalPlatform.isWindows
+                  ? WindowsStdoutLogger(
+                      terminal: finalTerminal,
+                      stdio: finalStdio,
+                      outputPreferences: finalOutputPreferences,
+                    )
+                  : StdoutLogger(
+                      terminal: finalTerminal,
+                      stdio: finalStdio,
+                      outputPreferences: finalOutputPreferences,
+                    )));
 
     // 4. File System
     final finalFS = fs == null
         ? ErrorHandlingFileSystem(
-            delegate: LocalFileSystem(
-              LocalSignals.instance,
-              Signals.defaultExitSignals,
-              finalShutdownHooks,
-            ),
+            delegate: LocalFileSystem(finalSignals, Signals.defaultExitSignals, finalShutdownHooks),
             platform: finalPlatform,
           )
         : ErrorHandlingFileSystem(delegate: fs, platform: finalPlatform);
@@ -351,12 +374,14 @@ class ToolDependencies {
           xcodeProjectInterpreterBuilder: () => finalXcodeProjectInterpreter,
         );
 
-    final finalOS = OperatingSystemUtils(
-      fileSystem: finalFS,
-      logger: finalLogger,
-      platform: finalPlatform,
-      processManager: finalProcessManager,
-    );
+    final OperatingSystemUtils finalOS =
+        os ??
+        OperatingSystemUtils(
+          fileSystem: finalFS,
+          logger: finalLogger,
+          platform: finalPlatform,
+          processManager: finalProcessManager,
+        );
 
     final Cache finalCache =
         cache ??
@@ -393,7 +418,9 @@ class ToolDependencies {
           config: finalConfig,
         );
     finalAnalyticsInitialized = true;
-    LocalSignals.instance.configureExit(analytics: finalAnalytics, logger: finalLogger);
+    if (finalSignals is LocalSignals) {
+      finalSignals.configureExit(analytics: finalAnalytics, logger: finalLogger);
+    }
 
     final String projectRoot = findProjectRoot(finalFS) ?? finalFS.currentDirectory.path;
     final FlutterManifest? projectManifest = FlutterManifest.createFromPath(
@@ -413,6 +440,7 @@ class ToolDependencies {
           ),
           platform: finalPlatform,
         );
+    finalTerminal.applyFeatureFlags(finalFeatureFlags);
 
     // 10. Remaining ToolContext Dependencies
     final BuildSystem finalBuildSystem =
@@ -491,7 +519,7 @@ class ToolDependencies {
       processUtils: finalProcessUtils,
       projectFactory: finalProjectFactory,
       shutdownHooks: finalShutdownHooks,
-      signals: LocalSignals.instance,
+      signals: finalSignals,
       stdio: finalStdio,
       systemClock: finalSystemClock,
       terminal: finalTerminal,
@@ -688,11 +716,13 @@ class ToolDependencies {
           logger: finalLogger,
           outputPreferences: finalOutputPreferences,
           validatorsProviderBuilder: ({ExtensionManager? extensionManager}) =>
+              doctorValidatorsProvider ??
               DoctorValidatorsProvider.create(
                 appleContext: appleContext,
                 deviceManager: finalDeviceManager,
                 extensionManager: extensionManager,
                 featureFlags: finalFeatureFlags,
+                httpClientFactory: httpClientFactory,
                 toolContext: finalToolContext,
               ),
         );
@@ -700,6 +730,7 @@ class ToolDependencies {
     return ToolDependencies(
       analytics: finalAnalytics,
       androidContext: finalAndroidContext,
+      androidWorkflow: finalAndroidWorkflow,
       appleContext: appleContext,
       buildSystem: finalBuildSystem,
       buildTargets: finalBuildTargets,
