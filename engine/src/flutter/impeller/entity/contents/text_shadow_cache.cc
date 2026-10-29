@@ -64,6 +64,9 @@ void TextShadowCache::MarkFrameEnd() {
       break;
     }
     auto it = entries_.find(key);
+    if (it == entries_.end()) {
+      continue;
+    }
     cache_bytes -= it->second.byte_size;
     entries_.erase(it);
   }
