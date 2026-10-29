@@ -219,7 +219,8 @@ Maven tree under `zip_archives/download.flutter.io/` (`embedding_jars`,
 profile jar's `libvmservice_snapshot.so` -- is built the way GN builds it:
 with `build/android/gyp/*.py` (javac, jar, zip) over the SDK's `android.jar`
 and `core-lambda-stubs.jar` (`@android_tools`), the `DEPS` JDK (`@openjdk`,
-`third_party/java/openjdk`) and the embedding's 43 dependency jars
+`third_party/java/openjdk`; on a Mac the bundle's `Contents/Home`, so that
+the overlay's paths hold on every host) and the embedding's 43 dependency jars
 (`@android_embedding_dependencies`), each GN action a `gn_action` the
 converter emits -- no Gradle, no `rules_android`. The rule grew what those
 actions need and host actions never did: `build_outputs` and `build_inputs`
@@ -360,7 +361,13 @@ builds for either (`macos_arm64_clang`, `macos_x64_clang`, and the two
 cross ones); the platforms `toolchains:macos_arm64` and `:macos_x64` name
 the CPU built for, and a Mac's own build needs no `--platforms`. Every
 target of theirs is `target_compatible_with` macOS, so a wildcard build on
-Linux skips them without fetching a clang the checkout there has not.
+Linux skips them without fetching a clang the checkout there has not -- and
+the Linux and Android toolchains' targets are compatible with Linux and
+Android alone for the same reason the other way round: a Mac's checkout has
+neither the Linux clang nor the Debian sysroots (DEPS syncs them under
+`download_linux_deps`), and its wildcard build skips them. The rule is
+general: a toolchain's files are configured for its target platform when
+it is used, so each toolchain's targets name that platform's OS.
 
 The iOS toolchains are GN's `ios_clang_arm` (a device), `ios_clang_arm_sim`
 and `ios_clang_x64_sim` (the simulator; `tools/gn --ios [--simulator
