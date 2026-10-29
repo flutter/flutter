@@ -6,11 +6,11 @@ import '../application_package.dart';
 import '../base/config.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
+import '../base/os.dart';
 import '../base/platform.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../context/tool_context.dart';
-import '../globals.dart' as globals;
 import '../template.dart';
 import '../xcode_project.dart';
 import 'plist_parser.dart';
@@ -23,31 +23,34 @@ abstract class IOSApp extends ApplicationPackage {
   IOSApp({required String projectBundleId}) : super(id: projectBundleId);
 
   /// Creates a new IOSApp from an existing app bundle or IPA.
-  static IOSApp? fromPrebuiltApp(FileSystemEntity applicationBinary) {
-    final FileSystemEntityType entityType = globals.fs.typeSync(applicationBinary.path);
+  static IOSApp? fromPrebuiltApp(
+    FileSystemEntity applicationBinary, {
+    required PlistParser plistParser,
+    required ToolContext toolContext,
+  }) {
+    final ToolContext(:FileSystem fs, :Logger logger, :OperatingSystemUtils os) = toolContext;
+    final FileSystemEntityType entityType = fs.typeSync(applicationBinary.path);
     if (entityType == FileSystemEntityType.notFound) {
-      globals.printError(
+      logger.printError(
         'File "${applicationBinary.path}" does not exist. Use an app bundle or an ipa.',
       );
       return null;
     }
     Directory uncompressedBundle;
     if (entityType == FileSystemEntityType.directory) {
-      final Directory directory = globals.fs.directory(applicationBinary);
+      final Directory directory = fs.directory(applicationBinary);
       if (!_isBundleDirectory(directory)) {
-        globals.printError('Folder "${applicationBinary.path}" is not an app bundle.');
+        logger.printError('Folder "${applicationBinary.path}" is not an app bundle.');
         return null;
       }
-      uncompressedBundle = globals.fs.directory(applicationBinary);
+      uncompressedBundle = fs.directory(applicationBinary);
     } else {
       // Try to unpack as an ipa.
-      final Directory tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_app.');
-      globals.os.unzip(globals.fs.file(applicationBinary), tempDir);
-      final Directory payloadDir = globals.fs.directory(
-        globals.fs.path.join(tempDir.path, 'Payload'),
-      );
+      final Directory tempDir = fs.systemTempDirectory.createTempSync('flutter_app.');
+      os.unzip(fs.file(applicationBinary), tempDir);
+      final Directory payloadDir = fs.directory(fs.path.join(tempDir.path, 'Payload'));
       if (!payloadDir.existsSync()) {
-        globals.printError('Invalid prebuilt iOS ipa. Does not contain a "Payload" directory.');
+        logger.printError('Invalid prebuilt iOS ipa. Does not contain a "Payload" directory.');
         return null;
       }
       try {
@@ -55,27 +58,27 @@ abstract class IOSApp extends ApplicationPackage {
           _isBundleDirectory,
         );
       } on StateError {
-        globals.printError('Invalid prebuilt iOS ipa. Does not contain a single app bundle.');
+        logger.printError('Invalid prebuilt iOS ipa. Does not contain a single app bundle.');
         return null;
       }
     }
-    final String plistPath = globals.fs.path.join(uncompressedBundle.path, 'Info.plist');
-    if (!globals.fs.file(plistPath).existsSync()) {
-      globals.printError('Invalid prebuilt iOS app. Does not contain Info.plist.');
+    final String plistPath = fs.path.join(uncompressedBundle.path, 'Info.plist');
+    if (!fs.file(plistPath).existsSync()) {
+      logger.printError('Invalid prebuilt iOS app. Does not contain Info.plist.');
       return null;
     }
-    final String? id = globals.plistParser.getValueFromFile<String>(
+    final String? id = plistParser.getValueFromFile<String>(
       plistPath,
       PlistParser.kCFBundleIdentifierKey,
     );
     if (id == null) {
-      globals.printError('Invalid prebuilt iOS app. Info.plist does not contain bundle identifier');
+      logger.printError('Invalid prebuilt iOS app. Info.plist does not contain bundle identifier');
       return null;
     }
 
     return PrebuiltIOSApp(
       uncompressedBundle: uncompressedBundle,
-      bundleName: globals.fs.path.basename(uncompressedBundle.path),
+      bundleName: fs.path.basename(uncompressedBundle.path),
       projectBundleId: id,
       applicationPackage: applicationBinary,
     );

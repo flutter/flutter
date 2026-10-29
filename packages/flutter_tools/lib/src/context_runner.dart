@@ -218,6 +218,7 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
           AndroidWorkflow(androidSdkBuilder: () => globals.androidSdk, featureFlags: featureFlags),
       ApplicationPackageFactory: () => FlutterApplicationPackageFactory(
         androidSdk: globals.androidSdk,
+        plistParser: globals.plistParser,
         toolContext: const GlobalToolContext(),
       ),
       Artifacts: () => CachedArtifacts(
