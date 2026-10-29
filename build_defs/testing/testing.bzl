@@ -68,6 +68,11 @@ _GPU_TEST_BACKEND_FILES = {
         "libvk_swiftshader.dylib": "libvk_swiftshader.dylib",
         "libvulkan.dylib": "libvulkan.dylib",
         "libVkLayer_khronos_validation.dylib": "libVkLayer_khronos_validation.dylib",
+        # ANGLE's shared libraries: the Impeller playground on a Mac opens
+        # libGLESv2.dylib by name for its OpenGLES variants (the golden
+        # suite's), as GN's golden suite has both beside it.
+        "libEGL.dylib": "libEGL.dylib",
+        "libGLESv2.dylib": "libGLESv2.dylib",
     } | _GPU_TEST_BACKEND_MANIFESTS,
 }
 
@@ -693,6 +698,15 @@ def _display_test_impl(ctx):
         env |= _METAL_VALIDATION_ENV
         if ctx.target_platform_has_constraint(ctx.attr._aarch64[platform_common.ConstraintValueInfo]):
             env |= _METAL_VALIDATION_ENV_ARM64
+        if ctx.attr.vulkan_validation:
+            # The backends' directory for dyld: the playground opens ANGLE's
+            # libGLESv2.dylib by its leaf name, which dyld looks for on
+            # DYLD_LIBRARY_PATH and in the working directory -- GN's build
+            # directory under run_tests.py, the runfiles root here. The
+            # wrapper exports DYLD_LIBRARY_PATH itself (xvfb_run.sh): set
+            # here, the variable would not survive /bin/bash, a protected
+            # binary dyld strips DYLD_* from.
+            env["FLUTTER_TEST_LIBRARY_PATH"] = ctx.label.package
     return [
         DefaultInfo(executable = launcher, runfiles = runfiles),
         RunEnvironmentInfo(environment = env),
