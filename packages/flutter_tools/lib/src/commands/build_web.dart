@@ -64,6 +64,15 @@ class BuildWebCommand extends BuildSubCommand {
       );
     }
 
+    if (getValue(WebOptions.pwaStrategy) != null) {
+      throwToolExit(
+        'The "--${WebOptions.pwaStrategy.name}" option has been removed because '
+        'Flutter no longer generates or registers an offline caching service worker.\n'
+        'Remove "--${WebOptions.pwaStrategy.name}" from your build command. '
+        'See https://github.com/flutter/flutter/issues/156910 for more details.',
+      );
+    }
+
     final String? optimizationLevelArg = getValue(WebOptions.optimizationLevel);
     final int? optimizationLevel = optimizationLevelArg != null
         ? int.parse(optimizationLevelArg)
@@ -211,7 +220,6 @@ class BuildWebCommand extends BuildSubCommand {
       project,
       targetFile,
       buildInfo,
-      getValue(WebOptions.pwaStrategy),
       compilerConfigs: compilerConfigs,
       baseHref: baseHref,
       staticAssetsUrl: staticAssetsUrl,
