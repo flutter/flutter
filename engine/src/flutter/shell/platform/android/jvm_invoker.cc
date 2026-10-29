@@ -644,6 +644,7 @@ JvmInvoker::ComputePlatformResolvedLocale(
 }
 
 void JvmInvoker::OnFirstFrame() {
+  on_first_frame_count_.fetch_add(1, std::memory_order_relaxed);
   JNIEnv* env = GetEnv();
   if (env == nullptr) {
     return;

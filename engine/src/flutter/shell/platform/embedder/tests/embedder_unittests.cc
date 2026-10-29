@@ -24,6 +24,7 @@
 #include "flutter/fml/time/time_delta.h"
 #include "flutter/fml/time/time_point.h"
 #include "flutter/runtime/dart_vm.h"
+#include "flutter/shell/platform/embedder/embedder_thread_host.h"
 #include "flutter/shell/platform/embedder/tests/embedder_assertions.h"
 #include "flutter/shell/platform/embedder/tests/embedder_config_builder.h"
 #include "flutter/shell/platform/embedder/tests/embedder_test.h"
@@ -4628,6 +4629,27 @@ TEST_F(EmbedderTest, EmbedderPrefetchDefaultFontManagerAndProcTable) {
   EXPECT_EQ(table.Spawn, &FlutterEngineSpawn);
   EXPECT_EQ(table.PrefetchDefaultFontManager,
             &FlutterEnginePrefetchDefaultFontManager);
+}
+
+TEST(EmbedderTestNoFixture,
+     EmbedderThreadHostMergesPlatformAndUiThreadWhenRequested) {
+  auto unmerged_host =
+      EmbedderThreadHost::CreateEmbedderOrEngineManagedThreadHost(
+          nullptr, fml::Thread::SetCurrentThreadName,
+          /*merge_platform_and_ui_thread=*/false);
+  ASSERT_NE(unmerged_host, nullptr);
+  ASSERT_TRUE(unmerged_host->IsValid());
+  EXPECT_NE(unmerged_host->GetTaskRunners().GetPlatformTaskRunner(),
+            unmerged_host->GetTaskRunners().GetUITaskRunner());
+
+  auto merged_host =
+      EmbedderThreadHost::CreateEmbedderOrEngineManagedThreadHost(
+          nullptr, fml::Thread::SetCurrentThreadName,
+          /*merge_platform_and_ui_thread=*/true);
+  ASSERT_NE(merged_host, nullptr);
+  ASSERT_TRUE(merged_host->IsValid());
+  EXPECT_EQ(merged_host->GetTaskRunners().GetPlatformTaskRunner(),
+            merged_host->GetTaskRunners().GetUITaskRunner());
 }
 
 }  // namespace testing

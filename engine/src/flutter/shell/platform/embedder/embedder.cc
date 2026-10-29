@@ -3462,32 +3462,44 @@ FlutterEngineResult FlutterEngineInitialize(size_t version,
       CreateExternalTextureResolver(config, user_data);
 
   auto custom_task_runners = SAFE_ACCESS(args, custom_task_runners, nullptr);
-  auto thread_config_callback = [&custom_task_runners](
-                                    const fml::Thread::ThreadConfig& config) {
-    fml::Thread::SetCurrentThreadName(config);
-    if (!custom_task_runners || !custom_task_runners->thread_priority_setter) {
-      return;
-    }
-    FlutterThreadPriority priority = FlutterThreadPriority::kNormal;
-    switch (config.priority) {
-      case fml::Thread::ThreadPriority::kBackground:
-        priority = FlutterThreadPriority::kBackground;
-        break;
-      case fml::Thread::ThreadPriority::kNormal:
-        priority = FlutterThreadPriority::kNormal;
-        break;
-      case fml::Thread::ThreadPriority::kDisplay:
-        priority = FlutterThreadPriority::kDisplay;
-        break;
-      case fml::Thread::ThreadPriority::kRaster:
-        priority = FlutterThreadPriority::kRaster;
-        break;
-    }
-    custom_task_runners->thread_priority_setter(priority);
-  };
+  void (*priority_setter)(FlutterThreadPriority) =
+      custom_task_runners != nullptr
+          ? SAFE_ACCESS(custom_task_runners, thread_priority_setter, nullptr)
+          : nullptr;
+  auto thread_config_callback =
+      [priority_setter](const fml::Thread::ThreadConfig& config) {
+        fml::Thread::SetCurrentThreadName(config);
+        if (!priority_setter) {
+          return;
+        }
+        FlutterThreadPriority priority = FlutterThreadPriority::kNormal;
+        switch (config.priority) {
+          case fml::Thread::ThreadPriority::kBackground:
+            priority = FlutterThreadPriority::kBackground;
+            break;
+          case fml::Thread::ThreadPriority::kNormal:
+            priority = FlutterThreadPriority::kNormal;
+            break;
+          case fml::Thread::ThreadPriority::kDisplay:
+            priority = FlutterThreadPriority::kDisplay;
+            break;
+          case fml::Thread::ThreadPriority::kRaster:
+            priority = FlutterThreadPriority::kRaster;
+            break;
+        }
+        priority_setter(priority);
+      };
+#if FML_OS_ANDROID
+  const bool merge_platform_and_ui_thread =
+      (settings.merged_platform_ui_thread ==
+       flutter::Settings::MergedPlatformUIThread::kEnabled);
+#else
+  const bool merge_platform_and_ui_thread = false;
+#endif
   auto thread_host =
       flutter::EmbedderThreadHost::CreateEmbedderOrEngineManagedThreadHost(
-          custom_task_runners, thread_config_callback);
+          custom_task_runners, thread_config_callback,
+          merge_platform_and_ui_thread);
 
   if (!thread_host || !thread_host->IsValid()) {
     return LOG_EMBEDDER_ERROR(kInvalidArguments,

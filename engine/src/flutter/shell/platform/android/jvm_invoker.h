@@ -369,6 +369,9 @@ class JvmInvoker {
       const std::vector<std::string>& supported_locales_data);
 
   void OnFirstFrame();
+  size_t GetOnFirstFrameCount() const {
+    return on_first_frame_count_.load(std::memory_order_relaxed);
+  }
   void OnEngineRestart();
   void OnPreEngineRestart() { OnEngineRestart(); }
 
@@ -447,6 +450,7 @@ class JvmInvoker {
  private:
   JNIEnv* test_env_ = nullptr;
   fml::jni::JavaObjectWeakGlobalRef java_object_;
+  std::atomic<size_t> on_first_frame_count_{0};
 
   FML_DISALLOW_COPY_AND_ASSIGN(JvmInvoker);
 };

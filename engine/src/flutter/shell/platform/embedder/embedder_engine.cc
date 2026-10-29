@@ -388,7 +388,8 @@ bool EmbedderEngine::PostRenderThreadTask(const fml::closure& task) {
     return false;
   }
 
-  shell_->GetTaskRunners().GetRasterTaskRunner()->PostTask(task);
+  fml::TaskRunner::RunNowOrPostTask(
+      shell_->GetTaskRunners().GetRasterTaskRunner(), task);
   return true;
 }
 

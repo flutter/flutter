@@ -55,6 +55,12 @@ constexpr double kDefaultInitialPixelRatio = 1.0;
 // Unset display corner radius sentinel value.
 constexpr int32_t kUnsetCornerRadiusSentinel = -1;
 
+// Converts a row of RGBA8888 pixels (4 bytes per pixel: R, G, B, A) into
+// packed 16-bit RGB565 pixels ([15:11]=R5, [10:5]=G6, [4:0]=B5).
+void ConvertRgba8888ToRgb565Row(uint16_t* dst_row,
+                                const uint8_t* src_row,
+                                size_t pixel_count);
+
 // Manages the C-API FlutterCustomTaskRunners for the Android embedder.
 class AndroidTaskRunners {
  public:
@@ -80,6 +86,7 @@ class AndroidTaskRunners {
   static void PostTaskCallback(FlutterTask task,
                                uint64_t target_time_nanos,
                                void* user_data);
+  static void SetThreadPriorityCallback(FlutterThreadPriority priority);
 
   void SetTaskExecutionCallback(
       std::function<void(FlutterTask)> execute_callback) {
@@ -471,6 +478,7 @@ class FlutterEmbedderNative {
     return surface_manager_.get();
   }
   int64_t GetEngineId() const { return engine_id_; }
+  bool IsFirstFramePresented() const { return first_frame_presented_.load(); }
 
  private:
   struct PendingPlatformMessage {
@@ -513,6 +521,8 @@ class FlutterEmbedderNative {
                               size_t row_bytes,
                               size_t height);
   void NotifyFirstFramePresented();
+  void RunOnRasterThreadSynchronously(const std::function<void()>& task);
+  void FlushPendingViewportMetrics();
   void FlushPendingStartupState();
 
   FlutterEngineProcTable proc_table_{};

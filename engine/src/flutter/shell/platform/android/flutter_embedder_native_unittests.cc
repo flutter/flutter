@@ -110,6 +110,7 @@ struct MockProcTableState {
   size_t notify_dart_deferred_library_error_count = 0;
   size_t update_locales_count = 0;
   size_t on_vsync_count = 0;
+  size_t post_render_thread_task_count = 0;
 
   // Captured arguments from Initialize.
   FlutterRendererType last_renderer_type = kOpenGL;
@@ -117,12 +118,20 @@ struct MockProcTableState {
   bool last_avoid_backing_store_cache = false;
   bool last_enable_direct_platform_message_dispatch = false;
   bool has_custom_task_runners = false;
+  bool has_thread_priority_setter = false;
   bool platform_task_runner_is_null = false;
   bool render_task_runner_is_null = false;
   size_t custom_asset_resolvers_count = 0;
   size_t image_decoders_count = 0;
   int32_t first_image_decoder_priority = 0;
   void* last_user_data = nullptr;
+
+  // Counts captured at the moment RunInitialized is entered.
+  size_t messages_sent_before_run_initialized = 0;
+  size_t semantics_updated_before_run_initialized = 0;
+  size_t accessibility_updated_before_run_initialized = 0;
+  size_t window_metrics_sent_at_run_initialized = 0;
+  size_t display_updates_at_run_initialized = 0;
 
   // Captured platform message fields.
   std::string last_message_channel;
@@ -187,6 +196,8 @@ FlutterEngineProcTable BuildMockProcTable(MockProcTableState* state) {
         }
         if (args->custom_task_runners != nullptr) {
           g_mock_state->has_custom_task_runners = true;
+          g_mock_state->has_thread_priority_setter =
+              (args->custom_task_runners->thread_priority_setter != nullptr);
           g_mock_state->platform_task_runner_is_null =
               (args->custom_task_runners->platform_task_runner == nullptr);
           g_mock_state->render_task_runner_is_null =
@@ -222,6 +233,16 @@ FlutterEngineProcTable BuildMockProcTable(MockProcTableState* state) {
   table.RunInitialized = [](FLUTTER_API_SYMBOL(FlutterEngine) engine) {
     if (g_mock_state != nullptr) {
       g_mock_state->run_initialized_count++;
+      g_mock_state->messages_sent_before_run_initialized =
+          g_mock_state->send_platform_message_count;
+      g_mock_state->semantics_updated_before_run_initialized =
+          g_mock_state->update_semantics_enabled_count;
+      g_mock_state->accessibility_updated_before_run_initialized =
+          g_mock_state->update_accessibility_features_count;
+      g_mock_state->window_metrics_sent_at_run_initialized =
+          g_mock_state->send_window_metrics_count;
+      g_mock_state->display_updates_at_run_initialized =
+          g_mock_state->notify_display_update_count;
     }
     return kSuccess;
   };
@@ -490,6 +511,18 @@ FlutterEngineProcTable BuildMockProcTable(MockProcTableState* state) {
       g_mock_state->last_vsync_baton = baton;
       g_mock_state->last_vsync_start_nanos = frame_start_time_nanos;
       g_mock_state->last_vsync_target_nanos = frame_target_time_nanos;
+    }
+    return kSuccess;
+  };
+
+  table.PostRenderThreadTask = [](FLUTTER_API_SYMBOL(FlutterEngine) engine,
+                                  VoidCallback callback, void* callback_data) {
+    (void)engine;
+    if (g_mock_state != nullptr) {
+      g_mock_state->post_render_thread_task_count++;
+    }
+    if (callback != nullptr) {
+      callback(callback_data);
     }
     return kSuccess;
   };
@@ -1037,6 +1070,195 @@ TEST_F(FlutterEmbedderNativeTest,
 
   stop_raster.store(true, std::memory_order_relaxed);
   raster_thread.join();
+}
+
+TEST_F(FlutterEmbedderNativeTest,
+       ConvertRgba8888ToRgb565RowQuantizesColorsAndHonorsPixelCount) {
+  // Sample RGBA8888 pixels and their expected 16-bit RGB565 encodings:
+  // Pixel 0: Scuba golden light-gray background (251, 251, 251, 255) ->
+  //          ((251>>3)<<11) | ((251>>2)<<5) | (251>>3) = 0xFFDF
+  // Pixel 1: Pure red (255, 0, 0, 255) -> 0xF800
+  // Pixel 2: Pure green (0, 255, 0, 255) -> 0x07E0
+  // Pixel 3: Pure blue (0, 0, 255, 255) -> 0x001F
+  // Pixel 4: Mid-tone (80, 99, 138, 255) -> ((80>>3)<<11)|((99>>2)<<5)|(138>>3)
+  // = 0x5311
+  constexpr size_t kConvertedPixelCount = 5;
+  constexpr size_t kTotalDstCount = 6;
+  constexpr uint16_t kSentinelValue = 0xABCD;
+  constexpr uint16_t kExpectedLightGray565 = 0xFFDF;
+  constexpr uint16_t kExpectedRed565 = 0xF800;
+  constexpr uint16_t kExpectedGreen565 = 0x07E0;
+  constexpr uint16_t kExpectedBlue565 = 0x001F;
+  constexpr uint16_t kExpectedMidTone565 = 0x5311;
+
+  const uint8_t src_rgba[] = {
+      251, 251, 251, 255,  // Light gray background
+      255, 0,   0,   255,  // Red
+      0,   255, 0,   255,  // Green
+      0,   0,   255, 255,  // Blue
+      80,  99,  138, 255,  // Mid-tone
+      12,  34,  56,  255,  // Extra pixel beyond kConvertedPixelCount
+  };
+  std::vector<uint16_t> dst_rgb565(kTotalDstCount, kSentinelValue);
+
+  ConvertRgba8888ToRgb565Row(dst_rgb565.data(), src_rgba, kConvertedPixelCount);
+
+  EXPECT_EQ(dst_rgb565[0], kExpectedLightGray565);
+  EXPECT_EQ(dst_rgb565[1], kExpectedRed565);
+  EXPECT_EQ(dst_rgb565[2], kExpectedGreen565);
+  EXPECT_EQ(dst_rgb565[3], kExpectedBlue565);
+  EXPECT_EQ(dst_rgb565[4], kExpectedMidTone565);
+  // Sentinel beyond kConvertedPixelCount must remain untouched.
+  EXPECT_EQ(dst_rgb565[5], kSentinelValue);
+}
+
+TEST_F(
+    FlutterEmbedderNativeTest,
+    FirstFrameNotificationResetsOnSurfaceDestroyAndRecreateAndWindowChanged) {
+  AndroidVMArgs vm_args;
+  vm_args.api_level = kTestApiLevel33;
+  vm_args.enable_software_rendering = true;
+  AndroidVMInit::SetGlobalVMArgs(vm_args);
+
+  FlutterEmbedderNative embedder(&proc_table_);
+  embedder.SetEngineForTesting(
+      reinterpret_cast<FLUTTER_API_SYMBOL(FlutterEngine)>(kFakeEngineAddress));
+
+  FlutterRendererConfig resolved_config{};
+  ASSERT_TRUE(FlutterEmbedderNative::OnResolveRendererConfigCallback(
+      &embedder, &resolved_config));
+  ASSERT_EQ(resolved_config.type, kSoftware);
+  ASSERT_NE(resolved_config.software.surface_present_callback, nullptr);
+
+  // Dimensions and synthetic surface handles for lifecycle testing.
+  constexpr size_t kFrameWidth = 4;
+  constexpr size_t kFrameHeight = 4;
+  constexpr size_t kBytesPerPixel = 4;
+  constexpr size_t kFrameRowBytes = kFrameWidth * kBytesPerPixel;
+  constexpr uintptr_t kFakeSurfaceAddress1 = 0x3001;
+  constexpr uintptr_t kFakeSurfaceAddress2 = 0x3002;
+  constexpr uintptr_t kFakeSurfaceAddress3 = 0x3003;
+  constexpr size_t kFirstFrameCountAfterFirstPresent = 1u;
+  constexpr size_t kFirstFrameCountAfterRecreatePresent = 2u;
+  constexpr size_t kFirstFrameCountAfterWindowChangedPresent = 3u;
+
+  std::vector<uint8_t> pixels(kFrameRowBytes * kFrameHeight, 0xFF);
+  auto surface_1 = reinterpret_cast<jobject>(kFakeSurfaceAddress1);
+  auto surface_2 = reinterpret_cast<jobject>(kFakeSurfaceAddress2);
+  auto surface_3 = reinterpret_cast<jobject>(kFakeSurfaceAddress3);
+
+  EXPECT_FALSE(embedder.IsFirstFramePresented());
+  EXPECT_EQ(embedder.GetJvmInvoker()->GetOnFirstFrameCount(), 0u);
+
+  // 1. Initial SurfaceCreated + frame present fires OnFirstFrame once.
+  embedder.SurfaceCreated(nullptr, surface_1);
+  EXPECT_FALSE(embedder.IsFirstFramePresented());
+  EXPECT_GE(mock_state_->post_render_thread_task_count, 1u);
+
+  EXPECT_TRUE(resolved_config.software.surface_present_callback(
+      &embedder, pixels.data(), kFrameRowBytes, kFrameHeight));
+  EXPECT_TRUE(embedder.IsFirstFramePresented());
+  EXPECT_EQ(embedder.GetJvmInvoker()->GetOnFirstFrameCount(),
+            kFirstFrameCountAfterFirstPresent);
+
+  // Subsequent frame on the same surface does not fire OnFirstFrame again.
+  EXPECT_TRUE(resolved_config.software.surface_present_callback(
+      &embedder, pixels.data(), kFrameRowBytes, kFrameHeight));
+  EXPECT_EQ(embedder.GetJvmInvoker()->GetOnFirstFrameCount(),
+            kFirstFrameCountAfterFirstPresent);
+
+  // 2. SurfaceDestroyed resets IsFirstFramePresented, and recreating the
+  // surface + presenting fires OnFirstFrame a second time.
+  size_t render_tasks_before_destroy =
+      mock_state_->post_render_thread_task_count;
+  embedder.SurfaceDestroyed();
+  EXPECT_FALSE(embedder.IsFirstFramePresented());
+  EXPECT_GT(mock_state_->post_render_thread_task_count,
+            render_tasks_before_destroy);
+
+  embedder.SurfaceCreated(nullptr, surface_2);
+  EXPECT_FALSE(embedder.IsFirstFramePresented());
+  EXPECT_TRUE(resolved_config.software.surface_present_callback(
+      &embedder, pixels.data(), kFrameRowBytes, kFrameHeight));
+  EXPECT_TRUE(embedder.IsFirstFramePresented());
+  EXPECT_EQ(embedder.GetJvmInvoker()->GetOnFirstFrameCount(),
+            kFirstFrameCountAfterRecreatePresent);
+
+  // 3. SurfaceWindowChanged resets IsFirstFramePresented, and presenting on the
+  // swapped surface fires OnFirstFrame a third time.
+  embedder.SurfaceWindowChanged(nullptr, surface_3);
+  EXPECT_FALSE(embedder.IsFirstFramePresented());
+  EXPECT_TRUE(resolved_config.software.surface_present_callback(
+      &embedder, pixels.data(), kFrameRowBytes, kFrameHeight));
+  EXPECT_TRUE(embedder.IsFirstFramePresented());
+  EXPECT_EQ(embedder.GetJvmInvoker()->GetOnFirstFrameCount(),
+            kFirstFrameCountAfterWindowChangedPresent);
+}
+
+TEST_F(
+    FlutterEmbedderNativeTest,
+    QueuesStartupStateBeforeInitAndFlushesPlatformMessagesAfterRunInitialized) {
+  AndroidVMArgs vm_args;
+  vm_args.api_level = kTestApiLevel34;
+  vm_args.assets_path = "/data/app/flutter_assets";
+  vm_args.icu_data_path = "/data/app/icudtl.dat";
+  AndroidVMInit::SetGlobalVMArgs(vm_args);
+
+  FlutterEmbedderNative embedder(&proc_table_,
+                                 /*use_engine_owned_task_runners=*/true);
+
+  // Queue viewport metrics, semantics, accessibility flags, and two startup
+  // platform messages BEFORE RunBundleAndSnapshotFromLibrary initializes the
+  // engine.
+  embedder.SetViewportMetrics(kTestPixelRatio, kTestPhysicalWidth,
+                              kTestPhysicalHeight, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                              0, 0, kTestTouchSlop, {}, {}, {}, kTestDisplayId);
+  EXPECT_TRUE(embedder.SetSemanticsEnabled(true));
+  EXPECT_TRUE(embedder.SetAccessibilityFeatures(kTestAccessibilityFlags));
+
+  const std::string lifecycle_payload = "AppLifecycleState.resumed";
+  EXPECT_TRUE(embedder.DispatchPlatformMessage(
+      "flutter/lifecycle",
+      reinterpret_cast<const uint8_t*>(lifecycle_payload.data()),
+      lifecycle_payload.size(), 0));
+  const std::vector<uint8_t> custom_payload = {0x01, 0x02, 0x03, 0x04};
+  EXPECT_TRUE(embedder.DispatchPlatformMessage(
+      "custom/startup_channel", custom_payload.data(), custom_payload.size(),
+      kTestResponseId));
+
+  // Nothing should be sent to the C-API proc table before Initialize.
+  EXPECT_EQ(mock_state_->send_window_metrics_count, 0u);
+  EXPECT_EQ(mock_state_->send_platform_message_count, 0u);
+  EXPECT_EQ(mock_state_->update_semantics_enabled_count, 0u);
+  EXPECT_EQ(mock_state_->update_accessibility_features_count, 0u);
+
+  EXPECT_TRUE(embedder.RunBundleAndSnapshotFromLibrary(
+      nullptr, "/data/app/flutter_assets", "main", "package:app/main.dart",
+      nullptr, {}, kTestPrimaryEngineId));
+
+  // Verify thread_priority_setter is wired on custom_task_runners.
+  EXPECT_TRUE(mock_state_->has_thread_priority_setter);
+
+  // Viewport metrics and display updates must be sent BEFORE RunInitialized so
+  // window physical dimensions are available when main() starts.
+  EXPECT_EQ(mock_state_->window_metrics_sent_at_run_initialized, 1u);
+  EXPECT_EQ(mock_state_->display_updates_at_run_initialized, 1u);
+
+  // Platform messages, semantics, and accessibility flags must NOT be sent
+  // before RunInitialized (when IsRootIsolateRunning() is false and
+  // non-settings messages would be dropped by Engine::DispatchPlatformMessage),
+  // and must be flushed immediately AFTER RunInitialized succeeds.
+  EXPECT_EQ(mock_state_->messages_sent_before_run_initialized, 0u);
+  EXPECT_EQ(mock_state_->semantics_updated_before_run_initialized, 0u);
+  EXPECT_EQ(mock_state_->accessibility_updated_before_run_initialized, 0u);
+
+  constexpr size_t kExpectedFlushedMessageCount = 2u;
+  EXPECT_EQ(mock_state_->send_platform_message_count,
+            kExpectedFlushedMessageCount);
+  EXPECT_EQ(mock_state_->last_message_channel, "custom/startup_channel");
+  EXPECT_EQ(mock_state_->last_message_payload, custom_payload);
+  EXPECT_EQ(mock_state_->update_semantics_enabled_count, 1u);
+  EXPECT_EQ(mock_state_->update_accessibility_features_count, 1u);
 }
 
 }  // namespace testing
