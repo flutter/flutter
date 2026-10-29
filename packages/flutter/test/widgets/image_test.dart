@@ -3164,6 +3164,98 @@ void main() {
     await tester.pumpWidget(RawImage(image: image, blendMode: BlendMode.multiply));
     expect(renderImage.blendMode, BlendMode.multiply);
   });
+
+  testWidgets('Image does not reload a failed image when a route is pushed and popped', (
+    WidgetTester tester,
+  ) async {
+    // Regression test for https://github.com/flutter/flutter/issues/166832.
+    final provider = _EvictOnErrorImageProvider();
+    final navigatorKey = GlobalKey<NavigatorState>();
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Navigator(
+          key: navigatorKey,
+          onGenerateRoute: (RouteSettings settings) => PageRouteBuilder<void>(
+            pageBuilder: (BuildContext context, _, _) => Image(
+              image: provider,
+              errorBuilder: (BuildContext context, Object error, StackTrace? stackTrace) {
+                return const Text('error');
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    expect(find.text('error'), findsOneWidget);
+    expect(provider.loadCallCount, 1);
+
+    navigatorKey.currentState!.push(
+      PageRouteBuilder<void>(pageBuilder: (BuildContext context, _, _) => const SizedBox()),
+    );
+    await tester.pumpAndSettle();
+    expect(provider.loadCallCount, 1);
+
+    navigatorKey.currentState!.pop();
+    await tester.pumpAndSettle();
+    expect(provider.loadCallCount, 1);
+    expect(find.text('error'), findsOneWidget);
+  });
+
+  testWidgets('Image resolves again when its image configuration changes', (
+    WidgetTester tester,
+  ) async {
+    final provider = _EvictOnErrorImageProvider();
+
+    Widget buildImage(double devicePixelRatio) {
+      return MediaQuery(
+        data: MediaQueryData(devicePixelRatio: devicePixelRatio),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Image(
+            image: provider,
+            errorBuilder: (BuildContext context, Object error, StackTrace? stackTrace) {
+              return const Text('error');
+            },
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildImage(1.0));
+    await tester.pump();
+    expect(provider.loadCallCount, 1);
+
+    await tester.pumpWidget(buildImage(2.0));
+    await tester.pump();
+    expect(provider.loadCallCount, 2);
+  });
+}
+
+/// An image provider that always fails to load, and evicts itself from the
+/// image cache on failure the same way [NetworkImage] does.
+class _EvictOnErrorImageProvider extends ImageProvider<_EvictOnErrorImageProvider> {
+  int loadCallCount = 0;
+
+  @override
+  Future<_EvictOnErrorImageProvider> obtainKey(ImageConfiguration configuration) {
+    return SynchronousFuture<_EvictOnErrorImageProvider>(this);
+  }
+
+  @override
+  ImageStreamCompleter loadImage(_EvictOnErrorImageProvider key, ImageDecoderCallback decode) {
+    loadCallCount += 1;
+    return OneFrameImageStreamCompleter(_load(key));
+  }
+
+  Future<ImageInfo> _load(_EvictOnErrorImageProvider key) async {
+    scheduleMicrotask(() {
+      imageCache.evict(key);
+    });
+    throw Exception('Failed to load image');
+  }
 }
 
 @immutable
