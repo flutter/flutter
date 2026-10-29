@@ -8,8 +8,10 @@
 #include <gmodule.h>
 
 #include <cstring>
+#include <string>
 
 #include "flutter/common/constants.h"
+#include "flutter/fml/trace_event.h"
 #include "flutter/shell/platform/common/engine_switches.h"
 #include "flutter/shell/platform/embedder/embedder.h"
 #include "flutter/shell/platform/linux/fl_accessibility_handler.h"
@@ -133,6 +135,9 @@ static void fl_engine_deliver_vsync(FlEngine* self,
   if (self->engine == nullptr) {
     return;
   }
+  TRACE_EVENT_INSTANT2("flutter", "LinuxVsyncDeliver", "baton",
+                       std::to_string(baton).c_str(), "frame_start_ns",
+                       std::to_string(frame_start_ns).c_str());
   FlutterEngineResult result = self->embedder_api.OnVsync(
       self->engine, baton, frame_start_ns, frame_target_ns);
   if (result != kSuccess) {
@@ -160,6 +165,16 @@ static gboolean fl_engine_frame_tick(GtkWidget* widget,
     return G_SOURCE_REMOVE;
   }
   const FlVsyncTiming timing = fl_vsync_timing_for_clock(frame_clock);
+  TRACE_EVENT_INSTANT2(
+      "flutter", "LinuxVsyncTick", "baton",
+      std::to_string(request->baton).c_str(), "frame_counter",
+      std::to_string(gdk_frame_clock_get_frame_counter(frame_clock)).c_str());
+  TRACE_EVENT_INSTANT2("flutter", "LinuxVsyncTiming", "frame_start_ns",
+                       std::to_string(timing.frame_start_ns).c_str(),
+                       "frame_target_ns",
+                       std::to_string(timing.frame_target_ns).c_str());
+  TRACE_EVENT_INSTANT1("flutter", "LinuxVsyncRefresh", "interval_us",
+                       std::to_string(timing.refresh_interval_us).c_str());
   fl_engine_complete_vsync(request, timing.frame_start_ns,
                            timing.frame_target_ns);
   // Keep GTK updating until the next tick, allowing the engine's next request
@@ -180,6 +195,8 @@ static gboolean fl_engine_vsync_timeout(gpointer user_data) {
 static gboolean fl_engine_vsync_watchdog(gpointer user_data) {
   auto* request = static_cast<VsyncRequest*>(user_data);
   request->watchdog_source_id = 0;
+  TRACE_EVENT_INSTANT1("flutter", "LinuxVsyncClockTimeout", "baton",
+                       std::to_string(request->baton).c_str());
   // Removing the tick runs its destroy notifier, which returns an undelivered
   // baton on wall time. A mapped but occluded/frozen clock may never tick.
   // Do not access request after removal: the notifier owns and frees it.
@@ -243,6 +260,8 @@ static FlRenderable* get_renderable(FlEngine* self, int64_t view_id);
 
 static void fl_engine_vsync_callback(void* user_data, intptr_t baton) {
   auto* self = FL_ENGINE(user_data);
+  TRACE_EVENT_INSTANT1("flutter", "LinuxVsyncRequest", "baton",
+                       std::to_string(baton).c_str());
   auto* request = g_new0(VsyncRequest, 1);
   request->engine = FL_ENGINE(g_object_ref(self));
   // The implicit view is the primary presentation clock for this engine.

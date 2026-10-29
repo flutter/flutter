@@ -20,6 +20,7 @@
 #include <cstring>
 
 #include "flutter/common/constants.h"
+#include "flutter/fml/trace_event.h"
 #include "flutter/shell/platform/linux/fl_engine_private.h"
 #include "flutter/shell/platform/linux/fl_gtk.h"
 #include "flutter/shell/platform/linux/fl_key_event.h"
@@ -80,6 +81,7 @@ G_DEFINE_TYPE_WITH_CODE(
 #if FLUTTER_LINUX_GTK4
 // Redraw the view from the GTK thread.
 static gboolean redraw_cb(gpointer user_data) {
+  TRACE_EVENT0("flutter", "GTK4UpdateTexture");
   g_autoptr(FlView) self = FL_VIEW(user_data);
 
 #if FLUTTER_LINUX_GTK4

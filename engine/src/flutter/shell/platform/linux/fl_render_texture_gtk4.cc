@@ -4,6 +4,7 @@
 
 #include "flutter/shell/platform/linux/fl_render_texture_gtk4.h"
 #include <cmath>
+#include "flutter/fml/trace_event.h"
 #include "flutter/shell/platform/linux/fl_gtk.h"
 #include "flutter/shell/platform/linux/fl_gtk4_runtime_api.h"
 #include "flutter/shell/platform/linux/fl_linux_gtk4_debug.h"
@@ -113,6 +114,7 @@ static void fl_render_texture_gtk4_measure(GtkWidget* widget,
 
 static void fl_render_texture_gtk4_snapshot(GtkWidget* widget,
                                             GtkSnapshot* snapshot) {
+  TRACE_EVENT0("flutter", "GTK4Snapshot");
   FlRenderTextureGtk4* self = FL_RENDER_TEXTURE_GTK4(widget);
 
   if (self->texture == nullptr) {

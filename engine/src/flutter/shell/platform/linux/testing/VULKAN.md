@@ -280,3 +280,25 @@ failed completion and cleanup outside the texture-release callback. The real
 DMA-BUF integration test repeatedly reuses one allocation and checks that new
 blue pixels and retained red fallback pixels remain correct. Hardware exports
 can be made mandatory with `FLUTTER_TEST_VULKAN_DMABUF=1`.
+
+
+## Vsync and publication trace correlation
+
+The optional Embedder timeline stream includes `LinuxVsyncRequest`,
+`LinuxVsyncTick` (with GTK frame counter), `LinuxVsyncTiming` (start/target in
+nanoseconds), `LinuxVsyncRefresh` (history interval), `LinuxVsyncDeliver`, and
+`LinuxVsyncClockTimeout`. Request/tick/
+delivery batons correlate across engine and GTK threads. `GTK4UpdateTexture`
+and `GTK4Snapshot` show the later texture publication and GTK snapshot phases.
+Match these with actual `wp_presentation` feedback in a diagnostic run; neither
+an engine callback, GTK tick nor snapshot proves a physical presentation.
+Tracing remains disabled for primary throughput comparisons.
+
+The history query and stalled-clock guard follow techniques explored in
+[the Linux Vulkan pacing work](https://github.com/ales-drnz/flutter/blob/impeller-vulkan-linux/engine/src/flutter/shell/platform/linux/fl_vsync_waiter.cc).
+[The shared VSync cleanup](https://github.com/flutter/flutter/pull/191444),
+already present in this branch, also motivates avoiding redundant event-loop
+turns on the platform thread. GTK/GSK owns commits and offloaded child surfaces
+in this presentation path. Committing its parent surface independently or
+changing its child synchronization mode requires a separate integration design;
+it is not equivalent to pacing an embedder-owned Vulkan swapchain surface.
