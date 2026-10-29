@@ -1195,9 +1195,8 @@ TEST_F(
             kFirstFrameCountAfterWindowChangedPresent);
 }
 
-TEST_F(
-    FlutterEmbedderNativeTest,
-    QueuesStartupStateBeforeInitAndFlushesPlatformMessagesAfterRunInitialized) {
+TEST_F(FlutterEmbedderNativeTest,
+       QueuesStartupStateBeforeInitAndSplitsPreLaunchAndPostLaunchFlushes) {
   AndroidVMArgs vm_args;
   vm_args.api_level = kTestApiLevel34;
   vm_args.assets_path = "/data/app/flutter_assets";
@@ -1207,20 +1206,37 @@ TEST_F(
   FlutterEmbedderNative embedder(&proc_table_,
                                  /*use_engine_owned_task_runners=*/true);
 
-  // Queue viewport metrics, semantics, accessibility flags, and two startup
-  // platform messages BEFORE RunBundleAndSnapshotFromLibrary initializes the
-  // engine.
+  // Queue viewport metrics, semantics, accessibility flags, the 4 pre-launch
+  // system channel messages, and 1 post-launch custom channel message BEFORE
+  // RunBundleAndSnapshotFromLibrary initializes the engine.
   embedder.SetViewportMetrics(kTestPixelRatio, kTestPhysicalWidth,
                               kTestPhysicalHeight, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                               0, 0, kTestTouchSlop, {}, {}, {}, kTestDisplayId);
   EXPECT_TRUE(embedder.SetSemanticsEnabled(true));
   EXPECT_TRUE(embedder.SetAccessibilityFeatures(kTestAccessibilityFlags));
 
+  const std::string nav_payload =
+      R"({"method":"setInitialRoute","args":"http://testsite.com/admin/wipe"})";
+  EXPECT_TRUE(embedder.DispatchPlatformMessage(
+      "flutter/navigation",
+      reinterpret_cast<const uint8_t*>(nav_payload.data()), nav_payload.size(),
+      0));
   const std::string lifecycle_payload = "AppLifecycleState.resumed";
   EXPECT_TRUE(embedder.DispatchPlatformMessage(
       "flutter/lifecycle",
       reinterpret_cast<const uint8_t*>(lifecycle_payload.data()),
       lifecycle_payload.size(), 0));
+  const std::string settings_payload = R"({"textScaleFactor":1.0})";
+  EXPECT_TRUE(embedder.DispatchPlatformMessage(
+      "flutter/settings",
+      reinterpret_cast<const uint8_t*>(settings_payload.data()),
+      settings_payload.size(), 0));
+  const std::string localization_payload =
+      R"({"method":"setLocale","args":["en","US","",""]})";
+  EXPECT_TRUE(embedder.DispatchPlatformMessage(
+      "flutter/localization",
+      reinterpret_cast<const uint8_t*>(localization_payload.data()),
+      localization_payload.size(), 0));
   const std::vector<uint8_t> custom_payload = {0x01, 0x02, 0x03, 0x04};
   EXPECT_TRUE(embedder.DispatchPlatformMessage(
       "custom/startup_channel", custom_payload.data(), custom_payload.size(),
@@ -1239,22 +1255,25 @@ TEST_F(
   // Verify thread_priority_setter is wired on custom_task_runners.
   EXPECT_TRUE(mock_state_->has_thread_priority_setter);
 
-  // Viewport metrics and display updates must be sent BEFORE RunInitialized so
-  // window physical dimensions are available when main() starts.
+  // Viewport metrics, display updates, semantics, accessibility flags, and the
+  // 4 pre-launch system channel messages (flutter/navigation setInitialRoute,
+  // flutter/lifecycle, flutter/settings, flutter/localization) must be flushed
+  // BEFORE RunInitialized so EmbedderEngine queues them in pre_launch_tasks_
+  // and applies them before RunRootIsolate() invokes main().
+  constexpr size_t kExpectedPreLaunchMessageCount = 4u;
   EXPECT_EQ(mock_state_->window_metrics_sent_at_run_initialized, 1u);
   EXPECT_EQ(mock_state_->display_updates_at_run_initialized, 1u);
+  EXPECT_EQ(mock_state_->semantics_updated_before_run_initialized, 1u);
+  EXPECT_EQ(mock_state_->accessibility_updated_before_run_initialized, 1u);
+  EXPECT_EQ(mock_state_->messages_sent_before_run_initialized,
+            kExpectedPreLaunchMessageCount);
 
-  // Platform messages, semantics, and accessibility flags must NOT be sent
-  // before RunInitialized (when IsRootIsolateRunning() is false and
-  // non-settings messages would be dropped by Engine::DispatchPlatformMessage),
-  // and must be flushed immediately AFTER RunInitialized succeeds.
-  EXPECT_EQ(mock_state_->messages_sent_before_run_initialized, 0u);
-  EXPECT_EQ(mock_state_->semantics_updated_before_run_initialized, 0u);
-  EXPECT_EQ(mock_state_->accessibility_updated_before_run_initialized, 0u);
-
-  constexpr size_t kExpectedFlushedMessageCount = 2u;
+  // Non-pre-launch platform messages (such as custom/startup_channel) must NOT
+  // be sent before RunInitialized, and must be flushed immediately AFTER
+  // RunInitialized succeeds when IsRootIsolateRunning() is true.
+  constexpr size_t kExpectedTotalFlushedMessageCount = 5u;
   EXPECT_EQ(mock_state_->send_platform_message_count,
-            kExpectedFlushedMessageCount);
+            kExpectedTotalFlushedMessageCount);
   EXPECT_EQ(mock_state_->last_message_channel, "custom/startup_channel");
   EXPECT_EQ(mock_state_->last_message_payload, custom_payload);
   EXPECT_EQ(mock_state_->update_semantics_enabled_count, 1u);

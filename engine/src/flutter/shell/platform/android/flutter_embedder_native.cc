@@ -477,6 +477,19 @@ std::optional<std::string> ExtractInitialRouteFromNavigationJson(
       json.substr(first_quote + 1, second_quote - first_quote - 1));
 }
 
+bool IsPreLaunchPlatformMessage(const std::string& channel,
+                                const std::vector<uint8_t>& data) {
+  if (channel == "flutter/lifecycle" || channel == "flutter/localization" ||
+      channel == "flutter/settings") {
+    return true;
+  }
+  if (channel == "flutter/navigation" && !data.empty()) {
+    return ExtractInitialRouteFromNavigationJson(data.data(), data.size())
+        .has_value();
+  }
+  return false;
+}
+
 }  // namespace
 
 // =============================================================================
@@ -1546,11 +1559,14 @@ bool FlutterEmbedderNative::RunBundleAndSnapshotFromLibrary(
   }
 #endif
 
-  // Register initial display and viewport metrics in EmbedderEngine's
-  // pre-launch tasks so they are applied to Engine before RunRootIsolate()
-  // launches main().
+  // Register initial display, viewport metrics, semantics/accessibility flags,
+  // and pre-launch system channel messages (flutter/lifecycle,
+  // flutter/localization, flutter/settings, and flutter/navigation
+  // setInitialRoute) in EmbedderEngine's pre-launch tasks so they are applied
+  // to Engine before RunRootIsolate() launches main().
   UpdateDisplayMetrics(env);
   FlushPendingViewportMetrics();
+  FlushPreLaunchStartupState();
 
   FlutterEngineResult run_result = proc_table_.RunInitialized(engine_);
   if (run_result != kSuccess) {
@@ -1567,10 +1583,9 @@ bool FlutterEmbedderNative::RunBundleAndSnapshotFromLibrary(
   }
   TRACE_EVENT0("flutter", "FlutterEmbedderNative::Initialize[C-API]");
 
-  // Flush pending semantics, accessibility features, and startup platform
-  // messages AFTER RunInitialized has started the root isolate so that
-  // Engine::DispatchPlatformMessage does not drop non-lifecycle/non-settings
-  // messages.
+  // Flush any remaining non-pre-launch platform messages AFTER RunInitialized
+  // has started the root isolate so that Engine::DispatchPlatformMessage
+  // forwards them to Dart instead of dropping them.
   FlushPendingStartupState();
 
   void* current_window = nullptr;
@@ -1681,6 +1696,7 @@ std::unique_ptr<FlutterEmbedderNative> FlutterEmbedderNative::Spawn(
 #endif
   child->UpdateDisplayMetrics(env);
   child->FlushPendingViewportMetrics();
+  child->FlushPreLaunchStartupState();
   child->FlushPendingStartupState();
   return child;
 }
@@ -1979,8 +1995,8 @@ bool FlutterEmbedderNative::DispatchPlatformMessage(const std::string& channel,
                                                     int32_t response_id) {
   TRACE_EVENT1("flutter", "FlutterEmbedderNative::DispatchPlatformMessage",
                "channel", channel.c_str());
-  if (!is_using_mock_proc_table_ && channel == "flutter/navigation" &&
-      message_data != nullptr && message_size > 0) {
+  if (channel == "flutter/navigation" && message_data != nullptr &&
+      message_size > 0) {
     if (auto route =
             ExtractInitialRouteFromNavigationJson(message_data, message_size);
         route.has_value()) {
@@ -3785,24 +3801,49 @@ void FlutterEmbedderNative::FlushPendingViewportMetrics() {
   }
 }
 
-void FlutterEmbedderNative::FlushPendingStartupState() {
+void FlutterEmbedderNative::FlushPreLaunchStartupState() {
   std::optional<bool> semantics_enabled;
   std::optional<int32_t> accessibility_features;
-  std::vector<PendingPlatformMessage> messages;
+  std::vector<PendingPlatformMessage> pre_launch_messages;
   {
     std::lock_guard<std::mutex> lock(pending_startup_mutex_);
     semantics_enabled = pending_semantics_enabled_;
     pending_semantics_enabled_.reset();
     accessibility_features = pending_accessibility_features_;
     pending_accessibility_features_.reset();
-    messages = std::move(pending_platform_messages_);
-    pending_platform_messages_.clear();
+
+    std::vector<PendingPlatformMessage> remaining_messages;
+    remaining_messages.reserve(pending_platform_messages_.size());
+    for (auto& msg : pending_platform_messages_) {
+      if (IsPreLaunchPlatformMessage(msg.channel, msg.data)) {
+        pre_launch_messages.push_back(std::move(msg));
+      } else {
+        remaining_messages.push_back(std::move(msg));
+      }
+    }
+    pending_platform_messages_ = std::move(remaining_messages);
   }
   if (semantics_enabled.has_value()) {
     SetSemanticsEnabled(*semantics_enabled);
   }
   if (accessibility_features.has_value()) {
     SetAccessibilityFeatures(*accessibility_features);
+  }
+  for (const auto& msg : pre_launch_messages) {
+    const uint8_t* ptr = nullptr;
+    if (msg.has_data) {
+      ptr = msg.data.empty() ? &kEmptyByte : msg.data.data();
+    }
+    DispatchPlatformMessage(msg.channel, ptr, msg.data.size(), msg.response_id);
+  }
+}
+
+void FlutterEmbedderNative::FlushPendingStartupState() {
+  std::vector<PendingPlatformMessage> messages;
+  {
+    std::lock_guard<std::mutex> lock(pending_startup_mutex_);
+    messages = std::move(pending_platform_messages_);
+    pending_platform_messages_.clear();
   }
   for (const auto& msg : messages) {
     const uint8_t* ptr = nullptr;

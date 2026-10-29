@@ -523,6 +523,7 @@ class FlutterEmbedderNative {
   void NotifyFirstFramePresented();
   void RunOnRasterThreadSynchronously(const std::function<void()>& task);
   void FlushPendingViewportMetrics();
+  void FlushPreLaunchStartupState();
   void FlushPendingStartupState();
 
   FlutterEngineProcTable proc_table_{};
