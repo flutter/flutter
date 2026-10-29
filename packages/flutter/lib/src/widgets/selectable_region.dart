@@ -458,7 +458,6 @@ class SelectableRegionState extends State<SelectableRegion>
   void initState() {
     super.initState();
     _focusNode.addListener(_handleFocusChanged);
-    _selectionDelegate.addListener(_handleSelectionChanged);
     _initMouseGestureRecognizer();
     _initTouchGestureRecognizer();
     // Right clicks.
@@ -550,18 +549,13 @@ class SelectableRegionState extends State<SelectableRegion>
         _selectionStatusNotifier.value = SelectableRegionSelectionStatus.changing;
         _finalizeSelectableRegionStatus();
       }
+    } else if (!_focusNode.hasPrimaryFocus) {
+      if (kIsWeb) {
+        PlatformSelectableRegionContextMenu.detach(_selectionDelegate);
+      }
     } else if (_webContextMenuEnabled) {
       PlatformSelectableRegionContextMenu.attach(_selectionDelegate);
       // There may already be a selection, so copy it into the hidden element.
-      PlatformSelectableRegionContextMenu.synchronizeSelection(_selectionDelegate);
-    }
-  }
-
-  /// Sync the hidden element whenever selection changes.
-  ///
-  /// If we don't do this immediately, Safari's Edit->Copy will remain disabled.
-  void _handleSelectionChanged() {
-    if (kIsWeb) {
       PlatformSelectableRegionContextMenu.synchronizeSelection(_selectionDelegate);
     }
   }
@@ -615,6 +609,11 @@ class SelectableRegionState extends State<SelectableRegion>
       return;
     }
     _selectionStatusNotifier.value = SelectableRegionSelectionStatus.finalized;
+    if (_webContextMenuEnabled) {
+      // Sync the hidden element whenever selection is finalized.
+      // If we don't do this immediately, Safari's Edit->Copy will remain disabled.
+      PlatformSelectableRegionContextMenu.synchronizeSelection(_selectionDelegate);
+    }
   }
 
   // Converts the details.consecutiveTapCount from a TapAndDrag*Details object,
@@ -1967,7 +1966,6 @@ class SelectableRegionState extends State<SelectableRegion>
     _selectionOverlay = null;
     widget.focusNode?.removeListener(_handleFocusChanged);
     _localFocusNode?.removeListener(_handleFocusChanged);
-    _selectionDelegate.removeListener(_handleSelectionChanged);
     _localFocusNode?.dispose();
     super.dispose();
   }

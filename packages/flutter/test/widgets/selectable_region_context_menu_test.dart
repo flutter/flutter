@@ -81,6 +81,7 @@ void main() {
     expect(element.style.width, '100%');
     expect(element.style.height, '100%');
     expect(element.classList.length, 1);
+    expect(element.getAttribute('aria-hidden'), 'true');
 
     final int numberOfStyleElements = getNumberOfStyleElements();
     expect(numberOfStyleElements, 1);
@@ -157,7 +158,7 @@ void main() {
     expect((selectWordEvent.globalPosition.dy - 300).abs() < precisionErrorTolerance, isTrue);
   }, variant: _browserContextMenuEnabledVariants);
 
-  testWidgets('copy event synchronizes the active SelectableRegion without a mouse event', (
+  testWidgets('selection changes synchronize the active SelectableRegion without a mouse event', (
     WidgetTester tester,
   ) async {
     final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
@@ -199,25 +200,25 @@ void main() {
     Future<void> selectRegion(FocusNode focusNode) async {
       focusNode.requestFocus();
       await tester.pump();
-      PlatformSelectableRegionContextMenu.debugActiveClient!.dispatchSelectionEvent(
-        const SelectAllSelectionEvent(),
+      final SelectableRegionState regionState = tester.state<SelectableRegionState>(
+        find.byWidgetPredicate(
+          (Widget widget) => widget is SelectableRegion && widget.focusNode == focusNode,
+        ),
       );
+      regionState.selectAll();
+      await tester.pump();
     }
 
-    // Select all text in the first region, then copy it without a mouse event.
+    // Select all text in the first region without a mouse event.
     await selectRegion(focusNodeA);
-    web.document.dispatchEvent(web.ClipboardEvent('copy'));
-    await tester.pump();
 
     // Check the element updated, and it's the selection.
     expect(elementA.innerText, 'first selection');
     expect(elementB.innerText, ''); // Hasn't updated yet
     expect(web.window.getSelection()?.toString().trim(), 'first selection');
 
-    // Select all text in the second region, then copy it without a mouse event.
+    // Select all text in the second region without a mouse event.
     await selectRegion(focusNodeB);
-    web.document.dispatchEvent(web.ClipboardEvent('copy'));
-    await tester.pump();
 
     // Check the element updated, and it's the selection.
     expect(elementA.innerText, 'first selection'); // Did not change
@@ -225,7 +226,9 @@ void main() {
     expect(web.window.getSelection()?.toString().trim(), 'second selection');
   }, variant: _browserContextMenuEnabledVariants);
 
-  testWidgets('copy event from a nested text field is ignored', (WidgetTester tester) async {
+  testWidgets('focusing a nested text field does not overwrite its DOM selection', (
+    WidgetTester tester,
+  ) async {
     final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
     final regionFocusNode = FocusNode();
     final fieldFocusNode = FocusNode();
@@ -262,11 +265,21 @@ void main() {
     web.document.body!.append(hiddenElement);
     addTearDown(() => hiddenElement.remove());
 
-    // Focusing the nested field gives the region focus (but not primary focus).
+    // First select text in the SelectableRegion so its hidden element is populated.
+    regionFocusNode.requestFocus();
+    await tester.pump();
+    tester.state<SelectableRegionState>(find.byType(SelectableRegion)).selectAll();
+    await tester.pump();
+    expect(hiddenElement.innerText, 'region text');
+    expect(PlatformSelectableRegionContextMenu.debugActiveClient, isNotNull);
+
+    // Focusing the nested field gives the region focus (but not primary focus),
+    // which must detach the region.
     fieldFocusNode.requestFocus();
     await tester.pump();
     expect(regionFocusNode.hasFocus, isTrue);
     expect(regionFocusNode.hasPrimaryFocus, isFalse);
+    expect(PlatformSelectableRegionContextMenu.debugActiveClient, isNull);
 
     // Add a stand-in for the engine's text-editing element, focus it and
     // set the selection.
@@ -277,14 +290,15 @@ void main() {
     input.focus();
     input.setSelectionRange(0, 10);
 
-    // The copy event on the input will bubble up.
-    input.dispatchEvent(web.ClipboardEvent('copy', web.ClipboardEventInit(bubbles: true)));
+    // Changing the region's selection while the nested field is focused must not
+    // overwrite the input's selection.
+    tester.state<SelectableRegionState>(find.byType(SelectableRegion)).clearSelection();
+    await tester.pump();
+    tester.state<SelectableRegionState>(find.byType(SelectableRegion)).selectAll();
     await tester.pump();
 
-    // Expect the input retains its selection and the input was not updated.
     expect(input.selectionStart, 0);
     expect(input.selectionEnd, 10);
-    expect(hiddenElement.innerText, isEmpty);
   }, variant: _browserContextMenuEnabledVariants);
 
   testWidgets('DOM selection reflects the region selection immediately', (
@@ -316,9 +330,7 @@ void main() {
 
     focusNode.requestFocus();
     await tester.pump();
-    PlatformSelectableRegionContextMenu.debugActiveClient!.dispatchSelectionEvent(
-      const SelectAllSelectionEvent(),
-    );
+    tester.state<SelectableRegionState>(find.byType(SelectableRegion)).selectAll();
     await tester.pump();
 
     // No copy event or right click has occurred, but the selection should've
