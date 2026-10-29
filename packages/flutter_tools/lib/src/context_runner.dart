@@ -159,10 +159,10 @@ class GlobalToolContext implements ToolContext {
   UserMessages get userMessages => globals.userMessages;
 }
 
-Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? overrides}) async {
+Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? overrides}) {
   // TODO(ianh): We should split this into two, one for tests (which should be
   // in test/), and one for production (which should be in executable.dart).
-  return await context.run<T>(
+  return context.run<T>(
     name: 'global fallbacks',
     body: runner,
     overrides: overrides,
