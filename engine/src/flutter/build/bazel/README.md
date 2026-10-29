@@ -234,7 +234,12 @@ a transition to `android_arm64_api26` for the Vulkan validation layer
 (`@vulkan_validation_layers`, converted from the secondary tree's GN, with
 `@vulkan-utility-libraries`), which GN's debug arm64 jar carries by default
 (`impeller_enable_vulkan_validation_layers`) under
-`clang_arm64_apilevel26/`. `shell/vmservice/BUILD.bazel` is hand-written
+`clang_arm64_apilevel26/`; and `env`, which carries into the action's key
+what a script reads outside its inputs (`copy_info_plist.py` runs `git
+rev-parse HEAD` for the Apple frameworks' Info.plist: the converter sets
+`FLUTTER_ENGINE_VERSION` from `@engine_version` on that script's actions,
+so they rerun when HEAD moves instead of serving a cached revision).
+`shell/vmservice/BUILD.bazel` is hand-written
 (the VM-service kernel and its AOT snapshot per ABI). Against CI's artifacts
 of the base commit: the embedding jar byte-identical (456 classes), the
 arm64 debug and profile `flutter.jar` the same classes and libraries,
