@@ -435,7 +435,11 @@ class PackagesGetCommand extends FlutterCommand {
       // Build a cache of all pubspec.yaml contents once, keyed by package root
       // URI. This avoids re-reading the same files for every workspace package
       // during post-processing.
-      final PubspecCache pubspecCache = await buildPubspecCache(packageConfig, fileSystem: fs);
+      final PubspecCache pubspecCache = await buildPubspecCache(
+        packageConfig,
+        fileSystem: fs,
+        logger: logger,
+      );
       // Process workspace root packages concurrently, capped to 64 to
       // saturate I/O without exhausting file descriptors or system resources.
       await Pool(64).forEach<String, void>(graph.roots, (String workspaceRootName) async {
@@ -492,7 +496,8 @@ class PackagesGetCommand extends FlutterCommand {
         // with Flutter project files.
         // See https://github.com/flutter/flutter/issues/189550.
         if (_dependsOnFlutter(graph, workspaceRootName)) {
-          await project.regeneratePlatformSpecificTooling(
+          await regeneratePlatformSpecificTooling(
+            project,
             releaseMode: ignoreReleaseModeSinceItsNotABuildAndHopeItWorks,
             pubspecCache: pubspecCache,
             packageGraph: graph,
@@ -505,7 +510,8 @@ class PackagesGetCommand extends FlutterCommand {
           // (or has already been) processed in the main loop, avoiding
           // double post-processing.
           if (!graph.roots.contains(exampleProject.manifest.appName)) {
-            await exampleProject.regeneratePlatformSpecificTooling(
+            await regeneratePlatformSpecificTooling(
+              exampleProject,
               releaseMode: ignoreReleaseModeSinceItsNotABuildAndHopeItWorks,
               pubspecCache: pubspecCache,
               packageGraph: graph,

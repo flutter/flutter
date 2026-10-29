@@ -66,6 +66,7 @@ void main() {
         logger: logger,
         platform: platform,
         processManager: processManager,
+        templateRenderer: FakeTemplateRenderer(),
       );
 
       expect(dependencies.toolContext, isNotNull);
@@ -129,6 +130,7 @@ void main() {
         logger: logger,
         platform: platform,
         processManager: processManager,
+        templateRenderer: FakeTemplateRenderer(),
       );
 
       expect(dependencies.androidContext.androidSdk, same(mockSdk));
@@ -144,6 +146,7 @@ void main() {
         logger: logger,
         platform: platform,
         processManager: processManager,
+        templateRenderer: FakeTemplateRenderer(),
       );
 
       expect(dependencies.buildTargets, same(mockBuildTargets));
@@ -158,6 +161,7 @@ void main() {
         logger: logger,
         platform: platform,
         processManager: processManager,
+        templateRenderer: FakeTemplateRenderer(),
       );
 
       expect(dependencies.deviceManager, same(mockDeviceManager));
@@ -172,6 +176,7 @@ void main() {
         logger: logger,
         platform: platform,
         processManager: processManager,
+        templateRenderer: FakeTemplateRenderer(),
       );
 
       expect(dependencies.featureFlags, same(mockFeatureFlags));
@@ -183,6 +188,7 @@ void main() {
         logger: logger,
         platform: platform,
         processManager: processManager,
+        templateRenderer: FakeTemplateRenderer(),
       );
 
       if (dependencies.toolContext.artifacts case final DeferredArtifacts artifacts) {
@@ -226,6 +232,7 @@ void main() {
           logger: logger,
           platform: platform,
           processManager: processManager,
+          templateRenderer: FakeTemplateRenderer(),
         );
 
         // Neither AndroidStudio nor Java is evaluated during bootstrap or EmulatorManager initialization.
@@ -267,6 +274,7 @@ void main() {
           logger: logger,
           platform: platform,
           processManager: processManager,
+          templateRenderer: FakeTemplateRenderer(),
         );
 
         expect(studioEvaluations, 0);
@@ -296,6 +304,7 @@ void main() {
         logger: logger,
         platform: platform,
         processManager: processManager,
+        templateRenderer: FakeTemplateRenderer(),
       );
 
       // AndroidSdk is not evaluated during bootstrap or EmulatorManager initialization.
@@ -324,6 +333,7 @@ void main() {
         logger: logger,
         platform: platform,
         processManager: processManager,
+        templateRenderer: FakeTemplateRenderer(),
       );
 
       // GradleUtils is not evaluated during bootstrap.
