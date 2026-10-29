@@ -466,6 +466,188 @@ void runTests() {
     expect(imgElement.style.pointerEvents, 'none');
   });
 
+  testWidgets('WebImageInfo clears htmlImage.src only when all clones are disposed', (
+    WidgetTester tester,
+  ) async {
+    final String url = _uniqueUrl(tester.testDescription);
+    final testImg = TestImgElement()..src = url;
+    final info1 = WebImageInfo(testImg.getMock() as web_shim.HTMLImageElement, debugLabel: 'test');
+    final WebImageInfo info2 = info1.clone();
+    final WebImageInfo info3 = info2.clone();
+
+    expect(info1.isCloneOf(info2), isTrue);
+    expect(info2.isCloneOf(info3), isTrue);
+    expect(testImg.src, url);
+
+    info1.dispose();
+    expect(testImg.src, url);
+
+    info2.dispose();
+    expect(testImg.src, url);
+
+    info3.dispose();
+    expect(testImg.src, isEmpty);
+  });
+
+  testWidgets('ImgElementPlatformView updates <img> src and clears it on dispose', (
+    WidgetTester tester,
+  ) async {
+    final String url1 = _uniqueUrl('${tester.testDescription}_1');
+    final String url2 = _uniqueUrl('${tester.testDescription}_2');
+    final testImg1 = TestImgElement()..src = url1;
+    final testImg2 = TestImgElement()..src = url2;
+
+    final streamCompleter = _TestImageStreamCompleter();
+    final imageProvider = _TestImageProvider(streamCompleter: streamCompleter);
+
+    await tester.pumpWidget(Image(image: imageProvider, gaplessPlayback: true));
+    streamCompleter.setData(
+      imageInfo: WebImageInfo(testImg1.getMock() as web_shim.HTMLImageElement),
+    );
+    await tester.pumpAndSettle();
+
+    final FakePlatformView imgElementPlatformView = fakePlatformViewRegistry.views.single;
+    final imgElement = imgElementPlatformView.htmlElement as web.HTMLImageElement;
+    expect(imgElement.src, url1);
+
+    // Updating the image while mounted updates the existing <img> element's src.
+    streamCompleter.setData(
+      imageInfo: WebImageInfo(testImg2.getMock() as web_shim.HTMLImageElement),
+    );
+    await tester.pumpAndSettle();
+    expect(imgElement.src, url2);
+
+    // Unmounting the Image clears the platform view <img> element's src attribute.
+    await tester.pumpWidget(const SizedBox());
+    expect(imgElement.getAttribute('src'), isEmpty);
+    expect(imgElement.src, isNot(contains('frame_')));
+  });
+
+  testWidgets('ImgElementPlatformView clears <img> src when updated to null', (
+    WidgetTester tester,
+  ) async {
+    final String url = _uniqueUrl(tester.testDescription);
+    await tester.pumpWidget(ImgElementPlatformView(url));
+    await tester.pumpAndSettle();
+
+    final FakePlatformView imgElementPlatformView = fakePlatformViewRegistry.views.single;
+    final imgElement = imgElementPlatformView.htmlElement as web.HTMLImageElement;
+    expect(imgElement.src, url);
+
+    await tester.pumpWidget(ImgElementPlatformView(null));
+    await tester.pumpAndSettle();
+    expect(imgElement.getAttribute('src'), isEmpty);
+  });
+
+  testWidgets('Image clears <img> src when unmounted and restores it when remounted', (
+    WidgetTester tester,
+  ) async {
+    final String url = _uniqueUrl(tester.testDescription);
+    final testImg = TestImgElement()..src = url;
+
+    final streamCompleter = _TestImageStreamCompleter();
+    final imageProvider = _TestImageProvider(streamCompleter: streamCompleter);
+
+    await tester.pumpWidget(Image(image: imageProvider));
+    streamCompleter.setData(
+      imageInfo: WebImageInfo(testImg.getMock() as web_shim.HTMLImageElement),
+    );
+    await tester.pumpAndSettle();
+
+    final FakePlatformView firstPlatformView = fakePlatformViewRegistry.views.single;
+    final firstImgElement = firstPlatformView.htmlElement as web.HTMLImageElement;
+    expect(firstImgElement.src, url);
+
+    // Unmount the image: the platform view's <img> src is cleared.
+    await tester.pumpWidget(const SizedBox());
+    await tester.pumpAndSettle();
+    expect(firstImgElement.getAttribute('src'), isEmpty);
+    expect(fakePlatformViewRegistry.views, isEmpty);
+
+    // Remount the image: a new platform view <img> is created with src restored.
+    await tester.pumpWidget(Image(image: imageProvider));
+    await tester.pumpAndSettle();
+    final FakePlatformView remountedPlatformView = fakePlatformViewRegistry.views.single;
+    final remountedImgElement = remountedPlatformView.htmlElement as web.HTMLImageElement;
+    expect(remountedImgElement.src, url);
+  });
+
+  testWidgets(
+    'Image mounted with one src, unmounted, updated to a new src, and remounted uses the new src',
+    (WidgetTester tester) async {
+      final String url1 = _uniqueUrl('${tester.testDescription}_1');
+      final String url2 = _uniqueUrl('${tester.testDescription}_2');
+      final testImg1 = TestImgElement()..src = url1;
+      final testImg2 = TestImgElement()..src = url2;
+
+      final streamCompleter = _TestImageStreamCompleter();
+      final imageProvider = _TestImageProvider(streamCompleter: streamCompleter);
+
+      await tester.pumpWidget(Image(image: imageProvider));
+      streamCompleter.setData(
+        imageInfo: WebImageInfo(testImg1.getMock() as web_shim.HTMLImageElement),
+      );
+      await tester.pumpAndSettle();
+
+      final FakePlatformView firstPlatformView = fakePlatformViewRegistry.views.single;
+      final firstImgElement = firstPlatformView.htmlElement as web.HTMLImageElement;
+      expect(firstImgElement.src, url1);
+
+      // Unmount the image.
+      await tester.pumpWidget(const SizedBox());
+      await tester.pumpAndSettle();
+      expect(firstImgElement.getAttribute('src'), isEmpty);
+
+      // Update the image source while unmounted.
+      streamCompleter.setData(
+        imageInfo: WebImageInfo(testImg2.getMock() as web_shim.HTMLImageElement),
+      );
+
+      // Remount the image: the new platform view <img> should have the new src.
+      await tester.pumpWidget(Image(image: imageProvider));
+      await tester.pumpAndSettle();
+      final FakePlatformView remountedPlatformView = fakePlatformViewRegistry.views.single;
+      final remountedImgElement = remountedPlatformView.htmlElement as web.HTMLImageElement;
+      expect(remountedImgElement.src, url2);
+    },
+  );
+
+  testWidgets(
+    'NetworkImage with WebHtmlElementStrategy.prefer clears both off-DOM and platform view <img> src when unmounted and evicted',
+    (WidgetTester tester) async {
+      final testImg = TestImgElement()
+        ..naturalWidth = 100
+        ..naturalHeight = 100;
+
+      imgElementFactory = () {
+        return testImg.getMock() as web_shim.HTMLImageElement;
+      };
+
+      final String url = _uniqueUrl(tester.testDescription);
+      await tester.pumpWidget(
+        Image.network(url, webHtmlElementStrategy: WebHtmlElementStrategy.prefer),
+      );
+      await tester.runAsync(() async {
+        testImg.decodeSuccess();
+        await Future<void>.delayed(Duration.zero);
+      });
+      await tester.pumpAndSettle();
+
+      expect(testImg.src, url);
+      final FakePlatformView imgElementPlatformView = fakePlatformViewRegistry.views.single;
+      final imgElement = imgElementPlatformView.htmlElement as web.HTMLImageElement;
+      expect(imgElement.src, url);
+
+      // Evict from cache and unmount the widget.
+      imageCache.clear();
+      await tester.pumpWidget(const SizedBox());
+      await tester.pump();
+
+      expect(testImg.src, isEmpty);
+      expect(imgElement.getAttribute('src'), isEmpty);
+    },
+  );
+
   group('RenderWebImage', () {
     testWidgets('BoxFit.contain centers and sizes the image correctly', (
       WidgetTester tester,

@@ -384,21 +384,34 @@ void assertContains(String text, List<String> patterns) {
 }
 
 const mainDartSrc = r'''
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 
 void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return WidgetsApp(
       title: 'Flutter Demo',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
+      color: const Color(0xFF0000FF),
       home: MyHomePage(title: 'Flutter Demo Home Page'),
+      pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) =>
+          PageRouteBuilder<T>(
+            settings: settings,
+            pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) => builder(context),
+          ),
     );
   }
+}
+
+class CustomButton extends StatelessWidget {
+  const CustomButton({Key? key, required this.onPressed, required this.child}) : super(key: key);
+
+  final VoidCallback onPressed;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => child;
 }
 
 class MyHomePage extends StatefulWidget {
@@ -421,28 +434,22 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: Icon(Icons.add),
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          Text(widget.title),
+          const Text(
+            'You have pushed the button this many times:',
+          ),
+          Text(
+            '$_counter',
+          ),
+          CustomButton(
+            onPressed: _incrementCounter,
+            child: const Text('Increment'),
+          ),
+        ],
       ),
     );
   }

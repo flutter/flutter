@@ -6,12 +6,12 @@ import("//build/config/android/config.gni")
 import("//flutter/tools/templater/templater.gni")
 
 android_buildtools =
-    "//flutter/third_party/android_tools/sdk/build-tools/36.1.0"
+    "//flutter/third_party/android_tools/sdk/build-tools/37.0.0"
 aapt2 = "$android_buildtools/aapt2"
 zipalign = "$android_buildtools/zipalign"
 apksigner = "$android_buildtools/apksigner"
 android_jar =
-    "//flutter/third_party/android_tools/sdk/platforms/android-36/android.jar"
+    "//flutter/third_party/android_tools/sdk/platforms/android-37.0/android.jar"
 src_root = "//flutter/testing/android/native_activity"
 
 # A drop in replacement for an executable or shared library target. Providing a
@@ -27,6 +27,7 @@ template("native_activity_apk") {
   android_manifest = "$target_gen_dir/AndroidManifest.xml"
 
   android_manifest_target_name = "android_manifest_$target_name"
+
   templater(android_manifest_target_name) {
     input = android_manifest_template
     output = android_manifest
@@ -34,12 +35,14 @@ template("native_activity_apk") {
   }
 
   shared_library_target_name = "shared_library_$target_name"
+
   shared_library(shared_library_target_name) {
     forward_variables_from(invoker, "*", [ "output_name" ])
     output_name = invoker_apk_name
   }
 
   apk_target_name = "apk_$target_name"
+
   action(apk_target_name) {
     forward_variables_from(invoker, [ "testonly" ])
 

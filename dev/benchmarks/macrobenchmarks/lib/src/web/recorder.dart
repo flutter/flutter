@@ -27,12 +27,42 @@ const int _kDefaultWarmUpSampleCount = 200;
 /// The default number of samples collected to compute benchmark statistics.
 ///
 /// This value is used when [Profile.useCustomWarmUp] is set to false.
-const int _kDefaultMeasuredSampleCount = 100;
+///
+/// Defaults to 100 and can be overridden at compile time with
+/// `--dart-define=BENCHMARK_MEASURED_SAMPLES=<n>`, where `<n>` must be a
+/// positive integer no greater than 800 (`dynamic_clip_on_static_picture`
+/// scrolls out of its picture beyond that).
+const int _kDefaultMeasuredSampleCount = int.fromEnvironment(
+  'BENCHMARK_MEASURED_SAMPLES',
+  defaultValue: 100,
+);
 
 /// The default total number of samples collected by a benchmark.
 ///
 /// This value is used when [Profile.useCustomWarmUp] is set to false.
 const int kDefaultTotalSampleCount = _kDefaultWarmUpSampleCount + _kDefaultMeasuredSampleCount;
+
+/// Whether [Profile.toJson] includes the raw samples of each series.
+///
+/// When enabled, each series reports its measured samples under
+/// `<series>.samples` and its warm-up samples under `<series>.warmUpSamples`,
+/// both as sample magnitudes in microseconds.
+///
+/// Opt-in via `--dart-define=BENCHMARK_REPORT_SAMPLES=true`. When unset, the
+/// reported JSON is unchanged.
+const bool _kReportSamples = bool.fromEnvironment('BENCHMARK_REPORT_SAMPLES');
+
+/// A phase of a benchmark run reported to a [BenchmarkPhaseListener].
+enum BenchmarkPhase {
+  /// Warm-up has ended and measured samples start being recorded.
+  measure,
+}
+
+/// Called when a benchmark named [benchmarkName] enters a new [phase].
+///
+/// Currently the only reported phase is [BenchmarkPhase.measure], which is
+/// reported when warm-up ends and measured samples start being recorded.
+typedef BenchmarkPhaseListener = void Function(String benchmarkName, BenchmarkPhase phase);
 
 /// A benchmark metric that includes frame-related computations prior to
 /// submitting layer and picture operations to the underlying renderer, such as
@@ -269,17 +299,18 @@ abstract class SceneBuilderRecorder extends Recorder {
         rethrow;
       }
     };
-    PlatformDispatcher.instance.onDrawFrame = () {
+    PlatformDispatcher.instance.onDrawFrame = () async {
       try {
-        _profile!.recordAsync('drawFrameDuration', () async {
+        await _profile!.recordAsync('drawFrameDuration', () async {
           final sceneBuilder = SceneBuilder();
           onDrawFrame(sceneBuilder);
-          _profile!.recordAsync('sceneBuildDuration', () async {
-            final Scene scene = sceneBuilder.build();
-            _profile!.recordAsync('windowRenderDuration', () async {
-              // On the web, render is asynchronous.
-              await (PlatformDispatcher.instance as dynamic).render(scene);
-            }, reported: false);
+          late final Scene scene;
+          _profile!.record('sceneBuildDuration', () {
+            scene = sceneBuilder.build();
+          }, reported: false);
+          await _profile!.recordAsync('windowRenderDuration', () async {
+            // On the web, render is asynchronous.
+            await (PlatformDispatcher.instance as dynamic).render(scene);
           }, reported: false);
         }, reported: true);
         endMeasureFrame();
@@ -867,6 +898,13 @@ class Profile {
   /// [kDefaultTotalSampleCount] samples and stops automatically.
   Profile({required this.name, this.useCustomWarmUp = false});
 
+  /// An optional listener notified when any profile changes phase.
+  ///
+  /// Null by default, in which case no notifications are sent. It is invoked
+  /// synchronously from [stopWarmingUp] with [BenchmarkPhase.measure], so it
+  /// must not block.
+  static BenchmarkPhaseListener? phaseListener;
+
   /// The name of the benchmark that produced this profile.
   final String name;
 
@@ -893,6 +931,7 @@ class Profile {
       throw StateError('Warm-up already stopped.');
     } else {
       _isWarmingUp = false;
+      Profile.phaseListener?.call(name, BenchmarkPhase.measure);
     }
   }
 
@@ -1023,7 +1062,16 @@ class Profile {
 
   /// Returns a JSON representation of the profile that will be sent to the
   /// server.
-  Map<String, dynamic> toJson() {
+  ///
+  /// If [reportSamples] is true, each series also reports two flat lists of
+  /// raw sample magnitudes in microseconds, both in recording order:
+  ///
+  ///  * `<series>.samples`: the measured (non-warm-up) samples.
+  ///  * `<series>.warmUpSamples`: the warm-up samples.
+  ///
+  /// It defaults to the opt-in `--dart-define=BENCHMARK_REPORT_SAMPLES=true`
+  /// setting, which is off. When off, neither key is reported.
+  Map<String, dynamic> toJson({bool reportSamples = _kReportSamples}) {
     final scoreKeys = <String>[];
     final json = <String, dynamic>{'name': name, 'scoreKeys': scoreKeys};
 
@@ -1043,6 +1091,16 @@ class Profile {
       json['$key.outlierAverage'] = stats.outlierAverage;
       json['$key.outlierRatio'] = stats.outlierRatio;
       json['$key.noise'] = stats.noise;
+      if (reportSamples) {
+        json['$key.samples'] = <double>[
+          for (final AnnotatedSample sample in stats.samples)
+            if (!sample.isWarmUpValue) sample.magnitude,
+        ];
+        json['$key.warmUpSamples'] = <double>[
+          for (final AnnotatedSample sample in stats.samples)
+            if (sample.isWarmUpValue) sample.magnitude,
+        ];
+      }
     }
 
     json.addAll(extraData);
@@ -1267,7 +1325,7 @@ bool _isMeasuringFrame = false;
 /// [WidgetBuildRecorder] only measures frames that build widgets, and ignores
 /// frames that clear the screen.
 ///
-/// Warm-up frames are not measured. If [profile.isWarmingUp] is true,
+/// Warm-up frames are not measured. If [Profile.isWarmingUp] is true,
 /// this function does nothing.
 void startMeasureFrame(Profile profile) {
   if (_calledStartMeasureFrame) {
@@ -1288,7 +1346,7 @@ void startMeasureFrame(Profile profile) {
 /// See [startMeasureFrame] for details on what this instrumentation is used
 /// for.
 ///
-/// Warm-up frames are not measured. If [profile.isWarmingUp] was true
+/// Warm-up frames are not measured. If [Profile.isWarmingUp] was true
 /// when the corresponding [startMeasureFrame] was called,
 /// this function does nothing.
 void endMeasureFrame() {

@@ -37,6 +37,10 @@ This policy is strictly enforced for two primary reasons:
 2. **Formatting, Lints, and Migrations:**
    Upgrading the minimum Dart version often triggers new static analysis lints, deprecation warnings, or changes in code formatting (`dart format`). These updates sometimes require repo-wide refactoring or massive formatting migrations. Attempting to absorb and resolve these changes on a continuously rolling basis with unstable Dart versions is highly disruptive. Bumping quarterly to a defined stable target allows the team to manage and absorb formatting/lint sweeps predictably.
 
+### Large Scale Changes (LSCs) and Release Alignment
+
+If and when bumping Dart in the repository requires a large scale change (LSC)—for example, to re-format the repository (`dart format`) or perform a repo-wide lint migration—the **release team** must be included in the process. The LSC must follow branch alignment so as not to disrupt the release process (e.g., avoiding widespread merge conflicts for cherry-picks across active release branches).
+
 > [!IMPORTANT]
 > Before planning or executing a constraint bump, the target Dart SDK version must already have rolled into the `flutter/flutter` repository via an Engine roll. If the SDK constraint in the pubspecs is bumped to a version newer than the SDK downloaded in the local cache, CI, tests, and static analysis will fail.
 

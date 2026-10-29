@@ -16,6 +16,5 @@ dependencies:
 dev_dependencies:
   analyzer_testing: any
   test: any
-  test_reflective_loader: any
 
-# PUBSPEC CHECKSUM: 11rp55
+# PUBSPEC CHECKSUM: da99t0

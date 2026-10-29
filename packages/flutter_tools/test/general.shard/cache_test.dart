@@ -1940,7 +1940,8 @@ class FakeIosUsbArtifacts extends Fake implements IosUsbArtifacts {
 
 class FakeLocalEngineArtifacts extends Fake implements Artifacts {
   @override
-  LocalEngineInfo get localEngineInfo => const LocalEngineInfo(
+  final LocalEngineInfo localEngineInfo = LocalEngineInfo(
+    fileSystem: MemoryFileSystem.test(),
     targetOutPath: 'out/android_debug_unopt',
     hostOutPath: 'out/host_debug_unopt',
   );
@@ -2099,7 +2100,7 @@ class FakeAndroidSdk extends Fake implements AndroidSdk {
   bool reinitialized = false;
 
   @override
-  void reinitialize({FileSystem? fileSystem}) {
+  void reinitialize() {
     reinitialized = true;
   }
 }

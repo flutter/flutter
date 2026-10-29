@@ -309,16 +309,6 @@ std::shared_ptr<Contents> Paint::WithFiltersForSubpassTarget(
   return input;
 }
 
-std::shared_ptr<Contents> Paint::WithMaskBlur(std::shared_ptr<Contents> input,
-                                              bool is_solid_color,
-                                              const Matrix& ctm) const {
-  if (mask_blur_descriptor.has_value()) {
-    input = mask_blur_descriptor->CreateMaskBlur(FilterInput::Make(input),
-                                                 is_solid_color, ctm);
-  }
-  return input;
-}
-
 std::shared_ptr<FilterContents> Paint::WithImageFilter(
     ContentContext& renderer,
     const FilterInput::Variant& input,
@@ -461,20 +451,15 @@ std::shared_ptr<Contents> Paint::MaskBlurDescriptor::CreateMaskBlur(
 
 std::shared_ptr<FilterContents> Paint::MaskBlurDescriptor::CreateMaskBlur(
     const FilterInput::Ref& input,
-    bool is_solid_color,
     const Matrix& ctm) const {
   Vector2 blur_sigma(sigma.sigma, sigma.sigma);
   if (!respect_ctm) {
     blur_sigma /=
         Vector2(ctm.GetBasisX().GetLength(), ctm.GetBasisY().GetLength());
   }
-  if (is_solid_color) {
-    return FilterContents::MakeGaussianBlur(
-        input, Sigma(blur_sigma.x), Sigma(blur_sigma.y),
-        Entity::TileMode::kDecal, /*bounds=*/std::nullopt, style);
-  }
-  return FilterContents::MakeBorderMaskBlur(input, Sigma(blur_sigma.x),
-                                            Sigma(blur_sigma.y), style);
+  return FilterContents::MakeGaussianBlur(
+      input, Sigma(blur_sigma.x), Sigma(blur_sigma.y), Entity::TileMode::kDecal,
+      /*bounds=*/std::nullopt, style);
 }
 
 bool Paint::HasColorFilter() const {

@@ -272,10 +272,12 @@ class _VideoDemoState extends State<VideoDemo> with SingleTickerProviderStateMix
     }
 
     Future<void> initController(VideoPlayerController controller, String name) async {
-      controller.setLooping(true);
-      controller.setVolume(0.0);
-      controller.play();
-      await controller.initialize();
+      await Future.wait<void>(<Future<void>>[
+        controller.setLooping(true),
+        controller.setVolume(0.0),
+        controller.play(),
+        controller.initialize(),
+      ]);
       if (mounted) {
         setState(() {});
       }

@@ -161,28 +161,32 @@ class SystemContextMenu extends StatefulWidget {
 
     // Use the generic Flutter-rendered context menu model as the single source of truth.
     for (final ContextMenuButtonItem button in editableTextState.contextMenuButtonItems) {
-      switch (button.type) {
-        case ContextMenuButtonType.copy:
+      switch (button.kind) {
+        case ContextMenuButtonKind.copy:
           items.add(const IOSSystemContextMenuItemCopy());
-        case ContextMenuButtonType.cut:
+        case ContextMenuButtonKind.cut:
           items.add(const IOSSystemContextMenuItemCut());
-        case ContextMenuButtonType.paste:
+        case ContextMenuButtonKind.paste:
           items.add(const IOSSystemContextMenuItemPaste());
-        case ContextMenuButtonType.selectAll:
+        case ContextMenuButtonKind.selectAll:
           items.add(const IOSSystemContextMenuItemSelectAll());
-        case ContextMenuButtonType.lookUp:
+        case ContextMenuButtonKind.lookUp:
           items.add(const IOSSystemContextMenuItemLookUp());
-        case ContextMenuButtonType.searchWeb:
+        case ContextMenuButtonKind.searchWeb:
           items.add(const IOSSystemContextMenuItemSearchWeb());
-        case ContextMenuButtonType.share:
+        case ContextMenuButtonKind.share:
           items.add(const IOSSystemContextMenuItemShare());
-        case ContextMenuButtonType.liveTextInput:
+        case ContextMenuButtonKind.liveTextInput:
           items.add(const IOSSystemContextMenuItemLiveText());
-        case ContextMenuButtonType.delete:
+        case ContextMenuButtonKind.delete:
         // No native iOS system menu button for Delete — intentionally ignored.
-        case ContextMenuButtonType.custom:
+        case ContextMenuButtonKind.translate:
+        // Not mapped to a system menu item yet.
+        case ContextMenuButtonKind.custom:
         // Custom items are provided explicitly via SystemContextMenu.items,
         // not via defaults. Intentionally ignore in default mapping.
+        case _:
+        // Kinds added in the future are ignored until they're mapped here.
       }
     }
 

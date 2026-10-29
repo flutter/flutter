@@ -59,7 +59,6 @@ namespace {
 
 std::unique_ptr<Engine> CreateEngine(
     Engine::Delegate& delegate,
-    const PointerDataDispatcherMaker& dispatcher_maker,
     DartVM& vm,
     const fml::RefPtr<const DartSnapshot>& isolate_snapshot,
     const TaskRunners& task_runners,
@@ -73,7 +72,6 @@ std::unique_ptr<Engine> CreateEngine(
     const std::shared_future<impeller::RuntimeStageBackend>&
         runtime_stage_backend) {
   return std::make_unique<Engine>(delegate,             //
-                                  dispatcher_maker,     //
                                   vm,                   //
                                   isolate_snapshot,     //
                                   task_runners,         //
@@ -391,10 +389,6 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
         io_manager->NotifyResourceContextAvailable(resource_context);
       });
 
-  // Send dispatcher_maker to the engine constructor because shell won't have
-  // platform_view set until Shell::Setup is called later.
-  auto dispatcher_maker = platform_view->GetDispatcherMaker();
-
   // Create the engine on the UI thread.
   std::promise<std::unique_ptr<Engine>> engine_promise;
   auto engine_future = engine_promise.get_future();
@@ -402,7 +396,6 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
       shell->GetTaskRunners().GetUITaskRunner(),
       fml::MakeCopyable([&engine_promise,                                 //
                          shell = shell.get(),                             //
-                         &dispatcher_maker,                               //
                          &platform_data,                                  //
                          isolate_snapshot = std::move(isolate_snapshot),  //
                          vsync_waiter = std::move(vsync_waiter),          //
@@ -421,7 +414,6 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
 
         engine_promise.set_value(
             on_create_engine(*shell,                               //
-                             dispatcher_maker,                     //
                              *shell->GetDartVM(),                  //
                              std::move(isolate_snapshot),          //
                              task_runners,                         //
@@ -721,8 +713,7 @@ std::unique_ptr<Shell> Shell::Spawn(
       vm_->GetVMData()->GetIsolateSnapshot(), on_create_platform_view,
       on_create_rasterizer,
       [engine = this->engine_.get(), initial_route](
-          Engine::Delegate& delegate,
-          const PointerDataDispatcherMaker& dispatcher_maker, DartVM& vm,
+          Engine::Delegate& delegate, DartVM& vm,
           const fml::RefPtr<const DartSnapshot>& isolate_snapshot,
           const TaskRunners& task_runners, const PlatformData& platform_data,
           const Settings& settings, std::unique_ptr<Animator> animator,
@@ -734,7 +725,6 @@ std::unique_ptr<Shell> Shell::Spawn(
               runtime_stage_backend) {
         return engine->Spawn(
             /*delegate=*/delegate,
-            /*dispatcher_maker=*/dispatcher_maker,
             /*settings=*/settings,
             /*animator=*/std::move(animator),
             /*initial_route=*/initial_route,
@@ -767,6 +757,15 @@ void Shell::NotifyLowMemoryWarning() const {
       });
   // The IO Manager uses resource cache limits of 0, so it is not necessary
   // to purge them.
+}
+
+void Shell::ClearRenderTargetCache() const {
+  task_runners_.GetRasterTaskRunner()->PostTask(
+      [rasterizer = rasterizer_->GetWeakPtr()]() {
+        if (rasterizer) {
+          rasterizer->ClearRenderTargetCache();
+        }
+      });
 }
 
 void Shell::FlushMicrotaskQueue() const {
@@ -1231,13 +1230,25 @@ void Shell::OnPlatformViewDispatchPointerDataPacket(
   FML_DCHECK(is_set_up_);
   FML_DCHECK(task_runners_.GetPlatformTaskRunner()->RunsTasksOnCurrentThread());
 
-  task_runners_.GetUITaskRunner()->PostTask(
+  auto task =
       fml::MakeCopyable([engine = weak_engine_, packet = std::move(packet),
                          flow_id = next_pointer_flow_id_]() mutable {
         if (engine) {
           engine->DispatchPointerDataPacket(std::move(packet), flow_id);
         }
-      }));
+      });
+
+  // Dispatch the event synchronously if possible to reduce latency.
+  // If the event dispatch is somehow triggered from Dart code though
+  // the task will be dispatched asynchronously in order to avoid re-entrancy
+  // issues.
+  if (task_runners_.GetUITaskRunner()->RunsTasksOnCurrentThread() &&
+      Dart_CurrentIsolate() == nullptr) {
+    task();
+  } else {
+    task_runners_.GetUITaskRunner()->PostTask(task);
+  }
+
   next_pointer_flow_id_++;
 }
 
@@ -1748,6 +1759,11 @@ double Shell::GetScaledFontSize(double unscaled_font_size,
                                            configuration_id);
 }
 
+// |Engine::Delegate|
+void Shell::OnEngineResetInternalState() {
+  ClearRenderTargetCache();
+}
+
 void Shell::RequestViewFocusChange(const ViewFocusChangeRequest& request) {
   FML_DCHECK(is_set_up_);
 
@@ -2219,15 +2235,38 @@ bool Shell::OnServiceProtocolSetAssetBundlePath(
   return false;
 }
 
+rapidjson::Value Shell::MakePipelineUsageJson(
+    const impeller::PipelineLibrary& pipeline_library,
+    rapidjson::Document::AllocatorType& allocator) {
+  rapidjson::Value pipelines(rapidjson::kArrayType);
+  for (const auto& [desc, usage] : pipeline_library.GetPipelineUsage()) {
+    std::string_view label = desc.GetLabel();
+    rapidjson::Value label_json(label.data(), label.length(), allocator);
+    rapidjson::Value constants_json(rapidjson::kArrayType);
+    for (impeller::Scalar constant : desc.GetSpecializationConstants()) {
+      constants_json.PushBack(constant, allocator);
+    }
+
+    rapidjson::Value pipeline_json(rapidjson::kObjectType);
+    pipeline_json.AddMember("label", label_json, allocator);
+    pipeline_json.AddMember("constants", constants_json, allocator);
+    pipeline_json.AddMember("count", usage.count, allocator);
+    pipeline_json.AddMember("eagerly_created", usage.eagerly_created,
+                            allocator);
+    pipelines.PushBack(pipeline_json, allocator);
+  }
+  return pipelines;
+}
+
 bool Shell::OnServiceProtocolGetPipelineUsage(
     const ServiceProtocol::Handler::ServiceProtocolMap& params,
     rapidjson::Document* response) {
   FML_DCHECK(task_runners_.GetIOTaskRunner()->RunsTasksOnCurrentThread());
 
   response->SetObject();
+  response->AddMember("type", "GetPipelineUsage", response->GetAllocator());
 
   auto context = io_manager_->GetImpellerContext();
-
   if (!context) {
     FML_DLOG(ERROR) << "Pipeline usage profiling only available in Impeller";
     ServiceProtocolFailureError(
@@ -2235,20 +2274,9 @@ bool Shell::OnServiceProtocolGetPipelineUsage(
     return false;
   }
 
-  auto use_counts = context->GetPipelineLibrary()->GetPipelineUseCounts();
-
-  rapidjson::Value pipelines_json(rapidjson::kObjectType);
-
-  for (const auto& pipelineCount : use_counts) {
-    std::string_view pipeline_name = pipelineCount.first.GetLabel();
-    rapidjson::Value pipeline_key(pipeline_name.data(), pipeline_name.length(),
-                                  response->GetAllocator());
-
-    pipelines_json.AddMember(pipeline_key, pipelineCount.second,
-                             response->GetAllocator());
-  }
-
-  response->AddMember("Usages", pipelines_json, response->GetAllocator());
+  rapidjson::Value pipelines = MakePipelineUsageJson(
+      *context->GetPipelineLibrary(), response->GetAllocator());
+  response->AddMember("pipelines", pipelines, response->GetAllocator());
   return true;
 }
 

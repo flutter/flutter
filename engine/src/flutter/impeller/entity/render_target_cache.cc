@@ -51,6 +51,10 @@ void RenderTargetCache::EnableCache() {
   cache_disabled_count_--;
 }
 
+void RenderTargetCache::Clear() {
+  render_target_data_.clear();
+}
+
 RenderTarget RenderTargetCache::CreateOffscreen(
     const Context& context,
     ISize size,

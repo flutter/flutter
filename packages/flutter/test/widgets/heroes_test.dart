@@ -654,7 +654,7 @@ Future<void> main() async {
     expect(find.byKey(key1), findsNothing);
     expect(find.byKey(key2), findsOneWidget);
 
-    showDialog<void>(
+    final Future<void> dialog = showDialog<void>(
       context: nav.currentContext!,
       useRootNavigator: false,
       builder: (BuildContext context) => const Text('dialog'),
@@ -668,6 +668,7 @@ Future<void> main() async {
     pages.removeLast();
     await tester.pumpWidget(buildWidget());
     await tester.pumpAndSettle();
+    await dialog;
     expect(find.byKey(key1), findsOneWidget);
   });
 

@@ -6,6 +6,7 @@
 ///
 /// @docImport 'dropdown.dart';
 /// @docImport 'ink_well.dart';
+/// @docImport 'tabs.dart';
 /// @docImport 'text_field.dart';
 /// @docImport 'text_form_field.dart';
 library;

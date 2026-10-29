@@ -92,7 +92,7 @@ std::unique_ptr<PlatformView> ShellTestPlatformViewBuilder::operator()(
           std::make_unique<ShellTestVsyncWaiter>(task_runners, vsync_clock));
     } else {
       return static_cast<std::unique_ptr<VsyncWaiter>>(
-          std::make_unique<VsyncWaiterFallback>(task_runners, true));
+          std::make_unique<VsyncWaiterFallback>(task_runners));
     }
   };
   return ShellTestPlatformView::Create(

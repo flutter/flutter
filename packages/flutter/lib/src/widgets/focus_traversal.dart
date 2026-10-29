@@ -6,6 +6,7 @@
 /// @docImport 'package:flutter/services.dart';
 ///
 /// @docImport 'app.dart';
+/// @docImport 'view.dart';
 library;
 
 import 'package:flutter/foundation.dart';
