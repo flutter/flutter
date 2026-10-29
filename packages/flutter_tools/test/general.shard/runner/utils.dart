@@ -9,8 +9,10 @@ import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
+import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
 
 import '../../src/fakes.dart';
+import '../../src/test_flutter_command_runner.dart';
 
 typedef CommandFunction = Future<FlutterCommandResult> Function();
 
@@ -31,6 +33,12 @@ class DummyFlutterCommand extends FlutterCommand {
          deviceManager: deviceManager ?? _defaultFromContext<DeviceManager>(),
          doctor: doctor ?? _defaultFromContext<Doctor>(),
        );
+
+  @override
+  FlutterCommandRunner? get runner => super.runner ?? _fallbackRunner;
+  late final FlutterCommandRunner _fallbackRunner = TestFlutterCommandRunner(
+    toolContext: toolContext,
+  );
 
   static T? _defaultFromContext<T>() {
     if (Zone.current[contextKey] case final AppContext appContext

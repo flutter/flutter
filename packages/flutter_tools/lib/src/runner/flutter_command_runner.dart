@@ -31,7 +31,6 @@ import '../doctor.dart';
 import '../experimental/extension_manager.dart';
 import '../features.dart';
 import '../ios/plist_parser.dart';
-import '../isolated/mustache_template.dart';
 import '../macos/cocoapods.dart';
 import '../resident_runner.dart';
 import '../tester/flutter_tester.dart';
@@ -80,7 +79,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
     this._featureFlags,
     this._gradleUtils,
     this._plistParser,
-    this._templateRenderer = const MustacheTemplateRenderer(),
+    this._templateRenderer,
   }) : _toolContext = toolContext,
        _verboseHelp = verboseHelp,
        _argParser = ArgParser(
@@ -323,7 +322,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
   final FeatureFlags? _featureFlags;
   final GradleUtils? _gradleUtils;
   final PlistParser? _plistParser;
-  final TemplateRenderer _templateRenderer;
+  final TemplateRenderer? _templateRenderer;
   final ToolContext _toolContext;
 
   /// The [Analytics] instance.
@@ -344,8 +343,8 @@ class FlutterCommandRunner extends CommandRunner<void> {
   /// The [PlistParser] instance, if provided.
   PlistParser? get plistParser => _plistParser;
 
-  /// The [TemplateRenderer] instance.
-  TemplateRenderer get templateRenderer => _templateRenderer;
+  /// The [TemplateRenderer] instance, if provided.
+  TemplateRenderer? get templateRenderer => _templateRenderer;
 
   /// The [ToolContext] instance.
   ToolContext get toolContext => _toolContext;

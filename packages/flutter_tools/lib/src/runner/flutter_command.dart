@@ -34,7 +34,6 @@ import '../doctor.dart';
 import '../features.dart';
 import '../flutter_plugins.dart';
 import '../ios/plist_parser.dart';
-import '../isolated/mustache_template.dart';
 import '../package_graph.dart';
 import '../persistent_tool_state.dart';
 import '../pre_run_validator.dart';
@@ -1301,7 +1300,7 @@ abstract class FlutterCommand extends Command<void> {
       pubspecCache: pubspecCache,
       packageGraph: packageGraph,
       packageConfig: packageConfig,
-      templateRenderer: runner?.templateRenderer ?? const MustacheTemplateRenderer(),
+      templateRenderer: runner!.templateRenderer!,
     );
   }
 
