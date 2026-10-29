@@ -16,6 +16,7 @@ import 'base/platform.dart';
 import 'build_info.dart';
 import 'convert.dart';
 import 'device.dart';
+import 'macos/macos_ipad_device.dart';
 
 // macOS error code for EADDRINUSE.
 const _kMacOSAddressAlreadyInUseErrno = 48;
@@ -54,10 +55,14 @@ class MDnsVmServiceDiscovery {
     required this._platform,
     MDnsClient? mdnsClient,
     MDnsClient? preliminaryMDnsClient,
+    this._ignoredServices = const <(int, String)>{},
   }) : _client = mdnsClient ?? MDnsClient(),
        _preliminaryClient = preliminaryMDnsClient;
 
   final MDnsClient _client;
+
+  // Port and authentication code pairs from previous launches.
+  final Set<(int, String)> _ignoredServices;
 
   // Used when discovering VM services with `queryForAttach` to do a preliminary
   // check for already running services so that results are not cached in _client.
@@ -414,6 +419,9 @@ class MDnsVmServiceDiscovery {
         if (txt.isNotEmpty) {
           authCode = _getAuthCode(txt.first.text);
         }
+        if (_ignoredServices.contains((srvRecord.port, authCode))) {
+          continue;
+        }
         results.add(
           MDnsVmServiceDiscoveryResult(domainName, srvRecord.port, authCode, ipAddress: ipAddress),
         );
@@ -515,10 +523,12 @@ class MDnsVmServiceDiscovery {
   /// Differs from [getVMServiceUriForAttach] because it only searches for a specific service.
   /// This is enforced by [applicationId] being required and using either the
   /// [deviceVmservicePort] or the [device]'s name to query.
+  /// [deviceName] overrides the device's display name when its mDNS host name differs.
   Future<Uri?> getVMServiceUriForLaunch(
     String applicationId,
     Device device, {
     int? deviceVmservicePort,
+    String? deviceName,
     int? hostVmservicePort,
     bool throwOnError = true,
     Duration timeout = const Duration(minutes: 10),
@@ -527,7 +537,7 @@ class MDnsVmServiceDiscovery {
   }) async {
     final MDnsVmServiceDiscoveryResult? result = await queryForLaunch(
       applicationId: applicationId,
-      deviceName: deviceVmservicePort == null ? device.name : null,
+      deviceName: deviceName ?? (deviceVmservicePort == null ? device.name : null),
       deviceVmservicePort: deviceVmservicePort,
       ipv6: usesIpv6,
       throwOnError: throwOnError,
@@ -579,6 +589,9 @@ class MDnsVmServiceDiscovery {
   // If there's not an ipv4 link local address in `NetworkInterfaces.list`,
   // then request user interventions with a `printError()` if possible.
   Future<void> _checkForIPv4LinkLocal(Device device) async {
+    if (device is MacOSDesignedForIPadDevice) {
+      return;
+    }
     _logger.printTrace(
       'mDNS query failed. Checking for an interface with a ipv4 link local address.',
     );

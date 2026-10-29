@@ -786,6 +786,33 @@ void main() {
         );
       });
 
+      testWithoutContext('finds the local Mac identifier and reuses discovery results', () async {
+        fakeProcessManager.addCommand(
+          const FakeCommand(
+            command: <String>['xcrun', 'xcdevice', 'list', '--timeout', '1'],
+            stdout:
+                '[{"platform":"com.apple.platform.iphoneos","available":true,"identifier":"phone"},'
+                '{"platform":"com.apple.platform.macosx","available":true,"identifier":"host-mac"}]',
+          ),
+        );
+        expect(await xcdevice.getMacOSDeviceIdentifier(), 'host-mac');
+        expect(await xcdevice.getMacOSDeviceIdentifier(), 'host-mac');
+        expect(fakeProcessManager, hasNoRemainingExpectations);
+      });
+
+      testWithoutContext('does not use an unavailable Mac or a phone as the host', () async {
+        fakeProcessManager.addCommand(
+          const FakeCommand(
+            command: <String>['xcrun', 'xcdevice', 'list', '--timeout', '1'],
+            stdout:
+                '[{"platform":"com.apple.platform.iphoneos","available":true,"identifier":"phone"},'
+                '{"platform":"com.apple.platform.macosx","available":false,"identifier":"host-mac"}]',
+          ),
+        );
+        expect(await xcdevice.getMacOSDeviceIdentifier(), isNull);
+        expect(fakeProcessManager, hasNoRemainingExpectations);
+      });
+
       group('observe device events', () {
         testUsingContext('relays events', () async {
           fakeProcessManager.addCommand(

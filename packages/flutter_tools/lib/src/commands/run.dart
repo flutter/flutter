@@ -28,6 +28,7 @@ import '../device.dart';
 import '../features.dart';
 import '../hook_runner.dart' show hookRunner;
 import '../ios/devices.dart';
+import '../macos/macos_ipad_device.dart';
 import '../project.dart';
 import '../resident_runner.dart';
 import '../run_cold.dart';
@@ -476,6 +477,7 @@ class RunCommand extends RunCommandBase {
     var anyAndroidDevices = false;
     var anyIOSDevices = false;
     var anyWirelessIOSDevices = false;
+    var anyPhysicalIOSDevices = false;
 
     if (devices == null || devices!.isEmpty) {
       deviceType = 'none';
@@ -486,6 +488,8 @@ class RunCommand extends RunCommandBase {
       final TargetPlatform platform = await device.targetPlatform;
       anyAndroidDevices = platform == TargetPlatform.android;
       anyIOSDevices = platform == TargetPlatform.ios;
+      anyPhysicalIOSDevices =
+          platform == TargetPlatform.ios && device is! MacOSDesignedForIPadDevice;
       if (device is IOSDevice && device.isWirelesslyConnected) {
         anyWirelessIOSDevices = true;
       }
@@ -500,6 +504,9 @@ class RunCommand extends RunCommandBase {
         final TargetPlatform platform = await device.targetPlatform;
         anyAndroidDevices = anyAndroidDevices || (platform == TargetPlatform.android);
         anyIOSDevices = anyIOSDevices || (platform == TargetPlatform.ios);
+        anyPhysicalIOSDevices =
+            anyPhysicalIOSDevices ||
+            (platform == TargetPlatform.ios && device is! MacOSDesignedForIPadDevice);
         if (device is IOSDevice && device.isWirelesslyConnected) {
           anyWirelessIOSDevices = true;
         }
@@ -510,7 +517,7 @@ class RunCommand extends RunCommandBase {
     }
 
     String? iOSInterfaceType;
-    if (anyIOSDevices) {
+    if (anyPhysicalIOSDevices) {
       iOSInterfaceType = anyWirelessIOSDevices ? 'wireless' : 'usb';
     }
 

@@ -9,13 +9,16 @@ import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/logs.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/macos/macos_ipad_device.dart';
 import 'package:test/fake.dart';
 
+import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_devices.dart';
 import '../../src/fakes.dart';
@@ -52,6 +55,23 @@ void main() {
         throwsA(
           isA<ToolExit>().having((ToolExit error) => error.exitCode, 'exitCode', anyOf(isNull, 1)),
         ),
+      );
+    }, overrides: <Type, Generator>{DeviceManager: () => deviceManager, Platform: () => platform});
+
+    testUsingContext('rejects standalone logs for Mac Designed for iPad', () async {
+      deviceManager.attachedDevices.add(
+        MacOSDesignedForIPadDevice(
+          toolContext: FakeToolContext(
+            os: FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_arm64),
+          ),
+          xcode: FakeXcode(),
+          xcdevice: FakeXCDevice(),
+        ),
+      );
+      final command = LogsCommand(toolContext: toolContext);
+      await expectLater(
+        () => createTestCommandRunner(command).run(<String>['-d', 'mac-designed-for-ipad', 'logs']),
+        throwsToolExit(message: 'Standalone logs are not supported'),
       );
     }, overrides: <Type, Generator>{DeviceManager: () => deviceManager, Platform: () => platform});
 

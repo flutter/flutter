@@ -63,6 +63,8 @@ class XcodeDebug {
     required XcodeDebugProject project,
     required String deviceId,
     required List<String> launchArguments,
+    String? devicePlatform,
+    String? deviceArchitecture,
   }) async {
     // If project is not already opened in Xcode, open it.
     if (!await _isProjectOpenInXcode(project: project)) {
@@ -97,6 +99,8 @@ class XcodeDebug {
         ],
         '--device-id',
         deviceId,
+        if (devicePlatform != null) ...<String>['--device-platform', devicePlatform],
+        if (deviceArchitecture != null) ...<String>['--device-architecture', deviceArchitecture],
         '--scheme',
         project.scheme,
         '--skip-building',
@@ -362,36 +366,69 @@ class XcodeDebug {
 
   /// Create a temporary empty Xcode project with the application bundle
   /// location explicitly set.
+  ///
+  /// If [copyApplicationBundle] is true, stage a copy in the temporary project
+  /// to avoid local iOS installation issues with percent-encoded source paths.
   Future<XcodeDebugProject> createXcodeProjectWithCustomBundle(
     String deviceBundlePath, {
     required TemplateRenderer templateRenderer,
     @visibleForTesting Directory? projectDestination,
     bool verboseLogging = false,
+    BuildMode buildMode = BuildMode.debug,
+    bool copyApplicationBundle = false,
+    bool debuggerEnabled = true,
+    String? lldbInitFile,
   }) async {
     final Directory tempXcodeProject =
         projectDestination ??
         _fileSystem.systemTempDirectory.createTempSync('flutter_empty_xcode.');
 
-    final Template template = await Template.fromName(
-      _fileSystem.path.join('xcode', 'ios', 'custom_application_bundle'),
-      fileSystem: _fileSystem,
-      templateManifest: null,
-      logger: _logger,
-      templateRenderer: templateRenderer,
-    );
+    try {
+      var applicationBundlePath = deviceBundlePath;
+      if (copyApplicationBundle) {
+        // Xcode's local iOS installer can treat percent-encoded source paths as
+        // file system paths when creating .XCInstall. Stage a real copy beside
+        // the launcher, preserving executable permissions and code signing.
+        applicationBundlePath = tempXcodeProject.childDirectory('Runner.app').path;
+        await _processUtils.run(<String>[
+          '/usr/bin/ditto',
+          deviceBundlePath,
+          applicationBundlePath,
+        ], throwOnError: true);
+      }
 
-    template.render(tempXcodeProject, <String, Object>{
-      'applicationBundlePath': deviceBundlePath,
-    }, printStatusWhenWriting: false);
+      final Template template = await Template.fromName(
+        _fileSystem.path.join('xcode', 'ios', 'custom_application_bundle'),
+        fileSystem: _fileSystem,
+        templateManifest: null,
+        logger: _logger,
+        templateRenderer: templateRenderer,
+      );
 
-    return XcodeDebugProject(
-      scheme: 'Runner',
-      hostAppProjectName: 'Runner',
-      xcodeProject: tempXcodeProject.childDirectory('Runner.xcodeproj'),
-      xcodeWorkspace: tempXcodeProject.childDirectory('Runner.xcworkspace'),
-      isTemporaryProject: true,
-      verboseLogging: verboseLogging,
-    );
+      template.render(tempXcodeProject, <String, Object>{
+        'applicationBundlePath': applicationBundlePath,
+        'buildConfiguration': sentenceCase(buildMode.name),
+        'debuggerIdentifier': debuggerEnabled ? 'Xcode.DebuggerFoundation.Debugger.LLDB' : '',
+        'launcherIdentifier': debuggerEnabled
+            ? 'Xcode.DebuggerFoundation.Launcher.LLDB'
+            : 'Xcode.IDEFoundation.Launcher.PosixSpawn',
+        'lldbInitFile': lldbInitFile ?? r'$(SRCROOT)/Flutter/ephemeral/flutter_lldbinit',
+      }, printStatusWhenWriting: false);
+
+      return XcodeDebugProject(
+        scheme: 'Runner',
+        hostAppProjectName: 'Runner',
+        xcodeProject: tempXcodeProject.childDirectory('Runner.xcodeproj'),
+        xcodeWorkspace: tempXcodeProject.childDirectory('Runner.xcworkspace'),
+        isTemporaryProject: true,
+        verboseLogging: verboseLogging,
+      );
+    } catch (_) {
+      if (tempXcodeProject.existsSync()) {
+        tempXcodeProject.deleteSync(recursive: true);
+      }
+      rethrow;
+    }
   }
 
   /// Ensure the Xcode project is set up to launch an LLDB debugger. If these

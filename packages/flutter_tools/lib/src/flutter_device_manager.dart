@@ -31,6 +31,7 @@ import 'macos/macos_device.dart';
 import 'macos/macos_ipad_device.dart';
 import 'macos/macos_workflow.dart';
 import 'macos/xcdevice.dart';
+import 'macos/xcode.dart';
 import 'native_assets.dart';
 import 'tester/flutter_tester.dart';
 import 'web/web_device.dart';
@@ -54,6 +55,7 @@ class FlutterDeviceManager extends DeviceManager {
     required ToolContext toolContext,
     required WindowsWorkflow windowsWorkflow,
     required XCDevice xcDevice,
+    required Xcode xcode,
   }) : super(logger: toolContext.logger) {
     final ToolContext(
       :Artifacts artifacts,
@@ -89,7 +91,12 @@ class FlutterDeviceManager extends DeviceManager {
         nativeAssetsBuilder: nativeAssetsBuilder,
       ),
       MacOSDevices(macOSWorkflow: macOSWorkflow, toolContext: toolContext),
-      MacOSDesignedForIPadDevices(iosWorkflow: iosWorkflow, toolContext: toolContext),
+      MacOSDesignedForIPadDevices(
+        iosWorkflow: iosWorkflow,
+        toolContext: toolContext,
+        xcdevice: xcDevice,
+        xcode: xcode,
+      ),
       LinuxDevices(analytics: analytics, featureFlags: featureFlags, toolContext: toolContext),
       WindowsDevices(
         analytics: analytics,
