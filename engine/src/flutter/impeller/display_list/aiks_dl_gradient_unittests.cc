@@ -2,6 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <array>
+#include <tuple>
+#include <utility>
+#include <vector>
+
 #include "display_list/display_list.h"
 #include "display_list/dl_blend_mode.h"
 #include "display_list/dl_tile_mode.h"
@@ -477,6 +482,27 @@ TEST_P(AiksTest, CanRenderLinearGradientManyColorsDecal) {
 }
 
 namespace {
+// Well above kMaxUniformGradientStops (256), which forces the texture-backed
+// gradient pipelines on backends without SSBO support.
+constexpr int kWayManyStops = 2000;
+
+// A smooth blue -> white -> orange-red ramp spread over kWayManyStops stops.
+std::pair<std::vector<DlColor>, std::vector<Scalar>> MakeWayManyColorStops() {
+  std::vector<DlColor> colors;
+  std::vector<Scalar> stops;
+  colors.reserve(kWayManyStops);
+  stops.reserve(kWayManyStops);
+  for (int i = 0; i < kWayManyStops; i++) {
+    Scalar t = static_cast<Scalar>(i) / (kWayManyStops - 1);
+    Color color = t < 0.5f ? Color::Lerp(Color::Blue(), Color::White(), t * 2)
+                           : Color::Lerp(Color::White(), Color::OrangeRed(),
+                                         (t - 0.5f) * 2);
+    colors.push_back(DlColor(color.ToARGB()));
+    stops.push_back(t);
+  }
+  return {std::move(colors), std::move(stops)};
+}
+
 void CanRenderLinearGradientWayManyColors(AiksTest* aiks_test,
                                           DlTileMode tile_mode) {
   DisplayListBuilder builder;
@@ -676,6 +702,19 @@ TEST_P(AiksTest, CanRenderRadialGradientManyColors) {
   ASSERT_TRUE(OpenPlaygroundHere(callback));
 }
 
+// The stop count forces the texture-backed radial gradient pipeline on non-SSBO
+// backends.
+TEST_P(AiksTest, CanRenderRadialGradientWayManyColorsClamp) {
+  auto [colors, stops] = MakeWayManyColorStops();
+  DisplayListBuilder builder;
+  DlPaint paint;
+  paint.setColorSource(DlColorSource::MakeRadial(
+      {300, 300}, /*radius=*/250, stops.size(), colors.data(), stops.data(),
+      DlTileMode::kClamp));
+  builder.DrawRect(DlRect::MakeXYWH(0, 0, 600, 600), paint);
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
 namespace {
 void CanRenderSweepGradient(AiksTest* aiks_test, DlTileMode tile_mode) {
   DisplayListBuilder builder;
@@ -757,6 +796,19 @@ TEST_P(AiksTest, CanRenderSweepGradientManyColorsDecal) {
   CanRenderSweepGradientManyColors(this, DlTileMode::kDecal);
 }
 
+// The stop count forces the texture-backed sweep gradient pipeline on non-SSBO
+// backends.
+TEST_P(AiksTest, CanRenderSweepGradientWayManyColorsClamp) {
+  auto [colors, stops] = MakeWayManyColorStops();
+  DisplayListBuilder builder;
+  DlPaint paint;
+  paint.setColorSource(DlColorSource::MakeSweep(
+      {300, 300}, /*start=*/0, /*end=*/360, stops.size(), colors.data(),
+      stops.data(), DlTileMode::kClamp));
+  builder.DrawRect(DlRect::MakeXYWH(0, 0, 600, 600), paint);
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
 TEST_P(AiksTest, CanRenderConicalGradient) {
   Scalar size = 256;
   DisplayListBuilder builder;
@@ -800,6 +852,41 @@ TEST_P(AiksTest, CanRenderConicalGradient) {
         /*stops=*/stops.data(),
         /*tile_mode=*/DlTileMode::kClamp));
     builder.DrawRect(DlRect::MakeXYWH(0, 0, size, size), paint);
+    builder.Restore();
+  }
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+// One cell per non-degenerate ConicalKind: distinct centers and radii
+// (kConical), coincident centers (kRadial), and equal radii (kStrip). The stop
+// count forces the texture-backed conical pipelines on non-SSBO backends.
+TEST_P(AiksTest, CanRenderConicalGradientWayManyColorsClamp) {
+  auto [colors, stops] = MakeWayManyColorStops();
+  constexpr Scalar kSize = 256;
+  const std::array<std::tuple<DlPoint, Scalar, DlPoint, Scalar>, 3> kCircles = {
+      std::make_tuple(DlPoint(kSize / 4, kSize / 4), 0.f,
+                      DlPoint(kSize / 2, kSize / 2), kSize / 2),  // kConical
+      std::make_tuple(DlPoint(kSize / 2, kSize / 2), kSize / 4,
+                      DlPoint(kSize / 2, kSize / 2), kSize / 2),  // kRadial
+      std::make_tuple(DlPoint(kSize / 8, kSize / 8), kSize / 8,
+                      DlPoint(kSize / 2, kSize / 2), kSize / 8),  // kStrip
+  };
+
+  DisplayListBuilder builder;
+  DlPaint paint;
+  for (size_t i = 0; i < kCircles.size(); i++) {
+    builder.Save();
+    builder.Translate(i * kSize, 0);
+    paint.setColorSource(DlColorSource::MakeConical(
+        /*start_center=*/std::get<0>(kCircles[i]),
+        /*start_radius=*/std::get<1>(kCircles[i]),
+        /*end_center=*/std::get<2>(kCircles[i]),
+        /*end_radius=*/std::get<3>(kCircles[i]),
+        /*stop_count=*/stops.size(),
+        /*colors=*/colors.data(),
+        /*stops=*/stops.data(),
+        /*tile_mode=*/DlTileMode::kClamp));
+    builder.DrawRect(DlRect::MakeXYWH(0, 0, kSize, kSize), paint);
     builder.Restore();
   }
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));

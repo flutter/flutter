@@ -150,7 +150,8 @@ class Selectable extends SemanticBehavior {
   // Roles confirmed to support aria-selected according to ARIA spec.
   // See: https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-selected
   static const Set<ui.SemanticsRole> _rolesSupportingAriaSelected = {
-    // Note: Flutter currently supports row and tab from the list (gridcell, option, row, tab).
+    // Note: Flutter currently supports option, row, and tab from the list (gridcell, option, row, tab).
+    ui.SemanticsRole.option,
     ui.SemanticsRole.row,
     ui.SemanticsRole.tab,
   };

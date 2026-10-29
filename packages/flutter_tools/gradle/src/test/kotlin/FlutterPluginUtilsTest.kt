@@ -12,7 +12,6 @@ import com.android.build.api.dsl.LibraryBuildType
 import com.android.build.api.variant.AndroidComponentsExtension
 import com.android.build.api.variant.Variant
 import com.android.build.api.variant.VariantBuilder
-import com.android.builder.model.BuildType
 import com.flutter.gradle.FlutterPluginUtils.BUILT_IN_KOTLIN_DOCS
 import com.flutter.gradle.FlutterPluginUtils.BUILT_IN_KOTLIN_DOCS_FOR_APPS
 import com.flutter.gradle.FlutterPluginUtils.BUILT_IN_KOTLIN_DOCS_FOR_PLUGINS
@@ -31,7 +30,6 @@ import io.mockk.verify
 import org.gradle.api.Action
 import org.gradle.api.GradleException
 import org.gradle.api.Project
-import org.gradle.api.Task
 import org.gradle.api.UnknownTaskException
 import org.gradle.api.internal.project.ProjectInternal
 import org.gradle.api.invocation.Gradle
@@ -382,24 +380,20 @@ class FlutterPluginUtilsTest {
     @Test
     fun `shouldConfigureFlutterTask returns true for assemble task`() {
         val project = mockk<Project>()
-        val assembleTask = mockk<Task>()
 
         every { project.gradle.startParameter.taskNames } returns listOf("assemble")
-        every { assembleTask.name } returns "assemble"
 
-        val result = FlutterPluginUtils.shouldConfigureFlutterTask(project, assembleTask)
+        val result = FlutterPluginUtils.shouldConfigureFlutterTask(project, "assemble")
         assertEquals(true, result)
     }
 
     @Test
     fun `shouldConfigureFlutterTask returns true when taskname and assembleTask end with Release`() {
         val project = mockk<Project>()
-        val assembleTask = mockk<Task>()
 
         every { project.gradle.startParameter.taskNames } returns listOf("assembleRelease")
-        every { assembleTask.name } returns "assembleSomethingElseRelease"
 
-        val result = FlutterPluginUtils.shouldConfigureFlutterTask(project, assembleTask)
+        val result = FlutterPluginUtils.shouldConfigureFlutterTask(project, "assembleSomethingElseRelease")
         assertEquals(true, result)
     }
 
@@ -416,12 +410,10 @@ class FlutterPluginUtilsTest {
     @Test
     fun `shouldConfigureFlutterTask returns true when taskname and assembleTask end with Profile`() {
         val project = mockk<Project>()
-        val assembleTask = mockk<Task>()
 
         every { project.gradle.startParameter.taskNames } returns listOf("assembleProfile")
-        every { assembleTask.name } returns "assembleSomethingElseProfile"
 
-        val result = FlutterPluginUtils.shouldConfigureFlutterTask(project, assembleTask)
+        val result = FlutterPluginUtils.shouldConfigureFlutterTask(project, "assembleSomethingElseProfile")
         assertEquals(true, result)
     }
 
@@ -438,12 +430,10 @@ class FlutterPluginUtilsTest {
     @Test
     fun `shouldConfigureFlutterTask returns false when taskname is Debug and assembleTask is Profile`() {
         val project = mockk<Project>()
-        val assembleTask = mockk<Task>()
 
         every { project.gradle.startParameter.taskNames } returns listOf("assembleDebug")
-        every { assembleTask.name } returns "assembleSomethingElseProfile"
 
-        val result = FlutterPluginUtils.shouldConfigureFlutterTask(project, assembleTask)
+        val result = FlutterPluginUtils.shouldConfigureFlutterTask(project, "assembleSomethingElseProfile")
         assertEquals(false, result)
     }
 
@@ -543,36 +533,6 @@ class FlutterPluginUtilsTest {
     }
 
     // buildModeFor
-    @Test
-    fun `buildModeFor returns profile if the BuildType has name profile`() {
-        val buildType = mockk<BuildType>()
-        every { buildType.name } returns "profile"
-        every { buildType.isDebuggable } returns false
-
-        val result = FlutterPluginUtils.buildModeFor(buildType)
-        assertEquals("profile", result)
-    }
-
-    @Test
-    fun `buildModeFor returns debug if the BuildType is debuggable`() {
-        val buildType = mockk<BuildType>()
-        every { buildType.name } returns "something random"
-        every { buildType.isDebuggable } returns true
-
-        val result = FlutterPluginUtils.buildModeFor(buildType)
-        assertEquals("debug", result)
-    }
-
-    @Test
-    fun `buildModeFor returns release if the BuildType is not debuggable and not named profile`() {
-        val buildType = mockk<BuildType>()
-        every { buildType.isDebuggable } returns false
-        every { buildType.name } returns "something random"
-
-        val result = FlutterPluginUtils.buildModeFor(buildType)
-        assertEquals("release", result)
-    }
-
     @Test
     fun `buildModeFor with a name and debuggable flag prefers the profile name over debuggability`() {
         assertEquals("profile", FlutterPluginUtils.buildModeFor("profile", isDebuggable = true))

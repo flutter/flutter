@@ -15,6 +15,7 @@ class DummyFlutterCommand extends FlutterCommand {
     this.packagesPath,
     this.fileSystemScheme,
     this.fileSystemRoots = const <String>[],
+    super.toolContext,
   });
 
   final bool noUsagePath;

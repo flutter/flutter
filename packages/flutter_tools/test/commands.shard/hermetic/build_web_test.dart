@@ -4,6 +4,7 @@
 
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -113,7 +114,6 @@ void main() {
         expect(environment.defines, <String, String>{
           'TargetFile': 'lib/main.dart',
           'HasWebPlugins': 'true',
-          'ServiceWorkerStrategy': 'offline-first',
           'BuildMode': 'release',
           'DartDefines': 'Zm9vPWE=,RkxVVFRFUl9WRVJTSU9OPTAuMC4w,RkxVVFRFUl9DSEFOTkVMPW1hc3Rlcg==,RkxVVFRFUl9HSVRfVVJMPWh0dHBzOi8vZ2l0aHViLmNvbS9mbHV0dGVyL2ZsdXR0ZXIuZ2l0,RkxVVFRFUl9GUkFNRVdPUktfUkVWSVNJT049MTExMTE=,RkxVVFRFUl9FTkdJTkVfUkVWSVNJT049YWJjZGU=,RkxVVFRFUl9EQVJUX1ZFUlNJT049MTI=',
           'DartObfuscation': 'false',
@@ -358,7 +358,6 @@ void main() {
         expect(environment.defines, <String, String>{
           'TargetFile': 'lib/a.dart',
           'HasWebPlugins': 'true',
-          'ServiceWorkerStrategy': 'offline-first',
           'BuildMode': 'release',
           'DartDefines': 'RkxVVFRFUl9WRVJTSU9OPTAuMC4w,RkxVVFRFUl9DSEFOTkVMPW1hc3Rlcg==,RkxVVFRFUl9HSVRfVVJMPWh0dHBzOi8vZ2l0aHViLmNvbS9mbHV0dGVyL2ZsdXR0ZXIuZ2l0,RkxVVFRFUl9GUkFNRVdPUktfUkVWSVNJT049MTExMTE=,RkxVVFRFUl9FTkdJTkVfUkVWSVNJT049YWJjZGU=,RkxVVFRFUl9EQVJUX1ZFUlNJT049MTI=',
           'DartObfuscation': 'false',
@@ -395,7 +394,6 @@ void main() {
         expect(environment.defines, <String, String>{
           'TargetFile': 'lib/a.dart',
           'HasWebPlugins': 'true',
-          'ServiceWorkerStrategy': 'offline-first',
           'BuildMode': 'release',
           'DartDefines': 'RkxVVFRFUl9WRVJTSU9OPTAuMC4w,RkxVVFRFUl9DSEFOTkVMPW1hc3Rlcg==,RkxVVFRFUl9HSVRfVVJMPWh0dHBzOi8vZ2l0aHViLmNvbS9mbHV0dGVyL2ZsdXR0ZXIuZ2l0,RkxVVFRFUl9GUkFNRVdPUktfUkVWSVNJT049MTExMTE=,RkxVVFRFUl9FTkdJTkVfUkVWSVNJT049YWJjZGU=,RkxVVFRFUl9EQVJUX1ZFUlNJT049MTI=',
           'DartObfuscation': 'false',
@@ -452,7 +450,6 @@ void main() {
         expect(environment.defines, <String, String>{
           'TargetFile': 'lib/main.dart',
           'HasWebPlugins': 'true',
-          'ServiceWorkerStrategy': 'offline-first',
           'BuildMode': 'release',
           'DartDefines': 'RkxVVFRFUl9WRVJTSU9OPTAuMC4w,RkxVVFRFUl9DSEFOTkVMPW1hc3Rlcg==,RkxVVFRFUl9HSVRfVVJMPWh0dHBzOi8vZ2l0aHViLmNvbS9mbHV0dGVyL2ZsdXR0ZXIuZ2l0,RkxVVFRFUl9GUkFNRVdPUktfUkVWSVNJT049MTExMTE=,RkxVVFRFUl9FTkdJTkVfUkVWSVNJT049YWJjZGU=,RkxVVFRFUl9EQVJUX1ZFUlNJT049MTI=',
           'DartObfuscation': 'false',
@@ -681,6 +678,74 @@ void main() {
     },
   );
 
+  testWithoutContext(
+    'Web build propagates local engine options to build system Environment',
+    () async {
+      fileSystem
+          .directory('engine')
+          .childDirectory('src')
+          .childDirectory('out')
+          .childDirectory('wasm_release')
+          .createSync(recursive: true);
+      fileSystem
+          .directory('engine')
+          .childDirectory('src')
+          .childDirectory('out')
+          .childDirectory('host_release')
+          .createSync(recursive: true);
+
+      var buildInvoked = false;
+      final deferredArtifacts = DeferredArtifacts(Artifacts.test());
+      final buildCommand = TestWebBuildCommand(
+        fileSystem: fileSystem,
+        platform: fakePlatform,
+        processManager: processManager,
+        toolContext: FakeToolContext(
+          artifacts: deferredArtifacts,
+          cache: FakeCache(),
+          fs: fileSystem,
+          logger: BufferLogger.test(),
+          platform: fakePlatform,
+          processManager: processManager,
+          projectFactory: FlutterProjectFactory(
+            fileSystem: fileSystem,
+            logger: BufferLogger.test(),
+          ),
+        ),
+        buildSystem: TestBuildSystem.all(BuildResult(success: true), (
+          Target target,
+          Environment environment,
+        ) {
+          buildInvoked = true;
+          expect(environment.artifacts.usesLocalArtifacts, isTrue);
+          expect(environment.artifacts.localEngineInfo, isNotNull);
+          expect(
+            fileSystem.path.basename(environment.artifacts.localEngineInfo!.targetOutPath),
+            'wasm_release',
+          );
+          expect(
+            fileSystem.path.basename(environment.artifacts.localEngineInfo!.hostOutPath),
+            'host_release',
+          );
+          expect(environment.engineVersion, isNull);
+        }),
+      );
+      final CommandRunner<void> runner = createTestCommandRunner(buildCommand);
+      setupFileSystemForEndToEndTest(fileSystem);
+
+      await runner.run(<String>[
+        '--local-engine=wasm_release',
+        '--local-engine-host=host_release',
+        '--local-engine-src-path=engine/src',
+        'build',
+        'web',
+        '--no-pub',
+      ]);
+
+      expect(buildInvoked, isTrue);
+    },
+  );
+
   testWithoutContext('Passes minify to only wasm when minify-wasm specified', () async {
     final buildCommand = TestWebBuildCommand(
       fileSystem: fileSystem,
@@ -848,6 +913,27 @@ void main() {
     expect(buildInfo.dartDefines, contains('FLUTTER_WEB_CANVASKIT_URL=abcdefg'));
   });
 
+  testWithoutContext('Rejects --pwa-strategy with migration message', () async {
+    final buildCommand = TestWebBuildCommand(
+      fileSystem: fileSystem,
+      platform: fakePlatform,
+      processManager: processManager,
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+    );
+    final CommandRunner<void> runner = createTestCommandRunner(buildCommand);
+
+    await expectLater(
+      runner.run(<String>['build', 'web', '--no-pub', '--pwa-strategy=none']),
+      throwsToolExit(
+        message:
+            'The "--pwa-strategy" option has been removed because Flutter no longer '
+            'generates or registers an offline caching service worker.\n'
+            'Remove "--pwa-strategy" from your build command. '
+            'See https://github.com/flutter/flutter/issues/156910 for more details.',
+      ),
+    );
+  });
+
   testWithoutContext('Rejects --base-href value that does not start with /', () async {
     final buildCommand = TestWebBuildCommand(
       fileSystem: fileSystem,
@@ -922,7 +1008,7 @@ void main() {
       expect(command.usage, isNot(contains(option)));
     }
 
-    // Deprecated options are always hidden.
+    // Removed options remain hidden so passing them produces a targeted ToolExit.
     expectHidden('pwa-strategy');
 
     // Verbose-only options are hidden in standard help output.
@@ -972,7 +1058,7 @@ void main() {
       expect(command.usage, isNot(contains(option)));
     }
 
-    // Deprecated options remain hidden.
+    // Removed options remain hidden.
     expectHidden('pwa-strategy');
 
     // Verbose-only options become visible when verboseHelp is true.

@@ -7,6 +7,7 @@
 #include <thread>
 
 #include "flutter/fml/logging.h"
+#include "flutter/fml/synchronization/count_down_latch.h"
 #include "flutter/fml/time/time_point.h"
 #include "impeller/base/validation.h"
 #include "impeller/core/device_buffer_descriptor.h"
@@ -535,7 +536,7 @@ TEST_P(RendererTest, CanRenderInstanced) {
         builder.CreateVertexBuffer(*data_host_buffer, *indexes_host_buffer));
 
     pass.SetInstanceCount(kInstancesCount);
-    pass.Draw();
+    pass.Draw().IgnoreError();
 
     data_host_buffer->Reset();
     return true;
@@ -638,14 +639,14 @@ TEST_P(RendererTest, CanBlitTextureToTexture) {
                          Matrix::MakeScale(GetContentScale());
         VS::BindFrameInfo(*pass, data_host_buffer->EmplaceUniform(frame_info));
 
-        FS::FragInfo frag_info;
+        FS::FragInfo frag_info{};
         frag_info.lod = 0;
         FS::BindFragInfo(*pass, data_host_buffer->EmplaceUniform(frag_info));
 
         auto sampler = context->GetSamplerLibrary()->GetSampler({});
         FS::BindTex(*pass, texture, sampler);
 
-        pass->Draw();
+        pass->Draw().IgnoreError();
       }
       pass->EncodeCommands();
     }
@@ -759,7 +760,7 @@ TEST_P(RendererTest, CanBlitTextureToBuffer) {
                          Matrix::MakeScale(GetContentScale());
         VS::BindFrameInfo(*pass, data_host_buffer->EmplaceUniform(frame_info));
 
-        FS::FragInfo frag_info;
+        FS::FragInfo frag_info{};
         frag_info.lod = 0;
         FS::BindFragInfo(*pass, data_host_buffer->EmplaceUniform(frag_info));
 
@@ -775,7 +776,7 @@ TEST_P(RendererTest, CanBlitTextureToBuffer) {
         }
         FS::BindTex(*pass, texture, sampler);
 
-        pass->Draw().ok();
+        pass->Draw().IgnoreError();
       }
       pass->EncodeCommands();
       if (!context->GetCommandQueue()->Submit({buffer}).ok()) {
@@ -887,7 +888,7 @@ TEST_P(RendererTest, CanGenerateMipmaps) {
                          Matrix::MakeScale(GetContentScale());
         VS::BindFrameInfo(*pass, data_host_buffer->EmplaceUniform(frame_info));
 
-        FS::FragInfo frag_info;
+        FS::FragInfo frag_info{};
         frag_info.lod = lod;
         FS::BindFragInfo(*pass, data_host_buffer->EmplaceUniform(frag_info));
 
@@ -898,7 +899,7 @@ TEST_P(RendererTest, CanGenerateMipmaps) {
             context->GetSamplerLibrary()->GetSampler(sampler_desc);
         FS::BindTex(*pass, boston, sampler);
 
-        pass->Draw();
+        pass->Draw().IgnoreError();
       }
       pass->EncodeCommands();
     }
@@ -967,7 +968,7 @@ TEST_P(RendererTest, TheImpeller) {
     FS::BindBlueNoise(pass, blue_noise, noise_sampler);
     FS::BindCubeMap(pass, cube_map, cube_map_sampler);
 
-    pass.Draw().ok();
+    pass.Draw().IgnoreError();
     data_host_buffer->Reset();
     return true;
   };
@@ -1034,7 +1035,7 @@ TEST_P(RendererTest, Planet) {
     fs_uniform.seed_value = seed_value;
     FS::BindFragInfo(pass, data_host_buffer->EmplaceUniform(fs_uniform));
 
-    pass.Draw().ok();
+    pass.Draw().IgnoreError();
     data_host_buffer->Reset();
     return true;
   };
@@ -1091,7 +1092,7 @@ TEST_P(RendererTest, ArrayUniforms) {
     };
     FS::BindFragInfo(pass, data_host_buffer->EmplaceUniform(fs_uniform));
 
-    pass.Draw();
+    pass.Draw().IgnoreError();
     data_host_buffer->Reset();
     return true;
   };
@@ -1138,7 +1139,7 @@ TEST_P(RendererTest, InactiveUniforms) {
                                .color = Color::Green()};
     FS::BindFragInfo(pass, data_host_buffer->EmplaceUniform(fs_uniform));
 
-    pass.Draw().ok();
+    pass.Draw().IgnoreError();
     data_host_buffer->Reset();
     return true;
   };
@@ -1804,6 +1805,59 @@ TEST_P(RendererTest, AttachmentRejectsOutOfRangeSubresource) {
   color0.mip_level = 0u;
   color0.slice = 1u;  // A 2D texture has a single slice.
   EXPECT_FALSE(color0.IsValid());
+}
+
+TEST_P(RendererTest, SamplerLibraryAllowsConcurrentGetSampler) {
+  auto library = GetContext()->GetSamplerLibrary();
+  ASSERT_TRUE(library);
+
+  std::vector<SamplerDescriptor> descriptors;
+  for (auto min : {MinMagFilter::kNearest, MinMagFilter::kLinear}) {
+    for (auto mag : {MinMagFilter::kNearest, MinMagFilter::kLinear}) {
+      for (auto mip :
+           {MipFilter::kBase, MipFilter::kNearest, MipFilter::kLinear}) {
+        for (auto mode :
+             {SamplerAddressMode::kClampToEdge, SamplerAddressMode::kRepeat,
+              SamplerAddressMode::kMirror}) {
+          SamplerDescriptor desc("Concurrent", min, mag, mip);
+          desc.width_address_mode = mode;
+          desc.height_address_mode = mode;
+          descriptors.push_back(desc);
+        }
+      }
+    }
+  }
+
+  constexpr size_t kThreadCount = 4;
+  std::vector<std::vector<const Sampler*>> results(
+      kThreadCount, std::vector<const Sampler*>(descriptors.size()));
+  fml::CountDownLatch start(kThreadCount);
+  std::vector<std::thread> threads;
+  threads.reserve(kThreadCount);
+  for (size_t t = 0; t < kThreadCount; t++) {
+    threads.emplace_back([&, t] {
+      start.CountDown();
+      start.Wait();
+      for (size_t i = 0; i < descriptors.size(); i++) {
+        size_t index =
+            (i + t * descriptors.size() / kThreadCount) % descriptors.size();
+        results[t][index] = library->GetSampler(descriptors[index]).get();
+      }
+    });
+  }
+  for (auto& thread : threads) {
+    thread.join();
+  }
+
+  for (size_t i = 0; i < descriptors.size(); i++) {
+    const Sampler* sampler = library->GetSampler(descriptors[i]).get();
+    ASSERT_NE(sampler, nullptr);
+    EXPECT_EQ(SamplerDescriptor::ToKey(sampler->GetDescriptor()),
+              SamplerDescriptor::ToKey(descriptors[i]));
+    for (size_t t = 0; t < kThreadCount; t++) {
+      EXPECT_EQ(results[t][i], sampler);
+    }
+  }
 }
 
 }  // namespace testing

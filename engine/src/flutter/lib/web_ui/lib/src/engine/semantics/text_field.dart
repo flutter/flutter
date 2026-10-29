@@ -47,7 +47,7 @@ void _applyIosMinimumFontSize(DomHTMLElement element, double? frameworkFontSize)
   element.style.fontSize = '${effectiveFontSize}px';
 }
 
-/// Text editing used by accesibility mode.
+/// Text editing used by accessibility mode.
 ///
 /// [SemanticsTextEditingStrategy] assumes the caller will own the creation,
 /// insertion and disposal of the DOM element. Due to this

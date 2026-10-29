@@ -500,7 +500,7 @@ TEST_P(AiksTest, CanRenderTextOutsideBoundaries) {
 
   struct {
     DlPoint position;
-    const char* text;
+    const char* text = nullptr;
   } text[] = {{DlPoint(0, 0), "0F0F0F0"},
               {DlPoint(1, 2), "789"},
               {DlPoint(1, 3), "456"},

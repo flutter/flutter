@@ -123,7 +123,7 @@ TEST_P(AiksTest, SrgbToLinearFilterSubpassCollapseOptimization) {
   DisplayListBuilder builder(DlRect::MakeSize(GetWindowSize()));
 
   DlPaint paint;
-  paint.setColorFilter(DlColorFilter::MakeLinearToSrgbGamma());
+  paint.setColorFilter(DlColorFilter::MakeSrgbToLinearGamma());
   builder.SaveLayer(std::nullopt, &paint);
 
   builder.Translate(500, 300);
@@ -1108,9 +1108,11 @@ TEST_P(AiksTest, ToImageFromImage) {
     blit_pass->EncodeCommands();
 
     auto latch = std::make_shared<fml::CountDownLatch>(1u);
-    GetContext()->GetCommandQueue()->Submit(
-        {cmd_buffer},
-        [latch](CommandBuffer::Status status) { latch->CountDown(); });
+    GetContext()
+        ->GetCommandQueue()
+        ->Submit({cmd_buffer},
+                 [latch](CommandBuffer::Status status) { latch->CountDown(); })
+        .IgnoreError();
     latch->Wait();
   }
 
@@ -1128,9 +1130,11 @@ TEST_P(AiksTest, ToImageFromImage) {
     blit_pass->EncodeCommands();
 
     auto latch = std::make_shared<fml::CountDownLatch>(1u);
-    GetContext()->GetCommandQueue()->Submit(
-        {cmd_buffer},
-        [latch](CommandBuffer::Status status) { latch->CountDown(); });
+    GetContext()
+        ->GetCommandQueue()
+        ->Submit({cmd_buffer},
+                 [latch](CommandBuffer::Status status) { latch->CountDown(); })
+        .IgnoreError();
     latch->Wait();
   }
 

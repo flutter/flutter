@@ -72,8 +72,8 @@ class FlutterHookResult {
 
   static bool _wasAnyFileModifiedSince(FileSystem fileSystem, DateTime since, List<Uri> uris) {
     for (final uri in uris) {
-      final DateTime modified = fileSystem.statSync(uri.toFilePath()).modified;
-      if (modified.isAfter(since)) {
+      final FileStat stat = fileSystem.statSync(fileSystem.path.fromUri(uri));
+      if (stat.type == FileSystemEntityType.notFound || stat.modified.isAfter(since)) {
         return true;
       }
     }
@@ -530,7 +530,7 @@ class ManifestAssetBundle implements AssetBundle {
       final Package package = packageConfig[dataAsset.package]!;
       final Uri fileUri = dataAsset.file;
 
-      final String filePath = fileUri.toFilePath();
+      final String filePath = _fileSystem.path.fromUri(fileUri);
 
       final asset = _Asset(
         baseDir: _fileSystem.path.dirname(filePath),
