@@ -139,7 +139,7 @@ abstract class DesktopDevice extends Device {
     try {
       Timer? timer;
       if (this is MacOSDevice) {
-        if (await botDetector.isRunningOnBot) {
+        if (botDetector.isRunningOnBot) {
           const defaultTimeout = 5;
           timer = Timer(const Duration(minutes: defaultTimeout), () {
             // As of macOS 14, if sandboxing is enabled and the app is not codesigned,

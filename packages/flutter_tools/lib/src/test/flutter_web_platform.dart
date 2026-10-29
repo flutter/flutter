@@ -320,7 +320,7 @@ class FlutterWebPlatform extends PlatformPlugin {
         entrypoint: 'main.dart',
         nativeNullAssertions: true,
         onLoadEndBootstrap: 'on_load_end_bootstrap.js',
-        isCi: await _toolContext.botDetector.isRunningOnBot,
+        isCi: _toolContext.botDetector.isRunningOnBot,
       );
 
       mainModuleSrc +=
