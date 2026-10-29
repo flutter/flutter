@@ -953,6 +953,9 @@ class MockSemanticsEnabler implements SemanticsEnabler {
   void removeAllPlaceholders() {}
 
   @override
+  void retirePlaceholders() {}
+
+  @override
   void addPlaceholderForView(DomElement viewRoot) {
     throw UnimplementedError();
   }
@@ -3171,6 +3174,32 @@ void _testCheckables() {
     owner().updateSemantics(builder.build());
     expectSemanticsTree(owner(), '''
 <sem role="checkbox" flt-tappable aria-checked="false"></sem>
+''');
+
+    semantics().semanticsEnabled = false;
+  });
+
+  test('renders a mixed checkbox', () async {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    final builder = ui.SemanticsUpdateBuilder();
+    updateNode(
+      builder,
+      actions: 0 | ui.SemanticsAction.tap.index,
+
+      flags: const ui.SemanticsFlags(
+        isChecked: ui.CheckedState.mixed,
+        isEnabled: ui.Tristate.isTrue,
+      ),
+      transform: Matrix4.identity().toFloat64(),
+      rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+    );
+
+    owner().updateSemantics(builder.build());
+    expectSemanticsTree(owner(), '''
+<sem role="checkbox" flt-tappable aria-checked="mixed"></sem>
 ''');
 
     semantics().semanticsEnabled = false;

@@ -25,10 +25,9 @@ import '../runner/flutter_command.dart';
 /// The DAP specification can be found at
 /// https://microsoft.github.io/debug-adapter-protocol/.
 class DebugAdapterCommand extends FlutterCommand {
-  DebugAdapterCommand({required super.toolContext, bool verboseHelp = false})
-    : hidden = !verboseHelp {
-    usesIpv6Flag(verboseHelp: verboseHelp);
-    addDdsOptions(verboseHelp: verboseHelp);
+  DebugAdapterCommand({required super.toolContext, super.verboseHelp}) : hidden = !verboseHelp {
+    DebuggingOptionDescriptors.ipv6.addTo(argParser, verboseHelp: verboseHelp);
+    registerOptionBundle(const DdsAndDevToolsOptionsBundle(includeDevTools: false));
     argParser.addFlag(
       'test',
       help:

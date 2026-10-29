@@ -4,10 +4,9 @@
 
 import 'package:flutter_devicelab/framework/devices.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
-import 'package:flutter_devicelab/tasks/new_gallery.dart';
+import 'package:flutter_devicelab/tasks/integration_tests.dart';
 
 Future<void> main() async {
-  deviceOperatingSystem = DeviceOperatingSystem.ios;
-
-  await task(NewGalleryPerfTest(enableImpeller: false).run);
+  deviceOperatingSystem = DeviceOperatingSystem.windows;
+  await task(createEngineIntegrationGoldenTest(maxD3DFeatureLevel: '10_0'));
 }

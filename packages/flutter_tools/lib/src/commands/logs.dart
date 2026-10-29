@@ -9,6 +9,7 @@ import '../application_package.dart';
 import '../base/common.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
+import '../build_info.dart';
 import '../context/tool_context.dart';
 import '../device.dart';
 import '../runner/flutter_command.dart';
@@ -29,9 +30,8 @@ class LogsCommand extends FlutterCommand {
       abbr: 'c',
       help: 'Clear log history before reading from logs.',
     );
-    usesDeviceTimeoutOption();
-    usesDeviceConnectionOption();
-    usesAdbLogFilteringOption(hide: false);
+    registerOptionBundle(const DeviceDiscoveryOptionsBundle());
+    DebuggingOptionDescriptors.adbLogFiltering.addTo(argParser, hideOverride: false);
   }
 
   final ProcessSignal _sigint;
@@ -74,9 +74,10 @@ class LogsCommand extends FlutterCommand {
       cachedDevice.clearLogs();
     }
 
-    final ApplicationPackage? app = await applicationPackages?.getPackageForPlatform(
-      await cachedDevice.targetPlatform,
-    );
+    final TargetPlatform targetPlatform = await cachedDevice.targetPlatform;
+    final ApplicationPackage? app = targetPlatform == .unsupported
+        ? null
+        : await applicationPackages?.getPackageForPlatform(targetPlatform);
 
     final bool filtering =
         argParser.options.containsKey('adb-log-filtering') && boolArg('adb-log-filtering');

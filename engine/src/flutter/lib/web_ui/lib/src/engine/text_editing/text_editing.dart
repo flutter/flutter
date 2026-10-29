@@ -1773,9 +1773,17 @@ abstract class DefaultTextEditingStrategy
 
   @override
   void setEditingState(EditingState? editingState) {
+    final String? previousText = lastEditingState?.text;
     lastEditingState = editingState;
     if (!isEnabled || !editingState!.isValid) {
       return;
+    }
+    // Writing different text into the element ends any composition in
+    // progress, and Chrome does so without a `compositionend` event. This
+    // happens when an input formatter rejects a dead key character. Forget the
+    // composition so its stale range is not reported back to the framework.
+    if (editingState.text != previousText) {
+      resetComposition();
     }
     lastEditingState!.applyToDomElement(domElement);
   }

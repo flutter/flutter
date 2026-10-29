@@ -349,19 +349,28 @@ class EngineFlutterView implements ui.FlutterView {
   /// presence. This allows the framework to correctly shrink its content using
   /// `resizeToAvoidBottomInset`. When the keyboard is dismissed, `_physicalSize`
   /// is updated to the actual new physical size of the window.
+  ///
+  /// The keyboard can only make the viewport shorter than the full screen size,
+  /// so a viewport that is taller than the preserved `_physicalSize` means the
+  /// preserved size isn't the full screen size. This happens when
+  /// `_physicalSize` was measured while the keyboard was already up, e.g. for
+  /// an input inside an iframe, which Flutter's text editing doesn't know
+  /// about. In that case `_physicalSize` is updated even though the text
+  /// editing is still active.
   void _handleBrowserResize(ui.Size? _) {
     StyleManager.scaleSemanticsHost(dom.semanticsHost, devicePixelRatio);
     final ui.Size newPhysicalSize = _computePhysicalSize();
-    if (_shouldPreservePhysicalSizeOnResize && !_isRotation(newPhysicalSize)) {
-      _computeOnScreenKeyboardInsets(true);
-    } else {
+    final bool isEditingOnMobile =
+        _shouldPreservePhysicalSizeOnResize && !_isRotation(newPhysicalSize);
+    if (!isEditingOnMobile || newPhysicalSize.height > physicalSize.height) {
       _physicalSize = newPhysicalSize;
       // The safe area moves with the size of the view, e.g. when the device is
       // rotated, so it has to be recalculated too.
       _viewPadding = dimensionsProvider.computeSafeAreaInsets();
-      // When physical size changes this value has to be recalculated.
-      _computeOnScreenKeyboardInsets(false);
     }
+    // The insets are relative to the physical size, so they have to be
+    // recalculated on every resize, whether the physical size changed or not.
+    _computeOnScreenKeyboardInsets(isEditingOnMobile);
     platformDispatcher.invokeOnMetricsChanged();
   }
 

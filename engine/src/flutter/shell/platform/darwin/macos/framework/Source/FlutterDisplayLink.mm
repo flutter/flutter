@@ -46,9 +46,9 @@ class DisplayLinkManager {
                      CVOptionFlags* flags_out);
 
   struct ScreenEntry {
-    CGDirectDisplayID display_id;
+    CGDirectDisplayID display_id = 0;
     std::vector<_FlutterDisplayLink*> clients;
-    CVDisplayLinkRef display_link;
+    CVDisplayLinkRef display_link = nullptr;
 
     bool ShouldBeRunning() {
       return std::any_of(clients.begin(), clients.end(),

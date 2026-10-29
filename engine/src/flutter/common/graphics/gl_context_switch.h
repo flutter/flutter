@@ -58,7 +58,7 @@ class GLContextResult {
 
  protected:
   explicit GLContextResult(bool static_result);
-  bool result_;
+  bool result_ = false;
 
   FML_DISALLOW_COPY_AND_ASSIGN(GLContextResult);
 };

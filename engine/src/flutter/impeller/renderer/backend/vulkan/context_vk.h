@@ -5,9 +5,9 @@
 #ifndef FLUTTER_IMPELLER_RENDERER_BACKEND_VULKAN_CONTEXT_VK_H_
 #define FLUTTER_IMPELLER_RENDERER_BACKEND_VULKAN_CONTEXT_VK_H_
 
-#include <format>
 #include <memory>
 #include <optional>
+#include <string>
 
 #include "flutter/fml/concurrent_message_loop.h"
 #include "flutter/fml/mapping.h"
@@ -30,6 +30,7 @@
 #include "impeller/renderer/command_queue.h"
 #include "impeller/renderer/context.h"
 #include "third_party/abseil-cpp/absl/status/statusor.h"
+#include "third_party/abseil-cpp/absl/strings/str_cat.h"
 
 namespace impeller {
 
@@ -76,11 +77,11 @@ class ContextVK final : public Context,
 
   /// Embedder Stuff
   struct EmbedderData {
-    VkInstance instance;
-    VkPhysicalDevice physical_device;
-    VkDevice device;
-    uint32_t queue_family_index;
-    VkQueue queue;
+    VkInstance instance = nullptr;
+    VkPhysicalDevice physical_device = nullptr;
+    VkDevice device = nullptr;
+    uint32_t queue_family_index = 0;
+    VkQueue queue = nullptr;
     std::vector<std::string> instance_extensions;
     std::vector<std::string> device_extensions;
   };
@@ -194,7 +195,7 @@ class ContextVK final : public Context,
       // No-op if validation layers are not enabled.
       return true;
     }
-    std::string combined = std::format("{} {}", label, trailing);
+    std::string combined = absl::StrCat(label, " ", trailing);
     return SetDebugName(GetDevice(), handle, combined);
   }
 

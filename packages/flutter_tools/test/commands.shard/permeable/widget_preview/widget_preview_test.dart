@@ -376,7 +376,13 @@ void main() {
       '--verbose',
       ?rootProject?.path,
     ], analysisServerFactoryOverride: analysisServerFactoryOverride);
-    await analyzeProject(WidgetPreviewStartCommand.widgetPreviewScaffold.path);
+    final Directory projectDir = rootProject ?? current;
+    final FlutterProject project = FlutterProjectFactory(
+      logger: logger,
+      fileSystem: fs,
+    ).fromDirectory(projectDir);
+    final Directory scaffoldDir = (project.workspaceRoot ?? project).widgetPreviewScaffold;
+    await analyzeProject(scaffoldDir.path);
     fs.currentDirectory = current;
   }
 
@@ -577,7 +583,7 @@ resolution: workspace
     );
 
     testUsingContext(
-      'start creates .dart_tool/widget_preview_scaffold',
+      'start creates .widget_preview',
       () async {
         final Directory rootProject = await createRootProject();
         await startWidgetPreview(rootProject: rootProject);
@@ -610,7 +616,8 @@ resolution: workspace
 
         await startWidgetPreview(rootProject: rootProject);
 
-        final Directory scaffoldWebDir = WidgetPreviewStartCommand.widgetPreviewScaffold
+        final Directory scaffoldWebDir = rootProject
+            .childDirectory('.widget_preview')
             .childDirectory('web');
         expect(scaffoldWebDir.existsSync(), true);
         expect(
@@ -681,7 +688,7 @@ resolution: workspace
     );
 
     testUsingContext(
-      'start creates .dart_tool/widget_preview_scaffold in the CWD',
+      'start creates .widget_preview in the CWD',
       () async {
         final Directory rootProject = await createRootProject();
         // Try to execute using the CWD.
@@ -769,9 +776,9 @@ List<_i1.WidgetPreview> previews() => [
 
           await startWidgetPreview(rootProject: rootProject);
 
-          final File generatedFile = WidgetPreviewStartCommand.widgetPreviewScaffold.childFile(
-            PreviewCodeGenerator.getGeneratedPreviewFilePath(fs),
-          );
+          final File generatedFile = rootProject
+              .childDirectory('.widget_preview')
+              .childFile(PreviewCodeGenerator.getGeneratedPreviewFilePath(fs));
 
           expect(generatedFile.readAsStringSync().stripScriptUris, expectedGeneratedFileContents);
           expectSinglePreviewLaunchTimingEvent();
@@ -827,9 +834,9 @@ List<_i1.WidgetPreview> previews() => [
           fs.currentDirectory = rootProject;
           await startWidgetPreview(rootProject: null);
 
-          final File generatedFile = WidgetPreviewStartCommand.widgetPreviewScaffold.childFile(
-            PreviewCodeGenerator.getGeneratedPreviewFilePath(fs),
-          );
+          final File generatedFile = rootProject
+              .childDirectory('.widget_preview')
+              .childFile(PreviewCodeGenerator.getGeneratedPreviewFilePath(fs));
 
           expect(generatedFile.readAsStringSync().stripScriptUris, expectedGeneratedFileContents);
           expectSinglePreviewLaunchTimingEvent();
@@ -913,9 +920,9 @@ List<_i1.WidgetPreview> previews() => [
 
           await startWidgetPreview(rootProject: rootProject, legacyDetection: true);
 
-          final File generatedFile = WidgetPreviewStartCommand.widgetPreviewScaffold.childFile(
-            PreviewCodeGenerator.getGeneratedPreviewFilePath(fs),
-          );
+          final File generatedFile = rootProject
+              .childDirectory('.widget_preview')
+              .childFile(PreviewCodeGenerator.getGeneratedPreviewFilePath(fs));
 
           expect(generatedFile.readAsStringSync().stripScriptUris, expectedGeneratedFileContents);
           expectSinglePreviewLaunchTimingEvent();
@@ -947,9 +954,9 @@ List<_i1.WidgetPreview> previews() => [
           fs.currentDirectory = rootProject;
           await startWidgetPreview(rootProject: null, legacyDetection: true);
 
-          final File generatedFile = WidgetPreviewStartCommand.widgetPreviewScaffold.childFile(
-            PreviewCodeGenerator.getGeneratedPreviewFilePath(fs),
-          );
+          final File generatedFile = rootProject
+              .childDirectory('.widget_preview')
+              .childFile(PreviewCodeGenerator.getGeneratedPreviewFilePath(fs));
 
           expect(generatedFile.readAsStringSync().stripScriptUris, expectedGeneratedFileContents);
           expectSinglePreviewLaunchTimingEvent();
@@ -981,9 +988,9 @@ List<_i1.WidgetPreview> previews() => [
 
           await startWidgetPreview(rootProject: rootProject, legacyDetection: true);
 
-          final File generatedFile = WidgetPreviewStartCommand.widgetPreviewScaffold.childFile(
-            PreviewCodeGenerator.getGeneratedPreviewFilePath(fs),
-          );
+          final File generatedFile = rootProject
+              .childDirectory('.widget_preview')
+              .childFile(PreviewCodeGenerator.getGeneratedPreviewFilePath(fs));
 
           expect(generatedFile.readAsStringSync().stripScriptUris, expectedGeneratedFileContents);
           expectSinglePreviewLaunchTimingEvent();
