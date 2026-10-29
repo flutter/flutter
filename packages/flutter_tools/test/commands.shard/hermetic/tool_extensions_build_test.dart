@@ -116,7 +116,6 @@ final class _FailingAndConflictingBuildService extends BuildService {
       errorMessage: 'Custom build compilation error.',
     ),
     _TestBuildTarget(description: 'Conflicting bundle target.', name: 'bundle'),
-    _TestBuildTarget(description: 'Empty target name that should be skipped.', name: ''),
   ];
 }
 
@@ -124,6 +123,33 @@ void _failingBuildExtensionEntryPoint(SendPort sendPort) {
   ToolExtensionEntryPoint.run(
     sendPort,
     <ToolExtensionService>[_FailingAndConflictingBuildService()],
+    supportedPlatforms: const <String>{'linux'},
+  );
+}
+
+final class _InvalidTargetBuildService extends ToolExtensionService {
+  @override
+  String get namespace => BuildService.serviceNamespace;
+
+  @override
+  Future<Map<String, ExtensionRpcHandler>> initialize() async {
+    return <String, ExtensionRpcHandler>{
+      'getBuildTargets': (_) async => <Map<String, Object?>>[
+        <String, Object?>{
+          'description': 'Target with invalid name',
+          'name': 'Invalid-Name',
+          'outputDir': '{OUTPUT_DIR}',
+          'targetPlatform': 'linux-x64',
+        },
+      ],
+    };
+  }
+}
+
+void _invalidTargetBuildExtensionEntryPoint(SendPort sendPort) {
+  ToolExtensionEntryPoint.run(
+    sendPort,
+    <ToolExtensionService>[_InvalidTargetBuildService()],
     supportedPlatforms: const <String>{'linux'},
   );
 }
@@ -491,6 +517,36 @@ void main() {
       },
     );
 
+    testWithoutContext(
+      'ExtensionBuildManager logs warning when extension returns invalid build target name',
+      () async {
+        final logger = BufferLogger.test();
+        final featureFlags = TestFeatureFlags(isToolExtensionsEnabled: true);
+        final manager = ExtensionManager(
+          hostPlatform: HostPlatform.linux_x64,
+          logger: logger,
+          entryPoints: <ExtensionEntryPoint>[_invalidTargetBuildExtensionEntryPoint],
+          featureFlags: featureFlags,
+        );
+        final buildManager = ExtensionBuildManager(
+          extensionManager: manager,
+          featureFlags: featureFlags,
+          logger: logger,
+        );
+
+        final List<ExtensionBuildTarget> targets = await buildManager.getBuildTargets();
+        expect(targets, isEmpty);
+        expect(
+          logger.warningText,
+          contains(
+            'Failed to query build targets from extension: FormatException: Invalid "name" field: "Invalid-Name".',
+          ),
+        );
+
+        await manager.dispose();
+      },
+    );
+
     testUsingContext(
       'BuildCommand includes custom subcommand and can run it when feature flag enabled',
       () async {
@@ -536,7 +592,7 @@ void main() {
       'ExtensionBuildSubCommand forwards flutterRoot, outputDir, and resolvedArtifacts in build parameters',
       () async {
         final fakeBuildManager = _RecordingExtensionBuildManager();
-        const target = ExtensionBuildTarget(
+        final target = ExtensionBuildTarget(
           description: 'Custom hermetic build target.',
           name: 'custom-hermetic-build',
           outputDir:
@@ -575,7 +631,7 @@ void main() {
 
     testWithoutContext('ExtensionBuildSubCommand resolves {OUTPUT_DIR} using custom build-dir from Config', () async {
       final buildManager = _RecordingExtensionBuildManager();
-      const target = ExtensionBuildTarget(
+      final target = ExtensionBuildTarget(
         description: 'Custom hermetic build target.',
         name: 'custom-hermetic-build',
         outputDir:
@@ -602,7 +658,7 @@ void main() {
       'ExtensionBuildSubCommand throws ToolExit when outputDir contains unsupported placeholder',
       () async {
         final buildManager = _RecordingExtensionBuildManager();
-        const target = ExtensionBuildTarget(
+        final target = ExtensionBuildTarget(
           description: 'Custom hermetic build target.',
           name: 'custom-hermetic-build',
           outputDir: '${BuiltInPlaceholders.buildDir}/custom',
@@ -664,7 +720,6 @@ void main() {
           ),
         );
         expect(command.subcommands['bundle'], isA<BuildBundleCommand>());
-        expect(command.subcommands.containsKey(''), isFalse);
 
         await manager.dispose();
       },
