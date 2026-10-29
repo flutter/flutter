@@ -359,6 +359,7 @@ def _cipd_package_impl(rctx):
         type = "zip",
         sha256 = rctx.attr.sha256,
         canonical_id = url,
+        stripPrefix = rctx.attr.strip_prefix,
     )
 
     _write_build_file(rctx, rctx.attr.build_file, rctx.attr.build_file_content)
@@ -392,6 +393,10 @@ _CIPD_PACKAGE_ATTRS = {
     ),
     "build_file_content": attr.string(
         doc = "Inline BUILD file content; mutually exclusive with `build_file`.",
+    ),
+    "strip_prefix": attr.string(
+        doc = "A directory of the archive that becomes the repository's root (the Mac's JDK bundle: " +
+              "`Contents/Home`); the archive's root by default.",
     ),
 }
 

@@ -28,6 +28,16 @@ load(":macos_toolchain.bzl", "ios_clang_toolchain", "macos_clang_toolchain")
 
 package(default_visibility = ["//visibility:public"])
 
+# Every target of a Linux or Android toolchain is compatible with that OS
+# alone, as the macOS toolchains' are with macOS (macos_toolchain.bzl): a
+# wildcard build on another host skips them without fetching the Linux
+# clang and the Debian sysroots, which a Mac's checkout has not (DEPS syncs
+# them under download_linux_deps). A toolchain's files are configured for
+# its target platform when it is used, so the constraint holds there.
+_LINUX = ["@platforms//os:linux"]
+
+_ANDROID = ["@platforms//os:android"]
+
 # The C++ standard library GN links into every executable, shared library and
 # loadable module (BUILDCONFIG.gn's default deps). The root .bazelrc attaches
 # it to every cc_binary and cc_test through --@bazel_tools//tools/cpp:link_extra_libs;
@@ -81,6 +91,7 @@ filegroup(
         "@clang_linux_x64//:compiler_files",
         "@sysroot_linux_x64//:headers",
     ],
+    target_compatible_with = _LINUX,
 )
 
 filegroup(
@@ -89,6 +100,7 @@ filegroup(
         "@clang_linux_x64//:linker_files",
         "@sysroot_linux_x64//:libraries",
     ],
+    target_compatible_with = _LINUX,
 )
 
 filegroup(
@@ -98,6 +110,7 @@ filegroup(
         ":linux_x64_linker_files",
         "@clang_linux_x64//:all_files",
     ],
+    target_compatible_with = _LINUX,
 )
 
 flutter_cc_toolchain_config(
@@ -125,6 +138,7 @@ flutter_cc_toolchain_config(
     resource_include_marker = "@clang_linux_x64//:resource_include_marker",
     strip = "@clang_linux_x64//:bin/llvm-strip",
     sysroot_marker = "@sysroot_linux_x64//:BUILD.bazel",
+    target_compatible_with = _LINUX,
     target_cpu = "k8",
     # The bullseye sysroot's library is glibc 2.31; its features.h is patched
     # by the Chrome sysroot creator to advertise 2.26 (see the smoke test).
@@ -143,6 +157,7 @@ cc_toolchain(
     objcopy_files = "@clang_linux_x64//:objcopy_files",
     strip_files = "@clang_linux_x64//:strip_files",
     supports_param_files = True,
+    target_compatible_with = _LINUX,
     toolchain_config = ":linux_x64_clang_config",
     toolchain_identifier = "linux_x64_clang",
 )
@@ -184,6 +199,7 @@ filegroup(
         "@clang_linux_x64//:compiler_files",
         "@sysroot_linux_arm64//:headers",
     ],
+    target_compatible_with = _LINUX,
 )
 
 filegroup(
@@ -192,6 +208,7 @@ filegroup(
         "@clang_linux_x64//:linker_files",
         "@sysroot_linux_arm64//:libraries",
     ],
+    target_compatible_with = _LINUX,
 )
 
 filegroup(
@@ -201,6 +218,7 @@ filegroup(
         ":linux_arm64_linker_files",
         "@clang_linux_x64//:all_files",
     ],
+    target_compatible_with = _LINUX,
 )
 
 flutter_cc_toolchain_config(
@@ -227,6 +245,7 @@ flutter_cc_toolchain_config(
     resource_include_marker = "@clang_linux_x64//:resource_include_marker",
     strip = "@clang_linux_x64//:bin/llvm-strip",
     sysroot_marker = "@sysroot_linux_arm64//:BUILD.bazel",
+    target_compatible_with = _LINUX,
     target_cpu = "aarch64",
     target_libc = "glibc_2.31",
     target_system_name = "aarch64-unknown-linux-gnu",
@@ -243,6 +262,7 @@ cc_toolchain(
     objcopy_files = "@clang_linux_x64//:objcopy_files",
     strip_files = "@clang_linux_x64//:strip_files",
     supports_param_files = True,
+    target_compatible_with = _LINUX,
     toolchain_config = ":linux_arm64_clang_config",
     toolchain_identifier = "linux_arm64_clang",
 )
@@ -288,6 +308,7 @@ filegroup(
         "@android_tools//:sysroot_headers",
         "@clang_linux_x64//:compiler_files",
     ],
+    target_compatible_with = _ANDROID,
 )
 
 filegroup(
@@ -296,6 +317,7 @@ filegroup(
         "@android_tools//:libraries_arm64",
         "@clang_linux_x64//:linker_files",
     ],
+    target_compatible_with = _ANDROID,
 )
 
 filegroup(
@@ -305,6 +327,7 @@ filegroup(
         ":android_arm64_linker_files",
         "@clang_linux_x64//:all_files",
     ],
+    target_compatible_with = _ANDROID,
 )
 
 ANDROID_ARM64_LIB = "sdk/ndk/28.2.13676358/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/aarch64-linux-android/24"
@@ -339,6 +362,7 @@ flutter_cc_toolchain_config(
     runtime_library = "@android_tools//:builtins_arm64",
     strip = "@clang_linux_x64//:bin/llvm-strip",
     sysroot_marker = "@android_tools//:sdk/ndk/28.2.13676358/toolchains/llvm/prebuilt/linux-x86_64/sysroot/NOTICE",
+    target_compatible_with = _ANDROID,
     target_cpu = "aarch64",
     target_libc = "bionic_24",
     target_system_name = "aarch64-unknown-linux-android",
@@ -355,6 +379,7 @@ cc_toolchain(
     objcopy_files = "@clang_linux_x64//:objcopy_files",
     strip_files = "@clang_linux_x64//:strip_files",
     supports_param_files = True,
+    target_compatible_with = _ANDROID,
     toolchain_config = ":android_arm64_clang_config",
     toolchain_identifier = "android_arm64_clang",
 )
@@ -417,6 +442,7 @@ filegroup(
         "@android_tools//:libraries_arm64_api26",
         "@clang_linux_x64//:linker_files",
     ],
+    target_compatible_with = _ANDROID,
 )
 
 filegroup(
@@ -426,6 +452,7 @@ filegroup(
         ":android_arm64_compiler_files",
         "@clang_linux_x64//:all_files",
     ],
+    target_compatible_with = _ANDROID,
 )
 
 ANDROID_ARM64_API26_LIB = "sdk/ndk/28.2.13676358/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/aarch64-linux-android/26"
@@ -460,6 +487,7 @@ flutter_cc_toolchain_config(
     runtime_library = "@android_tools//:builtins_arm64_api26",
     strip = "@clang_linux_x64//:bin/llvm-strip",
     sysroot_marker = "@android_tools//:sdk/ndk/28.2.13676358/toolchains/llvm/prebuilt/linux-x86_64/sysroot/NOTICE",
+    target_compatible_with = _ANDROID,
     target_cpu = "aarch64",
     target_libc = "bionic_26",
     target_system_name = "aarch64-unknown-linux-android",
@@ -476,6 +504,7 @@ cc_toolchain(
     objcopy_files = "@clang_linux_x64//:objcopy_files",
     strip_files = "@clang_linux_x64//:strip_files",
     supports_param_files = True,
+    target_compatible_with = _ANDROID,
     toolchain_config = ":android_arm64_api26_clang_config",
     toolchain_identifier = "android_arm64_api26_clang",
 )
@@ -519,6 +548,7 @@ filegroup(
         "@android_tools//:libraries_x64",
         "@clang_linux_x64//:linker_files",
     ],
+    target_compatible_with = _ANDROID,
 )
 
 filegroup(
@@ -528,6 +558,7 @@ filegroup(
         ":android_x64_linker_files",
         "@clang_linux_x64//:all_files",
     ],
+    target_compatible_with = _ANDROID,
 )
 
 ANDROID_X64_LIB = "sdk/ndk/28.2.13676358/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/x86_64-linux-android/24"
@@ -562,6 +593,7 @@ flutter_cc_toolchain_config(
     runtime_library = "@android_tools//:builtins_x64",
     strip = "@clang_linux_x64//:bin/llvm-strip",
     sysroot_marker = "@android_tools//:sdk/ndk/28.2.13676358/toolchains/llvm/prebuilt/linux-x86_64/sysroot/NOTICE",
+    target_compatible_with = _ANDROID,
     target_cpu = "x86_64",
     target_libc = "bionic_24",
     target_system_name = "x86_64-unknown-linux-android",
@@ -578,6 +610,7 @@ cc_toolchain(
     objcopy_files = "@clang_linux_x64//:objcopy_files",
     strip_files = "@clang_linux_x64//:strip_files",
     supports_param_files = True,
+    target_compatible_with = _ANDROID,
     toolchain_config = ":android_x64_clang_config",
     toolchain_identifier = "android_x64_clang",
 )
@@ -617,6 +650,7 @@ filegroup(
         "@android_tools//:libraries_riscv64",
         "@clang_linux_x64//:linker_files",
     ],
+    target_compatible_with = _ANDROID,
 )
 
 filegroup(
@@ -626,6 +660,7 @@ filegroup(
         ":android_riscv64_linker_files",
         "@clang_linux_x64//:all_files",
     ],
+    target_compatible_with = _ANDROID,
 )
 
 ANDROID_RISCV64_LIB = "sdk/ndk/28.2.13676358/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/riscv64-linux-android/35"
@@ -660,6 +695,7 @@ flutter_cc_toolchain_config(
     runtime_library = "@android_tools//:builtins_riscv64",
     strip = "@clang_linux_x64//:bin/llvm-strip",
     sysroot_marker = "@android_tools//:sdk/ndk/28.2.13676358/toolchains/llvm/prebuilt/linux-x86_64/sysroot/NOTICE",
+    target_compatible_with = _ANDROID,
     target_cpu = "riscv64",
     target_libc = "bionic_35",
     target_system_name = "riscv64-unknown-linux-android",
@@ -676,6 +712,7 @@ cc_toolchain(
     objcopy_files = "@clang_linux_x64//:objcopy_files",
     strip_files = "@clang_linux_x64//:strip_files",
     supports_param_files = True,
+    target_compatible_with = _ANDROID,
     toolchain_config = ":android_riscv64_clang_config",
     toolchain_identifier = "android_riscv64_clang",
 )
@@ -716,6 +753,7 @@ filegroup(
         "@android_tools//:libraries_arm",
         "@clang_linux_x64//:linker_files",
     ],
+    target_compatible_with = _ANDROID,
 )
 
 filegroup(
@@ -725,6 +763,7 @@ filegroup(
         ":android_arm_linker_files",
         "@clang_linux_x64//:all_files",
     ],
+    target_compatible_with = _ANDROID,
 )
 
 ANDROID_ARM_LIB = "sdk/ndk/28.2.13676358/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/arm-linux-androideabi/21"
@@ -759,6 +798,7 @@ flutter_cc_toolchain_config(
     runtime_library = "@android_tools//:builtins_arm",
     strip = "@clang_linux_x64//:bin/llvm-strip",
     sysroot_marker = "@android_tools//:sdk/ndk/28.2.13676358/toolchains/llvm/prebuilt/linux-x86_64/sysroot/NOTICE",
+    target_compatible_with = _ANDROID,
     target_cpu = "armv7",
     target_libc = "bionic_21",
     target_system_name = "arm-unknown-linux-androideabi",
@@ -775,6 +815,7 @@ cc_toolchain(
     objcopy_files = "@clang_linux_x64//:objcopy_files",
     strip_files = "@clang_linux_x64//:strip_files",
     supports_param_files = True,
+    target_compatible_with = _ANDROID,
     toolchain_config = ":android_arm_clang_config",
     toolchain_identifier = "android_arm_clang",
 )

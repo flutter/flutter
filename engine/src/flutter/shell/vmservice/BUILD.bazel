@@ -70,6 +70,15 @@ dart_kernel(
     ]
 ]
 
+# No snapshot for a CPU of no Android ABI (wasm32): an alias that resolves
+# to nothing buildable, so that a wildcard build under the web
+# configurations skips it rather than failing on a select with no match.
+filegroup(
+    name = "vmservice_snapshot_none",
+    srcs = [],
+    target_compatible_with = ["@platforms//:incompatible"],
+)
+
 alias(
     name = "vmservice_snapshot",
     actual = select({
@@ -78,6 +87,7 @@ alias(
         "@platforms//cpu:x86_32": ":vmservice_snapshot_x86",
         "@platforms//cpu:x86_64": ":vmservice_snapshot_x86_64",
         "@platforms//cpu:riscv64": ":vmservice_snapshot_riscv64",
+        "//conditions:default": ":vmservice_snapshot_none",
     }),
     visibility = ["//visibility:public"],
 )
