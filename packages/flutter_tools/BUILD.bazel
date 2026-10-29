@@ -85,7 +85,9 @@ _HARNESS = glob(
 
 # What the tests read of the SDK's cache under FLUTTER_ROOT: the Dart SDK
 # (cache_test reads DevTools' version from its resources) and the engine
-# stamp the tool's bootstrap writes (version_test).
+# stamp the tool's bootstrap writes (version_test) -- the fixed-word set
+# here, where no engine artifact is laid (bin/internal/BUILD.bazel); the
+# facsimiles with the engine's directories take the versioned set below.
 _CACHE = {
     HOST_DART_SDK + "//:dart": "dart-sdk",
     HOST_DART_SDK + "//:devtools": "dart-sdk",
@@ -103,9 +105,22 @@ _CACHE_FILES = {
 # the packages under FLUTTER_ROOT/packages, the engine's sky_engine package
 # under bin/cache/pkg (the analyzer reads dart:ui from it) -- and a pub cache
 # of the hosted packages they reach.
-_PUB_CACHE_FILES = _CACHE_FILES | {
-    "//bin/internal:flutter_version_json": "flutter.version.json",
+_PUB_FILES = {
     "//engine/src/flutter/sky/packages/sky_engine:package": "pkg/sky_engine",
+}
+
+_PUB_CACHE_FILES = _CACHE_FILES | _PUB_FILES | {
+    "//bin/internal:flutter_version_json": "flutter.version.json",
+}
+
+# The same with the engine's revision in the stamps and the version file,
+# for a facsimile that carries the engine's directories: the revision the
+# build stamps into them.
+_VERSIONED_CACHE_FILES = _PUB_FILES | {
+    "//bin/internal:versioned_engine_stamp": "engine.stamp",
+    "//bin/internal:versioned_engine_stamp_json": "engine_stamp.json",
+    "//bin/internal:versioned_engine_stamp_stamp": "engine_stamp.stamp",
+    "//bin/internal:versioned_flutter_version_json": "flutter.version.json",
 }
 
 # The Gradle wrapper `flutter create` copies into an Android project.
@@ -249,7 +264,7 @@ _IOS_USB_CACHE = {
     for artifact in IOS_USB_ARTIFACTS
 } if HOST_OS == "mac" else {}
 
-_TOOL_CACHE_FILES = _PUB_CACHE_FILES | {
+_TOOL_CACHE_FILES = _VERSIONED_CACHE_FILES | {
     ":flutter_tools_snapshot": "flutter_tools.snapshot",
     "//engine/src/flutter/build/archives:host_engine_directory": "artifacts/engine/" + _HOST_ENGINE,
     "//engine/src/flutter/build/archives:host_engine_profile_directory": "artifacts/engine/" + _HOST_ENGINE + "-profile",
@@ -499,6 +514,23 @@ _INTEGRATION_APPLE_IOS = [
 
 _INTEGRATION_APPLE = _INTEGRATION_APPLE_MACOS + _INTEGRATION_APPLE_IOS
 
+# The Apple builds that sign for an iOS device: `flutter build ios` without
+# --no-codesign or --simulator, an add-to-app project's `xcodebuild -sdk
+# iphoneos` with automatic signing. They want an Apple development
+# certificate in the host's keychain and a provisioning profile for the
+# app -- a CI Mac's, not every developer's ("No valid code signing
+# certificates were found", the Mac's T50) -- so they are a shard of their
+# own (apple_signed_shard, manual: run by name on a Mac so provisioned).
+_INTEGRATION_APPLE_SIGNED = [
+    "test/integration.shard/lldb_init_test.dart",
+    "test/integration.shard/swift_package_manager_add2app_test.dart",
+    "test/integration.shard/swift_package_manager_create_app_test.dart",
+    "test/integration.shard/swift_package_manager_create_plugin_test.dart",
+    "test/integration.shard/uiscene_migration_test.dart",
+]
+
+_INTEGRATION_APPLE_UNSIGNED = [test for test in _INTEGRATION_APPLE if test not in _INTEGRATION_APPLE_SIGNED]
+
 # The SDK's Xcode build-phase scripts resolve their own symlink first
 # (xcode_backend.sh's follow_links) and take FLUTTER_ROOT from where it
 # leads -- in the facsimile, the checkout, whose bin/dart bootstraps the
@@ -665,17 +697,38 @@ dart_package_tests(
 # are copied by the test itself. CocoaPods (`pod install`: the gallery has
 # a Podfile), Xcode, the simulators and the network (the pod specs, pub) are
 # the host's. Declared on every host, compatible with macOS alone: a Linux
-# analysis still checks it.
+# analysis still checks it. The tests that sign for an iOS device are the
+# second shard, run by name (manual) on a Mac with a development certificate.
+_APPLE_DATA = glob(["test/integration.shard/test_data/**"]) + _SDK_PACKAGES + _TOOL_DATA + _INTEGRATION_PROJECTS + [
+    "//dev/integration_tests/darwin_add2app_swiftpm:project",
+    "//dev/integration_tests/spell_check:project",
+]
+
+_APPLE_WRITABLE = [
+    "pubspec.lock",
+    # The engine directories as the cache unpacks them -- writable, their
+    # directories 0755: ios_content_validation_test plants a stray
+    # ._Info.plist in ios/Flutter.xcframework and removes it again, and the
+    # content validation tests check the frameworks' and dSYMs' modes (the
+    # build's directories are read-only). Clones on APFS, not copies.
+    "bin/cache/artifacts/engine/darwin-x64",
+    "bin/cache/artifacts/engine/darwin-x64-profile",
+    "bin/cache/artifacts/engine/darwin-x64-release",
+    "bin/cache/artifacts/engine/ios",
+    "bin/cache/artifacts/engine/ios-profile",
+    "bin/cache/artifacts/engine/ios-release",
+    "dev/integration_tests/flutter_gallery/ios",
+    "dev/integration_tests/flutter_gallery/macos",
+    "dev/integration_tests/spell_check",
+] + _APPLE_SCRIPTS
+
 dart_package_tests(
     name = "apple_shard",
     size = "enormous",
     srcs = _HARNESS,
     cache = _TOOL_CACHE,
     cache_files = _APPLE_CACHE_FILES,
-    data = glob(["test/integration.shard/test_data/**"]) + _SDK_PACKAGES + _TOOL_DATA + _INTEGRATION_PROJECTS + [
-        "//dev/integration_tests/darwin_add2app_swiftpm:project",
-        "//dev/integration_tests/spell_check:project",
-    ],
+    data = _APPLE_DATA,
     imports = _IMPORTS,
     network = True,
     package = "flutter_tools",
@@ -686,26 +739,33 @@ dart_package_tests(
     # The tool, xcodebuild's compiles and gen_snapshot at once.
     tags = ["cpu:4"],
     target_compatible_with = ["@platforms//os:macos"],
-    tests = _INTEGRATION_APPLE,
-    unsandboxed = _INTEGRATION_APPLE,
-    writable = [
-        "pubspec.lock",
-        # The engine directories as the cache unpacks them -- writable, their
-        # directories 0755: ios_content_validation_test plants a stray
-        # ._Info.plist in ios/Flutter.xcframework and removes it again, and
-        # the content validation tests check the frameworks' and dSYMs'
-        # modes (the build's directories are read-only). Clones on APFS,
-        # not copies.
-        "bin/cache/artifacts/engine/darwin-x64",
-        "bin/cache/artifacts/engine/darwin-x64-profile",
-        "bin/cache/artifacts/engine/darwin-x64-release",
-        "bin/cache/artifacts/engine/ios",
-        "bin/cache/artifacts/engine/ios-profile",
-        "bin/cache/artifacts/engine/ios-release",
-        "dev/integration_tests/flutter_gallery/ios",
-        "dev/integration_tests/flutter_gallery/macos",
-        "dev/integration_tests/spell_check",
-    ] + _APPLE_SCRIPTS,
+    tests = _INTEGRATION_APPLE_UNSIGNED,
+    unsandboxed = _INTEGRATION_APPLE_UNSIGNED,
+    writable = _APPLE_WRITABLE,
+)
+
+dart_package_tests(
+    name = "apple_signed_shard",
+    size = "enormous",
+    srcs = _HARNESS,
+    cache = _TOOL_CACHE,
+    cache_files = _APPLE_CACHE_FILES,
+    data = _APPLE_DATA,
+    imports = _IMPORTS,
+    network = True,
+    package = "flutter_tools",
+    packages = _PACKAGES,
+    pub_cache = ":workspace_pub_cache",
+    sdk_files = _TOOL_SDK_FILES,
+    sdk_trees = {"@pub_workspace//:pubspecs": ""},
+    tags = [
+        "cpu:4",
+        "manual",
+    ],
+    target_compatible_with = ["@platforms//os:macos"],
+    tests = _INTEGRATION_APPLE_SIGNED,
+    unsandboxed = _INTEGRATION_APPLE_SIGNED,
+    writable = _APPLE_WRITABLE,
 )
 
 # What `flutter build apk` needs of the build and the machine

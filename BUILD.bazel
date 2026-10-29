@@ -115,6 +115,16 @@ test_suite(
     tests = ["//packages/flutter_tools:apple_shard"],
 )
 
+# The Apple tests that sign for an iOS device (`flutter build ios` without
+# --no-codesign, an add-to-app project's device build): an Apple development
+# certificate in the keychain and a provisioning profile, which a CI Mac has
+# and a developer's may not. Run by name on such a Mac; manual otherwise.
+test_suite(
+    name = "apple_signed_tool_tests",
+    tags = ["manual"],
+    tests = ["//packages/flutter_tools:apple_signed_shard"],
+)
+
 # The pure-Dart packages' tests (package:test's runner on the VM).
 test_suite(
     name = "dart_tests",
