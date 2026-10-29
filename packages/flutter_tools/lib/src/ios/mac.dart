@@ -151,7 +151,7 @@ Future<XcodeBuildResult> buildXcodeProject({
       buildInfo,
       analytics: globals.analytics,
       plistParser: globals.plistParser,
-      reportCrashes: !await globals.isRunningOnBot,
+      reportCrashes: !globals.isRunningOnBot,
       toolContext: toolContext,
       xcodeProjectInterpreter: globals.xcodeProjectInterpreter!,
     ),
