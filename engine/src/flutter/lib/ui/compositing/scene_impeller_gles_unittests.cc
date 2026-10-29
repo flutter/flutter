@@ -2,9 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Reproduces https://github.com/flutter/flutter/issues/192365 end to end:
-// `Scene.toImage` from Dart while the view has no window surface, rendered by
-// Impeller's OpenGL ES backend.
+// Reproduces, end to end, snapshot and readback work from Dart while the view
+// has no window surface, rendered by Impeller's OpenGL ES backend:
+//  - `Scene.toImage` (https://github.com/flutter/flutter/issues/192365).
+//  - `Image.toByteData` on a raster-owned image
+//    (https://github.com/flutter/flutter/issues/195627).
 //
 // The OpenGL ES driver is |MockGLES|, so this runs on any host. EGL is faked
 // just enough to model what matters on Android:
@@ -217,6 +219,36 @@ void ConfigureMockDriver(NiceMock<impeller::testing::MockGLESImpl>& gl) {
       .WillByDefault(Return(GL_FRAMEBUFFER_COMPLETE));
 }
 
+/// An Impeller OpenGL ES context on |MockGLES| whose reactor may only react on
+/// the thread that has |egl| current.
+struct FakeGLESContext {
+  std::shared_ptr<impeller::testing::MockGLES> mock_gles;
+  std::shared_ptr<FakeEGL> egl;
+  std::shared_ptr<impeller::ContextGLES> context;
+  std::shared_ptr<FakeEGLReactorWorker> worker;
+};
+
+FakeGLESContext CreateFakeGLESContext() {
+  auto mock_gles_impl =
+      std::make_unique<NiceMock<impeller::testing::MockGLESImpl>>();
+  ConfigureMockDriver(*mock_gles_impl);
+  FakeGLESContext result;
+  result.mock_gles =
+      impeller::testing::MockGLES::Init(std::move(mock_gles_impl));
+  result.egl = std::make_shared<FakeEGL>();
+  result.context =
+      impeller::ContextGLES::Create(impeller::Flags{},
+                                    std::make_unique<impeller::ProcTableGLES>(
+                                        impeller::testing::kMockResolverGLES),
+                                    ShaderLibraryMappings(),
+                                    /*enable_gpu_tracing=*/false);
+  if (result.context) {
+    result.worker = std::make_shared<FakeEGLReactorWorker>(result.egl);
+    result.context->AddReactorWorker(result.worker);
+  }
+  return result;
+}
+
 }  // namespace
 
 // In unoptimized builds this stops first at the FML_DCHECK in
@@ -224,23 +256,10 @@ void ConfigureMockDriver(NiceMock<impeller::testing::MockGLESImpl>& gl) {
 // with no context current. In optimized builds it crashes with the
 // use-after-free in DeviceBufferGLES::OnGetContents from the issue.
 TEST_F(ShellTest, SceneToImageWithoutSurfaceOnImpellerGLES) {
-  auto mock_gles_impl =
-      std::make_unique<NiceMock<impeller::testing::MockGLESImpl>>();
-  ConfigureMockDriver(*mock_gles_impl);
-  std::shared_ptr<impeller::testing::MockGLES> mock_gles =
-      impeller::testing::MockGLES::Init(std::move(mock_gles_impl));
-
-  auto egl = std::make_shared<FakeEGL>();
-  std::shared_ptr<impeller::ContextGLES> context =
-      impeller::ContextGLES::Create(impeller::Flags{},
-                                    std::make_unique<impeller::ProcTableGLES>(
-                                        impeller::testing::kMockResolverGLES),
-                                    ShaderLibraryMappings(),
-                                    /*enable_gpu_tracing=*/false);
-  ASSERT_TRUE(context);
-  ASSERT_TRUE(std::static_pointer_cast<impeller::Context>(context)->IsValid());
-  auto worker = std::make_shared<FakeEGLReactorWorker>(egl);
-  context->AddReactorWorker(worker);
+  FakeGLESContext gles = CreateFakeGLESContext();
+  ASSERT_TRUE(gles.context);
+  ASSERT_TRUE(
+      std::static_pointer_cast<impeller::Context>(gles.context)->IsValid());
 
   Settings settings = CreateSettingsForFixture();
   settings.enable_impeller = true;
@@ -255,9 +274,9 @@ TEST_F(ShellTest, SceneToImageWithoutSurfaceOnImpellerGLES) {
       .settings = settings,
       .task_runners = task_runners,
       .platform_view_create_callback =
-          [&context, &egl](Shell& shell) -> std::unique_ptr<PlatformView> {
+          [&gles](Shell& shell) -> std::unique_ptr<PlatformView> {
         return std::make_unique<NoSurfaceGLESPlatformView>(
-            shell, shell.GetTaskRunners(), context, egl);
+            shell, shell.GetTaskRunners(), gles.context, gles.egl);
       },
   });
   ASSERT_TRUE(shell->IsSetup());
@@ -291,6 +310,78 @@ TEST_F(ShellTest, SceneToImageWithoutSurfaceOnImpellerGLES) {
   EXPECT_EQ(error, std::nullopt);
   EXPECT_EQ(width, 8);
   EXPECT_EQ(height, 8);
+
+  DestroyShell(std::move(shell), task_runners);
+}
+
+// `Image.toByteData` on a raster-owned image reads it back on the raster
+// thread. With no window surface there is no context current there, so the
+// AiksContext it renders with must come from the snapshot surface, which makes
+// its offscreen context current first. Otherwise, in unoptimized builds this
+// stops at the FML_DCHECK in ReactorGLES::CreateUntrackedHandle.
+//
+// Regression test for https://github.com/flutter/flutter/issues/195627.
+TEST_F(ShellTest, ImageToByteDataWithoutSurfaceOnImpellerGLES) {
+  FakeGLESContext gles = CreateFakeGLESContext();
+  ASSERT_TRUE(gles.context);
+  ASSERT_TRUE(
+      std::static_pointer_cast<impeller::Context>(gles.context)->IsValid());
+
+  Settings settings = CreateSettingsForFixture();
+  settings.enable_impeller = true;
+  TaskRunners task_runners("test",                  // label
+                           GetCurrentTaskRunner(),  // platform
+                           CreateNewThread(),       // raster
+                           CreateNewThread(),       // ui
+                           CreateNewThread()        // io
+  );
+
+  std::unique_ptr<Shell> shell = CreateShell({
+      .settings = settings,
+      .task_runners = task_runners,
+      .platform_view_create_callback =
+          [&gles](Shell& shell) -> std::unique_ptr<PlatformView> {
+        return std::make_unique<NoSurfaceGLESPlatformView>(
+            shell, shell.GetTaskRunners(), gles.context, gles.egl);
+      },
+  });
+  ASSERT_TRUE(shell->IsSetup());
+  // Deliberately no PlatformViewNotifyCreated(): the rasterizer has no
+  // surface.
+
+  AddNativeCallback("ClearGLContext",
+                    CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
+                      fml::AutoResetWaitableEvent cleared;
+                      task_runners.GetRasterTaskRunner()->PostTask([&] {
+                        gles.egl->ClearCurrent();
+                        cleared.Signal();
+                      });
+                      cleared.Wait();
+                    }));
+
+  fml::AutoResetWaitableEvent latch;
+  int64_t length = 0;
+  std::optional<std::string> error;
+  AddNativeCallback(
+      "ToByteDataResult", CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
+        length = tonic::DartConverter<int64_t>::FromDart(
+            Dart_GetNativeArgument(args, 0));
+        Dart_Handle error_handle = Dart_GetNativeArgument(args, 1);
+        if (!Dart_IsNull(error_handle)) {
+          error = tonic::DartConverter<std::string>::FromDart(error_handle);
+        }
+        latch.Signal();
+      }));
+
+  auto configuration = RunConfiguration::InferFromSettings(settings);
+  configuration.SetEntrypoint("imageToByteDataWithoutSurface");
+  shell->RunEngine(std::move(configuration), [](auto result) {
+    ASSERT_EQ(result, Engine::RunStatus::Success);
+  });
+
+  latch.Wait();
+  EXPECT_EQ(error, std::nullopt);
+  EXPECT_EQ(length, 8 * 8 * 4);
 
   DestroyShell(std::move(shell), task_runners);
 }
