@@ -33,6 +33,7 @@ runfiles tree's root, so a file the test reads is at its repository path.
 """
 
 load("@bazel_skylib//lib:paths.bzl", "paths")
+load("@bazel_skylib//lib:shell.bzl", "shell")
 load("@host_platform//:host.bzl", "HOST_DART_SDK", "HOST_OS")
 load(
     "//build_defs/dart:kernel.bzl",
@@ -387,13 +388,7 @@ root="$PWD"
 # FLUTTER_ROOT before deriving it from the script's path): the runfiles
 # tree, whose layout is the repository's.
 export FLUTTER_ROOT="$root"
-# The temporary directory with its symbolic links resolved, where the host
-# names one (a Mac's Bazel passes TMPDIR through: /var/folders/..., and
-# /var is /private/var there): the tool resolves the paths it watches
-# (PreviewDetector) and a test compares them with the path it created.
-# Linux's tests get no TMPDIR and use the sandbox's own /tmp.
-if [ -n "${{TMPDIR:-}}" ] && [ -d "$TMPDIR" ]; then export TMPDIR="$(cd "$TMPDIR" && pwd -P)"; fi
-# The SDK cache's directory, for a tool under test that writes there
+{tmpdir_env}# The SDK cache's directory, for a tool under test that writes there
 # (Cache.lock opens bin/cache/lockfile); what tests read of it is laid
 # in by `cache` and `cache_files`.
 mkdir -p "$root/bin/cache"
@@ -420,6 +415,11 @@ mkdir -p "$root/bin/cache"
             tool_env = ("export PATH=\"$root/bin:$PATH%s\"\n" % (":/opt/homebrew/bin:/usr/local/bin" if HOST_OS == "mac" else "") +
                         "export HOME=\"${TEST_TMPDIR:-$(mktemp -d)}/home\"\n" +
                         "mkdir -p \"$HOME\"\n") if [p for p in ctx.attr.sdk_files.values() if p.startswith("bin/")] else "",
+            # The temporary directory with its symbolic links resolved, for
+            # the tests that want it so (resolved_tmpdir); the others get the
+            # host's as Bazel passes it.
+            tmpdir_env = ("# The temporary directory with its symbolic links resolved (resolved_tmpdir).\n" +
+                          "if [ -n \"${TMPDIR:-}\" ] && [ -d \"$TMPDIR\" ]; then export TMPDIR=\"$(cd \"$TMPDIR\" && pwd -P)\"; fi\n") if ctx.attr.resolved_tmpdir else "",
             # The browser the test drives, by the variable the tool and the web
             # engine's test runner both read, and its driver's directory on
             # PATH (the web-server device's tests spawn `chromedriver`). A
@@ -444,7 +444,9 @@ mkdir -p "$root/bin/cache"
             dart = dart[0].short_path,
             runner_config = runner.package_config.short_path,
             runner = runner.kernel.short_path,
-            args = " ".join(ctx.attr.runner_args),
+            # Each argument as one shell word (a `--name` regular expression
+            # has spaces and parentheses).
+            args = " ".join([shell.quote(arg) for arg in ctx.attr.runner_args]),
             test = relative,
         ),
         is_executable = True,
@@ -609,6 +611,16 @@ dart_test = rule(
                   "directory (an Xcode project the tool migrates), its links followed -- which also " +
                   "serves a script that resolves its own symlink to find FLUTTER_ROOT (xcode_backend.sh).",
         ),
+        "resolved_tmpdir": attr.bool(
+            default = False,
+            doc = "Whether TMPDIR is exported with its symbolic links resolved. A Mac's Bazel passes the host's " +
+                  "through (/var/folders/..., where /var is /private/var), and the tool's tests are written for " +
+                  "that path (test/src/fs_safety.dart; the Swift Package Manager tests allow `[/private]*` " +
+                  "before it in Xcode's output, which prints /private/var as /var) -- except the widget_preview " +
+                  "tests that watch a directory, which compare the watcher's paths with the ones they created " +
+                  "while PreviewDetector resolves its project root: those resolve it. Linux's tests get no " +
+                  "TMPDIR and use the sandbox's own /tmp.",
+        ),
         "compile_args": attr.string_list(
             doc = "Further frontend server arguments for the compile.",
         ),
@@ -646,7 +658,7 @@ dart_test = rule(
     } | KERNEL_TOOL_ATTRS,
 )
 
-def dart_tests(name, tests, size = "medium", tags = [], network = False, large = [], sizes = {}, flaky = [], cases = {}, unsandboxed = [], runner_args = [], **kwargs):
+def dart_tests(name, tests, size = "medium", tags = [], network = False, large = [], sizes = {}, flaky = [], cases = {}, unsandboxed = [], resolved_tmpdir = [], runner_args = [], suffix = "", **kwargs):
     """One dart_test per test file, and a test_suite of them.
 
     Args:
@@ -670,19 +682,27 @@ def dart_tests(name, tests, size = "medium", tags = [], network = False, large =
       unsandboxed: test files run outside Bazel's sandbox (`no-sandbox`): the
         tool's Apple builds run xcodebuild, which runs sandbox-exec itself,
         and a sandbox inside the sandbox is refused.
+      resolved_tmpdir: test files given TMPDIR with its symbolic links
+        resolved (dart_test's resolved_tmpdir): the widget_preview tests
+        that watch a directory.
       runner_args: further runner arguments for every file.
+      suffix: appended to each file's target name (which is the file's path
+        otherwise), for a second suite over some of the same files: the
+        tool's apple_signed_shard, which runs whole two files whose other
+        cases the apple shard runs.
       **kwargs: dart_test's attributes, the same for every file.
     """
     test_tags = list(tags) + ([] if network else ["block-network"])
     targets = []
     for test in tests:
-        test_name = test.removesuffix(".dart").replace("/", "_")
+        test_name = test.removesuffix(".dart").replace("/", "_") + suffix
         dart_test(
             name = test_name,
             test = test,
             size = sizes.get(test, "large" if test in large else size),
             tags = test_tags + (["no-sandbox"] if test in unsandboxed else []),
             flaky = test in flaky,
+            resolved_tmpdir = test in resolved_tmpdir,
             runner_args = runner_args + (["--name=" + cases[test]] if test in cases else []),
             **kwargs
         )
@@ -724,9 +744,9 @@ def dart_package_tests(
         none compiles each test from scratch.
       compile_args: further frontend server arguments, for the prelude and
         the tests alike.
-      **kwargs: dart_tests' other arguments (size, large, sizes, flaky, cases, unsandboxed, tags,
-        network, runner_args, deps, cache, cache_files, sdk_files, sdk_trees, writable, pub_cache,
-        browser, browser_files, browser_driver, tools, display).
+      **kwargs: dart_tests' other arguments (size, large, sizes, flaky, cases, unsandboxed, resolved_tmpdir,
+        suffix, tags, network, runner_args, deps, cache, cache_files, sdk_files, sdk_trees, writable,
+        pub_cache, browser, browser_files, browser_driver, tools, display).
     """
     workspace_packages = {":sources": package} | packages
     config_roots = [package, "test"] + roots
