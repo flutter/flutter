@@ -295,18 +295,18 @@ class MediaQueryData {
   /// constructor is primarily for use in the implementation of the framework
   /// itself.
   ///
+  /// A [debugViewMetricsOverrides] entry for `view` is applied by the view and
+  /// its [PlatformDispatcher], so it reaches this constructor only through
+  /// what they report: its geometry always, and its platform-wide values only
+  /// when `platformData` does not supply them. An ancestor [MediaQuery] that
+  /// does supply them is not overridden, just as it is not overridden by the
+  /// real platform settings.
+  ///
   /// See also:
   ///
   ///  * [MediaQuery.fromView], which constructs [MediaQueryData] from a provided
   ///    [FlutterView], makes it available to descendant widgets, and sets up
   ///    the appropriate notification listeners to keep the data updated.
-  ///
-  /// A [debugViewMetricsOverrides] entry for `view` is applied by the view and
-  /// its [ui.PlatformDispatcher], so it reaches this constructor only through
-  /// what they report: its geometry always, and its platform-wide values only
-  /// when `platformData` does not supply them. An ancestor [MediaQuery] that
-  /// does supply them is not overridden, just as it is not overridden by the
-  /// real platform settings.
   MediaQueryData.fromView(ui.FlutterView view, {MediaQueryData? platformData})
     : this._fromView(
         kDebugMode ? debugViewWithMetricsOverrides(view) : view,
