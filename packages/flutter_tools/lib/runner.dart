@@ -137,6 +137,7 @@ Future<int> run(
           featureFlags: featureFlags,
           gradleUtils: toolDeps.androidContext.gradleUtils,
           plistParser: toolDeps.appleContext.plistParser,
+          templateRenderer: toolDeps.templateRenderer,
           toolContext: toolDeps.toolContext,
           verboseHelp: verboseHelp,
         );

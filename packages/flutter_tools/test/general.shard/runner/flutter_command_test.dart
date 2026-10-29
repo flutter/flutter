@@ -153,7 +153,9 @@ void main() {
     testUsingContext(
       "throws toolExit if flutter_tools source dir doesn't exist",
       () async {
-        final flutterCommand = DummyFlutterCommand();
+        final flutterCommand = DummyFlutterCommand(
+          toolContext: DelegatingToolContext(preRunValidator: preRunValidator),
+        );
         await expectToolExitLater(
           flutterCommand.run(),
           contains('Flutter SDK installation appears corrupted'),
@@ -162,7 +164,6 @@ void main() {
       overrides: <Type, Generator>{
         Cache: () => cache,
         FileSystem: () => fileSystem,
-        PreRunValidator: () => preRunValidator,
         ProcessManager: () => processManager,
       },
     );

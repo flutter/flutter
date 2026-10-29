@@ -99,6 +99,7 @@ class ToolDependencies {
     required this.doctor,
     required this.emulatorManager,
     required this.featureFlags,
+    required this.templateRenderer,
     required this.toolContext,
     this.extensionBuildManager,
     this.extensionCleanManager,
@@ -143,6 +144,9 @@ class ToolDependencies {
 
   /// Feature flags that govern tool capabilities and rollouts.
   final FeatureFlags featureFlags;
+
+  /// Renderer for mustache project and platform templates.
+  final TemplateRenderer templateRenderer;
 
   /// Core container holding host environment and SDK configuration dependencies.
   final ToolContext toolContext;
@@ -707,6 +711,7 @@ class ToolDependencies {
       extensionCleanManager: extensionCleanManager,
       extensionManager: extensionManager,
       featureFlags: finalFeatureFlags,
+      templateRenderer: templateRenderer,
       toolContext: finalToolContext,
     );
   }
