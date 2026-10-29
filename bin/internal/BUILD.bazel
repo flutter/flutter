@@ -9,6 +9,7 @@
 
 load("@bazel_skylib//rules:copy_file.bzl", "copy_file")
 load("@bazel_skylib//rules:write_file.bzl", "write_file")
+load("@engine_version//:version.bzl", "CONTENT_HASH", "ENGINE_VERSION")
 load("//build_defs/repositories:flutter_sdk_cache.bzl", "IOS_USB_ARTIFACTS")
 
 package(default_visibility = ["//visibility:public"])
@@ -32,95 +33,106 @@ filegroup(
 )
 
 # The engine revision the tool's bootstrap writes to bin/cache/engine.stamp
-# (update_engine_version.sh, from git). Under Bazel the engine is the tree
-# itself, and the stamp is a fixed word, as the SDK version's defines are
-# in the tests' compiles (flutter_test.bzl): flutter_tools' tests read that
-# the stamp exists (Cache.engineRevision), not what it says.
-write_file(
-    name = "engine_stamp",
-    out = "engine.stamp",
-    content = ["bazel"],
-)
+# (update_engine_version.sh: the checkout's `git rev-parse HEAD`), with its
+# details beside it (bin/cache/engine_stamp.json, which the tool otherwise
+# downloads for the revision the stamp names, and the bookkeeping stamp that
+# says the download is current) and the framework's version as the tool
+# writes it to bin/cache/flutter.version.json (from git): pub reads
+# `flutterVersion` from it to resolve `sdk: flutter` dependencies and checks
+# it against the packages' `flutter:` constraints (leak_tracker_flutter_testing
+# wants >=3.18), the tool reads the rest for `flutter --version` and parses
+# frameworkVersion as a git tag (GitTagVersion.parse: `<x>.<y>.<z>-<n>.<m>.pre`).
+#
+# Two sets. Under Bazel the engine is the tree itself; a facsimile without
+# engine artifacts -- the tool's unit tests', which read that the stamp
+# exists (Cache.engineRevision), not what it says -- takes fixed words, as
+# the SDK version's defines are in the tests' compiles (flutter_test.bzl),
+# so that a commit elsewhere re-runs nothing there. A facsimile with the
+# engine's directories takes the revision the build stamps into them
+# (@engine_version: the frameworks' Info.plist carry it as FlutterEngine,
+# and the content validation tests compare the two with the cache's) --
+# those directories change with the revision anyway (their archives'
+# readmes name it). The framework version is one every constraint allows:
+# the checkout is newer than any package that constrains it.
+[
+    [
+        write_file(
+            name = prefix + "engine_stamp",
+            out = prefix + "engine.stamp",
+            content = [revision],
+        ),
+        write_file(
+            name = prefix + "engine_stamp_stamp",
+            out = prefix + "engine_stamp.stamp",
+            content = [revision],
+        ),
+        write_file(
+            name = prefix + "engine_stamp_json",
+            out = prefix + "engine_stamp.json",
+            content = [json.encode({
+                "build_date": "1970-01-01T00:00:00.000000",
+                "build_time_ms": 0,
+                "git_revision": revision,
+                "git_revision_date": "1970-01-01T00:00:00Z",
+                "content_hash": content_hash,
+            })],
+        ),
+        write_file(
+            name = prefix + "flutter_version_json",
+            out = prefix + "flutter.version.json",
+            content = [json.encode({
+                "frameworkVersion": "999.0.0-0.0.pre",
+                "channel": "bazel",
+                "repositoryUrl": "https://github.com/flutter/flutter.git",
+                "frameworkRevision": "bazel",
+                "frameworkCommitDate": "1970-01-01 00:00:00 +0000",
+                "engineRevision": revision,
+                "engineCommitDate": "1970-01-01 00:00:00.000Z",
+                "engineContentHash": content_hash,
+                "engineBuildDate": "1970-01-01 00:00:00.000",
+                "dartSdkVersion": "bazel",
+                "devToolsVersion": "bazel",
+                "flutterVersion": "999.0.0-0.0.pre",
+            })],
+        ),
+    ]
+    for prefix, revision, content_hash in [
+        ("", "bazel", "bazel"),
+        ("versioned_", ENGINE_VERSION, CONTENT_HASH),
+    ]
+]
 
-# The engine's storage realm beside it (bin/cache/engine.realm, which the
-# bootstrap writes from bin/internal/engine.realm): empty, the default; the
-# Gradle plugin reads the file whether or not it needs a realm.
+# The engine's storage realm beside the stamp (bin/cache/engine.realm, which
+# the bootstrap writes from bin/internal/engine.realm): empty, the default;
+# the Gradle plugin reads the file whether or not it needs a realm.
 write_file(
     name = "engine_realm",
     out = "engine.realm",
     content = [""],
 )
 
-# The framework's version as the tool writes it to bin/cache/flutter.version.json
-# (from git); pub reads `flutterVersion` from it to resolve `sdk: flutter`
-# dependencies and checks it against the packages' `flutter:` constraints
-# (leak_tracker_flutter_testing wants >=3.18), the tool reads the rest for
-# `flutter --version` and parses frameworkVersion as a git tag
-# (GitTagVersion.parse: `<x>.<y>.<z>-<n>.<m>.pre`). Fixed words again, the
-# version one every constraint allows: the checkout is newer than any package
-# that constrains it.
-write_file(
-    name = "flutter_version_json",
-    out = "flutter.version.json",
-    content = [json.encode({
-        "frameworkVersion": "999.0.0-0.0.pre",
-        "channel": "bazel",
-        "repositoryUrl": "https://github.com/flutter/flutter.git",
-        "frameworkRevision": "bazel",
-        "frameworkCommitDate": "1970-01-01 00:00:00 +0000",
-        "engineRevision": "bazel",
-        "engineCommitDate": "1970-01-01 00:00:00.000Z",
-        "engineContentHash": "bazel",
-        "engineBuildDate": "1970-01-01 00:00:00.000",
-        "dartSdkVersion": "bazel",
-        "devToolsVersion": "bazel",
-        "flutterVersion": "999.0.0-0.0.pre",
-    })],
-)
-
-# The stamp's details beside it (bin/cache/engine_stamp.json), which the
-# tool otherwise downloads for the revision the stamp names, and the
-# bookkeeping stamp that says the download is current.
-write_file(
-    name = "engine_stamp_stamp",
-    out = "engine_stamp.stamp",
-    content = ["bazel"],
-)
-
-write_file(
-    name = "engine_stamp_json",
-    out = "engine_stamp.json",
-    content = [json.encode({
-        "build_date": "1970-01-01T00:00:00.000000",
-        "build_time_ms": 0,
-        "git_revision": "bazel",
-        "git_revision_date": "1970-01-01T00:00:00Z",
-        "content_hash": "bazel",
-    })],
-)
-
 # The cache's bookkeeping for the artifacts the tests' SDK facsimile lays
 # from the build instead of a download (packages/flutter_tools/BUILD.bazel):
 # the tool's Cache.updateAll downloads whatever its stamp does not vouch
-# for. An engine artifact's stamp is the engine revision -- the fixed word
-# above -- the fonts' and the Gradle wrapper's the archive path their pin
-# names.
+# for. An engine artifact's stamp is the engine revision (the versioned
+# set's: these go with the engine's directories), the fonts' and the Gradle
+# wrapper's the archive path their pin names.
 write_file(
     name = "flutter_sdk_stamp",
     out = "flutter_sdk.stamp",
-    content = ["bazel"],
+    content = [ENGINE_VERSION],
 )
 
 write_file(
     name = "font_subset_stamp",
     out = "font-subset.stamp",
-    content = ["bazel"],
+    content = [ENGINE_VERSION],
 )
 
 write_file(
     name = "linux_sdk_stamp",
     out = "linux-sdk.stamp",
-    content = ["bazel"],
+    content = [ENGINE_VERSION],
 )
 
 # A Mac host's counterpart (MacOSEngineArtifacts: the stamp is named
@@ -128,7 +140,7 @@ write_file(
 write_file(
     name = "macos_sdk_stamp",
     out = "macos-sdk.stamp",
-    content = ["bazel"],
+    content = [ENGINE_VERSION],
 )
 
 # The iOS engine artifacts' (IOSEngineArtifacts: the stamp is named
@@ -136,7 +148,7 @@ write_file(
 write_file(
     name = "ios_sdk_stamp",
     out = "ios-sdk.stamp",
-    content = ["bazel"],
+    content = [ENGINE_VERSION],
 )
 
 # The Android gen_snapshot artifacts' (AndroidGenSnapshotArtifacts: the
@@ -144,13 +156,13 @@ write_file(
 write_file(
     name = "android_sdk_stamp",
     out = "android-sdk.stamp",
-    content = ["bazel"],
+    content = [ENGINE_VERSION],
 )
 
 write_file(
     name = "flutter_web_sdk_stamp",
     out = "flutter_web_sdk.stamp",
-    content = ["bazel"],
+    content = [ENGINE_VERSION],
 )
 
 copy_file(
