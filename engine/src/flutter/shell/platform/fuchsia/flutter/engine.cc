@@ -536,7 +536,8 @@ void Engine::Initialize(
                 std::move(on_semantics_node_update_callback),
                 std::move(on_request_announce_callback),
                 std::move(on_shader_warmup_callback),
-                std::move(await_vsync_callback), std::move(svc));
+                std::move(await_vsync_callback), std::move(svc),
+                intercept_all_input_);
           });
 
   // Setup the callback that will instantiate the rasterizer.
