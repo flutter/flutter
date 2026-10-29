@@ -4,6 +4,7 @@
 
 #include "flutter/lib/ui/painting/image_decoder_impeller.h"
 
+#include <cmath>
 #include <format>
 #include <memory>
 
@@ -344,6 +345,25 @@ ImageDecoderImpeller::ImageDecoderImpeller(
 
 ImageDecoderImpeller::~ImageDecoderImpeller() = default;
 
+// static
+SkISize ImageDecoderImpeller::ClampToMaxTextureSize(
+    SkISize target_size,
+    impeller::ISize max_texture_size) {
+  if (target_size.width() <= max_texture_size.width &&
+      target_size.height() <= max_texture_size.height) {
+    return target_size;
+  }
+  // Shrink both sides by the same factor so the aspect ratio is kept, but
+  // never below one pixel.
+  const double scale = std::min(static_cast<double>(max_texture_size.width) /
+                                    std::max(target_size.width(), 1),
+                                static_cast<double>(max_texture_size.height) /
+                                    std::max(target_size.height(), 1));
+  return SkISize::Make(
+      std::max(1, static_cast<int>(std::lround(target_size.width() * scale))),
+      std::max(1, static_cast<int>(std::lround(target_size.height() * scale))));
+}
+
 absl::StatusOr<ImageDecoderImpeller::DecompressResult>
 ImageDecoderImpeller::DecompressTexture(
     ImageDescriptor* descriptor,
@@ -361,11 +381,9 @@ ImageDecoderImpeller::DecompressTexture(
 
   const SkISize source_size = SkISize::Make(descriptor->image_info().width,
                                             descriptor->image_info().height);
-  const SkISize target_size =
-      SkISize::Make(std::min(max_texture_size.width,
-                             static_cast<int64_t>(options.target_width)),
-                    std::min(max_texture_size.height,
-                             static_cast<int64_t>(options.target_height)));
+  const SkISize target_size = ClampToMaxTextureSize(
+      SkISize::Make(options.target_width, options.target_height),
+      max_texture_size);
 
   // Fast path for when the input requires no decompressing or conversion.
   if (!descriptor->is_compressed() && source_size == target_size &&

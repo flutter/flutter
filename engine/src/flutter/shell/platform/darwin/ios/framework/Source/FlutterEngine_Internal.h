@@ -36,9 +36,6 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface FlutterEngine () <FlutterViewEngineDelegate>
 
-// Indicates whether this engine has **ever** been manually registered to a scene.
-@property(nonatomic, assign) BOOL manuallyRegisteredToScene;
-
 - (void)updateViewportMetrics:(flutter::ViewportMetrics)viewportMetrics;
 - (void)dispatchPointerDataPacket:(std::unique_ptr<flutter::PointerDataPacket>)packet;
 - (BOOL)platformViewShouldAcceptTouchAtTouchBeganLocation:(flutter::PointData)location
@@ -98,7 +95,6 @@ NS_ASSUME_NONNULL_BEGIN
             userData:(nullable void*)userData;
 
 @property(nonatomic, readonly) FlutterDartProject* project;
-
 /**
  * Returns the engine handle. Used in FlutterEngineTest.
  */
@@ -132,6 +128,15 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)sendDeepLinkToFramework:(NSURL*)url completionHandler:(void (^)(BOOL success))completion;
 
 - (void)onStatusBarTap;
+
+/**
+ * Sends display information for the screen that the view controller's view is on, if it differs
+ * from the display last sent to the framework.
+ *
+ * If the view isn't in a window, keeps the last display sent. If no display has been sent yet,
+ * sends `UIScreen.mainScreen` as a best-effort initial display.
+ */
+- (void)updateDisplays;
 @end
 
 @interface FlutterImplicitEngineBridgeImpl : NSObject <FlutterImplicitEngineBridge>

@@ -8,6 +8,7 @@ import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/common.dart';
+import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
@@ -16,7 +17,6 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/targets/native_assets.dart';
 import 'package:flutter_tools/src/features.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/isolated/native_assets/dart_hook_result.dart';
 import 'package:flutter_tools/src/isolated/native_assets/native_assets.dart';
 import 'package:flutter_tools/src/isolated/native_assets/windows/native_assets.dart'
@@ -112,6 +112,7 @@ void main() {
             targetPlatform: targetPlatform,
             projectUri: projectUri,
             fileSystem: fileSystem,
+            logger: logger,
             buildRunner: buildRunner,
             buildCodeAssets: const BuildCodeAssetsOptions(appBuildDirectory: null),
             buildDataAssets: true,
@@ -129,13 +130,17 @@ void main() {
             targetPlatform: targetPlatform,
             projectUri: projectUri,
             fileSystem: fileSystem,
+            logger: logger,
+            processManager: processManager,
             nativeAssetsFileUri: nativeAssetsFileUri,
-            targetUri: projectUri.resolve('${getBuildDirectory()}/native_assets/windows/'),
+            targetUri: projectUri.resolve(
+              '${getBuildDirectory(Config.test(), fileSystem)}/native_assets/windows/',
+            ),
           );
           final expectedOS = flutterTester ? OS.current.toString() : 'windows';
           final expectedArch = flutterTester ? Architecture.current.toString() : 'x64';
           expect(
-            (globals.logger as BufferLogger).traceText,
+            logger.traceText,
             stringContainsInOrder(<String>[
               'Running build hooks for ${expectedOS}_$expectedArch.',
               'Running build hooks for ${expectedOS}_$expectedArch done.',

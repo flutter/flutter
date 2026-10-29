@@ -953,6 +953,9 @@ class MockSemanticsEnabler implements SemanticsEnabler {
   void removeAllPlaceholders() {}
 
   @override
+  void retirePlaceholders() {}
+
+  @override
   void addPlaceholderForView(DomElement viewRoot) {
     throw UnimplementedError();
   }

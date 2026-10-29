@@ -10,6 +10,7 @@ import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/isolated/mustache_template.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/test/flutter_web_platform.dart';
 import 'package:flutter_tools/src/web/chrome.dart';
@@ -121,8 +122,6 @@ void main() {
           '',
           packageConfigPath: '.dart_tool/package_config.json',
           treeShakeIcons: false,
-          extraFrontEndOptions: <String>['--dartdevc-module-format=ddc', '--canary'],
-          webEnableHotReload: true,
         ),
         chromiumLauncher: chromiumLauncher,
         crossOriginIsolation: false,
@@ -139,6 +138,7 @@ void main() {
         webRenderer: WebRendererMode.canvaskit,
         serverFactory: () async => server,
         testPackageUri: Uri.parse('test'),
+        templateRenderer: const MustacheTemplateRenderer(),
       );
       final shelf.Handler? handler = server.mountedHandler;
       expect(handler, isNotNull);
@@ -195,8 +195,6 @@ void main() {
           '',
           packageConfigPath: '.dart_tool/package_config.json',
           treeShakeIcons: false,
-          extraFrontEndOptions: <String>['--dartdevc-module-format=ddc', '--canary'],
-          webEnableHotReload: true,
         ),
         chromiumLauncher: chromiumLauncher,
         crossOriginIsolation: false,
@@ -213,6 +211,7 @@ void main() {
         webRenderer: WebRendererMode.canvaskit,
         serverFactory: () async => server,
         testPackageUri: Uri.parse('test'),
+        templateRenderer: const MustacheTemplateRenderer(),
       );
       final shelf.Handler? handler = server.mountedHandler;
       expect(handler, isNotNull);
@@ -268,7 +267,6 @@ void main() {
           '',
           packageConfigPath: '.dart_tool/package_config.json',
           treeShakeIcons: false,
-          webEnableHotReload: true,
         ),
         chromiumLauncher: recordingLauncher,
         crossOriginIsolation: false,
@@ -285,6 +283,7 @@ void main() {
         webRenderer: WebRendererMode.canvaskit,
         serverFactory: () async => server,
         testPackageUri: Uri.parse('test'),
+        templateRenderer: const MustacheTemplateRenderer(),
       );
 
       final suitePlatform = SuitePlatform(Runtime.chrome);
