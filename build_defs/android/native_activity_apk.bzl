@@ -28,7 +28,7 @@ is the Android test phase's (an emulator); nothing here is a test.
 """
 
 load("//build_defs/cc:shared_library.bzl", "flutter_shared_library")
-load("//build_defs/gn:build_directory.bzl", "BuildDirectoryInfo")
+load("//build_defs/gn:build_directory.bzl", "BuildDirectoryInfo", "build_directory_aspect", "shipped_file")
 load("//build_defs/gn:gn_action.bzl", "PYTHON_ATTRS", "run_python")
 
 _NATIVE_ACTIVITY = "//engine/src/flutter/testing/android/native_activity"
@@ -78,7 +78,12 @@ def _native_activity_apk_impl(ctx):
     # The script's intermediate APKs (<name>.apk.unaligned, .unsigned) go
     # under GN's target_gen_dir; a directory of this target's here.
     gen_dir = ctx.actions.declare_directory(ctx.label.name + ".gen")
-    library = ctx.file.library
+
+    # The library as GN's build root holds it: stripped under
+    # stripped_symbols (the linked one is lib.unstripped/'s), else as linked
+    # (build_directory.bzl's aspect strips it; the emulator builder's
+    # configuration says --stripped=false).
+    library = shipped_file(ctx.attr.library, ctx.file.library)
     args = ctx.actions.args()
     args.add("--aapt2-bin", ctx.executable.aapt2)
     args.add("--zipalign-bin", ctx.executable.zipalign)
@@ -118,7 +123,12 @@ _native_activity_apk = rule(
     doc = "native_activity_apk.py over the suite's library: the signed, aligned APK at the build root.",
     attrs = {
         "apk_name": attr.string(mandatory = True, doc = "GN's apk_name: the APK is <apk_name>.apk, the library lib<apk_name>.so."),
-        "library": attr.label(mandatory = True, allow_single_file = True, doc = "The suite's shared library."),
+        "library": attr.label(
+            mandatory = True,
+            allow_single_file = True,
+            aspects = [build_directory_aspect],
+            doc = "The suite's shared library (shared_library_<name>).",
+        ),
         "manifest": attr.label(mandatory = True, allow_single_file = True, doc = "The APK's AndroidManifest.xml."),
         "android_abi": attr.string(mandatory = True, doc = "GN's android_app_abi: the ABI directory of the library in the APK."),
         "android_jar": attr.label(default = _ANDROID_JAR, allow_single_file = True),
