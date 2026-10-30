@@ -7,9 +7,11 @@ Nothing here is needed to build with GN. Bazel is driven through `bazelisk`
 from the repository root (see the root `MODULE.bazel`, `.bazelrc` and
 `.bazelversion`). Install bazelisk yourself — see
 <https://github.com/bazelbuild/bazelisk#installation> — and make sure it is on
-`PATH`; it is a local prerequisite like git and depot_tools, and is
-intentionally not part of `DEPS`. The Bazel version it downloads is pinned by
-`.bazelversion`.
+`PATH`; it is a local prerequisite like git and depot_tools, and a developer's
+sync does not fetch it. (`DEPS` can: the gclient variable `download_bazelisk`
+puts the CIPD package at `engine/src/flutter/third_party/bazelisk`, which is
+how the CI builders that build with Bazel get it -- `build/bazel/ci.md`.) The
+Bazel version it downloads is pinned by `.bazelversion`.
 
 ## `bin/gen_deps.dart`
 

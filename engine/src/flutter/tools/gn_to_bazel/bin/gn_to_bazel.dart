@@ -293,9 +293,9 @@ Future<int> run(List<String> arguments) async {
   return failures == 0 ? 0 : 1;
 }
 
-/// Writes (or, with [check], compares) ci/builders/configs.bazelrc and
-/// ci/builders/BUILD.bazel from the builder files; returns the number of
-/// failures.
+/// Writes (or, with [check], compares) ci/builders/configs.bazelrc,
+/// ci/builders/BUILD.bazel and build/bazel/builds.json from the builder
+/// files; returns the number of failures.
 Future<int> _builderOutputs(
   String root,
   Map<String, Set<String>> convertedTargets,
@@ -314,6 +314,16 @@ Future<int> _builderOutputs(
     return loader.errors.length;
   }
   final List<BuilderBuild> builds = builderBuilds(configs);
+  // The Bazel variants of builder files (*_bazel.json) mirror builds above;
+  // a variant naming a build the Bazel build has no configuration or install
+  // for would fail on the bot (tools/gn --bazel), so it fails here.
+  final List<String> variantErrors = bazelVariantErrors(configs, builds);
+  for (final error in variantErrors) {
+    stderr.writeln('error: $error');
+  }
+  if (variantErrors.isNotEmpty) {
+    return variantErrors.length;
+  }
   final String bazelrc;
   try {
     bazelrc = configsBazelrc(builds, leftOut: leftOutBuilds(configs));
@@ -333,6 +343,14 @@ Future<int> _builderOutputs(
   final outputs = <String, String>{
     p.join(buildersDir, 'configs.bazelrc'): bazelrc,
     p.join(buildersDir, 'BUILD.bazel'): buildFile,
+    // Beside bazel_ci.py, which reads it; not under ci/builders, whose every
+    // JSON file engine_build_configs loads as a builder file.
+    p.join(root, 'flutter/build/bazel/builds.json'): buildersJson(
+      builds,
+      convertedTargets,
+      convertedTests: convertedTests,
+      packageConditions: packageConditions,
+    ),
   };
   var failures = 0;
   for (final MapEntry<String, String> output in outputs.entries) {
