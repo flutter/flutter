@@ -790,6 +790,18 @@ class PlatformViewRenderBox extends RenderBox with _PlatformViewGestureMixin {
   }
 
   @override
+  void attach(PipelineOwner owner) {
+    super.attach(owner);
+    owner.didAttachPlatformView();
+  }
+
+  @override
+  void detach() {
+    owner!.didDetachPlatformView();
+    super.detach();
+  }
+
+  @override
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
     config.isSemanticBoundary = true;
