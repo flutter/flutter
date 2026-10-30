@@ -83,15 +83,18 @@ EntityPassClipStack::ClipStateResult EntityPassClipStack::RecordRestore(
   if (subpass_state.clip_coverage.back().coverage.has_value()) {
     FML_DCHECK(next_replay_index_ <=
                subpass_state.rendered_clip_entities.size());
-    // https://github.com/flutter/flutter/issues/162172
-    // This code is slightly wrong and should be popping more than one clip
-    // entry.
-    if (!subpass_state.rendered_clip_entities.empty()) {
+    // `rendered_clip_entities` is a sparse subset of `clip_coverage`:
+    // containing axis-aligned intersect rects push coverage without pushing a
+    // replay entity, while multi-clip scopes push multiple replay entities.
+    // Popping strictly where `clip_height > restore_height` evicts all clips
+    // from restored child scopes while preserving active ancestor clips.
+    while (!subpass_state.rendered_clip_entities.empty() &&
+           subpass_state.rendered_clip_entities.back().clip_height >
+               restore_height) {
       subpass_state.rendered_clip_entities.pop_back();
-
-      if (next_replay_index_ > subpass_state.rendered_clip_entities.size()) {
-        next_replay_index_ = subpass_state.rendered_clip_entities.size();
-      }
+    }
+    if (next_replay_index_ > subpass_state.rendered_clip_entities.size()) {
+      next_replay_index_ = subpass_state.rendered_clip_entities.size();
     }
   }
   return result;
@@ -189,11 +192,15 @@ EntityPassClipStack::ClipStateResult EntityPassClipStack::RecordClip(
   FML_DCHECK(next_replay_index_ == subpass_state.rendered_clip_entities.size())
       << "Not all clips have been replayed before appending new clip.";
 
+  // Tag with the same `clip_height` as its `ClipCoverageLayer` above so
+  // `RecordRestore` pops this replay entity if and only if its coverage layer
+  // is popped.
   subpass_state.rendered_clip_entities.push_back(ReplayResult{
-      .clip_contents = clip_contents,   //
-      .transform = transform,           //
-      .clip_coverage = coverage_value,  //
-      .clip_depth = clip_depth          //
+      .clip_contents = clip_contents,           //
+      .transform = transform,                   //
+      .clip_coverage = coverage_value,          //
+      .clip_depth = clip_depth,                 //
+      .clip_height = previous_clip_height + 1,  //
   });
   next_replay_index_++;
 
