@@ -26,7 +26,10 @@ import '../ios/devices.dart';
 import '../ios/ios_deploy.dart';
 import '../ios/iproxy.dart';
 import '../ios/mac.dart';
+import '../ios/plist_parser.dart';
 import '../ios/xcode_debug.dart';
+import '../ios/xcodeproj.dart';
+import 'cocoapods.dart';
 import 'xcode.dart';
 
 class XCDeviceEventNotification {
@@ -52,10 +55,13 @@ enum XCDeviceEventInterface {
 class XCDevice {
   XCDevice({
     required this._analytics,
+    required this._cocoaPods,
     required IProxy iproxy,
+    required this._plistParser,
     required this._templateRenderer,
     required this._toolContext,
     required this._xcode,
+    required this._xcodeProjectInterpreter,
     @visibleForTesting IOSCoreDeviceControl? coreDeviceControl,
     XcodeDebug? xcodeDebug,
   }) : _iProxy = iproxy {
@@ -102,10 +108,13 @@ class XCDevice {
   late final IMobileDevice _iMobileDevice;
   late final IOSDeploy _iosDeploy;
   final Xcode _xcode;
+  final XcodeProjectInterpreter _xcodeProjectInterpreter;
   final IProxy _iProxy;
   late final IOSCoreDeviceControl _coreDeviceControl;
   late final XcodeDebug _xcodeDebug;
   final Analytics _analytics;
+  final CocoaPods _cocoaPods;
+  final PlistParser _plistParser;
   final TemplateRenderer _templateRenderer;
   final ToolContext _toolContext;
 
@@ -631,6 +640,8 @@ class XCDevice {
           iProxy: _iProxy,
           toolContext: _toolContext,
           analytics: _analytics,
+          cocoaPods: _cocoaPods,
+          plistParser: _plistParser,
           iosDeploy: _iosDeploy,
           iMobileDevice: _iMobileDevice,
           coreDeviceControl: _coreDeviceControl,
@@ -643,6 +654,7 @@ class XCDevice {
           ),
           xcodeDebug: _xcodeDebug,
           xcode: _xcode,
+          xcodeProjectInterpreter: _xcodeProjectInterpreter,
           devModeEnabled: devModeEnabled,
           isPaired: isPaired,
           isCoreDevice: coreDevice != null,
