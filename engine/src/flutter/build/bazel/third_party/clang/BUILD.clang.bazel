@@ -97,6 +97,13 @@ filegroup(
     srcs = ["bin/llvm-objcopy"] + _MULTICALL,
 )
 
+# llvm-nm, for the forbidden-symbol check of the shared libraries
+# (build_defs/testing/native_symbols.bzl).
+filegroup(
+    name = "nm_files",
+    srcs = ["bin/llvm-nm"] + _MULTICALL,
+)
+
 filegroup(
     name = "strip_files",
     srcs = [
@@ -108,11 +115,11 @@ filegroup(
 filegroup(
     name = "all_files",
     srcs = [
-        "bin/llvm-nm",
         "bin/llvm-symbolizer",
         ":ar_files",
         ":compiler_files",
         ":linker_files",
+        ":nm_files",
         ":objcopy_files",
         ":strip_files",
     ],

@@ -1868,21 +1868,24 @@ final class _Emitter {
             _sourceDirectoryInto(rule, argument, variable);
           }
         case TemplateArgumentKind.buildPath:
-          final String? path = _singleString(variable);
-          if (path == null) {
-            throw GnError(variable.assignments.first.location, '${variable.name} has no value');
+          rule.scalars[argument.attribute] = _buildPathText(rule, variable);
+        case TemplateArgumentKind.builtFile:
+          // A target's output: the one `get_target_outputs()` item, which
+          // the evaluator keeps for `[0]` of the outputs (the copied
+          // dylib); else the path, as buildPath has it.
+          final Map<String, List<String>> targets = _targetOutputs(variable);
+          if (targets.isNotEmpty) {
+            final MapEntry<String, List<String>> target = targets.entries.single;
+            if (target.value.isNotEmpty) {
+              throw GnError(
+                variable.assignments.first.location,
+                '${variable.name} is a filtered get_target_outputs(), not one output',
+              );
+            }
+            rule.scalars['${argument.attribute}_target'] = '"${target.key}"';
+          } else {
+            rule.scalars[argument.attribute] = _buildPathText(rule, variable);
           }
-          if (!path.startsWith('$buildDirRoot/') && !path.startsWith('$genDirRoot/')) {
-            throw GnError(
-              variable.assignments.first.location,
-              '${variable.name} is not a path under the build directory',
-            );
-          }
-          rule.scalars[argument.attribute] = _starlarkString(
-            path
-                .replaceFirst('$genDirRoot/', r'$root_gen_dir/')
-                .replaceFirst('$buildDirRoot/', r'$root_out_dir/'),
-          );
       }
       // An argument the macro applies only under a predicate (the GLES
       // exclusions, under impeller_enable_opengles): items under a condition
@@ -5371,6 +5374,46 @@ final class _Emitter {
     }
     final String rest = relative == owner ? '' : relative.substring(ownerPrefix.length);
     return '//$owner:$rest';
+  }
+
+  /// A path under the build directory as GN wrote it (`$root_out_dir/...`,
+  /// `$root_gen_dir/...`), as a Starlark string for a rule to place or find
+  /// a file by (BuildDirectoryInfo); a `select()` over the cases of a path
+  /// that differs by platform (the embedder's `.dylib` on a Mac, `.so`
+  /// elsewhere).
+  String _buildPathText(_Rule rule, GnVariable variable) {
+    final GnLocation location = variable.assignments.first.location;
+    final cases = <GnScalarCase>[
+      for (final GnScalarCase c in _enumerated(variable.cases(location), location))
+        if (c.value case GnStringValue(value: final String path))
+          GnScalarCase(
+            c.condition,
+            GnStringValue(switch (path) {
+              _ when path.startsWith('$genDirRoot/') => path.replaceFirst(
+                '$genDirRoot/',
+                r'$root_gen_dir/',
+              ),
+              _ when path.startsWith('$buildDirRoot/') => path.replaceFirst(
+                '$buildDirRoot/',
+                r'$root_out_dir/',
+              ),
+              _ => throw GnError(
+                c.assignment.location,
+                '${variable.name} is not a path under the build directory',
+              ),
+            }),
+            c.assignment,
+          )
+        else
+          throw GnError(c.assignment.location, '${variable.name} must be a string'),
+    ];
+    if (cases.isEmpty) {
+      throw GnError(location, '${variable.name} has no value');
+    }
+    if (cases.length == 1 && cases.single.condition == Condition.always) {
+      return _scalarText(cases.single);
+    }
+    return _renderScalarSelect(cases, rule, variable);
   }
 
   /// A scope of booleans and strings (a wasm toolchain's

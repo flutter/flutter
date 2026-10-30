@@ -54,11 +54,13 @@ packages without one, to `.cipd/pkgs/<n>/_current` next to `DEPS`), without
 downloading anything. Known hashes live in `_CIPD_SHA256` in `extensions.bzl`;
 for an unknown pin Bazel still fetches and prints the hash to add.
 
-A few tools are not in `DEPS` at all and are therefore always downloaded
-(`_DOWNLOADED_TOOL_REPOSITORIES` in `extensions.bzl`, pins included). The one
-so far is `@cpython3`, the interpreter for the Python scripts that wrapped GN
-builds run: `.gn` names depot_tools' `vpython3` for those, which a Bazel
-action must not reach for. Its pin is the one Skia's Bazel build uses.
+Every tool is a `DEPS` entry, `@cpython3` included: the hermetic Python
+`engine/src/.gn` names as GN's `script_executable` (DEPS'
+`engine/src/flutter/third_party/cpython3`) is the interpreter for the
+Python scripts that wrapped GN builds and the converted actions run, so no
+Bazel action reaches for depot_tools' `vpython3` or the machine's `python3`.
+(Until 10-30 `.gn` named `vpython3` and `@cpython3` was pinned by hand to
+Skia's Bazel build's version; the pin now comes from `DEPS` like the rest.)
 
 ## C/C++ toolchains
 
@@ -560,8 +562,8 @@ tree -- thirteen minutes for the GPU backends. The tools come
 from the same places as for the rest of the build: `@gn`, `@ninja`, the
 host's clang (`@host_platform`'s `HOST_CLANG`: `@clang_linux_x64`,
 `@clang_mac_arm64`, ...), the Linux sysroots for the Linux and Android
-targets, and `@cpython3` as the `--script-executable` in place of
-depot_tools' `vpython3`. GN's `host_os` and `host_cpu` are the host's
+targets, and `@cpython3` as the `--script-executable` (what `.gn` names
+too). GN's `host_os` and `host_cpu` are the host's
 (`HOST_OS`, `HOST_CPU`), and the host's tools land under
 `clang_<host cpu>/` in a build for anything but the host's own OS and CPU
 (`:host_own`); for the macOS platforms the GN args are what `tools/gn`
@@ -2548,9 +2550,8 @@ holds on this host before a run.
 1. Make sure `deps.lock.bzl` is current (`gen_deps.dart --check`).
 2. Add an entry to `_SOURCE_REPOSITORIES` or `_TOOL_REPOSITORIES` in
    `extensions.bzl`, pointing at the `DEPS` path (sysroots go in
-   `_SYSROOT_REPOSITORIES`, keyed by their `sysroots.json` entry; tools that
-   `DEPS` does not provide go in `_DOWNLOADED_TOOL_REPOSITORIES` with an
-   explicit CIPD pin and a hash in `_CIPD_SHA256`).
+   `_SYSROOT_REPOSITORIES`, keyed by their `sysroots.json` entry), and the
+   sha256 of its CIPD zip to `_CIPD_SHA256` so a download is verified.
 3. If upstream has no usable Bazel files, add `third_party/<name>/BUILD.<name>.bazel`,
    starting its `copts` from `FLUTTER_THIRD_PARTY_COPTS` and adding the `-Wno-*`
    flags its `BUILD.gn` uses.

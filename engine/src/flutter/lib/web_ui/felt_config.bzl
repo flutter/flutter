@@ -29,9 +29,11 @@ FELT_CONFIG = {
         "firefox": {"browser": "firefox"},
         "firefox-coi-wasm": {"browser": "firefox"},
         "firefox-wasm": {"browser": "firefox"},
+        "firefox-wimp": {"browser": "firefox"},
         "safari": {"browser": "safari"},
         "safari-coi-wasm": {"browser": "safari"},
         "safari-wasm": {"browser": "safari"},
+        "safari-wimp": {"browser": "safari"},
     },
     "test_bundles": {
         "dart2js-canvaskit-canvaskit": {
@@ -216,6 +218,11 @@ FELT_CONFIG = {
             "run_config": "firefox-wasm",
             "test_bundle": "dart2wasm-skwasm-ui",
         },
+        "firefox-dart2wasm-wimp-ui": {
+            "artifact_deps": ["skwasm"],
+            "run_config": "firefox-wimp",
+            "test_bundle": "dart2wasm-skwasm-ui",
+        },
         "firefox-fallbacks": {
             "artifact_deps": ["canvaskit", "skwasm"],
             "run_config": "firefox",
@@ -254,6 +261,11 @@ FELT_CONFIG = {
         "safari-dart2wasm-skwasm-ui": {
             "artifact_deps": ["skwasm"],
             "run_config": "safari-wasm",
+            "test_bundle": "dart2wasm-skwasm-ui",
+        },
+        "safari-dart2wasm-wimp-ui": {
+            "artifact_deps": ["skwasm"],
+            "run_config": "safari-wimp",
             "test_bundle": "dart2wasm-skwasm-ui",
         },
         "safari-fallbacks": {

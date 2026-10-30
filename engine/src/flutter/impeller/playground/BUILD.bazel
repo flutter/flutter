@@ -47,6 +47,7 @@ flutter_objc_library(
         "playground_impl.h",
         "switches.h",
         "widgets.h",
+        "yuv_test_textures.h",
     ] + select({
         "//engine/src/flutter/impeller/tools:metal": [
             "backend/metal/playground_impl_mtl.h",  # impeller_enable_metal
@@ -116,6 +117,8 @@ flutter_objc_library(
         "//engine/src/flutter/impeller/typographer/backends/skia:typographer_skia_backend",
         "//engine/src/flutter/testing:test_swiftshader_utils",
         "//engine/src/flutter/testing:testing_lib",
+        "@abseil-cpp//absl/status:statusor",
+        "@abseil_cpp_tree//:root_includes",
         "@glfw",
         "@imgui//:imgui_glfw",
     ] + select({
@@ -152,6 +155,7 @@ cc_library(
         "playground_impl.cc",
         "switches.cc",
         "widgets.cc",
+        "yuv_test_textures.cc",
     ] + select({
         "//engine/src/flutter/impeller/tools:opengles": [
             "backend/gles/playground_impl_gles.cc",  # impeller_enable_opengles
@@ -168,6 +172,7 @@ cc_library(
         "playground_impl.h",
         "switches.h",
         "widgets.h",
+        "yuv_test_textures.h",
     ] + select({
         "//engine/src/flutter/impeller/tools:metal": [
             "backend/metal/playground_impl_mtl.h",  # impeller_enable_metal
@@ -240,6 +245,8 @@ cc_library(
         "//engine/src/flutter/impeller/typographer/backends/skia:typographer_skia_backend",
         "//engine/src/flutter/testing:test_swiftshader_utils",
         "//engine/src/flutter/testing:testing_lib",
+        "@abseil-cpp//absl/status:statusor",
+        "@abseil_cpp_tree//:root_includes",
         "@glfw",
         "@imgui//:imgui_glfw",
     ] + select({
@@ -305,6 +312,69 @@ cc_library(
         "//engine/src:include_root",
         "//engine/src/flutter/impeller:impeller_public_config",
         "//engine/src/flutter/impeller/testing:golden_digest_manager",
+        "//engine/src/flutter/testing:testing_lib",
+    ],
+    alwayslink = True,
+)
+
+cc_library(
+    name = "pipeline_variant_recorder",
+    testonly = True,
+    srcs = ["pipeline_variant_recorder.cc"],
+    hdrs = ["pipeline_variant_recorder.h"],
+    copts = [
+        "-Wthread-safety-analysis",  # is_clang
+    ] + FLUTTER_COPTS + select({
+        "@platforms//os:macos": [
+            "-Wno-unguarded-availability",  # from ../entity
+        ],
+        "@platforms//os:ios": [
+            "-Wno-unguarded-availability",  # from ../entity
+        ],
+        "//conditions:default": [],
+    }),
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    target_compatible_with = select({
+        "//engine/src/flutter/testing:unittests_enabled": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        "//engine/src:include_root",
+        "//engine/src/flutter/fml",
+        "//engine/src/flutter/impeller:impeller_public_config",
+        "//engine/src/flutter/impeller/entity",
+        "//engine/src/flutter/impeller/renderer",
+    ],
+    alwayslink = True,
+)
+
+cc_library(
+    name = "pipeline_variant_recorder_unittests",
+    testonly = True,
+    srcs = ["pipeline_variant_recorder_unittests.cc"],
+    copts = [
+        "-Wthread-safety-analysis",  # is_clang
+    ] + FLUTTER_COPTS + [
+        "-Wno-inconsistent-missing-override",  # from ../renderer/testing:mocks
+    ] + select({
+        "@platforms//os:macos": [
+            "-Wno-unguarded-availability",  # from :pipeline_variant_recorder
+        ],
+        "@platforms//os:ios": [
+            "-Wno-unguarded-availability",  # from :pipeline_variant_recorder
+        ],
+        "//conditions:default": [],
+    }),
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    target_compatible_with = select({
+        "//engine/src/flutter/testing:unittests_enabled": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        ":pipeline_variant_recorder",
+        "//engine/src:include_root",
+        "//engine/src/flutter/impeller:impeller_public_config",
+        "//engine/src/flutter/impeller/renderer/testing:mocks",
         "//engine/src/flutter/testing:testing_lib",
     ],
     alwayslink = True,

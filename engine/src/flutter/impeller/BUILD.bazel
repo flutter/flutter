@@ -155,6 +155,7 @@ flutter_display_test(
             "//engine/src/flutter/impeller/entity:entity_unittests",  # impeller_supports_rendering
             "//engine/src/flutter/impeller/fixtures",  # impeller_supports_rendering
             "//engine/src/flutter/impeller/playground",  # impeller_supports_rendering
+            "//engine/src/flutter/impeller/playground:pipeline_variant_recorder_unittests",  # impeller_supports_rendering
             "//engine/src/flutter/impeller/renderer:renderer_unittests",  # impeller_supports_rendering
             "//engine/src/flutter/impeller/typographer:typographer_unittests",  # impeller_supports_rendering
         ],
@@ -164,6 +165,7 @@ flutter_display_test(
             "//engine/src/flutter/impeller/entity:entity_unittests",  # impeller_supports_rendering
             "//engine/src/flutter/impeller/fixtures",  # impeller_supports_rendering
             "//engine/src/flutter/impeller/playground",  # impeller_supports_rendering
+            "//engine/src/flutter/impeller/playground:pipeline_variant_recorder_unittests",  # impeller_supports_rendering
             "//engine/src/flutter/impeller/renderer:renderer_unittests",  # impeller_supports_rendering
             "//engine/src/flutter/impeller/typographer:typographer_unittests",  # impeller_supports_rendering
         ],
@@ -173,6 +175,7 @@ flutter_display_test(
             "//engine/src/flutter/impeller/entity:entity_unittests",  # impeller_supports_rendering
             "//engine/src/flutter/impeller/fixtures",  # impeller_supports_rendering
             "//engine/src/flutter/impeller/playground",  # impeller_supports_rendering
+            "//engine/src/flutter/impeller/playground:pipeline_variant_recorder_unittests",  # impeller_supports_rendering
             "//engine/src/flutter/impeller/renderer:renderer_unittests",  # impeller_supports_rendering
             "//engine/src/flutter/impeller/typographer:typographer_unittests",  # impeller_supports_rendering
         ],

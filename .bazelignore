@@ -21,6 +21,7 @@ engine/src/flutter/third_party/benchmark
 engine/src/flutter/third_party/boringssl/src
 engine/src/flutter/third_party/brotli
 engine/src/flutter/third_party/cpu_features/src
+engine/src/flutter/third_party/cpython3
 engine/src/flutter/third_party/dart
 engine/src/flutter/third_party/depot_tools
 engine/src/flutter/third_party/expat

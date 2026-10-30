@@ -134,6 +134,8 @@ flutter_test_fixtures(
         "check_gles_definition.frag",
         "check_gles_unflipped_definition.frag",
         "embarcadero.jpg",
+        "flutter_gpu_compute.comp",
+        "flutter_gpu_compute_specialized_size.comp",
         "flutter_gpu_instanced.frag",
         "flutter_gpu_instanced.vert",
         "flutter_gpu_texture.frag",
@@ -233,6 +235,7 @@ cc_library(
 # (tools/gn_to_bazel/lib/src/manifest.dart).
 
 exports_files(glob([
+    "*.comp",
     "*.frag",
     "*.vert",
     "ordering/*.frag",

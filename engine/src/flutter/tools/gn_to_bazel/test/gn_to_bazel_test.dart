@@ -2594,6 +2594,30 @@ action("jar") {
         },
       );
 
+      test('evaluates string_join(), keeping the build-directory paths of its strings', () async {
+        // The Flutter GPU fixtures' shader bundle: a JSON object joined
+        // from one entry per shader, each naming its source by the
+        // fixtures directory's rebased path.
+        final GnFileEvaluation evaluation = await evaluate(r'''
+action("shaders") {
+  script = "impellerc.py"
+  fixtures = rebase_path("//flutter/impeller/fixtures")
+  entries = [
+    "\"Unlit\": {\"file\": \"${fixtures}/unlit.frag\"}",
+    "\"Compute\": {\"file\": \"${fixtures}/compute.comp\"}",
+  ]
+  bundle = "{" + string_join(", ", entries) + "}"
+  args = [ "--shader-bundle=$bundle" ]
+  outputs = [ "$root_build_dir/test.shaderbundle" ]
+}
+''');
+        final GnTarget shaders = evaluation.targets.single;
+        const bundle =
+            '--shader-bundle={"Unlit": {"file": "\u0001//flutter/impeller/fixtures\u0001/unlit.frag"}, '
+            '"Compute": {"file": "\u0001//flutter/impeller/fixtures\u0001/compute.comp"}}';
+        expect(strings(shaders, 'args'), <String>[bundle]);
+      });
+
       test(
         "evaluates nested lists by index, as the validation layers' foreach reads them",
         () async {
@@ -5829,6 +5853,75 @@ web_platform_dill(
 '''),
       );
     });
+
+    test(
+      'check_forbidden_native_symbols names its library by path, or as the output of a copy',
+      () {
+        // The Android embedding's shape (the library at its path under the
+        // build directory, from the shared library's root_out_dir) beside the
+        // macOS framework's (the dylib the copy writes, get_target_outputs()[0]).
+        final GnSourceTree tree = sourceTree(<String, String>{
+          'flutter/sym/BUILD.gn': r'''
+_flutter_shell_native_output_name = "flutter"
+
+shared_library("flutter_shell_native") {
+  output_name = _flutter_shell_native_output_name
+  sources = [ "a.cc" ]
+}
+
+check_forbidden_native_symbols("check_native_symbols") {
+  deps = [ ":flutter_shell_native" ]
+  _out_dir = get_label_info(":flutter_shell_native", "root_out_dir")
+  library = "$_out_dir/lib$_flutter_shell_native_output_name.so"
+}
+
+copy("copy_dylib") {
+  visibility = [ ":*" ]
+  sources = [ "$root_out_dir/libflutter.so" ]
+  outputs = [ "$root_out_dir/FlutterMacOS.framework/FlutterMacOS" ]
+  deps = [ ":flutter_shell_native" ]
+}
+
+check_forbidden_native_symbols("check_dylib_symbols") {
+  visibility = [ ":*" ]
+  deps = [ ":copy_dylib" ]
+  _dylib_outputs = get_target_outputs(":copy_dylib")
+  library = _dylib_outputs[0]
+}
+''',
+          'flutter/sym/a.cc': '',
+        });
+        final String output = emitBuildFile(
+          evaluateIn(
+            tree,
+            '//flutter/sym/BUILD.gn',
+            templates: <String>{'check_forbidden_native_symbols'},
+          ),
+          gnPackage: '//flutter/sym',
+          tree: tree,
+        );
+        expect(
+          output,
+          contains(r'''
+check_forbidden_native_symbols(
+    name = "check_native_symbols",
+    library = "$root_out_dir/libflutter.so",
+    deps = [":flutter_shell_native"],
+)
+'''),
+        );
+        expect(
+          output,
+          contains(r'''
+check_forbidden_native_symbols(
+    name = "check_dylib_symbols",
+    library_target = ":copy_dylib",
+    deps = [":copy_dylib"],
+)
+'''),
+        );
+      },
+    );
 
     test('copy_tree copies the package directory itself, or a directorySources directory as its filegroup', () {
       // build/dart/BUILD.gn's shape (the prebuilt SDK into dart-sdk/) beside
