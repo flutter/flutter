@@ -38,6 +38,7 @@ TEST(CpuAffinity, NoLittleCores) {
   // Two prime and six performance cores, as read on a Snapdragon 8 Elite
   // Gen 5: the slowest cores are three quarters of the fastest.
   std::vector<CpuIndexAndSpeed> speeds;
+  speeds.reserve(8);
   for (size_t i = 0; i < 8; i++) {
     speeds.push_back({.index = i,
                       .speed = i < 6 ? 3628800 : 4608000,
@@ -72,6 +73,7 @@ TEST(CpuAffinity, CapacitiesThatSayNothing) {
        {std::vector<std::optional<int64_t>>{1024, 1024, 1024},
         std::vector<std::optional<int64_t>>{762, std::nullopt, 1024}}) {
     std::vector<CpuIndexAndSpeed> speeds;
+    speeds.reserve(3);
     for (size_t i = 0; i < 3; i++) {
       speeds.push_back({.index = i,
                         .speed = static_cast<int64_t>(i + 1),
