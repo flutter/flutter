@@ -855,10 +855,22 @@ class AndroidProject extends FlutterProjectPlatform {
   /// - `id "org.jetbrains.kotlin.android"`
   /// - `id("org.jetbrains.kotlin.android")`
   /// - `id ( "org.jetbrains.kotlin.android" )`
+  /// - `kotlin("android")`
+  /// - any of the above followed by `version "..."`
+  /// - `alias(libs.plugins.kotlin.android)` or
+  ///   `alias(libs.plugins.jetbrains.kotlin.android)`, the catalog names that
+  ///   Android Studio project templates use
   static final _declarativeKotlinPluginPatterns = <RegExp>[
-    RegExp('^\\s*id\\s*\\(?\\s*[\'"]kotlin-android[\'"]\\s*\\)?\\s*\$'),
-    RegExp('^\\s*id\\s*\\(?\\s*[\'"]org.jetbrains.kotlin.android[\'"]\\s*\\)?\\s*\$'),
+    RegExp('^\\s*id\\s*\\(?\\s*[\'"]kotlin-android[\'"]\\s*\\)?$_versionSuffix\\s*\$'),
+    RegExp(
+      '^\\s*id\\s*\\(?\\s*[\'"]org.jetbrains.kotlin.android[\'"]\\s*\\)?$_versionSuffix\\s*\$',
+    ),
+    RegExp('^\\s*kotlin\\s*\\(\\s*"android"\\s*\\)$_versionSuffix\\s*\$'),
+    RegExp(r'^\s*alias\s*\(\s*libs\.plugins\.(?:jetbrains\.)?kotlin\.android\s*\)\s*$'),
   ];
+
+  /// An optional plugin version, as in `id("org.jetbrains.kotlin.android") version "2.4.20"`.
+  static const _versionSuffix = '(?:\\s+version\\s*\\(?\\s*[\'"][^\'"]*[\'"]\\s*\\)?)?';
 
   /// Pattern used to find the assignment of the "group" property in Gradle.
   /// Expected example: `group "dev.flutter.plugin"`
@@ -952,17 +964,116 @@ class AndroidProject extends FlutterProjectPlatform {
     return false;
   }
 
-  /// True, if the app project is using Kotlin.
-  bool get isKotlin {
-    if (appGradleFile.existsSync()) {
-      if (firstMatchInFile(appGradleFile, _imperativeKotlinPluginPattern) != null) {
+  /// Whether the app module's Gradle build file applies the `kotlin-android`
+  /// (`org.jetbrains.kotlin.android`) plugin. Other modules, such as plugins,
+  /// are not checked.
+  bool get appliesKotlinAndroidPlugin {
+    if (!appGradleFile.existsSync()) {
+      return false;
+    }
+    if (firstMatchInFile(appGradleFile, _imperativeKotlinPluginPattern) != null) {
+      return true;
+    }
+    for (final RegExp pattern in _declarativeKotlinPluginPatterns) {
+      if (firstMatchInFile(appGradleFile, pattern) != null) {
         return true;
       }
-      for (final RegExp pattern in _declarativeKotlinPluginPatterns) {
-        if (firstMatchInFile(appGradleFile, pattern) != null) {
-          return true;
+    }
+    return false;
+  }
+
+  /// Matches a use of an Android Gradle Plugin API that does not exist when
+  /// `android.newDsl` is enabled: the legacy variant API and the extension
+  /// types that it belongs to.
+  static final _legacyNewDslApiPattern = RegExp(
+    r'\b(?:applicationVariants|libraryVariants|testVariants|unitTestVariants|'
+    r'variantFilter|BaseExtension|LibraryExtension|AppExtension)\b',
+  );
+
+  /// Matches a `kotlin-android` plugin use in any build file: a quoted
+  /// `kotlin-android` or `org.jetbrains.kotlin.android` plugin ID,
+  /// `kotlin("android")`, or a version catalog alias whose name contains
+  /// `kotlin` followed by `android`.
+  static final _anyKotlinAndroidPluginPattern = RegExp(
+    r'''['"](?:kotlin-android|org\.jetbrains\.kotlin\.android)['"]'''
+    r'''|\bkotlin\s*\(\s*"android"\s*\)'''
+    r'''|\balias\s*\(\s*libs\.plugins\.[\w.]*kotlin[\w.]*android[\w.]*\s*\)''',
+  );
+
+  /// The Gradle build files that keep the project from building with
+  /// `android.newDsl` enabled, as paths.
+  ///
+  /// The app module's build file and the `android/build.gradle(.kts)` file of
+  /// each Android plugin listed in `.flutter-plugins-dependencies` are scanned.
+  /// A file blocks the new DSL when it uses the legacy variant API
+  /// (`applicationVariants`, `libraryVariants`, `testVariants`,
+  /// `unitTestVariants`, `variantFilter`), the `BaseExtension`,
+  /// `LibraryExtension` or `AppExtension` types, or applies the
+  /// `kotlin-android` plugin.
+  ///
+  /// Returns null when the plugin list is missing or cannot be read, because
+  /// then the project's plugins are unknown.
+  ///
+  /// This is a text scan, so it misses code that is not in these files, such as
+  /// `buildSrc`, convention plugins and included builds. The Gradle error
+  /// handlers in `gradle_errors.dart` cover those cases.
+  List<String>? get newDslBlockingBuildFiles {
+    final File dependenciesFile = parent.flutterPluginsDependenciesFile;
+    final buildFiles = <File>[if (appGradleFile.existsSync()) appGradleFile];
+    try {
+      if (!dependenciesFile.existsSync()) {
+        return null;
+      }
+      final Object? decoded = json.decode(dependenciesFile.readAsStringSync());
+      final Object? plugins = decoded is Map<String, Object?> ? decoded['plugins'] : null;
+      final Object? androidPlugins = plugins is Map<String, Object?>
+          ? plugins[AndroidPlugin.kConfigKey]
+          : null;
+      if (androidPlugins != null && androidPlugins is! List<Object?>) {
+        return null;
+      }
+      for (final Object? plugin in androidPlugins as List<Object?>? ?? const <Object?>[]) {
+        final Object? path = plugin is Map<String, Object?> ? plugin['path'] : null;
+        if (path is! String) {
+          return null;
+        }
+        final Directory pluginAndroidDir = hostAppGradleRoot.fileSystem
+            .directory(path)
+            .childDirectory('android');
+        final File buildFile = getGroovyOrKotlin(pluginAndroidDir, 'build.gradle');
+        if (buildFile.existsSync()) {
+          buildFiles.add(buildFile);
         }
       }
+      final blocking = <String>[];
+      for (final buildFile in buildFiles) {
+        final String contents = _withoutComments(buildFile.readAsStringSync());
+        if (_legacyNewDslApiPattern.hasMatch(contents) ||
+            _anyKotlinAndroidPluginPattern.hasMatch(contents)) {
+          blocking.add(buildFile.path);
+        }
+      }
+      return blocking;
+    } on FormatException {
+      return null;
+    } on FileSystemException {
+      return null;
+    }
+  }
+
+  /// Removes `/* */` block comments and `//` line comments, so that code that
+  /// is commented out does not count. Strings are not parsed, so a `//` in a
+  /// string, as in a URL, also starts a comment; this can only hide a match
+  /// later on the same line.
+  static String _withoutComments(String contents) =>
+      contents.replaceAll(RegExp(r'/\*[\s\S]*?\*/'), '').replaceAll(RegExp(r'//[^\n]*'), '');
+
+  /// True, if the app project is using Kotlin.
+  bool get isKotlin {
+    if (appliesKotlinAndroidPlugin) {
+      return true;
+    }
+    if (appGradleFile.existsSync()) {
       try {
         final String content = appGradleFile.readAsStringSync();
         if (_kotlinCompilerOptionsPattern.hasMatch(content)) {
