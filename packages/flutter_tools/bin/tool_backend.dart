@@ -79,9 +79,13 @@ or
     'bin',
     if (Platform.isWindows) 'flutter.bat' else 'flutter',
   ]);
-  final target = targetPlatform.startsWith('darwin')
+  final bool isDarwin = targetPlatform.startsWith('darwin');
+  final target = isDarwin
       ? '${buildMode}_macos_bundle_flutter_assets'
       : '${buildMode}_bundle_${targetPlatform}_assets';
+  // The macOS AOT build needs the SDK it is compiled against, the same way
+  // xcode_backend.dart passes SDKROOT for Xcode builds.
+  final String? sdkRoot = isDarwin ? await macOSSdkRoot() : null;
   final Process assembleProcess = await Process.start(flutterExecutable, <String>[
     if (verbose) '--verbose',
     if (prefixedErrors) '--prefixed-errors',
@@ -97,6 +101,7 @@ or
     '-dTargetFile=$flutterTarget',
     '-dTreeShakeIcons=$treeShakeIcons',
     '-dDartObfuscation=$dartObfuscation',
+    if (sdkRoot != null) '-dSdkRoot=$sdkRoot',
     if (codeSizeDirectory != null) '-dCodeSizeDirectory=$codeSizeDirectory',
     if (flavor != null && flavor.isNotEmpty) '-dFlavor=$flavor',
     if (splitDebugInfo != null) '-dSplitDebugInfo=$splitDebugInfo',
@@ -120,6 +125,27 @@ or
   if (await assembleProcess.exitCode != 0) {
     exit(1);
   }
+}
+
+/// Returns the macOS SDK root to build against.
+///
+/// Uses Xcode's `SDKROOT` when this script runs inside an Xcode build, and
+/// otherwise asks `xcrun` for the default macOS SDK.
+Future<String> macOSSdkRoot() async {
+  final String? sdkRoot = Platform.environment['SDKROOT'];
+  if (sdkRoot != null && sdkRoot.isNotEmpty) {
+    return sdkRoot;
+  }
+  final ProcessResult result = await Process.run('xcrun', <String>[
+    '--sdk',
+    'macosx',
+    '--show-sdk-path',
+  ]);
+  if (result.exitCode != 0) {
+    stderr.write('Unable to locate the macOS SDK: ${result.stderr}');
+    exit(1);
+  }
+  return (result.stdout as String).trim();
 }
 
 /// Perform a simple path join on the segments based on the current platform.

@@ -281,6 +281,10 @@ class CompileMacOSFramework extends Target {
     final String buildOutputPath = environment.buildDir.path;
     final String? codeSizeDirectory = environment.defines[kCodeSizeDirectory];
     final String? splitDebugInfo = environment.defines[kSplitDebugInfo];
+    final String? sdkRoot = environment.defines[kSdkRoot];
+    if (sdkRoot == null) {
+      throw MissingDefineException(kSdkRoot, 'compile_macos_framework');
+    }
     final dartObfuscation = environment.defines[kDartObfuscation] == 'true';
     final List<String> extraGenSnapshotOptions = decodeCommaSeparated(
       environment.defines,
@@ -323,6 +327,7 @@ class CompileMacOSFramework extends Target {
           outputPath: environment.fileSystem.path.join(buildOutputPath, cpuArch.darwinArchName),
           platform: TargetPlatform.darwin,
           cpuArch: cpuArch,
+          sdkRoot: sdkRoot,
           splitDebugInfo: splitDebugInfo,
           dartObfuscation: dartObfuscation,
           extraGenSnapshotOptions: extraGenSnapshotOptions,

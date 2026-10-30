@@ -476,6 +476,20 @@ void main() {
             expect(fakeProcessManager, hasNoRemainingExpectations);
           });
 
+          testWithoutContext('--show-sdk-path macosx', () async {
+            const macosSdkroot =
+                'Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.2.sdk';
+            fakeProcessManager.addCommand(
+              const FakeCommand(
+                command: <String>['xcrun', '--sdk', 'macosx', '--show-sdk-path'],
+                stdout: '$macosSdkroot\n',
+              ),
+            );
+
+            expect(await xcode.macOSSdkLocation(), macosSdkroot);
+            expect(fakeProcessManager, hasNoRemainingExpectations);
+          });
+
           testWithoutContext('--show-sdk-path fails', () async {
             fakeProcessManager.addCommand(
               const FakeCommand(
@@ -488,6 +502,51 @@ void main() {
             expect(
               () async => xcode.sdkLocation(EnvironmentType.physical),
               throwsToolExit(message: 'Could not find SDK location'),
+            );
+            expect(fakeProcessManager, hasNoRemainingExpectations);
+          });
+        });
+
+        group('SDK Version', () {
+          testWithoutContext('--show-sdk-version iphoneos', () async {
+            fakeProcessManager.addCommand(
+              const FakeCommand(
+                command: <String>['xcrun', '--sdk', 'iphoneos', '--show-sdk-version'],
+                stdout: '21.4',
+              ),
+            );
+
+            expect(await xcode.sdkVersion('iphoneos'), '21.4');
+            expect(fakeProcessManager, hasNoRemainingExpectations);
+          });
+
+          testWithoutContext('--show-sdk-version with SDK root path', () async {
+            const sdkRoot =
+                '/Applications/Xcode.app/Contents/Developer/Platforms/'
+                'iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.0.sdk';
+            fakeProcessManager.addCommand(
+              const FakeCommand(
+                command: <String>['xcrun', '--sdk', sdkRoot, '--show-sdk-version'],
+                stdout: '26.0\n',
+              ),
+            );
+
+            expect(await xcode.sdkVersion(sdkRoot), '26.0');
+            expect(fakeProcessManager, hasNoRemainingExpectations);
+          });
+
+          testWithoutContext('--show-sdk-version fails', () async {
+            fakeProcessManager.addCommand(
+              const FakeCommand(
+                command: <String>['xcrun', '--sdk', 'iphoneos', '--show-sdk-version'],
+                exitCode: 1,
+                stderr: 'xcrun: error:',
+              ),
+            );
+
+            expect(
+              () async => xcode.sdkVersion('iphoneos'),
+              throwsToolExit(message: 'Could not find SDK version: xcrun: error:'),
             );
             expect(fakeProcessManager, hasNoRemainingExpectations);
           });

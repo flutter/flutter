@@ -1406,6 +1406,7 @@ class AppFrameworkAndNativeAssetsDependencies {
           kDarwinArchs: defaultMacOSArchsForEnvironment(artifacts)
               .map((CpuArch e) => e.darwinArchName)
               .join(' '),
+          kSdkRoot: await _utils.xcode.macOSSdkLocation(),
         };
     }
   }
