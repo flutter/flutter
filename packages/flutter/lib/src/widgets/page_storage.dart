@@ -43,7 +43,7 @@ class _StorageEntryIdentifier {
 
   final List<PageStorageKey<dynamic>> keys;
 
-  final Object? namespace;
+  final Type? namespace;
 
   bool get isNotEmpty => keys.isNotEmpty;
 
@@ -62,7 +62,8 @@ class _StorageEntryIdentifier {
 
   @override
   String toString() {
-    return 'StorageEntryIdentifier(${keys.join(":")}, namespace: $namespace)';
+    final namespaceString = namespace == null ? '' : ', namespace: $namespace';
+    return 'StorageEntryIdentifier(${keys.join(":")}$namespaceString)';
   }
 }
 
@@ -90,7 +91,7 @@ class PageStorageBucket {
     return keys;
   }
 
-  _StorageEntryIdentifier _computeIdentifier(BuildContext context, Object? namespace) {
+  _StorageEntryIdentifier _computeIdentifier(BuildContext context, Type? namespace) {
     return _StorageEntryIdentifier(_allKeys(context), namespace);
   }
 
@@ -105,10 +106,17 @@ class PageStorageBucket {
   /// If an explicit identifier is not provided and no [PageStorageKey]s
   /// are found, then the `data` is not saved.
   ///
-  /// The `namespace` keeps the data apart from data saved by other widgets
-  /// under the same [PageStorageKey]s with a different namespace. It is only
-  /// used when no identifier is provided.
-  void writeState(BuildContext context, dynamic data, {Object? identifier, Object? namespace}) {
+  /// {@template flutter.widgets.PageStorageBucket.namespace}
+  /// The `namespace` keeps this data apart from data saved by other kinds of
+  /// widgets under the same [PageStorageKey]s. It is typically the type of the
+  /// widget that owns the data, e.g. `namespace: MyWidget`. Prefer the type
+  /// literal over `runtimeType` so that subclasses share the slot.
+  ///
+  /// Defaults to null, the slot shared by widgets that do not pass a namespace,
+  /// such as [Scrollable]. Must be null if `identifier` is provided.
+  /// {@endtemplate}
+  void writeState(BuildContext context, dynamic data, {Object? identifier, Type? namespace}) {
+    assert(identifier == null || namespace == null);
     _storage ??= <Object, dynamic>{};
     if (identifier != null) {
       _storage![identifier] = data;
@@ -129,9 +137,9 @@ class PageStorageBucket {
   /// If an explicit identifier is not provided and no [PageStorageKey]s
   /// are found, then null is returned.
   ///
-  /// The `namespace` must match the one used to write the data. It is only
-  /// used when no identifier is provided.
-  dynamic readState(BuildContext context, {Object? identifier, Object? namespace}) {
+  /// {@macro flutter.widgets.PageStorageBucket.namespace}
+  dynamic readState(BuildContext context, {Object? identifier, Type? namespace}) {
+    assert(identifier == null || namespace == null);
     if (_storage == null) {
       return null;
     }
