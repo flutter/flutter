@@ -1822,7 +1822,14 @@ final class _Evaluator {
           // statements as beforeComments.
           break;
         case GnBinary() when statement.isAssignment:
-          _evaluateAssignment(statement, scope, path, source, comments: statement.beforeComments);
+          _evaluateAssignment(
+            statement,
+            scope,
+            path,
+            source,
+            target: target,
+            comments: statement.beforeComments,
+          );
         case GnCondition():
           _evaluateCondition(statement, scope, path, source, target: target);
         case GnFunctionCall():
@@ -2302,6 +2309,7 @@ final class _Evaluator {
     _Scope assignedIn,
     Condition condition,
     List<String> source, {
+    required GnTarget? target,
     required List<String> comments,
   }) {
     var scope = assignedIn;
@@ -2402,9 +2410,19 @@ final class _Evaluator {
     if (groups.isEmpty) {
       groups.add((Condition.always, <_Value>[]));
     }
+    // A target's variables hold relative to the target (its block is
+    // evaluated under no condition of its own, [_evaluateCall]); an element
+    // whose condition the target already holds under -- read from a
+    // variable of a file evaluated under a condition, whose assignments
+    // all carry it (the Android shell's output name, a file-scope string
+    // under is_android) -- is unconditional within it.
+    final Condition context = target == null ? condition : target.condition.and(condition);
     String op = reassignedEmpty ? '+=' : node.op;
     var first = true;
-    for (final (Condition groupCondition, List<_Value> groupItems) in groups) {
+    for (final (Condition itemCondition, List<_Value> groupItems) in groups) {
+      final Condition groupCondition = context.and(itemCondition) == context
+          ? Condition.always
+          : itemCondition;
       final Condition when = condition.and(groupCondition);
       if (when == Condition.never) {
         continue;
@@ -2602,6 +2620,32 @@ final class _Evaluator {
             else
               throw GnError(node.location, 'string_replace() of ${item.value}'),
         ], isList: false);
+      case GnFunctionCall(name: 'string_join', :final List<GnNode> args):
+        // string_join(separator, strings): the strings joined into one (the
+        // Flutter GPU fixtures' shader bundle, a JSON object assembled from
+        // one entry per shader). The strings keep whatever rebase_path()
+        // marked in them. A list whose items hold under conditions would
+        // join differently per case; nothing converted has one.
+        if (args.length != 2) {
+          throw GnError(node.location, 'string_join() takes a separator and a list of strings');
+        }
+        final String separator = _stringExpression(args[0], scope);
+        final _Expression strings = _expression(args[1], scope);
+        if (!strings.isList) {
+          throw GnError(node.location, 'string_join() of a string');
+        }
+        final parts = <String>[];
+        for (final _Value item in strings.items) {
+          if (item.condition != Condition.always) {
+            throw GnError(node.location, 'string_join() of a list with conditional items');
+          }
+          if (item.value case GnStringValue(:final String value)) {
+            parts.add(value);
+          } else {
+            throw GnError(node.location, 'string_join() of ${item.value}');
+          }
+        }
+        return _Expression.scalar(GnStringValue(parts.join(separator)));
       case GnFunctionCall(name: 'rebase_path', :final List<GnNode> args):
         // rebase_path(x, root_build_dir): the path of x as the build runs
         // it. Kept as a marked absolute path inside the string, which the

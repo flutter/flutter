@@ -163,6 +163,7 @@ build_directory_tree(
             "//engine/src/flutter/third_party/canvaskit:skwasm_group",  # is_wasm
             "//engine/src/flutter/third_party/canvaskit:skwasm_heavy_group",  # is_wasm
             "//engine/src/flutter/third_party/canvaskit:wimp_group",  # is_wasm
+            "//engine/src/flutter/third_party/canvaskit:wimp_heavy_group",  # is_wasm
         ],
         "//conditions:default": [],
     }),
@@ -193,6 +194,7 @@ zip_bundle_from_file(
             "//engine/src/flutter/third_party/canvaskit:skwasm_group",  # is_wasm
             "//engine/src/flutter/third_party/canvaskit:skwasm_heavy_group",  # is_wasm
             "//engine/src/flutter/third_party/canvaskit:wimp_group",  # is_wasm
+            "//engine/src/flutter/third_party/canvaskit:wimp_heavy_group",  # is_wasm
         ],
         "//conditions:default": [],
     }),

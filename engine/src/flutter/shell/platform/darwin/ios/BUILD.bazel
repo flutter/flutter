@@ -15,6 +15,7 @@ load("//build_defs/cc:shared_library.bzl", "flutter_shared_library")
 load("//build_defs/cc:swift_library.bzl", "flutter_swift_library")
 load("//build_defs/dist:framework.bzl", "framework_module_check", "xcframework")
 load("//build_defs/gn:gn_action.bzl", "gn_action", "gn_copy")
+load("//build_defs/testing:native_symbols.bzl", "check_forbidden_native_symbols")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -1017,6 +1018,16 @@ gn_copy(
     deps = [":create_flutter_framework_dylib"],
 )
 
+check_forbidden_native_symbols(
+    name = "check_native_symbols",
+    library_target = ":copy_dylib",
+    target_compatible_with = select({
+        "@platforms//os:ios": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [":copy_dylib"],
+)
+
 gn_action(
     name = "copy_framework_info_plist",
     srcs = ["framework/Info.plist"],
@@ -1194,6 +1205,7 @@ framework_module_check(
 filegroup(
     name = "universal_flutter_framework",
     srcs = [
+        ":check_native_symbols",
         ":copy_and_verify_framework_module",
         ":copy_dylib",
         ":copy_framework_icu",

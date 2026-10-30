@@ -133,6 +133,8 @@ cc_library(
         "//engine/src/flutter/display_list",
         "//engine/src/flutter/fml",
         "//engine/src/flutter/txt",
+        "@abseil-cpp//absl/status",
+        "@abseil_cpp_tree//:root_includes",
         "@skia",
     ] + select({
         "//engine/src/flutter/impeller/tools:metal": [
@@ -303,6 +305,8 @@ flutter_cc_test(
         "//engine/src/flutter/shell/common:base64",
         "//engine/src/flutter/testing:skia",
         "//engine/src/flutter/testing:testing_lib",
+        "@abseil-cpp//absl/strings",
+        "@abseil_cpp_tree//:root_includes",
         "@googletest//:gtest",
         "@googletest_tree//:root_includes",
         "@googletest_tree//:third_party_dir_includes",

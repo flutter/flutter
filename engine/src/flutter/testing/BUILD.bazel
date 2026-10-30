@@ -760,6 +760,10 @@ exports_files([
     "lsan_suppressions.txt",
     "tsan_suppressions.txt",
     "ubsan_suppressions.txt",
+    # symbols/check_forbidden_native_symbols.gni's script, which
+    # build_defs/testing's check_forbidden_native_symbols rule runs over the
+    # engine's shared libraries.
+    "symbols/check_forbidden_native_symbols.dart",
 ])
 
 # testing.gni's enable_unittests: `current_toolchain == host_toolchain ||

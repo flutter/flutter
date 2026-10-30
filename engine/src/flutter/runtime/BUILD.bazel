@@ -106,7 +106,8 @@ cc_library(
         "skia_concurrent_executor.cc",
     ] + select({
         ":when_is_ios_and_flutter_runtime_mode_debug": [
-            # These contain references to private APIs and this TU must only be compiled in debug runtime modes.
+            # These contain references to private APIs and this TU must only be compiled
+            # in debug runtime modes.
             "ptrace_check.cc",  # is_ios && (flutter_runtime_mode == "debug")
         ],
         "//conditions:default": [],

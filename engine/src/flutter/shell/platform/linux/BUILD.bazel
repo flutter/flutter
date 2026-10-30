@@ -10,13 +10,17 @@ load("//build_defs/cc:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
 load("//build_defs/cc:shared_library.bzl", "flutter_shared_library")
 load("//build_defs/dist:zip_bundle.bzl", "zip_bundle", "zip_tree")
 load("//build_defs/gn:gn_action.bzl", "gn_copy")
+load("//build_defs/testing:native_symbols.bzl", "check_forbidden_native_symbols")
 load("//build_defs/testing:testing.bzl", "flutter_display_test", "flutter_test_fixtures")
 
 package(default_visibility = ["//visibility:public"])
 
 cc_library(
     name = "linux",
-    data = [":publish_headers_linux"] + select({
+    data = [
+        ":check_native_symbols",
+        ":publish_headers_linux",
+    ] + select({
         ":when_is_linux_and_is_host_toolchain": [
             "//engine/src/flutter/shell/platform/glfw:publish_headers_glfw",  # build_glfw_shell
         ],
@@ -264,7 +268,8 @@ cc_library(
         "//engine/src/flutter/shell/platform/linux/config:wayland_client",
         "//engine/src/flutter/shell/platform/linux/config:wayland_egl",
     ],
-    # Set flag to stop headers being directly included (library users should not do this)
+    # Set flag to stop headers being directly included (library users should not
+    # do this)
     local_defines = FLUTTER_LOCAL_DEFINES + [
         "FLUTTER_LINUX_COMPILATION",
         "FLUTTER_ENGINE_NO_PROTOTYPES",
@@ -467,6 +472,16 @@ flutter_shared_library(
     ],
 )
 
+check_forbidden_native_symbols(
+    name = "check_native_symbols",
+    library = "$root_out_dir/libflutter_linux_gtk.so",
+    target_compatible_with = select({
+        "@platforms//os:linux": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [":flutter_linux_gtk"],
+)
+
 gn_copy(
     name = "publish_headers_linux",
     srcs = [
@@ -614,6 +629,7 @@ zip_bundle(
     }),
     trees = [":flutter_gtk_publish_headers_linux"],
     deps = [
+        ":check_native_symbols",
         ":flutter_linux_gtk",
         ":publish_headers_linux",
         "//engine/src/flutter/build/bazel/dart_wrap:gen_snapshot",
