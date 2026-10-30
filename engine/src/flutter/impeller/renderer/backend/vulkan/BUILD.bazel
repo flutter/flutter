@@ -3,9 +3,9 @@
 # found in the LICENSE file.
 
 # Generated from //flutter/impeller/renderer/backend/vulkan/BUILD.gn by gn_to_bazel; do not edit.
-# Not converted: vulkan_android_apk_unittests.
 
 load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
+load("//build_defs/android:native_activity_apk.bzl", "native_activity_apk")
 load("//build_defs/cc:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
 load("//build_defs/testing:testing.bzl", "flutter_test_fixtures")
 
@@ -327,4 +327,18 @@ alias(
         "@platforms//os:android": [],
         "//conditions:default": ["@platforms//:incompatible"],
     }),
+)
+
+native_activity_apk(
+    name = "vulkan_android_apk_unittests",
+    testonly = True,
+    apk_name = "impeller_vulkan_android_unittests",
+    target_compatible_with = select({
+        "@platforms//os:android": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        ":unittests_lib",
+        "//engine/src/flutter/testing/android/native_activity:gtest_activity",
+    ],
 )

@@ -5872,6 +5872,54 @@ gn_copy_tree(
       );
     });
 
+    test(
+      'native_activity_apk is the macro over the invocation deps, its inner targets expected',
+      () {
+        // impeller/toolkit/android's shape: the suite as an APK, under
+        // is_android.
+        final GnSourceTree tree = sourceTree(<String, String>{
+          'flutter/apk/BUILD.gn': r'''
+source_set("unittests_lib") {
+  testonly = true
+  sources = [ "a_unittests.cc" ]
+}
+native_activity_apk("apk_unittests") {
+  apk_name = "impeller_apk_unittests"
+  testonly = true
+  deps = [
+    ":unittests_lib",
+    "//flutter/testing/android/native_activity:gtest_activity",
+  ]
+}
+''',
+          'flutter/apk/a_unittests.cc': '',
+        });
+        final String output = emitBuildFile(
+          evaluateIn(tree, '//flutter/apk/BUILD.gn', templates: <String>{'native_activity_apk'}),
+          gnPackage: '//flutter/apk',
+          tree: tree,
+        );
+        expect(
+          output,
+          contains('load("//build_defs/android:native_activity_apk.bzl", "native_activity_apk")'),
+        );
+        expect(
+          output,
+          contains(r'''
+native_activity_apk(
+    name = "apk_unittests",
+    testonly = True,
+    apk_name = "impeller_apk_unittests",
+    deps = [
+        ":unittests_lib",
+        "//engine/src/flutter/testing/android/native_activity:gtest_activity",
+    ],
+)
+'''),
+        );
+      },
+    );
+
     test('a copy in a wasm toolchain whose source is not an output of its module is an error', () {
       final GnSourceTree tree = sourceTree(<String, String>{
         'flutter/ck/BUILD.gn': r'''

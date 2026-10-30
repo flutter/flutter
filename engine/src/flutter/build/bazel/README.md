@@ -268,11 +268,19 @@ and `android-javadoc.zip` (337 files); the arm builder's (`android_debug`,
 `zip_archives/`, the two packages the flutter tool downloads from it
 (`sky/dist`, `lib/gpu/dist`; `dist/packages/sky_engine` is the copy the
 first is made from), file for file CI's. With them, every archive the
-Android builders upload has its counterpart. What is not here: *running* the
+Android builders upload has its counterpart. The APK variants of two of the
+device suites (GN's `native_activity_apk`: the Vulkan backend's and the
+Android toolkit's, android.app.NativeActivity around the suite's library)
+build too -- `build_defs/android/native_activity_apk.bzl` is the template's
+three targets: the manifest from its template, the library as a
+`flutter_shared_library`, and the packaging script over the SDK's aapt2,
+zipalign and apksigner with `@openjdk`'s java, the APK at the build root
+(`impeller_vulkan_android_unittests.apk`, 144 MB unstripped under the
+emulator builder's configuration, signed by the checked-in debug keystore;
+the emulator builder's install lays it). What is not here: *running* the
 three device suites the emulator builder's `run_tests.py --type android`
-pushes (they build for `android_x64`; an emulator is the next phase), the
-APK variants of two of them (GN's `native_activity_apk`), and x86, which no
-builder builds.
+pushes and the APKs it installs (they build for `android_x64`; an emulator
+is the next phase), and x86, which no builder builds.
 
 ### The Emscripten toolchain (the spike)
 
@@ -2253,7 +2261,7 @@ install rule reads off its configuration (`checkout_view.bzl`'s
 `_unopt`, `_arm64`) --
 with the
 targets nothing converted answers to listed in a comment (the Mac's Android
-AOT builders' `flutter/lib/snapshot`, the Android APK suite); the host test
+AOT builders' `flutter/lib/snapshot`); the host test
 builders' `flutter/build/dart:dart_sdk`, GN's `copy_tree` of the prebuilt
 SDK into `dart-sdk/`, is `//engine/src/flutter/build/dart:dart_sdk`
 (`gn_copy_tree` over the Dart wrap's `prebuilt_dart_sdk`, the files placed

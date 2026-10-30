@@ -2203,6 +2203,23 @@ const Map<String, TemplateMapping> templateMappings = <String, TemplateMapping>{
     },
     files: true,
   ),
+  // testing/android/native_activity/native_activity.gni: a gtest suite as
+  // an APK around android.app.NativeActivity -- the manifest from its
+  // template, the suite's shared library over the invocation's deps, the
+  // script that links, aligns and signs the APK (build_defs/android's
+  // native_activity_apk, the same three targets); the Android test phase
+  // runs it.
+  'native_activity_apk': TemplateMapping(
+    '//build_defs/android:native_activity_apk.bzl',
+    'native_activity_apk',
+    <String, TemplateArgument>{
+      'apk_name': TemplateArgument('apk_name', TemplateArgumentKind.scalar),
+      'deps': TemplateArgument('deps', TemplateArgumentKind.labels),
+      'testonly': TemplateArgument('testonly', TemplateArgumentKind.scalar),
+    },
+    innerTargets: <String>['android_manifest_{name}', 'shared_library_{name}', 'apk_{name}'],
+    files: true,
+  ),
   // build/secondary/flutter/third_party/flatbuffers/flatbuffers.gni: flatc
   // over the schemas, the generated headers as a library.
   'flatbuffers': TemplateMapping(
