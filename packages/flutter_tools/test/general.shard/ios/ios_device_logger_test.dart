@@ -330,7 +330,7 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
       final iosDeployDebugger = FakeIOSDeployDebugger();
       logReader.debuggerStream = iosDeployDebugger;
 
-      logReader.dispose();
+      await logReader.dispose();
       expect(iosDeployDebugger.detached, true);
     });
 

@@ -534,9 +534,9 @@ class _ProxiedLogReader extends DeviceLogReader {
   }
 
   @override
-  void dispose() {
+  Future<void> dispose() async {
     if (_id != null) {
-      connection.sendRequest('device.logReader.stop', <String, Object?>{'id': _id});
+      await connection.sendRequest('device.logReader.stop', <String, Object?>{'id': _id});
     }
   }
 
