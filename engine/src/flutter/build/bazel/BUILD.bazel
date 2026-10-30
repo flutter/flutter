@@ -12,6 +12,7 @@ load("@bazel_skylib//lib:selects.bzl", "selects")
 load("@bazel_skylib//rules:common_settings.bzl", "bool_flag", "string_flag")
 load("@host_platform//:host.bzl", "HOST_CPU_CONSTRAINT", "HOST_OS")
 load("@rules_cc//cc:defs.bzl", "cc_library")
+load("//build_defs/testing:checkout_script_test.bzl", "checkout_script_test")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -371,4 +372,19 @@ cc_library(
     name = "ios_application_extension",
     linkopts = ["-fapplication-extension"],
     target_compatible_with = ["@platforms//os:ios"],
+)
+
+# bazel_ci.py's unit tests (ci.md: `tools/gn --bazel` and run_tests.py on a
+# CI bot): the match of a build's flags against builds.json, the build.ninja
+# and bazel.json written. The real table is read too, so the test runs in
+# the checkout like tools/gn's.
+checkout_script_test(
+    name = "bazel_ci_test",
+    srcs = [
+        "bazel_ci.py",
+        "bazel_ci_test.py",
+        "builds.json",
+    ],
+    in_checkout = True,
+    script = "bazel_ci_test.py",
 )

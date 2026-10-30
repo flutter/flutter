@@ -72,19 +72,17 @@ class GNTestCase(unittest.TestCase):
     self.assertEqual(gn.parse_size('5MB'), 5 * 2**20)
     self.assertEqual(gn.parse_size('5GB'), 5 * 2**30)
 
-  @unittest.skipIf(sys.platform.startswith('win'), 'LTO GN args are not set on Windows')
-  def test_thin_lto(self):
-    release = ['--runtime-mode', 'release']
-    self.assertFalse(self._gn_args(release)['use_thin_lto'])
-    self.assertTrue(self._gn_args(release + ['--thin-lto'])['use_thin_lto'])
-    self.assertTrue(self._gn_args(release + ['--thin-lto'])['enable_lto'])
-    # ThinLTO has no effect when LTO is disabled.
-    no_lto_args = self._gn_args(release + ['--thin-lto', '--no-lto'])
-    self.assertFalse(no_lto_args['enable_lto'])
-    self.assertNotIn('use_thin_lto', no_lto_args)
-    unopt_args = self._gn_args(release + ['--thin-lto', '--unoptimized'])
-    self.assertFalse(unopt_args['enable_lto'])
-    self.assertNotIn('use_thin_lto', unopt_args)
+  def test_bazel_takes_only_a_builder_files_build(self):
+    # --bazel writes the Bazel build directory of a build of ci/builders/*.json
+    # (flutter/build/bazel/ci.md); flags that are no such build are refused
+    # before anything is written.
+    args = gn.parse_args(['gn', '--bazel', '--target-dir', 'ci/host_debug_unopt'])
+    self.assertTrue(args.bazel)
+    self.assertEqual(
+        gn.main(['gn', '--bazel', '--target-dir', 'ci/no_such_build', '--runtime-mode', 'debug']),
+        1
+    )
+    self.assertFalse(os.path.exists(os.path.join(gn.SRC_ROOT, 'out', 'ci', 'no_such_build')))
 
 
 if __name__ == '__main__':

@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:engine_build_configs/engine_build_configs.dart';
@@ -9009,6 +9010,97 @@ test_suite(
 )
 '''),
       );
+    });
+
+    test("builds.json lists each build as tools/gn --bazel reads it; a Bazel variant's builds are checked", () {
+      // linux_unopt.json's shape: a test build, the licenses build with a
+      // test executable step; and linux_unopt_bazel.json, its Bazel variant
+      // (the same flags plus --bazel, --no-rbe for --rbe), with a build that
+      // mirrors nothing and one that mirrors a build without a configuration.
+      final Map<String, BuilderConfig> loaded = configs(<String, String>{
+        'linux_unopt.json':
+            '''
+{"builds": [
+  ${build('ci/host_debug_unopt', '--target-dir ci/host_debug_unopt --runtime-mode debug --unoptimized --asan --dart-debug --rbe --no-goma', <String>['flutter/tools/font_subset', 'flutter/fml:fml_unittests'], tests: runTests('Host Tests', 'dart,engine'))},
+  ${build('ci/host_release_licenses', '--target-dir ci/host_release_licenses --runtime-mode release --no-lto --rbe --no-goma', <String>['flutter/tools/licenses_cpp', 'flutter/tools/licenses_cpp:licenses_cpp_testrunner'], tests: '{"name": "Run license_cpp unittests", "script": "out/ci/host_release_licenses/licenses_cpp_testrunner"}')},
+  ${build('ci/host_fancy', '--target-dir ci/host_fancy --runtime-mode release --fancy', <String>['flutter/tools/licenses_cpp'])}
+]}''',
+        'linux_unopt_bazel.json':
+            '''
+{"builds": [
+  ${build('ci/host_debug_unopt', '--target-dir ci/host_debug_unopt --runtime-mode debug --unoptimized --asan --dart-debug --no-rbe --no-goma --bazel', <String>['flutter/tools/font_subset', 'flutter/fml:fml_unittests'], tests: runTests('Host Tests', 'dart,engine'))},
+  ${build('ci/host_release_licenses', '--target-dir ci/host_release_licenses --runtime-mode release --no-rbe --no-goma --bazel', <String>['flutter/tools/licenses_cpp'])},
+  ${build('ci/host_fancy', '--target-dir ci/host_fancy --runtime-mode release --fancy --bazel', <String>['flutter/tools/licenses_cpp'])},
+  ${build('ci/host_other', '--target-dir ci/host_other --runtime-mode release --no-lto', <String>['flutter/tools/licenses_cpp'])}
+]}''',
+      });
+      final List<BuilderBuild> builds = builderBuilds(loaded);
+      // The variant's builds are not builds of their own.
+      expect(builds.map((BuilderBuild b) => b.file).toSet(), <String>{'linux_unopt.json'});
+      const noBuild =
+          "linux_unopt_bazel.json's ci/host_release_licenses is no build of "
+          'linux_unopt.json: its flags are `--target-dir ci/host_release_licenses --runtime-mode release`';
+      const noConfiguration =
+          "linux_unopt_bazel.json's ci/host_fancy mirrors linux_unopt.json's "
+          "ci/host_fancy, which has no Bazel configuration (--fancy (not in the converter's table of "
+          'tools/gn flags))';
+      const noBazel = "linux_unopt_bazel.json's ci/host_other lacks --bazel";
+      const noBuildEither =
+          "linux_unopt_bazel.json's ci/host_other is no build of "
+          'linux_unopt.json: its flags are `--target-dir ci/host_other --runtime-mode release --no-lto`';
+      expect(bazelVariantErrors(loaded, builds), <String>[
+        noBuild,
+        noConfiguration,
+        noBazel,
+        noBuildEither,
+      ]);
+      final table = jsonDecode(
+        buildersJson(
+          builds,
+          <String, Set<String>>{
+            '//flutter/tools/font_subset': <String>{'font_subset'},
+            '//flutter/tools/licenses_cpp': <String>{'licenses_cpp'},
+          },
+          convertedTests: <String, Set<String>>{
+            '//flutter/fml': <String>{'fml_unittests'},
+            '//flutter/tools/licenses_cpp': <String>{'licenses_cpp_testrunner'},
+          },
+        ),
+      ) as Map<String, Object?>;
+      final linux = (table['builds']! as Map<String, Object?>)['linux']! as List<Object?>;
+      expect(linux.map((Object? b) => (b! as Map<String, Object?>)['name']), <String>[
+        'ci/host_debug_unopt',
+        'ci/host_release_licenses',
+        'ci/host_fancy',
+      ]);
+      final unopt = linux[0]! as Map<String, Object?>;
+      // No local_engine.json in the fixture: the name needs no ci_ prefix.
+      expect(unopt['config'], 'host_debug_unopt');
+      expect(unopt['install'], '//engine/src/flutter/ci/builders:host_debug_unopt');
+      expect(unopt['build_directory'], 'ci/host_debug_unopt');
+      expect(unopt['gn'], contains('--rbe'));
+      expect(unopt['ninja_targets'], <String>[
+        'flutter/tools/font_subset',
+        'flutter/fml:fml_unittests',
+      ]);
+      expect(unopt['ninja_targets_tested'], <String>['flutter/fml:fml_unittests']);
+      final tests = unopt['tests']! as Map<String, Object?>;
+      expect(tests['suite'], '//engine/src/flutter/ci/builders:host_debug_unopt_tests');
+      expect((tests['types']! as Map<String, Object?>)['dart'], runTestsTypeSuites['dart']);
+      expect((tests['types']! as Map<String, Object?>)['engine'], <String>[
+        '//engine/src/flutter/fml:fml_unittests',
+      ]);
+      expect(tests['missing'], isNot(isEmpty)); // the engine executables the fixture lacks
+      final licenses = linux[1]! as Map<String, Object?>;
+      expect((licenses['tests']! as Map<String, Object?>)['binaries'], <String>[
+        '//engine/src/flutter/tools/licenses_cpp:licenses_cpp_testrunner',
+      ]);
+      final fancy = linux[2]! as Map<String, Object?>;
+      expect(fancy['config'], isNull);
+      expect(fancy['install'], isNull);
+      expect(fancy['unsupported'], <String>[
+        "--fancy (not in the converter's table of tools/gn flags)",
+      ]);
     });
 
     test('the engine type names executables run_tests.py runs', () {

@@ -259,6 +259,21 @@ targets:
       # at https://github.com/flutter/flutter/issues/152186.
       cores: "8"
 
+  # The Bazel build of linux_host_engine (ci/builders/linux_host_engine_bazel.json):
+  # the host artifacts through `tools/gn --bazel`, archived to the experimental
+  # realm (engine/src/flutter/build/bazel/ci.md). Not a release build: nothing
+  # it uploads is where the tool downloads from.
+  - name: Linux linux_host_engine_bazel
+    recipe: engine_v2/engine_v2
+    bringup: true
+    timeout: 240
+    properties:
+      config_name: linux_host_engine_bazel
+    drone_dimensions:
+      - os=Linux
+    dimensions:
+      cores: "8"
+
   - name: Linux linux_host_engine_ddm
     recipe: engine_v2/engine_v2
     timeout: 120
@@ -440,6 +455,17 @@ targets:
     timeout: 120
     properties:
       config_name: linux_unopt
+
+  # The Bazel build of linux_unopt (ci/builders/linux_unopt_bazel.json): the
+  # same builds through `tools/gn --bazel`, their tests through run_tests.py
+  # under Bazel (engine/src/flutter/build/bazel/ci.md). Bringup: a bot builds
+  # from scratch (no remote cache yet), hence the timeout.
+  - name: Linux linux_unopt_bazel
+    recipe: engine_v2/engine_v2
+    bringup: true
+    timeout: 240
+    properties:
+      config_name: linux_unopt_bazel
 
   - name: Linux mac_android_aot_engine
     recipe: engine_v2/engine_v2

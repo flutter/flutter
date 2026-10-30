@@ -2335,6 +2335,20 @@ cache; `//:framework_tests //:tool_tests //:dart_tests` adds the framework's,
 the tool's and the repository's Dart tests on both (a Mac's `//:tool_tests`
 includes the apple shard and leaves out the Linux desktop shard).
 
+### CI on these configurations without a recipe change
+
+A LUCI builder runs the same install and suites through the unchanged
+`engine_v2` recipe: `tools/gn --bazel` writes a `build.ninja` that runs the
+build's install target (the recipe's `ninja -C out/<dir> <targets>` runs the
+Bazel build), `testing/run_tests.py` runs each `--type` as the build's Bazel
+suites, and Bazel variants of the builder files (`linux_unopt_bazel.json`,
+`linux_host_engine_bazel.json`; `.ci.yaml`'s `Linux linux_unopt_bazel` and
+`Linux linux_host_engine_bazel`, bringup) name the builds. The converter
+writes the table the scripts read (`build/bazel/builds.json`) with the two
+files above and checks the variants against it. [ci.md](ci.md) has the
+design, the limits of the first version and what a recipe change would do
+differently.
+
 ## `et` with `--backend bazel`
 
 `et build`, `et test`, `et run`, `et query targets` and `et lint` take
