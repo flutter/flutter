@@ -27,11 +27,14 @@ from the tests' SDK facsimile. The tool then wants:
   Maven artifacts the Gradle plugin resolves --
   `io.flutter:flutter_embedding_<mode>` and `io.flutter:<abi>_<mode>` at
   version `1.0.0-<engine.stamp>`, from `$FLUTTER_STORAGE_BASE_URL/download.flutter.io`.
-  The facsimile's engine.stamp is the fixed word `bazel` (bin/internal),
-  so `engine_maven_repository` lays the build's jars and poms, which name
-  the engine's git revision, under `1.0.0-bazel`, and `android_build_tools`
-  exports `FLUTTER_STORAGE_BASE_URL` as a `file:` URL to that directory:
-  Gradle reads Maven repositories from `file:` URLs as from https ones.
+  The facsimile's engine.stamp is the engine's revision (bin/internal's
+  versioned set, @engine_version: the facsimile that carries the engine's
+  directories), which is what the build names its jars and poms by, so
+  `engine_maven_repository` lays them under `1.0.0-<revision>` (or under
+  another version a facsimile with another stamp asks for: `version`), and
+  `android_build_tools` exports `FLUTTER_STORAGE_BASE_URL` as a `file:` URL
+  to that directory: Gradle reads Maven repositories from `file:` URLs as
+  from https ones.
   `android_engine_artifacts` declares the builds of all of it -- the
   engine for three CPUs in three modes, through in_configuration -- the
   first time, hours; cached afterwards.
@@ -96,7 +99,8 @@ def _engine_maven_repository_impl(ctx):
 engine_maven_repository = rule(
     implementation = _engine_maven_repository_impl,
     doc = "The Android embedding's Maven artifacts (jars and poms of the build) as a Maven repository under " +
-          "download.flutter.io/, at a version of the facsimile's choosing in place of the engine's revision.",
+          "download.flutter.io/, at the version the facsimile's engine.stamp asks for: the engine's revision, " +
+          "which the build names them by, unless `version` says otherwise.",
     attrs = {
         "srcs": attr.label_list(
             allow_files = [".jar", ".pom"],
@@ -104,8 +108,9 @@ engine_maven_repository = rule(
                   "poms (pom_embedding, pom_libflutter), each mode's and CPU's through in_configuration.",
         ),
         "version": attr.string(
-            default = "bazel",
-            doc = "What follows `1.0.0-` in the artifacts' version: the facsimile's engine.stamp.",
+            default = ENGINE_VERSION,
+            doc = "What follows `1.0.0-` in the artifacts' version: the facsimile's engine.stamp -- the engine's " +
+                  "revision (bin/internal's versioned stamps, the default) or a facsimile's fixed word.",
         ),
         "_script": attr.label(default = "//build_defs/android:engine_maven.py", allow_single_file = True),
         "_python": attr.label(
