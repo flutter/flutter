@@ -1408,9 +1408,6 @@ base class PipelineOwner with DiagnosticableTreeMixin {
     } else if (_semanticsOwner != null) {
       _semanticsOwner?.dispose();
       _semanticsOwner = null;
-      // Deferred updates would otherwise retain their render objects until
-      // this owner is disposed; re-enabling semantics rebuilds from scratch.
-      _deferredNodesNeedingSemanticsGeometryUpdate.clear();
       onSemanticsOwnerDisposed?.call();
     }
   }
@@ -1439,15 +1436,6 @@ base class PipelineOwner with DiagnosticableTreeMixin {
   /// Compare to [_nodesNeedingSemanticsUpdate], which tracks semantics boundaries of dirty nodes,
   /// this set only tracks the dirty nodes that need their semantics geometry updated directly.
   final Set<RenderObject> _nodesNeedingSemanticsGeometryUpdate = <RenderObject>{};
-
-  /// Nodes whose geometry update was skipped by [flushSemantics] because they
-  /// were not part of the semantics tree at the time, e.g. their branch was
-  /// blocked by [BlockSemantics].
-  ///
-  /// A blocked node can still move, so the update is retried on every flush
-  /// instead of dropped; otherwise the node would rejoin the tree with stale
-  /// geometry.
-  final Set<RenderObject> _deferredNodesNeedingSemanticsGeometryUpdate = <RenderObject>{};
 
   /// Update the semantics for render objects marked as needing a semantics
   /// update.
@@ -1520,14 +1508,6 @@ base class PipelineOwner with DiagnosticableTreeMixin {
       // It is possible the updateChildren above caused some nodes to be added
       // to _nodesNeedingSemanticsGeometryUpdate. Therefore, we need to
       // process them here.
-      //
-      // Deferred geometry updates are retried as well; if their branch
-      // rejoined the tree in the updateChildren phase above, they can now be
-      // applied.
-      if (_deferredNodesNeedingSemanticsGeometryUpdate.isNotEmpty) {
-        _nodesNeedingSemanticsGeometryUpdate.addAll(_deferredNodesNeedingSemanticsGeometryUpdate);
-        _deferredNodesNeedingSemanticsGeometryUpdate.clear();
-      }
       final nodesToProcessGeometry = <RenderObject>[];
       for (final RenderObject object in _nodesNeedingSemanticsGeometryUpdate) {
         if (object._needsLayout || object.owner != this) {
@@ -1538,8 +1518,9 @@ base class PipelineOwner with DiagnosticableTreeMixin {
         if (object._semantics.parentDataDirty) {
           // Not part of the semantics tree right now (e.g. blocked by
           // BlockSemantics), but the node may still move. Defer the update
-          // until the branch rejoins instead of dropping it.
-          _deferredNodesNeedingSemanticsGeometryUpdate.add(object);
+          // until _didUpdateParentData reconnects the node, without retaining
+          // or retrying it in this owner's work queue on every frame.
+          object._semantics._geometryUpdateDeferred = true;
           continue;
         }
         nodesToProcessGeometry.add(object);
@@ -1825,7 +1806,6 @@ base class PipelineOwner with DiagnosticableTreeMixin {
     _nodesNeedingCompositingBitsUpdate.clear();
     _nodesNeedingPaint.clear();
     _nodesNeedingSemanticsUpdate.clear();
-    _deferredNodesNeedingSemanticsGeometryUpdate.clear();
   }
 }
 
@@ -5603,6 +5583,11 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
   _SemanticsParentData? parentData;
   _SemanticsGeometry? geometry;
 
+  /// A geometry update received while this branch was excluded or blocked.
+  /// Requeue it when parent data is restored, including for render objects
+  /// that do not form semantics nodes but transform or clip their children.
+  bool _geometryUpdateDeferred = false;
+
   final _SemanticsConfigurationProvider configProvider;
 
   @override
@@ -5899,8 +5884,8 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
         // is dirty but it is not in the _nodesNeedingSemanticsGeometryUpdate.
         //
         // A node that moved while its branch was blocked has stale, not
-        // dirty, geometry, so this check misses it. That case is covered by
-        // PipelineOwner._deferredNodesNeedingSemanticsGeometryUpdate.
+        // dirty, geometry, so this check misses it. _didUpdateParentData
+        // requeues that node's deferred geometry update when it rejoins.
         if (childSemantics.geometryDirty) {
           renderObject.owner!._nodesNeedingSemanticsGeometryUpdate.add(childSemantics.renderObject);
         }
@@ -6097,6 +6082,10 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
   }
 
   void _didUpdateParentData(_SemanticsParentData newParentData) {
+    if (_geometryUpdateDeferred) {
+      _geometryUpdateDeferred = false;
+      renderObject.owner!._nodesNeedingSemanticsGeometryUpdate.add(renderObject);
+    }
     if (parentData == newParentData) {
       return;
     }
@@ -6652,6 +6641,7 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
     cachedSemanticsNode = null;
     parentData = null;
     geometry = null;
+    _geometryUpdateDeferred = false;
     _blocksPreviousSibling = null;
     _containsIncompleteFragment = false;
     mergeUp.clear();

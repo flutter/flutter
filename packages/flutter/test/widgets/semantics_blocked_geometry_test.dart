@@ -184,4 +184,127 @@ void main() {
     expect(tester.takeException(), isNull);
     expect(tester.getSemantics(find.bySemanticsLabel('other')), isNotNull);
   });
+
+  testWidgets('excluded geometry is not retried until its branch rejoins', (
+    WidgetTester tester,
+  ) async {
+    Widget buildExcluded({required bool excluding, required double offset}) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: Align(
+          alignment: Alignment.topLeft,
+          child: ExcludeSemantics(
+            excluding: excluding,
+            child: Transform.translate(
+              offset: Offset(0, offset),
+              child: _OwnerReadCounter(
+                child: Semantics(
+                  container: true,
+                  label: 'target',
+                  child: const SizedBox(key: targetKey, width: 100, height: 20),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildExcluded(excluding: false, offset: 0));
+    await tester.pumpWidget(buildExcluded(excluding: true, offset: 0));
+    await tester.pumpWidget(buildExcluded(excluding: true, offset: 50));
+    final _RenderOwnerReadCounter counter = tester.renderObject(find.byType(_OwnerReadCounter));
+    final PipelineOwner owner = counter.owner!;
+    counter.markNeedsSemanticsUpdate();
+    owner.flushSemantics();
+    counter.ownerReads = 0;
+
+    for (var frame = 0; frame < 100; frame += 1) {
+      owner.flushSemantics();
+    }
+    expect(counter.ownerReads, 0, reason: 'An excluded branch has no geometry work to retry.');
+
+    await tester.pumpWidget(buildExcluded(excluding: false, offset: 50));
+    expect(
+      globalSemanticsRect(tester, tester.getSemantics(find.bySemanticsLabel('target'))),
+      tester.getRect(find.byKey(targetKey)),
+    );
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('excluded transforms and clips are current when semantics rejoin', (
+    WidgetTester tester,
+  ) async {
+    const clipKey = Key('clip');
+    var taps = 0;
+    Widget buildExcluded({required bool excluding, required Offset offset, required double width}) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: Align(
+          alignment: Alignment.topLeft,
+          child: ExcludeSemantics(
+            excluding: excluding,
+            child: SizedBox(
+              width: width,
+              height: 100,
+              child: ClipRect(
+                key: clipKey,
+                child: Transform.translate(
+                  offset: offset,
+                  child: Semantics(
+                    container: true,
+                    label: 'target',
+                    button: true,
+                    onTap: () => taps += 1,
+                    child: const SizedBox.expand(key: targetKey),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildExcluded(excluding: false, offset: Offset.zero, width: 120));
+    await tester.pumpWidget(buildExcluded(excluding: true, offset: Offset.zero, width: 120));
+    for (var frame = 1; frame <= 5; frame += 1) {
+      await tester.pumpWidget(
+        buildExcluded(
+          excluding: true,
+          offset: Offset(frame * 5, frame * 10),
+          width: 120 + frame * 10,
+        ),
+      );
+    }
+    expect(find.semantics.byLabel('target'), findsNothing);
+    await tester.pumpWidget(
+      buildExcluded(excluding: false, offset: const Offset(25, 50), width: 170),
+    );
+
+    expect(
+      globalSemanticsRect(tester, tester.getSemantics(find.bySemanticsLabel('target'))),
+      tester.getRect(find.byKey(targetKey)).intersect(tester.getRect(find.byKey(clipKey))),
+    );
+    tester.semantics.tap(find.semantics.byLabel('target'));
+    expect(taps, 1);
+    expect(tester.takeException(), isNull);
+  });
+}
+
+class _OwnerReadCounter extends SingleChildRenderObjectWidget {
+  const _OwnerReadCounter({super.child});
+
+  @override
+  _RenderOwnerReadCounter createRenderObject(BuildContext context) => _RenderOwnerReadCounter();
+}
+
+class _RenderOwnerReadCounter extends RenderProxyBox {
+  int ownerReads = 0;
+
+  @override
+  PipelineOwner? get owner {
+    ownerReads += 1;
+    return super.owner;
+  }
 }
