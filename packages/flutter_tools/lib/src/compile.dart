@@ -960,13 +960,24 @@ class DefaultResidentCompiler implements ResidentCompiler {
         : null;
     late final List<String> commandToStartFrontendServer;
     if (frontendServerStarterPath != null && frontendServerStarterPath!.isNotEmpty) {
-      commandToStartFrontendServer = <String>[
-        artifacts.getArtifactPath(Artifact.engineDartBinary, platform: platform),
-        frontendServerStarterPath!,
-      ];
+      final String engineDartPath = artifacts.getArtifactPath(
+        Artifact.engineDartBinary,
+        platform: platform,
+      );
+      if (!_processManager.canRun(engineDartPath)) {
+        throwToolExit('Unable to find Dart binary at $engineDartPath');
+      }
+      commandToStartFrontendServer = <String>[engineDartPath, frontendServerStarterPath!];
     } else {
+      final String engineDartAotRuntimePath = artifacts.getArtifactPath(
+        Artifact.engineDartAotRuntime,
+        platform: platform,
+      );
+      if (!_processManager.canRun(engineDartAotRuntimePath)) {
+        throwToolExit('Unable to find dartaotruntime binary at $engineDartAotRuntimePath');
+      }
       commandToStartFrontendServer = <String>[
-        artifacts.getArtifactPath(Artifact.engineDartAotRuntime, platform: platform),
+        engineDartAotRuntimePath,
         artifacts.getArtifactPath(
           Artifact.frontendServerSnapshotForEngineDartSdk,
           platform: platform,
