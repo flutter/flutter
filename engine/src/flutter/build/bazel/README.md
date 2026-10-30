@@ -1020,9 +1020,11 @@ arm64, x64) in each AOT mode (`artifacts/engine/android-<cpu>-<mode>/linux-x64`,
 what `flutter precache --android` downloads), and the embedding as the
 Maven artifacts the Gradle plugin resolves, `io.flutter:flutter_embedding_<mode>`
 and `io.flutter:<abi>_<mode>` at `1.0.0-<engine.stamp>`. The facsimile's
-stamp is the word `bazel`, so `engine_maven_repository` lays the build's
-jars and poms, which name the engine's revision, under `1.0.0-bazel` (the
-poms' text rewritten) as a Maven repository, and `FLUTTER_STORAGE_BASE_URL`
+stamp is the engine's revision (bin/internal's versioned stamps, since 418;
+the word `bazel` before), which is what the build names its jars and poms
+by, so `engine_maven_repository` lays them under `1.0.0-<revision>` (under
+another version, the poms' text rewritten, for a facsimile whose stamp is
+another word) as a Maven repository, and `FLUTTER_STORAGE_BASE_URL`
 is a `file:` URL to it: the plugin reads `$FLUTTER_STORAGE_BASE_URL/download.flutter.io`,
 and Gradle reads Maven repositories from `file:` URLs as from https ones.
 `android_engine_artifacts` (in `build/archives`) declares all of it: the
