@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:file/memory.dart';
 import 'package:pub_semver/pub_semver.dart';
 import 'package:yaml/yaml.dart';
 
@@ -70,7 +69,6 @@ class Plugin {
     YamlMap? pluginYaml,
     VersionConstraint? flutterConstraint,
     List<String> dependencies, {
-    required FileSystem fileSystem,
     required bool isDevDependency,
     Set<String>? appDependencies,
   }) {
@@ -80,7 +78,6 @@ class Plugin {
       pluginYaml,
       flutterConstraint,
       dependencies,
-      fileSystem: fileSystem,
       isDevDependency: isDevDependency,
       appDependencies: appDependencies,
     );
@@ -98,7 +95,6 @@ class Plugin {
     YamlMap? pluginYaml,
     VersionConstraint? flutterConstraint,
     List<String> dependencies, {
-    required FileSystem fileSystem,
     required bool isDevDependency,
     Set<String>? appDependencies,
   }) {
@@ -139,7 +135,6 @@ class Plugin {
         pluginYaml,
         flutterConstraint,
         dependencies,
-        fileSystem,
         isDirectDependency,
         isDevDependency: isDevDependency,
       );
@@ -150,7 +145,6 @@ class Plugin {
       pluginYaml,
       flutterConstraint,
       dependencies,
-      fileSystem,
       isDirectDependency,
       isDevDependency: isDevDependency,
     );
@@ -162,7 +156,6 @@ class Plugin {
     YamlMap pluginYaml,
     VersionConstraint? flutterConstraint,
     List<String> dependencies,
-    FileSystem fileSystem,
     bool isDirectDependency, {
     required bool isDevDependency,
   }) {
@@ -237,8 +230,7 @@ class Plugin {
 
     parsePlatform(
       AndroidPlugin.kConfigKey,
-      (YamlMap yaml) =>
-          AndroidPlugin.parseFromYaml(name, yaml, pluginPath: path, fileSystem: fileSystem),
+      (YamlMap yaml) => AndroidPlugin.parseFromYaml(name, yaml, pluginPath: path),
     );
     parsePlatform(IOSPlugin.kConfigKey, (YamlMap yaml) => IOSPlugin.parseFromYaml(name, yaml));
     parsePlatform(LinuxPlugin.kConfigKey, (YamlMap yaml) => LinuxPlugin.parseFromYaml(name, yaml));
@@ -289,7 +281,6 @@ class Plugin {
     YamlMap pluginYaml,
     VersionConstraint? flutterConstraint,
     List<String> dependencies,
-    FileSystem fileSystem,
     bool isDirectDependency, {
     required bool isDevDependency,
   }) {
@@ -332,7 +323,6 @@ class Plugin {
           package: androidPackage,
           pluginClass: pluginClass,
           pluginPath: path,
-          fileSystem: fileSystem,
         );
       }
 
@@ -388,14 +378,6 @@ class Plugin {
       yaml,
       null,
       const <String>[],
-      // `_parseFromYaml` requires a `FileSystem` to construct `AndroidPlugin`,
-      // which only accesses `_fileSystem` lazily when `toMap()` is called. Since
-      // `validatePluginYaml` is called from `FlutterManifest` where no
-      // `FileSystem` is available and the parsed `Plugin` is discarded here,
-      // an unused `MemoryFileSystem` is passed.
-      // TODO(chingjun): Remove the required fileSystem parameter here,
-      // https://github.com/flutter/flutter/issues/194900.
-      fileSystem: MemoryFileSystem(),
       isDevDependency: false,
     );
     return switch (result) {
