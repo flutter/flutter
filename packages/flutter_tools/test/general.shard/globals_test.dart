@@ -17,22 +17,21 @@ void main() {
     var xcodeEvaluated = false;
     var xcodeProjectInterpreterEvaluated = false;
 
-    final FlutterProjectFactory factory = await context.run<FlutterProjectFactory>(
+    await context.run<FlutterProjectFactory>(
       name: 'test',
       overrides: <Type, Generator>{
         Xcode: () {
           xcodeEvaluated = true;
-          return FakeXcode();
+          return _FakeXcode();
         },
         XcodeProjectInterpreter: () {
           xcodeProjectInterpreterEvaluated = true;
-          return FakeXcodeProjectInterpreter();
+          return _FakeXcodeProjectInterpreter();
         },
       },
       body: () => globals.projectFactory,
     );
 
-    expect(factory, isNotNull);
     expect(xcodeEvaluated, isFalse, reason: 'xcode should be evaluated lazily');
     expect(
       xcodeProjectInterpreterEvaluated,
@@ -42,6 +41,6 @@ void main() {
   });
 }
 
-class FakeXcode extends Fake implements Xcode {}
+class _FakeXcode extends Fake implements Xcode {}
 
-class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterpreter {}
+class _FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterpreter {}
