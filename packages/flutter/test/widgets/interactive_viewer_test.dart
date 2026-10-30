@@ -1170,6 +1170,7 @@ void main() {
       expect(transformationController.value.getMaxScaleOnAxis(), greaterThan(1.0));
     });
 
+    // Regression test for https://github.com/flutter/flutter/issues/195678
     testWidgets('pan does not crash with NaN pointer sample', (WidgetTester tester) async {
       await tester.pumpWidget(
         TestWidgetsApp(
