@@ -931,6 +931,30 @@ void testMain() {
       expect(dormantForms[form.formIdentifier], form);
     });
 
+    // See https://github.com/flutter/flutter/issues/195174
+    test('hides synthetic autofill elements from assistive technology', () {
+      final (form: EngineAutofillForm form, textField: SemanticTextField textField) =
+          activateGroup();
+
+      // The synthetic element created for the non-focused member.
+      final DomHTMLElement password = form.elements['field2']!;
+      expect(password.getAttribute('aria-hidden'), 'true');
+      expect(password.tabIndex, -1);
+
+      // The focused member is the real semantics element and stays exposed.
+      expect(textField.editableElement.getAttribute('aria-hidden'), isNull);
+
+      strategy.disable();
+
+      // The synthetic placeholder created on blur stays in the dormant form for
+      // the rest of the session, so it must be hidden as well.
+      final DomHTMLElement placeholder = form.elements['field1']!;
+      expect(placeholder, isNot(same(textField.editableElement)));
+      expect(placeholder.getAttribute('aria-hidden'), 'true');
+      expect(placeholder.tabIndex, -1);
+      expect(textField.editableElement.getAttribute('aria-hidden'), isNull);
+    });
+
     // See https://github.com/flutter/flutter/issues/192102
     test('TextInput.updateConfig preserves active autofill form', () {
       final (form: EngineAutofillForm form, textField: SemanticTextField textField) =

@@ -3825,6 +3825,9 @@ Future<void> testMain() async {
 
       // Editing state is applied to the element.
       expect(passwordElement.value, 'Test');
+      // Without semantics, password manager extensions fill these elements,
+      // and some skip elements hidden from assistive technology.
+      expect(passwordElement.getAttribute('aria-hidden'), isNull);
       // When we only set the `value` without changing selection, the browser
       // automatically sets the selection to the end of the value.
       expect(passwordElement.selectionStart, 4);
