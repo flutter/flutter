@@ -37,6 +37,7 @@ load(
     "IOS_SIMULATOR_GN_ARGS",
     "IOS_TARGET_GN_ARGS",
     "MACOS_TARGET_GN_ARGS",
+    "MAC_HOST_GN_ARGS",
 )
 load("//build_defs/repositories:deps.lock.bzl", "GIT_DEPS")
 
@@ -310,6 +311,14 @@ _GN_ARGS = {
     "@platforms//os:ios": IOS_TARGET_GN_ARGS,
     "@platforms//os:macos": MACOS_TARGET_GN_ARGS,
     "//conditions:default": {"target_os": '"linux"'},
+}) | select({
+    # A Mac host's own settings, whatever the target (tools/gn's
+    # setup_apple_sdks runs on the host's OS): the host toolchain that
+    # compiles the build's host tools -- an Android target's gen_snapshot --
+    # wants the deployment target and the Mac SDK; the macOS and iOS
+    # targets' arguments above carry the same values.
+    "//engine/src/flutter/build/bazel:host_os_is_mac": MAC_HOST_GN_ARGS,
+    "//conditions:default": {},
 }) | select({
     "//engine/src/flutter/build/bazel:ios_simulator_enabled": IOS_SIMULATOR_GN_ARGS,
     "//engine/src/flutter/build/bazel:ios_device_enabled": IOS_DEVICE_GN_ARGS,
