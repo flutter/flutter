@@ -5,17 +5,17 @@
 # The engine's additions to the GN build configuration: templates, and the
 # secondary source tree (//flutter/build/secondary) that supplies BUILD.gn
 # files for dependencies which ship none. Inputs of the rules that wrap a GN
-# build of part of the tree. The bazel/ subdirectory is its own package.
+# build of part of the tree. The bazel/ subdirectory is its own package, as
+# are archives/ and dart/ (converted from their BUILD.gn files).
 
-# zip_bundle.gni's script, which bazel/zip_bundle.bzl runs the same way, the
-# dart_pkg action's, which bazel/dart/dart_pkg.bzl runs, the Android
-# embedding's Maven layout script (shell/platform/android/BUILD.gn's
-# embedding_jars and abi_jars), and the Info.plist copy of the macOS
-# frameworks (the embedder's FlutterEmbedder.framework, a gn_action).
+# zip_bundle.gni's script, which build_defs/dist's zip_bundle runs the same
+# way, the Android embedding's Maven layout script (shell/platform/android/
+# BUILD.gn's embedding_jars and abi_jars), and the Info.plist copy of the
+# macOS frameworks (the embedder's FlutterEmbedder.framework, a gn_action).
+# The dart_pkg action's script is the dart package's (dart/tools/dart_pkg.py).
 exports_files([
     "android_artifacts.py",
     "copy_info_plist.py",
-    "dart/tools/dart_pkg.py",
     "zip.py",
 ])
 
@@ -37,7 +37,6 @@ filegroup(
             "*.py",
             "*.sh",
             "config/**",
-            "dart/**",
             "esbuild/**",
             "secondary/flutter/third_party/libcxxabi/**",
             "secondary/flutter/third_party/llvm_libc/**",
@@ -64,6 +63,7 @@ filegroup(
     ) + [
         # Subpackages the glob does not enter.
         "//engine/src/flutter/build/archives:gn_files",
+        "//engine/src/flutter/build/dart:gn_files",
         "//engine/src/flutter/build/secondary/flutter/third_party/libcxx:gn_files",
     ],
     visibility = ["//engine/src/flutter/build/bazel:__subpackages__"],

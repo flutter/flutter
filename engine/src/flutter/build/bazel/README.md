@@ -615,8 +615,10 @@ MB); the root group under the configuration takes about 35 minutes with
 the wrap on the critical path. Left as they are: the archives' dart-sdk zip
 and the web SDK's compilers (no builder builds them without the prebuilt;
 the generated files keep `flutter_prebuilt_dart_sdk` assumed on), the
-`dart-sdk/` tree of `local_engine.json`'s facsimile (the prebuilt's; the
-built tree as a directory product of `gn_build` is research/22's N2), and
+`dart-sdk/` tree of `local_engine.json`'s facsimile and of the root group's
+install (`build/dart:dart_sdk` lays the prebuilt's there, where GN's is
+`create_sdk`'s; the built tree as a directory product of `gn_build` is
+research/22's N2), and
 the `dart_test`/`dart_binary` rules and the package tests, which run on the
 prebuilt SDK (the builder runs no tests).
 
@@ -2248,8 +2250,13 @@ install rule reads off its configuration (`checkout_view.bzl`'s
 `build_directory_attrs`: `host`, `wasm` or `linux`, the runtime mode,
 `_unopt`, `_arm64`) --
 with the
-targets nothing converted answers to listed (`flutter:unittests`,
-`flutter/build/dart:dart_sdk`, the licenses tool):
+targets nothing converted answers to listed in a comment (the Mac's Android
+AOT builders' `flutter/lib/snapshot`, the Android APK suite); the host test
+builders' `flutter/build/dart:dart_sdk`, GN's `copy_tree` of the prebuilt
+SDK into `dart-sdk/`, is `//engine/src/flutter/build/dart:dart_sdk`
+(`gn_copy_tree` over the Dart wrap's `prebuilt_dart_sdk`, the files placed
+at their paths under `dart-sdk/`; the one `copy_tree` of a directory
+outside its package, which the converter's `directorySources` names):
 
 ```sh
 bazel run --config=ci_host_release //engine/src/flutter/ci/builders:ci_host_release

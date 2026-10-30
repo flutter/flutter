@@ -164,8 +164,7 @@ const List<ConvertedFile> convertedFiles = <ConvertedFile>[
     },
     filesGroups: <String>{'flutter', 'unittests', 'archives', 'dist'},
     unconvertedDeps: <String>[
-      // The Dart SDK copy (copy_tree) and the Dart test fixtures.
-      '//flutter/build/dart:dart_sdk',
+      // The Dart test fixtures (build/dart/test, a file not converted).
       '//flutter/build/dart/test:gen_dartcli_call',
       '//flutter/build/dart/test:gen_executable_call',
       // Suites not converted in their files: Flutter GPU's (skipped in its
@@ -1310,6 +1309,41 @@ bundle_directory(
 android_engine_artifacts(
     name = "android_engine",
     target_compatible_with = ["@platforms//os:linux"],
+)
+''',
+  ),
+  // build/dart: the Dart SDK the engine's artifacts carry, laid into the
+  // build directory as dart-sdk/ where the artifacts are built
+  // (build_engine_artifacts) -- GN's copy_tree of the prebuilt SDK, the
+  // target's (directorySources maps it to the Dart wrap's selection by
+  // target CPU). The build without the prebuilt SDK has create_sdk there,
+  // the SDK compiled from the Dart tree, which the wrap exposes no whole of
+  // (its AOT runtime and frontend server snapshots alone); the generated
+  // file assumes the prebuilt, as the archives' does. The directory's other
+  // files are the GN build's templates (dart.gni, rules.gni, internal/) and
+  // the scripts they and the Bazel rules run (tools/).
+  ConvertedFile(
+    '//flutter/build/dart',
+    appendix: '''
+# dart_pkg.py, GN's dart_pkg action's script, which build_defs/dart's
+# dart_pkg rule runs.
+exports_files(["tools/dart_pkg.py"])
+
+# What a wrapped GN build reads here: the templates, their scripts and the
+# test file, for //engine/src/flutter/build:gn_files (a glob does not enter
+# a package).
+filegroup(
+    name = "gn_files",
+    srcs = glob(
+        ["**"],
+        exclude = [
+            # Bazel's own files are not GN inputs.
+            "**/BUILD.bazel",
+            "**/__pycache__/**",
+            "**/*.pyc",
+        ],
+    ),
+    visibility = ["//engine/src/flutter/build:__pkg__"],
 )
 ''',
   ),
