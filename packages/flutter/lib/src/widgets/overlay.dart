@@ -1506,7 +1506,7 @@ class _RenderTheater extends RenderBox
       if (child is _RenderDeferredLayoutBox &&
           !child.hasSize &&
           (!child._layoutSurrogate.hasSize ||
-              !child._layoutSurrogate.isReadyForInitialDeferredLayout)) {
+              !child._layoutSurrogate._isReadyForInitialDeferredLayout)) {
         continue;
       }
       if (child != sizeDeterminingChild) {
@@ -2570,7 +2570,8 @@ class _DeferredLayout extends SingleChildRenderObjectWidget {
 //    layout rather than dirtying its `_RenderTheater`. Adding it to the theater
 //    does not itself require the theater to relayout. Before its first layout,
 //    it can remain attached without being on the dirty list if
-//    its layout surrogate is not laid out (for example, while kept alive).
+//    its layout surrogate is not laid out (for example, while kept alive
+//    offscreen or in an offstage entry).
 //    The theater skips its initial layout until the surrogate has a size and has
 //    completed local layout; the surrogate can then schedule deferred layout.
 //
@@ -2767,12 +2768,11 @@ class _RenderLayoutSurrogateProxyBox extends RenderProxyBox {
   _RenderLayoutSurrogateProxyBox(this.overlayLocation);
 
   // The theater must not initiate a deferred child's first layout while its
-  // surrogate is parked in a keep-alive bucket with pending layout.
+  // surrogate has not been laid out (for example, kept alive offscreen or in an
+  // offstage entry).
   // Track successful local layout separately from RenderObject's dirty flag,
   // which is cleared even when performLayout throws. A failed layout must not make
   // the surrogate eligible to initiate deferred layout.
-  bool get isReadyForInitialDeferredLayout => _isReadyForInitialDeferredLayout;
-
   bool _isReadyForInitialDeferredLayout = false;
 
   @override

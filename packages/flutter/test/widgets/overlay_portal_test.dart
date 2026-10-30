@@ -635,6 +635,7 @@ void main() {
         ..dispose(),
     );
     const size = Size.square(40);
+    const overlayChildKey = ValueKey<String>('overlay child');
 
     final Widget widget = Directionality(
       key: GlobalKey(debugLabel: 'key'),
@@ -647,7 +648,8 @@ void main() {
               builder: (BuildContext context) {
                 return OverlayPortal(
                   controller: controller1,
-                  overlayChildBuilder: (BuildContext context) => const SizedBox(),
+                  overlayChildBuilder: (BuildContext context) =>
+                      const SizedBox(key: overlayChildKey),
                   child: SizedBox.fromSize(size: size),
                 );
               },
@@ -661,6 +663,83 @@ void main() {
     await tester.pumpWidget(widget);
     expect(tester.getSize(find.byType(Overlay)), size);
     expect(tester.takeException(), isNull);
+    // The theater, not the layout surrogate, starts this overlay child's first layout.
+    expect(tester.getSize(find.byKey(overlayChildKey)), size);
+  });
+
+  testWidgets('root overlay child waits for an offstage anchor that was never laid out', (
+    WidgetTester tester,
+  ) async {
+    final controller = OverlayPortalController()..show();
+    OverlayChildLayoutInfo? layoutInfo;
+    final bottom = OverlayEntry(
+      maintainState: true,
+      builder: (BuildContext context) => Center(
+        child: OverlayPortal.overlayChildLayoutBuilder(
+          controller: controller,
+          overlayLocation: OverlayChildLocation.rootOverlay,
+          overlayChildBuilder: (BuildContext context, OverlayChildLayoutInfo info) {
+            layoutInfo = info;
+            return const SizedBox.shrink();
+          },
+          child: const SizedBox.square(dimension: 10.0),
+        ),
+      ),
+    );
+    final top = OverlayEntry(
+      opaque: true,
+      builder: (BuildContext context) => const SizedBox.expand(),
+    );
+    final root = OverlayEntry(
+      builder: (BuildContext context) => Overlay(initialEntries: <OverlayEntry>[bottom, top]),
+    );
+    var topRemoved = false;
+    addTearDown(() {
+      if (!topRemoved) {
+        top.remove();
+      }
+      for (final entry in <OverlayEntry>[bottom, root]) {
+        entry.remove();
+      }
+      for (final entry in <OverlayEntry>[bottom, top, root]) {
+        entry.dispose();
+      }
+    });
+
+    // The anchor starts offstage in the inner Overlay, but its deferred child
+    // is attached to the onstage root Overlay.
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Overlay(initialEntries: <OverlayEntry>[root]),
+      ),
+    );
+    expect(tester.takeException(), isNull);
+    final RenderBox surrogate = tester.renderObject(
+      find.byType(OverlayPortal, skipOffstage: false),
+    );
+    expect(surrogate.attached, isTrue);
+    expect(surrogate.hasSize, isFalse);
+    final RenderObject rootTheater = tester.renderObject(find.byType(Overlay).first);
+    final deferredChildren = <RenderBox>[];
+    rootTheater.visitChildren((RenderObject child) {
+      if (child.runtimeType.toString() == '_RenderDeferredLayoutBox') {
+        deferredChildren.add(child as RenderBox);
+      }
+    });
+    expect(deferredChildren, hasLength(1));
+    final RenderBox deferredChild = deferredChildren.single;
+    expect(deferredChild.attached, isTrue);
+    expect(deferredChild.hasSize, isFalse);
+    expect(layoutInfo, isNull);
+
+    top.remove();
+    topRemoved = true;
+    await tester.pump();
+    expect(tester.takeException(), isNull);
+    expect(layoutInfo?.childSize, const Size.square(10.0));
+    expect(deferredChild.hasSize, isTrue);
+    expect(deferredChild.debugNeedsLayout, isFalse);
   });
 
   for (final bounded in <bool>[false, true]) {
@@ -3083,21 +3162,17 @@ void main() {
                       builder: (BuildContext context) => Center(
                         child: SizedBox(
                           height: 400.0,
-                          // Let debug baseline verification check the overlay child
-                          // without asking the viewport for an unsupported baseline.
-                          child: IgnoreBaseline(
-                            child: ListView.builder(
-                              controller: scrollController,
-                              itemCount: 20,
-                              itemBuilder: (BuildContext context, int index) => index == 3
-                                  ? _KeepAliveOverlayPortalItem(
-                                      useLayoutBuilder: useLayoutBuilder,
-                                      onOverlayHit: () {
-                                        overlayHitCount += 1;
-                                      },
-                                    )
-                                  : SizedBox(height: 250.0, child: Text('Item $index')),
-                            ),
+                          child: ListView.builder(
+                            controller: scrollController,
+                            itemCount: 20,
+                            itemBuilder: (BuildContext context, int index) => index == 3
+                                ? _KeepAliveOverlayPortalItem(
+                                    useLayoutBuilder: useLayoutBuilder,
+                                    onOverlayHit: () {
+                                      overlayHitCount += 1;
+                                    },
+                                  )
+                                : SizedBox(height: 250.0, child: Text('Item $index')),
                           ),
                         ),
                       ),
@@ -3274,7 +3349,6 @@ void main() {
       expect(surrogate.debugNeedsLayout, isFalse);
       // RenderObject clears its dirty flag after reporting a layout exception,
       // but the surrogate still needs a successful layout before it is ready.
-      expect((surrogate as dynamic).isReadyForInitialDeferredLayout, isFalse);
       errors.clear();
       final deferredChildren = <RenderBox>[];
       theater.visitChildren((RenderObject child) {
@@ -3295,7 +3369,6 @@ void main() {
       expect(errors, isEmpty);
       expect(deferredChild.hasSize, isTrue);
       expect(deferredChild.debugNeedsLayout, isFalse);
-      expect((surrogate as dynamic).isReadyForInitialDeferredLayout, isTrue);
     } finally {
       FlutterError.onError = previousHandler;
     }
@@ -3345,7 +3418,6 @@ void main() {
       final RenderObject theater = tester.renderObject(find.byType(Overlay));
       expect(errors, isEmpty);
       expect(surrogate.size, const Size(100.0, 100.0));
-      expect((surrogate as dynamic).isReadyForInitialDeferredLayout, isTrue);
 
       // The failed descendant leaves the Semantics proxy's old size in place.
       // Adopting it under tighter constraints fails the surrogate's local layout.
@@ -3373,7 +3445,6 @@ void main() {
       expect(surrogate.size, const Size(100.0, 100.0));
       expect(surrogate.constraints, BoxConstraints.tight(const Size(100.0, 50.0)));
       expect(surrogate.debugNeedsLayout, isFalse);
-      expect((surrogate as dynamic).isReadyForInitialDeferredLayout, isFalse);
       final deferredChildren = <RenderBox>[];
       theater.visitChildren((RenderObject child) {
         if (child.runtimeType.toString() == '_RenderDeferredLayoutBox') {
@@ -3399,7 +3470,6 @@ void main() {
       await tester.pump();
       expect(errors, isEmpty);
       expect(surrogate.size, const Size(100.0, 50.0));
-      expect((surrogate as dynamic).isReadyForInitialDeferredLayout, isTrue);
       expect(deferredChild.hasSize, isTrue);
       expect(deferredChild.debugNeedsLayout, isFalse);
     } finally {
