@@ -964,6 +964,133 @@ Future<void> testMain() async {
     await expectLater(ui.FragmentProgram.fromAsset('voronoi shader'), completes);
   }, skip: isWimp); // https://github.com/flutter/flutter/issues/175431
 
+  // https://github.com/flutter/flutter/issues/193221
+  test(
+    'disposing a fragment shader after recording does not change the recorded picture',
+    () async {
+      final ui.FragmentProgram program = await renderer.createFragmentProgram('vec4_uniform');
+      final ui.FragmentShader shader = program.fragmentShader();
+      shader.getUniformVec4('color_rgba').set(1.0, 0.0, 0.0, 1.0);
+
+      final recorder = ui.PictureRecorder();
+      final canvas = ui.Canvas(recorder);
+      canvas.drawRect(const ui.Rect.fromLTWH(0, 0, 10, 10), ui.Paint()..shader = shader);
+      final ui.Picture picture = recorder.endRecording();
+      shader.dispose();
+
+      final ByteData pixels = await _rasterizePicture(picture, width: 10, height: 10);
+      picture.dispose();
+
+      expect(_rgbaAt(pixels, width: 10, x: 5, y: 5), <int>[255, 0, 0, 255]);
+    },
+    skip: isWimp,
+  ); // https://github.com/flutter/flutter/issues/175431
+
+  // https://github.com/flutter/flutter/issues/193221
+  test('disposed fragment shader uniforms are not reused by later shaders in a picture', () async {
+    final ui.FragmentProgram program = await renderer.createFragmentProgram('vec4_uniform');
+    final recorder = ui.PictureRecorder();
+    final canvas = ui.Canvas(recorder);
+
+    final ui.FragmentShader redShader = program.fragmentShader();
+    redShader.getUniformVec4('color_rgba').set(1.0, 0.0, 0.0, 1.0);
+    canvas.drawRect(const ui.Rect.fromLTWH(0, 0, 10, 10), ui.Paint()..shader = redShader);
+    redShader.dispose();
+
+    // Created after the red shader is disposed, so it may be allocated in the
+    // memory the red shader released.
+    final ui.FragmentShader blueShader = program.fragmentShader();
+    blueShader.getUniformVec4('color_rgba').set(0.0, 0.0, 1.0, 1.0);
+    canvas.drawRect(const ui.Rect.fromLTWH(10, 0, 10, 10), ui.Paint()..shader = blueShader);
+
+    final ui.Picture picture = recorder.endRecording();
+    final ByteData pixels = await _rasterizePicture(picture, width: 20, height: 10);
+    picture.dispose();
+    blueShader.dispose();
+
+    expect(_rgbaAt(pixels, width: 20, x: 5, y: 5), <int>[
+      255,
+      0,
+      0,
+      255,
+    ], reason: 'left box should be red');
+    expect(_rgbaAt(pixels, width: 20, x: 15, y: 5), <int>[
+      0,
+      0,
+      255,
+      255,
+    ], reason: 'right box should be blue');
+  }, skip: isWimp); // https://github.com/flutter/flutter/issues/175431
+
+  // https://github.com/flutter/flutter/issues/193221
+  test('disposing a fragment shader with image sampler does not corrupt sampled picture', () async {
+    final ui.Image image = _createOvalGradientImage(imageDimension: 16);
+    final ui.FragmentProgram program = await renderer.createFragmentProgram('texture_shader');
+    final ui.FragmentShader shader = program.fragmentShader();
+    shader.getUniformFloat('u_size', 0).set(10);
+    shader.getUniformFloat('u_size', 1).set(10);
+    shader.setImageSampler(0, image);
+
+    ui.Picture recordTexturedRect() {
+      final recorder = ui.PictureRecorder();
+      final canvas = ui.Canvas(recorder);
+      canvas.drawRect(const ui.Rect.fromLTWH(0, 0, 10, 10), ui.Paint()..shader = shader);
+      return recorder.endRecording();
+    }
+
+    // Rendered while the shader and image are still alive.
+    final ui.Picture expectedPicture = recordTexturedRect();
+    final ByteData expectedPixels = await _rasterizePicture(expectedPicture, width: 10, height: 10);
+    expectedPicture.dispose();
+
+    final ui.Picture picture = recordTexturedRect();
+    shader.dispose();
+    image.dispose();
+    final ByteData pixels = await _rasterizePicture(picture, width: 10, height: 10);
+    picture.dispose();
+
+    // The center of the image lies inside the gradient oval, not on the black background.
+    expect(_rgbaAt(expectedPixels, width: 10, x: 5, y: 5), isNot(<int>[0, 0, 0, 255]));
+    expect(Uint8List.sublistView(pixels), Uint8List.sublistView(expectedPixels));
+  }, skip: isWimp); // https://github.com/flutter/flutter/issues/175431
+
+  // https://github.com/flutter/flutter/issues/193221
+  test(
+    'mutating uniforms across multiple draw calls in a single picture preserves independent states',
+    () async {
+      final ui.FragmentProgram program = await renderer.createFragmentProgram('vec4_uniform');
+      final ui.FragmentShader shader = program.fragmentShader();
+      final ui.UniformVec4Slot color = shader.getUniformVec4('color_rgba');
+      final paint = ui.Paint()..shader = shader;
+
+      final recorder = ui.PictureRecorder();
+      final canvas = ui.Canvas(recorder);
+      color.set(1.0, 0.0, 0.0, 1.0);
+      canvas.drawRect(const ui.Rect.fromLTWH(0, 0, 10, 10), paint);
+      color.set(0.0, 0.0, 1.0, 1.0);
+      canvas.drawRect(const ui.Rect.fromLTWH(10, 0, 10, 10), paint);
+      final ui.Picture picture = recorder.endRecording();
+
+      final ByteData pixels = await _rasterizePicture(picture, width: 20, height: 10);
+      picture.dispose();
+      shader.dispose();
+
+      expect(_rgbaAt(pixels, width: 20, x: 5, y: 5), <int>[
+        255,
+        0,
+        0,
+        255,
+      ], reason: 'left box should keep the uniforms it was drawn with');
+      expect(_rgbaAt(pixels, width: 20, x: 15, y: 5), <int>[
+        0,
+        0,
+        255,
+        255,
+      ], reason: 'right box should use the mutated uniforms');
+    },
+    skip: isWimp, // https://github.com/flutter/flutter/issues/175431
+  );
+
   group('fragmentShader uniforms', () {
     late Map<Type, ui.FragmentShader> shaderMap;
     setUpAll(() async {
@@ -2095,6 +2222,24 @@ ui.Image _createOvalGradientImage({required int imageDimension}) {
   } finally {
     picture.dispose();
   }
+}
+
+Future<ByteData> _rasterizePicture(
+  ui.Picture picture, {
+  required int width,
+  required int height,
+}) async {
+  final ui.Image image = await picture.toImage(width, height);
+  try {
+    return (await image.toByteData())!;
+  } finally {
+    image.dispose();
+  }
+}
+
+List<int> _rgbaAt(ByteData pixels, {required int width, required int x, required int y}) {
+  final int offset = (y * width + x) * 4;
+  return Uint8List.sublistView(pixels, offset, offset + 4).toList();
 }
 
 ui.Image _imageFromShader({required ui.Shader shader, required int imageDimension}) {
