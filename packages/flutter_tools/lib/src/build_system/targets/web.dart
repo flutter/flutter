@@ -14,14 +14,14 @@ import '../../base/common.dart';
 import '../../base/file_system.dart';
 import '../../base/logger.dart';
 import '../../base/process.dart';
+import '../../base/template.dart';
 import '../../build_info.dart';
-import '../../cache.dart';
 import '../../convert.dart';
 import '../../dart/language_version.dart';
 import '../../dart/package_map.dart';
 import '../../features.dart';
 import '../../flutter_plugins.dart';
-import '../../globals.dart' as globals;
+import '../../isolated/mustache_template.dart';
 import '../../isolated/native_assets/dart_hook_result.dart';
 import '../../project.dart';
 import '../../web/bootstrap.dart';
@@ -50,7 +50,9 @@ const String _kLegacyWebDeprecationWarning =
 /// Generates an entry point for a web target.
 // Keep this in sync with build_runner/resident_web_runner.dart
 class WebEntrypointTarget extends Target {
-  const WebEntrypointTarget();
+  const WebEntrypointTarget({this.templateRenderer = const MustacheTemplateRenderer()});
+
+  final TemplateRenderer templateRenderer;
 
   @override
   String get name => 'web_entrypoint';
@@ -86,7 +88,7 @@ class WebEntrypointTarget extends Target {
     final LanguageVersion languageVersion = determineLanguageVersion(
       environment.fileSystem.file(targetFile),
       packageConfig[flutterProject.manifest.appName],
-      Cache.flutterRoot!,
+      environment.flutterRootDir.path,
     );
 
     // Use the PackageConfig to find the correct package-scheme import path
@@ -105,6 +107,8 @@ class WebEntrypointTarget extends Target {
     await injectBuildTimePluginFilesForWebPlatform(
       flutterProject,
       destination: environment.buildDir,
+      logger: environment.logger,
+      templateRenderer: templateRenderer,
     );
     // The below works because `injectBuildTimePluginFiles` is configured to write
     // the web_plugin_registrant.dart file alongside the generated main.dart
@@ -161,7 +165,9 @@ String _hashAndRenameWebOutput({required File file, File? sourceMapFile}) {
 }
 
 abstract class Dart2WebTarget extends Target {
-  const Dart2WebTarget();
+  const Dart2WebTarget({required this.engineRevision});
+
+  final String engineRevision;
 
   WebCompilerConfig get compilerConfig;
 
@@ -180,7 +186,7 @@ abstract class Dart2WebTarget extends Target {
       );
       if (!canvasKitUrlAlreadySet) {
         dartDefines.add(
-          'FLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/${globals.flutterVersion.engineRevision}/',
+          'FLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/$engineRevision/',
         );
       }
     }
@@ -260,7 +266,7 @@ abstract class Dart2WebTarget extends Target {
 
 /// Compiles a web entry point with dart2js.
 class Dart2JSTarget extends Dart2WebTarget {
-  Dart2JSTarget(this.compilerConfig);
+  Dart2JSTarget(this.compilerConfig, {required super.engineRevision});
 
   static final RegExp _mainJsRegex = RegExp(r'^main\.dart(\.[a-f0-9]+)?\.js$');
   static final RegExp _mainJsMapRegex = RegExp(r'^main\.dart(\.[a-f0-9]+)?\.js\.map$');
@@ -506,7 +512,7 @@ enum _DryRunOutcome {
 
 /// Compiles a web entry point with dart2wasm.
 class Dart2WasmTarget extends Dart2WebTarget {
-  Dart2WasmTarget(this.compilerConfig, this._analytics);
+  Dart2WasmTarget(this.compilerConfig, this._analytics, {required super.engineRevision});
 
   static final RegExp _mainWasmRegex = RegExp(r'^main\.dart(\.[a-f0-9]+)?\.wasm$');
   static final RegExp _mainWasmMapRegex = RegExp(r'^main\.dart(\.[a-f0-9]+)?\.wasm\.map$');
@@ -1114,22 +1120,31 @@ class Dart2WasmTarget extends Dart2WebTarget {
 /// Unpacks the dart2js or dart2wasm compilation and resources to a given
 /// output directory.
 class WebReleaseBundle extends Target {
-  WebReleaseBundle(List<WebCompilerConfig> configs, Analytics analytics)
-    : this._(
-        compileTargets: configs
-            .map(
-              (WebCompilerConfig config) => switch (config) {
-                WasmCompilerConfig() => Dart2WasmTarget(config, analytics),
-                JsCompilerConfig() => Dart2JSTarget(config),
-              },
-            )
-            .toList(),
-      );
+  WebReleaseBundle(
+    List<WebCompilerConfig> configs,
+    Analytics analytics, {
+    required String engineRevision,
+  }) : this._(
+         compileTargets: configs
+             .map(
+               (WebCompilerConfig config) => switch (config) {
+                 WasmCompilerConfig() => Dart2WasmTarget(
+                   config,
+                   analytics,
+                   engineRevision: engineRevision,
+                 ),
+                 JsCompilerConfig() => Dart2JSTarget(config, engineRevision: engineRevision),
+               },
+             )
+             .toList(),
+         engineRevision: engineRevision,
+       );
 
-  WebReleaseBundle._({required this.compileTargets})
+  WebReleaseBundle._({required this.compileTargets, required String engineRevision})
     : templatedFilesTarget = WebTemplatedFiles(
         compileTargets.map((Dart2WebTarget target) => target.buildConfig).toList(),
         compileTargets: compileTargets,
+        engineRevision: engineRevision,
       );
 
   final List<Dart2WebTarget> compileTargets;
@@ -1318,7 +1333,7 @@ class WebReleaseBundle extends Target {
 
     final File sourceRobotoFont = environment.fileSystem.file(
       environment.fileSystem.path.join(
-        Cache.flutterRoot!,
+        environment.flutterRootDir.path,
         'engine',
         'src',
         'flutter',
@@ -1355,10 +1370,11 @@ class WebReleaseBundle extends Target {
 }
 
 class WebTemplatedFiles extends Target {
-  WebTemplatedFiles(this.buildDescriptions, {this.compileTargets});
+  WebTemplatedFiles(this.buildDescriptions, {this.compileTargets, required this.engineRevision});
 
   final List<Map<String, Object?>> buildDescriptions;
   final List<Dart2WebTarget>? compileTargets;
+  final String engineRevision;
 
   @override
   String get buildKey => compileTargets != null
@@ -1402,11 +1418,11 @@ class WebTemplatedFiles extends Target {
     // (https://wicg.github.io/cross-origin-storage/). This assumes that the files will exist in
     // the output directory at this point.
     final wasmHashes = <String, String>{};
-    final String canvasKitPath = globals.artifacts!
+    final String canvasKitPath = environment.artifacts
         .getHostArtifact(HostArtifact.flutterWebSdk)
         .path;
-    final Directory canvasKitDirectory = globals.fs.directory(
-      globals.fs.path.join(canvasKitPath, 'canvaskit'),
+    final Directory canvasKitDirectory = environment.fileSystem.directory(
+      environment.fileSystem.path.join(canvasKitPath, 'canvaskit'),
     );
     _scanDirectoryForWasmHashes(canvasKitDirectory, wasmHashes);
 
@@ -1441,7 +1457,7 @@ class WebTemplatedFiles extends Target {
               .toList()
         : buildDescriptions;
     final buildConfig = <String, Object>{
-      'engineRevision': globals.flutterVersion.engineRevision,
+      'engineRevision': engineRevision,
       'wasmHashes': _computeWasmHashes(environment),
       'builds': descriptions,
       if (environment.defines[kUseLocalCanvasKitFlag] == 'true') 'useLocalCanvasKit': true,
@@ -1467,16 +1483,12 @@ $supportsDart2WasmLine''';
   @override
   Future<void> build(Environment environment) async {
     final Directory webResources = environment.projectDir.childDirectory('web');
-    final includeServiceWorkerSettings =
-        environment.serviceWorkerStrategy == ServiceWorkerStrategy.offlineFirst;
     final File inputFlutterBootstrapJs = webResources.childFile('flutter_bootstrap.js');
     final String inputBootstrapContent;
     if (inputFlutterBootstrapJs.existsSync()) {
       inputBootstrapContent = await inputFlutterBootstrapJs.readAsString();
     } else {
-      inputBootstrapContent = generateDefaultFlutterBootstrapScript(
-        includeServiceWorkerSettings: includeServiceWorkerSettings,
-      );
+      inputBootstrapContent = generateDefaultFlutterBootstrapScript();
     }
     final bootstrapTemplate = WebTemplate(inputBootstrapContent);
     for (final WebTemplateWarning warning in bootstrapTemplate.getWarnings()) {
@@ -1486,7 +1498,7 @@ $supportsDart2WasmLine''';
     final FileSystem fileSystem = environment.fileSystem;
     final File flutterJsFile = fileSystem.file(
       fileSystem.path.join(
-        globals.artifacts!.getHostArtifact(HostArtifact.flutterJsDirectory).path,
+        environment.artifacts.getHostArtifact(HostArtifact.flutterJsDirectory).path,
         'flutter.js',
       ),
     );
@@ -1500,15 +1512,8 @@ $supportsDart2WasmLine''';
         if (key.startsWith(kWebDefinePrefix)) key.substring(kWebDefinePrefix.length): value,
     };
 
-    // Insert a random hash into the requests for service_worker.js. This is not a content hash,
-    // because it would need to be the hash for the entire bundle and not just the resource
-    // in question.
-    final String? serviceWorkerVersion = includeServiceWorkerSettings
-        ? Random().nextInt(1 << 32).toString()
-        : null;
     final String bootstrapContent = bootstrapTemplate.withSubstitutions(
       baseHref: '',
-      serviceWorkerVersion: serviceWorkerVersion,
       flutterJsFile: flutterJsFile,
       buildConfig: buildConfig,
       logger: environment.logger,
@@ -1532,7 +1537,6 @@ $supportsDart2WasmLine''';
         final String indexHtmlContent = indexHtmlTemplate.withSubstitutions(
           baseHref: environment.defines[kBaseHref] ?? '/',
           staticAssetsUrl: environment.defines[kStaticAssetsUrl] ?? '/',
-          serviceWorkerVersion: serviceWorkerVersion,
           flutterJsFile: flutterJsFile,
           buildConfig: buildConfig,
           flutterBootstrapJs: bootstrapContent,
@@ -1583,9 +1587,10 @@ $supportsDart2WasmLine''';
 /// These assets can be cached until a new version of the flutter web sdk is
 /// downloaded.
 class WebBuiltInAssets extends Target {
-  const WebBuiltInAssets(this.fileSystem);
+  const WebBuiltInAssets(this.fileSystem, this.artifacts);
 
   final FileSystem fileSystem;
+  final Artifacts artifacts;
 
   @override
   String get name => 'web_static_assets';
@@ -1599,11 +1604,8 @@ class WebBuiltInAssets extends Target {
   @override
   List<Source> get inputs => const <Source>[Source.hostArtifact(HostArtifact.flutterWebSdk)];
 
-  Directory get _canvasKitDirectory => globals.fs.directory(
-    fileSystem.path.join(
-      globals.artifacts!.getHostArtifact(HostArtifact.flutterWebSdk).path,
-      'canvaskit',
-    ),
+  Directory get _canvasKitDirectory => fileSystem.directory(
+    fileSystem.path.join(artifacts.getHostArtifact(HostArtifact.flutterWebSdk).path, 'canvaskit'),
   );
 
   List<File> get _canvasKitFiles =>
@@ -1634,7 +1636,7 @@ class WebBuiltInAssets extends Target {
 
     // Write the Flutter loader and its source map.
     final Directory flutterJsDirectory = fileSystem.directory(
-      globals.artifacts!.getHostArtifact(HostArtifact.flutterJsDirectory).path,
+      artifacts.getHostArtifact(HostArtifact.flutterJsDirectory).path,
     );
     for (final fileName in <String>['flutter.js', 'flutter.js.map']) {
       final File sourceFile = flutterJsDirectory.childFile(fileName);
@@ -1644,21 +1646,35 @@ class WebBuiltInAssets extends Target {
   }
 }
 
-/// Generate a service worker for a web target.
+/// Finalizes the web output directory, emits the self-unregistering
+/// `flutter_service_worker.js` cleanup stub when the project does not provide
+/// a custom `web/flutter_service_worker.js`, and generates
+/// `precache_manifest.json` when `--web-content-hash` is enabled.
+///
+/// The [WebServiceWorker] class and `web_service_worker` target name are
+/// preserved for `BuildTargets.webServiceWorker` compatibility.
 class WebServiceWorker extends Target {
-  const WebServiceWorker(this.fileSystem, this.compileConfigs, this.analytics);
+  const WebServiceWorker(
+    this.fileSystem,
+    this.compileConfigs,
+    this.analytics,
+    this.artifacts, {
+    required this.engineRevision,
+  });
 
   final FileSystem fileSystem;
   final List<WebCompilerConfig> compileConfigs;
   final Analytics analytics;
+  final Artifacts artifacts;
+  final String engineRevision;
 
   @override
   String get name => 'web_service_worker';
 
   @override
   List<Target> get dependencies => <Target>[
-    WebReleaseBundle(compileConfigs, analytics),
-    WebBuiltInAssets(fileSystem),
+    WebReleaseBundle(compileConfigs, analytics, engineRevision: engineRevision),
+    WebBuiltInAssets(fileSystem, artifacts),
   ];
 
   @override
@@ -1691,26 +1707,26 @@ class WebServiceWorker extends Target {
       enabled: webContentHash,
       useLocalCanvasKit: environment.defines[kUseLocalCanvasKitFlag] == 'true',
     );
-    final File serviceWorkerFile = environment.outputDir.childFile('flutter_service_worker.js');
-    final depfile = Depfile(contents, <File>[serviceWorkerFile, ?precacheManifestFile]);
-    final String fileGeneratorsPath = environment.artifacts.getArtifactPath(
-      Artifact.flutterToolsFileGenerators,
-    );
-    final String serviceWorker = generateServiceWorker(
-      fileGeneratorsPath,
-      fileSystem: environment.fileSystem,
-      serviceWorkerStrategy: environment.serviceWorkerStrategy,
-    );
-    serviceWorkerFile.writeAsStringSync(serviceWorker);
+    final File userServiceWorker = environment.projectDir
+        .childDirectory('web')
+        .childFile('flutter_service_worker.js');
+    File? serviceWorkerFile;
+    if (!userServiceWorker.existsSync()) {
+      serviceWorkerFile = environment.outputDir.childFile('flutter_service_worker.js');
+      final String fileGeneratorsPath = environment.artifacts.getArtifactPath(
+        Artifact.flutterToolsFileGenerators,
+      );
+      final String serviceWorker = generateServiceWorker(
+        fileGeneratorsPath,
+        fileSystem: environment.fileSystem,
+      );
+      serviceWorkerFile.writeAsStringSync(serviceWorker);
+    }
+    final depfile = Depfile(contents, <File>[?serviceWorkerFile, ?precacheManifestFile]);
     environment.depFileService.writeToFile(
       depfile,
       environment.buildDir.childFile('service_worker.d'),
+      writeEmpty: true,
     );
   }
-}
-
-extension on Environment {
-  ServiceWorkerStrategy get serviceWorkerStrategy =>
-      ServiceWorkerStrategy.fromCliName(defines[kServiceWorkerStrategy]) ??
-      ServiceWorkerStrategy.offlineFirst;
 }

@@ -23,7 +23,6 @@ import '../base/utils.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
 import '../build_system/build_targets.dart';
-import '../cache.dart';
 import '../context/tool_context.dart';
 import '../dart/language_version.dart';
 import '../dart/package_map.dart';
@@ -38,11 +37,11 @@ import '../vmservice.dart';
 import '../web/chrome.dart';
 import '../web/compile.dart';
 import '../web/devfs_config.dart';
-import '../web/file_generators/flutter_service_worker_js.dart';
 import '../web/file_generators/main_dart.dart' as main_dart;
 import '../web/web_device.dart';
 import '../web/web_runner.dart';
 import 'devfs_web.dart';
+import 'mustache_template.dart';
 import 'web_expression_compiler.dart';
 
 /// Injectable factory to create a [ResidentWebRunner].
@@ -299,9 +298,7 @@ class ResidentWebRunner extends ResidentRunner {
           rootDirectory: fileSystem.directory(projectRootPath),
           useDwdsWebSocketConnection: useDwdsWebSocketConnection,
           webCrossOriginIsolation: crossOriginIsolation,
-          fileSystem: fileSystem,
-          logger: logger,
-          platform: platform,
+          toolContext: toolContext,
           webDefines: _webDefines,
         );
         Uri url = await flutterDevice!.devFS!.create();
@@ -311,6 +308,12 @@ class ResidentWebRunner extends ResidentRunner {
         if (debuggingOptions.buildInfo.isDebug && !useWasm) {
           await runSourceGenerators();
           final UpdateFSReport report = await _updateDevFS(fullRestart: true, resetCompiler: true);
+          sendDdcCompileAnalytics(
+            deprecatedJsInterop: debuggingOptions.buildInfo.deprecatedJsInterop,
+            command: 'run',
+            succeeded: report.success,
+            analytics: analytics,
+          );
           if (!report.success) {
             logger.printError('Failed to compile application.');
             appFailedToStart();
@@ -320,24 +323,15 @@ class ResidentWebRunner extends ResidentRunner {
           cacheInitialDillCompilation();
         } else {
           final webBuilder = WebBuilder(
-            logger: logger,
-            processManager: processManager,
-            buildSystem: buildSystem,
-            fileSystem: fileSystem,
-            flutterVersion: flutterVersion,
             analytics: analytics,
-            artifacts: artifacts,
+            buildSystem: buildSystem,
             buildTargets: buildTargets,
-            cache: cache,
-            config: config,
-            platform: platform,
-            terminal: terminal,
+            toolContext: toolContext,
           );
           await webBuilder.buildWeb(
             flutterProject,
             target,
             debuggingOptions.buildInfo,
-            ServiceWorkerStrategy.none,
             compilerConfigs: <WebCompilerConfig>[_compilerConfig],
             webDefines: _webDefines,
           );
@@ -488,24 +482,15 @@ class ResidentWebRunner extends ResidentRunner {
         report = null;
         try {
           final webBuilder = WebBuilder(
-            logger: logger,
-            processManager: processManager,
-            buildSystem: buildSystem,
-            fileSystem: fileSystem,
-            flutterVersion: flutterVersion,
             analytics: analytics,
-            artifacts: artifacts,
+            buildSystem: buildSystem,
             buildTargets: buildTargets,
-            cache: cache,
-            config: config,
-            platform: platform,
-            terminal: terminal,
+            toolContext: toolContext,
           );
           await webBuilder.buildWeb(
             flutterProject,
             target,
             debuggingOptions.buildInfo,
-            ServiceWorkerStrategy.none,
             compilerConfigs: <WebCompilerConfig>[_compilerConfig],
             webDefines: _webDefines,
           );
@@ -704,6 +689,8 @@ class ResidentWebRunner extends ResidentRunner {
       await injectBuildTimePluginFilesForWebPlatform(
         flutterProject,
         destination: _generatedEntrypointDirectory!,
+        logger: logger,
+        templateRenderer: const MustacheTemplateRenderer(),
       );
       // The below works because `injectBuildTimePluginFiles` is configured to write
       // the web_plugin_registrant.dart file alongside the generated main.dart
@@ -725,7 +712,7 @@ class ResidentWebRunner extends ResidentRunner {
       final LanguageVersion languageVersion = determineLanguageVersion(
         fileSystem.file(mainUri),
         packageConfig[flutterProject.manifest.appName],
-        Cache.flutterRoot!,
+        cache.flutterRoot,
       );
 
       final String entrypoint = main_dart.generateMainDartFile(
@@ -890,6 +877,7 @@ class ResidentWebRunner extends ResidentRunner {
             },
             device: device,
             flutterProject: flutterProject,
+            flutterVersion: flutterVersion,
             printStructuredErrorLogMethod: printStructuredErrorLog,
             vmService: _vmService.service,
           );
