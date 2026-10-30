@@ -17,6 +17,8 @@
 # android_sdk_jar) and the build tools' lambda stubs, exported below; the rest
 # is unread.
 
+load("@host_platform//:host.bzl", "HOST_NDK_PREBUILT")
+
 package(default_visibility = ["//visibility:public"])
 
 # The SDK's platform and build tools (build/config/android/config.gni:
@@ -66,8 +68,11 @@ NDK_VERSION = "28.2.13676358"
 
 NDK = "sdk/ndk/" + NDK_VERSION
 
-# android_toolchain_root: the NDK's LLVM toolchain for a Linux x64 host.
-TOOLCHAIN = NDK + "/toolchains/llvm/prebuilt/linux-x86_64"
+# android_toolchain_root: the NDK's LLVM toolchain of the host
+# (build/config/android/config.gni: prebuilt/$android_host_os-$android_host_arch,
+# linux-x86_64 or darwin-x86_64 -- HOST_NDK_PREBUILT). Only its sysroot and
+# compiler runtime archives are read; the engine's own clang compiles.
+TOOLCHAIN = NDK + "/toolchains/llvm/prebuilt/" + HOST_NDK_PREBUILT
 
 # The sysroot (GN's `sysroot` for Android). The toolchain derives the
 # --sysroot path from the NOTICE file's directory.
