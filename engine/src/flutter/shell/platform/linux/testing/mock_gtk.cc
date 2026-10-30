@@ -30,6 +30,28 @@ GType gdk_keymap_get_type() {
   return fl_mock_keymap_get_type();
 }
 
+G_DECLARE_FINAL_TYPE(FlMockGLContext,
+                     fl_mock_gl_context,
+                     FL,
+                     MOCK_GL_CONTEXT,
+                     GObject)
+
+struct _FlMockGLContext {
+  GObject parent_instance;
+};
+
+G_DEFINE_TYPE(FlMockGLContext, fl_mock_gl_context, G_TYPE_OBJECT)
+
+static void fl_mock_gl_context_class_init(FlMockGLContextClass* klass) {}
+
+static void fl_mock_gl_context_init(FlMockGLContext* self) {}
+
+// Override the abstract GdkGLContext type so tests can create context handles
+// without depending on a window system or OpenGL driver.
+GType gdk_gl_context_get_type() {
+  return fl_mock_gl_context_get_type();
+}
+
 static MockGtk* mock = nullptr;
 
 MockGtk::MockGtk() {
@@ -165,6 +187,14 @@ void gdk_gl_context_clear_current(GdkGLContext* context) {
 
 void gdk_gl_context_make_current(GdkGLContext* context) {
   check_thread();
+  if (mock != nullptr) {
+    mock->gdk_gl_context_make_current(context);
+  }
+}
+
+GdkGLContext* gdk_gl_context_get_current() {
+  check_thread();
+  return mock != nullptr ? mock->gdk_gl_context_get_current() : nullptr;
 }
 
 void gdk_cairo_draw_from_gl(cairo_t* cr,
@@ -177,6 +207,10 @@ void gdk_cairo_draw_from_gl(cairo_t* cr,
                             int width,
                             int height) {
   check_thread();
+  if (mock != nullptr) {
+    mock->gdk_cairo_draw_from_gl(cr, window, source, source_type, buffer_scale,
+                                 x, y, width, height);
+  }
 }
 
 GtkWidget* gtk_window_new(GtkWindowType type) {

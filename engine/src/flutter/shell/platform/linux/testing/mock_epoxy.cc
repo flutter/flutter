@@ -504,6 +504,12 @@ static void _glGenFramebuffers(GLsizei n, GLuint* framebuffers) {
   }
 }
 
+static void _glFlush() {
+  if (mock != nullptr) {
+    mock->glFlush();
+  }
+}
+
 static void _glGenRenderbuffers(GLsizei n, GLuint* renderbuffers) {
   for (GLsizei i = 0; i < n; i++) {
     renderbuffers[i] = 0;
@@ -774,6 +780,7 @@ static void library_init() {
   epoxy_glDeleteTextures = _glDeleteTextures;
   epoxy_glDisable = _glDisable;
   epoxy_glEnable = _glEnable;
+  epoxy_glFlush = _glFlush;
   epoxy_glFramebufferRenderbuffer = _glFramebufferRenderbuffer;
   epoxy_glFramebufferTexture2D = _glFramebufferTexture2D;
   epoxy_glGenFramebuffers = _glGenFramebuffers;

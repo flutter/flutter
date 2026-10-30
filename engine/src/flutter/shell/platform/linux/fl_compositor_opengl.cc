@@ -270,10 +270,24 @@ static gboolean fl_compositor_opengl_render(FlCompositor* compositor,
   }
 
   if (fl_framebuffer_get_shareable(self->framebuffer)) {
+    GdkGLContext* current_context = gdk_gl_context_get_current();
+    if (current_context == nullptr) {
+      g_mutex_unlock(&self->frame_mutex);
+      return FALSE;
+    }
+    g_autoptr(GdkGLContext) owner_context =
+        GDK_GL_CONTEXT(g_object_ref(current_context));
+
     g_autoptr(FlFramebuffer) sibling =
         fl_framebuffer_create_sibling(self->framebuffer);
     gdk_cairo_draw_from_gl(cr, window, fl_framebuffer_get_texture_id(sibling),
                            GL_TEXTURE, scale_factor, 0, 0, width, height);
+
+    // GDK leaves its paint context current. Submit its draw before switching
+    // back: framebuffer objects are local to the context that created them.
+    glFlush();
+    gdk_gl_context_make_current(owner_context);
+    g_clear_object(&sibling);
   } else {
     GLint saved_texture_binding;
     glGetIntegerv(GL_TEXTURE_BINDING_2D, &saved_texture_binding);
