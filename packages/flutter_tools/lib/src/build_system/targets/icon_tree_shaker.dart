@@ -17,6 +17,7 @@ import '../../build_info.dart';
 import '../../convert.dart';
 import '../../devfs.dart';
 import '../build_system.dart';
+import '../tools/recorded_uses.dart';
 
 List<Map<String, Object?>> _getList(Object? object, String errorMessage) {
   if (object is List<Object?>) {
@@ -103,34 +104,20 @@ class IconTreeShaker {
       return;
     }
 
-    final candidates = <String>[
-      'recorded_uses.json',
-      'recorded_uses_js.json',
-      'recorded_uses_wasm.json',
-    ];
-    final recordedUsesFiles = <File>[];
-    for (final candidate in candidates) {
-      final File file = environment.buildDir.childFile(candidate);
-      if (file.existsSync() && file.lengthSync() > 0) {
-        recordedUsesFiles.add(file);
-      }
+    final Recordings? recordings;
+    try {
+      recordings = readRecordedUses(environment.buildDir);
+    } on FormatException catch (e) {
+      throw IconTreeShakerException._(e.message);
     }
-    if (recordedUsesFiles.isEmpty) {
-      final File defaultFile = environment.buildDir.childFile('recorded_uses.json');
+    if (recordings == null) {
+      final File defaultFile = environment.buildDir.childFile(recordedUsesFileNames.first);
       throw IconTreeShakerException._(
         'Expected to find recorded uses file at ${defaultFile.path}, but no file found.',
       );
     }
 
-    Recordings? combinedRecordings;
-    for (final file in recordedUsesFiles) {
-      final Recordings recordings = await _readRecordings(file);
-      combinedRecordings = combinedRecordings == null
-          ? recordings
-          : combinedRecordings + recordings;
-    }
-
-    final Map<String, List<int>> iconData = _parseRecordings(combinedRecordings!);
+    final Map<String, List<int>> iconData = _parseRecordings(recordings);
     final Set<String> familyKeys = iconData.keys.toSet();
 
     final Map<String, String> fonts = await _parseFontJson(
@@ -319,27 +306,6 @@ class IconTreeShaker {
       result[familyKey] = asset;
     }
     return result;
-  }
-
-  Future<Recordings> _readRecordings(File recordedUsesFile) async {
-    final String content = await recordedUsesFile.readAsString();
-    final Object? data;
-    try {
-      data = json.decode(content);
-    } on FormatException catch (e) {
-      throw IconTreeShakerException._('Failed to parse recorded uses file: $e');
-    }
-    if (data is! Map<String, Object?>) {
-      throw IconTreeShakerException._(
-        'Invalid recorded uses file: expected a top level JSON object.',
-      );
-    }
-
-    try {
-      return Recordings.fromJson(data);
-    } on Exception catch (e) {
-      throw IconTreeShakerException._('Failed to parse recorded uses file: $e');
-    }
   }
 
   Map<String, List<int>> _parseRecordings(Recordings recordings) {
