@@ -79,8 +79,7 @@ class GNTestCase(unittest.TestCase):
     args = gn.parse_args(['gn', '--bazel', '--target-dir', 'ci/host_debug_unopt'])
     self.assertTrue(args.bazel)
     self.assertEqual(
-        gn.main(['gn', '--bazel', '--target-dir', 'ci/no_such_build', '--runtime-mode', 'debug']),
-        1
+        gn.main(['gn', '--bazel', '--target-dir', 'ci/no_such_build', '--runtime-mode', 'debug']), 1
     )
     self.assertFalse(os.path.exists(os.path.join(gn.SRC_ROOT, 'out', 'ci', 'no_such_build')))
 

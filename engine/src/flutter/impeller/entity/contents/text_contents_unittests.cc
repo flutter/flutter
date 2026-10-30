@@ -6,11 +6,11 @@
 #include "flutter/impeller/renderer/testing/mocks.h"
 #include "flutter/testing/sk_data_fixtures.h"
 #include "flutter/testing/testing.h"
-#include "third_party/googletest/googletest/include/gtest/gtest.h"
 #include "impeller/entity/contents/text_contents.h"
 #include "impeller/playground/playground_test.h"
 #include "impeller/typographer/backends/skia/text_frame_skia.h"
 #include "impeller/typographer/backends/skia/typographer_context_skia.h"
+#include "third_party/googletest/googletest/include/gtest/gtest.h"
 #include "txt/platform.h"
 
 #pragma GCC diagnostic ignored "-Wunreachable-code"
