@@ -1069,6 +1069,9 @@ void main() {
     expect(find.text('Item 50'), findsOneWidget);
     expect(find.text('Item 55'), findsOneWidget);
     expect(find.text('Item 56'), findsNothing);
+    // Since items 47 to 58 were already cached during the jump to 10000.0,
+    // itemExtentBuilder is not re-invoked. We check renderSliver.layoutDimensions
+    // to verify that the sliver's layout dimensions reflect the updated scrollOffset.
     expect(
       sliverLayoutDimensions,
       const SliverLayoutDimensions(
