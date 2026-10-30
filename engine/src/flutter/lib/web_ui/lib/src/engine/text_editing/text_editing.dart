@@ -475,7 +475,8 @@ class EngineAutofillForm {
   /// The semantics tree already exposes each field through its own element, so
   /// a synthetic copy would show up as an extra, unlabeled control, and the
   /// dormant form keeps it in the page for the rest of the session. Browser
-  /// autofill does not read ARIA.
+  /// autofill does not read ARIA, so credential save and autofill keep working
+  /// through these elements.
   ///
   /// Without semantics, password manager extensions fill these elements, and
   /// some of them skip elements hidden from assistive technology, so they are
