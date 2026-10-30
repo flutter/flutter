@@ -505,15 +505,18 @@ class ToolDependencies {
         xcdevice ??
         XCDevice(
           analytics: finalAnalytics,
+          cocoaPods: finalCocoaPods,
           iproxy: IProxy(
             artifacts: finalArtifacts,
             logger: finalLogger,
             processManager: finalProcessManager,
             dyLdLibEntry: finalCache.dyLdLibEntry,
           ),
+          plistParser: finalPlistParser,
           templateRenderer: templateRenderer,
           toolContext: finalToolContext,
           xcode: finalXcode,
+          xcodeProjectInterpreter: finalXcodeProjectInterpreter,
         );
 
     final IOSWorkflow finalIOSWorkflow =
@@ -524,9 +527,12 @@ class ToolDependencies {
         iosSimulatorUtils ??
         IOSSimulatorUtils(
           analytics: finalAnalytics,
+          cocoaPods: finalCocoaPods,
           plistParser: finalPlistParser,
+          templateRenderer: templateRenderer,
           toolContext: finalToolContext,
           xcode: finalXcode,
+          xcodeProjectInterpreter: finalXcodeProjectInterpreter,
         );
 
     // 12. AndroidContext Dependencies
