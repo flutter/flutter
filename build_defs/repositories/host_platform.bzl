@@ -19,9 +19,9 @@ them.
 """
 
 _OSES = {
-    "linux": struct(gn = "linux", prebuilts = "linux", buildtools = "linux", platform = "linux", constraint = "@platforms//os:linux"),
-    "mac": struct(gn = "mac", prebuilts = "macos", buildtools = "mac", platform = "macos", constraint = "@platforms//os:macos"),
-    "windows": struct(gn = "win", prebuilts = "windows", buildtools = "windows", platform = "windows", constraint = "@platforms//os:windows"),
+    "linux": struct(gn = "linux", prebuilts = "linux", buildtools = "linux", platform = "linux", constraint = "@platforms//os:linux", ndk_host = "linux"),
+    "mac": struct(gn = "mac", prebuilts = "macos", buildtools = "mac", platform = "macos", constraint = "@platforms//os:macos", ndk_host = "darwin"),
+    "windows": struct(gn = "win", prebuilts = "windows", buildtools = "windows", platform = "windows", constraint = "@platforms//os:windows", ndk_host = "windows"),
 }
 
 _CPUS = {
@@ -77,6 +77,13 @@ def host_platform_values(os_name, arch):
         # linux_x64, macos_arm64, ...), the base of its runtime modes'
         # (build_defs/config/platforms.bzl).
         "HOST_PLATFORM": "%s_%s" % (spec.platform, cpu),
+        # The NDK's directory of host-built tools, which holds the Android
+        # sysroot and the compiler runtime archives the Android toolchains
+        # and a wrapped Android GN build read (build/config/android/config.gni:
+        # android_host_os and android_host_arch -- linux or darwin, and
+        # x86_64 on every host: the NDK ships no arm64 Mac tools, a Mac runs
+        # the x86_64 ones; the engine's own clang does the compiling).
+        "HOST_NDK_PREBUILT": "%s-x86_64" % spec.ndk_host,
     }
 
 def _host_platform_impl(rctx):
