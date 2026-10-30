@@ -314,15 +314,14 @@ class ToolDependencies {
     final Git finalGit =
         git ?? Git(currentPlatform: finalPlatform, runProcessWith: finalProcessUtils);
 
-    // 7. Flutter Version and Cache
+    // 7. Flutter Version
     final String flutterRoot =
-        Cache.flutterRoot ??
+        cache?.flutterRoot ??
         Cache.defaultFlutterRoot(
           platform: finalPlatform,
           fileSystem: finalFS,
           userMessages: finalUserMessages,
         );
-    Cache.flutterRoot ??= flutterRoot;
 
     final FlutterVersion finalFlutterVersion =
         flutterVersion ?? FlutterVersion(fs: finalFS, flutterRoot: flutterRoot, git: finalGit);
@@ -340,7 +339,7 @@ class ToolDependencies {
     finalAnalyticsInitialized = true;
     LocalSignals.instance.configureExit(analytics: finalAnalytics, logger: finalLogger);
 
-    // 9. Project Factory and Operating System Utilities
+    // 9. Project Factory, Operating System Utilities, and Cache
     final String projectRoot = findProjectRoot(finalFS) ?? finalFS.currentDirectory.path;
     final FlutterManifest? projectManifest = FlutterManifest.createFromPath(
       finalFS.path.join(projectRoot, 'pubspec.yaml'),
@@ -389,6 +388,7 @@ class ToolDependencies {
     final Cache finalCache =
         cache ??
         FlutterCache(
+          flutterRoot: flutterRoot,
           fileSystem: finalFS,
           logger: finalLogger,
           platform: finalPlatform,
@@ -414,10 +414,15 @@ class ToolDependencies {
 
     final CustomDevicesConfig finalCustomDevicesConfig =
         customDevicesConfig ??
-        CustomDevicesConfig(fileSystem: finalFS, logger: finalLogger, platform: finalPlatform);
+        CustomDevicesConfig(
+          cache: finalCache,
+          fileSystem: finalFS,
+          logger: finalLogger,
+          platform: finalPlatform,
+        );
 
     final PreRunValidator finalPreRunValidator =
-        preRunValidator ?? PreRunValidator(fileSystem: finalFS);
+        preRunValidator ?? PreRunValidator(cache: finalCache, fileSystem: finalFS);
 
     final ProcessInfo finalProcessInfo = processInfo ?? ProcessInfo(finalFS);
 
@@ -483,24 +488,14 @@ class ToolDependencies {
 
     finalXcode =
         xcode ??
-        Xcode(
-          platform: finalPlatform,
-          processManager: finalProcessManager,
-          logger: finalLogger,
-          fileSystem: finalFS,
-          xcodeProjectInterpreter: finalXcodeProjectInterpreter,
-          userMessages: finalUserMessages,
-        );
+        Xcode(toolContext: finalToolContext, xcodeProjectInterpreter: finalXcodeProjectInterpreter);
 
     final CocoaPods finalCocoaPods =
         cocoaPods ??
         CocoaPods(
-          fileSystem: finalFS,
-          processManager: finalProcessManager,
-          logger: finalLogger,
-          platform: finalPlatform,
-          xcodeProjectInterpreter: finalXcodeProjectInterpreter,
           analytics: finalAnalytics,
+          toolContext: finalToolContext,
+          xcodeProjectInterpreter: finalXcodeProjectInterpreter,
         );
 
     final CocoaPodsValidator finalCocoapodsValidator =
@@ -510,15 +505,18 @@ class ToolDependencies {
         xcdevice ??
         XCDevice(
           analytics: finalAnalytics,
+          cocoaPods: finalCocoaPods,
           iproxy: IProxy(
             artifacts: finalArtifacts,
             logger: finalLogger,
             processManager: finalProcessManager,
             dyLdLibEntry: finalCache.dyLdLibEntry,
           ),
+          plistParser: finalPlistParser,
           templateRenderer: templateRenderer,
           toolContext: finalToolContext,
           xcode: finalXcode,
+          xcodeProjectInterpreter: finalXcodeProjectInterpreter,
         );
 
     final IOSWorkflow finalIOSWorkflow =
@@ -529,9 +527,12 @@ class ToolDependencies {
         iosSimulatorUtils ??
         IOSSimulatorUtils(
           analytics: finalAnalytics,
+          cocoaPods: finalCocoaPods,
           plistParser: finalPlistParser,
+          templateRenderer: templateRenderer,
           toolContext: finalToolContext,
           xcode: finalXcode,
+          xcodeProjectInterpreter: finalXcodeProjectInterpreter,
         );
 
     // 12. AndroidContext Dependencies
@@ -585,7 +586,13 @@ class ToolDependencies {
 
     // 13. Doctor, EmulatorManager, and DeviceManager Dependencies
     final Doctor finalDoctor =
-        doctor ?? Doctor(clock: finalSystemClock, logger: finalLogger, analytics: finalAnalytics);
+        doctor ??
+        Doctor(
+          cache: finalCache,
+          clock: finalSystemClock,
+          logger: finalLogger,
+          analytics: finalAnalytics,
+        );
 
     final AndroidWorkflow finalAndroidWorkflow =
         androidWorkflow ??

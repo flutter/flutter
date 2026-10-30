@@ -49,7 +49,7 @@ void main() {
       logger: logger,
       processUtils: processUtils,
       xcode: Xcode.test(
-        processManager: FakeProcessManager.any(),
+        toolContext: FakeToolContext.macosHost(processManager: FakeProcessManager.any()),
         xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
       ),
       deviceVersion: Version(16, 0, 0),
@@ -103,7 +103,7 @@ void main() {
       logger: logger,
       processUtils: processUtils,
       xcode: Xcode.test(
-        processManager: FakeProcessManager.any(),
+        toolContext: FakeToolContext.macosHost(processManager: FakeProcessManager.any()),
         xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
       ),
       deviceVersion: Version(16, 0, 0),
@@ -177,7 +177,7 @@ void main() {
       logger: logger,
       processUtils: processUtils,
       xcode: Xcode.test(
-        processManager: FakeProcessManager.any(),
+        toolContext: FakeToolContext.macosHost(processManager: FakeProcessManager.any()),
         xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
       ),
       deviceVersion: Version(27, 0, 0),
@@ -246,7 +246,7 @@ void main() {
       logger: logger,
       processUtils: processUtils,
       xcode: Xcode.test(
-        processManager: FakeProcessManager.any(),
+        toolContext: FakeToolContext.macosHost(processManager: FakeProcessManager.any()),
         xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
       ),
       deviceVersion: Version(16, 0, 0),
@@ -308,7 +308,7 @@ void main() {
       logger: logger,
       processUtils: processUtils,
       xcode: Xcode.test(
-        processManager: FakeProcessManager.any(),
+        toolContext: FakeToolContext.macosHost(processManager: FakeProcessManager.any()),
         xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
       ),
       deviceVersion: Version(16, 0, 0),
@@ -363,7 +363,7 @@ void main() {
       logger: logger,
       processUtils: processUtils,
       xcode: Xcode.test(
-        processManager: FakeProcessManager.any(),
+        toolContext: FakeToolContext.macosHost(processManager: FakeProcessManager.any()),
         xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
       ),
       deviceVersion: Version(16, 0, 0),
@@ -434,7 +434,7 @@ void main() {
       logger: logger,
       processUtils: processUtils,
       xcode: Xcode.test(
-        processManager: FakeProcessManager.any(),
+        toolContext: FakeToolContext.macosHost(processManager: FakeProcessManager.any()),
         xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
       ),
       deviceVersion: Version(16, 0, 0),
@@ -506,7 +506,7 @@ void main() {
       logger: logger,
       processUtils: processUtils,
       xcode: Xcode.test(
-        processManager: FakeProcessManager.any(),
+        toolContext: FakeToolContext.macosHost(processManager: FakeProcessManager.any()),
         xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
       ),
       deviceVersion: Version(16, 0, 0),
@@ -550,7 +550,7 @@ void main() {
       logger: logger,
       processUtils: processUtils,
       xcode: Xcode.test(
-        processManager: FakeProcessManager.any(),
+        toolContext: FakeToolContext.macosHost(processManager: FakeProcessManager.any()),
         xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
       ),
       deviceVersion: Version(16, 0, 0),
@@ -610,7 +610,7 @@ void main() {
         logger: logger,
         processUtils: processUtils,
         xcode: Xcode.test(
-          processManager: FakeProcessManager.any(),
+          toolContext: FakeToolContext.macosHost(processManager: FakeProcessManager.any()),
           xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
         ),
         deviceVersion: Version(16, 0, 0),
@@ -701,7 +701,7 @@ void main() {
         logger: logger,
         processUtils: processUtils,
         xcode: Xcode.test(
-          processManager: FakeProcessManager.any(),
+          toolContext: FakeToolContext.macosHost(processManager: FakeProcessManager.any()),
           xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
         ),
         deviceVersion: Version(16, 0, 0),
@@ -826,7 +826,7 @@ void main() {
       logger: logger,
       processUtils: processUtils,
       xcode: Xcode.test(
-        processManager: FakeProcessManager.any(),
+        toolContext: FakeToolContext.macosHost(processManager: FakeProcessManager.any()),
         xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
       ),
       deviceVersion: Version(27, 0, 0),
