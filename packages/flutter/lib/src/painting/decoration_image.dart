@@ -419,6 +419,7 @@ class _DecorationImagePainter implements DecorationImagePainter {
       canvas: canvas,
       rect: rect,
       image: imageInfo.image,
+      // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
       debugImageLabel: imageInfo.debugLabel,
       scale: _details.scale * imageInfo.scale,
       colorFilter: _details.colorFilter,
@@ -688,6 +689,7 @@ void paintImage({
     );
     final sizeInfo = ImageSizeInfo(
       // Some ImageProvider implementations may not have given this.
+      // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
       source: debugImageLabel ?? '<Unknown Image(${image.width}×${image.height})>',
       imageSize: Size(image.width.toDouble(), image.height.toDouble()),
       displaySize: outputSize * maxDevicePixelRatio,
@@ -757,6 +759,7 @@ void paintImage({
           existingSizeInfo.displaySizeInBytes < sizeInfo.displaySizeInBytes) {
         _pendingImageSizeInfo[sizeInfo.source!] = sizeInfo;
       }
+      // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
       debugOnPaintImage?.call(sizeInfo);
       SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) {
         _lastFrameImageSizeInfo = _pendingImageSizeInfo.values.toSet();

@@ -4861,6 +4861,7 @@ class EditableTextState extends State<EditableText>
     renderEditable.cursorColor = widget.cursorColor.withOpacity(effectiveOpacity);
     _cursorVisibilityNotifier.value =
         widget.showCursor &&
+        // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
         (EditableText.debugDeterministicCursor || _cursorBlinkOpacityController.value > 0);
   }
 
@@ -4902,6 +4903,7 @@ class EditableTextState extends State<EditableText>
     }
     _cursorTimer?.cancel();
     _cursorBlinkOpacityController.value = 1.0;
+    // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
     if (EditableText.debugDeterministicCursor) {
       return;
     }

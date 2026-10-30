@@ -355,6 +355,7 @@ class TextSelectionOverlay {
     _selectionOverlay = SelectionOverlay(
       magnifierConfiguration: magnifierConfiguration,
       context: context,
+      // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
       debugRequiredFor: debugRequiredFor,
       // The metrics will be set when show handles.
       startHandleType: TextSelectionHandleType.collapsed,
@@ -1624,6 +1625,7 @@ class SelectionOverlay {
     final OverlayState overlay = Overlay.of(
       context,
       rootOverlay: true,
+      // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
       debugRequiredFor: debugRequiredFor,
     );
 
@@ -1672,6 +1674,7 @@ class SelectionOverlay {
       Overlay.of(
         this.context,
         rootOverlay: true,
+        // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
         debugRequiredFor: debugRequiredFor,
       ).insert(_toolbar!, above: _handles?.end);
       return;

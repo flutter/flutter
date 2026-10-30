@@ -5129,6 +5129,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
         final String description;
         if (route is TransitionRoute<dynamic>) {
           final TransitionRoute<dynamic> transitionRoute = route;
+          // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
           description = transitionRoute.debugLabel;
         } else {
           description = '$route';

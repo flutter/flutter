@@ -34,6 +34,7 @@ export 'message_codec.dart' show MessageCodec, MethodCall, MethodCodec;
 /// bytes per invocation in the last quantum. "Up" means in the direction of
 /// Flutter to the host platform, "down" is the host platform to flutter.
 bool get shouldProfilePlatformChannels =>
+    // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
     kProfilePlatformChannels || (!kReleaseMode && debugProfilePlatformChannels);
 
 /// Controls whether platform channel usage can be debugged in release mode.
@@ -67,6 +68,7 @@ class _ProfiledBinaryMessenger implements BinaryMessenger {
   }
 
   Future<ByteData?>? sendWithPostfix(String channel, String postfix, ByteData? message) async {
+    // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
     _debugRecordUpStream(channelTypeName, '$channel$postfix', codecTypeName, message);
     final timelineTask = TimelineTask()..start('Platform Channel send $channel$postfix');
     final ByteData? result;
@@ -75,6 +77,7 @@ class _ProfiledBinaryMessenger implements BinaryMessenger {
     } finally {
       timelineTask.finish();
     }
+    // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
     _debugRecordDownStream(channelTypeName, '$channel$postfix', codecTypeName, result);
     return result;
   }

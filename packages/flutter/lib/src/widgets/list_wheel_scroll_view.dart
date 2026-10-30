@@ -308,6 +308,11 @@ class FixedExtentScrollController extends ScrollController {
     ScrollContext context,
     ScrollPosition? oldPosition,
   ) {
+    String? debugLabel;
+    assert(() {
+      debugLabel = this.debugLabel;
+      return true;
+    }());
     return _FixedExtentScrollPosition(
       physics: physics,
       context: context,

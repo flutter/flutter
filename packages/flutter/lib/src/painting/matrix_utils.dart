@@ -642,13 +642,18 @@ class TransformProperty extends DiagnosticsProperty<Matrix4> {
       // Format the value on a single line to be compatible with the parent's
       // style.
       final values = <String>[
+        // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
         '${debugFormatDouble(value!.entry(0, 0))},${debugFormatDouble(value!.entry(0, 1))},${debugFormatDouble(value!.entry(0, 2))},${debugFormatDouble(value!.entry(0, 3))}',
+        // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
         '${debugFormatDouble(value!.entry(1, 0))},${debugFormatDouble(value!.entry(1, 1))},${debugFormatDouble(value!.entry(1, 2))},${debugFormatDouble(value!.entry(1, 3))}',
+        // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
         '${debugFormatDouble(value!.entry(2, 0))},${debugFormatDouble(value!.entry(2, 1))},${debugFormatDouble(value!.entry(2, 2))},${debugFormatDouble(value!.entry(2, 3))}',
+        // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
         '${debugFormatDouble(value!.entry(3, 0))},${debugFormatDouble(value!.entry(3, 1))},${debugFormatDouble(value!.entry(3, 2))},${debugFormatDouble(value!.entry(3, 3))}',
       ];
       return '[${values.join('; ')}]';
     }
+    // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
     return debugDescribeTransform(value).join('\n');
   }
 }

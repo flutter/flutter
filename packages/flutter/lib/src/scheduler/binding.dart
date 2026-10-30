@@ -99,6 +99,7 @@ class _TaskEntry<T> {
 
   void run() {
     if (!kReleaseMode) {
+      // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
       Timeline.timeSync(debugLabel ?? 'Scheduled Task', () {
         completer.complete(task());
       }, flow: flow != null ? Flow.step(flow!.id) : null);
@@ -472,6 +473,7 @@ mixin SchedulerBinding on BindingBase {
     Flow? flow,
   }) {
     final bool isFirstTask = _taskQueue.isEmpty;
+    // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
     final entry = _TaskEntry<T>(task, priority.value, debugLabel, flow);
     _taskQueue.add(entry);
     if (isFirstTask && !locked) {
@@ -1263,11 +1265,12 @@ mixin SchedulerBinding on BindingBase {
       _transientCallbacks = <int, _FrameCallbackEntry>{};
       callbacks.forEach((int id, _FrameCallbackEntry callbackEntry) {
         if (!_removedIds.contains(id)) {
-          _invokeFrameCallback(
-            callbackEntry.callback,
-            _currentFrameTimeStamp!,
-            callbackEntry.debugStack,
-          );
+          StackTrace? debugStack;
+          assert(() {
+            debugStack = callbackEntry.debugStack;
+            return true;
+          }());
+          _invokeFrameCallback(callbackEntry.callback, _currentFrameTimeStamp!, debugStack);
         }
       });
       _removedIds.clear();

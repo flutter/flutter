@@ -13,7 +13,12 @@ platform.TargetPlatform get defaultTargetPlatform {
   // To get a better guess at the targetPlatform we need to be able to reference
   // the window, but that won't be available until we fix the platforms
   // configuration for Flutter.
-  return platform.debugDefaultTargetPlatformOverride ?? _testPlatform ?? _browserPlatform;
+  platform.TargetPlatform? result = _testPlatform;
+  assert(() {
+    result = platform.debugDefaultTargetPlatformOverride ?? result;
+    return true;
+  }());
+  return result ?? _browserPlatform;
 }
 
 // The TargetPlatform used on Web tests, unless overridden.

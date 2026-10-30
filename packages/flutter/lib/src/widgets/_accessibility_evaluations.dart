@@ -289,7 +289,11 @@ abstract class _ContrastEvaluation extends AccessibilityEvaluation {
   Future<EvaluationResult> evaluate(WidgetsBinding binding) async {
     final violations = <Violation>[];
     for (final RenderView renderView in binding.renderViews) {
-      final layer = renderView.debugLayer! as OffsetLayer;
+      late final OffsetLayer layer;
+      assert(() {
+        layer = renderView.debugLayer! as OffsetLayer;
+        return true;
+      }());
       final SemanticsNode root = renderView.owner!.semanticsOwner!.rootSemanticsNode!;
 
       final double ratio = 1 / renderView.flutterView.devicePixelRatio;

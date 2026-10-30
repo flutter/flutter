@@ -589,8 +589,13 @@ class _FocusState extends State<Focus> {
   }
 
   FocusNode _createNode() {
+    String? debugLabel;
+    assert(() {
+      debugLabel = widget.debugLabel;
+      return true;
+    }());
     return FocusNode(
-      debugLabel: widget.debugLabel,
+      debugLabel: debugLabel,
       canRequestFocus: widget.canRequestFocus,
       descendantsAreFocusable: widget.descendantsAreFocusable,
       descendantsAreTraversable: widget.descendantsAreTraversable,
@@ -883,8 +888,13 @@ class _FocusScopeWithExternalFocusNode extends FocusScope {
 class _FocusScopeState extends _FocusState {
   @override
   FocusScopeNode _createNode() {
+    String? debugLabel;
+    assert(() {
+      debugLabel = widget.debugLabel;
+      return true;
+    }());
     return FocusScopeNode(
-      debugLabel: widget.debugLabel,
+      debugLabel: debugLabel,
       canRequestFocus: widget.canRequestFocus,
       skipTraversal: widget.skipTraversal,
     );

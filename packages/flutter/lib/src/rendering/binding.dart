@@ -182,41 +182,53 @@ mixin RendererBinding
     if (!kReleaseMode) {
       // these service extensions work in debug or profile mode
       registerServiceExtension(
+        // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
         name: RenderingServiceExtensions.debugDumpRenderTree.name,
         callback: (Map<String, String> parameters) async {
+          // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
           return <String, Object>{'data': _debugCollectRenderTrees()};
         },
       );
       registerServiceExtension(
+        // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
         name: RenderingServiceExtensions.debugDumpSemanticsTreeInTraversalOrder.name,
         callback: (Map<String, String> parameters) async {
           return <String, Object>{
+            // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
             'data': _debugCollectSemanticsTrees(DebugSemanticsDumpOrder.traversalOrder),
           };
         },
       );
       registerServiceExtension(
+        // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
         name: RenderingServiceExtensions.debugDumpSemanticsTreeInInverseHitTestOrder.name,
         callback: (Map<String, String> parameters) async {
           return <String, Object>{
+            // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
             'data': _debugCollectSemanticsTrees(DebugSemanticsDumpOrder.inverseHitTest),
           };
         },
       );
       registerBoolServiceExtension(
         name: RenderingServiceExtensions.profileRenderObjectPaints.name,
+        // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
         getter: () async => debugProfilePaintsEnabled,
         setter: (bool value) async {
+          // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
           if (debugProfilePaintsEnabled != value) {
+            // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
             debugProfilePaintsEnabled = value;
           }
         },
       );
       registerBoolServiceExtension(
         name: RenderingServiceExtensions.profileRenderObjectLayouts.name,
+        // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
         getter: () async => debugProfileLayoutsEnabled,
         setter: (bool value) async {
+          // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
           if (debugProfileLayoutsEnabled != value) {
+            // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
             debugProfileLayoutsEnabled = value;
           }
         },

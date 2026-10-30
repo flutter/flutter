@@ -432,6 +432,7 @@ class RenderImage extends RenderBox {
       canvas: context.canvas,
       rect: offset & size,
       image: _image!,
+      // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
       debugImageLabel: debugImageLabel,
       scale: _scale,
       opacity: _opacity?.value ?? 1.0,

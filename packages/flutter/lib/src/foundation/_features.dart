@@ -20,6 +20,7 @@ import 'package:meta/meta.dart';
 ///
 /// See: https://github.com/flutter/flutter/issues/30701.
 @internal
+// ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
 bool isWindowingEnabled = debugEnabledFeatureFlags.contains('windowing');
 
 /// The feature flags this app was built with.

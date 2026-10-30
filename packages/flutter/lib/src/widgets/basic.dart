@@ -2986,6 +2986,7 @@ class ConstraintsTransformBox extends SingleChildRenderObjectWidget {
     required this.constraintsTransform,
     this.clipBehavior = Clip.none,
     String debugTransformType = '',
+    // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
   }) : _debugTransformLabel = debugTransformType;
 
   /// A [BoxConstraintsTransform] that always returns its argument as-is (i.e.,
@@ -6933,6 +6934,7 @@ class RawImage extends LeafRenderObjectWidget {
     );
     return RenderImage(
       image: image?.clone(),
+      // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
       debugImageLabel: debugImageLabel,
       width: width,
       height: height,
@@ -6964,6 +6966,7 @@ class RawImage extends LeafRenderObjectWidget {
     );
     renderObject
       ..image = image?.clone()
+      // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
       ..debugImageLabel = debugImageLabel
       ..width = width
       ..height = height

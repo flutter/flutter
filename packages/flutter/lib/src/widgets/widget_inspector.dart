@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// The widget inspector is only available in debug mode, so ignoring this rule
+// for the entire file is safe.
+// ignore_for_file: flutter_analyzer_plugin/access_debug_members_only_in_asserts
+
 /// @docImport 'dart:ui';
 library;
 

@@ -754,9 +754,18 @@ class RestorationBucket {
     // In Case 3 we create a new bucket wrapping the existing data in
     // [_rawChildren].
 
+    Object? effectiveDebugOwner;
+    assert(() {
+      effectiveDebugOwner = debugOwner;
+      return true;
+    }());
+
     // Case 1+2: Adopt and return an empty bucket.
     if (_claimedChildren.containsKey(restorationId) || !_rawChildren.containsKey(restorationId)) {
-      final child = RestorationBucket.empty(debugOwner: debugOwner, restorationId: restorationId);
+      final child = RestorationBucket.empty(
+        debugOwner: effectiveDebugOwner,
+        restorationId: restorationId,
+      );
       adoptChild(child);
       return child;
     }
@@ -766,7 +775,7 @@ class RestorationBucket {
     final child = RestorationBucket.child(
       restorationId: restorationId,
       parent: this,
-      debugOwner: debugOwner,
+      debugOwner: effectiveDebugOwner,
     );
     _claimedChildren[restorationId] = child;
     return child;
@@ -971,7 +980,10 @@ class RestorationBucket {
     _parent?._removeChildData(this);
     _parent = null;
     _updateManager(null);
-    _debugDisposed = true;
+    assert(() {
+      _debugDisposed = true;
+      return true;
+    }());
   }
 
   @override

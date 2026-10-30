@@ -17,9 +17,11 @@ Future<R> compute<M, R>(
   M message, {
   String? debugLabel,
 }) async {
+  // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
   debugLabel ??= kReleaseMode ? 'compute' : callback.toString();
 
   return Isolate.run<R>(() {
     return callback(message);
+    // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
   }, debugName: debugLabel);
 }

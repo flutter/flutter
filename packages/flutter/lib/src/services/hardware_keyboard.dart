@@ -23,9 +23,9 @@ export 'package:flutter/foundation.dart' show DiagnosticPropertiesBuilder;
 
 export 'keyboard_key.g.dart' show LogicalKeyboardKey, PhysicalKeyboardKey;
 
-// When using _keyboardDebug, always call it like so:
+// When using _debugKeyboard, always call it like so:
 //
-// assert(_keyboardDebug(() => 'Blah $foo'));
+// assert(_debugKeyboard(() => 'Blah $foo'));
 //
 // It needs to be inside the assert in order to be removed in release mode, and
 // it needs to use a closure to generate the string in order to avoid string
@@ -33,12 +33,12 @@ export 'keyboard_key.g.dart' show LogicalKeyboardKey, PhysicalKeyboardKey;
 //
 // It will throw a StateError if you try to call it when the app is in release
 // mode.
-bool _keyboardDebug(String Function() messageFunc, [Iterable<Object> Function()? detailsFunc]) {
+bool _debugKeyboard(String Function() messageFunc, [Iterable<Object> Function()? detailsFunc]) {
   if (kReleaseMode) {
     throw StateError(
-      '_keyboardDebug was called in Release mode, which means they are called '
-      'without being wrapped in an assert. Always call _keyboardDebug like so:\n'
-      r"  assert(_keyboardDebug(() => 'Blah $foo'));",
+      '_debugKeyboard was called in Release mode, which means they are called '
+      'without being wrapped in an assert. Always call _debugKeyboard like so:\n'
+      r"  assert(_debugKeyboard(() => 'Blah $foo'));",
     );
   }
   if (!debugPrintKeyboardEvents) {
@@ -513,7 +513,7 @@ class HardwareKeyboard {
           "or a bug in the embedding's key event conciliation logic.";
       if (event is KeyDownEvent) {
         if (_pressedKeys.containsKey(event.physicalKey)) {
-          _keyboardDebug(
+          _debugKeyboard(
             () =>
                 'ERROR: Received unexpected ${event.runtimeType} for key that is already pressed.\n'
                 '$common\n'
@@ -523,14 +523,14 @@ class HardwareKeyboard {
         }
       } else if (event is KeyRepeatEvent || event is KeyUpEvent) {
         if (!_pressedKeys.containsKey(event.physicalKey)) {
-          _keyboardDebug(
+          _debugKeyboard(
             () =>
                 'ERROR: Received unexpected ${event.runtimeType} for key that is not pressed:\n'
                 '$common\n'
                 '    Event: $event',
           );
         } else if (_pressedKeys[event.physicalKey] != event.logicalKey) {
-          _keyboardDebug(
+          _debugKeyboard(
             () =>
                 'ERROR: Received unexpected ${event.runtimeType} for key with mismatched logical key:\n'
                 '$common\n'
@@ -664,9 +664,9 @@ class HardwareKeyboard {
   ///
   /// Returns true if any handler handled the event.
   bool handleKeyEvent(KeyEvent event) {
-    assert(_keyboardDebug(() => 'Key event received: $event'));
+    assert(_debugKeyboard(() => 'Key event received: $event'));
     assert(
-      _keyboardDebug(() => 'Pressed state before processing the event:', _debugPressedKeysDetails),
+      _debugKeyboard(() => 'Pressed state before processing the event:', _debugPressedKeysDetails),
     );
     _logEventIfIrregular(event);
     final PhysicalKeyboardKey physicalKey = event.physicalKey;
@@ -689,7 +689,7 @@ class HardwareKeyboard {
     }
 
     assert(
-      _keyboardDebug(() => 'Pressed state after processing the event:', _debugPressedKeysDetails),
+      _debugKeyboard(() => 'Pressed state after processing the event:', _debugPressedKeysDetails),
     );
     return _dispatchKeyEvent(event);
   }

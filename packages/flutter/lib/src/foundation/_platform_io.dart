@@ -33,7 +33,9 @@ platform.TargetPlatform get defaultTargetPlatform {
     }
     return true;
   }());
+  // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
   if (kDebugMode && platform.debugDefaultTargetPlatformOverride != null) {
+    // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
     result = platform.debugDefaultTargetPlatformOverride;
   }
   if (result == null) {

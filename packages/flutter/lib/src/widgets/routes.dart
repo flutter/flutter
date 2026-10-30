@@ -233,6 +233,11 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> implements PredictiveB
     assert(!debugTransitionCompleted(), 'Cannot reuse a $runtimeType after disposing it.');
     final Duration duration = transitionDuration;
     final Duration reverseDuration = reverseTransitionDuration;
+    String? debugLabel;
+    assert(() {
+      debugLabel = this.debugLabel;
+      return true;
+    }());
     return AnimationController(
       duration: duration,
       reverseDuration: reverseDuration,

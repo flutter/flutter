@@ -315,7 +315,11 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
   /// We have the initial size to animate from, but we do not have the target
   /// size to animate to, so we set both ends to child's size.
   void _layoutStart() {
-    _sizeTween.begin = _sizeTween.end = debugAdoptSize(child!.size);
+    _sizeTween.begin = _sizeTween.end = child!.size;
+    assert(() {
+      _sizeTween.begin = _sizeTween.end = debugAdoptSize(child!.size);
+      return true;
+    }());
     _state = RenderAnimatedSizeState.stable;
   }
 
@@ -327,12 +331,20 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
   void _layoutStable() {
     if (_sizeTween.end != child!.size) {
       _sizeTween.begin = size;
-      _sizeTween.end = debugAdoptSize(child!.size);
+      _sizeTween.end = child!.size;
+      assert(() {
+        _sizeTween.end = debugAdoptSize(child!.size);
+        return true;
+      }());
       _restartAnimation();
       _state = RenderAnimatedSizeState.changed;
     } else if (_controller.value == _controller.upperBound) {
       // Animation finished. Reset target sizes.
-      _sizeTween.begin = _sizeTween.end = debugAdoptSize(child!.size);
+      _sizeTween.begin = _sizeTween.end = child!.size;
+      assert(() {
+        _sizeTween.begin = _sizeTween.end = debugAdoptSize(child!.size);
+        return true;
+      }());
     } else if (!_controller.isAnimating) {
       _controller.forward(); // resume the animation after being detached
     }
@@ -347,7 +359,11 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
   void _layoutChanged() {
     if (_sizeTween.end != child!.size) {
       // Child size changed again. Match the child's size and restart animation.
-      _sizeTween.begin = _sizeTween.end = debugAdoptSize(child!.size);
+      _sizeTween.begin = _sizeTween.end = child!.size;
+      assert(() {
+        _sizeTween.begin = _sizeTween.end = debugAdoptSize(child!.size);
+        return true;
+      }());
       _restartAnimation();
       _state = RenderAnimatedSizeState.unstable;
     } else {
@@ -366,7 +382,11 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
   void _layoutUnstable() {
     if (_sizeTween.end != child!.size) {
       // Still unstable. Continue tracking the child.
-      _sizeTween.begin = _sizeTween.end = debugAdoptSize(child!.size);
+      _sizeTween.begin = _sizeTween.end = child!.size;
+      assert(() {
+        _sizeTween.begin = _sizeTween.end = debugAdoptSize(child!.size);
+        return true;
+      }());
       _restartAnimation();
     } else {
       // Child size stabilized.

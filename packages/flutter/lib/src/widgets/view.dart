@@ -494,6 +494,7 @@ class _RawViewElement extends RenderTreeRootElement {
         context: ErrorDescription('building $this'),
         informationCollector: !kDebugMode
             ? null
+            // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
             : () => <DiagnosticsNode>[DiagnosticsDebugCreator(DebugCreator(this))],
       );
       FlutterError.reportError(details);

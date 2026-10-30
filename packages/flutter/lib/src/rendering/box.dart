@@ -1617,14 +1617,18 @@ abstract class RenderBox extends RenderObject {
       return true;
     }());
     if (!kReleaseMode) {
+      // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
       if (debugProfileLayoutsEnabled || _debugIntrinsicsDepth == 0) {
         FlutterTimeline.startSync(type.eventLabel(this), arguments: debugTimelineArguments);
       }
+      // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
       _debugIntrinsicsDepth += 1;
     }
     final Output result = type.memoize(_layoutCacheStorage, input, computer);
     if (!kReleaseMode) {
+      // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
       _debugIntrinsicsDepth -= 1;
+      // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
       if (debugProfileLayoutsEnabled || _debugIntrinsicsDepth == 0) {
         FlutterTimeline.finishSync();
       }

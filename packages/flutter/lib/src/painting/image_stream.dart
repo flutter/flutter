@@ -59,6 +59,7 @@ class ImageInfo {
   ///
   ///  * [ui.Image.clone], which describes how and why to clone images.
   ImageInfo clone() {
+    // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
     return ImageInfo(image: image.clone(), scale: scale, debugLabel: debugLabel);
   }
 
@@ -99,6 +100,7 @@ class ImageInfo {
   /// ```
   /// {@end-tool}
   bool isCloneOf(ImageInfo other) {
+    // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
     return other.image.isCloneOf(image) && other.scale == scale && other.debugLabel == debugLabel;
   }
 
@@ -143,6 +145,7 @@ class ImageInfo {
       '${debugLabel != null ? '$debugLabel ' : ''}$image @ ${debugFormatDouble(scale)}x';
 
   @override
+  // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
   int get hashCode => Object.hash(image, scale, debugLabel);
 
   @override
@@ -153,6 +156,7 @@ class ImageInfo {
     return other is ImageInfo &&
         other.image == image &&
         other.scale == scale &&
+        // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
         other.debugLabel == debugLabel;
   }
 }
@@ -1002,6 +1006,7 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
     Stream<ImageChunkEvent>? chunkEvents,
     InformationCollector? informationCollector,
   }) : _informationCollector = informationCollector {
+    // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
     this.debugLabel = debugLabel;
     codec.then<void>(
       _handleCodecReady,
@@ -1070,6 +1075,7 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
     }
     if (_isFirstFrame() || _hasFrameDurationPassed(timestamp)) {
       _emitFrame(
+        // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
         ImageInfo(image: _nextFrame!.image.clone(), scale: _scale, debugLabel: debugLabel),
       );
       _shownTimestamp = timestamp;
@@ -1136,6 +1142,7 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
       // This is not an animated image, just return it and don't schedule more
       // frames.
       _emitFrame(
+        // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
         ImageInfo(image: _nextFrame!.image.clone(), scale: _scale, debugLabel: debugLabel),
       );
       _nextFrame!.image.dispose();

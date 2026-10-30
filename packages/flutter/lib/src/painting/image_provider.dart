@@ -1373,6 +1373,7 @@ class ResizeImage extends ImageProvider<ResizeImageKey> {
       decodeResize,
     );
     if (!kReleaseMode) {
+      // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
       completer.debugLabel = '${completer.debugLabel} - Resized(${key._width}×${key._height})';
     }
     _configureErrorListener(completer, key);
@@ -1457,6 +1458,7 @@ class ResizeImage extends ImageProvider<ResizeImageKey> {
       decodeResize,
     );
     if (!kReleaseMode) {
+      // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
       completer.debugLabel = '${completer.debugLabel} - Resized(${key._width}×${key._height})';
     }
     _configureErrorListener(completer, key);

@@ -681,9 +681,9 @@ abstract class BindingBase {
   ) async {
     if (parameters[_clearAllParameter] == 'true') {
       if (debugClearViewMetricsOverrides()) {
-        _postViewMetricsOverrideStateChangedEvent();
+        _debugPostViewMetricsOverrideStateChangedEvent();
       }
-      return _viewMetricsOverrideResult();
+      return _debugViewMetricsOverrideResult();
     }
 
     final String? rawViewId = parameters[_viewIdParameter];
@@ -694,7 +694,7 @@ abstract class BindingBase {
           'The $_viewIdParameter parameter is required when $_overridesParameter is provided.',
         );
       }
-      return _viewMetricsOverrideResult();
+      return _debugViewMetricsOverrideResult();
     }
     final int? viewId = int.tryParse(rawViewId);
     if (viewId == null || viewId < 0) {
@@ -714,11 +714,11 @@ abstract class BindingBase {
         ),
       };
       if (debugSetViewMetricsOverride(viewId, override)) {
-        _postViewMetricsOverrideStateChangedEvent();
+        _debugPostViewMetricsOverrideStateChangedEvent();
       }
     }
 
-    return _viewMetricsOverrideResult();
+    return _debugViewMetricsOverrideResult();
   }
 
   // The reply to every `ext.flutter.viewMetricsOverride` call, as documented on
@@ -726,14 +726,14 @@ abstract class BindingBase {
   //
   // Built after the change has been applied, so that the reply describes the
   // registry as it stands once the call is done.
-  Map<String, Object?> _viewMetricsOverrideResult() {
-    return <String, Object?>{'overrides': _viewMetricsOverridesWithStringKeys()};
+  Map<String, Object?> _debugViewMetricsOverrideResult() {
+    return <String, Object?>{'overrides': _debugViewMetricsOverridesWithStringKeys()};
   }
 
   // [debugViewMetricsOverrides] with its view ids stringified, because
   // json.encode accepts only String keys. It calls toJson on the values itself.
   // Both the reply and the event carry this map.
-  Map<String, DebugViewMetricsOverride> _viewMetricsOverridesWithStringKeys() {
+  Map<String, DebugViewMetricsOverride> _debugViewMetricsOverridesWithStringKeys() {
     return <String, DebugViewMetricsOverride>{
       for (final MapEntry<int, DebugViewMetricsOverride> entry in debugViewMetricsOverrides.entries)
         '${entry.key}': entry.value,
@@ -744,10 +744,10 @@ abstract class BindingBase {
   // changed, because one event then describes the state of the extension for a
   // client that missed the ones before it — including the clearAll that leaves
   // no entry to report.
-  void _postViewMetricsOverrideStateChangedEvent() {
+  void _debugPostViewMetricsOverrideStateChangedEvent() {
     _postExtensionStateChangedEvent(
       FoundationServiceExtensions.viewMetricsOverride.name,
-      _viewMetricsOverridesWithStringKeys(),
+      _debugViewMetricsOverridesWithStringKeys(),
     );
   }
 
@@ -1068,9 +1068,14 @@ abstract class BindingBase {
       // the possibility that they're handled in the middle of a frame, which
       // breaks many assertions. As such, we ensure they we run the callbacks
       // on the outer event loop here.
-      await debugInstrumentAction<void>('Wait for outer event loop', () {
-        return Future<void>.delayed(Duration.zero);
-      });
+      Future<void>? debugInstrumentFuture;
+      assert(() {
+        debugInstrumentFuture = debugInstrumentAction<void>('Wait for outer event loop', () {
+          return Future<void>.delayed(Duration.zero);
+        });
+        return true;
+      }());
+      await (debugInstrumentFuture ?? Future<void>.delayed(Duration.zero));
 
       try {
         final Map<String, dynamic> result = await callback(parameters);

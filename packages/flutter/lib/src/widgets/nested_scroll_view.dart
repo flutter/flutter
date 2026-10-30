@@ -1163,6 +1163,11 @@ class _NestedScrollController extends ScrollController {
     ScrollContext context,
     ScrollPosition? oldPosition,
   ) {
+    String? debugLabel;
+    assert(() {
+      debugLabel = this.debugLabel;
+      return true;
+    }());
     return _NestedScrollPosition(
       coordinator: coordinator,
       physics: physics,

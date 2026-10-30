@@ -1606,8 +1606,11 @@ abstract class _RenderCustomClip<T> extends RenderProxyBox {
 
   @override
   void dispose() {
-    _debugText?.dispose();
-    _debugText = null;
+    assert(() {
+      _debugText?.dispose();
+      _debugText = null;
+      return true;
+    }());
     super.dispose();
   }
 }

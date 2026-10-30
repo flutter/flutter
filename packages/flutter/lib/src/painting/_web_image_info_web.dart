@@ -32,6 +32,7 @@ class WebImageInfo implements ImageInfo {
 
   @override
   WebImageInfo clone() {
+    // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
     return WebImageInfo._(_handle.clone(), debugLabel: debugLabel);
   }
 
@@ -54,6 +55,7 @@ class WebImageInfo implements ImageInfo {
     }
 
     // It is a clone if it points to the same <img> element.
+    // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
     return other.htmlImage == htmlImage && other.debugLabel == debugLabel;
   }
 

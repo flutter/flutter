@@ -643,6 +643,7 @@ class FlutterErrorDetails with Diagnosticable {
     DiagnosticsNode? summary;
     if (diagnosticable != null) {
       final builder = DiagnosticPropertiesBuilder();
+      // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
       debugFillProperties(builder);
       summary = builder.properties.cast<DiagnosticsNode?>().firstWhere(
         (DiagnosticsNode? node) => node!.level == DiagnosticLevel.summary,
@@ -1031,6 +1032,7 @@ class FlutterError extends Error with DiagnosticableTreeMixin implements Asserti
           ).render(details.toDiagnosticsNode(style: DiagnosticsTreeStyle.error)).trimRight(),
         );
       } else {
+        // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
         debugPrintStack(
           stackTrace: details.stack,
           label: details.exception.toString(),

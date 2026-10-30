@@ -124,6 +124,7 @@ class PaintingContext extends ClipContext {
   ///    has a composited layer.
   static void repaintCompositedChild(RenderObject child, {bool debugAlsoPaintedParent = false}) {
     assert(child._needsPaint);
+    // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
     _repaintCompositedChild(child, debugAlsoPaintedParent: debugAlsoPaintedParent);
   }
 
@@ -1149,6 +1150,7 @@ base class PipelineOwner with DiagnosticableTreeMixin {
         return true;
       }());
       FlutterTimeline.startSync(
+        // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
         'LAYOUT$_debugRootSuffixForTimelineEventNames',
         arguments: debugTimelineArguments,
       );
@@ -1240,6 +1242,7 @@ base class PipelineOwner with DiagnosticableTreeMixin {
   /// [flushPaint].
   void flushCompositingBits() {
     if (!kReleaseMode) {
+      // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
       FlutterTimeline.startSync('UPDATING COMPOSITING BITS$_debugRootSuffixForTimelineEventNames');
     }
     _nodesNeedingCompositingBitsUpdate.sort((RenderObject a, RenderObject b) => a.depth - b.depth);
@@ -1305,6 +1308,7 @@ base class PipelineOwner with DiagnosticableTreeMixin {
         return true;
       }());
       FlutterTimeline.startSync(
+        // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
         'PAINT$_debugRootSuffixForTimelineEventNames',
         arguments: debugTimelineArguments,
       );
@@ -1467,6 +1471,7 @@ base class PipelineOwner with DiagnosticableTreeMixin {
       return;
     }
     if (!kReleaseMode) {
+      // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
       FlutterTimeline.startSync('SEMANTICS$_debugRootSuffixForTimelineEventNames');
     }
     assert(_semanticsOwner != null);
@@ -1769,6 +1774,7 @@ base class PipelineOwner with DiagnosticableTreeMixin {
     assert(_debugAllowChildListModifications, 'Cannot modify child list after layout.');
     _children.add(child);
     if (!kReleaseMode) {
+      // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
       _debugSetParent(child, this);
     }
     if (_manifold != null) {
@@ -1789,6 +1795,7 @@ base class PipelineOwner with DiagnosticableTreeMixin {
     assert(_debugAllowChildListModifications, 'Cannot modify child list after layout.');
     _children.remove(child);
     if (!kReleaseMode) {
+      // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
       _debugSetParent(child, null);
     }
     if (_manifold != null) {
@@ -2239,6 +2246,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
         informationCollector: () => <DiagnosticsNode>[
           // debugCreator should always be null outside of debugMode, but we want
           // the tree shaker to notice this.
+          // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
           if (kDebugMode && debugCreator != null) DiagnosticsDebugCreator(debugCreator!),
           describeForError(
             'The following RenderObject was being processed when the exception was fired',
@@ -2816,6 +2824,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
   @pragma('vm:notify-debugger-on-exception')
   void layout(Constraints constraints, {bool parentUsesSize = false}) {
     assert(!_debugDisposed);
+    // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
     if (!kReleaseMode && debugProfileLayoutsEnabled) {
       Map<String, String>? debugTimelineArguments;
       assert(() {
@@ -2882,6 +2891,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
         _debugDoingThisResize = false;
         return true;
       }());
+      // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
       if (!kReleaseMode && debugProfileLayoutsEnabled) {
         FlutterTimeline.finishSync();
       }
@@ -2945,6 +2955,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
     _needsLayout = false;
     markNeedsPaint();
 
+    // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
     if (!kReleaseMode && debugProfileLayoutsEnabled) {
       FlutterTimeline.finishSync();
     }
@@ -3516,6 +3527,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
     if (_needsLayout) {
       return;
     }
+    // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
     if (!kReleaseMode && debugProfilePaintsEnabled) {
       Map<String, String>? debugTimelineArguments;
       assert(() {
@@ -3596,6 +3608,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
       _debugDoingThisPaint = false;
       return true;
     }());
+    // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
     if (!kReleaseMode && debugProfilePaintsEnabled) {
       FlutterTimeline.finishSync();
     }
@@ -4001,8 +4014,15 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
   String toStringShort() {
     String header = describeIdentity(this);
     if (!kReleaseMode) {
-      if (_debugDisposed) {
-        header += ' DISPOSED';
+      var disposed = false;
+      assert(() {
+        if (_debugDisposed) {
+          header += ' DISPOSED';
+          disposed = true;
+        }
+        return true;
+      }());
+      if (disposed) {
         return header;
       }
 
@@ -4047,6 +4067,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
   String toStringDeep({
     String prefixLineOne = '',
     String? prefixOtherLines = '',
+    // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
     DiagnosticLevel minLevel = DiagnosticLevel.debug,
     int wrapWidth = 65,
   }) {
@@ -4066,6 +4087,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
   /// This includes the same information for this RenderObject as given by
   /// [toStringDeep], but does not recurse to any children.
   @override
+  // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
   String toStringShallow({String joiner = ', ', DiagnosticLevel minLevel = DiagnosticLevel.debug}) {
     return _withDebugActiveLayoutCleared(
       () => super.toStringShallow(joiner: joiner, minLevel: minLevel),
