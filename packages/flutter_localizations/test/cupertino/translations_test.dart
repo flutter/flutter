@@ -300,6 +300,23 @@ void main() {
     expect(localizations, isA<CupertinoLocalizationKo>());
     expect(localizations.datePickerDateTimeOrder, DatePickerDateTimeOrder.date_dayPeriod_time);
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/195676
+  testWidgets('Tajik translation spot check', (WidgetTester tester) async {
+    const locale = Locale('tg');
+    expect(GlobalCupertinoLocalizations.delegate.isSupported(locale), isTrue);
+    final CupertinoLocalizations localizations = await GlobalCupertinoLocalizations.delegate.load(
+      locale,
+    );
+    expect(localizations, isA<CupertinoLocalizationTg>());
+    expect(localizations.alertDialogLabel, 'Огоҳинома');
+    expect(localizations.anteMeridiemAbbreviation, 'AM');
+    expect(localizations.postMeridiemAbbreviation, 'PM');
+    expect(localizations.todayLabel, 'Имрӯз');
+    expect(localizations.clearButtonLabel, 'Тоза кардан');
+    expect(localizations.collapsedHint, 'Кушодашуда');
+    expect(localizations.expandedHint, 'Ҷамъшуда');
+  });
 }
 
 class _FakeEditableText extends EditableText {
