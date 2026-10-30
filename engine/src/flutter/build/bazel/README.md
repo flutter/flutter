@@ -2482,6 +2482,36 @@ is built in the other (the first `--config=host_debug_unopt` run of a tree
 that had only seen the wildcard took 89 minutes). Pick one mode for a
 checkout; the disk cache holds both once built.
 
+## What to run before landing: the suites no single wildcard covers
+
+`bazel test //engine/src/flutter/...` is the engine's gate on either host
+(1,345 tests on Linux x64, 968 declared on a Mac), but several suites are
+outside it by design, and a change can break one of them without a wildcard
+noticing -- as 418 did to the Android tool tests (the facsimile's engine
+stamp changed under the Maven repository the Gradle plugin reads; found at
+the first rerun, 440) and 436 to a Mac's wildcard (the aggregate `:tests`
+listed suites tagged `manual`; a test_suite runs what it lists). The full
+set, per host, with what each takes from a warm cache on a 24-core machine:
+
+| Host | Command | What it covers | Time |
+|---|---|---|---|
+| Linux | `bazel test //engine/src/flutter/...` | the engine: C++ suites, Dart tests under flutter_tester, the web engine's Chrome and Firefox suites, the packages' tests | 1 h 10 – 1 h 45 (2 h 15 when a wrapped GN build reruns) |
+| Linux | `bazel test //:framework_tests //:tool_tests //:dart_tests` | the framework's 1,644 files, the tool's six shards (general, commands, integration, desktop, web, hermetic), the Dart packages' | 75 min for the three (2,550 tests, 10-27); 75 min for the tool's and the Dart packages' alone when the framework's are cached |
+| Linux | `bazel test //:android_tool_tests` | `flutter build apk\|appbundle\|aar` through the tool against the build's Android engine; Gradle from the network | 50 min (the first run builds the Android engine for three CPUs in three modes) |
+| Linux | `bazel test --config=android_debug_test //engine/src/flutter/ci/builders:android_debug_test_tests` | the embedding's 87 Robolectric classes, under an Android configuration | 45 min (the Android debug engine's build included) |
+| Mac | `bazel test //engine/src/flutter/...` | the engine on a Mac: the macOS shell and its suites, the Metal backends, the golden suite, Chrome's web suites | 2 h 20 |
+| Mac | `bazel test //:framework_tests //:tool_tests //:dart_tests` | as Linux's, on a Mac | 67 min |
+| Mac | `bazel test //:apple_tool_tests` | `flutter build macos\|ios`, SwiftPM and the Xcode migrations through the tool against the universal frameworks | 15 min once the frameworks are built |
+
+A change to the tool tests' facsimile (`packages/flutter_tools/BUILD.bazel`'s
+cache lists, `bin/internal`'s stamps, `build_defs/android/build_tools.bzl`,
+`build_defs/dist/local_engine.bzl`) wants the second, third and seventh; a
+change to a test macro (`build_defs/web/web_ui_tests.bzl`,
+`build_defs/dart/dart_test.bzl`, `build_defs/java/robolectric.bzl`) the
+suites it declares on both hosts; a change to the engine's rules the
+wildcard on both. `bazel query 'tests(<suite>)' | wc -l` says what a suite
+holds on this host before a run.
+
 ## Adding a dependency
 
 1. Make sure `deps.lock.bzl` is current (`gen_deps.dart --check`).
