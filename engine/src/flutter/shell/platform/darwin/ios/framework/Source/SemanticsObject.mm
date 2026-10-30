@@ -1026,8 +1026,11 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
   // Even if it's marked accessible, VoiceControl labels will not appear if it's too
   // spatially distant. Set the frame to be the max screen size so all children are guaraenteed
   // to be contained.
-
-  return UIScreen.mainScreen.bounds;
+  //
+  // Prefer the screen that the view is on. Fallback to main screen if not available (e.g. the
+  // Flutter view hasn't been added to any screen).
+  UIScreen* screen = self.semanticsObject.bridgeView.window.windowScene.screen;
+  return (screen ?: UIScreen.mainScreen).bounds;
 }
 
 - (id)accessibilityContainer {

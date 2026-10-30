@@ -799,6 +799,48 @@ const float kFloatCompareEpsilon = 0.001;
   XCTAssertTrue(CGRectEqualToRect(container.accessibilityFrame, UIScreen.mainScreen.bounds));
 }
 
+- (void)testSemanticsObjectContainerAccessibilityFrameUsesScreenOfBridgeViewWindow {
+  flutter::testing::MockAccessibilityBridge* mock = new flutter::testing::MockAccessibilityBridge();
+  mock->isVoiceOverRunningValue = true;
+  fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(mock);
+  fml::WeakPtr<flutter::AccessibilityBridgeIos> bridge = factory.GetWeakPtr();
+
+  flutter::SemanticsNode parent;
+  parent.id = 0;
+
+  flutter::SemanticsNode child;
+  child.id = 1;
+  child.rect = SkRect::MakeXYWH(0, 0, 100, 100);
+  parent.childrenInTraversalOrder.push_back(1);
+
+  FlutterSemanticsObject* parentObject = [[FlutterSemanticsObject alloc] initWithBridge:bridge
+                                                                                    uid:0];
+  [parentObject setSemanticsNode:&parent];
+  FlutterSemanticsObject* childObject = [[FlutterSemanticsObject alloc] initWithBridge:bridge
+                                                                                   uid:1];
+  [childObject setSemanticsNode:&child];
+  parentObject.children = @[ childObject ];
+
+  // Put the bridge view's window on a screen that is not `UIScreen.mainScreen` (e.g. the inner
+  // display of a device with multiple built-in displays).
+  CGRect screenBounds = CGRectMake(0, 0, 951, 669);
+  UIScreen* mockScreen = OCMClassMock([UIScreen class]);
+  OCMStub([mockScreen bounds]).andDo(^(NSInvocation* invocation) {
+    CGRect bounds = screenBounds;
+    [invocation setReturnValue:&bounds];
+  });
+  UIWindowScene* mockWindowScene = OCMClassMock([UIWindowScene class]);
+  OCMStub([mockWindowScene screen]).andReturn(mockScreen);
+  UIWindow* mockWindow = OCMPartialMock(mock->view().window);
+  OCMStub([mockWindow windowScene]).andReturn(mockWindowScene);
+
+  SemanticsObjectContainer* container =
+      static_cast<SemanticsObjectContainer*>(parentObject.accessibilityContainer);
+  XCTAssertTrue(CGRectEqualToRect(container.accessibilityFrame, screenBounds));
+
+  [(id)mockWindow stopMocking];
+}
+
 - (void)testRootSemanticsObjectContainerAccessibilityContainerIsBridgeView {
   flutter::testing::MockAccessibilityBridge* mock = new flutter::testing::MockAccessibilityBridge();
   mock->isVoiceOverRunningValue = true;
