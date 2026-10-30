@@ -170,13 +170,6 @@ const List<ConvertedFile> convertedFiles = <ConvertedFile>[
       // A suite not converted in its file: Flutter GPU's (skipped there: it
       // crashes identically under GN and run_tests.py never runs it).
       '//flutter/lib/gpu:gpu_unittests',
-      // The darwin frameworks' suites, skipped in their file (the Apple
-      // test phase: XCTest, OCMock and the Testing framework from the
-      // platform's Developer directory).
-      '//flutter/shell/platform/darwin/common:framework_common_unittests',
-      '//flutter/shell/platform/darwin/common:framework_common_swift_unittests',
-      '//flutter/shell/platform/darwin/macos:flutter_desktop_darwin_unittests',
-      '//flutter/shell/platform/darwin/macos:flutter_desktop_darwin_swift_unittests',
     ],
     appendix: r'''
 load("@rules_cc//cc:defs.bzl", "cc_library")
