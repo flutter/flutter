@@ -72,6 +72,7 @@ class ExtensionManager {
     HostPlatform.darwin_x64 || HostPlatform.darwin_arm64 => 'macos',
     HostPlatform.linux_x64 || HostPlatform.linux_arm64 || HostPlatform.linux_riscv64 => 'linux',
     HostPlatform.windows_x64 || HostPlatform.windows_arm64 => 'windows',
+    _ => hostPlatform.cliName.split('-').first,
   };
 
   /// Spawns entrypoints without host OS checks; disposes any extension that reports

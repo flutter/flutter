@@ -36,7 +36,7 @@ import 'json_utils.dart';
 ///   `'device'`, `'build'`). Defaults to empty. Entries must be non-empty
 ///   lowercase service namespace identifiers matching known tool services
 ///   (`'build'`, `'device'`, `'template'`, `'config'`, `'diagnostics'`,
-///   `'clean'`, `'artifacts'`).
+///   `'clean'`, `'artifact'`).
 /// - `build_targets` (`List<String>`, optional): Lowercase kebab-case
 ///   subcommand target names contributed to `flutter build` (e.g.
 ///   `'custom-target'`).
