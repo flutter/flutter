@@ -221,11 +221,8 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
       AndroidWorkflow: () =>
           AndroidWorkflow(androidSdkBuilder: () => globals.androidSdk, featureFlags: featureFlags),
       ApplicationPackageFactory: () => FlutterApplicationPackageFactory(
-        userMessages: globals.userMessages,
-        processManager: globals.processManager,
-        logger: globals.logger,
-        fileSystem: globals.fs,
         androidSdk: globals.androidSdk,
+        toolContext: const GlobalToolContext(),
       ),
       Artifacts: () => CachedArtifacts(
         fileSystem: globals.fs,
@@ -288,12 +285,12 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
       Doctor: () => Doctor(logger: globals.logger, clock: globals.systemClock),
       DoctorValidatorsProvider: () => DoctorValidatorsProvider.defaultInstance,
       EmulatorManager: () => EmulatorManager(
-        javaBuilder: () => globals.java,
-        androidSdkBuilder: () => globals.androidSdk,
-        processManager: globals.processManager,
-        logger: globals.logger,
-        fileSystem: globals.fs,
         androidWorkflow: androidWorkflow!,
+        iosWorkflow: globals.iosWorkflow,
+        javaBuilder: () => globals.java,
+        toolContext: const GlobalToolContext(),
+        xcode: globals.xcode,
+        androidSdkBuilder: () => globals.androidSdk,
       ),
       FeatureFlags: () => FlutterFeatureFlags(
         flutterVersion: globals.flutterVersion,
@@ -322,10 +319,13 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
       ),
       HotRunnerConfig: () => HotRunnerConfig(),
       IOSSimulatorUtils: () => IOSSimulatorUtils(
-        logger: globals.logger,
-        processManager: globals.processManager,
+        analytics: globals.analytics,
+        cocoaPods: globals.cocoaPods!,
+        plistParser: globals.plistParser,
+        templateRenderer: globals.templateRenderer,
+        toolContext: const GlobalToolContext(),
         xcode: globals.xcode!,
-        operatingSystemUtils: globals.os,
+        xcodeProjectInterpreter: globals.xcodeProjectInterpreter!,
       ),
       IOSWorkflow: () => IOSWorkflow(
         featureFlags: featureFlags,
@@ -359,8 +359,11 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
               outputPreferences: globals.outputPreferences,
             ),
       MacOSWorkflow: () => MacOSWorkflow(featureFlags: featureFlags, platform: globals.platform),
-      MDnsVmServiceDiscovery: () =>
-          MDnsVmServiceDiscovery(logger: globals.logger, analytics: globals.analytics),
+      MDnsVmServiceDiscovery: () => MDnsVmServiceDiscovery(
+        logger: globals.logger,
+        analytics: globals.analytics,
+        platform: globals.platform,
+      ),
       OperatingSystemUtils: () => OperatingSystemUtils(
         fileSystem: globals.fs,
         logger: globals.logger,
@@ -411,28 +414,23 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
         userMessages: globals.userMessages,
       ),
       XCDevice: () => XCDevice(
-        processManager: globals.processManager,
-        logger: globals.logger,
-        artifacts: globals.artifacts!,
-        cache: globals.cache,
-        platform: globals.platform,
-        xcode: globals.xcode!,
+        analytics: globals.analytics,
+        cocoaPods: globals.cocoaPods!,
         iproxy: IProxy(
           artifacts: globals.artifacts!,
           logger: globals.logger,
           processManager: globals.processManager,
           dyLdLibEntry: globals.cache.dyLdLibEntry,
         ),
-        fileSystem: globals.fs,
-        analytics: globals.analytics,
-        shutdownHooks: globals.shutdownHooks,
+        plistParser: globals.plistParser,
+        templateRenderer: globals.templateRenderer,
+        toolContext: const GlobalToolContext(),
+        xcode: globals.xcode!,
+        xcodeProjectInterpreter: globals.xcodeProjectInterpreter!,
       ),
       XcodeProjectInterpreter: () => XcodeProjectInterpreter(
-        logger: globals.logger,
-        processManager: globals.processManager,
-        platform: globals.platform,
-        fileSystem: globals.fs,
         analytics: globals.analytics,
+        toolContext: const GlobalToolContext(),
       ),
     },
   );

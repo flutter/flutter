@@ -18,6 +18,7 @@ import '../base/user_messages.dart';
 import '../base/version.dart';
 import '../build_info.dart';
 import '../cache.dart';
+import '../context/tool_context.dart';
 import '../ios/xcodeproj.dart';
 import '../xcode_project.dart';
 
@@ -66,6 +67,7 @@ class Xcode {
   factory Xcode.test({
     required ProcessManager processManager,
     XcodeProjectInterpreter? xcodeProjectInterpreter,
+    ToolContext? toolContext,
     Platform? platform,
     FileSystem? fileSystem,
     String? flutterRoot,
@@ -81,7 +83,7 @@ class Xcode {
       flutterRoot: flutterRoot,
       logger: logger,
       xcodeProjectInterpreter:
-          xcodeProjectInterpreter ?? XcodeProjectInterpreter.test(processManager: processManager),
+          xcodeProjectInterpreter ?? XcodeProjectInterpreter.test(toolContext: toolContext!),
     );
   }
 
