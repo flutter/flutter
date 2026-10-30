@@ -3,24 +3,33 @@
 // found in the LICENSE file.
 
 #include <unordered_map>
+#include "flutter/display_list/dl_builder.h"
+#include "flutter/display_list/dl_color.h"
+#include "flutter/display_list/dl_paint.h"
 #include "flutter/display_list/dl_tile_mode.h"
 #include "flutter/display_list/effects/dl_image_filter.h"
 #include "flutter/display_list/geometry/dl_geometry_types.h"
-#include "flutter/fml/closure.h"
+#include "flutter/fml/synchronization/count_down_latch.h"
 #include "flutter/testing/testing.h"
 #include "gtest/gtest.h"
+#include "impeller/core/device_buffer.h"
+#include "impeller/core/device_buffer_descriptor.h"
 #include "impeller/core/formats.h"
 #include "impeller/core/texture_descriptor.h"
+#include "impeller/display_list/aiks_context.h"
 #include "impeller/display_list/aiks_unittests.h"
 #include "impeller/display_list/canvas.h"
+#include "impeller/display_list/dl_dispatcher.h"
 #include "impeller/display_list/dl_image_impeller.h"
 #include "impeller/display_list/dl_runtime_effect_impeller.h"
 #include "impeller/display_list/dl_vertices_geometry.h"
 #include "impeller/geometry/geometry_asserts.h"
 #include "impeller/playground/playground.h"
 #include "impeller/playground/widgets.h"
+#include "impeller/renderer/blit_pass.h"
+#include "impeller/renderer/command_buffer.h"
+#include "impeller/renderer/command_queue.h"
 #include "impeller/renderer/render_target.h"
-#include "impeller/renderer/testing/mocks.h"
 #include "third_party/abseil-cpp/absl/status/status_matchers.h"
 
 namespace impeller {
@@ -29,17 +38,12 @@ namespace testing {
 std::unique_ptr<Canvas> CreateTestCanvas(
     ContentContext& context,
     std::optional<Rect> cull_rect = std::nullopt,
-    bool requires_readback = false,
-    bool is_onscreen = false) {
+    bool requires_readback = false) {
   TextureDescriptor onscreen_desc;
   onscreen_desc.size = {100, 100};
   onscreen_desc.format =
       context.GetDeviceCapabilities().GetDefaultColorFormat();
   onscreen_desc.usage = TextureUsage::kRenderTarget;
-  if (requires_readback) {
-    onscreen_desc.usage = onscreen_desc.usage | static_cast<TextureUsageMask>(
-                                                    TextureUsage::kShaderRead);
-  }
   onscreen_desc.storage_mode = StorageMode::kDevicePrivate;
   onscreen_desc.sample_count = SampleCount::kCount1;
   std::shared_ptr<Texture> onscreen =
@@ -50,7 +54,6 @@ std::unique_ptr<Canvas> CreateTestCanvas(
   color0.load_action = LoadAction::kClear;
   if (context.GetContext()->GetCapabilities()->SupportsOffscreenMSAA()) {
     TextureDescriptor onscreen_msaa_desc = onscreen_desc;
-    onscreen_msaa_desc.usage = TextureUsage::kRenderTarget;
     onscreen_msaa_desc.sample_count = SampleCount::kCount4;
     onscreen_msaa_desc.storage_mode = StorageMode::kDeviceTransient;
     onscreen_msaa_desc.type = TextureType::kTexture2DMultisample;
@@ -70,11 +73,10 @@ std::unique_ptr<Canvas> CreateTestCanvas(
 
   if (cull_rect.has_value()) {
     return std::make_unique<Canvas>(
-        context, render_target, /*is_onscreen=*/is_onscreen,
+        context, render_target, /*is_onscreen=*/false,
         /*requires_readback=*/requires_readback, cull_rect.value());
   }
-  return std::make_unique<Canvas>(context, render_target,
-                                  /*is_onscreen=*/is_onscreen,
+  return std::make_unique<Canvas>(context, render_target, /*is_onscreen=*/false,
                                   /*requires_readback=*/requires_readback);
 }
 
@@ -114,8 +116,8 @@ TEST_P(AiksTest, TransformMultipliesCorrectly) {
     canvas->GetCurrentTransform(),
     Matrix(   0,   2,   0,   0,
              -3,   0,   0,   0,
-               0,   0,   0,   0,
-            -500, 400,   0,   1));
+              0,   0,   0,   0,
+           -500, 400,   0,   1));
   // clang-format on
 }
 
@@ -154,8 +156,7 @@ TEST_P(AiksTest, BackdropCountDownNormal) {
     GTEST_SKIP() << "Test requires device with framebuffer fetch";
   }
   auto canvas = CreateTestCanvas(context, Rect::MakeLTRB(0, 0, 100, 100),
-                                 /*requires_readback=*/true,
-                                 /*is_onscreen=*/true);
+                                 /*requires_readback=*/true);
   // 3 backdrop filters
   canvas->SetBackdropData({}, 3);
 
@@ -190,8 +191,7 @@ TEST_P(AiksTest, BackdropCountDownBackdropId) {
     GTEST_SKIP() << "Test requires device with framebuffer fetch";
   }
   auto canvas = CreateTestCanvas(context, Rect::MakeLTRB(0, 0, 100, 100),
-                                 /*requires_readback=*/true,
-                                 /*is_onscreen=*/true);
+                                 /*requires_readback=*/true);
   // 3 backdrop filters all with same id.
   std::unordered_map<int64_t, BackdropData> data;
   data[1] = BackdropData{.backdrop_count = 3};
@@ -231,8 +231,7 @@ TEST_P(AiksTest, BackdropCountDownBackdropIdMixed) {
     GTEST_SKIP() << "Test requires device with framebuffer fetch";
   }
   auto canvas = CreateTestCanvas(context, Rect::MakeLTRB(0, 0, 100, 100),
-                                 /*requires_readback=*/true,
-                                 /*is_onscreen=*/true);
+                                 /*requires_readback=*/true);
   // 3 backdrop filters, 2 with same id.
   std::unordered_map<int64_t, BackdropData> data;
   data[1] = BackdropData{.backdrop_count = 2};
@@ -343,8 +342,7 @@ TEST_P(AiksTest, BackdropCountDownWithNestedSaveLayers) {
     GTEST_SKIP() << "Test requires device with framebuffer fetch";
   }
   auto canvas = CreateTestCanvas(context, Rect::MakeLTRB(0, 0, 100, 100),
-                                 /*requires_readback=*/true,
-                                 /*is_onscreen=*/true);
+                                 /*requires_readback=*/true);
 
   canvas->SetBackdropData({}, 2);
 
@@ -644,157 +642,273 @@ TEST(CanvasTest, AntialiasedPaintCompatibleWithSDFRendering) {
   EXPECT_TRUE(Canvas::IsCompatibleWithSDFRendering(paint));
 }
 
-TEST_P(AiksTest, ClipDepthMaintainedAcrossBackdropFilterAndLayers) {
-  ContentContext& context = GetContentContext();
-  if (!context.GetDeviceCapabilities().SupportsFramebufferFetch()) {
-    GTEST_SKIP() << "Test requires device with framebuffer fetch";
+namespace {
+
+std::shared_ptr<DeviceBuffer> ReadbackTextureBytes(
+    const std::shared_ptr<Context>& context,
+    const std::shared_ptr<Texture>& texture) {
+  if (!context || !texture) {
+    return nullptr;
+  }
+  DeviceBufferDescriptor buf_desc;
+  buf_desc.size = texture->GetTextureDescriptor().GetByteSizeOfBaseMipLevel();
+  buf_desc.readback = true;
+  buf_desc.storage_mode = StorageMode::kHostVisible;
+  std::shared_ptr<DeviceBuffer> readback_buf =
+      context->GetResourceAllocator()->CreateBuffer(buf_desc);
+  if (!readback_buf) {
+    return nullptr;
   }
 
-  auto canvas = CreateTestCanvas(context, Rect::MakeLTRB(0, 0, 800, 600),
-                                 /*requires_readback=*/true,
-                                 /*is_onscreen=*/true);
-
-  // 1. Root route saves and applies ClipRoundSuperellipse.
-  canvas->Save(/*total_content_depth=*/20);
-  Rect sheet_rect = Rect::MakeXYWH(0, 42, 400, 500);
-  canvas->ClipGeometry(*Geometry::MakeRoundSuperellipse(sheet_rect, 12.0f),
-                       Entity::ClipOperation::kIntersect);
-
-  uint64_t initial_clip_depth = canvas->GetMaxOpDepth();
-
-  // 2. Child layer (body Ink items) renders and restores.
-  canvas->Save(/*total_content_depth=*/5);
-  for (int i = 0; i < 5; i++) {
-    canvas->DrawRect(Rect::MakeXYWH(0, i * 50, 400, 45),
-                     Paint{.color = Color::Azure()});
+  std::shared_ptr<CommandBuffer> cmd = context->CreateCommandBuffer();
+  std::shared_ptr<BlitPass> blit = cmd->CreateBlitPass();
+  if (!blit->AddCopy(texture, readback_buf) || !blit->EncodeCommands()) {
+    return nullptr;
   }
-  canvas->Restore();
-
-  // 3. Child layer (_glassBar BackdropFilter) renders and restores.
-  auto blur = flutter::DlImageFilter::MakeBlur(12.0f, 12.0f,
-                                               flutter::DlTileMode::kClamp);
-  Rect glass_rect = Rect::MakeXYWH(20, 350, 360, 60);
-  canvas->SaveLayer(Paint{}, glass_rect, blur.get(),
-                    ContentBoundsPromise::kContainsContents,
-                    /*total_content_depth=*/2);
-  canvas->DrawRect(glass_rect, Paint{.color = Color::Orange()});
-  canvas->Restore();
-
-  // 4. Next layer (AppBar header) renders.
-  // Invariant: Subsequent draw operations must NOT exceed the active clip's
-  // depth, and depth must stay within the precision bounds of kMaxDepth.
-  EXPECT_LE(initial_clip_depth, Canvas::kMaxDepth);
-  canvas->Save(/*total_content_depth=*/2);
-  canvas->DrawRect(Rect::MakeXYWH(0, 0, 400, 80),
-                   Paint{.color = Color::White()});
-  EXPECT_LE(canvas->GetOpDepth(), initial_clip_depth);
-  EXPECT_LE(canvas->GetOpDepth(), Canvas::kMaxDepth);
-  canvas->Restore();
-
-  canvas->Restore();
+  auto latch = std::make_shared<fml::CountDownLatch>(1u);
+  if (!context->GetCommandQueue()
+           ->Submit({cmd},
+                    [latch](CommandBuffer::Status) { latch->CountDown(); })
+           .ok()) {
+    return nullptr;
+  }
+  latch->Wait();
+  return readback_buf;
 }
 
-TEST_P(AiksTest, ParentClipDepthBudgetPreservedAfterBackdropLayerRestore) {
-  ContentContext& context = GetContentContext();
-  if (!context.GetDeviceCapabilities().SupportsFramebufferFetch()) {
-    GTEST_SKIP() << "Test requires device with framebuffer fetch";
+}  // namespace
+
+TEST_P(AiksTest, ClippedBackdropFilterInOffsetSubpassPreservesRoundedCorners) {
+  AiksContext aiks_context(GetContext(), nullptr);
+  ASSERT_TRUE(aiks_context.IsValid());
+
+  flutter::DisplayListBuilder builder;
+
+  // 1. Opaque black root background.
+  flutter::DlPaint bg_paint;
+  bg_paint.setColor(flutter::DlColor::kBlack());
+  builder.DrawPaint(bg_paint);
+
+  // 2. Offset subpass at (60, 100) with group-incompatible opacity (forcing an
+  // offscreen SaveLayer at non-zero global pass position where
+  // should_use_onscreen == false).
+  flutter::DlPaint opacity_paint;
+  opacity_paint.setOpacity(0.98f);
+  flutter::DlRect card_bounds = flutter::DlRect::MakeXYWH(60, 100, 200, 200);
+  builder.SaveLayer(card_bounds, &opacity_paint);
+
+  // 3. Rounded clip on the card.
+  builder.ClipRoundSuperellipse(
+      flutter::DlRoundSuperellipse::MakeRectXY(card_bounds, 40.0f, 40.0f),
+      flutter::DlClipOp::kIntersect);
+
+  // 4. Child scope with a containing ClipRect that restores before the
+  // BackdropFilter (previously evicted the parent rounded clip).
+  builder.Save();
+  builder.ClipRect(flutter::DlRect::MakeXYWH(0, 0, 400, 400),
+                   flutter::DlClipOp::kIntersect);
+  flutter::DlPaint green_paint;
+  green_paint.setColor(flutter::DlColor::RGBA(0.0f, 1.0f, 0.0f, 0.5f));
+  builder.DrawRect(card_bounds, green_paint);
+  builder.Restore();
+
+  // 5. BackdropFilter covering the top half of the card, intersecting the
+  // top-left and top-right rounded corners.
+  auto blur = flutter::DlImageFilter::MakeBlur(10.0f, 10.0f,
+                                               flutter::DlTileMode::kClamp);
+  flutter::DlRect header_bounds = flutter::DlRect::MakeXYWH(60, 100, 200, 100);
+  builder.SaveLayer(header_bounds, nullptr, blur.get());
+  flutter::DlPaint white_paint;
+  white_paint.setColor(flutter::DlColor::kWhite());
+  builder.DrawRect(header_bounds, white_paint);
+  builder.Restore();
+
+  builder.Restore();
+
+  std::shared_ptr<Texture> texture =
+      DisplayListToTexture(builder.Build(), ISize{320, 360}, aiks_context);
+  ASSERT_TRUE(texture);
+
+  std::shared_ptr<DeviceBuffer> readback_buf =
+      ReadbackTextureBytes(GetContext(), texture);
+  ASSERT_TRUE(readback_buf);
+  const uint8_t* bytes = readback_buf->OnGetContents();
+  ASSERT_NE(bytes, nullptr);
+
+  // Top-left (62, 102) and top-right (257, 102) pixels lie inside header_bounds
+  // (60..260, 100..200) but outside the r=40 rounded corners. Both must remain
+  // opaque black (0, 0, 0, 255) rather than bleeding white from an unclipped or
+  // mis-transformed BackdropFilter.
+  for (size_t x : {62u, 257u}) {
+    const size_t corner_offset = (102 * 320 + x) * 4;
+    EXPECT_EQ(bytes[corner_offset + 0], 0u) << "x=" << x;
+    EXPECT_EQ(bytes[corner_offset + 1], 0u) << "x=" << x;
+    EXPECT_EQ(bytes[corner_offset + 2], 0u) << "x=" << x;
+    EXPECT_EQ(bytes[corner_offset + 3], 255u) << "x=" << x;
   }
 
-  auto canvas = CreateTestCanvas(context, Rect::MakeLTRB(0, 0, 800, 600),
-                                 /*requires_readback=*/true,
-                                 /*is_onscreen=*/true);
-
-  // 1. Root pass with finite clip depth budget.
-  canvas->Save(/*total_content_depth=*/50);
-  Rect sheet_rect = Rect::MakeXYWH(0, 42, 400, 500);
-  canvas->ClipGeometry(*Geometry::MakeRoundSuperellipse(sheet_rect, 12.0f),
-                       Entity::ClipOperation::kIntersect);
-
-  uint64_t parent_clip_depth = canvas->GetMaxOpDepth();
-  EXPECT_LT(parent_clip_depth, Canvas::kMaxDepth);
-
-  // 2. BackdropFilter save layer executes FlipBackdrop.
-  auto blur = flutter::DlImageFilter::MakeBlur(12.0f, 12.0f,
-                                               flutter::DlTileMode::kClamp);
-  Rect glass_rect = Rect::MakeXYWH(20, 350, 360, 60);
-  canvas->SaveLayer(Paint{}, glass_rect, blur.get(),
-                    ContentBoundsPromise::kContainsContents,
-                    /*total_content_depth=*/2);
-  canvas->DrawRect(glass_rect, Paint{.color = Color::Orange()});
-  canvas->Restore();
-
-  // 3. Verify that parent scope clip_depth was NOT permanently overwritten with
-  // kMaxDepth.
-  EXPECT_EQ(canvas->GetMaxOpDepth(), parent_clip_depth);
-
-  canvas->Restore();
+  // Interior header pixel (160, 150) must render inside the clip.
+  const size_t interior_offset = (150 * 320 + 160) * 4;
+  EXPECT_GT(bytes[interior_offset + 0], 240u);
+  EXPECT_GT(bytes[interior_offset + 1], 240u);
+  EXPECT_GT(bytes[interior_offset + 2], 240u);
 }
 
-TEST_P(AiksTest, EmulatedAdvancedBlendPreservesDepthMonotonicity) {
-  if (GetParam() != PlaygroundBackend::kMetal) {
-    GTEST_SKIP()
-        << "This backend doesn't yet support setting device capabilities.";
+TEST_P(AiksTest, ClippedBackdropFilterInRootPassPreservesRoundedCorners) {
+  AiksContext aiks_context(GetContext(), nullptr);
+  ASSERT_TRUE(aiks_context.IsValid());
+
+  flutter::DisplayListBuilder builder;
+
+  // 1. Opaque black root background.
+  flutter::DlPaint bg_paint;
+  bg_paint.setColor(flutter::DlColor::kBlack());
+  builder.DrawPaint(bg_paint);
+
+  // 2. Root-pass translation + rounded clip (render_passes_.size() == 1, so
+  // should_use_onscreen == true on framebuffer-fetch backends).
+  builder.Save();
+  builder.Translate(60.0f, 100.0f);
+  flutter::DlRect local_card = flutter::DlRect::MakeXYWH(0, 0, 200, 200);
+  builder.ClipRoundSuperellipse(
+      flutter::DlRoundSuperellipse::MakeRectXY(local_card, 40.0f, 40.0f),
+      flutter::DlClipOp::kIntersect);
+
+  // 3. Child scope with containing ClipRect that restores before FlipBackdrop.
+  builder.Save();
+  builder.ClipRect(flutter::DlRect::MakeXYWH(-60, -100, 400, 400),
+                   flutter::DlClipOp::kIntersect);
+  flutter::DlPaint green_paint;
+  green_paint.setColor(flutter::DlColor::RGBA(0.0f, 1.0f, 0.0f, 0.5f));
+  builder.DrawRect(local_card, green_paint);
+  builder.Restore();
+
+  // 4. Root-pass BackdropFilter covering the top half of the card.
+  auto blur = flutter::DlImageFilter::MakeBlur(10.0f, 10.0f,
+                                               flutter::DlTileMode::kClamp);
+  flutter::DlRect local_header = flutter::DlRect::MakeXYWH(0, 0, 200, 100);
+  builder.SaveLayer(local_header, nullptr, blur.get());
+  flutter::DlPaint white_paint;
+  white_paint.setColor(flutter::DlColor::kWhite());
+  builder.DrawRect(local_header, white_paint);
+  builder.Restore();
+
+  builder.Restore();
+
+  std::shared_ptr<Texture> texture =
+      DisplayListToTexture(builder.Build(), ISize{320, 360}, aiks_context);
+  ASSERT_TRUE(texture);
+
+  std::shared_ptr<DeviceBuffer> readback_buf =
+      ReadbackTextureBytes(GetContext(), texture);
+  ASSERT_TRUE(readback_buf);
+  const uint8_t* bytes = readback_buf->OnGetContents();
+  ASSERT_NE(bytes, nullptr);
+
+  for (size_t x : {62u, 257u}) {
+    const size_t corner_offset = (102 * 320 + x) * 4;
+    EXPECT_EQ(bytes[corner_offset + 0], 0u) << "x=" << x;
+    EXPECT_EQ(bytes[corner_offset + 1], 0u) << "x=" << x;
+    EXPECT_EQ(bytes[corner_offset + 2], 0u) << "x=" << x;
+    EXPECT_EQ(bytes[corner_offset + 3], 255u) << "x=" << x;
   }
 
-  // 1. Mock capabilities to emulate non-framebuffer-fetch devices (e.g.
-  // OpenGLES).
-  std::shared_ptr<const Capabilities> old_capabilities =
-      GetContext()->GetCapabilities();
-  fml::ScopedCleanupClosure cleanup(fml::closure([&]() {
-    std::ignore = SetCapabilities(
-        std::const_pointer_cast<Capabilities>(old_capabilities));
-  }));
+  const size_t interior_offset = (150 * 320 + 160) * 4;
+  EXPECT_EQ(bytes[interior_offset + 0], 255u);
+  EXPECT_EQ(bytes[interior_offset + 1], 255u);
+  EXPECT_EQ(bytes[interior_offset + 2], 255u);
+  EXPECT_EQ(bytes[interior_offset + 3], 255u);
+}
 
-  auto mock_capabilities =
-      std::make_shared<::testing::NiceMock<MockCapabilities>>();
-  EXPECT_CALL(*mock_capabilities, SupportsFramebufferFetch())
-      .Times(::testing::AtLeast(1))
-      .WillRepeatedly(::testing::Return(false));
-  FLT_FORWARD(mock_capabilities, old_capabilities, GetDefaultColorFormat);
-  FLT_FORWARD(mock_capabilities, old_capabilities, GetDefaultStencilFormat);
-  FLT_FORWARD(mock_capabilities, old_capabilities,
-              GetDefaultDepthStencilFormat);
-  FLT_FORWARD(mock_capabilities, old_capabilities, SupportsOffscreenMSAA);
-  FLT_FORWARD(mock_capabilities, old_capabilities,
-              SupportsImplicitResolvingMSAA);
-  FLT_FORWARD(mock_capabilities, old_capabilities, SupportsReadFromResolve);
-  FLT_FORWARD(mock_capabilities, old_capabilities, SupportsSSBO);
-  FLT_FORWARD(mock_capabilities, old_capabilities, SupportsCompute);
-  FLT_FORWARD(mock_capabilities, old_capabilities,
-              SupportsTextureToTextureBlits);
-  FLT_FORWARD(mock_capabilities, old_capabilities, GetDefaultGlyphAtlasFormat);
-  FLT_FORWARD(mock_capabilities, old_capabilities, SupportsTriangleFan);
-  FLT_FORWARD(mock_capabilities, old_capabilities,
-              SupportsDecalSamplerAddressMode);
-  FLT_FORWARD(mock_capabilities, old_capabilities, SupportsPrimitiveRestart);
-  FLT_FORWARD(mock_capabilities, old_capabilities,
-              Supports32BitPrimitiveIndices);
-  FLT_FORWARD(mock_capabilities, old_capabilities, NeedsPartitionedHostBuffer);
-  FLT_FORWARD(mock_capabilities, old_capabilities, GetMinimumUniformAlignment);
-  ASSERT_TRUE(SetCapabilities(mock_capabilities).ok());
+TEST_P(AiksTest, ClippedBackdropFilterPreservesAlpha) {
+  AiksContext aiks_context(GetContext(), nullptr);
+  ASSERT_TRUE(aiks_context.IsValid());
 
-  // 2. Record sequential save scopes with emulated advanced blends.
-  ContentContext& context = GetContentContext();
-  auto canvas = CreateTestCanvas(context, Rect::MakeLTRB(0, 0, 800, 600),
-                                 /*requires_readback=*/true,
-                                 /*is_onscreen=*/true);
-
-  uint64_t previous_depth = 0;
-  for (int i = 0; i < 3; ++i) {
-    canvas->Save(/*total_content_depth=*/2);
-    canvas->DrawRect(Rect::MakeXYWH(i * 50, 0, 40, 40),
-                     Paint{.color = Color::Blue()});
-    canvas->DrawRect(
-        Rect::MakeXYWH(i * 50, 0, 40, 40),
-        Paint{.color = Color::Orange(), .blend_mode = BlendMode::kScreen});
-
-    // 3. Verify that emulated backdrop flips advance depth monotonically across
-    // sequential draw calls.
-    EXPECT_GT(canvas->GetOpDepth(), previous_depth);
-    previous_depth = canvas->GetOpDepth();
-
-    canvas->Restore();
+  // 1. Prime transient MSAA depth memory with non-zero clip depth values by
+  // executing and releasing an identically sized pass.
+  {
+    flutter::DisplayListBuilder prime_builder;
+    prime_builder.Save();
+    prime_builder.ClipRoundSuperellipse(
+        flutter::DlRoundSuperellipse::MakeRectXY(
+            flutter::DlRect::MakeXYWH(0, 0, 16, 16), 4.0f, 4.0f),
+        flutter::DlClipOp::kIntersect);
+    flutter::DlPaint white_paint;
+    white_paint.setColor(flutter::DlColor::kWhite());
+    prime_builder.DrawRect(flutter::DlRect::MakeXYWH(0, 0, 16, 16),
+                           white_paint);
+    prime_builder.Restore();
+    ASSERT_TRUE(DisplayListToTexture(prime_builder.Build(), ISize{320, 360},
+                                     aiks_context));
   }
+
+  // 2. Render a CupertinoPopupSurface-style root-clipped BackdropFilter over a
+  // transparent background (matching widget golden snapshots) alongside an
+  // offset Opacity(0.5) subpass clipped BackdropFilter.
+  flutter::DisplayListBuilder builder;
+
+  // Top sheet (y = 20..160): root-level ClipRoundSuperellipse + BackdropFilter
+  // over transparent black with translucent sheet fill (alpha = 200/255) and an
+  // opaque content bar (alpha = 255).
+  builder.Save();
+  flutter::DlRect top_sheet = flutter::DlRect::MakeXYWH(40, 20, 240, 140);
+  builder.ClipRoundSuperellipse(
+      flutter::DlRoundSuperellipse::MakeRectXY(top_sheet, 24.0f, 24.0f),
+      flutter::DlClipOp::kIntersect);
+  auto blur = flutter::DlImageFilter::MakeBlur(20.0f, 20.0f,
+                                               flutter::DlTileMode::kClamp);
+  builder.SaveLayer(top_sheet, nullptr, blur.get());
+  flutter::DlPaint sheet_fill;
+  sheet_fill.setColor(
+      flutter::DlColor::RGBA(1.0f, 1.0f, 1.0f, 200.0f / 255.0f));
+  builder.DrawRect(top_sheet, sheet_fill);
+  flutter::DlPaint opaque_white;
+  opaque_white.setColor(flutter::DlColor::kWhite());
+  builder.DrawRect(flutter::DlRect::MakeXYWH(60, 80, 200, 40), opaque_white);
+  builder.Restore();
+  builder.Restore();
+
+  // Bottom card (y = 190..330): offset SaveLayer with Opacity(0.5) containing a
+  // clipped BackdropFilter with an opaque white fill over transparent black.
+  flutter::DlPaint half_opacity;
+  half_opacity.setOpacity(0.5f);
+  flutter::DlRect bottom_card = flutter::DlRect::MakeXYWH(40, 190, 240, 140);
+  builder.SaveLayer(bottom_card, &half_opacity);
+  builder.ClipRoundSuperellipse(
+      flutter::DlRoundSuperellipse::MakeRectXY(bottom_card, 24.0f, 24.0f),
+      flutter::DlClipOp::kIntersect);
+  builder.SaveLayer(bottom_card, nullptr, blur.get());
+  builder.DrawRect(bottom_card, opaque_white);
+  builder.Restore();
+  builder.Restore();
+
+  std::shared_ptr<Texture> texture =
+      DisplayListToTexture(builder.Build(), ISize{320, 360}, aiks_context);
+  ASSERT_TRUE(texture);
+
+  std::shared_ptr<DeviceBuffer> readback_buf =
+      ReadbackTextureBytes(GetContext(), texture);
+  ASSERT_TRUE(readback_buf);
+  const uint8_t* bytes = readback_buf->OnGetContents();
+  ASSERT_NE(bytes, nullptr);
+
+  // Translucent sheet background at (160, 50): premultiplied RGBA must be ~200
+  // (never attenuated to 100 or 50).
+  const size_t sheet_bg_offset = (50 * 320 + 160) * 4;
+  EXPECT_NEAR(bytes[sheet_bg_offset + 0], 200, 2);
+  EXPECT_NEAR(bytes[sheet_bg_offset + 3], 200, 2);
+
+  // Opaque content bar inside BackdropFilter at (160, 100): must be 255 alpha
+  // (never attenuated to 128).
+  const size_t opaque_bar_offset = (100 * 320 + 160) * 4;
+  EXPECT_EQ(bytes[opaque_bar_offset + 0], 255u);
+  EXPECT_EQ(bytes[opaque_bar_offset + 3], 255u);
+
+  // Offset Opacity(0.5) subpass at (160, 260): premultiplied RGBA must be ~128
+  // (single 0.5x opacity application, never doubly attenuated to 64).
+  const size_t half_opacity_offset = (260 * 320 + 160) * 4;
+  EXPECT_NEAR(bytes[half_opacity_offset + 0], 128, 2);
+  EXPECT_NEAR(bytes[half_opacity_offset + 3], 128, 2);
 }
 
 }  // namespace testing
