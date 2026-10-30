@@ -12,12 +12,10 @@ import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/depfile.dart';
 import 'package:flutter_tools/src/build_system/targets/assets.dart';
-import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../../../src/common.dart';
@@ -422,12 +420,6 @@ flutter:
   testUsingContext(
     'transforms assets declared with transformers',
     () async {
-      Cache.flutterRoot = Cache.defaultFlutterRoot(
-        platform: globals.platform,
-        fileSystem: fileSystem,
-        userMessages: UserMessages(),
-      );
-
       final environment = Environment.test(
         fileSystem.currentDirectory,
         processManager: globals.processManager,
@@ -509,12 +501,6 @@ flutter:
   testUsingContext(
     'transforms shaders declared with transformers before compilation',
     () async {
-      Cache.flutterRoot = Cache.defaultFlutterRoot(
-        platform: globals.platform,
-        fileSystem: fileSystem,
-        userMessages: UserMessages(),
-      );
-
       final environment = Environment.test(
         fileSystem.currentDirectory,
         processManager: globals.processManager,
@@ -627,12 +613,6 @@ flutter:
   testUsingContext(
     'exits tool if an asset transformation fails',
     () async {
-      Cache.flutterRoot = Cache.defaultFlutterRoot(
-        platform: globals.platform,
-        fileSystem: fileSystem,
-        userMessages: UserMessages(),
-      );
-
       final environment = Environment.test(
         fileSystem.currentDirectory,
         processManager: globals.processManager,
@@ -719,12 +699,6 @@ flutter:
             ..createSync()
             ..writeAsStringSync('foo');
         },
-      );
-
-      Cache.flutterRoot = Cache.defaultFlutterRoot(
-        platform: globals.platform,
-        fileSystem: fileSystem,
-        userMessages: UserMessages(),
       );
 
       final environment = Environment.test(
@@ -967,12 +941,6 @@ flutter:
             ..writeAsStringSync('foo');
         },
         completer: markTransformDone,
-      );
-
-      Cache.flutterRoot = Cache.defaultFlutterRoot(
-        platform: globals.platform,
-        fileSystem: fileSystem,
-        userMessages: UserMessages(),
       );
 
       final processManager = FakeProcessManager.list(

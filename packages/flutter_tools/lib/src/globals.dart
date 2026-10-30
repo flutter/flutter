@@ -273,12 +273,12 @@ FlutterProjectFactory get projectFactory {
   return context.get<FlutterProjectFactory>() ??
       FlutterProjectFactory(
         config: config,
-        featureFlags: featureFlags,
+        featureFlagsBuilder: () => featureFlags,
         fileSystem: fs,
         logger: logger,
         plistParser: plistParser,
-        xcode: xcode,
-        xcodeProjectInterpreter: xcodeProjectInterpreter,
+        xcodeBuilder: () => xcode,
+        xcodeProjectInterpreterBuilder: () => xcodeProjectInterpreter,
       );
 }
 

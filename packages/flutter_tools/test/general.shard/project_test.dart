@@ -23,6 +23,7 @@ import 'package:flutter_tools/src/flutter_manifest.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
+import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:meta/meta.dart';
 import 'package:test/fake.dart';
@@ -2545,6 +2546,32 @@ resolution: workspace
         },
       );
     });
+
+    testWithoutContext('FlutterProjectFactory lazily evaluates featureFlagsBuilder', () {
+      final fs = MemoryFileSystem.test();
+      final Directory projectDir = fs.directory('app');
+      projectDir.childFile('pubspec.yaml')
+        ..createSync(recursive: true)
+        ..writeAsStringSync(validPubspec);
+      projectDir.childDirectory('ios').createSync(recursive: true);
+      var featureFlagsBuilderCalls = 0;
+      final factory = FlutterProjectFactory(
+        fileSystem: fs,
+        logger: BufferLogger.test(),
+        featureFlagsBuilder: () {
+          featureFlagsBuilderCalls++;
+          return TestFeatureFlags(isSwiftPackageManagerEnabled: true);
+        },
+        xcode: Xcode.test(
+          toolContext: FakeToolContext.macosHost(processManager: FakeProcessManager.any()),
+        ),
+      );
+      expect(featureFlagsBuilderCalls, 0);
+
+      final FlutterProject project = factory.fromDirectory(projectDir);
+      expect(featureFlagsBuilderCalls, 1);
+      expect(project.ios.usesSwiftPackageManager, isTrue);
+    });
   });
 }
 
@@ -2709,14 +2736,14 @@ void _testInMemory(
   ProcessManager? processManager,
   AndroidSdk? androidSdk,
 }) {
-  Cache.flutterRoot = getFlutterRoot();
+  final String flutterRoot = getFlutterRoot();
   final FileSystem testFileSystem = fileSystem ?? getFileSystemForPlatform();
 
-  final Directory fakeFlutterRoot = testFileSystem.directory(Cache.flutterRoot);
+  final Directory fakeFlutterRoot = testFileSystem.directory(flutterRoot);
   _insertFakeGradleArtifactDir(flutterRoot: fakeFlutterRoot);
   transfer(
     globals.fs
-        .directory(Cache.flutterRoot)
+        .directory(flutterRoot)
         .childDirectory('packages')
         .childDirectory('flutter_tools')
         .childDirectory('templates'),
@@ -2727,7 +2754,7 @@ void _testInMemory(
   dummyTemplateImagesDirectory.createSync(recursive: true);
   writePackageConfigFiles(
     directory: testFileSystem
-        .directory(Cache.flutterRoot)
+        .directory(flutterRoot)
         .childDirectory('packages')
         .childDirectory('flutter_tools'),
     mainLibName: 'app_name',
@@ -2747,6 +2774,7 @@ void _testInMemory(
       // Intentionally null if not set. Some ios tests fail if this is a fake.
       AndroidSdk: () => androidSdk,
       Cache: () => Cache(
+        flutterRoot: flutterRoot,
         logger: globals.logger,
         fileSystem: testFileSystem,
         osUtils: globals.os,
