@@ -2279,6 +2279,18 @@ runs what `Linux linux_host_engine_test`'s `host_debug_test` runs.
 `generated_file` over `metadata` (the macOS entitlements lists) is the
 Apple phase's.
 
+The whole engine tree is a wildcard on either host, each skipping the other
+platforms' targets as incompatible rather than failing on them (the
+toolchains' and system libraries' OS compatibility above; the files GN
+reaches under `is_android` or `build_glfw_shell` carry the same condition):
+`bazel test //engine/src/flutter/...` runs 1,345 targets on a Linux x64
+host (1,243 pass, 102 skipped -- Android's, Apple's) and 968 on an
+Apple-silicon Mac (873 pass, 95 skipped -- Android's, iOS's, Linux's; the
+377 Firefox web suites are a Linux host's), in an hour or two from a warm
+cache; `//:framework_tests //:tool_tests //:dart_tests` adds the framework's,
+the tool's and the repository's Dart tests on both (a Mac's `//:tool_tests`
+includes the apple shard and leaves out the Linux desktop shard).
+
 ## `et` with `--backend bazel`
 
 `et build`, `et test`, `et run`, `et query targets` and `et lint` take
