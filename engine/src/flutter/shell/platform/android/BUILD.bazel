@@ -3,7 +3,6 @@
 # found in the LICENSE file.
 
 # Generated from //flutter/shell/platform/android/BUILD.gn by gn_to_bazel; do not edit.
-# Not converted: android_entitlement_config.
 
 load("@bazel_skylib//lib:selects.bzl", "selects")
 load("@engine_version//:version.bzl", "CONTENT_HASH", "ENGINE_VERSION")
@@ -12,7 +11,7 @@ load("//build_defs/cc:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
 load("//build_defs/cc:shared_library.bzl", "flutter_shared_library")
 load("//build_defs/dart:snapshot.bzl", "bin_to_assembly")
 load("//build_defs/dist:zip_bundle.bzl", "zip_bundle")
-load("//build_defs/gn:gn_action.bzl", "gn_action")
+load("//build_defs/gn:gn_action.bzl", "gn_action", "gn_generated_file")
 load("//build_defs/java:robolectric.bzl", "android_test_apk", "java_classes", "robolectric_tests")
 
 package(default_visibility = ["//visibility:public"])
@@ -917,8 +916,27 @@ gn_action(
         "--classpath=[\"$(execpath @android_tools//:sdk/platforms/android-37.0/android.jar)\", \"$(execpath @android_tools//:sdk/build-tools/37.0.0/core-lambda-stubs.jar)\", \"$(execpath @android_embedding_dependencies//:lib/activity-1.8.1.jar)\", \"$(execpath @android_embedding_dependencies//:lib/annotation-jvm-1.8.1.jar)\", \"$(execpath @android_embedding_dependencies//:lib/annotation-experimental-1.4.0.jar)\", \"$(execpath @android_embedding_dependencies//:lib/annotations-23.0.0.jar)\", \"$(execpath @android_embedding_dependencies//:lib/collection-1.1.0.jar)\", \"$(execpath @android_embedding_dependencies//:lib/core-1.13.1.jar)\", \"$(execpath @android_embedding_dependencies//:lib/core-1.10.3.jar)\", \"$(execpath @android_embedding_dependencies//:lib/core-common-2.2.0.jar)\", \"$(execpath @android_embedding_dependencies//:lib/core-runtime-2.2.0.jar)\", \"$(execpath @android_embedding_dependencies//:lib/customview-1.0.0.jar)\", \"$(execpath @android_embedding_dependencies//:lib/exifinterface-1.4.1.jar)\", \"$(execpath @android_embedding_dependencies//:lib/fragment-1.7.1.jar)\", \"$(execpath @android_embedding_dependencies//:lib/kotlin-stdlib-1.8.22.jar)\", \"$(execpath @android_embedding_dependencies//:lib/kotlin-stdlib-common-1.8.22.jar)\", \"$(execpath @android_embedding_dependencies//:lib/kotlin-stdlib-jdk7-1.8.20.jar)\", \"$(execpath @android_embedding_dependencies//:lib/kotlin-stdlib-jdk8-1.8.20.jar)\", \"$(execpath @android_embedding_dependencies//:lib/kotlinx-coroutines-android-1.7.1.jar)\", \"$(execpath @android_embedding_dependencies//:lib/kotlinx-coroutines-core-jvm-1.7.1.jar)\", \"$(execpath @android_embedding_dependencies//:lib/lifecycle-common-2.7.0.jar)\", \"$(execpath @android_embedding_dependencies//:lib/lifecycle-common-java8-2.7.0.jar)\", \"$(execpath @android_embedding_dependencies//:lib/lifecycle-livedata-2.7.0.jar)\", \"$(execpath @android_embedding_dependencies//:lib/lifecycle-livedata-core-2.7.0.jar)\", \"$(execpath @android_embedding_dependencies//:lib/lifecycle-process-2.7.0.jar)\", \"$(execpath @android_embedding_dependencies//:lib/lifecycle-runtime-2.7.0.jar)\", \"$(execpath @android_embedding_dependencies//:lib/lifecycle-viewmodel-2.7.0.jar)\", \"$(execpath @android_embedding_dependencies//:lib/loader-1.0.0.jar)\", \"$(execpath @android_embedding_dependencies//:lib/savedstate-1.2.1.jar)\", \"$(execpath @android_embedding_dependencies//:lib/tracing-1.2.0.jar)\", \"$(execpath @android_embedding_dependencies//:lib/versionedparcelable-1.1.1.jar)\", \"$(execpath @android_embedding_dependencies//:lib/viewpager-1.0.0.jar)\", \"$(execpath @android_embedding_dependencies//:lib/window-1.2.0.jar)\", \"$(execpath @android_embedding_dependencies//:lib/window-java-1.2.0.jar)\", \"$(execpath @android_embedding_dependencies//:lib/relinker-1.4.5.jar)\"]",
         "--bootclasspath=$(execpath @android_tools//:sdk/platforms/android-37.0/android.jar)",
         "--java-version=1.8",  # Java 8 is required for backward compatibility.
-        "--jar-bin=$(execpath @openjdk//:bin/jar)",
-        "--javac-bin=$(execpath @openjdk//:bin/javac)",
+    ] + select({
+        "//engine/src/flutter/build/bazel:host_os_is_mac": [
+            "--jar-bin=$(execpath @openjdk//:bin/jar)",  # host_os == "mac"
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/build/bazel:host_os_is_mac": [],
+        "//conditions:default": [
+            "--jar-bin=$(execpath @openjdk//:bin/jar)",  # !(host_os == "mac") && !(host_os == "win")
+        ],
+    }) + select({
+        "//engine/src/flutter/build/bazel:host_os_is_mac": [
+            "--javac-bin=$(execpath @openjdk//:bin/javac)",  # host_os == "mac"
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/build/bazel:host_os_is_mac": [],
+        "//conditions:default": [
+            "--javac-bin=$(execpath @openjdk//:bin/javac)",  # !(host_os == "mac") && !(host_os == "win")
+        ],
+    }) + [
         "$(execpath :io/flutter/Build.java)",
         "$(execpath :io/flutter/FlutterInjector.java)",
         "$(execpath :io/flutter/Log.java)",
@@ -3080,7 +3098,17 @@ gn_action(
         "--src-dir",
         "$(src engine/src)",
         "--javadoc-bin",
-        "$(execpath @openjdk//:bin/javadoc)",
+    ] + select({
+        "//engine/src/flutter/build/bazel:host_os_is_mac": [
+            "$(execpath @openjdk//:bin/javadoc)",  # host_os == "mac"
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/build/bazel:host_os_is_mac": [],
+        "//conditions:default": [
+            "$(execpath @openjdk//:bin/javadoc)",  # !(host_os == "mac") && !(host_os == "win")
+        ],
+    }) + [
         "--android-jar",
         "$(execpath @android_tools//:sdk/platforms/android-37.0/android.jar)",
         "--embedding-dependencies-dir",
@@ -3116,70 +3144,1382 @@ zip_bundle(
     deps = [":gen_android_javadoc"],
 )
 
+gn_generated_file(
+    name = "android_entitlement_config",
+    out = "android_entitlements.txt",
+    content = ["gen_snapshot"],
+    outputs = ["$root_gen_dir/flutter/shell/platform/android/android_entitlements.txt"],
+    target_compatible_with = select({
+        "@platforms//os:android": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+)
+
+# `host_os == "linux" && flutter_runtime_mode == "jit_release" && target_cpu == "arm"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_host_os_linux_and_flutter_runtime_mode_jit_release_and_target_cpu_arm",
+    match_all = [
+        "//engine/src/flutter/build/bazel:host_os_is_linux",
+        "//engine/src/flutter/common:runtime_mode_jit_release",
+        "@platforms//cpu:armv7",
+    ],
+)
+
+# `host_os == "linux" && flutter_runtime_mode == "jit_release" && target_cpu == "arm64"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_host_os_linux_and_flutter_runtime_mode_jit_release_and_target_cpu_arm64",
+    match_all = [
+        "//engine/src/flutter/build/bazel:host_os_is_linux",
+        "//engine/src/flutter/common:runtime_mode_jit_release",
+        "@platforms//cpu:aarch64",
+    ],
+)
+
+# `host_os == "linux" && flutter_runtime_mode == "jit_release" && target_cpu == "riscv64"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_host_os_linux_and_flutter_runtime_mode_jit_release_and_target_cpu_riscv64",
+    match_all = [
+        "//engine/src/flutter/build/bazel:host_os_is_linux",
+        "//engine/src/flutter/common:runtime_mode_jit_release",
+        "@platforms//cpu:riscv64",
+    ],
+)
+
+# `host_os == "linux" && flutter_runtime_mode == "jit_release" && target_cpu == "x64"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_host_os_linux_and_flutter_runtime_mode_jit_release_and_target_cpu_x64",
+    match_all = [
+        "//engine/src/flutter/build/bazel:host_os_is_linux",
+        "//engine/src/flutter/common:runtime_mode_jit_release",
+        "@platforms//cpu:x86_64",
+    ],
+)
+
+# `host_os == "linux" && dart_dynamic_modules && dart_disable_secure_socket && target_cpu == "arm" && flutter_runtime_mode == "profile"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_host_os_linux_and_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_arm_and_flutter_runtime_mode_profile",
+    match_all = [
+        "//engine/src/flutter/build/bazel:host_os_is_linux",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_enabled",
+        "@platforms//cpu:armv7",
+        "//engine/src/flutter/common:runtime_mode_profile",
+    ],
+)
+
+# `host_os == "linux" && dart_dynamic_modules && dart_disable_secure_socket && target_cpu == "arm" && flutter_runtime_mode == "release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_host_os_linux_and_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_arm_and_flutter_runtime_mode_release",
+    match_all = [
+        "//engine/src/flutter/build/bazel:host_os_is_linux",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_enabled",
+        "@platforms//cpu:armv7",
+        "//engine/src/flutter/common:runtime_mode_release",
+    ],
+)
+
+# `host_os == "linux" && dart_dynamic_modules && dart_disable_secure_socket && target_cpu == "arm64" && flutter_runtime_mode == "profile"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_host_os_linux_and_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_arm64_and_flutter_runtime_mode_profile",
+    match_all = [
+        "//engine/src/flutter/build/bazel:host_os_is_linux",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_enabled",
+        "@platforms//cpu:aarch64",
+        "//engine/src/flutter/common:runtime_mode_profile",
+    ],
+)
+
+# `host_os == "linux" && dart_dynamic_modules && dart_disable_secure_socket && target_cpu == "arm64" && flutter_runtime_mode == "release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_host_os_linux_and_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_arm64_and_flutter_runtime_mode_release",
+    match_all = [
+        "//engine/src/flutter/build/bazel:host_os_is_linux",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_enabled",
+        "@platforms//cpu:aarch64",
+        "//engine/src/flutter/common:runtime_mode_release",
+    ],
+)
+
+# `host_os == "linux" && dart_dynamic_modules && dart_disable_secure_socket && target_cpu == "riscv64" && flutter_runtime_mode == "profile"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_host_os_linux_and_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_riscv64_and_flutter_runtime_mode_profile",
+    match_all = [
+        "//engine/src/flutter/build/bazel:host_os_is_linux",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_enabled",
+        "@platforms//cpu:riscv64",
+        "//engine/src/flutter/common:runtime_mode_profile",
+    ],
+)
+
+# `host_os == "linux" && dart_dynamic_modules && dart_disable_secure_socket && target_cpu == "riscv64" && flutter_runtime_mode == "release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_host_os_linux_and_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_riscv64_and_flutter_runtime_mode_release",
+    match_all = [
+        "//engine/src/flutter/build/bazel:host_os_is_linux",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_enabled",
+        "@platforms//cpu:riscv64",
+        "//engine/src/flutter/common:runtime_mode_release",
+    ],
+)
+
+# `host_os == "linux" && dart_dynamic_modules && dart_disable_secure_socket && target_cpu == "x64" && flutter_runtime_mode == "profile"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_host_os_linux_and_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_x64_and_flutter_runtime_mode_profile",
+    match_all = [
+        "//engine/src/flutter/build/bazel:host_os_is_linux",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_enabled",
+        "@platforms//cpu:x86_64",
+        "//engine/src/flutter/common:runtime_mode_profile",
+    ],
+)
+
+# `host_os == "linux" && dart_dynamic_modules && dart_disable_secure_socket && target_cpu == "x64" && flutter_runtime_mode == "release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_host_os_linux_and_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_x64_and_flutter_runtime_mode_release",
+    match_all = [
+        "//engine/src/flutter/build/bazel:host_os_is_linux",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_enabled",
+        "@platforms//cpu:x86_64",
+        "//engine/src/flutter/common:runtime_mode_release",
+    ],
+)
+
+# `host_os == "linux" && dart_dynamic_modules && !dart_disable_secure_socket && target_cpu == "arm" && flutter_runtime_mode == "profile"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_host_os_linux_and_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_arm_and_flutter_runtime_mode_profile",
+    match_all = [
+        "//engine/src/flutter/build/bazel:host_os_is_linux",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_disabled",
+        "@platforms//cpu:armv7",
+        "//engine/src/flutter/common:runtime_mode_profile",
+    ],
+)
+
+# `host_os == "linux" && dart_dynamic_modules && !dart_disable_secure_socket && target_cpu == "arm" && flutter_runtime_mode == "release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_host_os_linux_and_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_arm_and_flutter_runtime_mode_release",
+    match_all = [
+        "//engine/src/flutter/build/bazel:host_os_is_linux",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_disabled",
+        "@platforms//cpu:armv7",
+        "//engine/src/flutter/common:runtime_mode_release",
+    ],
+)
+
+# `host_os == "linux" && dart_dynamic_modules && !dart_disable_secure_socket && target_cpu == "arm64" && flutter_runtime_mode == "profile"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_host_os_linux_and_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_arm64_and_flutter_runtime_mode_profile",
+    match_all = [
+        "//engine/src/flutter/build/bazel:host_os_is_linux",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_disabled",
+        "@platforms//cpu:aarch64",
+        "//engine/src/flutter/common:runtime_mode_profile",
+    ],
+)
+
+# `host_os == "linux" && dart_dynamic_modules && !dart_disable_secure_socket && target_cpu == "arm64" && flutter_runtime_mode == "release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_host_os_linux_and_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_arm64_and_flutter_runtime_mode_release",
+    match_all = [
+        "//engine/src/flutter/build/bazel:host_os_is_linux",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_disabled",
+        "@platforms//cpu:aarch64",
+        "//engine/src/flutter/common:runtime_mode_release",
+    ],
+)
+
+# `host_os == "linux" && dart_dynamic_modules && !dart_disable_secure_socket && target_cpu == "riscv64" && flutter_runtime_mode == "profile"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_host_os_linux_and_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_riscv64_and_flutter_runtime_mode_profile",
+    match_all = [
+        "//engine/src/flutter/build/bazel:host_os_is_linux",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_disabled",
+        "@platforms//cpu:riscv64",
+        "//engine/src/flutter/common:runtime_mode_profile",
+    ],
+)
+
+# `host_os == "linux" && dart_dynamic_modules && !dart_disable_secure_socket && target_cpu == "riscv64" && flutter_runtime_mode == "release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_host_os_linux_and_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_riscv64_and_flutter_runtime_mode_release",
+    match_all = [
+        "//engine/src/flutter/build/bazel:host_os_is_linux",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_disabled",
+        "@platforms//cpu:riscv64",
+        "//engine/src/flutter/common:runtime_mode_release",
+    ],
+)
+
+# `host_os == "linux" && dart_dynamic_modules && !dart_disable_secure_socket && target_cpu == "x64" && flutter_runtime_mode == "profile"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_host_os_linux_and_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_x64_and_flutter_runtime_mode_profile",
+    match_all = [
+        "//engine/src/flutter/build/bazel:host_os_is_linux",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_disabled",
+        "@platforms//cpu:x86_64",
+        "//engine/src/flutter/common:runtime_mode_profile",
+    ],
+)
+
+# `host_os == "linux" && dart_dynamic_modules && !dart_disable_secure_socket && target_cpu == "x64" && flutter_runtime_mode == "release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_host_os_linux_and_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_x64_and_flutter_runtime_mode_release",
+    match_all = [
+        "//engine/src/flutter/build/bazel:host_os_is_linux",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_disabled",
+        "@platforms//cpu:x86_64",
+        "//engine/src/flutter/common:runtime_mode_release",
+    ],
+)
+
+# `host_os == "linux" && !dart_dynamic_modules && dart_disable_secure_socket && target_cpu == "arm" && flutter_runtime_mode == "profile"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_host_os_linux_and_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_arm_and_flutter_runtime_mode_profile",
+    match_all = [
+        "//engine/src/flutter/build/bazel:host_os_is_linux",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_enabled",
+        "@platforms//cpu:armv7",
+        "//engine/src/flutter/common:runtime_mode_profile",
+    ],
+)
+
+# `host_os == "linux" && !dart_dynamic_modules && dart_disable_secure_socket && target_cpu == "arm" && flutter_runtime_mode == "release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_host_os_linux_and_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_arm_and_flutter_runtime_mode_release",
+    match_all = [
+        "//engine/src/flutter/build/bazel:host_os_is_linux",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_enabled",
+        "@platforms//cpu:armv7",
+        "//engine/src/flutter/common:runtime_mode_release",
+    ],
+)
+
+# `host_os == "linux" && !dart_dynamic_modules && dart_disable_secure_socket && target_cpu == "arm64" && flutter_runtime_mode == "profile"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_host_os_linux_and_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_arm64_and_flutter_runtime_mode_profile",
+    match_all = [
+        "//engine/src/flutter/build/bazel:host_os_is_linux",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_enabled",
+        "@platforms//cpu:aarch64",
+        "//engine/src/flutter/common:runtime_mode_profile",
+    ],
+)
+
+# `host_os == "linux" && !dart_dynamic_modules && dart_disable_secure_socket && target_cpu == "arm64" && flutter_runtime_mode == "release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_host_os_linux_and_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_arm64_and_flutter_runtime_mode_release",
+    match_all = [
+        "//engine/src/flutter/build/bazel:host_os_is_linux",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_enabled",
+        "@platforms//cpu:aarch64",
+        "//engine/src/flutter/common:runtime_mode_release",
+    ],
+)
+
+# `host_os == "linux" && !dart_dynamic_modules && dart_disable_secure_socket && target_cpu == "riscv64" && flutter_runtime_mode == "profile"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_host_os_linux_and_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_riscv64_and_flutter_runtime_mode_profile",
+    match_all = [
+        "//engine/src/flutter/build/bazel:host_os_is_linux",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_enabled",
+        "@platforms//cpu:riscv64",
+        "//engine/src/flutter/common:runtime_mode_profile",
+    ],
+)
+
+# `host_os == "linux" && !dart_dynamic_modules && dart_disable_secure_socket && target_cpu == "riscv64" && flutter_runtime_mode == "release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_host_os_linux_and_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_riscv64_and_flutter_runtime_mode_release",
+    match_all = [
+        "//engine/src/flutter/build/bazel:host_os_is_linux",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_enabled",
+        "@platforms//cpu:riscv64",
+        "//engine/src/flutter/common:runtime_mode_release",
+    ],
+)
+
+# `host_os == "linux" && !dart_dynamic_modules && dart_disable_secure_socket && target_cpu == "x64" && flutter_runtime_mode == "profile"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_host_os_linux_and_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_x64_and_flutter_runtime_mode_profile",
+    match_all = [
+        "//engine/src/flutter/build/bazel:host_os_is_linux",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_enabled",
+        "@platforms//cpu:x86_64",
+        "//engine/src/flutter/common:runtime_mode_profile",
+    ],
+)
+
+# `host_os == "linux" && !dart_dynamic_modules && dart_disable_secure_socket && target_cpu == "x64" && flutter_runtime_mode == "release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_host_os_linux_and_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_x64_and_flutter_runtime_mode_release",
+    match_all = [
+        "//engine/src/flutter/build/bazel:host_os_is_linux",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_enabled",
+        "@platforms//cpu:x86_64",
+        "//engine/src/flutter/common:runtime_mode_release",
+    ],
+)
+
+# `host_os == "linux" && !dart_dynamic_modules && !dart_disable_secure_socket && target_cpu == "arm" && flutter_runtime_mode == "profile"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_host_os_linux_and_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_arm_and_flutter_runtime_mode_profile",
+    match_all = [
+        "//engine/src/flutter/build/bazel:host_os_is_linux",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_disabled",
+        "@platforms//cpu:armv7",
+        "//engine/src/flutter/common:runtime_mode_profile",
+    ],
+)
+
+# `host_os == "linux" && !dart_dynamic_modules && !dart_disable_secure_socket && target_cpu == "arm" && flutter_runtime_mode == "release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_host_os_linux_and_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_arm_and_flutter_runtime_mode_release",
+    match_all = [
+        "//engine/src/flutter/build/bazel:host_os_is_linux",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_disabled",
+        "@platforms//cpu:armv7",
+        "//engine/src/flutter/common:runtime_mode_release",
+    ],
+)
+
+# `host_os == "linux" && !dart_dynamic_modules && !dart_disable_secure_socket && target_cpu == "arm64" && flutter_runtime_mode == "profile"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_host_os_linux_and_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_arm64_and_flutter_runtime_mode_profile",
+    match_all = [
+        "//engine/src/flutter/build/bazel:host_os_is_linux",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_disabled",
+        "@platforms//cpu:aarch64",
+        "//engine/src/flutter/common:runtime_mode_profile",
+    ],
+)
+
+# `host_os == "linux" && !dart_dynamic_modules && !dart_disable_secure_socket && target_cpu == "arm64" && flutter_runtime_mode == "release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_host_os_linux_and_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_arm64_and_flutter_runtime_mode_release",
+    match_all = [
+        "//engine/src/flutter/build/bazel:host_os_is_linux",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_disabled",
+        "@platforms//cpu:aarch64",
+        "//engine/src/flutter/common:runtime_mode_release",
+    ],
+)
+
+# `host_os == "linux" && !dart_dynamic_modules && !dart_disable_secure_socket && target_cpu == "riscv64" && flutter_runtime_mode == "profile"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_host_os_linux_and_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_riscv64_and_flutter_runtime_mode_profile",
+    match_all = [
+        "//engine/src/flutter/build/bazel:host_os_is_linux",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_disabled",
+        "@platforms//cpu:riscv64",
+        "//engine/src/flutter/common:runtime_mode_profile",
+    ],
+)
+
+# `host_os == "linux" && !dart_dynamic_modules && !dart_disable_secure_socket && target_cpu == "riscv64" && flutter_runtime_mode == "release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_host_os_linux_and_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_riscv64_and_flutter_runtime_mode_release",
+    match_all = [
+        "//engine/src/flutter/build/bazel:host_os_is_linux",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_disabled",
+        "@platforms//cpu:riscv64",
+        "//engine/src/flutter/common:runtime_mode_release",
+    ],
+)
+
+# `host_os == "linux" && !dart_dynamic_modules && !dart_disable_secure_socket && target_cpu == "x64" && flutter_runtime_mode == "profile"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_host_os_linux_and_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_x64_and_flutter_runtime_mode_profile",
+    match_all = [
+        "//engine/src/flutter/build/bazel:host_os_is_linux",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_disabled",
+        "@platforms//cpu:x86_64",
+        "//engine/src/flutter/common:runtime_mode_profile",
+    ],
+)
+
+# `host_os == "linux" && !dart_dynamic_modules && !dart_disable_secure_socket && target_cpu == "x64" && flutter_runtime_mode == "release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_host_os_linux_and_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_x64_and_flutter_runtime_mode_release",
+    match_all = [
+        "//engine/src/flutter/build/bazel:host_os_is_linux",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_disabled",
+        "@platforms//cpu:x86_64",
+        "//engine/src/flutter/common:runtime_mode_release",
+    ],
+)
+
+# `host_os == "linux" && flutter_runtime_mode == "debug" && dart_dynamic_modules && dart_disable_secure_socket && target_cpu == "arm"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_host_os_linux_and_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_arm",
+    match_all = [
+        "//engine/src/flutter/build/bazel:host_os_is_linux",
+        "//engine/src/flutter/common:runtime_mode_debug",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_enabled",
+        "@platforms//cpu:armv7",
+    ],
+)
+
+# `host_os == "linux" && flutter_runtime_mode == "debug" && dart_dynamic_modules && dart_disable_secure_socket && target_cpu == "arm64"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_host_os_linux_and_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_arm64",
+    match_all = [
+        "//engine/src/flutter/build/bazel:host_os_is_linux",
+        "//engine/src/flutter/common:runtime_mode_debug",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_enabled",
+        "@platforms//cpu:aarch64",
+    ],
+)
+
+# `host_os == "linux" && flutter_runtime_mode == "debug" && dart_dynamic_modules && dart_disable_secure_socket && target_cpu == "riscv64"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_host_os_linux_and_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_riscv64",
+    match_all = [
+        "//engine/src/flutter/build/bazel:host_os_is_linux",
+        "//engine/src/flutter/common:runtime_mode_debug",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_enabled",
+        "@platforms//cpu:riscv64",
+    ],
+)
+
+# `host_os == "linux" && flutter_runtime_mode == "debug" && dart_dynamic_modules && dart_disable_secure_socket && target_cpu == "x64"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_host_os_linux_and_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_x64",
+    match_all = [
+        "//engine/src/flutter/build/bazel:host_os_is_linux",
+        "//engine/src/flutter/common:runtime_mode_debug",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_enabled",
+        "@platforms//cpu:x86_64",
+    ],
+)
+
+# `host_os == "linux" && flutter_runtime_mode == "debug" && dart_dynamic_modules && !dart_disable_secure_socket && target_cpu == "arm"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_host_os_linux_and_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_arm",
+    match_all = [
+        "//engine/src/flutter/build/bazel:host_os_is_linux",
+        "//engine/src/flutter/common:runtime_mode_debug",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_disabled",
+        "@platforms//cpu:armv7",
+    ],
+)
+
+# `host_os == "linux" && flutter_runtime_mode == "debug" && dart_dynamic_modules && !dart_disable_secure_socket && target_cpu == "arm64"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_host_os_linux_and_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_arm64",
+    match_all = [
+        "//engine/src/flutter/build/bazel:host_os_is_linux",
+        "//engine/src/flutter/common:runtime_mode_debug",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_disabled",
+        "@platforms//cpu:aarch64",
+    ],
+)
+
+# `host_os == "linux" && flutter_runtime_mode == "debug" && dart_dynamic_modules && !dart_disable_secure_socket && target_cpu == "riscv64"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_host_os_linux_and_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_riscv64",
+    match_all = [
+        "//engine/src/flutter/build/bazel:host_os_is_linux",
+        "//engine/src/flutter/common:runtime_mode_debug",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_disabled",
+        "@platforms//cpu:riscv64",
+    ],
+)
+
+# `host_os == "linux" && flutter_runtime_mode == "debug" && dart_dynamic_modules && !dart_disable_secure_socket && target_cpu == "x64"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_host_os_linux_and_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_x64",
+    match_all = [
+        "//engine/src/flutter/build/bazel:host_os_is_linux",
+        "//engine/src/flutter/common:runtime_mode_debug",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_disabled",
+        "@platforms//cpu:x86_64",
+    ],
+)
+
+# `host_os == "linux" && flutter_runtime_mode == "debug" && !dart_dynamic_modules && dart_disable_secure_socket && target_cpu == "arm"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_host_os_linux_and_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_arm",
+    match_all = [
+        "//engine/src/flutter/build/bazel:host_os_is_linux",
+        "//engine/src/flutter/common:runtime_mode_debug",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_enabled",
+        "@platforms//cpu:armv7",
+    ],
+)
+
+# `host_os == "linux" && flutter_runtime_mode == "debug" && !dart_dynamic_modules && dart_disable_secure_socket && target_cpu == "arm64"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_host_os_linux_and_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_arm64",
+    match_all = [
+        "//engine/src/flutter/build/bazel:host_os_is_linux",
+        "//engine/src/flutter/common:runtime_mode_debug",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_enabled",
+        "@platforms//cpu:aarch64",
+    ],
+)
+
+# `host_os == "linux" && flutter_runtime_mode == "debug" && !dart_dynamic_modules && dart_disable_secure_socket && target_cpu == "riscv64"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_host_os_linux_and_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_riscv64",
+    match_all = [
+        "//engine/src/flutter/build/bazel:host_os_is_linux",
+        "//engine/src/flutter/common:runtime_mode_debug",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_enabled",
+        "@platforms//cpu:riscv64",
+    ],
+)
+
+# `host_os == "linux" && flutter_runtime_mode == "debug" && !dart_dynamic_modules && dart_disable_secure_socket && target_cpu == "x64"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_host_os_linux_and_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_x64",
+    match_all = [
+        "//engine/src/flutter/build/bazel:host_os_is_linux",
+        "//engine/src/flutter/common:runtime_mode_debug",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_enabled",
+        "@platforms//cpu:x86_64",
+    ],
+)
+
+# `host_os == "linux" && flutter_runtime_mode == "debug" && !dart_dynamic_modules && !dart_disable_secure_socket && target_cpu == "arm"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_host_os_linux_and_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_arm",
+    match_all = [
+        "//engine/src/flutter/build/bazel:host_os_is_linux",
+        "//engine/src/flutter/common:runtime_mode_debug",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_disabled",
+        "@platforms//cpu:armv7",
+    ],
+)
+
+# `host_os == "linux" && flutter_runtime_mode == "debug" && !dart_dynamic_modules && !dart_disable_secure_socket && target_cpu == "arm64"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_host_os_linux_and_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_arm64",
+    match_all = [
+        "//engine/src/flutter/build/bazel:host_os_is_linux",
+        "//engine/src/flutter/common:runtime_mode_debug",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_disabled",
+        "@platforms//cpu:aarch64",
+    ],
+)
+
+# `host_os == "linux" && flutter_runtime_mode == "debug" && !dart_dynamic_modules && !dart_disable_secure_socket && target_cpu == "riscv64"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_host_os_linux_and_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_riscv64",
+    match_all = [
+        "//engine/src/flutter/build/bazel:host_os_is_linux",
+        "//engine/src/flutter/common:runtime_mode_debug",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_disabled",
+        "@platforms//cpu:riscv64",
+    ],
+)
+
+# `host_os == "linux" && flutter_runtime_mode == "debug" && !dart_dynamic_modules && !dart_disable_secure_socket && target_cpu == "x64"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_host_os_linux_and_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_x64",
+    match_all = [
+        "//engine/src/flutter/build/bazel:host_os_is_linux",
+        "//engine/src/flutter/common:runtime_mode_debug",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_disabled",
+        "@platforms//cpu:x86_64",
+    ],
+)
+
+# `host_os == "mac" && flutter_runtime_mode == "jit_release" && target_cpu == "arm"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_host_os_mac_and_flutter_runtime_mode_jit_release_and_target_cpu_arm",
+    match_all = [
+        "//engine/src/flutter/build/bazel:host_os_is_mac",
+        "//engine/src/flutter/common:runtime_mode_jit_release",
+        "@platforms//cpu:armv7",
+    ],
+)
+
+# `host_os == "mac" && flutter_runtime_mode == "jit_release" && target_cpu == "arm64"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_host_os_mac_and_flutter_runtime_mode_jit_release_and_target_cpu_arm64",
+    match_all = [
+        "//engine/src/flutter/build/bazel:host_os_is_mac",
+        "//engine/src/flutter/common:runtime_mode_jit_release",
+        "@platforms//cpu:aarch64",
+    ],
+)
+
+# `host_os == "mac" && flutter_runtime_mode == "jit_release" && target_cpu == "riscv64"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_host_os_mac_and_flutter_runtime_mode_jit_release_and_target_cpu_riscv64",
+    match_all = [
+        "//engine/src/flutter/build/bazel:host_os_is_mac",
+        "//engine/src/flutter/common:runtime_mode_jit_release",
+        "@platforms//cpu:riscv64",
+    ],
+)
+
+# `host_os == "mac" && flutter_runtime_mode == "jit_release" && target_cpu == "x64"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_host_os_mac_and_flutter_runtime_mode_jit_release_and_target_cpu_x64",
+    match_all = [
+        "//engine/src/flutter/build/bazel:host_os_is_mac",
+        "//engine/src/flutter/common:runtime_mode_jit_release",
+        "@platforms//cpu:x86_64",
+    ],
+)
+
+# `host_os == "mac" && dart_dynamic_modules && dart_disable_secure_socket && target_cpu == "arm" && flutter_runtime_mode == "profile"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_host_os_mac_and_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_arm_and_flutter_runtime_mode_profile",
+    match_all = [
+        "//engine/src/flutter/build/bazel:host_os_is_mac",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_enabled",
+        "@platforms//cpu:armv7",
+        "//engine/src/flutter/common:runtime_mode_profile",
+    ],
+)
+
+# `host_os == "mac" && dart_dynamic_modules && dart_disable_secure_socket && target_cpu == "arm" && flutter_runtime_mode == "release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_host_os_mac_and_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_arm_and_flutter_runtime_mode_release",
+    match_all = [
+        "//engine/src/flutter/build/bazel:host_os_is_mac",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_enabled",
+        "@platforms//cpu:armv7",
+        "//engine/src/flutter/common:runtime_mode_release",
+    ],
+)
+
+# `host_os == "mac" && dart_dynamic_modules && dart_disable_secure_socket && target_cpu == "arm64" && flutter_runtime_mode == "profile"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_host_os_mac_and_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_arm64_and_flutter_runtime_mode_profile",
+    match_all = [
+        "//engine/src/flutter/build/bazel:host_os_is_mac",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_enabled",
+        "@platforms//cpu:aarch64",
+        "//engine/src/flutter/common:runtime_mode_profile",
+    ],
+)
+
+# `host_os == "mac" && dart_dynamic_modules && dart_disable_secure_socket && target_cpu == "arm64" && flutter_runtime_mode == "release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_host_os_mac_and_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_arm64_and_flutter_runtime_mode_release",
+    match_all = [
+        "//engine/src/flutter/build/bazel:host_os_is_mac",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_enabled",
+        "@platforms//cpu:aarch64",
+        "//engine/src/flutter/common:runtime_mode_release",
+    ],
+)
+
+# `host_os == "mac" && dart_dynamic_modules && dart_disable_secure_socket && target_cpu == "riscv64" && flutter_runtime_mode == "profile"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_host_os_mac_and_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_riscv64_and_flutter_runtime_mode_profile",
+    match_all = [
+        "//engine/src/flutter/build/bazel:host_os_is_mac",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_enabled",
+        "@platforms//cpu:riscv64",
+        "//engine/src/flutter/common:runtime_mode_profile",
+    ],
+)
+
+# `host_os == "mac" && dart_dynamic_modules && dart_disable_secure_socket && target_cpu == "riscv64" && flutter_runtime_mode == "release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_host_os_mac_and_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_riscv64_and_flutter_runtime_mode_release",
+    match_all = [
+        "//engine/src/flutter/build/bazel:host_os_is_mac",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_enabled",
+        "@platforms//cpu:riscv64",
+        "//engine/src/flutter/common:runtime_mode_release",
+    ],
+)
+
+# `host_os == "mac" && dart_dynamic_modules && dart_disable_secure_socket && target_cpu == "x64" && flutter_runtime_mode == "profile"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_host_os_mac_and_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_x64_and_flutter_runtime_mode_profile",
+    match_all = [
+        "//engine/src/flutter/build/bazel:host_os_is_mac",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_enabled",
+        "@platforms//cpu:x86_64",
+        "//engine/src/flutter/common:runtime_mode_profile",
+    ],
+)
+
+# `host_os == "mac" && dart_dynamic_modules && dart_disable_secure_socket && target_cpu == "x64" && flutter_runtime_mode == "release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_host_os_mac_and_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_x64_and_flutter_runtime_mode_release",
+    match_all = [
+        "//engine/src/flutter/build/bazel:host_os_is_mac",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_enabled",
+        "@platforms//cpu:x86_64",
+        "//engine/src/flutter/common:runtime_mode_release",
+    ],
+)
+
+# `host_os == "mac" && dart_dynamic_modules && !dart_disable_secure_socket && target_cpu == "arm" && flutter_runtime_mode == "profile"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_host_os_mac_and_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_arm_and_flutter_runtime_mode_profile",
+    match_all = [
+        "//engine/src/flutter/build/bazel:host_os_is_mac",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_disabled",
+        "@platforms//cpu:armv7",
+        "//engine/src/flutter/common:runtime_mode_profile",
+    ],
+)
+
+# `host_os == "mac" && dart_dynamic_modules && !dart_disable_secure_socket && target_cpu == "arm" && flutter_runtime_mode == "release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_host_os_mac_and_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_arm_and_flutter_runtime_mode_release",
+    match_all = [
+        "//engine/src/flutter/build/bazel:host_os_is_mac",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_disabled",
+        "@platforms//cpu:armv7",
+        "//engine/src/flutter/common:runtime_mode_release",
+    ],
+)
+
+# `host_os == "mac" && dart_dynamic_modules && !dart_disable_secure_socket && target_cpu == "arm64" && flutter_runtime_mode == "profile"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_host_os_mac_and_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_arm64_and_flutter_runtime_mode_profile",
+    match_all = [
+        "//engine/src/flutter/build/bazel:host_os_is_mac",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_disabled",
+        "@platforms//cpu:aarch64",
+        "//engine/src/flutter/common:runtime_mode_profile",
+    ],
+)
+
+# `host_os == "mac" && dart_dynamic_modules && !dart_disable_secure_socket && target_cpu == "arm64" && flutter_runtime_mode == "release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_host_os_mac_and_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_arm64_and_flutter_runtime_mode_release",
+    match_all = [
+        "//engine/src/flutter/build/bazel:host_os_is_mac",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_disabled",
+        "@platforms//cpu:aarch64",
+        "//engine/src/flutter/common:runtime_mode_release",
+    ],
+)
+
+# `host_os == "mac" && dart_dynamic_modules && !dart_disable_secure_socket && target_cpu == "riscv64" && flutter_runtime_mode == "profile"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_host_os_mac_and_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_riscv64_and_flutter_runtime_mode_profile",
+    match_all = [
+        "//engine/src/flutter/build/bazel:host_os_is_mac",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_disabled",
+        "@platforms//cpu:riscv64",
+        "//engine/src/flutter/common:runtime_mode_profile",
+    ],
+)
+
+# `host_os == "mac" && dart_dynamic_modules && !dart_disable_secure_socket && target_cpu == "riscv64" && flutter_runtime_mode == "release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_host_os_mac_and_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_riscv64_and_flutter_runtime_mode_release",
+    match_all = [
+        "//engine/src/flutter/build/bazel:host_os_is_mac",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_disabled",
+        "@platforms//cpu:riscv64",
+        "//engine/src/flutter/common:runtime_mode_release",
+    ],
+)
+
+# `host_os == "mac" && dart_dynamic_modules && !dart_disable_secure_socket && target_cpu == "x64" && flutter_runtime_mode == "profile"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_host_os_mac_and_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_x64_and_flutter_runtime_mode_profile",
+    match_all = [
+        "//engine/src/flutter/build/bazel:host_os_is_mac",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_disabled",
+        "@platforms//cpu:x86_64",
+        "//engine/src/flutter/common:runtime_mode_profile",
+    ],
+)
+
+# `host_os == "mac" && dart_dynamic_modules && !dart_disable_secure_socket && target_cpu == "x64" && flutter_runtime_mode == "release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_host_os_mac_and_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_x64_and_flutter_runtime_mode_release",
+    match_all = [
+        "//engine/src/flutter/build/bazel:host_os_is_mac",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_disabled",
+        "@platforms//cpu:x86_64",
+        "//engine/src/flutter/common:runtime_mode_release",
+    ],
+)
+
+# `host_os == "mac" && !dart_dynamic_modules && dart_disable_secure_socket && target_cpu == "arm" && flutter_runtime_mode == "profile"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_host_os_mac_and_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_arm_and_flutter_runtime_mode_profile",
+    match_all = [
+        "//engine/src/flutter/build/bazel:host_os_is_mac",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_enabled",
+        "@platforms//cpu:armv7",
+        "//engine/src/flutter/common:runtime_mode_profile",
+    ],
+)
+
+# `host_os == "mac" && !dart_dynamic_modules && dart_disable_secure_socket && target_cpu == "arm" && flutter_runtime_mode == "release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_host_os_mac_and_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_arm_and_flutter_runtime_mode_release",
+    match_all = [
+        "//engine/src/flutter/build/bazel:host_os_is_mac",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_enabled",
+        "@platforms//cpu:armv7",
+        "//engine/src/flutter/common:runtime_mode_release",
+    ],
+)
+
+# `host_os == "mac" && !dart_dynamic_modules && dart_disable_secure_socket && target_cpu == "arm64" && flutter_runtime_mode == "profile"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_host_os_mac_and_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_arm64_and_flutter_runtime_mode_profile",
+    match_all = [
+        "//engine/src/flutter/build/bazel:host_os_is_mac",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_enabled",
+        "@platforms//cpu:aarch64",
+        "//engine/src/flutter/common:runtime_mode_profile",
+    ],
+)
+
+# `host_os == "mac" && !dart_dynamic_modules && dart_disable_secure_socket && target_cpu == "arm64" && flutter_runtime_mode == "release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_host_os_mac_and_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_arm64_and_flutter_runtime_mode_release",
+    match_all = [
+        "//engine/src/flutter/build/bazel:host_os_is_mac",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_enabled",
+        "@platforms//cpu:aarch64",
+        "//engine/src/flutter/common:runtime_mode_release",
+    ],
+)
+
+# `host_os == "mac" && !dart_dynamic_modules && dart_disable_secure_socket && target_cpu == "riscv64" && flutter_runtime_mode == "profile"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_host_os_mac_and_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_riscv64_and_flutter_runtime_mode_profile",
+    match_all = [
+        "//engine/src/flutter/build/bazel:host_os_is_mac",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_enabled",
+        "@platforms//cpu:riscv64",
+        "//engine/src/flutter/common:runtime_mode_profile",
+    ],
+)
+
+# `host_os == "mac" && !dart_dynamic_modules && dart_disable_secure_socket && target_cpu == "riscv64" && flutter_runtime_mode == "release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_host_os_mac_and_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_riscv64_and_flutter_runtime_mode_release",
+    match_all = [
+        "//engine/src/flutter/build/bazel:host_os_is_mac",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_enabled",
+        "@platforms//cpu:riscv64",
+        "//engine/src/flutter/common:runtime_mode_release",
+    ],
+)
+
+# `host_os == "mac" && !dart_dynamic_modules && dart_disable_secure_socket && target_cpu == "x64" && flutter_runtime_mode == "profile"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_host_os_mac_and_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_x64_and_flutter_runtime_mode_profile",
+    match_all = [
+        "//engine/src/flutter/build/bazel:host_os_is_mac",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_enabled",
+        "@platforms//cpu:x86_64",
+        "//engine/src/flutter/common:runtime_mode_profile",
+    ],
+)
+
+# `host_os == "mac" && !dart_dynamic_modules && dart_disable_secure_socket && target_cpu == "x64" && flutter_runtime_mode == "release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_host_os_mac_and_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_x64_and_flutter_runtime_mode_release",
+    match_all = [
+        "//engine/src/flutter/build/bazel:host_os_is_mac",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_enabled",
+        "@platforms//cpu:x86_64",
+        "//engine/src/flutter/common:runtime_mode_release",
+    ],
+)
+
+# `host_os == "mac" && !dart_dynamic_modules && !dart_disable_secure_socket && target_cpu == "arm" && flutter_runtime_mode == "profile"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_host_os_mac_and_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_arm_and_flutter_runtime_mode_profile",
+    match_all = [
+        "//engine/src/flutter/build/bazel:host_os_is_mac",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_disabled",
+        "@platforms//cpu:armv7",
+        "//engine/src/flutter/common:runtime_mode_profile",
+    ],
+)
+
+# `host_os == "mac" && !dart_dynamic_modules && !dart_disable_secure_socket && target_cpu == "arm" && flutter_runtime_mode == "release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_host_os_mac_and_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_arm_and_flutter_runtime_mode_release",
+    match_all = [
+        "//engine/src/flutter/build/bazel:host_os_is_mac",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_disabled",
+        "@platforms//cpu:armv7",
+        "//engine/src/flutter/common:runtime_mode_release",
+    ],
+)
+
+# `host_os == "mac" && !dart_dynamic_modules && !dart_disable_secure_socket && target_cpu == "arm64" && flutter_runtime_mode == "profile"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_host_os_mac_and_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_arm64_and_flutter_runtime_mode_profile",
+    match_all = [
+        "//engine/src/flutter/build/bazel:host_os_is_mac",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_disabled",
+        "@platforms//cpu:aarch64",
+        "//engine/src/flutter/common:runtime_mode_profile",
+    ],
+)
+
+# `host_os == "mac" && !dart_dynamic_modules && !dart_disable_secure_socket && target_cpu == "arm64" && flutter_runtime_mode == "release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_host_os_mac_and_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_arm64_and_flutter_runtime_mode_release",
+    match_all = [
+        "//engine/src/flutter/build/bazel:host_os_is_mac",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_disabled",
+        "@platforms//cpu:aarch64",
+        "//engine/src/flutter/common:runtime_mode_release",
+    ],
+)
+
+# `host_os == "mac" && !dart_dynamic_modules && !dart_disable_secure_socket && target_cpu == "riscv64" && flutter_runtime_mode == "profile"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_host_os_mac_and_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_riscv64_and_flutter_runtime_mode_profile",
+    match_all = [
+        "//engine/src/flutter/build/bazel:host_os_is_mac",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_disabled",
+        "@platforms//cpu:riscv64",
+        "//engine/src/flutter/common:runtime_mode_profile",
+    ],
+)
+
+# `host_os == "mac" && !dart_dynamic_modules && !dart_disable_secure_socket && target_cpu == "riscv64" && flutter_runtime_mode == "release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_host_os_mac_and_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_riscv64_and_flutter_runtime_mode_release",
+    match_all = [
+        "//engine/src/flutter/build/bazel:host_os_is_mac",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_disabled",
+        "@platforms//cpu:riscv64",
+        "//engine/src/flutter/common:runtime_mode_release",
+    ],
+)
+
+# `host_os == "mac" && !dart_dynamic_modules && !dart_disable_secure_socket && target_cpu == "x64" && flutter_runtime_mode == "profile"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_host_os_mac_and_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_x64_and_flutter_runtime_mode_profile",
+    match_all = [
+        "//engine/src/flutter/build/bazel:host_os_is_mac",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_disabled",
+        "@platforms//cpu:x86_64",
+        "//engine/src/flutter/common:runtime_mode_profile",
+    ],
+)
+
+# `host_os == "mac" && !dart_dynamic_modules && !dart_disable_secure_socket && target_cpu == "x64" && flutter_runtime_mode == "release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_host_os_mac_and_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_x64_and_flutter_runtime_mode_release",
+    match_all = [
+        "//engine/src/flutter/build/bazel:host_os_is_mac",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_disabled",
+        "@platforms//cpu:x86_64",
+        "//engine/src/flutter/common:runtime_mode_release",
+    ],
+)
+
+# `host_os == "mac" && flutter_runtime_mode == "debug" && dart_dynamic_modules && dart_disable_secure_socket && target_cpu == "arm"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_host_os_mac_and_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_arm",
+    match_all = [
+        "//engine/src/flutter/build/bazel:host_os_is_mac",
+        "//engine/src/flutter/common:runtime_mode_debug",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_enabled",
+        "@platforms//cpu:armv7",
+    ],
+)
+
+# `host_os == "mac" && flutter_runtime_mode == "debug" && dart_dynamic_modules && dart_disable_secure_socket && target_cpu == "arm64"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_host_os_mac_and_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_arm64",
+    match_all = [
+        "//engine/src/flutter/build/bazel:host_os_is_mac",
+        "//engine/src/flutter/common:runtime_mode_debug",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_enabled",
+        "@platforms//cpu:aarch64",
+    ],
+)
+
+# `host_os == "mac" && flutter_runtime_mode == "debug" && dart_dynamic_modules && dart_disable_secure_socket && target_cpu == "riscv64"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_host_os_mac_and_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_riscv64",
+    match_all = [
+        "//engine/src/flutter/build/bazel:host_os_is_mac",
+        "//engine/src/flutter/common:runtime_mode_debug",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_enabled",
+        "@platforms//cpu:riscv64",
+    ],
+)
+
+# `host_os == "mac" && flutter_runtime_mode == "debug" && dart_dynamic_modules && dart_disable_secure_socket && target_cpu == "x64"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_host_os_mac_and_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_x64",
+    match_all = [
+        "//engine/src/flutter/build/bazel:host_os_is_mac",
+        "//engine/src/flutter/common:runtime_mode_debug",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_enabled",
+        "@platforms//cpu:x86_64",
+    ],
+)
+
+# `host_os == "mac" && flutter_runtime_mode == "debug" && dart_dynamic_modules && !dart_disable_secure_socket && target_cpu == "arm"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_host_os_mac_and_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_arm",
+    match_all = [
+        "//engine/src/flutter/build/bazel:host_os_is_mac",
+        "//engine/src/flutter/common:runtime_mode_debug",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_disabled",
+        "@platforms//cpu:armv7",
+    ],
+)
+
+# `host_os == "mac" && flutter_runtime_mode == "debug" && dart_dynamic_modules && !dart_disable_secure_socket && target_cpu == "arm64"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_host_os_mac_and_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_arm64",
+    match_all = [
+        "//engine/src/flutter/build/bazel:host_os_is_mac",
+        "//engine/src/flutter/common:runtime_mode_debug",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_disabled",
+        "@platforms//cpu:aarch64",
+    ],
+)
+
+# `host_os == "mac" && flutter_runtime_mode == "debug" && dart_dynamic_modules && !dart_disable_secure_socket && target_cpu == "riscv64"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_host_os_mac_and_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_riscv64",
+    match_all = [
+        "//engine/src/flutter/build/bazel:host_os_is_mac",
+        "//engine/src/flutter/common:runtime_mode_debug",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_disabled",
+        "@platforms//cpu:riscv64",
+    ],
+)
+
+# `host_os == "mac" && flutter_runtime_mode == "debug" && dart_dynamic_modules && !dart_disable_secure_socket && target_cpu == "x64"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_host_os_mac_and_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_x64",
+    match_all = [
+        "//engine/src/flutter/build/bazel:host_os_is_mac",
+        "//engine/src/flutter/common:runtime_mode_debug",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_disabled",
+        "@platforms//cpu:x86_64",
+    ],
+)
+
+# `host_os == "mac" && flutter_runtime_mode == "debug" && !dart_dynamic_modules && dart_disable_secure_socket && target_cpu == "arm"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_host_os_mac_and_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_arm",
+    match_all = [
+        "//engine/src/flutter/build/bazel:host_os_is_mac",
+        "//engine/src/flutter/common:runtime_mode_debug",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_enabled",
+        "@platforms//cpu:armv7",
+    ],
+)
+
+# `host_os == "mac" && flutter_runtime_mode == "debug" && !dart_dynamic_modules && dart_disable_secure_socket && target_cpu == "arm64"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_host_os_mac_and_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_arm64",
+    match_all = [
+        "//engine/src/flutter/build/bazel:host_os_is_mac",
+        "//engine/src/flutter/common:runtime_mode_debug",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_enabled",
+        "@platforms//cpu:aarch64",
+    ],
+)
+
+# `host_os == "mac" && flutter_runtime_mode == "debug" && !dart_dynamic_modules && dart_disable_secure_socket && target_cpu == "riscv64"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_host_os_mac_and_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_riscv64",
+    match_all = [
+        "//engine/src/flutter/build/bazel:host_os_is_mac",
+        "//engine/src/flutter/common:runtime_mode_debug",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_enabled",
+        "@platforms//cpu:riscv64",
+    ],
+)
+
+# `host_os == "mac" && flutter_runtime_mode == "debug" && !dart_dynamic_modules && dart_disable_secure_socket && target_cpu == "x64"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_host_os_mac_and_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_x64",
+    match_all = [
+        "//engine/src/flutter/build/bazel:host_os_is_mac",
+        "//engine/src/flutter/common:runtime_mode_debug",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_enabled",
+        "@platforms//cpu:x86_64",
+    ],
+)
+
+# `host_os == "mac" && flutter_runtime_mode == "debug" && !dart_dynamic_modules && !dart_disable_secure_socket && target_cpu == "arm"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_host_os_mac_and_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_arm",
+    match_all = [
+        "//engine/src/flutter/build/bazel:host_os_is_mac",
+        "//engine/src/flutter/common:runtime_mode_debug",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_disabled",
+        "@platforms//cpu:armv7",
+    ],
+)
+
+# `host_os == "mac" && flutter_runtime_mode == "debug" && !dart_dynamic_modules && !dart_disable_secure_socket && target_cpu == "arm64"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_host_os_mac_and_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_arm64",
+    match_all = [
+        "//engine/src/flutter/build/bazel:host_os_is_mac",
+        "//engine/src/flutter/common:runtime_mode_debug",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_disabled",
+        "@platforms//cpu:aarch64",
+    ],
+)
+
+# `host_os == "mac" && flutter_runtime_mode == "debug" && !dart_dynamic_modules && !dart_disable_secure_socket && target_cpu == "riscv64"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_host_os_mac_and_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_riscv64",
+    match_all = [
+        "//engine/src/flutter/build/bazel:host_os_is_mac",
+        "//engine/src/flutter/common:runtime_mode_debug",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_disabled",
+        "@platforms//cpu:riscv64",
+    ],
+)
+
+# `host_os == "mac" && flutter_runtime_mode == "debug" && !dart_dynamic_modules && !dart_disable_secure_socket && target_cpu == "x64"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_host_os_mac_and_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_x64",
+    match_all = [
+        "//engine/src/flutter/build/bazel:host_os_is_mac",
+        "//engine/src/flutter/common:runtime_mode_debug",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_disabled",
+        "@platforms//cpu:x86_64",
+    ],
+)
+
 zip_bundle(
     name = "gen_snapshot",
-    files = {"gen_snapshot": "//engine/src/flutter/build/bazel/dart_wrap:gen_snapshot_host"},
+    files = select({
+        "//engine/src/flutter/build/bazel:host_os_is_mac": {
+            "gen_snapshot": "//engine/src/flutter/lib/snapshot:create_macos_gen_snapshots",
+            "entitlements.txt": ":android_entitlements.txt",
+        },
+        "//conditions:default": {"gen_snapshot": "//engine/src/flutter/build/bazel/dart_wrap:gen_snapshot_host"},
+    }),
     output = select({
-        ":when_flutter_runtime_mode_jit_release_and_target_cpu_arm": "android-arm-jit-release/linux-x64.zip",
-        ":when_flutter_runtime_mode_jit_release_and_target_cpu_arm64": "android-arm64-jit-release/linux-x64.zip",
-        ":when_flutter_runtime_mode_jit_release_and_target_cpu_riscv64": "android-riscv64-jit-release/linux-x64.zip",
-        ":when_flutter_runtime_mode_jit_release_and_target_cpu_x64": "android-x64-jit-release/linux-x64.zip",
-        ":when_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_arm_and_flutter_runtime_mode_profile": "android-arm-profile-ddm-size-exp/linux-x64.zip",
-        ":when_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_arm_and_flutter_runtime_mode_release": "android-arm-release-ddm-size-exp/linux-x64.zip",
-        ":when_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_arm64_and_flutter_runtime_mode_profile": "android-arm64-profile-ddm-size-exp/linux-x64.zip",
-        ":when_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_arm64_and_flutter_runtime_mode_release": "android-arm64-release-ddm-size-exp/linux-x64.zip",
-        ":when_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_riscv64_and_flutter_runtime_mode_profile": "android-riscv64-profile-ddm-size-exp/linux-x64.zip",
-        ":when_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_riscv64_and_flutter_runtime_mode_release": "android-riscv64-release-ddm-size-exp/linux-x64.zip",
-        ":when_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_x64_and_flutter_runtime_mode_profile": "android-x64-profile-ddm-size-exp/linux-x64.zip",
-        ":when_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_x64_and_flutter_runtime_mode_release": "android-x64-release-ddm-size-exp/linux-x64.zip",
-        ":when_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_arm_and_flutter_runtime_mode_profile": "android-arm-profile-ddm/linux-x64.zip",
-        ":when_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_arm_and_flutter_runtime_mode_release": "android-arm-release-ddm/linux-x64.zip",
-        ":when_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_arm64_and_flutter_runtime_mode_profile": "android-arm64-profile-ddm/linux-x64.zip",
-        ":when_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_arm64_and_flutter_runtime_mode_release": "android-arm64-release-ddm/linux-x64.zip",
-        ":when_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_riscv64_and_flutter_runtime_mode_profile": "android-riscv64-profile-ddm/linux-x64.zip",
-        ":when_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_riscv64_and_flutter_runtime_mode_release": "android-riscv64-release-ddm/linux-x64.zip",
-        ":when_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_x64_and_flutter_runtime_mode_profile": "android-x64-profile-ddm/linux-x64.zip",
-        ":when_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_x64_and_flutter_runtime_mode_release": "android-x64-release-ddm/linux-x64.zip",
-        ":when_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_arm_and_flutter_runtime_mode_profile": "android-arm-profile-size-exp/linux-x64.zip",
-        ":when_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_arm_and_flutter_runtime_mode_release": "android-arm-release-size-exp/linux-x64.zip",
-        ":when_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_arm64_and_flutter_runtime_mode_profile": "android-arm64-profile-size-exp/linux-x64.zip",
-        ":when_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_arm64_and_flutter_runtime_mode_release": "android-arm64-release-size-exp/linux-x64.zip",
-        ":when_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_riscv64_and_flutter_runtime_mode_profile": "android-riscv64-profile-size-exp/linux-x64.zip",
-        ":when_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_riscv64_and_flutter_runtime_mode_release": "android-riscv64-release-size-exp/linux-x64.zip",
-        ":when_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_x64_and_flutter_runtime_mode_profile": "android-x64-profile-size-exp/linux-x64.zip",
-        ":when_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_x64_and_flutter_runtime_mode_release": "android-x64-release-size-exp/linux-x64.zip",
-        ":when_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_arm_and_flutter_runtime_mode_profile": "android-arm-profile/linux-x64.zip",
-        ":when_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_arm_and_flutter_runtime_mode_release": "android-arm-release/linux-x64.zip",
-        ":when_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_arm64_and_flutter_runtime_mode_profile": "android-arm64-profile/linux-x64.zip",
-        ":when_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_arm64_and_flutter_runtime_mode_release": "android-arm64-release/linux-x64.zip",
-        ":when_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_riscv64_and_flutter_runtime_mode_profile": "android-riscv64-profile/linux-x64.zip",
-        ":when_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_riscv64_and_flutter_runtime_mode_release": "android-riscv64-release/linux-x64.zip",
-        ":when_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_x64_and_flutter_runtime_mode_profile": "android-x64-profile/linux-x64.zip",
-        ":when_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_x64_and_flutter_runtime_mode_release": "android-x64-release/linux-x64.zip",
-        ":when_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_arm": "android-arm-ddm-size-exp/linux-x64.zip",
-        ":when_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_arm64": "android-arm64-ddm-size-exp/linux-x64.zip",
-        ":when_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_riscv64": "android-riscv64-ddm-size-exp/linux-x64.zip",
-        ":when_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_x64": "android-x64-ddm-size-exp/linux-x64.zip",
-        ":when_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_arm": "android-arm-ddm/linux-x64.zip",
-        ":when_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_arm64": "android-arm64-ddm/linux-x64.zip",
-        ":when_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_riscv64": "android-riscv64-ddm/linux-x64.zip",
-        ":when_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_x64": "android-x64-ddm/linux-x64.zip",
-        ":when_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_arm": "android-arm-size-exp/linux-x64.zip",
-        ":when_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_arm64": "android-arm64-size-exp/linux-x64.zip",
-        ":when_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_riscv64": "android-riscv64-size-exp/linux-x64.zip",
-        ":when_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_x64": "android-x64-size-exp/linux-x64.zip",
-        ":when_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_arm": "android-arm/linux-x64.zip",
-        ":when_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_arm64": "android-arm64/linux-x64.zip",
-        ":when_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_riscv64": "android-riscv64/linux-x64.zip",
-        ":when_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_x64": "android-x64/linux-x64.zip",
+        ":when_host_os_linux_and_flutter_runtime_mode_jit_release_and_target_cpu_arm": "android-arm-jit-release/linux-x64.zip",
+        ":when_host_os_linux_and_flutter_runtime_mode_jit_release_and_target_cpu_arm64": "android-arm64-jit-release/linux-x64.zip",
+        ":when_host_os_linux_and_flutter_runtime_mode_jit_release_and_target_cpu_riscv64": "android-riscv64-jit-release/linux-x64.zip",
+        ":when_host_os_linux_and_flutter_runtime_mode_jit_release_and_target_cpu_x64": "android-x64-jit-release/linux-x64.zip",
+        ":when_host_os_linux_and_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_arm_and_flutter_runtime_mode_profile": "android-arm-profile-ddm-size-exp/linux-x64.zip",
+        ":when_host_os_linux_and_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_arm_and_flutter_runtime_mode_release": "android-arm-release-ddm-size-exp/linux-x64.zip",
+        ":when_host_os_linux_and_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_arm64_and_flutter_runtime_mode_profile": "android-arm64-profile-ddm-size-exp/linux-x64.zip",
+        ":when_host_os_linux_and_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_arm64_and_flutter_runtime_mode_release": "android-arm64-release-ddm-size-exp/linux-x64.zip",
+        ":when_host_os_linux_and_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_riscv64_and_flutter_runtime_mode_profile": "android-riscv64-profile-ddm-size-exp/linux-x64.zip",
+        ":when_host_os_linux_and_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_riscv64_and_flutter_runtime_mode_release": "android-riscv64-release-ddm-size-exp/linux-x64.zip",
+        ":when_host_os_linux_and_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_x64_and_flutter_runtime_mode_profile": "android-x64-profile-ddm-size-exp/linux-x64.zip",
+        ":when_host_os_linux_and_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_x64_and_flutter_runtime_mode_release": "android-x64-release-ddm-size-exp/linux-x64.zip",
+        ":when_host_os_linux_and_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_arm_and_flutter_runtime_mode_profile": "android-arm-profile-ddm/linux-x64.zip",
+        ":when_host_os_linux_and_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_arm_and_flutter_runtime_mode_release": "android-arm-release-ddm/linux-x64.zip",
+        ":when_host_os_linux_and_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_arm64_and_flutter_runtime_mode_profile": "android-arm64-profile-ddm/linux-x64.zip",
+        ":when_host_os_linux_and_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_arm64_and_flutter_runtime_mode_release": "android-arm64-release-ddm/linux-x64.zip",
+        ":when_host_os_linux_and_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_riscv64_and_flutter_runtime_mode_profile": "android-riscv64-profile-ddm/linux-x64.zip",
+        ":when_host_os_linux_and_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_riscv64_and_flutter_runtime_mode_release": "android-riscv64-release-ddm/linux-x64.zip",
+        ":when_host_os_linux_and_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_x64_and_flutter_runtime_mode_profile": "android-x64-profile-ddm/linux-x64.zip",
+        ":when_host_os_linux_and_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_x64_and_flutter_runtime_mode_release": "android-x64-release-ddm/linux-x64.zip",
+        ":when_host_os_linux_and_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_arm_and_flutter_runtime_mode_profile": "android-arm-profile-size-exp/linux-x64.zip",
+        ":when_host_os_linux_and_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_arm_and_flutter_runtime_mode_release": "android-arm-release-size-exp/linux-x64.zip",
+        ":when_host_os_linux_and_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_arm64_and_flutter_runtime_mode_profile": "android-arm64-profile-size-exp/linux-x64.zip",
+        ":when_host_os_linux_and_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_arm64_and_flutter_runtime_mode_release": "android-arm64-release-size-exp/linux-x64.zip",
+        ":when_host_os_linux_and_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_riscv64_and_flutter_runtime_mode_profile": "android-riscv64-profile-size-exp/linux-x64.zip",
+        ":when_host_os_linux_and_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_riscv64_and_flutter_runtime_mode_release": "android-riscv64-release-size-exp/linux-x64.zip",
+        ":when_host_os_linux_and_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_x64_and_flutter_runtime_mode_profile": "android-x64-profile-size-exp/linux-x64.zip",
+        ":when_host_os_linux_and_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_x64_and_flutter_runtime_mode_release": "android-x64-release-size-exp/linux-x64.zip",
+        ":when_host_os_linux_and_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_arm_and_flutter_runtime_mode_profile": "android-arm-profile/linux-x64.zip",
+        ":when_host_os_linux_and_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_arm_and_flutter_runtime_mode_release": "android-arm-release/linux-x64.zip",
+        ":when_host_os_linux_and_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_arm64_and_flutter_runtime_mode_profile": "android-arm64-profile/linux-x64.zip",
+        ":when_host_os_linux_and_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_arm64_and_flutter_runtime_mode_release": "android-arm64-release/linux-x64.zip",
+        ":when_host_os_linux_and_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_riscv64_and_flutter_runtime_mode_profile": "android-riscv64-profile/linux-x64.zip",
+        ":when_host_os_linux_and_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_riscv64_and_flutter_runtime_mode_release": "android-riscv64-release/linux-x64.zip",
+        ":when_host_os_linux_and_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_x64_and_flutter_runtime_mode_profile": "android-x64-profile/linux-x64.zip",
+        ":when_host_os_linux_and_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_x64_and_flutter_runtime_mode_release": "android-x64-release/linux-x64.zip",
+        ":when_host_os_linux_and_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_arm": "android-arm-ddm-size-exp/linux-x64.zip",
+        ":when_host_os_linux_and_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_arm64": "android-arm64-ddm-size-exp/linux-x64.zip",
+        ":when_host_os_linux_and_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_riscv64": "android-riscv64-ddm-size-exp/linux-x64.zip",
+        ":when_host_os_linux_and_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_x64": "android-x64-ddm-size-exp/linux-x64.zip",
+        ":when_host_os_linux_and_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_arm": "android-arm-ddm/linux-x64.zip",
+        ":when_host_os_linux_and_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_arm64": "android-arm64-ddm/linux-x64.zip",
+        ":when_host_os_linux_and_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_riscv64": "android-riscv64-ddm/linux-x64.zip",
+        ":when_host_os_linux_and_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_x64": "android-x64-ddm/linux-x64.zip",
+        ":when_host_os_linux_and_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_arm": "android-arm-size-exp/linux-x64.zip",
+        ":when_host_os_linux_and_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_arm64": "android-arm64-size-exp/linux-x64.zip",
+        ":when_host_os_linux_and_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_riscv64": "android-riscv64-size-exp/linux-x64.zip",
+        ":when_host_os_linux_and_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_x64": "android-x64-size-exp/linux-x64.zip",
+        ":when_host_os_linux_and_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_arm": "android-arm/linux-x64.zip",
+        ":when_host_os_linux_and_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_arm64": "android-arm64/linux-x64.zip",
+        ":when_host_os_linux_and_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_riscv64": "android-riscv64/linux-x64.zip",
+        ":when_host_os_linux_and_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_x64": "android-x64/linux-x64.zip",
+        ":when_host_os_mac_and_flutter_runtime_mode_jit_release_and_target_cpu_arm": "android-arm-jit-release/darwin-x64.zip",
+        ":when_host_os_mac_and_flutter_runtime_mode_jit_release_and_target_cpu_arm64": "android-arm64-jit-release/darwin-x64.zip",
+        ":when_host_os_mac_and_flutter_runtime_mode_jit_release_and_target_cpu_riscv64": "android-riscv64-jit-release/darwin-x64.zip",
+        ":when_host_os_mac_and_flutter_runtime_mode_jit_release_and_target_cpu_x64": "android-x64-jit-release/darwin-x64.zip",
+        ":when_host_os_mac_and_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_arm_and_flutter_runtime_mode_profile": "android-arm-profile-ddm-size-exp/darwin-x64.zip",
+        ":when_host_os_mac_and_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_arm_and_flutter_runtime_mode_release": "android-arm-release-ddm-size-exp/darwin-x64.zip",
+        ":when_host_os_mac_and_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_arm64_and_flutter_runtime_mode_profile": "android-arm64-profile-ddm-size-exp/darwin-x64.zip",
+        ":when_host_os_mac_and_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_arm64_and_flutter_runtime_mode_release": "android-arm64-release-ddm-size-exp/darwin-x64.zip",
+        ":when_host_os_mac_and_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_riscv64_and_flutter_runtime_mode_profile": "android-riscv64-profile-ddm-size-exp/darwin-x64.zip",
+        ":when_host_os_mac_and_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_riscv64_and_flutter_runtime_mode_release": "android-riscv64-release-ddm-size-exp/darwin-x64.zip",
+        ":when_host_os_mac_and_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_x64_and_flutter_runtime_mode_profile": "android-x64-profile-ddm-size-exp/darwin-x64.zip",
+        ":when_host_os_mac_and_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_x64_and_flutter_runtime_mode_release": "android-x64-release-ddm-size-exp/darwin-x64.zip",
+        ":when_host_os_mac_and_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_arm_and_flutter_runtime_mode_profile": "android-arm-profile-ddm/darwin-x64.zip",
+        ":when_host_os_mac_and_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_arm_and_flutter_runtime_mode_release": "android-arm-release-ddm/darwin-x64.zip",
+        ":when_host_os_mac_and_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_arm64_and_flutter_runtime_mode_profile": "android-arm64-profile-ddm/darwin-x64.zip",
+        ":when_host_os_mac_and_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_arm64_and_flutter_runtime_mode_release": "android-arm64-release-ddm/darwin-x64.zip",
+        ":when_host_os_mac_and_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_riscv64_and_flutter_runtime_mode_profile": "android-riscv64-profile-ddm/darwin-x64.zip",
+        ":when_host_os_mac_and_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_riscv64_and_flutter_runtime_mode_release": "android-riscv64-release-ddm/darwin-x64.zip",
+        ":when_host_os_mac_and_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_x64_and_flutter_runtime_mode_profile": "android-x64-profile-ddm/darwin-x64.zip",
+        ":when_host_os_mac_and_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_x64_and_flutter_runtime_mode_release": "android-x64-release-ddm/darwin-x64.zip",
+        ":when_host_os_mac_and_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_arm_and_flutter_runtime_mode_profile": "android-arm-profile-size-exp/darwin-x64.zip",
+        ":when_host_os_mac_and_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_arm_and_flutter_runtime_mode_release": "android-arm-release-size-exp/darwin-x64.zip",
+        ":when_host_os_mac_and_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_arm64_and_flutter_runtime_mode_profile": "android-arm64-profile-size-exp/darwin-x64.zip",
+        ":when_host_os_mac_and_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_arm64_and_flutter_runtime_mode_release": "android-arm64-release-size-exp/darwin-x64.zip",
+        ":when_host_os_mac_and_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_riscv64_and_flutter_runtime_mode_profile": "android-riscv64-profile-size-exp/darwin-x64.zip",
+        ":when_host_os_mac_and_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_riscv64_and_flutter_runtime_mode_release": "android-riscv64-release-size-exp/darwin-x64.zip",
+        ":when_host_os_mac_and_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_x64_and_flutter_runtime_mode_profile": "android-x64-profile-size-exp/darwin-x64.zip",
+        ":when_host_os_mac_and_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_x64_and_flutter_runtime_mode_release": "android-x64-release-size-exp/darwin-x64.zip",
+        ":when_host_os_mac_and_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_arm_and_flutter_runtime_mode_profile": "android-arm-profile/darwin-x64.zip",
+        ":when_host_os_mac_and_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_arm_and_flutter_runtime_mode_release": "android-arm-release/darwin-x64.zip",
+        ":when_host_os_mac_and_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_arm64_and_flutter_runtime_mode_profile": "android-arm64-profile/darwin-x64.zip",
+        ":when_host_os_mac_and_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_arm64_and_flutter_runtime_mode_release": "android-arm64-release/darwin-x64.zip",
+        ":when_host_os_mac_and_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_riscv64_and_flutter_runtime_mode_profile": "android-riscv64-profile/darwin-x64.zip",
+        ":when_host_os_mac_and_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_riscv64_and_flutter_runtime_mode_release": "android-riscv64-release/darwin-x64.zip",
+        ":when_host_os_mac_and_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_x64_and_flutter_runtime_mode_profile": "android-x64-profile/darwin-x64.zip",
+        ":when_host_os_mac_and_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_x64_and_flutter_runtime_mode_release": "android-x64-release/darwin-x64.zip",
+        ":when_host_os_mac_and_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_arm": "android-arm-ddm-size-exp/darwin-x64.zip",
+        ":when_host_os_mac_and_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_arm64": "android-arm64-ddm-size-exp/darwin-x64.zip",
+        ":when_host_os_mac_and_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_riscv64": "android-riscv64-ddm-size-exp/darwin-x64.zip",
+        ":when_host_os_mac_and_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_x64": "android-x64-ddm-size-exp/darwin-x64.zip",
+        ":when_host_os_mac_and_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_arm": "android-arm-ddm/darwin-x64.zip",
+        ":when_host_os_mac_and_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_arm64": "android-arm64-ddm/darwin-x64.zip",
+        ":when_host_os_mac_and_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_riscv64": "android-riscv64-ddm/darwin-x64.zip",
+        ":when_host_os_mac_and_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_x64": "android-x64-ddm/darwin-x64.zip",
+        ":when_host_os_mac_and_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_arm": "android-arm-size-exp/darwin-x64.zip",
+        ":when_host_os_mac_and_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_arm64": "android-arm64-size-exp/darwin-x64.zip",
+        ":when_host_os_mac_and_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_riscv64": "android-riscv64-size-exp/darwin-x64.zip",
+        ":when_host_os_mac_and_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_x64": "android-x64-size-exp/darwin-x64.zip",
+        ":when_host_os_mac_and_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_arm": "android-arm/darwin-x64.zip",
+        ":when_host_os_mac_and_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_arm64": "android-arm64/darwin-x64.zip",
+        ":when_host_os_mac_and_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_riscv64": "android-riscv64/darwin-x64.zip",
+        ":when_host_os_mac_and_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_x64": "android-x64/darwin-x64.zip",
         "//conditions:default": None,
     }),
-    sources = {"gen_snapshot": "clang_x64/gen_snapshot"},
+    sources = select({
+        "//engine/src/flutter/build/bazel:host_os_is_mac": {
+            "gen_snapshot": "universal/gen_snapshot",
+            "entitlements.txt": "gen/flutter/shell/platform/android/android_entitlements.txt",
+        },
+        "//conditions:default": {"gen_snapshot": "clang_x64/gen_snapshot"},
+    }),
     target_compatible_with = select({
         ":when_is_android_and_target_cpu_not_x86": [],
         "//conditions:default": ["@platforms//:incompatible"],
     }),
-    deps = ["//engine/src/flutter/lib/snapshot:generate_snapshot_bins"],
+    deps = ["//engine/src/flutter/lib/snapshot:generate_snapshot_bins"] + select({
+        "//engine/src/flutter/build/bazel:host_os_is_mac": [
+            ":android_entitlement_config",  # host_os == "mac"
+        ],
+        "//conditions:default": [],
+    }),
 )
 
 # `is_android && target_cpu != "x86"`, for the select()s of this file.
@@ -3195,50 +4535,50 @@ zip_bundle(
     name = "analyze_snapshot",
     files = {"analyze_snapshot": "//engine/src/flutter/build/bazel/dart_wrap:analyze_snapshot_host"},
     output = select({
-        ":when_flutter_runtime_mode_jit_release_and_target_cpu_arm64": "android-arm64-jit-release/analyze-snapshot-linux-x64.zip",
-        ":when_flutter_runtime_mode_jit_release_and_target_cpu_riscv64": "android-riscv64-jit-release/analyze-snapshot-linux-x64.zip",
-        ":when_flutter_runtime_mode_jit_release_and_target_cpu_x64": "android-x64-jit-release/analyze-snapshot-linux-x64.zip",
-        ":when_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_arm64_and_flutter_runtime_mode_profile": "android-arm64-profile-ddm-size-exp/analyze-snapshot-linux-x64.zip",
-        ":when_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_arm64_and_flutter_runtime_mode_release": "android-arm64-release-ddm-size-exp/analyze-snapshot-linux-x64.zip",
-        ":when_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_riscv64_and_flutter_runtime_mode_profile": "android-riscv64-profile-ddm-size-exp/analyze-snapshot-linux-x64.zip",
-        ":when_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_riscv64_and_flutter_runtime_mode_release": "android-riscv64-release-ddm-size-exp/analyze-snapshot-linux-x64.zip",
-        ":when_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_x64_and_flutter_runtime_mode_profile": "android-x64-profile-ddm-size-exp/analyze-snapshot-linux-x64.zip",
-        ":when_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_x64_and_flutter_runtime_mode_release": "android-x64-release-ddm-size-exp/analyze-snapshot-linux-x64.zip",
-        ":when_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_arm64_and_flutter_runtime_mode_profile": "android-arm64-profile-ddm/analyze-snapshot-linux-x64.zip",
-        ":when_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_arm64_and_flutter_runtime_mode_release": "android-arm64-release-ddm/analyze-snapshot-linux-x64.zip",
-        ":when_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_riscv64_and_flutter_runtime_mode_profile": "android-riscv64-profile-ddm/analyze-snapshot-linux-x64.zip",
-        ":when_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_riscv64_and_flutter_runtime_mode_release": "android-riscv64-release-ddm/analyze-snapshot-linux-x64.zip",
-        ":when_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_x64_and_flutter_runtime_mode_profile": "android-x64-profile-ddm/analyze-snapshot-linux-x64.zip",
-        ":when_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_x64_and_flutter_runtime_mode_release": "android-x64-release-ddm/analyze-snapshot-linux-x64.zip",
-        ":when_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_arm64_and_flutter_runtime_mode_profile": "android-arm64-profile-size-exp/analyze-snapshot-linux-x64.zip",
-        ":when_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_arm64_and_flutter_runtime_mode_release": "android-arm64-release-size-exp/analyze-snapshot-linux-x64.zip",
-        ":when_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_riscv64_and_flutter_runtime_mode_profile": "android-riscv64-profile-size-exp/analyze-snapshot-linux-x64.zip",
-        ":when_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_riscv64_and_flutter_runtime_mode_release": "android-riscv64-release-size-exp/analyze-snapshot-linux-x64.zip",
-        ":when_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_x64_and_flutter_runtime_mode_profile": "android-x64-profile-size-exp/analyze-snapshot-linux-x64.zip",
-        ":when_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_x64_and_flutter_runtime_mode_release": "android-x64-release-size-exp/analyze-snapshot-linux-x64.zip",
-        ":when_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_arm64_and_flutter_runtime_mode_profile": "android-arm64-profile/analyze-snapshot-linux-x64.zip",
-        ":when_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_arm64_and_flutter_runtime_mode_release": "android-arm64-release/analyze-snapshot-linux-x64.zip",
-        ":when_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_riscv64_and_flutter_runtime_mode_profile": "android-riscv64-profile/analyze-snapshot-linux-x64.zip",
-        ":when_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_riscv64_and_flutter_runtime_mode_release": "android-riscv64-release/analyze-snapshot-linux-x64.zip",
-        ":when_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_x64_and_flutter_runtime_mode_profile": "android-x64-profile/analyze-snapshot-linux-x64.zip",
-        ":when_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_x64_and_flutter_runtime_mode_release": "android-x64-release/analyze-snapshot-linux-x64.zip",
-        ":when_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_arm64": "android-arm64-ddm-size-exp/analyze-snapshot-linux-x64.zip",
-        ":when_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_riscv64": "android-riscv64-ddm-size-exp/analyze-snapshot-linux-x64.zip",
-        ":when_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_x64": "android-x64-ddm-size-exp/analyze-snapshot-linux-x64.zip",
-        ":when_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_arm64": "android-arm64-ddm/analyze-snapshot-linux-x64.zip",
-        ":when_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_riscv64": "android-riscv64-ddm/analyze-snapshot-linux-x64.zip",
-        ":when_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_x64": "android-x64-ddm/analyze-snapshot-linux-x64.zip",
-        ":when_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_arm64": "android-arm64-size-exp/analyze-snapshot-linux-x64.zip",
-        ":when_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_riscv64": "android-riscv64-size-exp/analyze-snapshot-linux-x64.zip",
-        ":when_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_x64": "android-x64-size-exp/analyze-snapshot-linux-x64.zip",
-        ":when_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_arm64": "android-arm64/analyze-snapshot-linux-x64.zip",
-        ":when_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_riscv64": "android-riscv64/analyze-snapshot-linux-x64.zip",
-        ":when_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_x64": "android-x64/analyze-snapshot-linux-x64.zip",
+        ":when_host_os_linux_and_flutter_runtime_mode_jit_release_and_target_cpu_arm64": "android-arm64-jit-release/analyze-snapshot-linux-x64.zip",
+        ":when_host_os_linux_and_flutter_runtime_mode_jit_release_and_target_cpu_riscv64": "android-riscv64-jit-release/analyze-snapshot-linux-x64.zip",
+        ":when_host_os_linux_and_flutter_runtime_mode_jit_release_and_target_cpu_x64": "android-x64-jit-release/analyze-snapshot-linux-x64.zip",
+        ":when_host_os_linux_and_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_arm64_and_flutter_runtime_mode_profile": "android-arm64-profile-ddm-size-exp/analyze-snapshot-linux-x64.zip",
+        ":when_host_os_linux_and_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_arm64_and_flutter_runtime_mode_release": "android-arm64-release-ddm-size-exp/analyze-snapshot-linux-x64.zip",
+        ":when_host_os_linux_and_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_riscv64_and_flutter_runtime_mode_profile": "android-riscv64-profile-ddm-size-exp/analyze-snapshot-linux-x64.zip",
+        ":when_host_os_linux_and_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_riscv64_and_flutter_runtime_mode_release": "android-riscv64-release-ddm-size-exp/analyze-snapshot-linux-x64.zip",
+        ":when_host_os_linux_and_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_x64_and_flutter_runtime_mode_profile": "android-x64-profile-ddm-size-exp/analyze-snapshot-linux-x64.zip",
+        ":when_host_os_linux_and_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_x64_and_flutter_runtime_mode_release": "android-x64-release-ddm-size-exp/analyze-snapshot-linux-x64.zip",
+        ":when_host_os_linux_and_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_arm64_and_flutter_runtime_mode_profile": "android-arm64-profile-ddm/analyze-snapshot-linux-x64.zip",
+        ":when_host_os_linux_and_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_arm64_and_flutter_runtime_mode_release": "android-arm64-release-ddm/analyze-snapshot-linux-x64.zip",
+        ":when_host_os_linux_and_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_riscv64_and_flutter_runtime_mode_profile": "android-riscv64-profile-ddm/analyze-snapshot-linux-x64.zip",
+        ":when_host_os_linux_and_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_riscv64_and_flutter_runtime_mode_release": "android-riscv64-release-ddm/analyze-snapshot-linux-x64.zip",
+        ":when_host_os_linux_and_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_x64_and_flutter_runtime_mode_profile": "android-x64-profile-ddm/analyze-snapshot-linux-x64.zip",
+        ":when_host_os_linux_and_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_x64_and_flutter_runtime_mode_release": "android-x64-release-ddm/analyze-snapshot-linux-x64.zip",
+        ":when_host_os_linux_and_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_arm64_and_flutter_runtime_mode_profile": "android-arm64-profile-size-exp/analyze-snapshot-linux-x64.zip",
+        ":when_host_os_linux_and_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_arm64_and_flutter_runtime_mode_release": "android-arm64-release-size-exp/analyze-snapshot-linux-x64.zip",
+        ":when_host_os_linux_and_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_riscv64_and_flutter_runtime_mode_profile": "android-riscv64-profile-size-exp/analyze-snapshot-linux-x64.zip",
+        ":when_host_os_linux_and_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_riscv64_and_flutter_runtime_mode_release": "android-riscv64-release-size-exp/analyze-snapshot-linux-x64.zip",
+        ":when_host_os_linux_and_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_x64_and_flutter_runtime_mode_profile": "android-x64-profile-size-exp/analyze-snapshot-linux-x64.zip",
+        ":when_host_os_linux_and_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_x64_and_flutter_runtime_mode_release": "android-x64-release-size-exp/analyze-snapshot-linux-x64.zip",
+        ":when_host_os_linux_and_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_arm64_and_flutter_runtime_mode_profile": "android-arm64-profile/analyze-snapshot-linux-x64.zip",
+        ":when_host_os_linux_and_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_arm64_and_flutter_runtime_mode_release": "android-arm64-release/analyze-snapshot-linux-x64.zip",
+        ":when_host_os_linux_and_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_riscv64_and_flutter_runtime_mode_profile": "android-riscv64-profile/analyze-snapshot-linux-x64.zip",
+        ":when_host_os_linux_and_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_riscv64_and_flutter_runtime_mode_release": "android-riscv64-release/analyze-snapshot-linux-x64.zip",
+        ":when_host_os_linux_and_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_x64_and_flutter_runtime_mode_profile": "android-x64-profile/analyze-snapshot-linux-x64.zip",
+        ":when_host_os_linux_and_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_x64_and_flutter_runtime_mode_release": "android-x64-release/analyze-snapshot-linux-x64.zip",
+        ":when_host_os_linux_and_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_arm64": "android-arm64-ddm-size-exp/analyze-snapshot-linux-x64.zip",
+        ":when_host_os_linux_and_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_riscv64": "android-riscv64-ddm-size-exp/analyze-snapshot-linux-x64.zip",
+        ":when_host_os_linux_and_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_x64": "android-x64-ddm-size-exp/analyze-snapshot-linux-x64.zip",
+        ":when_host_os_linux_and_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_arm64": "android-arm64-ddm/analyze-snapshot-linux-x64.zip",
+        ":when_host_os_linux_and_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_riscv64": "android-riscv64-ddm/analyze-snapshot-linux-x64.zip",
+        ":when_host_os_linux_and_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_x64": "android-x64-ddm/analyze-snapshot-linux-x64.zip",
+        ":when_host_os_linux_and_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_arm64": "android-arm64-size-exp/analyze-snapshot-linux-x64.zip",
+        ":when_host_os_linux_and_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_riscv64": "android-riscv64-size-exp/analyze-snapshot-linux-x64.zip",
+        ":when_host_os_linux_and_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_x64": "android-x64-size-exp/analyze-snapshot-linux-x64.zip",
+        ":when_host_os_linux_and_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_arm64": "android-arm64/analyze-snapshot-linux-x64.zip",
+        ":when_host_os_linux_and_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_riscv64": "android-riscv64/analyze-snapshot-linux-x64.zip",
+        ":when_host_os_linux_and_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_x64": "android-x64/analyze-snapshot-linux-x64.zip",
         "//conditions:default": None,
     }),
     sources = {"analyze_snapshot": "clang_x64/analyze_snapshot"},
     target_compatible_with = select({
-        ":when_is_android_and_target_cpu_x64_or_target_cpu_arm64_or_target_cpu_riscv64": [],
+        ":when_is_android_and_host_os_linux_and_target_cpu_x64_or_target_cpu_arm64_or_target_cpu_riscv64": [],
         "//conditions:default": ["@platforms//:incompatible"],
     }),
     deps = ["//engine/src/flutter/build/bazel/dart_wrap:analyze_snapshot_host"],
@@ -3254,11 +4594,12 @@ selects.config_setting_group(
     ],
 )
 
-# `is_android && (target_cpu == "x64" || target_cpu == "arm64" || target_cpu == "riscv64")`, for the select()s of this file.
+# `is_android && host_os == "linux" && (target_cpu == "x64" || target_cpu == "arm64" || target_cpu == "riscv64")`, for the select()s of this file.
 selects.config_setting_group(
-    name = "when_is_android_and_target_cpu_x64_or_target_cpu_arm64_or_target_cpu_riscv64",
+    name = "when_is_android_and_host_os_linux_and_target_cpu_x64_or_target_cpu_arm64_or_target_cpu_riscv64",
     match_all = [
         "@platforms//os:android",
+        "//engine/src/flutter/build/bazel:host_os_is_linux",
         ":when_target_cpu_x64_or_target_cpu_arm64_or_target_cpu_riscv64",
     ],
 )
