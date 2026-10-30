@@ -322,6 +322,26 @@ TEST(DisplayListImageFilter, DilateBounds) {
   TestBounds(filter, input_bounds, expected_output_bounds);
 }
 
+TEST(DisplayListImageFilter, DilateInputBounds) {
+  DlDilateImageFilter filter(10, 20);
+  DlIRect input_bounds;
+  EXPECT_EQ(filter.get_input_device_bounds(DlIRect::MakeLTRB(20, 30, 120, 130),
+                                           DlMatrix(), input_bounds),
+            &input_bounds);
+  EXPECT_EQ(input_bounds, DlIRect::MakeLTRB(10, 10, 130, 150));
+}
+
+TEST(DisplayListImageFilter, DilateInputBoundsWithTransform) {
+  DlDilateImageFilter filter(10, 20);
+  DlMatrix transform = DlMatrix::MakeTranslation({100, -200, 0}) *
+                       DlMatrix::MakeScale({-2, 3, 1});
+  DlIRect input_bounds;
+  EXPECT_EQ(filter.get_input_device_bounds(DlIRect::MakeLTRB(20, 30, 120, 130),
+                                           transform, input_bounds),
+            &input_bounds);
+  EXPECT_EQ(input_bounds, DlIRect::MakeLTRB(0, -30, 140, 190));
+}
+
 TEST(DisplayListImageFilter, ErodeConstructor) {
   DlErodeImageFilter filter(5.0, 6.0);
 }
@@ -897,12 +917,10 @@ TEST(DisplayListImageFilter, LocalImageFilterBounds) {
           }
         }
         {
-          // Test for: Know the outset bounds to get the inset bounds
-          // Skia have some bounds calculate error of DilateFilter and
-          // MatrixFilter
+          // Reverse bounds for MatrixFilter are not equivalent yet.
           // Skia issue: https://bugs.chromium.org/p/skia/issues/detail?id=13444
           // flutter issue: https://github.com/flutter/flutter/issues/108693
-          if (i == 2 || i == 3) {
+          if (i == 3) {
             continue;
           }
           auto outset_bounds = SkIRect::MakeLTRB(20, 20, 80, 80);

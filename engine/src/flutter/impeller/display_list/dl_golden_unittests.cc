@@ -140,6 +140,32 @@ TEST_P(DlGoldenTest, FractionalDilation) {
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
+TEST_P(DlGoldenTest, DilatedContentOutsideClip) {
+  SetWindowSize(impeller::ISize(160, 100));
+  DisplayListBuilder builder;
+  builder.DrawColor(DlColor::kBlack(), DlBlendMode::kSrc);
+  builder.ClipRect(DlRect::MakeXYWH(20, 20, 100, 60));
+
+  DlPaint layer_paint;
+  layer_paint.setImageFilter(DlImageFilter::MakeDilate(10, 10));
+  builder.SaveLayer(DlRect::MakeXYWH(0, 0, 160, 100), &layer_paint);
+  // The rectangle is outside the clip, but its dilated right edge is inside.
+  builder.DrawRect(DlRect::MakeXYWH(15, 45, 4, 10),
+                   DlPaint().setColor(DlColor::kWhite()));
+  builder.Restore();
+
+  auto screenshot = MakeScreenshot(builder.Build());
+  if (!screenshot) {
+    GTEST_SKIP() << "making screenshots not supported.";
+  }
+  const uint8_t* row =
+      screenshot->GetBytes() + 50 * screenshot->GetBytesPerRow();
+  for (size_t channel = 0; channel < 3; channel++) {
+    EXPECT_EQ(row[24 * 4 + channel], 255);
+    EXPECT_EQ(row[15 * 4 + channel], 0);
+  }
+}
+
 namespace {
 void DrawBlurGrid(DlCanvas* canvas) {
   DlPaint paint;
