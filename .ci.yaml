@@ -3768,9 +3768,10 @@ targets:
         ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: draw_arcs_all_fill_styles_perf__timeline_summary
 
-  - name: Mac_ios draw_arcs_all_fill_styles_perf_ios__timeline_summary
+  - name: Mac_ios impeller_primitives_perf_suite_ios__timeline_summary
     recipe: devicelab/devicelab_drone
-    presubmit: true
+    presubmit: false
+    bringup: true
     timeout: 60
     properties:
       tags: >
