@@ -16,6 +16,8 @@ cc_library(
     srcs = [
         "binding_set.cc",  # !is_fuchsia
         "command_buffer.cc",  # !is_fuchsia
+        "compute_pass.cc",  # !is_fuchsia
+        "compute_pipeline.cc",  # !is_fuchsia
         "context.cc",  # !is_fuchsia
         "device_buffer.cc",  # !is_fuchsia
         "export.cc",  # !is_fuchsia
@@ -30,6 +32,8 @@ cc_library(
     hdrs = [
         "binding_set.h",  # !is_fuchsia
         "command_buffer.h",  # !is_fuchsia
+        "compute_pass.h",  # !is_fuchsia
+        "compute_pipeline.h",  # !is_fuchsia
         "context.h",  # !is_fuchsia
         "device_buffer.h",  # !is_fuchsia
         "export.h",  # !is_fuchsia
@@ -91,6 +95,7 @@ cc_library(
         "//engine/src/flutter/impeller/shader_bundle:shader_bundle_flatbuffers",
         "//engine/src/flutter/lib/ui",
         "//engine/src/flutter/third_party/tonic",
+        "@abseil-cpp//absl/container:flat_hash_map",
         "@abseil-cpp//absl/status",
         "@abseil-cpp//absl/status:statusor",
         "@abseil-cpp//absl/strings",

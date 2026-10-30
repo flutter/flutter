@@ -1974,6 +1974,13 @@ enum TemplateArgumentKind {
   /// for a rule that reads the arguments GN's script would (the
   /// xcframework's bundle and location).
   actionArgs,
+
+  /// One file of the build directory a rule finds among its dependencies'
+  /// placements: named by its path (check_forbidden_native_symbols'
+  /// `library = "$_out_dir/libflutter.so"`), passed on as [buildPath] is,
+  /// or as an output of a target (`get_target_outputs(":copy_dylib")[0]`),
+  /// which becomes the target's label in `<attribute>_target`.
+  builtFile,
 }
 
 /// One argument of a known template: the macro attribute it becomes and how.
@@ -2443,6 +2450,19 @@ const Map<String, TemplateMapping> templateMappings = <String, TemplateMapping>{
     'sourcemap': TemplateArgument('sourcemap', TemplateArgumentKind.scalar),
     'public_deps': TemplateArgument('srcs', TemplateArgumentKind.labels),
   }, files: true),
+  // testing/symbols/check_forbidden_native_symbols.gni: the forbidden-symbol
+  // check (prebuilt_dart_action) over one shared library of the build
+  // directory, which the invoker names by path or as a copy's output; the
+  // helpers around it (`_out_dir`, `_dylib_outputs`) are the block's own.
+  'check_forbidden_native_symbols': TemplateMapping(
+    '//build_defs/testing:native_symbols.bzl',
+    'check_forbidden_native_symbols',
+    <String, TemplateArgument>{
+      'deps': TemplateArgument('deps', TemplateArgumentKind.labels),
+      'library': TemplateArgument('library', TemplateArgumentKind.builtFile),
+    },
+    files: true,
+  ),
 };
 
 /// GN actions known by the script they run, converted as a template
@@ -2583,6 +2603,10 @@ const ImportPolicy engineImportPolicy = ImportPolicy(
     // The esbuild template (templateMappings); its argument is the prebuilt
     // esbuild's path, which the rule knows.
     '//flutter/build/esbuild/esbuild.gni',
+    // The forbidden-symbol check of the shared libraries
+    // (check_forbidden_native_symbols, templateMappings): a
+    // prebuilt_dart_action whose script and llvm-nm the rule knows.
+    '//flutter/testing/symbols/check_forbidden_native_symbols.gni',
     // The Dart tree's dart_action templates (prebuilt_dart_action), which
     // web_sdk.gni and web_sdk/BUILD.gn import; the templates built on them
     // are mapped.

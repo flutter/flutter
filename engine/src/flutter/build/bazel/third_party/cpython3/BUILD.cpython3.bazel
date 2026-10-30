@@ -3,9 +3,11 @@
 # found in the LICENSE file.
 
 # Root BUILD file of @cpython3: the CIPD `infra/3pp/tools/cpython3` package
-# (see _DOWNLOADED_TOOL_REPOSITORIES in ../../extensions.bzl). It is the
-# interpreter for the Python scripts that wrapped GN builds run, in place of
-# the `vpython3` that `.gn` names, so that no action depends on depot_tools.
+# DEPS syncs to engine/src/flutter/third_party/cpython3 (see _TOOL_REPOSITORIES
+# in ../../extensions.bzl), the hermetic Python `engine/src/.gn` names as GN's
+# `script_executable`. It is the interpreter for the Python scripts that
+# wrapped GN builds and the converted actions run, so that no action depends
+# on depot_tools or the machine's python3.
 #
 # Layout of the POSIX packages: `bin/python3 -> python3.X` (a statically
 # linked interpreter, no lib-dynload), the standard library in

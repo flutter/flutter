@@ -37,6 +37,7 @@ cc_library(
         "compiler.cc",
         "compiler_backend.cc",
         "constants.cc",
+        "glsl_minifier.cc",
         "includer.cc",
         "reflector.cc",
         "runtime_stage_data.cc",
@@ -54,6 +55,7 @@ cc_library(
         "compiler.h",
         "compiler_backend.h",
         "constants.h",
+        "glsl_minifier.h",
         "include_dir.h",
         "includer.h",
         "logger.h",
@@ -145,6 +147,7 @@ cc_library(
     srcs = [
         "compiler_test.cc",
         "compiler_unittests.cc",
+        "glsl_minifier_unittests.cc",
         "shader_bundle_unittests.cc",
         "switches_unittests.cc",
     ],

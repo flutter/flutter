@@ -47,6 +47,8 @@ cc_library(
         "//engine/src/flutter/fml",
         "//engine/src/flutter/impeller:impeller_public_config",
         "@abseil-cpp//absl/status:statusor",
+        "@abseil-cpp//absl/strings",
+        "@abseil-cpp//absl/strings:str_format",
         "@abseil_cpp_tree//:root_includes",
     ],
     alwayslink = True,

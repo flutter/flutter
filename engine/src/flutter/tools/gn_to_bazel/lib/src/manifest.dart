@@ -1415,6 +1415,10 @@ exports_files([
     "lsan_suppressions.txt",
     "tsan_suppressions.txt",
     "ubsan_suppressions.txt",
+    # symbols/check_forbidden_native_symbols.gni's script, which
+    # build_defs/testing's check_forbidden_native_symbols rule runs over the
+    # engine's shared libraries.
+    "symbols/check_forbidden_native_symbols.dart",
 ])
 
 # testing.gni's enable_unittests: `current_toolchain == host_toolchain ||
@@ -1815,9 +1819,11 @@ exports_files([
     // host's setting selects it (hostOsCases; the font from @host_files).
     assume: hostOsCases,
     // lib/ui's shader fixtures compile shaders of this directory
-    // (`//flutter/impeller/fixtures/ink_sparkle.frag`, the Flutter GPU ones).
+    // (`//flutter/impeller/fixtures/ink_sparkle.frag`, the Flutter GPU ones,
+    // its compute shaders among them).
     appendix: '''
 exports_files(glob([
+    "*.comp",
     "*.frag",
     "*.vert",
     "ordering/*.frag",

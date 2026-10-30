@@ -57,7 +57,6 @@ cc_library(
         "engine.cc",
         "pipeline.cc",
         "platform_view.cc",
-        "pointer_data_dispatcher.cc",
         "rasterizer.cc",
         "resource_cache_limit_calculator.cc",
         "run_configuration.cc",
@@ -91,7 +90,6 @@ cc_library(
         "engine.h",
         "pipeline.h",
         "platform_view.h",
-        "pointer_data_dispatcher.h",
         "rasterizer.h",
         "resource_cache_limit_calculator.h",
         "run_configuration.h",
@@ -189,7 +187,8 @@ cc_library(
     alwayslink = True,
 )
 
-# These are in their own source_set to avoid a dependency cycle with //common/graphics
+# These are in their own source_set to avoid a dependency cycle with
+# //common/graphics
 cc_library(
     name = "base64",
     srcs = ["base64.cc"],
@@ -844,7 +843,6 @@ flutter_cc_test(
         "dl_op_spy_unittests.cc",
         "engine_animator_unittests.cc",
         "engine_unittests.cc",
-        "input_events_unittests.cc",
         "persistent_cache_unittests.cc",
         "pipeline_unittests.cc",
         "rasterizer_unittests.cc",
@@ -921,6 +919,7 @@ flutter_cc_test(
         "//engine/src/flutter/assets",
         "//engine/src/flutter/common/graphics",
         "//engine/src/flutter/display_list/testing:display_list_testing",
+        "//engine/src/flutter/impeller/renderer/testing:mocks",
         "//engine/src/flutter/lib/snapshot",
         "//engine/src/flutter/runtime:libdart",
         "//engine/src/flutter/shell/profiling:profiling_unittests",

@@ -175,3 +175,18 @@ gn_copy(
     outputs = ["$root_out_dir/flutter_web_sdk/canvaskit/{{source_file_part}}"],
     platform = ":skwasm",
 )
+
+gn_copy(
+    name = "wimp_heavy_group",
+    srcs = ["//engine/src/flutter/skwasm:wimp_heavy"],
+    files = [
+        "wimp_heavy.js",
+        "wimp_heavy.js.symbols",
+        "wimp_heavy.wasm",
+    ] + select({
+        "//engine/src/flutter/build/bazel:unoptimized": ["wimp_heavy.wasm.map"],
+        "//conditions:default": [],
+    }),
+    outputs = ["$root_out_dir/flutter_web_sdk/canvaskit/{{source_file_part}}"],
+    platform = ":skwasm_heavy",
+)

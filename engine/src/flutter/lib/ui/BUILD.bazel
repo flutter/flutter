@@ -252,6 +252,7 @@ cc_library(
         "//engine/src/flutter/third_party/tonic",
         "//engine/src/flutter/txt",
         "@abseil-cpp//absl/status:statusor",
+        "@abseil-cpp//absl/strings",
         "@abseil_cpp_tree//:root_includes",
         "@rapidjson",
         "@skia",
@@ -383,6 +384,11 @@ flutter_cc_test(
             "painting/image_decoder_unittests.cc",  # shell_enable_gl
         ],
         "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/impeller/tools:opengles": [
+            "compositing/scene_impeller_gles_unittests.cc",  # impeller_enable_opengles
+        ],
+        "//conditions:default": [],
     }),
     copts = FLUTTER_COPTS + [
         "-Wno-inconsistent-missing-override",  # from :ui_testing_mocks
@@ -440,6 +446,29 @@ flutter_cc_test(
             "-Wno-unguarded-availability",  # from //flutter/shell/common:shell_test_fixture_sources
         ],
         "//conditions:default": [],
+    }) + select({
+        ":when_impeller_enable_opengles_and_is_mac_or_is_ios": [
+            "-Wno-unguarded-availability",  # from //flutter/impeller/renderer/backend/gles:mock_gles
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_impeller_enable_opengles_and_shell_enable_vulkan": [
+            "-Wno-redundant-parens",  # from //flutter/shell/gpu:gpu_surface_gl
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_impeller_enable_opengles_and_impeller_enable_vulkan": [
+            "-Wno-redundant-parens",  # from //flutter/shell/gpu:gpu_surface_gl
+            "-Wno-c++98-compat-extra-semi",  # from //flutter/shell/gpu:gpu_surface_gl
+            "-Wno-deprecated-copy",  # from //flutter/shell/gpu:gpu_surface_gl
+            "-Wno-implicit-fallthrough",  # from //flutter/shell/gpu:gpu_surface_gl
+            "-Wno-nullability-completeness",  # from //flutter/shell/gpu:gpu_surface_gl
+            "-Wno-suggest-destructor-override",  # from //flutter/shell/gpu:gpu_surface_gl
+            "-Wno-suggest-override",  # from //flutter/shell/gpu:gpu_surface_gl
+            "-Wno-unused-private-field",  # from //flutter/shell/gpu:gpu_surface_gl
+            "-Wno-unused-variable",  # from //flutter/shell/gpu:gpu_surface_gl
+        ],
+        "//conditions:default": [],
     }),
     data = [":gpu_test_backends"],
     local_defines = FLUTTER_LOCAL_DEFINES,
@@ -469,6 +498,15 @@ flutter_cc_test(
     ] + select({
         "//engine/src/flutter/shell:enable_gl": [
             "//engine/src/flutter/testing:opengl",  # shell_enable_gl
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/impeller/tools:opengles": [
+            "//engine/src/flutter/impeller/entity:entity_shaders",  # impeller_enable_opengles
+            "//engine/src/flutter/impeller/entity:framebuffer_blend_entity_shaders",  # impeller_enable_opengles
+            "//engine/src/flutter/impeller/entity:modern_entity_shaders",  # impeller_enable_opengles
+            "//engine/src/flutter/impeller/renderer/backend/gles:mock_gles",  # impeller_enable_opengles
+            "//engine/src/flutter/shell/gpu:gpu_surface_gl",  # impeller_enable_opengles
         ],
         "//conditions:default": [],
     }),
@@ -599,6 +637,33 @@ selects.config_setting_group(
     match_all = [
         "//engine/src/flutter/shell:test_enable_metal",
         ":when_is_mac_or_is_ios",
+    ],
+)
+
+# `impeller_enable_opengles && (is_mac || is_ios)`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_impeller_enable_opengles_and_is_mac_or_is_ios",
+    match_all = [
+        "//engine/src/flutter/impeller/tools:opengles",
+        ":when_is_mac_or_is_ios",
+    ],
+)
+
+# `impeller_enable_opengles && shell_enable_vulkan`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_impeller_enable_opengles_and_shell_enable_vulkan",
+    match_all = [
+        "//engine/src/flutter/impeller/tools:opengles",
+        "//engine/src/flutter/shell:enable_vulkan",
+    ],
+)
+
+# `impeller_enable_opengles && impeller_enable_vulkan`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_impeller_enable_opengles_and_impeller_enable_vulkan",
+    match_all = [
+        "//engine/src/flutter/impeller/tools:opengles",
+        "//engine/src/flutter/impeller/tools:vulkan",
     ],
 )
 

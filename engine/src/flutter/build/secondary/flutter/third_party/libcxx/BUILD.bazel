@@ -2,9 +2,10 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-# The engine's libc++ configuration headers (__config_site and
-# __assertion_handler). Every C++ compile action gets this directory on its
-# include path from the toolchain; see
+# The engine's libc++ configuration headers (__config_site,
+# __assertion_handler, and the `<format>` and `<version>` that ban
+# std::format outside libc++'s own build). Every C++ compile action gets
+# this directory on its include path from the toolchain; see
 # //engine/src/flutter/build/bazel/toolchains.
 
 package(default_visibility = ["//visibility:public"])
@@ -17,6 +18,8 @@ filegroup(
     srcs = [
         "config/__assertion_handler",
         "config/__config_site",
+        "config/format",
+        "config/version",
     ],
 )
 

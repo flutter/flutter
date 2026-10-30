@@ -221,6 +221,8 @@ def _impellerc_compile_impl(ctx):
             arguments.append("--use-half-textures")
         if ctx.attr.require_framebuffer_fetch:
             arguments.append("--require-framebuffer-fetch")
+        if ctx.attr.minify:
+            arguments.append("--minify")
         arguments += [
             "--entry-point-prefix=" + ctx.attr.entry_point_prefix,
             "--sl=" + sl.path,
@@ -289,6 +291,9 @@ impellerc_compile = rule(
         ),
         "use_half_textures": attr.bool(),
         "require_framebuffer_fetch": attr.bool(),
+        "minify": attr.bool(
+            doc = "GN's minify: --minify (shaders_gles.gni sets it where impeller_debug is off).",
+        ),
         "entry_point_prefix": attr.string(
             mandatory = True,
             doc = "--entry-point-prefix.",
@@ -510,11 +515,17 @@ def impeller_shaders(
     testonly = kwargs.get("testonly")
 
     # impeller_debug (impeller/tools/args.gni): the debug and profile
-    # runtime modes.
+    # runtime modes. The GLES shaders are minified where it is off
+    # (shaders_gles.gni's `minify = !impeller_debug`).
     impeller_debug = select({
         "//engine/src/flutter/common:runtime_mode_release": False,
         "//engine/src/flutter/common:runtime_mode_jit_release": False,
         "//conditions:default": True,
+    })
+    minify_gles = select({
+        "//engine/src/flutter/common:runtime_mode_release": True,
+        "//engine/src/flutter/common:runtime_mode_jit_release": True,
+        "//conditions:default": False,
     })
 
     # What a shader may #include beside itself.
@@ -563,6 +574,7 @@ def impeller_shaders(
             metal_version = metal_version if metal else None,
             use_half_textures = use_half_textures and metal,
             require_framebuffer_fetch = require_framebuffer_fetch and backend.opengles,
+            minify = minify_gles if backend.opengles else False,
             entry_point_prefix = entry_point_prefix,
             mnemonic = backend.mnemonic,
             testonly = testonly,

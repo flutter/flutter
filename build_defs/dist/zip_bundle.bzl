@@ -11,7 +11,7 @@ running build/zip.py over a list of `{ source, destination }` scopes, writing
 license and the bundle's source directory at the engine's version.
 
 zip_bundle does the same under Bazel: the same script, under the synced
-Python (@cpython3; GN runs it under depot_tools' vpython3) through
+Python (@cpython3, GN's script_executable) through
 zip_bundle.py, which hands it the files the sandbox's input symlinks name,
 over the files of `files` (destination to the one file placed there -- or,
 for a directory of the build directory that a target's closure fills, a
