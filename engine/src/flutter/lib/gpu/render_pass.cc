@@ -310,16 +310,23 @@ bool RenderPass::Draw(size_t element_count,
   // Binding sets are replayed first, so an individual bind that collides
   // with a set member overrides it for this draw. Their metadata is borrowed
   // from the shader rather than copied, so no allocation happens here.
+  // A set's compute bindings belong to compute passes.
   for (const auto& set : binding_sets) {
     if (!set) {
       continue;
     }
     for (const auto& buffer : set->GetBufferBindings()) {
+      if (buffer.stage == impeller::ShaderStage::kCompute) {
+        continue;
+      }
       render_pass_->BindResource(buffer.stage,
                                  impeller::DescriptorType::kUniformBuffer,
                                  buffer.slot, buffer.metadata, buffer.view);
     }
     for (const auto& texture : set->GetTextureBindings()) {
+      if (texture.stage == impeller::ShaderStage::kCompute) {
+        continue;
+      }
       render_pass_->BindResource(
           texture.stage, impeller::DescriptorType::kSampledImage, texture.slot,
           texture.metadata, texture.texture, texture.sampler);
