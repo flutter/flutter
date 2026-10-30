@@ -9,6 +9,20 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  test('StarBorder interpolates fractional points consistently with CircleBorder', () {
+    const circle = CircleBorder();
+    for (final points in <double>[2.1, 2.2, 2.4]) {
+      final star = StarBorder(points: points);
+      for (final t in <double>[0.01, 0.25, 0.5, 0.75, 0.99]) {
+        final forward = ShapeBorder.lerp(circle, star, t)! as StarBorder;
+        final reverse = ShapeBorder.lerp(star, circle, 1.0 - t)! as StarBorder;
+        expect(forward.points, closeTo(2.0 + (points - 2.0) * t, 1e-10));
+        expect(forward.points, closeTo(reverse.points, 1e-10));
+        expect(forward.innerRadiusRatio, closeTo(reverse.innerRadiusRatio, 1e-10));
+      }
+    }
+  });
+
   Future<void> testBorder(
     WidgetTester tester,
     String name,
