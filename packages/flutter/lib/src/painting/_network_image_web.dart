@@ -148,11 +148,15 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
       // Decode the <img> element before creating the ImageStreamCompleter
       // to avoid double reporting the error.
       await imageElement.decode().toDart;
-      return OneFrameImageStreamCompleter(
+      final completer = OneFrameImageStreamCompleter(
         Future<ImageInfo>.value(WebImageInfo(imageElement, debugLabel: key.url)),
         informationCollector: _imageStreamInformationCollector(key),
-        // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
-      )..debugLabel = key.url;
+      );
+      assert(() {
+        completer.debugLabel = key.url;
+        return true;
+      }());
+      return completer;
     }
 
     final bool containsNetworkImageHeaders = key.headers?.isNotEmpty ?? false;
@@ -274,8 +278,10 @@ class _ForwardingImageStreamCompleter extends ImageStreamCompleter {
     InformationCollector? informationCollector,
     String? debugLabel,
   }) {
-    // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
-    this.debugLabel = debugLabel;
+    assert(() {
+      this.debugLabel = debugLabel;
+      return true;
+    }());
     task.then(
       (ImageStreamCompleter value) {
         resolved = true;
