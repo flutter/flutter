@@ -124,6 +124,7 @@ class FlutterTesterDevice extends Device {
     final ToolContext(
       :Artifacts artifacts,
       :FileSystem fs,
+      :FlutterProjectFactory projectFactory,
       :Logger logger,
       :TestCompilerNativeAssetsBuilder? nativeAssetsBuilder,
       :Platform platform,
@@ -142,7 +143,7 @@ class FlutterTesterDevice extends Device {
     );
 
     // Build assets and perform initial compilation.
-    final FlutterProject project = FlutterProject.current();
+    final FlutterProject project = projectFactory.fromDirectory(fs.currentDirectory);
     await BundleBuilder(
       analytics: _analytics,
       buildSystem: _buildSystem,
