@@ -277,8 +277,8 @@ FlutterProjectFactory get projectFactory {
         fileSystem: fs,
         logger: logger,
         plistParser: plistParser,
-        xcode: xcode,
-        xcodeProjectInterpreter: xcodeProjectInterpreter,
+        xcodeBuilder: () => xcode,
+        xcodeProjectInterpreterBuilder: () => xcodeProjectInterpreter,
       );
 }
 
