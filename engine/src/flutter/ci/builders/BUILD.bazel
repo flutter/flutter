@@ -356,9 +356,17 @@ install(
 
 # linux_android_emulator.json: ci/android_emulator_debug_x64
 #   bazel run --config=android_emulator_debug_x64 :android_emulator_debug_x64
-# Not built, no Bazel counterpart yet: flutter/impeller/renderer/backend/vulkan:vulkan_android_apk_unittests.
 # Tests, run by `bazel test` rather than installed: flutter/impeller/renderer/backend/vulkan:vulkan_android_unittests, flutter/impeller/toolkit/android:unittests, flutter/shell/platform/android:flutter_shell_native_unittests.
-# Nothing to install.
+install(
+    name = "android_emulator_debug_x64",
+    testonly = True,
+    contents = ["//engine/src/flutter/impeller/renderer/backend/vulkan:vulkan_android_apk_unittests"],
+    directory = "ci/android_emulator_debug_x64",
+    target_compatible_with = select({
+        "//engine/src/flutter/build/bazel:host_os_is_linux": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+)
 
 # ci/android_emulator_debug_x64's tests: run_tests.py --type android.
 # Not run, no Bazel test yet: the android type.
