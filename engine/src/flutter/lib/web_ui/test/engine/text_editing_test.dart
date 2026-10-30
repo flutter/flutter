@@ -1527,9 +1527,12 @@ Future<void> testMain() async {
     test(
       'focus and disconnection with delaying blur in iOS',
       () async {
+        // Autofill is off here: an autofill field's connection is closed by the
+        // framework when the view loses focus, not by this blur, so the deferred
+        // close this test waits for is the iOS caret-drag one.
         final setClient = MethodCall('TextInput.setClient', <dynamic>[
           123,
-          flutterSinglelineConfig,
+          createFlutterConfig('text', autofillEnabled: false),
         ]);
         sendFrameworkMessage(codec.encodeMethodCall(setClient));
 
@@ -1567,10 +1570,13 @@ Future<void> testMain() async {
         // DOM element is blurred.
         textEditing!.strategy.domElement!.blur();
 
-        expect(spy.messages, hasLength(1));
-        expect(spy.messages[0].channel, 'flutter/textinput');
-        expect(spy.messages[0].methodName, 'TextInputClient.onConnectionClosed');
-        await Future<void>.delayed(Duration.zero);
+        // The iOS caret drag deferral holds the close; wait past it.
+        expect(connectionClosedMessages(spy), isEmpty);
+        await Future<void>.delayed(const Duration(milliseconds: 150));
+
+        final List<PlatformMessage> closedMessages = connectionClosedMessages(spy);
+        expect(closedMessages, hasLength(1));
+        expect(closedMessages.single.channel, 'flutter/textinput');
         // DOM element loses the focus.
         expect(defaultTextEditingRoot.ownerDocument?.activeElement, domDocument.body);
       },
@@ -1799,7 +1805,13 @@ Future<void> testMain() async {
       });
 
       final setClient1 = MethodCall('TextInput.setClient', <dynamic>[123, flutterSinglelineConfig]);
-      final setClient2 = MethodCall('TextInput.setClient', <dynamic>[567, flutterSinglelineConfig]);
+      // A distinct field (different autofill id) so the second client does not
+      // reuse the first field's dormant element; focus moves to a new element.
+      final Map<String, dynamic> secondFieldConfig = createFlutterConfig(
+        'text',
+        autofillHint: 'username',
+      );
+      final setClient2 = MethodCall('TextInput.setClient', <dynamic>[567, secondFieldConfig]);
       const setEditingState = MethodCall('TextInput.setEditingState', <String, dynamic>{
         'text': 'abcd',
         'selectionBase': 2,
@@ -2108,6 +2120,16 @@ Future<void> testMain() async {
       final formElement = defaultTextEditingRoot.querySelector('form')! as DomHTMLFormElement;
       // The form has 4 input elements and one submit button.
       expect(formElement.childNodes, hasLength(5));
+      final Iterable<DomHTMLInputElement> fieldInputs = formElement.childNodes
+          .toList()
+          .whereType<DomHTMLInputElement>()
+          .where((DomHTMLInputElement input) => input.type != 'submit');
+      expect(fieldInputs, hasLength(4));
+      // Placement clustered the non-focused proxies under the focused field.
+      expect(
+        fieldInputs.where((DomHTMLInputElement input) => input.style.position == 'fixed'),
+        isNotEmpty,
+      );
 
       const clearClient = MethodCall('TextInput.clearClient');
       sendFrameworkMessage(codec.encodeMethodCall(clearClient));
@@ -2117,6 +2139,19 @@ Future<void> testMain() async {
       // Form stays on the DOM until autofill context is finalized.
       expect(defaultTextEditingRoot.querySelectorAll('form'), isNotEmpty);
       expect(dormantForms, hasLength(1));
+
+      // The dismissed proxies must not stay pinned to the viewport: goDormant
+      // parked them off screen, and disable parked the focused field the same
+      // way, so nothing of the dormant form is left over the app.
+      for (final input in fieldInputs) {
+        expect(input.style.position, isNot('fixed'));
+        final DomRect rect = input.getBoundingClientRect();
+        expect(
+          rect.left + rect.width <= 0 || rect.top + rect.height <= 0,
+          isTrue,
+          reason: 'parked outside the viewport',
+        );
+      }
     });
 
     test('TextInput.updateConfig preserves active autofill form', () async {
@@ -3694,6 +3729,712 @@ Future<void> testMain() async {
     tearDown(() {
       clearForms();
     });
+
+    test(
+      'keeps connection open across a transient autofill blur, closes on genuine unfocus',
+      () async {
+        // Password managers and browser autofill popups blur the hidden input
+        // (with a null relatedTarget) while the page keeps focus, then hand focus
+        // back to fill the field. For an autofill field that re-focus must cancel
+        // the pending close, or the autofilled value is dropped.
+
+        final Map<String, dynamic> config = createFlutterConfig(
+          'text',
+          autofillHint: 'email',
+          autofillHintsForFields: <String>['familyName', 'email', 'givenName', 'telephoneNumber'],
+        );
+        void send(MethodCall call) =>
+            textEditing!.channel.handleTextInput(codec.encodeMethodCall(call), (ByteData? _) {});
+        send(MethodCall('TextInput.setClient', <dynamic>[++clientId, config]));
+        send(
+          configureSetSizeAndTransformMethodCall(
+            150,
+            50,
+            Matrix4.translationValues(10.0, 20.0, 30.0).storage.toList(),
+          ),
+        );
+        send(const MethodCall('TextInput.show'));
+
+        expect(textEditing!.isEditing, isTrue);
+
+        final DefaultTextEditingStrategy strategy = textEditing!.strategy;
+        strategy.debugDocumentHasFocusOverride = true;
+        strategy.debugDocumentVisibilityStateOverride = 'visible';
+
+        // The popup takes focus: the field blurs while the page keeps focus.
+        strategy.handleBlur(createDomEvent('Event', 'blur'));
+
+        // The close is deferred, never synchronous.
+        expect(connectionClosedMessages(spy), isEmpty);
+
+        // The browser hands focus back to the field to autofill it.
+        strategy.handleFocus(createDomEvent('Event', 'focus'));
+
+        await Future<void>.delayed(const Duration(milliseconds: 150));
+
+        // The re-focus cancelled the close, so the connection stays open.
+        expect(connectionClosedMessages(spy), isEmpty);
+        expect(textEditing!.isEditing, isTrue);
+
+        strategy.debugDocumentHasFocusOverride = null;
+        strategy.debugDocumentVisibilityStateOverride = null;
+
+        // A genuine unfocus (the framework closes the connection) must actually
+        // tear the engine half down: the form goes dormant and the hidden input
+        // releases DOM focus, so the soft keyboard dismisses and physical
+        // keystrokes stop reaching the old field.
+        final DomHTMLElement? input = textEditing!.strategy.domElement;
+        send(const MethodCall('TextInput.clearClient'));
+        expect(textEditing!.isEditing, isFalse);
+        expect(dormantForms, hasLength(1));
+        // The DOM focus handoff (safeBlur) is asynchronous.
+        await Future<void>.delayed(Duration.zero);
+        expect(domDocument.activeElement, isNot(input));
+      },
+    );
+
+    test('keeps connection open for an autofill field that blurs without refocus', () async {
+      final Map<String, dynamic> config = createFlutterConfig(
+        'text',
+        autofillHint: 'email',
+        autofillHintsForFields: <String>['familyName', 'email', 'givenName', 'telephoneNumber'],
+      );
+      void send(MethodCall call) =>
+          textEditing!.channel.handleTextInput(codec.encodeMethodCall(call), (ByteData? _) {});
+      send(MethodCall('TextInput.setClient', <dynamic>[++clientId, config]));
+      send(
+        configureSetSizeAndTransformMethodCall(
+          150,
+          50,
+          Matrix4.translationValues(10.0, 20.0, 30.0).storage.toList(),
+        ),
+      );
+      send(const MethodCall('TextInput.show'));
+
+      expect(textEditing!.isEditing, isTrue);
+
+      final DefaultTextEditingStrategy strategy = textEditing!.strategy;
+      strategy.debugDocumentHasFocusOverride = true;
+      strategy.debugDocumentVisibilityStateOverride = 'visible';
+
+      // A password manager takes focus to fill the form (relatedTarget is null)
+      // and may keep its dialog open for several seconds without returning focus
+      // to the field.
+      strategy.handleBlur(createDomEvent('Event', 'blur'));
+
+      // The close is deferred, never synchronous.
+      expect(connectionClosedMessages(spy), isEmpty);
+
+      await Future<void>.delayed(const Duration(milliseconds: 150));
+
+      // The connection is kept alive so the pending fill is not dropped; it is
+      // closed normally later when the framework unfocuses the field
+      // (clearClient), not on this transient blur.
+      expect(connectionClosedMessages(spy), isEmpty);
+      expect(textEditing!.isEditing, isTrue);
+
+      strategy.debugDocumentHasFocusOverride = null;
+      strategy.debugDocumentVisibilityStateOverride = null;
+
+      // When the framework does unfocus, the engine closes for real.
+      final DomHTMLElement? input = textEditing!.strategy.domElement;
+      send(const MethodCall('TextInput.clearClient'));
+      expect(textEditing!.isEditing, isFalse);
+      expect(dormantForms, hasLength(1));
+      await Future<void>.delayed(Duration.zero);
+      expect(domDocument.activeElement, isNot(input));
+    });
+
+    // Opens a clustered two-field autofill form focused on the email field and
+    // returns its group and the active (focused) proxy.
+    ({EngineAutofillForm group, DomHTMLElement active}) openClusteredForm(
+      void Function(MethodCall) send,
+    ) {
+      final Map<String, dynamic> config = createFlutterConfig(
+        'text',
+        autofillHint: 'email',
+        autofillHintsForFields: <String>['email', 'password'],
+      );
+      send(MethodCall('TextInput.setClient', <dynamic>[++clientId, config]));
+      send(
+        configureSetSizeAndTransformMethodCall(
+          150,
+          50,
+          Matrix4.translationValues(10.0, 20.0, 30.0).storage.toList(),
+        ),
+      );
+      send(const MethodCall('TextInput.show'));
+
+      final DefaultTextEditingStrategy strategy = textEditing!.strategy;
+      final EngineAutofillForm group = strategy.inputConfiguration.autofillGroup!;
+      expect(
+        group.elements.values.where((DomHTMLElement e) => e.style.position == 'fixed'),
+        isNotEmpty,
+        reason: 'placement clusters and pins the non-focused proxy',
+      );
+      expect(group.formElement!.classList.contains(autofillFormClass), isTrue);
+      return (group: group, active: strategy.activeDomElement);
+    }
+
+    // Every field of a parked form is off screen, still above the size floor
+    // password managers use, and out of the tab order.
+    void expectFormParked(EngineAutofillForm group) {
+      for (final DomHTMLElement element in group.elements.values) {
+        expect(element.style.position, isNot('fixed'));
+        expect(element.tabIndex, -1, reason: 'a parked field is not reachable with Tab');
+        final DomRect rect = element.getBoundingClientRect();
+        expect(
+          rect.left + rect.width <= 0 || rect.top + rect.height <= 0,
+          isTrue,
+          reason: 'parked outside the viewport',
+        );
+        expect(rect.width, greaterThanOrEqualTo(40));
+        expect(rect.height, greaterThanOrEqualTo(20));
+      }
+    }
+
+    for (final (String trigger, void Function() endFill) in <(String, void Function())>[
+      (
+        'a tap on the page',
+        () => domDocument.body!.dispatchEvent(createDomEvent('Event', 'pointerdown')),
+      ),
+      (
+        'the window regaining focus',
+        () => domWindow.dispatchEvent(createDomEvent('Event', 'focus')),
+      ),
+    ]) {
+      test('goDormant during a password-manager fill keeps the form in place until $trigger', () {
+        void send(MethodCall call) =>
+            textEditing!.channel.handleTextInput(codec.encodeMethodCall(call), (ByteData? _) {});
+        final ({EngineAutofillForm group, DomHTMLElement active}) form = openClusteredForm(send);
+        final EngineAutofillForm group = form.group;
+        final DomHTMLElement active = form.active;
+
+        // A password manager taking the focus to fill the form is what opens the
+        // fill window; the framework then closes the connection while the
+        // manager still holds the focus.
+        group.beginFillWindow();
+        send(const MethodCall('TextInput.clearClient'));
+
+        // The field the manager was invoked from stays in place, and so do its
+        // siblings: a manager only fills a field that hit-tests back to itself.
+        expect(active.style.position, 'absolute');
+        expect(active.style.width, '150px');
+        expect(active.style.transform, contains('matrix'));
+        for (final DomHTMLElement element in group.elements.values) {
+          if (identical(element, active)) {
+            continue;
+          }
+          expect(element.style.position, 'fixed');
+          final DomRect rect = element.getBoundingClientRect();
+          expect(
+            rect.left + rect.width > 0 && rect.top + rect.height > 0,
+            isTrue,
+            reason: 'still inside the viewport',
+          );
+        }
+
+        // Once the fill is over the form is parked like any dismissed form.
+        endFill();
+        expectFormParked(group);
+      });
+    }
+
+    test('goDormant parks the form at once when no fill is in progress', () {
+      void send(MethodCall call) =>
+          textEditing!.channel.handleTextInput(codec.encodeMethodCall(call), (ByteData? _) {});
+      final ({EngineAutofillForm group, DomHTMLElement active}) form = openClusteredForm(send);
+
+      // An ordinary dismissal: the framework closes the connection without a
+      // manager holding the focus.
+      send(const MethodCall('TextInput.clearClient'));
+
+      expectFormParked(form.group);
+    });
+
+    // A focus event as the browser dispatches it. Unlike createDomEvent it does
+    // not bubble; one that did would reach the window's focus listener, which
+    // ends the fill window by itself and would hide what these tests check.
+    DomEvent focusEvent() => domDocument.createEvent('Event')..initEvent('focus', false);
+
+    // The field of a clustered form that is not the focused one.
+    DomHTMLElement otherField(EngineAutofillForm group, DomHTMLElement active) =>
+        group.elements.values.firstWhere((DomHTMLElement element) => !identical(element, active));
+
+    // Lays the focused field out 280 px to the right of where openClusteredForm
+    // put it, as a resize of the browser window does.
+    void moveField(void Function(MethodCall) send) => send(
+      configureSetSizeAndTransformMethodCall(
+        150,
+        50,
+        Matrix4.translationValues(290.0, 20.0, 30.0).storage.toList(),
+      ),
+    );
+
+    test('a manager focusing another field of the form ends the fill window', () {
+      void send(MethodCall call) =>
+          textEditing!.channel.handleTextInput(codec.encodeMethodCall(call), (ByteData? _) {});
+      final ({EngineAutofillForm group, DomHTMLElement active}) form = openClusteredForm(send);
+      final EngineAutofillForm group = form.group;
+      final DomHTMLElement active = form.active;
+      final DomHTMLElement other = otherField(group, active);
+
+      // A password manager's menu taking the focus from the field it was
+      // invoked on opens the fill window. The manager then focuses the other
+      // field to fill it, instead of handing the focus back.
+      group.beginFillWindow();
+      other.dispatchEvent(focusEvent());
+
+      // The app is laid out again: both proxies follow the field instead of
+      // staying at stale coordinates.
+      final double activeLeft = active.getBoundingClientRect().left;
+      final double otherLeft = other.getBoundingClientRect().left;
+      moveField(send);
+      expect(active.getBoundingClientRect().left - activeLeft, 280);
+      expect(other.getBoundingClientRect().left - otherLeft, 280);
+
+      send(const MethodCall('TextInput.clearClient'));
+    });
+
+    for (final (String trigger, void Function(DomHTMLElement, DomHTMLElement) endFill)
+        in <(String, void Function(DomHTMLElement, DomHTMLElement))>[
+          (
+            'another field of the form gets the focus',
+            (_, DomHTMLElement other) => other.dispatchEvent(focusEvent()),
+          ),
+          (
+            'the field gets the focus back',
+            (DomHTMLElement active, _) => active.dispatchEvent(focusEvent()),
+          ),
+          (
+            'the window gets the focus back',
+            (_, _) => domWindow.dispatchEvent(createDomEvent('Event', 'focus')),
+          ),
+        ]) {
+      test('a placement held during the fill window is applied when $trigger', () {
+        void send(MethodCall call) =>
+            textEditing!.channel.handleTextInput(codec.encodeMethodCall(call), (ByteData? _) {});
+        final ({EngineAutofillForm group, DomHTMLElement active}) form = openClusteredForm(send);
+        final EngineAutofillForm group = form.group;
+        final DomHTMLElement active = form.active;
+        final DomHTMLElement other = otherField(group, active);
+        final double activeLeft = active.getBoundingClientRect().left;
+        final double otherLeft = other.getBoundingClientRect().left;
+
+        // The app is laid out again while a manager fills, as when the browser
+        // window is resized with its menu open: the fields hold still.
+        group.beginFillWindow();
+        moveField(send);
+        expect(active.getBoundingClientRect().left, activeLeft);
+        expect(other.getBoundingClientRect().left, otherLeft);
+
+        // Once the fill window ends, the held placement is applied rather than
+        // waiting for a layout change that may never come.
+        endFill(active, other);
+        expect(active.getBoundingClientRect().left - activeLeft, 280);
+        expect(other.getBoundingClientRect().left - otherLeft, 280);
+
+        send(const MethodCall('TextInput.clearClient'));
+      });
+    }
+
+    // A password manager fills a login form by focusing each field in turn and
+    // writing into it, and the field it starts from is whichever one the user
+    // invoked it on. Whatever it writes has to reach the framework in every
+    // combination: the engine must not depend on which field happens to be the
+    // active editing element while the manager walks the form.
+    //
+    // These drive the DOM the way an extension does (focus, assign value,
+    // dispatch input/change) rather than going through the manager itself,
+    // which is the part outside our control.
+    void managerFill(DomHTMLInputElement element, String value) {
+      element.focusWithoutScroll();
+      element.value = value;
+      element.dispatchEvent(createDomEvent('Event', 'input'));
+      element.dispatchEvent(createDomEvent('Event', 'change'));
+    }
+
+    ({DomHTMLInputElement username, DomHTMLInputElement password}) openFormFocusing(
+      String focusedHint,
+      void Function(MethodCall) send,
+    ) {
+      final Map<String, dynamic> config = createFlutterConfig(
+        'text',
+        autofillHint: focusedHint,
+        autofillHintsForFields: <String>['email', 'password'],
+      );
+      send(MethodCall('TextInput.setClient', <dynamic>[++clientId, config]));
+      send(
+        configureSetSizeAndTransformMethodCall(
+          150,
+          50,
+          Matrix4.translationValues(10.0, 20.0, 30.0).storage.toList(),
+        ),
+      );
+      send(const MethodCall('TextInput.show'));
+      final form = textEditing!.strategy.domElement!.parent! as DomHTMLFormElement;
+      final fields = form.childNodes.toList() as List<DomHTMLInputElement>;
+      return (
+        username: fields.firstWhere((DomHTMLInputElement e) => e.name == 'email'),
+        password: fields.firstWhere((DomHTMLInputElement e) => e.name == 'current-password'),
+      );
+    }
+
+    // A value can arrive two ways: tagged (updateEditingStateWithTag, used for
+    // fields the manager fills while they are not the active editing element)
+    // or untagged (updateEditingState, used for the active element itself).
+    // Both mean the framework got it, which is what these tests are about.
+    bool frameworkReceived(PlatformMessagesSpy spy, String value) {
+      for (final PlatformMessage message in spy.messages) {
+        final Object? args = message.methodArguments;
+        if (args is! List || args.length < 2) {
+          continue;
+        }
+        final Object? payload = args[1];
+        if (payload is! Map) {
+          continue;
+        }
+        if (payload['text'] == value) {
+          return true;
+        }
+        for (final Object? field in payload.values) {
+          if (field is Map && field['text'] == value) {
+            return true;
+          }
+        }
+      }
+      return false;
+    }
+
+    for (final focused in <String>['email', 'password']) {
+      test('a manager filling both fields is forwarded when $focused is active', () async {
+        void send(MethodCall call) =>
+            textEditing!.channel.handleTextInput(codec.encodeMethodCall(call), (ByteData? _) {});
+
+        final ({DomHTMLInputElement username, DomHTMLInputElement password}) fields =
+            openFormFocusing(focused, send);
+        spy.messages.clear();
+
+        // The manager walks the form: username first, then the password.
+        managerFill(fields.username, 'user@example.com');
+        managerFill(fields.password, 'hunter2secret');
+
+        expect(
+          frameworkReceived(spy, 'user@example.com'),
+          isTrue,
+          reason: 'the username fill must reach the framework',
+        );
+        expect(
+          frameworkReceived(spy, 'hunter2secret'),
+          isTrue,
+          reason: 'the password fill must reach the framework',
+        );
+
+        send(const MethodCall('TextInput.clearClient'));
+        dormantForms.clear();
+      });
+
+      test('a manager filling only the other field is forwarded when $focused is active', () async {
+        void send(MethodCall call) =>
+            textEditing!.channel.handleTextInput(codec.encodeMethodCall(call), (ByteData? _) {});
+
+        final ({DomHTMLInputElement username, DomHTMLInputElement password}) fields =
+            openFormFocusing(focused, send);
+        spy.messages.clear();
+
+        // Some managers fill a single field. Whichever one it is, and whichever
+        // field is active, the value still has to arrive.
+        final DomHTMLInputElement other = focused == 'email' ? fields.password : fields.username;
+        managerFill(other, 'only-one-field');
+
+        expect(frameworkReceived(spy, 'only-one-field'), isTrue);
+
+        send(const MethodCall('TextInput.clearClient'));
+        dormantForms.clear();
+      });
+    }
+
+    test('moving to another field of the same form focuses the field moved to', () async {
+      void send(MethodCall call) =>
+          textEditing!.channel.handleTextInput(codec.encodeMethodCall(call), (ByteData? _) {});
+
+      final ({DomHTMLInputElement username, DomHTMLInputElement password}) fields =
+          openFormFocusing('email', send);
+      expect(domDocument.activeElement, fields.username);
+
+      // The user taps the password field, so the framework connects a new
+      // client for it. The field being left still holds the browser's focus at
+      // that point, because the engine blurs it asynchronously, which looks
+      // exactly like a password manager holding a field of the form. The field
+      // the framework moved to still has to end up focused, or there is
+      // nothing for the user to type into.
+      final ({DomHTMLInputElement username, DomHTMLInputElement password}) fieldsAfterMove =
+          openFormFocusing('password', send);
+
+      // Compared by name too, so a failure says which field ended up focused.
+      expect((domDocument.activeElement! as DomHTMLInputElement).name, 'current-password');
+      expect(domDocument.activeElement, fieldsAfterMove.password);
+      expect(domDocument.activeElement, textEditing!.strategy.domElement);
+
+      send(const MethodCall('TextInput.clearClient'));
+      dormantForms.clear();
+    });
+
+    test('forwards a fill on the previously focused field after the connection closes', () async {
+      // A password manager can write into the field after the framework
+      // already closed the connection (the user confirms the fill dialog after
+      // focus moved on). The dormant form's listeners must forward that value
+      // with the field's tag so it reaches the framework through the
+      // last-connection routing.
+
+      final Map<String, dynamic> config = createFlutterConfig(
+        'text',
+        autofillHint: 'email',
+        autofillHintsForFields: <String>['familyName', 'email', 'givenName', 'telephoneNumber'],
+      );
+      void send(MethodCall call) =>
+          textEditing!.channel.handleTextInput(codec.encodeMethodCall(call), (ByteData? _) {});
+      send(MethodCall('TextInput.setClient', <dynamic>[++clientId, config]));
+      send(
+        configureSetSizeAndTransformMethodCall(
+          150,
+          50,
+          Matrix4.translationValues(10.0, 20.0, 30.0).storage.toList(),
+        ),
+      );
+      send(const MethodCall('TextInput.show'));
+      expect(textEditing!.isEditing, isTrue);
+
+      final input = textEditing!.strategy.domElement! as DomHTMLInputElement;
+
+      // A genuine unfocus closes the connection; the form goes dormant with
+      // its listeners still attached.
+      send(const MethodCall('TextInput.clearClient'));
+      expect(textEditing!.isEditing, isFalse);
+      spy.messages.clear();
+
+      // The manager fills the previously focused field.
+      input.value = 'user@example.com';
+      input.dispatchEvent(createDomEvent('Event', 'input'));
+
+      expect(spy.messages, hasLength(1));
+      expect(spy.messages[0].methodName, 'TextInputClient.updateEditingStateWithTag');
+      expect(spy.messages[0].methodArguments, <dynamic>[
+        0, // Client ID
+        <String, dynamic>{
+          'email': <String, dynamic>{
+            'text': 'user@example.com',
+            'selectionBase': 16,
+            'selectionExtent': 16,
+            'composingBase': -1,
+            'composingExtent': -1,
+          },
+        },
+      ]);
+
+      // The same value again is deduplicated, not re-forwarded.
+      spy.messages.clear();
+      input.dispatchEvent(createDomEvent('Event', 'input'));
+      expect(spy.messages, isEmpty);
+
+      dormantForms.clear();
+    });
+
+    test('a reused dormant element does not carry the previous value', () async {
+      // A dormant element is reused for the next connection on the same form.
+      // It must start out like a freshly created one: the framework's value
+      // arrives later over the platform channel, and until it does the stale
+      // value is what a password manager reads. Managers that skip a field
+      // already containing the value they are about to write then fill
+      // nothing at all.
+      final Map<String, dynamic> config = createFlutterConfig(
+        'text',
+        autofillHint: 'email',
+        autofillHintsForFields: <String>['email', 'password'],
+      );
+      void send(MethodCall call) =>
+          textEditing!.channel.handleTextInput(codec.encodeMethodCall(call), (ByteData? _) {});
+      send(MethodCall('TextInput.setClient', <dynamic>[++clientId, config]));
+      send(
+        configureSetSizeAndTransformMethodCall(
+          150,
+          50,
+          Matrix4.translationValues(10.0, 20.0, 30.0).storage.toList(),
+        ),
+      );
+      send(const MethodCall('TextInput.show'));
+
+      final first = textEditing!.strategy.domElement! as DomHTMLInputElement;
+      first.value = 'left-over-secret';
+      send(const MethodCall('TextInput.clearClient'));
+      expect(dormantForms, hasLength(1));
+
+      // A new connection on the same form reuses that element.
+      send(MethodCall('TextInput.setClient', <dynamic>[++clientId, config]));
+      send(
+        configureSetSizeAndTransformMethodCall(
+          150,
+          50,
+          Matrix4.translationValues(10.0, 20.0, 30.0).storage.toList(),
+        ),
+      );
+      send(const MethodCall('TextInput.show'));
+
+      final second = textEditing!.strategy.domElement! as DomHTMLInputElement;
+      expect(second, first, reason: 'the dormant element should be reused');
+      expect(second.value, isEmpty);
+
+      send(const MethodCall('TextInput.clearClient'));
+      dormantForms.clear();
+    });
+
+    test('typing into a refocused field is not re-forwarded as autofill', () async {
+      // When a connection closes and a new one opens on the same form, the
+      // adopted dormant form's old listeners must be cancelled. The old
+      // instance observed the now-focused field as a non-focused one, so its
+      // stale listener would re-forward the user's typing as an autofill,
+      // collapsing the selection to the end of the text on every keystroke.
+
+      final Map<String, dynamic> config = createFlutterConfig(
+        'text',
+        autofillHint: 'email',
+        autofillHintsForFields: <String>['familyName', 'email', 'givenName', 'telephoneNumber'],
+      );
+      void send(MethodCall call) =>
+          textEditing!.channel.handleTextInput(codec.encodeMethodCall(call), (ByteData? _) {});
+      send(MethodCall('TextInput.setClient', <dynamic>[++clientId, config]));
+      send(
+        configureSetSizeAndTransformMethodCall(
+          150,
+          50,
+          Matrix4.translationValues(10.0, 20.0, 30.0).storage.toList(),
+        ),
+      );
+      send(const MethodCall('TextInput.show'));
+      send(const MethodCall('TextInput.clearClient'));
+      expect(textEditing!.isEditing, isFalse);
+
+      // A new connection on the same form adopts the dormant DOM.
+      send(MethodCall('TextInput.setClient', <dynamic>[++clientId, config]));
+      send(
+        configureSetSizeAndTransformMethodCall(
+          150,
+          50,
+          Matrix4.translationValues(10.0, 20.0, 30.0).storage.toList(),
+        ),
+      );
+      send(const MethodCall('TextInput.show'));
+      expect(textEditing!.isEditing, isTrue);
+
+      final input = textEditing!.strategy.domElement! as DomHTMLInputElement;
+      spy.messages.clear();
+
+      // The user types into the focused field.
+      input.value = 't';
+      input.dispatchEvent(createDomEvent('Event', 'input'));
+
+      // Delivered once as a normal editing-state update, never as an autofill.
+      expect(
+        spy.messages.where(
+          (PlatformMessage m) => m.methodName == 'TextInputClient.updateEditingState',
+        ),
+        hasLength(1),
+      );
+      expect(
+        spy.messages.where(
+          (PlatformMessage m) => m.methodName == 'TextInputClient.updateEditingStateWithTag',
+        ),
+        isEmpty,
+      );
+
+      send(const MethodCall('TextInput.clearClient'));
+      dormantForms.clear();
+    });
+
+    test('does not echo a programmatic setEditingState change as an autofill', () async {
+      // A programmatic controller.text change on a focused autofill field arrives
+      // through setEditingState. The next autofill rescan (e.g. after the tab is
+      // switched away and back) must not mistake that framework value for a browser
+      // autofill and forward it, which would collapse the cursor to the end.
+
+      final Map<String, dynamic> config = createFlutterConfig(
+        'text',
+        autofillHint: 'email',
+        autofillHintsForFields: <String>['familyName', 'email', 'givenName', 'telephoneNumber'],
+      );
+      void send(MethodCall call) =>
+          textEditing!.channel.handleTextInput(codec.encodeMethodCall(call), (ByteData? _) {});
+      send(MethodCall('TextInput.setClient', <dynamic>[++clientId, config]));
+      send(
+        configureSetSizeAndTransformMethodCall(
+          150,
+          50,
+          Matrix4.translationValues(10.0, 20.0, 30.0).storage.toList(),
+        ),
+      );
+      send(const MethodCall('TextInput.show'));
+
+      // The framework programmatically sets a new value on the focused field.
+      send(
+        const MethodCall('TextInput.setEditingState', <String, dynamic>{
+          'text': 'from-code@example.com',
+          'selectionBase': 21,
+          'selectionExtent': 21,
+          'composingBase': -1,
+          'composingExtent': -1,
+        }),
+      );
+
+      final DefaultTextEditingStrategy strategy = textEditing!.strategy;
+      strategy.debugDocumentHasFocusOverride = true;
+      strategy.debugDocumentVisibilityStateOverride = 'visible';
+
+      spy.messages.clear();
+
+      // The tab is switched away: the field blurs (null relatedTarget) and an
+      // autofill rescan runs. The programmatic value was recorded, so it must not
+      // be re-forwarded as a fake autofill.
+      strategy.handleBlur(createDomEvent('Event', 'blur'));
+
+      final Iterable<PlatformMessage> autofillMessages = spy.messages.where(
+        (PlatformMessage message) =>
+            message.methodName == 'TextInputClient.updateEditingStateWithTag',
+      );
+      expect(autofillMessages, isEmpty);
+
+      strategy.debugDocumentHasFocusOverride = null;
+      strategy.debugDocumentVisibilityStateOverride = null;
+      send(const MethodCall('TextInput.clearClient'));
+    });
+
+    test('geometry update before the input is shown does not throw (autofill)', () async {
+      // A setEditableSizeAndTransform can arrive before TextInput.show enables
+      // the strategy (for example a password manager forcing a relayout of the
+      // not-yet-shown field). updateElementPlacement must not read the late
+      // `inputConfiguration` before the strategy is enabled.
+      final Map<String, dynamic> config = createFlutterConfig(
+        'text',
+        autofillHint: 'email',
+        autofillHintsForFields: <String>['familyName', 'email', 'givenName', 'telephoneNumber'],
+      );
+      void send(MethodCall call) =>
+          textEditing!.channel.handleTextInput(codec.encodeMethodCall(call), (ByteData? _) {});
+      send(MethodCall('TextInput.setClient', <dynamic>[++clientId, config]));
+
+      // No TextInput.show yet, so the strategy is not enabled.
+      expect(
+        () => send(
+          configureSetSizeAndTransformMethodCall(
+            150,
+            50,
+            Matrix4.translationValues(10.0, 20.0, 30.0).storage.toList(),
+          ),
+        ),
+        returnsNormally,
+      );
+
+      send(const MethodCall('TextInput.clearClient'));
+    });
   });
 
   group('EngineAutofillForm', () {
@@ -3885,10 +4626,39 @@ Future<void> testMain() async {
       // Form is attached to the DOM.
       expect(form, formOnDom);
 
+      // The wake-up scan clustered the non-focused proxies under the focused
+      // element, pinning them to the viewport.
+      expect(
+        autofillForm.elements.values.where((DomHTMLElement e) => e.style.position == 'fixed'),
+        isNotEmpty,
+        reason: 'the wake-up scan pins the non-focused proxies',
+      );
+
       autofillForm.goDormant();
       expect(defaultTextEditingRoot.querySelectorAll('form'), isNotEmpty);
       expect(dormantForms, hasLength(1));
       expect(dormantForms, {autofillForm.formIdentifier: autofillForm});
+
+      // A dismissed proxy must not stay pinned over the app: goDormant parks
+      // each pinned proxy off screen at its real size. The focused element was
+      // never pinned and is left alone.
+      for (final MapEntry<String, DomHTMLElement> entry in autofillForm.elements.entries) {
+        expect(entry.value.style.position, isNot('fixed'));
+        if (entry.key != 'field1') {
+          expect(entry.value.style.position, 'absolute');
+          expect(entry.value.style.top, '-9999px');
+          expect(entry.value.style.left, '-9999px');
+          expect(entry.value.style.width, '');
+          expect(entry.value.style.height, '');
+          expect(entry.value.style.transform, '');
+          final DomRect rect = entry.value.getBoundingClientRect();
+          expect(
+            rect.left + rect.width <= 0 || rect.top + rect.height <= 0,
+            isTrue,
+            reason: 'parked outside the viewport',
+          );
+        }
+      }
 
       final EngineAutofillForm autofillForm2 = EngineAutofillForm.fromFrameworkMessage(
         kImplicitViewId,
@@ -3941,14 +4711,61 @@ Future<void> testMain() async {
       expect(autofillForm.formElement, isNotNull);
 
       final DomHTMLFormElement form = autofillForm.formElement!;
+      // A single-field form is not marked: a password manager has no second
+      // field to step to, so the view unfocus deferral does not apply.
+      expect(form.classList.contains(autofillFormClass), isFalse);
       // Submit button is added to the form.
       expect(form.childNodes, hasLength(2));
       final inputElement = form.childNodes.toList().last as DomHTMLInputElement;
       expect(inputElement.type, 'submit');
       expect(inputElement.tabIndex, -1, reason: 'The input should not be reachable by keyboard');
+      expect(
+        inputElement.getAttribute('aria-hidden'),
+        'true',
+        reason: 'engine plumbing, not part of the form a screen reader should announce',
+      );
 
       // The submit button should have class `submitBtn`.
       expect(inputElement.className, 'submitBtn');
+    });
+
+    test('non-focused fields are hidden from assistive technology only in semantics mode', () {
+      // With semantics on, each field has a real semantics node and the proxy is
+      // a duplicate that a screen reader should skip. With semantics off the
+      // proxy is the only representation of the field, and a password manager
+      // rejects an aria-hidden input outright, so it must not be hidden there.
+      final List<Map<String, Object?>> fields = createFieldValues(
+        <String>['email', 'username', 'password'],
+        <String>['field1', 'field2', 'field3'],
+      );
+      final emailAutofillMap = fields.first['autofill']! as Map<String, Object?>;
+      final emailAutofill = AutofillInfo.fromFrameworkMessage(emailAutofillMap);
+      final EngineAutofillForm autofillForm = EngineAutofillForm.fromFrameworkMessage(
+        kImplicitViewId,
+        emailAutofillMap,
+        fields,
+      )!;
+      final emailFocusedElement = createDomElement('input') as DomHTMLInputElement;
+
+      EngineSemantics.instance.semanticsEnabled = true;
+      addTearDown(() {
+        EngineSemantics.instance.semanticsEnabled = false;
+      });
+      autofillForm.wakeUp(emailFocusedElement, emailAutofill);
+
+      final formChildNodes =
+          autofillForm.formElement!.childNodes.toList() as List<DomHTMLInputElement>;
+      expect(formChildNodes[0], emailFocusedElement);
+      expect(formChildNodes[0].getAttribute('aria-hidden'), isNull);
+      expect(formChildNodes[1].getAttribute('aria-hidden'), 'true');
+      expect(formChildNodes[2].getAttribute('aria-hidden'), 'true');
+
+      // The proxies are reused for the life of the form, so waking it again
+      // with semantics off clears the attribute and they are candidates again.
+      EngineSemantics.instance.semanticsEnabled = false;
+      autofillForm.wakeUp(emailFocusedElement, emailAutofill);
+      expect(formChildNodes[1].getAttribute('aria-hidden'), isNull);
+      expect(formChildNodes[2].getAttribute('aria-hidden'), isNull);
     });
 
     test('Return null if no focused element', () {
@@ -4052,37 +4869,69 @@ Future<void> testMain() async {
       );
     });
 
-    test('hidden autofill elements should have a width and height of 0 on non-Safari browsers', () {
-      final List<Map<String, Object?>> fields = createFieldValues(
-        <String>['email', 'username', 'password'],
-        <String>['field1', 'field2', 'field3'],
-      );
-      final emailAutofillMap = fields.first['autofill']! as Map<String, Object?>;
-      final EngineAutofillForm autofillForm = EngineAutofillForm.fromFrameworkMessage(
-        kImplicitViewId,
-        emailAutofillMap,
-        fields,
-      )!;
+    test(
+      'non-focused autofill fields are discoverable and hit-testable on non-Safari browsers',
+      () {
+        final List<Map<String, Object?>> fields = createFieldValues(
+          <String>['email', 'username', 'password'],
+          <String>['field1', 'field2', 'field3'],
+        );
+        final emailAutofillMap = fields.first['autofill']! as Map<String, Object?>;
+        final EngineAutofillForm autofillForm = EngineAutofillForm.fromFrameworkMessage(
+          kImplicitViewId,
+          emailAutofillMap,
+          fields,
+        )!;
 
-      final emailFocusedElement = createDomElement('input') as DomHTMLInputElement;
-      final emailAutofill = AutofillInfo.fromFrameworkMessage(emailAutofillMap);
-      autofillForm.wakeUp(emailFocusedElement, emailAutofill);
+        final emailFocusedElement = createDomElement('input') as DomHTMLInputElement;
+        final emailAutofill = AutofillInfo.fromFrameworkMessage(emailAutofillMap);
+        autofillForm.wakeUp(emailFocusedElement, emailAutofill);
 
-      final formChildNodes =
-          autofillForm.formElement!.childNodes.toList() as List<DomHTMLInputElement>;
-      final DomHTMLInputElement username = formChildNodes[1];
-      final DomHTMLInputElement password = formChildNodes[2];
+        final formChildNodes =
+            autofillForm.formElement!.childNodes.toList() as List<DomHTMLInputElement>;
+        final DomHTMLInputElement email = formChildNodes[0];
+        final DomHTMLInputElement username = formChildNodes[1];
+        final DomHTMLInputElement password = formChildNodes[2];
 
-      expect(username.name, 'username');
-      expect(password.name, 'current-password');
-      expect(username.style.width, '0px');
-      expect(username.style.height, '0px');
-      expect(username.style.pointerEvents, isNot('none'));
-      expect(password.style.width, '0px');
-      expect(password.style.height, '0px');
-      expect(password.style.pointerEvents, isNot('none'));
-      expect(autofillForm.formElement!.style.pointerEvents, isNot('none'));
-    }, skip: isSafari);
+        expect(username.name, 'username');
+        expect(password.name, 'current-password');
+        // Non-focused autofill fields are kept discoverable: a non-zero size,
+        // positioned next to the focused field, and taking part in hit testing.
+        // A password manager only fills a field whose own centre point hit-tests
+        // back to it, so a field excluded from hit testing is one it will not
+        // fill, and a login form can never be filled as a pair. The default
+        // action of pointer input on them is suppressed instead (see the
+        // pointerdown/mousedown listeners), so a tap does not move the focus.
+        expect(username.style.width, isNot('0px'));
+        expect(username.style.height, isNot('0px'));
+        expect(username.style.pointerEvents, 'all');
+        expect(password.style.width, isNot('0px'));
+        expect(password.style.height, isNot('0px'));
+        expect(password.style.pointerEvents, 'all');
+        expect(autofillForm.formElement!.style.pointerEvents, isNot('none'));
+        // They are also removed from the tab order, so keyboard Tab does not land
+        // on the invisible fields, while the focused field stays reachable.
+        expect(username.tabIndex, -1);
+        expect(password.tabIndex, -1);
+        // With semantics off there is no other representation of these fields, so
+        // they are not hidden from assistive technology either: a password
+        // manager rejects an aria-hidden input outright, and a field it never
+        // considers is a field it never fills. Semantics mode, where the field
+        // does have a real semantics node, hides them instead.
+        expect(EngineSemantics.instance.semanticsEnabled, isFalse);
+        expect(username.getAttribute('aria-hidden'), isNull);
+        expect(password.getAttribute('aria-hidden'), isNull);
+        expect(email.getAttribute('aria-hidden'), isNull);
+        // The submit button is the exception: it is engine plumbing that only
+        // saveForms ever clicks, so it stays hidden from assistive technology
+        // even with semantics off. Otherwise a screen reader's form-controls
+        // listing announces a Submit button that completes a fake login form.
+        final DomHTMLInputElement submit = formChildNodes.last;
+        expect(submit.type, 'submit');
+        expect(submit.getAttribute('aria-hidden'), 'true');
+      },
+      skip: isSafari,
+    );
 
     test('hidden autofill elements should not have a width and height of 0 on Safari', () {
       final List<Map<String, Object?>> fields = createFieldValues(
