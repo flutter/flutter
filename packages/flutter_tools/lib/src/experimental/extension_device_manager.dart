@@ -354,10 +354,12 @@ class ExtensionDevices extends PollingDeviceDiscovery {
     required this._fileSystem,
     required this._logger,
     this._artifacts,
+    this._cache,
     this._config,
   }) : super('tool_extension');
 
   final Artifacts? _artifacts;
+  final Cache? _cache;
   final Config? _config;
   final ExtensionBuildManager _extensionBuildManager;
   final ExtensionManager _extensionManager;
@@ -422,6 +424,7 @@ class ExtensionDevices extends PollingDeviceDiscovery {
           device = ExtensionBackedDevice(
             artifacts: _artifacts,
             buildManager: _extensionBuildManager,
+            cache: _cache,
             config: _config,
             connection: service.connection,
             deviceService: service,
@@ -479,6 +482,7 @@ class ExtensionBackedDevice extends Device {
     required super.logger,
     required this._targetDevice,
     this._artifacts,
+    this._cache,
     this._config,
   }) : super(
          _targetDevice.id,
@@ -489,6 +493,7 @@ class ExtensionBackedDevice extends Device {
 
   final Artifacts? _artifacts;
   final ExtensionBuildManager _buildManager;
+  final Cache? _cache;
   final Config? _config;
   final ExtensionConnection connection;
   final DeviceService _deviceService;
@@ -640,7 +645,7 @@ class ExtensionBackedDevice extends Device {
           )
         : const <String, String>{};
 
-    final String flutterRootPath = Cache.flutterRoot ?? projectDir.path;
+    final String flutterRootPath = _cache?.flutterRoot ?? projectDir.path;
 
     final ExtensionBuildResult result = await _buildManager.build(
       buildMode: buildMode,

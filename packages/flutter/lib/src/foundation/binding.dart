@@ -212,6 +212,11 @@ abstract class BindingBase {
   /// [FlutterView]s in [PlatformDispatcher.views] to access view-specific
   /// functionality without a context.
   ///
+  /// Unlike the views [platformDispatcher] reports, this window — like
+  /// [ui.window] and [ui.PlatformDispatcher.instance] — reports the metrics the
+  /// platform reports, and does not apply the debug-only
+  /// [debugViewMetricsOverrides] that tooling such as DevTools installs.
+  ///
   /// See also:
   ///
   /// * [View.of] to access view-specific functionality on the [FlutterView]
@@ -247,7 +252,20 @@ abstract class BindingBase {
   /// for use by other bindings. A subclass of [BindingBase], such as
   /// [TestWidgetsFlutterBinding], can override this accessor to return a
   /// different [ui.PlatformDispatcher] implementation.
-  ui.PlatformDispatcher get platformDispatcher => ui.PlatformDispatcher.instance;
+  ///
+  /// In debug mode, this is [ui.PlatformDispatcher.instance] wrapped by
+  /// [debugApplyViewMetricsOverrides], so that it and the views it reports apply
+  /// [debugViewMetricsOverrides]; see [DebugViewMetricsOverride]. The views it
+  /// reports are therefore not identical to the ones
+  /// [ui.PlatformDispatcher.instance] reports; compare views by
+  /// [FlutterView.viewId] when both are in hand. A subclass that overrides
+  /// this accessor should build on `super.platformDispatcher`, the way
+  /// [TestWidgetsFlutterBinding] does, or apply [debugApplyViewMetricsOverrides]
+  /// to the dispatcher it supplies instead.
+  ui.PlatformDispatcher get platformDispatcher => _platformDispatcher;
+  final ui.PlatformDispatcher _platformDispatcher = kDebugMode
+      ? debugApplyViewMetricsOverrides(ui.PlatformDispatcher.instance)
+      : ui.PlatformDispatcher.instance;
 
   /// The initialization method.
   ///

@@ -77,9 +77,9 @@ class WebDevFS implements DevFS {
     required this.isWasm,
     required this.useLocalCanvasKit,
     required this.rootDirectory,
-    this.useDwdsWebSocketConnection = false,
     required this.webCrossOriginIsolation,
     required this._toolContext,
+    this.useDwdsWebSocketConnection = false,
     this.testMode = false,
     this._webDefines = const <String, String>{},
   }) {

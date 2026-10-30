@@ -10,7 +10,6 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/template.dart';
-import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/context_runner.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/isolated/mustache_template.dart';
@@ -21,17 +20,6 @@ import '../src/context.dart';
 import '../src/fakes.dart';
 
 void main() {
-  String? savedFlutterRoot;
-
-  setUp(() {
-    savedFlutterRoot = Cache.flutterRoot;
-    Cache.flutterRoot = '/flutter';
-  });
-
-  tearDown(() {
-    Cache.flutterRoot = savedFlutterRoot;
-  });
-
   // Uses plain `test` + the production `runInContext` on purpose:
   // `testUsingContext` overrides Analytics, FlutterVersion,
   // XcodeProjectInterpreter, etc., which is what hid the startup cycle.
@@ -63,7 +51,9 @@ void main() {
         Config: () => Config.test(),
         FileSystem: () => MemoryFileSystem.test(),
         Logger: () => BufferLogger.test(),
-        Platform: () => FakePlatform(environment: <String, String>{'HOME': '/home'}),
+        Platform: () => FakePlatform(
+          environment: <String, String>{'FLUTTER_ROOT': '/flutter', 'HOME': '/home'},
+        ),
         ProcessManager: () => FakeProcessManager.any(),
         Stdio: () => FakeStdio(),
         // Production override from executable.dart.
