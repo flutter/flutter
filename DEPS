@@ -304,7 +304,7 @@ deps = {
    Var('chromium_git') + '/external/github.com/google/re2' + '@' + 'c84a140c93352cdabbfb547c531be34515b12228',
 
   'engine/src/flutter/third_party/brotli':
-   Var('skia_git') + '/external/github.com/google/brotli.git' + '@' + '350100a5bb9d9671aca85213b2ec7a70a361b0cd',
+   Var('skia_git') + '/external/github.com/google/brotli.git' + '@' + 'db24a98aed38a16de78cc05ca15cdd8dc2a0d92d',
 
   'engine/src/flutter/third_party/yapf':
   Var('flutter_git') + '/third_party/yapf' + '@' + '212c5b5ad8e172d2d914ae454c121c89cccbcb35',
