@@ -126,7 +126,7 @@ projects. That opt-out dies with AGP 10.
 | eager `applicationVariants.configureEach` task creation; mergeAssets/processResources hooks | `FlutterPlugin.kt`, `FlutterPluginUtils.kt` | consolidated `onVariants` block; `CopyFlutterAssetsTask` + `variant.sources.assets.addGeneratedSourceDirectory` | P5 |
 | `variant.outputs` + `packageApplicationProvider` + `doLast` APK copy; `versionCodeOverride` | `FlutterPluginUtils.kt` | `CopyFlutterApksTask` (`SingleArtifact.APK` + `BuiltArtifactsLoader`); `VariantOutput.versionCode` set from a `finalizeDsl` snapshot (`DslVersionCodes`) | P6 |
 | `libraryVariants.all` × host `applicationVariants.all` cross-wiring | `FlutterPlugin.kt` (add-to-app) | library-side `onVariants` with `Component.debuggable`; no host-project lookup | P7 |
-| dynamic Groovy legacy API in `aar_init_script.gradle` | `aar_init_script.gradle` | `components`-based enumeration; ext-property guard | P8 |
+| `android.libraryVariants`; internal `publishing.singleVariants`; module-to-plugin `assembleAar<V>.dependsOn` | `aar_init_script.gradle` | `com.android.library` plugin check; per-variant `singleVariant` that keeps the build file's declaration; the tool requests `assembleAar<V>` without a project path, so it runs in the module and in every plugin that has it (no `dependsOn`) | P8 |
 | `android.newDsl=false` template/migrator | templates, `disable_new_dsl_migration.dart` | drop from templates; `RemoveNewDslOptOutMigration` | P9 |
 | FULL `gradle` artifact dependency | `build.gradle.kts` | `gradle-api` artifact (compile-time proof of zero internal usage) | P10 |
 
@@ -258,10 +258,11 @@ else serializes through `FlutterPlugin.kt` / `FlutterPluginUtils.kt`.
 7. **Task realization/type**: flutter tasks become lazy `TaskProvider`s, and
    `copyFlutterAssets<V>` changes type from `org.gradle.api.tasks.Copy` to a
    custom task class — `tasks.named(..., Copy::class)` casts fail.
-8. **`flutter build aar`**: the singleVariant dedup guard becomes an
-   ext-property/try-catch with a specified error message; variant enumeration
-   moves from `libraryVariants` to `components` — partial user `singleVariant`
-   declarations surface differently.
+8. **`flutter build aar`**: Flutter declares `singleVariant` publishing (with sources and
+   javadoc jars) for each variant of the module and of each Android plugin. For a variant that
+   the project's build file declares, the build file's declaration wins. The requested variant
+   must exist in the module and in each Android plugin; otherwise the build fails, and the fix
+   is to build a variant that all of them declare (`--flavor`, matching product flavors).
 9. **newDsl flip**: new projects lose the opt-out; the removal migrator deletes
    only marker-tagged `android.newDsl` lines (template marker "This newDsl flag
    was added by the Flutter template"; migrator marker "This newDsl flag was
