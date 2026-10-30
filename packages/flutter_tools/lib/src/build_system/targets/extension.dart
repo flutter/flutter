@@ -8,6 +8,134 @@ import '../../artifacts.dart';
 import '../../base/common.dart';
 import '../../base/file_system.dart';
 import '../../build_info.dart';
+import '../../experimental/extension_build_manager.dart';
+import '../build_system.dart';
+import '../exceptions.dart';
+
+/// Resolves a build target dependency by its [dependency] name.
+typedef DependencyResolverCallback = Target Function(String dependency);
+
+/// A `flutter assemble` target that delegates to a tool extension.
+class ExtensionTarget extends Target {
+  ExtensionTarget({
+    required this.assembleTarget,
+    required this._buildManager,
+    required this._dependencyResolver,
+  });
+
+  /// The extension-defined assemble target.
+  final ExtensionAssembleTarget assembleTarget;
+
+  final ExtensionBuildManager _buildManager;
+  final DependencyResolverCallback _dependencyResolver;
+
+  @override
+  String get name => assembleTarget.name;
+
+  @override
+  late final List<Target> dependencies = assembleTarget.dependencies
+      .map(_dependencyResolver)
+      .toList();
+
+  late final TargetPlatform? _defaultTargetPlatform = _tryResolveTargetPlatform(
+    assembleTarget.targetPlatform,
+  );
+
+  /// Static input sources for this target.
+  ///
+  /// [resolveInputs] resolves the concrete input files at build time by
+  /// supplying [BuildMode] from the build [Environment] to mode-dependent
+  /// artifacts.
+  @override
+  late final List<Source> inputs = assembleTarget.inputs
+      .map((ExtensionSource s) => _toHostSource(s, defaultTargetPlatform: _defaultTargetPlatform))
+      .toList();
+
+  /// Static output sources for this target.
+  ///
+  /// [resolveOutputs] resolves the concrete output files at build time by
+  /// supplying [BuildMode] from the build [Environment] to mode-dependent
+  /// artifacts.
+  @override
+  late final List<Source> outputs = assembleTarget.outputs
+      .map((ExtensionSource s) => _toHostSource(s, defaultTargetPlatform: _defaultTargetPlatform))
+      .toList();
+
+  BuildMode? _resolveEnvironmentBuildMode(Environment environment) {
+    final String? buildMode = environment.defines[kBuildMode];
+    return buildMode != null ? BuildMode.fromCliName(buildMode) : null;
+  }
+
+  @override
+  ResolvedFiles resolveInputs(Environment environment) =>
+      _resolveSources(assembleTarget.inputs, environment, inputs: true);
+
+  @override
+  ResolvedFiles resolveOutputs(Environment environment) =>
+      _resolveSources(assembleTarget.outputs, environment, inputs: false);
+
+  ResolvedFiles _resolveSources(
+    List<ExtensionSource> sources,
+    Environment environment, {
+    required bool inputs,
+  }) {
+    final BuildMode? mode = _resolveEnvironmentBuildMode(environment);
+    final List<Source> resolvedSources = sources
+        .map(
+          (ExtensionSource s) => _toHostSource(
+            s,
+            defaultBuildMode: mode,
+            defaultTargetPlatform: _defaultTargetPlatform,
+          ),
+        )
+        .toList();
+    final collector = SourceVisitor(environment, inputs);
+    for (final source in resolvedSources) {
+      source.accept(collector);
+    }
+    depfiles.forEach(collector.visitDepfile);
+    return collector;
+  }
+
+  @override
+  Future<void> build(Environment environment) async {
+    final Environment(
+      :Artifacts artifacts,
+      :Directory buildDir,
+      :Map<String, String> defines,
+      :FileSystem fileSystem,
+      :Directory outputDir,
+      :Directory projectDir,
+    ) = environment;
+    final String mainPath = defines[kTargetFile] ?? fileSystem.path.join('lib', 'main.dart');
+    final String? buildMode = defines[kBuildMode];
+    if (buildMode == null) {
+      throw MissingDefineException(kBuildMode, name);
+    }
+    final mode = BuildMode.fromCliName(buildMode);
+
+    final Map<String, String> resolvedArtifacts = resolveExtensionAssembleTargetArtifacts(
+      artifacts: artifacts,
+      buildMode: mode,
+      target: assembleTarget,
+    );
+
+    final ExtensionBuildResult result = await _buildManager.assemble(
+      buildDir: buildDir.uri,
+      buildMode: mode,
+      flutterRoot: environment.flutterRootDir.uri,
+      mainPath: mainPath,
+      outputDir: outputDir.uri,
+      projectRoot: projectDir.uri,
+      resolvedArtifacts: resolvedArtifacts,
+      targetName: assembleTarget.name,
+    );
+
+    if (!result.success) {
+      throw ExtensionAssembleException(assembleTarget.name, errorMessage: result.errorMessage);
+    }
+  }
+}
 
 final _placeholderRegex = RegExp(r'\{[A-Z_]+\}');
 
@@ -76,6 +204,49 @@ Map<String, String> resolveExtensionBuildTargetArtifacts({
   return resolvedArtifacts;
 }
 
+/// Resolves all engine and host artifact inputs declared on [target] using
+/// [artifacts] and [buildMode].
+///
+/// Throws a [ToolExit] if any requested artifact name is invalid or unsupported,
+/// or if the same artifact resolves to different paths across multiple target
+/// platforms or build modes.
+// TODO(bkonyi): Download required artifacts on demand if not already cached.
+Map<String, String> resolveExtensionAssembleTargetArtifacts({
+  required Artifacts artifacts,
+  required BuildMode buildMode,
+  required ExtensionAssembleTarget target,
+}) {
+  final resolvedArtifacts = <String, String>{};
+  for (final ExtensionSource input in target.inputs) {
+    switch (input) {
+      case ExtensionPatternSource():
+        continue;
+      case ExtensionArtifactSource(
+        :final ExtensionArtifact artifact,
+        :final String? platform,
+        :final BuildMode? mode,
+      ):
+        final String path = artifacts.getArtifactPath(
+          _resolveArtifact(artifact),
+          platform: _tryResolveTargetPlatform(platform ?? target.targetPlatform),
+          mode: mode ?? buildMode,
+        );
+        final String? existingPath = resolvedArtifacts[artifact.name];
+        if (existingPath != null && existingPath != path) {
+          throwToolExit(
+            'Assemble target "${target.name}" requested artifact "${artifact.name}" '
+            'for multiple target platforms or build modes.',
+          );
+        }
+        resolvedArtifacts[artifact.name] = path;
+      case ExtensionHostArtifactSource(:final ExtensionHostArtifact artifact):
+        final HostArtifact hostArtifact = _resolveHostArtifact(artifact);
+        resolvedArtifacts[artifact.name] = artifacts.getHostArtifact(hostArtifact).path;
+    }
+  }
+  return resolvedArtifacts;
+}
+
 TargetPlatform? _tryResolveTargetPlatform(String platformName) {
   if (platformName.isEmpty) {
     return null;
@@ -83,10 +254,41 @@ TargetPlatform? _tryResolveTargetPlatform(String platformName) {
   try {
     return TargetPlatform.fromName(platformName);
   } on Exception {
-    // Custom extension target platforms do not map to a built-in TargetPlatform.
+    // Out-of-tree extension target platforms don't map to a built-in
+    // TargetPlatform, so artifacts resolve with platform: null. CachedArtifacts
+    // then returns host artifacts: the android-arm profile gen_snapshot (in every
+    // mode) for genSnapshot, and the host's engine directory for icuData,
+    // linuxDesktopPath, and linuxHeaders. Extensions must set a built-in platform
+    // on the artifact source to get target-specific engine artifacts.
+    // TODO(bkonyi): Support custom extension-provided artifact resolution for
+    // out-of-tree target platforms via ExtensionArtifactManager.
     return null;
   }
 }
+
+Source _toHostSource(
+  ExtensionSource source, {
+  BuildMode? defaultBuildMode,
+  TargetPlatform? defaultTargetPlatform,
+}) => switch (source) {
+  ExtensionPatternSource(:final String value, :final bool optional) => Source.pattern(
+    value,
+    optional: optional,
+  ),
+  ExtensionArtifactSource(
+    :final ExtensionArtifact artifact,
+    :final String? platform,
+    :final BuildMode? mode,
+  ) =>
+    Source.artifact(
+      _resolveArtifact(artifact),
+      platform: platform != null ? _tryResolveTargetPlatform(platform) : defaultTargetPlatform,
+      mode: mode ?? defaultBuildMode,
+    ),
+  ExtensionHostArtifactSource(:final ExtensionHostArtifact artifact) => Source.hostArtifact(
+    _resolveHostArtifact(artifact),
+  ),
+};
 
 Artifact _resolveArtifact(ExtensionArtifact artifact) => switch (artifact.name) {
   'flutterPatchedSdkPath' => Artifact.flutterPatchedSdkPath,

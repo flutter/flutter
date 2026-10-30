@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:args/args.dart';
+import 'package:flutter_tools_core/flutter_tools_core.dart' show ExtensionAssembleTarget;
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 import 'package:unified_analytics/unified_analytics.dart';
@@ -19,6 +20,7 @@ import '../build_system/targets/android.dart';
 import '../build_system/targets/assets.dart';
 import '../build_system/targets/common.dart';
 import '../build_system/targets/deferred_components.dart';
+import '../build_system/targets/extension.dart';
 import '../build_system/targets/ios.dart';
 import '../build_system/targets/linux.dart';
 import '../build_system/targets/macos.dart';
@@ -26,6 +28,7 @@ import '../build_system/targets/windows.dart';
 import '../cache.dart';
 import '../context/tool_context.dart';
 import '../convert.dart';
+import '../experimental/extension_build_manager.dart';
 import '../features.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart';
@@ -103,6 +106,7 @@ class AssembleCommand extends FlutterCommand {
     required this._buildSystem,
     required this._featureFlags,
     required ToolContext super.toolContext,
+    this._extensionBuildManager,
     super.verboseHelp = false,
   }) {
     requiresPubspecYaml();
@@ -182,6 +186,7 @@ class AssembleCommand extends FlutterCommand {
   );
 
   final BuildSystem _buildSystem;
+  final ExtensionBuildManager? _extensionBuildManager;
   final FeatureFlags _featureFlags;
 
   @override
@@ -223,7 +228,7 @@ class AssembleCommand extends FlutterCommand {
   }
 
   /// The target(s) we are building.
-  List<Target> createTargets() {
+  Future<List<Target>> createTargets() async {
     final ArgResults argumentResults = argResults!;
     if (argumentResults.rest.isEmpty) {
       throwToolExit('missing target name for flutter assemble.');
@@ -232,6 +237,34 @@ class AssembleCommand extends FlutterCommand {
     final targetMap = <String, Target>{
       for (final Target target in _kDefaultTargets) target.name: target,
     };
+    if (_extensionBuildManager case final ExtensionBuildManager extensionBuildManager?
+        when argumentResults.rest.any((String targetName) => !targetMap.containsKey(targetName))) {
+      for (final ExtensionAssembleTarget target
+          in await extensionBuildManager.getAssembleTargets()) {
+        final String extensionName = extensionBuildManager.extensionNameForAssembleTarget(
+          target.name,
+        );
+        if (targetMap.containsKey(target.name)) {
+          toolContext.logger.printWarning(
+            'Skipping custom assemble target "${target.name}" from extension "$extensionName" because a target with that name already exists.',
+          );
+          continue;
+        }
+        targetMap[target.name] = ExtensionTarget(
+          assembleTarget: target,
+          buildManager: extensionBuildManager,
+          dependencyResolver: (String dependencyName) {
+            final Target? dependency = targetMap[dependencyName];
+            if (dependency == null) {
+              throwToolExit(
+                'Target "$dependencyName" required by "${target.name}" from extension "$extensionName" not found. It might not be registered.',
+              );
+            }
+            return dependency;
+          },
+        );
+      }
+    }
     final results = <Target>[
       for (final String targetName in argumentResults.rest)
         if (targetMap.containsKey(targetName)) targetMap[targetName]!,
@@ -355,7 +388,7 @@ class AssembleCommand extends FlutterCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     final ToolContext(:FileSystem fs, :Logger logger) = toolContext;
-    final List<Target> targets = createTargets();
+    final List<Target> targets = await createTargets();
     final nonDeferredTargets = <Target>[];
     final List<Target> deferredTargets = <AndroidAotDeferredComponentsBundle>[];
     for (final target in targets) {
