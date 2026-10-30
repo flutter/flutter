@@ -243,13 +243,13 @@ class TextStyleTween extends Tween<TextStyle> {
 /// the animation. While these widgets are simple to use and don't require you
 /// to manually manage the lifecycle of an [AnimationController], they
 /// are also somewhat limited: Besides the target value for the animated
-/// property, developers can only choose a [duration] and [curve] for the
-/// animation. If you require more control over the animation (e.g. you want
-/// to stop it somewhere in the middle), consider using an
-/// [AnimatedWidget] or one of its subclasses. These widgets take an [Animation]
-/// as an argument to power the animation. This gives the developer full control
-/// over the animation at the cost of requiring you to manually manage the
-/// underlying [AnimationController].
+/// property, developers can only choose a [duration], [curve], and
+/// [animationBehavior] for the animation. If you require more control over the
+/// animation (e.g. you want to stop it somewhere in the middle), consider using
+/// an [AnimatedWidget] or one of its subclasses. These widgets take an
+/// [Animation] as an argument to power the animation. This gives the developer
+/// full control over the animation at the cost of requiring you to manually
+/// manage the underlying [AnimationController].
 ///
 /// ## Common implicitly animated widgets
 ///
@@ -288,6 +288,7 @@ abstract class ImplicitlyAnimatedWidget extends StatefulWidget {
     this.curve = Curves.linear,
     required this.duration,
     this.onEnd,
+    this.animationBehavior = AnimationBehavior.normal,
   });
 
   /// The curve to apply when animating the parameters of this container.
@@ -302,6 +303,23 @@ abstract class ImplicitlyAnimatedWidget extends StatefulWidget {
   /// at the end of the current animation.
   final VoidCallback? onEnd;
 
+  /// The [AnimationBehavior] of the underlying [AnimationController].
+  ///
+  /// Defaults to [AnimationBehavior.normal], which lets the platform's
+  /// "disable animations" accessibility setting shorten the animation. Use
+  /// [AnimationBehavior.preserve] for motion that conveys information, such as
+  /// a piece moving across a game board, so that it keeps its full [duration]
+  /// even when that setting is active.
+  ///
+  /// Changing this value on an existing widget affects animations started
+  /// afterwards. An animation that is already running keeps the behavior it
+  /// started with.
+  ///
+  /// See also:
+  ///
+  ///  * [AnimationController.animationBehavior], which describes the behaviors.
+  final AnimationBehavior animationBehavior;
+
   @override
   ImplicitlyAnimatedWidgetState<ImplicitlyAnimatedWidget> createState();
 
@@ -309,6 +327,13 @@ abstract class ImplicitlyAnimatedWidget extends StatefulWidget {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(IntProperty('duration', duration.inMilliseconds, unit: 'ms'));
+    properties.add(
+      EnumProperty<AnimationBehavior>(
+        'animationBehavior',
+        animationBehavior,
+        defaultValue: AnimationBehavior.normal,
+      ),
+    );
   }
 }
 
@@ -366,6 +391,7 @@ abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget>
     duration: widget.duration,
     debugLabel: kDebugMode ? widget.toStringShort() : null,
     vsync: this,
+    animationBehavior: widget.animationBehavior,
   );
 
   /// The animation driving this widget's implicit animations.
@@ -394,6 +420,7 @@ abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget>
       _animation = _createCurve();
     }
     controller.duration = widget.duration;
+    controller.animationBehavior = widget.animationBehavior;
     if (_constructTweens()) {
       forEachTween((
         Tween<dynamic>? tween,
@@ -624,6 +651,7 @@ class AnimatedContainer extends ImplicitlyAnimatedWidget {
     super.curve,
     required super.duration,
     super.onEnd,
+    super.animationBehavior,
   }) : assert(margin == null || margin.isNonNegative),
        assert(padding == null || padding.isNonNegative),
        assert(decoration == null || decoration.debugAssertIsValid()),
@@ -896,6 +924,7 @@ class AnimatedPadding extends ImplicitlyAnimatedWidget {
     super.curve,
     required super.duration,
     super.onEnd,
+    super.animationBehavior,
   }) : assert(padding.isNonNegative);
 
   /// The amount of space by which to inset the child.
@@ -988,6 +1017,7 @@ class AnimatedAlign extends ImplicitlyAnimatedWidget {
     super.curve,
     required super.duration,
     super.onEnd,
+    super.animationBehavior,
   }) : assert(widthFactor == null || widthFactor >= 0.0),
        assert(heightFactor == null || heightFactor >= 0.0);
 
@@ -1145,6 +1175,7 @@ class AnimatedPositioned extends ImplicitlyAnimatedWidget {
     super.curve,
     required super.duration,
     super.onEnd,
+    super.animationBehavior,
   }) : assert(left == null || right == null || width == null),
        assert(top == null || bottom == null || height == null);
 
@@ -1156,6 +1187,7 @@ class AnimatedPositioned extends ImplicitlyAnimatedWidget {
     super.curve,
     required super.duration,
     super.onEnd,
+    super.animationBehavior,
   }) : left = rect.left,
        top = rect.top,
        width = rect.width,
@@ -1316,6 +1348,7 @@ class AnimatedPositionedDirectional extends ImplicitlyAnimatedWidget {
     super.curve,
     required super.duration,
     super.onEnd,
+    super.animationBehavior,
   }) : assert(start == null || end == null || width == null),
        assert(top == null || bottom == null || height == null);
 
@@ -1500,6 +1533,7 @@ class AnimatedScale extends ImplicitlyAnimatedWidget {
     super.curve,
     required super.duration,
     super.onEnd,
+    super.animationBehavior,
   });
 
   /// The widget below this widget in the tree.
@@ -1628,6 +1662,7 @@ class AnimatedRotation extends ImplicitlyAnimatedWidget {
     super.curve,
     required super.duration,
     super.onEnd,
+    super.animationBehavior,
   });
 
   /// The widget below this widget in the tree.
@@ -1726,6 +1761,7 @@ class AnimatedSlide extends ImplicitlyAnimatedWidget {
     super.curve,
     required super.duration,
     super.onEnd,
+    super.animationBehavior,
   });
 
   /// The widget below this widget in the tree.
@@ -1858,6 +1894,7 @@ class AnimatedOpacity extends ImplicitlyAnimatedWidget {
     super.curve,
     required super.duration,
     super.onEnd,
+    super.animationBehavior,
     this.alwaysIncludeSemantics = false,
   }) : assert(opacity >= 0.0 && opacity <= 1.0);
 
@@ -1973,6 +2010,7 @@ class SliverAnimatedOpacity extends ImplicitlyAnimatedWidget {
     super.curve,
     required super.duration,
     super.onEnd,
+    super.animationBehavior,
     this.alwaysIncludeSemantics = false,
   }) : assert(opacity >= 0.0 && opacity <= 1.0);
 
@@ -2069,6 +2107,7 @@ class AnimatedDefaultTextStyle extends ImplicitlyAnimatedWidget {
     super.curve,
     required super.duration,
     super.onEnd,
+    super.animationBehavior,
   }) : assert(maxLines == null || maxLines > 0);
 
   /// The widget below this widget in the tree.
@@ -2213,6 +2252,7 @@ class AnimatedPhysicalModel extends ImplicitlyAnimatedWidget {
     super.curve,
     required super.duration,
     super.onEnd,
+    super.animationBehavior,
   }) : assert(elevation >= 0.0);
 
   /// The widget below this widget in the tree.
@@ -2356,6 +2396,7 @@ class AnimatedFractionallySizedBox extends ImplicitlyAnimatedWidget {
     super.curve,
     required super.duration,
     super.onEnd,
+    super.animationBehavior,
   }) : assert(widthFactor == null || widthFactor >= 0.0),
        assert(heightFactor == null || heightFactor >= 0.0);
 

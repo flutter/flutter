@@ -1069,6 +1069,36 @@ void main() {
       controller.dispose();
       fastController.dispose();
     });
+
+    test('animationBehavior can be changed after construction', () {
+      debugSemanticsDisableAnimations = true;
+      final controller = AnimationController(vsync: const TestVSync());
+      expect(controller.animationBehavior, AnimationBehavior.normal);
+
+      controller.animationBehavior = AnimationBehavior.preserve;
+      controller.animateTo(1.0, duration: const Duration(milliseconds: 100));
+      tick(Duration.zero);
+      tick(const Duration(milliseconds: 50));
+      expect(controller.value, 0.5);
+
+      debugSemanticsDisableAnimations = null;
+      controller.dispose();
+    });
+
+    test('changing animationBehavior does not affect a running animation', () {
+      debugSemanticsDisableAnimations = true;
+      addTearDown(() => debugSemanticsDisableAnimations = null);
+      final controller = AnimationController(vsync: const TestVSync());
+      addTearDown(controller.dispose);
+
+      controller.animateTo(1.0, duration: const Duration(milliseconds: 100));
+      tick(Duration.zero);
+      controller.animationBehavior = AnimationBehavior.preserve;
+      // Still runs at 5% of 100ms, because the scale was captured at start.
+      tick(const Duration(milliseconds: 6));
+      expect(controller.value, 1.0);
+      expect(controller.status, AnimationStatus.completed);
+    });
   });
 
   test('AnimationController methods assert _ticker is not null', () {
