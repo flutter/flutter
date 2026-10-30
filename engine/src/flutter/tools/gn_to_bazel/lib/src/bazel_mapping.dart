@@ -1435,11 +1435,14 @@ const Set<String> unreadMetadataPackages = <String>{'//flutter/lib/snapshot'};
 /// create_macos_gen_snapshots is the Mac's gen_snapshot builders' one
 /// target (ci/host_debug_gen_snapshot and its kin); generate_snapshot_bins
 /// the iOS builders' (with the framework), the filegroup over the core
-/// snapshot and the host's gen_snapshot.
+/// snapshot and the host's gen_snapshot; `snapshot`, the source_set of the
+/// linkable blobs (the directory's own target, `flutter/lib/snapshot` as
+/// the Mac's Android AOT builders spell it), places the blobs under gen/.
 const Map<String, Map<String, String?>> handWrittenNinjaTargets = <String, Map<String, String?>>{
   '//flutter/lib/snapshot': <String, String?>{
     'create_macos_gen_snapshots': 'is_mac',
     'generate_snapshot_bins': null,
+    'snapshot': null,
   },
 };
 
