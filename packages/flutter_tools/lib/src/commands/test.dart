@@ -12,6 +12,7 @@ import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
+import '../base/template.dart';
 import '../build_info.dart';
 import '../bundle_builder.dart';
 import '../context/tool_context.dart';
@@ -67,15 +68,16 @@ const _kIntegrationTestDirectory = 'integration_test';
 /// - https://flutter.dev/to/integration-testing
 class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
   TestCommand({
-    required ToolContext toolContext,
+    required TemplateRenderer templateRenderer,
+    required super.toolContext,
     this.nativeAssetsBuilder,
     FlutterTestRunner? testRunner,
     this.testWrapper = const TestWrapper(),
     this.verbose = false,
     super.verboseHelp = false,
-  }) : _toolContext = toolContext,
-       _testRunner = testRunner ?? FlutterTestRunner(toolContext: toolContext),
-       super(toolContext: toolContext) {
+  }) : _testRunner =
+           testRunner ??
+           FlutterTestRunner(templateRenderer: templateRenderer, toolContext: toolContext!) {
     requiresPubspecYaml();
     registerOptionBundles(const <OptionBundle>[
       DdsAndDevToolsOptionsBundle(includeDevTools: false),
@@ -375,7 +377,8 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         'Set "--no-uninstall" to keep the app installed on the device.',
   );
 
-  final ToolContext _toolContext;
+  @override
+  ToolContext get toolContext => super.toolContext!;
 
   /// The interface for starting and configuring the tester.
   final TestWrapper testWrapper;
@@ -419,7 +422,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
 
   @override
   Future<FlutterCommandResult> verifyThenRunCommand(String? commandPath) {
-    final ToolContext(:FileSystem fs, :Logger logger) = _toolContext;
+    final ToolContext(:FileSystem fs, :Logger logger) = toolContext;
 
     final List<Uri> testUris = argResults!.rest.map(_parseTestArgument).toList();
     if (testUris.isEmpty) {
@@ -484,7 +487,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       :Logger logger,
       :FlutterProjectFactory projectFactory,
       :Stdio stdio,
-    ) = _toolContext;
+    ) = toolContext;
 
     if (!fs.isFileSync('pubspec.yaml')) {
       throwToolExit(
@@ -569,7 +572,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
             nativeAssetsManifest: null,
             flutterHookResult: null,
           ) // Don't build for host when running integration tests.
-        : (await nativeAssetsBuilder?.buildWithHookResult(buildInfo) ??
+        : (await nativeAssetsBuilder?.buildWithHookResult(buildInfo, toolContext: toolContext) ??
               (nativeAssetsManifest: null, flutterHookResult: null));
     String? testAssetPath;
     if (buildTestAssets) {
@@ -674,7 +677,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         packagesPath: buildInfo.packageConfigPath,
         resolver: await CoverageCollector.getResolver(buildInfo.packageConfigPath),
         testTimeRecorder: testTimeRecorder,
-        toolContext: _toolContext,
+        toolContext: toolContext,
         verbose: !outputMachineFormat,
       );
     }
@@ -832,7 +835,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
   /// Parses a test file/directory target passed as an argument and returns it
   /// as an absolute `file:///` [Uri] with optional querystring for name/line/col.
   Uri _parseTestArgument(String arg) {
-    final ToolContext(:FileSystem fs, :Platform platform) = _toolContext;
+    final ToolContext(:FileSystem fs, :Platform platform) = toolContext;
 
     // We can't parse Windows paths as URIs if they have query strings, so
     // parse the file and query parts separately.
@@ -862,7 +865,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     required String packageConfigPath,
     FlutterHookResult? flutterHookResult,
   }) async {
-    final ToolContext(:Config config, :FileSystem fs) = _toolContext;
+    final ToolContext(:Config config, :FileSystem fs) = toolContext;
     final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();
     final int build = await assetBundle.build(
       flutterHookResult: flutterHookResult,
@@ -882,7 +885,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         impellerStatus: impellerStatus,
         projectDir: fs.currentDirectory,
         targetPlatform: TargetPlatform.tester,
-        toolContext: _toolContext,
+        toolContext: toolContext,
       );
 
       final File cachedFlavorFile = fs.file(
@@ -907,7 +910,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     //  schema of the contents of the asset manifest file and the user does not
     //  perform a `flutter clean` after upgrading.
     //  See https://github.com/flutter/flutter/issues/128563.
-    final ToolContext(:Config config, :FileSystem fs) = _toolContext;
+    final ToolContext(:Config config, :FileSystem fs) = toolContext;
     final String unitTestAssetsDir = fs.path.join(
       getBuildDirectory(config, fs),
       'unit_test_assets',

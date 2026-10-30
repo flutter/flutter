@@ -53,8 +53,8 @@ sealed class ParseResult<T> {
   /// Applies [fn] to the wrapped value if this is a [ParseResultPass], or
   /// propagates the errors if this is a [ParseResultFail].
   ParseResult<R> flatMap<R>(ParseResult<R> Function(T) fn) => switch (this) {
-    ParseResultPass(:final value) => fn(value),
-    ParseResultFail(:final errors) => .fail(errors),
+    ParseResultPass(:final T value) => fn(value),
+    ParseResultFail(:final List<String> errors) => .fail(errors),
   };
 
   /// Transforms the wrapped value using [fn] if this is a [ParseResultPass], or
@@ -81,10 +81,10 @@ extension ParseResultRecord2<A, B> on (ParseResult<A>, ParseResult<B>) {
   /// [ParseResultPass], or returns a [ParseResultFail] containing all errors
   /// from any failed elements.
   ParseResult<R> flatMap<R>(ParseResult<R> Function(A, B) fn) => switch (this) {
-    (ParseResultPass(value: final a), ParseResultPass(value: final b)) => fn(a, b),
+    (ParseResultPass(value: final A a), ParseResultPass(value: final B b)) => fn(a, b),
     _ => .fail(<String>[
-      if ($1 case ParseResultFail(:final errors)) ...errors,
-      if ($2 case ParseResultFail(:final errors)) ...errors,
+      if ($1 case ParseResultFail(:final List<String> errors)) ...errors,
+      if ($2 case ParseResultFail(:final List<String> errors)) ...errors,
     ]),
   };
 
@@ -102,15 +102,15 @@ extension ParseResultRecord3<A, B, C> on (ParseResult<A>, ParseResult<B>, ParseR
   /// from any failed elements.
   ParseResult<R> flatMap<R>(ParseResult<R> Function(A, B, C) fn) => switch (this) {
     (
-      ParseResultPass(value: final a),
-      ParseResultPass(value: final b),
-      ParseResultPass(value: final c),
+      ParseResultPass(value: final A a),
+      ParseResultPass(value: final B b),
+      ParseResultPass(value: final C c),
     ) =>
       fn(a, b, c),
     _ => .fail(<String>[
-      if ($1 case ParseResultFail(:final errors)) ...errors,
-      if ($2 case ParseResultFail(:final errors)) ...errors,
-      if ($3 case ParseResultFail(:final errors)) ...errors,
+      if ($1 case ParseResultFail(:final List<String> errors)) ...errors,
+      if ($2 case ParseResultFail(:final List<String> errors)) ...errors,
+      if ($3 case ParseResultFail(:final List<String> errors)) ...errors,
     ]),
   };
 
@@ -129,17 +129,17 @@ extension ParseResultRecord4<A, B, C, D>
   /// from any failed elements.
   ParseResult<R> flatMap<R>(ParseResult<R> Function(A, B, C, D) fn) => switch (this) {
     (
-      ParseResultPass(value: final a),
-      ParseResultPass(value: final b),
-      ParseResultPass(value: final c),
-      ParseResultPass(value: final d),
+      ParseResultPass(value: final A a),
+      ParseResultPass(value: final B b),
+      ParseResultPass(value: final C c),
+      ParseResultPass(value: final D d),
     ) =>
       fn(a, b, c, d),
     _ => .fail(<String>[
-      if ($1 case ParseResultFail(:final errors)) ...errors,
-      if ($2 case ParseResultFail(:final errors)) ...errors,
-      if ($3 case ParseResultFail(:final errors)) ...errors,
-      if ($4 case ParseResultFail(:final errors)) ...errors,
+      if ($1 case ParseResultFail(:final List<String> errors)) ...errors,
+      if ($2 case ParseResultFail(:final List<String> errors)) ...errors,
+      if ($3 case ParseResultFail(:final List<String> errors)) ...errors,
+      if ($4 case ParseResultFail(:final List<String> errors)) ...errors,
     ]),
   };
 
