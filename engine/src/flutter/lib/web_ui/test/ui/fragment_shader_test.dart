@@ -1365,13 +1365,19 @@ Future<void> testMain() async {
           ('texture_shader', 'does_not_exist', 'No uniform named "does_not_exist".'),
           ('two_samplers', 'u_split', 'Uniform "u_split" is not an image sampler.'),
           ('two_samplers', 'u_offset', 'Uniform "u_offset" is not an image sampler.'),
+          // Only an exact name matches.
+          ('texture_shader', '', 'No uniform named "".'),
+          ('texture_shader', 'U_TEXTURE', 'No uniform named "U_TEXTURE".'),
+          ('texture_shader', 'u_tex', 'No uniform named "u_tex".'),
+          ('texture_shader', 'u_texture ', 'No uniform named "u_texture ".'),
+          ('no_uniforms', 'u_texture', 'No uniform named "u_texture".'),
         ]) {
           final ui.FragmentProgram program = await renderer.createFragmentProgram(asset);
           final ui.FragmentShader shader = program.fragmentShader();
           expect(
             () => shader.getImageSampler(name),
             throwsA(isA<ArgumentError>().having((e) => e.message, 'message', message)),
-            reason: '$asset: $name',
+            reason: '$asset: "$name"',
           );
           shader.dispose();
         }
@@ -1520,27 +1526,6 @@ Future<void> testMain() async {
           expect(Uint8List.sublistView(pixels), Uint8List.sublistView(expectedPixels));
         },
       );
-
-      test('only an exact sampler name matches', () async {
-        for (final (String asset, String name) in <(String, String)>[
-          ('texture_shader', ''),
-          ('texture_shader', 'U_TEXTURE'),
-          ('texture_shader', 'u_tex'),
-          ('texture_shader', 'u_texture '),
-          ('no_uniforms', 'u_texture'),
-        ]) {
-          final ui.FragmentProgram program = await renderer.createFragmentProgram(asset);
-          final ui.FragmentShader shader = program.fragmentShader();
-          expect(
-            () => shader.getImageSampler(name),
-            throwsA(
-              isA<ArgumentError>().having((e) => e.message, 'message', 'No uniform named "$name".'),
-            ),
-            reason: '$asset: "$name"',
-          );
-          shader.dispose();
-        }
-      });
 
       test('slots for the same sampler and setImageSampler share one binding', () async {
         final images = <ui.Image>[

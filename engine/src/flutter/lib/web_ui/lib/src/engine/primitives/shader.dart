@@ -436,6 +436,12 @@ class EngineFragmentShader extends EngineShader implements ui.FragmentShader {
 /// A binding to an image sampler of an [EngineFragmentShader].
 ///
 /// Calling [set] updates the image bound to the sampler.
+///
+/// Unlike the uniform float slots, which write directly into backend uniform
+/// storage, this slot is created by the frontend so that [set] goes through
+/// [EngineFragmentShader.setImageSampler], which owns the lifetime of the
+/// backend image shaders and keeps the bound image alive for recorded
+/// pictures.
 class EngineImageSamplerSlot implements ui.ImageSamplerSlot {
   EngineImageSamplerSlot._(this._shader, this.name, this.shaderIndex);
 
