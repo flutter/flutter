@@ -45,6 +45,14 @@ import androidx.annotation.VisibleForTesting;
 import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.LifecycleRegistry;
+import androidx.lifecycle.ViewModelStore;
+import androidx.lifecycle.ViewModelStoreOwner;
+import androidx.lifecycle.ViewTreeLifecycleOwner;
+import androidx.lifecycle.ViewTreeViewModelStoreOwner;
+import androidx.savedstate.SavedStateRegistry;
+import androidx.savedstate.SavedStateRegistryController;
+import androidx.savedstate.SavedStateRegistryOwner;
+import androidx.savedstate.ViewTreeSavedStateRegistryOwner;
 import io.flutter.Log;
 import io.flutter.embedding.android.FlutterActivityLaunchConfigs.BackgroundMode;
 import io.flutter.embedding.engine.FlutterEngine;
@@ -210,7 +218,10 @@ import java.util.List;
 // methods are duplicated for readability purposes. Be sure to replicate any change in this class in
 // FlutterFragmentActivity, too.
 public class FlutterActivity extends Activity
-    implements FlutterActivityAndFragmentDelegate.Host, LifecycleOwner {
+    implements FlutterActivityAndFragmentDelegate.Host,
+        LifecycleOwner,
+        SavedStateRegistryOwner,
+        ViewModelStoreOwner {
   private static final String TAG = "FlutterActivity";
 
   @VisibleForTesting boolean hasRegisteredBackCallback = false;
@@ -599,8 +610,15 @@ public class FlutterActivity extends Activity
 
   @NonNull private LifecycleRegistry lifecycle;
 
+  // Saved state and view models for androidx components hosted in this activity's view tree,
+  // such as a Jetpack Compose ComposeView inside a platform view. Flutter's own state goes through
+  // the restoration channel instead.
+  @NonNull private final SavedStateRegistryController savedStateRegistryController;
+  @Nullable private ViewModelStore viewModelStore;
+
   public FlutterActivity() {
     lifecycle = new LifecycleRegistry(this);
+    savedStateRegistryController = SavedStateRegistryController.create(this);
   }
 
   /**
@@ -646,13 +664,31 @@ public class FlutterActivity extends Activity
     delegate.onAttach(this);
     delegate.onRestoreInstanceState(savedInstanceState);
 
+    // Must happen before the lifecycle reaches STARTED.
+    savedStateRegistryController.performRestore(savedInstanceState);
     lifecycle.handleLifecycleEvent(Lifecycle.Event.ON_CREATE);
 
     configureWindowForTransparency();
 
     setContentView(createFlutterView());
+    initializeViewTreeOwners();
 
     configureStatusBarForFullscreenFlutterExperience();
+  }
+
+  /**
+   * Publishes this activity's lifecycle, saved-state registry and view-model store on the decor
+   * view, as androidx {@code ComponentActivity} does.
+   *
+   * <p>Views attached below the decor view, including platform views, find these owners when they
+   * attach. A Jetpack Compose {@code ComposeView} throws {@code IllegalStateException:
+   * ViewTreeLifecycleOwner not found} without them.
+   */
+  private void initializeViewTreeOwners() {
+    final View decorView = getWindow().getDecorView();
+    ViewTreeLifecycleOwner.set(decorView, this);
+    ViewTreeSavedStateRegistryOwner.set(decorView, this);
+    ViewTreeViewModelStoreOwner.set(decorView, this);
   }
 
   /**
@@ -871,6 +907,7 @@ public class FlutterActivity extends Activity
   @Override
   protected void onSaveInstanceState(Bundle outState) {
     super.onSaveInstanceState(outState);
+    savedStateRegistryController.performSave(outState);
     if (stillAttachedForEvent("onSaveInstanceState")) {
       delegate.onSaveInstanceState(outState);
     }
@@ -919,6 +956,9 @@ public class FlutterActivity extends Activity
     }
     release();
     lifecycle.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY);
+    if (viewModelStore != null && !isChangingConfigurations()) {
+      viewModelStore.clear();
+    }
   }
 
   @Override
@@ -1034,6 +1074,31 @@ public class FlutterActivity extends Activity
   @NonNull
   public Lifecycle getLifecycle() {
     return lifecycle;
+  }
+
+  @Override
+  @NonNull
+  public SavedStateRegistry getSavedStateRegistry() {
+    return savedStateRegistryController.getSavedStateRegistry();
+  }
+
+  @Override
+  @NonNull
+  public ViewModelStore getViewModelStore() {
+    if (viewModelStore == null) {
+      // Reuse the store retained across a configuration change, if there was one.
+      final Object retained = getLastNonConfigurationInstance();
+      viewModelStore =
+          retained instanceof ViewModelStore ? (ViewModelStore) retained : new ViewModelStore();
+    }
+    return viewModelStore;
+  }
+
+  /** Retains the view-model store across configuration changes that recreate this activity. */
+  @Override
+  @Nullable
+  public Object onRetainNonConfigurationInstance() {
+    return viewModelStore;
   }
 
   /**

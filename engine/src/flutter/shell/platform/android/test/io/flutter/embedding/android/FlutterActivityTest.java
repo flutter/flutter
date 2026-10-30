@@ -9,6 +9,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -37,6 +38,11 @@ import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.lifecycle.DefaultLifecycleObserver;
 import androidx.lifecycle.LifecycleOwner;
+import androidx.lifecycle.ViewModel;
+import androidx.lifecycle.ViewModelStore;
+import androidx.lifecycle.ViewTreeLifecycleOwner;
+import androidx.lifecycle.ViewTreeViewModelStoreOwner;
+import androidx.savedstate.ViewTreeSavedStateRegistryOwner;
 import androidx.test.core.app.ActivityScenario;
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -1166,6 +1172,78 @@ public class FlutterActivityTest {
     List<String> flags = activity.getFlutterEngineFlags();
     assertEquals(1, flags.size());
     assertTrue(flags.contains("--trace-startup"));
+  }
+
+  @Test
+  public void onCreate_initializesViewTreeOwnersOnDecorView() {
+    Intent intent = FlutterActivity.createDefaultIntent(ctx);
+    ActivityController<FlutterActivity> activityController =
+        Robolectric.buildActivity(FlutterActivity.class, intent);
+    FlutterActivity activity = activityController.get();
+
+    activity.onCreate(null);
+
+    android.view.View flutterView = activity.findViewById(FlutterActivity.FLUTTER_VIEW_ID);
+    assertNotNull(flutterView);
+    assertSame(activity, ViewTreeLifecycleOwner.get(flutterView));
+    assertSame(activity, ViewTreeSavedStateRegistryOwner.get(flutterView));
+    assertSame(activity, ViewTreeViewModelStoreOwner.get(flutterView));
+  }
+
+  @Test
+  public void savedStateRegistry_savesAndRestoresState() {
+    Intent intent = FlutterActivity.createDefaultIntent(ctx);
+    ActivityController<FlutterActivity> firstController =
+        Robolectric.buildActivity(FlutterActivity.class, intent);
+    FlutterActivity firstActivity = firstController.get();
+    firstActivity.onCreate(null);
+
+    firstActivity
+        .getSavedStateRegistry()
+        .registerSavedStateProvider(
+            "compose_test_key",
+            () -> {
+              Bundle bundle = new Bundle();
+              bundle.putBoolean("swapped", true);
+              return bundle;
+            });
+
+    Bundle outState = new Bundle();
+    firstActivity.onSaveInstanceState(outState);
+
+    ActivityController<FlutterActivity> secondController =
+        Robolectric.buildActivity(FlutterActivity.class, intent);
+    FlutterActivity secondActivity = secondController.get();
+    secondActivity.onCreate(outState);
+
+    Bundle restored =
+        secondActivity.getSavedStateRegistry().consumeRestoredStateForKey("compose_test_key");
+    assertNotNull(restored);
+    assertTrue(restored.getBoolean("swapped"));
+  }
+
+  @Test
+  public void viewModelStore_clearsOnDestroyWhenNotChangingConfigurations() {
+    Intent intent = FlutterActivity.createDefaultIntent(ctx);
+    ActivityController<FlutterActivity> activityController =
+        Robolectric.buildActivity(FlutterActivity.class, intent);
+    FlutterActivity activity = activityController.get();
+    activity.onCreate(null);
+
+    final boolean[] cleared = {false};
+    ViewModel testViewModel =
+        new ViewModel() {
+          @Override
+          protected void onCleared() {
+            cleared[0] = true;
+          }
+        };
+    ViewModelStore store = activity.getViewModelStore();
+    store.put("test_vm", testViewModel);
+    assertSame(store, activity.onRetainNonConfigurationInstance());
+
+    activity.onDestroy();
+    assertTrue(cleared[0]);
   }
 
   static class FlutterActivityWithOverriddenShellArgs extends FlutterActivity {
