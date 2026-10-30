@@ -1002,6 +1002,10 @@ void main() {
         .readAsString();
 
     expect(actualContents.contains('useAndroidX'), true);
+    // New projects use the Android Gradle Plugin defaults: built-in Kotlin and
+    // the new DSL.
+    expect(actualContents, isNot(contains('android.builtInKotlin')));
+    expect(actualContents, isNot(contains('android.newDsl')));
   });
 
   testUsingContext('flutter create --platforms appends platforms to existing .metadata', () async {
