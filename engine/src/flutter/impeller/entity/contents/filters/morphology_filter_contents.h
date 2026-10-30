@@ -47,7 +47,7 @@ class DirectionalMorphologyFilterContents final : public FilterContents {
 
   Radius radius_;
   Vector2 direction_;
-  MorphType morph_type_;
+  MorphType morph_type_ = MorphType::kDilate;
 
   DirectionalMorphologyFilterContents(
       const DirectionalMorphologyFilterContents&) = delete;

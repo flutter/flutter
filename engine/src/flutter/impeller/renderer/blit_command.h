@@ -32,7 +32,7 @@ struct BlitCopyTextureToBufferCommand : public BlitCommand {
   std::shared_ptr<Texture> source;
   std::shared_ptr<DeviceBuffer> destination;
   IRect source_region;
-  size_t destination_offset;
+  size_t destination_offset = 0;
 };
 
 struct BlitCopyBufferToTextureCommand : public BlitCommand {

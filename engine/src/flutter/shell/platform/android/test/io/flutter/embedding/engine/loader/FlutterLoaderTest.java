@@ -412,7 +412,7 @@ public class FlutterLoaderTest {
     flutterLoader.ensureInitializationComplete(ctx, null);
     shadowMainLooper().idle();
 
-    final String hcppArg = "--enable-hcpp-and-surface-control";
+    final String hcppArg = "--enable-hcpp-and-surface-control=true";
     ArgumentCaptor<String[]> shellArgsCaptor = ArgumentCaptor.forClass(String[].class);
     verify(mockFlutterJNI, times(1))
         .init(
@@ -425,6 +425,91 @@ public class FlutterLoaderTest {
             anyInt());
     List<String> arguments = Arrays.asList(shellArgsCaptor.getValue());
     assertTrue(arguments.contains(hcppArg));
+  }
+
+  @Test
+  public void itDisablesHcppFromMetaData() {
+    FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
+    FlutterLoader flutterLoader = new FlutterLoader(mockFlutterJNI);
+    Bundle metaData = new Bundle();
+    metaData.putBoolean("io.flutter.embedding.android.EnableHcpp", false);
+    ctx.getApplicationInfo().metaData = metaData;
+
+    FlutterLoader.Settings settings = new FlutterLoader.Settings();
+    assertFalse(flutterLoader.initialized());
+    flutterLoader.startInitialization(ctx, settings);
+    flutterLoader.ensureInitializationComplete(ctx, null);
+    shadowMainLooper().idle();
+
+    ArgumentCaptor<String[]> shellArgsCaptor = ArgumentCaptor.forClass(String[].class);
+    verify(mockFlutterJNI, times(1))
+        .init(
+            eq(ctx),
+            shellArgsCaptor.capture(),
+            anyString(),
+            anyString(),
+            anyString(),
+            anyLong(),
+            anyInt());
+    List<String> arguments = Arrays.asList(shellArgsCaptor.getValue());
+    assertTrue(arguments.contains("--enable-hcpp-and-surface-control=false"));
+    assertFalse(arguments.contains("--enable-hcpp-and-surface-control=true"));
+  }
+
+  @Test
+  public void ifHcppDisabledViaCommandLineAndEnabledViaManifestThenCommandLineTakesPrecedence() {
+    String expectedHcppArgFromMetadata = "--enable-hcpp-and-surface-control=true";
+    String expectedHcppArgFromCommandLine = "--enable-hcpp-and-surface-control=false";
+
+    FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
+    FlutterLoader flutterLoader = new FlutterLoader(mockFlutterJNI);
+    Bundle metaData = new Bundle();
+    metaData.putBoolean("io.flutter.embedding.android.EnableHcpp", true);
+    ctx.getApplicationInfo().metaData = metaData;
+
+    FlutterLoader.Settings settings = new FlutterLoader.Settings();
+    assertFalse(flutterLoader.initialized());
+    flutterLoader.startInitialization(ctx, settings);
+    flutterLoader.ensureInitializationComplete(ctx, new String[] {expectedHcppArgFromCommandLine});
+    shadowMainLooper().idle();
+
+    ArgumentCaptor<String[]> shellArgsCaptor = ArgumentCaptor.forClass(String[].class);
+    verify(mockFlutterJNI, times(1))
+        .init(
+            eq(ctx),
+            shellArgsCaptor.capture(),
+            anyString(),
+            anyString(),
+            anyString(),
+            anyLong(),
+            anyInt());
+    List<String> arguments = Arrays.asList(shellArgsCaptor.getValue());
+
+    // The engine uses the last value specified for a switch, so the command line argument must
+    // come after the manifest metadata argument.
+    assertTrue(arguments.contains(expectedHcppArgFromMetadata));
+    assertTrue(arguments.contains(expectedHcppArgFromCommandLine));
+    assertTrue(
+        arguments.indexOf(expectedHcppArgFromMetadata)
+            < arguments.indexOf(expectedHcppArgFromCommandLine));
+  }
+
+  @Test
+  public void itSetsHcppDisabledCommandLineFlagFromManifestMetadataInReleaseMode() {
+    testMultipleFlagsFromManifestMetadata(
+        "[\"--enable-hcpp-and-surface-control=false\"]",
+        new String[] {"--enable-hcpp-and-surface-control=false"},
+        true,
+        true);
+  }
+
+  @Test
+  public void itSetsHcppEnabledCommandLineFlagFromManifestMetadataInReleaseMode() {
+    testMultipleFlagsFromManifestMetadata(
+        "[\"--enable-hcpp-and-surface-control=true\"]",
+        new String[] {"--enable-hcpp-and-surface-control=true"},
+        true,
+        true);
   }
 
   @Test
@@ -1028,17 +1113,29 @@ public class FlutterLoaderTest {
   }
 
   @Test
-  public void itSetsMergedPlatformUiThread() {
-    // Test debug mode.
-    testFlagFromMetadataPresent(
-        "io.flutter.embedding.android.MergedPlatformUIThread",
-        defaultFlagTestValue,
-        "--merged-platform-ui-thread");
+  public void itSetsMergedPlatformUiThreadFromMetadata() {
+    for (String value : new String[] {"enabled", "mergeAfterLaunch"}) {
+      // Test debug mode.
+      testFlagFromMetadataPresent(
+          "io.flutter.embedding.android.MergedPlatformUIThread",
+          value,
+          "--merged-platform-ui-thread=" + value);
 
-    // Test release mode.
-    testFlagFromMetadataPresentInReleaseMode(
+      // Test release mode.
+      testFlagFromMetadataPresentInReleaseMode(
+          "io.flutter.embedding.android.MergedPlatformUIThread",
+          value,
+          "--merged-platform-ui-thread=" + value);
+    }
+  }
+
+  @Test
+  public void itDoesNotSetMergedPlatformUiThreadWithoutValueFromMetadata() {
+    // The engine ignores --merged-platform-ui-thread without a value, so the flag must be passed
+    // along with the value specified in the manifest.
+    testFlagFromMetadataNotPresent(
         "io.flutter.embedding.android.MergedPlatformUIThread",
-        defaultFlagTestValue,
+        "mergeAfterLaunch",
         "--merged-platform-ui-thread");
   }
 
@@ -1388,6 +1485,15 @@ public class FlutterLoaderTest {
     testMultipleFlagsFromManifestMetadata(
         "[\"--enable-impeller=true\",\"--enable-dart-profiling\"]",
         new String[] {"--enable-impeller=true", "--enable-dart-profiling"},
+        true,
+        true);
+  }
+
+  @Test
+  public void itSetsMergedPlatformUiThreadCommandLineFlagFromManifestMetadataInReleaseMode() {
+    testMultipleFlagsFromManifestMetadata(
+        "[\"--merged-platform-ui-thread=mergeAfterLaunch\"]",
+        new String[] {"--merged-platform-ui-thread=mergeAfterLaunch"},
         true,
         true);
   }

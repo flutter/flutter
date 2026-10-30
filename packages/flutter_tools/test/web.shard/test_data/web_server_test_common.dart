@@ -64,19 +64,18 @@ class WebServerDeviceTestRunner {
   /// Starts the 'chromedriver' process and returns the port number that it is
   /// listening on.
   Future<int> _startChromeDriverProcess() async {
-    final int chromeDriverPort = await findFreePort();
-    _chromeDriverProcess = await io.Process.start('chromedriver', <String>[
-      '--port=$chromeDriverPort',
-    ]);
+    _chromeDriverProcess = await io.Process.start('chromedriver', <String>['--port=0']);
     final completer = Completer<int>();
+    final portPattern = RegExp(r'started successfully on port (\d+)');
     _chromeDriverProcess!.stdout
         .transform(utf8.decoder)
         .transform(const LineSplitter())
         .listen(
           (String line) {
             printOnFailure('chromedriver stdout: $line');
-            if (!completer.isCompleted && line.contains('ChromeDriver was started successfully')) {
-              completer.complete(chromeDriverPort);
+            final Match? match = portPattern.firstMatch(line);
+            if (!completer.isCompleted && match != null) {
+              completer.complete(int.parse(match.group(1)!));
             }
           },
           onError: (dynamic error, StackTrace stack) {
@@ -219,15 +218,4 @@ class WebServerDeviceTestRunner {
       await _chromeDriverProcess?.exitCode;
     }
   }
-}
-
-/// Returns a port that is likely to be unused.
-///
-/// NOTE: Technically speaking another process could bind this port after this
-/// method returns.
-Future<int> findFreePort() async {
-  final io.ServerSocket socket = await io.ServerSocket.bind(io.InternetAddress.loopbackIPv4, 0);
-  final int port = socket.port;
-  await socket.close();
-  return port;
 }

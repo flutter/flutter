@@ -39,9 +39,10 @@ final licensesNoLongerNeeded = RegExp(
 );
 
 class AndroidWorkflow implements Workflow {
-  AndroidWorkflow({required this._androidSdk, required this._featureFlags});
+  AndroidWorkflow({required this._androidSdkBuilder, required this._featureFlags});
 
-  final AndroidSdk? _androidSdk;
+  final AndroidSdk? Function() _androidSdkBuilder;
+  late final AndroidSdk? _androidSdk = _androidSdkBuilder();
   final FeatureFlags _featureFlags;
 
   @override

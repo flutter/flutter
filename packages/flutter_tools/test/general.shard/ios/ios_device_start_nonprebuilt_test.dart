@@ -123,11 +123,21 @@ void main() {
     testUsingContext(
       'missing TARGET_BUILD_DIR',
       () async {
+        final xcodeProjectInterpreter = FakeXcodeProjectInterpreter(
+          buildSettings: const <String, String>{
+            'WRAPPER_NAME': 'My Super Awesome App.app',
+            'DEVELOPMENT_TEAM': '3333CCCC33',
+          },
+          projectInfo: projectInfo,
+        );
         final IOSDevice iosDevice = setUpIOSDevice(
           fileSystem: fileSystem,
           processManager: processManager,
           logger: logger,
           artifacts: artifacts,
+          analytics: fakeAnalytics,
+          xcode: xcode,
+          xcodeProjectInterpreter: xcodeProjectInterpreter,
         );
         setUpIOSProject(fileSystem);
         final FlutterProject flutterProject = FlutterProject.fromDirectory(
@@ -137,6 +147,7 @@ void main() {
           flutterProject.ios,
           'flutter',
           'My Super Awesome App',
+          toolContext: FakeToolContext(fs: fileSystem),
         );
 
         processManager.addCommand(const FakeCommand(command: kRunReleaseArgs));
@@ -177,7 +188,6 @@ void main() {
           projectInfo: projectInfo,
         ),
         Xcode: () => xcode,
-        Analytics: () => fakeAnalytics,
         Artifacts: () => artifacts,
       },
     );
@@ -190,6 +200,7 @@ void main() {
           processManager: FakeProcessManager.any(),
           logger: logger,
           artifacts: artifacts,
+          xcode: xcode,
         );
         setUpIOSProject(fileSystem);
         final FlutterProject flutterProject = FlutterProject.fromDirectory(
@@ -199,6 +210,7 @@ void main() {
           flutterProject.ios,
           'flutter',
           'My Super Awesome App',
+          toolContext: FakeToolContext(fs: fileSystem),
         );
 
         final LaunchResult launchResult = await iosDevice.startApp(
@@ -231,6 +243,8 @@ void main() {
           logger: logger,
           artifacts: artifacts,
           analytics: fakeExactAnalytics,
+          xcode: xcode,
+          xcodeProjectInterpreter: fakeXcodeProjectInterpreter,
         );
         setUpIOSProject(fileSystem);
         final FlutterProject flutterProject = FlutterProject.fromDirectory(
@@ -240,6 +254,7 @@ void main() {
           flutterProject.ios,
           'flutter',
           'My Super Awesome App',
+          toolContext: FakeToolContext(fs: fileSystem),
         );
         fileSystem
             .directory('build/ios/Release-iphoneos/My Super Awesome App.app')
@@ -286,13 +301,25 @@ void main() {
         expect(fileSystem.directory('build/ios/iphoneos'), exists);
         expect(launchResult.started, true);
         expect(processManager, hasNoRemainingExpectations);
-        expect(fakeExactAnalytics.sentEvents, [
-          Event.appleUsageEvent(
-            workflow: 'ios-physical-deployment',
-            parameter: IOSDeploymentMethod.iosDeployLaunch.name,
-            result: 'release success',
+        expect(fakeExactAnalytics.sentEvents, hasLength(2));
+        expect(
+          analyticsTimingEventExists(
+            sentEvents: fakeExactAnalytics.sentEvents,
+            workflow: 'build',
+            variableName: 'xcode-ios',
           ),
-        ]);
+          true,
+        );
+        expect(
+          fakeExactAnalytics.sentEvents,
+          contains(
+            Event.appleUsageEvent(
+              workflow: 'ios-physical-deployment',
+              parameter: IOSDeploymentMethod.iosDeployLaunch.name,
+              result: 'release success',
+            ),
+          ),
+        );
       },
       overrides: <Type, Generator>{
         ProcessManager: () => processManager,
@@ -318,6 +345,9 @@ void main() {
           logger: logger,
           artifacts: artifacts,
           analytics: fakeExactAnalytics,
+          os: FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_x64),
+          xcode: xcode,
+          xcodeProjectInterpreter: fakeXcodeProjectInterpreter,
         );
         setUpIOSProject(fileSystem);
         final FlutterProject flutterProject = FlutterProject.fromDirectory(
@@ -327,6 +357,7 @@ void main() {
           flutterProject.ios,
           'flutter',
           'My Super Awesome App',
+          toolContext: FakeToolContext(fs: fileSystem),
         );
         fileSystem
             .directory('build/ios/Release-iphoneos/My Super Awesome App.app')
@@ -402,13 +433,25 @@ void main() {
         expect(fileSystem.directory('build/ios/iphoneos'), exists);
         expect(launchResult.started, true);
         expect(processManager, hasNoRemainingExpectations);
-        expect(fakeExactAnalytics.sentEvents, [
-          Event.appleUsageEvent(
-            workflow: 'ios-physical-deployment',
-            parameter: IOSDeploymentMethod.iosDeployLaunch.name,
-            result: 'release success',
+        expect(fakeExactAnalytics.sentEvents, hasLength(2));
+        expect(
+          analyticsTimingEventExists(
+            sentEvents: fakeExactAnalytics.sentEvents,
+            workflow: 'build',
+            variableName: 'xcode-ios',
           ),
-        ]);
+          true,
+        );
+        expect(
+          fakeExactAnalytics.sentEvents,
+          contains(
+            Event.appleUsageEvent(
+              workflow: 'ios-physical-deployment',
+              parameter: IOSDeploymentMethod.iosDeployLaunch.name,
+              result: 'release success',
+            ),
+          ),
+        );
       },
       overrides: <Type, Generator>{
         ProcessManager: () => processManager,
@@ -449,7 +492,10 @@ void main() {
             fileSystem: fileSystem,
             processManager: processManager,
             logger: logger,
-            artifacts: artifacts,
+            artifacts: fakeArtifacts,
+            os: FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_x64),
+            xcode: xcode,
+            xcodeProjectInterpreter: fakeXcodeProjectInterpreter,
           );
           setUpIOSProject(fileSystem);
           final FlutterProject flutterProject = FlutterProject.fromDirectory(
@@ -459,6 +505,7 @@ void main() {
             flutterProject.ios,
             'flutter',
             'My Super Awesome App',
+            toolContext: FakeToolContext(fs: fileSystem),
           );
           fileSystem
               .directory('build/ios/Release-iphoneos/My Super Awesome App.app')
@@ -555,7 +602,10 @@ void main() {
             fileSystem: fileSystem,
             processManager: processManager,
             logger: logger,
-            artifacts: artifacts,
+            artifacts: fakeArtifacts,
+            os: FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_x64),
+            xcode: xcode,
+            xcodeProjectInterpreter: fakeXcodeProjectInterpreter,
           );
           setUpIOSProject(fileSystem);
           final FlutterProject flutterProject = FlutterProject.fromDirectory(
@@ -565,6 +615,7 @@ void main() {
             flutterProject.ios,
             'flutter',
             'My Super Awesome App',
+            toolContext: FakeToolContext(fs: fileSystem),
           );
 
           fileSystem.directory('build/ios/iphoneos').deleteSync(recursive: true);
@@ -638,6 +689,8 @@ void main() {
           logger: logger,
           artifacts: artifacts,
           analytics: fakeExactAnalytics,
+          xcode: xcode,
+          xcodeProjectInterpreter: fakeXcodeProjectInterpreter,
         );
         setUpIOSProject(fileSystem);
         final FlutterProject flutterProject = FlutterProject.fromDirectory(
@@ -647,6 +700,7 @@ void main() {
           flutterProject.ios,
           'flutter',
           'My Super Awesome App',
+          toolContext: FakeToolContext(fs: fileSystem),
         );
 
         // The first xcrun call should fail with a
@@ -696,13 +750,25 @@ void main() {
               );
               expect(launchResult.started, true);
               expect(processManager, hasNoRemainingExpectations);
-              expect(fakeExactAnalytics.sentEvents, [
-                Event.appleUsageEvent(
-                  workflow: 'ios-physical-deployment',
-                  parameter: IOSDeploymentMethod.iosDeployLaunch.name,
-                  result: 'release success',
+              expect(fakeExactAnalytics.sentEvents, hasLength(2));
+              expect(
+                analyticsTimingEventExists(
+                  sentEvents: fakeExactAnalytics.sentEvents,
+                  workflow: 'build',
+                  variableName: 'xcode-ios',
                 ),
-              ]);
+                true,
+              );
+              expect(
+                fakeExactAnalytics.sentEvents,
+                contains(
+                  Event.appleUsageEvent(
+                    workflow: 'ios-physical-deployment',
+                    parameter: IOSDeploymentMethod.iosDeployLaunch.name,
+                    result: 'release success',
+                  ),
+                ),
+              );
             }),
           ),
         );
@@ -765,6 +831,8 @@ void main() {
             isCoreDevice: true,
             coreDeviceControl: FakeIOSCoreDeviceControl(),
             analytics: fakeExactAnalytics,
+            xcode: xcode,
+            xcodeProjectInterpreter: fakeXcodeProjectInterpreter,
           );
           setUpIOSProject(fileSystem);
           final FlutterProject flutterProject = FlutterProject.fromDirectory(
@@ -774,6 +842,7 @@ void main() {
             flutterProject.ios,
             'flutter',
             'My Super Awesome App',
+            toolContext: FakeToolContext(fs: fileSystem),
           );
           fileSystem
               .directory('build/ios/Release-iphoneos/My Super Awesome App.app')
@@ -788,13 +857,25 @@ void main() {
           expect(fileSystem.directory('build/ios/iphoneos'), exists);
           expect(launchResult.started, true);
           expect(processManager, hasNoRemainingExpectations);
-          expect(fakeExactAnalytics.sentEvents, [
-            Event.appleUsageEvent(
-              workflow: 'ios-physical-deployment',
-              parameter: IOSDeploymentMethod.coreDeviceWithoutDebugger.name,
-              result: 'release success',
+          expect(fakeExactAnalytics.sentEvents, hasLength(2));
+          expect(
+            analyticsTimingEventExists(
+              sentEvents: fakeExactAnalytics.sentEvents,
+              workflow: 'build',
+              variableName: 'xcode-ios',
             ),
-          ]);
+            true,
+          );
+          expect(
+            fakeExactAnalytics.sentEvents,
+            contains(
+              Event.appleUsageEvent(
+                workflow: 'ios-physical-deployment',
+                parameter: IOSDeploymentMethod.coreDeviceWithoutDebugger.name,
+                result: 'release success',
+              ),
+            ),
+          );
         },
         overrides: <Type, Generator>{
           ProcessManager: () => FakeProcessManager.any(),
@@ -822,6 +903,8 @@ void main() {
             coreDeviceControl: FakeIOSCoreDeviceControl(installSuccess: false),
             coreDeviceLauncher: FakeIOSCoreDeviceLauncher(launchResult: false),
             analytics: fakeExactAnalytics,
+            xcode: xcode,
+            xcodeProjectInterpreter: fakeXcodeProjectInterpreter,
           );
           setUpIOSProject(fileSystem);
           final FlutterProject flutterProject = FlutterProject.fromDirectory(
@@ -831,6 +914,7 @@ void main() {
             flutterProject.ios,
             'flutter',
             'My Super Awesome App',
+            toolContext: FakeToolContext(fs: fileSystem),
           );
           fileSystem
               .directory('build/ios/Release-iphoneos/My Super Awesome App.app')
@@ -845,13 +929,25 @@ void main() {
           expect(fileSystem.directory('build/ios/iphoneos'), exists);
           expect(launchResult.started, false);
           expect(processManager, hasNoRemainingExpectations);
-          expect(fakeExactAnalytics.sentEvents, [
-            Event.appleUsageEvent(
-              workflow: 'ios-physical-deployment',
-              parameter: IOSDeploymentMethod.coreDeviceWithoutDebugger.name,
-              result: 'launch failed',
+          expect(fakeExactAnalytics.sentEvents, hasLength(2));
+          expect(
+            analyticsTimingEventExists(
+              sentEvents: fakeExactAnalytics.sentEvents,
+              workflow: 'build',
+              variableName: 'xcode-ios',
             ),
-          ]);
+            true,
+          );
+          expect(
+            fakeExactAnalytics.sentEvents,
+            contains(
+              Event.appleUsageEvent(
+                workflow: 'ios-physical-deployment',
+                parameter: IOSDeploymentMethod.coreDeviceWithoutDebugger.name,
+                result: 'launch failed',
+              ),
+            ),
+          );
         },
         overrides: <Type, Generator>{
           ProcessManager: () => FakeProcessManager.any(),
@@ -876,6 +972,8 @@ void main() {
             artifacts: artifacts,
             isCoreDevice: true,
             coreDeviceControl: FakeIOSCoreDeviceControl(launchSuccess: false),
+            xcode: xcode,
+            xcodeProjectInterpreter: fakeXcodeProjectInterpreter,
           );
           setUpIOSProject(fileSystem);
           final FlutterProject flutterProject = FlutterProject.fromDirectory(
@@ -885,6 +983,7 @@ void main() {
             flutterProject.ios,
             'flutter',
             'My Super Awesome App',
+            toolContext: FakeToolContext(fs: fileSystem),
           );
           fileSystem
               .directory('build/ios/Release-iphoneos/My Super Awesome App.app')
@@ -926,6 +1025,8 @@ void main() {
             isCoreDevice: true,
             coreDeviceControl: coreDeviceControl,
             analytics: fakeExactAnalytics,
+            xcode: xcode,
+            xcodeProjectInterpreter: fakeXcodeProjectInterpreter,
           );
           setUpIOSProject(fileSystem);
           final FlutterProject flutterProject = FlutterProject.fromDirectory(
@@ -935,6 +1036,7 @@ void main() {
             flutterProject.ios,
             'flutter',
             'My Super Awesome App',
+            toolContext: FakeToolContext(fs: fileSystem),
           );
           fileSystem
               .directory('build/ios/Release-iphoneos/My Super Awesome App.app')
@@ -951,13 +1053,25 @@ void main() {
           expect(processManager, hasNoRemainingExpectations);
           expect(coreDeviceControl.argumentsUsedForLaunch, isNotNull);
           expect(coreDeviceControl.argumentsUsedForLaunch, contains('--enable-dart-profiling'));
-          expect(fakeExactAnalytics.sentEvents, [
-            Event.appleUsageEvent(
-              workflow: 'ios-physical-deployment',
-              parameter: IOSDeploymentMethod.coreDeviceWithoutDebugger.name,
-              result: 'release success',
+          expect(fakeExactAnalytics.sentEvents, hasLength(2));
+          expect(
+            analyticsTimingEventExists(
+              sentEvents: fakeExactAnalytics.sentEvents,
+              workflow: 'build',
+              variableName: 'xcode-ios',
             ),
-          ]);
+            true,
+          );
+          expect(
+            fakeExactAnalytics.sentEvents,
+            contains(
+              Event.appleUsageEvent(
+                workflow: 'ios-physical-deployment',
+                parameter: IOSDeploymentMethod.coreDeviceWithoutDebugger.name,
+                result: 'release success',
+              ),
+            ),
+          );
         },
         overrides: <Type, Generator>{
           ProcessManager: () => FakeProcessManager.any(),
@@ -984,6 +1098,8 @@ void main() {
             artifacts: artifacts,
             isCoreDevice: true,
             coreDeviceControl: FakeIOSCoreDeviceControl(),
+            xcode: xcode,
+            xcodeProjectInterpreter: fakeXcodeProjectInterpreter,
             xcodeDebug: FakeXcodeDebug(
               expectedProject: XcodeDebugProject(
                 scheme: 'Runner',
@@ -1004,6 +1120,7 @@ void main() {
             flutterProject.ios,
             'flutter',
             'My Super Awesome App',
+            toolContext: FakeToolContext(fs: fileSystem),
           );
           fileSystem
               .directory('build/ios/Release-iphoneos/My Super Awesome App.app')
@@ -1063,6 +1180,8 @@ void main() {
             artifacts: artifacts,
             isCoreDevice: true,
             coreDeviceControl: FakeIOSCoreDeviceControl(),
+            xcode: xcode,
+            xcodeProjectInterpreter: fakeXcodeProjectInterpreter,
             xcodeDebug: FakeXcodeDebug(
               expectedProject: XcodeDebugProject(
                 scheme: 'Runner',
@@ -1083,6 +1202,7 @@ void main() {
             flutterProject.ios,
             'flutter',
             'My Super Awesome App',
+            toolContext: FakeToolContext(fs: fileSystem),
           );
           fileSystem
               .directory('build/ios/Release-iphoneos/My Super Awesome App.app')
@@ -1161,6 +1281,8 @@ void main() {
               artifacts: artifacts,
               isCoreDevice: true,
               coreDeviceControl: FakeIOSCoreDeviceControl(),
+              xcode: xcode,
+              xcodeProjectInterpreter: fakeXcodeProjectInterpreter,
               xcodeDebug: FakeXcodeDebug(
                 expectedProject: XcodeDebugProject(
                   scheme: flavor,
@@ -1183,6 +1305,7 @@ void main() {
               flutterProject.ios,
               'flutter',
               'My Super Awesome App',
+              toolContext: FakeToolContext(fs: fileSystem),
             );
             fileSystem
                 .directory('build/ios/Release-iphoneos/My Super Awesome App.app')
@@ -1245,6 +1368,8 @@ void main() {
             artifacts: artifacts,
             isCoreDevice: true,
             coreDeviceControl: FakeIOSCoreDeviceControl(),
+            xcode: xcode,
+            xcodeProjectInterpreter: fakeXcodeProjectInterpreter,
             xcodeDebug: FakeXcodeDebug(
               expectedProject: XcodeDebugProject(
                 scheme: 'Runner',
@@ -1268,6 +1393,7 @@ void main() {
             flutterProject.ios,
             'flutter',
             'My Super Awesome App',
+            toolContext: FakeToolContext(fs: fileSystem),
           );
           fileSystem
               .directory('build/ios/Release-iphoneos/My Super Awesome App.app')
@@ -1339,6 +1465,7 @@ void main() {
             artifacts: artifacts,
             isCoreDevice: true,
             coreDeviceControl: FakeIOSCoreDeviceControl(),
+            xcode: xcode,
           );
           setUpIOSProject(fileSystem);
           final FlutterProject flutterProject = FlutterProject.fromDirectory(
@@ -1348,6 +1475,7 @@ void main() {
             flutterProject.ios,
             'flutter',
             'My Super Awesome App',
+            toolContext: FakeToolContext(fs: fileSystem),
           );
           fileSystem
               .directory('build/ios/Release-iphoneos/My Super Awesome App.app')
@@ -1394,6 +1522,8 @@ void main() {
             artifacts: artifacts,
             isCoreDevice: true,
             coreDeviceControl: FakeIOSCoreDeviceControl(),
+            xcode: xcode,
+            xcodeProjectInterpreter: fakeXcodeProjectInterpreter,
           );
           setUpIOSProject(fileSystem, createWorkspace: false);
           final FlutterProject flutterProject = FlutterProject.fromDirectory(
@@ -1403,6 +1533,7 @@ void main() {
             flutterProject.ios,
             'flutter',
             'My Super Awesome App',
+            toolContext: FakeToolContext(fs: fileSystem),
           );
           fileSystem
               .directory('build/ios/Release-iphoneos/My Super Awesome App.app')
@@ -1450,6 +1581,8 @@ void main() {
             artifacts: artifacts,
             isCoreDevice: true,
             coreDeviceControl: FakeIOSCoreDeviceControl(),
+            xcode: xcode,
+            xcodeProjectInterpreter: fakeXcodeProjectInterpreter,
           );
           setUpIOSProject(fileSystem);
           final FlutterProject flutterProject = FlutterProject.fromDirectory(
@@ -1459,6 +1592,7 @@ void main() {
             flutterProject.ios,
             'flutter',
             'My Super Awesome App',
+            toolContext: FakeToolContext(fs: fileSystem),
           );
           fileSystem
               .directory('build/ios/Release-iphoneos/My Super Awesome App.app')
@@ -1536,17 +1670,20 @@ name: my_app
 }
 
 IOSDevice setUpIOSDevice({
+  required Xcode xcode,
+  XcodeProjectInterpreter? xcodeProjectInterpreter,
   String sdkVersion = '13.0.1',
   FileSystem? fileSystem,
   Logger? logger,
   ProcessManager? processManager,
   Artifacts? artifacts,
+  OperatingSystemUtils? os,
   bool isCoreDevice = false,
   IOSCoreDeviceControl? coreDeviceControl,
   IOSCoreDeviceLauncher? coreDeviceLauncher,
   FakeXcodeDebug? xcodeDebug,
   CpuArch cpuArchitecture = CpuArch.arm64,
-  FakeExactAnalytics? analytics,
+  Analytics? analytics,
 }) {
   artifacts ??= Artifacts.test();
   final cache = Cache.test(
@@ -1556,28 +1693,26 @@ IOSDevice setUpIOSDevice({
 
   logger ??= BufferLogger.test();
   final FileSystem testFileSystem = fileSystem ?? MemoryFileSystem.test();
+  final toolContext = FakeToolContext(
+    artifacts: artifacts,
+    cache: cache,
+    fs: testFileSystem,
+    logger: logger,
+    os: os ?? FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_arm64),
+    platform: macPlatform,
+    processManager: processManager ?? FakeProcessManager.any(),
+  );
   return IOSDevice(
     '123',
     name: 'iPhone 1',
     sdkVersion: sdkVersion,
-    fileSystem: testFileSystem,
-    fileSystemUtils: FileSystemUtils(fileSystem: testFileSystem, platform: macPlatform),
-    platform: macPlatform,
-    processUtils: ProcessUtils(
-      processManager: processManager ?? FakeProcessManager.any(),
-      logger: logger,
-    ),
-    xcode: null,
+    toolContext: toolContext,
+    xcode: xcode,
+    xcodeProjectInterpreter: xcodeProjectInterpreter ?? FakeXcodeProjectInterpreter(),
     iProxy: IProxy.test(logger: logger, processManager: processManager ?? FakeProcessManager.any()),
-    logger: logger,
-    iosDeploy: IOSDeploy(
-      logger: logger,
-      platform: macPlatform,
-      processManager: processManager ?? FakeProcessManager.any(),
-      artifacts: artifacts,
-      cache: cache,
-    ),
+    iosDeploy: IOSDeploy(toolContext: toolContext),
     analytics: analytics ?? FakeExactAnalytics(),
+    cocoaPods: FakeCocoaPods(),
     iMobileDevice: IMobileDevice(
       logger: logger,
       processManager: processManager ?? FakeProcessManager.any(),
@@ -1586,6 +1721,7 @@ IOSDevice setUpIOSDevice({
     ),
     coreDeviceControl: coreDeviceControl ?? FakeIOSCoreDeviceControl(),
     coreDeviceLauncher: coreDeviceLauncher ?? FakeIOSCoreDeviceLauncher(),
+    plistParser: FakePlistParser(),
     xcodeDebug: xcodeDebug ?? FakeXcodeDebug(),
     cpuArch: cpuArchitecture,
     connectionInterface: DeviceConnectionInterface.attached,
@@ -1593,6 +1729,7 @@ IOSDevice setUpIOSDevice({
     isPaired: true,
     devModeEnabled: true,
     isCoreDevice: isCoreDevice,
+    templateRenderer: FakeTemplateRenderer(),
   );
 }
 
@@ -1861,6 +1998,11 @@ class FakeArtifacts extends Fake implements Artifacts {
     EnvironmentType? environmentType,
   }) {
     return frameworkPath;
+  }
+
+  @override
+  FileSystemEntity getHostArtifact(HostArtifact artifact) {
+    return Artifacts.test().getHostArtifact(artifact);
   }
 
   @override

@@ -42,7 +42,7 @@ std::shared_ptr<ColorFilterContents> WrapWithGPUColorFilter(
       const flutter::DlMatrixColorFilter* matrix_filter = filter->asMatrix();
       FML_DCHECK(matrix_filter);
 
-      impeller::ColorMatrix color_matrix;
+      impeller::ColorMatrix color_matrix{};
       matrix_filter->get_matrix(color_matrix.array);
       auto filter = ColorFilterContents::MakeColorMatrix({input}, color_matrix);
       filter->SetAbsorbOpacity(absorb_opacity);
@@ -81,7 +81,7 @@ ColorFilterProc GetCPUColorFilterProc(const flutter::DlColorFilter* filter) {
       const flutter::DlMatrixColorFilter* matrix_filter = filter->asMatrix();
       FML_DCHECK(matrix_filter);
 
-      impeller::ColorMatrix color_matrix;
+      impeller::ColorMatrix color_matrix{};
       matrix_filter->get_matrix(color_matrix.array);
       return [color_matrix = color_matrix](Color color) {
         return color.ApplyColorMatrix(color_matrix);

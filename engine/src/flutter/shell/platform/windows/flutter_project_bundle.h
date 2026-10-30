@@ -11,6 +11,7 @@
 #include <vector>
 
 #include "flutter/shell/platform/embedder/embedder.h"
+#include "flutter/shell/platform/windows/egl/manager.h"
 #include "flutter/shell/platform/windows/public/flutter_windows.h"
 
 namespace flutter {
@@ -107,6 +108,11 @@ class FlutterProjectBundle {
     return program_cache_path_;
   }
 
+  // Returns the cap on the D3D11 feature level that ANGLE may use, if set.
+  std::optional<egl::D3DFeatureLevel> max_d3d_feature_level() const {
+    return max_d3d_feature_level_;
+  }
+
  private:
   std::filesystem::path assets_path_;
   std::filesystem::path icu_path_;
@@ -140,6 +146,11 @@ class FlutterProjectBundle {
 
   // The folder for compiled GPU programs, if the app set one.
   std::optional<std::wstring> program_cache_path_;
+
+  // Cap on the D3D11 feature level that ANGLE may use. Set from the
+  // FLUTTER_WINDOWS_MAX_D3D_FEATURE_LEVEL environment variable in debug and
+  // profile builds.
+  std::optional<egl::D3DFeatureLevel> max_d3d_feature_level_;
 };
 
 }  // namespace flutter

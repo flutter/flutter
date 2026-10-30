@@ -129,7 +129,7 @@ class AllCodeUnitFlags {
 
     // TODO(mdebbar): OPTIMIZATION:
     // We can make `segmentText` update `codeUnitFlags` in-place?
-    // Get text segmentation resuls using browser APIs.
+    // Get text segmentation results using browser APIs.
     final SegmentationResult result = segmentText(_text);
 
     // Fill out grapheme flags

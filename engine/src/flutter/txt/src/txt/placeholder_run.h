@@ -49,9 +49,9 @@ class PlaceholderRun {
   double width = 0;
   double height = 0;
 
-  PlaceholderAlignment alignment;
+  PlaceholderAlignment alignment = PlaceholderAlignment::kBaseline;
 
-  TextBaseline baseline;
+  TextBaseline baseline = TextBaseline::kAlphabetic;
 
   // Distance from the top edge of the rect to the baseline position. This
   // baseline will be aligned against the alphabetic baseline of the surrounding

@@ -5,7 +5,7 @@
 import 'dart:typed_data';
 
 import 'package:crypto/crypto.dart';
-import 'package:flutter_tools_core/flutter_tools_core.dart';
+import 'package:flutter_tools_core/flutter_tools_core.dart' hide BuildMode;
 import 'package:meta/meta.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
@@ -18,6 +18,7 @@ import '../base/logger.dart';
 import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
+import '../base/template.dart';
 import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../base/version.dart';
@@ -32,6 +33,8 @@ import '../ios/application_package.dart';
 import '../ios/code_signing.dart';
 import '../ios/mac.dart';
 import '../ios/plist_parser.dart';
+import '../ios/xcodeproj.dart';
+import '../macos/cocoapods.dart';
 import '../macos/xcode.dart';
 import '../runner/flutter_command.dart';
 import '../runner/flutter_command_runner.dart';
@@ -43,6 +46,7 @@ class BuildIOSCommand extends _BuildIOSSubCommand {
   BuildIOSCommand({
     required super.appleContext,
     required super.buildSystem,
+    required super.templateRenderer,
     required super.toolContext,
     required super.verboseHelp,
   }) {
@@ -78,7 +82,7 @@ class BuildIOSCommand extends _BuildIOSSubCommand {
 
   @override
   Directory _outputAppDirectory(String xcodeResultOutput) =>
-      _toolContext.fs.directory(xcodeResultOutput).parent;
+      toolContext.fs.directory(xcodeResultOutput).parent;
 }
 
 /// The key that uniquely identifies an image file in an image asset.
@@ -120,6 +124,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
   BuildIOSArchiveCommand({
     required super.appleContext,
     required super.buildSystem,
+    required super.templateRenderer,
     required super.toolContext,
     required super.verboseHelp,
   }) {
@@ -169,14 +174,14 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
   String? get exportOptionsPlist => getValue(_exportOptionsPlist);
 
   @override
-  Directory _outputAppDirectory(String xcodeResultOutput) => _toolContext.fs
+  Directory _outputAppDirectory(String xcodeResultOutput) => toolContext.fs
       .directory(xcodeResultOutput)
       .childDirectory('Products')
       .childDirectory('Applications');
 
   @override
   Future<void> validateCommand() async {
-    final FileSystem fs = _toolContext.fs;
+    final FileSystem fs = toolContext.fs;
     final String? exportOptions = exportOptionsPlist;
     if (exportOptions != null) {
       if (wasParsed(_exportMethod)) {
@@ -203,7 +208,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
     String contentsJsonDirName, {
     required bool requiresSize,
   }) {
-    final Directory contentsJsonDirectory = _toolContext.fs.directory(contentsJsonDirName);
+    final Directory contentsJsonDirectory = toolContext.fs.directory(contentsJsonDirName);
     if (!contentsJsonDirectory.existsSync()) {
       return <_ImageAssetFileKey, String>{};
     }
@@ -268,7 +273,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
     required String templateImageDirName,
     required String projectImageDirName,
   }) {
-    final FileSystem fs = _toolContext.fs;
+    final FileSystem fs = toolContext.fs;
     return projectImageInfoMap.entries.any((MapEntry<_ImageAssetFileKey, String> entry) {
       final String projectFileName = entry.value;
       final String? templateFileName = templateImageInfoMap[entry.key];
@@ -290,7 +295,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
     required Map<_ImageAssetFileKey, String> imageInfoMap,
     required String imageDirName,
   }) {
-    final FileSystem fs = _toolContext.fs;
+    final FileSystem fs = toolContext.fs;
     return imageInfoMap.entries
         .where((MapEntry<_ImageAssetFileKey, String> entry) {
           final String fileName = entry.value;
@@ -417,7 +422,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
     final BuildableIOSApp app = await buildableIOSApp;
 
     final String plistPath = app.builtInfoPlistPathAfterArchive;
-    final ToolContext(:FileSystem fs, :Logger logger) = _toolContext;
+    final ToolContext(:FileSystem fs, :Logger logger) = toolContext;
     final AppleContext(:PlistParser plistParser) = _appleContext;
 
     if (!fs.file(plistPath).existsSync()) {
@@ -491,7 +496,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
       :OperatingSystemUtils os,
       :ProcessUtils processUtils,
       :Terminal terminal,
-    ) = _toolContext;
+    ) = toolContext;
     final AppleContext(:PlistParser plistParser, :Xcode xcode) = _appleContext;
 
     final BuildInfo buildInfo = await cachedBuildInfo;
@@ -512,10 +517,10 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
     );
 
     for (final ValidationResult result in validationResults.whereType<ValidationResult>()) {
-      logger.printStatus('\n${result.coloredLeadingBox} ${result.statusInfo}');
+      logger.printStatus('\n${result.coloredLeadingBox(terminal)} ${result.statusInfo}');
       for (final ValidationMessage message in result.messages) {
         logger.printStatus(
-          '${message.coloredIndicator} ${message.message}',
+          '${message.coloredIndicator(terminal)} ${message.message}',
           indent: result.leadingBox.length + 1,
         );
       }
@@ -560,7 +565,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
         // Create XcodeCodeSigningSettings for dependency injection into createExportPlist
         final codeSigningSettings = XcodeCodeSigningSettings.fromContexts(
           appleContext: _appleContext,
-          toolContext: _toolContext,
+          toolContext: toolContext,
         );
         generatedExportPlist = await createExportPlist(
           exportMethod: exportMethod,
@@ -704,7 +709,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
           profileSpecifier,
           codeSigningSettings: codeSigningSettings,
           fileSystem: fileSystem,
-          fileSystemUtils: fileSystemUtils ?? _toolContext.fileSystemUtils,
+          fileSystemUtils: fileSystemUtils ?? toolContext.fileSystemUtils,
         );
 
         if (profileUuid != null) {
@@ -852,7 +857,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
         codeSigningSettings ??
         XcodeCodeSigningSettings.fromContexts(
           appleContext: _appleContext,
-          toolContext: _toolContext,
+          toolContext: toolContext,
         );
 
     // Search for profiles matching the specifier (could be name or UUID)
@@ -904,10 +909,10 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
   _BuildIOSSubCommand({
     required this._appleContext,
     required this._buildSystem,
+    required this._templateRenderer,
     required ToolContext super.toolContext,
     required super.verboseHelp,
-  }) : _toolContext = toolContext,
-       super(logger: toolContext.logger) {
+  }) : super(logger: toolContext.logger) {
     registerOptionBundles(const <OptionBundle>[
       CommonBuildOptionsBundle(),
       BuildModeOptionsBundle(),
@@ -925,7 +930,7 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
 
   final AppleContext _appleContext;
   final BuildSystem _buildSystem;
-  final ToolContext _toolContext;
+  final TemplateRenderer _templateRenderer;
 
   @visibleForTesting
   AppleContext get appleContext => _appleContext;
@@ -935,7 +940,7 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
 
   @visibleForTesting
   @override
-  ToolContext get toolContext => _toolContext;
+  ToolContext get toolContext => super.toolContext!;
 
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => const <DevelopmentArtifact>{
@@ -970,7 +975,7 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
   Directory _outputAppDirectory(String xcodeResultOutput);
 
   @override
-  bool get supported => _toolContext.platform.isMacOS;
+  bool get supported => toolContext.platform.isMacOS;
 
   @override
   Future<FlutterCommandResult> runCommand() async {
@@ -981,9 +986,15 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
       :Logger logger,
       :OperatingSystemUtils os,
       :Platform platform,
+      :ProcessUtils processUtils,
       :Terminal terminal,
-    ) = _toolContext;
-    final AppleContext(:PlistParser plistParser) = _appleContext;
+    ) = toolContext;
+    final AppleContext(
+      :CocoaPods cocoaPods,
+      :PlistParser plistParser,
+      :Xcode xcode,
+      :XcodeProjectInterpreter xcodeProjectInterpreter,
+    ) = _appleContext;
 
     defaultBuildMode = environmentType == EnvironmentType.simulator
         ? BuildMode.debug
@@ -1016,10 +1027,15 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
     });
     final String? specifiedDeviceId =
         globalResults?[FlutterGlobalOptions.kDeviceIdOption] as String? ??
-        _toolContext.platform.environment['FLUTTER_DEVICE_ID'];
+        platform.environment['FLUTTER_DEVICE_ID'];
     final XcodeBuildResult result = await buildXcodeProject(
+      analytics: analytics,
       app: app,
       buildInfo: buildInfo,
+      plistParser: plistParser,
+      templateRenderer: _templateRenderer,
+      toolContext: toolContext,
+      xcodeProjectInterpreter: xcodeProjectInterpreter,
       targetOverride: targetFile,
       environmentType: environmentType,
       codesign: shouldCodesign,
@@ -1030,6 +1046,10 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
           usingCISystem &&
           xcodeBuildAction == XcodeBuildAction.build &&
           await disablePortPublication,
+      verboseLogging:
+          logger.isVerbose || (globalResults?[FlutterGlobalOptions.kVerboseFlag] == true),
+      cocoaPods: cocoaPods,
+      xcode: xcode,
     );
     xcodeBuildResult = result;
 
@@ -1041,6 +1061,8 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
         logger: logger,
         platform: FlutterDarwinPlatform.ios,
         project: app.project.parent,
+        processUtils: processUtils,
+        xcode: xcode,
       );
       final presentParticiple = xcodeBuildAction == XcodeBuildAction.build
           ? 'building'
