@@ -2,11 +2,69 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  testWidgets('Slider can be disabled when a dialog closes', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/193706.
+    var disabled = false;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Scaffold(
+              body: Column(
+                children: <Widget>[
+                  Slider(value: 0.5, onChanged: disabled ? null : (double value) {}),
+                  FilledButton(
+                    onPressed: () async {
+                      final bool? result = await Navigator.of(context).push(
+                        DialogRoute<bool>(
+                          context: context,
+                          builder: (BuildContext context) => AlertDialog(
+                            title: FilledButton(
+                              onPressed: () => Navigator.pop(context, true),
+                              child: const Text('Close'),
+                            ),
+                          ),
+                        ),
+                      );
+                      if (result == true) {
+                        setState(() => disabled = true);
+                      }
+                    },
+                    child: const Text('Show dialog'),
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Show dialog'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Close'));
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+    expect(tester.widget<Slider>(find.byType(Slider)).onChanged, isNull);
+    expect(
+      find.semantics.byValue('50%').evaluate().single,
+      containsSemantics(
+        isSlider: true,
+        hasEnabledState: true,
+        isEnabled: false,
+        hasIncreaseAction: false,
+        hasDecreaseAction: false,
+        value: '50%',
+      ),
+    );
+  }, variant: TargetPlatformVariant.all());
+
   const targetKey = Key('target');
 
   // A page with a semantics boundary, a text with an inline widget span, a
@@ -162,6 +220,53 @@ void main() {
     await tester.pumpAndSettle();
 
     final SemanticsNode target = tester.getSemantics(find.byKey(targetKey));
+    expect(globalSemanticsRect(tester, target), tester.getRect(find.byKey(targetKey)));
+  });
+
+  testWidgets('A blocked subtree can be reparented', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/193706.
+    final GlobalKey targetKey = GlobalKey();
+
+    Widget buildFrame({required bool blocked, required bool wrapped}) {
+      Widget target = SizedBox(
+        key: targetKey,
+        width: 100,
+        height: 20,
+        child: Semantics(container: true, label: 'target'),
+      );
+      if (wrapped) {
+        target = Semantics(container: true, child: target);
+      }
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: Stack(
+          children: <Widget>[
+            Positioned(left: wrapped ? 10 : 30, top: 20, child: target),
+            if (blocked)
+              BlockSemantics(
+                child: Semantics(container: true, label: 'barrier', child: const SizedBox.expand()),
+              ),
+          ],
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame(blocked: false, wrapped: true));
+    expect(find.semantics.byLabel('target'), findsOne);
+    await tester.pumpWidget(buildFrame(blocked: true, wrapped: true));
+    expect(find.semantics.byLabel('target'), findsNothing);
+
+    // Remove a semantics ancestor while its globally keyed child remains blocked.
+    await tester.pumpWidget(buildFrame(blocked: true, wrapped: false));
+    expect(tester.takeException(), isNull);
+    expect(find.semantics.byLabel('target'), findsNothing);
+
+    await tester.pumpWidget(buildFrame(blocked: false, wrapped: false));
+    expect(tester.takeException(), isNull);
+    final SemanticsNode target = find.semantics.byLabel('target').evaluate().single;
+    expect(target.label, 'target');
+    expect(target.isInvisible, isFalse);
+    expect(target.flagsCollection.isHidden, isFalse);
     expect(globalSemanticsRect(tester, target), tester.getRect(find.byKey(targetKey)));
   });
 
