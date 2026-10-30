@@ -1177,10 +1177,12 @@ stay felt's, read from the YAML by suite name at run time. `--check`
 compares the two files as it compares the generated BUILD files. One macro
 call, `web_ui_tests(name = "tests", config = FELT_CONFIG, browsers =
 {...})`, declares everything above: the suites whose run configuration
-names one of the browsers given (Chrome's on every host and Firefox's on a
-Linux host, where CI runs them -- felt on a Mac would run them on a Firefox
-from Mozilla's disk image, which no repository mounts yet; Safari's and
-Edge's need other hosts), the bundles those suites run, one test per file
+names one of the browsers given (Chrome's and Firefox's: Chrome for
+Testing's build for the host, Mozilla's Linux tarball or, on a Mac, its disk
+image mounted with hdiutil as felt installs it -- CI runs the Firefox suites
+on Linux, and on a Mac they are `manual`, run by name, until a Mac's run of
+them is on record; Safari's and Edge's need other hosts), the bundles those
+suites run, one test per file
 and suite -- the test sets' files are globbed from their directories, so a
 new test file is a new target with no edit -- and the suites per browser
 and whole. What the BUILD file still says is this host's: the browsers
@@ -2286,7 +2288,8 @@ reaches under `is_android` or `build_glfw_shell` carry the same condition):
 `bazel test //engine/src/flutter/...` runs 1,345 targets on a Linux x64
 host (1,243 pass, 102 skipped -- Android's, Apple's) and 968 on an
 Apple-silicon Mac (873 pass, 95 skipped -- Android's, iOS's, Linux's; the
-377 Firefox web suites are a Linux host's), in an hour or two from a warm
+377 Firefox web suites are `manual` there until a Mac's run of them is on
+record), in an hour or two from a warm
 cache; `//:framework_tests //:tool_tests //:dart_tests` adds the framework's,
 the tool's and the repository's Dart tests on both (a Mac's `//:tool_tests`
 includes the apple shard and leaves out the Linux desktop shard).
