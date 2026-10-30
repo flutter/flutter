@@ -936,11 +936,13 @@ install(
 
 # mac_android_aot_engine.json: ci/android_profile
 #   bazel run --config=mac_android_profile :mac_android_profile
-# Not built, no Bazel counterpart yet: flutter/lib/snapshot.
 install(
     name = "mac_android_profile",
     testonly = True,
-    contents = ["//engine/src/flutter/shell/platform/android:gen_snapshot"],
+    contents = [
+        "//engine/src/flutter/lib/snapshot:snapshot",
+        "//engine/src/flutter/shell/platform/android:gen_snapshot",
+    ],
     directory = "ci/android_profile",
     target_compatible_with = select({
         "//engine/src/flutter/build/bazel:host_os_is_mac": [],
@@ -950,11 +952,13 @@ install(
 
 # mac_android_aot_engine.json: ci/android_profile_arm64
 #   bazel run --config=mac_android_profile_arm64 :mac_android_profile_arm64
-# Not built, no Bazel counterpart yet: flutter/lib/snapshot.
 install(
     name = "mac_android_profile_arm64",
     testonly = True,
-    contents = ["//engine/src/flutter/shell/platform/android:gen_snapshot"],
+    contents = [
+        "//engine/src/flutter/lib/snapshot:snapshot",
+        "//engine/src/flutter/shell/platform/android:gen_snapshot",
+    ],
     directory = "ci/android_profile_arm64",
     target_compatible_with = select({
         "//engine/src/flutter/build/bazel:host_os_is_mac": [],
@@ -964,11 +968,13 @@ install(
 
 # mac_android_aot_engine.json: ci/android_profile_x64
 #   bazel run --config=mac_android_profile_x64 :mac_android_profile_x64
-# Not built, no Bazel counterpart yet: flutter/lib/snapshot.
 install(
     name = "mac_android_profile_x64",
     testonly = True,
-    contents = ["//engine/src/flutter/shell/platform/android:gen_snapshot"],
+    contents = [
+        "//engine/src/flutter/lib/snapshot:snapshot",
+        "//engine/src/flutter/shell/platform/android:gen_snapshot",
+    ],
     directory = "ci/android_profile_x64",
     target_compatible_with = select({
         "//engine/src/flutter/build/bazel:host_os_is_mac": [],
@@ -978,11 +984,13 @@ install(
 
 # mac_android_aot_engine.json: ci/android_release
 #   bazel run --config=mac_android_release :mac_android_release
-# Not built, no Bazel counterpart yet: flutter/lib/snapshot.
 install(
     name = "mac_android_release",
     testonly = True,
-    contents = ["//engine/src/flutter/shell/platform/android:gen_snapshot"],
+    contents = [
+        "//engine/src/flutter/lib/snapshot:snapshot",
+        "//engine/src/flutter/shell/platform/android:gen_snapshot",
+    ],
     directory = "ci/android_release",
     target_compatible_with = select({
         "//engine/src/flutter/build/bazel:host_os_is_mac": [],
@@ -992,11 +1000,13 @@ install(
 
 # mac_android_aot_engine.json: ci/android_release_arm64
 #   bazel run --config=mac_android_release_arm64 :mac_android_release_arm64
-# Not built, no Bazel counterpart yet: flutter/lib/snapshot.
 install(
     name = "mac_android_release_arm64",
     testonly = True,
-    contents = ["//engine/src/flutter/shell/platform/android:gen_snapshot"],
+    contents = [
+        "//engine/src/flutter/lib/snapshot:snapshot",
+        "//engine/src/flutter/shell/platform/android:gen_snapshot",
+    ],
     directory = "ci/android_release_arm64",
     target_compatible_with = select({
         "//engine/src/flutter/build/bazel:host_os_is_mac": [],
@@ -1006,11 +1016,13 @@ install(
 
 # mac_android_aot_engine.json: ci/android_release_x64
 #   bazel run --config=mac_android_release_x64 :mac_android_release_x64
-# Not built, no Bazel counterpart yet: flutter/lib/snapshot.
 install(
     name = "mac_android_release_x64",
     testonly = True,
-    contents = ["//engine/src/flutter/shell/platform/android:gen_snapshot"],
+    contents = [
+        "//engine/src/flutter/lib/snapshot:snapshot",
+        "//engine/src/flutter/shell/platform/android:gen_snapshot",
+    ],
     directory = "ci/android_release_x64",
     target_compatible_with = select({
         "//engine/src/flutter/build/bazel:host_os_is_mac": [],
