@@ -5,6 +5,7 @@
 import 'package:args/args.dart';
 import 'package:flutter_tools_extension_linux_prototype/flutter_tools_extension_linux_prototype.dart';
 import 'package:meta/meta.dart';
+import 'package:process/process.dart';
 
 import 'runner.dart' as runner;
 import 'src/android/android_workflow.dart' as android_workflow;
@@ -13,6 +14,7 @@ import 'src/base/context.dart';
 import 'src/base/file_system.dart';
 import 'src/base/io.dart';
 import 'src/base/logger.dart';
+import 'src/base/platform.dart';
 import 'src/base/template.dart';
 import 'src/base/terminal.dart';
 import 'src/build_system/build_targets.dart';
@@ -224,151 +226,170 @@ List<FlutterCommand> generateCommands({
   required bool verbose,
   required bool verboseHelp,
   ExtensionTemplateManager? extensionTemplateManager,
-}) => <FlutterCommand>[
-  AnalyzeCommand(
-    allProjectValidators: <ProjectValidator>[
-      GeneralInfoProjectValidator(),
-      VariableDumpMachineProjectValidator(toolContext: toolDependencies.toolContext),
-    ],
-    suppressAnalytics: !toolDependencies.analytics.okToSend,
-    toolContext: toolDependencies.toolContext,
-    verboseHelp: verboseHelp,
-  ),
-  AssembleCommand(
-    buildSystem: toolDependencies.buildSystem,
-    featureFlags: toolDependencies.featureFlags,
-    toolContext: toolDependencies.toolContext,
-    verboseHelp: verboseHelp,
-  ),
-  AttachCommand(
-    buildSystem: toolDependencies.buildSystem,
-    buildTargets: toolDependencies.buildTargets,
-    toolContext: toolDependencies.toolContext,
-    xcode: toolDependencies.appleContext.xcode,
-    verboseHelp: verboseHelp,
-  ),
-  BuildCommand(
-    androidBuilder: AndroidGradleBuilder.fromContexts(
-      analytics: toolDependencies.analytics,
-      androidContext: toolDependencies.androidContext,
-      toolContext: toolDependencies.toolContext,
+}) {
+  final ToolContext toolContext = toolDependencies.toolContext;
+  final ToolContext(
+    :Cache cache,
+    :Logger logger,
+    :TestCompilerNativeAssetsBuilder? nativeAssetsBuilder,
+    :Platform platform,
+    :ProcessManager processManager,
+  ) = toolContext;
+  return <FlutterCommand>[
+    AnalyzeCommand(
+      allProjectValidators: <ProjectValidator>[
+        GeneralInfoProjectValidator(
+          androidContext: toolDependencies.androidContext,
+          logger: logger,
+          processManager: processManager,
+        ),
+        VariableDumpMachineProjectValidator(toolContext: toolContext),
+      ],
+      androidBuilder: AndroidGradleBuilder.fromContexts(
+        analytics: toolDependencies.analytics,
+        androidContext: toolDependencies.androidContext,
+        toolContext: toolContext,
+      ),
+      suppressAnalytics: !toolDependencies.analytics.okToSend,
+      toolContext: toolContext,
+      verboseHelp: verboseHelp,
     ),
-    androidContext: toolDependencies.androidContext,
-    appleContext: toolDependencies.appleContext,
-    buildSystem: toolDependencies.buildSystem,
-    extensionBuildManager: toolDependencies.extensionBuildManager,
-    featureFlags: toolDependencies.featureFlags,
-    templateRenderer: const MustacheTemplateRenderer(),
-    toolContext: toolDependencies.toolContext,
-    verboseHelp: verboseHelp,
-  ),
-  ChannelCommand(verboseHelp: verboseHelp, toolContext: toolDependencies.toolContext),
-  CleanCommand(
-    extensionCleanManager: toolDependencies.extensionCleanManager,
-    verbose: verbose,
-    toolContext: toolDependencies.toolContext,
-    xcode: toolDependencies.appleContext.xcode,
-    xcodeProjectInterpreter: toolDependencies.appleContext.xcodeProjectInterpreter,
-  ),
-  ConfigCommand(
-    verboseHelp: verboseHelp,
-    androidContext: toolDependencies.androidContext,
-    toolContext: toolDependencies.toolContext,
-    featureFlags: featureFlags,
-    extensionManager: toolDependencies.extensionManager,
-  ),
-  CustomDevicesCommand(featureFlags: featureFlags, toolContext: toolDependencies.toolContext),
-  CreateCommand(
-    androidContext: toolDependencies.androidContext,
-    appleContext: toolDependencies.appleContext,
-    templateRenderer: const MustacheTemplateRenderer(),
-    toolContext: toolDependencies.toolContext,
-    extensionTemplateManager: extensionTemplateManager,
-    verboseHelp: verboseHelp,
-  ),
-  DaemonCommand(
-    androidContext: toolDependencies.androidContext,
-    androidWorkflow: android_workflow.androidWorkflow,
-    buildSystem: toolDependencies.buildSystem,
-    buildTargets: toolDependencies.buildTargets,
-    deviceManager: toolDependencies.deviceManager,
-    hidden: !verboseHelp,
-    toolContext: toolDependencies.toolContext,
-    xcode: toolDependencies.appleContext.xcode,
-  ),
-  DebugAdapterCommand(toolContext: toolDependencies.toolContext, verboseHelp: verboseHelp),
-  DevicesCommand(
-    deviceManager: toolDependencies.deviceManager,
-    doctor: globals.doctor!,
-    toolContext: toolDependencies.toolContext,
-    verboseHelp: verboseHelp,
-  ),
-  DoctorCommand(
-    doctor: toolDependencies.doctor,
-    extensionManager: toolDependencies.extensionManager,
-    toolContext: toolDependencies.toolContext,
-    verbose: verbose,
-  ),
-  DowngradeCommand(toolContext: toolDependencies.toolContext, verboseHelp: verboseHelp),
-  DriveCommand(
-    buildSystem: toolDependencies.buildSystem,
-    buildTargets: toolDependencies.buildTargets,
-    toolContext: toolDependencies.toolContext,
-    verboseHelp: verboseHelp,
-  ),
-  EmulatorsCommand(
-    doctor: toolDependencies.doctor,
-    emulatorManager: toolDependencies.emulatorManager,
-    toolContext: toolDependencies.toolContext,
-    verboseHelp: verboseHelp,
-  ),
-  GenerateCommand(toolContext: toolDependencies.toolContext),
-  GenerateLocalizationsCommand(toolContext: toolDependencies.toolContext),
-  InstallCommand(toolContext: toolDependencies.toolContext, verboseHelp: verboseHelp),
-  LogsCommand(toolContext: toolDependencies.toolContext),
-  PackagesCommand(
-    buildSystem: toolDependencies.buildSystem,
-    toolContext: toolDependencies.toolContext,
-    verboseHelp: verboseHelp,
-  ),
-  PrecacheCommand(
-    verboseHelp: verboseHelp,
-    cache: toolDependencies.toolContext.cache,
-    logger: toolDependencies.toolContext.logger,
-    platform: toolDependencies.toolContext.platform,
-    featureFlags: featureFlags,
-  ),
-  RunCommand(
-    appleContext: toolDependencies.appleContext,
-    buildSystem: toolDependencies.buildSystem,
-    buildTargets: toolDependencies.buildTargets,
-    toolContext: toolDependencies.toolContext,
-    androidContext: toolDependencies.androidContext,
-    androidWorkflow: android_workflow.androidWorkflow,
-    deviceManager: toolDependencies.deviceManager,
-    verboseHelp: verboseHelp,
-  ),
-  ScreenshotCommand(toolContext: toolDependencies.toolContext),
-  ShellCompletionCommand(toolContext: toolDependencies.toolContext),
-  TestCommand(
-    templateRenderer: const MustacheTemplateRenderer(),
-    toolContext: toolDependencies.toolContext,
-    verboseHelp: verboseHelp,
-    verbose: verbose,
-    nativeAssetsBuilder: toolDependencies.toolContext.nativeAssetsBuilder,
-  ),
-  WidgetPreviewCommand(
-    buildSystem: toolDependencies.buildSystem,
-    buildTargets: toolDependencies.buildTargets,
-    toolContext: toolDependencies.toolContext,
-    verboseHelp: verboseHelp,
-  ),
-  UpgradeCommand(toolContext: toolDependencies.toolContext, verboseHelp: verboseHelp),
-  SymbolizeCommand(toolContext: toolDependencies.toolContext),
-  // Development-only commands. These are always hidden,
-  IdeConfigCommand(toolContext: toolDependencies.toolContext),
-  UpdatePackagesCommand(toolContext: toolDependencies.toolContext, verboseHelp: verboseHelp),
-];
+    AssembleCommand(
+      buildSystem: toolDependencies.buildSystem,
+      featureFlags: toolDependencies.featureFlags,
+      toolContext: toolContext,
+      verboseHelp: verboseHelp,
+    ),
+    AttachCommand(
+      buildSystem: toolDependencies.buildSystem,
+      buildTargets: toolDependencies.buildTargets,
+      toolContext: toolContext,
+      xcode: toolDependencies.appleContext.xcode,
+      verboseHelp: verboseHelp,
+    ),
+    BuildCommand(
+      androidBuilder: AndroidGradleBuilder.fromContexts(
+        analytics: toolDependencies.analytics,
+        androidContext: toolDependencies.androidContext,
+        toolContext: toolContext,
+      ),
+      androidContext: toolDependencies.androidContext,
+      appleContext: toolDependencies.appleContext,
+      buildSystem: toolDependencies.buildSystem,
+      extensionBuildManager: toolDependencies.extensionBuildManager,
+      featureFlags: toolDependencies.featureFlags,
+      templateRenderer: const MustacheTemplateRenderer(),
+      toolContext: toolContext,
+      verboseHelp: verboseHelp,
+    ),
+    ChannelCommand(verboseHelp: verboseHelp, toolContext: toolContext),
+    CleanCommand(
+      extensionCleanManager: toolDependencies.extensionCleanManager,
+      verbose: verbose,
+      toolContext: toolContext,
+      xcode: toolDependencies.appleContext.xcode,
+      xcodeProjectInterpreter: toolDependencies.appleContext.xcodeProjectInterpreter,
+    ),
+    ConfigCommand(
+      verboseHelp: verboseHelp,
+      androidContext: toolDependencies.androidContext,
+      toolContext: toolContext,
+      featureFlags: featureFlags,
+      extensionManager: toolDependencies.extensionManager,
+    ),
+    CustomDevicesCommand(featureFlags: featureFlags, toolContext: toolContext),
+    CreateCommand(
+      androidContext: toolDependencies.androidContext,
+      appleContext: toolDependencies.appleContext,
+      templateRenderer: const MustacheTemplateRenderer(),
+      toolContext: toolContext,
+      extensionTemplateManager: extensionTemplateManager,
+      verboseHelp: verboseHelp,
+    ),
+    DaemonCommand(
+      androidContext: toolDependencies.androidContext,
+      androidWorkflow: android_workflow.androidWorkflow,
+      buildSystem: toolDependencies.buildSystem,
+      buildTargets: toolDependencies.buildTargets,
+      deviceManager: toolDependencies.deviceManager,
+      hidden: !verboseHelp,
+      toolContext: toolContext,
+      xcode: toolDependencies.appleContext.xcode,
+    ),
+    DebugAdapterCommand(toolContext: toolContext, verboseHelp: verboseHelp),
+    DevicesCommand(
+      deviceManager: toolDependencies.deviceManager,
+      doctor: toolDependencies.doctor,
+      toolContext: toolContext,
+      verboseHelp: verboseHelp,
+    ),
+    DoctorCommand(
+      doctor: toolDependencies.doctor,
+      extensionManager: toolDependencies.extensionManager,
+      toolContext: toolContext,
+      verbose: verbose,
+    ),
+    DowngradeCommand(toolContext: toolContext, verboseHelp: verboseHelp),
+    DriveCommand(
+      buildSystem: toolDependencies.buildSystem,
+      buildTargets: toolDependencies.buildTargets,
+      toolContext: toolContext,
+      verboseHelp: verboseHelp,
+    ),
+    EmulatorsCommand(
+      doctor: toolDependencies.doctor,
+      emulatorManager: toolDependencies.emulatorManager,
+      toolContext: toolContext,
+      verboseHelp: verboseHelp,
+    ),
+    GenerateCommand(toolContext: toolContext),
+    GenerateLocalizationsCommand(toolContext: toolContext),
+    InstallCommand(toolContext: toolContext, verboseHelp: verboseHelp),
+    LogsCommand(toolContext: toolContext),
+    PackagesCommand(
+      buildSystem: toolDependencies.buildSystem,
+      toolContext: toolContext,
+      verboseHelp: verboseHelp,
+    ),
+    PrecacheCommand(
+      verboseHelp: verboseHelp,
+      cache: cache,
+      logger: logger,
+      platform: platform,
+      featureFlags: featureFlags,
+    ),
+    RunCommand(
+      appleContext: toolDependencies.appleContext,
+      buildSystem: toolDependencies.buildSystem,
+      buildTargets: toolDependencies.buildTargets,
+      toolContext: toolContext,
+      androidContext: toolDependencies.androidContext,
+      androidWorkflow: android_workflow.androidWorkflow,
+      deviceManager: toolDependencies.deviceManager,
+      verboseHelp: verboseHelp,
+    ),
+    ScreenshotCommand(toolContext: toolContext),
+    ShellCompletionCommand(toolContext: toolContext),
+    TestCommand(
+      templateRenderer: const MustacheTemplateRenderer(),
+      toolContext: toolContext,
+      verboseHelp: verboseHelp,
+      verbose: verbose,
+      nativeAssetsBuilder: nativeAssetsBuilder,
+    ),
+    WidgetPreviewCommand(
+      buildSystem: toolDependencies.buildSystem,
+      buildTargets: toolDependencies.buildTargets,
+      toolContext: toolContext,
+      verboseHelp: verboseHelp,
+    ),
+    UpgradeCommand(toolContext: toolContext, verboseHelp: verboseHelp),
+    SymbolizeCommand(toolContext: toolContext),
+    // Development-only commands. These are always hidden,
+    IdeConfigCommand(toolContext: toolContext),
+    UpdatePackagesCommand(toolContext: toolContext, verboseHelp: verboseHelp),
+  ];
+}
 
 /// An abstraction for instantiation of the correct logger type.
 ///

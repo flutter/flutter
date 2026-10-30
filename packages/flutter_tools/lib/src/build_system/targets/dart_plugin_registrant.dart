@@ -35,7 +35,9 @@ class DartPluginRegistrantTarget extends Target {
   @override
   Future<void> build(Environment environment) async {
     assert(environment.generateDartPluginRegistry);
-    final FlutterProject project = _project ?? FlutterProject.fromDirectory(environment.projectDir);
+    final FlutterProject project =
+        _project ??
+        FlutterProject.fromDirectory(environment.projectDir, logger: environment.logger);
     final File packageConfigFile = findPackageConfigFileOrDefault(environment.projectDir);
     final PackageConfig packageConfig = await loadPackageConfigWithLogging(
       packageConfigFile,

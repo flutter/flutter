@@ -315,7 +315,7 @@ void main() {
         ),
         platform: platform,
         processManager: loggingProcessManager,
-        projectFactory: FlutterProjectFactory(logger: logger, fileSystem: fs),
+        projectFactory: FlutterProjectFactory(logger: logger, fileSystem: fs, config: FakeConfig()),
         shutdownHooks: shutdownHooks,
         terminal: FakeTerminal(),
       ),
@@ -380,6 +380,7 @@ void main() {
     final FlutterProject project = FlutterProjectFactory(
       logger: logger,
       fileSystem: fs,
+      config: FakeConfig(),
     ).fromDirectory(projectDir);
     final Directory scaffoldDir = (project.workspaceRoot ?? project).widgetPreviewScaffold;
     await analyzeProject(scaffoldDir.path);

@@ -81,10 +81,9 @@ environement:
   sdk: '^3.5.0'
 ''');
 
-    // This needs to be run within testWithoutContext and not setUp since FlutterProject uses context.
-    final FlutterProject projectUnderTest = FlutterProject.fromDirectory(
-      fileSystem.directory('project'),
-    );
+    // This needs to be run within testUsingContext and not setUp since FlutterProjectFactory uses context.
+    final FlutterProject projectUnderTest = const DelegatingToolContext().projectFactory
+        .fromDirectory(fileSystem.directory('project'));
     writePackageConfigFiles(directory: projectUnderTest.directory, mainLibName: 'my_app');
     projectUnderTest.ios.xcodeProject.createSync(recursive: true);
     projectUnderTest.macos.xcodeProject.createSync(recursive: true);

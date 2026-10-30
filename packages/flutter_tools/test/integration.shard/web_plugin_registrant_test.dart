@@ -307,7 +307,7 @@ Future<void> _createProject(Directory dir, List<String> createArgs) async {
         processManager: processManager,
       ),
       flutterVersion: FakeFlutterVersion(),
-      projectFactory: FlutterProjectFactory(fileSystem: fs, logger: logger),
+      projectFactory: FlutterProjectFactory(fileSystem: fs, logger: logger, config: FakeConfig()),
     ),
   );
   final CommandRunner<void> runner = createTestCommandRunner(command);
