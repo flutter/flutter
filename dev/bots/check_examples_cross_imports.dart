@@ -626,8 +626,6 @@ class ExamplesCrossImportChecker {
     'examples/platform_channel/lib/main.dart',
     'examples/platform_channel_swift/lib/main.dart',
     'examples/platform_view/lib/main.dart',
-    'examples/splash/lib/main.dart',
-    'examples/splash/test/splash_test.dart',
     'examples/texture/lib/main.dart',
   };
 
