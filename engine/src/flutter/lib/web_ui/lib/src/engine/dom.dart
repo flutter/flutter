@@ -1009,6 +1009,9 @@ DomHTMLCanvasElement createDomCanvasElement({int? width, int? height}) {
 extension type WebGLContext._(JSObject _) implements JSObject {
   external int getParameter(int value);
 
+  external int get drawingBufferWidth;
+  external int get drawingBufferHeight;
+
   @JS('SAMPLES')
   external int get samples;
 
