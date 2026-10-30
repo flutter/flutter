@@ -618,7 +618,12 @@ const Map<String, String> fileRepositoryPrefixes = <String, String>{
   // The Android SDK and NDK (the files the overlay exports: android.jar, the
   // build tools' jars).
   '//flutter/third_party/android_tools/': '@android_tools//',
-  // The JDK, whose javac and jar the Android embedding's actions run.
+  // The JDK, whose javac and jar the Android embedding's actions run. A
+  // Mac's package is a bundle with the JDK under Contents/Home/ (GN's
+  // paths spell it out per host), where the repository is rooted on a Mac
+  // (synced_deps' mac_subdir): a file under it is the repository's, as a
+  // Linux host's is -- the two hosts' branches name one label.
+  '//flutter/third_party/java/openjdk/Contents/Home/': '@openjdk//',
   '//flutter/third_party/java/openjdk/': '@openjdk//',
   // The embedding's compile-time dependencies (the AndroidX jars), its
   // classpath.
@@ -1775,6 +1780,11 @@ const Map<String, String> buildOutputLabels = <String, String>{
   // compile reads).
   '//@out/gen/flutter/shell/platform/android/flutter/third_party/icu/flutter/icudtl.dat.S':
       '//engine/src/flutter/shell/platform/android:icudtl_asm',
+  // A Mac host's gen_snapshot for an Android target: the universal binary
+  // lib/snapshot's create_macos_gen_snapshots joins (the Android shell's
+  // gen_snapshot archive under `host_os == "mac"`, build/bazel/README's
+  // Android section).
+  '//@out/universal/gen_snapshot': '//engine/src/flutter/lib/snapshot:create_macos_gen_snapshots',
   // //flutter/lib/snapshot (hand-written): the core snapshot and the
   // platform kernels.
   '//@gen/flutter/lib/snapshot/isolate_snapshot.bin':
