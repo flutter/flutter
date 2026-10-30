@@ -20,6 +20,7 @@ import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
 import '../../src/package_config.dart';
 
@@ -245,6 +246,10 @@ void main() {
 
   testWithoutContext('supports screenshot and screen recording', () async {
     final device = MacOSDevice(
+      analytics: const NoOpAnalytics(),
+      appleContext: FakeAppleContext(),
+      featureFlags: TestFeatureFlags(),
+      templateRenderer: FakeTemplateRenderer(),
       toolContext: FakeToolContext(
         fs: MemoryFileSystem.test(),
         logger: BufferLogger.test(),
@@ -264,6 +269,10 @@ void main() {
       FakeCommand(command: <String>['screencapture', '-x', outputFile.path]),
     ]);
     final device = MacOSDevice(
+      analytics: const NoOpAnalytics(),
+      appleContext: FakeAppleContext(),
+      featureFlags: TestFeatureFlags(),
+      templateRenderer: FakeTemplateRenderer(),
       toolContext: FakeToolContext(
         fs: fileSystem,
         logger: BufferLogger.test(),
@@ -287,6 +296,10 @@ void main() {
       ),
     ]);
     final device = MacOSDevice(
+      analytics: const NoOpAnalytics(),
+      appleContext: FakeAppleContext(),
+      featureFlags: TestFeatureFlags(),
+      templateRenderer: FakeTemplateRenderer(),
       toolContext: FakeToolContext(
         fs: fileSystem,
         logger: BufferLogger.test(),
@@ -310,6 +323,10 @@ void main() {
         FakeCommand(command: <String>['screencapture', '-v', outputFile.path]),
       ]);
       final device = MacOSDevice(
+        analytics: const NoOpAnalytics(),
+        appleContext: FakeAppleContext(),
+        featureFlags: TestFeatureFlags(),
+        templateRenderer: FakeTemplateRenderer(),
         toolContext: FakeToolContext(
           fs: fileSystem,
           logger: BufferLogger.test(),
@@ -331,6 +348,10 @@ void main() {
       FakeCommand(command: <String>['screencapture', '-v', '-V', '10', outputFile.path]),
     ]);
     final device = MacOSDevice(
+      analytics: const NoOpAnalytics(),
+      appleContext: FakeAppleContext(),
+      featureFlags: TestFeatureFlags(),
+      templateRenderer: FakeTemplateRenderer(),
       toolContext: FakeToolContext(
         fs: fileSystem,
         logger: BufferLogger.test(),
@@ -358,6 +379,10 @@ void main() {
       ),
     ]);
     final device = MacOSDevice(
+      analytics: const NoOpAnalytics(),
+      appleContext: FakeAppleContext(),
+      featureFlags: TestFeatureFlags(),
+      templateRenderer: FakeTemplateRenderer(),
       toolContext: FakeToolContext(
         fs: fileSystem,
         logger: BufferLogger.test(),
