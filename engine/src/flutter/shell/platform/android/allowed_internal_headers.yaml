@@ -1,0 +1,12 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+#
+# JSON-compatible YAML baseline for the 3-Layer Dependency Ratchet (ADR-0010).
+{
+  "allowed_legacy_files": {},
+  "allowed_unique_headers": [],
+  "governing_adr": "ADR-0010",
+  "rfc": "RFC-410.0000",
+  "total_allowed_internal_headers": 0
+}

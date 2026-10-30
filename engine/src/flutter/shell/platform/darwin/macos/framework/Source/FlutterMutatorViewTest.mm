@@ -584,6 +584,48 @@ TEST(FlutterMutatorViewTest, ReparentingPlatformView) {
   EXPECT_TRUE(CGRectEqualToRect(placeholderView.frame, CGRectMake(0, 0, 100, 100)));
 }
 
+TEST(FlutterMutatorViewTest, IgnoresClipPathMutations) {
+  // Unscaled logical dimensions of the test platform view.
+  constexpr double kViewWidth = 100.0;
+  constexpr double kViewHeight = 100.0;
+  // Identity scale factor for transformation matrix.
+  constexpr double kIdentityScale = 1.0;
+  // Horizontal and vertical translation offsets in logical points.
+  constexpr double kTranslateX = 25.0;
+  constexpr double kTranslateY = 40.0;
+  // Expected path clip view count when only a clip-path mutation is present.
+  constexpr unsigned long kExpectedPathClipViewCount = 0ul;
+
+  NSView* platformView = [[NSView alloc] init];
+  FlutterMutatorView* mutatorView = [[FlutterMutatorView alloc] initWithPlatformView:platformView];
+
+  std::vector<FlutterPlatformViewMutation> mutations{
+      {
+          .type = kFlutterPlatformViewMutationTypeClipPath,
+          .clip_path =
+              FlutterPath{
+                  .struct_size = sizeof(FlutterPath),
+                  .fill_type = kFlutterPathFillTypeNonZero,
+              },
+      },
+      {
+          .type = kFlutterPlatformViewMutationTypeTransformation,
+          .transformation =
+              FlutterTransformation{
+                  .scaleX = kIdentityScale,
+                  .transX = kTranslateX,
+                  .scaleY = kIdentityScale,
+                  .transY = kTranslateY,
+              },
+      },
+  };
+
+  ApplyFlutterLayer(mutatorView, FlutterSize{kViewWidth, kViewHeight}, mutations);
+  EXPECT_TRUE(CGRectEqualToRect(mutatorView.frame,
+                                CGRectMake(kTranslateX, kTranslateY, kViewWidth, kViewHeight)));
+  EXPECT_EQ(mutatorView.pathClipViews.count, kExpectedPathClipViewCount);
+}
+
 @interface FlutterCursorCoordinatorTest : NSObject
 
 @end

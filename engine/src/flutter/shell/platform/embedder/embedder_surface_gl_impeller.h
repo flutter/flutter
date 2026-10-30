@@ -22,6 +22,8 @@ namespace testing {
 FML_TEST_CLASS(EmbedderSurfaceGLImpellerTest, GLES3ContextHasGLES3Shaders);
 FML_TEST_CLASS(EmbedderSurfaceGLImpellerTest,
                GLES2ContextDoesNotHaveGLES3Shaders);
+FML_TEST_CLASS(EmbedderSurfaceGLImpellerTest,
+               DefersContextCreationUntilSetupImpellerContext);
 }  // namespace testing
 
 class ReactorWorker;
@@ -34,21 +36,29 @@ class EmbedderSurfaceGLImpeller final : public EmbedderSurface,
       bool fbo_reset_after_present,
       std::shared_ptr<EmbedderExternalViewEmbedder> external_view_embedder,
       std::shared_ptr<fml::BasicTaskRunner> io_task_runner,
-      impeller::Flags impeller_flags = {});
+      impeller::Flags impeller_flags = {},
+      std::shared_ptr<impeller::Context> shared_context = nullptr);
 
   ~EmbedderSurfaceGLImpeller() override;
+
+  void SetupImpellerContext();
 
  private:
   FML_FRIEND_TEST(testing::EmbedderSurfaceGLImpellerTest,
                   GLES3ContextHasGLES3Shaders);
   FML_FRIEND_TEST(testing::EmbedderSurfaceGLImpellerTest,
                   GLES2ContextDoesNotHaveGLES3Shaders);
+  FML_FRIEND_TEST(testing::EmbedderSurfaceGLImpellerTest,
+                  DefersContextCreationUntilSetupImpellerContext);
   bool valid_ = false;
   EmbedderSurfaceGLSkia::GLDispatchTable gl_dispatch_table_;
   bool fbo_reset_after_present_;
   std::shared_ptr<impeller::ContextGLES> impeller_context_;
   std::shared_ptr<EmbedderExternalViewEmbedder> external_view_embedder_;
   std::shared_ptr<ReactorWorker> worker_;
+  std::shared_ptr<fml::BasicTaskRunner> io_task_runner_;
+  impeller::Flags impeller_flags_;
+  bool context_initialized_ = false;
 
   // |EmbedderSurface|
   bool IsValid() const override;

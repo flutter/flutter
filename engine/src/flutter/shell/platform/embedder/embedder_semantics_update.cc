@@ -32,6 +32,7 @@ FlutterTristate ToFlutterTristate(flutter::SemanticsTristate state) {
 std::unique_ptr<FlutterSemanticsFlags> ConvertToFlutterSemanticsFlags(
     const flutter::SemanticsFlags& source) {
   return std::make_unique<FlutterSemanticsFlags>(FlutterSemanticsFlags{
+      .struct_size = sizeof(FlutterSemanticsFlags),
       .is_checked = ToFlutterCheckState(source.isChecked),
       .is_selected = ToFlutterTristate(source.isSelected),
       .is_enabled = ToFlutterTristate(source.isEnabled),
@@ -57,6 +58,84 @@ std::unique_ptr<FlutterSemanticsFlags> ConvertToFlutterSemanticsFlags(
       .is_keyboard_key = source.isKeyboardKey,
       .is_accessibility_focus_blocked = source.isAccessibilityFocusBlocked,
   });
+}
+
+FlutterSemanticsRole ToFlutterSemanticsRole(flutter::SemanticsRole role) {
+  switch (role) {
+    case flutter::SemanticsRole::kNone:
+      return kFlutterSemanticsRoleNone;
+    case flutter::SemanticsRole::kTab:
+      return kFlutterSemanticsRoleTab;
+    case flutter::SemanticsRole::kTabBar:
+      return kFlutterSemanticsRoleTabBar;
+    case flutter::SemanticsRole::kTabPanel:
+      return kFlutterSemanticsRoleTabPanel;
+    case flutter::SemanticsRole::kDialog:
+      return kFlutterSemanticsRoleDialog;
+    case flutter::SemanticsRole::kAlertDialog:
+      return kFlutterSemanticsRoleAlertDialog;
+    case flutter::SemanticsRole::kTable:
+      return kFlutterSemanticsRoleTable;
+    case flutter::SemanticsRole::kCell:
+      return kFlutterSemanticsRoleCell;
+    case flutter::SemanticsRole::kRow:
+      return kFlutterSemanticsRoleRow;
+    case flutter::SemanticsRole::kColumnHeader:
+      return kFlutterSemanticsRoleColumnHeader;
+    case flutter::SemanticsRole::kDragHandle:
+      return kFlutterSemanticsRoleDragHandle;
+    case flutter::SemanticsRole::kSpinButton:
+      return kFlutterSemanticsRoleSpinButton;
+    case flutter::SemanticsRole::kComboBox:
+      return kFlutterSemanticsRoleComboBox;
+    case flutter::SemanticsRole::kMenuBar:
+      return kFlutterSemanticsRoleMenuBar;
+    case flutter::SemanticsRole::kMenu:
+      return kFlutterSemanticsRoleMenu;
+    case flutter::SemanticsRole::kMenuItem:
+      return kFlutterSemanticsRoleMenuItem;
+    case flutter::SemanticsRole::kMenuItemCheckbox:
+      return kFlutterSemanticsRoleMenuItemCheckbox;
+    case flutter::SemanticsRole::kMenuItemRadio:
+      return kFlutterSemanticsRoleMenuItemRadio;
+    case flutter::SemanticsRole::kList:
+      return kFlutterSemanticsRoleList;
+    case flutter::SemanticsRole::kListItem:
+      return kFlutterSemanticsRoleListItem;
+    case flutter::SemanticsRole::kForm:
+      return kFlutterSemanticsRoleForm;
+    case flutter::SemanticsRole::kTooltip:
+      return kFlutterSemanticsRoleTooltip;
+    case flutter::SemanticsRole::kLoadingSpinner:
+      return kFlutterSemanticsRoleLoadingSpinner;
+    case flutter::SemanticsRole::kProgressBar:
+      return kFlutterSemanticsRoleProgressBar;
+    case flutter::SemanticsRole::kHotKey:
+      return kFlutterSemanticsRoleHotKey;
+    case flutter::SemanticsRole::kRadioGroup:
+      return kFlutterSemanticsRoleRadioGroup;
+    case flutter::SemanticsRole::kStatus:
+      return kFlutterSemanticsRoleStatus;
+    case flutter::SemanticsRole::kAlert:
+      return kFlutterSemanticsRoleAlert;
+    case flutter::SemanticsRole::kComplementary:
+      return kFlutterSemanticsRoleComplementary;
+    case flutter::SemanticsRole::kContentInfo:
+      return kFlutterSemanticsRoleContentInfo;
+    case flutter::SemanticsRole::kMain:
+      return kFlutterSemanticsRoleMain;
+    case flutter::SemanticsRole::kNavigation:
+      return kFlutterSemanticsRoleNavigation;
+    case flutter::SemanticsRole::kRegion:
+      return kFlutterSemanticsRoleRegion;
+    case flutter::SemanticsRole::kSlider:
+      return kFlutterSemanticsRoleSlider;
+    case flutter::SemanticsRole::kListBox:
+      return kFlutterSemanticsRoleListBox;
+    case flutter::SemanticsRole::kOption:
+      return kFlutterSemanticsRoleOption;
+  }
+  return kFlutterSemanticsRoleNone;
 }
 
 }  // namespace
@@ -291,6 +370,17 @@ void EmbedderSemanticsUpdate2::AddNode(const SemanticsNode& node) {
       transform.get(SkMatrix::kMScaleY), transform.get(SkMatrix::kMTransY),
       transform.get(SkMatrix::kMPersp0), transform.get(SkMatrix::kMPersp1),
       transform.get(SkMatrix::kMPersp2)};
+  SkMatrix hit_test_transform = node.hitTestTransform.asM33();
+  FlutterTransformation flutter_hit_test_transform{
+      hit_test_transform.get(SkMatrix::kMScaleX),
+      hit_test_transform.get(SkMatrix::kMSkewX),
+      hit_test_transform.get(SkMatrix::kMTransX),
+      hit_test_transform.get(SkMatrix::kMSkewY),
+      hit_test_transform.get(SkMatrix::kMScaleY),
+      hit_test_transform.get(SkMatrix::kMTransY),
+      hit_test_transform.get(SkMatrix::kMPersp0),
+      hit_test_transform.get(SkMatrix::kMPersp1),
+      hit_test_transform.get(SkMatrix::kMPersp2)};
 
   auto label_attributes = CreateStringAttributes(node.labelAttributes);
   auto hint_attributes = CreateStringAttributes(node.hintAttributes);
@@ -344,6 +434,15 @@ void EmbedderSemanticsUpdate2::AddNode(const SemanticsNode& node) {
       flags_.back().get(),
       node.headingLevel,
       node.identifier.c_str(),
+      node.maxValueLength,
+      node.currentValueLength,
+      node.linkUrl.c_str(),
+      node.locale.c_str(),
+      node.minValue.c_str(),
+      node.maxValue.c_str(),
+      flutter_hit_test_transform,
+      ToFlutterSemanticsRole(node.role),
+      node.childrenInHitTestOrder.size(),
   });
 }
 
@@ -399,7 +498,7 @@ EmbedderSemanticsUpdate2::CreateStringAttributes(
         // All spell out attributes are identical and share a lazily created
         // instance.
         if (!spell_out_attribute_) {
-          auto spell_out_attribute_ =
+          spell_out_attribute_ =
               std::make_unique<FlutterSpellOutStringAttribute>();
           spell_out_attribute_->struct_size =
               sizeof(FlutterSpellOutStringAttribute);

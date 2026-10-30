@@ -17,7 +17,9 @@ import android.media.Image;
 import android.media.ImageReader;
 import android.os.Build;
 import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.Looper;
+import android.view.PixelCopy;
 import android.view.Surface;
 import androidx.annotation.Keep;
 import androidx.annotation.NonNull;
@@ -37,6 +39,9 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -93,9 +98,16 @@ public class FlutterRenderer implements TextureRegistry {
 
   private static final String TAG = "FlutterRenderer";
 
+  // Maximum time in milliseconds to wait for an asynchronous PixelCopy request to complete.
+  private static final long PIXEL_COPY_TIMEOUT_MS = 1000L;
+  // Single completion event count for the PixelCopy synchronization latch.
+  private static final int PIXEL_COPY_LATCH_COUNT = 1;
+
   @NonNull private final FlutterJNI flutterJNI;
   @NonNull private final AtomicLong nextTextureId = new AtomicLong(0L);
   @Nullable private Surface surface;
+  private int surfaceWidth = 0;
+  private int surfaceHeight = 0;
   private boolean isDisplayingFlutterUi = false;
   private final Handler handler = new Handler();
 
@@ -1180,6 +1192,8 @@ public class FlutterRenderer implements TextureRegistry {
    * android.view.TextureView.SurfaceTextureListener}
    */
   public void surfaceChanged(int width, int height) {
+    this.surfaceWidth = width;
+    this.surfaceHeight = height;
     flutterJNI.onSurfaceChanged(width, height);
   }
 
@@ -1228,6 +1242,12 @@ public class FlutterRenderer implements TextureRegistry {
     // Just ignore, as it will get called again when width/height are set.
     if (!viewportMetrics.validate()) {
       return;
+    }
+    if (viewportMetrics.width > 0) {
+      this.surfaceWidth = viewportMetrics.width;
+    }
+    if (viewportMetrics.height > 0) {
+      this.surfaceHeight = viewportMetrics.height;
     }
     Log.v(
         TAG,
@@ -1339,8 +1359,58 @@ public class FlutterRenderer implements TextureRegistry {
         viewportMetrics.displayCornerRadiusBottomLeft);
   }
 
+  @Nullable
   public Bitmap getBitmap() {
-    return flutterJNI.getBitmap();
+    final Surface currentSurface = this.surface;
+    final int width = this.surfaceWidth;
+    final int height = this.surfaceHeight;
+    if (currentSurface == null || !currentSurface.isValid() || width <= 0 || height <= 0) {
+      return null;
+    }
+
+    final Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+    final CountDownLatch latch = new CountDownLatch(PIXEL_COPY_LATCH_COUNT);
+    final AtomicInteger copyResult = new AtomicInteger(PixelCopy.ERROR_UNKNOWN);
+    final HandlerThread handlerThread = new HandlerThread("FlutterRendererPixelCopy");
+    handlerThread.start();
+    try {
+      final Handler callbackHandler = new Handler(handlerThread.getLooper());
+      requestPixelCopy(
+          currentSurface,
+          bitmap,
+          result -> {
+            copyResult.set(result);
+            latch.countDown();
+          },
+          callbackHandler);
+      if (!latch.await(PIXEL_COPY_TIMEOUT_MS, TimeUnit.MILLISECONDS)) {
+        Log.w(TAG, "Timed out waiting for PixelCopy to complete.");
+        return null;
+      }
+      if (copyResult.get() != PixelCopy.SUCCESS) {
+        Log.w(TAG, "PixelCopy failed with result code: " + copyResult.get());
+        return null;
+      }
+      return bitmap;
+    } catch (IllegalArgumentException e) {
+      Log.w(TAG, "Failed to copy pixels from Surface.", e);
+      return null;
+    } catch (InterruptedException e) {
+      Thread.currentThread().interrupt();
+      Log.w(TAG, "Interrupted while waiting for PixelCopy.", e);
+      return null;
+    } finally {
+      handlerThread.quitSafely();
+    }
+  }
+
+  @VisibleForTesting
+  /* package */ void requestPixelCopy(
+      @NonNull Surface source,
+      @NonNull Bitmap dest,
+      @NonNull PixelCopy.OnPixelCopyFinishedListener listener,
+      @NonNull Handler listenerThread) {
+    PixelCopy.request(source, dest, listener, listenerThread);
   }
 
   public void dispatchPointerDataPacket(@NonNull ByteBuffer buffer, int position) {

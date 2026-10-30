@@ -11,10 +11,12 @@
 #if IMPELLER_SUPPORTS_RENDERING
 #include "impeller/renderer/backend/vulkan/context_vk.h"         // nogncheck
 #include "impeller/renderer/backend/vulkan/texture_source_vk.h"  // nogncheck
+#include "impeller/renderer/backend/vulkan/texture_vk.h"         // nogncheck
 #include "impeller/renderer/backend/vulkan/vk.h"                 // nogncheck
 #include "impeller/renderer/backend/vulkan/yuv_conversion_vk.h"  // nogncheck
 #endif  // IMPELLER_SUPPORTS_RENDERING
 #include "third_party/skia/include/core/SkSize.h"
+#include "third_party/skia/include/gpu/ganesh/vk/GrVkTypes.h"
 
 namespace flutter {
 
@@ -90,6 +92,11 @@ class EmbedderExternalTextureVulkan : public flutter::Texture {
   const ExternalTextureCallback& external_texture_callback_;
 
   sk_sp<DlImage> last_image_;
+  VkImage last_vk_image_ = VK_NULL_HANDLE;
+#if IMPELLER_SUPPORTS_RENDERING
+  std::shared_ptr<impeller::TextureVK> last_impeller_texture_;
+#endif  // IMPELLER_SUPPORTS_RENDERING
+  bool new_frame_available_ = true;
 
   sk_sp<DlImage> ResolveTexture(int64_t texture_id,
                                 GrDirectContext* context,

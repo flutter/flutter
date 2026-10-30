@@ -95,10 +95,11 @@ CreateEmbedderTaskRunner(const FlutterTaskRunnerDescription* description) {
 std::unique_ptr<EmbedderThreadHost>
 EmbedderThreadHost::CreateEmbedderOrEngineManagedThreadHost(
     const FlutterCustomTaskRunners* custom_task_runners,
-    const flutter::ThreadConfigSetter& config_setter) {
+    const flutter::ThreadConfigSetter& config_setter,
+    bool merge_platform_and_ui_thread) {
   {
-    auto host =
-        CreateEmbedderManagedThreadHost(custom_task_runners, config_setter);
+    auto host = CreateEmbedderManagedThreadHost(
+        custom_task_runners, config_setter, merge_platform_and_ui_thread);
     if (host && host->IsValid()) {
       return host;
     }
@@ -109,7 +110,8 @@ EmbedderThreadHost::CreateEmbedderOrEngineManagedThreadHost(
   // configuration if the embedder attempted to specify a configuration but
   // messed up with an incorrect configuration.
   if (custom_task_runners == nullptr) {
-    auto host = CreateEngineManagedThreadHost(config_setter);
+    auto host = CreateEngineManagedThreadHost(config_setter,
+                                              merge_platform_and_ui_thread);
     if (host && host->IsValid()) {
       return host;
     }
@@ -138,7 +140,8 @@ fml::Thread::ThreadConfig MakeThreadConfig(
 std::unique_ptr<EmbedderThreadHost>
 EmbedderThreadHost::CreateEmbedderManagedThreadHost(
     const FlutterCustomTaskRunners* custom_task_runners,
-    const flutter::ThreadConfigSetter& config_setter) {
+    const flutter::ThreadConfigSetter& config_setter,
+    bool merge_platform_and_ui_thread) {
   if (custom_task_runners == nullptr) {
     return nullptr;
   }
@@ -166,8 +169,9 @@ EmbedderThreadHost::CreateEmbedderManagedThreadHost(
     return nullptr;
   }
 
-  // If the embedder has not supplied a UI task runner, one needs to be created.
-  if (!ui_task_runner_pair.second) {
+  // If the embedder has not supplied a UI task runner and platform/UI thread
+  // merging is not enabled, a dedicated UI thread needs to be created.
+  if (!ui_task_runner_pair.second && !merge_platform_and_ui_thread) {
     thread_host_config.SetUIConfig(MakeThreadConfig(
         ThreadHost::Type::kUi, fml::Thread::ThreadPriority::kDisplay));
   }
@@ -218,7 +222,9 @@ EmbedderThreadHost::CreateEmbedderManagedThreadHost(
   auto ui_task_runner = ui_task_runner_pair.second
                             ? static_cast<fml::RefPtr<fml::TaskRunner>>(
                                   ui_task_runner_pair.second)
-                            : thread_host.ui_thread->GetTaskRunner();
+                            : (merge_platform_and_ui_thread
+                                   ? platform_task_runner
+                                   : thread_host.ui_thread->GetTaskRunner());
 
   flutter::TaskRunners task_runners(
       kFlutterThreadName,
@@ -261,11 +267,14 @@ EmbedderThreadHost::CreateEmbedderManagedThreadHost(
 // static
 std::unique_ptr<EmbedderThreadHost>
 EmbedderThreadHost::CreateEngineManagedThreadHost(
-    const flutter::ThreadConfigSetter& config_setter) {
-  // Crate a thraed host config, and specified the thread name and priority.
+    const flutter::ThreadConfigSetter& config_setter,
+    bool merge_platform_and_ui_thread) {
+  // Create a thread host config, and specify the thread name and priority.
   auto thread_host_config = ThreadHost::ThreadHostConfig(config_setter);
-  thread_host_config.SetUIConfig(MakeThreadConfig(
-      flutter::ThreadHost::kUi, fml::Thread::ThreadPriority::kDisplay));
+  if (!merge_platform_and_ui_thread) {
+    thread_host_config.SetUIConfig(MakeThreadConfig(
+        flutter::ThreadHost::kUi, fml::Thread::ThreadPriority::kDisplay));
+  }
   thread_host_config.SetRasterConfig(MakeThreadConfig(
       flutter::ThreadHost::kRaster, fml::Thread::ThreadPriority::kRaster));
   thread_host_config.SetIOConfig(MakeThreadConfig(
@@ -279,12 +288,15 @@ EmbedderThreadHost::CreateEngineManagedThreadHost(
   // will reference a task runner that points to a null message loop
   // implementation.
   auto platform_task_runner = GetCurrentThreadTaskRunner();
+  auto ui_task_runner = merge_platform_and_ui_thread
+                            ? platform_task_runner
+                            : thread_host.ui_thread->GetTaskRunner();
 
   flutter::TaskRunners task_runners(
       kFlutterThreadName,
       platform_task_runner,                        // platform
       thread_host.raster_thread->GetTaskRunner(),  // raster
-      thread_host.ui_thread->GetTaskRunner(),      // ui
+      ui_task_runner,                              // ui
       thread_host.io_thread->GetTaskRunner()       // io
   );
 
@@ -344,7 +356,8 @@ bool EmbedderThreadHost::PostTask(intptr_t runner, uint64_t task) const {
   if (found == runners_map_.end()) {
     return false;
   }
-  return found->second->PostTask(task);
+  fml::RefPtr<EmbedderTaskRunner> runner_ref = found->second;
+  return runner_ref->PostTask(task);
 }
 
 }  // namespace flutter
