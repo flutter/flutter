@@ -20,7 +20,7 @@ import 'editable_text.dart' show EditableTextContextMenuBuilder;
 /// [List<SuggestionSpan>] spell check results and the [TextStyle] used to
 /// mark misspelled words within text input.
 @immutable
-class SpellCheckConfiguration {
+base class SpellCheckConfiguration {
   /// Creates a configuration that specifies the service and suggestions handler
   /// for spell check.
   const SpellCheckConfiguration({

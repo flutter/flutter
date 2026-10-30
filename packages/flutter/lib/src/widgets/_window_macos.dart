@@ -61,7 +61,7 @@ FlutterView _flutterViewForId(int viewId) {
 /// See also:
 ///
 ///  * [WindowingOwner], the abstract class that manages native windows.
-class WindowingOwnerMacOS extends WindowingOwner {
+base class WindowingOwnerMacOS extends WindowingOwner {
   /// Creates a new [WindowingOwnerMacOS] instance.
   ///
   /// {@macro flutter.widgets.windowing.experimental}

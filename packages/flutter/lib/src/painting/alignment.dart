@@ -22,7 +22,7 @@ import 'debug.dart';
 /// To convert an [AlignmentGeometry] object of indeterminate type into an
 /// [Alignment] object, call the [resolve] method.
 @immutable
-abstract class AlignmentGeometry {
+abstract base class AlignmentGeometry {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
   const AlignmentGeometry();
@@ -312,7 +312,7 @@ abstract class AlignmentGeometry {
 ///    that depends on the [TextDirection].
 ///  * [AlignmentGeometry], which is an abstract type that is agnostic as to
 ///    whether the horizontal direction depends on the [TextDirection].
-class Alignment extends AlignmentGeometry {
+base class Alignment extends AlignmentGeometry {
   /// Creates an alignment.
   const Alignment(this.x, this.y);
 
@@ -506,7 +506,7 @@ class Alignment extends AlignmentGeometry {
 ///
 ///  * [Alignment], a variant that is defined in physical terms (i.e.
 ///    whose horizontal component does not depend on the text direction).
-class AlignmentDirectional extends AlignmentGeometry {
+base class AlignmentDirectional extends AlignmentGeometry {
   /// Creates a directional alignment.
   const AlignmentDirectional(this.start, this.y);
 
@@ -673,7 +673,7 @@ class AlignmentDirectional extends AlignmentGeometry {
   String toString() => _stringify(start, y);
 }
 
-class _MixedAlignment extends AlignmentGeometry {
+base class _MixedAlignment extends AlignmentGeometry {
   const _MixedAlignment(this._x, this._start, this._y);
 
   @override

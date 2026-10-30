@@ -533,7 +533,7 @@ class SliverGridDelegateWithMaxCrossAxisExtent extends SliverGridDelegate {
 }
 
 /// Parent data structure used by [RenderSliverGrid].
-class SliverGridParentData extends SliverMultiBoxAdaptorParentData {
+base class SliverGridParentData extends SliverMultiBoxAdaptorParentData {
   /// The offset of the child in the non-scrolling axis.
   ///
   /// If the scroll axis is vertical, this offset is from the left-most edge of

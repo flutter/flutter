@@ -204,15 +204,6 @@ abstract class Gradient {
   /// canvas, but does not add any transformations to the canvas.
   final GradientTransform? transform;
 
-  List<double> _impliedStops() {
-    if (stops != null) {
-      return stops!;
-    }
-    assert(colors.length >= 2, 'colors list must have at least two colors');
-    final double separation = 1.0 / (colors.length - 1);
-    return List<double>.generate(colors.length, (int index) => index * separation, growable: false);
-  }
-
   /// Creates a [Shader] for this gradient to fill the given rect.
   ///
   /// If the gradient's configuration is text-direction-dependent, for example
@@ -352,6 +343,19 @@ abstract class Gradient {
   }
 }
 
+List<double> _impliedStops(Gradient gradient) {
+  if (gradient.stops != null) {
+    return gradient.stops!;
+  }
+  assert(gradient.colors.length >= 2, 'colors list must have at least two colors');
+  final double separation = 1.0 / (gradient.colors.length - 1);
+  return List<double>.generate(
+    gradient.colors.length,
+    (int index) => index * separation,
+    growable: false,
+  );
+}
+
 /// A 2D linear gradient.
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=gYNTcgZVcWw}
@@ -454,7 +458,7 @@ class LinearGradient extends Gradient {
       begin.resolve(textDirection).withinRect(rect),
       end.resolve(textDirection).withinRect(rect),
       colors,
-      _impliedStops(),
+      _impliedStops(this),
       tileMode,
       _resolveTransform(rect, textDirection),
     );
@@ -535,9 +539,9 @@ class LinearGradient extends Gradient {
     }
     final _ColorsAndStops interpolated = _interpolateColorsAndStops(
       a.colors,
-      a._impliedStops(),
+      _impliedStops(a),
       b.colors,
-      b._impliedStops(),
+      _impliedStops(b),
       t,
     );
     return LinearGradient(
@@ -756,7 +760,7 @@ class RadialGradient extends Gradient {
       center.resolve(textDirection).withinRect(rect),
       radius * rect.shortestSide,
       colors,
-      _impliedStops(),
+      _impliedStops(this),
       tileMode,
       _resolveTransform(rect, textDirection),
       focal?.resolve(textDirection).withinRect(rect),
@@ -843,9 +847,9 @@ class RadialGradient extends Gradient {
     }
     final _ColorsAndStops interpolated = _interpolateColorsAndStops(
       a.colors,
-      a._impliedStops(),
+      _impliedStops(a),
       b.colors,
-      b._impliedStops(),
+      _impliedStops(b),
       t,
     );
     return RadialGradient(
@@ -1079,7 +1083,7 @@ class SweepGradient extends Gradient {
     return ui.Gradient.sweep(
       center.resolve(textDirection).withinRect(rect),
       colors,
-      _impliedStops(),
+      _impliedStops(this),
       tileMode,
       startAngle,
       endAngle,
@@ -1163,9 +1167,9 @@ class SweepGradient extends Gradient {
     }
     final _ColorsAndStops interpolated = _interpolateColorsAndStops(
       a.colors,
-      a._impliedStops(),
+      _impliedStops(a),
       b.colors,
-      b._impliedStops(),
+      _impliedStops(b),
       t,
     );
     return SweepGradient(

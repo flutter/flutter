@@ -759,7 +759,7 @@ class SliverReorderableList extends StatefulWidget {
 /// [ReorderableDragStartListener] and [ReorderableDelayedDragStartListener]
 /// refer to their [SliverReorderableList] with the static
 /// [SliverReorderableList.of] method.
-class SliverReorderableListState extends State<SliverReorderableList>
+base class SliverReorderableListState extends State<SliverReorderableList>
     with TickerProviderStateMixin {
   // Map of index -> child state used manage where the dragging item will need
   // to be inserted.

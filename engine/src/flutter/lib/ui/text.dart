@@ -1469,6 +1469,11 @@ enum TextLeadingDistribution {
   even,
 }
 
+int _encodeTextHeightBehavior(TextHeightBehavior behavior) {
+  return (behavior.applyHeightToFirstAscent ? 0 : 1 << 0) |
+      (behavior.applyHeightToLastDescent ? 0 : 1 << 1);
+}
+
 /// {@template dart.ui.textHeightBehavior}
 /// Defines how to apply [TextStyle.height] over and under text.
 ///
@@ -1505,7 +1510,7 @@ class TextHeightBehavior {
 
   /// Creates a new TextHeightBehavior object from an encoded form.
   ///
-  /// See [_encode] for the creation of the encoded form.
+  /// See [_encodeTextHeightBehavior] for the creation of the encoded form.
   const TextHeightBehavior._fromEncoded(int encoded, this.leadingDistribution)
     : applyHeightToFirstAscent = (encoded & 0x1) == 0,
       applyHeightToLastDescent = (encoded & 0x2) == 0;
@@ -1545,12 +1550,6 @@ class TextHeightBehavior {
   ///
   /// Defaults to [TextLeadingDistribution.proportional],
   final TextLeadingDistribution leadingDistribution;
-
-  /// Returns an encoded int representation of this object (excluding
-  /// [leadingDistribution]).
-  int _encode() {
-    return (applyHeightToFirstAscent ? 0 : 1 << 0) | (applyHeightToLastDescent ? 0 : 1 << 1);
-  }
 
   @override
   bool operator ==(Object other) {
@@ -1991,7 +1990,7 @@ Int32List _encodeParagraphStyle(
   }
   if (textHeightBehavior != null) {
     result[0] |= 1 << 6;
-    result[6] = textHeightBehavior._encode();
+    result[6] = _encodeTextHeightBehavior(textHeightBehavior);
   }
   if (fontFamily != null) {
     result[0] |= 1 << 7;

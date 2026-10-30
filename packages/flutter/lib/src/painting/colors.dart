@@ -165,10 +165,6 @@ class HSVColor {
     return _colorFromHue(alpha, hue, chroma, secondary, match);
   }
 
-  HSVColor _scaleAlpha(double factor) {
-    return withAlpha(alpha * factor);
-  }
-
   /// Linearly interpolate between two HSVColors.
   ///
   /// The colors are interpolated by interpolating the [alpha], [hue],
@@ -190,10 +186,10 @@ class HSVColor {
       return a;
     }
     if (a == null) {
-      return b!._scaleAlpha(t);
+      return _scaleHSVAlpha(b!, t);
     }
     if (b == null) {
-      return a._scaleAlpha(1.0 - t);
+      return _scaleHSVAlpha(a, 1.0 - t);
     }
     return HSVColor.fromAHSV(
       clampDouble(lerpDouble(a.alpha, b.alpha, t)!, 0.0, 1.0),
@@ -220,6 +216,10 @@ class HSVColor {
 
   @override
   String toString() => '${objectRuntimeType(this, 'HSVColor')}($alpha, $hue, $saturation, $value)';
+}
+
+HSVColor _scaleHSVAlpha(HSVColor color, double factor) {
+  return color.withAlpha(color.alpha * factor);
 }
 
 /// A color represented using [alpha], [hue], [saturation], and [lightness].
@@ -338,10 +338,6 @@ class HSLColor {
     return _colorFromHue(alpha, hue, chroma, secondary, match);
   }
 
-  HSLColor _scaleAlpha(double factor) {
-    return withAlpha(alpha * factor);
-  }
-
   /// Linearly interpolate between two HSLColors.
   ///
   /// The colors are interpolated by interpolating the [alpha], [hue],
@@ -373,10 +369,10 @@ class HSLColor {
       return a;
     }
     if (a == null) {
-      return b!._scaleAlpha(t);
+      return _scaleHSLAlpha(b!, t);
     }
     if (b == null) {
-      return a._scaleAlpha(1.0 - t);
+      return _scaleHSLAlpha(a, 1.0 - t);
     }
     return HSLColor.fromAHSL(
       clampDouble(lerpDouble(a.alpha, b.alpha, t)!, 0.0, 1.0),
@@ -404,6 +400,10 @@ class HSLColor {
   @override
   String toString() =>
       '${objectRuntimeType(this, 'HSLColor')}($alpha, $hue, $saturation, $lightness)';
+}
+
+HSLColor _scaleHSLAlpha(HSLColor color, double factor) {
+  return color.withAlpha(color.alpha * factor);
 }
 
 /// A color that has a small table of related colors called a "swatch".

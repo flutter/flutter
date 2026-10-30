@@ -615,6 +615,15 @@ class Size extends OffsetBase {
   String toString() => 'Size(${width.toStringAsFixed(1)}, ${height.toStringAsFixed(1)})';
 }
 
+Float32List _getRectValue32(Rect rect) {
+  final result = Float32List(4);
+  result[0] = rect.left;
+  result[1] = rect.top;
+  result[2] = rect.right;
+  result[3] = rect.bottom;
+  return result;
+}
+
 /// An immutable, 2D, axis-aligned, floating-point rectangle whose coordinates
 /// are relative to a given origin.
 ///
@@ -677,15 +686,6 @@ class Rect {
         math.max(a.dx, b.dx),
         math.max(a.dy, b.dy),
       );
-
-  Float32List _getValue32() {
-    final result = Float32List(4);
-    result[0] = left;
-    result[1] = top;
-    result[2] = right;
-    result[3] = bottom;
-    return result;
-  }
 
   /// The offset of the left edge of this rectangle from the x axis.
   final double left;
@@ -1416,43 +1416,6 @@ abstract class _RRectLike<T extends _RRectLike<T>> {
     );
   }
 
-  // Linearly interpolate between this object and another of the same shape.
-  T _lerpTo(T? b, double t) {
-    assert(runtimeType == T);
-    if (b == null) {
-      final double k = 1.0 - t;
-      return _create(
-        left: left * k,
-        top: top * k,
-        right: right * k,
-        bottom: bottom * k,
-        tlRadiusX: math.max(0, tlRadiusX * k),
-        tlRadiusY: math.max(0, tlRadiusY * k),
-        trRadiusX: math.max(0, trRadiusX * k),
-        trRadiusY: math.max(0, trRadiusY * k),
-        brRadiusX: math.max(0, brRadiusX * k),
-        brRadiusY: math.max(0, brRadiusY * k),
-        blRadiusX: math.max(0, blRadiusX * k),
-        blRadiusY: math.max(0, blRadiusY * k),
-      );
-    } else {
-      return _create(
-        left: _lerpDouble(left, b.left, t),
-        top: _lerpDouble(top, b.top, t),
-        right: _lerpDouble(right, b.right, t),
-        bottom: _lerpDouble(bottom, b.bottom, t),
-        tlRadiusX: math.max(0, _lerpDouble(tlRadiusX, b.tlRadiusX, t)),
-        tlRadiusY: math.max(0, _lerpDouble(tlRadiusY, b.tlRadiusY, t)),
-        trRadiusX: math.max(0, _lerpDouble(trRadiusX, b.trRadiusX, t)),
-        trRadiusY: math.max(0, _lerpDouble(trRadiusY, b.trRadiusY, t)),
-        brRadiusX: math.max(0, _lerpDouble(brRadiusX, b.brRadiusX, t)),
-        brRadiusY: math.max(0, _lerpDouble(brRadiusY, b.brRadiusY, t)),
-        blRadiusX: math.max(0, _lerpDouble(blRadiusX, b.blRadiusX, t)),
-        blRadiusY: math.max(0, _lerpDouble(blRadiusY, b.blRadiusY, t)),
-      );
-    }
-  }
-
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) {
@@ -1512,6 +1475,75 @@ abstract class _RRectLike<T extends _RRectLike<T>> {
         'bottomLeft: $blRadius'
         ')';
   }
+}
+
+typedef _RRectLikeConstructor<T extends _RRectLike<T>> = T Function({
+  double left,
+  double top,
+  double right,
+  double bottom,
+  double tlRadiusX,
+  double tlRadiusY,
+  double trRadiusX,
+  double trRadiusY,
+  double brRadiusX,
+  double brRadiusY,
+  double blRadiusX,
+  double blRadiusY,
+});
+
+// Linearly interpolate between `a` and `b` of the same shape.
+T _lerpRRectLike<T extends _RRectLike<T>>(T a, T? b, double t, _RRectLikeConstructor<T> create) {
+  assert(a.runtimeType == T);
+  if (b == null) {
+    final double k = 1.0 - t;
+    return create(
+      left: a.left * k,
+      top: a.top * k,
+      right: a.right * k,
+      bottom: a.bottom * k,
+      tlRadiusX: math.max(0, a.tlRadiusX * k),
+      tlRadiusY: math.max(0, a.tlRadiusY * k),
+      trRadiusX: math.max(0, a.trRadiusX * k),
+      trRadiusY: math.max(0, a.trRadiusY * k),
+      brRadiusX: math.max(0, a.brRadiusX * k),
+      brRadiusY: math.max(0, a.brRadiusY * k),
+      blRadiusX: math.max(0, a.blRadiusX * k),
+      blRadiusY: math.max(0, a.blRadiusY * k),
+    );
+  } else {
+    return create(
+      left: _lerpDouble(a.left, b.left, t),
+      top: _lerpDouble(a.top, b.top, t),
+      right: _lerpDouble(a.right, b.right, t),
+      bottom: _lerpDouble(a.bottom, b.bottom, t),
+      tlRadiusX: math.max(0, _lerpDouble(a.tlRadiusX, b.tlRadiusX, t)),
+      tlRadiusY: math.max(0, _lerpDouble(a.tlRadiusY, b.tlRadiusY, t)),
+      trRadiusX: math.max(0, _lerpDouble(a.trRadiusX, b.trRadiusX, t)),
+      trRadiusY: math.max(0, _lerpDouble(a.trRadiusY, b.trRadiusY, t)),
+      brRadiusX: math.max(0, _lerpDouble(a.brRadiusX, b.brRadiusX, t)),
+      brRadiusY: math.max(0, _lerpDouble(a.brRadiusY, b.brRadiusY, t)),
+      blRadiusX: math.max(0, _lerpDouble(a.blRadiusX, b.blRadiusX, t)),
+      blRadiusY: math.max(0, _lerpDouble(a.blRadiusY, b.blRadiusY, t)),
+    );
+  }
+}
+
+Float32List _getRRectValue32(RRect rrect) {
+  final result = Float32List(12);
+  result[0] = rrect.left;
+  result[1] = rrect.top;
+  result[2] = rrect.right;
+  result[3] = rrect.bottom;
+  result[4] = rrect.tlRadiusX;
+  result[5] = rrect.tlRadiusY;
+  result[6] = rrect.trRadiusX;
+  result[7] = rrect.trRadiusY;
+  result[8] = rrect.brRadiusX;
+  result[9] = rrect.brRadiusY;
+  result[10] = rrect.blRadiusX;
+  result[11] = rrect.blRadiusY;
+  return result;
 }
 
 /// An immutable rounded rectangle with the custom radii for all four corners.
@@ -1701,23 +1733,6 @@ class RRect extends _RRectLike<RRect> {
     brRadiusY: brRadiusY,
   );
 
-  Float32List _getValue32() {
-    final result = Float32List(12);
-    result[0] = left;
-    result[1] = top;
-    result[2] = right;
-    result[3] = bottom;
-    result[4] = tlRadiusX;
-    result[5] = tlRadiusY;
-    result[6] = trRadiusX;
-    result[7] = trRadiusY;
-    result[8] = brRadiusX;
-    result[9] = brRadiusY;
-    result[10] = blRadiusX;
-    result[11] = blRadiusY;
-    return result;
-  }
-
   /// A rounded rectangle with all the values set to zero.
   static const RRect zero = RRect._raw();
 
@@ -1794,9 +1809,9 @@ class RRect extends _RRectLike<RRect> {
       if (b == null) {
         return null;
       }
-      return b._lerpTo(null, 1 - t);
+      return _lerpRRectLike(b, null, 1 - t, RRect._raw);
     }
-    return a._lerpTo(b, t);
+    return _lerpRRectLike(a, b, t, RRect._raw);
   }
 
   @override
@@ -2004,14 +2019,10 @@ class RSuperellipse extends _RRectLike<RSuperellipse> {
     brRadiusY: brRadiusY,
   );
 
-  _NativeRSuperellipse _native() {
-    return _NativeRSuperellipse(this);
-  }
-
   /// Whether the point specified by the given offset (which is assumed to be
   /// relative to the origin) lies inside the rounded superellipse.
   bool contains(Offset point) {
-    return _native().contains(point);
+    return _NativeRSuperellipse(this).contains(point);
   }
 
   /// A rounded rectangle with all the values set to zero.
@@ -2037,9 +2048,9 @@ class RSuperellipse extends _RRectLike<RSuperellipse> {
       if (b == null) {
         return null;
       }
-      return b._lerpTo(null, 1 - t);
+      return _lerpRRectLike(b, null, 1 - t, RSuperellipse._raw);
     }
-    return a._lerpTo(b, t);
+    return _lerpRRectLike(a, b, t, RSuperellipse._raw);
   }
 
   @override

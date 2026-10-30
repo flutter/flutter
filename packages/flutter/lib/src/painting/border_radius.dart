@@ -22,7 +22,7 @@ import 'debug.dart';
 /// To convert a [BorderRadiusGeometry] object of indeterminate type into a
 /// [BorderRadius] object, call the [resolve] method.
 @immutable
-abstract class BorderRadiusGeometry {
+abstract base class BorderRadiusGeometry {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
   const BorderRadiusGeometry();
@@ -350,7 +350,7 @@ abstract class BorderRadiusGeometry {
 /// both left-to-right and right-to-left layouts, consider using
 /// [BorderRadiusDirectional], which is expressed in terms that are relative to
 /// a [TextDirection] (typically obtained from the ambient [Directionality]).
-class BorderRadius extends BorderRadiusGeometry {
+base class BorderRadius extends BorderRadiusGeometry {
   /// Creates a border radius where all radii are [radius].
   const BorderRadius.all(Radius radius)
     : this.only(topLeft: radius, topRight: radius, bottomLeft: radius, bottomRight: radius);
@@ -600,7 +600,7 @@ class BorderRadius extends BorderRadiusGeometry {
 ///
 ///  * [BorderRadius], a variant that uses physical labels (`topLeft` and
 ///    `topRight` instead of `topStart` and `topEnd`).
-class BorderRadiusDirectional extends BorderRadiusGeometry {
+base class BorderRadiusDirectional extends BorderRadiusGeometry {
   /// Creates a border radius where all radii are [radius].
   const BorderRadiusDirectional.all(Radius radius)
     : this.only(topStart: radius, topEnd: radius, bottomStart: radius, bottomEnd: radius);
@@ -814,7 +814,7 @@ class BorderRadiusDirectional extends BorderRadiusGeometry {
   }
 }
 
-class _MixedBorderRadius extends BorderRadiusGeometry {
+base class _MixedBorderRadius extends BorderRadiusGeometry {
   const _MixedBorderRadius(
     this._topLeft,
     this._topRight,

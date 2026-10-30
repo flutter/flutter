@@ -729,7 +729,12 @@ base class _NativeSceneBuilder extends NativeFieldWrapperClass1 implements Scene
     assert(clipBehavior != Clip.none);
     assert(_debugCheckCanBeUsedAsOldLayer(oldLayer, 'pushClipRRect'));
     final EngineLayer engineLayer = _NativeEngineLayer._();
-    _pushClipRRect(engineLayer, rrect._getValue32(), clipBehavior.index, oldLayer?._nativeLayer);
+    _pushClipRRect(
+      engineLayer,
+      _getRRectValue32(rrect),
+      clipBehavior.index,
+      oldLayer?._nativeLayer,
+    );
     final layer = ClipRRectEngineLayer._(engineLayer);
     assert(_debugPushLayer(layer));
     return layer;
@@ -756,7 +761,7 @@ base class _NativeSceneBuilder extends NativeFieldWrapperClass1 implements Scene
     final EngineLayer engineLayer = _NativeEngineLayer._();
     _pushClipRSuperellipse(
       engineLayer,
-      rsuperellipse._native(),
+      _NativeRSuperellipse(rsuperellipse),
       clipBehavior.index,
       oldLayer?._nativeLayer,
     );

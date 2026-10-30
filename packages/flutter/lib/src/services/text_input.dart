@@ -1692,7 +1692,7 @@ final class TextInputStyle with Diagnosticable {
 ///    between the system's text input and a [TextInputClient].
 ///  * [EditableText], a [TextInputClient] that connects to and interacts with
 ///    the system's text input using a [TextInputConnection].
-class TextInputConnection {
+base class TextInputConnection {
   TextInputConnection._(this._client) : _id = _nextId++;
 
   Size? _cachedSize;
@@ -2882,7 +2882,7 @@ class _PlatformTextInputControl with TextInputControl {
 ///  * [SystemContextMenu], which wraps this functionality in a widget.
 ///  * [MediaQuery.maybeSupportsShowingSystemContextMenu], which indicates
 ///    whether the system context menu is supported.
-class SystemContextMenuController with SystemContextMenuClient, Diagnosticable {
+base class SystemContextMenuController with SystemContextMenuClient, Diagnosticable {
   /// Creates an instance of [SystemContextMenuController].
   ///
   /// Not shown until [show] is called.

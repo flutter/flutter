@@ -549,7 +549,7 @@ class RawTooltip extends StatefulWidget {
 ///
 /// This class can be used to programmatically show the [RawTooltip]. See the
 /// [ensureTooltipVisible] method.
-class RawTooltipState extends State<RawTooltip> with SingleTickerProviderStateMixin {
+base class RawTooltipState extends State<RawTooltip> with SingleTickerProviderStateMixin {
   final OverlayPortalController _overlayController = OverlayPortalController();
 
   Timer? _timer;

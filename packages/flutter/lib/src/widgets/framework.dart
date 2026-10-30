@@ -2918,7 +2918,7 @@ final class BuildScope {
 ///
 /// ** See code in examples/api/lib/widgets/framework/build_owner.0.dart **
 /// {@end-tool}
-class BuildOwner {
+base class BuildOwner {
   /// Creates an object that manages widgets.
   ///
   /// If the `focusManager` argument is not specified or is null, this will

@@ -3429,7 +3429,7 @@ base class _NativePath extends NativeFieldWrapperClass1 implements Path {
   @override
   void addRRect(RRect rrect) {
     assert(_rrectIsValid(rrect));
-    _addRRect(rrect._getValue32());
+    _addRRect(_getRRectValue32(rrect));
   }
 
   @Native<Void Function(Pointer<Void>, Handle)>(symbol: 'Path::addRRect')
@@ -3438,7 +3438,7 @@ base class _NativePath extends NativeFieldWrapperClass1 implements Path {
   @override
   void addRSuperellipse(RSuperellipse rsuperellipse) {
     assert(_rsuperellipseIsValid(rsuperellipse));
-    _addRSuperellipse(rsuperellipse._native());
+    _addRSuperellipse(_NativeRSuperellipse(rsuperellipse));
   }
 
   @Native<Void Function(Pointer<Void>, Pointer<Void>)>(symbol: 'Path::addRSuperellipse')
@@ -7852,7 +7852,7 @@ base class _NativeCanvas extends NativeFieldWrapperClass1 implements Canvas {
   @override
   void clipRRect(RRect rrect, {bool doAntiAlias = true}) {
     assert(_rrectIsValid(rrect));
-    _clipRRect(rrect._getValue32(), doAntiAlias);
+    _clipRRect(_getRRectValue32(rrect), doAntiAlias);
   }
 
   @Native<Void Function(Pointer<Void>, Handle, Bool)>(symbol: 'Canvas::clipRRect')
@@ -7861,7 +7861,7 @@ base class _NativeCanvas extends NativeFieldWrapperClass1 implements Canvas {
   @override
   void clipRSuperellipse(RSuperellipse rsuperellipse, {bool doAntiAlias = true}) {
     assert(_rsuperellipseIsValid(rsuperellipse));
-    _clipRSuperellipse(rsuperellipse._native(), doAntiAlias);
+    _clipRSuperellipse(_NativeRSuperellipse(rsuperellipse), doAntiAlias);
   }
 
   @Native<Void Function(Pointer<Void>, Pointer<Void>, Bool)>(symbol: 'Canvas::clipRSuperellipse')
@@ -7954,7 +7954,7 @@ base class _NativeCanvas extends NativeFieldWrapperClass1 implements Canvas {
   @override
   void drawRRect(RRect rrect, Paint paint) {
     assert(_rrectIsValid(rrect));
-    _drawRRect(rrect._getValue32(), paint._objects, paint._data);
+    _drawRRect(_getRRectValue32(rrect), paint._objects, paint._data);
   }
 
   @Native<Void Function(Pointer<Void>, Handle, Handle, Handle)>(symbol: 'Canvas::drawRRect')
@@ -7964,7 +7964,7 @@ base class _NativeCanvas extends NativeFieldWrapperClass1 implements Canvas {
   void drawDRRect(RRect outer, RRect inner, Paint paint) {
     assert(_rrectIsValid(outer));
     assert(_rrectIsValid(inner));
-    _drawDRRect(outer._getValue32(), inner._getValue32(), paint._objects, paint._data);
+    _drawDRRect(_getRRectValue32(outer), _getRRectValue32(inner), paint._objects, paint._data);
   }
 
   @Native<Void Function(Pointer<Void>, Handle, Handle, Handle, Handle)>(
@@ -7980,7 +7980,7 @@ base class _NativeCanvas extends NativeFieldWrapperClass1 implements Canvas {
   @override
   void drawRSuperellipse(RSuperellipse rsuperellipse, Paint paint) {
     assert(_rsuperellipseIsValid(rsuperellipse));
-    _drawRSuperellipse(rsuperellipse._native(), paint._objects, paint._data);
+    _drawRSuperellipse(_NativeRSuperellipse(rsuperellipse), paint._objects, paint._data);
   }
 
   @Native<Void Function(Pointer<Void>, Pointer<Void>, Handle, Handle)>(
@@ -8323,7 +8323,7 @@ base class _NativeCanvas extends NativeFieldWrapperClass1 implements Canvas {
     final Int32List? colorBuffer = (colors == null || colors.isEmpty)
         ? null
         : _encodeColorList(colors);
-    final Float32List? cullRectBuffer = cullRect?._getValue32();
+    final Float32List? cullRectBuffer = cullRect == null ? null : _getRectValue32(cullRect);
     final int qualityIndex = paint.filterQuality.index;
 
     final String? error = _drawAtlas(
@@ -8378,7 +8378,7 @@ base class _NativeCanvas extends NativeFieldWrapperClass1 implements Canvas {
       rects,
       colors,
       (blendMode ?? BlendMode.src).index,
-      cullRect?._getValue32(),
+      cullRect == null ? null : _getRectValue32(cullRect),
     );
 
     if (error != null) {

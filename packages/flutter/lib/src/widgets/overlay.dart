@@ -648,7 +648,7 @@ class Overlay extends StatefulWidget {
 ///
 /// Used to insert [OverlayEntry]s into the overlay using the [insert] and
 /// [insertAll] functions.
-class OverlayState extends State<Overlay> with TickerProviderStateMixin {
+base class OverlayState extends State<Overlay> with TickerProviderStateMixin {
   final List<OverlayEntry> _entries = <OverlayEntry>[];
 
   @protected
@@ -1690,7 +1690,7 @@ class _RenderTheater extends RenderBox
 /// [OverlayPortalController.show] and [OverlayPortalController.hide] can be
 /// called even before the controller is assigned to any [OverlayPortal], but
 /// they typically should not be called while the widget tree is being rebuilt.
-class OverlayPortalController {
+base class OverlayPortalController {
   /// Creates an [OverlayPortalController], optionally with a String identifier
   /// `debugLabel`.
   OverlayPortalController({this._debugLabel});

@@ -501,7 +501,7 @@ class RestorationManager extends ChangeNotifier {
 /// information stored in the bucket from the app's restoration data and that
 /// information will not be available again when the application is restored to
 /// this state in the future.
-class RestorationBucket {
+base class RestorationBucket {
   /// Creates an empty [RestorationBucket] to be provided to [adoptChild] to add
   /// it to the bucket hierarchy.
   ///

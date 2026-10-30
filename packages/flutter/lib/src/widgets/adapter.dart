@@ -82,7 +82,7 @@ class RenderObjectToWidgetAdapter<T extends RenderObject> extends RenderObjectWi
 ///
 /// In typical usage, it will be instantiated for a [RenderObjectToWidgetAdapter]
 /// whose container is the [RenderView].
-class RenderObjectToWidgetElement<T extends RenderObject> extends RenderTreeRootElement
+base class RenderObjectToWidgetElement<T extends RenderObject> extends RenderTreeRootElement
     with RootElementMixin {
   /// Creates an element that is hosted by a [RenderObject].
   ///

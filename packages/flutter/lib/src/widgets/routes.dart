@@ -705,7 +705,7 @@ abstract interface class PredictiveBackRoute {
 /// * [ModalRoute.addLocalHistoryEntry], which adds an entry to a route.
 /// * [showModalBottomSheet], which internally uses local history entries
 ///   to handle back button behavior.
-class LocalHistoryEntry {
+base class LocalHistoryEntry {
   /// Creates an entry in the history of a [LocalHistoryRoute].
   ///
   /// The [impliesAppBarDismissal] defaults to true if not provided.

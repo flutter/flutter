@@ -148,7 +148,7 @@ abstract class FlowDelegate {
 /// transformation matrix, which is private to the [RenderFlow]. To set the
 /// matrix, use the [FlowPaintingContext.paintChild] function from an override
 /// of the [FlowDelegate.paintChildren] function.
-class FlowParentData extends ContainerBoxParentData<RenderBox> {
+base class FlowParentData extends ContainerBoxParentData<RenderBox> {
   Matrix4? _transform;
 }
 

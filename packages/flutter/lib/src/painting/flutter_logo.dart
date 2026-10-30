@@ -36,7 +36,7 @@ enum FlutterLogoStyle {
 }
 
 /// An immutable description of how to paint Flutter's logo.
-class FlutterLogoDecoration extends Decoration {
+base class FlutterLogoDecoration extends Decoration {
   /// Creates a decoration that knows how to paint Flutter's logo.
   ///
   /// The [style] controls whether and where to draw the "Flutter" label. If one

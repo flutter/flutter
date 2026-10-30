@@ -2064,7 +2064,7 @@ class RootWidget extends Widget {
 /// [RootWidget.attach]. In this usage, it is normally instantiated by the
 /// bootstrapping logic in the [WidgetsFlutterBinding] singleton created by
 /// [runApp].
-class RootElement extends Element with RootElementMixin {
+base class RootElement extends Element with RootElementMixin {
   /// Creates a [RootElement] for the provided [RootWidget].
   RootElement(RootWidget super.widget);
 
