@@ -265,6 +265,25 @@ TEST_F(FlEngineVsyncTest, StalledMappedClockReturnsBatonAndRemovesTick) {
   EXPECT_EQ(batons, std::vector<intptr_t>({1}));
 }
 
+TEST_F(FlEngineVsyncTest, DeliveredBatonDoesNotKeepEngineAliveForIdleTick) {
+  Request(1);
+  bool finalized = false;
+  g_object_weak_ref(
+      G_OBJECT(engine),
+      [](gpointer data, GObject*) { *static_cast<bool*>(data) = true; },
+      &finalized);
+  g_clear_object(&engine);
+  EXPECT_FALSE(finalized);
+  Tick();
+  EXPECT_EQ(batons, std::vector<intptr_t>({1}));
+  EXPECT_TRUE(finalized);
+  EXPECT_EQ(TickHandler(), 0u);
+  // Keep the weak-notify storage alive even if the lifetime regression returns.
+  if (!finalized) {
+    Tick();
+  }
+}
+
 TEST_F(FlEngineVsyncTest, DeliveredBatonCancelsStalledClockGuard) {
   Request(1);
   const gulong handler = TickHandler();

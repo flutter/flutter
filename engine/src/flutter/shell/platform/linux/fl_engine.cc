@@ -678,6 +678,10 @@ static void fl_engine_set_property(GObject* object,
 static void fl_engine_dispose(GObject* object) {
   FlEngine* self = FL_ENGINE(object);
 
+  if (self->frame_pacer != nullptr) {
+    fl_gtk_frame_pacer_stop(self->frame_pacer);
+  }
+
   if (self->engine != nullptr) {
     if (self->embedder_api.Shutdown(self->engine) != kSuccess) {
       g_warning("Failed to shutdown Flutter engine");

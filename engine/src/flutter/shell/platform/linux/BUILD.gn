@@ -768,3 +768,35 @@ zip_bundle("flutter_gtk") {
   ]
   files = tmp_files
 }
+
+# Exercise real GTK clock lifecycle without the GTK replacements in the engine
+# unit tests. These targets do not construct an engine or renderer.
+foreach(variant,
+        [
+          "gtk3",
+          "gtk4",
+        ]) {
+  executable("flutter_linux_${variant}_frame_pacer_tests") {
+    testonly = true
+    sources = [
+      "fl_gtk_frame_pacer.cc",
+      "fl_gtk_frame_pacer.h",
+      "fl_gtk_frame_pacer_test.cc",
+      "fl_vsync_timing.cc",
+      "fl_vsync_timing.h",
+    ]
+    public_configs = [ "//flutter:config" ]
+    deps = [
+      ":flutter_linux_fixtures",
+      "//flutter/runtime:libdart",
+    ]
+    if (variant == "gtk4") {
+      defines = [ "FLUTTER_LINUX_GTK4" ]
+      configs += [ "//flutter/shell/platform/linux/config:gtk4" ]
+      deps += [ "//flutter/testing:testing_gtk4" ]
+    } else {
+      configs += [ "//flutter/shell/platform/linux/config:gtk" ]
+      deps += [ "//flutter/testing" ]
+    }
+  }
+}
