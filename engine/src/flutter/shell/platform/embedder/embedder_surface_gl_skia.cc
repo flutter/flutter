@@ -125,4 +125,17 @@ sk_sp<GrDirectContext> EmbedderSurfaceGLSkia::CreateResourceContext() const {
   return nullptr;
 }
 
+// |EmbedderSurface|
+void EmbedderSurfaceGLSkia::ReleaseResourceContext() const {
+  if (!valid_ || !gl_dispatch_table_.gl_make_resource_current_callback) {
+    return;
+  }
+  // EGL defers destruction while a context is current. Detach it on the IO
+  // thread before that thread exits and the embedder destroys its contexts.
+  if (!gl_dispatch_table_.gl_clear_current_callback()) {
+    FML_LOG(ERROR)
+        << "Could not release the resource context from the IO thread.";
+  }
+}
+
 }  // namespace flutter
