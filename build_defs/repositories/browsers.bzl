@@ -84,8 +84,12 @@ _FIREFOX_URL = "https://ftp.mozilla.org/pub/firefox/releases/%s/linux-x86_64/en-
 _FIREFOX_MAC_URL = "https://ftp.mozilla.org/pub/firefox/releases/%s/mac/en-US/Firefox%%20%s.dmg"
 
 # What felt writes beside the executable it resolves (dev/firefox.dart: no
-# update checks); in the repository already, so that it finds it written and
-# writes nothing into the repository.
+# update checks); in the Linux repository already, so that it finds it
+# written and writes nothing into the repository. Not in the Mac's app
+# bundle: a file added to a sealed bundle breaks its signature, and macOS
+# kills the browser at launch (the Mac's T54A); there felt resolves the
+# launcher script, which has the file beside it (browser_launcher's
+# `policies`), and the bundle stays as Mozilla signed it.
 _FIREFOX_POLICIES = """{
   "policies": {
     "DisableAppUpdate": true
@@ -248,7 +252,7 @@ def _firefox_impl(rctx):
         tree = "firefox"
         executable = "firefox/firefox"
         platform = "linux-x86_64"
-    rctx.file(executable.rsplit("/", 1)[0] + "/distribution/policies.json", _FIREFOX_POLICIES)
+        rctx.file("firefox/distribution/policies.json", _FIREFOX_POLICIES)
     rctx.file("BUILD.bazel", _FIREFOX_BUILD.format(version = named, platform = platform, tree = tree, executable = executable))
 
 firefox = repository_rule(
