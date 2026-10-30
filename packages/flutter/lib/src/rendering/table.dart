@@ -605,7 +605,6 @@ class RenderTable extends RenderBox {
     config.explicitChildNodes = true;
   }
 
-  final Map<int, _Index> _idToIndexMap = <int, _Index>{};
   final Map<int, SemanticsNode> _cachedRows = <int, SemanticsNode>{};
   final Map<_Index, SemanticsNode> _cachedCells = <_Index, SemanticsNode>{};
 
@@ -621,6 +620,14 @@ class RenderTable extends RenderBox {
   /// Table rows are not RenderObjects, so their semantics nodes must be created separately.
   /// And if a cell has multiple semantics node or has a different semantic role, we create
   /// a new semantics node to wrap it.
+  ///
+  /// Synthesized row and cell nodes share the table's coordinate system: their
+  /// [SemanticsNode.transform] is null and their [SemanticsNode.rect] is the row
+  /// or cell box in table space. Child transforms are left as the framework
+  /// produced them. Rewriting a child transform is not safe across passes,
+  /// because the framework does not copy the child's geometry back onto the
+  /// node before the next assemble, so a later pass would apply the same offset
+  /// again.
   @override
   void assembleSemanticsNode(
     SemanticsNode node,
@@ -665,30 +672,14 @@ class RenderTable extends RenderBox {
       return -1;
     }
 
-    void shiftTransform(SemanticsNode node, double dx, double dy) {
-      final Matrix4? previousTransform = node.transform;
-      final Offset offset =
-          (previousTransform != null ? MatrixUtils.getAsTranslation(previousTransform) : null) ??
-          Offset.zero;
-      final newTransform = Matrix4.translationValues(offset.dx + dx, offset.dy + dy, 0);
-      node.transform = newTransform;
-    }
-
     for (final child in children) {
-      if (_idToIndexMap.containsKey(child.id)) {
-        final _Index index = _idToIndexMap[child.id]!;
-        final int y = index.y;
-        final int x = index.x;
-        if (y < _rows && x < _columns) {
-          rawCells[y][x].add(child);
-        }
-      } else {
-        final Rect rect = rectWithOffset(child);
-        final int y = findRowIndex(rect.top);
-        final int x = findColumnIndex(rect.left);
-        if (y != -1 && x != -1) {
-          rawCells[y][x].add(child);
-        }
+      // Child transforms stay in table space on every pass, so the rect is
+      // always a valid row and column key.
+      final Rect rect = rectWithOffset(child);
+      final int y = findRowIndex(rect.top);
+      final int x = findColumnIndex(rect.left);
+      if (y != -1 && x != -1) {
+        rawCells[y][x].add(child);
       }
     }
 
@@ -745,33 +736,18 @@ class RenderTable extends RenderBox {
         if (cellWidth <= 0.0) {
           continue;
         }
-        // Add wrapper transform
+        // The wrapper shares the table's coordinate system, so its rect is the
+        // cell box in table space. Children keep the transforms the framework
+        // gave them.
         if (addCellWrapper) {
           cell
-            ..transform = Matrix4.translationValues(_columnLefts!.elementAt(x), 0, 0)
-            ..rect = Rect.fromLTWH(0, 0, cellWidth, rowBox.height);
-        }
-        for (final child in rawChildrens) {
-          _idToIndexMap[child.id] = _Index(y, x);
-
-          // Shift child transform.
-          final Rect localRect = rectWithOffset(child);
-          // The rect should satisfy 0 <= localRect.top < localRect.bottom <= rowBox.height
-          final double dy = localRect.bottom > rowBox.height + precisionErrorTolerance
-              ? -_rowTops.elementAt(y)
-              : 0.0;
-
-          // if addCellWrapper is true, the rect is relative to the cell
-          // The rect should satisfy 0 <= localRect.left < localRect.right <= cellWidth
-          // if addCellWrapper is false, the rect is relative to the row
-          // The rect should satisfy _columnLefts!.elementAt(x) <= localRect.left < localRect.right <= _columnLefts!.elementAt(x+1)
-          final double dx = addCellWrapper
-              ? ((localRect.left >= cellWidth) ? -_columnLefts!.elementAt(x) : 0.0)
-              : (localRect.right <= _columnLefts!.elementAt(x) ? _columnLefts!.elementAt(x) : 0.0);
-
-          if (dx != 0 || dy != 0) {
-            shiftTransform(child, dx, dy);
-          }
+            ..transform = null
+            ..rect = Rect.fromLTWH(
+              _columnLefts!.elementAt(x),
+              rowBox.top,
+              cellWidth,
+              rowBox.height,
+            );
         }
 
         cell.indexInParent = x;
@@ -785,8 +761,8 @@ class RenderTable extends RenderBox {
             ..role = SemanticsRole.row,
           childrenInInversePaintOrder: cells,
         )
-        ..transform = Matrix4.translationValues(rowBox.left, rowBox.top, 0)
-        ..rect = Rect.fromLTWH(0, 0, rowBox.width, rowBox.height);
+        ..transform = null
+        ..rect = rowBox;
 
       rows.add(newRow);
     }
