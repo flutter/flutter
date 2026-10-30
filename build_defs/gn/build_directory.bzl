@@ -79,6 +79,35 @@ def expand_output_pattern(pattern, file, package = None):
         return None
     return expanded
 
+def path_under_root(file, root, label = None):
+    """A file's path under `root`, a directory of its repository.
+
+    A directory copied or archived whole keeps its files' paths below it
+    (copy_tree's, a zip_tree's): the prebuilt Dart SDK's `bin/dart` under
+    `dart-sdk/`, the shader library's `impeller/blending.glsl`.
+
+    Args:
+      file: the File.
+      root: the directory, relative to the root of the file's repository;
+        empty for the repository's root itself.
+      label: the caller's label, for the message when the file is not
+        under `root`.
+
+    Returns:
+      The path, relative to `root`.
+    """
+
+    # short_path is relative to the main repository's root, with another
+    # repository's files under `../<repository>/`.
+    path = file.short_path
+    if path.startswith("../"):
+        path = path.split("/", 2)[2]
+    if root:
+        if not path.startswith(root + "/"):
+            fail("%s: %s is not under %s" % (label, file.short_path, root))
+        path = path[len(root) + 1:]
+    return path
+
 def copy_entries(outputs, files, package = None):
     """The BuildDirectoryInfo entries of a copy: its files at GN's `outputs`.
 

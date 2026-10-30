@@ -516,12 +516,12 @@ install(
 
 # linux_host_engine_test.json: ci/host_debug_test
 #   bazel run --config=host_debug_test :host_debug_test
-# Not built, no Bazel counterpart yet: flutter/build/dart:dart_sdk.
 install(
     name = "host_debug_test",
     testonly = True,
     contents = [
         "//engine/src/flutter:unittests",
+        "//engine/src/flutter/build/dart:dart_sdk",
         "//engine/src/flutter/shell/testing:testing",
         "//engine/src/flutter/tools/path_ops:path_ops",
     ],
@@ -546,12 +546,12 @@ test_suite(
 
 # linux_host_engine_test.json: ci/host_profile_test
 #   bazel run --config=host_profile_test :host_profile_test
-# Not built, no Bazel counterpart yet: flutter/build/dart:dart_sdk.
 install(
     name = "host_profile_test",
     testonly = True,
     contents = [
         "//engine/src/flutter:unittests",
+        "//engine/src/flutter/build/dart:dart_sdk",
         "//engine/src/flutter/shell/testing:testing",
         "//engine/src/flutter/tools/path_ops:path_ops",
     ],
@@ -603,13 +603,13 @@ test_suite(
 
 # linux_host_engine_test.json: ci/host_release_test
 #   bazel run --config=host_release_test :host_release_test
-# Not built, no Bazel counterpart yet: flutter/build/dart:dart_sdk.
 # Tests, run by `bazel test` rather than installed: flutter/display_list:display_list_builder_benchmarks, flutter/fml:fml_benchmarks, flutter/impeller/geometry:geometry_benchmarks, flutter/lib/ui:ui_benchmarks, flutter/shell/common:shell_benchmarks, flutter/txt:txt_benchmarks.
 install(
     name = "host_release_test",
     testonly = True,
     contents = [
         "//engine/src/flutter:unittests",
+        "//engine/src/flutter/build/dart:dart_sdk",
         "//engine/src/flutter/display_list:display_list_benchmarks",
         "//engine/src/flutter/display_list:display_list_region_benchmarks",
         "//engine/src/flutter/display_list:display_list_transform_benchmarks",
@@ -667,13 +667,13 @@ test_suite(
 
 # linux_unopt.json: ci/host_debug_unopt
 #   bazel run --config=ci_host_debug_unopt :ci_host_debug_unopt
-# Not built, no Bazel counterpart yet: flutter/build/dart:dart_sdk.
 # Tests, run by `bazel test` rather than installed: flutter/shell/platform/common/client_wrapper:client_wrapper_unittests, flutter/shell/platform/common:common_cpp_core_unittests, flutter/shell/platform/common:common_cpp_unittests, flutter/shell/platform/glfw/client_wrapper:client_wrapper_glfw_unittests.
 install(
     name = "ci_host_debug_unopt",
     testonly = True,
     contents = [
         "//engine/src/flutter:unittests",
+        "//engine/src/flutter/build/dart:dart_sdk",
         "//engine/src/flutter/shell/testing:testing",
         "//engine/src/flutter/sky/packages/sky_engine:sky_engine",
         "//engine/src/flutter/tools/font_subset:font_subset",

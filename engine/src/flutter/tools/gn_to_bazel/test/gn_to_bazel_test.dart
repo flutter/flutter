@@ -5830,6 +5830,48 @@ web_platform_dill(
       );
     });
 
+    test('copy_tree copies the package directory itself, or a directorySources directory as its filegroup', () {
+      // build/dart/BUILD.gn's shape (the prebuilt SDK into dart-sdk/) beside
+      // the iOS scenario app's (the package's own directory, with an
+      // exclusion).
+      final GnSourceTree tree = sourceTree(<String, String>{
+        'flutter/ct/BUILD.gn': r'''
+copy_tree("dart_sdk") {
+  source = "//flutter/prebuilts/linux-x64/dart-sdk"
+  dest = "$root_out_dir/dart-sdk"
+}
+copy_tree("copy_project") {
+  source = "."
+  dest = "$root_out_dir/project"
+  exclude = "*.*framework"
+}
+''',
+      });
+      final String output = emitBuildFile(
+        evaluateIn(tree, '//flutter/ct/BUILD.gn', templates: <String>{'copy_tree'}),
+        gnPackage: '//flutter/ct',
+        tree: tree,
+      );
+      expect(
+        output,
+        contains(r'''
+gn_copy_tree(
+    name = "dart_sdk",
+    srcs = ["//engine/src/flutter/build/bazel/dart_wrap:prebuilt_dart_sdk"],
+    dest = "$root_out_dir/dart-sdk",
+    source = "",
+)
+
+gn_copy_tree(
+    name = "copy_project",
+    dest = "$root_out_dir/project",
+    exclude = "*.*framework",
+    source = ".",
+)
+'''),
+      );
+    });
+
     test('a copy in a wasm toolchain whose source is not an output of its module is an error', () {
       final GnSourceTree tree = sourceTree(<String, String>{
         'flutter/ck/BUILD.gn': r'''
@@ -8770,12 +8812,13 @@ install(
       expect(
         buildFile,
         contains(
-          'the impeller-golden type.\n'
+          'flutter_linux_unittests (engine).\n'
           "# ci/host_debug_test's steps that run a script of the checkout, as Bazel tests: "
           '//engine/src/flutter:gn_test.\n'
           '# Other steps, scripts of the checkout: Lint.\n',
         ),
       );
+      // The impeller-golden type is the golden suite (runTestsTypeSuites).
       expect(
         buildFile,
         contains('''
@@ -8786,6 +8829,7 @@ test_suite(
         "//engine/src/flutter:dart_host_tests",
         "//engine/src/flutter:gn_test",
         "//engine/src/flutter/fml:fml_unittests",
+        "//engine/src/flutter/impeller/golden_tests:impeller_golden_tests",
         "//engine/src/flutter/testing/dart:dart",
         "//engine/src/flutter/testing/dart/vm_service:vm_service",
         "//engine/src/flutter/testing/smoke_test_failure:smoke_test_failure",

@@ -1859,6 +1859,14 @@ final class _Emitter {
               '"${_packageLabel(directory, variable.assignments.first.location)}"';
         case TemplateArgumentKind.sourceDirectory:
           _sourceDirectoryInto(rule, argument, variable);
+        case TemplateArgumentKind.directory:
+          // The package's own directory, which the macro globs itself; any
+          // other is a directorySources directory, its files in `inputs`.
+          if (_singleString(variable) == '.') {
+            rule.scalars[argument.attribute] = _starlarkString('.');
+          } else {
+            _sourceDirectoryInto(rule, argument, variable);
+          }
         case TemplateArgumentKind.buildPath:
           final String? path = _singleString(variable);
           if (path == null) {
