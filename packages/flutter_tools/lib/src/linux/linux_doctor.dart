@@ -172,6 +172,10 @@ class LinuxDoctorValidator extends DoctorValidator {
             ValidationMessage.error(_userMessages.clangTooOld(requiredVersion.toString())),
           );
         }
+        if (!await _libstdcxxIsPresent()) {
+          validationType = ValidationType.missing;
+          messages.add(ValidationMessage.error(_userMessages.libstdcxxMissing));
+        }
       }
     }
 
@@ -353,6 +357,29 @@ class LinuxDoctorValidator extends DoctorValidator {
     }
     final String firstLine = (result.stdout as String).split('\n').first.trim();
     return _VersionInfo(firstLine);
+  }
+
+  /// Checks that clang++ can find libstdc++ to link against.
+  ///
+  /// clang++ picks the newest GCC installation it finds, which can be one whose
+  /// libstdc++ development package isn't installed. Builds then fail at link
+  /// time with "cannot find -lstdc++".
+  Future<bool> _libstdcxxIsPresent() async {
+    ProcessResult? result;
+    try {
+      result = await _processManager.run(<String>[kClangBinary, '-print-file-name=libstdc++.so']);
+    } on ArgumentError {
+      // ignore error.
+    } on ProcessException {
+      // ignore error.
+    }
+    // If the check itself can't run, don't report a problem we can't confirm.
+    if (result == null || result.exitCode != 0) {
+      return true;
+    }
+    // clang++ prints the full path when it finds the library, and only the
+    // bare file name when it doesn't.
+    return (result.stdout as String).trim().startsWith('/');
   }
 
   /// Checks that [library] is available via pkg-config.
