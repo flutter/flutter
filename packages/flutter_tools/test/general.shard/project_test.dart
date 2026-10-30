@@ -23,6 +23,7 @@ import 'package:flutter_tools/src/flutter_manifest.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
+import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:meta/meta.dart';
 import 'package:test/fake.dart';
@@ -45,6 +46,7 @@ void main() {
         final projectFactory = FlutterProjectFactory(
           fileSystem: fileSystem,
           logger: BufferLogger.test(),
+          config: FakeConfig(),
         );
         fileSystem.file('pubspec.yaml').writeAsBytesSync(<int>[0xFFFE]);
 
@@ -59,7 +61,10 @@ void main() {
           ..createSync(recursive: true)
           ..writeAsStringSync(invalidPubspec);
 
-        expect(() => FlutterProject.fromDirectory(directory), throwsToolExit());
+        expect(
+          () => FlutterProject.fromDirectory(directory, logger: globals.logger),
+          throwsToolExit(),
+        );
       });
 
       _testInMemory('fails on pubspec.yaml parse failure', () async {
@@ -68,7 +73,10 @@ void main() {
           ..createSync(recursive: true)
           ..writeAsStringSync(parseErrorPubspec);
 
-        expect(() => FlutterProject.fromDirectory(directory), throwsToolExit());
+        expect(
+          () => FlutterProject.fromDirectory(directory, logger: globals.logger),
+          throwsToolExit(),
+        );
       });
 
       _testInMemory('fails on invalid example/pubspec.yaml', () async {
@@ -77,12 +85,18 @@ void main() {
           ..createSync(recursive: true)
           ..writeAsStringSync(invalidPubspec);
 
-        expect(() => FlutterProject.fromDirectory(directory), throwsToolExit());
+        expect(
+          () => FlutterProject.fromDirectory(directory, logger: globals.logger),
+          throwsToolExit(),
+        );
       });
 
       _testInMemory('treats missing pubspec.yaml as empty', () async {
         final Directory directory = globals.fs.directory('myproject')..createSync(recursive: true);
-        expect(FlutterProject.fromDirectory(directory).manifest.isEmpty, true);
+        expect(
+          FlutterProject.fromDirectory(directory, logger: globals.logger).manifest.isEmpty,
+          true,
+        );
       });
 
       _testInMemory('reads valid pubspec.yaml', () async {
@@ -90,7 +104,10 @@ void main() {
         directory.childFile('pubspec.yaml')
           ..createSync(recursive: true)
           ..writeAsStringSync(validPubspec);
-        expect(FlutterProject.fromDirectory(directory).manifest.appName, 'hello');
+        expect(
+          FlutterProject.fromDirectory(directory, logger: globals.logger).manifest.appName,
+          'hello',
+        );
       });
 
       _testInMemory('reads dependencies from pubspec.yaml', () async {
@@ -98,24 +115,24 @@ void main() {
         directory.childFile('pubspec.yaml')
           ..createSync(recursive: true)
           ..writeAsStringSync(validPubspecWithDependencies);
-        expect(FlutterProject.fromDirectory(directory).manifest.dependencies, <String>{
-          'plugin_a',
-          'plugin_b',
-        });
+        expect(
+          FlutterProject.fromDirectory(directory, logger: globals.logger).manifest.dependencies,
+          <String>{'plugin_a', 'plugin_b'},
+        );
       });
 
       _testInMemory('sets up location', () async {
         final Directory directory = globals.fs.directory('myproject');
         expect(
-          FlutterProject.fromDirectory(directory).directory.absolute.path,
+          FlutterProject.fromDirectory(directory, logger: globals.logger).directory.absolute.path,
           directory.absolute.path,
         );
         expect(
-          FlutterProject.fromDirectoryTest(directory).directory.absolute.path,
+          FlutterProject.fromDirectoryTest(directory, globals.logger).directory.absolute.path,
           directory.absolute.path,
         );
         expect(
-          FlutterProject.current().directory.absolute.path,
+          FlutterProject.current(globals.fs, logger: globals.logger).directory.absolute.path,
           globals.fs.currentDirectory.absolute.path,
         );
       });
@@ -123,7 +140,11 @@ void main() {
       _testInMemory('buildDirectory uses configured build-dir', () async {
         final Directory directory = globals.fs.directory('myproject');
         globals.config.setValue('build-dir', 'custom_build');
-        final FlutterProject project = FlutterProject.fromDirectory(directory);
+        final FlutterProject project = FlutterProject.fromDirectory(
+          directory,
+          config: globals.config,
+          logger: globals.logger,
+        );
         expect(project.buildDirectory.path, globals.fs.path.join(directory.path, 'custom_build'));
         expect(
           project.ephemeralDirectories.map((Directory d) => d.path),
@@ -181,7 +202,10 @@ dependencies:
   my_plugin:
     sdk: flutter
 ''');
-        final FlutterProject project = FlutterProject.fromDirectory(directory);
+        final FlutterProject project = FlutterProject.fromDirectory(
+          directory,
+          logger: globals.logger,
+        );
 
         await regeneratePlatformSpecificTooling(project, releaseMode: false);
 
@@ -336,7 +360,7 @@ dependencies:
           ProcessManager: () => FakeProcessManager.any(),
           Pub: ThrowingPub.new,
           FlutterProjectFactory: () =>
-              FlutterProjectFactory(logger: logger, fileSystem: globals.fs),
+              FlutterProjectFactory(logger: logger, fileSystem: globals.fs, config: globals.config),
         },
       );
 
@@ -359,7 +383,7 @@ dependencies:
           ProcessManager: () => FakeProcessManager.any(),
           Pub: ThrowingPub.new,
           FlutterProjectFactory: () =>
-              FlutterProjectFactory(logger: logger, fileSystem: globals.fs),
+              FlutterProjectFactory(logger: logger, fileSystem: globals.fs, config: globals.config),
         },
       );
 
@@ -382,7 +406,7 @@ dependencies:
           ProcessManager: () => FakeProcessManager.any(),
           Pub: ThrowingPub.new,
           FlutterProjectFactory: () =>
-              FlutterProjectFactory(logger: logger, fileSystem: globals.fs),
+              FlutterProjectFactory(logger: logger, fileSystem: globals.fs, config: globals.config),
         },
       );
 
@@ -399,7 +423,7 @@ dependencies:
           ProcessManager: () => FakeProcessManager.any(),
           FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
           FlutterProjectFactory: () =>
-              FlutterProjectFactory(logger: logger, fileSystem: globals.fs),
+              FlutterProjectFactory(logger: logger, fileSystem: globals.fs, config: globals.config),
         },
       );
       testUsingContext(
@@ -576,8 +600,11 @@ dependencies {
               gradleV: '8.0',
               agpV: '7.4.2',
             );
-            final CompatibilityResult value = await project!.android
-                .hasValidJavaGradleAgpVersions();
+            final CompatibilityResult value = await project!.android.hasValidJavaGradleAgpVersions(
+              java: java,
+              logger: logger,
+              processManager: processManager,
+            );
             expect(value.success, isTrue);
           },
           java: java,
@@ -604,8 +631,11 @@ dependencies {
               gradleV: '6.7.1',
               agpV: '4.2.0',
             );
-            final CompatibilityResult value = await project!.android
-                .hasValidJavaGradleAgpVersions();
+            final CompatibilityResult value = await project!.android.hasValidJavaGradleAgpVersions(
+              java: java,
+              logger: logger,
+              processManager: processManager,
+            );
             expect(value.success, isTrue);
           },
           java: java,
@@ -633,8 +663,11 @@ dependencies {
               gradleV: '7.3.3',
               agpV: '7.2.0',
             );
-            final CompatibilityResult value = await project!.android
-                .hasValidJavaGradleAgpVersions();
+            final CompatibilityResult value = await project!.android.hasValidJavaGradleAgpVersions(
+              java: java,
+              logger: logger,
+              processManager: processManager,
+            );
             expect(value.success, isTrue);
           },
           java: java,
@@ -666,8 +699,11 @@ dependencies {
               gradleV: gradleV,
               agpV: agpV,
             );
-            final CompatibilityResult value = await project!.android
-                .hasValidJavaGradleAgpVersions();
+            final CompatibilityResult value = await project!.android.hasValidJavaGradleAgpVersions(
+              java: java,
+              logger: logger,
+              processManager: processManager,
+            );
             expect(value.success, isFalse);
             // Should not have the valid string
             expect(
@@ -721,8 +757,11 @@ dependencies {
               gradleV: gradleV,
               agpV: agpV,
             );
-            final CompatibilityResult value = await project!.android
-                .hasValidJavaGradleAgpVersions();
+            final CompatibilityResult value = await project!.android.hasValidJavaGradleAgpVersions(
+              java: java,
+              logger: logger,
+              processManager: processManager,
+            );
             expect(value.success, isFalse);
             // Should not have the valid string.
             expect(
@@ -760,8 +799,11 @@ dependencies {
               gradleV: gradleV,
               agpV: agpV,
             );
-            final CompatibilityResult value = await project!.android
-                .hasValidJavaGradleAgpVersions();
+            final CompatibilityResult value = await project!.android.hasValidJavaGradleAgpVersions(
+              java: java,
+              logger: logger,
+              processManager: processManager,
+            );
             expect(value.success, isFalse);
             // Should not have the valid string.
             expect(
@@ -801,8 +843,11 @@ dependencies {
               gradleV: gradleV,
               agpV: agpV,
             );
-            final CompatibilityResult value = await project!.android
-                .hasValidJavaGradleAgpVersions();
+            final CompatibilityResult value = await project!.android.hasValidJavaGradleAgpVersions(
+              java: java,
+              logger: logger,
+              processManager: processManager,
+            );
             expect(value.success, isFalse);
             // Should not have the valid string.
             expect(
@@ -842,8 +887,11 @@ dependencies {
               gradleV: gradleV,
               agpV: agpV,
             );
-            final CompatibilityResult value = await project!.android
-                .hasValidJavaGradleAgpVersions();
+            final CompatibilityResult value = await project!.android.hasValidJavaGradleAgpVersions(
+              java: java,
+              logger: logger,
+              processManager: processManager,
+            );
             expect(value.success, isFalse);
             // Should not have the valid string.
             expect(
@@ -881,8 +929,11 @@ dependencies {
               gradleV: gradleV,
               agpV: '',
             );
-            final CompatibilityResult value = await project!.android
-                .hasValidJavaGradleAgpVersions();
+            final CompatibilityResult value = await project!.android.hasValidJavaGradleAgpVersions(
+              java: java,
+              logger: logger,
+              processManager: processManager,
+            );
             expect(value.success, isFalse);
             // Should not have the valid string.
             expect(
@@ -912,6 +963,7 @@ dependencies {
           toolContext: FakeToolContext.macosHost(processManager: FakeProcessManager.any()),
         );
         flutterProjectFactory = FlutterProjectFactory(
+          config: FakeConfig(),
           fileSystem: fs,
           logger: logger,
           xcodeProjectInterpreter: xcodeProjectInterpreter,
@@ -1159,6 +1211,7 @@ android {
         testPlistUtils = FakePlistParser();
         xcodeProjectInterpreter = FakeXcodeProjectInterpreter();
         flutterProjectFactory = FlutterProjectFactory(
+          config: FakeConfig(),
           fileSystem: fs,
           logger: logger,
           plistParser: testPlistUtils,
@@ -1722,7 +1775,10 @@ android {
                 .childFile('gradle-wrapper.properties')
               ..createSync(recursive: true);
 
-        final FlutterProject project = FlutterProject.fromDirectory(tempDir);
+        final FlutterProject project = FlutterProject.fromDirectory(
+          tempDir,
+          logger: globals.logger,
+        );
 
         expect(project.android.gradleWrapperPropertiesFile.path, expected.path);
       });
@@ -1735,7 +1791,10 @@ android {
 
         final File expected = androidDir.childFile('build.gradle')..createSync(recursive: true);
 
-        final FlutterProject project = FlutterProject.fromDirectory(tempDir);
+        final FlutterProject project = FlutterProject.fromDirectory(
+          tempDir,
+          logger: globals.logger,
+        );
 
         expect(project.android.appGradleFile.path, expected.path);
       });
@@ -1748,7 +1807,10 @@ android {
 
         final File expected = androidDir.childFile('build.gradle.kts')..createSync(recursive: true);
 
-        final FlutterProject project = FlutterProject.fromDirectory(tempDir);
+        final FlutterProject project = FlutterProject.fromDirectory(
+          tempDir,
+          logger: globals.logger,
+        );
 
         expect(project.android.appGradleFile.path, expected.path);
       });
@@ -1763,7 +1825,10 @@ android {
           androidDir.childFile('build.gradle.kts').createSync(recursive: true);
           final File expected = androidDir.childFile('build.gradle')..createSync(recursive: true);
 
-          final FlutterProject project = FlutterProject.fromDirectory(tempDir);
+          final FlutterProject project = FlutterProject.fromDirectory(
+            tempDir,
+            logger: globals.logger,
+          );
 
           expect(project.android.appGradleFile.path, expected.path);
         },
@@ -1780,7 +1845,10 @@ android {
 
           final File expected = androidDir.childFile('build.gradle')..createSync(recursive: true);
 
-          final FlutterProject project = FlutterProject.fromDirectory(tempDir);
+          final FlutterProject project = FlutterProject.fromDirectory(
+            tempDir,
+            logger: globals.logger,
+          );
 
           expect(project.android.hostAppGradleFile.path, expected.path);
         },
@@ -1797,7 +1865,10 @@ android {
           final File expected = androidDir.childFile('build.gradle.kts')
             ..createSync(recursive: true);
 
-          final FlutterProject project = FlutterProject.fromDirectory(tempDir);
+          final FlutterProject project = FlutterProject.fromDirectory(
+            tempDir,
+            logger: globals.logger,
+          );
 
           expect(project.android.hostAppGradleFile.path, expected.path);
         },
@@ -1810,7 +1881,10 @@ android {
         androidDir.childFile('build.gradle.kts').createSync(recursive: true);
         final File expected = androidDir.childFile('build.gradle')..createSync(recursive: true);
 
-        final FlutterProject project = FlutterProject.fromDirectory(tempDir);
+        final FlutterProject project = FlutterProject.fromDirectory(
+          tempDir,
+          logger: globals.logger,
+        );
 
         expect(project.android.hostAppGradleFile.path, expected.path);
       });
@@ -1826,7 +1900,10 @@ android {
           final File expected = androidDir.childFile('settings.gradle')
             ..createSync(recursive: true);
 
-          final FlutterProject project = FlutterProject.fromDirectory(tempDir);
+          final FlutterProject project = FlutterProject.fromDirectory(
+            tempDir,
+            logger: globals.logger,
+          );
 
           expect(project.android.settingsGradleFile.path, expected.path);
         },
@@ -1843,7 +1920,10 @@ android {
           final File expected = androidDir.childFile('settings.gradle.kts')
             ..createSync(recursive: true);
 
-          final FlutterProject project = FlutterProject.fromDirectory(tempDir);
+          final FlutterProject project = FlutterProject.fromDirectory(
+            tempDir,
+            logger: globals.logger,
+          );
 
           expect(project.android.settingsGradleFile.path, expected.path);
         },
@@ -1856,7 +1936,10 @@ android {
         androidDir.childFile('settings.gradle.kts').createSync(recursive: true);
         final File expected = androidDir.childFile('settings.gradle')..createSync(recursive: true);
 
-        final FlutterProject project = FlutterProject.fromDirectory(tempDir);
+        final FlutterProject project = FlutterProject.fromDirectory(
+          tempDir,
+          logger: globals.logger,
+        );
 
         expect(project.android.settingsGradleFile.path, expected.path);
       });
@@ -1876,7 +1959,10 @@ android {
                 .childFile('AndroidManifest.xml')
               ..createSync(recursive: true);
 
-        final FlutterProject project = FlutterProject.fromDirectory(tempDir);
+        final FlutterProject project = FlutterProject.fromDirectory(
+          tempDir,
+          logger: globals.logger,
+        );
 
         expect(project.android.appManifestFile.path, expected.path);
       });
@@ -1896,7 +1982,10 @@ android {
                 .childFile('AndroidManifest.xml')
               ..createSync(recursive: true);
 
-        final FlutterProject project = FlutterProject.fromDirectory(tempDir);
+        final FlutterProject project = FlutterProject.fromDirectory(
+          tempDir,
+          logger: globals.logger,
+        );
 
         expect(project.android.appManifestFile.path, expected.path);
       });
@@ -1917,7 +2006,10 @@ android {
                 .childFile('AndroidManifest.xml')
               ..createSync(recursive: true);
 
-        final FlutterProject project = FlutterProject.fromDirectory(tempDir);
+        final FlutterProject project = FlutterProject.fromDirectory(
+          tempDir,
+          logger: globals.logger,
+        );
 
         expect(project.android.appManifestFile.path, expected.path);
       });
@@ -1930,7 +2022,10 @@ android {
         final File expected = androidDir.childFile('AndroidManifest.xml')
           ..createSync(recursive: true);
 
-        final FlutterProject project = FlutterProject.fromDirectory(tempDir);
+        final FlutterProject project = FlutterProject.fromDirectory(
+          tempDir,
+          logger: globals.logger,
+        );
 
         expect(project.android.appManifestFile.path, expected.path);
       });
@@ -1946,7 +2041,10 @@ android {
           final File expected = androidDir.childFile('local.properties')
             ..createSync(recursive: true);
 
-          final FlutterProject project = FlutterProject.fromDirectory(tempDir);
+          final FlutterProject project = FlutterProject.fromDirectory(
+            tempDir,
+            logger: globals.logger,
+          );
 
           expect(project.android.localPropertiesFile.path, expected.path);
         },
@@ -1989,7 +2087,7 @@ resolution: workspace
 ''');
 
         expect(
-          FlutterProject.fromDirectory(directory).workspaceProjects
+          FlutterProject.fromDirectory(directory, logger: globals.logger).workspaceProjects
               .map((FlutterProject subproject) => subproject.manifest.appName)
               .toList(),
           <String>['child1', 'child2', 'child2_example'],
@@ -2022,7 +2120,7 @@ resolution: workspace
 ''');
 
         expect(
-          FlutterProject.fromDirectory(directory).workspaceProjects
+          FlutterProject.fromDirectory(directory, logger: globals.logger).workspaceProjects
               .map((FlutterProject subproject) => subproject.manifest.appName)
               .toList(),
           <String>['child1', 'child2'],
@@ -2059,7 +2157,7 @@ resolution: workspace
 ''');
 
         expect(
-          FlutterProject.fromDirectory(directory).workspaceProjects
+          FlutterProject.fromDirectory(directory, logger: globals.logger).workspaceProjects
               .map((FlutterProject subproject) => subproject.manifest.appName)
               .toSet(),
           <String>{'child1', 'child2'},
@@ -2076,7 +2174,10 @@ flutter:
 workspace:
 - ''
 ''');
-        expect(FlutterProject.fromDirectory(directory).workspaceProjects, isEmpty);
+        expect(
+          FlutterProject.fromDirectory(directory, logger: globals.logger).workspaceProjects,
+          isEmpty,
+        );
       });
 
       _testInMemory('handles Windows backslash separators in workspace entries', () async {
@@ -2106,7 +2207,7 @@ resolution: workspace
 ''');
 
         expect(
-          FlutterProject.fromDirectory(directory).workspaceProjects
+          FlutterProject.fromDirectory(directory, logger: globals.logger).workspaceProjects
               .map((FlutterProject subproject) => subproject.manifest.appName)
               .toSet(),
           <String>{'child1', 'child2'},
@@ -2156,7 +2257,7 @@ resolution: workspace
 ''');
 
           expect(
-            FlutterProject.fromDirectory(directory).workspaceProjects
+            FlutterProject.fromDirectory(directory, logger: globals.logger).workspaceProjects
                 .map((FlutterProject subproject) => subproject.manifest.appName)
                 .toSet(),
             <String>{'other'},
@@ -2183,8 +2284,14 @@ flutter:
 resolution: workspace
 ''');
 
-        final FlutterProject parentProject = FlutterProject.fromDirectory(directory);
-        final FlutterProject childProject = FlutterProject.fromDirectory(child1Dir);
+        final FlutterProject parentProject = FlutterProject.fromDirectory(
+          directory,
+          logger: globals.logger,
+        );
+        final FlutterProject childProject = FlutterProject.fromDirectory(
+          child1Dir,
+          logger: globals.logger,
+        );
 
         expect(
           globals.fs.path.canonicalize(childProject.workspaceRoot!.directory.path),
@@ -2213,6 +2320,7 @@ resolution: workspace
           globals.fs.currentDirectory = directory;
           final FlutterProject childProject = FlutterProject.fromDirectory(
             globals.fs.directory('child1'),
+            logger: globals.logger,
           );
           expect(
             globals.fs.path.canonicalize(childProject.workspaceRoot!.directory.path),
@@ -2252,8 +2360,14 @@ resolution: workspace
             ..createSync(recursive: true)
             ..writeAsStringSync('invalid: yaml: [broken');
 
-          final FlutterProject parentProject = FlutterProject.fromDirectory(directory);
-          final FlutterProject childProject = FlutterProject.fromDirectory(validChildDir);
+          final FlutterProject parentProject = FlutterProject.fromDirectory(
+            directory,
+            logger: globals.logger,
+          );
+          final FlutterProject childProject = FlutterProject.fromDirectory(
+            validChildDir,
+            logger: globals.logger,
+          );
 
           expect(
             globals.fs.path.canonicalize(childProject.workspaceRoot!.directory.path),
@@ -2274,6 +2388,7 @@ resolution: workspace
       testPlistParser = FakePlistParser();
       mockXcodeProjectInterpreter = FakeXcodeProjectInterpreter();
       flutterProjectFactory = FlutterProjectFactory(
+        config: FakeConfig(),
         fileSystem: fs,
         logger: logger,
         plistParser: testPlistParser,
@@ -2545,6 +2660,33 @@ resolution: workspace
         },
       );
     });
+
+    testWithoutContext('FlutterProjectFactory lazily evaluates featureFlagsBuilder', () {
+      final fs = MemoryFileSystem.test();
+      final Directory projectDir = fs.directory('app');
+      projectDir.childFile('pubspec.yaml')
+        ..createSync(recursive: true)
+        ..writeAsStringSync(validPubspec);
+      projectDir.childDirectory('ios').createSync(recursive: true);
+      var featureFlagsBuilderCalls = 0;
+      final factory = FlutterProjectFactory(
+        config: FakeConfig(),
+        fileSystem: fs,
+        logger: BufferLogger.test(),
+        featureFlagsBuilder: () {
+          featureFlagsBuilderCalls++;
+          return TestFeatureFlags(isSwiftPackageManagerEnabled: true);
+        },
+        xcode: Xcode.test(
+          toolContext: FakeToolContext.macosHost(processManager: FakeProcessManager.any()),
+        ),
+      );
+      expect(featureFlagsBuilderCalls, 0);
+
+      final FlutterProject project = factory.fromDirectory(projectDir);
+      expect(featureFlagsBuilderCalls, 1);
+      expect(project.ios.usesSwiftPackageManager, isTrue);
+    });
   });
 }
 
@@ -2553,8 +2695,40 @@ Future<void> regeneratePlatformSpecificTooling(
   required bool releaseMode,
 }) {
   return project.regeneratePlatformSpecificTooling(
-    toolContext: FakeToolContext(fs: project.directory.fileSystem),
+    toolContext: FakeToolContext(
+      artifacts: globals.artifacts,
+      botDetector: globals.botDetector,
+      cache: globals.cache,
+      config: globals.config,
+      customDevicesConfig: globals.customDevicesConfig,
+      flutterVersion: globals.flutterVersion,
+      fs: globals.fs,
+      git: globals.git,
+      localEngineLocator: globals.localEngineLocator,
+      logger: globals.logger,
+      nativeAssetsBuilder: globals.nativeAssetsBuilder,
+      os: globals.os,
+      outputPreferences: globals.outputPreferences,
+      persistentToolState: globals.persistentToolState,
+      platform: globals.platform,
+      preRunValidator: globals.preRunValidator,
+      processInfo: globals.processInfo,
+      processManager: globals.processManager,
+      processUtils: globals.processUtils,
+      projectFactory: globals.projectFactory,
+      shutdownHooks: globals.shutdownHooks,
+      stdio: globals.stdio,
+      systemClock: globals.systemClock,
+      terminal: globals.terminal,
+      userMessages: globals.userMessages,
+    ),
+    analytics: globals.analytics,
+    cocoaPods: globals.cocoaPods,
+    featureFlags: featureFlags,
+    gradleUtils: globals.gradleUtils,
+    plistParser: FakePlistParser(),
     releaseMode: releaseMode,
+    templateRenderer: globals.templateRenderer,
   );
 }
 
@@ -2575,7 +2749,7 @@ Future<FlutterProject> someProject({
   androidDirectory
       .childFile('AndroidManifest.xml')
       .writeAsStringSync(androidManifestOverride ?? '<manifest></manifest>');
-  return FlutterProject.fromDirectory(directory);
+  return const DelegatingToolContext().projectFactory.fromDirectory(directory);
 }
 
 Future<FlutterProject> projectWithPluginDependency() async {
@@ -2600,7 +2774,7 @@ dev_dependencies:
   final Directory androidDirectory = directory.childDirectory('android')
     ..createSync(recursive: true);
   androidDirectory.childFile('AndroidManifest.xml').writeAsStringSync('<manifest></manifest>');
-  return FlutterProject.fromDirectory(directory);
+  return const DelegatingToolContext().projectFactory.fromDirectory(directory);
 }
 
 Future<FlutterProject> aPluginProject({bool legacy = true, bool includeAndroidMain = false}) async {
@@ -2648,7 +2822,7 @@ import io.flutter.embedding.engine.plugins.FlutterPlugin;
 class MyPlugin extends FluttPlugin { /* ... */ }
 ''');
   }
-  return FlutterProject.fromDirectory(directory);
+  return const DelegatingToolContext().projectFactory.fromDirectory(directory);
 }
 
 Future<FlutterProject> aModuleProject() async {
@@ -2660,7 +2834,7 @@ flutter:
   module:
     androidPackage: com.example
 ''');
-  return FlutterProject.fromDirectory(directory);
+  return const DelegatingToolContext().projectFactory.fromDirectory(directory);
 }
 
 FakeCommand createKgpVersionCommand(String kgpV, {String? gradlewPath}) {
@@ -2709,14 +2883,14 @@ void _testInMemory(
   ProcessManager? processManager,
   AndroidSdk? androidSdk,
 }) {
-  Cache.flutterRoot = getFlutterRoot();
+  final String flutterRoot = getFlutterRoot();
   final FileSystem testFileSystem = fileSystem ?? getFileSystemForPlatform();
 
-  final Directory fakeFlutterRoot = testFileSystem.directory(Cache.flutterRoot);
+  final Directory fakeFlutterRoot = testFileSystem.directory(flutterRoot);
   _insertFakeGradleArtifactDir(flutterRoot: fakeFlutterRoot);
   transfer(
     globals.fs
-        .directory(Cache.flutterRoot)
+        .directory(flutterRoot)
         .childDirectory('packages')
         .childDirectory('flutter_tools')
         .childDirectory('templates'),
@@ -2727,7 +2901,7 @@ void _testInMemory(
   dummyTemplateImagesDirectory.createSync(recursive: true);
   writePackageConfigFiles(
     directory: testFileSystem
-        .directory(Cache.flutterRoot)
+        .directory(flutterRoot)
         .childDirectory('packages')
         .childDirectory('flutter_tools'),
     mainLibName: 'app_name',
@@ -2747,6 +2921,7 @@ void _testInMemory(
       // Intentionally null if not set. Some ios tests fail if this is a fake.
       AndroidSdk: () => androidSdk,
       Cache: () => Cache(
+        flutterRoot: flutterRoot,
         logger: globals.logger,
         fileSystem: testFileSystem,
         osUtils: globals.os,

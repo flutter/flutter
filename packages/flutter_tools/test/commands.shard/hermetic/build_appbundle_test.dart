@@ -40,7 +40,6 @@ void main() {
   setUp(() {
     fs = MemoryFileSystem.test();
     final Directory flutterRoot = fs.directory('flutter');
-    Cache.flutterRoot = flutterRoot.path;
     logger = BufferLogger.test();
     platform = FakePlatform(environment: const <String, String>{'PATH': ''});
     processManager = FakeProcessManager.empty();
@@ -55,7 +54,7 @@ void main() {
       logger: logger,
       platform: platform,
       processManager: processManager,
-      projectFactory: FlutterProjectFactory(fileSystem: fs, logger: logger),
+      projectFactory: FlutterProjectFactory(fileSystem: fs, logger: logger, config: FakeConfig()),
     );
     androidContext = FakeAndroidContext(androidSdk: FakeAndroidSdk());
   });

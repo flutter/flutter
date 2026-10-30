@@ -520,7 +520,6 @@ void main() {
   group('Simulator screenshot', () {
     testWithoutContext('supports screenshots', () async {
       final xcode = Xcode.test(
-        processManager: FakeProcessManager.any(),
         toolContext: FakeToolContext.macosHost(processManager: FakeProcessManager.any()),
       );
       final Logger logger = BufferLogger.test();
@@ -729,7 +728,6 @@ void main() {
       mockIosProject = FakeIosProject();
       simControl = FakeSimControl();
       xcode = Xcode.test(
-        processManager: FakeProcessManager.any(),
         toolContext: FakeToolContext.macosHost(processManager: FakeProcessManager.any()),
       );
     });
@@ -1246,7 +1244,6 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
     setUp(() {
       fakeProcessManager = FakeProcessManager.empty();
       xcode = Xcode.test(
-        processManager: FakeProcessManager.any(),
         toolContext: FakeToolContext.macosHost(processManager: FakeProcessManager.any()),
       );
 
@@ -1260,7 +1257,6 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
         ),
       ]);
       xcodeBadSimctl = Xcode.test(
-        processManager: fakeProcessManagerBadSimctl,
         toolContext: FakeToolContext.macosHost(processManager: fakeProcessManagerBadSimctl),
       );
       logger = BufferLogger.test();
@@ -1710,7 +1706,6 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
     setUp(() {
       simControl = FakeSimControl();
       xcode = Xcode.test(
-        processManager: FakeProcessManager.any(),
         toolContext: FakeToolContext.macosHost(processManager: FakeProcessManager.any()),
       );
       testPlistParser = FakePlistParser();

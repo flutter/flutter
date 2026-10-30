@@ -20,12 +20,15 @@ import 'src/base/file_system.dart';
 import 'src/base/io.dart';
 import 'src/base/logger.dart';
 import 'src/base/process.dart';
+import 'src/cache.dart';
+import 'src/context/tool_context.dart';
 import 'src/context/tool_dependencies.dart';
 import 'src/context_runner.dart';
 import 'src/device.dart';
 import 'src/doctor.dart';
 import 'src/emulator.dart';
 import 'src/experimental/extension_discovery.dart';
+import 'src/experimental/extension_manager.dart';
 import 'src/features.dart';
 import 'src/globals.dart' as globals;
 import 'src/reporting/crash_reporting.dart';
@@ -115,8 +118,19 @@ Future<int> run(
     return context.run<int>(
       overrides: <Type, Generator>{DeviceManager: () => toolDeps.deviceManager},
       body: () async {
+        final ToolContext(:Cache cache, :Logger logger) = toolDeps.toolContext;
+        DoctorValidatorsProvider createDoctorValidatorsProvider({
+          ExtensionManager? extensionManager,
+        }) => DoctorValidatorsProvider.create(
+          appleContext: toolDeps.appleContext,
+          deviceManager: toolDeps.deviceManager,
+          extensionManager: extensionManager,
+          featureFlags: toolDeps.featureFlags,
+          toolContext: toolDeps.toolContext,
+        );
         final runner = FlutterCommandRunner(
           analytics: toolDeps.analytics,
+          deviceManager: toolDeps.deviceManager,
           extensionManager: toolDeps.extensionManager,
           featureFlags: featureFlags,
           toolContext: toolDeps.toolContext,
@@ -191,7 +205,7 @@ Future<int> run(
                 return await exitWithHooks(
                   0,
                   analytics: toolDeps.analytics,
-                  logger: toolDeps.toolContext.logger,
+                  logger: logger,
                   shutdownHooks: shutdownHooks,
                 );
               }
@@ -212,10 +226,12 @@ Future<int> run(
                 reportCrashes!,
                 getVersion,
                 shutdownHooks,
+                cache: cache,
+                doctorValidatorsProviderBuilder: createDoctorValidatorsProvider,
                 usingLocalEngine: usingLocalEngine,
                 analytics: toolDeps.analytics,
                 featureFlags: featureFlags,
-                logger: toolDeps.toolContext.logger,
+                logger: logger,
               );
             }
           },
@@ -233,10 +249,12 @@ Future<int> run(
               reportCrashes!,
               getVersion,
               shutdownHooks,
+              cache: cache,
+              doctorValidatorsProviderBuilder: createDoctorValidatorsProvider,
               usingLocalEngine: usingLocalEngine,
               analytics: toolDeps.analytics,
               featureFlags: featureFlags,
-              logger: toolDeps.toolContext.logger,
+              logger: logger,
             );
           },
         )!;
@@ -260,6 +278,8 @@ Future<int> _handleToolError(
   bool reportCrashes,
   String Function() getFlutterVersion,
   ShutdownHooks shutdownHooks, {
+  required Cache cache,
+  required DoctorValidatorsProviderBuilder doctorValidatorsProviderBuilder,
   required bool usingLocalEngine,
   required Analytics analytics,
   required FeatureFlags featureFlags,
@@ -273,6 +293,8 @@ Future<int> _handleToolError(
     reportCrashes,
     getFlutterVersion,
     shutdownHooks,
+    cache: cache,
+    doctorValidatorsProviderBuilder: doctorValidatorsProviderBuilder,
     usingLocalEngine: usingLocalEngine,
     analytics: analytics,
     featureFlags: featureFlags,
@@ -288,6 +310,8 @@ Future<int> _handleToolErrorImpl(
   bool reportCrashes,
   String Function() getFlutterVersion,
   ShutdownHooks shutdownHooks, {
+  required Cache cache,
+  required DoctorValidatorsProviderBuilder doctorValidatorsProviderBuilder,
   required bool usingLocalEngine,
   required Analytics analytics,
   required FeatureFlags featureFlags,
@@ -388,7 +412,17 @@ Future<int> _handleToolErrorImpl(
         verbose: true /* Capture flutter doctor -v */,
       );
 
-      final doctorText = DoctorText(doctorLogger);
+      final doctorText = DoctorText(
+        doctorLogger,
+        doctor: Doctor(
+          analytics: analytics,
+          cache: cache,
+          clock: globals.systemClock,
+          logger: doctorLogger,
+          outputPreferences: globals.outputPreferences,
+          validatorsProviderBuilder: doctorValidatorsProviderBuilder,
+        ),
+      );
 
       final details = CrashDetails(
         command: _crashCommand(args),

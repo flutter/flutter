@@ -1032,9 +1032,11 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
       analytics: analytics,
       app: app,
       buildInfo: buildInfo,
+      cocoaPods: cocoaPods,
       plistParser: plistParser,
       templateRenderer: _templateRenderer,
       toolContext: toolContext,
+      xcode: xcode,
       xcodeProjectInterpreter: xcodeProjectInterpreter,
       targetOverride: targetFile,
       environmentType: environmentType,
@@ -1048,8 +1050,6 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
           await disablePortPublication,
       verboseLogging:
           logger.isVerbose || (globalResults?[FlutterGlobalOptions.kVerboseFlag] == true),
-      cocoaPods: cocoaPods,
-      xcode: xcode,
     );
     xcodeBuildResult = result;
 

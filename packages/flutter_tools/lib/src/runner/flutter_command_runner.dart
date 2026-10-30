@@ -6,6 +6,7 @@ import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:completion/completion.dart';
 import 'package:file/file.dart';
+import 'package:meta/meta.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../artifacts.dart';
@@ -24,9 +25,9 @@ import '../base/utils.dart';
 import '../cache.dart';
 import '../context/tool_context.dart';
 import '../convert.dart';
+import '../device.dart';
 import '../experimental/extension_manager.dart';
 import '../features.dart';
-import '../globals.dart' as globals;
 import '../resident_runner.dart';
 import '../tester/flutter_tester.dart';
 import '../version.dart';
@@ -66,6 +67,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
   FlutterCommandRunner({
     required ToolContext toolContext,
     this._analytics = const NoOpAnalytics(),
+    this._deviceManager,
     this._extensionManager,
     bool verboseHelp = false,
     this._featureFlags,
@@ -304,12 +306,17 @@ class FlutterCommandRunner extends CommandRunner<void> {
   }
 
   final Analytics _analytics;
+  final DeviceManager? _deviceManager;
   final ExtensionManager? _extensionManager;
   final FeatureFlags? _featureFlags;
   final ToolContext _toolContext;
 
   /// The [Analytics] instance.
   Analytics get analytics => _analytics;
+
+  /// The [DeviceManager] instance, if provided.
+  @protected
+  DeviceManager? get deviceManager => _deviceManager;
 
   /// The [ToolContext] instance.
   ToolContext get toolContext => _toolContext;
@@ -610,7 +617,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
         // See if the user specified a specific device.
         final specifiedDeviceId = topLevelResults[FlutterGlobalOptions.kDeviceIdOption] as String?;
         if (specifiedDeviceId != null) {
-          globals.deviceManager?.specifiedDeviceId = specifiedDeviceId;
+          deviceManager?.specifiedDeviceId = specifiedDeviceId;
         }
 
         final bool topLevelMachineFlag =
@@ -628,7 +635,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
           final String status;
           if (topLevelMachineFlag) {
             final Map<String, Object> jsonOut = version.toJson();
-            jsonOut['flutterRoot'] = Cache.flutterRoot!;
+            jsonOut['flutterRoot'] = _toolContext.cache.flutterRoot;
             status = const JsonEncoder.withIndent('  ').convert(jsonOut);
           } else {
             status = version.toString();
@@ -658,7 +665,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
   /// Get the root directories of the repo - the directories containing Dart packages.
   List<String> getRepoRoots() {
     final FileSystem fs = _toolContext.fs;
-    final String root = fs.path.absolute(Cache.flutterRoot!);
+    final String root = fs.path.absolute(_toolContext.cache.flutterRoot);
     // not bin, and not the root
     return <String>['dev', 'examples', 'packages'].map<String>((String item) {
       return fs.path.join(root, item);

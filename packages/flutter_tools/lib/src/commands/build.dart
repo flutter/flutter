@@ -296,7 +296,8 @@ class ExtensionBuildSubCommand extends BuildSubCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final ToolContext(:Artifacts artifacts, :Config config, :FileSystem fs) = toolContext;
+    final ToolContext(:Artifacts artifacts, :Cache cache, :Config config, :FileSystem fs) =
+        toolContext;
     final Directory projectDir = fs.currentDirectory;
     final BuildInfo buildInfo = await getBuildInfo();
     final Directory outputDir = resolveExtensionOutputDir(
@@ -314,7 +315,7 @@ class ExtensionBuildSubCommand extends BuildSubCommand {
 
     final ExtensionBuildResult result = await _buildManager.build(
       buildMode: buildInfo.mode,
-      flutterRoot: fs.directory(Cache.flutterRoot).uri,
+      flutterRoot: fs.directory(cache.flutterRoot).uri,
       mainPath: targetFile,
       outputDir: outputDir.uri,
       projectRoot: projectDir.uri,

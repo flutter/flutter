@@ -61,7 +61,6 @@ void main() {
       processManager = FakeProcessManager.empty();
       logger = BufferLogger.test();
       fileSystem = MemoryFileSystem.test();
-      Cache.flutterRoot = '';
 
       fakeAnalytics = getInitializedFakeAnalyticsInstance(
         fs: fileSystem,
@@ -80,8 +79,9 @@ void main() {
     );
     String sdkLicensesPath() => fileSystem.path.join(sdkPath(), 'licenses');
     String ndkPath(String version) => fileSystem.path.join(sdkPath(), 'ndk', version);
+    String apkAnalyzerName() => apkAnalyzerBinaryName(FakePlatform());
     String apkAnalyzerPath() =>
-        fileSystem.path.join(sdkPath(), 'cmdline-tools', 'latest', 'bin', apkAnalyzerBinaryName);
+        fileSystem.path.join(sdkPath(), 'cmdline-tools', 'latest', 'bin', apkAnalyzerName());
 
     AndroidGradleBuilder createBuilder({
       ToolContext? toolContext,
@@ -105,6 +105,11 @@ void main() {
             fs: fileSystem ?? globals.fs,
             artifacts: artifacts,
             platform: platform,
+            cache: Cache.test(
+              flutterRoot: '/',
+              fileSystem: fileSystem,
+              processManager: processManager ?? FakeProcessManager.any(),
+            ),
           );
       return AndroidGradleBuilder.fromContexts(
         toolContext: resolvedToolContext,
@@ -135,6 +140,7 @@ void main() {
         description,
         body,
         overrides: <Type, Generator>{
+          Cache: () => Cache.test(processManager: processManager, flutterRoot: ''),
           AndroidSdk: () => AndroidSdk(
             fileSystem.directory(missingSdkPath()),
             java: FakeJava(),
@@ -1526,7 +1532,7 @@ void main() {
             fileSystem.directory(sdkPath()).createSync(recursive: true);
             fileSystem
                 .directory(fileSystem.path.join(sdkPath(), 'cmdline-tools', 'latest', 'bin'))
-                .childFile(apkAnalyzerBinaryName)
+                .childFile(apkAnalyzerName())
                 .createSync(recursive: true);
             return AndroidSdk(
               fileSystem.directory(sdkPath()),
@@ -1597,7 +1603,7 @@ void main() {
             fileSystem.directory(sdkPath()).createSync(recursive: true);
             fileSystem
                 .directory(fileSystem.path.join(sdkPath(), 'cmdline-tools', 'latest', 'bin'))
-                .childFile(apkAnalyzerBinaryName)
+                .childFile(apkAnalyzerName())
                 .createSync(recursive: true);
             return AndroidSdk(
               fileSystem.directory(sdkPath()),
@@ -1661,7 +1667,7 @@ void main() {
             fileSystem.directory(sdkPath()).createSync(recursive: true);
             fileSystem
                 .directory(fileSystem.path.join(sdkPath(), 'cmdline-tools', 'latest', 'bin'))
-                .childFile(apkAnalyzerBinaryName)
+                .childFile(apkAnalyzerName())
                 .createSync(recursive: true);
             return AndroidSdk(
               fileSystem.directory(sdkPath()),
@@ -1679,7 +1685,7 @@ void main() {
           fileSystem.directory(sdkPath()).createSync(recursive: true);
           fileSystem
               .directory(fileSystem.path.join(sdkPath(), 'cmdline-tools', 'latest', 'bin'))
-              .childFile(apkAnalyzerBinaryName)
+              .childFile(apkAnalyzerName())
               .createSync(recursive: true);
           final sdk = AndroidSdk(
             fileSystem.directory(sdkPath()),
@@ -1708,7 +1714,7 @@ void main() {
           processManager.addCommand(
             FakeCommand(
               command: <String>[
-                sdk.getCmdlineToolsPath(apkAnalyzerBinaryName)!,
+                sdk.getCmdlineToolsPath(apkAnalyzerName())!,
                 'files',
                 'list',
                 aabFile.path,
@@ -1753,7 +1759,7 @@ void main() {
           fileSystem.directory(sdkPath()).createSync(recursive: true);
           fileSystem
               .directory(fileSystem.path.join(sdkPath(), 'cmdline-tools', 'latest', 'bin'))
-              .childFile(apkAnalyzerBinaryName)
+              .childFile(apkAnalyzerName())
               .createSync(recursive: true);
           final sdk = AndroidSdk(
             fileSystem.directory(sdkPath()),
@@ -1782,7 +1788,7 @@ void main() {
           processManager.addCommand(
             FakeCommand(
               command: <String>[
-                sdk.getCmdlineToolsPath(apkAnalyzerBinaryName)!,
+                sdk.getCmdlineToolsPath(apkAnalyzerName())!,
                 'files',
                 'list',
                 aabFile.path,

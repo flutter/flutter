@@ -314,51 +314,19 @@ class ToolDependencies {
     final Git finalGit =
         git ?? Git(currentPlatform: finalPlatform, runProcessWith: finalProcessUtils);
 
-    // 7. Flutter Version and Cache
+    // 7. Project Factory, Operating System Utilities, and Cache
     final String flutterRoot =
-        Cache.flutterRoot ??
+        cache?.flutterRoot ??
         Cache.defaultFlutterRoot(
           platform: finalPlatform,
           fileSystem: finalFS,
           userMessages: finalUserMessages,
         );
-    Cache.flutterRoot ??= flutterRoot;
 
-    final FlutterVersion finalFlutterVersion =
-        flutterVersion ?? FlutterVersion(fs: finalFS, flutterRoot: flutterRoot, git: finalGit);
-
-    // 8. Analytics
-    finalAnalytics =
-        analytics ??
-        getAnalytics(
-          runningOnBot: isBot,
-          flutterVersion: finalFlutterVersion,
-          environment: finalPlatform.environment,
-          clientIde: finalPlatform.environment['FLUTTER_HOST'],
-          config: finalConfig,
-        );
-    finalAnalyticsInitialized = true;
-    LocalSignals.instance.configureExit(analytics: finalAnalytics, logger: finalLogger);
-
-    // 9. Project Factory and Operating System Utilities
-    final String projectRoot = findProjectRoot(finalFS) ?? finalFS.currentDirectory.path;
-    final FlutterManifest? projectManifest = FlutterManifest.createFromPath(
-      finalFS.path.join(projectRoot, 'pubspec.yaml'),
-      fileSystem: finalFS,
-      logger: finalLogger,
-    );
-
-    final FeatureFlags finalFeatureFlags =
-        featureFlags ??
-        FlutterFeatureFlags(
-          flutterVersion: finalFlutterVersion,
-          featuresConfig: FlutterFeaturesConfig(
-            globalConfig: finalConfig,
-            platform: finalPlatform,
-            projectManifest: projectManifest,
-          ),
-          platform: finalPlatform,
-        );
+    // FeatureFlags depends on FlutterVersion, which depends on Cache, which
+    // depends on FlutterProjectFactory. The project factory resolves feature
+    // flags lazily to break this cycle.
+    late final FeatureFlags finalFeatureFlags;
 
     final PlistParser finalPlistParser =
         plistParser ??
@@ -371,7 +339,7 @@ class ToolDependencies {
         projectFactory ??
         FlutterProjectFactory(
           config: finalConfig,
-          featureFlags: finalFeatureFlags,
+          featureFlagsBuilder: () => finalFeatureFlags,
           fileSystem: finalFS,
           logger: finalLogger,
           plistParser: finalPlistParser,
@@ -389,12 +357,57 @@ class ToolDependencies {
     final Cache finalCache =
         cache ??
         FlutterCache(
+          flutterRoot: flutterRoot,
           fileSystem: finalFS,
           logger: finalLogger,
           platform: finalPlatform,
           osUtils: finalOS,
           projectFactory: finalProjectFactory,
           stdio: finalStdio,
+        );
+
+    // 8. Flutter Version
+    final FlutterVersion finalFlutterVersion =
+        flutterVersion ??
+        FlutterVersion(
+          cache: finalCache,
+          flutterRoot: flutterRoot,
+          fs: finalFS,
+          git: finalGit,
+          logger: finalLogger,
+          platform: finalPlatform,
+        );
+
+    // 9. Analytics and Feature Flags
+    finalAnalytics =
+        analytics ??
+        getAnalytics(
+          runningOnBot: isBot,
+          flutterVersion: finalFlutterVersion,
+          environment: finalPlatform.environment,
+          clientIde: finalPlatform.environment['FLUTTER_HOST'],
+          config: finalConfig,
+        );
+    finalAnalyticsInitialized = true;
+    LocalSignals.instance.configureExit(analytics: finalAnalytics, logger: finalLogger);
+
+    final String projectRoot = findProjectRoot(finalFS) ?? finalFS.currentDirectory.path;
+    final FlutterManifest? projectManifest = FlutterManifest.createFromPath(
+      finalFS.path.join(projectRoot, 'pubspec.yaml'),
+      fileSystem: finalFS,
+      logger: finalLogger,
+    );
+
+    finalFeatureFlags =
+        featureFlags ??
+        FlutterFeatureFlags(
+          flutterVersion: finalFlutterVersion,
+          featuresConfig: FlutterFeaturesConfig(
+            globalConfig: finalConfig,
+            platform: finalPlatform,
+            projectManifest: projectManifest,
+          ),
+          platform: finalPlatform,
         );
 
     // 10. Remaining ToolContext Dependencies
@@ -414,10 +427,15 @@ class ToolDependencies {
 
     final CustomDevicesConfig finalCustomDevicesConfig =
         customDevicesConfig ??
-        CustomDevicesConfig(fileSystem: finalFS, logger: finalLogger, platform: finalPlatform);
+        CustomDevicesConfig(
+          cache: finalCache,
+          fileSystem: finalFS,
+          logger: finalLogger,
+          platform: finalPlatform,
+        );
 
     final PreRunValidator finalPreRunValidator =
-        preRunValidator ?? PreRunValidator(fileSystem: finalFS);
+        preRunValidator ?? PreRunValidator(cache: finalCache, fileSystem: finalFS);
 
     final ProcessInfo finalProcessInfo = processInfo ?? ProcessInfo(finalFS);
 
@@ -483,24 +501,14 @@ class ToolDependencies {
 
     finalXcode =
         xcode ??
-        Xcode(
-          platform: finalPlatform,
-          processManager: finalProcessManager,
-          logger: finalLogger,
-          fileSystem: finalFS,
-          xcodeProjectInterpreter: finalXcodeProjectInterpreter,
-          userMessages: finalUserMessages,
-        );
+        Xcode(toolContext: finalToolContext, xcodeProjectInterpreter: finalXcodeProjectInterpreter);
 
     final CocoaPods finalCocoaPods =
         cocoaPods ??
         CocoaPods(
-          fileSystem: finalFS,
-          processManager: finalProcessManager,
-          logger: finalLogger,
-          platform: finalPlatform,
-          xcodeProjectInterpreter: finalXcodeProjectInterpreter,
           analytics: finalAnalytics,
+          toolContext: finalToolContext,
+          xcodeProjectInterpreter: finalXcodeProjectInterpreter,
         );
 
     final CocoaPodsValidator finalCocoapodsValidator =
@@ -589,10 +597,7 @@ class ToolDependencies {
       javaBuilder: finalJavaBuilder,
     );
 
-    // 13. Doctor, EmulatorManager, and DeviceManager Dependencies
-    final Doctor finalDoctor =
-        doctor ?? Doctor(clock: finalSystemClock, logger: finalLogger, analytics: finalAnalytics);
-
+    // 13. EmulatorManager and DeviceManager Dependencies
     final AndroidWorkflow finalAndroidWorkflow =
         androidWorkflow ??
         AndroidWorkflow(
@@ -667,6 +672,25 @@ class ToolDependencies {
           toolContext: finalToolContext,
           windowsWorkflow: finalWindowsWorkflow,
           xcDevice: finalXCDevice,
+        );
+
+    // 14. Doctor
+    final Doctor finalDoctor =
+        doctor ??
+        Doctor(
+          analytics: finalAnalytics,
+          cache: finalCache,
+          clock: finalSystemClock,
+          logger: finalLogger,
+          outputPreferences: finalOutputPreferences,
+          validatorsProviderBuilder: ({ExtensionManager? extensionManager}) =>
+              DoctorValidatorsProvider.create(
+                appleContext: appleContext,
+                deviceManager: finalDeviceManager,
+                extensionManager: extensionManager,
+                featureFlags: finalFeatureFlags,
+                toolContext: finalToolContext,
+              ),
         );
 
     return ToolDependencies(

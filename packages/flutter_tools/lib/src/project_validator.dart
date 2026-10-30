@@ -2,10 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:process/process.dart';
+
 import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'base/platform.dart';
 import 'cache.dart';
+import 'context/android_context.dart';
+import 'context/tool_context.dart';
 import 'flutter_manifest.dart';
 import 'git.dart';
 import 'project.dart';
@@ -33,17 +37,9 @@ abstract class MachineProjectValidator extends ProjectValidator {
 ///
 /// Specific info from different platforms should be written in their own ProjectValidator.
 class VariableDumpMachineProjectValidator extends MachineProjectValidator {
-  VariableDumpMachineProjectValidator({
-    required this.logger,
-    required this.fileSystem,
-    required this.platform,
-    required this.git,
-  });
+  const VariableDumpMachineProjectValidator({required this._toolContext});
 
-  final Logger logger;
-  final FileSystem fileSystem;
-  final Platform platform;
-  final Git git;
+  final ToolContext _toolContext;
 
   String _toJsonValue(Object? obj) {
     var value = obj.toString();
@@ -56,7 +52,16 @@ class VariableDumpMachineProjectValidator extends MachineProjectValidator {
 
   @override
   Future<List<ProjectValidatorResult>> start(FlutterProject project) async {
-    final version = FlutterVersion(flutterRoot: Cache.flutterRoot!, fs: fileSystem, git: git);
+    final ToolContext(:Cache cache, :FileSystem fs, :Git git, :Logger logger, :Platform platform) =
+        _toolContext;
+    final version = FlutterVersion(
+      cache: cache,
+      flutterRoot: cache.flutterRoot,
+      fs: fs,
+      git: git,
+      logger: logger,
+      platform: platform,
+    );
     final result = <String, Object?>{
       'FlutterProject.directory': project.directory.absolute.path,
       'FlutterProject.metadataFile': project.metadataFile.absolute.path,
@@ -89,7 +94,7 @@ class VariableDumpMachineProjectValidator extends MachineProjectValidator {
       'Platform.pathSeparator': platform.pathSeparator,
 
       // Cache
-      'Cache.flutterRoot': Cache.flutterRoot,
+      'Cache.flutterRoot': cache.flutterRoot,
     };
 
     return <ProjectValidatorResult>[
@@ -116,6 +121,16 @@ class VariableDumpMachineProjectValidator extends MachineProjectValidator {
 ///
 /// Specific info from different platforms should be written in their own ProjectValidator.
 class GeneralInfoProjectValidator extends ProjectValidator {
+  const GeneralInfoProjectValidator({
+    required this.androidContext,
+    required this.logger,
+    required this.processManager,
+  });
+
+  final AndroidContext androidContext;
+  final Logger logger;
+  final ProcessManager processManager;
+
   @override
   Future<List<ProjectValidatorResult>> start(FlutterProject project) async {
     final FlutterManifest flutterManifest = project.manifest;
@@ -139,7 +154,13 @@ class GeneralInfoProjectValidator extends ProjectValidator {
       result.add(_materialDesignResult(flutterManifest));
       result.add(_pluginValidatorResult(flutterManifest));
     }
-    result.add(await project.android.validateJavaAndGradleAgpVersions());
+    result.add(
+      await project.android.validateJavaAndGradleAgpVersions(
+        java: androidContext.java,
+        logger: logger,
+        processManager: processManager,
+      ),
+    );
     return result;
   }
 

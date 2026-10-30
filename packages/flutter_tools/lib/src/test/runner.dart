@@ -5,6 +5,7 @@
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 import 'package:process/process.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../artifacts.dart';
 import '../base/common.dart';
@@ -18,7 +19,6 @@ import '../base/process.dart';
 import '../base/template.dart';
 import '../base/terminal.dart';
 import '../build_info.dart';
-import '../cache.dart';
 import '../compile.dart';
 import '../context/tool_context.dart';
 import '../convert.dart';
@@ -148,8 +148,13 @@ class TestExecutionSpecification {
 
 /// Launching the `flutter_tester` process from the test runner.
 interface class FlutterTestRunner {
-  const FlutterTestRunner({required this._templateRenderer, required this._toolContext});
+  const FlutterTestRunner({
+    this._analytics = const NoOpAnalytics(),
+    required this._templateRenderer,
+    required this._toolContext,
+  });
 
+  final Analytics _analytics;
   final TemplateRenderer _templateRenderer;
   final ToolContext _toolContext;
 
@@ -192,14 +197,15 @@ interface class FlutterTestRunner {
           .absolute
           .uri
           .toFilePath();
-      final WebMemoryFS result = await WebTestCompiler(toolContext: _toolContext).initialize(
-        projectDirectory: flutterProject!.directory,
-        testOutputDir: tempBuildDir,
-        testFiles: testFiles.map((Uri uri) => uri.toFilePath()).toList(),
-        buildInfo: debuggingOptions.buildInfo,
-        webRenderer: debuggingOptions.webConfig.renderer,
-        useWasm: debuggingOptions.webConfig.useWasm,
-      );
+      final WebMemoryFS result =
+          await WebTestCompiler(analytics: _analytics, toolContext: _toolContext).initialize(
+            projectDirectory: flutterProject!.directory,
+            testOutputDir: tempBuildDir,
+            testFiles: testFiles.map((Uri uri) => uri.toFilePath()).toList(),
+            buildInfo: debuggingOptions.buildInfo,
+            webRenderer: debuggingOptions.webConfig.renderer,
+            useWasm: debuggingOptions.webConfig.useWasm,
+          );
       testArgs
         ..add('--platform=chrome')
         ..add('--')
@@ -315,7 +321,7 @@ interface class FlutterTestRunner {
     // The flutter_tools package_config.json is guaranteed to include
     // package:ffi and package:test_core.
     final File flutterToolsPackageConfigFile = fs
-        .directory(fs.path.join(Cache.flutterRoot!, 'packages', 'flutter_tools'))
+        .directory(fs.path.join(toolContext.cache.flutterRoot, 'packages', 'flutter_tools'))
         .childDirectory('.dart_tool')
         .childFile('package_config.json');
     final PackageConfig flutterToolsPackageConfig = PackageConfig.parseBytes(

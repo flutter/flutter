@@ -5,14 +5,17 @@
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/targets/macos.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
+import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
@@ -65,6 +68,14 @@ void main() {
       fileSystem: fileSystem,
       engineVersion: '2',
       analytics: fakeAnalytics,
+      xcode: Xcode.test(
+        toolContext: FakeToolContext(
+          fs: fileSystem,
+          logger: logger,
+          platform: FakePlatform(operatingSystem: 'macos'),
+          processManager: processManager,
+        ),
+      ),
     );
 
     binary = environment.outputDir
@@ -472,7 +483,18 @@ void main() {
         ..writeAsStringSync('testing');
       environment.buildDir.childFile('native_assets.json').createSync();
 
-      await const DebugMacOSBundleFlutterAssets().build(environment);
+      await const DebugMacOSBundleFlutterAssets().build(
+        environment.copyWith(
+          projectFactory: FlutterProjectFactory(
+            config: Config.test(directory: fileSystem.currentDirectory, logger: logger),
+            fileSystem: fileSystem,
+            logger: logger,
+            xcodeProjectInterpreter: FakeXcodeProjectInterpreter(
+              schemes: <String>['Runner', 'strawberry'],
+            ),
+          ),
+        ),
+      );
 
       expect(
         fileSystem
@@ -556,7 +578,18 @@ void main() {
       fileSystem.file('assets/strawberry/ice-cream.png').createSync(recursive: true);
       writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'example');
 
-      await const DebugMacOSBundleFlutterAssets().build(environment);
+      await const DebugMacOSBundleFlutterAssets().build(
+        environment.copyWith(
+          projectFactory: FlutterProjectFactory(
+            config: Config.test(directory: fileSystem.currentDirectory, logger: logger),
+            fileSystem: fileSystem,
+            logger: logger,
+            xcodeProjectInterpreter: FakeXcodeProjectInterpreter(
+              schemes: <String>['Runner', 'strawberry'],
+            ),
+          ),
+        ),
+      );
       final Directory frameworkDirectory = environment.outputDir.childDirectory(
         '/App.framework/Versions/A/Resources/',
       );

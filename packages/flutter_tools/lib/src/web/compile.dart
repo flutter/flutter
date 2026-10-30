@@ -20,7 +20,6 @@ import '../cache.dart';
 import '../compile.dart' show kDdcCanaryFeatures;
 import '../context/tool_context.dart';
 import '../flutter_plugins.dart';
-import '../globals.dart' as globals;
 import '../platform_plugins.dart';
 import '../plugins.dart';
 import '../project.dart';
@@ -71,11 +70,12 @@ class WebBuilder {
       :Artifacts artifacts,
       :Cache cache,
       :Config config,
-      fs: FileSystem fileSystem,
       :FlutterVersion flutterVersion,
+      fs: FileSystem fileSystem,
       :Logger logger,
       :Platform platform,
       :ProcessManager processManager,
+      :FlutterProjectFactory projectFactory,
       :Terminal terminal,
     ) = _toolContext;
     final bool hasWebPlugins = (await findPlugins(
@@ -131,9 +131,10 @@ class WebBuilder {
           processManager: processManager,
           platform: platform,
           analytics: _analytics,
+          projectFactory: projectFactory,
           cacheDir: cache.getRoot(),
           engineVersion: artifacts.usesLocalArtifacts ? null : flutterVersion.engineRevision,
-          flutterRootDir: fileSystem.directory(Cache.flutterRoot),
+          flutterRootDir: fileSystem.directory(cache.flutterRoot),
           // Web uses a different Dart plugin registry.
           // https://github.com/flutter/flutter/issues/80406
           generateDartPluginRegistry: false,
@@ -330,12 +331,12 @@ void sendDdcCompileAnalytics({
   required bool? deprecatedJsInterop,
   required String command,
   required bool succeeded,
-  Analytics? analytics,
+  required Analytics analytics,
 }) {
   if (deprecatedJsInterop == null) {
     return;
   }
-  (analytics ?? globals.analytics).send(
+  analytics.send(
     Event.flutterBuildInfo(
       label: 'web-compile',
       buildType: 'web',

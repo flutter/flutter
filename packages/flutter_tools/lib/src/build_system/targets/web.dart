@@ -16,7 +16,6 @@ import '../../base/logger.dart';
 import '../../base/process.dart';
 import '../../base/template.dart';
 import '../../build_info.dart';
-import '../../cache.dart';
 import '../../convert.dart';
 import '../../dart/language_version.dart';
 import '../../dart/package_map.dart';
@@ -85,11 +84,14 @@ class WebEntrypointTarget extends Target {
       packageConfigFile,
       logger: environment.logger,
     );
-    final FlutterProject flutterProject = FlutterProject.current();
+    final FlutterProject flutterProject = FlutterProject.current(
+      environment.fileSystem,
+      logger: environment.logger,
+    );
     final LanguageVersion languageVersion = determineLanguageVersion(
       environment.fileSystem.file(targetFile),
       packageConfig[flutterProject.manifest.appName],
-      Cache.flutterRoot!,
+      environment.flutterRootDir.path,
     );
 
     // Use the PackageConfig to find the correct package-scheme import path
@@ -1299,8 +1301,9 @@ class WebReleaseBundle extends Target {
 
   /// Create version.json file that contains data about version for package_info
   void createVersionFile(Environment environment, Map<String, String> defines) {
-    final versionInfo =
-        jsonDecode(FlutterProject.current().getVersionInfo()) as Map<String, Object?>;
+    final versionInfo = jsonDecode(
+      FlutterProject.current(environment.fileSystem, logger: environment.logger).getVersionInfo(),
+    ) as Map<String, Object?>;
 
     if (defines.containsKey(kBuildNumber)) {
       versionInfo['build_number'] = defines[kBuildNumber];
@@ -1334,7 +1337,7 @@ class WebReleaseBundle extends Target {
 
     final File sourceRobotoFont = environment.fileSystem.file(
       environment.fileSystem.path.join(
-        Cache.flutterRoot!,
+        environment.flutterRootDir.path,
         'engine',
         'src',
         'flutter',

@@ -204,6 +204,7 @@ void main() {
       final FlutterProject flutterProject = FlutterProjectFactory(
         logger: BufferLogger.test(),
         fileSystem: fileSystem,
+        config: FakeConfig(),
       ).fromDirectory(fileSystem.currentDirectory);
 
       expect(gradleUtils.getExecutable(flutterProject), androidDirectory.childFile('gradlew').path);

@@ -11,6 +11,7 @@ import 'package:process/process.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../artifacts.dart';
+import '../base/config.dart';
 import '../base/error_handling_io.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
@@ -19,6 +20,8 @@ import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../convert.dart';
+import '../macos/xcode.dart';
+import '../project.dart';
 import 'depfile.dart';
 import 'exceptions.dart';
 import 'file_store.dart';
@@ -344,6 +347,8 @@ class Environment {
     required ProcessManager processManager,
     required Platform platform,
     required Analytics analytics,
+    required FlutterProjectFactory projectFactory,
+    Xcode? xcode,
     String? engineVersion,
     required bool generateDartPluginRegistry,
     Directory? buildDir,
@@ -386,6 +391,8 @@ class Environment {
       processManager: processManager,
       platform: platform,
       analytics: analytics,
+      projectFactory: projectFactory,
+      xcode: xcode,
       engineVersion: engineVersion,
       inputs: inputs,
       generateDartPluginRegistry: generateDartPluginRegistry,
@@ -409,12 +416,15 @@ class Environment {
     String? engineVersion,
     Platform? platform,
     Analytics? analytics,
+    FlutterProjectFactory? projectFactory,
+    Xcode? xcode,
     bool generateDartPluginRegistry = false,
     required FileSystem fileSystem,
     required Logger logger,
     required Artifacts artifacts,
     required ProcessManager processManager,
   }) {
+    final Platform resolvedPlatform = platform ?? FakePlatform();
     return Environment(
       projectDir: projectDir ?? testDirectory,
       packageConfigPath: packageConfigPath ?? '.dart_tool/package_config.json',
@@ -428,8 +438,17 @@ class Environment {
       logger: logger,
       artifacts: artifacts,
       processManager: processManager,
-      platform: platform ?? FakePlatform(),
+      platform: resolvedPlatform,
       analytics: analytics ?? const NoOpAnalytics(),
+      projectFactory:
+          projectFactory ??
+          FlutterProjectFactory(
+            config: Config.test(directory: projectDir ?? testDirectory, logger: logger),
+            fileSystem: fileSystem,
+            logger: logger,
+            xcode: xcode,
+          ),
+      xcode: xcode,
       engineVersion: engineVersion,
       generateDartPluginRegistry: generateDartPluginRegistry,
     );
@@ -450,12 +469,18 @@ class Environment {
     required this.fileSystem,
     required this.artifacts,
     required this.analytics,
+    required this.projectFactory,
+    this.xcode,
     this.engineVersion,
     required this.inputs,
     required this.generateDartPluginRegistry,
   });
 
-  Environment copyWith({Directory? outputDir}) {
+  Environment copyWith({
+    Directory? outputDir,
+    FlutterProjectFactory? projectFactory,
+    Xcode? xcode,
+  }) {
     return Environment._(
       outputDir: outputDir ?? this.outputDir,
       projectDir: projectDir,
@@ -471,6 +496,8 @@ class Environment {
       processManager: processManager,
       platform: platform,
       analytics: analytics,
+      projectFactory: projectFactory ?? this.projectFactory,
+      xcode: xcode ?? this.xcode,
       engineVersion: engineVersion,
       inputs: inputs,
       generateDartPluginRegistry: generateDartPluginRegistry,
@@ -564,6 +591,10 @@ class Environment {
   final FileSystem fileSystem;
 
   final Analytics analytics;
+
+  final FlutterProjectFactory projectFactory;
+
+  final Xcode? xcode;
 
   /// The version of the current engine, or `null` if built with a local engine.
   final String? engineVersion;
