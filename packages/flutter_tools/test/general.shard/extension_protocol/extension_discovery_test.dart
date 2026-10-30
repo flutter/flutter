@@ -307,6 +307,7 @@ void main() {
       expect(packageConfigUri, isNotNull);
 
       final fs = LocalFileSystem.test(signals: LocalSignals.instance);
+      addTearDown(fs.dispose);
       final Uri configUri = libUri.resolve('../extension/flutter_tools/config.yaml');
       final rawYaml = loadYaml(fs.file(configUri).readAsStringSync()) as YamlMap;
       final expectedConfig = ExtensionPackageConfig.fromMap(
@@ -734,6 +735,7 @@ services:
       'discovers extensions via package:extension_discovery on LocalFileSystem',
       () async {
         final localFs = LocalFileSystem.test(signals: LocalSignals.instance);
+        addTearDown(localFs.dispose);
         final Directory tempDir = localFs.systemTempDirectory.createTempSync('ext_finder_local.');
         addTearDown(() {
           if (tempDir.existsSync()) {
