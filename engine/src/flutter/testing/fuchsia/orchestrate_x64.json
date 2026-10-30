@@ -1,0 +1,15 @@
+{
+  "experiments": [
+    "orchestrate-error-on-test-failure"
+  ],
+  "emulator": {
+    "comment": "Relative paths are resolved relative to OUT_DIR via symlinks created by run_tests.py because orchestrate runs with CWD set to OUT_DIR.",
+    "build_ids": [
+      ".build-id",
+      "fuchsia-sdk/.build-id"
+    ],
+    "device": "x64-emu-large",
+    "ffx_path": "fuchsia-sdk/tools/x64/ffx",
+    "local_pb": "fuchsia-images/terminal/x64/"
+  }
+}

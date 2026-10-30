@@ -32,7 +32,7 @@ sys.path.insert(
 
 # pylint: disable=import-error, wrong-import-position
 from bundled_test_runner import run_tests, TestCase
-from common import DIR_SRC_ROOT
+from common import DIR_SRC_ROOT, IMAGES_ROOT, SDK_ROOT
 from compatible_utils import force_running_unattended
 
 if len(sys.argv) == 2:
@@ -43,6 +43,16 @@ elif len(sys.argv) == 1:
 else:
   assert False, 'Expect only one parameter as the compile output directory.'
 OUT_DIR = os.path.join(DIR_SRC_ROOT, 'out', VARIANT)
+
+
+def _force_symlink(src: str, dst: str) -> None:
+  try:
+    # Remove the old one if it exists, usually happen on the devbox, so
+    # ignore the FileNotFoundError.
+    os.remove(dst)
+  except FileNotFoundError:
+    pass
+  os.symlink(src, dst)
 
 
 # Visible for testing
@@ -61,13 +71,7 @@ def resolve_packages(tests: Iterable[Mapping[str, Any]]) -> Set[str]:
       # Make a symbolic link to match the name of the package itself without the
       # '-0.far' suffix.
       new_package = os.path.join(OUT_DIR, package.replace('-0.far', '.far'))
-      try:
-        # Remove the old one if it exists, usually happen on the devbox, so
-        # ignore the FileNotFoundError.
-        os.remove(new_package)
-      except FileNotFoundError:
-        pass
-      os.symlink(package, new_package)
+      _force_symlink(package, new_package)
       resolved_packages.add(new_package)
     else:
       resolved_packages.add(os.path.join(OUT_DIR, package))
@@ -97,7 +101,11 @@ def main() -> int:
   if VARIANT.endswith('_arm64') or VARIANT.endswith('_arm64_tester'):
     sys.argv.append('--product=terminal.qemu-arm64')
   elif VARIANT.endswith('_x64') or VARIANT.endswith('_x64_tester'):
-    sys.argv.append('--orchestrate')
+    _force_symlink(SDK_ROOT, os.path.join(OUT_DIR, 'fuchsia-sdk'))
+    _force_symlink(IMAGES_ROOT, os.path.join(OUT_DIR, 'fuchsia-images'))
+    sys.argv.append(
+        '--orchestrate-config=' + os.path.join(os.path.dirname(__file__), 'orchestrate_x64.json')
+    )
 
   sys.argv.append('--logs-dir=' + os.environ.get('FLUTTER_LOGS_DIR', '/tmp/log'))
   with open(os.path.join(os.path.dirname(__file__), 'test_suites.yaml'), 'r') as file:
