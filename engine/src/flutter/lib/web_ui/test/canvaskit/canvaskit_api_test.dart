@@ -1005,6 +1005,23 @@ void _pathTests() {
     expect(measure2, isNull);
   });
 
+  test('createPathBuilderFromSkPath deletes its temporary SkPath', () {
+    final SkPathBuilder sourceBuilder = _testClosedSkPath();
+    final SkPath sourcePath = sourceBuilder.snapshot();
+    sourceBuilder.delete();
+
+    final CkPathBuilder pathBuilder = createPathBuilderFromSkPath(
+      sourcePath,
+      ui.PathFillType.nonZero,
+    );
+    expect((sourcePath as SkDeletable).isDeleted(), isTrue);
+
+    final CkPath copiedPath = pathBuilder.build();
+    expect(copiedPath.getBounds(), const ui.Rect.fromLTRB(10, 10, 20, 20));
+    copiedPath.dispose();
+    pathBuilder.dispose();
+  });
+
   test('SkPath.toCmds and CanvasKit.Path.MakeFromCmds', () {
     const rect = ui.Rect.fromLTRB(0, 0, 10, 10);
     final pathBuilder = SkPathBuilder();
