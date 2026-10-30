@@ -5679,34 +5679,6 @@ targets:
         ["devicelab", "hostonly", "mac"]
       task_name: integration_ui_ios_textfield
 
-  - name: Mac_x64 ios_app_with_extensions_test
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    enabled_branches:
-      - stable # TODO(flutter/flutter#189295): Delete this builder after 3.50 is released.
-    timeout: 60
-    properties:
-      dependencies: >-
-        [
-          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
-        ]
-      tags: >
-        ["devicelab", "hostonly", "mac"]
-      task_name: ios_app_with_extensions_test
-
-  - name: Mac_arm64 ios_app_with_extensions_test
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      dependencies: >-
-        [
-          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
-        ]
-      tags: >
-        ["devicelab", "hostonly", "mac", "arm64"]
-      task_name: ios_app_with_extensions_test
-
   - name: Mac ios_defines_test
     recipe: devicelab/devicelab_drone
     presubmit: false
