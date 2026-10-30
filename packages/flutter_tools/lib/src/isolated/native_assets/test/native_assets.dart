@@ -14,9 +14,11 @@ import '../../../base/file_system.dart';
 import '../../../base/logger.dart';
 import '../../../base/platform.dart';
 import '../../../build_info.dart';
+import '../../../cache.dart';
 import '../../../context/tool_context.dart';
 import '../../../native_assets.dart';
 import '../../../project.dart';
+import '../../../windows/visual_studio.dart';
 import '../dart_hook_result.dart';
 import '../native_assets.dart';
 
@@ -70,6 +72,7 @@ Future<TestCompilerNativeAssetsBuildResult> testCompilerBuildNativeAssets(
     return (nativeAssetsManifest: null, flutterHookResult: null);
   }
   final ToolContext(
+    :Cache cache,
     :Config config,
     fs: FileSystem fileSystem,
     :Logger logger,
@@ -104,7 +107,9 @@ Future<TestCompilerNativeAssetsBuildResult> testCompilerBuildNativeAssets(
     processManager,
     runPackageName,
     pubspecPath,
+    flutterRoot: cache.flutterRoot,
     includeDevDependencies: true,
+    visualStudio: VisualStudio(toolContext: toolContext),
   );
 
   if (!platform.isMacOS && !platform.isLinux && !platform.isWindows) {

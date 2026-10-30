@@ -7,6 +7,7 @@ import 'package:data_assets/data_assets.dart';
 import 'package:file/file.dart' show Directory, FileSystem;
 import 'package:hooks/hooks.dart';
 
+import '../../android/android_sdk.dart';
 import '../../base/common.dart' show throwToolExit;
 import '../../base/process.dart' show ProcessUtils;
 import '../../build_info.dart'
@@ -22,6 +23,7 @@ import '../../build_info.dart'
         kSdkRoot;
 import '../../build_system/exceptions.dart' show MissingDefineException;
 import '../../macos/xcode.dart' as xcode show environmentTypeFromSdkroot;
+import '../../windows/visual_studio.dart';
 import 'android/native_assets.dart'
     show cCompilerConfigAndroid, getNativeAndroidArchitecture, targetAndroidNdkApi;
 import 'ios/native_assets.dart' show getIOSSdk, getNativeIOSArchitecture, targetIOSVersion;
@@ -230,7 +232,9 @@ sealed class CodeAssetTarget extends AssetBuildTarget {
   /// hooks that only download code assets instead of compiling them to still function.
   Future<void> setCCompilerConfig({
     required ProcessUtils processUtils,
+    AndroidSdk? androidSdk,
     bool mustMatchAppBuild = true,
+    VisualStudio? visualStudio,
   });
 
   List<CodeAssetExtension> get codeAssetExtensions {
@@ -262,9 +266,14 @@ class WindowsAssetTarget extends CodeAssetTarget {
   @override
   Future<void> setCCompilerConfig({
     required ProcessUtils processUtils,
+    AndroidSdk? androidSdk,
     bool mustMatchAppBuild = true,
+    VisualStudio? visualStudio,
   }) async {
-    cCompilerConfigSync = await cCompilerConfigWindows(throwIfNotFound: mustMatchAppBuild);
+    cCompilerConfigSync = await cCompilerConfigWindows(
+      throwIfNotFound: mustMatchAppBuild,
+      visualStudio: visualStudio!,
+    );
   }
 }
 
@@ -282,7 +291,9 @@ final class LinuxAssetTarget extends CodeAssetTarget {
   @override
   Future<void> setCCompilerConfig({
     required ProcessUtils processUtils,
+    AndroidSdk? androidSdk,
     bool mustMatchAppBuild = true,
+    VisualStudio? visualStudio,
   }) async {
     final bool isNativeAppBuild = cmakeBuildDirectory != null && cmakeBuildDirectory!.existsSync();
 
@@ -313,7 +324,9 @@ final class IOSAssetTarget extends CodeAssetTarget {
   @override
   Future<void> setCCompilerConfig({
     required ProcessUtils processUtils,
+    AndroidSdk? androidSdk,
     bool mustMatchAppBuild = true,
+    VisualStudio? visualStudio,
   }) async => cCompilerConfigSync = await cCompilerConfigMacOS(
     processUtils: processUtils,
     throwIfNotFound: mustMatchAppBuild,
@@ -366,7 +379,9 @@ final class MacOSAssetTarget extends CodeAssetTarget {
   @override
   Future<void> setCCompilerConfig({
     required ProcessUtils processUtils,
+    AndroidSdk? androidSdk,
     bool mustMatchAppBuild = true,
+    VisualStudio? visualStudio,
   }) async => cCompilerConfigSync = await cCompilerConfigMacOS(
     processUtils: processUtils,
     throwIfNotFound: mustMatchAppBuild,
@@ -388,8 +403,10 @@ final class AndroidAssetTarget extends CodeAssetTarget {
   @override
   Future<void> setCCompilerConfig({
     required ProcessUtils processUtils,
+    AndroidSdk? androidSdk,
     bool mustMatchAppBuild = true,
-  }) async => cCompilerConfigSync = await cCompilerConfigAndroid();
+    VisualStudio? visualStudio,
+  }) async => cCompilerConfigSync = await cCompilerConfigAndroid(androidSdk: androidSdk);
 
   @override
   List<ProtocolExtension> get extensions => <ProtocolExtension>[
@@ -439,8 +456,15 @@ final class FlutterTesterAssetTarget extends CodeAssetTarget {
   @override
   Future<void> setCCompilerConfig({
     required ProcessUtils processUtils,
+    AndroidSdk? androidSdk,
     bool mustMatchAppBuild = true,
-  }) => subtarget.setCCompilerConfig(processUtils: processUtils, mustMatchAppBuild: false);
+    VisualStudio? visualStudio,
+  }) => subtarget.setCCompilerConfig(
+    androidSdk: androidSdk,
+    mustMatchAppBuild: false,
+    processUtils: processUtils,
+    visualStudio: visualStudio,
+  );
 }
 
 List<CpuArch> _androidArchs(TargetPlatform targetPlatform, String? androidArchsEnvironment) {

@@ -54,12 +54,10 @@ void main() {
 
   setUpAll(() {
     Cache.disableLocking();
-    Cache.flutterRoot = '';
   });
 
   setUp(() {
     fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
-    Cache.flutterRoot = flutterRoot;
     logger = BufferLogger.test();
     processManager = FakeProcessManager.empty();
     fakeAnalytics = getInitializedFakeAnalyticsInstance(
@@ -102,7 +100,11 @@ void main() {
       os: osUtils ?? FakeOperatingSystemUtils(),
       platform: platform ?? windowsPlatform,
       processManager: processManager,
-      projectFactory: FlutterProjectFactory(fileSystem: fileSystem, logger: resolvedLogger),
+      projectFactory: FlutterProjectFactory(
+        fileSystem: fileSystem,
+        logger: resolvedLogger,
+        config: FakeConfig(),
+      ),
     );
     return BuildWindowsCommand(
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),

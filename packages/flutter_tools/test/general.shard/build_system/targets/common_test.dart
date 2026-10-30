@@ -17,6 +17,7 @@ import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
+import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:test/fake.dart';
 
@@ -70,6 +71,14 @@ void main() {
       processManager: processManager,
       fileSystem: fileSystem,
       logger: logger,
+      xcode: Xcode.test(
+        toolContext: FakeToolContext.macosHost(
+          fs: fileSystem,
+          logger: logger,
+          processManager: processManager,
+        ),
+        xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+      ),
     );
     iosEnvironment.buildDir.createSync(recursive: true);
   });
@@ -501,7 +510,16 @@ void main() {
       ]);
 
       await const KernelSnapshot().build(
-        iosEnvironment
+        iosEnvironment.copyWith(
+            projectFactory: FlutterProjectFactory(
+              config: Config.test(directory: fileSystem.currentDirectory),
+              fileSystem: fileSystem,
+              logger: logger,
+              xcodeProjectInterpreter: FakeXcodeProjectInterpreter(
+                schemes: <String>['Runner', 'chocolate'],
+              ),
+            ),
+          )
           ..defines[kTargetPlatform] = TargetPlatform.ios.getName()
           ..defines[kBuildMode] = BuildMode.debug.cliName
           ..defines[kFlavor] = 'strawberry'
@@ -559,7 +577,16 @@ void main() {
       ]);
 
       await const KernelSnapshot().build(
-        iosEnvironment
+        iosEnvironment.copyWith(
+            projectFactory: FlutterProjectFactory(
+              config: Config.test(directory: fileSystem.currentDirectory),
+              fileSystem: fileSystem,
+              logger: logger,
+              xcodeProjectInterpreter: FakeXcodeProjectInterpreter(
+                schemes: <String>['Runner', 'chocolate'],
+              ),
+            ),
+          )
           ..defines[kTargetPlatform] = TargetPlatform.darwin.getName()
           ..defines[kBuildMode] = BuildMode.debug.cliName
           ..defines[kFlavor] = 'strawberry'
@@ -914,6 +941,9 @@ class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterprete
   final bool isInstalled;
 
   List<String> schemes;
+
+  @override
+  List<String> xcrunCommand() => <String>['xcrun'];
 
   @override
   Future<XcodeProjectInfo?> getInfo(

@@ -22,6 +22,7 @@ import 'package:flutter_tools/src/isolated/native_assets/native_assets.dart';
 import 'package:flutter_tools/src/isolated/native_assets/targets.dart';
 import 'package:flutter_tools/src/isolated/native_assets/test/native_assets.dart';
 import 'package:flutter_tools/src/project.dart';
+import 'package:flutter_tools/src/windows/visual_studio.dart';
 import 'package:package_config/package_config_types.dart';
 import 'package:test/fake.dart';
 
@@ -803,7 +804,11 @@ environment:
             logger: logger,
             platform: const LocalPlatform(),
             processManager: processManager,
-            projectFactory: FlutterProjectFactory(fileSystem: hostFileSystem, logger: logger),
+            projectFactory: FlutterProjectFactory(
+              config: Config.test(),
+              fileSystem: hostFileSystem,
+              logger: logger,
+            ),
           ),
         );
         expect(nativeAssetsManifest, isNotNull);
@@ -862,7 +867,11 @@ environment:
             logger: logger,
             platform: const LocalPlatform(),
             processManager: processManager,
-            projectFactory: FlutterProjectFactory(fileSystem: hostFileSystem, logger: logger),
+            projectFactory: FlutterProjectFactory(
+              config: Config.test(),
+              fileSystem: hostFileSystem,
+              logger: logger,
+            ),
           ),
         );
         expect(nativeAssetsManifest, isNull);
@@ -896,6 +905,14 @@ class _SetCCompilerConfigTarget extends FakeFlutterNativeAssetsBuildRunner {
   Future<void> setCCompilerConfig(CodeAssetTarget target) async {
     await target.setCCompilerConfig(
       processUtils: ProcessUtils(processManager: processManager, logger: logger),
+      visualStudio: VisualStudio(
+        toolContext: FakeToolContext(
+          fs: fileSystem,
+          logger: logger,
+          platform: platform,
+          processManager: processManager,
+        ),
+      ),
     );
     didSetCCompilerConfig = true;
   }

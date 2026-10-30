@@ -10,7 +10,9 @@ import 'package:pool/pool.dart';
 import 'package:process/process.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
+import '../android/android_sdk.dart';
 import '../artifacts.dart';
+import '../base/config.dart';
 import '../base/error_handling_io.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
@@ -19,6 +21,9 @@ import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../convert.dart';
+import '../macos/xcode.dart';
+import '../project.dart';
+import '../windows/visual_studio.dart';
 import 'depfile.dart';
 import 'exceptions.dart';
 import 'file_store.dart';
@@ -344,6 +349,11 @@ class Environment {
     required ProcessManager processManager,
     required Platform platform,
     required Analytics analytics,
+    required FlutterProjectFactory projectFactory,
+    AndroidSdk? androidSdk,
+    AndroidSdk? Function()? androidSdkBuilder,
+    VisualStudio? visualStudio,
+    Xcode? xcode,
     String? engineVersion,
     required bool generateDartPluginRegistry,
     Directory? buildDir,
@@ -386,6 +396,11 @@ class Environment {
       processManager: processManager,
       platform: platform,
       analytics: analytics,
+      projectFactory: projectFactory,
+      androidSdk: androidSdk,
+      androidSdkBuilder: androidSdkBuilder,
+      visualStudio: visualStudio,
+      xcode: xcode,
       engineVersion: engineVersion,
       inputs: inputs,
       generateDartPluginRegistry: generateDartPluginRegistry,
@@ -409,12 +424,17 @@ class Environment {
     String? engineVersion,
     Platform? platform,
     Analytics? analytics,
+    FlutterProjectFactory? projectFactory,
+    AndroidSdk? androidSdk,
+    VisualStudio? visualStudio,
+    Xcode? xcode,
     bool generateDartPluginRegistry = false,
     required FileSystem fileSystem,
     required Logger logger,
     required Artifacts artifacts,
     required ProcessManager processManager,
   }) {
+    final Platform resolvedPlatform = platform ?? FakePlatform();
     return Environment(
       projectDir: projectDir ?? testDirectory,
       packageConfigPath: packageConfigPath ?? '.dart_tool/package_config.json',
@@ -428,8 +448,19 @@ class Environment {
       logger: logger,
       artifacts: artifacts,
       processManager: processManager,
-      platform: platform ?? FakePlatform(),
+      platform: resolvedPlatform,
       analytics: analytics ?? const NoOpAnalytics(),
+      projectFactory:
+          projectFactory ??
+          FlutterProjectFactory(
+            config: Config.test(directory: projectDir ?? testDirectory, logger: logger),
+            fileSystem: fileSystem,
+            logger: logger,
+            xcode: xcode,
+          ),
+      androidSdk: androidSdk,
+      visualStudio: visualStudio,
+      xcode: xcode,
       engineVersion: engineVersion,
       generateDartPluginRegistry: generateDartPluginRegistry,
     );
@@ -450,12 +481,23 @@ class Environment {
     required this.fileSystem,
     required this.artifacts,
     required this.analytics,
+    required this.projectFactory,
+    this._androidSdk,
+    this._androidSdkBuilder,
+    this.visualStudio,
+    this.xcode,
     this.engineVersion,
     required this.inputs,
     required this.generateDartPluginRegistry,
   });
 
-  Environment copyWith({Directory? outputDir}) {
+  Environment copyWith({
+    AndroidSdk? androidSdk,
+    Directory? outputDir,
+    FlutterProjectFactory? projectFactory,
+    VisualStudio? visualStudio,
+    Xcode? xcode,
+  }) {
     return Environment._(
       outputDir: outputDir ?? this.outputDir,
       projectDir: projectDir,
@@ -471,6 +513,11 @@ class Environment {
       processManager: processManager,
       platform: platform,
       analytics: analytics,
+      projectFactory: projectFactory ?? this.projectFactory,
+      androidSdk: androidSdk ?? _androidSdk,
+      androidSdkBuilder: _androidSdkBuilder,
+      visualStudio: visualStudio ?? this.visualStudio,
+      xcode: xcode ?? this.xcode,
       engineVersion: engineVersion,
       inputs: inputs,
       generateDartPluginRegistry: generateDartPluginRegistry,
@@ -564,6 +611,16 @@ class Environment {
   final FileSystem fileSystem;
 
   final Analytics analytics;
+
+  final FlutterProjectFactory projectFactory;
+
+  final AndroidSdk? _androidSdk;
+  final AndroidSdk? Function()? _androidSdkBuilder;
+  late final AndroidSdk? androidSdk = _androidSdk ?? _androidSdkBuilder?.call();
+
+  final VisualStudio? visualStudio;
+
+  final Xcode? xcode;
 
   /// The version of the current engine, or `null` if built with a local engine.
   final String? engineVersion;

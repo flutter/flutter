@@ -21,6 +21,7 @@ import 'package:flutter_tools/src/isolated/native_assets/dart_hook_result.dart';
 import 'package:flutter_tools/src/isolated/native_assets/native_assets.dart';
 import 'package:flutter_tools/src/isolated/native_assets/windows/native_assets.dart'
     show cCompilerConfigWindows;
+import 'package:flutter_tools/src/windows/visual_studio.dart';
 
 import '../../../src/common.dart';
 import '../../../src/context.dart';
@@ -261,7 +262,17 @@ void main() {
       );
       await msvcBinDir.create(recursive: true);
 
-      final CCompilerConfig result = (await cCompilerConfigWindows(throwIfNotFound: true))!;
+      final CCompilerConfig result = (await cCompilerConfigWindows(
+        throwIfNotFound: true,
+        visualStudio: VisualStudio(
+          toolContext: FakeToolContext(
+            fs: fileSystem,
+            logger: logger,
+            platform: const LocalPlatform(),
+            processManager: processManager,
+          ),
+        ),
+      ))!;
       expect(result.compiler.toFilePath(), msvcBinDir.childFile('cl.exe').uri.toFilePath());
       expect(result.archiver.toFilePath(), msvcBinDir.childFile('lib.exe').uri.toFilePath());
       expect(result.linker.toFilePath(), msvcBinDir.childFile('link.exe').uri.toFilePath());
@@ -285,7 +296,18 @@ void main() {
         OperatingSystemUtils: () => FakeOperatingSystemUtils(),
       },
       () async {
-        final CCompilerConfig? result = await cCompilerConfigWindows(throwIfNotFound: false);
+        final CCompilerConfig? result = await cCompilerConfigWindows(
+          throwIfNotFound: false,
+          visualStudio: VisualStudio(
+            toolContext: FakeToolContext(
+              fs: fileSystem,
+              logger: logger,
+              os: FakeOperatingSystemUtils(),
+              platform: windowsPlatform,
+              processManager: FakeProcessManager.any(),
+            ),
+          ),
+        );
         expect(result, isNull);
       },
     );
@@ -299,7 +321,21 @@ void main() {
         OperatingSystemUtils: () => FakeOperatingSystemUtils(),
       },
       () async {
-        await expectLater(cCompilerConfigWindows(throwIfNotFound: true), throwsA(isA<ToolExit>()));
+        await expectLater(
+          cCompilerConfigWindows(
+            throwIfNotFound: true,
+            visualStudio: VisualStudio(
+              toolContext: FakeToolContext(
+                fs: fileSystem,
+                logger: logger,
+                os: FakeOperatingSystemUtils(),
+                platform: windowsPlatform,
+                processManager: FakeProcessManager.any(),
+              ),
+            ),
+          ),
+          throwsA(isA<ToolExit>()),
+        );
       },
     );
   });

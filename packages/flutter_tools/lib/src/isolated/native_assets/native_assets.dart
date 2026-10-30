@@ -12,6 +12,7 @@ import 'package:logging/logging.dart' as logging;
 import 'package:package_config/package_config_types.dart';
 import 'package:process/process.dart';
 
+import '../../android/android_sdk.dart';
 import '../../base/common.dart';
 import '../../base/error_handling_io.dart';
 import '../../base/file_system.dart';
@@ -20,8 +21,8 @@ import '../../base/platform.dart';
 import '../../base/process.dart';
 import '../../build_info.dart';
 import '../../build_system/exceptions.dart';
-import '../../cache.dart';
 import '../../features.dart';
+import '../../windows/visual_studio.dart';
 import 'android/native_assets.dart';
 import 'dart_hook_result.dart';
 import 'ios/native_assets.dart';
@@ -563,9 +564,13 @@ class FlutterNativeAssetsBuildRunnerImpl implements FlutterNativeAssetsBuildRunn
     this.processManager,
     this.runPackageName,
     this.pubspecPath, {
+    required this._flutterRoot,
     required this.includeDevDependencies,
+    this.androidSdk,
+    this.visualStudio,
   });
 
+  final AndroidSdk? androidSdk;
   final String pubspecPath;
   final String packageConfigPath;
   final PackageConfig packageConfig;
@@ -574,9 +579,11 @@ class FlutterNativeAssetsBuildRunnerImpl implements FlutterNativeAssetsBuildRunn
   final Platform platform;
   final ProcessManager processManager;
   final String runPackageName;
+  final VisualStudio? visualStudio;
 
   /// Include the dev dependencies of [runPackageName].
   final bool includeDevDependencies;
+  final String _flutterRoot;
 
   late final _logger = logging.Logger('')
     ..onRecord.listen((logging.LogRecord record) {
@@ -599,7 +606,7 @@ class FlutterNativeAssetsBuildRunnerImpl implements FlutterNativeAssetsBuildRunn
   // use the Dart standalone executable
   // ($FLUTTER_ROOT/bin/cache/dart-sdk/bin/dart).
   late final Uri _dartExecutable = fileSystem
-      .directory(Cache.flutterRoot)
+      .directory(_flutterRoot)
       .uri
       .resolve('bin/cache/dart-sdk/bin/dart${platform.isWindows ? '.exe' : ''}');
 
@@ -662,8 +669,10 @@ class FlutterNativeAssetsBuildRunnerImpl implements FlutterNativeAssetsBuildRunn
   }
 
   @override
-  Future<void> setCCompilerConfig(CodeAssetTarget target) async => target.setCCompilerConfig(
+  Future<void> setCCompilerConfig(CodeAssetTarget target) => target.setCCompilerConfig(
+    androidSdk: androidSdk,
     processUtils: ProcessUtils(processManager: processManager, logger: logger),
+    visualStudio: visualStudio,
   );
 }
 

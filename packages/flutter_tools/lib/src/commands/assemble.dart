@@ -24,12 +24,15 @@ import '../build_system/targets/linux.dart';
 import '../build_system/targets/macos.dart';
 import '../build_system/targets/windows.dart';
 import '../cache.dart';
+import '../context/android_context.dart';
 import '../context/tool_context.dart';
 import '../convert.dart';
 import '../features.dart';
+import '../macos/xcode.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart';
 import '../version.dart';
+import '../windows/visual_studio.dart';
 
 /// All currently implemented targets.
 var _kDefaultTargets = <Target>[
@@ -102,8 +105,10 @@ class AssembleCommand extends FlutterCommand {
   AssembleCommand({
     required this._buildSystem,
     required this._featureFlags,
-    required ToolContext super.toolContext,
+    required super.toolContext,
+    this._androidContext,
     super.verboseHelp = false,
+    this._xcode,
   }) {
     requiresPubspecYaml();
     argParser.addDescriptors(const <OptionDescriptor<Object?>>[
@@ -181,11 +186,10 @@ class AssembleCommand extends FlutterCommand {
     help: 'The maximum number of concurrent tasks the build system will run.',
   );
 
+  final AndroidContext? _androidContext;
   final BuildSystem _buildSystem;
   final FeatureFlags _featureFlags;
-
-  @override
-  ToolContext get toolContext => super.toolContext!;
+  final Xcode? _xcode;
 
   @override
   bool get hidden => !verboseHelp;
@@ -272,6 +276,7 @@ class AssembleCommand extends FlutterCommand {
       :Logger logger,
       :Platform platform,
       :ProcessManager processManager,
+      :FlutterProjectFactory projectFactory,
     ) = toolContext;
     final FlutterProject project = this.project;
     String? output = getValue(_output);
@@ -303,13 +308,17 @@ class AssembleCommand extends FlutterCommand {
       defines: _parseDefines([...getValue(_define), ...decodedDefines]),
       inputs: _parseDefines(getValue(_input)),
       cacheDir: cache.getRoot(),
-      flutterRootDir: fs.directory(Cache.flutterRoot),
+      flutterRootDir: fs.directory(cache.flutterRoot),
       artifacts: artifacts,
       fileSystem: fs,
       logger: logger,
       processManager: processManager,
       analytics: analytics,
+      androidSdkBuilder: () => _androidContext?.androidSdk,
       platform: platform,
+      projectFactory: projectFactory,
+      visualStudio: VisualStudio(toolContext: toolContext),
+      xcode: _xcode,
       engineVersion: artifacts.usesLocalArtifacts ? null : flutterVersion.engineRevision,
       generateDartPluginRegistry: true,
     );

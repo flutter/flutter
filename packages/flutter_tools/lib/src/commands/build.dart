@@ -222,9 +222,6 @@ class BuildCommand extends FlutterCommand {
   }
 
   @override
-  ToolContext get toolContext => super.toolContext!;
-
-  @override
   final String name = 'build';
 
   @override
@@ -248,7 +245,7 @@ abstract class BuildSubCommand extends FlutterCommand {
     required this.logger,
     required super.verboseHelp,
     super.outputPreferences,
-    super.toolContext,
+    required super.toolContext,
   }) {
     requiresPubspecYaml();
     CommonOptions.fatalWarnings.addTo(argParser, verboseHelp: verboseHelp);
@@ -266,13 +263,9 @@ class ExtensionBuildSubCommand extends BuildSubCommand {
   ExtensionBuildSubCommand({
     required this._buildManager,
     required this.target,
-    required ToolContext toolContext,
+    required super.toolContext,
     required super.verboseHelp,
-  }) : super(
-         logger: toolContext.logger,
-         outputPreferences: toolContext.outputPreferences,
-         toolContext: toolContext,
-       ) {
+  }) : super(logger: toolContext.logger) {
     registerOptionBundle(const BuildModeOptionsBundle());
     argParser.addDescriptors(const <OptionDescriptor<Object?>>[
       CommonOptions.target,
@@ -286,9 +279,6 @@ class ExtensionBuildSubCommand extends BuildSubCommand {
   final ExtensionBuildTarget target;
 
   @override
-  ToolContext get toolContext => super.toolContext!;
-
-  @override
   String get name => target.name;
 
   @override
@@ -296,7 +286,8 @@ class ExtensionBuildSubCommand extends BuildSubCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final ToolContext(:Artifacts artifacts, :Config config, :FileSystem fs) = toolContext;
+    final ToolContext(:Artifacts artifacts, :Cache cache, :Config config, :FileSystem fs) =
+        toolContext;
     final Directory projectDir = fs.currentDirectory;
     final BuildInfo buildInfo = await getBuildInfo();
     final Directory outputDir = resolveExtensionOutputDir(
@@ -314,7 +305,7 @@ class ExtensionBuildSubCommand extends BuildSubCommand {
 
     final ExtensionBuildResult result = await _buildManager.build(
       buildMode: buildInfo.mode,
-      flutterRoot: fs.directory(Cache.flutterRoot).uri,
+      flutterRoot: fs.directory(cache.flutterRoot).uri,
       mainPath: targetFile,
       outputDir: outputDir.uri,
       projectRoot: projectDir.uri,

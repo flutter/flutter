@@ -15,7 +15,6 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
-import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/terminal.dart';
@@ -23,7 +22,6 @@ import '../build_info.dart';
 import '../build_system/build_system.dart';
 import '../build_system/build_targets.dart';
 import '../cache.dart';
-import '../context/tool_context.dart';
 import '../convert.dart';
 import '../dart/analysis.dart';
 import '../device.dart';
@@ -77,8 +75,6 @@ class WidgetPreviewCommand extends FlutterCommand {
     );
     addSubcommand(WidgetPreviewCleanCommand(toolContext: toolContext));
   }
-  @override
-  ToolContext get toolContext => super.toolContext!;
 
   @override
   String get description => 'Manage the widget preview environment.';
@@ -96,9 +92,6 @@ class WidgetPreviewCommand extends FlutterCommand {
 
 abstract base class WidgetPreviewSubCommandBase extends FlutterCommand {
   WidgetPreviewSubCommandBase({required super.toolContext});
-
-  @override
-  ToolContext get toolContext => super.toolContext!;
 
   FileSystem get fs => toolContext.fs;
   Logger get logger => toolContext.logger;
@@ -248,8 +241,6 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
 
   ShutdownHooks get shutdownHooks => toolContext.shutdownHooks;
 
-  OperatingSystemUtils get os => toolContext.os;
-
   ProcessManager get processManager => toolContext.processManager;
 
   Artifacts get artifacts => toolContext.artifacts;
@@ -368,7 +359,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
           organization: 'flutter',
           projectName: kWidgetPreviewScaffoldName,
           titleCaseProjectName: 'Widget Preview Scaffold',
-          flutterRoot: Cache.flutterRoot!,
+          flutterRoot: cache.flutterRoot,
           dartSdkVersionBounds: '^${cache.dartSdkBuild}',
           web: true,
         ),

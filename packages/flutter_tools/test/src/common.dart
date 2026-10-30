@@ -257,6 +257,12 @@ class _NoContext implements AppContext {
   const _NoContext();
 
   @override
+  bool hasOverride(Type type) => false;
+
+  @override
+  T? resolveOverride<T>() => null;
+
+  @override
   T get<T>() {
     throw UnsupportedError(
       'context.get<$T> is not supported in test methods. '

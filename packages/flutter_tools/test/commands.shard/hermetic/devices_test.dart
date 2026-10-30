@@ -4,6 +4,7 @@
 
 import 'dart:convert';
 
+import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
@@ -800,7 +801,7 @@ If you expected another device to be detected, please run "flutter doctor" to di
 class _FakeDeviceManager extends DeviceManager {
   _FakeDeviceManager({List<FakeDeviceJsonData>? devices, Logger? logger})
     : fakeDevices = devices ?? <FakeDeviceJsonData>[],
-      super(logger: logger ?? BufferLogger.test());
+      super(logger: logger ?? BufferLogger.test(), fileSystem: MemoryFileSystem.test());
 
   List<FakeDeviceJsonData> fakeDevices = <FakeDeviceJsonData>[];
 
@@ -832,7 +833,7 @@ class _FakeDeviceManager extends DeviceManager {
 }
 
 class NoDevicesManager extends DeviceManager {
-  NoDevicesManager() : super(logger: BufferLogger.test());
+  NoDevicesManager() : super(logger: BufferLogger.test(), fileSystem: MemoryFileSystem.test());
 
   @override
   List<DeviceDiscovery> get deviceDiscoverers => <DeviceDiscovery>[];

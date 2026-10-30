@@ -825,7 +825,7 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
           device: fakeDevice,
           processUtils: ProcessUtils(processManager: processManager, logger: logger),
           xcode: Xcode.test(
-            processManager: processManager,
+            toolContext: FakeToolContext.macosHost(processManager: processManager),
             xcodeProjectInterpreter: FakeXcodeProjectInterpreter(version: Version(26, 0, 0)),
           ),
         );
