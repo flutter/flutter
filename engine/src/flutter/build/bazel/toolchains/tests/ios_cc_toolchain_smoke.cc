@@ -71,7 +71,8 @@ int main() {
 #endif
   Check(__IPHONE_OS_VERSION_MIN_REQUIRED == 150000,
         "__IPHONE_OS_VERSION_MIN_REQUIRED == 150000 (GN's deployment target)");
-  Check(__IPHONE_OS_VERSION_MAX_ALLOWED >= 150000, "__IPHONE_OS_VERSION_MAX_ALLOWED >= 150000");
+  Check(__IPHONE_OS_VERSION_MAX_ALLOWED >= 150000,
+        "__IPHONE_OS_VERSION_MAX_ALLOWED >= 150000");
 
 #if defined(__cpp_exceptions) || defined(__EXCEPTIONS)
   Check(false, "GN builds with -fno-exceptions");
@@ -96,7 +97,8 @@ int main() {
   // objc_library compiled the .mm (with ARC, the engine's Objective-C
   // flags) and the link found Foundation through the SDK.
   Check(FlutterBazelSmokeObjcUsesArc(), "Objective-C++ compiled with ARC");
-  Check(FlutterBazelSmokeUppercase("flutter") == "FLUTTER", "Foundation linked through the SDK");
+  Check(FlutterBazelSmokeUppercase("flutter") == "FLUTTER",
+        "Foundation linked through the SDK");
   Check(FlutterBazelSmokeCxxMemberLifetime() == 2,
         "a C++ member of an Objective-C object is constructed and destroyed");
 
