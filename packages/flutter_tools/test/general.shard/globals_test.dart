@@ -2,45 +2,73 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_tools/src/base/context.dart';
+import 'package:file/memory.dart';
+import 'package:flutter_tools/src/base/bot_detector.dart';
+import 'package:flutter_tools/src/base/config.dart';
+import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/template.dart';
+import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/context_runner.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
-import 'package:flutter_tools/src/ios/xcodeproj.dart';
-import 'package:flutter_tools/src/macos/xcode.dart';
-import 'package:flutter_tools/src/project.dart';
-import 'package:test/fake.dart';
+import 'package:flutter_tools/src/isolated/mustache_template.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
+import '../src/fakes.dart';
 
 void main() {
-  testUsingContext('globals.projectFactory does not eagerly evaluate Xcode', () async {
-    var xcodeEvaluated = false;
-    var xcodeProjectInterpreterEvaluated = false;
+  String? savedFlutterRoot;
 
-    await context.run<FlutterProjectFactory>(
-      name: 'test',
-      overrides: <Type, Generator>{
-        Xcode: () {
-          xcodeEvaluated = true;
-          return _FakeXcode();
-        },
-        XcodeProjectInterpreter: () {
-          xcodeProjectInterpreterEvaluated = true;
-          return _FakeXcodeProjectInterpreter();
-        },
+  setUp(() {
+    savedFlutterRoot = Cache.flutterRoot;
+    Cache.flutterRoot = '/flutter';
+  });
+
+  tearDown(() {
+    Cache.flutterRoot = savedFlutterRoot;
+  });
+
+  // Uses plain `test` + the production `runInContext` on purpose:
+  // `testUsingContext` overrides Analytics, FlutterVersion,
+  // XcodeProjectInterpreter, etc., which is what hid the startup cycle.
+  // Only I/O is faked, so Cache, FlutterVersion, Xcode,
+  // XcodeProjectInterpreter, CocoaPods, ... use their real fallbacks.
+  test('runInContext resolves production globals without a dependency cycle', () async {
+    await runInContext<void>(
+      () {
+        expect(globals.analytics, isNotNull);
+        expect(globals.flutterVersion, isNotNull);
+        expect(globals.cache, isNotNull);
+        expect(globals.artifacts, isNotNull);
+        expect(globals.projectFactory, isNotNull);
+        expect(globals.xcodeProjectInterpreter, isNotNull);
+        expect(globals.xcode, isNotNull);
+        expect(globals.cocoaPods, isNotNull);
+        expect(globals.xcdevice, isNotNull);
+        expect(globals.iosSimulatorUtils, isNotNull);
       },
-      body: () => globals.projectFactory,
-    );
-
-    expect(xcodeEvaluated, isFalse, reason: 'xcode should be evaluated lazily');
-    expect(
-      xcodeProjectInterpreterEvaluated,
-      isFalse,
-      reason: 'xcodeProjectInterpreter should be evaluated lazily',
+      overrides: <Type, Generator>{
+        // The real Analytics fallback only reads FlutterVersion.dartSdkVersion
+        // (-> Cache) for non-bot users, then constructs an Analytics that
+        // writes to the real $HOME. Make the same read, but stay hermetic.
+        Analytics: () {
+          expect(globals.flutterVersion.dartSdkVersion, isA<String>());
+          return const NoOpAnalytics();
+        },
+        BotDetector: () => const FakeBotDetector(false),
+        Config: () => Config.test(),
+        FileSystem: () => MemoryFileSystem.test(),
+        Logger: () => BufferLogger.test(),
+        Platform: () => FakePlatform(environment: <String, String>{'HOME': '/home'}),
+        ProcessManager: () => FakeProcessManager.any(),
+        Stdio: () => FakeStdio(),
+        // Production override from executable.dart.
+        TemplateRenderer: () => const MustacheTemplateRenderer(),
+      },
     );
   });
 }
-
-class _FakeXcode extends Fake implements Xcode {}
-
-class _FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterpreter {}
