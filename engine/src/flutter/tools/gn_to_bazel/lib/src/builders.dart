@@ -339,8 +339,12 @@ const String ltoSetting = '//engine/src/flutter/build/bazel:lto';
 /// build_defs/java/robolectric.bzl), `objc` the iOS embedding's XCTest run
 /// (run_objc_tests: xcodebuild over testing/ios/IosUnitTests on a simulator,
 /// against the build's libios_test_flutter.dylib and Flutter.framework;
-/// build_defs/testing/ios_xctest.bzl). `engine` is [runTestsEngineSuites],
-/// resolved among the converted targets.
+/// build_defs/testing/ios_xctest.bzl), `impeller-golden` the golden suite as
+/// run_impeller_golden_tests runs it (a Mac's: `--working_dir` into the
+/// test's own directory, the Metal and Vulkan validation environments, ANGLE
+/// and SwiftShader beside it -- testRuns; the Skia Gold comparison that
+/// follows is CI's step, which no Bazel test makes). `engine` is
+/// [runTestsEngineSuites], resolved among the converted targets.
 const Map<String, List<String>> runTestsTypeSuites = <String, List<String>>{
   'dart': <String>[
     '//engine/src/flutter/testing/dart:dart',
@@ -351,6 +355,7 @@ const Map<String, List<String>> runTestsTypeSuites = <String, List<String>>{
   'benchmarks': <String>['//engine/src/flutter:benchmarks'],
   'font-subset': <String>['//engine/src/flutter/tools/font_subset:font_subset_test'],
   'impeller': <String>['//engine/src/flutter/impeller:impeller_unittests'],
+  'impeller-golden': <String>['//engine/src/flutter/impeller/golden_tests:impeller_golden_tests'],
   'java': <String>['//engine/src/flutter/shell/platform/android:java_tests'],
   'objc': <String>['//engine/src/flutter/testing/ios:ios_unit_tests'],
 };
