@@ -4,7 +4,10 @@
 
 #include "flutter/shell/platform/linux/fl_key_embedder_responder.h"
 
+#include <vector>
+
 #include "flutter/shell/platform/linux/testing/linux_test.h"
+#include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
 #include "flutter/shell/platform/embedder/test_utils/key_codes.g.h"
@@ -1918,6 +1921,172 @@ TEST_F(FlKeyEmbedderResponderTest,
 
   invoke_record_callback(record, TRUE);
   g_main_loop_run(loop2);
+}
+
+// Test if a missed modifier key up is synthesized when two physical keys share
+// the same logical key. https://github.com/flutter/flutter/issues/150326
+TEST_F(FlKeyEmbedderResponderTest,
+       SynthesizeForDesyncPressingStateOnSharedLogicalKey) {
+  StartEngine();
+
+  g_autoptr(FlKeyEmbedderResponder) responder =
+      fl_key_embedder_responder_new(engine);
+
+  g_autoptr(GPtrArray) call_records =
+      g_ptr_array_new_with_free_func(g_object_unref);
+  fl_engine_get_embedder_api(engine)->SendKeyEvent = MOCK_ENGINE_PROC(
+      SendKeyEvent,
+      ([&call_records](auto engine, const FlutterKeyEvent* event,
+                       FlutterKeyEventCallback callback, void* user_data) {
+        g_ptr_array_add(call_records, fl_key_embedder_call_record_new(
+                                          event, callback, user_data));
+        callback(true, user_data);
+        return kSuccess;
+      }));
+
+  guint32 now_time = 1;
+  // A convenient shorthand to simulate events.
+  auto send_key_event = [responder, &now_time](bool is_press, guint keyval,
+                                               guint16 keycode,
+                                               GdkModifierType state) {
+    now_time += 1;
+    g_autoptr(FlKeyEvent) event =
+        fl_key_event_new(now_time, is_press, keycode, keyval, state, 0);
+    g_autoptr(GMainLoop) loop = g_main_loop_new(nullptr, 0);
+    fl_key_embedder_responder_handle_event(
+        responder, event, 0, nullptr,
+        [](GObject* object, GAsyncResult* result, gpointer user_data) {
+          gboolean handled;
+          EXPECT_TRUE(fl_key_embedder_responder_handle_event_finish(
+              FL_KEY_EMBEDDER_RESPONDER(object), result, &handled, nullptr));
+          EXPECT_EQ(handled, TRUE);
+
+          g_main_loop_quit(static_cast<GMainLoop*>(user_data));
+        },
+        loop);
+    g_main_loop_run(loop);
+  };
+
+  // CapsLock remapped to Control is pressed and held.
+  send_key_event(kPress, GDK_KEY_Control_L, kKeyCodeCapsLock,
+                 static_cast<GdkModifierType>(0));
+  EXPECT_EQ(call_records->len, 1u);
+  FlKeyEmbedderCallRecord* record =
+      FL_KEY_EMBEDDER_CALL_RECORD(g_ptr_array_index(call_records, 0));
+  EXPECT_EQ(record->event->type, kFlutterKeyEventTypeDown);
+  EXPECT_EQ(record->event->physical, kPhysicalCapsLock);
+  EXPECT_EQ(record->event->logical, kLogicalControlLeft);
+  EXPECT_EQ(record->event->synthesized, false);
+
+  // ControlLeft is tapped while CapsLock is still held.
+  send_key_event(kPress, GDK_KEY_Control_L, kKeyCodeControlLeft,
+                 GDK_CONTROL_MASK);
+  send_key_event(kRelease, GDK_KEY_Control_L, kKeyCodeControlLeft,
+                 GDK_CONTROL_MASK);
+  EXPECT_EQ(call_records->len, 3u);
+  record = FL_KEY_EMBEDDER_CALL_RECORD(g_ptr_array_index(call_records, 2));
+  EXPECT_EQ(record->event->type, kFlutterKeyEventTypeUp);
+  EXPECT_EQ(record->event->physical, kPhysicalControlLeft);
+  EXPECT_EQ(record->event->logical, kLogicalControlLeft);
+  clear_records(call_records);
+
+  // The CapsLock release is missed, and a pointer event reports no modifiers.
+  fl_key_embedder_responder_sync_modifiers_if_needed(responder, 0, 10);
+  EXPECT_EQ(call_records->len, 1u);
+  record = FL_KEY_EMBEDDER_CALL_RECORD(g_ptr_array_index(call_records, 0));
+  EXPECT_EQ(record->event->timestamp, 10000);
+  EXPECT_EQ(record->event->type, kFlutterKeyEventTypeUp);
+  EXPECT_EQ(record->event->physical, kPhysicalCapsLock);
+  EXPECT_EQ(record->event->logical, kLogicalControlLeft);
+  EXPECT_EQ(record->event->synthesized, true);
+  clear_records(call_records);
+
+  // Control is no longer pressed.
+  EXPECT_EQ(
+      g_hash_table_size(fl_key_embedder_responder_get_pressed_state(responder)),
+      0u);
+  send_key_event(kPress, GDK_KEY_a, kKeyCodeKeyA,
+                 static_cast<GdkModifierType>(0));
+  EXPECT_EQ(call_records->len, 1u);
+  record = FL_KEY_EMBEDDER_CALL_RECORD(g_ptr_array_index(call_records, 0));
+  EXPECT_EQ(record->event->type, kFlutterKeyEventTypeDown);
+  EXPECT_EQ(record->event->physical, kPhysicalKeyA);
+  EXPECT_EQ(record->event->logical, kLogicalKeyA);
+  EXPECT_EQ(record->event->synthesized, false);
+}
+
+// Test if all physical keys pressed as the same logical key are released when
+// the modifier is cleared. https://github.com/flutter/flutter/issues/150326
+TEST_F(FlKeyEmbedderResponderTest,
+       SynthesizeForDesyncPressingStateOnSharedLogicalKeyHeldTogether) {
+  StartEngine();
+
+  g_autoptr(FlKeyEmbedderResponder) responder =
+      fl_key_embedder_responder_new(engine);
+
+  g_autoptr(GPtrArray) call_records =
+      g_ptr_array_new_with_free_func(g_object_unref);
+  fl_engine_get_embedder_api(engine)->SendKeyEvent = MOCK_ENGINE_PROC(
+      SendKeyEvent,
+      ([&call_records](auto engine, const FlutterKeyEvent* event,
+                       FlutterKeyEventCallback callback, void* user_data) {
+        g_ptr_array_add(call_records, fl_key_embedder_call_record_new(
+                                          event, callback, user_data));
+        callback(true, user_data);
+        return kSuccess;
+      }));
+
+  guint32 now_time = 1;
+  // A convenient shorthand to simulate events.
+  auto send_key_event = [responder, &now_time](bool is_press, guint keyval,
+                                               guint16 keycode,
+                                               GdkModifierType state) {
+    now_time += 1;
+    g_autoptr(FlKeyEvent) event =
+        fl_key_event_new(now_time, is_press, keycode, keyval, state, 0);
+    g_autoptr(GMainLoop) loop = g_main_loop_new(nullptr, 0);
+    fl_key_embedder_responder_handle_event(
+        responder, event, 0, nullptr,
+        [](GObject* object, GAsyncResult* result, gpointer user_data) {
+          gboolean handled;
+          EXPECT_TRUE(fl_key_embedder_responder_handle_event_finish(
+              FL_KEY_EMBEDDER_RESPONDER(object), result, &handled, nullptr));
+          EXPECT_EQ(handled, TRUE);
+
+          g_main_loop_quit(static_cast<GMainLoop*>(user_data));
+        },
+        loop);
+    g_main_loop_run(loop);
+  };
+
+  // CapsLock remapped to Control and ControlLeft are both held.
+  send_key_event(kPress, GDK_KEY_Control_L, kKeyCodeCapsLock,
+                 static_cast<GdkModifierType>(0));
+  send_key_event(kPress, GDK_KEY_Control_L, kKeyCodeControlLeft,
+                 GDK_CONTROL_MASK);
+  EXPECT_EQ(call_records->len, 2u);
+  clear_records(call_records);
+
+  // Both releases are missed, and a pointer event reports no modifiers.
+  fl_key_embedder_responder_sync_modifiers_if_needed(responder, 0, 10);
+  EXPECT_EQ(call_records->len, 2u);
+  std::vector<uint64_t> released_physical_keys;
+  for (guint i = 0; i < call_records->len; i++) {
+    FlKeyEmbedderCallRecord* record =
+        FL_KEY_EMBEDDER_CALL_RECORD(g_ptr_array_index(call_records, i));
+    EXPECT_EQ(record->event->timestamp, 10000);
+    EXPECT_EQ(record->event->type, kFlutterKeyEventTypeUp);
+    EXPECT_EQ(record->event->logical, kLogicalControlLeft);
+    EXPECT_EQ(record->event->synthesized, true);
+    released_physical_keys.push_back(record->event->physical);
+  }
+  // The release order follows hash table order, so it is not checked.
+  EXPECT_THAT(
+      released_physical_keys,
+      ::testing::UnorderedElementsAre(kPhysicalCapsLock, kPhysicalControlLeft));
+  EXPECT_EQ(
+      g_hash_table_size(fl_key_embedder_responder_get_pressed_state(responder)),
+      0u);
 }
 
 // Test if missed lock keys can be detected and synthesized with state
