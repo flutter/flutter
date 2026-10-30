@@ -238,6 +238,11 @@ class SkwasmFragmentProgram extends SkwasmObjectWrapper<RawRuntimeEffect>
     }
     throw ArgumentError('No uniform named "$name".');
   }
+
+  /// Returns the index of the image sampler uniform named [name].
+  ///
+  /// See [ShaderData.getImageSamplerIndex].
+  int getImageSamplerIndex(String name) => _shaderData.getImageSamplerIndex(name);
 }
 
 class SkwasmShaderData extends SkwasmObjectWrapper<RawUniformData> {
@@ -475,9 +480,7 @@ class SkwasmFragmentShader extends BackendFragmentShader implements SkwasmShader
   }
 
   @override
-  ui.ImageSamplerSlot getImageSampler(String name) {
-    throw UnsupportedError('getImageSampler is not supported on the web.');
-  }
+  int getImageSamplerIndex(String name) => _program.getImageSamplerIndex(name);
 
   List<SkwasmUniformFloatSlot> _getUniformFloatSlots(String name, int size) {
     final UniformData info = _program._getUniformFloatInfo(name);

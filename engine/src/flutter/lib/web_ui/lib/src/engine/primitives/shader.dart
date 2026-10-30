@@ -408,7 +408,8 @@ class EngineFragmentShader extends EngineShader implements ui.FragmentShader {
   @override
   ui.UniformMat4Slot getUniformMat4(String name) => _backendShader.getUniformMat4(name);
   @override
-  ui.ImageSamplerSlot getImageSampler(String name) => _backendShader.getImageSampler(name);
+  ui.ImageSamplerSlot getImageSampler(String name) =>
+      EngineImageSamplerSlot._(this, name, _backendShader.getImageSamplerIndex(name));
   @override
   ui.UniformArray<ui.UniformFloatSlot> getUniformFloatArray(String name) =>
       _backendShader.getUniformFloatArray(name);
@@ -430,4 +431,24 @@ class EngineFragmentShader extends EngineShader implements ui.FragmentShader {
   @override
   ui.UniformArray<ui.UniformMat4Slot> getUniformMat4Array(String name) =>
       _backendShader.getUniformMat4Array(name);
+}
+
+/// A binding to an image sampler of an [EngineFragmentShader].
+///
+/// Calling [set] updates the image bound to the sampler.
+class EngineImageSamplerSlot implements ui.ImageSamplerSlot {
+  EngineImageSamplerSlot._(this._shader, this.name, this.shaderIndex);
+
+  final EngineFragmentShader _shader;
+
+  @override
+  final String name;
+
+  @override
+  final int shaderIndex;
+
+  @override
+  void set(ui.Image val) {
+    _shader.setImageSampler(shaderIndex, val);
+  }
 }
