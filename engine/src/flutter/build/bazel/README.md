@@ -2259,9 +2259,9 @@ build without one, the directory `tools/gn` names for its flags, which the
 install rule reads off its configuration (`checkout_view.bzl`'s
 `build_directory_attrs`: `host`, `wasm` or `linux`, the runtime mode,
 `_unopt`, `_arm64`) --
-with the
-targets nothing converted answers to listed in a comment (the Mac's Android
-AOT builders' `flutter/lib/snapshot`); the host test
+(a ninja
+target nothing converted answers to would be listed in a comment; since 448
+every builder's every target has its counterpart); the host test
 builders' `flutter/build/dart:dart_sdk`, GN's `copy_tree` of the prebuilt
 SDK into `dart-sdk/`, is `//engine/src/flutter/build/dart:dart_sdk`
 (`gn_copy_tree` over the Dart wrap's `prebuilt_dart_sdk`, the files placed
