@@ -282,6 +282,26 @@ three device suites the emulator builder's `run_tests.py --type android`
 pushes and the APKs it installs (they build for `android_x64`; an emulator
 is the next phase), and x86, which no builder builds.
 
+**Android from a Mac host** (450–452, NEED_DECISION Q32): the Android
+toolchains take the host's clang and constraints (`HOST_CLANG`,
+`HOST_OS_CONSTRAINT`, `HOST_CPU_CONSTRAINT`) and the NDK's directory of host
+tools (`HOST_NDK_PREBUILT`: `linux-x86_64` or `darwin-x86_64` -- GN's
+`android_host_os`/`android_host_arch`; only the sysroot and the compiler
+runtime archives under it are read), the Dart wrap passes a Mac host's
+Xcode arguments for every target (`MAC_HOST_GN_ARGS`: tools/gn's
+`setup_apple_sdks` runs on the host's OS, and the host toolchain compiles
+the Android target's gen_snapshot), and the Android shell's generated file
+is evaluated with `host_os` as cases (the gen_snapshot archive is
+`darwin-x64.zip` from a Mac, holding the universal gen_snapshot
+`lib/snapshot:create_macos_gen_snapshots` joins and the entitlements file;
+`analyze_snapshot`'s archive is a Linux host's). The six
+`mac_android_aot_engine.json` builds have their installs
+(`--config=mac_android_profile[_arm64|_x64]`, `mac_android_release[...]`);
+on an Apple-silicon Mac `libflutter.so` for arm64 builds in 12 minutes and
+`ci/android_profile_arm64`'s install matches GN's build of the same two
+targets file for file (GN's tree has besides the two thin host slices lipo
+joins, which the recipe does not publish).
+
 ### The Emscripten toolchain (the spike)
 
 `toolchains/emscripten/` is GN's `build/toolchain/wasm:wasm` -- the
