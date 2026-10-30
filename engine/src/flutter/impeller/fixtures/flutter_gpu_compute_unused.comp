@@ -1,0 +1,34 @@
+// Copyright 2013 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+// Doubles each of three vertex positions in place, like
+// flutter_gpu_compute_scale.comp, and declares a storage buffer and a uniform
+// block whose only reads are overwritten. Metal's shader compiler removes
+// them and Vulkan's keeps them. Dispatched as one workgroup.
+
+layout(local_size_x = 3) in;
+
+layout(std430) buffer;
+
+layout(binding = 0) buffer Vertices {
+  vec2 positions[];
+}
+vertices;
+
+layout(binding = 1) readonly buffer Unused {
+  vec4 never_read;
+}
+unused;
+
+layout(binding = 2) uniform UnusedInfo {
+  vec4 never_read;
+}
+unused_info;
+
+void main() {
+  uint index = gl_GlobalInvocationID.x;
+  vec2 value = unused.never_read.xy + unused_info.never_read.xy;
+  value = vertices.positions[index] * 2.0;
+  vertices.positions[index] = value;
+}

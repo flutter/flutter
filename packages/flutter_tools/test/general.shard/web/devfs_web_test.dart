@@ -14,6 +14,7 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/devfs.dart';
@@ -33,6 +34,7 @@ import 'package:shelf/shelf.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../../src/common.dart';
+import '../../src/fake_process_manager.dart';
 import '../../src/fake_web_devfs.dart';
 import '../../src/fakes.dart';
 import '../../src/testbed.dart';
@@ -930,7 +932,6 @@ void main() {
     expect(webDevFS.webAssetServer.getFile('main.dart'), isNotNull);
     expect(webDevFS.webAssetServer.getFile('manifest.json'), isNotNull);
     expect(webDevFS.webAssetServer.getFile('flutter.js'), isNotNull);
-    expect(webDevFS.webAssetServer.getFile('flutter_service_worker.js'), isNotNull);
     expect(webDevFS.webAssetServer.getFile('version.json'), isNotNull);
     expect(await webDevFS.webAssetServer.dartSourceContents('dart_sdk.js'), 'HELLO');
     expect(await webDevFS.webAssetServer.dartSourceContents('dart_sdk.js.map'), 'THERE');
@@ -1333,7 +1334,6 @@ void main() {
     expect(webDevFS.webAssetServer.getFile('main.dart'), isNotNull);
     expect(webDevFS.webAssetServer.getFile('manifest.json'), isNotNull);
     expect(webDevFS.webAssetServer.getFile('flutter.js'), isNotNull);
-    expect(webDevFS.webAssetServer.getFile('flutter_service_worker.js'), isNotNull);
     expect(webDevFS.webAssetServer.getFile('version.json'), isNotNull);
     expect(await webDevFS.webAssetServer.dartSourceContents('dart_sdk.js'), 'HELLO');
     expect(await webDevFS.webAssetServer.dartSourceContents('dart_sdk.js.map'), 'THERE');
@@ -1535,6 +1535,7 @@ void main() {
       null,
       toolContext: FakeToolContext(
         artifacts: Artifacts.test(),
+        cache: Cache.test(processManager: FakeProcessManager.any()),
         config: globals.config,
         fs: globals.fs,
         flutterVersion: globals.flutterVersion,
@@ -1577,6 +1578,7 @@ void main() {
       null,
       toolContext: FakeToolContext(
         artifacts: Artifacts.test(),
+        cache: Cache.test(processManager: FakeProcessManager.any()),
         config: globals.config,
         fs: globals.fs,
         flutterVersion: globals.flutterVersion,

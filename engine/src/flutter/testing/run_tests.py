@@ -205,6 +205,52 @@ def vulkan_validation_env(build_dir: str) -> typing.Dict[str, str]:
   return extra_env
 
 
+# A small, hand picked set of Vulkan `impeller_unittests` that are run with the
+# synchronization validation feature of the Vulkan validation layers enabled.
+# Synchronization validation is too expensive to run against the entire suite,
+# so these are selected to cover the broadest set of synchronization scenarios
+# (blits, readbacks, mipmap generation, MSAA resolves, depth/stencil
+# attachments, subpasses, compute, offscreen layers, backdrop filters, advanced
+# blends, and glyph atlas uploads).
+#
+# See https://github.com/flutter/flutter/issues/195502.
+VULKAN_SYNC_VALIDATION_TESTS = [
+    # Blits, readbacks and mipmap generation.
+    'Play/BlitPassTest.CanBlitSmallRegionToUninitializedTexture/Vulkan',
+    ## TODO(https://github.com/flutter/flutter/issues/195598):
+    ## BlitPassVK::ResizeTexture barrier.
+    # 'Play/BlitPassTest.CanResizeTextures/Vulkan',
+    ## TODO(https://github.com/flutter/flutter/issues/194987):
+    ## BlitPassVK::OnCopyTextureToBufferCommand barrier.
+    # 'Play/RendererTest.CanBlitTextureToBuffer/Vulkan',
+    ## TODO(https://github.com/flutter/flutter/issues/194987):
+    ## BlitPassVK::OnGenerateMipmapCommand barrier.
+    # 'Play/RendererTest.CanGenerateMipmaps/Vulkan',
+    # Render passes, offscreen targets, MSAA, depth/stencil and subpasses.
+    ## TODO(https://github.com/flutter/flutter/issues/194987):
+    ## RenderPassBuilderVK depth/stencil loadOp.
+    # 'Play/RendererTest.CanRenderToTexture/Vulkan',
+    'Play/RendererTest.CanSepiaToneWithSubpasses/Vulkan',
+    'Play/EntityPassTargetTest.SwapWithMSAAImplicitResolve/Vulkan',
+    # Compute.
+    'Compute/ComputeTest.MultiStageInputAndOutput/Vulkan',
+    # End-to-end rendering through Aiks/DisplayList.
+    ## TODO(https://github.com/flutter/flutter/issues/194987):
+    ## RenderPassBuilderVK depth/stencil loadOp.
+    # 'Play/AiksTest.CanRenderImage/Vulkan',
+    # 'Play/AiksTest.CanRenderClips/Vulkan',
+    # 'Play/AiksTest.CanRenderTextFrame/Vulkan',
+    # 'Play/AiksTest.CanRenderBackdropBlur/Vulkan',
+    # 'Play/AiksTest.CanRenderAdvancedBlendColorFilterWithSaveLayer/Vulkan',
+    ## TODO(https://github.com/flutter/flutter/issues/194987):
+    ## RenderPassBuilderVK depth/stencil loadOp.
+    ## TODO(https://github.com/flutter/flutter/issues/195599):
+    ## RenderPassBuilderVK depth/stencil storeOp.
+    # 'Play/AiksTest.CanRenderNestedBackdropBlur/Vulkan',
+    # 'Play/AiksTest.GaussianBlurBackdropTinyMipMap/Vulkan',
+]
+
+
 def metal_validation_env() -> typing.Dict[str, str]:
   extra_env = {
       # pylint: disable=line-too-long
@@ -623,6 +669,35 @@ def run_cc_tests(
         coverage=coverage,
         extra_env=extra_env,
     )
+
+
+def run_impeller_vulkan_sync_validation_tests(
+    build_dir: str, build_name: str, executable_filter: typing.Optional[typing.List[str]],
+    coverage: bool
+) -> None:
+  """
+  Runs `VULKAN_SYNC_VALIDATION_TESTS` with Vulkan synchronization validation.
+  """
+  flags = [
+      '--gtest_filter=' + ':'.join(VULKAN_SYNC_VALIDATION_TESTS),
+      '--',
+      '--enable_vulkan_sync_validation',
+  ]
+  try:
+    if is_linux():
+      xvfb.start_virtual_x(build_name, build_dir)
+    run_engine_executable(
+        build_dir,
+        'impeller_unittests',
+        executable_filter,
+        flags,
+        coverage=coverage,
+        gtest=True,
+        extra_env=vulkan_validation_env(build_dir),
+    )
+  finally:
+    if is_linux():
+      xvfb.stop_virtual_x(build_name)
 
 
 def run_engine_benchmarks(
@@ -1451,6 +1526,9 @@ Flutter Wiki page on the subject: https://github.com/flutter/flutter/wiki/Testin
       )
     finally:
       xvfb.stop_virtual_x(build_name)
+
+  if 'impeller-vulkan-sync-validation' in types:
+    run_impeller_vulkan_sync_validation_tests(build_dir, args.variant, engine_filter, args.coverage)
 
   if 'dart' in types:
     dart_filter = args.dart_filter.split(',') if args.dart_filter else None

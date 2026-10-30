@@ -28,7 +28,6 @@ import 'analysis_server_mock.dart';
 void main() {
   setUpAll(() {
     Cache.disableLocking();
-    Cache.flutterRoot = getFlutterRoot();
   });
 
   late Directory tempDir;

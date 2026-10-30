@@ -1213,10 +1213,12 @@ Xcode setupXcode({
   );
 
   return Xcode.test(
-    processManager: fakeProcessManager,
+    toolContext: FakeToolContext.macosHost(
+      flutterRoot: flutterRoot,
+      fs: fileSystem,
+      processManager: fakeProcessManager,
+    ),
     xcodeProjectInterpreter: xcodeProjectInterpreter,
-    fileSystem: fileSystem,
-    flutterRoot: flutterRoot,
   );
 }
 
