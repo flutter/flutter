@@ -73,11 +73,66 @@ def _host_key(rctx):
     return "%s_%s" % (os, cpu)
 
 # The Firefox version the lock named when this was pinned, and the sha256 of
-# linux-x86_64's firefox-<version>.tar.xz.
+# linux-x86_64's firefox-<version>.tar.xz and of the Mac's disk image
+# (`Firefox <version>.dmg`, one image for both CPUs), which felt downloads
+# the same way (lib/web_ui/dev/firefox_installer.dart).
 _FIREFOX_VERSION = "148.0"
 _FIREFOX_SHA256 = "a3ea5907006baa19183d5f582f7781c1d0e22fd1605603c4a76fc14b7f55be23"
+_FIREFOX_MAC_SHA256 = "ec50d7ed2337441d92272617f510cd4c11e44d68699349d466d62211b767e0a2"
 
 _FIREFOX_URL = "https://ftp.mozilla.org/pub/firefox/releases/%s/linux-x86_64/en-US/firefox-%s.tar.xz"
+_FIREFOX_MAC_URL = "https://ftp.mozilla.org/pub/firefox/releases/%s/mac/en-US/Firefox%%20%s.dmg"
+
+# What felt writes beside the executable it resolves (dev/firefox.dart: no
+# update checks); in the repository already, so that it finds it written and
+# writes nothing into the repository.
+_FIREFOX_POLICIES = """{
+  "policies": {
+    "DisableAppUpdate": true
+  }
+}
+"""
+
+_FIREFOX_BUILD = """# Firefox {version} ({platform}), the browser lib/web_ui/dev/package_lock.yaml pins (browsers.bzl).
+
+package(default_visibility = ["//visibility:public"])
+
+# The browser's directory whole: the executable loads its libraries and
+# resources from beside itself (an app bundle on a Mac).
+filegroup(
+    name = "firefox",
+    srcs = glob(["{tree}/**"]),
+)
+
+exports_files(["{executable}"])
+
+# The executable under one name per host (firefox/firefox on Linux, the
+# Mac's inside its app bundle).
+alias(
+    name = "executable",
+    actual = "{executable}",
+)
+"""
+
+def _firefox_mac(rctx, named):
+    """Mozilla's disk image, mounted with hdiutil and its app bundle copied in, as felt installs it on a Mac."""
+    image = rctx.path("Firefox.dmg")
+    rctx.download(
+        url = _FIREFOX_MAC_URL % (named, named),
+        output = image,
+        sha256 = _FIREFOX_MAC_SHA256,
+    )
+    mount = rctx.path("mount")
+    attached = rctx.execute(["hdiutil", "attach", "-nobrowse", "-readonly", "-noverify", "-mountpoint", str(mount), str(image)])
+    if attached.return_code != 0:
+        fail("browsers.bzl: hdiutil attach of %s failed: %s%s" % (image, attached.stdout, attached.stderr))
+    copied = rctx.execute(["cp", "-R", str(mount.get_child("Firefox.app")), str(rctx.path("Firefox.app"))])
+    detached = rctx.execute(["hdiutil", "detach", str(mount)])
+    if copied.return_code != 0:
+        fail("browsers.bzl: copying Firefox.app out of %s failed: %s%s" % (image, copied.stdout, copied.stderr))
+    if detached.return_code != 0:
+        fail("browsers.bzl: hdiutil detach of %s failed: %s%s" % (mount, detached.stdout, detached.stderr))
+    rctx.delete(image)
 
 def _locked_version(rctx, browser):
     """The `<browser>: version:` of package_lock.yaml (a small, fixed shape; no YAML parser here)."""
@@ -170,45 +225,36 @@ chrome = repository_rule(
 def _firefox_impl(rctx):
     named = _locked_version(rctx, "firefox")
     if named != _FIREFOX_VERSION:
-        fail(("lib/web_ui/dev/package_lock.yaml names Firefox %s, but %s pins %s: update _FIREFOX_VERSION and " +
-              "_FIREFOX_SHA256 (sha256sum of %s).") % (
+        fail(("lib/web_ui/dev/package_lock.yaml names Firefox %s, but %s pins %s: update _FIREFOX_VERSION, " +
+              "_FIREFOX_SHA256 (sha256sum of %s) and _FIREFOX_MAC_SHA256 (of %s).") % (
             named,
             "build_defs/repositories/browsers.bzl",
             _FIREFOX_VERSION,
             _FIREFOX_URL % (named, named),
+            _FIREFOX_MAC_URL % (named, named),
         ))
-    rctx.download_and_extract(
-        url = _FIREFOX_URL % (named, named),
-        sha256 = _FIREFOX_SHA256,
-        type = "tar.xz",
-    )
-
-    # The policy felt writes beside the executable before it launches Firefox
-    # (no update checks); here already, so that felt finds it and writes
-    # nothing into the repository.
-    rctx.file("firefox/distribution/policies.json", """{
-  "policies": {
-    "DisableAppUpdate": true
-  }
-}
-""")
-    rctx.file("BUILD.bazel", """# Firefox %s, the browser lib/web_ui/dev/package_lock.yaml pins (browsers.bzl).
-
-package(default_visibility = ["//visibility:public"])
-
-# The browser's directory whole: the executable loads its libraries and
-# resources from beside itself.
-filegroup(
-    name = "firefox",
-    srcs = glob(["firefox/**"]),
-)
-
-exports_files(["firefox/firefox"])
-""" % named)
+    host = _host_key(rctx)
+    if host.startswith("mac_"):
+        _firefox_mac(rctx, named)
+        tree = "Firefox.app"
+        executable = "Firefox.app/Contents/MacOS/firefox"
+        platform = "mac"
+    else:
+        rctx.download_and_extract(
+            url = _FIREFOX_URL % (named, named),
+            sha256 = _FIREFOX_SHA256,
+            type = "tar.xz",
+        )
+        tree = "firefox"
+        executable = "firefox/firefox"
+        platform = "linux-x86_64"
+    rctx.file(executable.rsplit("/", 1)[0] + "/distribution/policies.json", _FIREFOX_POLICIES)
+    rctx.file("BUILD.bazel", _FIREFOX_BUILD.format(version = named, platform = platform, tree = tree, executable = executable))
 
 firefox = repository_rule(
     implementation = _firefox_impl,
-    doc = "Firefox at the version lib/web_ui/dev/package_lock.yaml pins, for the web engine's Firefox suites.",
+    doc = "Firefox at the version lib/web_ui/dev/package_lock.yaml pins, for the web engine's Firefox suites: " +
+          "Mozilla's Linux tarball, or its Mac disk image mounted and copied as felt installs it.",
 )
 
 def _browsers_impl(mctx):
