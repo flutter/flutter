@@ -1,0 +1,67 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Generated from //flutter/testing/android/native_activity/BUILD.gn by gn_to_bazel; do not edit.
+
+load("@rules_cc//cc:defs.bzl", "cc_library")
+load("//build_defs/cc:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
+
+package(default_visibility = ["//visibility:public"])
+
+# To create an native activity, deps in this source set in a
+# `native_activity_apk` target and make sure to add the implementation of
+# `NativeActivityMain` which returns a `flutter::NativeActivity` subclass.
+cc_library(
+    name = "native_activity",
+    srcs = ["native_activity.cc"],
+    hdrs = ["native_activity.h"],
+    copts = FLUTTER_COPTS,
+    linkopts = [
+        "-landroid",
+        "-llog",
+    ],
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    target_compatible_with = select({
+        "@platforms//os:android": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        "//engine/src:include_root",
+        "//engine/src/flutter/fml",
+        "//engine/src/flutter/impeller/toolkit/android",
+    ],
+    alwayslink = True,
+)
+
+cc_library(
+    name = "gtest_activity",
+    testonly = True,
+    srcs = ["gtest_activity.cc"],
+    hdrs = ["gtest_activity.h"],
+    copts = FLUTTER_COPTS + [
+        "-Wno-inconsistent-missing-override",  # from //flutter/testing:testing_lib
+    ],
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    target_compatible_with = select({
+        "@platforms//os:android": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        ":native_activity",
+        "//engine/src:include_root",
+        "//engine/src/flutter/testing:testing_lib",
+    ],
+    alwayslink = True,
+)
+
+# What GN has no words for; maintained in the converter's manifest
+# (tools/gn_to_bazel/lib/src/manifest.dart).
+
+# The native_activity_apk template's inputs (native_activity.gni), which
+# //build_defs/android:native_activity_apk.bzl reads from this package.
+exports_files([
+    "AndroidManifest.xml.template",
+    "debug.keystore",
+    "native_activity_apk.py",
+])

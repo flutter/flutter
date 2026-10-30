@@ -27,9 +27,26 @@ exports_files(glob([
     "sdk/platforms/*/android.jar",
     "sdk/build-tools/*/core-lambda-stubs.jar",
     # aapt2 links the embedding's Java tests' resource APK
-    # (//build_defs/java:robolectric.bzl).
+    # (//build_defs/java:robolectric.bzl); with zipalign and apksigner it
+    # packages the Android suites' APKs (//build_defs/android:native_activity_apk.bzl).
     "sdk/build-tools/*/aapt2",
+    "sdk/build-tools/*/apksigner",
+    "sdk/build-tools/*/zipalign",
 ]))
+
+# What the build tools load beside themselves: apksigner's jar (the script
+# runs `java -jar lib/apksigner.jar`) and, in a Linux package, the libc++
+# zipalign finds under lib64/ (a Mac's build tools link the system's).
+filegroup(
+    name = "build_tools_libraries",
+    srcs = glob(
+        [
+            "sdk/build-tools/*/lib/apksigner.jar",
+            "sdk/build-tools/*/lib64/libc++.so",
+        ],
+        allow_empty = True,
+    ),
+)
 
 # build/config/android/config.gni: android_ndk_version. The directory name
 # is the version.

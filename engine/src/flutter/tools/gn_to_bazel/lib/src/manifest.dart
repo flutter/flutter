@@ -167,13 +167,9 @@ const List<ConvertedFile> convertedFiles = <ConvertedFile>[
       // The Dart test fixtures (build/dart/test, a file not converted).
       '//flutter/build/dart/test:gen_dartcli_call',
       '//flutter/build/dart/test:gen_executable_call',
-      // Suites not converted in their files: Flutter GPU's (skipped in its
-      // file: it crashes identically under GN and run_tests.py never runs
-      // it), and the two Android APKs (GN's native_activity_apk; the
-      // Android test phase -- their executables convert).
+      // A suite not converted in its file: Flutter GPU's (skipped there: it
+      // crashes identically under GN and run_tests.py never runs it).
       '//flutter/lib/gpu:gpu_unittests',
-      '//flutter/impeller/renderer/backend/vulkan:vulkan_android_apk_unittests',
-      '//flutter/impeller/toolkit/android:apk_unittests',
       // The darwin frameworks' suites, skipped in their file (the Apple
       // test phase: XCTest, OCMock and the Testing framework from the
       // platform's Developer directory).
@@ -1794,12 +1790,25 @@ exports_files([
   // The Android toolkit (NDK surface control, hardware buffers, the
   // choreographer), which the Vulkan backend and the Android shell reach
   // under is_android; its suite is an Android executable and an APK.
+  ConvertedFile('//flutter/impeller/toolkit/android', condition: 'is_android'),
+  // The NativeActivity glue the Android suites' APKs are built around
+  // (native_activity_apk: the two APK invocations above and in the Vulkan
+  // backend): the activity's main loop over the NDK and a gtest runner
+  // reporting through logcat. The template's inputs -- the manifest
+  // template, the debug keystore and the packaging script -- are exported
+  // for build_defs/android's rule.
   ConvertedFile(
-    '//flutter/impeller/toolkit/android',
+    '//flutter/testing/android/native_activity',
     condition: 'is_android',
-    skip: <String, String>{
-      'apk_unittests': 'an APK of the suite (native_activity_apk): the Android test phase',
-    },
+    appendix: '''
+# The native_activity_apk template's inputs (native_activity.gni), which
+# //build_defs/android:native_activity_apk.bzl reads from this package.
+exports_files([
+    "AndroidManifest.xml.template",
+    "debug.keystore",
+    "native_activity_apk.py",
+])
+''',
   ),
   ConvertedFile('//flutter/impeller/playground/image'),
   ConvertedFile('//flutter/impeller/playground/imgui'),
@@ -2105,18 +2114,7 @@ selects.config_setting_group(
   // M4, research/21 for iOS).
   ConvertedFile('//flutter/impeller/renderer/backend/gles'),
   ConvertedFile('//flutter/impeller/renderer/backend/metal', condition: 'impeller_enable_metal'),
-  ConvertedFile(
-    '//flutter/impeller/renderer/backend/vulkan',
-    skip: <String, String>{
-      // Under is_android: the suite as an APK (testing/android's
-      // native_activity_apk template, which the converter does not know);
-      // the Android test phase's. The same suite as an Android executable
-      // (vulkan_android_unittests, impeller_vulkan_android_unittests by
-      // output_name) converts: run_tests.py --type android pushes it.
-      'vulkan_android_apk_unittests':
-          'an APK of the suite (native_activity_apk): the Android test phase',
-    },
-  ),
+  ConvertedFile('//flutter/impeller/renderer/backend/vulkan'),
   ConvertedFile('//flutter/impeller/renderer/backend'),
   ConvertedFile('//flutter/flow'),
   // The Dart bindings library (engine-owned third_party), on the way to
