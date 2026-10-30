@@ -32,20 +32,27 @@ load(
 )
 load("//build_defs/cc:apple.bzl", "MACOS_DEPLOYMENT_TARGET")
 
-_XCODE_ARGS = {
+# What tools/gn sets whenever the *host* is a Mac (setup_apple_sdks runs on
+# the host's OS, whatever the target): the deployment target and the Mac
+# SDK, platform and toolchain paths GN's mac host toolchain compiles the
+# build's host tools with (build/toolchain/mac: -isysroot, -mmacosx-version-min).
+# A wrapped build on a Mac host takes these for every target -- an Android
+# target's gen_snapshot is a Mac binary (the Mac's T61: without them the
+# host compiles ran with an empty -mmacosx-version-min=).
+MAC_HOST_GN_ARGS = {
     "mac_deployment_target": '"%s"' % MACOS_DEPLOYMENT_TARGET,
     "mac_host_toolchain_path": '"%s/Toolchains/XcodeDefault.xctoolchain"' % XCODE_DEVELOPER_DIR,
     "mac_platform_path": '"%s"' % MACOS_PLATFORM_PATH,
     "mac_sdk_path": '"%s"' % MACOS_SDK_PATH,
 }
 
-MACOS_TARGET_GN_ARGS = _XCODE_ARGS | {
+MACOS_TARGET_GN_ARGS = MAC_HOST_GN_ARGS | {
     "ios_use_simulator": "false",
     "target_os": '"mac"',
     "use_ios_simulator": "false",
 }
 
-IOS_TARGET_GN_ARGS = _XCODE_ARGS | {
+IOS_TARGET_GN_ARGS = MAC_HOST_GN_ARGS | {
     "ios_device_platform_path": '"%s"' % IPHONEOS_PLATFORM_PATH,
     "ios_device_sdk_path": '"%s"' % IPHONEOS_SDK_PATH,
     "ios_simulator_platform_path": '"%s"' % IPHONESIMULATOR_PLATFORM_PATH,
