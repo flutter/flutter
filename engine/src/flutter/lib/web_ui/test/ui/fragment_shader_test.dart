@@ -978,7 +978,18 @@ Future<void> testMain() async {
     await expectLater(ui.FragmentProgram.fromAsset('voronoi shader'), completes);
   }, skip: isWimp); // https://github.com/flutter/flutter/issues/175431
 
-  // https://github.com/flutter/flutter/issues/193221
+  // Regression test for https://github.com/flutter/flutter/issues/193221.
+  //
+  // A picture must keep the uniform values a fragment shader had when it was
+  // drawn, independent of the shader object's lifetime. CanvasKit used to
+  // build the recorded SkShader directly on top of the FragmentShader's
+  // malloc'd uniform buffer, so `FragmentShader.dispose` freed memory that the
+  // picture still read from, and rasterizing the picture afterwards (for
+  // example with `Picture.toImage`) sampled garbage instead of the recorded
+  // color. This test disposes the shader right after recording and then
+  // checks that the picture still renders the recorded color, renders the same
+  // pixels on every rasterization, and renders the same pixels when nested
+  // inside another picture after the original picture is disposed.
   test(
     'disposing a fragment shader after recording does not change the recorded picture',
     () async {
@@ -1009,7 +1020,14 @@ Future<void> testMain() async {
     skip: isWimp, // https://github.com/flutter/flutter/issues/175431
   );
 
-  // https://github.com/flutter/flutter/issues/193221
+  // Regression test for https://github.com/flutter/flutter/issues/193221.
+  //
+  // When a disposed shader's uniform buffer was freed while a picture still
+  // referenced it, the allocator could hand the same memory to the next
+  // shader. Its uniform writes then silently changed what the earlier draw in
+  // the picture rendered. This test records a red draw, disposes its shader,
+  // records a blue draw with a new shader, and checks that both boxes keep
+  // their own color.
   test('disposed fragment shader uniforms are not reused by later shaders in a picture', () async {
     final ui.FragmentProgram program = await renderer.createFragmentProgram('vec4_uniform');
     final recorder = ui.PictureRecorder();
@@ -1045,7 +1063,14 @@ Future<void> testMain() async {
     ], reason: 'right box should be blue');
   }, skip: isWimp); // https://github.com/flutter/flutter/issues/175431
 
-  // https://github.com/flutter/flutter/issues/193221
+  // Regression test for https://github.com/flutter/flutter/issues/193221.
+  //
+  // Same as the disposal test above, but for a shader that also has an image
+  // sampler, which CanvasKit builds through a different code path
+  // (`makeShaderWithChildren`). Disposing the shader and its image after
+  // recording must not change the pixels the picture renders, so this test
+  // compares against the same draw rasterized while everything was still
+  // alive.
   test('disposing a fragment shader with image sampler does not corrupt sampled picture', () async {
     final ui.Image image = _createOvalGradientImage(imageDimension: 16);
     final ui.FragmentProgram program = await renderer.createFragmentProgram('texture_shader');
@@ -1077,7 +1102,14 @@ Future<void> testMain() async {
     expect(Uint8List.sublistView(pixels), Uint8List.sublistView(expectedPixels));
   }, skip: isWimp); // https://github.com/flutter/flutter/issues/175431
 
-  // https://github.com/flutter/flutter/issues/193221
+  // Regression test for https://github.com/flutter/flutter/issues/193221.
+  //
+  // Each draw must capture the uniform values the shader had at the time of
+  // that draw. When recorded shaders shared the FragmentShader's mutable
+  // uniform buffer, changing a uniform after a draw also changed every earlier
+  // draw of the same shader in the picture. This test draws one box per color
+  // with a single shader and Paint, updating the uniform between draws, and
+  // checks that every box keeps the color it was drawn with.
   test(
     'every draw of a repeatedly mutated fragment shader keeps its own uniforms',
     () async {
@@ -1121,7 +1153,13 @@ Future<void> testMain() async {
     skip: isSkwasm,
   );
 
-  // https://github.com/flutter/flutter/issues/193221
+  // Regression test for https://github.com/flutter/flutter/issues/193221.
+  //
+  // Like the uniform test above, but for image samplers: `setImageSampler`
+  // disposes the image shader that an earlier draw recorded, and that draw
+  // must keep sampling its original image. This test draws with a red image,
+  // swaps in a blue image, draws again, and checks that each box samples the
+  // image that was set when it was drawn.
   test('replacing an image sampler between draws keeps the sampler each draw used', () async {
     final ui.Image redImage = _createSolidColorImage(const ui.Color(0xFFFF0000), imageDimension: 4);
     final ui.Image blueImage = _createSolidColorImage(
@@ -1163,7 +1201,11 @@ Future<void> testMain() async {
     ], reason: 'right box should sample the replacement image');
   }, skip: isWimp); // https://github.com/flutter/flutter/issues/175431
 
-  // https://github.com/flutter/flutter/issues/193221
+  // Regression test for https://github.com/flutter/flutter/issues/193221.
+  //
+  // Edge case for the disposal fix: a shader with no uniforms has an empty
+  // uniform buffer, and disposing it after recording must still leave a picture
+  // that renders the shader's output.
   test('a disposed fragment shader without uniforms still renders its picture', () async {
     final ui.FragmentProgram program = await renderer.createFragmentProgram('no_uniforms');
     final ui.FragmentShader shader = program.fragmentShader();
