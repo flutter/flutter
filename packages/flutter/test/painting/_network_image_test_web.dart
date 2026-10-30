@@ -391,6 +391,63 @@ void runTests() {
     // The test passes if there are no crashes.
   });
 
+  testWidgets('Cached animated NetworkImages stop decoding without listeners', (
+    WidgetTester tester,
+  ) async {
+    final testHttpRequest = TestHttpRequest()
+      ..status = 200
+      ..mockEvent = MockEvent('load', web.Event('test error'))
+      ..response = (Uint8List.fromList(kTransparentImage)).buffer;
+
+    httpRequestFactory = () => testHttpRequest.getMock() as web_shim.XMLHttpRequest;
+
+    final ui.Image codecImage = await createTestImage();
+    addTearDown(() {
+      imageCache.clear();
+      codecImage.dispose();
+    });
+    final codec = _CountingAnimatedCodec(codecImage);
+    _TestBinding.instance.overrideCodec = codec;
+    final String url = _uniqueUrl(tester.testDescription);
+
+    await tester.pumpWidget(Image.network(url));
+    await tester.pump();
+    for (var i = 0; i < 10; i += 1) {
+      await tester.pump(const Duration(milliseconds: 100));
+    }
+    expect(codec.framesDecoded, greaterThan(1));
+
+    await tester.pumpWidget(const SizedBox());
+    // Let an in-flight frame finish before measuring background decoding.
+    for (var i = 0; i < 3; i += 1) {
+      await tester.pump(const Duration(milliseconds: 100));
+    }
+    final int framesDecodedWhileHidden = codec.framesDecoded;
+    for (var i = 0; i < 10; i += 1) {
+      await tester.pump(const Duration(milliseconds: 100));
+    }
+
+    expect(codec.framesDecoded, framesDecodedWhileHidden);
+
+    await tester.pumpWidget(Image.network(url));
+    for (var i = 0; i < 5; i += 1) {
+      await tester.pump(const Duration(milliseconds: 100));
+    }
+    expect(codec.framesDecoded, greaterThan(framesDecodedWhileHidden));
+
+    await tester.pumpWidget(const SizedBox());
+    for (var i = 0; i < 3; i += 1) {
+      await tester.pump(const Duration(milliseconds: 100));
+    }
+    final int framesDecodedAfterSecondUnmount = codec.framesDecoded;
+    for (var i = 0; i < 10; i += 1) {
+      await tester.pump(const Duration(milliseconds: 100));
+    }
+    expect(codec.framesDecoded, framesDecodedAfterSecondUnmount);
+
+    imageCache.clear();
+  });
+
   testWidgets('Can handle gestures when using a Platform View', (WidgetTester tester) async {
     final testImg = TestImgElement();
     // Give the test img naturalHeight and naturalWidth so it can be hit by a
@@ -943,11 +1000,33 @@ class _TwoFrameCodec implements ui.Codec {
   void dispose() {}
 }
 
-class _TestFrameInfo implements ui.FrameInfo {
-  _TestFrameInfo(this.image);
+class _CountingAnimatedCodec implements ui.Codec {
+  _CountingAnimatedCodec(this.image);
+
+  final ui.Image image;
+  int framesDecoded = 0;
 
   @override
-  final Duration duration = Duration.zero;
+  int get frameCount => 2;
+
+  @override
+  int get repetitionCount => -1;
+
+  @override
+  Future<ui.FrameInfo> getNextFrame() async {
+    framesDecoded += 1;
+    return _TestFrameInfo(image.clone(), duration: const Duration(milliseconds: 100));
+  }
+
+  @override
+  void dispose() {}
+}
+
+class _TestFrameInfo implements ui.FrameInfo {
+  _TestFrameInfo(this.image, {this.duration = Duration.zero});
+
+  @override
+  final Duration duration;
 
   @override
   final ui.Image image;
