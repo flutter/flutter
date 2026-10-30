@@ -851,6 +851,11 @@ dart_package_tests(
         # analyze_size_test builds hello_world for Android.
         "//examples/hello_world:project",
     ],
+    # The one file with a timeout of its own (`@Timeout(Duration(minutes:
+    # 5))`): its app bundle build takes four and a half minutes on a machine
+    # of its own and overran the five with three other Gradle builds beside
+    # it (10-30); a retry lands after they finish.
+    flaky = ["test/integration.shard/deferred_components_assets_reproduce_test.dart"],
     imports = _IMPORTS,
     # Gradle's downloads: see above.
     network = True,
