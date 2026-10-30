@@ -81,9 +81,13 @@ class OffscreenCanvasProvider extends CanvasProvider<DomOffscreenCanvas> {
 
 /// A [CanvasProvider] that manages [dom.DomHTMLCanvasElement] elements.
 class OnscreenCanvasProvider extends CanvasProvider<DomHTMLCanvasElement> {
+  OnscreenCanvasProvider({this.ownerDocument});
+
+  final DomDocument? ownerDocument;
+
   @override
   DomHTMLCanvasElement _createCanvas(BitmapSize size) {
-    final DomHTMLCanvasElement canvas = createDomCanvasElement();
+    final DomHTMLCanvasElement canvas = createDomCanvasElement(ownerDocument: ownerDocument);
     resizeCanvas(canvas, size);
     return canvas;
   }
@@ -97,7 +101,11 @@ class OnscreenCanvasProvider extends CanvasProvider<DomHTMLCanvasElement> {
   void resizeCanvas(DomHTMLCanvasElement canvas, BitmapSize size) {
     canvas.width = size.width.toDouble();
     canvas.height = size.height.toDouble();
+    resizeCanvasCss(canvas, size);
+  }
 
+  /// Updates only the visible CSS size of an onscreen canvas.
+  void resizeCanvasCss(DomHTMLCanvasElement canvas, BitmapSize size) {
     // When using an onscreen canvas, we also need to update the CSS size to
     // account for the device pixel ratio.
     final double ratio = EngineFlutterDisplay.instance.devicePixelRatio;

@@ -116,7 +116,8 @@ mergeInto(LibraryManager.library, {
               data.width,
               data.height,
               data.callbackId,
-              skwasm_getCurrentTimestamp());
+              skwasm_getCurrentTimestamp(),
+              data.captureImageBitmaps);
             return;
           case 'onRenderComplete':
             _surface_onRenderComplete(
@@ -252,7 +253,16 @@ mergeInto(LibraryManager.library, {
     };
 
     // Rendering
-    _skwasm_dispatchRenderPictures = function (threadId, surfaceHandle, pictures, pictureCount, width, height, callbackId) {
+    _skwasm_dispatchRenderPictures = function (
+      threadId,
+      surfaceHandle,
+      pictures,
+      pictureCount,
+      width,
+      height,
+      callbackId,
+      captureImageBitmaps
+    ) {
       skwasm_postMessage({
         skwasmMessage: 'renderPictures',
         surface: surfaceHandle,
@@ -261,6 +271,7 @@ mergeInto(LibraryManager.library, {
         width,
         height,
         callbackId,
+        captureImageBitmaps,
       }, [], threadId);
     };
     _skwasm_resolveAndPostImages = async function (surfaceHandle, imageBitmaps, rasterStart, callbackId) {
