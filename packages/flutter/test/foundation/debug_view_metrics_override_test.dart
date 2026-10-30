@@ -36,42 +36,41 @@ const DebugViewMetricsOverride _fullyPopulated = DebugViewMetricsOverride(
 /// A padding that shares no edge with any padding of [_fullyPopulated].
 const FakeViewPadding _otherPadding = FakeViewPadding(left: 99, top: 99, right: 99, bottom: 99);
 
+/// Changes one metric of an override and keeps the others.
+typedef _MetricChange = DebugViewMetricsOverride Function(DebugViewMetricsOverride override);
+
 /// Every metric [_fullyPopulated] sets, paired with a way to change just that
 /// one metric.
 ///
 /// Used as the completeness guard: a metric that is threaded through the
 /// constructor but forgotten in `copyWith`, `toJson`, `fromJson` or `==` shows
 /// up here rather than as a metric that quietly never applies.
-final Map<String, DebugViewMetricsOverride Function(DebugViewMetricsOverride)> _perMetricChange =
-    <String, DebugViewMetricsOverride Function(DebugViewMetricsOverride)>{
-      'devicePixelRatio': (DebugViewMetricsOverride o) => o.copyWith(devicePixelRatio: 2.0),
-      'physicalSize': (DebugViewMetricsOverride o) =>
-          o.copyWith(physicalSize: const ui.Size(10, 20)),
-      'textScaling': (DebugViewMetricsOverride o) =>
-          o.copyWith(textScaling: const <ui.Offset>[ui.Offset(1, 0.5)]),
-      'platformBrightness': (DebugViewMetricsOverride o) =>
-          o.copyWith(platformBrightness: ui.Brightness.light),
-      'padding': (DebugViewMetricsOverride o) => o.copyWith(padding: _otherPadding),
-      'viewPadding': (DebugViewMetricsOverride o) => o.copyWith(viewPadding: _otherPadding),
-      'viewInsets': (DebugViewMetricsOverride o) => o.copyWith(viewInsets: _otherPadding),
-      'systemGestureInsets': (DebugViewMetricsOverride o) =>
-          o.copyWith(systemGestureInsets: _otherPadding),
-      'alwaysUse24HourFormat': (DebugViewMetricsOverride o) =>
-          o.copyWith(alwaysUse24HourFormat: false),
-      'accessibleNavigation': (DebugViewMetricsOverride o) =>
-          o.copyWith(accessibleNavigation: false),
-      'invertColors': (DebugViewMetricsOverride o) => o.copyWith(invertColors: false),
-      'disableAnimations': (DebugViewMetricsOverride o) => o.copyWith(disableAnimations: false),
-      'boldText': (DebugViewMetricsOverride o) => o.copyWith(boldText: false),
-      'reduceMotion': (DebugViewMetricsOverride o) => o.copyWith(reduceMotion: false),
-      'highContrast': (DebugViewMetricsOverride o) => o.copyWith(highContrast: false),
-      'onOffSwitchLabels': (DebugViewMetricsOverride o) => o.copyWith(onOffSwitchLabels: false),
-      'supportsAnnounce': (DebugViewMetricsOverride o) => o.copyWith(supportsAnnounce: true),
-      'autoPlayAnimatedImages': (DebugViewMetricsOverride o) =>
-          o.copyWith(autoPlayAnimatedImages: true),
-      'autoPlayVideos': (DebugViewMetricsOverride o) => o.copyWith(autoPlayVideos: true),
-      'deterministicCursor': (DebugViewMetricsOverride o) => o.copyWith(deterministicCursor: false),
-    };
+final Map<String, _MetricChange> _perMetricChange = <String, _MetricChange>{
+  'devicePixelRatio': (DebugViewMetricsOverride o) => o.copyWith(devicePixelRatio: 2.0),
+  'physicalSize': (DebugViewMetricsOverride o) => o.copyWith(physicalSize: const ui.Size(10, 20)),
+  'textScaling': (DebugViewMetricsOverride o) =>
+      o.copyWith(textScaling: const <ui.Offset>[ui.Offset(1, 0.5)]),
+  'platformBrightness': (DebugViewMetricsOverride o) =>
+      o.copyWith(platformBrightness: ui.Brightness.light),
+  'padding': (DebugViewMetricsOverride o) => o.copyWith(padding: _otherPadding),
+  'viewPadding': (DebugViewMetricsOverride o) => o.copyWith(viewPadding: _otherPadding),
+  'viewInsets': (DebugViewMetricsOverride o) => o.copyWith(viewInsets: _otherPadding),
+  'systemGestureInsets': (DebugViewMetricsOverride o) =>
+      o.copyWith(systemGestureInsets: _otherPadding),
+  'alwaysUse24HourFormat': (DebugViewMetricsOverride o) => o.copyWith(alwaysUse24HourFormat: false),
+  'accessibleNavigation': (DebugViewMetricsOverride o) => o.copyWith(accessibleNavigation: false),
+  'invertColors': (DebugViewMetricsOverride o) => o.copyWith(invertColors: false),
+  'disableAnimations': (DebugViewMetricsOverride o) => o.copyWith(disableAnimations: false),
+  'boldText': (DebugViewMetricsOverride o) => o.copyWith(boldText: false),
+  'reduceMotion': (DebugViewMetricsOverride o) => o.copyWith(reduceMotion: false),
+  'highContrast': (DebugViewMetricsOverride o) => o.copyWith(highContrast: false),
+  'onOffSwitchLabels': (DebugViewMetricsOverride o) => o.copyWith(onOffSwitchLabels: false),
+  'supportsAnnounce': (DebugViewMetricsOverride o) => o.copyWith(supportsAnnounce: true),
+  'autoPlayAnimatedImages': (DebugViewMetricsOverride o) =>
+      o.copyWith(autoPlayAnimatedImages: true),
+  'autoPlayVideos': (DebugViewMetricsOverride o) => o.copyWith(autoPlayVideos: true),
+  'deterministicCursor': (DebugViewMetricsOverride o) => o.copyWith(deterministicCursor: false),
+};
 
 /// Tables that cannot be interpolated, that would report a scale factor that is
 /// not a finite number, or that scale text while reporting no scaling at all, by
@@ -223,8 +222,7 @@ void main() {
       expect(_fullyPopulated.hashCode, _fullyPopulated.copyWith().hashCode);
       expect(const DebugViewMetricsOverride(), equals(const DebugViewMetricsOverride()));
       expect(_fullyPopulated, isNot(equals(const DebugViewMetricsOverride())));
-      for (final MapEntry<String, DebugViewMetricsOverride Function(DebugViewMetricsOverride)> entry
-          in _perMetricChange.entries) {
+      for (final MapEntry<String, _MetricChange> entry in _perMetricChange.entries) {
         expect(
           entry.value(_fullyPopulated),
           isNot(equals(_fullyPopulated)),
@@ -258,8 +256,7 @@ void main() {
       // whole serialized form pins each metric to its own key without naming
       // all of them twice.
       final Map<String, Object?> base = _fullyPopulated.toJson();
-      for (final MapEntry<String, DebugViewMetricsOverride Function(DebugViewMetricsOverride)> entry
-          in _perMetricChange.entries) {
+      for (final MapEntry<String, _MetricChange> entry in _perMetricChange.entries) {
         final Map<String, Object?> changed = entry.value(_fullyPopulated).toJson();
         expect(
           changed[entry.key],
@@ -297,8 +294,7 @@ void main() {
 
       // Each individually changed metric survives a round trip too, which
       // catches a metric that is serialized but read back into the wrong field.
-      for (final MapEntry<String, DebugViewMetricsOverride Function(DebugViewMetricsOverride)> entry
-          in _perMetricChange.entries) {
+      for (final MapEntry<String, _MetricChange> entry in _perMetricChange.entries) {
         final DebugViewMetricsOverride changed = entry.value(_fullyPopulated);
         expect(
           DebugViewMetricsOverride.fromJson(changed.toJson()),
@@ -1382,8 +1378,7 @@ void main() {
       wrapped.onPlatformBrightnessChanged = () => notifications.add('platformBrightness');
       wrapped.onAccessibilityFeaturesChanged = () => notifications.add('accessibilityFeatures');
 
-      for (final MapEntry<String, DebugViewMetricsOverride Function(DebugViewMetricsOverride)> entry
-          in _perMetricChange.entries) {
+      for (final MapEntry<String, _MetricChange> entry in _perMetricChange.entries) {
         debugSetViewMetricsOverride(1, _fullyPopulated);
         notifications.clear();
         debugSetViewMetricsOverride(1, entry.value(_fullyPopulated));

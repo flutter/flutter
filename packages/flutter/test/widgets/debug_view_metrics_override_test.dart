@@ -18,6 +18,9 @@ final ui.Brightness _otherBrightness = switch (ui.PlatformDispatcher.instance.pl
   ui.Brightness.light => ui.Brightness.dark,
 };
 
+/// Reads one metric back from the [MediaQueryData] a test captured.
+typedef _MetricReader = Object? Function(MediaQueryData data);
+
 /// Every metric [DebugViewMetricsOverride] can set that [MediaQueryData]
 /// surfaces: an override that sets it, how to read it back, and the value
 /// [MediaQueryData] must then report.
@@ -28,94 +31,94 @@ final ui.Brightness _otherBrightness = switch (ui.PlatformDispatcher.instance.pl
 /// A metric that is in neither this table nor [_notSurfacedByMediaQuery] is one
 /// [MediaQueryData] could silently stop honoring, which is the failure the
 /// tests over this table exist to catch.
-final Map<String, (DebugViewMetricsOverride, Object? Function(MediaQueryData), Object?)>
-_surfacedMetrics = <String, (DebugViewMetricsOverride, Object? Function(MediaQueryData), Object?)>{
-  'devicePixelRatio': (
-    const DebugViewMetricsOverride(devicePixelRatio: 6.0),
-    (MediaQueryData data) => data.devicePixelRatio,
-    6.0,
-  ),
-  'physicalSize': (
-    const DebugViewMetricsOverride(physicalSize: ui.Size(600, 900)),
-    (MediaQueryData data) => data.size,
-    const Size(200, 300),
-  ),
-  'padding': (
-    const DebugViewMetricsOverride(padding: FakeViewPadding(top: 30)),
-    (MediaQueryData data) => data.padding,
-    const EdgeInsets.only(top: 10),
-  ),
-  'viewPadding': (
-    const DebugViewMetricsOverride(viewPadding: FakeViewPadding(top: 30)),
-    (MediaQueryData data) => data.viewPadding,
-    const EdgeInsets.only(top: 10),
-  ),
-  'viewInsets': (
-    const DebugViewMetricsOverride(viewInsets: FakeViewPadding(bottom: 30)),
-    (MediaQueryData data) => data.viewInsets,
-    const EdgeInsets.only(bottom: 10),
-  ),
-  'systemGestureInsets': (
-    const DebugViewMetricsOverride(systemGestureInsets: FakeViewPadding(bottom: 30)),
-    (MediaQueryData data) => data.systemGestureInsets,
-    const EdgeInsets.only(bottom: 10),
-  ),
-  'textScaling': (
-    const DebugViewMetricsOverride(textScaling: <ui.Offset>[ui.Offset(1, 3)]),
-    (MediaQueryData data) => data.textScaler.scale(10),
-    30.0,
-  ),
-  'platformBrightness': (
-    DebugViewMetricsOverride(platformBrightness: _otherBrightness),
-    (MediaQueryData data) => data.platformBrightness,
-    _otherBrightness,
-  ),
-  'alwaysUse24HourFormat': (
-    const DebugViewMetricsOverride(alwaysUse24HourFormat: true),
-    (MediaQueryData data) => data.alwaysUse24HourFormat,
-    true,
-  ),
-  'accessibleNavigation': (
-    const DebugViewMetricsOverride(accessibleNavigation: true),
-    (MediaQueryData data) => data.accessibleNavigation,
-    true,
-  ),
-  'invertColors': (
-    const DebugViewMetricsOverride(invertColors: true),
-    (MediaQueryData data) => data.invertColors,
-    true,
-  ),
-  'disableAnimations': (
-    const DebugViewMetricsOverride(disableAnimations: true),
-    (MediaQueryData data) => data.disableAnimations,
-    true,
-  ),
-  'boldText': (
-    const DebugViewMetricsOverride(boldText: true),
-    (MediaQueryData data) => data.boldText,
-    true,
-  ),
-  'reduceMotion': (
-    const DebugViewMetricsOverride(reduceMotion: true),
-    (MediaQueryData data) => data.reduceMotion,
-    true,
-  ),
-  'highContrast': (
-    const DebugViewMetricsOverride(highContrast: true),
-    (MediaQueryData data) => data.highContrast,
-    true,
-  ),
-  'onOffSwitchLabels': (
-    const DebugViewMetricsOverride(onOffSwitchLabels: true),
-    (MediaQueryData data) => data.onOffSwitchLabels,
-    true,
-  ),
-  'supportsAnnounce': (
-    const DebugViewMetricsOverride(supportsAnnounce: false),
-    (MediaQueryData data) => data.supportsAnnounce,
-    false,
-  ),
-};
+final Map<String, (DebugViewMetricsOverride, _MetricReader, Object?)> _surfacedMetrics =
+    <String, (DebugViewMetricsOverride, _MetricReader, Object?)>{
+      'devicePixelRatio': (
+        const DebugViewMetricsOverride(devicePixelRatio: 6.0),
+        (MediaQueryData data) => data.devicePixelRatio,
+        6.0,
+      ),
+      'physicalSize': (
+        const DebugViewMetricsOverride(physicalSize: ui.Size(600, 900)),
+        (MediaQueryData data) => data.size,
+        const Size(200, 300),
+      ),
+      'padding': (
+        const DebugViewMetricsOverride(padding: FakeViewPadding(top: 30)),
+        (MediaQueryData data) => data.padding,
+        const EdgeInsets.only(top: 10),
+      ),
+      'viewPadding': (
+        const DebugViewMetricsOverride(viewPadding: FakeViewPadding(top: 30)),
+        (MediaQueryData data) => data.viewPadding,
+        const EdgeInsets.only(top: 10),
+      ),
+      'viewInsets': (
+        const DebugViewMetricsOverride(viewInsets: FakeViewPadding(bottom: 30)),
+        (MediaQueryData data) => data.viewInsets,
+        const EdgeInsets.only(bottom: 10),
+      ),
+      'systemGestureInsets': (
+        const DebugViewMetricsOverride(systemGestureInsets: FakeViewPadding(bottom: 30)),
+        (MediaQueryData data) => data.systemGestureInsets,
+        const EdgeInsets.only(bottom: 10),
+      ),
+      'textScaling': (
+        const DebugViewMetricsOverride(textScaling: <ui.Offset>[ui.Offset(1, 3)]),
+        (MediaQueryData data) => data.textScaler.scale(10),
+        30.0,
+      ),
+      'platformBrightness': (
+        DebugViewMetricsOverride(platformBrightness: _otherBrightness),
+        (MediaQueryData data) => data.platformBrightness,
+        _otherBrightness,
+      ),
+      'alwaysUse24HourFormat': (
+        const DebugViewMetricsOverride(alwaysUse24HourFormat: true),
+        (MediaQueryData data) => data.alwaysUse24HourFormat,
+        true,
+      ),
+      'accessibleNavigation': (
+        const DebugViewMetricsOverride(accessibleNavigation: true),
+        (MediaQueryData data) => data.accessibleNavigation,
+        true,
+      ),
+      'invertColors': (
+        const DebugViewMetricsOverride(invertColors: true),
+        (MediaQueryData data) => data.invertColors,
+        true,
+      ),
+      'disableAnimations': (
+        const DebugViewMetricsOverride(disableAnimations: true),
+        (MediaQueryData data) => data.disableAnimations,
+        true,
+      ),
+      'boldText': (
+        const DebugViewMetricsOverride(boldText: true),
+        (MediaQueryData data) => data.boldText,
+        true,
+      ),
+      'reduceMotion': (
+        const DebugViewMetricsOverride(reduceMotion: true),
+        (MediaQueryData data) => data.reduceMotion,
+        true,
+      ),
+      'highContrast': (
+        const DebugViewMetricsOverride(highContrast: true),
+        (MediaQueryData data) => data.highContrast,
+        true,
+      ),
+      'onOffSwitchLabels': (
+        const DebugViewMetricsOverride(onOffSwitchLabels: true),
+        (MediaQueryData data) => data.onOffSwitchLabels,
+        true,
+      ),
+      'supportsAnnounce': (
+        const DebugViewMetricsOverride(supportsAnnounce: false),
+        (MediaQueryData data) => data.supportsAnnounce,
+        false,
+      ),
+    };
 
 /// The metrics [MediaQueryData.fromView] always reads from the view itself,
 /// rather than taking from the `platformData` an ancestor [MediaQuery] supplies.
@@ -852,17 +855,10 @@ void main() {
       late MediaQueryData data;
       await tester.pumpWidget(_capture((MediaQueryData value) => data = value));
 
-      for (final MapEntry<
-            String,
-            (DebugViewMetricsOverride, Object? Function(MediaQueryData), Object?)
-          >
-          entry
+      for (final MapEntry<String, (DebugViewMetricsOverride, _MetricReader, Object?)> entry
           in _surfacedMetrics.entries) {
-        final (
-          DebugViewMetricsOverride override,
-          Object? Function(MediaQueryData) read,
-          Object? expected,
-        ) = entry.value;
+        final (DebugViewMetricsOverride override, _MetricReader read, Object? expected) =
+            entry.value;
         final Object? reported = read(data);
         debugSetViewMetricsOverride(tester.view.viewId, override);
         await tester.pump();
@@ -915,17 +911,10 @@ void main() {
         ),
       );
 
-      for (final MapEntry<
-            String,
-            (DebugViewMetricsOverride, Object? Function(MediaQueryData), Object?)
-          >
-          entry
+      for (final MapEntry<String, (DebugViewMetricsOverride, _MetricReader, Object?)> entry
           in _surfacedMetrics.entries) {
-        final (
-          DebugViewMetricsOverride override,
-          Object? Function(MediaQueryData) read,
-          Object? expected,
-        ) = entry.value;
+        final (DebugViewMetricsOverride override, _MetricReader read, Object? expected) =
+            entry.value;
         final Object? inherited = read(data);
         debugSetViewMetricsOverride(tester.view.viewId, override);
         await tester.pump();
