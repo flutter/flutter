@@ -2530,6 +2530,7 @@ set, per host, with what each takes from a warm cache on a 24-core machine:
 | Mac | `bazel test //engine/src/flutter/...` | the engine on a Mac: the macOS shell and its suites, the Metal backends, the golden suite, Chrome's web suites | 2 h 20 |
 | Mac | `bazel test //:framework_tests //:tool_tests //:dart_tests` | as Linux's, on a Mac | 67 min |
 | Mac | `bazel test //:apple_tool_tests` | `flutter build macos\|ios`, SwiftPM and the Xcode migrations through the tool against the universal frameworks | 15 min once the frameworks are built |
+| Mac | `for c in mac_android_profile mac_android_profile_arm64 mac_android_profile_x64 mac_android_release mac_android_release_arm64 mac_android_release_x64; do bazel run --config=$c //engine/src/flutter/ci/builders:$c -- /tmp/$c; done` | Android from a Mac host (Q32): the six Android AOT builders' installs -- the universal gen_snapshot in `darwin-x64.zip`, lib/snapshot's blobs | 3 min each once the Dart wrap's halves are built (12 min the first) |
 
 A change to the tool tests' facsimile (`packages/flutter_tools/BUILD.bazel`'s
 cache lists, `bin/internal`'s stamps, `build_defs/android/build_tools.bzl`,
@@ -2537,7 +2538,9 @@ cache lists, `bin/internal`'s stamps, `build_defs/android/build_tools.bzl`,
 change to a test macro (`build_defs/web/web_ui_tests.bzl`,
 `build_defs/dart/dart_test.bzl`, `build_defs/java/robolectric.bzl`) the
 suites it declares on both hosts; a change to the engine's rules the
-wildcard on both. `bazel query 'tests(<suite>)' | wc -l` says what a suite
+wildcard on both; a change to the Android toolchains, the NDK overlay, the
+Dart wrap or the Android shell's file the eighth besides the Linux Android
+builds. `bazel query 'tests(<suite>)' | wc -l` says what a suite
 holds on this host before a run.
 
 ## Adding a dependency
