@@ -244,7 +244,6 @@ void main() {
         '-scheme',
         'Runner',
         'BUILD_DIR=/build/ios',
-        if (!simulator) ...<String>['-sdk', 'iphoneos'],
         if (deviceId != null) ...<String>[
           '-destination',
           'id=$deviceId',
