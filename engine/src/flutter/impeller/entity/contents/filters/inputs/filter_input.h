@@ -82,6 +82,13 @@ class FilterInput {
   virtual std::optional<Rect> GetSourceCoverage(const Matrix& effect_transform,
                                                 const Rect& output_limit) const;
 
+  /// @brief  Whether any filter in this input's chain requires its full
+  ///         source coverage, i.e. its input must not be trimmed to the
+  ///         portion that maps to the visible output.
+  ///
+  /// @see    `FilterContents::RequiresFullSourceCoverage`
+  virtual bool RequiresFullSourceCoverage() const;
+
   /// @brief  Get the local transform of this filter input. This transform is
   ///         relative to the `Entity` transform space.
   virtual Matrix GetLocalTransform(const Entity& entity) const;
