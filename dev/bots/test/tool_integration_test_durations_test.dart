@@ -36,10 +36,10 @@ void main() {
 
   setUpAll(() {
     // Map.from checks every key and value, so a malformed file fails here.
-    final hosts = json.decode(
+    final decoded = json.decode(
       io.File(p.join(flutterRoot, durationsPath)).readAsStringSync(),
     ) as Map<String, Object?>;
-    durations = hosts.map(
+    durations = decoded.map(
       (String host, Object? files) => MapEntry<String, Map<String, int>>(
         host,
         Map<String, int>.from(files! as Map<String, Object?>),

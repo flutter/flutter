@@ -28,6 +28,8 @@ const Map<String, String> _hostByPrefix = <String, String>{
 
 final RegExp _builderName = RegExp(r'^(Linux|Mac|Windows) tool_integration_tests_\d+(_\d+)?$');
 
+final http.Client _client = http.Client();
+
 Future<void> main(List<String> arguments) async {
   final parser = ArgParser()
     ..addOption('builds', defaultsTo: '3', help: 'Successful builds to sample per subshard.')
@@ -76,6 +78,8 @@ Future<void> main(List<String> arguments) async {
         sample.key: _median(sample.value),
     };
   }
+
+  _client.close();
 
   // Logs can include deleted files and miss new ones; emit what's in the tree.
   final String toolsRoot = path.join(flutterRoot, 'packages', 'flutter_tools');
@@ -162,7 +166,7 @@ Future<List<String>> _listProdBuilders() async {
 }
 
 Future<Object?> _rpc(String service, String method, Map<String, Object?> body) async {
-  final http.Response response = await http.post(
+  final http.Response response = await _client.post(
     Uri.parse('$service$method'),
     headers: const <String, String>{
       'Content-Type': 'application/json',
