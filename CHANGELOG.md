@@ -32,6 +32,11 @@ docs/releases/Hotfix-Documentation-Best-Practices.md
 
 ## Flutter 3.47 Changes
 
+### [3.47.9](https://github.com/flutter/flutter/releases/tag/3.47.9)
+- [flutter/194570](https://github.com/flutter/flutter/issues/194570) When a path or command exceeds `MAX_PATH` on Windows (OS Error 206), `flutter_tools` crashed with an unhandled `ProcessPackageException` or `FileSystemException` instead of exiting cleanly with an actionable error message.
+- [flutter/192933](https://github.com/flutter/flutter/issues/192933) When running `flutter test` in pub workspaces, monorepos, or symlinked directories on any platform, native assets compilation crashed with a `StateError`.
+- [flutter/193527](https://github.com/flutter/flutter/issues/193527) When building custom text selection menus, packages can't add new actions such as Translate without breaking exhaustive switches on `ContextMenuButtonType`; adds the extensible `ContextMenuButtonKind`.
+
 ### [3.47.8](https://github.com/flutter/flutter/releases/tag/3.47.8)
 #### Security advisory [GHSA-frr6-h895-5pxp](https://github.com/dart-lang/sdk/security/advisories/GHSA-frr6-h895-5pxp):
 - [dart/568000](https://dart-review.googlesource.com/c/sdk/+/568000) Updates BoringSSL in the Dart runtime (3.13.7) to block compromised eMudhra intermediate CA certificates.
