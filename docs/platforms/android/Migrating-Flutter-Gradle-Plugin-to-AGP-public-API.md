@@ -127,7 +127,7 @@ projects. That opt-out dies with AGP 10.
 | `variant.outputs` + `packageApplicationProvider` + `doLast` APK copy; `versionCodeOverride` | `FlutterPluginUtils.kt` | `CopyFlutterApksTask` (`SingleArtifact.APK` + `BuiltArtifactsLoader`); `VariantOutput.versionCode` set from a `finalizeDsl` snapshot (`DslVersionCodes`) | P6 |
 | `libraryVariants.all` × host `applicationVariants.all` cross-wiring | `FlutterPlugin.kt` (add-to-app) | library-side `onVariants` with `Component.debuggable`; no host-project lookup | P7 |
 | `android.libraryVariants`; internal `publishing.singleVariants`; module-to-plugin `assembleAar<V>.dependsOn` | `aar_init_script.gradle` | `com.android.library` plugin check; per-variant `singleVariant` that keeps the build file's declaration; the tool requests `assembleAar<V>` without a project path, so it runs in the module and in every plugin that has it (no `dependsOn`) | P8 |
-| `android.newDsl=false` migrator | `disable_new_dsl_migration.dart` | skip projects with `android.builtInKotlin=true` and no kotlin-android; `RemoveNewDslOptOutMigration` removes Flutter's marker pair from them | P9 |
+| `android.newDsl=false` migrator | `disable_new_dsl_migration.dart` | skip projects with `android.builtInKotlin=true` and no blocking app or plugin build files; `RemoveNewDslOptOutMigration` removes Flutter's marker pair from those projects | P9 |
 | `android.newDsl=false` template lines | templates | drop together with `android.builtInKotlin=false`, because kotlin-android fails to apply under newDsl | P9b |
 | FULL `gradle` artifact dependency | `build.gradle.kts` | `gradle-api` artifact (compile-time proof of zero internal usage) | P10 |
 
@@ -271,8 +271,11 @@ else serializes through `FlutterPlugin.kt` / `FlutterPluginUtils.kt`.
    compatible with AGP's 9.0 new DSL", KGP 2.4.20), so the flip follows the
    built-in Kotlin migration.
    - P9: only projects whose `gradle.properties` sets
-     `android.builtInKotlin=true`, and whose app does not apply kotlin-android,
-     build with newDsl. The migrator stops adding the opt-out to them and
+     `android.builtInKotlin=true`, and whose app and Android plugin build files
+     do not use legacy DSL or variant APIs or apply `kotlin-android` unguarded,
+     build with newDsl. Plugins that guard imperative `kotlin-android`
+     application on the AGP version or `android.builtInKotlin` do not block
+     newDsl. The migrator stops adding the opt-out to ready projects and
      removes a Flutter marker comment ("This newDsl flag was added by the
      Flutter template" or "This newDsl flag was added automatically by Flutter
      migrator") that is immediately followed by `android.newDsl=false`.

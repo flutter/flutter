@@ -94,8 +94,8 @@ final gradleErrors = <GradleHandledError>[
   missingNdkSourcePropertiesFile,
   applyingKotlinAndroidPluginErrorHandler,
   useNewAgpDslErrorHandler,
-  legacyVariantApiErrorHandler,
   kotlinAndroidPluginWithNewDslErrorHandler,
+  legacyVariantApiErrorHandler,
   incompatibleKotlinVersionHandler, // This handler should always be last, as its key log output is sometimes in error messages with other root causes.
 ];
 
@@ -961,9 +961,9 @@ For instructions on how to opt out, see: $kOptOutOfNewDslDocsUrl
 /// The Android Gradle Plugin guide to the variant API (`androidComponents`).
 const String kAgpVariantApiDocsUrl = 'https://developer.android.com/build/extend-agp';
 
-/// Gradle errors for build scripts that use an Android Gradle Plugin variant
-/// API that `android.newDsl=true` removes. With `android.newDsl=false` the same
-/// scripts build.
+/// Gradle errors for build scripts using a legacy Android Gradle Plugin DSL or
+/// variant API removed when `android.newDsl=true`. With `android.newDsl=false`
+/// the same build scripts build.
 final _legacyVariantApiPatterns = <RegExp>[
   // Groovy, for example `android.applicationVariants.all { ... }`. Wording of
   // Gradle 9.5.0 with AGP 9.3.1.
@@ -984,10 +984,22 @@ final _legacyVariantApiPatterns = <RegExp>[
   RegExp(
     r"Unresolved reference '(applicationVariants|libraryVariants|testVariants|unitTestVariants|variantFilter)'\.",
   ),
+  // Kotlin DSL or Groovy `extensions.configure<LibraryExtension>` /
+  // `extensions.getByType(BaseExtension)` against legacy extension types under
+  // `android.newDsl=true`. Wording of Gradle 9.5.0 with AGP 9.3.1.
+  RegExp(
+    r"Extension of type '(?:LibraryExtension|AppExtension|BaseExtension|TestedExtension)' does not exist\. Currently registered extension types: \[.*\b(?:LibraryExtensionImpl|ApplicationExtensionImpl|DynamicFeatureExtensionImpl|TestExtensionImpl)\b",
+  ),
+  // Groovy or Kotlin cast of the `android` extension to a legacy
+  // `com.android.build.gradle.*Extension` class under `android.newDsl=true`.
+  // Wording of Gradle 9.5.0 with AGP 9.3.1.
+  RegExp(
+    r'class com\.android\.build\..* cannot be cast to class com\.android\.build\.gradle\.(?:BaseExtension|LibraryExtension|AppExtension|TestedExtension)\b',
+  ),
 ];
 
-/// Handler for a build script that uses a variant API that does not exist
-/// when `android.newDsl` is enabled.
+/// Handler for a build script using a legacy DSL or variant API removed when
+/// `android.newDsl` is enabled.
 @visibleForTesting
 final legacyVariantApiErrorHandler = GradleHandledError(
   test: (String line) => _legacyVariantApiPatterns.any((RegExp pattern) => pattern.hasMatch(line)),
@@ -1017,7 +1029,8 @@ For details, see: $kOptOutOfNewDslDocsUrl
 
 If the build script is in a plugin, file an issue with that plugin asking it to
 support `android.newDsl`.
-If the build script is in your app, migrate it to the variant API
+If the build script is in your app, migrate the script to the
+`com.android.build.api.dsl` interfaces and the variant API
 (`androidComponents.onVariants`). For instructions, see: $kAgpVariantApiDocsUrl''',
           title: _boxTitle,
         );

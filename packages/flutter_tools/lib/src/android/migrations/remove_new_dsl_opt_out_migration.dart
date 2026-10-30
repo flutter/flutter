@@ -26,8 +26,8 @@ final RegExp _newDslFalseRegex = RegExp(r'^\s*android\.newDsl(?:\s*[=:]\s*|\s+)f
 /// Removes the `android.newDsl=false` opt-out that Flutter wrote to
 /// `gradle.properties`, in projects for which [isReadyForNewDsl] is true: the
 /// project uses built-in Kotlin, and a scan of the app's and every Android
-/// plugin's build file finds no legacy variant API and no `kotlin-android`
-/// plugin.
+/// plugin's build file finds no legacy DSL or variant API and no unguarded
+/// `kotlin-android` plugin application.
 ///
 /// Only a Flutter marker comment immediately followed by an
 /// `android.newDsl=false` line is removed. An opt-out without a marker, or with

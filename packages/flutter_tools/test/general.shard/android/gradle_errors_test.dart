@@ -64,8 +64,8 @@ void main() {
           missingNdkSourcePropertiesFile,
           applyingKotlinAndroidPluginErrorHandler,
           useNewAgpDslErrorHandler,
-          legacyVariantApiErrorHandler,
           kotlinAndroidPluginWithNewDslErrorHandler,
+          legacyVariantApiErrorHandler,
           incompatibleKotlinVersionHandler,
         ]),
       );
@@ -1632,6 +1632,8 @@ An exception occurred applying plugin request [id: 'dev.flutter.flutter-gradle-p
       'Kotlin DSL android.unitTestVariants.all':
           "e: file:///app/build.gradle.kts:3:9: Unresolved reference 'unitTestVariants'.",
       'Kotlin DSL android { variantFilter {} }': "  Line 3: android { variantFilter { println(name) } }\n                    ^ Unresolved reference 'variantFilter'.",
+      'Kotlin DSL configure<LibraryExtension> with legacy import': "> Extension of type 'LibraryExtension' does not exist. Currently registered extension types: [ExtraPropertiesExtension, LibraryExtensionImpl, AndroidComponentsExtension, LibraryAndroidComponentsExtension]",
+      'Groovy or Kotlin cast to legacy BaseExtension': r'> class com.android.build.gradle.internal.dsl.LibraryExtensionImpl$AgpDecorated cannot be cast to class com.android.build.gradle.BaseExtension (com.android.build.gradle.internal.dsl.LibraryExtensionImpl$AgpDecorated and com.android.build.gradle.BaseExtension are in unnamed module of loader org.gradle.internal.classloader.VisitableURLClassLoader @4b85612c)',
     };
 
     for (final MapEntry<String, String> entry in reproducedErrors.entries) {
@@ -1677,6 +1679,7 @@ An exception occurred applying plugin request [id: 'dev.flutter.flutter-gradle-p
         contains('Gradle names the build script under "* Where:" above.'),
       );
       expect(testLogger.statusText, contains("unknown property 'applicationVariants'"));
+      expect(testLogger.statusText, contains('com.android.build.api.dsl'));
       expect(testLogger.statusText, contains('androidComponents.onVariants'));
       expect(testLogger.statusText, contains(kAgpVariantApiDocsUrl));
       expect(testLogger.statusText, contains('android.newDsl=false'));

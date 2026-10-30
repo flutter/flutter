@@ -9,9 +9,11 @@ beta channel. Contributor-facing details live in
 ## Summary
 
 The Flutter Gradle Plugin uses only the public Android Gradle Plugin (AGP)
-API. Flutter projects that set `android.builtInKotlin=true`, and whose app does
-not apply the `kotlin-android` plugin, build with AGP's new DSL enabled: Flutter
-does not add `android.newDsl=false` to them, and removes the copy it added. Gradle build
+API. Flutter projects that set `android.builtInKotlin=true`, and whose app and
+Android plugin build files do not use legacy AGP APIs or apply the
+`kotlin-android` plugin unguarded, build with AGP's new DSL enabled: Flutter
+does not add `android.newDsl=false` to ready projects, and removes the
+marker-commented opt-out that Flutter added. Gradle build
 scripts that use the legacy AGP APIs — most commonly
 `android.applicationVariants` — fail to configure and must be migrated to the
 AGP Variant API.
@@ -35,9 +37,12 @@ built-in Kotlin migration (tracked in
 [flutter/flutter#184836](https://github.com/flutter/flutter/issues/184836))
 removes both.
 
-This also applies to the build scripts of the plugins your app uses. A plugin
-whose `android/build.gradle` uses `android.libraryVariants` or `variantFilter`
-builds with `android.newDsl=false` and fails once the opt-out is removed.
+Flutter scans the app module's build file and the `android/build.gradle(.kts)`
+file of each Android plugin before removing the opt-out. A plugin whose build
+file uses legacy APIs (such as `android.libraryVariants`, `variantFilter`, or
+`com.android.build.gradle.LibraryExtension`) or applies `kotlin-android` without
+guarding on the AGP version or `android.builtInKotlin` keeps
+`android.newDsl=false` in place, and fails once the opt-out is removed.
 
 If a build script, in the app or in one of its plugins, uses an API that does
 not exist under the new DSL, `flutter build` names the failing API and links to
