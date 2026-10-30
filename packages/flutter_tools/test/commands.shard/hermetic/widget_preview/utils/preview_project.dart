@@ -2,11 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// @docImport 'package:flutter_tools/src/widget_preview/preview_detector.dart';
-library;
-
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/widget_preview/dependency_graph.dart';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 
@@ -153,8 +149,6 @@ dependencies:
   String get pubspecContents => _pubspecYaml.readAsStringSync();
 
   /// The root of the fake project.
-  ///
-  /// This should always be set to [PreviewDetector.projectRoot].
   late final Directory projectRoot;
   late final Directory _libDirectory;
   final File _pubspecYaml;
@@ -167,21 +161,6 @@ dependencies:
 
   Set<WidgetPreviewSourceFile> get currentSources => _currentSources.values.toSet();
   final _currentSources = <String, WidgetPreviewSourceFile>{};
-
-  Set<PreviewPath> get paths => _currentSources.keys.map(toPreviewPath).toSet();
-
-  /// Builds a [PreviewPath] based on [path] using the [projectRoot]'s `lib/` directory as the
-  /// path root.
-  PreviewPath toPreviewPath(String path) {
-    final File file = _libDirectory.childFile(path);
-
-    return (
-      path: file.path,
-      uri: PackageConfig(<Package>[
-        Package(packageName, projectRoot.uri, packageUriRoot: Uri.parse('lib/')),
-      ]).toPackageUri(file.uri)!,
-    );
-  }
 
   /// Writes `pubspec.yaml` and `.dart_tool/package_config.json` at [projectRoot].
   Future<void> initializePubspec() async {
@@ -248,88 +227,5 @@ dependencies:
     final Directory dir = _libDirectory.childDirectory(context.dirname(file.path));
     _currentSources.removeWhere((String path, _) => path.startsWith(dir.path));
     dir.deleteSync(recursive: true);
-  }
-}
-
-/// A mixin for preview projects that support adding and removing libraries with previews.
-mixin ProjectWithPreviews on WidgetPreviewProject {
-  List<Matcher> get expectedPreviewDetails;
-
-  String get previewContainingFileContents;
-
-  String get nonPreviewContainingFileContents;
-
-  Map<PreviewPath, List<Matcher>> get matcherMapping => <PreviewPath, List<Matcher>>{
-    for (final PreviewPath path in librariesWithPreviews) path: expectedPreviewDetails,
-  };
-
-  final librariesWithPreviews = <PreviewPath>{};
-  final librariesWithoutPreviews = <PreviewPath>{};
-
-  void initialize({
-    required List<String> pathsWithPreviews,
-    required List<String> pathsWithoutPreviews,
-  }) {
-    final initialSources = <WidgetPreviewSourceFile>[];
-    for (final path in pathsWithPreviews) {
-      initialSources.add((path: path, source: previewContainingFileContents));
-      librariesWithPreviews.add(toPreviewPath(path));
-    }
-    for (final path in pathsWithoutPreviews) {
-      initialSources.add((path: path, source: nonPreviewContainingFileContents));
-      librariesWithoutPreviews.add(toPreviewPath(path));
-    }
-    initialSources.forEach(writeFile);
-  }
-
-  /// Adds a file containing previews at [path].
-  void addPreviewContainingFile({required String path}) {
-    writeFile((path: path, source: previewContainingFileContents));
-    final PreviewPath previewPath = toPreviewPath(path);
-    librariesWithoutPreviews.remove(previewPath);
-    librariesWithPreviews.add(previewPath);
-  }
-
-  /// Adds a file with no previews at [path].
-  void addNonPreviewContainingFile({required String path}) {
-    writeFile((path: path, source: nonPreviewContainingFileContents));
-    final PreviewPath previewPath = toPreviewPath(path);
-    librariesWithPreviews.remove(previewPath);
-    librariesWithoutPreviews.add(previewPath);
-  }
-
-  /// Writes a file containing previews under `test/$path`.
-  void addPreviewContainingTestFile({required String path}) {
-    projectRoot.childDirectory('test').childFile(path)
-      ..createSync(recursive: true)
-      ..writeAsStringSync(previewContainingFileContents);
-  }
-
-  /// Adds a new library with a part at [path].
-  ///
-  /// If the file name specified by [path] is 'path.dart', the part file will be named
-  /// 'path_part.dart'.
-  void addLibraryWithPartsContainingPreviews({required String path}) {
-    final String partPath = path.replaceAll('.dart', '_part.dart');
-    writeFile((
-      path: partPath,
-      source:
-          '''
-part of '$path';
-
-$previewContainingFileContents
-''',
-    ));
-
-    writeFile((
-      path: path,
-      source:
-          '''
-part '$partPath';
-''',
-    ));
-    final PreviewPath previewPath = toPreviewPath(path);
-    librariesWithoutPreviews.remove(previewPath);
-    librariesWithPreviews.add(previewPath);
   }
 }
