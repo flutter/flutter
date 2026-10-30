@@ -217,9 +217,7 @@ def vulkan_validation_env(build_dir: str) -> typing.Dict[str, str]:
 VULKAN_SYNC_VALIDATION_TESTS = [
     # Blits, readbacks and mipmap generation.
     'Play/BlitPassTest.CanBlitSmallRegionToUninitializedTexture/Vulkan',
-    ## TODO(https://github.com/flutter/flutter/issues/195598):
-    ## BlitPassVK::ResizeTexture barrier.
-    # 'Play/BlitPassTest.CanResizeTextures/Vulkan',
+    'Play/BlitPassTest.CanResizeTextures/Vulkan',
     ## TODO(https://github.com/flutter/flutter/issues/194987):
     ## BlitPassVK::OnCopyTextureToBufferCommand barrier.
     # 'Play/RendererTest.CanBlitTextureToBuffer/Vulkan',
