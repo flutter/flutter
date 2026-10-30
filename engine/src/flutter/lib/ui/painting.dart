@@ -8991,7 +8991,7 @@ abstract class ImageDescriptor {
   /// Creates an image descriptor from encoded data in a supported format.
   static Future<ImageDescriptor> encoded(ImmutableBuffer buffer) {
     final descriptor = _NativeImageDescriptor._();
-    return _futurize((_Callback<void> callback) {
+    return _futurizeWithError((_CallbackWithError<void> callback) {
       return descriptor._initEncoded(buffer, callback);
     }).then((_) => descriptor);
   }
@@ -9062,7 +9062,7 @@ base class _NativeImageDescriptor extends NativeFieldWrapperClass1 implements Im
   }
 
   @Native<Handle Function(Handle, Pointer<Void>, Handle)>(symbol: 'ImageDescriptor::initEncoded')
-  external String? _initEncoded(ImmutableBuffer buffer, _Callback<void> callback);
+  external String? _initEncoded(ImmutableBuffer buffer, _CallbackWithError<void> callback);
 
   @Native<Void Function(Handle, Handle, Int32, Int32, Int32, Int32)>(
     symbol: 'ImageDescriptor::initRaw',

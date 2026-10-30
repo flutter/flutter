@@ -4,6 +4,7 @@
 
 #include <algorithm>
 #include <utility>
+#include <vector>
 
 #include "flutter/lib/ui/painting/image_generator_registry.h"
 #include "third_party/skia/include/codec/SkBmpDecoder.h"
@@ -43,7 +44,6 @@ void RegisterSkiaCodecs() {
 }  // namespace
 
 namespace flutter {
-
 ImageGeneratorRegistry::ImageGeneratorRegistry() : weak_factory_(this) {
   AddFactory(
       [](sk_sp<SkData> buffer) {
@@ -68,7 +68,11 @@ ImageGeneratorRegistry::ImageGeneratorRegistry() : weak_factory_(this) {
         return BuiltinSkiaImageGenerator::MakeFromGenerator(
             std::move(generator));
       },
-      0);
+      0,
+      // SkImageGeneratorCG copies the complete ImageIO property dictionary
+      // while constructing a generator. Images with rich metadata can make that
+      // operation too expensive for the UI thread.
+      ImageGeneratorFactoryExecution::kConcurrentTaskRunner);
 #elif FML_OS_WIN
   AddFactory(
       [](sk_sp<SkData> buffer) {
@@ -82,14 +86,23 @@ ImageGeneratorRegistry::ImageGeneratorRegistry() : weak_factory_(this) {
 
 ImageGeneratorRegistry::~ImageGeneratorRegistry() = default;
 
-void ImageGeneratorRegistry::AddFactory(ImageGeneratorFactory factory,
-                                        int32_t priority) {
-  image_generator_factories_.insert({std::move(factory), priority, ++nonce_});
+void ImageGeneratorRegistry::AddFactory(
+    ImageGeneratorFactory factory,
+    int32_t priority,
+    ImageGeneratorFactoryExecution execution) {
+  image_generator_factories_.insert(
+      {std::make_shared<ImageGeneratorFactory>(std::move(factory)), priority,
+       ++nonce_, execution});
 }
 
-std::shared_ptr<ImageGenerator>
-ImageGeneratorRegistry::CreateCompatibleGenerator(const sk_sp<SkData>& buffer) {
-  if (!image_generator_factories_.size()) {
+void ImageGeneratorRegistry::CreateCompatibleGenerator(
+    const sk_sp<SkData>& buffer,
+    const std::shared_ptr<fml::ConcurrentTaskRunner>& concurrent_task_runner,
+    const fml::RefPtr<fml::TaskRunner>& ui_task_runner,
+    std::function<void(std::shared_ptr<ImageGenerator>)> callback) {
+  FML_DCHECK(ui_task_runner->RunsTasksOnCurrentThread());
+
+  if (image_generator_factories_.empty()) {
     FML_LOG(WARNING)
         << "There are currently no image decoders installed. If you're writing "
            "your own platform embedding, you can register new image decoders "
@@ -98,13 +111,58 @@ ImageGeneratorRegistry::CreateCompatibleGenerator(const sk_sp<SkData>& buffer) {
            "file a bug on https://github.com/flutter/flutter/issues.";
   }
 
-  for (auto& factory : image_generator_factories_) {
-    std::shared_ptr<ImageGenerator> result = factory.callback(buffer);
-    if (result) {
-      return result;
-    }
+  ResolveGenerator(
+      std::make_shared<const std::vector<PrioritizedFactory>>(
+          image_generator_factories_.begin(), image_generator_factories_.end()),
+      0u, buffer, concurrent_task_runner, ui_task_runner, std::move(callback));
+}
+
+void ImageGeneratorRegistry::ResolveGenerator(
+    std::shared_ptr<const std::vector<PrioritizedFactory>> factories,
+    size_t index,
+    sk_sp<SkData> buffer,
+    const std::shared_ptr<fml::ConcurrentTaskRunner>& concurrent_task_runner,
+    const fml::RefPtr<fml::TaskRunner>& ui_task_runner,
+    std::function<void(std::shared_ptr<ImageGenerator>)> callback) {
+  if (index == factories->size()) {
+    ui_task_runner->PostTask(
+        [callback = std::move(callback)]() { callback(nullptr); });
+    return;
   }
-  return nullptr;
+
+  const auto execution = (*factories)[index].execution;
+  auto invoke_factory = [factories = std::move(factories), index,
+                         buffer = std::move(buffer), concurrent_task_runner,
+                         ui_task_runner,
+                         callback = std::move(callback)]() mutable {
+    // Try to create a compatible generator on the UI or concurrent task runner.
+    auto& factory = *(*factories)[index].callback;
+    auto result = factory(buffer);
+    if (result) {
+      // Pass the compatible generator to the callback on the UI task runner.
+      fml::TaskRunner::RunNowOrPostTask(ui_task_runner,
+                                        [callback = std::move(callback),
+                                         result = std::move(result)]() mutable {
+                                          callback(std::move(result));
+                                        });
+      return;
+    }
+    // Otherwise, try again with the next factory.
+    fml::TaskRunner::RunNowOrPostTask(
+        ui_task_runner,
+        [factories = std::move(factories), index, buffer = std::move(buffer),
+         concurrent_task_runner, ui_task_runner,
+         callback = std::move(callback)]() mutable {
+          ResolveGenerator(std::move(factories), index + 1u, std::move(buffer),
+                           concurrent_task_runner, ui_task_runner,
+                           std::move(callback));
+        });
+  };
+  if (execution == ImageGeneratorFactoryExecution::kConcurrentTaskRunner) {
+    concurrent_task_runner->PostTask(std::move(invoke_factory));
+  } else {
+    invoke_factory();
+  }
 }
 
 fml::TaskRunnerAffineWeakPtr<ImageGeneratorRegistry>
