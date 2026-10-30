@@ -21,6 +21,10 @@ namespace testing {
 std::shared_ptr<std::vector<std::string>> GetMockVulkanFunctions(
     VkDevice device);
 
+/// @brief Returns the subpass dependencies passed to the most recent
+///        `vkCreateRenderPass` call on the given device.
+std::vector<VkSubpassDependency> GetLastRenderPassDependencies(VkDevice device);
+
 // A test-controlled version of |vk::Fence|.
 class MockFence final {
  public:
