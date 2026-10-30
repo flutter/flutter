@@ -148,14 +148,31 @@ TEST_P(PipelineVariantRecordingTest,
   ContentContext content_context(GetContext(), GetTypographerContext());
   ASSERT_TRUE(content_context.IsValid());
 
-  ContentContextOptions default_options{
-      .sample_count = SampleCount::kCount4,
-      .color_attachment_pixel_format =
-          GetContext()->GetCapabilities()->GetDefaultColorFormat()};
+  const SampleCount pass_sample_count =
+      GetContext()->GetCapabilities()->SupportsOffscreenMSAA()
+          ? SampleCount::kCount4
+          : SampleCount::kCount1;
+  const PixelFormat default_color_format =
+      GetContext()->GetCapabilities()->GetDefaultColorFormat();
+  ContentContextOptions default_solid_fill_options{
+      .sample_count = pass_sample_count,
+      .blend_mode = BlendMode::kSrc,
+      .depth_compare = CompareFunction::kGreaterEqual,
+      .primitive_type = PrimitiveType::kTriangleStrip,
+      .color_attachment_pixel_format = default_color_format,
+      .depth_write_enabled = true};
+  ContentContextOptions default_clip_options{
+      .sample_count = pass_sample_count,
+      .blend_mode = BlendMode::kDst,
+      .depth_compare = CompareFunction::kGreaterEqual,
+      .stencil_mode = ContentContextOptions::StencilMode::kCoverCompareInverted,
+      .primitive_type = PrimitiveType::kTriangleStrip,
+      .color_attachment_pixel_format = default_color_format,
+      .depth_write_enabled = true};
   PipelineRef solid_fill =
-      content_context.GetSolidFillPipeline(default_options);
+      content_context.GetSolidFillPipeline(default_solid_fill_options);
   ASSERT_TRUE(solid_fill);
-  PipelineRef clip = content_context.GetClipPipeline(default_options);
+  PipelineRef clip = content_context.GetClipPipeline(default_clip_options);
   ASSERT_TRUE(clip);
   PipelineRef lazy_solid_fill =
       content_context.GetSolidFillPipeline(MakeLazyOptions(*GetContext()));
