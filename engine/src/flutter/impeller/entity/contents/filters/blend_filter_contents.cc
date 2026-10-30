@@ -476,7 +476,7 @@ std::optional<Entity> BlendFilterContents::CreateForegroundPorterDuffBlend(
     pass.SetVertexBuffer(std::move(vtx_buffer));
     auto options = OptionsFromPassAndEntity(pass, entity);
     options.primitive_type = PrimitiveType::kTriangleStrip;
-    pass.SetPipeline(renderer.GetPorterDuffPipeline(blend_mode, options));
+    pass.SetPipeline(renderer.GetPorterDuffBlendPipeline(options));
 
     FS::FragInfo frag_info;
     VS::FrameInfo frame_info;
@@ -496,6 +496,7 @@ std::optional<Entity> BlendFilterContents::CreateForegroundPorterDuffBlend(
                     : 1.0,
                 1, 0, 0);
     frag_info.use_strict_source_rect = 0.0;
+    SetPorterDuffCoefficients(blend_mode, frag_info);
 
     FS::BindFragInfo(pass, data_host_buffer.EmplaceUniform(frag_info));
     VS::BindFrameInfo(pass, data_host_buffer.EmplaceUniform(frame_info));

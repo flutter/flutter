@@ -6,8 +6,10 @@ import 'dart:ffi' show Abi;
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
@@ -16,6 +18,7 @@ import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/flutter_plugins.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
+import 'package:flutter_tools/src/isolated/mustache_template.dart';
 import 'package:flutter_tools/src/macos/cocoapods.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:test/fake.dart';
@@ -89,7 +92,7 @@ environement:
   }
 
   setUp(() async {
-    Cache.flutterRoot = 'flutter';
+    const flutterRoot = 'flutter';
     fileSystem = MemoryFileSystem.test();
     fakeProcessManager = FakeProcessManager.empty();
     logger = BufferLogger.test();
@@ -98,16 +101,19 @@ environement:
       fakeFlutterVersion: FakeFlutterVersion(),
     );
     cocoaPodsUnderTest = CocoaPods(
-      fileSystem: fileSystem,
-      processManager: fakeProcessManager,
-      logger: logger,
-      platform: FakePlatform(operatingSystem: 'macos'),
-      xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
       analytics: fakeAnalytics,
+      toolContext: FakeToolContext(
+        cache: Cache.test(processManager: FakeProcessManager.any(), flutterRoot: flutterRoot),
+        fs: fileSystem,
+        logger: logger,
+        platform: FakePlatform(operatingSystem: 'macos'),
+        processManager: fakeProcessManager,
+      ),
+      xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
     );
     fileSystem.file(
         fileSystem.path.join(
-          Cache.flutterRoot!,
+          flutterRoot,
           'packages',
           'flutter_tools',
           'templates',
@@ -119,7 +125,7 @@ environement:
       ..writeAsStringSync('iOS podfile template');
     fileSystem.file(
         fileSystem.path.join(
-          Cache.flutterRoot!,
+          flutterRoot,
           'packages',
           'flutter_tools',
           'templates',
@@ -247,12 +253,15 @@ environement:
     testUsingContext('does not create Podfile when we cannot interpret Xcode projects', () async {
       final FlutterProject projectUnderTest = setupProjectUnderTest();
       final cocoaPodsUnderTest = CocoaPods(
-        fileSystem: fileSystem,
-        processManager: fakeProcessManager,
-        logger: logger,
-        platform: FakePlatform(operatingSystem: 'macos'),
-        xcodeProjectInterpreter: FakeXcodeProjectInterpreter(isInstalled: false),
         analytics: fakeAnalytics,
+        toolContext: FakeToolContext(
+          cache: Cache.test(processManager: FakeProcessManager.any(), flutterRoot: 'flutter'),
+          fs: fileSystem,
+          logger: logger,
+          platform: FakePlatform(operatingSystem: 'macos'),
+          processManager: fakeProcessManager,
+        ),
+        xcodeProjectInterpreter: FakeXcodeProjectInterpreter(isInstalled: false),
       );
 
       final FlutterProject project = FlutterProject.fromDirectoryTest(
@@ -393,7 +402,21 @@ environement:
         final FlutterProject project = FlutterProject.fromDirectoryTest(
           fileSystem.directory('project'),
         );
-        await injectPlugins(project, iosPlatform: true, releaseMode: false);
+        await injectPlugins(
+          project,
+          analytics: fakeAnalytics,
+          cocoaPods: cocoaPodsUnderTest,
+          featureFlags: TestFeatureFlags(),
+          releaseMode: false,
+          templateRenderer: const MustacheTemplateRenderer(),
+          toolContext: FakeToolContext(
+            config: Config.test(),
+            fs: fileSystem,
+            logger: logger,
+            processUtils: ProcessUtils(processManager: fakeProcessManager, logger: logger),
+          ),
+          iosPlatform: true,
+        );
 
         final String debugContents = projectUnderTest.ios
             .xcodeConfigFor('Debug')
@@ -1209,15 +1232,18 @@ end''');
               ..writeAsStringSync('Existing Podfile');
 
             cocoaPodsUnderTest = CocoaPods(
-              fileSystem: fileSystem,
-              processManager: fakeProcessManager,
-              logger: logger,
-              platform: FakePlatform(operatingSystem: 'macos'),
+              analytics: fakeAnalytics,
+              currentAbi: Abi.macosArm64,
+              toolContext: FakeToolContext(
+                cache: Cache.test(processManager: FakeProcessManager.any(), flutterRoot: 'flutter'),
+                fs: fileSystem,
+                logger: logger,
+                platform: FakePlatform(operatingSystem: 'macos'),
+                processManager: fakeProcessManager,
+              ),
               xcodeProjectInterpreter: XcodeProjectInterpreter.test(
                 toolContext: FakeToolContext.macosHost(processManager: fakeProcessManager),
               ),
-              analytics: fakeAnalytics,
-              currentAbi: Abi.macosArm64,
             );
 
             fakeProcessManager.addCommands(<FakeCommand>[
@@ -1268,15 +1294,18 @@ end''');
         ..writeAsStringSync('Existing Podfile');
 
       cocoaPodsUnderTest = CocoaPods(
-        fileSystem: fileSystem,
-        processManager: fakeProcessManager,
-        logger: logger,
-        platform: FakePlatform(operatingSystem: 'macos'),
+        analytics: fakeAnalytics,
+        currentAbi: Abi.macosX64,
+        toolContext: FakeToolContext(
+          cache: Cache.test(processManager: FakeProcessManager.any(), flutterRoot: 'flutter'),
+          fs: fileSystem,
+          logger: logger,
+          platform: FakePlatform(operatingSystem: 'macos'),
+          processManager: fakeProcessManager,
+        ),
         xcodeProjectInterpreter: XcodeProjectInterpreter.test(
           toolContext: FakeToolContext.macosHost(processManager: fakeProcessManager),
         ),
-        analytics: fakeAnalytics,
-        currentAbi: Abi.macosX64,
       );
 
       fakeProcessManager.addCommands(<FakeCommand>[
@@ -1473,14 +1502,17 @@ end''');
       ]);
 
       final cocoaPods = CocoaPods(
-        fileSystem: fileSystem,
-        processManager: fakeProcessManager,
-        logger: logger,
-        platform: FakePlatform(operatingSystem: 'macos'),
+        analytics: fakeAnalytics,
+        toolContext: FakeToolContext(
+          cache: Cache.test(processManager: FakeProcessManager.any(), flutterRoot: 'flutter'),
+          fs: fileSystem,
+          logger: logger,
+          platform: FakePlatform(operatingSystem: 'macos'),
+          processManager: fakeProcessManager,
+        ),
         xcodeProjectInterpreter: XcodeProjectInterpreter.test(
           toolContext: FakeToolContext.macosHost(processManager: fakeProcessManager),
         ),
-        analytics: fakeAnalytics,
       );
 
       final bool didInstall = await cocoaPods.processPods(

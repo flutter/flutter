@@ -31,7 +31,7 @@ import 'package:unified_analytics/unified_analytics.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
-import '../../src/fakes.dart' show FakePlistParser, FakeToolContext, FakeXcode;
+import '../../src/fakes.dart' hide FakeProcess;
 
 final Platform macosPlatform = FakePlatform(
   operatingSystem: 'macos',
@@ -72,7 +72,10 @@ void main() {
           simControl: simControl,
           simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-14-4',
           analytics: const NoOpAnalytics(),
+          cocoaPods: FakeCocoaPods(),
+          xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
           plistParser: FakePlistParser(),
+          templateRenderer: FakeTemplateRenderer(),
           toolContext: FakeToolContext(fs: fileSystem, logger: logger),
           xcode: FakeXcode(),
         );
@@ -106,7 +109,10 @@ void main() {
         simControl: FakeSimControl(),
         simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-14-4',
         analytics: const NoOpAnalytics(),
+        cocoaPods: FakeCocoaPods(),
+        xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
         plistParser: FakePlistParser(),
+        templateRenderer: FakeTemplateRenderer(),
         toolContext: FakeToolContext(fs: fileSystem, logger: logger),
         xcode: FakeXcode(),
       );
@@ -141,7 +147,10 @@ void main() {
           simControl: simControl,
           simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-14-4',
           analytics: const NoOpAnalytics(),
+          cocoaPods: FakeCocoaPods(),
+          xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
           plistParser: FakePlistParser(),
+          templateRenderer: FakeTemplateRenderer(),
           toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: osx),
           xcode: FakeXcode(),
         );
@@ -167,7 +176,10 @@ void main() {
           simControl: simControl,
           simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-14-4',
           analytics: const NoOpAnalytics(),
+          cocoaPods: FakeCocoaPods(),
+          xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
           plistParser: FakePlistParser(),
+          templateRenderer: FakeTemplateRenderer(),
           toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: osx),
           xcode: FakeXcode(),
         );
@@ -197,7 +209,10 @@ void main() {
         simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3',
         simControl: simControl,
         analytics: const NoOpAnalytics(),
+        cocoaPods: FakeCocoaPods(),
+        xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
         plistParser: FakePlistParser(),
+        templateRenderer: FakeTemplateRenderer(),
         toolContext: FakeToolContext(fs: fileSystem, logger: logger),
         xcode: FakeXcode(),
       );
@@ -213,7 +228,10 @@ void main() {
         simulatorCategory: 'iOS 11.2',
         simControl: simControl,
         analytics: const NoOpAnalytics(),
+        cocoaPods: FakeCocoaPods(),
+        xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
         plistParser: FakePlistParser(),
+        templateRenderer: FakeTemplateRenderer(),
         toolContext: FakeToolContext(fs: fileSystem, logger: logger),
         xcode: FakeXcode(),
       );
@@ -229,7 +247,10 @@ void main() {
         simulatorCategory: 'iOS 11.2',
         simControl: simControl,
         analytics: const NoOpAnalytics(),
+        cocoaPods: FakeCocoaPods(),
+        xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
         plistParser: FakePlistParser(),
+        templateRenderer: FakeTemplateRenderer(),
         toolContext: FakeToolContext(fs: fileSystem, logger: logger),
         xcode: FakeXcode(),
       );
@@ -255,7 +276,10 @@ void main() {
           simControl: simControl,
           simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.tvOS-14-5',
           analytics: const NoOpAnalytics(),
+          cocoaPods: FakeCocoaPods(),
+          xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
           plistParser: FakePlistParser(),
+          templateRenderer: FakeTemplateRenderer(),
           toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: osx),
           xcode: FakeXcode(),
         );
@@ -279,7 +303,10 @@ void main() {
             simControl: simControl,
             simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.watchOS-8-0',
             analytics: const NoOpAnalytics(),
+            cocoaPods: FakeCocoaPods(),
+            xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
             plistParser: FakePlistParser(),
+            templateRenderer: FakeTemplateRenderer(),
             toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: osx),
             xcode: FakeXcode(),
           ).isSupported(),
@@ -304,7 +331,10 @@ void main() {
             simControl: simControl,
             simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3',
             analytics: const NoOpAnalytics(),
+            cocoaPods: FakeCocoaPods(),
+            xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
             plistParser: FakePlistParser(),
+            templateRenderer: FakeTemplateRenderer(),
             toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: osx),
             xcode: FakeXcode(),
           ).isSupported(),
@@ -329,7 +359,10 @@ void main() {
             simControl: simControl,
             simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3',
             analytics: const NoOpAnalytics(),
+            cocoaPods: FakeCocoaPods(),
+            xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
             plistParser: FakePlistParser(),
+            templateRenderer: FakeTemplateRenderer(),
             toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: osx),
             xcode: FakeXcode(),
           ).isSupported(),
@@ -354,7 +387,10 @@ void main() {
             simControl: simControl,
             simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3',
             analytics: const NoOpAnalytics(),
+            cocoaPods: FakeCocoaPods(),
+            xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
             plistParser: FakePlistParser(),
+            templateRenderer: FakeTemplateRenderer(),
             toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: osx),
             xcode: FakeXcode(),
           ).isSupported(),
@@ -379,7 +415,10 @@ void main() {
             simControl: simControl,
             simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3',
             analytics: const NoOpAnalytics(),
+            cocoaPods: FakeCocoaPods(),
+            xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
             plistParser: FakePlistParser(),
+            templateRenderer: FakeTemplateRenderer(),
             toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: osx),
             xcode: FakeXcode(),
           ).isSupported(),
@@ -404,7 +443,10 @@ void main() {
             simControl: simControl,
             simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3',
             analytics: const NoOpAnalytics(),
+            cocoaPods: FakeCocoaPods(),
+            xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
             plistParser: FakePlistParser(),
+            templateRenderer: FakeTemplateRenderer(),
             toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: osx),
             xcode: FakeXcode(),
           ).isSupported(),
@@ -429,7 +471,10 @@ void main() {
             simControl: simControl,
             simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3',
             analytics: const NoOpAnalytics(),
+            cocoaPods: FakeCocoaPods(),
+            xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
             plistParser: FakePlistParser(),
+            templateRenderer: FakeTemplateRenderer(),
             toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: osx),
             xcode: FakeXcode(),
           ).isSupported(),
@@ -454,7 +499,10 @@ void main() {
             simControl: simControl,
             simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3',
             analytics: const NoOpAnalytics(),
+            cocoaPods: FakeCocoaPods(),
+            xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
             plistParser: FakePlistParser(),
+            templateRenderer: FakeTemplateRenderer(),
             toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: osx),
             xcode: FakeXcode(),
           ).isSupported(),
@@ -472,7 +520,6 @@ void main() {
   group('Simulator screenshot', () {
     testWithoutContext('supports screenshots', () async {
       final xcode = Xcode.test(
-        processManager: FakeProcessManager.any(),
         toolContext: FakeToolContext.macosHost(processManager: FakeProcessManager.any()),
       );
       final Logger logger = BufferLogger.test();
@@ -496,7 +543,10 @@ void main() {
         simControl: simControl,
         simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3',
         analytics: const NoOpAnalytics(),
+        cocoaPods: FakeCocoaPods(),
+        xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
         plistParser: FakePlistParser(),
+        templateRenderer: FakeTemplateRenderer(),
         toolContext: FakeToolContext(fs: fileSystem, logger: logger),
         xcode: FakeXcode(),
       );
@@ -526,7 +576,10 @@ void main() {
           simulatorCategory: 'iOS 9.3',
           simControl: simControl,
           analytics: const NoOpAnalytics(),
+          cocoaPods: FakeCocoaPods(),
+          xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
           plistParser: FakePlistParser(),
+          templateRenderer: FakeTemplateRenderer(),
           toolContext: FakeToolContext(
             fs: fileSystem,
             logger: logger,
@@ -560,7 +613,10 @@ void main() {
           simulatorCategory: 'iOS 11.0',
           simControl: simControl,
           analytics: const NoOpAnalytics(),
+          cocoaPods: FakeCocoaPods(),
+          xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
           plistParser: FakePlistParser(),
+          templateRenderer: FakeTemplateRenderer(),
           toolContext: FakeToolContext(
             fs: fileSystem,
             logger: logger,
@@ -614,7 +670,10 @@ void main() {
           simulatorCategory: 'iOS 11.0',
           simControl: simControl,
           analytics: const NoOpAnalytics(),
+          cocoaPods: FakeCocoaPods(),
+          xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
           plistParser: FakePlistParser(),
+          templateRenderer: FakeTemplateRenderer(),
           toolContext: FakeToolContext(
             fs: fileSystem,
             logger: logger,
@@ -669,7 +728,6 @@ void main() {
       mockIosProject = FakeIosProject();
       simControl = FakeSimControl();
       xcode = Xcode.test(
-        processManager: FakeProcessManager.any(),
         toolContext: FakeToolContext.macosHost(processManager: FakeProcessManager.any()),
       );
     });
@@ -705,7 +763,10 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
             simulatorCategory: 'iOS 10.0',
             simControl: simControl,
             analytics: const NoOpAnalytics(),
+            cocoaPods: FakeCocoaPods(),
+            xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
             plistParser: FakePlistParser(),
+            templateRenderer: FakeTemplateRenderer(),
             toolContext: FakeToolContext(
               fs: fileSystem,
               logger: logger,
@@ -761,7 +822,10 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
             simulatorCategory: 'iOS 10.3',
             simControl: simControl,
             analytics: const NoOpAnalytics(),
+            cocoaPods: FakeCocoaPods(),
+            xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
             plistParser: FakePlistParser(),
+            templateRenderer: FakeTemplateRenderer(),
             toolContext: FakeToolContext(
               fs: fileSystem,
               logger: logger,
@@ -830,7 +894,10 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
             simulatorCategory: 'iOS 10.3',
             simControl: simControl,
             analytics: const NoOpAnalytics(),
+            cocoaPods: FakeCocoaPods(),
+            xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
             plistParser: FakePlistParser(),
+            templateRenderer: FakeTemplateRenderer(),
             toolContext: FakeToolContext(
               fs: fileSystem,
               logger: logger,
@@ -926,7 +993,10 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
             simulatorCategory: 'iOS 11.0',
             simControl: simControl,
             analytics: const NoOpAnalytics(),
+            cocoaPods: FakeCocoaPods(),
+            xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
             plistParser: FakePlistParser(),
+            templateRenderer: FakeTemplateRenderer(),
             toolContext: FakeToolContext(
               fs: fileSystem,
               logger: logger,
@@ -999,7 +1069,10 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
             simulatorCategory: 'iOS 11.0',
             simControl: simControl,
             analytics: const NoOpAnalytics(),
+            cocoaPods: FakeCocoaPods(),
+            xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
             plistParser: FakePlistParser(),
+            templateRenderer: FakeTemplateRenderer(),
             toolContext: FakeToolContext(
               fs: fileSystem,
               logger: logger,
@@ -1077,7 +1150,10 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
             simulatorCategory: 'iOS 11.0',
             simControl: simControl,
             analytics: const NoOpAnalytics(),
+            cocoaPods: FakeCocoaPods(),
+            xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
             plistParser: FakePlistParser(),
+            templateRenderer: FakeTemplateRenderer(),
             toolContext: FakeToolContext(
               fs: fileSystem,
               logger: logger,
@@ -1168,7 +1244,6 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
     setUp(() {
       fakeProcessManager = FakeProcessManager.empty();
       xcode = Xcode.test(
-        processManager: FakeProcessManager.any(),
         toolContext: FakeToolContext.macosHost(processManager: FakeProcessManager.any()),
       );
 
@@ -1182,7 +1257,6 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
         ),
       ]);
       xcodeBadSimctl = Xcode.test(
-        processManager: fakeProcessManagerBadSimctl,
         toolContext: FakeToolContext.macosHost(processManager: fakeProcessManagerBadSimctl),
       );
       logger = BufferLogger.test();
@@ -1194,7 +1268,10 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
       );
       simulatorUtils = IOSSimulatorUtils(
         analytics: const NoOpAnalytics(),
+        cocoaPods: FakeCocoaPods(),
+        xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
         plistParser: FakePlistParser(),
+        templateRenderer: FakeTemplateRenderer(),
         toolContext: FakeToolContext(
           fs: fileSystem,
           logger: logger,
@@ -1211,7 +1288,10 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
       );
       simulatorUtilsBadSimctl = IOSSimulatorUtils(
         analytics: const NoOpAnalytics(),
+        cocoaPods: FakeCocoaPods(),
+        xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
         plistParser: FakePlistParser(),
+        templateRenderer: FakeTemplateRenderer(),
         toolContext: FakeToolContext(
           fs: fileSystem,
           logger: logger,
@@ -1359,7 +1439,10 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
         simulatorCategory: 'NaN',
         simControl: simControl,
         analytics: const NoOpAnalytics(),
+        cocoaPods: FakeCocoaPods(),
+        xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
         plistParser: FakePlistParser(),
+        templateRenderer: FakeTemplateRenderer(),
         toolContext: FakeToolContext(fs: fileSystem, logger: logger),
         xcode: FakeXcode(),
       );
@@ -1432,7 +1515,10 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
         simulatorCategory: 'NaN',
         simControl: simControl,
         analytics: const NoOpAnalytics(),
+        cocoaPods: FakeCocoaPods(),
+        xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
         plistParser: FakePlistParser(),
+        templateRenderer: FakeTemplateRenderer(),
         toolContext: FakeToolContext(fs: fileSystem, logger: logger),
         xcode: FakeXcode(),
       );
@@ -1620,7 +1706,6 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
     setUp(() {
       simControl = FakeSimControl();
       xcode = Xcode.test(
-        processManager: FakeProcessManager.any(),
         toolContext: FakeToolContext.macosHost(processManager: FakeProcessManager.any()),
       );
       testPlistParser = FakePlistParser();
@@ -1637,7 +1722,10 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
           simulatorCategory: 'iOS 11.2',
           simControl: simControl,
           analytics: const NoOpAnalytics(),
+          cocoaPods: FakeCocoaPods(),
+          xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
           plistParser: testPlistParser,
+          templateRenderer: FakeTemplateRenderer(),
           toolContext: FakeToolContext(
             fs: fileSystem,
             logger: logger,
@@ -1682,7 +1770,10 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
           simulatorCategory: 'iOS 11.2',
           simControl: simControl,
           analytics: const NoOpAnalytics(),
+          cocoaPods: FakeCocoaPods(),
+          xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
           plistParser: testPlistParser,
+          templateRenderer: FakeTemplateRenderer(),
           toolContext: FakeToolContext(
             fs: fileSystem,
             logger: logger,
@@ -1736,7 +1827,10 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
           simulatorCategory: 'iOS 11.2',
           simControl: simControl,
           analytics: const NoOpAnalytics(),
+          cocoaPods: FakeCocoaPods(),
+          xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
           plistParser: testPlistParser,
+          templateRenderer: FakeTemplateRenderer(),
           toolContext: FakeToolContext(
             fs: fileSystem,
             logger: logger,
@@ -1826,7 +1920,10 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
           simulatorCategory: 'iOS 11.2',
           simControl: simControl,
           analytics: const NoOpAnalytics(),
+          cocoaPods: FakeCocoaPods(),
+          xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
           plistParser: testPlistParser,
+          templateRenderer: FakeTemplateRenderer(),
           toolContext: FakeToolContext(
             fs: fileSystem,
             logger: logger,
@@ -1894,13 +1991,16 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
         simulatorCategory: 'iOS 11.2',
         simControl: simControl,
         analytics: const NoOpAnalytics(),
+        cocoaPods: FakeCocoaPods(),
         plistParser: testPlistParser,
+        templateRenderer: FakeTemplateRenderer(),
         toolContext: FakeToolContext(
           fs: fileSystem,
           logger: logger,
           processManager: processManager,
         ),
         xcode: xcode,
+        xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
       );
 
       IOSApp buildPackage() => PrebuiltIOSApp(
@@ -2077,7 +2177,10 @@ flutter:
           simControl: simControl,
           simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3',
           analytics: const NoOpAnalytics(),
+          cocoaPods: FakeCocoaPods(),
+          xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
           plistParser: FakePlistParser(),
+          templateRenderer: FakeTemplateRenderer(),
           toolContext: FakeToolContext(fs: fileSystem, logger: logger),
           xcode: FakeXcode(),
         );
@@ -2105,7 +2208,10 @@ flutter:
           simControl: simControl,
           simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3',
           analytics: const NoOpAnalytics(),
+          cocoaPods: FakeCocoaPods(),
+          xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
           plistParser: FakePlistParser(),
+          templateRenderer: FakeTemplateRenderer(),
           toolContext: FakeToolContext(fs: fileSystem, logger: logger),
           xcode: FakeXcode(),
         );
@@ -2132,7 +2238,10 @@ flutter:
           simControl: simControl,
           simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3',
           analytics: const NoOpAnalytics(),
+          cocoaPods: FakeCocoaPods(),
+          xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
           plistParser: FakePlistParser(),
+          templateRenderer: FakeTemplateRenderer(),
           toolContext: FakeToolContext(fs: fileSystem, logger: logger),
           xcode: FakeXcode(),
         );
@@ -2152,7 +2261,10 @@ flutter:
         simControl: simControl,
         simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3',
         analytics: const NoOpAnalytics(),
+        cocoaPods: FakeCocoaPods(),
+        xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
         plistParser: FakePlistParser(),
+        templateRenderer: FakeTemplateRenderer(),
         toolContext: FakeToolContext(fs: fileSystem, logger: logger),
         xcode: FakeXcode(),
       );
