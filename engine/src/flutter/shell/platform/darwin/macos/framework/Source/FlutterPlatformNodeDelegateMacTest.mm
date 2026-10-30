@@ -69,6 +69,53 @@ TEST(FlutterPlatformNodeDelegateMac, Basics) {
   [engine shutDownEngine];
 }
 
+TEST(FlutterPlatformNodeDelegateMac, ExposesHintAsAccessibilityHelp) {
+  FlutterViewController* viewController = CreateTestViewController();
+  FlutterEngine* engine = viewController.engine;
+  [viewController loadView];
+  engine.semanticsEnabled = YES;
+  auto bridge = viewController.accessibilityBridge.lock();
+
+  FlutterSemanticsFlags flags = FlutterSemanticsFlags{};
+  FlutterSemanticsNode2 root = {};
+  root.id = 0;
+  root.flags2 = &flags;
+  root.text_selection_base = -1;
+  root.text_selection_extent = -1;
+  root.label = "Export";
+  root.hint = "Writes the visible range to a PNG file";
+  root.value = "";
+  root.increased_value = "";
+  root.decreased_value = "";
+  root.tooltip = "";
+  root.identifier = "";
+
+  bridge->AddFlutterSemanticsNodeUpdate(root);
+  bridge->CommitUpdates();
+
+  auto root_platform_node_delegate = bridge->GetFlutterPlatformNodeDelegateFromID(0).lock();
+  ASSERT_TRUE(root_platform_node_delegate);
+  NSAccessibilityElement* native_accessibility =
+      root_platform_node_delegate->GetNativeViewAccessible();
+  ASSERT_NE(native_accessibility, nil);
+  EXPECT_TRUE([native_accessibility.accessibilityHelp
+      isEqualToString:@"Writes the visible range to a PNG file"]);
+
+  root.hint = "Writes the selected range to a PNG file";
+  bridge->AddFlutterSemanticsNodeUpdate(root);
+  bridge->CommitUpdates();
+  EXPECT_TRUE([native_accessibility.accessibilityHelp
+      isEqualToString:@"Writes the selected range to a PNG file"]);
+
+  root.hint = "";
+  bridge->AddFlutterSemanticsNodeUpdate(root);
+  bridge->CommitUpdates();
+  EXPECT_TRUE(native_accessibility.accessibilityHelp == nil ||
+              native_accessibility.accessibilityHelp.length == 0);
+
+  [engine shutDownEngine];
+}
+
 TEST(FlutterPlatformNodeDelegateMac, SelectableTextHasCorrectSemantics) {
   FlutterViewController* viewController = CreateTestViewController();
   FlutterEngine* engine = viewController.engine;

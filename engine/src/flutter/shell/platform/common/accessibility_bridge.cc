@@ -293,6 +293,7 @@ void AccessibilityBridge::ConvertFlutterUpdate(const SemanticsNode& node,
   SetStringListAttributesFromFlutterUpdate(node_data, node);
   SetIdentifierFromFlutterUpdate(node_data, node);
   SetNameFromFlutterUpdate(node_data, node);
+  SetDescriptionFromFlutterUpdate(node_data, node);
   SetValueFromFlutterUpdate(node_data, node);
   SetTooltipFromFlutterUpdate(node_data, node);
   node_data.relative_bounds.bounds.SetRect(node.rect.left, node.rect.top,
@@ -540,6 +541,12 @@ void AccessibilityBridge::SetIdentifierFromFlutterUpdate(
 void AccessibilityBridge::SetNameFromFlutterUpdate(ui::AXNodeData& node_data,
                                                    const SemanticsNode& node) {
   node_data.SetName(node.label);
+}
+
+void AccessibilityBridge::SetDescriptionFromFlutterUpdate(
+    ui::AXNodeData& node_data,
+    const SemanticsNode& node) {
+  node_data.SetDescription(node.hint);
 }
 
 void AccessibilityBridge::SetValueFromFlutterUpdate(ui::AXNodeData& node_data,
