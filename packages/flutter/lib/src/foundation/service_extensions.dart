@@ -105,6 +105,11 @@ enum FoundationServiceExtensions {
   ///
   /// A malformed `viewId` or `overrides` fails the call, and nothing changes.
   ///
+  /// A change takes effect before the call returns: the framework is told to
+  /// re-read the metrics it altered, as it would be if the platform had
+  /// changed them, so the next frame reflects it. See
+  /// [DebugViewMetricsOverride] for what is applied, and where.
+  ///
   /// Every reply has one key, whatever the call was, so that a client can
   /// resynchronize from any reply without remembering which call produced it:
   ///
