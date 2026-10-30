@@ -1927,13 +1927,16 @@ exports_files(["README"] + glob(
   // gathers them. The header the sub-packages share and the Java enums
   // tools/api_check reads are in the appendix, as the hand-written file had
   // them.
+  // The host's branches -- the gen_snapshot archive's name (linux-x64.zip,
+  // darwin-x64.zip), a Mac host's universal gen_snapshot as its source
+  // with the entitlements file beside it, analyze_snapshot's archive a
+  // Linux host's -- are select()s on the host's setting (hostOsCases): the
+  // Mac's Android AOT builders build this file too (NEED_DECISION Q32).
   ConvertedFile(
     '//flutter/shell/platform/android',
     condition: 'is_android',
     filesGroups: <String>{'android'},
-    skip: <String, String>{
-      'android_entitlement_config': "generated_file over metadata: the Apple phase's",
-    },
+    assume: hostOsCases,
     appendix: '''
 load("//build_defs/java:robolectric.bzl", "android_test_apk", "java_classes", "robolectric_tests")
 
