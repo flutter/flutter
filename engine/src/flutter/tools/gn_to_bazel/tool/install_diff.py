@@ -90,7 +90,7 @@ LOCAL_ENGINE_MANIFEST = "local_engine.json"
 
 
 def _manifest_resolver(directory):
-    """Resolves GN paths through `directory`'s local_engine.json; None without one.
+  """Resolves GN paths through `directory`'s local_engine.json; None without one.
 
     An entry maps a GN path (`flutter_tester`, `gen/flutter/lib/snapshot`) to
     where Bazel built it, relative to the manifest's directory; a path
@@ -98,175 +98,180 @@ def _manifest_resolver(directory):
     flutter tool's LocalEngineLayout does, and stays where it is under the
     directory when no entry covers it (and so reports as missing).
     """
-    manifest = os.path.join(directory, LOCAL_ENGINE_MANIFEST)
-    if not os.path.isfile(manifest):
-        return None
-    with open(manifest, encoding="utf-8") as f:
-        entries = json.load(f)["entries"]
-    base = os.path.realpath(directory)
+  manifest = os.path.join(directory, LOCAL_ENGINE_MANIFEST)
+  if not os.path.isfile(manifest):
+    return None
+  with open(manifest, encoding="utf-8") as f:
+    entries = json.load(f)["entries"]
+  base = os.path.realpath(directory)
 
-    def resolve(path):
-        parts = path.split("/")
-        for n in range(len(parts), 0, -1):
-            prefix = "/".join(parts[:n])
-            if prefix in entries:
-                return os.path.normpath(os.path.join(base, entries[prefix], *parts[n:]))
-        return os.path.join(directory, path)
+  def resolve(path):
+    parts = path.split("/")
+    for n in range(len(parts), 0, -1):
+      prefix = "/".join(parts[:n])
+      if prefix in entries:
+        return os.path.normpath(os.path.join(base, entries[prefix], *parts[n:]))
+    return os.path.join(directory, path)
 
-    return resolve
+  return resolve
 
 
 def _files_under(root, ignored):
-    """The files under `root` (a file or a directory) by path relative to it; empty if absent.
+  """The files under `root` (a file or a directory) by path relative to it; empty if absent.
 
     Symbolic links to directories are followed: a repository Bazel fetched
     (the prebuilt Dart SDK a manifest maps `dart-sdk` to) is one.
     """
-    if os.path.isfile(root):
-        return {"": root}
-    found = {}
-    for directory, _, files in os.walk(root, followlinks=True):
-        for name in files:
-            path = os.path.join(directory, name)
-            relative = os.path.relpath(path, root)
-            if any(fnmatch.fnmatch(relative, g) or fnmatch.fnmatch(name, g) for g in ignored):
-                continue
-            found[relative] = path
-    return found
+  if os.path.isfile(root):
+    return {"": root}
+  found = {}
+  for directory, _, files in os.walk(root, followlinks=True):
+    for name in files:
+      path = os.path.join(directory, name)
+      relative = os.path.relpath(path, root)
+      if any(fnmatch.fnmatch(relative, g) or fnmatch.fnmatch(name, g) for g in ignored):
+        continue
+      found[relative] = path
+  return found
 
 
 def _same(gn_path, bazel_path):
-    with open(gn_path, "rb") as gn, open(bazel_path, "rb") as bazel:
-        gn_content, bazel_content = gn.read(), bazel.read()
-    name = os.path.basename(gn_path)
-    return artifact_diff._normalized(name, gn_content) == artifact_diff._normalized(  # pylint: disable=protected-access
-        name, bazel_content
-    )
+  with open(gn_path, "rb") as gn, open(bazel_path, "rb") as bazel:
+    gn_content, bazel_content = gn.read(), bazel.read()
+  name = os.path.basename(gn_path)
+  return artifact_diff._normalized(
+      name, gn_content
+  ) == artifact_diff._normalized(  # pylint: disable=protected-access
+      name, bazel_content
+  )
 
 
 def main(argv):
-    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    parser.add_argument("--gn", required=True, help="GN's build directory.")
-    parser.add_argument(
-        "--bazel",
-        required=True,
-        help=f"The installed Bazel build directory, or the directory holding a {LOCAL_ENGINE_MANIFEST}.",
-    )
-    parser.add_argument(
-        "--expect-different",
-        action="append",
-        default=[],
-        metavar="GLOB",
-        help="Files (by path under the build directory, or base name) and archive entries whose "
-        "content is expected to differ (binaries); may repeat.",
-    )
-    parser.add_argument(
-        "--ignore",
-        action="append",
-        default=list(DEFAULT_IGNORED),
-        metavar="GLOB",
-        help=f"Files under a directory to leave out (default: {', '.join(DEFAULT_IGNORED)}); may repeat.",
-    )
-    parser.add_argument(
-        "--web",
-        action="store_true",
-        help="Compare a web build directory: the paths default to flutter_web_sdk/ and the SDK "
-        "archive, and the modules' files are expected to differ.",
-    )
-    parser.add_argument(
-        "paths", nargs="*", help="Paths under the build directory to compare (default: the Linux host's)."
-    )
-    args = parser.parse_args(argv)
-    if args.web:
-        args.expect_different = args.expect_different + WEB_EXPECTED_DIFFERENT
-    resolve = _manifest_resolver(args.bazel)
-    manifest = resolve is not None
-    if not args.paths:
-        args.paths = WEB_PATHS if args.web else DEFAULT_PATHS
-        if manifest:
-            args.paths = [path for path in args.paths if path != "zip_archives"]
-    if not manifest:
-        resolve = lambda path: os.path.join(args.bazel, path)  # pylint: disable=unnecessary-lambda-assignment
+  parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+  parser.add_argument("--gn", required=True, help="GN's build directory.")
+  parser.add_argument(
+      "--bazel",
+      required=True,
+      help=f"The installed Bazel build directory, or the directory holding a {LOCAL_ENGINE_MANIFEST}.",
+  )
+  parser.add_argument(
+      "--expect-different",
+      action="append",
+      default=[],
+      metavar="GLOB",
+      help="Files (by path under the build directory, or base name) and archive entries whose "
+      "content is expected to differ (binaries); may repeat.",
+  )
+  parser.add_argument(
+      "--ignore",
+      action="append",
+      default=list(DEFAULT_IGNORED),
+      metavar="GLOB",
+      help=f"Files under a directory to leave out (default: {', '.join(DEFAULT_IGNORED)}); may repeat.",
+  )
+  parser.add_argument(
+      "--web",
+      action="store_true",
+      help="Compare a web build directory: the paths default to flutter_web_sdk/ and the SDK "
+      "archive, and the modules' files are expected to differ.",
+  )
+  parser.add_argument(
+      "paths",
+      nargs="*",
+      help="Paths under the build directory to compare (default: the Linux host's)."
+  )
+  args = parser.parse_args(argv)
+  if args.web:
+    args.expect_different = args.expect_different + WEB_EXPECTED_DIFFERENT
+  resolve = _manifest_resolver(args.bazel)
+  manifest = resolve is not None
+  if not args.paths:
+    args.paths = WEB_PATHS if args.web else DEFAULT_PATHS
+    if manifest:
+      args.paths = [path for path in args.paths if path != "zip_archives"]
+  if not manifest:
+    resolve = lambda path: os.path.join(args.bazel, path)  # pylint: disable=unnecessary-lambda-assignment
 
-    def expected(path):
-        return any(
-            fnmatch.fnmatch(path, g) or fnmatch.fnmatch(os.path.basename(path), g)
-            for g in args.expect_different
+  def expected(path):
+    return any(
+        fnmatch.fnmatch(path, g) or fnmatch.fnmatch(os.path.basename(path), g)
+        for g in args.expect_different
+    )
+
+  failures = 0
+  totals = {"identical": 0, "expected": 0, "different": 0, "missing": 0}
+  for path in args.paths:
+    gn_root = os.path.join(args.gn, path)
+    bazel_root = resolve(path)
+    if not os.path.exists(gn_root) or not os.path.exists(bazel_root):
+      side = "GN" if os.path.exists(gn_root
+                                   ) else "Bazel" if os.path.exists(bazel_root) else "neither"
+      print(f"{path}: only in {side}")
+      failures += 1
+      totals["missing"] += 1
+      continue
+    gn_files = _files_under(gn_root, args.ignore)
+    bazel_files = _files_under(bazel_root, args.ignore)
+    beside = 0
+    if manifest:
+      # Bazel's output tree holds other outputs beside the mapped files
+      # (a package's intermediates, a repository's BUILD file); the
+      # consumer reads GN's paths, so only those are looked for.
+      beside = len(set(bazel_files) - set(gn_files))
+      bazel_files = {relative: f for relative, f in bazel_files.items() if relative in gn_files}
+    identical, expected_different, different, details = [], [], [], []
+    for relative in sorted(set(gn_files) | set(bazel_files)):
+      full = os.path.join(path, relative) if relative else path
+      if relative not in gn_files or relative not in bazel_files:
+        details.append(f"  only in {'GN' if relative in gn_files else 'Bazel'}: {full}")
+        continue
+      if full.endswith(".zip"):
+        ok, lines = artifact_diff.compare_archive(
+            full, gn_files[relative], bazel_files[relative], args.expect_different
         )
-
-    failures = 0
-    totals = {"identical": 0, "expected": 0, "different": 0, "missing": 0}
-    for path in args.paths:
-        gn_root = os.path.join(args.gn, path)
-        bazel_root = resolve(path)
-        if not os.path.exists(gn_root) or not os.path.exists(bazel_root):
-            side = "GN" if os.path.exists(gn_root) else "Bazel" if os.path.exists(bazel_root) else "neither"
-            print(f"{path}: only in {side}")
-            failures += 1
-            totals["missing"] += 1
-            continue
-        gn_files = _files_under(gn_root, args.ignore)
-        bazel_files = _files_under(bazel_root, args.ignore)
-        beside = 0
-        if manifest:
-            # Bazel's output tree holds other outputs beside the mapped files
-            # (a package's intermediates, a repository's BUILD file); the
-            # consumer reads GN's paths, so only those are looked for.
-            beside = len(set(bazel_files) - set(gn_files))
-            bazel_files = {relative: f for relative, f in bazel_files.items() if relative in gn_files}
-        identical, expected_different, different, details = [], [], [], []
-        for relative in sorted(set(gn_files) | set(bazel_files)):
-            full = os.path.join(path, relative) if relative else path
-            if relative not in gn_files or relative not in bazel_files:
-                details.append(f"  only in {'GN' if relative in gn_files else 'Bazel'}: {full}")
-                continue
-            if full.endswith(".zip"):
-                ok, lines = artifact_diff.compare_archive(
-                    full, gn_files[relative], bazel_files[relative], args.expect_different
-                )
-                details.extend("  " + line for line in lines)
-                (identical if ok else different).append(full)
-            elif _same(gn_files[relative], bazel_files[relative]):
-                identical.append(full)
-            elif expected(full):
-                # The sizes, so that two Bazel files that should differ and do
-                # not (one module installed at every variant's place) show.
-                expected_different.append(full)
-                details.append(
-                    f"  expected different: {full} (GN {os.path.getsize(gn_files[relative])} B, "
-                    f"Bazel {os.path.getsize(bazel_files[relative])} B)"
-                )
-            else:
-                different.append(full)
-                details.append(f"  different: {full}")
-        missing = [d for d in details if d.startswith("  only in")]
-        ok = not different and not missing
-        if os.path.isfile(gn_root):
-            verdict = "identical" if identical else "expected different" if expected_different else "DIFFERENT"
-            print(f"{path}: {verdict}")
-        else:
-            print(
-                f"{path}: {'ok' if ok else 'DIFFERS'}; {len(bazel_files)} files"
-                f"{'' if len(gn_files) == len(bazel_files) else f' (GN {len(gn_files)})'}, "
-                f"{len(identical)} identical, {len(expected_different)} expected different, "
-                f"{len(different)} different, {len(missing)} missing"
-                f"{f', {beside} other files beside them' if beside else ''}"
-            )
-        for line in details:
-            print(line)
-        if not ok:
-            failures += 1
-        totals["identical"] += len(identical)
-        totals["expected"] += len(expected_different)
-        totals["different"] += len(different)
-        totals["missing"] += len(missing)
-    print(
-        f"{len(args.paths)} paths, {len(args.paths) - failures} ok: "
-        f"{totals['identical']} files identical, {totals['expected']} expected different, "
-        f"{totals['different']} different, {totals['missing']} missing"
-    )
-    return 1 if failures else 0
+        details.extend("  " + line for line in lines)
+        (identical if ok else different).append(full)
+      elif _same(gn_files[relative], bazel_files[relative]):
+        identical.append(full)
+      elif expected(full):
+        # The sizes, so that two Bazel files that should differ and do
+        # not (one module installed at every variant's place) show.
+        expected_different.append(full)
+        details.append(
+            f"  expected different: {full} (GN {os.path.getsize(gn_files[relative])} B, "
+            f"Bazel {os.path.getsize(bazel_files[relative])} B)"
+        )
+      else:
+        different.append(full)
+        details.append(f"  different: {full}")
+    missing = [d for d in details if d.startswith("  only in")]
+    ok = not different and not missing
+    if os.path.isfile(gn_root):
+      verdict = "identical" if identical else "expected different" if expected_different else "DIFFERENT"
+      print(f"{path}: {verdict}")
+    else:
+      print(
+          f"{path}: {'ok' if ok else 'DIFFERS'}; {len(bazel_files)} files"
+          f"{'' if len(gn_files) == len(bazel_files) else f' (GN {len(gn_files)})'}, "
+          f"{len(identical)} identical, {len(expected_different)} expected different, "
+          f"{len(different)} different, {len(missing)} missing"
+          f"{f', {beside} other files beside them' if beside else ''}"
+      )
+    for line in details:
+      print(line)
+    if not ok:
+      failures += 1
+    totals["identical"] += len(identical)
+    totals["expected"] += len(expected_different)
+    totals["different"] += len(different)
+    totals["missing"] += len(missing)
+  print(
+      f"{len(args.paths)} paths, {len(args.paths) - failures} ok: "
+      f"{totals['identical']} files identical, {totals['expected']} expected different, "
+      f"{totals['different']} different, {totals['missing']} missing"
+  )
+  return 1 if failures else 0
 
 
 if __name__ == "__main__":
-    sys.exit(main(sys.argv[1:]))
+  sys.exit(main(sys.argv[1:]))

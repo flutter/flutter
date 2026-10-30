@@ -89,8 +89,8 @@ class NormalizedFlagsTest(unittest.TestCase):
     self.assertEqual(
         bazel_ci.normalized_flags([
             '--bazel', '--target-dir', 'ci/x', '--rbe', '--no-goma', '--no-rbe',
-            '--rbe-server-address=unix:///tmp/rbe/reproxy.sock',
-            '--gn-args=engine_version="abc"', '--android-cpu=arm64'
+            '--rbe-server-address=unix:///tmp/rbe/reproxy.sock', '--gn-args=engine_version="abc"',
+            '--android-cpu=arm64'
         ]), ['--target-dir', 'ci/x', '--android-cpu', 'arm64']
     )
 

@@ -38,7 +38,10 @@ def main():
   # The inputs the script otherwise finds by their paths in the source tree,
   # for a build that lays them elsewhere (the Bazel build's sandbox).
   parser.add_argument(
-      '--javadoc-bin', type=str, default=None, help='The javadoc binary; the checkout\'s JDK by default.'
+      '--javadoc-bin',
+      type=str,
+      default=None,
+      help='The javadoc binary; the checkout\'s JDK by default.'
   )
   parser.add_argument(
       '--android-jar',
