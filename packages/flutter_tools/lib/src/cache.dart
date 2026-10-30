@@ -153,21 +153,22 @@ class Cache {
   /// [artifacts] is configurable for testing.
   /// [artifactUpdater] is configurable for testing.
   Cache({
-    @protected this._rootOverride,
+    required FileSystem fileSystem,
+    required Logger logger,
+    required this._osUtils,
+    required Platform platform,
     @protected List<ArtifactSet>? artifacts,
     @visibleForTesting ArtifactUpdater? artifactUpdater,
-    required Logger logger,
-    required FileSystem fileSystem,
-    required Platform platform,
-    required this._osUtils,
+    this._flutterRoot,
+    @protected this._rootOverride,
     this._stdio,
-  }) : _logger = logger,
-       _fileSystem = fileSystem,
+  }) : _fileSystem = fileSystem,
+       _logger = logger,
        _platform = platform,
-       _net = Net(logger: logger, platform: platform),
-       _fsUtils = FileSystemUtils(fileSystem: fileSystem, platform: platform),
        _artifacts = artifacts ?? <ArtifactSet>[],
-       _artifactUpdaterOverride = artifactUpdater;
+       _artifactUpdaterOverride = artifactUpdater,
+       _net = Net(logger: logger, platform: platform),
+       _fsUtils = FileSystemUtils(fileSystem: fileSystem, platform: platform);
 
   /// Create a [Cache] for testing.
   ///
@@ -178,6 +179,7 @@ class Cache {
     Directory? rootOverride,
     List<ArtifactSet>? artifacts,
     ArtifactUpdater? artifactUpdater,
+    String? flutterRoot,
     Logger? logger,
     FileSystem? fileSystem,
     Platform? platform,
@@ -201,6 +203,7 @@ class Cache {
       rootOverride: rootOverride ?? fileSystem.currentDirectory,
       artifacts: artifacts ?? <ArtifactSet>[],
       artifactUpdater: artifactUpdater,
+      flutterRoot: flutterRoot,
       logger: logger,
       fileSystem: fileSystem,
       platform: platform,
@@ -254,9 +257,25 @@ class Cache {
     'chrome-infra-packages.appspot.com',
   ];
 
-  // Initialized by FlutterCommandRunner on startup.
-  // Explore making this field lazy to catch non-initialized access.
-  static String? flutterRoot;
+  /// The root directory of the Flutter SDK checkout.
+  String get flutterRoot {
+    if (_flutterRoot != null) {
+      return _flutterRoot!;
+    }
+    if (_rootOverride != null) {
+      return _rootOverride.path;
+    }
+    return _flutterRoot = defaultFlutterRoot(
+      platform: _platform,
+      fileSystem: _fileSystem,
+      userMessages: UserMessages(),
+    );
+  }
+
+  @visibleForTesting
+  set flutterRoot(String? value) => _flutterRoot = value;
+
+  String? _flutterRoot;
 
   /// Determine the absolute and normalized path for the root of the current
   /// Flutter checkout.
@@ -374,7 +393,7 @@ class Cache {
     }
     assert(_lock == null);
     final File lockFile = _fileSystem.file(
-      _fileSystem.path.join(flutterRoot!, 'bin', 'cache', 'lockfile'),
+      _fileSystem.path.join(flutterRoot, 'bin', 'cache', 'lockfile'),
     );
     try {
       _lock = lockFile.openSync(mode: FileMode.write);
@@ -619,7 +638,7 @@ class Cache {
   /// Return the top-level directory in the cache; this is `bin/cache`.
   Directory getRoot() {
     return _fileSystem.directory(
-      _fileSystem.path.join(_rootOverride?.path ?? flutterRoot!, 'bin', 'cache'),
+      _fileSystem.path.join(_rootOverride?.path ?? flutterRoot, 'bin', 'cache'),
     );
   }
 
@@ -647,7 +666,7 @@ class Cache {
   Directory getCacheArtifacts() => getCacheDir('artifacts');
 
   /// Location of LICENSE file.
-  File getLicenseFile() => _fileSystem.file(_fileSystem.path.join(flutterRoot!, 'LICENSE'));
+  File getLicenseFile() => _fileSystem.file(_fileSystem.path.join(flutterRoot, 'LICENSE'));
 
   /// Get a named directory from with the cache's artifact directory; for example,
   /// `material_fonts` would return `bin/cache/artifacts/material_fonts`.
@@ -686,7 +705,7 @@ class Cache {
   String? getVersionFor(String artifactName) {
     final File versionFile = _fileSystem.file(
       _fileSystem.path.join(
-        _rootOverride?.path ?? flutterRoot!,
+        _rootOverride?.path ?? flutterRoot,
         'bin',
         'internal',
         '$artifactName.version',
@@ -700,7 +719,7 @@ class Cache {
   String? getRealmFor(String artifactName) {
     final File realmFile = _fileSystem.file(
       _fileSystem.path.join(
-        _rootOverride?.path ?? flutterRoot!,
+        _rootOverride?.path ?? flutterRoot,
         'bin',
         'cache',
         '$artifactName.realm',

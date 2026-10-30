@@ -1422,7 +1422,7 @@ void _canvasTests() {
   });
 
   test('drawParagraph', () {
-    final builder = EngineParagraphBuilder(EngineParagraphStyle());
+    final builder = EngineParagraphBuilder(const EngineParagraphStyle());
     builder.addText('Hello');
     final EngineParagraph paragraph = builder.build();
     paragraph.layout(const ui.ParagraphConstraints(width: 100));

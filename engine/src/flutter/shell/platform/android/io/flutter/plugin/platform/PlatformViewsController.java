@@ -328,12 +328,7 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
           }
           final int physicalTop = toPhysicalPixels(top);
           final int physicalLeft = toPhysicalPixels(left);
-          final FrameLayout.LayoutParams layoutParams =
-              (FrameLayout.LayoutParams) viewWrapper.getLayoutParams();
-          layoutParams.topMargin = physicalTop;
-          layoutParams.leftMargin = physicalLeft;
-          layoutParams.gravity = Gravity.LEFT | Gravity.TOP;
-          viewWrapper.setLayoutParams(layoutParams);
+          viewWrapper.setOffset(physicalLeft, physicalTop);
         }
 
         @Override
