@@ -4,7 +4,6 @@
 
 import 'dart:async';
 
-import 'package:flutter_tools_core/flutter_tools_core.dart';
 import 'package:flutter_tools_extension/flutter_tools_extension.dart';
 
 import '../base/file_system.dart';
@@ -14,14 +13,12 @@ import '../features.dart';
 import 'extension_discovery.dart';
 import 'extension_manager.dart';
 
-const Duration _kRpcTimeout = Duration(seconds: 5);
-
-/// Manages querying project templates from extension isolates.
+/// Manages querying platform templates from extension isolates.
 ///
 /// This manager interacts with active [ExtensionConnection]s to discover custom
-/// project templates, resolve their directories on the host, and generate
-/// template parameters over the extension protocol RPC.
-base class ExtensionTemplateManager extends TemplateService {
+/// platform templates, resolve their directories on the host, and generate
+/// platform template parameters over the extension protocol RPC.
+base class ExtensionTemplateManager {
   /// Creates an [ExtensionTemplateManager].
   ExtensionTemplateManager({
     required this._extensionManager,
@@ -35,27 +32,51 @@ base class ExtensionTemplateManager extends TemplateService {
   final FileSystem _fileSystem;
   final Logger _logger;
 
-  List<ProjectTemplate>? _cachedTemplates;
+  Map<String, String>? _cachedAppPlatformTemplates;
+  Map<String, String>? _cachedPluginPlatformTemplates;
+  final _platformOwners = <String, ExtensionConnection>{};
 
-  /// Retrieve the cached templates synchronously.
-  ///
-  /// Returns the list of project templates cached from the last [getProjectTemplates] call.
-  List<ProjectTemplate> get cachedTemplates => _cachedTemplates ?? const <ProjectTemplate>[];
+  /// Retrieve the cached app platform templates synchronously.
+  Map<String, String> get cachedAppPlatformTemplates =>
+      _cachedAppPlatformTemplates ?? const <String, String>{};
 
-  /// Retrieve templates by routing `template.getProjectTemplates` to active tool extensions.
+  /// Retrieve the cached plugin platform templates synchronously.
+  Map<String, String> get cachedPluginPlatformTemplates =>
+      _cachedPluginPlatformTemplates ?? const <String, String>{};
+
+  /// Retrieve app platform templates by routing `template.getAppPlatformTemplates` to active tool extensions.
   ///
   /// Results are cached after the first successful call.
-  Future<List<ProjectTemplate>> getProjectTemplates() async {
+  Future<Map<String, String>> getAppPlatformTemplates() async {
     if (!_featureFlags.isToolExtensionsEnabled) {
-      return const <ProjectTemplate>[];
+      return const <String, String>{};
     }
-    if (_cachedTemplates != null) {
-      return _cachedTemplates!;
-    }
+    return _cachedAppPlatformTemplates ??= await _queryPlatformTemplates(
+      method: TemplateService.getAppPlatformTemplatesMethod,
+      templateKind: 'app',
+    );
+  }
 
+  /// Retrieve plugin platform templates by routing `template.getPluginPlatformTemplates` to active tool extensions.
+  ///
+  /// Results are cached after the first successful call.
+  Future<Map<String, String>> getPluginPlatformTemplates() async {
+    if (!_featureFlags.isToolExtensionsEnabled) {
+      return const <String, String>{};
+    }
+    return _cachedPluginPlatformTemplates ??= await _queryPlatformTemplates(
+      method: TemplateService.getPluginPlatformTemplatesMethod,
+      templateKind: 'plugin',
+    );
+  }
+
+  Future<Map<String, String>> _queryPlatformTemplates({
+    required String method,
+    required String templateKind,
+  }) async {
     await _extensionManager.ensureInitialized();
 
-    final templates = <ProjectTemplate>[];
+    final templates = <String, String>{};
     final List<ExtensionConnection> connections = _extensionManager.connections
         .where(
           (ExtensionConnection c) =>
@@ -63,25 +84,30 @@ base class ExtensionTemplateManager extends TemplateService {
         )
         .toList();
 
-    final List<List<ExtensionProjectTemplate>> results = await Future.wait(
-      connections.map((ExtensionConnection connection) async {
-        try {
-          final Object? rpcResult = await connection
-              .sendRequest(TemplateService.getProjectTemplatesMethod)
-              .timeout(_kRpcTimeout);
-          return ExtensionProjectTemplate.listFromJson(rpcResult);
-        } on Object catch (e) {
-          _logger.printTrace(
-            'Failed to get results from extension for ${TemplateService.getProjectTemplatesMethod}: $e',
-          );
-          return const <ExtensionProjectTemplate>[];
+    for (final connection in connections) {
+      try {
+        final Object? rpcResult = await connection.sendRequest(method);
+        if (rpcResult is Map<String, Object?>) {
+          for (final MapEntry(:key, :value) in rpcResult.entries) {
+            if (value is String) {
+              if (templates.containsKey(key)) {
+                _logger.printWarning(
+                  'Duplicate $templateKind platform template "$key" provided by extension '
+                  '"${connection.extensionName}" (already registered by extension '
+                  '"${_platformOwners[key]?.extensionName}"). Ignoring subsequent template mapping.',
+                );
+              } else {
+                templates[key] = value;
+                _platformOwners.putIfAbsent(key, () => connection);
+              }
+            }
+          }
         }
-      }),
-    );
+      } on Object catch (e) {
+        _logger.printTrace('Failed to get results from extension for $method: $e');
+      }
+    }
 
-    results.forEach(templates.addAll);
-
-    _cachedTemplates = templates;
     return templates;
   }
 
@@ -121,54 +147,52 @@ base class ExtensionTemplateManager extends TemplateService {
     throw ArgumentError('Unsupported template path format: $templatePath');
   }
 
-  /// Request template parameter generation over extension protocol RPC.
+  /// Request platform template parameter generation over extension protocol RPC.
   ///
-  /// Delegates the parameter generation for [templateName] to the active tool
-  /// extension, passing the host's [toolParameters]. Falls back to returning
-  /// [toolParameters] unchanged if the extension fails or is not available.
-  Future<Map<String, Object?>> generateTemplateParameters(
-    String templateName,
-    Map<String, Object?> toolParameters,
-  ) async {
+  /// Delegates parameter generation for [platformName] to the active tool
+  /// extension that provides platform support for [platformName], passing the
+  /// host's [toolParameters]. Falls back to returning [toolParameters] unchanged
+  /// if the extension fails, does not modify parameters, or is not available.
+  Future<Map<String, Object?>> generatePlatformTemplateParameters({
+    required String platformName,
+    required Map<String, Object?> toolParameters,
+  }) async {
     if (!_featureFlags.isToolExtensionsEnabled) {
       return toolParameters;
     }
 
-    final List<ExtensionConnection> connections = _extensionManager.connections
-        .where(
-          (ExtensionConnection c) =>
-              c.capabilities.services.contains(TemplateService.serviceNamespace),
-        )
-        .toList();
+    await _extensionManager.ensureInitialized();
 
-    for (final connection in connections) {
-      try {
-        final Object? result = await connection
-            .sendRequest(
-              TemplateService.generateTemplateParametersMethod,
-              params: <String, Object?>{
-                'templateName': templateName,
-                'toolParameters': toolParameters,
-              },
-            )
-            .timeout(_kRpcTimeout);
-        if (result is Map) {
-          return result.cast<String, Object?>();
-        }
-      } on Object catch (e) {
-        _logger.printTrace('Failed to generate template parameters from extension: $e');
+    if (_cachedAppPlatformTemplates == null) {
+      await getAppPlatformTemplates();
+    }
+    if (_cachedPluginPlatformTemplates == null) {
+      await getPluginPlatformTemplates();
+    }
+
+    final ExtensionConnection? owner = _platformOwners[platformName];
+    if (owner == null) {
+      return toolParameters;
+    }
+
+    try {
+      final Object? result = await owner.sendRequest(
+        TemplateService.generatePlatformTemplateParametersMethod,
+        params: <String, Object?>{
+          TemplateService.platformNameParam: platformName,
+          TemplateService.toolParametersParam: toolParameters,
+        },
+      );
+      if (result is Map<String, Object?>) {
+        return result;
       }
+    } on Object catch (e) {
+      _logger.printTrace(
+        'Failed to generate platform template parameters from extension '
+        '"${owner.extensionName}": $e',
+      );
     }
 
     return toolParameters;
   }
-
-  @override
-  Set<ProjectTemplate> get projectTemplates => cachedTemplates.toSet();
-
-  @override
-  Set<String> get appPlatformTemplates => const <String>{};
-
-  @override
-  Set<String> get pluginPlatformTemplates => const <String>{};
 }

@@ -18,7 +18,6 @@ import '../base/utils.dart';
 import '../cache.dart';
 import '../context/tool_context.dart';
 import '../convert.dart';
-import '../experimental/templates.dart';
 import '../flutter_project_metadata.dart';
 import '../isolated/mustache_template.dart';
 import '../project.dart';
@@ -168,18 +167,11 @@ mixin CreateBase on FlutterCommand {
   /// Throws assertion if [projectDir] does not exist or empty.
   /// Returns null if no project type can be determined.
   @protected
-  ParsedFlutterTemplateType? determineTemplateType({
-    required ExtensionTemplateManager? extensionTemplateManager,
-  }) {
+  ParsedFlutterTemplateType? determineTemplateType() {
     assert(projectDir.existsSync() && projectDir.listSync().isNotEmpty);
-    final FileSystem fs = _context.fs;
-    final Logger logger = _context.logger;
+    final ToolContext(:FileSystem fs, :Logger logger) = _context;
     final File metadataFile = fs.file(fs.path.join(projectDir.absolute.path, '.metadata'));
-    final projectMetadata = FlutterProjectMetadata(
-      metadataFile,
-      logger,
-      extensionTemplateManager: extensionTemplateManager,
-    );
+    final projectMetadata = FlutterProjectMetadata(metadataFile, logger);
     final ParsedFlutterTemplateType? projectType = projectMetadata.projectType;
     if (projectType != null) {
       return projectType;
@@ -582,11 +574,7 @@ mixin CreateBase on FlutterCommand {
       var migrateConfig = MigrateConfig();
       if (metadataFile.existsSync()) {
         try {
-          migrateConfig = FlutterProjectMetadata(
-            metadataFile,
-            logger,
-            extensionTemplateManager: null,
-          ).migrateConfig;
+          migrateConfig = FlutterProjectMetadata(metadataFile, logger).migrateConfig;
         } on Exception catch (error) {
           logger.printTrace('Failed to parse existing .metadata file: $error');
         }
@@ -598,7 +586,6 @@ mixin CreateBase on FlutterCommand {
         versionChannel: flutterVersion.getBranchName(), // may contain PII
         projectType: projectType,
         migrateConfig: migrateConfig,
-        extensionTemplateManager: null,
         logger: logger,
       );
       metadata.populate(

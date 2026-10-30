@@ -16,7 +16,6 @@ void main() {
         hostPlatforms: const <String>{'Linux', 'MacOS'},
         services: const <String>{'diagnostics', 'config', 'build', 'template'},
         buildTargets: const <String>{'custom-build'},
-        templates: const <String>{'custom-app'},
         targetPlatforms: const <String>{'custom_linux'},
       );
 
@@ -36,7 +35,6 @@ void main() {
         unorderedEquals(const <String>['diagnostics', 'config', 'build', 'template']),
       );
       expect(map[ExtensionPackageConfig.buildTargetsKey], const <String>['custom-build']);
-      expect(map[ExtensionPackageConfig.templatesKey], const <String>['custom-app']);
       expect(map[ExtensionPackageConfig.targetPlatformsKey], const <String>['custom_linux']);
 
       final String encoded = jsonEncode(map);
@@ -61,7 +59,6 @@ void main() {
       expect(config.supportsHostPlatform('windows'), isTrue);
       expect(config.services, isEmpty);
       expect(config.buildTargets, isEmpty);
-      expect(config.templates, isEmpty);
       expect(config.targetPlatforms, isEmpty);
 
       final emptyServicesConfig = ExtensionPackageConfig.fromMap(const <String, Object?>{
@@ -88,13 +85,11 @@ void main() {
         services: const <String>[' diagnostics ', 'build '],
         hostPlatforms: const <String>[' Linux '],
         buildTargets: const <String>[' custom-build '],
-        templates: const <String>[' custom-app '],
       );
 
       expect(config.services, const <String>{'diagnostics', 'build'});
       expect(config.hostPlatforms, const <String>{'linux'});
       expect(config.buildTargets, const <String>{'custom-build'});
-      expect(config.templates, const <String>{'custom-app'});
     });
 
     test('throws FormatException when services contains empty string elements', () {
