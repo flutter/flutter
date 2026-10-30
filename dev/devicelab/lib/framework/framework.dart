@@ -33,6 +33,30 @@ const int maximumRuns = 30;
 /// succeed, fail and be retried independently of others.
 typedef TaskFunction = Future<TaskResult> Function();
 
+/// Runs [benchmarks] in sequence and merges their results with
+/// [TaskResult.merge]. Each still gets a fresh `flutter drive`. [cooldown] is
+/// idle time between benchmarks. Stops at the first failure.
+TaskFunction runBenchmarks(
+  Map<String, TaskFunction> benchmarks, {
+  Duration cooldown = Duration.zero,
+}) {
+  return () async {
+    final results = <String, TaskResult>{};
+    for (final MapEntry<String, TaskFunction>(key: name, value: benchmark) in benchmarks.entries) {
+      if (results.isNotEmpty && cooldown > Duration.zero) {
+        await Future<void>.delayed(cooldown);
+      }
+      section('Running benchmark "$name"');
+      final TaskResult result = await benchmark();
+      if (result.failed) {
+        return TaskResult.failure('$name: ${result.message}');
+      }
+      results[name] = result;
+    }
+    return TaskResult.merge(results);
+  };
+}
+
 bool _isTaskRegistered = false;
 
 /// Registers a [task] to run, returns the result when it is complete.
