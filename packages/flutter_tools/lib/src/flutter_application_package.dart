@@ -9,6 +9,7 @@ import 'base/file_system.dart';
 import 'build_info.dart';
 import 'context/tool_context.dart';
 import 'ios/application_package.dart';
+import 'ios/plist_parser.dart';
 import 'linux/application_package.dart';
 import 'macos/application_package.dart';
 import 'project.dart';
@@ -18,9 +19,14 @@ import 'windows/application_package.dart';
 
 /// A package factory that supports all Flutter target platforms.
 class FlutterApplicationPackageFactory extends ApplicationPackageFactory {
-  FlutterApplicationPackageFactory({required this._androidSdk, required this._toolContext});
+  FlutterApplicationPackageFactory({
+    required this._androidSdk,
+    required this._plistParser,
+    required this._toolContext,
+  });
 
   final AndroidSdk? _androidSdk;
+  final PlistParser _plistParser;
   final ToolContext _toolContext;
 
   FlutterProject _currentProject() {
@@ -56,19 +62,31 @@ class FlutterApplicationPackageFactory extends ApplicationPackageFactory {
                 buildInfo,
                 toolContext: _toolContext,
               )
-            : IOSApp.fromPrebuiltApp(applicationBinary);
+            : IOSApp.fromPrebuiltApp(
+                applicationBinary,
+                plistParser: _plistParser,
+                toolContext: _toolContext,
+              );
       case .tester:
         return FlutterTesterApp.fromCurrentDirectory(_toolContext.fs);
       case .macos:
         return applicationBinary == null
-            ? MacOSApp.fromMacOSProject(_currentProject().macos, toolContext: _toolContext)
-            : MacOSApp.fromPrebuiltApp(applicationBinary);
+            ? MacOSApp.fromMacOSProject(
+                _currentProject().macos,
+                plistParser: _plistParser,
+                toolContext: _toolContext,
+              )
+            : MacOSApp.fromPrebuiltApp(
+                applicationBinary,
+                plistParser: _plistParser,
+                toolContext: _toolContext,
+              );
       case .web:
-        final FlutterProject project = _currentProject();
-        if (!project.web.existsSync()) {
+        final FlutterProject currentProject = _currentProject();
+        if (!currentProject.web.existsSync()) {
           return null;
         }
-        return WebApplicationPackage(project);
+        return WebApplicationPackage(currentProject);
       case .linux:
         return applicationBinary == null
             ? LinuxApp.fromLinuxProject(_currentProject().linux, toolContext: _toolContext)
@@ -76,7 +94,7 @@ class FlutterApplicationPackageFactory extends ApplicationPackageFactory {
       case .windows:
         return applicationBinary == null
             ? WindowsApp.fromWindowsProject(_currentProject().windows, toolContext: _toolContext)
-            : WindowsApp.fromPrebuiltApp(applicationBinary);
+            : WindowsApp.fromPrebuiltApp(applicationBinary, toolContext: _toolContext);
       case .fuchsia || .unsupported:
         TargetPlatform.throwUnsupportedTarget();
     }

@@ -77,13 +77,6 @@ void main() {
       runner = createTestCommandRunner(command);
       tempDir = fileSystem.systemTempDirectory.createTempSync('flutter_tools_packages_test.');
       tempDir.childDirectory('android').createSync();
-
-      // Setup repo roots
-      const homePath = '/home/user/flutter';
-      Cache.flutterRoot = homePath;
-      for (final dir in <String>['dev', 'examples', 'packages']) {
-        fileSystem.directory(homePath).childDirectory(dir).createSync(recursive: true);
-      }
     });
 
     testUsingContext('can list build variants', () async {

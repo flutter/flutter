@@ -15,7 +15,6 @@ import 'package:flutter_tools/src/widget_preview/preview_manifest.dart';
 import 'package:flutter_tools/src/widget_preview/preview_pubspec_builder.dart';
 import 'package:process/process.dart';
 import 'package:test/fake.dart';
-import 'package:test/test.dart';
 import 'package:yaml/yaml.dart';
 
 import '../../../src/common.dart';
@@ -122,6 +121,7 @@ $yaml
       },
       overrides: {
         Pub: () => Pub.test(
+          flutterRoot: getFlutterRoot(),
           fileSystem: fs,
           logger: logger,
           processManager: processManager,

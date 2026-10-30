@@ -37,9 +37,9 @@ abstract class MachineProjectValidator extends ProjectValidator {
 ///
 /// Specific info from different platforms should be written in their own ProjectValidator.
 class VariableDumpMachineProjectValidator extends MachineProjectValidator {
-  const VariableDumpMachineProjectValidator({required this.toolContext});
+  const VariableDumpMachineProjectValidator({required this._toolContext});
 
-  final ToolContext toolContext;
+  final ToolContext _toolContext;
 
   String _toJsonValue(Object? obj) {
     var value = obj.toString();
@@ -52,8 +52,8 @@ class VariableDumpMachineProjectValidator extends MachineProjectValidator {
 
   @override
   Future<List<ProjectValidatorResult>> start(FlutterProject project) async {
-    final ToolContext(fs: FileSystem fileSystem, :Git git, :Platform platform) = toolContext;
-    final version = FlutterVersion(flutterRoot: Cache.flutterRoot!, fs: fileSystem, git: git);
+    final ToolContext(:Cache cache, :FileSystem fs, :Git git, :Platform platform) = _toolContext;
+    final version = FlutterVersion(flutterRoot: cache.flutterRoot, fs: fs, git: git);
     final result = <String, Object?>{
       'FlutterProject.directory': project.directory.absolute.path,
       'FlutterProject.metadataFile': project.metadataFile.absolute.path,
@@ -86,7 +86,7 @@ class VariableDumpMachineProjectValidator extends MachineProjectValidator {
       'Platform.pathSeparator': platform.pathSeparator,
 
       // Cache
-      'Cache.flutterRoot': Cache.flutterRoot,
+      'Cache.flutterRoot': cache.flutterRoot,
     };
 
     return <ProjectValidatorResult>[

@@ -138,12 +138,6 @@ void main() {
       fs: MemoryFileSystem.test(),
       fakeFlutterVersion: fakeFlutterVersion,
     );
-
-    // Most, but not all, tests will run some variant of "pub get" after creation,
-    // which in turn will check for the presence of the Flutter SDK root. Without
-    // this field set consistently, the order of the tests becomes important *or*
-    // you need to remember to set it everywhere.
-    Cache.flutterRoot = '../..';
   });
 
   tearDown(() {
@@ -244,6 +238,7 @@ void main() {
     },
     overrides: {
       Pub: () => Pub.test(
+        flutterRoot: getFlutterRoot(),
         fileSystem: globals.fs,
         logger: logger,
         processManager: globals.processManager,
@@ -276,6 +271,7 @@ void main() {
     },
     overrides: {
       Pub: () => Pub.test(
+        flutterRoot: getFlutterRoot(),
         fileSystem: globals.fs,
         logger: globals.logger,
         processManager: globals.processManager,
@@ -312,6 +308,7 @@ void main() {
     },
     overrides: {
       Pub: () => Pub.test(
+        flutterRoot: getFlutterRoot(),
         fileSystem: globals.fs,
         logger: globals.logger,
         processManager: globals.processManager,
@@ -339,6 +336,7 @@ void main() {
     },
     overrides: {
       Pub: () => Pub.test(
+        flutterRoot: getFlutterRoot(),
         fileSystem: globals.fs,
         logger: globals.logger,
         processManager: globals.processManager,
@@ -361,12 +359,13 @@ void main() {
       final ProcessResult exec = await Process.run(flutterBin, <String>[
         'create',
         'flutter_project',
-      ], workingDirectory: Cache.flutterRoot);
+      ], workingDirectory: getFlutterRoot());
       expect(exec.exitCode, 2);
       expect(exec.stderr, contains('Cannot create a project within the Flutter SDK'));
     },
     overrides: {
       Pub: () => Pub.test(
+        flutterRoot: getFlutterRoot(),
         fileSystem: globals.fs,
         logger: globals.logger,
         processManager: globals.processManager,
@@ -408,6 +407,7 @@ void main() {
       },
       overrides: {
         Pub: () => Pub.test(
+          flutterRoot: getFlutterRoot(),
           fileSystem: globals.fs,
           logger: globals.logger,
           processManager: globals.processManager,
@@ -441,6 +441,7 @@ void main() {
     },
     overrides: {
       Pub: () => Pub.test(
+        flutterRoot: getFlutterRoot(),
         fileSystem: globals.fs,
         logger: globals.logger,
         processManager: globals.processManager,
@@ -472,6 +473,7 @@ void main() {
     },
     overrides: {
       Pub: () => Pub.test(
+        flutterRoot: getFlutterRoot(),
         fileSystem: globals.fs,
         logger: globals.logger,
         processManager: globals.processManager,
@@ -500,6 +502,7 @@ void main() {
     },
     overrides: {
       Pub: () => Pub.test(
+        flutterRoot: getFlutterRoot(),
         fileSystem: globals.fs,
         logger: globals.logger,
         processManager: globals.processManager,
@@ -539,6 +542,7 @@ void main() {
     },
     overrides: {
       Pub: () => Pub.test(
+        flutterRoot: getFlutterRoot(),
         fileSystem: globals.fs,
         logger: globals.logger,
         processManager: globals.processManager,
@@ -572,6 +576,7 @@ void main() {
     },
     overrides: {
       Pub: () => Pub.test(
+        flutterRoot: getFlutterRoot(),
         fileSystem: globals.fs,
         logger: globals.logger,
         processManager: globals.processManager,
@@ -625,6 +630,7 @@ void main() {
     },
     overrides: {
       Pub: () => Pub.test(
+        flutterRoot: getFlutterRoot(),
         fileSystem: globals.fs,
         logger: globals.logger,
         processManager: globals.processManager,
@@ -660,6 +666,7 @@ void main() {
     },
     overrides: {
       Pub: () => Pub.test(
+        flutterRoot: getFlutterRoot(),
         fileSystem: globals.fs,
         logger: globals.logger,
         processManager: globals.processManager,
@@ -692,6 +699,7 @@ void main() {
     overrides: {
       FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
       Pub: () => Pub.test(
+        flutterRoot: getFlutterRoot(),
         fileSystem: globals.fs,
         logger: globals.logger,
         processManager: globals.processManager,
@@ -724,6 +732,7 @@ void main() {
     },
     overrides: {
       Pub: () => Pub.test(
+        flutterRoot: getFlutterRoot(),
         fileSystem: globals.fs,
         logger: globals.logger,
         processManager: globals.processManager,
@@ -746,6 +755,7 @@ void main() {
     },
     overrides: {
       Pub: () => Pub.test(
+        flutterRoot: getFlutterRoot(),
         fileSystem: globals.fs,
         logger: globals.logger,
         processManager: globals.processManager,
@@ -978,6 +988,7 @@ void main() {
     },
     overrides: {
       Pub: () => Pub.test(
+        flutterRoot: getFlutterRoot(),
         fileSystem: globals.fs,
         logger: globals.logger,
         processManager: globals.processManager,
@@ -1882,6 +1893,7 @@ void main() {
     },
     overrides: {
       Pub: () => Pub.test(
+        flutterRoot: getFlutterRoot(),
         fileSystem: globals.fs,
         logger: globals.logger,
         processManager: globals.processManager,
@@ -2198,6 +2210,7 @@ void main() {
     },
     overrides: {
       Pub: () => Pub.test(
+        flutterRoot: getFlutterRoot(),
         fileSystem: globals.fs,
         logger: globals.logger,
         processManager: globals.processManager,
@@ -2228,6 +2241,7 @@ void main() {
     },
     overrides: {
       Pub: () => Pub.test(
+        flutterRoot: getFlutterRoot(),
         fileSystem: globals.fs,
         logger: globals.logger,
         processManager: globals.processManager,
@@ -2471,6 +2485,7 @@ void main() {
     },
     overrides: {
       Pub: () => Pub.test(
+        flutterRoot: getFlutterRoot(),
         fileSystem: globals.fs,
         logger: globals.logger,
         processManager: globals.processManager,
@@ -2516,6 +2531,7 @@ void main() {
     overrides: {
       ProcessManager: () => loggingProcessManager,
       Pub: () => Pub.test(
+        flutterRoot: getFlutterRoot(),
         fileSystem: globals.fs,
         logger: globals.logger,
         processManager: globals.processManager,
@@ -3547,7 +3563,7 @@ void main() {
 
   testUsingContext('newly created iOS plugins has correct min iOS version', () async {
     final String flutterToolsAbsolutePath = globals.fs.path.join(
-      Cache.flutterRoot!,
+      getFlutterRoot(),
       'packages',
       'flutter_tools',
     );
@@ -3749,6 +3765,7 @@ void main() {
     overrides: {
       FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
       Pub: () => Pub.test(
+        flutterRoot: getFlutterRoot(),
         fileSystem: globals.fs,
         logger: globals.logger,
         processManager: globals.processManager,
@@ -4044,6 +4061,7 @@ void main() {
     },
     overrides: {
       Pub: () => Pub.test(
+        flutterRoot: getFlutterRoot(),
         fileSystem: globals.fs,
         logger: globals.logger,
         processManager: globals.processManager,
@@ -4385,6 +4403,7 @@ void main() {
     },
     overrides: {
       Pub: () => Pub.test(
+        flutterRoot: getFlutterRoot(),
         fileSystem: globals.fs,
         logger: globals.logger,
         processManager: globals.processManager,
@@ -4449,6 +4468,7 @@ void main() {
     },
     overrides: {
       Pub: () => Pub.test(
+        flutterRoot: getFlutterRoot(),
         fileSystem: globals.fs,
         logger: globals.logger,
         processManager: globals.processManager,
@@ -5126,7 +5146,7 @@ To keep the default AGP version $templateAndroidGradlePluginVersion, download a 
       globals.fs
           .file(
             globals.fs.path.join(
-              Cache.flutterRoot!,
+              getFlutterRoot(),
               'packages',
               'flutter_tools',
               'templates',
@@ -5220,9 +5240,15 @@ To keep the default AGP version $templateAndroidGradlePluginVersion, download a 
     // 2. We want to pretend we're creating into a relative (not absolute) path
     // 3. It's non-trivial to use MemoryFileSystem.test(), we need real template files
     await io.IOOverrides.runZoned<Future<void>>(() async {
-      Cache.flutterRoot = getFlutterRoot();
-      final CommandRunner<void> runner = createTestCommandRunner(createCreateCommand());
-      await runner.run(['create', '--no-pub', '.']);
+      final CommandRunner<void> runner = createTestCommandRunner(
+        CreateCommand(
+          androidContext: FakeAndroidContext(),
+          appleContext: FakeAppleContext(),
+          templateRenderer: const MustacheTemplateRenderer(),
+          toolContext: DelegatingToolContext(fs: globals.fs),
+        ),
+      );
+      await runner.run(<String>['create', '--no-pub', '.']);
     }, getCurrentDirectory: () => out);
     expect(logger.statusText, isNot(contains(r'  $ cd')));
   }, overrides: {Logger: () => logger});
@@ -5380,14 +5406,8 @@ CreateCommand createCreateCommand({
         cache: globals.cache,
         flutterVersion: globals.flutterVersion,
       );
-  final ToolContext(
-    :Cache cache,
-    :FileSystem fs,
-    :Logger logger,
-    :OperatingSystemUtils os,
-    :Platform platform,
-    :ProcessManager processManager,
-  ) = resolvedToolContext;
+  final ToolContext(:Cache cache, :Logger logger, :OperatingSystemUtils os, :Platform platform) =
+      resolvedToolContext;
   return CreateCommand(
     androidContext:
         androidContext ??
@@ -5405,10 +5425,7 @@ CreateCommand createCreateCommand({
         FakeAppleContext(
           cocoaPods: CocoaPods(
             analytics: const NoOpAnalytics(),
-            fileSystem: fs,
-            logger: logger,
-            platform: platform,
-            processManager: processManager,
+            toolContext: resolvedToolContext,
             xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
           ),
         ),

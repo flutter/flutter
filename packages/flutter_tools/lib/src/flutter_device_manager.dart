@@ -17,6 +17,7 @@ import 'base/template.dart';
 import 'base/user_messages.dart';
 import 'build_system/build_system.dart';
 import 'build_system/build_targets.dart';
+import 'cache.dart';
 import 'context/apple_context.dart';
 import 'context/tool_context.dart';
 import 'custom_devices/custom_device.dart';
@@ -33,7 +34,6 @@ import 'macos/macos_device.dart';
 import 'macos/macos_ipad_device.dart';
 import 'macos/macos_workflow.dart';
 import 'macos/xcdevice.dart';
-import 'native_assets.dart';
 import 'tester/flutter_tester.dart';
 import 'web/web_device.dart';
 import 'windows/windows_device.dart';
@@ -61,10 +61,10 @@ class FlutterDeviceManager extends DeviceManager {
   }) : super(fileSystem: toolContext.fs, logger: toolContext.logger) {
     final ToolContext(
       :Artifacts artifacts,
+      :Cache cache,
       :Config config,
-      fs: FileSystem fileSystem,
+      :FileSystem fs,
       :Logger logger,
-      :TestCompilerNativeAssetsBuilder? nativeAssetsBuilder,
       :Platform platform,
       :ProcessManager processManager,
       :UserMessages userMessages,
@@ -75,7 +75,7 @@ class FlutterDeviceManager extends DeviceManager {
         androidSdkBuilder: androidSdkBuilder,
         androidWorkflow: androidWorkflow,
         processManager: processManager,
-        fileSystem: fileSystem,
+        fileSystem: fs,
         platform: platform,
         userMessages: userMessages,
       ),
@@ -86,11 +86,10 @@ class FlutterDeviceManager extends DeviceManager {
         platform: platform,
       ),
       FlutterTesterDevices(
-        toolContext: toolContext,
         analytics: analytics,
         buildSystem: buildSystem,
         buildTargets: buildTargets,
-        nativeAssetsBuilder: nativeAssetsBuilder,
+        toolContext: toolContext,
       ),
       MacOSDevices(
         analytics: analytics,
@@ -109,7 +108,7 @@ class FlutterDeviceManager extends DeviceManager {
       ),
       WebDevices(
         featureFlags: featureFlags,
-        fileSystem: fileSystem,
+        fileSystem: fs,
         platform: platform,
         processManager: processManager,
         logger: logger,
@@ -124,9 +123,10 @@ class FlutterDeviceManager extends DeviceManager {
       ExtensionDevices(
         extensionBuildManager: extensionBuildManager,
         extensionManager: extensionManager,
-        fileSystem: fileSystem,
+        fileSystem: fs,
         logger: logger,
         artifacts: artifacts,
+        cache: cache,
         config: config,
       ),
     ];

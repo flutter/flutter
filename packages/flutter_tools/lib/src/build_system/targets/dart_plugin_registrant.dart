@@ -51,6 +51,7 @@ class DartPluginRegistrantTarget extends Target {
       project,
       packageConfig,
       mainFile,
+      flutterRoot: environment.flutterRootDir.path,
       logger: environment.logger,
       templateRenderer: templateRenderer,
     );

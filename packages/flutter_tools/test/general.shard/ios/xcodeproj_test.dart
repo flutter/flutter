@@ -1539,7 +1539,7 @@ Information about project "Runner":
           version: Version(26, 0, 0),
         );
         xcode = Xcode.test(
-          processManager: fakeProcessManager,
+          toolContext: FakeToolContext.macosHost(processManager: fakeProcessManager),
           xcodeProjectInterpreter: xcodeProjectInterpreter,
         );
       });
@@ -1949,7 +1949,7 @@ Build settings for action build and target bad_plugin:
             version: Version(16, 0, 0),
           );
           xcode = Xcode.test(
-            processManager: fakeProcessManager,
+            toolContext: FakeToolContext.macosHost(processManager: fakeProcessManager),
             xcodeProjectInterpreter: xcodeProjectInterpreter,
           );
           const BuildInfo buildInfo = BuildInfo.debug;
@@ -2611,7 +2611,7 @@ flutter:
           version: Version(26, 0, 0),
         );
         xcode = Xcode.test(
-          processManager: fakeProcessManager,
+          toolContext: FakeToolContext.macosHost(processManager: fakeProcessManager),
           xcodeProjectInterpreter: xcodeProjectInterpreter,
         );
       });

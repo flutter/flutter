@@ -16,7 +16,6 @@ import '../../base/logger.dart';
 import '../../base/process.dart';
 import '../../base/template.dart';
 import '../../build_info.dart';
-import '../../cache.dart';
 import '../../convert.dart';
 import '../../dart/language_version.dart';
 import '../../dart/package_map.dart';
@@ -92,7 +91,7 @@ class WebEntrypointTarget extends Target {
     final LanguageVersion languageVersion = determineLanguageVersion(
       environment.fileSystem.file(targetFile),
       packageConfig[flutterProject.manifest.appName],
-      Cache.flutterRoot!,
+      environment.flutterRootDir.path,
     );
 
     // Use the PackageConfig to find the correct package-scheme import path
@@ -1338,7 +1337,7 @@ class WebReleaseBundle extends Target {
 
     final File sourceRobotoFont = environment.fileSystem.file(
       environment.fileSystem.path.join(
-        Cache.flutterRoot!,
+        environment.flutterRootDir.path,
         'engine',
         'src',
         'flutter',

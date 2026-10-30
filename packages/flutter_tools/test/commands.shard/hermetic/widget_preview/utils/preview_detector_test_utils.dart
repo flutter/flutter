@@ -87,7 +87,7 @@ PreviewDetector createTestPreviewDetector() {
     logger: BufferLogger.test(),
   );
 
-  final String sdkPath = _fs.path.join(Cache.flutterRoot!, 'bin', 'cache', 'dart-sdk');
+  final String sdkPath = _fs.path.join(getFlutterRoot(), 'bin', 'cache', 'dart-sdk');
   final Artifacts artifacts = FakeArtifacts(sdkPath: sdkPath);
 
   return PreviewDetector(
