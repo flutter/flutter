@@ -2,20 +2,35 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <mutex>
+#include <string>
+#include <vector>
+
 #include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/testing/testing.h"
 #include "gmock/gmock.h"
+#include "impeller/base/validation.h"
 #include "impeller/core/host_buffer.h"
 #include "impeller/fixtures/sample.comp.h"
 #include "impeller/fixtures/stage1.comp.h"
 #include "impeller/fixtures/stage2.comp.h"
 #include "impeller/playground/compute_playground_test.h"
+#include "impeller/renderer/blit_pass.h"
 #include "impeller/renderer/command_buffer.h"
 #include "impeller/renderer/compute_3d_test.comp.h"
 #include "impeller/renderer/compute_pipeline_builder.h"
+#include "impeller/renderer/computed_vertices_test.frag.h"
+#include "impeller/renderer/computed_vertices_test.vert.h"
+#include "impeller/renderer/increment_test.comp.h"
+#include "impeller/renderer/oversized_workgroup_test.comp.h"
+#include "impeller/renderer/pipeline_builder.h"
 #include "impeller/renderer/pipeline_library.h"
 #include "impeller/renderer/prefix_sum_test.comp.h"
+#include "impeller/renderer/render_pass.h"
+#include "impeller/renderer/render_target.h"
+#include "impeller/renderer/texture_reader_test.comp.h"
 #include "impeller/renderer/threadgroup_sizing_test.comp.h"
+#include "impeller/renderer/vertex_writer_test.comp.h"
 
 namespace {
 std::shared_ptr<impeller::HostBuffer> CreateHostBufferFromContext(
@@ -26,13 +41,8 @@ std::shared_ptr<impeller::HostBuffer> CreateHostBufferFromContext(
 }
 
 // The number of workgroups needed to cover `invocations` invocations given a
-// per-workgroup `local_size`. A `local_size` of 0 means the shader sizes its
-// workgroup with a specialization constant, in which case the caller should
-// dispatch an explicit count rather than derive one here.
+// per-workgroup `local_size`.
 constexpr uint32_t WorkgroupCount(size_t invocations, uint32_t local_size) {
-  if (local_size == 0u) {
-    return 0u;
-  }
   return static_cast<uint32_t>((invocations + local_size - 1) / local_size);
 }
 }  // namespace
@@ -164,8 +174,11 @@ TEST_P(ComputeTest, CanComputePrefixSum) {
   CS::BindInputData(*pass, host_buffer->EmplaceStorageBuffer(input_data));
   CS::BindOutputData(*pass, DeviceBuffer::AsBufferView(output_buffer));
 
-  // The prefix sum is computed within a single workgroup whose size is sized to
-  // the device (a specialization constant), so dispatch exactly one.
+  // The prefix sum is computed within a single workgroup whose literal size
+  // covers the whole input, so dispatch exactly one.
+  static_assert(CS::kWorkgroupSize[0] == 128u && CS::kWorkgroupSize[1] == 1u &&
+                CS::kWorkgroupSize[2] == 1u);
+  static_assert(kCount <= CS::kWorkgroupSize[0]);
   ASSERT_TRUE(pass->Compute({1, 1, 1}).ok());
   ASSERT_TRUE(pass->EncodeCommands());
 
@@ -329,7 +342,8 @@ TEST_P(ComputeTest, CanComputePrefixSumLargeInteractive) {
     auto cmd_buffer = context->CreateCommandBuffer();
     auto pass = cmd_buffer->CreateComputePass();
 
-    static constexpr size_t kCount = 1023;
+    // The largest input one workgroup can sum.
+    static constexpr size_t kCount = CS::kWorkgroupSize[0];
 
     pass->SetPipeline(compute_pipeline);
 
@@ -346,7 +360,7 @@ TEST_P(ComputeTest, CanComputePrefixSumLargeInteractive) {
     CS::BindOutputData(*pass, DeviceBuffer::AsBufferView(output_buffer));
 
     // Single workgroup; see CanComputePrefixSum.
-    pass->Compute({1, 1, 1});
+    pass->Compute({1, 1, 1}).IgnoreError();
     pass->EncodeCommands();
     host_buffer->Reset();
     return context->GetCommandQueue()->Submit({cmd_buffer}).ok();
@@ -541,56 +555,603 @@ TEST_P(ComputeTest, CanCompute1DimensionalData) {
   latch.Wait();
 }
 
-TEST_P(ComputeTest, ReturnsEarlyWhenAnyGridDimensionIsZero) {
-  using CS = SampleComputeShader;
+TEST_P(ComputeTest, ZeroWorkgroupCountIsNoOp) {
+  using CS = IncrementTestComputeShader;
   auto context = GetContext();
-  auto host_buffer = CreateHostBufferFromContext(context);
   ASSERT_TRUE(context);
   ASSERT_TRUE(context->GetCapabilities()->SupportsCompute());
 
-  using SamplePipelineBuilder = ComputePipelineBuilder<CS>;
   auto pipeline_desc =
-      SamplePipelineBuilder::MakeDefaultPipelineDescriptor(*context);
+      ComputePipelineBuilder<CS>::MakeDefaultPipelineDescriptor(*context);
   ASSERT_TRUE(pipeline_desc.has_value());
   auto compute_pipeline =
       context->GetPipelineLibrary()->GetPipeline(pipeline_desc).Get();
   ASSERT_TRUE(compute_pipeline);
 
+  static constexpr size_t kCount = CS::kWorkgroupSize[0];
+  auto buffer =
+      CreateHostVisibleDeviceBuffer<CS::Data<kCount>>(context, "Data");
+  CS::Data<kCount> initial = {};
+  ASSERT_TRUE(buffer->CopyHostBuffer(reinterpret_cast<const uint8_t*>(&initial),
+                                     Range{0, sizeof(initial)}, 0));
+
+  auto cmd_buffer = context->CreateCommandBuffer();
+  auto pass = cmd_buffer->CreateComputePass();
+  ASSERT_TRUE(pass && pass->IsValid());
+  pass->SetPipeline(compute_pipeline);
+  CS::BindData(*pass, DeviceBuffer::AsBufferView(buffer));
+
+  // A zero count in any dimension dispatches nothing and is not an error, like
+  // a draw with no vertices.
+  EXPECT_TRUE(pass->Compute({0, 1, 1}).ok());
+  EXPECT_TRUE(pass->Compute({1, 0, 1}).ok());
+  EXPECT_TRUE(pass->Compute({1, 1, 0}).ok());
+  ASSERT_TRUE(pass->EncodeCommands());
+
+  fml::AutoResetWaitableEvent latch;
+  ASSERT_TRUE(context->GetCommandQueue()
+                  ->Submit({cmd_buffer},
+                           [&latch, buffer](CommandBuffer::Status status) {
+                             EXPECT_EQ(status,
+                                       CommandBuffer::Status::kCompleted);
+                             buffer->Invalidate();
+                             auto* output = reinterpret_cast<CS::Data<kCount>*>(
+                                 buffer->OnGetContents());
+                             for (size_t i = 0; i < kCount; i++) {
+                               EXPECT_EQ(output->values[i], 0u);
+                             }
+                             latch.Signal();
+                           })
+                  .ok());
+  latch.Wait();
+}
+
+TEST_P(ComputeTest, BindingsPersistAcrossDispatches) {
+  using CS = IncrementTestComputeShader;
+  auto context = GetContext();
+  ASSERT_TRUE(context);
+  ASSERT_TRUE(context->GetCapabilities()->SupportsCompute());
+
+  auto pipeline_desc =
+      ComputePipelineBuilder<CS>::MakeDefaultPipelineDescriptor(*context);
+  ASSERT_TRUE(pipeline_desc.has_value());
+  auto compute_pipeline =
+      context->GetPipelineLibrary()->GetPipeline(pipeline_desc).Get();
+  ASSERT_TRUE(compute_pipeline);
+
+  static constexpr size_t kCount = CS::kWorkgroupSize[0] * 2;
+  CS::Data<kCount> initial = {};
+  auto buffer_a =
+      CreateHostVisibleDeviceBuffer<CS::Data<kCount>>(context, "Data A");
+  auto buffer_b =
+      CreateHostVisibleDeviceBuffer<CS::Data<kCount>>(context, "Data B");
+  ASSERT_TRUE(
+      buffer_a->CopyHostBuffer(reinterpret_cast<const uint8_t*>(&initial),
+                               Range{0, sizeof(initial)}, 0));
+  ASSERT_TRUE(
+      buffer_b->CopyHostBuffer(reinterpret_cast<const uint8_t*>(&initial),
+                               Range{0, sizeof(initial)}, 0));
+
   auto cmd_buffer = context->CreateCommandBuffer();
   auto pass = cmd_buffer->CreateComputePass();
   ASSERT_TRUE(pass && pass->IsValid());
 
-  static constexpr size_t kCount = 5;
+  const std::array<uint32_t, 3> workgroups = {
+      WorkgroupCount(kCount, CS::kWorkgroupSize[0]), 1, 1};
 
+  // Bind once and dispatch twice: the second dispatch reuses the pipeline and
+  // the binding.
   pass->SetPipeline(compute_pipeline);
+  CS::BindData(*pass, DeviceBuffer::AsBufferView(buffer_a));
+  ASSERT_TRUE(pass->Compute(workgroups).ok());
+  pass->AddBufferMemoryBarrier();
+  ASSERT_TRUE(pass->Compute(workgroups).ok());
+  pass->AddBufferMemoryBarrier();
 
-  CS::Info info{.count = kCount};
-  CS::Input0<kCount> input_0;
-  CS::Input1<kCount> input_1;
-  for (size_t i = 0; i < kCount; i++) {
-    input_0.elements[i] = Vector4(2.0 + i, 3.0 + i, 4.0 + i, 5.0 * i);
-    input_1.elements[i] = Vector4(6.0, 7.0, 8.0, 9.0);
+  // Changing a binding applies to later dispatches only, and is kept for the
+  // dispatch after that.
+  CS::BindData(*pass, DeviceBuffer::AsBufferView(buffer_b));
+  ASSERT_TRUE(pass->Compute(workgroups).ok());
+  pass->AddBufferMemoryBarrier();
+  ASSERT_TRUE(pass->Compute(workgroups).ok());
+  pass->AddBufferMemoryBarrier();
+  ASSERT_TRUE(pass->Compute(workgroups).ok());
+  ASSERT_TRUE(pass->EncodeCommands());
+
+  fml::AutoResetWaitableEvent latch;
+  ASSERT_TRUE(
+      context->GetCommandQueue()
+          ->Submit({cmd_buffer},
+                   [&latch, buffer_a, buffer_b](CommandBuffer::Status status) {
+                     EXPECT_EQ(status, CommandBuffer::Status::kCompleted);
+                     buffer_a->Invalidate();
+                     buffer_b->Invalidate();
+                     auto* a = reinterpret_cast<CS::Data<kCount>*>(
+                         buffer_a->OnGetContents());
+                     auto* b = reinterpret_cast<CS::Data<kCount>*>(
+                         buffer_b->OnGetContents());
+                     for (size_t i = 0; i < kCount; i++) {
+                       EXPECT_EQ(a->values[i], 2u) << "index " << i;
+                       EXPECT_EQ(b->values[i], 3u) << "index " << i;
+                     }
+                     latch.Signal();
+                   })
+          .ok());
+  latch.Wait();
+}
+
+TEST_P(ComputeTest, OversizedWorkgroupFailsPipelineCreation) {
+  using CS = OversizedWorkgroupTestComputeShader;
+  auto context = GetContext();
+  ASSERT_TRUE(context);
+  ASSERT_TRUE(context->GetCapabilities()->SupportsCompute());
+
+  auto pipeline_desc =
+      ComputePipelineBuilder<CS>::MakeDefaultPipelineDescriptor(*context);
+  ASSERT_TRUE(pipeline_desc.has_value());
+  ASSERT_EQ(pipeline_desc->GetWorkgroupSize(),
+            (std::array<uint32_t, 3>{1024u, 1024u, 1u}));
+
+  std::mutex mutex;
+  std::vector<std::string> messages;
+  ImpellerValidationErrorsSetCallback(
+      [&](const char* message, const char* file, int line) {
+        std::scoped_lock lock(mutex);
+        messages.emplace_back(message);
+        return true;
+      });
+  auto compute_pipeline =
+      context->GetPipelineLibrary()->GetPipeline(pipeline_desc).Get();
+  ImpellerValidationErrorsSetCallback(nullptr);
+
+  EXPECT_FALSE(compute_pipeline);
+  std::scoped_lock lock(mutex);
+  EXPECT_THAT(messages, ::testing::Contains(::testing::HasSubstr(
+                            "has a workgroup size of 1024x1024x1")));
+}
+
+TEST_P(ComputeTest, CapabilitiesReportComputeLimits) {
+  auto context = GetContext();
+  ASSERT_TRUE(context);
+  const auto& caps = context->GetCapabilities();
+  ASSERT_TRUE(caps->SupportsCompute());
+
+  // The minimums every Metal and Vulkan device meets.
+  const ComputeLimits limits = caps->GetComputeLimits();
+  EXPECT_GE(limits.max_workgroup_invocations, 128u);
+  EXPECT_GE(limits.max_workgroup_size[0], 128u);
+  EXPECT_GE(limits.max_workgroup_size[1], 128u);
+  EXPECT_GE(limits.max_workgroup_size[2], 64u);
+  EXPECT_GE(limits.max_workgroup_count[0], 65535u);
+  EXPECT_GE(limits.max_workgroup_count[1], 65535u);
+  EXPECT_GE(limits.max_workgroup_count[2], 65535u);
+  EXPECT_GE(limits.max_shared_memory_size, 16384u);
+  EXPECT_GT(caps->GetMinimumStorageBufferAlignment(), 0u);
+}
+
+TEST_P(ComputeTest, DependentDispatchesNeedNoBarrier) {
+  using CS = IncrementTestComputeShader;
+  auto context = GetContext();
+  ASSERT_TRUE(context);
+  ASSERT_TRUE(context->GetCapabilities()->SupportsCompute());
+
+  auto pipeline_desc =
+      ComputePipelineBuilder<CS>::MakeDefaultPipelineDescriptor(*context);
+  ASSERT_TRUE(pipeline_desc.has_value());
+  auto compute_pipeline =
+      context->GetPipelineLibrary()->GetPipeline(pipeline_desc).Get();
+  ASSERT_TRUE(compute_pipeline);
+
+  static constexpr size_t kCount = CS::kWorkgroupSize[0] * 64;
+  static constexpr uint32_t kDispatches = 8;
+  CS::Data<kCount> initial = {};
+  auto buffer =
+      CreateHostVisibleDeviceBuffer<CS::Data<kCount>>(context, "Data");
+  ASSERT_TRUE(buffer->CopyHostBuffer(reinterpret_cast<const uint8_t*>(&initial),
+                                     Range{0, sizeof(initial)}, 0));
+
+  auto cmd_buffer = context->CreateCommandBuffer();
+  auto pass = cmd_buffer->CreateComputePass();
+  ASSERT_TRUE(pass && pass->IsValid());
+  pass->SetPipeline(compute_pipeline);
+  CS::BindData(*pass, DeviceBuffer::AsBufferView(buffer));
+
+  // Each dispatch reads what the previous one wrote. No manual barrier is
+  // added between them.
+  for (uint32_t i = 0; i < kDispatches; i++) {
+    ASSERT_TRUE(
+        pass->Compute({WorkgroupCount(kCount, CS::kWorkgroupSize[0]), 1, 1})
+            .ok());
+  }
+  ASSERT_TRUE(pass->EncodeCommands());
+
+  fml::AutoResetWaitableEvent latch;
+  ASSERT_TRUE(context->GetCommandQueue()
+                  ->Submit({cmd_buffer},
+                           [&latch, buffer](CommandBuffer::Status status) {
+                             EXPECT_EQ(status,
+                                       CommandBuffer::Status::kCompleted);
+                             buffer->Invalidate();
+                             auto* output = reinterpret_cast<CS::Data<kCount>*>(
+                                 buffer->OnGetContents());
+                             for (size_t i = 0; i < kCount; i++) {
+                               EXPECT_EQ(output->values[i], kDispatches)
+                                   << "index " << i;
+                             }
+                             latch.Signal();
+                           })
+                  .ok());
+  latch.Wait();
+}
+
+TEST_P(ComputeTest, RenderPassDrawsVerticesWrittenByComputePass) {
+  using CS = VertexWriterTestComputeShader;
+  using VS = ComputedVerticesTestVertexShader;
+  using FS = ComputedVerticesTestFragmentShader;
+  auto context = GetContext();
+  ASSERT_TRUE(context);
+  ASSERT_TRUE(context->GetCapabilities()->SupportsCompute());
+
+  auto compute_desc =
+      ComputePipelineBuilder<CS>::MakeDefaultPipelineDescriptor(*context);
+  ASSERT_TRUE(compute_desc.has_value());
+  auto compute_pipeline =
+      context->GetPipelineLibrary()->GetPipeline(compute_desc).Get();
+  ASSERT_TRUE(compute_pipeline);
+
+  auto render_desc =
+      PipelineBuilder<VS, FS>::MakeDefaultPipelineDescriptor(*context);
+  ASSERT_TRUE(render_desc.has_value());
+  render_desc->SetSampleCount(SampleCount::kCount1);
+  render_desc->ClearStencilAttachments();
+  render_desc->ClearDepthAttachment();
+  auto render_pipeline =
+      context->GetPipelineLibrary()->GetPipeline(render_desc).Get();
+  ASSERT_TRUE(render_pipeline);
+
+  // Three vertices of two floats each, written only by the compute pass.
+  DeviceBufferDescriptor vertex_desc;
+  vertex_desc.storage_mode = StorageMode::kDevicePrivate;
+  vertex_desc.size = sizeof(float) * 2 * 3;
+  auto vertex_buffer =
+      context->GetResourceAllocator()->CreateBuffer(vertex_desc);
+  ASSERT_TRUE(vertex_buffer);
+
+  static constexpr ISize kSize = {4, 4};
+  RenderTargetAllocator target_allocator(context->GetResourceAllocator());
+  RenderTarget target = target_allocator.CreateOffscreen(
+      *context, kSize, 1, "Computed Vertices",
+      RenderTarget::kDefaultColorAttachmentConfig, std::nullopt);
+  auto texture = target.GetRenderTargetTexture();
+  ASSERT_TRUE(texture);
+
+  DeviceBufferDescriptor readback_desc;
+  readback_desc.storage_mode = StorageMode::kHostVisible;
+  readback_desc.readback = true;
+  readback_desc.size =
+      texture->GetTextureDescriptor().GetByteSizeOfBaseMipLevel();
+  auto readback = context->GetResourceAllocator()->CreateBuffer(readback_desc);
+  ASSERT_TRUE(readback);
+
+  auto cmd_buffer = context->CreateCommandBuffer();
+  {
+    auto pass = cmd_buffer->CreateComputePass();
+    ASSERT_TRUE(pass && pass->IsValid());
+    pass->SetPipeline(compute_pipeline);
+    CS::BindVertices(*pass, DeviceBuffer::AsBufferView(vertex_buffer));
+    ASSERT_TRUE(pass->Compute({1, 1, 1}).ok());
+    ASSERT_TRUE(pass->EncodeCommands());
+  }
+  {
+    auto pass = cmd_buffer->CreateRenderPass(target);
+    ASSERT_TRUE(pass && pass->IsValid());
+    pass->SetPipeline(render_pipeline);
+    ASSERT_TRUE(
+        pass->SetVertexBuffer(DeviceBuffer::AsBufferView(vertex_buffer)));
+    pass->SetElementCount(3);
+    ASSERT_TRUE(pass->Draw().ok());
+    ASSERT_TRUE(pass->EncodeCommands());
+  }
+  {
+    auto pass = cmd_buffer->CreateBlitPass();
+    ASSERT_TRUE(pass->AddCopy(texture, readback));
+    ASSERT_TRUE(pass->EncodeCommands());
   }
 
-  input_0.fixed_array[1] = IPoint32(2, 2);
-  input_1.fixed_array[0] = UintPoint32(3, 3);
-  input_0.some_int = 5;
-  input_1.some_struct = CS::SomeStruct{.vf = Point(3, 4), .i = 42};
+  fml::AutoResetWaitableEvent latch;
+  ASSERT_TRUE(context->GetCommandQueue()
+                  ->Submit({cmd_buffer},
+                           [&latch, readback](CommandBuffer::Status status) {
+                             EXPECT_EQ(status,
+                                       CommandBuffer::Status::kCompleted);
+                             readback->Invalidate();
+                             // The triangle covers the target, so every pixel
+                             // is the fragment shader's opaque green in either
+                             // RGBA or BGRA order. Without the computed
+                             // vertices nothing is drawn and the pixels stay
+                             // transparent black.
+                             const uint8_t* pixels = readback->OnGetContents();
+                             for (int i = 0; i < kSize.Area(); i++) {
+                               const int offset = i * 4;
+                               EXPECT_EQ(pixels[offset + 0], 0u)
+                                   << "pixel " << i << " at offset " << offset;
+                               EXPECT_EQ(pixels[offset + 1], 255u)
+                                   << "pixel " << i << " at offset " << offset;
+                               EXPECT_EQ(pixels[offset + 2], 0u)
+                                   << "pixel " << i << " at offset " << offset;
+                               EXPECT_EQ(pixels[offset + 3], 255u)
+                                   << "pixel " << i << " at offset " << offset;
+                             }
+                             latch.Signal();
+                           })
+                  .ok());
+  latch.Wait();
+}
 
-  auto output_buffer = CreateHostVisibleDeviceBuffer<CS::Output<kCount>>(
-      context, "Output Buffer");
+TEST_P(ComputeTest, ComputePassReadsTextureWrittenByRenderPass) {
+  using CS = TextureReaderTestComputeShader;
+  auto context = GetContext();
+  ASSERT_TRUE(context);
+  ASSERT_TRUE(context->GetCapabilities()->SupportsCompute());
 
-  CS::BindInfo(*pass, host_buffer->EmplaceUniform(info));
-  CS::BindInput0(*pass, host_buffer->EmplaceStorageBuffer(input_0));
-  CS::BindInput1(*pass, host_buffer->EmplaceStorageBuffer(input_1));
-  CS::BindOutput(*pass, DeviceBuffer::AsBufferView(output_buffer));
+  auto compute_desc =
+      ComputePipelineBuilder<CS>::MakeDefaultPipelineDescriptor(*context);
+  ASSERT_TRUE(compute_desc.has_value());
+  auto compute_pipeline =
+      context->GetPipelineLibrary()->GetPipeline(compute_desc).Get();
+  ASSERT_TRUE(compute_pipeline);
 
-  // Intentionally making the workgroup count zero in one dimension. No GPU will
-  // tolerate this.
-  auto status = pass->Compute({0, 1, 1});
-  EXPECT_FALSE(status.ok());
-  EXPECT_EQ(status.code(), fml::StatusCode::kCancelled);
-  pass->EncodeCommands();
+  // The render pass writes the texture by clearing it.
+  RenderTarget::AttachmentConfig color_config =
+      RenderTarget::kDefaultColorAttachmentConfig;
+  color_config.clear_color = Color(0.0, 1.0, 0.0, 1.0);
+  RenderTargetAllocator target_allocator(context->GetResourceAllocator());
+  RenderTarget target = target_allocator.CreateOffscreen(
+      *context, {4, 4}, 1, "Cleared Texture", color_config, std::nullopt);
+  auto texture = target.GetRenderTargetTexture();
+  ASSERT_TRUE(texture);
+
+  raw_ptr<const Sampler> sampler = context->GetSamplerLibrary()->GetSampler({});
+  ASSERT_TRUE(sampler);
+
+  auto output_buffer =
+      CreateHostVisibleDeviceBuffer<CS::OutputData>(context, "Output Buffer");
+  CS::OutputData initial = {};
+  ASSERT_TRUE(
+      output_buffer->CopyHostBuffer(reinterpret_cast<const uint8_t*>(&initial),
+                                    Range{0, sizeof(initial)}, 0));
+
+  auto cmd_buffer = context->CreateCommandBuffer();
+  {
+    auto pass = cmd_buffer->CreateRenderPass(target);
+    ASSERT_TRUE(pass && pass->IsValid());
+    ASSERT_TRUE(pass->EncodeCommands());
+  }
+  {
+    auto pass = cmd_buffer->CreateComputePass();
+    ASSERT_TRUE(pass && pass->IsValid());
+    pass->SetPipeline(compute_pipeline);
+    CS::BindInputTexture(*pass, texture, sampler);
+    CS::BindOutputData(*pass, DeviceBuffer::AsBufferView(output_buffer));
+    ASSERT_TRUE(pass->Compute({1, 1, 1}).ok());
+    ASSERT_TRUE(pass->EncodeCommands());
+  }
+
+  fml::AutoResetWaitableEvent latch;
+  ASSERT_TRUE(
+      context->GetCommandQueue()
+          ->Submit({cmd_buffer},
+                   [&latch, output_buffer](CommandBuffer::Status status) {
+                     EXPECT_EQ(status, CommandBuffer::Status::kCompleted);
+                     output_buffer->Invalidate();
+                     auto* output = reinterpret_cast<CS::OutputData*>(
+                         output_buffer->OnGetContents());
+                     EXPECT_EQ(output->color, Vector4(0, 1, 0, 1));
+                     latch.Signal();
+                   })
+          .ok());
+  latch.Wait();
+}
+
+TEST_P(ComputeTest, ComputePassReadsTextureWrittenByBlitPass) {
+  using CS = TextureReaderTestComputeShader;
+  auto context = GetContext();
+  ASSERT_TRUE(context);
+  ASSERT_TRUE(context->GetCapabilities()->SupportsCompute());
+
+  auto compute_desc =
+      ComputePipelineBuilder<CS>::MakeDefaultPipelineDescriptor(*context);
+  ASSERT_TRUE(compute_desc.has_value());
+  auto compute_pipeline =
+      context->GetPipelineLibrary()->GetPipeline(compute_desc).Get();
+  ASSERT_TRUE(compute_pipeline);
+
+  static constexpr ISize kSize = {4, 4};
+  TextureDescriptor texture_desc;
+  texture_desc.storage_mode = StorageMode::kDevicePrivate;
+  texture_desc.format = PixelFormat::kR8G8B8A8UNormInt;
+  texture_desc.size = kSize;
+  texture_desc.usage = TextureUsage::kShaderRead;
+  auto texture = context->GetResourceAllocator()->CreateTexture(texture_desc);
+  ASSERT_TRUE(texture);
+
+  // Opaque green, which reads back the same in RGBA and BGRA order.
+  std::vector<uint8_t> pixels;
+  for (int i = 0; i < kSize.Area(); i++) {
+    pixels.insert(pixels.end(), {0, 255, 0, 255});
+  }
+  auto staging_buffer = context->GetResourceAllocator()->CreateBufferWithCopy(
+      pixels.data(), pixels.size());
+  ASSERT_TRUE(staging_buffer);
+
+  raw_ptr<const Sampler> sampler = context->GetSamplerLibrary()->GetSampler({});
+  ASSERT_TRUE(sampler);
+
+  auto output_buffer =
+      CreateHostVisibleDeviceBuffer<CS::OutputData>(context, "Output Buffer");
+  CS::OutputData initial = {};
+  ASSERT_TRUE(
+      output_buffer->CopyHostBuffer(reinterpret_cast<const uint8_t*>(&initial),
+                                    Range{0, sizeof(initial)}, 0));
+
+  auto cmd_buffer = context->CreateCommandBuffer();
+  {
+    auto pass = cmd_buffer->CreateBlitPass();
+    ASSERT_TRUE(
+        pass->AddCopy(DeviceBuffer::AsBufferView(staging_buffer), texture));
+    ASSERT_TRUE(pass->EncodeCommands());
+  }
+  {
+    auto pass = cmd_buffer->CreateComputePass();
+    ASSERT_TRUE(pass && pass->IsValid());
+    pass->SetPipeline(compute_pipeline);
+    CS::BindInputTexture(*pass, texture, sampler);
+    CS::BindOutputData(*pass, DeviceBuffer::AsBufferView(output_buffer));
+    ASSERT_TRUE(pass->Compute({1, 1, 1}).ok());
+    ASSERT_TRUE(pass->EncodeCommands());
+  }
+
+  fml::AutoResetWaitableEvent latch;
+  ASSERT_TRUE(
+      context->GetCommandQueue()
+          ->Submit({cmd_buffer},
+                   [&latch, output_buffer](CommandBuffer::Status status) {
+                     EXPECT_EQ(status, CommandBuffer::Status::kCompleted);
+                     output_buffer->Invalidate();
+                     auto* output = reinterpret_cast<CS::OutputData*>(
+                         output_buffer->OnGetContents());
+                     EXPECT_EQ(output->color, Vector4(0, 1, 0, 1));
+                     latch.Signal();
+                   })
+          .ok());
+  latch.Wait();
+}
+
+TEST_P(ComputeTest, ComputePassReadsBufferWrittenByBlitPass) {
+  using CS = IncrementTestComputeShader;
+  auto context = GetContext();
+  ASSERT_TRUE(context);
+  ASSERT_TRUE(context->GetCapabilities()->SupportsCompute());
+
+  auto pipeline_desc =
+      ComputePipelineBuilder<CS>::MakeDefaultPipelineDescriptor(*context);
+  ASSERT_TRUE(pipeline_desc.has_value());
+  auto compute_pipeline =
+      context->GetPipelineLibrary()->GetPipeline(pipeline_desc).Get();
+  ASSERT_TRUE(compute_pipeline);
+
+  // One 4-byte texel per value, so a single workgroup covers the texture.
+  static constexpr size_t kCount = CS::kWorkgroupSize[0];
+  TextureDescriptor texture_desc;
+  texture_desc.storage_mode = StorageMode::kDevicePrivate;
+  texture_desc.format = PixelFormat::kR8G8B8A8UNormInt;
+  texture_desc.size = ISize(kCount, 1);
+  texture_desc.usage = TextureUsage::kShaderRead;
+  auto texture = context->GetResourceAllocator()->CreateTexture(texture_desc);
+  ASSERT_TRUE(texture);
+  // Texel `i` holds `i` in its first byte, so it reads back as the
+  // little-endian uint `i`.
+  std::vector<uint8_t> pixels(kCount * 4, 0);
+  for (size_t i = 0; i < kCount; i++) {
+    pixels[i * 4] = static_cast<uint8_t>(i);
+  }
+  // A device-private texture cannot be written from the CPU, so upload
+  // through a staging buffer.
+  auto staging_buffer = context->GetResourceAllocator()->CreateBufferWithCopy(
+      pixels.data(), pixels.size());
+  ASSERT_TRUE(staging_buffer);
+
+  CS::Data<kCount> initial = {};
+  auto buffer =
+      CreateHostVisibleDeviceBuffer<CS::Data<kCount>>(context, "Data");
+  ASSERT_TRUE(buffer->CopyHostBuffer(reinterpret_cast<const uint8_t*>(&initial),
+                                     Range{0, sizeof(initial)}, 0));
+
+  auto cmd_buffer = context->CreateCommandBuffer();
+  {
+    auto pass = cmd_buffer->CreateBlitPass();
+    ASSERT_TRUE(
+        pass->AddCopy(DeviceBuffer::AsBufferView(staging_buffer), texture));
+    ASSERT_TRUE(pass->AddCopy(texture, buffer));
+    ASSERT_TRUE(pass->EncodeCommands());
+  }
+  {
+    auto pass = cmd_buffer->CreateComputePass();
+    ASSERT_TRUE(pass && pass->IsValid());
+    pass->SetPipeline(compute_pipeline);
+    CS::BindData(*pass, DeviceBuffer::AsBufferView(buffer));
+    ASSERT_TRUE(pass->Compute({1, 1, 1}).ok());
+    ASSERT_TRUE(pass->EncodeCommands());
+  }
+
+  fml::AutoResetWaitableEvent latch;
+  ASSERT_TRUE(
+      context->GetCommandQueue()
+          ->Submit({cmd_buffer},
+                   [&latch, buffer](CommandBuffer::Status status) {
+                     EXPECT_EQ(status, CommandBuffer::Status::kCompleted);
+                     buffer->Invalidate();
+                     auto* output = reinterpret_cast<CS::Data<kCount>*>(
+                         buffer->OnGetContents());
+                     for (size_t i = 0; i < kCount; i++) {
+                       EXPECT_EQ(output->values[i], i + 1) << "index " << i;
+                     }
+                     latch.Signal();
+                   })
+          .ok());
+  latch.Wait();
+}
+
+TEST_P(ComputeTest, RemovingComputeEntryPointEvictsOnlyItsPipelines) {
+  using CS = IncrementTestComputeShader;
+  using OtherCS = ThreadgroupSizingTestComputeShader;
+  using VS = ComputedVerticesTestVertexShader;
+  using FS = ComputedVerticesTestFragmentShader;
+  auto context = GetContext();
+  ASSERT_TRUE(context);
+  ASSERT_TRUE(context->GetCapabilities()->SupportsCompute());
+  auto library = context->GetPipelineLibrary();
+
+  auto render_desc =
+      PipelineBuilder<VS, FS>::MakeDefaultPipelineDescriptor(*context);
+  ASSERT_TRUE(render_desc.has_value());
+  render_desc->SetSampleCount(SampleCount::kCount1);
+  render_desc->ClearStencilAttachments();
+  render_desc->ClearDepthAttachment();
+  auto render_pipeline = library->GetPipeline(render_desc).Get();
+  ASSERT_TRUE(render_pipeline);
+
+  auto compute_desc =
+      ComputePipelineBuilder<CS>::MakeDefaultPipelineDescriptor(*context);
+  ASSERT_TRUE(compute_desc.has_value());
+  auto compute_pipeline = library->GetPipeline(compute_desc).Get();
+  ASSERT_TRUE(compute_pipeline);
+
+  auto other_desc =
+      ComputePipelineBuilder<OtherCS>::MakeDefaultPipelineDescriptor(*context);
+  ASSERT_TRUE(other_desc.has_value());
+  auto other_pipeline = library->GetPipeline(other_desc).Get();
+  ASSERT_TRUE(other_pipeline);
+
+  // Removing a compute function, as a hot reload does, must skip the cached
+  // render pipelines, which have no compute entry point, and evict only the
+  // compute pipelines that use that function.
+  library->RemovePipelinesWithEntryPoint(compute_desc->GetStageEntrypoint());
+
+  EXPECT_TRUE(library->HasPipeline(*render_desc));
+  EXPECT_EQ(library->GetPipeline(render_desc).Get(), render_pipeline);
+  EXPECT_EQ(library->GetPipeline(other_desc).Get(), other_pipeline);
+  auto recreated_pipeline = library->GetPipeline(compute_desc).Get();
+  ASSERT_TRUE(recreated_pipeline);
+  EXPECT_NE(recreated_pipeline, compute_pipeline);
+
+  // Removing a vertex function evicts its render pipelines and leaves the
+  // compute pipelines.
+  library->RemovePipelinesWithEntryPoint(
+      render_desc->GetEntrypointForStage(ShaderStage::kVertex));
+  EXPECT_FALSE(library->HasPipeline(*render_desc));
+  EXPECT_EQ(library->GetPipeline(compute_desc).Get(), recreated_pipeline);
+  EXPECT_EQ(library->GetPipeline(other_desc).Get(), other_pipeline);
 }
 
 }  // namespace testing

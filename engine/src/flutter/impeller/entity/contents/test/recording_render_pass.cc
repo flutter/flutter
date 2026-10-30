@@ -80,13 +80,13 @@ bool RecordingRenderPass::SetVertexBuffer(VertexBuffer buffer) {
 }
 
 // |RenderPass|
-fml::Status RecordingRenderPass::Draw() {
+absl::Status RecordingRenderPass::Draw() {
   commands_.emplace_back(std::move(pending_));
   pending_ = {};
   if (delegate_) {
     return delegate_->Draw();
   }
-  return fml::Status();
+  return absl::OkStatus();
 }
 
 // |RenderPass|

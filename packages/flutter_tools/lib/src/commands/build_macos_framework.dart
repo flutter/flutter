@@ -38,6 +38,7 @@ class BuildMacOSFrameworkCommand extends BuildFrameworkCommand {
     required super.appleContext,
     required super.buildSystem,
     required super.codesign,
+    required super.templateRenderer,
     required super.toolContext,
     required super.verboseHelp,
   });
@@ -60,8 +61,19 @@ class BuildMacOSFrameworkCommand extends BuildFrameworkCommand {
   bool get regeneratePlatformSpecificToolingDuringVerify => false;
 
   @override
+  bool get deprecated => true;
+
+  @override
+  String get deprecationWarning {
+    return '${toolContext.logger.terminal.warningMark} The "flutter build macos-framework" command is '
+        'deprecated and has been replaced by "flutter build swift-package --platform macos". '
+        'For more information, see: https://docs.flutter.dev/add-to-app/macos/project-setup\n';
+  }
+
+  @override
   Future<FlutterCommandResult> runCommand() async {
     final ToolContext(
+      :Cache cache,
       :Config config,
       :FileSystem fs,
       :Logger logger,
@@ -134,6 +146,9 @@ class BuildMacOSFrameworkCommand extends BuildFrameworkCommand {
           project.macos,
           getMacOSBuildDirectory(config: config, fileSystem: fs),
           buildInfo.mode,
+          cocoaPods: appleContext.cocoaPods,
+          templateRenderer: templateRenderer,
+          toolContext: toolContext,
           forceCocoaPodsOnly: true,
         );
         if (hasPlugins(project)) {
@@ -278,7 +293,7 @@ end
         outputDir: macosBuildOutput,
         buildDir: project.dartTool.childDirectory('flutter_build'),
         cacheDir: cache.getRoot(),
-        flutterRootDir: fs.directory(Cache.flutterRoot),
+        flutterRootDir: fs.directory(cache.flutterRoot),
         defines: <String, String>{
           kTargetFile: targetFile,
           kTargetPlatform: TargetPlatform.darwin.getName(),

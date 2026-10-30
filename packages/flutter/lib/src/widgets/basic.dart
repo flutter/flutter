@@ -2008,7 +2008,7 @@ class CompositedTransformTarget extends SingleChildRenderObjectWidget {
 /// [CompositedTransformFollower] and [CompositedTransformTarget] are
 /// incompatible with [OverlayPortal.overlayChildLayoutBuilder] and thus
 /// must not be used together. Consider using
-/// [OverlayPortal.overlayChildLayoutBuilder] instead
+/// [OverlayPortal.overlayChildLayoutBuilder] instead.
 /// {@endtemplate}
 ///
 /// See also:

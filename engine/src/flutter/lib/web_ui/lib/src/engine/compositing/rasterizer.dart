@@ -86,14 +86,22 @@ abstract class ViewRasterizer {
     compositorFrame.raster(layerTree, currentFrameSize, recorder);
     _lastRenderedLayerTree = layerTree;
 
+    final Stopwatch? presentationTimer = Profiler.isBenchmarkMode ? (Stopwatch()..start()) : null;
     await prepareToDraw();
     await viewEmbedder.submitFrame(recorder);
+    if (presentationTimer != null) {
+      presentationTimer.stop();
+      Profiler.instance.benchmark(
+        kProfilePresentationDuration,
+        presentationTimer.elapsedMicroseconds.toDouble(),
+      );
+    }
   }
 
   /// Do some initialization to prepare to draw a frame.
   ///
-  /// For example, in the [OffscreenCanvasRasterizer], this ensures the backing
-  /// [OffscreenCanvas] is the correct size to draw the frame.
+  /// For example, in the [MultiSurfaceRasterizer], this ensures the base
+  /// canvas is the correct size to draw the frame.
   Future<void> prepareToDraw();
 
   /// Rasterizes the given [pictures] into the [displayCanvases].

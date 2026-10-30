@@ -13,6 +13,7 @@ import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
+import '../../src/fakes.dart';
 
 void main() {
   const kWhichSysctlCommand = FakeCommand(command: <String>['which', 'sysctl']);
@@ -27,9 +28,9 @@ void main() {
     testWithoutContext('Emits missing status when Xcode is not installed', () async {
       final ProcessManager processManager = FakeProcessManager.any();
       final xcode = Xcode.test(
-        processManager: processManager,
+        toolContext: FakeToolContext.macosHost(processManager: processManager),
         xcodeProjectInterpreter: XcodeProjectInterpreter.test(
-          processManager: processManager,
+          toolContext: FakeToolContext.macosHost(processManager: processManager),
           version: null,
         ),
       );
@@ -55,9 +56,9 @@ void main() {
         kx64CheckCommand,
       ]);
       final xcode = Xcode.test(
-        processManager: processManager,
+        toolContext: FakeToolContext.macosHost(processManager: processManager),
         xcodeProjectInterpreter: XcodeProjectInterpreter.test(
-          processManager: processManager,
+          toolContext: FakeToolContext.macosHost(processManager: processManager),
           version: null,
         ),
       );
@@ -75,9 +76,9 @@ void main() {
     testWithoutContext('Emits partial status when Xcode version too low', () async {
       final ProcessManager processManager = FakeProcessManager.any();
       final xcode = Xcode.test(
-        processManager: processManager,
+        toolContext: FakeToolContext.macosHost(processManager: processManager),
         xcodeProjectInterpreter: XcodeProjectInterpreter.test(
-          processManager: processManager,
+          toolContext: FakeToolContext.macosHost(processManager: processManager),
           version: Version(7, 0, 1),
         ),
       );
@@ -111,9 +112,9 @@ void main() {
         ),
       ]);
       final xcode = Xcode.test(
-        processManager: processManager,
+        toolContext: FakeToolContext.macosHost(processManager: processManager),
         xcodeProjectInterpreter: XcodeProjectInterpreter.test(
-          processManager: processManager,
+          toolContext: FakeToolContext.macosHost(processManager: processManager),
           version: Version(15, 4, null),
         ),
       );
@@ -153,8 +154,10 @@ void main() {
         const FakeCommand(command: <String>['xcrun', 'simctl', 'list', 'devices', 'booted']),
       ]);
       final xcode = Xcode.test(
-        processManager: processManager,
-        xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
+        toolContext: FakeToolContext.macosHost(processManager: processManager),
+        xcodeProjectInterpreter: XcodeProjectInterpreter.test(
+          toolContext: FakeToolContext.macosHost(processManager: processManager),
+        ),
       );
       final validator = XcodeValidator(
         xcode: xcode,
@@ -183,8 +186,10 @@ void main() {
         ),
       ]);
       final xcode = Xcode.test(
-        processManager: processManager,
-        xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
+        toolContext: FakeToolContext.macosHost(processManager: processManager),
+        xcodeProjectInterpreter: XcodeProjectInterpreter.test(
+          toolContext: FakeToolContext.macosHost(processManager: processManager),
+        ),
       );
       final validator = XcodeValidator(
         xcode: xcode,
@@ -213,8 +218,10 @@ void main() {
         ),
       ]);
       final xcode = Xcode.test(
-        processManager: processManager,
-        xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
+        toolContext: FakeToolContext.macosHost(processManager: processManager),
+        xcodeProjectInterpreter: XcodeProjectInterpreter.test(
+          toolContext: FakeToolContext.macosHost(processManager: processManager),
+        ),
       );
       final validator = XcodeValidator(
         xcode: xcode,
@@ -244,8 +251,10 @@ void main() {
         ),
       ]);
       final xcode = Xcode.test(
-        processManager: processManager,
-        xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
+        toolContext: FakeToolContext.macosHost(processManager: processManager),
+        xcodeProjectInterpreter: XcodeProjectInterpreter.test(
+          toolContext: FakeToolContext.macosHost(processManager: processManager),
+        ),
       );
       final validator = XcodeValidator(
         xcode: xcode,
@@ -280,8 +289,10 @@ void main() {
           ),
         ]);
         final xcode = Xcode.test(
-          processManager: processManager,
-          xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
+          toolContext: FakeToolContext.macosHost(processManager: processManager),
+          xcodeProjectInterpreter: XcodeProjectInterpreter.test(
+            toolContext: FakeToolContext.macosHost(processManager: processManager),
+          ),
         );
         final simulatorUtils = FakeIOSSimulatorUtils(
           runtimes: <IOSSimulatorRuntime>[
@@ -317,8 +328,10 @@ void main() {
         ),
       ]);
       final xcode = Xcode.test(
-        processManager: processManager,
-        xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
+        toolContext: FakeToolContext.macosHost(processManager: processManager),
+        xcodeProjectInterpreter: XcodeProjectInterpreter.test(
+          toolContext: FakeToolContext.macosHost(processManager: processManager),
+        ),
       );
       final simulatorUtils = FakeIOSSimulatorUtils(
         runtimes: <IOSSimulatorRuntime>[

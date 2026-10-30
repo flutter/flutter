@@ -155,6 +155,7 @@ void main() {
 
   group('throws ToolExit on Windows', () {
     const kDeviceFull = 112;
+    const kFilenameExcedRange = 206;
     const kUserMappedSectionOpened = 1224;
     const kUserPermissionDenied = 5;
     const kWriteProtect = 19;
@@ -438,6 +439,41 @@ void main() {
         () => fileSystem.currentDirectory,
         throwsToolExit(message: 'The flutter tool cannot access the file or directory'),
       );
+    });
+
+    testWithoutContext('when the filename or extension is too long', () async {
+      final fileSystem = ErrorHandlingFileSystem(
+        delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
+        platform: windowsPlatform,
+      );
+      final File file = fileSystem.file('file');
+
+      exceptionHandler.addError(
+        file,
+        FileSystemOp.write,
+        FileSystemException('', file.path, const OSError('', kFilenameExcedRange)),
+      );
+      exceptionHandler.addError(
+        file,
+        FileSystemOp.open,
+        FileSystemException('', file.path, const OSError('', kFilenameExcedRange)),
+      );
+      exceptionHandler.addError(
+        file,
+        FileSystemOp.create,
+        FileSystemException('', file.path, const OSError('', kFilenameExcedRange)),
+      );
+
+      const expectedMessage = 'The filename or extension is too long.';
+      await expectLater(
+        () => file.writeAsBytes(<int>[0]),
+        throwsToolExit(message: expectedMessage),
+      );
+      await expectLater(() => file.writeAsString(''), throwsToolExit(message: expectedMessage));
+      expect(() => file.writeAsBytesSync(<int>[0]), throwsToolExit(message: expectedMessage));
+      expect(() => file.writeAsStringSync(''), throwsToolExit(message: expectedMessage));
+      expect(() => file.openSync(), throwsToolExit(message: expectedMessage));
+      expect(() => file.createSync(), throwsToolExit(message: expectedMessage));
     });
   });
 
@@ -1140,6 +1176,7 @@ Please ensure that the SDK and/or project is installed in a location that has re
 
   group('ProcessManager on windows throws tool exit', () {
     const kDeviceFull = 112;
+    const kFilenameExcedRange = 206;
     const kUserMappedSectionOpened = 1224;
     const kUserPermissionDenied = 5;
     const kApplicationControlPolicyBlocked = 4551;
@@ -1336,6 +1373,62 @@ Please ensure that the SDK and/or project is installed in a location that has re
           r'Flutter failed to run "C:\path\to\dart". The flutter tool cannot access the file or directory.';
       expect(
         () async => processManager.canRun(r'C:\path\to\dart'),
+        throwsToolExit(message: expectedMessage),
+      );
+    });
+
+    testWithoutContext('when the filename or extension is too long', () async {
+      final fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
+        const FakeCommand(
+          command: <String>['foo', '--bar'],
+          exception: ProcessException(
+            'foo',
+            <String>['--bar'],
+            'The filename or extension is too long',
+            kFilenameExcedRange,
+          ),
+        ),
+        const FakeCommand(
+          command: <String>['foo', '--bar'],
+          exception: ProcessException(
+            'foo',
+            <String>['--bar'],
+            'The filename or extension is too long',
+            kFilenameExcedRange,
+          ),
+        ),
+        const FakeCommand(
+          command: <String>['foo', '--bar'],
+          exception: ProcessException(
+            'foo',
+            <String>['--bar'],
+            'The filename or extension is too long',
+            kFilenameExcedRange,
+          ),
+        ),
+      ]);
+
+      final ProcessManager processManager = createProcessManager(
+        delegate: fakeProcessManager,
+        platform: windowsPlatform,
+      );
+
+      const expectedMessage =
+          'Flutter failed to run "foo --bar". The filename or extension is too long.\n'
+          'ProcessException: The filename or extension is too long\n'
+          '  Command: foo --bar\n'
+          'Please consider moving the Flutter SDK and/or project to a shorter path, '
+          'or enabling long paths on Windows.';
+      await expectLater(
+        () => processManager.start(<String>['foo', '--bar']),
+        throwsToolExit(message: expectedMessage),
+      );
+      await expectLater(
+        () => processManager.run(<String>['foo', '--bar']),
+        throwsToolExit(message: expectedMessage),
+      );
+      expect(
+        () => processManager.runSync(<String>['foo', '--bar']),
         throwsToolExit(message: expectedMessage),
       );
     });

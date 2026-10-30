@@ -1056,7 +1056,7 @@ class AdbLogReader extends DeviceLogReader {
 
   @override
   Future<void> provideVmService(FlutterVmService connectedVmService) async {
-    final VM? vm = await connectedVmService.getVmGuarded();
+    final VM? vm = await connectedVmService.getVmGuarded(logger: _logger);
     if (vm == null) {
       _logger.printError(
         'An error occurred when setting up filtering for adb logs. '

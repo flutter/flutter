@@ -2,16 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:meta/meta.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../base/common.dart';
+import '../base/config.dart';
 import '../base/file_system.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
 import '../bundle_builder.dart';
 import '../context/tool_context.dart';
 import '../features.dart';
+import '../isolated/build_targets.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart';
 import 'build.dart';
@@ -20,15 +21,11 @@ class BuildBundleCommand extends BuildSubCommand {
   BuildBundleCommand({
     required this.buildSystem,
     required this.featureFlags,
-    required ToolContext toolContext,
+    required ToolContext super.toolContext,
     required super.verboseHelp,
-    BundleBuilder? bundleBuilder,
-  }) : _bundleBuilder = bundleBuilder ?? BundleBuilder(),
-       super(
-         logger: toolContext.logger,
-         outputPreferences: toolContext.outputPreferences,
-         toolContext: toolContext,
-       ) {
+    this._bundleBuilder,
+  }) : super(logger: toolContext.logger) {
+    final ToolContext(:Config config, :FileSystem fs) = toolContext;
     registerOptionBundles(const <OptionBundle>[
       FilesystemOptionsBundle(),
       BuildModeOptionsBundle(defaultToRelease: false),
@@ -46,10 +43,7 @@ class BuildBundleCommand extends BuildSubCommand {
     argParser
       ..addOption(
         'depfile',
-        defaultsTo: toolContext.fs.path.join(
-          getBuildDirectory(toolContext.config, toolContext.fs),
-          'snapshot_blob.bin.d',
-        ),
+        defaultsTo: fs.path.join(getBuildDirectory(config, fs), 'snapshot_blob.bin.d'),
         help:
             'A file path where a depfile will be written. '
             'This contains all build inputs and outputs in a Make-style syntax.',
@@ -73,7 +67,7 @@ class BuildBundleCommand extends BuildSubCommand {
       )
       ..addOption(
         'asset-dir',
-        defaultsTo: getAssetBuildDirectory(toolContext.config, toolContext.fs),
+        defaultsTo: getAssetBuildDirectory(config, fs),
         help:
             'The output directory for the kernel_blob.bin file, the native snapshot, the assets, etc. '
             'Can be used to redirect the output when driving the Flutter toolchain from another build system.',
@@ -86,11 +80,8 @@ class BuildBundleCommand extends BuildSubCommand {
   }
 
   final BuildSystem buildSystem;
-  final BundleBuilder _bundleBuilder;
+  final BundleBuilder? _bundleBuilder;
   final FeatureFlags featureFlags;
-
-  @visibleForTesting
-  BundleBuilder get bundleBuilder => _bundleBuilder;
 
   @override
   ToolContext get toolContext => super.toolContext!;
@@ -155,8 +146,16 @@ class BuildBundleCommand extends BuildSubCommand {
     }
 
     final BuildInfo buildInfo = await getBuildInfo();
+    final BundleBuilder bundleBuilder =
+        _bundleBuilder ??
+        BundleBuilder(
+          analytics: analytics,
+          buildSystem: buildSystem,
+          buildTargets: const BuildTargetsImpl(),
+          toolContext: toolContext,
+        );
 
-    await _bundleBuilder.build(
+    await bundleBuilder.build(
       buildInfo: buildInfo,
       platform: platform,
       assetDirPath: stringArg('asset-dir'),
