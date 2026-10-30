@@ -2378,7 +2378,7 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
 }
 
 // UIKit autofill prefers setText: over the append-only UIKeyInput fallback.
-- (void)setText:(NSString*)text {
+- (void)setText:(nullable NSString*)text {
   UITextRange* document = [self textRangeFromPosition:self.beginningOfDocument
                                            toPosition:self.endOfDocument];
   [self replaceRange:document withText:text ?: @""];
