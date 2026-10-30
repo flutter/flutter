@@ -21,13 +21,13 @@ import 'windows/application_package.dart';
 class FlutterApplicationPackageFactory extends ApplicationPackageFactory {
   FlutterApplicationPackageFactory({
     required this._androidSdk,
-    required this._plistParser,
     required this._toolContext,
+    required this._plistParser,
   });
 
   final AndroidSdk? _androidSdk;
-  final PlistParser _plistParser;
   final ToolContext _toolContext;
+  final PlistParser _plistParser;
 
   FlutterProject _currentProject() {
     final ToolContext(:FileSystem fs, :FlutterProjectFactory projectFactory) = _toolContext;
