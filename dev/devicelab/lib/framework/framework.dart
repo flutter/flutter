@@ -33,6 +33,29 @@ const int maximumRuns = 30;
 /// succeed, fail and be retried independently of others.
 typedef TaskFunction = Future<TaskResult> Function();
 
+/// Runs every benchmark in [benchmarks] and merges their results with
+/// [TaskResult.merge]. Each still gets a fresh `flutter drive`. Fails if any
+/// benchmark failed.
+TaskFunction runBenchmarks(Map<String, TaskFunction> benchmarks) {
+  return () async {
+    final results = <String, TaskResult>{};
+    final failures = <String>[];
+    for (final MapEntry<String, TaskFunction>(key: name, value: benchmark) in benchmarks.entries) {
+      section('Running benchmark "$name"');
+      final TaskResult result = await benchmark();
+      if (result.failed) {
+        failures.add('$name: ${result.message}');
+      } else {
+        results[name] = result;
+      }
+    }
+    if (failures.isNotEmpty) {
+      return TaskResult.failure(failures.join('\n'));
+    }
+    return TaskResult.merge(results);
+  };
+}
+
 bool _isTaskRegistered = false;
 
 /// Registers a [task] to run, returns the result when it is complete.
