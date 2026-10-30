@@ -84,7 +84,7 @@ class ImageGeneratorRegistry {
 
   using FactorySet = std::set<PrioritizedFactory, Compare>;
   FactorySet image_generator_factories_;
-  size_t nonce_;
+  size_t nonce_ = 0;
   fml::TaskRunnerAffineWeakPtrFactory<ImageGeneratorRegistry> weak_factory_;
 };
 

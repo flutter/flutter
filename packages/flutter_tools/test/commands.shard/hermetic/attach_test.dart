@@ -188,6 +188,7 @@ void main() {
             ),
             logger: logger,
             analytics: const NoOpAnalytics(),
+            platform: FakePlatform(),
           ),
         },
       );
@@ -260,6 +261,7 @@ void main() {
             ),
             logger: logger,
             analytics: const NoOpAnalytics(),
+            platform: FakePlatform(),
           ),
           Signals: () => FakeSignals(),
         },
@@ -345,6 +347,7 @@ void main() {
             ),
             logger: logger,
             analytics: const NoOpAnalytics(),
+            platform: FakePlatform(),
           ),
           ProcessManager: () => FakeProcessManager.empty(),
         },
@@ -428,6 +431,7 @@ void main() {
             ),
             logger: logger,
             analytics: const NoOpAnalytics(),
+            platform: FakePlatform(),
           ),
         },
       );
@@ -509,6 +513,7 @@ void main() {
             ),
             logger: logger,
             analytics: const NoOpAnalytics(),
+            platform: FakePlatform(),
           ),
         },
       );
@@ -603,6 +608,7 @@ void main() {
             ),
             logger: logger,
             analytics: const NoOpAnalytics(),
+            platform: FakePlatform(),
           ),
         },
       );
@@ -697,6 +703,7 @@ void main() {
             ),
             logger: logger,
             analytics: const NoOpAnalytics(),
+            platform: FakePlatform(),
           ),
         },
       );
@@ -941,6 +948,7 @@ void main() {
             ),
             logger: logger,
             analytics: const NoOpAnalytics(),
+            platform: FakePlatform(),
           ),
         },
       );
@@ -1517,6 +1525,84 @@ void main() {
         },
       );
     });
+
+    testUsingContext('preserves expected hidden and visible options across verboseHelp modes', () {
+      final defaultCommand = AttachCommand(
+        buildSystem: buildSystem,
+        buildTargets: const BuildTargetsImpl(),
+        xcode: null,
+        toolContext: createToolContext(),
+      );
+
+      final visibleByDefault = <String>{
+        for (final entry in defaultCommand.argParser.options.entries)
+          if (!entry.value.hide) entry.key,
+      };
+      final hiddenByDefault = <String>{
+        for (final entry in defaultCommand.argParser.options.entries)
+          if (entry.value.hide) entry.key,
+      };
+
+      expect(
+        visibleByDefault,
+        unorderedEquals(<String>[
+          'help',
+          'debug',
+          'profile',
+          'target',
+          'device-vmservice-port',
+          'host-vmservice-port',
+          'dart-define',
+          'dart-define-from-file',
+          'device-user',
+          'device-timeout',
+          'device-connection',
+          'dds',
+          'dds-port',
+          'debug-url',
+          'app-id',
+          'pid-file',
+          'track-widget-creation',
+        ]),
+      );
+      expect(
+        hiddenByDefault,
+        unorderedEquals(<String>[
+          'vm-service-port',
+          'ipv6',
+          'output-dill',
+          'filesystem-root',
+          'filesystem-scheme',
+          'initialize-from-dill',
+          'assume-initialize-from-dill-up-to-date',
+          'native-assets-yaml-file',
+          'disable-dds',
+          'devtools',
+          'devtools-server-address',
+          'target-model',
+          'module',
+          'enable-experiment',
+          'debug-port',
+          'report-ready',
+          'project-root',
+          'machine',
+          'adb-log-filtering',
+        ]),
+      );
+
+      final verboseCommand = AttachCommand(
+        buildSystem: buildSystem,
+        buildTargets: const BuildTargetsImpl(),
+        xcode: null,
+        toolContext: createToolContext(),
+        verboseHelp: true,
+      );
+      final hiddenInVerboseMode = <String>{
+        for (final entry in verboseCommand.argParser.options.entries)
+          if (entry.value.hide) entry.key,
+      };
+      expect(hiddenInVerboseMode, isEmpty);
+    });
   });
 }
 
@@ -1769,6 +1855,7 @@ class FakeDartDevelopmentService extends Fake implements DartDevelopmentService 
   @override
   Future<void> startDartDevelopmentService(
     Uri vmServiceUri, {
+    Artifacts? artifacts,
     String? appName = 'Fake App',
     int? ddsPort,
     FlutterDevice? device,

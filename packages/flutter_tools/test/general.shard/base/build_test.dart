@@ -11,6 +11,7 @@ import 'package:flutter_tools/src/macos/xcode.dart';
 
 import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
+import '../../src/fakes.dart' show FakeToolContext;
 
 void main() {
   const kWhichSysctlCommand = FakeCommand(command: <String>['which', 'sysctl']);
@@ -119,7 +120,10 @@ void main() {
       snapshotter = AOTSnapshotter(
         fileSystem: fileSystem,
         logger: BufferLogger.test(),
-        xcode: Xcode.test(processManager: processManager),
+        xcode: Xcode.test(
+          processManager: processManager,
+          toolContext: FakeToolContext.macosHost(processManager: processManager),
+        ),
         artifacts: artifacts,
         processManager: processManager,
         windowsLinkerPath: r'C:\VS\link.exe',
@@ -630,7 +634,10 @@ void main() {
       final snapshotter = AOTSnapshotter(
         fileSystem: fileSystem,
         logger: logger,
-        xcode: Xcode.test(processManager: processManager),
+        xcode: Xcode.test(
+          processManager: processManager,
+          toolContext: FakeToolContext.macosHost(processManager: processManager),
+        ),
         artifacts: artifacts,
         processManager: processManager,
         windowsLinkerPath: r'C:\VS\does-not-exist\link.exe',

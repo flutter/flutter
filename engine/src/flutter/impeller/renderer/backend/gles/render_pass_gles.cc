@@ -866,7 +866,7 @@ void RenderPassGLES::ResetGLState(const ProcTableGLES& gl) {
   const bool is_default_fbo = framebuffer_id == 0;
 
   if (gl.InvalidateFramebuffer.IsAvailable()) {
-    std::array<GLenum, 3> attachments;
+    std::array<GLenum, 3> attachments{};
     size_t attachment_count = 0;
 
     bool angle_safe = gl.GetCapabilities()->IsANGLE() ? !is_default_fbo : true;
@@ -890,7 +890,7 @@ void RenderPassGLES::ResetGLState(const ProcTableGLES& gl) {
                              attachments.data()  // size
     );
   } else if (gl.DiscardFramebufferEXT.IsAvailable()) {
-    std::array<GLenum, 3> attachments;
+    std::array<GLenum, 3> attachments{};
     size_t attachment_count = 0;
 
     // TODO(130048): discarding stencil or depth on the default fbo causes Angle

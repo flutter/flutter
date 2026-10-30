@@ -18,8 +18,8 @@
 #include "flutter/fml/closure.h"
 #include "flutter/fml/make_copyable.h"
 #include "flutter/fml/native_library.h"
-#include "flutter/fml/status_or.h"
 #include "flutter/fml/thread.h"
+#include "third_party/abseil-cpp/absl/status/statusor.h"
 #include "third_party/dart/runtime/bin/elf_loader.h"
 #include "third_party/dart/runtime/include/dart_native_api.h"
 #include "third_party/skia/include/core/SkSurface.h"
@@ -550,7 +550,7 @@ InferMetalPlatformViewCreationCallback(
     frame_info.struct_size = sizeof(FlutterFrameInfo);
     frame_info.size = {static_cast<uint32_t>(frame_size.width),
                        static_cast<uint32_t>(frame_size.height)};
-    flutter::GPUMTLTextureInfo texture_info;
+    flutter::GPUMTLTextureInfo texture_info{};
 
     FlutterMetalTexture metal_texture = ptr(user_data, &frame_info);
     texture_info.texture_id = metal_texture.texture_id;
@@ -1545,7 +1545,7 @@ CreateEmbedderRenderTarget(
 /// Creates an EmbedderExternalViewEmbedder.
 ///
 /// When a non-OK status is returned, engine startup should be halted.
-static fml::StatusOr<std::unique_ptr<flutter::EmbedderExternalViewEmbedder>>
+static absl::StatusOr<std::unique_ptr<flutter::EmbedderExternalViewEmbedder>>
 InferExternalViewEmbedderFromArgs(const FlutterCompositor* compositor,
                                   bool enable_impeller) {
   if (compositor == nullptr) {
@@ -1565,15 +1565,15 @@ InferExternalViewEmbedderFromArgs(const FlutterCompositor* compositor,
 
   // Make sure the required callbacks are present
   if (!c_create_callback || !c_collect_callback) {
-    return fml::Status(fml::StatusCode::kInvalidArgument,
-                       "Required compositor callbacks absent.");
+    return absl::Status(absl::StatusCode::kInvalidArgument,
+                        "Required compositor callbacks absent.");
   }
   // Either the present view or the present layers callback must be provided.
   if ((!c_present_view_callback && !c_present_callback) ||
       (c_present_view_callback && c_present_callback)) {
-    return fml::Status(fml::StatusCode::kInvalidArgument,
-                       "Either present_layers_callback or "
-                       "present_view_callback must be provided but not both.");
+    return absl::Status(absl::StatusCode::kInvalidArgument,
+                        "Either present_layers_callback or "
+                        "present_view_callback must be provided but not both.");
   }
 
   FlutterCompositor captured_compositor = *compositor;
@@ -2890,7 +2890,7 @@ FlutterEngineResult FlutterEngineSendPointerEvent(
   const FlutterPointerEvent* current = pointers;
 
   for (size_t i = 0; i < events_count; ++i) {
-    flutter::PointerData pointer_data;
+    flutter::PointerData pointer_data{};
     pointer_data.Clear();
     // this is currely in use only on android embedding.
     pointer_data.embedder_id = 0;
@@ -3043,7 +3043,7 @@ FlutterEngineResult FlutterEngineSendKeyEvent(FLUTTER_API_SYMBOL(FlutterEngine)
 
   const char* character = SAFE_ACCESS(event, character, nullptr);
 
-  flutter::KeyData key_data;
+  flutter::KeyData key_data{};
   key_data.Clear();
   key_data.timestamp = static_cast<uint64_t>(SAFE_ACCESS(event, timestamp, 0));
   key_data.type = MapKeyEventType(

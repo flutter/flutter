@@ -231,11 +231,18 @@ abstract class WebParagraphPainter {
             // TODO(jlavrova): We use calculateBlock in several places and it may need to calculate the rect height
             // differently for background blocks (to include the entire line height instead of just the text height).
             // I correct the value in place for now, but it may need to be fixed in calculateBlock itself.
-            final correctedTargetRect = ui.Rect.fromLTWH(
+            final double baseline = offset.dy + line.baseline;
+            final correctedTargetRect = ui.Rect.fromLTRB(
               targetRect.left,
-              targetRect.top,
-              targetRect.width,
-              block.multipliedHeight,
+              baseline -
+                  (line.usesRawAscent
+                      ? block.rawFontBoundingBoxAscent
+                      : block.multipliedFontBoundingBoxAscent),
+              targetRect.right,
+              baseline +
+                  (line.usesRawDescent
+                      ? block.rawFontBoundingBoxDescent
+                      : block.multipliedFontBoundingBoxDescent),
             );
             _paintBlockBackground(canvas, correctedTargetRect, block.style.background!, transform);
           case StyleElements.decorations:

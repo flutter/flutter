@@ -663,14 +663,14 @@ class Rasterizer final : public SnapshotDelegate,
 
   // |SnapshotDelegate|
   void MakeImpellerSnapshot(
-      sk_sp<DisplayList> display_list,
+      SnapshotDisplayListProvider provider,
       DlISize picture_size,
       std::function<void(std::shared_ptr<impeller::Texture>)> callback,
       SnapshotPixelFormat pixel_format) override;
 
   // |SnapshotDelegate|
   std::shared_ptr<impeller::Texture> MakeImpellerSnapshotSync(
-      sk_sp<DisplayList> display_list,
+      SnapshotDisplayListProvider provider,
       DlISize picture_size,
       SnapshotPixelFormat pixel_format) override;
 

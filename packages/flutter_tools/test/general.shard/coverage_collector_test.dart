@@ -10,6 +10,7 @@ import 'package:flutter_tools/src/test/coverage_collector.dart';
 import 'package:flutter_tools/src/test/test_device.dart' show TestDevice;
 import 'package:flutter_tools/src/test/test_time_recorder.dart';
 import 'package:stream_channel/stream_channel.dart' show StreamChannel;
+import 'package:test/fake.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../src/common.dart';
@@ -797,7 +798,7 @@ FakeVmServiceHost createFakeVmServiceHostWithFooAndBar({
   );
 }
 
-class TestTestDevice extends TestDevice {
+class TestTestDevice extends Fake implements TestDevice {
   @override
   Future<void> get finished => Future<void>.delayed(const Duration(seconds: 1));
 
