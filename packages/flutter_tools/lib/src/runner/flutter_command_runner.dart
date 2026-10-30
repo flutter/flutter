@@ -94,6 +94,9 @@ class FlutterCommandRunner extends CommandRunner<void> {
 
   final bool _verboseHelp;
 
+  static const _kDaemonCommandName = 'daemon';
+  static const _kUpgradeCommandName = 'upgrade';
+
   @override
   ArgParser get argParser => _argParser;
   ArgParser _argParser;
@@ -452,8 +455,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
   /// }
   /// ```
   Future<bool> _shouldCheckForUpdates(ArgResults topLevelResults) async {
-    final Stdio stdio = _toolContext.stdio;
-    final BotDetector botDetector = _toolContext.botDetector;
+    final ToolContext(:BotDetector botDetector, :Stdio stdio) = _toolContext;
     // Check if the user has explicitly requested a version check.
     final bool versionCheckFlag =
         topLevelResults[FlutterGlobalOptions.kVersionCheckFlag] as bool? ?? false;
@@ -464,7 +466,10 @@ class FlutterCommandRunner extends CommandRunner<void> {
     }
 
     // Running the "upgrade" command is already checking, don't check twice.
-    if (topLevelResults.command?.name == 'upgrade') {
+    // The "daemon" command is a non-interactive JSON-RPC server and should not
+    // run git version checks unless explicitly requested.
+    final String? commandName = topLevelResults.command?.name;
+    if (commandName == _kUpgradeCommandName || commandName == _kDaemonCommandName) {
       return false;
     }
 
@@ -599,10 +604,12 @@ class FlutterCommandRunner extends CommandRunner<void> {
           _extensionManager?.disable();
         }
 
-        // Required to support `flutter --version` before artifacts are cached.
-        await cache.updateAll(<DevelopmentArtifact>{DevelopmentArtifact.informative});
+        if (topLevelResults.command?.name != _kDaemonCommandName) {
+          // Required to support `flutter --version` before artifacts are cached.
+          await cache.updateAll(<DevelopmentArtifact>{DevelopmentArtifact.informative});
+          flutterVersion.ensureVersionFile();
+        }
 
-        flutterVersion.ensureVersionFile();
         if (await _shouldCheckForUpdates(topLevelResults)) {
           await flutterVersion.checkFlutterVersionFreshness();
         }

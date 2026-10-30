@@ -248,6 +248,20 @@ void main() {
       },
     );
 
+    testWithoutContext('can parse messages when stream contains malformed UTF-8 bytes', () async {
+      final inputStream = Stream<List<int>>.fromIterable(<List<int>>[
+        testCommandBinary(10),
+        <int>[0xff, 0xfe, 0xfd, 0x0a],
+        <int>[...utf8.encode('[{"id":20,"method":"'), 0xff, ...utf8.encode('"}]\n')],
+      ]);
+      final converter = DaemonInputStreamConverter(inputStream);
+      final Stream<DaemonMessage> outputStream = converter.convertedStream;
+      final List<DaemonMessage> outputs = await outputStream.toList();
+      expect(outputs, hasLength(2));
+      expect(outputs[0].data, testCommand(10));
+      expect(outputs[1].data, <String, Object?>{'id': 20, 'method': '\uFFFD'});
+    });
+
     testWithoutContext(
       'can parse multiple messages even when they are split in multiple packets',
       () async {
