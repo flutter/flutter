@@ -244,11 +244,19 @@ Hello!
       );
       device = FlutterTesterDevice(
         'flutter-tester',
-        fileSystem: fileSystem,
-        processManager: fakeProcessManager,
-        artifacts: artifacts,
-        logger: BufferLogger.test(),
-        flutterVersion: FakeFlutterVersion(),
+        toolContext: FakeToolContext(
+          artifacts: artifacts,
+          cache: Cache.test(processManager: fakeProcessManager),
+          config: Config.test(),
+          flutterVersion: FakeFlutterVersion(),
+          fs: fileSystem,
+          logger: BufferLogger.test(),
+          platform: FakePlatform(),
+          processManager: fakeProcessManager,
+        ),
+        analytics: const NoOpAnalytics(),
+        buildSystem: buildSystem,
+        buildTargets: const BuildTargetsImpl(),
       );
       final app = FlutterTesterApp.fromCurrentDirectory(fileSystem);
       final completer = Completer<void>();

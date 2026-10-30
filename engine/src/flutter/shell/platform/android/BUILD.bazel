@@ -13,6 +13,7 @@ load("//build_defs/dart:snapshot.bzl", "bin_to_assembly")
 load("//build_defs/dist:zip_bundle.bzl", "zip_bundle")
 load("//build_defs/gn:gn_action.bzl", "gn_action", "gn_generated_file")
 load("//build_defs/java:robolectric.bzl", "android_test_apk", "java_classes", "robolectric_tests")
+load("//build_defs/testing:native_symbols.bzl", "check_forbidden_native_symbols")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -101,7 +102,7 @@ cc_test(
         "-Wno-unused-variable",  # from :flutter_shell_native_src
         "-Wno-inconsistent-missing-override",  # from //flutter/third_party/googletest:gmock
     ],
-    local_defines = FLUTTER_LOCAL_DEFINES,
+    local_defines = FLUTTER_LOCAL_DEFINES + ["TESTING"],
     target_compatible_with = select({
         "@platforms//os:android": [],
         "//conditions:default": ["@platforms//:incompatible"],
@@ -695,6 +696,16 @@ gn_action(
     }),
 )
 
+check_forbidden_native_symbols(
+    name = "check_native_symbols",
+    library = "$root_out_dir/libflutter.so",
+    target_compatible_with = select({
+        "@platforms//os:android": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [":flutter_shell_native"],
+)
+
 gn_action(
     name = "flutter_shell_java",
     srcs = [
@@ -1126,52 +1137,52 @@ gn_action(
         "//conditions:default": [],
     }) + ["$(execpath :gen_android_build_config_java)"],
     build_outputs = select({
-        ":when_is_android_and_flutter_runtime_mode_debug": ["flutter_embedding_debug.jar"],
+        "//engine/src/flutter/common:runtime_mode_debug": ["flutter_embedding_debug.jar"],
         "//conditions:default": [],
     }) + select({
-        ":when_is_android_and_flutter_runtime_mode_profile": ["flutter_embedding_profile.jar"],
+        "//engine/src/flutter/common:runtime_mode_profile": ["flutter_embedding_profile.jar"],
         "//conditions:default": [],
     }) + select({
-        ":when_is_android_and_flutter_runtime_mode_release": ["flutter_embedding_release.jar"],
+        "//engine/src/flutter/common:runtime_mode_release": ["flutter_embedding_release.jar"],
         "//conditions:default": [],
     }) + select({
-        ":when_is_android_and_flutter_runtime_mode_jit_release": ["flutter_embedding_jit_release.jar"],
+        "//engine/src/flutter/common:runtime_mode_jit_release": ["flutter_embedding_jit_release.jar"],
         "//conditions:default": [],
     }) + select({
-        ":when_is_android_and_flutter_runtime_mode_debug": ["flutter_embedding_debug.jar.md5.stamp"],
+        "//engine/src/flutter/common:runtime_mode_debug": ["flutter_embedding_debug.jar.md5.stamp"],
         "//conditions:default": [],
     }) + select({
-        ":when_is_android_and_flutter_runtime_mode_profile": ["flutter_embedding_profile.jar.md5.stamp"],
+        "//engine/src/flutter/common:runtime_mode_profile": ["flutter_embedding_profile.jar.md5.stamp"],
         "//conditions:default": [],
     }) + select({
-        ":when_is_android_and_flutter_runtime_mode_release": ["flutter_embedding_release.jar.md5.stamp"],
+        "//engine/src/flutter/common:runtime_mode_release": ["flutter_embedding_release.jar.md5.stamp"],
         "//conditions:default": [],
     }) + select({
-        ":when_is_android_and_flutter_runtime_mode_jit_release": ["flutter_embedding_jit_release.jar.md5.stamp"],
+        "//engine/src/flutter/common:runtime_mode_jit_release": ["flutter_embedding_jit_release.jar.md5.stamp"],
         "//conditions:default": [],
     }) + select({
-        ":when_is_android_and_flutter_runtime_mode_debug": ["flutter_embedding_debug-sources.jar"],
+        "//engine/src/flutter/common:runtime_mode_debug": ["flutter_embedding_debug-sources.jar"],
         "//conditions:default": [],
     }) + select({
-        ":when_is_android_and_flutter_runtime_mode_profile": ["flutter_embedding_profile-sources.jar"],
+        "//engine/src/flutter/common:runtime_mode_profile": ["flutter_embedding_profile-sources.jar"],
         "//conditions:default": [],
     }) + select({
-        ":when_is_android_and_flutter_runtime_mode_release": ["flutter_embedding_release-sources.jar"],
+        "//engine/src/flutter/common:runtime_mode_release": ["flutter_embedding_release-sources.jar"],
         "//conditions:default": [],
     }) + select({
-        ":when_is_android_and_flutter_runtime_mode_jit_release": ["flutter_embedding_jit_release-sources.jar"],
+        "//engine/src/flutter/common:runtime_mode_jit_release": ["flutter_embedding_jit_release-sources.jar"],
         "//conditions:default": [],
     }) + select({
-        ":when_is_android_and_flutter_runtime_mode_debug": ["flutter_embedding_debug-sources.jar.md5.stamp"],
+        "//engine/src/flutter/common:runtime_mode_debug": ["flutter_embedding_debug-sources.jar.md5.stamp"],
         "//conditions:default": [],
     }) + select({
-        ":when_is_android_and_flutter_runtime_mode_profile": ["flutter_embedding_profile-sources.jar.md5.stamp"],
+        "//engine/src/flutter/common:runtime_mode_profile": ["flutter_embedding_profile-sources.jar.md5.stamp"],
         "//conditions:default": [],
     }) + select({
-        ":when_is_android_and_flutter_runtime_mode_release": ["flutter_embedding_release-sources.jar.md5.stamp"],
+        "//engine/src/flutter/common:runtime_mode_release": ["flutter_embedding_release-sources.jar.md5.stamp"],
         "//conditions:default": [],
     }) + select({
-        ":when_is_android_and_flutter_runtime_mode_jit_release": ["flutter_embedding_jit_release-sources.jar.md5.stamp"],
+        "//engine/src/flutter/common:runtime_mode_jit_release": ["flutter_embedding_jit_release-sources.jar.md5.stamp"],
         "//conditions:default": [],
     }),
     inputs = [
@@ -1296,16 +1307,16 @@ gn_action(
         ":when_current_cpu_riscv64_and_flutter_runtime_mode_jit_release": ["$(built riscv64_jit_release.jar)"],
         "//conditions:default": [],
     }) + ["--dist_jar"] + select({
-        ":when_is_android_and_flutter_runtime_mode_debug": ["$(built flutter_embedding_debug.jar)"],
+        "//engine/src/flutter/common:runtime_mode_debug": ["$(built flutter_embedding_debug.jar)"],
         "//conditions:default": [],
     }) + select({
-        ":when_is_android_and_flutter_runtime_mode_profile": ["$(built flutter_embedding_profile.jar)"],
+        "//engine/src/flutter/common:runtime_mode_profile": ["$(built flutter_embedding_profile.jar)"],
         "//conditions:default": [],
     }) + select({
-        ":when_is_android_and_flutter_runtime_mode_release": ["$(built flutter_embedding_release.jar)"],
+        "//engine/src/flutter/common:runtime_mode_release": ["$(built flutter_embedding_release.jar)"],
         "//conditions:default": [],
     }) + select({
-        ":when_is_android_and_flutter_runtime_mode_jit_release": ["$(built flutter_embedding_jit_release.jar)"],
+        "//engine/src/flutter/common:runtime_mode_jit_release": ["$(built flutter_embedding_jit_release.jar)"],
         "//conditions:default": [],
     }) + ["--native_lib"] + select({
         "//engine/src/flutter/build/bazel:stripped_enabled": [
@@ -1477,6 +1488,7 @@ gn_action(
         "//conditions:default": ["@platforms//:incompatible"],
     }),
     deps = [
+        ":check_native_symbols",
         ":flutter_shell_java",
         ":flutter_shell_native",
         ":pom_content_hash_embedding",
@@ -2782,7 +2794,10 @@ zip_bundle(
         "@platforms//os:android": [],
         "//conditions:default": ["@platforms//:incompatible"],
     }),
-    deps = [":flutter_shell_native"],
+    deps = [
+        ":check_native_symbols",
+        ":flutter_shell_native",
+    ],
 )
 
 zip_bundle(
@@ -6053,42 +6068,6 @@ selects.config_setting_group(
         "@platforms//os:android",
         "//engine/src/flutter/common:not_runtime_mode_release",
         "//engine/src/flutter/common:not_runtime_mode_jit_release",
-    ],
-)
-
-# `is_android && flutter_runtime_mode == "debug"`, for the select()s of this file.
-selects.config_setting_group(
-    name = "when_is_android_and_flutter_runtime_mode_debug",
-    match_all = [
-        "@platforms//os:android",
-        "//engine/src/flutter/common:runtime_mode_debug",
-    ],
-)
-
-# `is_android && flutter_runtime_mode == "profile"`, for the select()s of this file.
-selects.config_setting_group(
-    name = "when_is_android_and_flutter_runtime_mode_profile",
-    match_all = [
-        "@platforms//os:android",
-        "//engine/src/flutter/common:runtime_mode_profile",
-    ],
-)
-
-# `is_android && flutter_runtime_mode == "release"`, for the select()s of this file.
-selects.config_setting_group(
-    name = "when_is_android_and_flutter_runtime_mode_release",
-    match_all = [
-        "@platforms//os:android",
-        "//engine/src/flutter/common:runtime_mode_release",
-    ],
-)
-
-# `is_android && flutter_runtime_mode == "jit_release"`, for the select()s of this file.
-selects.config_setting_group(
-    name = "when_is_android_and_flutter_runtime_mode_jit_release",
-    match_all = [
-        "@platforms//os:android",
-        "//engine/src/flutter/common:runtime_mode_jit_release",
     ],
 )
 
