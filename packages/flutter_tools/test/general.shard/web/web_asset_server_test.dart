@@ -24,6 +24,7 @@ import 'package:flutter_tools/src/web/web_constants.dart';
 import 'package:shelf/shelf.dart';
 
 import '../../src/common.dart';
+import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
 
 const kTransparentImage = <int>[
@@ -99,7 +100,6 @@ void main() {
   late FileSystem fileSystem;
 
   setUp(() {
-    Cache.flutterRoot = getFlutterRoot();
     fileSystem = MemoryFileSystem.test();
     fileSystem.file('lib/main.dart').createSync(recursive: true);
     fileSystem.file('web/index.html')
@@ -448,6 +448,7 @@ void main() {
         null,
         toolContext: FakeToolContext(
           artifacts: Artifacts.test(),
+          cache: Cache.test(processManager: FakeProcessManager.any()),
           config: Config.test(),
           fs: fileSystem,
           flutterVersion: FakeFlutterVersion(),
@@ -482,6 +483,7 @@ void main() {
           null,
           toolContext: FakeToolContext(
             artifacts: Artifacts.test(),
+            cache: Cache.test(processManager: FakeProcessManager.any()),
             config: Config.test(),
             fs: fileSystem,
             flutterVersion: FakeFlutterVersion(),
@@ -515,6 +517,7 @@ void main() {
         null,
         toolContext: FakeToolContext(
           artifacts: Artifacts.test(),
+          cache: Cache.test(processManager: FakeProcessManager.any()),
           config: Config.test(),
           fs: fileSystem,
           flutterVersion: FakeFlutterVersion(),
@@ -549,6 +552,7 @@ void main() {
           null,
           toolContext: FakeToolContext(
             artifacts: Artifacts.test(),
+            cache: Cache.test(processManager: FakeProcessManager.any()),
             config: Config.test(),
             fs: fileSystem,
             flutterVersion: FakeFlutterVersion(),
@@ -582,6 +586,7 @@ void main() {
         null,
         toolContext: FakeToolContext(
           artifacts: Artifacts.test(),
+          cache: Cache.test(processManager: FakeProcessManager.any()),
           config: Config.test(),
           fs: fileSystem,
           flutterVersion: FakeFlutterVersion(),
@@ -613,6 +618,7 @@ void main() {
         null,
         toolContext: FakeToolContext(
           artifacts: Artifacts.test(),
+          cache: Cache.test(processManager: FakeProcessManager.any()),
           config: Config.test(),
           fs: fileSystem,
           flutterVersion: FakeFlutterVersion(),
@@ -644,6 +650,7 @@ void main() {
         null,
         toolContext: FakeToolContext(
           artifacts: Artifacts.test(),
+          cache: Cache.test(processManager: FakeProcessManager.any()),
           config: Config.test(),
           fs: fileSystem,
           flutterVersion: FakeFlutterVersion(),
@@ -679,6 +686,7 @@ void main() {
         null,
         toolContext: FakeToolContext(
           artifacts: Artifacts.test(),
+          cache: Cache.test(processManager: FakeProcessManager.any()),
           config: Config.test(),
           fs: fileSystem,
           flutterVersion: FakeFlutterVersion(),
@@ -720,6 +728,7 @@ void main() {
         null,
         toolContext: FakeToolContext(
           artifacts: Artifacts.test(),
+          cache: Cache.test(processManager: FakeProcessManager.any()),
           config: Config.test(),
           fs: fileSystem,
           flutterVersion: FakeFlutterVersion(),
@@ -773,6 +782,7 @@ void main() {
           null,
           toolContext: FakeToolContext(
             artifacts: Artifacts.test(),
+            cache: Cache.test(processManager: FakeProcessManager.any()),
             config: Config.test(),
             fs: fileSystem,
             flutterVersion: FakeFlutterVersion(),
@@ -890,6 +900,7 @@ void main() {
           null,
           toolContext: FakeToolContext(
             artifacts: Artifacts.test(),
+            cache: Cache.test(processManager: FakeProcessManager.any()),
             config: Config.test(),
             fs: windowsFileSystem,
             flutterVersion: FakeFlutterVersion(),
@@ -1067,6 +1078,7 @@ void main() {
               null,
               toolContext: FakeToolContext(
                 artifacts: Artifacts.test(),
+                cache: Cache.test(processManager: FakeProcessManager.any()),
                 config: Config.test(),
                 fs: fileSystem,
                 flutterVersion: FakeFlutterVersion(),

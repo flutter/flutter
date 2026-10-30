@@ -66,7 +66,7 @@ class AttachCommand extends FlutterCommand {
   AttachCommand({
     required this._buildSystem,
     required this._buildTargets,
-    required ToolContext super.toolContext,
+    required super.toolContext,
     required this._xcode,
     HotRunnerFactory? hotRunnerFactory,
     super.verboseHelp = false,

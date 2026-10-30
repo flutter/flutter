@@ -908,6 +908,7 @@ void main() {
             appleContext: FakeAppleContext(),
             buildSystem: globals.buildSystem,
             buildTargets: globals.buildTargets,
+            deviceManager: testDeviceManager,
             toolContext: const DelegatingToolContext(),
           ).requiredArtifacts,
           unorderedEquals(<DevelopmentArtifact>{
@@ -923,6 +924,7 @@ void main() {
             appleContext: FakeAppleContext(),
             buildSystem: globals.buildSystem,
             buildTargets: globals.buildTargets,
+            deviceManager: testDeviceManager,
             toolContext: const DelegatingToolContext(),
           ).requiredArtifacts,
           unorderedEquals(<DevelopmentArtifact>{
@@ -941,6 +943,7 @@ void main() {
             appleContext: FakeAppleContext(),
             buildSystem: globals.buildSystem,
             buildTargets: globals.buildTargets,
+            deviceManager: testDeviceManager,
             toolContext: const DelegatingToolContext(),
           ).requiredArtifacts,
           unorderedEquals(<DevelopmentArtifact>{
@@ -959,6 +962,7 @@ void main() {
             appleContext: FakeAppleContext(),
             buildSystem: globals.buildSystem,
             buildTargets: globals.buildTargets,
+            deviceManager: testDeviceManager,
             toolContext: const DelegatingToolContext(),
           ).requiredArtifacts,
           unorderedEquals(<DevelopmentArtifact>{
@@ -2443,7 +2447,8 @@ server:
 }
 
 class TestDeviceManager extends DeviceManager {
-  TestDeviceManager({required super.logger});
+  TestDeviceManager({required super.logger, FileSystem? fileSystem})
+    : super(fileSystem: fileSystem ?? MemoryFileSystem.test());
   List<Device> devices = <Device>[];
 
   @override

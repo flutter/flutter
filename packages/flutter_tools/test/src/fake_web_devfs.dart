@@ -15,6 +15,7 @@ import 'package:flutter_tools/src/base/net.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/tools/shader_compiler.dart';
+import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/convert.dart';
@@ -26,10 +27,10 @@ import 'package:flutter_tools/src/web/chrome.dart';
 import 'package:flutter_tools/src/web/compile.dart';
 import 'package:flutter_tools/src/web/devfs_config.dart';
 import 'package:package_config/package_config.dart';
-import 'package:process/process.dart';
 import 'package:test/fake.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
+import 'fake_process_manager.dart';
 import 'fakes.dart';
 
 /// Helper function to create a [WebDevFS] with sensible testbed defaults.
@@ -59,6 +60,7 @@ WebDevFS createWebDevFS({
   FlutterVersion? flutterVersion,
   Logger? logger,
   Platform? platform,
+  Cache? cache,
   ProcessManager? processManager,
   ToolContext? toolContext,
   bool testMode = true,
@@ -88,6 +90,7 @@ WebDevFS createWebDevFS({
         toolContext ??
         FakeToolContext(
           artifacts: artifacts ?? globals.artifacts!,
+          cache: cache ?? Cache.test(processManager: FakeProcessManager.any()),
           config: config ?? globals.config,
           fs: fileSystem ?? globals.fs,
           flutterVersion: flutterVersion ?? globals.flutterVersion,

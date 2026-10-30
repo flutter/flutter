@@ -68,7 +68,7 @@ class BuildSwiftPackage extends BuildSubCommand {
     required this._codesign,
     required this._featureFlags,
     required this._templateRenderer,
-    required ToolContext super.toolContext,
+    required super.toolContext,
     required super.verboseHelp,
     required this._xcode,
   }) : super(logger: toolContext.logger) {
@@ -120,9 +120,6 @@ class BuildSwiftPackage extends BuildSubCommand {
   final FeatureFlags _featureFlags;
   final DarwinAddToAppCodesigning _codesign;
   final CocoaPods _cocoaPods;
-
-  @override
-  ToolContext get toolContext => super.toolContext!;
 
   @override
   bool get supported => toolContext.platform.isMacOS;
@@ -210,7 +207,7 @@ class BuildSwiftPackage extends BuildSubCommand {
     analytics: _analytics,
     buildSystem: _buildSystem,
     cocoaPods: _cocoaPods,
-    flutterRoot: Cache.flutterRoot!,
+    flutterRoot: toolContext.cache.flutterRoot,
     project: project,
     templateRenderer: _templateRenderer,
     toolContext: toolContext,
@@ -2182,4 +2179,12 @@ class BuildSwiftPackageUtils {
   final TemplateRenderer templateRenderer;
   final ToolContext toolContext;
   final Xcode xcode;
+
+  Artifacts get artifacts => toolContext.artifacts;
+  Cache get cache => toolContext.cache;
+  FileSystem get fileSystem => toolContext.fs;
+  FlutterVersion get flutterVersion => toolContext.flutterVersion;
+  Logger get logger => toolContext.logger;
+  Platform get platform => toolContext.platform;
+  ProcessManager get processManager => toolContext.processManager;
 }
