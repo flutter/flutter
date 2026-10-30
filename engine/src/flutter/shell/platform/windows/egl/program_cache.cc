@@ -425,18 +425,24 @@ std::optional<std::vector<uint8_t>> ProgramCache::ReadEntry(
     const std::string& key) const {
   TRACE_EVENT0("flutter", "ProgramCache::Load");
   const std::filesystem::path path = EntryPath(key);
-  // Readers never block a writer that replaces the entry or evicts it.
+  // Readers never block a writer that evicts the entry. Replacing it fails
+  // while a reader has it open, and the old entry stays.
   constexpr DWORD kShare =
       FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE;
   bool can_modify = true;
   HANDLE handle = ::CreateFileW(
       path.c_str(), GENERIC_READ | FILE_WRITE_ATTRIBUTES | DELETE, kShare,
       nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
-  if (handle == INVALID_HANDLE_VALUE &&
-      ::GetLastError() == ERROR_ACCESS_DENIED) {
-    can_modify = false;
-    handle = ::CreateFileW(path.c_str(), GENERIC_READ, kShare, nullptr,
-                           OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
+  if (handle == INVALID_HANDLE_VALUE) {
+    // Without the right to refresh or delete the entry, still read it. Another
+    // process, such as a virus scanner, can hold it open without sharing
+    // write or delete access.
+    const DWORD error = ::GetLastError();
+    if (error == ERROR_ACCESS_DENIED || error == ERROR_SHARING_VIOLATION) {
+      can_modify = false;
+      handle = ::CreateFileW(path.c_str(), GENERIC_READ, kShare, nullptr,
+                             OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
+    }
   }
   ScopedHandle file(handle);
   if (!file.is_valid()) {

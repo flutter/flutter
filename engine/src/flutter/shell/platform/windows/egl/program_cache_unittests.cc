@@ -462,6 +462,43 @@ TEST(ProgramCacheTest, RecreatesAFolderDeletedWhileRunning) {
   EXPECT_EQ(Load(reopened, MakeKey('b')), MakeValue(100, 15));
 }
 
+TEST(ProgramCacheTest, LoadsAnEntryAnotherProcessHoldsOpen) {
+  TemporaryFolder directory;
+  ProgramCache cache(MakeOptions(PathOf(directory)));
+  Store(cache, MakeKey('a'), MakeValue(100, 16));
+  // As a virus scanner or a backup does: shared for reading only.
+  HANDLE scanner = ::CreateFileW(EntryPath(cache, MakeKey('a')).c_str(),
+                                 GENERIC_READ, FILE_SHARE_READ, nullptr,
+                                 OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
+  ASSERT_NE(scanner, INVALID_HANDLE_VALUE);
+  fml::ScopedCleanupClosure close([scanner]() { ::CloseHandle(scanner); });
+  EXPECT_EQ(Load(cache, MakeKey('a')), MakeValue(100, 16));
+}
+
+TEST(ProgramCacheTest, FailedReplaceKeepsAnEntryAndNoTemporaryFile) {
+  TemporaryFolder directory;
+  ProgramCache cache(MakeOptions(PathOf(directory)));
+  Store(cache, MakeKey('a'), MakeValue(100, 17));
+  {
+    // A reader's handle, opened as ReadEntry opens it, blocks the replace.
+    HANDLE reader =
+        ::CreateFileW(EntryPath(cache, MakeKey('a')).c_str(),
+                      GENERIC_READ | FILE_WRITE_ATTRIBUTES | DELETE,
+                      FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
+                      nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
+    ASSERT_NE(reader, INVALID_HANDLE_VALUE);
+    fml::ScopedCleanupClosure close([reader]() { ::CloseHandle(reader); });
+    Store(cache, MakeKey('a'), MakeValue(100, 18));
+  }
+  const std::optional<std::vector<uint8_t>> loaded = Load(cache, MakeKey('a'));
+  ASSERT_TRUE(loaded.has_value());
+  EXPECT_TRUE(*loaded == MakeValue(100, 17) || *loaded == MakeValue(100, 18));
+  for (const auto& item :
+       std::filesystem::directory_iterator(cache.version_directory())) {
+    EXPECT_NE(item.path().extension().wstring(), L".tmp");
+  }
+}
+
 TEST(ProgramCacheTest, ThreadsCanStoreAndLoadAtTheSameTime) {
   TemporaryFolder directory;
   ProgramCache::Options options = MakeOptions(PathOf(directory));
