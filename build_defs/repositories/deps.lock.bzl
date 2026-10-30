@@ -43,6 +43,7 @@ VARS = {
     "dart_webdriver_rev": "8e5c611ea242efdc9f597a8a37c38a9c586120ee",
     "dart_webkit_inspection_protocol_rev": "2c255f2a153239d009385774f12eb57e1c3056eb",
     "download_android_deps": "host_os == \"mac\" or (host_os == \"linux\" and host_cpu == \"x64\")",
+    "download_bazelisk": False,
     "download_dart_sdk": True,
     "download_emsdk": False,
     "download_esbuild": True,
@@ -691,6 +692,15 @@ CIPD_DEPS = {
             },
         ],
         "condition": "download_android_deps",
+    },
+    "engine/src/flutter/third_party/bazelisk": {
+        "packages": [
+            {
+                "package": "infra/3pp/tools/bazelisk/${platform}",
+                "version": "version:3@1.30.0",
+            },
+        ],
+        "condition": "download_bazelisk",
     },
     "engine/src/flutter/third_party/cpython3": {
         "packages": [

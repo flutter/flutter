@@ -25,6 +25,10 @@
 !/MODULE.bazel.lock
 /user.bazelrc
 /bazel-*
+# A CI bot's Bazel state (the output root, bazelisk's download of Bazel),
+# kept across builds in the bot's checkout cache; see
+# engine/src/flutter/build/bazel/ci.md.
+/.bazel_ci/
 
 # IntelliJ related
 *.iml
