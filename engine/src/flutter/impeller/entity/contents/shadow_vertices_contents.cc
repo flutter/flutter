@@ -4,8 +4,6 @@
 
 #include "shadow_vertices_contents.h"
 
-#include <format>
-
 #include "fml/logging.h"
 #include "impeller/base/validation.h"
 #include "impeller/core/formats.h"

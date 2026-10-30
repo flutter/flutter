@@ -5,7 +5,6 @@
 // This file is run as part of a reduced test set in CI on Mac and Windows
 // machines.
 @Tags(<String>['reduced-test-set'])
-@TestOn('!chrome')
 library;
 
 import 'package:flutter/rendering.dart';
@@ -45,6 +44,9 @@ void main() {
         child: ColorFiltered(
           colorFilter: sepia,
           child: TestWidgetsApp(
+            // Set the text color explicitly so the golden renders the same on
+            // every platform, since the default text color differs on the web.
+            textStyle: TextStyle(color: debugWhite),
             home: ColoredBox(
               color: debugWhite,
               child: Column(

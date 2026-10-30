@@ -201,6 +201,7 @@ if (enable_unittests) {
       "//flutter/testing:skia",
       "//flutter/testing:testing_lib",
       "//flutter/third_party/googletest:gtest",
+      "//third_party/abseil-cpp/absl/strings",
     ]
 
     if (!defined(defines)) {

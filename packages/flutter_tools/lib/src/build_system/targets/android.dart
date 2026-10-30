@@ -4,8 +4,10 @@
 
 import '../../artifacts.dart';
 import '../../base/build.dart';
+import '../../base/common.dart';
 import '../../base/deferred_component.dart';
 import '../../base/file_system.dart';
+import '../../base/os.dart';
 import '../../build_info.dart';
 import '../../devfs.dart';
 import '../../isolated/native_assets/dart_hook_result.dart';
@@ -240,6 +242,31 @@ class AndroidAot extends AotSnapshotBase {
       outputs.add(environment.fileSystem.file(manifestPath));
     }
     final buildMode = BuildMode.fromCliName(buildModeEnvironment);
+
+    // The Flutter SDK does not include gen_snapshot for Linux arm64 hosts
+    // targeting Android. Fail with an actionable message instead of a
+    // ProcessException, but still allow a gen_snapshot placed at the expected
+    // path to be used. The cached artifacts keep gen_snapshot in a directory
+    // named after the host platform.
+    final FileSystem fileSystem = environment.fileSystem;
+    final String genSnapshotPath = environment.artifacts.getArtifactPath(
+      Artifact.genSnapshot,
+      platform: targetPlatform,
+      mode: buildMode,
+    );
+    final String genSnapshotHost = fileSystem.path.basename(
+      fileSystem.path.dirname(genSnapshotPath),
+    );
+    if (genSnapshotHost == HostPlatform.linux_arm64.cliName &&
+        !fileSystem.file(genSnapshotPath).existsSync()) {
+      throwToolExit(
+        'Building Android apps in ${buildMode.cliName} mode is not supported on Linux arm64 '
+        'hosts because the Flutter SDK does not include gen_snapshot for this host '
+        '(expected at $genSnapshotPath).\n'
+        'See https://github.com/flutter/flutter/issues/75864 for details.',
+      );
+    }
+
     final dartObfuscation = environment.defines[kDartObfuscation] == 'true';
     final String? codeSizeDirectory = environment.defines[kCodeSizeDirectory];
 

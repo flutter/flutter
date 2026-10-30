@@ -4,7 +4,7 @@
 
 #include "vertices_contents.h"
 
-#include <format>
+#include <string>
 
 #include "fml/logging.h"
 #include "impeller/base/validation.h"
@@ -17,6 +17,7 @@
 #include "impeller/entity/geometry/vertices_geometry.h"
 #include "impeller/geometry/color.h"
 #include "impeller/renderer/render_pass.h"
+#include "third_party/abseil-cpp/absl/strings/str_cat.h"
 
 namespace impeller {
 
@@ -146,8 +147,8 @@ bool VerticesSimpleBlendContents::Render(const ContentContext& renderer,
     using FS = PorterDuffBlendPipeline::FragmentShader;
 
 #ifdef IMPELLER_DEBUG
-    pass.SetCommandLabel(std::format("DrawVertices Porterduff Blend ({})",
-                                     BlendModeToString(blend_mode)));
+    pass.SetCommandLabel(absl::StrCat("DrawVertices Porterduff Blend (",
+                                      BlendModeToString(blend_mode), ")"));
 #endif  // IMPELLER_DEBUG
     pass.SetVertexBuffer(std::move(geometry_result.vertex_buffer));
 
@@ -181,8 +182,8 @@ bool VerticesSimpleBlendContents::Render(const ContentContext& renderer,
   using FS = VerticesUber1Shader::FragmentShader;
 
 #ifdef IMPELLER_DEBUG
-  pass.SetCommandLabel(std::format("DrawVertices Advanced Blend ({})",
-                                   BlendModeToString(blend_mode)));
+  pass.SetCommandLabel(absl::StrCat("DrawVertices Advanced Blend (",
+                                    BlendModeToString(blend_mode), ")"));
 #endif  // IMPELLER_DEBUG
   pass.SetVertexBuffer(std::move(geometry_result.vertex_buffer));
 

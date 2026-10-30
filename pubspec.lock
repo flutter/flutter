@@ -238,10 +238,10 @@ packages:
     dependency: "direct main"
     description:
       name: cupertino_ui
-      sha256: a47c4e7c66fd7444a063a602597fceb238f705c3f6b1322bc0053d0a2638ee6e
+      sha256: e003b87afde18cb396ec15928c7894063d64af04462c68df9a1404c461316dd2
       url: "https://pub.dev"
     source: hosted
-    version: "1.1.4"
+    version: "1.1.5"
   dap:
     dependency: transitive
     description:
@@ -706,10 +706,10 @@ packages:
     dependency: "direct main"
     description:
       name: material_ui
-      sha256: e4031746f96c8316864d9b92bce375f1320a36ed56e166307e1e1bda9d90b4ab
+      sha256: feb289df1e5f9ed9522f9fe3d909432a7f7bc76943f16abad09f80a16cd25196
       url: "https://pub.dev"
     source: hosted
-    version: "1.8.0"
+    version: "1.9.0"
   meta:
     dependency: "direct main"
     description:

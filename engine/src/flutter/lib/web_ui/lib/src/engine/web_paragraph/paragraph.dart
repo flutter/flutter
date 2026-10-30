@@ -879,11 +879,79 @@ class TextSpan extends ParagraphSpan {
 ///
 /// See: https://chromestatus.com/feature/5075532483657728
 class WebParagraph implements ui.Paragraph {
-  WebParagraph(this.paragraphStyle, this.spans, this.text);
+  WebParagraph(this.paragraphStyle, List<ParagraphSpan> styleSpans, this.text)
+    : _styleSpans = styleSpans;
 
   final WebParagraphStyle paragraphStyle;
-  final List<ParagraphSpan> spans;
   final String text;
+
+  // Spans as pushed through the builder. Only read by _resolveSpans.
+  final List<ParagraphSpan> _styleSpans;
+
+  // Paragraph-level UAX #9 regions shared between span splitting and BiDi run extraction.
+  late final List<BidiRegion> bidiRegions = canvasKit.Bidi.getBidiRegions(
+    text,
+    paragraphStyle.textDirection,
+  );
+
+  /// Spans split at BiDi region boundaries, each with a single resolved direction.
+  late final List<ParagraphSpan> spans = _resolveSpans();
+
+  // Splits text spans at paragraph-level UAX #9 region boundaries so each sub-span has a
+  // single resolved textDirection.
+  List<ParagraphSpan> _resolveSpans() {
+    // Empty or placeholder-only paragraphs have no UAX #9 text regions to split across.
+    if (_styleSpans.isEmpty || bidiRegions.isEmpty) {
+      return _styleSpans;
+    }
+    final resolvedSpans = <ParagraphSpan>[];
+    var regionIndex = 0;
+    for (final ParagraphSpan span in _styleSpans) {
+      assert(span.isNotEmpty);
+      // Placeholders occupy a single U+FFFC code unit and do not measure text via Canvas2D.
+      if (span is PlaceholderSpan) {
+        resolvedSpans.add(span);
+        continue;
+      }
+      final textSpan = span as TextSpan;
+      // Skip BiDi regions that end before this span (such as regions on preceding placeholders).
+      while (regionIndex < bidiRegions.length && bidiRegions[regionIndex].end <= textSpan.start) {
+        regionIndex++;
+      }
+      for (
+        var i = regionIndex;
+        i < bidiRegions.length && bidiRegions[i].start < textSpan.end;
+        i++
+      ) {
+        final BidiRegion region = bidiRegions[i];
+        final int start = math.max(textSpan.start, region.start);
+        final int end = math.min(textSpan.end, region.end);
+        // UAX #9 even embedding levels resolve to LTR and odd levels to RTL. Assigning the
+        // paragraph-resolved direction per sub-span prevents Canvas2D from re-running BiDi in
+        // isolation and flipping neutral characters between same-direction spans.
+        final ui.TextDirection regionDirection = region.level.isEven
+            ? ui.TextDirection.ltr
+            : ui.TextDirection.rtl;
+        // Reuse the existing TextSpan when it already lies within a single matching BiDi region.
+        if (start == textSpan.start &&
+            end == textSpan.end &&
+            textSpan.textDirection == regionDirection) {
+          resolvedSpans.add(textSpan);
+        } else {
+          resolvedSpans.add(
+            TextSpan(
+              start: start,
+              end: end,
+              style: textSpan.style,
+              text: text.substring(start, end),
+              textDirection: regionDirection,
+            ),
+          );
+        }
+      }
+    }
+    return resolvedSpans;
+  }
 
   @override
   double alphabeticBaseline = 0;

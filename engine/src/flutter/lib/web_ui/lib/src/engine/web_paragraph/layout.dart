@@ -148,12 +148,8 @@ class TextLayout {
   void extractBidiRuns() {
     assert(bidiRuns.isEmpty);
 
-    final List<BidiRegion> regions = canvasKit.Bidi.getBidiRegions(
-      paragraph.text,
-      paragraph.paragraphStyle.textDirection,
-    );
-
-    for (final region in regions) {
+    // Reuse the paragraph-level BiDi regions already computed for cluster extraction.
+    for (final BidiRegion region in paragraph.bidiRegions) {
       // Regions operate in text indexes, not cluster indexes (one cluster can contain several text points)
       // We need to convert one into another
       final ClusterRange clusterRange = _mapping.toClusterRange(region.start, region.end);
@@ -368,7 +364,9 @@ class TextLayout {
         );
       }
 
-      for (final ParagraphSpan span in paragraph.spans) {
+      // Within an RTL BiDi run, logical spans progress from right to left, so iterate
+      // in reverse logical order to append visual blocks from left to right.
+      for (final ParagraphSpan span in bidiRun.isLtr ? paragraph.spans : paragraph.spans.reversed) {
         final bool isOverlapping = bidiLineTextRange.overlapsWith(span.start, span.end);
 
         if (!isOverlapping) {

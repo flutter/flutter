@@ -97,6 +97,7 @@ class BuildCommand extends FlutterCommand {
       BuildIOSCommand(
         appleContext: appleContext,
         buildSystem: buildSystem,
+        templateRenderer: templateRenderer,
         toolContext: toolContext,
         verboseHelp: verboseHelp,
       ),
@@ -139,6 +140,7 @@ class BuildCommand extends FlutterCommand {
       BuildIOSArchiveCommand(
         appleContext: appleContext,
         buildSystem: buildSystem,
+        templateRenderer: templateRenderer,
         toolContext: toolContext,
         verboseHelp: verboseHelp,
       ),
@@ -161,8 +163,10 @@ class BuildCommand extends FlutterCommand {
     );
     _addSubcommand(
       BuildMacosCommand(
+        appleContext: appleContext,
         buildSystem: buildSystem,
         featureFlags: featureFlags,
+        templateRenderer: templateRenderer,
         toolContext: toolContext,
         verboseHelp: verboseHelp,
       ),
