@@ -103,9 +103,7 @@ def main() -> int:
   elif VARIANT.endswith('_x64') or VARIANT.endswith('_x64_tester'):
     _force_symlink(SDK_ROOT, os.path.join(OUT_DIR, 'fuchsia-sdk'))
     _force_symlink(IMAGES_ROOT, os.path.join(OUT_DIR, 'fuchsia-images'))
-    sys.argv.append(
-        '--orchestrate-config=' + os.path.join(os.path.dirname(__file__), 'orchestrate_x64.json')
-    )
+    sys.argv.append('--orchestrate')
 
   sys.argv.append('--logs-dir=' + os.environ.get('FLUTTER_LOGS_DIR', '/tmp/log'))
   with open(os.path.join(os.path.dirname(__file__), 'test_suites.yaml'), 'r') as file:
