@@ -32,6 +32,8 @@
 /// `mac_host_debug`, the configuration, the install and the suite alike.
 library;
 
+import 'dart:convert';
+
 import 'package:engine_build_configs/engine_build_configs.dart';
 import 'package:path/path.dart' as p;
 
@@ -926,14 +928,92 @@ List<BuilderBuild> builderBuilds(Map<String, BuilderConfig> configs) {
 List<Build> _buildsOf(Map<String, BuilderConfig> configs, BuilderHost host) {
   final prefix = host == BuilderHost.linux ? 'linux_' : 'mac_';
   final developer = host == BuilderHost.linux ? 'linux/' : 'macos/';
-  final List<String> files = configs.keys.where((String f) => f.startsWith(prefix)).toList()
-    ..sort();
+  // The Bazel variants of builder files (*_bazel.json: the same builds with
+  // `--bazel`, for CI without a recipe change) mirror builds listed here
+  // already; they are checked against them instead (bazelVariantErrors).
+  final List<String> files =
+      configs.keys.where((String f) => f.startsWith(prefix) && !isBazelVariant(f)).toList()..sort();
   return <Build>[
     for (final file in files) ...configs[file]!.builds,
     if (configs.containsKey('local_engine'))
       for (final Build build in configs['local_engine']!.builds)
         if (build.name.startsWith(developer)) build,
   ];
+}
+
+/// Whether a builder file (by its name without `.json`, as
+/// BuildConfigLoader keys them) is the Bazel variant of another:
+/// `linux_unopt_bazel` of `linux_unopt`.
+bool isBazelVariant(String file) => file.endsWith('_bazel');
+
+/// The `tools/gn` flags of a build as a Bazel variant's are matched against
+/// the original's: `--x=v` as `--x v`, without the flags that say where the
+/// build runs (`--bazel`, `--rbe`, `--no-rbe`, `--goma`, `--no-goma`; what
+/// bazel_ci.py's normalized_flags does on the bot).
+List<String> _matchedFlags(List<String> gn) {
+  const infrastructure = <String>{'--bazel', '--rbe', '--no-rbe', '--goma', '--no-goma'};
+  final out = <String>[];
+  for (final flag in gn) {
+    if (infrastructure.contains(flag)) {
+      continue;
+    }
+    if (flag.startsWith('--') && flag.contains('=')) {
+      final int equals = flag.indexOf('=');
+      out
+        ..add(flag.substring(0, equals))
+        ..add(flag.substring(equals + 1));
+    } else {
+      out.add(flag);
+    }
+  }
+  return out;
+}
+
+/// The Bazel variants of the builder files (`<file>_bazel.json`) checked
+/// against the files they mirror: every build of a variant must carry
+/// `--bazel` and be, flags apart from the infrastructure ones, a build of
+/// the original file that has a Bazel configuration and an install (what
+/// `tools/gn --bazel` on the bot will look up in build/bazel/builds.json).
+/// Returns the errors, one line each.
+List<String> bazelVariantErrors(Map<String, BuilderConfig> configs, List<BuilderBuild> builds) {
+  final errors = <String>[];
+  for (final MapEntry<String, BuilderConfig> entry in configs.entries) {
+    if (!isBazelVariant(entry.key)) {
+      continue;
+    }
+    final variant = '${entry.key}.json';
+    final original = '${entry.key.substring(0, entry.key.length - '_bazel'.length)}.json';
+    if (!configs.containsKey(original.substring(0, original.length - 5))) {
+      errors.add('$variant: no $original to mirror');
+      continue;
+    }
+    for (final Build build in entry.value.builds) {
+      if (!build.gn.contains('--bazel')) {
+        errors.add("$variant's ${build.name} lacks --bazel");
+      }
+      final String wanted = _matchedFlags(build.gn).join(' ');
+      final Iterable<BuilderBuild> matches = builds.where(
+        (BuilderBuild b) => b.file == original && _matchedFlags(b.gn).join(' ') == wanted,
+      );
+      if (matches.isEmpty) {
+        errors.add("$variant's ${build.name} is no build of $original: its flags are `$wanted`");
+        continue;
+      }
+      final BuilderBuild mirrored = matches.first;
+      if (mirrored.unsupported.isNotEmpty) {
+        errors.add(
+          "$variant's ${build.name} mirrors $original's ${mirrored.name}, which has no Bazel "
+          'configuration (${mirrored.unsupported.join('; ')})',
+        );
+      } else if (mirrored.ninjaTargets.isEmpty) {
+        errors.add(
+          "$variant's ${build.name} mirrors $original's ${mirrored.name}, ninja's default "
+          'target, which has no install',
+        );
+      }
+    }
+  }
+  return errors;
 }
 
 /// The builder file's name (`linux_host_engine.json`) of [build].
@@ -1044,6 +1124,105 @@ String configsBazelrc(List<BuilderBuild> builds, {List<LeftOutBuild> leftOut = c
   return out.toString();
 }
 
+/// What a build's ninja targets amount to for its install: the Bazel labels
+/// of the targets to install (`resolved`), the targets with no Bazel
+/// counterpart yet (`missing`), and the test executables among them
+/// (`tests`), which `bazel test` runs from their own place rather than the
+/// install laying them.
+({List<String> resolved, List<String> missing, List<String> tests}) _installContents(
+  BuilderBuild build,
+  Map<String, Set<String>> convertedTargets, {
+  required Map<String, Set<String>> convertedTests,
+  required Map<String, String?> packageConditions,
+}) {
+  final resolved = <String>[];
+  final missing = <String>[];
+  final tests = <String>[];
+  for (final String target in build.ninjaTargets) {
+    // A build output named by its path (`clang_x64/gen_snapshot`, the AOT
+    // builders' host gen_snapshot): the target that produces it, when the
+    // build-output table has it.
+    final String? output = buildOutputLabels['$buildDirRoot/$target'];
+    if (output != null) {
+      if (!resolved.contains(output)) {
+        resolved.add(output);
+      }
+      continue;
+    }
+    if (_ninjaTargetLabel(target, convertedTests, build, packageConditions) != null) {
+      // A test executable: GN builds it for run_tests.py to run from the
+      // build directory; here `bazel test` runs it from its own place
+      // (the build's <name>_tests suite), and an install depending on a
+      // test would besides put the test in a second, trimmed
+      // configuration beside the one `bazel test` analyzes.
+      if (!tests.contains(target)) {
+        tests.add(target);
+      }
+      continue;
+    }
+    final String? label = _ninjaTargetLabel(target, convertedTargets, build, packageConditions);
+    if (label == null) {
+      missing.add(target);
+    } else if (!resolved.contains(label)) {
+      resolved.add(label);
+    }
+  }
+  return (resolved: resolved, missing: missing, tests: tests);
+}
+
+/// The Bazel suites of a build's tests, by what the builder file runs: each
+/// run_tests.py type (`engine` resolved to the converted tests of
+/// [runTestsEngineSuites] or the Mac's; the others [runTestsTypeSuites]),
+/// the test executables a step runs from the build directory (`binaries`),
+/// and the steps that run a script of the checkout (`scripts`,
+/// [checkoutScriptTests]); `missing` names what has no Bazel test yet.
+({
+  Map<String, List<String>> types,
+  List<String> binaries,
+  List<String> scripts,
+  List<String> missing,
+})
+_testSuites(
+  BuilderBuild build,
+  Map<String, Set<String>> convertedTests, {
+  required Map<String, String?> packageConditions,
+}) {
+  final binaries = <String>[];
+  final missing = <String>[];
+  for (final String name in build.binaryTests) {
+    final String? label = _ninjaTargetLabel(name, convertedTests, build, packageConditions);
+    if (label == null) {
+      missing.add('$name (run from the build directory)');
+    } else if (!binaries.contains(label)) {
+      binaries.add(label);
+    }
+  }
+  final types = <String, List<String>>{};
+  for (final String type in build.testTypes) {
+    final labels = <String>[];
+    if (type == 'engine') {
+      for (final String name
+          in build.host == BuilderHost.mac ? runTestsEngineSuitesMac : runTestsEngineSuites) {
+        final String? label = _ninjaTargetLabel(name, convertedTests, build, packageConditions);
+        if (label == null) {
+          missing.add('$name (engine)');
+        } else if (!labels.contains(label)) {
+          labels.add(label);
+        }
+      }
+    } else {
+      final List<String>? known = runTestsTypeSuites[type];
+      if (known == null) {
+        missing.add('the $type type');
+        continue;
+      }
+      labels.addAll(known);
+    }
+    types[type] = labels;
+  }
+  return (types: types, binaries: binaries, scripts: build.scriptTests, missing: missing);
+}
+
 /// The generated BUILD file: an `install` per build over the Bazel
 /// counterparts of its ninja targets, and a `test_suite` per build with
 /// tests over the suites that stand for its run_tests.py types.
@@ -1100,38 +1279,16 @@ String buildersBuildFile(
   final installs = <String, (BuilderBuild, String)>{};
   final suites = <String, (BuilderBuild, String)>{};
   for (final build in builds) {
-    final resolved = <String>[];
-    final missing = <String>[];
-    final tests = <String>[];
-    for (final String target in build.ninjaTargets) {
-      // A build output named by its path (`clang_x64/gen_snapshot`, the AOT
-      // builders' host gen_snapshot): the target that produces it, when the
-      // build-output table has it.
-      final String? output = buildOutputLabels['$buildDirRoot/$target'];
-      if (output != null) {
-        if (!resolved.contains(output)) {
-          resolved.add(output);
-        }
-        continue;
-      }
-      if (_ninjaTargetLabel(target, convertedTests, build, packageConditions) != null) {
-        // A test executable: GN builds it for run_tests.py to run from the
-        // build directory; here `bazel test` runs it from its own place
-        // (the build's <name>_tests suite), and an install depending on a
-        // test would besides put the test in a second, trimmed
-        // configuration beside the one `bazel test` analyzes.
-        if (!tests.contains(target)) {
-          tests.add(target);
-        }
-        continue;
-      }
-      final String? label = _ninjaTargetLabel(target, convertedTargets, build, packageConditions);
-      if (label == null) {
-        missing.add(target);
-      } else if (!resolved.contains(label)) {
-        resolved.add(label);
-      }
-    }
+    final (
+      resolved: List<String> resolved,
+      missing: List<String> missing,
+      tests: List<String> tests,
+    ) = _installContents(
+      build,
+      convertedTargets,
+      convertedTests: convertedTests,
+      packageConditions: packageConditions,
+    );
     out
       ..writeln()
       ..writeln('# ${build.file}: ${build.name}');
@@ -1216,6 +1373,78 @@ String buildersBuildFile(
   return out.toString();
 }
 
+/// `build/bazel/builds.json`: the builder files' builds as `tools/gn
+/// --bazel` and `testing/run_tests.py` read them on a CI bot that builds
+/// with Bazel (build/bazel/ci.md, beside bazel_ci.py, which reads it; not
+/// under ci/builders, whose every JSON file engine_build_configs loads as a
+/// builder file): one entry per build, by host, with the
+/// build's tools/gn flags as the builder file writes them (the key tools/gn
+/// matches its flags against, infrastructure flags aside), its build
+/// directory, its Bazel configuration and install target (null when the
+/// Bazel build cannot express the build, with the reasons), the ninja
+/// targets the recipe asks ninja for (each gets a phony edge), and the
+/// Bazel suites of its run_tests.py types, test executables and checkout
+/// scripts. Builds without a configuration or an install are listed all
+/// the same, so that tools/gn can say why it refuses them.
+String buildersJson(
+  List<BuilderBuild> builds,
+  Map<String, Set<String>> convertedTargets, {
+  Map<String, Set<String>> convertedTests = const <String, Set<String>>{},
+  Map<String, String?> packageConditions = const <String, String?>{},
+}) {
+  final hosts = <String, List<Map<String, Object?>>>{'linux': [], 'mac': []};
+  for (final build in builds) {
+    final (
+      resolved: List<String> resolved,
+      missing: List<String> missing,
+      tests: List<String> tests,
+    ) = _installContents(
+      build,
+      convertedTargets,
+      convertedTests: convertedTests,
+      packageConditions: packageConditions,
+    );
+    final (
+      types: Map<String, List<String>> types,
+      binaries: List<String> binaries,
+      scripts: List<String> scripts,
+      missing: List<String> missingTests,
+    ) = _testSuites(
+      build,
+      convertedTests,
+      packageConditions: packageConditions,
+    );
+    final bool configured = build.unsupported.isEmpty;
+    final bool installed = configured && build.ninjaTargets.isNotEmpty && resolved.isNotEmpty;
+    final bool hasSuite =
+        types.values.any((List<String> l) => l.isNotEmpty) ||
+        binaries.isNotEmpty ||
+        scripts.isNotEmpty;
+    hosts[build.host.name]!.add(<String, Object?>{
+      'file': build.file,
+      'name': build.name,
+      'gn': build.gn,
+      'build_directory': build.buildDirectory,
+      'config': configured ? build.configName : null,
+      'unsupported': build.unsupported,
+      'install': installed ? '//engine/src/flutter/ci/builders:${build.configName}' : null,
+      'ninja_targets': build.ninjaTargets,
+      'ninja_targets_not_built': missing,
+      'ninja_targets_tested': tests,
+      'tests': <String, Object?>{
+        'suite': hasSuite ? '//engine/src/flutter/ci/builders:${build.configName}_tests' : null,
+        'types': types,
+        'binaries': binaries,
+        'scripts': scripts,
+        'missing': missingTests,
+      },
+    });
+  }
+  const encoder = JsonEncoder.withIndent('  ');
+  return '${encoder.convert(<String, Object?>{'_comment': 'Generated from ci/builders/{linux,mac}_*.json by gn_to_bazel; do not edit. '
+      'The builds as tools/gn --bazel and testing/run_tests.py read them (build/bazel/ci.md).', 'builds': hosts})}\n';
+}
+
 /// `<name>_tests`: the suites of [build]'s run_tests.py types. [written]
 /// has the suites written so far by name: a second build of a name gets a
 /// note instead, when it runs the same.
@@ -1232,38 +1461,20 @@ void _testSuiteInto(
       build.otherTests.isEmpty) {
     return;
   }
-  final suites = <String>[...build.scriptTests];
-  final missing = <String>[];
-  for (final String name in build.binaryTests) {
-    final String? label = _ninjaTargetLabel(name, convertedTests, build, packageConditions);
-    if (label == null) {
-      missing.add('$name (run from the build directory)');
-    } else if (!suites.contains(label)) {
+  final (
+    types: Map<String, List<String>> types,
+    binaries: List<String> binaries,
+    scripts: List<String> scripts,
+    missing: List<String> missing,
+  ) = _testSuites(
+    build,
+    convertedTests,
+    packageConditions: packageConditions,
+  );
+  final suites = <String>[...scripts];
+  for (final label in <String>[...binaries, for (final List<String> t in types.values) ...t]) {
+    if (!suites.contains(label)) {
       suites.add(label);
-    }
-  }
-  for (final String type in build.testTypes) {
-    if (type == 'engine') {
-      for (final String name
-          in build.host == BuilderHost.mac ? runTestsEngineSuitesMac : runTestsEngineSuites) {
-        final String? label = _ninjaTargetLabel(name, convertedTests, build, packageConditions);
-        if (label == null) {
-          missing.add('$name (engine)');
-        } else if (!suites.contains(label)) {
-          suites.add(label);
-        }
-      }
-      continue;
-    }
-    final List<String>? known = runTestsTypeSuites[type];
-    if (known == null) {
-      missing.add('the $type type');
-      continue;
-    }
-    for (final String label in known) {
-      if (!suites.contains(label)) {
-        suites.add(label);
-      }
     }
   }
   out.writeln();

@@ -76,6 +76,16 @@ build --notrim_test_configuration
 build --disk_cache=~/.cache/flutter_engine_bazel
 build --experimental_disk_cache_gc_max_size=20G
 
+# CI's invocations (tools/gn --bazel and testing/run_tests.py on a bot,
+# through engine/src/flutter/build/bazel/bazel_ci.py; see ci.md there): plain
+# output for a log, a progress line every 30 s rather than five a second,
+# failures spelled out, every failing test's log in the output, and no disk
+# cache in the home directory (a bot's state lives under the checkout's
+# .bazel_ci, where bazel_ci.py puts the output root).
+common:ci --color=no --curses=no --show_timestamps --show_progress_rate_limit=30 --announce_rc
+build:ci --verbose_failures --disk_cache=
+test:ci --test_output=errors --keep_going --test_summary=short
+
 # The builders' configurations (`--config=host_debug`, ...), generated from
 # ci/builders/linux_*.json by tools/gn_to_bazel.
 import %workspace%/engine/src/flutter/ci/builders/configs.bazelrc

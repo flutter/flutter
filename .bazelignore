@@ -17,6 +17,7 @@ engine/src/flutter/third_party/ai
 engine/src/flutter/third_party/android_embedding_dependencies
 engine/src/flutter/third_party/android_tools
 engine/src/flutter/third_party/angle
+engine/src/flutter/third_party/bazelisk
 engine/src/flutter/third_party/benchmark
 engine/src/flutter/third_party/boringssl/src
 engine/src/flutter/third_party/brotli
