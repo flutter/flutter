@@ -57,6 +57,8 @@ targets:
     # local_engine schedules a bunch of other builds, so it's likely to timeout waiting for those builds to run.
     timeout: 180
 
+  # The debug unopt configurations most contributors build locally. Verified in
+  # presubmit; the rest of the local engine configurations are postsubmit-only.
   - name: Linux local_engine_builds_common
     enabled_branches:
       - master
