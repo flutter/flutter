@@ -54,6 +54,7 @@ load(
     "build_directory_path",
     "collected_build_directory_entries",
     "copy_entries",
+    "path_under_root",
 )
 load("//build_defs/web:wasm.bzl", "module_platform_transition")
 
@@ -536,29 +537,84 @@ gn_copy = rule(
     },
 )
 
-def gn_copy_tree(name, source, dest, exclude = "", **kwargs):
+def _gn_copy_tree_files_impl(ctx):
+    dest = build_directory_path(ctx.attr.dest)
+    if dest == None:
+        fail("%s: dest is a path under the build directory as GN writes it ($root_out_dir/<dir>), not %s" % (ctx.label, ctx.attr.dest))
+    dest = dest.rstrip("/")
+    entries = [(file, dest + "/" + path_under_root(file, ctx.attr.root, ctx.label)) for file in ctx.files.srcs]
+    return [
+        DefaultInfo(files = depset(ctx.files.srcs)),
+        BuildDirectoryInfo(entries = depset(entries)),
+    ]
+
+_gn_copy_tree_files = rule(
+    implementation = _gn_copy_tree_files_impl,
+    doc = "copy_tree() of a directory outside the package (gn_copy_tree): the directory's files as they are, " +
+          "each placed at its path under `dest` in the build directory.",
+    attrs = {
+        "srcs": attr.label_list(
+            allow_files = True,
+            mandatory = True,
+            doc = "The directory's files (a filegroup over them).",
+        ),
+        "root": attr.string(
+            doc = "The directory, relative to the root of the files' repository; empty for the repository itself.",
+        ),
+        "dest": attr.string(
+            mandatory = True,
+            doc = "GN's `dest`: a path under the build directory as GN wrote it (`$root_out_dir/dart-sdk`).",
+        ),
+    },
+)
+
+def gn_copy_tree(name, source, dest, exclude = "", srcs = None, **kwargs):
     """The Dart tree's copy_tree() (build/dart/copy_tree.gni): a directory's files into the build directory.
 
     copy_tree.py copies `source` recursively to `dest`, leaving out every
     file or directory whose name matches `exclude` (shutil.ignore_patterns:
-    one fnmatch pattern). Here it is a gn_copy of the directory's files as
-    they are, each placed at its path under `dest` (`{{source_target_relative}}`,
-    which build_directory.bzl expands against the package): the iOS
-    scenario app's Xcode project copied beside the build's App.framework.
-    The source is the package's own directory (`.`), the one form the
-    converted files use: a subdirectory would need its own relative paths.
+    one fnmatch pattern). Here each file is placed at its path under `dest`
+    (BuildDirectoryInfo), from one of two kinds of directory:
+
+    * The package's own (`source = "."`): a gn_copy of its files as they are,
+      placed through `{{source_target_relative}}`, which build_directory.bzl
+      expands against the package -- the iOS scenario app's Xcode project
+      copied beside the build's App.framework.
+    * A directory elsewhere, which a rule of this package cannot glob: the
+      files of `srcs`, a filegroup over it (the converter's directorySources),
+      with `source` the directory relative to the root of the files'
+      repository (zip_tree's `root`; empty for the repository itself) -- the
+      prebuilt Dart SDK, which build/dart's dart_sdk lays into the build
+      directory as dart-sdk/.
 
     Args:
       name: GN's target name.
-      source: GN's `source`: `.`, this package's directory.
+      source: GN's `source`: `.`, this package's directory; or, with `srcs`,
+        the directory the files are under, relative to their repository's
+        root.
       dest: GN's `dest`, a path under the build directory as GN wrote it
         (`$root_out_dir/ios_scenario_app`).
       exclude: GN's `exclude`, an fnmatch pattern over file and directory
-        names (`*.*framework`), or nothing.
-      **kwargs: gn_copy's other arguments (visibility, testonly, deps).
+        names (`*.*framework`), or nothing; for the package's own directory
+        (a filegroup's files are what it lists).
+      srcs: the files of a directory outside the package.
+      **kwargs: the rule's other arguments (visibility, testonly,
+        target_compatible_with; gn_copy's deps for the package's own
+        directory).
     """
+    if srcs != None:
+        if exclude:
+            fail("%s: gn_copy_tree's exclude applies to the package's own directory, not to srcs" % name)
+        _gn_copy_tree_files(
+            name = name,
+            srcs = srcs,
+            root = source,
+            dest = dest,
+            **kwargs
+        )
+        return
     if source != ".":
-        fail("%s: gn_copy_tree copies this package's directory alone (source = \".\"), not %s" % (name, source))
+        fail("%s: gn_copy_tree copies this package's directory (source = \".\") or the files of srcs, not %s" % (name, source))
     excludes = []
     if exclude:
         # The pattern names any file or directory at any depth.

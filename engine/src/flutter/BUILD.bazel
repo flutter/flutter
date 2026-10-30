@@ -4,7 +4,7 @@
 
 # Generated from //flutter/BUILD.gn by gn_to_bazel; do not edit.
 # Not converted: config, export_dynamic_symbols, export_dynamic_test_symbols.
-# Dependencies left out, having no Bazel counterpart yet: //flutter/build/dart:dart_sdk, //flutter/build/dart/test:gen_dartcli_call, //flutter/build/dart/test:gen_executable_call, //flutter/lib/gpu:gpu_unittests, //flutter/impeller/renderer/backend/vulkan:vulkan_android_apk_unittests, //flutter/impeller/toolkit/android:apk_unittests, //flutter/shell/platform/darwin/common:framework_common_unittests, //flutter/shell/platform/darwin/common:framework_common_swift_unittests, //flutter/shell/platform/darwin/macos:flutter_desktop_darwin_unittests, //flutter/shell/platform/darwin/macos:flutter_desktop_darwin_swift_unittests.
+# Dependencies left out, having no Bazel counterpart yet: //flutter/build/dart/test:gen_dartcli_call, //flutter/build/dart/test:gen_executable_call, //flutter/lib/gpu:gpu_unittests, //flutter/impeller/renderer/backend/vulkan:vulkan_android_apk_unittests, //flutter/impeller/toolkit/android:apk_unittests, //flutter/shell/platform/darwin/common:framework_common_unittests, //flutter/shell/platform/darwin/common:framework_common_swift_unittests, //flutter/shell/platform/darwin/macos:flutter_desktop_darwin_unittests, //flutter/shell/platform/darwin/macos:flutter_desktop_darwin_swift_unittests.
 
 load("@bazel_skylib//lib:selects.bzl", "selects")
 load("@rules_cc//cc:defs.bzl", "cc_library")
@@ -44,6 +44,7 @@ filegroup(
             # //flutter/lib/snapshot:generate_snapshot_bin will only build
             # gen_snapshot for the host and not the target.
             "//engine/src/flutter/build/bazel/dart_wrap:gen_snapshot",  # !is_fuchsia && !is_qnx && build_engine_artifacts
+            "//engine/src/flutter/build/dart:dart_sdk",  # !is_fuchsia && !is_qnx && build_engine_artifacts
             "//engine/src/flutter/flutter_frontend_server:frontend_server",  # !is_fuchsia && !is_qnx && build_engine_artifacts
             # Impeller artifacts - compiler and libtessellator
             "//engine/src/flutter/impeller/compiler:impellerc",  # !is_fuchsia && !is_qnx && build_engine_artifacts

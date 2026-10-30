@@ -33,7 +33,7 @@ directory in the filesystem's order; here the files come in Bazel's, sorted.
 """
 
 load("@engine_version//:version.bzl", "ENGINE_VERSION")
-load("//build_defs/gn:build_directory.bzl", "BuildDirectoryInfo", "build_directory_aspect", "collected_build_directory_entries", "shipped_file")
+load("//build_defs/gn:build_directory.bzl", "BuildDirectoryInfo", "build_directory_aspect", "collected_build_directory_entries", "path_under_root", "shipped_file")
 
 ZipTreeInfo = provider(
     doc = "The entries a zip_tree contributes to an archive.",
@@ -47,18 +47,9 @@ ZipBundleInfo = provider(
 )
 
 def _zip_tree_impl(ctx):
-    root = ctx.attr.root
     entries = []
     for file in ctx.files.srcs:
-        # short_path is relative to the main repository's root, with another
-        # repository's files under `../<repository>/`.
-        path = file.short_path
-        if path.startswith("../"):
-            path = path.split("/", 2)[2]
-        if root:
-            if not path.startswith(root + "/"):
-                fail("%s: %s is not under %s" % (ctx.label, file.short_path, root))
-            path = path[len(root) + 1:]
+        path = path_under_root(file, ctx.attr.root, ctx.label)
         entries.append((file, ctx.attr.destination + "/" + path if ctx.attr.destination else path))
     return [
         ZipTreeInfo(entries = entries),

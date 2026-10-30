@@ -1938,6 +1938,13 @@ enum TemplateArgumentKind {
   /// of another package cannot glob them.
   sourceDirectory,
 
+  /// A directory a macro copies whole (copy_tree's `source`): the package's
+  /// own, `.`, passed on as such for the macro to glob; or one of
+  /// [directorySources], whose filegroup joins [TemplateArgument.inputs]
+  /// with the directory's root in the attribute, as [sourceDirectory] has
+  /// it (the prebuilt Dart SDK of build/dart's dart_sdk).
+  directory,
+
   /// `{ source, destination }` scopes naming an archive's entries (a
   /// zip_bundle's `files`): the macro's dictionary of destination to the
   /// label of the file placed there, each source resolved to the target
@@ -2179,13 +2186,16 @@ const Map<String, TemplateMapping> templateMappings = <String, TemplateMapping>{
     files: true,
   ),
   // The Dart tree's copy_tree (build/dart/copy_tree.gni): a directory's
-  // files into the build directory, as a gn_copy placing each at its path
-  // under `dest` (build_defs/gn/gn_action.bzl's gn_copy_tree).
+  // files into the build directory, each placed at its path under `dest`
+  // (build_defs/gn/gn_action.bzl's gn_copy_tree): the package's own
+  // directory as a gn_copy of its files (the iOS scenario app's project),
+  // a directory of directorySources as its filegroup's files (the prebuilt
+  // Dart SDK, build/dart's dart_sdk).
   'copy_tree': TemplateMapping(
     '//build_defs/gn:gn_action.bzl',
     'gn_copy_tree',
     <String, TemplateArgument>{
-      'source': TemplateArgument('source', TemplateArgumentKind.scalar),
+      'source': TemplateArgument('source', TemplateArgumentKind.directory, inputs: 'srcs'),
       'dest': TemplateArgument('dest', TemplateArgumentKind.buildPath),
       'exclude': TemplateArgument('exclude', TemplateArgumentKind.scalar),
       'visibility': TemplateArgument('visibility', TemplateArgumentKind.ignored),

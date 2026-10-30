@@ -1,0 +1,44 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Generated from //flutter/build/dart/BUILD.gn by gn_to_bazel; do not edit.
+
+load("//build_defs/gn:gn_action.bzl", "gn_copy_tree")
+
+package(default_visibility = ["//visibility:public"])
+
+gn_copy_tree(
+    name = "dart_sdk",
+    srcs = ["//engine/src/flutter/build/bazel/dart_wrap:prebuilt_dart_sdk"],
+    dest = "$root_out_dir/dart-sdk",
+    source = "",
+    target_compatible_with = select({
+        "//engine/src/flutter/common:engine_artifacts": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+)
+
+# What GN has no words for; maintained in the converter's manifest
+# (tools/gn_to_bazel/lib/src/manifest.dart).
+
+# dart_pkg.py, GN's dart_pkg action's script, which build_defs/dart's
+# dart_pkg rule runs.
+exports_files(["tools/dart_pkg.py"])
+
+# What a wrapped GN build reads here: the templates, their scripts and the
+# test file, for //engine/src/flutter/build:gn_files (a glob does not enter
+# a package).
+filegroup(
+    name = "gn_files",
+    srcs = glob(
+        ["**"],
+        exclude = [
+            # Bazel's own files are not GN inputs.
+            "**/BUILD.bazel",
+            "**/__pycache__/**",
+            "**/*.pyc",
+        ],
+    ),
+    visibility = ["//engine/src/flutter/build:__pkg__"],
+)

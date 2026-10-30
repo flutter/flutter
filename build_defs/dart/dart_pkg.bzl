@@ -66,7 +66,7 @@ dart_pkg = rule(
             doc = "The copies that fill the package's lib/ (GN's deps), for install to find through this target.",
         ),
         "_script": attr.label(
-            default = "//engine/src/flutter/build:dart/tools/dart_pkg.py",
+            default = "//engine/src/flutter/build/dart:tools/dart_pkg.py",
             allow_single_file = True,
         ),
     } | PYTHON_ATTRS,
