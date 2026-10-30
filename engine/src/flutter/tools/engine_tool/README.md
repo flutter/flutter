@@ -95,7 +95,7 @@ configurations that are used only for local development and iteration in
 [`local_engine.json`](../../ci/builders/local_engine.json) and
 [`local_engine_common.json`](../../ci/builders/local_engine_common.json).
 `local_engine_common.json` holds the handful of debug unopt configurations most
-contributors build day to day and is verified on every PR; `local_engine.json`
+contributors build day to day and is verified on every PR. `local_engine.json`
 holds everything else and is only verified after merge. The builds specified in
 these files are referenced _by name_ as `--config`:
 
