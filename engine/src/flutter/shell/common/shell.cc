@@ -1310,6 +1310,19 @@ void Shell::OnPlatformViewSetAccessibilityFeatures(int32_t flags) {
 }
 
 // |PlatformView::Delegate|
+void Shell::OnPlatformViewSetAppLifecycleState(LifecycleState state) {
+  FML_DCHECK(is_set_up_);
+  FML_DCHECK(task_runners_.GetPlatformTaskRunner()->RunsTasksOnCurrentThread());
+
+  fml::TaskRunner::RunNowAndFlushMessages(
+      task_runners_.GetUITaskRunner(), [engine = engine_->GetWeakPtr(), state] {
+        if (engine) {
+          engine->SetAppLifecycleState(state);
+        }
+      });
+}
+
+// |PlatformView::Delegate|
 void Shell::OnPlatformViewRegisterTexture(
     std::shared_ptr<flutter::Texture> texture) {
   FML_DCHECK(is_set_up_);

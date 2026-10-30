@@ -246,6 +246,14 @@ class PlatformView {
     virtual void OnPlatformViewSetAccessibilityFeatures(int32_t flags) = 0;
 
     //--------------------------------------------------------------------------
+    /// @brief      Notifies the delegate that the embedder has changed the
+    ///             lifecycle state of the application.
+    ///
+    /// @param[in]  state  The lifecycle state.
+    ///
+    virtual void OnPlatformViewSetAppLifecycleState(LifecycleState state) = 0;
+
+    //--------------------------------------------------------------------------
     /// @brief      Notifies the delegate that the embedder has specified a
     ///             texture that it want the rasterizer to composite within the
     ///             Flutter layer tree. All textures must have a unique
@@ -523,6 +531,14 @@ class PlatformView {
   /// @param[in]  flags  The features to enable in the accessibility tree.
   ///
   virtual void SetAccessibilityFeatures(int32_t flags);
+
+  //----------------------------------------------------------------------------
+  /// @brief      Used by embedders to notify the framework that the lifecycle
+  ///             state of the application has changed.
+  ///
+  /// @param[in]  state  The lifecycle state.
+  ///
+  void SetAppLifecycleState(LifecycleState state);
 
   //----------------------------------------------------------------------------
   /// @brief      Used by the framework to tell the embedder to apply the

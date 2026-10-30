@@ -3,248 +3,93 @@
 // found in the LICENSE file.
 
 #include "flutter/shell/platform/linux/fl_window_state_monitor.h"
-#include "flutter/shell/platform/linux/fl_binary_messenger_private.h"
-#include "flutter/shell/platform/linux/public/flutter_linux/fl_string_codec.h"
-#include "flutter/shell/platform/linux/testing/fl_mock_binary_messenger.h"
+#include "flutter/shell/platform/embedder/test_utils/proc_table_replacement.h"
+#include "flutter/shell/platform/linux/fl_engine_private.h"
 #include "flutter/shell/platform/linux/testing/mock_gtk.h"
 
 #include "flutter/shell/platform/linux/testing/linux_test.h"
 #include "gtest/gtest.h"
 
+// MOCK_ENGINE_PROC is leaky by design
+// NOLINTBEGIN(clang-analyzer-core.StackAddressEscape)
+
 class FlWindowStateMonitorTest : public flutter::testing::LinuxTest {
  protected:
   void SetUp() override {
     gtk_init(0, nullptr);
-    messenger = fl_mock_binary_messenger_new();
+    StartEngine();
   }
 
-  ~FlWindowStateMonitorTest() {
-    fl_binary_messenger_shutdown(FL_BINARY_MESSENGER(messenger));
-    g_clear_object(&messenger);
+  // Checks changing a window from |old_state| to |new_state| sets the
+  // lifecycle state to |expected_state|.
+  void CheckStateChange(GdkWindowState old_state,
+                        GdkWindowState new_state,
+                        FlutterAppLifecycleState expected_state) {
+    EXPECT_CALL(mock_gtk, gdk_window_get_state)
+        .WillOnce(::testing::Return(old_state));
+
+    int call_count = 0;
+    fl_engine_get_embedder_api(engine)->SetAppLifecycleState =
+        MOCK_ENGINE_PROC(SetAppLifecycleState,
+                         ([&call_count, expected_state](
+                              auto engine, FlutterAppLifecycleState state) {
+                           call_count++;
+                           EXPECT_EQ(state, expected_state);
+                           return kSuccess;
+                         }));
+
+    GtkWindow* window = GTK_WINDOW(gtk_window_new(GTK_WINDOW_TOPLEVEL));
+    gtk_widget_show(GTK_WIDGET(window));
+    g_autoptr(FlWindowStateMonitor) monitor =
+        fl_window_state_monitor_new(engine, window);
+
+    GdkEvent event = {.window_state = {.new_window_state = new_state}};
+    gboolean handled;
+    g_signal_emit_by_name(window, "window-state-event", &event, &handled);
+    EXPECT_EQ(call_count, 1);
   }
 
-  FlMockBinaryMessenger* messenger = nullptr;
   ::testing::NiceMock<flutter::testing::MockGtk> mock_gtk;
 };
 
 TEST_F(FlWindowStateMonitorTest, GainFocus) {
-  EXPECT_CALL(mock_gtk, gdk_window_get_state)
-      .WillOnce(::testing::Return(static_cast<GdkWindowState>(0)));
-
-  gboolean called = TRUE;
-  fl_mock_binary_messenger_set_string_message_channel(
-      messenger, "flutter/lifecycle",
-      [](FlMockBinaryMessenger* messenger, GTask* task, FlValue* message,
-         gpointer user_data) {
-        gboolean* called = static_cast<gboolean*>(user_data);
-        *called = TRUE;
-        EXPECT_STREQ(fl_value_get_string(message), "AppLifecycleState.resumed");
-        return fl_value_new_string("");
-      },
-      &called);
-
-  GtkWindow* window = GTK_WINDOW(gtk_window_new(GTK_WINDOW_TOPLEVEL));
-  gtk_widget_show(GTK_WIDGET(window));
-  g_autoptr(FlWindowStateMonitor) monitor =
-      fl_window_state_monitor_new(FL_BINARY_MESSENGER(messenger), window);
-
-  GdkEvent event = {
-      .window_state = {.new_window_state = GDK_WINDOW_STATE_FOCUSED}};
-  gboolean handled;
-  g_signal_emit_by_name(window, "window-state-event", &event, &handled);
-  EXPECT_TRUE(called);
+  CheckStateChange(static_cast<GdkWindowState>(0), GDK_WINDOW_STATE_FOCUSED,
+                   kFlutterAppLifecycleStateResumed);
 }
 
 TEST_F(FlWindowStateMonitorTest, LoseFocus) {
-  EXPECT_CALL(mock_gtk, gdk_window_get_state)
-      .WillOnce(::testing::Return(GDK_WINDOW_STATE_FOCUSED));
-  gboolean called = TRUE;
-  fl_mock_binary_messenger_set_string_message_channel(
-      messenger, "flutter/lifecycle",
-      [](FlMockBinaryMessenger* messenger, GTask* task, FlValue* message,
-         gpointer user_data) {
-        gboolean* called = static_cast<gboolean*>(user_data);
-        *called = TRUE;
-        EXPECT_STREQ(fl_value_get_string(message),
-                     "AppLifecycleState.inactive");
-        return fl_value_new_string("");
-      },
-      &called);
-
-  GtkWindow* window = GTK_WINDOW(gtk_window_new(GTK_WINDOW_TOPLEVEL));
-  gtk_widget_show(GTK_WIDGET(window));
-  g_autoptr(FlWindowStateMonitor) monitor =
-      fl_window_state_monitor_new(FL_BINARY_MESSENGER(messenger), window);
-
-  GdkEvent event = {
-      .window_state = {.new_window_state = static_cast<GdkWindowState>(0)}};
-  gboolean handled;
-  g_signal_emit_by_name(window, "window-state-event", &event, &handled);
-  EXPECT_TRUE(called);
+  CheckStateChange(GDK_WINDOW_STATE_FOCUSED, static_cast<GdkWindowState>(0),
+                   kFlutterAppLifecycleStateInactive);
 }
 
 TEST_F(FlWindowStateMonitorTest, EnterIconified) {
-  EXPECT_CALL(mock_gtk, gdk_window_get_state)
-      .WillOnce(::testing::Return(static_cast<GdkWindowState>(0)));
-  gboolean called = TRUE;
-  fl_mock_binary_messenger_set_string_message_channel(
-      messenger, "flutter/lifecycle",
-      [](FlMockBinaryMessenger* messenger, GTask* task, FlValue* message,
-         gpointer user_data) {
-        gboolean* called = static_cast<gboolean*>(user_data);
-        *called = TRUE;
-        EXPECT_STREQ(fl_value_get_string(message), "AppLifecycleState.hidden");
-        return fl_value_new_string("");
-      },
-      &called);
-
-  GtkWindow* window = GTK_WINDOW(gtk_window_new(GTK_WINDOW_TOPLEVEL));
-  gtk_widget_show(GTK_WIDGET(window));
-  g_autoptr(FlWindowStateMonitor) monitor =
-      fl_window_state_monitor_new(FL_BINARY_MESSENGER(messenger), window);
-
-  GdkEvent event = {
-      .window_state = {.new_window_state = GDK_WINDOW_STATE_ICONIFIED}};
-  gboolean handled;
-  g_signal_emit_by_name(window, "window-state-event", &event, &handled);
-  EXPECT_TRUE(called);
+  CheckStateChange(static_cast<GdkWindowState>(0), GDK_WINDOW_STATE_ICONIFIED,
+                   kFlutterAppLifecycleStateHidden);
 }
 
 TEST_F(FlWindowStateMonitorTest, LeaveIconified) {
-  EXPECT_CALL(mock_gtk, gdk_window_get_state)
-      .WillOnce(::testing::Return(GDK_WINDOW_STATE_ICONIFIED));
-  gboolean called = TRUE;
-  fl_mock_binary_messenger_set_string_message_channel(
-      messenger, "flutter/lifecycle",
-      [](FlMockBinaryMessenger* messenger, GTask* task, FlValue* message,
-         gpointer user_data) {
-        gboolean* called = static_cast<gboolean*>(user_data);
-        *called = TRUE;
-        EXPECT_STREQ(fl_value_get_string(message),
-                     "AppLifecycleState.inactive");
-        return fl_value_new_string("");
-      },
-      &called);
-
-  GtkWindow* window = GTK_WINDOW(gtk_window_new(GTK_WINDOW_TOPLEVEL));
-  gtk_widget_show(GTK_WIDGET(window));
-  g_autoptr(FlWindowStateMonitor) monitor =
-      fl_window_state_monitor_new(FL_BINARY_MESSENGER(messenger), window);
-
-  GdkEvent event = {
-      .window_state = {.new_window_state = static_cast<GdkWindowState>(0)}};
-  gboolean handled;
-  g_signal_emit_by_name(window, "window-state-event", &event, &handled);
-  EXPECT_TRUE(called);
+  CheckStateChange(GDK_WINDOW_STATE_ICONIFIED, static_cast<GdkWindowState>(0),
+                   kFlutterAppLifecycleStateInactive);
 }
 
 TEST_F(FlWindowStateMonitorTest, LeaveIconifiedFocused) {
-  EXPECT_CALL(mock_gtk, gdk_window_get_state)
-      .WillOnce(::testing::Return(GDK_WINDOW_STATE_ICONIFIED));
-  gboolean called = TRUE;
-  fl_mock_binary_messenger_set_string_message_channel(
-      messenger, "flutter/lifecycle",
-      [](FlMockBinaryMessenger* messenger, GTask* task, FlValue* message,
-         gpointer user_data) {
-        gboolean* called = static_cast<gboolean*>(user_data);
-        *called = TRUE;
-        EXPECT_STREQ(fl_value_get_string(message), "AppLifecycleState.resumed");
-        return fl_value_new_string("");
-      },
-      &called);
-
-  GtkWindow* window = GTK_WINDOW(gtk_window_new(GTK_WINDOW_TOPLEVEL));
-  gtk_widget_show(GTK_WIDGET(window));
-  g_autoptr(FlWindowStateMonitor) monitor =
-      fl_window_state_monitor_new(FL_BINARY_MESSENGER(messenger), window);
-
-  GdkEvent event = {
-      .window_state = {.new_window_state = static_cast<GdkWindowState>(
-                           GDK_WINDOW_STATE_FOCUSED)}};
-  gboolean handled;
-  g_signal_emit_by_name(window, "window-state-event", &event, &handled);
-  EXPECT_TRUE(called);
+  CheckStateChange(GDK_WINDOW_STATE_ICONIFIED, GDK_WINDOW_STATE_FOCUSED,
+                   kFlutterAppLifecycleStateResumed);
 }
 
 TEST_F(FlWindowStateMonitorTest, EnterWithdrawn) {
-  EXPECT_CALL(mock_gtk, gdk_window_get_state)
-      .WillOnce(::testing::Return(static_cast<GdkWindowState>(0)));
-  gboolean called = TRUE;
-  fl_mock_binary_messenger_set_string_message_channel(
-      messenger, "flutter/lifecycle",
-      [](FlMockBinaryMessenger* messenger, GTask* task, FlValue* message,
-         gpointer user_data) {
-        gboolean* called = static_cast<gboolean*>(user_data);
-        *called = TRUE;
-        EXPECT_STREQ(fl_value_get_string(message), "AppLifecycleState.hidden");
-        return fl_value_new_string("");
-      },
-      &called);
-
-  GtkWindow* window = GTK_WINDOW(gtk_window_new(GTK_WINDOW_TOPLEVEL));
-  gtk_widget_show(GTK_WIDGET(window));
-  g_autoptr(FlWindowStateMonitor) monitor =
-      fl_window_state_monitor_new(FL_BINARY_MESSENGER(messenger), window);
-
-  GdkEvent event = {
-      .window_state = {.new_window_state = GDK_WINDOW_STATE_WITHDRAWN}};
-  gboolean handled;
-  g_signal_emit_by_name(window, "window-state-event", &event, &handled);
-  EXPECT_TRUE(called);
+  CheckStateChange(static_cast<GdkWindowState>(0), GDK_WINDOW_STATE_WITHDRAWN,
+                   kFlutterAppLifecycleStateHidden);
 }
 
 TEST_F(FlWindowStateMonitorTest, LeaveWithdrawn) {
-  EXPECT_CALL(mock_gtk, gdk_window_get_state)
-      .WillOnce(::testing::Return(GDK_WINDOW_STATE_WITHDRAWN));
-  gboolean called = TRUE;
-  fl_mock_binary_messenger_set_string_message_channel(
-      messenger, "flutter/lifecycle",
-      [](FlMockBinaryMessenger* messenger, GTask* task, FlValue* message,
-         gpointer user_data) {
-        gboolean* called = static_cast<gboolean*>(user_data);
-        *called = TRUE;
-        EXPECT_STREQ(fl_value_get_string(message),
-                     "AppLifecycleState.inactive");
-        return fl_value_new_string("");
-      },
-      &called);
-
-  GtkWindow* window = GTK_WINDOW(gtk_window_new(GTK_WINDOW_TOPLEVEL));
-  gtk_widget_show(GTK_WIDGET(window));
-  g_autoptr(FlWindowStateMonitor) monitor =
-      fl_window_state_monitor_new(FL_BINARY_MESSENGER(messenger), window);
-
-  GdkEvent event = {
-      .window_state = {.new_window_state = static_cast<GdkWindowState>(0)}};
-  gboolean handled;
-  g_signal_emit_by_name(window, "window-state-event", &event, &handled);
-  EXPECT_TRUE(called);
+  CheckStateChange(GDK_WINDOW_STATE_WITHDRAWN, static_cast<GdkWindowState>(0),
+                   kFlutterAppLifecycleStateInactive);
 }
 
 TEST_F(FlWindowStateMonitorTest, LeaveWithdrawnFocused) {
-  EXPECT_CALL(mock_gtk, gdk_window_get_state)
-      .WillOnce(::testing::Return(GDK_WINDOW_STATE_WITHDRAWN));
-  gboolean called = TRUE;
-  fl_mock_binary_messenger_set_string_message_channel(
-      messenger, "flutter/lifecycle",
-      [](FlMockBinaryMessenger* messenger, GTask* task, FlValue* message,
-         gpointer user_data) {
-        gboolean* called = static_cast<gboolean*>(user_data);
-        *called = TRUE;
-        EXPECT_STREQ(fl_value_get_string(message), "AppLifecycleState.resumed");
-        return fl_value_new_string("");
-      },
-      &called);
-
-  GtkWindow* window = GTK_WINDOW(gtk_window_new(GTK_WINDOW_TOPLEVEL));
-  gtk_widget_show(GTK_WIDGET(window));
-  g_autoptr(FlWindowStateMonitor) monitor =
-      fl_window_state_monitor_new(FL_BINARY_MESSENGER(messenger), window);
-
-  GdkEvent event = {
-      .window_state = {.new_window_state = static_cast<GdkWindowState>(
-                           GDK_WINDOW_STATE_FOCUSED)}};
-  gboolean handled;
-  g_signal_emit_by_name(window, "window-state-event", &event, &handled);
-  EXPECT_TRUE(called);
+  CheckStateChange(GDK_WINDOW_STATE_WITHDRAWN, GDK_WINDOW_STATE_FOCUSED,
+                   kFlutterAppLifecycleStateResumed);
 }
+
+// NOLINTEND(clang-analyzer-core.StackAddressEscape)

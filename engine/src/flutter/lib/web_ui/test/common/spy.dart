@@ -27,19 +27,6 @@ final class PlatformMessage {
   dynamic get methodArguments => methodCall.arguments;
 }
 
-/// A message that carries a plain string.
-///
-/// Messages of this type are coded using [StringCodec].
-final class PlatformStringMessage {
-  PlatformStringMessage(this.channel, this.string);
-
-  /// The name of the channel on which the message was sent.
-  final String channel;
-
-  /// The value of the string passed in the message.
-  final String string;
-}
-
 /// Intercepts platform messages sent from the engine to the framework.
 ///
 /// It holds all intercepted platform messages in a [messages] list that can
@@ -53,20 +40,13 @@ class PlatformMessagesSpy {
   /// List of intercepted method calls since the last [setUp] call.
   final List<PlatformMessage> messages = <PlatformMessage>[];
 
-  /// List of intercepted string messages since the last [setUp] call.
-  final List<PlatformStringMessage> strings = <PlatformStringMessage>[];
-
   /// Start spying on platform messages.
   ///
   /// This is typically called inside a test's `setUp` callback.
   void setUp() {
     assert(!_isActive);
     _callback = (String channel, ByteData? data, PlatformMessageResponseCallback? callback) {
-      if (channel == 'flutter/lifecycle') {
-        strings.add(PlatformStringMessage(channel, const StringCodec().decodeMessage(data!)));
-      } else {
-        messages.add(PlatformMessage(channel, const JSONMethodCodec().decodeMethodCall(data)));
-      }
+      messages.add(PlatformMessage(channel, const JSONMethodCodec().decodeMethodCall(data)));
     };
 
     _backup = PlatformDispatcher.instance.onPlatformMessage;
@@ -82,7 +62,6 @@ class PlatformMessagesSpy {
     assert(PlatformDispatcher.instance.onPlatformMessage == _callback);
     _callback = null;
     messages.clear();
-    strings.clear();
     PlatformDispatcher.instance.onPlatformMessage = _backup;
   }
 }

@@ -5,19 +5,25 @@
 package io.flutter.embedding.engine.systemchannels;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 import io.flutter.Log;
+import io.flutter.embedding.engine.FlutterJNI;
 import io.flutter.embedding.engine.dart.DartExecutor;
 import io.flutter.plugin.common.BasicMessageChannel;
 import io.flutter.plugin.common.StringCodec;
 import java.util.Locale;
 
 /**
- * A {@link BasicMessageChannel} that communicates lifecycle events to the framework.
+ * Communicates lifecycle events to the framework.
  *
  * <p>The activity listens to the Android lifecycle events, in addition to the focus events for
- * windows, and this channel combines that information to decide if the application is the inactive,
+ * windows, and this class combines that information to decide if the application is the inactive,
  * resumed, paused, or detached state.
+ *
+ * <p>When created with a {@link FlutterJNI} the state is sent directly to the engine. The
+ * constructors that send the state on the {@code flutter/lifecycle} platform channel are
+ * deprecated.
  */
 public class LifecycleChannel {
   private static final String TAG = "LifecycleChannel";
@@ -40,14 +46,37 @@ public class LifecycleChannel {
   private AppLifecycleState lastFlutterState = null;
   private boolean lastFocus = true;
 
-  @NonNull private final BasicMessageChannel<String> channel;
+  @Nullable private final FlutterJNI flutterJNI;
+  @Nullable private final BasicMessageChannel<String> channel;
 
+  /** Creates a {@code LifecycleChannel} that sends the lifecycle state directly to the engine. */
+  public LifecycleChannel(@NonNull FlutterJNI flutterJNI) {
+    this.flutterJNI = flutterJNI;
+    this.channel = null;
+  }
+
+  /**
+   * Creates a {@code LifecycleChannel} that sends the lifecycle state on the {@code
+   * flutter/lifecycle} platform channel.
+   *
+   * @deprecated The {@code flutter/lifecycle} platform channel is deprecated, use {@link
+   *     #LifecycleChannel(FlutterJNI)} instead.
+   */
+  @Deprecated
   public LifecycleChannel(@NonNull DartExecutor dartExecutor) {
     this(new BasicMessageChannel<String>(dartExecutor, CHANNEL_NAME, StringCodec.INSTANCE));
   }
 
+  /**
+   * Creates a {@code LifecycleChannel} that sends the lifecycle state on the given channel.
+   *
+   * @deprecated The {@code flutter/lifecycle} platform channel is deprecated, use {@link
+   *     #LifecycleChannel(FlutterJNI)} instead.
+   */
+  @Deprecated
   @VisibleForTesting
   public LifecycleChannel(@NonNull BasicMessageChannel<String> channel) {
+    this.flutterJNI = null;
     this.channel = channel;
   }
 
@@ -105,7 +134,12 @@ public class LifecycleChannel {
     }
     String message = "AppLifecycleState." + newState.name().toLowerCase(Locale.ROOT);
     Log.v(TAG, "Sending " + message + " message.");
-    channel.send(message);
+    if (flutterJNI != null) {
+      // The ordinal matches the engine's lifecycle state enum.
+      flutterJNI.setAppLifecycleState(newState.ordinal());
+    } else {
+      channel.send(message);
+    }
     lastFlutterState = newState;
   }
 

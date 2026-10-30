@@ -1095,6 +1095,28 @@ std::string FlutterWindowsEngine::GetExecutableName() const {
   return "Flutter";
 }
 
+void FlutterWindowsEngine::SetAppLifecycleState(AppLifecycleState state) {
+  FlutterAppLifecycleState embedder_state = kFlutterAppLifecycleStateDetached;
+  switch (state) {
+    case AppLifecycleState::kDetached:
+      embedder_state = kFlutterAppLifecycleStateDetached;
+      break;
+    case AppLifecycleState::kResumed:
+      embedder_state = kFlutterAppLifecycleStateResumed;
+      break;
+    case AppLifecycleState::kInactive:
+      embedder_state = kFlutterAppLifecycleStateInactive;
+      break;
+    case AppLifecycleState::kHidden:
+      embedder_state = kFlutterAppLifecycleStateHidden;
+      break;
+    case AppLifecycleState::kPaused:
+      embedder_state = kFlutterAppLifecycleStatePaused;
+      break;
+  }
+  embedder_api_.SetAppLifecycleState(engine_, embedder_state);
+}
+
 void FlutterWindowsEngine::UpdateAccessibilityFeatures() {
   UpdateHighContrastMode();
 }
@@ -1172,8 +1194,6 @@ void FlutterWindowsEngine::SetFlutterCursor(HCURSOR cursor) const {
 void FlutterWindowsEngine::OnChannelUpdate(std::string name, bool listening) {
   if (name == "flutter/platform" && listening) {
     lifecycle_manager_->BeginProcessingExit();
-  } else if (name == "flutter/lifecycle" && listening) {
-    lifecycle_manager_->BeginProcessingLifecycle();
   }
 }
 

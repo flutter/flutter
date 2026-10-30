@@ -63,6 +63,9 @@ FLUTTER_ASSERT_ARC
   return expectations;
 }
 
+// TODO(robert-ancell): The engine no longer sends lifecycle state on the
+// deprecated lifecycleChannel. If this test is re-enabled, observe the state
+// another way (e.g. from Dart via PlatformDispatcher.onAppLifecycleStateChanged).
 - (void)skip_testDismissedFlutterViewControllerNotRespondingToApplicationLifecycle {
   XCTestExpectation* engineStartedExpectation = [self expectationWithDescription:@"Engine started"];
   // Let the engine finish booting (at the end of which the channels are properly set-up) before
@@ -199,6 +202,9 @@ FLUTTER_ASSERT_ARC
   [engine destroyContext];
 }
 
+// TODO(robert-ancell): The engine no longer sends lifecycle state on the
+// deprecated lifecycleChannel. If this test is re-enabled, observe the state
+// another way (e.g. from Dart via PlatformDispatcher.onAppLifecycleStateChanged).
 - (void)skip_testFlutterViewControllerDetachingSendsApplicationLifecycle {
   XCTestExpectation* engineStartedExpectation = [self expectationWithDescription:@"Engine started"];
 

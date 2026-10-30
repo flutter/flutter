@@ -514,8 +514,7 @@ static void realize_cb(FlView* self) {
   GtkWidget* toplevel_window = gtk_widget_get_toplevel(GTK_WIDGET(self));
 
   self->window_state_monitor =
-      fl_window_state_monitor_new(fl_engine_get_binary_messenger(self->engine),
-                                  GTK_WINDOW(toplevel_window));
+      fl_window_state_monitor_new(self->engine, GTK_WINDOW(toplevel_window));
 
   // Handle requests by the user to close the application.
   g_signal_connect_object(toplevel_window, "delete-event",
