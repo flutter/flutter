@@ -147,6 +147,18 @@
                         "impeller",
                         "--engine-capture-core-dump"
                     ]
+                },
+                {
+                    "language": "python3",
+                    "name": "Impeller Vulkan synchronization validation tests",
+                    "script": "flutter/testing/run_tests.py",
+                    "parameters": [
+                        "--variant",
+                        "ci/host_debug_unopt_impeller_tests",
+                        "--type",
+                        "impeller-vulkan-sync-validation",
+                        "--engine-capture-core-dump"
+                    ]
                 }
             ]
         },

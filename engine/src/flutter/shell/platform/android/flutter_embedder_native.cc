@@ -560,7 +560,7 @@ void AndroidTaskRunners::SetThreadPriorityCallback(
       break;
     }
     case FlutterThreadPriority::kDisplay: {
-      fml::RequestAffinity(fml::CpuAffinity::kNotEfficiency);
+      fml::RequestAffinity(fml::CpuAffinity::kNotLittle);
       if (::setpriority(PRIO_PROCESS, kCurrentThreadPriorityTarget,
                         kAndroidDisplayThreadNiceValue) != 0) {
         FML_LOG(ERROR) << "Failed to set UI task runner priority";
@@ -568,7 +568,7 @@ void AndroidTaskRunners::SetThreadPriorityCallback(
       break;
     }
     case FlutterThreadPriority::kRaster: {
-      fml::RequestAffinity(fml::CpuAffinity::kNotEfficiency);
+      fml::RequestAffinity(fml::CpuAffinity::kNotLittle);
       if (::setpriority(PRIO_PROCESS, kCurrentThreadPriorityTarget,
                         kAndroidRasterThreadNiceValue) != 0) {
         if (::setpriority(PRIO_PROCESS, kCurrentThreadPriorityTarget,

@@ -67,6 +67,7 @@ import 'reporting/unified_analytics.dart';
 import 'resident_runner.dart';
 import 'run_hot.dart';
 import 'runner/local_engine.dart';
+import 'template.dart';
 import 'version.dart';
 import 'web/workflow.dart';
 import 'windows/visual_studio.dart';
@@ -183,16 +184,11 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
         config: globals.config,
       ),
       AndroidBuilder: () => AndroidGradleBuilder(
-        java: globals.java,
-        logger: globals.logger,
-        processManager: globals.processManager,
-        fileSystem: globals.fs,
-        artifacts: globals.artifacts!,
         analytics: globals.analytics,
-        gradleUtils: globals.gradleUtils!,
-        platform: globals.platform,
-        androidStudio: globals.androidStudio,
         androidSdk: globals.androidSdk,
+        androidStudio: globals.androidStudio,
+        gradleUtils: globals.gradleUtils!,
+        java: globals.java,
         toolContext: const GlobalToolContext(),
       ),
       AndroidLicenseValidator: () => AndroidLicenseValidator(
@@ -222,6 +218,7 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
           AndroidWorkflow(androidSdkBuilder: () => globals.androidSdk, featureFlags: featureFlags),
       ApplicationPackageFactory: () => FlutterApplicationPackageFactory(
         androidSdk: globals.androidSdk,
+        plistParser: globals.plistParser,
         toolContext: const GlobalToolContext(),
       ),
       Artifacts: () => CachedArtifacts(
@@ -234,6 +231,7 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
         return AssetBundleFactory.defaultInstance(
           logger: globals.logger,
           fileSystem: globals.fs,
+          flutterRoot: globals.cache.flutterRoot,
           platform: globals.platform,
         );
       },
@@ -251,12 +249,9 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
         stdio: globals.stdio,
       ),
       CocoaPods: () => CocoaPods(
-        fileSystem: globals.fs,
-        processManager: globals.processManager,
-        logger: globals.logger,
-        platform: globals.platform,
-        xcodeProjectInterpreter: globals.xcodeProjectInterpreter!,
         analytics: globals.analytics,
+        toolContext: const GlobalToolContext(),
+        xcodeProjectInterpreter: globals.xcodeProjectInterpreter!,
       ),
       CocoaPodsValidator: () => CocoaPodsValidator(globals.cocoaPods!, globals.userMessages),
       Config: () => Config(
@@ -266,6 +261,7 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
         platform: globals.platform,
       ),
       CustomDevicesConfig: () => CustomDevicesConfig(
+        cache: globals.cache,
         fileSystem: globals.fs,
         logger: globals.logger,
         platform: globals.platform,
@@ -282,8 +278,13 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
         logger: globals.logger,
         botDetector: globals.botDetector,
       ),
-      Doctor: () => Doctor(logger: globals.logger, clock: globals.systemClock),
-      DoctorValidatorsProvider: () => DoctorValidatorsProvider.defaultInstance,
+      Doctor: () =>
+          Doctor(cache: globals.cache, logger: globals.logger, clock: globals.systemClock),
+      DoctorValidatorsProvider: () => DoctorValidatorsProvider.create(
+        cache: globals.cache,
+        featureFlags: featureFlags,
+        platform: globals.platform,
+      ),
       EmulatorManager: () => EmulatorManager(
         androidWorkflow: androidWorkflow!,
         iosWorkflow: globals.iosWorkflow,
@@ -309,7 +310,7 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
         platform: globals.platform,
       ),
       FlutterVersion: () =>
-          FlutterVersion(fs: globals.fs, flutterRoot: Cache.flutterRoot!, git: globals.git),
+          FlutterVersion(fs: globals.fs, flutterRoot: globals.cache.flutterRoot, git: globals.git),
       Git: () => Git(currentPlatform: globals.platform, runProcessWith: globals.processUtils),
       GradleUtils: () => GradleUtils(
         operatingSystemUtils: globals.os,
@@ -320,9 +321,12 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
       HotRunnerConfig: () => HotRunnerConfig(),
       IOSSimulatorUtils: () => IOSSimulatorUtils(
         analytics: globals.analytics,
+        cocoaPods: globals.cocoaPods!,
         plistParser: globals.plistParser,
+        templateRenderer: globals.templateRenderer,
         toolContext: const GlobalToolContext(),
         xcode: globals.xcode!,
+        xcodeProjectInterpreter: globals.xcodeProjectInterpreter!,
       ),
       IOSWorkflow: () => IOSWorkflow(
         featureFlags: featureFlags,
@@ -342,7 +346,7 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
         logger: globals.logger,
         platform: globals.platform,
         fileSystem: globals.fs,
-        flutterRoot: Cache.flutterRoot!,
+        flutterRoot: globals.cache.flutterRoot,
       ),
       Logger: () => globals.platform.isWindows
           ? WindowsStdoutLogger(
@@ -385,15 +389,10 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
       ),
       ProcessUtils: () =>
           ProcessUtils(processManager: globals.processManager, logger: globals.logger),
-      Pub: () => Pub(
-        fileSystem: globals.fs,
-        logger: globals.logger,
-        processManager: globals.processManager,
-        botDetector: globals.botDetector,
-        platform: globals.platform,
-      ),
+      Pub: () => Pub(toolContext: const GlobalToolContext()),
       Stdio: () => Stdio(),
       SystemClock: () => const SystemClock(),
+      TemplatePathProvider: () => TemplatePathProvider(flutterRoot: globals.cache.flutterRoot),
       UserMessages: () => UserMessages(),
       VisualStudioValidator: () => VisualStudioValidator(
         userMessages: globals.userMessages,
@@ -403,24 +402,23 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
       WindowsWorkflow: () =>
           WindowsWorkflow(featureFlags: featureFlags, platform: globals.platform),
       Xcode: () => Xcode(
-        logger: globals.logger,
-        processManager: globals.processManager,
-        platform: globals.platform,
-        fileSystem: globals.fs,
+        toolContext: const GlobalToolContext(),
         xcodeProjectInterpreter: globals.xcodeProjectInterpreter!,
-        userMessages: globals.userMessages,
       ),
       XCDevice: () => XCDevice(
         analytics: globals.analytics,
+        cocoaPods: globals.cocoaPods!,
         iproxy: IProxy(
           artifacts: globals.artifacts!,
           logger: globals.logger,
           processManager: globals.processManager,
           dyLdLibEntry: globals.cache.dyLdLibEntry,
         ),
+        plistParser: globals.plistParser,
         templateRenderer: globals.templateRenderer,
         toolContext: const GlobalToolContext(),
         xcode: globals.xcode!,
+        xcodeProjectInterpreter: globals.xcodeProjectInterpreter!,
       ),
       XcodeProjectInterpreter: () => XcodeProjectInterpreter(
         analytics: globals.analytics,

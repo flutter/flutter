@@ -24,6 +24,7 @@ import 'base/version.dart';
 import 'base/yaml.dart';
 import 'build_info.dart';
 import 'bundle.dart' as bundle;
+import 'cache.dart';
 import 'cmake_project.dart';
 import 'context/tool_context.dart';
 import 'convert.dart';
@@ -63,6 +64,7 @@ class FlutterProjectFactory {
     required this._logger,
     this._config,
     this._featureFlags,
+    this._featureFlagsBuilder,
     this._plistParser,
     this._xcode,
     this._xcodeBuilder,
@@ -72,6 +74,7 @@ class FlutterProjectFactory {
 
   final Config? _config;
   final FeatureFlags? _featureFlags;
+  final FeatureFlags Function()? _featureFlagsBuilder;
   final FileSystem _fileSystem;
   final Logger _logger;
   final PlistParser? _plistParser;
@@ -90,6 +93,7 @@ class FlutterProjectFactory {
     final Directory? buildDirectory = config != null
         ? directory.childDirectory(getBuildDirectory(config, directory.fileSystem))
         : null;
+    final FeatureFlags? resolvedFeatureFlags = _featureFlags ?? _featureFlagsBuilder?.call();
     final Xcode? resolvedXcode = _xcode ?? _xcodeBuilder?.call();
     final XcodeProjectInterpreter? resolvedXcodeProjectInterpreter =
         _xcodeProjectInterpreter ?? _xcodeProjectInterpreterBuilder?.call();
@@ -110,7 +114,7 @@ class FlutterProjectFactory {
         manifest,
         exampleManifest,
         buildDirectory: buildDirectory,
-        featureFlags: _featureFlags,
+        featureFlags: resolvedFeatureFlags,
         plistParser: _plistParser,
         projectFactory: this,
         xcode: resolvedXcode,
@@ -133,7 +137,7 @@ class FlutterProjectFactory {
         manifest,
         exampleManifest,
         buildDirectory: buildDirectory,
-        featureFlags: _featureFlags,
+        featureFlags: resolvedFeatureFlags,
         plistParser: _plistParser,
         projectFactory: this,
         xcode: resolvedXcode,
@@ -652,8 +656,8 @@ class FlutterProject {
   /// such as not including dev-only dependencies.
   Future<void> regeneratePlatformSpecificTooling({
     required ToolContext toolContext,
-    DeprecationBehavior deprecationBehavior = DeprecationBehavior.none,
     required bool releaseMode,
+    DeprecationBehavior deprecationBehavior = DeprecationBehavior.none,
     PubspecCache? pubspecCache,
     PackageGraph? packageGraph,
     PackageConfig? packageConfig,
@@ -700,8 +704,9 @@ class FlutterProject {
       return;
     }
 
+    final ToolContext(:Cache cache, :Logger logger) = toolContext;
     final migration = ProjectMigration(<ProjectMigrator>[
-      AnalysisOptionsMigration(this, toolContext.logger, packageConfig: packageConfig),
+      AnalysisOptionsMigration(this, logger, packageConfig: packageConfig),
     ]);
     await migration.run();
 
@@ -729,7 +734,10 @@ class FlutterProject {
       packageConfig: packageConfig,
     );
     if (androidPlatform) {
-      await android.ensureReadyForPlatformSpecificTooling(deprecationBehavior: deprecationBehavior);
+      await android.ensureReadyForPlatformSpecificTooling(
+        cache: cache,
+        deprecationBehavior: deprecationBehavior,
+      );
     }
     if (iosPlatform) {
       await ios.ensureReadyForPlatformSpecificTooling(
@@ -1211,9 +1219,10 @@ See the link below for more information:
   }
 
   Future<void> ensureReadyForPlatformSpecificTooling({
+    required Cache cache,
     DeprecationBehavior deprecationBehavior = DeprecationBehavior.none,
   }) async {
-    if (isModule && _shouldRegenerateFromTemplate()) {
+    if (isModule && _shouldRegenerateFromTemplate(cache)) {
       await _regenerateLibrary();
       // Add ephemeral host app, if an editable host app does not already exist.
       if (!_editableHostAppDirectory.existsSync()) {
@@ -1230,15 +1239,15 @@ See the link below for more information:
     if (!hostAppGradleRoot.existsSync()) {
       return;
     }
-    gradle.updateLocalProperties(project: parent, requireAndroidSdk: false);
+    gradle.updateLocalProperties(project: parent, requireAndroidSdk: false, cache: cache);
   }
 
-  bool _shouldRegenerateFromTemplate() {
+  bool _shouldRegenerateFromTemplate(Cache cache) {
     return globals.fsUtils.isOlderThanReference(
           entity: ephemeralDirectory,
           referenceFile: parent.pubspecFile,
         ) ||
-        globals.cache.isOlderThanToolsStamp(ephemeralDirectory);
+        cache.isOlderThanToolsStamp(ephemeralDirectory);
   }
 
   File get localPropertiesFile => _flutterLibGradleRoot.childFile('local.properties');
