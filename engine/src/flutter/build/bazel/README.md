@@ -1181,7 +1181,9 @@ names one of the browsers given (Chrome's and Firefox's: Chrome for
 Testing's build for the host, Mozilla's Linux tarball or, on a Mac, its disk
 image mounted with hdiutil as felt installs it -- CI runs the Firefox suites
 on Linux, and on a Mac they are `manual`, run by name, until a Mac's run of
-them is on record; Safari's and Edge's need other hosts), the bundles those
+them is on record: a corporate Mac whose endpoint policy admits no browser
+but Chrome cannot run them, and the build does not re-sign the bundle to get
+around that; Safari's and Edge's need other hosts), the bundles those
 suites run, one test per file
 and suite -- the test sets' files are globbed from their directories, so a
 new test file is a new target with no edit -- and the suites per browser
