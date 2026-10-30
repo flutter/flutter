@@ -502,7 +502,8 @@ def web_ui_tests(
         exclude = {},
         network = [],
         tags = ["cpu:2"],
-        bundle_tags = ["manual"]):
+        bundle_tags = ["manual"],
+        browser_tags = {}):
     """The web engine's unit tests, whole, from felt's configuration.
 
     One call declares, for the suites of `config` whose run configuration
@@ -537,6 +538,8 @@ def web_ui_tests(
       network: the test files that reach the web (web_ui_test_suite's `network`).
       tags: each test's tags.
       bundle_tags: the bundle targets' tags (`manual`: built by the tests that run them).
+      browser_tags: further tags for one browser's tests and suites, by felt's name of the
+        browser (`manual` for a browser's suites a wildcard build leaves out on this host).
     """
     test_sets = {
         test_set: native.glob(["test/%s/**/*_test.dart" % directory])
@@ -582,7 +585,7 @@ def web_ui_tests(
                 network = network,
                 runtime_package_config = runtime_package_config,
                 suite = suite,
-                tags = tags,
+                tags = tags + browser_tags.get(browser, []),
                 test_images = test_images,
                 test_set = config["test_sets"][test_set],
                 tests = test_sets[test_set],
@@ -591,6 +594,7 @@ def web_ui_tests(
             )
         native.test_suite(
             name = browser + "_tests",
+            tags = browser_tags.get(browser, []),
             tests = [":" + suite for suite in suites],
         )
     native.test_suite(
