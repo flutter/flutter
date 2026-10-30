@@ -1353,6 +1353,12 @@ def run_bazel_tests(args, types: typing.List[str]) -> int:
   status = 0
   for name, directory in directories.items():
     description = bazel_ci.read_build_directory(directory)
+    if args.type == 'all':
+      # "all" is what the build runs: its run_tests.py types and the test
+      # executables its steps run from the build directory.
+      types = list(description['tests']['types'])
+      if description['tests']['binaries']:
+        types.append('binaries')
     own_types = [
         t for t in types
         if (t in ('java', 'android')) == (name == args.android_variant) or len(directories) == 1
