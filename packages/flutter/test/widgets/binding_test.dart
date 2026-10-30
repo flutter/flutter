@@ -83,11 +83,6 @@ class ThrowingObserver with WidgetsBindingObserver {
   }
 
   @override
-  void didChange24HourFormat() {
-    throw Exception('Intentional test exception from observer');
-  }
-
-  @override
   void didChangeLocales(List<Locale>? locales) {
     throw Exception('Intentional test exception from observer');
   }
@@ -203,11 +198,6 @@ class LoggingObserver with WidgetsBindingObserver {
   }
 
   @override
-  void didChange24HourFormat() {
-    log.add('didChange24HourFormat');
-  }
-
-  @override
   void didChangeLocales(List<Locale>? locales) {
     log.add('didChangeLocales');
   }
@@ -310,12 +300,6 @@ class RentrantObserver implements WidgetsBindingObserver {
   }
 
   @override
-  void didChange24HourFormat() {
-    assert(active);
-    WidgetsBinding.instance.addObserver(this);
-  }
-
-  @override
   void didHaveMemoryPressure() {
     assert(active);
     WidgetsBinding.instance.addObserver(this);
@@ -405,8 +389,6 @@ void main() {
     WidgetsBinding.instance.handlePlatformBrightnessChanged();
     WidgetsBinding.instance.handleTextScaleFactorChanged();
     WidgetsBinding.instance.handleMemoryPressure();
-    tester.platformDispatcher.alwaysUse24HourFormatTestValue =
-        !tester.platformDispatcher.alwaysUse24HourFormat;
     await WidgetsBinding.instance.handlePopRoute();
     await WidgetsBinding.instance.handlePushRoute('/');
     await WidgetsBinding.instance.handleRequestAppExit();
@@ -420,7 +402,6 @@ void main() {
     await tester.idle();
     expect(observer.removeSelf(), greaterThan(1));
     expect(observer.removeSelf(), 0);
-    tester.platformDispatcher.clearAlwaysUse24HourTestValue();
   });
 
   testWidgets('didHaveMemoryPressure callback', (WidgetTester tester) async {
@@ -1049,44 +1030,6 @@ void main() {
       WidgetsBinding.instance.handleAccessibilityFeaturesChanged();
       expect(log, contains('didChangeAccessibilityFeatures'));
       expect(errors, hasLength(1));
-    });
-
-    testWidgets('didChange24HourFormat', (WidgetTester tester) async {
-      addTearDown(tester.platformDispatcher.clearAlwaysUse24HourTestValue);
-      final log = <String>[];
-      final errors = <FlutterErrorDetails>[];
-      final FlutterExceptionHandler? oldHandler = FlutterError.onError;
-      FlutterError.onError = (FlutterErrorDetails details) => errors.add(details);
-      addTearDown(() {
-        FlutterError.onError = oldHandler;
-      });
-
-      final throwingObserver = ThrowingObserver();
-      final loggingObserver = LoggingObserver(log);
-      WidgetsBinding.instance.addObserver(throwingObserver);
-      WidgetsBinding.instance.addObserver(loggingObserver);
-      addTearDown(() {
-        WidgetsBinding.instance.removeObserver(throwingObserver);
-        WidgetsBinding.instance.removeObserver(loggingObserver);
-      });
-
-      tester.platformDispatcher.alwaysUse24HourFormatTestValue =
-          !tester.platformDispatcher.alwaysUse24HourFormat;
-      expect(log, contains('didChange24HourFormat'));
-      expect(errors, hasLength(1));
-
-      log.clear();
-      errors.clear();
-      WidgetsBinding.instance.handleAlwaysUse24HourFormatChanged();
-      expect(log, contains('didChange24HourFormat'));
-      expect(errors, hasLength(1));
-
-      // Observers should not be notified if other platform configuration changes occur.
-      log.clear();
-      errors.clear();
-      WidgetsBinding.instance.handlePlatformBrightnessChanged();
-      expect(log, isEmpty);
-      expect(errors, isEmpty);
     });
 
     testWidgets('didChangeLocales', (WidgetTester tester) async {

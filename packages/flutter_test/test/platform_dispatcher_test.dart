@@ -213,28 +213,6 @@ void main() {
     },
   );
 
-  testWidgets(
-    'TestPlatformDispatcher sends 24-hour format change when alwaysUse24HourFormatTestValue is updated',
-    (WidgetTester tester) async {
-      addTearDown(tester.platformDispatcher.clearAlwaysUse24HourTestValue);
-      final observer = TestObserver();
-      retrieveTestBinding(tester).addObserver(observer);
-      addTearDown(() => retrieveTestBinding(tester).removeObserver(observer));
-
-      expect(observer.didChange24HourFormatCalled, isFalse);
-      retrieveTestBinding(tester).platformDispatcher.alwaysUse24HourFormatTestValue = true;
-      expect(observer.didChange24HourFormatCalled, isTrue);
-
-      observer.didChange24HourFormatCalled = false;
-      retrieveTestBinding(tester).platformDispatcher.clearAlwaysUse24HourTestValue();
-      expect(observer.didChange24HourFormatCalled, isTrue);
-
-      observer.didChange24HourFormatCalled = false;
-      retrieveTestBinding(tester).platformDispatcher.onPlatformConfigurationChanged?.call();
-      expect(observer.didChange24HourFormatCalled, isFalse);
-    },
-  );
-
   testWidgets('TestPlatformDispatcher.view getter returns the implicit view', (
     WidgetTester tester,
   ) async {
@@ -666,16 +644,10 @@ void main() {
 
 class TestObserver with WidgetsBindingObserver {
   List<Locale>? locales;
-  bool didChange24HourFormatCalled = false;
 
   @override
   void didChangeLocales(List<Locale>? locales) {
     this.locales = locales;
-  }
-
-  @override
-  void didChange24HourFormat() {
-    didChange24HourFormatCalled = true;
   }
 }
 
@@ -740,9 +712,6 @@ class _FakePlatformDispatcher extends Fake implements PlatformDispatcher {
 
   @override
   VoidCallback? onPlatformBrightnessChanged;
-
-  @override
-  VoidCallback? onAlwaysUse24HourFormatChanged;
 
   @override
   double get textScaleFactor => 1.0;

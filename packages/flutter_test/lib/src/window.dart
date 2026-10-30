@@ -435,28 +435,17 @@ class TestPlatformDispatcher implements PlatformDispatcher {
       _alwaysUse24HourFormatTestValue ?? _platformDispatcher.alwaysUse24HourFormat;
   bool? _alwaysUse24HourFormatTestValue;
 
-  @override
-  VoidCallback? get onAlwaysUse24HourFormatChanged => _platformDispatcher.onAlwaysUse24HourFormatChanged;
-  @override
-  set onAlwaysUse24HourFormatChanged(VoidCallback? callback) {
-    _platformDispatcher.onAlwaysUse24HourFormatChanged = callback;
-  }
-
   /// Hides the real clock format and reports the given
   /// [alwaysUse24HourFormatTestValue] instead.
   // ignore: avoid_setters_without_getters
   set alwaysUse24HourFormatTestValue(bool alwaysUse24HourFormatTestValue) {
     _alwaysUse24HourFormatTestValue = alwaysUse24HourFormatTestValue;
-    onPlatformConfigurationChanged?.call();
-    onAlwaysUse24HourFormatChanged?.call();
   }
 
   /// Deletes any existing test clock format and returns to using the real clock
   /// format.
   void clearAlwaysUse24HourTestValue() {
     _alwaysUse24HourFormatTestValue = null;
-    onPlatformConfigurationChanged?.call();
-    onAlwaysUse24HourFormatChanged?.call();
   }
 
   @override
@@ -2079,7 +2068,6 @@ class TestWindow implements SingletonFlutterWindow {
   set onPlatformBrightnessChanged(VoidCallback? callback) {
     platformDispatcher.onPlatformBrightnessChanged = callback;
   }
-
 
   @Deprecated(
     'Use WidgetTester.platformDispatcher.alwaysUse24HourFormat instead. '
