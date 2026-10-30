@@ -1,0 +1,49 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Unprivileged half of the bot branch cleanup.
+#
+# This workflow runs on `pull_request` with a read-only token and no access to
+# secrets. When a `flutteractionsbot` pull request is closed, it records the
+# pull request number in a `delete-branch-metadata` artifact so that the
+# privileged `delete-bot-branches.yml` workflow can delete the head branch via
+# `workflow_run`.
+
+name: Delete Bot Branches Trigger
+
+on:
+  pull_request:
+    types: [closed]
+    branches:
+      - master
+      - 'flutter-*-candidate*'
+
+permissions:
+  contents: read
+
+jobs:
+  record:
+    name: Record bot PR
+    runs-on: ubuntu-latest
+    # Evaluated before a runner is allocated, so non-bot PRs cost nothing.
+    if: |
+      github.event.pull_request.head.repo != null &&
+      github.event.pull_request.head.repo.owner.login == 'flutteractionsbot' &&
+      github.event.pull_request.head.ref != 'master' &&
+      github.event.pull_request.head.ref != 'main'
+    steps:
+      - name: Record PR number
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          mkdir -p delete-branch-metadata
+          jq -n --arg pr "$PR_NUMBER" '{pr_number: $pr}' > delete-branch-metadata/metadata.json
+
+      - name: Upload metadata
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: delete-branch-metadata
+          path: delete-branch-metadata/
+          retention-days: 1
+          if-no-files-found: error

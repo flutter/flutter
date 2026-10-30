@@ -1,0 +1,47 @@
+# Copyright 2023 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Unprivileged half of the cherry-pick automation.
+#
+# This workflow runs on `pull_request` with a read-only token and no access to
+# secrets. When a `cp: beta` or `cp: stable` label is applied, it records the
+# pull request number and channel in a `cp-metadata` artifact. The privileged
+# `easy-cp.yml` workflow consumes that artifact via `workflow_run`, validates
+# the request, and either performs the cherry-pick or comments on the pull
+# request explaining why it can't.
+
+name: Cherry-pick Trigger
+
+on:
+  pull_request:
+    branches: [master]
+    types: [labeled]
+
+permissions:
+  contents: read
+
+jobs:
+  record:
+    name: Record cherry-pick request
+    runs-on: ubuntu-latest
+    # Evaluated before a runner is allocated, so other labels cost nothing.
+    if: github.event.label.name == format('cp{0} beta', ':') || github.event.label.name == format('cp{0} stable', ':')
+    steps:
+      - name: Record PR number and channel
+        env:
+          LABEL_NAME: ${{ github.event.label.name }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          mkdir -p cp-metadata
+          CHANNEL=$(echo "$LABEL_NAME" | cut -d ':' -f 2 | xargs)
+          jq -n --arg pr "$PR_NUMBER" --arg channel "$CHANNEL" \
+            '{pr_number: $pr, channel: $channel}' > cp-metadata/metadata.json
+
+      - name: Upload cherry-pick metadata
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: cp-metadata
+          path: cp-metadata/
+          retention-days: 1
+          if-no-files-found: error
