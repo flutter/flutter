@@ -33,6 +33,7 @@ TEST(FlutterPlatformNodeDelegateMac, Basics) {
   FlutterViewController* viewController = CreateTestViewController();
   FlutterEngine* engine = viewController.engine;
   [viewController loadView];
+  [engine setSemanticsTreeEnabled:YES];
   engine.semanticsEnabled = YES;
   auto bridge = viewController.accessibilityBridge.lock();
   // Initialize ax node data.
@@ -73,6 +74,7 @@ TEST(FlutterPlatformNodeDelegateMac, SelectableTextHasCorrectSemantics) {
   FlutterViewController* viewController = CreateTestViewController();
   FlutterEngine* engine = viewController.engine;
   [viewController loadView];
+  [engine setSemanticsTreeEnabled:YES];
   engine.semanticsEnabled = YES;
   auto bridge = viewController.accessibilityBridge.lock();
   // Initialize ax node data.
@@ -117,6 +119,7 @@ TEST(FlutterPlatformNodeDelegateMac, SelectableTextWithoutSelectionReturnZeroRan
   FlutterViewController* viewController = CreateTestViewController();
   FlutterEngine* engine = viewController.engine;
   [viewController loadView];
+  [engine setSemanticsTreeEnabled:YES];
   engine.semanticsEnabled = YES;
   auto bridge = viewController.accessibilityBridge.lock();
   // Initialize ax node data.
@@ -166,6 +169,7 @@ TEST(FlutterPlatformNodeDelegateMac, CanPerformAction) {
                                                      defer:NO];
   window.contentView = viewController.view;
 
+  [engine setSemanticsTreeEnabled:YES];
   engine.semanticsEnabled = YES;
   auto bridge = viewController.accessibilityBridge.lock();
   // Initialize ax node data.
@@ -246,6 +250,7 @@ TEST(FlutterPlatformNodeDelegateMac, TextFieldUsesFlutterTextField) {
                                                    backing:NSBackingStoreBuffered
                                                      defer:NO];
   window.contentView = viewController.view;
+  [engine setSemanticsTreeEnabled:YES];
   engine.semanticsEnabled = YES;
 
   auto bridge = viewController.accessibilityBridge.lock();
@@ -334,6 +339,7 @@ TEST(FlutterPlatformNodeDelegateMac, DisabledTextFieldDoesNotUseFlutterTextField
                                                    backing:NSBackingStoreBuffered
                                                      defer:NO];
   window.contentView = viewController.view;
+  [engine setSemanticsTreeEnabled:YES];
   engine.semanticsEnabled = YES;
 
   auto bridge = viewController.accessibilityBridge.lock();
@@ -407,6 +413,7 @@ TEST(FlutterPlatformNodeDelegateMac, ChangingFlagsUpdatesNativeViewAccessible) {
                                                    backing:NSBackingStoreBuffered
                                                      defer:NO];
   window.contentView = viewController.view;
+  [engine setSemanticsTreeEnabled:YES];
   engine.semanticsEnabled = YES;
 
   auto bridge = viewController.accessibilityBridge.lock();

@@ -336,7 +336,6 @@ static void CommonInit(FlutterViewController* controller, FlutterEngine* engine)
             @"the FlutterEngine is mocked. Please subclass these classes instead.",
             controller.engine, controller.viewIdentifier);
   controller->_mouseTrackingMode = kFlutterMouseTrackingModeInKeyWindow;
-  [controller notifySemanticsEnabledChanged];
 }
 
 - (instancetype)initWithCoder:(NSCoder*)coder {
@@ -397,6 +396,7 @@ static void CommonInit(FlutterViewController* controller, FlutterEngine* engine)
                                                                          controller:self];
   self.view = wrapperView;
   _flutterView = flutterView;
+  [self updateAccessibilityRoot];
 }
 
 - (void)viewDidLoad {
@@ -455,9 +455,9 @@ static void CommonInit(FlutterViewController* controller, FlutterEngine* engine)
 - (void)onPreEngineRestart {
 }
 
-- (void)notifySemanticsEnabledChanged {
+- (void)notifySemanticsTreeEnabledChanged {
   BOOL mySemanticsEnabled = !!_bridge;
-  BOOL newSemanticsEnabled = _engine.semanticsEnabled;
+  BOOL newSemanticsEnabled = _engine.semanticsTreeEnabled;
   if (newSemanticsEnabled == mySemanticsEnabled) {
     return;
   }
@@ -480,11 +480,13 @@ static void CommonInit(FlutterViewController* controller, FlutterEngine* engine)
   NSAssert(_engine == nil, @"Already attached to an engine %@.", _engine);
   _engine = engine;
   _viewIdentifier = viewIdentifier;
+  [self notifySemanticsTreeEnabledChanged];
 }
 
 - (void)detachFromEngine {
   NSAssert(_engine != nil, @"Not attached to any engine.");
   _engine = nil;
+  [self notifySemanticsTreeEnabledChanged];
 }
 
 - (BOOL)attached {
@@ -492,9 +494,7 @@ static void CommonInit(FlutterViewController* controller, FlutterEngine* engine)
 }
 
 - (void)updateSemantics:(const FlutterSemanticsUpdate2*)update {
-  // Semantics will be disabled when unfocusing application but the updateSemantics:
-  // callback is received in next run loop turn.
-  if (!_engine.semanticsEnabled) {
+  if (!_bridge) {
     return;
   }
   for (size_t i = 0; i < update->node_count; i++) {
@@ -509,8 +509,11 @@ static void CommonInit(FlutterViewController* controller, FlutterEngine* engine)
 
   _bridge->CommitUpdates();
 
-  // Accessibility tree can only be used when the view is loaded.
-  if (!self.viewLoaded) {
+  [self updateAccessibilityRoot];
+}
+
+- (void)updateAccessibilityRoot {
+  if (!_bridge || !self.viewLoaded) {
     return;
   }
   // Attaches the accessibility root to the flutter view.

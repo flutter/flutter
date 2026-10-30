@@ -903,15 +903,11 @@ FlutterWindowsView::CreateAccessibilityBridge() {
   return std::make_shared<AccessibilityBridgeWindows>(this);
 }
 
-void FlutterWindowsView::UpdateSemanticsEnabled(bool enabled) {
-  if (semantics_enabled_ != enabled) {
-    semantics_enabled_ = enabled;
-
-    if (!semantics_enabled_ && accessibility_bridge_) {
-      accessibility_bridge_.reset();
-    } else if (semantics_enabled_ && !accessibility_bridge_) {
-      accessibility_bridge_ = CreateAccessibilityBridge();
-    }
+void FlutterWindowsView::SetSemanticsTreeEnabled(bool enabled) {
+  if (!enabled) {
+    accessibility_bridge_.reset();
+  } else if (!accessibility_bridge_) {
+    accessibility_bridge_ = CreateAccessibilityBridge();
   }
 }
 
