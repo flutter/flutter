@@ -17,6 +17,7 @@ import '../base/logger.dart';
 import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
+import '../base/template.dart';
 import '../base/utils.dart';
 import '../base/version.dart';
 import '../build_info.dart';
@@ -27,6 +28,7 @@ import '../devfs.dart';
 import '../device.dart';
 import '../device_port_forwarder.dart';
 import '../device_vm_service_discovery_for_attach.dart';
+import '../macos/cocoapods.dart';
 import '../macos/xcode.dart';
 import '../project.dart';
 import '../protocol_discovery.dart';
@@ -36,6 +38,7 @@ import 'devices.dart';
 import 'ios_workflow.dart';
 import 'mac.dart';
 import 'plist_parser.dart';
+import 'xcodeproj.dart';
 
 const iosSimulatorId = 'apple_ios_simulator';
 
@@ -69,9 +72,12 @@ class IOSSimulators extends PollingDeviceDiscovery {
 class IOSSimulatorUtils {
   IOSSimulatorUtils({
     required this._analytics,
+    required this._cocoaPods,
     required this._plistParser,
+    required this._templateRenderer,
     required this._toolContext,
     required this._xcode,
+    required this._xcodeProjectInterpreter,
   }) {
     final ToolContext(:Logger logger, :ProcessManager processManager) = _toolContext;
     _simControl = SimControl(logger: logger, processManager: processManager, xcode: _xcode);
@@ -79,8 +85,11 @@ class IOSSimulatorUtils {
 
   late final SimControl _simControl;
   final Xcode _xcode;
+  final XcodeProjectInterpreter _xcodeProjectInterpreter;
   final Analytics _analytics;
+  final CocoaPods _cocoaPods;
   final PlistParser _plistParser;
+  final TemplateRenderer _templateRenderer;
   final ToolContext _toolContext;
 
   Future<List<IOSSimulator>> getAttachedDevices() async {
@@ -106,13 +115,16 @@ class IOSSimulatorUtils {
           return IOSSimulator(
             udid,
             analytics: _analytics,
+            cocoaPods: _cocoaPods,
             cpuArch: cpuArch,
             name: name,
             plistParser: _plistParser,
             simControl: _simControl,
             simulatorCategory: device.category,
+            templateRenderer: _templateRenderer,
             toolContext: _toolContext,
             xcode: _xcode,
+            xcodeProjectInterpreter: _xcodeProjectInterpreter,
           );
         })
         .whereType<IOSSimulator>()
@@ -375,13 +387,16 @@ class IOSSimulator extends Device {
   IOSSimulator(
     super.id, {
     required this._analytics,
+    required this._cocoaPods,
     required this._cpuArch,
     required this.name,
     required this._plistParser,
     required this._simControl,
     required this.simulatorCategory,
+    required this._templateRenderer,
     required ToolContext super.toolContext,
     required this._xcode,
+    required this._xcodeProjectInterpreter,
   }) : super(
          category: Category.mobile,
          ephemeral: true,
@@ -398,8 +413,11 @@ class IOSSimulator extends Device {
 
   final CpuArch _cpuArch;
   final Analytics _analytics;
+  final CocoaPods _cocoaPods;
   final PlistParser _plistParser;
+  final TemplateRenderer _templateRenderer;
   final Xcode _xcode;
+  final XcodeProjectInterpreter _xcodeProjectInterpreter;
 
   @override
   DevFSWriter createDevFSWriter(ApplicationPackage? app, String? userIdentifier) {
@@ -599,18 +617,24 @@ class IOSSimulator extends Device {
     BuildInfo buildInfo,
     String? mainPath,
   ) async {
-    final ToolContext(:FileSystem fs, :Logger logger) = toolContext;
+    final ToolContext(:FileSystem fs, :Logger logger, :ProcessUtils processUtils) = toolContext;
     // Step 1: Build the Xcode project.
     // The build mode for the simulator is always debug.
     assert(buildInfo.isDebug);
 
     final XcodeBuildResult buildResult = await buildXcodeProject(
+      analytics: _analytics,
       app: app,
       buildInfo: buildInfo,
+      plistParser: _plistParser,
+      templateRenderer: _templateRenderer,
+      toolContext: toolContext,
+      xcodeProjectInterpreter: _xcodeProjectInterpreter,
       targetOverride: mainPath,
       environmentType: EnvironmentType.simulator,
       deviceID: id,
-      toolContext: toolContext,
+      cocoaPods: _cocoaPods,
+      xcode: _xcode,
     );
     if (!buildResult.success) {
       await diagnoseXcodeBuildFailure(
@@ -619,7 +643,9 @@ class IOSSimulator extends Device {
         fileSystem: fs,
         logger: logger,
         platform: FlutterDarwinPlatform.ios,
+        processUtils: processUtils,
         project: app.project.parent,
+        xcode: _xcode,
         device: this,
       );
       throwToolExit('Could not build the application for the simulator.');
