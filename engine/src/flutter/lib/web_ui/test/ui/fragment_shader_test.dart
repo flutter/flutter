@@ -985,20 +985,29 @@ Future<void> testMain() async {
       final ui.FragmentProgram program = await renderer.createFragmentProgram('vec4_uniform');
       final ui.FragmentShader shader = program.fragmentShader();
       shader.getUniformVec4('color_rgba').set(1.0, 0.0, 0.0, 1.0);
-
       final recorder = ui.PictureRecorder();
-      final canvas = ui.Canvas(recorder);
-      canvas.drawRect(const ui.Rect.fromLTWH(0, 0, 10, 10), ui.Paint()..shader = shader);
+      ui.Canvas(recorder)
+          .drawRect(const ui.Rect.fromLTWH(0, 0, 10, 10), ui.Paint()..shader = shader);
       final ui.Picture picture = recorder.endRecording();
       shader.dispose();
 
-      final ByteData pixels = await _rasterizePicture(picture, width: 10, height: 10);
-      picture.dispose();
+      final ByteData firstRaster = await _rasterizePicture(picture, width: 10, height: 10);
+      final ByteData secondRaster = await _rasterizePicture(picture, width: 10, height: 10);
 
-      expect(_rgbaAt(pixels, width: 10, x: 5, y: 5), <int>[255, 0, 0, 255]);
+      // Nest the picture in another picture and drop the original one.
+      final outerRecorder = ui.PictureRecorder();
+      ui.Canvas(outerRecorder).drawPicture(picture);
+      final ui.Picture outerPicture = outerRecorder.endRecording();
+      picture.dispose();
+      final ByteData nested = await _rasterizePicture(outerPicture, width: 10, height: 10);
+      outerPicture.dispose();
+
+      expect(_rgbaAt(firstRaster, width: 10, x: 5, y: 5), <int>[255, 0, 0, 255]);
+      expect(Uint8List.sublistView(secondRaster), Uint8List.sublistView(firstRaster));
+      expect(Uint8List.sublistView(nested), Uint8List.sublistView(firstRaster));
     },
-    skip: isWimp,
-  ); // https://github.com/flutter/flutter/issues/175431
+    skip: isWimp, // https://github.com/flutter/flutter/issues/175431
+  );
 
   // https://github.com/flutter/flutter/issues/193221
   test('disposed fragment shader uniforms are not reused by later shaders in a picture', () async {
@@ -1011,8 +1020,8 @@ Future<void> testMain() async {
     canvas.drawRect(const ui.Rect.fromLTWH(0, 0, 10, 10), ui.Paint()..shader = redShader);
     redShader.dispose();
 
-    // Created after the red shader is disposed, so it may be allocated in the
-    // memory the red shader released.
+    // Created after the red shader is disposed. If disposing a shader released
+    // memory still referenced by the picture, this shader could reuse it.
     final ui.FragmentShader blueShader = program.fragmentShader();
     blueShader.getUniformVec4('color_rgba').set(0.0, 0.0, 1.0, 1.0);
     canvas.drawRect(const ui.Rect.fromLTWH(10, 0, 10, 10), ui.Paint()..shader = blueShader);
@@ -1070,46 +1079,6 @@ Future<void> testMain() async {
 
   // https://github.com/flutter/flutter/issues/193221
   test(
-    'mutating uniforms across multiple draw calls in a single picture preserves independent states',
-    () async {
-      final ui.FragmentProgram program = await renderer.createFragmentProgram('vec4_uniform');
-      final ui.FragmentShader shader = program.fragmentShader();
-      final ui.UniformVec4Slot color = shader.getUniformVec4('color_rgba');
-      final paint = ui.Paint()..shader = shader;
-
-      final recorder = ui.PictureRecorder();
-      final canvas = ui.Canvas(recorder);
-      color.set(1.0, 0.0, 0.0, 1.0);
-      canvas.drawRect(const ui.Rect.fromLTWH(0, 0, 10, 10), paint);
-      color.set(0.0, 0.0, 1.0, 1.0);
-      canvas.drawRect(const ui.Rect.fromLTWH(10, 0, 10, 10), paint);
-      final ui.Picture picture = recorder.endRecording();
-
-      final ByteData pixels = await _rasterizePicture(picture, width: 20, height: 10);
-      picture.dispose();
-      shader.dispose();
-
-      expect(_rgbaAt(pixels, width: 20, x: 5, y: 5), <int>[
-        255,
-        0,
-        0,
-        255,
-      ], reason: 'left box should keep the uniforms it was drawn with');
-      expect(_rgbaAt(pixels, width: 20, x: 15, y: 5), <int>[
-        0,
-        0,
-        255,
-        255,
-      ], reason: 'right box should use the mutated uniforms');
-    },
-    // Wimp: https://github.com/flutter/flutter/issues/175431
-    // Skwasm currently shares the uniform buffer with shaders already recorded
-    // in a picture, so later uniform changes affect earlier draws.
-    skip: isWimp || isSkwasm,
-  );
-
-  // https://github.com/flutter/flutter/issues/193221
-  test(
     'every draw of a repeatedly mutated fragment shader keeps its own uniforms',
     () async {
       final ui.FragmentProgram program = await renderer.createFragmentProgram('vec4_uniform');
@@ -1146,37 +1115,11 @@ Future<void> testMain() async {
         );
       }
     },
-    // Wimp: https://github.com/flutter/flutter/issues/175431
-    // Skwasm currently shares the uniform buffer with shaders already recorded
-    // in a picture, so later uniform changes affect earlier draws.
-    skip: isWimp || isSkwasm,
+    // Skwasm (including Wimp, https://github.com/flutter/flutter/issues/175431)
+    // currently shares the uniform buffer with shaders already recorded in a
+    // picture, so later uniform changes affect earlier draws.
+    skip: isSkwasm,
   );
-
-  // https://github.com/flutter/flutter/issues/193221
-  test('a picture can be rasterized repeatedly after its fragment shader is disposed', () async {
-    final ui.FragmentProgram program = await renderer.createFragmentProgram('vec4_uniform');
-    final ui.FragmentShader shader = program.fragmentShader();
-    shader.getUniformVec4('color_rgba').set(0.0, 1.0, 0.0, 1.0);
-    final recorder = ui.PictureRecorder();
-    ui.Canvas(recorder).drawRect(const ui.Rect.fromLTWH(0, 0, 10, 10), ui.Paint()..shader = shader);
-    final ui.Picture picture = recorder.endRecording();
-
-    final ByteData beforeDispose = await _rasterizePicture(picture, width: 10, height: 10);
-    shader.dispose();
-    final ByteData afterDispose = await _rasterizePicture(picture, width: 10, height: 10);
-
-    // Nest the picture in another picture and drop the original one.
-    final outerRecorder = ui.PictureRecorder();
-    ui.Canvas(outerRecorder).drawPicture(picture);
-    final ui.Picture outerPicture = outerRecorder.endRecording();
-    picture.dispose();
-    final ByteData nested = await _rasterizePicture(outerPicture, width: 10, height: 10);
-    outerPicture.dispose();
-
-    expect(_rgbaAt(beforeDispose, width: 10, x: 5, y: 5), <int>[0, 255, 0, 255]);
-    expect(Uint8List.sublistView(afterDispose), Uint8List.sublistView(beforeDispose));
-    expect(Uint8List.sublistView(nested), Uint8List.sublistView(beforeDispose));
-  }, skip: isWimp); // https://github.com/flutter/flutter/issues/175431
 
   // https://github.com/flutter/flutter/issues/193221
   test('replacing an image sampler between draws keeps the sampler each draw used', () async {

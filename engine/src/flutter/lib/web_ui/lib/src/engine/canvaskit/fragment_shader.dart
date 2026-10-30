@@ -77,6 +77,7 @@ class CkFragmentShader extends BackendFragmentShader implements CkShader {
     // memory) so that CanvasKit copies them into a buffer owned by the new
     // SkShader. Otherwise pictures that recorded this shader would alias the
     // mutable staging buffer and observe later `setFloat` calls or `dispose`.
+    // See https://github.com/flutter/flutter/issues/193221.
     final JSAny uniformData = floats.toJS;
     final SkShader? result = samplers.isEmpty
         ? effect.makeShader(uniformData)
