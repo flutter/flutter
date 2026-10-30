@@ -39,8 +39,11 @@ static constexpr char kIcuDataPath[] = "/pkg/data/icudtl.dat";
 // timezone files.
 static constexpr char kICUTZEnv[] = "ICU_TIMEZONE_FILES_DIR";
 
-// The data directory containing ICU timezone data files.
-static constexpr char kICUTZDataDir[] = "/config/data/tzdata/icu/44/le";
+// The directory containing ICU timezone data files.
+// See:
+// https://fuchsia.dev/fuchsia-src/development/internationalization/icu_data#timezone_configuration_data
+// https://fuchsia.dev/fuchsia-src/concepts/process/namespaces
+static constexpr char kICUTZDataDir[] = "/config/tzdata/icu/44/le";
 
 // Map the memory into the process and return a pointer to the memory.
 uintptr_t GetICUData(const fuchsia::mem::Buffer& icu_data) {
@@ -64,21 +67,23 @@ uintptr_t GetICUData(const fuchsia::mem::Buffer& icu_data) {
 // sets the value of the environment variable "ICU_TIMEZONE_FILES_DIR" to a
 // fixed value which is fuchsia-specific.
 bool InitializeTZData() {
-  // We need the ability to change the env variable for testing, so not
-  // overwriting if set.
-  setenv(kICUTZEnv, kICUTZDataDir, 0 /* No overwrite */);
+  const char* env_dir = getenv(kICUTZEnv);
+  const char* tzdata_dir = env_dir ? env_dir : kICUTZDataDir;
 
-  const std::string tzdata_dir = getenv(kICUTZEnv);
   // Try opening the path to check if present.  No need to verify that it is a
   // directory since ICU loading will return an error if the TZ data path is
   // wrong.
-  int fd = openat(AT_FDCWD, tzdata_dir.c_str(), O_RDONLY);
+  int fd = openat(AT_FDCWD, tzdata_dir, O_RDONLY);
   if (fd < 0) {
     FML_LOG(INFO) << "Could not open: '" << tzdata_dir
                   << "', proceeding without loading the timezone database: "
                   << strerror(errno);
     return false;
   }
+
+  // 0 == Not overwriting the env var if already set.
+  setenv(kICUTZEnv, tzdata_dir, 0 /* No overwrite */);
+
   if (close(fd)) {
     FML_LOG(WARNING) << "Could not close: " << tzdata_dir << ": "
                      << strerror(errno);
