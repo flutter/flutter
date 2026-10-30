@@ -11,6 +11,10 @@
 
 @interface FlutterShell ()
 
+// The underlying C++ ThreadHost.
+//
+// Spawned engines return the same ThreadHost as the engine they were spawned
+// from. null before creation and after destroyThreadHost.
 @property(nonatomic, readonly, nullable) const flutter::ThreadHost* threadHost;
 
 @end

@@ -259,15 +259,37 @@ class TestPlatformMessageResponse : public flutter::PlatformMessageResponse {
   XCTAssertTrue(((NSString*)infoDictionary[@"ClangVersion"]).length > 15UL);
 }
 
+// Checks releasing a running engine without calling -destroyContext doesn't
+// fail.
+//
+// Shell::~Shell waits for tasks it posts to the raster and IO threads, which
+// _backend owns, so this deadlocks unless FlutterEngine destroys _shell before
+// _backend. FlutterShell must also stop the profiler before it joins the
+// profiler thread.
 - (void)testDeallocated {
+  // Watchdog to prevent hangs and fail immediately if FlutterEngine->_shell was
+  // destroyed before the ThreadHost in FlutterShell.
+  dispatch_block_t watchdog = dispatch_block_create(static_cast<dispatch_block_flags_t>(0), ^{
+    FML_LOG(FATAL) << "Releasing a running FlutterEngine deadlocked. Check that FlutterEngine "
+                      "destroys _shell before _backend.";
+  });
+  dispatch_after(dispatch_time(DISPATCH_TIME_NOW, static_cast<int64_t>(30 * NSEC_PER_SEC)),
+                 dispatch_get_global_queue(QOS_CLASS_DEFAULT, 0), watchdog);
+
   __weak FlutterEngine* weakEngine = nil;
+  __weak FlutterShell* weakBackend = nil;
   @autoreleasepool {
     FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"foobar"];
+    // Check that there is a running shell and a thread host to tear down.
+    XCTAssertTrue([engine run]);
+    XCTAssertNotEqual(engine.backend.threadHost, nullptr);
     weakEngine = engine;
-    [engine run];
-    XCTAssertNotNil(weakEngine);
+    weakBackend = engine.backend;
   }
+  dispatch_block_cancel(watchdog);
+
   XCTAssertNil(weakEngine);
+  XCTAssertNil(weakBackend);
 }
 
 - (void)testSendMessageBeforeRun {

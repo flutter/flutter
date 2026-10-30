@@ -160,6 +160,9 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
 @end
 
 @implementation FlutterEngine {
+  // Keep _backend an explicit ivar declared before _shell. ~Shell posts tasks to the raster and IO
+  // threads owned by _backend, so _shell must be destroyed first. Explicit ivars are destroyed in
+  // reverse declaration order and @synthesized ivars without an explicit ivar are destroyed first.
   FlutterShell* _backend;
   std::unique_ptr<flutter::Shell> _shell;
 
@@ -1588,6 +1591,7 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
 }
 
 - (const flutter::ThreadHost&)threadHost {
+  FML_DCHECK(self.backend.threadHost);
   return *self.backend.threadHost;
 }
 

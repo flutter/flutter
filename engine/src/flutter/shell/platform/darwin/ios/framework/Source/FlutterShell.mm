@@ -118,6 +118,7 @@ flutter::ThreadHost MakeThreadHost(NSString* thread_label) {
 }
 
 - (void)inheritThreadHostFromShell:(FlutterShell*)shell {
+  FML_DCHECK(shell);
   FML_DCHECK(!_threadHost);
   _threadLabel = shell->_threadLabel;
   _threadHost = shell->_threadHost;
@@ -140,6 +141,8 @@ flutter::ThreadHost MakeThreadHost(NSString* thread_label) {
 }
 
 - (void)destroyThreadHost {
+  // The profiler's destructor posts to the profiler thread and waits, so it
+  // must be destroyed before _threadHost.
   _profiler.reset();
   _threadHost.reset();
   _threadLabel = nil;

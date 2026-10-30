@@ -6,7 +6,9 @@
 #import <XCTest/XCTest.h>
 
 #include "flutter/fml/synchronization/waitable_event.h"
+#include "flutter/runtime/dart_vm_lifecycle.h"
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterMacros.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterDartProject_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterShell.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterShell_Internal.h"
 
@@ -102,6 +104,10 @@ FLUTTER_ASSERT_ARC
 }
 
 - (void)testDestroyStopsProfilerBeforeJoiningThread {
+  // Ensure a VM has been created since the profiler names its thread via the VM.
+  flutter::DartVMRef vm = flutter::DartVMRef::Create(FLTDefaultSettingsForBundle());
+  XCTAssertTrue(vm);
+
   FlutterShell* shell = [[FlutterShell alloc] init];
   [shell createThreadHostWithLabelPrefix:@"foo"];
   [shell startProfilerIfEnabled];

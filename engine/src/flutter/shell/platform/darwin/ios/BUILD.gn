@@ -341,6 +341,7 @@ if (enable_ios_unittests) {
       ":ios_test_flutter_swift",
       "//flutter/common",
       "//flutter/lib/ui",
+      "//flutter/runtime",
       "//flutter/shell/platform/darwin/common:framework_common",
       "//flutter/shell/platform/darwin/common:test_utils_swift",
       "//flutter/shell/platform/embedder:embedder_as_internal_library",

@@ -6,6 +6,7 @@
 #define FLUTTER_SHELL_PLATFORM_DARWIN_IOS_FRAMEWORK_SOURCE_FLUTTERENGINE_TEST_H_
 
 #import "flutter/shell/common/shell.h"
+#include "flutter/shell/common/thread_host.h"
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterEngine.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterTextInputDelegate.h"
 #include "flutter/shell/platform/darwin/ios/platform_view_ios.h"
@@ -13,10 +14,6 @@
 
 @class FlutterBinaryMessengerRelay;
 @class FlutterShell;
-
-namespace flutter {
-class ThreadHost;
-}
 
 // Category to add test-only visibility.
 @interface FlutterEngine (Test) <FlutterBinaryMessenger>

@@ -20,15 +20,21 @@ NS_ASSUME_NONNULL_BEGIN
 
 /// Creates the raster, IO, and (in debug and profile modes) profiler threads, and adopts the
 /// calling thread as the platform and UI thread.
+///
+/// Must be called on the main thread. Replaces any existing thread host.
 - (void)createThreadHostWithLabelPrefix:(NSString*)labelPrefix;
 
 /// Shares `shell`'s thread host and profiler with this backend. Used by spawned engines.
+///
+/// This backend must not already have a thread host.
 - (void)inheritThreadHostFromShell:(FlutterShell*)shell;
 
 /// Starts the sampling profiler if the runtime mode supports it.
 - (void)startProfilerIfEnabled;
 
 /// Releases the profiler, then the thread host.
+///
+/// The shell using these threads must be destroyed before calling this method.
 - (void)destroyThreadHost;
 
 @end
