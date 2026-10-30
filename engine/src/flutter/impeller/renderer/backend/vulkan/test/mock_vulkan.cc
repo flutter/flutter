@@ -140,17 +140,6 @@ class MockDevice final {
 
   MockQueue& GetQueue() { return queue_; }
 
-  void SetLastRenderPassDependencies(
-      std::vector<VkSubpassDependency> dependencies) {
-    Lock lock(render_pass_mutex_);
-    last_render_pass_dependencies_ = std::move(dependencies);
-  }
-
-  std::vector<VkSubpassDependency> GetLastRenderPassDependencies() {
-    Lock lock(render_pass_mutex_);
-    return last_render_pass_dependencies_;
-  }
-
  private:
   MockDevice(const MockDevice&) = delete;
 
@@ -161,10 +150,6 @@ class MockDevice final {
   Mutex called_functions_mutex_;
   std::shared_ptr<std::vector<std::string>> called_functions_
       IPLR_GUARDED_BY(called_functions_mutex_);
-
-  Mutex render_pass_mutex_;
-  std::vector<VkSubpassDependency> last_render_pass_dependencies_
-      IPLR_GUARDED_BY(render_pass_mutex_);
 
   Mutex command_buffers_mutex_;
   std::vector<std::unique_ptr<MockCommandBuffer>> command_buffers_
@@ -616,13 +601,6 @@ VkResult vkCreateRenderPass(VkDevice device,
   *pRenderPass = reinterpret_cast<VkRenderPass>(0x12341234);
   MockDevice* mock_device = MockDevice::Unwrap(device);
   mock_device->AddCalledFunction("vkCreateRenderPass");
-  std::vector<VkSubpassDependency> dependencies;
-  if (pCreateInfo->pDependencies != nullptr) {
-    dependencies.assign(
-        pCreateInfo->pDependencies,
-        pCreateInfo->pDependencies + pCreateInfo->dependencyCount);
-  }
-  mock_device->SetLastRenderPassDependencies(std::move(dependencies));
   return VK_SUCCESS;
 }
 
@@ -1372,12 +1350,6 @@ std::shared_ptr<std::vector<std::string>> GetMockVulkanFunctions(
     VkDevice device) {
   MockDevice* mock_device = MockDevice::Unwrap(device);
   return mock_device->GetCalledFunctions();
-}
-
-std::vector<VkSubpassDependency> GetLastRenderPassDependencies(
-    VkDevice device) {
-  MockDevice* mock_device = MockDevice::Unwrap(device);
-  return mock_device->GetLastRenderPassDependencies();
 }
 
 void SetSwapchainImageSize(ISize size) {

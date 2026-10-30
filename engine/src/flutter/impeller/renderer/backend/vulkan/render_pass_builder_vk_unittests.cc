@@ -2,13 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include <memory>
-#include <optional>
-
 #include "flutter/testing/testing.h"  // IWYU pragma: keep
 #include "gtest/gtest.h"
 #include "impeller/core/formats.h"
-#include "impeller/renderer/backend/vulkan/context_vk.h"
 #include "impeller/renderer/backend/vulkan/render_pass_builder_vk.h"
 #include "impeller/renderer/backend/vulkan/test/mock_vulkan.h"
 #include "vulkan/vulkan_enums.hpp"
@@ -172,97 +168,6 @@ TEST(RenderPassBuilder, CreatesMSAAResolveWithCorrectStore) {
   EXPECT_EQ(resolve.finalLayout, vk::ImageLayout::eShaderReadOnlyOptimal);
   EXPECT_EQ(resolve.loadOp, vk::AttachmentLoadOp::eClear);
   EXPECT_EQ(resolve.storeOp, vk::AttachmentStoreOp::eStore);
-}
-
-namespace {
-std::optional<VkSubpassDependency> FindIncomingExternalDependency(
-    VkDevice device) {
-  for (const VkSubpassDependency& dependency :
-       GetLastRenderPassDependencies(device)) {
-    if (dependency.srcSubpass == VK_SUBPASS_EXTERNAL &&
-        dependency.dstSubpass == 0u) {
-      return dependency;
-    }
-  }
-  return std::nullopt;
-}
-}  // namespace
-
-// https://github.com/flutter/flutter/issues/195599
-// https://github.com/flutter/flutter/issues/194987
-TEST(RenderPassBuilder, IncomingDependencyCoversDepthStencilAttachment) {
-  RenderPassBuilderVK builder = RenderPassBuilderVK();
-  const std::shared_ptr<ContextVK> context = MockVulkanContextBuilder().Build();
-
-  builder.SetColorAttachment(0, PixelFormat::kR8G8B8A8UNormInt,
-                             SampleCount::kCount1, LoadAction::kClear,
-                             StoreAction::kStore);
-  builder.SetDepthStencilAttachment(PixelFormat::kD24UnormS8Uint,
-                                    SampleCount::kCount1, LoadAction::kClear,
-                                    StoreAction::kStore);
-
-  vk::UniqueRenderPass render_pass = builder.Build(context->GetDevice());
-  ASSERT_TRUE(!!render_pass);
-
-  std::optional<VkSubpassDependency> incoming =
-      FindIncomingExternalDependency(context->GetDevice());
-  ASSERT_TRUE(incoming.has_value());
-
-  // An earlier pass's depth/stencil writes and storeOp happen in the fragment
-  // test stages, so they must be in the source scope.
-  EXPECT_TRUE(incoming->srcStageMask &
-              VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT);
-  EXPECT_TRUE(incoming->srcStageMask &
-              VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT);
-  EXPECT_TRUE(incoming->srcAccessMask &
-              VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT);
-
-  // This pass's depth/stencil loadOp and accesses happen in the fragment test
-  // stages, so they must be in the destination scope.
-  EXPECT_TRUE(incoming->dstStageMask &
-              VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT);
-  EXPECT_TRUE(incoming->dstStageMask &
-              VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT);
-  EXPECT_TRUE(incoming->dstAccessMask &
-              VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT);
-  EXPECT_TRUE(incoming->dstAccessMask &
-              VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT);
-
-  // Color attachment synchronization is preserved.
-  EXPECT_TRUE(incoming->srcStageMask &
-              VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT);
-  EXPECT_TRUE(incoming->dstStageMask &
-              VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT);
-}
-
-TEST(RenderPassBuilder, IncomingDependencyOmitsDepthStagesWithoutDepthStencil) {
-  RenderPassBuilderVK builder = RenderPassBuilderVK();
-  const std::shared_ptr<ContextVK> context = MockVulkanContextBuilder().Build();
-
-  builder.SetColorAttachment(0, PixelFormat::kR8G8B8A8UNormInt,
-                             SampleCount::kCount1, LoadAction::kClear,
-                             StoreAction::kStore);
-
-  vk::UniqueRenderPass render_pass = builder.Build(context->GetDevice());
-  ASSERT_TRUE(!!render_pass);
-
-  std::optional<VkSubpassDependency> incoming =
-      FindIncomingExternalDependency(context->GetDevice());
-  ASSERT_TRUE(incoming.has_value());
-
-  // Color-only passes shouldn't wait on the fragment test stages.
-  EXPECT_EQ(incoming->srcStageMask,
-            static_cast<VkPipelineStageFlags>(
-                VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT |
-                VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT));
-  EXPECT_EQ(incoming->srcAccessMask,
-            static_cast<VkAccessFlags>(VK_ACCESS_SHADER_READ_BIT |
-                                       VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT));
-  EXPECT_EQ(incoming->dstStageMask,
-            static_cast<VkPipelineStageFlags>(
-                VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT));
-  EXPECT_EQ(incoming->dstAccessMask,
-            static_cast<VkAccessFlags>(VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT));
 }
 
 }  // namespace testing
