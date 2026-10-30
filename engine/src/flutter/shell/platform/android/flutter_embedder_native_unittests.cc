@@ -1074,22 +1074,34 @@ TEST_F(FlutterEmbedderNativeTest,
 
 TEST_F(FlutterEmbedderNativeTest,
        ConvertRgba8888ToRgb565RowQuantizesColorsAndHonorsPixelCount) {
-  // Sample RGBA8888 pixels and their expected 16-bit RGB565 encodings:
+  // Sample RGBA8888 pixels and their expected 16-bit RGB565 encodings matching
+  // Skia's store_565 to_unorm(c / 255.0f, scale) rounding:
+  //   r5 = (r * 31 + 127) / 255
+  //   g6 = (g * 63 + 127) / 255
+  //   b5 = (b * 31 + 127) / 255
   // Pixel 0: Scuba golden light-gray background (251, 251, 251, 255) ->
-  //          ((251>>3)<<11) | ((251>>2)<<5) | (251>>3) = 0xFFDF
+  //          (31 << 11) | (62 << 5) | 31 = 0xFFDF
   // Pixel 1: Pure red (255, 0, 0, 255) -> 0xF800
   // Pixel 2: Pure green (0, 255, 0, 255) -> 0x07E0
   // Pixel 3: Pure blue (0, 0, 255, 255) -> 0x001F
-  // Pixel 4: Mid-tone (80, 99, 138, 255) -> ((80>>3)<<11)|((99>>2)<<5)|(138>>3)
-  // = 0x5311
-  constexpr size_t kConvertedPixelCount = 5;
-  constexpr size_t kTotalDstCount = 6;
+  // Pixel 4: Mid-tone (80, 99, 138, 255) -> (10 << 11) | (24 << 5) | 17 =
+  // 0x5311
+  // Pixel 5: Anti-aliased pill border (225, 240, 225, 255) ->
+  //          (27 << 11) | (59 << 5) | 27 = 0xDF7B (diverges from bit-shift
+  //          (28 << 11) | (60 << 5) | 28 = 0xE79C)
+  // Pixel 6: Surface-tinted background (248, 251, 255, 255) ->
+  //          (30 << 11) | (62 << 5) | 31 = 0xF7DF (diverges from bit-shift
+  //          (31 << 11) | (62 << 5) | 31 = 0xFFDF)
+  constexpr size_t kConvertedPixelCount = 7;
+  constexpr size_t kTotalDstCount = 8;
   constexpr uint16_t kSentinelValue = 0xABCD;
   constexpr uint16_t kExpectedLightGray565 = 0xFFDF;
   constexpr uint16_t kExpectedRed565 = 0xF800;
   constexpr uint16_t kExpectedGreen565 = 0x07E0;
   constexpr uint16_t kExpectedBlue565 = 0x001F;
   constexpr uint16_t kExpectedMidTone565 = 0x5311;
+  constexpr uint16_t kExpectedAntiAliasedBorder565 = 0xDF7B;
+  constexpr uint16_t kExpectedSurfaceTint565 = 0xF7DF;
 
   const uint8_t src_rgba[] = {
       251, 251, 251, 255,  // Light gray background
@@ -1097,6 +1109,8 @@ TEST_F(FlutterEmbedderNativeTest,
       0,   255, 0,   255,  // Green
       0,   0,   255, 255,  // Blue
       80,  99,  138, 255,  // Mid-tone
+      225, 240, 225, 255,  // Anti-aliased border (tests to_unorm vs >>3/>>2)
+      248, 251, 255, 255,  // Surface-tinted background (tests R=248 to_unorm)
       12,  34,  56,  255,  // Extra pixel beyond kConvertedPixelCount
   };
   std::vector<uint16_t> dst_rgb565(kTotalDstCount, kSentinelValue);
@@ -1108,8 +1122,48 @@ TEST_F(FlutterEmbedderNativeTest,
   EXPECT_EQ(dst_rgb565[2], kExpectedGreen565);
   EXPECT_EQ(dst_rgb565[3], kExpectedBlue565);
   EXPECT_EQ(dst_rgb565[4], kExpectedMidTone565);
+  EXPECT_EQ(dst_rgb565[5], kExpectedAntiAliasedBorder565);
+  EXPECT_EQ(dst_rgb565[6], kExpectedSurfaceTint565);
   // Sentinel beyond kConvertedPixelCount must remain untouched.
-  EXPECT_EQ(dst_rgb565[5], kSentinelValue);
+  EXPECT_EQ(dst_rgb565[7], kSentinelValue);
+
+  // Exhaustively verify all 256 8-bit channel values [0, 255] match Skia's
+  // store_565 to_unorm(c * (1.0f / 255.0f), scale) rounding.
+  constexpr size_t kAllChannelValuesCount = 256;
+  constexpr size_t kBytesPerRgba = 4;
+  constexpr uint8_t kOpaqueAlpha = 255;
+  constexpr float kInv255 = 1.0f / 255.0f;
+  constexpr float kRedBlueScale = 31.0f;
+  constexpr float kGreenScale = 63.0f;
+  constexpr float kUnormHalf = 0.5f;
+  constexpr uint16_t kRedShift = 11;
+  constexpr uint16_t kGreenShift = 5;
+
+  std::vector<uint8_t> sweep_rgba(kAllChannelValuesCount * kBytesPerRgba);
+  for (size_t c = 0; c < kAllChannelValuesCount; ++c) {
+    sweep_rgba[c * kBytesPerRgba + 0] = static_cast<uint8_t>(c);
+    sweep_rgba[c * kBytesPerRgba + 1] = static_cast<uint8_t>(c);
+    sweep_rgba[c * kBytesPerRgba + 2] = static_cast<uint8_t>(c);
+    sweep_rgba[c * kBytesPerRgba + 3] = kOpaqueAlpha;
+  }
+  std::vector<uint16_t> sweep_rgb565(kAllChannelValuesCount, 0);
+  ConvertRgba8888ToRgb565Row(sweep_rgb565.data(), sweep_rgba.data(),
+                             kAllChannelValuesCount);
+
+  for (size_t c = 0; c < kAllChannelValuesCount; ++c) {
+    const float norm = static_cast<float>(c) * kInv255;
+    const uint16_t expected_r5 =
+        static_cast<uint16_t>(norm * kRedBlueScale + kUnormHalf);
+    const uint16_t expected_g6 =
+        static_cast<uint16_t>(norm * kGreenScale + kUnormHalf);
+    const uint16_t expected_b5 =
+        static_cast<uint16_t>(norm * kRedBlueScale + kUnormHalf);
+    const uint16_t expected_565 =
+        static_cast<uint16_t>((expected_r5 << kRedShift) |
+                              (expected_g6 << kGreenShift) | expected_b5);
+    EXPECT_EQ(sweep_rgb565[c], expected_565)
+        << "Mismatch at 8-bit channel value c=" << c;
+  }
 }
 
 TEST_F(

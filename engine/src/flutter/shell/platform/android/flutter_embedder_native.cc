@@ -118,10 +118,15 @@ constexpr size_t kRgbaRedChannelOffset = 0;
 constexpr size_t kRgbaGreenChannelOffset = 1;
 // Byte offset of the blue channel in an RGBA8888 pixel.
 constexpr size_t kRgbaBlueChannelOffset = 2;
-// Right shift to quantize an 8-bit red or blue channel to 5 bits.
-constexpr uint16_t kRgb565RedBlueQuantizeShift = 3;
-// Right shift to quantize an 8-bit green channel to 6 bits.
-constexpr uint16_t kRgb565GreenQuantizeShift = 2;
+// Maximum 8-bit channel value in an RGBA8888 pixel.
+constexpr uint32_t kRgba8888ChannelMax = 255u;
+// Maximum 5-bit red or blue channel value in a 16-bit RGB565 pixel.
+constexpr uint32_t kRgb565RedBlueMax = 31u;
+// Maximum 6-bit green channel value in a 16-bit RGB565 pixel.
+constexpr uint32_t kRgb565GreenMax = 63u;
+// Half-divisor rounding bias (255 / 2 = 127) matching Skia's store_565
+// to_unorm(c / 255.0f, scale) = floor(c * scale / 255.0f + 0.5f).
+constexpr uint32_t kRgb565UnormRoundBias = 127u;
 // Bit position of the 5-bit red field in a 16-bit RGB565 pixel.
 constexpr uint16_t kRgb565RedFieldShift = 11;
 // Bit position of the 6-bit green field in a 16-bit RGB565 pixel.
@@ -3862,12 +3867,21 @@ void ConvertRgba8888ToRgb565Row(uint16_t* dst_row,
   }
   for (size_t x = 0; x < pixel_count; ++x) {
     const uint8_t* pixel = src_row + x * kBytesPerRgbaPixel;
-    const uint16_t r5 = static_cast<uint16_t>(pixel[kRgbaRedChannelOffset] >>
-                                              kRgb565RedBlueQuantizeShift);
-    const uint16_t g6 = static_cast<uint16_t>(pixel[kRgbaGreenChannelOffset] >>
-                                              kRgb565GreenQuantizeShift);
-    const uint16_t b5 = static_cast<uint16_t>(pixel[kRgbaBlueChannelOffset] >>
-                                              kRgb565RedBlueQuantizeShift);
+    const uint16_t r5 = static_cast<uint16_t>(
+        (static_cast<uint32_t>(pixel[kRgbaRedChannelOffset]) *
+             kRgb565RedBlueMax +
+         kRgb565UnormRoundBias) /
+        kRgba8888ChannelMax);
+    const uint16_t g6 = static_cast<uint16_t>(
+        (static_cast<uint32_t>(pixel[kRgbaGreenChannelOffset]) *
+             kRgb565GreenMax +
+         kRgb565UnormRoundBias) /
+        kRgba8888ChannelMax);
+    const uint16_t b5 = static_cast<uint16_t>(
+        (static_cast<uint32_t>(pixel[kRgbaBlueChannelOffset]) *
+             kRgb565RedBlueMax +
+         kRgb565UnormRoundBias) /
+        kRgba8888ChannelMax);
     dst_row[x] = static_cast<uint16_t>((r5 << kRgb565RedFieldShift) |
                                        (g6 << kRgb565GreenFieldShift) | b5);
   }
