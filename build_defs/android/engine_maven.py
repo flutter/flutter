@@ -3,18 +3,20 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-"""Lays the Android embedding's Maven artifacts as a repository at another version (engine_maven_repository).
+"""Lays the Android embedding's Maven artifacts as a repository (engine_maven_repository).
 
 The build names the artifacts by the engine's git revision:
 `zip_archives/download.flutter.io/io/flutter/flutter_embedding_debug/1.0.0-<revision>/flutter_embedding_debug-1.0.0-<revision>.jar`
 (shell/platform/android's embedding_jars and abi_jars) and the poms beside
 the build's other outputs as `flutter_embedding_debug.pom`,
 `arm64_v8a_debug.pom` (pom_embedding, pom_libflutter), whose text names the
-revision too. The tests' SDK facsimile says the engine is `bazel`
-(bin/cache/engine.stamp), so the Gradle plugin asks for
-`io.flutter:flutter_embedding_debug:1.0.0-bazel`: this writes
+revision too. The Gradle plugin asks for
+`io.flutter:flutter_embedding_debug:1.0.0-<engine.stamp>`, the tests' SDK
+facsimile's stamp -- the revision itself (bin/internal's versioned stamps),
+or a fixed word for a facsimile that says so: this writes
 `<output>/download.flutter.io/io/flutter/<artifact>/1.0.0-<version>/<artifact>-1.0.0-<version>.<ext>`
-for every jar and pom given, the revision replaced in the poms' text.
+for every jar and pom given, the revision replaced in the poms' text where
+the version differs from it.
 """
 
 import argparse
