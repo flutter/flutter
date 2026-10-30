@@ -4,8 +4,8 @@
 
 #include "impeller/entity/contents/content_context.h"
 
-#include <format>
 #include <memory>
+#include <string>
 #include <utility>
 
 #include "flutter/display_list/image/dl_image.h"
@@ -27,6 +27,7 @@
 #include "impeller/renderer/texture_util.h"
 #include "impeller/tessellator/tessellator.h"
 #include "impeller/typographer/typographer_context.h"
+#include "third_party/abseil-cpp/absl/strings/str_cat.h"
 
 namespace impeller {
 
@@ -200,7 +201,7 @@ RenderPipelineHandleT* CreateIfNeeded(
       /*async=*/false, [&opts, variants_count = container.GetPipelineCount()](
                            PipelineDescriptor& desc) {
         opts.ApplyToPipelineDescriptor(desc);
-        desc.SetLabel(std::format("{} V#{}", desc.GetLabel(), variants_count));
+        desc.SetLabel(absl::StrCat(desc.GetLabel(), " V#", variants_count));
       });
   std::unique_ptr<RenderPipelineHandleT> variant =
       std::make_unique<RenderPipelineHandleT>(std::move(variant_future));
