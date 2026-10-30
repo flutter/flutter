@@ -755,7 +755,6 @@ static void fl_engine_class_init(FlEngineClass* klass) {
 
 static void fl_engine_init(FlEngine* self) {
   self->thread = g_thread_self();
-  self->frame_pacer = fl_gtk_frame_pacer_new();
 
   self->embedder_api.struct_size = sizeof(FlutterEngineProcTable);
   if (FlutterEngineGetProcAddresses(&self->embedder_api) != kSuccess) {
@@ -867,6 +866,19 @@ FlDisplayMonitor* fl_engine_get_display_monitor(FlEngine* self) {
 
 gboolean fl_engine_start(FlEngine* self, GError** error) {
   g_return_val_if_fail(FL_IS_ENGINE(self), FALSE);
+
+  // Select once before initialization. Renderer selection does not affect
+  // pacing.
+  const gchar* frame_pacer = g_getenv("FLUTTER_LINUX_FRAME_PACER");
+  const bool use_gtk_pacer =
+      frame_pacer == nullptr || strcmp(frame_pacer, "gtk") == 0;
+  if (!use_gtk_pacer && strcmp(frame_pacer, "engine") != 0) {
+    g_set_error(
+        error, fl_engine_error_quark(), FL_ENGINE_ERROR_FAILED,
+        "Unknown FLUTTER_LINUX_FRAME_PACER '%s'; expected gtk or engine",
+        frame_pacer);
+    return FALSE;
+  }
 
   FlutterRendererConfig config = {};
   config.type = self->renderer_type;
@@ -1002,7 +1014,16 @@ gboolean fl_engine_start(FlEngine* self, GError** error) {
   args.command_line_argv =
       reinterpret_cast<const char* const*>(command_line_args->pdata);
   args.platform_message_callback = fl_engine_platform_message_cb;
-  args.vsync_callback = fl_engine_vsync_callback;
+  if (use_gtk_pacer) {
+    if (self->frame_pacer == nullptr) {
+      self->frame_pacer = fl_gtk_frame_pacer_new();
+    }
+    args.vsync_callback = fl_engine_vsync_callback;
+  }
+  if (frame_pacer != nullptr) {
+    g_message("Flutter Linux frame pacer: %s",
+              use_gtk_pacer ? "gtk" : "engine");
+  }
   args.update_semantics_callback2 = fl_engine_update_semantics_cb;
   args.custom_task_runners = &custom_task_runners;
   args.shutdown_dart_vm_when_done = true;

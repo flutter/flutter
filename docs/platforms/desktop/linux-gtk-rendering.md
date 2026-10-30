@@ -14,6 +14,15 @@ This covers presentation of Flutter's composed frame, not video decoding or
 the plugin-to-Flutter external-texture boundary. Enabling DMA-BUF here does not
 make a media plugin export DMA-BUFs or select Flutter's Vulkan backend.
 
+## Frame pacing selection
+
+Set `FLUTTER_LINUX_FRAME_PACER=gtk` (the current default) or `engine` before
+starting the app to compare scheduling policies independently of its rendering
+backend. Selection applies to both GTK3 and GTK4 and is fixed at engine startup;
+invalid values fail startup. The engine fallback currently uses a fixed 60 Hz
+phase. See [frame pacing and lifecycle tests](../../../engine/src/flutter/shell/platform/linux/testing/FRAME_PACING.md)
+for ownership, recovery behavior, benchmark requirements, and limitations.
+
 ## Terminology
 
 * **CPU-copy-free**: pixels do not pass through `glReadPixels` or CPU memory.

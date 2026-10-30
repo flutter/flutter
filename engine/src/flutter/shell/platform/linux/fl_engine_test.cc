@@ -64,6 +64,76 @@ TEST_F(FlEngineTest, VulkanRejectsExplicitlyDisabledImpeller) {
 }
 #endif
 
+class FlEnginePacerPolicyTest : public flutter::testing::LinuxTest {
+ protected:
+  void SetUp() override {
+    previous = g_strdup(g_getenv("FLUTTER_LINUX_FRAME_PACER"));
+    g_unsetenv("FLUTTER_LINUX_FRAME_PACER");
+    fl_engine_get_embedder_api(engine)->Initialize = MOCK_ENGINE_PROC(
+        Initialize, ([this](size_t, const FlutterRendererConfig*,
+                            const FlutterProjectArgs* args, void*,
+                            FLUTTER_API_SYMBOL(FlutterEngine)* engine_out) {
+          initialized = true;
+          callback = args->vsync_callback;
+          *engine_out = reinterpret_cast<FLUTTER_API_SYMBOL(FlutterEngine)>(1);
+          return kSuccess;
+        }));
+    fl_engine_get_embedder_api(engine)->RunInitialized =
+        MOCK_ENGINE_PROC(RunInitialized, ([](auto) { return kSuccess; }));
+    fl_engine_get_embedder_api(engine)->Shutdown =
+        MOCK_ENGINE_PROC(Shutdown, ([](auto) { return kSuccess; }));
+  }
+
+  void TearDown() override {
+    LinuxTest::TearDown();
+    if (previous != nullptr) {
+      g_setenv("FLUTTER_LINUX_FRAME_PACER", previous, TRUE);
+    } else {
+      g_unsetenv("FLUTTER_LINUX_FRAME_PACER");
+    }
+    g_free(previous);
+  }
+
+  gchar* previous = nullptr;
+  bool initialized = false;
+  VsyncCallback callback = nullptr;
+};
+
+TEST_F(FlEnginePacerPolicyTest, DefaultPreservesGtkScheduling) {
+  StartEngine();
+  EXPECT_TRUE(initialized);
+  EXPECT_NE(callback, nullptr);
+}
+
+TEST_F(FlEnginePacerPolicyTest, ExplicitGtkInstallsCallback) {
+  g_setenv("FLUTTER_LINUX_FRAME_PACER", "gtk", TRUE);
+  StartEngine();
+  EXPECT_TRUE(initialized);
+  EXPECT_NE(callback, nullptr);
+}
+
+TEST_F(FlEnginePacerPolicyTest, EngineSelectionAtStartLeavesCallbackUnset) {
+  // The engine object already exists: selection happens at start, not creation.
+  g_setenv("FLUTTER_LINUX_FRAME_PACER", "engine", TRUE);
+  StartEngine();
+  EXPECT_TRUE(initialized);
+  EXPECT_EQ(callback, nullptr);
+}
+
+TEST_F(FlEnginePacerPolicyTest, RejectInvalidPolicyBeforeInitializingEngine) {
+  for (const gchar* value : {"timer", "GTK", ""}) {
+    g_setenv("FLUTTER_LINUX_FRAME_PACER", value, TRUE);
+    g_autoptr(GError) error = nullptr;
+    EXPECT_FALSE(fl_engine_start(engine, &error));
+    ASSERT_NE(error, nullptr);
+    EXPECT_STREQ(error->message,
+                 (std::string("Unknown FLUTTER_LINUX_FRAME_PACER '") + value +
+                  "'; expected gtk or engine")
+                     .c_str());
+    EXPECT_FALSE(initialized);
+  }
+}
+
 TEST_F(FlEngineTest, VsyncCallbackUsesMainContextAndReturnsBaton) {
   VsyncCallback vsync_callback = nullptr;
   void* callback_user_data = nullptr;
