@@ -16,16 +16,30 @@ final RegExp _builtInKotlinRegex = RegExp(
   multiLine: true,
 );
 
-/// Migrate from enabled Built-in Kotlin by default to disabled Built-in Kotlin by default.
+/// Adds `android.builtInKotlin=false` to projects whose app applies the
+/// `kotlin-android` plugin and that do not configure `android.builtInKotlin`.
+///
+/// The `kotlin-android` plugin fails to apply when built-in Kotlin is enabled,
+/// which the Android Gradle Plugin does when `android.builtInKotlin` is not
+/// set. Projects without the plugin are left on built-in Kotlin.
 /// For more details see: http://flutter.dev/go/android-built-in-kotlin-support
 class DisableBuiltInKotlinMigration extends ProjectMigrator {
   DisableBuiltInKotlinMigration(AndroidProject project, super.logger)
-    : _gradlePropertiesFile = project.hostAppGradleRoot.childFile('gradle.properties');
+    : _project = project,
+      _gradlePropertiesFile = project.hostAppGradleRoot.childFile('gradle.properties');
 
+  final AndroidProject _project;
   final File _gradlePropertiesFile;
 
   @override
   Future<void> migrate() async {
+    if (!_project.appliesKotlinAndroidPlugin) {
+      logger.printTrace(
+        'The app does not apply the kotlin-android plugin, skipping the Built-in Kotlin opt-out.',
+      );
+      return;
+    }
+
     if (!_gradlePropertiesFile.existsSync()) {
       logger.printTrace(
         'The gradle.properties file was not found. Creating it with a disabled Built-in Kotlin flag.',
