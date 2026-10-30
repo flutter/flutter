@@ -58,10 +58,13 @@ abstract class FlutterBaseDebugAdapter
 
   @override
   void handleSessionTerminate([String exitSuffix = '']) {
+    isTerminating = true;
     if (waitingForDebugger && !debuggerInitializationFailedCompleter.isCompleted) {
-      debuggerInitializationFailedCompleter.completeError(
-        DebugAdapterException('Session terminated before debugger initialized: $exitSuffix'),
-      );
+      final String suffix = exitSuffix.trim();
+      final message = suffix.isNotEmpty
+          ? 'Session terminated before debugger initialized: $suffix'
+          : 'Session terminated before debugger initialized';
+      debuggerInitializationFailedCompleter.completeError(DebugAdapterException(message));
     }
     super.handleSessionTerminate(exitSuffix);
   }
