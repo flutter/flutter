@@ -453,16 +453,21 @@ TEST_F(ShellTest, NotifyLowMemoryWarningDeletesTexturesOnImpellerGLES) {
                            CreateNewThread()        // io
   );
 
+  NoSurfaceGLESPlatformView* platform_view = nullptr;
   std::unique_ptr<Shell> shell = CreateShell({
       .settings = settings,
       .task_runners = task_runners,
       .platform_view_create_callback =
-          [&context, &egl](Shell& shell) -> std::unique_ptr<PlatformView> {
-        return std::make_unique<NoSurfaceGLESPlatformView>(
+          [&context, &egl,
+           &platform_view](Shell& shell) -> std::unique_ptr<PlatformView> {
+        auto view = std::make_unique<NoSurfaceGLESPlatformView>(
             shell, shell.GetTaskRunners(), context, egl);
+        platform_view = view.get();
+        return view;
       },
   });
   ASSERT_TRUE(shell->IsSetup());
+  ASSERT_NE(platform_view, nullptr);
 
   PlatformViewNotifyCreated(shell.get());
 
@@ -472,9 +477,7 @@ TEST_F(ShellTest, NotifyLowMemoryWarningDeletesTexturesOnImpellerGLES) {
     task_runners.GetRasterTaskRunner()->PostTask([&]() {
       egl->MakeCurrent();
       std::shared_ptr<impeller::AiksContext> aiks_context =
-          static_cast<NoSurfaceGLESPlatformView*>(
-              shell->GetPlatformView().get())
-              ->GetSharedAiksContext();
+          platform_view->GetSharedAiksContext();
       ASSERT_NE(aiks_context, nullptr);
       auto& allocator =
           aiks_context->GetContentContext().GetRenderTargetCache();
@@ -513,9 +516,7 @@ TEST_F(ShellTest, NotifyLowMemoryWarningDeletesTexturesOnImpellerGLES) {
     task_runners.GetRasterTaskRunner()->PostTask([&]() {
       egl->MakeCurrent();
       std::shared_ptr<impeller::AiksContext> aiks_context =
-          static_cast<NoSurfaceGLESPlatformView*>(
-              shell->GetPlatformView().get())
-              ->GetSharedAiksContext();
+          platform_view->GetSharedAiksContext();
       ASSERT_NE(aiks_context, nullptr);
       auto& allocator =
           aiks_context->GetContentContext().GetRenderTargetCache();
