@@ -5,7 +5,7 @@
 // Shared body of the UberSDF shaders, included by `uber_sdf.frag` and
 // `uber_sdf_ssbo.frag`. Each entrypoint supplies only `getGradientColor()`.
 
-precision mediump float;
+precision highp float;
 
 #include <impeller/color.glsl>
 #include <impeller/constants.glsl>
