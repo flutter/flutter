@@ -176,9 +176,9 @@ FLUTTER_ASSERT_ARC
   OCMStub([urlContext URL]).andReturn(url);
   NSSet<UIOpenURLContext*>* urlContexts = [NSSet setWithObjects:urlContext, nil];
   OCMStub([mockOptions URLContexts]).andReturn(urlContexts);
+  OCMReject([mockPlugin application:[OCMArg any] didFinishLaunchingWithOptions:[OCMArg any]]);
 
   [delegate sceneWillConnectFallback:mockOptions];
-  OCMReject([mockPlugin application:[OCMArg any] didFinishLaunchingWithOptions:[OCMArg any]]);
 }
 
 - (void)testSceneWillConnectFallbackSkippedNoOptions {
@@ -188,9 +188,9 @@ FLUTTER_ASSERT_ARC
   [delegate addDelegate:mockPlugin];
 
   id mockOptions = OCMClassMock([UISceneConnectionOptions class]);
+  OCMReject([mockPlugin application:[OCMArg any] didFinishLaunchingWithOptions:[OCMArg any]]);
 
   [delegate sceneWillConnectFallback:mockOptions];
-  OCMReject([mockPlugin application:[OCMArg any] didFinishLaunchingWithOptions:[OCMArg any]]);
 }
 
 - (void)testDidEnterBackground {
@@ -217,12 +217,12 @@ FLUTTER_ASSERT_ARC
   OCMStub([mockApplication hasSceneDelegate]).andReturn(YES);
   id plugin = OCMProtocolMock(@protocol(FlutterPlugin));
   [delegate addDelegate:plugin];
+  OCMReject([plugin applicationDidEnterBackground:[OCMArg any]]);
   [[NSNotificationCenter defaultCenter]
       postNotificationName:UIApplicationDidEnterBackgroundNotification
                     object:nil];
 
   [self waitForExpectations:@[ expectation ] timeout:5.0];
-  OCMReject([plugin applicationDidEnterBackground:[OCMArg any]]);
 }
 
 - (void)testSceneDidEnterBackgroundFallback {
@@ -238,9 +238,9 @@ FLUTTER_ASSERT_ARC
   FlutterPluginAppLifeCycleDelegate* delegate = [[FlutterPluginAppLifeCycleDelegate alloc] init];
   id plugin = OCMProtocolMock(@protocol(TestFlutterPluginWithSceneEvents));
   [delegate addDelegate:plugin];
+  OCMReject([plugin applicationDidEnterBackground:[OCMArg any]]);
 
   [delegate sceneDidEnterBackgroundFallback];
-  OCMReject([plugin applicationDidEnterBackground:[OCMArg any]]);
 }
 
 - (void)testWillEnterForeground {
@@ -267,12 +267,12 @@ FLUTTER_ASSERT_ARC
   OCMStub([mockApplication hasSceneDelegate]).andReturn(YES);
   id plugin = OCMProtocolMock(@protocol(FlutterPlugin));
   [delegate addDelegate:plugin];
+  OCMReject([plugin applicationWillEnterForeground:[OCMArg any]]);
   [[NSNotificationCenter defaultCenter]
       postNotificationName:UIApplicationWillEnterForegroundNotification
                     object:nil];
 
   [self waitForExpectations:@[ expectation ] timeout:5.0];
-  OCMReject([plugin applicationWillEnterForeground:[OCMArg any]]);
 }
 
 - (void)testSceneWillEnterForegroundFallback {
@@ -288,9 +288,9 @@ FLUTTER_ASSERT_ARC
   FlutterPluginAppLifeCycleDelegate* delegate = [[FlutterPluginAppLifeCycleDelegate alloc] init];
   id plugin = OCMProtocolMock(@protocol(TestFlutterPluginWithSceneEvents));
   [delegate addDelegate:plugin];
+  OCMReject([plugin applicationWillEnterForeground:[OCMArg any]]);
 
   [delegate sceneWillEnterForegroundFallback];
-  OCMReject([plugin applicationWillEnterForeground:[OCMArg any]]);
 }
 
 - (void)testWillResignActive {
@@ -317,12 +317,12 @@ FLUTTER_ASSERT_ARC
   OCMStub([mockApplication hasSceneDelegate]).andReturn(YES);
   id plugin = OCMProtocolMock(@protocol(FlutterPlugin));
   [delegate addDelegate:plugin];
+  OCMReject([plugin applicationWillResignActive:[OCMArg any]]);
   [[NSNotificationCenter defaultCenter]
       postNotificationName:UIApplicationWillResignActiveNotification
                     object:nil];
 
   [self waitForExpectations:@[ expectation ] timeout:5.0];
-  OCMReject([plugin applicationWillResignActive:[OCMArg any]]);
 }
 
 - (void)testSceneWillResignActiveFallback {
@@ -338,9 +338,9 @@ FLUTTER_ASSERT_ARC
   FlutterPluginAppLifeCycleDelegate* delegate = [[FlutterPluginAppLifeCycleDelegate alloc] init];
   id plugin = OCMProtocolMock(@protocol(TestFlutterPluginWithSceneEvents));
   [delegate addDelegate:plugin];
+  OCMReject([plugin applicationWillResignActive:[OCMArg any]]);
 
   [delegate sceneWillResignActiveFallback];
-  OCMReject([plugin applicationWillResignActive:[OCMArg any]]);
 }
 
 - (void)testDidBecomeActive {
@@ -367,12 +367,12 @@ FLUTTER_ASSERT_ARC
   OCMStub([mockApplication hasSceneDelegate]).andReturn(YES);
   id plugin = OCMProtocolMock(@protocol(FlutterPlugin));
   [delegate addDelegate:plugin];
+  OCMReject([plugin applicationDidBecomeActive:[OCMArg any]]);
   [[NSNotificationCenter defaultCenter]
       postNotificationName:UIApplicationDidBecomeActiveNotification
                     object:nil];
 
   [self waitForExpectations:@[ expectation ] timeout:5.0];
-  OCMReject([plugin applicationDidBecomeActive:[OCMArg any]]);
 }
 
 - (void)testSceneDidBecomeActiveFallback {
@@ -388,9 +388,9 @@ FLUTTER_ASSERT_ARC
   FlutterPluginAppLifeCycleDelegate* delegate = [[FlutterPluginAppLifeCycleDelegate alloc] init];
   id plugin = OCMProtocolMock(@protocol(TestFlutterPluginWithSceneEvents));
   [delegate addDelegate:plugin];
+  OCMReject([plugin applicationDidBecomeActive:[OCMArg any]]);
 
   [delegate sceneDidBecomeActiveFallback];
-  OCMReject([plugin applicationDidBecomeActive:[OCMArg any]]);
 }
 
 - (void)testSceneFallbackOpenURLContexts {
@@ -458,9 +458,9 @@ FLUTTER_ASSERT_ARC
 
   id urlContext = OCMClassMock([UIOpenURLContext class]);
   NSSet<UIOpenURLContext*>* urlContexts = [NSSet setWithObjects:urlContext, nil];
+  OCMReject([mockPlugin application:[OCMArg any] openURL:[OCMArg any] options:[OCMArg any]]);
 
   [delegate sceneFallbackOpenURLContexts:urlContexts];
-  OCMReject([mockPlugin application:[OCMArg any] openURL:[OCMArg any] options:[OCMArg any]]);
 }
 
 - (void)testSceneFallbackContinueUserActivity {
@@ -484,11 +484,11 @@ FLUTTER_ASSERT_ARC
   [delegate addDelegate:mockPlugin];
 
   id userActivity = OCMClassMock([NSUserActivity class]);
-
-  [delegate sceneFallbackContinueUserActivity:userActivity];
   OCMReject([mockPlugin application:[UIApplication sharedApplication]
                continueUserActivity:userActivity
                  restorationHandler:[OCMArg any]]);
+
+  [delegate sceneFallbackContinueUserActivity:userActivity];
 }
 
 - (void)testSceneFallbackPerformActionForShortcutItem {
@@ -515,12 +515,12 @@ FLUTTER_ASSERT_ARC
   [delegate addDelegate:mockPlugin];
 
   id shortcut = OCMClassMock([UIApplicationShortcutItem class]);
-  [delegate sceneFallbackPerformActionForShortcutItem:shortcut
-                                    completionHandler:^(BOOL succeeded){
-                                    }];
   OCMReject([mockPlugin application:[OCMArg any]
        performActionForShortcutItem:[OCMArg any]
                   completionHandler:[OCMArg any]]);
+  [delegate sceneFallbackPerformActionForShortcutItem:shortcut
+                                    completionHandler:^(BOOL succeeded){
+                                    }];
 }
 
 - (void)testWillTerminate {
