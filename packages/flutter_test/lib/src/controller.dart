@@ -1152,7 +1152,7 @@ abstract class WidgetController {
         kind: kind,
         view: view,
       );
-      await gesture.up();
+      await gesture.up(view: view);
     });
   }
 
@@ -1235,7 +1235,7 @@ abstract class WidgetController {
         view: view,
       );
       await pump(kLongPressTimeout + kPressTimeout);
-      await gesture.up();
+      await gesture.up(view: view);
     });
   }
 
