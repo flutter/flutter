@@ -106,12 +106,15 @@ class SemanticIncrementable extends SemanticRole {
   /// [GestureMode.browserGestures].
   late final GestureModeCallback _gestureModeListener;
 
-  /// Whether we forwarded a semantics action to the framework and awaiting an
-  /// update.
+  /// Whether we forwarded a semantics action to the framework and are awaiting
+  /// an update, or the role was newly attached and has not yet synced its
+  /// input values.
   ///
   /// This field is used to determine whether the HTML DOM of the semantics
-  /// tree should be updated.
-  bool _pendingResync = false;
+  /// tree should be updated. It starts out as true so that a newly attached
+  /// role syncs its initial range attributes even when the semantics object's
+  /// value fields are not dirty.
+  bool _pendingResync = true;
 
   @override
   void updateValidationResult() {
