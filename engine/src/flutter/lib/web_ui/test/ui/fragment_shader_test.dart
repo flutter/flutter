@@ -1520,6 +1520,109 @@ Future<void> testMain() async {
           expect(Uint8List.sublistView(pixels), Uint8List.sublistView(expectedPixels));
         },
       );
+
+      test('only an exact sampler name matches', () async {
+        for (final (String asset, String name) in <(String, String)>[
+          ('texture_shader', ''),
+          ('texture_shader', 'U_TEXTURE'),
+          ('texture_shader', 'u_tex'),
+          ('texture_shader', 'u_texture '),
+          ('no_uniforms', 'u_texture'),
+        ]) {
+          final ui.FragmentProgram program = await renderer.createFragmentProgram(asset);
+          final ui.FragmentShader shader = program.fragmentShader();
+          expect(
+            () => shader.getImageSampler(name),
+            throwsA(
+              isA<ArgumentError>().having((e) => e.message, 'message', 'No uniform named "$name".'),
+            ),
+            reason: '$asset: "$name"',
+          );
+          shader.dispose();
+        }
+      });
+
+      test('slots for the same sampler and setImageSampler share one binding', () async {
+        final images = <ui.Image>[
+          for (var i = 0; i < 3; i++) _createOvalGradientImage(imageDimension: 16),
+        ];
+        final ui.FragmentProgram program = await renderer.createFragmentProgram('texture_shader');
+        final shader = program.fragmentShader() as EngineFragmentShader;
+        final ui.ImageSamplerSlot first = shader.getImageSampler('u_texture');
+        final ui.ImageSamplerSlot second = shader.getImageSampler('u_texture');
+
+        final samplers = <BackendImageShader>[];
+        for (final (int i, void Function(ui.Image) bind) in <(int, void Function(ui.Image))>[
+          (0, first.set),
+          (1, (image) => shader.setImageSampler(0, image)),
+          (2, second.set),
+        ]) {
+          bind(images[i]);
+          expect(shader.samplerImages, orderedEquals(<ui.Image>[images[i]]), reason: 'bind $i');
+          expect(shader.debugImageSamplers.keys, orderedEquals(<int>[0]), reason: 'bind $i');
+          samplers.add(shader.debugImageSamplers[0]!);
+          for (var j = 0; j < i; j++) {
+            expect(_debugIsSamplerDisposed(samplers[j]), isTrue, reason: 'bind $i, sampler $j');
+          }
+          expect(_debugIsSamplerDisposed(samplers[i]), isFalse, reason: 'bind $i');
+        }
+
+        shader.dispose();
+        for (final image in images) {
+          image.dispose();
+        }
+      });
+
+      test('replacing one sampler via its slot between draws keeps the other bound', () async {
+        final ui.Image redImage = _createSolidColorImage(
+          const ui.Color(0xFFFF0000),
+          imageDimension: 4,
+        );
+        final ui.Image blueImage = _createSolidColorImage(
+          const ui.Color(0xFF0000FF),
+          imageDimension: 4,
+        );
+        final ui.Image greenImage = _createSolidColorImage(
+          const ui.Color(0xFF00FF00),
+          imageDimension: 4,
+        );
+        final ui.FragmentProgram program = await renderer.createFragmentProgram('two_samplers');
+        final ui.FragmentShader shader = program.fragmentShader();
+        shader.getUniformFloat('u_split').set(10);
+        shader.getUniformVec2('u_offset').set(1, 1);
+        final ui.ImageSamplerSlot left = shader.getImageSampler('u_left');
+        final ui.ImageSamplerSlot right = shader.getImageSampler('u_right');
+        final paint = ui.Paint()..shader = shader;
+
+        final recorder = ui.PictureRecorder();
+        final canvas = ui.Canvas(recorder);
+        left.set(redImage);
+        right.set(blueImage);
+        canvas.drawRect(const ui.Rect.fromLTWH(0, 0, 20, 10), paint);
+        right.set(greenImage);
+        canvas.drawRect(const ui.Rect.fromLTWH(0, 10, 20, 10), paint);
+        final ui.Picture picture = recorder.endRecording();
+        shader.dispose();
+        redImage.dispose();
+        blueImage.dispose();
+        greenImage.dispose();
+
+        final ByteData pixels = await _rasterizePicture(picture, width: 20, height: 20);
+        picture.dispose();
+
+        for (final (int x, int y, List<int> rgba) in <(int, int, List<int>)>[
+          (5, 5, <int>[255, 0, 0, 255]),
+          (15, 5, <int>[0, 0, 255, 255]),
+          (5, 15, <int>[255, 0, 0, 255]),
+          (15, 15, <int>[0, 255, 0, 255]),
+        ]) {
+          expect(
+            _rgbaAt(pixels, width: 20, x: x, y: y),
+            rgba,
+            reason: '($x, $y)',
+          );
+        }
+      });
     }, skip: isWimp); // https://github.com/flutter/flutter/issues/175431
   });
 
