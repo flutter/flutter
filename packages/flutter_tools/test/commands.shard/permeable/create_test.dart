@@ -5406,14 +5406,8 @@ CreateCommand createCreateCommand({
         cache: globals.cache,
         flutterVersion: globals.flutterVersion,
       );
-  final ToolContext(
-    :Cache cache,
-    :FileSystem fs,
-    :Logger logger,
-    :OperatingSystemUtils os,
-    :Platform platform,
-    :ProcessManager processManager,
-  ) = resolvedToolContext;
+  final ToolContext(:Cache cache, :Logger logger, :OperatingSystemUtils os, :Platform platform) =
+      resolvedToolContext;
   return CreateCommand(
     androidContext:
         androidContext ??
