@@ -20,7 +20,6 @@ import '../../base/platform.dart';
 import '../../base/process.dart';
 import '../../build_info.dart';
 import '../../build_system/exceptions.dart';
-import '../../cache.dart';
 import '../../features.dart';
 import 'android/native_assets.dart';
 import 'dart_hook_result.dart';
@@ -564,6 +563,7 @@ class FlutterNativeAssetsBuildRunnerImpl implements FlutterNativeAssetsBuildRunn
     this.runPackageName,
     this.pubspecPath, {
     required this.includeDevDependencies,
+    required this._flutterRoot,
   });
 
   final String pubspecPath;
@@ -577,6 +577,7 @@ class FlutterNativeAssetsBuildRunnerImpl implements FlutterNativeAssetsBuildRunn
 
   /// Include the dev dependencies of [runPackageName].
   final bool includeDevDependencies;
+  final String _flutterRoot;
 
   late final _logger = logging.Logger('')
     ..onRecord.listen((logging.LogRecord record) {
@@ -599,7 +600,7 @@ class FlutterNativeAssetsBuildRunnerImpl implements FlutterNativeAssetsBuildRunn
   // use the Dart standalone executable
   // ($FLUTTER_ROOT/bin/cache/dart-sdk/bin/dart).
   late final Uri _dartExecutable = fileSystem
-      .directory(Cache.flutterRoot)
+      .directory(_flutterRoot)
       .uri
       .resolve('bin/cache/dart-sdk/bin/dart${platform.isWindows ? '.exe' : ''}');
 

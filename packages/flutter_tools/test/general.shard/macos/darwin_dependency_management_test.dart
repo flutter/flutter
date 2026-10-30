@@ -817,13 +817,12 @@ let package = Package(
         path: '/path/to/test_plugin/',
         defaultPackagePlatforms: const <String, String>{},
         pluginDartClassPlatforms: const <String, DartPluginClassAndFilePair>{},
-        platforms: <String, PluginPlatform>{
+        platforms: const <String, PluginPlatform>{
           AndroidPlugin.kConfigKey: AndroidPlugin(
             name: 'test_plugin',
             package: 'com.example.test',
             pluginClass: 'TestPlugin',
             pluginPath: '/path/to/test_plugin/',
-            fileSystem: MemoryFileSystem.test(),
           ),
         },
         dependencies: <String>[],
@@ -1242,12 +1241,11 @@ flutter:
         implementsPackage: 'foo',
         defaultPackagePlatforms: const <String, String>{},
         pluginDartClassPlatforms: const <String, DartPluginClassAndFilePair>{},
-        platforms: <String, PluginPlatform>{
+        platforms: const <String, PluginPlatform>{
           AndroidPlugin.kConfigKey: AndroidPlugin(
             name: 'foo_android',
             package: 'com.example',
             pluginPath: '',
-            fileSystem: fileSystem,
           ),
         },
         dependencies: const <String>[],
