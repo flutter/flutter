@@ -1088,7 +1088,10 @@ Future<void> testMain() async {
         255,
       ], reason: 'right box should use the mutated uniforms');
     },
-    skip: isWimp, // https://github.com/flutter/flutter/issues/175431
+    // Wimp: https://github.com/flutter/flutter/issues/175431
+    // Skwasm currently shares the uniform buffer with shaders already recorded
+    // in a picture, so later uniform changes affect earlier draws.
+    skip: isWimp || isSkwasm,
   );
 
   group('fragmentShader uniforms', () {
