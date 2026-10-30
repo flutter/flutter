@@ -276,11 +276,7 @@ void main() {
       );
 
       group('getRepoPackages', () {
-        late String? oldFlutterRoot;
-
         setUp(() {
-          oldFlutterRoot = Cache.flutterRoot;
-          Cache.flutterRoot = _kFlutterRoot;
           fileSystem
               .directory(fileSystem.path.join(_kFlutterRoot, 'examples'))
               .createSync(recursive: true);
@@ -299,10 +295,6 @@ void main() {
               .createSync();
         });
 
-        tearDown(() {
-          Cache.flutterRoot = oldFlutterRoot;
-        });
-
         testUsingContext(
           'returns all packages in dev, examples, and packages',
           () {
@@ -319,6 +311,11 @@ void main() {
             ]);
           },
           overrides: <Type, Generator>{
+            Cache: () => Cache.test(
+              flutterRoot: _kFlutterRoot,
+              fileSystem: fileSystem,
+              processManager: FakeProcessManager.any(),
+            ),
             FileSystem: () => fileSystem,
             ProcessManager: () => FakeProcessManager.any(),
             Platform: () => platform,
