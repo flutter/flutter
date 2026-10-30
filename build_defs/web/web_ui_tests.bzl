@@ -517,7 +517,8 @@ def web_ui_tests(
     and a run of tools/gn_to_bazel.
 
     Args:
-      name: the test_suite over every suite declared.
+      name: the test_suite over the suites a wildcard build runs on this host (every browser's but
+        those `browser_tags` makes manual, which have their `<browser>_tests` alone).
       config: `FELT_CONFIG` from the generated felt_config.bzl (tools/gn_to_bazel's
         rendering of test/felt_config.yaml).
       browsers: the browsers this host runs, by felt's name (`chrome`, `firefox`), each a dict of
@@ -539,7 +540,8 @@ def web_ui_tests(
       tags: each test's tags.
       bundle_tags: the bundle targets' tags (`manual`: built by the tests that run them).
       browser_tags: further tags for one browser's tests and suites, by felt's name of the
-        browser (`manual` for a browser's suites a wildcard build leaves out on this host).
+        browser (`manual` for a browser's suites a wildcard build leaves out on this host; the
+        browser's suites then stay out of `name` too).
     """
     test_sets = {
         test_set: native.glob(["test/%s/**/*_test.dart" % directory])
@@ -597,7 +599,18 @@ def web_ui_tests(
             tags = browser_tags.get(browser, []),
             tests = [":" + suite for suite in suites],
         )
+
+    # The suites a wildcard build runs on this host. A test_suite runs what
+    # it lists, `manual` or not, so a browser whose suites are manual here
+    # (browser_tags: Firefox on a Mac) is left to its own `<browser>_tests`,
+    # run by name; listed here, the wildcard would run them after all (the
+    # Mac's T56: 377 Firefox suites run and killed at launch).
     native.test_suite(
         name = name,
-        tests = [":" + suite for suites in suites_by_browser.values() for suite in suites],
+        tests = [
+            ":" + suite
+            for browser, suites in suites_by_browser.items()
+            if "manual" not in browser_tags.get(browser, [])
+            for suite in suites
+        ],
     )

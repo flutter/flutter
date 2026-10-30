@@ -204,14 +204,16 @@ _BROWSERS = {
 }
 
 # CI runs the Firefox suites on Linux; on a Mac they are declared but
-# `manual` -- run by name (`:firefox_tests`), not by a wildcard -- until a
-# Mac's run of them is on record (research/20 §15).
+# `manual` -- run by name (`:firefox_tests`), not by a wildcard, and out of
+# `:tests` (a test_suite runs what it lists, manual or not) -- until a Mac's
+# run of them is on record (research/20 §15).
 _BROWSER_TAGS = {"firefox": ["manual"]} if HOST_OS == "mac" else {}
 
 # The web engine's unit tests: felt_config.yaml's suites (FELT_CONFIG, which
 # tools/gn_to_bazel generates from it), one web_ui_test per test file and
-# suite, each bundle compiled per file, and the suites `:tests`,
-# `:chrome_tests`, `:firefox_tests` and `:<suite>` (the run configuration --
+# suite, each bundle compiled per file, and the suites `:tests` (what a
+# wildcard build runs on this host), `:chrome_tests`, `:firefox_tests` and
+# `:<suite>` (the run configuration --
 # the CanvasKit variant, cross-origin isolation, single-threaded skwasm, wimp,
 # the browser's flags -- is felt's own, read from felt_config.yaml by suite
 # name; on an X display felt starts itself, the `:Xvfb` above).
