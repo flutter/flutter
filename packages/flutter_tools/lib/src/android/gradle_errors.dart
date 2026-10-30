@@ -94,6 +94,8 @@ final gradleErrors = <GradleHandledError>[
   missingNdkSourcePropertiesFile,
   applyingKotlinAndroidPluginErrorHandler,
   useNewAgpDslErrorHandler,
+  kotlinAndroidPluginWithNewDslErrorHandler,
+  legacyVariantApiErrorHandler,
   incompatibleKotlinVersionHandler, // This handler should always be last, as its key log output is sometimes in error messages with other root causes.
 ];
 
@@ -888,6 +890,10 @@ const String kMigrateToBuiltInKotlinDocsUrl =
 const String kOptOutOfNewDslDocsUrl =
     'https://developer.android.com/build/releases/agp-9-0-0-release-notes';
 
+/// The URL for documentation on extending the Android Gradle Plugin with the
+/// variant API.
+const String kAgpVariantApiDocsUrl = 'https://developer.android.com/build/extend-agp';
+
 /// Handler when applying the kotlin-android plugin results in a build failure. This failure occurs when
 /// using AGP 9+ because built-in Kotlin has become the default behavior.
 @visibleForTesting
@@ -954,4 +960,100 @@ For instructions on how to opt out, see: $kOptOutOfNewDslDocsUrl
         return GradleBuildStatus.exit;
       },
   eventLabel: 'use-new-agp-dsl-error',
+);
+
+/// Handles the Kotlin Gradle plugin failure when `org.jetbrains.kotlin.android`
+/// is applied while `android.newDsl` is enabled and `android.builtInKotlin` is
+/// disabled.
+@visibleForTesting
+final kotlinAndroidPluginWithNewDslErrorHandler = GradleHandledError(
+  test: _lineMatcher(const <String>[
+    "The 'org.jetbrains.kotlin.android' plugin is not compatible with AGP's 9.0 new DSL",
+  ]),
+  handler:
+      ({
+        required utils.GradleUtils gradleUtils,
+        required String line,
+        required FlutterProject project,
+        required ToolContext toolContext,
+        required bool usesAndroidX,
+        Java? java,
+      }) async {
+        final Logger logger = toolContext.logger;
+        logger.printBox(
+          '${logger.terminal.warningMark} The kotlin-android plugin, applied by the app or by one '
+          "of the app's plugins, does not support android.newDsl=true.\n"
+          'Gradle names the build script under "* Where:" above.\n\n'
+          'To build now, set android.newDsl=false in android/gradle.properties.\n'
+          'Android Gradle Plugin 10.0 removes the android.newDsl=false option.\n'
+          'For details, see: $kOptOutOfNewDslDocsUrl\n\n'
+          'If a plugin applies kotlin-android, upgrade the plugin or file an issue with the '
+          'plugin asking for built-in Kotlin support.\n'
+          'If the app applies kotlin-android, remove the kotlin-android plugin and set '
+          'android.builtInKotlin=true in android/gradle.properties.\n'
+          'For migration instructions, see: $kMigrateToBuiltInKotlinDocsUrl',
+          title: _boxTitle,
+        );
+        return GradleBuildStatus.exit;
+      },
+  eventLabel: 'kotlin-android-plugin-with-new-dsl-error',
+);
+
+final _legacyVariantApiPatterns = <RegExp>[
+  RegExp(
+    r"Could not get unknown property '(?:applicationVariants|libraryVariants|testVariants|unitTestVariants)' for object of type com\.android\.build\.",
+  ),
+  RegExp(
+    r'Could not find method variantFilter\(\) for arguments \[.*\] on object of type com\.android\.build\.',
+  ),
+  RegExp(r'on source set (?:application|library) variants of type com\.android\.build\.'),
+  RegExp(
+    r"Unresolved reference '(?:applicationVariants|libraryVariants|testVariants|unitTestVariants|variantFilter)'\.",
+  ),
+  RegExp(
+    r"Extension of type '(?:com\.android\.build\.gradle\.)?(?:LibraryExtension|AppExtension|BaseExtension|TestedExtension)' does not exist\. Currently registered extension types: \[.*\b(?:LibraryExtensionImpl|ApplicationExtensionImpl|DynamicFeatureExtensionImpl|TestExtensionImpl)\b",
+  ),
+  RegExp(
+    r'class com\.android\.build\.\S*ExtensionImpl\S* cannot be cast to class com\.android\.build\.gradle\.(?:BaseExtension|LibraryExtension|AppExtension|TestedExtension)\b',
+  ),
+];
+
+/// Handles Gradle build failures when a build script or plugin uses legacy
+/// Android Gradle Plugin extension types or variant APIs removed under
+/// `android.newDsl=true`.
+@visibleForTesting
+final legacyVariantApiErrorHandler = GradleHandledError(
+  test: (String line) => _legacyVariantApiPatterns.any((RegExp pattern) => pattern.hasMatch(line)),
+  handler:
+      ({
+        required utils.GradleUtils gradleUtils,
+        required String line,
+        required FlutterProject project,
+        required ToolContext toolContext,
+        required bool usesAndroidX,
+        Java? java,
+      }) async {
+        final Logger logger = toolContext.logger;
+        final String trimmedLine = line.trim();
+        final errorLineSection = trimmedLine.isEmpty ? '' : '\n$trimmedLine\n\n';
+        logger.printBox(
+          '${logger.terminal.warningMark} A Gradle build script or plugin, in the app or in one '
+          "of the app's plugins, uses an Android Gradle Plugin API unavailable when "
+          'android.newDsl is enabled.\n'
+          '$errorLineSection'
+          'Gradle names the build script under "* Where:" above.\n\n'
+          'To build now, set android.newDsl=false in android/gradle.properties.\n'
+          'Android Gradle Plugin 10.0 removes the android.newDsl=false option.\n'
+          'For details, see: $kOptOutOfNewDslDocsUrl\n\n'
+          'If the build script is in a plugin, upgrade the plugin or file an issue with the '
+          'plugin asking for android.newDsl support.\n'
+          'If the build script is in the app, migrate the build script to the '
+          'com.android.build.api.dsl interfaces and the variant API '
+          '(androidComponents.onVariants).\n'
+          'For migration instructions, see: $kAgpVariantApiDocsUrl',
+          title: _boxTitle,
+        );
+        return GradleBuildStatus.exit;
+      },
+  eventLabel: 'legacy-variant-api-error',
 );
