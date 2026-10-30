@@ -30,63 +30,6 @@ TEST(GLSLMinifierTest, StripGLSLComments) {
             "int  a;\nint b;");
 }
 
-TEST(GLSLMinifierTest, IsGLSLIdentStartCharAndIdentChar) {
-  EXPECT_TRUE(IsGLSLIdentStartChar('a'));
-  EXPECT_TRUE(IsGLSLIdentStartChar('z'));
-  EXPECT_TRUE(IsGLSLIdentStartChar('A'));
-  EXPECT_TRUE(IsGLSLIdentStartChar('Z'));
-  EXPECT_TRUE(IsGLSLIdentStartChar('_'));
-  EXPECT_FALSE(IsGLSLIdentStartChar('0'));
-  EXPECT_FALSE(IsGLSLIdentStartChar('.'));
-  EXPECT_FALSE(IsGLSLIdentStartChar('+'));
-
-  EXPECT_TRUE(IsGLSLIdentChar('a'));
-  EXPECT_TRUE(IsGLSLIdentChar('Z'));
-  EXPECT_TRUE(IsGLSLIdentChar('_'));
-  EXPECT_TRUE(IsGLSLIdentChar('0'));
-  EXPECT_TRUE(IsGLSLIdentChar('9'));
-  EXPECT_FALSE(IsGLSLIdentChar('.'));
-  EXPECT_FALSE(IsGLSLIdentChar(' '));
-}
-
-TEST(GLSLMinifierTest, IsGLSLIdentOrNumChar) {
-  EXPECT_TRUE(IsGLSLIdentOrNumChar('a'));
-  EXPECT_TRUE(IsGLSLIdentOrNumChar('z'));
-  EXPECT_TRUE(IsGLSLIdentOrNumChar('A'));
-  EXPECT_TRUE(IsGLSLIdentOrNumChar('Z'));
-  EXPECT_TRUE(IsGLSLIdentOrNumChar('0'));
-  EXPECT_TRUE(IsGLSLIdentOrNumChar('9'));
-  EXPECT_TRUE(IsGLSLIdentOrNumChar('_'));
-  EXPECT_TRUE(IsGLSLIdentOrNumChar('.'));
-
-  EXPECT_FALSE(IsGLSLIdentOrNumChar('+'));
-  EXPECT_FALSE(IsGLSLIdentOrNumChar('-'));
-  EXPECT_FALSE(IsGLSLIdentOrNumChar(' '));
-  EXPECT_FALSE(IsGLSLIdentOrNumChar(';'));
-  EXPECT_FALSE(IsGLSLIdentOrNumChar('\0'));
-}
-
-TEST(GLSLMinifierTest, NeedsGLSLSpaceBetween) {
-  // Both characters are identifier/number/dot characters.
-  EXPECT_TRUE(NeedsGLSLSpaceBetween('t', 'x'));
-  EXPECT_TRUE(NeedsGLSLSpaceBetween('0', 'f'));
-  EXPECT_TRUE(NeedsGLSLSpaceBetween('_', '.'));
-
-  // Only one character is an identifier/number/dot character.
-  EXPECT_FALSE(NeedsGLSLSpaceBetween('x', '+'));
-  EXPECT_FALSE(NeedsGLSLSpaceBetween('+', 'x'));
-
-  // Adjacent '+' or '-' characters must remain separated to avoid '++' / '--'.
-  EXPECT_TRUE(NeedsGLSLSpaceBetween('+', '+'));
-  EXPECT_FALSE(NeedsGLSLSpaceBetween('+', '-'));
-  EXPECT_TRUE(NeedsGLSLSpaceBetween('-', '-'));
-  EXPECT_FALSE(NeedsGLSLSpaceBetween('-', '+'));
-
-  // Other adjacent operators/delimiters do not need separating spaces.
-  EXPECT_FALSE(NeedsGLSLSpaceBetween('=', '-'));
-  EXPECT_FALSE(NeedsGLSLSpaceBetween(';', '}'));
-}
-
 TEST(GLSLMinifierTest, FormatFloatAndDouble) {
   // Integer-valued floats get ".0" appended so they remain valid GLSL float
   // literals.
@@ -102,44 +45,33 @@ TEST(GLSLMinifierTest, FormatFloatAndDouble) {
   EXPECT_EQ(MinifyingCompilerGLSL::FormatFloat(-0.475f), "-0.475");
   EXPECT_EQ(MinifyingCompilerGLSL::FormatFloat(1e20f), "1e+20");
 
-  // Non-finite values fall back safely to "0.0".
+  // Non-finite values are preserved.
   EXPECT_EQ(MinifyingCompilerGLSL::FormatFloat(
                 std::numeric_limits<float>::infinity()),
-            "0.0");
+            "inf");
+  EXPECT_EQ(MinifyingCompilerGLSL::FormatFloat(
+                -std::numeric_limits<float>::infinity()),
+            "-inf");
   EXPECT_EQ(MinifyingCompilerGLSL::FormatFloat(
                 std::numeric_limits<float>::quiet_NaN()),
-            "0.0");
+            "nan");
 
   // Doubles are formatted with the same round-trip and ".0" guarantees.
   EXPECT_EQ(MinifyingCompilerGLSL::FormatDouble(1.0), "1.0");
   EXPECT_EQ(MinifyingCompilerGLSL::FormatDouble(0.3), "0.3");
   EXPECT_EQ(MinifyingCompilerGLSL::FormatDouble(
                 std::numeric_limits<double>::infinity()),
-            "0.0");
+            "inf");
+  EXPECT_EQ(MinifyingCompilerGLSL::FormatDouble(
+                -std::numeric_limits<double>::infinity()),
+            "-inf");
 }
 
-TEST(GLSLMinifierTest, TrimGLSLLineWhitespace) {
-  EXPECT_EQ(TrimGLSLLineWhitespace(""), "");
-  EXPECT_EQ(TrimGLSLLineWhitespace("   \t\r  "), "");
-  EXPECT_EQ(TrimGLSLLineWhitespace("void main()"), "void main()");
-  EXPECT_EQ(TrimGLSLLineWhitespace(" \t float x = 1.0; \t\r"),
-            "float x = 1.0;");
-}
-
-TEST(GLSLMinifierTest, CollapseGLSLHorizontalWhitespace) {
-  EXPECT_EQ(CollapseGLSLHorizontalWhitespace(""), "");
-  EXPECT_EQ(CollapseGLSLHorizontalWhitespace("gl_FragColor=vec4(1.0);"),
-            "gl_FragColor=vec4(1.0);");
-  EXPECT_EQ(CollapseGLSLHorizontalWhitespace("#define \t  FOO \t\t 1.0"),
-            "#define FOO 1.0");
-}
-
-TEST(GLSLMinifierTest, MinifyGLSLNonPreprocessorLine) {
-  EXPECT_EQ(MinifyGLSLNonPreprocessorLine(""), "");
-  EXPECT_EQ(MinifyGLSLNonPreprocessorLine("  \t\r "), "");
-  EXPECT_EQ(
-      MinifyGLSLNonPreprocessorLine("  highp   float  x = a -  -b +  +c ; \t "),
-      "highp float x=a- -b+ +c;");
+TEST(GLSLMinifierTest, TrimsAndCollapsesLineWhitespace) {
+  EXPECT_EQ(MinifyGLSL("   \t\r  "), "");
+  EXPECT_EQ(MinifyGLSL(" \t float  \t x  = \t 1.0 ; \t\r\n"), "float x=1.0;\n");
+  EXPECT_EQ(MinifyGLSL(" \t #define \t  FOO \t\t 1.0 \t\r\n"),
+            "#define FOO 1.0\n");
 }
 
 TEST(GLSLMinifierTest, StripsSingleLineAndMultiLineComments) {
@@ -180,15 +112,15 @@ TEST(GLSLMinifierTest, PreservesRequiredSpacesBetweenIdentifiersAndOperators) {
   const std::string source = R"(
     precision highp
     float;
-    uniform float a;
-    uniform float b;
+    uniform float _a9;
+    uniform float B_0;
     float helper(float x) {
-      return x - -1.0 + +b;
+      return x - -1.0 + +B_0 + -_a9 - +x;
     }
   )";
   EXPECT_EQ(MinifyGLSL(source),
-            "precision highp float;uniform float a;uniform float b;"
-            "float helper(float x){return x- -1.0+ +b;}\n");
+            "precision highp float;uniform float _a9;uniform float B_0;"
+            "float helper(float x){return x- -1.0+ +B_0+-_a9-+x;}\n");
 }
 
 TEST(GLSLMinifierTest, HandlesEmptyAndTrailingPreprocessorSources) {

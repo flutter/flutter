@@ -55,38 +55,6 @@ class MinifyingCompilerGLSL final : public spirv_cross::CompilerGLSL {
 /// directives on subsequent lines remain line-delimited.
 std::string StripGLSLComments(std::string_view source);
 
-/// @brief Returns true if `c` can start a GLSL identifier (`[a-zA-Z_]`).
-bool IsGLSLIdentStartChar(char c);
-
-/// @brief Returns true if `c` can appear in a GLSL identifier (`[a-zA-Z0-9_]`).
-bool IsGLSLIdentChar(char c);
-
-/// @brief Returns true if `c` can appear in a GLSL identifier or numeric
-///        literal (`[a-zA-Z0-9_.]`).
-bool IsGLSLIdentOrNumChar(char c);
-
-/// @brief Returns true if removing horizontal whitespace between `prev` and
-///        `next` would merge two distinct GLSL tokens into one.
-///
-/// Specifically, a separating space must be preserved between:
-/// - Two adjacent identifier/numeric characters (e.g. `highp float`).
-/// - Two adjacent `+` characters (`+ +`), which would otherwise lex as `++`.
-/// - Two adjacent `-` characters (`- -`), which would otherwise lex as `--`.
-bool NeedsGLSLSpaceBetween(char prev, char next);
-
-/// @brief Trims leading and trailing spaces (`' '`), tabs (`'\t'`), and
-///        carriage returns (`'\r'`) from `line`.
-std::string_view TrimGLSLLineWhitespace(std::string_view line);
-
-/// @brief Collapses contiguous runs of horizontal whitespace (`' '` and
-///        `'\t'`) in `line` into a single space `' '`.
-std::string CollapseGLSLHorizontalWhitespace(std::string_view line);
-
-/// @brief Minifies a single non-preprocessor line of GLSL by trimming outer
-///        whitespace, collapsing internal horizontal whitespace, and removing
-///        spaces that are not required by `NeedsGLSLSpaceBetween`.
-std::string MinifyGLSLNonPreprocessorLine(std::string_view line);
-
 /// @brief Minifies GLSL shader source text by stripping comments, redundant
 ///        whitespace, and unnecessary newlines.
 ///
