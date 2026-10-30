@@ -166,6 +166,7 @@ source_set("InternalFlutterSwiftCommon") {
   configs += [ ":config" ]
   bridge_header = "InternalFlutterSwiftCommon-Bridging-Header.h"
   sources = [
+    "framework/Source/FlutterCodecs.swift",
     "framework/Source/Logger.swift",
     "framework/Source/Tracing+TraceScope.swift",
   ]
@@ -181,7 +182,6 @@ source_set("framework_common") {
   sources = [
     "framework/Source/FlutterBinaryMessengerRelay.mm",
     "framework/Source/FlutterChannels.mm",
-    "framework/Source/FlutterCodecs.mm",
     "framework/Source/FlutterHourFormat.mm",
     "framework/Source/FlutterNSBundleUtils.h",
     "framework/Source/FlutterNSBundleUtils.mm",
@@ -250,6 +250,7 @@ executable("framework_common_swift_unittests") {
     ":swift_testing_config",
   ]
   sources = [
+    "framework/Source/FlutterCodecsTests.swift",
     "framework/Source/LoggerTests.swift",
     "framework/Source/TracingTests.swift",
   ]
@@ -271,7 +272,6 @@ executable("framework_common_unittests") {
   sources = [
     "framework/Source/FlutterBinaryMessengerRelayTest.mm",
     "framework/Source/FlutterTestUtils.mm",
-    "framework/Source/flutter_codecs_unittest.mm",
     "framework/Source/flutter_standard_codec_unittest.mm",
   ]
 
