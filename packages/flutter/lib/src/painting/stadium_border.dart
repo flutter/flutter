@@ -165,7 +165,7 @@ class _StadiumToCircleBorder extends OutlinedBorder {
       return _StadiumToCircleBorder(
         side: BorderSide.lerp(a.side, side, t),
         circularity: circularity + (1.0 - circularity) * (1.0 - t),
-        eccentricity: a.eccentricity,
+        eccentricity: ui.lerpDouble(a.eccentricity, eccentricity, t)!,
       );
     }
     if (a is _StadiumToCircleBorder) {
@@ -191,7 +191,7 @@ class _StadiumToCircleBorder extends OutlinedBorder {
       return _StadiumToCircleBorder(
         side: BorderSide.lerp(side, b.side, t),
         circularity: circularity + (1.0 - circularity) * t,
-        eccentricity: b.eccentricity,
+        eccentricity: ui.lerpDouble(eccentricity, b.eccentricity, t)!,
       );
     }
     if (b is _StadiumToCircleBorder) {
@@ -294,11 +294,12 @@ class _StadiumToCircleBorder extends OutlinedBorder {
     }
     return other is _StadiumToCircleBorder &&
         other.side == side &&
-        other.circularity == circularity;
+        other.circularity == circularity &&
+        other.eccentricity == eccentricity;
   }
 
   @override
-  int get hashCode => Object.hash(side, circularity);
+  int get hashCode => Object.hash(side, circularity, eccentricity);
 
   @override
   String toString() {
