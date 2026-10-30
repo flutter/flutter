@@ -16,6 +16,14 @@ import 'package:args/args.dart';
 import 'package:http/http.dart' as http;
 import 'package:path/path.dart' as path;
 
+import 'utils.dart';
+
+/// Whole seconds per test file, keyed by path relative to `packages/flutter_tools`.
+typedef DurationsByFile = Map<String, int>;
+
+/// [DurationsByFile] keyed by `Platform.operatingSystem`.
+typedef DurationsByHost = Map<String, DurationsByFile>;
+
 const String _buildbucket = 'https://cr-buildbucket.appspot.com/prpc/buildbucket.v2.';
 const String _resultdb = 'https://results.api.luci.app/prpc/luci.resultdb.v1.';
 
@@ -41,12 +49,29 @@ Future<void> main(List<String> arguments) async {
   }
   final int builds = int.parse(args.option('builds')!);
 
-  final String flutterRoot = _repositoryRoot();
   final output = File(
     path.join(flutterRoot, 'dev', 'bots', 'tool_integration_test_durations.json'),
   );
 
-  // The local .ci.yaml may not match prod, so ask Buildbucket.
+  final sampled = <String, DurationsByFile>{};
+  for (final MapEntry(key: host, value: builders) in (await _buildersByHost()).entries) {
+    if (builders.isEmpty) {
+      throw StateError('No tool_integration_tests builders found for $host');
+    }
+    sampled[host] = await _sampleDurations(builders, builds);
+  }
+  _client.close();
+
+  final List<String> localFiles = _localTestFiles();
+  final DurationsByHost result = _reconcile(sampled, localFiles, _readExisting(output));
+  output.writeAsStringSync('${const JsonEncoder.withIndent('  ').convert(result)}\n');
+  stderr.writeln('Wrote ${output.path} (${localFiles.length} files)');
+}
+
+/// Prod `tool_integration_tests` builder names by host.
+///
+/// The local .ci.yaml may not match prod, so ask Buildbucket.
+Future<Map<String, List<String>>> _buildersByHost() async {
   final buildersByHost = <String, List<String>>{
     for (final String host in _hostByPrefix.values) host: <String>[],
   };
@@ -56,83 +81,65 @@ Future<void> main(List<String> arguments) async {
       buildersByHost[_hostByPrefix[m.group(1)]!]!.add(builder);
     }
   }
+  return buildersByHost;
+}
 
-  final result = <String, Map<String, int>>{};
-  for (final MapEntry<String, List<String>> entry in buildersByHost.entries) {
-    if (entry.value.isEmpty) {
-      throw StateError('No tool_integration_tests builders found for ${entry.key}');
-    }
-    final samples = <String, List<int>>{};
-    for (final String builder in entry.value..sort()) {
-      stderr.writeln('Fetching $builds builds of $builder');
-      for (final String invocation in await _recentInvocations(builder, builds)) {
-        for (final MapEntry<String, int> fileDuration in (await _fileDurations(
-          invocation,
-        )).entries) {
-          samples.putIfAbsent(fileDuration.key, () => <int>[]).add(fileDuration.value);
-        }
+/// Returns the median duration per file over the last [builds] successful builds of [builders].
+Future<DurationsByFile> _sampleDurations(List<String> builders, int builds) async {
+  final samples = <String, List<int>>{};
+  for (final builder in builders..sort()) {
+    stderr.writeln('Fetching $builds builds of $builder');
+    for (final String invocation in await _recentInvocations(builder, builds)) {
+      final DurationsByFile fileDurations = await _fileDurations(invocation);
+      for (final MapEntry(key: file, value: seconds) in fileDurations.entries) {
+        samples.putIfAbsent(file, () => <int>[]).add(seconds);
       }
     }
-    result[entry.key] = <String, int>{
-      for (final MapEntry<String, List<int>> sample in samples.entries)
-        sample.key: _median(sample.value),
+  }
+  return <String, int>{
+    for (final MapEntry(key: file, value: seconds) in samples.entries) file: _median(seconds),
+  };
+}
+
+/// `integration.shard` test files in the tree, relative to `packages/flutter_tools`.
+List<String> _localTestFiles() {
+  final String toolsRoot = path.join(flutterRoot, 'packages', 'flutter_tools');
+  return Directory(path.join(toolsRoot, 'test', 'integration.shard'))
+      .listSync(recursive: true)
+      .whereType<File>()
+      .map((File f) => path.posix.joinAll(path.split(path.relative(f.path, from: toolsRoot))))
+      .where((String f) => f.endsWith('_test.dart'))
+      .toList()
+    ..sort();
+}
+
+/// Emits exactly [localFiles] per host, filling in unsampled files.
+DurationsByHost _reconcile(
+  DurationsByHost sampled,
+  List<String> localFiles,
+  DurationsByHost previous,
+) {
+  final sampledAnywhere = <String>{for (final DurationsByFile m in sampled.values) ...m.keys};
+  final result = <String, DurationsByFile>{};
+  for (final MapEntry(key: host, value: durations) in sampled.entries) {
+    final int median = _median(durations.values.toList());
+    result[host] = <String, int>{
+      for (final String f in localFiles)
+        f: durations[f] ?? (sampledAnywhere.contains(f) ? 0 : previous[host]?[f] ?? median),
     };
   }
-
-  _client.close();
-
-  // Logs can include deleted files and miss new ones; emit what's in the tree.
-  final String toolsRoot = path.join(flutterRoot, 'packages', 'flutter_tools');
-  final List<String> localFiles =
-      Directory(path.join(toolsRoot, 'test', 'integration.shard'))
-          .listSync(recursive: true)
-          .whereType<File>()
-          .map((File f) => path.posix.joinAll(path.split(path.relative(f.path, from: toolsRoot))))
-          .where((String f) => f.endsWith('_test.dart'))
-          .toList()
-        ..sort();
-  final Map<String, Map<String, int>> previous = _readExisting(output);
-  final sampledAnywhere = <String>{for (final Map<String, int> m in result.values) ...m.keys};
-  for (final MapEntry<String, Map<String, int>> host in result.entries) {
-    final int median = _median(host.value.values.toList());
-    host.value.removeWhere((String f, _) => !localFiles.contains(f));
-    for (final f in localFiles) {
-      host.value.putIfAbsent(f, () {
-        if (sampledAnywhere.contains(f)) {
-          return 0; // Runs on another host only (`@TestOn`).
-        }
-        return previous[host.key]?[f] ?? median; // New file; keep any manual entry.
-      });
-    }
-  }
-
-  final sortedResult = <String, Map<String, int>>{
-    for (final String host in result.keys.toList()..sort())
-      host: <String, int>{for (final String f in localFiles) f: result[host]![f]!},
+  return <String, DurationsByFile>{
+    for (final String host in result.keys.toList()..sort()) host: result[host]!,
   };
-  output.writeAsStringSync('${const JsonEncoder.withIndent('  ').convert(sortedResult)}\n');
-  stderr.writeln('Wrote ${output.path} (${localFiles.length} files)');
 }
 
-/// The flutter repository root: the nearest ancestor of this script with a DEPS file.
-String _repositoryRoot() {
-  Directory dir = File.fromUri(Platform.script).parent;
-  while (!File(path.join(dir.path, 'DEPS')).existsSync()) {
-    if (dir.parent.path == dir.path) {
-      throw StateError('Could not find the flutter repository root from ${Platform.script}');
-    }
-    dir = dir.parent;
-  }
-  return dir.path;
-}
-
-Map<String, Map<String, int>> _readExisting(File file) {
+DurationsByHost _readExisting(File file) {
   if (!file.existsSync()) {
-    return const <String, Map<String, int>>{};
+    return const <String, DurationsByFile>{};
   }
   final hosts = json.decode(file.readAsStringSync()) as Map<String, Object?>;
   return hosts.map(
-    (String host, Object? files) => MapEntry<String, Map<String, int>>(
+    (String host, Object? files) => MapEntry<String, DurationsByFile>(
       host,
       Map<String, int>.from(files! as Map<String, Object?>),
     ),
@@ -204,9 +211,8 @@ Future<List<String>> _recentInvocations(String builder, int count) async {
 
 const String _integrationShard = 'packages/flutter_tools/test/integration.shard/';
 
-/// Whole seconds per `integration.shard` file in [invocation], keyed by path
-/// relative to `packages/flutter_tools`.
-Future<Map<String, int>> _fileDurations(String invocation) async {
+/// Whole seconds per `integration.shard` file in [invocation].
+Future<DurationsByFile> _fileDurations(String invocation) async {
   final seconds = <String, double>{};
   String? pageToken;
   do {

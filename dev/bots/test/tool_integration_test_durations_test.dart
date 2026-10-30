@@ -88,8 +88,8 @@ void main() {
     });
 
     test('$host durations are non-negative', () {
-      for (final MapEntry<String, int> entry in durations[host]!.entries) {
-        expect(entry.value, isNonNegative, reason: '${entry.key} on $host');
+      for (final MapEntry(key: file, value: seconds) in durations[host]!.entries) {
+        expect(seconds, isNonNegative, reason: '$file on $host');
       }
     });
   }
