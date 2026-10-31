@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:js_interop';
 import 'dart:js_interop_unsafe';
 
@@ -17,6 +18,10 @@ void main() {
 }
 
 const List<int> _red = <int>[255, 0, 0, 255];
+
+// Like the tests in `test/ui/surface_context_lost_test.dart`, tests that lose
+// WebGL contexts only run on Chromium-based browsers.
+final bool _skipContextLoss = isFirefox || isSafari;
 
 // Regression tests for https://github.com/flutter/flutter/issues/162868.
 void testMain() {
@@ -40,10 +45,23 @@ void testMain() {
     canvasKit['MakeOnScreenGLSurface'] = noSurface.toJS;
   }
 
+  Future<CkOnscreenSurface> createOnscreenSurface() async {
+    final surface = CkOnscreenSurface(OnscreenCanvasProvider());
+    addTearDown(surface.dispose);
+    await surface.initialized;
+    return surface;
+  }
+
+  Future<CkOffscreenSurface> createOffscreenSurface() async {
+    final surface = CkOffscreenSurface(OffscreenCanvasProvider());
+    addTearDown(surface.dispose);
+    await surface.initialized;
+    return surface;
+  }
+
   group('CkOnscreenSurface WebGL failure recovery', () {
     test('software fallback after WebGL surface failure can still render', () async {
-      final surface = CkOnscreenSurface(OnscreenCanvasProvider());
-      await surface.initialized;
+      final CkOnscreenSurface surface = await createOnscreenSurface();
       expect(surface.supportsWebGl, isTrue);
       expect(surface.glContext, isNot(-1));
       final DomEventTarget glCanvas = surface.canvas;
@@ -53,6 +71,7 @@ void testMain() {
 
       expect(surface.supportsWebGl, isFalse);
       expect(surface.skSurface, isNotNull);
+      // The original failure repeated on every frame, so render more than one.
       await surface.rasterizeToCanvas(_redSquare());
       await surface.rasterizeToCanvas(_redSquare());
       expect(_pixelOnCanvas(surface.canvas), _red);
@@ -66,13 +85,10 @@ void testMain() {
       await surface.rasterizeToCanvas(_redSquare());
       expect(_pixelOnCanvas(surface.canvas), _red);
       _expectSingleCanvasIn(surface);
-
-      surface.dispose();
     });
 
     test('recreating the context on a canvas with a lost context falls back gracefully', () async {
-      final surface = CkOnscreenSurface(OnscreenCanvasProvider());
-      await surface.initialized;
+      final CkOnscreenSurface surface = await createOnscreenSurface();
 
       final DomHTMLCanvasElement deadCanvas = createDomCanvasElement(width: 10, height: 10);
       final WebGLContext gl = deadCanvas.getGlContext(webGLVersion);
@@ -86,33 +102,49 @@ void testMain() {
       surface.setSize(const BitmapSize(10, 10));
       await surface.rasterizeToCanvas(_redSquare());
       expect(_pixelOnCanvas(surface.canvas), _red);
+    }, skip: _skipContextLoss);
 
-      surface.dispose();
-    });
+    test(
+      'context loss recovers to software rendering when the replacement canvas cannot use WebGL',
+      () async {
+        final CkOnscreenSurface surface = await createOnscreenSurface();
+        surface.setSize(const BitmapSize(10, 10));
+        surface.setIsOverlay(true);
+        final DomEventTarget glCanvas = surface.canvas;
 
-    test('handledContextLossEvent unblocks only after context recreation finishes', () async {
-      final surface = CkOnscreenSurface(OnscreenCanvasProvider());
-      await surface.initialized;
-      surface.setSize(const BitmapSize(10, 10));
+        // Context loss recreation and the software fallback both replace the
+        // canvas.
+        failWebGlSurfaces();
+        await surface.triggerContextLoss();
+        await surface.handledContextLossEvent;
 
-      // The replacement canvas cannot get a WebGL surface, so recreation has to
-      // finish by moving to software rendering before the event is handled.
-      failWebGlSurfaces();
-      await surface.triggerContextLoss();
-      await surface.handledContextLossEvent;
+        expect(surface.skSurface, isNotNull);
+        _expectSingleCanvasIn(surface);
+        await surface.rasterizeToCanvas(_redSquare());
+        expect(_pixelOnCanvas(surface.canvas), _red);
 
-      expect(surface.skSurface, isNotNull);
-      _expectSingleCanvasIn(surface);
-      await surface.rasterizeToCanvas(_redSquare());
-      expect(_pixelOnCanvas(surface.canvas), _red);
-
-      surface.dispose();
-    });
+        // The overlay positioning is kept on the replacement canvas.
+        final canvas = surface.canvas as DomHTMLCanvasElement;
+        expect(_isSameJsObject(canvas, glCanvas), isFalse);
+        expect(canvas.style.position, 'absolute');
+        surface.setIsOverlay(false);
+        expect(canvas.style.position, isEmpty);
+      },
+      skip: _skipContextLoss,
+    );
 
     test('software fallback releases the replaced canvas without triggering recovery', () async {
-      final surface = CkOnscreenSurface(OnscreenCanvasProvider());
-      await surface.initialized;
+      final CkOnscreenSurface surface = await createOnscreenSurface();
       final glCanvas = surface.canvas as DomHTMLCanvasElement;
+      final contextLost = Completer<void>();
+      glCanvas.addEventListener(
+        'webglcontextlost',
+        createDomEventListener((DomEvent _) {
+          if (!contextLost.isCompleted) {
+            contextLost.complete();
+          }
+        }),
+      );
 
       failWebGlSurfaces();
       surface.setSize(const BitmapSize(10, 10));
@@ -125,18 +157,16 @@ void testMain() {
 
       // Freeing that context fires `webglcontextlost` on the replaced canvas,
       // which must not replace the canvas the surface is now rendering to.
-      await Future<void>.delayed(const Duration(milliseconds: 50));
+      await contextLost.future.timeout(const Duration(seconds: 2));
+      await Future<void>.delayed(Duration.zero);
       expect(_isSameJsObject(surface.canvas, softwareCanvas), isTrue);
       _expectSingleCanvasIn(surface);
       await surface.rasterizeToCanvas(_redSquare());
       expect(_pixelOnCanvas(surface.canvas), _red);
-
-      surface.dispose();
-    });
+    }, skip: _skipContextLoss);
 
     test('consecutive context losses leave a single renderable canvas', () async {
-      final surface = CkOnscreenSurface(OnscreenCanvasProvider());
-      await surface.initialized;
+      final CkOnscreenSurface surface = await createOnscreenSurface();
       surface.setSize(const BitmapSize(10, 10));
 
       for (var i = 0; i < 2; i++) {
@@ -150,32 +180,7 @@ void testMain() {
       }
       await surface.rasterizeToCanvas(_redSquare());
       expect(_pixelOnCanvas(surface.canvas), _red);
-
-      surface.dispose();
-    });
-
-    test('overlay positioning is kept on replacement canvases', () async {
-      final surface = CkOnscreenSurface(OnscreenCanvasProvider());
-      await surface.initialized;
-      surface.setSize(const BitmapSize(10, 10));
-      surface.setIsOverlay(true);
-      final DomEventTarget glCanvas = surface.canvas;
-
-      // Context loss recreation and the software fallback both replace the
-      // canvas.
-      failWebGlSurfaces();
-      await surface.triggerContextLoss();
-      await surface.handledContextLossEvent;
-
-      final canvas = surface.canvas as DomHTMLCanvasElement;
-      expect(_isSameJsObject(canvas, glCanvas), isFalse);
-      expect(canvas.style.position, 'absolute');
-
-      surface.setIsOverlay(false);
-      expect(canvas.style.position, isEmpty);
-
-      surface.dispose();
-    });
+    }, skip: _skipContextLoss);
 
     test('initialized completes even if no surface can be created', () async {
       CkSurface.debugForceGLFailure = true;
@@ -183,12 +188,11 @@ void testMain() {
       canvasKit['MakeSWCanvasSurface'] = throwingSurface.toJS;
 
       final surface = CkOnscreenSurface(OnscreenCanvasProvider());
+      addTearDown(surface.dispose);
       await surface.initialized.timeout(const Duration(seconds: 2));
 
       expect(surface.skSurface, isNull);
       _expectSingleCanvasIn(surface);
-
-      surface.dispose();
     });
   });
 
@@ -196,8 +200,7 @@ void testMain() {
     test(
       'software fallback after WebGL surface failure can still render on offscreen canvas',
       () async {
-        final surface = CkOffscreenSurface(OffscreenCanvasProvider());
-        await surface.initialized;
+        final CkOffscreenSurface surface = await createOffscreenSurface();
         expect(surface.supportsWebGl, isTrue);
         expect(surface.glContext, isNot(-1));
 
@@ -206,19 +209,17 @@ void testMain() {
 
         expect(surface.supportsWebGl, isFalse);
         expect(surface.skSurface, isNotNull);
+        // The original failure repeated on every frame, so render more than one.
         await surface.rasterizeToCanvas(_redSquare());
         await surface.rasterizeToCanvas(_redSquare());
         expect(_pixelOnCanvas(surface.canvas), _red);
-
-        surface.dispose();
       },
     );
 
     test(
       'recreating the context on an offscreen canvas with a lost context falls back gracefully',
       () async {
-        final surface = CkOffscreenSurface(OffscreenCanvasProvider());
-        await surface.initialized;
+        final CkOffscreenSurface surface = await createOffscreenSurface();
 
         final deadCanvas = DomOffscreenCanvas(10, 10);
         final WebGLContext gl = deadCanvas.getGlContext(webGLVersion);
@@ -231,16 +232,14 @@ void testMain() {
         surface.setSize(const BitmapSize(10, 10));
         await surface.rasterizeToCanvas(_redSquare());
         expect(_pixelOnCanvas(surface.canvas), _red);
-
-        surface.dispose();
       },
+      skip: _skipContextLoss,
     );
 
     test(
       'offscreen canvas buffer clamping recovery does not re-taint canvas in software mode',
       () async {
-        final surface = CkOffscreenSurface(OffscreenCanvasProvider());
-        await surface.initialized;
+        final CkOffscreenSurface surface = await createOffscreenSurface();
         surface.setSize(const BitmapSize(100, 100));
         expect(surface.supportsWebGl, isTrue);
         final DomEventTarget clampedCanvas = surface.canvas;
@@ -264,8 +263,6 @@ void testMain() {
         expect(_isSameJsObject(surface.canvas, clampedCanvas), isFalse);
         await surface.rasterizeToCanvas(_redSquare());
         expect(_pixelOnCanvas(surface.canvas), _red);
-
-        surface.dispose();
       },
     );
   });
