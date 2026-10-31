@@ -4432,6 +4432,23 @@ abstract class ImageFilter {
   /// The optional [filterQuality] argument sets the quality level used to sample
   /// the filter input. By default, it is set to [FilterQuality.none].
   ///
+  /// By default, the filter input only contains the part of the filtered
+  /// content that is visible within the current clip (for example, the part of
+  /// a widget that is still on screen). The size of the input, and therefore
+  /// the values of the size uniform and `FlutterFragCoord()`, can change as the
+  /// content moves in and out of the clip. Set [unclippedInput] to true to
+  /// always provide the entire filtered content as the input, so that the size
+  /// and coordinate space seen by the shader stay stable. Only the output of
+  /// the filter is clipped in that case.
+  ///
+  /// Using [unclippedInput] renders the entire content offscreen even if most
+  /// of it is clipped, which uses more memory and GPU time. In some cases, such
+  /// as when the content is unbounded or larger than the maximum texture size,
+  /// the input is still clipped as if [unclippedInput] were false. This
+  /// argument is intended for filters applied to content, for example with an
+  /// `ImageFiltered` widget. It does not extend the input of a backdrop filter
+  /// beyond the backdrop within the clip.
+  ///
   /// When Impeller uses the OpenGL(ES) backend, the y-axis direction is
   /// reversed. Custom fragment shaders must invert the y-axis on
   /// GLES or they will render upside-down.
@@ -4464,6 +4481,7 @@ abstract class ImageFilter {
   factory ImageFilter.shader(
     FragmentShader shader, {
     FilterQuality filterQuality = FilterQuality.none,
+    bool unclippedInput = false,
   }) {
     if (!_impellerEnabled) {
       throw UnsupportedError('ImageFilter.shader only supported with Impeller rendering engine.');
@@ -4483,7 +4501,7 @@ abstract class ImageFilter {
       }
       throw StateError(buffer.toString());
     }
-    return _FragmentShaderImageFilter(shader, filterQuality);
+    return _FragmentShaderImageFilter(shader, filterQuality, unclippedInput);
   }
 
   /// Whether [ImageFilter.shader] is supported on the current backend.
@@ -4679,10 +4697,11 @@ class _ComposeImageFilter implements ImageFilter {
 }
 
 class _FragmentShaderImageFilter implements ImageFilter {
-  _FragmentShaderImageFilter(this.shader, this.filterQuality);
+  _FragmentShaderImageFilter(this.shader, this.filterQuality, this.unclippedInput);
 
   final FragmentShader shader;
   final FilterQuality filterQuality;
+  final bool unclippedInput;
 
   late final _ImageFilter nativeFilter = _ImageFilter.shader(this);
 
@@ -4693,7 +4712,8 @@ class _FragmentShaderImageFilter implements ImageFilter {
   String get debugShortDescription => 'shader';
 
   @override
-  String toString() => 'ImageFilter.shader(Shader#${shader.hashCode}, $filterQuality)';
+  String toString() =>
+      'ImageFilter.shader(Shader#${shader.hashCode}, $filterQuality${unclippedInput ? ', unclippedInput' : ''})';
 
   @override
   bool operator ==(Object other) {
@@ -4703,6 +4723,7 @@ class _FragmentShaderImageFilter implements ImageFilter {
     return other is _FragmentShaderImageFilter &&
         other.shader == shader &&
         other.filterQuality == filterQuality &&
+        other.unclippedInput == unclippedInput &&
         _equals(nativeFilter, other.nativeFilter);
   }
 
@@ -4710,7 +4731,7 @@ class _FragmentShaderImageFilter implements ImageFilter {
   external static bool _equals(_ImageFilter a, _ImageFilter b);
 
   @override
-  int get hashCode => Object.hash(shader, filterQuality);
+  int get hashCode => Object.hash(shader, filterQuality, unclippedInput);
 }
 
 /// An [ImageFilter] that is backed by a native DlImageFilter.
@@ -4778,7 +4799,7 @@ base class _ImageFilter extends NativeFieldWrapperClass1 {
 
   _ImageFilter.shader(_FragmentShaderImageFilter filter) : creator = filter {
     _constructor();
-    _initShader(filter.shader, filter.filterQuality.index);
+    _initShader(filter.shader, filter.filterQuality.index, filter.unclippedInput);
   }
 
   @Native<Void Function(Handle)>(symbol: 'ImageFilter::Create')
@@ -4821,8 +4842,10 @@ base class _ImageFilter extends NativeFieldWrapperClass1 {
   )
   external void _initComposed(_ImageFilter outerFilter, _ImageFilter innerFilter);
 
-  @Native<Void Function(Pointer<Void>, Pointer<Void>, Int32)>(symbol: 'ImageFilter::initShader')
-  external void _initShader(FragmentShader shader, int filterQuality);
+  @Native<Void Function(Pointer<Void>, Pointer<Void>, Int32, Bool)>(
+    symbol: 'ImageFilter::initShader',
+  )
+  external void _initShader(FragmentShader shader, int filterQuality, bool unclippedInput);
 
   /// The original Dart object that created the native wrapper, which retains
   /// the values used for the filter.
