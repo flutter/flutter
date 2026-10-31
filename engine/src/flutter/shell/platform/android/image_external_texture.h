@@ -72,6 +72,12 @@ class ImageExternalTexture : public flutter::Texture {
 
   JavaLocalRef HardwareBufferFor(const fml::jni::JavaRef<jobject>& image);
 
+  // Update only when accepting a frame, including buffer-cache hits. Image
+  // dimensions belong to the acquired frame, not to a cached allocation.
+  void UpdateImageBounds(const JavaLocalRef& image, AHardwareBuffer* buffer);
+
+  SkRect normalized_image_bounds_ = SkRect::MakeWH(1, 1);
+
   void CloseHardwareBuffer(const fml::jni::JavaRef<jobject>& hardware_buffer);
 
   AHardwareBuffer* AHardwareBufferFor(
