@@ -96,6 +96,61 @@ void main() {
     expect(bufferLogger.errorText, contains('Failed to decode preferences'));
   });
 
+  for (final invalidConfig in <String>['[]', 'true', '42', '"text"']) {
+    testWithoutContext('Config recovers from a non-object JSON root: $invalidConfig', () {
+      final bufferLogger = BufferLogger.test();
+      final File file = memoryFileSystem.file('.flutter_example')..writeAsStringSync(invalidConfig);
+
+      config = Config(
+        'example',
+        fileSystem: memoryFileSystem,
+        logger: bufferLogger,
+        platform: fakePlatform,
+      );
+
+      expect(config.keys, isEmpty);
+      expect(file.existsSync(), isFalse);
+      expect(bufferLogger.errorText, contains('Failed to decode preferences'));
+
+      config.setValue('foo', 'bar');
+      expect(json.decode(file.readAsStringSync()), <String, Object>{'foo': 'bar'});
+    });
+
+    testWithoutContext('Config.managed preserves a non-object JSON root: $invalidConfig', () {
+      final bufferLogger = BufferLogger.test();
+      final File file = memoryFileSystem.file('.flutter_example')..writeAsStringSync(invalidConfig);
+
+      expect(
+        () => Config.managed(
+          'example',
+          fileSystem: memoryFileSystem,
+          logger: bufferLogger,
+          platform: fakePlatform,
+        ),
+        throwsFormatException,
+      );
+
+      expect(file.readAsStringSync(), invalidConfig);
+      expect(bufferLogger.errorText, contains('Failed to decode preferences'));
+    });
+  }
+
+  testWithoutContext('Config accepts a null JSON root as an empty config', () {
+    final bufferLogger = BufferLogger.test();
+    final File file = memoryFileSystem.file('.flutter_example')..writeAsStringSync('null');
+
+    config = Config(
+      'example',
+      fileSystem: memoryFileSystem,
+      logger: bufferLogger,
+      platform: fakePlatform,
+    );
+
+    expect(config.keys, isEmpty);
+    expect(file.readAsStringSync(), 'null');
+    expect(bufferLogger.errorText, isEmpty);
+  });
+
   testWithoutContext('Config does not error on missing file', () {
     final bufferLogger = BufferLogger.test();
     final File file = memoryFileSystem.file('example');
