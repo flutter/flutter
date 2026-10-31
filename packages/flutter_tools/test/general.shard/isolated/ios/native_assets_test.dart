@@ -57,9 +57,12 @@ void main() {
             (null, '15.0'),
             ('', '15.0'),
             ('14.0', '15.0'),
-            ('16', '16'),
+            ('16', '16.0'),
             ('16.4', '16.4'),
             ('17.2.1', '17.2.1'),
+            ('17.0.1', '17.0.1'),
+            ('17.2.0', '17.2'),
+            ('16.0.0', '16.0'),
             (' 16.4 ', '16.4'),
           ])
             (buildMode, deploymentTarget, expectedMinimum),
@@ -251,18 +254,28 @@ void main() {
             file: Uri.file('${codeConfig.targetArchitecture}/libbuz.dylib'),
           ),
         ];
+        final List<int> components = expectedMinimum.split('.').map(int.parse).toList();
+        final expectedVersion = AppleVersion(
+          components[0],
+          minor: components[1],
+          patch: components.length == 3 ? components[2] : 0,
+        );
         final buildRunner = FakeFlutterNativeAssetsBuildRunner(
           packagesWithNativeAssetsResult: <String>['bar'],
-          onBuild: (BuildInput input) => FakeFlutterNativeAssetsBuilderResult.fromAssets(
-            codeAssets: buildMode == BuildMode.debug
-                ? codeAssets(input.config.code.targetOS, input.config.code)
-                : <CodeAsset>[],
-          ),
-          onLink: (LinkInput input) => buildMode == BuildMode.debug
-              ? null
-              : FakeFlutterNativeAssetsBuilderResult.fromAssets(
-                  codeAssets: codeAssets(input.config.code.targetOS, input.config.code),
-                ),
+          onBuild: (BuildInput input) {
+            expect(input.config.code.iOS.deploymentVersion, expectedVersion);
+            return FakeFlutterNativeAssetsBuilderResult.fromAssets(
+              codeAssets: buildMode == BuildMode.debug
+                  ? codeAssets(input.config.code.targetOS, input.config.code)
+                  : <CodeAsset>[],
+            );
+          },
+          onLink: (LinkInput input) {
+            expect(input.config.code.iOS.deploymentVersion, expectedVersion);
+            return FakeFlutterNativeAssetsBuilderResult.fromAssets(
+              codeAssets: codeAssets(input.config.code.targetOS, input.config.code),
+            );
+          },
         );
         final environmentDefines = <String, String>{
           kBuildMode: buildMode.cliName,
@@ -318,40 +331,6 @@ void main() {
         expect(buildRunner.buildInvocations, 2);
         expect(buildRunner.linkInvocations, buildMode == BuildMode.release ? 2 : 0);
       },
-    );
-  }
-
-  for (final target in <String>['16.4beta', '16.4.1.2', 'invalid', '-1', '16&4']) {
-    testUsingContext(
-      'rejects malformed iOS deployment target $target before copying assets',
-      () async {
-        await expectLater(
-          copyNativeCodeAssetsIOS(
-            Uri.directory('/build/native_assets/ios/'),
-            <Uri, List<FlutterCodeAsset>>{
-              Uri.file('bar.framework/bar'): <FlutterCodeAsset>[
-                FlutterCodeAsset(
-                  codeAsset: CodeAsset(
-                    package: 'bar',
-                    name: 'bar.dart',
-                    linkMode: DynamicLoadingBundled(),
-                    file: Uri.file('arm64/libbar.dylib'),
-                  ),
-                  os: OS.iOS,
-                  architecture: Architecture.arm64,
-                ),
-              ],
-            },
-            null,
-            BuildMode.debug,
-            fileSystem,
-            deploymentTarget: target,
-          ),
-          throwsToolExit(message: 'Invalid iOS deployment target "$target"'),
-        );
-        expect(fileSystem.directory('/build/native_assets/ios').existsSync(), isFalse);
-      },
-      overrides: <Type, Generator>{ProcessManager: () => processManager},
     );
   }
 

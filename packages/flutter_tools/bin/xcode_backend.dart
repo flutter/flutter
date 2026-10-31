@@ -728,6 +728,12 @@ class Context {
         flutterArgs.add('-dCodesignIdentity=$expandedCodeSignIdentity');
       }
     }
+    if (platform == TargetPlatform.macos) {
+      final String? deploymentTarget = environment['MACOSX_DEPLOYMENT_TARGET'];
+      if (deploymentTarget != null) {
+        flutterArgs.add('-dMacOSDeploymentTarget=$deploymentTarget');
+      }
+    }
     if (platform == TargetPlatform.macos && command == 'build') {
       final ephemeralDirectory = '$sourceRoot/Flutter/ephemeral';
       final buildInputsPath = '$ephemeralDirectory/FlutterInputs.xcfilelist';

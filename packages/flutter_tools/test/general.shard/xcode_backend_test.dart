@@ -96,7 +96,7 @@ void main() {
         expect(context.stderr, contains('ERROR: Unknown FLUTTER_BUILD_MODE: null.\n'));
       });
 
-      test('calls flutter assemble', () {
+      test('calls flutter assemble without deployment target defines when settings are absent', () {
         final targetPlatform = platform == TargetPlatform.ios ? 'Ios' : 'Darwin';
         final Directory buildDir = fileSystem.directory('/path/to/builds')
           ..createSync(recursive: true);
@@ -180,7 +180,8 @@ void main() {
         const treeShake = 'true';
         const srcRoot = '/path/to/project';
         const iOSVersion = '18.3.1';
-        const deploymentTarget = '16.4';
+        const iosDeploymentTarget = '16.4.1';
+        const macOSDeploymentTarget = '13.3.2';
         final context = TestContext(
           <String>['build', platformName],
           <String, String>{
@@ -207,7 +208,8 @@ void main() {
             'TREE_SHAKE_ICONS': treeShake,
             'SRCROOT': srcRoot,
             'TARGET_DEVICE_OS_VERSION': iOSVersion,
-            'IPHONEOS_DEPLOYMENT_TARGET': deploymentTarget,
+            'IPHONEOS_DEPLOYMENT_TARGET': iosDeploymentTarget,
+            'MACOSX_DEPLOYMENT_TARGET': macOSDeploymentTarget,
           },
           commands: <FakeCommand>[
             FakeCommand(
@@ -236,10 +238,11 @@ void main() {
                 '-dXcodeBuildScript=build',
                 if (platform == TargetPlatform.ios) ...<String>[
                   '-dTargetDeviceOSVersion=$iOSVersion',
-                  '-dIosDeploymentTarget=$deploymentTarget',
+                  '-dIosDeploymentTarget=$iosDeploymentTarget',
                   '-dCodesignIdentity=$expandedCodeSignIdentity',
                 ],
                 if (platform == TargetPlatform.macos) ...<String>[
+                  '-dMacOSDeploymentTarget=$macOSDeploymentTarget',
                   '--build-inputs=/Flutter/ephemeral/FlutterInputs.xcfilelist',
                   '--build-outputs=/Flutter/ephemeral/FlutterOutputs.xcfilelist',
                 ],
@@ -729,7 +732,7 @@ void main() {
         expect(context.stderr, contains('ERROR: Unknown FLUTTER_BUILD_MODE: null.\n'));
       });
 
-      test('calls flutter assemble', () {
+      test('calls flutter assemble without deployment target defines when settings are absent', () {
         final targetPlatform = platform == TargetPlatform.ios ? 'Ios' : 'Darwin';
         final Directory buildDir = fileSystem.directory('/path/to/builds')
           ..createSync(recursive: true);
@@ -803,7 +806,8 @@ void main() {
         const treeShake = 'true';
         const srcRoot = '/path/to/project';
         const iOSVersion = '18.3.1';
-        const deploymentTarget = '16.4';
+        const iosDeploymentTarget = '16.4.1';
+        const macOSDeploymentTarget = '13.3.2';
         final context = TestContext(
           <String>['prepare', platformName],
           <String, String>{
@@ -830,7 +834,8 @@ void main() {
             'TREE_SHAKE_ICONS': treeShake,
             'SRCROOT': srcRoot,
             'TARGET_DEVICE_OS_VERSION': iOSVersion,
-            'IPHONEOS_DEPLOYMENT_TARGET': deploymentTarget,
+            'IPHONEOS_DEPLOYMENT_TARGET': iosDeploymentTarget,
+            'MACOSX_DEPLOYMENT_TARGET': macOSDeploymentTarget,
           },
           commands: <FakeCommand>[
             FakeCommand(
@@ -859,9 +864,11 @@ void main() {
                 '-dXcodeBuildScript=prepare',
                 if (platform == TargetPlatform.ios) ...<String>[
                   '-dTargetDeviceOSVersion=$iOSVersion',
-                  '-dIosDeploymentTarget=$deploymentTarget',
+                  '-dIosDeploymentTarget=$iosDeploymentTarget',
                   '-dCodesignIdentity=$expandedCodeSignIdentity',
                 ],
+                if (platform == TargetPlatform.macos)
+                  '-dMacOSDeploymentTarget=$macOSDeploymentTarget',
                 'release_unpack_$platformName',
               ],
             ),
