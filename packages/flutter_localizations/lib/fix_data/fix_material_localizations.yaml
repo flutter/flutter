@@ -1211,6 +1211,17 @@ transforms:
     date: 2026-09-17
     element:
       uris: ['flutter_localizations.dart']
+      class: 'MaterialLocalizationTg'
+    changes:
+      - kind: 'replacedBy'
+        newElement:
+          uris: ['package:material_ui/material_ui.dart']
+          class: 'MaterialLocalizationTg'
+
+  - title: "Migrate to 'package:material_ui/material_ui.dart'"
+    date: 2026-09-17
+    element:
+      uris: ['flutter_localizations.dart']
       class: 'MaterialLocalizationTh'
     changes:
       - kind: 'replacedBy'

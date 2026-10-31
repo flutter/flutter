@@ -1,0 +1,18 @@
+{
+  "reorderItemToStart": "Интиқол ба аввал",
+  "reorderItemToEnd": "Интиқол ба охир",
+  "reorderItemUp": "Интиқол ба боло",
+  "reorderItemDown": "Интиқол ба поён",
+  "reorderItemLeft": "Интиқол ба чап",
+  "reorderItemRight": "Интиқол ба рост",
+  "searchResultsFound": "Натиҷаҳои ҷустуҷӯ ёфт шуданд",
+  "noResultsFound": "Ягон натиҷа ёфт нашуд",
+  "copyButtonLabel": "Нусхабардорӣ",
+  "cutButtonLabel": "Буридан",
+  "lookUpButtonLabel": "Ҷустуҷӯ",
+  "searchWebButtonLabel": "Ҷустуҷӯ дар веб",
+  "shareButtonLabel": "Мубодила",
+  "pasteButtonLabel": "Гузоштан",
+  "selectAllButtonLabel": "Интихоби ҳама",
+  "radioButtonUnselectedLabel": "Интихобнашуда"
+}
