@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include <array>
+#include <cmath>
 #include <tuple>
 #include <utility>
 #include <vector>
@@ -19,7 +20,11 @@
 #include "flutter/display_list/dl_builder.h"
 #include "flutter/display_list/dl_color.h"
 #include "flutter/display_list/dl_paint.h"
+#include "flutter/fml/synchronization/count_down_latch.h"
 #include "flutter/testing/testing.h"
+#include "impeller/core/device_buffer.h"
+#include "impeller/core/device_buffer_descriptor.h"
+#include "impeller/display_list/dl_dispatcher.h"
 #include "impeller/playground/widgets.h"
 #include "impeller/renderer/testing/mocks.h"
 
@@ -117,6 +122,96 @@ INSTANTIATE_TEST_SUITE_P(
     [](const ::testing::TestParamInfo<AiksTestNoSSBO::ParamType>& info) {
       return PlaygroundBackendToString(info.param);
     });
+
+// Exercise the actual SDF shaders and assert GPU pixels rather than only
+// checking that rendering succeeds. At x=164, a 400-pixel linear gradient's
+// dot product exceeds the half-float finite limit (164 * 400 > 65504), even
+// though the final normalized parameter is between zero and one.
+TEST_P(AiksTest, SDFGradientCoordinatePrecision) {
+  if (GetParam() != PlaygroundBackend::kOpenGLESSDF &&
+      GetParam() != PlaygroundBackend::kMetalSDF) {
+    GTEST_SKIP() << "Requires an SDF backend";
+  }
+
+  struct GradientCase {
+    const char* name;
+    int width;
+    DlPoint end;
+    bool radial;
+  };
+  const GradientCase cases[] = {
+      {"horizontal", 400, {400, 0}, false},
+      {"diagonal", 1100, {1100, 100}, false},
+      {"radial", 1100, {1000, 0}, true},
+  };
+  const DlColor colors[] = {DlColor::kRed(), DlColor::kBlue()};
+  const Scalar stops[] = {0, 1};
+  for (const auto& gradient : cases) {
+    SCOPED_TRACE(gradient.name);
+    DisplayListBuilder builder;
+    DlPaint paint;
+    if (gradient.radial) {
+      paint.setColorSource(DlColorSource::MakeRadial(
+          {0, 50}, gradient.end.x, 2, colors, stops, DlTileMode::kClamp));
+    } else {
+      paint.setColorSource(DlColorSource::MakeLinear(
+          {0, 0}, gradient.end, 2, colors, stops, DlTileMode::kClamp));
+    }
+    builder.DrawRect(DlRect::MakeWH(gradient.width, 100), paint);
+
+    AiksContext renderer(GetContext(), nullptr);
+    auto texture = DisplayListToTexture(
+        builder.Build(), ISize(gradient.width, 100), renderer,
+        /*reset_host_buffer=*/true, /*generate_mips=*/false,
+        PixelFormat::kR8G8B8A8UNormInt);
+    ASSERT_TRUE(texture);
+    DeviceBufferDescriptor desc;
+    desc.size = texture->GetTextureDescriptor().GetByteSizeOfBaseMipLevel();
+    desc.readback = true;
+    desc.storage_mode = StorageMode::kHostVisible;
+    auto buffer = GetContext()->GetResourceAllocator()->CreateBuffer(desc);
+    ASSERT_TRUE(buffer);
+    auto command_buffer = GetContext()->CreateCommandBuffer();
+    ASSERT_TRUE(command_buffer);
+    auto blit = command_buffer->CreateBlitPass();
+    ASSERT_TRUE(blit);
+    ASSERT_TRUE(blit->AddCopy(texture, buffer));
+    ASSERT_TRUE(blit->EncodeCommands());
+    fml::CountDownLatch latch(1u);
+    CommandBuffer::Status status = CommandBuffer::Status::kError;
+    ASSERT_TRUE(GetContext()
+                    ->GetCommandQueue()
+                    ->Submit({command_buffer},
+                             [&latch, &status](CommandBuffer::Status result) {
+                               status = result;
+                               latch.CountDown();
+                             })
+                    .ok());
+    latch.Wait();
+    ASSERT_EQ(status, CommandBuffer::Status::kCompleted);
+    buffer->Invalidate();
+    const auto* pixels = buffer->OnGetContents();
+    ASSERT_NE(pixels, nullptr);
+    for (int quarter = 1; quarter <= 3; quarter++) {
+      const int x = gradient.width * quarter / 4;
+      SCOPED_TRACE(x);
+      const Scalar px = x + 0.5f;
+      const Scalar py = 50.5f;
+      const Scalar t = gradient.radial
+                           ? std::hypot(px, py - 50) / gradient.end.x
+                           : (px * gradient.end.x + py * gradient.end.y) /
+                                 (gradient.end.x * gradient.end.x +
+                                  gradient.end.y * gradient.end.y);
+      const auto* pixel =
+          pixels + 50 * texture->GetTextureDescriptor().GetBytesPerRow() +
+          x * 4;
+      EXPECT_NEAR(pixel[0], (1 - t) * 255, 4);
+      EXPECT_NEAR(pixel[1], 0, 4);
+      EXPECT_NEAR(pixel[2], t * 255, 4);
+      EXPECT_NEAR(pixel[3], 255, 4);
+    }
+  }
+}
 
 TEST_P(AiksTest, CanRenderLinearGradientClamp) {
   CanRenderLinearGradient(this, DlTileMode::kClamp);
