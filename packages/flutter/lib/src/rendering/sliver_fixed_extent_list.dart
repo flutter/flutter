@@ -84,7 +84,7 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
         if (childCount != null && i > childCount - 1) {
           break;
         }
-        itemExtent = itemExtentBuilder!(i, layoutDimensions);
+        itemExtent = itemExtentOf(i);
         if (itemExtent == null) {
           break;
         }
@@ -123,7 +123,7 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
       }
       return 0;
     } else {
-      return _getChildIndexForScrollOffset(scrollOffset, itemExtentBuilder!);
+      return _getChildIndexForScrollOffset(scrollOffset);
     }
   }
 
@@ -156,7 +156,7 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
       }
       return 0;
     } else {
-      return _getChildIndexForScrollOffset(scrollOffset, itemExtentBuilder!);
+      return _getChildIndexForScrollOffset(scrollOffset);
     }
   }
 
@@ -228,7 +228,7 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
       var offset = 0.0;
       double? itemExtent;
       for (var i = 0; i < childManager.childCount; i++) {
-        itemExtent = itemExtentBuilder!(i, layoutDimensions);
+        itemExtent = itemExtentOf(i);
         if (itemExtent == null) {
           break;
         }
@@ -238,7 +238,7 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
     }
   }
 
-  int _getChildIndexForScrollOffset(double scrollOffset, ItemExtentBuilder callback) {
+  int _getChildIndexForScrollOffset(double scrollOffset) {
     if (scrollOffset == 0.0) {
       return 0;
     }
@@ -250,7 +250,7 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
       if (childCount != null && index > childCount - 1) {
         break;
       }
-      itemExtent = callback(index, layoutDimensions);
+      itemExtent = itemExtentOf(index);
       if (itemExtent == null) {
         break;
       }
@@ -263,6 +263,10 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
   /// Returns the extent of the child at the given [index].
   ///
   /// This is used to determine the dimensions of the child when laying it out.
+  ///
+  /// Returns null if [index] is past the end of the list. Only valid during
+  /// layout (uses [layoutDimensions]). Subclasses may override to memoize.
+  @visibleForTesting
   @protected
   double? itemExtentOf(int index) {
     if (itemExtentBuilder == null) {

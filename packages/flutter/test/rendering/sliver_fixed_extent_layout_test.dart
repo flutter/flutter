@@ -532,14 +532,14 @@ void main() {
     );
     final childManager = TestRenderSliverBoxChildManager(children: children);
 
+    final calledIndices = <int>[];
     SliverLayoutDimensions? lastDimensions;
-    var builderCallCount = 0;
     final RenderSliverVariedExtentList list = childManager.createRenderSliverVariedExtentList((
       index,
       layoutDimensions,
     ) {
       lastDimensions = layoutDimensions;
-      builderCallCount++;
+      calledIndices.add(index);
       return 100.0;
     });
 
@@ -557,23 +557,26 @@ void main() {
     final align = RenderPositionedBox(alignment: Alignment.topLeft, child: box);
     layout(align);
 
-    expect(builderCallCount, greaterThan(1));
+    expect(calledIndices.toSet().length, calledIndices.length);
+    expect(calledIndices.length, greaterThan(1));
     expect(lastDimensions!.viewportMainAxisExtent, 600.0);
     expect(lastDimensions!.crossAxisExtent, 800.0);
-    builderCallCount = 0;
+    calledIndices.clear();
 
     // Resize viewport main axis.
     box.additionalConstraints = const BoxConstraints.tightFor(width: 800.0, height: 400.0);
     pumpFrame();
-    expect(builderCallCount, greaterThan(1));
+    expect(calledIndices.toSet().length, calledIndices.length);
+    expect(calledIndices.length, greaterThan(1));
     expect(lastDimensions!.viewportMainAxisExtent, 400.0);
     expect(lastDimensions!.crossAxisExtent, 800.0);
 
-    builderCallCount = 0;
+    calledIndices.clear();
     // Resize viewport cross axis.
     box.additionalConstraints = const BoxConstraints.tightFor(width: 400.0, height: 400.0);
     pumpFrame();
-    expect(builderCallCount, greaterThan(1));
+    expect(calledIndices.toSet().length, calledIndices.length);
+    expect(calledIndices.length, greaterThan(1));
     expect(lastDimensions!.viewportMainAxisExtent, 400.0);
     expect(lastDimensions!.crossAxisExtent, 400.0);
   });
@@ -585,9 +588,14 @@ void main() {
     );
     final childManager = TestRenderSliverBoxChildManager(children: children);
 
-    final RenderSliverVariedExtentList list = childManager.createRenderSliverVariedExtentList(
-      (index, dimensions) => index.isEven ? 100.0 : 200.0,
-    );
+    final calledIndices = <int>[];
+    final RenderSliverVariedExtentList list = childManager.createRenderSliverVariedExtentList((
+      index,
+      dimensions,
+    ) {
+      calledIndices.add(index);
+      return index.isEven ? 100.0 : 200.0;
+    });
 
     final root = RenderViewport(
       axisDirection: AxisDirection.up,
@@ -597,6 +605,8 @@ void main() {
       children: <RenderSliver>[list],
     );
     layout(root);
+
+    expect(calledIndices.toSet().length, calledIndices.length);
 
     final child0 = children[0].parentData! as SliverMultiBoxAdaptorParentData;
     final child1 = children[1].parentData! as SliverMultiBoxAdaptorParentData;
@@ -612,9 +622,14 @@ void main() {
     );
     final childManager = TestRenderSliverBoxChildManager(children: children);
 
-    final RenderSliverVariedExtentList list = childManager.createRenderSliverVariedExtentList(
-      (index, dimensions) => index.isEven ? 100.0 : 50.0,
-    );
+    final calledIndices = <int>[];
+    final RenderSliverVariedExtentList list = childManager.createRenderSliverVariedExtentList((
+      index,
+      dimensions,
+    ) {
+      calledIndices.add(index);
+      return index.isEven ? 100.0 : 50.0;
+    });
 
     final root = RenderViewport(
       crossAxisDirection: AxisDirection.right,
@@ -626,28 +641,86 @@ void main() {
 
     // Max scroll offset should be 5 * 100 + 5 * 50 = 750.
     expect(list.computeMaxScrollOffset(list.constraints, 0.0), 750.0);
+    expect(calledIndices.toSet().length, calledIndices.length);
 
+    calledIndices.clear();
     // Expand: add 2 children.
     children.add(RenderSizedBox(const Size(400.0, 100.0)));
     children.add(RenderSizedBox(const Size(400.0, 100.0)));
 
-    list.itemExtentBuilder = (index, dimensions) => index.isEven ? 100.0 : 50.0;
+    list.itemExtentBuilder = (index, dimensions) {
+      calledIndices.add(index);
+      return index.isEven ? 100.0 : 50.0;
+    };
     pumpFrame();
 
     // Max scroll offset should be 6 * 100 + 6 * 50 = 900.
     expect(list.computeMaxScrollOffset(list.constraints, 0.0), 900.0);
+    expect(calledIndices.toSet().length, calledIndices.length);
 
+    calledIndices.clear();
     // Collapse: remove 4 children.
     children.removeLast();
     children.removeLast();
     children.removeLast();
     children.removeLast();
 
-    list.itemExtentBuilder = (index, dimensions) => index.isEven ? 100.0 : 50.0;
+    list.itemExtentBuilder = (index, dimensions) {
+      calledIndices.add(index);
+      return index.isEven ? 100.0 : 50.0;
+    };
     pumpFrame();
 
     // 8 children: 4 * 100 + 4 * 50 = 600.
     expect(list.computeMaxScrollOffset(list.constraints, 0.0), 600.0);
+    expect(calledIndices.toSet().length, calledIndices.length);
+  });
+
+  test('RenderSliverFixedExtentBoxAdaptor delegates extent queries to itemExtentOf', () {
+    final children = List<RenderBox>.generate(
+      10,
+      (index) => RenderSizedBox(const Size(400.0, 100.0)),
+    );
+    final childManager = TestRenderSliverBoxChildManager(children: children);
+    final ExtentOfTrackingSliverFixedExtentBoxAdaptor list = childManager
+        .createExtentOfTrackingSliverFixedExtentBoxAdaptor(
+          (index, dimensions) => (index + 1) * 10.0,
+        );
+    final root = RenderViewport(
+      crossAxisDirection: AxisDirection.right,
+      offset: ViewportOffset.zero(),
+      cacheExtent: 0,
+      children: <RenderSliver>[list],
+    );
+    layout(root);
+
+    list.itemExtentOfCalls.clear();
+    // indexToLayoutOffset should call itemExtentOf for each index prior to index.
+    final double offset = list.indexToLayoutOffset(0.0, 3);
+    // Extents: index 0: 10, index 1: 20, index 2: 30 -> offset = 60.
+    expect(offset, 60.0);
+    expect(list.itemExtentOfCalls, <int>[0, 1, 2]);
+
+    list.itemExtentOfCalls.clear();
+    // computeMaxScrollOffset should call itemExtentOf for each child.
+    final double maxScrollOffset = list.computeMaxScrollOffset(list.constraints, 0.0);
+    // Sum from index 0 to 9: 10 + 20 + ... + 100 = 550.
+    expect(maxScrollOffset, 550.0);
+    expect(list.itemExtentOfCalls, List<int>.generate(10, (int i) => i));
+
+    list.itemExtentOfCalls.clear();
+    // getMinChildIndexForScrollOffset should call itemExtentOf via _getChildIndexForScrollOffset.
+    final int minIndex = list.getMinChildIndexForScrollOffset(25.0, 0.0);
+    // index 0: 10, index 1: 20 (cumulative 30 >= 25.0) -> index = 1.
+    expect(minIndex, 1);
+    expect(list.itemExtentOfCalls, <int>[0, 1]);
+
+    list.itemExtentOfCalls.clear();
+    // getMaxChildIndexForScrollOffset should call itemExtentOf via _getChildIndexForScrollOffset.
+    final int maxIndex = list.getMaxChildIndexForScrollOffset(35.0, 0.0);
+    // index 0: 10, index 1: 20, index 2: 30 (cumulative 60 >= 35.0) -> index = 2.
+    expect(maxIndex, 2);
+    expect(list.itemExtentOfCalls, <int>[0, 1, 2]);
   });
 }
 
@@ -683,6 +756,17 @@ class TestRenderSliverBoxChildManager extends RenderSliverBoxChildManager {
       itemExtentBuilder: itemExtentBuilder,
     );
     return _renderObject! as RenderSliverVariedExtentList;
+  }
+
+  ExtentOfTrackingSliverFixedExtentBoxAdaptor createExtentOfTrackingSliverFixedExtentBoxAdaptor(
+    ItemExtentBuilder itemExtentBuilder,
+  ) {
+    assert(_renderObject == null);
+    _renderObject = ExtentOfTrackingSliverFixedExtentBoxAdaptor(
+      childManager: this,
+      builder: itemExtentBuilder,
+    );
+    return _renderObject! as ExtentOfTrackingSliverFixedExtentBoxAdaptor;
   }
 
   int? _currentlyUpdatingChildIndex;
@@ -746,6 +830,45 @@ class TestRenderSliverFixedExtentBoxAdaptor extends RenderSliverFixedExtentBoxAd
 
   @override
   double get itemExtent => _itemExtent;
+}
+
+class ExtentOfTrackingSliverFixedExtentBoxAdaptor extends RenderSliverFixedExtentBoxAdaptor {
+  ExtentOfTrackingSliverFixedExtentBoxAdaptor({required super.childManager, required this.builder});
+
+  final ItemExtentBuilder builder;
+  final List<int> itemExtentOfCalls = <int>[];
+
+  @override
+  ItemExtentBuilder? get itemExtentBuilder => builder;
+
+  @override
+  double? get itemExtent => null;
+
+  @override
+  double? itemExtentOf(int index) {
+    itemExtentOfCalls.add(index);
+    return super.itemExtentOf(index);
+  }
+
+  @override
+  double indexToLayoutOffset(double itemExtent, int index) {
+    return super.indexToLayoutOffset(itemExtent, index);
+  }
+
+  @override
+  double computeMaxScrollOffset(SliverConstraints constraints, double itemExtent) {
+    return super.computeMaxScrollOffset(constraints, itemExtent);
+  }
+
+  @override
+  int getMinChildIndexForScrollOffset(double scrollOffset, double itemExtent) {
+    return super.getMinChildIndexForScrollOffset(scrollOffset, itemExtent);
+  }
+
+  @override
+  int getMaxChildIndexForScrollOffset(double scrollOffset, double itemExtent) {
+    return super.getMaxChildIndexForScrollOffset(scrollOffset, itemExtent);
+  }
 }
 
 class NonMultipleFixedExtentList extends RenderSliverFixedExtentList {

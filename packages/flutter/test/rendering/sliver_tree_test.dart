@@ -715,4 +715,47 @@ void main() {
     expect(renderSliver.itemExtentBuilder(1, renderSliver.layoutDimensions), 60.0);
     expect(renderSliver.itemExtentBuilder(2, renderSliver.layoutDimensions), 40.0);
   });
+
+  testWidgets('TreeSliver scrolls and asserts per-layout call uniqueness', (
+    WidgetTester tester,
+  ) async {
+    final calledNodes = <TreeSliverNode<Object?>>[];
+    final tree = List<TreeSliverNode<String>>.generate(
+      50,
+      (int index) => TreeSliverNode<String>('Node $index'),
+    );
+    final controller = ScrollController();
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(
+      _buildTestWidget(
+        CustomScrollView(
+          controller: controller,
+          slivers: <Widget>[
+            TreeSliver<String>(
+              tree: tree,
+              treeRowExtentBuilder:
+                  (TreeSliverNode<Object?> node, SliverLayoutDimensions dimensions) {
+                    calledNodes.add(node);
+                    return 40.0;
+                  },
+            ),
+          ],
+        ),
+      ),
+    );
+
+    // Initial layout pass: each evaluated node is called at most once.
+    expect(calledNodes.toSet().length, calledNodes.length);
+    expect(calledNodes.isNotEmpty, isTrue);
+
+    // Scroll the tree sliver.
+    calledNodes.clear();
+    controller.jumpTo(200.0);
+    await tester.pump();
+
+    // Within this layout pass during scrolling, each evaluated node is called at most once.
+    expect(calledNodes.toSet().length, calledNodes.length);
+    expect(calledNodes.isNotEmpty, isTrue);
+  });
 }
