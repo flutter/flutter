@@ -7,7 +7,7 @@ import 'dart:ui' as ui show RootIsolateToken;
 import 'binding.dart';
 
 /// Stand-in for non-web platforms' [BackgroundIsolateBinaryMessenger].
-class BackgroundIsolateBinaryMessenger {
+abstract final class BackgroundIsolateBinaryMessenger {
   /// Throws an [UnsupportedError].
   static BinaryMessenger get instance {
     throw UnsupportedError('Isolates not supported on web.');

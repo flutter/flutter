@@ -11,7 +11,7 @@ part of dart.ui;
 // > When changes are made to this class, the equivalent APIs in
 // > `lib/ui/semantics/semantics_node.h` and in each of the embedders
 // > *must* be updated.
-class SemanticsAction {
+final class SemanticsAction {
   const SemanticsAction._(this.index, this.name);
 
   /// The numerical value for this action.
@@ -606,7 +606,7 @@ enum SemanticsInputType {
 // updated. If the change affects the visibility of a [SemanticsNode] to
 // accessibility services, `flutter_test/controller.dart#SemanticsController._importantFlags`
 // must be updated as well.
-class SemanticsFlag {
+final class SemanticsFlag {
   const SemanticsFlag._(this.index, this.name);
 
   /// The numerical value for this flag.
@@ -1235,7 +1235,7 @@ enum SemanticsHitTestBehavior {
 ///
 /// For example, These flags can indicate if an element is
 /// checkable, currently checked, selectable, or functions as a button.
-class SemanticsFlags extends NativeFieldWrapperClass1 {
+final class SemanticsFlags extends NativeFieldWrapperClass1 {
   /// Creates a set of semantics flags that describe various states of a widget.
   /// All flags default to `false` unless specified.
   SemanticsFlags({
@@ -1522,7 +1522,6 @@ class SemanticsFlags extends NativeFieldWrapperClass1 {
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is SemanticsFlags &&
-          runtimeType == other.runtimeType &&
           isChecked == other.isChecked &&
           isSelected == other.isSelected &&
           isEnabled == other.isEnabled &&
@@ -1743,7 +1742,7 @@ abstract base class StringAttribute extends NativeFieldWrapperClass1 {
 ///  * [AttributedString], where the string attributes are used.
 ///  * [LocaleStringAttribute], which causes the assistive technologies to
 ///    treat the string in the specific language.
-base class SpellOutStringAttribute extends StringAttribute {
+final class SpellOutStringAttribute extends StringAttribute {
   /// Creates a string attribute that denotes the text in [range] must be
   /// spell out when the assistive technologies announce the string.
   SpellOutStringAttribute({required TextRange range}) : super._(range: range) {
@@ -1778,7 +1777,7 @@ base class SpellOutStringAttribute extends StringAttribute {
 ///  * [AttributedString], where the string attributes are used.
 ///  * [SpellOutStringAttribute], which causes the assistive technologies to
 ///    spell out the string character by character when announcing the string.
-base class LocaleStringAttribute extends StringAttribute {
+final class LocaleStringAttribute extends StringAttribute {
   /// Creates a string attribute that denotes the text in [range] must be
   /// treated as the language specified by the [locale] when the assistive
   /// technologies announce the string.

@@ -34,7 +34,7 @@ enum UndoDirection {
 /// See also:
 ///
 /// * [NSUndoManager](https://developer.apple.com/documentation/foundation/nsundomanager)
-class UndoManager {
+final class UndoManager {
   UndoManager._() {
     _channel = SystemChannels.undoManager;
     _channel.setMethodCallHandler(_handleUndoManagerInvocation);
