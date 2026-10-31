@@ -29,6 +29,9 @@ struct MockCommandBuffer {
       : called_functions_(std::move(called_functions)) {}
   std::shared_ptr<std::vector<std::string>> called_functions_;
   std::vector<VkImageMemoryBarrier> image_memory_barriers_;
+  // The dstStageMask of the vkCmdPipelineBarrier call that recorded each entry
+  // of image_memory_barriers_, in the same order.
+  std::vector<VkPipelineStageFlags> image_memory_barrier_dst_stages_;
   std::vector<VkViewport> recorded_viewports_;
 };
 
@@ -724,6 +727,8 @@ void vkCmdPipelineBarrier(VkCommandBuffer commandBuffer,
     for (uint32_t i = 0; i < imageMemoryBarrierCount; ++i) {
       mock_command_buffer->image_memory_barriers_.push_back(
           pImageMemoryBarriers[i]);
+      mock_command_buffer->image_memory_barrier_dst_stages_.push_back(
+          dstStageMask);
     }
   }
 }
@@ -1361,6 +1366,13 @@ std::vector<VkImageMemoryBarrier>& GetImageMemoryBarriers(
   MockCommandBuffer* mock_command_buffer =
       reinterpret_cast<MockCommandBuffer*>(buffer);
   return mock_command_buffer->image_memory_barriers_;
+}
+
+const std::vector<VkPipelineStageFlags>& GetImageMemoryBarrierDstStages(
+    VkCommandBuffer buffer) {
+  MockCommandBuffer* mock_command_buffer =
+      reinterpret_cast<MockCommandBuffer*>(buffer);
+  return mock_command_buffer->image_memory_barrier_dst_stages_;
 }
 
 const std::vector<VkViewport>& GetRecordedViewports(VkCommandBuffer buffer) {

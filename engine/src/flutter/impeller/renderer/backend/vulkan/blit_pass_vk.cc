@@ -170,9 +170,10 @@ bool BlitPassVK::OnCopyTextureToBufferCommand(
   barrier.src_stage = vk::PipelineStageFlagBits::eFragmentShader |
                       vk::PipelineStageFlagBits::eTransfer |
                       vk::PipelineStageFlagBits::eColorAttachmentOutput;
-  barrier.dst_access = vk::AccessFlagBits::eShaderRead;
-  barrier.dst_stage = vk::PipelineStageFlagBits::eVertexShader |
-                      vk::PipelineStageFlagBits::eFragmentShader;
+  // The next access is the copy below, a transfer read. Shader stages don't
+  // order the copy after the layout transition (SYNC-HAZARD-READ-AFTER-WRITE).
+  barrier.dst_access = vk::AccessFlagBits::eTransferRead;
+  barrier.dst_stage = vk::PipelineStageFlagBits::eTransfer;
 
   const auto& dst = DeviceBufferVK::Cast(*destination);
 
