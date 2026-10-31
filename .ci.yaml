@@ -1893,6 +1893,21 @@ targets:
           {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
         ]
 
+  - name: Linux_android_emu android_engine_skia_tests
+    recipe: flutter/flutter_drone
+    bringup: true
+    timeout: 60
+    properties:
+      shard: android_engine_skia_tests
+      tags: >
+         ["framework", "hostonly", "shard", "linux"]
+      dependencies: >-
+        [
+          {"dependency": "android_sdk", "version": "version:37v2"},
+          {"dependency": "goldctl", "version": "git_revision:7f66c9b9efb2826e72c61bb2f50cdc20b635dea7"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
+        ]
+
   - name: Linux_android_emu_vulkan_stable android_hardware_smoke_vulkan_tests
     recipe: flutter/flutter_drone
     timeout: 60

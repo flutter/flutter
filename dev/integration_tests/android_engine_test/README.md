@@ -21,6 +21,7 @@ See [`dev/bots/suite_runners/run_android_engine_tests.dart`](../../bots/suite_ru
 # TIP: If golden-files do not exist locally, this command will fail locally.
 SHARD=android_engine_vulkan_tests bin/cache/dart-sdk/bin/dart dev/bots/test.dart
 SHARD=android_engine_opengles_tests bin/cache/dart-sdk/bin/dart dev/bots/test.dart
+SHARD=android_engine_skia_tests bin/cache/dart-sdk/bin/dart dev/bots/test.dart
 SHARD=android_engine_hcpp_tests bin/cache/dart-sdk/bin/dart dev/bots/test.dart
 ```
 
@@ -30,6 +31,7 @@ Each `lib/{prefix}_main.dart` file is a standalone Flutter app that you can run
 on an Android device or emulator.
 
 - [`flutter_rendered_blue_rectangle`](#flutter_rendered_blue_rectangle)
+- [`external_texture/multiple_external_textures`](#external_texturemultiple_external_textures)
 - [`external_texture/surface_producer_smiley_face`](#external_texturesurface_producer_smiley_face)
 - [`external_texture/surface_texture_smiley_face`](#external_texturesurface_texture_smiley_face)
 - [`platform_view/hybrid_composition_platform_view`](#platform_viewhybrid_composition_platform_view)
@@ -51,6 +53,22 @@ $ flutter run lib/flutter_rendered_blue_rectangle_main.dart
 
 # Run the test
 $ flutter drive lib/flutter_rendered_blue_rectangle_main.dart
+```
+
+### `external_texture/multiple_external_textures`
+
+This app displays a static blue `AndroidView` (TLHC) on top and mounts a second
+[`SurfaceProducer`](https://api.flutter.dev/javadoc/io/flutter/view/TextureRegistry.SurfaceProducer.html)
+smiley-face `Texture` below it when tapped, verifying that binding a new
+external texture does not overwrite the first texture (regression test for
+[#194048](https://github.com/flutter/flutter/issues/194048)).
+
+```sh
+# Run the app
+$ flutter run lib/external_texture/multiple_external_textures_main.dart
+
+# Run the test
+$ flutter drive lib/external_texture/multiple_external_textures_main.dart
 ```
 
 ### `external_texture/surface_producer_smiley_face`
