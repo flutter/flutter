@@ -96,6 +96,37 @@ TEST(ReactorGLES, UntrackedHandle) {
   EXPECT_TRUE(reactor->React());
 }
 
+TEST(ReactorGLES, CollectsTrackedAndUntrackedHandlesWithoutPendingOperations) {
+  auto mock_gles_impl = std::make_unique<MockGLESImpl>();
+
+  EXPECT_CALL(*mock_gles_impl, GenTextures(1, _))
+      .WillOnce([](GLsizei size, GLuint* queries) { queries[0] = 1111; })
+      .WillOnce([](GLsizei size, GLuint* queries) { queries[0] = 2222; });
+  EXPECT_CALL(*mock_gles_impl, DeleteTextures(1, ::testing::Pointee(1111)))
+      .Times(1);
+  EXPECT_CALL(*mock_gles_impl, DeleteTextures(1, ::testing::Pointee(2222)))
+      .Times(1);
+
+  std::shared_ptr<MockGLES> mock_gles =
+      MockGLES::Init(std::move(mock_gles_impl));
+  ProcTableGLES::Resolver resolver = kMockResolverGLES;
+  auto proc_table = std::make_unique<ProcTableGLES>(resolver);
+  auto worker = std::make_shared<TestWorker>();
+  auto reactor = std::make_shared<ReactorGLES>(std::move(proc_table));
+  reactor->AddWorker(worker);
+
+  HandleGLES tracked = reactor->CreateHandle(HandleType::kTexture);
+  HandleGLES untracked = reactor->CreateUntrackedHandle(HandleType::kTexture);
+  EXPECT_FALSE(tracked.IsDead());
+  EXPECT_FALSE(untracked.IsDead());
+
+  reactor->CollectHandle(tracked);
+  reactor->CollectHandle(untracked);
+  // React() must consolidate and delete collected handles even when no
+  // ReactorGLES::Operation is queued.
+  EXPECT_TRUE(reactor->React());
+}
+
 TEST(ReactorGLES, NameUntrackedHandle) {
   auto mock_gles_impl = std::make_unique<NiceMock<MockGLESImpl>>();
   NiceMock<MockGLESImpl>* raw_mock_gles = mock_gles_impl.get();

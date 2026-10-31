@@ -223,6 +223,36 @@ TEST(RasterizerTest, ClearRenderTargetCacheClearsImpellerCache) {
   rasterizer->Setup(std::move(surface));
   rasterizer->ClearRenderTargetCache();
 }
+
+TEST(RasterizerTest, TeardownClearsImpellerCache) {
+  std::string test_name =
+      ::testing::UnitTest::GetInstance()->current_test_info()->name();
+  ThreadHost thread_host("io.flutter.test." + test_name + ".",
+                         ThreadHost::Type::kPlatform |
+                             ThreadHost::Type::kRaster | ThreadHost::Type::kIo |
+                             ThreadHost::Type::kUi);
+  TaskRunners task_runners("test", thread_host.platform_thread->GetTaskRunner(),
+                           thread_host.raster_thread->GetTaskRunner(),
+                           thread_host.ui_thread->GetTaskRunner(),
+                           thread_host.io_thread->GetTaskRunner());
+  NiceMock<MockDelegate> delegate;
+  Settings settings;
+  ON_CALL(delegate, GetSettings()).WillByDefault(ReturnRef(settings));
+  ON_CALL(delegate, GetTaskRunners()).WillByDefault(ReturnRef(task_runners));
+  auto rasterizer = std::make_unique<Rasterizer>(delegate);
+  auto surface = std::make_unique<NiceMock<MockSurface>>();
+
+  auto aiks_context = std::make_shared<NiceMock<MockAiksContext>>();
+  EXPECT_CALL(*surface, GetAiksContext()).WillRepeatedly(Return(aiks_context));
+  EXPECT_CALL(*surface, MakeRenderContextCurrent()).WillRepeatedly([] {
+    return std::make_unique<GLContextDefaultResult>(true);
+  });
+  EXPECT_CALL(*aiks_context, ClearRenderTargetCache()).Times(1);
+  EXPECT_CALL(*aiks_context, ClearCachedTextures()).Times(1);
+
+  rasterizer->Setup(std::move(surface));
+  rasterizer->Teardown();
+}
 #endif  // IMPELLER_SUPPORTS_RENDERING
 
 static std::unique_ptr<FrameTimingsRecorder> CreateFinishedBuildRecorder(

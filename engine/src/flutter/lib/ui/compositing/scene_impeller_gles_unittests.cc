@@ -38,6 +38,7 @@
 #include "impeller/renderer/backend/gles/proc_table_gles.h"
 #include "impeller/renderer/backend/gles/reactor_gles.h"
 #include "impeller/renderer/backend/gles/test/mock_gles.h"
+#include "impeller/typographer/backends/skia/typographer_context_skia.h"
 #include "third_party/tonic/converter/dart_converter.h"
 
 // CREATE_NATIVE_ENTRY is leaky by design
@@ -90,11 +91,15 @@ class FakeEGLReactorWorker final : public impeller::ReactorGLES::Worker {
 class FakePbufferSnapshotSurfaceProducer final
     : public SnapshotSurfaceProducer {
  public:
-  FakePbufferSnapshotSurfaceProducer(GPUSurfaceGLDelegate* delegate,
-                                     std::shared_ptr<impeller::Context> context,
-                                     std::shared_ptr<FakeEGL> egl)
+  FakePbufferSnapshotSurfaceProducer(
+      GPUSurfaceGLDelegate* delegate,
+      std::shared_ptr<impeller::Context> context,
+      std::shared_ptr<FakeEGL> egl,
+      std::shared_ptr<impeller::AiksContext>* shared_aiks_context = nullptr)
       : delegate_(delegate),
         context_(std::move(context)),
+        shared_aiks_context_(shared_aiks_context ? shared_aiks_context
+                                                 : &local_aiks_context_),
         egl_(std::move(egl)) {}
 
   // |SnapshotSurfaceProducer|
@@ -102,19 +107,44 @@ class FakePbufferSnapshotSurfaceProducer final
     // Make the snapshot surface current because constructing a
     // GPUSurfaceGLImpeller and its AiksContext may invoke graphics APIs.
     egl_->MakeCurrent();
-    return std::make_unique<GPUSurfaceGLImpeller>(delegate_, context_,
-                                                  /*render_to_surface=*/true);
+    if (!*shared_aiks_context_) {
+      *shared_aiks_context_ = std::make_shared<impeller::AiksContext>(
+          context_, impeller::TypographerContextSkia::Make());
+    }
+    return std::make_unique<GPUSurfaceGLImpeller>(
+        /*delegate=*/delegate_,
+        /*aiks_context=*/*shared_aiks_context_,
+        /*render_to_surface=*/true);
   }
 
  private:
   GPUSurfaceGLDelegate* delegate_;
   std::shared_ptr<impeller::Context> context_;
+  std::shared_ptr<impeller::AiksContext> local_aiks_context_;
+  std::shared_ptr<impeller::AiksContext>* shared_aiks_context_;
   std::shared_ptr<FakeEGL> egl_;
 };
 
-/// A platform view with an Impeller OpenGL ES context that never gets a window
-/// surface: the test never calls |PlatformViewNotifyCreated|, like an Android
-/// app before `SurfaceView.surfaceCreated` (or after `surfaceDestroyed`).
+class MockGLDelegate : public GPUSurfaceGLDelegate {
+ public:
+  MOCK_METHOD(std::unique_ptr<GLContextResult>,
+              GLContextMakeCurrent,
+              (),
+              (override));
+  MOCK_METHOD(bool, GLContextClearCurrent, (), (override));
+  MOCK_METHOD(bool,
+              GLContextPresent,
+              (const GLPresentInfo& present_info),
+              (override));
+  MOCK_METHOD(GLFBOInfo,
+              GLContextFBO,
+              (GLFrameInfo frame_info),
+              (const, override));
+};
+
+/// A platform view with an Impeller OpenGL ES context that shares a single
+/// `AiksContext` across its rendering surfaces and snapshot surfaces, like
+/// `AndroidSurfaceGLImpeller`.
 class NoSurfaceGLESPlatformView final : public PlatformView,
                                         public GPUSurfaceGLDelegate {
  public:
@@ -132,10 +162,24 @@ class NoSurfaceGLESPlatformView final : public PlatformView,
   }
 
   // |PlatformView|
+  std::unique_ptr<Surface> CreateRenderingSurface() override {
+    egl_->MakeCurrent();
+    EnsureAiksContext();
+    return std::make_unique<GPUSurfaceGLImpeller>(
+        /*delegate=*/this,
+        /*aiks_context=*/aiks_context_,
+        /*render_to_surface=*/true);
+  }
+
+  // |PlatformView|
   std::unique_ptr<SnapshotSurfaceProducer> CreateSnapshotSurfaceProducer()
       override {
-    return std::make_unique<FakePbufferSnapshotSurfaceProducer>(this, context_,
-                                                                egl_);
+    return std::make_unique<FakePbufferSnapshotSurfaceProducer>(
+        this, context_, egl_, &aiks_context_);
+  }
+
+  const std::shared_ptr<impeller::AiksContext>& GetSharedAiksContext() const {
+    return aiks_context_;
   }
 
   // |GPUSurfaceGLDelegate|
@@ -161,7 +205,15 @@ class NoSurfaceGLESPlatformView final : public PlatformView,
   }
 
  private:
+  void EnsureAiksContext() {
+    if (!aiks_context_) {
+      aiks_context_ = std::make_shared<impeller::AiksContext>(
+          context_, impeller::TypographerContextSkia::Make());
+    }
+  }
+
   std::shared_ptr<impeller::ContextGLES> context_;
+  std::shared_ptr<impeller::AiksContext> aiks_context_;
   std::shared_ptr<FakeEGL> egl_;
 };
 
@@ -291,6 +343,197 @@ TEST_F(ShellTest, SceneToImageWithoutSurfaceOnImpellerGLES) {
   EXPECT_EQ(error, std::nullopt);
   EXPECT_EQ(width, 8);
   EXPECT_EQ(height, 8);
+
+  DestroyShell(std::move(shell), task_runners);
+}
+
+TEST_F(ShellTest, GPUSurfaceGLImpellerSharesAiksContext) {
+  auto mock_gles_impl =
+      std::make_unique<NiceMock<impeller::testing::MockGLESImpl>>();
+  ConfigureMockDriver(*mock_gles_impl);
+  size_t create_program_calls = 0;
+  ON_CALL(*mock_gles_impl, CreateProgram()).WillByDefault([&]() {
+    create_program_calls++;
+    return 1;
+  });
+  std::shared_ptr<impeller::testing::MockGLES> mock_gles =
+      impeller::testing::MockGLES::Init(std::move(mock_gles_impl));
+
+  auto egl = std::make_shared<FakeEGL>();
+  egl->MakeCurrent();
+  std::shared_ptr<impeller::ContextGLES> context =
+      impeller::ContextGLES::Create(impeller::Flags{},
+                                    std::make_unique<impeller::ProcTableGLES>(
+                                        impeller::testing::kMockResolverGLES),
+                                    ShaderLibraryMappings(),
+                                    /*enable_gpu_tracing=*/false);
+  ASSERT_TRUE(context);
+  auto worker = std::make_shared<FakeEGLReactorWorker>(egl);
+  context->AddReactorWorker(worker);
+
+  NiceMock<MockGLDelegate> delegate;
+  ON_CALL(delegate, GLContextMakeCurrent()).WillByDefault([&egl]() {
+    egl->MakeCurrent();
+    return std::make_unique<GLContextDefaultResult>(true);
+  });
+  ON_CALL(delegate, GLContextClearCurrent()).WillByDefault([&egl]() {
+    egl->ClearCurrent();
+    return true;
+  });
+  ON_CALL(delegate, GLContextPresent(_)).WillByDefault(Return(true));
+  ON_CALL(delegate, GLContextFBO(_))
+      .WillByDefault(Return(GLFBOInfo{0, std::nullopt}));
+
+  std::shared_ptr<impeller::Context> base_context = context;
+  std::weak_ptr<impeller::AiksContext> weak_aiks_context;
+  std::weak_ptr<impeller::PipelineLibrary> weak_pipeline_library =
+      base_context->GetPipelineLibrary();
+  {
+    FakePbufferSnapshotSurfaceProducer producer(&delegate, context, egl);
+    std::unique_ptr<Surface> first_surface = producer.CreateSnapshotSurface();
+    ASSERT_NE(first_surface, nullptr);
+    EXPECT_TRUE(first_surface->IsValid());
+    const size_t programs_after_first_surface = create_program_calls;
+    EXPECT_GT(programs_after_first_surface, 0u);
+
+    std::unique_ptr<Surface> second_surface = producer.CreateSnapshotSurface();
+    ASSERT_NE(second_surface, nullptr);
+    EXPECT_TRUE(second_surface->IsValid());
+    EXPECT_EQ(create_program_calls, programs_after_first_surface);
+    EXPECT_NE(first_surface->GetAiksContext(), nullptr);
+    EXPECT_EQ(first_surface->GetAiksContext(),
+              second_surface->GetAiksContext());
+    weak_aiks_context = first_surface->GetAiksContext();
+    EXPECT_FALSE(weak_aiks_context.expired());
+  }
+  // Once the surfaces and producer are destroyed, the shared AiksContext must
+  // not leak.
+  EXPECT_TRUE(weak_aiks_context.expired());
+
+  // Once the ContextGLES is released, its PipelineLibrary must not leak.
+  base_context->Shutdown();
+  base_context.reset();
+  context.reset();
+  EXPECT_TRUE(weak_pipeline_library.expired());
+}
+
+TEST_F(ShellTest, NotifyLowMemoryWarningDeletesTexturesOnImpellerGLES) {
+  auto mock_gles_impl =
+      std::make_unique<NiceMock<impeller::testing::MockGLESImpl>>();
+  NiceMock<impeller::testing::MockGLESImpl>* raw_mock_gles =
+      mock_gles_impl.get();
+  ConfigureMockDriver(*mock_gles_impl);
+  size_t delete_textures_calls = 0;
+  ON_CALL(*mock_gles_impl, DeleteTextures(_, _))
+      .WillByDefault([&](GLsizei n, const GLuint* textures) {
+        delete_textures_calls += static_cast<size_t>(n);
+      });
+  std::shared_ptr<impeller::testing::MockGLES> mock_gles =
+      impeller::testing::MockGLES::Init(std::move(mock_gles_impl));
+
+  auto egl = std::make_shared<FakeEGL>();
+  egl->MakeCurrent();
+  std::shared_ptr<impeller::ContextGLES> context =
+      impeller::ContextGLES::Create(impeller::Flags{},
+                                    std::make_unique<impeller::ProcTableGLES>(
+                                        impeller::testing::kMockResolverGLES),
+                                    ShaderLibraryMappings(),
+                                    /*enable_gpu_tracing=*/false);
+  ASSERT_TRUE(context);
+  auto worker = std::make_shared<FakeEGLReactorWorker>(egl);
+  context->AddReactorWorker(worker);
+  egl->ClearCurrent();
+
+  Settings settings = CreateSettingsForFixture();
+  settings.enable_impeller = true;
+  TaskRunners task_runners("test",                  // label
+                           GetCurrentTaskRunner(),  // platform
+                           CreateNewThread(),       // raster
+                           CreateNewThread(),       // ui
+                           CreateNewThread()        // io
+  );
+
+  NoSurfaceGLESPlatformView* platform_view = nullptr;
+  std::unique_ptr<Shell> shell = CreateShell({
+      .settings = settings,
+      .task_runners = task_runners,
+      .platform_view_create_callback =
+          [&context, &egl,
+           &platform_view](Shell& shell) -> std::unique_ptr<PlatformView> {
+        auto view = std::make_unique<NoSurfaceGLESPlatformView>(
+            shell, shell.GetTaskRunners(), context, egl);
+        platform_view = view.get();
+        return view;
+      },
+  });
+  ASSERT_TRUE(shell->IsSetup());
+  ASSERT_NE(platform_view, nullptr);
+
+  PlatformViewNotifyCreated(shell.get());
+
+  // Populate the shared AiksContext's RenderTargetCache on the raster thread.
+  {
+    fml::AutoResetWaitableEvent latch;
+    task_runners.GetRasterTaskRunner()->PostTask([&]() {
+      egl->MakeCurrent();
+      std::shared_ptr<impeller::AiksContext> aiks_context =
+          platform_view->GetSharedAiksContext();
+      ASSERT_NE(aiks_context, nullptr);
+      auto& allocator =
+          aiks_context->GetContentContext().GetRenderTargetCache();
+      allocator->Start();
+      impeller::RenderTarget target =
+          allocator->CreateOffscreen(*context, {64, 64}, /*mip_count=*/1);
+      EXPECT_TRUE(target.IsValid());
+      allocator->End();
+      (void)aiks_context->GetContext()->FlushCommandBuffers();
+      latch.Signal();
+    });
+    latch.Wait();
+  }
+
+  // The offscreen render target texture is retained in RenderTargetCache until
+  // a low-memory warning purges it.
+  EXPECT_EQ(delete_textures_calls, 0u);
+  EXPECT_CALL(*raw_mock_gles, DeleteTextures(_, _))
+      .Times(::testing::AtLeast(1));
+
+  shell->NotifyLowMemoryWarning();
+
+  {
+    fml::AutoResetWaitableEvent latch;
+    task_runners.GetRasterTaskRunner()->PostTask([&]() { latch.Signal(); });
+    latch.Wait();
+  }
+  EXPECT_GT(delete_textures_calls, 0u);
+
+  // When the onscreen surface is destroyed (e.g. app backgrounded),
+  // Rasterizer::Teardown must also clear the shared AiksContext's caches and
+  // call DeleteTextures.
+  const size_t delete_calls_before_teardown = delete_textures_calls;
+  {
+    fml::AutoResetWaitableEvent latch;
+    task_runners.GetRasterTaskRunner()->PostTask([&]() {
+      egl->MakeCurrent();
+      std::shared_ptr<impeller::AiksContext> aiks_context =
+          platform_view->GetSharedAiksContext();
+      ASSERT_NE(aiks_context, nullptr);
+      auto& allocator =
+          aiks_context->GetContentContext().GetRenderTargetCache();
+      allocator->Start();
+      impeller::RenderTarget target =
+          allocator->CreateOffscreen(*context, {64, 64}, /*mip_count=*/1);
+      EXPECT_TRUE(target.IsValid());
+      allocator->End();
+      (void)aiks_context->GetContext()->FlushCommandBuffers();
+      latch.Signal();
+    });
+    latch.Wait();
+  }
+  EXPECT_EQ(delete_textures_calls, delete_calls_before_teardown);
+
+  PlatformViewNotifyDestroyed(shell.get());
+  EXPECT_GT(delete_textures_calls, delete_calls_before_teardown);
 
   DestroyShell(std::move(shell), task_runners);
 }

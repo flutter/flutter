@@ -16,19 +16,29 @@ GPUSurfaceGLImpeller::GPUSurfaceGLImpeller(
     GPUSurfaceGLDelegate* delegate,
     std::shared_ptr<impeller::Context> context,
     bool render_to_surface)
+    : GPUSurfaceGLImpeller(delegate,
+                           (context && context->IsValid())
+                               ? std::make_shared<impeller::AiksContext>(
+                                     std::move(context),
+                                     impeller::TypographerContextSkia::Make())
+                               : nullptr,
+                           render_to_surface) {}
+
+GPUSurfaceGLImpeller::GPUSurfaceGLImpeller(
+    GPUSurfaceGLDelegate* delegate,
+    std::shared_ptr<impeller::AiksContext> aiks_context,
+    bool render_to_surface)
     : weak_factory_(this) {
   if (delegate == nullptr) {
     return;
   }
 
-  if (!context || !context->IsValid()) {
+  if (!aiks_context || !aiks_context->IsValid()) {
     return;
   }
 
-  auto aiks_context = std::make_shared<impeller::AiksContext>(
-      context, impeller::TypographerContextSkia::Make());
-
-  if (!aiks_context->IsValid()) {
+  auto context = aiks_context->GetContext();
+  if (!context || !context->IsValid()) {
     return;
   }
 

@@ -22,6 +22,8 @@ namespace testing {
 FML_TEST_CLASS(EmbedderSurfaceGLImpellerTest, GLES3ContextHasGLES3Shaders);
 FML_TEST_CLASS(EmbedderSurfaceGLImpellerTest,
                GLES2ContextDoesNotHaveGLES3Shaders);
+FML_TEST_CLASS(EmbedderSurfaceGLImpellerTest,
+               CreateGPUSurfaceSharesAiksContext);
 }  // namespace testing
 
 class ReactorWorker;
@@ -43,10 +45,15 @@ class EmbedderSurfaceGLImpeller final : public EmbedderSurface,
                   GLES3ContextHasGLES3Shaders);
   FML_FRIEND_TEST(testing::EmbedderSurfaceGLImpellerTest,
                   GLES2ContextDoesNotHaveGLES3Shaders);
+  FML_FRIEND_TEST(testing::EmbedderSurfaceGLImpellerTest,
+                  CreateGPUSurfaceSharesAiksContext);
   bool valid_ = false;
   EmbedderSurfaceGLSkia::GLDispatchTable gl_dispatch_table_;
   bool fbo_reset_after_present_;
   std::shared_ptr<impeller::ContextGLES> impeller_context_;
+  // Lazily initialized on the raster thread in CreateGPUSurface() once the GL
+  // context is current and reused across GPUSurfaceGLImpeller recreations.
+  std::shared_ptr<impeller::AiksContext> aiks_context_;
   std::shared_ptr<EmbedderExternalViewEmbedder> external_view_embedder_;
   std::shared_ptr<ReactorWorker> worker_;
 

@@ -30,7 +30,7 @@ struct GLFrameInfo {
 // the rendering backend after requesting a frame buffer object.
 struct GLFBOInfo {
   // The frame buffer's ID.
-  uint32_t fbo_id;
+  uint32_t fbo_id = 0;
   // The frame buffer's existing damage (i.e. damage since it was last used).
   const std::optional<DlIRect> existing_damage;
 };
