@@ -953,9 +953,9 @@ Future<void> testMain() async {
       ('right-to-left mark', '\u200F'),
     ]) {
       test('Soft line break before a $name after a zero width space wraps the line', () {
-        // A soft break opportunity after U+200B (LB8) lands on the immediately following
-        // directional mark, which has no cluster of its own. Line wrapping must still detect the
-        // soft break before the next visible cluster.
+        // Depending on the browser's line breaker, the soft break after U+200B (LB8) can land on
+        // the following directional mark, which has no cluster of its own. Line wrapping must
+        // still detect the soft break before the next visible cluster.
         final builder = ui.ParagraphBuilder(ahemStyle)..addText('ab\u200B${character}cd');
         final ui.Paragraph paragraph = builder.build()
           ..layout(const ui.ParagraphConstraints(width: 30));

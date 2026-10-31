@@ -280,8 +280,8 @@ class TextLayout {
         hardlineClusterRange.isNotEmpty && hardlineClusterRange.end == allClusters.length - 1;
     final allTextRange = ui.TextRange(
       start: contentTextRange.start,
-      // Use hardlineTextRange.start rather than whitespaceTextRange.end so unmapped clusterless
-      // characters following trailing spaces are included in this line's text range.
+      // Use hardlineTextRange.start rather than whitespaceTextRange.end so clusterless characters
+      // following trailing spaces are included in this line's text range.
       end: includesTrailingNewline ? hardlineTextRange.end : hardlineTextRange.start,
     );
     // TODO(jlavrova): Should we use a TextLineBuilder pattern instead?
