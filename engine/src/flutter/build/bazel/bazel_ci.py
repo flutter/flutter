@@ -226,6 +226,17 @@ def shell_quote(text):
   return "'" + text.replace("'", "'\\''") + "'"
 
 
+# What the edge's shell runs before bazelisk: closes every inherited file
+# descriptor above stderr. ninja learns that a console-pool command is done
+# when the write end of a pipe it hands the child is closed by everyone who
+# holds it; the Bazel server the client starts inherits it and lives on
+# after the command, and ninja waits for the server's idle timeout (hours)
+# -- seen on the first end-to-end run (10-31). POSIX sh, no seq.
+CLOSE_INHERITED_FDS = (
+    'fd=3; while [ "$fd" -le 255 ]; do eval "exec $fd>&-"; fd=$((fd + 1)); done'
+)
+
+
 def ninja_file(engine_src, build, out_dir, bazelisk):
   """The build.ninja that runs the build's install: one edge, a phony per ninja target."""
   root = repo_root(engine_src)
@@ -235,6 +246,7 @@ def ninja_file(engine_src, build, out_dir, bazelisk):
       engine_src, bazelisk, 'run', ['--config=' + build['config'], build['install'], '--', out_dir]
   )
   command = ' && '.join([
+      CLOSE_INHERITED_FDS,
       'cd ' + shell_quote(root),
       'env ' + env + ' ' + ' '.join(shell_quote(w) for w in run),
       'touch ' + shell_quote(stamp),

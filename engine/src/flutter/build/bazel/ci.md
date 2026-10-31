@@ -59,6 +59,13 @@ Steps 2 and 4 are scripts of this repository; step 3 runs whatever
   `download_bazelisk` (off by default; the variants' builds set it), as the
   CIPD package `infra/3pp/tools/bazelisk`; it fetches the Bazel release
   `.bazelversion` names. A developer's own bazelisk on `PATH` serves too.
+- **The edge's shell closes the file descriptors it inherits** before it runs
+  bazelisk. ninja learns that a console-pool command is done when every
+  holder of a pipe it hands the child has closed it; the Bazel server the
+  client starts inherits that pipe and lives on after the command (its idle
+  timeout is hours), and ninja waited on it -- the first end-to-end run hung
+  after a finished install. Closing fds 3–255 in the shell first keeps the
+  pipe out of the server; ninja still waits for the shell itself.
 - **Bazel's state** -- the output root, bazelisk's download -- lives under the
   checkout's `.bazel_ci/` (ignored by git, in the bot's `builder` cache), not
   under `out/` (which the recipe clobbers) or the bot's home (which may not
