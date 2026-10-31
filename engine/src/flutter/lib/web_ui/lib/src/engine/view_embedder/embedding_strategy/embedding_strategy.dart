@@ -19,11 +19,19 @@ import 'full_page_embedding_strategy.dart';
 ///   element, provided by the web app programmer through the engine
 ///   initialization.
 abstract class EmbeddingStrategy {
-  factory EmbeddingStrategy.create({DomElement? hostElement}) {
+  factory EmbeddingStrategy.create({
+    DomElement? hostElement,
+    DomWindow? domWindow,
+    DomDocument? domDocument,
+  }) {
     if (hostElement != null) {
-      return CustomElementEmbeddingStrategy(hostElement);
+      return CustomElementEmbeddingStrategy(
+        hostElement,
+        viewDomWindow: domWindow,
+        viewDomDocument: domDocument,
+      );
     } else {
-      return FullPageEmbeddingStrategy();
+      return FullPageEmbeddingStrategy(viewDomWindow: domWindow, viewDomDocument: domDocument);
     }
   }
 
@@ -44,4 +52,12 @@ abstract class EmbeddingStrategy {
 
   /// Attaches the view root element into the hostElement.
   void attachViewRoot(DomElement rootElement);
+
+  /// Updates this strategy to use [newHostElement] and [newRootElement].
+  ///
+  /// This is used by Document Picture-in-Picture support, where the host element
+  /// (and its owning [newRootElement]) changes after the view has already been
+  /// created. The view's DOM tree and framework state are preserved; only the
+  /// embedding container and per-window event listeners are updated.
+  void updateHostElement(DomElement newHostElement, DomElement newRootElement);
 }
