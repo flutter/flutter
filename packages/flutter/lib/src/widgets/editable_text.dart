@@ -4391,7 +4391,6 @@ class EditableTextState extends State<EditableText>
   }
 
   bool _showToolbarOnScreenScheduled = false;
-  bool _handleContextMenuOnScrollScheduled = false;
   void _handleContextMenuOnScroll(ScrollNotification notification) {
     if (_webContextMenuEnabled) {
       return;
@@ -4429,15 +4428,14 @@ class EditableTextState extends State<EditableText>
         case SchedulerPhase.transientCallbacks:
         case SchedulerPhase.midFrameMicrotasks:
         case SchedulerPhase.persistentCallbacks:
-          if (!_handleContextMenuOnScrollScheduled) {
-            _handleContextMenuOnScrollScheduled = true;
-            SchedulerBinding.instance.addPostFrameCallback((_) {
-              _handleContextMenuOnScrollScheduled = false;
-              if (mounted) {
-                _handleContextMenuOnScroll(notification);
-              }
-            }, debugLabel: 'EditableText.handleContextMenuOnScroll');
-          }
+          // Schedule a callback for every notification: addPostFrameCallback
+          // queues them in registration order, so no scroll notification
+          // is discarded when several arrive in the same frame.
+          SchedulerBinding.instance.addPostFrameCallback((_) {
+            if (mounted) {
+              _handleContextMenuOnScroll(notification);
+            }
+          }, debugLabel: 'EditableText.handleContextMenuOnScroll');
           return;
         case SchedulerPhase.idle:
         case SchedulerPhase.postFrameCallbacks:
