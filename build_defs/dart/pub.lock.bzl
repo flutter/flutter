@@ -42,14 +42,6 @@ PUB_HOSTED = {
             "meta",
         ],
     ),
-    "adaptive_breakpoints": struct(
-        version = "0.1.7",
-        sha256 = "56dd5f1016f4d5732b80628d1b63a29d8c9cabe4d66a8a5fe63fdbec7b3af5cd",
-        url = "https://pub.dev/api/archives/adaptive_breakpoints-0.1.7.tar.gz",
-        deps = [
-            "flutter",
-        ],
-    ),
     "analysis_server_plugin": struct(
         version = "0.3.22",
         sha256 = "fc372bb4778b901afe4dea2e7f71ec74e6cbe772999d9961a4d8e382bc4fa49c",
@@ -225,9 +217,9 @@ PUB_HOSTED = {
         ],
     ),
     "code_builder": struct(
-        version = "4.12.0",
-        sha256 = "aa5932e94c6c39c2f9ec4e5e06dfdd11a9430a61f6c41b6ba75b28ce0c481baf",
-        url = "https://pub.dev/api/archives/code_builder-4.12.0.tar.gz",
+        version = "4.13.0",
+        sha256 = "811709c1badd02fc054039a13f66e0db1961865f9a314175f68c3eaeebec786f",
+        url = "https://pub.dev/api/archives/code_builder-4.13.0.tar.gz",
         deps = [
             "built_collection",
             "built_value",
@@ -279,12 +271,10 @@ PUB_HOSTED = {
         ],
     ),
     "crypto": struct(
-        version = "3.0.7",
-        sha256 = "c8ea0233063ba03258fbcf2ca4d6dadfefe14f02fab57702265467a19f27fadf",
-        url = "https://pub.dev/api/archives/crypto-3.0.7.tar.gz",
-        deps = [
-            "typed_data",
-        ],
+        version = "3.0.8",
+        sha256 = "e3626ae6270383c9e3a549f34c9e4cd26c09ae6a9adaab2bf4737a00340efdc4",
+        url = "https://pub.dev/api/archives/crypto-3.0.8.tar.gz",
+        deps = [],
     ),
     "csslib": struct(
         version = "1.0.2",
@@ -301,9 +291,9 @@ PUB_HOSTED = {
         deps = [],
     ),
     "cupertino_ui": struct(
-        version = "1.1.1",
-        sha256 = "c23816577a1280cff409e989541767887011f8f1d8c1863a794ed308af46f2a9",
-        url = "https://pub.dev/api/archives/cupertino_ui-1.1.1.tar.gz",
+        version = "1.1.5",
+        sha256 = "e003b87afde18cb396ec15928c7894063d64af04462c68df9a1404c461316dd2",
+        url = "https://pub.dev/api/archives/cupertino_ui-1.1.5.tar.gz",
         deps = [
             "collection",
             "flutter",
@@ -318,9 +308,9 @@ PUB_HOSTED = {
         deps = [],
     ),
     "dap_adapters": struct(
-        version = "1.0.1",
-        sha256 = "a536d0bf43bc7b7859a3d18c0c3fdc134fb21e714a8ce3a5f1ae71b5678fb5d7",
-        url = "https://pub.dev/api/archives/dap_adapters-1.0.1.tar.gz",
+        version = "1.1.0",
+        sha256 = "6860f813e4ee81d9733631d28c8a93e333150d57caa06a668dfb7751d68cc889",
+        url = "https://pub.dev/api/archives/dap_adapters-1.1.0.tar.gz",
         deps = [
             "async",
             "collection",
@@ -341,9 +331,9 @@ PUB_HOSTED = {
         ],
     ),
     "dart_style": struct(
-        version = "3.1.13",
-        sha256 = "82ade9fc4273f29ed673e33166944465225b4f7fc5d4aaef48605cc751c18fc1",
-        url = "https://pub.dev/api/archives/dart_style-3.1.13.tar.gz",
+        version = "3.1.14",
+        sha256 = "a0e4f65339b31eb6a9e6a12e14b4682a48d46fbc54a82f4a702396fbdbac63a7",
+        url = "https://pub.dev/api/archives/dart_style-3.1.14.tar.gz",
         deps = [
             "analyzer",
             "args",
@@ -435,9 +425,9 @@ PUB_HOSTED = {
         ],
     ),
     "dwds": struct(
-        version = "27.1.3",
-        sha256 = "91dd4abb4df82dbcc219ba4e9b85d7ee492f7549de9e098bc45a4a40ba7403a7",
-        url = "https://pub.dev/api/archives/dwds-27.1.3.tar.gz",
+        version = "27.2.0",
+        sha256 = "b23d026f3f27d8446d9978836356a7025f32e9e8102a53143b86af53b7dad76e",
+        url = "https://pub.dev/api/archives/dwds-27.2.0.tar.gz",
         deps = [
             "async",
             "collection",
@@ -467,10 +457,11 @@ PUB_HOSTED = {
         ],
     ),
     "extension_discovery": struct(
-        version = "2.1.0",
-        sha256 = "de1fce715ab013cdfb00befc3bdf0914bea5e409c3a567b7f8f144bc061611a7",
-        url = "https://pub.dev/api/archives/extension_discovery-2.1.0.tar.gz",
+        version = "2.1.1",
+        sha256 = "45bcb4c7a1de1b9beb82b38a7157b0e5ef967081a744de9a92f1e29c343e7ac8",
+        url = "https://pub.dev/api/archives/extension_discovery-2.1.1.tar.gz",
         deps = [
+            "path",
             "yaml",
         ],
     ),
@@ -572,11 +563,12 @@ PUB_HOSTED = {
         deps = [],
     ),
     "frontend_server_client": struct(
-        version = "4.0.0",
-        sha256 = "f64a0333a82f30b0cca061bc3d143813a486dc086b574bfb233b7c1372427694",
-        url = "https://pub.dev/api/archives/frontend_server_client-4.0.0.tar.gz",
+        version = "4.2.0",
+        sha256 = "2b56423afc7651a81da53ed3a4f9f51e92572293f54d0d54e19b759f13714849",
+        url = "https://pub.dev/api/archives/frontend_server_client-4.2.0.tar.gz",
         deps = [
             "async",
+            "package_config",
             "path",
         ],
     ),
@@ -657,9 +649,9 @@ PUB_HOSTED = {
         ],
     ),
     "googleapis_auth": struct(
-        version = "2.3.4",
-        sha256 = "d31822528becea550f7c7a9ab73a4518e31e48f201ab574be7e141f262923f27",
-        url = "https://pub.dev/api/archives/googleapis_auth-2.3.4.tar.gz",
+        version = "2.3.5",
+        sha256 = "e15d48204e2f3c852dc1091a49705a163a8ba5897823f9abe1c0795e512357c4",
+        url = "https://pub.dev/api/archives/googleapis_auth-2.3.5.tar.gz",
         deps = [
             "crypto",
             "google_cloud",
@@ -729,9 +721,9 @@ PUB_HOSTED = {
         ],
     ),
     "http_multi_server": struct(
-        version = "3.2.2",
-        sha256 = "aa6199f908078bb1c5efb8d8638d4ae191aac11b311132c3ef48ce352fb52ef8",
-        url = "https://pub.dev/api/archives/http_multi_server-3.2.2.tar.gz",
+        version = "3.2.3",
+        sha256 = "361668bdd71f0ae2dc6d17b75a593520f3c414af6534f9eed1aa72049dd71d18",
+        url = "https://pub.dev/api/archives/http_multi_server-3.2.3.tar.gz",
         deps = [
             "async",
         ],
@@ -777,12 +769,6 @@ PUB_HOSTED = {
             "string_scanner",
         ],
     ),
-    "isolate": struct(
-        version = "2.1.1",
-        sha256 = "3554ab10fdeec965d27e0074c913ccb2229887633da080d2b35a6322da14938b",
-        url = "https://pub.dev/api/archives/isolate-2.1.1.tar.gz",
-        deps = [],
-    ),
     "jni": struct(
         version = "1.0.3",
         sha256 = "f038e58b4dc2c9037f50e233175086337e0b305e356d28211bf55f21c504cbd3",
@@ -814,12 +800,6 @@ PUB_HOSTED = {
         deps = [
             "path",
         ],
-    ),
-    "js": struct(
-        version = "0.7.2",
-        sha256 = "53385261521cc4a0c4658fd0ad07a7d14591cf8fc33abbceae306ddb974888dc",
-        url = "https://pub.dev/api/archives/js-0.7.2.tar.gz",
-        deps = [],
     ),
     "json_annotation": struct(
         version = "4.12.0",
@@ -913,9 +893,9 @@ PUB_HOSTED = {
         ],
     ),
     "material_ui": struct(
-        version = "1.5.0",
-        sha256 = "32d98f11cf5942a095a8c3e01b03e4de3b17941437713dcf36b1088fb62e23d2",
-        url = "https://pub.dev/api/archives/material_ui-1.5.0.tar.gz",
+        version = "1.9.0",
+        sha256 = "feb289df1e5f9ed9522f9fe3d909432a7f7bc76943f16abad09f80a16cd25196",
+        url = "https://pub.dev/api/archives/material_ui-1.9.0.tar.gz",
         deps = [
             "collection",
             "cupertino_ui",
@@ -1177,9 +1157,9 @@ PUB_HOSTED = {
         ],
     ),
     "pubspec_parse": struct(
-        version = "1.6.0",
-        sha256 = "c38b81cbf34450b67e0265d73433569d12e34782e30ed769c9cc99c9d5f2e796",
-        url = "https://pub.dev/api/archives/pubspec_parse-1.6.0.tar.gz",
+        version = "1.7.0",
+        sha256 = "9ac81c01ffd6a9cf9b2713288834fbaaf6aebde05ffdf02d380e68b8e06f27d8",
+        url = "https://pub.dev/api/archives/pubspec_parse-1.7.0.tar.gz",
         deps = [
             "checked_yaml",
             "collection",
@@ -1229,9 +1209,9 @@ PUB_HOSTED = {
         ],
     ),
     "shelf": struct(
-        version = "1.4.2",
-        sha256 = "e7dd780a7ffb623c57850b33f43309312fc863fb6aa3d276a754bb299839ef12",
-        url = "https://pub.dev/api/archives/shelf-1.4.2.tar.gz",
+        version = "1.4.3",
+        sha256 = "e75e9cf311d7fd712048038cc17c25199c38536c20330d53e7db058b543d5a48",
+        url = "https://pub.dev/api/archives/shelf-1.4.3.tar.gz",
         deps = [
             "async",
             "collection",
@@ -1262,9 +1242,9 @@ PUB_HOSTED = {
         ],
     ),
     "shelf_static": struct(
-        version = "1.1.3",
-        sha256 = "c87c3875f91262785dade62d135760c2c69cb217ac759485334c5857ad89f6e3",
-        url = "https://pub.dev/api/archives/shelf_static-1.1.3.tar.gz",
+        version = "1.2.0",
+        sha256 = "480504af9e5323899c5be26a4f6c2fc4437d50954d39842f0290f4ae733d57b4",
+        url = "https://pub.dev/api/archives/shelf_static-1.2.0.tar.gz",
         deps = [
             "convert",
             "http_parser",
@@ -1396,9 +1376,9 @@ PUB_HOSTED = {
         deps = [],
     ),
     "test": struct(
-        version = "1.32.0",
-        sha256 = "de5d145b0afff7921e5e788a880f52d7e5f3ae24068a202f6fd3b58e4ba26323",
-        url = "https://pub.dev/api/archives/test-1.32.0.tar.gz",
+        version = "1.33.0",
+        sha256 = "44b2fccf4407bcdb5e105c064c5d6b5e2a640c87761f8b03cdce8cf532d98cfa",
+        url = "https://pub.dev/api/archives/test-1.33.0.tar.gz",
         deps = [
             "analyzer",
             "async",
@@ -1428,9 +1408,9 @@ PUB_HOSTED = {
         ],
     ),
     "test_api": struct(
-        version = "0.7.14",
-        sha256 = "0a10344e901e5b2e63819567951cb6a06673ed6b84f40462188ff5a0c41f371f",
-        url = "https://pub.dev/api/archives/test_api-0.7.14.tar.gz",
+        version = "0.7.15",
+        sha256 = "47481c58bb92d0b1d218f0510ff5647e768f8e1256d07077a151fb520923b51d",
+        url = "https://pub.dev/api/archives/test_api-0.7.15.tar.gz",
         deps = [
             "async",
             "boolean_selector",
@@ -1444,9 +1424,9 @@ PUB_HOSTED = {
         ],
     ),
     "test_core": struct(
-        version = "0.6.20",
-        sha256 = "80f3fb49087454e07e7e07c67578cfdd156c8c3a5227d8b3f47c7b2d019c2e93",
-        url = "https://pub.dev/api/archives/test_core-0.6.20.tar.gz",
+        version = "0.6.21",
+        sha256 = "9dec4c178bd61493e1cd2060ffe701fcb61c43da2493e99590fb1b0cc82eb4af",
+        url = "https://pub.dev/api/archives/test_core-0.6.21.tar.gz",
         deps = [
             "analyzer",
             "args",
@@ -1480,22 +1460,21 @@ PUB_HOSTED = {
         ],
     ),
     "unified_analytics": struct(
-        version = "8.0.18",
-        sha256 = "28bb11ef24567e720dc1397cba60df03cc5aded5bf6bef4d17b49934402c719b",
-        url = "https://pub.dev/api/archives/unified_analytics-8.0.18.tar.gz",
+        version = "8.3.0",
+        sha256 = "f4405e1c205ef4ec54e428cae6c32cf1f9dab67e13cf7b82560ab50ac6e04dbc",
+        url = "https://pub.dev/api/archives/unified_analytics-8.3.0.tar.gz",
         deps = [
             "clock",
             "convert",
             "file",
             "http",
             "meta",
-            "platform",
         ],
     ),
     "url_launcher": struct(
-        version = "6.3.2",
-        sha256 = "f6a7e5c4835bb4e3026a04793a4199ca2d14c739ec378fdfe23fc8075d0439f8",
-        url = "https://pub.dev/api/archives/url_launcher-6.3.2.tar.gz",
+        version = "6.3.3",
+        sha256 = "e8cc955c97e06df9879140a1fe301f3d493f01b7c62dec7f46834be31d7e9fda",
+        url = "https://pub.dev/api/archives/url_launcher-6.3.3.tar.gz",
         deps = [
             "flutter",
             "url_launcher_android",
@@ -1587,15 +1566,15 @@ PUB_HOSTED = {
         ],
     ),
     "vector_math": struct(
-        version = "2.4.3",
-        sha256 = "92b9910f66ed1057fd4da7b040ae7c74cafacf885bdc81be496928d5049b032d",
-        url = "https://pub.dev/api/archives/vector_math-2.4.3.tar.gz",
+        version = "2.4.4",
+        sha256 = "fa49e1674cb84acb900141714e6c6e1f9ae099827c24d141430ff6819db4e1bc",
+        url = "https://pub.dev/api/archives/vector_math-2.4.4.tar.gz",
         deps = [],
     ),
     "video_player": struct(
-        version = "2.14.0",
-        sha256 = "8c837b570dccb9ae6ff73d2e0b03c7e708bfefd3bd1194faa7f3e7f200dfc399",
-        url = "https://pub.dev/api/archives/video_player-2.14.0.tar.gz",
+        version = "2.14.1",
+        sha256 = "07ae1e03f2d4c8e2e9a75ee678f90acbc4506d4458a9c628512d119a1eee5754",
+        url = "https://pub.dev/api/archives/video_player-2.14.1.tar.gz",
         deps = [
             "collection",
             "flutter",
@@ -1617,9 +1596,9 @@ PUB_HOSTED = {
         ],
     ),
     "video_player_avfoundation": struct(
-        version = "2.12.0",
-        sha256 = "2fc56e537324a19eb649fca991aa308ac961b5406292876fa657b062de461fd8",
-        url = "https://pub.dev/api/archives/video_player_avfoundation-2.12.0.tar.gz",
+        version = "2.12.3",
+        sha256 = "7d620d8c69d00c158a5c57bf3d2a051833b547631203ff724664fbf301024bc1",
+        url = "https://pub.dev/api/archives/video_player_avfoundation-2.12.3.tar.gz",
         deps = [
             "flutter",
             "meta",
@@ -1647,9 +1626,9 @@ PUB_HOSTED = {
         ],
     ),
     "vm_service": struct(
-        version = "15.3.0",
-        sha256 = "5f37239c4851efcef929cea7824e76df7f2f0970aef85d66bbc430afa40e72f0",
-        url = "https://pub.dev/api/archives/vm_service-15.3.0.tar.gz",
+        version = "15.4.0",
+        sha256 = "89b11d62e1040ee681af3b4f1c97a803ecbf010c6e8b9c5896ee5b08c3bf7b78",
+        url = "https://pub.dev/api/archives/vm_service-15.4.0.tar.gz",
         deps = [],
     ),
     "vm_service_interface": struct(
@@ -1680,9 +1659,9 @@ PUB_HOSTED = {
         ],
     ),
     "web": struct(
-        version = "1.1.1",
-        sha256 = "868d88a33d8a87b18ffc05f9f030ba328ffefba92d6c127917a2ba740f9cfe4a",
-        url = "https://pub.dev/api/archives/web-1.1.1.tar.gz",
+        version = "1.1.2",
+        sha256 = "e119e82ac4795c7925103b7cf3768191f33941b99e7ccffbd6c645201d9f606b",
+        url = "https://pub.dev/api/archives/web-1.1.2.tar.gz",
         deps = [],
     ),
     "web_socket": struct(
@@ -1757,9 +1736,9 @@ PUB_HOSTED = {
         ],
     ),
     "webview_flutter_wkwebview": struct(
-        version = "3.26.2",
-        sha256 = "0f784be1b080e5b918ef7c2c070c1f4616899fd23f1d001feb74b4978f92bdbc",
-        url = "https://pub.dev/api/archives/webview_flutter_wkwebview-3.26.2.tar.gz",
+        version = "3.27.0",
+        sha256 = "a9cc3f507ee40127ed0812ca54d00701a27833f51ea0b5820f4b3e7f42518bf3",
+        url = "https://pub.dev/api/archives/webview_flutter_wkwebview-3.27.0.tar.gz",
         deps = [
             "flutter",
             "meta",
@@ -1817,7 +1796,6 @@ PUB_WORKSPACE = {
         deps = [
             "_discoveryapis_commons",
             "_fe_analyzer_shared",
-            "adaptive_breakpoints",
             "analyzer",
             "animations",
             "archive",
@@ -1863,8 +1841,6 @@ PUB_WORKSPACE = {
             "http_parser",
             "intl",
             "io",
-            "isolate",
-            "js",
             "json_annotation",
             "leak_tracker",
             "leak_tracker_flutter_testing",
@@ -2056,7 +2032,6 @@ PUB_WORKSPACE = {
             "http_multi_server",
             "http_parser",
             "io",
-            "js",
             "leak_tracker",
             "leak_tracker_flutter_testing",
             "leak_tracker_testing",
@@ -2550,7 +2525,6 @@ PUB_WORKSPACE = {
         dev_deps = [
             "checked_yaml",
             "file_testing",
-            "js",
             "json_annotation",
             "node_preamble",
             "test",
@@ -2559,6 +2533,7 @@ PUB_WORKSPACE = {
     "flutter_tools_core": struct(
         path = "packages/flutter_tools/packages/flutter_tools_core",
         deps = [
+            "collection",
             "meta",
         ],
         dev_deps = [
@@ -2627,7 +2602,6 @@ PUB_WORKSPACE = {
     "gallery": struct(
         path = "dev/integration_tests/new_gallery",
         deps = [
-            "adaptive_breakpoints",
             "animations",
             "collection",
             "flutter",
