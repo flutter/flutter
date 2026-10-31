@@ -418,6 +418,42 @@ dependencies:
         },
       );
       testUsingContext(
+        'creates xcfilelists for macOS so Xcode can build before flutter build',
+        () async {
+          final FlutterProject project = await someProject();
+          project.macos.managedDirectory.createSync(recursive: true);
+          await regeneratePlatformSpecificTooling(project, releaseMode: false);
+          expectExists(project.macos.inputFileList);
+          expectExists(project.macos.outputFileList);
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => MemoryFileSystem.test(),
+          ProcessManager: () => FakeProcessManager.any(),
+          FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
+        },
+      );
+      testUsingContext(
+        'does not overwrite existing xcfilelists for macOS',
+        () async {
+          final FlutterProject project = await someProject();
+          project.macos.managedDirectory.createSync(recursive: true);
+          project.macos.inputFileList
+            ..createSync(recursive: true)
+            ..writeAsStringSync('input');
+          project.macos.outputFileList
+            ..createSync(recursive: true)
+            ..writeAsStringSync('output');
+          await regeneratePlatformSpecificTooling(project, releaseMode: false);
+          expect(project.macos.inputFileList.readAsStringSync(), 'input');
+          expect(project.macos.outputFileList.readAsStringSync(), 'output');
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => MemoryFileSystem.test(),
+          ProcessManager: () => FakeProcessManager.any(),
+          FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
+        },
+      );
+      testUsingContext(
         'injects plugins for Linux',
         () async {
           final FlutterProject project = await someProject();
