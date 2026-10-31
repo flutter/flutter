@@ -980,17 +980,19 @@ void CanvasDlDispatcher::SetBackdropData(
 FirstPassDispatcher::FirstPassDispatcher(const ContentContext& renderer,
                                          const Matrix& initial_matrix,
                                          const Rect cull_rect)
-    : renderer_(renderer), matrix_(initial_matrix) {
-  cull_rect_state_.push_back(cull_rect);
+    : renderer_(renderer) {
+  stack_.push_back({
+      .matrix = initial_matrix,
+      .cull_rect = cull_rect,
+  });
 }
 
 FirstPassDispatcher::~FirstPassDispatcher() {
-  FML_DCHECK(cull_rect_state_.size() == 1);
+  FML_DCHECK(stack_.size() == 1);
 }
 
 void FirstPassDispatcher::save() {
-  stack_.emplace_back(matrix_);
-  cull_rect_state_.push_back(cull_rect_state_.back());
+  stack_.push_back(stack_.back());
 }
 
 namespace {
@@ -1024,7 +1026,10 @@ void FirstPassDispatcher::saveLayer(const DlRect& bounds,
                                     const flutter::SaveLayerOptions options,
                                     const flutter::DlImageFilter* backdrop,
                                     std::optional<int64_t> backdrop_id) {
-  save();
+  SaveFrame frame = {
+      .matrix = stack_.back().matrix,
+      .cull_rect = stack_.back().cull_rect,
+  };
 
   const bool has_layer_bounds =
       !bounds.IsMaximum() &&
@@ -1032,41 +1037,38 @@ void FirstPassDispatcher::saveLayer(const DlRect& bounds,
 
   backdrop_count_ += (backdrop == nullptr ? 0 : 1);
   if (backdrop != nullptr && backdrop_id.has_value()) {
-    Rect layer_coverage = cull_rect_state_.back();
+    Rect layer_coverage = frame.cull_rect;
     if (has_layer_bounds) {
-      layer_coverage =
-          layer_coverage.IntersectionOrEmpty(bounds.TransformBounds(matrix_));
+      layer_coverage = layer_coverage.IntersectionOrEmpty(
+          bounds.TransformBounds(frame.matrix));
     }
-    RecordBackdropData(&backdrop_data_, backdrop_id.value(), backdrop->shared(),
+    RecordBackdropData(&backdrop_data_, *backdrop_id, backdrop->shared(),
                        layer_coverage);
   }
 
   // This dispatcher does not track enough state to accurately compute
   // cull rects with image filters.
-  auto global_cull_rect = cull_rect_state_.back();
-  if (has_image_filter_ || global_cull_rect.IsMaximum()) {
-    cull_rect_state_.back() = Rect::MakeMaximum();
+  if (has_image_filter_ || frame.cull_rect.IsMaximum()) {
+    frame.cull_rect = Rect::MakeMaximum();
   } else if (has_layer_bounds) {
-    cull_rect_state_.back() =
-        global_cull_rect.IntersectionOrEmpty(bounds.TransformBounds(matrix_));
+    frame.cull_rect = frame.cull_rect.IntersectionOrEmpty(
+        bounds.TransformBounds(frame.matrix));
   }
+
+  stack_.push_back(std::move(frame));
 }
 
 void FirstPassDispatcher::restore() {
-  matrix_ = stack_.back();
   stack_.pop_back();
-  cull_rect_state_.pop_back();
 }
 
 namespace {
-void Clip(std::vector<Rect>& cull_rect_state,
-          const Matrix& matrix,
+void Clip(FirstPassDispatcher::SaveFrame& frame,
           const DlRect& bounds,
           flutter::DlClipOp clip_op) {
   if (clip_op == flutter::DlClipOp::kIntersect) {
-    auto global_rect = bounds.TransformBounds(matrix);
-    cull_rect_state.back() =
-        cull_rect_state.back().IntersectionOrEmpty(global_rect);
+    auto global_rect = bounds.TransformBounds(frame.matrix);
+    frame.cull_rect = frame.cull_rect.IntersectionOrEmpty(global_rect);
   }
 }
 }  // namespace
@@ -1075,51 +1077,52 @@ void Clip(std::vector<Rect>& cull_rect_state,
 void FirstPassDispatcher::clipRect(const DlRect& rect,
                                    flutter::DlClipOp clip_op,
                                    bool is_aa) {
-  Clip(cull_rect_state_, matrix_, rect, clip_op);
+  Clip(stack_.back(), rect, clip_op);
 }
 
 // |flutter::DlOpReceiver|
 void FirstPassDispatcher::clipOval(const DlRect& bounds,
                                    flutter::DlClipOp clip_op,
                                    bool is_aa) {
-  Clip(cull_rect_state_, matrix_, bounds, clip_op);
+  Clip(stack_.back(), bounds, clip_op);
 }
 
 // |flutter::DlOpReceiver|
 void FirstPassDispatcher::clipRoundRect(const DlRoundRect& rrect,
                                         flutter::DlClipOp clip_op,
                                         bool is_aa) {
-  Clip(cull_rect_state_, matrix_, rrect.GetBounds(), clip_op);
+  Clip(stack_.back(), rrect.GetBounds(), clip_op);
 }
 
 // |flutter::DlOpReceiver|
 void FirstPassDispatcher::clipPath(const DlPath& path,
                                    flutter::DlClipOp clip_op,
                                    bool is_aa) {
-  Clip(cull_rect_state_, matrix_, path.GetBounds(), clip_op);
+  Clip(stack_.back(), path.GetBounds(), clip_op);
 }
 
 // |flutter::DlOpReceiver|
 void FirstPassDispatcher::clipRoundSuperellipse(const DlRoundSuperellipse& rse,
                                                 flutter::DlClipOp clip_op,
                                                 bool is_aa) {
-  Clip(cull_rect_state_, matrix_, rse.GetBounds(), clip_op);
+  Clip(stack_.back(), rse.GetBounds(), clip_op);
 }
 
 void FirstPassDispatcher::translate(DlScalar tx, DlScalar ty) {
-  matrix_ = matrix_.Translate({tx, ty});
+  stack_.back().matrix = stack_.back().matrix.Translate({tx, ty});
 }
 
 void FirstPassDispatcher::scale(DlScalar sx, DlScalar sy) {
-  matrix_ = matrix_.Scale({sx, sy, 1.0f});
+  stack_.back().matrix = stack_.back().matrix.Scale({sx, sy, 1.0f});
 }
 
 void FirstPassDispatcher::rotate(DlScalar degrees) {
-  matrix_ = matrix_ * Matrix::MakeRotationZ(Degrees(degrees));
+  stack_.back().matrix =
+      stack_.back().matrix * Matrix::MakeRotationZ(Degrees(degrees));
 }
 
 void FirstPassDispatcher::skew(DlScalar sx, DlScalar sy) {
-  matrix_ = matrix_ * Matrix::MakeSkew(sx, sy);
+  stack_.back().matrix = stack_.back().matrix * Matrix::MakeSkew(sx, sy);
 }
 
 // clang-format off
@@ -1127,7 +1130,7 @@ void FirstPassDispatcher::skew(DlScalar sx, DlScalar sy) {
 void FirstPassDispatcher::transform2DAffine(
     DlScalar mxx, DlScalar mxy, DlScalar mxt,
     DlScalar myx, DlScalar myy, DlScalar myt) {
-  matrix_ = matrix_ * Matrix::MakeColumn(
+  stack_.back().matrix = stack_.back().matrix * Matrix::MakeColumn(
       mxx,  myx,  0.0f, 0.0f,
       mxy,  myy,  0.0f, 0.0f,
       0.0f, 0.0f, 1.0f, 0.0f,
@@ -1143,7 +1146,7 @@ void FirstPassDispatcher::transformFullPerspective(
     DlScalar myx, DlScalar myy, DlScalar myz, DlScalar myt,
     DlScalar mzx, DlScalar mzy, DlScalar mzz, DlScalar mzt,
     DlScalar mwx, DlScalar mwy, DlScalar mwz, DlScalar mwt) {
-  matrix_ = matrix_ * Matrix::MakeColumn(
+  stack_.back().matrix = stack_.back().matrix * Matrix::MakeColumn(
       mxx, myx, mzx, mwx,
       mxy, myy, mzy, mwy,
       mxz, myz, mzz, mwz,
@@ -1153,7 +1156,7 @@ void FirstPassDispatcher::transformFullPerspective(
 // clang-format on
 
 void FirstPassDispatcher::transformReset() {
-  matrix_ = Matrix();
+  stack_.back().matrix = Matrix();
 }
 
 void FirstPassDispatcher::drawText(const std::shared_ptr<flutter::DlText>& text,
@@ -1175,17 +1178,17 @@ void FirstPassDispatcher::drawText(const std::shared_ptr<flutter::DlText>& text,
     properties.tone_or_color = GlyphProperties::ComputeTone(paint_.color);
   }
 
-  renderer_.GetLazyGlyphAtlas()->AddTextFrame(text_frame,   //
-                                              Point(x, y),  //
-                                              matrix_,      //
-                                              properties    //
+  renderer_.GetLazyGlyphAtlas()->AddTextFrame(text_frame,            //
+                                              Point(x, y),           //
+                                              stack_.back().matrix,  //
+                                              properties             //
   );
 }
 
 const Rect FirstPassDispatcher::GetCurrentLocalCullingBounds() const {
-  auto cull_rect = cull_rect_state_.back();
+  auto cull_rect = stack_.back().cull_rect;
   if (!cull_rect.IsEmpty() && !cull_rect.IsMaximum()) {
-    Matrix inverse = matrix_.Invert();
+    Matrix inverse = stack_.back().matrix.Invert();
     cull_rect = cull_rect.TransformBounds(inverse);
   }
   return cull_rect;
@@ -1201,7 +1204,7 @@ void FirstPassDispatcher::drawDisplayList(
   bool old_has_image_filter = has_image_filter_;
   has_image_filter_ = false;
 
-  if (matrix_.HasPerspective()) {
+  if (stack_.back().matrix.HasPerspective()) {
     display_list->Dispatch(*this);
   } else {
     Rect local_cull_bounds = GetCurrentLocalCullingBounds();
