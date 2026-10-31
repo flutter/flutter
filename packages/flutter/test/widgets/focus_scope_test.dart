@@ -1901,6 +1901,38 @@ void main() {
       focusNode.requestFocus();
       await tester.pump();
     });
+
+    testWidgets(
+      'Focus re-attaches its node when another Focus widget with the same node is removed',
+      (WidgetTester tester) async {
+        final focusNode = FocusNode();
+        addTearDown(focusNode.dispose);
+
+        Widget build({required bool duplicated}) {
+          return Directionality(
+            textDirection: TextDirection.ltr,
+            child: Column(
+              children: <Widget>[
+                Focus(focusNode: focusNode, child: const SizedBox(height: 10)),
+                // A second Focus widget hosting the same node, which is what
+                // happens when a subtree is duplicated for the duration of a
+                // transition, e.g. by the Cupertino navigation bar heroes.
+                if (duplicated) Focus(focusNode: focusNode, child: const SizedBox(height: 10)),
+              ],
+            ),
+          );
+        }
+
+        await tester.pumpWidget(build(duplicated: false));
+        await tester.pumpWidget(build(duplicated: true));
+        await tester.pumpWidget(build(duplicated: false));
+
+        // The remaining Focus widget still hosts the node, so it can be focused.
+        focusNode.requestFocus();
+        await tester.pump();
+        expect(focusNode.hasFocus, isTrue);
+      },
+    );
   });
 
   group('ExcludeFocus', () {
