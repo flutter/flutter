@@ -35,13 +35,19 @@ am start -n io.flutter.integration.deferred_components_test/.MainActivity
 exit
 "
 run_start_time_seconds=$(date +%s)
+deferred_error_seen=0
 while read LOGLINE
 do
+    if [[ "${LOGLINE}" == *"Deferred component error delivered to Dart:"* ]]; then
+        deferred_error_seen=1
+    fi
     if [[ "${LOGLINE}" == *"Running deferred code"* ]]; then
-        echo "Found ${LOGLINE}"
-        echo "All tests passed."
-        pkill -P $$
-        exit 0
+        if [[ ${deferred_error_seen} -eq 1 ]]; then
+            echo "Found deferred component error delivery and successful retry."
+            echo "All tests passed."
+            pkill -P $$
+            exit 0
+        fi
     fi
     # Timeout if expected log not found
     current_time=$(date +%s)
