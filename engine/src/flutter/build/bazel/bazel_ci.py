@@ -272,6 +272,15 @@ def ninja_file(engine_src, build, out_dir, bazelisk):
 def write_build_directory(engine_src, build, out_dir, bazelisk):
   """Writes build.ninja and bazel.json into `out_dir`; returns the paths written."""
   os.makedirs(out_dir, exist_ok=True)
+  # The install's edge has no inputs ninja could compare -- Bazel knows what
+  # changed -- so its stamp alone would keep ninja from running it again
+  # ("no work to do") in a build directory that outlives one run: the bots'
+  # checkout persists between builds, as does a developer's. tools/gn runs
+  # before ninja in every build, and removing the stamp here makes each
+  # one's ninja run the install once.
+  stamp = os.path.join(out_dir, STAMP)
+  if os.path.lexists(stamp):
+    os.remove(stamp)
   ninja_path = os.path.join(out_dir, NINJA_FILE)
   with open(ninja_path, 'w', encoding='utf-8') as ninja:
     ninja.write(ninja_file(engine_src, build, out_dir, bazelisk))
