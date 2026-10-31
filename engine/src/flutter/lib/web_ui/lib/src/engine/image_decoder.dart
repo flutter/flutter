@@ -347,7 +347,7 @@ Future<ui.Codec> engineInstantiateImageCodec(
     final bool backendCanDecode = renderer.supportsAnimatedImages;
     final bool preferBitmap = !imageType.isAnimated || !backendCanDecode;
     if (preferBitmap && browserSupportsCreateImageBitmap) {
-      final DomBlob blob = createDomBlob(<ByteBuffer>[list.buffer]);
+      final DomBlob blob = createDomBlob(<JSAny>[list.toJS]);
       final DomImageBitmap originalBitmap = await createImageBitmap(blob);
       final int originalWidth = originalBitmap.width;
       final int originalHeight = originalBitmap.height;

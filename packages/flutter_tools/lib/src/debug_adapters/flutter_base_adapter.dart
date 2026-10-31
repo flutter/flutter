@@ -24,20 +24,22 @@ abstract class FlutterBaseDebugAdapter
     super.channel, {
     required this.fileSystem,
     required this.platform,
+    required this.cache,
     super.ipv6,
     this.enableFlutterDds = true,
     super.enableAuthCodes,
     super.logger,
     super.onError,
-  }) : flutterSdkRoot = Cache.flutterRoot! {
+  }) {
     configureOrgDartlangSdkMappings();
   }
 
   FileSystem fileSystem;
   Platform platform;
+  final Cache cache;
   Process? process;
 
-  final String flutterSdkRoot;
+  String get flutterSdkRoot => cache.flutterRoot;
 
   /// Whether DDS should be enabled in the Flutter process.
   ///
