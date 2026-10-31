@@ -8,45 +8,51 @@
 #include "flutter/skwasm/skwasm_support.h"
 #include "third_party/skia/include/core/SkData.h"
 
+namespace {
+// Callers are expected to check `skwasm_supportsAnimatedImages` and route to
+// the browser's decoder instead of calling into these stubs.
+void WarnUnsupported() {
+  emscripten_console_warn(
+      "Animated image decoding is not supported in this skwasm build.");
+}
+}  // namespace
+
+SKWASM_EXPORT bool skwasm_supportsAnimatedImages() {
+  return false;
+}
+
 SKWASM_EXPORT void* animatedImage_create(SkData* data,
                                          int target_width,
                                          int target_height) {
-  emscripten_console_warn(
-      "Animated image not implemented in non-heavy skwasm build.");
+  WarnUnsupported();
   return nullptr;
 }
 
 SKWASM_EXPORT void animatedImage_dispose(void* image) {
-  emscripten_console_warn(
-      "Animated image not implemented in non-heavy skwasm build.");
+  WarnUnsupported();
 }
 
 SKWASM_EXPORT int animatedImage_getFrameCount(void* image) {
-  emscripten_console_warn(
-      "Animated image not implemented in non-heavy skwasm build.");
+  WarnUnsupported();
   return 0;
 }
 
 SKWASM_EXPORT int animatedImage_getRepetitionCount(void* image) {
-  emscripten_console_warn(
-      "Animated image not implemented in non-heavy skwasm build.");
+  WarnUnsupported();
   return 0;
 }
 
 SKWASM_EXPORT int animatedImage_getCurrentFrameDurationMilliseconds(
     void* image) {
-  emscripten_console_warn(
-      "Animated image not implemented in non-heavy skwasm build.");
+  WarnUnsupported();
   return 0;
 }
 
 SKWASM_EXPORT void animatedImage_decodeNextFrame(void* image) {
-  emscripten_console_warn(
-      "Animated image not implemented in non-heavy skwasm build.");
+  WarnUnsupported();
 }
 
 SKWASM_EXPORT void* animatedImage_getCurrentFrame(void* image) {
-  emscripten_console_warn(
-      "Animated image not implemented in non-heavy skwasm build.");
+  WarnUnsupported();
   return nullptr;
 }

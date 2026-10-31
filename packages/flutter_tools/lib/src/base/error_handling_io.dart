@@ -1239,8 +1239,9 @@ class ErrorHandlingProcessManager extends ProcessManager {
     // bump), and when analytics are suppressed for this invocation
     // (`--suppress-analytics`).
     //
-    // Like `package:unified_analytics`, only the exact (case-sensitive) string
-    // `true` is treated as a request to suppress analytics.
+    // This matches `areAnalyticsSuppressed` in `package:unified_analytics`
+    // (which uses case-sensitive `bool.parse`) and the `dart` CLI: only the
+    // exact string `true` requests suppression.
     final String suppressKey = DashEnvVar.suppressAnalytics.name;
     final bool suppressionRequested =
         _platform.environment[suppressKey] == 'true' || environmentResult[suppressKey] == 'true';

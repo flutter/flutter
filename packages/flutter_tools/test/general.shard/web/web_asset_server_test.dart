@@ -24,6 +24,7 @@ import 'package:flutter_tools/src/web/web_constants.dart';
 import 'package:shelf/shelf.dart';
 
 import '../../src/common.dart';
+import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
 
 const kTransparentImage = <int>[
@@ -99,7 +100,6 @@ void main() {
   late FileSystem fileSystem;
 
   setUp(() {
-    Cache.flutterRoot = getFlutterRoot();
     fileSystem = MemoryFileSystem.test();
     fileSystem.file('lib/main.dart').createSync(recursive: true);
     fileSystem.file('web/index.html')
@@ -302,6 +302,87 @@ void main() {
   );
 
   testWithoutContext(
+    'release asset server does not serve an absolute reference on Windows',
+    () async {
+      final windowsFileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
+      final windowsPlatform = FakePlatform(
+        operatingSystem: 'windows',
+        environment: <String, String>{},
+      );
+      windowsFileSystem.file(r'C:\project\build\web\index.html')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('<html></html>');
+      windowsFileSystem.file(r'C:\Windows\win.ini')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('[secret]');
+      final assetServer = ReleaseAssetServer(
+        Uri.base,
+        fileSystem: windowsFileSystem,
+        platform: windowsPlatform,
+        flutterRoot: r'C:\flutter',
+        webBuildDirectory: r'C:\project\build\web',
+        needsCoopCoep: false,
+      );
+
+      for (final path in <String>['file:///C:/Windows/win.ini', 'C:/Windows/win.ini']) {
+        final Response response = await assetServer.handle(
+          Request('GET', Uri.parse('http://localhost:8080/$path')),
+        );
+        expect(
+          await response.readAsString(),
+          '<html></html>',
+          reason: '"$path" should not be served and should return the index.html fallback',
+        );
+      }
+
+      // Behind a base path the colon is no longer in the first segment, so it
+      // reaches the handler unencoded.
+      final prefixed = ReleaseAssetServer(
+        Uri.base,
+        fileSystem: windowsFileSystem,
+        platform: windowsPlatform,
+        flutterRoot: r'C:\flutter',
+        webBuildDirectory: r'C:\project\build\web',
+        needsCoopCoep: false,
+        basePath: 'my_app',
+      );
+      for (final path in <String>['file:///C:/Windows/win.ini', 'C:/Windows/win.ini']) {
+        final Response response = await prefixed.handle(
+          Request('GET', Uri.parse('http://localhost:8080/my_app/$path')),
+        );
+        expect(
+          await response.readAsString(),
+          '<html></html>',
+          reason: '"/my_app/$path" should not be served',
+        );
+      }
+    },
+  );
+
+  testWithoutContext('release asset server serves nested build output paths', () async {
+    final assetServer = ReleaseAssetServer(
+      Uri.base,
+      fileSystem: fileSystem,
+      platform: platform,
+      flutterRoot: '/flutter',
+      webBuildDirectory: 'build/web',
+      needsCoopCoep: false,
+    );
+    // A colon is only meaningful in the first segment of a relative reference,
+    // so it stays usable in an asset name.
+    for (final path in <String>['assets/fonts/MyFont-Regular.ttf', 'assets/a:b.png']) {
+      fileSystem.file('build/web/$path')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('asset bytes');
+      final Response response = await assetServer.handle(
+        Request('GET', Uri.parse('http://localhost:8080/$path')),
+      );
+      expect(response.statusCode, HttpStatus.ok, reason: '"$path" should be served');
+      expect(await response.readAsString(), 'asset bytes', reason: '"$path" should be served');
+    }
+  });
+
+  testWithoutContext(
     'release asset server serves html content with COOP/COEP headers when specified',
     () async {
       final assetServer = ReleaseAssetServer(
@@ -367,6 +448,7 @@ void main() {
         null,
         toolContext: FakeToolContext(
           artifacts: Artifacts.test(),
+          cache: Cache.test(processManager: FakeProcessManager.any()),
           config: Config.test(),
           fs: fileSystem,
           flutterVersion: FakeFlutterVersion(),
@@ -401,6 +483,7 @@ void main() {
           null,
           toolContext: FakeToolContext(
             artifacts: Artifacts.test(),
+            cache: Cache.test(processManager: FakeProcessManager.any()),
             config: Config.test(),
             fs: fileSystem,
             flutterVersion: FakeFlutterVersion(),
@@ -434,6 +517,7 @@ void main() {
         null,
         toolContext: FakeToolContext(
           artifacts: Artifacts.test(),
+          cache: Cache.test(processManager: FakeProcessManager.any()),
           config: Config.test(),
           fs: fileSystem,
           flutterVersion: FakeFlutterVersion(),
@@ -468,6 +552,7 @@ void main() {
           null,
           toolContext: FakeToolContext(
             artifacts: Artifacts.test(),
+            cache: Cache.test(processManager: FakeProcessManager.any()),
             config: Config.test(),
             fs: fileSystem,
             flutterVersion: FakeFlutterVersion(),
@@ -501,6 +586,7 @@ void main() {
         null,
         toolContext: FakeToolContext(
           artifacts: Artifacts.test(),
+          cache: Cache.test(processManager: FakeProcessManager.any()),
           config: Config.test(),
           fs: fileSystem,
           flutterVersion: FakeFlutterVersion(),
@@ -532,6 +618,7 @@ void main() {
         null,
         toolContext: FakeToolContext(
           artifacts: Artifacts.test(),
+          cache: Cache.test(processManager: FakeProcessManager.any()),
           config: Config.test(),
           fs: fileSystem,
           flutterVersion: FakeFlutterVersion(),
@@ -563,6 +650,7 @@ void main() {
         null,
         toolContext: FakeToolContext(
           artifacts: Artifacts.test(),
+          cache: Cache.test(processManager: FakeProcessManager.any()),
           config: Config.test(),
           fs: fileSystem,
           flutterVersion: FakeFlutterVersion(),
@@ -598,6 +686,7 @@ void main() {
         null,
         toolContext: FakeToolContext(
           artifacts: Artifacts.test(),
+          cache: Cache.test(processManager: FakeProcessManager.any()),
           config: Config.test(),
           fs: fileSystem,
           flutterVersion: FakeFlutterVersion(),
@@ -639,6 +728,7 @@ void main() {
         null,
         toolContext: FakeToolContext(
           artifacts: Artifacts.test(),
+          cache: Cache.test(processManager: FakeProcessManager.any()),
           config: Config.test(),
           fs: fileSystem,
           flutterVersion: FakeFlutterVersion(),
@@ -692,6 +782,7 @@ void main() {
           null,
           toolContext: FakeToolContext(
             artifacts: Artifacts.test(),
+            cache: Cache.test(processManager: FakeProcessManager.any()),
             config: Config.test(),
             fs: fileSystem,
             flutterVersion: FakeFlutterVersion(),
@@ -739,6 +830,46 @@ void main() {
       },
     );
 
+    testWithoutContext('serves assets from configured build-dir', () async {
+      final config = Config.test()..setValue('build-dir', 'out');
+      fileSystem.file('out/flutter_assets/assets/custom_dir_asset.txt')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('custom dir asset');
+
+      final WebAssetServer server = await WebAssetServer.start(
+        null,
+        null,
+        false,
+        false,
+        false,
+        BuildInfo.debug,
+        false,
+        const DartDevelopmentServiceConfiguration(enable: false),
+        Uri.base,
+        null,
+        toolContext: FakeToolContext(
+          artifacts: Artifacts.test(),
+          config: config,
+          fs: fileSystem,
+          flutterVersion: FakeFlutterVersion(),
+          logger: BufferLogger.test(),
+          platform: platform,
+        ),
+        crossOriginIsolation: false,
+        webDevServerConfig: const WebDevServerConfig(),
+        webRenderer: WebRendererMode.canvaskit,
+        isWasm: false,
+        useLocalCanvasKit: false,
+        testMode: true,
+      );
+
+      final Response response = await server.handleRequest(
+        Request('GET', Uri.parse('http://localhost:8080/assets/assets/custom_dir_asset.txt')),
+      );
+      expect(response.statusCode, HttpStatus.ok);
+      expect(await response.readAsString(), 'custom dir asset');
+    });
+
     group('on Windows', () {
       late FileSystem windowsFileSystem;
       late Platform windowsPlatform;
@@ -769,6 +900,7 @@ void main() {
           null,
           toolContext: FakeToolContext(
             artifacts: Artifacts.test(),
+            cache: Cache.test(processManager: FakeProcessManager.any()),
             config: Config.test(),
             fs: windowsFileSystem,
             flutterVersion: FakeFlutterVersion(),
@@ -946,6 +1078,7 @@ void main() {
               null,
               toolContext: FakeToolContext(
                 artifacts: Artifacts.test(),
+                cache: Cache.test(processManager: FakeProcessManager.any()),
                 config: Config.test(),
                 fs: fileSystem,
                 flutterVersion: FakeFlutterVersion(),
