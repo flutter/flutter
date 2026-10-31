@@ -3,11 +3,17 @@
 # found in the LICENSE file.
 
 # package:flutter_tools_extension_linux_prototype's sources, for the flutter_tools tests Bazel compiles and
-# runs (build_defs/dart/dart_test.bzl).
+# runs (build_defs/dart/dart_test.bzl): the library, and the extension's entry point (bin/) and
+# manifest (extension/flutter_tools/config.yaml), which the tool's extension_discovery_test spawns
+# and reads through the package's resolved URI.
 
 package(default_visibility = ["//visibility:public"])
 
 filegroup(
     name = "sources",
-    srcs = glob(["lib/**"]) + ["pubspec.yaml"],
+    srcs = glob([
+        "bin/**",
+        "extension/**",
+        "lib/**",
+    ]) + ["pubspec.yaml"],
 )

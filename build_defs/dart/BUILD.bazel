@@ -20,6 +20,8 @@ package(default_visibility = ["//visibility:public"])
 exports_files([
     "extract_archive.py",
     "package_config.py",
+    # Generated from pubspec.lock; tools/bazel_tools' tests check it is current.
+    "pub.lock.bzl",
     "snapshot.bzl",
     "test_assets.py",
 ])

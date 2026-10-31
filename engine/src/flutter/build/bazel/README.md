@@ -2559,6 +2559,18 @@ Dart wrap or the Android shell's file the eighth besides the Linux Android
 builds. `bazel query 'tests(<suite>)' | wc -l` says what a suite
 holds on this host before a run.
 
+After a rebase or a roll, before any of them, the generated files: `DEPS`
+feeds `deps.lock.bzl` (`gen_deps.dart --check` in `tools/bazel_tools`),
+`pubspec.lock` and lib/web_ui's feed `pub.lock.bzl` (`gen_pub_lock.dart
+--check` there too, after `dart pub get` at the root and in lib/web_ui so the
+package configurations match the locks), the GN files feed the BUILD files
+(`gn_to_bazel.dart --check` in `tools/gn_to_bazel`), and the recipe's CI
+sequence runs by hand (`ci.md`). The rebase of 10-30 regenerated the first
+and third and not the second: the tool's tests then ran against pub
+packages the lock had moved past (`dap_adapters` 1.0.1 for 1.1.0), which
+the `bazel_tools` tests now catch (`pub_lock_current_test.dart`, data on
+both locks and the generated file) and the root suites found.
+
 ## Adding a dependency
 
 1. Make sure `deps.lock.bzl` is current (`gen_deps.dart --check`).
