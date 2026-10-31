@@ -147,8 +147,14 @@ class BuildDirectoryTest(unittest.TestCase):
     out_dir = os.path.join(self.engine_src, 'out', 'ci', 'host_debug_unopt')
     text = bazel_ci.ninja_file(self.engine_src, HOST_DEBUG_UNOPT, out_dir, '/tools/bazelisk')
     root = os.path.join(self.tmp.name, 'checkout')
+    # The inherited descriptors closed first (the Bazel server would hold
+    # ninja's pipe open otherwise); `$` doubled for ninja.
     self.assertIn(
-        f'command = cd {root} && env BAZELISK_HOME={root}/.bazel_ci/bazelisk /tools/bazelisk '
+        'command = fd=3; while [ "$$fd" -le 255 ]; do eval "exec $$fd>&-"; fd=$$((fd + 1)); done && ',
+        text
+    )
+    self.assertIn(
+        f'cd {root} && env BAZELISK_HOME={root}/.bazel_ci/bazelisk /tools/bazelisk '
         f'--output_user_root={root}/.bazel_ci/output run --config=ci --config=ci_host_debug_unopt '
         f'//engine/src/flutter/ci/builders:ci_host_debug_unopt -- {out_dir} && '
         f'touch {out_dir}/bazel_install.stamp\n', text
