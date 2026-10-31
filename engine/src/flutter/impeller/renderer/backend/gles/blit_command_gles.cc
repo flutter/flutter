@@ -35,11 +35,22 @@ static std::optional<GLuint> ConfigureFBO(
     return std::nullopt;
   }
 
-  if (TextureGLES::Cast(*texture).IsWrapped()) {
-    // The texture is attached to the default FBO, so there's no need to
-    // create/configure one.
-    gl.BindFramebuffer(fbo_type, 0);
-    return 0;
+  const TextureGLES& texture_gles = TextureGLES::Cast(*texture);
+  if (texture_gles.IsWrappedFBO()) {
+    // The texture wraps a framebuffer (the default one, for onscreen
+    // targets), so bind that framebuffer. It belongs to the caller, so
+    // report GL_NONE and let the caller skip deleting it.
+    // NOLINTNEXTLINE(bugprone-unchecked-optional-access)
+    gl.BindFramebuffer(fbo_type, *texture_gles.GetFBO());
+    return GL_NONE;
+  }
+
+  if (texture_gles.IsWrapped() && fbo_type == GL_DRAW_FRAMEBUFFER) {
+    // A wrapped texture name belongs to the caller. It can be read below,
+    // but writing into it is not supported, as with uploads and
+    // SetContents.
+    VALIDATION_LOG << "Cannot blit into a wrapped texture.";
+    return std::nullopt;
   }
 
   GLuint fbo;

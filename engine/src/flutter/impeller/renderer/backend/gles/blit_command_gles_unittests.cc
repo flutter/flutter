@@ -17,6 +17,7 @@ namespace impeller {
 namespace testing {
 
 using ::testing::_;
+using ::testing::NiceMock;
 using ::testing::Return;
 
 class TestReactorGLES : public ReactorGLES {
@@ -249,6 +250,170 @@ TEST(BlitCommandGLESTest, BlitCopyTextureToBufferCommandGLESBindsFramebuffer) {
   dest_buffer.reset();
 
   ASSERT_TRUE(reactor->React());
+}
+
+// A texture created with TextureGLES::WrapTexture wraps a texture name, not a
+// framebuffer. Reading it back must attach that name to a new FBO instead of
+// reading from the default framebuffer.
+TEST(BlitCommandGLESTest,
+     BlitCopyTextureToBufferCommandGLESReadsWrappedTextureName) {
+  auto mock_gles_impl = std::make_unique<MockGLESImpl>();
+  auto& mock_gles_impl_ref = *mock_gles_impl;
+
+  const GLuint kExternalTexture = 7;
+  const GLuint kReadFramebuffer = 3;
+
+  {
+    ::testing::InSequence sequence;
+    EXPECT_CALL(mock_gles_impl_ref, GenFramebuffers(1, _))
+        .WillOnce(::testing::SetArgPointee<1>(kReadFramebuffer));
+    EXPECT_CALL(mock_gles_impl_ref,
+                BindFramebuffer(GL_FRAMEBUFFER, kReadFramebuffer));
+    EXPECT_CALL(mock_gles_impl_ref,
+                FramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+                                     GL_TEXTURE_2D, kExternalTexture, 0));
+    EXPECT_CALL(mock_gles_impl_ref, CheckFramebufferStatus(GL_FRAMEBUFFER))
+        .WillOnce(Return(GL_FRAMEBUFFER_COMPLETE));
+    EXPECT_CALL(mock_gles_impl_ref, ReadPixels(_, _, _, _, _, _, _));
+    EXPECT_CALL(mock_gles_impl_ref, BindFramebuffer(GL_FRAMEBUFFER, 0));
+  }
+  // The caller owns the texture name, so no new texture is generated for it.
+  EXPECT_CALL(mock_gles_impl_ref, GenTextures(_, _)).Times(0);
+
+  std::shared_ptr<MockGLES> mock_gl = MockGLES::Init(std::move(mock_gles_impl));
+  auto reactor = std::make_shared<TestReactorGLES>();
+  auto worker = std::make_shared<MockWorker>();
+  reactor->AddWorker(worker);
+
+  TextureDescriptor tex_desc;
+  tex_desc.format = PixelFormat::kR8G8B8A8UNormInt;
+  tex_desc.size = {10, 10};
+  tex_desc.usage = static_cast<TextureUsageMask>(TextureUsage::kShaderRead);
+  std::shared_ptr<TextureGLES> source_texture = TextureGLES::WrapTexture(
+      reactor, tex_desc,
+      reactor->CreateHandle(HandleType::kTexture, kExternalTexture));
+  ASSERT_TRUE(source_texture);
+  ASSERT_TRUE(source_texture->IsWrapped());
+  ASSERT_FALSE(source_texture->GetFBO().has_value());
+
+  std::shared_ptr<DeviceBufferGLES> dest_buffer = CreateBuffer(reactor);
+  ASSERT_TRUE(reactor->React());
+
+  BlitCopyTextureToBufferCommandGLES command =
+      CreateCopyTextureToBufferCommand(source_texture, dest_buffer);
+  EXPECT_TRUE(command.Encode(*reactor));
+}
+
+// A texture created with TextureGLES::WrapFBO is read through the framebuffer
+// it wraps. That framebuffer belongs to the caller, so it is bound directly
+// and never deleted.
+TEST(BlitCommandGLESTest,
+     BlitCopyTextureToBufferCommandGLESReadsWrappedFramebuffer) {
+  auto mock_gles_impl = std::make_unique<MockGLESImpl>();
+  auto& mock_gles_impl_ref = *mock_gles_impl;
+
+  const GLuint kWrappedFramebuffer = 5;
+
+  {
+    ::testing::InSequence sequence;
+    EXPECT_CALL(mock_gles_impl_ref,
+                BindFramebuffer(GL_FRAMEBUFFER, kWrappedFramebuffer));
+    EXPECT_CALL(mock_gles_impl_ref, ReadPixels(_, _, _, _, _, _, _));
+  }
+  EXPECT_CALL(mock_gles_impl_ref, GenFramebuffers(_, _)).Times(0);
+  EXPECT_CALL(mock_gles_impl_ref, DeleteFramebuffers(_, _)).Times(0);
+
+  std::shared_ptr<MockGLES> mock_gl = MockGLES::Init(std::move(mock_gles_impl));
+  auto reactor = std::make_shared<TestReactorGLES>();
+  auto worker = std::make_shared<MockWorker>();
+  reactor->AddWorker(worker);
+
+  TextureDescriptor tex_desc;
+  tex_desc.format = PixelFormat::kR8G8B8A8UNormInt;
+  tex_desc.size = {10, 10};
+  tex_desc.usage = static_cast<TextureUsageMask>(TextureUsage::kRenderTarget);
+  std::shared_ptr<TextureGLES> source_texture =
+      TextureGLES::WrapFBO(reactor, tex_desc, kWrappedFramebuffer);
+  ASSERT_TRUE(source_texture);
+  std::shared_ptr<DeviceBufferGLES> dest_buffer = CreateBuffer(reactor);
+  ASSERT_TRUE(reactor->React());
+
+  BlitCopyTextureToBufferCommandGLES command =
+      CreateCopyTextureToBufferCommand(source_texture, dest_buffer);
+  EXPECT_TRUE(command.Encode(*reactor));
+}
+
+std::shared_ptr<TextureGLES> WrapTextureName(
+    const std::shared_ptr<ReactorGLES>& reactor,
+    GLuint name) {
+  TextureDescriptor tex_desc;
+  tex_desc.format = PixelFormat::kR8G8B8A8UNormInt;
+  tex_desc.size = {10, 10};
+  tex_desc.usage = static_cast<TextureUsageMask>(TextureUsage::kShaderRead);
+  return TextureGLES::WrapTexture(
+      reactor, tex_desc, reactor->CreateHandle(HandleType::kTexture, name));
+}
+
+// Reading a wrapped texture name in a texture-to-texture blit attaches the
+// name to the read framebuffer.
+TEST(BlitCommandGLESTest,
+     BlitCopyTextureToTextureCommandGLESReadsWrappedTextureName) {
+  auto mock_gles_impl = std::make_unique<NiceMock<MockGLESImpl>>();
+  auto& mock_gles_impl_ref = *mock_gles_impl;
+
+  ON_CALL(mock_gles_impl_ref, CheckFramebufferStatus(_))
+      .WillByDefault(Return(GL_FRAMEBUFFER_COMPLETE));
+  const GLuint kExternalTexture = 7;
+  EXPECT_CALL(mock_gles_impl_ref,
+              FramebufferTexture2D(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+                                   GL_TEXTURE_2D, kExternalTexture, 0));
+  // The destination is an ordinary texture attached to the draw framebuffer.
+  EXPECT_CALL(mock_gles_impl_ref,
+              FramebufferTexture2D(GL_DRAW_FRAMEBUFFER, _, _, _, _));
+  EXPECT_CALL(mock_gles_impl_ref, BlitFramebuffer(_, _, _, _, _, _, _, _, _, _))
+      .Times(1);
+
+  std::shared_ptr<MockGLES> mock_gl = MockGLES::Init(std::move(mock_gles_impl));
+  auto reactor = std::make_shared<TestReactorGLES>();
+  auto worker = std::make_shared<MockWorker>();
+  reactor->AddWorker(worker);
+
+  BlitCopyTextureToTextureCommandGLES command;
+  command.source = WrapTextureName(reactor, kExternalTexture);
+  command.destination = CreateTexture(reactor, PixelFormat::kR8G8B8A8UNormInt);
+  command.source_region = IRect::MakeSize(ISize{10, 10});
+  command.label = "TestBlit";
+  ASSERT_TRUE(reactor->React());
+
+  EXPECT_TRUE(command.Encode(*reactor));
+}
+
+// Writing into a texture name the caller owns is out of scope for the GLES
+// backend: uploads and SetContents refuse wrapped textures, and so does a
+// blit that would draw into one.
+TEST(BlitCommandGLESTest,
+     BlitCopyTextureToTextureCommandGLESRefusesWrappedTextureDestination) {
+  auto mock_gles_impl = std::make_unique<NiceMock<MockGLESImpl>>();
+  auto& mock_gles_impl_ref = *mock_gles_impl;
+
+  ON_CALL(mock_gles_impl_ref, CheckFramebufferStatus(_))
+      .WillByDefault(Return(GL_FRAMEBUFFER_COMPLETE));
+  EXPECT_CALL(mock_gles_impl_ref, BlitFramebuffer(_, _, _, _, _, _, _, _, _, _))
+      .Times(0);
+
+  std::shared_ptr<MockGLES> mock_gl = MockGLES::Init(std::move(mock_gles_impl));
+  auto reactor = std::make_shared<TestReactorGLES>();
+  auto worker = std::make_shared<MockWorker>();
+  reactor->AddWorker(worker);
+
+  BlitCopyTextureToTextureCommandGLES command;
+  command.source = CreateTexture(reactor, PixelFormat::kR8G8B8A8UNormInt);
+  command.destination = WrapTextureName(reactor, 7);
+  command.source_region = IRect::MakeSize(ISize{10, 10});
+  command.label = "TestBlit";
+  ASSERT_TRUE(reactor->React());
+
+  EXPECT_FALSE(command.Encode(*reactor));
 }
 
 TEST(BlitCommandGLESTest, BlitCopyTextureToBufferCommandGLESRGBA) {

@@ -62,6 +62,16 @@ class IMockGLESImpl {
                           GLenum format,
                           GLenum type,
                           void* pixels) {}
+  virtual void BlitFramebuffer(GLint src_x0,
+                               GLint src_y0,
+                               GLint src_x1,
+                               GLint src_y1,
+                               GLint dst_x0,
+                               GLint dst_y0,
+                               GLint dst_x1,
+                               GLint dst_y1,
+                               GLbitfield mask,
+                               GLenum filter) {}
   virtual void DeleteFramebuffers(GLsizei n, const GLuint* framebuffers) {}
   virtual void ObjectLabelKHR(GLenum identifier,
                               GLuint name,
@@ -245,6 +255,19 @@ class MockGLESImpl : public IMockGLESImpl {
                GLenum format,
                GLenum type,
                void* pixels),
+              (override));
+  MOCK_METHOD(void,
+              BlitFramebuffer,
+              (GLint src_x0,
+               GLint src_y0,
+               GLint src_x1,
+               GLint src_y1,
+               GLint dst_x0,
+               GLint dst_y0,
+               GLint dst_x1,
+               GLint dst_y1,
+               GLbitfield mask,
+               GLenum filter),
               (override));
   MOCK_METHOD(void,
               DeleteFramebuffers,

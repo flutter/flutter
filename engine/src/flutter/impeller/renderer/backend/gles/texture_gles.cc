@@ -860,6 +860,10 @@ bool TextureGLES::IsWrapped() const {
   return is_wrapped_;
 }
 
+bool TextureGLES::IsWrappedFBO() const {
+  return wrapped_fbo_.has_value();
+}
+
 std::optional<GLuint> TextureGLES::GetFBO() const {
   return wrapped_fbo_;
 }
