@@ -53,6 +53,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (instancetype)initWithFrame:(CGRect)frame NS_UNAVAILABLE;
 - (instancetype)initWithCoder:(NSCoder*)coder NS_UNAVAILABLE;
 - (instancetype)initWithSemanticsObject:(SemanticsObject*)semanticsObject;
+- (nullable id)accessibilityContainer;
 
 @end
 NS_ASSUME_NONNULL_END

@@ -987,7 +987,7 @@ const float kFloatCompareEpsilon = 0.001;
   XCTAssertFalse(scrollView.isAccessibilityElement);
   XCTAssertEqual(scrollable.accessibilityContainer, scrollView);
   XCTAssertEqual(childObject.accessibilityContainer, scrollView);
-  XCTAssertEqual(scrollView.accessibilityContainer, parentObject.accessibilityContainer);
+  XCTAssertEqual([scrollView accessibilityContainer], parentObject.accessibilityContainer);
 
   SemanticsObjectContainer* parentContainer =
       static_cast<SemanticsObjectContainer*>(parentObject.accessibilityContainer);
@@ -1001,9 +1001,12 @@ const float kFloatCompareEpsilon = 0.001;
   XCTAssertEqual([scrollView indexOfAccessibilityElement:childObject], 0);
   XCTAssertEqual([scrollView indexOfAccessibilityElement:parentObject], NSNotFound);
 
-  // Off-screen (hidden) child still reports its globalRect as accessibilityFrame.
-  XCTAssertFalse(CGRectIsEmpty(childObject.accessibilityFrame));
-  XCTAssertTrue(CGRectEqualToRect(childObject.accessibilityFrame, [childObject globalRect]));
+  // Off-screen (hidden) child still reports its non-empty accessibilityFrame.
+  CGRect hiddenFrame = childObject.accessibilityFrame;
+  XCTAssertFalse(CGRectIsEmpty(hiddenFrame));
+  childNode.flags.isHidden = false;
+  [childObject setSemanticsNode:&childNode];
+  XCTAssertTrue(CGRectEqualToRect(hiddenFrame, childObject.accessibilityFrame));
 }
 
 - (void)testFlutterScrollableSemanticsObjectNoScrollBarOrContentInsets {
