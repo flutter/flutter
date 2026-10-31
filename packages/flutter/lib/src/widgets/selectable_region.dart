@@ -2539,7 +2539,9 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
     assert((currentSelectionEndIndex == -1) == (selectionEndIndex == -1));
     currentSelectionEndIndex = selectionEndIndex;
     currentSelectionStartIndex = selectionStartIndex;
-    selectablesToUpdate.forEach(ensureChildUpdated);
+    for (final Selectable selectable in selectablesToUpdate) {
+      ensureChildUpdated(selectable);
+    }
     _additions = <Selectable>{};
   }
 
