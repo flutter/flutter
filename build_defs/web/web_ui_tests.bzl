@@ -555,6 +555,15 @@ def web_ui_tests(
             continue
         suites_by_browser.setdefault(browser, []).append(suite)
         bundles[spec["test_bundle"]] = None
+
+    # A suite felt keeps off CI (`enable-ci: false` in the YAML; felt's
+    # generate_builder_json.dart leaves it out of the builders, and it runs
+    # by name alone: Firefox's wimp suite, whose animated-image cases fail
+    # there) is `manual` here the same way: declared, out of the aggregates,
+    # run as `bazel test //...:<suite>`.
+    def _enabled(suite):
+        return config["test_suites"][suite].get("enable_ci", True)
+
     for bundle in bundles:
         spec = config["test_bundles"][bundle]
         web_ui_test_bundles(
@@ -587,7 +596,7 @@ def web_ui_tests(
                 network = network,
                 runtime_package_config = runtime_package_config,
                 suite = suite,
-                tags = tags + browser_tags.get(browser, []),
+                tags = tags + browser_tags.get(browser, []) + ([] if _enabled(suite) else ["manual"]),
                 test_images = test_images,
                 test_set = config["test_sets"][test_set],
                 tests = test_sets[test_set],
@@ -597,14 +606,15 @@ def web_ui_tests(
         native.test_suite(
             name = browser + "_tests",
             tags = browser_tags.get(browser, []),
-            tests = [":" + suite for suite in suites],
+            tests = [":" + suite for suite in suites if _enabled(suite)],
         )
 
     # The suites a wildcard build runs on this host. A test_suite runs what
     # it lists, `manual` or not, so a browser whose suites are manual here
     # (browser_tags: Firefox on a Mac) is left to its own `<browser>_tests`,
     # run by name; listed here, the wildcard would run them after all (the
-    # Mac's T56: 377 Firefox suites run and killed at launch).
+    # Mac's T56: 377 Firefox suites run and killed at launch). The suites
+    # felt keeps off CI are left out the same way.
     native.test_suite(
         name = name,
         tests = [
@@ -612,5 +622,6 @@ def web_ui_tests(
             for browser, suites in suites_by_browser.items()
             if "manual" not in browser_tags.get(browser, [])
             for suite in suites
+            if _enabled(suite)
         ],
     )

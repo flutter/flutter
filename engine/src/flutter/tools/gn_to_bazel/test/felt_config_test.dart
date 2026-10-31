@@ -52,6 +52,7 @@ test-suites:
     test-bundle: fallbacks
     run-config: safari-wasm
     artifact-deps: [ canvaskit, skwasm ]
+    enable-ci: false
 ''';
 
   group('FeltConfig', () {
@@ -76,6 +77,9 @@ test-suites:
       expect(suite.testBundle, 'fallbacks');
       expect(suite.runConfig, 'safari-wasm');
       expect(suite.artifactDeps, <String>['canvaskit', 'skwasm']);
+      // enable-ci: felt's default is true; a suite that opts out stays off CI.
+      expect(suite.enableCi, isFalse);
+      expect(config.testSuites['chrome-dart2js-canvaskit-engine']!.enableCi, isTrue);
     });
 
     test('writes the tables as one Starlark dict, sorted', () {
@@ -102,9 +106,19 @@ test-suites:
         contains(
           '        "safari-fallbacks": {\n'
           '            "artifact_deps": ["canvaskit", "skwasm"],\n'
+          '            "enable_ci": False,\n'
           '            "run_config": "safari-wasm",\n'
           '            "test_bundle": "fallbacks",\n'
           '        },\n',
+        ),
+      );
+      // Only a suite that opts out carries the key.
+      expect(
+        starlark,
+        contains(
+          '        "chrome-dart2js-canvaskit-engine": {\n'
+          '            "artifact_deps": ["canvaskit_chromium"],\n'
+          '            "run_config": "chrome",\n',
         ),
       );
       // Sorted: chrome's suite before safari's, as buildifier would order the keys.
@@ -144,6 +158,16 @@ test-suites:
             (FormatException e) => e.message,
             'message',
             'test bundle fallbacks names an unknown compile config: dart2js-skwasm',
+          ),
+        ),
+      );
+      expect(
+        () => FeltConfig.parse(yaml.replaceFirst('enable-ci: false', 'enable-ci: no')),
+        throwsA(
+          isA<FormatException>().having(
+            (FormatException e) => e.message,
+            'message',
+            'test suite safari-fallbacks has a non-boolean enable-ci: no',
           ),
         ),
       );
