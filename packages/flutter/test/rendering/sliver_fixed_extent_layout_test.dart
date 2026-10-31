@@ -477,21 +477,29 @@ void main() {
     expect(child0.layoutOffset, 0.0);
     expect(child1.layoutOffset, 100.0);
 
-    // Re-assign itemExtentBuilder (even with same identity) clears the cache.
+    // Re-assigning itemExtentBuilder with same identity should not trigger layout.
     builderCallCount = 0;
     currentExtent = 200.0;
     list.itemExtentBuilder = builder;
     pumpFrame();
 
-    // The cache should have been cleared and builder called to re-layout.
+    expect(builderCallCount, 0);
+    expect(child0.layoutOffset, 0.0);
+    expect(child1.layoutOffset, 100.0);
+
+    // Assigning a new itemExtentBuilder clears the cache and triggers layout.
+    builderCallCount = 0;
+    list.itemExtentBuilder = (int index, SliverLayoutDimensions dimensions) =>
+        builder(index, dimensions);
+    pumpFrame();
+
     expect(builderCallCount, greaterThan(0));
     expect(child0.layoutOffset, 0.0);
     expect(child1.layoutOffset, 200.0);
 
-    // Explicitly clear the cache.
+    // Explicitly marking needs layout also re-layouts and calls builder.
     builderCallCount = 0;
     currentExtent = 50.0;
-    list.reassemble();
     list.markNeedsLayout();
     pumpFrame();
 

@@ -551,7 +551,7 @@ class RenderSliverVariedExtentList extends RenderSliverFixedExtentBoxAdaptor {
 
   /// Clears the cached item extents.
   ///
-  /// This is called before each layout pass or when the [itemExtentBuilder] is assigned.
+  /// This is called at the beginning of each layout pass.
   void _clearItemExtentCache() {
     _itemExtentCache.clear();
     _itemOffsetCache.clear();
@@ -595,8 +595,10 @@ class RenderSliverVariedExtentList extends RenderSliverFixedExtentBoxAdaptor {
   ItemExtentBuilder get itemExtentBuilder => _itemExtentBuilder;
   ItemExtentBuilder _itemExtentBuilder;
   set itemExtentBuilder(ItemExtentBuilder value) {
+    if (_itemExtentBuilder == value) {
+      return;
+    }
     _itemExtentBuilder = value;
-    _clearItemExtentCache();
     markNeedsLayout();
   }
 
