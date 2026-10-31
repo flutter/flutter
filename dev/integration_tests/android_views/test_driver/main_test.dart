@@ -49,22 +49,16 @@ Future<void> main() async {
       expect(status, 'Success');
     }, timeout: Timeout.none);
 
-    test(
-      'Child windows can handle touches',
-      () async {
-        final SerializableFinder addWindow = find.byValueKey('AddWindow');
-        await driver?.waitFor(addWindow);
-        await driver?.tap(addWindow);
-        final SerializableFinder tapWindow = find.byValueKey('TapWindow');
-        await driver?.tap(tapWindow);
-        final String windowClickCount = (await driver?.getText(
-          find.byValueKey('WindowClickCount'),
-        ))!;
-        expect(windowClickCount, 'Click count: 1');
-      },
-      timeout: Timeout.none,
-      // TODO(garyq): Skipped, see https://github.com/flutter/flutter/issues/88479
-      skip: true,
-    );
+    test('Child windows can handle touches', () async {
+      final SerializableFinder addWindow = find.byValueKey('AddWindow');
+      await driver?.waitFor(addWindow);
+      await driver?.tap(addWindow);
+      await driver?.waitFor(find.byValueKey('WindowAdded'));
+      final SerializableFinder childView = find.byValueKey('PlatformView');
+      await driver?.tap(childView);
+      await driver?.waitFor(find.text('Click count: 1'));
+      final String windowClickCount = (await driver?.getText(find.byValueKey('WindowClickCount')))!;
+      expect(windowClickCount, 'Click count: 1');
+    }, timeout: Timeout.none);
   });
 }
