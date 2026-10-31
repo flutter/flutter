@@ -87,6 +87,27 @@ uint16_t ResolveKeyCode(uint16_t original, bool extended, uint8_t scancode) {
   }
 }
 
+// Returns |lparam| with the scan code of a Shift key message replaced by the
+// standard ShiftLeft or ShiftRight scan code, and the extended bit cleared.
+//
+// Some sources, such as IMEs and input injection, deliver Shift with the
+// extended bit set or with a zero scan code. Such a message resolves to a
+// non-standard physical key, which the modifier synchronization never checks,
+// so Shift stays pressed in the framework after the key is released.
+// See https://github.com/flutter/flutter/issues/181907.
+LPARAM NormalizeShiftLParam(WPARAM wparam, LPARAM lparam) {
+  if (wparam != VK_SHIFT && wparam != VK_LSHIFT && wparam != VK_RSHIFT) {
+    return lparam;
+  }
+  constexpr LPARAM kScanCodeAndExtendedMask = LPARAM{0x1ff} << 16;
+  const LPARAM scancode = (lparam >> 16) & 0xff;
+  const LPARAM normalized =
+      (wparam == VK_RSHIFT || scancode == kScanCodeShiftRight)
+          ? kScanCodeShiftRight
+          : kScanCodeShiftLeft;
+  return (lparam & ~kScanCodeAndExtendedMask) | (normalized << 16);
+}
+
 bool IsPrintable(uint32_t c) {
   constexpr char32_t kMinPrintable = ' ';
   constexpr char32_t kDelete = 0x7F;
@@ -247,11 +268,12 @@ bool KeyboardManager::HandleMessage(UINT const action,
         return false;
       }
 
-      const uint8_t scancode = (lparam >> 16) & 0xff;
-      const bool extended = ((lparam >> 24) & 0x01) == 0x01;
+      const LPARAM key_lparam = NormalizeShiftLParam(wparam, lparam);
+      const uint8_t scancode = (key_lparam >> 16) & 0xff;
+      const bool extended = ((key_lparam >> 24) & 0x01) == 0x01;
       // If the key is a modifier, get its side.
       const uint16_t key_code = ResolveKeyCode(wparam, extended, scancode);
-      const bool was_down = lparam & 0x40000000;
+      const bool was_down = key_lparam & 0x40000000;
 
       // Detect a pattern of key events in order to forge a CtrlLeft up event.
       // See |IsKeyDownAltRight| for explanation.
@@ -279,8 +301,8 @@ bool KeyboardManager::HandleMessage(UINT const action,
       }
 
       current_session_.clear();
-      current_session_.push_back(
-          Win32Message{.action = action, .wparam = wparam, .lparam = lparam});
+      current_session_.push_back(Win32Message{
+          .action = action, .wparam = wparam, .lparam = key_lparam});
       const bool is_keydown_message =
           (action == WM_KEYDOWN || action == WM_SYSKEYDOWN);
       // Check if this key produces a character by peeking if this key down
