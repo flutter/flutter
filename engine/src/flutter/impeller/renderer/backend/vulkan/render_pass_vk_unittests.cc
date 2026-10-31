@@ -4,7 +4,9 @@
 
 #include "flutter/testing/testing.h"  // IWYU pragma: keep
 #include "gtest/gtest.h"
+#include "impeller/base/validation.h"
 #include "impeller/core/formats.h"
+#include "impeller/core/texture_descriptor.h"
 #include "impeller/renderer/backend/vulkan/command_buffer_vk.h"
 #include "impeller/renderer/backend/vulkan/render_pass_builder_vk.h"
 #include "impeller/renderer/backend/vulkan/render_pass_vk.h"
@@ -88,6 +90,35 @@ TEST(RenderPassVK, SetViewportPropagatesAllUserSuppliedFields) {
   EXPECT_FLOAT_EQ(vp.height, -80.0f);
   EXPECT_FLOAT_EQ(vp.minDepth, 0.25f);
   EXPECT_FLOAT_EQ(vp.maxDepth, 0.75f);
+}
+
+// Regression guard: a render target with no color attachment at index zero is
+// not a valid target — `RenderTarget::IsValid` says as much — and the Vulkan
+// backend used to read that attachment's texture while setting the pass up,
+// which is a null dereference rather than a refusal. A depth-only pass, which
+// is how a shadow map is drawn, is the way an application reaches it. The
+// Metal backend checks the target in its own constructor; both refuse it now.
+TEST(RenderPassVK, RefusesATargetWithNoColorAttachment) {
+  ScopedValidationDisable disable_validation;
+
+  std::shared_ptr<ContextVK> context = MockVulkanContextBuilder().Build();
+  std::shared_ptr<CommandBuffer> cmd_buffer = context->CreateCommandBuffer();
+
+  TextureDescriptor depth_desc;
+  depth_desc.storage_mode = StorageMode::kDeviceTransient;
+  depth_desc.format = PixelFormat::kD32FloatS8UInt;
+  depth_desc.size = ISize{1, 1};
+  depth_desc.usage = TextureUsage::kRenderTarget;
+  depth_desc.sample_count = SampleCount::kCount1;
+
+  DepthAttachment depth;
+  depth.texture = context->GetResourceAllocator()->CreateTexture(depth_desc);
+  ASSERT_TRUE(depth.texture);
+
+  RenderTarget target;
+  target.SetDepthAttachment(depth);
+
+  EXPECT_EQ(cmd_buffer->CreateRenderPass(target), nullptr);
 }
 
 }  // namespace testing
