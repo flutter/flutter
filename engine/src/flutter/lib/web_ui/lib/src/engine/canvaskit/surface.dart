@@ -81,7 +81,21 @@ abstract class CkSurface extends Surface {
   DomEventTarget get canvas => _canvas;
   late DomEventTarget _canvas;
 
+  /// Whether a WebGL context has been requested on the current [canvas].
+  ///
+  /// A canvas that owns a WebGL context cannot provide a 2D context, so it
+  /// cannot back a software [SkSurface]. When this is true and the surface
+  /// falls back to software rendering, the canvas is replaced with a fresh one
+  /// first.
+  bool _canvasIsWebGlTainted = false;
+
   void _maybeAttachCanvasToDom();
+
+  /// Removes the current [canvas] from the DOM, if it is attached to it.
+  void _detachCanvasFromDom();
+
+  /// Releases the WebGL context owned by [canvas], if it is still alive.
+  void _destroyGlContext(DomEventTarget canvas);
 
   /// A [Future] which completes when the [Surface] is initialized and ready to
   /// render pictures.
@@ -93,8 +107,15 @@ abstract class CkSurface extends Surface {
 
   /// Creates the canvas object and initializes the graphics context.
   Future<void> _initialize() async {
-    _createSkiaObjects();
-    _initialized.complete();
+    try {
+      _createSkiaObjects();
+    } catch (e, s) {
+      printWarning('Failed to initialize CanvasKit surface: $e\n$s');
+    } finally {
+      if (!_initialized.isCompleted) {
+        _initialized.complete();
+      }
+    }
   }
 
   /// The underlying Skia graphics context.
@@ -104,20 +125,31 @@ abstract class CkSurface extends Surface {
 
   /// Handles the context lost event by acquiring a new canvas and recreating
   /// the graphics context.
+  ///
+  /// [handledContextLossEvent] completes only once the graphics context has
+  /// been recreated (or recovery has failed).
   void onContextLost() {
     if (_isDisposed) {
       return;
-    }
-    if (_handledContextLostEvent case final Completer<void> completer) {
-      if (!completer.isCompleted) {
-        completer.complete();
-      }
     }
     final DomEventTarget newCanvas = _canvasProvider.acquireCanvas(
       _currentSize,
       onContextLost: onContextLost,
     );
-    recreateContextForCanvas(newCanvas);
+    unawaited(
+      recreateContextForCanvas(newCanvas)
+          .then((_) {
+            if (_handledContextLostEvent?.isCompleted == false) {
+              _handledContextLostEvent?.complete();
+            }
+          })
+          .catchError((Object e, StackTrace s) {
+            printWarning('Error recovering from context loss: $e\n$s');
+            if (_handledContextLostEvent?.isCompleted == false) {
+              _handledContextLostEvent?.complete();
+            }
+          }),
+    );
   }
 
   void _recreateSkSurface() {
@@ -145,7 +177,15 @@ abstract class CkSurface extends Surface {
       antialias: _kUsingMSAA ? 1 : 0,
       majorVersion: webGLVersion.toDouble(),
     );
+    // Requesting a WebGL context binds the canvas to WebGL, even if the request
+    // ends up failing, so mark the canvas as tainted before making it.
+    _canvasIsWebGlTainted = true;
     _glContext = _getGlContext(options);
+    if (_glContext <= 0) {
+      _failedToCreateGrContext = true;
+      _fallbackToSoftwareReason = 'failed to create WebGL context (id: $_glContext).';
+      return;
+    }
     _grContext = canvasKit.MakeGrContext(_glContext.toDouble());
     if (_grContext == null) {
       _failedToCreateGrContext = true;
@@ -164,8 +204,13 @@ abstract class CkSurface extends Surface {
   /// This method is responsible for creating the `SkGrContext` and the
   /// `SkSurface`.
   void _createSkiaObjects() {
-    if (supportsWebGl) {
-      _createGrContext();
+    try {
+      if (supportsWebGl) {
+        _createGrContext();
+      }
+    } catch (e) {
+      _failedToCreateGrContext = true;
+      _fallbackToSoftwareReason = 'failed to create GrContext. Error: $e';
     }
     _recreateSkSurface();
   }
@@ -186,6 +231,9 @@ abstract class CkSurface extends Surface {
   }
 
   void _recreateSoftwareSkSurface() {
+    if (_canvasIsWebGlTainted) {
+      _swapCanvasForSoftwareRendering();
+    }
     if (!_didWarnAboutWebGlInitializationFailure) {
       _didWarnAboutWebGlInitializationFailure = true;
       printWarning(
@@ -202,6 +250,33 @@ abstract class CkSurface extends Surface {
   /// Creates an SkSurface for software rendering. This is used when WebGl is not
   /// supported or when it fails to initialize.
   SkSurface _createSoftwareSkSurface();
+
+  /// Replaces the WebGL-tainted [canvas] with a fresh canvas that can provide
+  /// the 2D context required for software rendering.
+  ///
+  /// The old canvas is detached, released and its WebGL context (along with
+  /// the Skia objects backed by it) is torn down.
+  void _swapCanvasForSoftwareRendering() {
+    final DomEventTarget oldCanvas = _canvas;
+    _detachCanvasFromDom();
+    _canvasProvider.releaseCanvas(oldCanvas);
+    _destroyGlContext(oldCanvas);
+
+    _skSurface?.dispose();
+    _skSurface = null;
+    try {
+      _grContext?.releaseResourcesAndAbandonContext();
+      _grContext?.delete();
+    } catch (_) {
+      // Ignore GrContext deletion errors on inconsistent state.
+    }
+    _grContext = null;
+    _glContext = -1;
+
+    _canvas = _canvasProvider.acquireCanvas(_currentSize, onContextLost: onContextLost);
+    _maybeAttachCanvasToDom();
+    _canvasIsWebGlTainted = false;
+  }
 
   double _currentDevicePixelRatio = -1;
 
@@ -258,7 +333,13 @@ abstract class CkSurface extends Surface {
     // The GrContext is also invalid and will be recreated by `_createSkiaObjects`.
     _grContext = null;
 
+    // The old canvas is replaced, so it is removed from the DOM and released.
+    final DomEventTarget oldCanvas = _canvas;
+    _detachCanvasFromDom();
+    _canvasProvider.releaseCanvas(oldCanvas);
+
     _canvas = newCanvas;
+    _canvasIsWebGlTainted = false;
     _maybeAttachCanvasToDom();
     _createSkiaObjects();
   }
@@ -417,6 +498,23 @@ class CkOffscreenSurface extends CkSurface implements OffscreenSurface {
   @override
   void _maybeAttachCanvasToDom() {
     // Do not attach the OffscreenCanvas to the DOM.
+  }
+
+  @override
+  void _detachCanvasFromDom() {
+    // The OffscreenCanvas is not attached to the DOM.
+  }
+
+  @override
+  void _destroyGlContext(DomEventTarget canvas) {
+    try {
+      final WebGLContext gl = (canvas as DomOffscreenCanvas).getGlContext(webGLVersion);
+      if (!gl.isContextLost()) {
+        gl.loseContextExtension.loseContext();
+      }
+    } catch (_) {
+      // The context may already be unusable; there is nothing left to release.
+    }
   }
 
   /// Resizes the offscreen canvas to [size], preserving fast in-place resizing
@@ -585,6 +683,24 @@ class CkOnscreenSurface extends CkSurface implements OnscreenSurface {
   @override
   void _maybeAttachCanvasToDom() {
     hostElement.appendChild(canvas as DomHTMLCanvasElement);
+    _applyOverlayStyle();
+  }
+
+  @override
+  void _detachCanvasFromDom() {
+    (canvas as DomHTMLCanvasElement).remove();
+  }
+
+  @override
+  void _destroyGlContext(DomEventTarget canvas) {
+    try {
+      final WebGLContext gl = (canvas as DomHTMLCanvasElement).getGlContext(webGLVersion);
+      if (!gl.isContextLost()) {
+        gl.loseContextExtension.loseContext();
+      }
+    } catch (_) {
+      // The context may already be unusable; there is nothing left to release.
+    }
   }
 
   @override
@@ -597,10 +713,20 @@ class CkOnscreenSurface extends CkSurface implements OnscreenSurface {
     // No extra initialization is required.
   }
 
+  /// Whether this surface is used as an overlay, see [setIsOverlay].
+  bool _isOverlay = false;
+
   @override
   void setIsOverlay(bool isOverlay) {
+    _isOverlay = isOverlay;
+    _applyOverlayStyle();
+  }
+
+  /// Applies the overlay positioning to the current [canvas], so that it
+  /// survives the canvas being replaced.
+  void _applyOverlayStyle() {
     final DomCSSStyleDeclaration style = (canvas as DomHTMLCanvasElement).style;
-    if (isOverlay) {
+    if (_isOverlay) {
       if (style.position != 'absolute') {
         style.position = 'absolute';
       }
