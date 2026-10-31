@@ -288,5 +288,78 @@ TEST_P(HostBufferTest, EmplaceWithFailingAllocationDoesntCrash) {
   EXPECT_EQ(view.GetRange().length, 0u);
 }
 
+TEST_P(HostBufferTest, FastPathProducesCorrectRangesAndContent) {
+  auto buffer = HostBuffer::Create(GetContext()->GetResourceAllocator(),
+                                   GetContext()->GetIdleWaiter(), 256);
+
+  struct alignas(16) Align16 {
+    uint8_t data[16];
+  };
+
+  std::vector<BufferView> views;
+  for (size_t i = 0; i < 64; i++) {
+    Align16 block;
+    std::fill(block.data, block.data + 16, static_cast<uint8_t>(i));
+    views.push_back(buffer->Emplace(block));
+  }
+  for (size_t i = 0; i < views.size(); i++) {
+    ASSERT_TRUE(views[i]);
+    ASSERT_EQ(views[i].GetRange(), Range(i * 16u, 16u));
+    const uint8_t* contents =
+        views[i].GetBuffer()->OnGetContents() + views[i].GetRange().offset;
+    for (size_t j = 0; j < 16; j++) {
+      EXPECT_EQ(contents[j], static_cast<uint8_t>(i));
+    }
+  }
+}
+
+TEST_P(HostBufferTest, FastPathHandlesBufferRollover) {
+  auto buffer = HostBuffer::Create(GetContext()->GetResourceAllocator(),
+                                   GetContext()->GetIdleWaiter(), 256);
+
+  const size_t big_size = kAllocatorBlockSize - 4096;
+  std::vector<uint8_t> big(big_size, 0xAB);
+  auto first = buffer->Emplace(big.data(), big.size(), 0);
+  ASSERT_TRUE(first);
+  ASSERT_EQ(first.GetRange().offset, 0u);
+
+  // The remaining 4096 bytes can't hold this allocation, so it must move to
+  // a fresh buffer at offset 0.
+  std::vector<uint8_t> next(8192, 0xCD);
+  auto second = buffer->Emplace(next.data(), next.size(), 0);
+  ASSERT_TRUE(second);
+  ASSERT_EQ(second.GetRange().offset, 0u);
+  EXPECT_NE(first.GetBuffer(), second.GetBuffer());
+  const uint8_t* contents =
+      second.GetBuffer()->OnGetContents() + second.GetRange().offset;
+  EXPECT_EQ(std::vector<uint8_t>(contents, contents + next.size()), next);
+}
+
+TEST_P(HostBufferTest, FastPathResetDoesNotClobberPreviousFrame) {
+  auto buffer = HostBuffer::Create(GetContext()->GetResourceAllocator(),
+                                   GetContext()->GetIdleWaiter(), 256);
+
+  std::vector<uint8_t> first_bytes(64, 0xAA);
+  auto first = buffer->Emplace(first_bytes.data(), first_bytes.size(), 0);
+  ASSERT_TRUE(first);
+  const DeviceBuffer* first_buffer = first.GetBuffer();
+  const size_t first_offset = first.GetRange().offset;
+
+  buffer->Reset();
+
+  std::vector<uint8_t> second_bytes(64, 0xBB);
+  auto second = buffer->Emplace(second_bytes.data(), second_bytes.size(), 0);
+  ASSERT_TRUE(second);
+
+  const uint8_t* previous = first_buffer->OnGetContents() + first_offset;
+  EXPECT_EQ(std::vector<uint8_t>(previous, previous + first_bytes.size()),
+            first_bytes);
+
+  const uint8_t* current =
+      second.GetBuffer()->OnGetContents() + second.GetRange().offset;
+  EXPECT_EQ(std::vector<uint8_t>(current, current + second_bytes.size()),
+            second_bytes);
+}
+
 }  // namespace  testing
 }  // namespace impeller
