@@ -234,6 +234,10 @@ class Rasterizer final : public SnapshotDelegate,
   ///
   void Teardown();
 
+  /// Ensures the Rasterizer's shared Impeller AiksContext has been created on
+  /// the raster thread once the underlying impeller::Context is available.
+  void EnsureAiksContextInitialized() const;
+
   //----------------------------------------------------------------------------
   /// @brief      Releases any resource used by the external view embedder.
   ///             For example, overlay surfaces or Android views.
@@ -708,7 +712,7 @@ class Rasterizer final : public SnapshotDelegate,
   // |SnapshotController::Delegate|
   bool IsAiksContextInitialized() const override {
 #if IMPELLER_SUPPORTS_RENDERING
-    return surface_ && surface_->GetAiksContext();
+    return aiks_context_ != nullptr;
 #else
     return false;
 #endif
@@ -717,12 +721,12 @@ class Rasterizer final : public SnapshotDelegate,
   // |SnapshotController::Delegate|
   std::shared_ptr<impeller::AiksContext> GetAiksContext() const override {
 #if IMPELLER_SUPPORTS_RENDERING
+    EnsureAiksContextInitialized();
+    if (aiks_context_) {
+      return aiks_context_;
+    }
     if (surface_) {
       return surface_->GetAiksContext();
-    }
-    if (auto context = impeller_context_->GetContext()) {
-      return std::make_shared<impeller::AiksContext>(
-          context, impeller::TypographerContextSkia::Make());
     }
 #endif
     return nullptr;
@@ -793,6 +797,9 @@ class Rasterizer final : public SnapshotDelegate,
   Delegate& delegate_;
   [[maybe_unused]] MakeGpuImageBehavior gpu_image_behavior_;
   std::shared_ptr<impeller::ImpellerContextFuture> impeller_context_;
+#if IMPELLER_SUPPORTS_RENDERING
+  mutable std::shared_ptr<impeller::AiksContext> aiks_context_;
+#endif
   std::unique_ptr<Surface> surface_;
   std::unique_ptr<SnapshotSurfaceProducer> snapshot_surface_producer_;
   std::unique_ptr<flutter::CompositorContext> compositor_context_;

@@ -28,8 +28,11 @@ GPUSurfaceMetalImpeller::GPUSurfaceMetalImpeller(
     const std::shared_ptr<impeller::AiksContext>& context,
     bool render_to_surface)
     : delegate_(delegate),
-      render_target_type_(delegate->GetRenderTargetType()),
+      render_target_type_(delegate ? delegate->GetRenderTargetType()
+                                   : MTLRenderTargetType::kCAMetalLayer),
+      impeller_context_(context ? context->GetContext() : nullptr),
       aiks_context_(context),
+      is_valid_(delegate != nullptr && context && context->IsValid()),
       render_to_surface_(render_to_surface) {
   // If this preference is explicitly set, we allow for disabling partial repaint.
   NSNumber* disablePartialRepaint =
@@ -37,9 +40,30 @@ GPUSurfaceMetalImpeller::GPUSurfaceMetalImpeller(
   if (disablePartialRepaint != nil) {
     disable_partial_repaint_ = disablePartialRepaint.boolValue;
   }
-  if (aiks_context_) {
+  if (impeller_context_) {
     swapchain_transients_ = std::make_shared<impeller::SwapchainTransientsMTL>(
-        aiks_context_->GetContext()->GetResourceAllocator());
+        impeller_context_->GetResourceAllocator());
+  }
+}
+
+GPUSurfaceMetalImpeller::GPUSurfaceMetalImpeller(GPUSurfaceMetalDelegate* delegate,
+                                                 const std::shared_ptr<impeller::Context>& context,
+                                                 bool render_to_surface)
+    : delegate_(delegate),
+      render_target_type_(delegate ? delegate->GetRenderTargetType()
+                                   : MTLRenderTargetType::kCAMetalLayer),
+      impeller_context_(context),
+      is_valid_(delegate != nullptr && context && context->IsValid()),
+      render_to_surface_(render_to_surface) {
+  // If this preference is explicitly set, we allow for disabling partial repaint.
+  NSNumber* disablePartialRepaint =
+      [[NSBundle mainBundle] objectForInfoDictionaryKey:@"FLTDisablePartialRepaint"];
+  if (disablePartialRepaint != nil) {
+    disable_partial_repaint_ = disablePartialRepaint.boolValue;
+  }
+  if (impeller_context_) {
+    swapchain_transients_ = std::make_shared<impeller::SwapchainTransientsMTL>(
+        impeller_context_->GetResourceAllocator());
   }
 }
 
@@ -47,7 +71,7 @@ GPUSurfaceMetalImpeller::~GPUSurfaceMetalImpeller() = default;
 
 // |Surface|
 bool GPUSurfaceMetalImpeller::IsValid() {
-  return !!aiks_context_ && aiks_context_->IsValid();
+  return is_valid_;
 }
 
 // |Surface|
@@ -66,13 +90,13 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceMetalImpeller::AcquireFrame(const DlISiz
 
   if (!render_to_surface_) {
 #ifdef IMPELLER_DEBUG
-    impeller::ContextMTL::Cast(*aiks_context_->GetContext()).GetCaptureManager()->StartCapture();
+    impeller::ContextMTL::Cast(*impeller_context_).GetCaptureManager()->StartCapture();
 #endif  // IMPELLER_DEBUG
     return std::make_unique<SurfaceFrame>(
         nullptr, SurfaceFrame::FramebufferInfo(),
         [](const SurfaceFrame& surface_frame, DlCanvas* canvas) { return true; },
 #ifdef IMPELLER_DEBUG
-        [context = aiks_context_->GetContext()](const SurfaceFrame& surface_frame) {
+        [context = impeller_context_](const SurfaceFrame& surface_frame) {
           impeller::ContextMTL::Cast(*context).GetCaptureManager()->FinishCapture();
           return true;
         },
@@ -103,7 +127,7 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceMetalImpeller::AcquireFrameFromCAMetalLa
   }
 
   id<CAMetalDrawable> drawable =
-      impeller::SurfaceMTL::GetMetalDrawableAndValidate(aiks_context_->GetContext(), layer);
+      impeller::SurfaceMTL::GetMetalDrawableAndValidate(impeller_context_, layer);
   if (!drawable) {
     return nullptr;
   }
@@ -112,7 +136,7 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceMetalImpeller::AcquireFrameFromCAMetalLa
   }
 
 #ifdef IMPELLER_DEBUG
-  impeller::ContextMTL::Cast(*aiks_context_->GetContext()).GetCaptureManager()->StartCapture();
+  impeller::ContextMTL::Cast(*impeller_context_).GetCaptureManager()->StartCapture();
 #endif  // IMPELLER_DEBUG
 
   __weak id<MTLTexture> weak_last_texture = last_texture_;
@@ -120,7 +144,7 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceMetalImpeller::AcquireFrameFromCAMetalLa
   SurfaceFrame::EncodeCallback encode_callback =
       fml::MakeCopyable([damage = damage_,
                          disable_partial_repaint = disable_partial_repaint_,  //
-                         aiks_context = aiks_context_,                        //
+                         aiks_context = GetAiksContext(),                     //
                          drawable,                                            //
                          weak_last_texture,                                   //
                          weak_layer,                                          //
@@ -242,14 +266,14 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceMetalImpeller::AcquireFrameFromMTLTextur
   }
 
 #ifdef IMPELLER_DEBUG
-  impeller::ContextMTL::Cast(*aiks_context_->GetContext()).GetCaptureManager()->StartCapture();
+  impeller::ContextMTL::Cast(*impeller_context_).GetCaptureManager()->StartCapture();
 #endif  // IMPELLER_DEBUG
 
   __weak id<MTLTexture> weak_texture = mtl_texture;
   SurfaceFrame::EncodeCallback encode_callback =
       fml::MakeCopyable([disable_partial_repaint = disable_partial_repaint_,  //
                          damage = damage_,
-                         aiks_context = aiks_context_,                 //
+                         aiks_context = GetAiksContext(),              //
                          weak_texture,                                 //
                          swapchain_transients = swapchain_transients_  //
   ](SurfaceFrame& surface_frame, DlCanvas* canvas) mutable -> bool {
@@ -375,7 +399,32 @@ bool GPUSurfaceMetalImpeller::EnableRasterCache() const {
 
 // |Surface|
 std::shared_ptr<impeller::AiksContext> GPUSurfaceMetalImpeller::GetAiksContext() const {
+  if (!aiks_context_ && impeller_context_) {
+    auto candidate = std::make_shared<impeller::AiksContext>(
+        impeller_context_, impeller::TypographerContextSkia::Make());
+    if (candidate->IsValid()) {
+      aiks_context_ = std::move(candidate);
+    }
+  }
   return aiks_context_;
+}
+
+// |Surface|
+void GPUSurfaceMetalImpeller::SetAiksContext(
+    const std::shared_ptr<impeller::AiksContext>& aiks_context) {
+  if (aiks_context_ == aiks_context) {
+    return;
+  }
+  aiks_context_ = aiks_context;
+  if (aiks_context_ && aiks_context_->GetContext()) {
+    impeller_context_ = aiks_context_->GetContext();
+    swapchain_transients_ = std::make_shared<impeller::SwapchainTransientsMTL>(
+        impeller_context_->GetResourceAllocator());
+    is_valid_ = delegate_ != nullptr && aiks_context_->IsValid();
+  } else {
+    swapchain_transients_.reset();
+    is_valid_ = false;
+  }
 }
 
 Surface::SurfaceData GPUSurfaceMetalImpeller::GetSurfaceData() const {

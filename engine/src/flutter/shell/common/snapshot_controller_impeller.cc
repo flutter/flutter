@@ -96,9 +96,9 @@ SnapshotContext MakeSnapshotContextCurrent(
     result.aiks_context = delegate.GetAiksContext();
   } else if (const std::unique_ptr<SnapshotSurfaceProducer>& producer =
                  delegate.GetSnapshotSurfaceProducer()) {
-    // The producer makes its offscreen surface current before it constructs
-    // the surface's AiksContext, so reuse that AiksContext rather than asking
-    // the delegate, which would construct yet another one.
+    // Make the temporary offscreen surface's context current first, then prefer
+    // the delegate's shared AiksContext so headless/backgrounded snapshots
+    // reuse compiled pipelines rather than constructing a throwaway context.
     result.pbuffer_surface = producer->CreateSnapshotSurface();
     if (!result.pbuffer_surface) {
       return result;
@@ -107,7 +107,10 @@ SnapshotContext MakeSnapshotContextCurrent(
     if (!result.context_result || !result.context_result->GetResult()) {
       return result;
     }
-    result.aiks_context = result.pbuffer_surface->GetAiksContext();
+    result.aiks_context = delegate.GetAiksContext();
+    if (!result.aiks_context) {
+      result.aiks_context = result.pbuffer_surface->GetAiksContext();
+    }
   } else {
     // No surface and no way to make one. Backends that get here (Metal,
     // Vulkan) have no notion of a current context, so constructing an
@@ -134,7 +137,24 @@ std::shared_ptr<impeller::Texture> DoMakeRasterSnapshot(
   if (!display_list) {
     return nullptr;
   }
-  return DoMakeRasterSnapshot(display_list, size, aiks_context, pixel_format);
+  std::shared_ptr<impeller::Texture> texture =
+      DoMakeRasterSnapshot(display_list, size, aiks_context, pixel_format);
+  if (snapshot_context.pbuffer_surface) {
+    // When rendering a snapshot via a temporary offscreen snapshot surface (no
+    // active onscreen surface), reset transient host buffers and purge any
+    // cached subpass render targets while the snapshot context is still current
+    // so the shared AiksContext does not retain transient GPU allocations while
+    // headless or backgrounded.
+    if (aiks_context->IsValid()) {
+      aiks_context->GetContentContext().ResetTransientsBuffers();
+    }
+    aiks_context->ClearRenderTargetCache();
+    aiks_context->ClearCachedTextures();
+    if (auto context = aiks_context->GetContext()) {
+      (void)context->FlushCommandBuffers();
+    }
+  }
+  return texture;
 }
 
 std::shared_ptr<impeller::Texture> DoMakeRasterSnapshot(

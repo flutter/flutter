@@ -262,5 +262,58 @@ TEST(GPUSurfaceVulkanImpeller,
   EXPECT_EQ(data_host_buffer.GetStateForTest().current_frame, 2u);
 }
 
+TEST(GPUSurfaceVulkanImpeller, EncodesFrameWithoutPriorGetOrSetAiksContext) {
+  impeller::ContextVK::Settings context_settings;
+  context_settings.proc_address_callback = vkGetInstanceProcAddr;
+  context_settings.shader_libraries_data = ShaderLibraryMappings();
+  std::shared_ptr<impeller::ContextVK> context =
+      impeller::ContextVK::Create(std::move(context_settings));
+  ASSERT_NE(context, nullptr);
+  std::shared_ptr<impeller::SurfaceContextVK> surface_context =
+      context->CreateSurfaceContext();
+  ASSERT_NE(surface_context, nullptr);
+
+  const DlISize size(64, 64);
+  fml::RefPtr<TestVulkanContext> test_context =
+      fml::MakeRefCounted<TestVulkanContext>();
+  std::unique_ptr<TestVulkanSurface> test_surface =
+      TestVulkanSurface::Create(*test_context, size);
+  ASSERT_NE(test_surface, nullptr);
+  impeller::TextureDescriptor desc;
+  desc.format = impeller::PixelFormat::kR8G8B8A8UNormInt;
+  desc.size = impeller::ISize{size.width, size.height};
+  desc.storage_mode = impeller::StorageMode::kDevicePrivate;
+  desc.mip_count = 1;
+  desc.compression_type = impeller::CompressionType::kLossless;
+  desc.usage = impeller::TextureUsage::kRenderTarget;
+  std::shared_ptr<impeller::SwapchainTransientsVK> transients =
+      std::make_shared<impeller::SwapchainTransientsVK>(context, desc,
+                                                        /*enable_msaa=*/true);
+
+  std::shared_ptr<::testing::NiceMock<MockSwapchainVK>> swapchain =
+      std::make_shared<::testing::NiceMock<MockSwapchainVK>>();
+  ON_CALL(*swapchain, IsValid()).WillByDefault(::testing::Return(true));
+  EXPECT_CALL(*swapchain, AcquireNextDrawable())
+      .WillOnce([&]() -> std::unique_ptr<impeller::Surface> {
+        std::shared_ptr<impeller::TextureSourceVK> wrapped =
+            impeller::WrapTextureSourceVK(
+                context, desc, impeller::vk::Image(test_surface->GetImage()));
+        return impeller::SurfaceVK::WrapSwapchainImage(transients, wrapped,
+                                                       []() { return true; });
+      });
+  ASSERT_TRUE(surface_context->SetSwapchain(swapchain));
+
+  std::unique_ptr<Surface> surface = std::make_unique<GPUSurfaceVulkanImpeller>(
+      /*delegate=*/nullptr, surface_context);
+  ASSERT_TRUE(surface->IsValid());
+
+  // Acquire and submit immediately without calling GetAiksContext() or
+  // SetAiksContext() beforehand.
+  std::unique_ptr<SurfaceFrame> frame = surface->AcquireFrame(size);
+  ASSERT_NE(frame, nullptr);
+  frame->set_submit_info({.frame_boundary = true});
+  EXPECT_TRUE(frame->Submit());
+}
+
 }  // namespace testing
 }  // namespace flutter

@@ -78,7 +78,31 @@ void Rasterizer::SetImpellerContext(
   impeller_context_ = std::move(impeller_context);
 }
 
+void Rasterizer::EnsureAiksContextInitialized() const {
+#if IMPELLER_SUPPORTS_RENDERING
+  if (aiks_context_ || !impeller_context_) {
+    return;
+  }
+  if (auto context = impeller_context_->GetContext()) {
+    auto candidate = std::make_shared<impeller::AiksContext>(
+        context, impeller::TypographerContextSkia::Make());
+    if (candidate->IsValid()) {
+      aiks_context_ = std::move(candidate);
+    }
+  }
+#endif
+}
+
 void Rasterizer::Setup(std::unique_ptr<Surface> surface) {
+#if IMPELLER_SUPPORTS_RENDERING
+  if (!aiks_context_ && surface) {
+    aiks_context_ = surface->GetAiksContext();
+  }
+  EnsureAiksContextInitialized();
+  if (aiks_context_ && surface) {
+    surface->SetAiksContext(aiks_context_);
+  }
+#endif  // IMPELLER_SUPPORTS_RENDERING
   surface_ = std::move(surface);
 
   if (max_cache_bytes_.has_value()) {
@@ -123,6 +147,18 @@ void Rasterizer::Teardown() {
     auto context_switch = surface_->MakeRenderContextCurrent();
     if (context_switch->GetResult()) {
       compositor_context_->OnGrContextDestroyed();
+#if IMPELLER_SUPPORTS_RENDERING
+      if (auto aiks_context = surface_->GetAiksContext()) {
+        if (aiks_context->IsValid()) {
+          aiks_context->GetContentContext().ResetTransientsBuffers();
+        }
+        aiks_context->ClearRenderTargetCache();
+        aiks_context->ClearCachedTextures();
+        if (auto context = aiks_context->GetContext()) {
+          (void)context->FlushCommandBuffers();
+        }
+      }
+#endif  // IMPELLER_SUPPORTS_RENDERING
 #if !SLIMPELLER
       if (auto* context = surface_->GetContext()) {
         context->purgeUnlockedResources(GrPurgeResourceOptions::kAllResources);
@@ -175,21 +211,31 @@ void Rasterizer::NotifyLowMemoryWarning() const {
 }
 
 void Rasterizer::ClearRenderTargetCache() const {
+#if IMPELLER_SUPPORTS_RENDERING
+  std::shared_ptr<impeller::AiksContext> aiks_context =
+      aiks_context_ ? aiks_context_
+                    : (surface_ ? surface_->GetAiksContext() : nullptr);
+  if (aiks_context) {
+    std::unique_ptr<GLContextResult> context_switch;
+    if (surface_) {
+      context_switch = surface_->MakeRenderContextCurrent();
+      if (!context_switch || !context_switch->GetResult()) {
+        return;
+      }
+    }
+    aiks_context->ClearRenderTargetCache();
+    aiks_context->ClearCachedTextures();
+    if (auto context = aiks_context->GetContext()) {
+      (void)context->FlushCommandBuffers();
+    }
+    return;
+  }
+#endif  // IMPELLER_SUPPORTS_RENDERING
   if (!surface_) {
     FML_DLOG(INFO)
         << "Rasterizer::ClearRenderTargetCache called with no surface.";
     return;
   }
-#if IMPELLER_SUPPORTS_RENDERING
-  if (auto aiks_context = surface_->GetAiksContext()) {
-    auto context_switch = surface_->MakeRenderContextCurrent();
-    if (context_switch->GetResult()) {
-      aiks_context->ClearRenderTargetCache();
-      aiks_context->ClearCachedTextures();
-    }
-    return;
-  }
-#endif  // IMPELLER_SUPPORTS_RENDERING
 #if !SLIMPELLER
   auto context = surface_->GetContext();
   if (!context) {

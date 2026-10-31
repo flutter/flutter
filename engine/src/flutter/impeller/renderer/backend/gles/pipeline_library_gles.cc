@@ -229,6 +229,28 @@ void PipelineLibraryGLES::PendingProgram::ReleaseShaders() {
   if (vert_shader_ == 0 && frag_shader_ == 0) {
     return;
   }
+  if (!reactor_->CanReactOnCurrentThread()) {
+    GLuint program = program_;
+    GLuint vert_shader = vert_shader_;
+    GLuint frag_shader = frag_shader_;
+    bool shaders_attached = shaders_attached_;
+    shaders_attached_ = false;
+    vert_shader_ = 0;
+    frag_shader_ = 0;
+    (void)reactor_->AddOperation(
+        [program, vert_shader, frag_shader,
+         shaders_attached](const ReactorGLES& reactor) {
+          const ProcTableGLES& gl = reactor.GetProcTable();
+          if (shaders_attached) {
+            gl.DetachShader(program, vert_shader);
+            gl.DetachShader(program, frag_shader);
+          }
+          gl.DeleteShader(vert_shader);
+          gl.DeleteShader(frag_shader);
+        },
+        /*defer=*/true);
+    return;
+  }
   const ProcTableGLES& gl = reactor_->GetProcTable();
   if (shaders_attached_) {
     gl.DetachShader(program_, vert_shader_);
@@ -368,7 +390,12 @@ class PipelineLibraryGLES::PipelineCompileJob final
   }
 
   // |CompileJob|
-  void Finish() override { AddReactorOperation(&FinishPipelineCreation); }
+  void Finish() override {
+    if (creation_->weak_library.expired()) {
+      return;
+    }
+    AddReactorOperation(&FinishPipelineCreation);
+  }
 
  private:
   /// Runs the step on the reactor. Reactor operations added on the same thread

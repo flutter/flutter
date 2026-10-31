@@ -20,9 +20,8 @@ IOSSurfaceMetalImpeller::IOSSurfaceMetalImpeller(CAMetalLayer* layer,
     : IOSSurface(context),
       GPUSurfaceMetalDelegate(MTLRenderTargetType::kCAMetalLayer),
       layer_(layer),
-      impeller_context_(context ? context->GetImpellerContext() : nullptr),
-      aiks_context_(context ? context->GetAiksContext() : nullptr) {
-  if (!impeller_context_ || !aiks_context_) {
+      impeller_context_(context ? context->GetImpellerContext() : nullptr) {
+  if (!impeller_context_) {
     return;
   }
   is_valid_ = true;
@@ -45,8 +44,8 @@ void IOSSurfaceMetalImpeller::UpdateStorageSizeIfNecessary() {
 std::unique_ptr<Surface> IOSSurfaceMetalImpeller::CreateGPUSurface() {
   impeller_context_->UpdateOffscreenLayerPixelFormat(
       impeller::FromMTLPixelFormat(layer_.pixelFormat));
-  return std::make_unique<GPUSurfaceMetalImpeller>(this,          //
-                                                   aiks_context_  //
+  return std::make_unique<GPUSurfaceMetalImpeller>(this,              //
+                                                   impeller_context_  //
   );
 }
 

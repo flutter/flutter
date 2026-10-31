@@ -28,7 +28,7 @@ class IOSContextMetalImpeller final : public IOSContext {
 
  private:
   FlutterDarwinContextMetalImpeller* darwin_context_metal_impeller_;
-  std::shared_ptr<impeller::AiksContext> aiks_context_;
+  mutable std::shared_ptr<impeller::AiksContext> aiks_context_;
 
   // |IOSContext|
   std::unique_ptr<Texture> CreateExternalTexture(int64_t texture_id,

@@ -53,6 +53,12 @@ class Surface {
 
   virtual std::shared_ptr<impeller::AiksContext> GetAiksContext() const;
 
+  /// Binds the engine's shared `impeller::AiksContext` to this surface so that
+  /// pipeline state, glyph atlases, and transient host buffers are shared
+  /// across surface re-creations within the same `Rasterizer`.
+  virtual void SetAiksContext(
+      const std::shared_ptr<impeller::AiksContext>& aiks_context) {}
+
   /// Capture the `SurfaceData` currently present in the surface.
   ///
   /// Not guaranteed to work on all setups and not intended to be used in

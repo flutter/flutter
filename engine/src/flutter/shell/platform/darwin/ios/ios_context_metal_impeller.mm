@@ -25,12 +25,7 @@ IOSContextMetalImpeller::IOSContextMetalImpeller(
     const std::shared_ptr<const fml::SyncSwitch>& is_gpu_disabled_sync_switch)
     : darwin_context_metal_impeller_([[FlutterDarwinContextMetalImpeller alloc]
                            init:SettingsToFlags(settings)
-          gpuDisabledSyncSwitch:is_gpu_disabled_sync_switch]) {
-  if (darwin_context_metal_impeller_.context) {
-    aiks_context_ = std::make_shared<impeller::AiksContext>(
-        darwin_context_metal_impeller_.context, impeller::TypographerContextSkia::Make());
-  }
-}
+          gpuDisabledSyncSwitch:is_gpu_disabled_sync_switch]) {}
 
 IOSContextMetalImpeller::~IOSContextMetalImpeller() = default;
 
@@ -41,6 +36,10 @@ std::shared_ptr<impeller::Context> IOSContextMetalImpeller::GetImpellerContext()
 
 // |IOSContext|
 std::shared_ptr<impeller::AiksContext> IOSContextMetalImpeller::GetAiksContext() const {
+  if (!aiks_context_ && darwin_context_metal_impeller_.context) {
+    aiks_context_ = std::make_shared<impeller::AiksContext>(
+        darwin_context_metal_impeller_.context, impeller::TypographerContextSkia::Make());
+  }
   return aiks_context_;
 }
 

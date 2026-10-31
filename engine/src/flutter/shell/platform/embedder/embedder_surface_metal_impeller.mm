@@ -69,13 +69,9 @@ std::unique_ptr<Surface> EmbedderSurfaceMetalImpeller::CreateGPUSurface()
   if (!IsValid()) {
     return nullptr;
   }
-  if (!aiks_context_) {
-    aiks_context_ =
-        std::make_shared<impeller::AiksContext>(context_, impeller::TypographerContextSkia::Make());
-  }
 
   const bool render_to_surface = !external_view_embedder_;
-  auto surface = std::make_unique<GPUSurfaceMetalImpeller>(this, aiks_context_, render_to_surface);
+  auto surface = std::make_unique<GPUSurfaceMetalImpeller>(this, context_, render_to_surface);
 
   if (!surface->IsValid()) {
     return nullptr;

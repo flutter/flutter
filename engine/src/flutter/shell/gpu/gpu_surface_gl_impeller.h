@@ -31,7 +31,7 @@ class GPUSurfaceGLImpeller final : public Surface {
   GPUSurfaceGLDelegate* delegate_ = nullptr;
   std::shared_ptr<impeller::Context> impeller_context_;
   bool render_to_surface_ = true;
-  std::shared_ptr<impeller::AiksContext> aiks_context_;
+  mutable std::shared_ptr<impeller::AiksContext> aiks_context_;
   bool is_valid_ = false;
   fml::TaskRunnerAffineWeakPtrFactory<GPUSurfaceGLImpeller> weak_factory_;
 
@@ -58,6 +58,10 @@ class GPUSurfaceGLImpeller final : public Surface {
 
   // |Surface|
   std::shared_ptr<impeller::AiksContext> GetAiksContext() const override;
+
+  // |Surface|
+  void SetAiksContext(
+      const std::shared_ptr<impeller::AiksContext>& aiks_context) override;
 
   FML_DISALLOW_COPY_AND_ASSIGN(GPUSurfaceGLImpeller);
 };

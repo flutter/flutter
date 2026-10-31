@@ -2893,6 +2893,42 @@ TEST_P(EntityTest, RoundSuperellipseGetPositionBufferFlushes) {
   EXPECT_TRUE(device_buffer->flush_called());
 }
 
+TEST_P(EntityTest, GetEmptyTextureDoesNotUseSharedTransientsDataBuffer) {
+  auto flush_allocator = std::make_shared<FlushTestAllocator>();
+  auto content_context = std::make_shared<FlushTestContentContext>(
+      GetContext(), GetTypographerContext(), flush_allocator);
+  ASSERT_TRUE(content_context->IsValid());
+
+  const size_t initial_transient_buffers =
+      content_context->GetTransientsDataBuffer()
+          .GetStateForTest()
+          .total_buffer_count;
+
+  // Fill the initial transient buffer so any Emplace() on the shared transient
+  // HostBuffer allocates a second transient buffer.
+  std::vector<uint8_t> filler(1024 * 1024, 0xAB);
+  (void)content_context->GetTransientsDataBuffer().Emplace(
+      filler.data(), filler.size(), /*align=*/16);
+  const size_t buffers_before_empty_texture =
+      content_context->GetTransientsDataBuffer()
+          .GetStateForTest()
+          .total_buffer_count;
+  EXPECT_GE(buffers_before_empty_texture, initial_transient_buffers);
+
+  std::shared_ptr<Texture> empty_texture = content_context->GetEmptyTexture();
+  ASSERT_NE(empty_texture, nullptr);
+  EXPECT_EQ(empty_texture->GetSize(), ISize(1, 1));
+  EXPECT_EQ(content_context->GetEmptyTexture(), empty_texture);
+
+  // Initializing the 1x1 empty texture must use a dedicated staging buffer
+  // rather than mutating or allocating from the shared per-frame transient
+  // HostBuffer.
+  EXPECT_EQ(content_context->GetTransientsDataBuffer()
+                .GetStateForTest()
+                .total_buffer_count,
+            buffers_before_empty_texture);
+}
+
 }  // namespace testing
 }  // namespace impeller
 
