@@ -142,16 +142,22 @@ class PrerollVisitor extends LayerVisitor<void> {
     mutatorsStack.pushTransform(
       Matrix4.translationValues(imageFilter.offset.dx, imageFilter.offset.dy, 0.0),
     );
+    final ui.ImageFilter filter = imageFilter.filter;
+    final bool hasMatrixMutator = filter is EngineMatrixImageFilter;
+    if (hasMatrixMutator) {
+      mutatorsStack.pushTransform(filter.transform);
+    }
     ui.Rect childPaintBounds = prerollChildren(imageFilter);
+    if (hasMatrixMutator) {
+      mutatorsStack.pop();
+    }
     childPaintBounds = childPaintBounds.translate(imageFilter.offset.dx, imageFilter.offset.dy);
-    if (imageFilter.filter is ui.ColorFilter) {
+    if (filter is ui.ColorFilter) {
       // If the filter is a ColorFilter, the extended paint bounds will be the
       // entire screen, which is not what we want.
       imageFilter.paintBounds = childPaintBounds;
     } else {
-      imageFilter.paintBounds = (imageFilter.filter as EngineImageFilter).filterBounds(
-        childPaintBounds,
-      );
+      imageFilter.paintBounds = (filter as EngineImageFilter).filterBounds(childPaintBounds);
     }
     mutatorsStack.pop();
   }

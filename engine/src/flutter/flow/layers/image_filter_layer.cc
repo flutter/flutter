@@ -52,6 +52,9 @@ void ImageFilterLayer::Diff(DiffContext* context, const Layer* old_layer) {
 void ImageFilterLayer::Preroll(PrerollContext* context) {
   auto mutator = context->state_stack.save();
   mutator.translate(offset_);
+  if (filter_) {
+    mutator.applyImageFilter(DlRect(), filter_);
+  }
 
   Layer::AutoPrerollSaveLayerState save =
       Layer::AutoPrerollSaveLayerState::Create(context);

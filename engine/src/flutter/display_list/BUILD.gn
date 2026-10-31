@@ -122,6 +122,8 @@ source_set("display_list") {
     "effects/image_filters/dl_matrix_image_filter.h",
     "effects/image_filters/dl_runtime_effect_image_filter.cc",
     "effects/image_filters/dl_runtime_effect_image_filter.h",
+    "effects/image_filters/dl_stretch_image_filter.cc",
+    "effects/image_filters/dl_stretch_image_filter.h",
     "geometry/dl_region.cc",
     "geometry/dl_region.h",
     "geometry/dl_rtree.cc",

@@ -116,7 +116,8 @@ void AndroidExternalViewEmbedder2::SubmitFlutterView(
 
   std::unordered_map<int64_t, DlRect> view_rects;
   for (auto platform_id : composition_order_) {
-    view_rects[platform_id] = GetViewRect(platform_id, view_params_);
+    view_rects[platform_id] =
+        view_params_.at(platform_id).stretchedBoundingRect();
   }
 
   std::unordered_map<int64_t, DlRect> overlay_layers =
@@ -169,9 +170,12 @@ void AndroidExternalViewEmbedder2::SubmitFlutterView(
       // For all following platform views that would cover this overlay,
       // emulate the effect by adding a difference clip. This makes the
       // overlays appear as if they are under the platform view, when in
-      // reality there is only a single layer.
+      // reality there is only a single layer. Use mappedBoundingRect() rather
+      // than stretchedBoundingRect() so that any strip vacated by a stretched
+      // later platform view is not clipped out of earlier overlays.
       for (size_t j = i + 1; j < composition_order_.size(); j++) {
-        DlRect view_rect = GetViewRect(composition_order_[j], view_params_);
+        DlRect view_rect =
+            view_params_.at(composition_order_[j]).mappedBoundingRect();
         overlay_canvas->ClipRect(view_rect, DlClipOp::kDifference);
       }
 

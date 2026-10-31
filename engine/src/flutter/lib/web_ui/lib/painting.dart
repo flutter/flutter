@@ -685,6 +685,36 @@ class ImageFilter {
     throw UnsupportedError('ImageFilter.shader only supported with Impeller rendering engine.');
   }
 
+  factory ImageFilter.stretch({
+    double overscrollX = 0.0,
+    double overscrollY = 0.0,
+    // ignore: avoid_unused_constructor_parameters
+    double interpolationStrength = 0.7,
+    required Rect bounds,
+  }) {
+    final matrix = Float64List(16);
+    if (bounds.isEmpty) {
+      matrix[0] = 1.0;
+      matrix[5] = 1.0;
+      matrix[10] = 1.0;
+      matrix[15] = 1.0;
+      return ImageFilter.matrix(matrix, filterQuality: FilterQuality.medium);
+    }
+    final double absOverscrollX = overscrollX.abs();
+    final double absOverscrollY = overscrollY.abs();
+    final double scaleX = 1.0 + absOverscrollX;
+    final double scaleY = 1.0 + absOverscrollY;
+    final double pivotX = overscrollX >= 0.0 ? bounds.left : bounds.right;
+    final double pivotY = overscrollY >= 0.0 ? bounds.top : bounds.bottom;
+    matrix[0] = scaleX;
+    matrix[5] = scaleY;
+    matrix[10] = 1.0;
+    matrix[12] = -pivotX * absOverscrollX;
+    matrix[13] = -pivotY * absOverscrollY;
+    matrix[15] = 1.0;
+    return ImageFilter.matrix(matrix, filterQuality: FilterQuality.medium);
+  }
+
   static bool get isShaderFilterSupported => false;
 
   String get debugShortDescription => toString();
