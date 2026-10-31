@@ -184,6 +184,30 @@ void main() {
       expect(actualAlignment, const Alignment(0.0, 0.5));
     });
 
+    // Regression test for https://github.com/flutter/flutter/issues/82320
+    testWidgets('animates an AlignmentGeometryTween', (WidgetTester tester) async {
+      final controller = AnimationController(vsync: const TestVSync());
+      addTearDown(controller.dispose);
+      final Animation<AlignmentGeometry> alignmentTween = AlignmentGeometryTween(
+        begin: AlignmentDirectional.centerStart,
+        end: AlignmentDirectional.bottomEnd,
+      ).animate(controller);
+      final Widget widget = Directionality(
+        textDirection: TextDirection.rtl,
+        child: AlignTransition(alignment: alignmentTween, child: const Text('Ready')),
+      );
+
+      await tester.pumpWidget(widget);
+
+      final RenderPositionedBox actualPositionedBox = tester.renderObject(find.byType(Align));
+
+      expect(actualPositionedBox.alignment, AlignmentDirectional.centerStart);
+
+      controller.value = 0.5;
+      await tester.pump();
+      expect(actualPositionedBox.alignment, const AlignmentDirectional(0.0, 0.5));
+    });
+
     testWidgets('keeps width and height factors', (WidgetTester tester) async {
       final controller = AnimationController(vsync: const TestVSync());
       addTearDown(controller.dispose);
