@@ -113,6 +113,36 @@ public class FlutterRendererTest {
   }
 
   @Test
+  public void itForwardsPrewarmRenderingToFlutterJNI() {
+    // Intentionally do not use 'engineRule' in this test: the Activity that it launches attaches a
+    // FlutterView, which prewarms rendering on its own.
+    FlutterJNI flutterJNI = mock(FlutterJNI.class);
+    when(flutterJNI.isAttached()).thenReturn(true);
+    FlutterRenderer flutterRenderer = new FlutterRenderer(flutterJNI);
+
+    // Execute the behavior under test.
+    flutterRenderer.prewarmRendering();
+
+    // Verify the behavior under test.
+    verify(flutterJNI, times(1)).prewarmRendering();
+  }
+
+  @Test
+  public void itDoesNotPrewarmRenderingWhenDetached() {
+    // Intentionally do not use 'engineRule' in this test: the Activity that it launches attaches a
+    // FlutterView, which prewarms rendering on its own.
+    FlutterJNI flutterJNI = mock(FlutterJNI.class);
+    when(flutterJNI.isAttached()).thenReturn(false);
+    FlutterRenderer flutterRenderer = new FlutterRenderer(flutterJNI);
+
+    // Execute the behavior under test.
+    flutterRenderer.prewarmRendering();
+
+    // Verify the behavior under test.
+    verify(flutterJNI, never()).prewarmRendering();
+  }
+
+  @Test
   public void itStopsRenderingToOneSurfaceBeforeRenderingToANewSurface() {
     // Setup the test.
     Surface fakeSurface = mock(Surface.class);

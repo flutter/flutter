@@ -139,6 +139,36 @@ TEST_P(PipelineVariantRecordingTest, ReportsEachContextSeparately) {
   EXPECT_EQ(count_lazy(observer.GetReports()[1]), 1u);
 }
 
+// The Android embedder warms up rendering before it has a surface by building a
+// ContentContext and discarding it. That only helps because the pipelines that
+// the discarded context warmed stay in the pipeline library, where the next
+// ContentContext finds them instead of compiling them again.
+TEST_P(PipelineVariantRecordingTest,
+       WarmedPipelinesOutliveTheContextThatWarmedThem) {
+  if (!IMPELLER_PIPELINE_VARIANT_RECORDER_IS_SUPPORTED()) {
+    GTEST_SKIP() << "Pipeline variant recording is only in debug builds.";
+  }
+  ScopedObserver observer;
+  {
+    ContentContext discarded(GetContext(), GetTypographerContext());
+    ASSERT_TRUE(discarded.IsValid());
+  }
+
+  ASSERT_EQ(observer.GetReports().size(), 1u);
+  const std::shared_ptr<PipelineLibrary> library =
+      GetContext()->GetPipelineLibrary();
+  size_t warmed = 0u;
+  for (const RecordedPipelineVariant& variant : observer.GetReports()[0]) {
+    if (!variant.warmed) {
+      continue;
+    }
+    warmed++;
+    EXPECT_TRUE(library->HasPipeline(variant.descriptor))
+        << variant.descriptor.GetLabel();
+  }
+  EXPECT_GT(warmed, 0u);
+}
+
 TEST_P(PipelineVariantRecordingTest,
        DefaultPipelinesAreLoggedAsEagerlyCreated) {
 #if FLUTTER_RUNTIME_MODE != FLUTTER_RUNTIME_MODE_DEBUG && \

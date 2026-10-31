@@ -15,6 +15,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -43,6 +44,7 @@ import android.util.SparseArray;
 import android.view.DisplayCutout;
 import android.view.RoundedCorner;
 import android.view.Surface;
+import android.view.SurfaceHolder;
 import android.view.View;
 import android.view.ViewStructure;
 import android.view.WindowInsets;
@@ -72,6 +74,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
@@ -112,6 +115,25 @@ public class FlutterViewTest {
 
     verify(platformViewsController, times(1)).attachToView(flutterView);
     verify(platformViewsController2, times(1)).attachToView(flutterView);
+  }
+
+  @Test
+  public void attachToFlutterEngine_prewarmsRenderingBeforeRenderingToAvailableSurface() {
+    // A surface that is already available, as when a FlutterView is re-attached, is rendered to as
+    // soon as the FlutterView attaches to the renderer.
+    FlutterSurfaceView flutterSurfaceView = spy(new FlutterSurfaceView(ctx));
+    SurfaceHolder fakeSurfaceHolder = mock(SurfaceHolder.class);
+    when(fakeSurfaceHolder.getSurface()).thenReturn(mock(Surface.class));
+    when(flutterSurfaceView.getHolder()).thenReturn(fakeSurfaceHolder);
+    when(flutterSurfaceView.isSurfaceAvailableForRendering()).thenReturn(true);
+    FlutterView flutterView = new FlutterView(ctx, flutterSurfaceView);
+    FlutterEngine flutterEngine = spy(new FlutterEngine(ctx, mockFlutterLoader, mockFlutterJni));
+
+    flutterView.attachToFlutterEngine(flutterEngine);
+
+    InOrder inOrder = inOrder(mockFlutterJni);
+    inOrder.verify(mockFlutterJni).prewarmRendering();
+    inOrder.verify(mockFlutterJni).onSurfaceCreated(any(Surface.class));
   }
 
   @Test
