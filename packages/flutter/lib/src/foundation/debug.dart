@@ -1676,6 +1676,12 @@ class _DebugViewMetricsPlatformDispatcher implements ui.PlatformDispatcher {
       _dispatcher.onTextScaleFactorChanged = callback;
 
   @override
+  ui.VoidCallback? get onAlwaysUse24HourFormatChanged => _dispatcher.onAlwaysUse24HourFormatChanged;
+  @override
+  set onAlwaysUse24HourFormatChanged(ui.VoidCallback? callback) =>
+      _dispatcher.onAlwaysUse24HourFormatChanged = callback;
+
+  @override
   ui.ViewFocusChangeCallback? get onViewFocusChange => _dispatcher.onViewFocusChange;
   @override
   set onViewFocusChange(ui.ViewFocusChangeCallback? callback) =>

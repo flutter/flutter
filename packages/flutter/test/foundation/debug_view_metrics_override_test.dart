@@ -1469,6 +1469,16 @@ void main() {
   });
 
   group('engine roll tolerance', () {
+    test('forwards onAlwaysUse24HourFormatChanged', () {
+      final fake = _TwoViewPlatformDispatcher();
+      final ui.PlatformDispatcher dispatcher = debugApplyViewMetricsOverrides(fake);
+      var calls = 0;
+      dispatcher.onAlwaysUse24HourFormatChanged = () => calls += 1;
+      expect(fake.onAlwaysUse24HourFormatChanged, isNotNull);
+      fake.onAlwaysUse24HourFormatChanged!();
+      expect(calls, 1);
+    });
+
     test('wrappers declare no noSuchMethod', () {
       final fake = _TwoViewPlatformDispatcher();
       final ui.PlatformDispatcher dispatcher = debugApplyViewMetricsOverrides(fake);
@@ -1572,6 +1582,9 @@ class _TwoViewPlatformDispatcher implements ui.PlatformDispatcher {
 
   @override
   ui.VoidCallback? onTextScaleFactorChanged;
+
+  @override
+  ui.VoidCallback? onAlwaysUse24HourFormatChanged;
 
   @override
   ui.ViewFocusChangeCallback? onViewFocusChange;

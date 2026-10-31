@@ -1297,6 +1297,23 @@ class PlatformDispatcher {
     _onSystemFontFamilyChangedZone = Zone.current;
   }
 
+  /// A callback that is invoked whenever [alwaysUse24HourFormat] changes value.
+  ///
+  /// The framework invokes this callback in the same zone in which the callback
+  /// was set.
+  ///
+  /// See also:
+  ///
+  ///  * [WidgetsBindingObserver], for a mechanism at the widgets layer to
+  ///    observe when this callback is invoked.
+  VoidCallback? get onAlwaysUse24HourFormatChanged => _onAlwaysUse24HourFormatChanged;
+  VoidCallback? _onAlwaysUse24HourFormatChanged;
+  Zone _onAlwaysUse24HourFormatChangedZone = Zone.root;
+  set onAlwaysUse24HourFormatChanged(VoidCallback? callback) {
+    _onAlwaysUse24HourFormatChanged = callback;
+    _onAlwaysUse24HourFormatChangedZone = Zone.current;
+  }
+
   // Called from the engine, via hooks.dart
   void _updateUserSettingsData(String jsonData) {
     final data = json.decode(jsonData) as Map<String, Object?>;
@@ -1363,6 +1380,9 @@ class PlatformDispatcher {
     }
     if (systemFontFamilyChanged) {
       _invoke(onSystemFontFamilyChanged, _onSystemFontFamilyChangedZone);
+    }
+    if (alwaysUse24HourFormatChanged) {
+      _invoke(onAlwaysUse24HourFormatChanged, _onAlwaysUse24HourFormatChangedZone);
     }
   }
 
