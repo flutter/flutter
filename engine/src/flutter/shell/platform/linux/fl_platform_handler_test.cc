@@ -5,10 +5,14 @@
 #include <gtk/gtk.h>
 
 #include "flutter/shell/platform/linux/fl_binary_messenger_private.h"
+#include "flutter/shell/platform/linux/fl_engine_private.h"
 #include "flutter/shell/platform/linux/fl_platform_handler.h"
+#include "flutter/shell/platform/linux/fl_view_private.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_method_codec.h"
 #include "flutter/shell/platform/linux/testing/fl_mock_binary_messenger.h"
 #include "flutter/shell/platform/linux/testing/fl_test.h"
+#include "flutter/shell/platform/linux/testing/fl_test_gtk_logs.h"
+#include "flutter/shell/platform/linux/testing/mock_gtk.h"
 
 #include "flutter/shell/platform/linux/testing/linux_test.h"
 #include "gmock/gmock.h"
@@ -42,8 +46,9 @@ static void fl_test_application_activate(GApplication* application) {
   G_APPLICATION_CLASS(fl_test_application_parent_class)->activate(application);
 
   g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
-  g_autoptr(FlPlatformHandler) handler =
-      fl_platform_handler_new(FL_BINARY_MESSENGER(messenger));
+  g_autoptr(FlEngine) engine =
+      fl_engine_new_with_binary_messenger(FL_BINARY_MESSENGER(messenger));
+  g_autoptr(FlPlatformHandler) handler = fl_platform_handler_new(engine);
   EXPECT_NE(handler, nullptr);
 
   // Request app exit.
@@ -107,8 +112,12 @@ FlTestApplication* fl_test_application_new(gboolean* dispose_called) {
 class FlPlatformHandlerTest : public flutter::testing::LinuxTest {
  protected:
   void SetUp() override {
+    flutter::testing::fl_ensure_gtk_init();
     messenger = fl_mock_binary_messenger_new();
-    handler = fl_platform_handler_new(FL_BINARY_MESSENGER(messenger));
+    g_clear_object(&engine);
+    engine =
+        fl_engine_new_with_binary_messenger(FL_BINARY_MESSENGER(messenger));
+    handler = fl_platform_handler_new(engine);
   }
 
   ~FlPlatformHandlerTest() {
@@ -140,6 +149,80 @@ TEST_F(FlPlatformHandlerTest, PlaySound) {
       },
       &called);
   EXPECT_TRUE(called);
+}
+
+// Sends SystemChrome.setApplicationSwitcherDescription. |view_id| is omitted
+// from the message if null.
+static void set_application_switcher_description(
+    FlMockBinaryMessenger* messenger,
+    const gchar* label,
+    const int64_t* view_id) {
+  g_autoptr(FlValue) args = fl_value_new_map();
+  fl_value_set_string_take(args, "label", fl_value_new_string(label));
+  if (view_id != nullptr) {
+    fl_value_set_string_take(args, "viewId", fl_value_new_int(*view_id));
+  }
+  gboolean called = FALSE;
+  fl_mock_binary_messenger_invoke_json_method(
+      messenger, "flutter/platform",
+      "SystemChrome.setApplicationSwitcherDescription", args,
+      [](FlMockBinaryMessenger* messenger, FlMethodResponse* response,
+         gpointer user_data) {
+        gboolean* called = static_cast<gboolean*>(user_data);
+        *called = TRUE;
+
+        EXPECT_TRUE(FL_IS_METHOD_SUCCESS_RESPONSE(response));
+      },
+      &called);
+  EXPECT_TRUE(called);
+}
+
+TEST_F(FlPlatformHandlerTest, SetApplicationSwitcherDescription) {
+  ::testing::NiceMock<flutter::testing::MockGtk> mock_gtk;
+
+  GtkWidget* window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+  FlView* view = fl_view_new_for_engine(engine);
+  gtk_container_add(GTK_CONTAINER(window), GTK_WIDGET(view));
+
+  EXPECT_CALL(mock_gtk, gtk_window_set_title(GTK_WINDOW(window),
+                                             ::testing::StrEq("My Title")));
+
+  int64_t view_id = fl_view_get_id(view);
+  set_application_switcher_description(messenger, "My Title", &view_id);
+
+  gtk_widget_destroy(window);
+}
+
+TEST_F(FlPlatformHandlerTest, SetApplicationSwitcherDescriptionImplicitView) {
+  ::testing::NiceMock<flutter::testing::MockGtk> mock_gtk;
+
+  GtkWidget* window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+  FlView* view = fl_view_new_for_engine(engine);
+  fl_engine_set_implicit_view(engine, FL_RENDERABLE(view));
+  gtk_container_add(GTK_CONTAINER(window), GTK_WIDGET(view));
+
+  EXPECT_CALL(mock_gtk, gtk_window_set_title(GTK_WINDOW(window),
+                                             ::testing::StrEq("My Title")));
+
+  set_application_switcher_description(messenger, "My Title", nullptr);
+
+  gtk_widget_destroy(window);
+}
+
+TEST_F(FlPlatformHandlerTest, SetApplicationSwitcherDescriptionUnknownView) {
+  ::testing::NiceMock<flutter::testing::MockGtk> mock_gtk;
+
+  GtkWidget* window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+  FlView* view = fl_view_new_for_engine(engine);
+  gtk_container_add(GTK_CONTAINER(window), GTK_WIDGET(view));
+
+  EXPECT_CALL(mock_gtk, gtk_window_set_title(::testing::_, ::testing::_))
+      .Times(0);
+
+  int64_t view_id = fl_view_get_id(view) + 1000;
+  set_application_switcher_description(messenger, "My Title", &view_id);
+
+  gtk_widget_destroy(window);
 }
 
 TEST_F(FlPlatformHandlerTest, ExitApplication) {
