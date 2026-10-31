@@ -158,7 +158,7 @@ class WindowingOwnerLinux extends WindowingOwner {
   TooltipWindowController createTooltipWindowController({
     required TooltipWindowControllerDelegate delegate,
     required BoxConstraints constraints,
-    required Rect anchorRect,
+    required ValueGetter<Rect> anchorRect,
     required WindowPositioner positioner,
     required BaseWindowController parent,
   }) {
@@ -183,7 +183,7 @@ class WindowingOwnerLinux extends WindowingOwner {
   PopupWindowController createPopupWindowController({
     required PopupWindowControllerDelegate delegate,
     required BoxConstraints constraints,
-    required Rect anchorRect,
+    required ValueGetter<Rect> anchorRect,
     required WindowPositioner positioner,
     required BaseWindowController parent,
   }) {
@@ -589,7 +589,7 @@ mixin _ToplevelWindowControllerLinux on BaseWindowControllerLinux {
 /// {@macro flutter.widgets.windowing.experimental}
 mixin _PositionedWindowControllerLinux on BaseWindowControllerLinux {
   late final BaseWindowController _parent;
-  late Rect _anchorRect;
+  late final ValueGetter<Rect> _anchorRect;
   late WindowPositioner _positioner;
 
   /// Makes this window transient for its parent and moves it to [anchorRect].
@@ -598,7 +598,7 @@ mixin _PositionedWindowControllerLinux on BaseWindowControllerLinux {
   /// window has gone away.
   void _attachToParent({
     required BaseWindowController parent,
-    required Rect anchorRect,
+    required ValueGetter<Rect> anchorRect,
     required WindowPositioner positioner,
     required String description,
   }) {
@@ -608,17 +608,15 @@ mixin _PositionedWindowControllerLinux on BaseWindowControllerLinux {
       throw StateError('Failed to find $description parent window');
     }
     _window.setTransientFor(parentWindow);
-    updatePosition(anchorRect: anchorRect, positioner: positioner);
+    _anchorRect = anchorRect;
+    updatePosition(positioner: positioner);
   }
 
   @internal
   BaseWindowController get parent => _parent;
 
   @internal
-  void updatePosition({Rect? anchorRect, WindowPositioner? positioner}) {
-    if (anchorRect != null) {
-      _anchorRect = anchorRect;
-    }
+  void updatePosition({WindowPositioner? positioner}) {
     if (positioner != null) {
       _positioner = positioner;
     }
@@ -634,11 +632,12 @@ mixin _PositionedWindowControllerLinux on BaseWindowControllerLinux {
     // received. Since GTK3 does not set the [reactive flag](https://wayland.app/protocols/xdg-shell#xdg_positioner:request:set_reactive)
     // on the positioner it is only [received once](https://wayland.app/protocols/xdg-shell#xdg_popup:event:configure).
     // This means if such a window is resized it will not be repositioned.
+    final Rect anchor = _anchorRect();
     _window.getWindow().moveToRect(
-      x: _anchorRect.left.toInt() + offset.$1,
-      y: _anchorRect.top.toInt() + offset.$2,
-      width: (_anchorRect.right - _anchorRect.left).toInt(),
-      height: (_anchorRect.bottom - _anchorRect.top).toInt(),
+      x: anchor.left.toInt() + offset.$1,
+      y: anchor.top.toInt() + offset.$2,
+      width: (anchor.right - anchor.left).toInt(),
+      height: (anchor.bottom - anchor.top).toInt(),
       rectAnchor: _anchorToGravity(_positioner.parentAnchor),
       windowAnchor: _anchorToGravity(_positioner.childAnchor),
       anchorHints: _constraintAdjustmentToHints(_positioner.constraintAdjustment),
@@ -846,7 +845,7 @@ class TooltipWindowControllerLinux extends TooltipWindowController
     required WindowingOwnerLinux owner,
     required this._delegate,
     required BoxConstraints constraints,
-    required Rect anchorRect,
+    required ValueGetter<Rect> anchorRect,
     required WindowPositioner positioner,
     required BaseWindowController parent,
   }) : super.empty() {
@@ -904,7 +903,7 @@ class PopupWindowControllerLinux extends PopupWindowController
     required WindowingOwnerLinux owner,
     required this._delegate,
     required BoxConstraints constraints,
-    required Rect anchorRect,
+    required ValueGetter<Rect> anchorRect,
     required WindowPositioner positioner,
     required BaseWindowController parent,
   }) : super.empty() {
