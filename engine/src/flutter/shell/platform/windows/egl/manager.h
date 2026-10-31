@@ -23,6 +23,7 @@
 
 #include "flutter/fml/macros.h"
 #include "flutter/shell/platform/windows/egl/context.h"
+#include "flutter/shell/platform/windows/egl/program_cache.h"
 #include "flutter/shell/platform/windows/egl/surface.h"
 #include "flutter/shell/platform/windows/egl/window_surface.h"
 
@@ -56,10 +57,14 @@ class Manager {
   // most that feature level, even if the hardware supports a higher one. This
   // is intended for testing: capping to 10_0 makes ANGLE expose only an
   // OpenGL ES 2.0 context, emulating older GPUs on any machine.
+  //
+  // Keeps the GL programs that ANGLE compiles in |program_cache|, if there is
+  // one, so that later launches do not compile them again.
   static std::unique_ptr<Manager> Create(
       GpuPreference gpu_preference,
       bool allow_inverted_surface,
-      std::optional<D3DFeatureLevel> max_feature_level = std::nullopt);
+      std::optional<D3DFeatureLevel> max_feature_level = std::nullopt,
+      std::unique_ptr<ProgramCache> program_cache = nullptr);
 
   virtual ~Manager();
 
@@ -120,7 +125,8 @@ class Manager {
   // for the lifetime of the manager.
   Manager(GpuPreference gpu_preference,
           bool allow_inverted_surface,
-          std::optional<D3DFeatureLevel> max_feature_level = std::nullopt);
+          std::optional<D3DFeatureLevel> max_feature_level = std::nullopt,
+          std::unique_ptr<ProgramCache> program_cache = nullptr);
 
  private:
   // Number of active instances of Manager
@@ -133,7 +139,8 @@ class Manager {
   // Initialize the EGL display.
   bool InitializeDisplay(GpuPreference gpu_preference,
                          bool allow_inverted_surface,
-                         std::optional<D3DFeatureLevel> max_feature_level);
+                         std::optional<D3DFeatureLevel> max_feature_level,
+                         std::unique_ptr<ProgramCache> program_cache);
 
   // Initialize the EGL configs.
   bool InitializeConfig();
