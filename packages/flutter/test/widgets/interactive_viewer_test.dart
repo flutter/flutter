@@ -1170,6 +1170,39 @@ void main() {
       expect(transformationController.value.getMaxScaleOnAxis(), greaterThan(1.0));
     });
 
+    // Regression test for https://github.com/flutter/flutter/issues/195678
+    testWidgets('pan does not crash with NaN pointer sample', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: Center(
+            child: SizedBox(
+              width: 400,
+              height: 300,
+              child: InteractiveViewer(
+                constrained: false,
+                minScale: 1,
+                maxScale: 6,
+                boundaryMargin: const EdgeInsets.symmetric(horizontal: 100),
+                child: const SizedBox(width: 2000, height: 300),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final TestGesture gesture = await tester.startGesture(
+        tester.getCenter(find.byType(InteractiveViewer)),
+      );
+
+      await gesture.moveBy(const Offset(-40, 0));
+      await tester.pump();
+
+      await gesture.moveTo(const Offset(double.nan, double.nan));
+      expect(tester.takeException(), isNull);
+
+      await gesture.up();
+    });
+
     // Regression test for https://github.com/flutter/flutter/issues/65304
     testWidgets('can view beyond boundary when necessary for a small child', (
       WidgetTester tester,
@@ -1964,6 +1997,21 @@ void main() {
 
       expect(nearestPoint.x, moreOrLessEquals(5.8, epsilon: 0.1));
       expect(nearestPoint.y, moreOrLessEquals(10.8, epsilon: 0.1));
+    });
+
+    test('does not throw for a NaN point', () {
+      final point = Vector3(double.nan, double.nan, 0.0);
+      final quad = Quad.points(
+        Vector3(0.0, 0.0, 0.0),
+        Vector3(0.0, 10.0, 0.0),
+        Vector3(10.0, 10.0, 0.0),
+        Vector3(10.0, 0.0, 0.0),
+      );
+
+      final Vector3 nearestPoint = InteractiveViewer.getNearestPointInside(point, quad);
+
+      expect(nearestPoint.x, isNaN);
+      expect(nearestPoint.y, isNaN);
     });
   });
 
