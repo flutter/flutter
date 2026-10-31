@@ -21,6 +21,7 @@ load(
     "ANDROID_RISCV64_LINK_FLAGS",
     "ANDROID_X64_COMPILE_FLAGS",
     "ANDROID_X64_LINK_FLAGS",
+    "CXX_INCLUDE_MARKERS",
     "LINUX_ARM64_COMPILE_FLAGS",
     "LINUX_ARM64_LINK_FLAGS",
     "flutter_cc_toolchain_config",
@@ -124,13 +125,9 @@ flutter_cc_toolchain_config(
     }),
     clang = "@clang_linux_x64//:bin/clang",
     clangxx = "@clang_linux_x64//:bin/clang++",
-    # Search order matches GN: libc++, libc++abi, then the engine's
-    # __config_site (found through libc++'s <__config>).
-    cxx_include_markers = [
-        "@libcxx//:include/__config",
-        "@libcxxabi//:include/cxxabi.h",
-        "//engine/src/flutter/build/secondary/flutter/third_party/libcxx:config/__config_site",
-    ],
+    # The C++ standard library's include directories in GN's search order
+    # (CXX_INCLUDE_MARKERS, cc_toolchain_config.bzl).
+    cxx_include_markers = CXX_INCLUDE_MARKERS,
     lto = select({
         "//engine/src/flutter/build/bazel:lto_enabled": True,
         "//conditions:default": False,
@@ -233,11 +230,7 @@ flutter_cc_toolchain_config(
     }),
     clang = "@clang_linux_x64//:bin/clang",
     clangxx = "@clang_linux_x64//:bin/clang++",
-    cxx_include_markers = [
-        "@libcxx//:include/__config",
-        "@libcxxabi//:include/cxxabi.h",
-        "//engine/src/flutter/build/secondary/flutter/third_party/libcxx:config/__config_site",
-    ],
+    cxx_include_markers = CXX_INCLUDE_MARKERS,
     lto = select({
         "//engine/src/flutter/build/bazel:lto_enabled": True,
         "//conditions:default": False,
@@ -348,11 +341,7 @@ flutter_cc_toolchain_config(
     crt_begin_so = "@android_tools//:" + ANDROID_ARM64_LIB + "/crtbegin_so.o",
     crt_end_exe = "@android_tools//:" + ANDROID_ARM64_LIB + "/crtend_android.o",
     crt_end_so = "@android_tools//:" + ANDROID_ARM64_LIB + "/crtend_so.o",
-    cxx_include_markers = [
-        "@libcxx//:include/__config",
-        "@libcxxabi//:include/cxxabi.h",
-        "//engine/src/flutter/build/secondary/flutter/third_party/libcxx:config/__config_site",
-    ],
+    cxx_include_markers = CXX_INCLUDE_MARKERS,
     lto = select({
         "//engine/src/flutter/build/bazel:lto_enabled": True,
         "//conditions:default": False,
@@ -473,11 +462,7 @@ flutter_cc_toolchain_config(
     crt_begin_so = "@android_tools//:" + ANDROID_ARM64_API26_LIB + "/crtbegin_so.o",
     crt_end_exe = "@android_tools//:" + ANDROID_ARM64_API26_LIB + "/crtend_android.o",
     crt_end_so = "@android_tools//:" + ANDROID_ARM64_API26_LIB + "/crtend_so.o",
-    cxx_include_markers = [
-        "@libcxx//:include/__config",
-        "@libcxxabi//:include/cxxabi.h",
-        "//engine/src/flutter/build/secondary/flutter/third_party/libcxx:config/__config_site",
-    ],
+    cxx_include_markers = CXX_INCLUDE_MARKERS,
     lto = select({
         "//engine/src/flutter/build/bazel:lto_enabled": True,
         "//conditions:default": False,
@@ -579,11 +564,7 @@ flutter_cc_toolchain_config(
     crt_begin_so = "@android_tools//:" + ANDROID_X64_LIB + "/crtbegin_so.o",
     crt_end_exe = "@android_tools//:" + ANDROID_X64_LIB + "/crtend_android.o",
     crt_end_so = "@android_tools//:" + ANDROID_X64_LIB + "/crtend_so.o",
-    cxx_include_markers = [
-        "@libcxx//:include/__config",
-        "@libcxxabi//:include/cxxabi.h",
-        "//engine/src/flutter/build/secondary/flutter/third_party/libcxx:config/__config_site",
-    ],
+    cxx_include_markers = CXX_INCLUDE_MARKERS,
     lto = select({
         "//engine/src/flutter/build/bazel:lto_enabled": True,
         "//conditions:default": False,
@@ -681,11 +662,7 @@ flutter_cc_toolchain_config(
     crt_begin_so = "@android_tools//:" + ANDROID_RISCV64_LIB + "/crtbegin_so.o",
     crt_end_exe = "@android_tools//:" + ANDROID_RISCV64_LIB + "/crtend_android.o",
     crt_end_so = "@android_tools//:" + ANDROID_RISCV64_LIB + "/crtend_so.o",
-    cxx_include_markers = [
-        "@libcxx//:include/__config",
-        "@libcxxabi//:include/cxxabi.h",
-        "//engine/src/flutter/build/secondary/flutter/third_party/libcxx:config/__config_site",
-    ],
+    cxx_include_markers = CXX_INCLUDE_MARKERS,
     lto = select({
         "//engine/src/flutter/build/bazel:lto_enabled": True,
         "//conditions:default": False,
@@ -784,11 +761,7 @@ flutter_cc_toolchain_config(
     crt_begin_so = "@android_tools//:" + ANDROID_ARM_LIB + "/crtbegin_so.o",
     crt_end_exe = "@android_tools//:" + ANDROID_ARM_LIB + "/crtend_android.o",
     crt_end_so = "@android_tools//:" + ANDROID_ARM_LIB + "/crtend_so.o",
-    cxx_include_markers = [
-        "@libcxx//:include/__config",
-        "@libcxxabi//:include/cxxabi.h",
-        "//engine/src/flutter/build/secondary/flutter/third_party/libcxx:config/__config_site",
-    ],
+    cxx_include_markers = CXX_INCLUDE_MARKERS,
     lto = select({
         "//engine/src/flutter/build/bazel:lto_enabled": True,
         "//conditions:default": False,
