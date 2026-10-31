@@ -546,6 +546,58 @@ void main() {
     _expectTransformedEvent(original: up, transform: transform, localPosition: localPosition);
   });
 
+  group('transforming pan-zoom events', () {
+    final Matrix4 transform = (Matrix4.identity()..scale(2.0, 2.0, 1.0)).multiplied(
+      Matrix4.translationValues(10.0, 20.0, 0.0),
+    );
+
+    const pan = Offset(20, 30);
+    const localPan = Offset(40, 60);
+
+    const panDelta = Offset(5, 5);
+    const localPanDelta = Offset(10, 10);
+
+    // Zero pan should not be affected by the translation component of the transform.
+    test('zero pan', () {
+      const update = PointerPanZoomUpdateEvent(
+        timeStamp: Duration(seconds: 2),
+        device: 1,
+        position: Offset(20, 30),
+      );
+
+      final PointerPanZoomUpdateEvent updateTransformed = update.transformed(transform);
+      expect(updateTransformed.localPan, Offset.zero);
+    });
+
+    // Non-zero pan should not be affected by the translation component of the transform.
+    test('non-zero pan', () {
+      const update = PointerPanZoomUpdateEvent(
+        timeStamp: Duration(seconds: 2),
+        device: 1,
+        position: Offset(20, 30),
+        pan: pan,
+      );
+
+      final PointerPanZoomUpdateEvent updateTransformed = update.transformed(transform);
+      expect(updateTransformed.pan, pan);
+      expect(updateTransformed.localPan, localPan);
+    });
+
+    // Local pan deltas should be transformed correctly
+    test('pan delta', () {
+      const update = PointerPanZoomUpdateEvent(
+        timeStamp: Duration(seconds: 2),
+        device: 1,
+        pan: pan,
+        panDelta: panDelta,
+      );
+
+      final PointerPanZoomUpdateEvent updateTransformed = update.transformed(transform);
+      expect(updateTransformed.panDelta, panDelta);
+      expect(updateTransformed.localPanDelta, localPanDelta);
+    });
+  });
+
   group('copyWith', () {
     const PointerEvent added = PointerAddedEvent(
       timeStamp: Duration(days: 1),
