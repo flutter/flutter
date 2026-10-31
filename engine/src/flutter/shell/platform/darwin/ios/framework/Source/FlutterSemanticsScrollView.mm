@@ -17,6 +17,12 @@ FLUTTER_ASSERT_ARC
     _semanticsObject = semanticsObject;
     _isDoingSystemScrolling = NO;
     self.delegate = self;
+    if (@available(iOS 26.0, *)) {
+      self.topEdgeEffect.hidden = YES;
+      self.bottomEdgeEffect.hidden = YES;
+      self.leftEdgeEffect.hidden = YES;
+      self.rightEdgeEffect.hidden = YES;
+    }
   }
   return self;
 }

@@ -41,6 +41,21 @@ const float kFloatCompareEpsilon = 0.001;
   XCTAssertNotNil(object);
 }
 
+- (void)testFlutterSemanticsScrollViewHidesScrollEdgeEffects {
+  if (@available(iOS 26.0, *)) {
+    auto mock_bridge = std::make_unique<flutter::testing::MockAccessibilityBridge>();
+    fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(mock_bridge.get());
+    fml::WeakPtr<flutter::AccessibilityBridgeIos> bridge = factory.GetWeakPtr();
+    SemanticsObject* object = [[SemanticsObject alloc] initWithBridge:bridge uid:0];
+    FlutterSemanticsScrollView* scrollView =
+        [[FlutterSemanticsScrollView alloc] initWithSemanticsObject:object];
+    XCTAssertTrue(scrollView.topEdgeEffect.hidden);
+    XCTAssertTrue(scrollView.bottomEdgeEffect.hidden);
+    XCTAssertTrue(scrollView.leftEdgeEffect.hidden);
+    XCTAssertTrue(scrollView.rightEdgeEffect.hidden);
+  }
+}
+
 - (void)testUIFocusSystemMethodsDoNotCrashWhenBridgeIsDead {
   fml::WeakPtr<flutter::AccessibilityBridgeIos> bridge;
   SemanticsObject* object;
