@@ -549,16 +549,17 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
         child: RawGestureDetector(
           behavior: HitTestBehavior.opaque,
           gestures: <Type, GestureRecognizerFactory>{
-            TapGestureRecognizer: GestureRecognizerFactoryWithHandlers<TapGestureRecognizer>(
-              () => TapGestureRecognizer(postAcceptSlopTolerance: null),
-              (TapGestureRecognizer instance) {
-                instance.onTapDown = enabled ? _handleTapDown : null;
-                instance.onTapUp = enabled ? _handleTapUp : null;
-                instance.onTapCancel = enabled ? _handleTapCancel : null;
-                instance.onTapMove = enabled ? _handleTapMove : null;
-                instance.gestureSettings = gestureSettings;
-              },
-            ),
+            if (enabled)
+              TapGestureRecognizer: GestureRecognizerFactoryWithHandlers<TapGestureRecognizer>(
+                () => TapGestureRecognizer(postAcceptSlopTolerance: null),
+                (TapGestureRecognizer instance) {
+                  instance.onTapDown = _handleTapDown;
+                  instance.onTapUp = _handleTapUp;
+                  instance.onTapCancel = _handleTapCancel;
+                  instance.onTapMove = _handleTapMove;
+                  instance.gestureSettings = gestureSettings;
+                },
+              ),
             if (widget.onLongPress != null)
               LongPressGestureRecognizer:
                   GestureRecognizerFactoryWithHandlers<LongPressGestureRecognizer>(
@@ -571,6 +572,7 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
           },
           child: Semantics(
             button: true,
+            enabled: enabled,
             child: ConstrainedBox(
               constraints: BoxConstraints(
                 minWidth:

@@ -808,6 +808,34 @@ void main() {
     expect(getBackgroundColor(tester, 1), CupertinoColors.activeBlue);
   });
 
+  testWidgets('Disabled segment is semantically disabled and has no tap action', (
+    WidgetTester tester,
+  ) async {
+    final semantics = SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      boilerplate(
+        child: CupertinoSegmentedControl<int>(
+          groupValue: 0,
+          onValueChanged: (int value) {},
+          disabledChildren: const <int>{1},
+          children: const <int, Widget>{0: Text('Photo'), 1: Text('Video')},
+        ),
+      ),
+    );
+
+    final SemanticsNode enabledNode = tester.getSemantics(find.text('Photo'));
+    expect(enabledNode.flagsCollection.isEnabled, ui.Tristate.isTrue);
+    expect(enabledNode.getSemanticsData().hasAction(SemanticsAction.tap), isTrue);
+
+    final SemanticsNode disabledNode = tester.getSemantics(find.text('Video'));
+    expect(disabledNode.flagsCollection.isButton, isTrue);
+    expect(disabledNode.flagsCollection.isEnabled, ui.Tristate.isFalse);
+    expect(disabledNode.getSemanticsData().hasAction(SemanticsAction.tap), isFalse);
+
+    semantics.dispose();
+  });
+
   testWidgets('Segmented control semantics', (WidgetTester tester) async {
     final semantics = SemanticsTester(tester);
 
@@ -849,6 +877,8 @@ void main() {
                   label: 'Child 1',
                   flags: <SemanticsFlag>[
                     SemanticsFlag.isButton,
+                    SemanticsFlag.hasEnabledState,
+                    SemanticsFlag.isEnabled,
                     SemanticsFlag.isInMutuallyExclusiveGroup,
                     SemanticsFlag.hasSelectedState,
                     SemanticsFlag.isSelected,
@@ -860,6 +890,8 @@ void main() {
                   label: 'Child 2',
                   flags: <SemanticsFlag>[
                     SemanticsFlag.isButton,
+                    SemanticsFlag.hasEnabledState,
+                    SemanticsFlag.isEnabled,
                     SemanticsFlag.isInMutuallyExclusiveGroup,
                     // Declares that it is selectable, but not currently selected.
                     SemanticsFlag.hasSelectedState,
@@ -892,6 +924,8 @@ void main() {
                   label: 'Child 1',
                   flags: <SemanticsFlag>[
                     SemanticsFlag.isButton,
+                    SemanticsFlag.hasEnabledState,
+                    SemanticsFlag.isEnabled,
                     SemanticsFlag.isInMutuallyExclusiveGroup,
                     // Declares that it is selectable, but not currently selected.
                     SemanticsFlag.hasSelectedState,
@@ -903,6 +937,8 @@ void main() {
                   label: 'Child 2',
                   flags: <SemanticsFlag>[
                     SemanticsFlag.isButton,
+                    SemanticsFlag.hasEnabledState,
+                    SemanticsFlag.isEnabled,
                     SemanticsFlag.isInMutuallyExclusiveGroup,
                     SemanticsFlag.hasSelectedState,
                     SemanticsFlag.isSelected,

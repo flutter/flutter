@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' as ui;
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -344,6 +346,47 @@ void main() {
     await tester.pumpAndSettle();
   });
 
+  testWidgets('Disabled CupertinoButton is semantically disabled and has no tap action', (
+    WidgetTester tester,
+  ) async {
+    final semantics = SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(child: CupertinoButton(onPressed: null, child: Text('Delete'))),
+      ),
+    );
+
+    final SemanticsNode node = tester.getSemantics(find.text('Delete'));
+    expect(node.flagsCollection.isButton, isTrue);
+    expect(node.flagsCollection.isEnabled, ui.Tristate.isFalse);
+    expect(node.getSemanticsData().hasAction(SemanticsAction.tap), isFalse);
+
+    semantics.dispose();
+  });
+
+  testWidgets('Enabled CupertinoButton is semantically enabled and has a tap action', (
+    WidgetTester tester,
+  ) async {
+    final semantics = SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: CupertinoButton(onPressed: () {}, child: const Text('Delete')),
+        ),
+      ),
+    );
+
+    final SemanticsNode node = tester.getSemantics(find.text('Delete'));
+    expect(node.flagsCollection.isEnabled, ui.Tristate.isTrue);
+    expect(node.getSemanticsData().hasAction(SemanticsAction.tap), isTrue);
+
+    semantics.dispose();
+  });
+
   testWidgets('Cupertino button is semantically a button', (WidgetTester tester) async {
     final semantics = SemanticsTester(tester);
     await tester.pumpWidget(
@@ -362,7 +405,12 @@ void main() {
             TestSemantics.rootChild(
               actions: SemanticsAction.tap.index | SemanticsAction.focus.index,
               label: 'ABC',
-              flags: <SemanticsFlag>[SemanticsFlag.isButton, SemanticsFlag.isFocusable],
+              flags: <SemanticsFlag>[
+                SemanticsFlag.isButton,
+                SemanticsFlag.hasEnabledState,
+                SemanticsFlag.isEnabled,
+                SemanticsFlag.isFocusable,
+              ],
             ),
           ],
         ),

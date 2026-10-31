@@ -497,18 +497,19 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSegmentedC
                   }
                 : null,
             onTapCancel: isEnabled ? _onTapCancel : null,
-            onTap: () {
-              if (isEnabled) {
-                _segmentKeys[currentKey]?.currentState?.requestFocus();
-              }
-              _onTap(currentKey);
-            },
+            onTap: isEnabled
+                ? () {
+                    _segmentKeys[currentKey]?.currentState?.requestFocus();
+                    _onTap(currentKey);
+                  }
+                : null,
             child: IconTheme(
               data: iconTheme,
               child: DefaultTextStyle(
                 style: textStyle,
                 child: Semantics(
                   button: true,
+                  enabled: isEnabled,
                   inMutuallyExclusiveGroup: true,
                   selected: widget.groupValue == currentKey,
                   child: child,

@@ -890,13 +890,13 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSlidingSeg
           enabled: !widget.disabledChildren.contains(entry.key),
           child: Semantics(
             button: true,
-            onTap: () {
-              if (widget.disabledChildren.contains(entry.key)) {
-                return;
-              }
-              _segmentKeys[entry.key]?.currentState?.requestFocus();
-              widget.onValueChanged(entry.key);
-            },
+            enabled: !widget.disabledChildren.contains(entry.key),
+            onTap: widget.disabledChildren.contains(entry.key)
+                ? null
+                : () {
+                    _segmentKeys[entry.key]?.currentState?.requestFocus();
+                    widget.onValueChanged(entry.key);
+                  },
             inMutuallyExclusiveGroup: true,
             selected: widget.groupValue == entry.key,
             child: MouseRegion(

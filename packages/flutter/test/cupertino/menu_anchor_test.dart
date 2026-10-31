@@ -6439,6 +6439,8 @@ void main() {
                               id: 4,
                               flags: <SemanticsFlag>[
                                 SemanticsFlag.isButton,
+                                SemanticsFlag.hasEnabledState,
+                                SemanticsFlag.isEnabled,
                                 SemanticsFlag.isFocusable,
                               ],
                               actions: <SemanticsAction>[
@@ -6550,6 +6552,8 @@ void main() {
                               id: 4,
                               flags: <SemanticsFlag>[
                                 SemanticsFlag.isButton,
+                                SemanticsFlag.hasEnabledState,
+                                SemanticsFlag.isEnabled,
                                 SemanticsFlag.isFocusable,
                               ],
                               actions: <SemanticsAction>[
