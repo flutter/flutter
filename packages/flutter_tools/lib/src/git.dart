@@ -55,7 +55,7 @@ interface class Git {
   };
 
   Map<String, String> _filterEnvironment(Map<String, String>? environment) {
-    final result = Map<String, String>.from(environment ?? _platform.environment);
+    final result = <String, String>{..._platform.environment, ...?environment};
     result.removeWhere(
       // Doing toUpperCase because windows environment vars are case-insensitive
       (String key, String value) => _kGitEnvironmentVariables.contains(key.toUpperCase()),
@@ -72,6 +72,9 @@ interface class Git {
   ///
   /// - [arguments] does _not_ include the executable (it is implicit);
   /// - [environment] may include additional (implicit) platform-specific variables
+  ///
+  /// Repository-context variables are removed from the full parent environment,
+  /// and parent inheritance is disabled so those variables cannot be reintroduced.
   Future<RunResult> run(
     List<String> arguments, {
     bool throwOnError = false,
@@ -89,6 +92,7 @@ interface class Git {
       workingDirectory: workingDirectory,
       allowReentrantFlutter: allowReentrantFlutter,
       environment: _filterEnvironment(environment),
+      includeParentEnvironment: false,
       timeout: timeout,
       timeoutRetries: timeoutRetries,
     );
@@ -119,6 +123,7 @@ interface class Git {
       hideStdout: hideStdout,
       workingDirectory: workingDirectory,
       environment: _filterEnvironment(environment),
+      includeParentEnvironment: false,
       allowReentrantFlutter: allowReentrantFlutter,
       encoding: encoding,
     );
@@ -152,6 +157,7 @@ interface class Git {
       stdoutErrorMatcher: stdoutErrorMatcher,
       mapFunction: mapFunction,
       environment: _filterEnvironment(environment),
+      includeParentEnvironment: false,
     );
   }
 

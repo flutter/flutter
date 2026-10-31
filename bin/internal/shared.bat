@@ -63,6 +63,9 @@ GOTO :after_subroutine
     CALL "%bootstrap_path%"
   )
 
+  REM Isolate SDK git queries from repository variables exported by git hooks.
+  SETLOCAL
+  FOR %%v IN (GIT_DIR GIT_INDEX_FILE GIT_WORK_TREE GIT_OBJECT_DIRECTORY GIT_ALTERNATE_OBJECT_DIRECTORIES GIT_QUARANTINE_PATH GIT_COMMON_DIR) DO SET "%%v="
   REM Get the Git revision.
   2>NUL (
     REM 'FOR /f' spawns a new terminal instance to run the command. If an
@@ -76,6 +79,7 @@ GOTO :after_subroutine
       SET revision=%%r
     )
   )
+  ENDLOCAL & SET "revision=%revision%"
   SET compilekey="%revision%:%FLUTTER_TOOL_ARGS%"
 
   REM Invalidate cache if:
