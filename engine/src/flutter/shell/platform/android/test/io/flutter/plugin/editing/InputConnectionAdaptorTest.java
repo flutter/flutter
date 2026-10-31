@@ -26,6 +26,7 @@ import android.os.Bundle;
 import android.text.InputType;
 import android.text.Selection;
 import android.text.SpannableStringBuilder;
+import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.CursorAnchorInfo;
@@ -1230,6 +1231,194 @@ public class InputConnectionAdaptorTest {
   }
 
   @Test
+  public void testSendKeyEvent_deadKeyComposesWithNextCharacter() {
+    // Regression test for https://github.com/flutter/flutter/issues/194925.
+    ListenableEditingState editable = sampleEditable(1, 1, "ab");
+    InputConnectionAdaptor adaptor = sampleInputConnectionAdaptor(editable);
+
+    assertTrue(adaptor.handleKeyEvent(characterKeyDown(DEAD_KEY_CARON)));
+    assertEquals("aˇb", editable.toString());
+    assertEquals(2, Selection.getSelectionStart(editable));
+
+    assertTrue(adaptor.handleKeyEvent(characterKeyDown('n')));
+    assertEquals("aňb", editable.toString());
+    assertEquals(2, Selection.getSelectionStart(editable));
+    assertEquals(2, Selection.getSelectionEnd(editable));
+  }
+
+  @Test
+  public void testSendKeyEvent_deadKeysOfVariousLayoutsCompose() {
+    // Each case is {accent reported by KeyEvent#getUnicodeChar, next character, result}.
+    final int[][] cases = {
+      {'´', 'e', 'é'}, // Acute: Czech, Slovak, Spanish.
+      {'ˇ', 'r', 'ř'}, // Caron: Czech, Slovak.
+      {'˚', 'u', 'ů'}, // Ring above: Czech.
+      {'ˆ', 'o', 'ô'}, // Circumflex: Slovak, French.
+      {'¨', 'u', 'ü'}, // Umlaut: German, Spanish.
+      {'˜', 'n', 'ñ'}, // Tilde: Spanish, Portuguese.
+      {'ˋ', 'e', 'è'}, // Grave: French, Italian.
+      {'¸', 'c', 'ç'}, // Cedilla: French, Portuguese.
+      {'˛', 'a', 'ą'}, // Ogonek: Polish.
+      {'˙', 'z', 'ż'}, // Dot above: Polish.
+      {'˝', 'o', 'ő'}, // Double acute: Hungarian.
+    };
+
+    for (int[] testCase : cases) {
+      final String message = "Accent U+" + Integer.toHexString(testCase[0]).toUpperCase();
+      ListenableEditingState editable = sampleEditable(0, 0, "");
+      InputConnectionAdaptor adaptor = sampleInputConnectionAdaptor(editable);
+
+      assertTrue(
+          message,
+          adaptor.handleKeyEvent(characterKeyDown(testCase[0] | KeyCharacterMap.COMBINING_ACCENT)));
+      assertTrue(message, adaptor.handleKeyEvent(characterKeyDown(testCase[1])));
+
+      assertEquals(message, String.valueOf((char) testCase[2]), editable.toString());
+      assertEquals(message, 1, Selection.getSelectionStart(editable));
+      assertEquals(message, 1, Selection.getSelectionEnd(editable));
+    }
+  }
+
+  @Test
+  public void testSendKeyEvent_deadKeyReplacesSelection() {
+    ListenableEditingState editable = sampleEditable(1, 3, "abcd");
+    InputConnectionAdaptor adaptor = sampleInputConnectionAdaptor(editable);
+
+    adaptor.handleKeyEvent(characterKeyDown(DEAD_KEY_CARON));
+    assertEquals("aˇd", editable.toString());
+    assertEquals(2, Selection.getSelectionStart(editable));
+    assertEquals(2, Selection.getSelectionEnd(editable));
+
+    adaptor.handleKeyEvent(characterKeyDown('n'));
+    assertEquals("aňd", editable.toString());
+    assertEquals(2, Selection.getSelectionStart(editable));
+  }
+
+  @Test
+  public void testSendKeyEvent_sameDeadKeyTwiceInsertsOnlyAccent() {
+    ListenableEditingState editable = sampleEditable(0, 0, "");
+    InputConnectionAdaptor adaptor = sampleInputConnectionAdaptor(editable);
+
+    adaptor.handleKeyEvent(characterKeyDown(DEAD_KEY_ACUTE));
+    adaptor.handleKeyEvent(characterKeyDown(DEAD_KEY_ACUTE));
+    // Depending on the Android version, this is the accent itself or a fallback such as "'".
+    final String accent = String.valueOf((char) KeyCharacterMap.getDeadChar('´', '´'));
+    assertEquals(accent, editable.toString());
+
+    // The second press used up the accent, so the next character does not compose.
+    adaptor.handleKeyEvent(characterKeyDown('e'));
+    assertEquals(accent + "e", editable.toString());
+  }
+
+  @Test
+  public void testSendKeyEvent_differentDeadKeysDoNotCompose() {
+    ListenableEditingState editable = sampleEditable(0, 0, "");
+    InputConnectionAdaptor adaptor = sampleInputConnectionAdaptor(editable);
+
+    adaptor.handleKeyEvent(characterKeyDown(DEAD_KEY_CARON));
+    adaptor.handleKeyEvent(characterKeyDown(DEAD_KEY_ACUTE));
+    assertEquals("ˇ´", editable.toString());
+
+    // The second accent is pending now.
+    adaptor.handleKeyEvent(characterKeyDown('e'));
+    assertEquals("ˇé", editable.toString());
+  }
+
+  @Test
+  public void testSendKeyEvent_heldDeadKeyInsertsOneAccent() {
+    ListenableEditingState editable = sampleEditable(0, 0, "");
+    InputConnectionAdaptor adaptor = sampleInputConnectionAdaptor(editable);
+
+    adaptor.handleKeyEvent(characterKeyDown(DEAD_KEY_CARON));
+    for (int repeatCount = 1; repeatCount <= 3; repeatCount++) {
+      assertTrue(adaptor.handleKeyEvent(characterKeyDown(DEAD_KEY_CARON, repeatCount)));
+    }
+    assertEquals("ˇ", editable.toString());
+
+    adaptor.handleKeyEvent(characterKeyDown('n'));
+    assertEquals("ň", editable.toString());
+  }
+
+  @Test
+  public void testSendKeyEvent_deadKeyComposesAfterOuterBatchEditEnds() {
+    ListenableEditingState editable = sampleEditable(0, 0, "");
+    InputConnectionAdaptor adaptor = sampleInputConnectionAdaptor(editable);
+
+    // The input method can hold a batch edit while the framework replies to a key event.
+    adaptor.beginBatchEdit();
+    adaptor.handleKeyEvent(characterKeyDown(DEAD_KEY_CARON));
+    adaptor.endBatchEdit();
+    adaptor.handleKeyEvent(characterKeyDown('n'));
+
+    assertEquals("ň", editable.toString());
+  }
+
+  @Test
+  public void testSendKeyEvent_frameworkUpdateCancelsDeadKey() {
+    ListenableEditingState editable = sampleEditable(0, 0, "");
+    InputConnectionAdaptor adaptor = sampleInputConnectionAdaptor(editable);
+
+    adaptor.handleKeyEvent(characterKeyDown(DEAD_KEY_CARON));
+    // The user taps before the accent and then back after it.
+    editable.setEditingState(new TextInputChannel.TextEditState("ˇ", 0, 0, -1, -1));
+    editable.setEditingState(new TextInputChannel.TextEditState("ˇ", 1, 1, -1, -1));
+    adaptor.handleKeyEvent(characterKeyDown('n'));
+
+    assertEquals("ˇn", editable.toString());
+  }
+
+  @Test
+  public void testSendKeyEvent_deadKeyComposesAcrossShiftKey() {
+    ListenableEditingState editable = sampleEditable(0, 0, "");
+    InputConnectionAdaptor adaptor = sampleInputConnectionAdaptor(editable);
+
+    adaptor.handleKeyEvent(characterKeyDown(DEAD_KEY_CARON));
+    assertFalse(
+        adaptor.handleKeyEvent(
+            new FakeKeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_SHIFT_LEFT)));
+    adaptor.handleKeyEvent(characterKeyDown('N'));
+
+    assertEquals("Ň", editable.toString());
+  }
+
+  @Test
+  public void testSendKeyEvent_deadKeyKeepsAccentWhenNextCharacterDoesNotCompose() {
+    ListenableEditingState editable = sampleEditable(0, 0, "");
+    InputConnectionAdaptor adaptor = sampleInputConnectionAdaptor(editable);
+
+    adaptor.handleKeyEvent(characterKeyDown(DEAD_KEY_CARON));
+    adaptor.handleKeyEvent(characterKeyDown('x'));
+
+    assertEquals("ˇx", editable.toString());
+    assertEquals(2, Selection.getSelectionStart(editable));
+  }
+
+  @Test
+  public void testSendKeyEvent_deadKeyFollowedBySpaceInsertsOnlyAccent() {
+    ListenableEditingState editable = sampleEditable(0, 0, "");
+    InputConnectionAdaptor adaptor = sampleInputConnectionAdaptor(editable);
+
+    adaptor.handleKeyEvent(characterKeyDown(DEAD_KEY_CARON));
+    adaptor.handleKeyEvent(characterKeyDown(' '));
+    adaptor.handleKeyEvent(characterKeyDown('n'));
+
+    assertEquals("ˇn", editable.toString());
+  }
+
+  @Test
+  public void testSendKeyEvent_caretMovementCancelsDeadKey() {
+    ListenableEditingState editable = sampleEditable(0, 0, "");
+    InputConnectionAdaptor adaptor = sampleInputConnectionAdaptor(editable);
+
+    adaptor.handleKeyEvent(characterKeyDown(DEAD_KEY_CARON));
+    adaptor.handleKeyEvent(new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_DPAD_LEFT));
+    adaptor.handleKeyEvent(new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_DPAD_RIGHT));
+    adaptor.handleKeyEvent(characterKeyDown('n'));
+
+    assertEquals("ˇn", editable.toString());
+  }
+
+  @Test
   public void testDoesNotConsumeBackButton() {
     ListenableEditingState editable = sampleEditable(0, 0);
     InputConnectionAdaptor adaptor = sampleInputConnectionAdaptor(editable);
@@ -1277,6 +1466,18 @@ public class InputConnectionAdaptorTest {
           + "a"; // Normal Character
 
   private static final String SAMPLE_RTL_TEXT = "متن ساختگی" + "\nبرای تستfor test😊";
+
+  // What KeyEvent#getUnicodeChar returns for the caron and acute dead keys of the Czech layout.
+  private static final int DEAD_KEY_CARON = 'ˇ' | KeyCharacterMap.COMBINING_ACCENT;
+  private static final int DEAD_KEY_ACUTE = '´' | KeyCharacterMap.COMBINING_ACCENT;
+
+  private static FakeKeyEvent characterKeyDown(int character) {
+    return characterKeyDown(character, 0);
+  }
+
+  private static FakeKeyEvent characterKeyDown(int character, int repeatCount) {
+    return new FakeKeyEvent(KeyEvent.ACTION_DOWN, 0, KeyEvent.KEYCODE_A, repeatCount, character, 0);
+  }
 
   private static ListenableEditingState sampleEditable(int selStart, int selEnd) {
     ListenableEditingState sample =
