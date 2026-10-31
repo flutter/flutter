@@ -36,8 +36,11 @@ class ImageExternalTextureGLSkia : public ImageExternalTextureGL {
       std::optional<HardwareBufferKey> id,
       impeller::UniqueEGLImageKHR&& egl_image) override;
 
-  void BindImageToTexture(const impeller::UniqueEGLImageKHR& image, GLuint tex);
+ protected:
+  virtual void BindImageToTexture(const impeller::UniqueEGLImageKHR& image,
+                                  GLuint tex);
 
+ private:
   FML_DISALLOW_COPY_AND_ASSIGN(ImageExternalTextureGLSkia);
 };
 
