@@ -220,6 +220,7 @@ FELT_CONFIG = {
         },
         "firefox-dart2wasm-wimp-ui": {
             "artifact_deps": ["skwasm"],
+            "enable_ci": False,
             "run_config": "firefox-wimp",
             "test_bundle": "dart2wasm-skwasm-ui",
         },
@@ -265,6 +266,7 @@ FELT_CONFIG = {
         },
         "safari-dart2wasm-wimp-ui": {
             "artifact_deps": ["skwasm"],
+            "enable_ci": False,
             "run_config": "safari-wimp",
             "test_bundle": "dart2wasm-skwasm-ui",
         },

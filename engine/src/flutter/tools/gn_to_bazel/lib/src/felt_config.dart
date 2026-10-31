@@ -89,10 +89,18 @@ final class FeltConfig {
         throw FormatException('test suite $name names an unknown run config: $runConfig');
       }
       final Object? deps = node['artifact-deps'];
+      // felt_config.dart: `enable-ci`, true unless the suite says otherwise;
+      // felt's generate_builder_json.dart leaves a suite that opts out off
+      // the CI builders (it stays runnable by name).
+      final Object? enableCi = node['enable-ci'];
+      if (enableCi != null && enableCi is! bool) {
+        throw FormatException('test suite $name has a non-boolean enable-ci: $enableCi');
+      }
       testSuites[name] = FeltTestSuite(
         testBundle: bundle,
         runConfig: runConfig,
         artifactDeps: deps is YamlList ? deps.cast<String>().toList() : const <String>[],
+        enableCi: enableCi as bool? ?? true,
       );
     }
     for (final MapEntry<String, FeltTestBundle> bundle in testBundles.entries) {
@@ -182,7 +190,12 @@ final class FeltConfig {
       final FeltTestSuite suite = testSuites[name]!;
       out
         ..writeln('        "$name": {')
-        ..writeln('            "artifact_deps": [${_quoted(suite.artifactDeps)}],')
+        ..writeln('            "artifact_deps": [${_quoted(suite.artifactDeps)}],');
+      if (!suite.enableCi) {
+        // Only the suites that opt out carry the key, as in the YAML.
+        out.writeln('            "enable_ci": False,');
+      }
+      out
         ..writeln('            "run_config": "${suite.runConfig}",')
         ..writeln('            "test_bundle": "${suite.testBundle}",')
         ..writeln('        },');
@@ -241,15 +254,18 @@ final class FeltTestBundle {
 }
 
 /// A test suite: a bundle run under a run configuration, with the artifacts
-/// it needs (felt's artifact-deps: canvaskit, canvaskit_chromium, skwasm, ...).
+/// it needs (felt's artifact-deps: canvaskit, canvaskit_chromium, skwasm, ...)
+/// and whether CI runs it (`enable-ci`, true unless the suite says otherwise).
 final class FeltTestSuite {
   const FeltTestSuite({
     required this.testBundle,
     required this.runConfig,
     required this.artifactDeps,
+    this.enableCi = true,
   });
 
   final String testBundle;
   final String runConfig;
   final List<String> artifactDeps;
+  final bool enableCi;
 }
