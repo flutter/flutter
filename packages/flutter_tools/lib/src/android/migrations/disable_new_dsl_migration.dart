@@ -6,44 +6,55 @@ import '../../base/file_system.dart';
 import '../../base/project_migrator.dart';
 import '../../project.dart';
 
-const String _newDslFlagText = '''
-# This newDsl flag was added automatically by Flutter migrator
-android.newDsl=false''';
+/// Marker comment written above `android.newDsl=false` by the app and module
+/// templates.
+const String kNewDslTemplateMarker = '# This newDsl flag was added by the Flutter template';
 
-// Gradle Properties are case sensitive so the AGP config must be this exact flag
-final RegExp _newDslRegex = RegExp(r'^\s*android\.newDsl(?=[ \t=:])', multiLine: true);
+/// Marker comment written above `android.newDsl=false` by [DisableNewDslMigration].
+const String kNewDslMigratorMarker =
+    '# This newDsl flag was added automatically by Flutter migrator';
 
-/// Captures the value of each `android.builtInKotlin` entry. A properties file
-/// separates a key from its value with `=`, `:` or whitespace. Like
-/// `java.util.Properties`, the value keeps its trailing whitespace.
-final RegExp _builtInKotlinValueRegex = RegExp(
-  r'^[ \t]*android\.builtInKotlin(?:[ \t]*[=:][ \t]*|[ \t]+)(.*)$',
+const String _newDslFlagText = '$kNewDslMigratorMarker\nandroid.newDsl=false';
+
+// Gradle Properties are case sensitive, matching exact `android.newDsl` entries
+// including bare keys without an `=`, `:`, or whitespace separator.
+final RegExp _newDslRegex = RegExp(r'^[ \t]*android\.newDsl(?=[ \t=:]|\r?$)', multiLine: true);
+
+/// Captures the value of each `android.builtInKotlin` entry, including bare
+/// keys with an empty value.
+///
+/// A `.properties` file separates a key from a value with `=`, `:`, or
+/// whitespace; bare keys without a separator resolve to `""` in
+/// `java.util.Properties`, while trailing whitespace remains part of the value.
+final RegExp _builtInKotlinEntryRegex = RegExp(
+  r'^[ \t]*android\.builtInKotlin(?:(?:[ \t]*[=:][ \t]*|[ \t]+)([^\r\n]*)|[ \t]*)\r?$',
   multiLine: true,
 );
 
-/// Whether the project can build with `android.newDsl` enabled:
-/// [gradleProperties], the content of the project's `gradle.properties` file,
-/// enables built-in Kotlin, and neither the app nor any of its Android plugins
-/// blocks the new DSL, as [AndroidProject.newDslBlockingBuildFiles] reports.
+/// Whether [gradleProperties] sets `android.builtInKotlin` to `true`.
 ///
-/// The `kotlin-android` plugin fails to apply when `android.newDsl` is enabled,
-/// and the legacy variant API does not exist then, so only these projects can
-/// build without the `android.newDsl=false` opt-out.
+/// Evaluates the last `android.builtInKotlin` entry in [gradleProperties]
+/// using `java.util.Properties` parsing rules and case-insensitive `'true'`
+/// matching, mirroring `FlutterPluginUtils.isBuiltInKotlinEnabled` via Kotlin
+/// `String.toBoolean()`. Trailing whitespace (such as `'true '`) or a bare
+/// `android.builtInKotlin` line without a value evaluates to `false`.
+bool hasBuiltInKotlinEnabled(String gradleProperties) {
+  final RegExpMatch? lastEntry = _builtInKotlinEntryRegex.allMatches(gradleProperties).lastOrNull;
+  return (lastEntry?.group(1) ?? '').toLowerCase() == 'true';
+}
+
+/// Whether [project] can build with `android.newDsl` enabled.
 ///
-/// The last `android.builtInKotlin` entry decides. Its value, as
-/// `java.util.Properties` reads it, must be `true`, ignoring case: the test that
-/// the Flutter Gradle Plugin's `FlutterPluginUtils.isBuiltInKotlinEnabled`
-/// applies through Kotlin's `String.toBoolean()`. A value with trailing
-/// whitespace, such as `true `, is not `true`.
-/// Without an entry this returns false: `DisableBuiltInKotlinMigration` adds
-/// `android.builtInKotlin=false` to such projects.
+/// Requires [hasBuiltInKotlinEnabled] on [gradleProperties] and an empty
+/// [AndroidProject.newDslBlockingBuildFiles] list across the app, module,
+/// deferred component, and native Android plugin Gradle build scripts.
 ///
-/// When the plugin list cannot be read, the plugins are unknown and this
-/// returns false.
+/// Applying `kotlin-android` or referencing legacy AGP DSL and variant APIs
+/// fails when `android.newDsl` is enabled, so projects with blocking build
+/// files or unresolved plugin metadata keep the `android.newDsl=false`
+/// opt-out.
 bool isReadyForNewDsl(AndroidProject project, String gradleProperties) {
-  final RegExpMatch? lastEntry = _builtInKotlinValueRegex.allMatches(gradleProperties).lastOrNull;
-  final bool builtInKotlin = lastEntry != null && lastEntry.group(1)!.toLowerCase() == 'true';
-  if (!builtInKotlin || project.appliesKotlinAndroidPlugin) {
+  if (!hasBuiltInKotlinEnabled(gradleProperties)) {
     return false;
   }
   return project.newDslBlockingBuildFiles?.isEmpty ?? false;
@@ -51,9 +62,9 @@ bool isReadyForNewDsl(AndroidProject project, String gradleProperties) {
 
 /// Migrate from enabled new DSL by default to disabled new DSL by default.
 ///
-/// Projects for which [isReadyForNewDsl] is true are skipped, so they build
-/// with the Android Gradle Plugin's default, `android.newDsl=true`.
-/// For more details see: https://developer.android.com/build/releases/agp-9-0-0-release-notes#android-gradle-plugin-changed-dsl
+/// Projects where [isReadyForNewDsl] returns `true` skip adding the opt-out
+/// and build with the Android Gradle Plugin default (`android.newDsl=true`).
+/// For details, see: https://developer.android.com/build/releases/agp-9-0-0-release-notes#android-gradle-plugin-changed-dsl
 class DisableNewDslMigration extends ProjectMigrator {
   DisableNewDslMigration(AndroidProject project, super.logger)
     : _project = project,
@@ -62,14 +73,21 @@ class DisableNewDslMigration extends ProjectMigrator {
   final AndroidProject _project;
   final File _gradlePropertiesFile;
 
+  bool _addedOptOut = false;
+
+  /// Whether [migrate] wrote `android.newDsl=false` during the current run.
+  bool get addedOptOut => _addedOptOut;
+
   @override
   Future<void> migrate() async {
+    _addedOptOut = false;
     if (!_gradlePropertiesFile.existsSync()) {
       logger.printTrace(
         'The gradle.properties file was not found. Creating it with a disabled new DSL flag.',
       );
       try {
         await _gradlePropertiesFile.writeAsString('$_newDslFlagText\n');
+        _addedOptOut = true;
       } on FileSystemException catch (e) {
         logger.printError('Failed to write to the gradle.properties during migration: $e');
       }
@@ -85,7 +103,7 @@ class DisableNewDslMigration extends ProjectMigrator {
       return;
     }
 
-    // Skip migration if the newDsl flag already exists
+    // Skip migration if the newDsl flag already exists.
     if (contents.contains(_newDslRegex)) {
       logger.printTrace(
         'The developer has already configured the new DSL flag, skipping migration.',
@@ -95,7 +113,7 @@ class DisableNewDslMigration extends ProjectMigrator {
 
     if (isReadyForNewDsl(_project, contents)) {
       logger.printTrace(
-        'The project uses built-in Kotlin, and neither the app nor its plugins '
+        'Built-in Kotlin is enabled and scanned Gradle build files do not '
         'block the new DSL, skipping the new DSL opt-out.',
       );
       return;
@@ -114,6 +132,7 @@ class DisableNewDslMigration extends ProjectMigrator {
       return fileContents;
     }
 
+    _addedOptOut = true;
     final propertyToAppend = StringBuffer();
     propertyToAppend.writeln(_newDslFlagText);
 

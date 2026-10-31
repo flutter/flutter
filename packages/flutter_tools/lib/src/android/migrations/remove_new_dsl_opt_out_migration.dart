@@ -2,46 +2,40 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:meta/meta.dart';
-
 import '../../base/file_system.dart';
 import '../../base/project_migrator.dart';
 import '../../project.dart';
 import '../gradle_errors.dart';
 import 'disable_new_dsl_migration.dart';
 
-/// The comment the app and module templates write above `android.newDsl=false`.
-///
-/// A test checks that the templates still write this comment.
-@visibleForTesting
-const String kNewDslTemplateMarker = '# This newDsl flag was added by the Flutter template';
+export 'disable_new_dsl_migration.dart' show kNewDslMigratorMarker, kNewDslTemplateMarker;
 
-/// The comment [DisableNewDslMigration] writes above `android.newDsl=false`.
-const String _migratorMarker = '# This newDsl flag was added automatically by Flutter migrator';
-
-/// Matches an `android.newDsl` entry whose value is `false`, with any of the
-/// `=`, `:` or whitespace separators that a properties file allows.
+/// Matches an `android.newDsl` entry whose value is `false` with any `=`, `:`,
+/// or whitespace separator allowed by `.properties` files.
 final RegExp _newDslFalseRegex = RegExp(r'^\s*android\.newDsl(?:\s*[=:]\s*|\s+)false\s*$');
 
-/// Removes the `android.newDsl=false` opt-out that Flutter wrote to
-/// `gradle.properties`, in projects for which [isReadyForNewDsl] is true: the
-/// project uses built-in Kotlin, and a scan of the app's and every Android
-/// plugin's build file finds no legacy DSL or variant API and no unguarded
-/// `kotlin-android` plugin application.
+/// Removes the `android.newDsl=false` opt-out written by Flutter in
+/// `gradle.properties` once [hasBuiltInKotlinEnabled] is true and
+/// [AndroidProject.newDslBlockingBuildFiles] is empty.
 ///
-/// Only a Flutter marker comment immediately followed by an
-/// `android.newDsl=false` line is removed. An opt-out without a marker, or with
-/// another value, belongs to the developer and stays.
+/// Only a [kNewDslTemplateMarker] or [kNewDslMigratorMarker] line immediately
+/// followed by an `android.newDsl=false` line is removed. An `android.newDsl`
+/// entry without a Flutter marker, or with another value, belongs to the
+/// developer and remains untouched.
 class RemoveNewDslOptOutMigration extends ProjectMigrator {
-  RemoveNewDslOptOutMigration(AndroidProject project, super.logger)
+  RemoveNewDslOptOutMigration(AndroidProject project, super.logger, {this._disableNewDslMigration})
     : _project = project,
       _gradlePropertiesFile = project.hostAppGradleRoot.childFile('gradle.properties');
 
   final AndroidProject _project;
   final File _gradlePropertiesFile;
+  final DisableNewDslMigration? _disableNewDslMigration;
 
   @override
   Future<void> migrate() async {
+    if (_disableNewDslMigration?.addedOptOut ?? false) {
+      return;
+    }
     if (!_gradlePropertiesFile.existsSync()) {
       return;
     }
@@ -52,17 +46,33 @@ class RemoveNewDslOptOutMigration extends ProjectMigrator {
       logger.printError('Failed to read gradle.properties during migration: $e');
       return;
     }
-    if (!isReadyForNewDsl(_project, contents)) {
-      final List<String>? blocking = _project.newDslBlockingBuildFiles;
-      if (blocking != null && blocking.isNotEmpty) {
-        logger.printTrace(
-          'Keeping the android.newDsl=false opt-out, because these build files '
-          'block the new DSL: ${blocking.join(', ')}',
-        );
-      }
+    if (!_hasRemovableMarkerPair(contents) || !hasBuiltInKotlinEnabled(contents)) {
+      return;
+    }
+    final List<String>? blocking = _project.newDslBlockingBuildFiles;
+    if (blocking == null) {
+      return;
+    }
+    if (blocking.isNotEmpty) {
+      logger.printTrace(
+        'Keeping the android.newDsl=false opt-out because the following build '
+        'files block the new DSL: ${blocking.join(', ')}',
+      );
       return;
     }
     processFileLines(_gradlePropertiesFile);
+  }
+
+  static bool _hasRemovableMarkerPair(String fileContents) {
+    final List<String> lines = fileContents.split('\n');
+    for (var i = 0; i + 1 < lines.length; i++) {
+      final String marker = lines[i].trim();
+      if ((marker == kNewDslTemplateMarker || marker == kNewDslMigratorMarker) &&
+          _newDslFalseRegex.hasMatch(lines[i + 1])) {
+        return true;
+      }
+    }
+    return false;
   }
 
   @override
@@ -71,7 +81,7 @@ class RemoveNewDslOptOutMigration extends ProjectMigrator {
     final kept = <String>[];
     for (var i = 0; i < lines.length; i++) {
       final String marker = lines[i].trim();
-      if ((marker == kNewDslTemplateMarker || marker == _migratorMarker) &&
+      if ((marker == kNewDslTemplateMarker || marker == kNewDslMigratorMarker) &&
           i + 1 < lines.length &&
           _newDslFalseRegex.hasMatch(lines[i + 1])) {
         i++;
@@ -83,13 +93,13 @@ class RemoveNewDslOptOutMigration extends ProjectMigrator {
       return fileContents;
     }
     logger.printWarning(
-      'Removed the android.newDsl=false opt-out that Flutter added to '
-      '${_gradlePropertiesFile.path}, because the project uses built-in Kotlin '
-      'and neither the app nor its plugins use an API that the new DSL removes. '
-      'The Android Gradle Plugin builds this project with android.newDsl enabled. '
+      'Removed the android.newDsl=false opt-out added by Flutter to '
+      '${_gradlePropertiesFile.path} because built-in Kotlin is enabled and '
+      'scanned Gradle build files use no APIs removed by the new DSL. '
+      'Android Gradle Plugin now builds the project with android.newDsl enabled. '
       'If the build fails, add android.newDsl=false back without the comment '
-      '"$kNewDslTemplateMarker" or "$_migratorMarker" above it. '
-      'Flutter removes the line again if it has either comment. '
+      '"$kNewDslTemplateMarker" or "$kNewDslMigratorMarker" above android.newDsl=false; '
+      'Flutter removes android.newDsl=false again when preceded by either comment. '
       'For details, see $kOptOutOfNewDslDocsUrl',
     );
     return kept.join('\n');

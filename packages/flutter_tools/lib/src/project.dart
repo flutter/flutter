@@ -12,9 +12,11 @@ import 'package:xml/xml.dart';
 import 'package:yaml/yaml.dart';
 
 import 'android/android_builder.dart';
+import 'android/gradle_new_dsl_scanner.dart';
 import 'android/gradle_utils.dart' as gradle;
 import 'base/common.dart';
 import 'base/config.dart';
+import 'base/deferred_component.dart';
 import 'base/error_handling_io.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
@@ -871,14 +873,14 @@ class AndroidProject extends FlutterProjectPlatform {
   static final _declarativeKotlinPluginPatterns = <RegExp>[
     RegExp('^\\s*id\\s*\\(?\\s*[\'"]kotlin-android[\'"]\\s*\\)?$_versionSuffix\\s*\$'),
     RegExp(
-      '^\\s*id\\s*\\(?\\s*[\'"]org.jetbrains.kotlin.android[\'"]\\s*\\)?$_versionSuffix\\s*\$',
+      '^\\s*id\\s*\\(?\\s*[\'"]org\\.jetbrains\\.kotlin\\.android[\'"]\\s*\\)?$_versionSuffix\\s*\$',
     ),
     RegExp('^\\s*kotlin\\s*\\(\\s*"android"\\s*\\)$_versionSuffix\\s*\$'),
     RegExp(r'^\s*alias\s*\(\s*libs\.plugins\.(?:jetbrains\.)?kotlin\.android\s*\)\s*$'),
   ];
 
   /// An optional plugin version, as in `id("org.jetbrains.kotlin.android") version "2.4.20"`.
-  static const _versionSuffix = '(?:\\s+version\\s*\\(?\\s*[\'"][^\'"]*[\'"]\\s*\\)?)?';
+  static const _versionSuffix = r'''(?:\s+version\s*\(?\s*['"][^'"]*['"]\s*\)?)?''';
 
   /// Pattern used to find the assignment of the "group" property in Gradle.
   /// Expected example: `group "dev.flutter.plugin"`
@@ -990,60 +992,106 @@ class AndroidProject extends FlutterProjectPlatform {
     return false;
   }
 
-  /// Paths of Gradle build files that prevent the project from building with
-  /// `android.newDsl` enabled.
+  /// Paths of Gradle build files blocking `android.newDsl=true`.
   ///
-  /// Scans the app module's build file and the `android/build.gradle(.kts)`
-  /// file of each Android plugin listed in `.flutter-plugins-dependencies`.
-  /// A build file blocks `android.newDsl` when the build file uses:
-  /// - the legacy variant API (`applicationVariants`, `libraryVariants`,
-  ///   `testVariants`, `unitTestVariants`, `variantFilter`),
-  /// - a legacy extension type (`BaseExtension`, `AppExtension`,
-  ///   `TestedExtension`, or `LibraryExtension` unless imported or qualified
-  ///   from `com.android.build.api.dsl`), or
-  /// - an unguarded `kotlin-android` plugin application (imperative
-  ///   applications inside an `if` or `else` branch in files that check the
-  ///   AGP version or `android.builtInKotlin`, reactive callbacks such as
-  ///   `plugins.withId`, and `apply false` declarations do not block).
+  /// Scans the root `android/build.gradle(.kts)` file, the app module build
+  /// file, the `.android/Flutter/build.gradle(.kts)` module library script
+  /// when [isModule] is true, each deferred component module's
+  /// `build.gradle(.kts)` file, and the `android/build.gradle(.kts)` file of
+  /// each native Android plugin listed in `.flutter-plugins-dependencies`.
   ///
-  /// Returns null when `.flutter-plugins-dependencies` is missing or unreadable
-  /// because the project's Android plugins are unknown.
+  /// When `.flutter-plugins-dependencies` is absent (for example in an app
+  /// with zero plugins), falls back to `.dart_tool/package_config.json` to
+  /// verify package resolution completed with no Android plugin packages
+  /// awaiting `.flutter-plugins-dependencies` generation.
   ///
-  /// Because only the app and plugin `build.gradle(.kts)` files are scanned,
-  /// logic in `buildSrc`, convention plugins, or included builds is covered by
-  /// the Gradle error handlers in `gradle_errors.dart`.
+  /// Returns `null` when plugin dependencies are unresolved or unreadable.
+  ///
+  /// Build logic in `buildSrc`, convention plugins, or included builds is
+  /// not scanned here and is handled at build time by `gradle_errors.dart`.
   List<String>? get newDslBlockingBuildFiles {
+    final FileSystem fileSystem = hostAppGradleRoot.fileSystem;
     final File dependenciesFile = parent.flutterPluginsDependenciesFile;
-    final buildFiles = <File>[if (appGradleFile.existsSync()) appGradleFile];
+    final buildFiles = <File>[];
+    final seenPaths = <String>{};
+    void addBuildFileIfExists(File file) {
+      if (file.existsSync() && seenPaths.add(fileSystem.path.normalize(file.absolute.path))) {
+        buildFiles.add(file);
+      }
+    }
+
     try {
+      addBuildFileIfExists(hostAppGradleFile);
+      addBuildFileIfExists(appGradleFile);
+      if (isModule) {
+        addBuildFileIfExists(
+          getGroovyOrKotlin(_flutterLibGradleRoot.childDirectory('Flutter'), 'build.gradle'),
+        );
+      }
+      for (final DeferredComponent component
+          in parent.manifest.deferredComponents ?? const <DeferredComponent>[]) {
+        addBuildFileIfExists(
+          getGroovyOrKotlin(hostAppGradleRoot.childDirectory(component.name), 'build.gradle'),
+        );
+      }
+
       if (!dependenciesFile.existsSync()) {
-        return null;
-      }
-      final Object? decoded = json.decode(dependenciesFile.readAsStringSync());
-      final Object? plugins = decoded is Map<String, Object?> ? decoded['plugins'] : null;
-      final Object? androidPlugins = plugins is Map<String, Object?>
-          ? plugins[AndroidPlugin.kConfigKey]
-          : null;
-      if (androidPlugins != null && androidPlugins is! List<Object?>) {
-        return null;
-      }
-      for (final Object? plugin in androidPlugins as List<Object?>? ?? const <Object?>[]) {
-        final Object? path = plugin is Map<String, Object?> ? plugin['path'] : null;
-        if (path is! String) {
+        final File? packageConfigFile = findPackageConfigFile(parent.directory);
+        if (packageConfigFile == null) {
           return null;
         }
-        final Directory pluginAndroidDir = hostAppGradleRoot.fileSystem
-            .directory(path)
-            .childDirectory('android');
-        final File buildFile = getGroovyOrKotlin(pluginAndroidDir, 'build.gradle');
-        if (buildFile.existsSync()) {
-          buildFiles.add(buildFile);
+        final PackageConfig packageConfig = PackageConfig.parseString(
+          packageConfigFile.readAsStringSync(),
+          packageConfigFile.uri,
+        );
+        final String projectRootPath = fileSystem.path.normalize(parent.directory.absolute.path);
+        for (final Package pkg in packageConfig.packages) {
+          final Directory pkgDir = fileSystem.directory(pkg.root);
+          final String pkgRootPath = fileSystem.path.normalize(pkgDir.absolute.path);
+          if (fileSystem.path.equals(pkgRootPath, projectRootPath)) {
+            continue;
+          }
+          final Directory pkgAndroidDir = pkgDir.childDirectory('android');
+          if (pkgAndroidDir.childFile('build.gradle').existsSync() ||
+              pkgAndroidDir.childFile('build.gradle.kts').existsSync()) {
+            return null;
+          }
+        }
+      } else {
+        final Object? decoded = json.decode(dependenciesFile.readAsStringSync());
+        if (decoded is! Map<String, Object?>) {
+          return null;
+        }
+        final Object? plugins = decoded['plugins'];
+        if (plugins is! Map<String, Object?>) {
+          return null;
+        }
+        final Object? androidPlugins = plugins[AndroidPlugin.kConfigKey];
+        if (androidPlugins != null && androidPlugins is! List<Object?>) {
+          return null;
+        }
+        if (androidPlugins is List<Object?>) {
+          for (final Object? plugin in androidPlugins) {
+            if (plugin is! Map<String, Object?>) {
+              return null;
+            }
+            if (plugin['native_build'] == false) {
+              continue;
+            }
+            final Object? path = plugin['path'];
+            if (path is! String) {
+              return null;
+            }
+            final Directory pluginAndroidDir = fileSystem.directory(path).childDirectory('android');
+            addBuildFileIfExists(getGroovyOrKotlin(pluginAndroidDir, 'build.gradle'));
+          }
         }
       }
+
       final blocking = <String>[];
       for (final buildFile in buildFiles) {
         final bool isKotlinDsl = buildFile.path.endsWith('.kts');
-        if (_GradleNewDslScanner.blocksNewDsl(
+        if (GradleNewDslScanner.blocksNewDsl(
           buildFile.readAsStringSync(),
           isKotlinDsl: isKotlinDsl,
         )) {
@@ -1649,854 +1697,4 @@ String? versionToParsableString(Version? version) {
   }
 
   return '${version.major}.${version.minor}.${version.patch}';
-}
-
-enum _GradleTokenKind {
-  ident,
-  string,
-  lBrace,
-  rBrace,
-  lParen,
-  rParen,
-  lBracket,
-  rBracket,
-  dot,
-  colon,
-  equals,
-  semicolon,
-  star,
-  other,
-}
-
-final class _GradleToken {
-  const _GradleToken(this.kind, this.text, this.line);
-
-  final _GradleTokenKind kind;
-  final String text;
-  final int line;
-}
-
-final class _StringLexState {
-  _StringLexState({required this.quote, required this.triple});
-
-  final int quote;
-  final bool triple;
-  final StringBuffer buffer = StringBuffer();
-  int? interpolationBraceDepth;
-}
-
-/// Lexical scanner for Groovy and Kotlin Gradle build files used by
-/// [AndroidProject.newDslBlockingBuildFiles].
-abstract final class _GradleNewDslScanner {
-  static const _unconditionalLegacyIdentifiers = <String>{
-    'applicationVariants',
-    'libraryVariants',
-    'testVariants',
-    'unitTestVariants',
-    'variantFilter',
-    'BaseExtension',
-    'AppExtension',
-    'TestedExtension',
-  };
-
-  static const _legacyGradlePackage = <String>['com', 'android', 'build', 'gradle'];
-  static const _newApiDslPackage = <String>['com', 'android', 'build', 'api', 'dsl'];
-
-  static final _kotlinAndroidCatalogPattern = RegExp(r'kotlin.*android', caseSensitive: false);
-
-  /// Returns true when [contents] uses a legacy AGP DSL or variant API or
-  /// applies the `kotlin-android` plugin without an AGP-version or
-  /// `android.builtInKotlin` guard, using [isKotlinDsl] to apply Kotlin raw
-  /// string and nested block comment rules.
-  static bool blocksNewDsl(String contents, {required bool isKotlinDsl}) {
-    final List<_GradleToken> tokens = _tokenize(contents, isKotlinDsl: isKotlinDsl);
-    if (tokens.isEmpty) {
-      return false;
-    }
-
-    final List<int?> matchingClose = _computeMatchingDelimiters(tokens);
-    final inPluginsBlock = List<bool>.filled(tokens.length, false);
-    if (_hasBlockingPluginsBlockDeclaration(tokens, matchingClose, inPluginsBlock)) {
-      return true;
-    }
-    if (_hasBlockingLegacyApiReference(tokens)) {
-      return true;
-    }
-    return _hasUnguardedImperativeKotlinAndroidApply(tokens, matchingClose, inPluginsBlock);
-  }
-
-  static List<_GradleToken> _tokenize(String source, {required bool isKotlinDsl}) {
-    final tokens = <_GradleToken>[];
-    final stringStack = <_StringLexState>[];
-    final int length = source.length;
-    var i = 0;
-    var line = 1;
-
-    while (i < length) {
-      final _StringLexState? activeString = stringStack.isNotEmpty ? stringStack.last : null;
-      if (activeString != null && activeString.interpolationBraceDepth == null) {
-        final int ch = source.codeUnitAt(i);
-        if (ch == 0x5C /* \ */ && !(isKotlinDsl && activeString.triple)) {
-          if (i + 1 < length) {
-            if (source.codeUnitAt(i + 1) == 0x0A /* \n */ ) {
-              line++;
-            }
-            activeString.buffer.writeCharCode(source.codeUnitAt(i + 1));
-            i += 2;
-            continue;
-          }
-          i++;
-          continue;
-        }
-        if (activeString.quote == 0x22 /* " */ &&
-            ch == 0x24 /* $ */ &&
-            i + 1 < length &&
-            source.codeUnitAt(i + 1) == 0x7B /* { */ ) {
-          activeString.interpolationBraceDepth = 0;
-          i += 2;
-          continue;
-        }
-        if (activeString.triple) {
-          if (ch == activeString.quote &&
-              i + 2 < length &&
-              source.codeUnitAt(i + 1) == activeString.quote &&
-              source.codeUnitAt(i + 2) == activeString.quote) {
-            while (i + 3 < length && source.codeUnitAt(i + 3) == activeString.quote) {
-              activeString.buffer.writeCharCode(activeString.quote);
-              i++;
-            }
-            tokens.add(_GradleToken(_GradleTokenKind.string, activeString.buffer.toString(), line));
-            stringStack.removeLast();
-            i += 3;
-            continue;
-          }
-          if (ch == 0x0A /* \n */ ) {
-            line++;
-          }
-          activeString.buffer.writeCharCode(ch);
-          i++;
-          continue;
-        }
-        if (ch == activeString.quote) {
-          tokens.add(_GradleToken(_GradleTokenKind.string, activeString.buffer.toString(), line));
-          stringStack.removeLast();
-          i++;
-          continue;
-        }
-        if (ch == 0x0A /* \n */ ) {
-          tokens.add(_GradleToken(_GradleTokenKind.string, activeString.buffer.toString(), line));
-          stringStack.removeLast();
-          line++;
-          i++;
-          continue;
-        }
-        activeString.buffer.writeCharCode(ch);
-        i++;
-        continue;
-      }
-
-      final int ch = source.codeUnitAt(i);
-      if (ch == 0x0A /* \n */ ) {
-        line++;
-        i++;
-        continue;
-      }
-      if (ch <= 0x20) {
-        i++;
-        continue;
-      }
-
-      // Line comment `// ...`
-      if (ch == 0x2F /* / */ && i + 1 < length && source.codeUnitAt(i + 1) == 0x2F /* / */ ) {
-        i += 2;
-        while (i < length && source.codeUnitAt(i) != 0x0A /* \n */ ) {
-          i++;
-        }
-        continue;
-      }
-
-      // Block comment `/* ... */`
-      if (ch == 0x2F /* / */ && i + 1 < length && source.codeUnitAt(i + 1) == 0x2A /* * */ ) {
-        i += 2;
-        var depth = 1;
-        while (i < length && depth > 0) {
-          final int c = source.codeUnitAt(i);
-          if (c == 0x0A /* \n */ ) {
-            line++;
-            i++;
-          } else if (isKotlinDsl &&
-              c == 0x2F /* / */ &&
-              i + 1 < length &&
-              source.codeUnitAt(i + 1) == 0x2A /* * */ ) {
-            depth++;
-            i += 2;
-          } else if (c == 0x2A /* * */ &&
-              i + 1 < length &&
-              source.codeUnitAt(i + 1) == 0x2F /* / */ ) {
-            depth--;
-            i += 2;
-          } else {
-            i++;
-          }
-        }
-        continue;
-      }
-
-      // String and character literals
-      if (ch == 0x22 /* " */ || ch == 0x27 /* ' */ ) {
-        final bool isTriple =
-            i + 2 < length &&
-            source.codeUnitAt(i + 1) == ch &&
-            source.codeUnitAt(i + 2) == ch &&
-            (!isKotlinDsl || ch == 0x22 /* " */ );
-        stringStack.add(_StringLexState(quote: ch, triple: isTriple));
-        i += isTriple ? 3 : 1;
-        continue;
-      }
-
-      // Backticked Kotlin identifier
-      if (ch == 0x60 /* ` */ ) {
-        final int start = i + 1;
-        i++;
-        while (i < length && source.codeUnitAt(i) != 0x60 && source.codeUnitAt(i) != 0x0A) {
-          i++;
-        }
-        tokens.add(_GradleToken(_GradleTokenKind.ident, source.substring(start, i), line));
-        if (i < length && source.codeUnitAt(i) == 0x60) {
-          i++;
-        }
-        continue;
-      }
-
-      // Identifiers
-      if (_isIdentStart(ch)) {
-        final start = i;
-        i++;
-        while (i < length && _isIdentPart(source.codeUnitAt(i))) {
-          i++;
-        }
-        tokens.add(_GradleToken(_GradleTokenKind.ident, source.substring(start, i), line));
-        continue;
-      }
-
-      if (ch == 0x7B /* { */ ) {
-        if (activeString != null && activeString.interpolationBraceDepth != null) {
-          activeString.interpolationBraceDepth = activeString.interpolationBraceDepth! + 1;
-        }
-        tokens.add(_GradleToken(_GradleTokenKind.lBrace, '{', line));
-        i++;
-        continue;
-      }
-      if (ch == 0x7D /* } */ ) {
-        if (activeString != null && activeString.interpolationBraceDepth != null) {
-          if (activeString.interpolationBraceDepth == 0) {
-            activeString.interpolationBraceDepth = null;
-            i++;
-            continue;
-          }
-          activeString.interpolationBraceDepth = activeString.interpolationBraceDepth! - 1;
-        }
-        tokens.add(_GradleToken(_GradleTokenKind.rBrace, '}', line));
-        i++;
-        continue;
-      }
-
-      final _GradleTokenKind kind = switch (ch) {
-        0x28 /* ( */ => _GradleTokenKind.lParen,
-        0x29 /* ) */ => _GradleTokenKind.rParen,
-        0x5B /* [ */ => _GradleTokenKind.lBracket,
-        0x5D /* ] */ => _GradleTokenKind.rBracket,
-        0x2E /* . */ => _GradleTokenKind.dot,
-        0x3A /* : */ => _GradleTokenKind.colon,
-        0x3D /* = */ => _GradleTokenKind.equals,
-        0x3B /* ; */ => _GradleTokenKind.semicolon,
-        0x2A /* * */ => _GradleTokenKind.star,
-        _ => _GradleTokenKind.other,
-      };
-      tokens.add(_GradleToken(kind, String.fromCharCode(ch), line));
-      i++;
-    }
-
-    while (stringStack.isNotEmpty) {
-      final _StringLexState unclosed = stringStack.removeLast();
-      tokens.add(_GradleToken(_GradleTokenKind.string, unclosed.buffer.toString(), line));
-    }
-
-    return tokens;
-  }
-
-  static bool _isIdentStart(int ch) =>
-      (ch >= 0x41 && ch <= 0x5A) ||
-      (ch >= 0x61 && ch <= 0x7A) ||
-      ch == 0x5F /* _ */ ||
-      ch == 0x24 /* $ */;
-
-  static bool _isIdentPart(int ch) => _isIdentStart(ch) || (ch >= 0x30 && ch <= 0x39);
-
-  static List<int?> _computeMatchingDelimiters(List<_GradleToken> tokens) {
-    final matching = List<int?>.filled(tokens.length, null);
-    final braceStack = <int>[];
-    final parenStack = <int>[];
-    final bracketStack = <int>[];
-    for (var i = 0; i < tokens.length; i++) {
-      switch (tokens[i].kind) {
-        case _GradleTokenKind.lBrace:
-          braceStack.add(i);
-        case _GradleTokenKind.rBrace:
-          if (braceStack.isNotEmpty) {
-            matching[braceStack.removeLast()] = i;
-          }
-        case _GradleTokenKind.lParen:
-          parenStack.add(i);
-        case _GradleTokenKind.rParen:
-          if (parenStack.isNotEmpty) {
-            matching[parenStack.removeLast()] = i;
-          }
-        case _GradleTokenKind.lBracket:
-          bracketStack.add(i);
-        case _GradleTokenKind.rBracket:
-          if (bracketStack.isNotEmpty) {
-            matching[bracketStack.removeLast()] = i;
-          }
-        case _GradleTokenKind.ident ||
-            _GradleTokenKind.string ||
-            _GradleTokenKind.dot ||
-            _GradleTokenKind.colon ||
-            _GradleTokenKind.equals ||
-            _GradleTokenKind.semicolon ||
-            _GradleTokenKind.star ||
-            _GradleTokenKind.other:
-          break;
-      }
-    }
-    return matching;
-  }
-
-  static bool _hasBlockingPluginsBlockDeclaration(
-    List<_GradleToken> tokens,
-    List<int?> matchingClose,
-    List<bool> inPluginsBlock,
-  ) {
-    for (var i = 0; i + 1 < tokens.length; i++) {
-      if (tokens[i].kind != _GradleTokenKind.ident ||
-          tokens[i].text != 'plugins' ||
-          (i > 0 && tokens[i - 1].kind == _GradleTokenKind.dot) ||
-          tokens[i + 1].kind != _GradleTokenKind.lBrace) {
-        continue;
-      }
-      final int blockEnd = matchingClose[i + 1] ?? tokens.length;
-      for (var k = i; k < blockEnd && k < tokens.length; k++) {
-        inPluginsBlock[k] = true;
-      }
-
-      for (int j = i + 2; j < blockEnd; j++) {
-        final int? afterSpec = _matchDeclarativeKotlinAndroidSpec(
-          tokens,
-          matchingClose,
-          j,
-          blockEnd,
-        );
-        if (afterSpec == null) {
-          continue;
-        }
-        if (!_hasApplyFalseModifier(tokens, afterSpec, blockEnd)) {
-          return true;
-        }
-      }
-      i = blockEnd;
-    }
-    return false;
-  }
-
-  static int? _matchDeclarativeKotlinAndroidSpec(
-    List<_GradleToken> tokens,
-    List<int?> matchingClose,
-    int index,
-    int blockEnd,
-  ) {
-    final _GradleToken token = tokens[index];
-    if (token.kind != _GradleTokenKind.ident ||
-        (index > 0 && tokens[index - 1].kind == _GradleTokenKind.dot)) {
-      return null;
-    }
-    if (token.text == 'id') {
-      if (index + 1 < blockEnd &&
-          tokens[index + 1].kind == _GradleTokenKind.string &&
-          _isKotlinAndroidPluginId(tokens[index + 1].text)) {
-        return index + 2;
-      }
-      if (index + 3 < blockEnd &&
-          tokens[index + 1].kind == _GradleTokenKind.lParen &&
-          tokens[index + 2].kind == _GradleTokenKind.string &&
-          _isKotlinAndroidPluginId(tokens[index + 2].text) &&
-          tokens[index + 3].kind == _GradleTokenKind.rParen) {
-        return index + 4;
-      }
-      return null;
-    }
-    if (token.text == 'kotlin') {
-      if (index + 1 < blockEnd &&
-          tokens[index + 1].kind == _GradleTokenKind.string &&
-          tokens[index + 1].text == 'android') {
-        return index + 2;
-      }
-      if (index + 3 < blockEnd &&
-          tokens[index + 1].kind == _GradleTokenKind.lParen &&
-          tokens[index + 2].kind == _GradleTokenKind.string &&
-          tokens[index + 2].text == 'android' &&
-          tokens[index + 3].kind == _GradleTokenKind.rParen) {
-        return index + 4;
-      }
-      return null;
-    }
-    if (token.text == 'alias' &&
-        index + 1 < blockEnd &&
-        tokens[index + 1].kind == _GradleTokenKind.lParen) {
-      final int? closeParen = matchingClose[index + 1];
-      if (closeParen == null || closeParen > blockEnd) {
-        return null;
-      }
-      // Match `alias(libs.plugins.<...kotlin...android...>)`.
-      if (index + 6 < closeParen &&
-          tokens[index + 2].kind == _GradleTokenKind.ident &&
-          tokens[index + 2].text == 'libs' &&
-          tokens[index + 3].kind == _GradleTokenKind.dot &&
-          tokens[index + 4].kind == _GradleTokenKind.ident &&
-          tokens[index + 4].text == 'plugins' &&
-          tokens[index + 5].kind == _GradleTokenKind.dot) {
-        final segments = <String>[];
-        var validChain = true;
-        for (int k = index + 6; k < closeParen; k += 2) {
-          if (tokens[k].kind != _GradleTokenKind.ident) {
-            validChain = false;
-            break;
-          }
-          segments.add(tokens[k].text);
-          if (k + 1 < closeParen && tokens[k + 1].kind != _GradleTokenKind.dot) {
-            validChain = false;
-            break;
-          }
-        }
-        if (validChain && _kotlinAndroidCatalogPattern.hasMatch(segments.join('.'))) {
-          return closeParen + 1;
-        }
-      }
-    }
-    return null;
-  }
-
-  static bool _hasApplyFalseModifier(List<_GradleToken> tokens, int start, int blockEnd) {
-    var parenDepth = 0;
-    for (var k = start; k < blockEnd; k++) {
-      final _GradleToken token = tokens[k];
-      if (parenDepth == 0) {
-        if (token.kind == _GradleTokenKind.semicolon ||
-            token.kind == _GradleTokenKind.lBrace ||
-            token.kind == _GradleTokenKind.rBrace) {
-          return false;
-        }
-        final bool startsNextPluginSpec =
-            token.kind == _GradleTokenKind.ident &&
-            (k == 0 || tokens[k - 1].kind != _GradleTokenKind.dot) &&
-            (token.text == 'id' || token.text == 'kotlin' || token.text == 'alias') &&
-            k + 1 < blockEnd &&
-            (tokens[k + 1].kind == _GradleTokenKind.lParen ||
-                tokens[k + 1].kind == _GradleTokenKind.string);
-        if (startsNextPluginSpec) {
-          return false;
-        }
-        if (token.kind == _GradleTokenKind.ident && token.text == 'apply') {
-          if (k + 1 < blockEnd &&
-              tokens[k + 1].kind == _GradleTokenKind.ident &&
-              tokens[k + 1].text == 'false') {
-            return true;
-          }
-          if (k + 3 < blockEnd &&
-              tokens[k + 1].kind == _GradleTokenKind.lParen &&
-              tokens[k + 2].kind == _GradleTokenKind.ident &&
-              tokens[k + 2].text == 'false' &&
-              tokens[k + 3].kind == _GradleTokenKind.rParen) {
-            return true;
-          }
-        }
-      }
-      if (token.kind == _GradleTokenKind.lParen) {
-        parenDepth++;
-      } else if (token.kind == _GradleTokenKind.rParen && parenDepth > 0) {
-        parenDepth--;
-      }
-    }
-    return false;
-  }
-
-  static bool _hasBlockingLegacyApiReference(List<_GradleToken> tokens) {
-    var importsNewLibraryExtension = false;
-    var importsLegacyGradleWildcard = false;
-
-    for (var i = 0; i < tokens.length; i++) {
-      if (tokens[i].kind != _GradleTokenKind.ident || tokens[i].text != 'import') {
-        continue;
-      }
-      final int? targetEnd = _consumeImportPath(tokens, i + 1);
-      if (targetEnd == null) {
-        continue;
-      }
-      final _GradleToken lastSegment = tokens[targetEnd - 1];
-      if (lastSegment.kind == _GradleTokenKind.star) {
-        if (_hasDottedPrefix(tokens, targetEnd - 1, _legacyGradlePackage)) {
-          importsLegacyGradleWildcard = true;
-        } else if (_hasDottedPrefix(tokens, targetEnd - 1, _newApiDslPackage)) {
-          importsNewLibraryExtension = true;
-        }
-      } else if (lastSegment.kind == _GradleTokenKind.ident &&
-          lastSegment.text == 'LibraryExtension') {
-        if (_hasDottedPrefix(tokens, targetEnd - 1, _legacyGradlePackage)) {
-          return true;
-        }
-        final bool hasDifferentAlias =
-            targetEnd + 1 < tokens.length &&
-            tokens[targetEnd].kind == _GradleTokenKind.ident &&
-            tokens[targetEnd].text == 'as' &&
-            tokens[targetEnd + 1].kind == _GradleTokenKind.ident &&
-            tokens[targetEnd + 1].text != 'LibraryExtension';
-        if (!hasDifferentAlias && _hasDottedPrefix(tokens, targetEnd - 1, _newApiDslPackage)) {
-          importsNewLibraryExtension = true;
-        }
-      }
-    }
-
-    for (var i = 0; i < tokens.length; i++) {
-      final _GradleToken token = tokens[i];
-      if (token.kind != _GradleTokenKind.ident) {
-        continue;
-      }
-      if (_unconditionalLegacyIdentifiers.contains(token.text)) {
-        return true;
-      }
-      if (token.text == 'LibraryExtension') {
-        if (_hasDottedPrefix(tokens, i, _legacyGradlePackage)) {
-          return true;
-        }
-        if (_hasDottedPrefix(tokens, i, _newApiDslPackage)) {
-          continue;
-        }
-        if (!importsNewLibraryExtension || importsLegacyGradleWildcard) {
-          return true;
-        }
-      }
-    }
-    return false;
-  }
-
-  static int? _consumeImportPath(List<_GradleToken> tokens, int start) {
-    var index = start;
-    if (index < tokens.length &&
-        tokens[index].kind == _GradleTokenKind.ident &&
-        tokens[index].text == 'static') {
-      index++;
-    }
-    if (index >= tokens.length || tokens[index].kind != _GradleTokenKind.ident) {
-      return null;
-    }
-    index++;
-    while (index + 1 < tokens.length && tokens[index].kind == _GradleTokenKind.dot) {
-      final _GradleToken next = tokens[index + 1];
-      if (next.kind == _GradleTokenKind.star) {
-        return index + 2;
-      }
-      if (next.kind != _GradleTokenKind.ident) {
-        break;
-      }
-      index += 2;
-    }
-    return index;
-  }
-
-  static bool _hasDottedPrefix(List<_GradleToken> tokens, int targetIndex, List<String> prefix) {
-    final int requiredTokens = prefix.length * 2;
-    if (targetIndex < requiredTokens) {
-      return false;
-    }
-    final int start = targetIndex - requiredTokens;
-    if (start > 0 && tokens[start - 1].kind == _GradleTokenKind.dot) {
-      return false;
-    }
-    for (var i = 0; i < prefix.length; i++) {
-      final _GradleToken segment = tokens[start + i * 2];
-      final _GradleToken separator = tokens[start + i * 2 + 1];
-      if (segment.kind != _GradleTokenKind.ident ||
-          segment.text != prefix[i] ||
-          separator.kind != _GradleTokenKind.dot) {
-        return false;
-      }
-    }
-    return true;
-  }
-
-  static bool _hasUnguardedImperativeKotlinAndroidApply(
-    List<_GradleToken> tokens,
-    List<int?> matchingClose,
-    List<bool> inPluginsBlock,
-  ) {
-    final bool hasGuardSignal = tokens.any(
-      (_GradleToken token) =>
-          (token.kind == _GradleTokenKind.ident &&
-              (token.text == 'ANDROID_GRADLE_PLUGIN_VERSION' ||
-                  token.text == 'AndroidPluginVersion')) ||
-          (token.kind == _GradleTokenKind.string && token.text == 'android.builtInKotlin'),
-    );
-
-    final inConditionalBody = List<bool>.filled(tokens.length, false);
-    for (var i = 0; i + 1 < tokens.length; i++) {
-      if (tokens[i].kind != _GradleTokenKind.ident ||
-          tokens[i].text != 'if' ||
-          (i > 0 && tokens[i - 1].kind == _GradleTokenKind.dot) ||
-          tokens[i + 1].kind != _GradleTokenKind.lParen) {
-        continue;
-      }
-      final int? condClose = matchingClose[i + 1];
-      if (condClose == null || condClose + 1 >= tokens.length) {
-        continue;
-      }
-      final int? thenEnd = _markConditionalBranch(
-        tokens,
-        matchingClose,
-        inConditionalBody,
-        condClose + 1,
-      );
-      if (thenEnd != null &&
-          thenEnd + 1 < tokens.length &&
-          tokens[thenEnd].kind == _GradleTokenKind.ident &&
-          tokens[thenEnd].text == 'else') {
-        _markConditionalBranch(tokens, matchingClose, inConditionalBody, thenEnd + 1);
-      }
-    }
-
-    final kotlinPluginVariables = <String>{};
-    for (var i = 0; i + 2 < tokens.length; i++) {
-      if (tokens[i].kind == _GradleTokenKind.ident &&
-          tokens[i].text != 'plugin' &&
-          tokens[i + 1].kind == _GradleTokenKind.equals &&
-          tokens[i + 2].kind == _GradleTokenKind.string &&
-          _isKotlinAndroidPluginId(tokens[i + 2].text)) {
-        kotlinPluginVariables.add(tokens[i].text);
-      }
-    }
-
-    for (var i = 0; i < tokens.length; i++) {
-      if (inPluginsBlock[i] ||
-          tokens[i].kind != _GradleTokenKind.ident ||
-          tokens[i].text != 'apply') {
-        continue;
-      }
-      if (i + 1 >= tokens.length) {
-        continue;
-      }
-      final _GradleToken next = tokens[i + 1];
-      if (next.kind == _GradleTokenKind.lParen) {
-        final int closeParen = matchingClose[i + 1] ?? tokens.length;
-        final bool appliesViaNamedArg = _rangeHasPluginKeyTarget(
-          tokens,
-          i + 2,
-          closeParen,
-          kotlinPluginVariables,
-          allowEquals: true,
-        );
-        final bool appliesViaContainer =
-            _hasPluginContainerReceiver(tokens, i) &&
-            i + 2 < closeParen &&
-            _isKotlinAndroidTarget(tokens[i + 2], kotlinPluginVariables);
-        if ((appliesViaNamedArg || appliesViaContainer) &&
-            (!hasGuardSignal || !inConditionalBody[i])) {
-          return true;
-        }
-      } else if (next.kind == _GradleTokenKind.lBrace) {
-        final int closeBrace = matchingClose[i + 1] ?? tokens.length;
-        for (int k = i + 2; k < closeBrace; k++) {
-          if (tokens[k].kind != _GradleTokenKind.ident || tokens[k].text != 'plugin') {
-            continue;
-          }
-          final bool parenCall =
-              k + 2 < closeBrace &&
-              tokens[k + 1].kind == _GradleTokenKind.lParen &&
-              _isKotlinAndroidTarget(tokens[k + 2], kotlinPluginVariables);
-          final bool bareCall =
-              k + 1 < closeBrace &&
-              tokens[k + 1].line == tokens[k].line &&
-              _isKotlinAndroidTarget(tokens[k + 1], kotlinPluginVariables);
-          if ((parenCall || bareCall) && (!hasGuardSignal || !inConditionalBody[k])) {
-            return true;
-          }
-        }
-      } else {
-        final int stmtEnd = _findSingleStatementEnd(tokens, matchingClose, i);
-        final bool appliesViaMap = _rangeHasPluginKeyTarget(
-          tokens,
-          i + 1,
-          stmtEnd,
-          kotlinPluginVariables,
-          allowEquals: false,
-        );
-        final bool appliesViaContainer =
-            _hasPluginContainerReceiver(tokens, i) &&
-            i + 1 < stmtEnd &&
-            tokens[i + 1].line == tokens[i].line &&
-            _isKotlinAndroidTarget(tokens[i + 1], kotlinPluginVariables);
-        if ((appliesViaMap || appliesViaContainer) && (!hasGuardSignal || !inConditionalBody[i])) {
-          return true;
-        }
-      }
-    }
-    return false;
-  }
-
-  static bool _rangeHasPluginKeyTarget(
-    List<_GradleToken> tokens,
-    int start,
-    int end,
-    Set<String> kotlinPluginVariables, {
-    required bool allowEquals,
-  }) {
-    for (var k = start; k + 2 < end; k++) {
-      final _GradleToken key = tokens[k];
-      final bool isPluginKey =
-          (key.kind == _GradleTokenKind.ident || key.kind == _GradleTokenKind.string) &&
-          key.text == 'plugin';
-      final _GradleToken sep = tokens[k + 1];
-      final bool validSep =
-          sep.kind == _GradleTokenKind.colon ||
-          (allowEquals && sep.kind == _GradleTokenKind.equals) ||
-          (sep.kind == _GradleTokenKind.ident && sep.text == 'to');
-      if (isPluginKey && validSep && _isKotlinAndroidTarget(tokens[k + 2], kotlinPluginVariables)) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  static bool _hasPluginContainerReceiver(List<_GradleToken> tokens, int applyIndex) {
-    if (applyIndex < 2 || tokens[applyIndex - 1].kind != _GradleTokenKind.dot) {
-      return false;
-    }
-    final _GradleToken receiver = tokens[applyIndex - 2];
-    if (receiver.kind == _GradleTokenKind.ident &&
-        (receiver.text == 'pluginManager' || receiver.text == 'plugins')) {
-      return true;
-    }
-    if (applyIndex >= 4 &&
-        receiver.kind == _GradleTokenKind.rParen &&
-        tokens[applyIndex - 3].kind == _GradleTokenKind.lParen &&
-        tokens[applyIndex - 4].kind == _GradleTokenKind.ident &&
-        (tokens[applyIndex - 4].text == 'getPluginManager' ||
-            tokens[applyIndex - 4].text == 'getPlugins')) {
-      return true;
-    }
-    return false;
-  }
-
-  static int? _markConditionalBranch(
-    List<_GradleToken> tokens,
-    List<int?> matchingClose,
-    List<bool> inConditionalBody,
-    int start,
-  ) {
-    if (start >= tokens.length) {
-      return null;
-    }
-    if (tokens[start].kind == _GradleTokenKind.lBrace) {
-      final int? closeBrace = matchingClose[start];
-      if (closeBrace == null) {
-        return null;
-      }
-      for (int k = start + 1; k < closeBrace; k++) {
-        inConditionalBody[k] = true;
-      }
-      return closeBrace + 1;
-    }
-    if (tokens[start].kind == _GradleTokenKind.ident && tokens[start].text == 'if') {
-      if (start + 1 >= tokens.length || tokens[start + 1].kind != _GradleTokenKind.lParen) {
-        return null;
-      }
-      final int? condClose = matchingClose[start + 1];
-      if (condClose == null || condClose + 1 >= tokens.length) {
-        return null;
-      }
-      final int? nestedThenEnd = _markConditionalBranch(
-        tokens,
-        matchingClose,
-        inConditionalBody,
-        condClose + 1,
-      );
-      if (nestedThenEnd != null &&
-          nestedThenEnd + 1 < tokens.length &&
-          tokens[nestedThenEnd].kind == _GradleTokenKind.ident &&
-          tokens[nestedThenEnd].text == 'else') {
-        return _markConditionalBranch(tokens, matchingClose, inConditionalBody, nestedThenEnd + 1);
-      }
-      return nestedThenEnd;
-    }
-    final int stmtEnd = _findSingleStatementEnd(tokens, matchingClose, start);
-    for (var k = start; k < stmtEnd; k++) {
-      inConditionalBody[k] = true;
-    }
-    return stmtEnd;
-  }
-
-  static int _findSingleStatementEnd(
-    List<_GradleToken> tokens,
-    List<int?> matchingClose,
-    int start,
-  ) {
-    var j = start;
-    while (j < tokens.length) {
-      final _GradleToken token = tokens[j];
-      if (token.kind == _GradleTokenKind.semicolon ||
-          token.kind == _GradleTokenKind.rBrace ||
-          token.kind == _GradleTokenKind.rParen ||
-          token.kind == _GradleTokenKind.rBracket ||
-          (token.kind == _GradleTokenKind.ident && token.text == 'else')) {
-        return j;
-      }
-      if (token.kind == _GradleTokenKind.lParen ||
-          token.kind == _GradleTokenKind.lBrace ||
-          token.kind == _GradleTokenKind.lBracket) {
-        final int? close = matchingClose[j];
-        if (close == null) {
-          return start;
-        }
-        final wasBrace = token.kind == _GradleTokenKind.lBrace;
-        j = close + 1;
-        if (j >= tokens.length) {
-          return j;
-        }
-        if (wasBrace && tokens[j].kind != _GradleTokenKind.dot) {
-          return j;
-        }
-        if (tokens[j].line > tokens[close].line &&
-            tokens[j].kind != _GradleTokenKind.dot &&
-            tokens[j].kind != _GradleTokenKind.lBrace) {
-          return j;
-        }
-        continue;
-      }
-      if (j + 1 >= tokens.length) {
-        return j + 1;
-      }
-      final _GradleToken next = tokens[j + 1];
-      if (next.line > token.line &&
-          token.kind != _GradleTokenKind.dot &&
-          next.kind != _GradleTokenKind.dot) {
-        return j + 1;
-      }
-      j++;
-    }
-    return j;
-  }
-
-  static bool _isKotlinAndroidTarget(_GradleToken token, Set<String> kotlinPluginVariables) =>
-      (token.kind == _GradleTokenKind.string && _isKotlinAndroidPluginId(token.text)) ||
-      (token.kind == _GradleTokenKind.ident && kotlinPluginVariables.contains(token.text));
-
-  static bool _isKotlinAndroidPluginId(String value) =>
-      value == 'kotlin-android' || value == 'org.jetbrains.kotlin.android';
 }

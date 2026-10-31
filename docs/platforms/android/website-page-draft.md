@@ -9,14 +9,14 @@ beta channel. Contributor-facing details live in
 ## Summary
 
 The Flutter Gradle Plugin uses only the public Android Gradle Plugin (AGP)
-API. Flutter projects that set `android.builtInKotlin=true`, and whose app and
-Android plugin build files do not use legacy AGP APIs or apply the
-`kotlin-android` plugin unguarded, build with AGP's new DSL enabled: Flutter
-does not add `android.newDsl=false` to ready projects, and removes the
-marker-commented opt-out that Flutter added. Gradle build
-scripts that use the legacy AGP APIs — most commonly
-`android.applicationVariants` — fail to configure and must be migrated to the
-AGP Variant API.
+API. Flutter projects setting `android.builtInKotlin=true`, whose scanned
+Gradle build files neither use legacy AGP APIs nor apply `kotlin-android`
+unguarded, build with AGP's new DSL enabled: Flutter skips adding
+`android.newDsl=false` to ready projects and removes any marker-commented
+`android.newDsl=false` opt-out previously added by Flutter. Gradle build
+scripts referencing legacy AGP APIs — most commonly
+`android.applicationVariants` — fail during configuration and require migration
+to the AGP Variant API.
 
 ## Background
 
@@ -37,19 +37,27 @@ built-in Kotlin migration (tracked in
 [flutter/flutter#184836](https://github.com/flutter/flutter/issues/184836))
 removes both.
 
-Flutter scans the app module's build file and the `android/build.gradle(.kts)`
-file of each Android plugin before removing the opt-out. A plugin whose build
-file uses legacy APIs (such as `android.libraryVariants`, `variantFilter`, or
-`com.android.build.gradle.LibraryExtension`) or applies `kotlin-android` without
-guarding on the AGP version or `android.builtInKotlin` keeps
-`android.newDsl=false` in place, and fails once the opt-out is removed.
+Flutter scans the root `android/build.gradle(.kts)` script, the app module
+`android/app/build.gradle(.kts)` script, the `.android/Flutter/build.gradle(.kts)`
+module library script, each deferred component module's `build.gradle(.kts)`
+script, and the `android/build.gradle(.kts)` script of each native Android
+plugin before removing the opt-out (using `.dart_tool/package_config.json` to
+confirm package resolution in zero-plugin apps). When any scanned build file
+uses legacy AGP APIs (such as `android.libraryVariants`, `variantFilter`,
+`BaseAppModuleExtension`, or `com.android.build.gradle.LibraryExtension`) or
+applies `kotlin-android` without an AGP-version, `android.builtInKotlin`, or
+`android.newDsl` guard, Flutter keeps `android.newDsl=false` in place so the
+project continues to build.
 
-If a build script, in the app or in one of its plugins, uses an API that does
-not exist under the new DSL, `flutter build` names the failing API and links to
-the AGP Variant API guide. To keep opting out until the script is migrated,
-add `android.newDsl=false` to `android/gradle.properties` without Flutter's
-marker comment above it; Flutter removes the line pair that carries its marker
-comment on every build.
+Build logic in `buildSrc`, convention plugins, or included builds is not scanned
+ahead of time. If unrecorded build logic uses an API unavailable under
+`android.newDsl=true`, or if `android.newDsl=false` was removed by hand from a
+project whose scripts still rely on legacy AGP APIs, `flutter build` reports the
+failing API and links to the AGP Variant API guide. To keep opting out until
+migration completes, set `android.newDsl=false` in `android/gradle.properties`
+(or `.android/gradle.properties` for modules) without either Flutter marker
+comment above `android.newDsl=false`; Flutter removes `android.newDsl=false` on
+subsequent builds only when preceded by a Flutter marker comment.
 
 ## Migration guide
 
@@ -236,6 +244,78 @@ aliases:
       matchingFallbacks += listOf("debug", "release") // staging gets debug Flutter artifacts
   }
   ```
+
+### Deferred components (`com.android.dynamic-feature`)
+
+Dynamic-feature modules created from older deferred-component templates wired
+generated assets and JNI libraries through `android.applicationVariants`. Under
+`android.newDsl=true`, replace the `applicationVariants` hook in each deferred
+component's `build.gradle` script with a `FlutterDeferredComponentFiles` task
+and `androidComponents.onVariants`:
+
+```groovy
+@org.gradle.work.DisableCachingByDefault(because = "Syncs local Flutter deferred component outputs")
+abstract class FlutterDeferredComponentFiles extends DefaultTask {
+    @InputFiles
+    @Optional
+    @PathSensitive(PathSensitivity.RELATIVE)
+    abstract DirectoryProperty getStagedAssetsDir()
+
+    @InputFiles
+    @Optional
+    @PathSensitive(PathSensitivity.RELATIVE)
+    abstract DirectoryProperty getStagedLibsDir()
+
+    @OutputDirectory
+    abstract DirectoryProperty getAssetsDir()
+
+    @OutputDirectory
+    abstract DirectoryProperty getLibsDir()
+
+    @javax.inject.Inject
+    abstract org.gradle.api.file.FileSystemOperations getFileSystemOperations()
+
+    @TaskAction
+    void syncFiles() {
+        syncDirectory(stagedAssetsDir, assetsDir)
+        syncDirectory(stagedLibsDir, libsDir)
+    }
+
+    private void syncDirectory(DirectoryProperty sourceProperty, DirectoryProperty targetProperty) {
+        def target = targetProperty.get().asFile
+        def source = sourceProperty.orNull?.asFile
+        if (source != null && source.exists()) {
+            fileSystemOperations.sync { spec ->
+                spec.from(source)
+                spec.into(target)
+            }
+        } else {
+            fileSystemOperations.delete { spec ->
+                spec.delete(target)
+            }
+            target.mkdirs()
+        }
+    }
+}
+
+androidComponents {
+    onVariants(selector().all()) { variant ->
+        // Flutter stages deferred component outputs by Flutter build mode,
+        // matching the mode selection in FlutterPluginUtils.buildModeFor.
+        def flutterBuildMode = variant.buildType == "profile" ? "profile" : (variant.debuggable ? "debug" : "release")
+        def variantName = variant.name.capitalize()
+        def deferredFiles = tasks.register("flutterDeferredComponentFiles${variantName}", FlutterDeferredComponentFiles) {
+            stagedAssetsDir.set(layout.buildDirectory.dir("intermediates/flutter/${flutterBuildMode}/deferred_assets"))
+            stagedLibsDir.set(layout.buildDirectory.dir("intermediates/flutter/${flutterBuildMode}/deferred_libs"))
+            assetsDir.set(layout.buildDirectory.dir("intermediates/flutter/${variant.name}/deferred_assets"))
+            libsDir.set(layout.buildDirectory.dir("intermediates/flutter/${variant.name}/deferred_libs"))
+            dependsOn(project(":app").tasks.matching { it.name == "compileFlutterBuild${variantName}" })
+        }
+        variant.sources.assets?.addGeneratedSourceDirectory(deferredFiles) { it.assetsDir }
+        variant.sources.jniLibs?.addGeneratedSourceDirectory(deferredFiles) { it.libsDir }
+    }
+}
+```
 
 ### Flutter plugin authors
 
