@@ -10,6 +10,7 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
+import 'package:flutter_tools/src/build_system/depfile.dart';
 import 'package:flutter_tools/src/build_system/exceptions.dart';
 import 'package:flutter_tools/src/build_system/targets/common.dart';
 import 'package:flutter_tools/src/build_system/targets/ios.dart';
@@ -743,6 +744,51 @@ void main() {
 
       await const AotSnapshotRelease(TargetPlatform.android_arm).build(androidEnvironment);
 
+      expect(processManager, hasNoRemainingExpectations);
+    },
+  );
+
+  testWithoutContext(
+    'AotSnapshotRelease builds windows-x64 ELF format with no app.o in depfile',
+    () async {
+      final windowsEnvironment = Environment.test(
+        fileSystem.currentDirectory,
+        defines: <String, String>{
+          kBuildMode: BuildMode.release.cliName,
+          kTargetPlatform: TargetPlatform.windows_x64.getName(),
+          kWindowsAotFormat: 'elf',
+        },
+        inputs: <String, String>{},
+        artifacts: artifacts,
+        processManager: processManager,
+        fileSystem: fileSystem,
+        logger: logger,
+      );
+      final String build = windowsEnvironment.buildDir.path;
+      processManager.addCommands(<FakeCommand>[
+        FakeCommand(
+          command: <String>[
+            artifacts.getArtifactPath(
+              Artifact.genSnapshot,
+              platform: TargetPlatform.windows_x64,
+              mode: BuildMode.release,
+            ),
+            '--deterministic',
+            kElfAot,
+            '--elf=$build/app.so',
+            '--strip',
+            '$build/app.dill',
+          ],
+        ),
+      ]);
+      windowsEnvironment.buildDir.childFile('app.dill').createSync(recursive: true);
+
+      await const AotSnapshotRelease(TargetPlatform.windows_x64).build(windowsEnvironment);
+
+      final Depfile depfile = windowsEnvironment.depFileService.parse(
+        windowsEnvironment.buildDir.childFile('flutter_aot_snapshot_release.d'),
+      );
+      expect(depfile.outputs, isEmpty);
       expect(processManager, hasNoRemainingExpectations);
     },
   );
