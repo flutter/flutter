@@ -4,6 +4,8 @@
 
 #include "impeller/playground/playground_test.h"
 
+#include <mutex>
+
 #ifndef FML_OS_WIN
 #include <wordexp.h>
 #endif
@@ -14,6 +16,8 @@
 #include "impeller/base/validation.h"
 #include "impeller/playground/playground_impl.h"
 #include "impeller/testing/golden_digest_manager.h"
+#include "third_party/skia/include/codec/SkCodec.h"
+#include "third_party/skia/include/codec/SkPngDecoder.h"
 
 namespace impeller {
 
@@ -41,6 +45,15 @@ PlaygroundTest::~PlaygroundTest() {
 }
 
 void PlaygroundTest::SetUp() {
+  // Playground tests rasterize text with the host's font stack. On Windows,
+  // Skia's DirectWrite backend decodes PNG format color emoji glyphs through
+  // the SkCodecs registry and aborts with a fatal assert when no PNG decoder
+  // is registered. The engine runtime registers the codecs in
+  // ImageGeneratorRegistry; test binaries must register them for themselves.
+  static std::once_flag png_codec_registered;
+  std::call_once(png_codec_registered,
+                 []() { SkCodecs::Register(SkPngDecoder::Decoder()); });
+
   if (!Playground::SupportsBackend(GetParam())) {
     GTEST_SKIP() << "Playground doesn't support this backend type.";
     return;
