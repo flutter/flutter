@@ -1063,7 +1063,7 @@ class SliverHitTestEntry extends HitTestEntry<RenderSliver> {
 
   @override
   String toString() =>
-      '${target.runtimeType}@(mainAxis: $mainAxisPosition, crossAxis: $crossAxisPosition)';
+      '${describeIdentity(target)}@(mainAxis: $mainAxisPosition, crossAxis: $crossAxisPosition)';
 }
 
 /// Parent data structure used by parents of slivers that position their
