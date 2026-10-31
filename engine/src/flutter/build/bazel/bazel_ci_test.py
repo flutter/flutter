@@ -150,8 +150,8 @@ class BuildDirectoryTest(unittest.TestCase):
     # The inherited descriptors closed first (the Bazel server would hold
     # ninja's pipe open otherwise); `$` doubled for ninja.
     self.assertIn(
-        'command = fd=3; while [ "$$fd" -le 255 ]; do eval "exec $$fd>&-"; fd=$$((fd + 1)); done && ',
-        text
+        'command = fd=3; while [ "$$fd" -le 255 ]; '
+        'do eval "exec $$fd>&-"; fd=$$((fd + 1)); done && ', text
     )
     self.assertIn(
         f'cd {root} && env BAZELISK_HOME={root}/.bazel_ci/bazelisk /tools/bazelisk '

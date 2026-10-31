@@ -232,9 +232,7 @@ def shell_quote(text):
 # holds it; the Bazel server the client starts inherits it and lives on
 # after the command, and ninja waits for the server's idle timeout (hours)
 # -- seen on the first end-to-end run (10-31). POSIX sh, no seq.
-CLOSE_INHERITED_FDS = (
-    'fd=3; while [ "$fd" -le 255 ]; do eval "exec $fd>&-"; fd=$((fd + 1)); done'
-)
+CLOSE_INHERITED_FDS = ('fd=3; while [ "$fd" -le 255 ]; do eval "exec $fd>&-"; fd=$((fd + 1)); done')
 
 
 def ninja_file(engine_src, build, out_dir, bazelisk):
