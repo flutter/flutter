@@ -710,6 +710,8 @@ class _FocusState extends State<Focus> {
   @override
   Widget build(BuildContext context) {
     _focusAttachment!.reparent(parent: widget.parentNode);
+    // Reparenting can change focusability without notifying this node.
+    _couldRequestFocus = focusNode.canRequestFocus;
     Widget child = widget.child;
     if (widget.includeSemantics) {
       child = Semantics(
