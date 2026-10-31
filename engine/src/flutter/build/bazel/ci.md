@@ -66,12 +66,25 @@ Steps 2 and 4 are scripts of this repository; step 3 runs whatever
   timeout is hours), and ninja waited on it -- the first end-to-end run hung
   after a finished install. Closing fds 3–255 in the shell first keeps the
   pipe out of the server; ninja still waits for the shell itself.
-- **Bazel's state** -- the output root, bazelisk's download -- lives under the
-  checkout's `.bazel_ci/` (ignored by git, in the bot's `builder` cache), not
-  under `out/` (which the recipe clobbers) or the bot's home (which may not
-  outlive the task): a bot's second build of a configuration is incremental.
-  `--config=ci` (the root `.bazelrc`) keeps the output readable in a log and
-  turns the home-directory disk cache off.
+- **Bazel's state** -- the output root, bazelisk's download, the disk cache --
+  lives under the checkout's `.bazel_ci/` (ignored by git, in the bot's
+  `builder` cache), not under `out/` (which the recipe clobbers) or the bot's
+  home (which may not outlive the task): a bot's second build of a
+  configuration is incremental. `--config=ci` (the root `.bazelrc`) keeps the
+  output readable in a log; `bazel_ci.py` puts the disk cache under
+  `.bazel_ci/disk_cache` (capped at 40 GB) because a builder file's builds
+  run one after another in one checkout and the flags that tell them apart
+  (asan, unoptimized, dart_debug) reach the exec configuration, whose output
+  directory does not spell them -- without the cache each switch rebuilds the
+  host tools (the first end-to-end run paid 10 minutes for it between
+  `ci/host_debug` and a second `ci/host_debug_unopt`).
+- **The install runs once per build.** The edge has no inputs ninja could
+  compare, so `tools/gn --bazel` removes the previous run's
+  `bazel_install.stamp` when it writes the directory; a second `ninja` in the
+  same build is "no work to do", as under GN.
+- **`icudtl.dat` is at the root of every install that links ICU**, as GN's
+  `copy_icudata` lays it from `icuuc`'s dependency edge (the install's
+  `flutter_tester` loads it from there without `--icu-data-file-path`).
 
 The shared code is `build/bazel/bazel_ci.py` (`bazel_ci_test.py` tests it;
 `tools/gn_test.py` covers the flag). The module runs under the recipe's
@@ -97,6 +110,24 @@ The first command writes `out/ci/host_debug_unopt/build.ninja` and
 named are the builder file's, any of them: the one edge satisfies them all);
 the third runs the four types' suites with `--config=ci_host_debug_unopt`.
 `ninja -n` shows the command without running it.
+
+The whole of both variants' sequences, run this way on a 24-core
+workstation from a warm output root (10-31, before the GitHub run): every
+`tools/gn --bazel`, ninja and archive step passed -- `ci/host_debug_unopt`'s
+install 1,367 files, its `run_tests.py` 307 of 308 in 68 minutes (the one
+failure is this workstation's GDK leaking under LSAN, a host finding from
+before, not CI's image), `check_build_configs.sh`, the licenses build and
+its test runner, `ci/host_debug`'s 67 files and six archives (36 minutes,
+the GL wrap rerunning), `ci/host_release`'s archive, `verify_exported.dart`
+(0 failing checks, with the recipe's `ENGINE_CHECKOUT_PATH`), `et stamp`.
+Two steps of the originals are worth knowing when reading a run: `tools/
+gn_test.py` wants `prebuilts/SDKs` for its `--ios` case unless
+`LUCI_CONTEXT` is set (as it is on a bot; 6 of 6 with it), and the "test:
+service protocol" step runs from `engine/src/flutter` with a path relative
+to `engine/src`, where `test.dart` prints "Error launching shell" and exits
+0 -- a silent no-op under GN too; the Bazel suite's
+`//engine/src/flutter/shell/testing/vm_service:service_protocol_test` runs
+the test for real, and so does the command from `engine/src`.
 
 ### Where the variants stop
 
