@@ -583,6 +583,78 @@ void main() {
       expect(moveArgs[kIndexAction], AndroidViewController.kActionMove);
       expect(xOf(moveCall), <double>[31, 21]);
     });
+
+    // Regression test for https://github.com/flutter/flutter/issues/195431.
+    testWidgets('motion event converter preserves native Android pointer ids from device field', (
+      WidgetTester tester,
+    ) async {
+      final log = <MethodCall>[];
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.platform_views,
+        (MethodCall methodCall) async {
+          log.add(methodCall);
+          return null;
+        },
+      );
+
+      final AndroidViewController viewController = PlatformViewsService.initSurfaceAndroidView(
+        id: 7,
+        viewType: 'web',
+        layoutDirection: TextDirection.ltr,
+      );
+      viewController.pointTransformer = (Offset offset) => offset;
+
+      const kIndexAction = 3;
+      const kIndexPointerCount = 4;
+      const kIndexPointerProperties = 5;
+      const kToolTypeBits = 3;
+      const int kToolTypeFinger = AndroidPointerProperties.kToolTypeFinger;
+
+      // AndroidTouchProcessor.uniquePointerIdByType packs (pointerId << 3) | toolType into device.
+      await viewController.dispatchPointerEvent(
+        const PointerDownEvent(
+          pointer: 1,
+          device: (0 << kToolTypeBits) | kToolTypeFinger,
+          position: Offset(10, 10),
+        ),
+      );
+      await viewController.dispatchPointerEvent(
+        const PointerDownEvent(
+          pointer: 2,
+          device: (1 << kToolTypeBits) | kToolTypeFinger,
+          position: Offset(20, 20),
+        ),
+      );
+      // When pointer 2 (Android id 1) lifts and pointer 3 lands in the same frame,
+      // Android assigns id 2 to the new pointer rather than reusing id 1.
+      await viewController.dispatchPointerEvent(
+        const PointerUpEvent(
+          pointer: 2,
+          device: (1 << kToolTypeBits) | kToolTypeFinger,
+          position: Offset(20, 20),
+        ),
+      );
+      log.clear();
+      await viewController.dispatchPointerEvent(
+        const PointerDownEvent(
+          pointer: 3,
+          device: (2 << kToolTypeBits) | kToolTypeFinger,
+          position: Offset(30, 30),
+        ),
+      );
+
+      final MethodCall downCall = log.singleWhere((MethodCall call) => call.method == 'touch');
+      final downArgs = downCall.arguments as List<dynamic>;
+      expect(downArgs[kIndexPointerCount], 2);
+      expect(
+        downArgs[kIndexAction],
+        AndroidViewController.pointerAction(1, AndroidViewController.kActionPointerDown),
+      );
+      expect(downArgs[kIndexPointerProperties], <List<int>>[
+        <int>[0, kToolTypeFinger],
+        <int>[2, kToolTypeFinger],
+      ]);
+    });
   });
 
   group('iOS', () {
