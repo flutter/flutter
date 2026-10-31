@@ -1542,6 +1542,37 @@ void hooksTests() async {
     expectEquals(alwaysUse24HourFormat, false);
   });
 
+  await test('onAlwaysUse24HourFormatChanged is not invoked when unrelated user settings change', () {
+    int calls = 0;
+    PlatformDispatcher.instance.onAlwaysUse24HourFormatChanged = () {
+      calls++;
+    };
+
+    // Initial setting.
+    _callHook(
+      '_updateUserSettingsData',
+      1,
+      '{"textScaleFactor": 1.0, "platformBrightness": "light", "alwaysUse24HourFormat": false}',
+    );
+    expectEquals(calls, 1);
+
+    // Unrelated user setting changes (platformBrightness and textScaleFactor).
+    _callHook(
+      '_updateUserSettingsData',
+      1,
+      '{"textScaleFactor": 1.5, "platformBrightness": "dark", "alwaysUse24HourFormat": false}',
+    );
+    expectEquals(calls, 1);
+
+    // alwaysUse24HourFormat changes.
+    _callHook(
+      '_updateUserSettingsData',
+      1,
+      '{"textScaleFactor": 1.5, "platformBrightness": "dark", "alwaysUse24HourFormat": true}',
+    );
+    expectEquals(calls, 2);
+  });
+
   await test('onFrameDataChanged preserves callback zone', () {
     late Zone innerZone;
     late Zone runZone;
