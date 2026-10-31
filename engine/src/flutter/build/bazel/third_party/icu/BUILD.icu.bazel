@@ -19,7 +19,7 @@
 
 # This file is loaded as the root of @icu, so the main module is named.
 load("@flutter//build_defs/cc:copts.bzl", "FLUTTER_THIRD_PARTY_COPTS")
-load("@flutter//build_defs/gn:gn_action.bzl", "gn_action")
+load("@flutter//build_defs/gn:gn_action.bzl", "gn_action", "gn_copy")
 load("@rules_cc//cc:defs.bzl", "cc_library")
 
 package(default_visibility = ["//visibility:public"])
@@ -115,7 +115,9 @@ cc_library(
 # headers are exported too: icui18n includes them, as GN allows through the
 # source/common include directory. Its `deps = [ ":icudata" ]` is the data
 # compiled in on the web (icudata_static, below); on the host the data is a
-# file loaded at runtime and the stub data is compiled instead.
+# file loaded at runtime and the stub data is compiled instead -- and the
+# same edge reaches copy("copy_icudata") (below), which lays the file at the
+# root of the build directory.
 cc_library(
     name = "icuuc",
     srcs = glob(["source/common/*.cpp"]) + select({
@@ -140,8 +142,26 @@ cc_library(
     ],
     deps = [":root_includes"] + select({
         _WEB: [":icudata_static"],
-        "//conditions:default": [],
+        # bundle_data("icudata"): the file goes inside the framework.
+        "@platforms//os:ios": [],
+        "//conditions:default": [":copy_icudata"],
     }),
+)
+
+# copy("copy_icudata"), icu_copy_icudata_to_root_build_dir being true
+# (config.gni): the data file for the target OS at the root of the build
+# directory, as icudtl.dat. group("icudata") has it as public_deps and
+# generate_icuuc's `deps = [ ":icudata" ]` reaches it from every target that
+# links ICU, so GN's build directory holds icudtl.dat whatever ninja built,
+# and a binary that initializes ICU without --icu-data-file-path
+# (flutter_tester, run from the directory as the service protocol test runs
+# it) finds it beside itself. install lays it the same way, over icuuc's
+# edge (build_directory_aspect) -- the first end-to-end run of the recipe's
+# sequence found ci/host_debug_unopt's install without it (10-31).
+gn_copy(
+    name = "copy_icudata",
+    srcs = [":icudata"],
+    outputs = ["$root_out_dir/icudtl.dat"],
 )
 
 # The web's data: action("make_data_assembly") with current_cpu == "wasm"

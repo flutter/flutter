@@ -186,6 +186,18 @@ class BuildDirectoryTest(unittest.TestCase):
     with open(os.path.join(out_dir, 'bazel.json'), encoding='utf-8') as written_json:
       self.assertEqual(json.load(written_json), description)
 
+  def test_writing_the_directory_again_removes_the_stamp(self):
+    # A persistent build directory (the bots', a developer's): ninja would
+    # otherwise find the stamp up to date and run no install.
+    out_dir = os.path.join(self.engine_src, 'out', 'ci', 'host_debug_unopt')
+    bazel_ci.write_build_directory(self.engine_src, HOST_DEBUG_UNOPT, out_dir, '/tools/bazelisk')
+    stamp = os.path.join(out_dir, 'bazel_install.stamp')
+    with open(stamp, 'w', encoding='utf-8'):
+      pass
+    bazel_ci.write_build_directory(self.engine_src, HOST_DEBUG_UNOPT, out_dir, '/tools/bazelisk')
+    self.assertFalse(os.path.exists(stamp))
+    self.assertTrue(os.path.exists(os.path.join(out_dir, 'build.ninja')))
+
   def test_a_gn_directory_has_no_description(self):
     out_dir = os.path.join(self.engine_src, 'out', 'host_debug_unopt')
     os.makedirs(out_dir)
