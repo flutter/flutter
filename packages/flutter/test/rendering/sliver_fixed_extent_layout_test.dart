@@ -500,30 +500,33 @@ void main() {
     expect(child1.layoutOffset, 50.0);
   });
 
-  test('RenderSliverVariedExtentList _getChildIndexForScrollOffset boundary', () {
-    final children = List<RenderBox>.generate(
-      10,
-      (index) => RenderSizedBox(const Size(400.0, 100.0)),
-    );
-    final childManager = TestRenderSliverBoxChildManager(children: children);
+  test(
+    'RenderSliverVariedExtentList lays out first visible child at exact scroll offset boundary',
+    () {
+      final children = List<RenderBox>.generate(
+        10,
+        (index) => RenderSizedBox(const Size(400.0, 100.0)),
+      );
+      final childManager = TestRenderSliverBoxChildManager(children: children);
 
-    final RenderSliverVariedExtentList list = childManager.createRenderSliverVariedExtentList(
-      (index, dimensions) => 100.0,
-    );
+      final RenderSliverVariedExtentList list = childManager.createRenderSliverVariedExtentList(
+        (index, dimensions) => 100.0,
+      );
 
-    final root = RenderViewport(
-      crossAxisDirection: AxisDirection.right,
-      offset: ViewportOffset.fixed(300.0),
-      cacheExtent: 0,
-      children: <RenderSliver>[list],
-    );
-    layout(root);
+      final root = RenderViewport(
+        crossAxisDirection: AxisDirection.right,
+        offset: ViewportOffset.fixed(300.0),
+        cacheExtent: 0,
+        children: <RenderSliver>[list],
+      );
+      layout(root);
 
-    final child3 = children[3].parentData! as SliverMultiBoxAdaptorParentData;
-    expect(child3.layoutOffset, 300.0);
+      final child3 = children[3].parentData! as SliverMultiBoxAdaptorParentData;
+      expect(child3.layoutOffset, 300.0);
 
-    expect(children[2].parentData, isNull);
-  });
+      expect(children[2].parentData, isNull);
+    },
+  );
 
   test('RenderSliverVariedExtentList invalidation on resize', () {
     final children = List<RenderBox>.generate(
