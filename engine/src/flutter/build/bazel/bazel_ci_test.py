@@ -155,7 +155,9 @@ class BuildDirectoryTest(unittest.TestCase):
     )
     self.assertIn(
         f'cd {root} && env BAZELISK_HOME={root}/.bazel_ci/bazelisk /tools/bazelisk '
-        f'--output_user_root={root}/.bazel_ci/output run --config=ci --config=ci_host_debug_unopt '
+        f'--output_user_root={root}/.bazel_ci/output run --config=ci '
+        f'--disk_cache={root}/.bazel_ci/disk_cache --experimental_disk_cache_gc_max_size=40G '
+        f'--config=ci_host_debug_unopt '
         f'//engine/src/flutter/ci/builders:ci_host_debug_unopt -- {out_dir} && '
         f'touch {out_dir}/bazel_install.stamp\n', text
     )

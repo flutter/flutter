@@ -208,10 +208,38 @@ def startup_options(engine_src):
   return ['--output_user_root=' + os.path.join(bazel_home(engine_src), 'output')]
 
 
+# The cap on the disk cache under .bazel_ci (Bazel's idle server collects
+# the cache down to it): room for the builders' configurations' exec
+# closures and a build's worth of objects.
+DISK_CACHE_GC_MAX_SIZE = '40G'
+
+
+def build_options(engine_src):
+  """The options of every build command: the disk cache under the checkout's .bazel_ci.
+
+  A builder file's builds run one after another in one checkout, and the
+  flags that tell them apart -- asan, unoptimized, dart_debug -- reach the
+  exec configuration too (Bazel keeps a build setting's value across the
+  exec transition), whose output directory does not spell them: each
+  switch overwrites the host tools' outputs (impellerc's closure: half of a
+  cold build) and the next build of the other value compiles them again.
+  The first end-to-end run of the recipe's sequence paid it (10-31: the
+  second install of ci/host_debug_unopt after ci/host_debug rebuilt the
+  exec configuration, 10 minutes). A disk cache under .bazel_ci -- the
+  checkout's, persisting with it, bounded -- serves every such repeat, and
+  a bot's later builds of the same inputs; the root .bazelrc's home-
+  directory cache is a developer's.
+  """
+  return [
+      '--disk_cache=' + os.path.join(bazel_home(engine_src), 'disk_cache'),
+      '--experimental_disk_cache_gc_max_size=' + DISK_CACHE_GC_MAX_SIZE,
+  ]
+
+
 def bazel_command(engine_src, bazelisk, command, arguments):
-  """`bazelisk <startup options> <command> --config=ci <arguments>`."""
+  """`bazelisk <startup options> <command> --config=ci <build options> <arguments>`."""
   return ([bazelisk] + startup_options(engine_src) + [command, '--config=' + CI_CONFIG] +
-          list(arguments))
+          build_options(engine_src) + list(arguments))
 
 
 def ninja_escape(text):
