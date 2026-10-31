@@ -108,7 +108,7 @@ TEST_P(RenderPassGLESWithDiscardFrameBufferExtTest, DiscardFramebufferExt) {
   const auto render_pass = command_buffer->CreateRenderPass(render_target);
 
   EXPECT_CALL(mock_gl_impl_ref, GetIntegerv(GL_FRAMEBUFFER_BINDING, _))
-      .WillOnce(SetArgPointee<1>(test_params.frame_buffer_id));
+      .Times(0);
 
   EXPECT_CALL(mock_gl_impl_ref, DiscardFramebufferEXT(GL_FRAMEBUFFER, _, _))
       .With(Args<2, 1>(ElementsAreArray(test_params.expected_attachments)))
@@ -157,7 +157,7 @@ TEST_P(RenderPassGLESWithDiscardFrameBufferExtTest, InvalidateFramebuffer) {
   const auto render_pass = command_buffer->CreateRenderPass(render_target);
 
   EXPECT_CALL(mock_gl_impl_ref, GetIntegerv(GL_FRAMEBUFFER_BINDING, _))
-      .WillOnce(SetArgPointee<1>(test_params.frame_buffer_id));
+      .Times(0);
 
   // InvalidateFramebuffer should be called instead of DiscardFramebufferEXT
   EXPECT_CALL(mock_gl_impl_ref, InvalidateFramebuffer(GL_FRAMEBUFFER, _, _))
