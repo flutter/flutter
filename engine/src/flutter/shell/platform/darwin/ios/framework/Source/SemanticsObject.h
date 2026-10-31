@@ -192,8 +192,8 @@ constexpr float kScrollExtentMaxForInf = 1000;
 
 @end
 
-/// The semantics object for scrollable. This class creates an UIScrollView to interact with the
-/// iOS.
+/// The semantics object for scrollable containers. Creates a `FlutterSemanticsScrollView`
+/// (`UIScrollView` subclass) to represent the scrollable to iOS accessibility services.
 @interface FlutterScrollableSemanticsObject : SemanticsObject
 @property(nonatomic, readonly) FlutterSemanticsScrollView* scrollView;
 @end
@@ -226,6 +226,9 @@ constexpr float kScrollExtentMaxForInf = 1000;
  * From Flutter's view of the world (the first tree seen above), we construct iOS's view of the
  * world (second tree) as follows: We replace each SemanticsObjects that has children with a
  * SemanticsObjectContainer, which has the original SemanticsObject and its children as children.
+ * (Exception: `FlutterScrollableSemanticsObject` uses its `FlutterSemanticsScrollView` directly as
+ * its container instead of `SemanticsObjectContainer` so that child elements have a `UIScrollView`
+ * as their `accessibilityContainer` ancestor. See `FlutterSemanticsScrollView` for more details).
  *
  * SemanticsObjects have semantic information attached to them which is interpreted by
  * VoiceOver (they return YES for isAccessibilityElement). The SemanticsObjectContainers are just

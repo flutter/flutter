@@ -188,6 +188,19 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
   return _scrollView;
 }
 
+- (id)accessibilityContainer {
+  if ([self hasChildren]) {
+    if (!self.bridge) {
+      return nil;
+    }
+    // Expose `scrollView` directly as the container instead of wrapping it in a
+    // `SemanticsObjectContainer` so child elements have this `UIScrollView` as their
+    // `accessibilityContainer` ancestor.
+    return self.scrollView;
+  }
+  return [super accessibilityContainer];
+}
+
 // private methods
 
 - (UIView*)reattachScrollViewToCurrentBridgeView {
@@ -713,10 +726,6 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
   if (!self.bridge) {
     return CGRectZero;
   }
-
-  if (self.node.flags.isHidden) {
-    return [super accessibilityFrame];
-  }
   return [self globalRect];
 }
 
@@ -1008,7 +1017,7 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
   for (size_t i = 0; i < [children count]; i++) {
     SemanticsObject* child = children[i];
     if ((![child hasChildren] && child.nativeAccessibility == element) ||
-        ([child hasChildren] && [child.nativeAccessibility accessibilityContainer] == element)) {
+        ([child hasChildren] && [child accessibilityContainer] == element)) {
       return i + 1;
     }
   }
