@@ -41,11 +41,4 @@ abstract class BackendFragmentShader extends BackendShader {
   ui.UniformArray<ui.UniformMat2Slot> getUniformMat2Array(String name);
   ui.UniformArray<ui.UniformMat3Slot> getUniformMat3Array(String name);
   ui.UniformArray<ui.UniformMat4Slot> getUniformMat4Array(String name);
-
-  /// Returns the index of the image sampler uniform named [name], for use with
-  /// [setImageSampler].
-  ///
-  /// Throws an [ArgumentError] if there is no uniform named [name], or if that
-  /// uniform is not an image sampler.
-  int getImageSamplerIndex(String name);
 }

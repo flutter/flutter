@@ -326,11 +326,17 @@ class EngineImageShader extends EngineShader implements ui.ImageShader {
 }
 
 class EngineFragmentShader extends EngineShader implements ui.FragmentShader {
-  EngineFragmentShader(BackendFragmentShader delegate) {
+  EngineFragmentShader(BackendFragmentShader delegate, this._shaderData) {
     _backendShader = _cacheAndAttach(delegate) as BackendFragmentShader;
   }
 
   late final BackendFragmentShader _backendShader;
+
+  /// The uniform metadata of the program this shader was created from.
+  ///
+  /// Lookups that only depend on this metadata, such as resolving an image
+  /// sampler name to its index, live here so they are shared by all backends.
+  final ShaderData _shaderData;
   final Map<int, BackendImageShader> _imageSamplers = <int, BackendImageShader>{};
   final Map<int, ui.Image> _samplerImages = <int, ui.Image>{};
 
@@ -409,7 +415,7 @@ class EngineFragmentShader extends EngineShader implements ui.FragmentShader {
   ui.UniformMat4Slot getUniformMat4(String name) => _backendShader.getUniformMat4(name);
   @override
   ui.ImageSamplerSlot getImageSampler(String name) =>
-      EngineImageSamplerSlot._(this, name, _backendShader.getImageSamplerIndex(name));
+      EngineImageSamplerSlot._(this, name, _shaderData.getImageSamplerIndex(name));
   @override
   ui.UniformArray<ui.UniformFloatSlot> getUniformFloatArray(String name) =>
       _backendShader.getUniformFloatArray(name);

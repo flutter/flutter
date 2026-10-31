@@ -1273,7 +1273,13 @@ Future<void> testMain() async {
     expect(_rgbaAt(pixels, width: 10, x: 5, y: 5), <int>[0, 255, 0, 255]);
   }, skip: isWimp); // https://github.com/flutter/flutter/issues/175431
 
-  // https://github.com/flutter/flutter/issues/194290
+  // `FragmentShader.getImageSampler` used to throw an `UnsupportedError` on the
+  // web. These tests check that it now matches the native engine: the returned
+  // slot has the index of the sampler among the shader's image samplers
+  // (ignoring other uniforms), it throws an `ArgumentError` for unknown or
+  // non-sampler uniform names, and `ImageSamplerSlot.set` behaves exactly like
+  // calling `setImageSampler` with that index.
+  // See https://github.com/flutter/flutter/issues/194290.
   group('getImageSampler', () {
     test('ShaderData.getImageSamplerIndex counts only sampler uniforms', () {
       final shaderData = ShaderData(

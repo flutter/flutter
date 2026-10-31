@@ -31,7 +31,7 @@ class CkFragmentProgram implements ui.FragmentProgram {
 
   @override
   ui.FragmentShader fragmentShader() {
-    return EngineFragmentShader(CkFragmentShader(name, effect, this));
+    return EngineFragmentShader(CkFragmentShader(name, effect, this), _shaderData);
   }
 
   UniformData _getUniformFloatInfo(String name) {
@@ -42,11 +42,6 @@ class CkFragmentProgram implements ui.FragmentProgram {
     }
     throw ArgumentError('No uniform named "$name".');
   }
-
-  /// Returns the index of the image sampler uniform named [name].
-  ///
-  /// See [ShaderData.getImageSamplerIndex].
-  int getImageSamplerIndex(String name) => _shaderData.getImageSamplerIndex(name);
 }
 
 class CkFragmentShader extends BackendFragmentShader implements CkShader {
@@ -316,9 +311,6 @@ class CkFragmentShader extends BackendFragmentShader implements CkShader {
       ),
     );
   }
-
-  @override
-  int getImageSamplerIndex(String name) => _program.getImageSamplerIndex(name);
 
   List<CkUniformFloatSlot> _getUniformFloatSlots(String name, int size) {
     final UniformData info = _program._getUniformFloatInfo(name);

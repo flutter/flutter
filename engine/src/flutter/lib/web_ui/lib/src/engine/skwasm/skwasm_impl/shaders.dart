@@ -226,7 +226,8 @@ class SkwasmFragmentProgram extends SkwasmObjectWrapper<RawRuntimeEffect>
   final ShaderData _shaderData;
 
   @override
-  ui.FragmentShader fragmentShader() => EngineFragmentShader(SkwasmFragmentShader(this));
+  ui.FragmentShader fragmentShader() =>
+      EngineFragmentShader(SkwasmFragmentShader(this), _shaderData);
 
   int get uniformSize => runtimeEffectGetUniformSize(handle);
 
@@ -238,11 +239,6 @@ class SkwasmFragmentProgram extends SkwasmObjectWrapper<RawRuntimeEffect>
     }
     throw ArgumentError('No uniform named "$name".');
   }
-
-  /// Returns the index of the image sampler uniform named [name].
-  ///
-  /// See [ShaderData.getImageSamplerIndex].
-  int getImageSamplerIndex(String name) => _shaderData.getImageSamplerIndex(name);
 }
 
 class SkwasmShaderData extends SkwasmObjectWrapper<RawUniformData> {
@@ -478,9 +474,6 @@ class SkwasmFragmentShader extends BackendFragmentShader implements SkwasmShader
       ),
     );
   }
-
-  @override
-  int getImageSamplerIndex(String name) => _program.getImageSamplerIndex(name);
 
   List<SkwasmUniformFloatSlot> _getUniformFloatSlots(String name, int size) {
     final UniformData info = _program._getUniformFloatInfo(name);
