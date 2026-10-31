@@ -15,6 +15,7 @@
 #include "flutter/fml/macros.h"
 #include "flutter/shell/platform/common/client_wrapper/include/flutter/binary_messenger.h"
 #include "flutter/shell/platform/common/client_wrapper/include/flutter/method_channel.h"
+#include "flutter/shell/platform/embedder/embedder.h"
 #include "rapidjson/document.h"
 
 namespace flutter {
@@ -75,6 +76,11 @@ class PlatformHandler {
   virtual void SystemSoundPlay(
       const std::string& sound_type,
       std::unique_ptr<MethodResult<rapidjson::Document>> result);
+
+  // Sets the title of the top-level window containing the view with ID
+  // |view_id| to |label|.
+  virtual void SetApplicationSwitcherDescription(FlutterViewId view_id,
+                                                 const std::string& label);
 
   // Handle a request from the framework to exit the application.
   virtual void SystemExitApplication(
