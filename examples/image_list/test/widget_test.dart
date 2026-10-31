@@ -5,7 +5,7 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:image_list/main.dart';
 
@@ -73,7 +73,7 @@ void main() {
     await tester.pumpWidget(const MyApp(8080));
 
     // Trigger a rebuild by tapping the increment button
-    await tester.tap(find.byType(FloatingActionButton));
+    await tester.tap(find.byTooltip('Increment'));
     await tester.pump();
 
     // Unmount the tree, which calls dispose() on the state.
