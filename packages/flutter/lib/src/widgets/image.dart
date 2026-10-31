@@ -1158,6 +1158,9 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
   StackTrace? _lastStack;
   ImageStreamCompleterHandle? _completerHandle;
 
+  /// The configuration that [_imageStream] was last resolved with.
+  ImageConfiguration? _resolvedConfiguration;
+
   /// True when animations are disabled and the image should not update, such as
   /// when [TickerMode] is disabled or [MediaQueryData.disableAnimations] is
   /// true.
@@ -1184,7 +1187,14 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
   @override
   void didChangeDependencies() {
     _updateInvertColors();
-    _resolveImage();
+    // Resolving again with an unchanged configuration is redundant, and for
+    // providers that evict failed loads from the cache (such as NetworkImage)
+    // it would start a new load every time an unrelated dependency changes,
+    // e.g. when a route is pushed on top of this one.
+    final ImageConfiguration configuration = _createImageConfiguration();
+    if (_imageStream == null || configuration != _resolvedConfiguration) {
+      _resolveImage(configuration);
+    }
 
     _isPaused = !TickerMode.of(context) || (MediaQuery.maybeDisableAnimationsOf(context) ?? false);
 
@@ -1232,19 +1242,22 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
         SemanticsBinding.instance.accessibilityFeatures.invertColors;
   }
 
-  void _resolveImage() {
+  ImageConfiguration _createImageConfiguration() {
+    return createLocalImageConfiguration(
+      context,
+      size: widget.width != null && widget.height != null
+          ? Size(widget.width!, widget.height!)
+          : null,
+    );
+  }
+
+  void _resolveImage([ImageConfiguration? configuration]) {
     final provider = ScrollAwareImageProvider<Object>(
       context: _scrollAwareContext,
       imageProvider: widget.image,
     );
-    final ImageStream newStream = provider.resolve(
-      createLocalImageConfiguration(
-        context,
-        size: widget.width != null && widget.height != null
-            ? Size(widget.width!, widget.height!)
-            : null,
-      ),
-    );
+    _resolvedConfiguration = configuration ?? _createImageConfiguration();
+    final ImageStream newStream = provider.resolve(_resolvedConfiguration!);
     _updateSourceStream(newStream);
   }
 
