@@ -1009,8 +1009,13 @@ bool RenderPassGLES::OnEncodeCommands(const Context& context) const {
             /*bound_buffers=*/render_pass->bound_buffers_,    //
             /*tracer=*/tracer,                                //
             /*impeller_context=*/render_pass->context_);
-        FML_CHECK(result)
-            << "Must be able to encode GL commands without error.";
+        // A driver can refuse a command at this point, for example by
+        // reporting an incomplete framebuffer. That fails the pass, not the
+        // process.
+        if (!result) {
+          VALIDATION_LOG << "Could not encode the commands of render pass '"
+                         << pass_data->label << "'.";
+        }
       },
       /*defer=*/true);
 }

@@ -27,6 +27,7 @@ impeller_component("gles_unittests") {
   testonly = true
   sources = [
     "blit_command_gles_unittests.cc",
+    "blit_pass_gles_unittests.cc",
     "buffer_bindings_gles_unittests.cc",
     "command_buffer_gles_unittests.cc",
     "device_buffer_gles_unittests.cc",
