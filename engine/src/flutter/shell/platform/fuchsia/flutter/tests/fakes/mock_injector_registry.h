@@ -39,16 +39,14 @@ class MockInjectorRegistry : public fuchsia::ui::pointerinjector::Registry,
     callback();
   }
 
-  // |fuchsia.ui.pointerinjector.Device.Inject|.
-  void Inject(std::vector<fuchsia::ui::pointerinjector::Event> events,
-              InjectCallback callback) override {
+  // |fuchsia.ui.pointerinjector.Device.InjectEvents|.
+  void InjectEvents(
+      std::vector<fuchsia::ui::pointerinjector::Event> events) override {
     num_events_received_ += events.size();
 
     for (auto& event : events) {
       events_.push_back(std::move(event));
     }
-
-    callback();
   }
 
   void ClearBindings() { bindings_.clear(); }
