@@ -202,6 +202,20 @@ vk::UniqueRenderPass RenderPassBuilderVK::Build(
                           vk::AccessFlagBits::eColorAttachmentWrite;
   deps[0].dstStageMask = vk::PipelineStageFlagBits::eColorAttachmentOutput;
   deps[0].dstAccessMask = vk::AccessFlagBits::eColorAttachmentWrite;
+  if (depth_stencil_.has_value()) {
+    // The depth/stencil load op (clear) runs in the fragment test stages and
+    // must be ordered after the attachment's layout transition and any
+    // earlier depth/stencil writes (SYNC-HAZARD-WRITE-AFTER-WRITE). Passes
+    // without a depth/stencil attachment don't wait on these stages.
+    constexpr auto kFragmentTests =
+        vk::PipelineStageFlagBits::eEarlyFragmentTests |
+        vk::PipelineStageFlagBits::eLateFragmentTests;
+    deps[0].srcStageMask |= kFragmentTests;
+    deps[0].srcAccessMask |= vk::AccessFlagBits::eDepthStencilAttachmentWrite;
+    deps[0].dstStageMask |= kFragmentTests;
+    deps[0].dstAccessMask |= vk::AccessFlagBits::eDepthStencilAttachmentRead |
+                             vk::AccessFlagBits::eDepthStencilAttachmentWrite;
+  }
   deps[0].dependencyFlags = kSelfDependencyFlags;
 
   // Self dependency for reading back the framebuffer, necessary for
