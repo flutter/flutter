@@ -119,6 +119,10 @@ filegroup(
 # The script GN's bin_to_assembly template runs (//flutter/build/bin_to_obj.gni).
 exports_files(["runtime/tools/bin_to_assembly.py"])
 
+# The SDK's version numbers, which the wrapped build stamps into the VM
+# (tools/make_version.py); the Dart wrap's smoke test reads them back.
+exports_files(["tools/VERSION"])
+
 # ANGLE's gni imports this one file of the Dart tree (through
 # build_overrides/angle.gni's angle_has_build); for the wrapped GN build of
 # the GPU test backends.

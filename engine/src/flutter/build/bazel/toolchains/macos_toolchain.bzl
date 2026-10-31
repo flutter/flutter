@@ -20,6 +20,7 @@ load("@rules_cc//cc:defs.bzl", "cc_toolchain")
 load("//build_defs/cc:apple.bzl", "IOS_DEPLOYMENT_TARGET")
 load(
     ":cc_toolchain_config.bzl",
+    "CXX_INCLUDE_MARKERS",
     "IOS_ARM64_COMPILE_FLAGS",
     "IOS_ARM64_LINK_FLAGS",
     "IOS_X64_COMPILE_FLAGS",
@@ -145,11 +146,7 @@ def macos_clang_toolchain(name, exec_cpu, target_cpu, clang, sdk = "@macos_sdk//
         }),
         clang = clang + "//:bin/clang",
         clangxx = clang + "//:bin/clang++",
-        cxx_include_markers = [
-            "@libcxx//:include/__config",
-            "@libcxxabi//:include/cxxabi.h",
-            "//engine/src/flutter/build/secondary/flutter/third_party/libcxx:config/__config_site",
-        ],
+        cxx_include_markers = CXX_INCLUDE_MARKERS,
         lto = select({
             "//engine/src/flutter/build/bazel:lto_enabled": True,
             "//conditions:default": False,
@@ -251,11 +248,7 @@ def ios_clang_toolchain(name, exec_cpu, target_cpu, environment, clang, cxx_head
         }),
         clang = clang + "//:bin/clang",
         clangxx = clang + "//:bin/clang++",
-        cxx_include_markers = [
-            "@libcxx//:include/__config",
-            "@libcxxabi//:include/cxxabi.h",
-            "//engine/src/flutter/build/secondary/flutter/third_party/libcxx:config/__config_site",
-        ],
+        cxx_include_markers = CXX_INCLUDE_MARKERS,
         deployment_target = IOS_DEPLOYMENT_TARGET,
         deployment_target_flag = env.deployment_target_flag,
         lto = select({

@@ -12,11 +12,15 @@ cc_test(
     name = "dart_vm_smoke_test",
     size = "small",
     srcs = ["dart_vm_smoke_test.cc"],
+    # The version the wrapped build stamped (tools/make_version.py reads
+    # these numbers), for the test to expect: a Dart roll moves them.
+    args = ["$(rootpath @dart//:tools/VERSION)"],
     copts = FLUTTER_COPTS,
+    data = ["@dart//:tools/VERSION"],
     local_defines = FLUTTER_LOCAL_DEFINES,
     deps = [
         "//engine/src/flutter/build/bazel/dart_wrap:common_embedder_dart_io",
         "//engine/src/flutter/build/bazel/dart_wrap:libdart_jit",
-        "@googletest//:gtest_main",
+        "@googletest//:gtest",
     ],
 )
