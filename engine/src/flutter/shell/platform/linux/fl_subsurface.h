@@ -21,6 +21,12 @@ G_DECLARE_FINAL_TYPE(FlSubsurface, fl_subsurface, FL, SUBSURFACE, GObject)
  * #FlSubsurface manages a Wayland subsurface attached to another Wayland
  * surface. It is used to render Flutter content directly to a Wayland surface,
  * independently of the GTK widget hierarchy.
+ *
+ * The subsurface is desynchronized from its parent surface, so frames
+ * committed to it are shown by the compositor as soon as they are committed
+ * and the parent (GTK) surface doesn't have to be redrawn for each one. It can
+ * be synchronized with the parent while that is changing size, so a frame of
+ * the new size is shown together with the resized parent.
  */
 
 /**
@@ -56,6 +62,19 @@ struct wl_surface* fl_subsurface_get_surface(FlSubsurface* subsurface);
  * Moves the subsurface to the given position relative to the parent surface.
  */
 void fl_subsurface_set_position(FlSubsurface* subsurface, gint x, gint y);
+
+/**
+ * fl_subsurface_set_synchronized:
+ * @subsurface: an #FlSubsurface.
+ * @synchronized: %TRUE to synchronize the subsurface with its parent surface.
+ *
+ * Sets whether frames committed to the subsurface are held back until the
+ * parent surface is next committed (synchronized) or shown as soon as they are
+ * committed (desynchronized). A new #FlSubsurface is desynchronized. A frame
+ * that was held back is shown when the subsurface is desynchronized again.
+ */
+void fl_subsurface_set_synchronized(FlSubsurface* subsurface,
+                                    gboolean synchronized);
 
 G_END_DECLS
 
