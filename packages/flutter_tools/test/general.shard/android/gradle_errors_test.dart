@@ -1483,43 +1483,96 @@ A problem occurred configuring project ':app'.
     );
   });
 
-  testWithoutContext('Failure to apply kotlin-android plugin', () async {
-    const applyingKotlinAndroidPluginErrorExample = r'''
+  group('kotlin-android plugin with built-in Kotlin', () {
+    // Output of Kotlin Gradle Plugin 2.4.20 with Android Gradle Plugin 9.3.1
+    // when android/app/build.gradle.kts applies kotlin-android.
+    const appErrorExample = r'''
 FAILURE: Build failed with an exception.
-
-* Where:
-Build file '/Users/jesswon/Desktop/fresh_flutter_app/android/app/build.gradle.kts'
 
 * What went wrong:
 An exception occurred applying plugin request [id: 'kotlin-android']
 > Failed to apply plugin 'kotlin-android'.
-   > ⛔ Failed to apply plugin 'com.jetbrains.kotlin.android'
+   > ⛔ Failed to apply plugin 'org.jetbrains.kotlin.android'
      The 'org.jetbrains.kotlin.android' plugin is no longer required for Kotlin support since AGP 9.0.
      Solution: Remove the 'org.jetbrains.kotlin.android' plugin from this project's build file: app/build.gradle.kts.
-     See https://issuetracker.google.com/438678642 for more details.
-      > java.lang.Throwable (no error message)
-    ''';
+     See https://kotl.in/gradle/agp-built-in-kotlin for more details.
+''';
 
-    final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
-    await applyingKotlinAndroidPluginErrorHandler.handler(
-      gradleUtils: FakeGradleUtils(),
-      line: applyingKotlinAndroidPluginErrorExample,
-      project: project,
-      toolContext: toolContext,
-      usesAndroidX: true,
-    );
+    // The same failure when a plugin's build file applies kotlin-android.
+    const pluginErrorExample = r'''
+FAILURE: Build failed with an exception.
 
-    expect(
-      testLogger.statusText,
-      contains('Starting AGP 9+, the default has become built-in Kotlin.'),
-    );
-    expect(
-      testLogger.statusText,
-      contains(' This results in a build failure when applying the kotlin-android plugin'),
-    );
-    expect(testLogger.statusText, contains('applying the kotlin-android plugin'));
-    expect(testLogger.statusText, contains('For instructions on how to migrate, see:'));
-    expect(testLogger.statusText, contains(kMigrateToBuiltInKotlinDocsUrl));
+* What went wrong:
+An exception occurred applying plugin request [id: 'kotlin-android']
+> Failed to apply plugin 'kotlin-android'.
+   > ⛔ Failed to apply plugin 'org.jetbrains.kotlin.android'
+     The 'org.jetbrains.kotlin.android' plugin is no longer required for Kotlin support since AGP 9.0.
+     Solution: Remove the 'org.jetbrains.kotlin.android' plugin from this project's build file: ../../plug/android/build.gradle.kts.
+     See https://kotl.in/gradle/agp-built-in-kotlin for more details.
+''';
+
+    String matchedLine(String errorMessage) => errorMessage
+        .split('\n')
+        .firstWhere((String line) => applyingKotlinAndroidPluginErrorHandler.test(line));
+
+    testWithoutContext('matches only the line that names the build file', () {
+      expect(
+        formatTestErrorMessage(appErrorExample, applyingKotlinAndroidPluginErrorHandler),
+        isTrue,
+      );
+      expect(
+        applyingKotlinAndroidPluginErrorHandler.test(
+          "     The 'org.jetbrains.kotlin.android' plugin is no longer required for Kotlin support since AGP 9.0.",
+        ),
+        isFalse,
+      );
+    });
+
+    testWithoutContext('tells the developer to migrate the app', () async {
+      await applyingKotlinAndroidPluginErrorHandler.handler(
+        gradleUtils: FakeGradleUtils(),
+        line: matchedLine(appErrorExample),
+        project: FakeFlutterProject(),
+        toolContext: toolContext,
+        usesAndroidX: true,
+      );
+
+      expect(testLogger.statusText, contains('android/app/build.gradle.kts applies the'));
+      expect(testLogger.statusText, contains('kotlinOptions {}'));
+      expect(testLogger.statusText, contains(kMigrateAppToBuiltInKotlinDocsUrl));
+      expect(testLogger.statusText, isNot(contains('A plugin applies')));
+    });
+
+    testWithoutContext('treats a Windows app build file path as the app', () async {
+      await applyingKotlinAndroidPluginErrorHandler.handler(
+        gradleUtils: FakeGradleUtils(),
+        line: matchedLine(
+          appErrorExample.replaceAll('app/build.gradle.kts', r'app\build.gradle.kts'),
+        ),
+        project: FakeFlutterProject(),
+        toolContext: toolContext,
+        usesAndroidX: true,
+      );
+
+      expect(testLogger.statusText, contains('android/app/build.gradle.kts applies the'));
+      expect(testLogger.statusText, isNot(contains('A plugin applies')));
+    });
+
+    testWithoutContext('tells the developer to upgrade or report the plugin', () async {
+      await applyingKotlinAndroidPluginErrorHandler.handler(
+        gradleUtils: FakeGradleUtils(),
+        line: matchedLine(pluginErrorExample),
+        project: FakeFlutterProject(),
+        toolContext: toolContext,
+        usesAndroidX: true,
+      );
+
+      expect(testLogger.statusText, contains('A plugin applies the kotlin-android plugin'));
+      expect(testLogger.statusText, contains('../../plug/android/build.gradle.kts'));
+      expect(testLogger.statusText, contains(kMigrateAppToBuiltInKotlinDocsUrl));
+      expect(testLogger.statusText, contains('`android.builtInKotlin=false`'));
+      expect(testLogger.statusText, isNot(contains('kotlinOptions')));
+    });
   });
 
   group('new AGP DSL error', () {
