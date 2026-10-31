@@ -15,7 +15,7 @@ import '../native_assets_manifest.dart';
 
 const targetIOSVersion = 15;
 
-/// The app deployment version supplied by Xcode, or the native-assets default.
+/// The deployment version supplied to assemble, or the native-assets default.
 AppleVersion iosDeploymentVersion(Map<String, String> defines) => parseAppleDeploymentVersion(
   defines[kIosDeploymentTarget],
   platform: 'iOS',

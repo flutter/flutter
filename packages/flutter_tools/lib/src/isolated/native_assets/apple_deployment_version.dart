@@ -7,7 +7,7 @@ import 'package:code_assets/code_assets.dart';
 import '../../base/common.dart';
 import '../../base/version.dart';
 
-/// Resolves an app deployment target, retaining the native-assets platform floor.
+/// Resolves a deployment target, retaining the native-assets platform floor.
 AppleVersion parseAppleDeploymentVersion(
   String? deploymentTarget, {
   required String platform,

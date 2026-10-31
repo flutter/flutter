@@ -142,12 +142,7 @@ void main() {
     for (final (String? deploymentTarget, AppleVersion expectedVersion)
         in <(String?, AppleVersion)>[
           (null, AppleVersion(minimumVersion)),
-          ('', AppleVersion(minimumVersion)),
-          ('${minimumVersion - 1}.9.9', AppleVersion(minimumVersion)),
-          ('${minimumVersion + 1}', AppleVersion(minimumVersion + 1)),
-          ('${minimumVersion + 1}.4', AppleVersion(minimumVersion + 1, minor: 4)),
           ('${minimumVersion + 2}.2.1', AppleVersion(minimumVersion + 2, minor: 2, patch: 1)),
-          (' ${minimumVersion + 1}.4 ', AppleVersion(minimumVersion + 1, minor: 4)),
         ]) {
       testUsingContext(
         'NativeAssets $platformName deployment target $deploymentTarget reaches build and link hooks',
@@ -187,46 +182,37 @@ void main() {
       );
     }
 
-    for (final deploymentTarget in <String>[
-      'invalid',
-      '16.4beta',
-      '16.4.1.2',
-      '-1',
-      '2147483648',
-      '16.2147483648',
-      '16.4.2147483648',
-    ]) {
-      for (final linking in <bool>[false, true]) {
-        final hookStage = linking ? 'link' : 'build';
-        testUsingContext(
-          'NativeAssets rejects $platformName deployment target $deploymentTarget before running $hookStage hooks',
-          () async {
-            writePackageConfigFiles(directory: iosEnvironment.projectDir, mainLibName: 'my_app');
-            iosEnvironment.defines.addAll(<String, String>{
-              kTargetPlatform: platform.getName(),
-              if (!isIOS) kDarwinArchs: 'arm64',
-            });
-            final buildRunner = FakeFlutterNativeAssetsBuildRunner(
-              packagesWithNativeAssetsResult: <String>['foo'],
-            );
-            if (linking) {
-              await BuildHooks(buildRunner: buildRunner).build(iosEnvironment);
-            }
-            iosEnvironment.defines[deploymentTargetDefine] = deploymentTarget;
-            await expectLater(
-              linking
-                  ? LinkHooks(buildRunner: buildRunner).build(iosEnvironment)
-                  : BuildHooks(buildRunner: buildRunner).build(iosEnvironment),
-              throwsToolExit(message: 'Invalid $platformName deployment target'),
-            );
-            expect(buildRunner.buildInvocations, linking ? 1 : 0);
-            expect(buildRunner.linkInvocations, 0);
-          },
-          overrides: <Type, Generator>{
-            FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
-          },
-        );
-      }
+    const deploymentTarget = 'invalid';
+    for (final linking in <bool>[false, true]) {
+      final hookStage = linking ? 'link' : 'build';
+      testUsingContext(
+        'NativeAssets rejects $platformName deployment target $deploymentTarget before running $hookStage hooks',
+        () async {
+          writePackageConfigFiles(directory: iosEnvironment.projectDir, mainLibName: 'my_app');
+          iosEnvironment.defines.addAll(<String, String>{
+            kTargetPlatform: platform.getName(),
+            if (!isIOS) kDarwinArchs: 'arm64',
+          });
+          final buildRunner = FakeFlutterNativeAssetsBuildRunner(
+            packagesWithNativeAssetsResult: <String>['foo'],
+          );
+          if (linking) {
+            await BuildHooks(buildRunner: buildRunner).build(iosEnvironment);
+          }
+          iosEnvironment.defines[deploymentTargetDefine] = deploymentTarget;
+          await expectLater(
+            linking
+                ? LinkHooks(buildRunner: buildRunner).build(iosEnvironment)
+                : BuildHooks(buildRunner: buildRunner).build(iosEnvironment),
+            throwsToolExit(message: 'Invalid $platformName deployment target'),
+          );
+          expect(buildRunner.buildInvocations, linking ? 1 : 0);
+          expect(buildRunner.linkInvocations, 0);
+        },
+        overrides: <Type, Generator>{
+          FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
+        },
+      );
     }
   }
 

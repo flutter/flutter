@@ -15,7 +15,7 @@ import 'native_assets_host.dart';
 
 const targetMacOSVersion = 13;
 
-/// The app deployment version supplied by Xcode, or the native-assets default.
+/// The deployment version supplied to assemble, or the native-assets default.
 AppleVersion macOSDeploymentVersion(Map<String, String> defines) => parseAppleDeploymentVersion(
   defines[kMacOSDeploymentTarget],
   platform: 'macOS',
