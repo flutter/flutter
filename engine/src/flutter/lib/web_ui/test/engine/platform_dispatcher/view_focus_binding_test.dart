@@ -15,15 +15,25 @@ void testMain() {
   group(ViewFocusBinding, () {
     late List<ui.ViewFocusEvent> dispatchedViewFocusEvents;
     late EnginePlatformDispatcher dispatcher;
+    late SemanticsEnabler originalSemanticsEnabler;
+    late SemanticsEnabler semanticsEnabler;
 
     setUp(() {
       dispatcher = EnginePlatformDispatcher.instance;
       dispatchedViewFocusEvents = <ui.ViewFocusEvent>[];
       dispatcher.onViewFocusChange = dispatchedViewFocusEvents.add;
+      // Views register an accessibility placeholder when they are created.
+      // Most tests are not about it, so they use an enabler that never places
+      // one. Tests about the placeholder swap in a real one.
+      originalSemanticsEnabler = EngineSemantics.instance.semanticsHelper.semanticsEnabler;
+      semanticsEnabler = _NoPlaceholderSemanticsEnabler();
+      EngineSemantics.instance.semanticsHelper.semanticsEnabler = semanticsEnabler;
     });
 
     tearDown(() {
       EngineSemantics.instance.semanticsEnabled = false;
+      semanticsEnabler.dispose();
+      EngineSemantics.instance.semanticsHelper.semanticsEnabler = originalSemanticsEnabler;
       endFakeTextEditing();
       debugEmulateIosSafari = false;
       debugViewFocusDocumentHasFocusOverride = null;
@@ -332,6 +342,104 @@ void testMain() {
       expect(dispatchedViewFocusEvents[0].direction, ui.ViewFocusDirection.undefined);
     });
 
+    group('while the accessibility placeholder is waiting', () {
+      // https://github.com/flutter/flutter/issues/195585
+      late EngineFlutterView view;
+      late DomElement placeholder;
+
+      setUp(() {
+        semanticsEnabler = DesktopSemanticsEnabler();
+        EngineSemantics.instance.semanticsHelper.semanticsEnabler = semanticsEnabler;
+        // Views from earlier tests stay in the page, and one may hold focus.
+        domDocument.activeElement?.blur();
+        dispatchedViewFocusEvents.clear();
+        view = createAndRegisterView(dispatcher);
+        placeholder = semanticsEnabler.placeholders.single;
+      });
+
+      DomKeyboardEvent dispatchTab(DomElement target) {
+        final DomKeyboardEvent event = createDomKeyboardEvent('keydown', <String, Object>{
+          'key': 'Tab',
+          'bubbles': true,
+        });
+        target.dispatchEvent(event);
+        return event;
+      }
+
+      test('requestViewFocusChange leaves focus ahead of the views', () {
+        expect(domDocument.activeElement, isNot(view.dom.rootElement));
+
+        dispatcher.requestViewFocusChange(
+          viewId: view.viewId,
+          state: ui.ViewFocusState.focused,
+          direction: ui.ViewFocusDirection.forward,
+        );
+
+        // Focusing the view would put browser focus past the placeholder, so
+        // moving forward through the page would never reach it.
+        expect(domDocument.activeElement, isNot(view.dom.rootElement));
+        expect(dispatchedViewFocusEvents, isEmpty);
+      });
+
+      test('requestViewFocusChange keeps focus on the placeholder', () {
+        placeholder.focusWithoutScroll();
+
+        dispatcher.requestViewFocusChange(
+          viewId: view.viewId,
+          state: ui.ViewFocusState.focused,
+          direction: ui.ViewFocusDirection.forward,
+        );
+
+        expect(domDocument.activeElement, placeholder);
+      });
+
+      test('requestViewFocusChange focuses the view once semantics is enabled', () {
+        EngineSemantics.instance.semanticsEnabled = true;
+
+        dispatcher.requestViewFocusChange(
+          viewId: view.viewId,
+          state: ui.ViewFocusState.focused,
+          direction: ui.ViewFocusDirection.forward,
+        );
+
+        expect(domDocument.activeElement, view.dom.rootElement);
+      });
+
+      test('requestViewFocusChange still moves focus from one view to another', () {
+        final EngineFlutterView otherView = createAndRegisterView(dispatcher);
+        view.dom.rootElement.focusWithoutScroll();
+
+        dispatcher.requestViewFocusChange(
+          viewId: otherView.viewId,
+          state: ui.ViewFocusState.focused,
+          direction: ui.ViewFocusDirection.forward,
+        );
+
+        expect(domDocument.activeElement, otherView.dom.rootElement);
+      });
+
+      test('Tab outside the views is left to the browser', () {
+        final SemanticsHelper helper = EngineSemantics.instance.semanticsHelper;
+
+        // From the page, the browser's tab order steps onto the placeholder.
+        expect(helper.shouldEnableSemantics(dispatchTab(domDocument.body!)), isFalse);
+        // From the placeholder, it steps into the view.
+        expect(helper.shouldEnableSemantics(dispatchTab(placeholder)), isFalse);
+        // Inside a view, the framework handles Tab as usual.
+        expect(helper.shouldEnableSemantics(dispatchTab(view.dom.rootElement)), isTrue);
+        // Neither enables semantics.
+        expect(EngineSemantics.instance.semanticsEnabled, isFalse);
+        expect(placeholder.isConnected, isTrue);
+      });
+
+      test('Tab goes to the framework once the placeholder is gone', () {
+        semanticsEnabler.retirePlaceholders();
+
+        final SemanticsHelper helper = EngineSemantics.instance.semanticsHelper;
+        expect(helper.shouldEnableSemantics(dispatchTab(domDocument.body!)), isTrue);
+      });
+    });
+
     test('works even if focus is changed in the middle of a blur call', () {
       debugViewFocusDocumentHasFocusOverride = true;
       final DomElement input1 = createDomElement('input');
@@ -508,6 +616,13 @@ EngineFlutterView createAndRegisterView(EnginePlatformDispatcher dispatcher) {
   domDocument.body!.append(div);
   dispatcher.viewManager.registerView(view);
   return view;
+}
+
+/// A desktop enabler that never places an accessibility placeholder, so it is
+/// never waiting for the user to enable semantics.
+class _NoPlaceholderSemanticsEnabler extends DesktopSemanticsEnabler {
+  @override
+  DomElement? placeholderHostFor(DomElement viewRoot) => null;
 }
 
 extension on DomElement {

@@ -9,6 +9,7 @@ import 'package:meta/meta.dart';
 import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 import '../dom.dart';
+import '../platform_dispatcher.dart';
 import 'semantics.dart';
 
 /// The maximum [semanticsActivationAttempts] before we give up waiting for
@@ -52,6 +53,14 @@ class SemanticsHelper {
     return _semanticsEnabler.shouldEnableSemantics(event);
   }
 
+  /// Whether a request to focus a Flutter view should leave browser focus
+  /// where it is, given that [activeElement] currently has focus.
+  ///
+  /// See [SemanticsEnabler.shouldDeferViewFocus].
+  bool shouldDeferViewFocus(DomElement? activeElement) {
+    return _semanticsEnabler.shouldDeferViewFocus(activeElement);
+  }
+
   /// Notifies that a Flutter view rooted at [viewRoot] was created, so that a
   /// placeholder can be put where this form factor needs it.
   void addPlaceholderForView(DomElement viewRoot) {
@@ -92,7 +101,7 @@ abstract class SemanticsEnabler {
     if (event.isA<DomKeyboardEvent>()) {
       event as DomKeyboardEvent;
       if (event.key == 'Tab') {
-        return true;
+        return shouldForwardTab(event);
       }
     }
 
@@ -103,6 +112,16 @@ abstract class SemanticsEnabler {
       return tryEnableSemantics(event);
     }
   }
+
+  /// Whether a Tab key event should be forwarded to the framework.
+  ///
+  /// Tab never enables semantics. When it is not forwarded, the browser moves
+  /// focus to the next element in its own tab order.
+  bool shouldForwardTab(DomKeyboardEvent event) => true;
+
+  /// Whether a request to focus a Flutter view should leave browser focus
+  /// where it is, given that [activeElement] currently has focus.
+  bool shouldDeferViewFocus(DomElement? activeElement) => false;
 
   /// Attempts to activate semantics.
   ///
@@ -259,6 +278,39 @@ class DesktopSemanticsEnabler extends SemanticsEnabler {
   @override
   DomElement? placeholderHostFor(DomElement viewRoot) => domDocument.body;
 
+  /// Whether focus is outside every Flutter view while the placeholder is
+  /// still waiting, so that moving forward through the page reaches the
+  /// placeholder before any view.
+  bool _isFocusAheadOfViews(DomElement? element) {
+    return isWaitingToEnableSemantics &&
+        !EngineSemantics.instance.semanticsEnabled &&
+        EnginePlatformDispatcher.instance.viewManager.findViewForElement(element) == null;
+  }
+
+  /// Leaves browser focus ahead of the views while the placeholder is waiting.
+  ///
+  /// The framework asks for its view to be focused as soon as a widget gains
+  /// focus, which happens at startup. Moving browser focus into the view then
+  /// would put it past the placeholder, where neither Tab nor a screen reader
+  /// reading forward comes back to it. Focus that is already in a view still
+  /// moves between views, and keyboard input reaches the framework either way
+  /// because [KeyboardBinding] listens on the window.
+  ///
+  /// See https://github.com/flutter/flutter/issues/195585
+  @override
+  bool shouldDeferViewFocus(DomElement? activeElement) => _isFocusAheadOfViews(activeElement);
+
+  /// Lets the browser handle Tab outside the views while the placeholder is
+  /// waiting.
+  ///
+  /// Otherwise the framework would move its own focus and consume the key, and
+  /// browser focus would never step onto the placeholder or from it into the
+  /// view. Inside a view, Tab goes to the framework as usual.
+  @override
+  bool shouldForwardTab(DomKeyboardEvent event) {
+    return !_isFocusAheadOfViews(event.target as DomElement?);
+  }
+
   @override
   bool tryEnableSemantics(DomEvent event) {
     // Semantics may be enabled programmatically. If there's a race between that
@@ -316,11 +368,11 @@ class DesktopSemanticsEnabler extends SemanticsEnabler {
       true.toJS,
     );
 
-    // Adding roles to semantics placeholder. 'aria-live' will make sure that
-    // the content is announced to the assistive technology user as soon as the
-    // page receives focus. 'tabindex' makes sure the button is the first
-    // target of tab. 'aria-label' is used to define the placeholder message
-    // to the assistive technology user.
+    // Adding roles to semantics placeholder. 'tabindex' puts the button in the
+    // tab order, ahead of the views, see [shouldDeferViewFocus]. 'aria-label'
+    // is used to define the placeholder message to the assistive technology
+    // user. 'aria-live' does not announce it, since the element has no content
+    // that changes.
     placeholder
       ..setAttribute('role', 'button')
       ..setAttribute('aria-live', 'polite')
