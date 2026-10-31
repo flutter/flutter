@@ -214,6 +214,25 @@ _LINUX_C_FLAGS = [
     "-fno-cxx-modules",
 ]
 
+# The C++ standard library's include directories, one file of each, in GN's
+# search order: libc++abi's (//flutter/third_party/libcxxabi:libcxxabi_config's
+# include_dirs), then the engine's libc++ configuration directory
+# (//flutter/third_party/libcxx:libcxx_config's include_dirs: __config_site,
+# which libc++'s <__config> includes, and the <format> and <version> that ban
+# std::format -- they must be found before libc++'s own, which they
+# #include_next), then libc++'s and libc++abi's again (the compiler config's
+# `-nostdinc++ -I...` cflags_cc, which GN's tool emits after {{include_dirs}}).
+# The toolchains pass this list as cxx_include_markers; the rule turns each
+# file's directory into -I, in order. 10-30: the configuration directory had
+# come last, which was no matter while it held __config_site alone, and left
+# std::format in the Apple binaries once the ban headers arrived (the Mac's
+# T66: check_forbidden_native_symbols).
+CXX_INCLUDE_MARKERS = [
+    "@libcxxabi//:include/cxxabi.h",
+    "//engine/src/flutter/build/secondary/flutter/third_party/libcxx:config/__config_site",
+    "@libcxx//:include/__config",
+]
+
 # C++-only flags (//build/config/compiler:cxx_version_default,
 # :cxx_disable_modules, :no_rtti, //build/config/gcc:no_exceptions, the
 # libc++/libc++abi configs). The -nostdinc++ include paths are appended by the
