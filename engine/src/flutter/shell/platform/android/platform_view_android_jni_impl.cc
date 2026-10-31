@@ -91,6 +91,7 @@ static jfieldID g_jni_shell_holder_field = nullptr;
     "(IIIIIIILio/flutter/embedding/engine/mutatorsstack/"                     \
     "FlutterMutatorsStack;)V")                                                \
   V(g_hide_platform_view2_method, hidePlatformView2, "(I)V")                  \
+  V(g_on_backdrop_blurs2_method, onBackdropBlurs2, "([F)Z")                   \
   V(g_on_end_frame2_method, endFrame2, "()V")                                 \
   V(g_show_overlay_surface2_method, showOverlaySurface2, "()V")               \
   V(g_hide_overlay_surface2_method, hideOverlaySurface2, "()V")               \
@@ -2423,6 +2424,27 @@ void PlatformViewAndroidJNIImpl::hidePlatformView2(int32_t view_id) {
   }
 
   env->CallVoidMethod(java_object.obj(), g_hide_platform_view2_method, view_id);
+}
+
+bool PlatformViewAndroidJNIImpl::onBackdropBlurs2(
+    const std::vector<float>& blurs) {
+  JNIEnv* env = fml::jni::AttachCurrentThread();
+  auto java_object = java_object_.get(env);
+  if (java_object.is_null()) {
+    return false;
+  }
+
+  fml::jni::ScopedJavaLocalRef<jfloatArray> array(
+      env, env->NewFloatArray(static_cast<jsize>(blurs.size())));
+  if (!blurs.empty()) {
+    env->SetFloatArrayRegion(array.obj(), 0, static_cast<jsize>(blurs.size()),
+                             blurs.data());
+  }
+  const jboolean supported = env->CallBooleanMethod(
+      java_object.obj(), g_on_backdrop_blurs2_method, array.obj());
+
+  FML_CHECK(fml::jni::CheckException(env));
+  return supported == JNI_TRUE;
 }
 
 void PlatformViewAndroidJNIImpl::onEndFrame2() {

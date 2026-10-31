@@ -134,5 +134,51 @@ TEST(ViewSlicerTest, OverlappingTwoPVs) {
   EXPECT_EQ(overlay->second, DlRect::MakeLTRB(0, 0, 100, 100));
 }
 
+TEST(ViewSlicerTest, ExtraOverlayRectsForceContentIntoOverlay) {
+  DisplayListBuilder builder(DlRect::MakeLTRB(0, 0, 100, 100));
+
+  std::vector<int64_t> composition_order = {1};
+  std::unordered_map<int64_t, std::unique_ptr<EmbedderViewSlice>> slices;
+  // The slice content does not overlap the platform view at all, so without
+  // an extra overlay rect no overlay would be needed.
+  AddSliceOfSize(slices, 1, DlRect::MakeLTRB(60, 60, 100, 100));
+
+  std::unordered_map<int64_t, DlRect> view_rects = {
+      {1, DlRect::MakeLTRB(0, 0, 50, 50)}};
+
+  // A backdrop filter's children must composite above the native blur, so
+  // the embedder forces the filter region into the overlay.
+  std::unordered_map<int64_t, DlRect> extra_overlay_rects = {
+      {1, DlRect::MakeLTRB(60, 60, 80, 80)}};
+
+  auto computed_overlays = SliceViews(&builder, composition_order, slices,
+                                      view_rects, extra_overlay_rects);
+
+  EXPECT_EQ(computed_overlays.size(), 1u);
+  auto overlay = computed_overlays.find(1);
+  ASSERT_NE(overlay, computed_overlays.end());
+  EXPECT_EQ(overlay->second, DlRect::MakeLTRB(60, 60, 80, 80));
+}
+
+TEST(ViewSlicerTest, ExtraOverlayRectsUnionWithPlatformViewOverlap) {
+  DisplayListBuilder builder(DlRect::MakeLTRB(0, 0, 100, 100));
+
+  std::vector<int64_t> composition_order = {1};
+  std::unordered_map<int64_t, std::unique_ptr<EmbedderViewSlice>> slices;
+  AddSliceOfSize(slices, 1, DlRect::MakeLTRB(0, 0, 100, 100));
+
+  std::unordered_map<int64_t, DlRect> view_rects = {
+      {1, DlRect::MakeLTRB(0, 0, 50, 50)}};
+  std::unordered_map<int64_t, DlRect> extra_overlay_rects = {
+      {1, DlRect::MakeLTRB(40, 40, 90, 90)}};
+
+  auto computed_overlays = SliceViews(&builder, composition_order, slices,
+                                      view_rects, extra_overlay_rects);
+
+  auto overlay = computed_overlays.find(1);
+  ASSERT_NE(overlay, computed_overlays.end());
+  EXPECT_EQ(overlay->second, DlRect::MakeLTRB(0, 0, 90, 90));
+}
+
 }  // namespace testing
 }  // namespace flutter

@@ -129,6 +129,9 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
   private Surface overlayerSurface = null;
   private SurfaceControl overlaySurfaceControl = null;
 
+  // Blurs BackdropFilters over platform views via SurfaceFlinger; see BackdropBlurCarrier.
+  private final BackdropBlurCarrier backdropBlurCarrier = new BackdropBlurCarrier();
+
   private final HashSet<Integer> viewsWithPendingSurfaceCallback = new HashSet<>();
 
   public PlatformViewsController2() {
@@ -316,6 +319,9 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
     }
 
     destroyOverlaySurface();
+    if (Build.VERSION.SDK_INT >= API_LEVELS.API_34) {
+      backdropBlurCarrier.detachFromView();
+    }
     flutterView = null;
 
     if (Build.VERSION.SDK_INT >= API_LEVELS.API_34) {
@@ -1006,6 +1012,13 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
   @RequiresApi(API_LEVELS.API_34)
   public FlutterOverlaySurface createOverlaySurface() {
     if (overlayerSurface == null) {
+      // Only engines running Hybrid Composition++ create an overlay, and only they can route
+      // backdrop blurs through SurfaceFlinger, so this is where the carrier SurfaceView is
+      // added. It runs on the platform thread before the first frame's platform view
+      // positions are applied, so the carrier joins the same traversal.
+      if (BackdropBlurCarrier.isSupported() && flutterView != null) {
+        backdropBlurCarrier.attachToView(flutterView);
+      }
       final SurfaceControl.Builder surfaceControlBuilder = new SurfaceControl.Builder();
       surfaceControlBuilder.setBufferSize(flutterView.getWidth(), flutterView.getHeight());
       surfaceControlBuilder.setFormat(PixelFormat.RGBA_8888);
@@ -1019,6 +1032,7 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
       tx.apply();
       overlayerSurface = new Surface(surfaceControl);
       overlaySurfaceControl = surfaceControl;
+      backdropBlurCarrier.setOverlaySurfaceControl(surfaceControl);
     }
 
     return new FlutterOverlaySurface(0, overlayerSurface);
@@ -1026,10 +1040,26 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
 
   public void destroyOverlaySurface() {
     if (overlayerSurface != null) {
+      if (Build.VERSION.SDK_INT >= API_LEVELS.API_34) {
+        backdropBlurCarrier.setOverlaySurfaceControl(null);
+      }
       overlayerSurface.release();
       overlayerSurface = null;
       overlaySurfaceControl = null;
     }
+  }
+
+  /**
+   * Applies this frame's {@code BackdropFilter} blurs that cover platform views. Each blur is
+   * {@code [left, top, right, bottom, sigma, cornerRadius]} in physical pixels. Called from the
+   * engine before {@link #swapTransactions()} so the blur lands on the same frame as the platform
+   * view updates. Returns whether native blur is available on this device; the engine leaves
+   * backdrop filters to Flutter when it is not. See {@link BackdropBlurCarrier}.
+   */
+  @UiThread
+  @RequiresApi(API_LEVELS.API_34)
+  public boolean onBackdropBlurs(@NonNull float[] blurs) {
+    return backdropBlurCarrier.onBackdropBlurs(blurs);
   }
 
   @RequiresApi(API_LEVELS.API_34)
@@ -1070,8 +1100,14 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
     tx.setVisibility(overlaySurfaceControl, /*visible=*/ false);
   }
 
+  @VisibleForTesting
+  @NonNull
+  BackdropBlurCarrier getBackdropBlurCarrierForTest() {
+    return backdropBlurCarrier;
+  }
+
   public boolean isHcppEnabled() {
-    if (flutterJNI == null) {
+    if (flutterJNI == null || !flutterJNI.isAttached()) {
       return false;
     }
     return flutterJNI.IsSurfaceControlEnabled();
