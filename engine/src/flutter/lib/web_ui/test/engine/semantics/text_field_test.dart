@@ -94,15 +94,13 @@ void testMain() {
 
       expectSemanticsTree(owner(), '<sem><input type="text" /></sem>');
 
-      // TODO(yjbanov): this used to attempt to test that value="hello" but the
-      //                test was a false positive. We should revise this test and
-      //                make sure it tests the right things:
-      //                https://github.com/flutter/flutter/issues/147200
+      // `outerHTML` does not include the `value` property, so it is checked
+      // on the element directly.
       final SemanticsObject node = owner().debugSemanticsTree![0]!;
       final textFieldRole = node.semanticRole! as SemanticTextField;
       final inputElement = textFieldRole.editableElement as DomHTMLInputElement;
       expect(inputElement.tagName.toLowerCase(), 'input');
-      expect(inputElement.value, '');
+      expect(inputElement.value, 'hello');
       expect(inputElement.disabled, isFalse);
       expect(inputElement.getAttribute('aria-required'), isNull);
     });
@@ -156,6 +154,44 @@ void testMain() {
       final inputElement = textFieldRole.editableElement as DomHTMLInputElement;
       expect(inputElement.tagName.toLowerCase(), 'input');
       expect(inputElement.disabled, isTrue);
+      // A disabled field is never focused, so its value has to come from
+      // semantics for screen readers to read it.
+      expect(inputElement.value, 'hello');
+    });
+
+    test('updates the value of a field that is not being edited', () {
+      final SemanticsObject node = createTextFieldSemantics(value: 'hello');
+      final inputElement =
+          (node.semanticRole! as SemanticTextField).editableElement as DomHTMLInputElement;
+      expect(inputElement.value, 'hello');
+
+      createTextFieldSemantics(value: 'bye');
+      expect(inputElement.value, 'bye');
+    });
+
+    test('renders the value of a multi-line field that is not being edited', () {
+      final SemanticsObject node = createTextFieldSemantics(value: 'hello', isMultiline: true);
+      final textArea =
+          (node.semanticRole! as SemanticTextField).editableElement as DomHTMLTextAreaElement;
+      expect(textArea.value, 'hello');
+    });
+
+    test('does not write the masked value of an obscured field', () {
+      final SemanticsObject node = createTextFieldSemantics(value: '•••', isObscured: true);
+      final inputElement =
+          (node.semanticRole! as SemanticTextField).editableElement as DomHTMLInputElement;
+      expect(inputElement.value, '');
+    });
+
+    test('does not write the value of a field owned by an autofill group', () {
+      final SemanticsObject node = createTextFieldSemantics(value: 'hello');
+      final inputElement =
+          (node.semanticRole! as SemanticTextField).editableElement as DomHTMLInputElement;
+      inputElement.name = 'username';
+      inputElement.value = 'autofilled';
+
+      createTextFieldSemantics(value: 'bye');
+      expect(inputElement.value, 'autofilled');
     });
 
     test('sends a SemanticsAction.focus action when browser requests focus', () async {
