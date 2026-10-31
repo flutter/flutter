@@ -3804,6 +3804,60 @@ void main() {
     await tester.pump();
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/147000
+  testWidgets('Drag and drop - childDragAnchorStrategy works when the draggable is scaled', (
+    WidgetTester tester,
+  ) async {
+    final Key sourceKey = UniqueKey();
+    final Key feedbackKey = UniqueKey();
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: Align(
+          alignment: Alignment.topLeft,
+          child: Transform.scale(
+            scale: 0.5,
+            alignment: Alignment.topLeft,
+            child: LongPressDraggable<int>(
+              data: 42,
+              feedback: Container(
+                key: feedbackKey,
+                width: 40.0,
+                height: 20.0,
+                color: const Color(0xFFFF0000),
+              ),
+              child: Container(
+                key: sourceKey,
+                width: 300.0,
+                height: 200.0,
+                color: const Color(0xFF0000FF),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    final Finder source = find.byKey(sourceKey);
+    final Finder feedback = find.byKey(feedbackKey);
+    final Offset sourceTopLeft = tester.getTopLeft(source);
+
+    // The feedback must be anchored to the top left of the child no matter
+    // where inside the child the drag was started.
+    for (final startLocation in <Offset>[
+      tester.getTopLeft(source) + const Offset(1.0, 1.0),
+      tester.getCenter(source),
+      tester.getBottomRight(source) - const Offset(1.0, 1.0),
+    ]) {
+      final TestGesture gesture = await tester.startGesture(startLocation);
+      await tester.pump(kLongPressTimeout);
+      expect(feedback, findsOneWidget);
+      expect(tester.getTopLeft(feedback), sourceTopLeft);
+
+      // Finish gesture to release resources.
+      await gesture.up();
+      await tester.pump();
+    }
+  });
+
   testWidgets('Drag and drop - feedback matches pointer in rotated WidgetsApp', (
     WidgetTester tester,
   ) async {
