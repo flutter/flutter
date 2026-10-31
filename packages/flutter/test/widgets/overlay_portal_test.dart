@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/src/foundation/constants.dart';
 import 'package:flutter/widgets.dart';
@@ -634,6 +635,7 @@ void main() {
         ..dispose(),
     );
     const size = Size.square(40);
+    const overlayChildKey = ValueKey<String>('overlay child');
 
     final Widget widget = Directionality(
       key: GlobalKey(debugLabel: 'key'),
@@ -646,7 +648,8 @@ void main() {
               builder: (BuildContext context) {
                 return OverlayPortal(
                   controller: controller1,
-                  overlayChildBuilder: (BuildContext context) => const SizedBox(),
+                  overlayChildBuilder: (BuildContext context) =>
+                      const SizedBox(key: overlayChildKey),
                   child: SizedBox.fromSize(size: size),
                 );
               },
@@ -660,6 +663,83 @@ void main() {
     await tester.pumpWidget(widget);
     expect(tester.getSize(find.byType(Overlay)), size);
     expect(tester.takeException(), isNull);
+    // The theater, not the layout surrogate, starts this overlay child's first layout.
+    expect(tester.getSize(find.byKey(overlayChildKey)), size);
+  });
+
+  testWidgets('root overlay child waits for an offstage anchor that was never laid out', (
+    WidgetTester tester,
+  ) async {
+    final controller = OverlayPortalController()..show();
+    OverlayChildLayoutInfo? layoutInfo;
+    final bottom = OverlayEntry(
+      maintainState: true,
+      builder: (BuildContext context) => Center(
+        child: OverlayPortal.overlayChildLayoutBuilder(
+          controller: controller,
+          overlayLocation: OverlayChildLocation.rootOverlay,
+          overlayChildBuilder: (BuildContext context, OverlayChildLayoutInfo info) {
+            layoutInfo = info;
+            return const SizedBox.shrink();
+          },
+          child: const SizedBox.square(dimension: 10.0),
+        ),
+      ),
+    );
+    final top = OverlayEntry(
+      opaque: true,
+      builder: (BuildContext context) => const SizedBox.expand(),
+    );
+    final root = OverlayEntry(
+      builder: (BuildContext context) => Overlay(initialEntries: <OverlayEntry>[bottom, top]),
+    );
+    var topRemoved = false;
+    addTearDown(() {
+      if (!topRemoved) {
+        top.remove();
+      }
+      for (final entry in <OverlayEntry>[bottom, root]) {
+        entry.remove();
+      }
+      for (final entry in <OverlayEntry>[bottom, top, root]) {
+        entry.dispose();
+      }
+    });
+
+    // The anchor starts offstage in the inner Overlay, but its deferred child
+    // is attached to the onstage root Overlay.
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Overlay(initialEntries: <OverlayEntry>[root]),
+      ),
+    );
+    expect(tester.takeException(), isNull);
+    final RenderBox surrogate = tester.renderObject(
+      find.byType(OverlayPortal, skipOffstage: false),
+    );
+    expect(surrogate.attached, isTrue);
+    expect(surrogate.hasSize, isFalse);
+    final RenderObject rootTheater = tester.renderObject(find.byType(Overlay).first);
+    final deferredChildren = <RenderBox>[];
+    rootTheater.visitChildren((RenderObject child) {
+      if (child.runtimeType.toString() == '_RenderDeferredLayoutBox') {
+        deferredChildren.add(child as RenderBox);
+      }
+    });
+    expect(deferredChildren, hasLength(1));
+    final RenderBox deferredChild = deferredChildren.single;
+    expect(deferredChild.attached, isTrue);
+    expect(deferredChild.hasSize, isFalse);
+    expect(layoutInfo, isNull);
+
+    top.remove();
+    topRemoved = true;
+    await tester.pump();
+    expect(tester.takeException(), isNull);
+    expect(layoutInfo?.childSize, const Size.square(10.0));
+    expect(deferredChild.hasSize, isTrue);
+    expect(deferredChild.debugNeedsLayout, isFalse);
   });
 
   for (final bounded in <bool>[false, true]) {
@@ -3056,6 +3136,472 @@ void main() {
     });
   });
 
+  for (final useLayoutBuilder in <bool>[false, true]) {
+    for (final semanticsEnabled in <bool>[false, true]) {
+      testWidgets(
+        'pending-layout overlay child is ignored and recovers '
+        'with semantics ${semanticsEnabled ? 'enabled' : 'disabled'}, layoutBuilder: $useLayoutBuilder',
+        (WidgetTester tester) async {
+          final SemanticsTester? semantics = semanticsEnabled ? SemanticsTester(tester) : null;
+          try {
+            final scrollController = ScrollController();
+            addTearDown(scrollController.dispose);
+            late final OverlayEntry entry;
+            addTearDown(() {
+              entry.remove();
+              entry.dispose();
+            });
+            var overlayHitCount = 0;
+
+            await tester.pumpWidget(
+              Directionality(
+                textDirection: TextDirection.ltr,
+                child: Overlay(
+                  initialEntries: <OverlayEntry>[
+                    entry = OverlayEntry(
+                      builder: (BuildContext context) => Center(
+                        child: SizedBox(
+                          height: 400.0,
+                          child: ListView.builder(
+                            controller: scrollController,
+                            itemCount: 20,
+                            itemBuilder: (BuildContext context, int index) => index == 3
+                                ? _KeepAliveOverlayPortalItem(
+                                    useLayoutBuilder: useLayoutBuilder,
+                                    onOverlayHit: () {
+                                      overlayHitCount += 1;
+                                    },
+                                  )
+                                : SizedBox(height: 250.0, child: Text('Item $index')),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+            scrollController.jumpTo(700.0);
+            await tester.pump();
+
+            final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+            await gesture.addPointer(location: Offset.zero);
+            addTearDown(gesture.removePointer);
+            await tester.pump();
+
+            // Showing the overlay child also requests keep-alive. Moving the item
+            // beyond the trailing cache extent in the same frame parks its layout
+            // surrogate before it can schedule the deferred child's layout.
+            await gesture.moveTo(
+              tester.getCenter(find.byKey(_KeepAliveOverlayPortalItem.targetKey)),
+            );
+            scrollController.jumpTo(0.0);
+            _PaintOrder.paintOrder.clear();
+            await tester.pump();
+            // The layout-builder callback has not run, so inspect the deferred
+            // theater child rather than a widget built by that callback.
+            final RenderObject theater = tester.renderObject(find.byType(Overlay));
+            final deferredChildren = <RenderBox>[];
+            theater.visitChildren((RenderObject child) {
+              if (child.runtimeType.toString() == '_RenderDeferredLayoutBox') {
+                deferredChildren.add(child as RenderBox);
+              }
+            });
+            expect(deferredChildren, hasLength(1));
+            final RenderBox deferredChild = deferredChildren.single;
+            expect(deferredChild.attached, isTrue);
+            expect(deferredChild.hasSize, isFalse);
+            final RenderBox surrogate = tester.renderObject(
+              find.byType(OverlayPortal, skipOffstage: false),
+            );
+            expect(surrogate.runtimeType.toString(), '_RenderLayoutSurrogateProxyBox');
+            expect(surrogate.hasSize, isTrue);
+            expect(surrogate.debugNeedsLayout, isTrue);
+            if (useLayoutBuilder) {
+              expect(
+                find.byKey(_KeepAliveOverlayPortalItem.overlayKey, skipOffstage: false),
+                findsNothing,
+              );
+            } else {
+              final RenderBox overlayChild = tester.renderObject(
+                find.byKey(_KeepAliveOverlayPortalItem.overlayKey, skipOffstage: false),
+              );
+              expect(overlayChild.attached, isTrue);
+              expect(overlayChild.hasSize, isFalse);
+            }
+            expect(tester.takeException(), isNull);
+            expect(_PaintOrder.paintOrder, isEmpty);
+            // Relayout of the theater must not bypass the parked surrogate.
+            deferredChild.parent!.markNeedsLayout();
+            await tester.pump();
+            expect(tester.takeException(), isNull);
+            expect(deferredChild.attached, isTrue);
+            expect(deferredChild.hasSize, isFalse);
+            expect(surrogate.debugNeedsLayout, isTrue);
+            if (semantics != null) {
+              expect(semantics.nodesWith(label: _KeepAliveOverlayPortalItem.overlayLabel), isEmpty);
+            }
+
+            // Pointer movement still hit-tests the theater, but the pending overlay
+            // child must not participate.
+            await gesture.moveTo(const Offset(25.0, 25.0));
+            await tester.pump();
+            expect(tester.takeException(), isNull);
+            await tester.tapAt(const Offset(25.0, 25.0));
+            expect(tester.takeException(), isNull);
+            expect(overlayHitCount, 0);
+
+            // Laying out the surrogate again lets the deferred child catch up and
+            // rejoin paint, hit testing, and semantics.
+            _PaintOrder.paintOrder.clear();
+            scrollController.jumpTo(700.0);
+            await tester.pump();
+            expect(tester.takeException(), isNull);
+            expect(surrogate.debugNeedsLayout, isFalse);
+            expect(deferredChild.hasSize, isTrue);
+            expect(deferredChild.debugNeedsLayout, isFalse);
+            expect(_PaintOrder.paintOrder, isNotEmpty);
+            expect(
+              tester.getCenter(find.byKey(_KeepAliveOverlayPortalItem.overlayKey)),
+              const Offset(25.0, 25.0),
+            );
+            if (semantics != null) {
+              expect(
+                semantics.nodesWith(label: _KeepAliveOverlayPortalItem.overlayLabel),
+                isNotEmpty,
+              );
+            }
+            await tester.tapAt(const Offset(25.0, 25.0));
+            expect(overlayHitCount, 1);
+
+            // Once sized, the deferred child must still receive new theater
+            // constraints even while its surrogate is parked and dirty.
+            scrollController.jumpTo(0.0);
+            await tester.pump();
+            surrogate.markNeedsLayout();
+            final Size previousSize = deferredChild.size;
+            addTearDown(tester.view.resetPhysicalSize);
+            tester.view.physicalSize = Size(
+              tester.view.physicalSize.width,
+              tester.view.physicalSize.height - 150.0,
+            );
+            await tester.pump();
+            expect(tester.takeException(), isNull);
+            expect(surrogate.debugNeedsLayout, isTrue);
+            expect(deferredChild.debugNeedsLayout, isFalse);
+            expect(deferredChild.size, tester.getSize(find.byType(Overlay)));
+            expect(deferredChild.size, isNot(previousSize));
+            await tester.tapAt(const Offset(25.0, 25.0));
+            expect(overlayHitCount, 2);
+          } finally {
+            semantics?.dispose();
+          }
+        },
+        semanticsEnabled: semanticsEnabled,
+      );
+    }
+  }
+
+  testWidgets('surrogate requires successful layout after a layout exception', (
+    WidgetTester tester,
+  ) async {
+    final controller = OverlayPortalController();
+    var failLayout = true;
+    late final OverlayEntry entry;
+    addTearDown(() {
+      entry.remove();
+      entry.dispose();
+    });
+    final errors = <FlutterErrorDetails>[];
+    final void Function(FlutterErrorDetails)? previousHandler = FlutterError.onError;
+    FlutterError.onError = errors.add;
+    try {
+      controller.show();
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Overlay(
+            initialEntries: <OverlayEntry>[
+              entry = OverlayEntry(
+                builder: (BuildContext context) => OverlayPortal(
+                  controller: controller,
+                  overlayChildBuilder: (BuildContext context) => const SizedBox(),
+                  child: failLayout
+                      ? WidgetToRenderBoxAdapter(renderBox: _ThrowingLayoutBox())
+                      : const SizedBox(),
+                ),
+              ),
+            ],
+          ),
+        ),
+        phase: EnginePhase.layout,
+      );
+      final RenderBox surrogate = tester.renderObject(find.byType(OverlayPortal));
+      final RenderObject theater = tester.renderObject(find.byType(Overlay));
+      expect(
+        errors.any(
+          (FlutterErrorDetails error) =>
+              error.exception.toString().contains('intentional layout failure'),
+        ),
+        isTrue,
+      );
+      expect(surrogate.hasSize, isFalse);
+      expect(surrogate.debugNeedsLayout, isFalse);
+      // RenderObject clears its dirty flag after reporting a layout exception,
+      // but the surrogate still needs a successful layout before it is ready.
+      errors.clear();
+      final deferredChildren = <RenderBox>[];
+      theater.visitChildren((RenderObject child) {
+        if (child.runtimeType.toString() == '_RenderDeferredLayoutBox') {
+          deferredChildren.add(child as RenderBox);
+        }
+      });
+      expect(deferredChildren, hasLength(1));
+      final RenderBox deferredChild = deferredChildren.single;
+      expect(deferredChild.hasSize, isFalse);
+      expect(deferredChild.attached, isTrue);
+
+      failLayout = false;
+      entry.markNeedsBuild();
+      // RenderObject does not automatically retry a failed layout.
+      surrogate.markNeedsLayout();
+      await tester.pump();
+      expect(errors, isEmpty);
+      expect(deferredChild.hasSize, isTrue);
+      expect(deferredChild.debugNeedsLayout, isFalse);
+    } finally {
+      FlutterError.onError = previousHandler;
+    }
+  });
+
+  testWidgets('failed surrogate with retained size cannot initiate deferred layout', (
+    WidgetTester tester,
+  ) async {
+    final controller = OverlayPortalController();
+    var anchorHeight = 100.0;
+    var failLayout = false;
+    late final OverlayEntry entry;
+    addTearDown(() {
+      entry.remove();
+      entry.dispose();
+    });
+    final errors = <FlutterErrorDetails>[];
+    final void Function(FlutterErrorDetails)? previousHandler = FlutterError.onError;
+    FlutterError.onError = errors.add;
+    try {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Overlay(
+            initialEntries: <OverlayEntry>[
+              entry = OverlayEntry(
+                builder: (BuildContext context) => Center(
+                  child: SizedBox(
+                    width: 100.0,
+                    height: anchorHeight,
+                    child: OverlayPortal(
+                      controller: controller,
+                      overlayChildBuilder: (BuildContext context) => const SizedBox.shrink(),
+                      child: failLayout
+                          ? WidgetToRenderBoxAdapter(renderBox: _ThrowingLayoutBox())
+                          : const SizedBox.expand(),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        phase: EnginePhase.layout,
+      );
+      final RenderBox surrogate = tester.renderObject(find.byType(OverlayPortal));
+      final RenderObject theater = tester.renderObject(find.byType(Overlay));
+      expect(errors, isEmpty);
+      expect(surrogate.size, const Size(100.0, 100.0));
+
+      // The failed descendant leaves the Semantics proxy's old size in place.
+      // Adopting it under tighter constraints fails the surrogate's local layout.
+      anchorHeight = 50.0;
+      failLayout = true;
+      entry.markNeedsBuild();
+      controller.show();
+      await tester.pump(null, EnginePhase.layout);
+      expect(
+        errors.any(
+          (FlutterErrorDetails error) =>
+              error.exception.toString().contains('intentional layout failure'),
+        ),
+        isTrue,
+      );
+      expect(
+        errors.any(
+          (FlutterErrorDetails error) => error.exception.toString().contains(
+            '_RenderLayoutSurrogateProxyBox does not meet its constraints',
+          ),
+        ),
+        isTrue,
+      );
+      expect(surrogate.hasSize, isTrue);
+      expect(surrogate.size, const Size(100.0, 100.0));
+      expect(surrogate.constraints, BoxConstraints.tight(const Size(100.0, 50.0)));
+      expect(surrogate.debugNeedsLayout, isFalse);
+      final deferredChildren = <RenderBox>[];
+      theater.visitChildren((RenderObject child) {
+        if (child.runtimeType.toString() == '_RenderDeferredLayoutBox') {
+          deferredChildren.add(child as RenderBox);
+        }
+      });
+      expect(deferredChildren, hasLength(1));
+      final RenderBox deferredChild = deferredChildren.single;
+      expect(deferredChild.attached, isTrue);
+      expect(deferredChild.hasSize, isFalse);
+
+      // Its retained size alone must not allow the theater to initiate layout.
+      errors.clear();
+      theater.markNeedsLayout();
+      await tester.pump(null, EnginePhase.layout);
+      expect(errors, isEmpty);
+      expect(deferredChild.attached, isTrue);
+      expect(deferredChild.hasSize, isFalse);
+
+      failLayout = false;
+      entry.markNeedsBuild();
+      surrogate.markNeedsLayout();
+      await tester.pump();
+      expect(errors, isEmpty);
+      expect(surrogate.size, const Size(100.0, 50.0));
+      expect(deferredChild.hasSize, isTrue);
+      expect(deferredChild.debugNeedsLayout, isFalse);
+    } finally {
+      FlutterError.onError = previousHandler;
+    }
+  });
+
+  testWidgets('dirty deferred overlay child remains hit-testable', (WidgetTester tester) async {
+    final controller = OverlayPortalController();
+    const Key overlayKey = ValueKey<String>('overlay-child');
+    var overlayHitCount = 0;
+    late final OverlayEntry entry;
+    addTearDown(() {
+      entry.remove();
+      entry.dispose();
+    });
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Overlay(
+          initialEntries: <OverlayEntry>[
+            entry = OverlayEntry(
+              builder: (BuildContext context) => OverlayPortal(
+                controller: controller,
+                overlayChildBuilder: (BuildContext context) => Positioned(
+                  left: 0.0,
+                  top: 0.0,
+                  width: 50.0,
+                  height: 50.0,
+                  child: Listener(
+                    key: overlayKey,
+                    behavior: HitTestBehavior.opaque,
+                    onPointerDown: (PointerDownEvent event) {
+                      overlayHitCount += 1;
+                    },
+                  ),
+                ),
+                child: const SizedBox.shrink(),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+    controller.show();
+    await tester.pump();
+
+    final Offset overlayCenter = tester.getCenter(find.byKey(overlayKey));
+    await tester.tapAt(overlayCenter);
+    expect(overlayHitCount, 1);
+
+    // A dirty box retains its previous geometry and must remain hit-testable
+    // until the next layout updates it.
+    final RenderBox overlayChild = tester.renderObject(find.byKey(overlayKey));
+    final deferredChild = overlayChild.parent! as RenderBox;
+    expect(deferredChild.runtimeType.toString(), '_RenderDeferredLayoutBox');
+    expect(deferredChild.hasSize, isTrue);
+    deferredChild.markNeedsLayout();
+    expect(deferredChild.debugNeedsLayout, isTrue);
+    await tester.tapAt(overlayCenter);
+    expect(overlayHitCount, 2);
+    await tester.pump();
+    expect(tester.takeException(), isNull);
+    await tester.tapAt(overlayCenter);
+    expect(overlayHitCount, 3);
+  });
+
+  for (final useLayoutBuilder in <bool>[false, true]) {
+    for (final entryHasBaseline in <bool>[false, true]) {
+      testWidgets(
+        'Overlay inside Baseline excludes portal baseline, layoutBuilder: $useLayoutBuilder, entry baseline: $entryHasBaseline',
+        (WidgetTester tester) async {
+          final controller = OverlayPortalController()..show();
+          late final OverlayEntry entry;
+          addTearDown(() {
+            entry.remove();
+            entry.dispose();
+          });
+          const Widget overlayChild = Text('Portal baseline');
+          final Widget entryChild = entryHasBaseline
+              ? const Text('Entry baseline', style: TextStyle(fontSize: 20.0))
+              : const SizedBox.shrink();
+          await tester.pumpWidget(
+            Directionality(
+              textDirection: TextDirection.ltr,
+              child: Baseline(
+                baseline: 30.0,
+                baselineType: TextBaseline.alphabetic,
+                child: Overlay(
+                  initialEntries: <OverlayEntry>[
+                    entry = OverlayEntry(
+                      builder: (BuildContext context) => useLayoutBuilder
+                          ? OverlayPortal.overlayChildLayoutBuilder(
+                              controller: controller,
+                              overlayChildBuilder: (
+                                BuildContext context,
+                                OverlayChildLayoutInfo info,
+                              ) => overlayChild,
+                              child: entryChild,
+                            )
+                          : OverlayPortal(
+                              controller: controller,
+                              overlayChildBuilder: (BuildContext context) => overlayChild,
+                              child: entryChild,
+                            ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+          expect(tester.takeException(), isNull);
+          final RenderBox theater = tester.renderObject(find.byType(Overlay));
+          final double? entryBaseline = entryHasBaseline
+              ? tester
+                    .renderObject<RenderBox>(find.text('Entry baseline'))
+                    .getDryBaseline(theater.constraints, TextBaseline.alphabetic)
+              : null;
+          expect(
+            theater.getDryBaseline(theater.constraints, TextBaseline.alphabetic),
+            entryBaseline,
+          );
+          // Query again after deferred layout has completed, with unchanged constraints.
+          tester.renderObject(find.byType(Baseline)).markNeedsLayout();
+          await tester.pump();
+          expect(tester.takeException(), isNull);
+        },
+      );
+    }
+  }
+
   group('Semantics', () {
     testWidgets('ordering and transform', (WidgetTester tester) async {
       final semantics = SemanticsTester(tester);
@@ -3570,11 +4116,96 @@ class _RenderLayoutCounter extends RenderProxyBox {
   }
 }
 
+class _ThrowingLayoutBox extends RenderBox {
+  @override
+  void performLayout() {
+    throw FlutterError('intentional layout failure');
+  }
+}
+
+class _KeepAliveOverlayPortalItem extends StatefulWidget {
+  const _KeepAliveOverlayPortalItem({required this.onOverlayHit, required this.useLayoutBuilder});
+
+  static const Key targetKey = ValueKey<String>('keep-alive-overlay-portal-target');
+  static const Key overlayKey = ValueKey<String>('keep-alive-overlay-portal-child');
+  static const String overlayLabel = 'overlay child';
+
+  final VoidCallback onOverlayHit;
+  final bool useLayoutBuilder;
+
+  @override
+  State<_KeepAliveOverlayPortalItem> createState() => _KeepAliveOverlayPortalItemState();
+}
+
+class _KeepAliveOverlayPortalItemState extends State<_KeepAliveOverlayPortalItem>
+    with AutomaticKeepAliveClientMixin<_KeepAliveOverlayPortalItem> {
+  final OverlayPortalController _controller = OverlayPortalController();
+  bool _keepAlive = false;
+
+  @override
+  bool get wantKeepAlive => _keepAlive;
+
+  void _handleEnter(PointerEnterEvent event) {
+    _keepAlive = true;
+    updateKeepAlive();
+    _controller.show();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
+    final Widget target = MouseRegion(
+      onEnter: _handleEnter,
+      child: const SizedBox(key: _KeepAliveOverlayPortalItem.targetKey, width: 48.0, height: 48.0),
+    );
+    final Widget overlayChild = Positioned(
+      left: 0.0,
+      top: 0.0,
+      width: 50.0,
+      height: 50.0,
+      child: Semantics(
+        label: _KeepAliveOverlayPortalItem.overlayLabel,
+        excludeSemantics: true,
+        child: Listener(
+          key: _KeepAliveOverlayPortalItem.overlayKey,
+          behavior: HitTestBehavior.opaque,
+          onPointerDown: (PointerDownEvent event) => widget.onOverlayHit(),
+          child: const _PaintOrder(child: Text('Overlay baseline')),
+        ),
+      ),
+    );
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        Row(
+          children: <Widget>[
+            const Expanded(child: Text('Item 3')),
+            if (widget.useLayoutBuilder)
+              OverlayPortal.overlayChildLayoutBuilder(
+                controller: _controller,
+                overlayChildBuilder: (BuildContext context, OverlayChildLayoutInfo info) =>
+                    overlayChild,
+                child: target,
+              )
+            else
+              OverlayPortal(
+                controller: _controller,
+                overlayChildBuilder: (BuildContext context) => overlayChild,
+                child: target,
+              ),
+          ],
+        ),
+        const SizedBox(height: 202.0),
+      ],
+    );
+  }
+}
+
 /// This helper makes leak tracker forgiving the entry is not disposed.
 OverlayEntry _buildOverlayEntry(WidgetBuilder builder) => OverlayEntry(builder: builder);
 
 class _PaintOrder extends SingleChildRenderObjectWidget {
-  const _PaintOrder();
+  const _PaintOrder({super.child});
   static List<_PaintOrder> paintOrder = <_PaintOrder>[];
 
   void onPaint() => paintOrder.add(this);
