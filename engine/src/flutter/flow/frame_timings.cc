@@ -128,75 +128,77 @@ size_t FrameTimingsRecorder::GetPictureCacheBytes() const {
 
 void FrameTimingsRecorder::RecordVsync(fml::TimePoint vsync_start,
                                        fml::TimePoint vsync_target) {
-  fml::Status status = RecordVsyncImpl(vsync_start, vsync_target);
+  absl::Status status = RecordVsyncImpl(vsync_start, vsync_target);
   FML_DCHECK(status.ok());
   (void)status;
 }
 
 void FrameTimingsRecorder::RecordBuildStart(fml::TimePoint build_start) {
-  fml::Status status = RecordBuildStartImpl(build_start);
+  absl::Status status = RecordBuildStartImpl(build_start);
   FML_DCHECK(status.ok());
   (void)status;
 }
 
 void FrameTimingsRecorder::RecordBuildEnd(fml::TimePoint build_end) {
-  fml::Status status = RecordBuildEndImpl(build_end);
+  absl::Status status = RecordBuildEndImpl(build_end);
   FML_DCHECK(status.ok());
   (void)status;
 }
 
 void FrameTimingsRecorder::RecordRasterStart(fml::TimePoint raster_start) {
-  fml::Status status = RecordRasterStartImpl(raster_start);
+  absl::Status status = RecordRasterStartImpl(raster_start);
   FML_DCHECK(status.ok());
   (void)status;
 }
 
-fml::Status FrameTimingsRecorder::RecordVsyncImpl(fml::TimePoint vsync_start,
-                                                  fml::TimePoint vsync_target) {
+absl::Status FrameTimingsRecorder::RecordVsyncImpl(
+    fml::TimePoint vsync_start,
+    fml::TimePoint vsync_target) {
   std::scoped_lock state_lock(state_mutex_);
   if (state_ != State::kUninitialized) {
-    return fml::Status(fml::StatusCode::kFailedPrecondition,
-                       "Check failed: state_ == State::kUninitialized.");
+    return absl::Status(absl::StatusCode::kFailedPrecondition,
+                        "Check failed: state_ == State::kUninitialized.");
   }
   state_ = State::kVsync;
   vsync_start_ = vsync_start;
   vsync_target_ = vsync_target;
-  return fml::Status();
+  return absl::OkStatus();
 }
 
-fml::Status FrameTimingsRecorder::RecordBuildStartImpl(
+absl::Status FrameTimingsRecorder::RecordBuildStartImpl(
     fml::TimePoint build_start) {
   std::scoped_lock state_lock(state_mutex_);
   if (state_ != State::kVsync) {
-    return fml::Status(fml::StatusCode::kFailedPrecondition,
-                       "Check failed: state_ == State::kVsync.");
+    return absl::Status(absl::StatusCode::kFailedPrecondition,
+                        "Check failed: state_ == State::kVsync.");
   }
   state_ = State::kBuildStart;
   build_start_ = build_start;
-  return fml::Status();
+  return absl::OkStatus();
 }
 
-fml::Status FrameTimingsRecorder::RecordBuildEndImpl(fml::TimePoint build_end) {
+absl::Status FrameTimingsRecorder::RecordBuildEndImpl(
+    fml::TimePoint build_end) {
   std::scoped_lock state_lock(state_mutex_);
   if (state_ != State::kBuildStart) {
-    return fml::Status(fml::StatusCode::kFailedPrecondition,
-                       "Check failed: state_ == State::kBuildStart.");
+    return absl::Status(absl::StatusCode::kFailedPrecondition,
+                        "Check failed: state_ == State::kBuildStart.");
   }
   state_ = State::kBuildEnd;
   build_end_ = build_end;
-  return fml::Status();
+  return absl::OkStatus();
 }
 
-fml::Status FrameTimingsRecorder::RecordRasterStartImpl(
+absl::Status FrameTimingsRecorder::RecordRasterStartImpl(
     fml::TimePoint raster_start) {
   std::scoped_lock state_lock(state_mutex_);
   if (state_ != State::kBuildEnd) {
-    return fml::Status(fml::StatusCode::kFailedPrecondition,
-                       "Check failed: state_ == State::kBuildEnd.");
+    return absl::Status(absl::StatusCode::kFailedPrecondition,
+                        "Check failed: state_ == State::kBuildEnd.");
   }
   state_ = State::kRasterStart;
   raster_start_ = raster_start;
-  return fml::Status();
+  return absl::OkStatus();
 }
 
 FrameTiming FrameTimingsRecorder::RecordRasterEnd(const RasterCache* cache) {

@@ -307,4 +307,97 @@ void main() {
       expectDarkMode();
     },
   );
+
+  Future<void> pumpPreview(WidgetTester tester, WidgetBuilder builder) async {
+    final controller = FakeWidgetPreviewScaffoldController(
+      previews: [
+        WidgetPreview.test(
+          builder: () => Builder(builder: builder),
+          previewData: Preview(),
+        ),
+      ],
+    );
+
+    await controller.initialize();
+    if (controller.filterBySelectedFileListenable.value) {
+      await controller.toggleFilterBySelectedFile();
+    }
+
+    await tester.pumpWidget(TestWidgetPreviewScaffold(controller: controller));
+    await tester.pumpAndSettle();
+  }
+
+  testWidgets('Previewed MaterialApp ListTileTheme is not overridden', (
+    tester,
+  ) async {
+    Color? tileColor;
+
+    await pumpPreview(
+      tester,
+      (_) => MaterialApp(
+        theme: ThemeData(
+          listTileTheme: const ListTileThemeData(tileColor: Colors.red),
+        ),
+        home: Builder(
+          builder: (context) {
+            tileColor = ListTileTheme.of(context).tileColor;
+            return const SizedBox();
+          },
+        ),
+      ),
+    );
+
+    expect(tileColor, Colors.red);
+  });
+
+  testWidgets(
+    'ListTileTheme does not leak into previewed widgets without MaterialApp',
+    (tester) async {
+      bool builderRan = false;
+      Color? inheritedTileColor;
+
+      await pumpPreview(tester, (context) {
+        builderRan = true;
+        inheritedTileColor = ListTileTheme.of(context).tileColor;
+        return const SizedBox();
+      });
+
+      expect(builderRan, isTrue);
+      expect(inheritedTileColor, isNull);
+    },
+  );
+
+  testWidgets(
+    'SwitchListTile in preview has transparent background by default',
+    (tester) async {
+      await pumpPreview(
+        tester,
+        (_) => MaterialApp(
+          home: Scaffold(
+            backgroundColor: Colors.green,
+            body: Center(child: SwitchListTile(value: true, onChanged: (_) {})),
+          ),
+        ),
+      );
+
+      final switchListTileFinder = find.byType(SwitchListTile);
+      expect(switchListTileFinder, findsOneWidget);
+
+      final inkFinder = find.descendant(
+        of: switchListTileFinder,
+        matching: find.byType(Ink),
+      );
+      expect(inkFinder, findsOneWidget);
+
+      final ink = tester.widget<Ink>(inkFinder);
+      expect(
+        ink.decoration,
+        isA<ShapeDecoration>().having(
+          (decoration) => decoration.color,
+          'color',
+          Colors.transparent,
+        ),
+      );
+    },
+  );
 }

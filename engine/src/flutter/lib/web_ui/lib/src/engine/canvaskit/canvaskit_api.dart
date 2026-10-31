@@ -1929,6 +1929,7 @@ extension type SkParagraphStyleProperties._(JSObject _) implements JSObject {
   external set strutStyle(SkStrutStyleProperties? strutStyle);
   external set replaceTabCharacters(bool? bool);
   external set applyRoundingHack(bool applyRoundingHack);
+  external set renderSoftHyphens(bool renderSoftHyphens);
 }
 
 extension type SkTextStyle(JSObject _) implements JSObject {}

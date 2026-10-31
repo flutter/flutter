@@ -162,11 +162,18 @@ final class DomTextRepresentation extends LabelRepresentationBehavior {
     final DomText domText = domDocument.createTextNode(label);
     _domText = domText;
     semanticsObject.element.appendChild(domText);
+
+    // Clip the text to the node's rect. Text that overflows, such as a long
+    // label wrapping inside a small button, is still hit-tested by the browser
+    // and would steal taps from nodes underneath it. This is safe because DOM
+    // text is only used by nodes without children.
+    semanticsObject.element.style.overflow = 'hidden';
   }
 
   @override
   void cleanUp() {
     _domText?.remove();
+    semanticsObject.element.style.overflow = 'visible';
   }
 
   // DOM text does not introduce extra DOM elements, so focus should go to the

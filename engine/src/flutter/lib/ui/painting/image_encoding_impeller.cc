@@ -7,12 +7,12 @@
 #include "flutter/display_list/geometry/dl_geometry_conversions.h"
 #include "flutter/impeller/display_list/dl_image_impeller.h"
 #include "flutter/lib/ui/painting/image.h"
-#include "fml/status.h"
 #include "impeller/core/device_buffer.h"
 #include "impeller/core/formats.h"
 #include "impeller/display_list/aiks_context.h"
 #include "impeller/renderer/command_buffer.h"
 #include "impeller/renderer/context.h"
+#include "third_party/abseil-cpp/absl/status/status.h"
 #include "third_party/skia/include/core/SkBitmap.h"
 #include "third_party/skia/include/core/SkImage.h"
 
@@ -61,18 +61,18 @@ sk_sp<SkImage> ConvertBufferToSkImage(
   return raster_image;
 }
 
-[[nodiscard]] fml::Status DoConvertImageToRasterImpeller(
+[[nodiscard]] absl::Status DoConvertImageToRasterImpeller(
     const sk_sp<DlImage>& dl_image,
-    const std::function<void(fml::StatusOr<sk_sp<SkImage>>)>& encode_task,
+    const std::function<void(absl::StatusOr<sk_sp<SkImage>>)>& encode_task,
     const fml::TaskRunnerAffineWeakPtr<SnapshotDelegate>& snapshot_delegate,
     const std::shared_ptr<const fml::SyncSwitch>& is_gpu_disabled_sync_switch,
     const std::shared_ptr<impeller::Context>& impeller_context) {
-  fml::Status result;
+  absl::Status result;
   is_gpu_disabled_sync_switch->Execute(
       fml::SyncSwitch::Handlers()
           .SetIfTrue([&result] {
-            result =
-                fml::Status(fml::StatusCode::kUnavailable, "GPU unavailable.");
+            result = absl::Status(absl::StatusCode::kUnavailable,
+                                  "GPU unavailable.");
           })
           .SetIfFalse(
               [&dl_image, &encode_task, &snapshot_delegate, &impeller_context] {
@@ -87,18 +87,18 @@ sk_sp<SkImage> ConvertBufferToSkImage(
 /// GPU becomes available again.
 void DoConvertImageToRasterImpellerWithRetry(
     const sk_sp<DlImage>& dl_image,
-    std::function<void(fml::StatusOr<sk_sp<SkImage>>)>&& encode_task,
+    std::function<void(absl::StatusOr<sk_sp<SkImage>>)>&& encode_task,
     const fml::TaskRunnerAffineWeakPtr<SnapshotDelegate>& snapshot_delegate,
     const std::shared_ptr<const fml::SyncSwitch>& is_gpu_disabled_sync_switch,
     const std::shared_ptr<impeller::Context>& impeller_context,
     const fml::RefPtr<fml::TaskRunner>& retry_runner) {
-  fml::Status status = DoConvertImageToRasterImpeller(
+  absl::Status status = DoConvertImageToRasterImpeller(
       dl_image, encode_task, snapshot_delegate, is_gpu_disabled_sync_switch,
       impeller_context);
   if (!status.ok()) {
     // If the conversion failed because of the GPU is unavailable, store the
     // task on the Context so it can be executed when the GPU becomes available.
-    if (status.code() == fml::StatusCode::kUnavailable) {
+    if (status.code() == absl::StatusCode::kUnavailable) {
       impeller_context->StoreTaskForGPU(
           [dl_image, encode_task, snapshot_delegate,
            is_gpu_disabled_sync_switch, impeller_context,
@@ -106,7 +106,7 @@ void DoConvertImageToRasterImpellerWithRetry(
             auto retry_task = [dl_image, encode_task = std::move(encode_task),
                                snapshot_delegate, is_gpu_disabled_sync_switch,
                                impeller_context] {
-              fml::Status retry_status = DoConvertImageToRasterImpeller(
+              absl::Status retry_status = DoConvertImageToRasterImpeller(
                   dl_image, encode_task, snapshot_delegate,
                   is_gpu_disabled_sync_switch, impeller_context);
               if (!retry_status.ok()) {
@@ -124,8 +124,8 @@ void DoConvertImageToRasterImpellerWithRetry(
             }
           },
           [encode_task]() {
-            encode_task(
-                fml::Status(fml::StatusCode::kUnavailable, "GPU unavailable."));
+            encode_task(absl::Status(absl::StatusCode::kUnavailable,
+                                     "GPU unavailable."));
           });
     } else {
       // Pass on errors that are not `kUnavailable`.
@@ -138,18 +138,18 @@ void DoConvertImageToRasterImpellerWithRetry(
 
 void ImageEncodingImpeller::ConvertDlImageToSkImage(
     const sk_sp<DlImage>& dl_image,
-    std::function<void(fml::StatusOr<sk_sp<SkImage>>)> encode_task,
+    std::function<void(absl::StatusOr<sk_sp<SkImage>>)> encode_task,
     const fml::TaskRunnerAffineWeakPtr<SnapshotDelegate>& snapshot_delegate,
     const std::shared_ptr<impeller::Context>& impeller_context) {
   auto impeller_image = dl_image->asImpellerImage();
   if (!impeller_image) {
-    encode_task(fml::Status(fml::StatusCode::kFailedPrecondition,
-                            "Image is not an Impeller image."));
+    encode_task(absl::Status(absl::StatusCode::kFailedPrecondition,
+                             "Image is not an Impeller image."));
     return;
   }
   if (impeller_context == nullptr) {
-    encode_task(fml::Status(fml::StatusCode::kFailedPrecondition,
-                            "Impeller context was null."));
+    encode_task(absl::Status(absl::StatusCode::kFailedPrecondition,
+                             "Impeller context was null."));
     return;
   }
 
@@ -166,7 +166,7 @@ void ImageEncodingImpeller::ConvertDlImageToSkImage(
 
   if (texture == nullptr) {
     encode_task(
-        fml::Status(fml::StatusCode::kFailedPrecondition, "Image was null."));
+        absl::Status(absl::StatusCode::kFailedPrecondition, "Image was null."));
     return;
   }
 
@@ -176,14 +176,14 @@ void ImageEncodingImpeller::ConvertDlImageToSkImage(
   auto color_type = ToSkColorType(texture->GetTextureDescriptor().format);
 
   if (dimensions.IsEmpty()) {
-    encode_task(fml::Status(fml::StatusCode::kFailedPrecondition,
-                            "Image dimensions were empty."));
+    encode_task(absl::Status(absl::StatusCode::kFailedPrecondition,
+                             "Image dimensions were empty."));
     return;
   }
 
   if (!color_type.has_value()) {
-    encode_task(fml::Status(fml::StatusCode::kUnimplemented,
-                            "Failed to get color type from pixel format."));
+    encode_task(absl::Status(absl::StatusCode::kUnimplemented,
+                             "Failed to get color type from pixel format."));
     return;
   }
 
@@ -193,8 +193,8 @@ void ImageEncodingImpeller::ConvertDlImageToSkImage(
   // task has run on that thread.
   if (snapshot_delegate) {
     if (!snapshot_delegate->MakeRenderContextCurrent()) {
-      encode_task(fml::Status(fml::StatusCode::kFailedPrecondition,
-                              "Failed to bind the render context."));
+      encode_task(absl::Status(absl::StatusCode::kFailedPrecondition,
+                               "Failed to bind the render context."));
       return;
     }
   }
@@ -207,8 +207,8 @@ void ImageEncodingImpeller::ConvertDlImageToSkImage(
   auto buffer =
       impeller_context->GetResourceAllocator()->CreateBuffer(buffer_desc);
   if (!buffer) {
-    encode_task(fml::Status(fml::StatusCode::kUnimplemented,
-                            "Failed to allocate destination buffer."));
+    encode_task(absl::Status(absl::StatusCode::kUnimplemented,
+                             "Failed to allocate destination buffer."));
     return;
   }
 
@@ -222,7 +222,7 @@ void ImageEncodingImpeller::ConvertDlImageToSkImage(
                      encode_task = std::move(encode_task)](
                         impeller::CommandBuffer::Status status) {
     if (status != impeller::CommandBuffer::Status::kCompleted) {
-      encode_task(fml::Status(fml::StatusCode::kUnknown, ""));
+      encode_task(absl::Status(absl::StatusCode::kUnknown, ""));
       return;
     }
     buffer->Invalidate();
@@ -242,7 +242,7 @@ void ImageEncodingImpeller::ConvertDlImageToSkImage(
 
 void ImageEncodingImpeller::ConvertImageToRaster(
     const sk_sp<DlImage>& dl_image,
-    std::function<void(fml::StatusOr<sk_sp<SkImage>>)> encode_task,
+    std::function<void(absl::StatusOr<sk_sp<SkImage>>)> encode_task,
     const fml::RefPtr<fml::TaskRunner>& raster_task_runner,
     const fml::RefPtr<fml::TaskRunner>& io_task_runner,
     const fml::TaskRunnerAffineWeakPtr<SnapshotDelegate>& snapshot_delegate,
@@ -250,7 +250,7 @@ void ImageEncodingImpeller::ConvertImageToRaster(
     const std::shared_ptr<impeller::Context>& impeller_context) {
   auto original_encode_task = std::move(encode_task);
   encode_task = [original_encode_task = std::move(original_encode_task),
-                 io_task_runner](fml::StatusOr<sk_sp<SkImage>> image) mutable {
+                 io_task_runner](absl::StatusOr<sk_sp<SkImage>> image) mutable {
     fml::TaskRunner::RunNowOrPostTask(
         io_task_runner,
         [original_encode_task = std::move(original_encode_task),

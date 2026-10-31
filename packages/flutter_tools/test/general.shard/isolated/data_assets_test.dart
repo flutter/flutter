@@ -61,6 +61,7 @@ void main() {
           targetPlatform: TargetPlatform.windows_x64,
           projectUri: projectUri,
           fileSystem: fileSystem,
+          logger: logger,
           buildRunner: FakeFlutterNativeAssetsBuildRunner(
             packagesWithNativeAssetsResult: <String>['bar'],
           ),
@@ -106,6 +107,7 @@ void main() {
             buildDataAssets: true,
             recordedUsesFile: null,
             fileSystem: fileSystem,
+            logger: logger,
             buildRunner: FakeFlutterNativeAssetsBuildRunner(
               packagesWithNativeAssetsResult: <String>['bar'],
               buildResult: FakeFlutterNativeAssetsBuilderResult.fromAssets(

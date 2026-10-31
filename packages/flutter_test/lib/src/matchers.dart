@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter_test/flutter_test.dart' as flutter_test;
+///
 /// @docImport '_goldens_io.dart';
 /// @docImport 'window.dart';
 library;

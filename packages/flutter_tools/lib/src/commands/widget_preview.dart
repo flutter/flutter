@@ -15,14 +15,12 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
-import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/terminal.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
 import '../build_system/build_targets.dart';
-import '../bundle.dart' as bundle;
 import '../cache.dart';
 import '../context/tool_context.dart';
 import '../convert.dart';
@@ -162,8 +160,11 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
     }
     _analysisServerFactoryOverride = analysisServerFactoryOverride;
     addPubOptions();
-    addMachineOutputFlag(verboseHelp: verbose);
-    addDevToolsOptions(verboseHelp: verbose);
+    argParser.addDescriptors(<OptionDescriptor<Object?>>[
+      CommonOptions.machine,
+      DebuggingOptionDescriptors.enableDevTools,
+      DebuggingOptionDescriptors.devToolsServerAddress(),
+    ], verboseHelp: verbose);
     argParser
       ..addFlag(
         kWebServer,
@@ -246,8 +247,6 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
 
   ShutdownHooks get shutdownHooks => toolContext.shutdownHooks;
 
-  OperatingSystemUtils get os => toolContext.os;
-
   ProcessManager get processManager => toolContext.processManager;
 
   Artifacts get artifacts => toolContext.artifacts;
@@ -275,23 +274,19 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
     fs: fs,
     onChangeDetected: onLegacyChangeDetected,
     onPubspecChangeDetected: _onPubspecChangeDetected,
+    onNonDartFileChangeDetected: _onNonDartFileChangeDetected,
   );
 
   late final _lspPreviewDetector = LspPreviewDetector(
-    platform: platform,
-    previewAnalytics: previewAnalytics,
-    project: rootProject,
-    logger: logger,
-    fs: fs,
+    dtd: _dtdService,
     onChangeDetected: onChangeDetected,
     onPubspecChangeDetected: _onPubspecChangeDetected,
-    shutdownHooks: shutdownHooks,
-    dtd: _dtdService,
-    processManager: processManager,
-    terminal: terminal,
+    previewAnalytics: previewAnalytics,
+    project: rootProject,
     suppressAnalytics: !analytics.okToSend,
+    toolContext: toolContext,
     analysisServerFactory: _analysisServerFactoryOverride,
-    artifacts: artifacts,
+    onNonDartFileChangeDetected: _onNonDartFileChangeDetected,
   );
 
   late final Future<AnalysisServer> Function()? _analysisServerFactoryOverride;
@@ -337,15 +332,6 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
   /// [_PendingReload.hotRestart] if a full restart is requested) without
   /// queueing duplicate tasks on [_reloadMutex].
   _PendingReload? _pendingReload;
-
-  /// The location of the widget_preview_scaffold for the current execution of the command.
-  ///
-  /// This is only meant for testing as there's no simple mapping from the target project to the
-  /// scaffold project.
-  // TODO(bkonyi): remove once https://github.com/flutter/flutter/issues/179036 is resolved.
-  @visibleForTesting
-  static late Directory widgetPreviewScaffold;
-
   @override
   Future<FlutterCommandResult> runCommand() async {
     assert(toolContext.logger is WidgetPreviewMachineAwareLogger);
@@ -357,7 +343,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
     await WidgetPreviewGitignoreMigration(rootProject, logger).migrate();
 
     final String? customPreviewScaffoldOutput = stringArg(kWidgetPreviewScaffoldOutputDir);
-    widgetPreviewScaffold = customPreviewScaffoldOutput != null
+    final Directory widgetPreviewScaffold = customPreviewScaffoldOutput != null
         ? fs.directory(customPreviewScaffoldOutput)
         : rootProject.widgetPreviewScaffold;
 
@@ -365,9 +351,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
     // generate one.
     final bool generateScaffoldProject =
         customPreviewScaffoldOutput != null || _previewManifest.shouldGenerateProject();
-    // TODO(bkonyi): can this be moved?
     widgetPreviewScaffold.createSync(recursive: true);
-    fs.currentDirectory = widgetPreviewScaffold;
 
     if (generateScaffoldProject) {
       // WARNING: this log message is used by test/integration.shard/widget_preview_test.dart
@@ -381,7 +365,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
           organization: 'flutter',
           projectName: kWidgetPreviewScaffoldName,
           titleCaseProjectName: 'Widget Preview Scaffold',
-          flutterRoot: Cache.flutterRoot!,
+          flutterRoot: cache.flutterRoot,
           dartSdkVersionBounds: '^${cache.dartSdkBuild}',
           web: true,
         ),
@@ -559,6 +543,13 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
     unawaited(_triggerReload(.hotReload));
   }
 
+  void _onNonDartFileChangeDetected(String path) {
+    if (_widgetPreviewApp?.assetBundle.needsBuild() ?? false) {
+      logger.printStatus('Triggering reload based on update to asset: $path');
+      unawaited(_triggerReload(.hotReload));
+    }
+  }
+
   /// Configures the Dart Tooling Daemon connection.
   ///
   /// If --dtd-uri is provided, the existing DTD instance will be used. If the tool fails to
@@ -654,15 +645,19 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
             trackWidgetCreation: true,
             // Don't try and download canvaskit from the CDN.
             useLocalCanvasKit: true,
-            webEnableHotReload: true,
             includeUnsupportedPlatformLibraryStubs: true,
           ),
-          webEnableExposeUrl: false,
-          webEnableExpressionEvaluation: true,
-          webRunHeadless: boolArg(kHeadless),
+          webConfig: WebDebugConfig(
+            enableExpressionEvaluation: true,
+            runHeadless: boolArg(kHeadless),
+          ),
           devToolsServerAddress: devToolsServerAddress,
         );
-        final String target = bundle.defaultMainPath;
+        final String target = widgetPreviewScaffoldProject.directory
+            .childDirectory('lib')
+            .childFile('main.dart')
+            .absolute
+            .path;
         final FlutterDevice flutterDevice = await FlutterDevice.create(
           device,
           toolContext: toolContext,

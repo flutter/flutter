@@ -4,6 +4,7 @@
 
 import 'dart:collection';
 
+import 'package:flutter_tools_core/flutter_tools_core.dart';
 import 'package:glob/glob.dart';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
@@ -13,6 +14,7 @@ import 'package:yaml/yaml.dart';
 import 'android/android_builder.dart';
 import 'android/gradle_utils.dart' as gradle;
 import 'base/common.dart';
+import 'base/config.dart';
 import 'base/error_handling_io.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
@@ -22,13 +24,18 @@ import 'base/version.dart';
 import 'base/yaml.dart';
 import 'build_info.dart';
 import 'bundle.dart' as bundle;
+import 'cache.dart';
 import 'cmake_project.dart';
+import 'context/tool_context.dart';
 import 'convert.dart';
 import 'dart/package_map.dart';
 import 'features.dart';
 import 'flutter_manifest.dart';
 import 'flutter_plugins.dart';
 import 'globals.dart' as globals;
+import 'ios/plist_parser.dart';
+import 'ios/xcodeproj.dart';
+import 'macos/xcode.dart';
 import 'migrations/analysis_options_migration.dart';
 import 'package_graph.dart';
 import 'platform_plugins.dart';
@@ -52,10 +59,29 @@ enum SupportedPlatform {
 }
 
 class FlutterProjectFactory {
-  FlutterProjectFactory({required this._logger, required this._fileSystem});
+  FlutterProjectFactory({
+    required this._fileSystem,
+    required this._logger,
+    this._config,
+    this._featureFlags,
+    this._featureFlagsBuilder,
+    this._plistParser,
+    this._xcode,
+    this._xcodeBuilder,
+    this._xcodeProjectInterpreter,
+    this._xcodeProjectInterpreterBuilder,
+  });
 
-  final Logger _logger;
+  final Config? _config;
+  final FeatureFlags? _featureFlags;
+  final FeatureFlags Function()? _featureFlagsBuilder;
   final FileSystem _fileSystem;
+  final Logger _logger;
+  final PlistParser? _plistParser;
+  final Xcode? _xcode;
+  final Xcode? Function()? _xcodeBuilder;
+  final XcodeProjectInterpreter? _xcodeProjectInterpreter;
+  final XcodeProjectInterpreter? Function()? _xcodeProjectInterpreterBuilder;
 
   @visibleForTesting
   final projects = <String, FlutterProject>{};
@@ -63,6 +89,14 @@ class FlutterProjectFactory {
   /// Returns a [FlutterProject] view of the given directory or a ToolExit error,
   /// if `pubspec.yaml` or `example/pubspec.yaml` is invalid.
   FlutterProject fromDirectory(Directory directory) {
+    final Config? config = _config;
+    final Directory? buildDirectory = config != null
+        ? directory.childDirectory(getBuildDirectory(config, directory.fileSystem))
+        : null;
+    final FeatureFlags? resolvedFeatureFlags = _featureFlags ?? _featureFlagsBuilder?.call();
+    final Xcode? resolvedXcode = _xcode ?? _xcodeBuilder?.call();
+    final XcodeProjectInterpreter? resolvedXcodeProjectInterpreter =
+        _xcodeProjectInterpreter ?? _xcodeProjectInterpreterBuilder?.call();
     final File pubspec = directory.childFile(bundle.defaultManifestPath);
     if (!pubspec.existsSync()) {
       final FlutterManifest manifest = FlutterProject._readManifest(
@@ -75,7 +109,17 @@ class FlutterProjectFactory {
         logger: _logger,
         fileSystem: _fileSystem,
       );
-      return FlutterProject(directory, manifest, exampleManifest);
+      return FlutterProject(
+        directory,
+        manifest,
+        exampleManifest,
+        buildDirectory: buildDirectory,
+        featureFlags: resolvedFeatureFlags,
+        plistParser: _plistParser,
+        projectFactory: this,
+        xcode: resolvedXcode,
+        xcodeProjectInterpreter: resolvedXcodeProjectInterpreter,
+      );
     }
     return projects.putIfAbsent(directory.path, () {
       final FlutterManifest manifest = FlutterProject._readManifest(
@@ -88,7 +132,17 @@ class FlutterProjectFactory {
         logger: _logger,
         fileSystem: _fileSystem,
       );
-      return FlutterProject(directory, manifest, exampleManifest, projectFactory: this);
+      return FlutterProject(
+        directory,
+        manifest,
+        exampleManifest,
+        buildDirectory: buildDirectory,
+        featureFlags: resolvedFeatureFlags,
+        plistParser: _plistParser,
+        projectFactory: this,
+        xcode: resolvedXcode,
+        xcodeProjectInterpreter: resolvedXcodeProjectInterpreter,
+      );
     });
   }
 
@@ -114,12 +168,20 @@ class FlutterProject {
     FlutterManifest manifest,
     this._exampleManifest, {
     this._buildDirectory,
+    this._featureFlags,
+    this._plistParser,
     this._projectFactory,
+    this._xcode,
+    this._xcodeProjectInterpreter,
   }) {
     _setManifest(manifest);
   }
 
+  final FeatureFlags? _featureFlags;
+  final PlistParser? _plistParser;
   final FlutterProjectFactory? _projectFactory;
+  final Xcode? _xcode;
+  final XcodeProjectInterpreter? _xcodeProjectInterpreter;
 
   FlutterProject? _workspaceRoot;
   bool _searchedForWorkspaceRoot = false;
@@ -196,15 +258,15 @@ class FlutterProject {
     Directory? buildDirectory,
   ]) {
     final FileSystem fileSystem = directory.fileSystem;
-    logger ??= BufferLogger.test();
+    final Logger manifestLogger = logger ?? BufferLogger.test();
     final FlutterManifest manifest = FlutterProject._readManifest(
       directory.childFile(bundle.defaultManifestPath).path,
-      logger: logger,
+      logger: manifestLogger,
       fileSystem: fileSystem,
     );
     final FlutterManifest exampleManifest = FlutterProject._readManifest(
       FlutterProject._exampleDirectory(directory).childFile(bundle.defaultManifestPath).path,
-      logger: logger,
+      logger: manifestLogger,
       fileSystem: fileSystem,
     );
     return FlutterProject(
@@ -221,8 +283,7 @@ class FlutterProject {
   final Directory? _buildDirectory;
 
   /// The location of the build folder.
-  Directory get buildDirectory =>
-      _buildDirectory ?? directory.childDirectory(getBuildDirectory(null, directory.fileSystem));
+  Directory get buildDirectory => _buildDirectory ?? directory.childDirectory('build');
 
   /// The manifest of this project.
   FlutterManifest get manifest => _manifest;
@@ -393,7 +454,13 @@ class FlutterProject {
   }
 
   /// The iOS sub project of this project.
-  late final ios = IosProject.fromFlutter(this);
+  late final ios = IosProject.fromFlutter(
+    this,
+    featureFlags: _featureFlags,
+    plistParser: _plistParser,
+    xcode: _xcode,
+    xcodeProjectInterpreter: _xcodeProjectInterpreter,
+  );
 
   /// The Android sub project of this project.
   late final android = AndroidProject._(this);
@@ -402,7 +469,12 @@ class FlutterProject {
   late final web = WebProject._(this);
 
   /// The MacOS sub project of this project.
-  late final macos = MacOSProject.fromFlutter(this);
+  late final macos = MacOSProject.fromFlutter(
+    this,
+    featureFlags: _featureFlags,
+    xcode: _xcode,
+    xcodeProjectInterpreter: _xcodeProjectInterpreter,
+  );
 
   /// The Linux sub project of this project.
   late final linux = LinuxProject.fromFlutter(this);
@@ -467,6 +539,11 @@ class FlutterProject {
     _exampleDirectory(directory),
     _exampleManifest,
     FlutterManifest.empty(logger: _manifest.logger),
+    featureFlags: _featureFlags,
+    plistParser: _plistParser,
+    projectFactory: _projectFactory,
+    xcode: _xcode,
+    xcodeProjectInterpreter: _xcodeProjectInterpreter,
   );
 
   /// The generated scaffolding project for hosting widget previews from this
@@ -486,6 +563,22 @@ class FlutterProject {
 
   /// True if this project has an example application.
   bool get hasExampleApp => _exampleDirectory(directory).existsSync();
+
+  /// Converts this project into a serializable [ExtensionFlutterProject] representation
+  /// for tool extensions.
+  ExtensionFlutterProject toExtensionProject() {
+    return ExtensionFlutterProject(
+      appName: manifest.appName,
+      buildDirectory: buildDirectory.uri,
+      directory: directory.uri,
+      appVersion: manifest.appVersion,
+      dependencies: <String>{...manifest.dependencies},
+      isEmpty: manifest.isEmpty,
+      isModule: isModule,
+      isPlugin: isPlugin,
+      workspace: <String>[...manifest.workspace],
+    );
+  }
 
   /// Returns a list of platform names that are supported by the project.
   List<SupportedPlatform> getSupportedPlatforms({bool includeRoot = false}) {
@@ -562,13 +655,15 @@ class FlutterProject {
   /// may apply optimizations or changes that are only specific to release builds,
   /// such as not including dev-only dependencies.
   Future<void> regeneratePlatformSpecificTooling({
-    DeprecationBehavior deprecationBehavior = DeprecationBehavior.none,
+    required ToolContext toolContext,
     required bool releaseMode,
+    DeprecationBehavior deprecationBehavior = DeprecationBehavior.none,
     PubspecCache? pubspecCache,
     PackageGraph? packageGraph,
     PackageConfig? packageConfig,
   }) async {
     return ensureReadyForPlatformSpecificTooling(
+      toolContext: toolContext,
       androidPlatform: android.existsSync(),
       iosPlatform: ios.existsSync(),
       // TODO(stuartmorgan): Revisit the conditions here once the plans for handling
@@ -592,6 +687,7 @@ class FlutterProject {
   /// may apply optimizations or changes that are only specific to release builds,
   /// such as not including dev-only dependencies.
   Future<void> ensureReadyForPlatformSpecificTooling({
+    required ToolContext toolContext,
     required bool releaseMode,
     bool androidPlatform = false,
     bool iosPlatform = false,
@@ -608,8 +704,9 @@ class FlutterProject {
       return;
     }
 
+    final ToolContext(:Cache cache, :Logger logger) = toolContext;
     final migration = ProjectMigration(<ProjectMigrator>[
-      AnalysisOptionsMigration(this, globals.logger, packageConfig: packageConfig),
+      AnalysisOptionsMigration(this, logger, packageConfig: packageConfig),
     ]);
     await migration.run();
 
@@ -627,6 +724,9 @@ class FlutterProject {
     }
     await refreshPluginsList(
       this,
+      cocoaPods: globals.cocoaPods,
+      featureFlags: featureFlags,
+      toolContext: toolContext,
       iosPlatform: iosPlatform,
       macOSPlatform: macOSPlatform,
       pubspecCache: pubspecCache,
@@ -634,16 +734,23 @@ class FlutterProject {
       packageConfig: packageConfig,
     );
     if (androidPlatform) {
-      await android.ensureReadyForPlatformSpecificTooling(deprecationBehavior: deprecationBehavior);
+      await android.ensureReadyForPlatformSpecificTooling(
+        cache: cache,
+        deprecationBehavior: deprecationBehavior,
+      );
     }
     if (iosPlatform) {
-      await ios.ensureReadyForPlatformSpecificTooling();
+      await ios.ensureReadyForPlatformSpecificTooling(
+        plistParser: _plistParser ?? globals.plistParser,
+        templateRenderer: globals.templateRenderer,
+        toolContext: toolContext,
+      );
     }
     if (linuxPlatform) {
       await linux.ensureReadyForPlatformSpecificTooling();
     }
     if (macOSPlatform) {
-      await macos.ensureReadyForPlatformSpecificTooling();
+      await macos.ensureReadyForPlatformSpecificTooling(toolContext: toolContext);
     }
     if (windowsPlatform) {
       await windows.ensureReadyForPlatformSpecificTooling();
@@ -653,12 +760,17 @@ class FlutterProject {
     }
     await injectPlugins(
       this,
+      analytics: globals.analytics,
       androidPlatform: androidPlatform,
+      cocoaPods: globals.cocoaPods,
+      featureFlags: featureFlags,
       iosPlatform: iosPlatform,
       linuxPlatform: linuxPlatform,
       macOSPlatform: macOSPlatform,
-      windowsPlatform: windowsPlatform,
       releaseMode: releaseMode,
+      templateRenderer: globals.templateRenderer,
+      toolContext: toolContext,
+      windowsPlatform: windowsPlatform,
       pubspecCache: pubspecCache,
       packageGraph: packageGraph,
       packageConfig: packageConfig,
@@ -1107,9 +1219,10 @@ See the link below for more information:
   }
 
   Future<void> ensureReadyForPlatformSpecificTooling({
+    required Cache cache,
     DeprecationBehavior deprecationBehavior = DeprecationBehavior.none,
   }) async {
-    if (isModule && _shouldRegenerateFromTemplate()) {
+    if (isModule && _shouldRegenerateFromTemplate(cache)) {
       await _regenerateLibrary();
       // Add ephemeral host app, if an editable host app does not already exist.
       if (!_editableHostAppDirectory.existsSync()) {
@@ -1126,15 +1239,15 @@ See the link below for more information:
     if (!hostAppGradleRoot.existsSync()) {
       return;
     }
-    gradle.updateLocalProperties(project: parent, requireAndroidSdk: false);
+    gradle.updateLocalProperties(project: parent, requireAndroidSdk: false, cache: cache);
   }
 
-  bool _shouldRegenerateFromTemplate() {
+  bool _shouldRegenerateFromTemplate(Cache cache) {
     return globals.fsUtils.isOlderThanReference(
           entity: ephemeralDirectory,
           referenceFile: parent.pubspecFile,
         ) ||
-        globals.cache.isOlderThanToolsStamp(ephemeralDirectory);
+        cache.isOlderThanToolsStamp(ephemeralDirectory);
   }
 
   File get localPropertiesFile => _flutterLibGradleRoot.childFile('local.properties');
@@ -1402,7 +1515,12 @@ class WebProject extends FlutterProjectPlatform {
   Future<void> ensureReadyForPlatformSpecificTooling() async {
     /// Create .dart_tool/dartpad/web_plugin_registrant.dart.
     /// See: https://github.com/dart-lang/dart-services/pull/874
-    await injectBuildTimePluginFilesForWebPlatform(parent, destination: dartpadToolDirectory);
+    await injectBuildTimePluginFilesForWebPlatform(
+      parent,
+      destination: dartpadToolDirectory,
+      logger: globals.logger,
+      templateRenderer: globals.templateRenderer,
+    );
   }
 }
 

@@ -25,7 +25,7 @@
 #include "flutter/fml/memory/weak_ptr.h"
 #include "flutter/shell/platform/fuchsia/flutter/external_view_embedder.h"
 
-#include "flow/embedded_views.h"
+#include "flutter/flow/embedded_views.h"
 #include "flutter/fml/macros.h"
 #include "flutter/fml/memory/weak_ptr.h"
 #include "flutter/fml/time/time_delta.h"
@@ -93,9 +93,12 @@ class PlatformView : public flutter::PlatformView {
       OnRequestAnnounceCallback on_request_announce_callback,
       OnShaderWarmupCallback on_shader_warmup_callback,
       AwaitVsyncCallback await_vsync_callback,
-      std::shared_ptr<sys::ServiceDirectory> dart_application_svc);
+      std::shared_ptr<sys::ServiceDirectory> dart_application_svc,
+      bool intercept_all_input = false);
 
   ~PlatformView() override;
+
+  void SetGestureResponsePolicy(GestureResponsePolicy policy);
 
   void OnGetLayout(fuchsia::ui::composition::LayoutInfo info);
   void OnParentViewportStatus(
@@ -113,6 +116,10 @@ class PlatformView : public flutter::PlatformView {
   std::shared_ptr<flutter::ExternalViewEmbedder> CreateExternalViewEmbedder()
       override;
 
+  // |flutter::PlatformView|
+  void HandlePlatformMessage(
+      std::unique_ptr<flutter::PlatformMessage> message) override;
+
  private:
   void RegisterPlatformMessageHandlers();
 
@@ -125,10 +132,6 @@ class PlatformView : public flutter::PlatformView {
 
   // |flutter::PlatformView|
   std::unique_ptr<flutter::Surface> CreateRenderingSurface() override;
-
-  // |flutter::PlatformView|
-  void HandlePlatformMessage(
-      std::unique_ptr<flutter::PlatformMessage> message) override;
 
   // |flutter::PlatformView|
   void UpdateSemantics(

@@ -33,8 +33,8 @@ static NSString* const kGestureBlockingPolicyFallbackToPluginDefault = @"fallbac
 
 struct LayerData {
   DlRect rect;
-  int64_t view_id;
-  int64_t overlay_id;
+  int64_t view_id = 0;
+  int64_t overlay_id = 0;
   std::shared_ptr<flutter::OverlayLayer> layer;
 };
 using LayersMap = std::unordered_map<int64_t, LayerData>;
@@ -602,6 +602,9 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
         CGFloat blurRadius = (*iter)->GetFilterMutation().GetFilter().asBlur()->sigma_x();
         UIVisualEffectView* visualEffectView = [[UIVisualEffectView alloc]
             initWithEffect:[UIBlurEffect effectWithStyle:UIBlurEffectStyleLight]];
+        // The visual effect shouldn't swallow touches.
+        // See: https://github.com/flutter/flutter/issues/191203
+        visualEffectView.userInteractionEnabled = NO;
 
         // TODO(https://github.com/flutter/flutter/issues/179126)
         CGFloat cornerRadius = 0.0;

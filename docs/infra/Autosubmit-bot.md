@@ -31,6 +31,7 @@ When a pull request is opened the Cocoon backend service will create a number of
 The Autosubmit bot will make several other checks to determine viability of the pull request up until the moment the pull request is queued for merge. They are:
 * merge-ability - this is a GitHub status that says the code can be merged into the mainline branch.
 * code conflicts - the bot will check for this and notify the author in the event conflicts happen before merging of the pull request.
+* test exemption - if the pull request has the `missing-tests` label, the bot will not merge it (and will remove the `autosubmit` label) unless it also has the `test-exempt` label (applied by a tech lead) or the `emergency` label.
 
 ## Submitting a Revert Request
 

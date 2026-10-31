@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 /// @docImport 'package:flutter_test/flutter_test.dart';
+/// @docImport 'package:flutter_test/flutter_test.dart' as flutter_test;
 library;
 
 import 'dart:async';
