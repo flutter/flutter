@@ -47,6 +47,7 @@ Future<Depfile> copyAssets(
   final AssetBundle assetBundle = AssetBundleFactory.defaultInstance(
     logger: environment.logger,
     fileSystem: environment.fileSystem,
+    flutterRoot: environment.flutterRootDir.path,
     platform: environment.platform,
     splitDeferredAssets: buildMode != BuildMode.debug && buildMode != BuildMode.jitRelease,
   ).createBundle();
@@ -87,6 +88,7 @@ Future<Depfile> copyAssets(
     logger: environment.logger,
     fileSystem: environment.fileSystem,
     artifacts: environment.artifacts,
+    platform: environment.platform,
   );
   final assetTransformer = AssetTransformer(
     processManager: environment.processManager,

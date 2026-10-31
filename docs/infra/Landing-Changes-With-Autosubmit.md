@@ -15,6 +15,8 @@ and who adds them.
 | `revert` | Label used to initiate a revert request on a closed and merged PR. | X | | Revert a particular change that has been merged. |
 | `revert of` | Tracking label for the revert request generated from the closed and merged original pull request. | | X | To track the new pull request that reverts a previous change. |
 | `emergency` | Override the tree-status check and land even when the tree is closed. | X | | To submit a potential fix for the current tree-status. |
+| `missing-tests` | Indicates that a pull request appears to be missing tests. | | X | Prevent merging changes without tests unless exempted. |
+| `test-exempt` | Grants a test exemption to a pull request with the `missing-tests` label. | X | | Allow a pull request without tests to merge after tech lead approval. |
 
 Note that `emergency` cannot be used on its own and should be used in
 conjunction with the `autosubmit` label.
@@ -33,6 +35,7 @@ sure validations pass and have the correct number of reviews.
 * ci checks
 * approvals (2 from flutter hackers)
 * mergeability
+* test exemption (does not have `missing-tests` label, or has `test-exempt` label)
 
 #### Merging a fix on red tree-status (tree is closed)
 
@@ -46,7 +49,7 @@ contribute a fix to the status of the tree.
 * ci checks
 * approvals (2 from flutter hackers)
 * mergeability
-* ignores the results of the tree status check.
+* ignores the results of the tree status and test exemption checks.
 
 Warning: if you are not merging a fix for the tree you should not use the
 `emergency` label. You will need to wait for the tree to open again.

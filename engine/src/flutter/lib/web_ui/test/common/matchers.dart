@@ -205,13 +205,13 @@ Matcher hasHtml(String htmlPattern) {
   if (originalDom.children.isEmpty) {
     fail(
       'Test HTML pattern is empty.\n'
-      'The pattern must contain exacly one top-level element, but was: $htmlPattern',
+      'The pattern must contain exactly one top-level element, but was: $htmlPattern',
     );
   }
   if (originalDom.children.length > 1) {
     fail(
       'Test HTML pattern has more than one top-level element.\n'
-      'The pattern must contain exacly one top-level element, but was: $htmlPattern',
+      'The pattern must contain exactly one top-level element, but was: $htmlPattern',
     );
   }
   return HtmlPatternMatcher(originalDom.children.single);

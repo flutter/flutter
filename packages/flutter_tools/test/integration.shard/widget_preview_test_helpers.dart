@@ -17,6 +17,7 @@ import 'package:flutter_tools/src/widget_preview/dtd_types.dart';
 import 'package:process/process.dart';
 
 import '../src/common.dart';
+import '../src/fakes.dart';
 import 'test_utils.dart';
 
 final RegExp launchingOnDeviceRegExp = RegExp(
@@ -54,12 +55,14 @@ Future<Stream<String>> startWidgetPreview({
     final analysisServer = AnalysisServer(
       globals.artifacts!.getArtifactPath(Artifact.engineDartSdkPath),
       <String>[tempDir.path],
-      fileSystem: globals.fs,
-      logger: globals.logger,
-      platform: globals.platform,
-      processManager: processManager,
-      terminal: globals.terminal,
       suppressAnalytics: true,
+      toolContext: FakeToolContext(
+        fs: globals.fs,
+        logger: globals.logger,
+        platform: globals.platform,
+        processManager: processManager,
+        terminal: globals.terminal,
+      ),
     );
     addTearDown(() async {
       await analysisServer.dispose();

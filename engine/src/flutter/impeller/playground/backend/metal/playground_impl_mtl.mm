@@ -133,10 +133,10 @@ std::unique_ptr<Surface> PlaygroundImplMTL::AcquireSurfaceFrame(
                                                 swapchain_transients_);
 }
 
-fml::Status PlaygroundImplMTL::SetCapabilities(
+absl::Status PlaygroundImplMTL::SetCapabilities(
     const std::shared_ptr<Capabilities>& capabilities) {
   context_->SetCapabilities(capabilities);
-  return fml::Status();
+  return absl::OkStatus();
 }
 
 void PlaygroundImplMTL::SetGPUDisabled(bool disabled) const {

@@ -54,11 +54,13 @@ const _kIntelMacWarning = ValidationMessage.hint(
 abstract class DoctorValidatorsProvider {
   /// Create a [DoctorValidatorsProvider] with explicit options.
   factory DoctorValidatorsProvider.create({
-    Platform? platform,
+    required Cache cache,
     required FeatureFlags featureFlags,
+    Platform? platform,
     ExtensionManager? extensionManager,
   }) {
     return _DefaultDoctorValidatorsProvider(
+      cache: cache,
       platform: platform ?? globals.platform,
       featureFlags: featureFlags,
       extensionManager: extensionManager,
@@ -68,11 +70,13 @@ abstract class DoctorValidatorsProvider {
   // Allow tests to construct a [_DefaultDoctorValidatorsProvider] with explicit
   // [FeatureFlags].
   factory DoctorValidatorsProvider.test({
-    Platform? platform,
+    required Cache cache,
     required FeatureFlags featureFlags,
+    Platform? platform,
     ExtensionManager? extensionManager,
   }) {
     return _DefaultDoctorValidatorsProvider(
+      cache: cache,
       featureFlags: featureFlags,
       platform: platform ?? FakePlatform(),
       extensionManager: extensionManager,
@@ -82,17 +86,13 @@ abstract class DoctorValidatorsProvider {
   /// The singleton instance, pulled from the [AppContext].
   static DoctorValidatorsProvider get _instance => context.get<DoctorValidatorsProvider>()!;
 
-  static final DoctorValidatorsProvider defaultInstance = _DefaultDoctorValidatorsProvider(
-    platform: globals.platform,
-    featureFlags: featureFlags,
-  );
-
   List<DoctorValidator> get validators;
   List<Workflow> get workflows;
 }
 
 class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
   _DefaultDoctorValidatorsProvider({
+    required this.cache,
     required this.platform,
     required this.featureFlags,
     this.extensionManager,
@@ -100,6 +100,7 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
 
   List<DoctorValidator>? _validators;
   List<Workflow>? _workflows;
+  final Cache cache;
   final Platform platform;
   final FeatureFlags featureFlags;
   final ExtensionManager? extensionManager;
@@ -124,10 +125,10 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
         platform: globals.platform,
         flutterVersion: () =>
             globals.flutterVersion.fetchTagsAndGetVersion(clock: globals.systemClock),
-        devToolsVersion: () => globals.cache.devToolsVersion,
+        devToolsVersion: () => cache.devToolsVersion,
         processManager: globals.processManager,
         artifacts: globals.artifacts!,
-        flutterRoot: () => Cache.flutterRoot!,
+        flutterRoot: () => cache.flutterRoot,
         operatingSystemUtils: globals.os,
         featureFlags: featureFlags,
       ),
@@ -198,9 +199,10 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
 }
 
 class Doctor {
-  Doctor({required this._logger, required this._clock, Analytics? analytics})
+  Doctor({required this._cache, required this._clock, required this._logger, Analytics? analytics})
     : _analytics = analytics ?? globals.analytics;
 
+  final Cache _cache;
   final Logger _logger;
   final SystemClock _clock;
   final Analytics _analytics;
@@ -217,6 +219,7 @@ class Doctor {
     }
     final List<DoctorValidator> validatorList = extensionManager != null
         ? DoctorValidatorsProvider.create(
+            cache: _cache,
             platform: globals.platform,
             featureFlags: featureFlags,
             extensionManager: extensionManager,
@@ -282,7 +285,7 @@ class Doctor {
         // We're generating a summary, so drop the stack trace.
         result = ValidationResult.crash(exception);
       }
-      lineBuffer.write('${result.coloredLeadingBox} ${validator.title}: ');
+      lineBuffer.write('${result.coloredLeadingBox(_logger.terminal)} ${validator.title}: ');
       switch (result.type) {
         case ValidationType.crash:
           lineBuffer.write('the doctor check crashed without a result.');
@@ -355,7 +358,8 @@ class Doctor {
     bool sendEvent = true,
     ExtensionManager? extensionManager,
   }) async {
-    final bool showColor = globals.terminal.supportsColor;
+    final Terminal terminal = _logger.terminal;
+    final bool showColor = terminal.supportsColor;
     if (androidLicenses && androidLicenseValidator != null) {
       return androidLicenseValidator.runLicenseManager();
     }
@@ -447,7 +451,7 @@ class Doctor {
         return ' [$formatted]';
       }();
 
-      final String leadingBox = showColor ? result.coloredLeadingBox : result.leadingBox;
+      final String leadingBox = showColor ? result.coloredLeadingBox(terminal) : result.leadingBox;
       if (result.statusInfo != null) {
         _logger.printStatus(
           '$leadingBox ${validator.title} (${result.statusInfo})$executionDuration',
@@ -464,7 +468,9 @@ class Doctor {
         if (!message.isInformation || verbose) {
           var hangingIndent = 2;
           var indent = 4;
-          final String indicator = showColor ? message.coloredIndicator : message.indicator;
+          final String indicator = showColor
+              ? message.coloredIndicator(terminal)
+              : message.indicator;
           for (final String line
               in '$indicator ${showPii ? message.message : message.piiStrippedMessage}'.split(
                 '\n',
@@ -496,13 +502,13 @@ class Doctor {
 
     if (issues > 0) {
       _logger.printStatus(
-        '${showColor ? globals.terminal.color('!', TerminalColor.yellow) : '!'}'
+        '${showColor ? terminal.color('!', TerminalColor.yellow) : '!'}'
         ' Doctor found issues in $issues categor${issues > 1 ? "ies" : "y"}.',
         hangingIndent: 2,
       );
     } else {
       _logger.printStatus(
-        '${showColor ? globals.terminal.color('•', TerminalColor.green) : '•'}'
+        '${showColor ? terminal.color('•', TerminalColor.green) : '•'}'
         ' No issues found!',
         hangingIndent: 2,
       );
@@ -858,9 +864,13 @@ class DeviceValidator extends DoctorValidator {
 
 /// Wrapper for doctor to run multiple times with PII and without, running the validators only once.
 class DoctorText {
-  DoctorText(BufferLogger logger, {SystemClock? clock, @visibleForTesting Doctor? doctor})
-    : _doctor = doctor ?? Doctor(logger: logger, clock: clock ?? globals.systemClock),
-      _logger = logger;
+  DoctorText(
+    BufferLogger logger, {
+    required Cache cache,
+    SystemClock clock = const SystemClock(),
+    @visibleForTesting Doctor? doctor,
+  }) : _doctor = doctor ?? Doctor(cache: cache, logger: logger, clock: clock),
+       _logger = logger;
 
   final BufferLogger _logger;
   final Doctor _doctor;

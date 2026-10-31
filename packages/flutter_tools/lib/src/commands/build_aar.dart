@@ -10,6 +10,7 @@ import '../android/android_sdk.dart';
 import '../android/gradle_utils.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
+import '../base/logger.dart';
 import '../base/os.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
@@ -27,7 +28,6 @@ class BuildAarCommand extends BuildSubCommand {
     required ToolContext toolContext,
     super.verboseHelp = false,
   }) : super(logger: toolContext.logger, toolContext: toolContext) {
-    enableUsesPubOption();
     registerOptionBundles(const <OptionBundle>[
       DartCompileOptionsBundle(),
       AndroidGradleOptionsBundle(),
@@ -45,7 +45,7 @@ class BuildAarCommand extends BuildSubCommand {
       BuildInfoOptions.obfuscate,
       BuildInfoOptions.extraFrontEndOptions,
       BuildInfoOptions.extraGenSnapshotOptions,
-      _targetPlatform,
+      AndroidBuildOptionsBundle.targetPlatformWithDefaults,
       BuildInfoOptions.trackWidgetCreation,
     ], verboseHelp: verboseHelp);
   }
@@ -66,13 +66,6 @@ class BuildAarCommand extends BuildSubCommand {
     name: 'release',
     defaultsTo: true,
     help: 'Build a release version of the current project.',
-  );
-
-  static const _targetPlatform = MultiOptionDescriptor(
-    name: 'target-platform',
-    defaultsTo: <String>['android-arm', 'android-arm64', 'android-x64'],
-    allowed: <String>['android-arm', 'android-arm64', 'android-x64'],
-    help: 'The target platform for which the project is compiled.',
   );
 
   final AndroidBuilder _androidBuilder;
@@ -126,7 +119,8 @@ class BuildAarCommand extends BuildSubCommand {
       workflow: commandPath,
       commandHasTerminal: hasTerminal,
       buildAarProjectType: projectType,
-      buildAarTargetPlatform: getValue(_targetPlatform).join(','),
+      buildAarTargetPlatform: getValue(AndroidBuildOptionsBundle.targetPlatformWithDefaults)
+          .join(','),
       // TODO(gmackall): Consider collecting hcpp analytics, see https://github.com/flutter/flutter/issues/184541.
     );
   }
@@ -153,13 +147,15 @@ class BuildAarCommand extends BuildSubCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    if (_androidContext.androidSdk == null) {
+    final Logger logger = toolContext.logger;
+    if (androidSdk == null) {
       exitWithNoSdkMessage(analytics: analytics, logger: logger);
     }
     final androidBuildInfo = <AndroidBuildInfo>{};
 
-    final Iterable<CpuArch> targetArchitectures = getValue(_targetPlatform)
-        .map<CpuArch>(getCpuArchForName);
+    final Iterable<CpuArch> targetArchitectures = getValue(
+      AndroidBuildOptionsBundle.targetPlatformWithDefaults,
+    ).map<CpuArch>(getCpuArchForName);
 
     final String? buildNumberArg = getValue(CommonOptions.buildNumber);
     final String buildNumber = (buildNumberArg != null && buildNumberArg.isNotEmpty)

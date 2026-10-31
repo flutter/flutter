@@ -89,6 +89,7 @@ template("impeller_shaders") {
     }
     not_needed(invoker, [ "analyze" ])
     mtl_shaders = "mtl_$target_name"
+
     impeller_shaders_metal(mtl_shaders) {
       name = invoker.name
       shaders = invoker.shaders
@@ -146,6 +147,7 @@ template("impeller_shaders") {
       analyze = false
     }
     vk_shaders = "vk_$target_name"
+
     impeller_shaders_vk(vk_shaders) {
       name = invoker.name
       if (defined(invoker.vulkan_language_version)) {

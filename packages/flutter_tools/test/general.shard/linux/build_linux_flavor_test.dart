@@ -37,11 +37,10 @@ void main() {
 
   late MemoryFileSystem fileSystem;
   late FakeProcessManager processManager;
-  late Logger logger;
+  late BufferLogger logger;
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();
-    Cache.flutterRoot = _kTestFlutterRoot;
     logger = BufferLogger.test();
     processManager = FakeProcessManager.empty();
   });
@@ -98,7 +97,7 @@ void main() {
           .run(const <String>['build', 'linux', '--no-pub', '--flavor', 'apple']);
 
       expect(processManager.hasRemainingExpectations, isFalse);
-      expect(testLogger.statusText, contains('✓ Built build/linux/x64/apple/release/bundle'));
+      expect(logger.statusText, contains('✓ Built build/linux/x64/apple/release/bundle'));
     },
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,

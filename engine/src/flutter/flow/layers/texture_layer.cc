@@ -57,6 +57,9 @@ void TextureLayer::Paint(PaintContext& context) const {
     return;
   }
   DlPaint paint;
+  // Set AA to false to preserve historical behavior. See
+  // https://github.com/flutter/flutter/pull/193939
+  paint.setAntiAlias(false);
   Texture::PaintContext ctx{
       .canvas = context.canvas,
       .gr_context = context.gr_context,

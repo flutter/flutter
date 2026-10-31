@@ -8,17 +8,12 @@ import 'package:flutter_tools/src/base/deferred_component.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/yaml.dart';
-import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/flutter_manifest.dart';
 
 import '../src/common.dart';
 
 void main() {
   late BufferLogger logger;
-
-  setUpAll(() {
-    Cache.flutterRoot = getFlutterRoot();
-  });
 
   setUp(() {
     logger = BufferLogger.test();
@@ -1094,6 +1089,30 @@ flutter:
     expect(
       logger.errorText,
       contains('Cannot find the `flutter.plugin.platforms` key in the `pubspec.yaml` file. '),
+    );
+  });
+
+  testWithoutContext('FlutterManifest validates web plugin section and reports package name', () {
+    const manifest = '''
+name: my_web_plugin
+flutter:
+  plugin:
+    platforms:
+      web:
+        pluginClass: MyWebPlugin
+''';
+
+    final FlutterManifest? flutterManifest = FlutterManifest.createFromString(
+      manifest,
+      logger: logger,
+    );
+
+    expect(flutterManifest, isNull);
+    expect(
+      logger.errorText,
+      contains(
+        'The plugin `my_web_plugin` is missing the required field `fileName` in pubspec.yaml',
+      ),
     );
   });
 

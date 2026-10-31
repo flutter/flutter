@@ -33,24 +33,51 @@ bool HasExtension(std::string_view extensions, std::string_view name) {
   return false;
 }
 
+// If |max_feature_level| is set, appends attributes that limit ANGLE's D3D11
+// device to at most that feature level.
+void AppendMaxFeatureLevel(std::optional<D3DFeatureLevel> max_feature_level,
+                           std::vector<EGLint>& attributes) {
+  if (!max_feature_level.has_value()) {
+    return;
+  }
+  attributes.push_back(EGL_PLATFORM_ANGLE_MAX_VERSION_MAJOR_ANGLE);
+  attributes.push_back(static_cast<EGLint>(max_feature_level->major));
+  attributes.push_back(EGL_PLATFORM_ANGLE_MAX_VERSION_MINOR_ANGLE);
+  attributes.push_back(static_cast<EGLint>(max_feature_level->minor));
+
+  // ANGLE caches displays per process, keyed on a fixed set of attributes
+  // that does not include the feature level cap. Add a key based on the
+  // feature level to prevent incorrect cache hits for displays that have
+  // different feature levels.
+  attributes.push_back(EGL_PLATFORM_ANGLE_DISPLAY_KEY_ANGLE);
+  attributes.push_back(static_cast<EGLint>(max_feature_level->major * 10 +
+                                           max_feature_level->minor));
+}
+
 }  // namespace
 
 int Manager::instance_count_ = 0;
 
-std::unique_ptr<Manager> Manager::Create(GpuPreference gpu_preference,
-                                         bool allow_inverted_surface) {
+std::unique_ptr<Manager> Manager::Create(
+    GpuPreference gpu_preference,
+    bool allow_inverted_surface,
+    std::optional<D3DFeatureLevel> max_feature_level) {
   std::unique_ptr<Manager> manager;
-  manager.reset(new Manager(gpu_preference, allow_inverted_surface));
+  manager.reset(
+      new Manager(gpu_preference, allow_inverted_surface, max_feature_level));
   if (!manager->IsValid()) {
     return nullptr;
   }
   return std::move(manager);
 }
 
-Manager::Manager(GpuPreference gpu_preference, bool allow_inverted_surface) {
+Manager::Manager(GpuPreference gpu_preference,
+                 bool allow_inverted_surface,
+                 std::optional<D3DFeatureLevel> max_feature_level) {
   ++instance_count_;
 
-  if (!InitializeDisplay(gpu_preference, allow_inverted_surface)) {
+  if (!InitializeDisplay(gpu_preference, allow_inverted_surface,
+                         max_feature_level)) {
     return;
   }
 
@@ -70,8 +97,10 @@ Manager::~Manager() {
   --instance_count_;
 }
 
-bool Manager::InitializeDisplay(GpuPreference gpu_preference,
-                                bool allow_inverted_surface) {
+bool Manager::InitializeDisplay(
+    GpuPreference gpu_preference,
+    bool allow_inverted_surface,
+    std::optional<D3DFeatureLevel> max_feature_level) {
   // If the request for a low power GPU is provided,
   // we will attempt to select GPU explicitly, via ANGLE extension
   // that allows to specify the GPU to use via LUID.
@@ -132,6 +161,8 @@ bool Manager::InitializeDisplay(GpuPreference gpu_preference,
       attributes.push_back(static_cast<EGLint>(luid->LowPart));
     }
 
+    AppendMaxFeatureLevel(max_feature_level, attributes);
+
     attributes.push_back(EGL_NONE);
     return attributes;
   };
@@ -161,13 +192,14 @@ bool Manager::InitializeDisplay(GpuPreference gpu_preference,
 
   // These attributes request D3D11 WARP (software rendering fallback) in case
   // hardware-backed D3D11 is unavailable.
-  const EGLint d3d11_warp_display_attributes[] = {
+  std::vector<EGLint> d3d11_warp_display_attributes = {
       EGL_PLATFORM_ANGLE_TYPE_ANGLE,
       EGL_PLATFORM_ANGLE_TYPE_D3D11_ANGLE,
       EGL_PLATFORM_ANGLE_ENABLE_AUTOMATIC_TRIM_ANGLE,
       EGL_TRUE,
-      EGL_NONE,
   };
+  AppendMaxFeatureLevel(max_feature_level, d3d11_warp_display_attributes);
+  d3d11_warp_display_attributes.push_back(EGL_NONE);
 
   std::vector<const EGLint*> display_attributes_configs;
 
@@ -178,7 +210,7 @@ bool Manager::InitializeDisplay(GpuPreference gpu_preference,
   }
   display_attributes_configs.push_back(d3d11_display_attributes.data());
   display_attributes_configs.push_back(d3d11_fl_9_3_display_attributes);
-  display_attributes_configs.push_back(d3d11_warp_display_attributes);
+  display_attributes_configs.push_back(d3d11_warp_display_attributes.data());
 
   PFNEGLGETPLATFORMDISPLAYEXTPROC egl_get_platform_display_EXT =
       reinterpret_cast<PFNEGLGETPLATFORMDISPLAYEXTPROC>(

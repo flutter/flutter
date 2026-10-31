@@ -4,7 +4,7 @@
 
 #include "vertices_contents.h"
 
-#include <format>
+#include <string>
 
 #include "fml/logging.h"
 #include "impeller/base/validation.h"
@@ -17,6 +17,7 @@
 #include "impeller/entity/geometry/vertices_geometry.h"
 #include "impeller/geometry/color.h"
 #include "impeller/renderer/render_pass.h"
+#include "third_party/abseil-cpp/absl/strings/str_cat.h"
 
 namespace impeller {
 
@@ -146,17 +147,14 @@ bool VerticesSimpleBlendContents::Render(const ContentContext& renderer,
     using FS = PorterDuffBlendPipeline::FragmentShader;
 
 #ifdef IMPELLER_DEBUG
-    pass.SetCommandLabel(std::format("DrawVertices Porterduff Blend ({})",
-                                     BlendModeToString(blend_mode)));
+    pass.SetCommandLabel(absl::StrCat("DrawVertices Porterduff Blend (",
+                                      BlendModeToString(blend_mode), ")"));
 #endif  // IMPELLER_DEBUG
     pass.SetVertexBuffer(std::move(geometry_result.vertex_buffer));
 
     auto options = OptionsFromPassAndEntity(pass, entity);
     options.primitive_type = geometry_result.type;
-    auto inverted_blend_mode =
-        InvertPorterDuffBlend(blend_mode).value_or(BlendMode::kSrc);
-    pass.SetPipeline(
-        renderer.GetPorterDuffPipeline(inverted_blend_mode, options));
+    pass.SetPipeline(renderer.GetPorterDuffBlendPipeline(options));
 
     FS::BindTextureSamplerDst(pass, texture, dst_sampler);
 
@@ -169,6 +167,8 @@ bool VerticesSimpleBlendContents::Render(const ContentContext& renderer,
         Vector4(1, alpha_, static_cast<int>(tile_mode_x_),
                 static_cast<int>(tile_mode_y_));
     frag_info.use_strict_source_rect = 0.0;
+    SetPorterDuffCoefficients(
+        InvertPorterDuffBlend(blend_mode).value_or(BlendMode::kSrc), frag_info);
 
     auto& host_buffer = renderer.GetTransientsDataBuffer();
     FS::BindFragInfo(pass, host_buffer.EmplaceUniform(frag_info));
@@ -181,8 +181,8 @@ bool VerticesSimpleBlendContents::Render(const ContentContext& renderer,
   using FS = VerticesUber1Shader::FragmentShader;
 
 #ifdef IMPELLER_DEBUG
-  pass.SetCommandLabel(std::format("DrawVertices Advanced Blend ({})",
-                                   BlendModeToString(blend_mode)));
+  pass.SetCommandLabel(absl::StrCat("DrawVertices Advanced Blend (",
+                                    BlendModeToString(blend_mode), ")"));
 #endif  // IMPELLER_DEBUG
   pass.SetVertexBuffer(std::move(geometry_result.vertex_buffer));
 
@@ -193,7 +193,7 @@ bool VerticesSimpleBlendContents::Render(const ContentContext& renderer,
   FS::BindTextureSampler(pass, texture, dst_sampler);
 
   VS::FrameInfo frame_info;
-  FS::FragInfo frag_info;
+  FS::FragInfo frag_info{};
 
   frame_info.mvp = geometry_result.transform;
   frag_info.alpha = alpha_;

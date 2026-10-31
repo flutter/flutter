@@ -5,6 +5,7 @@
 #ifndef FLUTTER_IMPELLER_RENDERER_BACKEND_GLES_SAMPLER_LIBRARY_GLES_H_
 #define FLUTTER_IMPELLER_RENDERER_BACKEND_GLES_SAMPLER_LIBRARY_GLES_H_
 
+#include "impeller/base/thread.h"
 #include "impeller/core/sampler.h"
 #include "impeller/core/sampler_descriptor.h"
 #include "impeller/renderer/backend/gles/sampler_gles.h"
@@ -21,7 +22,9 @@ class SamplerLibraryGLES final : public SamplerLibrary {
  private:
   friend class ContextGLES;
 
-  std::vector<std::pair<uint64_t, std::shared_ptr<const Sampler>>> samplers_;
+  Mutex samplers_mutex_;
+  std::vector<std::pair<uint64_t, std::shared_ptr<const Sampler>>> samplers_
+      IPLR_GUARDED_BY(samplers_mutex_);
 
   SamplerLibraryGLES();
 

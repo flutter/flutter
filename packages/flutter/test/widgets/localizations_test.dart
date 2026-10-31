@@ -79,6 +79,25 @@ void main() {
     expect(tester.binding.platformDispatcher.applicationLocale, const Locale('fo'));
   });
 
+  testWidgets('Locale is not sent to engine if Localizations is not application level', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      WidgetsApp(
+        color: const Color(0xFF000000),
+        locale: const Locale('en', 'US'),
+        builder: (BuildContext context, _) {
+          return Localizations.override(
+            context: context,
+            locale: const Locale('es', 'US'),
+            child: const Text('Hola'),
+          );
+        },
+      ),
+    );
+    expect(tester.binding.platformDispatcher.applicationLocale, const Locale('en', 'US'));
+  });
+
   testWidgets('Localizations.localeOf throws when no localizations exist', (
     WidgetTester tester,
   ) async {

@@ -43,7 +43,7 @@ external ImageFilterHandle imageFilterCreateMatrix(Pointer<Float> matrix33, int 
   symbol: 'imageFilter_createFromColorFilter',
   isLeaf: true,
 )
-external ImageFilterHandle imageFilterCreateFromColorFilter(ColorFilterHandle colorFilte);
+external ImageFilterHandle imageFilterCreateFromColorFilter(ColorFilterHandle colorFilter);
 
 @Native<ImageFilterHandle Function(ImageFilterHandle, ImageFilterHandle)>(
   symbol: 'imageFilter_compose',

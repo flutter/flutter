@@ -5,11 +5,13 @@
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/custom_devices/custom_device_config.dart';
 import 'package:flutter_tools/src/custom_devices/custom_devices_config.dart';
 
 import '../../src/common.dart';
 import '../../src/custom_devices_common.dart';
+import '../../src/fake_process_manager.dart';
 
 Map<String, dynamic> copyJsonObjectWith(
   Map<String, dynamic> object,
@@ -30,6 +32,7 @@ void main() {
         fileSystem: fileSystem,
         directory: directory,
         logger: logger,
+        cache: Cache.test(processManager: FakeProcessManager.any(), flutterRoot: '/flutter'),
       );
 
       expect(customDevicesConfig.devices, hasLength(0));
@@ -50,6 +53,7 @@ void main() {
         fileSystem: fileSystem,
         directory: directory,
         logger: logger,
+        cache: Cache.test(processManager: FakeProcessManager.any(), flutterRoot: '/flutter'),
       );
 
       const msg =
@@ -81,6 +85,7 @@ void main() {
       fileSystem: fileSystem,
       directory: directory,
       logger: logger,
+      cache: Cache.test(processManager: FakeProcessManager.any(), flutterRoot: '/flutter'),
     );
 
     final List<CustomDeviceConfig> devices = customDevicesConfig.devices;
@@ -105,6 +110,7 @@ void main() {
       fileSystem: fileSystem,
       directory: directory,
       logger: logger,
+      cache: Cache.test(processManager: FakeProcessManager.any(), flutterRoot: '/flutter'),
     );
 
     const msg = 'Could not load custom device from config index 0: Expected id to be a string.';
@@ -128,6 +134,7 @@ void main() {
       fileSystem: fileSystem,
       directory: directory,
       logger: logger,
+      cache: Cache.test(processManager: FakeProcessManager.any(), flutterRoot: '/flutter'),
     );
 
     const msg = 'Could not load custom device from config index 0: Expected id to be a string.';
@@ -151,6 +158,7 @@ void main() {
       fileSystem: fileSystem,
       directory: directory,
       logger: logger,
+      cache: Cache.test(processManager: FakeProcessManager.any(), flutterRoot: '/flutter'),
     );
 
     const msg = 'Could not load custom device from config index 0: Expected label to be a string.';
@@ -174,6 +182,7 @@ void main() {
       fileSystem: fileSystem,
       directory: directory,
       logger: logger,
+      cache: Cache.test(processManager: FakeProcessManager.any(), flutterRoot: '/flutter'),
     );
 
     expect(customDevicesConfig.devices, hasLength(1));
@@ -198,6 +207,7 @@ void main() {
       fileSystem: fileSystem,
       directory: directory,
       logger: logger,
+      cache: Cache.test(processManager: FakeProcessManager.any(), flutterRoot: '/flutter'),
     );
 
     final List<CustomDeviceConfig> devices = customDevicesConfig.devices;
@@ -222,6 +232,7 @@ void main() {
       fileSystem: fileSystem,
       directory: directory,
       logger: logger,
+      cache: Cache.test(processManager: FakeProcessManager.any(), flutterRoot: '/flutter'),
     );
 
     const msg =
