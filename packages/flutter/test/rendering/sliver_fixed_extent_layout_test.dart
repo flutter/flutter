@@ -451,10 +451,10 @@ void main() {
     );
     final childManager = TestRenderSliverBoxChildManager(children: children);
 
-    var builderCallCount = 0;
+    final calledIndices = <int>[];
     var currentExtent = 100.0;
     double? builder(int index, SliverLayoutDimensions dimensions) {
-      builderCallCount++;
+      calledIndices.add(index);
       return currentExtent;
     }
 
@@ -470,7 +470,8 @@ void main() {
     );
     layout(root);
 
-    expect(builderCallCount, greaterThan(0));
+    expect(calledIndices.isNotEmpty, isTrue);
+    expect(calledIndices.toSet().length, calledIndices.length);
 
     final child0 = children[0].parentData! as SliverMultiBoxAdaptorParentData;
     final child1 = children[1].parentData! as SliverMultiBoxAdaptorParentData;
@@ -478,32 +479,34 @@ void main() {
     expect(child1.layoutOffset, 100.0);
 
     // Re-assigning itemExtentBuilder with same identity should not trigger layout.
-    builderCallCount = 0;
+    calledIndices.clear();
     currentExtent = 200.0;
     list.itemExtentBuilder = builder;
     pumpFrame();
 
-    expect(builderCallCount, 0);
+    expect(calledIndices.isEmpty, isTrue);
     expect(child0.layoutOffset, 0.0);
     expect(child1.layoutOffset, 100.0);
 
     // Assigning a new itemExtentBuilder clears the cache and triggers layout.
-    builderCallCount = 0;
+    calledIndices.clear();
     list.itemExtentBuilder = (int index, SliverLayoutDimensions dimensions) =>
         builder(index, dimensions);
     pumpFrame();
 
-    expect(builderCallCount, greaterThan(0));
+    expect(calledIndices.isNotEmpty, isTrue);
+    expect(calledIndices.toSet().length, calledIndices.length);
     expect(child0.layoutOffset, 0.0);
     expect(child1.layoutOffset, 200.0);
 
     // Explicitly marking needs layout also re-layouts and calls builder.
-    builderCallCount = 0;
+    calledIndices.clear();
     currentExtent = 50.0;
     list.markNeedsLayout();
     pumpFrame();
 
-    expect(builderCallCount, greaterThan(0));
+    expect(calledIndices.isNotEmpty, isTrue);
+    expect(calledIndices.toSet().length, calledIndices.length);
     expect(child0.layoutOffset, 0.0);
     expect(child1.layoutOffset, 50.0);
   });

@@ -646,7 +646,7 @@ void main() {
   testWidgets('TreeSliver treeRowExtentBuilder is not called excessively', (
     WidgetTester tester,
   ) async {
-    var calls = 0;
+    final calledNodes = <TreeSliverNode<Object?>>[];
     final tree = <TreeSliverNode<String>>[
       TreeSliverNode<String>('First'),
       TreeSliverNode<String>('Second'),
@@ -659,7 +659,7 @@ void main() {
               tree: tree,
               treeRowExtentBuilder:
                   (TreeSliverNode<Object?> node, SliverLayoutDimensions dimensions) {
-                    calls++;
+                    calledNodes.add(node);
                     return 40.0;
                   },
             ),
@@ -667,9 +667,13 @@ void main() {
         ),
       ),
     );
-    final initialCalls = calls;
+    // In a single layout pass, each visible row is evaluated at most once.
+    expect(calledNodes.length, 2);
+    expect(calledNodes.toSet().length, calledNodes.length);
+
+    final int initialCalls = calledNodes.length;
     await tester.pump();
-    expect(calls, initialCalls);
+    expect(calledNodes.length, initialCalls);
   });
 
   testWidgets('TreeSliver empty tree', (WidgetTester tester) async {
