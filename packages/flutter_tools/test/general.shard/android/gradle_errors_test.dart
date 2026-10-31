@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
+
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/android/gradle_errors.dart';
@@ -1789,39 +1791,36 @@ Caused by: java.lang.ClassCastException: class com.android.build.gradle.internal
       expect(testLogger.statusText, isNot(contains('in android/gradle.properties')));
     });
 
-    testWithoutContext(
-      'notes external override when gradle.properties already sets android.newDsl=false',
-      () async {
-        fileSystem.currentDirectory
-            .childDirectory('android')
-            .childFile('gradle.properties')
-            .createSync(recursive: true);
-        fileSystem.currentDirectory
-            .childDirectory('android')
-            .childFile('gradle.properties')
-            .writeAsStringSync('android.newDsl=false\n');
-        final FlutterProject project = FlutterProject.fromDirectoryTest(
-          fileSystem.currentDirectory,
-        );
+    testWithoutContext('notes external override without redundant set instruction when gradle.properties already sets android.newDsl=false', () async {
+      fileSystem.currentDirectory
+          .childDirectory('android')
+          .childFile('gradle.properties')
+          .createSync(recursive: true);
+      fileSystem.currentDirectory
+          .childDirectory('android')
+          .childFile('gradle.properties')
+          .writeAsStringSync('android.newDsl=false\n');
+      final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
 
-        await kotlinAndroidPluginWithNewDslErrorHandler.handler(
-          gradleUtils: FakeGradleUtils(),
-          line:
-              "The 'org.jetbrains.kotlin.android' plugin is not compatible with AGP's 9.0 new DSL.",
-          project: project,
-          toolContext: toolContext,
-          usesAndroidX: true, // Unused by kotlinAndroidPluginWithNewDslErrorHandler.
-        );
+      await kotlinAndroidPluginWithNewDslErrorHandler.handler(
+        gradleUtils: FakeGradleUtils(),
+        line: "The 'org.jetbrains.kotlin.android' plugin is not compatible with AGP's 9.0 new DSL.",
+        project: project,
+        toolContext: toolContext,
+        usesAndroidX: true, // Unused by kotlinAndroidPluginWithNewDslErrorHandler.
+      );
 
-        expect(
-          unwrapBoxText(testLogger.statusText),
-          contains(
-            'android/gradle.properties already sets android.newDsl=false; check '
-            '~/.gradle/gradle.properties and -Pandroid.newDsl command-line flags for an override.',
-          ),
-        );
-      },
-    );
+      final String unwrappedBox = unwrapBoxText(testLogger.statusText);
+      expect(
+        unwrappedBox,
+        contains(
+          'android/gradle.properties already sets android.newDsl=false; to build now, remove '
+          'any android.newDsl=true override in ~/.gradle/gradle.properties or -Pandroid.newDsl '
+          'command-line flags.',
+        ),
+      );
+      expect(unwrappedBox, isNot(contains('To build now, set android.newDsl=false')));
+    });
   });
 
   group('legacy AGP variant and extension API errors with new DSL', () {
@@ -2044,7 +2043,7 @@ Caused by: java.lang.ClassCastException: class com.android.build.gradle.internal
       expect(testLogger.statusText, isEmpty);
     });
 
-    testWithoutContext('prints box with external override note when runtime ExtensionImpl error occurs despite android.newDsl=false in gradle.properties', () async {
+    testWithoutContext('prints box with external override note and omits redundant set instruction when runtime ExtensionImpl error occurs despite android.newDsl=false in gradle.properties', () async {
       fileSystem.currentDirectory
           .childDirectory('android')
           .childFile('gradle.properties')
@@ -2063,12 +2062,72 @@ Caused by: java.lang.ClassCastException: class com.android.build.gradle.internal
         usesAndroidX: true, // Unused by legacyVariantApiErrorHandler.
       );
 
+      final String unwrappedBox = unwrapBoxText(testLogger.statusText);
       expect(
-        unwrapBoxText(testLogger.statusText),
+        unwrappedBox,
         contains(
-          'android/gradle.properties already sets android.newDsl=false; check '
-          '~/.gradle/gradle.properties and -Pandroid.newDsl command-line flags for an override.',
+          'android/gradle.properties already sets android.newDsl=false; to build now, remove '
+          'any android.newDsl=true override in ~/.gradle/gradle.properties or -Pandroid.newDsl '
+          'command-line flags.',
         ),
+      );
+      expect(unwrappedBox, isNot(contains('To build now, set android.newDsl=false')));
+    });
+
+    testWithoutContext('handles invalid UTF-8 bytes or FormatException when reading gradle.properties without crashing', () async {
+      final File invalidUtf8Properties =
+          fileSystem.currentDirectory.childDirectory('android').childFile('gradle.properties')
+            ..createSync(recursive: true)
+            ..writeAsBytesSync(<int>[0xFF, 0xFE, 0x80]);
+      expect(invalidUtf8Properties, exists);
+      final FlutterProject invalidUtf8Project = FlutterProject.fromDirectoryTest(
+        fileSystem.currentDirectory,
+      );
+
+      final GradleBuildStatus invalidUtf8Status = await legacyVariantApiErrorHandler.handler(
+        gradleUtils: FakeGradleUtils(),
+        line: "e: file:///path/to/my_app/android/app/build.gradle.kts:5:5: Unresolved reference 'libraryVariants'.",
+        project: invalidUtf8Project,
+        toolContext: toolContext,
+        usesAndroidX: true, // Unused by legacyVariantApiErrorHandler.
+      );
+      expect(invalidUtf8Status, equals(GradleBuildStatus.exit));
+      expect(
+        testLogger.statusText,
+        contains('To build now, set android.newDsl=false in android/gradle.properties.'),
+      );
+
+      testLogger.clear();
+      final FlutterProject formatExceptionProject = _FormatExceptionGradlePropertiesProject(
+        fileSystem.currentDirectory,
+      );
+
+      final GradleBuildStatus
+      kotlinStatus = await kotlinAndroidPluginWithNewDslErrorHandler.handler(
+        gradleUtils: FakeGradleUtils(),
+        line: "The 'org.jetbrains.kotlin.android' plugin is not compatible with AGP's 9.0 new DSL.",
+        project: formatExceptionProject,
+        toolContext: toolContext,
+        usesAndroidX: true, // Unused by kotlinAndroidPluginWithNewDslErrorHandler.
+      );
+      expect(kotlinStatus, equals(GradleBuildStatus.exit));
+      expect(
+        testLogger.statusText,
+        contains('To build now, set android.newDsl=false in android/gradle.properties.'),
+      );
+
+      testLogger.clear();
+      final GradleBuildStatus legacyStatus = await legacyVariantApiErrorHandler.handler(
+        gradleUtils: FakeGradleUtils(),
+        line: "e: file:///path/to/my_app/android/app/build.gradle.kts:5:5: Unresolved reference 'libraryVariants'.",
+        project: formatExceptionProject,
+        toolContext: toolContext,
+        usesAndroidX: true, // Unused by legacyVariantApiErrorHandler.
+      );
+      expect(legacyStatus, equals(GradleBuildStatus.exit));
+      expect(
+        testLogger.statusText,
+        contains('To build now, set android.newDsl=false in android/gradle.properties.'),
       );
     });
 
@@ -2229,3 +2288,50 @@ class _TestPromptTerminal extends Fake implements AnsiTerminal {
 }
 
 class FakeFlutterProject extends Fake implements FlutterProject {}
+
+class _FormatExceptionGradlePropertiesProject extends Fake implements FlutterProject {
+  _FormatExceptionGradlePropertiesProject(this.directory);
+
+  @override
+  final Directory directory;
+
+  @override
+  late final AndroidProject android = _FormatExceptionAndroidProject(
+    directory.childDirectory('android'),
+  );
+}
+
+class _FormatExceptionAndroidProject extends Fake implements AndroidProject {
+  _FormatExceptionAndroidProject(this._androidDir);
+
+  final Directory _androidDir;
+
+  @override
+  late final Directory hostAppGradleRoot = _FormatExceptionGradleDirectory(_androidDir);
+}
+
+class _FormatExceptionGradleDirectory extends Fake implements Directory {
+  _FormatExceptionGradleDirectory(this._delegate);
+
+  final Directory _delegate;
+
+  @override
+  File childFile(String basename) => _FormatExceptionFile(_delegate.childFile(basename));
+}
+
+class _FormatExceptionFile extends Fake implements File {
+  _FormatExceptionFile(this._delegate);
+
+  final File _delegate;
+
+  @override
+  String get path => _delegate.path;
+
+  @override
+  bool existsSync() => true;
+
+  @override
+  List<String> readAsLinesSync({Encoding encoding = utf8}) {
+    throw const FormatException('Invalid UTF-8 byte');
+  }
+}

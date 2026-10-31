@@ -1004,17 +1004,20 @@ bool _isNewDslDisabledInGradleProperties(FlutterProject project) {
     return false;
   } on FileSystemException {
     return false;
+  } on FormatException {
+    return false;
   }
 }
 
 String _newDslOptOutInstructions(FlutterProject project, {required String gradlePropertiesPath}) {
-  final overrideNote = _isNewDslDisabledInGradleProperties(project)
-      ? '$gradlePropertiesPath already sets android.newDsl=false; check '
-            '~/.gradle/gradle.properties and -Pandroid.newDsl command-line flags '
-            'for an override.\n'
-      : '';
+  if (_isNewDslDisabledInGradleProperties(project)) {
+    return '$gradlePropertiesPath already sets android.newDsl=false; to build now, '
+        'remove any android.newDsl=true override in ~/.gradle/gradle.properties '
+        'or -Pandroid.newDsl command-line flags.\n'
+        'Android Gradle Plugin 10.0 removes the android.newDsl=false option.\n'
+        'For details, see: $kOptOutOfNewDslDocsUrl';
+  }
   return 'To build now, set android.newDsl=false in $gradlePropertiesPath.\n'
-      '$overrideNote'
       'Android Gradle Plugin 10.0 removes the android.newDsl=false option.\n'
       'For details, see: $kOptOutOfNewDslDocsUrl';
 }
