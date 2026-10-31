@@ -680,11 +680,11 @@ void UpdateRootSemantics(flutter::AccessibilityBridge* bridge, std::string label
   XCTAssertTrue([rootContainer accessibilityElementCount] ==
                 2);  // one for root, one for scrollable.
   id scrollableContainer = [rootContainer accessibilityElementAtIndex:1];
-  XCTAssertTrue([scrollableContainer accessibilityElementCount] ==
-                2);  // one for scrollable, one for scrollable child.
-  id child = [scrollableContainer accessibilityElementAtIndex:1];
+  XCTAssertTrue([scrollableContainer isKindOfClass:[FlutterSemanticsScrollView class]]);
+  XCTAssertTrue([scrollableContainer accessibilityElementCount] == 1);
+  id child = [scrollableContainer accessibilityElementAtIndex:0];
   /// Replacing node 1 should not accidentally clean up its child's container.
-  XCTAssertNotNil([child accessibilityContainer]);
+  XCTAssertEqual([child accessibilityContainer], scrollableContainer);
 }
 
 - (void)testScrollableSemanticsDeallocated {

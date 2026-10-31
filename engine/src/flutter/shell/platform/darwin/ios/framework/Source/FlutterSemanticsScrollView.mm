@@ -35,6 +35,10 @@ FLUTTER_ASSERT_ARC
     return NO;
   }
 
+  if ([self.semanticsObject hasChildren]) {
+    return NO;
+  }
+
   if (bridge->isVoiceOverRunning()) {
     return self.semanticsObject.accessibilityLabel.length > 0;
   }
@@ -104,11 +108,45 @@ FLUTTER_ASSERT_ARC
 }
 
 - (id)accessibilityContainer {
+  if (!self.semanticsObject.bridge) {
+    return nil;
+  }
+  if ([self.semanticsObject hasChildren]) {
+    // When `semanticsObject` has children, this scroll view itself serves as
+    // `semanticsObject.accessibilityContainer` (replacing `SemanticsObjectContainer`), so its own
+    // parent container in the accessibility hierarchy is `semanticsObject.parent`'s container.
+    return ([self.semanticsObject uid] == kRootNodeId)
+               ? self.semanticsObject.bridgeView
+               : self.semanticsObject.parent.accessibilityContainer;
+  }
   return self.semanticsObject.accessibilityContainer;
 }
 
 - (NSInteger)accessibilityElementCount {
   return self.semanticsObject.children.count;
+}
+
+- (nullable id)accessibilityElementAtIndex:(NSInteger)index {
+  if (index < 0 || index >= self.accessibilityElementCount) {
+    return nil;
+  }
+  SemanticsObject* child = self.semanticsObject.children[index];
+  if ([child hasChildren]) {
+    return child.accessibilityContainer;
+  }
+  return child.nativeAccessibility;
+}
+
+- (NSInteger)indexOfAccessibilityElement:(id)element {
+  NSArray<SemanticsObject*>* children = self.semanticsObject.children;
+  for (size_t i = 0; i < children.count; i++) {
+    SemanticsObject* child = children[i];
+    if ((![child hasChildren] && child.nativeAccessibility == element) ||
+        ([child hasChildren] && [child accessibilityContainer] == element)) {
+      return i;
+    }
+  }
+  return NSNotFound;
 }
 
 - (void)scrollViewWillEndDragging:(UIScrollView*)scrollView
