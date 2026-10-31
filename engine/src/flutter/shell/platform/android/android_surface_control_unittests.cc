@@ -200,17 +200,56 @@ struct MockVulkanEnv {
   size_t queue_submit_calls = 0;
   size_t queue_present_calls = 0;
   size_t get_semaphore_fd_calls = 0;
+  size_t wait_for_fences_calls = 0;
+  // Default mock surface capability maxImageCount (allows triple-buffering).
+  static constexpr uint32_t kDefaultMockMaxSwapchainImages = 4;
+  uint64_t last_submit_fence = 0;
+  uint32_t custom_max_image_count = kDefaultMockMaxSwapchainImages;
+  uint32_t custom_supported_usage_flags = 0;
+  VkExtent2DCompat custom_min_extent = {0, 0};
+  VkExtent2DCompat custom_max_extent = {0, 0};
+  uint32_t last_swapchain_min_image_count = 0;
+  uint32_t last_swapchain_image_usage = 0;
+  VkExtent2DCompat last_swapchain_extent = {0, 0};
+  std::vector<std::string> created_instance_layers;
+  std::vector<std::string> created_instance_extensions;
 };
 
 MockVulkanEnv* g_vk_env = nullptr;
 
+int32_t StubVkEnumerateInstanceLayerProperties(uint32_t* count,
+                                               VkLayerPropertiesCompat* props) {
+  std::vector<std::string> layers = {"VK_LAYER_KHRONOS_validation"};
+  if (props == nullptr) {
+    *count = static_cast<uint32_t>(layers.size());
+    return kVkSuccess;
+  }
+  const uint32_t to_write =
+      std::min(*count, static_cast<uint32_t>(layers.size()));
+  for (uint32_t i = 0; i < to_write; ++i) {
+    std::memset(&props[i], 0, sizeof(VkLayerPropertiesCompat));
+    std::strncpy(props[i].layerName, layers[i].c_str(),
+                 kVkMaxExtensionNameSize - 1);
+    props[i].specVersion = 1;
+    props[i].implementationVersion = 1;
+  }
+  *count = to_write;
+  return kVkSuccess;
+}
+
 int32_t StubVkEnumerateInstanceExtensionProperties(
-    const char* /*layer_name*/,
+    const char* layer_name,
     uint32_t* count,
     VkExtensionPropertiesCompat* props) {
-  std::vector<std::string> exts = {"VK_KHR_surface"};
-  if (g_vk_env == nullptr || g_vk_env->include_surface_instance_extension) {
-    exts.emplace_back("VK_KHR_android_surface");
+  std::vector<std::string> exts;
+  if (layer_name != nullptr &&
+      std::string(layer_name) == "VK_LAYER_KHRONOS_validation") {
+    exts.emplace_back("VK_EXT_debug_utils");
+  } else {
+    exts.emplace_back("VK_KHR_surface");
+    if (g_vk_env == nullptr || g_vk_env->include_surface_instance_extension) {
+      exts.emplace_back("VK_KHR_android_surface");
+    }
   }
   if (props == nullptr) {
     *count = static_cast<uint32_t>(exts.size());
@@ -228,9 +267,27 @@ int32_t StubVkEnumerateInstanceExtensionProperties(
   return kVkSuccess;
 }
 
-int32_t StubVkCreateInstance(const VkInstanceCreateInfoCompat* /*create_info*/,
+int32_t StubVkCreateInstance(const VkInstanceCreateInfoCompat* create_info,
                              const void* /*allocator*/,
                              void** instance_out) {
+  if (g_vk_env != nullptr && create_info != nullptr) {
+    g_vk_env->created_instance_layers.clear();
+    for (uint32_t i = 0; i < create_info->enabledLayerCount; ++i) {
+      if (create_info->ppEnabledLayerNames != nullptr &&
+          create_info->ppEnabledLayerNames[i] != nullptr) {
+        g_vk_env->created_instance_layers.emplace_back(
+            create_info->ppEnabledLayerNames[i]);
+      }
+    }
+    g_vk_env->created_instance_extensions.clear();
+    for (uint32_t i = 0; i < create_info->enabledExtensionCount; ++i) {
+      if (create_info->ppEnabledExtensionNames != nullptr &&
+          create_info->ppEnabledExtensionNames[i] != nullptr) {
+        g_vk_env->created_instance_extensions.emplace_back(
+            create_info->ppEnabledExtensionNames[i]);
+      }
+    }
+  }
   *instance_out = reinterpret_cast<void*>(0x7001);
   return kVkSuccess;
 }
@@ -401,8 +458,14 @@ int32_t StubVkGetPhysicalDeviceSurfaceCapabilitiesKHR(
     VkSurfaceCapabilitiesKHRCompat* caps) {
   std::memset(caps, 0, sizeof(VkSurfaceCapabilitiesKHRCompat));
   caps->minImageCount = 2;
-  caps->maxImageCount = 4;
+  caps->maxImageCount =
+      g_vk_env != nullptr ? g_vk_env->custom_max_image_count : 4;
   caps->currentExtent = {kTestSurfaceWidth, kTestSurfaceHeight};
+  if (g_vk_env != nullptr) {
+    caps->minImageExtent = g_vk_env->custom_min_extent;
+    caps->maxImageExtent = g_vk_env->custom_max_extent;
+    caps->supportedUsageFlags = g_vk_env->custom_supported_usage_flags;
+  }
   caps->currentTransform =
       g_vk_env != nullptr ? g_vk_env->reported_surface_transform : 0;
   caps->supportedTransforms = kVkSurfaceTransformIdentityBitKhr;
@@ -429,11 +492,16 @@ int32_t StubVkGetPhysicalDeviceSurfaceFormatsKHR(
 
 int32_t StubVkCreateSwapchainKHR(
     void* /*device*/,
-    const VkSwapchainCreateInfoKHRCompat* /*create_info*/,
+    const VkSwapchainCreateInfoKHRCompat* create_info,
     const void* /*allocator*/,
     uint64_t* swapchain_out) {
   if (g_vk_env != nullptr) {
     ++g_vk_env->create_swapchain_calls;
+    if (create_info != nullptr) {
+      g_vk_env->last_swapchain_min_image_count = create_info->minImageCount;
+      g_vk_env->last_swapchain_image_usage = create_info->imageUsage;
+      g_vk_env->last_swapchain_extent = create_info->imageExtent;
+    }
     if (g_vk_env->fail_swapchain_with_native_window_in_use_once) {
       g_vk_env->fail_swapchain_with_native_window_in_use_once = false;
       return kVkErrorNativeWindowInUseKhr;
@@ -487,9 +555,10 @@ int32_t StubVkQueuePresentKHR(void* /*queue*/,
 int32_t StubVkQueueSubmit(void* /*queue*/,
                           uint32_t /*submit_count*/,
                           const VkSubmitInfoCompat* /*submits*/,
-                          uint64_t /*fence*/) {
+                          uint64_t fence) {
   if (g_vk_env != nullptr) {
     ++g_vk_env->queue_submit_calls;
+    g_vk_env->last_submit_fence = fence;
   }
   return kVkSuccess;
 }
@@ -515,6 +584,9 @@ int32_t StubVkWaitForFences(void* /*device*/,
                             const uint64_t* /*fences*/,
                             uint32_t /*wait_all*/,
                             uint64_t /*timeout*/) {
+  if (g_vk_env != nullptr) {
+    ++g_vk_env->wait_for_fences_calls;
+  }
   return kVkSuccess;
 }
 
@@ -616,6 +688,9 @@ void* StubVkGetInstanceProcAddr(void* /*instance*/, const char* name) {
     // AndroidSurfaceControl::GetInstanceProcAddressCallback returns the
     // resolved function pointer directly.
     return nullptr;
+  }
+  if (sym == "vkEnumerateInstanceLayerProperties") {
+    return reinterpret_cast<void*>(&StubVkEnumerateInstanceLayerProperties);
   }
   if (sym == "vkEnumerateInstanceExtensionProperties") {
     return reinterpret_cast<void*>(&StubVkEnumerateInstanceExtensionProperties);
@@ -1200,6 +1275,100 @@ TEST(AndroidSurfaceControlTest,
   EXPECT_TRUE(controller.CreateBackingStore(&bs_config, &bs));
   EXPECT_EQ(bs.type, kFlutterBackingStoreTypeVulkan);
   EXPECT_TRUE(controller.CollectBackingStore(&bs));
+
+  g_vk_env = nullptr;
+}
+
+TEST(AndroidSurfaceControlTest,
+     SwapchainClampsCapabilitiesAndWaitsOnPerImageSubmitFenceBeforeReset) {
+  // Set maxImageCount below kMinimumSwapchainImageCount (3) to verify clamping.
+  constexpr uint32_t kClampedMaxSwapchainImages = 2;
+  // Set minImageExtent and maxImageExtent below kTestSurfaceWidth/Height
+  // (1080x1920) to verify swapchain extent clamping to [min, max].
+  constexpr uint32_t kClampedMinExtentWidth = 320;
+  constexpr uint32_t kClampedMinExtentHeight = 480;
+  constexpr uint32_t kClampedMaxExtentWidth = 800;
+  constexpr uint32_t kClampedMaxExtentHeight = 1200;
+
+  MockVulkanEnv vk_env;
+  vk_env.custom_max_image_count = kClampedMaxSwapchainImages;
+  vk_env.custom_supported_usage_flags =
+      kVkImageUsageColorAttachmentBit | kVkImageUsageTransferDstBit;
+  vk_env.custom_min_extent = {kClampedMinExtentWidth, kClampedMinExtentHeight};
+  vk_env.custom_max_extent = {kClampedMaxExtentWidth, kClampedMaxExtentHeight};
+  g_vk_env = &vk_env;
+
+  AndroidSurfaceControl controller(CreateMockVulkanLibraryLoader());
+  FlutterRendererConfig resolved = {};
+  ASSERT_TRUE(controller.ResolveRendererConfig(&resolved));
+  ASSERT_EQ(resolved.type, kVulkan);
+
+  ASSERT_TRUE(controller.SurfaceCreated(
+      kPrimaryViewId, reinterpret_cast<void*>(kDummyNativeWindow1), nullptr,
+      kTestSurfaceWidth, kTestSurfaceHeight));
+
+  FlutterFrameInfo frame_info = {};
+  frame_info.struct_size = sizeof(FlutterFrameInfo);
+  frame_info.size = {kTestSurfaceWidth, kTestSurfaceHeight};
+
+  // Frame 1: acquire & present image 0.
+  FlutterVulkanImage acquired1 =
+      resolved.vulkan.get_next_image_callback(&controller, &frame_info);
+  ASSERT_NE(acquired1.image, 0u);
+  EXPECT_EQ(vk_env.last_swapchain_min_image_count, kClampedMaxSwapchainImages);
+  EXPECT_EQ(vk_env.last_swapchain_image_usage,
+            kVkImageUsageColorAttachmentBit | kVkImageUsageTransferDstBit);
+  EXPECT_EQ(vk_env.last_swapchain_extent.width, kClampedMaxExtentWidth);
+  EXPECT_EQ(vk_env.last_swapchain_extent.height, kClampedMaxExtentHeight);
+
+  const size_t waits_after_acquire1 = vk_env.wait_for_fences_calls;
+  EXPECT_TRUE(resolved.vulkan.present_image_callback(&controller, &acquired1));
+  EXPECT_NE(vk_env.last_submit_fence, 0u);
+  // First present on image 0 has no prior submit fence pending.
+  EXPECT_EQ(vk_env.wait_for_fences_calls, waits_after_acquire1);
+
+  // Frame 2: acquire & present image 0 again -> must wait on per-image submit
+  // fence before vkResetCommandBuffer.
+  FlutterVulkanImage acquired2 =
+      resolved.vulkan.get_next_image_callback(&controller, &frame_info);
+  ASSERT_NE(acquired2.image, 0u);
+  const size_t waits_after_acquire2 = vk_env.wait_for_fences_calls;
+  EXPECT_TRUE(resolved.vulkan.present_image_callback(&controller, &acquired2));
+  EXPECT_EQ(vk_env.wait_for_fences_calls, waits_after_acquire2 + 1u);
+
+  g_vk_env = nullptr;
+}
+
+TEST(AndroidSurfaceControlTest,
+     EnableVulkanValidationEnablesValidationLayerAndDebugUtilsExtension) {
+  MockVulkanEnv vk_env;
+  g_vk_env = &vk_env;
+
+  AndroidSurfaceControl controller(CreateMockVulkanLibraryLoader());
+  AndroidSystemPropertiesForVulkan sys_props = {};
+  sys_props.impeller_enabled = true;
+  sys_props.enable_vulkan_validation = true;
+  controller.SetSystemPropertiesForVulkan(sys_props);
+
+  FlutterRendererConfig resolved = {};
+  ASSERT_TRUE(controller.ResolveRendererConfig(&resolved));
+  ASSERT_EQ(resolved.type, kVulkan);
+
+  bool found_validation_layer = false;
+  for (const auto& layer : vk_env.created_instance_layers) {
+    if (layer == "VK_LAYER_KHRONOS_validation") {
+      found_validation_layer = true;
+    }
+  }
+  EXPECT_TRUE(found_validation_layer);
+
+  bool found_debug_utils_ext = false;
+  for (const auto& ext : vk_env.created_instance_extensions) {
+    if (ext == "VK_EXT_debug_utils") {
+      found_debug_utils_ext = true;
+    }
+  }
+  EXPECT_TRUE(found_debug_utils_ext);
 
   g_vk_env = nullptr;
 }

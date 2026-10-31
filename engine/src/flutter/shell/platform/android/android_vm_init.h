@@ -128,6 +128,9 @@ struct AndroidVMArgs {
   /// Whether wide gamut color spaces are enabled.
   bool enable_wide_gamut = false;
 
+  /// Whether Vulkan validation layers are enabled.
+  bool enable_vulkan_validation = false;
+
   /// Initial VM service URI (if available).
   std::string vm_service_uri;
 
@@ -164,6 +167,7 @@ struct AndroidVMArgs {
            enable_surface_control == other.enable_surface_control &&
            merged_platform_ui_thread == other.merged_platform_ui_thread &&
            enable_wide_gamut == other.enable_wide_gamut &&
+           enable_vulkan_validation == other.enable_vulkan_validation &&
            vm_service_uri == other.vm_service_uri;
   }
 

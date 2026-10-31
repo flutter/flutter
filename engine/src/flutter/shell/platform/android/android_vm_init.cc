@@ -194,6 +194,12 @@ AndroidVMArgs ParseCommandLineIntoVMArgs(
     } else if (arg == "--enable-wide-gamut" ||
                arg == "--enable-wide-gamut=true") {
       vm_args.enable_wide_gamut = true;
+    } else if (arg == "--enable-vulkan-validation" ||
+               arg == "--enable-vulkan-validation=true") {
+      vm_args.enable_vulkan_validation = true;
+    } else if (arg == "--enable-vulkan-validation=false" ||
+               arg == "--no-enable-vulkan-validation") {
+      vm_args.enable_vulkan_validation = false;
     } else if (arg.rfind(kBackendPrefix, 0) == 0) {
       vm_args.requested_rendering_backend = arg.substr(kBackendPrefix.length());
     } else if (arg.rfind(kOldGenHeapPrefix, 0) == 0) {

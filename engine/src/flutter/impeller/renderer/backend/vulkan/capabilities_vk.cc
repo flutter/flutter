@@ -54,6 +54,9 @@ CapabilitiesVK::CapabilitiesVK(bool enable_validations,
     for (const auto& ext : embedder_instance_extensions_) {
       exts_[kInstanceLayer].insert(ext);
     }
+    if (enable_validations && HasExtension("VK_EXT_debug_utils")) {
+      exts_["VK_LAYER_KHRONOS_validation"].insert("VK_EXT_debug_utils");
+    }
   }
 
   validations_enabled_ =

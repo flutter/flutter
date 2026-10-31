@@ -24,6 +24,7 @@
 #include "flutter/fml/time/time_delta.h"
 #include "flutter/fml/time/time_point.h"
 #include "flutter/runtime/dart_vm.h"
+#include "flutter/shell/platform/embedder/embedder_platform_message_response.h"
 #include "flutter/shell/platform/embedder/embedder_thread_host.h"
 #include "flutter/shell/platform/embedder/tests/embedder_assertions.h"
 #include "flutter/shell/platform/embedder/tests/embedder_config_builder.h"
@@ -4650,6 +4651,59 @@ TEST(EmbedderTestNoFixture,
   ASSERT_TRUE(merged_host->IsValid());
   EXPECT_EQ(merged_host->GetTaskRunners().GetPlatformTaskRunner(),
             merged_host->GetTaskRunners().GetUITaskRunner());
+}
+
+TEST(EmbedderTestNoFixture,
+     EmbedderPlatformMessageResponsePreservesZeroByteNonNullPointer) {
+  fml::Thread thread("response_test_thread");
+  auto runner = thread.GetTaskRunner();
+  // Non-zero initial sentinel size so assertions verify that the response
+  // callback explicitly overwrote received_size with 0.
+  constexpr size_t kInitialUnsetSize = 999u;
+  // Non-null initial pointer sentinel so assertions verify that CompleteEmpty()
+  // explicitly overwrote received_data with nullptr.
+  constexpr uintptr_t kInitialNonNullSentinel = 0x1;
+
+  // 1. Completing with a 0-byte DataMapping (std::vector<uint8_t>{}) must pass
+  // a non-null pointer with size == 0 so C-API embedders distinguish a 0-byte
+  // ByteData(0) reply from CompleteEmpty().
+  {
+    fml::AutoResetWaitableEvent latch;
+    const uint8_t* received_data = nullptr;
+    size_t received_size = kInitialUnsetSize;
+    fml::RefPtr<PlatformMessageResponse> response =
+        fml::MakeRefCounted<EmbedderPlatformMessageResponse>(
+            runner, [&](const uint8_t* data, size_t size) {
+              received_data = data;
+              received_size = size;
+              latch.Signal();
+            });
+    auto empty_vector_mapping =
+        std::make_unique<fml::DataMapping>(std::vector<uint8_t>{});
+    response->Complete(std::move(empty_vector_mapping));
+    latch.Wait();
+    EXPECT_NE(received_data, nullptr);
+    EXPECT_EQ(received_size, 0u);
+  }
+
+  // 2. CompleteEmpty() must pass nullptr with size == 0.
+  {
+    fml::AutoResetWaitableEvent latch;
+    const uint8_t* received_data =
+        reinterpret_cast<const uint8_t*>(kInitialNonNullSentinel);
+    size_t received_size = kInitialUnsetSize;
+    fml::RefPtr<PlatformMessageResponse> response =
+        fml::MakeRefCounted<EmbedderPlatformMessageResponse>(
+            runner, [&](const uint8_t* data, size_t size) {
+              received_data = data;
+              received_size = size;
+              latch.Signal();
+            });
+    response->CompleteEmpty();
+    latch.Wait();
+    EXPECT_EQ(received_data, nullptr);
+    EXPECT_EQ(received_size, 0u);
+  }
 }
 
 }  // namespace testing

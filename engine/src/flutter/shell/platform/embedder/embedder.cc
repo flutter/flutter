@@ -813,6 +813,7 @@ InferVulkanPlatformViewCreationCallback(
         external_view_embedder,
     bool enable_impeller,
     impeller::Flags impeller_flags,
+    bool enable_vulkan_validation = false,
     const std::shared_ptr<SharedRendererConfigState>& renderer_state =
         nullptr) {
   if (config->type != kVulkan) {
@@ -884,7 +885,7 @@ InferVulkanPlatformViewCreationCallback(
             static_cast<VkDevice>(config->vulkan.device),
             config->vulkan.queue_family_index,
             static_cast<VkQueue>(config->vulkan.queue), vulkan_dispatch_table,
-            view_embedder, impeller_flags, /*enable_vulkan_validation=*/false,
+            view_embedder, impeller_flags, enable_vulkan_validation,
             shared_context);
 
     return fml::MakeCopyable(
@@ -1023,6 +1024,7 @@ InferDeferredPlatformViewCreationCallback(
         external_view_embedder,
     bool enable_impeller,
     impeller::Flags impeller_flags,
+    bool enable_vulkan_validation,
     const std::shared_ptr<SharedRendererConfigState>& renderer_state,
     const std::shared_ptr<flutter::EmbedderEngine*>& engine_ptr_holder) {
   if (config->type != kDeferred) {
@@ -1041,16 +1043,19 @@ InferDeferredPlatformViewCreationCallback(
 
   return fml::MakeCopyable([resolve_callback, engine_user_data,
                             platform_dispatch_table, view_embedder,
-                            enable_impeller, impeller_flags, renderer_state,
+                            enable_impeller, impeller_flags,
+                            enable_vulkan_validation, renderer_state,
                             engine_ptr_holder](flutter::Shell& shell) mutable {
     auto io_task_runner = shell.GetShutdownSafeIOTaskRunner();
     flutter::PlatformViewEmbedder::ResolveEmbedderSurfaceCallback
         surface_factory =
             [resolve_callback, engine_user_data, view_embedder, enable_impeller,
-             impeller_flags, renderer_state, engine_ptr_holder,
+             impeller_flags, enable_vulkan_validation, renderer_state,
+             engine_ptr_holder,
              io_task_runner]() -> std::unique_ptr<flutter::EmbedderSurface> {
       (void)enable_impeller;
       (void)impeller_flags;
+      (void)enable_vulkan_validation;
       (void)io_task_runner;
       FlutterRendererConfig resolved = {};
       std::shared_ptr<impeller::Context> shared_context;
@@ -1148,7 +1153,7 @@ InferDeferredPlatformViewCreationCallback(
                 resolved.vulkan.queue_family_index,
                 static_cast<VkQueue>(resolved.vulkan.queue),
                 vulkan_dispatch_table, view_embedder, impeller_flags,
-                /*enable_vulkan_validation=*/false, shared_context);
+                enable_vulkan_validation, shared_context);
           }
 #endif  // IMPELLER_SUPPORTS_RENDERING
           flutter::EmbedderSurfaceVulkan::VulkanDispatchTable
@@ -1438,6 +1443,7 @@ InferPlatformViewCreationCallback(
         external_view_embedder,
     bool enable_impeller,
     impeller::Flags impeller_flags,
+    bool enable_vulkan_validation = false,
     const std::shared_ptr<SharedRendererConfigState>& renderer_state = nullptr,
     const std::shared_ptr<flutter::EmbedderEngine*>& engine_ptr_holder =
         nullptr) {
@@ -1463,12 +1469,12 @@ InferPlatformViewCreationCallback(
       return InferVulkanPlatformViewCreationCallback(
           config, user_data, platform_dispatch_table,
           std::move(external_view_embedder), enable_impeller, impeller_flags,
-          renderer_state);
+          enable_vulkan_validation, renderer_state);
     case kDeferred:
       return InferDeferredPlatformViewCreationCallback(
           config, user_data, platform_dispatch_table,
           std::move(external_view_embedder), enable_impeller, impeller_flags,
-          renderer_state, engine_ptr_holder);
+          enable_vulkan_validation, renderer_state, engine_ptr_holder);
     default:
       return nullptr;
   }
@@ -3042,12 +3048,21 @@ CreatePlatformDispatchTable(const FlutterProjectArgs* args, void* user_data) {
         [ptr = args->platform_message_callback,
          user_data](std::unique_ptr<flutter::PlatformMessage> message) {
           auto handle = new FlutterPlatformMessageResponseHandle();
+          static constexpr uint8_t kEmptyMessageSentinel = 0;
+          const uint8_t* message_bytes = nullptr;
+          if (message->hasData()) {
+            message_bytes = message->data().GetMapping();
+            if (message_bytes == nullptr && message->data().GetSize() == 0) {
+              message_bytes = &kEmptyMessageSentinel;
+            }
+          }
           const FlutterPlatformMessage incoming_message = {
               sizeof(FlutterPlatformMessage),  // struct_size
               message->channel().c_str(),      // channel
-              message->data().GetMapping(),    // message
-              message->data().GetSize(),       // message_size
-              handle,                          // response_handle
+              message_bytes,                   // message
+              message->hasData() ? message->data().GetSize()
+                                 : 0,  // message_size
+              handle,                  // response_handle
           };
           handle->message = std::move(message);
           return ptr(&incoming_message, user_data);
@@ -3444,8 +3459,8 @@ FlutterEngineResult FlutterEngineInitialize(size_t version,
   auto on_create_platform_view = InferPlatformViewCreationCallback(
       config, user_data, platform_dispatch_table,
       std::move(external_view_embedder_result.value()),
-      settings.enable_impeller, impeller_flags, renderer_state,
-      engine_ptr_holder);
+      settings.enable_impeller, impeller_flags,
+      settings.enable_vulkan_validation, renderer_state, engine_ptr_holder);
 
   if (!on_create_platform_view) {
     return LOG_EMBEDDER_ERROR(
@@ -3755,8 +3770,8 @@ FlutterEngineResult FlutterEngineSpawn(FLUTTER_API_SYMBOL(FlutterEngine)
   auto on_create_platform_view = InferPlatformViewCreationCallback(
       effective_renderer, user_data, platform_dispatch_table,
       std::move(external_view_embedder_result.value()),
-      settings.enable_impeller, impeller_flags, renderer_state,
-      engine_ptr_holder);
+      settings.enable_impeller, impeller_flags,
+      settings.enable_vulkan_validation, renderer_state, engine_ptr_holder);
   if (!on_create_platform_view) {
     return LOG_EMBEDDER_ERROR(
         kInternalInconsistency,

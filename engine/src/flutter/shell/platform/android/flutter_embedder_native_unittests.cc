@@ -1334,5 +1334,20 @@ TEST_F(FlutterEmbedderNativeTest,
   EXPECT_EQ(mock_state_->update_accessibility_features_count, 1u);
 }
 
+TEST_F(FlutterEmbedderNativeTest,
+       ParseCommandLineSetsEnableVulkanValidationFlag) {
+  const AndroidVMArgs args_enabled =
+      ParseCommandLineIntoVMArgs({"flutter", "--enable-vulkan-validation"});
+  EXPECT_TRUE(args_enabled.enable_vulkan_validation);
+
+  const AndroidVMArgs args_true = ParseCommandLineIntoVMArgs(
+      {"flutter", "--enable-vulkan-validation=true"});
+  EXPECT_TRUE(args_true.enable_vulkan_validation);
+
+  const AndroidVMArgs args_false = ParseCommandLineIntoVMArgs(
+      {"flutter", "--enable-vulkan-validation=false"});
+  EXPECT_FALSE(args_false.enable_vulkan_validation);
+}
+
 }  // namespace testing
 }  // namespace flutter

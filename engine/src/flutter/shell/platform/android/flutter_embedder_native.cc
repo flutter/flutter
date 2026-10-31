@@ -351,6 +351,7 @@ android::AndroidSystemPropertiesForVulkan BuildSystemPropertiesForVulkan(
   sys_props.force_opengles =
       (rendering_api == AndroidRenderingAPI::kImpellerOpenGLES ||
        rendering_api == AndroidRenderingAPI::kSkiaOpenGLES);
+  sys_props.enable_vulkan_validation = vm_args.enable_vulkan_validation;
   sys_props.ro_hardware = dev_props.hardware;
   sys_props.ro_product_model = dev_props.model;
   sys_props.vendor_api_level = api_level;
@@ -1341,7 +1342,8 @@ bool FlutterEmbedderNative::RunBundleAndSnapshotFromLibrary(
           BuildSystemPropertiesForVulkan(api_level, vm_args, rendering_api));
     }
 #endif
-    if (rendering_api != AndroidRenderingAPI::kImpellerVulkan) {
+    if (rendering_api != AndroidRenderingAPI::kImpellerVulkan &&
+        rendering_api != AndroidRenderingAPI::kImpellerAutoselect) {
       InitializeAndroidEGL();
       void* current_window = nullptr;
       {
@@ -1644,7 +1646,8 @@ std::unique_ptr<FlutterEmbedderNative> FlutterEmbedderNative::Spawn(
             BuildSystemPropertiesForVulkan(api_level, vm_args, rendering_api));
       }
 #endif
-      if (rendering_api != AndroidRenderingAPI::kImpellerVulkan) {
+      if (rendering_api != AndroidRenderingAPI::kImpellerVulkan &&
+          rendering_api != AndroidRenderingAPI::kImpellerAutoselect) {
         child->InitializeAndroidEGL();
       }
     }
@@ -2497,8 +2500,10 @@ bool FlutterEmbedderNative::ResolveRendererConfig(
     };
     return true;
   }
-  if (api == AndroidRenderingAPI::kImpellerVulkan) {
-    if (is_using_mock_proc_table_) {
+  if (api == AndroidRenderingAPI::kImpellerVulkan ||
+      api == AndroidRenderingAPI::kImpellerAutoselect) {
+    if (is_using_mock_proc_table_ &&
+        api == AndroidRenderingAPI::kImpellerVulkan) {
       config_out->type = kVulkan;
       config_out->vulkan.struct_size = sizeof(FlutterVulkanRendererConfig);
       config_out->vulkan.version = kDefaultVulkanApiVersion;
@@ -2507,7 +2512,7 @@ bool FlutterEmbedderNative::ResolveRendererConfig(
       return true;
     }
 #if FLUTTER_HAS_ANDROID_SURFACE_CONTROL
-    if (surface_control_ &&
+    if (!is_using_mock_proc_table_ && surface_control_ &&
         surface_control_->ResolveRendererConfig(config_out)) {
       if (config_out->type == kVulkan) {
         if (vk_texture_provider_) {

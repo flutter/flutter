@@ -11,6 +11,7 @@
 #include "flutter/impeller/entity/vk/modern_shaders_vk.h"
 #include "flutter/shell/gpu/gpu_surface_vulkan.h"
 #include "impeller/display_list/aiks_context.h"
+#include "impeller/renderer/backend/vulkan/capabilities_vk.h"
 #include "impeller/renderer/backend/vulkan/context_vk.h"
 #include "shell/gpu/gpu_surface_vulkan_impeller.h"
 #include "third_party/skia/include/gpu/ganesh/GrDirectContext.h"
@@ -97,10 +98,16 @@ void EmbedderSurfaceVulkanImpeller::SetupImpellerContext() {
     return;
   }
 
+  const auto& caps_vk =
+      impeller::CapabilitiesVK::Cast(*context_->GetCapabilities());
   if (use_sdfs) {
     FML_LOG(IMPORTANT) << "Using the Impeller rendering backend (VulkanSDF).";
   } else {
-    FML_LOG(IMPORTANT) << "Using the Impeller rendering backend (Vulkan).";
+    FML_LOG(IMPORTANT) << "Using the Impeller rendering backend (Vulkan"
+                       << (caps_vk.AreValidationsEnabled()
+                               ? " with Validation Layers"
+                               : "")
+                       << ").";
   }
 }
 

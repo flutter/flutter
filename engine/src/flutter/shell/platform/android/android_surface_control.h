@@ -186,6 +186,9 @@ struct AndroidSystemPropertiesForVulkan {
   std::string ro_mediatek_platform;
   /// @brief Value of `ro.product.board` (checked against `kBadSocs`).
   std::string ro_product_board;
+  /// @brief Whether Vulkan validation layers (`VK_LAYER_KHRONOS_validation`)
+  /// should be enabled on the `VkInstance` if available.
+  bool enable_vulkan_validation = false;
 };
 
 // Minimal binary-compatible Vulkan C ABI definitions so
@@ -303,6 +306,13 @@ struct VkInstanceCreateInfoCompat {
 struct VkExtensionPropertiesCompat {
   char extensionName[kVkMaxExtensionNameSize];
   uint32_t specVersion;
+};
+
+struct VkLayerPropertiesCompat {
+  char layerName[kVkMaxExtensionNameSize];
+  uint32_t specVersion;
+  uint32_t implementationVersion;
+  char description[kVkMaxExtensionNameSize];
 };
 
 struct VkExtent2DCompat {
@@ -911,6 +921,9 @@ class AndroidSurfaceControl {
     bool swapchain_needs_recreation = true;
     uint64_t acquire_fence = 0;
     uint64_t render_complete_semaphore = 0;
+    std::vector<uint64_t> render_complete_semaphores;
+    std::vector<uint64_t> submit_fences;
+    std::vector<bool> submit_fence_pending;
     uint64_t hcpp_export_semaphore = 0;
     uint64_t command_pool = 0;
     std::vector<void*> command_buffers;
@@ -922,6 +935,8 @@ class AndroidSurfaceControl {
       int32_t (*)(const char* layer_name,
                   uint32_t* count,
                   VkExtensionPropertiesCompat* props);
+  using PFN_vkEnumerateInstanceLayerProperties =
+      int32_t (*)(uint32_t* count, VkLayerPropertiesCompat* props);
   using PFN_vkCreateInstance =
       int32_t (*)(const VkInstanceCreateInfoCompat* create_info,
                   const void* allocator,
@@ -1100,6 +1115,8 @@ class AndroidSurfaceControl {
   void* vk_device_ = nullptr;
   void* vk_queue_ = nullptr;
   uint32_t vk_queue_family_index_ = 0;
+  std::vector<std::string> enabled_instance_layers_;
+  std::vector<const char*> enabled_instance_layer_ptrs_;
   std::vector<std::string> enabled_instance_extensions_;
   std::vector<const char*> enabled_instance_extension_ptrs_;
   std::vector<std::string> enabled_device_extensions_;
@@ -1110,6 +1127,8 @@ class AndroidSurfaceControl {
   PFN_vkGetInstanceProcAddr vk_get_instance_proc_addr_fn_ = nullptr;
   PFN_vkEnumerateInstanceExtensionProperties
       vk_enumerate_instance_extension_properties_fn_ = nullptr;
+  PFN_vkEnumerateInstanceLayerProperties
+      vk_enumerate_instance_layer_properties_fn_ = nullptr;
   PFN_vkCreateInstance vk_create_instance_fn_ = nullptr;
   PFN_vkDestroyInstance vk_destroy_instance_fn_ = nullptr;
   PFN_vkEnumeratePhysicalDevices vk_enumerate_physical_devices_fn_ = nullptr;

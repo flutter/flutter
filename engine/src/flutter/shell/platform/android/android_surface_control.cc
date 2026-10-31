@@ -401,6 +401,9 @@ bool AndroidSurfaceControl::InitializeVulkanOnRasterThreadLocked() {
   vk_enumerate_instance_extension_properties_fn_ =
       reinterpret_cast<PFN_vkEnumerateInstanceExtensionProperties>(
           resolve_global_proc("vkEnumerateInstanceExtensionProperties"));
+  vk_enumerate_instance_layer_properties_fn_ =
+      reinterpret_cast<PFN_vkEnumerateInstanceLayerProperties>(
+          resolve_global_proc("vkEnumerateInstanceLayerProperties"));
   vk_create_instance_fn_ = reinterpret_cast<PFN_vkCreateInstance>(
       resolve_global_proc("vkCreateInstance"));
 
@@ -427,6 +430,8 @@ bool AndroidSurfaceControl::InitializeVulkanOnRasterThreadLocked() {
     return false;
   }
 
+  enabled_instance_layers_.clear();
+  enabled_instance_layer_ptrs_.clear();
   enabled_instance_extensions_.clear();
   enabled_instance_extension_ptrs_.clear();
   for (const char* req_ext : kRequiredInstanceExtensions) {
@@ -436,6 +441,56 @@ bool AndroidSurfaceControl::InitializeVulkanOnRasterThreadLocked() {
       return false;
     }
     enabled_instance_extensions_.emplace_back(req_ext);
+  }
+
+  if (system_props_.enable_vulkan_validation &&
+      vk_enumerate_instance_layer_properties_fn_ != nullptr) {
+    uint32_t layer_count = 0;
+    if (vk_enumerate_instance_layer_properties_fn_(&layer_count, nullptr) ==
+            kVkSuccess &&
+        layer_count > 0) {
+      std::vector<VkLayerPropertiesCompat> layers(layer_count);
+      if (vk_enumerate_instance_layer_properties_fn_(
+              &layer_count, layers.data()) == kVkSuccess) {
+        constexpr const char* kValidationLayerName =
+            "VK_LAYER_KHRONOS_validation";
+        bool has_validation_layer = false;
+        for (const auto& layer : layers) {
+          if (std::strcmp(layer.layerName, kValidationLayerName) == 0) {
+            has_validation_layer = true;
+            break;
+          }
+        }
+        if (has_validation_layer) {
+          std::vector<VkExtensionPropertiesCompat> layer_exts;
+          uint32_t layer_ext_count = 0;
+          if (vk_enumerate_instance_extension_properties_fn_(
+                  kValidationLayerName, &layer_ext_count, nullptr) ==
+                  kVkSuccess &&
+              layer_ext_count > 0) {
+            layer_exts.resize(layer_ext_count);
+            vk_enumerate_instance_extension_properties_fn_(
+                kValidationLayerName, &layer_ext_count, layer_exts.data());
+          }
+          const bool has_debug_utils =
+              HasExtension(instance_exts, "VK_EXT_debug_utils") ||
+              HasExtension(layer_exts, "VK_EXT_debug_utils");
+          if (has_debug_utils) {
+            enabled_instance_layers_.emplace_back(kValidationLayerName);
+            enabled_instance_extensions_.emplace_back("VK_EXT_debug_utils");
+            if (HasExtension(instance_exts, "VK_EXT_validation_features") ||
+                HasExtension(layer_exts, "VK_EXT_validation_features")) {
+              enabled_instance_extensions_.emplace_back(
+                  "VK_EXT_validation_features");
+            }
+          }
+        }
+      }
+    }
+  }
+
+  for (const auto& layer : enabled_instance_layers_) {
+    enabled_instance_layer_ptrs_.push_back(layer.c_str());
   }
   for (const auto& ext : enabled_instance_extensions_) {
     enabled_instance_extension_ptrs_.push_back(ext.c_str());
@@ -452,6 +507,11 @@ bool AndroidSurfaceControl::InitializeVulkanOnRasterThreadLocked() {
   VkInstanceCreateInfoCompat instance_info = {};
   instance_info.sType = kVkStructureTypeInstanceCreateInfo;
   instance_info.pApplicationInfo = &app_info;
+  instance_info.enabledLayerCount =
+      static_cast<uint32_t>(enabled_instance_layer_ptrs_.size());
+  instance_info.ppEnabledLayerNames = enabled_instance_layer_ptrs_.empty()
+                                          ? nullptr
+                                          : enabled_instance_layer_ptrs_.data();
   instance_info.enabledExtensionCount =
       static_cast<uint32_t>(enabled_instance_extension_ptrs_.size());
   instance_info.ppEnabledExtensionNames =
@@ -1073,6 +1133,16 @@ bool AndroidSurfaceControl::EnsureSwapchainForViewLocked(
   if (extent_height == 0) {
     extent_height = kDefaultSwapchainHeight;
   }
+  if (caps.maxImageExtent.width >= caps.minImageExtent.width &&
+      caps.maxImageExtent.width > 0) {
+    extent_width = std::clamp(extent_width, caps.minImageExtent.width,
+                              caps.maxImageExtent.width);
+  }
+  if (caps.maxImageExtent.height >= caps.minImageExtent.height &&
+      caps.maxImageExtent.height > 0) {
+    extent_height = std::clamp(extent_height, caps.minImageExtent.height,
+                               caps.maxImageExtent.height);
+  }
 
   // Always set swapchain preTransform to
   // `VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR` matching
@@ -1098,8 +1168,11 @@ bool AndroidSurfaceControl::EnsureSwapchainForViewLocked(
     composite_alpha = kVkCompositeAlphaOpaqueBitKhr;
   }
 
-  const uint32_t min_image_count =
+  uint32_t min_image_count =
       std::max(caps.minImageCount, kMinimumSwapchainImageCount);
+  if (caps.maxImageCount > 0 && min_image_count > caps.maxImageCount) {
+    min_image_count = caps.maxImageCount;
+  }
 
   VkSwapchainCreateInfoKHRCompat swapchain_info = {};
   swapchain_info.sType = kVkStructureTypeSwapchainCreateInfoKhr;
@@ -1109,9 +1182,14 @@ bool AndroidSurfaceControl::EnsureSwapchainForViewLocked(
   swapchain_info.imageColorSpace = chosen_color_space;
   swapchain_info.imageExtent = {extent_width, extent_height};
   swapchain_info.imageArrayLayers = kSingleImageArrayLayer;
-  swapchain_info.imageUsage =
+  uint32_t desired_usage =
       kVkImageUsageColorAttachmentBit | kVkImageUsageTransferSrcBit |
       kVkImageUsageTransferDstBit | kVkImageUsageSampledBit;
+  if (caps.supportedUsageFlags != 0) {
+    desired_usage &= caps.supportedUsageFlags;
+  }
+  swapchain_info.imageUsage =
+      desired_usage != 0 ? desired_usage : kVkImageUsageColorAttachmentBit;
   swapchain_info.imageSharingMode = kVkSharingModeExclusive;
   swapchain_info.preTransform = pre_transform;
   swapchain_info.compositeAlpha = composite_alpha;
@@ -1176,6 +1254,42 @@ bool AndroidSurfaceControl::EnsureSwapchainForViewLocked(
     sem_info.sType = kVkStructureTypeSemaphoreCreateInfo;
     vk_create_semaphore_fn_(vk_device_, &sem_info, nullptr,
                             &state.render_complete_semaphore);
+  }
+  if (vk_create_semaphore_fn_ != nullptr &&
+      state.render_complete_semaphores.size() !=
+          state.swapchain_images.size()) {
+    if (vk_destroy_semaphore_fn_ != nullptr) {
+      for (uint64_t sem : state.render_complete_semaphores) {
+        if (sem != 0) {
+          vk_destroy_semaphore_fn_(vk_device_, sem, nullptr);
+        }
+      }
+    }
+    state.render_complete_semaphores.assign(state.swapchain_images.size(), 0);
+    VkSemaphoreCreateInfoCompat sem_info = {};
+    sem_info.sType = kVkStructureTypeSemaphoreCreateInfo;
+    for (size_t i = 0; i < state.render_complete_semaphores.size(); ++i) {
+      vk_create_semaphore_fn_(vk_device_, &sem_info, nullptr,
+                              &state.render_complete_semaphores[i]);
+    }
+  }
+  if (vk_create_fence_fn_ != nullptr &&
+      state.submit_fences.size() != state.swapchain_images.size()) {
+    if (vk_destroy_fence_fn_ != nullptr) {
+      for (uint64_t f : state.submit_fences) {
+        if (f != 0) {
+          vk_destroy_fence_fn_(vk_device_, f, nullptr);
+        }
+      }
+    }
+    state.submit_fences.assign(state.swapchain_images.size(), 0);
+    state.submit_fence_pending.assign(state.swapchain_images.size(), false);
+    VkFenceCreateInfoCompat fence_info = {};
+    fence_info.sType = kVkStructureTypeFenceCreateInfo;
+    for (size_t i = 0; i < state.submit_fences.size(); ++i) {
+      vk_create_fence_fn_(vk_device_, &fence_info, nullptr,
+                          &state.submit_fences[i]);
+    }
   }
   if (state.command_pool == 0 && vk_create_command_pool_fn_ != nullptr) {
     VkCommandPoolCreateInfoCompat pool_info = {};
@@ -1349,11 +1463,27 @@ bool AndroidSurfaceControl::PresentImageForView(
   last_present_barrier_new_layout_ = barrier.newLayout;
 
   bool signaled_semaphore = false;
+  uint64_t render_sem =
+      (image_index < state.render_complete_semaphores.size() &&
+       state.render_complete_semaphores[image_index] != 0)
+          ? state.render_complete_semaphores[image_index]
+          : state.render_complete_semaphore;
+  uint64_t submit_fence = (image_index < state.submit_fences.size())
+                              ? state.submit_fences[image_index]
+                              : 0;
   if (image_index < state.command_buffers.size() &&
       state.command_buffers[image_index] != nullptr &&
       vk_begin_command_buffer_fn_ != nullptr &&
       vk_cmd_pipeline_barrier_fn_ != nullptr &&
       vk_end_command_buffer_fn_ != nullptr && vk_queue_submit_fn_ != nullptr) {
+    if (submit_fence != 0 && image_index < state.submit_fence_pending.size() &&
+        state.submit_fence_pending[image_index] &&
+        vk_wait_for_fences_fn_ != nullptr && vk_reset_fences_fn_ != nullptr) {
+      vk_wait_for_fences_fn_(vk_device_, 1, &submit_fence, kVkTrue,
+                             kVulkanInfiniteTimeoutNs);
+      vk_reset_fences_fn_(vk_device_, 1, &submit_fence);
+      state.submit_fence_pending[image_index] = false;
+    }
     void* cmd = state.command_buffers[image_index];
     if (vk_reset_command_buffer_fn_ != nullptr) {
       vk_reset_command_buffer_fn_(cmd, 0);
@@ -1370,13 +1500,18 @@ bool AndroidSurfaceControl::PresentImageForView(
         submit_info.sType = kVkStructureTypeSubmitInfo;
         submit_info.commandBufferCount = 1;
         submit_info.pCommandBuffers = &cmd;
-        if (state.render_complete_semaphore != 0) {
+        if (render_sem != 0) {
           submit_info.signalSemaphoreCount = 1;
-          submit_info.pSignalSemaphores = &state.render_complete_semaphore;
+          submit_info.pSignalSemaphores = &render_sem;
           signaled_semaphore = true;
         }
-        if (vk_queue_submit_fn_(vk_queue_, 1, &submit_info, 0) != kVkSuccess) {
+        if (vk_queue_submit_fn_(vk_queue_, 1, &submit_info, submit_fence) !=
+            kVkSuccess) {
           return false;
+        }
+        if (submit_fence != 0 &&
+            image_index < state.submit_fence_pending.size()) {
+          state.submit_fence_pending[image_index] = true;
         }
       }
     }
@@ -1384,9 +1519,9 @@ bool AndroidSurfaceControl::PresentImageForView(
 
   VkPresentInfoKHRCompat present_info = {};
   present_info.sType = kVkStructureTypePresentInfoKhr;
-  if (signaled_semaphore && state.render_complete_semaphore != 0) {
+  if (signaled_semaphore && render_sem != 0) {
     present_info.waitSemaphoreCount = 1;
-    present_info.pWaitSemaphores = &state.render_complete_semaphore;
+    present_info.pWaitSemaphores = &render_sem;
   }
   present_info.swapchainCount = 1;
   present_info.pSwapchains = &state.vk_swapchain;
@@ -1714,6 +1849,10 @@ void AndroidSurfaceControl::DestroyVulkanSwapchainLocked(
   if (vk_device_ == nullptr) {
     state.vk_swapchain = 0;
     state.swapchain_images.clear();
+    state.render_complete_semaphores.clear();
+    state.submit_fences.clear();
+    state.submit_fence_pending.clear();
+    state.command_buffers.clear();
     return;
   }
   if (vk_queue_ != nullptr && vk_queue_wait_idle_fn_ != nullptr) {
@@ -1729,6 +1868,23 @@ void AndroidSurfaceControl::DestroyVulkanSwapchainLocked(
                              nullptr);
     state.render_complete_semaphore = 0;
   }
+  if (vk_destroy_semaphore_fn_ != nullptr) {
+    for (uint64_t sem : state.render_complete_semaphores) {
+      if (sem != 0) {
+        vk_destroy_semaphore_fn_(vk_device_, sem, nullptr);
+      }
+    }
+  }
+  state.render_complete_semaphores.clear();
+  if (vk_destroy_fence_fn_ != nullptr) {
+    for (uint64_t f : state.submit_fences) {
+      if (f != 0) {
+        vk_destroy_fence_fn_(vk_device_, f, nullptr);
+      }
+    }
+  }
+  state.submit_fences.clear();
+  state.submit_fence_pending.clear();
   if (state.hcpp_export_semaphore != 0 && vk_destroy_semaphore_fn_ != nullptr) {
     vk_destroy_semaphore_fn_(vk_device_, state.hcpp_export_semaphore, nullptr);
     state.hcpp_export_semaphore = 0;
