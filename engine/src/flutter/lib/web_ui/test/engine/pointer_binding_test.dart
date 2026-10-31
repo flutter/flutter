@@ -3780,6 +3780,31 @@ void _testClickDebouncer({required PointerBinding Function() getBinding}) {
     expect(semanticsActions, isEmpty);
   });
 
+  // Chrome turns screen reader activation into mouse pointer events and a click
+  // at the center of the element, all dispatched in a single task. Those must
+  // keep producing `SemanticsAction.tap`, otherwise nodes that only handle the
+  // semantics action, such as `Semantics(onTap: ...)`, stop responding.
+  testWithSemantics('Forwards tap action for mouse clicks within a single task', () async {
+    expect(PointerBinding.clickDebouncer.isDebouncing, false);
+
+    final DomElement testElement = createDomElement('flt-semantics');
+    testElement.setAttribute('flt-tappable', '');
+    view.dom.semanticsHost.appendChild(testElement);
+    testElement.dispatchEvent(context.primaryDown());
+    testElement.dispatchEvent(context.primaryUp());
+    expect(PointerBinding.clickDebouncer.isDebouncing, true);
+
+    final DomEvent click = createDomMouseEvent('click', <Object?, Object?>{
+      'clientX': testElement.getBoundingClientRect().x,
+      'clientY': testElement.getBoundingClientRect().y,
+    });
+    PointerBinding.clickDebouncer.onClick(click, view.viewId, 42, true);
+
+    expect(PointerBinding.clickDebouncer.isDebouncing, false);
+    expect(pointerPackets, isEmpty);
+    expect(semanticsActions, <CapturedSemanticsEvent>[(type: ui.SemanticsAction.tap, nodeId: 42)]);
+  });
+
   testWithSemantics('Dedupes click if debouncing but not listening', () async {
     expect(PointerBinding.clickDebouncer.isDebouncing, false);
 
