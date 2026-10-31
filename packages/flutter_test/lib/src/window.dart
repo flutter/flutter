@@ -401,8 +401,27 @@ class TestPlatformDispatcher implements PlatformDispatcher {
     onTextScaleFactorChanged?.call();
   }
 
+  // An explicit [textScaleFactorTestValue] scales every font size by that
+  // factor. Otherwise the wrapped dispatcher scales them, so that its own curve
+  // applies. That curve can be a non-linear table that a debug view metrics
+  // override installs. A fake dispatcher may not implement scaleFontSize at all,
+  // because this method used to need only textScaleFactor. Such a fake gets the
+  // linear scaling it always got.
   @override
-  double scaleFontSize(double unscaledFontSize) => textScaleFactor * unscaledFontSize;
+  double scaleFontSize(double unscaledFontSize) {
+    final double? testValue = _textScaleFactorTestValue;
+    if (testValue != null) {
+      return testValue * unscaledFontSize;
+    }
+    try {
+      return _platformDispatcher.scaleFontSize(unscaledFontSize);
+    } on UnimplementedError {
+      // A Fake test double that does not implement scaleFontSize.
+    } on NoSuchMethodError {
+      // A test double that forwards scaleFontSize to noSuchMethod.
+    }
+    return textScaleFactor * unscaledFontSize;
+  }
 
   @override
   Brightness get platformBrightness =>

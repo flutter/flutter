@@ -17,6 +17,7 @@ import 'package:flutter_tools/src/commands/logs.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/macos/macos_ipad_device.dart';
 import 'package:test/fake.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -64,8 +65,9 @@ void main() {
           toolContext: FakeToolContext(
             os: FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_arm64),
           ),
-          xcode: FakeXcode(),
-          xcdevice: FakeXCDevice(),
+          analytics: const NoOpAnalytics(),
+          appleContext: FakeAppleContext(),
+          templateRenderer: FakeTemplateRenderer(),
         ),
       );
       final command = LogsCommand(toolContext: toolContext);

@@ -531,6 +531,7 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     final ToolContext(
+      :Cache cache,
       :Config config,
       :FileSystem fs,
       :Logger logger,
@@ -851,7 +852,7 @@ end
           outputDir: outputBuildDirectory,
           buildDir: project.dartTool.childDirectory('flutter_build'),
           cacheDir: cache.getRoot(),
-          flutterRootDir: fs.directory(Cache.flutterRoot),
+          flutterRootDir: fs.directory(cache.flutterRoot),
           defines: <String, String>{
             kTargetFile: targetFile,
             kTargetPlatform: TargetPlatform.ios.getName(),
@@ -986,7 +987,7 @@ end
           if (fs.path.extension(podFrameworkName) != '.framework') {
             continue;
           }
-          final String binaryName = toolContext.fs.path.basenameWithoutExtension(podFrameworkName);
+          final String binaryName = fs.path.basenameWithoutExtension(podFrameworkName);
 
           final frameworks = <Directory>[
             podProduct as Directory,

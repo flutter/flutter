@@ -13,9 +13,12 @@ import 'base/config.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'base/platform.dart';
+import 'base/template.dart';
 import 'base/user_messages.dart';
 import 'build_system/build_system.dart';
 import 'build_system/build_targets.dart';
+import 'cache.dart';
+import 'context/apple_context.dart';
 import 'context/tool_context.dart';
 import 'custom_devices/custom_device.dart';
 import 'device.dart';
@@ -31,8 +34,6 @@ import 'macos/macos_device.dart';
 import 'macos/macos_ipad_device.dart';
 import 'macos/macos_workflow.dart';
 import 'macos/xcdevice.dart';
-import 'macos/xcode.dart';
-import 'native_assets.dart';
 import 'tester/flutter_tester.dart';
 import 'web/web_device.dart';
 import 'windows/windows_device.dart';
@@ -44,6 +45,7 @@ class FlutterDeviceManager extends DeviceManager {
     required Analytics analytics,
     required AndroidSdk? Function() androidSdkBuilder,
     required AndroidWorkflow androidWorkflow,
+    required AppleContext appleContext,
     required BuildSystem buildSystem,
     required BuildTargets buildTargets,
     required ExtensionBuildManager extensionBuildManager,
@@ -52,17 +54,17 @@ class FlutterDeviceManager extends DeviceManager {
     required IOSSimulatorUtils iosSimulatorUtils,
     required IOSWorkflow iosWorkflow,
     required MacOSWorkflow macOSWorkflow,
+    required TemplateRenderer templateRenderer,
     required ToolContext toolContext,
     required WindowsWorkflow windowsWorkflow,
     required XCDevice xcDevice,
-    required Xcode xcode,
   }) : super(logger: toolContext.logger) {
     final ToolContext(
       :Artifacts artifacts,
+      :Cache cache,
       :Config config,
-      fs: FileSystem fileSystem,
+      :FileSystem fs,
       :Logger logger,
-      :TestCompilerNativeAssetsBuilder? nativeAssetsBuilder,
       :Platform platform,
       :ProcessManager processManager,
       :UserMessages userMessages,
@@ -73,7 +75,7 @@ class FlutterDeviceManager extends DeviceManager {
         androidSdkBuilder: androidSdkBuilder,
         androidWorkflow: androidWorkflow,
         processManager: processManager,
-        fileSystem: fileSystem,
+        fileSystem: fs,
         platform: platform,
         userMessages: userMessages,
       ),
@@ -84,18 +86,25 @@ class FlutterDeviceManager extends DeviceManager {
         platform: platform,
       ),
       FlutterTesterDevices(
-        toolContext: toolContext,
         analytics: analytics,
         buildSystem: buildSystem,
         buildTargets: buildTargets,
-        nativeAssetsBuilder: nativeAssetsBuilder,
-      ),
-      MacOSDevices(macOSWorkflow: macOSWorkflow, toolContext: toolContext),
-      MacOSDesignedForIPadDevices(
-        iosWorkflow: iosWorkflow,
         toolContext: toolContext,
-        xcdevice: xcDevice,
-        xcode: xcode,
+      ),
+      MacOSDevices(
+        analytics: analytics,
+        appleContext: appleContext,
+        featureFlags: featureFlags,
+        macOSWorkflow: macOSWorkflow,
+        templateRenderer: templateRenderer,
+        toolContext: toolContext,
+      ),
+      MacOSDesignedForIPadDevices(
+        analytics: analytics,
+        appleContext: appleContext,
+        iosWorkflow: iosWorkflow,
+        templateRenderer: templateRenderer,
+        toolContext: toolContext,
       ),
       LinuxDevices(analytics: analytics, featureFlags: featureFlags, toolContext: toolContext),
       WindowsDevices(
@@ -105,7 +114,7 @@ class FlutterDeviceManager extends DeviceManager {
       ),
       WebDevices(
         featureFlags: featureFlags,
-        fileSystem: fileSystem,
+        fileSystem: fs,
         platform: platform,
         processManager: processManager,
         logger: logger,
@@ -120,9 +129,10 @@ class FlutterDeviceManager extends DeviceManager {
       ExtensionDevices(
         extensionBuildManager: extensionBuildManager,
         extensionManager: extensionManager,
-        fileSystem: fileSystem,
+        fileSystem: fs,
         logger: logger,
         artifacts: artifacts,
+        cache: cache,
         config: config,
       ),
     ];

@@ -1602,7 +1602,7 @@ Information about project "Runner":
           version: Version(26, 0, 0),
         );
         xcode = Xcode.test(
-          processManager: fakeProcessManager,
+          toolContext: FakeToolContext.macosHost(processManager: fakeProcessManager),
           xcodeProjectInterpreter: xcodeProjectInterpreter,
         );
       });
@@ -1673,7 +1673,7 @@ Information about project "Runner":
             ..createSync(recursive: true)
             ..writeAsStringSync('name: my_app\n');
 
-          final FlutterProject project = FlutterProject.fromDirectoryTest(projectDir);
+          final FlutterProject project = FlutterProject.fromDirectory(projectDir);
 
           final Directory podXcodeProject =
               project.ios.hostAppRoot.childDirectory('Pods').childDirectory('Pods.xcodeproj')
@@ -1787,7 +1787,7 @@ PODS:
             ..createSync(recursive: true)
             ..writeAsStringSync('name: my_app\n');
 
-          final FlutterProject project = FlutterProject.fromDirectoryTest(projectDir);
+          final FlutterProject project = FlutterProject.fromDirectory(projectDir);
 
           final Directory podXcodeProject =
               project.ios.hostAppRoot.childDirectory('Pods').childDirectory('Pods.xcodeproj')
@@ -1854,7 +1854,7 @@ Build settings for action build and target good_plugin:
             ..createSync(recursive: true)
             ..writeAsStringSync('name: my_app\n');
 
-          final FlutterProject project = FlutterProject.fromDirectoryTest(projectDir);
+          final FlutterProject project = FlutterProject.fromDirectory(projectDir);
 
           final Directory podXcodeProject =
               project.ios.hostAppRoot.childDirectory('Pods').childDirectory('Pods.xcodeproj')
@@ -1929,7 +1929,7 @@ Build settings for action build and target good_plugin:
             ..createSync(recursive: true)
             ..writeAsStringSync('name: my_app\n');
 
-          final FlutterProject project = FlutterProject.fromDirectoryTest(projectDir);
+          final FlutterProject project = FlutterProject.fromDirectory(projectDir);
 
           final Directory podXcodeProject =
               project.ios.hostAppRoot.childDirectory('Pods').childDirectory('Pods.xcodeproj')
@@ -2004,7 +2004,7 @@ Build settings for action build and target bad_plugin:
             version: Version(16, 0, 0),
           );
           xcode = Xcode.test(
-            processManager: fakeProcessManager,
+            toolContext: FakeToolContext.macosHost(processManager: fakeProcessManager),
             xcodeProjectInterpreter: xcodeProjectInterpreter,
           );
           const BuildInfo buildInfo = BuildInfo.debug;
@@ -2014,7 +2014,7 @@ Build settings for action build and target bad_plugin:
             ..createSync(recursive: true)
             ..writeAsStringSync('name: my_app\n');
 
-          final FlutterProject project = FlutterProject.fromDirectoryTest(projectDir);
+          final FlutterProject project = FlutterProject.fromDirectory(projectDir);
 
           final Directory podXcodeProject =
               project.ios.hostAppRoot.childDirectory('Pods').childDirectory('Pods.xcodeproj')
@@ -2664,7 +2664,7 @@ flutter:
           version: Version(26, 0, 0),
         );
         xcode = Xcode.test(
-          processManager: fakeProcessManager,
+          toolContext: FakeToolContext.macosHost(processManager: fakeProcessManager),
           xcodeProjectInterpreter: xcodeProjectInterpreter,
         );
       });

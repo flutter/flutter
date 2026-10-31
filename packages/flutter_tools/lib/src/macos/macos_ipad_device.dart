@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:unified_analytics/unified_analytics.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 import 'package:vm_service/vm_service_io.dart' as vm_service_io;
 
@@ -11,14 +12,15 @@ import '../application_package.dart';
 import '../base/common.dart';
 import '../base/logger.dart';
 import '../base/os.dart';
+import '../base/template.dart';
 import '../build_info.dart';
+import '../context/apple_context.dart';
 import '../context/tool_context.dart';
 import '../convert.dart';
 import '../darwin/darwin.dart';
 import '../desktop_device.dart';
 import '../device.dart';
 import '../device_vm_service_discovery_for_attach.dart';
-import '../globals.dart' as globals;
 import '../ios/application_package.dart';
 import '../ios/ios_workflow.dart';
 import '../ios/mac.dart';
@@ -26,33 +28,34 @@ import '../ios/xcode_debug.dart';
 import '../mdns_discovery.dart';
 import '../project.dart';
 import '../vmservice.dart';
-import 'xcdevice.dart';
-import 'xcode.dart';
 
 /// Represents an ARM macOS target that can run iPad apps.
 ///
 /// https://developer.apple.com/documentation/apple-silicon/running-your-ios-apps-on-macos
 class MacOSDesignedForIPadDevice extends DesktopDevice {
   MacOSDesignedForIPadDevice({
+    required Analytics analytics,
+    required AppleContext appleContext,
+    required this._templateRenderer,
     required super.toolContext,
-    required Xcode xcode,
-    required this._xcdevice,
     XcodeDebug? xcodeDebug,
     MDnsVmServiceDiscovery Function(Set<(int, String)>)? vmServiceDiscoveryFactory,
     Future<vm_service.VmService> Function(Uri)? vmServiceConnector,
-  }) : _xcodeDebug =
+  }) : _analytics = analytics,
+       _appleContext = appleContext,
+       _xcodeDebug =
            xcodeDebug ??
            XcodeDebug(
              logger: toolContext.logger,
              processManager: toolContext.processManager,
-             xcode: xcode,
+             xcode: appleContext.xcode,
              fileSystem: toolContext.fs,
            ),
        _vmServiceDiscoveryFactory =
            vmServiceDiscoveryFactory ??
            ((Set<(int, String)> ignoredServices) => MDnsVmServiceDiscovery(
              logger: toolContext.logger,
-             analytics: globals.analytics,
+             analytics: analytics,
              platform: toolContext.platform,
              ignoredServices: ignoredServices,
            )),
@@ -63,7 +66,9 @@ class MacOSDesignedForIPadDevice extends DesktopDevice {
            )),
        super('mac-designed-for-ipad', platformType: PlatformType.ios, ephemeral: false);
 
-  final XCDevice _xcdevice;
+  final Analytics _analytics;
+  final AppleContext _appleContext;
+  final TemplateRenderer _templateRenderer;
   final XcodeDebug _xcodeDebug;
   final MDnsVmServiceDiscovery Function(Set<(int, String)>) _vmServiceDiscoveryFactory;
   final Future<vm_service.VmService> Function(Uri) _vmServiceConnector;
@@ -147,7 +152,7 @@ class MacOSDesignedForIPadDevice extends DesktopDevice {
     if (debuggingOptions.disablePortPublication && debuggingOptions.debuggingEnabled) {
       throwToolExit('Disabling VM service publication is not supported for $name.');
     }
-    final String? deviceId = await _xcdevice.getMacOSDeviceIdentifier();
+    final String? deviceId = await _appleContext.xcdevice.getMacOSDeviceIdentifier();
     if (deviceId == null) {
       throwToolExit('Unable to find this Mac in Xcode. Run "flutter doctor" to check Xcode.');
     }
@@ -172,10 +177,14 @@ class MacOSDesignedForIPadDevice extends DesktopDevice {
     final FlutterProject project = toolContext.projectFactory.fromDirectory(
       toolContext.fs.currentDirectory,
     );
-    await project.ios.ensureReadyForPlatformSpecificTooling(toolContext: toolContext);
+    await project.ios.ensureReadyForPlatformSpecificTooling(
+      plistParser: _appleContext.plistParser,
+      templateRenderer: _templateRenderer,
+      toolContext: toolContext,
+    );
     final XcodeDebugProject debugProject = await _xcodeDebug.createXcodeProjectWithCustomBundle(
       toolContext.fs.path.absolute(package.deviceBundlePath),
-      templateRenderer: globals.templateRenderer,
+      templateRenderer: _templateRenderer,
       copyApplicationBundle: true,
       buildMode: debuggingOptions.buildInfo.mode,
       debuggerEnabled:
@@ -329,8 +338,14 @@ class MacOSDesignedForIPadDevice extends DesktopDevice {
     String? mainPath,
   ) async {
     final XcodeBuildResult result = await buildXcodeProject(
+      analytics: _analytics,
       app: app,
       buildInfo: buildInfo,
+      cocoaPods: _appleContext.cocoaPods,
+      plistParser: _appleContext.plistParser,
+      templateRenderer: _templateRenderer,
+      xcode: _appleContext.xcode,
+      xcodeProjectInterpreter: _appleContext.xcodeProjectInterpreter,
       targetOverride: mainPath,
       activeArch: CpuArch.arm64,
       destination: _destination,
@@ -339,9 +354,11 @@ class MacOSDesignedForIPadDevice extends DesktopDevice {
     if (!result.success) {
       await diagnoseXcodeBuildFailure(
         result,
-        analytics: globals.analytics,
+        analytics: _analytics,
         fileSystem: toolContext.fs,
         logger: toolContext.logger,
+        processUtils: toolContext.processUtils,
+        xcode: _appleContext.xcode,
         platform: FlutterDarwinPlatform.ios,
         project: app.project.parent,
         device: this,
@@ -354,15 +371,17 @@ class MacOSDesignedForIPadDevice extends DesktopDevice {
 
 class MacOSDesignedForIPadDevices extends PollingDeviceDiscovery {
   MacOSDesignedForIPadDevices({
+    required this._analytics,
+    required this._appleContext,
     required this._iosWorkflow,
+    required this._templateRenderer,
     required ToolContext super.toolContext,
-    required this.xcode,
-    required this.xcdevice,
   }) : super('Mac designed for iPad devices');
 
+  final Analytics _analytics;
+  final AppleContext _appleContext;
   final IOSWorkflow _iosWorkflow;
-  final Xcode xcode;
-  final XCDevice xcdevice;
+  final TemplateRenderer _templateRenderer;
   MacOSDesignedForIPadDevice? _device;
 
   @override
@@ -384,9 +403,10 @@ class MacOSDesignedForIPadDevices extends PollingDeviceDiscovery {
     }
     return <Device>[
       _device ??= MacOSDesignedForIPadDevice(
+        analytics: _analytics,
+        appleContext: _appleContext,
+        templateRenderer: _templateRenderer,
         toolContext: toolContext,
-        xcode: xcode,
-        xcdevice: xcdevice,
       ),
     ];
   }

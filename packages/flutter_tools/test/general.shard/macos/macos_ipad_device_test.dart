@@ -14,13 +14,14 @@ import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/ios/application_package.dart';
 import 'package:flutter_tools/src/ios/ios_workflow.dart';
+import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:flutter_tools/src/ios/xcode_debug.dart';
 import 'package:flutter_tools/src/macos/macos_ipad_device.dart';
 import 'package:flutter_tools/src/macos/xcdevice.dart';
-import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:flutter_tools/src/mdns_discovery.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:test/fake.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../../src/common.dart';
@@ -31,8 +32,9 @@ void main() {
   group('MacOSDesignedForIPadDevices', () {
     testWithoutContext('does not support non-macOS platforms', () async {
       final discoverer = MacOSDesignedForIPadDevices(
-        xcode: FakeXcode(),
-        xcdevice: FakeXCDevice(),
+        analytics: const NoOpAnalytics(),
+        appleContext: FakeAppleContext(),
+        templateRenderer: FakeTemplateRenderer(),
         iosWorkflow: FakeIOSWorkflow(canListDevices: true),
         toolContext: FakeToolContext(
           fs: MemoryFileSystem.test(),
@@ -48,8 +50,9 @@ void main() {
 
     testWithoutContext('discovery is enabled for ordinary commands', () async {
       final discoverer = MacOSDesignedForIPadDevices(
-        xcode: FakeXcode(),
-        xcdevice: FakeXCDevice(),
+        analytics: const NoOpAnalytics(),
+        appleContext: FakeAppleContext(),
+        templateRenderer: FakeTemplateRenderer(),
         iosWorkflow: FakeIOSWorkflow(canListDevices: true),
         toolContext: FakeToolContext(
           fs: MemoryFileSystem.test(),
@@ -67,8 +70,9 @@ void main() {
 
     testWithoutContext('no device on x86', () async {
       final discoverer = MacOSDesignedForIPadDevices(
-        xcode: FakeXcode(),
-        xcdevice: FakeXCDevice(),
+        analytics: const NoOpAnalytics(),
+        appleContext: FakeAppleContext(),
+        templateRenderer: FakeTemplateRenderer(),
         iosWorkflow: FakeIOSWorkflow(canListDevices: true),
         toolContext: FakeToolContext(
           fs: MemoryFileSystem.test(),
@@ -86,8 +90,9 @@ void main() {
 
     testWithoutContext('no device on when iOS development off', () async {
       final discoverer = MacOSDesignedForIPadDevices(
-        xcode: FakeXcode(),
-        xcdevice: FakeXCDevice(),
+        analytics: const NoOpAnalytics(),
+        appleContext: FakeAppleContext(),
+        templateRenderer: FakeTemplateRenderer(),
         iosWorkflow: FakeIOSWorkflow(canListDevices: false),
         toolContext: FakeToolContext(
           fs: MemoryFileSystem.test(),
@@ -105,8 +110,9 @@ void main() {
 
     testWithoutContext('reuses the device across polls and refreshes', () async {
       final discoverer = MacOSDesignedForIPadDevices(
-        xcode: FakeXcode(),
-        xcdevice: FakeXCDevice(),
+        analytics: const NoOpAnalytics(),
+        appleContext: FakeAppleContext(),
+        templateRenderer: FakeTemplateRenderer(),
         iosWorkflow: FakeIOSWorkflow(canListDevices: true),
         toolContext: FakeToolContext(
           fs: MemoryFileSystem.test(),
@@ -157,8 +163,9 @@ void main() {
       connections = <FakeMacVmService>[];
       connectedServices = <FakeMacVmService>[];
       device = MacOSDesignedForIPadDevice(
-        xcode: FakeXcode(),
-        xcdevice: xcdevice,
+        analytics: const NoOpAnalytics(),
+        appleContext: FakeAppleContext(xcdevice: xcdevice),
+        templateRenderer: FakeTemplateRenderer(),
         xcodeDebug: debug,
         vmServiceDiscoveryFactory: (Set<(int, String)> ignored) {
           ignoredServices.add(Set<(int, String)>.of(ignored));
@@ -332,8 +339,9 @@ void main() {
 
   testWithoutContext('MacOSDesignedForIPadDevice properties', () async {
     final device = MacOSDesignedForIPadDevice(
-      xcode: FakeXcode(),
-      xcdevice: FakeXCDevice(),
+      analytics: const NoOpAnalytics(),
+      appleContext: FakeAppleContext(),
+      templateRenderer: FakeTemplateRenderer(),
       toolContext: FakeToolContext(
         fs: MemoryFileSystem.test(),
         logger: BufferLogger.test(),
@@ -385,10 +393,6 @@ class FakeApplicationPackage extends Fake implements ApplicationPackage {}
 
 class FakeIOSApp extends Fake implements IOSApp {}
 
-class FakeXcode extends Fake implements Xcode {}
-
-class FakeXCDevice extends Fake implements XCDevice {}
-
 class FakeMacXCDevice extends Fake implements XCDevice {
   String? identifier = 'host-mac-id';
   @override
@@ -420,7 +424,11 @@ class FakeMacIOSProject extends Fake implements IosProject {
   FakeMacIOSProject(this.fs);
   final FileSystem fs;
   @override
-  Future<void> ensureReadyForPlatformSpecificTooling({required ToolContext toolContext}) async {}
+  Future<void> ensureReadyForPlatformSpecificTooling({
+    required PlistParser plistParser,
+    required TemplateRenderer templateRenderer,
+    required ToolContext toolContext,
+  }) async {}
   @override
   File get lldbInitFile => fs.file('/ios/Flutter/ephemeral/flutter_lldbinit');
 }

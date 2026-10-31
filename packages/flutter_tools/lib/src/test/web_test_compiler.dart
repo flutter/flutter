@@ -101,6 +101,7 @@ class WebTestCompiler {
   }) async {
     final ToolContext(
       :Artifacts artifacts,
+      :Cache cache,
       :Config config,
       :FileSystem fs,
       :Logger logger,
@@ -108,7 +109,7 @@ class WebTestCompiler {
       :ProcessManager processManager,
       :ShutdownHooks shutdownHooks,
     ) = _toolContext;
-    final LanguageVersion languageVersion = currentLanguageVersion(fs, Cache.flutterRoot!);
+    final LanguageVersion languageVersion = currentLanguageVersion(fs, cache.flutterRoot);
 
     final Directory outputDirectory = fs.directory(testOutputDir)..createSync(recursive: true);
     final File testFile = await _generateTestEntrypoint(
@@ -180,6 +181,7 @@ class WebTestCompiler {
   }) async {
     final ToolContext(
       :Artifacts artifacts,
+      :Cache cache,
       :FileSystem fs,
       :Logger logger,
       :ProcessManager processManager,
@@ -189,7 +191,7 @@ class WebTestCompiler {
       testFiles: testFiles,
       projectDirectory: projectDirectory,
       outputDirectory: outputDirectory,
-      languageVersion: currentLanguageVersion(fs, Cache.flutterRoot!),
+      languageVersion: currentLanguageVersion(fs, cache.flutterRoot),
     );
 
     final String platformBinariesPath = artifacts

@@ -32,6 +32,7 @@ template("impeller_shaders_gles") {
     shaders = invoker.shaders
     sl_file_extension = "gles"
     require_framebuffer_fetch = require_framebuffer_fetch
+    minify = !impeller_debug
     if (defined(invoker.gles_language_version)) {
       gles_language_version = invoker.gles_language_version
     }
