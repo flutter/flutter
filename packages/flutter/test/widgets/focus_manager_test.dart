@@ -483,6 +483,61 @@ void main() {
       expect(nodeB.hasPrimaryFocus, isTrue);
       expect(nodeA.hasPrimaryFocus, isFalse);
     }, variant: TargetPlatformVariant.desktop());
+
+    // Regression test for https://github.com/flutter/flutter/issues/192783
+    testWidgets('Detached FocusNode ancestors list is empty', (WidgetTester tester) async {
+      final outer = FocusNode(debugLabel: 'outer');
+      final inner = FocusNode(debugLabel: 'inner');
+      addTearDown(outer.dispose);
+      addTearDown(inner.dispose);
+
+      await tester.pumpWidget(
+        Focus(
+          focusNode: outer,
+          child: Focus(focusNode: inner, child: const SizedBox()),
+        ),
+      );
+      expect(inner.parent, equals(outer));
+      expect(inner.ancestors, contains(outer));
+
+      await tester.pumpWidget(Focus(focusNode: outer, child: const SizedBox()));
+
+      expect(inner.parent, isNull);
+      expect(inner.ancestors, isEmpty);
+    });
+
+    // Regression test for https://github.com/flutter/flutter/issues/192783
+    testWidgets('Ancestors of children of detached FocusNode are empty', (
+      WidgetTester tester,
+    ) async {
+      final first = FocusNode(debugLabel: 'first');
+      final second = FocusNode(debugLabel: 'second');
+      final third = FocusNode(debugLabel: 'third');
+      addTearDown(first.dispose);
+      addTearDown(second.dispose);
+      addTearDown(third.dispose);
+
+      await tester.pumpWidget(
+        Focus(
+          focusNode: first,
+          child: Focus(
+            focusNode: second,
+            child: Focus(focusNode: third, child: const SizedBox()),
+          ),
+        ),
+      );
+
+      expect(second.ancestors, contains(first));
+      expect(third.ancestors, contains(first));
+      expect(third.ancestors, contains(second));
+
+      await tester.pumpWidget(const SizedBox());
+
+      expect(second.parent, isNull);
+      expect(second.ancestors, isEmpty);
+      expect(third.parent, isNull);
+      expect(third.ancestors, isEmpty);
+    });
   });
 
   group(FocusScopeNode, () {
