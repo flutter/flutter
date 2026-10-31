@@ -178,12 +178,49 @@ void main() {
   test('BoxShadow toString test', () {
     expect(
       const BoxShadow(blurRadius: 4.0).toString(),
-      equals('BoxShadow(${const Color(0xff000000)}, Offset(0.0, 0.0), 4.0, 0.0, BlurStyle.normal)'),
+      equals(
+        'BoxShadow(${const Color(0xff000000)}, Offset(0.0, 0.0), 4.0, 0.0, BlurStyle.normal, inset: false)',
+      ),
     );
     expect(
       const BoxShadow(blurRadius: 4.0, blurStyle: BlurStyle.solid).toString(),
-      equals('BoxShadow(${const Color(0xff000000)}, Offset(0.0, 0.0), 4.0, 0.0, BlurStyle.solid)'),
+      equals(
+        'BoxShadow(${const Color(0xff000000)}, Offset(0.0, 0.0), 4.0, 0.0, BlurStyle.solid, inset: false)',
+      ),
     );
+    expect(
+      const BoxShadow(blurRadius: 4.0, inset: true).toString(),
+      equals(
+        'BoxShadow(${const Color(0xff000000)}, Offset(0.0, 0.0), 4.0, 0.0, BlurStyle.normal, inset: true)',
+      ),
+    );
+  });
+
+  testWidgets('inset BoxShadow paints below the child', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              color: Color(0xFF00FF00),
+              boxShadow: <BoxShadow>[BoxShadow(blurRadius: 0, inset: true)],
+            ),
+            child: SizedBox(width: 30, height: 30, child: ColoredBox(color: Color(0xFF0000FF))),
+          ),
+        ),
+      ),
+    );
+    final RenderBox box = tester.renderObject<RenderBox>(find.byType(DecoratedBox));
+    final TestRecordingCanvas canvas = TestRecordingCanvas();
+    box.paint(TestRecordingPaintingContext(canvas), Offset.zero);
+    final List<Symbol> calls = canvas.invocations
+        .map((RecordedInvocation call) => call.invocation.memberName)
+        .toList();
+    final int clip = calls.indexOf(#clipRRect);
+    final int child = calls.lastIndexOf(#drawRect);
+    expect(clip, greaterThanOrEqualTo(0));
+    expect(child, greaterThan(clip));
   });
 
   testWidgets('BoxShadow BoxStyle.solid', (WidgetTester tester) async {
