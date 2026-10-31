@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:code_assets/code_assets.dart';
 import 'package:data_assets/data_assets.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
@@ -131,6 +132,89 @@ void main() {
       );
     },
   );
+
+  for (final platform in <TargetPlatform>[TargetPlatform.ios, TargetPlatform.darwin]) {
+    final isIOS = platform == TargetPlatform.ios;
+    final platformName = isIOS ? 'iOS' : 'macOS';
+    final String deploymentTargetDefine = isIOS ? kIosDeploymentTarget : kMacOSDeploymentTarget;
+    final minimumVersion = isIOS ? 15 : 13;
+
+    for (final (String? deploymentTarget, AppleVersion expectedVersion)
+        in <(String?, AppleVersion)>[
+          (null, AppleVersion(minimumVersion)),
+          ('${minimumVersion + 2}.2.1', AppleVersion(minimumVersion + 2, minor: 2, patch: 1)),
+        ]) {
+      testUsingContext(
+        'NativeAssets $platformName deployment target $deploymentTarget reaches build and link hooks',
+        () async {
+          writePackageConfigFiles(directory: iosEnvironment.projectDir, mainLibName: 'my_app');
+          iosEnvironment.defines.addAll(<String, String>{
+            kTargetPlatform: platform.getName(),
+            if (!isIOS) kDarwinArchs: 'arm64',
+            deploymentTargetDefine: ?deploymentTarget,
+          });
+          void expectDeploymentVersion(CodeConfig config) {
+            expect(
+              isIOS ? config.iOS.deploymentVersion : config.macOS.deploymentVersion,
+              expectedVersion,
+            );
+          }
+
+          final buildRunner = FakeFlutterNativeAssetsBuildRunner(
+            packagesWithNativeAssetsResult: <String>['foo'],
+            onBuild: (input) {
+              expectDeploymentVersion(input.config.code);
+              return const FakeFlutterNativeAssetsBuilderResult();
+            },
+            onLink: (input) {
+              expectDeploymentVersion(input.config.code);
+              return const FakeFlutterNativeAssetsBuilderResult();
+            },
+          );
+          await BuildHooks(buildRunner: buildRunner).build(iosEnvironment);
+          await LinkHooks(buildRunner: buildRunner).build(iosEnvironment);
+          expect(buildRunner.buildInvocations, 1);
+          expect(buildRunner.linkInvocations, 1);
+        },
+        overrides: <Type, Generator>{
+          FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
+        },
+      );
+    }
+
+    const deploymentTarget = 'invalid';
+    for (final linking in <bool>[false, true]) {
+      final hookStage = linking ? 'link' : 'build';
+      testUsingContext(
+        'NativeAssets rejects $platformName deployment target $deploymentTarget before running $hookStage hooks',
+        () async {
+          writePackageConfigFiles(directory: iosEnvironment.projectDir, mainLibName: 'my_app');
+          iosEnvironment.defines.addAll(<String, String>{
+            kTargetPlatform: platform.getName(),
+            if (!isIOS) kDarwinArchs: 'arm64',
+          });
+          final buildRunner = FakeFlutterNativeAssetsBuildRunner(
+            packagesWithNativeAssetsResult: <String>['foo'],
+          );
+          if (linking) {
+            await BuildHooks(buildRunner: buildRunner).build(iosEnvironment);
+          }
+          iosEnvironment.defines[deploymentTargetDefine] = deploymentTarget;
+          await expectLater(
+            linking
+                ? LinkHooks(buildRunner: buildRunner).build(iosEnvironment)
+                : BuildHooks(buildRunner: buildRunner).build(iosEnvironment),
+            throwsToolExit(message: 'Invalid $platformName deployment target'),
+          );
+          expect(buildRunner.buildInvocations, linking ? 1 : 0);
+          expect(buildRunner.linkInvocations, 0);
+        },
+        overrides: <Type, Generator>{
+          FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
+        },
+      );
+    }
+  }
 
   // The NativeAssets Target should _always_ be creating a yaml an d file.
   // The caching logic depends on this.
