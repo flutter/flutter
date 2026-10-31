@@ -547,6 +547,7 @@ class RenderSliverVariedExtentList extends RenderSliverFixedExtentBoxAdaptor {
 
   final List<double> _itemExtentCache = <double>[];
   final List<double> _itemOffsetCache = <double>[0.0];
+  int? _endIndex;
 
   /// Clears the cached item extents.
   ///
@@ -555,16 +556,21 @@ class RenderSliverVariedExtentList extends RenderSliverFixedExtentBoxAdaptor {
     _itemExtentCache.clear();
     _itemOffsetCache.clear();
     _itemOffsetCache.add(0.0);
+    _endIndex = null;
   }
 
   double? _getOrCreateItemOffset(int index) {
     if (index < _itemOffsetCache.length) {
       return _itemOffsetCache[index];
     }
+    if (_endIndex != null && index > _endIndex!) {
+      return null;
+    }
     final SliverLayoutDimensions dimensions = layoutDimensions;
     for (int i = _itemExtentCache.length; i < index; i++) {
       final double? extent = itemExtentBuilder(i, dimensions);
       if (extent == null) {
+        _endIndex = i;
         return null;
       }
       _itemExtentCache.add(extent);
@@ -590,13 +596,6 @@ class RenderSliverVariedExtentList extends RenderSliverFixedExtentBoxAdaptor {
   ItemExtentBuilder _itemExtentBuilder;
   set itemExtentBuilder(ItemExtentBuilder value) {
     _itemExtentBuilder = value;
-    _clearItemExtentCache();
-    markNeedsLayout();
-  }
-
-  @override
-  void reassemble() {
-    super.reassemble();
     _clearItemExtentCache();
     markNeedsLayout();
   }

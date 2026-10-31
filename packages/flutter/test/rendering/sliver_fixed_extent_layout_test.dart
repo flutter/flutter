@@ -722,6 +722,47 @@ void main() {
     expect(maxIndex, 2);
     expect(list.itemExtentOfCalls, <int>[0, 1, 2]);
   });
+
+  test(
+    'RenderSliverVariedExtentList memoizes terminal index when itemExtentBuilder returns null',
+    () {
+      final children = List<RenderBox>.generate(
+        5,
+        (index) => RenderSizedBox(const Size(400.0, 100.0)),
+      );
+      final childManager = TestRenderSliverBoxChildManager(children: children);
+
+      final calledIndices = <int>[];
+      final RenderSliverVariedExtentList list = childManager.createRenderSliverVariedExtentList((
+        int index,
+        SliverLayoutDimensions dimensions,
+      ) {
+        calledIndices.add(index);
+        if (index >= 5) {
+          return null;
+        }
+        return 100.0;
+      });
+
+      final root = RenderViewport(
+        crossAxisDirection: AxisDirection.right,
+        offset: ViewportOffset.zero(),
+        cacheExtent: 0,
+        children: <RenderSliver>[list],
+      );
+      layout(root);
+
+      // Queries beyond the terminal index within the same layout pass
+      // should short-circuit and not invoke the builder again.
+      expect(list.indexToLayoutOffset(100.0, 10), 500.0);
+      expect(list.itemExtentOf(5), isNull);
+      expect(list.itemExtentOf(10), isNull);
+
+      // Each evaluated index, including the terminal index 5, must be called at most once.
+      expect(calledIndices.toSet().length, calledIndices.length);
+      expect(calledIndices, <int>[0, 1, 2, 3, 4, 5]);
+    },
+  );
 }
 
 int testGetMaxChildIndexForScrollOffset(double scrollOffset, double itemExtent) {
