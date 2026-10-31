@@ -36,8 +36,6 @@ anything on the web).
 
 ### Snippet Tool
 
-![Code snippet image](assets/code_snippet.png)
-
 The code `snippet` tool generates a block containing a description and example
 code. Here is an example of the code `snippet` tool in use:
 
@@ -103,8 +101,6 @@ You can assume that the entire Flutter framework and most common
 `dart:ui` as `ui`.
 
 ### Sample Tool
-
-![Code sample image](assets/code_sample.png)
 
 The code `sample` and `dartpad` tools can expand sample code into full Flutter
 applications. These sample applications can be directly copied and used to
