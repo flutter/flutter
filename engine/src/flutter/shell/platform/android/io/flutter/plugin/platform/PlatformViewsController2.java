@@ -126,6 +126,10 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
         mainHandler.sendMessageAtFrontOfQueue(msg);
       };
 
+  // Platform-thread only: tracks the child index of the last platform view displayed in the
+  // current frame so bringToFront() is only called when z-order actually changes.
+  private int lastDisplayedChildIndex = -1;
+
   private Surface overlayerSurface = null;
   private SurfaceControl overlaySurfaceControl = null;
 
@@ -605,14 +609,27 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
     final FlutterMutatorView parentView = platformViewParent.get(viewId);
     parentView.readyToDisplay(mutatorsStack, x, y, width, height);
     parentView.setVisibility(View.VISIBLE);
-    parentView.bringToFront();
+    final ViewGroup mutatorParent = (ViewGroup) parentView.getParent();
+    if (mutatorParent != null) {
+      final int childIndex = mutatorParent.indexOfChild(parentView);
+      if (childIndex < lastDisplayedChildIndex) {
+        parentView.bringToFront();
+        lastDisplayedChildIndex = mutatorParent.getChildCount() - 1;
+      } else {
+        lastDisplayedChildIndex = childIndex;
+      }
+    }
 
-    final FrameLayout.LayoutParams layoutParams =
-        new FrameLayout.LayoutParams(viewWidth, viewHeight, Gravity.LEFT | Gravity.TOP);
     final View view = platformViews.get(viewId).getView();
     if (view != null) {
-      view.setLayoutParams(layoutParams);
-      view.bringToFront();
+      final ViewGroup.LayoutParams currentParams = view.getLayoutParams();
+      if (!(currentParams instanceof FrameLayout.LayoutParams)
+          || currentParams.width != viewWidth
+          || currentParams.height != viewHeight
+          || ((FrameLayout.LayoutParams) currentParams).gravity != (Gravity.LEFT | Gravity.TOP)) {
+        view.setLayoutParams(
+            new FrameLayout.LayoutParams(viewWidth, viewHeight, Gravity.LEFT | Gravity.TOP));
+      }
       if (view instanceof SurfaceView) {
         maybeApplyClipToSurfaceView((SurfaceView) view, x, y, width, height, mutatorsStack, viewId);
       }
@@ -787,6 +804,7 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
   @UiThread
   @RequiresApi(API_LEVELS.API_34)
   private void commitActiveFrame() {
+    lastDisplayedChildIndex = -1;
     final SurfaceControl.Transaction platformTx = activePlatformTransaction;
     activePlatformTransaction = null;
 
@@ -903,6 +921,7 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
   @UiThread
   @RequiresApi(API_LEVELS.API_34)
   private void dropTransactions() {
+    lastDisplayedChildIndex = -1;
     frameStagedForTraversal = false;
     choreographerCallbackFired = false;
     pendingViewOps.clear();
