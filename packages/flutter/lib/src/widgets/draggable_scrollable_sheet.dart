@@ -873,6 +873,7 @@ class _DraggableScrollableSheetScrollPosition extends ScrollPositionWithSingleCo
   });
 
   VoidCallback? _dragCancelCallback;
+  VoidCallback? _holdCancelCallback;
   final _DraggableSheetExtent Function() getExtent;
   final Set<AnimationController> _ballisticControllers = <AnimationController>{};
   bool get listShouldScroll => pixels > 0.0;
@@ -883,6 +884,7 @@ class _DraggableScrollableSheetScrollPosition extends ScrollPositionWithSingleCo
   void absorb(ScrollPosition other) {
     super.absorb(other);
     assert(_dragCancelCallback == null);
+    assert(_holdCancelCallback == null);
 
     if (other is! _DraggableScrollableSheetScrollPosition) {
       return;
@@ -891,6 +893,11 @@ class _DraggableScrollableSheetScrollPosition extends ScrollPositionWithSingleCo
     if (other._dragCancelCallback != null) {
       _dragCancelCallback = other._dragCancelCallback;
       other._dragCancelCallback = null;
+    }
+
+    if (other._holdCancelCallback != null) {
+      _holdCancelCallback = other._holdCancelCallback;
+      other._holdCancelCallback = null;
     }
   }
 
@@ -946,8 +953,14 @@ class _DraggableScrollableSheetScrollPosition extends ScrollPositionWithSingleCo
       return;
     }
     // Scrollable expects that we will dispose of its current _dragCancelCallback
+    // or _holdCancelCallback when we manage ballistic simulations on our own.
+    // Without this, interrupting a snap animation with a tap and releasing
+    // without dragging leaves the HoldScrollActivity active, causing Scrollable
+    // to fail its assert(_hold == null) check in _handleDragCancel.
     _dragCancelCallback?.call();
     _dragCancelCallback = null;
+    _holdCancelCallback?.call();
+    _holdCancelCallback = null;
 
     late final Simulation simulation;
     if (extent.snap) {
@@ -1017,6 +1030,14 @@ class _DraggableScrollableSheetScrollPosition extends ScrollPositionWithSingleCo
     // Save this so we can call it later if we have to [goBallistic] on our own.
     _dragCancelCallback = dragCancelCallback;
     return super.drag(details, dragCancelCallback);
+  }
+
+  @override
+  ScrollHoldController hold(VoidCallback holdCancelCallback) {
+    // Save this so we can call it later if we have to [goBallistic] on our own,
+    // to snap the sheet without transitioning through a standard BallisticScrollActivity.
+    _holdCancelCallback = holdCancelCallback;
+    return super.hold(holdCancelCallback);
   }
 }
 
