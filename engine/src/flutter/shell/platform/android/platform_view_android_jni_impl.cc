@@ -666,18 +666,22 @@ static jboolean FlutterTextUtilsIsRegionalIndicator(JNIEnv* env,
   return u_hasBinaryProperty(codePoint, UProperty::UCHAR_REGIONAL_INDICATOR);
 }
 
-static void LoadLoadingUnitFailure(intptr_t loading_unit_id,
+static void LoadLoadingUnitFailure(jlong shell_holder,
+                                   intptr_t loading_unit_id,
                                    const std::string& message,
                                    bool transient) {
-  // TODO(garyq): Implement
+  ANDROID_SHELL_HOLDER->GetPlatformView()->LoadDartDeferredLibraryError(
+      loading_unit_id, message, transient);
 }
 
 static void DeferredComponentInstallFailure(JNIEnv* env,
                                             jobject obj,
+                                            jlong shell_holder,
                                             jint jLoadingUnitId,
                                             jstring jError,
                                             jboolean jTransient) {
-  LoadLoadingUnitFailure(static_cast<intptr_t>(jLoadingUnitId),
+  LoadLoadingUnitFailure(shell_holder,
+                         static_cast<intptr_t>(jLoadingUnitId),
                          fml::jni::JavaStringToString(env, jError),
                          static_cast<bool>(jTransient));
 }
@@ -717,8 +721,9 @@ static void LoadDartDeferredLibrary(JNIEnv* env,
       search_paths,
       [](const std::string& path) { return ::dlopen(path.c_str(), RTLD_NOW); });
   if (handle == nullptr) {
-    LoadLoadingUnitFailure(loading_unit_id,
-                           "No lib .so found for provided search paths.", true);
+    LoadLoadingUnitFailure(
+        shell_holder, loading_unit_id,
+        "No lib .so found for provided search paths.", true);
     return;
   }
   fml::RefPtr<fml::NativeLibrary> native_lib =
@@ -944,7 +949,7 @@ bool RegisterApi(JNIEnv* env) {
       },
       {
           .name = "nativeDeferredComponentInstallFailure",
-          .signature = "(ILjava/lang/String;Z)V",
+          .signature = "(JILjava/lang/String;Z)V",
           .fnPtr = reinterpret_cast<void*>(&DeferredComponentInstallFailure),
       },
       {
