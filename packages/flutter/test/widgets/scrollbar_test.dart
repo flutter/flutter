@@ -4362,4 +4362,192 @@ The provided ScrollController cannot be shared by multiple ScrollView widgets.''
     await tester.pump();
     expect(scrollbarCursor(), SystemMouseCursors.grab);
   });
+
+  testWidgets('RawScrollbar without a controller follows the ScrollView it wraps', (
+    WidgetTester tester,
+  ) async {
+    // Regression test for https://github.com/flutter/flutter/issues/175012
+    // A scrollbar that inherits a PrimaryScrollController must still paint for
+    // the scroll view it wraps, even when that controller is attached to a
+    // different scroll view.
+    final inner = ScrollController();
+    addTearDown(inner.dispose);
+    final primary = ScrollController();
+    addTearDown(primary.dispose);
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: PrimaryScrollController(
+            controller: primary,
+            child: Column(
+              children: <Widget>[
+                // Attaches to the PrimaryScrollController above.
+                SizedBox(
+                  height: 200.0,
+                  child: ListView(
+                    primary: true,
+                    children: const <Widget>[SizedBox(height: 4000.0)],
+                  ),
+                ),
+                SizedBox(
+                  height: 200.0,
+                  child: RawScrollbar(
+                    // No controller: the PrimaryScrollController is inherited,
+                    // but it belongs to the list above.
+                    child: ListView(
+                      controller: inner,
+                      children: const <Widget>[SizedBox(height: 4000.0)],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // Scrolling the wrapped list fades its own scrollbar in.
+    await tester.drag(find.byType(RawScrollbar), const Offset(0.0, -20.0));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+
+    expect(inner.offset, greaterThan(0.0));
+    expect(
+      find.byType(RawScrollbar),
+      paints..rect(rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 200.0)),
+    );
+  });
+
+  testWidgets('RawScrollbar ignores metrics from a sibling ScrollView', (
+    WidgetTester tester,
+  ) async {
+    // Regression test for https://github.com/flutter/flutter/issues/175012
+    // A sibling ScrollView shares the scrollbar's notification scope. Its
+    // metrics must not be applied to a scrollbar that is attached to a
+    // different ScrollView, which would otherwise leave the thumb unpainted
+    // until the user scrolled.
+    final scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: RawScrollbar(
+            thumbVisibility: true,
+            controller: scrollController,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                SizedBox(
+                  height: 300.0,
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    controller: scrollController,
+                    child: const SizedBox(width: 1600.0),
+                  ),
+                ),
+                // Scrolls along the same axis, is not attached to the
+                // scrollbar's controller, and has nothing to scroll. This is
+                // the PaginatedDataTable footer scenario.
+                const SizedBox(
+                  height: 300.0,
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: SizedBox(width: 100.0),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // The thumb is painted without any user interaction, and its extent is
+    // derived from the scrollable child rather than from the sibling.
+    expect(scrollController.offset, 0.0);
+    expect(
+      find.byType(RawScrollbar),
+      paints
+        ..rect(rect: const Rect.fromLTRB(0.0, 594.0, 800.0, 600.0))
+        ..rect(rect: const Rect.fromLTRB(0.0, 594.0, 400.0, 600.0)),
+    );
+  });
+
+  testWidgets('RawScrollbar keeps tracking its own ScrollView after a sibling scrolls', (
+    WidgetTester tester,
+  ) async {
+    // Regression test for https://github.com/flutter/flutter/issues/175012
+    // The sibling here can scroll, so it keeps sending notifications after the
+    // first frame. They must not move this scrollbar's thumb.
+    final scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
+    final siblingController = ScrollController();
+    addTearDown(siblingController.dispose);
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: RawScrollbar(
+            thumbVisibility: true,
+            controller: scrollController,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                SizedBox(
+                  height: 300.0,
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    controller: scrollController,
+                    child: const SizedBox(width: 1600.0),
+                  ),
+                ),
+                SizedBox(
+                  height: 300.0,
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    controller: siblingController,
+                    child: const SizedBox(width: 3200.0),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // Scrolling the ScrollView this scrollbar is attached to moves the thumb.
+    scrollController.jumpTo(100.0);
+    await tester.pumpAndSettle();
+    const trackRect = Rect.fromLTRB(0.0, 594.0, 800.0, 600.0);
+    const thumbRect = Rect.fromLTRB(50.0, 594.0, 450.0, 600.0);
+    expect(
+      find.byType(RawScrollbar),
+      paints
+        ..rect(rect: trackRect)
+        ..rect(rect: thumbRect),
+    );
+
+    // Scrolling the sibling leaves the thumb where it is.
+    siblingController.jumpTo(800.0);
+    await tester.pumpAndSettle();
+    expect(scrollController.offset, 100.0);
+    expect(
+      find.byType(RawScrollbar),
+      paints
+        ..rect(rect: trackRect)
+        ..rect(rect: thumbRect),
+    );
+  });
 }
