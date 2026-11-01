@@ -320,4 +320,99 @@ void main() {
     expect(tester.takeException(), isNull);
     expect(tester.state<ScrollableState>(find.byType(Scrollable)).position.pixels, 0.0);
   });
+
+  testWidgets('$ScrollPosition asserts if an activity changes the scroll offset in correctBy', (
+    WidgetTester tester,
+  ) async {
+    final controller = ScrollController();
+    addTearDown(controller.dispose);
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: ListView.builder(
+          controller: controller,
+          itemExtent: 100.0,
+          itemBuilder: (context, index) => Text('$index'),
+        ),
+      ),
+    );
+
+    // Start an activity that changes the scroll offset when it receives a correction.
+    final ScrollPosition position = controller.position;
+    position.beginActivity(
+      _CorrectByCallbackActivity(position as ScrollActivityDelegate, (delegate, correction) {
+        delegate.setPixels(500.0);
+      }),
+    );
+
+    // Correct the scroll offset directly, as a viewport does during layout.
+    expect(
+      () => position.correctBy(10.0),
+      throwsA(
+        isAssertionError.having(
+          (error) => error.message,
+          'message',
+          '_CorrectByCallbackActivity.correctBy() changed the scroll offset.',
+        ),
+      ),
+    );
+  });
+
+  testWidgets('$ScrollPosition asserts if an activity starts another activity in correctBy', (
+    WidgetTester tester,
+  ) async {
+    final controller = ScrollController();
+    addTearDown(controller.dispose);
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: ListView.builder(
+          controller: controller,
+          itemExtent: 100.0,
+          itemBuilder: (context, index) => Text('$index'),
+        ),
+      ),
+    );
+
+    // Start an activity that starts another activity when it receives a correction.
+    final ScrollPosition position = controller.position;
+    position.beginActivity(
+      _CorrectByCallbackActivity(position as ScrollActivityDelegate, (delegate, correction) {
+        delegate.goIdle();
+      }),
+    );
+
+    // Correct the scroll offset directly, as a viewport does during layout.
+    expect(
+      () => position.correctBy(10.0),
+      throwsA(
+        isAssertionError.having(
+          (error) => error.message,
+          'message',
+          '_CorrectByCallbackActivity.correctBy() started another activity.',
+        ),
+      ),
+    );
+  });
+}
+
+/// A scroll activity that calls [onCorrectBy] with its [delegate] and the correction when it
+/// receives a scroll offset correction.
+class _CorrectByCallbackActivity extends ScrollActivity {
+  _CorrectByCallbackActivity(super.delegate, this.onCorrectBy);
+
+  final void Function(ScrollActivityDelegate delegate, double correction) onCorrectBy;
+
+  @override
+  void correctBy(double correction) => onCorrectBy(delegate, correction);
+
+  @override
+  bool get shouldIgnorePointer => false;
+
+  // Calls to setPixels() from onCorrectBy require this to be true.
+  @override
+  bool get isScrolling => true;
+
+  @override
+  double get velocity => 0.0;
 }
