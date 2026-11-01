@@ -129,6 +129,62 @@ flutter:
       ]);
     });
 
+    testWithoutContext('parses an asset with environment conditions', () async {
+      final logger = BufferLogger.test();
+      const manifest = '''
+name: test
+dependencies:
+  flutter:
+    sdk: flutter
+flutter:
+  assets:
+    - path: a/foo
+      environment:
+        APP: alpha
+        AUDIENCE:
+          - internal
+          - staging
+''';
+
+      final FlutterManifest flutterManifest = FlutterManifest.createFromString(
+        manifest,
+        logger: logger,
+      )!;
+
+      expect(flutterManifest.assets, <AssetsEntry>[
+        AssetsEntry(
+          uri: Uri.parse('a/foo'),
+          environment: const <String, Set<String>>{
+            'APP': <String>{'alpha'},
+            'AUDIENCE': <String>{'internal', 'staging'},
+          },
+        ),
+      ]);
+    });
+
+    testWithoutContext('prints an error when an asset environment is not a map', () async {
+      final logger = BufferLogger.test();
+      const manifest = '''
+name: test
+dependencies:
+  flutter:
+    sdk: flutter
+flutter:
+  assets:
+    - path: a/foo
+      environment: internal
+''';
+
+      FlutterManifest.createFromString(manifest, logger: logger);
+
+      expect(
+        logger.errorText,
+        contains(
+          'In environment section of asset "a/foo": Expected environment to be a map, but got String.',
+        ),
+      );
+    });
+
     testWithoutContext("prints an error when an asset entry's flavor is not a string", () async {
       final logger = BufferLogger.test();
 
