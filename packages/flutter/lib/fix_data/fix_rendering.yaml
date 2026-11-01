@@ -18,6 +18,44 @@
 # * Fixes in this file are from the Rendering library. *
 version: 1
 transforms:
+  # Change made in https://github.com/flutter/flutter/pull/177102
+  - title: "Migrate to 'TableBorderPainter.all'"
+    date: 2026-10-27
+    element:
+      uris: [ 'rendering.dart', 'widgets.dart', 'material.dart', 'cupertino.dart' ]
+      constructor: 'all'
+      inClass: 'TableBorder'
+    changes:
+      - kind: 'replacedBy'
+        newElement:
+          uris: [ 'rendering.dart', 'widgets.dart', 'material.dart', 'cupertino.dart' ]
+          constructor: 'all'
+          inClass: 'TableBorderPainter'
+
+  # Change made in https://github.com/flutter/flutter/pull/177102
+  - title: "Migrate to 'TableBorderPainter.symmetric'"
+    date: 2026-10-27
+    element:
+      uris: [ 'rendering.dart', 'widgets.dart', 'material.dart', 'cupertino.dart' ]
+      constructor: 'symmetric'
+      inClass: 'TableBorder'
+    changes:
+      - kind: 'replacedBy'
+        newElement:
+          uris: [ 'rendering.dart', 'widgets.dart', 'material.dart', 'cupertino.dart' ]
+          constructor: 'symmetric'
+          inClass: 'TableBorderPainter'
+
+  # Change made in https://github.com/flutter/flutter/pull/177102
+  - title: "Migrate to 'TableBorderPainter'"
+    date: 2026-10-27
+    element:
+      uris: [ 'rendering.dart', 'widgets.dart', 'material.dart', 'cupertino.dart' ]
+      class: 'TableBorder'
+    changes:
+      - kind: 'rename'
+        newName: 'TableBorderPainter'
+
   # Change made in https://github.com/flutter/flutter/pull/135218
   - title: "Migrate to 'scrollCacheExtent'"
     date: 2026-02-09

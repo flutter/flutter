@@ -60,4 +60,11 @@ void main() {
     cacheExtent: 1.0,
     cacheExtentStyle: cacheExtentStyle,
   );
+
+  // Change made in https://github.com/flutter/flutter/pull/177102
+  TableBorder tableBorder = TableBorder.all();
+  tableBorder = const TableBorder(top: BorderSide());
+  tableBorder = const TableBorder.symmetric(inside: BorderSide());
+  tableBorder = TableBorder.lerp(tableBorder, tableBorder, 0.5)!;
+  RenderTable(textDirection: TextDirection.ltr, border: TableBorder.all());
 }
