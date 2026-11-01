@@ -3037,9 +3037,12 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     if (_drawFrame == _HandleDrawFrame.reset) {
       throw StateError('handleDrawFrame() called without paired handleBeginFrame()');
     }
-    if (_drawFrame == _HandleDrawFrame.drawFrame) {
-      super.handleDrawFrame();
+    if (_drawFrame == _HandleDrawFrame.skipFrame) {
+      _drawFrame = _HandleDrawFrame.reset;
+      platformDispatcher.scheduleFrame();
+      return;
     }
+    super.handleDrawFrame();
     _drawFrame = _HandleDrawFrame.reset;
     _viewNeedsPaint = false;
     _expectingFrameToReassemble = false;
