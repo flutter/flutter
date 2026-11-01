@@ -53,7 +53,11 @@ uint32_t g_next_callback_id = 0;
 
 uint32_t NextCallbackId() {
   assert(emscripten_is_main_browser_thread());
-  return ++g_next_callback_id;
+  // Zero is reserved for an unset context-loss callback.
+  if (++g_next_callback_id == 0) {
+    ++g_next_callback_id;
+  }
+  return g_next_callback_id;
 }
 }  // namespace
 
