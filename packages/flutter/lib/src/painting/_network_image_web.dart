@@ -266,7 +266,8 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
 /// An [ImageStreamCompleter] that delegates to another [ImageStreamCompleter]
 /// that is loaded asynchronously.
 ///
-/// This completer keeps its child completer alive until this completer is disposed.
+/// This completer listens to its child only while it has listeners, and keeps
+/// the child alive until this completer is disposed.
 class _ForwardingImageStreamCompleter extends ImageStreamCompleter {
   _ForwardingImageStreamCompleter(
     this.task, {
@@ -282,7 +283,10 @@ class _ForwardingImageStreamCompleter extends ImageStreamCompleter {
           return;
         }
         completer = value;
-        completer.addListener(listener);
+        _completerHandle = completer.keepAlive();
+        if (hasListeners) {
+          _addCompleterListener();
+        }
       },
       onError: (Object error, StackTrace stack) {
         reportError(
@@ -299,6 +303,8 @@ class _ForwardingImageStreamCompleter extends ImageStreamCompleter {
   final Future<ImageStreamCompleter> task;
   bool resolved = false;
   late final ImageStreamCompleter completer;
+  ImageStreamCompleterHandle? _completerHandle;
+  bool _listeningToCompleter = false;
 
   bool _disposed = false;
 
@@ -315,9 +321,42 @@ class _ForwardingImageStreamCompleter extends ImageStreamCompleter {
   );
 
   @override
+  void addListener(ImageStreamListener listener) {
+    if (_disposed) {
+      super.addListener(listener);
+      return;
+    }
+    if (!hasListeners) {
+      _addCompleterListener();
+    }
+    super.addListener(listener);
+  }
+
+  void _addCompleterListener() {
+    if (!resolved || _listeningToCompleter) {
+      return;
+    }
+    addOnLastListenerRemovedCallback(_removeCompleterListener);
+    // Set this before adding the listener: the child may synchronously emit an
+    // image, and the receiving listener can remove itself from this completer.
+    _listeningToCompleter = true;
+    completer.addListener(listener);
+  }
+
+  void _removeCompleterListener() {
+    if (!_listeningToCompleter) {
+      return;
+    }
+    _listeningToCompleter = false;
+    completer.removeListener(listener);
+  }
+
+  @override
   void onDisposed() {
     if (resolved) {
-      completer.removeListener(listener);
+      _removeCompleterListener();
+      _completerHandle?.dispose();
+      _completerHandle = null;
     }
     _disposed = true;
     super.onDisposed();
