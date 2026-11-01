@@ -2099,12 +2099,14 @@ mixin WidgetInspectorService {
     final withPreviews = parameters['withPreviews'] == 'true';
     // If the "fullDetails" parameter is not provided, default to true.
     final fullDetails = parameters['fullDetails'] != 'false';
+    final withCreationLocations = parameters['withCreationLocations'] == 'true';
 
     final Map<String, Object?>? result = _getRootWidgetTreeImpl(
       groupName: groupName,
       isSummaryTree: isSummaryTree,
       withPreviews: withPreviews,
       fullDetails: fullDetails,
+      withCreationLocations: withCreationLocations,
     );
 
     return Future<Map<String, dynamic>>.value(<String, dynamic>{'result': result});
@@ -2115,28 +2117,35 @@ mixin WidgetInspectorService {
     required bool isSummaryTree,
     required bool withPreviews,
     bool fullDetails = true,
+    bool withCreationLocations = false,
     Map<String, Object>? Function(DiagnosticsNode, InspectorSerializationDelegate)?
     addAdditionalPropertiesCallback,
   }) {
+    // The full details already include creation locations.
+    final bool addCreationLocations = withCreationLocations && !fullDetails;
     final bool shouldAddAdditionalProperties =
-        addAdditionalPropertiesCallback != null || withPreviews;
+        addAdditionalPropertiesCallback != null || withPreviews || addCreationLocations;
 
     // Combine the given addAdditionalPropertiesCallback with logic to add text
-    // previews as well (if withPreviews is true):
+    // previews (if withPreviews is true) and creation locations (if
+    // addCreationLocations is true):
     Map<String, Object>? combinedAddAdditionalPropertiesCallback(
       DiagnosticsNode node,
       InspectorSerializationDelegate delegate,
     ) {
       final Map<String, Object> additionalPropertiesJson =
           addAdditionalPropertiesCallback?.call(node, delegate) ?? <String, Object>{};
-      if (!withPreviews) {
-        return additionalPropertiesJson;
-      }
       final Object? value = node.value;
-      if (value is Element) {
+      if (withPreviews && value is Element) {
         final RenderObject? renderObject = _renderObjectOrNull(value);
         if (renderObject is RenderParagraph) {
           additionalPropertiesJson['textPreview'] = renderObject.text.toPlainText();
+        }
+      }
+      if (addCreationLocations) {
+        final developer.CreationLocation? creationLocation = _getCreationLocation(value);
+        if (creationLocation != null) {
+          additionalPropertiesJson['creationLocation'] = creationLocation.toJsonMap();
         }
       }
       return additionalPropertiesJson;
