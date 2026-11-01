@@ -241,10 +241,10 @@ class ProxyAnimation extends Animation<double>
   }
 
   @override
-  AnimationStatus get status => _parent != null ? _parent!.status : _status!;
+  AnimationStatus get status => _parent?.status ?? _status!;
 
   @override
-  double get value => _parent != null ? _parent!.value : _value!;
+  double get value => _parent?.value ?? _value!;
 
   @override
   String toString() {

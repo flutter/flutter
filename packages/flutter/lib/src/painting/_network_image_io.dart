@@ -99,9 +99,7 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
   static HttpClient get _httpClient {
     HttpClient? client;
     assert(() {
-      if (debugNetworkImageHttpClientProvider != null) {
-        client = debugNetworkImageHttpClientProvider!();
-      }
+      client = debugNetworkImageHttpClientProvider?.call();
       return true;
     }());
     return client ?? _sharedHttpClient;
