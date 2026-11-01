@@ -448,7 +448,11 @@ abstract class OneSequenceGestureRecognizer extends GestureRecognizer {
   void acceptGesture(int pointer) {}
 
   @override
-  void rejectGesture(int pointer) {}
+  @mustCallSuper
+  void rejectGesture(int pointer) {
+    stopTrackingPointer(pointer);
+    _entries.remove(pointer);
+  }
 
   /// Called when the number of pointers this recognizer is tracking changes from one to zero.
   ///
@@ -775,11 +779,13 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
   }
 
   @override
+  @mustCallSuper
   void rejectGesture(int pointer) {
     if (pointer == primaryPointer && state == GestureRecognizerState.possible) {
       _stopTimer();
       _state = GestureRecognizerState.defunct;
     }
+    super.rejectGesture(pointer);
   }
 
   @override
