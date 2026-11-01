@@ -929,5 +929,10 @@ void main() {
       const BoxShadow().copyWith(blurStyle: BlurStyle.outer),
       const BoxShadow(blurStyle: BlurStyle.outer),
     );
+    expect(const BoxShadow(), isNot(const BoxShadow(inset: true)));
+    expect(const BoxShadow().copyWith(inset: true), const BoxShadow(inset: true));
+    expect(BoxShadow.lerp(const BoxShadow(), const BoxShadow(inset: true), 0.5)!.inset, isTrue);
+    expect(BoxShadow.lerp(const BoxShadow(inset: true), const BoxShadow(), 0.4)!.inset, isTrue);
+    expect(const BoxShadow(inset: true).scale(2).inset, isTrue);
   });
 }
