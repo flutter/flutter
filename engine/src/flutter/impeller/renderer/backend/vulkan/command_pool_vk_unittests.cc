@@ -285,5 +285,89 @@ TEST(CommandPoolVKTest, DestroysCleanlyIfDeviceIsDestroyed) {
   context->Shutdown();
 }
 
+namespace {
+
+// A command pool with one allocated command buffer, created directly on the
+// device so that no CommandPoolVK or recycler is involved.
+CommandPoolRecyclerVK::RecycledData CreatePoolWithOneBuffer(
+    const std::shared_ptr<ContextVK>& context) {
+  vk::CommandPoolCreateInfo pool_info;
+  pool_info.setQueueFamilyIndex(context->GetGraphicsQueue()->GetIndex().family);
+  pool_info.setFlags(vk::CommandPoolCreateFlagBits::eTransient);
+  auto device = context->GetDevice();
+  auto [pool_result, pool] = device.createCommandPoolUnique(pool_info);
+  EXPECT_EQ(pool_result, vk::Result::eSuccess);
+
+  vk::CommandBufferAllocateInfo buffer_info;
+  buffer_info.setCommandPool(pool.get());
+  buffer_info.setCommandBufferCount(1u);
+  buffer_info.setLevel(vk::CommandBufferLevel::ePrimary);
+  auto [buffer_result, buffers] =
+      device.allocateCommandBuffersUnique(buffer_info);
+  EXPECT_EQ(buffer_result, vk::Result::eSuccess);
+
+  return CommandPoolRecyclerVK::RecycledData{.pool = std::move(pool),
+                                             .buffers = std::move(buffers)};
+}
+
+}  // namespace
+
+TEST(BackgroundCommandPoolVKTest, DestroysCleanlyIfDeviceIsDestroyed) {
+  auto const context = MockVulkanContextBuilder().Build();
+  auto data = CreatePoolWithOneBuffer(context);
+
+  auto device_holder = std::make_shared<MockDeviceHolder>(context->GetDevice());
+  std::weak_ptr<DeviceHolderVK> weak_device_holder = device_holder;
+  device_holder.reset();
+
+  {
+    // The device is gone, and the pool and its buffer with it. Destroying the
+    // holder must not call vkFreeCommandBuffers or vkDestroyCommandPool.
+    BackgroundCommandPoolVK background_pool(
+        std::move(data.pool), std::move(data.buffers), /*unused_count=*/0u,
+        std::weak_ptr<CommandPoolRecyclerVK>(), weak_device_holder);
+  }
+
+  auto const called = ReclaimAndGetMockVulkanFunctions(context);
+  EXPECT_EQ(std::count(called->begin(), called->end(), "vkFreeCommandBuffers"),
+            0u);
+  EXPECT_EQ(std::count(called->begin(), called->end(), "vkDestroyCommandPool"),
+            0u);
+
+  context->Shutdown();
+}
+
+TEST(BackgroundCommandPoolVKTest, DestroysHandlesIfOnlyTheRecyclerIsGone) {
+  auto const context = MockVulkanContextBuilder().Build();
+  auto data = CreatePoolWithOneBuffer(context);
+
+  auto const device_holder =
+      std::make_shared<MockDeviceHolder>(context->GetDevice());
+
+  {
+    // The recycler is gone but the device is alive: the pool can not be
+    // recycled, so it is destroyed, after its buffer was freed.
+    BackgroundCommandPoolVK background_pool(
+        std::move(data.pool), std::move(data.buffers), /*unused_count=*/0u,
+        std::weak_ptr<CommandPoolRecyclerVK>(), device_holder);
+  }
+
+  auto const called = ReclaimAndGetMockVulkanFunctions(context);
+  size_t frees = 0u;
+  size_t destroys = 0u;
+  for (const auto& function : *called) {
+    if (function == "vkFreeCommandBuffers") {
+      frees++;
+    } else if (function == "vkDestroyCommandPool") {
+      destroys++;
+    }
+    EXPECT_GE(frees, destroys);
+  }
+  EXPECT_EQ(frees, 1u);
+  EXPECT_EQ(destroys, 1u);
+
+  context->Shutdown();
+}
+
 }  // namespace testing
 }  // namespace impeller

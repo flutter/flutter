@@ -18,56 +18,43 @@
 
 namespace impeller {
 
-// Holds the command pool in a background thread, recyling it when not in use.
-class BackgroundCommandPoolVK final {
- public:
-  BackgroundCommandPoolVK(BackgroundCommandPoolVK&&) = default;
+BackgroundCommandPoolVK::BackgroundCommandPoolVK(
+    vk::UniqueCommandPool&& pool,
+    std::vector<vk::UniqueCommandBuffer>&& buffers,
+    size_t unused_count,
+    std::weak_ptr<CommandPoolRecyclerVK> recycler,
+    std::weak_ptr<DeviceHolderVK> device_holder)
+    : pool_(std::move(pool)),
+      buffers_(std::move(buffers)),
+      unused_count_(unused_count),
+      recycler_(std::move(recycler)),
+      device_holder_(std::move(device_holder)) {}
 
-  // The recycler also recycles command buffers that were never used, up to a
-  // limit of 16 per frame. This number was somewhat arbitrarily chosen.
-  static constexpr size_t kUnusedCommandBufferLimit = 16u;
-
-  explicit BackgroundCommandPoolVK(
-      vk::UniqueCommandPool&& pool,
-      std::vector<vk::UniqueCommandBuffer>&& buffers,
-      size_t unused_count,
-      std::weak_ptr<CommandPoolRecyclerVK> recycler)
-      : pool_(std::move(pool)),
-        buffers_(std::move(buffers)),
-        unused_count_(unused_count),
-        recycler_(std::move(recycler)) {}
-
-  ~BackgroundCommandPoolVK() {
-    auto const recycler = recycler_.lock();
-
-    // Not only does this prevent recycling when the context is being destroyed,
-    // but it also prevents the destructor from effectively being called twice;
-    // once for the original BackgroundCommandPoolVK() and once for the moved
-    // BackgroundCommandPoolVK().
-    if (!recycler) {
-      return;
+BackgroundCommandPoolVK::~BackgroundCommandPoolVK() {
+  std::shared_ptr<DeviceHolderVK> device_holder = device_holder_.lock();
+  if (!device_holder) {
+    pool_.release();
+    for (auto& buffer : buffers_) {
+      buffer.release();
     }
-    // If there are many unused command buffers, release some of them and
-    // trim the command pool.
-    bool should_trim = unused_count_ > kUnusedCommandBufferLimit;
-    recycler->Reclaim(std::move(pool_), std::move(buffers_),
-                      /*should_trim=*/should_trim);
+    return;
   }
 
- private:
-  BackgroundCommandPoolVK(const BackgroundCommandPoolVK&) = delete;
+  auto const recycler = recycler_.lock();
 
-  BackgroundCommandPoolVK& operator=(const BackgroundCommandPoolVK&) = delete;
-
-  vk::UniqueCommandPool pool_;
-
-  // These are retained because the destructor of the C++ UniqueCommandBuffer
-  // wrapper type will attempt to reset the cmd buffer, and doing so may be a
-  // thread safety violation as this may happen on the fence waiter thread.
-  std::vector<vk::UniqueCommandBuffer> buffers_;
-  const size_t unused_count_;
-  std::weak_ptr<CommandPoolRecyclerVK> recycler_;
-};
+  // Not only does this prevent recycling when the context is being destroyed,
+  // but it also prevents the destructor from effectively being called twice;
+  // once for the original BackgroundCommandPoolVK() and once for the moved
+  // BackgroundCommandPoolVK().
+  if (!recycler) {
+    return;
+  }
+  // If there are many unused command buffers, release some of them and
+  // trim the command pool.
+  bool should_trim = unused_count_ > kUnusedCommandBufferLimit;
+  recycler->Reclaim(std::move(pool_), std::move(buffers_),
+                    /*should_trim=*/should_trim);
+}
 
 CommandPoolVK::~CommandPoolVK() {
   if (!pool_) {
@@ -102,8 +89,9 @@ CommandPoolVK::~CommandPoolVK() {
   }
   unused_command_buffers_.clear();
 
-  auto reset_pool_when_dropped = BackgroundCommandPoolVK(
-      std::move(pool_), std::move(collected_buffers_), unused_count, recycler);
+  auto reset_pool_when_dropped =
+      BackgroundCommandPoolVK(std::move(pool_), std::move(collected_buffers_),
+                              unused_count, recycler, device_holder_);
 
   UniqueResourceVKT<BackgroundCommandPoolVK> pool(
       context->GetResourceManager(), std::move(reset_pool_when_dropped));
