@@ -26,7 +26,7 @@ void main() {
     ];
   });
 
-  test('Cache extent - null, pixels', () async {
+  test('Cache extent - null, defaults to 0.8x viewport', () async {
     final renderViewport = RenderViewport(
       crossAxisDirection: AxisDirection.left,
       offset: ViewportOffset.zero(),
@@ -35,7 +35,7 @@ void main() {
     layout(renderViewport, phase: EnginePhase.flushSemantics);
     expect(
       renderViewport.describeSemanticsClip(null),
-      rectExpandedOnAxis(RenderAbstractViewport.defaultCacheExtent),
+      rectExpandedOnAxis(height * RenderAbstractViewport.kDefaultScrollCacheExtent.value),
     );
   });
 
