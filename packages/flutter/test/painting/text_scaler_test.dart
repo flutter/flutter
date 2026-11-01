@@ -45,6 +45,15 @@ void main() {
   });
 
   group('SystemTextScaler', () {
+    testWidgets('Clamping with no upper limit accepts zero font size', (WidgetTester tester) async {
+      final TextScaler scaler = MediaQueryData.fromView(tester.view).textScaler;
+      for (final minScale in <double>[0.5, 1.0, 2.0]) {
+        final TextScaler clamped = scaler.clamp(minScaleFactor: minScale);
+        expect(clamped.scale(0.0), 0.0);
+        expect(clamped.scale(12.0), 12.0 * (minScale > 1.0 ? minScale : 1.0));
+      }
+    });
+
     testWidgets('equality', (WidgetTester tester) async {
       addTearDown(() => tester.platformDispatcher.clearAllTestValues());
 
