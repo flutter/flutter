@@ -12,6 +12,26 @@
 #include "impeller/tessellator/tessellator_libtess.h"
 
 namespace impeller {
+
+class TessellatorTestAccess {
+ public:
+  static const std::vector<Point>* Find(const Tessellator& tessellator,
+                                        const void* identity,
+                                        const StrokeParameters& stroke,
+                                        Scalar scale) {
+    return tessellator.FindCachedStrokeTessellation(identity, stroke, scale);
+  }
+
+  static void Store(Tessellator& tessellator,
+                    std::shared_ptr<const void> identity,
+                    const StrokeParameters& stroke,
+                    Scalar scale,
+                    std::vector<Point> points) {
+    tessellator.StoreCachedStrokeTessellation(std::move(identity), stroke,
+                                              scale, std::move(points));
+  }
+};
+
 namespace testing {
 
 TEST(TessellatorTest, TessellatorBuilderReturnsCorrectResultStatus) {
@@ -706,6 +726,78 @@ TEST(TessellatorTest, EarlyReturnEmptyConvexShape) {
 
   EXPECT_TRUE(points.empty());
   EXPECT_TRUE(indices.empty());
+}
+
+TEST(TessellatorTest, StrokeTessellationCacheFindStoreAndEvict) {
+  Tessellator tessellator(/*supports_32bit_primitive_indices=*/true);
+  const StrokeParameters stroke{.width = 2.0f};
+
+  const auto identity = std::make_shared<int>(0);
+  TessellatorTestAccess::Store(tessellator, identity, stroke, 1.0f,
+                               {Point(1, 2), Point(3, 4)});
+  const std::vector<Point>* found =
+      TessellatorTestAccess::Find(tessellator, identity.get(), stroke, 1.0f);
+  ASSERT_TRUE(found);
+  EXPECT_EQ((std::vector<Point>{Point(1, 2), Point(3, 4)}), *found);
+
+  // Different identity, scale, or stroke parameters must miss.
+  const auto other_identity = std::make_shared<int>(1);
+  EXPECT_EQ(nullptr, TessellatorTestAccess::Find(
+                         tessellator, other_identity.get(), stroke, 1.0f));
+  EXPECT_EQ(nullptr, TessellatorTestAccess::Find(tessellator, identity.get(),
+                                                 stroke, 2.0f));
+  StrokeParameters wide = stroke;
+  wide.width = 4.0f;
+  EXPECT_EQ(nullptr, TessellatorTestAccess::Find(tessellator, identity.get(),
+                                                 wide, 1.0f));
+}
+
+TEST(TessellatorTest, StrokeTessellationCacheReinsertUpdatesInPlace) {
+  Tessellator tessellator(/*supports_32bit_primitive_indices=*/true);
+  const StrokeParameters stroke{.width = 2.0f};
+  const auto identity = std::make_shared<int>(0);
+
+  TessellatorTestAccess::Store(tessellator, identity, stroke, 1.0f,
+                               {Point(1, 2)});
+  TessellatorTestAccess::Store(tessellator, identity, stroke, 1.0f,
+                               {Point(3, 4), Point(5, 6)});
+  EXPECT_EQ(tessellator.GetStrokeTessellationCacheSizeForTesting(), 1u);
+  const std::vector<Point>* found =
+      TessellatorTestAccess::Find(tessellator, identity.get(), stroke, 1.0f);
+  ASSERT_TRUE(found);
+  EXPECT_EQ((std::vector<Point>{Point(3, 4), Point(5, 6)}), *found);
+}
+
+TEST(TessellatorTest, StrokeTessellationCacheRejectsOversizedEntries) {
+  Tessellator tessellator(/*supports_32bit_primitive_indices=*/true);
+  const StrokeParameters stroke{.width = 1.0f};
+  const auto identity = std::make_shared<int>(0);
+  std::vector<Point> oversized(kMaxCachedStrokePointsPerEntry + 1u);
+  TessellatorTestAccess::Store(tessellator, identity, stroke, 1.0f,
+                               std::move(oversized));
+  EXPECT_EQ(tessellator.GetStrokeTessellationCacheSizeForTesting(), 0u);
+}
+
+TEST(TessellatorTest, StrokeTessellationCacheEvictsOldestEntry) {
+  Tessellator tessellator(/*supports_32bit_primitive_indices=*/true);
+  const StrokeParameters stroke{.width = 1.0f};
+
+  // The cache retains at most 256 entries.
+  constexpr size_t kEntries = 256;
+  std::vector<std::shared_ptr<int>> identities;
+  for (size_t i = 0; i < kEntries + 2; i++) {
+    auto identity = std::make_shared<int>(static_cast<int>(i));
+    TessellatorTestAccess::Store(tessellator, identity, stroke, 1.0f,
+                                 {Point(static_cast<Scalar>(i), 0)});
+    identities.push_back(std::move(identity));
+  }
+  // The first two entries have been evicted; the newest remains.
+  EXPECT_EQ(nullptr, TessellatorTestAccess::Find(
+                         tessellator, identities[0].get(), stroke, 1.0f));
+  EXPECT_EQ(nullptr, TessellatorTestAccess::Find(
+                         tessellator, identities[1].get(), stroke, 1.0f));
+  EXPECT_TRUE(TessellatorTestAccess::Find(tessellator, identities.back().get(),
+                                          stroke, 1.0f));
 }
 
 }  // namespace testing
