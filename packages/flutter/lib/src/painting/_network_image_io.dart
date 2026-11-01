@@ -120,7 +120,7 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
       final HttpClientRequest request = await _httpClient.getUrl(resolved);
 
       headers?.forEach((String name, String value) {
-        request.headers.add(name, value);
+        request.headers.set(name, value);
       });
       final HttpClientResponse response = await request.close();
       if (response.statusCode != HttpStatus.ok) {
