@@ -2,10 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
+
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/android/gradle_errors.dart';
 import 'package:flutter_tools/src/android/gradle_utils.dart';
+import 'package:flutter_tools/src/android/migrations/disable_new_dsl_migration.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -63,6 +66,8 @@ void main() {
           jlinkErrorWithJava21AndSourceCompatibility,
           missingNdkSourcePropertiesFile,
           applyingKotlinAndroidPluginErrorHandler,
+          kotlinAndroidPluginWithNewDslErrorHandler,
+          legacyVariantApiErrorHandler,
           useNewAgpDslErrorHandler,
           incompatibleKotlinVersionHandler,
         ]),
@@ -1611,6 +1616,667 @@ An exception occurred applying plugin request [id: 'dev.flutter.flutter-gradle-p
       contains('If you are not upgrading to AGP 9+, run `flutter analyze --suggestions`'),
     );
   });
+
+  group('kotlin-android plugin with new AGP DSL error', () {
+    const kotlinAndroidWithNewDslStacktraceExample = r'''
+FAILURE: Build failed with an exception.
+
+* Where:
+Build file '/path/to/my_app/android/app/build.gradle.kts'
+
+* What went wrong:
+An exception occurred applying plugin request [id: 'org.jetbrains.kotlin.android', version: '2.4.20']
+> Failed to apply plugin 'org.jetbrains.kotlin.android'.
+   > ⛔ Failed to apply plugin 'org.jetbrains.kotlin.android'
+     The 'org.jetbrains.kotlin.android' plugin is not compatible with AGP's 9.0 new DSL (`android.newDsl=true` is enabled by default).
+     Solution: Set `android.builtInKotlin=true` in `gradle.properties` and migrate to built-in Kotlin (see https://kotl.in/gradle/agp-built-in-kotlin for guidance), or set `android.newDsl=false` in `gradle.properties` to temporarily bypass this issue.
+     See https://kotl.in/gradle/agp-new-dsl for more details.
+      > class com.android.build.gradle.internal.dsl.ApplicationExtensionImpl$AgpDecorated_Decorated cannot be cast to class com.android.build.gradle.BaseExtension (com.android.build.gradle.internal.dsl.ApplicationExtensionImpl$AgpDecorated_Decorated and com.android.build.gradle.BaseExtension are in unnamed module of loader org.gradle.internal.classloader.VisitableURLClassLoader$InstrumentingVisitableURLClassLoader @5a20f9cc)
+
+* Exception is:
+org.gradle.api.plugins.InvalidPluginException: An exception occurred applying plugin request [id: 'org.jetbrains.kotlin.android', version: '2.4.20']
+Caused by: java.lang.ClassCastException: class com.android.build.gradle.internal.dsl.ApplicationExtensionImpl$AgpDecorated_Decorated cannot be cast to class com.android.build.gradle.BaseExtension
+''';
+
+    testWithoutContext('matches Kotlin Gradle plugin incompatibility with AGP new DSL', () {
+      expect(
+        formatTestErrorMessage(
+          kotlinAndroidWithNewDslStacktraceExample,
+          kotlinAndroidPluginWithNewDslErrorHandler,
+        ),
+        isTrue,
+      );
+      // Future-proofed against KGP fixing the "AGP's 9.0" typo in newer releases.
+      expect(
+        kotlinAndroidPluginWithNewDslErrorHandler.test(
+          "The 'org.jetbrains.kotlin.android' plugin is not compatible with AGP 9.0 new DSL.",
+        ),
+        isTrue,
+      );
+    });
+
+    testWithoutContext('does not match built-in Kotlin duplicate plugin error', () {
+      const builtInKotlinErrorExample = r'''
+> Failed to apply plugin 'kotlin-android'.
+   > ⛔ Failed to apply plugin 'com.jetbrains.kotlin.android'
+     The 'org.jetbrains.kotlin.android' plugin is no longer required for Kotlin support since AGP 9.0.
+''';
+      expect(
+        formatTestErrorMessage(
+          builtInKotlinErrorExample,
+          kotlinAndroidPluginWithNewDslErrorHandler,
+        ),
+        isFalse,
+      );
+    });
+
+    testWithoutContext('prioritizes kotlinAndroidPluginWithNewDslErrorHandler ahead of legacyVariantApiErrorHandler on stacktraces with BaseExtension cast', () {
+      GradleHandledError? firstMatchedLineHandler;
+      for (final String line in kotlinAndroidWithNewDslStacktraceExample.split('\n')) {
+        for (final GradleHandledError error in gradleErrors) {
+          if (error.test(line)) {
+            firstMatchedLineHandler = error;
+            break;
+          }
+        }
+        if (firstMatchedLineHandler != null) {
+          break;
+        }
+      }
+      expect(firstMatchedLineHandler, same(kotlinAndroidPluginWithNewDslErrorHandler));
+
+      final GradleHandledError combinedChunkHandler = gradleErrors.firstWhere(
+        (GradleHandledError error) => error.test(kotlinAndroidWithNewDslStacktraceExample),
+      );
+      expect(combinedChunkHandler, same(kotlinAndroidPluginWithNewDslErrorHandler));
+    });
+
+    testWithoutContext('prints android.newDsl=false workaround, marker warning, automatic builtInKotlin=false context, and migration guidance', () async {
+      final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
+      final GradleBuildStatus status = await kotlinAndroidPluginWithNewDslErrorHandler.handler(
+        gradleUtils: FakeGradleUtils(),
+        line: "     The 'org.jetbrains.kotlin.android' plugin is not compatible with AGP's 9.0 new DSL (`android.newDsl=true` is enabled by default).",
+        project: project,
+        toolContext: toolContext,
+        usesAndroidX: true,
+      );
+
+      expect(
+        kotlinAndroidPluginWithNewDslErrorHandler.eventLabel,
+        equals('kotlin-android-plugin-with-new-dsl-error'),
+      );
+      expect(status, equals(GradleBuildStatus.exit));
+      expect(testLogger.statusText, contains('┌─ Flutter Fix'));
+      final String unwrappedBox = unwrapBoxText(testLogger.statusText);
+      expect(
+        unwrappedBox,
+        contains(
+          "The 'org.jetbrains.kotlin.android' (kotlin-android) Gradle plugin does not support "
+          'android.newDsl=true.',
+        ),
+      );
+      expect(
+        unwrappedBox,
+        contains(
+          'Flutter applies kotlin-android automatically when android.builtInKotlin=false is set '
+          'in android/gradle.properties, or a Gradle build script in the app or in a Flutter '
+          'plugin may apply kotlin-android directly.',
+        ),
+      );
+      expect(
+        unwrappedBox,
+        contains(
+          'Gradle identifies the build script or project under "* Where:" or '
+          '"* What went wrong:" above.',
+        ),
+      );
+      expect(
+        testLogger.statusText,
+        contains('To build now, set android.newDsl=false in android/gradle.properties.'),
+      );
+      expect(unwrappedBox, contains(kNewDslTemplateMarker));
+      expect(unwrappedBox, contains(kNewDslMigratorMarker));
+      expect(
+        unwrappedBox,
+        contains('Flutter removes android.newDsl=false when preceded by either comment.'),
+      );
+      expect(
+        testLogger.statusText,
+        contains('Android Gradle Plugin 10.0 removes the android.newDsl=false option.'),
+      );
+      expect(testLogger.statusText, contains(kOptOutOfNewDslDocsUrl));
+      expect(
+        unwrappedBox,
+        contains(
+          'If a Flutter plugin applies kotlin-android, upgrade the Flutter plugin or file an '
+          'issue with the plugin asking for built-in Kotlin support.',
+        ),
+      );
+      expect(
+        unwrappedBox,
+        contains(
+          'Otherwise, set android.builtInKotlin=true in android/gradle.properties and remove '
+          "any 'org.jetbrains.kotlin.android' (kotlin-android) declaration from the app's "
+          'Gradle build script.',
+        ),
+      );
+      expect(testLogger.statusText, contains(kMigrateToBuiltInKotlinDocsUrl));
+    });
+
+    testWithoutContext('points add-to-app module projects to .android/gradle.properties', () async {
+      fileSystem.currentDirectory
+          .childFile('pubspec.yaml')
+          .writeAsStringSync('name: my_module\nflutter:\n  module:\n    androidX: true\n');
+      final FlutterProject moduleProject = FlutterProject.fromDirectoryTest(
+        fileSystem.currentDirectory,
+      );
+
+      await kotlinAndroidPluginWithNewDslErrorHandler.handler(
+        gradleUtils: FakeGradleUtils(),
+        line: "The 'org.jetbrains.kotlin.android' plugin is not compatible with AGP's 9.0 new DSL.",
+        project: moduleProject,
+        toolContext: toolContext,
+        usesAndroidX: true,
+      );
+
+      expect(
+        testLogger.statusText,
+        contains('To build now, set android.newDsl=false in .android/gradle.properties.'),
+      );
+      expect(
+        unwrapBoxText(testLogger.statusText),
+        contains('set android.builtInKotlin=true in .android/gradle.properties'),
+      );
+      expect(testLogger.statusText, isNot(contains('in android/gradle.properties')));
+    });
+
+    testWithoutContext('notes external override without redundant set or marker instructions when gradle.properties already sets android.newDsl=false', () async {
+      fileSystem.currentDirectory
+          .childDirectory('android')
+          .childFile('gradle.properties')
+          .createSync(recursive: true);
+      fileSystem.currentDirectory
+          .childDirectory('android')
+          .childFile('gradle.properties')
+          .writeAsStringSync('android.newDsl=false\n');
+      final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
+
+      await kotlinAndroidPluginWithNewDslErrorHandler.handler(
+        gradleUtils: FakeGradleUtils(),
+        line: "The 'org.jetbrains.kotlin.android' plugin is not compatible with AGP's 9.0 new DSL.",
+        project: project,
+        toolContext: toolContext,
+        usesAndroidX: true,
+      );
+
+      final String unwrappedBox = unwrapBoxText(testLogger.statusText);
+      expect(
+        unwrappedBox,
+        contains(
+          'android/gradle.properties already sets android.newDsl=false; to build now, remove '
+          'any android.newDsl=true override in ~/.gradle/gradle.properties or -Pandroid.newDsl '
+          'command-line flags.',
+        ),
+      );
+      expect(unwrappedBox, isNot(contains('To build now, set android.newDsl=false')));
+      expect(unwrappedBox, isNot(contains(kNewDslTemplateMarker)));
+    });
+  });
+
+  group('legacy AGP variant and extension API errors with new DSL', () {
+    testWithoutContext(
+      'matches Groovy unknown variant properties on AGP ExtensionImpl objects',
+      () {
+        const groovyVariantPropertyExamples = <String>[
+          r"> Could not get unknown property 'applicationVariants' for object of type com.android.build.gradle.internal.dsl.ApplicationExtensionImpl$AgpDecorated.",
+          r"> Could not get unknown property 'libraryVariants' for object of type com.android.build.gradle.internal.dsl.LibraryExtensionImpl$AgpDecorated.",
+          r"> Could not get unknown property 'testVariants' for object of type com.android.build.gradle.internal.dsl.ApplicationExtensionImpl$AgpDecorated.",
+          r"> Could not get unknown property 'unitTestVariants' for object of type com.android.build.gradle.internal.dsl.LibraryExtensionImpl$AgpDecorated.",
+        ];
+        for (final example in groovyVariantPropertyExamples) {
+          expect(
+            formatTestErrorMessage(example, legacyVariantApiErrorHandler),
+            isTrue,
+            reason: example,
+          );
+        }
+      },
+    );
+
+    testWithoutContext(
+      'matches Groovy variantFilter and variant closure calls on AGP ExtensionImpl objects',
+      () {
+        const groovyVariantMethodExamples = <String>[
+          r'> Could not find method variantFilter() for arguments [build_abc123$_run_closure1$_closure2@25d18118] on object of type com.android.build.gradle.internal.dsl.ApplicationExtensionImpl$AgpDecorated.',
+          r'> Could not find method applicationVariants() for arguments [build_abc123$_run_closure1@25d18118] on object of type com.android.build.gradle.internal.dsl.ApplicationExtensionImpl$AgpDecorated.',
+          r'> Could not find method libraryVariants() for arguments [build_abc123$_run_closure1@25d18118] on object of type com.android.build.gradle.internal.dsl.LibraryExtensionImpl$AgpDecorated.',
+          r'> Could not find method testVariants() for arguments [build_abc123$_run_closure1@25d18118] on object of type com.android.build.gradle.internal.dsl.ApplicationExtensionImpl$AgpDecorated.',
+          r'> Could not find method unitTestVariants() for arguments [build_abc123$_run_closure1@25d18118] on object of type com.android.build.gradle.internal.dsl.LibraryExtensionImpl$AgpDecorated.',
+        ];
+        for (final example in groovyVariantMethodExamples) {
+          expect(
+            formatTestErrorMessage(example, legacyVariantApiErrorHandler),
+            isTrue,
+            reason: example,
+          );
+        }
+      },
+    );
+
+    testWithoutContext('matches Groovy variant containers nested inside sourceSets', () {
+      const sourceSetVariantExamples = <String>[
+        r'> Could not find method all() for arguments [build_abc123$_run_closure1$_closure2$_closure3@6b68870d] on source set application variants of type com.android.build.gradle.internal.api.DefaultAndroidSourceSet.',
+        r'> Could not find method all() for arguments [build_abc123$_run_closure1$_closure2$_closure3@208dfc0] on source set library variants of type com.android.build.gradle.internal.api.DefaultAndroidLibrarySourceSet.',
+      ];
+      for (final example in sourceSetVariantExamples) {
+        expect(
+          formatTestErrorMessage(example, legacyVariantApiErrorHandler),
+          isTrue,
+          reason: example,
+        );
+      }
+    });
+
+    testWithoutContext(
+      'matches Kotlin build script .gradle.kts unresolved variant API references',
+      () {
+        const kotlinDslVariantExamples = <String>[
+          "e: file:///path/to/my_app/android/app/build.gradle.kts:5:5: Unresolved reference 'applicationVariants'.",
+          "e: file:///path/to/plugin/android/build.gradle.kts:8:5: Unresolved reference 'libraryVariants'.",
+          "e: file:///path/to/my_app/android/app/build.gradle.kts:9:5: Unresolved reference 'testVariants'.",
+          "e: file:///path/to/my_app/android/app/build.gradle.kts:10:5: Unresolved reference 'unitTestVariants'.",
+          "e: file:///path/to/my_app/android/app/build.gradle.kts:11:5: Unresolved reference 'variantFilter'.",
+        ];
+        for (final example in kotlinDslVariantExamples) {
+          expect(
+            formatTestErrorMessage(example, legacyVariantApiErrorHandler),
+            isTrue,
+            reason: example,
+          );
+        }
+      },
+    );
+
+    testWithoutContext(
+      'matches missing legacy extension types when AGP 9 new DSL types are registered',
+      () {
+        const missingExtensionExamples = <String>[
+          "Extension of type 'LibraryExtension' does not exist. Currently registered extension types: [ExtraPropertiesExtension, FlutterExtension, VersionCatalogsExtension, BasePluginExtension, SourceSetContainer, ReportingExtension, JavaToolchainService, JavaPluginExtension, KotlinAndroidProjectExtension, LibraryExtensionImpl, LibraryAndroidComponentsExtension, LintLifecycleExtension]",
+          "Extension of type 'com.android.build.gradle.LibraryExtension' does not exist. Currently registered extension types: [ExtraPropertiesExtension, LibraryExtensionImpl, LibraryAndroidComponentsExtension]",
+          "Extension of type 'AppExtension' does not exist. Currently registered extension types: [ExtraPropertiesExtension, FlutterExtension, ApplicationExtension, ApplicationAndroidComponentsExtension, LintLifecycleExtension]",
+          "Extension of type 'BaseAppModuleExtension' does not exist. Currently registered extension types: [ExtraPropertiesExtension, FlutterExtension, ApplicationExtension, ApplicationAndroidComponentsExtension, LintLifecycleExtension]",
+          "Extension of type 'com.android.build.gradle.internal.dsl.BaseAppModuleExtension' does not exist. Currently registered extension types: [ExtraPropertiesExtension, ApplicationExtension, ApplicationAndroidComponentsExtension]",
+          "Extension of type 'BaseExtension' does not exist. Currently registered extension types: [ExtraPropertiesExtension, ApplicationExtension, ApplicationAndroidComponentsExtension]",
+          "Extension of type 'BaseExtension' does not exist. Currently registered extension types: [ExtraPropertiesExtension, DynamicFeatureExtensionImpl]",
+          "Extension of type 'TestedExtension' does not exist. Currently registered extension types: [ExtraPropertiesExtension, TestExtensionImpl]",
+          "Extension of type 'TestExtension' does not exist. Currently registered extension types: [ExtraPropertiesExtension, TestExtensionImpl]",
+        ];
+        for (final example in missingExtensionExamples) {
+          expect(
+            formatTestErrorMessage(example, legacyVariantApiErrorHandler),
+            isTrue,
+            reason: example,
+          );
+        }
+      },
+    );
+
+    testWithoutContext('matches JVM ClassCastException and GroovyCastException from ExtensionImpl to legacy AGP extension types', () {
+      const castExamples = <String>[
+        r'> class com.android.build.gradle.internal.dsl.LibraryExtensionImpl$AgpDecorated_Decorated cannot be cast to class com.android.build.gradle.BaseExtension (com.android.build.gradle.internal.dsl.LibraryExtensionImpl$AgpDecorated_Decorated and com.android.build.gradle.BaseExtension are in unnamed module of loader org.gradle.internal.classloader.VisitableURLClassLoader$InstrumentingVisitableURLClassLoader @1a2b3c4d)',
+        r'Caused by: java.lang.ClassCastException: class com.android.build.gradle.internal.dsl.ApplicationExtensionImpl$AgpDecorated_Decorated cannot be cast to class com.android.build.gradle.AppExtension',
+        r'Caused by: java.lang.ClassCastException: class com.android.build.gradle.internal.dsl.ApplicationExtensionImpl$AgpDecorated_Decorated cannot be cast to class com.android.build.gradle.internal.dsl.BaseAppModuleExtension',
+        r'Caused by: java.lang.ClassCastException: class com.android.build.gradle.internal.dsl.LibraryExtensionImpl$AgpDecorated_Decorated cannot be cast to class com.android.build.gradle.LibraryExtension',
+        r'Caused by: java.lang.ClassCastException: class com.android.build.gradle.internal.dsl.TestExtensionImpl$AgpDecorated_Decorated cannot be cast to class com.android.build.gradle.TestedExtension',
+        r'Caused by: java.lang.ClassCastException: class com.android.build.gradle.internal.dsl.TestExtensionImpl$AgpDecorated_Decorated cannot be cast to class com.android.build.gradle.TestExtension',
+        r"> Cannot cast object 'extension 'android'' with class 'com.android.build.gradle.internal.dsl.ApplicationExtensionImpl$AgpDecorated' to class 'com.android.build.gradle.BaseExtension'",
+        r"> Cannot cast object 'extension 'android'' with class 'com.android.build.gradle.internal.dsl.ApplicationExtensionImpl$AgpDecorated' to class 'com.android.build.gradle.internal.dsl.BaseAppModuleExtension'",
+        r"> Cannot cast object 'extension 'android'' with class 'com.android.build.gradle.internal.dsl.LibraryExtensionImpl$AgpDecorated' to class 'com.android.build.gradle.LibraryExtension'",
+        r"> Cannot cast object 'extension 'android'' with class 'com.android.build.gradle.internal.dsl.TestExtensionImpl$AgpDecorated' to class 'com.android.build.gradle.TestExtension'",
+      ];
+      for (final example in castExamples) {
+        expect(
+          formatTestErrorMessage(example, legacyVariantApiErrorHandler),
+          isTrue,
+          reason: example,
+        );
+      }
+    });
+
+    testWithoutContext('does not match kotlinOptions errors caused by built-in Kotlin', () {
+      const kotlinOptionsExamples = <String>[
+        r"> Could not get unknown property 'kotlinOptions' for object of type com.android.build.gradle.internal.dsl.ApplicationExtensionImpl$AgpDecorated.",
+        r'> Could not find method kotlinOptions() for arguments [build_abc123$_run_closure1@1234] on object of type com.android.build.gradle.internal.dsl.ApplicationExtensionImpl$AgpDecorated.',
+        "e: file:///path/to/my_app/android/app/build.gradle.kts:12:5: Unresolved reference 'kotlinOptions'.",
+      ];
+      for (final example in kotlinOptionsExamples) {
+        expect(
+          formatTestErrorMessage(example, legacyVariantApiErrorHandler),
+          isFalse,
+          reason: example,
+        );
+      }
+    });
+
+    testWithoutContext('does not match Kotlin app or plugin .kt source compilation errors or unrelated Gradle properties', () {
+      const unrelatedExamples = <String>[
+        "e: file:///path/to/my_app/android/app/src/main/kotlin/com/example/MainActivity.kt:10:5: Unresolved reference 'testVariants'.",
+        "e: file:///path/to/plugin/android/src/main/kotlin/com/example/Plugin.kt:4:12: Unresolved reference 'applicationVariants'.",
+        r"> Could not get unknown property 'flutterVersionCode' for object of type com.android.build.gradle.internal.dsl.ApplicationExtensionImpl$AgpDecorated.",
+        r"> Could not get unknown property 'libraryVariants' for object of type com.android.build.gradle.internal.dsl.BaseAppModuleExtension$AgpDecorated.",
+        "> Could not get unknown property 'applicationVariants' for root project 'android' of type org.gradle.api.Project.",
+        "> Could not find method variantFilter() for arguments [] on root project 'android' of type org.gradle.api.Project.",
+        '> Could not find method unknownMethod() for arguments [] on source set main of type com.android.build.gradle.internal.api.DefaultAndroidSourceSet.',
+        "e: file:///path/to/my_app/android/app/build.gradle.kts:15:5: Unresolved reference 'flutterVersionCode'.",
+      ];
+      for (final example in unrelatedExamples) {
+        expect(
+          formatTestErrorMessage(example, legacyVariantApiErrorHandler),
+          isFalse,
+          reason: example,
+        );
+      }
+    });
+
+    testWithoutContext('does not match wrong-module extension lookups when android.newDsl is false', () {
+      const wrongExtensionInLibraryUnderLegacyDsl =
+          "Extension of type 'AppExtension' does not exist. Currently registered extension types: [ExtraPropertiesExtension, VersionCatalogsExtension, BasePluginExtension, SourceSetContainer, ReportingExtension, JavaToolchainService, JavaPluginExtension, KotlinAndroidProjectExtension, LibraryExtension, LibraryAndroidComponentsExtension, LintLifecycleExtension, NamedDomainObjectContainer<BaseVariantOutput>]";
+      expect(
+        formatTestErrorMessage(wrongExtensionInLibraryUnderLegacyDsl, legacyVariantApiErrorHandler),
+        isFalse,
+      );
+
+      // When android.newDsl=false in :app, AppPlugin registers both ApplicationExtension and BaseAppModuleExtension.
+      const wrongExtensionInAppUnderLegacyDsl =
+          "Extension of type 'LibraryExtension' does not exist. Currently registered extension types: [ExtraPropertiesExtension, FlutterExtension, ApplicationExtension, BaseAppModuleExtension, ApplicationAndroidComponentsExtension, LintLifecycleExtension]";
+      expect(
+        formatTestErrorMessage(wrongExtensionInAppUnderLegacyDsl, legacyVariantApiErrorHandler),
+        isFalse,
+      );
+    });
+
+    testWithoutContext('does not match unrelated or legacy-DSL cast exceptions', () {
+      const unrelatedClassCastExamples = <String>[
+        'java.lang.ClassCastException: class java.lang.String cannot be cast to class java.lang.Integer',
+        r'Caused by: java.lang.ClassCastException: class com.android.build.gradle.LibraryExtension$AgpDecorated_Decorated cannot be cast to class com.android.build.gradle.AppExtension',
+        r'Caused by: java.lang.ClassCastException: class com.android.build.gradle.internal.dsl.ApplicationExtensionImpl$AgpDecorated_Decorated cannot be cast to class com.android.build.gradle.BaseExtensionSubclass',
+        r"> Cannot cast object 'extension 'android'' with class 'com.android.build.gradle.LibraryExtension$AgpDecorated' to class 'com.android.build.gradle.AppExtension'",
+      ];
+      for (final example in unrelatedClassCastExamples) {
+        expect(
+          formatTestErrorMessage(example, legacyVariantApiErrorHandler),
+          isFalse,
+          reason: example,
+        );
+      }
+    });
+
+    testWithoutContext('suppresses Flutter Fix box for ambiguous .gradle.kts or sourceSets errors when gradle.properties already sets android.newDsl=false', () async {
+      fileSystem.currentDirectory
+          .childDirectory('android')
+          .childFile('gradle.properties')
+          .createSync(recursive: true);
+      fileSystem.currentDirectory
+          .childDirectory('android')
+          .childFile('gradle.properties')
+          .writeAsStringSync('# Comment line\nandroid.newDsl = false\n');
+      final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
+
+      final GradleBuildStatus ktsStatus = await legacyVariantApiErrorHandler.handler(
+        gradleUtils: FakeGradleUtils(),
+        line: "e: file:///path/to/my_app/android/app/build.gradle.kts:5:5: Unresolved reference 'libraryVariants'.",
+        project: project,
+        toolContext: toolContext,
+        usesAndroidX: true,
+      );
+      expect(ktsStatus, equals(GradleBuildStatus.exit));
+      expect(testLogger.statusText, isEmpty);
+
+      final GradleBuildStatus sourceSetStatus = await legacyVariantApiErrorHandler.handler(
+        gradleUtils: FakeGradleUtils(),
+        line: r'> Could not find method all() for arguments [closure] on source set library variants of type com.android.build.gradle.internal.api.DefaultAndroidSourceSet.',
+        project: project,
+        toolContext: toolContext,
+        usesAndroidX: true,
+      );
+      expect(sourceSetStatus, equals(GradleBuildStatus.exit));
+      expect(testLogger.statusText, isEmpty);
+    });
+
+    testWithoutContext('prints box with external override note and omits redundant set instruction when runtime ExtensionImpl error occurs despite android.newDsl=false in gradle.properties', () async {
+      fileSystem.currentDirectory
+          .childDirectory('android')
+          .childFile('gradle.properties')
+          .createSync(recursive: true);
+      fileSystem.currentDirectory
+          .childDirectory('android')
+          .childFile('gradle.properties')
+          .writeAsStringSync('android.newDsl=false\n');
+      final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
+
+      await legacyVariantApiErrorHandler.handler(
+        gradleUtils: FakeGradleUtils(),
+        line: r"> Could not get unknown property 'applicationVariants' for object of type com.android.build.gradle.internal.dsl.ApplicationExtensionImpl$AgpDecorated.",
+        project: project,
+        toolContext: toolContext,
+        usesAndroidX: true,
+      );
+
+      final String unwrappedBox = unwrapBoxText(testLogger.statusText);
+      expect(
+        unwrappedBox,
+        contains(
+          'android/gradle.properties already sets android.newDsl=false; to build now, remove '
+          'any android.newDsl=true override in ~/.gradle/gradle.properties or -Pandroid.newDsl '
+          'command-line flags.',
+        ),
+      );
+      expect(unwrappedBox, isNot(contains('To build now, set android.newDsl=false')));
+      expect(unwrappedBox, isNot(contains(kNewDslTemplateMarker)));
+    });
+
+    testWithoutContext(
+      'treats bare android.newDsl line after android.newDsl=false as overriding the false setting',
+      () async {
+        fileSystem.currentDirectory.childDirectory('android').childFile('gradle.properties')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('android.newDsl=false\nandroid.newDsl\n');
+        final FlutterProject project = FlutterProject.fromDirectoryTest(
+          fileSystem.currentDirectory,
+        );
+
+        await legacyVariantApiErrorHandler.handler(
+          gradleUtils: FakeGradleUtils(),
+          line: r"> Could not get unknown property 'applicationVariants' for object of type com.android.build.gradle.internal.dsl.ApplicationExtensionImpl$AgpDecorated.",
+          project: project,
+          toolContext: toolContext,
+          usesAndroidX: true,
+        );
+
+        final String unwrappedBox = unwrapBoxText(testLogger.statusText);
+        expect(
+          unwrappedBox,
+          contains('To build now, set android.newDsl=false in android/gradle.properties.'),
+        );
+        expect(unwrappedBox, contains(kNewDslTemplateMarker));
+        expect(unwrappedBox, contains(kNewDslMigratorMarker));
+      },
+    );
+
+    testWithoutContext('handles invalid UTF-8 bytes or FormatException when reading gradle.properties without crashing', () async {
+      final File invalidUtf8Properties =
+          fileSystem.currentDirectory.childDirectory('android').childFile('gradle.properties')
+            ..createSync(recursive: true)
+            ..writeAsBytesSync(<int>[0xFF, 0xFE, 0x80]);
+      expect(invalidUtf8Properties, exists);
+      final FlutterProject invalidUtf8Project = FlutterProject.fromDirectoryTest(
+        fileSystem.currentDirectory,
+      );
+
+      final GradleBuildStatus invalidUtf8Status = await legacyVariantApiErrorHandler.handler(
+        gradleUtils: FakeGradleUtils(),
+        line: "e: file:///path/to/my_app/android/app/build.gradle.kts:5:5: Unresolved reference 'libraryVariants'.",
+        project: invalidUtf8Project,
+        toolContext: toolContext,
+        usesAndroidX: true,
+      );
+      expect(invalidUtf8Status, equals(GradleBuildStatus.exit));
+      expect(
+        testLogger.statusText,
+        contains('To build now, set android.newDsl=false in android/gradle.properties.'),
+      );
+
+      testLogger.clear();
+      final FlutterProject formatExceptionProject = _FormatExceptionGradlePropertiesProject(
+        fileSystem.currentDirectory,
+      );
+
+      final GradleBuildStatus
+      kotlinStatus = await kotlinAndroidPluginWithNewDslErrorHandler.handler(
+        gradleUtils: FakeGradleUtils(),
+        line: "The 'org.jetbrains.kotlin.android' plugin is not compatible with AGP's 9.0 new DSL.",
+        project: formatExceptionProject,
+        toolContext: toolContext,
+        usesAndroidX: true,
+      );
+      expect(kotlinStatus, equals(GradleBuildStatus.exit));
+      expect(
+        testLogger.statusText,
+        contains('To build now, set android.newDsl=false in android/gradle.properties.'),
+      );
+
+      testLogger.clear();
+      final GradleBuildStatus legacyStatus = await legacyVariantApiErrorHandler.handler(
+        gradleUtils: FakeGradleUtils(),
+        line: "e: file:///path/to/my_app/android/app/build.gradle.kts:5:5: Unresolved reference 'libraryVariants'.",
+        project: formatExceptionProject,
+        toolContext: toolContext,
+        usesAndroidX: true,
+      );
+      expect(legacyStatus, equals(GradleBuildStatus.exit));
+      expect(
+        testLogger.statusText,
+        contains('To build now, set android.newDsl=false in android/gradle.properties.'),
+      );
+    });
+
+    testWithoutContext('echoes only the matching line when multi-line ProcessException text is passed and resolves module .android/gradle.properties', () async {
+      fileSystem.currentDirectory
+          .childFile('pubspec.yaml')
+          .writeAsStringSync('name: my_module\nflutter:\n  module:\n    androidX: true\n');
+      final FlutterProject moduleProject = FlutterProject.fromDirectoryTest(
+        fileSystem.currentDirectory,
+      );
+      const multiLineException = r'''
+ProcessException: Failed to run Gradle:
+FAILURE: Build failed with an exception.
+* What went wrong:
+> Could not get unknown property 'applicationVariants' for object of type com.android.build.gradle.internal.dsl.ApplicationExtensionImpl$AgpDecorated.
+* Try:
+> Run with --stacktrace option to get the stack trace.''';
+
+      await legacyVariantApiErrorHandler.handler(
+        gradleUtils: FakeGradleUtils(),
+        line: multiLineException,
+        project: moduleProject,
+        toolContext: toolContext,
+        usesAndroidX: true,
+      );
+
+      expect(
+        unwrapBoxText(testLogger.statusText),
+        contains(
+          r"> Could not get unknown property 'applicationVariants' for object of type com.android.build.gradle.internal.dsl.ApplicationExtensionImpl$AgpDecorated.",
+        ),
+      );
+      expect(testLogger.statusText, isNot(contains('ProcessException:')));
+      expect(testLogger.statusText, isNot(contains('Run with --stacktrace')));
+      expect(
+        testLogger.statusText,
+        contains('To build now, set android.newDsl=false in .android/gradle.properties.'),
+      );
+    });
+
+    testWithoutContext('prints matched error line, android.newDsl=false workaround, marker warning, and variant API migration link', () async {
+      const matchedLine =
+          r"   > Could not get unknown property 'applicationVariants' for object of type com.android.build.gradle.internal.dsl.ApplicationExtensionImpl$AgpDecorated.   ";
+      final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
+      final GradleBuildStatus status = await legacyVariantApiErrorHandler.handler(
+        gradleUtils: FakeGradleUtils(),
+        line: matchedLine,
+        project: project,
+        toolContext: toolContext,
+        usesAndroidX: true,
+      );
+
+      expect(legacyVariantApiErrorHandler.eventLabel, equals('legacy-variant-api-error'));
+      expect(status, equals(GradleBuildStatus.exit));
+      expect(testLogger.statusText, contains('┌─ Flutter Fix'));
+      final String unwrappedBox = unwrapBoxText(testLogger.statusText);
+      expect(
+        unwrappedBox,
+        contains(
+          'A Gradle build script or Gradle plugin, in the app or in a Flutter plugin, uses an '
+          'Android Gradle Plugin API unavailable when android.newDsl is enabled.',
+        ),
+      );
+      expect(
+        unwrappedBox,
+        contains(
+          r"> Could not get unknown property 'applicationVariants' for object of type com.android.build.gradle.internal.dsl.ApplicationExtensionImpl$AgpDecorated.",
+        ),
+      );
+      expect(
+        unwrappedBox,
+        contains(
+          'Gradle identifies the build script or project under "* Where:" or '
+          '"* What went wrong:" above.',
+        ),
+      );
+      expect(
+        testLogger.statusText,
+        contains('To build now, set android.newDsl=false in android/gradle.properties.'),
+      );
+      expect(unwrappedBox, contains(kNewDslTemplateMarker));
+      expect(unwrappedBox, contains(kNewDslMigratorMarker));
+      expect(
+        unwrappedBox,
+        contains('Flutter removes android.newDsl=false when preceded by either comment.'),
+      );
+      expect(
+        testLogger.statusText,
+        contains('Android Gradle Plugin 10.0 removes the android.newDsl=false option.'),
+      );
+      expect(testLogger.statusText, contains(kOptOutOfNewDslDocsUrl));
+      expect(
+        unwrappedBox,
+        contains(
+          'If a Flutter plugin or third-party Gradle plugin uses the removed API, upgrade the '
+          'plugin or file an issue with the plugin author asking for android.newDsl support.',
+        ),
+      );
+      expect(
+        unwrappedBox,
+        contains(
+          'If the build script is in the app, migrate the build script to the '
+          'com.android.build.api.dsl interfaces and the variant API '
+          '(androidComponents.onVariants or androidComponents.beforeVariants).',
+        ),
+      );
+      expect(testLogger.statusText, contains(kAgpVariantApiDocsUrl));
+    });
+  });
+}
+
+String unwrapBoxText(String rawStatusText) {
+  return rawStatusText
+      .split('\n')
+      .map(
+        (String line) => line.replaceAll(RegExp(r'^\s*[┌┐└┘─│]+.*?(?=\S)|^\s*│\s*|\s*│\s*$'), ''),
+      )
+      .join(' ')
+      .replaceAll(RegExp(r'\s+'), ' ')
+      .trim();
 }
 
 bool formatTestErrorMessage(String errorMessage, GradleHandledError error) {
@@ -1657,3 +2323,50 @@ class _TestPromptTerminal extends Fake implements AnsiTerminal {
 }
 
 class FakeFlutterProject extends Fake implements FlutterProject {}
+
+class _FormatExceptionGradlePropertiesProject extends Fake implements FlutterProject {
+  _FormatExceptionGradlePropertiesProject(this.directory);
+
+  @override
+  final Directory directory;
+
+  @override
+  late final AndroidProject android = _FormatExceptionAndroidProject(
+    directory.childDirectory('android'),
+  );
+}
+
+class _FormatExceptionAndroidProject extends Fake implements AndroidProject {
+  _FormatExceptionAndroidProject(this._androidDir);
+
+  final Directory _androidDir;
+
+  @override
+  late final Directory hostAppGradleRoot = _FormatExceptionGradleDirectory(_androidDir);
+}
+
+class _FormatExceptionGradleDirectory extends Fake implements Directory {
+  _FormatExceptionGradleDirectory(this._delegate);
+
+  final Directory _delegate;
+
+  @override
+  File childFile(String basename) => _FormatExceptionFile(_delegate.childFile(basename));
+}
+
+class _FormatExceptionFile extends Fake implements File {
+  _FormatExceptionFile(this._delegate);
+
+  final File _delegate;
+
+  @override
+  String get path => _delegate.path;
+
+  @override
+  bool existsSync() => true;
+
+  @override
+  List<String> readAsLinesSync({Encoding encoding = utf8}) {
+    throw const FormatException('Invalid UTF-8 byte');
+  }
+}

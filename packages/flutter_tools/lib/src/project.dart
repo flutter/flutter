@@ -12,9 +12,11 @@ import 'package:xml/xml.dart';
 import 'package:yaml/yaml.dart';
 
 import 'android/android_builder.dart';
+import 'android/gradle_new_dsl_scanner.dart';
 import 'android/gradle_utils.dart' as gradle;
 import 'base/common.dart';
 import 'base/config.dart';
+import 'base/deferred_component.dart';
 import 'base/error_handling_io.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
@@ -863,10 +865,22 @@ class AndroidProject extends FlutterProjectPlatform {
   /// - `id "org.jetbrains.kotlin.android"`
   /// - `id("org.jetbrains.kotlin.android")`
   /// - `id ( "org.jetbrains.kotlin.android" )`
+  /// - `kotlin("android")`
+  /// - any of the above followed by `version "..."`
+  /// - `alias(libs.plugins.kotlin.android)` or
+  ///   `alias(libs.plugins.jetbrains.kotlin.android)`, the catalog names that
+  ///   Android Studio project templates use
   static final _declarativeKotlinPluginPatterns = <RegExp>[
-    RegExp('^\\s*id\\s*\\(?\\s*[\'"]kotlin-android[\'"]\\s*\\)?\\s*\$'),
-    RegExp('^\\s*id\\s*\\(?\\s*[\'"]org.jetbrains.kotlin.android[\'"]\\s*\\)?\\s*\$'),
+    RegExp('^\\s*id\\s*\\(?\\s*[\'"]kotlin-android[\'"]\\s*\\)?$_versionSuffix\\s*\$'),
+    RegExp(
+      '^\\s*id\\s*\\(?\\s*[\'"]org\\.jetbrains\\.kotlin\\.android[\'"]\\s*\\)?$_versionSuffix\\s*\$',
+    ),
+    RegExp('^\\s*kotlin\\s*\\(\\s*"android"\\s*\\)$_versionSuffix\\s*\$'),
+    RegExp(r'^\s*alias\s*\(\s*libs\.plugins\.(?:jetbrains\.)?kotlin\.android\s*\)\s*$'),
   ];
+
+  /// An optional plugin version, as in `id("org.jetbrains.kotlin.android") version "2.4.20"`.
+  static const _versionSuffix = r'''(?:\s+version\s*\(?\s*['"][^'"]*['"]\s*\)?)?''';
 
   /// Pattern used to find the assignment of the "group" property in Gradle.
   /// Expected example: `group "dev.flutter.plugin"`
@@ -960,17 +974,144 @@ class AndroidProject extends FlutterProjectPlatform {
     return false;
   }
 
-  /// True, if the app project is using Kotlin.
-  bool get isKotlin {
-    if (appGradleFile.existsSync()) {
-      if (firstMatchInFile(appGradleFile, _imperativeKotlinPluginPattern) != null) {
+  /// Whether the app module's Gradle build file applies the `kotlin-android`
+  /// (`org.jetbrains.kotlin.android`) plugin. Other modules, such as plugins,
+  /// are not checked.
+  bool get appliesKotlinAndroidPlugin {
+    if (!appGradleFile.existsSync()) {
+      return false;
+    }
+    if (firstMatchInFile(appGradleFile, _imperativeKotlinPluginPattern) != null) {
+      return true;
+    }
+    for (final RegExp pattern in _declarativeKotlinPluginPatterns) {
+      if (firstMatchInFile(appGradleFile, pattern) != null) {
         return true;
       }
-      for (final RegExp pattern in _declarativeKotlinPluginPatterns) {
-        if (firstMatchInFile(appGradleFile, pattern) != null) {
-          return true;
+    }
+    return false;
+  }
+
+  /// Paths of Gradle build files blocking `android.newDsl=true`.
+  ///
+  /// Scans the root `android/build.gradle(.kts)` file, the app module build
+  /// file, the `.android/Flutter/build.gradle(.kts)` module library script
+  /// when [isModule] is true, each deferred component module's
+  /// `build.gradle(.kts)` file, and the `android/build.gradle(.kts)` file of
+  /// each native Android plugin listed in `.flutter-plugins-dependencies`.
+  ///
+  /// When `.flutter-plugins-dependencies` is absent (for example in an app
+  /// with zero plugins), falls back to `.dart_tool/package_config.json` to
+  /// verify package resolution completed with no Android plugin packages
+  /// awaiting `.flutter-plugins-dependencies` generation.
+  ///
+  /// Returns `null` when plugin dependencies are unresolved or unreadable.
+  ///
+  /// Build logic in `buildSrc`, convention plugins, or included builds is
+  /// not scanned here and is handled at build time by `gradle_errors.dart`.
+  List<String>? get newDslBlockingBuildFiles {
+    final FileSystem fileSystem = hostAppGradleRoot.fileSystem;
+    final File dependenciesFile = parent.flutterPluginsDependenciesFile;
+    final buildFiles = <File>[];
+    final seenPaths = <String>{};
+    void addBuildFileIfExists(File file) {
+      if (file.existsSync() && seenPaths.add(fileSystem.path.normalize(file.absolute.path))) {
+        buildFiles.add(file);
+      }
+    }
+
+    try {
+      addBuildFileIfExists(hostAppGradleFile);
+      addBuildFileIfExists(appGradleFile);
+      if (isModule) {
+        addBuildFileIfExists(
+          getGroovyOrKotlin(_flutterLibGradleRoot.childDirectory('Flutter'), 'build.gradle'),
+        );
+      }
+      for (final DeferredComponent component
+          in parent.manifest.deferredComponents ?? const <DeferredComponent>[]) {
+        addBuildFileIfExists(
+          getGroovyOrKotlin(hostAppGradleRoot.childDirectory(component.name), 'build.gradle'),
+        );
+      }
+
+      if (!dependenciesFile.existsSync()) {
+        final File? packageConfigFile = findPackageConfigFile(parent.directory);
+        if (packageConfigFile == null) {
+          return null;
+        }
+        final PackageConfig packageConfig = PackageConfig.parseString(
+          packageConfigFile.readAsStringSync(),
+          packageConfigFile.uri,
+        );
+        final String projectRootPath = fileSystem.path.normalize(parent.directory.absolute.path);
+        for (final Package pkg in packageConfig.packages) {
+          final Directory pkgDir = fileSystem.directory(pkg.root);
+          final String pkgRootPath = fileSystem.path.normalize(pkgDir.absolute.path);
+          if (fileSystem.path.equals(pkgRootPath, projectRootPath)) {
+            continue;
+          }
+          final Directory pkgAndroidDir = pkgDir.childDirectory('android');
+          if (pkgAndroidDir.childFile('build.gradle').existsSync() ||
+              pkgAndroidDir.childFile('build.gradle.kts').existsSync()) {
+            return null;
+          }
+        }
+      } else {
+        final Object? decoded = json.decode(dependenciesFile.readAsStringSync());
+        if (decoded is! Map<String, Object?>) {
+          return null;
+        }
+        final Object? plugins = decoded['plugins'];
+        if (plugins is! Map<String, Object?>) {
+          return null;
+        }
+        final Object? androidPlugins = plugins[AndroidPlugin.kConfigKey];
+        if (androidPlugins != null && androidPlugins is! List<Object?>) {
+          return null;
+        }
+        if (androidPlugins is List<Object?>) {
+          for (final Object? plugin in androidPlugins) {
+            if (plugin is! Map<String, Object?>) {
+              return null;
+            }
+            if (plugin['native_build'] == false) {
+              continue;
+            }
+            final Object? path = plugin['path'];
+            if (path is! String) {
+              return null;
+            }
+            final Directory pluginAndroidDir = fileSystem.directory(path).childDirectory('android');
+            addBuildFileIfExists(getGroovyOrKotlin(pluginAndroidDir, 'build.gradle'));
+          }
         }
       }
+
+      final blocking = <String>[];
+      for (final buildFile in buildFiles) {
+        final bool isKotlinDsl = buildFile.path.endsWith('.kts');
+        if (GradleNewDslScanner.blocksNewDsl(
+          buildFile.readAsStringSync(),
+          isKotlinDsl: isKotlinDsl,
+        )) {
+          blocking.add(buildFile.path);
+        }
+      }
+      return blocking;
+    } on FormatException {
+      return null;
+    } on FileSystemException {
+      return null;
+    }
+  }
+
+  /// True, if the app project is using Kotlin.
+  bool get isKotlin {
+    if (appliesKotlinAndroidPlugin) {
+      return true;
+    }
+    if (appGradleFile.existsSync()) {
       try {
         final String content = appGradleFile.readAsStringSync();
         if (_kotlinCompilerOptionsPattern.hasMatch(content)) {

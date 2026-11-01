@@ -922,6 +922,7 @@ dependencies {
       _testInMemory('default host app language', () async {
         final FlutterProject project = await someProject();
         expect(project.android.isKotlin, isFalse);
+        expect(project.android.appliesKotlinAndroidPlugin, isFalse);
       });
 
       testUsingContext(
@@ -939,6 +940,7 @@ apply plugin: 'kotlin-android'
             },
           );
           expect(project.android.isKotlin, isTrue);
+          expect(project.android.appliesKotlinAndroidPlugin, isTrue);
         },
         overrides: <Type, Generator>{
           FileSystem: () => fs,
@@ -967,6 +969,7 @@ plugins {
             },
           );
           expect(project.android.isKotlin, isTrue);
+          expect(project.android.appliesKotlinAndroidPlugin, isTrue);
         },
         overrides: <Type, Generator>{
           FileSystem: () => fs,
@@ -995,6 +998,439 @@ plugins {
             },
           );
           expect(project.android.isKotlin, isTrue);
+          expect(project.android.appliesKotlinAndroidPlugin, isTrue);
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => fs,
+          ProcessManager: () => FakeProcessManager.any(),
+          XcodeProjectInterpreter: () => xcodeProjectInterpreter,
+          FlutterProjectFactory: () => flutterProjectFactory,
+        },
+      );
+
+      testUsingContext(
+        'kotlin host app language with id("org.jetbrains.kotlin.android") version',
+        () async {
+          final FlutterProject project = await someProject();
+
+          addAndroidGradleFile(
+            project.directory,
+            kotlinDsl: true,
+            gradleFileContent: () {
+              return '''
+plugins {
+    id("com.android.application")
+    id("org.jetbrains.kotlin.android") version "2.4.20"
+}
+''';
+            },
+          );
+          expect(project.android.appliesKotlinAndroidPlugin, isTrue);
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => fs,
+          ProcessManager: () => FakeProcessManager.any(),
+          XcodeProjectInterpreter: () => xcodeProjectInterpreter,
+          FlutterProjectFactory: () => flutterProjectFactory,
+        },
+      );
+
+      testUsingContext(
+        'kotlin host app language with kotlin("android") version',
+        () async {
+          final FlutterProject project = await someProject();
+
+          addAndroidGradleFile(
+            project.directory,
+            kotlinDsl: true,
+            gradleFileContent: () {
+              return '''
+plugins {
+    id("com.android.application")
+    kotlin("android") version "2.4.20"
+}
+''';
+            },
+          );
+          expect(project.android.appliesKotlinAndroidPlugin, isTrue);
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => fs,
+          ProcessManager: () => FakeProcessManager.any(),
+          XcodeProjectInterpreter: () => xcodeProjectInterpreter,
+          FlutterProjectFactory: () => flutterProjectFactory,
+        },
+      );
+
+      testUsingContext(
+        'kotlin host app language with alias(libs.plugins.jetbrains.kotlin.android)',
+        () async {
+          final FlutterProject project = await someProject();
+
+          addAndroidGradleFile(
+            project.directory,
+            kotlinDsl: true,
+            gradleFileContent: () {
+              return '''
+plugins {
+    id("com.android.application")
+    alias(libs.plugins.jetbrains.kotlin.android)
+}
+''';
+            },
+          );
+          expect(project.android.appliesKotlinAndroidPlugin, isTrue);
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => fs,
+          ProcessManager: () => FakeProcessManager.any(),
+          XcodeProjectInterpreter: () => xcodeProjectInterpreter,
+          FlutterProjectFactory: () => flutterProjectFactory,
+        },
+      );
+
+      testWithoutContext(
+        'appliesKotlinAndroidPlugin escapes literal dots and accepts parenthesized version',
+        () {
+          final FileSystem fileSystem = MemoryFileSystem.test();
+          final Directory projectDir = fileSystem.directory('/app')..createSync(recursive: true);
+          projectDir.childFile('pubspec.yaml').writeAsStringSync(validPubspec);
+          final FlutterProject project = FlutterProject.fromDirectoryTest(projectDir);
+
+          addAndroidGradleFile(
+            project.directory,
+            kotlinDsl: true,
+            gradleFileContent: () => '''
+plugins {
+    id("com.android.application")
+    id("orgXjetbrainsYkotlinZandroid")
+}
+''',
+          );
+          expect(project.android.appliesKotlinAndroidPlugin, isFalse);
+
+          addAndroidGradleFile(
+            project.directory,
+            kotlinDsl: true,
+            gradleFileContent: () => '''
+plugins {
+    id("com.android.application")
+    id("org.jetbrains.kotlin.android") version("2.4.20")
+}
+''',
+          );
+          expect(project.android.appliesKotlinAndroidPlugin, isTrue);
+        },
+      );
+
+      group('newDslBlockingBuildFiles', () {
+        const migratedPlugin = '''
+plugins { id("com.android.library") }
+android { namespace = "a" }
+''';
+
+        FlutterProject createTestProject(
+          FileSystem fileSystem, {
+          String path = '/app',
+          String? pubspecContent,
+        }) {
+          final Directory projectDir = fileSystem.directory(path)..createSync(recursive: true);
+          projectDir.childFile('pubspec.yaml').writeAsStringSync(pubspecContent ?? validPubspec);
+          addAndroidGradleFile(
+            projectDir,
+            gradleFileContent: () => 'plugins { id "com.android.application" }\n',
+          );
+          return FlutterProject.fromDirectoryTest(projectDir);
+        }
+
+        void writePlugins(
+          FlutterProject project,
+          Map<String, String> pluginBuildFiles, {
+          bool kotlinDsl = false,
+          Set<String> nonNativePlugins = const <String>{},
+        }) {
+          final FileSystem fileSystem = project.directory.fileSystem;
+          final plugins = <Map<String, Object?>>[];
+          final buildFileName = kotlinDsl ? 'build.gradle.kts' : 'build.gradle';
+          for (final MapEntry<String, String> entry in pluginBuildFiles.entries) {
+            final Directory pluginDir = fileSystem.directory('/pub/${entry.key}');
+            pluginDir.childDirectory('android').childFile(buildFileName)
+              ..createSync(recursive: true)
+              ..writeAsStringSync(entry.value);
+            plugins.add(<String, Object?>{
+              'name': entry.key,
+              'path': pluginDir.path,
+              if (nonNativePlugins.contains(entry.key)) 'native_build': false,
+            });
+          }
+          project.flutterPluginsDependenciesFile.writeAsStringSync(
+            json.encode(<String, Object?>{
+              'plugins': <String, Object?>{'android': plugins},
+            }),
+          );
+        }
+
+        testWithoutContext(
+          'returns empty for a zero-plugin app with package_config.json and no plugin list',
+          () {
+            final FileSystem fileSystem = MemoryFileSystem.test();
+            final FlutterProject project = createTestProject(fileSystem);
+            final Directory pureDartPkg = fileSystem.directory('/pub/pure_dart')
+              ..createSync(recursive: true);
+            writePackageConfigFiles(
+              directory: project.directory,
+              mainLibName: 'hello',
+              packages: <String, String>{'pure_dart': pureDartPkg.uri.toString()},
+            );
+
+            expect(project.flutterPluginsDependenciesFile.existsSync(), isFalse);
+            expect(project.android.newDslBlockingBuildFiles, isEmpty);
+          },
+        );
+
+        testWithoutContext(
+          'returns null when both .flutter-plugins-dependencies and package_config.json are absent',
+          () {
+            final FileSystem fileSystem = MemoryFileSystem.test();
+            final FlutterProject project = createTestProject(fileSystem);
+
+            expect(project.flutterPluginsDependenciesFile.existsSync(), isFalse);
+            expect(project.android.newDslBlockingBuildFiles, isNull);
+          },
+        );
+
+        testWithoutContext(
+          'returns null when .flutter-plugins-dependencies is absent and package_config.json '
+          'references an Android plugin package',
+          () {
+            for (final buildFileName in <String>['build.gradle', 'build.gradle.kts']) {
+              final FileSystem fileSystem = MemoryFileSystem.test();
+              final FlutterProject project = createTestProject(fileSystem);
+              final Directory androidPkg = fileSystem.directory('/pub/plugin_a');
+              androidPkg.childDirectory('android').childFile(buildFileName)
+                ..createSync(recursive: true)
+                ..writeAsStringSync(migratedPlugin);
+              writePackageConfigFiles(
+                directory: project.directory,
+                mainLibName: 'hello',
+                packages: <String, String>{'plugin_a': androidPkg.uri.toString()},
+              );
+
+              expect(
+                project.android.newDslBlockingBuildFiles,
+                isNull,
+                reason: 'Expected null for $buildFileName without .flutter-plugins-dependencies',
+              );
+            }
+          },
+        );
+
+        testWithoutContext('returns null for malformed .flutter-plugins-dependencies shapes', () {
+          for (final badContents in <String>[
+            '{',
+            '{}',
+            '[]',
+            '{"plugins":[]}',
+            '{"plugins":{"android":"bad"}}',
+            '{"plugins":{"android":["bad"]}}',
+            '{"plugins":{"android":[{"name":"missing_path"}]}}',
+          ]) {
+            final FileSystem fileSystem = MemoryFileSystem.test();
+            final FlutterProject project = createTestProject(fileSystem);
+            project.flutterPluginsDependenciesFile.writeAsStringSync(badContents);
+
+            expect(
+              project.android.newDslBlockingBuildFiles,
+              isNull,
+              reason: 'Expected null for $badContents',
+            );
+          }
+        });
+
+        testWithoutContext(
+          'skips native_build: false entries while reporting blocking native plugins',
+          () {
+            final FileSystem fileSystem = MemoryFileSystem.test();
+            final FlutterProject project = createTestProject(fileSystem);
+            writePlugins(
+              project,
+              <String, String>{
+                'good': migratedPlugin,
+                'dart_only_wrapper': 'android.libraryVariants.all { }\n',
+                'blocking_native': 'android.libraryVariants.all { }\n',
+              },
+              kotlinDsl: true,
+              nonNativePlugins: const <String>{'dart_only_wrapper'},
+            );
+
+            expect(project.android.newDslBlockingBuildFiles, <String>[
+              fileSystem.path.join('/pub/blocking_native', 'android', 'build.gradle.kts'),
+            ]);
+          },
+        );
+
+        testWithoutContext('reports blocking root android/build.gradle(.kts) files', () {
+          for (final buildFileName in <String>['build.gradle', 'build.gradle.kts']) {
+            final FileSystem fileSystem = MemoryFileSystem.test();
+            final FlutterProject project = createTestProject(fileSystem);
+            writePlugins(project, const <String, String>{});
+            final File rootBuildFile =
+                project.directory.childDirectory('android').childFile(buildFileName)
+                  ..writeAsStringSync("apply plugin: 'kotlin-android'\n");
+
+            expect(project.android.newDslBlockingBuildFiles, <String>[rootBuildFile.path]);
+          }
+        });
+
+        testWithoutContext('reports blocking app android/app/build.gradle(.kts) files', () {
+          final FileSystem fileSystem = MemoryFileSystem.test();
+          final FlutterProject project = createTestProject(fileSystem);
+          addAndroidGradleFile(
+            project.directory,
+            gradleFileContent: () => 'android.applicationVariants.all { }\n',
+          );
+          writePlugins(project, const <String, String>{});
+
+          expect(project.android.newDslBlockingBuildFiles, <String>[
+            project.android.appGradleFile.path,
+          ]);
+        });
+
+        testWithoutContext('reports blocking deferred component module build files', () {
+          final FileSystem fileSystem = MemoryFileSystem.test();
+          final FlutterProject project = createTestProject(
+            fileSystem,
+            pubspecContent: '''
+name: hello
+flutter:
+  deferred-components:
+    - name: component1
+    - name: component2
+''',
+          );
+          writePlugins(project, const <String, String>{});
+          project.directory
+              .childDirectory('android')
+              .childDirectory('component1')
+              .childFile('build.gradle')
+            ..createSync(recursive: true)
+            ..writeAsStringSync('plugins { id "com.android.dynamic-feature" }\n');
+          final File blockingComponentFile =
+              project.directory
+                  .childDirectory('android')
+                  .childDirectory('component2')
+                  .childFile('build.gradle.kts')
+                ..createSync(recursive: true)
+                ..writeAsStringSync('android.applicationVariants.all { }\n');
+
+          expect(project.android.newDslBlockingBuildFiles, <String>[blockingComponentFile.path]);
+        });
+
+        testWithoutContext('reports blocking .android/Flutter/build.gradle for modules', () {
+          final FileSystem fileSystem = MemoryFileSystem.test();
+          final Directory moduleDir = fileSystem.directory('/my_module')
+            ..createSync(recursive: true);
+          moduleDir.childFile('pubspec.yaml').writeAsStringSync('''
+name: my_module
+flutter:
+  module:
+    androidPackage: com.example.my_module
+''');
+          // Editable host app exists in `android/`, while the generated Flutter
+          // library module lives in `.android/Flutter/build.gradle`.
+          addAndroidGradleFile(
+            moduleDir,
+            gradleFileContent: () => 'plugins { id "com.android.application" }\n',
+          );
+          final File flutterModuleGradle =
+              moduleDir
+                  .childDirectory('.android')
+                  .childDirectory('Flutter')
+                  .childFile('build.gradle')
+                ..createSync(recursive: true)
+                ..writeAsStringSync('android.libraryVariants.all { }\n');
+          final FlutterProject project = FlutterProject.fromDirectoryTest(moduleDir);
+          writePlugins(project, const <String, String>{});
+
+          expect(project.isModule, isTrue);
+          expect(project.android.newDslBlockingBuildFiles, <String>[flutterModuleGradle.path]);
+        });
+      });
+
+      testUsingContext(
+        'kotlin-android declared with apply false is not applied',
+        () async {
+          final FlutterProject project = await someProject();
+
+          addAndroidGradleFile(
+            project.directory,
+            kotlinDsl: true,
+            gradleFileContent: () {
+              return '''
+plugins {
+    id("com.android.application")
+    id("org.jetbrains.kotlin.android") version "2.4.20" apply false
+}
+''';
+            },
+          );
+          expect(project.android.appliesKotlinAndroidPlugin, isFalse);
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => fs,
+          ProcessManager: () => FakeProcessManager.any(),
+          XcodeProjectInterpreter: () => xcodeProjectInterpreter,
+          FlutterProjectFactory: () => flutterProjectFactory,
+        },
+      );
+
+      testUsingContext(
+        'kotlin host app language with kotlin("android")',
+        () async {
+          final FlutterProject project = await someProject();
+
+          addAndroidGradleFile(
+            project.directory,
+            kotlinDsl: true,
+            gradleFileContent: () {
+              return '''
+plugins {
+    id("com.android.application")
+    kotlin("android")
+}
+''';
+            },
+          );
+          expect(project.android.isKotlin, isTrue);
+          expect(project.android.appliesKotlinAndroidPlugin, isTrue);
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => fs,
+          ProcessManager: () => FakeProcessManager.any(),
+          XcodeProjectInterpreter: () => xcodeProjectInterpreter,
+          FlutterProjectFactory: () => flutterProjectFactory,
+        },
+      );
+
+      testUsingContext(
+        'kotlin host app language with alias(libs.plugins.kotlin.android)',
+        () async {
+          final FlutterProject project = await someProject();
+
+          addAndroidGradleFile(
+            project.directory,
+            kotlinDsl: true,
+            gradleFileContent: () {
+              return '''
+plugins {
+    id("com.android.application")
+    alias(libs.plugins.kotlin.android)
+}
+''';
+            },
+          );
+          expect(project.android.isKotlin, isTrue);
+          expect(project.android.appliesKotlinAndroidPlugin, isTrue);
         },
         overrides: <Type, Generator>{
           FileSystem: () => fs,
@@ -1035,6 +1471,7 @@ plugins {
           );
 
           expect(project.android.isKotlin, isFalse);
+          expect(project.android.appliesKotlinAndroidPlugin, isFalse);
         },
         overrides: <Type, Generator>{
           FileSystem: () => fs,
@@ -1052,6 +1489,7 @@ plugins {
               final FlutterProject project = await someProject();
               addAndroidGradleFile(project.directory, gradleFileContent: () => content);
               expect(project.android.isKotlin, expected);
+              expect(project.android.appliesKotlinAndroidPlugin, isFalse);
             },
             overrides: <Type, Generator>{
               FileSystem: () => fs,

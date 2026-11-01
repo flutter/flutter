@@ -15,6 +15,8 @@ import 'package:flutter_tools/src/android/gradle.dart';
 import 'package:flutter_tools/src/android/gradle_errors.dart';
 import 'package:flutter_tools/src/android/gradle_utils.dart';
 import 'package:flutter_tools/src/android/java.dart';
+import 'package:flutter_tools/src/android/migrations/disable_new_dsl_migration.dart';
+import 'package:flutter_tools/src/android/migrations/remove_new_dsl_opt_out_migration.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -3546,6 +3548,136 @@ Gradle Crashed
         AndroidStudio: () => FakeAndroidStudio(),
       },
     );
+
+    testUsingContext(
+      'buildGradleApp configOnly removes template newDsl opt-out for a ready zero-plugin project',
+      () async {
+        final AndroidGradleBuilder builder = createBuilder(
+          java: FakeJava(),
+          logger: logger,
+          processManager: processManager,
+          fileSystem: fileSystem,
+          artifacts: Artifacts.test(),
+          analytics: fakeAnalytics,
+          gradleUtils: FakeGradleUtils(),
+          platform: FakePlatform(),
+          androidStudio: FakeAndroidStudio(),
+        );
+        fileSystem.file('pubspec.yaml').writeAsStringSync('name: hello\nflutter:\n');
+        fileSystem.directory('.dart_tool').childFile('package_config.json')
+          ..createSync(recursive: true)
+          ..writeAsStringSync(
+            json.encode(<String, Object?>{
+              'configVersion': 2,
+              'packages': <Object>[
+                <String, Object?>{
+                  'name': 'hello',
+                  'rootUri': '../',
+                  'packageUri': 'lib/',
+                  'languageVersion': '3.7',
+                },
+              ],
+            }),
+          );
+        fileSystem.directory('android').childFile('build.gradle').createSync(recursive: true);
+        final File gradleProperties = fileSystem.directory('android').childFile('gradle.properties')
+          ..createSync(recursive: true)
+          ..writeAsStringSync(
+            'android.useAndroidX=true\n'
+            'android.builtInKotlin=true\n'
+            '$kNewDslTemplateMarker\n'
+            'android.newDsl=false\n',
+          );
+        fileSystem.directory('android').childDirectory('app').childFile('build.gradle.kts')
+          ..createSync(recursive: true)
+          ..writeAsStringSync(
+            'plugins {\n'
+            '    id("com.android.application")\n'
+            '    id("dev.flutter.flutter-gradle-plugin")\n'
+            '}\n',
+          );
+
+        final FlutterProject project = FlutterProject.fromDirectoryTest(
+          fileSystem.currentDirectory,
+        );
+        project.android.appManifestFile
+          ..createSync(recursive: true)
+          ..writeAsStringSync(minimalV2EmbeddingManifest);
+
+        await builder.buildGradleApp(
+          project: project,
+          androidBuildInfo: const AndroidBuildInfo(
+            BuildInfo(
+              BuildMode.debug,
+              null,
+              treeShakeIcons: false,
+              packageConfigPath: '.dart_tool/package_config.json',
+            ),
+          ),
+          target: 'lib/main.dart',
+          isBuildingBundle: false,
+          configOnly: true,
+          localGradleErrors: const <GradleHandledError>[],
+        );
+
+        expect(
+          gradleProperties.readAsStringSync(),
+          'android.useAndroidX=true\nandroid.builtInKotlin=true\n',
+        );
+        expect(logger.warningText, contains('Removed the android.newDsl=false opt-out'));
+        expect(processManager, hasNoRemainingExpectations);
+      },
+      overrides: <Type, Generator>{AndroidStudio: () => FakeAndroidStudio()},
+    );
+
+    testUsingContext('buildGradleApp configOnly adds and retains builtInKotlin=false and newDsl=false when unconfigured', () async {
+      final AndroidGradleBuilder builder = createBuilder(
+        java: FakeJava(),
+        logger: logger,
+        processManager: processManager,
+        fileSystem: fileSystem,
+        artifacts: Artifacts.test(),
+        analytics: fakeAnalytics,
+        gradleUtils: FakeGradleUtils(),
+        platform: FakePlatform(),
+        androidStudio: FakeAndroidStudio(),
+      );
+      fileSystem.file('pubspec.yaml').writeAsStringSync('name: hello\nflutter:\n');
+      fileSystem.directory('android').childFile('build.gradle').createSync(recursive: true);
+      final File gradleProperties = fileSystem.directory('android').childFile('gradle.properties')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('android.useAndroidX=true\n');
+      fileSystem.directory('android').childDirectory('app').childFile('build.gradle')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('apply from: irrelevant/flutter.gradle\n');
+
+      final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
+      project.android.appManifestFile
+        ..createSync(recursive: true)
+        ..writeAsStringSync(minimalV2EmbeddingManifest);
+
+      await builder.buildGradleApp(
+        project: project,
+        androidBuildInfo: const AndroidBuildInfo(
+          BuildInfo(
+            BuildMode.debug,
+            null,
+            treeShakeIcons: false,
+            packageConfigPath: '.dart_tool/package_config.json',
+          ),
+        ),
+        target: 'lib/main.dart',
+        isBuildingBundle: false,
+        configOnly: true,
+        localGradleErrors: const <GradleHandledError>[],
+      );
+
+      final String updatedProperties = gradleProperties.readAsStringSync();
+      expect(updatedProperties, contains('android.builtInKotlin=false'));
+      expect(updatedProperties, contains('$kNewDslMigratorMarker\nandroid.newDsl=false'));
+      expect(logger.warningText, isEmpty);
+      expect(processManager, hasNoRemainingExpectations);
+    }, overrides: <Type, Generator>{AndroidStudio: () => FakeAndroidStudio()});
   });
 }
 

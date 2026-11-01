@@ -227,6 +227,8 @@ flutter.versionCode=22
   String get androidGradleProperties => '''
 org.gradle.jvmargs=-Xmx8G -XX:MaxMetaspaceSize=4G -XX:ReservedCodeCacheSize=512m -XX:+HeapDumpOnOutOfMemoryError
 android.useAndroidX=true
+android.builtInKotlin=true
+# This newDsl flag was added by the Flutter template
 android.newDsl=false
 ''';
 
@@ -4001,4 +4003,30 @@ loading-units:
     libraries:
       - package:test/invalid_lib_name.dart
 ''';
+}
+
+/// Declares `free` and `paid` product flavors on the app and dynamic-feature
+/// module so variant names (`freeRelease`, `paidRelease`) differ from Flutter
+/// build modes (`release`) and use distinct per-variant output directories.
+class FlavoredDeferredComponentsConfig extends BasicDeferredComponentsConfig {
+  static const _flavors = '''
+    flavorDimensions += "tier"
+    productFlavors {
+        free {
+            dimension = "tier"
+        }
+        paid {
+            dimension = "tier"
+        }
+    }
+''';
+
+  @override
+  String get appBuild =>
+      super.appBuild.replaceFirst('    buildTypes {', '$_flavors    buildTypes {');
+
+  @override
+  List<DeferredComponentModule> get deferredComponents => <DeferredComponentModule>[
+    DeferredComponentModule('component1', androidBlockExtras: _flavors),
+  ];
 }

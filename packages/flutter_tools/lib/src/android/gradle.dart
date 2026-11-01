@@ -45,6 +45,7 @@ import 'migrations/disable_built_in_kotlin_migration.dart';
 import 'migrations/disable_new_dsl_migration.dart';
 import 'migrations/min_sdk_version_migration.dart';
 import 'migrations/multidex_removal_migration.dart';
+import 'migrations/remove_new_dsl_opt_out_migration.dart';
 import 'migrations/top_level_gradle_build_file_migration.dart';
 
 /// The regex to grab variant names from printBuildVariants gradle task
@@ -519,6 +520,7 @@ To fix this, you can either:
       _exitWithUnsupportedProjectMessage(logger.terminal, _analytics);
     }
 
+    final disableNewDslMigration = DisableNewDslMigration(project.android, logger);
     final migrators = <ProjectMigrator>[
       TopLevelGradleBuildFileMigration(project.android, logger),
       AndroidStudioJavaGradleConflictMigration(
@@ -530,8 +532,21 @@ To fix this, you can either:
       MinSdkVersionMigration(project.android, logger),
       MultidexRemovalMigration(project.android, logger),
       CmakeAndroid16kPagesMigration(project.android, logger),
+      // Relative order among the next three migrators is load-bearing:
+      // 1. DisableBuiltInKotlinMigration writes `android.builtInKotlin=false`
+      //    when `gradle.properties` has no `android.builtInKotlin` entry.
+      // 2. DisableNewDslMigration reads `android.builtInKotlin` and adds
+      //    `android.newDsl=false` unless the project is ready for the new DSL.
+      // 3. RemoveNewDslOptOutMigration removes a pre-existing Flutter-added
+      //    `android.newDsl=false` marker pair once the project becomes ready,
+      //    skipping any opt-out added by DisableNewDslMigration on the same run.
       DisableBuiltInKotlinMigration(project.android, logger),
-      DisableNewDslMigration(project.android, logger),
+      disableNewDslMigration,
+      RemoveNewDslOptOutMigration(
+        project.android,
+        logger,
+        disableNewDslMigration: disableNewDslMigration,
+      ),
     ];
 
     final migration = ProjectMigration(migrators);
