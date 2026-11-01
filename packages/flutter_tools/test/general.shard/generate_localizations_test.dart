@@ -90,6 +90,7 @@ void main() {
     bool suppressWarnings = false,
     bool relaxSyntax = false,
     bool useNamedParameters = false,
+    bool useExplicitPluralValues = false,
     void Function(Directory)? setup,
     FileSystem? fileSystem,
   }) {
@@ -121,6 +122,7 @@ void main() {
         suppressWarnings: suppressWarnings,
         useRelaxedSyntax: relaxSyntax,
         useNamedParameters: useNamedParameters,
+        useExplicitPluralValues: useExplicitPluralValues,
         projectPathString: (fileSystem ?? fs).currentDirectory.path,
       )
       ..loadResources()
@@ -2506,6 +2508,229 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
     3 is not a valid plural case.
     {count,plural, =0{None} =1{One} =2{Two} =3{Undefined Behavior!} other{Hmm...}}
                                             ^'''),
+          );
+        }
+      });
+
+      testWithoutContext('explicit plural values are mapped to plural categories by default', () {
+        setupLocalizations(<String, String>{
+          'en': '''
+{
+  "itemCount": "{count,plural, =0{none} =1{exactly one} other{many}}"
+}''',
+        });
+        final String content = getGeneratedFileContent(locale: 'en');
+        expect(content, contains("zero: 'none',"));
+        expect(content, contains("one: 'exactly one',"));
+        expect(content, isNot(contains('count == ')));
+      });
+
+      testWithoutContext(
+        'explicit plural values generate exact-match checks before intl.Intl.pluralLogic',
+        () {
+          setupLocalizations(<String, String>{
+            'en': '''
+{
+  "itemCount": "{count,plural, =0{none} =1{exactly one} one{{count} item} other{{count} items}}"
+}''',
+          }, useExplicitPluralValues: true);
+          expect(logger.hadWarningOutput, isFalse);
+          expect(
+            getGeneratedFileContent(locale: 'en'),
+            contains(r'''
+    String _temp0 = count == 0
+        ? 'none'
+        : count == 1
+        ? 'exactly one'
+        : intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count items',
+      one: '$count item',
+    );'''),
+          );
+        },
+      );
+
+      testWithoutContext('explicit plural values are not passed as plural categories', () {
+        setupLocalizations(<String, String>{
+          'en': '''
+{
+  "itemCount": "{count,plural, =0{none} =1{exactly one} =2{exactly two} other{many}}"
+}''',
+        }, useExplicitPluralValues: true);
+        final String content = getGeneratedFileContent(locale: 'en');
+        expect(content, contains("count == 0\n        ? 'none'"));
+        expect(content, contains("count == 1\n        ? 'exactly one'"));
+        expect(content, contains("count == 2\n        ? 'exactly two'"));
+        expect(content, isNot(contains('zero:')));
+        expect(content, isNot(contains('one:')));
+        expect(content, isNot(contains('two:')));
+        expect(content, contains("other: 'many',"));
+      });
+
+      testWithoutContext('explicit plural values without categories only emit other', () {
+        setupLocalizations(<String, String>{
+          'en': '''
+{
+  "itemCount": "{count,plural, =5{five} other{many}}"
+}''',
+        }, useExplicitPluralValues: true);
+        expect(
+          getGeneratedFileContent(locale: 'en'),
+          contains(r'''
+    String _temp0 = count == 5
+        ? 'five'
+        : intl.Intl.pluralLogic('''),
+        );
+      });
+
+      testWithoutContext('plural messages without explicit values are unchanged by the option', () {
+        const arb = '''
+{
+  "itemCount": "{count,plural, zero{none} one{one} other{many}}"
+}''';
+        setupLocalizations(<String, String>{'en': arb});
+        final String withoutOption = getGeneratedFileContent(locale: 'en');
+        setupLocalizations(<String, String>{'en': arb}, useExplicitPluralValues: true);
+        expect(getGeneratedFileContent(locale: 'en'), withoutOption);
+      });
+
+      testWithoutContext(
+        'explicit plural values and plural categories coexist without warnings',
+        () {
+          setupLocalizations(<String, String>{
+            'en': '''
+{
+  "itemCount": "{count,plural, =0{none} zero{zero category} =1{exactly one} one{one category} =2{exactly two} two{two category} other{many}}"
+}''',
+          }, useExplicitPluralValues: true);
+          expect(logger.hadWarningOutput, isFalse);
+          final String content = getGeneratedFileContent(locale: 'en');
+          expect(content, contains("'none'"));
+          expect(content, contains("'exactly one'"));
+          expect(content, contains("'exactly two'"));
+          expect(content, contains("zero: 'zero category',"));
+          expect(content, contains("one: 'one category',"));
+          expect(content, contains("two: 'two category',"));
+        },
+      );
+
+      testWithoutContext('arbitrary explicit plural values are accepted when enabled', () {
+        setupLocalizations(<String, String>{
+          'en': '''
+{
+  "itemCount": "{count,plural, =3{three} =10{ten} =007{seven} other{many}}"
+}''',
+        }, useExplicitPluralValues: true);
+        final String content = getGeneratedFileContent(locale: 'en');
+        expect(content, contains("count == 3\n        ? 'three'"));
+        expect(content, contains("count == 10\n        ? 'ten'"));
+        expect(content, contains("count == 7\n        ? 'seven'"));
+      });
+
+      testWithoutContext('explicit plural values support placeholders and nested messages', () {
+        setupLocalizations(<String, String>{
+          'en': '''
+{
+  "itemCount": "{count,plural, =1{one {name}} other{{name} has {count} items}}"
+}''',
+        }, useExplicitPluralValues: true);
+        final String content = getGeneratedFileContent(locale: 'en');
+        expect(content, contains(r"count == 1\n        ? 'one $name'".replaceAll(r'\n', '\n')));
+        expect(content, contains(r"other: '$name has $count items',"));
+      });
+
+      testWithoutContext('explicit plural values too large for an integer throw when enabled', () {
+        try {
+          setupLocalizations(<String, String>{
+            'en': '''
+{
+  "count": "{count,plural, =99999999999999999999{Huge} other{Hmm...}}"
+}''',
+          }, useExplicitPluralValues: true);
+          fail('Expected an L10nException.');
+        } on L10nException catch (error) {
+          expect(error.message, contains('Found syntax errors.'));
+          expect(
+            logger.errorText,
+            contains('The plural case "=99999999999999999999" is too large'),
+          );
+        }
+      });
+
+      testWithoutContext('repeated explicit plural values warn when enabled', () {
+        setupLocalizations(<String, String>{
+          'en': '''
+{
+  "helloWorlds": "{count,plural, =1{Hello} =01{hello} other{hi}}"
+}''',
+        }, useExplicitPluralValues: true);
+        expect(logger.hadWarningOutput, isTrue);
+        expect(
+          logger.warningText,
+          contains('''
+[app_en.arb:helloWorlds] ICU Syntax Warning: The plural part specified below is overridden by a later plural part.
+    {count,plural, =1{Hello} =01{hello} other{hi}}
+                   ^'''),
+        );
+        final String content = getGeneratedFileContent(locale: 'en');
+        expect(content, contains("count == 1\n        ? 'hello'"));
+        expect(content, isNot(contains("'Hello'")));
+      });
+
+      testWithoutContext(
+        'repeated explicit plural values do not warn when warnings are suppressed',
+        () {
+          setupLocalizations(
+            <String, String>{
+              'en': '''
+{
+  "helloWorlds": "{count,plural, =1{Hello} =1{hello} other{hi}}"
+}''',
+            },
+            useExplicitPluralValues: true,
+            suppressWarnings: true,
+          );
+          expect(logger.hadWarningOutput, isFalse);
+        },
+      );
+
+      testWithoutContext('repeated plural categories warn when explicit values are enabled', () {
+        setupLocalizations(<String, String>{
+          'en': '''
+{
+  "helloWorlds": "{count,plural, one{Hello} one{hello} other{hi}}"
+}''',
+        }, useExplicitPluralValues: true);
+        expect(logger.hadWarningOutput, isTrue);
+        expect(
+          logger.warningText,
+          contains('''
+[app_en.arb:helloWorlds] ICU Syntax Warning: The plural part specified below is overridden by a later plural part.
+    {count,plural, one{Hello} one{hello} other{hi}}
+                   ^'''),
+        );
+      });
+
+      testWithoutContext('undefined plural categories throw a syntax error when enabled', () {
+        try {
+          setupLocalizations(<String, String>{
+            'en': '''
+{
+  "count": "{count,plural, =3{Three} some{Undefined Behavior!} other{Hmm...}}"
+}''',
+          }, useExplicitPluralValues: true);
+          fail('Expected an L10nException.');
+        } on L10nException catch (error) {
+          expect(error.message, contains('Found syntax errors.'));
+          expect(logger.hadErrorOutput, isTrue);
+          expect(
+            logger.errorText,
+            contains('''
+[app_en.arb:count] ICU Syntax Error: Plural expressions case must be one of "zero", "one", "two", "few", "many", or "other".
+    {count,plural, =3{Three} some{Undefined Behavior!} other{Hmm...}}
+                             ^'''),
           );
         }
       });
