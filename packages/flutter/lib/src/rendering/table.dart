@@ -614,6 +614,7 @@ class RenderTable extends RenderBox {
     super.clearSemantics();
     _cachedRows.clear();
     _cachedCells.clear();
+    _idToIndexMap.clear();
   }
 
   /// Provides custom semantics for tables by generating nodes for rows and maybe cells.
@@ -822,6 +823,10 @@ class RenderTable extends RenderBox {
       }
       _rows = 0;
       _children.clear();
+      _idToIndexMap.clear();
+      _cachedRows.clear();
+      _cachedCells.clear();
+      markNeedsSemanticsUpdate();
       markNeedsLayout();
       return;
     }
@@ -862,6 +867,10 @@ class RenderTable extends RenderBox {
     _rows = cells.length ~/ columns;
     _children = List<RenderBox?>.of(cells);
     assert(_children.length == rows * columns);
+    _idToIndexMap.clear();
+    _cachedRows.clear();
+    _cachedCells.clear();
+    markNeedsSemanticsUpdate();
     markNeedsLayout();
   }
 
@@ -880,8 +889,12 @@ class RenderTable extends RenderBox {
     _children.clear();
     _columns = cells.isNotEmpty ? cells.first.length : 0;
     _rows = 0;
+    _idToIndexMap.clear();
+    _cachedRows.clear();
+    _cachedCells.clear();
     cells.forEach(addRow);
     assert(_children.length == rows * columns);
+    markNeedsSemanticsUpdate();
   }
 
   /// Adds a row to the end of the table.
@@ -920,6 +933,10 @@ class RenderTable extends RenderBox {
     if (value != null) {
       adoptChild(value);
     }
+    _idToIndexMap.clear();
+    _cachedRows.clear();
+    _cachedCells.clear();
+    markNeedsSemanticsUpdate();
   }
 
   @override

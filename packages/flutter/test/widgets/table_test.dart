@@ -1112,4 +1112,99 @@ void main() {
     );
     expect(tester.getSize(find.byType(Table)), Size.zero);
   });
+
+  testWidgets('Keyed rows that move up after a removal update their semantics row index', (
+    WidgetTester tester,
+  ) async {
+    // Regression test for https://github.com/flutter/flutter/issues/194545.
+    final semantics = SemanticsTester(tester);
+    var lines = <String>['a', 'b', 'c'];
+    late StateSetter setState;
+
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setter) {
+            setState = setter;
+            return Table(
+              children: <TableRow>[
+                for (final String l in lines)
+                  TableRow(
+                    key: ValueKey<String>(l),
+                    children: <Widget>[
+                      TableCell(child: Text('$l reps')),
+                      TableCell(child: Text('$l load')),
+                    ],
+                  ),
+              ],
+            );
+          },
+        ),
+      ),
+    );
+
+    TestSemantics expectedSemantics(List<String> items) {
+      return TestSemantics.root(
+        children: <TestSemantics>[
+          TestSemantics(
+            textDirection: TextDirection.ltr,
+            children: <TestSemantics>[
+              TestSemantics(
+                children: <TestSemantics>[
+                  TestSemantics(
+                    role: SemanticsRole.table,
+                    children: <TestSemantics>[
+                      for (int i = 0; i < items.length; i++)
+                        TestSemantics(
+                          role: SemanticsRole.row,
+                          children: <TestSemantics>[
+                            TestSemantics(
+                              label: '${items[i]} reps',
+                              textDirection: TextDirection.ltr,
+                              role: SemanticsRole.cell,
+                            ),
+                            TestSemantics(
+                              label: '${items[i]} load',
+                              textDirection: TextDirection.ltr,
+                              role: SemanticsRole.cell,
+                            ),
+                          ],
+                        ),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
+      );
+    }
+
+    expect(
+      semantics,
+      hasSemantics(
+        expectedSemantics(<String>['a', 'b', 'c']),
+        ignoreTransform: true,
+        ignoreId: true,
+        ignoreRect: true,
+      ),
+    );
+
+    setState(() {
+      lines = <String>['b', 'c'];
+    });
+    await tester.pumpAndSettle();
+
+    expect(
+      semantics,
+      hasSemantics(
+        expectedSemantics(<String>['b', 'c']),
+        ignoreTransform: true,
+        ignoreId: true,
+        ignoreRect: true,
+      ),
+    );
+
+    semantics.dispose();
+  });
 }
