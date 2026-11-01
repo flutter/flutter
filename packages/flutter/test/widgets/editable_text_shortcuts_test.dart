@@ -1741,6 +1741,89 @@ void main() {
     }, variant: macOSOnly);
   }, skip: kIsWeb); // [intended] on web these keys are handled by the browser.
 
+  group('Arrow keys while composing', () {
+    final iOSOnly = TargetPlatformVariant.only(TargetPlatform.iOS);
+    const composingValue = TextEditingValue(
+      text: testText,
+      selection: TextSelection.collapsed(
+        offset: 23, // After "all".
+      ),
+      composing: TextRange(start: 20, end: 23), // "all".
+    );
+    // Caret offset after pressing each key at offset 23.
+    final caretOffsets = <LogicalKeyboardKey, int>{
+      LogicalKeyboardKey.arrowLeft: 22,
+      LogicalKeyboardKey.arrowRight: 24,
+      LogicalKeyboardKey.arrowUp: 3,
+      LogicalKeyboardKey.arrowDown: 39,
+    };
+
+    testWidgets('are left unhandled on iOS', (WidgetTester tester) async {
+      controller.value = composingValue;
+      await tester.pumpWidget(buildEditableText());
+
+      for (final LogicalKeyboardKey key in caretOffsets.keys) {
+        final bool handled = await tester.sendKeyDownEvent(key);
+        await tester.sendKeyUpEvent(key);
+        await tester.pump();
+
+        expect(handled, isFalse, reason: key.toString());
+        expect(controller.value, composingValue, reason: key.toString());
+      }
+    }, variant: iOSOnly);
+
+    testWidgets('are left unhandled with shift on iOS', (WidgetTester tester) async {
+      controller.value = composingValue;
+      await tester.pumpWidget(buildEditableText());
+
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.shift);
+      for (final LogicalKeyboardKey key in caretOffsets.keys) {
+        final bool handled = await tester.sendKeyDownEvent(key);
+        await tester.sendKeyUpEvent(key);
+        await tester.pump();
+
+        expect(handled, isFalse, reason: key.toString());
+        expect(controller.value, composingValue, reason: key.toString());
+      }
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.shift);
+    }, variant: iOSOnly);
+
+    testWidgets('move the caret on iOS when not composing', (WidgetTester tester) async {
+      controller.value = composingValue.copyWith(composing: TextRange.empty);
+      await tester.pumpWidget(buildEditableText());
+
+      for (final MapEntry(key: LogicalKeyboardKey key, value: int offset) in caretOffsets.entries) {
+        controller.selection = composingValue.selection;
+        await tester.pump();
+
+        final bool handled = await tester.sendKeyDownEvent(key);
+        await tester.sendKeyUpEvent(key);
+        await tester.pump();
+
+        expect(handled, isTrue, reason: key.toString());
+        expect(controller.selection.isCollapsed, isTrue, reason: key.toString());
+        expect(controller.selection.baseOffset, offset, reason: key.toString());
+      }
+    }, variant: iOSOnly);
+
+    testWidgets('move the caret on other platforms', (WidgetTester tester) async {
+      controller.value = composingValue;
+      await tester.pumpWidget(buildEditableText());
+
+      for (final MapEntry(key: LogicalKeyboardKey key, value: int offset) in caretOffsets.entries) {
+        controller.selection = composingValue.selection;
+        await tester.pump();
+
+        await tester.sendKeyDownEvent(key);
+        await tester.sendKeyUpEvent(key);
+        await tester.pump();
+
+        expect(controller.selection.isCollapsed, isTrue, reason: key.toString());
+        expect(controller.selection.baseOffset, offset, reason: key.toString());
+      }
+    }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{TargetPlatform.iOS}));
+  }, skip: kIsWeb); // [intended] on web these keys are handled by the browser.
+
   group('Web does not accept', () {
     final allExceptApple = TargetPlatformVariant.all(
       excluding: <TargetPlatform>{TargetPlatform.iOS, TargetPlatform.macOS},
