@@ -207,10 +207,30 @@ class DraggableScrollableController extends ChangeNotifier {
   }
 
   void _attach(_DraggableScrollableSheetScrollController scrollController) {
-    assert(
-      _attachedController == null,
-      'Draggable scrollable controller is already attached to a sheet.',
-    );
+    assert(() {
+      if (_attachedController != null) {
+        throw FlutterError.fromParts(<DiagnosticsNode>[
+          ErrorSummary('DraggableScrollableController is already attached to a sheet.'),
+          ErrorDescription(
+            'A DraggableScrollableController can only be attached to one '
+            'DraggableScrollableSheet at a time, but it was given to a new sheet while '
+            'it was still attached to another one.',
+          ),
+          ErrorHint(
+            'This can also happen when a single DraggableScrollableSheet is recreated '
+            'instead of updated, for example because its key changed or because a widget '
+            'was inserted before it in the tree. The new sheet attaches to the controller '
+            'before the old sheet is disposed.',
+          ),
+          ErrorHint(
+            'Use a separate DraggableScrollableController for each sheet. If the sheet is '
+            'being recreated, give it a GlobalKey so that it keeps its state when it moves '
+            'in the tree, or avoid changing its key.',
+          ),
+        ]);
+      }
+      return true;
+    }());
     _attachedController = scrollController;
     _attachedController!.extent._currentSize.addListener(notifyListeners);
     _attachedController!.onPositionDetached = _disposeAnimationControllers;
