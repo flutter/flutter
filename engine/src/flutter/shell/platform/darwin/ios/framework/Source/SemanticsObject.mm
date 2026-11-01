@@ -615,6 +615,9 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
 
 // Finds the first eligiable semantics object in hit test order.
 - (id)search:(CGPoint)point {
+  if (![self containsPoint:point]) {
+    return nil;
+  }
   // Search children in hit test order.
   for (SemanticsObject* child in [self childrenInHitTestOrder]) {
     if ([child containsPoint:point]) {
@@ -624,8 +627,11 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
       }
     }
   }
-  // Check if the current semantic object should be returned.
-  if ([self containsPoint:point] && [self isFocusable]) {
+  // Check if the current semantic object should be returned. Hidden elements
+  // (e.g. off-screen or obscured scroll children that still report a non-empty
+  // accessibilityFrame for VoiceOver linear navigation) cannot gain focus via
+  // touch exploration.
+  if (!self.node.flags.isHidden && [self isFocusable]) {
     return self.nativeAccessibility;
   }
   return nil;
@@ -1049,6 +1055,10 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
 
 - (BOOL)accessibilityScroll:(UIAccessibilityScrollDirection)direction {
   return [self.semanticsObject accessibilityScroll:direction];
+}
+
+- (id)_accessibilityHitTest:(CGPoint)point withEvent:(UIEvent*)event {
+  return [self.semanticsObject _accessibilityHitTest:point withEvent:event];
 }
 
 @end

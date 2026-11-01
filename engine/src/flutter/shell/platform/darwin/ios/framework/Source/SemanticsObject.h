@@ -128,6 +128,8 @@ constexpr float kScrollExtentMaxForInf = 1000;
  */
 - (void)accessibilityBridgeDidChangeView;
 
+- (nullable id)_accessibilityHitTest:(CGPoint)point withEvent:(nullable UIEvent*)event;
+
 #pragma mark - Designated initializers
 
 - (instancetype)init __attribute__((unavailable("Use initWithBridge instead")));
@@ -242,6 +244,8 @@ constexpr float kScrollExtentMaxForInf = 1000;
 - (instancetype)initWithSemanticsObject:(SemanticsObject*)semanticsObject NS_DESIGNATED_INITIALIZER;
 
 @property(nonatomic, weak, nullable) SemanticsObject* semanticsObject;
+
+- (nullable id)_accessibilityHitTest:(CGPoint)point withEvent:(nullable UIEvent*)event;
 
 @end
 

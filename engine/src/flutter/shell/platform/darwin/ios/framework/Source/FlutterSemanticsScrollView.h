@@ -54,6 +54,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (instancetype)initWithCoder:(NSCoder*)coder NS_UNAVAILABLE;
 - (instancetype)initWithSemanticsObject:(SemanticsObject*)semanticsObject;
 - (nullable id)accessibilityContainer;
+- (nullable id)_accessibilityHitTest:(CGPoint)point withEvent:(nullable UIEvent*)event;
 
 @end
 NS_ASSUME_NONNULL_END

@@ -25,6 +25,13 @@ FLUTTER_ASSERT_ARC
   return nil;
 }
 
+- (id)_accessibilityHitTest:(CGPoint)point withEvent:(UIEvent*)event {
+  CGPoint pointInScreenCoordinates =
+      UIAccessibilityConvertFrameToScreenCoordinates(CGRectMake(point.x, point.y, 0, 0), self)
+          .origin;
+  return [self.semanticsObject _accessibilityHitTest:pointInScreenCoordinates withEvent:event];
+}
+
 // The following methods are explicitly forwarded to the wrapped SemanticsObject because the
 // forwarding logic above doesn't apply to them since they are also implemented in the
 // UIScrollView class, the base class.

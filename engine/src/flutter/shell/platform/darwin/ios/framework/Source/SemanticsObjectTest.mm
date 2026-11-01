@@ -978,7 +978,9 @@ const float kFloatCompareEpsilon = 0.001;
   [childObject setSemanticsNode:&childNode];
 
   scrollable.children = @[ childObject ];
+  scrollable.childrenInHitTestOrder = @[ childObject ];
   parentObject.children = @[ scrollable ];
+  parentObject.childrenInHitTestOrder = @[ scrollable ];
   [parentObject accessibilityBridgeDidFinishUpdate];
   [scrollable accessibilityBridgeDidFinishUpdate];
   [childObject accessibilityBridgeDidFinishUpdate];
@@ -1001,12 +1003,39 @@ const float kFloatCompareEpsilon = 0.001;
   XCTAssertEqual([scrollView indexOfAccessibilityElement:childObject], 0);
   XCTAssertEqual([scrollView indexOfAccessibilityElement:parentObject], NSNotFound);
 
-  // Off-screen (hidden) child still reports its non-empty accessibilityFrame.
+  // Off-screen (hidden) child still reports its non-empty accessibilityFrame,
+  // but cannot be focused via VoiceOver touch exploration (_accessibilityHitTest:withEvent:).
   CGRect hiddenFrame = childObject.accessibilityFrame;
   XCTAssertFalse(CGRectIsEmpty(hiddenFrame));
+  CGPoint offscreenPoint = CGPointMake(CGRectGetMidX(hiddenFrame), CGRectGetMidY(hiddenFrame));
+  XCTAssertNil([parentObject _accessibilityHitTest:offscreenPoint withEvent:nil]);
+  XCTAssertNil([parentContainer _accessibilityHitTest:offscreenPoint withEvent:nil]);
+  XCTAssertNil([scrollable _accessibilityHitTest:offscreenPoint withEvent:nil]);
+  XCTAssertNil([scrollView _accessibilityHitTest:offscreenPoint withEvent:nil]);
+
+  // Even when a scroll child's rect is inside the scrollable's viewport, if it
+  // is marked hidden (e.g. obscured behind a pinned header or overlay), it must
+  // not be returned by _accessibilityHitTest:withEvent:.
+  childNode.rect = SkRect::MakeXYWH(0, 50, 100, 50);
+  childNode.flags.isHidden = true;
+  [childObject setSemanticsNode:&childNode];
+  CGRect obscuredFrame = childObject.accessibilityFrame;
+  XCTAssertFalse(CGRectIsEmpty(obscuredFrame));
+  CGPoint inViewportPoint = CGPointMake(CGRectGetMidX(obscuredFrame), CGRectGetMidY(obscuredFrame));
+  XCTAssertNil([parentObject _accessibilityHitTest:inViewportPoint withEvent:nil]);
+  XCTAssertNil([parentContainer _accessibilityHitTest:inViewportPoint withEvent:nil]);
+  XCTAssertNil([scrollable _accessibilityHitTest:inViewportPoint withEvent:nil]);
+  XCTAssertNil([scrollView _accessibilityHitTest:inViewportPoint withEvent:nil]);
+
+  // Once the in-viewport child is no longer hidden, touch exploration hits it.
   childNode.flags.isHidden = false;
   [childObject setSemanticsNode:&childNode];
-  XCTAssertTrue(CGRectEqualToRect(hiddenFrame, childObject.accessibilityFrame));
+  XCTAssertTrue(CGRectEqualToRect(obscuredFrame, childObject.accessibilityFrame));
+  XCTAssertEqual([parentObject _accessibilityHitTest:inViewportPoint withEvent:nil], childObject);
+  XCTAssertEqual([parentContainer _accessibilityHitTest:inViewportPoint withEvent:nil],
+                 childObject);
+  XCTAssertEqual([scrollable _accessibilityHitTest:inViewportPoint withEvent:nil], childObject);
+  XCTAssertEqual([scrollView _accessibilityHitTest:inViewportPoint withEvent:nil], childObject);
 }
 
 - (void)testFlutterScrollableSemanticsObjectNoScrollBarOrContentInsets {
