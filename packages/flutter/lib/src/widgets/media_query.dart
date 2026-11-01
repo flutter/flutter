@@ -1309,12 +1309,6 @@ class MediaQueryData {
 /// prefer using the specific methods
 /// (for example: [MediaQuery.sizeOf] and [MediaQuery.paddingOf]), as it will
 /// rebuild more efficiently.
-///
-/// If no [MediaQuery] is in scope then [MediaQuery.of] and the "...Of" methods
-/// similar to [MediaQuery.sizeOf] will throw an exception. Alternatively, the
-/// "maybe-" variant methods (such as [MediaQuery.maybeOf] and
-/// [MediaQuery.maybeSizeOf]) can be used, which return null, instead of
-/// throwing, if no [MediaQuery] is in scope.
 /// {@endtemplate}
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=A3WrA4zAaPw}
@@ -1463,7 +1457,6 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
     return Builder(
       key: key,
       builder: (BuildContext context) {
-        assert(debugCheckHasMediaQuery(context));
         return MediaQuery(
           data: MediaQuery.of(context).applyTextStyleOverrides(
             lineHeightScaleFactorOverride: lineHeightScaleFactorOverride,
@@ -1531,7 +1524,6 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
     return Builder(
       key: key,
       builder: (BuildContext context) {
-        assert(debugCheckHasMediaQuery(context));
         return MediaQuery(
           data: MediaQuery.of(context).copyWith(textScaler: TextScaler.noScaling),
           child: child,
@@ -1564,7 +1556,6 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
 
     return Builder(
       builder: (BuildContext context) {
-        assert(debugCheckHasMediaQuery(context));
         final MediaQueryData data = MediaQuery.of(context);
         return MediaQuery(
           data: data.copyWith(
@@ -1609,8 +1600,6 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   ///
   /// See also:
   ///
-  /// * [maybeOf], which doesn't throw or assert if it doesn't find a
-  ///   [MediaQuery] ancestor. It returns null instead.
   /// * [sizeOf] and other specific methods for retrieving and depending on
   ///   changes of a specific value.
   static MediaQueryData of(BuildContext context) {
@@ -1622,6 +1611,8 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
     return InheritedModel.inheritFrom<MediaQuery>(context, aspect: aspect)!.data;
   }
 
+  /// Deprecated. Use [of] instead.
+  ///
   /// The data from the closest instance of this class that encloses the given
   /// context, if any.
   ///
@@ -1632,13 +1623,14 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   ///
   /// Since it is typical that the widget only requires a subset of properties
   /// of the [MediaQueryData] object, prefer using the more specific methods
-  /// (for example: [MediaQuery.maybeSizeOf] and [MediaQuery.maybePaddingOf]),
-  /// as those methods will not cause a widget to rebuild when unrelated
-  /// properties are updated.
+  /// (for example: [MediaQuery.sizeOf] and [MediaQuery.paddingOf]), as those
+  /// methods will not cause a widget to rebuild when unrelated properties are
+  /// updated.
   ///
   /// Typical usage is as follows:
   ///
   /// ```dart
+  /// // ignore: deprecated_member_use
   /// MediaQueryData? mediaQuery = MediaQuery.maybeOf(context);
   /// if (mediaQuery == null) {
   ///   // Do something else instead.
@@ -1649,8 +1641,13 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   ///
   /// * [of], which will throw if it doesn't find a [MediaQuery] ancestor,
   ///   instead of returning null.
-  /// * [maybeSizeOf] and other specific methods for retrieving and depending on
+  /// * [sizeOf] and other specific methods for retrieving and depending on
   ///   changes of a specific value.
+  @Deprecated(
+    'Use of instead. '
+    'There is no need to handle a missing MediaQuery, since one is always introduced by runApp. '
+    'This feature was deprecated after v3.49.0-0.2.pre.',
+  )
   static MediaQueryData? maybeOf(BuildContext context) {
     return _maybeOf(context);
   }
@@ -1673,6 +1670,8 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// {@endtemplate}
   static Size sizeOf(BuildContext context) => _of(context, _MediaQueryAspect.size).size;
 
+  /// Deprecated. Use [sizeOf] instead.
+  ///
   /// Returns [MediaQueryData.size] from the nearest [MediaQuery] ancestor or
   /// null, if no such ancestor exists.
   ///
@@ -1681,10 +1680,15 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   ///
   /// {@template flutter.widgets.media_query.MediaQuery.dontUseMaybeOf}
   /// Prefer using this function over getting the attribute directly from the
-  /// [MediaQueryData] returned from [maybeOf], because using this function will
+  /// [MediaQueryData] returned from [of], because using this function will
   /// only rebuild the `context` when this specific attribute changes, not when
   /// _any_ attribute changes.
   /// {@endtemplate}
+  @Deprecated(
+    'Use sizeOf instead. '
+    'There is no need to handle a missing MediaQuery, since one is always introduced by runApp. '
+    'This feature was deprecated after v3.49.0-0.2.pre.',
+  )
   static Size? maybeSizeOf(BuildContext context) => _maybeOf(context, _MediaQueryAspect.size)?.size;
 
   /// Returns width of [MediaQueryData.size] from the nearest [MediaQuery]
@@ -1697,6 +1701,8 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// {@macro flutter.widgets.media_query.MediaQuery.dontUseOf}
   static double widthOf(BuildContext context) => _of(context, _MediaQueryAspect.width).size.width;
 
+  /// Deprecated. Use [widthOf] instead.
+  ///
   /// Returns width of [MediaQueryData.size] from the nearest [MediaQuery]
   /// ancestor or null, if no such ancestor exists.
   ///
@@ -1705,6 +1711,11 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// changes.
   ///
   /// {@macro flutter.widgets.media_query.MediaQuery.dontUseMaybeOf}
+  @Deprecated(
+    'Use widthOf instead. '
+    'There is no need to handle a missing MediaQuery, since one is always introduced by runApp. '
+    'This feature was deprecated after v3.49.0-0.2.pre.',
+  )
   static double? maybeWidthOf(BuildContext context) =>
       _maybeOf(context, _MediaQueryAspect.width)?.size.width;
 
@@ -1719,6 +1730,8 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   static double heightOf(BuildContext context) =>
       _of(context, _MediaQueryAspect.height).size.height;
 
+  /// Deprecated. Use [heightOf] instead.
+  ///
   /// Returns height of [MediaQueryData.size] from the nearest [MediaQuery]
   /// ancestor or null, if no such ancestor exists.
   ///
@@ -1727,6 +1740,11 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// changes.
   ///
   /// {@macro flutter.widgets.media_query.MediaQuery.dontUseMaybeOf}
+  @Deprecated(
+    'Use heightOf instead. '
+    'There is no need to handle a missing MediaQuery, since one is always introduced by runApp. '
+    'This feature was deprecated after v3.49.0-0.2.pre.',
+  )
   static double? maybeHeightOf(BuildContext context) =>
       _maybeOf(context, _MediaQueryAspect.height)?.size.height;
 
@@ -1740,6 +1758,8 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   static Orientation orientationOf(BuildContext context) =>
       _of(context, _MediaQueryAspect.orientation).orientation;
 
+  /// Deprecated. Use [orientationOf] instead.
+  ///
   /// Returns [MediaQueryData.orientation] for the nearest [MediaQuery] ancestor or
   /// null, if no such ancestor exists.
   ///
@@ -1747,6 +1767,11 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// the [MediaQueryData.orientation] property of the ancestor [MediaQuery] changes.
   ///
   /// {@macro flutter.widgets.media_query.MediaQuery.dontUseMaybeOf}
+  @Deprecated(
+    'Use orientationOf instead. '
+    'There is no need to handle a missing MediaQuery, since one is always introduced by runApp. '
+    'This feature was deprecated after v3.49.0-0.2.pre.',
+  )
   static Orientation? maybeOrientationOf(BuildContext context) =>
       _maybeOf(context, _MediaQueryAspect.orientation)?.orientation;
 
@@ -1760,6 +1785,8 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   static double devicePixelRatioOf(BuildContext context) =>
       _of(context, _MediaQueryAspect.devicePixelRatio).devicePixelRatio;
 
+  /// Deprecated. Use [devicePixelRatioOf] instead.
+  ///
   /// Returns [MediaQueryData.devicePixelRatio] for the nearest [MediaQuery] ancestor or
   /// null, if no such ancestor exists.
   ///
@@ -1767,11 +1794,16 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// the [MediaQueryData.devicePixelRatio] property of the ancestor [MediaQuery] changes.
   ///
   /// {@macro flutter.widgets.media_query.MediaQuery.dontUseMaybeOf}
+  @Deprecated(
+    'Use devicePixelRatioOf instead. '
+    'There is no need to handle a missing MediaQuery, since one is always introduced by runApp. '
+    'This feature was deprecated after v3.49.0-0.2.pre.',
+  )
   static double? maybeDevicePixelRatioOf(BuildContext context) =>
       _maybeOf(context, _MediaQueryAspect.devicePixelRatio)?.devicePixelRatio;
 
   /// Deprecated. Will be removed in a future version of Flutter. Use
-  /// [maybeTextScalerOf] instead.
+  /// [textScalerOf] instead.
   ///
   /// Returns [MediaQueryData.textScaleFactor] for the nearest [MediaQuery] ancestor or
   /// 1.0, if no such ancestor exists.
@@ -1785,10 +1817,11 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
     'Use of textScaleFactor was deprecated in preparation for the upcoming nonlinear text scaling support. '
     'This feature was deprecated after v3.12.0-2.0.pre.',
   )
-  static double textScaleFactorOf(BuildContext context) => maybeTextScaleFactorOf(context) ?? 1.0;
+  static double textScaleFactorOf(BuildContext context) =>
+      _maybeOf(context, _MediaQueryAspect.textScaleFactor)?.textScaleFactor ?? 1.0;
 
   /// Deprecated. Will be removed in a future version of Flutter. Use
-  /// [maybeTextScalerOf] instead.
+  /// [textScalerOf] instead.
   ///
   /// Returns [MediaQueryData.textScaleFactor] for the nearest [MediaQuery] ancestor or
   /// null, if no such ancestor exists.
@@ -1799,7 +1832,7 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   ///
   /// {@macro flutter.widgets.media_query.MediaQuery.dontUseMaybeOf}
   @Deprecated(
-    'Use maybeTextScalerOf instead. '
+    'Use textScalerOf instead. '
     'Use of textScaleFactor was deprecated in preparation for the upcoming nonlinear text scaling support. '
     'This feature was deprecated after v3.12.0-2.0.pre.',
   )
@@ -1815,8 +1848,10 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   ///
   /// {@macro flutter.widgets.media_query.MediaQuery.dontUseOf}
   static TextScaler textScalerOf(BuildContext context) =>
-      maybeTextScalerOf(context) ?? TextScaler.noScaling;
+      _maybeOf(context, _MediaQueryAspect.textScaler)?.textScaler ?? TextScaler.noScaling;
 
+  /// Deprecated. Use [textScalerOf] instead.
+  ///
   /// Returns the [MediaQueryData.textScaler] for the nearest [MediaQuery]
   /// ancestor or null if no such ancestor exists.
   ///
@@ -1825,6 +1860,11 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// changes.
   ///
   /// {@macro flutter.widgets.media_query.MediaQuery.dontUseMaybeOf}
+  @Deprecated(
+    'Use textScalerOf instead. '
+    'There is no need to handle a missing MediaQuery, since one is always introduced by runApp. '
+    'This feature was deprecated after v3.49.0-0.2.pre.',
+  )
   static TextScaler? maybeTextScalerOf(BuildContext context) =>
       _maybeOf(context, _MediaQueryAspect.textScaler)?.textScaler;
 
@@ -1837,8 +1877,11 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   ///
   /// {@macro flutter.widgets.media_query.MediaQuery.dontUseOf}
   static Brightness platformBrightnessOf(BuildContext context) =>
-      maybePlatformBrightnessOf(context) ?? Brightness.light;
+      _maybeOf(context, _MediaQueryAspect.platformBrightness)?.platformBrightness ??
+      Brightness.light;
 
+  /// Deprecated. Use [platformBrightnessOf] instead.
+  ///
   /// Returns [MediaQueryData.platformBrightness] for the nearest [MediaQuery]
   /// ancestor or null, if no such ancestor exists.
   ///
@@ -1847,6 +1890,11 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// [MediaQuery] changes.
   ///
   /// {@macro flutter.widgets.media_query.MediaQuery.dontUseMaybeOf}
+  @Deprecated(
+    'Use platformBrightnessOf instead. '
+    'There is no need to handle a missing MediaQuery, since one is always introduced by runApp. '
+    'This feature was deprecated after v3.49.0-0.2.pre.',
+  )
   static Brightness? maybePlatformBrightnessOf(BuildContext context) =>
       _maybeOf(context, _MediaQueryAspect.platformBrightness)?.platformBrightness;
 
@@ -1861,6 +1909,8 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   static EdgeInsets paddingOf(BuildContext context) =>
       _of(context, _MediaQueryAspect.padding).padding;
 
+  /// Deprecated. Use [paddingOf] instead.
+  ///
   /// Returns [MediaQueryData.padding] for the nearest [MediaQuery] ancestor
   /// or null, if no such ancestor exists.
   ///
@@ -1869,6 +1919,11 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// changes.
   ///
   /// {@macro flutter.widgets.media_query.MediaQuery.dontUseMaybeOf}
+  @Deprecated(
+    'Use paddingOf instead. '
+    'There is no need to handle a missing MediaQuery, since one is always introduced by runApp. '
+    'This feature was deprecated after v3.49.0-0.2.pre.',
+  )
   static EdgeInsets? maybePaddingOf(BuildContext context) =>
       _maybeOf(context, _MediaQueryAspect.padding)?.padding;
 
@@ -1883,6 +1938,8 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   static EdgeInsets viewInsetsOf(BuildContext context) =>
       _of(context, _MediaQueryAspect.viewInsets).viewInsets;
 
+  /// Deprecated. Use [viewInsetsOf] instead.
+  ///
   /// Returns [MediaQueryData.viewInsets] for the nearest [MediaQuery] ancestor
   /// or null, if no such ancestor exists.
   ///
@@ -1891,6 +1948,11 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// changes.
   ///
   /// {@macro flutter.widgets.media_query.MediaQuery.dontUseMaybeOf}
+  @Deprecated(
+    'Use viewInsetsOf instead. '
+    'There is no need to handle a missing MediaQuery, since one is always introduced by runApp. '
+    'This feature was deprecated after v3.49.0-0.2.pre.',
+  )
   static EdgeInsets? maybeViewInsetsOf(BuildContext context) =>
       _maybeOf(context, _MediaQueryAspect.viewInsets)?.viewInsets;
 
@@ -1905,6 +1967,8 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   static EdgeInsets systemGestureInsetsOf(BuildContext context) =>
       _of(context, _MediaQueryAspect.systemGestureInsets).systemGestureInsets;
 
+  /// Deprecated. Use [systemGestureInsetsOf] instead.
+  ///
   /// Returns [MediaQueryData.systemGestureInsets] for the nearest [MediaQuery]
   /// ancestor or null, if no such ancestor exists.
   ///
@@ -1913,6 +1977,11 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// [MediaQuery] changes.
   ///
   /// {@macro flutter.widgets.media_query.MediaQuery.dontUseMaybeOf}
+  @Deprecated(
+    'Use systemGestureInsetsOf instead. '
+    'There is no need to handle a missing MediaQuery, since one is always introduced by runApp. '
+    'This feature was deprecated after v3.49.0-0.2.pre.',
+  )
   static EdgeInsets? maybeSystemGestureInsetsOf(BuildContext context) =>
       _maybeOf(context, _MediaQueryAspect.systemGestureInsets)?.systemGestureInsets;
 
@@ -1927,6 +1996,8 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   static EdgeInsets viewPaddingOf(BuildContext context) =>
       _of(context, _MediaQueryAspect.viewPadding).viewPadding;
 
+  /// Deprecated. Use [viewPaddingOf] instead.
+  ///
   /// Returns [MediaQueryData.viewPadding] for the nearest [MediaQuery] ancestor
   /// or null, if no such ancestor exists.
   ///
@@ -1935,6 +2006,11 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// changes.
   ///
   /// {@macro flutter.widgets.media_query.MediaQuery.dontUseMaybeOf}
+  @Deprecated(
+    'Use viewPaddingOf instead. '
+    'There is no need to handle a missing MediaQuery, since one is always introduced by runApp. '
+    'This feature was deprecated after v3.49.0-0.2.pre.',
+  )
   static EdgeInsets? maybeViewPaddingOf(BuildContext context) =>
       _maybeOf(context, _MediaQueryAspect.viewPadding)?.viewPadding;
 
@@ -1949,6 +2025,8 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   static bool alwaysUse24HourFormatOf(BuildContext context) =>
       _of(context, _MediaQueryAspect.alwaysUse24HourFormat).alwaysUse24HourFormat;
 
+  /// Deprecated. Use [alwaysUse24HourFormatOf] instead.
+  ///
   /// Returns [MediaQueryData.alwaysUse24HourFormat] for the nearest
   /// [MediaQuery] ancestor or null, if no such ancestor exists.
   ///
@@ -1957,6 +2035,11 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// [MediaQuery] changes.
   ///
   /// {@macro flutter.widgets.media_query.MediaQuery.dontUseMaybeOf}
+  @Deprecated(
+    'Use alwaysUse24HourFormatOf instead. '
+    'There is no need to handle a missing MediaQuery, since one is always introduced by runApp. '
+    'This feature was deprecated after v3.49.0-0.2.pre.',
+  )
   static bool? maybeAlwaysUse24HourFormatOf(BuildContext context) =>
       _maybeOf(context, _MediaQueryAspect.alwaysUse24HourFormat)?.alwaysUse24HourFormat;
 
@@ -1971,6 +2054,8 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   static bool accessibleNavigationOf(BuildContext context) =>
       _of(context, _MediaQueryAspect.accessibleNavigation).accessibleNavigation;
 
+  /// Deprecated. Use [accessibleNavigationOf] instead.
+  ///
   /// Returns [MediaQueryData.accessibleNavigation] for the nearest [MediaQuery]
   /// ancestor or null, if no such ancestor exists.
   ///
@@ -1979,6 +2064,11 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// [MediaQuery] changes.
   ///
   /// {@macro flutter.widgets.media_query.MediaQuery.dontUseMaybeOf}
+  @Deprecated(
+    'Use accessibleNavigationOf instead. '
+    'There is no need to handle a missing MediaQuery, since one is always introduced by runApp. '
+    'This feature was deprecated after v3.49.0-0.2.pre.',
+  )
   static bool? maybeAccessibleNavigationOf(BuildContext context) =>
       _maybeOf(context, _MediaQueryAspect.accessibleNavigation)?.accessibleNavigation;
 
@@ -1993,6 +2083,8 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   static bool invertColorsOf(BuildContext context) =>
       _of(context, _MediaQueryAspect.invertColors).invertColors;
 
+  /// Deprecated. Use [invertColorsOf] instead.
+  ///
   /// Returns [MediaQueryData.invertColors] for the nearest [MediaQuery]
   /// ancestor or null, if no such ancestor exists.
   ///
@@ -2001,6 +2093,11 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// changes.
   ///
   /// {@macro flutter.widgets.media_query.MediaQuery.dontUseMaybeOf}
+  @Deprecated(
+    'Use invertColorsOf instead. '
+    'There is no need to handle a missing MediaQuery, since one is always introduced by runApp. '
+    'This feature was deprecated after v3.49.0-0.2.pre.',
+  )
   static bool? maybeInvertColorsOf(BuildContext context) =>
       _maybeOf(context, _MediaQueryAspect.invertColors)?.invertColors;
 
@@ -2012,8 +2109,11 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// changes.
   ///
   /// {@macro flutter.widgets.media_query.MediaQuery.dontUseOf}
-  static bool highContrastOf(BuildContext context) => maybeHighContrastOf(context) ?? false;
+  static bool highContrastOf(BuildContext context) =>
+      _maybeOf(context, _MediaQueryAspect.highContrast)?.highContrast ?? false;
 
+  /// Deprecated. Use [highContrastOf] instead.
+  ///
   /// Returns [MediaQueryData.highContrast] for the nearest [MediaQuery]
   /// ancestor or null, if no such ancestor exists.
   ///
@@ -2022,6 +2122,11 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// changes.
   ///
   /// {@macro flutter.widgets.media_query.MediaQuery.dontUseMaybeOf}
+  @Deprecated(
+    'Use highContrastOf instead. '
+    'There is no need to handle a missing MediaQuery, since one is always introduced by runApp. '
+    'This feature was deprecated after v3.49.0-0.2.pre.',
+  )
   static bool? maybeHighContrastOf(BuildContext context) =>
       _maybeOf(context, _MediaQueryAspect.highContrast)?.highContrast;
 
@@ -2034,8 +2139,10 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   ///
   /// {@macro flutter.widgets.media_query.MediaQuery.dontUseOf}
   static bool onOffSwitchLabelsOf(BuildContext context) =>
-      maybeOnOffSwitchLabelsOf(context) ?? false;
+      _maybeOf(context, _MediaQueryAspect.onOffSwitchLabels)?.onOffSwitchLabels ?? false;
 
+  /// Deprecated. Use [onOffSwitchLabelsOf] instead.
+  ///
   /// Returns [MediaQueryData.onOffSwitchLabels] for the nearest [MediaQuery]
   /// ancestor or null, if no such ancestor exists.
   ///
@@ -2044,6 +2151,11 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// [MediaQuery] changes.
   ///
   /// {@macro flutter.widgets.media_query.MediaQuery.dontUseMaybeOf}
+  @Deprecated(
+    'Use onOffSwitchLabelsOf instead. '
+    'There is no need to handle a missing MediaQuery, since one is always introduced by runApp. '
+    'This feature was deprecated after v3.49.0-0.2.pre.',
+  )
   static bool? maybeOnOffSwitchLabelsOf(BuildContext context) =>
       _maybeOf(context, _MediaQueryAspect.onOffSwitchLabels)?.onOffSwitchLabels;
 
@@ -2058,6 +2170,8 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   static bool disableAnimationsOf(BuildContext context) =>
       _of(context, _MediaQueryAspect.disableAnimations).disableAnimations;
 
+  /// Deprecated. Use [disableAnimationsOf] instead.
+  ///
   /// Returns [MediaQueryData.disableAnimations] for the nearest [MediaQuery]
   /// ancestor or null, if no such ancestor exists.
   ///
@@ -2066,6 +2180,11 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// [MediaQuery] changes.
   ///
   /// {@macro flutter.widgets.media_query.MediaQuery.dontUseMaybeOf}
+  @Deprecated(
+    'Use disableAnimationsOf instead. '
+    'There is no need to handle a missing MediaQuery, since one is always introduced by runApp. '
+    'This feature was deprecated after v3.49.0-0.2.pre.',
+  )
   static bool? maybeDisableAnimationsOf(BuildContext context) =>
       _maybeOf(context, _MediaQueryAspect.disableAnimations)?.disableAnimations;
 
@@ -2080,6 +2199,8 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   static bool reduceMotionOf(BuildContext context) =>
       _of(context, _MediaQueryAspect.reduceMotion).reduceMotion;
 
+  /// Deprecated. Use [reduceMotionOf] instead.
+  ///
   /// Returns [MediaQueryData.reduceMotion] for the nearest [MediaQuery]
   /// ancestor or null, if no such ancestor exists.
   ///
@@ -2088,6 +2209,11 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// [MediaQuery] changes.
   ///
   /// {@macro flutter.widgets.media_query.MediaQuery.dontUseMaybeOf}
+  @Deprecated(
+    'Use reduceMotionOf instead. '
+    'There is no need to handle a missing MediaQuery, since one is always introduced by runApp. '
+    'This feature was deprecated after v3.49.0-0.2.pre.',
+  )
   static bool? maybeReduceMotionOf(BuildContext context) =>
       _maybeOf(context, _MediaQueryAspect.reduceMotion)?.reduceMotion;
 
@@ -2099,8 +2225,11 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// changes.
   ///
   /// {@macro flutter.widgets.media_query.MediaQuery.dontUseOf}
-  static bool boldTextOf(BuildContext context) => maybeBoldTextOf(context) ?? false;
+  static bool boldTextOf(BuildContext context) =>
+      _maybeOf(context, _MediaQueryAspect.boldText)?.boldText ?? false;
 
+  /// Deprecated. Use [boldTextOf] instead.
+  ///
   /// Returns the [MediaQueryData.boldText] accessibility setting for the
   /// nearest [MediaQuery] ancestor or null, if no such ancestor exists.
   ///
@@ -2109,6 +2238,11 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// changes.
   ///
   /// {@macro flutter.widgets.media_query.MediaQuery.dontUseMaybeOf}
+  @Deprecated(
+    'Use boldTextOf instead. '
+    'There is no need to handle a missing MediaQuery, since one is always introduced by runApp. '
+    'This feature was deprecated after v3.49.0-0.2.pre.',
+  )
   static bool? maybeBoldTextOf(BuildContext context) =>
       _maybeOf(context, _MediaQueryAspect.boldText)?.boldText;
 
@@ -2123,8 +2257,11 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// dramatic difference.
   ///
   /// {@macro flutter.widgets.media_query.MediaQuery.dontUseOf}
-  static bool supportsAnnounceOf(BuildContext context) => maybeSupportsAnnounceOf(context) ?? false;
+  static bool supportsAnnounceOf(BuildContext context) =>
+      _maybeOf(context, _MediaQueryAspect.supportsAnnounce)?.supportsAnnounce ?? false;
 
+  /// Deprecated. Use [supportsAnnounceOf] instead.
+  ///
   /// Returns the [MediaQueryData.supportsAnnounce] accessibility setting for the
   /// nearest [MediaQuery] ancestor or null, if no such ancestor exists.
   ///
@@ -2133,6 +2270,11 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// changes.
   ///
   /// {@macro flutter.widgets.media_query.MediaQuery.dontUseMaybeOf}
+  @Deprecated(
+    'Use supportsAnnounceOf instead. '
+    'There is no need to handle a missing MediaQuery, since one is always introduced by runApp. '
+    'This feature was deprecated after v3.49.0-0.2.pre.',
+  )
   static bool? maybeSupportsAnnounceOf(BuildContext context) =>
       _maybeOf(context, _MediaQueryAspect.supportsAnnounce)?.supportsAnnounce;
 
@@ -2147,6 +2289,8 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   static NavigationMode navigationModeOf(BuildContext context) =>
       _of(context, _MediaQueryAspect.navigationMode).navigationMode;
 
+  /// Deprecated. Use [navigationModeOf] instead.
+  ///
   /// Returns [MediaQueryData.navigationMode] for the nearest [MediaQuery]
   /// ancestor or null, if no such ancestor exists.
   ///
@@ -2155,6 +2299,11 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// changes.
   ///
   /// {@macro flutter.widgets.media_query.MediaQuery.dontUseMaybeOf}
+  @Deprecated(
+    'Use navigationModeOf instead. '
+    'There is no need to handle a missing MediaQuery, since one is always introduced by runApp. '
+    'This feature was deprecated after v3.49.0-0.2.pre.',
+  )
   static NavigationMode? maybeNavigationModeOf(BuildContext context) =>
       _maybeOf(context, _MediaQueryAspect.navigationMode)?.navigationMode;
 
@@ -2169,6 +2318,8 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   static DeviceGestureSettings gestureSettingsOf(BuildContext context) =>
       _of(context, _MediaQueryAspect.gestureSettings).gestureSettings;
 
+  /// Deprecated. Use [gestureSettingsOf] instead.
+  ///
   /// Returns [MediaQueryData.gestureSettings] for the nearest [MediaQuery]
   /// ancestor or null, if no such ancestor exists.
   ///
@@ -2177,6 +2328,11 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// changes.
   ///
   /// {@macro flutter.widgets.media_query.MediaQuery.dontUseMaybeOf}
+  @Deprecated(
+    'Use gestureSettingsOf instead. '
+    'There is no need to handle a missing MediaQuery, since one is always introduced by runApp. '
+    'This feature was deprecated after v3.49.0-0.2.pre.',
+  )
   static DeviceGestureSettings? maybeGestureSettingsOf(BuildContext context) =>
       _maybeOf(context, _MediaQueryAspect.gestureSettings)?.gestureSettings;
 
@@ -2191,6 +2347,8 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   static List<ui.DisplayFeature> displayFeaturesOf(BuildContext context) =>
       _of(context, _MediaQueryAspect.displayFeatures).displayFeatures;
 
+  /// Deprecated. Use [displayFeaturesOf] instead.
+  ///
   /// Returns [MediaQueryData.displayFeatures] for the nearest [MediaQuery]
   /// ancestor or null, if no such ancestor exists.
   ///
@@ -2199,6 +2357,11 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// changes.
   ///
   /// {@macro flutter.widgets.media_query.MediaQuery.dontUseMaybeOf}
+  @Deprecated(
+    'Use displayFeaturesOf instead. '
+    'There is no need to handle a missing MediaQuery, since one is always introduced by runApp. '
+    'This feature was deprecated after v3.49.0-0.2.pre.',
+  )
   static List<ui.DisplayFeature>? maybeDisplayFeaturesOf(BuildContext context) =>
       _maybeOf(context, _MediaQueryAspect.displayFeatures)?.displayFeatures;
 
@@ -2215,6 +2378,8 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
     _MediaQueryAspect.supportsShowingSystemContextMenu,
   ).supportsShowingSystemContextMenu;
 
+  /// Deprecated. Use [supportsShowingSystemContextMenu] instead.
+  ///
   /// Returns [MediaQueryData.supportsShowingSystemContextMenu] for the nearest
   /// [MediaQuery] ancestor or null, if no such ancestor exists.
   ///
@@ -2223,6 +2388,11 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// ancestor [MediaQuery] changes.
   ///
   /// {@macro flutter.widgets.media_query.MediaQuery.dontUseMaybeOf}
+  @Deprecated(
+    'Use supportsShowingSystemContextMenu instead. '
+    'There is no need to handle a missing MediaQuery, since one is always introduced by runApp. '
+    'This feature was deprecated after v3.49.0-0.2.pre.',
+  )
   static bool? maybeSupportsShowingSystemContextMenu(BuildContext context) => _maybeOf(
     context,
     _MediaQueryAspect.supportsShowingSystemContextMenu,
@@ -2282,18 +2452,8 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
       _maybeOf(context, _MediaQueryAspect.paragraphSpacingOverride)?.paragraphSpacingOverride;
 
   /// Returns [MediaQueryData.displayCornerRadii] for the nearest [MediaQuery]
-  /// ancestor or throws an exception, if no such ancestor exists.
-  ///
-  /// Use of this method will cause the given [context] to rebuild any time that
-  /// the [MediaQueryData.displayCornerRadii] property of the ancestor [MediaQuery]
-  /// changes.
-  ///
-  /// {@macro flutter.widgets.media_query.MediaQuery.dontUseOf}
-  static BorderRadius? displayCornerRadiiOf(BuildContext context) =>
-      _of(context, _MediaQueryAspect.displayCornerRadii).displayCornerRadii;
-
-  /// Returns [MediaQueryData.displayCornerRadii] for the nearest [MediaQuery]
-  /// ancestor or null, if no such ancestor exists.
+  /// ancestor or null, if no such ancestor exists or if the platform has not
+  /// specified the display corner radii.
   ///
   /// Use of this method will cause the given [context] to rebuild any time that
   /// the [MediaQueryData.displayCornerRadii] property of the ancestor [MediaQuery]
@@ -2302,6 +2462,24 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// {@macro flutter.widgets.media_query.MediaQuery.dontUseMaybeOf}
   static BorderRadius? maybeDisplayCornerRadiiOf(BuildContext context) =>
       _maybeOf(context, _MediaQueryAspect.displayCornerRadii)?.displayCornerRadii;
+
+  /// Deprecated. Use [maybeDisplayCornerRadiiOf] instead.
+  ///
+  /// Returns [MediaQueryData.displayCornerRadii] for the nearest [MediaQuery]
+  /// ancestor or throws an exception, if no such ancestor exists.
+  ///
+  /// Use of this method will cause the given [context] to rebuild any time that
+  /// the [MediaQueryData.displayCornerRadii] property of the ancestor [MediaQuery]
+  /// changes.
+  ///
+  /// {@macro flutter.widgets.media_query.MediaQuery.dontUseOf}
+  @Deprecated(
+    'Use maybeDisplayCornerRadiiOf instead. '
+    'MediaQueryData.displayCornerRadii is nullable, so the accessor uses the maybe prefix. '
+    'This feature was deprecated after v3.49.0-0.2.pre.',
+  )
+  static BorderRadius? displayCornerRadiiOf(BuildContext context) =>
+      _of(context, _MediaQueryAspect.displayCornerRadii).displayCornerRadii;
 
   @override
   bool updateShouldNotify(MediaQuery oldWidget) => data != oldWidget.data;
@@ -2447,7 +2625,7 @@ class _MediaQueryFromViewState extends State<_MediaQueryFromView> with WidgetsBi
   }
 
   void _updateParentData() {
-    _parentData = widget.ignoreParentData ? null : MediaQuery.maybeOf(context);
+    _parentData = widget.ignoreParentData ? null : MediaQuery._maybeOf(context);
     _data = null; // _updateData must be called again after changing parent data.
   }
 
