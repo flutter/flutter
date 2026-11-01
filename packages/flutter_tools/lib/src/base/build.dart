@@ -123,6 +123,7 @@ class AOTSnapshotter {
     String? splitDebugInfo,
     required bool dartObfuscation,
     bool quiet = false,
+    bool windowsX64Elf = false,
   }) async {
     assert(platform != TargetPlatform.ios || cpuArch != null);
 
@@ -150,6 +151,9 @@ class AOTSnapshotter {
     // See: https://github.com/flutter/flutter/issues/190897
     final targetingWindowsX64 = platform == TargetPlatform.windows_x64;
     _logger.printTrace('targetingWindowsX64 = $targetingWindowsX64');
+
+    final bool buildingWindowsPeCoff = targetingWindowsX64 && !windowsX64Elf;
+    _logger.printTrace('buildingWindowsPeCoff = $buildingWindowsPeCoff');
 
     // We strip snapshot by default, but allow to suppress this behavior
     // by supplying --no-strip in extraGenSnapshotOptions.
@@ -197,7 +201,7 @@ class AOTSnapshotter {
         '--macho-rpath=@executable_path/Frameworks,@loader_path/Frameworks',
         '--macho-install-name=@rpath/$frameworkName/$frameworkSnapshotName',
       ]);
-    } else if (targetingWindowsX64) {
+    } else if (buildingWindowsPeCoff) {
       genSnapshotArgs.addAll(<String>[
         '--snapshot_kind=app-aot-pecoff-obj',
         '--coff=$windowsAotObject',
@@ -236,7 +240,7 @@ class AOTSnapshotter {
     final String archName = platform.getName(cpuArch: cpuArch);
     final debugFilename = 'app.$archName.symbols';
     final bool shouldSplitDebugInfo = splitDebugInfo?.isNotEmpty ?? false;
-    final String? windowsSplitDebugInfoPdb = shouldSplitDebugInfo && targetingWindowsX64
+    final String? windowsSplitDebugInfoPdb = shouldSplitDebugInfo && buildingWindowsPeCoff
         ? _fileSystem.path.join(splitDebugInfo!, 'app.$archName.pdb')
         : null;
     final String windowsPdbFile = windowsSplitDebugInfoPdb ?? defaultWindowsPdbFile;
@@ -250,7 +254,7 @@ class AOTSnapshotter {
         _logger.printTrace('Windows AOT PE/COFF uses PDB for split debug info.');
       }
     }
-    final bool emitDwarfDebugInfo = shouldSplitDebugInfo && !targetingWindowsX64;
+    final bool emitDwarfDebugInfo = shouldSplitDebugInfo && !buildingWindowsPeCoff;
 
     // Debugging information.
     genSnapshotArgs.addAll(<String>[
@@ -275,7 +279,7 @@ class AOTSnapshotter {
       return genSnapshotExitCode;
     }
 
-    if (targetingWindowsX64) {
+    if (buildingWindowsPeCoff) {
       final String? linkerPath = _windowsLinkerPath;
       if (linkerPath == null || !_fileSystem.file(linkerPath).existsSync()) {
         _logger.printError('Unable to find Visual Studio link.exe required to build Windows AOT.');
