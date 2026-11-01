@@ -90,6 +90,7 @@ class ParagraphStyle {
   size_t max_lines = std::numeric_limits<size_t>::max();
   std::u16string ellipsis;
   std::string locale;
+  bool fake_missing_font_styles = true;
 
   // Whether to render the soft hyphen (U+00AD) glyph at a line-break
   // opportunity. Defaults to true, which renders the hyphen (Hyphens.manual);

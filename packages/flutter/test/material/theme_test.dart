@@ -1254,6 +1254,8 @@ class _TextStyleProxy implements TextStyle {
   List<ui.FontVariation>? get fontVariations => _delegate.fontVariations;
   @override
   TextOverflow? get overflow => _delegate.overflow;
+  @override
+  bool? get fakeMissingFontStyles => _delegate.fakeMissingFontStyles;
 
   @override
   String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) => super.toString();
@@ -1297,6 +1299,7 @@ class _TextStyleProxy implements TextStyle {
     List<ui.FontVariation>? fontVariations,
     TextOverflow? overflow,
     String? package,
+    bool? fakeMissingFontStyles,
   }) {
     throw UnimplementedError();
   }
@@ -1334,6 +1337,7 @@ class _TextStyleProxy implements TextStyle {
     String? debugLabel,
     TextOverflow? overflow,
     String? package,
+    bool? fakeMissingFontStyles,
   }) {
     throw UnimplementedError();
   }
@@ -1360,6 +1364,7 @@ class _TextStyleProxy implements TextStyle {
     FontStyle? fontStyle,
     double? height,
     StrutStyle? strutStyle,
+    bool? fakeMissingFontStyles,
   }) {
     throw UnimplementedError();
   }
