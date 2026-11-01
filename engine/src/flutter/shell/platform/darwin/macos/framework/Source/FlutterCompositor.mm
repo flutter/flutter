@@ -110,23 +110,27 @@ bool FlutterCompositor::Present(FlutterViewIdentifier view_id,
   // the layer information instead of passing the original pointers from embedder.
   auto layers_copy = std::make_shared<std::vector<LayerVariant>>(CopyLayers(layers, layers_count));
 
-  [view.surfaceManager presentSurfaces:surfaces
-                                atTime:presentation_time
-                                notify:^{
-                                  // Accessing presenters_ here does not need a
-                                  // lock to avoid race condition against
-                                  // AddView and RemoveView, since all three
-                                  // take place on the platform thread. (The
-                                  // macOS API requires platform view presenting
-                                  // to take place on the platform thread,
-                                  // enforced by `FlutterThreadSynchronizer`.)
-                                  dispatch_assert_queue(dispatch_get_main_queue());
-                                  auto found_presenter = presenters_.find(view_id);
-                                  if (found_presenter != presenters_.end()) {
-                                    found_presenter->second.PresentPlatformViews(
-                                        view, *layers_copy, platform_view_controller_);
-                                  }
-                                }];
+  dispatch_block_t notify_block = ^{
+    // Accessing presenters_ here does not need a
+    // lock to avoid race condition against
+    // AddView and RemoveView, since all three
+    // take place on the platform thread. (The
+    // macOS API requires platform view presenting
+    // to take place on the platform thread,
+    // enforced by `FlutterThreadSynchronizer`.)
+    dispatch_assert_queue(dispatch_get_main_queue());
+    auto found_presenter = presenters_.find(view_id);
+    if (found_presenter != presenters_.end()) {
+      found_presenter->second.PresentPlatformViews(view, *layers_copy, platform_view_controller_);
+    }
+  };
+
+  if (layers_count == 0) {
+    // A frame with no layers displays nothing, and so has no frame size to commit.
+    [view.surfaceManager presentEmptyFrameAtTime:presentation_time notify:notify_block];
+  } else {
+    [view.surfaceManager presentSurfaces:surfaces atTime:presentation_time notify:notify_block];
+  }
 
   return true;
 }
