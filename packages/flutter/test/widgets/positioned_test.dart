@@ -137,10 +137,24 @@ void main() {
       const Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
-          child: Stack(children: [Positioned(top: 0.0, left: 0.0, child: Placeholder())]),
+          child: Stack(children: [Positioned(child: Placeholder())]),
         ),
       ),
     );
-    expect(tester.getSize(find.byType(Stack)), Size.zero);
+    expect(tester.getSize(find.byType(Positioned)), Size.zero);
+  });
+
+  testWidgets('PositionedDirectional does not crash at zero area', (WidgetTester tester) async {
+    tester.view.physicalSize = Size.zero;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: Stack(children: [PositionedDirectional(child: Placeholder())]),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(PositionedDirectional)), Size.zero);
   });
 }

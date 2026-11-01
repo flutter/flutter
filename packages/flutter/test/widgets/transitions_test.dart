@@ -235,51 +235,124 @@ void main() {
     });
   });
 
-  testWidgets('RelativePositionedTransition animates', (WidgetTester tester) async {
-    final controller = AnimationController(vsync: const TestVSync());
+  testWidgets('PositionedTransition does not crash at zero area', (WidgetTester tester) async {
+    tester.view.physicalSize = Size.zero;
+    final controller = AnimationController(
+      vsync: const TestVSync(),
+      value: 1,
+      duration: const Duration(seconds: 2),
+    );
+    final curvedAnimation = CurvedAnimation(parent: controller, curve: Curves.linear);
+    addTearDown(tester.view.reset);
     addTearDown(controller.dispose);
-    final Animation<Rect?> rectTween = RectTween(
-      begin: const Rect.fromLTWH(0, 0, 30, 40),
-      end: const Rect.fromLTWH(100, 200, 100, 200),
-    ).animate(controller);
-    final Widget widget = Directionality(
-      textDirection: TextDirection.rtl,
-      child: Stack(
-        alignment: Alignment.centerLeft,
-        children: <Widget>[
-          RelativePositionedTransition(
-            size: const Size(200, 300),
-            rect: rectTween,
-            child: const Placeholder(),
+    addTearDown(curvedAnimation.dispose);
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: Stack(
+            children: [
+              PositionedTransition(
+                rect: RelativeRectTween(
+                  begin: RelativeRect.fromRect(
+                    const Rect.fromLTRB(10.0, 20.0, 20.0, 30.0),
+                    const Rect.fromLTRB(0.0, 10.0, 100.0, 110.0),
+                  ),
+                  end: RelativeRect.fromRect(
+                    const Rect.fromLTRB(81.0, 91.0, 91.0, 101.0),
+                    const Rect.fromLTRB(1.0, 11.0, 101.0, 111.0),
+                  ),
+                ).animate(curvedAnimation),
+                child: const Placeholder(),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
+    expect(tester.getSize(find.byType(PositionedTransition)), Size.zero);
+  });
 
-    await tester.pumpWidget(widget);
+  group('RelativePositionedTransition', () {
+    testWidgets('animates', (WidgetTester tester) async {
+      final controller = AnimationController(vsync: const TestVSync());
+      addTearDown(controller.dispose);
+      final Animation<Rect?> rectTween = RectTween(
+        begin: const Rect.fromLTWH(0, 0, 30, 40),
+        end: const Rect.fromLTWH(100, 200, 100, 200),
+      ).animate(controller);
+      final Widget widget = Directionality(
+        textDirection: TextDirection.rtl,
+        child: Stack(
+          alignment: Alignment.centerLeft,
+          children: <Widget>[
+            RelativePositionedTransition(
+              size: const Size(200, 300),
+              rect: rectTween,
+              child: const Placeholder(),
+            ),
+          ],
+        ),
+      );
 
-    final Positioned actualPositioned = tester.widget(find.byType(Positioned));
-    final RenderBox renderBox = tester.renderObject(find.byType(Placeholder));
+      await tester.pumpWidget(widget);
 
-    var actualRect = Rect.fromLTRB(
-      actualPositioned.left!,
-      actualPositioned.top!,
-      actualPositioned.right ?? 0.0,
-      actualPositioned.bottom ?? 0.0,
-    );
-    expect(actualRect, equals(const Rect.fromLTRB(0, 0, 170, 260)));
-    expect(renderBox.size, equals(const Size(630, 340)));
+      final Positioned actualPositioned = tester.widget(find.byType(Positioned));
+      final RenderBox renderBox = tester.renderObject(find.byType(Placeholder));
 
-    controller.value = 0.5;
-    await tester.pump();
-    actualRect = Rect.fromLTRB(
-      actualPositioned.left!,
-      actualPositioned.top!,
-      actualPositioned.right ?? 0.0,
-      actualPositioned.bottom ?? 0.0,
-    );
-    expect(actualRect, equals(const Rect.fromLTWH(0, 0, 170, 260)));
-    expect(renderBox.size, equals(const Size(665, 420)));
+      var actualRect = Rect.fromLTRB(
+        actualPositioned.left!,
+        actualPositioned.top!,
+        actualPositioned.right ?? 0.0,
+        actualPositioned.bottom ?? 0.0,
+      );
+      expect(actualRect, equals(const Rect.fromLTRB(0, 0, 170, 260)));
+      expect(renderBox.size, equals(const Size(630, 340)));
+
+      controller.value = 0.5;
+      await tester.pump();
+      actualRect = Rect.fromLTRB(
+        actualPositioned.left!,
+        actualPositioned.top!,
+        actualPositioned.right ?? 0.0,
+        actualPositioned.bottom ?? 0.0,
+      );
+      expect(actualRect, equals(const Rect.fromLTWH(0, 0, 170, 260)));
+      expect(renderBox.size, equals(const Size(665, 420)));
+    });
+
+    testWidgets('does not crash at zero area', (WidgetTester tester) async {
+      tester.view.physicalSize = Size.zero;
+      final controller = AnimationController(
+        vsync: const TestVSync(),
+        value: 1,
+        duration: const Duration(seconds: 2),
+      );
+      final curvedAnimation = CurvedAnimation(parent: controller, curve: Curves.linear);
+      addTearDown(tester.view.reset);
+      addTearDown(controller.dispose);
+      addTearDown(curvedAnimation.dispose);
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: Stack(
+              children: [
+                RelativePositionedTransition(
+                  size: const Size(200, 300),
+                  rect: RectTween(
+                    begin: const Rect.fromLTRB(0.0, 10.0, 100.0, 110.0),
+                    end: const Rect.fromLTRB(1.0, 11.0, 101.0, 111.0),
+                  ).animate(curvedAnimation),
+                  child: const Placeholder(),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+      expect(tester.getSize(find.byType(RelativePositionedTransition)), Size.zero);
+    });
   });
 
   group('SizeTransition', () {
