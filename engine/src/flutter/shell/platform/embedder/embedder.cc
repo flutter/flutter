@@ -2338,6 +2338,15 @@ FlutterEngineResult FlutterEngineInitialize(size_t version,
         };
   }
 
+  flutter::PlatformViewEmbedder::SemanticsTreeEnabledCallback
+      semantics_tree_enabled_callback;
+  if (auto callback =
+          SAFE_ACCESS(args, semantics_tree_enabled_callback, nullptr)) {
+    semantics_tree_enabled_callback = [callback, user_data](bool enabled) {
+      callback(enabled, user_data);
+    };
+  }
+
   auto external_view_embedder_result = InferExternalViewEmbedderFromArgs(
       SAFE_ACCESS(args, compositor, nullptr), settings.enable_impeller);
   if (!external_view_embedder_result.ok()) {
@@ -2355,6 +2364,7 @@ FlutterEngineResult FlutterEngineInitialize(size_t version,
           on_pre_engine_restart_callback,             //
           channel_update_callback,                    //
           view_focus_change_request_callback,         //
+          semantics_tree_enabled_callback,            //
   };
 
   impeller::Flags impeller_flags;

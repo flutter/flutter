@@ -1154,6 +1154,11 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   }
 
   @override
+  void setSemanticsTreeEnabled(bool enabled) {
+    _platformDispatcher.setSemanticsTreeEnabled(enabled);
+  }
+
+  @override
   void updateSemantics(SemanticsUpdate update) {
     _platformDispatcher.updateSemantics(update);
   }

@@ -438,6 +438,10 @@ bool FlutterWindowsEngine::Run(std::string_view entrypoint) {
     auto host = static_cast<FlutterWindowsEngine*>(user_data);
     host->OnPreEngineRestart();
   };
+  args.semantics_tree_enabled_callback = [](bool enabled, void* user_data) {
+    static_cast<FlutterWindowsEngine*>(user_data)->SetSemanticsTreeEnabled(
+        enabled);
+  };
   args.update_semantics_callback2 = [](const FlutterSemanticsUpdate2* update,
                                        void* user_data) {
     auto host = static_cast<FlutterWindowsEngine*>(user_data);
@@ -575,6 +579,7 @@ bool FlutterWindowsEngine::Run(std::string_view entrypoint) {
 
 bool FlutterWindowsEngine::Stop() {
   if (engine_) {
+    SetSemanticsTreeEnabled(false);
     window_manager_->OnEngineShutdown();
     for (const auto& [callback, registrar] :
          plugin_registrar_destruction_callbacks_) {
@@ -603,7 +608,7 @@ std::unique_ptr<FlutterWindowsView> FlutterWindowsEngine::CreateView(
       sizing_delegate, windows_proc_table_);
 
   view->CreateRenderSurface();
-  view->UpdateSemanticsEnabled(semantics_enabled_);
+  view->SetSemanticsTreeEnabled(semantics_tree_enabled_);
 
   next_view_id_++;
 
@@ -1065,17 +1070,24 @@ bool FlutterWindowsEngine::DispatchSemanticsAction(
 
 void FlutterWindowsEngine::UpdateSemanticsEnabled(bool enabled) {
   if (engine_ && semantics_enabled_ != enabled) {
-    std::shared_lock read_lock(views_mutex_);
-
     semantics_enabled_ = enabled;
     embedder_api_.UpdateSemanticsEnabled(engine_, enabled);
-    for (auto iterator = views_.begin(); iterator != views_.end(); iterator++) {
-      iterator->second->UpdateSemanticsEnabled(enabled);
-    }
+  }
+}
+
+void FlutterWindowsEngine::SetSemanticsTreeEnabled(bool enabled) {
+  if (semantics_tree_enabled_ == enabled) {
+    return;
+  }
+  semantics_tree_enabled_ = enabled;
+  std::shared_lock read_lock(views_mutex_);
+  for (const auto& [view_id, view] : views_) {
+    view->SetSemanticsTreeEnabled(enabled);
   }
 }
 
 void FlutterWindowsEngine::OnPreEngineRestart() {
+  SetSemanticsTreeEnabled(false);
   // Reset the keyboard's state on hot restart.
   InitializeKeyboard();
   window_manager_->OnPreEngineRestart();

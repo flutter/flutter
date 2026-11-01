@@ -200,7 +200,7 @@ TEST(FlutterWindowsViewTest, SubMenuExpandedState) {
                          /*is_sized_to_content=*/false, BoxConstraints(),
                          /*allow_implicit_view=*/true);
 
-  // Enable semantics to instantiate accessibility bridge.
+  engine->SetSemanticsTreeEnabled(true);
   view->OnUpdateSemanticsEnabled(true);
 
   auto bridge = view->accessibility_bridge().lock();
@@ -292,6 +292,7 @@ TEST(FlutterWindowsViewTest, SubMenuExpandedState) {
         UIA_AriaPropertiesPropertyId, &native_state)));
     EXPECT_NE(std::wcsstr(native_state.bstrVal, L"expanded=false"), nullptr);
   }
+  engine->RemoveView(view->view_id());
 }
 
 // The view's surface must be destroyed after the engine is shutdown.
@@ -437,7 +438,7 @@ TEST(FlutterWindowsViewTest, AddSemanticsNodeUpdate) {
                          /*is_sized_to_content=*/false, BoxConstraints(),
                          /*allow_implicit_view=*/true);
 
-  // Enable semantics to instantiate accessibility bridge.
+  engine->SetSemanticsTreeEnabled(true);
   view->OnUpdateSemanticsEnabled(true);
 
   auto bridge = view->accessibility_bridge().lock();
@@ -511,6 +512,7 @@ TEST(FlutterWindowsViewTest, AddSemanticsNodeUpdate) {
             S_OK);
   EXPECT_EQ(varrole.vt, VT_I4);
   EXPECT_EQ(varrole.lVal, UIA_TextControlTypeId);
+  engine->RemoveView(view->view_id());
 }
 
 // Verify the native IAccessible COM object tree is an accurate reflection of
@@ -538,7 +540,7 @@ TEST(FlutterWindowsViewTest, AddSemanticsNodeUpdateWithChildren) {
                          /*is_sized_to_content=*/false, BoxConstraints(),
                          /*allow_implicit_view=*/true);
 
-  // Enable semantics to instantiate accessibility bridge.
+  engine->SetSemanticsTreeEnabled(true);
   view->OnUpdateSemanticsEnabled(true);
 
   auto bridge = view->accessibility_bridge().lock();
@@ -717,6 +719,7 @@ TEST(FlutterWindowsViewTest, AddSemanticsNodeUpdateWithChildren) {
         S_OK);
     EXPECT_EQ(parent_accessible, node2_accessible);
   }
+  engine->RemoveView(view->view_id());
 }
 
 // Flutter used to assume that the accessibility root had ID 0.
@@ -741,7 +744,7 @@ TEST(FlutterWindowsViewTest, NonZeroSemanticsRoot) {
                          /*is_sized_to_content=*/false, BoxConstraints(),
                          /*allow_implicit_view=*/true);
 
-  // Enable semantics to instantiate accessibility bridge.
+  engine->SetSemanticsTreeEnabled(true);
   view->OnUpdateSemanticsEnabled(true);
 
   auto bridge = view->accessibility_bridge().lock();
@@ -839,6 +842,7 @@ TEST(FlutterWindowsViewTest, NonZeroSemanticsRoot) {
         S_OK);
     EXPECT_EQ(parent_accessible, node1_accessible);
   }
+  engine->RemoveView(view->view_id());
 }
 
 // Verify the native IAccessible accHitTest method returns the correct
@@ -875,7 +879,7 @@ TEST(FlutterWindowsViewTest, AccessibilityHitTesting) {
                          /*is_sized_to_content=*/false, BoxConstraints(),
                          /*allow_implicit_view=*/true);
 
-  // Enable semantics to instantiate accessibility bridge.
+  engine->SetSemanticsTreeEnabled(true);
   view->OnUpdateSemanticsEnabled(true);
 
   auto bridge = view->accessibility_bridge().lock();
@@ -955,6 +959,7 @@ TEST(FlutterWindowsViewTest, AccessibilityHitTesting) {
   ASSERT_TRUE(SUCCEEDED(node0_accessible->accHitTest(450, 450, &varchild)));
   EXPECT_EQ(varchild.vt, VT_DISPATCH);
   EXPECT_EQ(varchild.pdispVal, node3_delegate->GetNativeViewAccessible());
+  engine->RemoveView(view->view_id());
 }
 
 TEST(FlutterWindowsViewTest, WindowResizeTests) {
@@ -1242,7 +1247,7 @@ TEST(FlutterWindowsViewTest, CheckboxNativeState) {
                          /*is_sized_to_content=*/false, BoxConstraints(),
                          /*allow_implicit_view=*/true);
 
-  // Enable semantics to instantiate accessibility bridge.
+  engine->SetSemanticsTreeEnabled(true);
   view->OnUpdateSemanticsEnabled(true);
 
   auto bridge = view->accessibility_bridge().lock();
@@ -1376,6 +1381,7 @@ TEST(FlutterWindowsViewTest, CheckboxNativeState) {
         UIA_AriaPropertiesPropertyId, &native_state)));
     EXPECT_NE(std::wcsstr(native_state.bstrVal, L"checked=mixed"), nullptr);
   }
+  engine->RemoveView(view->view_id());
 }
 
 // Ensure that switches have their toggle status set apropriately
@@ -1392,7 +1398,7 @@ TEST(FlutterWindowsViewTest, SwitchNativeState) {
                          /*is_sized_to_content=*/false, BoxConstraints(),
                          /*allow_implicit_view=*/true);
 
-  // Enable semantics to instantiate accessibility bridge.
+  engine->SetSemanticsTreeEnabled(true);
   view->OnUpdateSemanticsEnabled(true);
 
   auto bridge = view->accessibility_bridge().lock();
@@ -1501,6 +1507,7 @@ TEST(FlutterWindowsViewTest, SwitchNativeState) {
         S_OK);
     EXPECT_NE(std::wcsstr(native_state.bstrVal, L"pressed=false"), nullptr);
   }
+  engine->RemoveView(view->view_id());
 }
 
 TEST(FlutterWindowsViewTest, TooltipNodeData) {
@@ -1516,7 +1523,7 @@ TEST(FlutterWindowsViewTest, TooltipNodeData) {
                          /*is_sized_to_content=*/false, BoxConstraints(),
                          /*allow_implicit_view=*/true);
 
-  // Enable semantics to instantiate accessibility bridge.
+  engine->SetSemanticsTreeEnabled(true);
   view->OnUpdateSemanticsEnabled(true);
 
   auto bridge = view->accessibility_bridge().lock();
@@ -1560,6 +1567,7 @@ TEST(FlutterWindowsViewTest, TooltipNodeData) {
   ASSERT_EQ(uia_node->GetPropertyValue(UIA_HelpTextPropertyId, &varname), S_OK);
   std::string uia_tooltip = _com_util::ConvertBSTRToString(varname.bstrVal);
   EXPECT_EQ(uia_tooltip, "tooltip");
+  engine->RemoveView(view->view_id());
 }
 
 // Don't block until the v-blank if it is disabled by the window.
