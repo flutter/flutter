@@ -15,6 +15,8 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vector_math/vector_math_64.dart';
 
+import '../impeller_test_helpers.dart';
+
 void main() {
   testWidgets('Transform origin', (WidgetTester tester) async {
     var didReceiveTap = false;
@@ -532,6 +534,8 @@ void main() {
     );
   }
 
+  // Verifies that a 3D perspective transform does not introduce visual shifts or
+  // snapping wiggles when toggling needsCompositing (see https://github.com/flutter/flutter/issues/41654).
   testWidgets(
     '3D transform renders the same with or without needsCompositing',
     (WidgetTester tester) async {
@@ -545,7 +549,14 @@ void main() {
         await tester.pumpWidget(RepaintBoundary(child: generateTransform(false, angle)));
         await expectLater(
           find.byType(RepaintBoundary).first,
-          matchesReferenceImage(imageWithCompositing),
+          matchesReferenceImage(
+            imageWithCompositing,
+            // Under Impeller, allow a small tolerance (0.1%) for minor subpixel
+            // antialiasing differences along 3D quad edges between direct canvas
+            // rasterization and composited bilinear texture sampling.
+            // Under Skia, both paths render identically.
+            maxDifferentPixelsRate: impellerEnabled ? 0.001 : 0.0,
+          ),
         );
       }
     },
