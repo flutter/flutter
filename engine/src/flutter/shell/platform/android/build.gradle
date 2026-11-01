@@ -53,7 +53,7 @@ android {
 
         // These dependencies should be kept in line with those in the ./test_runner/build.gradle
         implementation "androidx.test:core:1.4.0"
-        implementation "com.google.android.play:core:1.8.0"
+        implementation "com.google.android.play:feature-delivery:2.1.0"
         implementation "com.ibm.icu:icu4j:69.1"
         implementation "org.robolectric:robolectric:4.17"
         implementation "junit:junit:4.13.2"
