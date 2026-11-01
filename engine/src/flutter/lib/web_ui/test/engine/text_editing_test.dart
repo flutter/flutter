@@ -3696,6 +3696,61 @@ Future<void> testMain() async {
     });
   });
 
+  group('placeElement() when placeForm() disables the strategy', () {
+    late HybridTextEditing owner;
+
+    setUp(() {
+      owner = HybridTextEditing();
+    });
+
+    /// A configuration whose autofill group owns the editing element, which is
+    /// what makes `placeElement()` go through `placeForm()`.
+    InputConfiguration autofillGroupConfig() {
+      final List<Map<String, Object?>> fields = createFieldValues(
+        <String>['username', 'password'],
+        <String>['field1', 'field2'],
+      );
+      final focusedAutofillMap = fields.first['autofill']! as Map<String, Object?>;
+      return InputConfiguration(
+        viewId: kImplicitViewId,
+        autofill: AutofillInfo.fromFrameworkMessage(focusedAutofillMap),
+        autofillGroup: EngineAutofillForm.fromFrameworkMessage(
+          kImplicitViewId,
+          focusedAutofillMap,
+          fields,
+        ),
+      );
+    }
+
+    test('$GloballyPositionedTextEditingStrategy does not throw', () {
+      final strategy = GlobalStrategyDisablingInPlaceForm(owner);
+      owner.debugTextEditingStrategyOverride = strategy;
+      strategy.enable(autofillGroupConfig(), onChange: (_, _) {}, onAction: (_) {});
+      expect(strategy.isEnabled, isTrue);
+
+      strategy.disableOnNextPlaceForm = true;
+      expect(strategy.placeElement, returnsNormally);
+
+      // The blur won: the strategy stays disabled and nothing resurrected the
+      // element behind its back.
+      expect(strategy.isEnabled, isFalse);
+      expect(strategy.domElement, isNull);
+    });
+
+    test('$SafariDesktopTextEditingStrategy does not throw', () {
+      final strategy = SafariDesktopStrategyDisablingInPlaceForm(owner);
+      owner.debugTextEditingStrategyOverride = strategy;
+      strategy.enable(autofillGroupConfig(), onChange: (_, _) {}, onAction: (_) {});
+      expect(strategy.isEnabled, isTrue);
+
+      strategy.disableOnNextPlaceForm = true;
+      expect(strategy.placeElement, returnsNormally);
+
+      expect(strategy.isEnabled, isFalse);
+      expect(strategy.domElement, isNull);
+    });
+  });
+
   group('EngineAutofillForm', () {
     test('applies a programmatic change to a non-focused field instead of reverting it', () {
       // A programmatic framework update to a non-focused autofill field must win
@@ -4927,6 +4982,36 @@ void clearForms() {
 /// Waits until the text strategy closes and moves the focus accordingly.
 Future<void> waitForTextStrategyStopPropagation() async {
   await Future<void>.delayed(Duration.zero);
+}
+
+/// Simulates `placeForm()` tearing the strategy down before it returns.
+///
+/// Appending a focused element to a detached form fires a synchronous `blur`
+/// with a null `relatedTarget`, which reaches `strategy.disable()` without
+/// yielding to the event loop. `placeElement()` then resumes on a strategy
+/// whose `domElement` is already null.
+mixin _DisableInsidePlaceFormMixin on DefaultTextEditingStrategy {
+  /// Set after `enable()`, so that only the next `placeForm()` disables.
+  bool disableOnNextPlaceForm = false;
+
+  @override
+  void placeForm() {
+    super.placeForm();
+    if (disableOnNextPlaceForm) {
+      disableOnNextPlaceForm = false;
+      disable();
+    }
+  }
+}
+
+class GlobalStrategyDisablingInPlaceForm extends GloballyPositionedTextEditingStrategy
+    with _DisableInsidePlaceFormMixin {
+  GlobalStrategyDisablingInPlaceForm(super.owner);
+}
+
+class SafariDesktopStrategyDisablingInPlaceForm extends SafariDesktopTextEditingStrategy
+    with _DisableInsidePlaceFormMixin {
+  SafariDesktopStrategyDisablingInPlaceForm(super.owner);
 }
 
 class GlobalTextEditingStrategySpy extends GloballyPositionedTextEditingStrategy {
