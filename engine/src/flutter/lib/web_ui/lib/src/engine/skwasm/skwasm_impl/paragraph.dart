@@ -426,6 +426,11 @@ ParagraphStyleHandle _createNativeParagraphStyle(
   paragraphStyleSetApplyRoundingHack(handle, false);
   // Like the native engine, render soft hyphens unless they are hidden.
   paragraphStyleSetRenderSoftHyphens(handle, style.hyphens != ui.Hyphens.hidden);
+  if (style.hyphenCharacter != null) {
+    final SkStringHandle hyphenCharacterHandle = skStringFromDartString(style.hyphenCharacter!);
+    paragraphStyleSetSoftHyphenString(handle, hyphenCharacterHandle);
+    skStringFree(hyphenCharacterHandle);
+  }
   return handle;
 }
 

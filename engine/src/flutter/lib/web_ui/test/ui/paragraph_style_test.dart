@@ -137,6 +137,9 @@ final Map<String, _ParagraphStylePropertyPopulator> _populatorsA =
       'hyphens': (_TestParagraphStyleBuilder builder) {
         builder.hyphens = ui.Hyphens.manual;
       },
+      'hyphenCharacter': (_TestParagraphStyleBuilder builder) {
+        builder.hyphenCharacter = '-';
+      },
     };
 
 final Map<String, _ParagraphStylePropertyPopulator> _populatorsB =
@@ -180,6 +183,9 @@ final Map<String, _ParagraphStylePropertyPopulator> _populatorsB =
       'hyphens': (_TestParagraphStyleBuilder builder) {
         builder.hyphens = ui.Hyphens.hidden;
       },
+      'hyphenCharacter': (_TestParagraphStyleBuilder builder) {
+        builder.hyphenCharacter = '\u2010';
+      },
     };
 
 class _TestParagraphStyleBuilder {
@@ -196,6 +202,7 @@ class _TestParagraphStyleBuilder {
   String? ellipsis;
   ui.Locale? locale;
   ui.Hyphens? hyphens;
+  String? hyphenCharacter;
 
   ui.ParagraphStyle build() {
     return ui.ParagraphStyle(
@@ -212,6 +219,7 @@ class _TestParagraphStyleBuilder {
       ellipsis: ellipsis,
       locale: locale,
       hyphens: hyphens,
+      hyphenCharacter: hyphenCharacter,
     );
   }
 }

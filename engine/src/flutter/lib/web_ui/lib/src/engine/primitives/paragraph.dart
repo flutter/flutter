@@ -238,6 +238,7 @@ class EngineParagraphStyle implements ui.ParagraphStyle {
     this.ellipsis,
     this.locale,
     this.hyphens,
+    this.hyphenCharacter,
   }) : height = height == ui.kTextHeightNone ? null : height,
        strutStyle = strutStyle as EngineStrutStyle?;
 
@@ -254,6 +255,7 @@ class EngineParagraphStyle implements ui.ParagraphStyle {
   final String? ellipsis;
   final ui.Locale? locale;
   final ui.Hyphens? hyphens;
+  final String? hyphenCharacter;
 
   EngineStrutStyle? get effectiveStrutStyle {
     final EngineStrutStyle? strutStyle = this.strutStyle;
@@ -311,7 +313,8 @@ class EngineParagraphStyle implements ui.ParagraphStyle {
         other.strutStyle == strutStyle &&
         other.ellipsis == ellipsis &&
         other.locale == locale &&
-        other.hyphens == hyphens;
+        other.hyphens == hyphens &&
+        other.hyphenCharacter == hyphenCharacter;
   }
 
   @override
@@ -330,6 +333,7 @@ class EngineParagraphStyle implements ui.ParagraphStyle {
       ellipsis,
       locale,
       hyphens,
+      hyphenCharacter,
     );
   }
 
@@ -353,7 +357,8 @@ class EngineParagraphStyle implements ui.ParagraphStyle {
           'strutStyle: ${strutStyle ?? "unspecified"}, '
           'ellipsis: ${ellipsis != null ? '"$ellipsis"' : "unspecified"}, '
           'locale: ${locale ?? "unspecified"}, '
-          'hyphens: ${hyphens ?? "unspecified"}'
+          'hyphens: ${hyphens ?? "unspecified"}, '
+          'hyphenCharacter: ${hyphenCharacter != null ? '"$hyphenCharacter"' : "unspecified"}'
           ')';
       return true;
     }());
