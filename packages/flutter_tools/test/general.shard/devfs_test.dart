@@ -8,7 +8,6 @@ import 'dart:io' as io show Process, ProcessSignal;
 import 'dart:typed_data';
 
 import 'package:args/args.dart';
-import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
@@ -1109,6 +1108,249 @@ void main() {
       expect(secondUploadSyncedBytes, 0);
       expect(dirtyEntries, isEmpty);
     });
+  });
+
+  group('macOS sandbox container DevFS redirection', () {
+    testWithoutContext(
+      'redirects macOS sandbox container URI to DARWIN_USER_TEMP_DIR and cleans up on destroy',
+      () async {
+        const containerId = 'com.example.myApp';
+        const darwinUserTempDir = '/var/folders/xx/yy/T';
+        const tempSubdir = 'appABC123';
+        const fsName = 'app';
+        const sandboxUri =
+            'file:///Users/tester/Library/Containers/$containerId/Data/tmp/$tempSubdir/$fsName/';
+        const compiledDillPath = 'build/app.dill';
+        const reloadDillPath = 'main.dart.dill';
+
+        final fileSystem = MemoryFileSystem.test();
+        final Directory expectedContainerTempDir = fileSystem
+            .directory(darwinUserTempDir)
+            .childDirectory(containerId);
+
+        final processManager = FakeProcessManager.list(<FakeCommand>[
+          const FakeCommand(
+            command: <String>['getconf', 'DARWIN_USER_TEMP_DIR'],
+            stdout: '$darwinUserTempDir\n',
+          ),
+        ]);
+        final fakeVmServiceHost = FakeVmServiceHost(
+          requests: <VmServiceExpectation>[
+            const FakeVmServiceRequest(
+              method: '_createDevFS',
+              args: <String, Object>{'fsName': fsName},
+              jsonResponse: <String, Object>{'uri': sandboxUri},
+            ),
+            const FakeVmServiceRequest(
+              method: '_deleteDevFS',
+              args: <String, Object>{'fsName': fsName},
+            ),
+          ],
+          httpAddress: Uri.parse('http://localhost'),
+        );
+        final devFS = DevFS(
+          fakeVmServiceHost.vmService,
+          fsName,
+          fileSystem.currentDirectory,
+          buildMode: .debug,
+          toolContext: FakeToolContext(
+            artifacts: Artifacts.test(),
+            fs: fileSystem,
+            logger: BufferLogger.test(),
+            os: FakeOperatingSystemUtils(),
+            platform: FakePlatform(operatingSystem: 'macos'),
+            processManager: processManager,
+          ),
+          httpClient: FakeHttpClient.any(),
+        );
+
+        final Directory expectedSandboxTempDir = expectedContainerTempDir.childDirectory(
+          tempSubdir,
+        );
+        final Directory expectedDevFSDir = expectedSandboxTempDir.childDirectory(fsName);
+
+        final Uri baseUri = await devFS.create();
+
+        expect(processManager, hasNoRemainingExpectations);
+        expect(baseUri, expectedDevFSDir.uri);
+        expect(devFS.baseUri, expectedDevFSDir.uri);
+        expect(expectedDevFSDir, exists);
+        expect(fileSystem.systemTempDirectory.childDirectory(containerId), isNot(exists));
+
+        final residentCompiler = FakeResidentCompiler()
+          ..onRecompile = (Uri mainUri, List<Uri>? invalidatedFiles) async {
+            fileSystem.file(compiledDillPath)
+              ..createSync(recursive: true)
+              ..writeAsBytesSync(const <int>[1, 2, 3, 4]);
+            return const CompilerOutput(compiledDillPath, 0, <Uri>[]);
+          };
+
+        final UpdateFSReport report = await devFS.update(
+          mainUri: Uri.file('/main.dart'),
+          generator: residentCompiler,
+          dillOutputPath: compiledDillPath,
+          pathToReload: reloadDillPath,
+          trackWidgetCreation: false,
+          invalidatedFiles: <Uri>[],
+          packageConfig: PackageConfig.empty,
+          devFSWriter: LocalDevFSWriter(fileSystem: fileSystem),
+          shaderCompiler: const FakeShaderCompiler(),
+        );
+
+        expect(report.success, isTrue);
+        final File syncedDill = expectedDevFSDir.childFile(reloadDillPath);
+        expect(syncedDill, exists);
+        expect(syncedDill.readAsBytesSync(), const <int>[1, 2, 3, 4]);
+
+        await devFS.destroy();
+
+        expect(expectedSandboxTempDir, isNot(exists));
+        expect(fakeVmServiceHost.hasRemainingExpectations, isFalse);
+      },
+    );
+
+    testWithoutContext(
+      'falls back to original URI when getconf DARWIN_USER_TEMP_DIR fails',
+      () async {
+        const containerId = 'com.example.myApp';
+        const tempSubdir = 'appABC123';
+        const fsName = 'app';
+        const sandboxUri =
+            'file:///Users/tester/Library/Containers/$containerId/Data/tmp/$tempSubdir/$fsName/';
+
+        final fileSystem = MemoryFileSystem.test();
+        final processManager = FakeProcessManager.list(<FakeCommand>[
+          const FakeCommand(
+            command: <String>['getconf', 'DARWIN_USER_TEMP_DIR'],
+            exitCode: 1,
+            stderr: 'getconf: no such configuration parameter',
+          ),
+        ]);
+        final fakeVmServiceHost = FakeVmServiceHost(
+          requests: <VmServiceExpectation>[
+            const FakeVmServiceRequest(
+              method: '_createDevFS',
+              args: <String, Object>{'fsName': fsName},
+              jsonResponse: <String, Object>{'uri': sandboxUri},
+            ),
+          ],
+          httpAddress: Uri.parse('http://localhost'),
+        );
+        final devFS = DevFS(
+          fakeVmServiceHost.vmService,
+          fsName,
+          fileSystem.currentDirectory,
+          buildMode: .debug,
+          toolContext: FakeToolContext(
+            artifacts: Artifacts.test(),
+            fs: fileSystem,
+            logger: BufferLogger.test(),
+            os: FakeOperatingSystemUtils(),
+            platform: FakePlatform(operatingSystem: 'macos'),
+            processManager: processManager,
+          ),
+          httpClient: FakeHttpClient.any(),
+        );
+
+        final Uri baseUri = await devFS.create();
+
+        expect(processManager, hasNoRemainingExpectations);
+        expect(baseUri, Uri.parse(sandboxUri));
+        expect(devFS.baseUri, Uri.parse(sandboxUri));
+        expect(fakeVmServiceHost.hasRemainingExpectations, isFalse);
+      },
+    );
+
+    testWithoutContext('does not redirect on non-macOS host platform', () async {
+      const containerId = 'com.example.myApp';
+      const tempSubdir = 'appABC123';
+      const fsName = 'app';
+      const sandboxUri =
+          'file:///Users/tester/Library/Containers/$containerId/Data/tmp/$tempSubdir/$fsName/';
+
+      final fileSystem = MemoryFileSystem.test();
+      final processManager = FakeProcessManager.empty();
+      final fakeVmServiceHost = FakeVmServiceHost(
+        requests: <VmServiceExpectation>[
+          const FakeVmServiceRequest(
+            method: '_createDevFS',
+            args: <String, Object>{'fsName': fsName},
+            jsonResponse: <String, Object>{'uri': sandboxUri},
+          ),
+        ],
+        httpAddress: Uri.parse('http://localhost'),
+      );
+      final devFS = DevFS(
+        fakeVmServiceHost.vmService,
+        fsName,
+        fileSystem.currentDirectory,
+        buildMode: .debug,
+        toolContext: FakeToolContext(
+          artifacts: Artifacts.test(),
+          fs: fileSystem,
+          logger: BufferLogger.test(),
+          os: FakeOperatingSystemUtils(),
+          platform: FakePlatform(),
+          processManager: processManager,
+        ),
+        httpClient: FakeHttpClient.any(),
+      );
+
+      final Uri baseUri = await devFS.create();
+
+      expect(processManager, hasNoRemainingExpectations);
+      expect(baseUri, Uri.parse(sandboxUri));
+      expect(devFS.baseUri, Uri.parse(sandboxUri));
+      expect(fakeVmServiceHost.hasRemainingExpectations, isFalse);
+    });
+
+    testWithoutContext(
+      'preserves non-sandbox and non-Data/tmp container file URIs unchanged',
+      () async {
+        const fsName = 'app';
+        const nonSandboxUris = <String>[
+          'file:///tmp/my_app_devfs/',
+          'file:///Users/tester/Library/Containers/com.example.myApp/Data/Documents/my_app/',
+        ];
+
+        final fileSystem = MemoryFileSystem.test();
+        final processManager = FakeProcessManager.empty();
+        for (final uriString in nonSandboxUris) {
+          final fakeVmServiceHost = FakeVmServiceHost(
+            requests: <VmServiceExpectation>[
+              FakeVmServiceRequest(
+                method: '_createDevFS',
+                args: const <String, Object>{'fsName': fsName},
+                jsonResponse: <String, Object>{'uri': uriString},
+              ),
+            ],
+            httpAddress: Uri.parse('http://localhost'),
+          );
+          final devFS = DevFS(
+            fakeVmServiceHost.vmService,
+            fsName,
+            fileSystem.currentDirectory,
+            buildMode: .debug,
+            toolContext: FakeToolContext(
+              artifacts: Artifacts.test(),
+              fs: fileSystem,
+              logger: BufferLogger.test(),
+              os: FakeOperatingSystemUtils(),
+              platform: FakePlatform(operatingSystem: 'macos'),
+              processManager: processManager,
+            ),
+            httpClient: FakeHttpClient.any(),
+          );
+
+          final Uri baseUri = await devFS.create();
+
+          expect(processManager, hasNoRemainingExpectations);
+          expect(baseUri, Uri.parse(uriString));
+          expect(devFS.baseUri, Uri.parse(uriString));
+          expect(fakeVmServiceHost.hasRemainingExpectations, isFalse);
+        }
+      },
+    );
   });
 }
 
