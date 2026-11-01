@@ -102,7 +102,14 @@ class TextureGLES final : public Texture,
 
   Type GetType() const;
 
+  /// @brief Whether the texture was created by WrapFBO or WrapTexture, so
+  ///        its GL object is owned by the caller.
   bool IsWrapped() const;
+
+  /// @brief Whether the texture wraps a framebuffer (WrapFBO), as opposed to
+  ///        a texture name (WrapTexture). Only such textures can be bound as
+  ///        a framebuffer directly; see GetFBO.
+  bool IsWrappedFBO() const;
 
   /// @brief Reset the internal texture state so that the reactor will not free
   ///        the associated handle.
