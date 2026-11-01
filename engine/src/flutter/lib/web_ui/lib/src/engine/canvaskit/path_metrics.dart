@@ -4,6 +4,7 @@
 
 import 'dart:typed_data';
 
+import 'package:meta/meta.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
@@ -67,7 +68,7 @@ class CkContourMeasure implements BackendPathMetric {
   @override
   CkPathBuilder extractPath(double start, double end, {bool startWithMoveTo = true}) {
     final SkPath skPath = skiaObject.getSegment(start, end, startWithMoveTo);
-    return CkPathBuilder.fromSkPath(skPath, _fillType);
+    return createPathBuilderFromSkPath(skPath, _fillType);
   }
 
   @override
@@ -84,6 +85,19 @@ class CkContourMeasure implements BackendPathMetric {
   @override
   double get length {
     return skiaObject.length();
+  }
+}
+
+/// Copies [skPath] into a [CkPathBuilder] and releases the temporary SkPath.
+///
+/// [SkPathBuilder] copies its input path, so the `SkPath` returned by
+/// `SkContourMeasure.getSegment` is no longer needed after the copy.
+@visibleForTesting
+CkPathBuilder createPathBuilderFromSkPath(SkPath skPath, ui.PathFillType fillType) {
+  try {
+    return CkPathBuilder.fromSkPath(skPath, fillType);
+  } finally {
+    skPath.delete();
   }
 }
 
