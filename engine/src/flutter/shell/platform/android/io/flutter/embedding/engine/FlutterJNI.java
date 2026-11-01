@@ -640,6 +640,9 @@ public class FlutterJNI {
 
   private native void nativeSurfaceCreated(long nativeShellHolderId, @NonNull Surface surface);
 
+  @SuppressWarnings("unused")
+  private native boolean nativeShouldDisableAHB();
+
   /**
    * In hybrid composition, call this method when the {@link Surface} has changed.
    *
@@ -1697,15 +1700,6 @@ public class FlutterJNI {
     platformViewsController.onDisplayPlatformView(
         viewId, x, y, width, height, viewWidth, viewHeight, mutatorsStack);
   }
-
-  @UiThread
-  public Bitmap getBitmap() {
-    ensureRunningOnMainThread();
-    ensureAttachedToNative();
-    return nativeGetBitmap(nativeShellHolderId);
-  }
-
-  private native Bitmap nativeGetBitmap(long nativeShellHolderId);
 
   /**
    * Notifies the Dart VM of a low memory event, or that the application is in a state such that now

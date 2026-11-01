@@ -996,6 +996,13 @@ class PlatformView {
   ///
   const Settings& GetSettings() const;
 
+  //----------------------------------------------------------------------------
+  /// @brief      Get the task runners for this platform view instance.
+  ///
+  /// @return     The task runners.
+  ///
+  const TaskRunners& GetTaskRunners() const { return task_runners_; }
+
   //--------------------------------------------------------------------------
   /// @brief      Synchronously invokes platform-specific APIs to apply the
   ///             system text scaling on the given unscaled font size.
