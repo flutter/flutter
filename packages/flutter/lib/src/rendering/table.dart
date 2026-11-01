@@ -889,12 +889,14 @@ class RenderTable extends RenderBox {
     _children.clear();
     _columns = cells.isNotEmpty ? cells.first.length : 0;
     _rows = 0;
-    _idToIndexMap.clear();
-    _cachedRows.clear();
-    _cachedCells.clear();
     cells.forEach(addRow);
     assert(_children.length == rows * columns);
-    markNeedsSemanticsUpdate();
+    if (cells.isEmpty) {
+      _idToIndexMap.clear();
+      _cachedRows.clear();
+      _cachedCells.clear();
+      markNeedsSemanticsUpdate();
+    }
   }
 
   /// Adds a row to the end of the table.
@@ -910,6 +912,10 @@ class RenderTable extends RenderBox {
         adoptChild(cell);
       }
     }
+    _idToIndexMap.clear();
+    _cachedRows.clear();
+    _cachedCells.clear();
+    markNeedsSemanticsUpdate();
     markNeedsLayout();
   }
 

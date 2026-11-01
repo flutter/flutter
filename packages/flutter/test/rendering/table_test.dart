@@ -423,4 +423,36 @@ void main() {
     expect(table.getMinIntrinsicHeight(double.infinity), equals(0.0));
     expect(table.getMaxIntrinsicHeight(double.infinity), equals(0.0));
   });
+
+  test('RenderTable.addRow clears semantics cache and updates semantics', () {
+    final SemanticsHandle semanticsHandle = TestRenderingFlutterBinding.instance.ensureSemantics();
+    final table = RenderTable(
+      textDirection: TextDirection.ltr,
+      columns: 1,
+      children: <List<RenderBox>>[
+        <RenderBox>[
+          RenderSemanticsAnnotations(
+            textDirection: TextDirection.ltr,
+            properties: const SemanticsProperties(label: 'row 0'),
+            child: sizedBox(10.0, 10.0),
+          ),
+        ],
+      ],
+    );
+    layout(table, phase: EnginePhase.flushSemantics);
+    pumpFrame(phase: EnginePhase.flushSemantics);
+    expect(table.debugSemantics!.childrenCount, equals(1));
+
+    table.addRow(<RenderBox>[
+      RenderSemanticsAnnotations(
+        textDirection: TextDirection.ltr,
+        properties: const SemanticsProperties(label: 'row 1'),
+        child: sizedBox(10.0, 10.0),
+      ),
+    ]);
+    pumpFrame(phase: EnginePhase.flushSemantics);
+    expect(table.debugSemantics!.childrenCount, equals(2));
+
+    semanticsHandle.dispose();
+  });
 }
