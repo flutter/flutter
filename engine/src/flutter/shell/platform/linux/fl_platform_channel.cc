@@ -6,6 +6,7 @@
 
 #include <cstring>
 
+#include "flutter/common/constants.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_json_method_codec.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_method_channel.h"
 
@@ -19,6 +20,10 @@ static constexpr char kRequestAppExitMethod[] = "System.requestAppExit";
 static constexpr char kInitializationCompleteMethod[] =
     "System.initializationComplete";
 static constexpr char kPlaySoundMethod[] = "SystemSound.play";
+static constexpr char kSetApplicationSwitcherDescriptionMethod[] =
+    "SystemChrome.setApplicationSwitcherDescription";
+static constexpr char kLabelKey[] = "label";
+static constexpr char kViewIdKey[] = "viewId";
 static constexpr char kSystemNavigatorPopMethod[] = "SystemNavigator.pop";
 static constexpr char kTextKey[] = "text";
 static constexpr char kValueKey[] = "value";
@@ -165,6 +170,38 @@ static FlMethodResponse* system_sound_play(FlPlatformChannel* self,
   return FL_METHOD_RESPONSE(fl_method_success_response_new(nullptr));
 }
 
+static FlMethodResponse* system_chrome_set_application_switcher_description(
+    FlPlatformChannel* self,
+    FlValue* args) {
+  if (fl_value_get_type(args) != FL_VALUE_TYPE_MAP) {
+    return FL_METHOD_RESPONSE(fl_method_error_response_new(
+        kBadArgumentsError, "Argument map missing or malformed", nullptr));
+  }
+
+  FlValue* label_value = fl_value_lookup_string(args, kLabelKey);
+  if (label_value == nullptr ||
+      fl_value_get_type(label_value) != FL_VALUE_TYPE_STRING) {
+    return FL_METHOD_RESPONSE(fl_method_error_response_new(
+        kBadArgumentsError, "Missing label", nullptr));
+  }
+
+  // Older frameworks do not send a view ID.
+  int64_t view_id = flutter::kFlutterImplicitViewId;
+  FlValue* view_id_value = fl_value_lookup_string(args, kViewIdKey);
+  if (view_id_value != nullptr) {
+    if (fl_value_get_type(view_id_value) != FL_VALUE_TYPE_INT) {
+      return FL_METHOD_RESPONSE(fl_method_error_response_new(
+          kBadArgumentsError, "Invalid view ID", nullptr));
+    }
+    view_id = fl_value_get_int(view_id_value);
+  }
+
+  self->vtable->system_chrome_set_application_switcher_description(
+      fl_value_get_string(label_value), view_id, self->user_data);
+
+  return FL_METHOD_RESPONSE(fl_method_success_response_new(nullptr));
+}
+
 static FlMethodResponse* system_navigator_pop(FlPlatformChannel* self) {
   self->vtable->system_navigator_pop(self->user_data);
   return FL_METHOD_RESPONSE(fl_method_success_response_new(nullptr));
@@ -191,6 +228,8 @@ static void method_call_cb(FlMethodChannel* channel,
     response = system_initialization_complete(self);
   } else if (strcmp(method, kPlaySoundMethod) == 0) {
     response = system_sound_play(self, args);
+  } else if (strcmp(method, kSetApplicationSwitcherDescriptionMethod) == 0) {
+    response = system_chrome_set_application_switcher_description(self, args);
   } else if (strcmp(method, kSystemNavigatorPopMethod) == 0) {
     response = system_navigator_pop(self);
   } else {

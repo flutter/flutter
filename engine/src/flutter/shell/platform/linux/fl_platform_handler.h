@@ -5,7 +5,7 @@
 #ifndef FLUTTER_SHELL_PLATFORM_LINUX_FL_PLATFORM_HANDLER_H_
 #define FLUTTER_SHELL_PLATFORM_LINUX_FL_PLATFORM_HANDLER_H_
 
-#include "flutter/shell/platform/linux/public/flutter_linux/fl_binary_messenger.h"
+#include "flutter/shell/platform/linux/public/flutter_linux/fl_engine.h"
 
 G_BEGIN_DECLS
 
@@ -24,14 +24,14 @@ G_DECLARE_FINAL_TYPE(FlPlatformHandler,
 
 /**
  * fl_platform_handler_new:
- * @messenger: an #FlBinaryMessenger
+ * @engine: an #FlEngine
  *
  * Creates a new handler that implements SystemChannels.platform from the
  * Flutter services library.
  *
  * Returns: a new #FlPlatformHandler
  */
-FlPlatformHandler* fl_platform_handler_new(FlBinaryMessenger* messenger);
+FlPlatformHandler* fl_platform_handler_new(FlEngine* engine);
 
 /**
  * fl_platform_handler_request_app_exit:

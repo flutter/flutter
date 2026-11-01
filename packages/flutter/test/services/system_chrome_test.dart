@@ -133,6 +133,36 @@ void main() {
     );
   });
 
+  test('setApplicationSwitcherDescription sends the view ID when provided', () async {
+    final log = <MethodCall>[];
+
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+      SystemChannels.platform,
+      (MethodCall methodCall) async {
+        log.add(methodCall);
+        return null;
+      },
+    );
+
+    await SystemChrome.setApplicationSwitcherDescription(
+      const ApplicationSwitcherDescription(label: 'Example label', primaryColor: 0xFF00FF00),
+      viewId: 3,
+    );
+
+    expect(log, hasLength(1));
+    expect(
+      log.single,
+      isMethodCall(
+        'SystemChrome.setApplicationSwitcherDescription',
+        arguments: <String, dynamic>{
+          'label': 'Example label',
+          'primaryColor': 4278255360,
+          'viewId': 3,
+        },
+      ),
+    );
+  });
+
   test('setApplicationSwitcherDescription missing plugin', () async {
     final List<ByteData?> log = <ByteData>[];
 
