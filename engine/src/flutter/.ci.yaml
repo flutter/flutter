@@ -51,9 +51,20 @@ targets:
     enabled_branches:
       - master
     recipe: engine_v2/engine_v2
+    presubmit: false
     properties:
       config_name: local_engine
     # local_engine schedules a bunch of other builds, so it's likely to timeout waiting for those builds to run.
+    timeout: 180
+
+  # The local engine configurations most contributors build, so run in presubmit.
+  - name: Linux local_engine_builds_common
+    enabled_branches:
+      - master
+    recipe: engine_v2/engine_v2
+    bringup: true
+    properties:
+      config_name: local_engine_common
     timeout: 180
 
   - name: Linux linux_android_emulator_tests
