@@ -453,12 +453,6 @@ Future<XcodeBuildResult> buildXcodeProject({
       logger.printError('and specify one using the -d, --device-id flag.');
       return XcodeBuildResult(success: false);
     }
-  } else {
-    if (environmentType == EnvironmentType.physical) {
-      buildCommands.addAll(<String>['-sdk', XcodeSdk.IPhoneOS.platformName]);
-    } else {
-      buildCommands.addAll(<String>['-sdk', XcodeSdk.IPhoneSimulator.platformName]);
-    }
   }
 
   buildCommands.add('-destination');
