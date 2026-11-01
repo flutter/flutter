@@ -145,7 +145,7 @@ class _StubTooltipWindowController extends TooltipWindowController {
   void setConstraints(BoxConstraints constraints) {}
 
   @override
-  void updatePosition({Rect? anchorRect, WindowPositioner? positioner}) {}
+  void updatePosition({WindowPositioner? positioner}) {}
 
   @override
   bool get isDestroyed => _destroyed;
@@ -183,7 +183,7 @@ class _StubPopupWindowController extends PopupWindowController {
   }
 
   @override
-  void updatePosition({Rect? anchorRect, WindowPositioner? positioner}) {}
+  void updatePosition({WindowPositioner? positioner}) {}
 
   @override
   Offset get offsetFromParent => Offset.zero;

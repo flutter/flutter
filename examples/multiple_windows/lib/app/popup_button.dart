@@ -8,9 +8,106 @@
 import 'package:flutter/src/widgets/_window.dart';
 import 'package:material_ui/material_ui.dart';
 
-import 'element_position_tracker.dart';
 import 'models.dart';
 import 'popup_window_content.dart';
+
+class WindowAnchorController {
+  void showWindow(BaseWindowController controller) {
+    if (controller != _controller) {
+      hide();
+      _controller = controller;
+      _state?.controllerDidChange();
+    }
+  }
+
+  bool get isWindowVisible => _controller != null && !_controller!.isDestroyed;
+
+  ValueGetter<Rect> get anchorRect {
+    return () {
+      return _state?.anchorRect ?? Rect.zero;
+    };
+  }
+
+  void hide() {
+    final BaseWindowController? controller = _controller;
+    if (controller == null) {
+      return;
+    }
+    _controller = null;
+    if (!controller.isDestroyed) {
+      controller.destroy();
+    }
+    _state?.controllerDidChange();
+  }
+
+  _WindowAnchorState? _state;
+  BaseWindowController? _controller;
+}
+
+class WindowAnchor extends StatefulWidget {
+  const WindowAnchor({
+    super.key,
+    required this.controller,
+    required this.contentBuilder,
+    this.child,
+  });
+
+  final WindowAnchorController controller;
+  final WidgetBuilder contentBuilder;
+  final Widget? child;
+
+  @override
+  State<StatefulWidget> createState() => _WindowAnchorState();
+}
+
+class _WindowAnchorState extends State<WindowAnchor> {
+  @override
+  void initState() {
+    super.initState();
+    widget.controller._state = this;
+  }
+
+  @override
+  void dispose() {
+    widget.controller._state = null;
+    widget.controller.hide();
+    super.dispose();
+  }
+
+  @override
+  void didUpdateWidget(covariant WindowAnchor oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.controller != widget.controller) {
+      oldWidget.controller._state = null;
+      widget.controller._state = this;
+    }
+  }
+
+  void controllerDidChange() {
+    setState(() {});
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final BaseWindowController? windowController = widget.controller._controller;
+    if (windowController != null && !windowController.isDestroyed) {
+      return ViewAnchor(
+        view: View(view: windowController.rootView, child: widget.contentBuilder(context)),
+        child: widget.child ?? const SizedBox.shrink(),
+      );
+    }
+    return widget.child ?? const SizedBox.shrink();
+  }
+
+  Rect get anchorRect {
+    // Bounds of the anchor in the coordinates of its view.
+    final renderObject = context.findRenderObject()! as RenderBox;
+    return MatrixUtils.transformRect(
+      renderObject.getTransformTo(null),
+      Offset.zero & renderObject.size,
+    );
+  }
+}
 
 class PopupButton extends StatefulWidget {
   const PopupButton({super.key, required this.parentController});
@@ -22,74 +119,38 @@ class PopupButton extends StatefulWidget {
 }
 
 class _PopupButtonState extends State<PopupButton> {
-  WindowEntry? _popupWindowEntry;
-  ElementPositionTracker? _popupTracker;
-  final GlobalKey _popupButtonKey = GlobalKey();
-
-  @override
-  void dispose() {
-    _popupTracker?.dispose();
-    super.dispose();
-  }
+  final anchorController = WindowAnchorController();
 
   void _onPressed(WindowSettings windowSettings) {
     // Toggle popup visibility.
-    if (_popupWindowEntry != null) {
-      _popupWindowEntry!.controller.destroy();
-      _popupTracker?.dispose();
-      setState(() {
-        _popupWindowEntry = null;
-        _popupTracker = null;
-      });
+    if (anchorController.isWindowVisible) {
+      anchorController.hide();
     } else {
-      // Popup is not shown, show it.
-      final tracker = ElementPositionTracker(element: _popupButtonKey.currentContext!);
-      late final WindowEntry entry;
-      final controller = PopupWindowController(
-        anchorRect: tracker.getGlobalRect()!,
+      final popupController = PopupWindowController(
+        anchorRect: anchorController.anchorRect,
+        parent: widget.parentController,
         positioner: windowSettings.positioner,
         delegate: _PopupWindowControllerDelegate(
           onDestroyed: () {
-            tracker.dispose();
-            if (mounted) {
-              setState(() {
-                _popupWindowEntry = null;
-                _popupTracker = null;
-              });
-            }
+            anchorController.hide();
           },
         ),
-        parent: widget.parentController,
       );
-      entry = WindowEntry(
-        controller: controller,
-        builder: (BuildContext context) => PopupWindowContent(controller: controller),
-      );
-      tracker.onGlobalRectChange = (rect) {
-        controller.updatePosition(anchorRect: rect);
-      };
-      setState(() {
-        _popupWindowEntry = entry;
-        _popupTracker = tracker;
-      });
+      anchorController.showWindow(popupController);
     }
+    setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
     final WindowSettings windowSettings = WindowSettingsAccessor.of(context);
 
-    return OutlinedButton(
-      key: _popupButtonKey,
-      onPressed: () => _onPressed(windowSettings),
-      child: ViewAnchor(
-        view: _popupWindowEntry != null
-            ? View(
-                view: _popupWindowEntry!.controller.rootView,
-                child: Builder(builder: _popupWindowEntry!.builder),
-              )
-            : null,
-        child: Text(_popupWindowEntry != null ? 'Hide Popup' : 'Show Popup'),
+    return WindowAnchor(
+      controller: anchorController,
+      contentBuilder: (context) => const PopupWindowContent(),
+      child: OutlinedButton(
+        onPressed: () => _onPressed(windowSettings),
+        child: Text(anchorController.isWindowVisible ? 'Hide Popup' : 'Show Popup'),
       ),
     );
   }

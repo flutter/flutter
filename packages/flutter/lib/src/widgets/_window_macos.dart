@@ -130,14 +130,14 @@ class WindowingOwnerMacOS extends WindowingOwner {
   TooltipWindowController createTooltipWindowController({
     required TooltipWindowControllerDelegate delegate,
     required BoxConstraints constraints,
-    required Rect anchorRect,
+    required ValueGetter<Rect> anchorRect,
     required WindowPositioner positioner,
     required BaseWindowController parent,
   }) {
     final controller = TooltipWindowControllerMacOS(
       owner: this,
       delegate: delegate,
-      contentSizeConstraints: constraints,
+      constraints: constraints,
       anchorRect: anchorRect,
       positioner: positioner,
       parent: parent,
@@ -151,14 +151,14 @@ class WindowingOwnerMacOS extends WindowingOwner {
   PopupWindowController createPopupWindowController({
     required PopupWindowControllerDelegate delegate,
     required BoxConstraints constraints,
-    required Rect anchorRect,
+    required ValueGetter<Rect> anchorRect,
     required WindowPositioner positioner,
     required BaseWindowController parent,
   }) {
     final controller = PopupWindowControllerMacOS(
       owner: this,
       delegate: delegate,
-      contentSizeConstraints: constraints,
+      constraints: constraints,
       parent: parent,
       anchorRect: anchorRect,
       positioner: positioner,
@@ -240,14 +240,6 @@ mixin _WindowControllerMixin implements BaseWindowControllerMacOS {
     _onShouldClose = NativeCallable<Void Function()>.isolateLocal(_handleOnShouldClose);
     _onWillClose = NativeCallable<Void Function()>.isolateLocal(_handleOnWillClose);
     _onResize = NativeCallable<Void Function()>.isolateLocal(_handleOnResize);
-    _onGetWindowPosition =
-        NativeCallable<
-          Pointer<_Rect> Function(
-            Pointer<_Size> childSize,
-            Pointer<_Rect> parentRect,
-            Pointer<_Rect> outputRect,
-          )
-        >.isolateLocal(_handleOnGetWindowPosition);
     _owner = owner;
     _owner._activeControllers.add(this);
   }
@@ -261,18 +253,8 @@ mixin _WindowControllerMixin implements BaseWindowControllerMacOS {
     _onWillClose.close();
     _onShouldClose.close();
     _onResize.close();
-    _onGetWindowPosition.close();
     _destroyed = true;
     _owner._activeControllers.remove(this);
-  }
-
-  @mustCallSuper
-  Pointer<_Rect> _handleOnGetWindowPosition(
-    Pointer<_Size> childSize,
-    Pointer<_Rect> parentRect,
-    Pointer<_Rect> outputRect,
-  ) {
-    return Pointer<_Rect>.fromAddress(0);
   }
 
   void _ensureNotDestroyed() {
@@ -313,27 +295,66 @@ mixin _WindowControllerMixin implements BaseWindowControllerMacOS {
   late final NativeCallable<Void Function()> _onShouldClose;
   late final NativeCallable<Void Function()> _onWillClose;
   late final NativeCallable<Void Function()> _onResize;
-  late final NativeCallable<
-    Pointer<_Rect> Function(
-      Pointer<_Size> childSize,
-      Pointer<_Rect> parentRect,
-      Pointer<_Rect> outputRect,
-    )
-  >
-  _onGetWindowPosition;
 
   late final WindowingOwnerMacOS _owner;
+}
+
+/// Places tooltip and popup windows relative to their anchor after every frame.
+///
+/// The window position and size are fully driven from the framework; on the
+/// native side the window is only revealed once the geometry has been applied.
+mixin _AnchoredWindowControllerMixin on _WindowControllerMixin {
+  ValueGetter<Rect> get _anchorRect;
+  WindowPositioner get _positioner;
+
+  void _placeWindow(Size contentSize) {
+    final Rect parentRect = _MacOSPlatformInterface.getParentContentRect(windowHandle);
+    final Rect contentRect = _positioner.placeWindow(
+      childSize: contentSize,
+      anchorRect: _anchorRect().shift(parentRect.topLeft),
+      parentRect: parentRect,
+      displayRect: _MacOSPlatformInterface.getScreenVisibleFrame(windowHandle),
+    );
+    _MacOSPlatformInterface.setWindowContentRect(windowHandle, contentRect);
+  }
+}
+
+/// Sizes regular and dialog windows created without an explicit size to their
+/// content.
+///
+/// Windows that can't be resized by the user keep tracking the content size.
+/// Resizable windows are sized to their content once; afterwards the user owns
+/// the window size.
+mixin _ContentSizedWindowControllerMixin on _WindowControllerMixin {
+  bool get _sizedToContent;
+  bool get _resizable;
+
+  bool _sizingComplete = false;
+  Size? _lastContentSize;
+
+  void _syncWindowSize(Size contentSize) {
+    if (!_sizedToContent || _sizingComplete || contentSize == _lastContentSize) {
+      return;
+    }
+    _lastContentSize = contentSize;
+    _MacOSPlatformInterface.setWindowContentSize(windowHandle, contentSize);
+    if (_resizable) {
+      _sizingComplete = true;
+      _MacOSPlatformInterface.sizingComplete(windowHandle);
+    }
+  }
 }
 
 /// MacOS specific implementation of [TooltipWindowController].
 ///
 /// {@macro flutter.widgets.windowing.experimental}
-class TooltipWindowControllerMacOS extends TooltipWindowController with _WindowControllerMixin {
+class TooltipWindowControllerMacOS extends TooltipWindowController
+    with _WindowControllerMixin, _AnchoredWindowControllerMixin {
   /// Creates a new tooltip window controller for macOS.
   TooltipWindowControllerMacOS({
     required WindowingOwnerMacOS owner,
     required this._delegate,
-    required BoxConstraints contentSizeConstraints,
+    required BoxConstraints constraints,
     required BaseWindowController parent,
     required this._anchorRect,
     required this._positioner,
@@ -342,11 +363,10 @@ class TooltipWindowControllerMacOS extends TooltipWindowController with _WindowC
     _initController(owner);
 
     final int viewId = _MacOSPlatformInterface.createTooltipWindow(
-      constraints: contentSizeConstraints,
+      constraints: constraints,
       onShouldClose: _onShouldClose.nativeFunction,
       onWillClose: _onWillClose.nativeFunction,
       onNotifyListeners: _onResize.nativeFunction,
-      onGetWindowPosition: _onGetWindowPosition.nativeFunction,
       parentViewId: parent.rootView.viewId,
     );
 
@@ -354,14 +374,17 @@ class TooltipWindowControllerMacOS extends TooltipWindowController with _WindowC
   }
 
   @override
-  void updatePosition({Rect? anchorRect, WindowPositioner? positioner}) {
-    if (anchorRect != null) {
-      _anchorRect = anchorRect;
-    }
+  @protected
+  void updateContentSize(Size size) => _placeWindow(size);
+
+  @override
+  void updatePosition({WindowPositioner? positioner}) {
+    _ensureNotDestroyed();
     if (positioner != null) {
       _positioner = positioner;
     }
-    _MacOSPlatformInterface.updateWindowPosition(windowHandle);
+    // The window is placed again after the next frame.
+    WidgetsBinding.instance.scheduleFrame();
   }
 
   @override
@@ -382,27 +405,6 @@ class TooltipWindowControllerMacOS extends TooltipWindowController with _WindowC
   }
 
   @override
-  Pointer<_Rect> _handleOnGetWindowPosition(
-    Pointer<_Size> childSize,
-    Pointer<_Rect> parentRect,
-    Pointer<_Rect> outputRect,
-  ) {
-    super._handleOnGetWindowPosition(childSize, parentRect, outputRect);
-    final Pointer<_Rect> result = _allocator<_Rect>();
-    final Rect targetRect = _positioner.placeWindow(
-      childSize: childSize.ref.toSize(),
-      anchorRect: _anchorRect.translate(parentRect.ref.left, parentRect.ref.top),
-      parentRect: parentRect.ref.toRect(),
-      displayRect: outputRect.ref.toRect(),
-    );
-    result.ref.left = targetRect.left;
-    result.ref.top = targetRect.top;
-    result.ref.width = childSize.ref.width;
-    result.ref.height = childSize.ref.height;
-    return result;
-  }
-
-  @override
   BaseWindowController get parent => _parent;
 
   @override
@@ -413,19 +415,22 @@ class TooltipWindowControllerMacOS extends TooltipWindowController with _WindowC
 
   final TooltipWindowControllerDelegate _delegate;
   final BaseWindowController _parent;
+  @override
   WindowPositioner _positioner;
-  Rect _anchorRect;
+  @override
+  final ValueGetter<Rect> _anchorRect;
 }
 
 /// MacOS specific implementation of [PopupWindowController].
 ///
 /// {@macro flutter.widgets.windowing.experimental}
-class PopupWindowControllerMacOS extends PopupWindowController with _WindowControllerMixin {
+class PopupWindowControllerMacOS extends PopupWindowController
+    with _WindowControllerMixin, _AnchoredWindowControllerMixin {
   /// Creates a new tooltip window controller for macOS.
   PopupWindowControllerMacOS({
     required WindowingOwnerMacOS owner,
     required this._delegate,
-    required BoxConstraints contentSizeConstraints,
+    required BoxConstraints constraints,
     required BaseWindowController parent,
     required this._anchorRect,
     required this._positioner,
@@ -434,11 +439,10 @@ class PopupWindowControllerMacOS extends PopupWindowController with _WindowContr
     _initController(owner);
 
     final int viewId = _MacOSPlatformInterface.createPopupWindow(
-      constraints: contentSizeConstraints,
+      constraints: constraints,
       onShouldClose: _onShouldClose.nativeFunction,
       onWillClose: _onWillClose.nativeFunction,
       onNotifyListeners: _onResize.nativeFunction,
-      onGetWindowPosition: _onGetWindowPosition.nativeFunction,
       parentViewId: parent.rootView.viewId,
     );
 
@@ -446,14 +450,17 @@ class PopupWindowControllerMacOS extends PopupWindowController with _WindowContr
   }
 
   @override
-  void updatePosition({Rect? anchorRect, WindowPositioner? positioner}) {
-    if (anchorRect != null) {
-      _anchorRect = anchorRect;
-    }
+  @protected
+  void updateContentSize(Size size) => _placeWindow(size);
+
+  @override
+  void updatePosition({WindowPositioner? positioner}) {
+    _ensureNotDestroyed();
     if (positioner != null) {
       _positioner = positioner;
     }
-    _MacOSPlatformInterface.updateWindowPosition(windowHandle);
+    // The window is placed again after the next frame.
+    WidgetsBinding.instance.scheduleFrame();
   }
 
   @override
@@ -479,27 +486,6 @@ class PopupWindowControllerMacOS extends PopupWindowController with _WindowContr
   }
 
   @override
-  Pointer<_Rect> _handleOnGetWindowPosition(
-    Pointer<_Size> childSize,
-    Pointer<_Rect> parentRect,
-    Pointer<_Rect> outputRect,
-  ) {
-    super._handleOnGetWindowPosition(childSize, parentRect, outputRect);
-    final Pointer<_Rect> result = _allocator<_Rect>();
-    final Rect targetRect = _positioner.placeWindow(
-      childSize: childSize.ref.toSize(),
-      anchorRect: _anchorRect.translate(parentRect.ref.left, parentRect.ref.top),
-      parentRect: parentRect.ref.toRect(),
-      displayRect: outputRect.ref.toRect(),
-    );
-    result.ref.left = targetRect.left;
-    result.ref.top = targetRect.top;
-    result.ref.width = childSize.ref.width;
-    result.ref.height = childSize.ref.height;
-    return result;
-  }
-
-  @override
   BaseWindowController get parent => _parent;
 
   @override
@@ -510,8 +496,10 @@ class PopupWindowControllerMacOS extends PopupWindowController with _WindowContr
 
   final PopupWindowControllerDelegate _delegate;
   final BaseWindowController _parent;
+  @override
   WindowPositioner _positioner;
-  Rect _anchorRect;
+  @override
+  final ValueGetter<Rect> _anchorRect;
 }
 
 /// MacOS specific implementation of [SatelliteWindowController].
@@ -541,13 +529,33 @@ class SatelliteWindowControllerMacOS extends SatelliteWindowController with _Win
       onShouldClose: _onShouldClose.nativeFunction,
       onWillClose: _onWillClose.nativeFunction,
       onNotifyListeners: _onResize.nativeFunction,
-      onGetWindowPosition: _onGetWindowPosition.nativeFunction,
     );
     rootView = _flutterViewForId(viewId);
     if (title != null) {
       setTitle(title);
     }
-    _MacOSPlatformInterface.updateWindowPosition(windowHandle);
+  }
+
+  @override
+  @protected
+  void updateContentSize(Size size) {
+    // The positioner is only applied the first time the window is shown;
+    // afterwards the user may move the window.
+    if (_hasPlacedWindow) {
+      return;
+    }
+    _hasPlacedWindow = true;
+    final Rect parentRect = _MacOSPlatformInterface.getParentContentRect(windowHandle);
+    _MacOSPlatformInterface.setWindowContentRect(
+      windowHandle,
+      _initialPositioner.placeWindow(
+        childSize: size,
+        // Without an anchor the window is placed relative to the whole parent.
+        anchorRect: _initialAnchorRect?.shift(parentRect.topLeft) ?? parentRect,
+        parentRect: parentRect,
+        displayRect: _MacOSPlatformInterface.getScreenVisibleFrame(windowHandle),
+      ),
+    );
   }
 
   @override
@@ -609,44 +617,13 @@ class SatelliteWindowControllerMacOS extends SatelliteWindowController with _Win
   }
 
   @override
-  Pointer<_Rect> _handleOnGetWindowPosition(
-    Pointer<_Size> childSize,
-    Pointer<_Rect> parentRect,
-    Pointer<_Rect> outputRect,
-  ) {
-    super._handleOnGetWindowPosition(childSize, parentRect, outputRect);
-    Rect parent = parentRect.ref.toRect();
-    Rect? anchor = _initialAnchorRect;
-    if (anchor == null) {
-      final Pointer<Void> parentHandle = _MacOSPlatformInterface.getParent(windowHandle);
-      final Rect anchorExpanded = _MacOSPlatformInterface.frameRectAsAnchorRect(parentHandle)
-          .toRect()
-          .translate(parent.left, parent.top);
-      parent = parent.expandToInclude(anchorExpanded);
-      anchor = Rect.fromLTWH(0, 0, parent.width, parent.height);
-    }
-
-    final Pointer<_Rect> result = _allocator<_Rect>();
-    final Rect targetRect = _initialPositioner.placeWindow(
-      childSize: childSize.ref.toSize(),
-      anchorRect: anchor.translate(parent.left, parent.top),
-      parentRect: parent,
-      displayRect: outputRect.ref.toRect(),
-    );
-    result.ref.left = targetRect.left;
-    result.ref.top = targetRect.top;
-    result.ref.width = childSize.ref.width;
-    result.ref.height = childSize.ref.height;
-    return result;
-  }
-
-  @override
   String get title => _MacOSPlatformInterface.getTitle(windowHandle);
 
   final BaseWindowController _parent;
   final SatelliteWindowControllerDelegate _delegate;
   final WindowPositioner _initialPositioner;
   final Rect? _initialAnchorRect;
+  bool _hasPlacedWindow = false;
 }
 
 /// Implementation of [WindowController] for the macOS platform.
@@ -656,7 +633,8 @@ class SatelliteWindowControllerMacOS extends SatelliteWindowController with _Win
 /// See also:
 ///
 ///  * [WindowController], the base class for regular windows.
-class WindowControllerMacOS extends WindowController with _WindowControllerMixin {
+class WindowControllerMacOS extends WindowController
+    with _WindowControllerMixin, _ContentSizedWindowControllerMixin {
   /// Creates a new regular window controller for macOS. When this constructor
   /// completes the FlutterView is created and framework is aware of it.
   WindowControllerMacOS({
@@ -666,7 +644,9 @@ class WindowControllerMacOS extends WindowController with _WindowControllerMixin
     required bool resizable,
     BoxConstraints? constraints,
     String? title,
-  }) : super.empty() {
+  }) : _sizedToContent = size == null,
+       _resizable = resizable,
+       super.empty() {
     _initController(owner);
 
     final int viewId = _MacOSPlatformInterface.createWindow(
@@ -682,6 +662,10 @@ class WindowControllerMacOS extends WindowController with _WindowControllerMixin
       setTitle(title);
     }
   }
+
+  @override
+  @protected
+  void updateContentSize(Size size) => _syncWindowSize(size);
 
   @override
   void _handleOnShouldClose() {
@@ -774,6 +758,10 @@ class WindowControllerMacOS extends WindowController with _WindowControllerMixin
   }
 
   final WindowControllerDelegate _delegate;
+  @override
+  final bool _sizedToContent;
+  @override
+  final bool _resizable;
 
   @override
   bool get isActivated => _MacOSPlatformInterface.isActivated(windowHandle);
@@ -789,7 +777,8 @@ class WindowControllerMacOS extends WindowController with _WindowControllerMixin
 /// See also:
 ///
 ///  * [DialogWindowController], the base class for dialog windows.
-class DialogWindowControllerMacOS extends DialogWindowController with _WindowControllerMixin {
+class DialogWindowControllerMacOS extends DialogWindowController
+    with _WindowControllerMixin, _ContentSizedWindowControllerMixin {
   /// Creates a new regular window controller for macOS. When this constructor
   /// completes the FlutterView is created and framework is aware of it.
   DialogWindowControllerMacOS({
@@ -800,7 +789,9 @@ class DialogWindowControllerMacOS extends DialogWindowController with _WindowCon
     this.parent,
     BoxConstraints? constraints,
     String? title,
-  }) : super.empty() {
+  }) : _sizedToContent = size == null,
+       _resizable = resizable,
+       super.empty() {
     _initController(owner);
 
     final int viewId = _MacOSPlatformInterface.createDialogWindow(
@@ -817,6 +808,10 @@ class DialogWindowControllerMacOS extends DialogWindowController with _WindowCon
       setTitle(title);
     }
   }
+
+  @override
+  @protected
+  void updateContentSize(Size size) => _syncWindowSize(size);
 
   @override
   void _handleOnShouldClose() {
@@ -857,6 +852,10 @@ class DialogWindowControllerMacOS extends DialogWindowController with _WindowCon
   }
 
   final DialogWindowControllerDelegate _delegate;
+  @override
+  final bool _sizedToContent;
+  @override
+  final bool _resizable;
 
   @override
   Size get contentSize {
@@ -914,16 +913,6 @@ final class _WindowCreationRequest extends Struct {
   external Pointer<NativeFunction<Void Function()>> onShouldClose;
   external Pointer<NativeFunction<Void Function()>> onWillClose;
   external Pointer<NativeFunction<Void Function()>> onNotifyListeners;
-  external Pointer<
-    NativeFunction<
-      Pointer<_Rect> Function(
-        Pointer<_Size> childSize,
-        Pointer<_Rect> parentRect,
-        Pointer<_Rect> outputRect,
-      )
-    >
-  >
-  onGetWindowPosition;
 }
 
 final class _Size extends Struct {
@@ -1006,6 +995,9 @@ class _MacOSPlatformInterface {
     _setWindowContentSize(windowHandle, ffiSize);
     _allocator.free(ffiSize);
   }
+
+  @Native<Void Function(Pointer<Void>)>(symbol: 'InternalFlutter_Window_SizingComplete')
+  external static void sizingComplete(Pointer<Void> windowHandle);
 
   @Native<Void Function(Pointer<Void>, Pointer<_Constraints>)>(
     symbol: 'InternalFlutter_Window_SetConstraints',
@@ -1129,29 +1121,23 @@ class _MacOSPlatformInterface {
   )
   external static int _createTooltipWindow(int engineId, Pointer<_WindowCreationRequest> request);
 
-  /// Creates a new window and returns the viewId of the created FlutterView.
+  /// Creates a new tooltip window and returns the viewId of the created
+  /// FlutterView.
+  ///
+  /// The window is created hidden and is revealed by the engine by setting the
+  /// window alpha when the first frame is presented. The framework fully drives
+  /// the window position and size via [setWindowContentRect].
   static int createTooltipWindow({
     required BoxConstraints constraints,
     required int parentViewId,
     required Pointer<NativeFunction<Void Function()>> onShouldClose,
     required Pointer<NativeFunction<Void Function()>> onWillClose,
     required Pointer<NativeFunction<Void Function()>> onNotifyListeners,
-    required Pointer<
-      NativeFunction<
-        Pointer<_Rect> Function(
-          Pointer<_Size> childSize,
-          Pointer<_Rect> parentRect,
-          Pointer<_Rect> outputRect,
-        )
-      >
-    >
-    onGetWindowPosition,
   }) {
     final Pointer<_WindowCreationRequest> request = _allocator<_WindowCreationRequest>()
       ..ref.onShouldClose = onShouldClose
       ..ref.onWillClose = onWillClose
       ..ref.onNotifyListeners = onNotifyListeners
-      ..ref.onGetWindowPosition = onGetWindowPosition
       ..ref.parentViewId = parentViewId;
 
     request.ref
@@ -1174,29 +1160,23 @@ class _MacOSPlatformInterface {
   )
   external static int _createPopupWindow(int engineId, Pointer<_WindowCreationRequest> request);
 
-  /// Creates a new window and returns the viewId of the created FlutterView.
+  /// Creates a new popup window and returns the viewId of the created
+  /// FlutterView.
+  ///
+  /// The window is created hidden and is revealed by the engine by setting the
+  /// window alpha when the first frame is presented. The framework fully drives
+  /// the window position and size via [setWindowContentRect].
   static int createPopupWindow({
     required BoxConstraints constraints,
     required int parentViewId,
     required Pointer<NativeFunction<Void Function()>> onShouldClose,
     required Pointer<NativeFunction<Void Function()>> onWillClose,
     required Pointer<NativeFunction<Void Function()>> onNotifyListeners,
-    required Pointer<
-      NativeFunction<
-        Pointer<_Rect> Function(
-          Pointer<_Size> childSize,
-          Pointer<_Rect> parentRect,
-          Pointer<_Rect> outputRect,
-        )
-      >
-    >
-    onGetWindowPosition,
   }) {
     final Pointer<_WindowCreationRequest> request = _allocator<_WindowCreationRequest>()
       ..ref.onShouldClose = onShouldClose
       ..ref.onWillClose = onWillClose
       ..ref.onNotifyListeners = onNotifyListeners
-      ..ref.onGetWindowPosition = onGetWindowPosition
       ..ref.parentViewId = parentViewId;
 
     request.ref
@@ -1228,23 +1208,12 @@ class _MacOSPlatformInterface {
     required Pointer<NativeFunction<Void Function()>> onShouldClose,
     required Pointer<NativeFunction<Void Function()>> onWillClose,
     required Pointer<NativeFunction<Void Function()>> onNotifyListeners,
-    required Pointer<
-      NativeFunction<
-        Pointer<_Rect> Function(
-          Pointer<_Size> childSize,
-          Pointer<_Rect> parentRect,
-          Pointer<_Rect> outputRect,
-        )
-      >
-    >
-    onGetWindowPosition,
   }) {
     final Pointer<_WindowCreationRequest> request = _allocator<_WindowCreationRequest>()
       ..ref.parentViewId = parentViewId
       ..ref.onShouldClose = onShouldClose
       ..ref.onWillClose = onWillClose
-      ..ref.onNotifyListeners = onNotifyListeners
-      ..ref.onGetWindowPosition = onGetWindowPosition;
+      ..ref.onNotifyListeners = onNotifyListeners;
 
     if (size != null) {
       request.ref
@@ -1336,17 +1305,44 @@ class _MacOSPlatformInterface {
   @Native<Bool Function(Pointer<Void>)>(symbol: 'InternalFlutter_Window_IsActivated')
   external static bool isActivated(Pointer<Void> windowHandle);
 
-  @Native<Void Function(Pointer<Void>)>(symbol: 'InternalFlutter_Window_UpdatePosition')
-  external static void updateWindowPosition(Pointer<Void> windowHandle);
+  @Native<Void Function(Pointer<Void>, Pointer<_Rect>)>(
+    symbol: 'InternalFlutter_Window_SetContentRect',
+  )
+  external static void _setWindowContentRect(Pointer<Void> windowHandle, Pointer<_Rect> rect);
+
+  /// Moves the window so that its content area matches [rect] in Flutter
+  /// logical coordinates (top-left origin over the union of all screens).
+  static void setWindowContentRect(Pointer<Void> windowHandle, Rect rect) {
+    final Pointer<_Rect> ffiRect = _allocator<_Rect>();
+    ffiRect.ref
+      ..left = rect.left
+      ..top = rect.top
+      ..width = rect.width
+      ..height = rect.height;
+    _setWindowContentRect(windowHandle, ffiRect);
+    _allocator.free(ffiRect);
+  }
+
+  @Native<_Rect Function(Pointer<Void>)>(symbol: 'InternalFlutter_Window_ParentContentRect')
+  external static _Rect _getParentContentRect(Pointer<Void> windowHandle);
+
+  /// Returns the content rect of the parent window in Flutter logical
+  /// coordinates (top-left origin over the union of all screens).
+  static Rect getParentContentRect(Pointer<Void> windowHandle) {
+    return _getParentContentRect(windowHandle).toRect();
+  }
+
+  @Native<_Rect Function(Pointer<Void>)>(symbol: 'InternalFlutter_Window_ScreenVisibleFrame')
+  external static _Rect _getScreenVisibleFrame(Pointer<Void> windowHandle);
+
+  /// Returns the visible frame of the screen hosting this window in Flutter
+  /// logical coordinates (top-left origin over the union of all screens).
+  static Rect getScreenVisibleFrame(Pointer<Void> windowHandle) {
+    return _getScreenVisibleFrame(windowHandle).toRect();
+  }
 
   @Native<Void Function(Int64, Pointer<Void>, Int64)>(symbol: 'InternalFlutter_Window_Reparent')
   external static void reparent(int engineId, Pointer<Void> windowHandle, int newParentViewId);
-
-  @Native<Pointer<Void> Function(Pointer<Void>)>(symbol: 'InternalFlutter_Window_GetParent')
-  external static Pointer<Void> getParent(Pointer<Void> windowHandle);
-
-  @Native<_Rect Function(Pointer<Void>)>(symbol: 'InternalFlutter_Window_FrameRectAsAnchorRect')
-  external static _Rect frameRectAsAnchorRect(Pointer<Void> windowHandle);
 
   @Native<_Offset Function(Pointer<Void>)>(symbol: 'InternalFlutter_Window_GetOffsetInParent')
   external static _Offset getOffsetInParent(Pointer<Void> windowHandle);
