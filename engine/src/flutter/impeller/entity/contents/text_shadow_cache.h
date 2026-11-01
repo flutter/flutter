@@ -53,8 +53,11 @@ struct TextFrameFingerprint {
 /// @brief A cache for blurred text that re-uses these across frames.
 ///
 /// Text shadows are generally stable, but expensive to compute as we use a
-/// full gaussian blur. This class caches these shadows by text blob identifier
-/// and holds them for at least one frame.
+/// full gaussian blur. This class caches these shadows by text blob identifier.
+/// Entries live until they were unused for [kKeepAliveFrameCount] frames, so
+/// text that cycles through a few states (typing dots, counters) keeps hitting.
+/// Memory is bounded by a byte budget: past it, the least recently used
+/// entries are evicted first.
 ///
 /// Additionally, there is an optimization for a single glyph (generally an
 /// Icon) that uses the content itself as a key.
@@ -65,7 +68,7 @@ struct TextFrameFingerprint {
 /// substantially better performance than Skia.
 class TextShadowCache {
  public:
-  TextShadowCache() = default;
+  explicit TextShadowCache(size_t byte_budget = kDefaultByteBudget);
 
   ~TextShadowCache() = default;
 
@@ -101,7 +104,10 @@ class TextShadowCache {
   /// @brief Mark all glyph textures as unused this frame.
   void MarkFrameStart();
 
-  /// @brief Remove all glyph textures that were not referenced at least once.
+  /// @brief Remove glyph textures that were not referenced in the last
+  ///        [kKeepAliveFrameCount] + 1 frames, then evict the least recently
+  ///        used ones until the cache fits its byte budget. Entries used this
+  ///        frame are never evicted for the budget.
   void MarkFrameEnd();
 
   /// @brief Lookup the entity in the cache with the given filter/text contents,
@@ -116,6 +122,15 @@ class TextShadowCache {
   // Visible for testing.
   size_t GetCacheSizeForTesting() const { return entries_.size(); }
 
+  size_t GetCacheBytesForTesting() const { return GetCacheBytes(); }
+
+  /// Number of consecutive unused frames an entry survives: 2 seconds at
+  /// 120 Hz, longer than one cycle of typical typing indicators.
+  static constexpr uint32_t kKeepAliveFrameCount = 240;
+
+  /// Default byte budget for all cached shadow textures.
+  static constexpr size_t kDefaultByteBudget = 8u * 1024u * 1024u;
+
  private:
   TextShadowCache(const TextShadowCache&) = delete;
 
@@ -124,8 +139,14 @@ class TextShadowCache {
   struct TextShadowCacheData {
     Entity entity;
     bool used_this_frame = true;
+    uint32_t unused_frame_count = 0;
+    size_t byte_size = 0;
     Matrix key_matrix;
   };
+
+  size_t GetCacheBytes() const;
+
+  size_t byte_budget_ = kDefaultByteBudget;
 
   absl::flat_hash_map<TextShadowCacheKey,
                       TextShadowCacheData,
