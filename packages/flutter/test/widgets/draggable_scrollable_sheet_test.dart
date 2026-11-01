@@ -1969,4 +1969,57 @@ void main() {
       expect(lastExtent, 1.0);
     },
   );
+
+  testWidgets('A touch lifted while the sheet snaps does not assert _hold == null', (
+    WidgetTester tester,
+  ) async {
+    // Regression test for https://github.com/flutter/flutter/issues/195744
+    tester.view
+      ..devicePixelRatio = 1.0
+      ..physicalSize = const Size(400.0, 800.0);
+    addTearDown(tester.view.reset);
+
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: GestureDetector(
+          // A competing gesture recognizer ensures that the drag recognizer
+          // does not win the arena unconditionally on pointer down, reproducing
+          // _handleDragCancel when a touch lifts without dragging.
+          onTap: () {},
+          child: DraggableScrollableSheet(
+            initialChildSize: 2 / 3,
+            minChildSize: 1 / 3,
+            snap: true,
+            snapSizes: const <double>[2 / 3],
+            builder: (BuildContext context, ScrollController controller) {
+              return SingleChildScrollView(
+                controller: controller,
+                child: Column(children: <Widget>[for (int i = 0; i < 40; i++) Text('Line $i')]),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final Finder line = find.text('Line 3');
+    final TestGesture drag = await tester.startGesture(tester.getCenter(line));
+    await drag.moveBy(const Offset(0.0, -60.0));
+    await tester.pump();
+    await drag.moveBy(const Offset(0.0, -60.0));
+    await tester.pump();
+    await drag.up();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 16));
+
+    // Touch the sheet while it is snapping, then lift without dragging.
+    final TestGesture touch = await tester.startGesture(tester.getCenter(line));
+    await tester.pump();
+    await touch.up();
+    await tester.pump();
+
+    expect(tester.takeException(), isNull);
+    await tester.pumpAndSettle();
+  });
 }
