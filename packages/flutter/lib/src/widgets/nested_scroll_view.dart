@@ -125,8 +125,9 @@ typedef NestedScrollViewHeaderSliversBuilder = List<Widget> Function(
 /// {@tool dartpad}
 /// This simple example shows a [NestedScrollView] whose header contains a
 /// floating [SliverAppBar]. By using the [floatHeaderSlivers] property, the
-/// floating behavior is coordinated between the outer and inner [Scrollable]s,
-/// so it behaves as it would in a single scrollable.
+/// floating behavior during a drag is coordinated between the outer and inner
+/// [Scrollable]s. This does not change the order of ballistic scrolling: a
+/// reverse fling scrolls the body to its start before expanding the header.
 ///
 /// ** See code in examples/api/lib/widgets/nested_scroll_view/nested_scroll_view.1.dart **
 /// {@end-tool}
@@ -247,27 +248,28 @@ class NestedScrollView extends StatefulWidget {
   /// [ScrollPhysics.createBallisticSimulation] allows this particular aspect of
   /// the physics to be overridden).
   ///
-  /// If an explicit [ScrollBehavior] is provided to [scrollBehavior], the
-  /// [ScrollPhysics] provided by that behavior will take precedence after
-  /// [physics].
+  /// If null, uses the physics from an explicitly provided [scrollBehavior],
+  /// or the inherited [ScrollConfiguration] when no such behavior is provided.
+  /// If there is no ancestor [ScrollConfiguration], [ScrollConfiguration.of]
+  /// supplies a default [ScrollBehavior]. The default behavior uses
+  /// [BouncingScrollPhysics] on iOS and macOS and [ClampingScrollPhysics] on
+  /// other platforms. An inherited custom behavior can override this choice.
+  /// To use clamping ballistic motion on every platform, explicitly provide
+  /// [ClampingScrollPhysics].
   ///
-  /// Defaults to matching platform conventions.
-  ///
-  /// The [ScrollPhysics.applyBoundaryConditions] implementation of the provided
-  /// object should not allow scrolling outside the scroll extent range
-  /// described by the [ScrollMetrics.minScrollExtent] and
-  /// [ScrollMetrics.maxScrollExtent] properties passed to that method. If that
-  /// invariant is not maintained, the nested scroll view may respond to user
-  /// scrolling erratically.
+  /// The outer scroll position is always clamped to its scroll extents,
+  /// regardless of the provided [ScrollPhysics.applyBoundaryConditions]. The
+  /// provided physics governs its ballistic simulation and scrolling
+  /// permissions; it cannot enable overscroll of the outer position.
   ///
   /// This property only applies to the outer scroll view, composed of the
-  /// slivers returned from [headerSliverBuilder]. Since the inner scroll view
-  /// is not directly configured by the [NestedScrollView]. For both to scroll
-  /// with the same [ScrollPhysics], configure the scroll view of the [body]
-  /// the same way if they are expected to match, or use a [ScrollBehavior] as
-  /// an ancestor so both the inner and outer scroll views inherit the same
-  /// [ScrollPhysics]. This allows for flexible configurations of the
-  /// NestedScrollView.
+  /// slivers returned from [headerSliverBuilder]. The inner scroll view is
+  /// configured separately by the [body]. To use the same physics for both,
+  /// configure this property and the body's scroll view accordingly. A
+  /// shared ancestor [ScrollConfiguration] can configure the default physics
+  /// of both scroll views. Explicit settings on either scroll view, or a closer
+  /// [ScrollConfiguration] inside the body, can make their physics differ.
+  /// During a fling, each phase uses the physics of the position it moves.
   ///
   /// The [ScrollPhysics] also determine whether or not the [NestedScrollView]
   /// can accept input from the user to change the scroll offset. For example,
@@ -299,10 +301,13 @@ class NestedScrollView extends StatefulWidget {
   final DragStartBehavior dragStartBehavior;
 
   /// Whether or not the [NestedScrollView]'s coordinator should prioritize the
-  /// outer scrollable over the inner when scrolling back.
+  /// outer scrollable over the inner when scrolling back during a drag or
+  /// pointer-signal scroll.
   ///
   /// This is useful for an outer scrollable containing a [SliverAppBar] that
-  /// is expected to float.
+  /// is expected to float. It does not change the ballistic phase order:
+  /// a reverse fling scrolls the participating bodies to their starts before
+  /// expanding the header.
   final bool floatHeaderSlivers;
 
   /// {@macro flutter.material.Material.clipBehavior}
@@ -319,6 +324,16 @@ class NestedScrollView extends StatefulWidget {
   final String? restorationId;
 
   /// {@macro flutter.widgets.scrollable.scrollBehavior}
+  ///
+  /// This property applies only to the outer scroll view. Its
+  /// [ScrollBehavior.getScrollPhysics] supplies the outer physics when
+  /// [physics] is null. If both properties are null, the outer physics comes
+  /// from [ScrollConfiguration.of]. The outer position remains clamped to its
+  /// scroll extents regardless of which behavior supplies its physics.
+  ///
+  /// This behavior is not installed as a [ScrollConfiguration] for the [body].
+  /// To configure both scroll views, provide a shared ancestor
+  /// [ScrollConfiguration], or configure each scroll view separately.
   ///
   /// The [ScrollBehavior] of the inherited [ScrollConfiguration] will be
   /// modified by default to not apply a [Scrollbar]. This is because the
@@ -488,10 +503,11 @@ class NestedScrollViewState extends State<NestedScrollView> {
   @protected
   @override
   Widget build(BuildContext context) {
-    final ScrollPhysics scrollPhysics =
-        widget.physics?.applyTo(const ClampingScrollPhysics()) ??
-        widget.scrollBehavior?.getScrollPhysics(context).applyTo(const ClampingScrollPhysics()) ??
-        const ClampingScrollPhysics();
+    final ScrollPhysics scrollPhysics = const _NestedScrollViewPhysics().applyTo(
+      widget.physics ??
+          widget.scrollBehavior?.getScrollPhysics(context) ??
+          ScrollConfiguration.of(context).getScrollPhysics(context),
+    );
 
     return _InheritedNestedScrollView(
       state: this,
@@ -521,6 +537,77 @@ class NestedScrollViewState extends State<NestedScrollView> {
       ),
     );
   }
+}
+
+/// Clamps the header while delegating its motion and permissions to its parent.
+///
+/// [NestedScrollViewState.build] resolves the parent from explicit physics,
+/// explicit scroll behavior, or the inherited scroll configuration, in that
+/// order. Clamping the boundary does not require clamping ballistic motion.
+/// The null-parent fallbacks below are defensive; they do not select the
+/// default physics of a normally built [NestedScrollView].
+class _NestedScrollViewPhysics extends ScrollPhysics {
+  const _NestedScrollViewPhysics({super.parent});
+
+  @override
+  _NestedScrollViewPhysics applyTo(ScrollPhysics? ancestor) =>
+      _NestedScrollViewPhysics(parent: buildParent(ancestor));
+
+  @override
+  double applyBoundaryConditions(ScrollMetrics position, double value) {
+    assert(() {
+      if (value == position.pixels) {
+        throw FlutterError.fromParts(<DiagnosticsNode>[
+          ErrorSummary('$runtimeType.applyBoundaryConditions() was called redundantly.'),
+          ErrorDescription(
+            'The proposed new position, $value, is exactly equal to the current position of the '
+            'given ${position.runtimeType}, ${position.pixels}.\n'
+            'The applyBoundaryConditions method should only be called when the value is '
+            'going to actually change the pixels, otherwise it is redundant.',
+          ),
+          DiagnosticsProperty<ScrollPhysics>(
+            'The physics object in question was',
+            this,
+            style: DiagnosticsTreeStyle.errorProperty,
+          ),
+          DiagnosticsProperty<ScrollMetrics>(
+            'The position object in question was',
+            position,
+            style: DiagnosticsTreeStyle.errorProperty,
+          ),
+        ]);
+      }
+      return true;
+    }());
+    if (value < position.pixels && position.pixels <= position.minScrollExtent) {
+      // Underscroll.
+      return value - position.pixels;
+    }
+    if (position.maxScrollExtent <= position.pixels && position.pixels < value) {
+      // Overscroll.
+      return value - position.pixels;
+    }
+    if (value < position.minScrollExtent && position.minScrollExtent < position.pixels) {
+      // Hit top edge.
+      return value - position.minScrollExtent;
+    }
+    if (position.pixels < position.maxScrollExtent && position.maxScrollExtent < value) {
+      // Hit bottom edge.
+      return value - position.maxScrollExtent;
+    }
+    return 0.0;
+  }
+
+  @override
+  Simulation? createBallisticSimulation(ScrollMetrics position, double velocity) =>
+      (parent ?? const ClampingScrollPhysics()).createBallisticSimulation(position, velocity);
+
+  @override
+  bool get allowUserScrolling => (parent ?? const ClampingScrollPhysics()).allowUserScrolling;
+
+  @override
+  bool get allowImplicitScrolling =>
+      (parent ?? const ClampingScrollPhysics()).allowImplicitScrolling;
 }
 
 class _NestedScrollViewCustomScrollView extends CustomScrollView {
@@ -567,52 +654,6 @@ class _InheritedNestedScrollView extends InheritedWidget {
   bool updateShouldNotify(_InheritedNestedScrollView old) => state != old.state;
 }
 
-class _NestedScrollMetrics extends FixedScrollMetrics {
-  _NestedScrollMetrics({
-    required super.minScrollExtent,
-    required super.maxScrollExtent,
-    required super.pixels,
-    required super.viewportDimension,
-    required super.axisDirection,
-    required super.devicePixelRatio,
-    required this.minRange,
-    required this.maxRange,
-    required this.correctionOffset,
-  });
-
-  @override
-  _NestedScrollMetrics copyWith({
-    double? minScrollExtent,
-    double? maxScrollExtent,
-    double? pixels,
-    double? viewportDimension,
-    AxisDirection? axisDirection,
-    double? devicePixelRatio,
-    double? minRange,
-    double? maxRange,
-    double? correctionOffset,
-  }) {
-    return _NestedScrollMetrics(
-      minScrollExtent: minScrollExtent ?? (hasContentDimensions ? this.minScrollExtent : null),
-      maxScrollExtent: maxScrollExtent ?? (hasContentDimensions ? this.maxScrollExtent : null),
-      pixels: pixels ?? (hasPixels ? this.pixels : null),
-      viewportDimension:
-          viewportDimension ?? (hasViewportDimension ? this.viewportDimension : null),
-      axisDirection: axisDirection ?? this.axisDirection,
-      devicePixelRatio: devicePixelRatio ?? this.devicePixelRatio,
-      minRange: minRange ?? this.minRange,
-      maxRange: maxRange ?? this.maxRange,
-      correctionOffset: correctionOffset ?? this.correctionOffset,
-    );
-  }
-
-  final double minRange;
-
-  final double maxRange;
-
-  final double correctionOffset;
-}
-
 typedef _NestedScrollActivityGetter = ScrollActivity Function(_NestedScrollPosition position);
 
 class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldController {
@@ -639,11 +680,6 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
 
   late _NestedScrollController _outerController;
   late _NestedScrollController _innerController;
-
-  bool get outOfRange {
-    return (_outerPosition?.outOfRange ?? false) ||
-        _innerPositions.any((_NestedScrollPosition position) => position.outOfRange);
-  }
 
   _NestedScrollPosition? get _outerPosition {
     if (!_outerController.hasClients) {
@@ -697,6 +733,15 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
     }
   }
 
+  // Activities finish independently; an idle header must not mark a moving
+  // body idle. The outer position can still be unattached during construction.
+  void updateUserScrollDirectionIfIdle() {
+    if (_outerPosition?.isScrollingNotifier.value != true &&
+        _innerPositions.every((position) => !position.isScrollingNotifier.value)) {
+      updateUserScrollDirection(ScrollDirection.idle);
+    }
+  }
+
   ScrollDragController? _currentDrag;
 
   void beginActivity(
@@ -708,7 +753,7 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
     for (final _NestedScrollPosition position in _innerPositions) {
       final ScrollActivity newInnerActivity = innerActivityGetter(position);
       position.beginActivity(newInnerActivity);
-      scrolling = scrolling && newInnerActivity.isScrolling;
+      scrolling = scrolling || newInnerActivity.isScrolling;
     }
     _currentDrag?.dispose();
     _currentDrag = null;
@@ -730,158 +775,53 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
   }
 
   @override
-  void goBallistic(double velocity) {
-    beginActivity(createOuterBallisticScrollActivity(velocity), (_NestedScrollPosition position) {
-      return createInnerBallisticScrollActivity(position, velocity);
-    });
-  }
-
-  ScrollActivity createOuterBallisticScrollActivity(double velocity) {
-    // This function creates a ballistic scroll for the outer scrollable.
-    //
-    // It assumes that the outer scrollable can't be overscrolled, and sets up a
-    // ballistic scroll over the combined space of the innerPositions and the
-    // outerPosition.
-
-    // First we must pick a representative inner position that we will care
-    // about. This is somewhat arbitrary. Ideally we'd pick the one that is "in
-    // the center" but there isn't currently a good way to do that so we
-    // arbitrarily pick the one that is the furthest away from the infinity we
-    // are heading towards.
-    _NestedScrollPosition? innerPosition;
-    if (velocity != 0.0) {
-      for (final _NestedScrollPosition position in _innerPositions) {
-        if (innerPosition != null) {
-          if (velocity > 0.0) {
-            if (innerPosition.pixels < position.pixels) {
-              continue;
-            }
-          } else {
-            assert(velocity < 0.0);
-            if (innerPosition.pixels > position.pixels) {
-              continue;
-            }
-          }
-        }
-        innerPosition = position;
-      }
-    }
-
-    if (innerPosition == null) {
-      // It's either just us or a velocity=0 situation.
-      return _outerPosition!.createBallisticScrollActivity(
-        _outerPosition!.physics.createBallisticSimulation(_outerPosition!, velocity),
-        mode: _NestedBallisticScrollActivityMode.independent,
+  void goBallistic(double velocity, {Set<_NestedScrollPosition> settledBodies = const {}}) {
+    if (_innerPositions.isEmpty) {
+      beginActivity(
+        _outerPosition!.createBallisticScrollActivity(
+          _outerPosition!.physics.createBallisticSimulation(_outerPosition!, velocity),
+        ),
+        _createIdleScrollActivity,
       );
+      return;
     }
-
-    final _NestedScrollMetrics metrics = _getMetrics(innerPosition, velocity);
-
-    return _outerPosition!.createBallisticScrollActivity(
-      _outerPosition!.physics.createBallisticSimulation(metrics, velocity),
-      mode: _NestedBallisticScrollActivityMode.outer,
-      metrics: metrics,
-    );
-  }
-
-  @protected
-  ScrollActivity createInnerBallisticScrollActivity(
-    _NestedScrollPosition position,
-    double velocity,
-  ) {
-    return position.createBallisticScrollActivity(
-      position.physics.createBallisticSimulation(_getMetrics(position, velocity), velocity),
-      mode: _NestedBallisticScrollActivityMode.inner,
-    );
-  }
-
-  _NestedScrollMetrics _getMetrics(_NestedScrollPosition innerPosition, double velocity) {
-    double pixels, minRange, maxRange, correctionOffset;
-    var extra = 0.0;
-    if (innerPosition.pixels == innerPosition.minScrollExtent) {
-      // minRange/maxRange here always span the outer position's full range,
-      // so it can't degenerate the way it can in the `else` branch; see
-      // correctPixelsIfOutOfRange for why that branch needs the correction
-      // and this one doesn't.
-      pixels = clampDouble(
-        _outerPosition!.pixels,
-        _outerPosition!.minScrollExtent,
-        _outerPosition!.maxScrollExtent,
-      ); // TODO(ianh): gracefully handle out-of-range outer positions
-      minRange = _outerPosition!.minScrollExtent;
-      maxRange = _outerPosition!.maxScrollExtent;
-      assert(minRange <= maxRange);
-      correctionOffset = 0.0;
-    } else {
-      assert(innerPosition.pixels != innerPosition.minScrollExtent);
-      // The `extra` computations below assume the outer position is within
-      // its own range; see correctPixelsIfOutOfRange for why that can
-      // transiently be false, and why it must be corrected here.
-      _outerPosition!.correctPixelsIfOutOfRange();
-      if (innerPosition.pixels < innerPosition.minScrollExtent) {
-        pixels =
-            innerPosition.pixels - innerPosition.minScrollExtent + _outerPosition!.minScrollExtent;
-      } else {
-        assert(innerPosition.pixels > innerPosition.minScrollExtent);
-        pixels =
-            innerPosition.pixels - innerPosition.minScrollExtent + _outerPosition!.maxScrollExtent;
-      }
-      if ((velocity > 0.0) && (innerPosition.pixels > innerPosition.minScrollExtent)) {
-        // This handles going forward (fling up) and inner list is scrolled past
-        // zero. We want to grab the extra pixels immediately to shrink.
-        extra = _outerPosition!.maxScrollExtent - _outerPosition!.pixels;
-        assert(extra >= 0.0);
-        minRange = pixels;
-        maxRange = pixels + extra;
-        assert(minRange <= maxRange);
-        correctionOffset = _outerPosition!.pixels - pixels;
-      } else if ((velocity < 0.0) && (innerPosition.pixels < innerPosition.minScrollExtent)) {
-        // This handles going backward (fling down) and inner list is
-        // underscrolled. We want to grab the extra pixels immediately to grow.
-        extra = _outerPosition!.pixels - _outerPosition!.minScrollExtent;
-        assert(extra >= 0.0);
-        minRange = pixels - extra;
-        maxRange = pixels;
-        assert(minRange <= maxRange);
-        correctionOffset = _outerPosition!.pixels - pixels;
-      } else {
-        // This handles going forward (fling up) and inner list is
-        // underscrolled, OR, going backward (fling down) and inner list is
-        // scrolled past zero. We want to skip the pixels we don't need to grow
-        // or shrink over.
-        if (velocity > 0.0) {
-          // shrinking
-          extra = _outerPosition!.minScrollExtent - _outerPosition!.pixels;
-        } else if (velocity < 0.0) {
-          // growing
-          extra =
-              _outerPosition!.pixels -
-              (_outerPosition!.maxScrollExtent - _outerPosition!.minScrollExtent);
-        }
-        assert(extra <= 0.0);
-        minRange = _outerPosition!.minScrollExtent;
-        maxRange = _outerPosition!.maxScrollExtent + extra;
-        assert(minRange <= maxRange);
-        correctionOffset = 0.0;
-      }
+    _outerPosition!.correctPixelsIfOutOfRange();
+    if (_innerPositions.length > 1) {
+      final group = _NestedBallisticGroup(
+        this,
+        _outerPosition!,
+        _innerPositions.toList(),
+        velocity,
+        settledBodies: settledBodies,
+      );
+      beginActivity(
+        group.done(_outerPosition!)
+            ? _createIdleScrollActivity(_outerPosition!)
+            : _NestedGroupedBallisticActivity(group, _outerPosition!),
+        (_NestedScrollPosition position) => group.done(position)
+            ? _createIdleScrollActivity(position)
+            : _NestedGroupedBallisticActivity(group, position),
+      );
+      return;
     }
-    return _NestedScrollMetrics(
-      minScrollExtent: _outerPosition!.minScrollExtent,
-      maxScrollExtent:
-          _outerPosition!.maxScrollExtent +
-          innerPosition.maxScrollExtent -
-          innerPosition.minScrollExtent +
-          extra,
-      pixels: pixels,
-      viewportDimension: _outerPosition!.viewportDimension,
-      axisDirection: _outerPosition!.axisDirection,
-      minRange: minRange,
-      maxRange: maxRange,
-      correctionOffset: correctionOffset,
-      devicePixelRatio: _outerPosition!.devicePixelRatio,
+    final simulation = _NestedCoordinatedSimulation(
+      this,
+      _outerPosition!,
+      _innerPositions.single,
+      velocity,
+    );
+    beginActivity(
+      simulation._done || simulation.outerFinished
+          ? _createIdleScrollActivity(_outerPosition!)
+          : _NestedCoordinatedBallisticActivity(this, _outerPosition!, simulation, true),
+      (_NestedScrollPosition position) => simulation._done
+          ? _createIdleScrollActivity(position)
+          : _NestedCoordinatedBallisticActivity(this, position, simulation, false),
     );
   }
 
+  // Controller targets for jumpTo and animateTo use this conversion
+  // independently of the coordinated ballistic trajectories.
   double unnestOffset(double value, _NestedScrollPosition source) {
     if (source == _outerPosition) {
       return clampDouble(value, _outerPosition!.minScrollExtent, _outerPosition!.maxScrollExtent);
@@ -1246,9 +1186,36 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
   @override
   AxisDirection get axisDirection => context.axisDirection;
 
+  bool _isCurrentActivity(ScrollActivity candidate) => identical(activity, candidate);
+
   @override
   void absorb(ScrollPosition other) {
     super.absorb(other);
+    if (other is _NestedScrollPosition) {
+      // A position may already be idle while its partner still reads the shared
+      // simulation. Rebind through absorption, not only an active delegate.
+      final simulations = <_NestedCoordinatedSimulation>{};
+      final groups = <_NestedBallisticGroup>{};
+      final _NestedScrollPosition? outer = coordinator._outerPosition;
+      for (final position in <_NestedScrollPosition>[
+        this,
+        if (outer != null) outer,
+        ...coordinator._innerPositions,
+      ]) {
+        final ScrollActivity? current = position.activity;
+        if (current is _NestedCoordinatedBallisticActivity) {
+          simulations.add(current.simulation);
+        } else if (current is _NestedGroupedBallisticActivity) {
+          groups.add(current.group);
+        }
+      }
+      for (final simulation in simulations) {
+        simulation.replacePosition(other, this);
+      }
+      for (final group in groups) {
+        group.replacePosition(other, this);
+      }
+    }
     activity!.updateDelegate(this);
   }
 
@@ -1382,7 +1349,7 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
   @override
   void goIdle() {
     beginActivity(IdleScrollActivity(this));
-    coordinator.updateUserScrollDirection(ScrollDirection.idle);
+    coordinator.updateUserScrollDirectionIfIdle();
   }
 
   // This is called by activities when they finish their work and want to go
@@ -1393,48 +1360,14 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
     if (velocity != 0.0 || outOfRange) {
       simulation = physics.createBallisticSimulation(this, velocity);
     }
-    beginActivity(
-      createBallisticScrollActivity(
-        simulation,
-        mode: _NestedBallisticScrollActivityMode.independent,
-      ),
-    );
+    beginActivity(createBallisticScrollActivity(simulation));
+    coordinator.updateUserScrollDirectionIfIdle();
   }
 
-  ScrollActivity createBallisticScrollActivity(
-    Simulation? simulation, {
-    required _NestedBallisticScrollActivityMode mode,
-    _NestedScrollMetrics? metrics,
-  }) {
-    if (simulation == null) {
-      return IdleScrollActivity(this);
-    }
-
-    switch (mode) {
-      case _NestedBallisticScrollActivityMode.outer:
-        assert(metrics != null);
-        if (metrics!.minRange == metrics.maxRange) {
-          return IdleScrollActivity(this);
-        }
-        return _NestedOuterBallisticScrollActivity(
-          coordinator,
-          this,
-          metrics,
-          simulation,
-          context.vsync,
-          shouldIgnorePointer,
-        );
-      case _NestedBallisticScrollActivityMode.inner:
-        return _NestedInnerBallisticScrollActivity(
-          coordinator,
-          this,
-          simulation,
-          context.vsync,
-          shouldIgnorePointer,
-        );
-      case _NestedBallisticScrollActivityMode.independent:
-        return BallisticScrollActivity(this, simulation, context.vsync, shouldIgnorePointer);
-    }
+  ScrollActivity createBallisticScrollActivity(Simulation? simulation) {
+    return simulation == null
+        ? IdleScrollActivity(this)
+        : BallisticScrollActivity(this, simulation, context.vsync, shouldIgnorePointer);
   }
 
   @override
@@ -1479,8 +1412,9 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
   /// one frame until the next layout catches up.
   /// `RangeMaintainingScrollPhysics` intentionally skips its usual
   /// correction while a ballistic activity is in flight, so nothing else
-  /// corrects it in that window. The coordinator calls this before computing
-  /// ballistic metrics so it never operates on a stale out-of-range value.
+  /// corrects it in that window. With bodies attached, the coordinator calls
+  /// this before creating coordinated ballistic simulations, including for
+  /// zero-velocity releases from pointer scrolling, jumping, or cancelling a hold.
   void correctPixelsIfOutOfRange() {
     // Not haveDimensions: this can run before that bookkeeping flag is set,
     // e.g. via ScrollPosition.restoreOffset -> jumpTo -> goBallistic during
@@ -1520,97 +1454,1053 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
   }
 }
 
-enum _NestedBallisticScrollActivityMode { outer, inner, independent }
-
-class _NestedInnerBallisticScrollActivity extends BallisticScrollActivity {
-  _NestedInnerBallisticScrollActivity(
+/// Coordinates the shared header without letting an early body pull it open.
+///
+/// Bodies recover their own overscroll before competing for the header. While
+/// waiting, each body advances on its own clock until it reaches an outer phase.
+/// The last arrival supplies the shared header's velocity; the others retain
+/// their body offsets. After that header phase, all bodies resume independently.
+/// A group with no outer phases is independent from the start.
+///
+/// All position activities read the same cached frame state. Replacing a
+/// position transfers its simulation to the new delegate; detaching one removes
+/// it from the group without restarting the remaining activities' clocks.
+/// Each activity supplies its animation time through [_NestedGroupSimulation].
+/// Only a time newer than [_time] advances the group, so x, dx, and isDone reads
+/// by different positions at the same time observe the same handoff.
+///
+/// A dependent group either waits for all bodies or starts with a header leader.
+/// Once waiting ends, only that leader advances the header. Header completion
+/// releases all bodies, each from its retained offset and the leader's arrival
+/// velocity. Settled recoveries do not participate in header selection. If a
+/// participant stops before its boundary and all others are waiting or done,
+/// the group stops without starting the header. Detaching all bodies switches
+/// to an outer-only simulation; newly attached bodies do not join this group.
+class _NestedBallisticGroup {
+  _NestedBallisticGroup(
     this.coordinator,
-    _NestedScrollPosition position,
-    Simulation simulation,
-    TickerProvider vsync,
-    bool shouldIgnorePointer,
-  ) : super(position, simulation, vsync, shouldIgnorePointer);
+    this.outer,
+    List<_NestedScrollPosition> bodies,
+    double velocity, {
+    Set<_NestedScrollPosition> settledBodies = const {},
+  }) {
+    final bool holdBeforeOuter = velocity < 0.0 || bodies.any((body) => body.outOfRange);
+    for (final body in bodies) {
+      _simulations[body] = _NestedCoordinatedSimulation(
+        coordinator,
+        outer,
+        body,
+        settledBodies.contains(body) ? 0.0 : velocity,
+        holdBeforeOuter: holdBeforeOuter,
+        settled: settledBodies.contains(body),
+      );
+    }
+    _independent = _simulations.values.every((simulation) => simulation.outerFinished);
+    _waiting = !_independent && holdBeforeOuter;
+    if (!_waiting && !_independent) {
+      _leader = _participants.reduce((a, b) => a.innerStart <= b.innerStart ? a : b);
+    }
+  }
 
   final _NestedScrollCoordinator coordinator;
+  _NestedScrollPosition outer;
+  final _simulations = <_NestedScrollPosition, _NestedCoordinatedSimulation>{};
+  _NestedCoordinatedSimulation? _leader;
+  // True until every participating body arrives at an outer phase. It becomes
+  // false when the last arrival is selected as leader and is never re-enabled.
+  late bool _waiting;
+  // True when no trajectory needs a header phase, either at construction or
+  // after every recovery settles. Bodies then advance independently.
+  late bool _independent;
+  // Changes from false to true once the leader completes (or skips) its header
+  // phase. The leader's arrival then starts every parked body's final phase.
+  bool _released = false;
+  double _time = 0.0;
+  Simulation? _outerOnly;
+  double _outerEpoch = 0.0;
 
-  @override
-  _NestedScrollPosition get delegate => super.delegate as _NestedScrollPosition;
-
-  @override
-  void resetActivity() {
-    delegate.beginActivity(coordinator.createInnerBallisticScrollActivity(delegate, velocity));
+  void replacePosition(_NestedScrollPosition previous, _NestedScrollPosition replacement) {
+    if (identical(outer, previous)) {
+      outer = replacement;
+    }
+    final _NestedCoordinatedSimulation? simulation = _simulations.remove(previous);
+    if (simulation != null) {
+      _simulations[replacement] = simulation;
+    }
+    for (final _NestedCoordinatedSimulation simulation in _simulations.values) {
+      simulation.replacePosition(previous, replacement);
+    }
+    if (_leader != null && !_simulations.containsValue(_leader)) {
+      _leader!.replacePosition(previous, replacement);
+    }
   }
 
-  @override
-  void applyNewDimensions() {
-    delegate.beginActivity(coordinator.createInnerBallisticScrollActivity(delegate, velocity));
+  bool updateDimensions() {
+    if (_leader != null &&
+        !_simulations.containsValue(_leader) &&
+        !_leader!.tryUpdateDimensions()) {
+      // A detached leader can still own the header. Restart only its outer-only
+      // segment so a resize does not transfer its velocity to settled bodies.
+      outer.correctPixelsIfOutOfRange();
+      _leader!.outerMetrics = outer.copyWith();
+      _leader!._outerPixels = outer.pixels;
+      _leader!._pixels = outer.pixels;
+      _leader!._startSegment();
+    }
+    final failed = <_NestedScrollPosition>[
+      for (final entry in _simulations.entries)
+        if (!entry.value.tryUpdateDimensions()) entry.key,
+    ];
+    if (failed.isEmpty) {
+      return true;
+    }
+    if (_independent || _released || (_leader?._independentOuter ?? false)) {
+      // Bodies no longer share a velocity or need a header handoff. Preserve
+      // unaffected trajectories and restart only those whose bounds changed.
+      outer.correctPixelsIfOutOfRange();
+      for (final position in failed) {
+        final _NestedCoordinatedSimulation previous = _simulations[position]!;
+        final replacement = _NestedCoordinatedSimulation(
+          coordinator,
+          outer,
+          position,
+          previous._velocity,
+          bodyOnly: true,
+        );
+        replacement._time = _time;
+        replacement._segmentEpoch = _time;
+        _simulations[position] = replacement;
+        if (identical(_leader, previous)) {
+          _leader = replacement;
+        }
+      }
+      return true;
+    }
+    if (!_waiting) {
+      return false;
+    }
+    // The waiting header reports zero velocity, but its bodies may still be
+    // moving. Restart each body from its own state instead of restarting the
+    // whole coordinator with the header's velocity.
+    outer.correctPixelsIfOutOfRange();
+    _simulations.updateAll((position, previous) {
+      final replacement = _NestedCoordinatedSimulation(
+        coordinator,
+        outer,
+        position,
+        previous._velocity,
+        holdBeforeOuter: true,
+        stoppedBeforeOuter: previous._done && !previous.outerFinished,
+      );
+      // The activities retain their clocks across a layout change.
+      replacement._time = _time;
+      replacement._segmentEpoch = _time;
+      if (previous._waitingForOuter) {
+        replacement._bodyArrival = previous._bodyArrival;
+      }
+      if (previous._done) {
+        replacement._done = true;
+      }
+      return replacement;
+    });
+    return true;
   }
 
-  @override
-  bool applyMoveTo(double value) {
-    return super.applyMoveTo(coordinator.nestOffset(value, delegate));
+  double restartVelocity(_NestedScrollPosition position) {
+    if (!_independent && !_waiting && !_released) {
+      return _leader!._velocity;
+    }
+    if (position == outer) {
+      return velocity(position);
+    }
+    return _simulations[position]!._velocity;
+  }
+
+  void advance(double time) {
+    if (time <= _time) {
+      return;
+    }
+    final double previousVelocity =
+        _leader?._velocity ??
+        _simulations.values.fold<double>(
+          0.0,
+          (velocity, simulation) =>
+              velocity.abs() > simulation._velocity.abs() ? velocity : simulation._velocity,
+        );
+    _simulations.removeWhere((position, _) => !coordinator._innerPositions.contains(position));
+    if (_simulations.isEmpty) {
+      if (_outerOnly == null) {
+        _outerEpoch = _time;
+        _outerOnly = outer.physics.createBallisticSimulation(outer, previousVelocity);
+      }
+      _time = time;
+      return;
+    }
+    if (_leader != null && !_simulations.containsValue(_leader)) {
+      // Rebuild from the remaining positions after the header's owning body
+      // detaches. Newly attached positions do not join an existing fling.
+      final double velocity = _leader!._velocity;
+      final Iterable<_NestedCoordinatedSimulation> candidates = _participants;
+      if (_released) {
+        _leader = _simulations.values.first;
+      } else if (candidates.isNotEmpty) {
+        _leader = candidates.first;
+        _leader!._outerPixels = outer.pixels;
+        _leader!._innerPixels = _leader!.inner.pixels;
+        _leader!._pixels = outer.pixels + _leader!.inner.pixels - _leader!.inner.minScrollExtent;
+        _leader!._resumeOuter(_time, velocity);
+      }
+      // With only settled bodies remaining, the detached leader's trajectory
+      // switches to outer-only motion in _advance. Do not revive a body to
+      // provide the header's remaining motion.
+    }
+    if (_independent) {
+      for (final _NestedCoordinatedSimulation simulation in _simulations.values) {
+        simulation._advance(time);
+      }
+    } else {
+      if (_waiting) {
+        for (final _NestedCoordinatedSimulation simulation in _simulations.values) {
+          simulation._advance(time);
+        }
+        final List<_NestedCoordinatedSimulation> participants = _participants.toList();
+        if (participants.isEmpty) {
+          // Settled recoveries have no header phase and cannot veto or lead it.
+          _waiting = false;
+          _independent = true;
+          _released = true;
+        } else if (participants.every((simulation) => simulation._waitingForOuter)) {
+          // Arrival time, rather than initial offset or frame callback order,
+          // determines which body's velocity starts the header. For equal
+          // times use the greater speed, independently of attachment order.
+          _leader = participants.reduce((a, b) {
+            final (time: double leftTime, velocity: double leftVelocity) = a._bodyArrival!;
+            final (time: double rightTime, velocity: double rightVelocity) = b._bodyArrival!;
+            return switch (leftTime.compareTo(rightTime)) {
+              > 0 => a,
+              < 0 => b,
+              _ => leftVelocity.abs() >= rightVelocity.abs() ? a : b,
+            };
+          });
+          final ({double time, double velocity}) arrival = _leader!._bodyArrival!;
+          // Detaching an unfinished body can release bodies that arrived in
+          // an earlier frame. Start now instead of replaying their wait time.
+          final double startTime = _simulations.values.fold<double>(
+            math.max(arrival.time, _time),
+            (time, simulation) => math.max(time, simulation._settledRecoveryTime ?? 0.0),
+          );
+          _leader!._resumeOuter(startTime, arrival.velocity);
+          _waiting = false;
+        }
+      }
+      if (!_waiting && !_independent) {
+        _leader!._advance(time);
+        final ({double time, double velocity})? arrival = _leader!._outerArrival;
+        if (arrival != null && !_released) {
+          for (final _NestedCoordinatedSimulation simulation in _simulations.values) {
+            if (simulation != _leader && !simulation.outerFinished) {
+              simulation._resumeBody(arrival.time, arrival.velocity, _leader!._outerPixels);
+            }
+          }
+          _released = true;
+        }
+        if (_released) {
+          for (final _NestedCoordinatedSimulation simulation in _simulations.values) {
+            if (simulation != _leader) {
+              simulation._advance(time);
+            }
+          }
+        }
+      }
+    }
+    _time = time;
+  }
+
+  // Include bodies that stopped before their header phase: they must still
+  // prevent the header from opening while their content remains scrolled.
+  // A settled recovery has a terminal body phase and is not a participant.
+  Iterable<_NestedCoordinatedSimulation> get _participants => _simulations.values.where(
+    (simulation) => simulation._waitingForOuter || !simulation.outerFinished,
+  );
+
+  bool get _stoppedShort =>
+      _waiting &&
+      _participants.any((simulation) => !simulation._waitingForOuter && simulation._done) &&
+      _participants.every((simulation) => simulation._waitingForOuter || simulation._done);
+
+  // The leader controls completion while the shared header is moving.
+  bool get _movingHeader => !_independent && !_waiting && !_released;
+
+  double offset(_NestedScrollPosition position) {
+    if (position == outer) {
+      if (_simulations.isEmpty) {
+        return clampDouble(
+          _outerOnly?.x(_time - _outerEpoch) ?? outer.pixels,
+          outer.minScrollExtent,
+          outer.maxScrollExtent,
+        );
+      }
+      return _leader == null ? outer.pixels : _leader!.outerOffset;
+    }
+    return _simulations[position]!.innerOffset;
+  }
+
+  double velocity(_NestedScrollPosition position) {
+    if (position == outer) {
+      if (_simulations.isEmpty) {
+        return _outerOnly?.dx(_time - _outerEpoch) ?? 0.0;
+      }
+      return _waiting || _independent || _leader!.outerFinished ? 0.0 : _leader!._velocity;
+    }
+    final _NestedCoordinatedSimulation simulation = _simulations[position]!;
+    if (_movingHeader ||
+        simulation._waitingForOuter ||
+        simulation._phases[simulation._phase].outer) {
+      return 0.0;
+    }
+    return simulation._done ? 0.0 : simulation._velocity;
+  }
+
+  bool done(_NestedScrollPosition position) {
+    if (position == outer) {
+      if (_simulations.isEmpty) {
+        return _outerOnly?.isDone(_time - _outerEpoch) ?? true;
+      }
+      return _independent ||
+          _stoppedShort ||
+          (!_waiting && (_leader!._done || _leader!.outerFinished));
+    }
+    final _NestedCoordinatedSimulation simulation = _simulations[position]!;
+    return switch ((_stoppedShort, _movingHeader, _independent || _released)) {
+      (true, _, _) => true,
+      (_, true, _) => _leader!._done,
+      (_, _, true) => simulation._done,
+      _ => false,
+    };
   }
 }
 
-class _NestedOuterBallisticScrollActivity extends BallisticScrollActivity {
-  _NestedOuterBallisticScrollActivity(
-    this.coordinator,
-    _NestedScrollPosition position,
-    this.metrics,
-    Simulation simulation,
-    TickerProvider vsync,
-    bool shouldIgnorePointer,
-  ) : assert(metrics.minRange != metrics.maxRange),
-      assert(metrics.maxRange > metrics.minRange),
-      super(position, simulation, vsync, shouldIgnorePointer);
-
-  final _NestedScrollCoordinator coordinator;
-  final _NestedScrollMetrics metrics;
+/// Exposes one position's view of a group's cached trajectory to its activity.
+///
+/// Reads advance the shared clock before selecting this position's offset,
+/// velocity, or completion state. This wrapper does not own a separate physics
+/// simulation, and its position reference follows activity delegate replacement.
+class _NestedGroupSimulation extends Simulation {
+  _NestedGroupSimulation(this.group, this.position);
+  final _NestedBallisticGroup group;
+  _NestedScrollPosition position;
+  @override
+  double x(double time) {
+    group.advance(time);
+    return group.offset(position);
+  }
 
   @override
-  _NestedScrollPosition get delegate => super.delegate as _NestedScrollPosition;
+  double dx(double time) {
+    group.advance(time);
+    return group.velocity(position);
+  }
+
+  @override
+  bool isDone(double time) {
+    group.advance(time);
+    return group.done(position);
+  }
+}
+
+/// Drives one position while sharing motion and lifecycle with its group.
+///
+/// Position absorption updates the delegate and wrapper without resetting the
+/// animation clock. Dimension changes first try to preserve each trajectory.
+/// Independent or released bodies restart separately with their own velocities;
+/// during a shared header phase the coordinator can rebuild the whole group.
+class _NestedGroupedBallisticActivity extends BallisticScrollActivity {
+  _NestedGroupedBallisticActivity(_NestedBallisticGroup group, _NestedScrollPosition position)
+    : this._(group, position, _NestedGroupSimulation(group, position));
+
+  _NestedGroupedBallisticActivity._(this.group, _NestedScrollPosition position, this.simulation)
+    : super(position, simulation, position.vsync, position.shouldIgnorePointer);
+  final _NestedBallisticGroup group;
+  final _NestedGroupSimulation simulation;
+
+  @override
+  bool get shouldIgnorePointer =>
+      !(identical(simulation.position, group.outer) &&
+          group._simulations.values.any((simulation) => simulation._recovering)) &&
+      super.shouldIgnorePointer;
+
+  @override
+  bool applyMoveTo(double value) {
+    final bool applied = super.applyMoveTo(value);
+    if (simulation.position._isCurrentActivity(this)) {
+      simulation.position.context.setIgnorePointer(shouldIgnorePointer);
+    }
+    return applied;
+  }
+
+  @override
+  void updateDelegate(ScrollActivityDelegate value) {
+    super.updateDelegate(value);
+    simulation.position = value as _NestedScrollPosition;
+  }
 
   @override
   void resetActivity() {
-    delegate.beginActivity(coordinator.createOuterBallisticScrollActivity(velocity));
+    group.coordinator.goBallistic(group.restartVelocity(simulation.position));
   }
 
   @override
   void applyNewDimensions() {
-    delegate.beginActivity(coordinator.createOuterBallisticScrollActivity(velocity));
+    if (!group.updateDimensions()) {
+      group.coordinator.goBallistic(
+        group.restartVelocity(simulation.position),
+        // A layout restart shares the leader's velocity only with unfinished
+        // participants. Settled bodies must not rejoin the fling, unless their
+        // new bounds require recovery. New gestures still start every body.
+        settledBodies: <_NestedScrollPosition>{
+          for (final entry in group._simulations.entries)
+            if (entry.value._done && entry.value.outerFinished && !entry.key.outOfRange) entry.key,
+        },
+      );
+    }
   }
+}
+
+/// One header or body stage in a coordinated ballistic trajectory.
+///
+/// A null [end] denotes a terminal phase. [bodyOuter] translates the body's
+/// bounds by the stationary header's offset; combining it with an [end] denotes
+/// recovery from an initial body overscroll.
+class _NestedPhase {
+  const _NestedPhase.header({required double this.end}) : outer = true, bodyOuter = null;
+
+  const _NestedPhase.body({this.end, this.bodyOuter}) : outer = false;
+
+  // After the only body detaches, the header uses its own coordinates and has
+  // no remaining phase boundary.
+  const _NestedPhase.outerOnly() : outer = true, end = null, bodyOuter = null;
+
+  final bool outer;
+  final double? end;
+  final double? bodyOuter;
+
+  bool get isTerminal => end == null;
+  bool get isRecovery => !isTerminal && bodyOuter != null;
+}
+
+/// A trajectory whose active phase moves either the header or one body.
+///
+/// Physics sees a combined coordinate: outer + inner - inner.minScrollExtent.
+/// The component offsets are retained separately, since their sum cannot reveal
+/// an overscrolled body behind a partially collapsed header. Only the component
+/// owned by the current phase receives its displacement. Each phase uses its
+/// owner's configured physics; inheriting the same default does not merge the
+/// header and body into a single physics policy.
+///
+/// An initially out-of-range body first recovers using its own bounds translated
+/// into combined coordinates. At the recovery boundary, phases are selected
+/// again using the arrival velocity and the unchanged header position. Unlike
+/// a standalone list's spring, recovery intentionally transfers a velocity at
+/// or above the body's tolerance into a new phase. A sub-tolerance arrival
+/// settles at the body boundary without requesting a header phase. Forward
+/// motion collapses the header before moving even an already scrolled body;
+/// reverse motion drains the body before expanding the header. The final body
+/// phase uses its translated bounds to handle terminal overscroll. Zero velocity
+/// follows the same phase selection and lets the relevant physics decide whether
+/// a simulation is needed.
+///
+/// Each phase records its owner and a combined-coordinate end, or null for a
+/// terminal phase. From an in-range start, positive velocity selects header then
+/// body; negative velocity selects body-to-start, header, then body. Already
+/// completed parts are omitted, and zero velocity selects only the body. An
+/// out-of-range start first selects recovery to the nearest body boundary, then
+/// rebuilds the list from that boundary's position and velocity. A bodyOuter
+/// value translates the body's own bounds by the stationary header position.
+///
+/// Future-phase candidates avoid restarting a trajectory that the next physics
+/// would continue unchanged. They share the active segment's starting state and
+/// epoch, and remain eligible only while every sampled x and dx differs by at
+/// most precisionErrorTolerance and isDone agrees. At a boundary, the next
+/// retained candidate is adopted with the same epoch; otherwise a new segment
+/// starts from the boundary state. A rejected candidate cannot be revived by a
+/// later bounds update, and matching physics types alone never permit adoption.
+/// Each segment creates its active simulation and candidates for later phases.
+/// A boundary search creates two more simulations from the segment's starting
+/// state: one coarse forward scan and one fine forward scan of the bracket.
+/// Both advance monotonically. The fine bracket's time and velocity are linearly
+/// interpolated; the component offsets are placed exactly at the boundary.
+///
+/// Activities (or the group) call x, dx, and isDone with their animation time.
+/// [_advance] caches the newest time, while each segment sees time relative to
+/// its epoch. Position absorption retains that clock: replacing the active
+/// owner restarts its segment at the current state; replacing an inactive owner
+/// discards only that owner's candidates. Dimension updates retain a trajectory
+/// only if it reproduces the current state. If a single body detaches, the
+/// trajectory switches to outer-only coordinates; groups handle their own
+/// participant removal before advancing their trajectories.
+class _NestedCoordinatedSimulation extends Simulation {
+  _NestedCoordinatedSimulation(
+    this.coordinator,
+    this.outer,
+    this.inner,
+    double velocity, {
+    bool holdBeforeOuter = false,
+    bool bodyOnly = false,
+    bool stoppedBeforeOuter = false,
+    bool settled = false,
+  }) : innerStart = inner.pixels,
+       combinedMax = math.max(
+         outer.maxScrollExtent,
+         outer.maxScrollExtent + inner.maxScrollExtent - inner.minScrollExtent,
+       ),
+       outerMetrics = outer.copyWith(),
+       innerMetrics = inner.copyWith() {
+    _pixels = outer.pixels + inner.pixels - inner.minScrollExtent;
+    _outerPixels = outer.pixels;
+    _innerPixels = innerStart;
+    _velocity = velocity;
+    _holdBeforeOuter = holdBeforeOuter;
+    if (settled) {
+      _phases.add(_NestedPhase.body(bodyOuter: _outerPixels));
+      _done = true;
+      return;
+    }
+    if (stoppedBeforeOuter) {
+      // A dimension update must retain a stopped body's veto even when its
+      // zero velocity would otherwise select only a terminal body phase.
+      _phases.add(_NestedPhase.body(end: _outerPixels));
+      _phases.add(_NestedPhase.header(end: outer.minScrollExtent));
+      _startSegment();
+      _done = true;
+      return;
+    }
+    if (bodyOnly) {
+      _phases.add(_NestedPhase.body(bodyOuter: _outerPixels));
+    } else {
+      _buildPhases();
+    }
+    _startSegment();
+  }
+
+  void _buildPhases() {
+    _phase = 0;
+    _phases.clear();
+    if (_innerPixels < inner.minScrollExtent || _innerPixels > inner.maxScrollExtent) {
+      _phases.add(
+        _NestedPhase.body(
+          end:
+              _outerPixels +
+              clampDouble(_innerPixels, inner.minScrollExtent, inner.maxScrollExtent) -
+              inner.minScrollExtent,
+          bodyOuter: _outerPixels,
+        ),
+      );
+      return;
+    }
+    double terminalOuter = _outerPixels;
+    if (_velocity > 0.0 && _outerPixels < outerMetrics.maxScrollExtent) {
+      terminalOuter = outerMetrics.maxScrollExtent;
+      _phases.add(_NestedPhase.header(end: _pixels + terminalOuter - _outerPixels));
+    } else if (_velocity < 0.0 && _outerPixels > outerMetrics.minScrollExtent) {
+      if (_innerPixels > innerMetrics.minScrollExtent) {
+        _phases.add(_NestedPhase.body(end: _outerPixels));
+      }
+      terminalOuter = outerMetrics.minScrollExtent;
+      _phases.add(_NestedPhase.header(end: terminalOuter));
+    }
+    _phases.add(_NestedPhase.body(bodyOuter: terminalOuter));
+    _waitForOuter();
+  }
+
+  bool get _recovering => _phases[_phase].isRecovery;
+
+  void _waitForOuter() {
+    if (_holdBeforeOuter && _phases[_phase].outer) {
+      _waitingForOuter = true;
+      _bodyArrival = (time: _time, velocity: _velocity);
+    }
+  }
+
+  void _moveTo(double pixels) {
+    if (_independentOuter || _phases[_phase].outer) {
+      _outerPixels += pixels - _pixels;
+    } else {
+      _innerPixels += pixels - _pixels;
+    }
+    _pixels = pixels;
+  }
+
+  final _NestedScrollCoordinator coordinator;
+  // Set only when a single attached body detaches. Thereafter this trajectory
+  // owns just the outer position, and never switches back to combined space.
+  bool _independentOuter = false;
+  _NestedScrollPosition outer;
+  _NestedScrollPosition inner;
+  ScrollMetrics outerMetrics;
+  final ScrollMetrics innerMetrics;
+  final double innerStart;
+  late double _outerPixels;
+  late double _innerPixels;
+  double combinedMax;
+  // Future physics candidates keep the active segment's epoch only while their
+  // sampled x, dx, and isDone agree with it. Otherwise the boundary starts a new
+  // simulation with the outgoing phase's position and velocity.
+  final _coherentSegments = <int, Simulation>{};
+  final _phases = <_NestedPhase>[];
+  var _phase = 0;
+  Simulation? _segment;
+  var _segmentEpoch = 0.0;
+  late double _segmentStartPixels;
+  late double _segmentStartVelocity;
+  var _time = 0.0;
+  late double _pixels;
+  late double _velocity;
+  // A null or completed segment stops time advancement. Releasing a waiting
+  // body into its final phase clears this flag before starting that segment.
+  bool _done = false;
+  // Groups request a pause before the outer phase. Arrival freezes this
+  // trajectory until the group either resumes the header or releases the body.
+  bool _holdBeforeOuter = false;
+  // Arrival sets this flag and freezes _time. Only _resumeOuter and
+  // _resumeBody release a parked body.
+  bool _waitingForOuter = false;
+  ({double time, double velocity})? _bodyArrival;
+  ({double time, double velocity})? _outerArrival;
+  // Settled recoveries do not supply header velocity, but the header must not
+  // start before their boundary arrival, even when a frame spans both phases.
+  double? _settledRecoveryTime;
+
+  void _resumeOuter(double time, double velocity) {
+    _time = time;
+    _velocity = velocity;
+    _waitingForOuter = false;
+    _holdBeforeOuter = false;
+    _startSegment();
+  }
+
+  void _resumeBody(double time, double velocity, double outerPixels) {
+    _time = time;
+    _velocity = velocity;
+    _outerPixels = outerPixels;
+    _pixels = _outerPixels + _innerPixels - innerMetrics.minScrollExtent;
+    _phases
+      ..clear()
+      ..add(_NestedPhase.body(bodyOuter: _outerPixels));
+    _phase = 0;
+    _waitingForOuter = false;
+    _holdBeforeOuter = false;
+    _done = false;
+    _startSegment();
+  }
+
+  void replacePosition(_NestedScrollPosition previous, _NestedScrollPosition replacement) {
+    final bool replacedOuter;
+    if (identical(outer, previous)) {
+      outer = replacement;
+      replacedOuter = true;
+    } else if (identical(inner, previous)) {
+      inner = replacement;
+      replacedOuter = false;
+    } else {
+      return;
+    }
+    if (_phases[_phase].outer == replacedOuter) {
+      // Absorption keeps the activities' clocks. Start the new physics at the
+      // current shared time so replacement does not lose a frame of movement.
+      _startSegment();
+      return;
+    }
+    // A waiting position's new physics will be used at the next boundary.
+    // Keep the active segment, but discard candidates created by its old physics.
+    _coherentSegments.removeWhere((phase, _) => _phases[phase].outer == replacedOuter);
+  }
+
+  bool get outerFinished =>
+      !_independentOuter && !_recovering && !_phases.skip(_phase).any((phase) => phase.outer);
+
+  bool tryUpdateDimensions() {
+    if (outer.minScrollExtent != outerMetrics.minScrollExtent ||
+        outer.maxScrollExtent != outerMetrics.maxScrollExtent ||
+        outer.viewportDimension != outerMetrics.viewportDimension ||
+        (!_independentOuter && inner.minScrollExtent != innerMetrics.minScrollExtent)) {
+      return false;
+    }
+    if (_independentOuter) {
+      return true;
+    }
+    final double newMax = outer.maxScrollExtent + inner.maxScrollExtent - inner.minScrollExtent;
+    if ((newMax - combinedMax).abs() <= precisionErrorTolerance) {
+      return true;
+    }
+    if (_done && outerFinished) {
+      // Header movement can resize a settled body's viewport. There is no live
+      // segment to reconstruct. Preserve its stop unless changed bounds require
+      // a new recovery, including for bodies retained across a group restart.
+      if (_innerPixels < inner.minScrollExtent || _innerPixels > inner.maxScrollExtent) {
+        return false;
+      }
+      combinedMax = newMax;
+      return true;
+    }
+    if (_waitingForOuter) {
+      // A parked body has no active segment to reconstruct. Its next segment
+      // will use the updated range after the shared header completes.
+      combinedMax = newMax;
+      return true;
+    }
+    // Re-evaluate from the segment's original state so a bounds-only layout
+    // update need not discard a simulation's elapsed-time-dependent behavior.
+    // Adopt the revised trajectory only if it still reaches the current state.
+    final double elapsed = _time - _segmentEpoch;
+    Simulation? revised(int phase) => _createSegment(
+      phase,
+      pixels: _segmentStartPixels,
+      velocity: _segmentStartVelocity,
+      maxScrollExtent: newMax,
+    );
+    final Simulation? candidate = revised(_phase);
+    if (candidate == null || !_matchesState(candidate, elapsed)) {
+      return false;
+    }
+    combinedMax = newMax;
+    _segment = candidate;
+    // Only retained candidates have shared the active trajectory's history.
+    // A bounds update must not make an already rejected candidate eligible.
+    for (final int phase in _coherentSegments.keys.toList()) {
+      final Simulation? replacement = revised(phase);
+      if (replacement != null && _matchesState(replacement, elapsed)) {
+        _coherentSegments[phase] = replacement;
+      } else {
+        _coherentSegments.remove(phase);
+      }
+    }
+    return true;
+  }
+
+  bool _matchesState(Simulation candidate, double elapsed) =>
+      (candidate.x(elapsed) - _pixels).abs() <= precisionErrorTolerance &&
+      (candidate.dx(elapsed) - _velocity).abs() <= precisionErrorTolerance &&
+      candidate.isDone(elapsed) == _done;
+
+  Simulation? _createSegment(
+    int phase, {
+    double? pixels,
+    double? velocity,
+    double? maxScrollExtent,
+  }) {
+    if (_independentOuter) {
+      return outer.physics.createBallisticSimulation(
+        outer.copyWith(pixels: pixels ?? _pixels),
+        velocity ?? _velocity,
+      );
+    }
+    final ScrollPhysics physics = _phases[phase].outer ? outer.physics : inner.physics;
+    final double? bodyOuter = _phases[phase].bodyOuter;
+    return physics.createBallisticSimulation(
+      FixedScrollMetrics(
+        minScrollExtent: bodyOuter ?? outerMetrics.minScrollExtent,
+        maxScrollExtent:
+            (maxScrollExtent ?? combinedMax) +
+            (bodyOuter == null ? 0.0 : bodyOuter - outerMetrics.maxScrollExtent),
+        pixels: pixels ?? _pixels,
+        viewportDimension: outerMetrics.viewportDimension,
+        axisDirection: outerMetrics.axisDirection,
+        devicePixelRatio: outerMetrics.devicePixelRatio,
+      ),
+      velocity ?? _velocity,
+    );
+  }
+
+  void _startSegment() {
+    // Only the group's leader may start a parked body's header phase. This
+    // also applies during construction and position replacement.
+    if (_waitingForOuter) {
+      return;
+    }
+    _segmentEpoch = _time;
+    _segmentStartPixels = _pixels;
+    _segmentStartVelocity = _velocity;
+    _coherentSegments.clear();
+    _segment = _createSegment(_phase);
+    if (_segment == null && _phases[_phase].outer) {
+      // A stationary header need not prevent the body from moving or settling.
+      // Release this body's wait, and let a group's leader release its peers
+      // just as it would after completing a moving header phase.
+      _waitingForOuter = false;
+      _holdBeforeOuter = false;
+      _outerArrival = (time: _time, velocity: _velocity);
+      _phases
+        ..clear()
+        ..add(_NestedPhase.body(bodyOuter: _outerPixels));
+      _phase = 0;
+      _segment = _createSegment(_phase);
+    }
+    if (_segment == null) {
+      _done = true;
+      _velocity = 0.0;
+      return;
+    }
+    _moveTo(_segment!.x(0.0));
+    _velocity = _segment!.dx(0.0);
+    _done = _segment!.isDone(0.0);
+    for (int phase = _phase + 1; phase < _phases.length; phase += 1) {
+      final Simulation? candidate = _createSegment(phase);
+      if (candidate != null && _matchesState(candidate, 0.0)) {
+        _coherentSegments[phase] = candidate;
+      }
+    }
+  }
+
+  void _advance(double time) {
+    // Ballistic activities can read x, dx and isDone repeatedly for a frame.
+    // Never query the underlying (possibly stateful) simulation backwards.
+    if (time <= _time || _done || _waitingForOuter) {
+      return;
+    }
+    if (!_independentOuter && !coordinator._innerPositions.contains(inner)) {
+      // Stop waiting for the detached participant without replacing the outer
+      // clock. Newly attached bodies retain their existing idle activities.
+      final bool wasOuter = _phases[_phase].outer;
+      final double shift = outer.pixels - _pixels;
+      _independentOuter = true;
+      _pixels = outer.pixels;
+      _outerPixels = outer.pixels;
+      _phases
+        ..clear()
+        ..add(const _NestedPhase.outerOnly());
+      _phase = 0;
+      _coherentSegments.clear();
+      final Simulation? continuation = wasOuter
+          ? _createSegment(
+              _phase,
+              pixels: _segmentStartPixels + shift,
+              velocity: _segmentStartVelocity,
+            )
+          : null;
+      final double elapsed = _time - _segmentEpoch;
+      if (continuation != null && _matchesState(continuation, elapsed)) {
+        _segment = continuation;
+        _segmentStartPixels += shift;
+      } else {
+        _startSegment();
+      }
+    }
+    while (_time < time && !_done) {
+      final nextTime = time;
+      final double elapsed = nextTime - _segmentEpoch;
+      final double nextPixels = _segment!.x(elapsed);
+      final double nextVelocity = _segment!.dx(elapsed);
+      final bool nextDone = _segment!.isDone(elapsed);
+      _coherentSegments.removeWhere((int phase, Simulation candidate) {
+        final double candidatePixels = candidate.x(elapsed);
+        final double candidateVelocity = candidate.dx(elapsed);
+        return (candidatePixels - nextPixels).abs() > precisionErrorTolerance ||
+            (candidateVelocity - nextVelocity).abs() > precisionErrorTolerance ||
+            candidate.isDone(elapsed) != nextDone;
+      });
+      var restarted = false;
+      double? boundary = _phases[_phase].end;
+      while (boundary != null &&
+          (nextPixels - boundary) * (boundary - _segmentStartPixels).sign >= 0.0) {
+        final ({double time, double velocity}) state = _boundaryState(boundary, nextTime);
+        _moveTo(boundary);
+        if (_recovering) {
+          _innerPixels = clampDouble(_innerPixels, inner.minScrollExtent, inner.maxScrollExtent);
+          _pixels = _outerPixels + _innerPixels - inner.minScrollExtent;
+          _time = state.time;
+          _velocity = state.velocity;
+          if (_velocity.abs() < inner.physics.toleranceFor(inner).velocity) {
+            // ScrollSpringSimulation can snap to its end with a tiny residual
+            // velocity. It has settled, not arrived at a new fling phase.
+            _phases
+              ..clear()
+              ..add(_NestedPhase.body(bodyOuter: _outerPixels));
+            _phase = 0;
+            _velocity = 0.0;
+            _settledRecoveryTime = state.time;
+            _done = true;
+            return;
+          }
+          _buildPhases();
+          if (_waitingForOuter) {
+            return;
+          }
+          _startSegment();
+          restarted = true;
+          break;
+        }
+        if (_phases[_phase].outer) {
+          _outerArrival = state;
+        } else {
+          _bodyArrival = state;
+          if (_holdBeforeOuter) {
+            _time = state.time;
+            _velocity = state.velocity;
+            _pixels = boundary;
+            _phase += 1;
+            _waitingForOuter = true;
+            return;
+          }
+        }
+        final Simulation? continuing = _coherentSegments.remove(_phase + 1);
+        if (continuing != null) {
+          // Continue the incoming trajectory only while its sampled position,
+          // velocity and completion agree. Its future behavior is authoritative;
+          // equivalence is not inferred from the physics type or configuration.
+          _phase += 1;
+          _segment = continuing;
+          boundary = _phases[_phase].end;
+        } else {
+          _time = state.time;
+          _velocity = state.velocity;
+          _pixels = boundary;
+          _phase += 1;
+          _startSegment();
+          restarted = true;
+          break;
+        }
+      }
+      if (!restarted) {
+        _time = nextTime;
+        _moveTo(nextPixels);
+        _velocity = nextVelocity;
+        _done = _segment!.isDone(elapsed);
+      }
+    }
+  }
+
+  ({double time, double velocity}) _boundaryState(double boundary, double endTime) {
+    double low = _time - _segmentEpoch;
+    double high = endTime - _segmentEpoch;
+    final double direction = (boundary - _segmentStartPixels).sign;
+    Simulation probe() =>
+        _createSegment(_phase, pixels: _segmentStartPixels, velocity: _segmentStartVelocity)!;
+
+    // Bound both work and allocations even after a long frame. Reusing the live
+    // segment here would query times earlier than its latest frame sample.
+    const divisions = 128;
+    final Simulation coarse = probe();
+    final start = low;
+    final double width = high - low;
+    for (var step = 1; step <= divisions; step += 1) {
+      final double time = step == divisions ? high : start + width * step / divisions;
+      if ((coarse.x(time) - boundary) * direction >= 0.0) {
+        high = time;
+        break;
+      }
+      low = time;
+    }
+
+    final Simulation fine = probe();
+    var lowerTime = low;
+    double lowerPixels = fine.x(low);
+    double lowerVelocity = fine.dx(low);
+    if (high == low || (lowerPixels - boundary) * direction >= 0.0) {
+      return (time: _segmentEpoch + low, velocity: lowerVelocity);
+    }
+    for (var step = 1; step <= divisions; step += 1) {
+      final double time = step == divisions ? high : low + (high - low) * step / divisions;
+      final double pixels = fine.x(time);
+      final double velocity = fine.dx(time);
+      if ((pixels - boundary) * direction >= 0.0 || step == divisions) {
+        final double fraction = pixels == lowerPixels
+            ? 1.0
+            : clampDouble((boundary - lowerPixels) / (pixels - lowerPixels), 0.0, 1.0);
+        // The fine probe has reached the upper endpoint. Interpolate its saved
+        // samples instead of asking it for dx at an earlier, interpolated time.
+        return (
+          time: _segmentEpoch + lowerTime + (time - lowerTime) * fraction,
+          velocity: lowerVelocity + (velocity - lowerVelocity) * fraction,
+        );
+      }
+      lowerTime = time;
+      lowerPixels = pixels;
+      lowerVelocity = velocity;
+    }
+    throw StateError('The final boundary sample must return a result.');
+  }
+
+  double get outerOffset {
+    return clampDouble(_outerPixels, outerMetrics.minScrollExtent, outerMetrics.maxScrollExtent);
+  }
+
+  double get innerOffset => _innerPixels;
+
+  @override
+  double x(double time) {
+    _advance(time);
+    return _pixels;
+  }
+
+  @override
+  double dx(double time) {
+    _advance(time);
+    return _velocity;
+  }
+
+  @override
+  bool isDone(double time) {
+    _advance(time);
+    return _done;
+  }
+}
+
+/// Applies the header or body component of a shared single-body trajectory.
+///
+/// Both activities retain their animation clocks when their positions absorb
+/// replacements. The header may become idle before the body; ending it locally
+/// must not cancel the body's activity. A stationary header during recovery
+/// also must not block pointer input intended to interrupt the body.
+class _NestedCoordinatedBallisticActivity extends BallisticScrollActivity {
+  _NestedCoordinatedBallisticActivity(
+    this.coordinator,
+    _NestedScrollPosition position,
+    this.simulation,
+    this.isOuter,
+  ) : super(position, simulation, position.vsync, position.shouldIgnorePointer);
+
+  final _NestedScrollCoordinator coordinator;
+  final _NestedCoordinatedSimulation simulation;
+  final bool isOuter;
+
+  @override
+  double get velocity =>
+      simulation._phases[simulation._phase].outer == isOuter ? super.velocity : 0.0;
+
+  @override
+  bool get shouldIgnorePointer => !(isOuter && simulation._recovering) && super.shouldIgnorePointer;
 
   @override
   bool applyMoveTo(double value) {
-    var done = false;
-    if (velocity > 0.0) {
-      if (value < metrics.minRange) {
-        return true;
-      }
-      if (value > metrics.maxRange) {
-        value = metrics.maxRange;
-        done = true;
-      }
-    } else if (velocity < 0.0) {
-      if (value > metrics.maxRange) {
-        return true;
-      }
-      if (value < metrics.minRange) {
-        value = metrics.minRange;
-        done = true;
-      }
-    } else {
-      value = clampDouble(value, metrics.minRange, metrics.maxRange);
-      done = true;
+    final double target = isOuter ? simulation.outerOffset : simulation.innerOffset;
+    final bool applied = super.applyMoveTo(target);
+    final position = delegate as _NestedScrollPosition;
+    // Offset listeners may synchronously replace this activity.
+    if (!position._isCurrentActivity(this)) {
+      return true;
     }
-    final bool result = super.applyMoveTo(value + metrics.correctionOffset);
-    assert(result); // since we tried to pass an in-range value, it shouldn't ever overflow
-    return !done;
+    position.context.setIgnorePointer(shouldIgnorePointer);
+    if (applied && isOuter && simulation.outerFinished) {
+      // End this position's activity without cancelling the body's fling.
+      position.beginActivity(IdleScrollActivity(position));
+      return true;
+    }
+    return applied &&
+        !(isOuter &&
+            simulation._independentOuter &&
+            (target - value).abs() > precisionErrorTolerance);
   }
 
   @override
-  String toString() {
-    return '${objectRuntimeType(this, '_NestedOuterBallisticScrollActivity')}(${metrics.minRange} .. ${metrics.maxRange}; correcting by ${metrics.correctionOffset})';
+  void resetActivity() {
+    coordinator.goBallistic(simulation._velocity);
+  }
+
+  @override
+  void applyNewDimensions() {
+    if (!simulation.tryUpdateDimensions()) {
+      coordinator.goBallistic(simulation._velocity);
+    }
   }
 }
 
