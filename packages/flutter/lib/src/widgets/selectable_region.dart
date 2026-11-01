@@ -2966,7 +2966,13 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
   /// Selects all contents of all [Selectable]s.
   @protected
   SelectionResult handleSelectAll(SelectAllSelectionEvent event) {
-    for (final Selectable selectable in selectables) {
+    // Iterate over a snapshot: dispatching the event may cause a [Selectable]
+    // to unregister itself synchronously through [remove]. Skip any
+    // [Selectable] that was unregistered by an earlier iteration.
+    for (final selectable in List<Selectable>.of(selectables)) {
+      if (!selectables.contains(selectable)) {
+        continue;
+      }
       dispatchSelectionEventToChild(selectable, event);
     }
     currentSelectionStartIndex = 0;
@@ -3079,7 +3085,13 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
   /// Removes the selection of all [Selectable]s this delegate manages.
   @protected
   SelectionResult handleClearSelection(ClearSelectionEvent event) {
-    for (final Selectable selectable in selectables) {
+    // Iterate over a snapshot: dispatching the event may cause a [Selectable]
+    // to unregister itself synchronously through [remove]. Skip any
+    // [Selectable] that was unregistered by an earlier iteration.
+    for (final selectable in List<Selectable>.of(selectables)) {
+      if (!selectables.contains(selectable)) {
+        continue;
+      }
       dispatchSelectionEventToChild(selectable, event);
     }
     currentSelectionEndIndex = -1;
