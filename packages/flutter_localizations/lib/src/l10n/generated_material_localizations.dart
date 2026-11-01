@@ -41843,6 +41843,510 @@ class MaterialLocalizationTe extends GlobalMaterialLocalizations {
   String get viewLicensesButtonLabel => 'లైసెన్స్‌లను చూడండి';
 }
 
+/// The translations for Tajik (`tg`).
+@Deprecated(
+  'Use MaterialLocalizationTg from package:material_ui/material_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
+class MaterialLocalizationTg extends GlobalMaterialLocalizations {
+  /// Create an instance of the translation bundle for Tajik.
+  ///
+  /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  @Deprecated(
+    'Use MaterialLocalizationTg from package:material_ui/material_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
+  const MaterialLocalizationTg({
+    super.localeName = 'tg',
+    required super.fullYearFormat,
+    required super.compactDateFormat,
+    required super.shortDateFormat,
+    required super.mediumDateFormat,
+    required super.longDateFormat,
+    required super.yearMonthFormat,
+    required super.shortMonthDayFormat,
+    required super.decimalFormat,
+    required super.twoDigitZeroPaddedFormat,
+  });
+
+  @override
+  String get aboutListTileTitleRaw => r'Дар бораи $applicationName';
+
+  @override
+  String get alertDialogLabel => 'Огоҳинома';
+
+  @override
+  String get anteMeridiemAbbreviation => 'AM';
+
+  @override
+  String get backButtonTooltip => 'Бозгашт';
+
+  @override
+  String get bottomSheetLabel => 'Лавҳаи поёнӣ';
+
+  @override
+  String get calendarModeButtonLabel => 'Гузариш ба тақвим';
+
+  @override
+  String get cancelButtonLabel => 'Бекор кардан';
+
+  @override
+  String get clearButtonTooltip => 'Тоза кардани матн';
+
+  @override
+  String get closeButtonLabel => 'Пӯшидан';
+
+  @override
+  String get closeButtonTooltip => 'Пӯшидан';
+
+  @override
+  String get collapsedHint => 'Кушодашуда';
+
+  @override
+  String get collapsedIconTapHint => 'Кушодан';
+
+  @override
+  String get continueButtonLabel => 'Идома';
+
+  @override
+  String get copyButtonLabel => 'Нусхабардорӣ';
+
+  @override
+  String get currentDateLabel => 'Имрӯз';
+
+  @override
+  String get cutButtonLabel => 'Буридан';
+
+  @override
+  String get dateHelpText => 'рр.мм.сссс';
+
+  @override
+  String get dateInputLabel => 'Ворид кардани сана';
+
+  @override
+  String get dateOutOfRangeLabel => 'Берун аз фосила.';
+
+  @override
+  String get datePickerHelpText => 'Интихоби сана';
+
+  @override
+  String get dateRangeEndDateSemanticLabelRaw => r'Санаи анҷом: $fullDate';
+
+  @override
+  String get dateRangeEndLabel => 'Санаи анҷом';
+
+  @override
+  String get dateRangePickerHelpText => 'Интихоби фосила';
+
+  @override
+  String get dateRangeStartDateSemanticLabelRaw => r'Санаи оғоз: $fullDate';
+
+  @override
+  String get dateRangeStartLabel => 'Санаи оғоз';
+
+  @override
+  String get dateSeparator => '.';
+
+  @override
+  String get deleteButtonTooltip => 'Нест кардан';
+
+  @override
+  String get dialModeButtonLabel => 'Гузариш ба ҳолати интихобгар';
+
+  @override
+  String get dialogLabel => 'Равзанаи муколама';
+
+  @override
+  String get drawerLabel => 'Менюи паймоиш';
+
+  @override
+  String get expandedHint => 'Ҷамъшуда';
+
+  @override
+  String get expandedIconTapHint => 'Ҷамъ кардан';
+
+  @override
+  String get expansionTileCollapsedHint => 'барои кушодан ду маротиба ламс кунед';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Кушодан барои тафсилоти бештар';
+
+  @override
+  String get expansionTileExpandedHint => 'барои ҷамъ кардан ду маротиба ламс кунед';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Ҷамъ кардан';
+
+  @override
+  String get firstPageTooltip => 'Саҳифаи аввал';
+
+  @override
+  String get hideAccountsLabel => 'Пинҳон кардани ҳисобҳо';
+
+  @override
+  String get inputDateModeButtonLabel => 'Гузариш ба вуруд';
+
+  @override
+  String get inputTimeModeButtonLabel => 'Гузариш ба ҳолати вуруди матн';
+
+  @override
+  String get invalidDateFormatLabel => 'Формати нодуруст.';
+
+  @override
+  String get invalidDateRangeLabel => 'Фосилаи нодуруст.';
+
+  @override
+  String get invalidTimeLabel => 'Вақти дурустро ворид кунед';
+
+  @override
+  String get keyboardKeyAlt => 'Alt';
+
+  @override
+  String get keyboardKeyAltGraph => 'AltGr';
+
+  @override
+  String get keyboardKeyBackspace => 'Backspace';
+
+  @override
+  String get keyboardKeyCapsLock => 'Caps Lock';
+
+  @override
+  String get keyboardKeyChannelDown => 'Канали поён';
+
+  @override
+  String get keyboardKeyChannelUp => 'Канали боло';
+
+  @override
+  String get keyboardKeyControl => 'Ctrl';
+
+  @override
+  String get keyboardKeyDelete => 'Del';
+
+  @override
+  String get keyboardKeyEject => 'Баровардан';
+
+  @override
+  String get keyboardKeyEnd => 'End';
+
+  @override
+  String get keyboardKeyEscape => 'Esc';
+
+  @override
+  String get keyboardKeyFn => 'Fn';
+
+  @override
+  String get keyboardKeyHome => 'Home';
+
+  @override
+  String get keyboardKeyInsert => 'Insert';
+
+  @override
+  String get keyboardKeyMeta => 'Meta';
+
+  @override
+  String get keyboardKeyMetaMacOs => 'Command';
+
+  @override
+  String get keyboardKeyMetaWindows => 'Win';
+
+  @override
+  String get keyboardKeyNumLock => 'Num Lock';
+
+  @override
+  String get keyboardKeyNumpad0 => 'Num 0';
+
+  @override
+  String get keyboardKeyNumpad1 => 'Num 1';
+
+  @override
+  String get keyboardKeyNumpad2 => 'Num 2';
+
+  @override
+  String get keyboardKeyNumpad3 => 'Num 3';
+
+  @override
+  String get keyboardKeyNumpad4 => 'Num 4';
+
+  @override
+  String get keyboardKeyNumpad5 => 'Num 5';
+
+  @override
+  String get keyboardKeyNumpad6 => 'Num 6';
+
+  @override
+  String get keyboardKeyNumpad7 => 'Num 7';
+
+  @override
+  String get keyboardKeyNumpad8 => 'Num 8';
+
+  @override
+  String get keyboardKeyNumpad9 => 'Num 9';
+
+  @override
+  String get keyboardKeyNumpadAdd => 'Num +';
+
+  @override
+  String get keyboardKeyNumpadComma => 'Num ,';
+
+  @override
+  String get keyboardKeyNumpadDecimal => 'Num .';
+
+  @override
+  String get keyboardKeyNumpadDivide => 'Num /';
+
+  @override
+  String get keyboardKeyNumpadEnter => 'Num Enter';
+
+  @override
+  String get keyboardKeyNumpadEqual => 'Num =';
+
+  @override
+  String get keyboardKeyNumpadMultiply => 'Num *';
+
+  @override
+  String get keyboardKeyNumpadParenLeft => 'Num (';
+
+  @override
+  String get keyboardKeyNumpadParenRight => 'Num )';
+
+  @override
+  String get keyboardKeyNumpadSubtract => 'Num -';
+
+  @override
+  String get keyboardKeyPageDown => 'PgDown';
+
+  @override
+  String get keyboardKeyPageUp => 'PgUp';
+
+  @override
+  String get keyboardKeyPower => 'Хомӯш/Фурузон';
+
+  @override
+  String get keyboardKeyPowerOff => 'Хомӯш кардан';
+
+  @override
+  String get keyboardKeyPrintScreen => 'Print Screen';
+
+  @override
+  String get keyboardKeyScrollLock => 'Scroll Lock';
+
+  @override
+  String get keyboardKeySelect => 'Интихоб';
+
+  @override
+  String get keyboardKeyShift => 'Shift';
+
+  @override
+  String get keyboardKeySpace => 'Фосила';
+
+  @override
+  String get lastPageTooltip => 'Саҳифаи охир';
+
+  @override
+  String? get licensesPackageDetailTextFew => null;
+
+  @override
+  String? get licensesPackageDetailTextMany => null;
+
+  @override
+  String? get licensesPackageDetailTextOne => '1 иҷозатнома';
+
+  @override
+  String get licensesPackageDetailTextOther => r'$licenseCount иҷозатнома';
+
+  @override
+  String? get licensesPackageDetailTextTwo => null;
+
+  @override
+  String? get licensesPackageDetailTextZero => 'Ҳеҷ иҷозатномае нест';
+
+  @override
+  String get licensesPageTitle => 'Иҷозатномаҳо';
+
+  @override
+  String get lookUpButtonLabel => 'Ҷустуҷӯ';
+
+  @override
+  String get menuBarMenuLabel => 'Менюи сатри меню';
+
+  @override
+  String get menuDismissLabel => 'Пӯшидани меню';
+
+  @override
+  String get modalBarrierDismissLabel => 'Пӯшидан';
+
+  @override
+  String get moreButtonTooltip => 'Бештар';
+
+  @override
+  String get nextMonthTooltip => 'Моҳи оянда';
+
+  @override
+  String get nextPageTooltip => 'Саҳифаи оянда';
+
+  @override
+  String get okButtonLabel => 'Хуб';
+
+  @override
+  String get openAppDrawerTooltip => 'Кушодани менюи паймоиш';
+
+  @override
+  String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow аз $rowCount';
+
+  @override
+  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow аз тақрибан $rowCount';
+
+  @override
+  String get pasteButtonLabel => 'Гузоштан';
+
+  @override
+  String get popupMenuLabel => 'Менюи зоҳиршаванда';
+
+  @override
+  String get postMeridiemAbbreviation => 'PM';
+
+  @override
+  String get previousMonthTooltip => 'Моҳи гузашта';
+
+  @override
+  String get previousPageTooltip => 'Саҳифаи гузашта';
+
+  @override
+  String get refreshIndicatorSemanticLabel => 'Навсозӣ';
+
+  @override
+  String? get remainingTextFieldCharacterCountFew => null;
+
+  @override
+  String? get remainingTextFieldCharacterCountMany => null;
+
+  @override
+  String? get remainingTextFieldCharacterCountOne => '1 аломат боқӣ монд';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'$remainingCount аломат боқӣ монд';
+
+  @override
+  String? get remainingTextFieldCharacterCountTwo => null;
+
+  @override
+  String? get remainingTextFieldCharacterCountZero => 'Ягон аломат боқӣ намондааст';
+
+  @override
+  String get reorderItemDown => 'Интиқол ба поён';
+
+  @override
+  String get reorderItemLeft => 'Интиқол ба чап';
+
+  @override
+  String get reorderItemRight => 'Интиқол ба рост';
+
+  @override
+  String get reorderItemToEnd => 'Интиқол ба охир';
+
+  @override
+  String get reorderItemToStart => 'Интиқол ба аввал';
+
+  @override
+  String get reorderItemUp => 'Интиқол ба боло';
+
+  @override
+  String get rowsPerPageTitle => 'Сатрҳо дар саҳифа:';
+
+  @override
+  String get saveButtonLabel => 'Нигоҳ доштан';
+
+  @override
+  String get scanTextButtonLabel => 'Скан кардани матн';
+
+  @override
+  String get scrimLabel => 'Замина';
+
+  @override
+  String get scrimOnTapHintRaw => r'Пӯшидани $modalRouteContentName';
+
+  @override
+  ScriptCategory get scriptCategory => ScriptCategory.englishLike;
+
+  @override
+  String get searchFieldLabel => 'Ҷустуҷӯ';
+
+  @override
+  String get searchWebButtonLabel => 'Ҷустуҷӯ дар веб';
+
+  @override
+  String get selectAllButtonLabel => 'Интихоби ҳама';
+
+  @override
+  String get selectYearSemanticsLabel => 'Интихоби сол';
+
+  @override
+  String get selectedDateLabel => 'Интихобшуда';
+
+  @override
+  String? get selectedRowCountTitleFew => null;
+
+  @override
+  String? get selectedRowCountTitleMany => null;
+
+  @override
+  String? get selectedRowCountTitleOne => '1 сатр интихоб шуд';
+
+  @override
+  String get selectedRowCountTitleOther => r'$selectedRowCount сатр интихоб шуд';
+
+  @override
+  String? get selectedRowCountTitleTwo => null;
+
+  @override
+  String? get selectedRowCountTitleZero => 'Ягон сатр интихоб нашудааст';
+
+  @override
+  String get shareButtonLabel => 'Мубодила';
+
+  @override
+  String get showAccountsLabel => 'Намоиши ҳисобҳо';
+
+  @override
+  String get showMenuTooltip => 'Намоиши меню';
+
+  @override
+  String get signedInLabel => 'Воридшуда';
+
+  @override
+  String get tabLabelRaw => r'Варақаи $tabIndex аз $tabCount';
+
+  @override
+  TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
+
+  @override
+  String get timePickerDialHelpText => 'Интихоби вақт';
+
+  @override
+  String get timePickerHourLabel => 'Соат';
+
+  @override
+  String get timePickerHourModeAnnouncement => 'Интихоби соат';
+
+  @override
+  String get timePickerInputHelpText => 'Ворид кардани вақт';
+
+  @override
+  String get timePickerMinuteLabel => 'Дақиқа';
+
+  @override
+  String get timePickerMinuteModeAnnouncement => 'Интихоби дақиқа';
+
+  @override
+  String get unspecifiedDate => 'Сана';
+
+  @override
+  String get unspecifiedDateRange => 'Фосилаи санаҳо';
+
+  @override
+  String get viewLicensesButtonLabel => 'Дидани иҷозатномаҳо';
+}
+
 /// The translations for Thai (`th`).
 @Deprecated(
   'Use MaterialLocalizationTh from package:material_ui/material_ui.dart instead. '
@@ -47544,6 +48048,7 @@ final Set<String> kMaterialSupportedLanguages = HashSet<String>.from(const <Stri
   'sw', // Swahili
   'ta', // Tamil
   'te', // Telugu
+  'tg', // Tajik
   'th', // Thai
   'tl', // Tagalog
   'tr', // Turkish
@@ -47638,6 +48143,7 @@ final Set<String> kMaterialSupportedLanguages = HashSet<String>.from(const <Stri
 ///  * `sw` - Swahili
 ///  * `ta` - Tamil
 ///  * `te` - Telugu
+///  * `tg` - Tajik
 ///  * `th` - Thai
 ///  * `tl` - Tagalog
 ///  * `tr` - Turkish
@@ -47899,6 +48405,8 @@ GlobalMaterialLocalizations? getMaterialTranslation(
       return MaterialLocalizationTa(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'te':
       return MaterialLocalizationTe(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+    case 'tg':
+      return MaterialLocalizationTg(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'th':
       return MaterialLocalizationTh(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'tl':

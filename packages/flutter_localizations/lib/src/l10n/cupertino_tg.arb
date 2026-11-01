@@ -1,0 +1,45 @@
+{
+  "datePickerHourSemanticsLabelOne": "соати $hour",
+  "datePickerHourSemanticsLabelOther": "соати $hour",
+  "datePickerMinuteSemanticsLabelOne": "1 дақиқа",
+  "datePickerMinuteSemanticsLabelOther": "$minute дақиқа",
+
+  "datePickerDateOrder": "dmy",
+  "datePickerDateTimeOrder": "date_time_dayPeriod",
+
+  "anteMeridiemAbbreviation": "AM",
+  "postMeridiemAbbreviation": "PM",
+  "todayLabel": "Имрӯз",
+  "alertDialogLabel": "Огоҳинома",
+
+  "timerPickerHourLabelOne": "соат",
+  "timerPickerHourLabelOther": "соат",
+  "timerPickerMinuteLabelOne": "дақ.",
+  "timerPickerMinuteLabelOther": "дақ.",
+  "timerPickerSecondLabelOne": "сон.",
+  "timerPickerSecondLabelOther": "сон.",
+
+  "cutButtonLabel": "Буридан",
+  "copyButtonLabel": "Нусхабардорӣ",
+  "pasteButtonLabel": "Гузоштан",
+  "selectAllButtonLabel": "Интихоби ҳама",
+  "tabSemanticsLabel": "Варақаи $tabIndex аз $tabCount",
+  "modalBarrierDismissLabel": "Пӯшидан",
+  "searchTextFieldPlaceholderLabel": "Ҷустуҷӯ",
+  "noSpellCheckReplacementsLabel": "Ягон ивазкунӣ ёфт нашуд",
+
+  "backButtonLabel": "Бозгашт",
+  "cancelButtonLabel": "Бекор кардан",
+  "clearButtonLabel": "Тоза кардан",
+  "lookUpButtonLabel": "Ҷустуҷӯ",
+  "menuDismissLabel": "Пӯшидани меню",
+  "searchWebButtonLabel": "Ҷустуҷӯ дар веб",
+  "shareButtonLabel": "Мубодила...",
+
+  "collapsedHint": "Кушодашуда",
+  "expandedHint": "Ҷамъшуда",
+  "expansionTileCollapsedHint": "барои кушодан ду маротиба ламс кунед",
+  "expansionTileCollapsedTapHint": "Кушодан барои тафсилоти бештар",
+  "expansionTileExpandedHint": "барои ҷамъ кардан ду маротиба ламс кунед",
+  "expansionTileExpandedTapHint": "Ҷамъ кардан"
+}

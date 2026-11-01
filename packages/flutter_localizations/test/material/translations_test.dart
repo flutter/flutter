@@ -622,4 +622,26 @@ void main() {
     expect(localizations, isA<MaterialLocalizationEu>());
     expect(localizations.timeOfDayFormat(), TimeOfDayFormat.HH_colon_mm);
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/195676
+  testWidgets('Tajik translation spot check', (WidgetTester tester) async {
+    const locale = Locale('tg');
+    expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
+    final MaterialLocalizations localizations = await GlobalMaterialLocalizations.delegate.load(
+      locale,
+    );
+    expect(localizations, isA<MaterialLocalizationTg>());
+    expect(localizations.openAppDrawerTooltip, 'Кушодани менюи паймоиш');
+    expect(localizations.backButtonTooltip, 'Бозгашт');
+    expect(localizations.closeButtonTooltip, 'Пӯшидан');
+    expect(localizations.cancelButtonLabel, 'Бекор кардан');
+    expect(localizations.okButtonLabel, 'Хуб');
+    expect(localizations.pasteButtonLabel, 'Гузоштан');
+    expect(localizations.copyButtonLabel, 'Нусхабардорӣ');
+    expect(localizations.cutButtonLabel, 'Буридан');
+    expect(localizations.selectAllButtonLabel, 'Интихоби ҳама');
+    expect(localizations.searchFieldLabel, 'Ҷустуҷӯ');
+    expect(localizations.collapsedHint, 'Кушодашуда');
+    expect(localizations.expandedHint, 'Ҷамъшуда');
+  });
 }

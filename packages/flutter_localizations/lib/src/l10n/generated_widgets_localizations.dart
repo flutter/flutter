@@ -4784,6 +4784,62 @@ class WidgetsLocalizationTe extends GlobalWidgetsLocalizations {
   String get shareButtonLabel => 'షేర్ చేయండి';
 }
 
+/// The translations for Tajik (`tg`).
+class WidgetsLocalizationTg extends GlobalWidgetsLocalizations {
+  /// Create an instance of the translation bundle for Tajik.
+  ///
+  /// For details on the meaning of the arguments, see [GlobalWidgetsLocalizations].
+  const WidgetsLocalizationTg() : super(TextDirection.ltr);
+
+  @override
+  String get copyButtonLabel => 'Нусхабардорӣ';
+
+  @override
+  String get cutButtonLabel => 'Буридан';
+
+  @override
+  String get lookUpButtonLabel => 'Ҷустуҷӯ';
+
+  @override
+  String get noResultsFound => 'Ягон натиҷа ёфт нашуд';
+
+  @override
+  String get pasteButtonLabel => 'Гузоштан';
+
+  @override
+  String get radioButtonUnselectedLabel => 'Интихобнашуда';
+
+  @override
+  String get reorderItemDown => 'Интиқол ба поён';
+
+  @override
+  String get reorderItemLeft => 'Интиқол ба чап';
+
+  @override
+  String get reorderItemRight => 'Интиқол ба рост';
+
+  @override
+  String get reorderItemToEnd => 'Интиқол ба охир';
+
+  @override
+  String get reorderItemToStart => 'Интиқол ба аввал';
+
+  @override
+  String get reorderItemUp => 'Интиқол ба боло';
+
+  @override
+  String get searchResultsFound => 'Натиҷаҳои ҷустуҷӯ ёфт шуданд';
+
+  @override
+  String get searchWebButtonLabel => 'Ҷустуҷӯ дар веб';
+
+  @override
+  String get selectAllButtonLabel => 'Интихоби ҳама';
+
+  @override
+  String get shareButtonLabel => 'Мубодила';
+}
+
 /// The translations for Thai (`th`).
 class WidgetsLocalizationTh extends GlobalWidgetsLocalizations {
   /// Create an instance of the translation bundle for Thai.
@@ -5523,6 +5579,7 @@ final Set<String> kWidgetsSupportedLanguages = HashSet<String>.from(const <Strin
   'sw', // Swahili
   'ta', // Tamil
   'te', // Telugu
+  'tg', // Tajik
   'th', // Thai
   'tl', // Tagalog
   'tr', // Turkish
@@ -5617,6 +5674,7 @@ final Set<String> kWidgetsSupportedLanguages = HashSet<String>.from(const <Strin
 ///  * `sw` - Swahili
 ///  * `ta` - Tamil
 ///  * `te` - Telugu
+///  * `tg` - Tajik
 ///  * `th` - Thai
 ///  * `tl` - Tagalog
 ///  * `tr` - Turkish
@@ -5867,6 +5925,8 @@ GlobalWidgetsLocalizations? getWidgetsTranslation(
       return const WidgetsLocalizationTa();
     case 'te':
       return const WidgetsLocalizationTe();
+    case 'tg':
+      return const WidgetsLocalizationTg();
     case 'th':
       return const WidgetsLocalizationTh();
     case 'tl':
