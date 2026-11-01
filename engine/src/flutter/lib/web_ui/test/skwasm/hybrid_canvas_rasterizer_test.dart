@@ -39,20 +39,36 @@ void testMain() {
   late _OnscreenSurface direct;
   late _View first;
   var publishDirect = true;
+  var failDirectCreation = false;
+  var failDirectInitialization = false;
+  var directCreations = 0;
   Duration nativeCallbackDelay = Duration.zero;
   Duration readbackDelay = Duration.zero;
 
   setUp(() async {
     EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(1);
     publishDirect = true;
+    failDirectCreation = false;
+    failDirectInitialization = false;
+    directCreations = 0;
     nativeCallbackDelay = Duration.zero;
     readbackDelay = Duration.zero;
     rasterizer = HybridCanvasRasterizer(
-      (OnscreenCanvasProvider provider) =>
-          direct = _OnscreenSurface(SkwasmOnscreenSurface(provider))
-            ..published = publishDirect
-            ..completionDelay = nativeCallbackDelay
-            ..readbackDelay = readbackDelay,
+      (OnscreenCanvasProvider provider) {
+        directCreations++;
+        if (failDirectCreation) {
+          throw StateError('Direct canvas creation failed.');
+        }
+        return direct =
+            _OnscreenSurface(
+                SkwasmOnscreenSurface(
+                  failDirectInitialization ? _ContextBoundOnscreenCanvasProvider() : provider,
+                ),
+              )
+              ..published = publishDirect
+              ..completionDelay = nativeCallbackDelay
+              ..readbackDelay = readbackDelay;
+      },
       (OffscreenCanvasProvider provider) =>
           export = _ExportSurface(SkwasmOffscreenSurface(provider)),
     );
@@ -98,6 +114,72 @@ void testMain() {
     await first.draw(8);
     expect(direct.renders, renders + 1);
     expect(first.rasterizer.debugIsDirect, isTrue);
+  });
+
+  for (final failInitialization in <bool>[false, true]) {
+    test(
+      'failed direct setup keeps bitmaps and permits a later promotion ($failInitialization)',
+      () async {
+        failDirectCreation = !failInitialization;
+        failDirectInitialization = failInitialization;
+        await first.draw(9);
+        expect(first.rasterizer.debugIsDirect, isFalse);
+        expect(_pixel(first.canvases.single.canvasElement), <int>[9, 0, 0, 255]);
+        failDirectCreation = false;
+        failDirectInitialization = false;
+        await first.draw(10);
+        expect(directCreations, 1, reason: 'A failed promotion is not retried every frame.');
+        expect(_pixel(first.canvases.single.canvasElement), <int>[10, 0, 0, 255]);
+        first.resize(const ui.Size(80, 60));
+        await first.draw(11);
+        await first.draw(12);
+        expect(directCreations, 2);
+        expect(first.rasterizer.debugIsDirect, isTrue);
+      },
+    );
+  }
+
+  test('readback errors keep the completed bitmap visible', () async {
+    final JSFunction original = _getImageData;
+    var attempts = 0;
+    JSAny? failReadback(JSObject context, JSNumber x, JSNumber y, JSNumber width, JSNumber height) {
+      attempts++;
+      throw StateError('Canvas readback failed.');
+    }
+
+    _getImageData = failReadback.toJSCaptureThis;
+    try {
+      await first.draw(9);
+      expect(first.rasterizer.debugIsDirect, isFalse);
+      expect(first.rasterizer.debugDirectSurface, isNull);
+      await first.draw(10);
+      expect(attempts, 1);
+      expect(directCreations, 1);
+    } finally {
+      _getImageData = original;
+    }
+    expect(_pixel(first.canvases.single.canvasElement), <int>[10, 0, 0, 255]);
+  });
+
+  test('a failed direct render preserves the old frame until bitmap export completes', () async {
+    await first.draw(1);
+    final source = direct.canvasImageSource as DomHTMLCanvasElement;
+    final List<int> oldPixel = _pixel(source);
+    direct.failNextRender = true;
+    export.hold();
+    final Future<void> pending = first.draw(2);
+    await export.reached.future.timeout(const Duration(seconds: 5));
+    expect(first.rasterizer.debugIsDirect, isTrue);
+    expect(source.isConnected, isTrue);
+    expect(_pixel(source), oldPixel);
+    export.release();
+    await pending;
+    expect(first.rasterizer.debugIsDirect, isFalse);
+    expect(first.rasterizer.debugDirectSurface, isNull);
+    expect(_pixel(first.canvases.single.canvasElement), <int>[2, 0, 0, 255]);
+    await first.draw(3);
+    expect(directCreations, 1);
+    expect(_pixel(first.canvases.single.canvasElement), <int>[3, 0, 0, 255]);
   });
 
   test('a missing readback context retains bitmap presentation without retrying', () async {
@@ -721,9 +803,20 @@ List<int> _pixels(DomHTMLCanvasElement source) {
   }
 }
 
+class _ContextBoundOnscreenCanvasProvider extends OnscreenCanvasProvider {
+  @override
+  DomHTMLCanvasElement acquireCanvas(BitmapSize size, {required ui.VoidCallback onContextLost}) {
+    final DomHTMLCanvasElement canvas = super.acquireCanvas(size, onContextLost: onContextLost);
+    // Transferring a canvas with a context makes asynchronous initialization fail.
+    expect(canvas.getContext('2d'), isNotNull);
+    return canvas;
+  }
+}
+
 class _OnscreenSurface extends _TestSurface<SkwasmOnscreenSurface> implements OnscreenSurface {
   _OnscreenSurface(super.delegate);
   bool published = true;
+  bool failNextRender = false;
   Duration completionDelay = Duration.zero;
   Duration readbackDelay = Duration.zero;
   int sourceReads = 0;
@@ -746,6 +839,10 @@ class _OnscreenSurface extends _TestSurface<SkwasmOnscreenSurface> implements On
   @override
   Future<void> rasterizeToCanvas(ui.Picture picture) async {
     renders++;
+    if (failNextRender) {
+      failNextRender = false;
+      throw StateError('Direct rendering failed.');
+    }
     final Completer<void>? release = _release;
     if (release != null) {
       reached.complete();
