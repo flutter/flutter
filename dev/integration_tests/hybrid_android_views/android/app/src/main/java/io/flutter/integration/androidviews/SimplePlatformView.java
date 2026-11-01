@@ -70,18 +70,18 @@ public class SimplePlatformView implements PlatformView, MethodChannel.MethodCal
         result.notImplemented();
     }
 
-    private void showAndHideAlertDialog(MethodChannel.Result result) {
+    private void showAndHideAlertDialog(final MethodChannel.Result result) {
         Context context = view.getContext();
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         TextView textView = new TextView(context);
         textView.setText("This alert dialog will close in 1 second");
         builder.setView(textView);
         final AlertDialog alertDialog = builder.show();
-        result.success(null);
         view.postDelayed(new Runnable() {
             @Override
             public void run() {
                 alertDialog.hide();
+                result.success(null);
             }
         }, 1000);
     }
@@ -90,6 +90,24 @@ public class SimplePlatformView implements PlatformView, MethodChannel.MethodCal
         Context context = view.getContext();
         final Button button = new Button(context);
         button.setText("This view was added to the Android view");
+        button.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
+            @Override
+            public void onLayoutChange(
+                    View v,
+                    int left,
+                    int top,
+                    int right,
+                    int bottom,
+                    int oldLeft,
+                    int oldTop,
+                    int oldRight,
+                    int oldBottom) {
+                if (right > left && bottom > top) {
+                    button.removeOnLayoutChangeListener(this);
+                    methodChannel.invokeMethod("onChildViewAdded", null);
+                }
+            }
+        });
         view.addView(button);
         button.setOnClickListener(v -> {
             view.removeView(button);
