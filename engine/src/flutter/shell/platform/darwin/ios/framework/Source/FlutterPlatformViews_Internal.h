@@ -53,6 +53,9 @@
 // The `path` is transformed with the `matrix` before adding to the queue.
 - (void)clipPath:(CGPathRef)path matrix:(CATransform3D)matrix;
 
+// Whether `point`, in this view's coordinate space, is inside every clip in the queue.
+- (BOOL)containsPoint:(CGPoint)point;
+
 @end
 
 // A pool that provides |FlutterClippingMaskView|s.
