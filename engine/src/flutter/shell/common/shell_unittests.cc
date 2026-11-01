@@ -169,6 +169,11 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
               (override));
 
   MOCK_METHOD(void,
+              OnPlatformViewSetAppLifecycleState,
+              (LifecycleState state),
+              (override));
+
+  MOCK_METHOD(void,
               OnPlatformViewRegisterTexture,
               (std::shared_ptr<Texture> texture),
               (override));

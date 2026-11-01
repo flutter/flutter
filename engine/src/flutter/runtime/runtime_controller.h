@@ -289,21 +289,15 @@ class RuntimeController : public PlatformConfigurationClient,
   bool SetUserSettingsData(const std::string& data);
 
   //----------------------------------------------------------------------------
-  /// @brief      Forward the initial lifecycle state data to the running
-  ///             isolate. If the isolate is not running, this data will be
+  /// @brief      Forward the lifecycle state of the application to the running
+  ///             isolate. If the isolate is not running, the state will be
   ///             saved and flushed to the isolate when it starts running.
-  ///             After the isolate starts running, the current lifecycle
-  ///             state is pushed to it via the "flutter/lifecycle" channel.
   ///
-  /// @deprecated The persistent isolate data must be used for this purpose
-  ///             instead.
+  /// @param[in]  state  The lifecycle state.
   ///
-  /// @param[in]  data  The lifecycle state data.
+  /// @return     If the lifecycle state was forwarded to the running isolate.
   ///
-  /// @return     If the lifecycle state data was forwarded to the running
-  ///             isolate.
-  ///
-  bool SetInitialLifecycleState(const std::string& data);
+  bool SetAppLifecycleState(LifecycleState state);
 
   //----------------------------------------------------------------------------
   /// @brief      Notifies the running isolate about whether the semantics tree
@@ -703,6 +697,22 @@ class RuntimeController : public PlatformConfigurationClient,
   RuntimeController(RuntimeDelegate& p_client, const TaskRunners& task_runners);
 
  private:
+  //----------------------------------------------------------------------------
+  /// @brief      Forward the initial lifecycle state data to the running
+  ///             isolate. If the isolate is not running, this data will be
+  ///             saved and flushed to the isolate when it starts running.
+  ///             This is updated by `SetAppLifecycleState`.
+  ///
+  /// @deprecated Kept for `PlatformDispatcher.initialLifecycleState`, use
+  ///             `PlatformDispatcher.appLifecycleState` instead.
+  ///
+  /// @param[in]  data  The lifecycle state data.
+  ///
+  /// @return     If the lifecycle state data was forwarded to the running
+  ///             isolate.
+  ///
+  bool SetInitialLifecycleState(const std::string& data);
+
   struct Locale {
     Locale(std::string language_code_,
            std::string country_code_,

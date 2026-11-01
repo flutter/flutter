@@ -388,8 +388,8 @@ mixin SchedulerBinding on BindingBase {
   /// Whether the application is visible, and if so, whether it is currently
   /// interactive.
   ///
-  /// This is set by [handleAppLifecycleStateChanged] when the
-  /// [SystemChannels.lifecycle] notification is dispatched.
+  /// This is set by [handleAppLifecycleStateChanged] when the engine reports a
+  /// change to [PlatformDispatcher.appLifecycleState].
   ///
   /// The preferred ways to watch for changes to this value are using
   /// [WidgetsBindingObserver.didChangeAppLifecycleState], or through an
@@ -410,7 +410,7 @@ mixin SchedulerBinding on BindingBase {
   /// Notifies all the observers using
   /// [WidgetsBindingObserver.didChangeAppLifecycleState].
   ///
-  /// This method exposes notifications from [SystemChannels.lifecycle].
+  /// This method exposes changes to [PlatformDispatcher.appLifecycleState].
   @protected
   @mustCallSuper
   void handleAppLifecycleStateChanged(AppLifecycleState state) {

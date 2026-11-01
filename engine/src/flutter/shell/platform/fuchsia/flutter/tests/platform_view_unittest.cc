@@ -145,6 +145,8 @@ class MockPlatformViewDelegate : public flutter::PlatformView::Delegate {
     semantics_features_ = flags;
   }
   // |flutter::PlatformView::Delegate|
+  void OnPlatformViewSetAppLifecycleState(flutter::LifecycleState state) {}
+  // |flutter::PlatformView::Delegate|
   void OnPlatformViewRegisterTexture(
       std::shared_ptr<flutter::Texture> texture) {}
   // |flutter::PlatformView::Delegate|

@@ -235,6 +235,18 @@ bool EmbedderEngine::SetAccessibilityFeatures(int32_t flags) {
   return true;
 }
 
+bool EmbedderEngine::SetAppLifecycleState(LifecycleState state) {
+  if (!IsValid()) {
+    return false;
+  }
+  auto platform_view = shell_->GetPlatformView();
+  if (!platform_view) {
+    return false;
+  }
+  platform_view->SetAppLifecycleState(state);
+  return true;
+}
+
 bool EmbedderEngine::DispatchSemanticsAction(int64_t view_id,
                                              int node_id,
                                              flutter::SemanticsAction action,

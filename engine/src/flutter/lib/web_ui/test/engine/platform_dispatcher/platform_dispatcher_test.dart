@@ -59,6 +59,29 @@ void testMain() {
       expect(ui.PlatformDispatcher.instance.displays.length, greaterThan(0));
     });
 
+    test('reports appLifecycleState directly', () {
+      expect(dispatcher.appLifecycleState, ui.AppLifecycleState.resumed);
+
+      final states = <ui.AppLifecycleState?>[];
+      dispatcher.onAppLifecycleStateChanged = () {
+        states.add(dispatcher.appLifecycleState);
+      };
+      final lifecycleMessages = <String>[];
+      dispatcher.onPlatformMessage = (String channel, _, _) {
+        lifecycleMessages.add(channel);
+      };
+
+      domWindow.dispatchEvent(createDomEvent('Event', 'blur'));
+      expect(dispatcher.appLifecycleState, ui.AppLifecycleState.inactive);
+      domWindow.dispatchEvent(createDomEvent('Event', 'focus'));
+      expect(dispatcher.appLifecycleState, ui.AppLifecycleState.resumed);
+      expect(
+        states,
+        equals(<ui.AppLifecycleState>[ui.AppLifecycleState.inactive, ui.AppLifecycleState.resumed]),
+      );
+      expect(lifecycleMessages, isNot(contains('flutter/lifecycle')));
+    });
+
     test('AppLifecycleState transitions through all states', () {
       final states = <ui.AppLifecycleState>[];
       void listener(ui.AppLifecycleState state) {

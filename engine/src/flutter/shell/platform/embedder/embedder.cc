@@ -3303,6 +3303,42 @@ FlutterEngineResult FlutterEngineUpdateAccessibilityFeatures(
   return kSuccess;
 }
 
+FlutterEngineResult FlutterEngineSetAppLifecycleState(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine,
+    FlutterAppLifecycleState state) {
+  if (engine == nullptr) {
+    return LOG_EMBEDDER_ERROR(kInvalidArguments, "Invalid engine handle.");
+  }
+
+  flutter::LifecycleState engine_state;
+  switch (state) {
+    case kFlutterAppLifecycleStateDetached:
+      engine_state = flutter::LifecycleState::kDetached;
+      break;
+    case kFlutterAppLifecycleStateResumed:
+      engine_state = flutter::LifecycleState::kResumed;
+      break;
+    case kFlutterAppLifecycleStateInactive:
+      engine_state = flutter::LifecycleState::kInactive;
+      break;
+    case kFlutterAppLifecycleStateHidden:
+      engine_state = flutter::LifecycleState::kHidden;
+      break;
+    case kFlutterAppLifecycleStatePaused:
+      engine_state = flutter::LifecycleState::kPaused;
+      break;
+    default:
+      return LOG_EMBEDDER_ERROR(kInvalidArguments, "Invalid lifecycle state.");
+  }
+
+  if (!reinterpret_cast<flutter::EmbedderEngine*>(engine)->SetAppLifecycleState(
+          engine_state)) {
+    return LOG_EMBEDDER_ERROR(kInternalInconsistency,
+                              "Could not update lifecycle state.");
+  }
+  return kSuccess;
+}
+
 FlutterEngineResult FlutterEngineDispatchSemanticsAction(
     FLUTTER_API_SYMBOL(FlutterEngine) engine,
     uint64_t node_id,
@@ -3859,6 +3895,7 @@ FlutterEngineResult FlutterEngineGetProcAddresses(
   SET_PROC(AddView, FlutterEngineAddView);
   SET_PROC(RemoveView, FlutterEngineRemoveView);
   SET_PROC(SendViewFocusEvent, FlutterEngineSendViewFocusEvent);
+  SET_PROC(SetAppLifecycleState, FlutterEngineSetAppLifecycleState);
 #undef SET_PROC
 
   return kSuccess;
