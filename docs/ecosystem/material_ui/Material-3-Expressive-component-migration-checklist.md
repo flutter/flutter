@@ -129,7 +129,47 @@ class IconButtonThemeData with Diagnosticable {
 
 Update the component theme data class support methods, such as `lerp`, `==`, `hashCode`, `debugFillProperties`, etc. Update `copyWith` if the class already has one.
 
-Default null to `StyleVariant.material3` in component behavior.
+Add a static `variantOf` method to the component theme widget. It returns the variant that applies at a given `BuildContext`:
+
+1. The first non-null `variant` of the enclosing component themes, starting from the closest one.
+2. Otherwise, the `variant` of the component theme in `ThemeData`.
+3. Otherwise, `StyleVariant.material3`.
+
+With this, a nested component theme that doesn't set `variant` inherits it instead of resetting its subtree to Material 3. This covers themes that only override `style`, and themes that widgets add internally. For example, `ListTile`, `InputDecorator`, and `AppBar` wrap their children in an `IconButtonTheme` without a variant. An explicit `variant: StyleVariant.material3` still opts a subtree out. Only `variant` is inherited. `style` keeps its current behavior, where the closest theme replaces its ancestors.
+
+Use [`IconButtonTheme.variantOf`](https://github.com/flutter/packages/pull/13263) as the reference implementation.
+
+Example:
+
+```dart
+class IconButtonTheme extends InheritedTheme {
+  // ...
+
+  static StyleVariant variantOf(BuildContext context) {
+    InheritedElement? element = context.getElementForInheritedWidgetOfExactType<IconButtonTheme>();
+    while (element != null) {
+      // Depend on every theme that is visited, so that a change to any of them
+      // rebuilds the dependent.
+      context.dependOnInheritedElement(element);
+      final StyleVariant? variant = (element.widget as IconButtonTheme).data.variant;
+      if (variant != null) {
+        return variant;
+      }
+      // Calling getElementForInheritedWidgetOfExactType on the element itself
+      // would return the same element, so continue the search from its parent.
+      Element? parent;
+      element.visitAncestorElements((Element ancestor) {
+        parent = ancestor;
+        return false;
+      });
+      element = parent?.getElementForInheritedWidgetOfExactType<IconButtonTheme>();
+    }
+    return Theme.of(context).iconButtonTheme.variant ?? StyleVariant.material3;
+  }
+}
+```
+
+Document the inheritance on the theme data `variant` field, including that an enclosing component theme takes precedence over the one in `ThemeData`. On the theme's `of` method, note that the returned `variant` is only the value of the closest theme and can be null, and point to `variantOf`.
 
 Do not add extra component theme flags unless the component needs them.
 
@@ -148,8 +188,7 @@ Select defaults using the component theme variant.
 Example pattern:
 
 ```dart
-final StyleVariant effectiveVariant =
-    <Component>Theme.of(context).variant ?? StyleVariant.material3;
+final StyleVariant effectiveVariant = <Component>Theme.variantOf(context);
 
 return switch (effectiveVariant) {
   StyleVariant.material3 => _<Component>DefaultsM3(context),
@@ -159,7 +198,7 @@ return switch (effectiveVariant) {
 
 Keep existing Material 3 defaults unchanged.
 
-Ensure M3E defaults apply only when the component theme variant is `StyleVariant.material3Expressive`.
+Ensure M3E defaults apply only when `<Component>Theme.variantOf(context)` returns `StyleVariant.material3Expressive`. Use `variantOf` everywhere the component checks the variant. Do not read `<Component>Theme.of(context).variant` directly.
 
 ## 6. Add Public Style APIs Only When Required
 
@@ -200,6 +239,7 @@ Avoid exposing token implementation details in user-facing docs unless the API i
 Add focused tests for:
 
 - Component theme `variant` opt-in.
+- Variant inheritance through `<Component>Theme.variantOf`: a nested component theme without a `variant` inherits it, an explicit `StyleVariant.material3` opts a subtree out, the `ThemeData` component theme is the fallback, and changing an enclosing theme's `variant` rebuilds the component.
 - Generated M3E defaults.
 - New style properties.
 - Theme-level style defaults.
@@ -334,7 +374,7 @@ Adds Material 3 Expressive support for `<Component>` behind an explicit componen
 
 ## Changes
 
-- Adds `<Component>ThemeData.variant`.
+- Adds `<Component>ThemeData.variant` and `<Component>Theme.variantOf`.
 - Adds new style APIs: `<new style APIs>`.
 - Adds `<Component>TemplateM3E`.
 - Adds generated defaults in `packages/material_ui/lib/src/generated/<component>_defaults_m3e.g.dart`.
