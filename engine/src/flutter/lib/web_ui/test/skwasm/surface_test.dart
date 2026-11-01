@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:js_interop';
 import 'dart:typed_data';
 
 import 'package:test/bootstrap/browser.dart';
@@ -11,32 +12,52 @@ import 'package:ui/src/engine.dart';
 import 'package:ui/src/engine/skwasm/skwasm_impl.dart';
 import 'package:ui/ui.dart' as ui;
 
+@JS('OffscreenCanvas.prototype.getContext')
+external JSFunction get _getOffscreenContext;
+
+@JS('OffscreenCanvas.prototype.getContext')
+external set _getOffscreenContext(JSFunction value);
+
 void main() {
   internalBootstrapBrowserTest(() => testMain);
 }
 
 void testMain() {
-  test(
-    'context creation failure completes initialization with an error',
-    () async {
-      final int pending = SkwasmCallbackHandler.instance.debugPendingCallbackCount;
-      final provider = _ContextBoundCanvasProvider();
-      final surface = SkwasmOffscreenSurface(provider);
-      try {
-        await expectLater(
-          surface.initialized.timeout(const Duration(seconds: 5)),
-          throwsStateError,
-        );
-      } finally {
-        surface.dispose();
-        provider.dispose();
-      }
-      expect(SkwasmCallbackHandler.instance.debugPendingCallbackCount, pending);
-    },
-    // A canvas with an existing context cannot be transferred to a worker.
-    // ST passes it directly, exercising native WebGL context creation failure.
-    skip: (renderer as SkwasmRenderer).isMultiThreaded,
-  );
+  for (final throwError in <bool>[false, true]) {
+    test(
+      'context creation failure completes initialization with an error ($throwError)',
+      () async {
+        final int pending = SkwasmCallbackHandler.instance.debugPendingCallbackCount;
+        final JSFunction original = _getOffscreenContext;
+        JSAny? createContext(JSObject canvas, JSString kind, JSAny? attributes) {
+          if (kind.toDart == 'webgl2') {
+            if (throwError) {
+              throw StateError('WebGL context creation failed.');
+            }
+            return null;
+          }
+          return original.callAsFunction(canvas, kind, attributes);
+        }
+
+        _getOffscreenContext = createContext.toJSCaptureThis;
+        final provider = OffscreenCanvasProvider();
+        final surface = SkwasmOffscreenSurface(provider);
+        try {
+          await expectLater(
+            surface.initialized.timeout(const Duration(seconds: 5)),
+            throwsStateError,
+          );
+        } finally {
+          _getOffscreenContext = original;
+          surface.dispose();
+          provider.dispose();
+        }
+        expect(SkwasmCallbackHandler.instance.debugPendingCallbackCount, pending);
+      },
+      // The overridden browser API is local to this thread, not the worker.
+      skip: (renderer as SkwasmRenderer).isMultiThreaded,
+    );
+  }
 
   for (final failAcquire in <bool>[true, false]) {
     test('context recovery failure completes rendering with an error ($failAcquire)', () async {
@@ -269,15 +290,6 @@ Future<void> _settleOnscreenFrame() async {
     channel.port1.removeEventListener('message', listener);
     channel.port1.close();
     channel.port2.close();
-  }
-}
-
-class _ContextBoundCanvasProvider extends OffscreenCanvasProvider {
-  @override
-  DomOffscreenCanvas acquireCanvas(BitmapSize size, {required ui.VoidCallback onContextLost}) {
-    final DomOffscreenCanvas canvas = super.acquireCanvas(size, onContextLost: onContextLost);
-    expect(canvas.getContext('2d'), isNotNull);
-    return canvas;
   }
 }
 
