@@ -1133,6 +1133,9 @@ class SelectionOverlay {
   /// {@macro flutter.widgets.SelectionOverlay.context}
   final BuildContext context;
 
+  final GlobalKey _startHandleKey = GlobalKey();
+  final GlobalKey _endHandleKey = GlobalKey();
+
   final ValueNotifier<MagnifierInfo> _magnifierInfo = ValueNotifier<MagnifierInfo>(
     MagnifierInfo.empty,
   );
@@ -1804,6 +1807,8 @@ class SelectionOverlay {
       handle = _SelectionHandleOverlay(
         type: _startHandleType,
         handleLayerLink: startHandleLayerLink,
+        handleKey: _startHandleKey,
+        otherHandleKey: _endHandleKey,
         onSelectionHandleTapped: onSelectionHandleTapped,
         onSelectionHandleDragStart: _handleStartHandleDragStart,
         onSelectionHandleDragUpdate: _handleStartHandleDragUpdate,
@@ -1835,6 +1840,8 @@ class SelectionOverlay {
       handle = _SelectionHandleOverlay(
         type: _endHandleType,
         handleLayerLink: endHandleLayerLink,
+        handleKey: _endHandleKey,
+        otherHandleKey: _startHandleKey,
         onSelectionHandleTapped: onSelectionHandleTapped,
         onSelectionHandleDragStart: _handleEndHandleDragStart,
         onSelectionHandleDragUpdate: _handleEndHandleDragUpdate,
@@ -2009,12 +2016,116 @@ class _SelectionToolbarWrapperState extends State<_SelectionToolbarWrapper>
   }
 }
 
+class _SelectionHandleHitTest extends SingleChildRenderObjectWidget {
+  const _SelectionHandleHitTest({
+    required super.key,
+    required this.otherHandleKey,
+    required this.handleRect,
+    required super.child,
+  });
+
+  final GlobalKey otherHandleKey;
+  final Rect handleRect;
+
+  @override
+  RenderObject createRenderObject(BuildContext context) {
+    return _RenderSelectionHandleHitTest(
+      otherHandleKey: otherHandleKey,
+      visibleHandleRect: handleRect,
+    );
+  }
+
+  @override
+  void updateRenderObject(
+    BuildContext context,
+    covariant _RenderSelectionHandleHitTest renderObject,
+  ) {
+    renderObject.updateProperties(otherHandleKey: otherHandleKey, visibleHandleRect: handleRect);
+  }
+}
+
+class _RenderSelectionHandleHitTest extends RenderProxyBox {
+  _RenderSelectionHandleHitTest({required this._otherHandleKey, required this._visibleHandleRect});
+
+  GlobalKey _otherHandleKey;
+  Rect _visibleHandleRect;
+
+  void updateProperties({required GlobalKey otherHandleKey, required Rect visibleHandleRect}) {
+    _otherHandleKey = otherHandleKey;
+    _visibleHandleRect = visibleHandleRect;
+  }
+
+  // Converts the handle's visible bounds to global coordinates so the two
+  // handles can be compared even when they belong to separate overlay entries.
+  Rect _globalRect(RenderBox box, Rect rect) {
+    final List<Offset> corners = <Offset>[
+      rect.topLeft,
+      rect.topRight,
+      rect.bottomLeft,
+      rect.bottomRight,
+    ].map(box.localToGlobal).toList();
+
+    return Rect.fromLTRB(
+      corners.map((Offset point) => point.dx).reduce(math.min),
+      corners.map((Offset point) => point.dy).reduce(math.min),
+      corners.map((Offset point) => point.dx).reduce(math.max),
+      corners.map((Offset point) => point.dy).reduce(math.max),
+    );
+  }
+
+  // Returns the squared distance from a point to the nearest point on a
+  // rectangle, or zero when the point lies inside it.
+  double _distanceSquaredToRect(Offset point, Rect rect) {
+    final double dx = point.dx < rect.left
+        ? rect.left - point.dx
+        : point.dx > rect.right
+        ? point.dx - rect.right
+        : 0.0;
+    final double dy = point.dy < rect.top
+        ? rect.top - point.dy
+        : point.dy > rect.bottom
+        ? point.dy - rect.bottom
+        : 0.0;
+
+    return dx * dx + dy * dy;
+  }
+
+  @override
+  bool hitTest(BoxHitTestResult result, {required Offset position}) {
+    final RenderObject? otherObject = _otherHandleKey.currentContext?.findRenderObject();
+
+    if (otherObject is _RenderSelectionHandleHitTest &&
+        otherObject.attached &&
+        otherObject.hasSize) {
+      final Offset globalPosition = localToGlobal(position);
+      final Rect ownRect = _globalRect(this, _visibleHandleRect);
+      final Rect otherRect = _globalRect(otherObject, otherObject._visibleHandleRect);
+
+      final double ownDistance = _distanceSquaredToRect(globalPosition, ownRect);
+      final double otherDistance = _distanceSquaredToRect(globalPosition, otherRect);
+
+      final bool otherIsCloser =
+          otherDistance < ownDistance ||
+          (otherDistance == ownDistance &&
+              (globalPosition - otherRect.center).distanceSquared <
+                  (globalPosition - ownRect.center).distanceSquared);
+
+      if (otherIsCloser) {
+        return false;
+      }
+    }
+    return super.hitTest(result, position: position);
+  }
+}
+
 /// This widget represents a single draggable selection handle.
 class _SelectionHandleOverlay extends StatefulWidget {
   /// Create selection overlay.
   const _SelectionHandleOverlay({
     required this.type,
     required this.handleLayerLink,
+    required this.handleKey,
+    required this.otherHandleKey,
     this.onSelectionHandleTapped,
     this.onSelectionHandleDragStart,
     this.onSelectionHandleDragUpdate,
@@ -2026,6 +2137,8 @@ class _SelectionHandleOverlay extends StatefulWidget {
   });
 
   final LayerLink handleLayerLink;
+  final GlobalKey handleKey;
+  final GlobalKey otherHandleKey;
   final VoidCallback? onSelectionHandleTapped;
   final ValueChanged<DragStartDetails>? onSelectionHandleDragStart;
   final ValueChanged<DragUpdateDetails>? onSelectionHandleDragUpdate;
@@ -2133,43 +2246,48 @@ class _SelectionHandleOverlayState extends State<_SelectionHandleOverlay>
           height: interactiveRect.height,
           child: Align(
             alignment: Alignment.topLeft,
-            child: RawGestureDetector(
-              behavior: HitTestBehavior.translucent,
-              gestures: <Type, GestureRecognizerFactory>{
-                PanGestureRecognizer: GestureRecognizerFactoryWithHandlers<PanGestureRecognizer>(
-                  () => PanGestureRecognizer(
-                    debugOwner: this,
-                    // Mouse events select the text and do not drag the cursor.
-                    supportedDevices: <PointerDeviceKind>{
-                      PointerDeviceKind.touch,
-                      PointerDeviceKind.stylus,
-                      PointerDeviceKind.unknown,
+            child: _SelectionHandleHitTest(
+              key: widget.handleKey,
+              otherHandleKey: widget.otherHandleKey,
+              handleRect: handleRect.shift(Offset(padding.left, padding.top)),
+              child: RawGestureDetector(
+                behavior: HitTestBehavior.translucent,
+                gestures: <Type, GestureRecognizerFactory>{
+                  PanGestureRecognizer: GestureRecognizerFactoryWithHandlers<PanGestureRecognizer>(
+                    () => PanGestureRecognizer(
+                      debugOwner: this,
+                      // Mouse events select the text and do not drag the cursor.
+                      supportedDevices: <PointerDeviceKind>{
+                        PointerDeviceKind.touch,
+                        PointerDeviceKind.stylus,
+                        PointerDeviceKind.unknown,
+                      },
+                    ),
+                    (PanGestureRecognizer instance) {
+                      instance
+                        ..dragStartBehavior = widget.dragStartBehavior
+                        ..gestureSettings = eagerlyAcceptDragWhenCollapsed
+                            ? const DeviceGestureSettings(touchSlop: 1.0)
+                            : null
+                        ..onStart = widget.onSelectionHandleDragStart
+                        ..onUpdate = widget.onSelectionHandleDragUpdate
+                        ..onEnd = widget.onSelectionHandleDragEnd;
                     },
                   ),
-                  (PanGestureRecognizer instance) {
-                    instance
-                      ..dragStartBehavior = widget.dragStartBehavior
-                      ..gestureSettings = eagerlyAcceptDragWhenCollapsed
-                          ? const DeviceGestureSettings(touchSlop: 1.0)
-                          : null
-                      ..onStart = widget.onSelectionHandleDragStart
-                      ..onUpdate = widget.onSelectionHandleDragUpdate
-                      ..onEnd = widget.onSelectionHandleDragEnd;
-                  },
-                ),
-              },
-              child: Padding(
-                padding: EdgeInsets.only(
-                  left: padding.left,
-                  top: padding.top,
-                  right: padding.right,
-                  bottom: padding.bottom,
-                ),
-                child: widget.selectionControls.buildHandle(
-                  context,
-                  widget.type,
-                  widget.preferredLineHeight,
-                  widget.onSelectionHandleTapped,
+                },
+                child: Padding(
+                  padding: EdgeInsets.only(
+                    left: padding.left,
+                    top: padding.top,
+                    right: padding.right,
+                    bottom: padding.bottom,
+                  ),
+                  child: widget.selectionControls.buildHandle(
+                    context,
+                    widget.type,
+                    widget.preferredLineHeight,
+                    widget.onSelectionHandleTapped,
+                  ),
                 ),
               ),
             ),
