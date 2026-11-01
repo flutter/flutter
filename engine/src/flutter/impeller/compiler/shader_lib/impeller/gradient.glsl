@@ -149,16 +149,18 @@ vec3 IPComputeFixedGradientValues(float t, float colors_length) {
   return vec3(lower_index, upper_index, scale);
 }
 
-float IPComputeLinearGradientT(vec2 positon,
-                               vec2 start,
-                               vec2 delta,
-                               float inv_gradient_length) {
+// Gradient dot products can overflow mediump even when the normalized
+// result is between zero and one. Preserve coordinate precision in both helpers.
+highp float IPComputeLinearGradientT(highp vec2 positon,
+                                     highp vec2 start,
+                                     highp vec2 delta,
+                                     highp float inv_gradient_length) {
   return dot(positon - start, delta) * inv_gradient_length;
 }
 
-float IPComputeRadialGradientT(vec2 position,
-                               vec2 center,
-                               float inv_gradient_length) {
+highp float IPComputeRadialGradientT(highp vec2 position,
+                                     highp vec2 center,
+                                     highp float inv_gradient_length) {
   return length(position - center) * inv_gradient_length;
 }
 
