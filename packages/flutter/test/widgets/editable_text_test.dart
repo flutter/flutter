@@ -19066,6 +19066,63 @@ void main() {
     // [intended] only applies to platforms where we supply the context menu.
     skip: kIsWeb,
   );
+  group('toolbar showing while the text shrinks', () {
+    // Regression tests for https://github.com/flutter/flutter/issues/195335.
+    // A long single-line text scrolls the field horizontally to the caret.
+    // While the toolbar is showing, shortening the text below the scroll
+    // offset dispatches a scroll notification from inside
+    // RenderEditable.performLayout; reading the selection geometry then
+    // throws, as does reading the boxes of an invalid selection.
+
+    /// Pumps [app], types a long text into its TextField (the field scrolls
+    /// to the caret at the end), and shows the text selection toolbar.
+    Future<void> scrolledFieldWithToolbar(WidgetTester tester, Widget app) async {
+      await tester.pumpWidget(app);
+      await tester.enterText(find.byType(TextField), 'lorem ipsum ' * 40);
+      await tester.pumpAndSettle();
+      final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+      state.showToolbar();
+      await tester.pumpAndSettle();
+      expect(state.selectionOverlay!.toolbarIsVisible, isTrue);
+    }
+
+    testWidgets('clearing the text while the toolbar shows', (WidgetTester tester) async {
+      final controller = TextEditingController();
+      addTearDown(controller.dispose);
+      await scrolledFieldWithToolbar(
+        tester,
+        MaterialApp(
+          home: Scaffold(body: TextField(controller: controller)),
+        ),
+      );
+      controller.clear();
+      await tester.pump();
+    });
+
+    testWidgets('swapping the controller while the toolbar shows', (WidgetTester tester) async {
+      final longController = TextEditingController();
+      final emptyController = TextEditingController();
+      addTearDown(longController.dispose);
+      addTearDown(emptyController.dispose);
+      var swapped = false;
+      late StateSetter setState;
+      await scrolledFieldWithToolbar(
+        tester,
+        MaterialApp(
+          home: Scaffold(
+            body: StatefulBuilder(
+              builder: (BuildContext context, StateSetter set) {
+                setState = set;
+                return TextField(controller: swapped ? emptyController : longController);
+              },
+            ),
+          ),
+        ),
+      );
+      setState(() => swapped = true);
+      await tester.pump();
+    });
+  });
 }
 
 class UnsettableController extends TextEditingController {
