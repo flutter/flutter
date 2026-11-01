@@ -1820,7 +1820,7 @@ class TextStyle {
          fontVariations,
        ),
        _leadingDistribution = leadingDistribution,
-       _fontFamily = fontFamily ?? '',
+       _fontFamily = fontFamily,
        _fontFamilyFallback = fontFamilyFallback,
        _fontSize = fontSize,
        _letterSpacing = letterSpacing,
@@ -1835,7 +1835,7 @@ class TextStyle {
        _fontVariations = fontVariations;
 
   final Int32List _encoded;
-  final String _fontFamily;
+  final String? _fontFamily;
   final List<String>? _fontFamilyFallback;
   final double? _fontSize;
   final double? _letterSpacing;
@@ -1913,7 +1913,7 @@ class TextStyle {
         'fontWeight: ${_encoded[0] & 0x00020 == 0x00020 ? FontWeight(_encoded[5]) : "unspecified"}, '
         'fontStyle: ${_encoded[0] & 0x00040 == 0x00040 ? FontStyle.values[_encoded[6]] : "unspecified"}, '
         'textBaseline: ${_encoded[0] & 0x00080 == 0x00080 ? TextBaseline.values[_encoded[7]] : "unspecified"}, '
-        'fontFamily: ${_encoded[0] & 0x00200 == 0x00200 && _fontFamily != '' ? _fontFamily : "unspecified"}, '
+        'fontFamily: ${_encoded[0] & 0x00200 == 0x00200 && (_fontFamily ?? '') != '' ? _fontFamily : "unspecified"}, '
         'fontFamilyFallback: ${_encoded[0] & 0x00200 == 0x00200 && fontFamilyFallback != null && fontFamilyFallback.isNotEmpty ? fontFamilyFallback : "unspecified"}, '
         'fontSize: ${_encoded[0] & 0x00400 == 0x00400 ? _fontSize : "unspecified"}, '
         'letterSpacing: ${_encoded[0] & 0x00800 == 0x00800 ? "${_letterSpacing}x" : "unspecified"}, '
@@ -3638,12 +3638,7 @@ base class _NativeParagraphBuilder extends NativeFieldWrapperClass1 implements P
 
   @override
   void pushStyle(TextStyle style) {
-    final fullFontFamilies = <String>[];
-    fullFontFamilies.add(style._fontFamily);
-    final List<String>? fontFamilyFallback = style._fontFamilyFallback;
-    if (fontFamilyFallback != null) {
-      fullFontFamilies.addAll(fontFamilyFallback);
-    }
+    final fullFontFamilies = <String>[?style._fontFamily, ...?style._fontFamilyFallback];
 
     final Int32List encoded = style._encoded;
     final TextLeadingDistribution finalLeadingDistribution =

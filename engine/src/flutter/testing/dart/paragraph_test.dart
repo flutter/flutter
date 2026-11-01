@@ -381,4 +381,14 @@ void main() {
     final Paragraph paragraph = builder.build()..layout(const ParagraphConstraints(width: 1000));
     expect(paragraph.height, fontSize);
   });
+
+  test('fontFamilyFallback[0] is the preferred font when fontFamily is null', () {
+    // Ahem's baseline is at 0.8em, FlutterTest's (the default test font) at 0.75em.
+    const double fontSize = 100;
+    final builder = ParagraphBuilder(ParagraphStyle());
+    builder.pushStyle(TextStyle(fontFamilyFallback: <String>['Ahem'], fontSize: fontSize));
+    builder.addText('A');
+    final Paragraph paragraph = builder.build()..layout(const ParagraphConstraints(width: 1000));
+    expect(paragraph.alphabeticBaseline, fontSize * 0.8);
+  });
 }
