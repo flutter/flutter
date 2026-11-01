@@ -39,6 +39,10 @@ class TextLayout {
   List<WebCluster> ellipsisClusters = <WebCluster>[];
   int? _ellipsisBidiLevel;
 
+  // The hyphen for each soft hyphen break, keyed by the index of the cluster
+  // after the soft hyphen. Shaped on first use and kept across layouts.
+  final _softHyphens = <int, SoftHyphen?>{};
+
   void performLayout(double width) {
     // TODO(jlavrova): IMPLEMENT:
     // I suggest with go with the general code flow for an empty text
@@ -101,11 +105,23 @@ class TextLayout {
       allClusters.addAll(span.extractClusters());
     }
     allClusters.sort((a, b) => a.start.compareTo(b.start));
+    // The browser gives some invisible characters, such as a soft hyphen (U+00AD) or a zero
+    // width space (U+200B), no cluster of their own. Map each of those code units to the
+    // cluster before it (or the first cluster, at the start of the text), so that text ranges
+    // that include them still map to cluster ranges in order.
+    var unmappedStart = 0;
     for (var i = 0; i < allClusters.length; ++i) {
       final WebCluster cluster = allClusters[i];
+      for (var j = unmappedStart; j < cluster.start; ++j) {
+        _mapping.add(textIndex: j, clusterIndex: math.max(i - 1, 0));
+      }
       for (int j = cluster.start; j < cluster.end; ++j) {
         _mapping.add(textIndex: j, clusterIndex: i);
       }
+      unmappedStart = math.max(unmappedStart, cluster.end);
+    }
+    for (var j = unmappedStart; j < paragraph.text.length; ++j) {
+      _mapping.add(textIndex: j, clusterIndex: math.max(allClusters.length - 1, 0));
     }
 
     // One more dummy element in the end to avoid extra checks
@@ -145,6 +161,56 @@ class TextLayout {
     return _ellipsisBidiLevel!;
   }
 
+  /// Returns the hyphen drawn if a line breaks before the cluster at
+  /// [clusterIndex], or null if that break is not at a soft hyphen (U+00AD)
+  /// or no hyphen is drawn there.
+  ///
+  /// Like SkParagraph, no hyphen is drawn for a soft hyphen at the end of the
+  /// text, or when [WebParagraphStyle.softHyphenString] is null or empty.
+  SoftHyphen? softHyphenBefore(int clusterIndex) {
+    // The last cluster is the artificial end of text.
+    if (clusterIndex <= 0 || clusterIndex >= allClusters.length - 1) {
+      return null;
+    }
+    // The browser gives the soft hyphen no cluster of its own, so check the
+    // code unit just before the break.
+    final int softHyphenOffset = allClusters[clusterIndex].start - 1;
+    if (paragraph.text.codeUnitAt(softHyphenOffset) != 0x00AD) {
+      return null;
+    }
+    return _softHyphens.putIfAbsent(
+      clusterIndex,
+      () => _shapeSoftHyphen(clusterIndex, softHyphenOffset),
+    );
+  }
+
+  SoftHyphen? _shapeSoftHyphen(int clusterIndex, int softHyphenOffset) {
+    final String? hyphen = paragraph.paragraphStyle.softHyphenString;
+    if (hyphen == null || hyphen.isEmpty) {
+      return null;
+    }
+    // The hyphen takes the style of the soft hyphen, and the direction of the
+    // text it ends.
+    final ParagraphSpan span = paragraph.spans.firstWhere(
+      (ParagraphSpan span) => span.start <= softHyphenOffset && softHyphenOffset < span.end,
+    );
+    final int bidiLevel = bidiRuns
+        .firstWhere((BidiRun run) => run.clusterRange.overlapsWith(clusterIndex - 1, clusterIndex))
+        .bidiLevel;
+    final hyphenSpan = TextSpan(
+      start: 0,
+      end: hyphen.length,
+      style: span.style,
+      text: hyphen,
+      textDirection: bidiLevel.isEven ? ui.TextDirection.ltr : ui.TextDirection.rtl,
+    );
+    return SoftHyphen(
+      hyphenSpan,
+      bidiLevel,
+      ui.TextRange(start: softHyphenOffset, end: softHyphenOffset + 1),
+    );
+  }
+
   void extractBidiRuns() {
     assert(bidiRuns.isEmpty);
 
@@ -153,6 +219,11 @@ class TextLayout {
       // Regions operate in text indexes, not cluster indexes (one cluster can contain several text points)
       // We need to convert one into another
       final ClusterRange clusterRange = _mapping.toClusterRange(region.start, region.end);
+      if (clusterRange.isEmpty) {
+        // A bidi region containing only clusterless characters (such as a standalone directional
+        // mark or soft hyphen) owns no clusters and produces no visual run.
+        continue;
+      }
       final run = BidiRun(clusterRange, region.level);
       bidiRuns.add(run);
     }
@@ -172,7 +243,9 @@ class TextLayout {
   void wrapText(double width) {
     lines.clear();
 
-    if (paragraph.text.isEmpty) {
+    // A paragraph that is empty or contains only characters without clusters has only the
+    // trailing EmptyCluster and produces no lines.
+    if (allClusters.length == 1) {
       // Empty text still has to have some metrics
       paragraph.width = width;
       paragraph.maxIntrinsicWidth = 0;
@@ -207,6 +280,7 @@ class TextLayout {
     double top, {
     required bool isSyntheticEmptyLine,
     required bool isLastLine,
+    SoftHyphen? softHyphen,
   }) {
     assert(contentClusterRange.end == whitespaceClusterRange.start);
     assert(whitespaceClusterRange.end == hardlineClusterRange.start);
@@ -240,8 +314,16 @@ class TextLayout {
       );
     }
 
-    // Arrange line vertically, calculate metrics and bounds
-    final ui.TextRange contentTextRange = _mapping.toTextRange(contentClusterRange);
+    // Arrange line vertically, calculate metrics and bounds.
+    // Leading clusterless characters (at offset 0 or right after a hard line break) map to the
+    // first visible cluster after them, so start the line's text range where the previous line's
+    // hard break ended (or at 0 for the first line) to keep line ranges contiguous.
+    final int lineStart = lines.isEmpty ? 0 : lines.last.hardLineBreakRange.end;
+    final ui.TextRange rawContentTextRange = _mapping.toTextRange(contentClusterRange);
+    final contentTextRange = ui.TextRange(
+      start: math.min(lineStart, rawContentTextRange.start),
+      end: rawContentTextRange.end,
+    );
     final ui.TextRange whitespaceTextRange = _mapping.toTextRange(whitespaceClusterRange);
     final ui.TextRange hardlineTextRange = _mapping.toTextRange(hardlineClusterRange);
     // A line includes the trailing newline if it has a hard line break that
@@ -253,7 +335,9 @@ class TextLayout {
         hardlineClusterRange.isNotEmpty && hardlineClusterRange.end == allClusters.length - 1;
     final allTextRange = ui.TextRange(
       start: contentTextRange.start,
-      end: includesTrailingNewline ? hardlineTextRange.end : whitespaceTextRange.end,
+      // Use hardlineTextRange.start rather than whitespaceTextRange.end so unmapped clusterless
+      // characters following trailing spaces are included in this line's text range.
+      end: includesTrailingNewline ? hardlineTextRange.end : hardlineTextRange.start,
     );
     // TODO(jlavrova): Should we use a TextLineBuilder pattern instead?
     final line = TextLine(
@@ -320,11 +404,21 @@ class TextLayout {
     // and shift all runs for this line so this first cluster starts from 0
     // Break the line into the blocks that belong to the same bidi run (monodirectional text) and to the same style block (the same text metrics)
     var trailingSpacesWidth = 0.0;
-    // In case we attach the ellipsis block at the left (RTL paragraph) we need to reserve its width
-    double blockShiftFromLineStart =
-        ellipsisBlock != null && paragraph.paragraphStyle.textDirection == ui.TextDirection.rtl
-        ? ellipsisBlock.advance.width
-        : 0.0;
+    // Like SkParagraph, a hyphen at a soft hyphen break goes at the end of the line in the
+    // paragraph's direction, not next to the text it ends. A line with an ellipsis has none.
+    final SoftHyphen? lineSoftHyphen = ellipsisBlock == null ? softHyphen : null;
+    final isRtlParagraph = paragraph.paragraphStyle.textDirection == ui.TextDirection.rtl;
+    // In an RTL paragraph the hyphen block goes at the left edge of the line, so it can be
+    // built now.
+    final SoftHyphenBlock? rtlSoftHyphenBlock = isRtlParagraph && lineSoftHyphen != null
+        ? SoftHyphenBlock(lineSoftHyphen, 0.0)
+        : null;
+    // In case we attach the ellipsis or hyphen block at the left (RTL paragraph) we need to
+    // reserve its width
+    var blockShiftFromLineStart = 0.0;
+    if (isRtlParagraph) {
+      blockShiftFromLineStart = (ellipsisBlock ?? rtlSoftHyphenBlock)?.advance.width ?? 0.0;
+    }
     for (final bidiRun in lineVisualRuns) {
       // We (almost always true) assume that trailing whitespaces do not affect the line height.
       // Let's keep it as is.
@@ -382,6 +476,11 @@ class TextLayout {
           bidiLineSpanTextRange.start,
           bidiLineSpanTextRange.end,
         );
+        if (bidiLineSpanRange.isEmpty) {
+          // A span slice containing only clusterless characters (such as a standalone U+00AD or
+          // U+200B span) has no clusters to measure or paint on this line.
+          continue;
+        }
         final LineBlock block;
         final double blockWidth;
         if (span is PlaceholderSpan) {
@@ -467,6 +566,22 @@ class TextLayout {
         line.visualBlocks.insert(0, ellipsisBlock);
       }
       line.updateBoundingBox(ellipsisBlock);
+    }
+
+    // Add the hyphen block if any
+    if (lineSoftHyphen != null) {
+      final SoftHyphenBlock softHyphenBlock;
+      if (rtlSoftHyphenBlock != null) {
+        // The width is already reserved at the beginning of the line
+        softHyphenBlock = rtlSoftHyphenBlock;
+        line.visualBlocks.insert(0, softHyphenBlock);
+      } else {
+        softHyphenBlock = SoftHyphenBlock(lineSoftHyphen, blockShiftFromLineStart);
+        line.visualBlocks.add(softHyphenBlock);
+        blockShiftFromLineStart += softHyphenBlock.advance.width;
+      }
+      line.updateBoundingBox(softHyphenBlock);
+      line.softHyphenWidth = softHyphenBlock.advance.width;
     }
 
     // Now when we calculated all line metrics we have to correct placeholders that depend on it
@@ -569,6 +684,12 @@ class TextLayout {
   }
 
   void _calculatePaintBounds() {
+    if (lines.isEmpty) {
+      // A non-empty paragraph containing only clusterless characters has no lines to paint.
+      paragraph.paintBounds = ui.Rect.zero;
+      return;
+    }
+
     double left = double.infinity;
     double top = double.infinity;
     double right = double.negativeInfinity;
@@ -624,7 +745,8 @@ class TextLayout {
           continue;
         }
         ui.Rect firstRect = block.advance;
-        if (block is! PlaceholderBlock) {
+        // A hyphen block covers the whole drawn hyphen for its one soft hyphen.
+        if (block is! PlaceholderBlock && block is! SoftHyphenBlock) {
           // We need to calculate the intersect rectangle
           firstRect = (block.span as TextSpan).getTextRangeSelectionInBlock(block, intersect);
         }
@@ -822,6 +944,16 @@ class TextLayout {
         final double left = block.advance.left + lineShift;
         final double right = block.advance.right + lineShift;
 
+        if (block is SoftHyphenBlock) {
+          // Like SkParagraph, the hyphen maps to the position after the soft hyphen.
+          // Because that offset is also the start of the next line, use upstream affinity so
+          // line-boundary and closest-glyph queries keep the position on the hyphenated line.
+          if (right < offset.dx) {
+            continue;
+          }
+          return ui.TextPosition(offset: block.textRange.end, affinity: ui.TextAffinity.upstream);
+        }
+
         if (right < offset.dx) {
           // We are not there yet; we need a block containing the offset (or the closest to it)
           continue;
@@ -874,6 +1006,14 @@ class TextLayout {
       }
       // We found the line but not the block because the offset is to the right of all blocks in this line.
       final LineBlock? lastVisualBlockInLine = line.visualBlocks.lastOrNull;
+      if (lastVisualBlockInLine is SoftHyphenBlock) {
+        // Offsets past a trailing soft hyphen map to the break boundary at the end of this line,
+        // so use upstream affinity to keep the position on the hyphenated line.
+        return ui.TextPosition(
+          offset: lastVisualBlockInLine.textRange.end,
+          affinity: ui.TextAffinity.upstream,
+        );
+      }
       return lastVisualBlockInLine == null
           ? ui.TextPosition(offset: line.allLineTextRange.start, affinity: ui.TextAffinity.upstream)
           : lastVisualBlockInLine.isLtr
@@ -900,6 +1040,20 @@ class TextLayout {
     // We cannot assume clusters go sequentially because of bidi reshuffling
     // but we don't care about the order because we only look for a cluster that contains the offset
     for (final LineBlock visualBlock in line.visualBlocks) {
+      if (visualBlock is SoftHyphenBlock) {
+        // A soft hyphen at a line break has no cluster; its glyph is the drawn hyphen.
+        if (visualBlock.textRange.start == codeUnitOffset) {
+          return ui.GlyphInfo(
+            visualBlock.advance.translate(
+              line.advance.left + line.formattingShift,
+              line.advance.top + line.fontBoundingBoxAscent,
+            ),
+            visualBlock.textRange,
+            visualBlock.isLtr ? ui.TextDirection.ltr : ui.TextDirection.rtl,
+          );
+        }
+        continue;
+      }
       for (
         int start = visualBlock.clusterRange.start;
         start < visualBlock.clusterRange.end;
@@ -1075,7 +1229,19 @@ class _TextClusterMapping {
       final int clusterIndex = toClusterIndex(start);
       return ClusterRange.collapsed(clusterIndex);
     }
-    return ClusterRange(start: toClusterIndex(start), end: toClusterIndex(end - 1) + 1);
+    int startClusterIndex = toClusterIndex(start);
+    if (_clusters[startClusterIndex].end <= start) {
+      // `start` has no cluster of its own and is mapped to the cluster before it, so the range
+      // starts at the next cluster.
+      startClusterIndex += 1;
+    }
+    int endClusterIndex = toClusterIndex(end - 1) + 1;
+    if (_clusters[endClusterIndex - 1].start >= end) {
+      // The code unit at (end - 1) has no cluster of its own at the start of the text and is
+      // mapped to the first cluster after it, so the range ends before that cluster.
+      endClusterIndex -= 1;
+    }
+    return ClusterRange(start: startClusterIndex, end: endClusterIndex);
   }
 
   ui.TextRange toTextRange(ClusterRange clusterRange) {
@@ -1443,6 +1609,69 @@ class EllipsisBlock extends TextBlock {
   );
 }
 
+/// The hyphen drawn at a line break at a soft hyphen (U+00AD).
+class SoftHyphen {
+  SoftHyphen(this.span, this.bidiLevel, this.textRange);
+
+  /// The hyphen string, shaped in the soft hyphen's style.
+  final TextSpan span;
+
+  /// The bidi level of the text the hyphen ends.
+  final int bidiLevel;
+
+  /// The soft hyphen's range in the paragraph text.
+  final ui.TextRange textRange;
+
+  late final double width = span.advanceWidth()!;
+}
+
+/// A block for the hyphen drawn at the end of a line that breaks at a soft
+/// hyphen (U+00AD).
+///
+/// The hyphen is shaped separately from the paragraph text, so the block owns
+/// its clusters and covers no paragraph clusters. Its [textRange] is the soft
+/// hyphen's, so that queries over the soft hyphen find the drawn hyphen, as in
+/// SkParagraph.
+class SoftHyphenBlock extends TextBlock {
+  factory SoftHyphenBlock(SoftHyphen softHyphen, double shiftFromLineStart) {
+    final List<TextCluster> clusters = softHyphen.span.extractClusters();
+    final TextCluster firstVisualCluster = softHyphen.bidiLevel.isEven
+        ? clusters.first
+        : clusters.last;
+    return SoftHyphenBlock._(
+      softHyphen,
+      clusters,
+      shiftFromLineStart,
+      firstVisualCluster.advance.left,
+    );
+  }
+
+  SoftHyphenBlock._(
+    SoftHyphen softHyphen,
+    this.clusters,
+    double shiftFromLineStart,
+    double shiftFromSpanStart,
+  ) : super(
+        softHyphen.span,
+        softHyphen.bidiLevel,
+        ClusterRange.collapsed(0),
+        softHyphen.textRange,
+        // Relative to the hyphen's own span: the whole hyphen string.
+        ui.TextRange(start: 0, end: softHyphen.span.text.length),
+        shiftFromLineStart,
+        shiftFromSpanStart,
+      );
+
+  final List<TextCluster> clusters;
+
+  @override
+  Iterable<(WebCluster, bool)> getTextClustersInVisualOrder(TextLayout layout) sync* {
+    for (final TextCluster cluster in isLtr ? clusters : clusters.reversed) {
+      yield (cluster, isLtr);
+    }
+  }
+}
+
 class TextLine {
   TextLine(
     this.textClusterRange,
@@ -1469,7 +1698,8 @@ class TextLine {
       // It was not implemented in SkParagraph either; kept it as is
       unscaledAscent: fontBoundingBoxAscent,
       height: advance.height,
-      width: advance.width,
+      // Like SkParagraph, the width leaves out a hyphen at a soft hyphen break.
+      width: advance.width - softHyphenWidth,
       // TODO(jlavrova): This should be set to `formattingShift`, right?
       //                 `advance.left` is always zero.
       left: advance.left,
@@ -1541,6 +1771,10 @@ class TextLine {
 
   double formattingShift = 0.0; // For centered or right aligned text
   late final double trailingSpacesWidth;
+
+  /// The width of the hyphen drawn at the end of the line, if it breaks at a
+  /// soft hyphen. It is included in [advance].
+  double softHyphenWidth = 0.0;
 
   double get fullWidth => advance.width + formattingShift + trailingSpacesWidth;
 

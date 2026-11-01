@@ -31,8 +31,17 @@ class TextWrapper {
   double get height => _height;
   double _height = 0.0;
 
-  bool _isSoftLineBreak(WebCluster cluster) {
-    return _layout.codeUnitFlags.hasFlag(cluster.start, CodeUnitFlag.softLineBreak);
+  bool _isSoftLineBreak(int index) {
+    // A soft break after a clusterless character (such as U+200B or U+00AD) may land on a
+    // subsequent clusterless code unit (such as U+200E or U+200F) before the next cluster starts.
+    final int end = _layout.allClusters[index].start;
+    final int start = index > 0 ? _layout.allClusters[index - 1].end : end;
+    for (var i = start; i <= end; ++i) {
+      if (_layout.codeUnitFlags.hasFlag(i, CodeUnitFlag.softLineBreak)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   bool _isHardLineBreak(WebCluster cluster) {
@@ -71,14 +80,14 @@ class TextWrapper {
         } else {
           continue;
         }
-      } else if (_isSoftLineBreak(cluster) && line.isNotEmpty) {
+      } else if (_isSoftLineBreak(index) && line.isNotEmpty) {
         // Mark the potential line break and then continue with the current cluster as usual
         if (line.hasLeadingWhitespaces) {
           // There is one case when we have to ignore this soft line break: if we only had whitespaces so far -
           // these are the leading spaces and Flutter wants them to be preserved
           // We need to pretend that these are not whitespaces
         } else {
-          line.markSoftLineBreak(index);
+          line.markSoftLineBreak(index, softHyphen: _layout.softHyphenBefore(index));
         }
       }
 
@@ -93,9 +102,12 @@ class TextWrapper {
       // Check if we exceeded the line width
       if (!line.canFit(widthCluster)) {
         var clusterAdded = false;
+        var rescan = false;
 
         if (line.hasSoftLineBreak) {
-          // There was at least one possible line break so we can use it to break the text
+          // There was at least one possible line break so we can use it to break the text.
+          // If it is a soft hyphen break whose hyphen does not fit, an earlier one is used.
+          rescan = line.restoreFallbackBreak();
         } else if (line.isNotEmpty) {
           // There was some text without line break, we will have to force-break the text at this cluster.
           assert(!line.hasConsumedText);
@@ -109,8 +121,11 @@ class TextWrapper {
           clusterAdded = true;
         }
 
-        // Add ellipsis if needed (and correct all the structures accordingly)
-        line.ellipsize(index);
+        // Add ellipsis if needed (and correct all the structures accordingly). A line that went
+        // back to an earlier break kept room for a hyphen, so it is not an ellipsis line.
+        if (!rescan) {
+          line.ellipsize(index);
+        }
         // Add the line
         line.build(hasTrailingNewline: false);
         if (line.reachedMaxLines()) {
@@ -118,6 +133,13 @@ class TextWrapper {
             _layout.paragraph.didExceedMaxLines = true;
           }
           break;
+        }
+
+        if (rescan) {
+          // The text after the earlier break has break opportunities of its own, so it is
+          // scanned again for the next line.
+          index = line.start - 1;
+          continue;
         }
 
         if (clusterAdded) {
@@ -282,8 +304,45 @@ class _LineBuilder {
   bool get hasSoftLineBreak => _hasSoftLineBreak;
   bool _hasSoftLineBreak = false;
 
-  void markSoftLineBreak(int index) {
+  // The hyphen drawn if the line ends at the last soft line break, and where that break is.
+  SoftHyphen? _breakSoftHyphen;
+  int _breakIndex = -1;
+
+  // Whether the last soft line break is at a soft hyphen whose hyphen does not fit.
+  bool _isBreakTooWide = false;
+
+  // The line as of the last soft line break that fits, to go back to when the last break
+  // is too wide.
+  _FallbackBreak? _fallbackBreak;
+
+  /// Whether this line could end with an ellipsis, in which case no room is kept for a hyphen.
+  ///
+  /// This matches SkParagraph, where the ellipsis wins over the hyphen.
+  bool get _mayEllipsize {
+    final String? ellipsis = _layout.paragraph.paragraphStyle.ellipsis;
+    if (ellipsis == null || ellipsis.isEmpty) {
+      return false;
+    }
+    final int? maxLines = _layout.paragraph.paragraphStyle.maxLines;
+    return maxLines == null || _layout.lines.length + 1 >= maxLines;
+  }
+
+  void markSoftLineBreak(int index, {SoftHyphen? softHyphen}) {
+    // A soft hyphen immediately after whitespace (when there is no pending word before the break)
+    // breaks at the preceding whitespace and never draws a hyphen.
+    final SoftHyphen? effectiveSoftHyphen = hasPendingText ? softHyphen : null;
+
+    // Like SkParagraph, a break at a soft hyphen only fits if the hyphen fits too.
+    // If it does not, the line ends at the last earlier break that fits instead, if there
+    // is one; otherwise the hyphen overflows.
+    final double reservedWidth = effectiveSoftHyphen == null || _mayEllipsize
+        ? 0.0
+        : effectiveSoftHyphen.width;
+    _isBreakTooWide = reservedWidth > 0.0 && _fallbackBreak != null && !canFit(reservedWidth);
+
     _hasSoftLineBreak = true;
+    _breakSoftHyphen = effectiveSoftHyphen;
+    _breakIndex = index;
 
     if (hasPendingText) {
       assert(_pendingTextEnd == index);
@@ -291,8 +350,53 @@ class _LineBuilder {
       assert(_newlineEnd == index);
     }
 
-    consumePendingText();
+    consumePendingText(hyphenWidth: effectiveSoftHyphen?.width ?? 0.0);
     assert(_newlineEnd == index);
+
+    if (!_isBreakTooWide) {
+      _fallbackBreak = _FallbackBreak(
+        whitespaceStart: _whitespaceStart,
+        whitespaceEnd: _whitespaceEnd,
+        newlineEnd: _newlineEnd,
+        widthConsumedText: _widthConsumedText,
+        widthWhitespaces: _widthWhitespaces,
+        softHyphen: _breakSoftHyphen,
+        breakIndex: _breakIndex,
+      );
+    }
+  }
+
+  /// If the last soft line break is too wide for its hyphen, goes back to the last earlier
+  /// break that fits, and returns true. The text after that break must then be scanned again.
+  bool restoreFallbackBreak() {
+    final _FallbackBreak? fallback = _fallbackBreak;
+    if (!_isBreakTooWide || fallback == null) {
+      return false;
+    }
+    _whitespaceStart = fallback.whitespaceStart;
+    _whitespaceEnd = fallback.whitespaceEnd;
+    _newlineEnd = fallback.newlineEnd;
+    _pendingTextEnd = fallback.newlineEnd;
+    _widthConsumedText = fallback.widthConsumedText;
+    _widthWhitespaces = fallback.widthWhitespaces;
+    _widthPendingText = 0.0;
+    _breakSoftHyphen = fallback.softHyphen;
+    _breakIndex = fallback.breakIndex;
+    _isBreakTooWide = false;
+    return true;
+  }
+
+  /// The hyphen to draw at the end of the line, if the line ends at a soft hyphen break and
+  /// has no ellipsis.
+  SoftHyphen? get _endingSoftHyphen {
+    if (_breakSoftHyphen == null ||
+        _whitespaceStart != _breakIndex ||
+        hasWhitespaces ||
+        hasHardLineBreak ||
+        _layout.ellipsisClusters.isNotEmpty) {
+      return null;
+    }
+    return _breakSoftHyphen;
   }
 
   bool canFit(double extraWidth) {
@@ -333,13 +437,14 @@ class _LineBuilder {
   }
 
   // TODO(mdebbar): Can we inline this in `markSoftLineBreak` and use that everywhere?
-  void consumePendingText() {
-    // Update min intrinsic width.
-    _minIntrinsicWidth = math.max(_minIntrinsicWidth, _widthPendingText);
-
+  void consumePendingText({double hyphenWidth = 0.0}) {
     if (!hasPendingText) {
       return;
     }
+
+    // Update min intrinsic width. Like CSS min-content, a piece of a word that ends at a soft
+    // hyphen counts with its hyphen.
+    _minIntrinsicWidth = math.max(_minIntrinsicWidth, _widthPendingText + hyphenWidth);
 
     _whitespaceStart = _pendingTextEnd;
     _whitespaceEnd = _pendingTextEnd;
@@ -359,10 +464,13 @@ class _LineBuilder {
   ///
   /// Returns the height of the line.
   void build({required bool hasTrailingNewline}) {
-    _longestLine = math.max(_longestLine, _widthConsumedText);
+    final SoftHyphen? softHyphen = _endingSoftHyphen;
+    // Like SkParagraph, the longest line includes the hyphen.
+    final double hyphenWidth = softHyphen?.width ?? 0.0;
+    _longestLine = math.max(_longestLine, _widthConsumedText + hyphenWidth);
     _maxLineWidthWithTrailingSpaces = math.max(
       _maxLineWidthWithTrailingSpaces,
-      _widthConsumedText + _widthWhitespaces,
+      _widthConsumedText + _widthWhitespaces + hyphenWidth,
     );
 
     final int? maxLines = _layout.paragraph.paragraphStyle.maxLines;
@@ -379,6 +487,7 @@ class _LineBuilder {
       _top,
       isSyntheticEmptyLine: false,
       isLastLine: isLastLine,
+      softHyphen: softHyphen,
     );
     _top += height;
 
@@ -404,6 +513,10 @@ class _LineBuilder {
     // Reset the line builder to be ready for the next line.
 
     _hasSoftLineBreak = false;
+    _breakSoftHyphen = null;
+    _breakIndex = -1;
+    _isBreakTooWide = false;
+    _fallbackBreak = null;
 
     start = _newlineEnd;
     _whitespaceStart = start;
@@ -488,4 +601,25 @@ class _LineBuilder {
     return _layout.codeUnitFlags.hasFlag(cluster.start, CodeUnitFlag.whitespace) &&
         !_layout.codeUnitFlags.hasFlag(cluster.end, CodeUnitFlag.hardLineBreak);
   }
+}
+
+/// The state of a [_LineBuilder] right after a soft line break.
+class _FallbackBreak {
+  _FallbackBreak({
+    required this.whitespaceStart,
+    required this.whitespaceEnd,
+    required this.newlineEnd,
+    required this.widthConsumedText,
+    required this.widthWhitespaces,
+    required this.softHyphen,
+    required this.breakIndex,
+  });
+
+  final int whitespaceStart;
+  final int whitespaceEnd;
+  final int newlineEnd;
+  final double widthConsumedText;
+  final double widthWhitespaces;
+  final SoftHyphen? softHyphen;
+  final int breakIndex;
 }
