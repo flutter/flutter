@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -86,6 +87,56 @@ void main() {
       );
 
       expect(client2.currentTextEditingValue, text2);
+    });
+
+    test('updateEditingStateWithTag routes autofill to the last connection only on web', () async {
+      // A browser password manager can autofill a field in the brief window after
+      // the text input connection is torn down (so TextInput's _currentConnection is
+      // null) but before it is re-established. On the web the value must still reach
+      // the client, routed through the last connection; on other platforms the
+      // fallback is not used.
+      final client1 = FakeAutofillClient(const TextEditingValue(text: 'test1'));
+      final client2 = FakeAutofillClient(const TextEditingValue(text: 'test2'));
+
+      client1.textInputConfiguration = TextInputConfiguration(
+        autofillConfiguration: AutofillConfiguration(
+          uniqueIdentifier: client1.autofillId,
+          autofillHints: const <String>['client1'],
+          currentEditingValue: client1.currentTextEditingValue,
+        ),
+      );
+      client2.textInputConfiguration = TextInputConfiguration(
+        autofillConfiguration: AutofillConfiguration(
+          uniqueIdentifier: client2.autofillId,
+          autofillHints: const <String>['client2'],
+          currentEditingValue: client2.currentTextEditingValue,
+        ),
+      );
+
+      scope.register(client1);
+      scope.register(client2);
+      client1.currentAutofillScope = scope;
+      client2.currentAutofillScope = scope;
+
+      final TextInputConnection connection = scope.attach(client1, client1.textInputConfiguration);
+      // Tear the connection down: _currentConnection becomes null.
+      connection.close();
+
+      const filled = TextEditingValue(text: 'filled');
+      await fakeTextChannel.incoming?.call(
+        MethodCall('TextInputClient.updateEditingStateWithTag', <dynamic>[
+          0,
+          <String, dynamic>{client2.autofillId: filled.toJSON()},
+        ]),
+      );
+
+      if (kIsWeb) {
+        expect(client2.currentTextEditingValue, filled);
+      } else {
+        // Native: the last-connection fallback is not used, so the value is dropped
+        // and the client keeps its original editing state.
+        expect(client2.currentTextEditingValue, const TextEditingValue(text: 'test2'));
+      }
     });
   });
 
