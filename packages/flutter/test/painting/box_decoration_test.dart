@@ -66,6 +66,23 @@ void main() {
     expect(identical(BoxDecoration.lerp(decoration, decoration, 0.5), decoration), true);
   });
 
+  test('BoxDecoration.lerp keeps backgroundBlendMode', () {
+    const a = BoxDecoration(color: Color(0xFF000000), backgroundBlendMode: BlendMode.multiply);
+    const b = BoxDecoration(color: Color(0xFFFFFFFF), backgroundBlendMode: BlendMode.screen);
+    expect(BoxDecoration.lerp(a, b, 0.25)!.backgroundBlendMode, BlendMode.multiply);
+    expect(BoxDecoration.lerp(a, b, 0.75)!.backgroundBlendMode, BlendMode.screen);
+    expect(BoxDecoration.lerp(a, null, 0.25)!.backgroundBlendMode, BlendMode.multiply);
+    expect(BoxDecoration.lerp(null, b, 0.75)!.backgroundBlendMode, BlendMode.screen);
+  });
+
+  test('BoxDecoration.scale keeps backgroundBlendMode', () {
+    const decoration = BoxDecoration(
+      color: Color(0xFF000000),
+      backgroundBlendMode: BlendMode.multiply,
+    );
+    expect(decoration.scale(0.5).backgroundBlendMode, BlendMode.multiply);
+  });
+
   test('BoxDecoration.lerp supports custom BoxBorder subclasses', () {
     final BoxDecoration? decoration = BoxDecoration.lerp(
       const BoxDecoration(border: _TestBoxBorder(2.0)),
