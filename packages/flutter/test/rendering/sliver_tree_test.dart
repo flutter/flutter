@@ -642,4 +642,175 @@ void main() {
     expect(rowNeedsPaint('Third'), isFalse);
     expect(rowNeedsPaint('gamma'), isFalse); // Now visible
   });
+
+  testWidgets('TreeSliver treeRowExtentBuilder is not called excessively', (
+    WidgetTester tester,
+  ) async {
+    final calledNodes = <TreeSliverNode<Object?>>[];
+    final tree = <TreeSliverNode<String>>[
+      TreeSliverNode<String>('First'),
+      TreeSliverNode<String>('Second'),
+    ];
+    await tester.pumpWidget(
+      _buildTestWidget(
+        CustomScrollView(
+          slivers: <Widget>[
+            TreeSliver<String>(
+              tree: tree,
+              treeRowExtentBuilder:
+                  (TreeSliverNode<Object?> node, SliverLayoutDimensions dimensions) {
+                    calledNodes.add(node);
+                    return 40.0;
+                  },
+            ),
+          ],
+        ),
+      ),
+    );
+    // In a single layout pass, each visible row is evaluated at most once.
+    expect(calledNodes.length, 2);
+    expect(calledNodes.toSet().length, calledNodes.length);
+
+    final int initialCalls = calledNodes.length;
+    await tester.pump();
+    expect(calledNodes.length, initialCalls);
+  });
+
+  testWidgets('TreeSliver empty tree', (WidgetTester tester) async {
+    final tree = <TreeSliverNode<String>>[];
+    await tester.pumpWidget(
+      _buildTestWidget(CustomScrollView(slivers: <Widget>[TreeSliver<String>(tree: tree)])),
+    );
+    expect(find.byType(CustomScrollView), findsOneWidget);
+    // Should not throw.
+  });
+
+  testWidgets('TreeSliver expand/collapse with mixed row heights', (WidgetTester tester) async {
+    final calledNodes = <TreeSliverNode<Object?>>[];
+    final first = TreeSliverNode<String>(
+      'First',
+      children: <TreeSliverNode<String>>[TreeSliverNode<String>('alpha')],
+    );
+    final second = TreeSliverNode<String>(
+      'Second',
+      expanded: true,
+      children: <TreeSliverNode<String>>[TreeSliverNode<String>('beta')],
+    );
+    final tree = <TreeSliverNode<String>>[first, second];
+
+    await tester.pumpWidget(
+      _buildTestWidget(
+        CustomScrollView(
+          slivers: <Widget>[
+            TreeSliver<String>(
+              tree: tree,
+              toggleAnimationStyle: AnimationStyle.noAnimation,
+              treeRowExtentBuilder:
+                  (TreeSliverNode<Object?> node, SliverLayoutDimensions dimensions) {
+                    calledNodes.add(node);
+                    return switch (node.content! as String) {
+                      'First' => 50.0,
+                      'alpha' => 70.0,
+                      'Second' => 60.0,
+                      'beta' => 40.0,
+                      _ => 50.0,
+                    };
+                  },
+            ),
+          ],
+        ),
+      ),
+    );
+    final RenderTreeSliver renderSliver = tester.renderObject<RenderTreeSliver>(
+      find.byType(TreeSliver<String>),
+    );
+
+    // Initial state: 'First' is collapsed, 'Second' is expanded ('beta' is visible).
+    expect(find.text('First'), findsOneWidget);
+    expect(find.text('Second'), findsOneWidget);
+    expect(find.text('beta'), findsOneWidget);
+    expect(find.text('alpha'), findsNothing);
+
+    expect(renderSliver.indexToLayoutOffset(0.0, 0), 0.0);
+    expect(renderSliver.indexToLayoutOffset(0.0, 1), 50.0);
+    expect(renderSliver.indexToLayoutOffset(0.0, 2), 110.0);
+    expect(renderSliver.computeMaxScrollOffset(renderSliver.constraints, 0.0), 150.0);
+    expect(calledNodes.toSet().length, calledNodes.length);
+
+    // Expand 'First'.
+    calledNodes.clear();
+    await tester.tap(find.byType(Icon).first);
+    await tester.pump();
+
+    expect(find.text('First'), findsOneWidget);
+    expect(find.text('alpha'), findsOneWidget);
+    expect(find.text('Second'), findsOneWidget);
+    expect(find.text('beta'), findsOneWidget);
+
+    expect(renderSliver.indexToLayoutOffset(0.0, 0), 0.0);
+    expect(renderSliver.indexToLayoutOffset(0.0, 1), 50.0);
+    expect(renderSliver.indexToLayoutOffset(0.0, 2), 120.0);
+    expect(renderSliver.indexToLayoutOffset(0.0, 3), 180.0);
+    expect(renderSliver.computeMaxScrollOffset(renderSliver.constraints, 0.0), 220.0);
+    expect(calledNodes.toSet().length, calledNodes.length);
+
+    // Collapse 'Second'.
+    calledNodes.clear();
+    await tester.tap(find.byType(Icon).last);
+    await tester.pump();
+
+    expect(find.text('First'), findsOneWidget);
+    expect(find.text('alpha'), findsOneWidget);
+    expect(find.text('Second'), findsOneWidget);
+    expect(find.text('beta'), findsNothing);
+
+    expect(renderSliver.indexToLayoutOffset(0.0, 0), 0.0);
+    expect(renderSliver.indexToLayoutOffset(0.0, 1), 50.0);
+    expect(renderSliver.indexToLayoutOffset(0.0, 2), 120.0);
+    expect(renderSliver.computeMaxScrollOffset(renderSliver.constraints, 0.0), 180.0);
+    expect(calledNodes.toSet().length, calledNodes.length);
+  });
+
+  testWidgets('TreeSliver scrolls and asserts per-layout call uniqueness', (
+    WidgetTester tester,
+  ) async {
+    final calledNodes = <TreeSliverNode<Object?>>[];
+    final tree = List<TreeSliverNode<String>>.generate(
+      50,
+      (int index) => TreeSliverNode<String>('Node $index'),
+    );
+    final controller = ScrollController();
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(
+      _buildTestWidget(
+        CustomScrollView(
+          controller: controller,
+          slivers: <Widget>[
+            TreeSliver<String>(
+              tree: tree,
+              treeRowExtentBuilder:
+                  (TreeSliverNode<Object?> node, SliverLayoutDimensions dimensions) {
+                    calledNodes.add(node);
+                    return 40.0;
+                  },
+            ),
+          ],
+        ),
+      ),
+    );
+
+    // Initial layout pass: each evaluated node is called at most once.
+    expect(calledNodes.toSet().length, calledNodes.length);
+    expect(calledNodes.isNotEmpty, isTrue);
+
+    // Scroll the tree sliver.
+    calledNodes.clear();
+    controller.jumpTo(200.0);
+    await tester.pump();
+
+    // Within this layout pass during scrolling, each evaluated node is called at most once.
+    expect(calledNodes.toSet().length, calledNodes.length);
+    expect(calledNodes.isNotEmpty, isTrue);
+  });
 }

@@ -996,6 +996,40 @@ void main() {
     expect(find.text('Item 5'), findsNothing);
   });
 
+  testWidgets('itemExtentBuilder memoizes terminal index when itemCount is null', (
+    WidgetTester tester,
+  ) async {
+    final calledIndices = <int>[];
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: ListView.builder(
+          itemExtentBuilder: (int index, SliverLayoutDimensions dimensions) {
+            calledIndices.add(index);
+            if (index >= 5) {
+              return null;
+            }
+            return 50.0;
+          },
+          itemBuilder: (BuildContext context, int index) {
+            if (index >= 5) {
+              return null;
+            }
+            return SizedBox(height: 50.0, child: Text('Item $index'));
+          },
+        ),
+      ),
+    );
+
+    expect(find.text('Item 0'), findsOneWidget);
+    expect(find.text('Item 4'), findsOneWidget);
+    expect(find.text('Item 5'), findsNothing);
+
+    // Each evaluated index, including the terminal index 5, must be called at most once during layout.
+    expect(calledIndices.toSet().length, calledIndices.length);
+    expect(calledIndices.contains(5), isTrue);
+  });
+
   // Regression test for https://github.com/flutter/flutter/pull/131393
   testWidgets('itemExtentBuilder test', (WidgetTester tester) async {
     final controller = ScrollController();
