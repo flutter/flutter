@@ -2539,10 +2539,10 @@ set, per host, with what each takes from a warm cache on a 24-core machine:
 
 | Host | Command | What it covers | Time |
 |---|---|---|---|
-| Linux | `bazel test //engine/src/flutter/...` | the engine: C++ suites, Dart tests under flutter_tester, the web engine's Chrome and Firefox suites, the packages' tests | 1 h 10 – 1 h 45 (2 h 15 when a wrapped GN build reruns) |
-| Linux | `bazel test //:framework_tests //:tool_tests //:dart_tests` | the framework's 1,644 files, the tool's six shards (general, commands, integration, desktop, web, hermetic), the Dart packages' | 75 min for the three (2,550 tests, 10-27); 75 min for the tool's and the Dart packages' alone when the framework's are cached |
-| Linux | `bazel test //:android_tool_tests` | `flutter build apk\|appbundle\|aar` through the tool against the build's Android engine; Gradle from the network | 50 min (the first run builds the Android engine for three CPUs in three modes) |
-| Linux | `bazel test --config=android_debug_test //engine/src/flutter/ci/builders:android_debug_test_tests` | the embedding's 87 Robolectric classes, under an Android configuration | 45 min (the Android debug engine's build included) |
+| Linux | `bazel test //engine/src/flutter/...` | the engine: C++ suites, Dart tests under flutter_tester, the web engine's Chrome and Firefox suites, the packages' tests | 1 h 10 – 1 h 45 (2 h 15 when a wrapped GN build reruns; 7 h 50 at 462 with every C++ object recompiled and both wrapped builds rerun per configuration, 1,427 tests after the roll) |
+| Linux | `bazel test //:framework_tests //:tool_tests //:dart_tests` | the framework's 1,644 files, the tool's six shards (general, commands, integration, desktop, web, hermetic), the Dart packages' | 75 min for the three (2,550 tests, 10-27; 3 h 14 at 463 with the engine's profile and release builds for the facsimile); 78 min for the tool's and the Dart packages' alone when the framework's are cached (509 tests at 464) |
+| Linux | `bazel test //:android_tool_tests` | `flutter build apk\|appbundle\|aar` through the tool against the build's Android engine; Gradle from the network | 50 min (the first run builds the Android engine for three CPUs in three modes); 72 min at 464 |
+| Linux | `bazel test --config=android_debug_test //engine/src/flutter/ci/builders:android_debug_test_tests` | the embedding's 87 Robolectric classes, under an Android configuration | 45 min (the Android debug engine's build included); 36 min at 464 |
 | Mac | `bazel test //engine/src/flutter/...` | the engine on a Mac: the macOS shell and its suites, the Metal backends, the golden suite, Chrome's web suites | 2 h 20 |
 | Mac | `bazel test //:framework_tests //:tool_tests //:dart_tests` | as Linux's, on a Mac | 67 min |
 | Mac | `bazel test //:apple_tool_tests` | `flutter build macos\|ios`, SwiftPM and the Xcode migrations through the tool against the universal frameworks | 15 min once the frameworks are built |
@@ -2557,7 +2557,14 @@ suites it declares on both hosts; a change to the engine's rules the
 wildcard on both; a change to the Android toolchains, the NDK overlay, the
 Dart wrap or the Android shell's file the eighth besides the Linux Android
 builds. `bazel query 'tests(<suite>)' | wc -l` says what a suite
-holds on this host before a run.
+holds on this host before a run. Disk: the framework tests' kernels and the
+engine's extra configurations write on the order of a gigabyte a minute at
+full load, and the home-directory disk cache (`--disk_cache` in the root
+`.bazelrc`, collected to its cap by the idle server) grows with them -- the
+round of 10-31 ran the root suites with `--disk_cache=` after the cache had
+regrown to 56 GB between two runs with no idle time between them; a build
+with `--experimental_disk_cache_gc_max_size=10G
+--experimental_disk_cache_gc_idle_delay=10s` collects it on demand.
 
 After a rebase or a roll, before any of them, the generated files: `DEPS`
 feeds `deps.lock.bzl` (`gen_deps.dart --check` in `tools/bazel_tools`),
