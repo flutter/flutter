@@ -182,6 +182,11 @@ void SetSwapchainImageSize(ISize size);
 std::vector<VkImageMemoryBarrier>& GetImageMemoryBarriers(
     VkCommandBuffer buffer);
 
+/// @brief Returns the dstStageMask of the `vkCmdPipelineBarrier` call that
+///        recorded each entry of `GetImageMemoryBarriers`, in the same order.
+const std::vector<VkPipelineStageFlags>& GetImageMemoryBarrierDstStages(
+    VkCommandBuffer buffer);
+
 /// @brief Returns the viewports passed to `vkCmdSetViewport` calls on the
 ///        given command buffer, in call order.
 const std::vector<VkViewport>& GetRecordedViewports(VkCommandBuffer buffer);

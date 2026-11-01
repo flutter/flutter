@@ -4,6 +4,7 @@
 
 #include "flutter/testing/testing.h"
 #include "fml/macros.h"
+#include "impeller/core/device_buffer_descriptor.h"
 #include "impeller/renderer/backend/vulkan/blit_pass_vk.h"
 #include "impeller/renderer/backend/vulkan/command_buffer_vk.h"
 #include "impeller/renderer/backend/vulkan/test/mock_vulkan.h"
@@ -52,6 +53,50 @@ TEST(BlitPassVKTest, MipmapGenerationTransitionsAllLevelsCorrectly) {
   EXPECT_EQ(barriers[7].newLayout, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
   EXPECT_EQ(barriers[7].subresourceRange.baseMipLevel, 0u);
   EXPECT_EQ(barriers[7].subresourceRange.levelCount, 6u);
+}
+
+TEST(BlitPassVKTest, CopyTextureToBufferBarrierTargetsTheCopy) {
+  auto context = testing::MockVulkanContextBuilder().Build();
+  ASSERT_TRUE(context->IsValid());
+
+  auto cmd_buffer = context->CreateCommandBuffer();
+  ASSERT_TRUE(cmd_buffer);
+  auto blit_pass = cmd_buffer->CreateBlitPass();
+  ASSERT_TRUE(blit_pass);
+
+  auto vk_cmd_buffer = static_cast<CommandBufferVK*>(cmd_buffer.get());
+
+  TextureDescriptor desc;
+  desc.size = ISize(16, 16);
+  desc.format = PixelFormat::kR8G8B8A8UNormInt;
+  auto texture = context->GetResourceAllocator()->CreateTexture(desc);
+  ASSERT_TRUE(texture);
+  auto buffer =
+      context->GetResourceAllocator()->CreateBuffer(DeviceBufferDescriptor{
+          .storage_mode = StorageMode::kHostVisible, .size = 16 * 16 * 4});
+  ASSERT_TRUE(buffer);
+
+  ASSERT_TRUE(blit_pass->AddCopy(texture, buffer, IRect::MakeXYWH(0, 0, 16, 16),
+                                 0, "TestCopy"));
+
+  auto vk_buffer = vk_cmd_buffer->GetCommandBuffer();
+  auto& barriers = testing::GetImageMemoryBarriers(vk_buffer);
+  auto& dst_stages = testing::GetImageMemoryBarrierDstStages(vk_buffer);
+  ASSERT_FALSE(barriers.empty());
+  ASSERT_EQ(barriers.size(), dst_stages.size());
+
+  // The barrier before vkCmdCopyImageToBuffer must order the copy, a transfer
+  // read, after the transition to TransferSrc. Shader stages don't.
+  size_t index = 0;
+  while (index < barriers.size() &&
+         barriers[index].newLayout != VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL) {
+    index++;
+  }
+  ASSERT_LT(index, barriers.size());
+  EXPECT_EQ(barriers[index].dstAccessMask,
+            static_cast<VkAccessFlags>(VK_ACCESS_TRANSFER_READ_BIT));
+  EXPECT_EQ(dst_stages[index],
+            static_cast<VkPipelineStageFlags>(VK_PIPELINE_STAGE_TRANSFER_BIT));
 }
 
 }  // namespace impeller
