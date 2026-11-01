@@ -1183,6 +1183,11 @@ abstract class ImageSamplerSlot {
 }
 
 abstract class FragmentShader implements Shader {
+  @Deprecated(
+    'Use getUniformFloat, getUniformVec2, getUniformVec3, getUniformVec4, or a related method '
+    'to set uniforms by name instead. '
+    'This feature was deprecated after v3.51.0-0.1.pre.',
+  )
   void setFloat(int index, double value);
 
   void setImageSampler(int index, Image image, {FilterQuality filterQuality = FilterQuality.none});
