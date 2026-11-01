@@ -138,6 +138,8 @@ static void setup_shader(FlCompositorOpenGLShader* self) {
   glBindBuffer(GL_ARRAY_BUFFER, self->vertex_buffer);
   glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_data), vertex_data,
                GL_STATIC_DRAW);
+
+  fl_opengl_manager_clear_current(self->opengl_manager);
 }
 
 static void fl_compositor_opengl_shader_dispose(GObject* object) {
@@ -151,6 +153,7 @@ static void fl_compositor_opengl_shader_dispose(GObject* object) {
       if (self->vertex_buffer != 0) {
         glDeleteBuffers(1, &self->vertex_buffer);
       }
+      fl_opengl_manager_clear_current(self->opengl_manager);
     } else {
       g_warning(
           "Failed to cleanup compositor shaders, unable to make OpenGL context "
