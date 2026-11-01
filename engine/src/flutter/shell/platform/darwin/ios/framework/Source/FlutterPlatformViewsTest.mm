@@ -502,6 +502,87 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
   XCTAssertTrue([childClippingView pointInside:CGPointMake(199, 199) withEvent:nil]);
 }
 
+// A clip only ever shrinks what a platform view shows, so it must only ever shrink what it can be
+// touched through. See https://github.com/flutter/flutter/issues/195738
+- (void)testChildClippingViewHitTestsRespectClipRect {
+  ChildClippingView* childClippingView =
+      [[ChildClippingView alloc] initWithFrame:CGRectMake(0, 0, 500, 500)];
+  UIView* childView = [[UIView alloc] initWithFrame:CGRectMake(100, 100, 100, 100)];
+  [childClippingView addSubview:childView];
+
+  // A screen scale of 1 keeps the clip in the same units as the frames above.
+  FlutterClippingMaskView* maskView =
+      [[FlutterClippingMaskView alloc] initWithFrame:CGRectMake(0, 0, 500, 500) screenScale:1];
+  [maskView clipRect:flutter::DlRect::MakeXYWH(100, 100, 50, 50) matrix:flutter::DlMatrix()];
+  childClippingView.maskView = maskView;
+
+  XCTAssertTrue([childClippingView pointInside:CGPointMake(105, 105) withEvent:nil]);
+  XCTAssertTrue([childClippingView pointInside:CGPointMake(120, 120) withEvent:nil]);
+  XCTAssertTrue([childClippingView pointInside:CGPointMake(145, 145) withEvent:nil]);
+
+  // Inside the platform view, but the clip removed it from the screen.
+  XCTAssertFalse([childClippingView pointInside:CGPointMake(160, 120) withEvent:nil]);
+  XCTAssertFalse([childClippingView pointInside:CGPointMake(120, 160) withEvent:nil]);
+  XCTAssertFalse([childClippingView pointInside:CGPointMake(180, 180) withEvent:nil]);
+
+  XCTAssertFalse([childClippingView pointInside:CGPointMake(50, 50) withEvent:nil]);
+}
+
+- (void)testChildClippingViewHitTestsRespectClipRRectCorners {
+  ChildClippingView* childClippingView =
+      [[ChildClippingView alloc] initWithFrame:CGRectMake(0, 0, 200, 200)];
+  UIView* childView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 200, 200)];
+  [childClippingView addSubview:childView];
+
+  FlutterClippingMaskView* maskView =
+      [[FlutterClippingMaskView alloc] initWithFrame:CGRectMake(0, 0, 200, 200) screenScale:1];
+  flutter::DlRoundRect clipRRect =
+      flutter::DlRoundRect::MakeRectXY(flutter::DlRect::MakeXYWH(0, 0, 200, 200), 50, 50);
+  [maskView clipRRect:clipRRect matrix:flutter::DlMatrix()];
+  childClippingView.maskView = maskView;
+
+  XCTAssertTrue([childClippingView pointInside:CGPointMake(100, 100) withEvent:nil]);
+  XCTAssertFalse([childClippingView pointInside:CGPointMake(2, 2) withEvent:nil]);
+  XCTAssertFalse([childClippingView pointInside:CGPointMake(198, 2) withEvent:nil]);
+  XCTAssertFalse([childClippingView pointInside:CGPointMake(2, 198) withEvent:nil]);
+  XCTAssertFalse([childClippingView pointInside:CGPointMake(198, 198) withEvent:nil]);
+}
+
+// The scenario of https://github.com/flutter/flutter/issues/195738: a platform view still laid out
+// inside a collapsed panel that clipped all of it away, so it has no pixels to be touched through.
+- (void)testChildClippingViewIsNotHitTestedWhenTheClipRemovesAllOfIt {
+  // The platform view is laid out at y = 150..350 on screen, so this is the frame
+  // |compositeView:withParams:| gives the ChildClippingView.
+  ChildClippingView* childClippingView =
+      [[ChildClippingView alloc] initWithFrame:CGRectMake(0, 150, 500, 200)];
+  UIView* childView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 500, 200)];
+  [childClippingView addSubview:childView];
+
+  // The panel clips everything below y = 110. |clipViewSetMaskView:| offsets the maskView by the
+  // origin of the ChildClippingView, so that the clips stay in screen coordinates.
+  FlutterClippingMaskView* maskView =
+      [[FlutterClippingMaskView alloc] initWithFrame:CGRectMake(0, -150, 500, 500) screenScale:1];
+  [maskView clipRect:flutter::DlRect::MakeXYWH(0, 0, 500, 110) matrix:flutter::DlMatrix()];
+  childClippingView.maskView = maskView;
+
+  // Points are in the coordinate space of the ChildClippingView, so y = 0 is y = 150 on screen.
+  XCTAssertFalse([childClippingView pointInside:CGPointMake(250, 0) withEvent:nil]);
+  XCTAssertFalse([childClippingView pointInside:CGPointMake(250, 50) withEvent:nil]);
+  XCTAssertFalse([childClippingView pointInside:CGPointMake(250, 199) withEvent:nil]);
+}
+
+// Without a clip there is no maskView, and hit testing is unchanged.
+- (void)testChildClippingViewHitTestsAreUnchangedWithoutAMaskView {
+  ChildClippingView* childClippingView =
+      [[ChildClippingView alloc] initWithFrame:CGRectMake(0, 0, 500, 500)];
+  UIView* childView = [[UIView alloc] initWithFrame:CGRectMake(100, 100, 100, 100)];
+  [childClippingView addSubview:childView];
+
+  XCTAssertNil(childClippingView.maskView);
+  XCTAssertTrue([childClippingView pointInside:CGPointMake(150, 150) withEvent:nil]);
+  XCTAssertFalse([childClippingView pointInside:CGPointMake(50, 50) withEvent:nil]);
+}
+
 - (void)testReleasesBackdropFilterSubviewsOnChildClippingViewDealloc {
   __weak NSMutableArray<UIVisualEffectView*>* weakBackdropFilterSubviews = nil;
   __weak UIVisualEffectView* weakVisualEffectView1 = nil;
