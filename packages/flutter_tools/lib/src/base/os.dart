@@ -366,17 +366,19 @@ class _LinuxUtils extends _PosixUtils {
     final List<String> osReleaseSplit = osRelease.split('\n');
     for (var entry in osReleaseSplit) {
       entry = entry.trim();
-      final List<String> entryKeyValuePair = entry.split('=');
-      if (entryKeyValuePair[0] == key) {
-        final String value = entryKeyValuePair[1];
-        // Remove quotes from either end of the value if they exist
+      final int separator = entry.indexOf('=');
+      if (separator == -1 || entry.substring(0, separator) != key) {
+        continue;
+      }
+      final String value = entry.substring(separator + 1);
+      // Remove matching quotes from either end of the value if they exist.
+      if (value.length >= 2) {
         final String quote = value[0];
-        if (quote == "'" || quote == '"') {
-          return value.substring(0, value.length - 1).substring(1);
-        } else {
-          return value;
+        if ((quote == "'" || quote == '"') && value.endsWith(quote)) {
+          return value.substring(1, value.length - 1);
         }
       }
+      return value;
     }
     return '';
   }
