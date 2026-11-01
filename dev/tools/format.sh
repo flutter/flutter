@@ -23,7 +23,7 @@ function follow_links() (
     cd -P -- "$(dirname -- "$file")"
     file="$PWD/$(basename -- "$file")"
   done
-  echo "$file"
+  printf '%s\n' "$file"
 )
 
 SCRIPT_DIR=$(follow_links "$(dirname -- "${BASH_SOURCE[0]}")")
