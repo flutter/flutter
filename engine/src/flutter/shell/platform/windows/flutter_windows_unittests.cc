@@ -70,11 +70,21 @@ TEST(WindowsNoFixtureTest, GetTextureRegistrar) {
   properties.assets_path = L"";
   properties.icu_data_path = L"icudtl.dat";
   properties.impeller_switch = DefaultImpeller;
+  // Test engines keep no compiled programs in the user's folders.
+  properties.program_cache_path = L"";
   auto engine = FlutterDesktopEngineCreate(&properties);
   ASSERT_NE(engine, nullptr);
   auto texture_registrar = FlutterDesktopEngineGetTextureRegistrar(engine);
   EXPECT_NE(texture_registrar, nullptr);
   FlutterDesktopEngineDestroy(engine);
+}
+
+// Verify that the engines these tests run keep no program cache, which would
+// write to the user's folder and let later runs skip compiling programs.
+TEST_F(WindowsTest, TestEnginesKeepNoProgramCache) {
+  auto& context = GetContext();
+  WindowsConfigBuilder builder(context);
+  EXPECT_STREQ(builder.GetEngineProperties().program_cache_path, L"");
 }
 
 // Verify we can successfully launch main().
