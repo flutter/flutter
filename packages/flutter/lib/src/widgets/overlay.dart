@@ -1083,6 +1083,7 @@ mixin _RenderTheaterMixin on RenderBox {
 
   Iterable<RenderBox> _childrenInPaintOrder();
   Iterable<RenderBox> _childrenInHitTestOrder();
+  Iterable<RenderBox> _childrenInBaselineOrder() => _childrenInPaintOrder();
 
   @override
   void setupParentData(RenderBox child) {
@@ -1095,12 +1096,7 @@ mixin _RenderTheaterMixin on RenderBox {
   double? computeDistanceToActualBaseline(TextBaseline baseline) {
     assert(!debugNeedsLayout);
     BaselineOffset baselineOffset = BaselineOffset.noBaseline;
-    for (final RenderBox child in _childrenInPaintOrder()) {
-      // Portal children are laid out after the theater and cannot contribute
-      // to its baseline during layout.
-      if (child is _RenderDeferredLayoutBox) {
-        continue;
-      }
+    for (final RenderBox child in _childrenInBaselineOrder()) {
       assert(!child.debugNeedsLayout);
       final childParentData = child.parentData! as StackParentData;
       baselineOffset = baselineOffset.minOf(
@@ -1418,11 +1414,7 @@ class _RenderTheater extends RenderBox
     final Alignment alignment = theater._resolvedAlignment;
 
     BaselineOffset baselineOffset = BaselineOffset.noBaseline;
-    for (final RenderBox child in _childrenInPaintOrder()) {
-      // Match the actual baseline traversal by excluding portal children.
-      if (child is _RenderDeferredLayoutBox) {
-        continue;
-      }
+    for (final RenderBox child in _childrenInBaselineOrder()) {
       baselineOffset = baselineOffset.minOf(
         BaselineOffset(
           _RenderTheaterMixin.baselineForChild(
@@ -1444,6 +1436,18 @@ class _RenderTheater extends RenderBox
       return constraints.biggest;
     }
     return _findSizeDeterminingChild().getDryLayout(constraints);
+  }
+
+  // Like intrinsic dimensions, baselines only depend on ordinary entry children.
+  // Portal children are laid out after the theater and its ancestors.
+  @override
+  // The following uses sync* because baseline queries do not need to allocate a list.
+  Iterable<RenderBox> _childrenInBaselineOrder() sync* {
+    RenderBox? child = _firstOnstageChild;
+    while (child != null) {
+      yield child;
+      child = (child.parentData! as _TheaterParentData).nextSibling;
+    }
   }
 
   @override
@@ -1517,8 +1521,7 @@ class _RenderTheater extends RenderBox
       // Already-sized children must still receive updated theater constraints.
       if (child is _RenderDeferredLayoutBox &&
           !child.hasSize &&
-          (!child._layoutSurrogate.hasSize ||
-              !child._layoutSurrogate._isReadyForInitialDeferredLayout)) {
+          (!child._layoutSurrogate.hasSize || child._layoutSurrogate.needsLayout)) {
         continue;
       }
       if (child != sizeDeterminingChild) {
@@ -1854,6 +1857,9 @@ enum OverlayChildLocation {
 /// overlay child is showing. The overlay child is rendered by the [Overlay]
 /// ancestor, not by the widget itself. This allows the overlay child to float
 /// above other widgets, independent of its position in the widget tree.
+///
+/// The overlay child does not contribute to the target [Overlay]'s intrinsic
+/// dimensions or baseline.
 ///
 /// When [OverlayPortalController.hide] is called, the widget built using
 /// [overlayChildBuilder] will be removed from the widget tree the next time the
@@ -2783,14 +2789,16 @@ class _RenderLayoutSurrogateProxyBox extends RenderProxyBox {
   // The theater must not initiate a deferred child's first layout while its
   // surrogate has not been laid out (for example, kept alive offscreen or in an
   // offstage entry).
-  // Track successful local layout separately from RenderObject's dirty flag,
-  // which is cleared even when performLayout throws. A failed layout must not make
-  // the surrogate eligible to initiate deferred layout.
-  bool _isReadyForInitialDeferredLayout = false;
+  bool get needsLayout {
+    assert(debugNeedsLayout == _needsLayout);
+    return _needsLayout;
+  }
+
+  bool _needsLayout = true;
 
   @override
   void markNeedsLayout() {
-    _isReadyForInitialDeferredLayout = false;
+    _needsLayout = true;
     super.markNeedsLayout();
   }
 
@@ -2844,10 +2852,8 @@ class _RenderLayoutSurrogateProxyBox extends RenderProxyBox {
 
   @override
   void performLayout() {
-    // Changed constraints can start layout without calling markNeedsLayout.
-    _isReadyForInitialDeferredLayout = false;
+    _needsLayout = false;
     super.performLayout();
-    _isReadyForInitialDeferredLayout = true;
     final _RenderDeferredLayoutBox? deferredChild = _deferredLayoutChild;
     if (deferredChild == null) {
       return;
