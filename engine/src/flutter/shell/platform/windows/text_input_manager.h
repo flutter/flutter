@@ -72,7 +72,9 @@ class TextInputManager {
   //
   // This may be called in response to WM_IME_COMPOSITION events where the
   // GCS_RESULTSTR flag is set in the lparam. This contains the final string to
-  // be committed in the composing region when composition is ended.
+  // be committed in the composing region when composition is ended. Some IMEs
+  // send this event after WM_IME_ENDCOMPOSITION, so the string is readable
+  // even when no IME window is active.
   virtual std::optional<std::u16string> GetResultString() const;
 
   /// Aborts IME composing.
@@ -80,6 +82,11 @@ class TextInputManager {
   /// Aborts composing, closes the candidates window, and clears the contents
   /// of the composing string.
   void AbortComposing();
+
+ protected:
+  // Reads the composing or result string, selected by |type|, from the IMM
+  // context of the window.
+  virtual std::optional<std::u16string> ReadImmString(int type) const;
 
  private:
   // Returns either the composing string or result string based on the value of
