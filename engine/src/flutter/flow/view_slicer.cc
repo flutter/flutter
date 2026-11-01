@@ -15,7 +15,8 @@ std::unordered_map<int64_t, DlRect> SliceViews(
     const std::vector<int64_t>& composition_order,
     const std::unordered_map<int64_t, std::unique_ptr<EmbedderViewSlice>>&
         slices,
-    const std::unordered_map<int64_t, DlRect>& view_rects) {
+    const std::unordered_map<int64_t, DlRect>& view_rects,
+    const std::unordered_map<int64_t, DlRect>& extra_overlay_rects) {
   std::unordered_map<int64_t, DlRect> overlay_layers;
 
   auto current_frame_view_count = composition_order.size();
@@ -105,6 +106,11 @@ std::unordered_map<int64_t, DlRect> SliceViews(
         // bounds - if the above implementation ever changes - so we check it.
         full_joined_rect = full_joined_rect.Union(partial_joined_rect);
       }
+    }
+
+    auto extra = extra_overlay_rects.find(view_id);
+    if (extra != extra_overlay_rects.end()) {
+      full_joined_rect = full_joined_rect.Union(extra->second);
     }
 
     if (!full_joined_rect.IsEmpty()) {

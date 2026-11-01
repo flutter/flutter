@@ -89,6 +89,18 @@ class NativeDriverSupportPlugin :
                 val versionMap = mapOf("version" to Build.VERSION.SDK_INT)
                 result.success(versionMap)
             }
+            "is_cross_window_blur_enabled" -> {
+                // SurfaceFlinger blur can be disabled per device (ro.surface_flinger.supports_background_blur)
+                // or at runtime (battery saver, developer settings). Tests that depend on native blur
+                // use this to pick the right golden.
+                val enabled =
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                        activity.windowManager.isCrossWindowBlurEnabled
+                    } else {
+                        false
+                    }
+                result.success(mapOf("enabled" to enabled))
+            }
             "is_emulator" -> {
                 val isEmulator =
                     when {

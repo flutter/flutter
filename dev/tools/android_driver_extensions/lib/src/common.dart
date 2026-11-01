@@ -33,6 +33,11 @@ final class NativeCommand extends Command {
   /// Gets whether the device is an emulator.
   static const NativeCommand getIsEmulator = NativeCommand('is_emulator');
 
+  /// Gets whether SurfaceFlinger cross-window blur is enabled on the device.
+  static const NativeCommand getIsCrossWindowBlurEnabled = NativeCommand(
+    'is_cross_window_blur_enabled',
+  );
+
   /// Waits until the first frame is displayed on the native surface.
   static const NativeCommand waitForFirstFrameDisplayed = NativeCommand(
     'wait_for_first_frame_displayed',
