@@ -76,6 +76,36 @@ class _StatefulListViewState extends State<_StatefulListView> {
   }
 }
 
+class _SwapRenderObject extends StatefulWidget {
+  const _SwapRenderObject(this.label, {super.key});
+
+  final String label;
+
+  @override
+  _SwapRenderObjectState createState() => _SwapRenderObjectState();
+}
+
+class _SwapRenderObjectState extends State<_SwapRenderObject> {
+  bool swapped = false;
+
+  void swap() {
+    setState(() {
+      swapped = !swapped;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (swapped) {
+      return ColoredBox(
+        color: const Color(0xFF00FF00),
+        child: SizedBox(height: 100.0, child: Text('${widget.label} swapped')),
+      );
+    }
+    return SizedBox(height: 100.0, child: Text(widget.label));
+  }
+}
+
 void main() {
   // Regression test for https://github.com/flutter/flutter/issues/100451
   testWidgets('ListView.builder respects findChildIndexCallback', (WidgetTester tester) async {
@@ -1220,6 +1250,106 @@ void main() {
       await tester.pump();
       expect(find.text('Item 0'), findsNothing);
       expect(find.text('Item 1'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'ListView without repaint boundaries and semantic indexes allows a child to change its render object',
+    (WidgetTester tester) async {
+      final key = GlobalKey<_SwapRenderObjectState>();
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: ListView(
+            addRepaintBoundaries: false,
+            addSemanticIndexes: false,
+            children: <Widget>[_SwapRenderObject('Item 0', key: key)],
+          ),
+        ),
+      );
+      expect(find.text('Item 0'), findsOneWidget);
+
+      key.currentState!.swap();
+      await tester.pump();
+      expect(find.text('Item 0 swapped'), findsOneWidget);
+      expect(tester.getTopLeft(find.text('Item 0 swapped')), Offset.zero);
+
+      key.currentState!.swap();
+      await tester.pump();
+      expect(find.text('Item 0'), findsOneWidget);
+      expect(tester.getTopLeft(find.text('Item 0')), Offset.zero);
+    },
+  );
+
+  testWidgets(
+    'ListView without repaint boundaries and semantic indexes keeps child order when a child changes its render object',
+    (WidgetTester tester) async {
+      final keys = List<GlobalKey<_SwapRenderObjectState>>.generate(
+        3,
+        (int index) => GlobalKey<_SwapRenderObjectState>(),
+      );
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: ListView(
+            addRepaintBoundaries: false,
+            addSemanticIndexes: false,
+            children: <Widget>[
+              for (int index = 0; index < 3; index++)
+                _SwapRenderObject('Item $index', key: keys[index]),
+            ],
+          ),
+        ),
+      );
+
+      for (final key in keys) {
+        key.currentState!.swap();
+        await tester.pump();
+      }
+
+      for (var index = 0; index < 3; index++) {
+        expect(tester.getTopLeft(find.text('Item $index swapped')), Offset(0.0, 100.0 * index));
+      }
+    },
+  );
+
+  testWidgets(
+    'ListView without repaint boundaries and semantic indexes allows a kept alive child to change its render object',
+    (WidgetTester tester) async {
+      final key = GlobalKey<_SwapRenderObjectState>();
+      final controller = ScrollController();
+      addTearDown(controller.dispose);
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: ListView(
+            controller: controller,
+            cacheExtent: 0.0,
+            addAutomaticKeepAlives: false,
+            addRepaintBoundaries: false,
+            addSemanticIndexes: false,
+            children: <Widget>[
+              KeepAlive(keepAlive: true, child: _SwapRenderObject('Item 0', key: key)),
+              for (int index = 1; index < 20; index++) _SwapRenderObject('Item $index'),
+            ],
+          ),
+        ),
+      );
+
+      controller.jumpTo(1000.0);
+      await tester.pump();
+      expect(find.text('Item 0'), findsNothing);
+      expect(find.text('Item 0', skipOffstage: false), findsOneWidget);
+
+      key.currentState!.swap();
+      await tester.pump();
+      expect(find.text('Item 0 swapped'), findsNothing);
+      expect(find.text('Item 0 swapped', skipOffstage: false), findsOneWidget);
+
+      controller.jumpTo(0.0);
+      await tester.pump();
+      expect(tester.getTopLeft(find.text('Item 0 swapped')), Offset.zero);
+      expect(tester.getTopLeft(find.text('Item 1')), const Offset(0.0, 100.0));
     },
   );
 }
