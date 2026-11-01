@@ -61,8 +61,10 @@ void main() {
       platform = FakePlatform();
       logger = BufferLogger.test();
       processManager = FakeProcessManager.empty();
+      builder = FakeAndroidBuilder();
       command = AnalyzeCommand(
         allProjectValidators: <ProjectValidator>[],
+        androidBuilder: builder,
         suppressAnalytics: true,
         toolContext: FakeToolContext(
           artifacts: Artifacts.test(),
@@ -75,15 +77,13 @@ void main() {
       runner = createTestCommandRunner(command);
       tempDir = fileSystem.systemTempDirectory.createTempSync('flutter_tools_packages_test.');
       tempDir.childDirectory('android').createSync();
-
-      builder = FakeAndroidBuilder();
     });
 
     testUsingContext('can list build variants', () async {
       builder.variants = <String>['debug', 'release'];
       await runner.run(<String>['analyze', '--android', '--list-build-variants', tempDir.path]);
       expect(logger.statusText, contains('["debug","release"]'));
-    }, overrides: <Type, Generator>{AndroidBuilder: () => builder});
+    });
 
     testUsingContext('throw if provide multiple path', () async {
       final Directory anotherTempDir = fileSystem.systemTempDirectory.createTempSync('another');
@@ -116,7 +116,7 @@ void main() {
       ]);
       expect(builder.outputVariant, buildVariant);
       expect(logger.statusText, contains(builder.outputPath));
-    }, overrides: <Type, Generator>{AndroidBuilder: () => builder});
+    });
 
     testUsingContext('output app link settings throws if no build variant', () async {
       await expectLater(

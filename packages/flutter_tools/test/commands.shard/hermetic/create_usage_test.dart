@@ -225,7 +225,11 @@ void main() {
           processManager: globals.processManager,
           cache: globals.cache,
           flutterVersion: FakeFlutterVersion(),
-          projectFactory: FlutterProjectFactory(fileSystem: globals.fs, logger: globals.logger),
+          projectFactory: FlutterProjectFactory(
+            fileSystem: globals.fs,
+            logger: globals.logger,
+            config: globals.config,
+          ),
         ),
         pub: pub,
       );
