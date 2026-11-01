@@ -1163,6 +1163,15 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
   /// true.
   bool _isPaused = false;
 
+  /// The [TickerMode] values that decide [_isPaused].
+  ///
+  /// This is listened to instead of depending on [TickerMode], so that a
+  /// change does not rebuild the image.
+  ValueListenable<TickerModeData>? _tickerModeNotifier;
+
+  /// The [MediaQueryData.disableAnimations] value that decides [_isPaused].
+  bool _disableAnimations = false;
+
   @override
   void initState() {
     super.initState();
@@ -1174,6 +1183,8 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
   void dispose() {
     assert(_imageStream != null);
     WidgetsBinding.instance.removeObserver(this);
+    _tickerModeNotifier?.removeListener(_updatePaused);
+    _tickerModeNotifier = null;
     _stopListeningToStream();
     _completerHandle?.dispose();
     _scrollAwareContext.dispose();
@@ -1185,16 +1196,37 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
   void didChangeDependencies() {
     _updateInvertColors();
     _resolveImage();
+    _disableAnimations = MediaQuery.maybeDisableAnimationsOf(context) ?? false;
+    _updateTickerModeNotifier();
+    _updatePaused();
+    super.didChangeDependencies();
+  }
 
-    _isPaused = !TickerMode.of(context) || (MediaQuery.maybeDisableAnimationsOf(context) ?? false);
+  @override
+  void activate() {
+    super.activate();
+    // We may have a new TickerMode ancestor.
+    _updateTickerModeNotifier();
+    _updatePaused();
+  }
 
+  void _updateTickerModeNotifier() {
+    final ValueListenable<TickerModeData> newNotifier = TickerMode.getValuesNotifier(context);
+    if (newNotifier == _tickerModeNotifier) {
+      return;
+    }
+    _tickerModeNotifier?.removeListener(_updatePaused);
+    newNotifier.addListener(_updatePaused);
+    _tickerModeNotifier = newNotifier;
+  }
+
+  void _updatePaused() {
+    _isPaused = !_tickerModeNotifier!.value.enabled || _disableAnimations;
     if (_isPaused && _frameNumber != null) {
       _stopListeningToStream(keepStreamAlive: true);
     } else {
       _listenToStream();
     }
-
-    super.didChangeDependencies();
   }
 
   @override
@@ -1279,6 +1311,21 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
   }
 
   void _handleImageFrame(ImageInfo imageInfo, bool synchronousCall) {
+    final ImageInfo? currentImageInfo = _imageInfo;
+    if (synchronousCall &&
+        _frameNumber != null &&
+        currentImageInfo != null &&
+        _lastException == null &&
+        _loadingProgress == null &&
+        imageInfo.isCloneOf(currentImageInfo)) {
+      // Listening to the stream again sends the frame that is already shown.
+      // It is not a new frame.
+      imageInfo.dispose();
+      if (_isPaused) {
+        _stopListeningToStream(keepStreamAlive: true);
+      }
+      return;
+    }
     setState(() {
       _replaceImage(info: imageInfo);
       _loadingProgress = null;
