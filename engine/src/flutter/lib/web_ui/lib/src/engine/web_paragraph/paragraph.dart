@@ -427,10 +427,8 @@ class WebTextStyle extends SharedTextStyle implements ui.TextStyle {
       case StyleElements.shadows:
         return shadows != null && shadows!.isNotEmpty;
       case StyleElements.decorations:
-        return decoration != null &&
-            decoration! != ui.TextDecoration.none &&
-            decorationStyle != null &&
-            decorationColor != null;
+        // A missing decoration style or color falls back to a solid line in the text color.
+        return decoration != null && decoration! != ui.TextDecoration.none;
       case StyleElements.text:
         return true;
     }
