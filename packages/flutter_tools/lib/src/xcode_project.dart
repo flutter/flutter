@@ -1328,6 +1328,18 @@ class MacOSProject extends XcodeBasedProject {
   Future<void> ensureReadyForPlatformSpecificTooling({required ToolContext toolContext}) async {
     // TODO(stuartmorgan): Add create-from-template logic here.
     await _updateGeneratedXcodeConfigIfNeeded(toolContext: toolContext);
+    _ensureFileListsExist();
+  }
+
+  /// Xcode refuses to build the Flutter Assemble target when these file lists
+  /// are missing, so create them before the project is opened in Xcode.
+  /// See https://github.com/flutter/flutter/issues/115804.
+  void _ensureFileListsExist() {
+    for (final fileList in <File>[inputFileList, outputFileList]) {
+      if (!fileList.existsSync()) {
+        fileList.createSync(recursive: true);
+      }
+    }
   }
 
   Future<void> _updateGeneratedXcodeConfigIfNeeded({required ToolContext toolContext}) async {
