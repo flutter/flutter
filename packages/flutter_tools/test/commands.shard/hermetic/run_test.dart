@@ -73,6 +73,8 @@ void main() {
       expect(defaultCommand.argParser.options['track-widget-creation']?.hide, isFalse);
       expect(defaultCommand.argParser.options['native-null-assertions']?.hide, isTrue);
       expect(defaultCommand.argParser.options['adb-log-filtering']?.hide, isTrue);
+      expect(defaultCommand.argParser.parse(<String>[])['no-uninstall'], isFalse);
+      expect(defaultCommand.argParser.parse(<String>['--no-uninstall'])['no-uninstall'], isTrue);
 
       final verboseCommand = RunCommand(
         verboseHelp: true,
