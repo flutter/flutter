@@ -297,10 +297,40 @@ static void sync_modifier_if_needed(FlView* self, GdkEvent* event) {
       fl_engine_get_keyboard_manager(self->engine), event_state, event_time);
 }
 
-static void set_scrolling_position(FlView* self, gdouble x, gdouble y) {
-  gint scale_factor = gtk_widget_get_scale_factor(GTK_WIDGET(self));
-  fl_scrolling_manager_set_last_mouse_position(
-      self->scrolling_manager, x * scale_factor, y * scale_factor);
+// Returns the position of the gesture being processed, in physical pixels.
+//
+// The position is taken from the gesture rather than from a position cached
+// from earlier pointer activity. A pinch is frequently the very first
+// interaction with a freshly opened window, so there is no cached position to
+// use; without this the gesture would be delivered to Flutter at (0, 0), and
+// the framework hit-tests a pan/zoom gesture at that position, so it would land
+// on the top-left corner of the window instead of on whatever is under the
+// user's fingers.
+//
+// |sequence| is the sequence the signal was emitted for; touchpad pinches are
+// not associated with a GdkEventSequence, so they pass NULL.
+static void get_gesture_position(GtkGesture* gesture,
+                                 GdkEventSequence* sequence,
+                                 gint scale_factor,
+                                 gdouble* x,
+                                 gdouble* y) {
+  gdouble event_x = 0.0, event_y = 0.0;
+  // GTK retains the event for the duration of the begin/update/end callbacks,
+  // except when the gesture is cancelled, in which case the event has already
+  // been discarded and there is no position to report.
+  const GdkEvent* event = gtk_gesture_get_last_event(gesture, sequence);
+  if (event != nullptr) {
+    if (event->type == GDK_TOUCHPAD_PINCH) {
+      // A touchpad pinch reports the position of the pinch itself.
+      gdk_event_get_coords(event, &event_x, &event_y);
+    } else {
+      // A touchscreen pinch is positioned at the centre of the gesture; the
+      // last updated event is the position of only one of the fingers.
+      gtk_gesture_get_bounding_box_center(gesture, &event_x, &event_y);
+    }
+  }
+  *x = event_x * scale_factor;
+  *y = event_y * scale_factor;
 }
 
 // Signal handler for GtkWidget::button-press-event
@@ -321,7 +351,6 @@ static gboolean button_press_event_cb(FlView* self,
   gdouble x = 0.0, y = 0.0;
   gdk_event_get_coords(event, &x, &y);
 
-  set_scrolling_position(self, x, y);
   sync_modifier_if_needed(self, event);
 
   gint scale_factor = gtk_widget_get_scale_factor(GTK_WIDGET(self));
@@ -345,7 +374,6 @@ static gboolean button_release_event_cb(FlView* self,
   gdouble x = 0.0, y = 0.0;
   gdk_event_get_coords(event, &x, &y);
 
-  set_scrolling_position(self, x, y);
   sync_modifier_if_needed(self, event);
 
   gint scale_factor = gtk_widget_get_scale_factor(GTK_WIDGET(self));
@@ -478,31 +506,66 @@ static gboolean leave_notify_event_cb(FlView* self,
       rotation, pressure);
 }
 
-static void gesture_rotation_begin_cb(FlView* self) {
-  fl_scrolling_manager_handle_rotation_begin(self->scrolling_manager);
+static void gesture_rotation_begin_cb(FlView* self,
+                                      GdkEventSequence* sequence,
+                                      GtkGesture* gesture) {
+  gdouble x = 0.0, y = 0.0;
+  gint scale_factor = gtk_widget_get_scale_factor(GTK_WIDGET(self));
+  get_gesture_position(gesture, sequence, scale_factor, &x, &y);
+  fl_scrolling_manager_handle_rotation_begin(self->scrolling_manager, x, y);
 }
 
 static void gesture_rotation_update_cb(FlView* self,
                                        gdouble rotation,
-                                       gdouble delta) {
-  fl_scrolling_manager_handle_rotation_update(self->scrolling_manager,
+                                       gdouble delta,
+                                       GtkGestureRotate* gesture) {
+  gdouble x = 0.0, y = 0.0;
+  gint scale_factor = gtk_widget_get_scale_factor(GTK_WIDGET(self));
+  get_gesture_position(
+      GTK_GESTURE(gesture),
+      gtk_gesture_get_last_updated_sequence(GTK_GESTURE(gesture)), scale_factor,
+      &x, &y);
+  fl_scrolling_manager_handle_rotation_update(self->scrolling_manager, x, y,
                                               rotation);
 }
 
-static void gesture_rotation_end_cb(FlView* self) {
-  fl_scrolling_manager_handle_rotation_end(self->scrolling_manager);
+static void gesture_rotation_end_cb(FlView* self,
+                                    GdkEventSequence* sequence,
+                                    GtkGesture* gesture) {
+  gdouble x = 0.0, y = 0.0;
+  gint scale_factor = gtk_widget_get_scale_factor(GTK_WIDGET(self));
+  get_gesture_position(gesture, sequence, scale_factor, &x, &y);
+  fl_scrolling_manager_handle_rotation_end(self->scrolling_manager, x, y);
 }
 
-static void gesture_zoom_begin_cb(FlView* self) {
-  fl_scrolling_manager_handle_zoom_begin(self->scrolling_manager);
+static void gesture_zoom_begin_cb(FlView* self,
+                                  GdkEventSequence* sequence,
+                                  GtkGesture* gesture) {
+  gdouble x = 0.0, y = 0.0;
+  gint scale_factor = gtk_widget_get_scale_factor(GTK_WIDGET(self));
+  get_gesture_position(gesture, sequence, scale_factor, &x, &y);
+  fl_scrolling_manager_handle_zoom_begin(self->scrolling_manager, x, y);
 }
 
-static void gesture_zoom_update_cb(FlView* self, gdouble scale) {
-  fl_scrolling_manager_handle_zoom_update(self->scrolling_manager, scale);
+static void gesture_zoom_update_cb(FlView* self,
+                                   gdouble scale,
+                                   GtkGestureZoom* gesture) {
+  gdouble x = 0.0, y = 0.0;
+  gint scale_factor = gtk_widget_get_scale_factor(GTK_WIDGET(self));
+  get_gesture_position(
+      GTK_GESTURE(gesture),
+      gtk_gesture_get_last_updated_sequence(GTK_GESTURE(gesture)), scale_factor,
+      &x, &y);
+  fl_scrolling_manager_handle_zoom_update(self->scrolling_manager, x, y, scale);
 }
 
-static void gesture_zoom_end_cb(FlView* self) {
-  fl_scrolling_manager_handle_zoom_end(self->scrolling_manager);
+static void gesture_zoom_end_cb(FlView* self,
+                                GdkEventSequence* sequence,
+                                GtkGesture* gesture) {
+  gdouble x = 0.0, y = 0.0;
+  gint scale_factor = gtk_widget_get_scale_factor(GTK_WIDGET(self));
+  get_gesture_position(gesture, sequence, scale_factor, &x, &y);
+  fl_scrolling_manager_handle_zoom_end(self->scrolling_manager, x, y);
 }
 
 static void realize_cb(FlView* self) {
