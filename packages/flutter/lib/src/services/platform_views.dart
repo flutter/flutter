@@ -592,6 +592,14 @@ class _AndroidMotionEventConverter {
   }
 
   void updatePointerPositions(PointerEvent event) {
+    // Where a pointer was canceled doesn't matter to the view, so keep its last
+    // position instead of transforming the position of the cancel. The transform
+    // might not be available: the render object of the platform view dispatches
+    // cancels while it's being detached, when it's no longer in the render tree.
+    // See https://github.com/flutter/flutter/issues/193708.
+    if (event is PointerCancelEvent && pointerPositions.containsKey(event.pointer)) {
+      return;
+    }
     final Offset position = pointTransformer(event.position);
     pointerPositions[event.pointer] = AndroidPointerCoords(
       orientation: event.orientation,
