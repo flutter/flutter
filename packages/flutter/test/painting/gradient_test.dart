@@ -791,6 +791,56 @@ void main() {
     );
   });
 
+  test('SweepGradient.lerp preserves negative angles at endpoints', () {
+    const a = SweepGradient(
+      startAngle: -math.pi,
+      endAngle: -math.pi / 2,
+      colors: <Color>[Color(0x33333333), Color(0x66666666)],
+      stops: <double>[0.0, 1.0],
+    );
+    const b = SweepGradient(
+      startAngle: -math.pi / 2,
+      colors: <Color>[Color(0x44444444), Color(0x88888888)],
+      stops: <double>[0.0, 1.0],
+    );
+
+    expect(SweepGradient.lerp(a, b, 0.0), a);
+    expect(SweepGradient.lerp(a, b, 1.0), b);
+  });
+
+  test('SweepGradient.lerp interpolates negative angles', () {
+    const a = SweepGradient(
+      startAngle: -2 * math.pi,
+      endAngle: -math.pi,
+      colors: <Color>[Color(0x33333333), Color(0x66666666)],
+    );
+    const b = SweepGradient(
+      startAngle: -math.pi,
+      endAngle: 0.0,
+      colors: <Color>[Color(0x44444444), Color(0x88888888)],
+    );
+
+    final actual = Gradient.lerp(a, b, 0.5)! as SweepGradient;
+    expect(actual.startAngle, -1.5 * math.pi);
+    expect(actual.endAngle, -math.pi / 2);
+  });
+
+  test('SweepGradient.lerp extrapolates to negative angles', () {
+    const a = SweepGradient(
+      endAngle: math.pi / 2,
+      colors: <Color>[Color(0x33333333), Color(0x66666666)],
+    );
+    const b = SweepGradient(
+      startAngle: math.pi,
+      endAngle: 1.5 * math.pi,
+      colors: <Color>[Color(0x44444444), Color(0x88888888)],
+    );
+
+    final SweepGradient actual = SweepGradient.lerp(a, b, -1.0)!;
+    expect(actual.startAngle, -math.pi);
+    expect(actual.endAngle, -math.pi / 2);
+  });
+
   test('SweepGradient.lerp identical a,b', () {
     expect(SweepGradient.lerp(null, null, 0), null);
     const gradient = SweepGradient(colors: <Color>[Color(0x33333333), Color(0x66666666)]);
