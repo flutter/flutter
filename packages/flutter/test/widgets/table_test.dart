@@ -1096,6 +1096,174 @@ void main() {
     expect(cellWrapperIdAfterUIchanges, cellWrapperId);
   });
 
+  testWidgets('Cell without a TableCell keeps the column offset just once (x axis)', (
+    WidgetTester tester,
+  ) async {
+    final SemanticsHandle semantics = tester.ensureSemantics();
+
+    // https://github.com/flutter/flutter/issues/194546
+    //
+    // None of the cells is wrapped in a TableCell, so RenderTable synthesizes
+    // a wrapper cell semantics node per cell. Composing the wrapper transform
+    // with the child nodes' positions must not shift them by the column's left
+    // offset twice.
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: Align(
+          alignment: Alignment.topLeft,
+          child: Table(
+            columnWidths: const <int, TableColumnWidth>{
+              0: FixedColumnWidth(36),
+              1: FixedColumnWidth(72),
+              2: FixedColumnWidth(80),
+            },
+            children: const <TableRow>[
+              TableRow(children: <Widget>[Text('1'), Text('reps'), Text('load')]),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getTopLeft(find.text('reps')), const Offset(36, 0));
+    expect(tester.getTopLeft(find.text('load')), const Offset(108, 0));
+    final List<String> positions = _tableSemanticsNodePositions(tester);
+    expect(positions, containsAll(<String>['1@0,0', 'reps@36,0', 'load@108,0']));
+    semantics.dispose();
+  });
+
+  testWidgets('Cell without a TableCell keeps the row offset just once (y axis)', (
+    WidgetTester tester,
+  ) async {
+    final SemanticsHandle semantics = tester.ensureSemantics();
+
+    // Same as above, vertical: the short first row places the row below it
+    // wherever its height puts it; semantics must match that regardless.
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: Align(
+          alignment: Alignment.topLeft,
+          child: Table(
+            columnWidths: const <int, TableColumnWidth>{
+              0: FixedColumnWidth(100),
+              1: FixedColumnWidth(100),
+            },
+            children: const <TableRow>[
+              TableRow(children: <Widget>[Text('head'), Text('head2')]),
+              TableRow(children: <Widget>[Text('top of tall row'), SizedBox(height: 200)]),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final Offset laidOutPosition = tester.getTopLeft(find.text('top of tall row'));
+    expect(
+      _tableSemanticsNodePositions(tester),
+      contains('top of tall row@${laidOutPosition.dx.round()},${laidOutPosition.dy.round()}'),
+    );
+    semantics.dispose();
+  });
+
+  testWidgets('Synthesized cell semantics stay put when the table is reassembled', (
+    WidgetTester tester,
+  ) async {
+    final SemanticsHandle semantics = tester.ensureSemantics();
+
+    // https://github.com/flutter/flutter/issues/194546
+    //
+    // assembleSemanticsNode runs again whenever any cell's semantics change.
+    // Positions have to match layout on every pass, not only the first.
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: Align(
+          alignment: Alignment.topLeft,
+          child: Table(
+            columnWidths: const <int, TableColumnWidth>{
+              0: FixedColumnWidth(36),
+              1: FixedColumnWidth(72),
+              2: FixedColumnWidth(80),
+            },
+            children: const <TableRow>[
+              TableRow(children: <Widget>[Text('1'), Text('reps'), Text('load')]),
+              TableRow(
+                children: <Widget>[
+                  Text('below'),
+                  Text('mid'),
+                  SizedBox(height: 40, child: Text('tail')),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    const labels = <String>['1', 'reps', 'load', 'below', 'mid', 'tail'];
+    _expectSemanticsMatchLayout(tester, labels);
+    tester.renderObject(find.text('1')).markNeedsSemanticsUpdate();
+    await tester.pump();
+    _expectSemanticsMatchLayout(tester, labels);
+    tester.renderObject(find.text('1')).markNeedsSemanticsUpdate();
+    await tester.pump();
+    _expectSemanticsMatchLayout(tester, labels);
+    semantics.dispose();
+  });
+
+  testWidgets('TableCell semantics match the laid-out position', (WidgetTester tester) async {
+    final SemanticsHandle semantics = tester.ensureSemantics();
+
+    // A TableCell keeps its own semantics node, so the row must not add the
+    // row offset on top of the child's transform. The short cell in the tall
+    // second row is the case the old bottom-edge heuristic missed, and the
+    // bottom-aligned cell must stay at the bottom of that row.
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: Align(
+          alignment: Alignment.topLeft,
+          child: Table(
+            columnWidths: const <int, TableColumnWidth>{
+              0: FixedColumnWidth(100),
+              1: FixedColumnWidth(120),
+              2: FixedColumnWidth(40),
+            },
+            children: const <TableRow>[
+              TableRow(
+                children: <Widget>[
+                  TableCell(child: Text('head')),
+                  TableCell(child: Text('head2')),
+                  TableCell(child: Text('head3')),
+                ],
+              ),
+              TableRow(
+                children: <Widget>[
+                  TableCell(child: Text('body')),
+                  TableCell(
+                    verticalAlignment: TableCellVerticalAlignment.bottom,
+                    child: Text('bottom'),
+                  ),
+                  SizedBox(height: 200),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      tester.getTopLeft(find.text('bottom')).dy,
+      greaterThan(tester.getTopLeft(find.text('body')).dy),
+    );
+
+    const labels = <String>['head', 'head2', 'head3', 'body', 'bottom'];
+    _expectSemanticsMatchLayout(tester, labels);
+    tester.renderObject(find.text('head')).markNeedsSemanticsUpdate();
+    await tester.pump();
+    _expectSemanticsMatchLayout(tester, labels);
+    semantics.dispose();
+  });
+
   testWidgets('Table does not crash at zero area', (WidgetTester tester) async {
     await tester.pumpWidget(
       TestWidgetsApp(
@@ -1112,4 +1280,41 @@ void main() {
     );
     expect(tester.getSize(find.byType(Table)), Size.zero);
   });
+}
+
+/// Every labelled semantics node reachable from the root, formatted as
+/// `label@x,y`, with its position in logical pixels.
+///
+/// Sibling transforms are composed while descending, so the returned values
+/// are what an assistive technology would compute for the nodes' placement.
+List<String> _tableSemanticsNodePositions(WidgetTester tester) {
+  final out = <String>[];
+  void visit(SemanticsNode node, Matrix4 transform) {
+    final Matrix4 matrix = transform.clone();
+    if (node.transform != null) {
+      matrix.multiply(node.transform!);
+    }
+    final Rect rect = MatrixUtils.transformRect(matrix, node.rect);
+    if (node.label.isNotEmpty) {
+      out.add(
+        '${node.label}@${(rect.left / tester.view.devicePixelRatio).round()},'
+        '${(rect.top / tester.view.devicePixelRatio).round()}',
+      );
+    }
+    node.visitChildren((child) {
+      visit(child, matrix);
+      return true;
+    });
+  }
+
+  visit(tester.binding.pipelineOwner.semanticsOwner!.rootSemanticsNode!, Matrix4.identity());
+  return out;
+}
+
+void _expectSemanticsMatchLayout(WidgetTester tester, List<String> labels) {
+  final List<String> positions = _tableSemanticsNodePositions(tester);
+  for (final label in labels) {
+    final Offset laidOut = tester.getTopLeft(find.text(label));
+    expect(positions, contains('$label@${laidOut.dx.round()},${laidOut.dy.round()}'));
+  }
 }
