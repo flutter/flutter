@@ -240,6 +240,95 @@ void main() {
 
     semantics.dispose();
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/79029
+  testWidgets('Semantics nodes added in assembleSemanticsNode update their merge flag', (
+    WidgetTester tester,
+  ) async {
+    final semantics = SemanticsTester(tester);
+    final GlobalKey paintKey = GlobalKey();
+
+    Widget buildCustomPaint({required String label}) {
+      return CustomPaint(
+        key: paintKey,
+        size: const Size(100.0, 100.0),
+        painter: _PainterWithSemantics(label: label),
+      );
+    }
+
+    // Not merged.
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: buildCustomPaint(label: 'test1'),
+      ),
+    );
+
+    expect(_semanticsChildrenOfCustomPaint(tester).single.isMergedIntoParent, isFalse);
+
+    // Merged. The global key keeps the render object alive, and with it the
+    // semantics nodes that RenderCustomPaint created in assembleSemanticsNode.
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MergeSemantics(child: buildCustomPaint(label: 'test2')),
+      ),
+    );
+
+    expect(tester.takeException(), isNull);
+    expect(_semanticsChildrenOfCustomPaint(tester).single.isMergedIntoParent, isTrue);
+    expect(tester.getSemantics(find.byType(MergeSemantics)).getSemanticsData().label, 'test2');
+
+    // Not merged again.
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: buildCustomPaint(label: 'test3'),
+      ),
+    );
+
+    expect(tester.takeException(), isNull);
+    expect(_semanticsChildrenOfCustomPaint(tester).single.isMergedIntoParent, isFalse);
+
+    semantics.dispose();
+  });
+}
+
+List<SemanticsNode> _semanticsChildrenOfCustomPaint(WidgetTester tester) {
+  final children = <SemanticsNode>[];
+  tester.getSemantics(find.byType(CustomPaint)).visitChildren((SemanticsNode child) {
+    children.add(child);
+    return true;
+  });
+  return children;
+}
+
+class _PainterWithSemantics extends CustomPainter {
+  const _PainterWithSemantics({required this.label});
+
+  final String label;
+
+  @override
+  void paint(Canvas canvas, Size size) {}
+
+  @override
+  SemanticsBuilderCallback get semanticsBuilder {
+    return (Size size) {
+      return <CustomPainterSemantics>[
+        CustomPainterSemantics(
+          key: const ValueKey<int>(1),
+          rect: const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0),
+          properties: SemanticsProperties(label: label, textDirection: TextDirection.ltr),
+        ),
+      ];
+    };
+  }
+
+  @override
+  bool shouldRepaint(_PainterWithSemantics oldDelegate) => oldDelegate.label != label;
+
+  @override
+  bool shouldRebuildSemantics(_PainterWithSemantics oldDelegate) => oldDelegate.label != label;
 }
 
 class TestConfigDelegate extends SingleChildRenderObjectWidget {
