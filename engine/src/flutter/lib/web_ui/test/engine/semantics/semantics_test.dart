@@ -2883,6 +2883,215 @@ void _testIncrementables() {
     );
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/195215.
+  // A disabled slider reports value/increasedValue/decreasedValue but no
+  // increase/decrease actions, so the node does not receive the incrementable
+  // role. When the slider is later enabled without changing those values, the
+  // node gains the incrementable role while its value fields are clean. The
+  // newly created role must still populate the input's value and aria-*
+  // attributes on its first update.
+  test('populates input values when the incrementable role is added to a clean node', () async {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+    addTearDown(() {
+      semantics().semanticsEnabled = false;
+    });
+
+    final tester = SemanticsTester(owner());
+
+    // A disabled slider: value fields are present but there are no
+    // increase/decrease actions, so the node is not incrementable.
+    tester.updateNode(
+      id: 0,
+      flags: const ui.SemanticsFlags(isEnabled: ui.Tristate.isFalse, isSlider: true),
+      value: '50%',
+      increasedValue: '60%',
+      decreasedValue: '40%',
+      transform: Matrix4.identity().toFloat64(),
+      rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+    );
+    tester.apply();
+
+    final SemanticsObject node = owner().debugSemanticsTree![0]!;
+    expect(node.semanticRole?.kind, isNot(EngineSemanticsRole.incrementable));
+    expect(owner().semanticsHost.querySelector('input'), isNull);
+
+    // Enable the slider. Only flags and actions change; the value fields are
+    // identical to the previous update, so they are not marked dirty.
+    tester.updateNode(
+      id: 0,
+      flags: const ui.SemanticsFlags(isEnabled: ui.Tristate.isTrue, isSlider: true),
+      hasIncrease: true,
+      hasDecrease: true,
+      value: '50%',
+      increasedValue: '60%',
+      decreasedValue: '40%',
+      transform: Matrix4.identity().toFloat64(),
+      rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+    );
+    tester.apply();
+
+    expect(node.semanticRole?.kind, EngineSemanticsRole.incrementable);
+    expectSemanticsTree(owner(), '''
+<sem>
+  <input role="slider" aria-valuenow="1" aria-valuetext="50%" aria-valuemax="2" aria-valuemin="0">
+</sem>''');
+
+    final input = owner().semanticsHost.querySelector('input')! as DomHTMLInputElement;
+    expect(input.value, '1');
+    expect(input.getAttribute('aria-valuenow'), '1');
+    expect(input.getAttribute('aria-valuetext'), '50%');
+    expect(input.getAttribute('max'), '2');
+    expect(input.getAttribute('aria-valuemax'), '2');
+    expect(input.getAttribute('min'), '0');
+    expect(input.getAttribute('aria-valuemin'), '0');
+  });
+
+  // A slider that is disabled and then re-enabled with an unchanged value
+  // loses and regains the incrementable role. The newly attached role must
+  // resync the input's range attributes even though the value fields were not
+  // modified between the two updates.
+  test(
+    'resyncs input values when the incrementable role is reattached with clean values',
+    () async {
+      semantics()
+        ..debugOverrideTimestampFunction(() => _testTime)
+        ..semanticsEnabled = true;
+      addTearDown(() {
+        semantics().semanticsEnabled = false;
+      });
+
+      final tester = SemanticsTester(owner());
+
+      // An enabled slider.
+      tester.updateNode(
+        id: 0,
+        flags: const ui.SemanticsFlags(isEnabled: ui.Tristate.isTrue, isSlider: true),
+        hasIncrease: true,
+        hasDecrease: true,
+        value: '50%',
+        increasedValue: '60%',
+        decreasedValue: '40%',
+        transform: Matrix4.identity().toFloat64(),
+        rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+      );
+      tester.apply();
+
+      var input = owner().semanticsHost.querySelector('input')! as DomHTMLInputElement;
+      expect(input.getAttribute('aria-valuetext'), '50%');
+
+      // Disable the slider: the actions are dropped and the node loses the
+      // incrementable role.
+      tester.updateNode(
+        id: 0,
+        flags: const ui.SemanticsFlags(isEnabled: ui.Tristate.isFalse, isSlider: true),
+        value: '50%',
+        increasedValue: '60%',
+        decreasedValue: '40%',
+        transform: Matrix4.identity().toFloat64(),
+        rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+      );
+      tester.apply();
+
+      final SemanticsObject node = owner().debugSemanticsTree![0]!;
+      expect(node.semanticRole?.kind, isNot(EngineSemanticsRole.incrementable));
+      expect(owner().semanticsHost.querySelector('input'), isNull);
+
+      // Re-enable the slider with identical values: the node regains the
+      // incrementable role while its value fields are clean.
+      tester.updateNode(
+        id: 0,
+        flags: const ui.SemanticsFlags(isEnabled: ui.Tristate.isTrue, isSlider: true),
+        hasIncrease: true,
+        hasDecrease: true,
+        value: '50%',
+        increasedValue: '60%',
+        decreasedValue: '40%',
+        transform: Matrix4.identity().toFloat64(),
+        rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+      );
+      tester.apply();
+
+      expect(node.semanticRole?.kind, EngineSemanticsRole.incrementable);
+      expectSemanticsTree(owner(), '''
+<sem>
+  <input role="slider" aria-valuenow="1" aria-valuetext="50%" aria-valuemax="2" aria-valuemin="0">
+</sem>''');
+
+      input = owner().semanticsHost.querySelector('input')! as DomHTMLInputElement;
+      expect(input.value, '1');
+      expect(input.getAttribute('aria-valuenow'), '1');
+      expect(input.getAttribute('aria-valuetext'), '50%');
+      expect(input.getAttribute('max'), '2');
+      expect(input.getAttribute('aria-valuemax'), '2');
+      expect(input.getAttribute('min'), '0');
+      expect(input.getAttribute('aria-valuemin'), '0');
+    },
+  );
+
+  // Same as above, but the role is attached while the engine is in
+  // pointer-events gesture mode. The input stays disabled, but its range
+  // attributes must still be synced so assistive technology can announce the
+  // value once the mode switches back to browser gestures.
+  test(
+    'populates input values when the incrementable role is added in pointer-events mode',
+    () async {
+      semantics()
+        ..debugOverrideTimestampFunction(() => _testTime)
+        ..semanticsEnabled = true;
+      addTearDown(() {
+        semantics().semanticsEnabled = false;
+      });
+
+      final tester = SemanticsTester(owner());
+
+      tester.updateNode(
+        id: 0,
+        flags: const ui.SemanticsFlags(isEnabled: ui.Tristate.isFalse, isSlider: true),
+        value: '50%',
+        increasedValue: '60%',
+        decreasedValue: '40%',
+        transform: Matrix4.identity().toFloat64(),
+        rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+      );
+      tester.apply();
+      expect(owner().semanticsHost.querySelector('input'), isNull);
+
+      semantics().receiveGlobalEvent(createDomEvent('Event', 'pointerdown'));
+      expect(semantics().gestureMode, GestureMode.pointerEvents);
+
+      tester.updateNode(
+        id: 0,
+        flags: const ui.SemanticsFlags(isEnabled: ui.Tristate.isTrue, isSlider: true),
+        hasIncrease: true,
+        hasDecrease: true,
+        value: '50%',
+        increasedValue: '60%',
+        decreasedValue: '40%',
+        transform: Matrix4.identity().toFloat64(),
+        rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+      );
+      tester.apply();
+
+      final SemanticsObject node = owner().debugSemanticsTree![0]!;
+      expect(node.semanticRole?.kind, EngineSemanticsRole.incrementable);
+      expectSemanticsTree(owner(), '''
+<sem>
+  <input role="slider" aria-valuenow="1" aria-valuetext="50%" aria-valuemax="2" aria-valuemin="0">
+</sem>''');
+
+      final input = owner().semanticsHost.querySelector('input')! as DomHTMLInputElement;
+      expect(input.value, '1');
+      expect(input.getAttribute('aria-valuetext'), '50%');
+      expect(
+        input.disabled,
+        isTrue,
+        reason: 'Input must remain disabled while gesture mode is pointer-events.',
+      );
+    },
+  );
+
   test('sends focus events', () async {
     semantics()
       ..debugOverrideTimestampFunction(() => _testTime)
