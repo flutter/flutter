@@ -1562,7 +1562,7 @@ class PlatformDispatcher {
   /// [onTextScaleFactorChanged] callback can be used to monitor such changes.
   ///
   /// Instead of directly calling this method, applications should typically use
-  /// [MediaQuery.textScalerOf] to retrive the scaled font size in a widget tree,
+  /// [MediaQuery.textScalerOf] to retrieve the scaled font size in a widget tree,
   /// so text in the app resizes properly when the text scaling preference
   /// changes.
   double scaleFontSize(double unscaledFontSize) {
@@ -2686,6 +2686,10 @@ class ViewConstraints {
 /// the shape of the display, for example [DisplayFeatureState.postureFlat] or
 /// [DisplayFeatureState.postureHalfOpened]. For [DisplayFeatureType.cutout],
 /// the state is not used and has the [DisplayFeatureState.unknown] value.
+///
+/// See also:
+///
+///  * [MediaQuery.displayFeaturesOf], to get the display features in a widget tree.
 class DisplayFeature {
   // TODO(matanlurey): have original authors document; see https://github.com/flutter/flutter/issues/151917.
   // ignore: public_member_api_docs
