@@ -310,10 +310,10 @@ class RenderListBody extends RenderBox
   @override
   double computeMinIntrinsicHeight(double width) {
     return switch (mainAxis) {
-      Axis.horizontal => _getIntrinsicMainAxis(
+      Axis.horizontal => _getIntrinsicCrossAxis(
         (RenderBox child) => child.getMinIntrinsicHeight(width),
       ),
-      Axis.vertical => _getIntrinsicCrossAxis(
+      Axis.vertical => _getIntrinsicMainAxis(
         (RenderBox child) => child.getMinIntrinsicHeight(width),
       ),
     };
@@ -322,10 +322,10 @@ class RenderListBody extends RenderBox
   @override
   double computeMaxIntrinsicHeight(double width) {
     return switch (mainAxis) {
-      Axis.horizontal => _getIntrinsicMainAxis(
+      Axis.horizontal => _getIntrinsicCrossAxis(
         (RenderBox child) => child.getMaxIntrinsicHeight(width),
       ),
-      Axis.vertical => _getIntrinsicCrossAxis(
+      Axis.vertical => _getIntrinsicMainAxis(
         (RenderBox child) => child.getMaxIntrinsicHeight(width),
       ),
     };
