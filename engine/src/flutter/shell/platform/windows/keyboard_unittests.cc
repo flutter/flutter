@@ -772,6 +772,73 @@ TEST_F(KeyboardTest, ShiftRightUnhandled) {
   EXPECT_EQ(tester.RedispatchedMessageCountAndClear(), 1);
 }
 
+// A Shift key down with the extended bit set must resolve to the standard
+// physical key, so that a regular key up releases it.
+//
+// Regression test for https://github.com/flutter/flutter/issues/181907.
+TEST_F(KeyboardTest, ShiftRightWithExtendedBitIsReleasedByRegularKeyUp) {
+  KeyboardTester tester{GetContext()};
+  tester.Responding(true);
+
+  // Press ShiftRight, reported with the extended bit.
+  tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
+      KeyStateChange{VK_RSHIFT, true, false},
+      WmKeyDownInfo{VK_SHIFT, kScanCodeShiftRight, kExtended, kWasUp}.Build(
+          kWmResultZero)});
+
+  ASSERT_EQ(tester.key_calls.size(), 1u);
+  EXPECT_CALL_IS_EVENT(tester.key_calls[0], kFlutterKeyEventTypeDown,
+                       kPhysicalShiftRight, kLogicalShiftRight, "",
+                       kNotSynthesized);
+  tester.clear_key_calls();
+
+  // Release ShiftRight, reported without the extended bit.
+  tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
+      KeyStateChange{VK_RSHIFT, false, true},
+      WmKeyUpInfo{VK_SHIFT, kScanCodeShiftRight, kNotExtended}.Build(
+          kWmResultZero)});
+
+  ASSERT_EQ(tester.key_calls.size(), 1u);
+  EXPECT_CALL_IS_EVENT(tester.key_calls[0], kFlutterKeyEventTypeUp,
+                       kPhysicalShiftRight, kLogicalShiftRight, "",
+                       kNotSynthesized);
+  tester.clear_key_calls();
+  EXPECT_EQ(tester.RedispatchedMessageCountAndClear(), 0);
+}
+
+// A Shift key down with a zero scan code must resolve to the standard
+// physical key, so that a regular key up releases it.
+//
+// Regression test for https://github.com/flutter/flutter/issues/181907.
+TEST_F(KeyboardTest, ShiftWithZeroScanCodeIsReleasedByRegularKeyUp) {
+  KeyboardTester tester{GetContext()};
+  tester.Responding(true);
+
+  // Press ShiftLeft, reported with a zero scan code.
+  tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
+      KeyStateChange{VK_LSHIFT, true, false},
+      WmKeyDownInfo{VK_SHIFT, 0, kNotExtended, kWasUp}.Build(kWmResultZero)});
+
+  ASSERT_EQ(tester.key_calls.size(), 1u);
+  EXPECT_CALL_IS_EVENT(tester.key_calls[0], kFlutterKeyEventTypeDown,
+                       kPhysicalShiftLeft, kLogicalShiftLeft, "",
+                       kNotSynthesized);
+  tester.clear_key_calls();
+
+  // Release ShiftLeft, reported with its regular scan code.
+  tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
+      KeyStateChange{VK_LSHIFT, false, true},
+      WmKeyUpInfo{VK_SHIFT, kScanCodeShiftLeft, kNotExtended}.Build(
+          kWmResultZero)});
+
+  ASSERT_EQ(tester.key_calls.size(), 1u);
+  EXPECT_CALL_IS_EVENT(tester.key_calls[0], kFlutterKeyEventTypeUp,
+                       kPhysicalShiftLeft, kLogicalShiftLeft, "",
+                       kNotSynthesized);
+  tester.clear_key_calls();
+  EXPECT_EQ(tester.RedispatchedMessageCountAndClear(), 0);
+}
+
 TEST_F(KeyboardTest, CtrlLeftUnhandled) {
   KeyboardTester tester{GetContext()};
   tester.Responding(false);
