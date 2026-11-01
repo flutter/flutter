@@ -1974,11 +1974,6 @@ void main() {
     WidgetTester tester,
   ) async {
     // Regression test for https://github.com/flutter/flutter/issues/195744
-    tester.view
-      ..devicePixelRatio = 1.0
-      ..physicalSize = const Size(400.0, 800.0);
-    addTearDown(tester.view.reset);
-
     await tester.pumpWidget(
       TestWidgetsApp(
         home: GestureDetector(
@@ -2001,7 +1996,6 @@ void main() {
         ),
       ),
     );
-    await tester.pumpAndSettle();
 
     final Finder line = find.text('Line 3');
     final TestGesture drag = await tester.startGesture(tester.getCenter(line));

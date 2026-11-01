@@ -1034,7 +1034,7 @@ class _DraggableScrollableSheetScrollPosition extends ScrollPositionWithSingleCo
 
   @override
   ScrollHoldController hold(VoidCallback holdCancelCallback) {
-    // Save this so we can call it later if we have to [goBallistic] on our own
+    // Save this so we can call it later if we have to [goBallistic] on our own,
     // to snap the sheet without transitioning through a standard BallisticScrollActivity.
     _holdCancelCallback = holdCancelCallback;
     return super.hold(holdCancelCallback);
