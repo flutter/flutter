@@ -363,7 +363,12 @@ mergeInto(LibraryManager.library, {
         failIfMajorPerformanceCaveat: false,
         enableExtensionsByDefault: true,
       };
-      const contextHandle = GL.createContext(canvas, contextAttributes);
+      let contextHandle;
+      try {
+        contextHandle = GL.createContext(canvas, contextAttributes);
+      } catch (_) {
+        return 0;
+      }
       if (!contextHandle) {
         return 0;
       }
