@@ -855,6 +855,73 @@ public class PlatformViewsControllerTest {
   }
 
   @Test
+  public void toMotionEvent_handlesPointerIdMismatch() {
+    MotionEventTracker motionEventTracker = MotionEventTracker.getInstance();
+    PlatformViewsController platformViewsController = new PlatformViewsController();
+
+    MotionEvent.PointerProperties[] properties = new MotionEvent.PointerProperties[2];
+    properties[0] = new MotionEvent.PointerProperties();
+    properties[0].id = 0;
+    properties[0].toolType = MotionEvent.TOOL_TYPE_FINGER;
+    properties[1] = new MotionEvent.PointerProperties();
+    properties[1].id = 2;
+    properties[1].toolType = MotionEvent.TOOL_TYPE_FINGER;
+
+    MotionEvent.PointerCoords[] coords = new MotionEvent.PointerCoords[2];
+    coords[0] = new MotionEvent.PointerCoords();
+    coords[0].x = 100;
+    coords[0].y = 100;
+    coords[1] = new MotionEvent.PointerCoords();
+    coords[1].x = 200;
+    coords[1].y = 200;
+
+    MotionEvent original =
+        MotionEvent.obtain(
+            10, 10, MotionEvent.ACTION_MOVE, 2, properties, coords, 0, 0, 1.0f, 1.0f, 0, 0, 0, 0);
+
+    MotionEventTracker.MotionEventId motionEventId = motionEventTracker.track(original);
+
+    // Same pointerCount (2) and action (ACTION_MOVE), but different pointer IDs ([0, 1] vs [0, 2]).
+    List<List<Integer>> frameworkPointerProperties =
+        Arrays.asList(
+            Arrays.asList(0, MotionEvent.TOOL_TYPE_FINGER),
+            Arrays.asList(1, MotionEvent.TOOL_TYPE_FINGER));
+
+    List<List<Double>> frameworkPointerCoords =
+        Arrays.asList(
+            Arrays.asList(0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 100.0, 100.0),
+            Arrays.asList(0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 200.0, 200.0));
+
+    PlatformViewTouch touch =
+        new PlatformViewTouch(
+            0,
+            original.getDownTime(),
+            original.getEventTime(),
+            MotionEvent.ACTION_MOVE,
+            2,
+            frameworkPointerProperties,
+            frameworkPointerCoords,
+            original.getMetaState(),
+            original.getButtonState(),
+            original.getXPrecision(),
+            original.getYPrecision(),
+            original.getDeviceId(),
+            original.getEdgeFlags(),
+            original.getSource(),
+            original.getFlags(),
+            motionEventId.getId());
+
+    MotionEvent resolvedEvent =
+        platformViewsController.toMotionEvent(
+            1, touch, false // usingVirtualDisplays
+            );
+
+    assertNotSame(original, resolvedEvent);
+    assertEquals(0, resolvedEvent.getPointerId(0));
+    assertEquals(1, resolvedEvent.getPointerId(1));
+  }
+
+  @Test
   @Config(shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
   public void getPlatformViewById_hybridComposition() {
     PlatformViewsController platformViewsController = new PlatformViewsController();
