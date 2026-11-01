@@ -193,6 +193,74 @@ void main() {
       expect(renderBox.localToGlobal(Offset.zero), equals(Offset.zero));
     });
 
+    testWidgets('child MediaQuery is relative to the sub-screen', (WidgetTester tester) async {
+      // This is a regression test for https://github.com/flutter/flutter/issues/192667
+      const notch = DisplayFeature(
+        bounds: Rect.fromLTRB(500, 0, 600, 50),
+        type: DisplayFeatureType.cutout,
+        state: DisplayFeatureState.unknown,
+      );
+      final MediaQueryData mediaQuery = MediaQueryData.fromView(tester.view).copyWith(
+        displayFeatures: <DisplayFeature>[
+          const DisplayFeature(
+            bounds: Rect.fromLTRB(390, 0, 410, 600),
+            type: DisplayFeatureType.hinge,
+            state: DisplayFeatureState.unknown,
+          ),
+          notch,
+        ],
+      );
+
+      late MediaQueryData childMediaQuery;
+      await tester.pumpWidget(
+        MediaQuery(
+          data: mediaQuery,
+          child: DisplayFeatureSubScreen(
+            anchorPoint: const Offset(800, 0),
+            child: Builder(
+              builder: (BuildContext context) {
+                childMediaQuery = MediaQuery.of(context);
+                return const SizedBox.expand();
+              },
+            ),
+          ),
+        ),
+      );
+
+      expect(childMediaQuery.size, const Size(390, 600));
+      expect(childMediaQuery.displayFeatures, const <DisplayFeature>[
+        DisplayFeature(
+          bounds: Rect.fromLTRB(90, 0, 190, 50),
+          type: DisplayFeatureType.cutout,
+          state: DisplayFeatureState.unknown,
+        ),
+      ]);
+    });
+
+    testWidgets('child MediaQuery is unchanged without splitting display features', (
+      WidgetTester tester,
+    ) async {
+      final mediaQuery = MediaQueryData.fromView(tester.view);
+
+      late MediaQueryData childMediaQuery;
+      await tester.pumpWidget(
+        MediaQuery(
+          data: mediaQuery,
+          child: DisplayFeatureSubScreen(
+            anchorPoint: Offset.zero,
+            child: Builder(
+              builder: (BuildContext context) {
+                childMediaQuery = MediaQuery.of(context);
+                return const SizedBox.expand();
+              },
+            ),
+          ),
+        ),
+      );
+
+      expect(childMediaQuery, same(mediaQuery));
+    });
+
     testWidgets('with size 0 display feature in half-opened posture and anchorPoint', (
       WidgetTester tester,
     ) async {
