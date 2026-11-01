@@ -38,6 +38,7 @@ void testMain() {
         view.debugPhysicalSizeOverride = const ui.Size(100, 100);
         view.debugForceResize();
         rasterizer = _PausedViewRasterizer(view, renderer.rasterizer.createViewRasterizer(view));
+        renderer.rasterizers[view.viewId] = rasterizer;
         PlatformViewManager.instance.registerFactory(
           'commit-test',
           (int id) => createDomHTMLDivElement(),
@@ -46,6 +47,8 @@ void testMain() {
       });
 
       tearDown(() {
+        EnginePlatformDispatcher.instance.onReportTimings = null;
+        FrameTimingRecorder.debugResetFrameTimings();
         rasterizer.dispose();
         view.dispose();
         host.remove();
@@ -75,7 +78,7 @@ void testMain() {
         }
         final scene = builder.build() as LayerScene;
         try {
-          await rasterizer.draw(scene.layerTree, null);
+          await renderer.renderScene(scene, view);
         } finally {
           scene.dispose();
           picture.dispose();
@@ -121,6 +124,30 @@ void testMain() {
         }
       });
 
+      test('disposal during preparation does not submit a cleared frame', () async {
+        await draw();
+        EnginePlatformDispatcher.instance.onReportTimings = (List<ui.FrameTiming> timings) {
+          fail('A canceled frame must not report timings.');
+        };
+        rasterizer.hold(preparation: true);
+        final Future<void> pending = draw(width: 40);
+        await rasterizer.reached.future;
+        rasterizer.dispose();
+        rasterizer.release();
+        await pending;
+        expect(rasterizer.commits, 1);
+        expect(FrameTimingRecorder.debugFrameTimings, isEmpty);
+        expect(rasterizer.sceneElement.children, isEmpty);
+      });
+
+      test('drawing a disposed view does not prepare or commit a frame', () async {
+        rasterizer.dispose();
+        await draw();
+        expect(rasterizer.preparations, 0);
+        expect(rasterizer.commits, 0);
+        expect(rasterizer.sceneElement.children, isEmpty);
+      });
+
       test('a rasterization failure preserves the DOM and permits the next frame', () async {
         await draw(platformView: false);
         final List<DomElement> previous = rasterizer.sceneElement.children.toList();
@@ -146,8 +173,11 @@ class _PausedViewRasterizer extends ViewRasterizer {
   late Completer<void> reached;
   bool failNextFrame = false;
   int commits = 0;
+  int preparations = 0;
+  bool _holdPreparation = false;
 
-  void hold() {
+  void hold({bool preparation = false}) {
+    _holdPreparation = preparation;
     reached = Completer<void>();
     _release = Completer<void>();
   }
@@ -161,9 +191,15 @@ class _PausedViewRasterizer extends ViewRasterizer {
   DisplayCanvasFactory<DisplayCanvas> get displayFactory => delegate.displayFactory;
 
   @override
-  Future<void> prepareToDraw() {
+  Future<void> prepareToDraw() async {
+    preparations++;
     delegate.currentFrameSize = currentFrameSize;
-    return delegate.prepareToDraw();
+    await delegate.prepareToDraw();
+    final Completer<void>? release = _release;
+    if (_holdPreparation && release != null) {
+      reached.complete();
+      await release.future;
+    }
   }
 
   @override
@@ -173,7 +209,7 @@ class _PausedViewRasterizer extends ViewRasterizer {
     FrameTimingRecorder? recorder,
   ) async {
     final Completer<void>? release = _release;
-    if (release != null) {
+    if (!_holdPreparation && release != null) {
       reached.complete();
       await release.future;
     }

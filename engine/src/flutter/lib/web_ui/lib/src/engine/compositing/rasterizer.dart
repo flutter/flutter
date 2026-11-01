@@ -63,6 +63,9 @@ abstract class ViewRasterizer {
   /// Draws the [layerTree] to the screen for the view associated with this
   /// rasterizer.
   Future<void> draw(LayerTree layerTree, FrameTimingRecorder? recorder) async {
+    if (isDisposed) {
+      return;
+    }
     final ui.Size frameSize = view.physicalSize;
     if (frameSize.isEmpty) {
       // Available drawing area is empty. Skip drawing.
@@ -90,6 +93,9 @@ abstract class ViewRasterizer {
     _lastRenderedLayerTree = layerTree;
 
     await prepareToDraw();
+    if (isDisposed) {
+      return;
+    }
     await viewEmbedder.submitFrame(recorder);
   }
 
