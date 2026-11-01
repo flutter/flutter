@@ -40,7 +40,20 @@ class RenderSliverCrossAxisGroup extends RenderSliver
   }
 
   @override
-  double childMainAxisPosition(RenderSliver child) => 0.0;
+  double childMainAxisPosition(RenderSliver child) {
+    final childParentData = child.parentData! as SliverPhysicalParentData;
+    return switch (applyGrowthDirectionToAxisDirection(
+      constraints.axisDirection,
+      constraints.growthDirection,
+    )) {
+      AxisDirection.down => childParentData.paintOffset.dy,
+      AxisDirection.right => childParentData.paintOffset.dx,
+      AxisDirection.up =>
+        geometry!.paintExtent - child.geometry!.paintExtent - childParentData.paintOffset.dy,
+      AxisDirection.left =>
+        geometry!.paintExtent - child.geometry!.paintExtent - childParentData.paintOffset.dx,
+    };
+  }
 
   @override
   double childCrossAxisPosition(RenderSliver child) {
@@ -112,17 +125,34 @@ class RenderSliverCrossAxisGroup extends RenderSliver
     while (child != null) {
       final childParentData = child.parentData! as SliverPhysicalParentData;
       final SliverGeometry childLayoutGeometry = child.geometry!;
-      final double remainingExtent = geometry!.scrollExtent - constraints.scrollOffset;
-      final double paintCorrection = childLayoutGeometry.paintExtent > remainingExtent
-          ? childLayoutGeometry.paintExtent - remainingExtent
+      // A child such as a pinned SliverPersistentHeader moves itself away from
+      // the leading edge of this group by its paint origin, so that it is not
+      // covered by the preceding pinned slivers (SliverConstraints.overlap).
+      // The paint origin of the group itself is already applied by the parent,
+      // so only the difference has to be accounted for here.
+      final double childPaintOrigin = childLayoutGeometry.paintOrigin - geometry!.paintOrigin;
+      final double childPaintEnd = childPaintOrigin + childLayoutGeometry.paintExtent;
+      final double paintCorrection = childPaintEnd > geometry!.paintExtent
+          ? childPaintEnd - geometry!.paintExtent
           : 0.0;
       final double childExtent =
           child.geometry!.crossAxisExtent ??
           extentPerFlexValue * (childParentData.crossAxisFlex ?? 0);
+      // The offset of the child from the leading edge of this group, along the
+      // main axis and in the growth direction.
+      final double mainAxisOffset = childPaintOrigin - paintCorrection;
+      final double mainAxisPaintOffset = switch (applyGrowthDirectionToAxisDirection(
+        constraints.axisDirection,
+        constraints.growthDirection,
+      )) {
+        AxisDirection.down || AxisDirection.right => mainAxisOffset,
+        AxisDirection.up || AxisDirection.left =>
+          geometry!.paintExtent - childLayoutGeometry.paintExtent - mainAxisOffset,
+      };
       // Set child parent data.
       childParentData.paintOffset = switch (constraints.axis) {
-        Axis.vertical => Offset(offset, -paintCorrection),
-        Axis.horizontal => Offset(-paintCorrection, offset),
+        Axis.vertical => Offset(offset, mainAxisPaintOffset),
+        Axis.horizontal => Offset(mainAxisPaintOffset, offset),
       };
       offset += childExtent;
       child = childAfter(child);
