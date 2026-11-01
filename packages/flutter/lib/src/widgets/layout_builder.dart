@@ -132,9 +132,10 @@ class _LayoutBuilderElement<LayoutInfoType> extends RenderObjectElement {
 
     final bool deferMarkNeedsLayout = switch (SchedulerBinding.instance.schedulerPhase) {
       SchedulerPhase.idle || SchedulerPhase.postFrameCallbacks => true,
-      SchedulerPhase.transientCallbacks ||
-      SchedulerPhase.midFrameMicrotasks ||
-      SchedulerPhase.persistentCallbacks => false,
+      // After this frame's layout callback ran, the render object can no longer
+      // honor a new request in this frame (https://github.com/flutter/flutter/issues/192945).
+      SchedulerPhase.persistentCallbacks => _layoutCallbackRanThisFrame,
+      SchedulerPhase.transientCallbacks || SchedulerPhase.midFrameMicrotasks => false,
     };
     if (!deferMarkNeedsLayout) {
       renderObject.scheduleLayoutCallback();
@@ -222,7 +223,21 @@ class _LayoutBuilderElement<LayoutInfoType> extends RenderObjectElement {
   LayoutInfoType? _previousLayoutInfo;
   bool _needsBuild = true;
 
+  bool _layoutCallbackRanThisFrame = false;
+
+  void _resetLayoutCallbackRanThisFrame(Duration _) {
+    _layoutCallbackRanThisFrame = false;
+  }
+
   void _rebuildWithConstraints(Constraints _) {
+    if (!_layoutCallbackRanThisFrame &&
+        SchedulerBinding.instance.schedulerPhase == SchedulerPhase.persistentCallbacks) {
+      _layoutCallbackRanThisFrame = true;
+      SchedulerBinding.instance.addPostFrameCallback(
+        _resetLayoutCallbackRanThisFrame,
+        debugLabel: 'LayoutBuilder.resetLayoutCallbackRanThisFrame',
+      );
+    }
     final LayoutInfoType layoutInfo = renderObject.layoutInfo;
     @pragma('vm:notify-debugger-on-exception')
     void updateChildCallback() {
