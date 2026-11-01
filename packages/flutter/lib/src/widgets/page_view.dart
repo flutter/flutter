@@ -507,6 +507,10 @@ class _PagePosition extends ScrollPositionWithSingleContext implements PageMetri
     super.didUpdateScrollMetrics();
     if (_viewportDimensionChangeDidUpdatePixels) {
       _viewportDimensionChangeDidUpdatePixels = false;
+      // didUpdateScrollMetrics is scheduled as a microtask by
+      // ScrollPosition.applyNewDimensions after layout and paint phases
+      // complete, so invoking notifyListeners() here is safe even if listeners
+      // call setState().
       notifyListeners();
     }
   }

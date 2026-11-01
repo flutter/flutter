@@ -416,22 +416,29 @@ void main() {
     final controller = PageController(initialPage: 1);
     addTearDown(controller.dispose);
     final notifiedOffsets = <double>[];
+    StateSetter? setStateRef;
     controller.addListener(() {
       notifiedOffsets.add(controller.offset);
+      setStateRef?.call(() {});
     });
 
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
-        child: Center(
-          child: SizedBox(
-            width: 400.0,
-            height: 300.0,
-            child: PageView(
-              controller: controller,
-              children: const <Widget>[Text('Page 0'), Text('Page 1'), Text('Page 2')],
-            ),
-          ),
+        child: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            setStateRef = setState;
+            return Center(
+              child: SizedBox(
+                width: 400.0,
+                height: 300.0,
+                child: PageView(
+                  controller: controller,
+                  children: const <Widget>[Text('Page 0'), Text('Page 1'), Text('Page 2')],
+                ),
+              ),
+            );
+          },
         ),
       ),
     );
@@ -444,15 +451,20 @@ void main() {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
-        child: Center(
-          child: SizedBox(
-            width: 800.0,
-            height: 300.0,
-            child: PageView(
-              controller: controller,
-              children: const <Widget>[Text('Page 0'), Text('Page 1'), Text('Page 2')],
-            ),
-          ),
+        child: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            setStateRef = setState;
+            return Center(
+              child: SizedBox(
+                width: 800.0,
+                height: 300.0,
+                child: PageView(
+                  controller: controller,
+                  children: const <Widget>[Text('Page 0'), Text('Page 1'), Text('Page 2')],
+                ),
+              ),
+            );
+          },
         ),
       ),
     );
