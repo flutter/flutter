@@ -535,7 +535,7 @@ void main() {
   testWidgets(
     '3D transform renders the same with or without needsCompositing',
     (WidgetTester tester) async {
-      for (double angle = 0; angle <= math.pi / 4; angle += 0.05) {
+      for (double angle = 0; angle <= math.pi / 4; angle += 0.01) {
         await tester.pumpWidget(RepaintBoundary(child: generateTransform(true, angle)));
         final RenderBox renderBox = tester.binding.renderView.child!;
         final layer = renderBox.debugLayer! as OffsetLayer;
@@ -545,7 +545,13 @@ void main() {
         await tester.pumpWidget(RepaintBoundary(child: generateTransform(false, angle)));
         await expectLater(
           find.byType(RepaintBoundary).first,
-          matchesReferenceImage(imageWithCompositing),
+          matchesReferenceImage(
+            imageWithCompositing,
+            // Allow a small tolerance for minor subpixel antialiasing differences
+            // along 3D quad edges between direct canvas rasterization and
+            // composited texture sampling.
+            maxDifferentPixelsRate: 0.001,
+          ),
         );
       }
     },
