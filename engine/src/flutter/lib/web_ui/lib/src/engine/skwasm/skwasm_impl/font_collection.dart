@@ -73,6 +73,7 @@ class SkwasmFontCollection implements FlutterFontCollection {
   void clear() {
     fontCollectionDispose(handle);
     handle = fontCollectionCreate();
+    registeredTypefaces.clear();
   }
 
   @override
