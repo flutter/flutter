@@ -6,6 +6,7 @@
 #define FLUTTER_SHELL_PLATFORM_ANDROID_ANDROID_SURFACE_GL_IMPELLER_H_
 
 #include "flutter/fml/macros.h"
+#include "flutter/impeller/display_list/aiks_context.h"
 #include "flutter/impeller/renderer/context.h"
 #include "flutter/shell/gpu/gpu_surface_gl_delegate.h"
 #include "flutter/shell/platform/android/android_context_gl_impeller.h"
@@ -76,6 +77,10 @@ class AndroidSurfaceGLImpeller final : public GPUSurfaceGLDelegate,
 
  private:
   std::shared_ptr<AndroidContextGLImpeller> android_context_;
+  // Lazily initialized on the raster thread once an EGL context is current and
+  // shared across GPUSurfaceGLImpeller instances created by CreateGPUSurface()
+  // and CreateSnapshotSurface().
+  std::shared_ptr<impeller::AiksContext> aiks_context_;
   std::unique_ptr<impeller::egl::Surface> onscreen_surface_;
   std::unique_ptr<impeller::egl::Surface> offscreen_surface_;
   fml::RefPtr<AndroidNativeWindow> native_window_;

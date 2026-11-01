@@ -15,6 +15,7 @@
 #include "impeller/entity/gles3/modern_shaders_gles.h"
 #include "impeller/renderer/backend/gles/context_gles.h"
 #include "impeller/renderer/backend/gles/proc_table_gles.h"
+#include "impeller/typographer/backends/skia/typographer_context_skia.h"
 
 namespace flutter {
 
@@ -141,9 +142,9 @@ bool EmbedderSurfaceGLImpeller::IsValid() const {
 // |GPUSurfaceGLDelegate|
 std::unique_ptr<GLContextResult>
 EmbedderSurfaceGLImpeller::GLContextMakeCurrent() {
-  worker_->SetReactionsAllowedOnCurrentThread(true);
-  return std::make_unique<GLContextDefaultResult>(
-      gl_dispatch_table_.gl_make_current_callback());
+  bool status = gl_dispatch_table_.gl_make_current_callback();
+  worker_->SetReactionsAllowedOnCurrentThread(status);
+  return std::make_unique<GLContextDefaultResult>(status);
 }
 
 // |GPUSurfaceGLDelegate|
@@ -201,16 +202,30 @@ EmbedderSurfaceGLImpeller::GLContextFramebufferInfo() const {
 
 // |EmbedderSurface|
 std::unique_ptr<Surface> EmbedderSurfaceGLImpeller::CreateGPUSurface() {
-  // Ensure that the GL context is current before creating the GPU surface.
-  // GPUSurfaceGLImpeller initialization will set up shader pipelines, and the
-  // current thread needs to be able to execute reactor operations.
-  GLContextMakeCurrent();
+  // Ensure that the GL context is current before lazily initializing
+  // `aiks_context_`. AiksContext initialization will set up shader pipelines
+  // and allocate textures, so the current thread needs to be able to execute
+  // reactor operations.
+  if (!aiks_context_) {
+    auto context_switch = GLContextMakeCurrent();
+    if (!context_switch || !context_switch->GetResult()) {
+      FML_LOG(ERROR)
+          << "Could not make GL context current to create AiksContext.";
+      return nullptr;
+    }
+
+    aiks_context_ = std::make_shared<impeller::AiksContext>(
+        impeller_context_, impeller::TypographerContextSkia::Make());
+    if (!aiks_context_->IsValid()) {
+      aiks_context_.reset();
+      return nullptr;
+    }
+  }
 
   return std::make_unique<GPUSurfaceGLImpeller>(
-      this,                     // GPU surface GL delegate
-      impeller_context_,        // Impeller context
-      !external_view_embedder_  // render to surface
-  );
+      /*delegate=*/this,
+      /*aiks_context=*/aiks_context_,
+      /*render_to_surface=*/!external_view_embedder_);
 }
 
 // |EmbedderSurface|
