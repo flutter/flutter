@@ -215,6 +215,19 @@ Future<void> _testBuildIosFramework(Directory projectDir, {bool isModule = false
     );
   }
 
+  checkFileExists(
+    path.join(
+      outputPath,
+      'Profile',
+      'VMService.xcframework',
+      'ios-arm64',
+      'VMService.framework',
+      'VMService',
+    ),
+  );
+  checkDirectoryNotExists(path.join(outputPath, 'Debug', 'VMService.xcframework'));
+  checkDirectoryNotExists(path.join(outputPath, 'Release', 'VMService.xcframework'));
+
   section("Check all modes' engine dylib");
 
   for (final mode in <String>['Debug', 'Profile', 'Release']) {
@@ -381,6 +394,9 @@ Future<void> _testBuildIosFramework(Directory projectDir, {bool isModule = false
     final String modePath = path.join(outputPath, mode);
     await _checkCodeSignature(path.join(modePath, 'Flutter.xcframework'));
     await _checkCodeSignature(path.join(modePath, 'App.xcframework'));
+    if (mode == 'Profile') {
+      await _checkCodeSignature(path.join(modePath, 'VMService.xcframework'));
+    }
     await _checkCodeSignature(path.join(modePath, 'connectivity.xcframework'));
     await _checkCodeSignature(path.join(modePath, 'Reachability.xcframework'));
     if (isModule) {
@@ -611,6 +627,19 @@ Future<void> _testBuildMacOSFramework(Directory projectDir) async {
     await _checkDsym(path.join(appFrameworkDsymPath, 'Contents', 'Resources', 'DWARF', 'App'));
   }
 
+  checkSymlinkExists(
+    path.join(
+      outputPath,
+      'Profile',
+      'VMService.xcframework',
+      'macos-arm64_x86_64',
+      'VMService.framework',
+      'VMService',
+    ),
+  );
+  checkDirectoryNotExists(path.join(outputPath, 'Debug', 'VMService.xcframework'));
+  checkDirectoryNotExists(path.join(outputPath, 'Release', 'VMService.xcframework'));
+
   section("Check all modes' engine dylib");
 
   for (final mode in <String>['Debug', 'Profile', 'Release']) {
@@ -722,6 +751,9 @@ Future<void> _testBuildMacOSFramework(Directory projectDir) async {
     final String modePath = path.join(outputPath, mode);
     await _checkCodeSignature(path.join(modePath, 'FlutterMacOS.xcframework'));
     await _checkCodeSignature(path.join(modePath, 'App.xcframework'));
+    if (mode == 'Profile') {
+      await _checkCodeSignature(path.join(modePath, 'VMService.xcframework'));
+    }
     await _checkCodeSignature(path.join(modePath, 'connectivity_macos.xcframework'));
     await _checkCodeSignature(path.join(modePath, 'Reachability.xcframework'));
   }

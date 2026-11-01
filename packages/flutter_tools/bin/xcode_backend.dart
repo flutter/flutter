@@ -356,6 +356,7 @@ class Context {
         environment['CODE_SIGNING_REQUIRED'] != 'NO';
 
     _embedAppFramework(xcodeFrameworksDir, codesign ? expandedCodeSignIdentity : null);
+    _embedVmServiceFramework(xcodeFrameworksDir, codesign ? expandedCodeSignIdentity : null);
 
     // Embed the actual Flutter.framework that the Flutter app expects to run against,
     // which could be a local build or an arch/type-specific build.
@@ -395,6 +396,32 @@ class Context {
     runRsync('${environment['BUILT_PRODUCTS_DIR']}/App.framework', xcodeFrameworksDir);
     if (expandedCodeSignIdentity != null) {
       _codesignFramework(expandedCodeSignIdentity, '$xcodeFrameworksDir/App.framework/App');
+    }
+  }
+
+  static const _kVmServiceFrameworkName = 'VMService.framework';
+  static const _kVmServiceExecutableName = 'VMService';
+
+  /// Embeds VMService.framework from BUILT_PRODUCTS_DIR into the Xcode Frameworks
+  /// directory when present in profile mode.
+  void _embedVmServiceFramework(String xcodeFrameworksDir, String? expandedCodeSignIdentity) {
+    if (parseFlutterBuildMode() != 'profile') {
+      return;
+    }
+    final String? builtProductsDir = environment['BUILT_PRODUCTS_DIR'];
+    if (builtProductsDir == null) {
+      return;
+    }
+    final vmServiceFrameworkPath = '$builtProductsDir/$_kVmServiceFrameworkName';
+    if (!directoryFromPath(vmServiceFrameworkPath).existsSync()) {
+      return;
+    }
+    runRsync(vmServiceFrameworkPath, xcodeFrameworksDir);
+    if (expandedCodeSignIdentity != null) {
+      _codesignFramework(
+        expandedCodeSignIdentity,
+        '$xcodeFrameworksDir/$_kVmServiceFrameworkName/$_kVmServiceExecutableName',
+      );
     }
   }
 
