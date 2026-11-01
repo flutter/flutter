@@ -50,6 +50,19 @@ typedef NS_ENUM(NSInteger, FlutterFloatingCursorDragState) {
 - (void)flutterTextInputView:(FlutterTextInputView*)textInputView
                performAction:(FlutterTextInputAction)action
                   withClient:(int)client;
+/**
+ * Reports that a backward deletion was performed, after it has been applied.
+ *
+ * `deletedText` is the text that was removed, and is empty when the deletion
+ * removed nothing -- a backspace on an empty field, or one with the caret at
+ * offset zero. Those presses change no text, so they produce no
+ * `updateEditingClient:` call and are otherwise invisible to the framework.
+ *
+ * This is a notification only. The deletion has already been applied here.
+ */
+- (void)flutterTextInputView:(FlutterTextInputView*)textInputView
+           didDeleteBackward:(NSString*)deletedText
+                  withClient:(int)client;
 - (void)flutterTextInputView:(FlutterTextInputView*)textInputView
         updateFloatingCursor:(FlutterFloatingCursorDragState)state
                   withClient:(int)client
