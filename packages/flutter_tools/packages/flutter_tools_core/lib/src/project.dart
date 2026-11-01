@@ -6,17 +6,6 @@ import 'package:meta/meta.dart';
 
 import 'json_utils.dart';
 
-/// Validation helpers for file system [Uri]s exchanged over the tool
-/// extension protocol.
-extension ExtensionUriValidation on Uri? {
-  /// Whether this URI is a non-null, absolute `file:` directory URI ending
-  /// with a trailing slash (`/`).
-  bool get isValidDirectoryUri => switch (this) {
-    final Uri uri => uri.isScheme('file') && uri.hasAbsolutePath && uri.path.endsWith('/'),
-    null => false,
-  };
-}
-
 /// Serializable representation of a Flutter project and its manifest metadata
 /// for tool extensions.
 @immutable
@@ -56,8 +45,8 @@ class ExtensionFlutterProject {
   factory ExtensionFlutterProject.fromJson(Map<String, Object?> json) {
     return ExtensionFlutterProject(
       appName: json.requiredField<String>(appNameKey),
-      buildDirectory: _parseDirectoryUri(json, buildDirectoryKey),
-      directory: _parseDirectoryUri(json, directoryKey),
+      buildDirectory: json.directoryUri(buildDirectoryKey),
+      directory: json.directoryUri(directoryKey),
       appVersion: json.nullableField<String>(appVersionKey),
       dependencies: json.stringIterable(dependenciesKey).toSet(),
       isEmpty: json.optionalField<bool>(isEmptyKey, defaultValue: false),
@@ -65,15 +54,6 @@ class ExtensionFlutterProject {
       isPlugin: json.optionalField<bool>(isPluginKey, defaultValue: false),
       workspace: json.stringIterable(workspaceKey).toList(),
     );
-  }
-
-  static Uri _parseDirectoryUri(Map<String, Object?> json, String key) {
-    final String rawUri = json.requiredField<String>(key);
-    final Uri? uri = Uri.tryParse(rawUri);
-    if (uri != null && uri.isValidDirectoryUri) {
-      return uri;
-    }
-    throw FormatException('Invalid "$key": expected trailing-slash-terminated absolute file: URI.');
   }
 
   /// Map key for [appName].

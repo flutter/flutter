@@ -79,7 +79,7 @@ class BundleBuilder {
       outputDir: fs.directory(assetDirPath),
       buildDir: project.dartTool.childDirectory('flutter_build'),
       cacheDir: cache.getRoot(),
-      flutterRootDir: fs.directory(Cache.flutterRoot),
+      flutterRootDir: fs.directory(cache.flutterRoot),
       engineVersion: artifacts.usesLocalArtifacts ? null : flutterVersion.engineRevision,
       defines: <String, String>{
         // used by the KernelSnapshot target

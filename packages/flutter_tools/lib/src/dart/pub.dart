@@ -20,6 +20,7 @@ import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
 import '../cache.dart';
+import '../context/tool_context.dart';
 import '../convert.dart';
 import '../git.dart';
 import '../project.dart';
@@ -109,38 +110,42 @@ enum PubOutputMode {
 /// A handle for interacting with the pub tool.
 abstract class Pub {
   /// Create a default [Pub] instance.
-  factory Pub({
-    required BotDetector botDetector,
-    required FileSystem fileSystem,
-    required Logger logger,
-    required Platform platform,
-    required ProcessManager processManager,
-    Stdio? stdio,
-  }) {
+  factory Pub({required ToolContext toolContext, Stdio? stdio}) {
+    final ToolContext(
+      :BotDetector botDetector,
+      :Cache cache,
+      fs: FileSystem fileSystem,
+      :Logger logger,
+      :Platform platform,
+      :ProcessManager processManager,
+    ) = toolContext;
     if (stdio != null) {
       return _DefaultPub.test(
-        fileSystem: fileSystem,
-        logger: logger,
-        processManager: processManager,
-        platform: platform,
         botDetector: botDetector,
+        fileSystem: fileSystem,
+        flutterRoot: cache.flutterRoot,
+        logger: logger,
+        platform: platform,
+        processManager: processManager,
         stdio: stdio,
       );
     }
     return _DefaultPub(
-      fileSystem: fileSystem,
-      logger: logger,
-      processManager: processManager,
-      platform: platform,
       botDetector: botDetector,
+      fileSystem: fileSystem,
+      flutterRoot: cache.flutterRoot,
+      logger: logger,
+      platform: platform,
+      processManager: processManager,
     );
   }
 
-  /// Create a [Pub] instance with a mocked [stdio].
+  /// Create a [Pub] instance for testing.
   @visibleForTesting
   factory Pub.test({
     required BotDetector botDetector,
     required FileSystem fileSystem,
+    required String flutterRoot,
     required Logger logger,
     required Platform platform,
     required ProcessManager processManager,
@@ -220,13 +225,14 @@ class _DefaultPub implements Pub {
   _DefaultPub({
     required this._botDetector,
     required this._fileSystem,
+    required this._flutterRoot,
     required Logger logger,
     required Platform platform,
     required ProcessManager processManager,
   }) : _logger = logger,
        _platform = platform,
-       _processUtils = ProcessUtils(logger: logger, processManager: processManager),
        _processManager = processManager,
+       _processUtils = ProcessUtils(logger: logger, processManager: processManager),
        _stdio = null {
     _git = Git(currentPlatform: platform, runProcessWith: _processUtils);
   }
@@ -235,14 +241,15 @@ class _DefaultPub implements Pub {
   _DefaultPub.test({
     required this._botDetector,
     required this._fileSystem,
+    required this._flutterRoot,
     required Logger logger,
     required Platform platform,
     required ProcessManager processManager,
-    required Stdio this._stdio,
+    required this._stdio,
   }) : _logger = logger,
        _platform = platform,
-       _processUtils = ProcessUtils(logger: logger, processManager: processManager),
-       _processManager = processManager {
+       _processManager = processManager,
+       _processUtils = ProcessUtils(logger: logger, processManager: processManager) {
     _git = Git(currentPlatform: platform, runProcessWith: _processUtils);
   }
 
@@ -253,6 +260,7 @@ class _DefaultPub implements Pub {
   final BotDetector _botDetector;
   final ProcessManager _processManager;
   final Stdio? _stdio;
+  final String _flutterRoot;
   late final Git _git;
 
   @override
@@ -317,7 +325,7 @@ class _DefaultPub implements Pub {
     if (packageConfigFile.existsSync()) {
       final File lastVersion = packageConfigFile.parent.childFile('version');
       final versionFromFile = FlutterVersion(
-        flutterRoot: Cache.flutterRoot!,
+        flutterRoot: _flutterRoot,
         fs: _fileSystem,
         git: _git,
         platform: _platform,
@@ -621,7 +629,7 @@ class _DefaultPub implements Pub {
   List<String> _computePubCommand() {
     // TODO(zanderso): refactor to use artifacts.
     final String sdkPath = _fileSystem.path.joinAll(<String>[
-      Cache.flutterRoot!,
+      _flutterRoot,
       'bin',
       'cache',
       'dart-sdk',
@@ -678,18 +686,28 @@ class _DefaultPub implements Pub {
   ///
   /// Deletes the `.pub-preload-cache` directory.
   void _preloadPubCache() {
-    final String flutterRootPath = Cache.flutterRoot!;
-    final Directory flutterRoot = _fileSystem.directory(flutterRootPath);
+    final Directory flutterRoot = _fileSystem.directory(_flutterRoot);
     final Directory preloadCacheDir = flutterRoot.childDirectory('.pub-preload-cache');
     if (preloadCacheDir.existsSync()) {
       /// We only want to inform about existing caches on first run of a freshly
       /// downloaded Flutter SDK. Therefore it is conditioned on the existence
       /// of the .pub-preload-cache dir.
-      final Iterable<String> cacheFiles = preloadCacheDir
+      // Pass archive names relative to the preload cache directory. Absolute
+      // paths can exceed the Windows command line length limit when FLUTTER_ROOT
+      // is deeply nested. See https://github.com/flutter/flutter/issues/194570.
+      final List<String> cacheFiles = preloadCacheDir
           .listSync()
-          .map((FileSystemEntity f) => f.path)
-          .where((String path) => path.endsWith('.tar.gz'));
-      _processManager.runSync(<String>[..._pubCommand, 'cache', 'preload', ...cacheFiles]);
+          .map((FileSystemEntity f) => _fileSystem.path.basename(f.path))
+          .where((String path) => path.endsWith('.tar.gz'))
+          .toList();
+      if (cacheFiles.isNotEmpty) {
+        _processManager.runSync(<String>[
+          ..._pubCommand,
+          'cache',
+          'preload',
+          ...cacheFiles,
+        ], workingDirectory: preloadCacheDir.path);
+      }
       _tryDeleteDirectory(preloadCacheDir, _logger);
     }
   }
@@ -704,7 +722,7 @@ class _DefaultPub implements Pub {
     bool? summaryOnly = false,
   }) async {
     final environment = <String, String>{
-      'FLUTTER_ROOT': flutterRootOverride ?? Cache.flutterRoot!,
+      'FLUTTER_ROOT': flutterRootOverride ?? _flutterRoot,
       _kPubEnvironmentKey: await _getPubEnvironmentValue(context),
       if (summaryOnly ?? false) 'PUB_SUMMARY_ONLY': '1',
     };
@@ -731,7 +749,7 @@ class _DefaultPub implements Pub {
       _fileSystem.path.join(packageConfig.parent.path, 'version'),
     );
     final versionFromFile = FlutterVersion(
-      flutterRoot: Cache.flutterRoot!,
+      flutterRoot: _flutterRoot,
       fs: _fileSystem,
       git: _git,
       platform: _platform,

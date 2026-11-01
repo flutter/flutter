@@ -16,6 +16,7 @@ import 'package:flutter_tools/src/android/gradle_errors.dart';
 import 'package:flutter_tools/src/android/gradle_utils.dart';
 import 'package:flutter_tools/src/android/java.dart';
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -60,7 +61,6 @@ void main() {
       processManager = FakeProcessManager.empty();
       logger = BufferLogger.test();
       fileSystem = MemoryFileSystem.test();
-      Cache.flutterRoot = '';
 
       fakeAnalytics = getInitializedFakeAnalyticsInstance(
         fs: fileSystem,
@@ -104,6 +104,11 @@ void main() {
             fs: fileSystem ?? globals.fs,
             artifacts: artifacts,
             platform: platform,
+            cache: Cache.test(
+              flutterRoot: '/',
+              fileSystem: fileSystem,
+              processManager: processManager ?? FakeProcessManager.any(),
+            ),
           );
       return AndroidGradleBuilder.fromContexts(
         toolContext: resolvedToolContext,
@@ -134,6 +139,7 @@ void main() {
         description,
         body,
         overrides: <Type, Generator>{
+          Cache: () => Cache.test(processManager: processManager, flutterRoot: ''),
           AndroidSdk: () => AndroidSdk(
             fileSystem.directory(missingSdkPath()),
             java: FakeJava(),
@@ -1942,16 +1948,19 @@ android {
       final AndroidApk? androidApk = await AndroidApk.fromAndroidProject(
         project.android,
         androidSdk: sdk,
-        fileSystem: fileSystem,
-        logger: logger,
-        processManager: processManager,
-        processUtils: ProcessUtils(processManager: processManager, logger: logger),
-        userMessages: UserMessages(),
         buildInfo: const BuildInfo(
           BuildMode.debug,
           null,
           treeShakeIcons: false,
           packageConfigPath: '.dart_tool/package_config.json',
+        ),
+        toolContext: FakeToolContext(
+          config: Config.test(),
+          fs: fileSystem,
+          logger: logger,
+          processManager: processManager,
+          processUtils: ProcessUtils(processManager: processManager, logger: logger),
+          userMessages: UserMessages(),
         ),
       );
 
