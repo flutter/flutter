@@ -353,6 +353,8 @@ class _PagePosition extends ScrollPositionWithSingleContext implements PageMetri
   // for use when resizing the viewport to non-zero next time.
   double? _cachedPage;
 
+  bool _viewportDimensionChangeDidUpdatePixels = false;
+
   @override
   Future<void> ensureVisible(
     RenderObject object, {
@@ -491,10 +493,32 @@ class _PagePosition extends ScrollPositionWithSingleContext implements PageMetri
     _cachedPage = (viewportDimension == 0.0) ? page : null;
 
     if (newPixels != oldPixels) {
+      if (oldPixels != null) {
+        _viewportDimensionChangeDidUpdatePixels = true;
+      }
       correctPixels(newPixels);
       return false;
     }
     return result;
+  }
+
+  @override
+  void didUpdateScrollMetrics() {
+    super.didUpdateScrollMetrics();
+    if (_viewportDimensionChangeDidUpdatePixels) {
+      _viewportDimensionChangeDidUpdatePixels = false;
+      // didUpdateScrollMetrics is scheduled as a microtask by
+      // ScrollPosition.applyNewDimensions after layout and paint phases
+      // complete, so invoking notifyListeners() here is safe even if listeners
+      // call setState().
+      notifyListeners();
+    }
+  }
+
+  @override
+  void dispose() {
+    _viewportDimensionChangeDidUpdatePixels = false;
+    super.dispose();
   }
 
   @override

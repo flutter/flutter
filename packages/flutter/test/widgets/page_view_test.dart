@@ -410,6 +410,70 @@ void main() {
     expect(find.text('Arizona'), findsOneWidget);
   });
 
+  testWidgets('PageController notifies listeners on viewport dimension / size change', (
+    WidgetTester tester,
+  ) async {
+    final controller = PageController(initialPage: 1);
+    addTearDown(controller.dispose);
+    final notifiedOffsets = <double>[];
+    StateSetter? setStateRef;
+    controller.addListener(() {
+      notifiedOffsets.add(controller.offset);
+      setStateRef?.call(() {});
+    });
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            setStateRef = setState;
+            return Center(
+              child: SizedBox(
+                width: 400.0,
+                height: 300.0,
+                child: PageView(
+                  controller: controller,
+                  children: const <Widget>[Text('Page 0'), Text('Page 1'), Text('Page 2')],
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    expect(controller.page, 1.0);
+    expect(controller.offset, 400.0);
+    expect(notifiedOffsets, isEmpty);
+
+    // Resize viewport (e.g. device rotation to landscape).
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            setStateRef = setState;
+            return Center(
+              child: SizedBox(
+                width: 800.0,
+                height: 300.0,
+                child: PageView(
+                  controller: controller,
+                  children: const <Widget>[Text('Page 0'), Text('Page 1'), Text('Page 2')],
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    expect(controller.page, 1.0);
+    expect(controller.offset, 800.0);
+    expect(notifiedOffsets, equals(<double>[800.0]));
+  });
+
   testWidgets('PageController nextPage and previousPage return Futures that resolve', (
     WidgetTester tester,
   ) async {
