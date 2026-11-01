@@ -121,7 +121,9 @@ function upgrade_flutter () (
   # Ensure the engine.version is populated
   "$FLUTTER_ROOT/bin/internal/update_engine_version.sh"
 
-  local revision="$(git -C "$FLUTTER_ROOT" rev-parse HEAD)"
+  local revision="$(unset GIT_DIR GIT_INDEX_FILE GIT_WORK_TREE GIT_OBJECT_DIRECTORY \
+    GIT_ALTERNATE_OBJECT_DIRECTORIES GIT_QUARANTINE_PATH GIT_COMMON_DIR
+    git -C "$FLUTTER_ROOT" rev-parse HEAD)"
   local compilekey="$revision:$FLUTTER_TOOL_ARGS"
 
   # Invalidate cache if:
