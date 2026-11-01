@@ -1429,6 +1429,31 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     invoke(_onSystemFontFamilyChanged, _onSystemFontFamilyChangedZone);
   }
 
+  /// A callback that is invoked whenever [alwaysUse24HourFormat] changes value.
+  ///
+  /// The framework invokes this callback in the same zone in which the
+  /// callback was set.
+  ///
+  /// See also:
+  ///
+  ///  * [WidgetsBindingObserver], for a mechanism at the widgets layer to
+  ///    observe when this callback is invoked.
+  @override
+  ui.VoidCallback? get onAlwaysUse24HourFormatChanged => _onAlwaysUse24HourFormatChanged;
+  ui.VoidCallback? _onAlwaysUse24HourFormatChanged;
+  Zone? _onAlwaysUse24HourFormatChangedZone;
+  @override
+  set onAlwaysUse24HourFormatChanged(ui.VoidCallback? callback) {
+    _onAlwaysUse24HourFormatChanged = callback;
+    _onAlwaysUse24HourFormatChangedZone = Zone.current;
+  }
+
+  /// Engine code should use this method instead of the callback directly.
+  /// Otherwise zones won't work properly.
+  void invokeOnAlwaysUse24HourFormatChanged() {
+    invoke(_onAlwaysUse24HourFormatChanged, _onAlwaysUse24HourFormatChangedZone);
+  }
+
   /// Whether the user has requested that [updateSemantics] be called when
   /// the semantic contents of window changes.
   ///

@@ -1485,8 +1485,10 @@ void hooksTests() async {
     late Zone innerZone;
     late Zone runZoneTextScaleFactor;
     late Zone runZonePlatformBrightness;
+    late Zone runZoneAlwaysUse24HourFormat;
     late double? textScaleFactor;
     late Brightness? platformBrightness;
+    late bool? alwaysUse24HourFormat;
 
     runZoned(() {
       innerZone = Zone.current;
@@ -1497,6 +1499,10 @@ void hooksTests() async {
       window.onPlatformBrightnessChanged = () {
         runZonePlatformBrightness = Zone.current;
         platformBrightness = window.platformBrightness;
+      };
+      PlatformDispatcher.instance.onAlwaysUse24HourFormatChanged = () {
+        runZoneAlwaysUse24HourFormat = Zone.current;
+        alwaysUse24HourFormat = PlatformDispatcher.instance.alwaysUse24HourFormat;
       };
     });
 
@@ -1521,6 +1527,50 @@ void hooksTests() async {
     );
     expectIdentical(runZonePlatformBrightness, innerZone);
     expectEquals(platformBrightness, Brightness.dark);
+
+    textScaleFactor = null;
+    platformBrightness = null;
+    alwaysUse24HourFormat = null;
+
+    PlatformDispatcher.instance.onAlwaysUse24HourFormatChanged!();
+    _callHook(
+      '_updateUserSettingsData',
+      1,
+      '{"textScaleFactor": 0.5, "platformBrightness": "dark", "alwaysUse24HourFormat": false}',
+    );
+    expectIdentical(runZoneAlwaysUse24HourFormat, innerZone);
+    expectEquals(alwaysUse24HourFormat, false);
+  });
+
+  await test('onAlwaysUse24HourFormatChanged is not invoked when unrelated user settings change', () {
+    int calls = 0;
+    PlatformDispatcher.instance.onAlwaysUse24HourFormatChanged = () {
+      calls++;
+    };
+
+    // Initial setting.
+    _callHook(
+      '_updateUserSettingsData',
+      1,
+      '{"textScaleFactor": 1.0, "platformBrightness": "light", "alwaysUse24HourFormat": false}',
+    );
+    expectEquals(calls, 1);
+
+    // Unrelated user setting changes (platformBrightness and textScaleFactor).
+    _callHook(
+      '_updateUserSettingsData',
+      1,
+      '{"textScaleFactor": 1.5, "platformBrightness": "dark", "alwaysUse24HourFormat": false}',
+    );
+    expectEquals(calls, 1);
+
+    // alwaysUse24HourFormat changes.
+    _callHook(
+      '_updateUserSettingsData',
+      1,
+      '{"textScaleFactor": 1.5, "platformBrightness": "dark", "alwaysUse24HourFormat": true}',
+    );
+    expectEquals(calls, 2);
   });
 
   await test('onFrameDataChanged preserves callback zone', () {
