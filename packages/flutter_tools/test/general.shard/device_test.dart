@@ -842,6 +842,40 @@ void main() {
       },
     );
 
+    for (final ipv6 in <bool>[false, true]) {
+      testWithoutContext('local iOS app uses the host port and loopback (ipv6=$ipv6)', () {
+        final options = DebuggingOptions.enabled(
+          BuildInfo.debug,
+          hostVmServicePort: 12345,
+          deviceVmServicePort: 54321,
+          ipv6: ipv6,
+        );
+        final List<String> arguments = options.getIOSLaunchArguments(
+          EnvironmentType.physical,
+          null,
+          <String, Object?>{},
+          isLocal: true,
+        );
+        expect(arguments, contains('--vm-service-port=12345'));
+        expect(arguments, isNot(contains('--vm-service-port=54321')));
+        expect(arguments, contains('--vm-service-host=${ipv6 ? '::1' : '127.0.0.1'}'));
+        expect(arguments, isNot(contains('--vm-service-host=0.0.0.0')));
+      });
+    }
+
+    testWithoutContext('local iOS app accepts a device port when no host port is set', () {
+      final options = DebuggingOptions.enabled(BuildInfo.debug, deviceVmServicePort: 54321);
+      expect(
+        options.getIOSLaunchArguments(
+          EnvironmentType.physical,
+          null,
+          <String, Object?>{},
+          isLocal: true,
+        ),
+        contains('--vm-service-port=54321'),
+      );
+    });
+
     testWithoutContext('Get launch arguments for physical device with iPv4 network connection', () {
       final original = DebuggingOptions.enabled(BuildInfo.debug);
 

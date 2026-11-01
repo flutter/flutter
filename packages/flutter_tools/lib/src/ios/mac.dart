@@ -130,6 +130,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   CpuArch? activeArch,
   bool codesign = true,
   String? deviceID,
+  String? destination,
   bool configOnly = false,
   XcodeBuildAction buildAction = XcodeBuildAction.build,
   bool disablePortPublication = false,
@@ -318,6 +319,7 @@ Future<XcodeBuildResult> buildXcodeProject({
         buildInfo,
         environmentType: environmentType,
         deviceId: deviceID,
+        destination: destination,
       ) ??
       <String, String>{};
 
@@ -462,7 +464,9 @@ Future<XcodeBuildResult> buildXcodeProject({
   }
 
   buildCommands.add('-destination');
-  if (deviceID != null) {
+  if (destination != null) {
+    buildCommands.add(destination);
+  } else if (deviceID != null) {
     buildCommands.add('id=$deviceID');
   } else if (environmentType == EnvironmentType.physical) {
     buildCommands.add(XcodeSdk.IPhoneOS.genericPlatform);

@@ -99,7 +99,13 @@ class FlutterDeviceManager extends DeviceManager {
         templateRenderer: templateRenderer,
         toolContext: toolContext,
       ),
-      MacOSDesignedForIPadDevices(iosWorkflow: iosWorkflow, toolContext: toolContext),
+      MacOSDesignedForIPadDevices(
+        analytics: analytics,
+        appleContext: appleContext,
+        iosWorkflow: iosWorkflow,
+        templateRenderer: templateRenderer,
+        toolContext: toolContext,
+      ),
       LinuxDevices(analytics: analytics, featureFlags: featureFlags, toolContext: toolContext),
       WindowsDevices(
         analytics: analytics,

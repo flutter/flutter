@@ -9,11 +9,13 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/version.dart';
+import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/xcode_debug.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:test/fake.dart';
+import 'package:xml/xml.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -148,6 +150,88 @@ void main() {
         expect(status, true);
       });
 
+      testWithoutContext(
+        'passes the Designed for iPad platform and architecture to automation',
+        () async {
+          fakeProcessManager.addCommands(<FakeCommand>[
+            FakeCommand(
+              command: <String>[
+                'xcrun',
+                'osascript',
+                '-l',
+                'JavaScript',
+                pathToXcodeAutomationScript,
+                'check-workspace-opened',
+                '--xcode-path',
+                pathToXcodeApp,
+                '--project-path',
+                project.xcodeProject.path,
+                '--workspace-path',
+                project.xcodeWorkspace.path,
+              ],
+              stdout: '''
+  {"status":false,"errorMessage":"Xcode is not running","debugResult":null}
+  ''',
+            ),
+            FakeCommand(
+              command: <String>['open', '-a', pathToXcodeApp, '-g', '-j', '-F', xcworkspace.path],
+            ),
+            FakeCommand(
+              command: <String>[
+                'xcrun',
+                'osascript',
+                '-l',
+                'JavaScript',
+                pathToXcodeAutomationScript,
+                'debug',
+                '--xcode-path',
+                pathToXcodeApp,
+                '--project-path',
+                project.xcodeProject.path,
+                '--workspace-path',
+                project.xcodeWorkspace.path,
+                '--project-name',
+                project.hostAppProjectName,
+                '--device-id',
+                deviceId,
+                '--device-platform',
+                'iphoneos',
+                '--device-architecture',
+                'arm64',
+                '--scheme',
+                project.scheme,
+                '--skip-building',
+                '--launch-args',
+                '[]',
+              ],
+              stdout: '''
+  {"status":true,"errorMessage":null,"debugResult":{"completed":false,"status":"running","errorMessage":null}}
+  ''',
+            ),
+          ]);
+
+          final xcodeDebug = XcodeDebug(
+            logger: logger,
+            processManager: fakeProcessManager,
+            xcode: xcode,
+            fileSystem: fileSystem,
+          );
+
+          final bool status = await xcodeDebug.debugApp(
+            project: project,
+            deviceId: deviceId,
+            devicePlatform: 'iphoneos',
+            deviceArchitecture: 'arm64',
+            launchArguments: <String>[],
+          );
+
+          expect(logger.errorText, isEmpty);
+          expect(logger.traceText, contains('Error checking if project opened in Xcode'));
+          expect(fakeProcessManager, hasNoRemainingExpectations);
+          expect(xcodeDebug.startDebugActionProcess, isNull);
+          expect(status, true);
+        },
+      );
       testWithoutContext('succeeds in opening and debugging without launch options, expectedConfigurationBuildDir, and verbose logging', () async {
         fakeProcessManager.addCommands(<FakeCommand>[
           FakeCommand(
@@ -1141,6 +1225,164 @@ void main() {
       fakeProcessManager = FakeProcessManager.empty();
       fileSystem = MemoryFileSystem.test();
     });
+
+    testUsingContext(
+      'stages a signed bundle from a path with spaces for local installation',
+      () async {
+        final Directory root = globals.fs.systemTempDirectory.createTempSync('flutter_stage.');
+        addTearDown(() => root.deleteSync(recursive: true));
+        final Directory source = root.childDirectory(
+          'source with spaces %20 & Unicode Ω/Runner.app',
+        )..createSync(recursive: true);
+        final File executable = source.childFile('Runner')..writeAsStringSync('signed executable');
+        final Directory destination = root.childDirectory('launcher')..createSync();
+        final Directory stagedBundle = destination.childDirectory('Runner.app');
+        fakeProcessManager.addCommand(
+          FakeCommand(
+            command: <String>['/usr/bin/ditto', source.path, stagedBundle.path],
+            onRun: (_) {
+              stagedBundle.createSync();
+              executable.copySync(stagedBundle.childFile('Runner').path);
+            },
+          ),
+        );
+        final xcodeDebug = XcodeDebug(
+          logger: logger,
+          processManager: fakeProcessManager,
+          xcode: setupXcode(
+            fakeProcessManager: FakeProcessManager.any(),
+            fileSystem: fileSystem,
+            flutterRoot: flutterRoot,
+          ),
+          fileSystem: globals.fs,
+        );
+
+        await xcodeDebug.createXcodeProjectWithCustomBundle(
+          source.path,
+          templateRenderer: globals.templateRenderer,
+          projectDestination: destination,
+          copyApplicationBundle: true,
+        );
+
+        final document = XmlDocument.parse(
+          destination
+              .childFile('Runner.xcodeproj/xcshareddata/xcschemes/Runner.xcscheme')
+              .readAsStringSync(),
+        );
+        expect(
+          document
+              .findAllElements('PathRunnable')
+              .map((XmlElement node) => node.getAttribute('FilePath')),
+          everyElement(stagedBundle.path),
+        );
+        expect(stagedBundle.childFile('Runner').readAsStringSync(), 'signed executable');
+        expect(executable.readAsStringSync(), 'signed executable');
+        expect(fakeProcessManager, hasNoRemainingExpectations);
+      },
+    );
+
+    testUsingContext('failed bundle staging removes the temporary launcher', () async {
+      final Directory destination = globals.fs.systemTempDirectory.createTempSync('flutter_stage.');
+      addTearDown(() {
+        if (destination.existsSync()) {
+          destination.deleteSync(recursive: true);
+        }
+      });
+      fakeProcessManager.addCommand(
+        FakeCommand(
+          command: <String>[
+            '/usr/bin/ditto',
+            '/source with spaces/Runner.app',
+            destination.childDirectory('Runner.app').path,
+          ],
+          exitCode: 1,
+          stderr: 'Copy failed',
+        ),
+      );
+      final xcodeDebug = XcodeDebug(
+        logger: logger,
+        processManager: fakeProcessManager,
+        xcode: setupXcode(
+          fakeProcessManager: FakeProcessManager.any(),
+          fileSystem: fileSystem,
+          flutterRoot: flutterRoot,
+        ),
+        fileSystem: globals.fs,
+      );
+
+      await expectLater(
+        () => xcodeDebug.createXcodeProjectWithCustomBundle(
+          '/source with spaces/Runner.app',
+          templateRenderer: globals.templateRenderer,
+          projectDestination: destination,
+          copyApplicationBundle: true,
+        ),
+        throwsA(isA<ProcessException>()),
+      );
+      expect(destination.existsSync(), isFalse);
+      expect(fakeProcessManager, hasNoRemainingExpectations);
+    });
+
+    for (final mode in <BuildMode>[BuildMode.debug, BuildMode.profile, BuildMode.release]) {
+      testUsingContext(
+        'temporary project launches ${mode.name} with the correct debugger',
+        () async {
+          final Xcode xcode = setupXcode(
+            fakeProcessManager: fakeProcessManager,
+            fileSystem: fileSystem,
+            flutterRoot: flutterRoot,
+          );
+          final xcodeDebug = XcodeDebug(
+            logger: logger,
+            processManager: fakeProcessManager,
+            xcode: xcode,
+            fileSystem: globals.fs,
+          );
+          final Directory directory = globals.fs.systemTempDirectory.createTempSync(
+            'flutter_mode.',
+          );
+          addTearDown(() => directory.deleteSync(recursive: true));
+          await xcodeDebug.createXcodeProjectWithCustomBundle(
+            '/path with spaces/Runner.app',
+            templateRenderer: globals.templateRenderer,
+            projectDestination: directory,
+            buildMode: mode,
+            debuggerEnabled: mode == BuildMode.debug,
+            lldbInitFile: '/original app/Flutter/ephemeral/flutter_lldbinit',
+          );
+          final document = XmlDocument.parse(
+            directory
+                .childFile('Runner.xcodeproj/xcshareddata/xcschemes/Runner.xcscheme')
+                .readAsStringSync(),
+          );
+          final XmlElement launch = document.findAllElements('LaunchAction').single;
+          expect(launch.getAttribute('buildConfiguration'), switch (mode) {
+            BuildMode.debug => 'Debug',
+            BuildMode.profile => 'Profile',
+            BuildMode.release => 'Release',
+            _ => throw StateError('Unexpected mode'),
+          });
+          expect(
+            launch.getAttribute('selectedDebuggerIdentifier'),
+            mode == BuildMode.debug ? 'Xcode.DebuggerFoundation.Debugger.LLDB' : '',
+          );
+          expect(
+            launch.getAttribute('selectedLauncherIdentifier'),
+            mode == BuildMode.debug
+                ? 'Xcode.DebuggerFoundation.Launcher.LLDB'
+                : 'Xcode.IDEFoundation.Launcher.PosixSpawn',
+          );
+          expect(
+            launch.getAttribute('customLLDBInitFile'),
+            '/original app/Flutter/ephemeral/flutter_lldbinit',
+          );
+          expect(
+            launch.findElements('PathRunnable').single.getAttribute('FilePath'),
+            '/path with spaces/Runner.app',
+          );
+        },
+      );
+    }
 
     testUsingContext('creates temporary xcode project', () async {
       final Xcode xcode = setupXcode(

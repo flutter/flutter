@@ -249,7 +249,7 @@ class XcodeProjectInterpreter {
         XcodeSdk.IPhoneSimulator.platformName,
       ],
       '-destination',
-      if (deviceId != null) 'id=$deviceId' else sdk.genericPlatform,
+      buildContext.destination ?? (deviceId != null ? 'id=$deviceId' : sdk.genericPlatform),
       '-showBuildSettings',
       'BUILD_DIR=${fileSystem.path.absolute(buildDir)}',
       ...environmentVariablesAsXcodeBuildSettings(platform),
@@ -630,6 +630,7 @@ class XcodeProjectBuildContext {
     this.sdk = XcodeSdk.IPhoneOS,
     this.deviceId,
     this.target,
+    this.destination,
   });
 
   final String? scheme;
@@ -638,8 +639,11 @@ class XcodeProjectBuildContext {
   final String? deviceId;
   final String? target;
 
+  /// An explicit Xcode destination, including platform and variant when needed.
+  final String? destination;
+
   @override
-  int get hashCode => Object.hash(scheme, configuration, sdk, deviceId, target);
+  int get hashCode => Object.hash(scheme, configuration, sdk, deviceId, target, destination);
 
   @override
   bool operator ==(Object other) {
@@ -651,7 +655,8 @@ class XcodeProjectBuildContext {
         other.configuration == configuration &&
         other.deviceId == deviceId &&
         other.sdk == sdk &&
-        other.target == target;
+        other.target == target &&
+        other.destination == destination;
   }
 }
 

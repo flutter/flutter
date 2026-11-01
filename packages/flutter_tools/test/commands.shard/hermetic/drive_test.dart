@@ -16,6 +16,7 @@ import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/signals.dart';
@@ -30,10 +31,12 @@ import 'package:flutter_tools/src/drive/drive_service.dart';
 import 'package:flutter_tools/src/ios/application_package.dart';
 import 'package:flutter_tools/src/ios/devices.dart';
 import 'package:flutter_tools/src/isolated/build_targets.dart';
+import 'package:flutter_tools/src/macos/macos_ipad_device.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/web/web_device.dart';
 import 'package:test/fake.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -73,6 +76,44 @@ void main() {
   tearDownAll(() {
     Cache.enableLocking();
   });
+
+  testUsingContext(
+    'rejects flutter drive for Mac Designed for iPad',
+    () async {
+      fileSystem.file('lib/main.dart').createSync(recursive: true);
+      fileSystem.file('test_driver/main_test.dart').createSync(recursive: true);
+      fileSystem.file('pubspec.yaml').createSync();
+      fileSystem.file('ios/Runner.xcodeproj/project.pbxproj').createSync(recursive: true);
+      fakeDeviceManager.attachedDevices = <Device>[
+        MacOSDesignedForIPadDevice(
+          toolContext: FakeToolContext(
+            fs: fileSystem,
+            os: FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_arm64),
+          ),
+          analytics: const NoOpAnalytics(),
+          appleContext: FakeAppleContext(),
+          templateRenderer: FakeTemplateRenderer(),
+        ),
+      ];
+      final command = DriveCommand(
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        buildTargets: const BuildTargetsImpl(),
+        toolContext: createToolContext(),
+      );
+      await expectLater(
+        () =>
+            createTestCommandRunner(command)
+                .run(<String>['drive', '--no-pub', '-d', 'mac-designed-for-ipad']),
+        throwsToolExit(message: '"flutter drive" is not supported'),
+      );
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      DeviceManager: () => fakeDeviceManager,
+      ProcessManager: () => FakeProcessManager.any(),
+      Pub: () => FakePub(),
+    },
+  );
 
   testUsingContext(
     'web drive runs without launching Chrome directly',
