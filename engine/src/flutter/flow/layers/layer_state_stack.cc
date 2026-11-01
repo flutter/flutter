@@ -4,6 +4,7 @@
 
 #include "flutter/flow/layers/layer_state_stack.h"
 
+#include "flutter/display_list/effects/dl_image_filters.h"
 #include "flutter/display_list/utils/dl_matrix_clip_tracker.h"
 #include "flutter/flow/layers/layer.h"
 #include "flutter/flow/paint_utils.h"
@@ -278,9 +279,11 @@ class ImageFilterEntry : public LayerStateStack::StateEntry {
  public:
   ImageFilterEntry(const DlRect& bounds,
                    const std::shared_ptr<DlImageFilter>& filter,
+                   const DlMatrix& matrix,
                    const LayerStateStack::RenderingAttributes& prev)
       : bounds_(bounds),
         filter_(filter),
+        matrix_(matrix),
         old_filter_(prev.image_filter),
         old_bounds_(prev.save_layer_bounds) {}
   ~ImageFilterEntry() override = default;
@@ -294,12 +297,22 @@ class ImageFilterEntry : public LayerStateStack::StateEntry {
     stack->outstanding_.image_filter = old_filter_;
   }
 
-  // There is no ImageFilter mutator currently
-  // void update_mutators(MutatorsStack* mutators_stack) const override;
+  void update_mutators(MutatorsStack* mutators_stack) const override {
+    if (!filter_) {
+      return;
+    }
+    if (const DlStretchImageFilter* stretch = filter_->asStretch()) {
+      mutators_stack->PushStretchEffect(
+          stretch->overscroll_x(), stretch->overscroll_y(),
+          stretch->interpolation_strength(),
+          stretch->stretch_bounds().TransformAndClipBounds(matrix_));
+    }
+  }
 
  private:
   const DlRect bounds_;
   const std::shared_ptr<DlImageFilter> filter_;
+  const DlMatrix matrix_;
   const std::shared_ptr<DlImageFilter> old_filter_;
   const DlRect old_bounds_;
 
@@ -700,8 +713,12 @@ void LayerStateStack::push_image_filter(
     const DlRect& bounds,
     const std::shared_ptr<DlImageFilter>& filter) {
   maybe_save_layer(filter);
-  state_stack_.emplace_back(
-      std::make_unique<ImageFilterEntry>(bounds, filter, outstanding_));
+  DlMatrix current_matrix;
+  if (delegate_ != DummyDelegate::kInstance) {
+    current_matrix = delegate_->matrix();
+  }
+  state_stack_.emplace_back(std::make_unique<ImageFilterEntry>(
+      bounds, filter, current_matrix, outstanding_));
   apply_last_entry();
 }
 

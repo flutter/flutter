@@ -270,6 +270,141 @@ public class FlutterMutatorViewTest {
     assertFalse(view.getFlutterWonGesture());
   }
 
+  @Test
+  public void pushStretchEffect_storesFinalStretchEffect() {
+    final FlutterMutatorsStack stack = new FlutterMutatorsStack();
+    assertNull(stack.getFinalStretchEffect());
+
+    stack.pushStretchEffect(0.15f, -0.25f, 0.7f, 10.0f, 20.0f, 310.0f, 620.0f);
+    final FlutterMutatorsStack.FlutterStretchEffect stretch = stack.getFinalStretchEffect();
+    assertNotNull(stretch);
+    assertEquals(0.15f, stretch.getOverscrollX(), 1e-5f);
+    assertEquals(-0.25f, stretch.getOverscrollY(), 1e-5f);
+    assertEquals(0.7f, stretch.getInterpolationStrength(), 1e-5f);
+    assertEquals(10.0f, stretch.getRect().left, 1e-5f);
+    assertEquals(20.0f, stretch.getRect().top, 1e-5f);
+    assertEquals(310.0f, stretch.getRect().right, 1e-5f);
+    assertEquals(620.0f, stretch.getRect().bottom, 1e-5f);
+  }
+
+  @Test
+  public void computeStretchedPosition_matchesOverscrollFormula() {
+    // At overscroll = 0, position is unchanged.
+    assertEquals(0.25f, FlutterMutatorView.computeStretchedPosition(0.25f, 0.0f, 0.7f), 1e-5f);
+
+    // Positive overscroll pins the leading edge (0.0) and stretches interior points forward.
+    assertEquals(0.0f, FlutterMutatorView.computeStretchedPosition(0.0f, 0.3f, 0.7f), 1e-5f);
+    final float stretchedMid = FlutterMutatorView.computeStretchedPosition(0.5f, 0.3f, 0.7f);
+    assertTrue(stretchedMid > 0.5f);
+
+    // Negative overscroll pins the trailing edge (1.0) and pulls interior points backward.
+    assertEquals(1.0f, FlutterMutatorView.computeStretchedPosition(1.0f, -0.3f, 0.7f), 1e-5f);
+    final float pulledMid = FlutterMutatorView.computeStretchedPosition(0.5f, -0.3f, 0.7f);
+    assertTrue(pulledMid < 0.5f);
+  }
+
+  @Test
+  public void computeStretchedRect_leavesOutOfBoundsEdgesAtIdentity() {
+    final FlutterMutatorsStack stack = new FlutterMutatorsStack();
+    stack.pushStretchEffect(0.2f, 0.3f, 0.7f, 0.0f, 0.0f, 300.0f, 600.0f);
+    final FlutterMutatorsStack.FlutterStretchEffect stretch = stack.getFinalStretchEffect();
+    assertNotNull(stretch);
+
+    // Left (-20) and top (-40) are outside [0, 300] x [0, 600] and must remain at identity,
+    // while right (150 -> norm 0.5) and bottom (300 -> norm 0.5) are inside and stretched.
+    final android.graphics.RectF rect =
+        FlutterMutatorView.computeStretchedRect(-20, -40, 170, 340, stretch);
+    assertEquals(-20.0f, rect.left, 1e-4f);
+    assertEquals(-40.0f, rect.top, 1e-4f);
+    assertEquals(
+        FlutterMutatorView.computeStretchedPosition(0.5f, 0.2f, 0.7f) * 300.0f, rect.right, 1e-4f);
+    assertEquals(
+        FlutterMutatorView.computeStretchedPosition(0.5f, 0.3f, 0.7f) * 600.0f, rect.bottom, 1e-4f);
+  }
+
+  @Test
+  @Config(sdk = 31)
+  public void readyToDisplay_appliesMatrixTransformFallbackBelowApi33() {
+    final AndroidTouchProcessor touchProcessor = mock(AndroidTouchProcessor.class);
+    final FlutterMutatorView view = new FlutterMutatorView(ctx, 1.0f, touchProcessor);
+    final FlutterMutatorsStack stack = new FlutterMutatorsStack();
+    stack.pushStretchEffect(0.0f, 0.3f, 0.7f, 0.0f, 0.0f, 300.0f, 600.0f);
+
+    view.readyToDisplay(stack, /*left=*/ 50, /*top=*/ 100, /*width=*/ 200, /*height=*/ 200);
+    assertTrue(view.isUsingMatrixStretchFallback());
+    final FrameLayout.LayoutParams layoutParams = (FrameLayout.LayoutParams) view.getLayoutParams();
+    assertEquals(50, layoutParams.leftMargin);
+    assertTrue(layoutParams.topMargin > 100);
+    assertEquals(200, layoutParams.width);
+    assertTrue(layoutParams.height > 200);
+
+    // Verify dispatchDraw(Canvas) applies the non-identity fallback matrix when stretched on API <
+    // 33.
+    final android.graphics.Canvas canvas = mock(android.graphics.Canvas.class);
+    view.dispatchDraw(canvas);
+    final ArgumentCaptor<Matrix> matrixCaptor = ArgumentCaptor.forClass(Matrix.class);
+    verify(canvas).concat(matrixCaptor.capture());
+    assertFalse(matrixCaptor.getValue().isIdentity());
+  }
+
+  @Test
+  @Config(sdk = 34)
+  public void readyToDisplay_appliesMatrixTransformFallbackForSurfaceViewChild() {
+    final AndroidTouchProcessor touchProcessor = mock(AndroidTouchProcessor.class);
+    final FlutterMutatorView view = new FlutterMutatorView(ctx, 1.0f, touchProcessor);
+    final android.view.SurfaceView surfaceView = new android.view.SurfaceView(ctx);
+    view.addView(surfaceView);
+
+    final FlutterMutatorsStack stack = new FlutterMutatorsStack();
+    stack.pushStretchEffect(0.0f, 0.3f, 0.7f, 0.0f, 0.0f, 300.0f, 600.0f);
+
+    surfaceView.setScaleX(1.25f);
+    surfaceView.setScaleY(0.75f);
+    surfaceView.setPivotX(12.0f);
+    surfaceView.setPivotY(34.0f);
+
+    view.readyToDisplay(stack, /*left=*/ 50, /*top=*/ 100, /*width=*/ 200, /*height=*/ 200);
+    assertTrue(surfaceView.getScaleY() > 1.0f);
+
+    // Restoring to idle restores the child's pre-existing scale and pivot.
+    final FlutterMutatorsStack idleStack = new FlutterMutatorsStack();
+    view.readyToDisplay(idleStack, /*left=*/ 50, /*top=*/ 100, /*width=*/ 200, /*height=*/ 200);
+    assertEquals(1.25f, surfaceView.getScaleX(), 1e-5f);
+    assertEquals(0.75f, surfaceView.getScaleY(), 1e-5f);
+    assertEquals(12.0f, surfaceView.getPivotX(), 1e-5f);
+    assertEquals(34.0f, surfaceView.getPivotY(), 1e-5f);
+  }
+
+  @Test
+  @Config(sdk = 34)
+  public void getOrCreateStretchShader_isIsolatedPerMutatorViewInstance() {
+    final AndroidTouchProcessor touchProcessor = mock(AndroidTouchProcessor.class);
+    final FlutterMutatorView view1 = new FlutterMutatorView(ctx, 1.0f, touchProcessor);
+    final FlutterMutatorView view2 = new FlutterMutatorView(ctx, 1.0f, touchProcessor);
+    assertNotNull(view1.getOrCreateStretchShader());
+    assertNotNull(view2.getOrCreateStretchShader());
+    assertNotSame(view1.getOrCreateStretchShader(), view2.getOrCreateStretchShader());
+  }
+
+  @Test
+  @Config(sdk = 34)
+  public void draw_clipsWhenContainerTransformedAndNotStretched() {
+    final AndroidTouchProcessor touchProcessor = mock(AndroidTouchProcessor.class);
+    final FlutterMutatorView view = new FlutterMutatorView(ctx, 1.0f, touchProcessor);
+    final FlutterMutatorsStack stack = new FlutterMutatorsStack();
+    final Matrix scaleMatrix = new Matrix();
+    scaleMatrix.setScale(1.5f, 1.5f);
+    final float[] scaleValues = new float[9];
+    scaleMatrix.getValues(scaleValues);
+    stack.pushTransform(scaleValues);
+    stack.pushClipRect(0, 0, 200, 200);
+
+    view.readyToDisplay(stack, /*left=*/ 0, /*top=*/ 0, /*width=*/ 200, /*height=*/ 200);
+    final android.graphics.Canvas canvas = mock(android.graphics.Canvas.class);
+    view.draw(canvas);
+    verify(canvas, atLeastOnce()).clipPath(any());
+  }
+
   @Implements(ViewGroup.class)
   public static class ShadowViewGroup extends org.robolectric.shadows.ShadowViewGroup {
     @Implementation

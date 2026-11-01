@@ -386,6 +386,13 @@ void DisplayListBuilder::onSetImageFilter(const DlImageFilter* filter) {
         new (pod) DlMatrixImageFilter(matrix_filter);
         break;
       }
+      case DlImageFilterType::kStretch: {
+        const DlStretchImageFilter* stretch_filter = filter->asStretch();
+        FML_DCHECK(stretch_filter);
+        void* pod = Push<SetPodImageFilterOp>(stretch_filter->size());
+        new (pod) DlStretchImageFilter(stretch_filter);
+        break;
+      }
       case DlImageFilterType::kCompose:
       case DlImageFilterType::kLocalMatrix:
       case DlImageFilterType::kColorFilter:
@@ -700,6 +707,14 @@ void DisplayListBuilder::RestoreLayer() {
   depth_ += render_op_depth_cost_;
 
   DlRect content_bounds = current_layer().layer_local_accumulator.GetBounds();
+  if (!content_bounds.IsEmpty() && current_layer().filter) {
+    if (const DlStretchImageFilter* stretch =
+            current_layer().filter->asStretch()) {
+      if (!stretch->stretch_bounds().IsEmpty()) {
+        content_bounds = content_bounds.Union(stretch->stretch_bounds());
+      }
+    }
+  }
 
   SaveLayerOpBase* layer_op = reinterpret_cast<SaveLayerOpBase*>(
       storage_.base() + current_info().save_offset);

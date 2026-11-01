@@ -137,6 +137,22 @@ void ImageFilter::initShader(ReusableFragmentShader* shader,
   filter_ = shader->as_image_filter(SamplingFromIndex(filterQualityIndex));
 }
 
+void ImageFilter::initStretch(double overscroll_x,
+                              double overscroll_y,
+                              double interpolation_strength,
+                              double bounds_left,
+                              double bounds_top,
+                              double bounds_right,
+                              double bounds_bottom) {
+  is_dynamic_tile_mode_ = false;
+  DlRect bounds =
+      DlRect::MakeLTRB(SafeNarrow(bounds_left), SafeNarrow(bounds_top),
+                       SafeNarrow(bounds_right), SafeNarrow(bounds_bottom));
+  filter_ = DlStretchImageFilter::Make(
+      SafeNarrow(overscroll_x), SafeNarrow(overscroll_y),
+      SafeNarrow(interpolation_strength), bounds);
+}
+
 bool ImageFilter::equals(Dart_Handle a_handle, Dart_Handle b_handle) {
   ImageFilter* a = tonic::DartConverter<ImageFilter*>::FromDart(a_handle);
   ImageFilter* b = tonic::DartConverter<ImageFilter*>::FromDart(b_handle);

@@ -102,7 +102,8 @@ void AndroidExternalViewEmbedder::SubmitFlutterView(
 
   std::unordered_map<int64_t, DlRect> view_rects;
   for (auto platform_id : composition_order_) {
-    view_rects[platform_id] = GetViewRect(platform_id);
+    view_rects[platform_id] =
+        view_params_.at(platform_id).stretchedBoundingRect();
   }
 
   std::unordered_map<int64_t, DlRect> overlay_layers =
