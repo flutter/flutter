@@ -149,6 +149,16 @@ RenderPassVK::RenderPassVK(const std::shared_ptr<const Context>& context,
                            const RenderTarget& target,
                            std::shared_ptr<CommandBufferVK> command_buffer)
     : RenderPass(context, target), command_buffer_(std::move(command_buffer)) {
+  // Everything below dereferences color attachment zero's texture, and
+  // `GetColorAttachment(0)` hands back a default-constructed attachment with a
+  // null texture when the target has none. `RenderTarget::IsValid()` is where
+  // that requirement is stated, and `RenderPassMTL` checks it in its own
+  // constructor; without the same check here a depth-only target — a shadow
+  // map — is a null dereference rather than a failed pass.
+  if (!render_target_.IsValid()) {
+    is_valid_ = false;
+    return;
+  }
   const ColorAttachment& color0 = render_target_.GetColorAttachment(0);
   color_image_vk_ = color0.texture;
   resolve_image_vk_ = color0.resolve_texture;
