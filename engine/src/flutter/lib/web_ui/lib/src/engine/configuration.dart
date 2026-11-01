@@ -294,6 +294,17 @@ class FlutterConfiguration {
     'FLUTTER_WEB_CANVASKIT_FORCE_MULTI_SURFACE_RASTERIZER',
   );
 
+  /// Uses direct transferred-canvas presentation for single-canvas Skwasm
+  /// scenes, and bitmap presentation when multiple surfaces are needed.
+  ///
+  /// Disabled unless explicitly enabled. JavaScript configuration takes
+  /// precedence over the Dart define.
+  bool? get skwasmUseHybridRasterizer =>
+      _configuration?.skwasmUseHybridRasterizer ??
+      (const bool.hasEnvironment('FLUTTER_WEB_SKWASM_USE_HYBRID_RASTERIZER')
+          ? const bool.fromEnvironment('FLUTTER_WEB_SKWASM_USE_HYBRID_RASTERIZER')
+          : null);
+
   /// The maximum number of canvases to use when rendering in CanvasKit.
   ///
   /// Limits the amount of overlays that can be created.
@@ -395,6 +406,7 @@ extension type JsFlutterConfiguration._(JSObject _) implements JSObject {
     String? fontFallbackBaseUrl,
     bool? debugSkipFontRetryDelay,
     bool? forceSingleThreadedSkwasm,
+    bool? skwasmUseHybridRasterizer,
   });
 
   external String? get assetBase;
@@ -412,6 +424,7 @@ extension type JsFlutterConfiguration._(JSObject _) implements JSObject {
   external String? get fontFallbackBaseUrl;
   external bool? get debugSkipFontRetryDelay;
   external bool? get forceSingleThreadedSkwasm;
+  external bool? get skwasmUseHybridRasterizer;
 }
 
 /// A JavaScript entrypoint that allows developer to set rendering backend
