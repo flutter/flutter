@@ -6,9 +6,16 @@ import("//flutter/common/config.gni")
 import("//flutter/impeller/tools/impeller.gni")
 import("//flutter/shell/config.gni")
 import("//flutter/testing/testing.gni")
+import("//flutter/tools/dart_data_to_cpp/dart_data_to_cpp.gni")
 
 if (is_fuchsia) {
   import("//flutter/tools/fuchsia/gn-sdk/src/gn_configs.gni")
+}
+
+dart_data_to_cpp("generate_text_styles") {
+  input = "text.dart"
+  cpp_out = "text/text_styles.g.h"
+  dart_out = "text_styles.g.dart"
 }
 
 source_set("ui") {
@@ -133,6 +140,7 @@ source_set("ui") {
     "text/paragraph.h",
     "text/paragraph_builder.cc",
     "text/paragraph_builder.h",
+    "text/text_styles.g.h",
     "ui_dart_state.cc",
     "ui_dart_state.h",
     "window/hit_test_response.h",
@@ -177,6 +185,7 @@ source_set("ui") {
   ]
 
   deps = [
+    ":generate_text_styles",
     "$dart_src/runtime/bin:common_embedder_dart_io",
     "//flutter/assets",
     "//flutter/common",

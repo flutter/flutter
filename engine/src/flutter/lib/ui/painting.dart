@@ -8688,12 +8688,6 @@ class Shadow {
   }) : assert(blurRadius >= 0.0, 'Text shadow blur radius should be non-negative.');
 
   static const int _kColorDefault = 0xFF000000;
-  // Constants for shadow encoding.
-  static const int _kBytesPerShadow = 16;
-  static const int _kColorOffset = 0 << 2;
-  static const int _kXOffset = 1 << 2;
-  static const int _kYOffset = 2 << 2;
-  static const int _kBlurOffset = 3 << 2;
 
   /// Color that the shadow will be drawn with.
   ///
@@ -8825,39 +8819,6 @@ class Shadow {
 
   @override
   int get hashCode => Object.hash(color, offset, blurRadius);
-
-  // Serialize [shadows] into ByteData. The format is a single uint_32_t at
-  // the beginning indicating the number of shadows, followed by _kBytesPerShadow
-  // bytes for each shadow.
-  static ByteData _encodeShadows(List<Shadow>? shadows) {
-    if (shadows == null) {
-      return ByteData(0);
-    }
-
-    final int byteCount = shadows.length * _kBytesPerShadow;
-    final shadowsData = ByteData(byteCount);
-
-    var shadowOffset = 0;
-    for (var shadowIndex = 0; shadowIndex < shadows.length; ++shadowIndex) {
-      final Shadow shadow = shadows[shadowIndex];
-      shadowOffset = shadowIndex * _kBytesPerShadow;
-
-      shadowsData.setInt32(
-        _kColorOffset + shadowOffset,
-        shadow.color.value ^ Shadow._kColorDefault,
-        _kFakeHostEndian,
-      );
-
-      shadowsData.setFloat32(_kXOffset + shadowOffset, shadow.offset.dx, _kFakeHostEndian);
-
-      shadowsData.setFloat32(_kYOffset + shadowOffset, shadow.offset.dy, _kFakeHostEndian);
-
-      final double blurSigma = Shadow.convertRadiusToSigma(shadow.blurRadius);
-      shadowsData.setFloat32(_kBlurOffset + shadowOffset, blurSigma, _kFakeHostEndian);
-    }
-
-    return shadowsData;
-  }
 
   @override
   String toString() => 'TextShadow($color, $offset, $blurRadius)';
