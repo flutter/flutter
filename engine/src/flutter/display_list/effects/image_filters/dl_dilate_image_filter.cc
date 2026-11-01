@@ -32,8 +32,8 @@ DlIRect* DlDilateImageFilter::get_input_device_bounds(
     const DlIRect& output_bounds,
     const DlMatrix& ctm,
     DlIRect& input_bounds) const {
-  return inset_device_bounds(output_bounds, radius_x_, radius_y_, ctm,
-                             input_bounds);
+  return outset_device_bounds(output_bounds, radius_x_, radius_y_, ctm,
+                              input_bounds);
 }
 
 bool DlDilateImageFilter::equals_(const DlImageFilter& other) const {
