@@ -227,27 +227,19 @@ VULKAN_SYNC_VALIDATION_TESTS = [
     ## BlitPassVK::OnGenerateMipmapCommand barrier.
     # 'Play/RendererTest.CanGenerateMipmaps/Vulkan',
     # Render passes, offscreen targets, MSAA, depth/stencil and subpasses.
-    ## TODO(https://github.com/flutter/flutter/issues/194987):
-    ## RenderPassBuilderVK depth/stencil loadOp.
-    # 'Play/RendererTest.CanRenderToTexture/Vulkan',
+    'Play/RendererTest.CanRenderToTexture/Vulkan',
     'Play/RendererTest.CanSepiaToneWithSubpasses/Vulkan',
     'Play/EntityPassTargetTest.SwapWithMSAAImplicitResolve/Vulkan',
     # Compute.
     'Compute/ComputeTest.MultiStageInputAndOutput/Vulkan',
     # End-to-end rendering through Aiks/DisplayList.
-    ## TODO(https://github.com/flutter/flutter/issues/194987):
-    ## RenderPassBuilderVK depth/stencil loadOp.
-    # 'Play/AiksTest.CanRenderImage/Vulkan',
-    # 'Play/AiksTest.CanRenderClips/Vulkan',
-    # 'Play/AiksTest.CanRenderTextFrame/Vulkan',
-    # 'Play/AiksTest.CanRenderBackdropBlur/Vulkan',
-    # 'Play/AiksTest.CanRenderAdvancedBlendColorFilterWithSaveLayer/Vulkan',
-    ## TODO(https://github.com/flutter/flutter/issues/194987):
-    ## RenderPassBuilderVK depth/stencil loadOp.
-    ## TODO(https://github.com/flutter/flutter/issues/195599):
-    ## RenderPassBuilderVK depth/stencil storeOp.
-    # 'Play/AiksTest.CanRenderNestedBackdropBlur/Vulkan',
-    # 'Play/AiksTest.GaussianBlurBackdropTinyMipMap/Vulkan',
+    'Play/AiksTest.CanRenderImage/Vulkan',
+    'Play/AiksTest.CanRenderClips/Vulkan',
+    'Play/AiksTest.CanRenderTextFrame/Vulkan',
+    'Play/AiksTest.CanRenderBackdropBlur/Vulkan',
+    'Play/AiksTest.CanRenderAdvancedBlendColorFilterWithSaveLayer/Vulkan',
+    'Play/AiksTest.CanRenderNestedBackdropBlur/Vulkan',
+    'Play/AiksTest.GaussianBlurBackdropTinyMipMap/Vulkan',
 ]
 
 
