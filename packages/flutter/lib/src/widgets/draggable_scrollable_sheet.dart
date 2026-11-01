@@ -1029,10 +1029,7 @@ class _DraggableScrollableSheetScrollPosition extends ScrollPositionWithSingleCo
   Drag drag(DragStartDetails details, VoidCallback dragCancelCallback) {
     // Save this so we can call it later if we have to [goBallistic] on our own.
     _dragCancelCallback = dragCancelCallback;
-    return super.drag(details, () {
-      _dragCancelCallback = null;
-      dragCancelCallback();
-    });
+    return super.drag(details, dragCancelCallback);
   }
 
   @override
@@ -1040,10 +1037,7 @@ class _DraggableScrollableSheetScrollPosition extends ScrollPositionWithSingleCo
     // Save this so we can call it later if we have to [goBallistic] on our own
     // to snap the sheet without transitioning through a standard BallisticScrollActivity.
     _holdCancelCallback = holdCancelCallback;
-    return super.hold(() {
-      _holdCancelCallback = null;
-      holdCancelCallback();
-    });
+    return super.hold(holdCancelCallback);
   }
 }
 
