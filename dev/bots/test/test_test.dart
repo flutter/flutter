@@ -164,6 +164,27 @@ void main() {
       expect(result.stdout, contains('Invalid subshard name'));
     });
 
+    test('exits with code 1 when SUBSHARD index is less than 1', () async {
+      final ProcessResult result = await runScript(<String, String>{
+        'SHARD': kTestHarnessShardName,
+        'SUBSHARD': '0_3',
+      });
+      expectExitCode(result, 1);
+      expect(result.stdout, contains('Invalid subshard name'));
+    });
+
+    test('tool_integration_tests subshards by weight', () async {
+      final ProcessResult result = await runScript(
+        <String, String>{'SHARD': 'tool_integration_tests', 'SUBSHARD': '2_3'},
+        <String>['--dry-run'],
+      );
+      expectExitCode(result, 0);
+      expect(
+        result.stdout,
+        contains(RegExp(r'Selecting subshard 2 of 3 \(\d+ of \d+ tests, estimated weight \d+\)')),
+      );
+    });
+
     test('exits with code 255 when invalid SUBSHARD name', () async {
       final ProcessResult result = await runScript(<String, String>{
         'SHARD': kTestHarnessShardName,
@@ -236,5 +257,74 @@ void main() {
     testSubsharding(9, 3);
     testSubsharding(25, 8);
     testSubsharding(30, 15);
+  });
+
+  group('partitionByWeight', () {
+    int identity(int w) => w;
+
+    test('assigns every item to exactly one bucket and preserves order', () {
+      final weights = <int>[5, 1, 9, 3, 10, 7, 2, 8, 4, 6];
+      final List<List<int>> buckets = partitionByWeight<int>(weights, 3, identity);
+      expect(buckets, hasLength(3));
+      expect(buckets.flattened, unorderedEquals(weights));
+      for (final bucket in buckets) {
+        // Items keep their relative order from the input list.
+        final List<int> positions = bucket.map(weights.indexOf).toList();
+        expect(positions, orderedEquals(positions.toList()..sort()));
+      }
+    });
+
+    test('balances by weight, not by count', () {
+      // One heavy item and many light ones. By count this would be 4/4; by
+      // weight the heavy item should sit alone.
+      final weights = <int>[100, 1, 1, 1, 1, 1, 1, 1];
+      final List<List<int>> buckets = partitionByWeight<int>(weights, 2, identity);
+      expect(buckets.map((List<int> b) => b.sum), unorderedEquals(<int>[100, 7]));
+    });
+
+    test('no bucket exceeds the ideal by more than the heaviest item', () {
+      final weights = List<int>.generate(97, (int i) => (i * 37) % 61 + 1);
+      for (final bucketCount in <int>[1, 2, 5, 7, 10]) {
+        final List<List<int>> buckets = partitionByWeight<int>(weights, bucketCount, identity);
+        final double ideal = weights.sum / bucketCount;
+        final int heaviest = weights.max;
+        for (final bucket in buckets) {
+          expect(
+            bucket.sum,
+            lessThanOrEqualTo(ideal + heaviest),
+            reason: 'bucketCount=$bucketCount',
+          );
+        }
+      }
+    });
+
+    test('is deterministic', () {
+      final weights = <int>[3, 3, 3, 3, 3, 3, 1, 1, 1];
+      final List<List<int>> first = partitionByWeight<int>(weights, 4, identity);
+      final List<List<int>> second = partitionByWeight<int>(weights, 4, identity);
+      expect(first, equals(second));
+    });
+
+    test('spreads equal weights, including zero, by count', () {
+      for (final w in <int>[0, 5]) {
+        final List<List<int>> buckets = partitionByWeight<int>(
+          List<int>.filled(10, w),
+          3,
+          identity,
+        );
+        expect(
+          buckets.map((List<int> b) => b.length),
+          unorderedEquals(<int>[4, 3, 3]),
+          reason: 'w=$w',
+        );
+      }
+    });
+
+    test('handles more buckets than items', () {
+      final List<List<int>> buckets = partitionByWeight<int>(<int>[2, 1], 4, identity);
+      expect(buckets, hasLength(4));
+      expect(buckets.where((List<int> b) => b.isEmpty), hasLength(2));
+      expect(buckets.flattened, unorderedEquals(<int>[2, 1]));
+    });
   });
 }
