@@ -2413,7 +2413,7 @@ class ObjectFlagProperty<T> extends DiagnosticsProperty<T> {
 
   @override
   DiagnosticLevel get level {
-    if ((value != null && ifPresent == null) || ifNull == null) {
+    if ((value != null && ifPresent == null) || (value == null && ifNull == null)) {
       return DiagnosticLevel.hidden;
     }
     return super.level;
