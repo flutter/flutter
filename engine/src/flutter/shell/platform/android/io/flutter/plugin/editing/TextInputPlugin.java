@@ -152,6 +152,11 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
           }
 
           @Override
+          public void updateConfig(TextInputChannel.Configuration configuration) {
+            updateTextInputConfig(configuration);
+          }
+
+          @Override
           public void setEditingState(TextInputChannel.TextEditState editingState) {
             setTextInputEditingState(mView, editingState);
           }
@@ -469,6 +474,17 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
     unlockPlatformViewInputConnection();
     lastClientRect = null;
     mEditable.addEditingStateListener(this);
+  }
+
+  // Updates the configuration of the active framework text input client and restarts the IME.
+  @VisibleForTesting
+  void updateTextInputConfig(TextInputChannel.Configuration configuration) {
+    if (inputTarget.type != InputTarget.Type.FRAMEWORK_CLIENT) {
+      return;
+    }
+    this.configuration = configuration;
+    updateAutofillConfigurationIfNeeded(configuration);
+    mImm.restartInput(mView);
   }
 
   private void setPlatformViewTextInputClient(int platformViewId, boolean usesVirtualDisplay) {
