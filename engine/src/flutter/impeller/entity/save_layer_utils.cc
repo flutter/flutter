@@ -14,6 +14,13 @@ bool SizeDifferenceUnderThreshold(Size a, Size b, Scalar threshold) {
 }
 
 static constexpr Scalar kDefaultSizeThreshold = 0.3;
+
+// Compares in floating point so that non-finite or very large sizes are
+// rejected rather than overflowing a conversion to an integer size.
+bool FitsWithin(Size size, ISize max_size) {
+  return size.width <= static_cast<Scalar>(max_size.width) &&
+         size.height <= static_cast<Scalar>(max_size.height);
+}
 }  // namespace
 
 std::optional<Rect> ComputeSaveLayerCoverage(
@@ -22,7 +29,8 @@ std::optional<Rect> ComputeSaveLayerCoverage(
     const Rect& coverage_limit,
     const std::shared_ptr<FilterContents>& image_filter,
     bool flood_output_coverage,
-    bool flood_input_coverage) {
+    bool flood_input_coverage,
+    std::optional<ISize> max_subpass_size) {
   Rect coverage = content_coverage;
   // There are three conditions that should cause input coverage to flood, the
   // first is the presence of a backdrop filter on the saveLayer. The second is
@@ -84,6 +92,24 @@ std::optional<Rect> ComputeSaveLayerCoverage(
     auto transformed_coverage = coverage.TransformBounds(effect_transform);
     auto intersected_coverage =
         transformed_coverage.Intersection(source_coverage_limit.value());
+    // Filters that require their full source coverage (e.g. runtime effect
+    // shaders, whose output depends on the input's extent via `u_size` and
+    // `FlutterFragCoord()`) must not have their input trimmed to the source
+    // coverage limit. Preserve the full coverage as long as some of it is
+    // visible and it fits within a single render target. Both
+    // `transformed_coverage` and `source_coverage_limit` are in the filter's
+    // input space, so this also holds for filters composed with an outer
+    // filter that moves or expands its input.
+    if (image_filter->RequiresFullSourceCoverage()) {
+      if (!intersected_coverage.has_value()) {
+        return std::nullopt;
+      }
+      if (!max_subpass_size.has_value() ||
+          FitsWithin(transformed_coverage.GetSize(), *max_subpass_size)) {
+        return transformed_coverage;
+      }
+      return intersected_coverage;
+    }
     if (intersected_coverage.has_value() &&
         SizeDifferenceUnderThreshold(transformed_coverage.GetSize(),
                                      intersected_coverage->GetSize(),

@@ -36,7 +36,7 @@ DlIRect* DlRuntimeEffectImageFilter::get_input_device_bounds(
     const DlMatrix& ctm,
     DlIRect& input_bounds) const {
   input_bounds = output_bounds;
-  return &input_bounds;
+  return nullptr;
 }
 
 bool DlRuntimeEffectImageFilter::equals_(const DlImageFilter& other) const {

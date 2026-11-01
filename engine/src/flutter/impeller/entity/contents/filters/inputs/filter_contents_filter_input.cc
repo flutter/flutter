@@ -45,6 +45,10 @@ std::optional<Rect> FilterContentsFilterInput::GetSourceCoverage(
   return filter_->GetSourceCoverage(effect_transform, output_limit);
 }
 
+bool FilterContentsFilterInput::RequiresFullSourceCoverage() const {
+  return filter_->RequiresFullSourceCoverage();
+}
+
 Matrix FilterContentsFilterInput::GetLocalTransform(
     const Entity& entity) const {
   return filter_->GetLocalTransform(entity.GetTransform());
