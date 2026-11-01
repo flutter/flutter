@@ -41,7 +41,7 @@ void ImageExternalTextureGL::Attach(PaintContext& context) {
   }
 }
 
-void ImageExternalTextureGL::UpdateImage(JavaLocalRef& hardware_buffer,
+bool ImageExternalTextureGL::UpdateImage(JavaLocalRef& hardware_buffer,
                                          const SkRect& bounds,
                                          PaintContext& context) {
   AHardwareBuffer* latest_hardware_buffer = AHardwareBufferFor(hardware_buffer);
@@ -51,18 +51,23 @@ void ImageExternalTextureGL::UpdateImage(JavaLocalRef& hardware_buffer,
   auto existing_image = image_lru_.FindImage(key);
   if (existing_image != nullptr) {
     dl_image_ = existing_image;
-    return;
+    return true;
   }
 
   auto egl_image = CreateEGLImage(latest_hardware_buffer);
   if (!egl_image.is_valid()) {
-    return;
+    return false;
   }
 
-  dl_image_ = CreateDlImage(context, bounds, key, std::move(egl_image));
+  auto next_image = CreateDlImage(context, bounds, key, std::move(egl_image));
+  if (!next_image) {
+    return false;
+  }
+  dl_image_ = std::move(next_image);
   if (key.has_value()) {
     gl_entries_.erase(image_lru_.AddImage(dl_image_, key.value()));
   }
+  return true;
 }
 
 void ImageExternalTextureGL::ProcessFrame(PaintContext& context,
@@ -75,7 +80,9 @@ void ImageExternalTextureGL::ProcessFrame(PaintContext& context,
   if (hardware_buffer.is_null()) {
     return;
   }
-  UpdateImage(hardware_buffer, bounds, context);
+  if (UpdateImage(hardware_buffer, bounds, context)) {
+    UpdateImageBounds(image, AHardwareBufferFor(hardware_buffer));
+  }
   CloseHardwareBuffer(hardware_buffer);
 }
 

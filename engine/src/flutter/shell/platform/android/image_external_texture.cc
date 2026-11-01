@@ -8,7 +8,9 @@
 #include <android/sensor.h>
 
 #include "flutter/fml/platform/android/jni_util.h"
+#include "flutter/impeller/toolkit/android/hardware_buffer.h"
 #include "flutter/impeller/toolkit/android/proc_table.h"
+#include "flutter/shell/platform/android/image_size.h"
 #include "flutter/shell/platform/android/jni/platform_view_android_jni.h"
 
 namespace flutter {
@@ -39,9 +41,13 @@ void ImageExternalTexture::Paint(PaintContext& context,
     ProcessFrame(context, ToSkRect(bounds));
   }
   if (dl_image_) {
+    const auto image_size = dl_image_->GetSize();
     context.canvas->DrawImageRect(
-        dl_image_,                             // image
-        DlRect::Make(dl_image_->GetBounds()),  // source rect
+        dl_image_,  // image
+        DlRect::MakeLTRB(normalized_image_bounds_.left() * image_size.width,
+                         normalized_image_bounds_.top() * image_size.height,
+                         normalized_image_bounds_.right() * image_size.width,
+                         normalized_image_bounds_.bottom() * image_size.height),
         bounds,                                // destination rect
         sampling,                              // sampling
         context.paint,                         // paint
@@ -95,6 +101,15 @@ JavaLocalRef ImageExternalTexture::AcquireLatestImage() {
       jni_facade_->ImageProducerTextureEntryAcquireLatestImage(
           JavaLocalRef(image_texture_entry_));
   return image_java;
+}
+
+void ImageExternalTexture::UpdateImageBounds(const JavaLocalRef& image,
+                                             AHardwareBuffer* buffer) {
+  auto desc = impeller::android::HardwareBuffer::Describe(buffer);
+  normalized_image_bounds_ =
+      desc ? NormalizeImageBounds(jni_facade_->ImageGetSize(image), desc->width,
+                                  desc->height)
+           : SkRect::MakeWH(1, 1);
 }
 
 void ImageExternalTexture::CloseImage(const fml::jni::JavaRef<jobject>& image) {
