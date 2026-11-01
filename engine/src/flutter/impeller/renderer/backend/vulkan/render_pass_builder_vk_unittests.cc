@@ -170,5 +170,92 @@ TEST(RenderPassBuilder, CreatesMSAAResolveWithCorrectStore) {
   EXPECT_EQ(resolve.storeOp, vk::AttachmentStoreOp::eStore);
 }
 
+TEST(RenderPassBuilder, ExternalDependencyCoversDepthStencilClear) {
+  RenderPassBuilderVK builder = RenderPassBuilderVK();
+  auto const context = MockVulkanContextBuilder().Build();
+
+  builder.SetColorAttachment(0, PixelFormat::kR8G8B8A8UNormInt,
+                             SampleCount::kCount1, LoadAction::kClear,
+                             StoreAction::kStore);
+  builder.SetDepthStencilAttachment(PixelFormat::kD24UnormS8Uint,
+                                    SampleCount::kCount1, LoadAction::kClear,
+                                    StoreAction::kDontCare);
+
+  auto render_pass = builder.Build(context->GetDevice());
+  ASSERT_TRUE(!!render_pass);
+
+  std::optional<VkSubpassDependency> external;
+  for (const auto& dependency :
+       GetLastRenderPassDependencies(context->GetDevice())) {
+    if (dependency.srcSubpass == VK_SUBPASS_EXTERNAL &&
+        dependency.dstSubpass == 0u) {
+      external = dependency;
+    }
+  }
+  ASSERT_TRUE(external.has_value());
+
+  // The depth/stencil clear runs in the fragment test stages. The incoming
+  // dependency must order it after earlier depth/stencil writes, not only
+  // after color writes.
+  EXPECT_EQ(external->srcStageMask,
+            static_cast<VkPipelineStageFlags>(
+                VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT |
+                VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT |
+                VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT |
+                VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT));
+  EXPECT_EQ(
+      external->srcAccessMask,
+      static_cast<VkAccessFlags>(VK_ACCESS_SHADER_READ_BIT |
+                                 VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT |
+                                 VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT));
+  EXPECT_EQ(external->dstStageMask,
+            static_cast<VkPipelineStageFlags>(
+                VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT |
+                VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT |
+                VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT));
+  EXPECT_EQ(
+      external->dstAccessMask,
+      static_cast<VkAccessFlags>(VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT |
+                                 VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT |
+                                 VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT));
+}
+
+TEST(RenderPassBuilder, ExternalDependencyOmitsDepthStagesWithoutDepthStencil) {
+  RenderPassBuilderVK builder = RenderPassBuilderVK();
+  auto const context = MockVulkanContextBuilder().Build();
+
+  builder.SetColorAttachment(0, PixelFormat::kR8G8B8A8UNormInt,
+                             SampleCount::kCount1, LoadAction::kClear,
+                             StoreAction::kStore);
+
+  auto render_pass = builder.Build(context->GetDevice());
+  ASSERT_TRUE(!!render_pass);
+
+  std::optional<VkSubpassDependency> external;
+  for (const auto& dependency :
+       GetLastRenderPassDependencies(context->GetDevice())) {
+    if (dependency.srcSubpass == VK_SUBPASS_EXTERNAL &&
+        dependency.dstSubpass == 0u) {
+      external = dependency;
+    }
+  }
+  ASSERT_TRUE(external.has_value());
+
+  // Without a depth/stencil attachment, the incoming dependency has nothing
+  // to order in the fragment test stages, so it keeps the color-only masks.
+  EXPECT_EQ(external->srcStageMask,
+            static_cast<VkPipelineStageFlags>(
+                VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT |
+                VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT));
+  EXPECT_EQ(external->srcAccessMask,
+            static_cast<VkAccessFlags>(VK_ACCESS_SHADER_READ_BIT |
+                                       VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT));
+  EXPECT_EQ(external->dstStageMask,
+            static_cast<VkPipelineStageFlags>(
+                VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT));
+  EXPECT_EQ(external->dstAccessMask,
+            static_cast<VkAccessFlags>(VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT));
+}
+
 }  // namespace testing
 }  // namespace impeller
