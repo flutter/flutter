@@ -274,12 +274,18 @@ class _SliverPersistentHeaderElement extends RenderObjectElement {
   @override
   void update(_SliverPersistentHeaderRenderObjectWidget newWidget) {
     final oldWidget = widget as _SliverPersistentHeaderRenderObjectWidget;
+    // RenderObjectElement.update clears the dirty flag without going through
+    // performRebuild, so a rebuild that was already scheduled for this element
+    // (because an inherited widget the delegate depends on changed, for
+    // instance) would otherwise be silently dropped.
+    final bool needsRebuild = dirty;
     super.update(newWidget);
     final SliverPersistentHeaderDelegate newDelegate = newWidget.delegate;
     final SliverPersistentHeaderDelegate oldDelegate = oldWidget.delegate;
-    if (newDelegate != oldDelegate &&
-        (newDelegate.runtimeType != oldDelegate.runtimeType ||
-            newDelegate.shouldRebuild(oldDelegate))) {
+    if (needsRebuild ||
+        (newDelegate != oldDelegate &&
+            (newDelegate.runtimeType != oldDelegate.runtimeType ||
+                newDelegate.shouldRebuild(oldDelegate)))) {
       final _RenderSliverPersistentHeaderForWidgetsMixin renderObject = this.renderObject;
       _updateChild(newDelegate, renderObject.lastShrinkOffset, renderObject.lastOverlapsContent);
       renderObject.triggerRebuild();
