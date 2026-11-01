@@ -1306,6 +1306,16 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// ```
   /// {@end-tool}
   ///
+  /// A route can pop itself directly using [pop] or [maybePop]:
+  ///
+  /// ```dart
+  /// ModalRoute.of(context)?.pop(true);
+  /// ```
+  ///
+  /// Unlike `Navigator.pop(context)`, which always pops the top-most route on the
+  /// navigator, `ModalRoute.of(context)?.pop()` ensures that this specific route is
+  /// popped even if other routes are currently above it on the stack.
+  ///
   /// The given [BuildContext] will be rebuilt if the state of the route changes
   /// while it is visible (specifically, if [isCurrent] or [canPop] change value).
   @optionalTypeArgs
