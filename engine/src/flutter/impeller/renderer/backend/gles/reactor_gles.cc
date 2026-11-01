@@ -229,6 +229,9 @@ HandleGLES ReactorGLES::CreateHandle(HandleType type, GLuint external_handle) {
 
   WriterLock handles_lock(handles_mutex_);
   handles_[new_handle] = LiveHandle{gl_handle};
+  if (!gl_handle.has_value()) {
+    has_pending_handle_work_ = true;
+  }
   return new_handle;
 }
 
@@ -241,6 +244,8 @@ void ReactorGLES::CollectHandle(HandleGLES handle) {
     live_handle.pending_collection = true;
     WriterLock handles_lock(handles_mutex_);
     handles_[handle] = std::move(live_handle);
+    handles_to_collect_count_ += 1;
+    has_pending_handle_work_ = true;
   } else {
     WriterLock handles_lock(handles_mutex_);
     if (auto found = handles_.find(handle); found != handles_.end()) {
@@ -248,6 +253,7 @@ void ReactorGLES::CollectHandle(HandleGLES handle) {
         handles_to_collect_count_ += 1;
       }
       found->second.pending_collection = true;
+      has_pending_handle_work_ = true;
     }
   }
 }
@@ -257,11 +263,16 @@ bool ReactorGLES::React() {
     return false;
   }
   TRACE_EVENT0("impeller", "ReactorGLES::React");
-  while (HasPendingOperations()) {
+  // Always run at least one reaction pass even if `ops_` is empty for the
+  // current thread. `CollectHandle()` and `CreateHandle()` record pending
+  // handle deletions/creations in `handles_` without queueing an entry in
+  // `ops_`, so `ConsolidateHandles()` must still run when callers flush the
+  // reactor (e.g. via `ContextGLES::FlushCommandBuffers()`).
+  do {
     if (!ReactOnce()) {
       return false;
     }
-  }
+  } while (HasPendingOperations());
   return true;
 }
 
@@ -295,6 +306,12 @@ bool ReactorGLES::ReactOnce() {
 
 bool ReactorGLES::ConsolidateHandles() {
   TRACE_EVENT0("impeller", __FUNCTION__);
+  {
+    ReaderLock handles_lock(handles_mutex_);
+    if (!has_pending_handle_work_ && handles_to_collect_count_ == 0) {
+      return true;
+    }
+  }
   const auto& gl = GetProcTable();
   std::thread::id current_thread = std::this_thread::get_id();
   std::vector<std::tuple<HandleGLES, std::optional<GLStorage>>>
@@ -304,7 +321,7 @@ bool ReactorGLES::ConsolidateHandles() {
   {
     WriterLock handles_lock(handles_mutex_);
     handles_to_delete.reserve(handles_to_collect_count_);
-    handles_to_collect_count_ = 0;
+    size_t remaining_to_collect = 0;
     for (auto& handle : handles_) {
       // Collect dead handles.
       if (handle.second.pending_collection) {
@@ -313,6 +330,7 @@ bool ReactorGLES::ConsolidateHandles() {
         // a reaction and triggers collection of handles.
         const auto& owner_thread = handle.first.owner_thread_;
         if (owner_thread.has_value() && *owner_thread != current_thread) {
+          remaining_to_collect += 1;
           continue;
         }
         std::optional<GLStorage> storage;
@@ -345,6 +363,8 @@ bool ReactorGLES::ConsolidateHandles() {
     for (const auto& handle_to_delete : handles_to_delete) {
       handles_.erase(std::get<0>(handle_to_delete));
     }
+    handles_to_collect_count_ = remaining_to_collect;
+    has_pending_handle_work_ = remaining_to_collect > 0;
   }
 
   for (const auto& handle : handles_to_name) {
@@ -417,6 +437,7 @@ void ReactorGLES::SetDebugLabel(const HandleGLES& handle,
     WriterLock handles_lock(handles_mutex_);
     if (auto found = handles_.find(handle); found != handles_.end()) {
       found->second.pending_debug_label = label;
+      has_pending_handle_work_ = true;
     }
   }
 }

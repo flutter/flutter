@@ -288,6 +288,66 @@ TEST(PipelineLibraryGLESAsyncTest, FulfillsPromiseWhenReactorOpsAreDropped) {
   ASSERT_TRUE(IsReady(future));
   EXPECT_EQ(future.Get(), nullptr);
 }
+
+TEST(PipelineLibraryGLESAsyncTest,
+     CompletesPipelineWhenQueuedBeforeThreadCanReact) {
+  using VS = SpecConstantVertexShader;
+  using FS = SpecConstantFragmentShader;
+  MockAsyncContext mock = CreateMockAsyncContext();
+  std::shared_ptr<Context> context = mock.context;
+  ASSERT_TRUE(context && context->IsValid());
+  std::optional<PipelineDescriptor> desc =
+      PipelineBuilder<VS, FS>::MakeDefaultPipelineDescriptor(*context);
+  ASSERT_TRUE(desc.has_value());
+
+  // Queue pipeline creation while no GL context is current on any thread.
+  mock.worker->SetCanReact(false);
+  PipelineFuture<PipelineDescriptor> future =
+      context->GetPipelineLibrary()->GetPipeline(desc, /*async=*/true);
+  ASSERT_EQ(mock.io_task_runner->PendingTaskCount(), 1u);
+
+  // Once the resource/render thread can react, running the queued IO tasks
+  // compiles, links, and resolves the pipeline without error.
+  mock.worker->SetCanReact(true);
+  mock.io_task_runner->RunAll();
+
+  ASSERT_TRUE(IsReady(future));
+  std::shared_ptr<Pipeline<PipelineDescriptor>> pipeline = future.Get();
+  EXPECT_TRUE(pipeline && pipeline->IsValid());
+}
+
+TEST(PipelineLibraryGLESAsyncTest,
+     DefersFinishUntilThreadCanReactAgainWithoutPoisoningCache) {
+  using VS = SpecConstantVertexShader;
+  using FS = SpecConstantFragmentShader;
+  MockAsyncContext mock = CreateMockAsyncContext();
+  std::shared_ptr<Context> context = mock.context;
+  ASSERT_TRUE(context && context->IsValid());
+  std::optional<PipelineDescriptor> desc =
+      PipelineBuilder<VS, FS>::MakeDefaultPipelineDescriptor(*context);
+  ASSERT_TRUE(desc.has_value());
+
+  PipelineFuture<PipelineDescriptor> future =
+      context->GetPipelineLibrary()->GetPipeline(desc, /*async=*/true);
+  ASSERT_EQ(mock.io_task_runner->PendingTaskCount(), 1u);
+
+  // Start compilation while the thread can react.
+  mock.io_task_runner->RunOne();
+  EXPECT_FALSE(IsReady(future));
+
+  // Temporarily disable reacting on this thread when Finish() executes.
+  mock.worker->SetCanReact(false);
+  mock.io_task_runner->RunAll();
+  EXPECT_FALSE(IsReady(future));
+
+  // Once the thread can react again, flushing resolves the pipeline cleanly
+  // without poisoning the pipeline library cache with nullptr.
+  mock.worker->SetCanReact(true);
+  ASSERT_TRUE(context->FlushCommandBuffers());
+  ASSERT_TRUE(IsReady(future));
+  std::shared_ptr<Pipeline<PipelineDescriptor>> pipeline = future.Get();
+  EXPECT_TRUE(pipeline && pipeline->IsValid());
+}
 // NOLINTEND(bugprone-unchecked-optional-access)
 
 namespace {

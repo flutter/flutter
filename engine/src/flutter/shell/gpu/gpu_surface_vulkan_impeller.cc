@@ -32,15 +32,8 @@ GPUSurfaceVulkanImpeller::GPUSurfaceVulkanImpeller(
     return;
   }
 
-  auto aiks_context = std::make_shared<impeller::AiksContext>(
-      context, impeller::TypographerContextSkia::Make());
-  if (!aiks_context->IsValid()) {
-    return;
-  }
-
   impeller_context_ = std::move(context);
-  aiks_context_ = std::move(aiks_context);
-  is_valid_ = !!aiks_context_;
+  is_valid_ = true;
 }
 
 // |Surface|
@@ -100,7 +93,7 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceVulkanImpeller::AcquireFrame(
         impeller::Rect::MakeSize(render_target.GetRenderTargetSize());
 
     SurfaceFrame::EncodeCallback encode_callback = [aiks_context =
-                                                        aiks_context_,  //
+                                                        GetAiksContext(),  //
                                                     render_target,
                                                     cull_rect  //
     ](SurfaceFrame& surface_frame, DlCanvas* canvas) mutable -> bool {
@@ -114,10 +107,10 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceVulkanImpeller::AcquireFrame(
         return false;
       }
 
-      // This surface owns its AiksContext, so no other surface encodes into
-      // its transient host buffers. Reset them after every frame, including
-      // frames that are not the last surface submitted (such as platform
-      // view overlays, which set frame_boundary to false).
+      // Reset transient host buffers after every frame on the raster thread,
+      // including frames that are not the last surface submitted (such as
+      // platform view overlays, which set frame_boundary to false), so the
+      // engine's shared AiksContext host buffer ring never overflows mid-frame.
       return impeller::RenderToTarget(aiks_context->GetContentContext(),  //
                                       render_target,                      //
                                       display_list,                       //
@@ -185,7 +178,7 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceVulkanImpeller::AcquireFrame(
         impeller::Rect::MakeSize(render_target.GetRenderTargetSize());
 
     SurfaceFrame::EncodeCallback encode_callback = [aiks_context =
-                                                        aiks_context_,  //
+                                                        GetAiksContext(),  //
                                                     render_target,
                                                     cull_rect  //
     ](SurfaceFrame& surface_frame, DlCanvas* canvas) mutable -> bool {
@@ -288,7 +281,20 @@ bool GPUSurfaceVulkanImpeller::EnableRasterCache() const {
 // |Surface|
 std::shared_ptr<impeller::AiksContext>
 GPUSurfaceVulkanImpeller::GetAiksContext() const {
+  if (!aiks_context_ && impeller_context_) {
+    auto candidate = std::make_shared<impeller::AiksContext>(
+        impeller_context_, impeller::TypographerContextSkia::Make());
+    if (candidate->IsValid()) {
+      aiks_context_ = std::move(candidate);
+    }
+  }
   return aiks_context_;
+}
+
+// |Surface|
+void GPUSurfaceVulkanImpeller::SetAiksContext(
+    const std::shared_ptr<impeller::AiksContext>& aiks_context) {
+  aiks_context_ = aiks_context;
 }
 
 }  // namespace flutter

@@ -24,6 +24,10 @@ class IMPELLER_CA_METAL_LAYER_AVAILABLE GPUSurfaceMetalImpeller
                           const std::shared_ptr<impeller::AiksContext>& context,
                           bool render_to_surface = true);
 
+  GPUSurfaceMetalImpeller(GPUSurfaceMetalDelegate* delegate,
+                          const std::shared_ptr<impeller::Context>& context,
+                          bool render_to_surface = true);
+
   // |Surface|
   ~GPUSurfaceMetalImpeller();
 
@@ -35,7 +39,9 @@ class IMPELLER_CA_METAL_LAYER_AVAILABLE GPUSurfaceMetalImpeller
  private:
   const GPUSurfaceMetalDelegate* delegate_;
   const MTLRenderTargetType render_target_type_;
-  std::shared_ptr<impeller::AiksContext> aiks_context_;
+  std::shared_ptr<impeller::Context> impeller_context_;
+  mutable std::shared_ptr<impeller::AiksContext> aiks_context_;
+  bool is_valid_ = false;
   id<MTLTexture> last_texture_;
   // TODO(38466): Refactor GPU surface APIs take into account the fact that an
   // external view embedder may want to render to the root surface. This is a
@@ -76,6 +82,10 @@ class IMPELLER_CA_METAL_LAYER_AVAILABLE GPUSurfaceMetalImpeller
 
   // |Surface|
   std::shared_ptr<impeller::AiksContext> GetAiksContext() const override;
+
+  // |Surface|
+  void SetAiksContext(
+      const std::shared_ptr<impeller::AiksContext>& aiks_context) override;
 
   FML_DISALLOW_COPY_AND_ASSIGN(GPUSurfaceMetalImpeller);
 };

@@ -25,17 +25,9 @@ GPUSurfaceGLImpeller::GPUSurfaceGLImpeller(
     return;
   }
 
-  auto aiks_context = std::make_shared<impeller::AiksContext>(
-      context, impeller::TypographerContextSkia::Make());
-
-  if (!aiks_context->IsValid()) {
-    return;
-  }
-
   delegate_ = delegate;
   impeller_context_ = std::move(context);
   render_to_surface_ = render_to_surface;
-  aiks_context_ = std::move(aiks_context);
   is_valid_ = true;
 }
 
@@ -101,7 +93,7 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceGLImpeller::AcquireFrame(
   impeller::RenderTarget render_target = surface->GetRenderTarget();
 
   SurfaceFrame::EncodeCallback encode_callback =
-      [aiks_context = aiks_context_,  //
+      [aiks_context = GetAiksContext(),  //
        render_target](SurfaceFrame& surface_frame,
                       DlCanvas* canvas) mutable -> bool {
     if (!aiks_context) {
@@ -122,7 +114,6 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceGLImpeller::AcquireFrame(
                                     cull_rect,                          //
                                     /*reset_host_buffer=*/true          //
     );
-    return true;
   };
 
   return std::make_unique<SurfaceFrame>(
@@ -174,7 +165,20 @@ bool GPUSurfaceGLImpeller::EnableRasterCache() const {
 // |Surface|
 std::shared_ptr<impeller::AiksContext> GPUSurfaceGLImpeller::GetAiksContext()
     const {
+  if (!aiks_context_ && impeller_context_) {
+    auto candidate = std::make_shared<impeller::AiksContext>(
+        impeller_context_, impeller::TypographerContextSkia::Make());
+    if (candidate->IsValid()) {
+      aiks_context_ = std::move(candidate);
+    }
+  }
   return aiks_context_;
+}
+
+// |Surface|
+void GPUSurfaceGLImpeller::SetAiksContext(
+    const std::shared_ptr<impeller::AiksContext>& aiks_context) {
+  aiks_context_ = aiks_context;
 }
 
 }  // namespace flutter

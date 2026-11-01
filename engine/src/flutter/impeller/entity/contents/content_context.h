@@ -367,7 +367,9 @@ class ContentContext {
   std::shared_ptr<RenderTargetAllocator> render_target_cache_;
   std::shared_ptr<HostBuffer> data_host_buffer_;
   std::shared_ptr<HostBuffer> indexes_host_buffer_;
-  std::shared_ptr<Texture> empty_texture_;
+  mutable Mutex empty_texture_mutex_;
+  mutable std::shared_ptr<Texture> empty_texture_
+      IPLR_GUARDED_BY(empty_texture_mutex_);
   std::unique_ptr<TextShadowCache> text_shadow_cache_;
 
   bool is_texture_caching_enabled_ = false;

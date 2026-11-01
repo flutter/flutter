@@ -45,7 +45,7 @@ class GPUSurfaceVulkanImpeller final : public Surface {
   GPUSurfaceVulkanDelegate* delegate_;
   bool render_to_surface_ = true;
   std::shared_ptr<impeller::Context> impeller_context_;
-  std::shared_ptr<impeller::AiksContext> aiks_context_;
+  mutable std::shared_ptr<impeller::AiksContext> aiks_context_;
   std::shared_ptr<impeller::SwapchainTransientsVK> transients_;
   /// The size of the textures in [transients_]
   impeller::ISize transients_size_ = {};
@@ -68,6 +68,10 @@ class GPUSurfaceVulkanImpeller final : public Surface {
 
   // |Surface|
   std::shared_ptr<impeller::AiksContext> GetAiksContext() const override;
+
+  // |Surface|
+  void SetAiksContext(
+      const std::shared_ptr<impeller::AiksContext>& aiks_context) override;
 
   FML_DISALLOW_COPY_AND_ASSIGN(GPUSurfaceVulkanImpeller);
 };

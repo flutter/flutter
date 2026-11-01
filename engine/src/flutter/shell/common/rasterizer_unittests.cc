@@ -91,6 +91,10 @@ class MockSurface : public Surface {
               GetAiksContext,
               (),
               (const, override));
+  MOCK_METHOD(void,
+              SetAiksContext,
+              (const std::shared_ptr<impeller::AiksContext>&),
+              (override));
 };
 
 class MockExternalViewEmbedder : public ExternalViewEmbedder {
@@ -1519,5 +1523,225 @@ TEST(RasterizerTest, presentationTimeNotSetWhenVsyncTargetInPast) {
   latch.Wait();
 #endif  // false
 }
+
+#if IMPELLER_SUPPORTS_RENDERING
+TEST(RasterizerTest, SharesSingleAiksContextAcrossSurfaces) {
+  std::string test_name =
+      ::testing::UnitTest::GetInstance()->current_test_info()->name();
+  ThreadHost thread_host("io.flutter.test." + test_name + ".",
+                         ThreadHost::Type::kPlatform | ThreadHost::Type::kIo |
+                             ThreadHost::Type::kUi | ThreadHost::Type::kRaster);
+  TaskRunners task_runners("test", thread_host.platform_thread->GetTaskRunner(),
+                           thread_host.raster_thread->GetTaskRunner(),
+                           thread_host.ui_thread->GetTaskRunner(),
+                           thread_host.io_thread->GetTaskRunner());
+  Settings settings;
+  MockDelegate delegate;
+  ON_CALL(delegate, GetTaskRunners()).WillByDefault(ReturnRef(task_runners));
+  ON_CALL(delegate, GetSettings()).WillByDefault(ReturnRef(settings));
+
+  auto shared_aiks = std::make_shared<impeller::AiksContext>(
+      /*context=*/nullptr, /*typographer_context=*/nullptr);
+
+  auto surface1 = std::make_unique<NiceMock<MockSurface>>();
+  ON_CALL(*surface1, GetAiksContext()).WillByDefault(Return(shared_aiks));
+  ON_CALL(*surface1, MakeRenderContextCurrent()).WillByDefault([] {
+    return std::make_unique<GLContextDefaultResult>(true);
+  });
+
+  std::shared_ptr<impeller::AiksContext> injected_into_surface2;
+  auto surface2 = std::make_unique<NiceMock<MockSurface>>();
+  ON_CALL(*surface2, SetAiksContext(_))
+      .WillByDefault([&](const std::shared_ptr<impeller::AiksContext>& ctx) {
+        injected_into_surface2 = ctx;
+      });
+  ON_CALL(*surface2, MakeRenderContextCurrent()).WillByDefault([] {
+    return std::make_unique<GLContextDefaultResult>(true);
+  });
+
+  fml::AutoResetWaitableEvent latch;
+  thread_host.raster_thread->GetTaskRunner()->PostTask([&] {
+    Rasterizer rasterizer(delegate);
+    const SnapshotDelegate& snapshot_delegate = rasterizer;
+    rasterizer.Setup(std::move(surface1));
+    EXPECT_EQ(snapshot_delegate.GetAiksContext(), shared_aiks);
+    rasterizer.Teardown();
+    // Even after surface teardown, Rasterizer retains its single AiksContext
+    // and injects it into subsequent surfaces attached on the same engine.
+    EXPECT_EQ(snapshot_delegate.GetAiksContext(), shared_aiks);
+    rasterizer.Setup(std::move(surface2));
+    EXPECT_EQ(injected_into_surface2, shared_aiks);
+    latch.Signal();
+  });
+  latch.Wait();
+}
+
+TEST(RasterizerTest,
+     DoesNotLeakAiksContextAcrossFiftySurfaceChurnAndLowMemoryCycles) {
+  std::string test_name =
+      ::testing::UnitTest::GetInstance()->current_test_info()->name();
+  ThreadHost thread_host("io.flutter.test." + test_name + ".",
+                         ThreadHost::Type::kPlatform | ThreadHost::Type::kIo |
+                             ThreadHost::Type::kUi | ThreadHost::Type::kRaster);
+  TaskRunners task_runners("test", thread_host.platform_thread->GetTaskRunner(),
+                           thread_host.raster_thread->GetTaskRunner(),
+                           thread_host.ui_thread->GetTaskRunner(),
+                           thread_host.io_thread->GetTaskRunner());
+  Settings settings;
+  NiceMock<MockDelegate> delegate;
+  ON_CALL(delegate, GetTaskRunners()).WillByDefault(ReturnRef(task_runners));
+  ON_CALL(delegate, GetSettings()).WillByDefault(ReturnRef(settings));
+
+  std::weak_ptr<impeller::AiksContext> weak_aiks;
+  impeller::AiksContext* raw_aiks_ptr = nullptr;
+
+  fml::AutoResetWaitableEvent latch;
+  thread_host.raster_thread->GetTaskRunner()->PostTask([&] {
+    auto rasterizer = std::make_unique<Rasterizer>(delegate);
+    const SnapshotDelegate& snapshot_delegate = *rasterizer;
+
+    {
+      auto initial_aiks = std::make_shared<impeller::AiksContext>(
+          /*context=*/nullptr, /*typographer_context=*/nullptr);
+      weak_aiks = initial_aiks;
+      raw_aiks_ptr = initial_aiks.get();
+
+      auto first_surface = std::make_unique<NiceMock<MockSurface>>();
+      ON_CALL(*first_surface, GetAiksContext())
+          .WillByDefault(Return(initial_aiks));
+      ON_CALL(*first_surface, MakeRenderContextCurrent()).WillByDefault([] {
+        return std::make_unique<GLContextDefaultResult>(true);
+      });
+      rasterizer->Setup(std::move(first_surface));
+      rasterizer->NotifyLowMemoryWarning();
+      rasterizer->Teardown();
+    }
+
+    // Only Rasterizer holds a strong reference now (use_count == 1).
+    EXPECT_EQ(weak_aiks.use_count(), 1L);
+
+    for (int i = 0; i < 50; ++i) {
+      std::shared_ptr<impeller::AiksContext> observed;
+      auto surface = std::make_unique<NiceMock<MockSurface>>();
+      ON_CALL(*surface, SetAiksContext(_))
+          .WillByDefault([&](const std::shared_ptr<impeller::AiksContext>& c) {
+            observed = c;
+          });
+      ON_CALL(*surface, MakeRenderContextCurrent()).WillByDefault([] {
+        return std::make_unique<GLContextDefaultResult>(true);
+      });
+      rasterizer->Setup(std::move(surface));
+      EXPECT_EQ(observed.get(), raw_aiks_ptr);
+      EXPECT_EQ(snapshot_delegate.GetAiksContext().get(), raw_aiks_ptr);
+      rasterizer->NotifyLowMemoryWarning();
+      rasterizer->Teardown();
+      observed.reset();
+      // Every surface attach/detach cycle leaves exact use_count == 1.
+      EXPECT_EQ(weak_aiks.use_count(), 1L);
+    }
+
+    // Destroying Rasterizer at Shell shutdown deterministically frees
+    // AiksContext.
+    rasterizer.reset();
+    EXPECT_TRUE(weak_aiks.expired());
+    latch.Signal();
+  });
+  latch.Wait();
+}
+
+TEST(RasterizerTest,
+     ReclaimsAllAiksContextsAcrossMultiEngineDestructionCycles) {
+  std::string test_name =
+      ::testing::UnitTest::GetInstance()->current_test_info()->name();
+  ThreadHost thread_host("io.flutter.test." + test_name + ".",
+                         ThreadHost::Type::kPlatform | ThreadHost::Type::kIo |
+                             ThreadHost::Type::kUi | ThreadHost::Type::kRaster);
+  TaskRunners task_runners("test", thread_host.platform_thread->GetTaskRunner(),
+                           thread_host.raster_thread->GetTaskRunner(),
+                           thread_host.ui_thread->GetTaskRunner(),
+                           thread_host.io_thread->GetTaskRunner());
+  Settings settings;
+  NiceMock<MockDelegate> delegate;
+  ON_CALL(delegate, GetTaskRunners()).WillByDefault(ReturnRef(task_runners));
+  ON_CALL(delegate, GetSettings()).WillByDefault(ReturnRef(settings));
+
+  fml::AutoResetWaitableEvent latch;
+  thread_host.raster_thread->GetTaskRunner()->PostTask([&] {
+    std::vector<std::weak_ptr<impeller::AiksContext>> weak_contexts;
+    constexpr int kEngineCount = 20;
+    for (int i = 0; i < kEngineCount; ++i) {
+      auto rasterizer = std::make_unique<Rasterizer>(delegate);
+      auto engine_aiks = std::make_shared<impeller::AiksContext>(
+          /*context=*/nullptr, /*typographer_context=*/nullptr);
+      weak_contexts.push_back(engine_aiks);
+
+      auto surface = std::make_unique<NiceMock<MockSurface>>();
+      ON_CALL(*surface, GetAiksContext()).WillByDefault(Return(engine_aiks));
+      ON_CALL(*surface, MakeRenderContextCurrent()).WillByDefault([] {
+        return std::make_unique<GLContextDefaultResult>(true);
+      });
+      engine_aiks.reset();
+
+      rasterizer->Setup(std::move(surface));
+      rasterizer->NotifyLowMemoryWarning();
+      rasterizer->Teardown();
+      EXPECT_FALSE(weak_contexts.back().expired());
+
+      rasterizer.reset();
+      EXPECT_TRUE(weak_contexts.back().expired());
+    }
+    for (const auto& weak_ctx : weak_contexts) {
+      EXPECT_TRUE(weak_ctx.expired());
+    }
+    latch.Signal();
+  });
+  latch.Wait();
+}
+
+TEST(RasterizerTest, IsAiksContextInitializedDoesNotTriggerLazySurfaceAlloc) {
+  std::string test_name =
+      ::testing::UnitTest::GetInstance()->current_test_info()->name();
+  ThreadHost thread_host("io.flutter.test." + test_name + ".",
+                         ThreadHost::Type::kPlatform | ThreadHost::Type::kIo |
+                             ThreadHost::Type::kUi | ThreadHost::Type::kRaster);
+  TaskRunners task_runners("test", thread_host.platform_thread->GetTaskRunner(),
+                           thread_host.raster_thread->GetTaskRunner(),
+                           thread_host.ui_thread->GetTaskRunner(),
+                           thread_host.io_thread->GetTaskRunner());
+  Settings settings;
+  NiceMock<MockDelegate> delegate;
+  ON_CALL(delegate, GetTaskRunners()).WillByDefault(ReturnRef(task_runners));
+  ON_CALL(delegate, GetSettings()).WillByDefault(ReturnRef(settings));
+
+  fml::AutoResetWaitableEvent latch;
+  thread_host.raster_thread->GetTaskRunner()->PostTask([&] {
+    auto rasterizer = std::make_unique<Rasterizer>(delegate);
+    const SnapshotController::Delegate& snapshot_delegate = *rasterizer;
+    EXPECT_FALSE(snapshot_delegate.IsAiksContextInitialized());
+
+    auto surface_aiks = std::make_shared<impeller::AiksContext>(
+        /*context=*/nullptr, /*typographer_context=*/nullptr);
+    auto surface = std::make_unique<NiceMock<MockSurface>>();
+    ON_CALL(*surface, GetAiksContext()).WillByDefault(Return(surface_aiks));
+    ON_CALL(*surface, MakeRenderContextCurrent()).WillByDefault([] {
+      return std::make_unique<GLContextDefaultResult>(true);
+    });
+
+    rasterizer->Setup(std::move(surface));
+    EXPECT_TRUE(snapshot_delegate.IsAiksContextInitialized());
+    EXPECT_EQ(snapshot_delegate.GetAiksContext(), surface_aiks);
+
+    // Low-memory notifications after Teardown (when surface_ is null) must
+    // still safely purge caches on the retained shared AiksContext.
+    rasterizer->Teardown();
+    EXPECT_TRUE(snapshot_delegate.IsAiksContextInitialized());
+    rasterizer->NotifyLowMemoryWarning();
+
+    rasterizer.reset();
+    latch.Signal();
+  });
+  latch.Wait();
+}
+#endif  // IMPELLER_SUPPORTS_RENDERING
 
 }  // namespace flutter

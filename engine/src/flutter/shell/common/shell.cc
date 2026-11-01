@@ -435,6 +435,18 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
     return nullptr;
   }
 
+  // Eagerly initialize the Rasterizer's shared Impeller AiksContext on the
+  // raster thread now that both the Impeller context and IO resource context
+  // are ready, kicking off background bootstrap shader compilation immediately
+  // without requiring any window surface or temporary pbuffer.
+  fml::TaskRunner::RunNowOrPostTask(
+      task_runners.GetRasterTaskRunner(),
+      [rasterizer = shell->rasterizer_->GetWeakPtr()]() {
+        if (rasterizer) {
+          rasterizer->EnsureAiksContextInitialized();
+        }
+      });
+
   return shell;
 }
 
@@ -646,6 +658,13 @@ Shell::~Shell() {
       fml::MakeCopyable([io_manager = std::move(io_manager_),
                          platform_view = platform_view_.get(),
                          &io_latch]() mutable {
+#if IMPELLER_SUPPORTS_RENDERING
+        if (io_manager) {
+          if (auto impeller_context = io_manager->GetImpellerContext()) {
+            (void)impeller_context->FlushCommandBuffers();
+          }
+        }
+#endif  // IMPELLER_SUPPORTS_RENDERING
         std::weak_ptr<ShellIOManager> weak_io_manager(io_manager);
         io_manager.reset();
 

@@ -60,7 +60,8 @@ static std::shared_ptr<impeller::ContextMTL> CreateImpellerContext() {
 
 TEST(GPUSurfaceMetalImpeller, InvalidImpellerContextCreatesCausesSurfaceToBeInvalid) {
   auto delegate = std::make_shared<TestGPUSurfaceMetalDelegate>();
-  auto surface = std::make_shared<GPUSurfaceMetalImpeller>(delegate.get(), nullptr);
+  auto surface = std::make_shared<GPUSurfaceMetalImpeller>(
+      delegate.get(), std::shared_ptr<impeller::Context>(nullptr));
 
   ASSERT_FALSE(surface->IsValid());
 }
@@ -158,6 +159,24 @@ TEST(GPUSurfaceMetalImpeller, CreatesImpellerCaptureScope) {
   EXPECT_FALSE(context->GetCaptureManager()->CaptureScopeActive());
 }
 #endif  // IMPELLER_DEBUG
+
+TEST(GPUSurfaceMetalImpeller, SetAiksContextUpdatesValidityWhenContextIsInvalid) {
+  auto delegate = std::make_shared<TestGPUSurfaceMetalDelegate>();
+  auto valid_aiks_context =
+      std::make_shared<impeller::AiksContext>(CreateImpellerContext(), nullptr);
+  std::unique_ptr<Surface> surface =
+      std::make_unique<GPUSurfaceMetalImpeller>(delegate.get(), valid_aiks_context);
+  ASSERT_TRUE(surface->IsValid());
+
+  // Resetting the AiksContext to nullptr clears swapchain_transients_ and must
+  // mark the surface invalid rather than leaving is_valid_ stale at true.
+  surface->SetAiksContext(nullptr);
+  EXPECT_FALSE(surface->IsValid());
+
+  // Re-binding a valid AiksContext restores validity and swapchain transients.
+  surface->SetAiksContext(valid_aiks_context);
+  EXPECT_TRUE(surface->IsValid());
+}
 
 }  // namespace testing
 }  // namespace flutter

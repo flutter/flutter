@@ -564,28 +564,6 @@ ContentContext::ContentContext(
                 context_->GetCapabilities()->GetMinimumUniformAlignment(),
                 context_->GetSubmissionTracker())
           : data_host_buffer_;
-  {
-    TextureDescriptor desc;
-    desc.storage_mode = StorageMode::kDevicePrivate;
-    desc.format = PixelFormat::kR8G8B8A8UNormInt;
-    desc.size = ISize{1, 1};
-    empty_texture_ = GetContext()->GetResourceAllocator()->CreateTexture(desc);
-
-    std::array<uint8_t, 4> data = Color::BlackTransparent().ToR8G8B8A8();
-    std::shared_ptr<CommandBuffer> cmd_buffer =
-        GetContext()->CreateCommandBuffer();
-    std::shared_ptr<BlitPass> blit_pass = cmd_buffer->CreateBlitPass();
-    HostBuffer& data_host_buffer = GetTransientsDataBuffer();
-    BufferView buffer_view = data_host_buffer.Emplace(data);
-    blit_pass->AddCopy(buffer_view, empty_texture_);
-
-    if (!blit_pass->EncodeCommands() || !GetContext()
-                                             ->GetCommandQueue()
-                                             ->Submit({std::move(cmd_buffer)})
-                                             .ok()) {
-      VALIDATION_LOG << "Failed to create empty texture.";
-    }
-  }
 
   // A warmed variant is only used if its options match, field for field, the
   // options that the contents using it draw with. Those always start from
@@ -911,6 +889,47 @@ bool ContentContext::IsValid() const {
 }
 
 std::shared_ptr<Texture> ContentContext::GetEmptyTexture() const {
+  Lock lock(empty_texture_mutex_);
+  if (!empty_texture_) {
+    TextureDescriptor desc;
+    desc.storage_mode = StorageMode::kDevicePrivate;
+    desc.format = PixelFormat::kR8G8B8A8UNormInt;
+    desc.size = ISize{1, 1};
+    std::shared_ptr<Texture> texture =
+        GetContext()->GetResourceAllocator()->CreateTexture(desc);
+    if (!texture) {
+      VALIDATION_LOG << "Failed to allocate empty texture.";
+      return nullptr;
+    }
+
+    std::array<uint8_t, 4> data = Color::BlackTransparent().ToR8G8B8A8();
+    DeviceBufferDescriptor buffer_desc;
+    buffer_desc.size = data.size();
+    buffer_desc.storage_mode = StorageMode::kHostVisible;
+    std::shared_ptr<DeviceBuffer> staging_buffer =
+        GetContext()->GetResourceAllocator()->CreateBuffer(buffer_desc);
+    if (!staging_buffer || !staging_buffer->CopyHostBuffer(
+                               reinterpret_cast<const uint8_t*>(data.data()),
+                               Range{0, data.size()})) {
+      VALIDATION_LOG << "Failed to allocate staging buffer for empty texture.";
+      return nullptr;
+    }
+
+    std::shared_ptr<CommandBuffer> cmd_buffer =
+        GetContext()->CreateCommandBuffer();
+    std::shared_ptr<BlitPass> blit_pass = cmd_buffer->CreateBlitPass();
+    BufferView buffer_view(staging_buffer, Range{0, data.size()});
+    blit_pass->AddCopy(buffer_view, texture);
+
+    if (!blit_pass->EncodeCommands() || !GetContext()
+                                             ->GetCommandQueue()
+                                             ->Submit({std::move(cmd_buffer)})
+                                             .ok()) {
+      VALIDATION_LOG << "Failed to create empty texture.";
+      return nullptr;
+    }
+    empty_texture_ = std::move(texture);
+  }
   return empty_texture_;
 }
 
