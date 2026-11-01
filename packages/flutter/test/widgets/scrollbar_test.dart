@@ -7,6 +7,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/foundation.dart';
 
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/src/physics/utils.dart' show nearEqual;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -2879,6 +2880,173 @@ The provided ScrollController cannot be shared by multiple ScrollView widgets.''
     await tester.pumpAndSettle();
 
     expect(scrollController.offset, 100.0);
+  }, variant: TargetPlatformVariant.all());
+
+  testWidgets('The bar uses the scrollable pointer axis modifiers for mouse wheel events', (
+    WidgetTester tester,
+  ) async {
+    final scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
+
+    Widget buildFrame({ScrollBehavior? scrollableBehavior, ScrollBehavior? inheritedBehavior}) {
+      Widget scrollable = CustomScrollView(
+        controller: scrollController,
+        scrollDirection: Axis.horizontal,
+        scrollBehavior: scrollableBehavior,
+        slivers: const <Widget>[SliverToBoxAdapter(child: SizedBox(width: 1200.0, height: 600.0))],
+      );
+      if (inheritedBehavior != null) {
+        scrollable = ScrollConfiguration(behavior: inheritedBehavior, child: scrollable);
+      }
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: ScrollConfiguration(
+            behavior: const ScrollBehavior().copyWith(
+              pointerAxisModifiers: <LogicalKeyboardKey>{LogicalKeyboardKey.controlLeft},
+            ),
+            child: RawScrollbar(
+              thumbVisibility: true,
+              thickness: 24.0,
+              controller: scrollController,
+              child: scrollable,
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame());
+    await tester.pumpAndSettle();
+    expect(scrollController.offset, 0.0);
+
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+
+    final pointer = TestPointer(1, ui.PointerDeviceKind.mouse);
+    pointer.hover(const Offset(15.0, 598.0));
+    await tester.sendEventToBinding(pointer.scroll(const Offset(0.0, 30.0)));
+    await tester.pumpAndSettle();
+
+    expect(scrollController.offset, 30.0);
+
+    scrollController.jumpTo(0.0);
+    await tester.pumpWidget(
+      buildFrame(
+        scrollableBehavior: const ScrollBehavior().copyWith(
+          pointerAxisModifiers: <LogicalKeyboardKey>{LogicalKeyboardKey.altLeft},
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.sendEventToBinding(pointer.scroll(const Offset(0.0, 30.0)));
+    await tester.pumpAndSettle();
+    expect(scrollController.offset, 0.0);
+
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.altLeft);
+    addTearDown(() => tester.sendKeyUpEvent(LogicalKeyboardKey.altLeft));
+    await tester.sendEventToBinding(pointer.scroll(const Offset(0.0, 30.0)));
+    await tester.pumpAndSettle();
+    expect(scrollController.offset, 30.0);
+
+    scrollController.jumpTo(0.0);
+    await tester.pumpWidget(
+      buildFrame(
+        inheritedBehavior: const ScrollBehavior().copyWith(
+          pointerAxisModifiers: <LogicalKeyboardKey>{LogicalKeyboardKey.altLeft},
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.sendEventToBinding(pointer.scroll(const Offset(0.0, 30.0)));
+    await tester.pumpAndSettle();
+    expect(scrollController.offset, 30.0);
+  }, variant: TargetPlatformVariant.all());
+
+  testWidgets('The bar only flips mouse wheel axes while a modifier is held', (
+    WidgetTester tester,
+  ) async {
+    final scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: ScrollConfiguration(
+            behavior: const ScrollBehavior().copyWith(
+              pointerAxisModifiers: <LogicalKeyboardKey>{LogicalKeyboardKey.controlLeft},
+            ),
+            child: RawScrollbar(
+              thumbVisibility: true,
+              thickness: 24.0,
+              controller: scrollController,
+              child: CustomScrollView(
+                controller: scrollController,
+                slivers: const <Widget>[SliverToBoxAdapter(child: SizedBox(height: 1200.0))],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+    addTearDown(() => tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft));
+
+    final mouse = TestPointer(1, ui.PointerDeviceKind.mouse);
+    mouse.hover(const Offset(798.0, 15.0));
+    await tester.sendEventToBinding(mouse.scroll(const Offset(0.0, 30.0)));
+    await tester.pumpAndSettle();
+    expect(scrollController.offset, 0.0);
+
+    await tester.sendEventToBinding(mouse.scroll(const Offset(30.0, 0.0)));
+    await tester.pumpAndSettle();
+    expect(scrollController.offset, 30.0);
+
+    final trackpad = TestPointer(2, ui.PointerDeviceKind.trackpad);
+    trackpad.hover(const Offset(798.0, 15.0));
+    await tester.sendEventToBinding(trackpad.scroll(const Offset(0.0, 30.0)));
+    await tester.pumpAndSettle();
+    expect(scrollController.offset, 60.0);
+  }, variant: TargetPlatformVariant.all());
+
+  testWidgets('The bar uses default Shift modifiers without a ScrollConfiguration', (
+    WidgetTester tester,
+  ) async {
+    final scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: RawScrollbar(
+            thumbVisibility: true,
+            thickness: 24.0,
+            controller: scrollController,
+            child: ListView.builder(
+              controller: scrollController,
+              scrollDirection: Axis.horizontal,
+              itemCount: 200,
+              itemBuilder: (_, _) => const SizedBox(width: 120.0),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
+    addTearDown(() => tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft));
+
+    final pointer = TestPointer(1, ui.PointerDeviceKind.mouse);
+    pointer.hover(const Offset(15.0, 598.0));
+    await tester.sendEventToBinding(pointer.scroll(const Offset(0.0, 30.0)));
+    await tester.pumpAndSettle();
+    expect(scrollController.offset, 30.0);
   }, variant: TargetPlatformVariant.all());
 
   testWidgets(

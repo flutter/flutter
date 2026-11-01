@@ -574,6 +574,10 @@ class ScrollableState extends State<Scrollable>
   ScrollPhysics? get resolvedPhysics => _physics;
   ScrollPhysics? _physics;
 
+  /// The [ScrollBehavior] used by this scrollable, including an inherited
+  /// [ScrollConfiguration] when [Scrollable.scrollBehavior] is null.
+  ScrollBehavior get resolvedScrollBehavior => _configuration;
+
   /// An [Offset] that represents the absolute distance from the origin, or 0,
   /// of the [ScrollPosition] expressed in the associated [Axis].
   ///
