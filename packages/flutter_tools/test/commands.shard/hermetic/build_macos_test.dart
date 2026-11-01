@@ -661,7 +661,7 @@ STDERR STUFF
         'FLUTTER_XCODE_ASSETCATALOG_COMPILER_APPICON_NAME': 'AppIcon.special',
       });
 
-      final FlutterProject flutterProject = FlutterProject.fromDirectory(
+      final FlutterProject flutterProject = FlutterProject.fromDirectoryTest(
         fileSystem.currentDirectory,
       );
       final Directory flutterBuildDir = fileSystem.directory(
