@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 #include "flutter/shell/platform/linux/fl_display_monitor.h"
+
+#include "flutter/shell/platform/linux/fl_display_monitor_backend.h"
 #include "flutter/shell/platform/linux/fl_engine_private.h"
 
 struct _FlDisplayMonitor {
@@ -17,6 +19,9 @@ struct _FlDisplayMonitor {
   // Mapping of GdkMonitor to display IDs.
   GHashTable* display_ids_by_monitor;
 
+  // Toolkit-specific discovery and signal subscriptions.
+  FlDisplayMonitorBackend* backend;
+
   // Next ID to assign to a new monitor.
   FlutterEngineDisplayId next_display_id;
 };
@@ -30,13 +35,15 @@ static void notify_display_update(FlDisplayMonitor* self) {
     return;
   }
 
-  int n_monitors = gdk_display_get_n_monitors(self->display);
+  g_autoptr(GPtrArray) monitors =
+      fl_display_monitor_backend_get_monitors(self->backend);
+  const guint n_monitors = monitors->len;
   g_autofree FlutterEngineDisplay* displays =
       g_new0(FlutterEngineDisplay, n_monitors);
-  for (int i = 0; i < n_monitors; i++) {
+  for (guint i = 0; i < static_cast<guint>(n_monitors); i++) {
     FlutterEngineDisplay* display = &displays[i];
 
-    GdkMonitor* monitor = gdk_display_get_monitor(self->display, i);
+    GdkMonitor* monitor = GDK_MONITOR(g_ptr_array_index(monitors, i));
     FlutterEngineDisplayId display_id = GPOINTER_TO_INT(
         g_hash_table_lookup(self->display_ids_by_monitor, monitor));
     if (display_id == 0) {
@@ -53,20 +60,20 @@ static void notify_display_update(FlDisplayMonitor* self) {
     display->display_id = display_id;
     display->single_display = false;
     display->refresh_rate = gdk_monitor_get_refresh_rate(monitor) / 1000.0;
+    display->device_pixel_ratio = fl_display_monitor_backend_get_scale(monitor);
     display->width = geometry.width;
     display->height = geometry.height;
-    display->device_pixel_ratio = gdk_monitor_get_scale_factor(monitor);
   }
 
   fl_engine_notify_display_update(engine, displays, n_monitors);
 }
 
-static void monitor_added_cb(FlDisplayMonitor* self, GdkMonitor* monitor) {
-  notify_display_update(self);
-}
-
-static void monitor_removed_cb(FlDisplayMonitor* self, GdkMonitor* monitor) {
-  g_hash_table_remove(self->display_ids_by_monitor, monitor);
+static void monitors_changed_cb(GdkMonitor* removed_monitor,
+                                gpointer user_data) {
+  FlDisplayMonitor* self = FL_DISPLAY_MONITOR(user_data);
+  if (removed_monitor != nullptr) {
+    g_hash_table_remove(self->display_ids_by_monitor, removed_monitor);
+  }
   notify_display_update(self);
 }
 
@@ -74,6 +81,7 @@ static void fl_display_monitor_dispose(GObject* object) {
   FlDisplayMonitor* self = FL_DISPLAY_MONITOR(object);
 
   g_weak_ref_clear(&self->engine);
+  g_clear_pointer(&self->backend, fl_display_monitor_backend_free);
   g_clear_object(&self->display);
   g_clear_pointer(&self->display_ids_by_monitor, g_hash_table_unref);
 
@@ -103,12 +111,11 @@ FlDisplayMonitor* fl_display_monitor_new(FlEngine* engine,
 void fl_display_monitor_start(FlDisplayMonitor* self) {
   g_return_if_fail(FL_IS_DISPLAY_MONITOR(self));
 
-  g_signal_connect_object(self->display, "monitor-added",
-                          G_CALLBACK(monitor_added_cb), self,
-                          G_CONNECT_SWAPPED);
-  g_signal_connect_object(self->display, "monitor-removed",
-                          G_CALLBACK(monitor_removed_cb), self,
-                          G_CONNECT_SWAPPED);
+  if (self->backend == nullptr) {
+    self->backend = fl_display_monitor_backend_new(self->display,
+                                                   monitors_changed_cb, self);
+  }
+  fl_display_monitor_backend_start(self->backend);
   notify_display_update(self);
 }
 
