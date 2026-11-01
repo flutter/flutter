@@ -838,7 +838,13 @@ class _TreeSliverState<T> extends State<TreeSliver<T>>
     _activeAnimations.clear();
     for (final TreeSliverNode<T> node in _currentAnimationForParent.keys) {
       final _AnimationRecord animationRecord = _currentAnimationForParent[node]!;
-      final int leadingChildIndex = _activeNodes.indexOf(node) + 1;
+      final int nodeIndex = _activeNodes.indexOf(node);
+      if (nodeIndex == -1) {
+        // An ancestor may have collapsed while this node is still animating.
+        // Hidden nodes must not contribute to the render object's animations.
+        continue;
+      }
+      final int leadingChildIndex = nodeIndex + 1;
       final TreeSliverNodesAnimation animatingChildren = (
         fromIndex: leadingChildIndex,
         toIndex: leadingChildIndex + node.children.length - 1,
@@ -891,13 +897,13 @@ class _TreeSliverState<T> extends State<TreeSliver<T>>
                   _currentAnimationForParent[node]!.animation.dispose();
                   _currentAnimationForParent[node]!.controller.dispose();
                   _currentAnimationForParent.remove(node);
-                  _updateActiveAnimations();
                   // If the node is collapsing, we need to unpack the active
                   // nodes to remove the ones that were removed from the tree.
                   // This is only necessary if the node is collapsing.
                   if (!node._expanded) {
                     _unpackActiveNodes();
                   }
+                  _updateActiveAnimations();
                 case AnimationStatus.forward:
                 case AnimationStatus.reverse:
               }
