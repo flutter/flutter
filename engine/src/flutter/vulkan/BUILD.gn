@@ -22,6 +22,7 @@ source_set("vulkan") {
     "vulkan_image.h",
     "vulkan_native_surface.cc",
     "vulkan_native_surface.h",
+    "vulkan_provider.h",
     "vulkan_skia_proc_table.cc",
     "vulkan_skia_proc_table.h",
     "vulkan_surface.cc",
