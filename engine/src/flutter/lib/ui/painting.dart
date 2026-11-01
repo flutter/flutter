@@ -3847,7 +3847,7 @@ enum BlurStyle {
 /// color pixels.
 ///
 /// Instances of this class are used with [Paint.maskFilter] on [Paint] objects.
-class MaskFilter {
+final class MaskFilter {
   /// Creates a mask filter that takes the shape being drawn and blurs it.
   ///
   /// This is commonly used to approximate shadows.
@@ -4070,7 +4070,7 @@ _ColorTransform _getColorTransform(ColorSpace source, ColorSpace destination) {
 ///
 /// Instances of this class are used with [Paint.colorFilter] on [Paint]
 /// objects.
-class ColorFilter implements ImageFilter {
+final class ColorFilter implements ImageFilter {
   /// Creates a color filter that applies the blend mode given as the second
   /// argument. The source color is the one given as the first argument, and the
   /// destination color is the one from the layer being composited.
@@ -4223,9 +4223,6 @@ class ColorFilter implements ImageFilter {
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType) {
-      return false;
-    }
     return other is ColorFilter &&
         other._type == _type &&
         _listEquals<double>(other._matrix, _matrix) &&
@@ -5037,7 +5034,7 @@ Float32List _encodeTwoPoints(Offset pointA, Offset pointB) {
 ///
 ///  * [Gradient](https://api.flutter.dev/flutter/painting/Gradient-class.html), the class in the [painting] library.
 ///
-base class Gradient extends Shader {
+final class Gradient extends Shader {
   /// Creates a linear gradient from `from` to `to`.
   ///
   /// If `colorStops` is provided, `colorStops[i]` is a number from 0.0 to 1.0
@@ -5336,7 +5333,7 @@ base class Gradient extends Shader {
 }
 
 /// A shader (as used by [Paint.shader]) that tiles an image.
-base class ImageShader extends Shader {
+final class ImageShader extends Shader {
   /// Creates an image-tiling shader.
   ///
   /// The first argument specifies the image to render. The
@@ -5414,7 +5411,7 @@ typedef _UniformFloatInfo = ({int index, int size});
 ///
 /// For more information, see the website
 /// [documentation]( https://docs.flutter.dev/development/ui/advanced/shaders).
-base class FragmentProgram extends NativeFieldWrapperClass1 {
+final class FragmentProgram extends NativeFieldWrapperClass1 {
   @pragma('vm:entry-point')
   FragmentProgram._fromAsset(String assetKey) {
     _constructor();
@@ -5636,7 +5633,7 @@ sealed class UniformType {}
 /// See also:
 ///   [FragmentShader.getUniformFloat] - How [UniformFloatSlot] instances are acquired.
 ///
-base class UniformFloatSlot extends UniformType {
+final class UniformFloatSlot extends UniformType {
   UniformFloatSlot._(this._shader, this.name, this.index, this._shaderIndex);
 
   /// Set the float value of the bound uniform.
@@ -5674,7 +5671,7 @@ base class UniformFloatSlot extends UniformType {
 /// See also:
 ///   [FragmentShader.getUniformVec2] - How [UniformVec2Slot] instances are acquired.
 ///
-base class UniformVec2Slot extends UniformType {
+final class UniformVec2Slot extends UniformType {
   UniformVec2Slot._(this._xSlot, this._ySlot);
 
   /// Set the float value of the bound uniform.
@@ -5700,7 +5697,7 @@ base class UniformVec2Slot extends UniformType {
 /// See also:
 ///   [FragmentShader.getUniformVec3] - How [UniformVec3Slot] instances are acquired.
 ///
-base class UniformVec3Slot extends UniformType {
+final class UniformVec3Slot extends UniformType {
   UniformVec3Slot._(this._xSlot, this._ySlot, this._zSlot);
 
   /// Set the float value of the bound uniform.
@@ -5727,7 +5724,7 @@ base class UniformVec3Slot extends UniformType {
 /// See also:
 ///   [FragmentShader.getUniformVec4] - How [UniformVec4Slot] instances are acquired.
 ///
-base class UniformVec4Slot extends UniformType {
+final class UniformVec4Slot extends UniformType {
   UniformVec4Slot._(this._xSlot, this._ySlot, this._zSlot, this._wSlot);
 
   /// Set the float value of the bound uniform.
@@ -5758,7 +5755,7 @@ base class UniformVec4Slot extends UniformType {
 /// See also:
 ///   [FragmentShader.getUniformMat2] - How [UniformMat2Slot] instances are acquired.
 ///
-base class UniformMat2Slot extends UniformType {
+final class UniformMat2Slot extends UniformType {
   UniformMat2Slot._(this._m00, this._m01, this._m10, this._m11);
 
   /// Set the float value of the matrix in row-major order.
@@ -5790,7 +5787,7 @@ base class UniformMat2Slot extends UniformType {
 /// See also:
 ///   [FragmentShader.getUniformMat3] - How [UniformMat3Slot] instances are acquired.
 ///
-base class UniformMat3Slot extends UniformType {
+final class UniformMat3Slot extends UniformType {
   UniformMat3Slot._(
     this._m00,
     this._m01,
@@ -5849,7 +5846,7 @@ base class UniformMat3Slot extends UniformType {
 ///   [FragmentShader.getUniformMat4] - How [UniformMat4Slot] instances are acquired.
 ///
 
-base class UniformMat4Slot extends UniformType {
+final class UniformMat4Slot extends UniformType {
   UniformMat4Slot._(
     this._m00,
     this._m01,
@@ -5954,7 +5951,7 @@ class UniformArray<T extends UniformType> {
 
 /// A binding to a shader's image sampler. Calling [set] on this object updates
 /// a sampler's bound image.
-base class ImageSamplerSlot {
+final class ImageSamplerSlot {
   ImageSamplerSlot._(this._shader, this.name, this._shaderIndex);
 
   final FragmentShader _shader;
@@ -5986,7 +5983,7 @@ base class ImageSamplerSlot {
 /// if two [FragmentShader] objects with different float uniforms or samplers
 /// are required to exist simultaneously, they must be obtained from two
 /// different calls to [FragmentProgram.fragmentShader].
-base class FragmentShader extends Shader {
+final class FragmentShader extends Shader {
   FragmentShader._(this._program, {String? debugName}) : _debugName = debugName, super._() {
     _floats = _constructor(_program, _program._uniformFloatCount, _program._samplerCount);
   }
@@ -6589,7 +6586,7 @@ enum VertexMode {
 /// the conversion overhead. The raw constructor is useful if the data is coming
 /// from another source (e.g. a file) and can therefore be parsed directly into
 /// the underlying representation.
-base class Vertices extends NativeFieldWrapperClass1 {
+final class Vertices extends NativeFieldWrapperClass1 {
   /// Creates a set of vertex data for use with [Canvas.drawVertices].
   ///
   /// The `mode` parameter describes how the points should be interpreted: as
@@ -8867,7 +8864,7 @@ class Shadow {
 ///
 /// The creator of this object is responsible for calling [dispose] when it is
 /// no longer needed.
-base class ImmutableBuffer extends NativeFieldWrapperClass1 {
+final class ImmutableBuffer extends NativeFieldWrapperClass1 {
   ImmutableBuffer._(this._length);
 
   /// Creates a copy of the data from a [Uint8List] suitable for internal use
