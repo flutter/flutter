@@ -160,6 +160,8 @@ void main() {
     const kUserPermissionDenied = 5;
     const kWriteProtect = 19;
     const kPrivilegeNotHeld = 1314;
+    const kInsufficientSystemResources = 1450;
+    const kPagingFileTooSmall = 1455;
     const kFatalDeviceHardwareError = 483;
     const kDeviceDoesNotExist = 433;
 
@@ -475,6 +477,47 @@ void main() {
       expect(() => file.openSync(), throwsToolExit(message: expectedMessage));
       expect(() => file.createSync(), throwsToolExit(message: expectedMessage));
     });
+
+    for (final (name, errorCode) in const <(String, int)>[
+      ('insufficient system resources', kInsufficientSystemResources),
+      ('paging file too small', kPagingFileTooSmall),
+    ]) {
+      testWithoutContext('when $name ($errorCode)', () async {
+        final fileSystem = ErrorHandlingFileSystem(
+          delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
+          platform: windowsPlatform,
+        );
+        final File file = fileSystem.file('file');
+
+        exceptionHandler.addError(
+          file,
+          FileSystemOp.write,
+          FileSystemException('', file.path, OSError('', errorCode)),
+        );
+        exceptionHandler.addError(
+          file,
+          FileSystemOp.open,
+          FileSystemException('', file.path, OSError('', errorCode)),
+        );
+        exceptionHandler.addError(
+          file,
+          FileSystemOp.create,
+          FileSystemException('', file.path, OSError('', errorCode)),
+        );
+
+        const expectedMessage =
+            'Your system is running low on available memory or paging file space.';
+        await expectLater(
+          () => file.writeAsBytes(<int>[0]),
+          throwsToolExit(message: expectedMessage),
+        );
+        await expectLater(() => file.writeAsString(''), throwsToolExit(message: expectedMessage));
+        expect(() => file.writeAsBytesSync(<int>[0]), throwsToolExit(message: expectedMessage));
+        expect(() => file.writeAsStringSync(''), throwsToolExit(message: expectedMessage));
+        expect(() => file.openSync(), throwsToolExit(message: expectedMessage));
+        expect(() => file.createSync(), throwsToolExit(message: expectedMessage));
+      });
+    }
   });
 
   group('throws ToolExit on Linux', () {
@@ -1181,6 +1224,8 @@ Please ensure that the SDK and/or project is installed in a location that has re
     const kUserPermissionDenied = 5;
     const kApplicationControlPolicyBlocked = 4551;
     const kAccessDisabledByPolicy = 1260;
+    const kInsufficientSystemResources = 1450;
+    const kPagingFileTooSmall = 1455;
     const kSystemIntegrityPolicyViolation = 454;
 
     testWithoutContext(
@@ -1467,6 +1512,48 @@ Please ensure that the SDK and/or project is installed in a location that has re
         );
         expect(
           () async => processManager.run(<String>['foo']),
+          throwsToolExit(message: expectedMessage),
+        );
+        expect(
+          () => processManager.runSync(<String>['foo']),
+          throwsToolExit(message: expectedMessage),
+        );
+      });
+    }
+
+    for (final (name, errorCode) in const <(String, int)>[
+      ('insufficient system resources', kInsufficientSystemResources),
+      ('paging file too small', kPagingFileTooSmall),
+    ]) {
+      testWithoutContext('when $name ($errorCode)', () async {
+        final fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
+          FakeCommand(
+            command: const <String>['foo'],
+            exception: ProcessException('foo', const <String>[], 'Low memory', errorCode),
+          ),
+          FakeCommand(
+            command: const <String>['foo'],
+            exception: ProcessException('foo', const <String>[], 'Low memory', errorCode),
+          ),
+          FakeCommand(
+            command: const <String>['foo'],
+            exception: ProcessException('foo', const <String>[], 'Low memory', errorCode),
+          ),
+        ]);
+
+        final ProcessManager processManager = createProcessManager(
+          delegate: fakeProcessManager,
+          platform: windowsPlatform,
+        );
+
+        const expectedMessage =
+            'Your system is running low on available memory or paging file space.';
+        await expectLater(
+          () => processManager.start(<String>['foo']),
+          throwsToolExit(message: expectedMessage),
+        );
+        await expectLater(
+          () => processManager.run(<String>['foo']),
           throwsToolExit(message: expectedMessage),
         );
         expect(
