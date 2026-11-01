@@ -9,6 +9,7 @@ library;
 
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/rendering.dart';
 
@@ -363,6 +364,8 @@ class _RenderSingleChildViewport extends RenderBox
       return;
     }
     _axisDirection = value;
+    // The remembered max scroll extent measured the previous axis.
+    _reconciledMaxScrollExtent = null;
     markNeedsLayout();
   }
 
@@ -381,6 +384,8 @@ class _RenderSingleChildViewport extends RenderBox
     if (attached) {
       _offset.addListener(_hasScrolled);
     }
+    // The new offset has not been reconciled against the extents yet.
+    _reconciledMaxScrollExtent = null;
     markNeedsLayout();
   }
 
@@ -450,6 +455,9 @@ class _RenderSingleChildViewport extends RenderBox
     });
   }
 
+  // The max scroll extent the offset was last reconciled against.
+  double? _reconciledMaxScrollExtent;
+
   BoxConstraints _getInnerConstraints(BoxConstraints constraints) {
     return switch (axis) {
       Axis.horizontal => constraints.heightConstraints(),
@@ -501,16 +509,45 @@ class _RenderSingleChildViewport extends RenderBox
       size = constraints.constrain(child!.size);
     }
 
+    final double minScrollExtent = _minScrollExtent;
+    final double maxScrollExtent = _maxScrollExtent;
+
     if (offset.hasPixels) {
-      if (offset.pixels > _maxScrollExtent) {
-        offset.correctBy(_maxScrollExtent - offset.pixels);
-      } else if (offset.pixels < _minScrollExtent) {
-        offset.correctBy(_minScrollExtent - offset.pixels);
+      final double pixels = offset.pixels;
+      final double? previousMaxScrollExtent = _reconciledMaxScrollExtent;
+      // Preserve an existing overscroll unless the edge it is past moved inward. A new offset
+      // still needs its initial correction, as does an offset left out of range by a shrink. The
+      // leading edge never moves. A relayout of the same content can measure the trailing edge
+      // a rounding error away from the last layout; that is not a move.
+      final isNewOffset = previousMaxScrollExtent == null;
+      final bool trailingEdgeMovedInward =
+          previousMaxScrollExtent != null &&
+          maxScrollExtent < previousMaxScrollExtent - precisionErrorTolerance;
+      if (pixels > maxScrollExtent && (isNewOffset || trailingEdgeMovedInward)) {
+        offset.correctBy(maxScrollExtent - pixels);
+      } else if (pixels < minScrollExtent && isNewOffset) {
+        offset.correctBy(minScrollExtent - pixels);
       }
+      _reconciledMaxScrollExtent = maxScrollExtent;
     }
 
     offset.applyViewportDimension(_viewportExtent);
-    offset.applyContentDimensions(_minScrollExtent, _maxScrollExtent);
+    if (!offset.applyContentDimensions(minScrollExtent, maxScrollExtent)) {
+      // The physics corrected the offset for the new extents. The child's layout does not depend
+      // on the offset, so the corrected offset only has to be accepted. A position may correct
+      // again, to the same pixels, while it waits for a viewport dimension; one that corrects to
+      // other pixels on every call would never settle, as a sliver viewport's layout cycles would
+      // show.
+      final double correctedPixels = offset.pixels;
+      final bool accepted = offset.applyContentDimensions(minScrollExtent, maxScrollExtent);
+      assert(
+        accepted || offset.pixels == correctedPixels,
+        'The ViewportOffset of a SingleChildScrollView corrected its pixels twice in one layout, '
+        'to different values. A correction made in applyContentDimensions must be accepted by the '
+        'next call with the same dimensions, or repeat the same pixels, since the layout of a '
+        'SingleChildScrollView does not depend on the offset and is not run again.',
+      );
+    }
   }
 
   Offset get _paintOffset => _paintOffsetForPosition(offset.pixels);
