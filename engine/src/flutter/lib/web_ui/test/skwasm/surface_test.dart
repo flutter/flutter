@@ -16,6 +16,28 @@ void main() {
 }
 
 void testMain() {
+  test(
+    'context creation failure completes initialization with an error',
+    () async {
+      final int pending = SkwasmCallbackHandler.instance.debugPendingCallbackCount;
+      final provider = _ContextBoundCanvasProvider();
+      final surface = SkwasmOffscreenSurface(provider);
+      try {
+        await expectLater(
+          surface.initialized.timeout(const Duration(seconds: 5)),
+          throwsStateError,
+        );
+      } finally {
+        surface.dispose();
+        provider.dispose();
+      }
+      expect(SkwasmCallbackHandler.instance.debugPendingCallbackCount, pending);
+    },
+    // A canvas with an existing context cannot be transferred to a worker.
+    // ST passes it directly, exercising native WebGL context creation failure.
+    skip: (renderer as SkwasmRenderer).isMultiThreaded,
+  );
+
   for (final failAcquire in <bool>[true, false]) {
     test('context recovery failure completes rendering with an error ($failAcquire)', () async {
       final provider = _FailingCanvasProvider();
@@ -247,6 +269,15 @@ Future<void> _settleOnscreenFrame() async {
     channel.port1.removeEventListener('message', listener);
     channel.port1.close();
     channel.port2.close();
+  }
+}
+
+class _ContextBoundCanvasProvider extends OffscreenCanvasProvider {
+  @override
+  DomOffscreenCanvas acquireCanvas(BitmapSize size, {required ui.VoidCallback onContextLost}) {
+    final DomOffscreenCanvas canvas = super.acquireCanvas(size, onContextLost: onContextLost);
+    expect(canvas.getContext('2d'), isNotNull);
+    return canvas;
   }
 }
 

@@ -53,7 +53,11 @@ uint32_t g_next_callback_id = 0;
 
 uint32_t NextCallbackId() {
   assert(emscripten_is_main_browser_thread());
-  return ++g_next_callback_id;
+  // Zero is reserved for an unset context-loss callback.
+  if (++g_next_callback_id == 0) {
+    ++g_next_callback_id;
+  }
+  return g_next_callback_id;
 }
 }  // namespace
 
@@ -117,10 +121,12 @@ uint32_t Skwasm::Surface::SetCanvas(SkwasmObject canvas) {
   return callback_id;
 }
 
-void Skwasm::Surface::OnInitialized(uint32_t callback_id) {
+void Skwasm::Surface::OnInitialized(uint32_t callback_id, bool success) {
   assert(emscripten_is_main_browser_thread());
-  callback_handler_(callback_id, (void*)context_lost_callback_id_,
-                    __builtin_wasm_ref_null_extern());
+  callback_handler_(
+      callback_id,
+      success ? reinterpret_cast<void*>(context_lost_callback_id_) : nullptr,
+      __builtin_wasm_ref_null_extern());
 }
 
 // Worker thread only
@@ -134,7 +140,7 @@ void Skwasm::Surface::ReceiveCanvasOnWorker(SkwasmObject canvas,
   bool antialias = skwasm_isWimp();
   gl_context_ = skwasm_getGlContextForCanvas(canvas, antialias, this);
   if (!gl_context_) {
-    printf("Failed to create context!\n");
+    skwasm_reportInitialized(this, callback_id, false);
     return;
   }
 
@@ -160,7 +166,7 @@ void Skwasm::Surface::ReceiveCanvasOnWorker(SkwasmObject canvas,
     render_context_->SetResourceCacheLimit(*resource_cache_limit_);
   }
 
-  skwasm_reportInitialized(this, callback_id);
+  skwasm_reportInitialized(this, callback_id, true);
 }
 
 // Resizing
@@ -400,8 +406,9 @@ SKWASM_EXPORT void surface_receiveCanvasOnWorker(Skwasm::Surface* surface,
 }
 
 SKWASM_EXPORT void surface_onInitialized(Skwasm::Surface* surface,
-                                         uint32_t callback_id) {
-  surface->OnInitialized(callback_id);
+                                         uint32_t callback_id,
+                                         bool success) {
+  surface->OnInitialized(callback_id, success);
 }
 
 SKWASM_EXPORT uint32_t surface_setSize(Skwasm::Surface* surface,

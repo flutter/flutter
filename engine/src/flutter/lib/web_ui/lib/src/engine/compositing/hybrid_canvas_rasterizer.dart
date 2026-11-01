@@ -97,6 +97,7 @@ class HybridCanvasViewRasterizer extends ViewRasterizer {
   DomDocument? _directDocument;
   final DomElement _stagingHost = createDomElement('flt-canvas-staging');
   OnscreenSurface? _directSurface;
+  bool _directSurfaceFailed = false;
   DomCanvasImageSource? _presentedSource;
   HybridDisplayCanvas? _directCanvas;
   HybridDisplayCanvas? _nextDirectCanvas;
@@ -177,10 +178,18 @@ class HybridCanvasViewRasterizer extends ViewRasterizer {
       if (single &&
           identical(_directCanvas, displayCanvases.single) &&
           !metricsChanged &&
-          !sourceChanged) {
-        await _directSurface!.rasterizeToCanvas(pictures.single);
-        _nextDirectCanvas = _directCanvas;
-        return;
+          !sourceChanged &&
+          !_directSurfaceFailed) {
+        try {
+          await _directSurface!.rasterizeToCanvas(pictures.single);
+          _nextDirectCanvas = _directCanvas;
+          return;
+        } catch (error) {
+          // Keep the previous frame until a bitmap can replace it at commit.
+          _directSurfaceFailed = true;
+          _promotionAttempted = true;
+          printWarning('Unable to use direct Skwasm presentation: $error');
+        }
       }
       if (pictures.isEmpty || isDisposed) {
         return;
@@ -198,28 +207,32 @@ class HybridCanvasViewRasterizer extends ViewRasterizer {
           !_promotionAttempted &&
           (sceneElement.isConnected ?? false)) {
         _promotionAttempted = true;
-        if (_directDocument != sceneElement.ownerDocument) {
-          _directSurface?.hostElement.remove();
-          _directProvider.dispose();
-          _directDocument = sceneElement.ownerDocument;
-          _directProvider = OnscreenSurfaceProvider(
-            OnscreenCanvasProvider(ownerDocument: _directDocument),
-            rasterizer.createOnscreenSurface,
-          );
-          final int? cacheBytes = rasterizer._resourceCacheMaxBytes;
-          if (cacheBytes != null) {
-            _directProvider.setSkiaResourceCacheMaxBytes(cacheBytes);
+        try {
+          if (_directDocument != sceneElement.ownerDocument) {
+            _discardDirectSurface();
+            _directDocument = sceneElement.ownerDocument;
+            _directProvider = OnscreenSurfaceProvider(
+              OnscreenCanvasProvider(ownerDocument: _directDocument),
+              rasterizer.createOnscreenSurface,
+            );
+            final int? cacheBytes = rasterizer._resourceCacheMaxBytes;
+            if (cacheBytes != null) {
+              _directProvider.setSkiaResourceCacheMaxBytes(cacheBytes);
+            }
           }
-          _directSurface = null;
-        }
-        final OnscreenSurface surface = _directSurface ??= _directProvider.createSurface();
-        _stagingHost.append(surface.hostElement);
-        sceneElement.append(_stagingHost);
-        await surface.setSize(currentFrameSize);
-        await surface.rasterizeToCanvas(pictures.single);
-        _presentedSource = surface.canvasImageSource;
-        if (await _isPlaceholderReady(surface, _nextBitmaps.single) && !isDisposed) {
-          _nextDirectCanvas = _nextCanvases.single;
+          final OnscreenSurface surface = _directSurface ??= _directProvider.createSurface();
+          _stagingHost.append(surface.hostElement);
+          sceneElement.append(_stagingHost);
+          await surface.setSize(currentFrameSize);
+          await surface.rasterizeToCanvas(pictures.single);
+          _presentedSource = surface.canvasImageSource;
+          if (await _isPlaceholderReady(surface, _nextBitmaps.single) && !isDisposed) {
+            _nextDirectCanvas = _nextCanvases.single;
+          }
+        } catch (error) {
+          // Promotion is optional; the exported bitmaps are ready to commit.
+          _discardDirectSurface();
+          printWarning('Unable to use direct Skwasm presentation: $error');
         }
       }
     } finally {
@@ -334,7 +347,9 @@ class HybridCanvasViewRasterizer extends ViewRasterizer {
       if (!identical(_directCanvas, _nextDirectCanvas)) {
         _directCanvas?.canvasElement.style.removeProperty('visibility');
         if (_nextDirectCanvas == null) {
-          if (_directSurface != null) {
+          if (_directSurfaceFailed) {
+            _discardDirectSurface();
+          } else if (_directSurface != null) {
             _stagingHost.append(_directSurface!.hostElement);
           }
         } else {
@@ -364,6 +379,14 @@ class HybridCanvasViewRasterizer extends ViewRasterizer {
       bitmap.close();
     }
     _nextBitmaps = <DomImageBitmap>[];
+  }
+
+  void _discardDirectSurface() {
+    _directSurface?.hostElement.remove();
+    _directProvider.dispose();
+    _directSurface = null;
+    _presentedSource = null;
+    _directSurfaceFailed = false;
   }
 
   @override

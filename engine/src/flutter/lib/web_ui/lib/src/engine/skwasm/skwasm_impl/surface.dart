@@ -134,7 +134,11 @@ abstract class SkwasmSurface<C extends DomEventTarget, P extends CanvasProvider<
     if (_disposed) {
       return;
     }
-    _contextLostCallbackId = contextLostCallbackId.toDartInt;
+    final int id = contextLostCallbackId.toDartInt;
+    if (id == 0) {
+      throw StateError('Failed to create a Skwasm WebGL context.');
+    }
+    _contextLostCallbackId = id;
     unawaited(
       SkwasmCallbackHandler.instance.registerCallback(_contextLostCallbackId!).then((_) {
         _contextLostCallbackId = null;
