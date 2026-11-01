@@ -59,11 +59,6 @@ class NoImplicitViewPlatformDispatcher extends TestPlatformDispatcher {
 /// explanation when used when the `implicitView` is disabled (like in Flutter
 /// web when multi-view is enabled).
 ///
-/// Because of how [testWidgets] uses `runApp` internally to manage the lifecycle
-/// of a test, the implicitView must be disabled/reenabled inside of the body of
-/// the [WidgetTesterCallback] under test. In practice: the implicitView is disabled
-/// in the first line of the test, and reenabled in the last.
-///
 /// See: multi_view_no_implicitView_binding_test.dart
 class NoImplicitViewWidgetsBinding extends AutomatedTestWidgetsFlutterBinding {
   late final NoImplicitViewPlatformDispatcher _platformDispatcher =
