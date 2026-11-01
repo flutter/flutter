@@ -59,6 +59,7 @@ mixin RendererBinding
       ..onTextScaleFactorChanged = handleTextScaleFactorChanged
       ..onPlatformBrightnessChanged = handlePlatformBrightnessChanged;
     addPersistentFrameCallback(_handlePersistentFrameCallback);
+    addPersistentFrameCallback(_handleHitTestRegionsFrameCallback);
     initMouseTracker();
     if (kIsWeb) {
       addPostFrameCallback(_handleWebFirstFrame, debugLabel: 'RendererBinding.webFirstFrame');
@@ -558,6 +559,57 @@ mixin RendererBinding
     drawFrame();
     _scheduleMouseTrackerUpdate();
   }
+
+  // Runs every frame, after [_handlePersistentFrameCallback] (and therefore
+  // after [drawFrame]) because it is registered right after it in
+  // [initInstances]. The hit-test region pass has to run after the frame has
+  // been composited, because some render objects (such as
+  // [RenderFollowerLayer]) only learn their final paint transform while the
+  // scene is being built.
+  //
+  // This is a separate persistent frame callback rather than a step in
+  // [drawFrame] so that it also runs for bindings that override [drawFrame]
+  // without calling the superclass implementation (such as the test bindings
+  // in package:flutter_test). As a consequence, it does not observe the
+  // `EnginePhase` early exits of those test bindings: it runs even if a
+  // test frame stopped before compositing.
+  void _handleHitTestRegionsFrameCallback(Duration timeStamp) {
+    if (sendFramesToEngine && _shouldFlushHitTestRegions) {
+      rootPipelineOwner.flushHitTestRegions();
+    }
+  }
+
+  bool _automaticPointerInterceptorsEnabled = false;
+
+  /// Whether the framework automatically computes hit-test regions that overlap
+  /// platform views and sends them to the engine each frame.
+  ///
+  /// When enabled, [PipelineOwner.flushHitTestRegions] runs after every frame
+  /// and reports the regions through [PipelineOwner.onHitTestRegionsUpdate].
+  ///
+  /// This flag is experimental and only has an effect on the web (unless
+  /// [debugEnableHitTestRegionsOnAllPlatforms] is enabled in tests).
+  ///
+  /// Defaults to false.
+  bool get automaticPointerInterceptorsEnabled => _automaticPointerInterceptorsEnabled;
+  set automaticPointerInterceptorsEnabled(bool value) {
+    if (_automaticPointerInterceptorsEnabled == value) {
+      return;
+    }
+    _automaticPointerInterceptorsEnabled = value;
+    if (!value && _hitTestRegionsSupportedOnPlatform) {
+      rootPipelineOwner.clearHitTestRegions();
+    }
+    scheduleFrame();
+  }
+
+  // Whether the hit-test region pass can run on the current platform. Regions
+  // are only ever computed (and therefore only ever need clearing) when this is
+  // true.
+  bool get _hitTestRegionsSupportedOnPlatform => kIsWeb || debugEnableHitTestRegionsOnAllPlatforms;
+
+  bool get _shouldFlushHitTestRegions =>
+      _automaticPointerInterceptorsEnabled && _hitTestRegionsSupportedOnPlatform;
 
   bool _debugMouseTrackerUpdateScheduled = false;
   void _scheduleMouseTrackerUpdate() {

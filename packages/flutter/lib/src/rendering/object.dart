@@ -9,6 +9,7 @@
 ///
 /// @docImport 'box.dart';
 /// @docImport 'paragraph.dart';
+/// @docImport 'platform_view.dart';
 /// @docImport 'proxy_box.dart';
 /// @docImport 'sliver.dart';
 /// @docImport 'view.dart';
@@ -26,6 +27,7 @@ import 'package:flutter/semantics.dart';
 
 import 'binding.dart';
 import 'debug.dart';
+import 'hit_test_regions.dart';
 import 'layer.dart';
 
 export 'package:flutter/foundation.dart'
@@ -1029,6 +1031,7 @@ base class PipelineOwner with DiagnosticableTreeMixin {
     this.onSemanticsOwnerCreated,
     this.onSemanticsUpdate,
     this.onSemanticsOwnerDisposed,
+    this.onHitTestRegionsUpdate,
   }) {
     assert(debugMaybeDispatchCreated('rendering', 'PipelineOwner', this));
   }
@@ -1062,6 +1065,23 @@ base class PipelineOwner with DiagnosticableTreeMixin {
   ///
   /// Typical implementations will tear down the semantics tree.
   final VoidCallback? onSemanticsOwnerDisposed;
+
+  /// Called with the hit-test regions computed by [flushHitTestRegions] for the
+  /// platform views attached to this pipeline owner.
+  ///
+  /// While a platform view with a non-empty size is attached, this is called on
+  /// every
+  /// [flushHitTestRegions] with the latest payload (even if it is unchanged).
+  /// The payload is a flat list of groups, one per platform view in paint
+  /// order, each encoded as the platform view ID, the number of rectangles
+  /// `n`, and then `n` rectangles as left, top, right, bottom values in the
+  /// root render object's coordinate space (physical pixels for a
+  /// [RenderView]).
+  ///
+  /// An empty list means that any previously reported regions should be
+  /// discarded. It is sent once when the last platform view goes away, and by
+  /// [clearHitTestRegions].
+  final ValueSetter<Float64List>? onHitTestRegionsUpdate;
 
   /// Calls [onNeedVisualUpdate] if [onNeedVisualUpdate] is not null.
   ///
@@ -1675,6 +1695,119 @@ base class PipelineOwner with DiagnosticableTreeMixin {
       if (!kReleaseMode) {
         FlutterTimeline.finishSync();
       }
+    }
+  }
+
+  /// The number of [PlatformViewRenderBox]es currently attached to this
+  /// pipeline owner (not counting those attached to child pipeline owners).
+  ///
+  /// Maintained by [didAttachPlatformView] and [didDetachPlatformView].
+  /// [flushHitTestRegions] skips walking this owner's render tree entirely
+  /// while the count is zero, so apps without platform views pay nothing for
+  /// the hit-test region pass.
+  int _attachedPlatformViewCount = 0;
+
+  /// Whether the most recent payload sent to [onHitTestRegionsUpdate] was
+  /// non-empty.
+  ///
+  /// Used to send a single empty payload when the last platform view goes
+  /// away (or stops being laid out), so that the engine can discard the
+  /// regions it received earlier, without sending an empty payload on every
+  /// frame afterwards.
+  bool _sentNonEmptyHitTestRegions = false;
+
+  /// The payload computed by the most recent [flushHitTestRegions] call on this
+  /// owner, or null if none was computed (no platform views attached, or none
+  /// with a non-empty size). Exposed to tests through
+  /// [debugLastHitTestRegions].
+  Float64List? _lastHitTestRegions;
+
+  /// The payload sent to [onHitTestRegionsUpdate] to discard previously
+  /// reported regions.
+  static final Float64List _emptyHitTestRegions = Float64List(0);
+
+  /// Called when a [PlatformViewRenderBox] is attached to this pipeline owner.
+  @internal
+  void didAttachPlatformView() {
+    _attachedPlatformViewCount += 1;
+  }
+
+  /// Called when a [PlatformViewRenderBox] is detached from this pipeline owner.
+  @internal
+  void didDetachPlatformView() {
+    assert(_attachedPlatformViewCount > 0);
+    _attachedPlatformViewCount -= 1;
+  }
+
+  /// The hit-test region payload computed during the most recent
+  /// [flushHitTestRegions] pass, or null if no platform view with a non-empty
+  /// size was found.
+  ///
+  /// If this pipeline owner has no [rootNode] (for example, the root pipeline
+  /// owner in a multi-view app), this returns the first non-null payload of
+  /// its child pipeline owners.
+  @visibleForTesting
+  Float64List? get debugLastHitTestRegions {
+    if (_lastHitTestRegions != null) {
+      return _lastHitTestRegions;
+    }
+    if (rootNode == null) {
+      for (final PipelineOwner child in _children) {
+        final Float64List? childRegions = child.debugLastHitTestRegions;
+        if (childRegions != null) {
+          return childRegions;
+        }
+      }
+    }
+    return null;
+  }
+
+  /// Computes the hit-test regions that overlap any attached platform views
+  /// and dispatches the encoded payload to [onHitTestRegionsUpdate].
+  ///
+  /// Each pipeline owner only walks its own render tree, and only while it has
+  /// platform views attached; child pipeline owners are always visited, since
+  /// in a multi-view app the root pipeline owner has no render tree of its own.
+  void flushHitTestRegions() {
+    Float64List? regions;
+    if (_attachedPlatformViewCount > 0 && rootNode != null) {
+      if (!kReleaseMode) {
+        FlutterTimeline.startSync('HIT TEST REGIONS$_debugRootSuffixForTimelineEventNames');
+      }
+      try {
+        regions = computeHitTestRegions(rootNode!);
+      } finally {
+        if (!kReleaseMode) {
+          FlutterTimeline.finishSync();
+        }
+      }
+    }
+    _lastHitTestRegions = regions;
+    if (regions != null) {
+      _sentNonEmptyHitTestRegions = true;
+      onHitTestRegionsUpdate?.call(regions);
+    } else if (_sentNonEmptyHitTestRegions) {
+      // Tell the engine once to drop the regions it received earlier.
+      _sentNonEmptyHitTestRegions = false;
+      onHitTestRegionsUpdate?.call(_emptyHitTestRegions);
+    }
+    for (final PipelineOwner child in _children) {
+      child.flushHitTestRegions();
+    }
+  }
+
+  /// Clears any cached hit-test regions and notifies [onHitTestRegionsUpdate]
+  /// with an empty list.
+  ///
+  /// Unlike [flushHitTestRegions], this always sends the empty list, even if no
+  /// regions were reported before, so that turning the feature off is
+  /// guaranteed to reset the engine's state.
+  void clearHitTestRegions() {
+    _lastHitTestRegions = null;
+    _sentNonEmptyHitTestRegions = false;
+    onHitTestRegionsUpdate?.call(_emptyHitTestRegions);
+    for (final PipelineOwner child in _children) {
+      child.clearHitTestRegions();
     }
   }
 
