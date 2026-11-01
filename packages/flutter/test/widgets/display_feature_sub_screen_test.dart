@@ -152,6 +152,83 @@ void main() {
       expect(renderBox.localToGlobal(Offset.zero), equals(const Offset(410, 310)));
     });
 
+    testWidgets('with multiple vertical display features in any order', (
+      WidgetTester tester,
+    ) async {
+      // This is a regression test for https://github.com/flutter/flutter/issues/195216
+      const childKey = Key('childKey');
+      const fold = DisplayFeature(
+        bounds: Rect.fromLTRB(390, 0, 410, 600),
+        type: DisplayFeatureType.fold,
+        state: DisplayFeatureState.postureHalfOpened,
+      );
+      // A full-height band at the right edge.
+      const band = DisplayFeature(
+        bounds: Rect.fromLTRB(760, 0, 800, 600),
+        type: DisplayFeatureType.cutout,
+        state: DisplayFeatureState.unknown,
+      );
+
+      for (final features in <List<DisplayFeature>>[
+        <DisplayFeature>[fold, band],
+        <DisplayFeature>[band, fold],
+      ]) {
+        await tester.pumpWidget(
+          MediaQuery(
+            data: MediaQueryData.fromView(tester.view).copyWith(displayFeatures: features),
+            child: const DisplayFeatureSubScreen(
+              anchorPoint: Offset.zero,
+              child: SizedBox.expand(key: childKey),
+            ),
+          ),
+        );
+
+        final RenderBox renderBox = tester.renderObject(find.byKey(childKey));
+        expect(renderBox.size, equals(const Size(390, 600)), reason: '$features');
+        expect(renderBox.localToGlobal(Offset.zero), equals(Offset.zero), reason: '$features');
+      }
+    });
+
+    test('subScreensInBounds does not depend on the order of avoidBounds', () {
+      const wantedBounds = Rect.fromLTRB(0, 0, 800, 600);
+
+      const verticalFold = Rect.fromLTRB(390, 0, 410, 600);
+      const rightBand = Rect.fromLTRB(760, 0, 800, 600);
+      const verticalSubScreens = <Rect>[
+        Rect.fromLTRB(0, 0, 390, 600),
+        Rect.fromLTRB(410, 0, 760, 600),
+      ];
+      expect(
+        DisplayFeatureSubScreen.subScreensInBounds(wantedBounds, <Rect>[verticalFold, rightBand]),
+        unorderedEquals(verticalSubScreens),
+      );
+      expect(
+        DisplayFeatureSubScreen.subScreensInBounds(wantedBounds, <Rect>[rightBand, verticalFold]),
+        unorderedEquals(verticalSubScreens),
+      );
+
+      const horizontalFold = Rect.fromLTRB(0, 290, 800, 310);
+      const bottomBand = Rect.fromLTRB(0, 560, 800, 600);
+      const horizontalSubScreens = <Rect>[
+        Rect.fromLTRB(0, 0, 800, 290),
+        Rect.fromLTRB(0, 310, 800, 560),
+      ];
+      expect(
+        DisplayFeatureSubScreen.subScreensInBounds(wantedBounds, <Rect>[
+          horizontalFold,
+          bottomBand,
+        ]),
+        unorderedEquals(horizontalSubScreens),
+      );
+      expect(
+        DisplayFeatureSubScreen.subScreensInBounds(wantedBounds, <Rect>[
+          bottomBand,
+          horizontalFold,
+        ]),
+        unorderedEquals(horizontalSubScreens),
+      );
+    });
+
     testWidgets('with non-splitting display features and anchorPoint', (WidgetTester tester) async {
       const childKey = Key('childKey');
       final MediaQueryData mediaQuery = MediaQueryData.fromView(tester.view).copyWith(
