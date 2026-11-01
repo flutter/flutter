@@ -29,6 +29,9 @@ shelf.Request proxyRequest(shelf.Request originalRequest, Uri finalTargetUrl) {
 /// If a rule's pattern matches the request's path, the request is
 /// rewritten and forwarded to the target URI defined in the matching [ProxyRule].
 /// Otherwise, the request is passed to the next handler in the Shelf stack.
+///
+/// Proxied responses are written without output buffering, so streamed bodies
+/// such as server-sent events reach the client as soon as the backend sends them.
 Future<shelf.Response> _applyProxyRules(
   shelf.Request request,
   List<ProxyRule> effectiveProxy,
@@ -47,7 +50,7 @@ Future<shelf.Response> _applyProxyRules(
       final shelf.Response proxyResponse = await handler(proxyBackendRequest);
       logger.printStatus('$_kLogEntryPrefix Matched "$requestPath". Requesting "$finalTargetUrl"');
       logger.printTrace('$_kLogEntryPrefix Matched with proxy rule: $rule');
-      return proxyResponse;
+      return proxyResponse.change(context: <String, Object>{'shelf.io.buffer_output': false});
     } on Exception catch (e) {
       logger.printError('$_kLogEntryPrefix Error for $finalTargetUrl: $e. Allowing fall-through.');
       return innerHandler(request);
