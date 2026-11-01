@@ -18,23 +18,26 @@ class DlRuntimeEffectImageFilter final : public DlImageFilter {
       sk_sp<DlRuntimeEffect> runtime_effect,
       std::vector<std::shared_ptr<DlColorSource>> samplers,
       std::shared_ptr<std::vector<uint8_t>> uniform_data,
-      DlImageSampling input_sampling = DlImageSampling::kNearestNeighbor)
+      DlImageSampling input_sampling = DlImageSampling::kNearestNeighbor,
+      bool unclipped_input = false)
       : runtime_effect_(std::move(runtime_effect)),
         samplers_(std::move(samplers)),
         uniform_data_(std::move(uniform_data)),
-        input_sampling_(input_sampling) {}
+        input_sampling_(input_sampling),
+        unclipped_input_(unclipped_input) {}
 
   std::shared_ptr<DlImageFilter> shared() const override {
     return std::make_shared<DlRuntimeEffectImageFilter>(
         this->runtime_effect_, this->samplers_, this->uniform_data_,
-        this->input_sampling_);
+        this->input_sampling_, this->unclipped_input_);
   }
 
   static std::shared_ptr<DlImageFilter> Make(
       sk_sp<DlRuntimeEffect> runtime_effect,
       std::vector<std::shared_ptr<DlColorSource>> samplers,
       std::shared_ptr<std::vector<uint8_t>> uniform_data,
-      DlImageSampling input_sampling = DlImageSampling::kNearestNeighbor);
+      DlImageSampling input_sampling = DlImageSampling::kNearestNeighbor,
+      bool unclipped_input = false);
 
   DlImageFilterType type() const override {
     return DlImageFilterType::kRuntimeEffect;
@@ -72,6 +75,11 @@ class DlRuntimeEffectImageFilter final : public DlImageFilter {
 
   DlImageSampling input_sampling() const { return input_sampling_; }
 
+  /// Whether the filter input should contain the entire content being
+  /// filtered rather than only the part of it that is inside the clip. Only
+  /// the filtered output is clipped when this is true.
+  bool unclipped_input() const { return unclipped_input_; }
+
  protected:
   bool equals_(const DlImageFilter& other) const override;
 
@@ -80,6 +88,7 @@ class DlRuntimeEffectImageFilter final : public DlImageFilter {
   std::vector<std::shared_ptr<DlColorSource>> samplers_;
   std::shared_ptr<std::vector<uint8_t>> uniform_data_;
   DlImageSampling input_sampling_;
+  bool unclipped_input_;
 };
 
 }  // namespace flutter

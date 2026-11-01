@@ -64,6 +64,10 @@ struct CanvasStackEntry {
   // Whether subpass coverage was rounded out to pixel coverage, or if false
   // truncated.
   bool did_round_out = false;
+  // Whether this entry is within a save layer whose image filter needs its
+  // entire input (see RuntimeEffectFilterContents::SetUnclippedInput). Content
+  // outside of the root render target is not culled in that case.
+  bool unclipped_input = false;
 };
 
 enum class PointStyle {

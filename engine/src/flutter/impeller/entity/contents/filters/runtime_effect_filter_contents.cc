@@ -31,6 +31,10 @@ void RuntimeEffectFilterContents::SetTextureInputs(
   texture_inputs_ = std::move(texture_inputs);
 }
 
+void RuntimeEffectFilterContents::SetUnclippedInput(bool unclipped_input) {
+  unclipped_input_ = unclipped_input;
+}
+
 // |FilterContents|
 std::optional<Entity> RuntimeEffectFilterContents::RenderFilter(
     const FilterInput::Vector& inputs,
@@ -43,8 +47,20 @@ std::optional<Entity> RuntimeEffectFilterContents::RenderFilter(
     return std::nullopt;
   }
 
-  std::optional<Snapshot> input_snapshot =
-      inputs[0]->GetSnapshot("RuntimeEffectContents", renderer, entity);
+  std::optional<Snapshot> input_snapshot;
+  if (unclipped_input_) {
+    // Inputs fall back to the coverage hint of the entity's contents (this
+    // filter, whose hint is typically the parent pass bounds) as their
+    // coverage limit. Snapshot the input without contents so that it isn't
+    // trimmed to that hint.
+    Entity input_entity = entity.Clone();
+    input_entity.SetContents(nullptr);
+    input_snapshot =
+        inputs[0]->GetSnapshot("RuntimeEffectContents", renderer, input_entity);
+  } else {
+    input_snapshot =
+        inputs[0]->GetSnapshot("RuntimeEffectContents", renderer, entity);
+  }
   if (!input_snapshot.has_value()) {
     return std::nullopt;
   }
@@ -70,12 +86,16 @@ std::optional<Entity> RuntimeEffectFilterContents::RenderFilter(
   if (input_snapshot->ShouldRasterizeForRuntimeEffects()) {
     Vector2 entity_offset =
         Vector2(entity.GetTransform().m[12], entity.GetTransform().m[13]);
+    // The coverage may have been trimmed by the coverage hint. Rasterize the
+    // whole input instead when it must not be clipped.
+    Rect rasterize_coverage =
+        unclipped_input_ ? maybe_input_coverage.value() : coverage;
     Matrix inverse = input_snapshot->transform.Invert();
     Quad quad = inverse.Transform(Quad{
-        coverage.GetLeftTop(),     //
-        coverage.GetRightTop(),    //
-        coverage.GetLeftBottom(),  //
-        coverage.GetRightBottom()  //
+        rasterize_coverage.GetLeftTop(),     //
+        rasterize_coverage.GetRightTop(),    //
+        rasterize_coverage.GetLeftBottom(),  //
+        rasterize_coverage.GetRightBottom()  //
     });
     TextureContents texture_contents;
     texture_contents.SetTexture(input_snapshot->texture);
@@ -83,7 +103,7 @@ std::optional<Entity> RuntimeEffectFilterContents::RenderFilter(
         Rect::MakePointBounds(quad.begin(), quad.end());
     if (bounds.has_value()) {
       texture_contents.SetSourceRect(bounds.value());
-      texture_contents.SetDestinationRect(coverage);
+      texture_contents.SetDestinationRect(rasterize_coverage);
       texture_contents.SetStencilEnabled(false);
       texture_contents.SetSamplerDescriptor(input_snapshot->sampler_descriptor);
 
@@ -183,6 +203,11 @@ std::optional<Entity> RuntimeEffectFilterContents::RenderFilter(
 std::optional<Rect> RuntimeEffectFilterContents::GetFilterSourceCoverage(
     const Matrix& effect_transform,
     const Rect& output_limit) const {
+  if (unclipped_input_) {
+    // Every output pixel may depend on the whole input, for example through
+    // the input size uniform, so the entire input is needed.
+    return Rect::MakeMaximum();
+  }
   return output_limit;
 }
 
