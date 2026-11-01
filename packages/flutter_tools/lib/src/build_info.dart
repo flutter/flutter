@@ -1040,6 +1040,18 @@ const kFileSystemRoots = 'FileSystemRoots';
 /// provided, defaults to arm64.
 const kIosArchs = 'IosArchs';
 
+/// The iOS deployment target used for native asset hooks and framework metadata.
+///
+/// Passed from Xcode's IPHONEOS_DEPLOYMENT_TARGET build setting. May include
+/// minor and patch versions. If absent, uses the native-assets default.
+const kIosDeploymentTarget = 'IosDeploymentTarget';
+
+/// The macOS deployment target used for native asset hooks.
+///
+/// Passed from the build phase's MACOSX_DEPLOYMENT_TARGET setting. May include
+/// minor and patch versions. If absent, uses the native-assets default.
+const kMacOSDeploymentTarget = 'MacOSDeploymentTarget';
+
 /// The define to control what macOS architectures are built for.
 ///
 /// This is expected to be a space-delimited list of architectures. If not

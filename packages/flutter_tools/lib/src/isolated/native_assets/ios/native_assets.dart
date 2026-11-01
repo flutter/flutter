@@ -8,12 +8,19 @@ import '../../../base/file_system.dart';
 import '../../../base/logger.dart';
 import '../../../base/process.dart';
 import '../../../build_info.dart';
+import '../apple_deployment_version.dart';
 import '../macos/native_assets_host.dart';
 import '../native_assets.dart';
 import '../native_assets_manifest.dart';
 
-// TODO(dcharkes): Fetch minimum iOS version from somewhere. https://github.com/flutter/flutter/issues/145104
 const targetIOSVersion = 15;
+
+/// The deployment version supplied to assemble, or the native-assets default.
+AppleVersion iosDeploymentVersion(Map<String, String> defines) => parseAppleDeploymentVersion(
+  defines[kIosDeploymentTarget],
+  platform: 'iOS',
+  minimumVersion: targetIOSVersion,
+);
 
 IOSSdk getIOSSdk(EnvironmentType environmentType) {
   return switch (environmentType) {
@@ -62,16 +69,23 @@ Map<FlutterCodeAsset, FlutterCodeAssetTargetLocation> assetTargetLocationsIOS(
 ///
 /// Code signing is also done here, so that it doesn't have to be done in
 /// in xcode_backend.dart.
+///
+/// The framework minimum OS version uses the same [deploymentVersion] as the
+/// hooks, with [targetIOSVersion] as the default.
 Future<List<File>> copyNativeCodeAssetsIOS(
   Uri targetUri,
   Map<Uri, List<FlutterCodeAsset>> assetTargetLocations,
   String? codesignIdentity,
   BuildMode buildMode,
   FileSystem fileSystem, {
+  AppleVersion? deploymentVersion,
   required Logger logger,
   required ProcessUtils processUtils,
 }) async {
   assert(assetTargetLocations.isNotEmpty);
+  final AppleVersion version = deploymentVersion ?? AppleVersion(targetIOSVersion);
+  final minimumIOSVersion =
+      '${version.major}.${version.minor}${version.patch == 0 ? '' : '.${version.patch}'}';
   final installedFiles = <File>[];
   final oldToNewInstallNames = <String, String>{};
   final dylibs = <(File, String, Directory)>[];
@@ -113,7 +127,7 @@ Future<List<File>> copyNativeCodeAssetsIOS(
     await createInfoPlist(
       assetTargetUri.pathSegments.last,
       frameworkDir,
-      minimumIOSVersion: '$targetIOSVersion.0',
+      minimumIOSVersion: minimumIOSVersion,
     );
     installedFiles.add(frameworkDir.childFile('Info.plist'));
   }
