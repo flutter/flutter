@@ -39,20 +39,22 @@ class ImageExternalTextureGL : public ImageExternalTexture {
       std::optional<HardwareBufferKey> id,
       impeller::UniqueEGLImageKHR&& egl_image) = 0;
 
-  void UpdateImage(JavaLocalRef& hardware_buffer,
+  void UpdateImage(AHardwareBuffer* latest_hardware_buffer,
                    const SkRect& bounds,
                    PaintContext& context);
 
   impeller::UniqueEGLImageKHR CreateEGLImage(AHardwareBuffer* buffer);
+
+  virtual EGLImageKHR CreateEGLImageKHR(EGLDisplay display,
+                                        EGLClientBuffer buffer);
 
   struct GlEntry {
     impeller::UniqueEGLImageKHR egl_image;
     impeller::UniqueGLTexture texture;
   };
 
-  // Each GL entry is keyed off of the currently active
-  // hardware buffers and evicted when the hardware buffer
-  // is removed from the LRU cache.
+  // Impeller's EGL images are keyed by hardware buffer and evicted with the
+  // LRU cache entries. Skia's images own their GlEntry via a release callback.
   std::unordered_map<HardwareBufferKey, GlEntry> gl_entries_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(ImageExternalTextureGL);
