@@ -4,6 +4,7 @@
 
 #include <memory>
 
+#include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/shell/platform/android/android_shell_holder.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
@@ -229,6 +230,26 @@ TEST(AndroidShellHolder, CreateWithUnMergedPlatformAndUIThread) {
   EXPECT_NE(
       holder->GetShellForTesting()->GetTaskRunners().GetUITaskRunner(),
       holder->GetShellForTesting()->GetTaskRunners().GetPlatformTaskRunner());
+}
+
+TEST(AndroidShellHolder, PrewarmRenderingWithoutSurface) {
+  Settings settings;
+  auto jni = std::make_shared<MockPlatformViewAndroidJNI>();
+  // Selects Vulkan, the backend that prewarms, where the device supports it,
+  // and falls back to OpenGL ES elsewhere.
+  auto holder = std::make_unique<AndroidShellHolder>(
+      settings, jni, AndroidRenderingAPI::kImpellerAutoselect);
+  ASSERT_TRUE(holder->IsValid());
+
+  holder->GetPlatformView()->PrewarmRendering();
+
+  // The prewarm runs on the raster thread, with no surface ever created.
+  fml::AutoResetWaitableEvent latch;
+  holder->GetShellForTesting()
+      ->GetTaskRunners()
+      .GetRasterTaskRunner()
+      ->PostTask([&latch]() { latch.Signal(); });
+  latch.Wait();
 }
 
 }  // namespace testing

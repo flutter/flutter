@@ -62,6 +62,19 @@ class PlatformViewAndroid final : public PlatformView {
 
   ~PlatformViewAndroid() override;
 
+  //----------------------------------------------------------------------------
+  /// @brief      Hints that a view is about to render with this platform view,
+  ///             so that the parts of rendering that don't need a native
+  ///             window, such as compiling pipelines, can start before
+  ///             |NotifyCreated| is called.
+  ///
+  ///             Returns without waiting for the work, which happens on the
+  ///             raster thread and only on backends that can do it without a
+  ///             window (currently Vulkan). Does nothing once rendering has
+  ///             been warmed up, or once a surface has been created.
+  ///
+  void PrewarmRendering();
+
   void NotifyCreated(fml::RefPtr<AndroidNativeWindow> native_window);
 
   void NotifySurfaceWindowChanged(
@@ -137,6 +150,9 @@ class PlatformViewAndroid final : public PlatformView {
   std::unique_ptr<AndroidSurface> android_surface_;
   std::shared_ptr<PlatformMessageHandlerAndroid> platform_message_handler_;
   bool android_meets_hcpp_criteria_ = false;
+  // Whether the pipelines that rendering needs have been requested, either by
+  // |PrewarmRendering| or by creating a surface. Platform thread only.
+  bool requested_pipelines_ = false;
 
   // |PlatformView|
   void UpdateSemantics(
