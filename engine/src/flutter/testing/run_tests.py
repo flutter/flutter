@@ -230,6 +230,7 @@ VULKAN_SYNC_VALIDATION_TESTS = [
     ## TODO(https://github.com/flutter/flutter/issues/194987):
     ## RenderPassBuilderVK depth/stencil loadOp.
     # 'Play/RendererTest.CanRenderToTexture/Vulkan',
+    'Play/RendererTest.CachesRenderPassAndFramebufferMixed/Vulkan',
     'Play/RendererTest.CanSepiaToneWithSubpasses/Vulkan',
     'Play/EntityPassTargetTest.SwapWithMSAAImplicitResolve/Vulkan',
     # Compute.

@@ -201,7 +201,11 @@ vk::UniqueRenderPass RenderPassBuilderVK::Build(
   deps[0].srcAccessMask = vk::AccessFlagBits::eShaderRead |
                           vk::AccessFlagBits::eColorAttachmentWrite;
   deps[0].dstStageMask = vk::PipelineStageFlagBits::eColorAttachmentOutput;
-  deps[0].dstAccessMask = vk::AccessFlagBits::eColorAttachmentWrite;
+  // A color attachment with a LOAD loadOp is read at the color attachment
+  // output stage, so the read must be in the destination scope for the layout
+  // transition and earlier writes to be made visible to it.
+  deps[0].dstAccessMask = vk::AccessFlagBits::eColorAttachmentRead |
+                          vk::AccessFlagBits::eColorAttachmentWrite;
   deps[0].dependencyFlags = kSelfDependencyFlags;
 
   // Self dependency for reading back the framebuffer, necessary for
