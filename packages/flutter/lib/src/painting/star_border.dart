@@ -234,7 +234,7 @@ class StarBorder extends OutlinedBorder {
       } else {
         // Have a slightly different lerp for two-pointed stars, since they get
         // kind of squirrelly with near-zero innerRadiusRatios.
-        final double lerpedPoints = ui.lerpDouble(points, 2, t)!;
+        final double lerpedPoints = ui.lerpDouble(2, points, t)!;
         return StarBorder(
           side: BorderSide.lerp(a.side, side, t),
           points: lerpedPoints,
