@@ -82,8 +82,8 @@ class FrameService {
   /// At the time this callback is called, the framework completed responding to
   /// `onBeginFrame` and `onDrawFrame`, and [isRenderingFrame] is set to false.
   ///
-  /// Any microtasks scheduled while rendering the frame execute after this
-  /// callback.
+  /// Microtasks scheduled in `onBeginFrame` execute before `onDrawFrame`.
+  /// Microtasks scheduled in `onDrawFrame` execute after this callback.
   ui.VoidCallback? onFinishedRenderingFrame;
 
   void scheduleFrame() {
@@ -117,13 +117,29 @@ class FrameService {
         return;
       }
 
+      var isDrawFrameScheduled = false;
       try {
         _isRenderingFrame = true;
         _frameData = ui.FrameData(frameNumber: _frameData.frameNumber + 1);
-        _renderFrame(highResTime.toDartDouble);
+        _beginFrame(highResTime.toDartDouble);
+
+        // On mobile Flutter flushes microtasks between onBeginFrame and
+        // onDrawFrame. The web can't flush the microtask queue synchronously,
+        // because the event loop is controlled by the browser. Instead,
+        // onDrawFrame is called from a JavaScript microtask queued after
+        // onBeginFrame returns. Dart microtasks run from JavaScript microtasks,
+        // so the microtasks scheduled by onBeginFrame (and any microtasks they
+        // schedule in turn) run before onDrawFrame. The browser runs
+        // microtasks right after each animation frame callback, so onDrawFrame
+        // still runs before the browser renders this frame.
+        //
+        // See: https://github.com/flutter/flutter/issues/181698
+        domWindow.queueMicrotask(_drawFrame);
+        isDrawFrameScheduled = true;
       } finally {
-        _isRenderingFrame = false;
-        onFinishedRenderingFrame?.call();
+        if (!isDrawFrameScheduled) {
+          _finishFrame();
+        }
       }
     });
   }
@@ -142,10 +158,10 @@ class FrameService {
     // We use timers here to ensure that microtasks flush in between.
     //
     // TODO(dkwingsmt): This logic was moved from the framework and is different
-    // from how Web renders a regular frame, which doesn't flush microtasks
-    // between the callbacks at all (see `initializeEngineServices`). We might
-    // want to change this. See the to-do in `initializeEngineServices` and
-    // https://github.com/flutter/engine/pull/50570#discussion_r1496671676
+    // from how Web renders a regular frame, which calls both callbacks in the
+    // same animation frame and flushes microtasks in between using a
+    // JavaScript microtask (see `scheduleFrame`). We might want to change
+    // this. See https://github.com/flutter/engine/pull/50570#discussion_r1496671676
 
     Timer.run(() {
       _isRenderingFrame = true;
@@ -174,7 +190,7 @@ class FrameService {
     });
   }
 
-  void _renderFrame(double highResTime) {
+  void _beginFrame(double highResTime) {
     FrameTimingRecorder.recordCurrentFrameNumber(_frameData.frameNumber);
     FrameTimingRecorder.recordCurrentFrameVsync();
 
@@ -201,19 +217,21 @@ class FrameService {
     if (EnginePlatformDispatcher.instance.onFrameDataChanged != null) {
       EnginePlatformDispatcher.instance.invokeOnFrameDataChanged();
     }
+  }
 
-    if (EnginePlatformDispatcher.instance.onDrawFrame != null) {
-      // On mobile Flutter flushes microtasks between onBeginFrame and
-      // onDrawFrame. The web doesn't because there's no way to hook into the
-      // event loop, which is controlled by the browser (mobile Flutter hooks
-      // into the event loop using C++ code behind-the-scenes). This hasn't
-      // been an issue yet. However, if in the future someone can find a way
-      // to implement it exactly like mobile does, that would be great.
-      //
-      // (Also see the to-do in
-      //                `EnginePlatformDispatcher.scheduleWarmUpFrame`).
-      EnginePlatformDispatcher.instance.invokeOnDrawFrame();
+  void _drawFrame() {
+    try {
+      if (EnginePlatformDispatcher.instance.onDrawFrame != null) {
+        EnginePlatformDispatcher.instance.invokeOnDrawFrame();
+      }
+    } finally {
+      _finishFrame();
     }
+  }
+
+  void _finishFrame() {
+    _isRenderingFrame = false;
+    onFinishedRenderingFrame?.call();
   }
 
   void _dispose() {
