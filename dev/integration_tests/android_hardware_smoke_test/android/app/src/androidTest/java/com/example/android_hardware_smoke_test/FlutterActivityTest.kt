@@ -24,6 +24,8 @@ import java.util.concurrent.CompletableFuture
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
+// Keep exception class names in sync with _isRetryableDisplayOrEglFailure in
+// dev/bots/suite_runners/run_android_hardware_smoke_tests.dart.
 private class BlankScreenshotException(
     message: String
 ) : IllegalStateException(message)
@@ -67,24 +69,14 @@ class FlutterActivityTest {
             try {
                 val pid = android.os.Process.myPid()
                 val instrumentation = InstrumentationRegistry.getInstrumentation()
-                val pfd = instrumentation.uiAutomation.executeShellCommand("logcat -d --pid=$pid *:W")
-                android.os.ParcelFileDescriptor.AutoCloseInputStream(pfd).bufferedReader().use { reader ->
-                    var line: String?
-                    var seenMarker = false
-                    while (reader.readLine().also { line = it } != null) {
-                        val currentLine = line ?: continue
-                        if (currentLine.contains(marker)) {
-                            seenMarker = true
-                        }
-                        if (seenMarker) {
-                            if (currentLine.contains("libEGL") ||
-                                currentLine.contains("HWUI") ||
-                                currentLine.contains("EGL_")
-                            ) {
-                                errorLogs.add(currentLine)
-                            }
-                        }
-                    }
+                // Include $TAG:I alongside *:W so the Log.i(TAG, marker) boundary line is present
+                // in the dump, and filter through GraphicsErrorLogFilter because Android's HWUI
+                // RenderThread runs inside this PID and emits benign warnings (such as Davey!
+                // slow-frame logs and capability probes) that would otherwise preempt
+                // BlankScreenshotException retries.
+                val pfd = instrumentation.uiAutomation.executeShellCommand("logcat -d --pid=$pid $TAG:I *:W")
+                android.os.ParcelFileDescriptor.AutoCloseInputStream(pfd).bufferedReader().useLines { lines ->
+                    errorLogs.addAll(GraphicsErrorLogFilter.extractErrorsAfterMarker(lines, marker))
                 }
             } catch (e: Exception) {
                 Log.w(TAG, "Failed to self-inspect logcat: ${e.message}")
@@ -141,6 +133,10 @@ class FlutterActivityTest {
                 if (e is org.junit.AssumptionViolatedException) {
                     throw e
                 }
+                // Only BlankScreenshotException is retried via Activity recreation. Process-level
+                // EglInitializationException cannot be recovered in-process and must bubble up to
+                // the host runner, while golden mismatches and assertion errors must fail on
+                // attempt 1 so real rendering regressions are not masked.
                 if (!isBlankScreenshotException(e)) {
                     throw RuntimeException(
                         "Test '$testName' failed on attempt $currentAttempt with a non-retryable error: ${e.message}",
@@ -303,8 +299,8 @@ class FlutterActivityTest {
                         candidate.recycle()
                     }
 
-                    // If EGL/graphics pipeline has failed, further retries in this process are futile.
-                    // Break early to trigger activity re-creation.
+                    // If a fatal process-level EGL error occurred, further screenshot retries or in-process
+                    // activity re-creation cannot recover the broken display context. Break early to fail fast.
                     if (hasGraphicsPipelineErrors(marker)) {
                         Log.w(TAG, "Graphics pipeline/EGL error detected during screenshot. Short-circuiting retries.")
                         break
