@@ -426,6 +426,7 @@ class RenderParagraph extends RenderBox
         return;
       case RenderComparison.metadata:
         _textPainter.text = value;
+        _cachedAttributedLabels = null;
         _cachedCombinedSemanticsInfos = null;
         markNeedsSemanticsUpdate();
       case RenderComparison.paint:
