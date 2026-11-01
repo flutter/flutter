@@ -3,21 +3,32 @@
 // found in the LICENSE file.
 
 #include <unordered_map>
+#include "flutter/display_list/dl_builder.h"
+#include "flutter/display_list/dl_color.h"
+#include "flutter/display_list/dl_paint.h"
 #include "flutter/display_list/dl_tile_mode.h"
 #include "flutter/display_list/effects/dl_image_filter.h"
 #include "flutter/display_list/geometry/dl_geometry_types.h"
+#include "flutter/fml/synchronization/count_down_latch.h"
 #include "flutter/testing/testing.h"
 #include "gtest/gtest.h"
+#include "impeller/core/device_buffer.h"
+#include "impeller/core/device_buffer_descriptor.h"
 #include "impeller/core/formats.h"
 #include "impeller/core/texture_descriptor.h"
+#include "impeller/display_list/aiks_context.h"
 #include "impeller/display_list/aiks_unittests.h"
 #include "impeller/display_list/canvas.h"
+#include "impeller/display_list/dl_dispatcher.h"
 #include "impeller/display_list/dl_image_impeller.h"
 #include "impeller/display_list/dl_runtime_effect_impeller.h"
 #include "impeller/display_list/dl_vertices_geometry.h"
 #include "impeller/geometry/geometry_asserts.h"
 #include "impeller/playground/playground.h"
 #include "impeller/playground/widgets.h"
+#include "impeller/renderer/blit_pass.h"
+#include "impeller/renderer/command_buffer.h"
+#include "impeller/renderer/command_queue.h"
 #include "impeller/renderer/render_target.h"
 #include "third_party/abseil-cpp/absl/status/status_matchers.h"
 
@@ -629,6 +640,275 @@ TEST(CanvasTest, NonAntialiasedPaintIncompatibleWithSDFRendering) {
 TEST(CanvasTest, AntialiasedPaintCompatibleWithSDFRendering) {
   Paint paint;
   EXPECT_TRUE(Canvas::IsCompatibleWithSDFRendering(paint));
+}
+
+namespace {
+
+std::shared_ptr<DeviceBuffer> ReadbackTextureBytes(
+    const std::shared_ptr<Context>& context,
+    const std::shared_ptr<Texture>& texture) {
+  if (!context || !texture) {
+    return nullptr;
+  }
+  DeviceBufferDescriptor buf_desc;
+  buf_desc.size = texture->GetTextureDescriptor().GetByteSizeOfBaseMipLevel();
+  buf_desc.readback = true;
+  buf_desc.storage_mode = StorageMode::kHostVisible;
+  std::shared_ptr<DeviceBuffer> readback_buf =
+      context->GetResourceAllocator()->CreateBuffer(buf_desc);
+  if (!readback_buf) {
+    return nullptr;
+  }
+
+  std::shared_ptr<CommandBuffer> cmd = context->CreateCommandBuffer();
+  std::shared_ptr<BlitPass> blit = cmd->CreateBlitPass();
+  if (!blit->AddCopy(texture, readback_buf) || !blit->EncodeCommands()) {
+    return nullptr;
+  }
+  auto latch = std::make_shared<fml::CountDownLatch>(1u);
+  if (!context->GetCommandQueue()
+           ->Submit({cmd},
+                    [latch](CommandBuffer::Status) { latch->CountDown(); })
+           .ok()) {
+    return nullptr;
+  }
+  latch->Wait();
+  return readback_buf;
+}
+
+}  // namespace
+
+TEST_P(AiksTest, ClippedBackdropFilterInOffsetSubpassPreservesRoundedCorners) {
+  AiksContext aiks_context(GetContext(), nullptr);
+  ASSERT_TRUE(aiks_context.IsValid());
+
+  flutter::DisplayListBuilder builder;
+
+  // 1. Opaque black root background.
+  flutter::DlPaint bg_paint;
+  bg_paint.setColor(flutter::DlColor::kBlack());
+  builder.DrawPaint(bg_paint);
+
+  // 2. Offset subpass at (60, 100) with group-incompatible opacity (forcing an
+  // offscreen SaveLayer at non-zero global pass position where
+  // should_use_onscreen == false).
+  flutter::DlPaint opacity_paint;
+  opacity_paint.setOpacity(0.98f);
+  flutter::DlRect card_bounds = flutter::DlRect::MakeXYWH(60, 100, 200, 200);
+  builder.SaveLayer(card_bounds, &opacity_paint);
+
+  // 3. Rounded clip on the card.
+  builder.ClipRoundSuperellipse(
+      flutter::DlRoundSuperellipse::MakeRectXY(card_bounds, 40.0f, 40.0f),
+      flutter::DlClipOp::kIntersect);
+
+  // 4. Child scope with a containing ClipRect that restores before the
+  // BackdropFilter (previously evicted the parent rounded clip).
+  builder.Save();
+  builder.ClipRect(flutter::DlRect::MakeXYWH(0, 0, 400, 400),
+                   flutter::DlClipOp::kIntersect);
+  flutter::DlPaint green_paint;
+  green_paint.setColor(flutter::DlColor::RGBA(0.0f, 1.0f, 0.0f, 0.5f));
+  builder.DrawRect(card_bounds, green_paint);
+  builder.Restore();
+
+  // 5. BackdropFilter covering the top half of the card, intersecting the
+  // top-left and top-right rounded corners.
+  auto blur = flutter::DlImageFilter::MakeBlur(10.0f, 10.0f,
+                                               flutter::DlTileMode::kClamp);
+  flutter::DlRect header_bounds = flutter::DlRect::MakeXYWH(60, 100, 200, 100);
+  builder.SaveLayer(header_bounds, nullptr, blur.get());
+  flutter::DlPaint white_paint;
+  white_paint.setColor(flutter::DlColor::kWhite());
+  builder.DrawRect(header_bounds, white_paint);
+  builder.Restore();
+
+  builder.Restore();
+
+  std::shared_ptr<Texture> texture =
+      DisplayListToTexture(builder.Build(), ISize{320, 360}, aiks_context);
+  ASSERT_TRUE(texture);
+
+  std::shared_ptr<DeviceBuffer> readback_buf =
+      ReadbackTextureBytes(GetContext(), texture);
+  ASSERT_TRUE(readback_buf);
+  const uint8_t* bytes = readback_buf->OnGetContents();
+  ASSERT_NE(bytes, nullptr);
+
+  // Top-left (62, 102) and top-right (257, 102) pixels lie inside header_bounds
+  // (60..260, 100..200) but outside the r=40 rounded corners. Both must remain
+  // opaque black (0, 0, 0, 255) rather than bleeding white from an unclipped or
+  // mis-transformed BackdropFilter.
+  for (size_t x : {62u, 257u}) {
+    const size_t corner_offset = (102 * 320 + x) * 4;
+    EXPECT_EQ(bytes[corner_offset + 0], 0u) << "x=" << x;
+    EXPECT_EQ(bytes[corner_offset + 1], 0u) << "x=" << x;
+    EXPECT_EQ(bytes[corner_offset + 2], 0u) << "x=" << x;
+    EXPECT_EQ(bytes[corner_offset + 3], 255u) << "x=" << x;
+  }
+
+  // Interior header pixel (160, 150) must render inside the clip.
+  const size_t interior_offset = (150 * 320 + 160) * 4;
+  EXPECT_GT(bytes[interior_offset + 0], 240u);
+  EXPECT_GT(bytes[interior_offset + 1], 240u);
+  EXPECT_GT(bytes[interior_offset + 2], 240u);
+}
+
+TEST_P(AiksTest, ClippedBackdropFilterInRootPassPreservesRoundedCorners) {
+  AiksContext aiks_context(GetContext(), nullptr);
+  ASSERT_TRUE(aiks_context.IsValid());
+
+  flutter::DisplayListBuilder builder;
+
+  // 1. Opaque black root background.
+  flutter::DlPaint bg_paint;
+  bg_paint.setColor(flutter::DlColor::kBlack());
+  builder.DrawPaint(bg_paint);
+
+  // 2. Root-pass translation + rounded clip (render_passes_.size() == 1, so
+  // should_use_onscreen == true on framebuffer-fetch backends).
+  builder.Save();
+  builder.Translate(60.0f, 100.0f);
+  flutter::DlRect local_card = flutter::DlRect::MakeXYWH(0, 0, 200, 200);
+  builder.ClipRoundSuperellipse(
+      flutter::DlRoundSuperellipse::MakeRectXY(local_card, 40.0f, 40.0f),
+      flutter::DlClipOp::kIntersect);
+
+  // 3. Child scope with containing ClipRect that restores before FlipBackdrop.
+  builder.Save();
+  builder.ClipRect(flutter::DlRect::MakeXYWH(-60, -100, 400, 400),
+                   flutter::DlClipOp::kIntersect);
+  flutter::DlPaint green_paint;
+  green_paint.setColor(flutter::DlColor::RGBA(0.0f, 1.0f, 0.0f, 0.5f));
+  builder.DrawRect(local_card, green_paint);
+  builder.Restore();
+
+  // 4. Root-pass BackdropFilter covering the top half of the card.
+  auto blur = flutter::DlImageFilter::MakeBlur(10.0f, 10.0f,
+                                               flutter::DlTileMode::kClamp);
+  flutter::DlRect local_header = flutter::DlRect::MakeXYWH(0, 0, 200, 100);
+  builder.SaveLayer(local_header, nullptr, blur.get());
+  flutter::DlPaint white_paint;
+  white_paint.setColor(flutter::DlColor::kWhite());
+  builder.DrawRect(local_header, white_paint);
+  builder.Restore();
+
+  builder.Restore();
+
+  std::shared_ptr<Texture> texture =
+      DisplayListToTexture(builder.Build(), ISize{320, 360}, aiks_context);
+  ASSERT_TRUE(texture);
+
+  std::shared_ptr<DeviceBuffer> readback_buf =
+      ReadbackTextureBytes(GetContext(), texture);
+  ASSERT_TRUE(readback_buf);
+  const uint8_t* bytes = readback_buf->OnGetContents();
+  ASSERT_NE(bytes, nullptr);
+
+  for (size_t x : {62u, 257u}) {
+    const size_t corner_offset = (102 * 320 + x) * 4;
+    EXPECT_EQ(bytes[corner_offset + 0], 0u) << "x=" << x;
+    EXPECT_EQ(bytes[corner_offset + 1], 0u) << "x=" << x;
+    EXPECT_EQ(bytes[corner_offset + 2], 0u) << "x=" << x;
+    EXPECT_EQ(bytes[corner_offset + 3], 255u) << "x=" << x;
+  }
+
+  const size_t interior_offset = (150 * 320 + 160) * 4;
+  EXPECT_EQ(bytes[interior_offset + 0], 255u);
+  EXPECT_EQ(bytes[interior_offset + 1], 255u);
+  EXPECT_EQ(bytes[interior_offset + 2], 255u);
+  EXPECT_EQ(bytes[interior_offset + 3], 255u);
+}
+
+TEST_P(AiksTest, ClippedBackdropFilterPreservesAlpha) {
+  AiksContext aiks_context(GetContext(), nullptr);
+  ASSERT_TRUE(aiks_context.IsValid());
+
+  // 1. Prime transient MSAA depth memory with non-zero clip depth values by
+  // executing and releasing an identically sized pass.
+  {
+    flutter::DisplayListBuilder prime_builder;
+    prime_builder.Save();
+    prime_builder.ClipRoundSuperellipse(
+        flutter::DlRoundSuperellipse::MakeRectXY(
+            flutter::DlRect::MakeXYWH(0, 0, 16, 16), 4.0f, 4.0f),
+        flutter::DlClipOp::kIntersect);
+    flutter::DlPaint white_paint;
+    white_paint.setColor(flutter::DlColor::kWhite());
+    prime_builder.DrawRect(flutter::DlRect::MakeXYWH(0, 0, 16, 16),
+                           white_paint);
+    prime_builder.Restore();
+    ASSERT_TRUE(DisplayListToTexture(prime_builder.Build(), ISize{320, 360},
+                                     aiks_context));
+  }
+
+  // 2. Render a CupertinoPopupSurface-style root-clipped BackdropFilter over a
+  // transparent background (matching widget golden snapshots) alongside an
+  // offset Opacity(0.5) subpass clipped BackdropFilter.
+  flutter::DisplayListBuilder builder;
+
+  // Top sheet (y = 20..160): root-level ClipRoundSuperellipse + BackdropFilter
+  // over transparent black with translucent sheet fill (alpha = 200/255) and an
+  // opaque content bar (alpha = 255).
+  builder.Save();
+  flutter::DlRect top_sheet = flutter::DlRect::MakeXYWH(40, 20, 240, 140);
+  builder.ClipRoundSuperellipse(
+      flutter::DlRoundSuperellipse::MakeRectXY(top_sheet, 24.0f, 24.0f),
+      flutter::DlClipOp::kIntersect);
+  auto blur = flutter::DlImageFilter::MakeBlur(20.0f, 20.0f,
+                                               flutter::DlTileMode::kClamp);
+  builder.SaveLayer(top_sheet, nullptr, blur.get());
+  flutter::DlPaint sheet_fill;
+  sheet_fill.setColor(
+      flutter::DlColor::RGBA(1.0f, 1.0f, 1.0f, 200.0f / 255.0f));
+  builder.DrawRect(top_sheet, sheet_fill);
+  flutter::DlPaint opaque_white;
+  opaque_white.setColor(flutter::DlColor::kWhite());
+  builder.DrawRect(flutter::DlRect::MakeXYWH(60, 80, 200, 40), opaque_white);
+  builder.Restore();
+  builder.Restore();
+
+  // Bottom card (y = 190..330): offset SaveLayer with Opacity(0.5) containing a
+  // clipped BackdropFilter with an opaque white fill over transparent black.
+  flutter::DlPaint half_opacity;
+  half_opacity.setOpacity(0.5f);
+  flutter::DlRect bottom_card = flutter::DlRect::MakeXYWH(40, 190, 240, 140);
+  builder.SaveLayer(bottom_card, &half_opacity);
+  builder.ClipRoundSuperellipse(
+      flutter::DlRoundSuperellipse::MakeRectXY(bottom_card, 24.0f, 24.0f),
+      flutter::DlClipOp::kIntersect);
+  builder.SaveLayer(bottom_card, nullptr, blur.get());
+  builder.DrawRect(bottom_card, opaque_white);
+  builder.Restore();
+  builder.Restore();
+
+  std::shared_ptr<Texture> texture =
+      DisplayListToTexture(builder.Build(), ISize{320, 360}, aiks_context);
+  ASSERT_TRUE(texture);
+
+  std::shared_ptr<DeviceBuffer> readback_buf =
+      ReadbackTextureBytes(GetContext(), texture);
+  ASSERT_TRUE(readback_buf);
+  const uint8_t* bytes = readback_buf->OnGetContents();
+  ASSERT_NE(bytes, nullptr);
+
+  // Translucent sheet background at (160, 50): premultiplied RGBA must be ~200
+  // (never attenuated to 100 or 50).
+  const size_t sheet_bg_offset = (50 * 320 + 160) * 4;
+  EXPECT_NEAR(bytes[sheet_bg_offset + 0], 200, 2);
+  EXPECT_NEAR(bytes[sheet_bg_offset + 3], 200, 2);
+
+  // Opaque content bar inside BackdropFilter at (160, 100): must be 255 alpha
+  // (never attenuated to 128).
+  const size_t opaque_bar_offset = (100 * 320 + 160) * 4;
+  EXPECT_EQ(bytes[opaque_bar_offset + 0], 255u);
+  EXPECT_EQ(bytes[opaque_bar_offset + 3], 255u);
+
+  // Offset Opacity(0.5) subpass at (160, 260): premultiplied RGBA must be ~128
+  // (single 0.5x opacity application, never doubly attenuated to 64).
+  const size_t half_opacity_offset = (260 * 320 + 160) * 4;
+  EXPECT_NEAR(bytes[half_opacity_offset + 0], 128, 2);
+  EXPECT_NEAR(bytes[half_opacity_offset + 3], 128, 2);
 }
 
 }  // namespace testing
