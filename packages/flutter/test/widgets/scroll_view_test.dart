@@ -122,6 +122,46 @@ void main() {
     expect(textField.focusNode.hasFocus, isFalse);
   });
 
+  testWidgets('ListView dismiss keyboard onDrag does not refocus the field after a pop', (
+    WidgetTester tester,
+  ) async {
+    // Regression test for https://github.com/flutter/flutter/issues/124778.
+    final focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
+    final navigatorKey = GlobalKey<NavigatorState>();
+
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        navigatorKey: navigatorKey,
+        home: ListView(
+          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+          children: <Widget>[
+            TestTextField(focusNode: focusNode),
+            const SizedBox(height: 1000.0),
+          ],
+        ),
+      ),
+    );
+
+    final Finder finder = find.byType(EditableText);
+    await tester.showKeyboard(finder);
+    expect(focusNode.hasFocus, isTrue);
+
+    await tester.drag(finder, const Offset(0.0, -40.0));
+    await tester.pumpAndSettle();
+    expect(focusNode.hasFocus, isFalse);
+
+    // Popping back to the route focuses the route's last focused child, which
+    // must no longer be the field that the drag dismissed.
+    navigatorKey.currentState!.push(
+      PageRouteBuilder<void>(pageBuilder: (_, _, _) => const SizedBox()),
+    );
+    await tester.pumpAndSettle();
+    navigatorKey.currentState!.pop();
+    await tester.pumpAndSettle();
+    expect(focusNode.hasFocus, isFalse);
+  });
+
   testWidgets('GridView.builder supports null items', (WidgetTester tester) async {
     await tester.pumpWidget(
       TestWidgetsApp(
