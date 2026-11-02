@@ -395,7 +395,7 @@ return u_color;
 }
 ''';
 
-    final Float32List uniformData = Float32List(4);
+    final uniformData = Float32List(4);
 
     uniformData[0] = 1.0;
     uniformData[1] = 0.0;
