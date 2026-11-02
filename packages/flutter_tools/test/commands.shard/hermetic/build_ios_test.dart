@@ -221,6 +221,7 @@ void main() {
     bool hasWorkspace = true,
     bool disablePortPublication = false,
     String? deviceId,
+    String? scriptOutputStreamFile,
     int exitCode = 0,
     String? stdout,
     void Function(List<String> command)? onRun,
@@ -253,6 +254,7 @@ void main() {
           '-destination',
           'generic/platform=iOS Simulator',
         ] else ...<String>['-destination', 'generic/platform=iOS'],
+        if (scriptOutputStreamFile != null) 'SCRIPT_OUTPUT_STREAM_FILE=$scriptOutputStreamFile',
         '-resultBundlePath',
         _xcBundleDirectoryPath,
         '-resultBundleVersion',
@@ -1605,6 +1607,98 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
         Artifacts: () => Artifacts.test(),
       },
     );
+
+    testUsingContext(
+      'Do not crash if temporary build directory is deleted before cleanup.',
+      () async {
+        final BuildCommand command = createBuildCommand();
+        processManager.addCommands(<FakeCommand>[
+          setUpFakeXcodeBuildHandler(
+            simulator: true,
+            exitCode: 1,
+            onRun: (_) {
+              final Directory tempDir = fileSystem.directory(_xcBundleDirectoryPath).parent;
+              expect(tempDir, exists);
+              tempDir.deleteSync(recursive: true);
+            },
+          ),
+        ]);
+
+        createMinimalMockProjectFiles();
+
+        await expectLater(
+          createTestCommandRunner(command)
+              .run(const <String>['build', 'ios', '--simulator', '--no-pub']),
+          throwsToolExit(message: 'Encountered error while building for simulator.'),
+        );
+        expect(processManager.hasRemainingExpectations, isFalse);
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        Logger: () => logger,
+        ProcessManager: () => processManager,
+        Pub: ThrowingPub.new,
+        Platform: () => macosPlatform,
+        XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+        Artifacts: () => Artifacts.test(),
+      },
+    );
+
+    testUsingContext(
+      'Do not crash if temporary build directory is deleted before cleanup in terminal session.',
+      () async {
+        final BuildCommand command = createFakeBuildCommand(
+          androidSdk: FakeAndroidSdk(),
+          buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+          fileSystem: fileSystem,
+          logger: _TerminalBufferLogger(),
+          osUtils: _PipeOperatingSystemUtils(fileSystem),
+          config: FakeConfig(),
+          platform: macosPlatform,
+          fileSystemUtils: FileSystemUtils(fileSystem: fileSystem, platform: macosPlatform),
+          terminal: FakeTerminal(),
+          plistParser: testPlistUtils,
+          processManager: processManager,
+          templateRenderer: FakeTemplateRenderer(),
+          xcode: FakeXcode(),
+          xcodeProjectInterpreter: FakeXcodeProjectInterpreterWithBuildSettings(),
+          artifacts: FakeArtifacts(),
+          cache: FakeCache(),
+          flutterVersion: FakeFlutterVersion(),
+        );
+        final Directory tempDir = fileSystem.directory(_xcBundleDirectoryPath).parent;
+        final File pipeFile = tempDir.childFile('pipe_to_stdout');
+        processManager.addCommand(
+          setUpFakeXcodeBuildHandler(
+            simulator: true,
+            exitCode: 1,
+            scriptOutputStreamFile: pipeFile.path,
+            onRun: (_) {
+              expect(pipeFile, exists);
+              tempDir.deleteSync(recursive: true);
+            },
+          ),
+        );
+
+        createMinimalMockProjectFiles();
+
+        await expectLater(
+          createTestCommandRunner(command)
+              .run(const <String>['build', 'ios', '--simulator', '--no-pub']),
+          throwsToolExit(message: 'Encountered error while building for simulator.'),
+        );
+        expect(processManager.hasRemainingExpectations, isFalse);
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        Logger: () => logger,
+        ProcessManager: () => processManager,
+        Pub: ThrowingPub.new,
+        Platform: () => macosPlatform,
+        XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+        Artifacts: () => Artifacts.test(),
+      },
+    );
   });
 }
 
@@ -1633,4 +1727,22 @@ class FakeOperatingSystemUtils extends Fake implements OperatingSystemUtils {
 
   @override
   void chmod(FileSystemEntity file, String mode) {}
+}
+
+class _TerminalBufferLogger extends BufferLogger {
+  _TerminalBufferLogger() : super.test();
+
+  @override
+  bool get hasTerminal => true;
+}
+
+class _PipeOperatingSystemUtils extends FakeOperatingSystemUtils {
+  _PipeOperatingSystemUtils(this._fileSystem);
+
+  final FileSystem _fileSystem;
+
+  // Emulates a FIFO that already delivered the final 'all done' line, so the
+  // pipe listener in buildXcodeProject returns right away.
+  @override
+  File makePipe(String path) => _fileSystem.file(path)..writeAsStringSync('all done\n');
 }

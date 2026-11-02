@@ -11,6 +11,7 @@ import 'package:unified_analytics/unified_analytics.dart';
 import '../artifacts.dart';
 import '../base/bot_detector.dart';
 import '../base/config.dart';
+import '../base/error_handling_io.dart';
 import '../base/file_system.dart';
 import '../base/fingerprint.dart';
 import '../base/io.dart';
@@ -591,8 +592,11 @@ Future<XcodeBuildResult> buildXcodeProject({
       processUtils: processUtils,
     );
 
-    // Notifies listener that no more output is coming.
-    scriptOutputPipeFile?.writeAsStringSync('all done');
+    // Notifies listener that no more output is coming. The temporary directory
+    // may have been deleted mid-build (e.g. by fatal-signal temp cleanup).
+    if (scriptOutputPipeFile != null && scriptOutputPipeFile.existsSync()) {
+      scriptOutputPipeFile.writeAsStringSync('all done');
+    }
     buildSubStatus?.stop();
     buildSubStatus = null;
     initialBuildStatus?.cancel();
@@ -634,7 +638,7 @@ Future<XcodeBuildResult> buildXcodeProject({
       }
     }
   } finally {
-    tempDir.deleteSync(recursive: true);
+    ErrorHandlingFileSystem.deleteIfExists(tempDir, recursive: true);
   }
   if (buildResult != null && buildResult.exitCode != 0) {
     logger.printStatus('Failed to build iOS app');
