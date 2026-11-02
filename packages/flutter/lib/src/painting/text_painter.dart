@@ -642,6 +642,7 @@ class TextPainter {
     this._textWidthBasis = TextWidthBasis.parent,
     this._textHeightBehavior,
     this._hyphens = Hyphens.manual,
+    this._hyphenCharacter,
   }) : assert(text == null || text.debugAssertIsValid()),
        assert(maxLines == null || maxLines > 0),
        assert(
@@ -682,6 +683,7 @@ class TextPainter {
     TextWidthBasis textWidthBasis = TextWidthBasis.parent,
     TextHeightBehavior? textHeightBehavior,
     Hyphens hyphens = Hyphens.manual,
+    String? hyphenCharacter,
     double minWidth = 0.0,
     double maxWidth = double.infinity,
   }) {
@@ -703,6 +705,7 @@ class TextPainter {
       textWidthBasis: textWidthBasis,
       textHeightBehavior: textHeightBehavior,
       hyphens: hyphens,
+      hyphenCharacter: hyphenCharacter,
     )..layout(minWidth: minWidth, maxWidth: maxWidth);
 
     try {
@@ -738,6 +741,7 @@ class TextPainter {
     TextWidthBasis textWidthBasis = TextWidthBasis.parent,
     TextHeightBehavior? textHeightBehavior,
     Hyphens hyphens = Hyphens.manual,
+    String? hyphenCharacter,
     double minWidth = 0.0,
     double maxWidth = double.infinity,
   }) {
@@ -759,6 +763,7 @@ class TextPainter {
       textWidthBasis: textWidthBasis,
       textHeightBehavior: textHeightBehavior,
       hyphens: hyphens,
+      hyphenCharacter: hyphenCharacter,
     )..layout(minWidth: minWidth, maxWidth: maxWidth);
 
     try {
@@ -1077,6 +1082,29 @@ class TextPainter {
     markNeedsLayout();
   }
 
+  /// {@template flutter.painting.textPainter.hyphenCharacter}
+  /// The string drawn at the end of a line that breaks at a soft hyphen
+  /// (U+00AD).
+  ///
+  /// If null, a hyphen-minus ("-") is drawn. Line breaking leaves room for the
+  /// string when it can, so a longer string can move a break earlier. The
+  /// empty string draws nothing, but the line still breaks there. Has no effect
+  /// when [hyphens] is [Hyphens.hidden].
+  ///
+  /// The string is shaped as a single run in the style of the text before it,
+  /// so it should be short, typically one character, and supported by that
+  /// text's font.
+  /// {@endtemplate}
+  String? get hyphenCharacter => _hyphenCharacter;
+  String? _hyphenCharacter;
+  set hyphenCharacter(String? value) {
+    if (_hyphenCharacter == value) {
+      return;
+    }
+    _hyphenCharacter = value;
+    markNeedsLayout();
+  }
+
   /// An ordered list of [TextBox]es that bound the positions of the placeholders
   /// in the paragraph.
   ///
@@ -1140,6 +1168,7 @@ class TextPainter {
       maxLines: _maxLines,
       textHeightBehavior: _textHeightBehavior,
       hyphens: _hyphens,
+      hyphenCharacter: _hyphenCharacter,
       ellipsis: _ellipsis,
       locale: _locale,
       strutStyle: _strutStyle,
