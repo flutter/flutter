@@ -11,12 +11,19 @@ NS_ASSUME_NONNULL_BEGIN
 @class SemanticsObject;
 
 /**
- * A UIScrollView to represent Flutter scrollable in iOS accessibility
- * services.
+ * A hidden UIScrollView that represents a Flutter scrollable in iOS
+ * accessibility services.
  *
- * This class is hidden from the user and can't be interacted with. It
- * sends all of selector calls from accessibility services to the
- * owner SemanticsObject.
+ * UIKit's accessibility runtime only recognizes scrollable regions that are
+ * `UIScrollView` subclasses (checking `[obj isKindOfClass:[UIScrollView class]]`
+ * and inspecting `frame`, `contentSize`, and `contentOffset`). Because
+ * `FlutterScrollableSemanticsObject` subclasses `SemanticsObject`
+ * (`UIAccessibilityElement`), it creates this `UIScrollView` to represent
+ * itself to iOS and forwards accessibility callbacks back to `semanticsObject`.
+ *
+ * When `semanticsObject` has children, this view also serves directly as its
+ * `UIAccessibilityContainer` (instead of `SemanticsObjectContainer`) so that
+ * child elements have this `UIScrollView` as their `accessibilityContainer`.
  */
 @interface FlutterSemanticsScrollView : UIScrollView <UIScrollViewDelegate>
 
@@ -46,6 +53,8 @@ NS_ASSUME_NONNULL_BEGIN
 - (instancetype)initWithFrame:(CGRect)frame NS_UNAVAILABLE;
 - (instancetype)initWithCoder:(NSCoder*)coder NS_UNAVAILABLE;
 - (instancetype)initWithSemanticsObject:(SemanticsObject*)semanticsObject;
+- (nullable id)accessibilityContainer;
+- (nullable id)_accessibilityHitTest:(CGPoint)point withEvent:(nullable UIEvent*)event;
 
 @end
 NS_ASSUME_NONNULL_END

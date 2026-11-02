@@ -188,6 +188,19 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
   return _scrollView;
 }
 
+- (id)accessibilityContainer {
+  if ([self hasChildren]) {
+    if (!self.bridge) {
+      return nil;
+    }
+    // Expose `scrollView` directly as the container instead of wrapping it in a
+    // `SemanticsObjectContainer` so child elements have this `UIScrollView` as their
+    // `accessibilityContainer` ancestor.
+    return self.scrollView;
+  }
+  return [super accessibilityContainer];
+}
+
 // private methods
 
 - (UIView*)reattachScrollViewToCurrentBridgeView {
@@ -595,24 +608,36 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
   return label;
 }
 
-- (bool)containsPoint:(CGPoint)point {
-  // The point is in global coordinates, so use the global rect here.
-  return CGRectContainsPoint([self globalRect], point);
+- (bool)containsPointInBridgeViewCoordinates:(CGPoint)point {
+  UIView* containerView = [self bridgeView];
+  if (!containerView) {
+    return false;
+  }
+  CGPoint globalPoint = UIAccessibilityConvertFrameToScreenCoordinates(
+                            CGRectMake(point.x, point.y, 0, 0), containerView)
+                            .origin;
+  return CGRectContainsPoint([self globalRect], globalPoint);
 }
 
 // Finds the first eligiable semantics object in hit test order.
 - (id)search:(CGPoint)point {
+  if (![self containsPointInBridgeViewCoordinates:point]) {
+    return nil;
+  }
   // Search children in hit test order.
   for (SemanticsObject* child in [self childrenInHitTestOrder]) {
-    if ([child containsPoint:point]) {
+    if ([child containsPointInBridgeViewCoordinates:point]) {
       id childSearchResult = [child search:point];
       if (childSearchResult != nil) {
         return childSearchResult;
       }
     }
   }
-  // Check if the current semantic object should be returned.
-  if ([self containsPoint:point] && [self isFocusable]) {
+  // Check if the current semantic object should be returned. Hidden elements
+  // (e.g. off-screen or obscured scroll children that still report a non-empty
+  // accessibilityFrame for VoiceOver linear navigation) cannot gain focus via
+  // touch exploration.
+  if (!self.node.flags.isHidden && [self isFocusable]) {
     return self.nativeAccessibility;
   }
   return nil;
@@ -625,6 +650,14 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
 // goes to the smallest object before IOS 16, but to the top-left object in
 // IOS 16. Overrides this method to focus the first eligiable semantics
 // object in hit test order.
+//
+// `point` is in the local coordinate space of `bridgeView` (`FlutterView`),
+// because UIKit only converts hit-test points when traversing into a `UIView`
+// or `CALayer` child and passes `bridgeView`'s local coordinates unchanged to
+// non-view accessibility elements (`SemanticsObjectContainer` / `SemanticsObject`).
+//
+// TODO(LongCatIsLooong): Replace this private override with a public equivalent.
+// https://github.com/flutter/flutter/issues/195775.
 - (id)_accessibilityHitTest:(CGPoint)point withEvent:(UIEvent*)event {
   if (!self.bridge) {
     return nil;
@@ -712,10 +745,6 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
 - (CGRect)accessibilityFrame {
   if (!self.bridge) {
     return CGRectZero;
-  }
-
-  if (self.node.flags.isHidden) {
-    return [super accessibilityFrame];
   }
   return [self globalRect];
 }
@@ -1010,7 +1039,7 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
   for (size_t i = 0; i < [children count]; i++) {
     SemanticsObject* child = children[i];
     if ((![child hasChildren] && child.nativeAccessibility == element) ||
-        ([child hasChildren] && [child.nativeAccessibility accessibilityContainer] == element)) {
+        ([child hasChildren] && [child accessibilityContainer] == element)) {
       return i + 1;
     }
   }
@@ -1045,6 +1074,10 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
 
 - (BOOL)accessibilityScroll:(UIAccessibilityScrollDirection)direction {
   return [self.semanticsObject accessibilityScroll:direction];
+}
+
+- (id)_accessibilityHitTest:(CGPoint)point withEvent:(UIEvent*)event {
+  return [self.semanticsObject _accessibilityHitTest:point withEvent:event];
 }
 
 @end

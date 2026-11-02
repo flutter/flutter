@@ -981,6 +981,123 @@ const float kFloatCompareEpsilon = 0.001;
   XCTAssertEqual(container.semanticsObject, parentObject);
 }
 
+- (void)testFlutterScrollableSemanticsObjectWithChildrenUsesScrollViewAsAccessibilityContainer {
+  flutter::testing::MockAccessibilityBridge* mock = new flutter::testing::MockAccessibilityBridge();
+  mock->isVoiceOverRunningValue = true;
+  fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(mock);
+  fml::WeakPtr<flutter::AccessibilityBridgeIos> bridge = factory.GetWeakPtr();
+
+  flutter::SemanticsNode parent;
+  parent.id = 0;
+  parent.rect = SkRect::MakeXYWH(0, 0, 100, 200);
+  parent.childrenInTraversalOrder.push_back(1);
+
+  flutter::SemanticsNode node;
+  node.id = 1;
+  node.flags.hasImplicitScrolling = true;
+  node.actions = flutter::kVerticalScrollSemanticsActions;
+  node.rect = SkRect::MakeXYWH(0, 0, 100, 200);
+  node.scrollExtentMax = 100.0;
+  node.scrollPosition = 0.0;
+  node.childrenInTraversalOrder.push_back(2);
+
+  flutter::SemanticsNode childNode;
+  childNode.id = 2;
+  childNode.rect = SkRect::MakeXYWH(0, 250, 100, 50);
+  childNode.flags.isHidden = true;
+  childNode.label = "offscreen item";
+
+  FlutterSemanticsObject* parentObject = [[FlutterSemanticsObject alloc] initWithBridge:bridge
+                                                                                    uid:0];
+  [parentObject setSemanticsNode:&parent];
+
+  FlutterScrollableSemanticsObject* scrollable =
+      [[FlutterScrollableSemanticsObject alloc] initWithBridge:bridge uid:1];
+  [scrollable setSemanticsNode:&node];
+
+  FlutterSemanticsObject* childObject = [[FlutterSemanticsObject alloc] initWithBridge:bridge
+                                                                                   uid:2];
+  [childObject setSemanticsNode:&childNode];
+
+  scrollable.children = @[ childObject ];
+  scrollable.childrenInHitTestOrder = @[ childObject ];
+  parentObject.children = @[ scrollable ];
+  parentObject.childrenInHitTestOrder = @[ scrollable ];
+  [parentObject accessibilityBridgeDidFinishUpdate];
+  [scrollable accessibilityBridgeDidFinishUpdate];
+  [childObject accessibilityBridgeDidFinishUpdate];
+
+  FlutterSemanticsScrollView* scrollView = [scrollable nativeAccessibility];
+  XCTAssertFalse(scrollView.isAccessibilityElement);
+  XCTAssertEqual(scrollable.accessibilityContainer, scrollView);
+  XCTAssertEqual(childObject.accessibilityContainer, scrollView);
+  XCTAssertEqual([scrollView accessibilityContainer], parentObject.accessibilityContainer);
+
+  SemanticsObjectContainer* parentContainer =
+      static_cast<SemanticsObjectContainer*>(parentObject.accessibilityContainer);
+  XCTAssertEqual([parentContainer accessibilityElementAtIndex:1], scrollView);
+  XCTAssertEqual([parentContainer indexOfAccessibilityElement:scrollView], 1);
+
+  XCTAssertEqual([scrollView accessibilityElementCount], 1);
+  XCTAssertEqual([scrollView accessibilityElementAtIndex:0], childObject);
+  XCTAssertNil([scrollView accessibilityElementAtIndex:-1]);
+  XCTAssertNil([scrollView accessibilityElementAtIndex:1]);
+  XCTAssertEqual([scrollView indexOfAccessibilityElement:childObject], 0);
+  XCTAssertEqual([scrollView indexOfAccessibilityElement:parentObject], NSNotFound);
+
+  // Off-screen (hidden) child still reports its non-empty accessibilityFrame,
+  // but cannot be focused via VoiceOver touch exploration (_accessibilityHitTest:withEvent:).
+  CGRect hiddenFrame = childObject.accessibilityFrame;
+  XCTAssertFalse(CGRectIsEmpty(hiddenFrame));
+  CGPoint offscreenPoint = CGPointMake(CGRectGetMidX(hiddenFrame), CGRectGetMidY(hiddenFrame));
+  XCTAssertNil([parentObject _accessibilityHitTest:offscreenPoint withEvent:nil]);
+  XCTAssertNil([parentContainer _accessibilityHitTest:offscreenPoint withEvent:nil]);
+  XCTAssertNil([scrollable _accessibilityHitTest:offscreenPoint withEvent:nil]);
+  XCTAssertNil([scrollView _accessibilityHitTest:offscreenPoint withEvent:nil]);
+
+  // Even when a scroll child's rect is inside the scrollable's viewport, if it
+  // is marked hidden (e.g. obscured behind a pinned header or overlay), it must
+  // not be returned by _accessibilityHitTest:withEvent:.
+  childNode.rect = SkRect::MakeXYWH(0, 50, 100, 50);
+  childNode.flags.isHidden = true;
+  [childObject setSemanticsNode:&childNode];
+  CGRect obscuredFrame = childObject.accessibilityFrame;
+  XCTAssertFalse(CGRectIsEmpty(obscuredFrame));
+  CGPoint inViewportPoint = CGPointMake(CGRectGetMidX(obscuredFrame), CGRectGetMidY(obscuredFrame));
+  XCTAssertNil([parentObject _accessibilityHitTest:inViewportPoint withEvent:nil]);
+  XCTAssertNil([parentContainer _accessibilityHitTest:inViewportPoint withEvent:nil]);
+  XCTAssertNil([scrollable _accessibilityHitTest:inViewportPoint withEvent:nil]);
+  XCTAssertNil([scrollView _accessibilityHitTest:inViewportPoint withEvent:nil]);
+
+  // Once the in-viewport child is no longer hidden, touch exploration hits it.
+  childNode.flags.isHidden = false;
+  [childObject setSemanticsNode:&childNode];
+  XCTAssertTrue(CGRectEqualToRect(obscuredFrame, childObject.accessibilityFrame));
+  XCTAssertEqual([parentObject _accessibilityHitTest:inViewportPoint withEvent:nil], childObject);
+  XCTAssertEqual([parentContainer _accessibilityHitTest:inViewportPoint withEvent:nil],
+                 childObject);
+  XCTAssertEqual([scrollable _accessibilityHitTest:inViewportPoint withEvent:nil], childObject);
+  XCTAssertEqual([scrollView _accessibilityHitTest:inViewportPoint withEvent:nil], childObject);
+
+  // When the scroll view has a non-zero origin within `bridgeView`, UIKit
+  // passes `point` to `FlutterSemanticsScrollView._accessibilityHitTest:withEvent:`
+  // in `scrollView` local coordinates, whereas `SemanticsObject` hit-testing
+  // expects `bridgeView` coordinates.
+  node.transform = SkM44::Translate(0, 60);
+  [scrollable setSemanticsNode:&node];
+  [scrollable accessibilityBridgeDidFinishUpdate];
+  CGRect translatedChildFrame = childObject.accessibilityFrame;
+  CGPoint pointInBridgeView =
+      CGPointMake(CGRectGetMidX(translatedChildFrame), CGRectGetMidY(translatedChildFrame));
+  CGPoint pointInScrollView = [scrollView convertPoint:pointInBridgeView fromView:mock->view()];
+  XCTAssertNotEqual(pointInScrollView.y, pointInBridgeView.y);
+  XCTAssertEqual([parentObject _accessibilityHitTest:pointInBridgeView withEvent:nil], childObject);
+  XCTAssertEqual([parentContainer _accessibilityHitTest:pointInBridgeView withEvent:nil],
+                 childObject);
+  XCTAssertEqual([scrollable _accessibilityHitTest:pointInBridgeView withEvent:nil], childObject);
+  XCTAssertEqual([scrollView _accessibilityHitTest:pointInScrollView withEvent:nil], childObject);
+}
+
 - (void)testFlutterScrollableSemanticsObjectNoScrollBarOrContentInsets {
   fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(
       new flutter::testing::MockAccessibilityBridge());

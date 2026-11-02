@@ -407,10 +407,12 @@ bool AccessibilityBridge::AccessibilityElementsWereInstalledByBridge(NSArray* el
     return false;
   }
   id element = elements.firstObject;
-  if (![element isKindOfClass:[SemanticsObjectContainer class]]) {
-    return false;
+  SemanticsObject* semanticsObject = nil;
+  if ([element isKindOfClass:[SemanticsObjectContainer class]]) {
+    semanticsObject = ((SemanticsObjectContainer*)element).semanticsObject;
+  } else if ([element isKindOfClass:[FlutterSemanticsScrollView class]]) {
+    semanticsObject = ((FlutterSemanticsScrollView*)element).semanticsObject;
   }
-  SemanticsObject* semanticsObject = ((SemanticsObjectContainer*)element).semanticsObject;
   return semanticsObject && semanticsObject.bridge == this;
 }
 
