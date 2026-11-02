@@ -692,7 +692,6 @@ void main() {
   testWithoutContext(
     'Plugin parsing rejects sharedDarwinSource without pluginClass or ffiPlugin',
     () {
-      final fileSystem = MemoryFileSystem.test();
       const pluginYamlRaw =
           'platforms:\n'
           ' ios:\n'
@@ -710,7 +709,6 @@ void main() {
           null,
           const <String>[],
           isDevDependency: false,
-          fileSystem: fileSystem,
         ),
         throwsToolExit(
           message:
@@ -723,7 +721,6 @@ void main() {
   );
 
   testWithoutContext('Plugin parsing allows sharedDarwinSource with ffiPlugin', () {
-    final fileSystem = MemoryFileSystem.test();
     const pluginYamlRaw =
         'platforms:\n'
         ' ios:\n'
@@ -741,7 +738,6 @@ void main() {
       null,
       const <String>[],
       isDevDependency: false,
-      fileSystem: fileSystem,
     );
 
     final iosPlugin = plugin.platforms[IOSPlugin.kConfigKey]! as IOSPlugin;

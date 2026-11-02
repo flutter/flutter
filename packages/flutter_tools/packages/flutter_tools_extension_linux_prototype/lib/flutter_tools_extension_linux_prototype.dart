@@ -5,8 +5,6 @@
 /// Prototype Linux platform extension package for Flutter tools extensibility.
 library flutter_tools_extension_linux_prototype;
 
-import 'dart:isolate';
-
 import 'package:flutter_tools_extension/flutter_tools_extension.dart';
 
 import 'src/build.dart';
@@ -17,8 +15,8 @@ import 'src/diagnostics.dart';
 import 'src/template.dart';
 
 /// Isolate entrypoint for the prototype Linux Flutter Tool Extension.
-void linuxExtensionEntryPoint(SendPort sendPort) {
-  ToolExtensionEntryPoint.run(
+Future<void> linuxExtensionEntryPoint(Object? sendPort) {
+  return ToolExtensionEntryPoint.run(
     sendPort,
     <ToolExtensionService>[
       LinuxExtensionDiagnostics(),
