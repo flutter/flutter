@@ -2749,7 +2749,7 @@ class SemanticsObject {
   /// Calls [searchSubtree] for `this` node, then for all of its descendants.
   /// If [searchSubtree] returns false for a node, that node's descendants are
   /// skipped, but the traversal continues with the node's siblings. This is
-  /// different from [visitDepthFirstInTraversalOrder], which stops the entire
+  /// different from [_visitDepthFirstInTraversalOrder], which stops the entire
   /// traversal as soon as the callback returns false.
   void _visitDepthFirstInTraversalOrderCanSkipSubtree(
     bool Function(SemanticsObject) searchSubtree,
