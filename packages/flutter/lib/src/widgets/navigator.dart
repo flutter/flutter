@@ -2902,7 +2902,7 @@ class Navigator extends StatefulWidget {
   ///  * [removeRoute], which removes a route immediately without running any
   ///    animations.
   @optionalTypeArgs
-  static void popRoute<T extends Object?>(BuildContext context, Route<dynamic> route, [T? result]) {
+  static void popRoute<T extends Object?>(BuildContext context, Route<T> route, [T? result]) {
     Navigator.of(context).popRoute<T>(route, result);
   }
 
@@ -2926,7 +2926,7 @@ class Navigator extends StatefulWidget {
   @awaitNotRequired
   static Future<bool> maybePopRoute<T extends Object?>(
     BuildContext context,
-    Route<dynamic> route, [
+    Route<T> route, [
     T? result,
   ]) {
     return Navigator.of(context).maybePopRoute<T>(route, result);
@@ -5728,7 +5728,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   ///  * [popRoute], which pops the given route unconditionally.
   @optionalTypeArgs
   @awaitNotRequired
-  Future<bool> maybePopRoute<T extends Object?>(Route<dynamic> route, [T? result]) async {
+  Future<bool> maybePopRoute<T extends Object?>(Route<T> route, [T? result]) async {
     assert(route._isInstalledIn(this));
     final _RouteEntry? entry = _firstRouteEntryWhereOrNull(_RouteEntry.isRoutePredicate(route));
     if (entry == null || !entry.isPresent) {
@@ -5773,7 +5773,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
       case RoutePopDisposition.bubble:
         return false;
       case RoutePopDisposition.pop:
-        popRoute<T>(entry.route, result);
+        popRoute<dynamic>(entry.route, result);
         return true;
       case RoutePopDisposition.doNotPop:
         entry.route.onPopInvokedWithResult(false, result);
@@ -5813,7 +5813,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
       return entry?.route._debugCheckCanConsumeResult(result, methodName: 'pop') ?? true;
     }());
     final _RouteEntry entry = _history.lastWhere(_RouteEntry.isPresentPredicate);
-    popRoute<T>(entry.route, result);
+    popRoute<dynamic>(entry.route, result);
   }
 
   /// Pop the given `route` off the navigator.
@@ -5839,7 +5839,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   ///  * [removeRoute], which immediately removes a route without running any
   ///    transitions.
   @optionalTypeArgs
-  void popRoute<T extends Object?>(Route<dynamic> route, [T? result]) {
+  void popRoute<T extends Object?>(Route<T> route, [T? result]) {
     assert(!_debugLocked);
     assert(route._isInstalledIn(this));
     final _RouteEntry? entry = _firstRouteEntryWhereOrNull(_RouteEntry.isRoutePredicate(route));
