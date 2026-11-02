@@ -9,7 +9,12 @@
 #include <string>
 #include <vector>
 
+#include "EGL/egl.h"
+#include "EGL/eglext.h"
+#include "GLES2/gl2.h"
+#include "GLES2/gl2ext.h"
 #include "GLES3/gl3.h"
+
 #include "flutter/display_list/image/dl_image_skia.h"
 #include "flutter/flow/raster_cache.h"
 #include "flutter/fml/file.h"
@@ -4898,6 +4903,111 @@ TEST_F(EmbedderTest, RenderTextureWithImpellerOpenGL) {
     ASSERT_TRUE(
         ImageMatchesFixture("external_texture_impeller.png", rendered_scene));
   }
+}
+
+TEST_F(EmbedderTest, RenderExternalTextureWithImpellerOpenGL) {
+  constexpr int kWidth = 800;
+  constexpr int kHeight = 600;
+  auto& context = GetEmbedderContext<EmbedderTestContextGL>();
+  EmbedderConfigBuilder builder(context);
+  fml::AutoResetWaitableEvent latch;
+  context.SetGLPresentCallback(
+      [&](FlutterPresentInfo present_info) { latch.Signal(); });
+  builder.AddCommandLineArgument("--enable-impeller");
+  builder.SetDartEntrypoint("render_texture_impeller_test");
+  builder.SetSurface(DlISize(kWidth, kHeight));
+  typedef void (*glGenTexturesProc)(GLsizei n, GLuint* textures);
+  typedef void (*glBindTextureProc)(GLenum n, GLuint texture);
+  typedef void (*glTexImage2DProc)(GLenum target, GLint level,
+                                   GLint internalformat, GLsizei width,
+                                   GLsizei height, GLint border, GLenum format,
+                                   GLenum type, const void* pixels);
+  typedef void (*glTexParameteriProc)(GLenum target, GLenum pname, GLint param);
+  static glGenTexturesProc glGenTextures = reinterpret_cast<glGenTexturesProc>(
+      context.GLGetProcAddress("glGenTextures"));
+  static glBindTextureProc glBindTexture = reinterpret_cast<glBindTextureProc>(
+      context.GLGetProcAddress("glBindTexture"));
+  static glTexImage2DProc glTexImage2D = reinterpret_cast<glTexImage2DProc>(
+      context.GLGetProcAddress("glTexImage2D"));
+  static glTexParameteriProc glTexParameteri =
+      reinterpret_cast<glTexParameteriProc>(
+          context.GLGetProcAddress("glTexParameteri"));
+  static PFNGLEGLIMAGETARGETTEXTURE2DOESPROC glEGLImageTargetTexture2DOES =
+      reinterpret_cast<PFNGLEGLIMAGETARGETTEXTURE2DOESPROC>(
+          context.GLGetProcAddress("glEGLImageTargetTexture2DOES"));
+  static PFNEGLGETCURRENTDISPLAYPROC eglGetCurrentDisplay =
+      reinterpret_cast<PFNEGLGETCURRENTDISPLAYPROC>(
+          context.GLGetProcAddress("eglGetCurrentDisplay"));
+  static PFNEGLGETCURRENTCONTEXTPROC eglGetCurrentContext =
+      reinterpret_cast<PFNEGLGETCURRENTCONTEXTPROC>(
+          context.GLGetProcAddress("eglGetCurrentContext"));
+  static PFNEGLCREATEIMAGEKHRPROC eglCreateImageKHR =
+      reinterpret_cast<PFNEGLCREATEIMAGEKHRPROC>(
+          context.GLGetProcAddress("eglCreateImageKHR"));
+
+  static GLuint gl_texture = 0;
+  auto rendered_scene = context.GetNextSceneImage();
+  context.GetRendererConfig().open_gl.gl_external_texture_frame_callback =
+      [](void* user_data, int64_t texture_id, size_t width, size_t height,
+         FlutterOpenGLTexture* texture) -> bool {
+    if (gl_texture == 0) {
+      std::vector<uint8_t> buffer(kWidth * kHeight * 4);
+      for (int i = 0; i < kWidth * kHeight; ++i) {
+        bool top = i < kWidth * kHeight / 2;
+        buffer[i * 4 + 0] = top ? 255 : 0;
+        buffer[i * 4 + 1] = 0;
+        buffer[i * 4 + 2] = top ? 0 : 255;
+        buffer[i * 4 + 3] = 255;
+      }
+      GLuint source;
+      glGenTextures(1, &source);
+      glBindTexture(GL_TEXTURE_2D, source);
+      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, kWidth, kHeight, 0, GL_RGBA,
+                   GL_UNSIGNED_BYTE, buffer.data());
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+      // Sample the texture through an EGLImage as an external texture.
+      EGLImageKHR image = eglCreateImageKHR(
+          eglGetCurrentDisplay(), eglGetCurrentContext(), EGL_GL_TEXTURE_2D_KHR,
+          reinterpret_cast<EGLClientBuffer>(static_cast<uintptr_t>(source)),
+          nullptr);
+      if (image == EGL_NO_IMAGE_KHR) {
+        return false;
+      }
+      glGenTextures(1, &gl_texture);
+      glBindTexture(GL_TEXTURE_EXTERNAL_OES, gl_texture);
+      glEGLImageTargetTexture2DOES(GL_TEXTURE_EXTERNAL_OES, image);
+    }
+    texture->target = GL_TEXTURE_EXTERNAL_OES;
+    texture->name = gl_texture;
+    texture->format = GL_RGBA8;
+    texture->destruction_callback = nullptr;
+    texture->user_data = nullptr;
+    texture->width = width;
+    texture->height = height;
+    return true;
+  };
+
+  auto engine = builder.LaunchEngine();
+
+  ASSERT_TRUE(engine.is_valid());
+
+  flutter::EmbedderEngine* embedder_engine = ToEmbedderEngine(engine.get());
+
+  constexpr int texture_id = 1;
+  ASSERT_TRUE(embedder_engine->RegisterTexture(texture_id));
+
+  // Send a window metrics events so frames may be scheduled.
+  FlutterWindowMetricsEvent event = {};
+  event.struct_size = sizeof(event);
+  event.width = kWidth;
+  event.height = kHeight;
+  event.pixel_ratio = 1.0;
+  ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
+            kSuccess);
+  latch.Wait();
+  ASSERT_TRUE(
+      ImageMatchesFixture("external_texture_impeller.png", rendered_scene));
 }
 
 TEST_F(EmbedderTest, RenderTextureWithImpellerOpenGLDestructCallback) {
