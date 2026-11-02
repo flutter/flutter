@@ -152,6 +152,136 @@ void testMain() {
       expect(dispatchedViewFocusEvents[1].direction, ui.ViewFocusDirection.undefined);
     });
 
+    test('does not report a view unfocused while something steps between form fields', () async {
+      final EngineFlutterView view = createAndRegisterView(dispatcher);
+
+      // The engine puts the fields of an autofill group in a marked form. A
+      // password manager fills one field at a time, blurring each before
+      // focusing the next, and that blur lands on <body> with no relatedTarget.
+      final DomHTMLFormElement form = createDomHTMLFormElement();
+      form.classList.add(autofillFormClass);
+      final DomHTMLInputElement username = createDomHTMLInputElement();
+      final DomHTMLInputElement password = createDomHTMLInputElement();
+      form.append(username);
+      form.append(password);
+      view.dom.rootElement.append(form);
+
+      username.focusWithoutScroll();
+      expect(dispatchedViewFocusEvents, hasLength(1));
+      expect(dispatchedViewFocusEvents[0].state, ui.ViewFocusState.focused);
+
+      username.blur();
+      expect(
+        dispatchedViewFocusEvents,
+        hasLength(1),
+        reason: 'the report is deferred, not made synchronously',
+      );
+
+      // Focus goes to another field of the same form, so the view never lost it.
+      password.focusWithoutScroll();
+      await Future<void>.delayed(const Duration(milliseconds: 150));
+
+      expect(
+        dispatchedViewFocusEvents,
+        hasLength(1),
+        reason: 'focus came back to the view, so it was never unfocused',
+      );
+    });
+
+    test('reports a view unfocused when focus does not come back to it', () async {
+      final EngineFlutterView view = createAndRegisterView(dispatcher);
+
+      final DomHTMLFormElement form = createDomHTMLFormElement();
+      form.classList.add(autofillFormClass);
+      final DomHTMLInputElement username = createDomHTMLInputElement();
+      form.append(username);
+      view.dom.rootElement.append(form);
+
+      username.focusWithoutScroll();
+      expect(dispatchedViewFocusEvents, hasLength(1));
+
+      // Nothing takes the focus back this time, so the deferred report stands.
+      username.blur();
+      expect(
+        dispatchedViewFocusEvents,
+        hasLength(1),
+        reason: 'the report is deferred, not made synchronously',
+      );
+      await Future<void>.delayed(const Duration(milliseconds: 150));
+
+      expect(dispatchedViewFocusEvents, hasLength(2));
+      expect(dispatchedViewFocusEvents[1].viewId, view.viewId);
+      expect(dispatchedViewFocusEvents[1].state, ui.ViewFocusState.unfocused);
+    });
+
+    test('reports a view unfocused at once when the blurred element is not in a form', () async {
+      final EngineFlutterView view = createAndRegisterView(dispatcher);
+
+      // Only the fields of an autofill form defer. Anything else keeps the
+      // synchronous behaviour.
+      final DomHTMLInputElement loose = createDomHTMLInputElement();
+      view.dom.rootElement.append(loose);
+
+      loose.focusWithoutScroll();
+      expect(dispatchedViewFocusEvents, hasLength(1));
+
+      loose.blur();
+      expect(dispatchedViewFocusEvents, hasLength(2));
+      expect(dispatchedViewFocusEvents[1].state, ui.ViewFocusState.unfocused);
+    });
+
+    test(
+      'reports a view unfocused at once when a form field blurs to an element outside the view',
+      () {
+        final EngineFlutterView view = createAndRegisterView(dispatcher);
+
+        final DomHTMLFormElement form = createDomHTMLFormElement();
+        form.classList.add(autofillFormClass);
+        final DomHTMLInputElement username = createDomHTMLInputElement();
+        form.append(username);
+        view.dom.rootElement.append(form);
+
+        // Something outside the view that can take the focus.
+        final DomHTMLInputElement outside = createDomHTMLInputElement();
+        domDocument.body!.append(outside);
+        addTearDown(() => outside.remove());
+
+        username.focusWithoutScroll();
+        expect(dispatchedViewFocusEvents, hasLength(1));
+
+        // Only a blur to nothing waits: that is what a manager stepping between
+        // fields produces. Focus moving to a known element outside the view is a
+        // genuine focus loss and is reported synchronously, even from a field of
+        // the engine's own autofill form.
+        outside.focusWithoutScroll();
+        expect(dispatchedViewFocusEvents, hasLength(2));
+        expect(dispatchedViewFocusEvents[1].viewId, view.viewId);
+        expect(dispatchedViewFocusEvents[1].state, ui.ViewFocusState.unfocused);
+      },
+    );
+
+    test(
+      'reports a view unfocused at once when the form is not the engine autofill form',
+      () async {
+        final EngineFlutterView view = createAndRegisterView(dispatcher);
+
+        // A form without the engine's marker class is not an autofill group's,
+        // for example HTML inside a platform view; its fields do not take the
+        // deferral.
+        final DomHTMLFormElement form = createDomHTMLFormElement();
+        final DomHTMLInputElement input = createDomHTMLInputElement();
+        form.append(input);
+        view.dom.rootElement.append(form);
+
+        input.focusWithoutScroll();
+        expect(dispatchedViewFocusEvents, hasLength(1));
+
+        input.blur();
+        expect(dispatchedViewFocusEvents, hasLength(2));
+        expect(dispatchedViewFocusEvents[1].state, ui.ViewFocusState.unfocused);
+      },
+    );
+
     test('fires a focus event - focus transitions between views', () async {
       final EngineFlutterView view1 = createAndRegisterView(dispatcher);
       final EngineFlutterView view2 = createAndRegisterView(dispatcher);

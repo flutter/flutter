@@ -38,10 +38,15 @@ ui.Offset computeEventOffsetToTarget(
     return _computeOffsetForTalkbackEvent(event, actualTarget);
   }
 
-  // On one of our text-editing nodes
+  // On the active text-editing node. The text editing host also holds the other
+  // fields of an autofill form, which are kept hit-testable so that a password
+  // manager's own hit test finds them; a pointer event on one of those is not an
+  // event on the active input and is positioned like any other element below.
   eventTarget ??= event.target!;
-  final bool isInput = view.dom.textEditingHost.contains(eventTarget as DomNode);
-  if (isInput) {
+  final bool isActiveInput =
+      view.dom.textEditingHost.contains(eventTarget as DomNode) &&
+      eventTarget == textEditing.strategy.domElement;
+  if (isActiveInput) {
     final EditableTextGeometry? inputGeometry = textEditing.strategy.geometry;
     if (inputGeometry != null) {
       return _computeOffsetForInputs(event, eventTarget, inputGeometry);
