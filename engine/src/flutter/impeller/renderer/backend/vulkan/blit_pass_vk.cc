@@ -134,11 +134,13 @@ bool BlitPassVK::OnCopyTextureToTextureCommand(
     return true;
   }
 
+  // The layout transition must be ordered after the copy's transfer write
+  // (SYNC-HAZARD-WRITE-AFTER-WRITE).
   BarrierVK barrier;
   barrier.cmd_buffer = cmd_buffer;
   barrier.new_layout = vk::ImageLayout::eShaderReadOnlyOptimal;
-  barrier.src_access = {};
-  barrier.src_stage = vk::PipelineStageFlagBits::eTopOfPipe;
+  barrier.src_access = vk::AccessFlagBits::eTransferWrite;
+  barrier.src_stage = vk::PipelineStageFlagBits::eTransfer;
   barrier.dst_access = vk::AccessFlagBits::eShaderRead;
   barrier.dst_stage = vk::PipelineStageFlagBits::eFragmentShader;
 
