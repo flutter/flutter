@@ -3032,6 +3032,11 @@ class SemanticsNode with DiagnosticableTreeMixin {
   ///
   /// This value indicates whether this node has any ancestors with
   /// [mergeAllDescendantsIntoThisNode] set to true.
+  ///
+  /// Changing this value marks this node and its parent as needing to be sent
+  /// to the engine again, and updates the value on this node's descendants
+  /// (unless this node merges them itself via [mergeAllDescendantsIntoThisNode]),
+  /// since their value is derived from this node's [isPartOfNodeMerging].
   bool get isMergedIntoParent => _isMergedIntoParent;
   bool _isMergedIntoParent = false;
   set isMergedIntoParent(bool value) {
@@ -3039,7 +3044,17 @@ class SemanticsNode with DiagnosticableTreeMixin {
       return;
     }
     _isMergedIntoParent = value;
+    // This node's own serialization changes: a node that stops being merged
+    // has to be sent to the engine as a standalone node (and a node that
+    // starts being merged has to stop being sent). The parent's merged data
+    // and child list change as well.
+    _markDirty();
     parent?._markDirty();
+    // Descendants derive their flag from this node's `isPartOfNodeMerging`,
+    // so they need to be re-evaluated unless this node merges them itself.
+    if (!mergeAllDescendantsIntoThisNode) {
+      _updateChildrenMergeFlags();
+    }
   }
 
   /// Whether the user can interact with this node in assistive technologies.
@@ -3308,20 +3323,15 @@ class SemanticsNode with DiagnosticableTreeMixin {
   }
 
   void _updateChildMergeFlagRecursively(SemanticsNode child) {
-    assert(child.owner == owner);
-    final bool childShouldMergeToParent = isPartOfNodeMerging;
-
-    if (childShouldMergeToParent == child.isMergedIntoParent) {
+    if (child.parent != this) {
+      // While the tree is being rebuilt bottom-up, `_children` can still list
+      // a node that a deeper node has already adopted in this pass (see
+      // [_replaceChildren]). Its merge flag is owned by its new parent.
       return;
     }
-
-    child.isMergedIntoParent = childShouldMergeToParent;
-
-    if (child.mergeAllDescendantsIntoThisNode) {
-      // No need to update the descendants since `child` has the merge flag set.
-    } else {
-      child._updateChildrenMergeFlags();
-    }
+    assert(child.owner == owner);
+    // The setter re-evaluates `child`'s own descendants when the flag changes.
+    child.isMergedIntoParent = isPartOfNodeMerging;
   }
 
   void _updateChildrenMergeFlags() {
