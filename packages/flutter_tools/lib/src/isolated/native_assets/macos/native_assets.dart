@@ -20,10 +20,7 @@ Architecture getNativeMacOSArchitecture(CpuArch cpuArch) {
   return switch (cpuArch) {
     CpuArch.arm64 => Architecture.arm64,
     CpuArch.x64 => Architecture.x64,
-    CpuArch.armv7 ||
-    CpuArch.x86 ||
-    CpuArch.riscv64 ||
-    CpuArch.unknown => throw Exception('Unknown macOS CPU arch: $cpuArch.'),
+    _ => throw Exception('Unknown macOS CPU arch: $cpuArch.'),
   };
 }
 

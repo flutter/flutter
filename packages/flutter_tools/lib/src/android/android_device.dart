@@ -193,7 +193,7 @@ class AndroidDevice extends Device {
       CpuArch.arm64 => TargetPlatform.android_arm64,
       CpuArch.armv7 => TargetPlatform.android_arm,
       CpuArch.x64 => TargetPlatform.android_x64,
-      CpuArch.x86 || CpuArch.riscv64 || CpuArch.unknown => TargetPlatform.unsupported,
+      _ => TargetPlatform.unsupported,
     };
   }();
 
@@ -536,9 +536,7 @@ class AndroidDevice extends Device {
       case CpuArch.arm64:
       case CpuArch.x64:
         break;
-      case CpuArch.x86:
-      case CpuArch.riscv64:
-      case CpuArch.unknown:
+      default:
         _logger.printError('Android platforms are only supported.');
         return LaunchResult.failed();
     }

@@ -6,20 +6,147 @@ import 'package:meta/meta.dart';
 
 import 'json_utils.dart';
 
+/// Platform-agnostic CPU architecture type.
+///
+/// Built-in architectures are exposed as static constants (e.g. [x64],
+/// [arm64], [riscv64]), while extensions targeting non-standard architectures
+/// can construct or parse custom lowercase alphanumeric identifiers (e.g.
+/// `CpuArch('ppc64le')`).
+@immutable
+final class CpuArch {
+  /// Creates a [CpuArch] with the given lowercase alphanumeric [name] (e.g.
+  /// `'x64'` or `'ppc64le'`).
+  CpuArch(this.name)
+    : assert(
+        _validNameRegExp.hasMatch(name),
+        'Invalid CPU architecture name (expected lowercase alphanumeric): "$name"',
+      );
+
+  const CpuArch._(this.name) : assert(name.length > 0);
+
+  /// Parses a [CpuArch] from its [name] (e.g. `'x64'`, `'x86_64'`, `'arm64'`, or `'ppc64le'`).
+  ///
+  /// Throws a [FormatException] if [name] is not a valid CPU architecture identifier.
+  factory CpuArch.fromName(String name) {
+    return tryFromName(name) ?? (throw FormatException('Invalid CPU arch: "$name"'));
+  }
+
+  /// Unknown architecture. Used when the architecture is not relevant.
+  static const unknown = CpuArch._('unknown');
+
+  /// 32-bit ARM (ARMv7) architecture.
+  static const armv7 = CpuArch._('armv7');
+
+  /// 64-bit ARM (AArch64 / ARM64) architecture.
+  static const arm64 = CpuArch._('arm64');
+
+  /// 32-bit x86 (IA-32) architecture.
+  static const x86 = CpuArch._('x86');
+
+  /// 64-bit x86 (x86_64 / AMD64) architecture.
+  static const x64 = CpuArch._('x64');
+
+  /// 64-bit RISC-V (RV64GC) architecture.
+  static const riscv64 = CpuArch._('riscv64');
+
+  /// Standard built-in CPU architectures supported by the Flutter tool.
+  static const values = <CpuArch>[unknown, armv7, arm64, x86, x64, riscv64];
+
+  static final RegExp _validNameRegExp = RegExp(r'^[a-z0-9]+$');
+
+  /// The canonical architecture identifier (e.g. `'x64'`, `'arm64'`, `'riscv64'`).
+  final String name;
+
+  /// Parses a [CpuArch] from [name], returning canonical constants from
+  /// [values] when matched (including `'x86_64'` -> [x64]) or a custom
+  /// [CpuArch] for non-standard lowercase alphanumeric architectures, or `null`
+  /// if [name] is invalid.
+  static CpuArch? tryFromName(String name) {
+    return switch (name) {
+      'unknown' => unknown,
+      'armv7' => armv7,
+      'arm64' => arm64,
+      'x86' => x86,
+      'x64' || 'x86_64' => x64,
+      'riscv64' => riscv64,
+      _ when _validNameRegExp.hasMatch(name) => CpuArch(name),
+      _ => null,
+    };
+  }
+
+  /// Returns the Dart SDK's name for the specified target architecture.
+  ///
+  /// When building for Darwin platforms, the tool invokes architecture-specific
+  /// variants of `gen_snapshot`, one for each target architecture. The output
+  /// instructions are then built into architecture-specific binaries, which are
+  /// merged into a universal binary using the `lipo` tool.
+  String get dartName => switch (this) {
+    armv7 => 'armv7',
+    arm64 => 'arm64',
+    x86 => 'x86',
+    x64 => 'x64',
+    riscv64 => 'riscv64',
+    _ => throw UnsupportedError('Unexpected CPU arch $this'),
+  };
+
+  /// The Apple architecture name for this architecture.
+  ///
+  /// This is the name understood by the Darwin toolchain (e.g. `lipo`, `clang`,
+  /// and the `-arch` flag) and used for architecture-specific build output
+  /// directories on iOS and macOS. This differs from [dartName] for [x64],
+  /// which maps to `x86_64` here.
+  String get darwinArchName => switch (this) {
+    armv7 => 'armv7',
+    arm64 => 'arm64',
+    x64 => 'x86_64',
+    _ => throw UnsupportedError('Unexpected Darwin CPU arch $this'),
+  };
+
+  /// The name of the Android ABI (as used in `jniLibs` directories) for this
+  /// architecture.
+  String get androidArchName => switch (this) {
+    armv7 => 'armeabi-v7a',
+    arm64 => 'arm64-v8a',
+    x64 => 'x86_64',
+    _ => throw UnsupportedError('Unexpected Android CPU arch $this'),
+  };
+
+  /// The `TargetPlatform` name of the Android platform for this architecture.
+  String get androidPlatformName => switch (this) {
+    armv7 => 'android-arm',
+    arm64 => 'android-arm64',
+    x64 => 'android-x64',
+    _ => throw UnsupportedError('Unexpected Android CPU arch $this'),
+  };
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) || (other is CpuArch && other.name == name);
+
+  @override
+  int get hashCode => name.hashCode;
+
+  @override
+  String toString() => 'CpuArch.$name';
+}
+
 /// Host platforms that Flutter tools and extensions can be executed on.
 ///
 /// Built-in host platforms are exposed as static constants (e.g. [linux_x64],
 /// [darwin_arm64]), while extensions running on non-standard host platforms can
 /// construct or parse custom `<os>-<arch>` identifiers (e.g.
-/// `HostPlatform('freebsd-x64', 'x64')`).
+/// `HostPlatform('freebsd', CpuArch.x64)`).
 @immutable
 final class HostPlatform {
-  /// Creates a [HostPlatform] with the given lowercase `<os>-<arch>` [cliName]
-  /// (e.g. `'linux-x64'` or `'freebsd-x64'`) and architecture [platformName]
-  /// matching the `<arch>` segment (e.g. `'x64'`).
-  const HostPlatform(this.cliName, this.platformName)
-    : assert(cliName.length > 0),
-      assert(platformName.length > 0);
+  /// Creates a [HostPlatform] with the given lowercase alphanumeric [osName]
+  /// (e.g. `'linux'`, `'darwin'`, `'freebsd'`) and [cpuArch].
+  HostPlatform(this.osName, this.cpuArch)
+    : assert(
+        _validOsNameRegExp.hasMatch(osName),
+        'Invalid host OS name (expected lowercase alphanumeric): "$osName"',
+      );
+
+  const HostPlatform._(this.osName, this.cpuArch) : assert(osName.length > 0);
 
   /// Parses a [HostPlatform] from its [cliName] (e.g. `'linux-x64'`) or
   /// underscore-delimited [name] (e.g. `'linux_x64'`).
@@ -30,13 +157,26 @@ final class HostPlatform {
     return tryFromName(name) ?? (throw FormatException('Invalid host platform: "$name"'));
   }
 
-  static const darwin_x64 = HostPlatform('darwin-x64', 'x64');
-  static const darwin_arm64 = HostPlatform('darwin-arm64', 'arm64');
-  static const linux_x64 = HostPlatform('linux-x64', 'x64');
-  static const linux_arm64 = HostPlatform('linux-arm64', 'arm64');
-  static const linux_riscv64 = HostPlatform('linux-riscv64', 'riscv64');
-  static const windows_x64 = HostPlatform('windows-x64', 'x64');
-  static const windows_arm64 = HostPlatform('windows-arm64', 'arm64');
+  /// macOS (Darwin) on x64.
+  static const darwin_x64 = HostPlatform._('darwin', .x64);
+
+  /// macOS (Darwin) on ARM64 (Apple Silicon).
+  static const darwin_arm64 = HostPlatform._('darwin', .arm64);
+
+  /// Linux on x64.
+  static const linux_x64 = HostPlatform._('linux', .x64);
+
+  /// Linux on ARM64.
+  static const linux_arm64 = HostPlatform._('linux', .arm64);
+
+  /// Linux on RISC-V 64-bit.
+  static const linux_riscv64 = HostPlatform._('linux', .riscv64);
+
+  /// Windows on x64.
+  static const windows_x64 = HostPlatform._('windows', .x64);
+
+  /// Windows on ARM64.
+  static const windows_arm64 = HostPlatform._('windows', .arm64);
 
   /// Standard built-in host platforms supported by the Flutter tool.
   static const values = <HostPlatform>[
@@ -49,17 +189,25 @@ final class HostPlatform {
     windows_arm64,
   ];
 
+  static final RegExp _validOsNameRegExp = RegExp(r'^[a-z0-9]+$');
+
   // Matches a lowercase alphanumeric <os> and <arch> separated by a single '-' or '_'.
   static final RegExp _validNameRegExp = RegExp(r'^[a-z0-9]+[-_][a-z0-9]+$');
 
-  /// The hyphen-delimited CLI representation (e.g. `'linux-x64'`).
-  final String cliName;
+  /// Operating system identifier of the host platform (e.g. `'linux'`, `'darwin'`, `'windows'`).
+  final String osName;
+
+  /// CPU architecture of the host platform.
+  final CpuArch cpuArch;
 
   /// Architecture name of the host platform (e.g. `'x64'`, `'arm64'`, `'riscv64'`).
-  final String platformName;
+  String get cpuArchName => cpuArch.name;
+
+  /// The hyphen-delimited CLI representation (e.g. `'linux-x64'`).
+  String get cliName => '$osName-$cpuArchName';
 
   /// The underscore-delimited representation (e.g. `'linux_x64'`).
-  String get name => cliName.replaceAll('-', '_');
+  String get name => '${osName}_$cpuArchName';
 
   /// Parses a [HostPlatform] from its [cliName] or [name], returning canonical
   /// constants from [values] when matched or a custom [HostPlatform] for
@@ -69,20 +217,22 @@ final class HostPlatform {
       return null;
     }
     final String normalizedCli = name.replaceAll('_', '-');
+    final int separatorIndex = normalizedCli.indexOf('-');
+    final String os = normalizedCli.substring(0, separatorIndex);
+    final String arch = normalizedCli.substring(separatorIndex + 1);
+    final archValue = CpuArch.fromName(arch);
     for (final HostPlatform value in values) {
-      if (value.cliName == normalizedCli) {
+      if (value.osName == os && value.cpuArch == archValue) {
         return value;
       }
     }
-    final int separatorIndex = normalizedCli.indexOf('-');
-    final String arch = normalizedCli.substring(separatorIndex + 1);
-    return HostPlatform(normalizedCli, arch);
+    return HostPlatform(os, archValue);
   }
 
   /// Returns the host platform for the specified OS and architecture.
   ///
   /// [os] is an operating system name as returned by `Platform.operatingSystem`.
-  /// [arch] is an architecture name matching the [platformName] of one of the
+  /// [arch] is an architecture name matching the [cpuArchName] of one of the
   /// values in [values]. Returns `null` if no match is found.
   static HostPlatform? fromOsAndArch(String os, String arch) {
     return switch ((os, arch.toLowerCase())) {
@@ -100,10 +250,10 @@ final class HostPlatform {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      (other is HostPlatform && other.cliName == cliName && other.platformName == platformName);
+      (other is HostPlatform && other.osName == osName && other.cpuArch == cpuArch);
 
   @override
-  int get hashCode => Object.hash(cliName, platformName);
+  int get hashCode => Object.hash(osName, cpuArch);
 
   @override
   String toString() => 'HostPlatform.$name';

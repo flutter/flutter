@@ -53,9 +53,7 @@ Architecture getNativeAndroidArchitecture(CpuArch cpuArch) {
     CpuArch.armv7 => Architecture.arm,
     CpuArch.arm64 => Architecture.arm64,
     CpuArch.x64 => Architecture.x64,
-    CpuArch.x86 ||
-    CpuArch.riscv64 ||
-    CpuArch.unknown => throwToolExit('Invalid Android arch: $cpuArch.'),
+    _ => throwToolExit('Invalid Android arch: $cpuArch.'),
   };
 }
 
