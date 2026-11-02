@@ -34,6 +34,8 @@ echo "$(date +%T) Running pylint"
 
 cd "$FLUTTER_DIR"
 pylint-2.7 --rcfile=.pylintrc \
+  "build/bazel/bazel_ci.py" \
+  "build/bazel/bazel_ci_test.py" \
   "ci/" \
   "impeller/" \
   "sky/" \

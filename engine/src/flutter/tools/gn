@@ -1336,7 +1336,8 @@ def bazel_main(argv, args):
   a bazel.json for run_tests.py; see flutter/build/bazel/ci.md.
   """
   sys.path.insert(0, os.path.join(SRC_ROOT, 'flutter', 'build', 'bazel'))
-  import bazel_ci  # pylint: disable=import-outside-toplevel
+  # Resolved through the sys.path insert above, which pylint cannot see.
+  import bazel_ci  # pylint: disable=import-outside-toplevel,import-error
 
   try:
     build = bazel_ci.match_build(bazel_ci.load_builds(SRC_ROOT), argv[1:])
