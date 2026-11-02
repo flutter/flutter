@@ -2131,7 +2131,7 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
       DiagnosticsProperty<FocusNode>('nextFocus', _markedForFocus, defaultValue: null),
     );
     properties.add(
-      DiagnosticsProperty<FocusLifecyclePolicy>(
+      EnumProperty<FocusLifecyclePolicy>(
         'lifecyclePolicy',
         lifecyclePolicy,
         defaultValue: FocusLifecyclePolicy.automatic,

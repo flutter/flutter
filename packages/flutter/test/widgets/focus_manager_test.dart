@@ -686,6 +686,9 @@ void main() {
 
         // Switch to keepFocused while paused — the suspended node must be discarded.
         tester.binding.focusManager.lifecyclePolicy = FocusLifecyclePolicy.keepFocused;
+        // Switch back so the lifecycle listener is registered again and
+        // receives the resumed state below.
+        tester.binding.focusManager.lifecyclePolicy = FocusLifecyclePolicy.suspendAndRestore;
 
         // On resume, the previously suspended node should NOT be restored.
         await setAppLifecycleState(AppLifecycleState.resumed);
