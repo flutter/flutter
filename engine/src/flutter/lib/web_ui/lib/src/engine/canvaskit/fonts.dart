@@ -43,6 +43,9 @@ class CkFontCollection implements BackendFontCollection {
 
   /// Returns [fontFamilies] followed by the current fallback font families.
   List<String> withFallbackFontFamilies(List<String> fontFamilies) {
+    if (fontFamilies.isEmpty) {
+      return _fallbackFontFamilies;
+    }
     return <String>[...fontFamilies, ..._fallbackFontFamilies];
   }
 
@@ -67,6 +70,9 @@ class CkFontCollection implements BackendFontCollection {
   @override
   void registerTypeface(BackendTypeface typeface, String family) {
     _provider.registerFont((typeface as CkTypeface).bytes, family);
+    // The current `FontCollection` has already cached family lookups and would
+    // not resolve the new typeface, so drop it. The `skFontCollection` getter
+    // recreates it on next use.
     _skFontCollection?.delete();
     _skFontCollection = null;
   }

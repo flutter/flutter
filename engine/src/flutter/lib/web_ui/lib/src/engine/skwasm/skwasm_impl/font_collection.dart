@@ -16,9 +16,11 @@ class SkwasmTypeface extends SkwasmObjectWrapper<RawTypeface> implements Backend
   @override
   String get familyName {
     final SkStringHandle familyNameHandle = typefaceGetFamilyName(handle);
-    final String familyName = skStringToDartString(familyNameHandle);
-    skStringFree(familyNameHandle);
-    return familyName;
+    try {
+      return skStringToDartString(familyNameHandle);
+    } finally {
+      skStringFree(familyNameHandle);
+    }
   }
 }
 
@@ -35,7 +37,7 @@ class SkwasmFontCollection implements BackendFontCollection {
   ///
   /// Its font families are the fallback families set by
   /// [setFallbackFontFamilies]; styles prepend their own families to it.
-  SkwasmNativeTextStyle defaultTextStyle = SkwasmNativeTextStyle.defaultTextStyle();
+  final SkwasmNativeTextStyle defaultTextStyle = SkwasmNativeTextStyle.defaultTextStyle();
 
   @override
   void setFallbackFontFamilies(List<String> families) => withStackScope((StackScope scope) {
