@@ -322,6 +322,38 @@ Could not build the precompiled application for the device.''',
     });
 
     testWithoutContext(
+      'shows Xcode output instead of no development team message when code signing is disabled',
+      () async {
+        final buildResult = XcodeBuildResult(
+          success: false,
+          stdout: 'error: Unable to find a destination',
+          xcodeBuildExecution: XcodeBuildExecution(
+            buildCommands: <String>['xcrun', 'xcodebuild', 'CODE_SIGNING_ALLOWED=NO'],
+            appDirectory: '/blah/blah',
+            environmentType: EnvironmentType.physical,
+            buildSettings: buildSettings,
+          ),
+        );
+        final fs = MemoryFileSystem.test();
+        await diagnoseXcodeBuildFailure(
+          buildResult,
+          logger: logger,
+          analytics: fakeAnalytics,
+          fileSystem: fs,
+          platform: FlutterDarwinPlatform.ios,
+          processUtils: processUtils,
+          project: FakeFlutterProject(fileSystem: fs),
+          xcode: null,
+        );
+        expect(
+          logger.errorText,
+          isNot(contains('Building a deployable iOS app requires a selected Development Team')),
+        );
+        expect(logger.statusText, contains('error: Unable to find a destination'));
+      },
+    );
+
+    testWithoutContext(
       'does not show no development team message when other Xcode issues detected',
       () async {
         final buildResult = XcodeBuildResult(

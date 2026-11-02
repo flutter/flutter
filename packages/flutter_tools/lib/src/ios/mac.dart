@@ -1425,8 +1425,10 @@ bool _missingDevelopmentTeam(XcodeBuildExecution? xcodeBuildExecution) {
   // Make sure the user has specified one of:
   // * DEVELOPMENT_TEAM (automatic signing)
   // * PROVISIONING_PROFILE (manual signing)
+  // A build with code signing disabled (--no-codesign) needs neither.
   return xcodeBuildExecution != null &&
       xcodeBuildExecution.environmentType == EnvironmentType.physical &&
+      !xcodeBuildExecution.buildCommands.contains('CODE_SIGNING_ALLOWED=NO') &&
       !<String>[
         'DEVELOPMENT_TEAM',
         'PROVISIONING_PROFILE',
