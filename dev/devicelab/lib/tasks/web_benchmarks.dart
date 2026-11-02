@@ -243,6 +243,7 @@ Future<TaskResult> runWebBenchmark(
             '--web-run-headless',
             '--no-web-enable-expression-evaluation',
             '--web-browser-flag=--disable-popup-blocking',
+            '--web-browser-flag=--enable-experimental-web-platform-features',
             '--web-browser-flag=--bwsi',
             '--web-browser-flag=--no-first-run',
             '--web-browser-flag=--no-default-browser-check',
