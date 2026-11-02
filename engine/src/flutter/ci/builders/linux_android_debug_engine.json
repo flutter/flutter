@@ -35,7 +35,8 @@
                 "os=Linux"
             ],
             "gclient_variables": {
-                "use_rbe": true
+                "use_rbe": false,
+                "download_bazelisk": true
             },
             "gn": [
                 "--target-dir",
@@ -43,7 +44,9 @@
                 "--android",
                 "--android-cpu=arm",
                 "--no-lto",
-                "--rbe"
+                "--no-rbe",
+                "--no-goma",
+                "--bazel"
             ],
             "name": "ci/android_debug",
             "description": "Produces debug mode artifacts to target 32-bit arm Android from a Linux host.",
@@ -81,7 +84,8 @@
                 "os=Linux"
             ],
             "gclient_variables": {
-                "use_rbe": true
+                "use_rbe": false,
+                "download_bazelisk": true
             },
             "gn": [
                 "--target-dir",
@@ -89,7 +93,9 @@
                 "--android",
                 "--android-cpu=arm64",
                 "--no-lto",
-                "--rbe"
+                "--no-rbe",
+                "--no-goma",
+                "--bazel"
             ],
             "name": "ci/android_debug_arm64",
             "description": "Produces debug mode artifacts to target 64-bit arm Android from a Linux host.",
@@ -124,7 +130,8 @@
                 "os=Linux"
             ],
             "gclient_variables": {
-                "use_rbe": true
+                "use_rbe": false,
+                "download_bazelisk": true
             },
             "gn": [
                 "--target-dir",
@@ -132,7 +139,9 @@
                 "--android",
                 "--android-cpu=x64",
                 "--no-lto",
-                "--rbe"
+                "--no-rbe",
+                "--no-goma",
+                "--bazel"
             ],
             "name": "ci/android_debug_x64",
             "description": "Produces debug mode artifacts to target x64 Android from a Linux host.",
@@ -167,7 +176,8 @@
                 "os=Linux"
             ],
             "gclient_variables": {
-                "use_rbe": true
+                "use_rbe": false,
+                "download_bazelisk": true
             },
             "gn": [
                 "--target-dir",
@@ -175,7 +185,9 @@
                 "--android",
                 "--android-cpu=riscv64",
                 "--no-lto",
-                "--rbe"
+                "--no-rbe",
+                "--no-goma",
+                "--bazel"
             ],
             "name": "ci/android_debug_riscv64",
             "description": "Produces debug mode artifacts to target riscv64 Android from a Linux host.",

@@ -31,7 +31,8 @@
                 "os=Linux"
             ],
             "gclient_variables": {
-                "use_rbe": true
+                "use_rbe": false,
+                "download_bazelisk": true
             },
             "gn": [
                 "--target-dir",
@@ -42,7 +43,9 @@
                 "--android-cpu",
                 "arm64",
                 "--no-dart-secure-socket",
-                "--rbe"
+                "--no-rbe",
+                "--no-goma",
+                "--bazel"
             ],
             "name": "ci/android_release_arm64_size_exp",
             "description": "Produces experimental release mode artifacts to target 64-bit arm Android from a Linux host with dynamic modules enabled.",
@@ -84,7 +87,8 @@
                 "os=Linux"
             ],
             "gclient_variables": {
-                "use_rbe": true
+                "use_rbe": false,
+                "download_bazelisk": true
             },
             "gn": [
                 "--target-dir",
@@ -93,7 +97,9 @@
                 "--android-cpu=arm64",
                 "--no-lto",
                 "--no-dart-secure-socket",
-                "--rbe"
+                "--no-rbe",
+                "--no-goma",
+                "--bazel"
             ],
             "name": "ci/android_debug_arm64_size_exp",
             "description": "Produces experimental debug mode artifacts to target 64-bit arm Android from a Linux host with dynamic modules enabled.",

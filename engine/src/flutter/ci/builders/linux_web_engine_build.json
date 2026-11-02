@@ -20,12 +20,15 @@
       ],
       "gclient_variables": {
         "download_android_deps": false,
-        "download_emsdk": true
+        "download_emsdk": true,
+        "download_bazelisk": true
       },
       "gn": [
         "--web",
         "--runtime-mode=release",
-        "--no-rbe"
+        "--no-rbe",
+        "--no-goma",
+        "--bazel"
       ],
       "ninja": {
         "config": "wasm_release",
