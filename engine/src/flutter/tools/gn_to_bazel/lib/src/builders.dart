@@ -227,6 +227,9 @@ const Map<String, GnFlag> gnFlags = <String, GnFlag>{
   '--no-rbe': GnFlag(GnFlagEffect.ignored, note: 'where the build runs'),
   '--goma': GnFlag(GnFlagEffect.ignored, note: 'where the build runs'),
   '--no-goma': GnFlag(GnFlagEffect.ignored, note: 'where the build runs'),
+  // tools/gn --bazel: the build runs under Bazel through the unchanged recipe
+  // (build/bazel/ci.md); the configuration is the one the other flags name.
+  '--bazel': GnFlag(GnFlagEffect.ignored, note: 'where the build runs'),
   '--build-embedder-examples': GnFlag(
     GnFlagEffect.ignored,
     note: 'adds targets to the build, which a configuration cannot name',
@@ -1016,6 +1019,31 @@ List<String> bazelVariantErrors(Map<String, BuilderConfig> configs, List<Builder
   return errors;
 }
 
+/// The builds of the builder files that carry `--bazel` themselves (a Linux
+/// builder that builds with Bazel on the bot, build/bazel/ci.md) checked the
+/// way a variant's are: each must have a Bazel configuration and an install,
+/// or `tools/gn --bazel` fails on the bot. Returns the errors, one line each.
+List<String> bazelBuildErrors(List<BuilderBuild> builds) {
+  final errors = <String>[];
+  for (final build in builds) {
+    if (!build.gn.contains('--bazel')) {
+      continue;
+    }
+    if (build.unsupported.isNotEmpty) {
+      errors.add(
+        "${build.file}'s ${build.name} carries --bazel but has no Bazel configuration "
+        '(${build.unsupported.join('; ')})',
+      );
+    } else if (build.ninjaTargets.isEmpty) {
+      errors.add(
+        "${build.file}'s ${build.name} carries --bazel but builds ninja's default target, "
+        'which has no install',
+      );
+    }
+  }
+  return errors;
+}
+
 /// The builder file's name (`linux_host_engine.json`) of [build].
 String _fileOf(Map<String, BuilderConfig> configs, Build build) {
   for (final MapEntry<String, BuilderConfig> entry in configs.entries) {
@@ -1173,9 +1201,11 @@ String configsBazelrc(List<BuilderBuild> builds, {List<LeftOutBuild> leftOut = c
 /// The Bazel suites of a build's tests, by what the builder file runs: each
 /// run_tests.py type (`engine` resolved to the converted tests of
 /// [runTestsEngineSuites] or the Mac's; the others [runTestsTypeSuites]),
-/// the test executables a step runs from the build directory (`binaries`),
-/// and the steps that run a script of the checkout (`scripts`,
-/// [checkoutScriptTests]); `missing` names what has no Bazel test yet.
+/// the test executables a step runs from the build directory (`binaries`;
+/// under `run_tests.py --type binaries`, the test executables among the
+/// build's ninja targets), and the steps that run a script of the checkout
+/// (`scripts`, [checkoutScriptTests]); `missing` names what has no Bazel
+/// test yet.
 ({
   Map<String, List<String>> types,
   List<String> binaries,
@@ -1197,8 +1227,30 @@ _testSuites(
       binaries.add(label);
     }
   }
+  // `run_tests.py --type binaries`, a Bazel build's form of a step that runs
+  // a test executable from the build directory: the test executables among
+  // the build's ninja targets (what such a step would have run).
+  if (build.testTypes.contains('binaries')) {
+    var found = false;
+    for (final String name in build.ninjaTargets) {
+      final String? label = _ninjaTargetLabel(name, convertedTests, build, packageConditions);
+      if (label == null) {
+        continue;
+      }
+      found = true;
+      if (!binaries.contains(label)) {
+        binaries.add(label);
+      }
+    }
+    if (!found) {
+      missing.add('the binaries type (no test executable among the ninja targets)');
+    }
+  }
   final types = <String, List<String>>{};
   for (final String type in build.testTypes) {
+    if (type == 'binaries') {
+      continue;
+    }
     final labels = <String>[];
     if (type == 'engine') {
       for (final String name

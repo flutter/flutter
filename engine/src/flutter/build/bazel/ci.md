@@ -45,18 +45,23 @@ Steps 2 and 4 are scripts of this repository; step 3 runs whatever
   suites `ci/builders/BUILD.bazel` already declares per builder (the C++
   suites of the `engine` type, the Dart tests on flutter_tester, the packages'
   `dart test`s, the Java tests, ...). A test executable a step runs from the
-  build directory is `run_tests.py --type binaries` in a Bazel variant: the
+  build directory is `run_tests.py --type binaries` in a Bazel build: the
   Bazel test of the same executable. A `--type` the build runs no Bazel test
   for is an error, not a silent pass.
-- **The builder files** get Bazel variants beside the originals,
-  `<file>_bazel.json`, with `--bazel` among each build's flags (and `--no-rbe`
-  in place of `--rbe`: Bazel's actions run on the bot). `.ci.yaml` names them
-  as `bringup: true` targets with the same recipe. The converter refuses a
-  variant whose build is not, infrastructure flags apart, a build of the
-  original with a configuration and an install -- which is what `tools/gn
-  --bazel` would refuse on the bot.
+- **The builder files** carry `--bazel` among each build's flags (and
+  `--no-rbe` in place of `--rbe`, with `use_rbe: false` and
+  `download_bazelisk: true` among the gclient variables: Bazel's actions run
+  on the bot). The Linux engine builders build this way themselves, in
+  place: cocoon admits a new `.ci.yaml` target only as `bringup: true`, which
+  never runs in presubmit, so a build that is to be tested on a PR has to be
+  an existing builder's. A `<file>_bazel.json` variant beside an original (a
+  Mac's, when it comes) is still accepted and checked the same way. The
+  converter refuses a build with `--bazel` that has no configuration or
+  install, and a variant's build that is not, infrastructure flags apart, a
+  build of the original -- which is what `tools/gn --bazel` would refuse on
+  the bot.
 - **bazelisk** comes from `DEPS` under the gclient variable
-  `download_bazelisk` (off by default; the variants' builds set it), as the
+  `download_bazelisk` (off by default; the Bazel builds set it), as the
   CIPD package `infra/3pp/tools/bazelisk`; it fetches the Bazel release
   `.bazelversion` names. A developer's own bazelisk on `PATH` serves too.
 - **The edge's shell closes the file descriptors it inherits** before it runs
@@ -111,7 +116,9 @@ named are the builder file's, any of them: the one edge satisfies them all);
 the third runs the four types' suites with `--config=ci_host_debug_unopt`.
 `ninja -n` shows the command without running it.
 
-The whole of both variants' sequences, run this way on a 24-core
+The whole of both sequences (then the `linux_unopt_bazel.json` and
+`linux_host_engine_bazel.json` variants, since folded into the originals), run
+this way on a 24-core
 workstation from a warm output root (10-31, before the GitHub run): every
 `tools/gn --bazel`, ninja and archive step passed -- `ci/host_debug_unopt`'s
 install 1,367 files, its `run_tests.py` 307 of 308 in 68 minutes (the one
@@ -129,36 +136,53 @@ to `engine/src`, where `test.dart` prints "Error launching shell" and exits
 `//engine/src/flutter/shell/testing/vm_service:service_protocol_test` runs
 the test for real, and so does the command from `engine/src`.
 
-### Where the variants stop
+### Which builders build with Bazel, and where that stops
 
-- `linux_unopt_bazel.json`: the builds of `linux_unopt.json` whose ninja
-  targets have an install (`ci/host_debug_unopt`, the Impeller test build,
-  the Android embedder, validation-layer, debug and test builds, the
-  licenses build); not `ci/host_debug_no_prebuilt_dart_sdk` (ninja's default
-  target -- a Bazel build of it is `bazel build --config=... //engine/src/
-  flutter:local_engine`, which no install mirrors) and not the malioc diff
-  (GN's Mali offline compiler analysis has no Bazel counterpart).
-- `linux_host_engine_bazel.json`: `ci/host_debug` and `ci/host_release` with
-  their archives in the **experimental realm** -- the recipe routes it to
-  `flutter_archives_v2`, never to the release bucket the tool downloads from
-  -- the symbol-export check and the engine stamp among the generators; not
-  the API docs.
-- Linux only. A Mac's builds have their configurations and installs
-  (`mac_*.json`), and `tools/gn --bazel` knows the host; a Mac variant is a
-  copy of a Mac file with the flags above. Windows has no Bazel build.
+- With Bazel, in place: `linux_host_engine` (`ci/host_debug` and
+  `ci/host_release`, their archives, and the global generators -- the
+  symbol-export check, the API docs, the engine stamp), `linux_host_engine_ddm`,
+  `linux_host_engine_test` (the three test builds, their `run_tests.py` types
+  as Bazel suites), `linux_host_desktop_engine`, `linux_arm_host_engine`,
+  `linux_arm_host_desktop_engine`, `linux_android_aot_engine` (and `_ddm`,
+  `_size_exp`), `linux_android_debug_engine` (and `_ddm`), `linux_web_engine`
+  (`ci/wasm_release`), and `linux_unopt`'s builds but one. A try build's
+  archives go where they always went for a try build (the recipe's archives
+  module routes the try bucket to `flutter_archives_v2`, never to the release
+  bucket the tool downloads from).
+- Still GN, and why: `linux_unopt`'s `ci/host_debug_no_prebuilt_dart_sdk`
+  (the Dart SDK from source; `--config=host_debug_no_prebuilt_dart_sdk`
+  exists for a developer, a cold bot has no time for it); `linux_clang_tidy`
+  (clang-tidy over GN's compile database); `linux_android_emulator_tests`
+  (`run_tests.py --type android` runs the C++ suites on the emulator: no
+  Bazel counterpart yet); `local_engine_builds` (local_engine.json's builds
+  are `bazel build` targets without installs); the Fuchsia builders; the
+  standalone files (`linux_license`, `linux_benchmarks`, `linux_clangd`);
+  Mac and Windows. A Mac's builds have their configurations and installs
+  (`mac_*.json`), and `tools/gn --bazel` knows the host: a Mac builder
+  switches as the Linux ones did, or as a `mac_*_bazel.json` variant first.
+- Steps left out of a Bazel build: the malioc diff (GN's Mali offline
+  compiler analysis), and `linux_host_engine_test`'s benchmark-metrics dry
+  runs (`generate_metrics.sh` and `upload_metrics.sh --no-upload` run
+  benchmark executables from the directory, which the install does not lay:
+  the `benchmarks` type runs them as Bazel tests; the real upload is
+  `linux_benchmarks`, GN). The licenses test runner, an executable the
+  original ran from the directory, runs as `run_tests.py --type binaries`.
 - Global tests (`tests` at the top of a builder file, run on tester drones
-  against the CAS archive of `out/<name>`) are not in a variant: a tester
-  drone has the installed directory but not the Bazel outputs, and a Bazel
-  run_tests.py there would rebuild. The variants keep tests local to the
+  against the CAS archive of `out/<name>`) stay what they are: a tester
+  drone has the installed directory, laid out as GN lays it, and not the
+  Bazel outputs, so the Bazel builds keep their tests local to the
   builder's drone.
 - No remote cache and no remote execution. The bot builds from its `.bazel_ci`
   output root: incremental when the bot has built the configuration before,
   from scratch otherwise (the first `ci/host_debug_unopt` on a fresh 32-core
   bot: the wrapped Dart SDK build alone is 15–25 minutes; the whole build and
-  its tests on the order of two hours, which is why the targets' timeouts are
-  240 minutes). Disk: an output root of a test build is tens of gigabytes.
-- Presubmit: `bringup: true` runs the targets in postsubmit on the staging
-  pool and keeps them from closing the tree; the usual promotion applies.
+  its tests on the order of two hours, which is why the switched targets'
+  timeouts are 240 minutes). Disk: an output root of a test build is tens
+  of gigabytes.
+- Presubmit: the switched builders run on every PR as they did under GN,
+  which is the point. A new `.ci.yaml` target cannot do that: cocoon admits
+  it only as `bringup: true`, which runs in postsubmit on the staging pool
+  until the usual promotion.
 
 ## What a recipe change would do differently
 
@@ -214,8 +238,8 @@ simpler, faster and better reported:
    developer's `host_debug`): under a recipe that names configurations, the
    directory name stops mattering and `configs.bazelrc` shrinks to the
    configurations proper.
-8. **The Mac and Windows hosts.** A Mac bot runs the same sequence once a
-   `mac_*_bazel.json` exists; with the recipe driving Bazel, the Xcode
+8. **The Mac and Windows hosts.** A Mac bot runs the same sequence once its
+   builder file carries `--bazel`; with the recipe driving Bazel, the Xcode
    selection (`osx_sdk`) and the code-signing step work on files Bazel
    names. Windows has no Bazel build yet; the recipe change is not the gate
    there.

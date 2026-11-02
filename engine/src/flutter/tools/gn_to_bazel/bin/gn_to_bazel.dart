@@ -314,10 +314,14 @@ Future<int> _builderOutputs(
     return loader.errors.length;
   }
   final List<BuilderBuild> builds = builderBuilds(configs);
-  // The Bazel variants of builder files (*_bazel.json) mirror builds above;
-  // a variant naming a build the Bazel build has no configuration or install
-  // for would fail on the bot (tools/gn --bazel), so it fails here.
-  final List<String> variantErrors = bazelVariantErrors(configs, builds);
+  // The Bazel variants of builder files (*_bazel.json) mirror builds above,
+  // and a Linux builder file's own builds may carry --bazel; a build the
+  // Bazel build has no configuration or install for would fail on the bot
+  // (tools/gn --bazel), so it fails here.
+  final variantErrors = <String>[
+    ...bazelVariantErrors(configs, builds),
+    ...bazelBuildErrors(builds),
+  ];
   for (final error in variantErrors) {
     stderr.writeln('error: $error');
   }

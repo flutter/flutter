@@ -9103,6 +9103,77 @@ test_suite(
       ]);
     });
 
+    test(
+      "a builder file's own builds may carry --bazel; each needs a configuration and an install",
+      () {
+        // linux_host_engine.json as a Linux builder that builds with Bazel in
+        // place: --bazel is a flag of where the build runs, like --no-rbe, so
+        // the configuration is the one the other flags name; a build with a
+        // flag the converter has no setting for, or with no ninja targets
+        // (ninja's default, no install), fails the check -- what tools/gn
+        // --bazel would refuse on the bot.
+        final Map<String, BuilderConfig> loaded = configs(<String, String>{
+          'linux_host_engine.json':
+              '''
+{"builds": [
+  ${build('ci/host_debug', '--target-dir ci/host_debug --runtime-mode debug --no-lto --no-rbe --no-goma --bazel', <String>['flutter/tools/font_subset'])},
+  ${build('ci/host_fancy', '--target-dir ci/host_fancy --runtime-mode release --fancy --no-rbe --bazel', <String>['flutter/tools/font_subset'])},
+  ${build('ci/host_default', '--target-dir ci/host_default --runtime-mode release --no-rbe --bazel', <String>[])},
+  ${build('ci/host_licenses', '--target-dir ci/host_licenses --runtime-mode release --no-rbe --no-goma --bazel', <String>['flutter/tools/licenses_cpp', 'flutter/tools/licenses_cpp:licenses_cpp_testrunner'], tests: runTests('Run license_cpp unittests', 'binaries'))},
+  ${build('ci/host_gn', '--target-dir ci/host_gn --runtime-mode release --rbe --no-goma', <String>[])}
+]}''',
+        });
+        final List<BuilderBuild> builds = builderBuilds(loaded);
+        final BuilderBuild debug = builds.singleWhere(
+          (BuilderBuild b) => b.name == 'ci/host_debug',
+        );
+        expect(debug.unsupported, isEmpty);
+        expect(debug.bazelFlags, <String>[
+          '--compilation_mode=opt',
+          '--//engine/src/flutter/common:runtime_mode=debug',
+          '--platforms=//engine/src/flutter/build/bazel/toolchains:linux_x64_debug',
+        ]);
+        const noConfiguration =
+            "linux_host_engine.json's ci/host_fancy carries --bazel but has no Bazel configuration "
+            "(--fancy (not in the converter's table of tools/gn flags))";
+        const noInstall =
+            "linux_host_engine.json's ci/host_default carries --bazel but builds ninja's default "
+            'target, which has no install';
+        expect(bazelBuildErrors(builds), <String>[noConfiguration, noInstall]);
+        expect(bazelVariantErrors(loaded, builds), isEmpty);
+        // `run_tests.py --type binaries` names the test executables among the
+        // build's ninja targets, as the executable step of the GN form did.
+        final table = jsonDecode(
+          buildersJson(
+            builds,
+            <String, Set<String>>{
+              '//flutter/tools/font_subset': <String>{'font_subset'},
+              '//flutter/tools/licenses_cpp': <String>{'licenses_cpp'},
+            },
+            convertedTests: <String, Set<String>>{
+              '//flutter/tools/licenses_cpp': <String>{'licenses_cpp_testrunner'},
+            },
+          ),
+        ) as Map<String, Object?>;
+        final linux = (table['builds']! as Map<String, Object?>)['linux']! as List<Object?>;
+        final licenses =
+            linux.singleWhere(
+                  (Object? b) => (b! as Map<String, Object?>)['name'] == 'ci/host_licenses',
+                )!
+                as Map<String, Object?>;
+        expect(licenses['ninja_targets_tested'], <String>[
+          'flutter/tools/licenses_cpp:licenses_cpp_testrunner',
+        ]);
+        final tests = licenses['tests']! as Map<String, Object?>;
+        expect(tests['binaries'], <String>[
+          '//engine/src/flutter/tools/licenses_cpp:licenses_cpp_testrunner',
+        ]);
+        expect(tests['types'], isEmpty);
+        expect(tests['missing'], isEmpty);
+        expect(tests['suite'], '//engine/src/flutter/ci/builders:host_licenses_tests');
+      },
+    );
+
     test('the engine type names executables run_tests.py runs', () {
       // One-directional: every name of the tables is one the script runs
       // (the script's platform branches keep the other direction manual).
