@@ -282,17 +282,34 @@ static bool IsRendererValid(const FlutterRendererConfig* config) {
 
 namespace {
 
+class OncePromiseSignaler {
+ public:
+  OncePromiseSignaler() : future_(promise_.get_future().share()) {}
+  ~OncePromiseSignaler() { Signal(); }
+
+  void Signal() {
+    std::call_once(once_flag_, [this]() { promise_.set_value(); });
+  }
+
+  std::shared_future<void> GetFuture() const { return future_; }
+
+ private:
+  std::once_flag once_flag_;
+  std::promise<void> promise_;
+  std::shared_future<void> future_;
+};
+
 struct SharedRendererConfigState {
   std::mutex mutex;
+  FlutterRendererConfig initial_config = {};
   FlutterRendererConfig config = {};
   void* resolve_user_data = nullptr;
   bool is_resolved = false;
   bool resolution_failed = false;
   std::shared_ptr<impeller::Context> impeller_context;
-  std::shared_ptr<std::promise<void>> resolved_promise =
-      std::make_shared<std::promise<void>>();
-  std::shared_future<void> resolved_future =
-      resolved_promise->get_future().share();
+  std::shared_ptr<OncePromiseSignaler> resolved_signaler =
+      std::make_shared<OncePromiseSignaler>();
+  std::shared_future<void> resolved_future = resolved_signaler->GetFuture();
 };
 
 std::mutex g_renderer_config_states_mutex;
@@ -676,11 +693,18 @@ InferOpenGLPlatformViewCreationCallback(
             std::lock_guard<std::mutex> lock(renderer_state->mutex);
             shared_context = renderer_state->impeller_context;
           }
-          auto embedder_surface =
+          std::unique_ptr<flutter::EmbedderSurface> embedder_surface =
               std::make_unique<flutter::EmbedderSurfaceGLImpeller>(
                   gl_dispatch_table, fbo_reset_after_present, view_embedder,
                   shell.GetShutdownSafeIOTaskRunner(), impeller_flags,
                   shared_context);
+          if (renderer_state && embedder_surface) {
+            std::lock_guard<std::mutex> lock(renderer_state->mutex);
+            if (!renderer_state->impeller_context) {
+              renderer_state->impeller_context =
+                  embedder_surface->CreateImpellerContext();
+            }
+          }
           return std::make_unique<flutter::PlatformViewEmbedder>(
               shell,                        // delegate
               shell.GetTaskRunners(),       // task runners
@@ -874,7 +898,7 @@ InferVulkanPlatformViewCreationCallback(
       shared_context = renderer_state->impeller_context;
     }
 
-    std::unique_ptr<flutter::EmbedderSurfaceVulkanImpeller> embedder_surface =
+    std::unique_ptr<flutter::EmbedderSurface> embedder_surface =
         std::make_unique<flutter::EmbedderSurfaceVulkanImpeller>(
             config->vulkan.version, vk_instance,
             config->vulkan.enabled_instance_extension_count,
@@ -887,6 +911,13 @@ InferVulkanPlatformViewCreationCallback(
             static_cast<VkQueue>(config->vulkan.queue), vulkan_dispatch_table,
             view_embedder, impeller_flags, enable_vulkan_validation,
             shared_context);
+    if (renderer_state && embedder_surface) {
+      std::lock_guard<std::mutex> lock(renderer_state->mutex);
+      if (!renderer_state->impeller_context) {
+        renderer_state->impeller_context =
+            embedder_surface->CreateImpellerContext();
+      }
+    }
 
     return fml::MakeCopyable(
         [embedder_surface = std::move(embedder_surface),
@@ -1026,7 +1057,9 @@ InferDeferredPlatformViewCreationCallback(
     impeller::Flags impeller_flags,
     bool enable_vulkan_validation,
     const std::shared_ptr<SharedRendererConfigState>& renderer_state,
-    const std::shared_ptr<flutter::EmbedderEngine*>& engine_ptr_holder) {
+    const std::shared_ptr<flutter::EmbedderEngine*>& engine_ptr_holder,
+    const std::shared_ptr<OncePromiseSignaler>& engine_resolved_signaler =
+        nullptr) {
   if (config->type != kDeferred) {
     return nullptr;
   }
@@ -1045,13 +1078,14 @@ InferDeferredPlatformViewCreationCallback(
                             platform_dispatch_table, view_embedder,
                             enable_impeller, impeller_flags,
                             enable_vulkan_validation, renderer_state,
-                            engine_ptr_holder](flutter::Shell& shell) mutable {
+                            engine_ptr_holder, engine_resolved_signaler](
+                               flutter::Shell& shell) mutable {
     auto io_task_runner = shell.GetShutdownSafeIOTaskRunner();
     flutter::PlatformViewEmbedder::ResolveEmbedderSurfaceCallback
         surface_factory =
             [resolve_callback, engine_user_data, view_embedder, enable_impeller,
              impeller_flags, enable_vulkan_validation, renderer_state,
-             engine_ptr_holder,
+             engine_ptr_holder, engine_resolved_signaler,
              io_task_runner]() -> std::unique_ptr<flutter::EmbedderSurface> {
       (void)enable_impeller;
       (void)impeller_flags;
@@ -1061,6 +1095,7 @@ InferDeferredPlatformViewCreationCallback(
       std::shared_ptr<impeller::Context> shared_context;
       flutter::EmbedderEngine* current_engine =
           engine_ptr_holder ? *engine_ptr_holder : nullptr;
+      bool did_resolve = false;
       {
         std::lock_guard<std::mutex> lock(renderer_state->mutex);
         if (!renderer_state->is_resolved &&
@@ -1069,21 +1104,22 @@ InferDeferredPlatformViewCreationCallback(
               resolved.type != kDeferred && IsRendererValid(&resolved)) {
             renderer_state->config = resolved;
             renderer_state->is_resolved = true;
-            if (current_engine) {
-              current_engine->SetRendererConfig(resolved);
-              current_engine->SetExternalTextureResolver(
-                  CreateExternalTextureResolver(&resolved, engine_user_data));
-            }
-            renderer_state->resolved_promise->set_value();
+            did_resolve = true;
           } else {
             renderer_state->resolution_failed = true;
-            renderer_state->resolved_promise->set_value();
+            renderer_state->resolved_signaler->Signal();
+            if (engine_resolved_signaler) {
+              engine_resolved_signaler->Signal();
+            }
             FML_LOG(ERROR) << "Deferred renderer configuration resolution "
                               "failed or returned an invalid renderer config.";
             return nullptr;
           }
         }
         if (renderer_state->resolution_failed) {
+          if (engine_resolved_signaler) {
+            engine_resolved_signaler->Signal();
+          }
           return nullptr;
         }
         resolved = renderer_state->config;
@@ -1096,53 +1132,79 @@ InferDeferredPlatformViewCreationCallback(
             CreateExternalTextureResolver(&resolved, engine_user_data));
       }
 
-      switch (resolved.type) {
-        case kVulkan: {
+      auto create_surface = [&]() -> std::unique_ptr<flutter::EmbedderSurface> {
+        switch (resolved.type) {
+          case kVulkan: {
 #ifdef SHELL_ENABLE_VULKAN
-          std::function<void*(VkInstance, const char*)>
-              vulkan_get_instance_proc_address =
-                  [ptr = resolved.vulkan.get_instance_proc_address_callback,
-                   engine_user_data](VkInstance instance,
-                                     const char* proc_name) -> void* {
-            return ptr(engine_user_data, instance, proc_name);
-          };
-
-          auto vulkan_get_next_image =
-              [ptr = resolved.vulkan.get_next_image_callback, engine_user_data](
-                  const flutter::DlISize& frame_size) -> FlutterVulkanImage {
-            FlutterFrameInfo frame_info = {
-                .struct_size = sizeof(FlutterFrameInfo),
-                .size = {static_cast<uint32_t>(frame_size.width),
-                         static_cast<uint32_t>(frame_size.height)},
+            std::function<void*(VkInstance, const char*)>
+                vulkan_get_instance_proc_address =
+                    [ptr = resolved.vulkan.get_instance_proc_address_callback,
+                     engine_user_data](VkInstance instance,
+                                       const char* proc_name) -> void* {
+              return ptr(engine_user_data, instance, proc_name);
             };
-            return ptr(engine_user_data, &frame_info);
-          };
 
-          auto vulkan_present_image_callback =
-              [ptr = resolved.vulkan.present_image_callback, engine_user_data](
-                  VkImage image, VkFormat format) -> bool {
-            FlutterVulkanImage image_desc = {
-                .struct_size = sizeof(FlutterVulkanImage),
-                .image = reinterpret_cast<uint64_t>(image),
-                .format = static_cast<uint32_t>(format),
+            auto vulkan_get_next_image =
+                [ptr = resolved.vulkan.get_next_image_callback,
+                 engine_user_data](
+                    const flutter::DlISize& frame_size) -> FlutterVulkanImage {
+              FlutterFrameInfo frame_info = {
+                  .struct_size = sizeof(FlutterFrameInfo),
+                  .size = {static_cast<uint32_t>(frame_size.width),
+                           static_cast<uint32_t>(frame_size.height)},
+              };
+              return ptr(engine_user_data, &frame_info);
             };
-            return ptr(engine_user_data, &image_desc);
-          };
 
-          auto vk_instance = static_cast<VkInstance>(resolved.vulkan.instance);
-          auto proc_addr = vulkan_get_instance_proc_address(
-              vk_instance, "vkGetInstanceProcAddr");
+            auto vulkan_present_image_callback =
+                [ptr = resolved.vulkan.present_image_callback,
+                 engine_user_data](VkImage image, VkFormat format) -> bool {
+              FlutterVulkanImage image_desc = {
+                  .struct_size = sizeof(FlutterVulkanImage),
+                  .image = reinterpret_cast<uint64_t>(image),
+                  .format = static_cast<uint32_t>(format),
+              };
+              return ptr(engine_user_data, &image_desc);
+            };
+
+            auto vk_instance =
+                static_cast<VkInstance>(resolved.vulkan.instance);
+            auto proc_addr = vulkan_get_instance_proc_address(
+                vk_instance, "vkGetInstanceProcAddr");
 
 #if IMPELLER_SUPPORTS_RENDERING
-          if (enable_impeller) {
-            flutter::EmbedderSurfaceVulkanImpeller::VulkanDispatchTable
+            if (enable_impeller) {
+              flutter::EmbedderSurfaceVulkanImpeller::VulkanDispatchTable
+                  vulkan_dispatch_table = {
+                      .get_instance_proc_address =
+                          reinterpret_cast<PFN_vkGetInstanceProcAddr>(
+                              proc_addr),
+                      .get_next_image = vulkan_get_next_image,
+                      .present_image = vulkan_present_image_callback,
+              };
+              return std::make_unique<flutter::EmbedderSurfaceVulkanImpeller>(
+                  resolved.vulkan.version, vk_instance,
+                  resolved.vulkan.enabled_instance_extension_count,
+                  resolved.vulkan.enabled_instance_extensions,
+                  resolved.vulkan.enabled_device_extension_count,
+                  resolved.vulkan.enabled_device_extensions,
+                  static_cast<VkPhysicalDevice>(
+                      resolved.vulkan.physical_device),
+                  static_cast<VkDevice>(resolved.vulkan.device),
+                  resolved.vulkan.queue_family_index,
+                  static_cast<VkQueue>(resolved.vulkan.queue),
+                  vulkan_dispatch_table, view_embedder, impeller_flags,
+                  enable_vulkan_validation, shared_context);
+            }
+#endif  // IMPELLER_SUPPORTS_RENDERING
+            flutter::EmbedderSurfaceVulkan::VulkanDispatchTable
                 vulkan_dispatch_table = {
                     .get_instance_proc_address =
                         reinterpret_cast<PFN_vkGetInstanceProcAddr>(proc_addr),
                     .get_next_image = vulkan_get_next_image,
                     .present_image = vulkan_present_image_callback,
             };
-            return std::make_unique<flutter::EmbedderSurfaceVulkanImpeller>(
+            return std::make_unique<flutter::EmbedderSurfaceVulkan>(
                 resolved.vulkan.version, vk_instance,
                 resolved.vulkan.enabled_instance_extension_count,
                 resolved.vulkan.enabled_instance_extensions,
@@ -1152,275 +1214,276 @@ InferDeferredPlatformViewCreationCallback(
                 static_cast<VkDevice>(resolved.vulkan.device),
                 resolved.vulkan.queue_family_index,
                 static_cast<VkQueue>(resolved.vulkan.queue),
-                vulkan_dispatch_table, view_embedder, impeller_flags,
-                enable_vulkan_validation, shared_context);
-          }
-#endif  // IMPELLER_SUPPORTS_RENDERING
-          flutter::EmbedderSurfaceVulkan::VulkanDispatchTable
-              vulkan_dispatch_table = {
-                  .get_instance_proc_address =
-                      reinterpret_cast<PFN_vkGetInstanceProcAddr>(proc_addr),
-                  .get_next_image = vulkan_get_next_image,
-                  .present_image = vulkan_present_image_callback,
-          };
-          return std::make_unique<flutter::EmbedderSurfaceVulkan>(
-              resolved.vulkan.version, vk_instance,
-              resolved.vulkan.enabled_instance_extension_count,
-              resolved.vulkan.enabled_instance_extensions,
-              resolved.vulkan.enabled_device_extension_count,
-              resolved.vulkan.enabled_device_extensions,
-              static_cast<VkPhysicalDevice>(resolved.vulkan.physical_device),
-              static_cast<VkDevice>(resolved.vulkan.device),
-              resolved.vulkan.queue_family_index,
-              static_cast<VkQueue>(resolved.vulkan.queue),
-              vulkan_dispatch_table, view_embedder);
+                vulkan_dispatch_table, view_embedder);
 #else
-          FML_LOG(ERROR)
-              << "This Flutter Engine does not support Vulkan rendering.";
-          return nullptr;
+            FML_LOG(ERROR)
+                << "This Flutter Engine does not support Vulkan rendering.";
+            return nullptr;
 #endif  // SHELL_ENABLE_VULKAN
-        }
-        case kOpenGL: {
+          }
+          case kOpenGL: {
 #ifdef SHELL_ENABLE_GL
-          const FlutterOpenGLRendererConfig* open_gl_config = &resolved.open_gl;
-          auto gl_make_current = [ptr = open_gl_config->make_current,
-                                  engine_user_data]() -> bool {
-            return ptr(engine_user_data);
-          };
-          auto gl_clear_current = [ptr = open_gl_config->clear_current,
-                                   engine_user_data]() -> bool {
-            return ptr(engine_user_data);
-          };
-          auto gl_present =
-              [present = open_gl_config->present,
-               present_with_info = open_gl_config->present_with_info,
-               engine_user_data](
-                  flutter::GLPresentInfo gl_present_info) -> bool {
-            if (present) {
-              return present(engine_user_data);
-            }
-            std::optional<FlutterRect> frame_damage_rect;
-            if (gl_present_info.frame_damage) {
-              frame_damage_rect =
-                  DlIRectToFlutterRect(*(gl_present_info.frame_damage));
-            }
-            std::optional<FlutterRect> buffer_damage_rect;
-            if (gl_present_info.buffer_damage) {
-              buffer_damage_rect =
-                  DlIRectToFlutterRect(*(gl_present_info.buffer_damage));
-            }
-            FlutterDamage frame_damage{
-                .struct_size = sizeof(FlutterDamage),
-                .num_rects = frame_damage_rect ? size_t{1} : size_t{0},
-                .damage =
-                    frame_damage_rect ? &frame_damage_rect.value() : nullptr,
+            const FlutterOpenGLRendererConfig* open_gl_config =
+                &resolved.open_gl;
+            auto gl_make_current = [ptr = open_gl_config->make_current,
+                                    engine_user_data]() -> bool {
+              return ptr(engine_user_data);
             };
-            FlutterDamage buffer_damage{
-                .struct_size = sizeof(FlutterDamage),
-                .num_rects = buffer_damage_rect ? size_t{1} : size_t{0},
-                .damage =
-                    buffer_damage_rect ? &buffer_damage_rect.value() : nullptr,
+            auto gl_clear_current = [ptr = open_gl_config->clear_current,
+                                     engine_user_data]() -> bool {
+              return ptr(engine_user_data);
             };
-            FlutterPresentInfo present_info = {
-                .struct_size = sizeof(FlutterPresentInfo),
-                .fbo_id = gl_present_info.fbo_id,
-                .frame_damage = frame_damage,
-                .buffer_damage = buffer_damage,
+            auto gl_present =
+                [present = open_gl_config->present,
+                 present_with_info = open_gl_config->present_with_info,
+                 engine_user_data](
+                    flutter::GLPresentInfo gl_present_info) -> bool {
+              if (present) {
+                return present(engine_user_data);
+              }
+              std::optional<FlutterRect> frame_damage_rect;
+              if (gl_present_info.frame_damage) {
+                frame_damage_rect =
+                    DlIRectToFlutterRect(*(gl_present_info.frame_damage));
+              }
+              std::optional<FlutterRect> buffer_damage_rect;
+              if (gl_present_info.buffer_damage) {
+                buffer_damage_rect =
+                    DlIRectToFlutterRect(*(gl_present_info.buffer_damage));
+              }
+              FlutterDamage frame_damage{
+                  .struct_size = sizeof(FlutterDamage),
+                  .num_rects = frame_damage_rect ? size_t{1} : size_t{0},
+                  .damage =
+                      frame_damage_rect ? &frame_damage_rect.value() : nullptr,
+              };
+              FlutterDamage buffer_damage{
+                  .struct_size = sizeof(FlutterDamage),
+                  .num_rects = buffer_damage_rect ? size_t{1} : size_t{0},
+                  .damage = buffer_damage_rect ? &buffer_damage_rect.value()
+                                               : nullptr,
+              };
+              FlutterPresentInfo present_info = {
+                  .struct_size = sizeof(FlutterPresentInfo),
+                  .fbo_id = gl_present_info.fbo_id,
+                  .frame_damage = frame_damage,
+                  .buffer_damage = buffer_damage,
+              };
+              return present_with_info(engine_user_data, &present_info);
             };
-            return present_with_info(engine_user_data, &present_info);
-          };
-          auto gl_fbo_callback =
-              [fbo_callback = open_gl_config->fbo_callback,
-               fbo_with_frame_info_callback =
-                   open_gl_config->fbo_with_frame_info_callback,
-               engine_user_data](
-                  flutter::GLFrameInfo gl_frame_info) -> intptr_t {
-            if (fbo_callback) {
-              return fbo_callback(engine_user_data);
-            }
-            FlutterFrameInfo frame_info = {};
-            frame_info.struct_size = sizeof(FlutterFrameInfo);
-            frame_info.size = {gl_frame_info.width, gl_frame_info.height};
-            return fbo_with_frame_info_callback(engine_user_data, &frame_info);
-          };
-          auto gl_populate_existing_damage =
-              [populate_existing_damage =
-                   open_gl_config->populate_existing_damage,
-               engine_user_data](intptr_t id) -> flutter::GLFBOInfo {
-            if (!populate_existing_damage) {
+            auto gl_fbo_callback =
+                [fbo_callback = open_gl_config->fbo_callback,
+                 fbo_with_frame_info_callback =
+                     open_gl_config->fbo_with_frame_info_callback,
+                 engine_user_data](
+                    flutter::GLFrameInfo gl_frame_info) -> intptr_t {
+              if (fbo_callback) {
+                return fbo_callback(engine_user_data);
+              }
+              FlutterFrameInfo frame_info = {};
+              frame_info.struct_size = sizeof(FlutterFrameInfo);
+              frame_info.size = {gl_frame_info.width, gl_frame_info.height};
+              return fbo_with_frame_info_callback(engine_user_data,
+                                                  &frame_info);
+            };
+            auto gl_populate_existing_damage =
+                [populate_existing_damage =
+                     open_gl_config->populate_existing_damage,
+                 engine_user_data](intptr_t id) -> flutter::GLFBOInfo {
+              if (!populate_existing_damage) {
+                return flutter::GLFBOInfo{
+                    .fbo_id = static_cast<uint32_t>(id),
+                    .existing_damage = std::nullopt,
+                };
+              }
+              FlutterDamage existing_damage;
+              populate_existing_damage(engine_user_data, id, &existing_damage);
+              std::optional<flutter::DlIRect> existing_damage_rect =
+                  std::nullopt;
+              if (existing_damage.num_rects > 0 &&
+                  existing_damage.damage != nullptr) {
+                existing_damage_rect = flutter::DlIRect();
+                for (size_t i = 0; i < existing_damage.num_rects; i++) {
+                  existing_damage_rect = existing_damage_rect->Union(
+                      FlutterRectToDlIRect(existing_damage.damage[i]));
+                }
+              }
               return flutter::GLFBOInfo{
                   .fbo_id = static_cast<uint32_t>(id),
-                  .existing_damage = std::nullopt,
+                  .existing_damage = existing_damage_rect,
               };
-            }
-            FlutterDamage existing_damage;
-            populate_existing_damage(engine_user_data, id, &existing_damage);
-            std::optional<flutter::DlIRect> existing_damage_rect = std::nullopt;
-            if (existing_damage.num_rects > 0 &&
-                existing_damage.damage != nullptr) {
-              existing_damage_rect = flutter::DlIRect();
-              for (size_t i = 0; i < existing_damage.num_rects; i++) {
-                existing_damage_rect = existing_damage_rect->Union(
-                    FlutterRectToDlIRect(existing_damage.damage[i]));
-              }
-            }
-            return flutter::GLFBOInfo{
-                .fbo_id = static_cast<uint32_t>(id),
-                .existing_damage = existing_damage_rect,
             };
-          };
-          std::function<bool()> gl_make_resource_current_callback = nullptr;
-          if (SAFE_ACCESS(open_gl_config, make_resource_current, nullptr) !=
-              nullptr) {
-            gl_make_resource_current_callback =
-                [ptr = open_gl_config->make_resource_current,
-                 engine_user_data]() { return ptr(engine_user_data); };
-          }
-          std::function<flutter::DlMatrix(void)>
-              gl_surface_transformation_callback = nullptr;
-          if (SAFE_ACCESS(open_gl_config, surface_transformation, nullptr) !=
-              nullptr) {
-            gl_surface_transformation_callback =
-                [ptr = open_gl_config->surface_transformation,
-                 engine_user_data]() {
-                  FlutterTransformation transformation = ptr(engine_user_data);
-                  // clang-format off
+            std::function<bool()> gl_make_resource_current_callback = nullptr;
+            if (SAFE_ACCESS(open_gl_config, make_resource_current, nullptr) !=
+                nullptr) {
+              gl_make_resource_current_callback =
+                  [ptr = open_gl_config->make_resource_current,
+                   engine_user_data]() { return ptr(engine_user_data); };
+            }
+            std::function<flutter::DlMatrix(void)>
+                gl_surface_transformation_callback = nullptr;
+            if (SAFE_ACCESS(open_gl_config, surface_transformation, nullptr) !=
+                nullptr) {
+              gl_surface_transformation_callback =
+                  [ptr = open_gl_config->surface_transformation,
+                   engine_user_data]() {
+                    FlutterTransformation transformation =
+                        ptr(engine_user_data);
+                    // clang-format off
                   return flutter::DlMatrix(
                       transformation.scaleX, transformation.skewY,  0.0f, transformation.pers0,
                       transformation.skewX,  transformation.scaleY, 0.0f, transformation.pers1,
                       0.0f,                  0.0f,                  1.0f, 0.0f,
                       transformation.transX, transformation.transY, 0.0f, transformation.pers2
                   );
-                  // clang-format on
-                };
-            if (view_embedder) {
-              view_embedder->SetSurfaceTransformationCallback(
-                  gl_surface_transformation_callback);
-            }
-          }
-          flutter::GPUSurfaceGLDelegate::GLProcResolver gl_proc_resolver =
-              nullptr;
-          if (SAFE_ACCESS(open_gl_config, gl_proc_resolver, nullptr) !=
-              nullptr) {
-            gl_proc_resolver = [ptr = open_gl_config->gl_proc_resolver,
-                                engine_user_data](const char* gl_proc_name) {
-              return ptr(engine_user_data, gl_proc_name);
-            };
-          } else {
-#if FML_OS_LINUX || FML_OS_WIN
-            gl_proc_resolver = DefaultGLProcResolver;
-#endif
-          }
-          bool fbo_reset_after_present =
-              SAFE_ACCESS(open_gl_config, fbo_reset_after_present, false);
-          flutter::EmbedderSurfaceGLSkia::GLDispatchTable gl_dispatch_table = {
-              gl_make_current,
-              gl_clear_current,
-              gl_present,
-              gl_fbo_callback,
-              gl_make_resource_current_callback,
-              gl_surface_transformation_callback,
-              gl_proc_resolver,
-              gl_populate_existing_damage,
-          };
-#ifdef IMPELLER_SUPPORTS_RENDERING
-          if (enable_impeller) {
-            return std::make_unique<flutter::EmbedderSurfaceGLImpeller>(
-                gl_dispatch_table, fbo_reset_after_present, view_embedder,
-                io_task_runner, impeller_flags, shared_context);
-          }
-#endif
-          return std::make_unique<flutter::EmbedderSurfaceGLSkia>(
-              gl_dispatch_table, fbo_reset_after_present, view_embedder);
-#else
-          FML_LOG(ERROR)
-              << "This Flutter Engine does not support OpenGL rendering.";
-          return nullptr;
-#endif  // SHELL_ENABLE_GL
-        }
-        case kMetal: {
-#ifdef SHELL_ENABLE_METAL
-          std::function<bool(flutter::GPUMTLTextureInfo texture)>
-              metal_present =
-                  [ptr = resolved.metal.present_drawable_callback,
-                   engine_user_data](flutter::GPUMTLTextureInfo texture) {
-                    FlutterMetalTexture embedder_texture;
-                    embedder_texture.struct_size = sizeof(FlutterMetalTexture);
-                    embedder_texture.texture = texture.texture;
-                    embedder_texture.texture_id = texture.texture_id;
-                    embedder_texture.user_data = texture.destruction_context;
-                    embedder_texture.destruction_callback =
-                        texture.destruction_callback;
-                    return ptr(engine_user_data, &embedder_texture);
+                    // clang-format on
                   };
-          auto metal_get_texture =
-              [ptr = resolved.metal.get_next_drawable_callback,
-               engine_user_data](const flutter::DlISize& frame_size)
-              -> flutter::GPUMTLTextureInfo {
-            FlutterFrameInfo frame_info = {};
-            frame_info.struct_size = sizeof(FlutterFrameInfo);
-            frame_info.size = {static_cast<uint32_t>(frame_size.width),
-                               static_cast<uint32_t>(frame_size.height)};
-            flutter::GPUMTLTextureInfo texture_info = {};
-            FlutterMetalTexture metal_texture =
-                ptr(engine_user_data, &frame_info);
-            texture_info.texture_id = metal_texture.texture_id;
-            texture_info.texture = metal_texture.texture;
-            texture_info.destruction_callback =
-                metal_texture.destruction_callback;
-            texture_info.destruction_context = metal_texture.user_data;
-            return texture_info;
-          };
-          if (enable_impeller) {
-            flutter::EmbedderSurfaceMetalImpeller::MetalDispatchTable
+              if (view_embedder) {
+                view_embedder->SetSurfaceTransformationCallback(
+                    gl_surface_transformation_callback);
+              }
+            }
+            flutter::GPUSurfaceGLDelegate::GLProcResolver gl_proc_resolver =
+                nullptr;
+            if (SAFE_ACCESS(open_gl_config, gl_proc_resolver, nullptr) !=
+                nullptr) {
+              gl_proc_resolver = [ptr = open_gl_config->gl_proc_resolver,
+                                  engine_user_data](const char* gl_proc_name) {
+                return ptr(engine_user_data, gl_proc_name);
+              };
+            } else {
+#if FML_OS_LINUX || FML_OS_WIN
+              gl_proc_resolver = DefaultGLProcResolver;
+#endif
+            }
+            bool fbo_reset_after_present =
+                SAFE_ACCESS(open_gl_config, fbo_reset_after_present, false);
+            flutter::EmbedderSurfaceGLSkia::GLDispatchTable gl_dispatch_table =
+                {
+                    gl_make_current,
+                    gl_clear_current,
+                    gl_present,
+                    gl_fbo_callback,
+                    gl_make_resource_current_callback,
+                    gl_surface_transformation_callback,
+                    gl_proc_resolver,
+                    gl_populate_existing_damage,
+            };
+#ifdef IMPELLER_SUPPORTS_RENDERING
+            if (enable_impeller) {
+              return std::make_unique<flutter::EmbedderSurfaceGLImpeller>(
+                  gl_dispatch_table, fbo_reset_after_present, view_embedder,
+                  io_task_runner, impeller_flags, shared_context);
+            }
+#endif
+            return std::make_unique<flutter::EmbedderSurfaceGLSkia>(
+                gl_dispatch_table, fbo_reset_after_present, view_embedder);
+#else
+            FML_LOG(ERROR)
+                << "This Flutter Engine does not support OpenGL rendering.";
+            return nullptr;
+#endif  // SHELL_ENABLE_GL
+          }
+          case kMetal: {
+#ifdef SHELL_ENABLE_METAL
+            std::function<bool(flutter::GPUMTLTextureInfo texture)>
+                metal_present = [ptr = resolved.metal.present_drawable_callback,
+                                 engine_user_data](
+                                    flutter::GPUMTLTextureInfo texture) {
+                  FlutterMetalTexture embedder_texture;
+                  embedder_texture.struct_size = sizeof(FlutterMetalTexture);
+                  embedder_texture.texture = texture.texture;
+                  embedder_texture.texture_id = texture.texture_id;
+                  embedder_texture.user_data = texture.destruction_context;
+                  embedder_texture.destruction_callback =
+                      texture.destruction_callback;
+                  return ptr(engine_user_data, &embedder_texture);
+                };
+            auto metal_get_texture =
+                [ptr = resolved.metal.get_next_drawable_callback,
+                 engine_user_data](const flutter::DlISize& frame_size)
+                -> flutter::GPUMTLTextureInfo {
+              FlutterFrameInfo frame_info = {};
+              frame_info.struct_size = sizeof(FlutterFrameInfo);
+              frame_info.size = {static_cast<uint32_t>(frame_size.width),
+                                 static_cast<uint32_t>(frame_size.height)};
+              flutter::GPUMTLTextureInfo texture_info = {};
+              FlutterMetalTexture metal_texture =
+                  ptr(engine_user_data, &frame_info);
+              texture_info.texture_id = metal_texture.texture_id;
+              texture_info.texture = metal_texture.texture;
+              texture_info.destruction_callback =
+                  metal_texture.destruction_callback;
+              texture_info.destruction_context = metal_texture.user_data;
+              return texture_info;
+            };
+            if (enable_impeller) {
+              flutter::EmbedderSurfaceMetalImpeller::MetalDispatchTable
+                  metal_dispatch_table = {
+                      .present = metal_present,
+                      .get_texture = metal_get_texture,
+              };
+              return std::make_unique<flutter::EmbedderSurfaceMetalImpeller>(
+                  const_cast<flutter::GPUMTLDeviceHandle>(
+                      resolved.metal.device),
+                  const_cast<flutter::GPUMTLCommandQueueHandle>(
+                      resolved.metal.present_command_queue),
+                  metal_dispatch_table, view_embedder, impeller_flags);
+            }
+#if !SLIMPELLER
+            flutter::EmbedderSurfaceMetalSkia::MetalDispatchTable
                 metal_dispatch_table = {
                     .present = metal_present,
                     .get_texture = metal_get_texture,
             };
-            return std::make_unique<flutter::EmbedderSurfaceMetalImpeller>(
+            return std::make_unique<flutter::EmbedderSurfaceMetalSkia>(
                 const_cast<flutter::GPUMTLDeviceHandle>(resolved.metal.device),
                 const_cast<flutter::GPUMTLCommandQueueHandle>(
                     resolved.metal.present_command_queue),
-                metal_dispatch_table, view_embedder, impeller_flags);
-          }
-#if !SLIMPELLER
-          flutter::EmbedderSurfaceMetalSkia::MetalDispatchTable
-              metal_dispatch_table = {
-                  .present = metal_present,
-                  .get_texture = metal_get_texture,
-          };
-          return std::make_unique<flutter::EmbedderSurfaceMetalSkia>(
-              const_cast<flutter::GPUMTLDeviceHandle>(resolved.metal.device),
-              const_cast<flutter::GPUMTLCommandQueueHandle>(
-                  resolved.metal.present_command_queue),
-              metal_dispatch_table, view_embedder);
+                metal_dispatch_table, view_embedder);
 #else
-          FML_LOG(FATAL) << "Impeller opt-out unavailable.";
-          return nullptr;
+            FML_LOG(FATAL) << "Impeller opt-out unavailable.";
+            return nullptr;
 #endif
 #else
-          FML_LOG(ERROR)
-              << "This Flutter Engine does not support Metal rendering.";
-          return nullptr;
+            FML_LOG(ERROR)
+                << "This Flutter Engine does not support Metal rendering.";
+            return nullptr;
 #endif  // SHELL_ENABLE_METAL
+          }
+          case kSoftware: {
+            auto software_present_backing_store =
+                [ptr = resolved.software.surface_present_callback,
+                 engine_user_data](const void* allocation, size_t row_bytes,
+                                   size_t height) -> bool {
+              return ptr(engine_user_data, allocation, row_bytes, height);
+            };
+            flutter::EmbedderSurfaceSoftware::SoftwareDispatchTable
+                software_dispatch_table = {
+                    software_present_backing_store,
+            };
+            return std::make_unique<flutter::EmbedderSurfaceSoftware>(
+                software_dispatch_table, view_embedder);
+          }
+          default:
+            return nullptr;
         }
-        case kSoftware: {
-          auto software_present_backing_store =
-              [ptr = resolved.software.surface_present_callback,
-               engine_user_data](const void* allocation, size_t row_bytes,
-                                 size_t height) -> bool {
-            return ptr(engine_user_data, allocation, row_bytes, height);
-          };
-          flutter::EmbedderSurfaceSoftware::SoftwareDispatchTable
-              software_dispatch_table = {
-                  software_present_backing_store,
-          };
-          return std::make_unique<flutter::EmbedderSurfaceSoftware>(
-              software_dispatch_table, view_embedder);
+      };
+
+      std::unique_ptr<flutter::EmbedderSurface> surface = create_surface();
+      if (surface && enable_impeller) {
+        std::lock_guard<std::mutex> lock(renderer_state->mutex);
+        if (!renderer_state->impeller_context) {
+          renderer_state->impeller_context = surface->CreateImpellerContext();
         }
-        default:
-          return nullptr;
       }
+      if (did_resolve) {
+        renderer_state->resolved_signaler->Signal();
+      }
+      if (engine_resolved_signaler) {
+        engine_resolved_signaler->Signal();
+      }
+      return surface;
     };
 
     return std::make_unique<flutter::PlatformViewEmbedder>(
@@ -1446,6 +1509,8 @@ InferPlatformViewCreationCallback(
     bool enable_vulkan_validation = false,
     const std::shared_ptr<SharedRendererConfigState>& renderer_state = nullptr,
     const std::shared_ptr<flutter::EmbedderEngine*>& engine_ptr_holder =
+        nullptr,
+    const std::shared_ptr<OncePromiseSignaler>& engine_resolved_signaler =
         nullptr) {
   if (config == nullptr) {
     return nullptr;
@@ -1474,7 +1539,8 @@ InferPlatformViewCreationCallback(
       return InferDeferredPlatformViewCreationCallback(
           config, user_data, platform_dispatch_table,
           std::move(external_view_embedder), enable_impeller, impeller_flags,
-          enable_vulkan_validation, renderer_state, engine_ptr_holder);
+          enable_vulkan_validation, renderer_state, engine_ptr_holder,
+          engine_resolved_signaler);
     default:
       return nullptr;
   }
@@ -3446,12 +3512,15 @@ FlutterEngineResult FlutterEngineInitialize(size_t version,
       settings.impeller_top_left_default_framebuffer_origin;
 
   auto renderer_state = std::make_shared<SharedRendererConfigState>();
+  renderer_state->initial_config = *config;
   renderer_state->config = *config;
+  auto engine_resolved_signaler = std::make_shared<OncePromiseSignaler>();
   if (config->type == kDeferred) {
     renderer_state->resolve_user_data = user_data;
   } else {
     renderer_state->is_resolved = true;
-    renderer_state->resolved_promise->set_value();
+    renderer_state->resolved_signaler->Signal();
+    engine_resolved_signaler->Signal();
   }
 
   auto engine_ptr_holder = std::make_shared<flutter::EmbedderEngine*>(nullptr);
@@ -3460,7 +3529,8 @@ FlutterEngineResult FlutterEngineInitialize(size_t version,
       config, user_data, platform_dispatch_table,
       std::move(external_view_embedder_result.value()),
       settings.enable_impeller, impeller_flags,
-      settings.enable_vulkan_validation, renderer_state, engine_ptr_holder);
+      settings.enable_vulkan_validation, renderer_state, engine_ptr_holder,
+      engine_resolved_signaler);
 
   if (!on_create_platform_view) {
     return LOG_EMBEDDER_ERROR(
@@ -3607,7 +3677,7 @@ FlutterEngineResult FlutterEngineInitialize(size_t version,
   embedder_engine->SetRendererConfig(*config);
   if (config->type == kDeferred) {
     embedder_engine->SetDeferredRendererResolvedFuture(
-        renderer_state->resolved_future);
+        engine_resolved_signaler->GetFuture());
   }
   embedder_engine->SetSavedProjectArgs(*args);
   embedder_engine->SetAssetManager(asset_manager);
@@ -3742,28 +3812,37 @@ FlutterEngineResult FlutterEngineSpawn(FLUTTER_API_SYMBOL(FlutterEngine)
   impeller_flags.top_left_default_framebuffer_origin =
       settings.impeller_top_left_default_framebuffer_origin;
 
-  std::optional<FlutterRendererConfig> parent_config =
-      parent->GetRendererConfig();
-  if (!parent_config.has_value()) {
-    return LOG_EMBEDDER_ERROR(
-        kInvalidArguments,
-        "Parent engine does not have a valid renderer configuration.");
-  }
   auto renderer_state = GetRendererConfigState(parent);
-  if (!renderer_state) {
-    renderer_state = std::make_shared<SharedRendererConfigState>();
-    renderer_state->config = *parent_config;
-    renderer_state->is_resolved = true;
-    renderer_state->resolved_promise->set_value();
-  }
-  if (parent->GetShell().GetPlatformView()) {
-    std::lock_guard<std::mutex> lock(renderer_state->mutex);
-    if (!renderer_state->impeller_context) {
-      renderer_state->impeller_context =
-          parent->GetShell().GetPlatformView()->GetImpellerContext();
+  std::optional<FlutterRendererConfig> parent_config;
+  const FlutterRendererConfig* effective_renderer = nullptr;
+  auto engine_resolved_signaler = std::make_shared<OncePromiseSignaler>();
+
+  if (renderer_state && renderer_state->initial_config.type == kDeferred) {
+    effective_renderer = &renderer_state->initial_config;
+  } else {
+    parent_config = parent->GetRendererConfig();
+    if (!parent_config.has_value()) {
+      return LOG_EMBEDDER_ERROR(
+          kInvalidArguments,
+          "Parent engine does not have a valid renderer configuration.");
     }
+    if (!renderer_state) {
+      renderer_state = std::make_shared<SharedRendererConfigState>();
+      renderer_state->initial_config = *parent_config;
+      renderer_state->config = *parent_config;
+      renderer_state->is_resolved = true;
+      renderer_state->resolved_signaler->Signal();
+    }
+    if (parent->GetShell().GetPlatformView()) {
+      std::lock_guard<std::mutex> lock(renderer_state->mutex);
+      if (!renderer_state->impeller_context) {
+        renderer_state->impeller_context =
+            parent->GetShell().GetPlatformView()->GetImpellerContext();
+      }
+    }
+    effective_renderer = &(*parent_config);
+    engine_resolved_signaler->Signal();
   }
-  const FlutterRendererConfig* effective_renderer = &(*parent_config);
 
   auto engine_ptr_holder = std::make_shared<flutter::EmbedderEngine*>(nullptr);
 
@@ -3771,7 +3850,8 @@ FlutterEngineResult FlutterEngineSpawn(FLUTTER_API_SYMBOL(FlutterEngine)
       effective_renderer, user_data, platform_dispatch_table,
       std::move(external_view_embedder_result.value()),
       settings.enable_impeller, impeller_flags,
-      settings.enable_vulkan_validation, renderer_state, engine_ptr_holder);
+      settings.enable_vulkan_validation, renderer_state, engine_ptr_holder,
+      engine_resolved_signaler);
   if (!on_create_platform_view) {
     return LOG_EMBEDDER_ERROR(
         kInternalInconsistency,
@@ -3860,9 +3940,9 @@ FlutterEngineResult FlutterEngineSpawn(FLUTTER_API_SYMBOL(FlutterEngine)
 
   *engine_ptr_holder = spawned_engine.get();
   spawned_engine->SetRendererConfig(texture_config);
-  if (renderer_state) {
+  if (effective_renderer->type == kDeferred) {
     spawned_engine->SetDeferredRendererResolvedFuture(
-        renderer_state->resolved_future);
+        engine_resolved_signaler->GetFuture());
   }
   spawned_engine->SetSavedProjectArgs(parent_args);
   spawned_engine->SetAssetManager(asset_manager);

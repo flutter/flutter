@@ -369,7 +369,8 @@ jobject JniDelegate::Spawn(JNIEnv* env,
   std::vector<std::string> args = JStringListToStdVector(env, jEntrypointArgs);
 
   jobject new_flutter_jni = nullptr;
-  jfieldID shell_holder_fid = nullptr;
+  jfieldID shell_holder_obj_fid = nullptr;
+  jfieldID shell_holder_long_fid = nullptr;
   if (env != nullptr) {
     jclass flutter_jni_cls =
         env->FindClass("io/flutter/embedding/engine/FlutterJNI");
@@ -377,17 +378,32 @@ jobject JniDelegate::Spawn(JNIEnv* env,
       env->ExceptionClear();
       flutter_jni_cls = nullptr;
     }
+    if (flutter_jni_cls == nullptr && jcaller != nullptr) {
+      flutter_jni_cls = env->GetObjectClass(jcaller);
+      if (env->ExceptionCheck()) {
+        env->ExceptionClear();
+        flutter_jni_cls = nullptr;
+      }
+    }
     if (flutter_jni_cls != nullptr) {
       jmethodID ctor = env->GetMethodID(flutter_jni_cls, "<init>", "()V");
       if (env->ExceptionCheck()) {
         env->ExceptionClear();
         ctor = nullptr;
       }
-      shell_holder_fid =
-          env->GetFieldID(flutter_jni_cls, "nativeShellHolderId", "J");
+      shell_holder_obj_fid = env->GetFieldID(
+          flutter_jni_cls, "nativeShellHolderId", "Ljava/lang/Long;");
       if (env->ExceptionCheck()) {
         env->ExceptionClear();
-        shell_holder_fid = nullptr;
+        shell_holder_obj_fid = nullptr;
+      }
+      if (shell_holder_obj_fid == nullptr) {
+        shell_holder_long_fid =
+            env->GetFieldID(flutter_jni_cls, "nativeShellHolderId", "J");
+        if (env->ExceptionCheck()) {
+          env->ExceptionClear();
+          shell_holder_long_fid = nullptr;
+        }
       }
       if (ctor != nullptr) {
         new_flutter_jni = env->NewObject(flutter_jni_cls, ctor);
@@ -411,9 +427,47 @@ jobject JniDelegate::Spawn(JNIEnv* env,
   }
 
   jlong child_handle = reinterpret_cast<jlong>(child.release());
-  if (new_flutter_jni != nullptr && shell_holder_fid != nullptr &&
-      env != nullptr) {
-    env->SetLongField(new_flutter_jni, shell_holder_fid, child_handle);
+  if (new_flutter_jni != nullptr && env != nullptr) {
+    if (shell_holder_obj_fid != nullptr) {
+      jclass long_cls = env->FindClass("java/lang/Long");
+      if (env->ExceptionCheck()) {
+        env->ExceptionClear();
+        long_cls = nullptr;
+      }
+      if (long_cls != nullptr) {
+        jmethodID value_of =
+            env->GetStaticMethodID(long_cls, "valueOf", "(J)Ljava/lang/Long;");
+        if (env->ExceptionCheck()) {
+          env->ExceptionClear();
+          value_of = nullptr;
+        }
+        if (value_of != nullptr) {
+          jobject boxed_handle =
+              env->CallStaticObjectMethod(long_cls, value_of, child_handle);
+          if (env->ExceptionCheck()) {
+            env->ExceptionClear();
+            boxed_handle = nullptr;
+          }
+          if (boxed_handle != nullptr) {
+            env->SetObjectField(new_flutter_jni, shell_holder_obj_fid,
+                                boxed_handle);
+            if (env->ExceptionCheck()) {
+              env->ExceptionClear();
+            }
+            env->DeleteLocalRef(boxed_handle);
+          }
+        }
+        env->DeleteLocalRef(long_cls);
+      }
+      return new_flutter_jni;
+    }
+    if (shell_holder_long_fid != nullptr) {
+      env->SetLongField(new_flutter_jni, shell_holder_long_fid, child_handle);
+      if (env->ExceptionCheck()) {
+        env->ExceptionClear();
+      }
+      return new_flutter_jni;
+    }
     return new_flutter_jni;
   }
   return reinterpret_cast<jobject>(child_handle);

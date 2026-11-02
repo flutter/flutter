@@ -346,6 +346,7 @@ void PlatformViewEmbedder::HandlePlatformMessage(
 
 // |PlatformView|
 std::unique_ptr<Surface> PlatformViewEmbedder::CreateRenderingSurface() {
+  std::lock_guard<std::mutex> lock(embedder_surface_mutex_);
   if (embedder_surface_ == nullptr &&
       platform_dispatch_table_.resolve_embedder_surface_callback != nullptr) {
     embedder_surface_ =
@@ -374,6 +375,7 @@ PlatformViewEmbedder::CreateSnapshotSurfaceProducer() {
 
 std::shared_ptr<impeller::Context> PlatformViewEmbedder::GetImpellerContext()
     const {
+  std::lock_guard<std::mutex> lock(embedder_surface_mutex_);
   if (embedder_surface_ == nullptr) {
     return nullptr;
   }
@@ -381,6 +383,7 @@ std::shared_ptr<impeller::Context> PlatformViewEmbedder::GetImpellerContext()
 }
 
 void PlatformViewEmbedder::SetupImpellerContext() {
+  std::lock_guard<std::mutex> lock(embedder_surface_mutex_);
   if (embedder_surface_ == nullptr &&
       platform_dispatch_table_.resolve_embedder_surface_callback != nullptr) {
     embedder_surface_ =
@@ -394,8 +397,11 @@ void PlatformViewEmbedder::SetupImpellerContext() {
 
 // |PlatformView|
 sk_sp<GrDirectContext> PlatformViewEmbedder::CreateResourceContext() const {
+  std::lock_guard<std::mutex> lock(embedder_surface_mutex_);
   if (embedder_surface_ == nullptr) {
-    FML_LOG(ERROR) << "Embedder surface was null.";
+    if (platform_dispatch_table_.resolve_embedder_surface_callback == nullptr) {
+      FML_LOG(ERROR) << "Embedder surface was null.";
+    }
     return nullptr;
   }
   return embedder_surface_->CreateResourceContext();
@@ -403,8 +409,11 @@ sk_sp<GrDirectContext> PlatformViewEmbedder::CreateResourceContext() const {
 
 // |PlatformView|
 void PlatformViewEmbedder::ReleaseResourceContext() const {
+  std::lock_guard<std::mutex> lock(embedder_surface_mutex_);
   if (embedder_surface_ == nullptr) {
-    FML_LOG(ERROR) << "Embedder surface was null.";
+    if (platform_dispatch_table_.resolve_embedder_surface_callback == nullptr) {
+      FML_LOG(ERROR) << "Embedder surface was null.";
+    }
     return;
   }
   embedder_surface_->ReleaseResourceContext();

@@ -143,33 +143,35 @@ void* OpenGLDefaultProcResolver(void* /*user_data*/, const char* /*name*/) {
 AndroidSurfaceControl::AndroidSurfaceControl(
     std::shared_ptr<OSLibraryLoader> library_loader,
     std::shared_ptr<AndroidSurfaceControlProvider> surface_control_provider)
-    : library_loader_(library_loader != nullptr
-                          ? std::move(library_loader)
-                          : std::make_shared<DefaultOSLibraryLoader>()),
-      surface_control_provider_(std::move(surface_control_provider)) {
+    : surface_control_provider_(std::move(surface_control_provider)) {
+  shared_vk_->library_loader = library_loader != nullptr
+                                   ? std::move(library_loader)
+                                   : std::make_shared<DefaultOSLibraryLoader>();
   proc_table_.struct_size = sizeof(FlutterEngineProcTable);
 }
 
 AndroidSurfaceControl::AndroidSurfaceControl(const std::string& debug_name,
                                              void* raw_handle)
-    : debug_name_(debug_name),
-      raw_handle_(raw_handle),
-      library_loader_(std::make_shared<DefaultOSLibraryLoader>()) {
+    : debug_name_(debug_name), raw_handle_(raw_handle) {
+  shared_vk_->library_loader = std::make_shared<DefaultOSLibraryLoader>();
   proc_table_.struct_size = sizeof(FlutterEngineProcTable);
 }
 
 AndroidSurfaceControl::~AndroidSurfaceControl() {
-  std::lock_guard<std::mutex> lock(mutex_);
-  TeardownVulkanLocked();
+  std::lock_guard<std::mutex> lock(shared_vk_->mutex);
+  TeardownPerViewSurfacesLocked();
+  if (shared_vk_.use_count() == 1) {
+    TeardownSharedVulkanDeviceAndInstanceLocked();
+  }
 }
 
 bool AndroidSurfaceControl::IsValid() const {
-  std::lock_guard<std::mutex> lock(mutex_);
+  std::lock_guard<std::mutex> lock(shared_vk_->mutex);
   return raw_handle_ != nullptr || HasAnySurfaceLocked();
 }
 
 void* AndroidSurfaceControl::RawHandle() const {
-  std::lock_guard<std::mutex> lock(mutex_);
+  std::lock_guard<std::mutex> lock(shared_vk_->mutex);
   return raw_handle_;
 }
 
@@ -180,20 +182,36 @@ const std::string& AndroidSurfaceControl::DebugName() const {
 void AndroidSurfaceControl::SetEngineProcTable(
     const FlutterEngineProcTable& proc_table,
     FLUTTER_API_SYMBOL(FlutterEngine) engine) {
-  std::lock_guard<std::mutex> lock(mutex_);
+  std::lock_guard<std::mutex> lock(shared_vk_->mutex);
   proc_table_ = proc_table;
   engine_ = engine;
 }
 
 void AndroidSurfaceControl::SetSystemPropertiesForVulkan(
     const AndroidSystemPropertiesForVulkan& props) {
-  std::lock_guard<std::mutex> lock(mutex_);
-  system_props_ = props;
+  std::lock_guard<std::mutex> lock(shared_vk_->mutex);
+  shared_vk_->system_props = props;
+}
+
+void AndroidSurfaceControl::ShareVulkanStateFrom(
+    const AndroidSurfaceControl& parent) {
+  if (this == &parent || shared_vk_ == parent.shared_vk_) {
+    return;
+  }
+  {
+    std::lock_guard<std::mutex> lock(shared_vk_->mutex);
+    TeardownPerViewSurfacesLocked();
+    if (shared_vk_.use_count() == 1) {
+      TeardownSharedVulkanDeviceAndInstanceLocked();
+    }
+  }
+  shared_vk_ = parent.shared_vk_;
 }
 
 const AndroidSystemPropertiesForVulkan&
 AndroidSurfaceControl::GetSystemPropertiesForVulkan() const {
-  return system_props_;
+  std::lock_guard<std::mutex> lock(shared_vk_->mutex);
+  return shared_vk_->system_props;
 }
 
 AndroidVulkanResolutionStatus AndroidSurfaceControl::EvaluateSystemProperties(
@@ -267,31 +285,31 @@ bool AndroidSurfaceControl::ResolveRendererConfig(
   if (config_out == nullptr) {
     return false;
   }
-  std::lock_guard<std::mutex> lock(mutex_);
+  std::lock_guard<std::mutex> lock(shared_vk_->mutex);
   std::memset(config_out, 0, sizeof(FlutterRendererConfig));
 
   if (InitializeVulkanOnRasterThreadLocked()) {
-    resolved_renderer_type_ = kVulkan;
+    shared_vk_->resolved_renderer_type = kVulkan;
     config_out->type = kVulkan;
     config_out->vulkan.struct_size = sizeof(FlutterVulkanRendererConfig);
     config_out->vulkan.version = kVkApiVersion11;
-    config_out->vulkan.instance = vk_instance_;
-    config_out->vulkan.physical_device = vk_physical_device_;
-    config_out->vulkan.device = vk_device_;
-    config_out->vulkan.queue_family_index = vk_queue_family_index_;
-    config_out->vulkan.queue = vk_queue_;
+    config_out->vulkan.instance = shared_vk_->vk_instance;
+    config_out->vulkan.physical_device = shared_vk_->vk_physical_device;
+    config_out->vulkan.device = shared_vk_->vk_device;
+    config_out->vulkan.queue_family_index = shared_vk_->vk_queue_family_index;
+    config_out->vulkan.queue = shared_vk_->vk_queue;
     config_out->vulkan.enabled_instance_extension_count =
-        enabled_instance_extension_ptrs_.size();
+        shared_vk_->enabled_instance_extension_ptrs.size();
     config_out->vulkan.enabled_instance_extensions =
-        enabled_instance_extension_ptrs_.empty()
+        shared_vk_->enabled_instance_extension_ptrs.empty()
             ? nullptr
-            : enabled_instance_extension_ptrs_.data();
+            : shared_vk_->enabled_instance_extension_ptrs.data();
     config_out->vulkan.enabled_device_extension_count =
-        enabled_device_extension_ptrs_.size();
+        shared_vk_->enabled_device_extension_ptrs.size();
     config_out->vulkan.enabled_device_extensions =
-        enabled_device_extension_ptrs_.empty()
+        shared_vk_->enabled_device_extension_ptrs.empty()
             ? nullptr
-            : enabled_device_extension_ptrs_.data();
+            : shared_vk_->enabled_device_extension_ptrs.data();
     config_out->vulkan.get_instance_proc_address_callback =
         &AndroidSurfaceControl::GetInstanceProcAddressCallback;
     config_out->vulkan.get_next_image_callback =
@@ -303,154 +321,165 @@ bool AndroidSurfaceControl::ResolveRendererConfig(
     return true;
   }
 
-  TeardownVulkanLocked();
+  TeardownPerViewSurfacesLocked();
+  TeardownSharedVulkanDeviceAndInstanceLocked();
   return InitializeOpenGLFallbackLocked(config_out);
 }
 
 AndroidVulkanResolutionStatus
 AndroidSurfaceControl::LastVulkanResolutionStatus() const {
-  std::lock_guard<std::mutex> lock(mutex_);
-  return last_vulkan_status_;
+  std::lock_guard<std::mutex> lock(shared_vk_->mutex);
+  return shared_vk_->last_vulkan_status;
 }
 
 FlutterRendererType AndroidSurfaceControl::ResolvedRendererType() const {
-  std::lock_guard<std::mutex> lock(mutex_);
-  return resolved_renderer_type_;
+  std::lock_guard<std::mutex> lock(shared_vk_->mutex);
+  return shared_vk_->resolved_renderer_type;
 }
 
 void* AndroidSurfaceControl::GetVulkanInstance() const {
-  std::lock_guard<std::mutex> lock(mutex_);
-  return vk_instance_;
+  std::lock_guard<std::mutex> lock(shared_vk_->mutex);
+  return shared_vk_->vk_instance;
 }
 
 void* AndroidSurfaceControl::GetVulkanPhysicalDevice() const {
-  std::lock_guard<std::mutex> lock(mutex_);
-  return vk_physical_device_;
+  std::lock_guard<std::mutex> lock(shared_vk_->mutex);
+  return shared_vk_->vk_physical_device;
 }
 
 void* AndroidSurfaceControl::GetVulkanDevice() const {
-  std::lock_guard<std::mutex> lock(mutex_);
-  return vk_device_;
+  std::lock_guard<std::mutex> lock(shared_vk_->mutex);
+  return shared_vk_->vk_device;
 }
 
 void* AndroidSurfaceControl::GetVulkanQueue() const {
-  std::lock_guard<std::mutex> lock(mutex_);
-  return vk_queue_;
+  std::lock_guard<std::mutex> lock(shared_vk_->mutex);
+  return shared_vk_->vk_queue;
 }
 
 uint32_t AndroidSurfaceControl::GetVulkanQueueFamilyIndex() const {
-  std::lock_guard<std::mutex> lock(mutex_);
-  return vk_queue_family_index_;
+  std::lock_guard<std::mutex> lock(shared_vk_->mutex);
+  return shared_vk_->vk_queue_family_index;
 }
 
 void AndroidSurfaceControl::SetVulkanExternalTextureCallback(
     FlutterVulkanTextureFrameCallback callback) {
-  std::lock_guard<std::mutex> lock(mutex_);
+  std::lock_guard<std::mutex> lock(shared_vk_->mutex);
   vulkan_external_texture_callback_ = callback;
 }
 
 void AndroidSurfaceControl::SetOpenGLExternalTextureCallback(
     FlutterOpenGLTextureFrameCallback callback) {
-  std::lock_guard<std::mutex> lock(mutex_);
+  std::lock_guard<std::mutex> lock(shared_vk_->mutex);
   opengl_external_texture_callback_ = callback;
 }
 
 bool AndroidSurfaceControl::InitializeVulkanOnRasterThreadLocked() {
+  if (shared_vk_->vk_device != nullptr && shared_vk_->vk_instance != nullptr &&
+      shared_vk_->vk_physical_device != nullptr &&
+      shared_vk_->vk_queue != nullptr) {
+    shared_vk_->last_vulkan_status =
+        AndroidVulkanResolutionStatus::kSelectedVulkan;
+    return true;
+  }
+
   const AndroidVulkanResolutionStatus prop_status =
-      EvaluateSystemProperties(system_props_);
+      EvaluateSystemProperties(shared_vk_->system_props);
   if (prop_status != AndroidVulkanResolutionStatus::kSelectedVulkan) {
-    last_vulkan_status_ = prop_status;
+    shared_vk_->last_vulkan_status = prop_status;
     return false;
   }
 
-  if (library_loader_ == nullptr) {
-    last_vulkan_status_ =
+  if (shared_vk_->library_loader == nullptr) {
+    shared_vk_->last_vulkan_status =
         AndroidVulkanResolutionStatus::kVulkanLibraryUnavailable;
     return false;
   }
 
-  vulkan_library_ = library_loader_->Load("libvulkan.so");
-  if (vulkan_library_ == nullptr) {
-    vulkan_library_ = library_loader_->Load("libvulkan.so.1");
+  shared_vk_->vulkan_library = shared_vk_->library_loader->Load("libvulkan.so");
+  if (shared_vk_->vulkan_library == nullptr) {
+    shared_vk_->vulkan_library =
+        shared_vk_->library_loader->Load("libvulkan.so.1");
   }
-  if (vulkan_library_ == nullptr) {
-    last_vulkan_status_ =
+  if (shared_vk_->vulkan_library == nullptr) {
+    shared_vk_->last_vulkan_status =
         AndroidVulkanResolutionStatus::kVulkanLibraryUnavailable;
     return false;
   }
 
-  vk_get_instance_proc_addr_fn_ = ResolveSymbolAs<PFN_vkGetInstanceProcAddr>(
-      vulkan_library_.get(), "vkGetInstanceProcAddr");
-  if (vk_get_instance_proc_addr_fn_ == nullptr) {
-    last_vulkan_status_ =
+  shared_vk_->vk_get_instance_proc_addr_fn =
+      ResolveSymbolAs<PFN_vkGetInstanceProcAddr>(
+          shared_vk_->vulkan_library.get(), "vkGetInstanceProcAddr");
+  if (shared_vk_->vk_get_instance_proc_addr_fn == nullptr) {
+    shared_vk_->last_vulkan_status =
         AndroidVulkanResolutionStatus::kVulkanLibraryUnavailable;
     return false;
   }
 
   auto resolve_global_proc = [this](const char* name) -> void* {
-    if (vk_get_instance_proc_addr_fn_ == nullptr) {
+    if (shared_vk_->vk_get_instance_proc_addr_fn == nullptr) {
       return nullptr;
     }
-    void* sym = vk_get_instance_proc_addr_fn_(nullptr, name);
-    if (sym == nullptr && vulkan_library_ != nullptr) {
-      sym = vulkan_library_->ResolveSymbol(name);
+    void* sym = shared_vk_->vk_get_instance_proc_addr_fn(nullptr, name);
+    if (sym == nullptr && shared_vk_->vulkan_library != nullptr) {
+      sym = shared_vk_->vulkan_library->ResolveSymbol(name);
     }
     return sym;
   };
 
-  vk_enumerate_instance_extension_properties_fn_ =
+  shared_vk_->vk_enumerate_instance_extension_properties_fn =
       reinterpret_cast<PFN_vkEnumerateInstanceExtensionProperties>(
           resolve_global_proc("vkEnumerateInstanceExtensionProperties"));
-  vk_enumerate_instance_layer_properties_fn_ =
+  shared_vk_->vk_enumerate_instance_layer_properties_fn =
       reinterpret_cast<PFN_vkEnumerateInstanceLayerProperties>(
           resolve_global_proc("vkEnumerateInstanceLayerProperties"));
-  vk_create_instance_fn_ = reinterpret_cast<PFN_vkCreateInstance>(
+  shared_vk_->vk_create_instance_fn = reinterpret_cast<PFN_vkCreateInstance>(
       resolve_global_proc("vkCreateInstance"));
 
-  if (vk_enumerate_instance_extension_properties_fn_ == nullptr ||
-      vk_create_instance_fn_ == nullptr) {
-    last_vulkan_status_ =
+  if (shared_vk_->vk_enumerate_instance_extension_properties_fn == nullptr ||
+      shared_vk_->vk_create_instance_fn == nullptr) {
+    shared_vk_->last_vulkan_status =
         AndroidVulkanResolutionStatus::kVulkanLibraryUnavailable;
     return false;
   }
 
   uint32_t instance_ext_count = 0;
-  if (vk_enumerate_instance_extension_properties_fn_(
+  if (shared_vk_->vk_enumerate_instance_extension_properties_fn(
           nullptr, &instance_ext_count, nullptr) != kVkSuccess ||
       instance_ext_count == 0) {
-    last_vulkan_status_ =
+    shared_vk_->last_vulkan_status =
         AndroidVulkanResolutionStatus::kInstanceExtensionsMissing;
     return false;
   }
   std::vector<VkExtensionPropertiesCompat> instance_exts(instance_ext_count);
-  if (vk_enumerate_instance_extension_properties_fn_(
+  if (shared_vk_->vk_enumerate_instance_extension_properties_fn(
           nullptr, &instance_ext_count, instance_exts.data()) != kVkSuccess) {
-    last_vulkan_status_ =
+    shared_vk_->last_vulkan_status =
         AndroidVulkanResolutionStatus::kInstanceExtensionsMissing;
     return false;
   }
 
-  enabled_instance_layers_.clear();
-  enabled_instance_layer_ptrs_.clear();
-  enabled_instance_extensions_.clear();
-  enabled_instance_extension_ptrs_.clear();
+  shared_vk_->enabled_instance_layers.clear();
+  shared_vk_->enabled_instance_layer_ptrs.clear();
+  shared_vk_->enabled_instance_extensions.clear();
+  shared_vk_->enabled_instance_extension_ptrs.clear();
   for (const char* req_ext : kRequiredInstanceExtensions) {
     if (!HasExtension(instance_exts, req_ext)) {
-      last_vulkan_status_ =
+      shared_vk_->last_vulkan_status =
           AndroidVulkanResolutionStatus::kInstanceExtensionsMissing;
       return false;
     }
-    enabled_instance_extensions_.emplace_back(req_ext);
+    shared_vk_->enabled_instance_extensions.emplace_back(req_ext);
   }
 
-  if (system_props_.enable_vulkan_validation &&
-      vk_enumerate_instance_layer_properties_fn_ != nullptr) {
+  if (shared_vk_->system_props.enable_vulkan_validation &&
+      shared_vk_->vk_enumerate_instance_layer_properties_fn != nullptr) {
     uint32_t layer_count = 0;
-    if (vk_enumerate_instance_layer_properties_fn_(&layer_count, nullptr) ==
-            kVkSuccess &&
+    if (shared_vk_->vk_enumerate_instance_layer_properties_fn(
+            &layer_count, nullptr) == kVkSuccess &&
         layer_count > 0) {
       std::vector<VkLayerPropertiesCompat> layers(layer_count);
-      if (vk_enumerate_instance_layer_properties_fn_(
+      if (shared_vk_->vk_enumerate_instance_layer_properties_fn(
               &layer_count, layers.data()) == kVkSuccess) {
         constexpr const char* kValidationLayerName =
             "VK_LAYER_KHRONOS_validation";
@@ -464,23 +493,25 @@ bool AndroidSurfaceControl::InitializeVulkanOnRasterThreadLocked() {
         if (has_validation_layer) {
           std::vector<VkExtensionPropertiesCompat> layer_exts;
           uint32_t layer_ext_count = 0;
-          if (vk_enumerate_instance_extension_properties_fn_(
+          if (shared_vk_->vk_enumerate_instance_extension_properties_fn(
                   kValidationLayerName, &layer_ext_count, nullptr) ==
                   kVkSuccess &&
               layer_ext_count > 0) {
             layer_exts.resize(layer_ext_count);
-            vk_enumerate_instance_extension_properties_fn_(
+            shared_vk_->vk_enumerate_instance_extension_properties_fn(
                 kValidationLayerName, &layer_ext_count, layer_exts.data());
           }
           const bool has_debug_utils =
               HasExtension(instance_exts, "VK_EXT_debug_utils") ||
               HasExtension(layer_exts, "VK_EXT_debug_utils");
           if (has_debug_utils) {
-            enabled_instance_layers_.emplace_back(kValidationLayerName);
-            enabled_instance_extensions_.emplace_back("VK_EXT_debug_utils");
+            shared_vk_->enabled_instance_layers.emplace_back(
+                kValidationLayerName);
+            shared_vk_->enabled_instance_extensions.emplace_back(
+                "VK_EXT_debug_utils");
             if (HasExtension(instance_exts, "VK_EXT_validation_features") ||
                 HasExtension(layer_exts, "VK_EXT_validation_features")) {
-              enabled_instance_extensions_.emplace_back(
+              shared_vk_->enabled_instance_extensions.emplace_back(
                   "VK_EXT_validation_features");
             }
           }
@@ -489,11 +520,11 @@ bool AndroidSurfaceControl::InitializeVulkanOnRasterThreadLocked() {
     }
   }
 
-  for (const auto& layer : enabled_instance_layers_) {
-    enabled_instance_layer_ptrs_.push_back(layer.c_str());
+  for (const auto& layer : shared_vk_->enabled_instance_layers) {
+    shared_vk_->enabled_instance_layer_ptrs.push_back(layer.c_str());
   }
-  for (const auto& ext : enabled_instance_extensions_) {
-    enabled_instance_extension_ptrs_.push_back(ext.c_str());
+  for (const auto& ext : shared_vk_->enabled_instance_extensions) {
+    shared_vk_->enabled_instance_extension_ptrs.push_back(ext.c_str());
   }
 
   VkApplicationInfoCompat app_info = {};
@@ -508,112 +539,123 @@ bool AndroidSurfaceControl::InitializeVulkanOnRasterThreadLocked() {
   instance_info.sType = kVkStructureTypeInstanceCreateInfo;
   instance_info.pApplicationInfo = &app_info;
   instance_info.enabledLayerCount =
-      static_cast<uint32_t>(enabled_instance_layer_ptrs_.size());
-  instance_info.ppEnabledLayerNames = enabled_instance_layer_ptrs_.empty()
-                                          ? nullptr
-                                          : enabled_instance_layer_ptrs_.data();
+      static_cast<uint32_t>(shared_vk_->enabled_instance_layer_ptrs.size());
+  instance_info.ppEnabledLayerNames =
+      shared_vk_->enabled_instance_layer_ptrs.empty()
+          ? nullptr
+          : shared_vk_->enabled_instance_layer_ptrs.data();
   instance_info.enabledExtensionCount =
-      static_cast<uint32_t>(enabled_instance_extension_ptrs_.size());
+      static_cast<uint32_t>(shared_vk_->enabled_instance_extension_ptrs.size());
   instance_info.ppEnabledExtensionNames =
-      enabled_instance_extension_ptrs_.data();
+      shared_vk_->enabled_instance_extension_ptrs.data();
 
-  if (vk_create_instance_fn_(&instance_info, nullptr, &vk_instance_) !=
-          kVkSuccess ||
-      vk_instance_ == nullptr) {
-    last_vulkan_status_ =
+  if (shared_vk_->vk_create_instance_fn(
+          &instance_info, nullptr, &shared_vk_->vk_instance) != kVkSuccess ||
+      shared_vk_->vk_instance == nullptr) {
+    shared_vk_->last_vulkan_status =
         AndroidVulkanResolutionStatus::kInstanceCreationFailed;
     return false;
   }
 
   auto resolve_instance_proc = [this](const char* name) -> void* {
-    if (vk_get_instance_proc_addr_fn_ == nullptr) {
+    if (shared_vk_->vk_get_instance_proc_addr_fn == nullptr) {
       return nullptr;
     }
-    void* sym = vk_get_instance_proc_addr_fn_(vk_instance_, name);
-    if (sym == nullptr && vulkan_library_ != nullptr) {
-      sym = vulkan_library_->ResolveSymbol(name);
+    void* sym =
+        shared_vk_->vk_get_instance_proc_addr_fn(shared_vk_->vk_instance, name);
+    if (sym == nullptr && shared_vk_->vulkan_library != nullptr) {
+      sym = shared_vk_->vulkan_library->ResolveSymbol(name);
     }
     return sym;
   };
 
-  vk_destroy_instance_fn_ = reinterpret_cast<PFN_vkDestroyInstance>(
+  shared_vk_->vk_destroy_instance_fn = reinterpret_cast<PFN_vkDestroyInstance>(
       resolve_instance_proc("vkDestroyInstance"));
-  vk_enumerate_physical_devices_fn_ =
+  shared_vk_->vk_enumerate_physical_devices_fn =
       reinterpret_cast<PFN_vkEnumeratePhysicalDevices>(
           resolve_instance_proc("vkEnumeratePhysicalDevices"));
-  vk_get_physical_device_properties_fn_ =
+  shared_vk_->vk_get_physical_device_properties_fn =
       reinterpret_cast<PFN_vkGetPhysicalDeviceProperties>(
           resolve_instance_proc("vkGetPhysicalDeviceProperties"));
-  vk_get_physical_device_format_properties_fn_ =
+  shared_vk_->vk_get_physical_device_format_properties_fn =
       reinterpret_cast<PFN_vkGetPhysicalDeviceFormatProperties>(
           resolve_instance_proc("vkGetPhysicalDeviceFormatProperties"));
-  vk_get_physical_device_queue_family_properties_fn_ =
+  shared_vk_->vk_get_physical_device_queue_family_properties_fn =
       reinterpret_cast<PFN_vkGetPhysicalDeviceQueueFamilyProperties>(
           resolve_instance_proc("vkGetPhysicalDeviceQueueFamilyProperties"));
-  vk_get_physical_device_features_2_fn_ =
+  shared_vk_->vk_get_physical_device_features_2_fn =
       reinterpret_cast<PFN_vkGetPhysicalDeviceFeatures2>(
           resolve_instance_proc("vkGetPhysicalDeviceFeatures2"));
-  if (vk_get_physical_device_features_2_fn_ == nullptr) {
-    vk_get_physical_device_features_2_fn_ =
+  if (shared_vk_->vk_get_physical_device_features_2_fn == nullptr) {
+    shared_vk_->vk_get_physical_device_features_2_fn =
         reinterpret_cast<PFN_vkGetPhysicalDeviceFeatures2>(
             resolve_instance_proc("vkGetPhysicalDeviceFeatures2KHR"));
   }
-  vk_enumerate_device_extension_properties_fn_ =
+  shared_vk_->vk_enumerate_device_extension_properties_fn =
       reinterpret_cast<PFN_vkEnumerateDeviceExtensionProperties>(
           resolve_instance_proc("vkEnumerateDeviceExtensionProperties"));
-  vk_create_device_fn_ = reinterpret_cast<PFN_vkCreateDevice>(
+  shared_vk_->vk_create_device_fn = reinterpret_cast<PFN_vkCreateDevice>(
       resolve_instance_proc("vkCreateDevice"));
-  vk_get_device_proc_addr_fn_ = reinterpret_cast<PFN_vkGetDeviceProcAddr>(
-      resolve_instance_proc("vkGetDeviceProcAddr"));
-  vk_create_android_surface_khr_fn_ =
+  shared_vk_->vk_get_device_proc_addr_fn =
+      reinterpret_cast<PFN_vkGetDeviceProcAddr>(
+          resolve_instance_proc("vkGetDeviceProcAddr"));
+  shared_vk_->vk_create_android_surface_khr_fn =
       reinterpret_cast<PFN_vkCreateAndroidSurfaceKHR>(
           resolve_instance_proc("vkCreateAndroidSurfaceKHR"));
-  vk_destroy_surface_khr_fn_ = reinterpret_cast<PFN_vkDestroySurfaceKHR>(
-      resolve_instance_proc("vkDestroySurfaceKHR"));
-  vk_get_physical_device_surface_capabilities_khr_fn_ =
+  shared_vk_->vk_destroy_surface_khr_fn =
+      reinterpret_cast<PFN_vkDestroySurfaceKHR>(
+          resolve_instance_proc("vkDestroySurfaceKHR"));
+  shared_vk_->vk_get_physical_device_surface_capabilities_khr_fn =
       reinterpret_cast<PFN_vkGetPhysicalDeviceSurfaceCapabilitiesKHR>(
           resolve_instance_proc("vkGetPhysicalDeviceSurfaceCapabilitiesKHR"));
-  vk_get_physical_device_surface_formats_khr_fn_ =
+  shared_vk_->vk_get_physical_device_surface_formats_khr_fn =
       reinterpret_cast<PFN_vkGetPhysicalDeviceSurfaceFormatsKHR>(
           resolve_instance_proc("vkGetPhysicalDeviceSurfaceFormatsKHR"));
 
-  if (vk_enumerate_physical_devices_fn_ == nullptr ||
-      vk_get_physical_device_properties_fn_ == nullptr ||
-      vk_get_physical_device_format_properties_fn_ == nullptr ||
-      vk_get_physical_device_queue_family_properties_fn_ == nullptr ||
-      vk_enumerate_device_extension_properties_fn_ == nullptr ||
-      vk_create_device_fn_ == nullptr) {
-    last_vulkan_status_ =
+  if (shared_vk_->vk_enumerate_physical_devices_fn == nullptr ||
+      shared_vk_->vk_get_physical_device_properties_fn == nullptr ||
+      shared_vk_->vk_get_physical_device_format_properties_fn == nullptr ||
+      shared_vk_->vk_get_physical_device_queue_family_properties_fn ==
+          nullptr ||
+      shared_vk_->vk_enumerate_device_extension_properties_fn == nullptr ||
+      shared_vk_->vk_create_device_fn == nullptr) {
+    shared_vk_->last_vulkan_status =
         AndroidVulkanResolutionStatus::kVulkanLibraryUnavailable;
     return false;
   }
 
   uint32_t phys_device_count = 0;
-  if (vk_enumerate_physical_devices_fn_(vk_instance_, &phys_device_count,
-                                        nullptr) != kVkSuccess ||
+  if (shared_vk_->vk_enumerate_physical_devices_fn(
+          shared_vk_->vk_instance, &phys_device_count, nullptr) != kVkSuccess ||
       phys_device_count == 0) {
-    last_vulkan_status_ = AndroidVulkanResolutionStatus::kNoPhysicalDevice;
+    shared_vk_->last_vulkan_status =
+        AndroidVulkanResolutionStatus::kNoPhysicalDevice;
     return false;
   }
   std::vector<void*> phys_devices(phys_device_count, nullptr);
-  if (vk_enumerate_physical_devices_fn_(vk_instance_, &phys_device_count,
-                                        phys_devices.data()) != kVkSuccess ||
+  if (shared_vk_->vk_enumerate_physical_devices_fn(
+          shared_vk_->vk_instance, &phys_device_count, phys_devices.data()) !=
+          kVkSuccess ||
       phys_devices[0] == nullptr) {
-    last_vulkan_status_ = AndroidVulkanResolutionStatus::kNoPhysicalDevice;
+    shared_vk_->last_vulkan_status =
+        AndroidVulkanResolutionStatus::kNoPhysicalDevice;
     return false;
   }
-  vk_physical_device_ = phys_devices[0];
+  shared_vk_->vk_physical_device = phys_devices[0];
 
   // Query VkPhysicalDeviceProperties and check `flutter::VulkanDriverInfo`.
   VkPhysicalDevicePropertiesCompat phys_props = {};
-  vk_get_physical_device_properties_fn_(vk_physical_device_, &phys_props);
+  shared_vk_->vk_get_physical_device_properties_fn(
+      shared_vk_->vk_physical_device, &phys_props);
   const flutter::VulkanDriverInfo driver_info(phys_props);
   if (driver_info.IsKnownBadDriver()) {
-    last_vulkan_status_ = AndroidVulkanResolutionStatus::kKnownBadVulkanDriver;
+    shared_vk_->last_vulkan_status =
+        AndroidVulkanResolutionStatus::kKnownBadVulkanDriver;
     return false;
   }
   if (driver_info.IsEmulator()) {
-    last_vulkan_status_ = AndroidVulkanResolutionStatus::kEmulatorDetected;
+    shared_vk_->last_vulkan_status =
+        AndroidVulkanResolutionStatus::kEmulatorDetected;
     return false;
   }
 
@@ -623,57 +665,58 @@ bool AndroidSurfaceControl::InitializeVulkanOnRasterThreadLocked() {
       kVkSampleCount1Bit | kVkSampleCount4Bit;
   if ((phys_props.limits.framebufferColorSampleCounts &
        kRequiredSampleCounts) != kRequiredSampleCounts) {
-    last_vulkan_status_ =
+    shared_vk_->last_vulkan_status =
         AndroidVulkanResolutionStatus::kRequiredSampleCountsUnsupported;
     return false;
   }
 
   // Check required device extensions (`CapabilitiesVK`).
   uint32_t dev_ext_count = 0;
-  if (vk_enumerate_device_extension_properties_fn_(vk_physical_device_, nullptr,
-                                                   &dev_ext_count,
-                                                   nullptr) != kVkSuccess ||
+  if (shared_vk_->vk_enumerate_device_extension_properties_fn(
+          shared_vk_->vk_physical_device, nullptr, &dev_ext_count, nullptr) !=
+          kVkSuccess ||
       dev_ext_count == 0) {
-    last_vulkan_status_ =
+    shared_vk_->last_vulkan_status =
         AndroidVulkanResolutionStatus::kDeviceExtensionsMissing;
     return false;
   }
   std::vector<VkExtensionPropertiesCompat> dev_exts(dev_ext_count);
-  if (vk_enumerate_device_extension_properties_fn_(
-          vk_physical_device_, nullptr, &dev_ext_count, dev_exts.data()) !=
-      kVkSuccess) {
-    last_vulkan_status_ =
+  if (shared_vk_->vk_enumerate_device_extension_properties_fn(
+          shared_vk_->vk_physical_device, nullptr, &dev_ext_count,
+          dev_exts.data()) != kVkSuccess) {
+    shared_vk_->last_vulkan_status =
         AndroidVulkanResolutionStatus::kDeviceExtensionsMissing;
     return false;
   }
 
-  enabled_device_extensions_.clear();
-  enabled_device_extension_ptrs_.clear();
+  shared_vk_->enabled_device_extensions.clear();
+  shared_vk_->enabled_device_extension_ptrs.clear();
   for (const char* req_ext : kRequiredDeviceExtensions) {
     if (!HasExtension(dev_exts, req_ext)) {
-      last_vulkan_status_ =
+      shared_vk_->last_vulkan_status =
           AndroidVulkanResolutionStatus::kDeviceExtensionsMissing;
       return false;
     }
-    enabled_device_extensions_.emplace_back(req_ext);
+    shared_vk_->enabled_device_extensions.emplace_back(req_ext);
   }
   for (const char* opt_ext : kOptionalSyncDeviceExtensions) {
     if (HasExtension(dev_exts, opt_ext)) {
-      enabled_device_extensions_.emplace_back(opt_ext);
+      shared_vk_->enabled_device_extensions.emplace_back(opt_ext);
     }
   }
-  for (const auto& ext : enabled_device_extensions_) {
-    enabled_device_extension_ptrs_.push_back(ext.c_str());
+  for (const auto& ext : shared_vk_->enabled_device_extensions) {
+    shared_vk_->enabled_device_extension_ptrs.push_back(ext.c_str());
   }
 
   // Check required color format (`VK_FORMAT_R8G8B8A8_UNORM` optimal tiling
   // color attachment).
   VkFormatPropertiesCompat color_format_props = {};
-  vk_get_physical_device_format_properties_fn_(
-      vk_physical_device_, kVkFormatR8G8B8A8Unorm, &color_format_props);
+  shared_vk_->vk_get_physical_device_format_properties_fn(
+      shared_vk_->vk_physical_device, kVkFormatR8G8B8A8Unorm,
+      &color_format_props);
   if ((color_format_props.optimalTilingFeatures &
        kVkFormatFeatureColorAttachmentBit) == 0) {
-    last_vulkan_status_ =
+    shared_vk_->last_vulkan_status =
         AndroidVulkanResolutionStatus::kRequiredColorFormatUnsupported;
     return false;
   }
@@ -682,32 +725,34 @@ bool AndroidSurfaceControl::InitializeVulkanOnRasterThreadLocked() {
   // `D24_UNORM_S8_UINT`).
   VkFormatPropertiesCompat d32_s8_props = {};
   VkFormatPropertiesCompat d24_s8_props = {};
-  vk_get_physical_device_format_properties_fn_(
-      vk_physical_device_, kVkFormatD32SfloatS8Uint, &d32_s8_props);
-  vk_get_physical_device_format_properties_fn_(
-      vk_physical_device_, kVkFormatD24UnormS8Uint, &d24_s8_props);
+  shared_vk_->vk_get_physical_device_format_properties_fn(
+      shared_vk_->vk_physical_device, kVkFormatD32SfloatS8Uint, &d32_s8_props);
+  shared_vk_->vk_get_physical_device_format_properties_fn(
+      shared_vk_->vk_physical_device, kVkFormatD24UnormS8Uint, &d24_s8_props);
   const bool has_depth_stencil =
       ((d32_s8_props.optimalTilingFeatures &
         kVkFormatFeatureDepthStencilAttachmentBit) != 0) ||
       ((d24_s8_props.optimalTilingFeatures &
         kVkFormatFeatureDepthStencilAttachmentBit) != 0);
   if (!has_depth_stencil) {
-    last_vulkan_status_ =
+    shared_vk_->last_vulkan_status =
         AndroidVulkanResolutionStatus::kRequiredDepthStencilFormatUnsupported;
     return false;
   }
 
   // Check required queue family flags (`GRAPHICS | COMPUTE | TRANSFER`).
   uint32_t queue_family_count = 0;
-  vk_get_physical_device_queue_family_properties_fn_(
-      vk_physical_device_, &queue_family_count, nullptr);
+  shared_vk_->vk_get_physical_device_queue_family_properties_fn(
+      shared_vk_->vk_physical_device, &queue_family_count, nullptr);
   if (queue_family_count == 0) {
-    last_vulkan_status_ = AndroidVulkanResolutionStatus::kRequiredQueuesMissing;
+    shared_vk_->last_vulkan_status =
+        AndroidVulkanResolutionStatus::kRequiredQueuesMissing;
     return false;
   }
   std::vector<VkQueueFamilyPropertiesCompat> queue_families(queue_family_count);
-  vk_get_physical_device_queue_family_properties_fn_(
-      vk_physical_device_, &queue_family_count, queue_families.data());
+  shared_vk_->vk_get_physical_device_queue_family_properties_fn(
+      shared_vk_->vk_physical_device, &queue_family_count,
+      queue_families.data());
 
   uint32_t combined_queue_flags = 0;
   bool found_graphics_queue = false;
@@ -718,7 +763,7 @@ bool AndroidSurfaceControl::InitializeVulkanOnRasterThreadLocked() {
     combined_queue_flags |= queue_families[i].queueFlags;
     if (!found_graphics_queue &&
         (queue_families[i].queueFlags & kVkQueueGraphicsBit) != 0) {
-      vk_queue_family_index_ = i;
+      shared_vk_->vk_queue_family_index = i;
       found_graphics_queue = true;
     }
   }
@@ -726,7 +771,8 @@ bool AndroidSurfaceControl::InitializeVulkanOnRasterThreadLocked() {
       kVkQueueGraphicsBit | kVkQueueComputeBit | kVkQueueTransferBit;
   if (!found_graphics_queue ||
       (combined_queue_flags & kRequiredQueueFlags) != kRequiredQueueFlags) {
-    last_vulkan_status_ = AndroidVulkanResolutionStatus::kRequiredQueuesMissing;
+    shared_vk_->last_vulkan_status =
+        AndroidVulkanResolutionStatus::kRequiredQueuesMissing;
     return false;
   }
 
@@ -748,13 +794,14 @@ bool AndroidSurfaceControl::InitializeVulkanOnRasterThreadLocked() {
   features2.sType = kVkStructureTypePhysicalDeviceFeatures2;
   features2.pNext = &ycbcr_features;
 
-  if (vk_get_physical_device_features_2_fn_ != nullptr) {
+  if (shared_vk_->vk_get_physical_device_features_2_fn != nullptr) {
     ycbcr_features.samplerYcbcrConversion = kVkFalse;
     storage_16bit_features.uniformAndStorageBuffer16BitAccess = kVkFalse;
-    vk_get_physical_device_features_2_fn_(vk_physical_device_, &features2);
+    shared_vk_->vk_get_physical_device_features_2_fn(
+        shared_vk_->vk_physical_device, &features2);
     if (ycbcr_features.samplerYcbcrConversion == kVkFalse ||
         storage_16bit_features.uniformAndStorageBuffer16BitAccess == kVkFalse) {
-      last_vulkan_status_ =
+      shared_vk_->last_vulkan_status =
           AndroidVulkanResolutionStatus::kRequiredFeaturesUnsupported;
       return false;
     }
@@ -763,7 +810,7 @@ bool AndroidSurfaceControl::InitializeVulkanOnRasterThreadLocked() {
   const float queue_priority = kDefaultQueuePriority;
   VkDeviceQueueCreateInfoCompat queue_info = {};
   queue_info.sType = kVkStructureTypeDeviceQueueCreateInfo;
-  queue_info.queueFamilyIndex = vk_queue_family_index_;
+  queue_info.queueFamilyIndex = shared_vk_->vk_queue_family_index;
   queue_info.queueCount = 1;
   queue_info.pQueuePriorities = &queue_priority;
 
@@ -773,20 +820,25 @@ bool AndroidSurfaceControl::InitializeVulkanOnRasterThreadLocked() {
   device_info.queueCreateInfoCount = 1;
   device_info.pQueueCreateInfos = &queue_info;
   device_info.enabledExtensionCount =
-      static_cast<uint32_t>(enabled_device_extension_ptrs_.size());
-  device_info.ppEnabledExtensionNames = enabled_device_extension_ptrs_.data();
+      static_cast<uint32_t>(shared_vk_->enabled_device_extension_ptrs.size());
+  device_info.ppEnabledExtensionNames =
+      shared_vk_->enabled_device_extension_ptrs.data();
 
-  if (vk_create_device_fn_(vk_physical_device_, &device_info, nullptr,
-                           &vk_device_) != kVkSuccess ||
-      vk_device_ == nullptr) {
-    last_vulkan_status_ = AndroidVulkanResolutionStatus::kDeviceCreationFailed;
+  if (shared_vk_->vk_create_device_fn(shared_vk_->vk_physical_device,
+                                      &device_info, nullptr,
+                                      &shared_vk_->vk_device) != kVkSuccess ||
+      shared_vk_->vk_device == nullptr) {
+    shared_vk_->last_vulkan_status =
+        AndroidVulkanResolutionStatus::kDeviceCreationFailed;
     return false;
   }
 
   auto resolve_device_proc =
       [this, &resolve_instance_proc](const char* name) -> void* {
-    if (vk_get_device_proc_addr_fn_ != nullptr && vk_device_ != nullptr) {
-      void* sym = vk_get_device_proc_addr_fn_(vk_device_, name);
+    if (shared_vk_->vk_get_device_proc_addr_fn != nullptr &&
+        shared_vk_->vk_device != nullptr) {
+      void* sym =
+          shared_vk_->vk_get_device_proc_addr_fn(shared_vk_->vk_device, name);
       if (sym != nullptr) {
         return sym;
       }
@@ -794,67 +846,83 @@ bool AndroidSurfaceControl::InitializeVulkanOnRasterThreadLocked() {
     return resolve_instance_proc(name);
   };
 
-  vk_destroy_device_fn_ = reinterpret_cast<PFN_vkDestroyDevice>(
+  shared_vk_->vk_destroy_device_fn = reinterpret_cast<PFN_vkDestroyDevice>(
       resolve_device_proc("vkDestroyDevice"));
-  vk_get_device_queue_fn_ = reinterpret_cast<PFN_vkGetDeviceQueue>(
+  shared_vk_->vk_get_device_queue_fn = reinterpret_cast<PFN_vkGetDeviceQueue>(
       resolve_device_proc("vkGetDeviceQueue"));
-  vk_create_swapchain_khr_fn_ = reinterpret_cast<PFN_vkCreateSwapchainKHR>(
-      resolve_device_proc("vkCreateSwapchainKHR"));
-  vk_destroy_swapchain_khr_fn_ = reinterpret_cast<PFN_vkDestroySwapchainKHR>(
-      resolve_device_proc("vkDestroySwapchainKHR"));
-  vk_get_swapchain_images_khr_fn_ =
+  shared_vk_->vk_create_swapchain_khr_fn =
+      reinterpret_cast<PFN_vkCreateSwapchainKHR>(
+          resolve_device_proc("vkCreateSwapchainKHR"));
+  shared_vk_->vk_destroy_swapchain_khr_fn =
+      reinterpret_cast<PFN_vkDestroySwapchainKHR>(
+          resolve_device_proc("vkDestroySwapchainKHR"));
+  shared_vk_->vk_get_swapchain_images_khr_fn =
       reinterpret_cast<PFN_vkGetSwapchainImagesKHR>(
           resolve_device_proc("vkGetSwapchainImagesKHR"));
-  vk_acquire_next_image_khr_fn_ = reinterpret_cast<PFN_vkAcquireNextImageKHR>(
-      resolve_device_proc("vkAcquireNextImageKHR"));
-  vk_queue_present_khr_fn_ = reinterpret_cast<PFN_vkQueuePresentKHR>(
+  shared_vk_->vk_acquire_next_image_khr_fn =
+      reinterpret_cast<PFN_vkAcquireNextImageKHR>(
+          resolve_device_proc("vkAcquireNextImageKHR"));
+  shared_vk_->vk_queue_present_khr_fn = reinterpret_cast<PFN_vkQueuePresentKHR>(
       resolve_device_proc("vkQueuePresentKHR"));
-  vk_queue_submit_fn_ =
+  shared_vk_->vk_queue_submit_fn =
       reinterpret_cast<PFN_vkQueueSubmit>(resolve_device_proc("vkQueueSubmit"));
-  vk_queue_wait_idle_fn_ = reinterpret_cast<PFN_vkQueueWaitIdle>(
+  shared_vk_->vk_queue_wait_idle_fn = reinterpret_cast<PFN_vkQueueWaitIdle>(
       resolve_device_proc("vkQueueWaitIdle"));
-  vk_create_fence_fn_ =
+  shared_vk_->vk_create_fence_fn =
       reinterpret_cast<PFN_vkCreateFence>(resolve_device_proc("vkCreateFence"));
-  vk_destroy_fence_fn_ = reinterpret_cast<PFN_vkDestroyFence>(
+  shared_vk_->vk_destroy_fence_fn = reinterpret_cast<PFN_vkDestroyFence>(
       resolve_device_proc("vkDestroyFence"));
-  vk_wait_for_fences_fn_ = reinterpret_cast<PFN_vkWaitForFences>(
+  shared_vk_->vk_wait_for_fences_fn = reinterpret_cast<PFN_vkWaitForFences>(
       resolve_device_proc("vkWaitForFences"));
-  vk_reset_fences_fn_ =
+  shared_vk_->vk_reset_fences_fn =
       reinterpret_cast<PFN_vkResetFences>(resolve_device_proc("vkResetFences"));
-  vk_create_semaphore_fn_ = reinterpret_cast<PFN_vkCreateSemaphore>(
+  shared_vk_->vk_create_semaphore_fn = reinterpret_cast<PFN_vkCreateSemaphore>(
       resolve_device_proc("vkCreateSemaphore"));
-  vk_destroy_semaphore_fn_ = reinterpret_cast<PFN_vkDestroySemaphore>(
-      resolve_device_proc("vkDestroySemaphore"));
-  vk_get_semaphore_fd_khr_fn_ = reinterpret_cast<PFN_vkGetSemaphoreFdKHR>(
-      resolve_device_proc("vkGetSemaphoreFdKHR"));
-  vk_create_command_pool_fn_ = reinterpret_cast<PFN_vkCreateCommandPool>(
-      resolve_device_proc("vkCreateCommandPool"));
-  vk_destroy_command_pool_fn_ = reinterpret_cast<PFN_vkDestroyCommandPool>(
-      resolve_device_proc("vkDestroyCommandPool"));
-  vk_allocate_command_buffers_fn_ =
+  shared_vk_->vk_destroy_semaphore_fn =
+      reinterpret_cast<PFN_vkDestroySemaphore>(
+          resolve_device_proc("vkDestroySemaphore"));
+  shared_vk_->vk_get_semaphore_fd_khr_fn =
+      reinterpret_cast<PFN_vkGetSemaphoreFdKHR>(
+          resolve_device_proc("vkGetSemaphoreFdKHR"));
+  shared_vk_->vk_create_command_pool_fn =
+      reinterpret_cast<PFN_vkCreateCommandPool>(
+          resolve_device_proc("vkCreateCommandPool"));
+  shared_vk_->vk_destroy_command_pool_fn =
+      reinterpret_cast<PFN_vkDestroyCommandPool>(
+          resolve_device_proc("vkDestroyCommandPool"));
+  shared_vk_->vk_allocate_command_buffers_fn =
       reinterpret_cast<PFN_vkAllocateCommandBuffers>(
           resolve_device_proc("vkAllocateCommandBuffers"));
-  vk_reset_command_buffer_fn_ = reinterpret_cast<PFN_vkResetCommandBuffer>(
-      resolve_device_proc("vkResetCommandBuffer"));
-  vk_begin_command_buffer_fn_ = reinterpret_cast<PFN_vkBeginCommandBuffer>(
-      resolve_device_proc("vkBeginCommandBuffer"));
-  vk_end_command_buffer_fn_ = reinterpret_cast<PFN_vkEndCommandBuffer>(
-      resolve_device_proc("vkEndCommandBuffer"));
-  vk_cmd_pipeline_barrier_fn_ = reinterpret_cast<PFN_vkCmdPipelineBarrier>(
-      resolve_device_proc("vkCmdPipelineBarrier"));
+  shared_vk_->vk_reset_command_buffer_fn =
+      reinterpret_cast<PFN_vkResetCommandBuffer>(
+          resolve_device_proc("vkResetCommandBuffer"));
+  shared_vk_->vk_begin_command_buffer_fn =
+      reinterpret_cast<PFN_vkBeginCommandBuffer>(
+          resolve_device_proc("vkBeginCommandBuffer"));
+  shared_vk_->vk_end_command_buffer_fn =
+      reinterpret_cast<PFN_vkEndCommandBuffer>(
+          resolve_device_proc("vkEndCommandBuffer"));
+  shared_vk_->vk_cmd_pipeline_barrier_fn =
+      reinterpret_cast<PFN_vkCmdPipelineBarrier>(
+          resolve_device_proc("vkCmdPipelineBarrier"));
 
-  if (vk_get_device_queue_fn_ == nullptr) {
-    last_vulkan_status_ = AndroidVulkanResolutionStatus::kDeviceCreationFailed;
+  if (shared_vk_->vk_get_device_queue_fn == nullptr) {
+    shared_vk_->last_vulkan_status =
+        AndroidVulkanResolutionStatus::kDeviceCreationFailed;
     return false;
   }
 
-  vk_get_device_queue_fn_(vk_device_, vk_queue_family_index_, 0, &vk_queue_);
-  if (vk_queue_ == nullptr) {
-    last_vulkan_status_ = AndroidVulkanResolutionStatus::kDeviceCreationFailed;
+  shared_vk_->vk_get_device_queue_fn(shared_vk_->vk_device,
+                                     shared_vk_->vk_queue_family_index, 0,
+                                     &shared_vk_->vk_queue);
+  if (shared_vk_->vk_queue == nullptr) {
+    shared_vk_->last_vulkan_status =
+        AndroidVulkanResolutionStatus::kDeviceCreationFailed;
     return false;
   }
 
-  last_vulkan_status_ = AndroidVulkanResolutionStatus::kSelectedVulkan;
+  shared_vk_->last_vulkan_status =
+      AndroidVulkanResolutionStatus::kSelectedVulkan;
   return true;
 }
 
@@ -863,16 +931,17 @@ bool AndroidSurfaceControl::InitializeOpenGLFallbackLocked(
   if (config_out == nullptr) {
     return false;
   }
-  if (library_loader_ != nullptr) {
-    if (egl_library_ == nullptr) {
-      egl_library_ = library_loader_->Load("libEGL.so");
+  if (shared_vk_->library_loader != nullptr) {
+    if (shared_vk_->egl_library == nullptr) {
+      shared_vk_->egl_library = shared_vk_->library_loader->Load("libEGL.so");
     }
-    if (gles_library_ == nullptr) {
-      gles_library_ = library_loader_->Load("libGLESv2.so");
+    if (shared_vk_->gles_library == nullptr) {
+      shared_vk_->gles_library =
+          shared_vk_->library_loader->Load("libGLESv2.so");
     }
   }
 
-  resolved_renderer_type_ = kOpenGL;
+  shared_vk_->resolved_renderer_type = kOpenGL;
   config_out->type = kOpenGL;
   config_out->open_gl.struct_size = sizeof(FlutterOpenGLRendererConfig);
   config_out->open_gl.make_current = &OpenGLNoOpMakeCurrent;
@@ -899,7 +968,7 @@ bool AndroidSurfaceControl::SurfaceCreated(FlutterViewId view_id,
   if (native_window == nullptr) {
     return false;
   }
-  std::lock_guard<std::mutex> lock(mutex_);
+  std::lock_guard<std::mutex> lock(shared_vk_->mutex);
   auto& state = view_surfaces_[view_id];
   if (state.native_window != nullptr && state.native_window != native_window) {
     DestroyVulkanSwapchainLocked(state);
@@ -932,7 +1001,7 @@ bool AndroidSurfaceControl::SurfaceWindowChanged(FlutterViewId view_id,
     SurfaceDestroyed(view_id);
     return false;
   }
-  std::lock_guard<std::mutex> lock(mutex_);
+  std::lock_guard<std::mutex> lock(shared_vk_->mutex);
   auto& state = view_surfaces_[view_id];
   DestroyVulkanSwapchainLocked(state);
   DestroyVulkanSurfaceLocked(state);
@@ -954,7 +1023,7 @@ bool AndroidSurfaceControl::SurfaceWindowChanged(FlutterViewId view_id,
 bool AndroidSurfaceControl::SurfaceChanged(FlutterViewId view_id,
                                            uint32_t width,
                                            uint32_t height) {
-  std::lock_guard<std::mutex> lock(mutex_);
+  std::lock_guard<std::mutex> lock(shared_vk_->mutex);
   auto it = view_surfaces_.find(view_id);
   if (it == view_surfaces_.end() || it->second.native_window == nullptr) {
     return false;
@@ -970,7 +1039,7 @@ bool AndroidSurfaceControl::SurfaceChanged(uint32_t width, uint32_t height) {
 }
 
 void AndroidSurfaceControl::SurfaceDestroyed(FlutterViewId view_id) {
-  std::lock_guard<std::mutex> lock(mutex_);
+  std::lock_guard<std::mutex> lock(shared_vk_->mutex);
   auto it = view_surfaces_.find(view_id);
   if (it != view_surfaces_.end()) {
     DestroyVulkanSwapchainLocked(it->second);
@@ -990,41 +1059,41 @@ void AndroidSurfaceControl::OnTrimMemory(int level) {
   if (level < kTrimMemoryRunningLow) {
     return;
   }
-  std::lock_guard<std::mutex> lock(mutex_);
+  std::lock_guard<std::mutex> lock(shared_vk_->mutex);
   DispatchLowMemoryWarningLocked();
 }
 
 size_t AndroidSurfaceControl::LowMemoryWarningCount() const {
-  std::lock_guard<std::mutex> lock(mutex_);
+  std::lock_guard<std::mutex> lock(shared_vk_->mutex);
   return low_memory_warning_count_;
 }
 
 bool AndroidSurfaceControl::HasSurface(FlutterViewId view_id) const {
-  std::lock_guard<std::mutex> lock(mutex_);
+  std::lock_guard<std::mutex> lock(shared_vk_->mutex);
   auto it = view_surfaces_.find(view_id);
   return it != view_surfaces_.end() && it->second.native_window != nullptr;
 }
 
 void* AndroidSurfaceControl::GetNativeWindow(FlutterViewId view_id) const {
-  std::lock_guard<std::mutex> lock(mutex_);
+  std::lock_guard<std::mutex> lock(shared_vk_->mutex);
   auto it = view_surfaces_.find(view_id);
   return it != view_surfaces_.end() ? it->second.native_window : nullptr;
 }
 
 void* AndroidSurfaceControl::GetASurfaceControl(FlutterViewId view_id) const {
-  std::lock_guard<std::mutex> lock(mutex_);
+  std::lock_guard<std::mutex> lock(shared_vk_->mutex);
   auto it = view_surfaces_.find(view_id);
   return it != view_surfaces_.end() ? it->second.surface_control : nullptr;
 }
 
 uint32_t AndroidSurfaceControl::GetSurfaceWidth(FlutterViewId view_id) const {
-  std::lock_guard<std::mutex> lock(mutex_);
+  std::lock_guard<std::mutex> lock(shared_vk_->mutex);
   auto it = view_surfaces_.find(view_id);
   return it != view_surfaces_.end() ? it->second.width : 0u;
 }
 
 uint32_t AndroidSurfaceControl::GetSurfaceHeight(FlutterViewId view_id) const {
-  std::lock_guard<std::mutex> lock(mutex_);
+  std::lock_guard<std::mutex> lock(shared_vk_->mutex);
   auto it = view_surfaces_.find(view_id);
   return it != view_surfaces_.end() ? it->second.height : 0u;
 }
@@ -1053,16 +1122,18 @@ bool AndroidSurfaceControl::EnsureSwapchainForViewLocked(
     PerViewSurfaceState& state,
     uint32_t requested_width,
     uint32_t requested_height) {
-  if (state.native_window == nullptr || vk_instance_ == nullptr ||
-      vk_physical_device_ == nullptr || vk_device_ == nullptr) {
+  if (state.native_window == nullptr || shared_vk_->vk_instance == nullptr ||
+      shared_vk_->vk_physical_device == nullptr ||
+      shared_vk_->vk_device == nullptr) {
     return false;
   }
 
   // Guard required Vulkan function pointers at entry.
-  if (vk_create_android_surface_khr_fn_ == nullptr ||
-      vk_get_physical_device_surface_capabilities_khr_fn_ == nullptr ||
-      vk_create_swapchain_khr_fn_ == nullptr ||
-      vk_get_swapchain_images_khr_fn_ == nullptr) {
+  if (shared_vk_->vk_create_android_surface_khr_fn == nullptr ||
+      shared_vk_->vk_get_physical_device_surface_capabilities_khr_fn ==
+          nullptr ||
+      shared_vk_->vk_create_swapchain_khr_fn == nullptr ||
+      shared_vk_->vk_get_swapchain_images_khr_fn == nullptr) {
     return false;
   }
 
@@ -1070,8 +1141,9 @@ bool AndroidSurfaceControl::EnsureSwapchainForViewLocked(
     VkAndroidSurfaceCreateInfoKHRCompat surface_info = {};
     surface_info.sType = kVkStructureTypeAndroidSurfaceCreateInfoKhr;
     surface_info.window = state.native_window;
-    if (vk_create_android_surface_khr_fn_(vk_instance_, &surface_info, nullptr,
-                                          &state.vk_surface) != kVkSuccess ||
+    if (shared_vk_->vk_create_android_surface_khr_fn(
+            shared_vk_->vk_instance, &surface_info, nullptr,
+            &state.vk_surface) != kVkSuccess ||
         state.vk_surface == 0) {
       state.vk_surface = 0;
       return false;
@@ -1086,22 +1158,23 @@ bool AndroidSurfaceControl::EnsureSwapchainForViewLocked(
   caps.currentTransform = kVkSurfaceTransformIdentityBitKhr;
   caps.supportedTransforms = kVkSurfaceTransformIdentityBitKhr;
   caps.supportedCompositeAlpha = kVkCompositeAlphaOpaqueBitKhr;
-  if (vk_get_physical_device_surface_capabilities_khr_fn_(
-          vk_physical_device_, state.vk_surface, &caps) != kVkSuccess) {
+  if (shared_vk_->vk_get_physical_device_surface_capabilities_khr_fn(
+          shared_vk_->vk_physical_device, state.vk_surface, &caps) !=
+      kVkSuccess) {
     return false;
   }
 
   uint32_t chosen_format = kVkFormatR8G8B8A8Unorm;
   uint32_t chosen_color_space = kVkColorSpaceSrgbNonlinearKhr;
-  if (vk_get_physical_device_surface_formats_khr_fn_ != nullptr) {
+  if (shared_vk_->vk_get_physical_device_surface_formats_khr_fn != nullptr) {
     uint32_t format_count = 0;
-    if (vk_get_physical_device_surface_formats_khr_fn_(
-            vk_physical_device_, state.vk_surface, &format_count, nullptr) ==
-            kVkSuccess &&
+    if (shared_vk_->vk_get_physical_device_surface_formats_khr_fn(
+            shared_vk_->vk_physical_device, state.vk_surface, &format_count,
+            nullptr) == kVkSuccess &&
         format_count > 0) {
       std::vector<VkSurfaceFormatKHRCompat> formats(format_count);
-      if (vk_get_physical_device_surface_formats_khr_fn_(
-              vk_physical_device_, state.vk_surface, &format_count,
+      if (shared_vk_->vk_get_physical_device_surface_formats_khr_fn(
+              shared_vk_->vk_physical_device, state.vk_surface, &format_count,
               formats.data()) == kVkSuccess) {
         chosen_format = formats[0].format;
         chosen_color_space = formats[0].colorSpace;
@@ -1198,8 +1271,8 @@ bool AndroidSurfaceControl::EnsureSwapchainForViewLocked(
   swapchain_info.oldSwapchain = state.vk_swapchain;
 
   uint64_t new_swapchain = 0;
-  int32_t res = vk_create_swapchain_khr_fn_(vk_device_, &swapchain_info,
-                                            nullptr, &new_swapchain);
+  int32_t res = shared_vk_->vk_create_swapchain_khr_fn(
+      shared_vk_->vk_device, &swapchain_info, nullptr, &new_swapchain);
 
   // Decouple swapchain destruction from `VkSurfaceKHR` destruction on
   // `VK_ERROR_NATIVE_WINDOW_IN_USE_KHR` (or when `oldSwapchain` is rejected):
@@ -1209,8 +1282,8 @@ bool AndroidSurfaceControl::EnsureSwapchainForViewLocked(
       (res != kVkSuccess && state.vk_swapchain != 0)) {
     DestroyVulkanSwapchainLocked(state);
     swapchain_info.oldSwapchain = 0;
-    res = vk_create_swapchain_khr_fn_(vk_device_, &swapchain_info, nullptr,
-                                      &new_swapchain);
+    res = shared_vk_->vk_create_swapchain_khr_fn(
+        shared_vk_->vk_device, &swapchain_info, nullptr, &new_swapchain);
   }
 
   if (res != kVkSuccess || new_swapchain == 0) {
@@ -1228,40 +1301,44 @@ bool AndroidSurfaceControl::EnsureSwapchainForViewLocked(
   state.swapchain_needs_recreation = false;
 
   uint32_t image_count = 0;
-  if (vk_get_swapchain_images_khr_fn_(vk_device_, state.vk_swapchain,
-                                      &image_count, nullptr) != kVkSuccess ||
+  if (shared_vk_->vk_get_swapchain_images_khr_fn(
+          shared_vk_->vk_device, state.vk_swapchain, &image_count, nullptr) !=
+          kVkSuccess ||
       image_count == 0) {
     DestroyVulkanSwapchainLocked(state);
     return false;
   }
   state.swapchain_images.resize(image_count, 0);
-  if (vk_get_swapchain_images_khr_fn_(
-          vk_device_, state.vk_swapchain, &image_count,
+  if (shared_vk_->vk_get_swapchain_images_khr_fn(
+          shared_vk_->vk_device, state.vk_swapchain, &image_count,
           state.swapchain_images.data()) != kVkSuccess) {
     DestroyVulkanSwapchainLocked(state);
     return false;
   }
 
   // Allocate per-view synchronization and command resources if needed.
-  if (state.acquire_fence == 0 && vk_create_fence_fn_ != nullptr) {
+  if (state.acquire_fence == 0 && shared_vk_->vk_create_fence_fn != nullptr) {
     VkFenceCreateInfoCompat fence_info = {};
     fence_info.sType = kVkStructureTypeFenceCreateInfo;
-    vk_create_fence_fn_(vk_device_, &fence_info, nullptr, &state.acquire_fence);
+    shared_vk_->vk_create_fence_fn(shared_vk_->vk_device, &fence_info, nullptr,
+                                   &state.acquire_fence);
   }
   if (state.render_complete_semaphore == 0 &&
-      vk_create_semaphore_fn_ != nullptr) {
+      shared_vk_->vk_create_semaphore_fn != nullptr) {
     VkSemaphoreCreateInfoCompat sem_info = {};
     sem_info.sType = kVkStructureTypeSemaphoreCreateInfo;
-    vk_create_semaphore_fn_(vk_device_, &sem_info, nullptr,
-                            &state.render_complete_semaphore);
+    shared_vk_->vk_create_semaphore_fn(shared_vk_->vk_device, &sem_info,
+                                       nullptr,
+                                       &state.render_complete_semaphore);
   }
-  if (vk_create_semaphore_fn_ != nullptr &&
+  if (shared_vk_->vk_create_semaphore_fn != nullptr &&
       state.render_complete_semaphores.size() !=
           state.swapchain_images.size()) {
-    if (vk_destroy_semaphore_fn_ != nullptr) {
+    if (shared_vk_->vk_destroy_semaphore_fn != nullptr) {
       for (uint64_t sem : state.render_complete_semaphores) {
         if (sem != 0) {
-          vk_destroy_semaphore_fn_(vk_device_, sem, nullptr);
+          shared_vk_->vk_destroy_semaphore_fn(shared_vk_->vk_device, sem,
+                                              nullptr);
         }
       }
     }
@@ -1269,16 +1346,17 @@ bool AndroidSurfaceControl::EnsureSwapchainForViewLocked(
     VkSemaphoreCreateInfoCompat sem_info = {};
     sem_info.sType = kVkStructureTypeSemaphoreCreateInfo;
     for (size_t i = 0; i < state.render_complete_semaphores.size(); ++i) {
-      vk_create_semaphore_fn_(vk_device_, &sem_info, nullptr,
-                              &state.render_complete_semaphores[i]);
+      shared_vk_->vk_create_semaphore_fn(shared_vk_->vk_device, &sem_info,
+                                         nullptr,
+                                         &state.render_complete_semaphores[i]);
     }
   }
-  if (vk_create_fence_fn_ != nullptr &&
+  if (shared_vk_->vk_create_fence_fn != nullptr &&
       state.submit_fences.size() != state.swapchain_images.size()) {
-    if (vk_destroy_fence_fn_ != nullptr) {
+    if (shared_vk_->vk_destroy_fence_fn != nullptr) {
       for (uint64_t f : state.submit_fences) {
         if (f != 0) {
-          vk_destroy_fence_fn_(vk_device_, f, nullptr);
+          shared_vk_->vk_destroy_fence_fn(shared_vk_->vk_device, f, nullptr);
         }
       }
     }
@@ -1287,19 +1365,21 @@ bool AndroidSurfaceControl::EnsureSwapchainForViewLocked(
     VkFenceCreateInfoCompat fence_info = {};
     fence_info.sType = kVkStructureTypeFenceCreateInfo;
     for (size_t i = 0; i < state.submit_fences.size(); ++i) {
-      vk_create_fence_fn_(vk_device_, &fence_info, nullptr,
-                          &state.submit_fences[i]);
+      shared_vk_->vk_create_fence_fn(shared_vk_->vk_device, &fence_info,
+                                     nullptr, &state.submit_fences[i]);
     }
   }
-  if (state.command_pool == 0 && vk_create_command_pool_fn_ != nullptr) {
+  if (state.command_pool == 0 &&
+      shared_vk_->vk_create_command_pool_fn != nullptr) {
     VkCommandPoolCreateInfoCompat pool_info = {};
     pool_info.sType = kVkStructureTypeCommandPoolCreateInfo;
     pool_info.flags = kVkCommandPoolCreateResetCommandBufferBit;
-    pool_info.queueFamilyIndex = vk_queue_family_index_;
-    vk_create_command_pool_fn_(vk_device_, &pool_info, nullptr,
-                               &state.command_pool);
+    pool_info.queueFamilyIndex = shared_vk_->vk_queue_family_index;
+    shared_vk_->vk_create_command_pool_fn(shared_vk_->vk_device, &pool_info,
+                                          nullptr, &state.command_pool);
   }
-  if (state.command_pool != 0 && vk_allocate_command_buffers_fn_ != nullptr &&
+  if (state.command_pool != 0 &&
+      shared_vk_->vk_allocate_command_buffers_fn != nullptr &&
       state.command_buffers.size() != state.swapchain_images.size()) {
     state.command_buffers.assign(state.swapchain_images.size(), nullptr);
     VkCommandBufferAllocateInfoCompat alloc_info = {};
@@ -1308,8 +1388,8 @@ bool AndroidSurfaceControl::EnsureSwapchainForViewLocked(
     alloc_info.level = kVkCommandBufferLevelPrimary;
     alloc_info.commandBufferCount =
         static_cast<uint32_t>(state.command_buffers.size());
-    vk_allocate_command_buffers_fn_(vk_device_, &alloc_info,
-                                    state.command_buffers.data());
+    shared_vk_->vk_allocate_command_buffers_fn(
+        shared_vk_->vk_device, &alloc_info, state.command_buffers.data());
   }
 
   return true;
@@ -1325,13 +1405,13 @@ bool AndroidSurfaceControl::AcquireNextImageForView(
   std::memset(image_out, 0, sizeof(FlutterVulkanImage));
   image_out->struct_size = sizeof(FlutterVulkanImage);
 
-  std::lock_guard<std::mutex> lock(mutex_);
+  std::lock_guard<std::mutex> lock(shared_vk_->mutex);
   auto it = view_surfaces_.find(view_id);
   if (it == view_surfaces_.end() || it->second.native_window == nullptr) {
     return false;
   }
 
-  if (vk_acquire_next_image_khr_fn_ == nullptr) {
+  if (shared_vk_->vk_acquire_next_image_khr_fn == nullptr) {
     return false;
   }
 
@@ -1345,8 +1425,8 @@ bool AndroidSurfaceControl::AcquireNextImageForView(
   }
 
   uint32_t image_index = 0;
-  int32_t res = vk_acquire_next_image_khr_fn_(
-      vk_device_, state.vk_swapchain, kVulkanInfiniteTimeoutNs, 0,
+  int32_t res = shared_vk_->vk_acquire_next_image_khr_fn(
+      shared_vk_->vk_device, state.vk_swapchain, kVulkanInfiniteTimeoutNs, 0,
       state.acquire_fence, &image_index);
 
   if (res == kVkErrorOutOfDateKhr || res == kVkErrorSurfaceLostKhr) {
@@ -1358,9 +1438,9 @@ bool AndroidSurfaceControl::AcquireNextImageForView(
     if (!EnsureSwapchainForViewLocked(state, req_width, req_height)) {
       return false;
     }
-    res = vk_acquire_next_image_khr_fn_(vk_device_, state.vk_swapchain,
-                                        kVulkanInfiniteTimeoutNs, 0,
-                                        state.acquire_fence, &image_index);
+    res = shared_vk_->vk_acquire_next_image_khr_fn(
+        shared_vk_->vk_device, state.vk_swapchain, kVulkanInfiniteTimeoutNs, 0,
+        state.acquire_fence, &image_index);
   }
 
   if (res != kVkSuccess && res != kVkSuboptimalKhr) {
@@ -1370,11 +1450,14 @@ bool AndroidSurfaceControl::AcquireNextImageForView(
     state.swapchain_needs_recreation = true;
   }
 
-  if (state.acquire_fence != 0 && vk_wait_for_fences_fn_ != nullptr &&
-      vk_reset_fences_fn_ != nullptr) {
-    vk_wait_for_fences_fn_(vk_device_, 1, &state.acquire_fence, kVkTrue,
-                           kVulkanInfiniteTimeoutNs);
-    vk_reset_fences_fn_(vk_device_, 1, &state.acquire_fence);
+  if (state.acquire_fence != 0 &&
+      shared_vk_->vk_wait_for_fences_fn != nullptr &&
+      shared_vk_->vk_reset_fences_fn != nullptr) {
+    shared_vk_->vk_wait_for_fences_fn(shared_vk_->vk_device, 1,
+                                      &state.acquire_fence, kVkTrue,
+                                      kVulkanInfiniteTimeoutNs);
+    shared_vk_->vk_reset_fences_fn(shared_vk_->vk_device, 1,
+                                   &state.acquire_fence);
   }
 
   if (image_index >= state.swapchain_images.size()) {
@@ -1401,7 +1484,7 @@ FlutterVulkanImage AndroidSurfaceControl::GetNextImageCallback(
   auto* self = static_cast<AndroidSurfaceControl*>(user_data);
   FlutterViewId target_view = kAndroidImplicitViewId;
   {
-    std::lock_guard<std::mutex> lock(self->mutex_);
+    std::lock_guard<std::mutex> lock(self->shared_vk_->mutex);
     target_view = self->active_acquire_view_id_;
   }
   self->AcquireNextImageForView(target_view, frame_info, &result);
@@ -1415,9 +1498,9 @@ bool AndroidSurfaceControl::PresentImageForView(
     return false;
   }
 
-  std::lock_guard<std::mutex> lock(mutex_);
-  if (vk_device_ == nullptr || vk_queue_ == nullptr ||
-      vk_queue_present_khr_fn_ == nullptr) {
+  std::lock_guard<std::mutex> lock(shared_vk_->mutex);
+  if (shared_vk_->vk_device == nullptr || shared_vk_->vk_queue == nullptr ||
+      shared_vk_->vk_queue_present_khr_fn == nullptr) {
     return false;
   }
 
@@ -1473,29 +1556,33 @@ bool AndroidSurfaceControl::PresentImageForView(
                               : 0;
   if (image_index < state.command_buffers.size() &&
       state.command_buffers[image_index] != nullptr &&
-      vk_begin_command_buffer_fn_ != nullptr &&
-      vk_cmd_pipeline_barrier_fn_ != nullptr &&
-      vk_end_command_buffer_fn_ != nullptr && vk_queue_submit_fn_ != nullptr) {
+      shared_vk_->vk_begin_command_buffer_fn != nullptr &&
+      shared_vk_->vk_cmd_pipeline_barrier_fn != nullptr &&
+      shared_vk_->vk_end_command_buffer_fn != nullptr &&
+      shared_vk_->vk_queue_submit_fn != nullptr) {
     if (submit_fence != 0 && image_index < state.submit_fence_pending.size() &&
         state.submit_fence_pending[image_index] &&
-        vk_wait_for_fences_fn_ != nullptr && vk_reset_fences_fn_ != nullptr) {
-      vk_wait_for_fences_fn_(vk_device_, 1, &submit_fence, kVkTrue,
-                             kVulkanInfiniteTimeoutNs);
-      vk_reset_fences_fn_(vk_device_, 1, &submit_fence);
+        shared_vk_->vk_wait_for_fences_fn != nullptr &&
+        shared_vk_->vk_reset_fences_fn != nullptr) {
+      shared_vk_->vk_wait_for_fences_fn(shared_vk_->vk_device, 1, &submit_fence,
+                                        kVkTrue, kVulkanInfiniteTimeoutNs);
+      shared_vk_->vk_reset_fences_fn(shared_vk_->vk_device, 1, &submit_fence);
       state.submit_fence_pending[image_index] = false;
     }
     void* cmd = state.command_buffers[image_index];
-    if (vk_reset_command_buffer_fn_ != nullptr) {
-      vk_reset_command_buffer_fn_(cmd, 0);
+    if (shared_vk_->vk_reset_command_buffer_fn != nullptr) {
+      shared_vk_->vk_reset_command_buffer_fn(cmd, 0);
     }
     VkCommandBufferBeginInfoCompat begin_info = {};
     begin_info.sType = kVkStructureTypeCommandBufferBeginInfo;
     begin_info.flags = kVkCommandBufferUsageOneTimeSubmitBit;
-    if (vk_begin_command_buffer_fn_(cmd, &begin_info) == kVkSuccess) {
-      vk_cmd_pipeline_barrier_fn_(cmd, kVkPipelineStageColorAttachmentOutputBit,
-                                  kVkPipelineStageBottomOfPipeBit, 0, 0,
-                                  nullptr, 0, nullptr, 1, &barrier);
-      if (vk_end_command_buffer_fn_(cmd) == kVkSuccess) {
+    if (shared_vk_->vk_begin_command_buffer_fn(cmd, &begin_info) ==
+        kVkSuccess) {
+      shared_vk_->vk_cmd_pipeline_barrier_fn(
+          cmd, kVkPipelineStageColorAttachmentOutputBit,
+          kVkPipelineStageBottomOfPipeBit, 0, 0, nullptr, 0, nullptr, 1,
+          &barrier);
+      if (shared_vk_->vk_end_command_buffer_fn(cmd) == kVkSuccess) {
         VkSubmitInfoCompat submit_info = {};
         submit_info.sType = kVkStructureTypeSubmitInfo;
         submit_info.commandBufferCount = 1;
@@ -1505,8 +1592,9 @@ bool AndroidSurfaceControl::PresentImageForView(
           submit_info.pSignalSemaphores = &render_sem;
           signaled_semaphore = true;
         }
-        if (vk_queue_submit_fn_(vk_queue_, 1, &submit_info, submit_fence) !=
-            kVkSuccess) {
+        if (shared_vk_->vk_queue_submit_fn(shared_vk_->vk_queue, 1,
+                                           &submit_info,
+                                           submit_fence) != kVkSuccess) {
           return false;
         }
         if (submit_fence != 0 &&
@@ -1528,7 +1616,7 @@ bool AndroidSurfaceControl::PresentImageForView(
   present_info.pImageIndices = &image_index;
 
   const int32_t present_res =
-      vk_queue_present_khr_fn_(vk_queue_, &present_info);
+      shared_vk_->vk_queue_present_khr_fn(shared_vk_->vk_queue, &present_info);
   state.has_acquired_image = false;
 
   if (present_res == kVkErrorOutOfDateKhr || present_res == kVkSuboptimalKhr) {
@@ -1553,7 +1641,7 @@ bool AndroidSurfaceControl::PresentImageCallback(
   auto* self = static_cast<AndroidSurfaceControl*>(user_data);
   FlutterViewId target_view = kAndroidImplicitViewId;
   {
-    std::lock_guard<std::mutex> lock(self->mutex_);
+    std::lock_guard<std::mutex> lock(self->shared_vk_->mutex);
     target_view = self->active_acquire_view_id_;
   }
   return self->PresentImageForView(target_view, image);
@@ -1567,23 +1655,27 @@ void* AndroidSurfaceControl::GetInstanceProcAddressCallback(
     return nullptr;
   }
   auto* self = static_cast<AndroidSurfaceControl*>(user_data);
-  std::lock_guard<std::mutex> lock(self->mutex_);
-  if (self->vk_get_instance_proc_addr_fn_ == nullptr) {
+  std::lock_guard<std::mutex> lock(self->shared_vk_->mutex);
+  if (self->shared_vk_->vk_get_instance_proc_addr_fn == nullptr) {
     return nullptr;
   }
   if (std::strcmp(name, "vkGetInstanceProcAddr") == 0) {
-    return reinterpret_cast<void*>(self->vk_get_instance_proc_addr_fn_);
+    return reinterpret_cast<void*>(
+        self->shared_vk_->vk_get_instance_proc_addr_fn);
   }
-  void* sym = self->vk_get_instance_proc_addr_fn_(instance, name);
-  if (sym == nullptr && instance == nullptr && self->vk_instance_ != nullptr) {
-    sym = self->vk_get_instance_proc_addr_fn_(self->vk_instance_, name);
+  void* sym = self->shared_vk_->vk_get_instance_proc_addr_fn(instance, name);
+  if (sym == nullptr && instance == nullptr &&
+      self->shared_vk_->vk_instance != nullptr) {
+    sym = self->shared_vk_->vk_get_instance_proc_addr_fn(
+        self->shared_vk_->vk_instance, name);
   }
-  if (sym == nullptr && self->vk_device_ != nullptr &&
-      self->vk_get_device_proc_addr_fn_ != nullptr) {
-    sym = self->vk_get_device_proc_addr_fn_(self->vk_device_, name);
+  if (sym == nullptr && self->shared_vk_->vk_device != nullptr &&
+      self->shared_vk_->vk_get_device_proc_addr_fn != nullptr) {
+    sym = self->shared_vk_->vk_get_device_proc_addr_fn(
+        self->shared_vk_->vk_device, name);
   }
-  if (sym == nullptr && self->vulkan_library_ != nullptr) {
-    sym = self->vulkan_library_->ResolveSymbol(name);
+  if (sym == nullptr && self->shared_vk_->vulkan_library != nullptr) {
+    sym = self->shared_vk_->vulkan_library->ResolveSymbol(name);
   }
   return sym;
 }
@@ -1594,10 +1686,11 @@ int AndroidSurfaceControl::ExportHcppAcquireFenceFd(
     AndroidSurfaceTransaction* transaction,
     AndroidSurfaceControl* surface_node,
     void* hardware_buffer) {
-  std::lock_guard<std::mutex> lock(mutex_);
-  if (vk_device_ == nullptr || vk_queue_ == nullptr ||
-      vk_create_semaphore_fn_ == nullptr || vk_queue_submit_fn_ == nullptr ||
-      vk_get_semaphore_fd_khr_fn_ == nullptr) {
+  std::lock_guard<std::mutex> lock(shared_vk_->mutex);
+  if (shared_vk_->vk_device == nullptr || shared_vk_->vk_queue == nullptr ||
+      shared_vk_->vk_create_semaphore_fn == nullptr ||
+      shared_vk_->vk_queue_submit_fn == nullptr ||
+      shared_vk_->vk_get_semaphore_fd_khr_fn == nullptr) {
     last_exported_hcpp_fence_fd_ = kInvalidFenceFd;
     return kInvalidFenceFd;
   }
@@ -1612,8 +1705,9 @@ int AndroidSurfaceControl::ExportHcppAcquireFenceFd(
     sem_info.sType = kVkStructureTypeSemaphoreCreateInfo;
     sem_info.pNext = &export_info;
 
-    if (vk_create_semaphore_fn_(vk_device_, &sem_info, nullptr,
-                                &state.hcpp_export_semaphore) != kVkSuccess ||
+    if (shared_vk_->vk_create_semaphore_fn(
+            shared_vk_->vk_device, &sem_info, nullptr,
+            &state.hcpp_export_semaphore) != kVkSuccess ||
         state.hcpp_export_semaphore == 0) {
       last_exported_hcpp_fence_fd_ = kInvalidFenceFd;
       return kInvalidFenceFd;
@@ -1627,16 +1721,17 @@ int AndroidSurfaceControl::ExportHcppAcquireFenceFd(
     cmd = state.command_buffers[0];
   }
   if (cmd != nullptr && image_handle != 0 &&
-      vk_begin_command_buffer_fn_ != nullptr &&
-      vk_cmd_pipeline_barrier_fn_ != nullptr &&
-      vk_end_command_buffer_fn_ != nullptr) {
-    if (vk_reset_command_buffer_fn_ != nullptr) {
-      vk_reset_command_buffer_fn_(cmd, 0);
+      shared_vk_->vk_begin_command_buffer_fn != nullptr &&
+      shared_vk_->vk_cmd_pipeline_barrier_fn != nullptr &&
+      shared_vk_->vk_end_command_buffer_fn != nullptr) {
+    if (shared_vk_->vk_reset_command_buffer_fn != nullptr) {
+      shared_vk_->vk_reset_command_buffer_fn(cmd, 0);
     }
     VkCommandBufferBeginInfoCompat begin_info = {};
     begin_info.sType = kVkStructureTypeCommandBufferBeginInfo;
     begin_info.flags = kVkCommandBufferUsageOneTimeSubmitBit;
-    if (vk_begin_command_buffer_fn_(cmd, &begin_info) == kVkSuccess) {
+    if (shared_vk_->vk_begin_command_buffer_fn(cmd, &begin_info) ==
+        kVkSuccess) {
       VkImageMemoryBarrierCompat barrier = {};
       barrier.sType = kVkStructureTypeImageMemoryBarrier;
       barrier.srcAccessMask = kVkAccessColorAttachmentWriteBit;
@@ -1649,10 +1744,11 @@ int AndroidSurfaceControl::ExportHcppAcquireFenceFd(
       barrier.subresourceRange.aspectMask = kVkImageAspectColorBit;
       barrier.subresourceRange.levelCount = kSingleMipLevel;
       barrier.subresourceRange.layerCount = kSingleImageArrayLayer;
-      vk_cmd_pipeline_barrier_fn_(cmd, kVkPipelineStageColorAttachmentOutputBit,
-                                  kVkPipelineStageBottomOfPipeBit, 0, 0,
-                                  nullptr, 0, nullptr, 1, &barrier);
-      vk_end_command_buffer_fn_(cmd);
+      shared_vk_->vk_cmd_pipeline_barrier_fn(
+          cmd, kVkPipelineStageColorAttachmentOutputBit,
+          kVkPipelineStageBottomOfPipeBit, 0, 0, nullptr, 0, nullptr, 1,
+          &barrier);
+      shared_vk_->vk_end_command_buffer_fn(cmd);
     }
   }
 
@@ -1665,7 +1761,8 @@ int AndroidSurfaceControl::ExportHcppAcquireFenceFd(
   submit_info.signalSemaphoreCount = 1;
   submit_info.pSignalSemaphores = &state.hcpp_export_semaphore;
 
-  if (vk_queue_submit_fn_(vk_queue_, 1, &submit_info, 0) != kVkSuccess) {
+  if (shared_vk_->vk_queue_submit_fn(shared_vk_->vk_queue, 1, &submit_info,
+                                     0) != kVkSuccess) {
     last_exported_hcpp_fence_fd_ = kInvalidFenceFd;
     return kInvalidFenceFd;
   }
@@ -1676,8 +1773,8 @@ int AndroidSurfaceControl::ExportHcppAcquireFenceFd(
   get_fd_info.handleType = kVkExternalSemaphoreHandleTypeSyncFdBit;
 
   int exported_fd = kInvalidFenceFd;
-  if (vk_get_semaphore_fd_khr_fn_(vk_device_, &get_fd_info, &exported_fd) !=
-      kVkSuccess) {
+  if (shared_vk_->vk_get_semaphore_fd_khr_fn(
+          shared_vk_->vk_device, &get_fd_info, &exported_fd) != kVkSuccess) {
     last_exported_hcpp_fence_fd_ = kInvalidFenceFd;
     return kInvalidFenceFd;
   }
@@ -1812,41 +1909,41 @@ bool AndroidSurfaceControl::PresentView(const FlutterPresentViewInfo* info) {
 // =============================================================================
 
 uint32_t AndroidSurfaceControl::LastPresentBarrierOldLayout() const {
-  std::lock_guard<std::mutex> lock(mutex_);
+  std::lock_guard<std::mutex> lock(shared_vk_->mutex);
   return last_present_barrier_old_layout_;
 }
 
 uint32_t AndroidSurfaceControl::LastPresentBarrierNewLayout() const {
-  std::lock_guard<std::mutex> lock(mutex_);
+  std::lock_guard<std::mutex> lock(shared_vk_->mutex);
   return last_present_barrier_new_layout_;
 }
 
 uint32_t AndroidSurfaceControl::LastSwapchainPreTransform(
     FlutterViewId view_id) const {
-  std::lock_guard<std::mutex> lock(mutex_);
+  std::lock_guard<std::mutex> lock(shared_vk_->mutex);
   auto it = view_surfaces_.find(view_id);
   return it != view_surfaces_.end() ? it->second.vk_pre_transform
                                     : kVkSurfaceTransformIdentityBitKhr;
 }
 
 size_t AndroidSurfaceControl::VulkanSurfaceDestroyCount() const {
-  std::lock_guard<std::mutex> lock(mutex_);
+  std::lock_guard<std::mutex> lock(shared_vk_->mutex);
   return vk_surface_destroy_count_;
 }
 
 size_t AndroidSurfaceControl::VulkanSwapchainDestroyCount() const {
-  std::lock_guard<std::mutex> lock(mutex_);
+  std::lock_guard<std::mutex> lock(shared_vk_->mutex);
   return vk_swapchain_destroy_count_;
 }
 
 int AndroidSurfaceControl::LastExportedHcppFenceFd() const {
-  std::lock_guard<std::mutex> lock(mutex_);
+  std::lock_guard<std::mutex> lock(shared_vk_->mutex);
   return last_exported_hcpp_fence_fd_;
 }
 
 void AndroidSurfaceControl::DestroyVulkanSwapchainLocked(
     PerViewSurfaceState& state) {
-  if (vk_device_ == nullptr) {
+  if (shared_vk_->vk_device == nullptr) {
     state.vk_swapchain = 0;
     state.swapchain_images.clear();
     state.render_complete_semaphores.clear();
@@ -1855,47 +1952,56 @@ void AndroidSurfaceControl::DestroyVulkanSwapchainLocked(
     state.command_buffers.clear();
     return;
   }
-  if (vk_queue_ != nullptr && vk_queue_wait_idle_fn_ != nullptr) {
-    vk_queue_wait_idle_fn_(vk_queue_);
+  if (shared_vk_->vk_queue != nullptr &&
+      shared_vk_->vk_queue_wait_idle_fn != nullptr) {
+    shared_vk_->vk_queue_wait_idle_fn(shared_vk_->vk_queue);
   }
-  if (state.acquire_fence != 0 && vk_destroy_fence_fn_ != nullptr) {
-    vk_destroy_fence_fn_(vk_device_, state.acquire_fence, nullptr);
+  if (state.acquire_fence != 0 && shared_vk_->vk_destroy_fence_fn != nullptr) {
+    shared_vk_->vk_destroy_fence_fn(shared_vk_->vk_device, state.acquire_fence,
+                                    nullptr);
     state.acquire_fence = 0;
   }
   if (state.render_complete_semaphore != 0 &&
-      vk_destroy_semaphore_fn_ != nullptr) {
-    vk_destroy_semaphore_fn_(vk_device_, state.render_complete_semaphore,
-                             nullptr);
+      shared_vk_->vk_destroy_semaphore_fn != nullptr) {
+    shared_vk_->vk_destroy_semaphore_fn(
+        shared_vk_->vk_device, state.render_complete_semaphore, nullptr);
     state.render_complete_semaphore = 0;
   }
-  if (vk_destroy_semaphore_fn_ != nullptr) {
+  if (shared_vk_->vk_destroy_semaphore_fn != nullptr) {
     for (uint64_t sem : state.render_complete_semaphores) {
       if (sem != 0) {
-        vk_destroy_semaphore_fn_(vk_device_, sem, nullptr);
+        shared_vk_->vk_destroy_semaphore_fn(shared_vk_->vk_device, sem,
+                                            nullptr);
       }
     }
   }
   state.render_complete_semaphores.clear();
-  if (vk_destroy_fence_fn_ != nullptr) {
+  if (shared_vk_->vk_destroy_fence_fn != nullptr) {
     for (uint64_t f : state.submit_fences) {
       if (f != 0) {
-        vk_destroy_fence_fn_(vk_device_, f, nullptr);
+        shared_vk_->vk_destroy_fence_fn(shared_vk_->vk_device, f, nullptr);
       }
     }
   }
   state.submit_fences.clear();
   state.submit_fence_pending.clear();
-  if (state.hcpp_export_semaphore != 0 && vk_destroy_semaphore_fn_ != nullptr) {
-    vk_destroy_semaphore_fn_(vk_device_, state.hcpp_export_semaphore, nullptr);
+  if (state.hcpp_export_semaphore != 0 &&
+      shared_vk_->vk_destroy_semaphore_fn != nullptr) {
+    shared_vk_->vk_destroy_semaphore_fn(shared_vk_->vk_device,
+                                        state.hcpp_export_semaphore, nullptr);
     state.hcpp_export_semaphore = 0;
   }
-  if (state.command_pool != 0 && vk_destroy_command_pool_fn_ != nullptr) {
-    vk_destroy_command_pool_fn_(vk_device_, state.command_pool, nullptr);
+  if (state.command_pool != 0 &&
+      shared_vk_->vk_destroy_command_pool_fn != nullptr) {
+    shared_vk_->vk_destroy_command_pool_fn(shared_vk_->vk_device,
+                                           state.command_pool, nullptr);
     state.command_pool = 0;
   }
   state.command_buffers.clear();
-  if (state.vk_swapchain != 0 && vk_destroy_swapchain_khr_fn_ != nullptr) {
-    vk_destroy_swapchain_khr_fn_(vk_device_, state.vk_swapchain, nullptr);
+  if (state.vk_swapchain != 0 &&
+      shared_vk_->vk_destroy_swapchain_khr_fn != nullptr) {
+    shared_vk_->vk_destroy_swapchain_khr_fn(shared_vk_->vk_device,
+                                            state.vk_swapchain, nullptr);
     ++vk_swapchain_destroy_count_;
     state.vk_swapchain = 0;
   }
@@ -1905,30 +2011,41 @@ void AndroidSurfaceControl::DestroyVulkanSwapchainLocked(
 
 void AndroidSurfaceControl::DestroyVulkanSurfaceLocked(
     PerViewSurfaceState& state) {
-  if (state.vk_surface != 0 && vk_instance_ != nullptr &&
-      vk_destroy_surface_khr_fn_ != nullptr) {
-    vk_destroy_surface_khr_fn_(vk_instance_, state.vk_surface, nullptr);
+  if (state.vk_surface != 0 && shared_vk_->vk_instance != nullptr &&
+      shared_vk_->vk_destroy_surface_khr_fn != nullptr) {
+    shared_vk_->vk_destroy_surface_khr_fn(shared_vk_->vk_instance,
+                                          state.vk_surface, nullptr);
     ++vk_surface_destroy_count_;
   }
   state.vk_surface = 0;
 }
 
-void AndroidSurfaceControl::TeardownVulkanLocked() {
+void AndroidSurfaceControl::TeardownPerViewSurfacesLocked() {
   for (auto& [view_id, state] : view_surfaces_) {
     DestroyVulkanSwapchainLocked(state);
     DestroyVulkanSurfaceLocked(state);
   }
-  if (vk_device_ != nullptr && vk_destroy_device_fn_ != nullptr) {
-    vk_destroy_device_fn_(vk_device_, nullptr);
-  }
-  vk_device_ = nullptr;
-  vk_queue_ = nullptr;
-  vk_physical_device_ = nullptr;
+}
 
-  if (vk_instance_ != nullptr && vk_destroy_instance_fn_ != nullptr) {
-    vk_destroy_instance_fn_(vk_instance_, nullptr);
+void AndroidSurfaceControl::TeardownSharedVulkanDeviceAndInstanceLocked() {
+  if (shared_vk_->vk_device != nullptr &&
+      shared_vk_->vk_destroy_device_fn != nullptr) {
+    shared_vk_->vk_destroy_device_fn(shared_vk_->vk_device, nullptr);
   }
-  vk_instance_ = nullptr;
+  shared_vk_->vk_device = nullptr;
+  shared_vk_->vk_queue = nullptr;
+  shared_vk_->vk_physical_device = nullptr;
+
+  if (shared_vk_->vk_instance != nullptr &&
+      shared_vk_->vk_destroy_instance_fn != nullptr) {
+    shared_vk_->vk_destroy_instance_fn(shared_vk_->vk_instance, nullptr);
+  }
+  shared_vk_->vk_instance = nullptr;
+}
+
+void AndroidSurfaceControl::TeardownVulkanLocked() {
+  TeardownPerViewSurfacesLocked();
+  TeardownSharedVulkanDeviceAndInstanceLocked();
 }
 
 // =============================================================================

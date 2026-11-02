@@ -697,6 +697,11 @@ class AndroidSurfaceControl {
   void SetSystemPropertiesForVulkan(
       const AndroidSystemPropertiesForVulkan& props);
 
+  /// @brief Shares the underlying Vulkan instance, physical device, logical
+  /// device, graphics queue, and resolved dispatch table with `parent` while
+  /// keeping per-view `ANativeWindow*` surfaces and swapchains independent.
+  void ShareVulkanStateFrom(const AndroidSurfaceControl& parent);
+
   /// @brief Returns the current system properties configured for Vulkan
   /// resolution.
   const AndroidSystemPropertiesForVulkan& GetSystemPropertiesForVulkan() const;
@@ -1081,98 +1086,104 @@ class AndroidSurfaceControl {
                                     uint32_t requested_height);
   void DestroyVulkanSwapchainLocked(PerViewSurfaceState& state);
   void DestroyVulkanSurfaceLocked(PerViewSurfaceState& state);
+  void TeardownPerViewSurfacesLocked();
+  void TeardownSharedVulkanDeviceAndInstanceLocked();
   void TeardownVulkanLocked();
   bool HasAnySurfaceLocked() const;
   void DispatchLowMemoryWarningLocked();
 
+  struct SharedVulkanState {
+    mutable std::mutex mutex;
+    std::shared_ptr<OSLibraryLoader> library_loader;
+    AndroidSystemPropertiesForVulkan system_props;
+    AndroidVulkanResolutionStatus last_vulkan_status =
+        AndroidVulkanResolutionStatus::kSelectedVulkan;
+    FlutterRendererType resolved_renderer_type = kOpenGL;
+
+    std::unique_ptr<OSLibrary> vulkan_library;
+    std::unique_ptr<OSLibrary> egl_library;
+    std::unique_ptr<OSLibrary> gles_library;
+
+    void* vk_instance = nullptr;
+    void* vk_physical_device = nullptr;
+    void* vk_device = nullptr;
+    void* vk_queue = nullptr;
+    uint32_t vk_queue_family_index = 0;
+    std::vector<std::string> enabled_instance_layers;
+    std::vector<const char*> enabled_instance_layer_ptrs;
+    std::vector<std::string> enabled_instance_extensions;
+    std::vector<const char*> enabled_instance_extension_ptrs;
+    std::vector<std::string> enabled_device_extensions;
+    std::vector<const char*> enabled_device_extension_ptrs;
+
+    // All Vulkan procedure pointers use `lower_snake_case` (`vk_*_fn`) and are
+    // explicitly guarded at function entry.
+    PFN_vkGetInstanceProcAddr vk_get_instance_proc_addr_fn = nullptr;
+    PFN_vkEnumerateInstanceExtensionProperties
+        vk_enumerate_instance_extension_properties_fn = nullptr;
+    PFN_vkEnumerateInstanceLayerProperties
+        vk_enumerate_instance_layer_properties_fn = nullptr;
+    PFN_vkCreateInstance vk_create_instance_fn = nullptr;
+    PFN_vkDestroyInstance vk_destroy_instance_fn = nullptr;
+    PFN_vkEnumeratePhysicalDevices vk_enumerate_physical_devices_fn = nullptr;
+    PFN_vkGetPhysicalDeviceProperties vk_get_physical_device_properties_fn =
+        nullptr;
+    PFN_vkGetPhysicalDeviceFormatProperties
+        vk_get_physical_device_format_properties_fn = nullptr;
+    PFN_vkGetPhysicalDeviceQueueFamilyProperties
+        vk_get_physical_device_queue_family_properties_fn = nullptr;
+    PFN_vkGetPhysicalDeviceFeatures2 vk_get_physical_device_features_2_fn =
+        nullptr;
+    PFN_vkEnumerateDeviceExtensionProperties
+        vk_enumerate_device_extension_properties_fn = nullptr;
+    PFN_vkCreateDevice vk_create_device_fn = nullptr;
+    PFN_vkDestroyDevice vk_destroy_device_fn = nullptr;
+    PFN_vkGetDeviceProcAddr vk_get_device_proc_addr_fn = nullptr;
+    PFN_vkGetDeviceQueue vk_get_device_queue_fn = nullptr;
+    PFN_vkCreateAndroidSurfaceKHR vk_create_android_surface_khr_fn = nullptr;
+    PFN_vkDestroySurfaceKHR vk_destroy_surface_khr_fn = nullptr;
+    PFN_vkGetPhysicalDeviceSurfaceCapabilitiesKHR
+        vk_get_physical_device_surface_capabilities_khr_fn = nullptr;
+    PFN_vkGetPhysicalDeviceSurfaceFormatsKHR
+        vk_get_physical_device_surface_formats_khr_fn = nullptr;
+    PFN_vkCreateSwapchainKHR vk_create_swapchain_khr_fn = nullptr;
+    PFN_vkDestroySwapchainKHR vk_destroy_swapchain_khr_fn = nullptr;
+    PFN_vkGetSwapchainImagesKHR vk_get_swapchain_images_khr_fn = nullptr;
+    PFN_vkAcquireNextImageKHR vk_acquire_next_image_khr_fn = nullptr;
+    PFN_vkQueuePresentKHR vk_queue_present_khr_fn = nullptr;
+    PFN_vkQueueSubmit vk_queue_submit_fn = nullptr;
+    PFN_vkQueueWaitIdle vk_queue_wait_idle_fn = nullptr;
+    PFN_vkCreateFence vk_create_fence_fn = nullptr;
+    PFN_vkDestroyFence vk_destroy_fence_fn = nullptr;
+    PFN_vkWaitForFences vk_wait_for_fences_fn = nullptr;
+    PFN_vkResetFences vk_reset_fences_fn = nullptr;
+    PFN_vkCreateSemaphore vk_create_semaphore_fn = nullptr;
+    PFN_vkDestroySemaphore vk_destroy_semaphore_fn = nullptr;
+    PFN_vkGetSemaphoreFdKHR vk_get_semaphore_fd_khr_fn = nullptr;
+    PFN_vkCreateCommandPool vk_create_command_pool_fn = nullptr;
+    PFN_vkDestroyCommandPool vk_destroy_command_pool_fn = nullptr;
+    PFN_vkAllocateCommandBuffers vk_allocate_command_buffers_fn = nullptr;
+    PFN_vkResetCommandBuffer vk_reset_command_buffer_fn = nullptr;
+    PFN_vkBeginCommandBuffer vk_begin_command_buffer_fn = nullptr;
+    PFN_vkEndCommandBuffer vk_end_command_buffer_fn = nullptr;
+    PFN_vkCmdPipelineBarrier vk_cmd_pipeline_barrier_fn = nullptr;
+  };
+
   std::string debug_name_;
   void* raw_handle_ = nullptr;
-  std::shared_ptr<OSLibraryLoader> library_loader_;
   std::shared_ptr<AndroidSurfaceControlProvider> surface_control_provider_;
+  std::shared_ptr<SharedVulkanState> shared_vk_ =
+      std::make_shared<SharedVulkanState>();
 
-  mutable std::mutex mutex_;
   FlutterEngineProcTable proc_table_ = {};
   FLUTTER_API_SYMBOL(FlutterEngine) engine_ = nullptr;
   size_t low_memory_warning_count_ = 0;
-
-  AndroidSystemPropertiesForVulkan system_props_;
-  AndroidVulkanResolutionStatus last_vulkan_status_ =
-      AndroidVulkanResolutionStatus::kSelectedVulkan;
-  FlutterRendererType resolved_renderer_type_ = kOpenGL;
 
   FlutterVulkanTextureFrameCallback vulkan_external_texture_callback_ = nullptr;
   FlutterOpenGLTextureFrameCallback opengl_external_texture_callback_ = nullptr;
 
   std::map<FlutterViewId, PerViewSurfaceState> view_surfaces_;
   FlutterViewId active_acquire_view_id_ = kAndroidImplicitViewId;
-
-  std::unique_ptr<OSLibrary> vulkan_library_;
-  std::unique_ptr<OSLibrary> egl_library_;
-  std::unique_ptr<OSLibrary> gles_library_;
-
-  void* vk_instance_ = nullptr;
-  void* vk_physical_device_ = nullptr;
-  void* vk_device_ = nullptr;
-  void* vk_queue_ = nullptr;
-  uint32_t vk_queue_family_index_ = 0;
-  std::vector<std::string> enabled_instance_layers_;
-  std::vector<const char*> enabled_instance_layer_ptrs_;
-  std::vector<std::string> enabled_instance_extensions_;
-  std::vector<const char*> enabled_instance_extension_ptrs_;
-  std::vector<std::string> enabled_device_extensions_;
-  std::vector<const char*> enabled_device_extension_ptrs_;
-
-  // All Vulkan procedure pointers use `lower_snake_case` (`vk_*_fn_`) and are
-  // explicitly guarded at function entry.
-  PFN_vkGetInstanceProcAddr vk_get_instance_proc_addr_fn_ = nullptr;
-  PFN_vkEnumerateInstanceExtensionProperties
-      vk_enumerate_instance_extension_properties_fn_ = nullptr;
-  PFN_vkEnumerateInstanceLayerProperties
-      vk_enumerate_instance_layer_properties_fn_ = nullptr;
-  PFN_vkCreateInstance vk_create_instance_fn_ = nullptr;
-  PFN_vkDestroyInstance vk_destroy_instance_fn_ = nullptr;
-  PFN_vkEnumeratePhysicalDevices vk_enumerate_physical_devices_fn_ = nullptr;
-  PFN_vkGetPhysicalDeviceProperties vk_get_physical_device_properties_fn_ =
-      nullptr;
-  PFN_vkGetPhysicalDeviceFormatProperties
-      vk_get_physical_device_format_properties_fn_ = nullptr;
-  PFN_vkGetPhysicalDeviceQueueFamilyProperties
-      vk_get_physical_device_queue_family_properties_fn_ = nullptr;
-  PFN_vkGetPhysicalDeviceFeatures2 vk_get_physical_device_features_2_fn_ =
-      nullptr;
-  PFN_vkEnumerateDeviceExtensionProperties
-      vk_enumerate_device_extension_properties_fn_ = nullptr;
-  PFN_vkCreateDevice vk_create_device_fn_ = nullptr;
-  PFN_vkDestroyDevice vk_destroy_device_fn_ = nullptr;
-  PFN_vkGetDeviceProcAddr vk_get_device_proc_addr_fn_ = nullptr;
-  PFN_vkGetDeviceQueue vk_get_device_queue_fn_ = nullptr;
-  PFN_vkCreateAndroidSurfaceKHR vk_create_android_surface_khr_fn_ = nullptr;
-  PFN_vkDestroySurfaceKHR vk_destroy_surface_khr_fn_ = nullptr;
-  PFN_vkGetPhysicalDeviceSurfaceCapabilitiesKHR
-      vk_get_physical_device_surface_capabilities_khr_fn_ = nullptr;
-  PFN_vkGetPhysicalDeviceSurfaceFormatsKHR
-      vk_get_physical_device_surface_formats_khr_fn_ = nullptr;
-  PFN_vkCreateSwapchainKHR vk_create_swapchain_khr_fn_ = nullptr;
-  PFN_vkDestroySwapchainKHR vk_destroy_swapchain_khr_fn_ = nullptr;
-  PFN_vkGetSwapchainImagesKHR vk_get_swapchain_images_khr_fn_ = nullptr;
-  PFN_vkAcquireNextImageKHR vk_acquire_next_image_khr_fn_ = nullptr;
-  PFN_vkQueuePresentKHR vk_queue_present_khr_fn_ = nullptr;
-  PFN_vkQueueSubmit vk_queue_submit_fn_ = nullptr;
-  PFN_vkQueueWaitIdle vk_queue_wait_idle_fn_ = nullptr;
-  PFN_vkCreateFence vk_create_fence_fn_ = nullptr;
-  PFN_vkDestroyFence vk_destroy_fence_fn_ = nullptr;
-  PFN_vkWaitForFences vk_wait_for_fences_fn_ = nullptr;
-  PFN_vkResetFences vk_reset_fences_fn_ = nullptr;
-  PFN_vkCreateSemaphore vk_create_semaphore_fn_ = nullptr;
-  PFN_vkDestroySemaphore vk_destroy_semaphore_fn_ = nullptr;
-  PFN_vkGetSemaphoreFdKHR vk_get_semaphore_fd_khr_fn_ = nullptr;
-  PFN_vkCreateCommandPool vk_create_command_pool_fn_ = nullptr;
-  PFN_vkDestroyCommandPool vk_destroy_command_pool_fn_ = nullptr;
-  PFN_vkAllocateCommandBuffers vk_allocate_command_buffers_fn_ = nullptr;
-  PFN_vkResetCommandBuffer vk_reset_command_buffer_fn_ = nullptr;
-  PFN_vkBeginCommandBuffer vk_begin_command_buffer_fn_ = nullptr;
-  PFN_vkEndCommandBuffer vk_end_command_buffer_fn_ = nullptr;
-  PFN_vkCmdPipelineBarrier vk_cmd_pipeline_barrier_fn_ = nullptr;
 
   uint32_t last_present_barrier_old_layout_ = kVkImageLayoutUndefined;
   uint32_t last_present_barrier_new_layout_ = kVkImageLayoutUndefined;

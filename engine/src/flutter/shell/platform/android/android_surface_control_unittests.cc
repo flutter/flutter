@@ -1373,6 +1373,64 @@ TEST(AndroidSurfaceControlTest,
   g_vk_env = nullptr;
 }
 
+TEST(
+    AndroidSurfaceControlTest,
+    ShareVulkanStateFromSharesVulkanDeviceAcrossControllersAndPerViewSwapchains) {
+  MockVulkanEnv vk_env;
+  g_vk_env = &vk_env;
+
+  auto parent =
+      std::make_unique<AndroidSurfaceControl>(CreateMockVulkanLibraryLoader());
+  auto child =
+      std::make_unique<AndroidSurfaceControl>(CreateMockVulkanLibraryLoader());
+
+  // Share Vulkan state BEFORE parent resolves its renderer config on the raster
+  // thread (matching FlutterEngineGroup spawning on the platform thread).
+  child->ShareVulkanStateFrom(*parent);
+
+  FlutterRendererConfig resolved = {};
+  ASSERT_TRUE(parent->ResolveRendererConfig(&resolved));
+  ASSERT_EQ(resolved.type, kVulkan);
+
+  // Child sees the exact same shared VkInstance, VkPhysicalDevice, VkDevice,
+  // VkQueue, and GetInstanceProcAddressCallback without re-initializing.
+  EXPECT_EQ(child->GetVulkanInstance(), parent->GetVulkanInstance());
+  EXPECT_EQ(child->GetVulkanPhysicalDevice(),
+            parent->GetVulkanPhysicalDevice());
+  EXPECT_EQ(child->GetVulkanDevice(), parent->GetVulkanDevice());
+  EXPECT_EQ(child->GetVulkanQueue(), parent->GetVulkanQueue());
+  EXPECT_EQ(AndroidSurfaceControl::GetInstanceProcAddressCallback(
+                child.get(), nullptr, "vkGetInstanceProcAddr"),
+            reinterpret_cast<void*>(&StubVkGetInstanceProcAddr));
+
+  // Attach independent surfaces to parent and child and acquire/present on
+  // child even after parent is destroyed.
+  ASSERT_TRUE(parent->SurfaceCreated(
+      kPrimaryViewId, reinterpret_cast<void*>(kDummyNativeWindow1), nullptr,
+      kTestSurfaceWidth, kTestSurfaceHeight));
+  ASSERT_TRUE(child->SurfaceCreated(
+      kPrimaryViewId, reinterpret_cast<void*>(kDummyNativeWindow2), nullptr,
+      kTestSurfaceWidth, kTestSurfaceHeight));
+
+  // Destroying parent must tear down parent's swapchain but keep the shared
+  // VkDevice alive while child is still alive.
+  parent.reset();
+  EXPECT_NE(child->GetVulkanDevice(), nullptr);
+
+  FlutterFrameInfo frame_info = {};
+  frame_info.struct_size = sizeof(FlutterFrameInfo);
+  frame_info.size = {kTestSurfaceWidth, kTestSurfaceHeight};
+
+  FlutterVulkanImage child_acquired =
+      AndroidSurfaceControl::GetNextImageCallback(child.get(), &frame_info);
+  EXPECT_NE(child_acquired.image, 0u);
+  EXPECT_TRUE(AndroidSurfaceControl::PresentImageCallback(child.get(),
+                                                          &child_acquired));
+
+  child.reset();
+  g_vk_env = nullptr;
+}
+
 }  // namespace testing
 }  // namespace android
 }  // namespace flutter

@@ -543,7 +543,7 @@ class FlutterEmbedderNative {
   std::unique_ptr<AndroidPlatformViewsController> platform_views_controller_;
   std::unique_ptr<AndroidSurfaceControl> surface_control_;
   std::unique_ptr<APKAssetProvider> asset_provider_;
-  std::unique_ptr<AndroidEngineGroup> engine_group_;
+  std::shared_ptr<AndroidEngineGroup> engine_group_;
   std::unique_ptr<AndroidSurfaceManager> surface_manager_;
 
   FlutterCustomAssetResolver custom_asset_resolver_{};
@@ -556,13 +556,17 @@ class FlutterEmbedderNative {
   double last_pixel_ratio_ = kDefaultInitialPixelRatio;
   int32_t last_display_id_ = 0;
 
-  mutable std::mutex egl_mutex_;
-  void* egl_display_ = nullptr;
-  void* egl_config_ = nullptr;
-  void* egl_context_ = nullptr;
-  void* egl_resource_context_ = nullptr;
-  void* egl_pbuffer_surface_ = nullptr;
-  void* egl_resource_pbuffer_surface_ = nullptr;
+  struct SharedAndroidEGLState {
+    mutable std::mutex mutex;
+    void* display = nullptr;
+    void* config = nullptr;
+    void* context = nullptr;
+    void* resource_context = nullptr;
+    void* pbuffer_surface = nullptr;
+    void* resource_pbuffer_surface = nullptr;
+  };
+  std::shared_ptr<SharedAndroidEGLState> shared_egl_ =
+      std::make_shared<SharedAndroidEGLState>();
   void* egl_window_surface_ = nullptr;
 
   struct OverlayEglSurfaceEntry {

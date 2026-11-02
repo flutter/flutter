@@ -6,6 +6,7 @@
 #define FLUTTER_SHELL_PLATFORM_EMBEDDER_PLATFORM_VIEW_EMBEDDER_H_
 
 #include <functional>
+#include <mutex>
 
 #include "flow/embedded_views.h"
 #include "flutter/fml/macros.h"
@@ -185,6 +186,7 @@ class PlatformViewEmbedder final : public PlatformView {
 
  private:
   class EmbedderPlatformMessageHandler;
+  mutable std::mutex embedder_surface_mutex_;
   std::shared_ptr<EmbedderExternalViewEmbedder> external_view_embedder_;
   std::unique_ptr<EmbedderSurface> embedder_surface_;
   std::shared_ptr<EmbedderPlatformMessageHandler>

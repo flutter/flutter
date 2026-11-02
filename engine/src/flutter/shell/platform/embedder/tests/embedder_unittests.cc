@@ -4580,6 +4580,95 @@ TEST_F(EmbedderTest, EmbedderDeferredRendererValidation) {
             kInvalidArguments);
 }
 
+TEST_F(EmbedderTest, EmbedderSpawnWithDeferredRenderer) {
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  EmbedderConfigBuilder builder(
+      context, EmbedderConfigBuilder::InitializationPreference::kNoInitialize);
+  builder.SetAssetsPath();
+  builder.SetSnapshots();
+  builder.SetSurface(DlISize(1, 1));
+  builder.SetDartEntrypoint("render_implicit_view");
+
+  struct SharedSpawnStats {
+    std::atomic<size_t> resolve_count{0};
+    std::atomic<void*> resolve_user_data{nullptr};
+  } shared_stats;
+
+  struct PerEngineContext {
+    SharedSpawnStats* shared = nullptr;
+    fml::AutoResetWaitableEvent present_latch;
+    std::atomic<size_t> present_count{0};
+  };
+
+  PerEngineContext parent_ctx{&shared_stats};
+  PerEngineContext child_ctx{&shared_stats};
+
+  FlutterRendererConfig deferred_config = {};
+  deferred_config.type = kDeferred;
+  deferred_config.deferred.struct_size = sizeof(FlutterDeferredRendererConfig);
+  deferred_config.deferred.resolve_callback =
+      [](void* user_data, FlutterRendererConfig* config_out) -> bool {
+    auto* ctx = reinterpret_cast<PerEngineContext*>(user_data);
+    ctx->shared->resolve_user_data.store(user_data);
+    ctx->shared->resolve_count.fetch_add(1);
+
+    std::memset(config_out, 0, sizeof(FlutterRendererConfig));
+    config_out->type = kSoftware;
+    config_out->software.struct_size = sizeof(FlutterSoftwareRendererConfig);
+    config_out->software.surface_present_callback =
+        [](void* present_user_data, const void* /*allocation*/,
+           size_t /*row_bytes*/, size_t /*height*/) -> bool {
+      auto* engine_ctx = reinterpret_cast<PerEngineContext*>(present_user_data);
+      if (engine_ctx->present_count.fetch_add(1) == 0) {
+        engine_ctx->present_latch.Signal();
+      }
+      return true;
+    };
+    return true;
+  };
+
+  FlutterEngine raw_parent = nullptr;
+  auto project_args = builder.GetProjectArgs();
+  ASSERT_EQ(FlutterEngineInitialize(FLUTTER_ENGINE_VERSION, &deferred_config,
+                                    &project_args, &parent_ctx, &raw_parent),
+            kSuccess);
+  ASSERT_NE(raw_parent, nullptr);
+  UniqueEngine parent_engine(raw_parent);
+  ASSERT_EQ(FlutterEngineRunInitialized(parent_engine.get()), kSuccess);
+
+  FlutterEngineSpawnInfo spawn_info = {};
+  spawn_info.struct_size = sizeof(FlutterEngineSpawnInfo);
+  spawn_info.entrypoint = "render_implicit_view";
+  spawn_info.user_data = &child_ctx;
+
+  FlutterEngine raw_child = nullptr;
+  ASSERT_EQ(FlutterEngineSpawn(parent_engine.get(), &spawn_info, &raw_child),
+            kSuccess);
+  ASSERT_NE(raw_child, nullptr);
+  UniqueEngine child_engine(raw_child);
+
+  FlutterWindowMetricsEvent metrics = {};
+  metrics.struct_size = sizeof(FlutterWindowMetricsEvent);
+  metrics.width = 800;
+  metrics.height = 600;
+  metrics.pixel_ratio = 1.0;
+  metrics.view_id = kFlutterImplicitViewId;
+  ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(parent_engine.get(), &metrics),
+            kSuccess);
+  ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(child_engine.get(), &metrics),
+            kSuccess);
+  ASSERT_EQ(FlutterEngineScheduleFrame(parent_engine.get()), kSuccess);
+  ASSERT_EQ(FlutterEngineScheduleFrame(child_engine.get()), kSuccess);
+
+  parent_ctx.present_latch.Wait();
+  child_ctx.present_latch.Wait();
+
+  EXPECT_EQ(shared_stats.resolve_count.load(), 1u);
+  EXPECT_EQ(shared_stats.resolve_user_data.load(), &parent_ctx);
+  EXPECT_GE(parent_ctx.present_count.load(), 1u);
+  EXPECT_GE(child_ctx.present_count.load(), 1u);
+}
+
 TEST_F(EmbedderTest, EmbedderExtendedWindowMetricsAndCornerRadii) {
   auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
   EmbedderConfigBuilder builder(context);

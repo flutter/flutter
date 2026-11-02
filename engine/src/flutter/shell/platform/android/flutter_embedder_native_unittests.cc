@@ -902,6 +902,145 @@ TEST_F(FlutterEmbedderNativeTest,
   EXPECT_EQ(mock_state_->last_spawn_initial_route, "/details");
   EXPECT_EQ(mock_state_->last_spawn_args, child_args);
   EXPECT_EQ(parent.GetEngineGroup()->GetActiveEngineCount(), 2u);
+  EXPECT_EQ(child->GetEngineGroup(), parent.GetEngineGroup());
+
+  // Spawning a grandchild from a spawned child shares the same
+  // AndroidEngineGroup.
+  constexpr int64_t kTestGrandchildEngineId = 3;
+  std::unique_ptr<FlutterEmbedderNative> grandchild = child->Spawn(
+      nullptr, nullptr, "tertiaryMain", "package:app/tertiary.dart",
+      "/settings", {}, kTestGrandchildEngineId);
+  ASSERT_NE(grandchild, nullptr);
+  EXPECT_TRUE(grandchild->IsValid());
+  EXPECT_EQ(grandchild->GetEngineGroup(), parent.GetEngineGroup());
+  EXPECT_EQ(parent.GetEngineGroup()->GetActiveEngineCount(), 3u);
+
+  grandchild.reset();
+  EXPECT_EQ(parent.GetEngineGroup()->GetActiveEngineCount(), 2u);
+}
+
+TEST_F(FlutterEmbedderNativeTest,
+       JniDelegateSpawnBoxesShellHolderIdIntoJavaLongObject) {
+  FlutterEmbedderNative parent(&proc_table_);
+  ASSERT_TRUE(parent.RunBundleAndSnapshotFromLibrary(
+      nullptr, "/data/app/flutter_assets", "main", "package:app/main.dart",
+      nullptr, {}, kTestPrimaryEngineId));
+
+  struct FakeSpawnJniState {
+    jclass flutter_jni_cls = reinterpret_cast<jclass>(0x2001);
+    jclass long_cls = reinterpret_cast<jclass>(0x2002);
+    jmethodID flutter_jni_ctor = reinterpret_cast<jmethodID>(0x3001);
+    jmethodID long_value_of = reinterpret_cast<jmethodID>(0x3002);
+    jfieldID shell_holder_obj_fid = reinterpret_cast<jfieldID>(0x4001);
+    jobject new_flutter_jni_obj = reinterpret_cast<jobject>(0x5001);
+    jobject boxed_long_obj = reinterpret_cast<jobject>(0x5002);
+    jlong boxed_long_value = 0;
+    jobject set_field_target_obj = nullptr;
+    jfieldID set_field_fid = nullptr;
+    jobject set_field_value_obj = nullptr;
+    bool queried_long_obj_field = false;
+  };
+  static FakeSpawnJniState* s_state = nullptr;
+  FakeSpawnJniState state;
+  s_state = &state;
+
+  JNINativeInterface_ table{};
+  table.ExceptionCheck = [](JNIEnv*) -> jboolean { return JNI_FALSE; };
+  table.ExceptionClear = [](JNIEnv*) {};
+  table.DeleteLocalRef = [](JNIEnv*, jobject) {};
+  table.NewWeakGlobalRef = [](JNIEnv*, jobject obj) -> jweak { return obj; };
+  table.DeleteWeakGlobalRef = [](JNIEnv*, jweak) {};
+  table.NewLocalRef = [](JNIEnv*, jobject obj) -> jobject { return obj; };
+  table.FindClass = [](JNIEnv*, const char* name) -> jclass {
+    if (std::string(name) == "io/flutter/embedding/engine/FlutterJNI") {
+      return s_state->flutter_jni_cls;
+    }
+    if (std::string(name) == "java/lang/Long") {
+      return s_state->long_cls;
+    }
+    return nullptr;
+  };
+  table.GetMethodID = [](JNIEnv*, jclass clazz, const char* name,
+                         const char* sig) -> jmethodID {
+    if (clazz == s_state->flutter_jni_cls && std::string(name) == "<init>" &&
+        std::string(sig) == "()V") {
+      return s_state->flutter_jni_ctor;
+    }
+    return nullptr;
+  };
+  table.GetFieldID = [](JNIEnv*, jclass clazz, const char* name,
+                        const char* sig) -> jfieldID {
+    if (clazz == s_state->flutter_jni_cls &&
+        std::string(name) == "nativeShellHolderId" &&
+        std::string(sig) == "Ljava/lang/Long;") {
+      s_state->queried_long_obj_field = true;
+      return s_state->shell_holder_obj_fid;
+    }
+    return nullptr;
+  };
+  table.NewObjectV = [](JNIEnv*, jclass clazz, jmethodID methodID,
+                        va_list) -> jobject {
+    if (clazz == s_state->flutter_jni_cls &&
+        methodID == s_state->flutter_jni_ctor) {
+      return s_state->new_flutter_jni_obj;
+    }
+    return nullptr;
+  };
+  table.GetStaticMethodID = [](JNIEnv*, jclass clazz, const char* name,
+                               const char* sig) -> jmethodID {
+    if (clazz == s_state->long_cls && std::string(name) == "valueOf" &&
+        std::string(sig) == "(J)Ljava/lang/Long;") {
+      return s_state->long_value_of;
+    }
+    return nullptr;
+  };
+  table.CallStaticObjectMethodV = [](JNIEnv*, jclass clazz, jmethodID methodID,
+                                     va_list args) -> jobject {
+    if (clazz == s_state->long_cls && methodID == s_state->long_value_of) {
+      s_state->boxed_long_value = va_arg(args, jlong);
+      return s_state->boxed_long_obj;
+    }
+    return nullptr;
+  };
+  table.SetObjectField = [](JNIEnv*, jobject obj, jfieldID fieldID,
+                            jobject val) {
+    s_state->set_field_target_obj = obj;
+    s_state->set_field_fid = fieldID;
+    s_state->set_field_value_obj = val;
+  };
+
+  JNIEnv fake_env{};
+  fake_env.functions = &table;
+
+  size_t method_count = 0;
+  const JNINativeMethod* methods = JniRouter::GetNativeMethods(&method_count);
+  using SpawnFn = jobject (*)(JNIEnv*, jobject, jlong, jstring, jstring,
+                              jstring, jobject, jlong);
+  SpawnFn spawn_fn = nullptr;
+  using DestroyFn = void (*)(JNIEnv*, jobject, jlong);
+  DestroyFn destroy_fn = nullptr;
+  for (size_t i = 0; i < method_count; ++i) {
+    if (std::string(methods[i].name) == "nativeSpawn") {
+      spawn_fn = reinterpret_cast<SpawnFn>(methods[i].fnPtr);
+    } else if (std::string(methods[i].name) == "nativeDestroy") {
+      destroy_fn = reinterpret_cast<DestroyFn>(methods[i].fnPtr);
+    }
+  }
+  ASSERT_NE(spawn_fn, nullptr);
+  ASSERT_NE(destroy_fn, nullptr);
+
+  jobject spawned_jni =
+      spawn_fn(&fake_env, nullptr, reinterpret_cast<jlong>(&parent), nullptr,
+               nullptr, nullptr, nullptr, kTestSpawnedEngineId);
+  EXPECT_EQ(spawned_jni, state.new_flutter_jni_obj);
+  EXPECT_TRUE(state.queried_long_obj_field);
+  EXPECT_NE(state.boxed_long_value, 0);
+  EXPECT_EQ(state.set_field_target_obj, state.new_flutter_jni_obj);
+  EXPECT_EQ(state.set_field_fid, state.shell_holder_obj_fid);
+  EXPECT_EQ(state.set_field_value_obj, state.boxed_long_obj);
+
+  destroy_fn(&fake_env, nullptr, state.boxed_long_value);
+  s_state = nullptr;
 }
 
 // =============================================================================

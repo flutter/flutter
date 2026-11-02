@@ -827,7 +827,7 @@ FlutterEmbedderNative::FlutterEmbedderNative(
           is_using_mock_proc_table_
               ? std::make_unique<APKAssetProvider>()
               : std::make_unique<APKAssetProvider>(nullptr, nullptr, "")),
-      engine_group_(std::make_unique<AndroidEngineGroup>(nullptr,
+      engine_group_(std::make_shared<AndroidEngineGroup>(nullptr,
                                                          nullptr,
                                                          &proc_table_)) {
   TRACE_EVENT0("flutter", "FlutterEmbedderNative::FlutterEmbedderNative");
@@ -1066,7 +1066,7 @@ FlutterEmbedderNative::FlutterEmbedderNative(
         AndroidRenderingAPI api = SelectRenderingAPI(vm_args);
         if (!vm_args.enable_software_rendering &&
             (api == AndroidRenderingAPI::kImpellerOpenGLES ||
-             egl_display_ != nullptr)) {
+             shared_egl_->display != nullptr)) {
           CreateOrUpdateAndroidWindowSurface(window);
         }
       }
@@ -1106,7 +1106,7 @@ FlutterEmbedderNative::FlutterEmbedderNative(
           AndroidRenderingAPI api = SelectRenderingAPI(vm_args);
           if (!vm_args.enable_software_rendering &&
               (api == AndroidRenderingAPI::kImpellerOpenGLES ||
-               egl_display_ != nullptr)) {
+               shared_egl_->display != nullptr)) {
             CreateOrUpdateAndroidWindowSurface(window);
           }
         } else {
@@ -1626,6 +1626,13 @@ std::unique_ptr<FlutterEmbedderNative> FlutterEmbedderNative::Spawn(
       use_engine_owned_task_runners_);
   child->engine_id_ = engine_id;
   child->enable_surface_control_ = enable_surface_control_;
+  child->engine_group_ = engine_group_;
+  child->shared_egl_ = shared_egl_;
+#if FLUTTER_HAS_ANDROID_SURFACE_CONTROL
+  if (surface_control_ && child->surface_control_) {
+    child->surface_control_->ShareVulkanStateFrom(*surface_control_);
+  }
+#endif
   if (asset_provider_) {
     child->asset_provider_ = asset_provider_->Clone();
   }
@@ -1640,12 +1647,6 @@ std::unique_ptr<FlutterEmbedderNative> FlutterEmbedderNative::Spawn(
     vm_args.api_level = api_level;
     AndroidRenderingAPI rendering_api = SelectRenderingAPI(vm_args);
     if (!vm_args.enable_software_rendering) {
-#if FLUTTER_HAS_ANDROID_SURFACE_CONTROL
-      if (child->surface_control_) {
-        child->surface_control_->SetSystemPropertiesForVulkan(
-            BuildSystemPropertiesForVulkan(api_level, vm_args, rendering_api));
-      }
-#endif
       if (rendering_api != AndroidRenderingAPI::kImpellerVulkan &&
           rendering_api != AndroidRenderingAPI::kImpellerAutoselect) {
         child->InitializeAndroidEGL();
@@ -2289,11 +2290,12 @@ bool FlutterEmbedderNative::UnregisterTexture(int64_t texture_id) {
     auto img_it = image_textures_.find(texture_id);
     if (img_it != image_textures_.end()) {
 #if FML_OS_ANDROID
-      if (img_it->second.egl_image != nullptr && egl_display_ != nullptr) {
+      if (img_it->second.egl_image != nullptr &&
+          shared_egl_->display != nullptr) {
         auto destroy_image_fn = reinterpret_cast<PFNEGLDESTROYIMAGEKHRPROC>(
             eglGetProcAddress("eglDestroyImageKHR"));
         if (destroy_image_fn != nullptr) {
-          destroy_image_fn(static_cast<EGLDisplay>(egl_display_),
+          destroy_image_fn(static_cast<EGLDisplay>(shared_egl_->display),
                            static_cast<EGLImageKHR>(img_it->second.egl_image));
         }
       }
@@ -2346,11 +2348,11 @@ bool FlutterEmbedderNative::NotifyLowMemoryWarning() {
     for (auto& [id, entry] : image_textures_) {
       if (entry.reset_on_background) {
 #if FML_OS_ANDROID
-        if (entry.egl_image != nullptr && egl_display_ != nullptr) {
+        if (entry.egl_image != nullptr && shared_egl_->display != nullptr) {
           auto destroy_image_fn = reinterpret_cast<PFNEGLDESTROYIMAGEKHRPROC>(
               eglGetProcAddress("eglDestroyImageKHR"));
           if (destroy_image_fn != nullptr) {
-            destroy_image_fn(static_cast<EGLDisplay>(egl_display_),
+            destroy_image_fn(static_cast<EGLDisplay>(shared_egl_->display),
                              static_cast<EGLImageKHR>(entry.egl_image));
           }
           entry.egl_image = nullptr;
@@ -2572,7 +2574,7 @@ bool FlutterEmbedderNative::ResolveRendererConfig(
 #endif
   }
 
-  if (!is_using_mock_proc_table_ && egl_display_ == nullptr) {
+  if (!is_using_mock_proc_table_ && shared_egl_->display == nullptr) {
     InitializeAndroidEGL();
     void* current_window = nullptr;
     {
@@ -2888,7 +2890,7 @@ bool FlutterEmbedderNative::AcquireOpenGLExternalTextureFrame(
           if (need_reimport) {
             entry.last_ahb = std::move(ahb);
 #if FML_OS_ANDROID
-            if (egl_display_ != nullptr) {
+            if (shared_egl_->display != nullptr) {
               auto create_image_fn = reinterpret_cast<PFNEGLCREATEIMAGEKHRPROC>(
                   eglGetProcAddress("eglCreateImageKHR"));
               auto destroy_image_fn =
@@ -2908,8 +2910,9 @@ bool FlutterEmbedderNative::AcquireOpenGLExternalTextureFrame(
                 if (client_buf != nullptr) {
                   if (entry.egl_image != nullptr &&
                       destroy_image_fn != nullptr) {
-                    destroy_image_fn(static_cast<EGLDisplay>(egl_display_),
-                                     static_cast<EGLImageKHR>(entry.egl_image));
+                    destroy_image_fn(
+                        static_cast<EGLDisplay>(shared_egl_->display),
+                        static_cast<EGLImageKHR>(entry.egl_image));
                     entry.egl_image = nullptr;
                   }
                   // EGL_IMAGE_PRESERVED_KHR = 0x30D2,
@@ -2922,8 +2925,9 @@ bool FlutterEmbedderNative::AcquireOpenGLExternalTextureFrame(
                       EGL_NONE,
                   };
                   EGLImageKHR egl_img = create_image_fn(
-                      static_cast<EGLDisplay>(egl_display_), EGL_NO_CONTEXT,
-                      kEglNativeBufferAndroidTarget, client_buf, image_attribs);
+                      static_cast<EGLDisplay>(shared_egl_->display),
+                      EGL_NO_CONTEXT, kEglNativeBufferAndroidTarget, client_buf,
+                      image_attribs);
                   if (egl_img != EGL_NO_IMAGE_KHR) {
                     entry.egl_image = egl_img;
                     if (entry.gl_texture_id == 0) {
@@ -3134,11 +3138,11 @@ void FlutterEmbedderNative::ReleaseAllTextures() {
 
   for (auto& [id, entry] : image_textures_) {
 #if FML_OS_ANDROID
-    if (entry.egl_image != nullptr && egl_display_ != nullptr) {
+    if (entry.egl_image != nullptr && shared_egl_->display != nullptr) {
       auto destroy_image_fn = reinterpret_cast<PFNEGLDESTROYIMAGEKHRPROC>(
           eglGetProcAddress("eglDestroyImageKHR"));
       if (destroy_image_fn != nullptr) {
-        destroy_image_fn(static_cast<EGLDisplay>(egl_display_),
+        destroy_image_fn(static_cast<EGLDisplay>(shared_egl_->display),
                          static_cast<EGLImageKHR>(entry.egl_image));
       }
     }
@@ -3157,8 +3161,8 @@ void FlutterEmbedderNative::ReleaseAllTextures() {
 
 bool FlutterEmbedderNative::InitializeAndroidEGL() {
 #if FML_OS_ANDROID
-  std::lock_guard<std::mutex> lock(egl_mutex_);
-  if (egl_display_ != nullptr && egl_context_ != nullptr) {
+  std::lock_guard<std::mutex> lock(shared_egl_->mutex);
+  if (shared_egl_->display != nullptr && shared_egl_->context != nullptr) {
     return true;
   }
   EGLDisplay display = eglGetDisplay(EGL_DEFAULT_DISPLAY);
@@ -3262,12 +3266,12 @@ bool FlutterEmbedderNative::InitializeAndroidEGL() {
   EGLSurface resource_pbuffer =
       eglCreatePbufferSurface(display, offscreen_config, pbuffer_attribs);
 
-  egl_display_ = display;
-  egl_config_ = config;
-  egl_context_ = context;
-  egl_resource_context_ = resource_context;
-  egl_pbuffer_surface_ = pbuffer;
-  egl_resource_pbuffer_surface_ = resource_pbuffer;
+  shared_egl_->display = display;
+  shared_egl_->config = config;
+  shared_egl_->context = context;
+  shared_egl_->resource_context = resource_context;
+  shared_egl_->pbuffer_surface = pbuffer;
+  shared_egl_->resource_pbuffer_surface = resource_pbuffer;
   return true;
 #else
   return false;
@@ -3276,42 +3280,41 @@ bool FlutterEmbedderNative::InitializeAndroidEGL() {
 
 void FlutterEmbedderNative::TeardownAndroidEGL() {
 #if FML_OS_ANDROID
-  std::lock_guard<std::mutex> lock(egl_mutex_);
-  if (egl_display_ == nullptr) {
+  std::lock_guard<std::mutex> lock(shared_egl_->mutex);
+  if (shared_egl_->display == nullptr) {
     return;
   }
-  EGLDisplay display = static_cast<EGLDisplay>(egl_display_);
+  EGLDisplay display = static_cast<EGLDisplay>(shared_egl_->display);
   eglMakeCurrent(display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
   if (egl_window_surface_ != nullptr) {
     eglDestroySurface(display, static_cast<EGLSurface>(egl_window_surface_));
     egl_window_surface_ = nullptr;
   }
-  if (egl_pbuffer_surface_ != nullptr) {
-    eglDestroySurface(display, static_cast<EGLSurface>(egl_pbuffer_surface_));
-    egl_pbuffer_surface_ = nullptr;
+  if (shared_egl_.use_count() <= 1) {
+    if (shared_egl_->pbuffer_surface != nullptr) {
+      eglDestroySurface(display,
+                        static_cast<EGLSurface>(shared_egl_->pbuffer_surface));
+      shared_egl_->pbuffer_surface = nullptr;
+    }
+    if (shared_egl_->resource_pbuffer_surface != nullptr) {
+      eglDestroySurface(display, static_cast<EGLSurface>(
+                                     shared_egl_->resource_pbuffer_surface));
+      shared_egl_->resource_pbuffer_surface = nullptr;
+    }
+    if (shared_egl_->resource_context != nullptr) {
+      eglDestroyContext(display,
+                        static_cast<EGLContext>(shared_egl_->resource_context));
+      shared_egl_->resource_context = nullptr;
+    }
+    if (shared_egl_->context != nullptr) {
+      eglDestroyContext(display, static_cast<EGLContext>(shared_egl_->context));
+      shared_egl_->context = nullptr;
+    }
+    shared_egl_->display = nullptr;
+    shared_egl_->config = nullptr;
   }
-  if (egl_resource_pbuffer_surface_ != nullptr) {
-    eglDestroySurface(display,
-                      static_cast<EGLSurface>(egl_resource_pbuffer_surface_));
-    egl_resource_pbuffer_surface_ = nullptr;
-  }
-  if (egl_resource_context_ != nullptr) {
-    eglDestroyContext(display, static_cast<EGLContext>(egl_resource_context_));
-    egl_resource_context_ = nullptr;
-  }
-  if (egl_context_ != nullptr) {
-    eglDestroyContext(display, static_cast<EGLContext>(egl_context_));
-    egl_context_ = nullptr;
-  }
-  egl_display_ = nullptr;
-  egl_config_ = nullptr;
 #else
-  (void)egl_display_;
-  (void)egl_config_;
-  (void)egl_context_;
-  (void)egl_resource_context_;
-  (void)egl_pbuffer_surface_;
-  (void)egl_resource_pbuffer_surface_;
+  (void)shared_egl_;
   (void)egl_window_surface_;
 #endif
 }
@@ -3322,14 +3325,14 @@ bool FlutterEmbedderNative::CreateOrUpdateAndroidWindowSurface(
   if (native_window == nullptr) {
     return false;
   }
-  if (egl_display_ == nullptr && !InitializeAndroidEGL()) {
+  if (shared_egl_->display == nullptr && !InitializeAndroidEGL()) {
     return false;
   }
-  std::lock_guard<std::mutex> lock(egl_mutex_);
-  EGLDisplay display = static_cast<EGLDisplay>(egl_display_);
-  EGLConfig config = static_cast<EGLConfig>(egl_config_);
-  EGLContext context = static_cast<EGLContext>(egl_context_);
-  EGLSurface pbuffer = static_cast<EGLSurface>(egl_pbuffer_surface_);
+  std::lock_guard<std::mutex> lock(shared_egl_->mutex);
+  EGLDisplay display = static_cast<EGLDisplay>(shared_egl_->display);
+  EGLConfig config = static_cast<EGLConfig>(shared_egl_->config);
+  EGLContext context = static_cast<EGLContext>(shared_egl_->context);
+  EGLSurface pbuffer = static_cast<EGLSurface>(shared_egl_->pbuffer_surface);
   if (egl_window_surface_ != nullptr) {
     EGLSurface old_surface = static_cast<EGLSurface>(egl_window_surface_);
     if (context != EGL_NO_CONTEXT && eglGetCurrentContext() == context &&
@@ -3370,11 +3373,11 @@ bool FlutterEmbedderNative::CreateOrUpdateAndroidWindowSurface(
 
 void FlutterEmbedderNative::DestroyAndroidWindowSurface() {
 #if FML_OS_ANDROID
-  std::lock_guard<std::mutex> lock(egl_mutex_);
-  if (egl_display_ != nullptr && egl_window_surface_ != nullptr) {
-    EGLDisplay display = static_cast<EGLDisplay>(egl_display_);
-    EGLContext context = static_cast<EGLContext>(egl_context_);
-    EGLSurface pbuffer = static_cast<EGLSurface>(egl_pbuffer_surface_);
+  std::lock_guard<std::mutex> lock(shared_egl_->mutex);
+  if (shared_egl_->display != nullptr && egl_window_surface_ != nullptr) {
+    EGLDisplay display = static_cast<EGLDisplay>(shared_egl_->display);
+    EGLContext context = static_cast<EGLContext>(shared_egl_->context);
+    EGLSurface pbuffer = static_cast<EGLSurface>(shared_egl_->pbuffer_surface);
     EGLSurface old_surface = static_cast<EGLSurface>(egl_window_surface_);
     if (context != EGL_NO_CONTEXT && eglGetCurrentContext() == context &&
         (eglGetCurrentSurface(EGL_DRAW) == old_surface ||
@@ -3389,15 +3392,16 @@ void FlutterEmbedderNative::DestroyAndroidWindowSurface() {
 
 bool FlutterEmbedderNative::MakeAndroidEGLCurrent() {
 #if FML_OS_ANDROID
-  std::lock_guard<std::mutex> lock(egl_mutex_);
-  if (egl_display_ == nullptr || egl_context_ == nullptr) {
+  std::lock_guard<std::mutex> lock(shared_egl_->mutex);
+  if (shared_egl_->display == nullptr || shared_egl_->context == nullptr) {
     return false;
   }
-  EGLDisplay display = static_cast<EGLDisplay>(egl_display_);
-  EGLContext context = static_cast<EGLContext>(egl_context_);
-  EGLSurface surface = egl_window_surface_ != nullptr
-                           ? static_cast<EGLSurface>(egl_window_surface_)
-                           : static_cast<EGLSurface>(egl_pbuffer_surface_);
+  EGLDisplay display = static_cast<EGLDisplay>(shared_egl_->display);
+  EGLContext context = static_cast<EGLContext>(shared_egl_->context);
+  EGLSurface surface =
+      egl_window_surface_ != nullptr
+          ? static_cast<EGLSurface>(egl_window_surface_)
+          : static_cast<EGLSurface>(shared_egl_->pbuffer_surface);
   return eglMakeCurrent(display, surface, surface, context) == EGL_TRUE;
 #else
   return true;
@@ -3406,11 +3410,11 @@ bool FlutterEmbedderNative::MakeAndroidEGLCurrent() {
 
 bool FlutterEmbedderNative::ClearAndroidEGLCurrent() {
 #if FML_OS_ANDROID
-  std::lock_guard<std::mutex> lock(egl_mutex_);
-  if (egl_display_ == nullptr) {
+  std::lock_guard<std::mutex> lock(shared_egl_->mutex);
+  if (shared_egl_->display == nullptr) {
     return true;
   }
-  EGLDisplay display = static_cast<EGLDisplay>(egl_display_);
+  EGLDisplay display = static_cast<EGLDisplay>(shared_egl_->display);
   return eglMakeCurrent(display, EGL_NO_SURFACE, EGL_NO_SURFACE,
                         EGL_NO_CONTEXT) == EGL_TRUE;
 #else
@@ -3422,10 +3426,10 @@ bool FlutterEmbedderNative::PresentAndroidEGL() {
 #if FML_OS_ANDROID
   bool swapped_window = false;
   {
-    std::lock_guard<std::mutex> lock(egl_mutex_);
-    if (egl_display_ != nullptr && egl_window_surface_ != nullptr) {
-      EGLDisplay display = static_cast<EGLDisplay>(egl_display_);
-      EGLContext context = static_cast<EGLContext>(egl_context_);
+    std::lock_guard<std::mutex> lock(shared_egl_->mutex);
+    if (shared_egl_->display != nullptr && egl_window_surface_ != nullptr) {
+      EGLDisplay display = static_cast<EGLDisplay>(shared_egl_->display);
+      EGLContext context = static_cast<EGLContext>(shared_egl_->context);
       EGLSurface surface = static_cast<EGLSurface>(egl_window_surface_);
       if (context != EGL_NO_CONTEXT &&
           (eglGetCurrentContext() != context ||
@@ -3449,11 +3453,11 @@ bool FlutterEmbedderNative::ClearAndPresentAndroidEGL() {
 #if FML_OS_ANDROID
   bool swapped_window = false;
   {
-    std::lock_guard<std::mutex> lock(egl_mutex_);
-    if (egl_display_ != nullptr && egl_window_surface_ != nullptr &&
-        egl_context_ != nullptr) {
-      EGLDisplay display = static_cast<EGLDisplay>(egl_display_);
-      EGLContext context = static_cast<EGLContext>(egl_context_);
+    std::lock_guard<std::mutex> lock(shared_egl_->mutex);
+    if (shared_egl_->display != nullptr && egl_window_surface_ != nullptr &&
+        shared_egl_->context != nullptr) {
+      EGLDisplay display = static_cast<EGLDisplay>(shared_egl_->display);
+      EGLContext context = static_cast<EGLContext>(shared_egl_->context);
       EGLSurface surface = static_cast<EGLSurface>(egl_window_surface_);
       if (eglMakeCurrent(display, surface, surface, context) == EGL_TRUE) {
         // Default onscreen window framebuffer ID in OpenGL ES.
@@ -3481,13 +3485,15 @@ bool FlutterEmbedderNative::ClearAndPresentAndroidEGL() {
 
 bool FlutterEmbedderNative::MakeAndroidEGLResourceCurrent() {
 #if FML_OS_ANDROID
-  std::lock_guard<std::mutex> lock(egl_mutex_);
-  if (egl_display_ == nullptr || egl_resource_context_ == nullptr) {
+  std::lock_guard<std::mutex> lock(shared_egl_->mutex);
+  if (shared_egl_->display == nullptr ||
+      shared_egl_->resource_context == nullptr) {
     return false;
   }
-  EGLDisplay display = static_cast<EGLDisplay>(egl_display_);
-  EGLContext context = static_cast<EGLContext>(egl_resource_context_);
-  EGLSurface surface = static_cast<EGLSurface>(egl_resource_pbuffer_surface_);
+  EGLDisplay display = static_cast<EGLDisplay>(shared_egl_->display);
+  EGLContext context = static_cast<EGLContext>(shared_egl_->resource_context);
+  EGLSurface surface =
+      static_cast<EGLSurface>(shared_egl_->resource_pbuffer_surface);
   return eglMakeCurrent(display, surface, surface, context) == EGL_TRUE;
 #else
   return true;
@@ -3512,17 +3518,18 @@ bool FlutterEmbedderNative::BindAndroidOverlayEGLSurface(
     return false;
   }
 #if FML_OS_ANDROID
-  if (egl_display_ == nullptr && !InitializeAndroidEGL()) {
+  if (shared_egl_->display == nullptr && !InitializeAndroidEGL()) {
     return false;
   }
   {
-    std::lock_guard<std::mutex> lock(egl_mutex_);
-    EGLDisplay display = static_cast<EGLDisplay>(egl_display_);
-    EGLConfig config = static_cast<EGLConfig>(egl_config_);
-    EGLContext context = static_cast<EGLContext>(egl_context_);
-    EGLSurface fallback = egl_window_surface_ != nullptr
-                              ? static_cast<EGLSurface>(egl_window_surface_)
-                              : static_cast<EGLSurface>(egl_pbuffer_surface_);
+    std::lock_guard<std::mutex> lock(shared_egl_->mutex);
+    EGLDisplay display = static_cast<EGLDisplay>(shared_egl_->display);
+    EGLConfig config = static_cast<EGLConfig>(shared_egl_->config);
+    EGLContext context = static_cast<EGLContext>(shared_egl_->context);
+    EGLSurface fallback =
+        egl_window_surface_ != nullptr
+            ? static_cast<EGLSurface>(egl_window_surface_)
+            : static_cast<EGLSurface>(shared_egl_->pbuffer_surface);
     auto& entry = egl_overlay_surfaces_[overlay_surface_id];
     if (entry.native_window != native_window && entry.egl_surface != nullptr) {
       EGLSurface old_surface = static_cast<EGLSurface>(entry.egl_surface);
@@ -3600,16 +3607,16 @@ bool FlutterEmbedderNative::BindAndroidOverlayEGLSurface(
 bool FlutterEmbedderNative::MakeAndroidOverlayEGLCurrent(
     int32_t overlay_surface_id) {
 #if FML_OS_ANDROID
-  std::lock_guard<std::mutex> lock(egl_mutex_);
-  if (egl_display_ == nullptr || egl_context_ == nullptr) {
+  std::lock_guard<std::mutex> lock(shared_egl_->mutex);
+  if (shared_egl_->display == nullptr || shared_egl_->context == nullptr) {
     return false;
   }
   auto it = egl_overlay_surfaces_.find(overlay_surface_id);
   if (it == egl_overlay_surfaces_.end() || it->second.egl_surface == nullptr) {
     return false;
   }
-  EGLDisplay display = static_cast<EGLDisplay>(egl_display_);
-  EGLContext context = static_cast<EGLContext>(egl_context_);
+  EGLDisplay display = static_cast<EGLDisplay>(shared_egl_->display);
+  EGLContext context = static_cast<EGLContext>(shared_egl_->context);
   EGLSurface surface = static_cast<EGLSurface>(it->second.egl_surface);
   return eglMakeCurrent(display, surface, surface, context) == EGL_TRUE;
 #else
@@ -3623,13 +3630,13 @@ bool FlutterEmbedderNative::PresentAndroidOverlayEGL(
 #if FML_OS_ANDROID
   bool swapped = false;
   {
-    std::lock_guard<std::mutex> lock(egl_mutex_);
-    if (egl_display_ != nullptr) {
+    std::lock_guard<std::mutex> lock(shared_egl_->mutex);
+    if (shared_egl_->display != nullptr) {
       auto it = egl_overlay_surfaces_.find(overlay_surface_id);
       if (it != egl_overlay_surfaces_.end() &&
           it->second.egl_surface != nullptr) {
-        EGLDisplay display = static_cast<EGLDisplay>(egl_display_);
-        EGLContext context = static_cast<EGLContext>(egl_context_);
+        EGLDisplay display = static_cast<EGLDisplay>(shared_egl_->display);
+        EGLContext context = static_cast<EGLContext>(shared_egl_->context);
         EGLSurface surface = static_cast<EGLSurface>(it->second.egl_surface);
         if (context != EGL_NO_CONTEXT &&
             (eglGetCurrentContext() != context ||
@@ -3653,13 +3660,14 @@ bool FlutterEmbedderNative::PresentAndroidOverlayEGL(
 
 void FlutterEmbedderNative::DestroyAndroidOverlayEGLSurfaces() {
 #if FML_OS_ANDROID
-  std::lock_guard<std::mutex> lock(egl_mutex_);
-  if (egl_display_ != nullptr) {
-    EGLDisplay display = static_cast<EGLDisplay>(egl_display_);
-    EGLContext context = static_cast<EGLContext>(egl_context_);
-    EGLSurface fallback = egl_window_surface_ != nullptr
-                              ? static_cast<EGLSurface>(egl_window_surface_)
-                              : static_cast<EGLSurface>(egl_pbuffer_surface_);
+  std::lock_guard<std::mutex> lock(shared_egl_->mutex);
+  if (shared_egl_->display != nullptr) {
+    EGLDisplay display = static_cast<EGLDisplay>(shared_egl_->display);
+    EGLContext context = static_cast<EGLContext>(shared_egl_->context);
+    EGLSurface fallback =
+        egl_window_surface_ != nullptr
+            ? static_cast<EGLSurface>(egl_window_surface_)
+            : static_cast<EGLSurface>(shared_egl_->pbuffer_surface);
     for (auto& [id, entry] : egl_overlay_surfaces_) {
       if (entry.egl_surface != nullptr) {
         EGLSurface old_surface = static_cast<EGLSurface>(entry.egl_surface);
