@@ -22,20 +22,16 @@ static CPUSpeedTracker* gCPUTracker;
 
 // For each CPU index provided, attempts to open the file
 // /sys/devices/system/cpu/cpu$NUM/cpufreq/cpuinfo_max_freq and parse a number
-// containing the CPU frequency, and
-// /sys/devices/system/cpu/cpu$NUM/cpu_capacity for the kernel's capacity of the
-// CPU.
+// containing the CPU frequency.
 void InitCPUInfo(size_t cpu_count) {
   std::vector<CpuIndexAndSpeed> cpu_speeds;
 
   for (auto i = 0u; i < cpu_count; i++) {
-    auto cpu = "/sys/devices/system/cpu/cpu" + std::to_string(i);
-    auto speed = ReadIntFromFile(cpu + "/cpufreq/cpuinfo_max_freq");
+    auto path = "/sys/devices/system/cpu/cpu" + std::to_string(i) +
+                "/cpufreq/cpuinfo_max_freq";
+    auto speed = ReadIntFromFile(path);
     if (speed.has_value()) {
-      cpu_speeds.push_back(
-          {.index = i,
-           .speed = speed.value(),
-           .capacity = ReadIntFromFile(cpu + "/cpu_capacity")});
+      cpu_speeds.push_back({.index = i, .speed = speed.value()});
     }
   }
   gCPUTracker = new CPUSpeedTracker(cpu_speeds);
