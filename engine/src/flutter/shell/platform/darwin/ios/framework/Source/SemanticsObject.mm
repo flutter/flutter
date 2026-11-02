@@ -532,7 +532,17 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
     return false;
   }
 
-  return [self isFocusable];
+  // If the node is scrollable AND hidden OR
+  // The node has a label, value, or hint OR
+  // The node has non-scrolling related actions.
+  //
+  // The kIsHidden flag set with the scrollable flag means this node is now
+  // hidden but still is a valid target for a11y focus in the tree, e.g. a list
+  // item that is currently off screen but the a11y navigation needs to know
+  // about.
+  return (self.node.flags.hasImplicitScrolling && self.node.flags.isHidden) ||
+         !self.node.label.empty() || !self.node.value.empty() || !self.node.hint.empty() ||
+         (self.node.actions & ~flutter::kScrollableSemanticsActions) != 0;
 }
 
 - (NSString*)accessibilityLanguage {
@@ -545,21 +555,6 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
     return @(self.node.locale.data());
   }
   return bridge->GetDefaultLocale();
-}
-
-- (bool)isFocusable {
-  // If the node is scrollable AND hidden OR
-  // The node has a label, value, or hint OR
-  // The node has non-scrolling related actions.
-  //
-  // The kIsHidden flag set with the scrollable flag means this node is now
-  // hidden but still is a valid target for a11y focus in the tree, e.g. a list
-  // item that is currently off screen but the a11y navigation needs to know
-  // about.
-  return (self.node.flags.hasImplicitScrolling && self.node.flags.isHidden)
-
-         || !self.node.label.empty() || !self.node.value.empty() || !self.node.hint.empty() ||
-         (self.node.actions & ~flutter::kScrollableSemanticsActions) != 0;
 }
 
 - (void)collectRoutes:(NSMutableArray<SemanticsObject*>*)edges {
