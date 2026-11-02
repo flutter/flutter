@@ -736,8 +736,8 @@ void UpdateRootSemantics(flutter::AccessibilityBridge* bridge, std::string label
   childNode.rect = SkRect::MakeXYWH(0, 10, 100, 50);
   childNode.label = "child label";
 
-  nodes[0] = rootNode;
   nodes[1] = childNode;
+  nodes[0] = rootNode;
   flutter::CustomAccessibilityActionUpdates actions;
   bridge->UpdateSemantics(/*nodes=*/nodes, /*actions=*/actions);
 
