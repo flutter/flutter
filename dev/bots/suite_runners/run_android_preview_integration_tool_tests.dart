@@ -17,7 +17,8 @@ Future<void> androidPreviewIntegrationToolTestsRunner() async {
           .whereType<File>()
           .map<String>((FileSystemEntity entry) => path.relative(entry.path, from: toolsPath))
           .where((String testPath) => path.basename(testPath).endsWith('_test.dart'))
-          .toList();
+          .toList()
+        ..sort();
 
   await runDartTest(
     toolsPath,
