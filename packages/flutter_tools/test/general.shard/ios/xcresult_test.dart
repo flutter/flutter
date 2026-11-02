@@ -11,6 +11,7 @@ import 'package:flutter_tools/src/macos/xcode.dart';
 
 import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
+import '../../src/fakes.dart';
 import 'xcresult_test_data.dart';
 
 void main() {
@@ -78,9 +79,9 @@ void main() {
   }) {
     final fakeProcessManager = FakeProcessManager.list(<FakeCommand>[]);
     final xcode = Xcode.test(
-      processManager: fakeProcessManager,
+      toolContext: FakeToolContext.macosHost(processManager: fakeProcessManager),
       xcodeProjectInterpreter: XcodeProjectInterpreter.test(
-        processManager: fakeProcessManager,
+        toolContext: FakeToolContext.macosHost(processManager: fakeProcessManager),
         version: xcodeVersion,
       ),
     );

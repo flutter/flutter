@@ -36,7 +36,7 @@ class _FakeFlutterVmService extends Fake implements FlutterVmService {
   final int _appPid;
 
   @override
-  Future<VM?> getVmGuarded() async => _FakeVm(_appPid);
+  Future<VM?> getVmGuarded({required Logger logger}) async => _FakeVm(_appPid);
 }
 
 void main() {

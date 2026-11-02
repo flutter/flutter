@@ -12,6 +12,7 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/config.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/doctor.dart';
+import 'package:flutter_tools/src/experimental/extension_build_manager.dart';
 import 'package:flutter_tools/src/experimental/extension_device_manager.dart';
 import 'package:flutter_tools/src/experimental/extension_discovery.dart';
 import 'package:flutter_tools/src/experimental/extension_manager.dart';
@@ -87,7 +88,7 @@ void main() {
           entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
           featureFlags: featureFlags,
         );
-        final doctor = Doctor(logger: testLogger, clock: const SystemClock());
+        final doctor = Doctor(cache: FakeCache(), logger: testLogger, clock: const SystemClock());
 
         await doctor.diagnose(extensionManager: manager);
         expect(testLogger.statusText, isNot(contains('Linux Custom Extension Prototype')));
@@ -157,7 +158,7 @@ void main() {
           entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
           featureFlags: featureFlags,
         );
-        final doctor = Doctor(logger: testLogger, clock: const SystemClock());
+        final doctor = Doctor(cache: FakeCache(), logger: testLogger, clock: const SystemClock());
 
         await doctor.diagnose(extensionManager: manager);
         expect(testLogger.statusText, contains('[✓] Linux Custom Extension Prototype'));
@@ -262,7 +263,17 @@ void main() {
           featureFlags: featureFlags,
         );
         final toolContext = FakeToolContext(logger: logger);
-        final discovery = ExtensionDevices(extensionManager: manager, logger: logger);
+        final buildManager = ExtensionBuildManager(
+          extensionManager: manager,
+          featureFlags: featureFlags,
+          logger: logger,
+        );
+        final discovery = ExtensionDevices(
+          extensionBuildManager: buildManager,
+          extensionManager: manager,
+          fileSystem: toolContext.fs,
+          logger: logger,
+        );
         final probeCommand = _ExtensionDevicesProbeCommand(
           toolContext: toolContext,
           discovery: discovery,

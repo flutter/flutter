@@ -19,6 +19,9 @@ class SkwasmRenderer extends Renderer {
   @override
   bool get supportsResizingAnimatedImages => true;
 
+  @override
+  bool get supportsAnimatedImages => skwasmSupportsAnimatedImages();
+
   bool get isWimp => skwasmIsWimp();
 
   @override

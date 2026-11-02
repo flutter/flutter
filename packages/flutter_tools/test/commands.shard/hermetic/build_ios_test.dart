@@ -322,6 +322,7 @@ void main() {
       final bool supported = BuildIOSCommand(
         appleContext: FakeAppleContext(),
         buildSystem: FakeBuildSystem(),
+        templateRenderer: FakeTemplateRenderer(),
         toolContext: FakeToolContext(logger: BufferLogger.test()),
         verboseHelp: false,
       ).supported;
@@ -855,8 +856,21 @@ void main() {
         Platform: () => macosPlatform,
         FileSystemUtils: () => FileSystemUtils(fileSystem: fileSystem, platform: macosPlatform),
         XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
-        FlutterProjectFactory: () =>
-            FlutterProjectFactory(fileSystem: fileSystem, logger: BufferLogger.test()),
+        FlutterProjectFactory: () => FlutterProjectFactory(
+          fileSystem: fileSystem,
+          logger: BufferLogger.test(),
+          plistParser: PlistParser(
+            fileSystem: fileSystem,
+            logger: BufferLogger.test(),
+            processManager: FakeProcessManager.list(<FakeCommand>[
+              plutilCommand,
+              plutilCommand,
+              plutilCommand,
+              plutilCommand,
+            ]),
+          ),
+          xcodeProjectInterpreter: FakeXcodeProjectInterpreterWithBuildSettings(),
+        ),
         PlistParser: () => PlistParser(
           fileSystem: fileSystem,
           logger: BufferLogger.test(),
@@ -1616,4 +1630,7 @@ class FakeOperatingSystemUtils extends Fake implements OperatingSystemUtils {
 
   @override
   int? getDirectorySize(Directory directory) => 1024;
+
+  @override
+  void chmod(FileSystemEntity file, String mode) {}
 }

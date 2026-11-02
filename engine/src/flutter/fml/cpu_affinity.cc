@@ -5,8 +5,10 @@
 #include "flutter/fml/cpu_affinity.h"
 #include "flutter/fml/build_config.h"
 
+#include <algorithm>
 #include <cstdint>
 #include <fstream>
+#include <limits>
 #include <optional>
 #include <string>
 
@@ -31,6 +33,29 @@ bool RequestAffinity(CpuAffinity affinity) {
   return true;
 #endif
 }
+
+namespace {
+
+// Whether the kernel's capacities rule out little cores: every CPU reports
+// one, and none is below half of the fastest. Equal capacities say nothing,
+// since a kernel without capacity data reports 1024 for every CPU.
+bool HasNoLittleCores(const std::vector<CpuIndexAndSpeed>& cpus) {
+  if (cpus.empty()) {
+    return false;
+  }
+  int64_t min_capacity = std::numeric_limits<int64_t>::max();
+  int64_t max_capacity = std::numeric_limits<int64_t>::min();
+  for (const auto& cpu : cpus) {
+    if (!cpu.capacity.has_value()) {
+      return false;
+    }
+    min_capacity = std::min(min_capacity, *cpu.capacity);
+    max_capacity = std::max(max_capacity, *cpu.capacity);
+  }
+  return min_capacity != max_capacity && min_capacity * 2 >= max_capacity;
+}
+
+}  // namespace
 
 CPUSpeedTracker::CPUSpeedTracker(std::vector<CpuIndexAndSpeed> data)
     : cpu_speeds_(std::move(data)) {
@@ -60,7 +85,16 @@ CPUSpeedTracker::CPUSpeedTracker(std::vector<CpuIndexAndSpeed> data)
     if (data.speed == min_speed_value) {
       efficiency_.push_back(data.index);
     } else {
-      not_efficiency_.push_back(data.index);
+      not_little_.push_back(data.index);
+    }
+  }
+  // Without little cores, the efficiency cores are full-size ones: excluding
+  // them would leave the performance cores alone, which may be as few as one
+  // or two.
+  if (HasNoLittleCores(cpu_speeds_)) {
+    not_little_.clear();
+    for (const auto& data : cpu_speeds_) {
+      not_little_.push_back(data.index);
     }
   }
 
@@ -80,8 +114,8 @@ const std::vector<size_t>& CPUSpeedTracker::GetIndices(
       return efficiency_;
     case CpuAffinity::kNotPerformance:
       return not_performance_;
-    case CpuAffinity::kNotEfficiency:
-      return not_efficiency_;
+    case CpuAffinity::kNotLittle:
+      return not_little_;
   }
 }
 

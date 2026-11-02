@@ -12,6 +12,7 @@ import 'package:flutter_tools/src/commands/screenshot.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/project.dart';
+import 'package:flutter_tools/src/version.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:test/fake.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
@@ -45,6 +46,7 @@ void main() {
               Restart? restart,
               CompileExpression? compileExpression,
               FlutterProject? flutterProject,
+              FlutterVersion? flutterVersion,
               PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
               CompressionOptions compression = CompressionOptions.compressionDefault,
               Device? device,
@@ -235,12 +237,14 @@ Device 2 (mobile) • 456 • android • 1.2.3
               Restart? restart,
               CompileExpression? compileExpression,
               FlutterProject? flutterProject,
+              FlutterVersion? flutterVersion,
               PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
               CompressionOptions compression = CompressionOptions.compressionDefault,
               Device? device,
               required Logger logger,
             }) async {
               expect(uri.toString(), 'http://localhost:8181');
+              expect(flutterVersion, same(toolContext.flutterVersion));
               return fakeVmService;
             },
       );
@@ -274,6 +278,7 @@ Device 2 (mobile) • 456 • android • 1.2.3
               Restart? restart,
               CompileExpression? compileExpression,
               FlutterProject? flutterProject,
+              FlutterVersion? flutterVersion,
               PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
               CompressionOptions compression = CompressionOptions.compressionDefault,
               Device? device,

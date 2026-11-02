@@ -15,22 +15,28 @@ import '../util.dart';
 const String _kWeightAxisTag = 'wght';
 const List<String> _testFonts = <String>['FlutterTest', 'Ahem'];
 
-String? _computeEffectiveFontFamily(String? fontFamily) {
-  return ui_web.TestEnvironment.instance.forceTestFonts && !_testFonts.contains(fontFamily)
-      ? _testFonts.first
-      : fontFamily;
-}
-
-List<String> _computeEffectiveFontFamilies(String? fontFamily, [List<String>? fontFamilyFallback]) {
+List<String> _computeEffectiveFontFamilies(String? fontFamily, List<String>? fontFamilyFallback) {
   if (fontFamily == null && (fontFamilyFallback == null || fontFamilyFallback.isEmpty)) {
     return ui_web.TestEnvironment.instance.forceTestFonts ? _testFonts : const <String>[];
   }
-  final fontFamilies = <String>[?fontFamily, ...?fontFamilyFallback];
+  final fontFamilies = <String>[
+    ?fontFamily,
+    if (fontFamilyFallback != null)
+      ...fontFamilyFallback.where((String font) => font != fontFamily),
+  ];
   if (!ui_web.TestEnvironment.instance.forceTestFonts) {
     return fontFamilies;
   }
   final Iterable<String> filteredFonts = fontFamilies.where(_testFonts.contains);
   return filteredFonts.isEmpty ? _testFonts : filteredFonts.toList();
+}
+
+bool? _computeHalfLeading(ui.TextLeadingDistribution? leadingDistribution) {
+  return switch (leadingDistribution) {
+    null => null,
+    ui.TextLeadingDistribution.even => true,
+    ui.TextLeadingDistribution.proportional => false,
+  };
 }
 
 class EngineLineMetrics implements ui.LineMetrics {
@@ -134,7 +140,7 @@ class EngineLineMetrics implements ui.LineMetrics {
 
 @immutable
 class EngineStrutStyle implements ui.StrutStyle {
-  EngineStrutStyle({
+  const EngineStrutStyle({
     this.fontFamily,
     this.fontFamilyFallback,
     this.fontSize,
@@ -144,16 +150,10 @@ class EngineStrutStyle implements ui.StrutStyle {
     this.fontWeight,
     this.fontStyle,
     this.forceStrutHeight,
-  }) : effectiveFontFamily = _computeEffectiveFontFamily(fontFamily),
-       effectiveFontFamilyFallback = ui_web.TestEnvironment.instance.forceTestFonts
-           ? null
-           : fontFamilyFallback,
-       height = height == ui.kTextHeightNone ? null : height;
+  }) : height = height == ui.kTextHeightNone ? null : height;
 
   final String? fontFamily;
   final List<String>? fontFamilyFallback;
-  final String? effectiveFontFamily;
-  final List<String>? effectiveFontFamilyFallback;
   final double? fontSize;
   final double? height;
   final ui.TextLeadingDistribution? leadingDistribution;
@@ -164,6 +164,8 @@ class EngineStrutStyle implements ui.StrutStyle {
 
   List<String> get effectiveFontFamilies =>
       _computeEffectiveFontFamilies(fontFamily, fontFamilyFallback);
+
+  bool? get halfLeading => _computeHalfLeading(leadingDistribution);
 
   @override
   bool operator ==(Object other) {
@@ -222,7 +224,7 @@ class EngineStrutStyle implements ui.StrutStyle {
 
 @immutable
 class EngineParagraphStyle implements ui.ParagraphStyle {
-  EngineParagraphStyle({
+  const EngineParagraphStyle({
     this.textAlign,
     this.textDirection,
     this.maxLines,
@@ -236,8 +238,7 @@ class EngineParagraphStyle implements ui.ParagraphStyle {
     this.ellipsis,
     this.locale,
     this.hyphens,
-  }) : effectiveFontFamily = _computeEffectiveFontFamily(fontFamily),
-       height = height == ui.kTextHeightNone ? null : height,
+  }) : height = height == ui.kTextHeightNone ? null : height,
        strutStyle = strutStyle as EngineStrutStyle?;
 
   final ui.TextAlign? textAlign;
@@ -246,7 +247,6 @@ class EngineParagraphStyle implements ui.ParagraphStyle {
   final ui.FontStyle? fontStyle;
   final int? maxLines;
   final String? fontFamily;
-  final String? effectiveFontFamily;
   final double? fontSize;
   final double? height;
   final ui.TextHeightBehavior? textHeightBehavior;
@@ -255,7 +255,28 @@ class EngineParagraphStyle implements ui.ParagraphStyle {
   final ui.Locale? locale;
   final ui.Hyphens? hyphens;
 
-  List<String> get effectiveFontFamilies => _computeEffectiveFontFamilies(fontFamily);
+  EngineStrutStyle? get effectiveStrutStyle {
+    final EngineStrutStyle? strutStyle = this.strutStyle;
+    if (strutStyle == null) {
+      return null;
+    }
+    final ui.TextLeadingDistribution? paragraphLeadingDistribution =
+        textHeightBehavior?.leadingDistribution;
+    if (strutStyle.leadingDistribution != null || paragraphLeadingDistribution == null) {
+      return strutStyle;
+    }
+    return EngineStrutStyle(
+      fontFamily: strutStyle.fontFamily,
+      fontFamilyFallback: strutStyle.fontFamilyFallback,
+      fontSize: strutStyle.fontSize,
+      height: strutStyle.height,
+      leadingDistribution: paragraphLeadingDistribution,
+      leading: strutStyle.leading,
+      fontWeight: strutStyle.fontWeight,
+      fontStyle: strutStyle.fontStyle,
+      forceStrutHeight: strutStyle.forceStrutHeight,
+    );
+  }
 
   EngineTextStyle getTextStyle() {
     return EngineTextStyle(
@@ -380,11 +401,7 @@ class EngineTextStyle implements ui.TextStyle {
       fontStyle: fontStyle,
       textBaseline: textBaseline,
       fontFamily: fontFamily,
-      effectiveFontFamily: _computeEffectiveFontFamily(fontFamily),
       fontFamilyFallback: fontFamilyFallback,
-      effectiveFontFamilyFallback: ui_web.TestEnvironment.instance.forceTestFonts
-          ? null
-          : fontFamilyFallback,
       fontSize: fontSize,
       letterSpacing: letterSpacing,
       wordSpacing: wordSpacing,
@@ -409,9 +426,7 @@ class EngineTextStyle implements ui.TextStyle {
     required this.fontStyle,
     required this.textBaseline,
     required this.fontFamily,
-    required this.effectiveFontFamily,
     required this.fontFamilyFallback,
-    required this.effectiveFontFamilyFallback,
     required this.fontSize,
     required this.letterSpacing,
     required this.wordSpacing,
@@ -434,9 +449,7 @@ class EngineTextStyle implements ui.TextStyle {
   final ui.FontStyle? fontStyle;
   final ui.TextBaseline? textBaseline;
   final String? fontFamily;
-  final String? effectiveFontFamily;
   final List<String>? fontFamilyFallback;
-  final List<String>? effectiveFontFamilyFallback;
   final double? fontSize;
   final double? letterSpacing;
   final double? wordSpacing;
@@ -451,6 +464,8 @@ class EngineTextStyle implements ui.TextStyle {
 
   List<String> get effectiveFontFamilies =>
       _computeEffectiveFontFamilies(fontFamily, fontFamilyFallback);
+
+  bool? get halfLeading => _computeHalfLeading(leadingDistribution);
 
   List<ui.FontVariation> get effectiveFontVariations {
     final List<ui.FontVariation>? fontVariations = this.fontVariations;
@@ -475,13 +490,7 @@ class EngineTextStyle implements ui.TextStyle {
       fontStyle: other.fontStyle ?? fontStyle,
       textBaseline: other.textBaseline ?? textBaseline,
       fontFamily: other.fontFamily ?? fontFamily,
-      effectiveFontFamily: other.fontFamily != null
-          ? other.effectiveFontFamily
-          : effectiveFontFamily,
       fontFamilyFallback: other.fontFamilyFallback ?? fontFamilyFallback,
-      effectiveFontFamilyFallback: other.fontFamilyFallback != null
-          ? other.effectiveFontFamilyFallback
-          : effectiveFontFamilyFallback,
       fontSize: other.fontSize ?? fontSize,
       letterSpacing: other.letterSpacing ?? letterSpacing,
       wordSpacing: other.wordSpacing ?? wordSpacing,
