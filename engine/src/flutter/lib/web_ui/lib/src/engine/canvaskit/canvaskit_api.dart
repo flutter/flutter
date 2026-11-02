@@ -2388,11 +2388,11 @@ extension type SkPartialImageInfo._(JSObject _) implements JSObject {
 
 @JS('window.flutterCanvasKit.RuntimeEffect')
 extension type SkRuntimeEffect(JSObject _) implements JSObject {
-  external SkShader? makeShader(JSAny uniforms);
+  external SkShader? makeShader(JSFloat32Array uniforms);
 
   @JS('makeShaderWithChildren')
-  external SkShader? _makeShaderWithChildren(JSAny uniforms, JSAny children);
-  SkShader? makeShaderWithChildren(JSAny uniforms, List<Object?> children) =>
+  external SkShader? _makeShaderWithChildren(JSFloat32Array uniforms, JSAny children);
+  SkShader? makeShaderWithChildren(JSFloat32Array uniforms, List<Object?> children) =>
       _makeShaderWithChildren(uniforms, children.toJSAnyShallow);
 }
 
