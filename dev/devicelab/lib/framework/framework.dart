@@ -42,11 +42,16 @@ TaskFunction runBenchmarks(Map<String, TaskFunction> benchmarks) {
     final failures = <String>[];
     for (final MapEntry<String, TaskFunction>(key: name, value: benchmark) in benchmarks.entries) {
       section('Running benchmark "$name"');
-      final TaskResult result = await benchmark();
-      if (result.failed) {
-        failures.add('$name: ${result.message}');
-      } else {
-        results[name] = result;
+      try {
+        final TaskResult result = await benchmark();
+        if (result.failed) {
+          failures.add('$name: ${result.message}');
+        } else {
+          results[name] = result;
+        }
+      } catch (error, stackTrace) {
+        print(stackTrace);
+        failures.add('$name: $error');
       }
     }
     if (failures.isNotEmpty) {

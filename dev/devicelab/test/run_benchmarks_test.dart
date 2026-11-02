@@ -43,4 +43,19 @@ void main() {
     expect(result.failed, isTrue);
     expect(result.message, 'b: boom\nd: bang');
   });
+
+  test('runBenchmarks keeps going when a benchmark throws', () async {
+    final log = <String>[];
+    final TaskResult result = await runBenchmarks(<String, TaskFunction>{
+      'a': succeed(log, 'a', 1),
+      'b': () async {
+        log.add('b');
+        throw StateError('boom');
+      },
+      'c': succeed(log, 'c', 3),
+    })();
+    expect(log, <String>['a', 'b', 'c']);
+    expect(result.failed, isTrue);
+    expect(result.message, 'b: Bad state: boom');
+  });
 }
