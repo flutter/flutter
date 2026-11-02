@@ -24,8 +24,10 @@ void main() {
         category: Category.desktop,
         id: 'custom_linux_device',
         name: 'Linux Custom Extension Prototype Device',
+        buildTarget: 'custom-linux-build',
         ephemeral: false,
         sdkNameAndVersion: 'Custom Linux 1.0.0',
+        supportsInstall: true,
         supportsScreenRecording: true,
         supportsScreenshot: true,
         targetPlatform: 'linux-x64',
@@ -35,9 +37,11 @@ void main() {
       expect(map['id'], 'custom_linux_device');
       expect(map['name'], 'Linux Custom Extension Prototype Device');
       expect(map['category'], 'desktop');
+      expect(map['buildTarget'], 'custom-linux-build');
       expect(map['ephemeral'], isFalse);
       expect(map['isSupported'], isTrue);
       expect(map['sdkNameAndVersion'], 'Custom Linux 1.0.0');
+      expect(map[TargetDevice.supportsInstallKey], isTrue);
       expect(map[TargetDevice.supportsScreenshotKey], isTrue);
       expect(map[TargetDevice.supportsScreenRecordingKey], isTrue);
       expect(map['targetPlatform'], 'linux-x64');
@@ -46,6 +50,8 @@ void main() {
       expect(parsed, equals(device));
       expect(parsed.hashCode, equals(device.hashCode));
       expect(parsed.toString(), contains('custom_linux_device'));
+      expect(parsed.toString(), contains('custom-linux-build'));
+      expect(parsed.toString(), contains('supportsInstall: true'));
       expect(parsed.toString(), contains('supportsScreenshot: true'));
       expect(parsed.toString(), contains('supportsScreenRecording: true'));
     });
@@ -61,15 +67,19 @@ void main() {
       expect(device.id, 'minimal_device');
       expect(device.name, 'Minimal Device');
       expect(device.category, Category.mobile);
+      expect(device.buildTarget, isNull);
       expect(device.ephemeral, isTrue);
       expect(device.isSupported, isTrue);
       expect(device.sdkNameAndVersion, isNull);
+      expect(device.supportsInstall, isFalse);
       expect(device.supportsScreenshot, isFalse);
       expect(device.supportsScreenRecording, isFalse);
       expect(device.targetPlatform, isNull);
 
       final Map<String, Object?> map = device.toMap();
+      expect(map.containsKey('buildTarget'), isFalse);
       expect(map.containsKey('sdkNameAndVersion'), isFalse);
+      expect(map[TargetDevice.supportsInstallKey], isFalse);
       expect(map[TargetDevice.supportsScreenshotKey], isFalse);
       expect(map[TargetDevice.supportsScreenRecordingKey], isFalse);
       expect(map.containsKey('targetPlatform'), isFalse);
@@ -106,6 +116,54 @@ void main() {
       );
       expect(
         () => TargetDevice.fromJson(const <String, Object?>{TargetDevice.ephemeralKey: 'true'}),
+        throwsFormatException,
+      );
+      expect(
+        () => TargetDevice.fromJson(const <String, Object?>{TargetDevice.buildTargetKey: 123}),
+        throwsFormatException,
+      );
+    });
+  });
+
+  group('ExtensionDebuggingOptions', () {
+    test('serializes and deserializes correctly', () {
+      const options = ExtensionDebuggingOptions(buildMode: .debug, debuggingEnabled: true);
+      final Map<String, Object?> map = options.toMap();
+      expect(map['buildMode'], 'debug');
+      expect(map['debuggingEnabled'], isTrue);
+
+      final parsed = ExtensionDebuggingOptions.fromJson(map);
+      expect(parsed, equals(options));
+      expect(parsed.hashCode, equals(options.hashCode));
+      expect(parsed.toString(), contains('buildMode: debug'));
+      expect(parsed.toString(), contains('debuggingEnabled: true'));
+    });
+
+    test('validates fields and throws FormatException when missing or invalid', () {
+      expect(
+        () => ExtensionDebuggingOptions.fromJson(const <String, Object?>{'debuggingEnabled': true}),
+        throwsFormatException,
+      );
+      expect(
+        () => ExtensionDebuggingOptions.fromJson(const <String, Object?>{'buildMode': 'release'}),
+        throwsFormatException,
+      );
+      expect(
+        () => ExtensionDebuggingOptions.fromJson(const <String, Object?>{}),
+        throwsFormatException,
+      );
+      expect(
+        () => ExtensionDebuggingOptions.fromJson(const <String, Object?>{
+          'buildMode': 'invalid_mode',
+          'debuggingEnabled': true,
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => ExtensionDebuggingOptions.fromJson(const <String, Object?>{
+          'buildMode': 'debug',
+          'debuggingEnabled': 'not_a_bool',
+        }),
         throwsFormatException,
       );
     });

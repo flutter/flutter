@@ -8,8 +8,9 @@ import 'package:json_rpc_2/json_rpc_2.dart' show RpcException;
 
 import 'protocol_base/service.dart';
 
-/// Extension service interface for retrieving target devices and managing
-/// device application installation and screen capture.
+/// Extension service interface for retrieving target devices, managing
+/// application installation and execution, capturing device screens, and
+/// streaming device logs.
 abstract base class DeviceService extends ToolExtensionService {
   /// Service namespace identifier for device services.
   static const String serviceNamespace = 'device';
@@ -22,6 +23,11 @@ abstract base class DeviceService extends ToolExtensionService {
   static const _takeScreenshotRpcMethod = 'takeScreenshot';
   static const _startScreenRecordingRpcMethod = 'startScreenRecording';
   static const _stopScreenRecordingRpcMethod = 'stopScreenRecording';
+  static const String _launchAppRpcMethod = 'launchApp';
+  static const String _getVmServiceUriRpcMethod = 'getVmServiceUri';
+  static const String _stopAppRpcMethod = 'stopApp';
+  static const String _startLogStreamRpcMethod = 'startLogStream';
+  static const String _stopLogStreamRpcMethod = 'stopLogStream';
 
   /// RPC method identifier to query contributed target devices.
   static const String getDevicesMethod = '$serviceNamespace.$_getDevicesRpcMethod';
@@ -48,6 +54,25 @@ abstract base class DeviceService extends ToolExtensionService {
   /// RPC method identifier to stop an active screen recording on a target device.
   static const stopScreenRecordingMethod = '$serviceNamespace.$_stopScreenRecordingRpcMethod';
 
+  /// RPC method identifier to launch an application on a target device.
+  static const String launchAppMethod = '$serviceNamespace.$_launchAppRpcMethod';
+
+  /// RPC method identifier to retrieve the VM service URI for a running application.
+  static const String getVmServiceUriMethod = '$serviceNamespace.$_getVmServiceUriRpcMethod';
+
+  /// RPC method identifier to stop a running application on a target device.
+  static const String stopAppMethod = '$serviceNamespace.$_stopAppRpcMethod';
+
+  /// RPC method identifier to start streaming log output for a target device.
+  static const String startLogStreamMethod = '$serviceNamespace.$_startLogStreamRpcMethod';
+
+  /// RPC method identifier to stop streaming log output for a target device.
+  static const String stopLogStreamMethod = '$serviceNamespace.$_stopLogStreamRpcMethod';
+
+  /// JSON-RPC 2.0 notification method emitted by the extension for each device
+  /// log line.
+  static const String logEntryNotificationMethod = '$serviceNamespace.logEntry';
+
   /// RPC parameter key for the target device ID.
   static const String deviceIdParam = 'deviceId';
 
@@ -65,6 +90,19 @@ abstract base class DeviceService extends ToolExtensionService {
 
   /// RPC parameter key for the optional screen recording duration in milliseconds.
   static const durationMsParam = 'durationMs';
+
+  /// RPC parameter key for the executable URI to launch.
+  static const String executableUriParam = 'executableUri';
+
+  /// RPC parameter key for debugging options.
+  static const String debuggingOptionsParam = 'debuggingOptions';
+
+  /// RPC response key for the VM service URI.
+  static const String vmServiceUriKey = 'vmServiceUri';
+
+  /// JSON key for the log line text in [logEntryNotificationMethod]
+  /// notifications.
+  static const String lineKey = 'line';
 
   @override
   String get namespace => serviceNamespace;
@@ -85,15 +123,27 @@ abstract base class DeviceService extends ToolExtensionService {
   /// succeeded, or `false` if installation failed or is unsupported.
   Future<bool> installApp({required Uri bundleUri, required String deviceId}) async => false;
 
-  /// Uninstalls the application identified by [appId] from the device with [deviceId].
+  /// Uninstalls the application identified by [appId] or [project] from the
+  /// device with [deviceId].
   ///
-  /// Returns `true` if uninstallation succeeded, or `false` if uninstallation
-  /// failed or is unsupported.
-  Future<bool> uninstallApp({required String appId, required String deviceId}) async => false;
+  /// At least one of [appId] or [project] is guaranteed to be non-null. Returns
+  /// `true` if uninstallation succeeded, or `false` if uninstallation failed or
+  /// is unsupported.
+  Future<bool> uninstallApp({
+    required String deviceId,
+    String? appId,
+    ExtensionFlutterProject? project,
+  }) async => false;
 
-  /// Returns whether the application identified by [appId] is currently
-  /// installed on the device with [deviceId].
-  Future<bool> isAppInstalled({required String appId, required String deviceId}) async => false;
+  /// Returns whether the application identified by [appId] or [project] is
+  /// currently installed on the device with [deviceId].
+  ///
+  /// At least one of [appId] or [project] is guaranteed to be non-null.
+  Future<bool> isAppInstalled({
+    required String deviceId,
+    String? appId,
+    ExtensionFlutterProject? project,
+  }) async => false;
 
   /// Captures a screenshot from the device with [deviceId] and writes it to
   /// [outputFileUri].
@@ -126,6 +176,56 @@ abstract base class DeviceService extends ToolExtensionService {
     throw UnsupportedError('Screen recording is not supported on $deviceId.');
   }
 
+  /// Launches the application at [executableUri] on the device with [deviceId]
+  /// using the given [debuggingOptions].
+  ///
+  /// [executableUri] is guaranteed to be an absolute `file:` URI pointing to
+  /// the built application binary or bundle. Returns `true` once the
+  /// application process has been started, or `false` if launching failed.
+  Future<bool> launchApp({
+    required ExtensionDebuggingOptions debuggingOptions,
+    required String deviceId,
+    required Uri executableUri,
+  });
+
+  /// Returns the VM Service URI for a running application on [deviceId].
+  ///
+  /// Called by the host tool after [launchApp] succeeds when
+  /// [ExtensionDebuggingOptions.debuggingEnabled] is `true`. Implementations
+  /// may await VM Service discovery from the running process before returning,
+  /// or return `null` if the process exits or VM Service discovery fails.
+  Future<Uri?> getVmServiceUri({required String deviceId});
+
+  /// Stops any running application on [deviceId].
+  ///
+  /// Returns `true` if a running application was stopped, or `false` if no
+  /// application was running on [deviceId] or stopping it failed.
+  Future<bool> stopApp({required String deviceId});
+
+  /// Starts streaming log output for the device identified by [deviceId].
+  ///
+  /// Invoked by the host tool when a log consumer (such as `flutter logs` or
+  /// `flutter run`) begins reading logs from [deviceId]. Implementations should
+  /// return once log streaming has been initiated rather than awaiting the
+  /// lifetime of the stream, and forward each log line (without a trailing
+  /// newline) to the host by calling [emitLogLine].
+  Future<void> startLogStream({required String deviceId}) async {}
+
+  /// Stops streaming log output for the device identified by [deviceId].
+  ///
+  /// Invoked by the host tool when the device log reader is disposed.
+  Future<void> stopLogStream({required String deviceId}) async {}
+
+  /// Sends a [logEntryNotificationMethod] JSON-RPC notification containing a
+  /// single log [line] (excluding any trailing newline) from [deviceId] to the
+  /// host tool.
+  void emitLogLine({required String deviceId, required String line}) {
+    sendNotification(logEntryNotificationMethod, <String, Object?>{
+      deviceIdParam: deviceId,
+      lineKey: line,
+    });
+  }
+
   @override
   Future<Map<String, ExtensionRpcHandler>> initialize() async {
     return <String, ExtensionRpcHandler>{
@@ -137,6 +237,11 @@ abstract base class DeviceService extends ToolExtensionService {
       _takeScreenshotRpcMethod: _takeScreenshotRpc,
       _startScreenRecordingRpcMethod: _startScreenRecordingRpc,
       _stopScreenRecordingRpcMethod: _stopScreenRecordingRpc,
+      _launchAppRpcMethod: _launchAppRpc,
+      _getVmServiceUriRpcMethod: _getVmServiceUriRpc,
+      _stopAppRpcMethod: _stopAppRpc,
+      _startLogStreamRpcMethod: _startLogStreamRpc,
+      _stopLogStreamRpcMethod: _stopLogStreamRpc,
     };
   }
 
@@ -149,10 +254,9 @@ abstract base class DeviceService extends ToolExtensionService {
   }
 
   Future<bool> _isSupportedForProjectRpc(Map<String, Object?> params) async {
-    final String deviceId;
+    final String deviceId = _parseDeviceId(params);
     final ExtensionFlutterProject project;
     try {
-      deviceId = params.requiredField<String>(deviceIdParam);
       final Map<String, Object?> projectMap = params.requiredField<Map<String, Object?>>(
         projectParam,
       );
@@ -164,10 +268,9 @@ abstract base class DeviceService extends ToolExtensionService {
   }
 
   Future<bool> _installAppRpc(Map<String, Object?> params) async {
-    final String deviceId;
+    final String deviceId = _parseDeviceId(params);
     final Uri bundleUri;
     try {
-      deviceId = _requireNonEmptyString(params, deviceIdParam);
       bundleUri = _requireFileUri(params, bundleUriParam);
     } on FormatException catch (e) {
       throw RpcException.invalidParams(e.message);
@@ -176,34 +279,47 @@ abstract base class DeviceService extends ToolExtensionService {
   }
 
   Future<bool> _uninstallAppRpc(Map<String, Object?> params) async {
-    final String deviceId;
-    final String appId;
-    try {
-      deviceId = _requireNonEmptyString(params, deviceIdParam);
-      appId = _requireNonEmptyString(params, appIdParam);
-    } on FormatException catch (e) {
-      throw RpcException.invalidParams(e.message);
-    }
-    return uninstallApp(appId: appId, deviceId: deviceId);
+    final (String deviceId, String? appId, ExtensionFlutterProject? project) = _parseAppTarget(
+      params,
+    );
+    return uninstallApp(appId: appId, deviceId: deviceId, project: project);
   }
 
   Future<bool> _isAppInstalledRpc(Map<String, Object?> params) async {
-    final String deviceId;
-    final String appId;
+    final (String deviceId, String? appId, ExtensionFlutterProject? project) = _parseAppTarget(
+      params,
+    );
+    return isAppInstalled(appId: appId, deviceId: deviceId, project: project);
+  }
+
+  (String deviceId, String? appId, ExtensionFlutterProject? project) _parseAppTarget(
+    Map<String, Object?> params,
+  ) {
+    final String deviceId = _parseDeviceId(params);
+    final String? appId;
+    final ExtensionFlutterProject? project;
     try {
-      deviceId = _requireNonEmptyString(params, deviceIdParam);
-      appId = _requireNonEmptyString(params, appIdParam);
+      appId = params.nullableField<String>(appIdParam);
+      if (appId != null && appId.isEmpty) {
+        throw const FormatException('Invalid "$appIdParam": must not be empty.');
+      }
+      final Map<String, Object?>? projectMap = params.nullableField<Map<String, Object?>>(
+        projectParam,
+      );
+      project = projectMap != null ? ExtensionFlutterProject.fromJson(projectMap) : null;
+      if (appId == null && project == null) {
+        throw const FormatException('Either "$appIdParam" or "$projectParam" must be provided.');
+      }
     } on FormatException catch (e) {
       throw RpcException.invalidParams(e.message);
     }
-    return isAppInstalled(appId: appId, deviceId: deviceId);
+    return (deviceId, appId, project);
   }
 
   Future<void> _takeScreenshotRpc(Map<String, Object?> params) async {
-    final String deviceId;
+    final String deviceId = _parseDeviceId(params);
     final Uri outputFileUri;
     try {
-      deviceId = _requireNonEmptyString(params, deviceIdParam);
       outputFileUri = _requireFileUri(params, outputFileUriParam);
     } on FormatException catch (e) {
       throw RpcException.invalidParams(e.message);
@@ -212,11 +328,10 @@ abstract base class DeviceService extends ToolExtensionService {
   }
 
   Future<void> _startScreenRecordingRpc(Map<String, Object?> params) async {
-    final String deviceId;
+    final String deviceId = _parseDeviceId(params);
     final Uri outputFileUri;
     final int? durationMs;
     try {
-      deviceId = _requireNonEmptyString(params, deviceIdParam);
       outputFileUri = _requireFileUri(params, outputFileUriParam);
       durationMs = params.nullableField<int>(durationMsParam);
       if (durationMs != null && durationMs < 0) {
@@ -233,22 +348,9 @@ abstract base class DeviceService extends ToolExtensionService {
   }
 
   Future<String> _stopScreenRecordingRpc(Map<String, Object?> params) async {
-    final String deviceId;
-    try {
-      deviceId = _requireNonEmptyString(params, deviceIdParam);
-    } on FormatException catch (e) {
-      throw RpcException.invalidParams(e.message);
-    }
+    final String deviceId = _parseDeviceId(params);
     final Uri recordingUri = await stopScreenRecording(deviceId: deviceId);
     return recordingUri.toString();
-  }
-
-  static String _requireNonEmptyString(Map<String, Object?> params, String key) {
-    final String value = params.requiredField<String>(key);
-    if (value.isEmpty) {
-      throw FormatException('Invalid "$key": must not be empty.');
-    }
-    return value;
   }
 
   static Uri _requireFileUri(Map<String, Object?> params, String key) {
@@ -258,5 +360,78 @@ abstract base class DeviceService extends ToolExtensionService {
       throw FormatException('Invalid "$key": must be an absolute "file:" URI.');
     }
     return uri;
+  }
+
+  String _parseDeviceId(Map<String, Object?> params) {
+    final String deviceId;
+    try {
+      deviceId = params.requiredField<String>(deviceIdParam);
+    } on FormatException catch (e) {
+      throw RpcException.invalidParams(e.message);
+    }
+    if (deviceId.isEmpty) {
+      throw RpcException.invalidParams('Parameter "$deviceIdParam" must not be empty.');
+    }
+    return deviceId;
+  }
+
+  Future<bool> _launchAppRpc(Map<String, Object?> params) async {
+    final String deviceId = _parseDeviceId(params);
+    final String executableUriStr;
+    final Map<String, Object?> optionsMap;
+    try {
+      executableUriStr = params.requiredField<String>(executableUriParam);
+      optionsMap = params.requiredField<Map<String, Object?>>(debuggingOptionsParam);
+    } on FormatException catch (e) {
+      throw RpcException.invalidParams(e.message);
+    }
+    final Uri executableUri = _parseExecutableUri(executableUriStr);
+    final ExtensionDebuggingOptions debuggingOptions = _parseDebuggingOptions(optionsMap);
+    return launchApp(
+      debuggingOptions: debuggingOptions,
+      deviceId: deviceId,
+      executableUri: executableUri,
+    );
+  }
+
+  static Uri _parseExecutableUri(String executableUriStr) {
+    final Uri? uri = Uri.tryParse(executableUriStr);
+    if (uri == null || !uri.isValidFileUri) {
+      throw RpcException.invalidParams(
+        'Invalid "$executableUriParam" parameter for $launchAppMethod: must be an absolute "file:" URI.',
+      );
+    }
+    return uri;
+  }
+
+  static ExtensionDebuggingOptions _parseDebuggingOptions(Map<String, Object?> options) {
+    try {
+      return ExtensionDebuggingOptions.fromJson(options);
+    } on FormatException catch (e) {
+      throw RpcException.invalidParams(
+        'Invalid "$debuggingOptionsParam" parameter for $launchAppMethod: ${e.message}',
+      );
+    }
+  }
+
+  Future<Map<String, Object?>> _getVmServiceUriRpc(Map<String, Object?> params) async {
+    final String deviceId = _parseDeviceId(params);
+    final Uri? uri = await getVmServiceUri(deviceId: deviceId);
+    return <String, Object?>{vmServiceUriKey: uri?.toString()};
+  }
+
+  Future<bool> _stopAppRpc(Map<String, Object?> params) async {
+    final String deviceId = _parseDeviceId(params);
+    return stopApp(deviceId: deviceId);
+  }
+
+  Future<Object?> _startLogStreamRpc(Map<String, Object?> params) async {
+    await startLogStream(deviceId: _parseDeviceId(params));
+    return null;
+  }
+
+  Future<Object?> _stopLogStreamRpc(Map<String, Object?> params) async {
+    await stopLogStream(deviceId: _parseDeviceId(params));
+    return null;
   }
 }
