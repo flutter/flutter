@@ -85,6 +85,106 @@ abstract class BenchParagraphBase extends ParagraphRecorder {
   }
 }
 
+/// Short UI labels typical of buttons, tab headers, menu items, pills, and
+/// input placeholders. Each is 2–7 characters before the per-iteration badge
+/// suffix is appended.
+const List<String> _kTinyLabels = <String>[
+  'OK',
+  'Save',
+  'Cancel',
+  'Edit',
+  'Done',
+  'Next',
+  'Back',
+  'Home',
+  'Inbox',
+  'Sent',
+  'Drafts',
+  'More',
+  'Help',
+  'New',
+  'Share',
+  'Search',
+  'Filter',
+  'Sort',
+  'All',
+  'Active',
+  'Beta',
+  'Pro',
+  'Menu',
+  'Files',
+  'Photos',
+  'Music',
+  'Chats',
+  'Calls',
+  'Pins',
+  'Tags',
+  'Notes',
+  'Login',
+];
+
+/// Benchmarks 100 tiny single-line paragraphs (~5–9 chars each) per frame.
+///
+/// Models the dominant text workload of real app chrome: buttons, input
+/// labels and placeholders, tab headers, sidebar links, menu items, and pills.
+/// Per-paragraph fixed costs dominate here (paragraph construction, the first
+/// `measureText` / `getTextClusters` call, and on `WebParagraph` one 2D canvas
+/// rasterization + `getImageData` readback + `SkImage` upload per paragraph on
+/// uncached paint, then one distinct `drawImageRect` texture per paragraph on
+/// cached paint, versus a shared glyph atlas on `SkParagraph`).
+///
+/// Each label carries a short numeric badge suffix (e.g. `Inbox 42`) that is
+/// unique within a frame and changes every iteration, so `SkParagraph`'s
+/// `ParagraphCache` cannot serve repeated text from cache, matching the
+/// `[$tag]` convention of the other buckets.
+class BenchTextParagraphTiny extends BenchParagraphBase {
+  BenchTextParagraphTiny.skParagraph() : super(name: skParagraphName, useWebParagraph: false);
+
+  BenchTextParagraphTiny.webParagraph() : super(name: webParagraphName, useWebParagraph: true);
+
+  static const String skParagraphName = 'text_paragraph_tiny';
+  static const String webParagraphName = 'web_paragraph_tiny';
+
+  static const int _paragraphCount = 100;
+  static const int _columns = 10;
+
+  @override
+  double get layoutWidth => 120.0;
+
+  @override
+  double get relayoutWidth => 100.0;
+
+  @override
+  ui.Offset paragraphOffset(int index, ui.Offset baseOffset) {
+    final int col = index % _columns;
+    final int row = index ~/ _columns;
+    return ui.Offset(baseOffset.dx + col * 96.0, baseOffset.dy + row * 28.0);
+  }
+
+  @override
+  List<ui.Paragraph> buildParagraphs(int iteration) {
+    final paragraphStyle = ui.ParagraphStyle(fontFamily: 'Roboto', fontSize: 13.0, maxLines: 1);
+    final textStyle = ui.TextStyle(
+      fontFamily: 'Roboto',
+      fontSize: 13.0,
+      color: const ui.Color(0xFF202124),
+    );
+    final paragraphs = <ui.Paragraph>[];
+    for (var i = 0; i < _paragraphCount; i++) {
+      final String label = _kTinyLabels[i % _kTinyLabels.length];
+      // The badge shifts every iteration and differs between repeats of the
+      // same label within a frame, so no two paragraphs in consecutive frames
+      // share text.
+      final int badge = (iteration + 25 * (i ~/ _kTinyLabels.length)) % 100;
+      final builder = ui.ParagraphBuilder(paragraphStyle)
+        ..pushStyle(textStyle)
+        ..addText('$label $badge');
+      paragraphs.add(builder.build());
+    }
+    return paragraphs;
+  }
+}
+
 /// Benchmarks 50 short single-line paragraphs (~36 chars each) per frame.
 ///
 /// Exercises per-paragraph construction overhead, single-line layout, and
