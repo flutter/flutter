@@ -537,6 +537,13 @@ class TextSelectionOverlay {
     if (_value == newValue) {
       return;
     }
+    // The text can change while a selection handle is being dragged, for
+    // example when the keyboard deletes text. Keep the anchor of the drag
+    // within the new text, so that the next drag update doesn't create a
+    // selection that extends past the end of the text.
+    if (_dragStartSelection != null && newValue.text != _value.text) {
+      _dragStartSelection = _clampSelection(_dragStartSelection!, newValue.text.length);
+    }
     _value = newValue;
     _updateSelectionOverlay();
     // _updateSelectionOverlay may not rebuild the selection overlay if the
@@ -1077,8 +1084,20 @@ class TextSelectionOverlay {
 
   void _handleSelectionHandleChanged(TextSelection newSelection) {
     selectionDelegate.userUpdateTextEditingValue(
-      _value.copyWith(selection: newSelection),
+      _value.copyWith(selection: _clampSelection(newSelection, _value.text.length)),
       SelectionChangedCause.drag,
+    );
+  }
+
+  /// Returns `selection` with its base and extent offsets limited to
+  /// `textLength`.
+  static TextSelection _clampSelection(TextSelection selection, int textLength) {
+    if (selection.baseOffset <= textLength && selection.extentOffset <= textLength) {
+      return selection;
+    }
+    return selection.copyWith(
+      baseOffset: math.min(selection.baseOffset, textLength),
+      extentOffset: math.min(selection.extentOffset, textLength),
     );
   }
 }
