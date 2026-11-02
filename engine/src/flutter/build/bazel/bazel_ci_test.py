@@ -108,13 +108,24 @@ class MatchBuildTest(unittest.TestCase):
     build = bazel_ci.match_build(
         BUILDS, HOST_DEBUG_UNOPT['gn'] + ['--bazel', '--no-goma', '--no-rbe']
     )
-    self.assertIs(build, HOST_DEBUG_UNOPT)
+    self.assertEqual(build, {**HOST_DEBUG_UNOPT, 'options': []})
+
+  def test_the_recipes_no_lto_turns_lto_off(self):
+    # cocoon's no_lto property on a release builder's presubmit builds:
+    # the recipe appends --no-lto to flags that lack it.
+    build = bazel_ci.match_build(BUILDS, HOST_DEBUG_UNOPT['gn'] + ['--bazel', '--no-lto'])
+    self.assertEqual(build['name'], HOST_DEBUG_UNOPT['name'])
+    self.assertEqual(build['options'], ['--//engine/src/flutter/build/bazel:lto=false'])
+    # A build whose own flags have it matches as it is.
+    self.assertEqual(bazel_ci.match_build(BUILDS, HOST_DEBUG['gn'] + ['--bazel'])['options'], [])
 
   def test_tells_two_builds_of_one_directory_apart(self):
-    self.assertIs(bazel_ci.match_build(BUILDS, HOST_DEBUG['gn'] + ['--bazel']), HOST_DEBUG)
-    self.assertIs(
-        bazel_ci.match_build(BUILDS, HOST_DEBUG_NO_PREBUILT['gn'] + ['--bazel']),
-        HOST_DEBUG_NO_PREBUILT
+    self.assertEqual(
+        bazel_ci.match_build(BUILDS, HOST_DEBUG['gn'] + ['--bazel'])['name'], HOST_DEBUG['name']
+    )
+    self.assertEqual(
+        bazel_ci.match_build(BUILDS, HOST_DEBUG_NO_PREBUILT['gn'] + ['--bazel'])['name'],
+        HOST_DEBUG_NO_PREBUILT['name']
     )
 
   def test_no_match_names_the_directorys_builds(self):
@@ -146,20 +157,16 @@ class BuildDirectoryTest(unittest.TestCase):
   def test_ninja_file_runs_the_install_once_for_every_target(self):
     out_dir = os.path.join(self.engine_src, 'out', 'ci', 'host_debug_unopt')
     text = bazel_ci.ninja_file(self.engine_src, HOST_DEBUG_UNOPT, out_dir, '/tools/bazelisk')
-    root = os.path.join(self.tmp.name, 'checkout')
-    # The inherited descriptors closed first (the Bazel server would hold
-    # ninja's pipe open otherwise); `$` doubled for ninja.
+    # The edge runs the install through this module (which closes the
+    # inherited descriptors: the Bazel server would hold ninja's pipe open
+    # otherwise), from the description beside the file.
     self.assertIn(
-        'command = fd=3; while [ "$$fd" -le 255 ]; '
-        'do eval "exec $$fd>&-"; fd=$$((fd + 1)); done && ', text
+        f'\n  command = {sys.executable} {os.path.abspath(bazel_ci.__file__)} install {out_dir}\n',
+        text
     )
     self.assertIn(
-        f'cd {root} && env BAZELISK_HOME={root}/.bazel_ci/bazelisk /tools/bazelisk '
-        f'--output_user_root={root}/.bazel_ci/output run --config=ci '
-        f'--disk_cache={root}/.bazel_ci/disk_cache --experimental_disk_cache_gc_max_size=40G '
-        f'--config=ci_host_debug_unopt '
-        f'//engine/src/flutter/ci/builders:ci_host_debug_unopt -- {out_dir} && '
-        f'touch {out_dir}/bazel_install.stamp\n', text
+        '  description = bazel run --config=ci_host_debug_unopt '
+        f'//engine/src/flutter/ci/builders:ci_host_debug_unopt -- {out_dir}\n', text
     )
     self.assertIn('  pool = console\n', text)
     self.assertIn('\nbuild bazel_install.stamp: bazel_install\n', text)
@@ -168,6 +175,50 @@ class BuildDirectoryTest(unittest.TestCase):
     self.assertIn('\nbuild flutter/tools/font_subset: phony bazel_install.stamp\n', text)
     self.assertIn('\nbuild sky_engine: phony bazel_install.stamp\n', text)
     self.assertTrue(text.endswith('\ndefault bazel_install.stamp\n'))
+
+  def test_install_command_from_the_description(self):
+    out_dir = os.path.join(self.engine_src, 'out', 'ci', 'host_debug_unopt')
+    bazel_ci.write_build_directory(self.engine_src, HOST_DEBUG_UNOPT, out_dir, '/tools/bazelisk')
+    root = os.path.join(self.tmp.name, 'checkout')
+    description = bazel_ci.read_build_directory(out_dir)
+    self.assertEqual(
+        bazel_ci.install_command(description), [
+            '/tools/bazelisk', f'--output_user_root={root}/.bazel_ci/output', 'run', '--config=ci',
+            f'--disk_cache={root}/.bazel_ci/disk_cache',
+            '--experimental_disk_cache_gc_max_size=40G', '--config=ci_host_debug_unopt',
+            '//engine/src/flutter/ci/builders:ci_host_debug_unopt', '--', out_dir
+        ]
+    )
+    self.assertEqual(description['environment'], {'BAZELISK_HOME': f'{root}/.bazel_ci/bazelisk'})
+
+  def test_the_builds_options_reach_both_commands(self):
+    # The recipe's --no-lto on a build whose flags lack it: LTO off in the
+    # install and in the tests.
+    build = bazel_ci.match_build(BUILDS, HOST_DEBUG_UNOPT['gn'] + ['--no-lto'])
+    self.assertEqual(build['options'], ['--//engine/src/flutter/build/bazel:lto=false'])
+    out_dir = os.path.join(self.engine_src, 'out', 'ci', 'host_debug_unopt')
+    bazel_ci.write_build_directory(self.engine_src, build, out_dir, '/tools/bazelisk')
+    description = bazel_ci.read_build_directory(out_dir)
+    self.assertEqual(description['options'], ['--//engine/src/flutter/build/bazel:lto=false'])
+    command = bazel_ci.install_command(description)
+    self.assertEqual(
+        command[command.index('--config=ci_host_debug_unopt'):], [
+            '--config=ci_host_debug_unopt', '--//engine/src/flutter/build/bazel:lto=false',
+            '//engine/src/flutter/ci/builders:ci_host_debug_unopt', '--', out_dir
+        ]
+    )
+    text = bazel_ci.ninja_file(self.engine_src, build, out_dir, '/tools/bazelisk')
+    self.assertIn(
+        '  description = bazel run --config=ci_host_debug_unopt '
+        '--//engine/src/flutter/build/bazel:lto=false '
+        f'//engine/src/flutter/ci/builders:ci_host_debug_unopt -- {out_dir}\n', text
+    )
+
+  def test_install_of_a_gn_directory_is_an_error(self):
+    out_dir = os.path.join(self.engine_src, 'out', 'host_debug')
+    os.makedirs(out_dir)
+    self.assertEqual(bazel_ci.run_install(out_dir), 1)
+    self.assertEqual(bazel_ci.main(['bazel_ci.py']), 2)
 
   def test_shell_quoting_of_a_path_with_a_space(self):
     self.assertEqual(bazel_ci.shell_quote('/a b/c'), "'/a b/c'")
