@@ -49,10 +49,10 @@ class _TestSliverPersistentHeaderDelegate extends SliverPersistentHeaderDelegate
 
 void main() {
   test('RenderViewport cacheExtent setter bug reproduction', () {
-    final viewport = RenderViewport(
-      crossAxisDirection: AxisDirection.right,
-      offset: ViewportOffset.fixed(0.0),
-    );
+    final offset = ViewportOffset.fixed(0.0);
+    addTearDown(offset.dispose);
+    final viewport = RenderViewport(crossAxisDirection: AxisDirection.right, offset: offset);
+    addTearDown(viewport.dispose);
 
     // New default is viewport-based
     expect(viewport.scrollCacheExtent.style, CacheExtentStyle.viewport);

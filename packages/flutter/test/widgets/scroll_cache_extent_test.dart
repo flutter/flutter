@@ -283,6 +283,7 @@ void main() {
     'RenderViewportBase.cacheExtent setter should not switch style if explicitly set to default fraction',
     (WidgetTester tester) async {
       final offset = ViewportOffset.fixed(0.0);
+      addTearDown(offset.dispose);
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
@@ -316,6 +317,7 @@ void main() {
     WidgetTester tester,
   ) async {
     final offset = ViewportOffset.fixed(0.0);
+    addTearDown(offset.dispose);
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,

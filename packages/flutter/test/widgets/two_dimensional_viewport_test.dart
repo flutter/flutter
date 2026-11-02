@@ -1626,18 +1626,23 @@ void main() {
       'ISSUE 1: RenderTwoDimensionalViewport.cacheExtent setter fails to switch style from default',
       (WidgetTester tester) async {
         final horizontalOffset = ViewportOffset.fixed(0.0);
+        addTearDown(horizontalOffset.dispose);
         final verticalOffset = ViewportOffset.fixed(0.0);
+        addTearDown(verticalOffset.dispose);
         final childManager = _SimpleChildManager();
+        final delegate = _SimpleDelegate();
+        addTearDown(delegate.dispose);
 
         final viewport = _SimpleTwoDimensionalViewport(
           horizontalOffset: horizontalOffset,
           horizontalAxisDirection: AxisDirection.right,
           verticalOffset: verticalOffset,
           verticalAxisDirection: AxisDirection.down,
-          delegate: _SimpleDelegate(),
+          delegate: delegate,
           mainAxis: Axis.vertical,
           childManager: childManager,
         );
+        addTearDown(viewport.dispose);
 
         // Default is viewport(0.8)
         expect(viewport.cacheExtentStyle, CacheExtentStyle.viewport);
