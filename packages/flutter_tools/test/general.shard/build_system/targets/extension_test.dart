@@ -491,43 +491,52 @@ void main() {
     },
   );
 
+  testWithoutContext('ExtensionTarget supports custom targetPlatform on target with built-in platform override on genSnapshot', () async {
+    final buildManager = FakeExtensionBuildManager();
+    final ExtensionTarget customTargetPlatformTarget = _createTarget(
+      buildManager: buildManager,
+      targetPlatform: 'custom-embedder-arm64',
+      inputs: const <ExtensionSource>[
+        ExtensionSource.artifact(BuiltInArtifacts.icuData),
+        ExtensionSource.artifact(BuiltInArtifacts.flutterPatchedSdkPath),
+        ExtensionSource.artifact(
+          BuiltInArtifacts.genSnapshot,
+          platform: 'linux-arm64',
+          mode: .release,
+        ),
+      ],
+    );
+
+    final ResolvedFiles resolvedInputs = customTargetPlatformTarget.resolveInputs(environment);
+    expect(
+      resolvedInputs.sources.map((File file) => file.path),
+      containsAll(<String>[
+        'Artifact.icuData.debug',
+        'Artifact.flutterPatchedSdkPath.debug',
+        'Artifact.genSnapshot.TargetPlatform.linux_arm64.release',
+      ]),
+    );
+
+    await customTargetPlatformTarget.build(environment);
+
+    expect(
+      buildManager.invokedResolvedArtifacts,
+      equals(<String, String>{
+        'icuData': 'Artifact.icuData.debug',
+        'flutterPatchedSdkPath': 'Artifact.flutterPatchedSdkPath.debug',
+        'genSnapshot': 'Artifact.genSnapshot.TargetPlatform.linux_arm64.release',
+      }),
+    );
+  });
+
   testWithoutContext(
-    'ExtensionTarget supports custom targetPlatform on target and artifact sources',
+    'ExtensionTarget throws ToolExit when artifact source specifies unsupported target platform',
     () async {
-      final buildManager = FakeExtensionBuildManager();
-      final ExtensionTarget customTargetPlatformTarget = _createTarget(
-        buildManager: buildManager,
-        targetPlatform: 'custom-embedder-arm64',
+      const expectedMessage =
+          'Unsupported target platform "custom-artifact-platform" '
+          'for artifact "flutterPatchedSdkPath".';
+      final ExtensionTarget targetWithUnsupportedSourcePlatform = _createTarget(
         inputs: const <ExtensionSource>[
-          ExtensionSource.artifact(BuiltInArtifacts.icuData),
-          ExtensionSource.artifact(
-            BuiltInArtifacts.flutterPatchedSdkPath,
-            platform: 'custom-artifact-platform',
-          ),
-          ExtensionSource.artifact(
-            BuiltInArtifacts.genSnapshot,
-            platform: 'linux-arm64',
-            mode: .release,
-          ),
-        ],
-      );
-
-      await customTargetPlatformTarget.build(environment);
-
-      expect(
-        buildManager.invokedResolvedArtifacts,
-        equals(<String, String>{
-          'icuData': 'Artifact.icuData.debug',
-          'flutterPatchedSdkPath': 'Artifact.flutterPatchedSdkPath.debug',
-          'genSnapshot': 'Artifact.genSnapshot.TargetPlatform.linux_arm64.release',
-        }),
-      );
-
-      final builtInTargetBuildManager = FakeExtensionBuildManager();
-      final ExtensionTarget builtInTargetWithCustomArtifactPlatform = _createTarget(
-        buildManager: builtInTargetBuildManager,
-        inputs: const <ExtensionSource>[
-          ExtensionSource.artifact(BuiltInArtifacts.icuData),
           ExtensionSource.artifact(
             BuiltInArtifacts.flutterPatchedSdkPath,
             platform: 'custom-artifact-platform',
@@ -535,28 +544,102 @@ void main() {
         ],
       );
 
-      final ResolvedFiles resolvedInputs = builtInTargetWithCustomArtifactPlatform.resolveInputs(
-        environment,
-      );
       expect(
-        resolvedInputs.sources.map((File file) => file.path),
-        containsAll(<String>[
-          'Artifact.icuData.TargetPlatform.linux_x64.debug',
-          'Artifact.flutterPatchedSdkPath.debug',
-        ]),
+        () => targetWithUnsupportedSourcePlatform.resolveInputs(environment),
+        throwsToolExit(message: expectedMessage),
       );
 
-      await builtInTargetWithCustomArtifactPlatform.build(environment);
-
-      expect(
-        builtInTargetBuildManager.invokedResolvedArtifacts,
-        equals(<String, String>{
-          'icuData': 'Artifact.icuData.TargetPlatform.linux_x64.debug',
-          'flutterPatchedSdkPath': 'Artifact.flutterPatchedSdkPath.debug',
-        }),
+      await expectLater(
+        () => targetWithUnsupportedSourcePlatform.build(environment),
+        throwsToolExit(message: expectedMessage),
       );
     },
   );
+
+  testWithoutContext('ExtensionTarget throws ToolExit when target-specific artifact resolves to null target platform', () async {
+    const expectedGenSnapshotMessage =
+        'Artifact "genSnapshot" requires a built-in target platform; specify a built-in '
+        '"platform" on the artifact source when targeting out-of-tree platform '
+        '"custom-embedder-arm64".';
+    final ExtensionTarget outOfTreeGenSnapshotTarget = _createTarget(
+      targetPlatform: 'custom-embedder-arm64',
+      inputs: const <ExtensionSource>[ExtensionSource.artifact(BuiltInArtifacts.genSnapshot)],
+    );
+
+    expect(
+      () => outOfTreeGenSnapshotTarget.resolveInputs(environment),
+      throwsToolExit(message: expectedGenSnapshotMessage),
+    );
+
+    await expectLater(
+      () => outOfTreeGenSnapshotTarget.build(environment),
+      throwsToolExit(message: expectedGenSnapshotMessage),
+    );
+
+    const expectedLinuxDesktopMessage =
+        'Artifact "linuxDesktopPath" requires a built-in target platform; specify a built-in '
+        '"platform" on the artifact source when targeting out-of-tree platform '
+        '"custom-embedder-arm64".';
+    final ExtensionTarget outOfTreeLinuxDesktopTarget = _createTarget(
+      targetPlatform: 'custom-embedder-arm64',
+      inputs: const <ExtensionSource>[
+        ExtensionSource.artifact(ExtensionArtifact('linuxDesktopPath')),
+      ],
+    );
+
+    expect(
+      () => outOfTreeLinuxDesktopTarget.resolveInputs(environment),
+      throwsToolExit(message: expectedLinuxDesktopMessage),
+    );
+
+    await expectLater(
+      () => outOfTreeLinuxDesktopTarget.build(environment),
+      throwsToolExit(message: expectedLinuxDesktopMessage),
+    );
+  });
+
+  testWithoutContext('resolveExtensionBuildTargetArtifacts resolves target-independent artifacts and throws ToolExit when target-specific artifact is requested for out-of-tree platform', () {
+    final Map<String, String> resolvedIndependent = resolveExtensionBuildTargetArtifacts(
+      artifacts: artifacts,
+      buildMode: .release,
+      target: ExtensionBuildTarget(
+        description: 'Out-of-tree build target with target-independent artifacts',
+        name: 'custom-target',
+        outputDir: '{OUTPUT_DIR}/custom',
+        targetPlatform: 'custom-embedder-arm64',
+        artifacts: const <ExtensionArtifact>{
+          BuiltInArtifacts.flutterPatchedSdkPath,
+          BuiltInArtifacts.icuData,
+        },
+      ),
+    );
+    expect(
+      resolvedIndependent,
+      equals(<String, String>{
+        'flutterPatchedSdkPath': 'Artifact.flutterPatchedSdkPath.release',
+        'icuData': 'Artifact.icuData.release',
+      }),
+    );
+
+    expect(
+      () => resolveExtensionBuildTargetArtifacts(
+        artifacts: artifacts,
+        buildMode: .release,
+        target: ExtensionBuildTarget(
+          description: 'Out-of-tree build target with genSnapshot',
+          name: 'custom-target',
+          outputDir: '{OUTPUT_DIR}/custom',
+          targetPlatform: 'custom-embedder-arm64',
+          artifacts: const <ExtensionArtifact>{BuiltInArtifacts.genSnapshot},
+        ),
+      ),
+      throwsToolExit(
+        message:
+            'Artifact "genSnapshot" requires a built-in target platform, '
+            'but build target "custom-target" targets out-of-tree platform "custom-embedder-arm64".',
+      ),
+    );
+  });
 
   group('resolveExtensionOutputDir', () {
     final cases = <({String description, String pattern, String expectedPath})>[
