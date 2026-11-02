@@ -633,7 +633,6 @@ install(
 )
 
 # ci/host_release_test's tests: run_tests.py --type dart,dart-host,engine,benchmarks.
-# Other steps, scripts of the checkout: Generate metrics test; Upload metrics dry-run.
 test_suite(
     name = "host_release_test_tests",
     tags = ["manual"],
@@ -809,7 +808,6 @@ install(
 )
 
 # ci/android_debug_unopt's tests: run_tests.py --type java.
-# Other steps, scripts of the checkout: malioc diff.
 test_suite(
     name = "android_debug_unopt_tests",
     tags = ["manual"],
@@ -830,7 +828,7 @@ install(
     }),
 )
 
-# ci/host_release_licenses's tests run from the build directory: licenses_cpp_testrunner.
+# ci/host_release_licenses's tests: run_tests.py --type binaries.
 test_suite(
     name = "host_release_licenses_tests",
     tags = ["manual"],
