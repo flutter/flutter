@@ -64,13 +64,28 @@ Steps 2 and 4 are scripts of this repository; step 3 runs whatever
   `download_bazelisk` (off by default; the Bazel builds set it), as the
   CIPD package `infra/3pp/tools/bazelisk`; it fetches the Bazel release
   `.bazelversion` names. A developer's own bazelisk on `PATH` serves too.
-- **The edge's shell closes the file descriptors it inherits** before it runs
-  bazelisk. ninja learns that a console-pool command is done when every
-  holder of a pipe it hands the child has closed it; the Bazel server the
-  client starts inherits that pipe and lives on after the command (its idle
-  timeout is hours), and ninja waited on it -- the first end-to-end run hung
-  after a finished install. Closing fds 3–255 in the shell first keeps the
-  pipe out of the server; ninja still waits for the shell itself.
+- **The edge runs the install through `bazel_ci.py install <dir>`**, which
+  reads `bazel.json` and starts bazelisk with every inherited file
+  descriptor above stderr closed. ninja learns that a console-pool command
+  is done when every holder of a pipe it hands the child has closed it; the
+  Bazel server the client starts inherits what the client has and lives on
+  after the command (its idle timeout is hours), and ninja waited on it --
+  the first end-to-end run hung after a finished install. A shell loop over
+  `exec N>&-` did the same on a host whose `/bin/sh` is bash; the bots' is
+  dash, which has no descriptors above 9 (`exec: 10: not found`, the first
+  presubmit run), and Python's `close_fds` has no such limit.
+- **The recipe's `--no-lto`.** cocoon sets the `no_lto` property on a
+  release builder's presubmit builds and the recipe appends `--no-lto` to
+  the flags; a build whose own flags lack it matches without it and runs
+  with LTO off (`--//engine/src/flutter/build/bazel:lto=false` after its
+  configuration, in the install and the tests alike: `bazel.json`'s
+  `options`).
+- **One output root for the install and the tests.** `run_tests.py` runs
+  its Bazel commands from `bazel.json`'s recorded startup and build options
+  rather than recomputing them: computed again from the checkout root they
+  landed two directories above it (`repo_root` of a root), and the tests
+  rebuilt the build in a second output root -- outside the bot's cache,
+  25 GB under a developer's home.
 - **Bazel's state** -- the output root, bazelisk's download, the disk cache --
   lives under the checkout's `.bazel_ci/` (ignored by git, in the bot's
   `builder` cache), not under `out/` (which the recipe clobbers) or the bot's
