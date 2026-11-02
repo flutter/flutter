@@ -17,6 +17,13 @@ import 'package:test/test.dart';
 /// pubspec.lock without a rerun of the generator is what this catches (the
 /// rebase of 10-30 left dap_adapters at 1.0.1 for the tool's tests while
 /// the lock had moved to 1.1.0).
+///
+/// lib/web_ui's lock is not in the repository (the engine's .gitignore
+/// ignores every *.lock; felt's `pub get` writes it), so PUB_LOCKS carries
+/// the resolution of the host that last ran the generator, and its case
+/// here runs only where the file exists -- under `dart test` in this
+/// directory after felt has run, not under Bazel, whose data cannot name
+/// an unversioned file.
 void main() {
   final String repoRoot = findRepositoryRoot()!;
   final String generated = io.File(p.join(repoRoot, 'build_defs', 'dart', 'pub.lock.bzl'))
@@ -65,9 +72,15 @@ void main() {
     expectCurrent('pubspec.lock', pinsOf(between(generated, 'PUB_HOSTED = {', '\n}\n')));
   });
 
-  test("PUB_LOCKS holds lib/web_ui's pubspec.lock", () {
-    final String locks = between(generated, 'PUB_LOCKS = {', '\n}\n');
-    final String webUi = between(locks, '"engine/src/flutter/lib/web_ui": struct(', '\n    ),');
-    expectCurrent('engine/src/flutter/lib/web_ui/pubspec.lock', pinsOf(webUi));
-  });
+  const webUiLock = 'engine/src/flutter/lib/web_ui/pubspec.lock';
+  final bool webUiLockExists = io.File(p.join(repoRoot, webUiLock)).existsSync();
+  test(
+    "PUB_LOCKS holds lib/web_ui's pubspec.lock",
+    () {
+      final String locks = between(generated, 'PUB_LOCKS = {', '\n}\n');
+      final String webUi = between(locks, '"engine/src/flutter/lib/web_ui": struct(', '\n    ),');
+      expectCurrent(webUiLock, pinsOf(webUi));
+    },
+    skip: webUiLockExists ? false : '$webUiLock is not in the repository (gitignored) and not here',
+  );
 }
