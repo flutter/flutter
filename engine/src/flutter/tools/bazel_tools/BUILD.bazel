@@ -15,8 +15,11 @@ filegroup(
     srcs = glob(["lib/**/*.dart"]),
 )
 
-# The tests parse the checkout's DEPS and pubspec.lock (and lib/web_ui's)
-# and check the generated files against them.
+# The tests parse the checkout's DEPS and pubspec.lock and check the
+# generated files against them. lib/web_ui's pubspec.lock, the other lock
+# pub.lock.bzl mirrors, is not here: the engine's .gitignore ignores every
+# *.lock, so it exists only where `pub get` (felt) has run -- the test
+# checks it when it is there, under `dart test` in this directory.
 dart_package_test(
     name = "tests",
     data = [
@@ -25,6 +28,5 @@ dart_package_test(
         "//:pubspec.lock",
         "//build_defs/dart:pub.lock.bzl",
         "//build_defs/repositories:deps.lock.bzl",
-        "//engine/src/flutter/lib/web_ui:pubspec.lock",
     ],
 )

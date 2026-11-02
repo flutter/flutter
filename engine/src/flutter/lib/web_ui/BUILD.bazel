@@ -67,9 +67,6 @@ exports_files([
     "lib/src/engine/skwasm/skwasm_impl.dart",
     "lib/src/engine/skwasm/skwasm_stub.dart",
     "lib/ui_web/src/ui_web.dart",
-    # The web engine's own resolution, mirrored by pub.lock.bzl's PUB_LOCKS
-    # (tools/bazel_tools' tests check the mirror).
-    "pubspec.lock",
 ])
 
 # ---------------------------------------------------------------------------
