@@ -89,8 +89,8 @@ struct InputDescription {
 /// A shader config parsed as part of a ShaderBundleConfig.
 struct ShaderConfig {
   std::string source_file_name;
-  SourceType type;
-  SourceLanguage language;
+  SourceType type = SourceType::kUnknown;
+  SourceLanguage language = SourceLanguage::kUnknown;
   std::string entry_point;
 };
 

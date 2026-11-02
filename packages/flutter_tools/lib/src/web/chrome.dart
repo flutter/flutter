@@ -52,6 +52,23 @@ const kWindowsEdgeExecutable = r'Microsoft\Edge\Application\msedge.exe';
 ///     Inconsistency detected by ld.so: ../elf/dl-tls.c: 493: _dl_allocate_tls_init: Assertion `listp->slotinfo[cnt].gen <= GL(dl_tls_generation)' failed!
 const _kGlibcError = 'Inconsistency detected by ld.so';
 
+/// Printed by Chromium to stderr when it fails to bind the remote debugging
+/// port (e.g. because the port is already taken on both IPv4 and IPv6
+/// loopback). Chromium keeps running after this, so it never prints
+/// "DevTools listening" and never exits on its own.
+///
+/// See: https://github.com/flutter/flutter/issues/192013
+const _kDevToolsServerFailure = 'Cannot start http server for devtools';
+
+/// How long to wait for Chromium to print "DevTools listening" before giving
+/// up on the current launch attempt.
+///
+/// This is a backstop for failure modes that keep Chromium alive without ever
+/// reporting that DevTools is listening. Known failure modes (e.g.
+/// [_kDevToolsServerFailure]) are detected eagerly without waiting this long.
+@visibleForTesting
+const kDevToolsListeningTimeout = Duration(seconds: 30);
+
 /// Filters out non-fatal D-Bus connection error messages emitted by Chromium.
 ///
 /// Headless Linux Chrome attempts to query Linux D-Bus desktop services (such as
@@ -242,8 +259,7 @@ class ChromiumLauncher {
       _restoreUserSessionInformation(cacheDir, userDataDir);
     }
 
-    final int port = debugPort ?? await _operatingSystemUtils.findFreePort();
-    final args = <String>[
+    List<String> buildArgs(int port) => <String>[
       chromeExecutable,
       // Using a tmp directory ensures that a new instance of chrome launches
       // allowing for the remote debug port to be enabled.
@@ -299,8 +315,8 @@ class ChromiumLauncher {
       url,
     ];
 
-    final _SpawnResult spawnResult = await _spawnChromiumProcess(args, chromeExecutable);
-    final Process process = spawnResult.process;
+    final _SpawnResult(:Process process, :int port, :String host, :List<String> logBuffer) =
+        await _spawnChromiumProcess(buildArgs, debugPort);
 
     // When the process exits, copy the user settings back to the provided data-dir.
     if (cacheDir != null) {
@@ -316,27 +332,38 @@ class ChromiumLauncher {
         }),
       );
     }
+    final connectionHost = host.contains(':') && !host.startsWith('[') ? '[$host]' : host;
     return connect(
       Chromium(
         port,
-        ChromeConnection('localhost', port),
+        ChromeConnection(connectionHost, port),
         url: url,
         process: process,
         chromiumLauncher: this,
         logger: _logger,
-        logBuffer: spawnResult.logBuffer,
+        logBuffer: logBuffer,
       ),
       skipCheck,
     );
   }
 
-  Future<_SpawnResult> _spawnChromiumProcess(List<String> args, String chromeExecutable) async {
+  /// Spawns Chromium, retrying on known failures.
+  ///
+  /// If [debugPort] is null, `--remote-debugging-port=0` is passed so Chromium
+  /// binds to an ephemeral port allocated atomically by the OS kernel, avoiding
+  /// TOCTOU race conditions.
+  Future<_SpawnResult> _spawnChromiumProcess(
+    List<String> Function(int port) buildArgs,
+    int? debugPort,
+  ) async {
     // Keep attempting to launch the browser until one of:
     // - Chrome launched successfully, in which case we just return from the loop.
     // - The tool reached the maximum retry count, in which case we throw ToolExit.
     const kMaxRetries = 3;
     var retry = 0;
     while (true) {
+      final int requestedPort = debugPort ?? 0;
+      final List<String> args = buildArgs(requestedPort);
       final Process process = await _processManager.start(args);
       final logBuffer = ListQueue<String>(200);
 
@@ -355,27 +382,52 @@ class ChromiumLauncher {
         },
       );
 
-      final devToolsListening = Completer<void>();
+      final devToolsListening = Completer<({String host, int port})>();
       var hitGlibcBug = false;
       var shouldRetry = false;
 
-      final StreamSubscription<String> stderrSub = process.stderr.transform(utf8LineDecoder).listen(
-        (String line) {
-          if (_isDbusError(line)) {
-            return;
-          }
-          addLog('CHROME STDERR', line);
-          if (line.contains(_kGlibcError)) {
-            hitGlibcBug = true;
-            shouldRetry = true;
-          }
-          if (line.startsWith('DevTools listening')) {
-            if (!devToolsListening.isCompleted) {
-              devToolsListening.complete();
+      final StreamSubscription<String>
+      stderrSub = process.stderr.transform(utf8LineDecoder).listen((String line) {
+        if (_isDbusError(line)) {
+          return;
+        }
+        addLog('CHROME STDERR', line);
+        if (line.contains(_kGlibcError)) {
+          hitGlibcBug = true;
+          shouldRetry = true;
+        }
+        if (line.startsWith('DevTools listening')) {
+          if (!devToolsListening.isCompleted) {
+            final RegExpMatch? devToolsMatch = RegExp(r'DevTools listening on (ws://[^\s]+)')
+                .firstMatch(line);
+            if (devToolsMatch != null) {
+              final Uri devToolsUri = Uri.parse(devToolsMatch.group(1)!);
+              devToolsListening.complete((host: devToolsUri.host, port: devToolsUri.port));
+            } else if (requestedPort != 0) {
+              devToolsListening.complete((host: 'localhost', port: requestedPort));
+            } else {
+              devToolsListening.completeError(
+                Exception(
+                  'Chrome reported "DevTools listening" but failed to provide WebSocket URL: $line',
+                ),
+              );
             }
           }
-        },
-      );
+        }
+        // Chromium stays alive after failing to bind the debugging port, so
+        // neither "DevTools listening" nor process exit will ever unblock us.
+        if (line.contains(_kDevToolsServerFailure)) {
+          if (!devToolsListening.isCompleted) {
+            devToolsListening.completeError(
+              Exception(
+                requestedPort == 0
+                    ? 'Chrome failed to start the DevTools server.'
+                    : 'Chrome failed to start the DevTools server on port $requestedPort.',
+              ),
+            );
+          }
+        }
+      });
 
       // Handle premature process exit.
       unawaited(
@@ -388,14 +440,24 @@ class ChromiumLauncher {
         }),
       );
 
+      ({String host, int port})? boundAddress;
       try {
-        await devToolsListening.future;
+        boundAddress = await devToolsListening.future.timeout(
+          kDevToolsListeningTimeout,
+          onTimeout: () => throw Exception(
+            'Chrome did not report "DevTools listening" within '
+            '${kDevToolsListeningTimeout.inSeconds} seconds.',
+          ),
+        );
       } on Object catch (error) {
         if (retry >= kMaxRetries) {
           logBuffer.forEach(_logger.printError);
           _logger.printError(
             'Failed to launch browser after $kMaxRetries tries. Command used to launch it: ${args.join(' ')}',
           );
+          // The process may still be alive (e.g. DevTools server failure or
+          // timeout). Don't leave it behind.
+          process.kill();
           throwToolExit(
             'Failed to launch browser. Make sure you are using an up-to-date '
             'Chrome or Edge. Otherwise, consider using -d web-server instead '
@@ -406,28 +468,28 @@ class ChromiumLauncher {
         shouldRetry = true;
       }
 
-      if (!hitGlibcBug && !shouldRetry) {
-        return _SpawnResult(process, logBuffer.toList());
+      if (!hitGlibcBug && !shouldRetry && boundAddress != null) {
+        final (:String host, :int port) = boundAddress;
+        return _SpawnResult(process, port, host, logBuffer.toList());
       }
 
       retry += 1;
 
-      // Clean up subscriptions.
-      await stdoutSub.cancel();
-      await stderrSub.cancel();
+      // Clean up subscriptions. Not awaited: nothing depends on the pipes being
+      // fully torn down before the next attempt, and cancelling a completed
+      // subscription can return a root-zone future.
+      unawaited(stdoutSub.cancel());
+      unawaited(stderrSub.cancel());
 
-      // A precaution that avoids accumulating browser processes, in case the
-      // glibc bug doesn't cause the browser to quit and we keep looping and
-      // launching more processes.
-      unawaited(
-        process.exitCode.timeout(
-          const Duration(seconds: 1),
-          onTimeout: () {
-            process.kill();
-            // sigterm
-            return 15;
-          },
-        ),
+      // Terminate the failed browser process so it releases its debugging port
+      // and profile lock before the next attempt starts.
+      process.kill();
+      await process.exitCode.timeout(
+        const Duration(seconds: 2),
+        onTimeout: () {
+          ProcessSignal.sigkill.kill(process);
+          return 137;
+        },
       );
     }
   }
@@ -733,7 +795,9 @@ Future<ChromeTab?> getChromeTabGuarded(
 }
 
 class _SpawnResult {
-  _SpawnResult(this.process, this.logBuffer);
+  _SpawnResult(this.process, this.port, this.host, this.logBuffer);
   final Process process;
+  final int port;
+  final String host;
   final List<String> logBuffer;
 }

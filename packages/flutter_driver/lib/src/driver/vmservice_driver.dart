@@ -300,7 +300,7 @@ class VMServiceFlutterDriver extends FlutterDriver {
   ///
   /// If you used the [registerExtension] API to instrument your application,
   /// you can use this [vms.Isolate] to call these extension methods via
-  /// [vms.Isolate.invokeExtension].
+  /// [vms.VmService.callServiceExtension].
   final vms.Isolate _appIsolate;
 
   /// Whether to print communication between host and app to `stdout`.

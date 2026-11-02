@@ -10,11 +10,11 @@ import 'base/file_system.dart';
 import 'build_info.dart';
 import 'compile.dart';
 import 'convert.dart';
-import 'globals.dart' as globals;
 
-String get defaultMainPath => globals.fs.path.join('lib', 'main.dart');
+String defaultMainPath(FileSystem fileSystem) => fileSystem.path.join('lib', 'main.dart');
 const defaultManifestPath = 'pubspec.yaml';
-String get defaultDepfilePath => globals.fs.path.join(getBuildDirectory(), 'snapshot_blob.bin.d');
+String defaultDepfilePath({required Config config, required FileSystem fileSystem}) =>
+    fileSystem.path.join(getBuildDirectory(config, fileSystem), 'snapshot_blob.bin.d');
 
 String getDefaultCachedKernelPath({
   required bool trackWidgetCreation,

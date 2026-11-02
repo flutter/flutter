@@ -16,6 +16,7 @@ import 'package:flutter_tools/src/android/gradle_errors.dart';
 import 'package:flutter_tools/src/android/gradle_utils.dart';
 import 'package:flutter_tools/src/android/java.dart';
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -60,7 +61,6 @@ void main() {
       processManager = FakeProcessManager.empty();
       logger = BufferLogger.test();
       fileSystem = MemoryFileSystem.test();
-      Cache.flutterRoot = '';
 
       fakeAnalytics = getInitializedFakeAnalyticsInstance(
         fs: fileSystem,
@@ -96,16 +96,22 @@ void main() {
       AndroidStudio? androidStudio,
       AndroidSdk? androidSdk,
     }) {
-      return AndroidGradleBuilder.fromContexts(
-        toolContext:
-            toolContext ??
-            FakeToolContext(
-              logger: logger,
-              processManager: processManager,
-              fs: fileSystem ?? globals.fs,
-              artifacts: artifacts,
-              platform: platform,
+      final ToolContext resolvedToolContext =
+          toolContext ??
+          FakeToolContext(
+            logger: logger,
+            processManager: processManager,
+            fs: fileSystem ?? globals.fs,
+            artifacts: artifacts,
+            platform: platform,
+            cache: Cache.test(
+              flutterRoot: '/',
+              fileSystem: fileSystem,
+              processManager: processManager ?? FakeProcessManager.any(),
             ),
+          );
+      return AndroidGradleBuilder.fromContexts(
+        toolContext: resolvedToolContext,
         androidContext:
             androidContext ??
             FakeAndroidContext(
@@ -117,7 +123,7 @@ void main() {
                   AndroidSdk(
                     (fileSystem ?? globals.fs).directory(missingSdkPath()),
                     java: FakeJava(),
-                    fileSystem: fileSystem ?? globals.fs,
+                    toolContext: resolvedToolContext,
                   ),
             ),
         analytics: analytics ?? fakeAnalytics,
@@ -133,10 +139,11 @@ void main() {
         description,
         body,
         overrides: <Type, Generator>{
+          Cache: () => Cache.test(processManager: processManager, flutterRoot: ''),
           AndroidSdk: () => AndroidSdk(
             fileSystem.directory(missingSdkPath()),
             java: FakeJava(),
-            fileSystem: fileSystem,
+            toolContext: const DelegatingToolContext(),
           ),
           ProcessManager: () => processManager,
           ...overrides,
@@ -233,7 +240,7 @@ void main() {
           return AndroidSdk(
             fileSystem.directory(sdkPath()),
             java: FakeJava(),
-            fileSystem: fileSystem,
+            toolContext: const DelegatingToolContext(),
           );
         },
         AndroidStudio: () => FakeAndroidStudio(),
@@ -303,7 +310,7 @@ void main() {
               'dev',
               treeShakeIcons: false,
               packageConfigPath: '.dart_tool/package_config.json',
-              androidSkipBuildDependencyValidation: true,
+              androidGradleConfig: AndroidGradleConfig(skipBuildDependencyValidation: true),
             ),
           ),
           target: 'lib/main.dart',
@@ -324,7 +331,7 @@ void main() {
           return AndroidSdk(
             fileSystem.directory(sdkPath()),
             java: FakeJava(),
-            fileSystem: fileSystem,
+            toolContext: const DelegatingToolContext(),
           );
         },
         AndroidStudio: () => FakeAndroidStudio(),
@@ -419,7 +426,7 @@ void main() {
           return AndroidSdk(
             fileSystem.directory(sdkPath()),
             java: FakeJava(),
-            fileSystem: fileSystem,
+            toolContext: const DelegatingToolContext(),
           );
         },
         AndroidStudio: () => FakeAndroidStudio(),
@@ -510,7 +517,7 @@ void main() {
           return AndroidSdk(
             fileSystem.directory(sdkPath()),
             java: FakeJava(),
-            fileSystem: fileSystem,
+            toolContext: const DelegatingToolContext(),
           );
         },
         AndroidStudio: () => FakeAndroidStudio(),
@@ -580,10 +587,18 @@ void main() {
               test: (String line) {
                 return line.contains('Some gradle message');
               },
-              handler: ({String? line, FlutterProject? project, bool? usesAndroidX}) async {
-                handlerCalled = true;
-                return GradleBuildStatus.exit;
-              },
+              handler:
+                  ({
+                    required GradleUtils gradleUtils,
+                    required String line,
+                    required FlutterProject project,
+                    required ToolContext toolContext,
+                    required bool usesAndroidX,
+                    Java? java,
+                  }) async {
+                    handlerCalled = true;
+                    return GradleBuildStatus.exit;
+                  },
               eventLabel: 'random-event-label',
             ),
           ],
@@ -767,9 +782,17 @@ void main() {
                 }
                 return false;
               },
-              handler: ({String? line, FlutterProject? project, bool? usesAndroidX}) async {
-                return GradleBuildStatus.retry;
-              },
+              handler:
+                  ({
+                    required GradleUtils gradleUtils,
+                    required String line,
+                    required FlutterProject project,
+                    required ToolContext toolContext,
+                    required bool usesAndroidX,
+                    Java? java,
+                  }) async {
+                    return GradleBuildStatus.retry;
+                  },
               eventLabel: 'random-event-label',
             ),
           ],
@@ -858,9 +881,17 @@ void main() {
             localGradleErrors: <GradleHandledError>[
               GradleHandledError(
                 test: (String line) => line.contains('Some gradle message'),
-                handler: ({String? line, FlutterProject? project, bool? usesAndroidX}) async {
-                  return GradleBuildStatus.retry;
-                },
+                handler:
+                    ({
+                      required GradleUtils gradleUtils,
+                      required String line,
+                      required FlutterProject project,
+                      required ToolContext toolContext,
+                      required bool usesAndroidX,
+                      Java? java,
+                    }) async {
+                      return GradleBuildStatus.retry;
+                    },
                 eventLabel: 'random-event-label',
               ),
             ],
@@ -957,10 +988,18 @@ void main() {
               test: (String line) {
                 return line.contains('Some gradle message');
               },
-              handler: ({String? line, FlutterProject? project, bool? usesAndroidX}) async {
-                handlerCalled = true;
-                return GradleBuildStatus.exit;
-              },
+              handler:
+                  ({
+                    required GradleUtils gradleUtils,
+                    required String line,
+                    required FlutterProject project,
+                    required ToolContext toolContext,
+                    required bool usesAndroidX,
+                    Java? java,
+                  }) async {
+                    handlerCalled = true;
+                    return GradleBuildStatus.exit;
+                  },
               eventLabel: 'random-event-label',
             ),
           ],
@@ -1131,9 +1170,17 @@ void main() {
             test: (String line) {
               return line.contains('Some gradle message');
             },
-            handler: ({String? line, FlutterProject? project, bool? usesAndroidX}) async {
-              return GradleBuildStatus.retry;
-            },
+            handler:
+                ({
+                  required GradleUtils gradleUtils,
+                  required String line,
+                  required FlutterProject project,
+                  required ToolContext toolContext,
+                  required bool usesAndroidX,
+                  Java? java,
+                }) async {
+                  return GradleBuildStatus.retry;
+                },
             eventLabel: 'random-event-label',
           ),
         ],
@@ -1489,7 +1536,7 @@ void main() {
             return AndroidSdk(
               fileSystem.directory(sdkPath()),
               java: FakeJava(),
-              fileSystem: fileSystem,
+              toolContext: const DelegatingToolContext(),
             );
           },
           AndroidStudio: () => FakeAndroidStudio(),
@@ -1560,7 +1607,7 @@ void main() {
             return AndroidSdk(
               fileSystem.directory(sdkPath()),
               java: FakeJava(),
-              fileSystem: fileSystem,
+              toolContext: const DelegatingToolContext(),
             );
           },
           AndroidStudio: () => FakeAndroidStudio(),
@@ -1624,7 +1671,7 @@ void main() {
             return AndroidSdk(
               fileSystem.directory(sdkPath()),
               java: FakeJava(),
-              fileSystem: fileSystem,
+              toolContext: const DelegatingToolContext(),
             );
           },
           AndroidStudio: () => FakeAndroidStudio(),
@@ -1642,7 +1689,7 @@ void main() {
           final sdk = AndroidSdk(
             fileSystem.directory(sdkPath()),
             java: FakeJava(),
-            fileSystem: fileSystem,
+            toolContext: const DelegatingToolContext(),
           );
           final AndroidGradleBuilder builder = createBuilder(
             java: FakeJava(),
@@ -1702,21 +1749,7 @@ void main() {
             throwsToolExit(message: failedToStripDebugSymbolsErrorMessage),
           );
         },
-        overrides: <Type, Generator>{
-          AndroidSdk: () {
-            fileSystem.directory(sdkPath()).createSync(recursive: true);
-            fileSystem
-                .directory(fileSystem.path.join(sdkPath(), 'cmdline-tools', 'latest', 'bin'))
-                .childFile(apkAnalyzerBinaryName)
-                .createSync(recursive: true);
-            return AndroidSdk(
-              fileSystem.directory(sdkPath()),
-              java: FakeJava(),
-              fileSystem: fileSystem,
-            );
-          },
-          AndroidStudio: () => FakeAndroidStudio(),
-        },
+        overrides: <Type, Generator>{AndroidStudio: () => FakeAndroidStudio()},
       );
 
       testUsingContext(
@@ -1730,7 +1763,7 @@ void main() {
           final sdk = AndroidSdk(
             fileSystem.directory(sdkPath()),
             java: FakeJava(),
-            fileSystem: fileSystem,
+            toolContext: const DelegatingToolContext(),
           );
           final AndroidGradleBuilder builder = createBuilder(
             java: FakeJava(),
@@ -1915,16 +1948,19 @@ android {
       final AndroidApk? androidApk = await AndroidApk.fromAndroidProject(
         project.android,
         androidSdk: sdk,
-        fileSystem: fileSystem,
-        logger: logger,
-        processManager: processManager,
-        processUtils: ProcessUtils(processManager: processManager, logger: logger),
-        userMessages: UserMessages(),
         buildInfo: const BuildInfo(
           BuildMode.debug,
           null,
           treeShakeIcons: false,
           packageConfigPath: '.dart_tool/package_config.json',
+        ),
+        toolContext: FakeToolContext(
+          config: Config.test(),
+          fs: fileSystem,
+          logger: logger,
+          processManager: processManager,
+          processUtils: ProcessUtils(processManager: processManager, logger: logger),
+          userMessages: UserMessages(),
         ),
       );
 
@@ -2226,7 +2262,7 @@ Gradle Crashed
           return AndroidSdk(
             fileSystem.directory(sdkPath()),
             java: FakeJava(),
-            fileSystem: fileSystem,
+            toolContext: const DelegatingToolContext(),
           );
         },
         AndroidStudio: () => FakeAndroidStudio(),
@@ -2814,7 +2850,7 @@ Gradle Crashed
               BuildMode.release,
               null,
               treeShakeIcons: false,
-              androidGradleDaemon: false,
+              androidGradleConfig: AndroidGradleConfig(gradleDaemon: false),
               packageConfigPath: '.dart_tool/package_config.json',
             ),
           ),
@@ -2875,7 +2911,7 @@ Gradle Crashed
               BuildMode.release,
               null,
               treeShakeIcons: false,
-              androidGradleProjectCacheDir: '/made/up/dir',
+              androidGradleConfig: AndroidGradleConfig(projectCacheDir: '/made/up/dir'),
               packageConfigPath: '.dart_tool/package_config.json',
             ),
           ),
@@ -3293,7 +3329,7 @@ Gradle Crashed
           return AndroidSdk(
             fileSystem.directory(sdkPath()),
             java: FakeJava(version: const Version.withText(21, 0, 0, '21.0.0')),
-            fileSystem: fileSystem,
+            toolContext: const DelegatingToolContext(),
           );
         },
         AndroidStudio: () => FakeAndroidStudio(),
@@ -3397,7 +3433,7 @@ Gradle Crashed
           return AndroidSdk(
             fileSystem.directory(sdkPath()),
             java: FakeJava(version: const Version.withText(21, 0, 0, '21.0.0')),
-            fileSystem: fileSystem,
+            toolContext: const DelegatingToolContext(),
           );
         },
         AndroidStudio: () => FakeAndroidStudio(),
@@ -3405,7 +3441,7 @@ Gradle Crashed
     );
 
     testUsingContext(
-      'skips Java and Gradle compatibility check when androidSkipBuildDependencyValidation is true',
+      'skips Java and Gradle compatibility check when skipBuildDependencyValidation is true',
       () async {
         final AndroidGradleBuilder builder = createBuilder(
           java: FakeJava(version: const Version.withText(21, 0, 0, '21.0.0')),
@@ -3477,7 +3513,7 @@ Gradle Crashed
               'dev',
               treeShakeIcons: false,
               packageConfigPath: '.dart_tool/package_config.json',
-              androidSkipBuildDependencyValidation: true, // Skip validation
+              androidGradleConfig: AndroidGradleConfig(skipBuildDependencyValidation: true),
             ),
           ),
           target: 'lib/main.dart',
@@ -3504,7 +3540,7 @@ Gradle Crashed
           return AndroidSdk(
             fileSystem.directory(sdkPath()),
             java: FakeJava(version: const Version.withText(21, 0, 0, '21.0.0')),
-            fileSystem: fileSystem,
+            toolContext: const DelegatingToolContext(),
           );
         },
         AndroidStudio: () => FakeAndroidStudio(),

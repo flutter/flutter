@@ -150,7 +150,7 @@ class BenchTextCachedLayout extends RawRecorder {
 }
 
 /// Global counter incremented every time the benchmark is asked to
-/// [createWidget].
+/// [BenchBuildColorsGrid.createWidget].
 ///
 /// The purpose of this counter is to make sure the rendered paragraphs on each
 /// build are unique.

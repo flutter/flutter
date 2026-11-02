@@ -553,7 +553,7 @@ class _DesktopCategoryHeader extends StatelessWidget {
   }
 }
 
-/// Animates the category item to stagger in. The [_AnimatedCategoryItem.startDelayFraction]
+/// Animates the category item to stagger in. The `_AnimatedCategoryItem.startDelayFraction`
 /// gives a delay in the unit of a fraction of the whole animation duration,
 /// which is defined in [_AnimatedHomePageState].
 class _AnimatedCategoryItem extends StatelessWidget {

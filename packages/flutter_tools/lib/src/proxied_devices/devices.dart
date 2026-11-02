@@ -8,6 +8,7 @@ import 'dart:typed_data';
 import 'package:meta/meta.dart';
 
 import '../application_package.dart';
+import '../artifacts.dart';
 import '../base/dds.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
@@ -691,25 +692,30 @@ class ProxiedPortForwarder extends DevicePortForwarder {
             },
           ),
         );
-        debounceDataStream(socket).listen((Uint8List data) {
-          unawaited(
-            connection
-                .sendRequest('proxy.write', <String, Object>{'id': id}, data)
-                .then(
-                  (Object? obj) => obj,
-                  onError: (Object error, StackTrace stackTrace) {
-                    // Log the error, but proceed normally. Network failure should not
-                    // crash the tool. If this is critical, the place where the connection
-                    // is being used would crash.
-                    _logger.printWarning('Write to remote proxy error: $error');
-                    _logger.printTrace(
-                      'Write to remote proxy error: $error, stack trace: $stackTrace',
-                    );
-                    return null;
-                  },
-                ),
-          );
-        });
+        debounceDataStream(socket).listen(
+          (Uint8List data) {
+            unawaited(
+              connection
+                  .sendRequest('proxy.write', <String, Object>{'id': id}, data)
+                  .then(
+                    (Object? obj) => obj,
+                    onError: (Object error, StackTrace stackTrace) {
+                      // Log the error, but proceed normally. Network failure should not
+                      // crash the tool. If this is critical, the place where the connection
+                      // is being used would crash.
+                      _logger.printWarning('Write to remote proxy error: $error');
+                      _logger.printTrace(
+                        'Write to remote proxy error: $error, stack trace: $stackTrace',
+                      );
+                      return null;
+                    },
+                  ),
+            );
+          },
+          onError: (Object error, StackTrace stackTrace) {
+            _logger.printTrace('Socket error: $error\n$stackTrace');
+          },
+        );
         _connectedSockets.add(socket);
 
         unawaited(
@@ -850,6 +856,7 @@ class ProxiedDartDevelopmentService
   @override
   Future<void> startDartDevelopmentService(
     Uri vmServiceUri, {
+    required Artifacts artifacts,
     String? appName,
     FlutterDevice? device,
     int? ddsPort,
@@ -871,6 +878,7 @@ class ProxiedDartDevelopmentService
       _ddsStartedLocally = true;
       await _localDds.startDartDevelopmentService(
         vmServiceUri,
+        artifacts: artifacts,
         appName: appName,
         ddsPort: ddsPort,
         ipv6: ipv6,

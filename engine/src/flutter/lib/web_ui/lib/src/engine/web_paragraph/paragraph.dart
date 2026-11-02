@@ -36,6 +36,7 @@ class WebParagraphStyle implements ui.ParagraphStyle {
     ui.Color? color,
     ui.StrutStyle? strutStyle,
     this.textHeightBehavior,
+    this.hyphens,
   }) : _strutStyle = strutStyle as WebStrutStyle?,
        _textStyle = WebTextStyle(
          fontFamily: fontFamily,
@@ -43,6 +44,9 @@ class WebParagraphStyle implements ui.ParagraphStyle {
          fontStyle: fontStyle,
          fontWeight: fontWeight,
          height: height,
+         // Propagate the paragraph's default leadingDistribution to the root text style
+         // so spans and lines inherit it unless overridden by a child TextStyle.
+         leadingDistribution: textHeightBehavior?.leadingDistribution,
          locale: locale,
          color: color,
        ),
@@ -59,6 +63,11 @@ class WebParagraphStyle implements ui.ParagraphStyle {
   final String? ellipsis;
 
   final ui.TextHeightBehavior? textHeightBehavior;
+
+  // TODO(dbebawy): honor hyphens in the pure-Dart line-breaker/painter (no
+  // soft-hyphen glyph emitted at a break yet). Accepted and stored for now.
+  // https://github.com/flutter/flutter/issues/193506
+  final ui.Hyphens? hyphens;
 
   WebStrutStyle? get strutStyle => _strutStyle;
   final WebStrutStyle? _strutStyle;
@@ -78,7 +87,8 @@ class WebParagraphStyle implements ui.ParagraphStyle {
         ellipsis == other.ellipsis &&
         textHeightBehavior == other.textHeightBehavior &&
         _strutStyle == other._strutStyle &&
-        _textStyle == other._textStyle;
+        _textStyle == other._textStyle &&
+        hyphens == other.hyphens;
   }
 
   @override
@@ -91,6 +101,7 @@ class WebParagraphStyle implements ui.ParagraphStyle {
       textHeightBehavior,
       _strutStyle,
       _textStyle,
+      hyphens,
     );
   }
 
@@ -105,6 +116,7 @@ class WebParagraphStyle implements ui.ParagraphStyle {
           'maxLines: $maxLines, '
           'ellipsis: $ellipsis, '
           'textHeightBehavior: $textHeightBehavior, '
+          'hyphens: $hyphens, '
           'strutStyle: $_strutStyle, '
           'textAlign: $textAlign'
           'textStyle: $_textStyle'
@@ -783,8 +795,11 @@ class TextSpan extends ParagraphSpan {
   }
 
   ui.Rect getTextRangeSelectionInBlock(LineBlock block, ui.TextRange textRange) {
-    // Let's normalize the ranges
-    final ui.TextRange intersect = block.textRange.intersect(textRange);
+    final ui.TextRange physicalRange = block is TextBlock
+        ? block.physicalTextRange
+        : block.textRange;
+    // Let's normalize the ranges against physical content range (excluding \n)
+    final ui.TextRange intersect = physicalRange.intersect(textRange);
     if (intersect.isEmpty) {
       return ui.Rect.zero;
     }
@@ -796,9 +811,12 @@ class TextSpan extends ParagraphSpan {
   }
 
   ui.Rect getBlockBounds(TextBlock block) {
+    if (block.physicalTextRange.isEmpty) {
+      return ui.Rect.fromLTWH(block.shiftFromLineStart, 0.0, 0.0, 0.0);
+    }
     final ui.Rect bounds = _metrics.getBounds(
-      block.textRange.start - start,
-      block.textRange.end - start,
+      block.physicalTextRange.start - start,
+      block.physicalTextRange.end - start,
     );
     return ui.Rect.fromLTWH(
       bounds.left + block.spanShiftFromLineStart,
@@ -809,10 +827,16 @@ class TextSpan extends ParagraphSpan {
   }
 
   ui.Rect getBlockSelection(LineBlock block) {
+    final ui.TextRange physicalRange = block is TextBlock
+        ? block.physicalTextRange
+        : block.textRange;
+    if (physicalRange.isEmpty) {
+      return ui.Rect.fromLTWH(block.shiftFromLineStart, 0.0, 0.0, 0.0);
+    }
     // This `selection` is relative to the span, but blocks should be positioned relative to the line.
     final ui.Rect selection = _metrics.getSelection(
-      block.textRange.start - start,
-      block.textRange.end - start,
+      physicalRange.start - start,
+      physicalRange.end - start,
     );
 
     // TODO(mdebbar): Consider moving this block-aware code to `TextBlock`.
@@ -855,11 +879,79 @@ class TextSpan extends ParagraphSpan {
 ///
 /// See: https://chromestatus.com/feature/5075532483657728
 class WebParagraph implements ui.Paragraph {
-  WebParagraph(this.paragraphStyle, this.spans, this.text);
+  WebParagraph(this.paragraphStyle, List<ParagraphSpan> styleSpans, this.text)
+    : _styleSpans = styleSpans;
 
   final WebParagraphStyle paragraphStyle;
-  final List<ParagraphSpan> spans;
   final String text;
+
+  // Spans as pushed through the builder. Only read by _resolveSpans.
+  final List<ParagraphSpan> _styleSpans;
+
+  // Paragraph-level UAX #9 regions shared between span splitting and BiDi run extraction.
+  late final List<BidiRegion> bidiRegions = canvasKit.Bidi.getBidiRegions(
+    text,
+    paragraphStyle.textDirection,
+  );
+
+  /// Spans split at BiDi region boundaries, each with a single resolved direction.
+  late final List<ParagraphSpan> spans = _resolveSpans();
+
+  // Splits text spans at paragraph-level UAX #9 region boundaries so each sub-span has a
+  // single resolved textDirection.
+  List<ParagraphSpan> _resolveSpans() {
+    // Empty or placeholder-only paragraphs have no UAX #9 text regions to split across.
+    if (_styleSpans.isEmpty || bidiRegions.isEmpty) {
+      return _styleSpans;
+    }
+    final resolvedSpans = <ParagraphSpan>[];
+    var regionIndex = 0;
+    for (final ParagraphSpan span in _styleSpans) {
+      assert(span.isNotEmpty);
+      // Placeholders occupy a single U+FFFC code unit and do not measure text via Canvas2D.
+      if (span is PlaceholderSpan) {
+        resolvedSpans.add(span);
+        continue;
+      }
+      final textSpan = span as TextSpan;
+      // Skip BiDi regions that end before this span (such as regions on preceding placeholders).
+      while (regionIndex < bidiRegions.length && bidiRegions[regionIndex].end <= textSpan.start) {
+        regionIndex++;
+      }
+      for (
+        var i = regionIndex;
+        i < bidiRegions.length && bidiRegions[i].start < textSpan.end;
+        i++
+      ) {
+        final BidiRegion region = bidiRegions[i];
+        final int start = math.max(textSpan.start, region.start);
+        final int end = math.min(textSpan.end, region.end);
+        // UAX #9 even embedding levels resolve to LTR and odd levels to RTL. Assigning the
+        // paragraph-resolved direction per sub-span prevents Canvas2D from re-running BiDi in
+        // isolation and flipping neutral characters between same-direction spans.
+        final ui.TextDirection regionDirection = region.level.isEven
+            ? ui.TextDirection.ltr
+            : ui.TextDirection.rtl;
+        // Reuse the existing TextSpan when it already lies within a single matching BiDi region.
+        if (start == textSpan.start &&
+            end == textSpan.end &&
+            textSpan.textDirection == regionDirection) {
+          resolvedSpans.add(textSpan);
+        } else {
+          resolvedSpans.add(
+            TextSpan(
+              start: start,
+              end: end,
+              style: textSpan.style,
+              text: text.substring(start, end),
+              textDirection: regionDirection,
+            ),
+          );
+        }
+      }
+    }
+    return resolvedSpans;
+  }
 
   @override
   double alphabeticBaseline = 0;
@@ -932,6 +1024,7 @@ class WebParagraph implements ui.Paragraph {
     final ui.GlyphInfo? result = getGlyphInfoAt(
       position.offset + (position.affinity == ui.TextAffinity.downstream ? 0 : -1),
     );
+
     if (result == null) {
       WebParagraphDebug.apiTrace(
         'getClosestGlyphInfoForOffset(${offset.dx}, ${offset.dy}): '
@@ -939,7 +1032,6 @@ class WebParagraph implements ui.Paragraph {
       );
       return null;
     }
-
     WebParagraphDebug.apiTrace(
       'getClosestGlyphInfoForOffset(${offset.dx}, ${offset.dy}): '
       'TextPosition(${position.offset}, ${position.affinity.toString().replaceFirst('TextAffinity.', '')} '
@@ -969,7 +1061,7 @@ class WebParagraph implements ui.Paragraph {
       ui.TextAffinity.downstream => position.offset,
     };
     if (codepointPosition < 0) {
-      return const ui.TextRange(start: 0, end: 0);
+      return ui.TextRange(start: text.length, end: text.length);
     }
     if (codepointPosition >= text.length) {
       return ui.TextRange(start: text.length, end: text.length);
@@ -998,8 +1090,7 @@ class WebParagraph implements ui.Paragraph {
 
   @override
   ui.TextRange getLineBoundary(ui.TextPosition position) {
-    final int codepointPosition = position.offset;
-    final ui.TextRange result = _layout.getLineBoundary(codepointPosition);
+    final ui.TextRange result = _layout.getLineBoundary(position);
     WebParagraphDebug.apiTrace('getLineBoundary($position): $result');
     return result;
   }
@@ -1040,21 +1131,32 @@ class WebParagraph implements ui.Paragraph {
       return null;
     }
 
-    for (final TextLine line in _layout.lines) {
-      if (line.allLineTextRange.isBefore(codeUnitOffset)) {
-        // We haven't reached the offset yet, keep going.
-        continue;
-      }
-      if (line.allLineTextRange.isAfter(codeUnitOffset)) {
-        break;
-      }
-
-      WebParagraphDebug.apiTrace('getLineNumberAt($codeUnitOffset): ${line.lineNumber}');
-      return line.lineNumber;
+    if (_layout.lines.isEmpty || (_layout.lines.last.hardLineBreakRange.end <= codeUnitOffset)) {
+      return null;
     }
 
-    assert(false, 'getLineNumberAt($codeUnitOffset): null (out of range, should not happen)');
-    return null;
+    // This is the algorithm that works in SkParagraph
+    var startLine = 0;
+    int endLine = _layout.lines.length - 1;
+    while (endLine > startLine) {
+      // startLine + 1 <= endLine, so we have startLine <= midLine <= endLine - 1.
+      final int midLine = ((endLine + startLine) / 2).floor();
+      final TextLine line = _layout.lines[midLine];
+      // We need to take into account hard line break, too
+      final midLineRange = ui.TextRange(
+        start: line.allLineTextRange.start,
+        end: line.hardLineBreakRange.end,
+      );
+      if (codeUnitOffset < midLineRange.start) {
+        endLine = midLine - 1;
+      } else if (midLineRange.end <= codeUnitOffset) {
+        startLine = midLine + 1;
+      } else {
+        return midLine;
+      }
+    }
+    assert(startLine == endLine);
+    return startLine;
   }
 
   void clearPaintCache() {
@@ -1473,10 +1575,11 @@ class ChildStyleNode extends StyleNode {
   @override
   double? get _wordSpacing => style.wordSpacing ?? parent._wordSpacing;
 
+  // Preserve `style.height` as-is (including `ui.kTextHeightNone`) so a child
+  // span can explicitly override a non-null parent height and disable the
+  // height multiplier during layout.
   @override
-  double? get _height {
-    return style.height == ui.kTextHeightNone ? null : (style.height ?? parent._height);
-  }
+  double? get _height => style.height ?? parent._height;
 
   @override
   ui.TextLeadingDistribution? get _leadingDistribution =>
@@ -1559,8 +1662,9 @@ class RootStyleNode extends StyleNode {
   @override
   double? get _height => style.height;
 
+  // Inherit the default leadingDistribution from ParagraphStyle.textHeightBehavior.
   @override
-  ui.TextLeadingDistribution? get _leadingDistribution => null;
+  ui.TextLeadingDistribution? get _leadingDistribution => style.leadingDistribution;
 
   @override
   ui.Locale? get _locale => style.locale;

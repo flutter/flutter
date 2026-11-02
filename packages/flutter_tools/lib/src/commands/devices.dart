@@ -21,15 +21,14 @@ class DevicesCommand extends FlutterCommand {
     required super.toolContext,
     super.verboseHelp,
   }) {
-    addMachineOutputFlag(verboseHelp: verboseHelp);
+    CommonOptions.machine.addTo(argParser, verboseHelp: verboseHelp);
     argParser.addOption(
       'timeout',
       abbr: 't',
       help: '(deprecated) This option has been replaced by "--${FlutterOptions.kDeviceTimeout}".',
       hide: !verboseHelp,
     );
-    usesDeviceTimeoutOption();
-    usesDeviceConnectionOption();
+    registerOptionBundle(const DeviceDiscoveryOptionsBundle());
   }
 
   final DeviceManager _deviceManager;

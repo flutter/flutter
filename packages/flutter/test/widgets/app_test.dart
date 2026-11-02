@@ -621,7 +621,11 @@ void main() {
       builder: (BuildContext context) =>
           const Text('overlay content', textDirection: TextDirection.ltr),
     );
-    addTearDown(entry.remove);
+    addTearDown(
+      () => entry
+        ..remove()
+        ..dispose(),
+    );
     delegate.navigatorKey.currentState!.overlay!.insert(entry);
     await tester.pump();
 

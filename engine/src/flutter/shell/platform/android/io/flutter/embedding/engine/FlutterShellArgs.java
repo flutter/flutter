@@ -10,8 +10,8 @@ import androidx.annotation.NonNull;
 import java.util.*;
 
 /**
- * DEPRECATED. Please see {@link FlutterEngineFlags} for the list of arguments to use or update if
- * you are adding a new flag.
+ * DEPRECATED. Please see {@link io.flutter.embedding.engine.flags.FlutterEngineFlags} for the list
+ * of arguments to use or update if you are adding a new flag.
  *
  * <p>Arguments that can be delivered to the Flutter shell when it is created.
  *
@@ -21,8 +21,9 @@ import java.util.*;
  * io.flutter.embedding.engine.loader.FlutterLoader#ensureInitializationComplete(Context, String[])}
  * for more information.
  */
-// TODO(camsim99): Delete this class when support for setting engine shell arguments via Intent
-// is no longer supported. See https://github.com/flutter/flutter/issues/180686.
+// TODO(camsim99): Delete this class after a stable release has passed since the
+// FlutterActivityAndFragmentDelegate.Host.getFlutterShellArgs deprecation:
+// https://github.com/flutter/flutter/issues/193256.
 @SuppressWarnings({"WeakerAccess", "unused"})
 @Deprecated
 public class FlutterShellArgs {
