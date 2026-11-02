@@ -79,11 +79,10 @@ Xcode? get xcode => context.get<Xcode>();
 IOSWorkflow? get iosWorkflow => context.get<IOSWorkflow>();
 LocalEngineLocator? get localEngineLocator => context.get<LocalEngineLocator>();
 
-PersistentToolState? get persistentToolState => PersistentToolState.instance;
+PersistentToolState? get persistentToolState => context.get<PersistentToolState>();
 
 BotDetector get botDetector => context.get<BotDetector>() ?? _defaultBotDetector;
 final _defaultBotDetector = BotDetector(platform: platform);
-Future<bool> get isRunningOnBot => botDetector.isRunningOnBot;
 
 // Analytics instance for package:unified_analytics for analytics
 // reporting for all Flutter and Dart related tooling
@@ -97,9 +96,6 @@ FileSystem get fs => ErrorHandlingFileSystem(
   delegate: context.get<FileSystem>() ?? localFileSystem,
   platform: platform,
 );
-
-FileSystemUtils get fsUtils =>
-    context.get<FileSystemUtils>() ?? FileSystemUtils(fileSystem: fs, platform: platform);
 
 Git get git => context.get<Git>()!;
 
@@ -204,20 +200,6 @@ void printStatus(
     hangingIndent: hangingIndent,
     wrap: wrap,
   );
-}
-
-/// Display the [message] inside a box.
-///
-/// For example, this is the generated output:
-///
-///   ┌─ [title] ─┐
-///   │ [message] │
-///   └───────────┘
-///
-/// If a terminal is attached, the lines in [message] are automatically wrapped based on
-/// the available columns.
-void printBox(String message, {String? title}) {
-  logger.printBox(message, title: title);
 }
 
 /// Use this for verbose tracing output. Users can turn this output on in order

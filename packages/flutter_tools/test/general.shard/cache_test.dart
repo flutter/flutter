@@ -9,7 +9,6 @@ import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
-import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -298,7 +297,7 @@ void main() {
       expect(artifact2.didUpdate, true);
     });
 
-    testUsingContext('should skip EngineCachedArtifacts when local engine is provided', () async {
+    testWithoutContext('should skip EngineCachedArtifacts when local engine is provided', () async {
       final artifact1 = FakeSecondaryCachedArtifact()..upToDate = false;
       final fileSystem = MemoryFileSystem.test();
       final cache = Cache.test(fileSystem: fileSystem, processManager: FakeProcessManager.any());
@@ -310,12 +309,14 @@ void main() {
         processManager: FakeProcessManager.any(),
       );
 
-      await cacheWithArtifacts.updateAll(<DevelopmentArtifact>{DevelopmentArtifact.universal});
+      await cacheWithArtifacts.updateAll(<DevelopmentArtifact>{
+        DevelopmentArtifact.universal,
+      }, isLocalEngine: true);
       expect(artifact1.didUpdate, true);
       expect(artifact2.didUpdate, false);
-    }, overrides: <Type, Generator>{Artifacts: () => FakeLocalEngineArtifacts()});
+    });
 
-    testUsingContext('should skip engine_stamp artifact when local engine is provided', () async {
+    testWithoutContext('should skip engine_stamp artifact when local engine is provided', () async {
       final artifact1 = FakeSecondaryCachedArtifact()..upToDate = false;
       final fileSystem = MemoryFileSystem.test();
       final artifact2 = FakeEngineStampArtifact()..upToDate = false;
@@ -326,10 +327,12 @@ void main() {
         processManager: FakeProcessManager.any(),
       );
 
-      await cacheWithArtifacts.updateAll(<DevelopmentArtifact>{DevelopmentArtifact.universal});
+      await cacheWithArtifacts.updateAll(<DevelopmentArtifact>{
+        DevelopmentArtifact.universal,
+      }, isLocalEngine: true);
       expect(artifact1.didUpdate, true);
       expect(artifact2.didUpdate, false);
-    }, overrides: <Type, Generator>{Artifacts: () => FakeLocalEngineArtifacts()});
+    });
 
     testWithoutContext(
       "getter dyLdLibEntry concatenates the output of each artifact's dyLdLibEntry getter",
@@ -1970,18 +1973,6 @@ class FakeIosUsbArtifacts extends Fake implements IosUsbArtifacts {
 
   @override
   String stampName = 'ios-usb';
-}
-
-class FakeLocalEngineArtifacts extends Fake implements Artifacts {
-  @override
-  final LocalEngineInfo localEngineInfo = LocalEngineInfo(
-    fileSystem: MemoryFileSystem.test(),
-    targetOutPath: 'out/android_debug_unopt',
-    hostOutPath: 'out/host_debug_unopt',
-  );
-
-  @override
-  bool get usesLocalArtifacts => true;
 }
 
 class FakeEngineCachedArtifact extends EngineCachedArtifact {

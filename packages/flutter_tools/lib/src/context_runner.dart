@@ -33,6 +33,7 @@ import 'base/time.dart';
 import 'base/user_messages.dart';
 import 'build_system/build_system.dart';
 import 'cache.dart';
+import 'context/android_context.dart';
 import 'context/apple_context.dart';
 import 'context/tool_context.dart';
 import 'custom_devices/custom_devices_config.dart';
@@ -72,8 +73,6 @@ import 'runner/local_engine.dart';
 import 'template.dart';
 import 'version.dart';
 import 'web/workflow.dart';
-import 'windows/visual_studio.dart';
-import 'windows/visual_studio_validator.dart';
 import 'windows/windows_workflow.dart';
 
 /// A [ToolContext] that delegates to [globals] for legacy callers.
@@ -96,7 +95,7 @@ class _GlobalToolContext implements ToolContext {
   CustomDevicesConfig get customDevicesConfig => globals.customDevicesConfig;
 
   @override
-  FileSystemUtils get fileSystemUtils => globals.fsUtils;
+  FileSystemUtils get fileSystemUtils => FileSystemUtils(fileSystem: fs, platform: platform);
 
   @override
   FlutterVersion get flutterVersion => globals.flutterVersion;
@@ -167,7 +166,7 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
   // overrides and callbacks.
   late bool runningOnBot;
   FutureOr<T> runnerWrapper() async {
-    runningOnBot = await globals.isRunningOnBot;
+    runningOnBot = await globals.botDetector.isRunningOnBot;
     return runner();
   }
 
@@ -192,15 +191,6 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
         gradleUtils: globals.gradleUtils!,
         java: globals.java,
         toolContext: const _GlobalToolContext(),
-      ),
-      AndroidLicenseValidator: () => AndroidLicenseValidator(
-        platform: globals.platform,
-        userMessages: globals.userMessages,
-        processManager: globals.processManager,
-        java: globals.java,
-        androidSdk: globals.androidSdk,
-        logger: globals.logger,
-        stdio: globals.stdio,
       ),
       AndroidSdk: () => AndroidSdk.locateAndroidSdk(toolContext: const _GlobalToolContext()),
       AndroidStudio: () => AndroidStudio.latestValid(
@@ -404,10 +394,6 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
       SystemClock: () => const SystemClock(),
       TemplatePathProvider: () => TemplatePathProvider(flutterRoot: globals.cache.flutterRoot),
       UserMessages: () => UserMessages(),
-      VisualStudioValidator: () => VisualStudioValidator(
-        userMessages: globals.userMessages,
-        visualStudio: VisualStudio(toolContext: const _GlobalToolContext()),
-      ),
       WebWorkflow: () => WebWorkflow(featureFlags: featureFlags, platform: globals.platform),
       WindowsWorkflow: () =>
           WindowsWorkflow(featureFlags: featureFlags, platform: globals.platform),
@@ -440,6 +426,12 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
 
 DoctorValidatorsProvider _createDoctorValidatorsProvider({ExtensionManager? extensionManager}) {
   return DoctorValidatorsProvider.create(
+    androidContext: AndroidContext(
+      androidSdkBuilder: () => globals.androidSdk,
+      androidStudioBuilder: () => globals.androidStudio,
+      gradleUtilsBuilder: () => globals.gradleUtils!,
+      javaBuilder: () => globals.java,
+    ),
     appleContext: AppleContext(
       cocoaPods: globals.cocoaPods!,
       cocoapodsValidator: globals.cocoapodsValidator!,

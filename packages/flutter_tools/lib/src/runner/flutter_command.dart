@@ -1223,10 +1223,17 @@ abstract class FlutterCommand extends Command<void> {
       // First always update universal artifacts, as some of these (e.g.
       // ios-deploy on macOS) are required to determine `requiredArtifacts`.
       final bool offline = getValue(CommonOptions.offline);
-      await _cache.updateAll(<DevelopmentArtifact>{
-        DevelopmentArtifact.universal,
-      }, offline: offline);
-      await _cache.updateAll(await requiredArtifacts, offline: offline);
+      final isLocalEngine = toolContext.artifacts.localEngineInfo != null;
+      await _cache.updateAll(
+        <DevelopmentArtifact>{DevelopmentArtifact.universal},
+        isLocalEngine: isLocalEngine,
+        offline: offline,
+      );
+      await _cache.updateAll(
+        await requiredArtifacts,
+        isLocalEngine: isLocalEngine,
+        offline: offline,
+      );
     }
     await validateCommand();
 

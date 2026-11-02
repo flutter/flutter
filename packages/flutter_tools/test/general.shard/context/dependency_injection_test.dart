@@ -16,7 +16,6 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_system/build_targets.dart';
 import 'package:flutter_tools/src/context/android_context.dart';
 import 'package:flutter_tools/src/context/tool_dependencies.dart';
-import 'package:flutter_tools/src/emulator.dart';
 import 'package:flutter_tools/src/flutter_device_manager.dart';
 import 'package:test/fake.dart';
 
@@ -360,10 +359,9 @@ void main() {
     });
 
     testUsingContext(
-      'AndroidWorkflow and EmulatorManager do not eagerly evaluate AndroidSdk or Java',
+      'AndroidWorkflow does not eagerly evaluate AndroidSdk or Java',
       () {
         expect(androidWorkflow, isNotNull);
-        expect(emulatorManager, isNotNull);
         expect(sdkEvaluations, 0);
         expect(javaEvaluations, 0);
       },

@@ -4,6 +4,7 @@
 
 import '../android/android_workflow.dart' as android_workflow;
 import '../base/common.dart';
+import '../context/android_context.dart';
 import '../doctor.dart';
 import '../experimental/extension_manager.dart';
 import '../runner/flutter_command.dart';
@@ -11,13 +12,10 @@ import '../runner/flutter_command.dart';
 /// The `flutter doctor` command, which displays diagnostic information about the
 /// installed developer environment and tooling.
 class DoctorCommand extends FlutterCommand {
-  /// Creates a new [DoctorCommand].
-  ///
-  /// If [_androidLicenseValidator] is omitted, it is lazily resolved from the
-  /// active context when `--android-licenses` is supplied.
   DoctorCommand({
     required this._doctor,
     required super.toolContext,
+    this._androidContext,
     this._androidLicenseValidator,
     this.extensionManager,
     this.verbose = false,
@@ -38,6 +36,7 @@ class DoctorCommand extends FlutterCommand {
   }
 
   final Doctor _doctor;
+  final AndroidContext? _androidContext;
   final android_workflow.AndroidLicenseValidator? _androidLicenseValidator;
   final bool verbose;
   final ExtensionManager? extensionManager;
@@ -73,12 +72,16 @@ class DoctorCommand extends FlutterCommand {
     }
     android_workflow.AndroidLicenseValidator? androidLicenseValidator = _androidLicenseValidator;
     if (androidLicenseValidator == null && boolArg('android-licenses')) {
-      try {
-        androidLicenseValidator = android_workflow.androidLicenseValidator;
-      } on Exception {
-        // Fallback when running in hermetic test environments without AppContext.
-      } on Error {
-        // Catches UnsupportedError in testWithoutContext and StateError if AppContext is missing.
+      if (_androidContext case final AndroidContext androidContext) {
+        androidLicenseValidator = android_workflow.AndroidLicenseValidator(
+          androidSdk: androidContext.androidSdk,
+          java: androidContext.java,
+          logger: toolContext.logger,
+          platform: toolContext.platform,
+          processManager: toolContext.processManager,
+          stdio: toolContext.stdio,
+          userMessages: toolContext.userMessages,
+        );
       }
     }
     final bool success = await _doctor.diagnose(

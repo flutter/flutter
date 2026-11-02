@@ -38,6 +38,7 @@ import 'src/base/user_messages.dart';
 import 'src/build_system/build_system.dart';
 import 'src/build_system/build_targets.dart';
 import 'src/cache.dart';
+import 'src/context/android_context.dart';
 import 'src/context/apple_context.dart';
 import 'src/context/tool_context.dart';
 import 'src/context/tool_dependencies.dart';
@@ -174,6 +175,7 @@ Future<int> run(
     );
     final ToolDependencies(
       :Analytics analytics,
+      :AndroidContext androidContext,
       :AppleContext appleContext,
       :BuildSystem buildSystem,
       buildTargets: BuildTargets resolvedBuildTargets,
@@ -216,6 +218,7 @@ Future<int> run(
     DoctorValidatorsProvider createDoctorValidatorsProvider({ExtensionManager? extensionManager}) =>
         overriddenDoctorValidatorsProvider ??
         DoctorValidatorsProvider.create(
+          androidContext: androidContext,
           appleContext: appleContext,
           deviceManager: deviceManager,
           extensionManager: extensionManager,

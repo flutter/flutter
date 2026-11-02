@@ -1120,6 +1120,7 @@ class FakeCache extends Fake implements Cache {
   @override
   Future<void> updateAll(
     Set<DevelopmentArtifact> requiredArtifacts, {
+    bool isLocalEngine = false,
     bool offline = false,
   }) async {}
 

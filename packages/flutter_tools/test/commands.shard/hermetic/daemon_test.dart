@@ -235,18 +235,18 @@ void main() {
       },
     );
 
-    testUsingContext('printError should send daemon.logMessage event', () async {
+    testWithoutContext('printError should send daemon.logMessage event', () async {
       daemon = Daemon(
         daemonConnection,
         analytics: const NoOpAnalytics(),
         buildSystem: buildSystem,
         buildTargets: buildTargets,
-        toolContext: const DelegatingToolContext(),
+        toolContext: FakeToolContext(),
         xcode: null,
         notifyingLogger: notifyingLogger,
-        featureFlags: featureFlags,
+        featureFlags: TestFeatureFlags(),
       );
-      globals.printError('daemon.logMessage test');
+      notifyingLogger.printError('daemon.logMessage test');
       final DaemonMessage response = await daemonStreams.outputs.stream.firstWhere((
         DaemonMessage message,
       ) {
@@ -259,20 +259,20 @@ void main() {
           .cast<String, String>();
       expect(logMessage['level'], 'error');
       expect(logMessage['message'], 'daemon.logMessage test');
-    }, overrides: <Type, Generator>{Logger: () => notifyingLogger});
+    });
 
-    testUsingContext('printWarning should send daemon.logMessage event', () async {
+    testWithoutContext('printWarning should send daemon.logMessage event', () async {
       daemon = Daemon(
         daemonConnection,
         analytics: const NoOpAnalytics(),
         buildSystem: buildSystem,
         buildTargets: buildTargets,
-        toolContext: const DelegatingToolContext(),
+        toolContext: FakeToolContext(),
         xcode: null,
         notifyingLogger: notifyingLogger,
-        featureFlags: featureFlags,
+        featureFlags: TestFeatureFlags(),
       );
-      globals.printWarning('daemon.logMessage test');
+      notifyingLogger.printWarning('daemon.logMessage test');
       final DaemonMessage response = await daemonStreams.outputs.stream.firstWhere((
         DaemonMessage message,
       ) {
@@ -285,49 +285,49 @@ void main() {
           .cast<String, String>();
       expect(logMessage['level'], 'warning');
       expect(logMessage['message'], 'daemon.logMessage test');
-    }, overrides: <Type, Generator>{Logger: () => notifyingLogger});
+    });
 
-    testUsingContext('printStatus should log to stdout when logToStdout is enabled', () async {
+    testWithoutContext('printStatus should log to stdout when logToStdout is enabled', () async {
       final StringBuffer buffer = await capturedConsolePrint(() {
         daemon = Daemon(
           daemonConnection,
           analytics: const NoOpAnalytics(),
           buildSystem: buildSystem,
           buildTargets: buildTargets,
-          toolContext: const DelegatingToolContext(),
+          toolContext: FakeToolContext(),
           xcode: null,
           notifyingLogger: notifyingLogger,
           logToStdout: true,
-          featureFlags: featureFlags,
+          featureFlags: TestFeatureFlags(),
         );
-        globals.printStatus('daemon.logMessage test');
+        notifyingLogger.printStatus('daemon.logMessage test');
         return Future<void>.value();
       });
 
       expect(buffer.toString().trim(), 'daemon.logMessage test');
-    }, overrides: <Type, Generator>{Logger: () => notifyingLogger});
+    });
 
-    testUsingContext('printBox should log to stdout when logToStdout is enabled', () async {
+    testWithoutContext('printBox should log to stdout when logToStdout is enabled', () async {
       final StringBuffer buffer = await capturedConsolePrint(() {
         daemon = Daemon(
           daemonConnection,
           analytics: const NoOpAnalytics(),
           buildSystem: buildSystem,
           buildTargets: buildTargets,
-          toolContext: const DelegatingToolContext(),
+          toolContext: FakeToolContext(),
           xcode: null,
           notifyingLogger: notifyingLogger,
           logToStdout: true,
-          featureFlags: featureFlags,
+          featureFlags: TestFeatureFlags(),
         );
-        globals.printBox('This is the box message', title: 'Sample title');
+        notifyingLogger.printBox('This is the box message', title: 'Sample title');
         return Future<void>.value();
       });
 
       expect(buffer.toString().trim(), contains('Sample title: This is the box message'));
-    }, overrides: <Type, Generator>{Logger: () => notifyingLogger});
+    });
 
-    testUsingContext(
+    testWithoutContext(
       'printTrace should send daemon.logMessage event when notifyVerbose is enabled',
       () async {
         daemon = Daemon(
@@ -335,15 +335,15 @@ void main() {
           analytics: const NoOpAnalytics(),
           buildSystem: buildSystem,
           buildTargets: buildTargets,
-          toolContext: const DelegatingToolContext(),
+          toolContext: FakeToolContext(),
           xcode: null,
           notifyingLogger: notifyingLogger,
-          featureFlags: featureFlags,
+          featureFlags: TestFeatureFlags(),
         );
         notifyingLogger.notifyVerbose = false;
-        globals.printTrace('daemon.logMessage test 1');
+        notifyingLogger.printTrace('daemon.logMessage test 1');
         notifyingLogger.notifyVerbose = true;
-        globals.printTrace('daemon.logMessage test 2');
+        notifyingLogger.printTrace('daemon.logMessage test 2');
         final DaemonMessage response = await daemonStreams.outputs.stream.firstWhere((
           DaemonMessage message,
         ) {
@@ -357,7 +357,6 @@ void main() {
         expect(logMessage['level'], 'trace');
         expect(logMessage['message'], 'daemon.logMessage test 2');
       },
-      overrides: <Type, Generator>{Logger: () => notifyingLogger},
     );
 
     testUsingContext(

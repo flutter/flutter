@@ -1274,7 +1274,11 @@ class FakeCache extends Fake implements Cache {
   void releaseLock() {}
 
   @override
-  Future<void> updateAll(Set<DevelopmentArtifact> requiredArtifacts, {bool offline = false}) async {
+  Future<void> updateAll(
+    Set<DevelopmentArtifact> requiredArtifacts, {
+    bool isLocalEngine = false,
+    bool offline = false,
+  }) async {
     globals.logger.startProgress('Downloading package Foo').stop();
   }
 

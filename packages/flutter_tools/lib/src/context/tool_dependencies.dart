@@ -188,6 +188,7 @@ class ToolDependencies {
     EmulatorManager? emulatorManager,
     List<ExtensionEntryPoint> extensionEntryPoints = const <ExtensionEntryPoint>[],
     FeatureFlags? featureFlags,
+    String? flutterRoot,
     FlutterVersion? flutterVersion,
     FileSystem? fs,
     Git? git,
@@ -342,7 +343,8 @@ class ToolDependencies {
         git ?? Git(currentPlatform: finalPlatform, runProcessWith: finalProcessUtils);
 
     // 7. Project Factory, Operating System Utilities, and Cache
-    final String flutterRoot =
+    final String resolvedFlutterRoot =
+        flutterRoot ??
         cache?.flutterRoot ??
         Cache.defaultFlutterRoot(
           platform: finalPlatform,
@@ -386,7 +388,7 @@ class ToolDependencies {
     final Cache finalCache =
         cache ??
         FlutterCache(
-          flutterRoot: flutterRoot,
+          flutterRoot: resolvedFlutterRoot,
           fileSystem: finalFS,
           logger: finalLogger,
           platform: finalPlatform,
@@ -400,7 +402,7 @@ class ToolDependencies {
         flutterVersion ??
         FlutterVersion(
           cache: finalCache,
-          flutterRoot: flutterRoot,
+          flutterRoot: resolvedFlutterRoot,
           fs: finalFS,
           git: finalGit,
           logger: finalLogger,
@@ -478,7 +480,7 @@ class ToolDependencies {
           logger: finalLogger,
           platform: finalPlatform,
           fileSystem: finalFS,
-          flutterRoot: flutterRoot,
+          flutterRoot: resolvedFlutterRoot,
         );
 
     final finalNativeAssetsBuilder = nativeAssetsBuilder;
@@ -718,6 +720,7 @@ class ToolDependencies {
           validatorsProviderBuilder: ({ExtensionManager? extensionManager}) =>
               doctorValidatorsProvider ??
               DoctorValidatorsProvider.create(
+                androidContext: finalAndroidContext,
                 appleContext: appleContext,
                 deviceManager: finalDeviceManager,
                 extensionManager: extensionManager,

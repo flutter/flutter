@@ -637,7 +637,9 @@ class FlutterCommandRunner extends CommandRunner<void> {
         }
 
         // Required to support `flutter --version` before artifacts are cached.
-        await cache.updateAll(<DevelopmentArtifact>{DevelopmentArtifact.informative});
+        await cache.updateAll(<DevelopmentArtifact>{
+          DevelopmentArtifact.informative,
+        }, isLocalEngine: artifacts.localEngineInfo != null);
 
         flutterVersion.ensureVersionFile();
         if (await _shouldCheckForUpdates(topLevelResults)) {

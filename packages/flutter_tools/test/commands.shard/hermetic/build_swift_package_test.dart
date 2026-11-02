@@ -220,6 +220,7 @@ void main() {
             projectDir.childDirectory('lib').childFile('main.dart').createSync(recursive: true);
 
             final runner = FlutterCommandRunner(
+              templateRenderer: const MustacheTemplateRenderer(),
               toolContext: const DelegatingToolContext(),
               verboseHelp: true,
             );
@@ -268,6 +269,7 @@ void main() {
             projectDir.childDirectory('lib').childFile('main.dart').createSync(recursive: true);
 
             final runner = FlutterCommandRunner(
+              templateRenderer: const MustacheTemplateRenderer(),
               toolContext: const DelegatingToolContext(),
               verboseHelp: true,
             );
@@ -3569,7 +3571,11 @@ class FakeCache extends Fake implements Cache {
   Future<void> lock() async {}
 
   @override
-  Future<void> updateAll(Set<DevelopmentArtifact> artifacts, {bool offline = false}) async {}
+  Future<void> updateAll(
+    Set<DevelopmentArtifact> artifacts, {
+    bool isLocalEngine = false,
+    bool offline = false,
+  }) async {}
 
   @override
   void releaseLock() {}

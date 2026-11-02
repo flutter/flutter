@@ -208,7 +208,10 @@ class PrecacheCommand extends FlutterCommand {
       }
     }
     if (!await _cache.isUpToDate()) {
-      await _cache.updateAll(requiredArtifacts);
+      await _cache.updateAll(
+        requiredArtifacts,
+        isLocalEngine: toolContext.artifacts.localEngineInfo != null,
+      );
     } else {
       _logger.printStatus('Already up-to-date.');
     }
