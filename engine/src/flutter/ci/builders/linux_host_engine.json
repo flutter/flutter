@@ -34,7 +34,8 @@
             ],
             "gclient_variables": {
                 "download_android_deps": false,
-                "use_rbe": true
+                "use_rbe": false,
+                "download_bazelisk": true
             },
             "gn": [
                 "--target-dir",
@@ -43,8 +44,9 @@
                 "debug",
                 "--prebuilt-dart-sdk",
                 "--no-lto",
-                "--rbe",
-                "--no-goma"
+                "--no-rbe",
+                "--no-goma",
+                "--bazel"
             ],
             "name": "ci/host_debug",
             "description": "Produces debug mode Linux host-side tooling.",
@@ -84,7 +86,8 @@
             ],
             "gclient_variables": {
                 "download_android_deps": false,
-                "use_rbe": true
+                "use_rbe": false,
+                "download_bazelisk": true
             },
             "gn": [
                 "--target-dir",
@@ -93,8 +96,9 @@
                 "release",
                 "--prebuilt-dart-sdk",
                 "--no-lto",
-                "--rbe",
-                "--no-goma"
+                "--no-rbe",
+                "--no-goma",
+                "--bazel"
             ],
             "name": "ci/host_release",
             "description": "Produces flutter_patched_sdk_product.zip shared by all Flutter release builds.",

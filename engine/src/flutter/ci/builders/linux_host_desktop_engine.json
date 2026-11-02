@@ -29,7 +29,8 @@
             ],
             "gclient_variables": {
                 "download_android_deps": false,
-                "use_rbe": true
+                "use_rbe": false,
+                "download_bazelisk": true
             },
             "gn": [
                 "--runtime-mode",
@@ -37,10 +38,11 @@
                 "--enable-fontconfig",
                 "--prebuilt-dart-sdk",
                 "--no-lto",
-                "--rbe",
+                "--no-rbe",
                 "--no-goma",
                 "--target-dir",
-                "ci/host_debug_desktop"
+                "ci/host_debug_desktop",
+                "--bazel"
             ],
             "name": "ci/host_debug_desktop",
             "description": "Produces debug mode artifacts for x64 Linux desktop.",
@@ -69,7 +71,8 @@
             ],
             "gclient_variables": {
                 "download_android_deps": false,
-                "use_rbe": true
+                "use_rbe": false,
+                "download_bazelisk": true
             },
             "gn": [
                 "--runtime-mode",
@@ -77,10 +80,11 @@
                 "--enable-fontconfig",
                 "--prebuilt-dart-sdk",
                 "--no-lto",
-                "--rbe",
+                "--no-rbe",
                 "--no-goma",
                 "--target-dir",
-                "ci/host_profile_desktop"
+                "ci/host_profile_desktop",
+                "--bazel"
             ],
             "name": "ci/host_profile_desktop",
             "description": "Produces profile mode artifacts for x64 Linux desktop.",
@@ -109,7 +113,8 @@
             ],
             "gclient_variables": {
                 "download_android_deps": false,
-                "use_rbe": true
+                "use_rbe": false,
+                "download_bazelisk": true
             },
             "gn": [
                 "--runtime-mode",
@@ -117,10 +122,11 @@
                 "--enable-fontconfig",
                 "--prebuilt-dart-sdk",
                 "--no-lto",
-                "--rbe",
+                "--no-rbe",
                 "--no-goma",
                 "--target-dir",
-                "ci/host_release_desktop"
+                "ci/host_release_desktop",
+                "--bazel"
             ],
             "name": "ci/host_release_desktop",
             "description": "Produces release mode artifacts for x64 Linux desktop.",

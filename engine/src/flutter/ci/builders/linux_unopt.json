@@ -1,4 +1,12 @@
 {
+    "_comment": [
+        "The builds run under Bazel (--bazel among the tools/gn flags; flutter/build/bazel/ci.md):",
+        "`ninja -C out/<dir>` runs the build's Bazel install target instead of GN, and run_tests.py",
+        "runs each --type as the Bazel suites of the build (ci/builders/BUILD.bazel). Not yet:",
+        "ci/host_debug_no_prebuilt_dart_sdk (the Dart SDK from source: too slow for a cold bot),",
+        "and the malioc diff (GN's Mali offline compiler analysis has no Bazel counterpart).",
+        "Bazel's actions run on the bot (--no-rbe, use_rbe false); a remote cache is for later."
+    ],
     "builds": [
         {
             "drone_dimensions": [
@@ -7,7 +15,8 @@
                 "cores=32"
             ],
             "gclient_variables": {
-                "use_rbe": true
+                "use_rbe": false,
+                "download_bazelisk": true
             },
             "gn": [
                 "--target-dir",
@@ -18,8 +27,9 @@
                 "--prebuilt-dart-sdk",
                 "--asan",
                 "--dart-debug",
-                "--rbe",
-                "--no-goma"
+                "--no-rbe",
+                "--no-goma",
+                "--bazel"
             ],
             "name": "ci/host_debug_unopt",
             "description": "Builds a debug mode unopt Linux engine. Builds and runs many tests and lints.",
@@ -113,7 +123,8 @@
             ],
             "gclient_variables": {
                 "download_android_deps": false,
-                "use_rbe": true
+                "use_rbe": false,
+                "download_bazelisk": true
             },
             "gn": [
                 "--runtime-mode",
@@ -122,9 +133,10 @@
                 "--prebuilt-dart-sdk",
                 "--target-dir",
                 "ci/host_debug_unopt_impeller_tests",
-                "--rbe",
+                "--no-rbe",
                 "--no-goma",
-                "--use-glfw-swiftshader"
+                "--use-glfw-swiftshader",
+                "--bazel"
             ],
             "name": "ci/host_debug_unopt_impeller_tests",
             "description": "Builds a debug mode unopt Linux engine with swiftshader. Runs Impeller unit tests.",
@@ -158,7 +170,8 @@
             ],
             "dependencies": [],
             "gclient_variables": {
-                "use_rbe": true
+                "use_rbe": false,
+                "download_bazelisk": true
             },
             "gn": [
                 "--android",
@@ -166,8 +179,9 @@
                 "--target-dir",
                 "ci/android_embedder_debug_unopt",
                 "--unoptimized",
-                "--rbe",
-                "--no-goma"
+                "--no-rbe",
+                "--no-goma",
+                "--bazel"
             ],
             "name": "ci/android_embedder_debug_unopt",
             "description": "Builds embedder artifacts targeting 32-bit arm Android.",
@@ -185,7 +199,8 @@
                 "os=Linux"
             ],
             "gclient_variables": {
-                "use_rbe": true
+                "use_rbe": false,
+                "download_bazelisk": true
             },
             "gn": [
                 "--target-dir",
@@ -194,8 +209,9 @@
                 "--android-cpu=arm64",
                 "--no-lto",
                 "--enable-vulkan-validation-layers",
-                "--rbe",
-                "--no-goma"
+                "--no-rbe",
+                "--no-goma",
+                "--bazel"
             ],
             "name": "ci/android_debug_arm64_validation_layers",
             "description": "Builds a debug mode engine targeting 64-bit arm Android with Vulkan validation layers.",
@@ -219,15 +235,17 @@
                 }
             ],
             "gclient_variables": {
-                "use_rbe": true
+                "use_rbe": false,
+                "download_bazelisk": true
             },
             "gn": [
                 "--target-dir",
                 "ci/android_debug_unopt",
                 "--android",
                 "--unoptimized",
-                "--rbe",
-                "--no-goma"
+                "--no-rbe",
+                "--no-goma",
+                "--bazel"
             ],
             "name": "ci/android_debug_unopt",
             "description": "Builds a debug mode unopt engine targeting 32-bit arm Android. Runs host-side Java unit tests and malioc.",
@@ -252,18 +270,6 @@
                         "--android-variant",
                         "ci/android_debug_unopt"
                     ]
-                },
-                {
-                    "language": "python3",
-                    "name": "malioc diff",
-                    "script": "flutter/impeller/tools/malioc_diff.py",
-                    "parameters": [
-                        "--before-relative-to-src",
-                        "flutter/impeller/tools/malioc.json",
-                        "--after-relative-to-src",
-                        "out/ci/android_debug_unopt/gen/malioc",
-                        "--print-diff"
-                    ]
                 }
             ]
         },
@@ -274,7 +280,8 @@
                 "os=Linux"
             ],
             "gclient_variables": {
-                "use_rbe": true
+                "use_rbe": false,
+                "download_bazelisk": true
             },
             "gn": [
                 "--target-dir",
@@ -282,8 +289,9 @@
                 "--runtime-mode",
                 "release",
                 "--no-lto",
-                "--rbe",
-                "--no-goma"
+                "--no-rbe",
+                "--no-goma",
+                "--bazel"
             ],
             "name": "ci/host_release_licenses",
             "description": "Runs the license_cpp script.",
@@ -296,8 +304,15 @@
             },
             "tests": [
                 {
+                    "language": "python3",
                     "name": "Run license_cpp unittests",
-                    "script": "out/ci/host_release_licenses/licenses_cpp_testrunner"
+                    "script": "flutter/testing/run_tests.py",
+                    "parameters": [
+                        "--variant",
+                        "ci/host_release_licenses",
+                        "--type",
+                        "binaries"
+                    ]
                 }
             ]
         },
@@ -308,7 +323,8 @@
                 "os=Linux"
             ],
             "gclient_variables": {
-                "use_rbe": true
+                "use_rbe": false,
+                "download_bazelisk": true
             },
             "gn": [
                 "--target-dir",
@@ -316,8 +332,9 @@
                 "--android",
                 "--android-cpu=arm",
                 "--no-lto",
-                "--rbe",
-                "--no-goma"
+                "--no-rbe",
+                "--no-goma",
+                "--bazel"
             ],
             "name": "ci/android_debug_test",
             "description": "Produces debug mode artifacts to target 32-bit arm Android from a Linux host.",
