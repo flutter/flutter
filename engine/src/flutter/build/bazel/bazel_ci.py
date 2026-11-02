@@ -13,13 +13,14 @@ out/<dir> <targets>`, then the build's test steps (`testing/run_tests.py
 tools/gn writes no GN build: it looks the flags up among the builder files'
 builds (builds.json beside this module, which the converter generates with
 ci/builders/BUILD.bazel) and writes a `build.ninja` into the build directory
-whose one edge runs the build's Bazel install target -- `bazelisk run
---config=<name> //engine/src/flutter/ci/builders:<name> -- <dir>`, which
-builds what the ninja targets build and lays it into the directory as GN
-would -- with a phony edge per ninja target, so that the recipe's `ninja -C
-out/<dir> <targets>` runs the Bazel build. It also writes `bazel.json`
-beside it, from which run_tests.py knows to run each `--type` as `bazelisk
-test --config=<name> <the type's suites>` rather than from the directory.
+whose one edge runs the build's Bazel install target (`bazel_ci.py install
+<dir>`: `bazelisk run --config=<name> //engine/src/flutter/ci/builders:<name>
+-- <dir>`, which builds what the ninja targets build and lays it into the
+directory as GN would) -- with a phony edge per ninja target, so that the
+recipe's `ninja -C out/<dir> <targets>` runs the Bazel build. It also writes
+`bazel.json` beside it, which the edge reads and from which run_tests.py
+knows to run each `--type` as `bazelisk test --config=<name> <the type's
+suites>` rather than from the directory.
 
 This module is what both scripts share: the builds' table, the match of a
 flag list against it, the files written into the build directory, and the
@@ -34,9 +35,9 @@ import subprocess
 import sys
 
 # The flags of a build that say where it runs rather than what it builds:
-# the recipe appends `--no-goma --no-rbe` to an official build's and
-# `--no-lto` under its no_lto property; `--bazel` is this mode's own. They
-# are left out when a flag list is matched against the builder files'.
+# the recipe appends `--no-goma --no-rbe` to an official build's; `--bazel`
+# is this mode's own. They are left out when a flag list is matched against
+# the builder files'.
 INFRA_FLAGS = frozenset(['--bazel', '--rbe', '--no-rbe', '--goma', '--no-goma'])
 
 # The value flags of the same kind: the recipe appends reproxy's address
@@ -47,6 +48,14 @@ _INFRA_VALUE_FLAGS = ('--rbe-server-address',)
 # build (the engine's version string); a Bazel build stamps the version from
 # the checkout (@engine_version), so the flag is matched away too.
 _IGNORED_GN_ARGS = ('engine_version=',)
+
+# What the recipe appends under its `no_lto` property (cocoon sets it on a
+# release builder's presubmit builds: a try build without LTO is a faster
+# one): a build whose own flags lack it matches without it and runs with
+# LTO off -- the Bazel setting the converter maps `--no-lto` to
+# (build/bazel/BUILD.bazel's `lto`, on in the configuration otherwise).
+NO_LTO_FLAG = '--no-lto'
+LTO_OFF_OPTION = '--//engine/src/flutter/build/bazel:lto=false'
 
 # Where the build directory's Bazel files go.
 NINJA_FILE = 'build.ninja'
@@ -121,12 +130,21 @@ def _target_dir(flags):
 def match_build(builds, flags):
   """The build of `builds` whose tools/gn flags are `flags` (infrastructure flags aside).
 
-  Raises BazelCiError when none matches (naming the builds of the same
-  build directory, if any, and their flags), or when the matching builds
-  disagree about their Bazel configuration.
+  The build is returned with an `options` list: the Bazel options the
+  flags add to its configuration (LTO off when the recipe appended
+  `--no-lto` to a build that has it on). Raises BazelCiError when none
+  matches (naming the builds of the same build directory, if any, and
+  their flags), or when the matching builds disagree about their Bazel
+  configuration.
   """
   wanted = normalized_flags(flags)
+  options = []
   matches = [build for build in builds if normalized_flags(build['gn']) == wanted]
+  if not matches and NO_LTO_FLAG in wanted:
+    without = [flag for flag in wanted if flag != NO_LTO_FLAG]
+    matches = [build for build in builds if normalized_flags(build['gn']) == without]
+    if matches:
+      options.append(LTO_OFF_OPTION)
   if not matches:
     directory = _target_dir(wanted)
     nearest = [build for build in builds if directory and build.get('build_directory') == directory]
@@ -167,7 +185,7 @@ def match_build(builds, flags):
             if build['ninja_targets_not_built'] else ''
         ) + ')'
     )
-  return build
+  return {**build, 'options': options}
 
 
 def find_bazelisk(engine_src):
@@ -236,12 +254,6 @@ def build_options(engine_src):
   ]
 
 
-def bazel_command(engine_src, bazelisk, command, arguments):
-  """`bazelisk <startup options> <command> --config=ci <build options> <arguments>`."""
-  return ([bazelisk] + startup_options(engine_src) + [command, '--config=' + CI_CONFIG] +
-          build_options(engine_src) + list(arguments))
-
-
 def ninja_escape(text):
   """`text` as a ninja path or identifier: `$`, `:` and spaces escaped."""
   return text.replace('$', '$$').replace(':', '$:').replace(' ', '$ ')
@@ -254,29 +266,71 @@ def shell_quote(text):
   return "'" + text.replace("'", "'\\''") + "'"
 
 
-# What the edge's shell runs before bazelisk: closes every inherited file
-# descriptor above stderr. ninja learns that a console-pool command is done
-# when the write end of a pipe it hands the child is closed by everyone who
-# holds it; the Bazel server the client starts inherits it and lives on
-# after the command, and ninja waits for the server's idle timeout (hours)
-# -- seen on the first end-to-end run (10-31). POSIX sh, no seq.
-CLOSE_INHERITED_FDS = ('fd=3; while [ "$fd" -le 255 ]; do eval "exec $fd>&-"; fd=$((fd + 1)); done')
+def described_command(description, command, arguments):
+  """A Bazel command of a build directory's description (bazel.json).
+
+  `bazelisk <startup options> <command> --config=ci <build options>
+  --config=<name> <options> <arguments>`. The description holds the
+  options as tools/gn computed them from the checkout -- the output root
+  and the disk cache under its .bazel_ci -- so
+  that the install and the tests run in one output root: computing them
+  again from the description's repo_root is what put run_tests.py's
+  output root two directories above the checkout (repo_root of a root).
+  """
+  return ([description['bazelisk']] + list(description['startup_options']) +
+          [command, '--config=' + CI_CONFIG] + list(description['build_options']) +
+          ['--config=' + description['config']] + list(description.get('options', [])) +
+          list(arguments))
+
+
+def install_command(description):
+  """`bazelisk run --config=<name> <options> <install> -- <dir>` of a description."""
+  return described_command(
+      description, 'run', [description['install'], '--', description['out_dir']]
+  )
+
+
+def run_install(out_dir):
+  """Runs the install of the build directory `out_dir` (its bazel.json); the exit status.
+
+  This is what the edge of the directory's build.ninja runs, through this
+  module rather than a shell: ninja learns that a console-pool command is
+  done when the write end of a pipe it hands the child is closed by
+  everyone who holds it, and the Bazel server the client starts inherits
+  what the client has and lives on after the command (its idle timeout is
+  hours) -- the first end-to-end run hung on a finished install (10-31).
+  Python's subprocess closes every descriptor above stderr in the child
+  (close_fds), so the server never holds ninja's pipe. (A shell loop over
+  `exec N>&-` did the same on a host whose /bin/sh is bash; the bots' is
+  dash, which has no descriptors above 9: "exec: 10: not found".)
+  """
+  description = read_build_directory(out_dir)
+  if description is None:
+    print(
+        f'{BAZEL_JSON} not found in {out_dir}: not a directory tools/gn --bazel wrote',
+        file=sys.stderr
+    )
+    return 1
+  command = install_command(description)
+  print(' '.join(shell_quote(w) for w in command), flush=True)
+  result = subprocess.run(
+      command,
+      cwd=description['repo_root'],
+      env={**os.environ, **description['environment']},
+      close_fds=True,
+      check=False,
+  )
+  if result.returncode == 0:
+    with open(os.path.join(out_dir, STAMP), 'w', encoding='utf-8'):
+      pass
+  return result.returncode
 
 
 def ninja_file(engine_src, build, out_dir, bazelisk):
   """The build.ninja that runs the build's install: one edge, a phony per ninja target."""
-  root = repo_root(engine_src)
-  stamp = os.path.join(out_dir, STAMP)
-  env = ' '.join(f'{k}={shell_quote(v)}' for k, v in sorted(bazel_environment(engine_src).items()))
-  run = bazel_command(
-      engine_src, bazelisk, 'run', ['--config=' + build['config'], build['install'], '--', out_dir]
-  )
-  command = ' && '.join([
-      CLOSE_INHERITED_FDS,
-      'cd ' + shell_quote(root),
-      'env ' + env + ' ' + ' '.join(shell_quote(w) for w in run),
-      'touch ' + shell_quote(stamp),
-  ])
+  del engine_src, bazelisk  # In bazel.json, which the edge's command reads.
+  run = [sys.executable or 'python3', os.path.abspath(__file__), 'install', out_dir]
+  command = ' '.join(shell_quote(w) for w in run)
   lines = [
       f"# Written by flutter/tools/gn --bazel for {build['file']}'s {build['name']}: `ninja -C",
       f'# {out_dir} <targets>` runs the Bazel build of the configuration',
@@ -286,7 +340,8 @@ def ninja_file(engine_src, build, out_dir, bazelisk):
       '',
       'rule bazel_install',
       '  command = ' + command.replace('$', '$$'),
-      f"  description = bazel run --config={build['config']} {build['install']} -- {out_dir}",
+      f"  description = bazel run --config={build['config']} "
+      f"{' '.join(build.get('options', []) + [build['install']])} -- {out_dir}",
       '  pool = console',
       '',
       f'build {ninja_escape(STAMP)}: bazel_install',
@@ -319,11 +374,13 @@ def write_build_directory(engine_src, build, out_dir, bazelisk):
       'file': build['file'],
       'name': build['name'],
       'config': build['config'],
+      'options': build.get('options', []),
       'install': build['install'],
       'tests': build['tests'],
       'bazelisk': bazelisk,
       'repo_root': repo_root(engine_src),
       'startup_options': startup_options(engine_src),
+      'build_options': build_options(engine_src),
       'environment': bazel_environment(engine_src),
       'out_dir': out_dir,
   }
@@ -383,7 +440,7 @@ def copy_failed_test_logs(description, logs_dir):
   package: CI's log collection uploads the directory.
   """
   result = subprocess.run(
-      bazel_command(description['repo_root'], description['bazelisk'], 'info', ['bazel-testlogs']),
+      described_command(description, 'info', ['bazel-testlogs']),
       cwd=description['repo_root'],
       env={**os.environ, **description['environment']},
       capture_output=True,
@@ -421,12 +478,7 @@ def run_tests(description, types, logs_dir=None, extra_arguments=()):
   if not suites:
     print('run_tests.py: nothing to run under Bazel for ' + ', '.join(types), file=sys.stderr)
     return 0
-  command = bazel_command(
-      description['repo_root'],
-      description['bazelisk'],
-      'test',
-      ['--config=' + description['config']] + list(extra_arguments) + suites,
-  )
+  command = described_command(description, 'test', list(extra_arguments) + suites)
   print('run_tests.py: ' + ' '.join(shell_quote(w) for w in command), file=sys.stderr)
   sys.stderr.flush()
   result = subprocess.run(
@@ -438,3 +490,15 @@ def run_tests(description, types, logs_dir=None, extra_arguments=()):
   if logs_dir:
     copy_failed_test_logs(description, logs_dir)
   return result.returncode
+
+
+def main(argv):
+  """`bazel_ci.py install <dir>`: the install of a build directory tools/gn --bazel wrote."""
+  if len(argv) == 3 and argv[1] == 'install':
+    return run_install(argv[2])
+  print(f'usage: {argv[0]} install <build directory>', file=sys.stderr)
+  return 2
+
+
+if __name__ == '__main__':
+  sys.exit(main(sys.argv))
