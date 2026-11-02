@@ -24,7 +24,6 @@ void testMain() {
     addTearDown(() {
       fontCollectionDispose(collection.handle);
       collection.defaultTextStyle.dispose();
-      collection.registeredTypefaces.clear();
     });
 
     const fontFamily = 'TestFont';
