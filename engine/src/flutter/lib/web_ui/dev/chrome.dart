@@ -102,6 +102,15 @@ class Chrome extends Browser {
           '--user-data-dir=$dir',
           url.toString(),
           if (!debug) '--headless',
+          // A headless window counts as occluded when the console's screen is
+          // locked (macOS: CGSSessionScreenIsLocked), and Chromium then stops
+          // delivering requestAnimationFrame to it -- every test that waits
+          // for a frame (the golden tests pump 15) hangs to its timeout on a
+          // locked Mac. Headless runs are not meant to depend on the state of
+          // a screen nobody is looking at.
+          if (!debug) '--disable-backgrounding-occluded-windows',
+          if (!debug) '--disable-renderer-backgrounding',
+          if (!debug) '--disable-background-timer-throttling',
           if (isChromeNoSandbox) '--no-sandbox',
           // When headless, this is the actual size of the viewport.
           if (!debug) '--window-size=$kMaxScreenshotWidth,$kMaxScreenshotHeight',
