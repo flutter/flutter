@@ -132,7 +132,6 @@ void main() {
     testUsingContext(
       'sends timing events to analytics',
       () async {
-        Cache.flutterRoot = r'C:\flutter';
         fileSystem.file('pubspec.yaml').createSync();
         writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
         fileSystem
@@ -196,6 +195,7 @@ void main() {
         final device = WindowsDevice(
           analytics: fakeAnalytics,
           toolContext: FakeToolContext(
+            cache: Cache.test(processManager: FakeProcessManager.any(), flutterRoot: r'C:\flutter'),
             fs: fileSystem,
             logger: BufferLogger.test(),
             os: FakeOperatingSystemUtils(),

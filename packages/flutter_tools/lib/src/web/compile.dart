@@ -26,7 +26,6 @@ import '../plugins.dart';
 import '../project.dart';
 import '../version.dart';
 import 'compiler_config.dart';
-import 'file_generators/flutter_service_worker_js.dart';
 import 'migrations/scrub_generated_plugin_registrant.dart';
 
 export 'compiler_config.dart';
@@ -39,9 +38,6 @@ const kBaseHref = 'baseHref';
 
 /// Static assets url to set in index.html in flutter build command
 const kStaticAssetsUrl = 'staticAssetsUrl';
-
-/// The caching strategy to use for service worker generation.
-const kServiceWorkerStrategy = 'ServiceWorkerStrategy';
 
 /// Prefix for web-define variables stored in [Environment.defines].
 const kWebDefinePrefix = 'webDefine:';
@@ -64,8 +60,7 @@ class WebBuilder {
   Future<void> buildWeb(
     FlutterProject flutterProject,
     String target,
-    BuildInfo buildInfo,
-    ServiceWorkerStrategy? serviceWorkerStrategy, {
+    BuildInfo buildInfo, {
     required List<WebCompilerConfig> compilerConfigs,
     String? baseHref,
     String? staticAssetsUrl,
@@ -76,20 +71,13 @@ class WebBuilder {
       :Artifacts artifacts,
       :Cache cache,
       :Config config,
-      fs: FileSystem fileSystem,
       :FlutterVersion flutterVersion,
+      fs: FileSystem fileSystem,
       :Logger logger,
       :Platform platform,
       :ProcessManager processManager,
       :Terminal terminal,
     ) = _toolContext;
-    if (serviceWorkerStrategy != null) {
-      logger.printWarning(
-        'The --pwa-strategy option is deprecated and will be removed in a future Flutter release.\n'
-        'For more information, see: https://github.com/flutter/flutter/issues/156910',
-      );
-    }
-
     final bool hasWebPlugins = (await findPlugins(
       flutterProject,
       logger: logger,
@@ -133,8 +121,6 @@ class WebBuilder {
             kHasWebPlugins: hasWebPlugins.toString(),
             kBaseHref: ?baseHref,
             kStaticAssetsUrl: ?staticAssetsUrl,
-            kServiceWorkerStrategy:
-                serviceWorkerStrategy?.cliName ?? ServiceWorkerStrategy.offlineFirst.cliName,
             ...buildInfo.toBuildSystemEnvironment(),
             for (final MapEntry(:key, :value) in webDefines.entries) '$kWebDefinePrefix$key': value,
           },
@@ -147,7 +133,7 @@ class WebBuilder {
           analytics: _analytics,
           cacheDir: cache.getRoot(),
           engineVersion: artifacts.usesLocalArtifacts ? null : flutterVersion.engineRevision,
-          flutterRootDir: fileSystem.directory(Cache.flutterRoot),
+          flutterRootDir: fileSystem.directory(cache.flutterRoot),
           // Web uses a different Dart plugin registry.
           // https://github.com/flutter/flutter/issues/80406
           generateDartPluginRegistry: false,

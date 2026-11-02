@@ -191,7 +191,7 @@ class _CompressedNode extends _TrieNode {
       );
     } else {
       // Adding new key/value mapping.
-      final int occupiedCount = _bitCount(occupiedIndices);
+      final int occupiedCount = occupiedIndices.oneBitCount;
       if (occupiedCount >= 16) {
         // Too many occupied: inflate compressed node into full node and
         // update descendant at the corresponding index.
@@ -271,7 +271,7 @@ class _CompressedNode extends _TrieNode {
   @pragma('vm:prefer-inline')
   @pragma('wasm:prefer-inline')
   int _compressedIndex(int bit) {
-    return _bitCount(occupiedIndices & (bit - 1));
+    return (occupiedIndices & (bit - 1)).oneBitCount;
   }
 
   static _TrieNode _resolveCollision(
@@ -357,22 +357,6 @@ class _HashCollisionNode extends _TrieNode {
     }
     return -1;
   }
-}
-
-/// Returns number of bits set in a 32bit integer.
-///
-/// dart2js safe because we work with 32bit integers.
-@pragma('dart2js:tryInline')
-@pragma('vm:prefer-inline')
-@pragma('wasm:prefer-inline')
-int _bitCount(int n) {
-  assert((n & 0xFFFFFFFF) == n);
-  int v = n - ((n >> 1) & 0x55555555);
-  v = (v & 0x33333333) + ((v >>> 2) & 0x33333333);
-  v = (v + (v >> 4)) & 0x0F0F0F0F;
-  v = v + (v >> 8);
-  v = v + (v >> 16);
-  return v & 0x0000003F;
 }
 
 /// Create a copy of the given array.
