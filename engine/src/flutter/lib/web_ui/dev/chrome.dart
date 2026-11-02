@@ -111,6 +111,14 @@ class Chrome extends Browser {
           if (!debug) '--disable-backgrounding-occluded-windows',
           if (!debug) '--disable-renderer-backgrounding',
           if (!debug) '--disable-background-timer-throttling',
+          // Those three keep the renderer awake, but on a locked Mac
+          // WindowServer also stops the display's vsync (CVDisplayLink)
+          // ticks, Chromium's compositor issues no BeginFrame without them,
+          // and requestAnimationFrame fires once and never again. This
+          // Chromium feature drives vsync from a software timer instead; an
+          // unknown feature name is ignored, so a Chrome without it loses
+          // nothing but the locked-screen case.
+          if (!debug && Platform.isMacOS) '--enable-features=ForceMacVSyncTimerForDebugging',
           if (isChromeNoSandbox) '--no-sandbox',
           // When headless, this is the actual size of the viewport.
           if (!debug) '--window-size=$kMaxScreenshotWidth,$kMaxScreenshotHeight',
