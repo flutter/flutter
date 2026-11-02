@@ -658,6 +658,7 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
   }
   if (request->state == kFocused) {
     [controller.flutterView.window makeFirstResponder:controller.flutterView];
+    [controller.flutterView.window makeKeyWindow];
   }
 }
 

@@ -13,10 +13,8 @@ import 'src/base/context.dart';
 import 'src/base/file_system.dart';
 import 'src/base/io.dart';
 import 'src/base/logger.dart';
-import 'src/base/platform.dart';
 import 'src/base/template.dart';
 import 'src/base/terminal.dart';
-import 'src/base/user_messages.dart';
 import 'src/build_system/build_targets.dart';
 import 'src/build_system/targets/hook_runner_native.dart' show FlutterHookRunnerNative;
 import 'src/cache.dart';
@@ -103,28 +101,20 @@ Future<void> main(List<String> args) async {
   final widgetPreviews = commandName == WidgetPreviewCommand.kWidgetPreview;
   final bool runMachine = args.contains('--machine');
 
-  // Cache.flutterRoot must be set early because other features use it (e.g.
-  // enginePath's initializer uses it). This can only work with the real
-  // instances of the platform or filesystem, so just use those.
-  Cache.flutterRoot = Cache.defaultFlutterRoot(
-    platform: const LocalPlatform(),
-    fileSystem: globals.localFileSystem,
-    userMessages: UserMessages(),
-  );
-
   await runner.run(
     args,
     (ToolDependencies toolDependencies) {
       final ToolDependencies(
         :ExtensionManager? extensionManager,
         :FeatureFlags featureFlags,
-        toolContext: ToolContext(:FileSystem fs, :Logger logger),
+        toolContext: ToolContext(:Cache cache, :FileSystem fs, :Logger logger),
       ) = toolDependencies;
       final ExtensionManager manager = extensionManager!;
       final templateManager = ExtensionTemplateManager(
         extensionManager: manager,
         featureFlags: featureFlags,
         fileSystem: fs,
+        flutterRoot: cache.flutterRoot,
         logger: logger,
       );
       return generateCommands(
@@ -181,7 +171,7 @@ Future<void> main(List<String> args) async {
         );
         // runner.run calls "terminal.applyFeatureFlags()"
       },
-      PreRunValidator: () => PreRunValidator(fileSystem: globals.fs),
+      PreRunValidator: () => PreRunValidator(fileSystem: globals.fs, cache: globals.cache),
       TestCompilerNativeAssetsBuilder: () => const TestCompilerNativeAssetsBuilderImpl(),
     },
     shutdownHooks: globals.shutdownHooks,
@@ -238,12 +228,7 @@ List<FlutterCommand> generateCommands({
   AnalyzeCommand(
     allProjectValidators: <ProjectValidator>[
       GeneralInfoProjectValidator(),
-      VariableDumpMachineProjectValidator(
-        logger: toolDependencies.toolContext.logger,
-        fileSystem: toolDependencies.toolContext.fs,
-        platform: toolDependencies.toolContext.platform,
-        git: toolDependencies.toolContext.git,
-      ),
+      VariableDumpMachineProjectValidator(toolContext: toolDependencies.toolContext),
     ],
     suppressAnalytics: !toolDependencies.analytics.okToSend,
     toolContext: toolDependencies.toolContext,
@@ -279,6 +264,7 @@ List<FlutterCommand> generateCommands({
   ),
   ChannelCommand(verboseHelp: verboseHelp, toolContext: toolDependencies.toolContext),
   CleanCommand(
+    extensionCleanManager: toolDependencies.extensionCleanManager,
     verbose: verbose,
     toolContext: toolDependencies.toolContext,
     xcode: toolDependencies.appleContext.xcode,
@@ -365,6 +351,7 @@ List<FlutterCommand> generateCommands({
   ScreenshotCommand(toolContext: toolDependencies.toolContext),
   ShellCompletionCommand(toolContext: toolDependencies.toolContext),
   TestCommand(
+    templateRenderer: const MustacheTemplateRenderer(),
     toolContext: toolDependencies.toolContext,
     verboseHelp: verboseHelp,
     verbose: verbose,

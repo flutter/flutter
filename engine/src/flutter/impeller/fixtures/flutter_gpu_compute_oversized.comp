@@ -1,0 +1,19 @@
+// Copyright 2013 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+// Declares a workgroup of 1024 x 1024 invocations, more than any device
+// allows, so creating a pipeline from it fails.
+
+layout(local_size_x = 1024, local_size_y = 1024) in;
+
+layout(std430) buffer;
+
+layout(binding = 0) buffer Data {
+  uint values[];
+}
+data;
+
+void main() {
+  data.values[gl_LocalInvocationIndex] += 1u;
+}

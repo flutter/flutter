@@ -31,7 +31,9 @@ import '../dart/package_map.dart';
 import '../dart/pub.dart';
 import '../device.dart';
 import '../features.dart';
+import '../flutter_plugins.dart';
 import '../globals.dart' as globals;
+import '../package_graph.dart';
 import '../persistent_tool_state.dart';
 import '../pre_run_validator.dart';
 import '../project.dart';
@@ -351,7 +353,7 @@ abstract class FlutterCommand extends Command<void> {
     if (rest != null && rest.isNotEmpty) {
       return rest.first;
     }
-    return toolContext?.fs.path.join('lib', 'main.dart') ?? bundle.defaultMainPath;
+    return bundle.defaultMainPath(_fs);
   }
 
   /// Indicates if the current command running has a terminal attached.
@@ -645,7 +647,10 @@ abstract class FlutterCommand extends Command<void> {
       final String? customDir = getValue(BuildInfoOptions.codeSizeDirectory);
       final Directory directory = (customDir != null)
           ? _fs.directory(customDir)
-          : _fsUtils.getUniqueDirectory(_fs.directory(getBuildDirectory()), 'flutter_size');
+          : _fsUtils.getUniqueDirectory(
+              _fs.directory(getBuildDirectory(toolContext!.config, _fs)),
+              'flutter_size',
+            );
       directory.createSync(recursive: true);
       codeSizeDirectory = directory.path;
     }
@@ -1261,7 +1266,28 @@ abstract class FlutterCommand extends Command<void> {
     if (!shouldRunPub) {
       return;
     }
-    await project.regeneratePlatformSpecificTooling(releaseMode: releaseMode);
+    await regeneratePlatformSpecificTooling(project, releaseMode: releaseMode);
+  }
+
+  /// Runs [FlutterProject.regeneratePlatformSpecificTooling] for [project] using
+  /// this command's dependencies.
+  @protected
+  Future<void> regeneratePlatformSpecificTooling(
+    FlutterProject project, {
+    DeprecationBehavior deprecationBehavior = DeprecationBehavior.none,
+    required bool releaseMode,
+    PubspecCache? pubspecCache,
+    PackageGraph? packageGraph,
+    PackageConfig? packageConfig,
+  }) {
+    return project.regeneratePlatformSpecificTooling(
+      toolContext: toolContext!,
+      deprecationBehavior: deprecationBehavior,
+      releaseMode: releaseMode,
+      pubspecCache: pubspecCache,
+      packageGraph: packageGraph,
+      packageConfig: packageConfig,
+    );
   }
 
   /// The set of development artifacts required for this command.

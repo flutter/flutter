@@ -7,8 +7,10 @@ import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
+import 'package:web_engine_tester/golden_tester.dart';
 
-import 'common.dart';
+import '../common/test_initialization.dart';
+import 'utils.dart';
 
 void main() {
   internalBootstrapBrowserTest(() => testMain);
@@ -18,14 +20,15 @@ const ui.Rect kDefaultRegion = ui.Rect.fromLTRB(0, 0, 500, 250);
 
 void testMain() {
   group('flutter_tester emulation', () {
-    setUpCanvasKitTest(
+    setUpUnitTests(
       withImplicitView: true,
+      setUpTestViewDimensions: false,
       testEnvironment: const ui_web.TestEnvironment.flutterTester(),
     );
 
     test('defaults to FlutterTest font family', () async {
-      final recorder = CkPictureRecorder();
-      final CkCanvas canvas = recorder.beginRecording(kDefaultRegion);
+      final recorder = ui.PictureRecorder();
+      final canvas = ui.Canvas(recorder, kDefaultRegion);
       canvas.translate(10, 10);
 
       void drawTextWithOutline(
@@ -37,12 +40,12 @@ void testMain() {
         List<String>? strutStyleFontFallbacks,
         double? strutStyleFontSize,
       }) {
-        final CkStrutStyle? strutStyle;
+        final ui.StrutStyle? strutStyle;
 
         if (strutStyleFontFamily != null ||
             strutStyleFontFallbacks != null ||
             strutStyleFontSize != null) {
-          strutStyle = CkStrutStyle(
+          strutStyle = ui.StrutStyle(
             fontFamily: strutStyleFontFamily,
             fontFamilyFallback: strutStyleFontFallbacks,
             fontSize: strutStyleFontSize,
@@ -51,15 +54,15 @@ void testMain() {
           strutStyle = null;
         }
 
-        final builder = CkParagraphBuilder(
-          CkParagraphStyle(fontFamily: paragraphFontFamily, strutStyle: strutStyle),
+        final builder = ui.ParagraphBuilder(
+          ui.ParagraphStyle(fontFamily: paragraphFontFamily, strutStyle: strutStyle),
         );
 
         final bool needsTextStyle = textFontFamily != null || textFontFallbacks != null;
 
         if (needsTextStyle) {
           builder.pushStyle(
-            CkTextStyle(fontFamily: textFontFamily, fontFamilyFallback: textFontFallbacks),
+            ui.TextStyle(fontFamily: textFontFamily, fontFamilyFallback: textFontFallbacks),
           );
         }
 
@@ -69,12 +72,12 @@ void testMain() {
           builder.pop();
         }
 
-        final CkParagraph paragraph = builder.build();
+        final ui.Paragraph paragraph = builder.build();
         paragraph.layout(const ui.ParagraphConstraints(width: 10000));
         canvas.drawParagraph(paragraph, ui.Offset.zero);
         canvas.drawRect(
           ui.Rect.fromLTWH(-4, -4, paragraph.maxIntrinsicWidth + 8, paragraph.height + 8),
-          CkPaint()
+          ui.Paint()
             ..style = ui.PaintingStyle.stroke
             ..strokeWidth = 1,
         );
@@ -96,11 +99,8 @@ void testMain() {
         strutStyleFontSize: 40,
       );
 
-      await matchPictureGolden(
-        'canvaskit_defaults_to_ahem.png',
-        recorder.endRecording(),
-        region: kDefaultRegion,
-      );
+      await drawPictureUsingCurrentRenderer(recorder.endRecording());
+      await matchGoldenFile('ui_flutter_tester_emulation.png', region: kDefaultRegion);
     });
     // TODO(yjbanov): https://github.com/flutter/flutter/issues/71520
   }, skip: isSafari || isFirefox);
