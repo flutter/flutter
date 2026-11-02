@@ -220,4 +220,23 @@ void main() {
       expect(base.hashCode, isNot(equals(differentAppName.hashCode)));
     });
   });
+
+  group('ExtensionUriValidation', () {
+    test('isValidDirectoryUri returns true only for directory-terminated absolute file URIs', () {
+      expect(Uri.directory('/path/to/my_app').isValidDirectoryUri, isTrue);
+      expect(Uri.file('/path/to/my_app').isValidDirectoryUri, isFalse);
+      expect(Uri.parse('https://example.com/dir/').isValidDirectoryUri, isFalse);
+    });
+
+    test('isValidFileUri returns true only for non-directory absolute file URIs', () {
+      expect(Uri.parse('file:///path/to/app').isValidFileUri, isTrue);
+      expect(Uri(scheme: 'file').isValidFileUri, isFalse);
+      expect(Uri.parse('file:').isValidFileUri, isFalse);
+      expect(Uri.parse('file:///').isValidFileUri, isFalse);
+      expect(Uri.parse('file:///path/to/dir/').isValidFileUri, isFalse);
+      expect(Uri.parse('relative/app').isValidFileUri, isFalse);
+      expect(Uri.parse('/absolute/without/scheme').isValidFileUri, isFalse);
+      expect(Uri.parse('https://example.com/app').isValidFileUri, isFalse);
+    });
+  });
 }

@@ -40,7 +40,6 @@ void main() {
   setUp(() {
     fs = MemoryFileSystem.test();
     final Directory flutterRoot = fs.directory('flutter');
-    Cache.flutterRoot = flutterRoot.path;
     logger = BufferLogger.test();
     platform = FakePlatform(environment: const <String, String>{'PATH': ''});
     processManager = FakeProcessManager.empty();
