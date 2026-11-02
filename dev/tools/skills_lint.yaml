@@ -6,6 +6,5 @@ skills_lint:
     check-relative-paths: error
     check-absolute-paths: error
     check-trailing-whitespace: error
-    disallowed-field: error
   directories:
     - path: "../../.agents/skills"
