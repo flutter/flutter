@@ -398,35 +398,31 @@ void main() {
       expect(data.systemGestureInsets, EdgeInsets.zero);
     });
 
-    testWidgets('yields platformBrightness to debugBrightnessOverride', (
+    testWidgets("debugBrightnessOverride overrides the implicit view's brightness", (
       WidgetTester tester,
     ) async {
-      // debugBrightnessOverride is applied by MediaQuery after the data has
-      // been built, so it wins there. Pinned because the two mechanisms
-      // overlap, and because everything that reads the dispatcher rather than
-      // MediaQuery still sees the view override.
       late MediaQueryData data;
       await tester.pumpWidget(_capture((MediaQueryData value) => data = value));
+      final ui.Brightness platform = data.platformBrightness;
 
-      debugSetViewMetricsOverride(
-        tester.view.viewId,
-        const DebugViewMetricsOverride(platformBrightness: ui.Brightness.dark),
-      );
+      expect(tester.binding.hasScheduledFrame, isFalse);
+      debugBrightnessOverride = _otherBrightness;
+      expect(tester.binding.hasScheduledFrame, isTrue);
       await tester.pump();
-      expect(data.platformBrightness, ui.Brightness.dark);
+      final ui.Brightness overridden = data.platformBrightness;
 
-      debugBrightnessOverride = ui.Brightness.light;
-      await tester.pumpWidget(
-        _capture((MediaQueryData value) => data = value, child: const SizedBox()),
-      );
-      final ui.Brightness withBoth = data.platformBrightness;
-      final ui.Brightness fromDispatcher = tester.binding.platformDispatcher.platformBrightness;
+      // Like any override, it yields to a value a test sets explicitly.
+      tester.platformDispatcher.platformBrightnessTestValue = platform;
+      await tester.pump();
+      final ui.Brightness withTestValue = data.platformBrightness;
 
+      tester.platformDispatcher.clearPlatformBrightnessTestValue();
       debugBrightnessOverride = null;
-      debugClearViewMetricsOverrides();
+      await tester.pump();
 
-      expect(withBoth, ui.Brightness.light);
-      expect(fromDispatcher, ui.Brightness.dark);
+      expect(overridden, _otherBrightness);
+      expect(withTestValue, platform);
+      expect(data.platformBrightness, platform);
     });
 
     testWidgets('an override for another view leaves this one alone', (WidgetTester tester) async {

@@ -53,6 +53,18 @@ class TestServiceExtensionsBinding extends BindingBase
         .where((Map<String, dynamic> event) => event['extension'] == extensionName);
   }
 
+  // The events of getServiceExtensionStateChangedEvents that are posted after
+  // this call. The tests share this binding and run in a random order, and
+  // more than one of them posts events for the same extension.
+  Iterable<Map<String, dynamic>> getServiceExtensionStateChangedEventsFromNow(
+    String extensionName,
+  ) {
+    final Iterable<Map<String, dynamic>> events = getServiceExtensionStateChangedEvents(
+      extensionName,
+    );
+    return events.skip(events.length);
+  }
+
   Future<Map<String, dynamic>> testExtension(String name, Map<String, String> arguments) {
     expect(extensions.containsKey(name), isTrue);
     return extensions[name]!(arguments);
@@ -1421,14 +1433,82 @@ void main() {
   });
 
   test('Service extensions - brightnessOverride', () async {
-    Map<String, dynamic> result;
-    result = await binding.testExtension(
-      FoundationServiceExtensions.brightnessOverride.name,
-      <String, String>{},
-    );
-    final brightnessValue = result['value'] as String;
+    final int viewId = binding.platformDispatcher.implicitView!.viewId;
+    addTearDown(debugClearViewMetricsOverrides);
+    final Iterable<Map<String, dynamic>> brightnessEvents = binding
+        .getServiceExtensionStateChangedEventsFromNow(
+          'ext.flutter.${FoundationServiceExtensions.brightnessOverride.name}',
+        );
+    final Iterable<Map<String, dynamic>> viewMetricsEvents = binding
+        .getServiceExtensionStateChangedEventsFromNow(
+          'ext.flutter.${FoundationServiceExtensions.viewMetricsOverride.name}',
+        );
+    Future<Map<String, dynamic>> call([String? value]) {
+      return binding.testExtension(
+        FoundationServiceExtensions.brightnessOverride.name,
+        <String, String>{'value': ?value},
+      );
+    }
 
-    expect(brightnessValue, 'Brightness.light');
+    final platform = ui.PlatformDispatcher.instance.platformBrightness.toString();
+
+    // A read reports the brightness the binding's dispatcher reports.
+    expect(await call(), <String, String>{'value': platform});
+    expect(debugViewMetricsOverrides, isEmpty);
+    expect(brightnessEvents, isEmpty);
+
+    // An override is the brightness of the implicit view's entry, which the
+    // dispatcher then reports. Clients that keep the whole registry are told
+    // about the change too.
+    expect(await call('Brightness.dark'), <String, String>{'value': 'Brightness.dark'});
+    expect(debugViewMetricsOverrides, <int, DebugViewMetricsOverride>{
+      viewId: const DebugViewMetricsOverride(platformBrightness: ui.Brightness.dark),
+    });
+    expect(brightnessEvents.length, 1);
+    expect(brightnessEvents.last['value'], 'Brightness.dark');
+    expect(viewMetricsEvents.length, 1);
+    expect(json.decode(json.encode(viewMetricsEvents.last['value'])), <String, Object?>{
+      '$viewId': <String, Object?>{'platformBrightness': 'dark'},
+    });
+
+    // Asking for the same brightness changes nothing, and posts only the extension's own event.
+    expect(await call('Brightness.dark'), <String, String>{'value': 'Brightness.dark'});
+    expect(brightnessEvents.length, 2);
+    expect(brightnessEvents.last['value'], 'Brightness.dark');
+    expect(viewMetricsEvents.length, 1);
+
+    // Only the brightness of the entry is replaced.
+    debugSetViewMetricsOverride(
+      viewId,
+      const DebugViewMetricsOverride(platformBrightness: ui.Brightness.dark, boldText: true),
+    );
+    expect(await call('Brightness.light'), <String, String>{'value': 'Brightness.light'});
+    expect(
+      debugViewMetricsOverrides[viewId],
+      const DebugViewMetricsOverride(platformBrightness: ui.Brightness.light, boldText: true),
+    );
+    expect(viewMetricsEvents.length, 2);
+
+    // Any other value stops overriding the brightness, and only the brightness.
+    expect(await call('system'), <String, String>{'value': platform});
+    expect(debugViewMetricsOverrides[viewId], const DebugViewMetricsOverride(boldText: true));
+    expect(brightnessEvents.length, 4);
+    expect(brightnessEvents.last['value'], platform);
+    expect(viewMetricsEvents.length, 3);
+
+    // An entry that is left with nothing to override is removed. 'dark' is
+    // not a value that overrides the brightness.
+    debugSetViewMetricsOverride(
+      viewId,
+      const DebugViewMetricsOverride(platformBrightness: ui.Brightness.dark),
+    );
+    expect(await call('dark'), <String, String>{'value': platform});
+    expect(debugViewMetricsOverrides, isEmpty);
+    expect(viewMetricsEvents.length, 4);
+    expect(json.decode(json.encode(viewMetricsEvents.last['value'])), <String, Object?>{});
+
+    // Nothing is reassembled.
+    expect(binding.reassembled, 0);
 
     testedExtensions.add(FoundationServiceExtensions.brightnessOverride.name);
   });
@@ -1448,8 +1528,14 @@ void main() {
     // Every client listening for extension state changes has to learn about an
     // override, not just the one that asked for it.
     final Iterable<Map<String, dynamic>> extensionChangedEvents = binding
-        .getServiceExtensionStateChangedEvents(
+        .getServiceExtensionStateChangedEventsFromNow(
           'ext.flutter.${FoundationServiceExtensions.viewMetricsOverride.name}',
+        );
+    // The brightness of the implicit view's override is also the state of the
+    // brightnessOverride extension.
+    final Iterable<Map<String, dynamic>> brightnessEvents = binding
+        .getServiceExtensionStateChangedEventsFromNow(
+          'ext.flutter.${FoundationServiceExtensions.brightnessOverride.name}',
         );
     // The service extension machinery encodes the reply and the event as JSON
     // before a client sees them, so the assertions below are on that form.
@@ -1640,10 +1726,7 @@ void main() {
     expect(extensionChangedEvents.length, 8);
 
     // The extension is the way tooling installs overrides, so the whole path
-    // — handler, registry, replay, binding — is exercised once end to end. This
-    // is part of this test, not a test of its own, because the tests in this
-    // file share the binding and run in a random order: the event counts above
-    // assume that no other test has used this extension.
+    // — handler, registry, replay, binding — is exercised once end to end.
     final observer = _MetricsObserver();
     binding.addObserver(observer);
     addTearDown(() => binding.removeObserver(observer));
@@ -1657,6 +1740,42 @@ void main() {
     expect(observer.metricsChanged, 2);
     expect(binding.platformDispatcher.implicitView!.devicePixelRatio, realRatio);
     expect(extensionChangedEvents.length, 10);
+
+    // A change of the implicit view's brightness also posts the brightnessOverride event.
+    expect(brightnessEvents, isEmpty);
+    final platform = ui.PlatformDispatcher.instance.platformBrightness.toString();
+    await call(<String, String>{
+      'viewId': '$viewId',
+      'overrides': '{"platformBrightness": "dark"}',
+    });
+    expect(brightnessEvents.length, 1);
+    expect(brightnessEvents.last['value'], 'Brightness.dark');
+
+    // A change of the implicit view's other metrics is not a change of its
+    // brightness, and neither is a change of another view's brightness.
+    await call(<String, String>{
+      'viewId': '$viewId',
+      'overrides': '{"platformBrightness": "dark", "boldText": true}',
+    });
+    await call(<String, String>{
+      'viewId': '${viewId + 1}',
+      'overrides': '{"platformBrightness": "light"}',
+    });
+    expect(brightnessEvents.length, 1);
+
+    // Removing the implicit view's entry, or every entry, removes its
+    // brightness.
+    await call(<String, String>{'viewId': '$viewId', 'overrides': '{}'});
+    expect(brightnessEvents.length, 2);
+    expect(brightnessEvents.last['value'], platform);
+    await call(<String, String>{
+      'viewId': '$viewId',
+      'overrides': '{"platformBrightness": "dark"}',
+    });
+    await call(<String, String>{'clearAll': 'true'});
+    expect(brightnessEvents.length, 4);
+    expect(brightnessEvents.last['value'], platform);
+    expect(extensionChangedEvents.length, 16);
 
     testedExtensions.add(FoundationServiceExtensions.viewMetricsOverride.name);
   });

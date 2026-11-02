@@ -667,6 +667,35 @@ void main() {
     });
   });
 
+  group('debugBrightnessOverride', () {
+    tearDown(debugClearViewMetricsOverrides);
+
+    test("is the brightness of the implicit view's entry", () {
+      final int viewId = ui.PlatformDispatcher.instance.implicitView!.viewId;
+      expect(debugBrightnessOverride, isNull);
+
+      debugBrightnessOverride = ui.Brightness.dark;
+      expect(debugViewMetricsOverrides, <int, DebugViewMetricsOverride>{
+        viewId: const DebugViewMetricsOverride(platformBrightness: ui.Brightness.dark),
+      });
+
+      // It reads an entry that something else registered, such as tooling, and
+      // replaces only its brightness.
+      debugSetViewMetricsOverride(
+        viewId,
+        const DebugViewMetricsOverride(platformBrightness: ui.Brightness.light, boldText: true),
+      );
+      expect(debugBrightnessOverride, ui.Brightness.light);
+      debugBrightnessOverride = ui.Brightness.dark;
+      expect(
+        debugViewMetricsOverrides[viewId],
+        const DebugViewMetricsOverride(platformBrightness: ui.Brightness.dark, boldText: true),
+      );
+      debugBrightnessOverride = null;
+      expect(debugViewMetricsOverrides[viewId], const DebugViewMetricsOverride(boldText: true));
+    });
+  });
+
   group('debugApplyViewMetricsOverrides', () {
     tearDown(debugClearViewMetricsOverrides);
 

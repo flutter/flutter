@@ -90,7 +90,6 @@ bool debugAssertAllFoundationVarsUnset(
     if (debugPrint != debugPrintOverride ||
         debugDefaultTargetPlatformOverride != null ||
         debugDoublePrecision != null ||
-        debugBrightnessOverride != null ||
         debugViewMetricsOverrides.isNotEmpty) {
       throw FlutterError(reason);
     }
@@ -169,14 +168,37 @@ String debugFormatDouble(double? value) {
   return value.toStringAsFixed(1);
 }
 
-/// A setting that can be used to override the platform [Brightness] exposed
-/// from [BindingBase.platformDispatcher].
+/// Overrides the platform [Brightness] of the implicit view.
 ///
-/// See also:
+/// This is the [DebugViewMetricsOverride.platformBrightness] of the implicit
+/// view's entry in [debugViewMetricsOverrides].
+/// [FoundationServiceExtensions.brightnessOverride] exposes it to developer
+/// tools. Setting it replaces only that field, and removes the entry if
+/// nothing else in it is overridden. When there is no implicit view, this is
+/// null and setting it does nothing.
 ///
-///  * [WidgetsApp], which uses the [debugBrightnessOverride] setting in debug mode
-///    to construct a [MediaQueryData].
-ui.Brightness? debugBrightnessOverride;
+/// This has no effect outside of debug mode (in profile or release mode).
+ui.Brightness? get debugBrightnessOverride {
+  final int? viewId = ui.PlatformDispatcher.instance.implicitView?.viewId;
+  return viewId == null ? null : _viewMetricsOverrides[viewId]?.platformBrightness;
+}
+
+set debugBrightnessOverride(ui.Brightness? value) {
+  assert(() {
+    final int? viewId = ui.PlatformDispatcher.instance.implicitView?.viewId;
+    if (viewId != null) {
+      final DebugViewMetricsOverride entry =
+          _viewMetricsOverrides[viewId] ?? const DebugViewMetricsOverride();
+      debugSetViewMetricsOverride(
+        viewId,
+        value == null
+            ? entry.copyWith(clear: const <DebugViewMetric>{DebugViewMetric.platformBrightness})
+            : entry.copyWith(platformBrightness: value),
+      );
+    }
+    return true;
+  }());
+}
 
 /// The address for the active DevTools server used for debugging this
 /// application.
@@ -437,8 +459,8 @@ class DebugViewMetricsOverride with Diagnosticable {
 
   /// Overrides [ui.PlatformDispatcher.platformBrightness].
   ///
-  /// Unlike [debugBrightnessOverride], which replaces the brightness of every
-  /// view, this applies only to the view it is registered for.
+  /// [FoundationServiceExtensions.brightnessOverride] and
+  /// [debugBrightnessOverride] set this for the implicit view.
   final ui.Brightness? platformBrightness;
 
   /// Overrides [ui.FlutterView.padding], in physical pixels.
