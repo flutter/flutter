@@ -236,17 +236,29 @@ Future<void> _runWebToolTests() async {
 Future<void> _runToolHostCrossArchTests() async {}
 
 Future<void> _runIntegrationToolTests() async {
-  final List<String> allTests = Directory(path.join(_toolsPath, 'test', 'integration.shard'))
-      .listSync(recursive: true)
-      .whereType<File>()
-      .map<String>((FileSystemEntity entry) => path.relative(entry.path, from: _toolsPath))
-      .where((String testPath) => path.basename(testPath).endsWith('_test.dart'))
-      .toList();
+  final List<String> allTests =
+      Directory(path.join(_toolsPath, 'test', 'integration.shard'))
+          .listSync(recursive: true)
+          .whereType<File>()
+          .map<String>((FileSystemEntity entry) => path.relative(entry.path, from: _toolsPath))
+          .where((String testPath) => path.basename(testPath).endsWith('_test.dart'))
+          .toList()
+        ..sort();
+
+  final Map<String, int>? durations = _loadIntegrationTestDurations();
+  if (durations == null) {
+    return;
+  }
+  final List<int> known = durations.values.toList()..sort();
+  final int defaultDuration = known.isEmpty ? 0 : known[known.length ~/ 2];
+  int weight(String testPath) {
+    return durations[path.posix.joinAll(path.split(testPath))] ?? defaultDuration;
+  }
 
   await runDartTest(
     _toolsPath,
     forceSingleCore: true,
-    testPaths: selectIndexOfTotalSubshard<String>(allTests),
+    testPaths: selectWeightedSubshard<String>(allTests, weight: weight),
     collectMetrics: true,
   );
 
@@ -256,6 +268,33 @@ Future<void> _runIntegrationToolTests() async {
     path.join(flutterRoot, 'dev', 'integration_tests', 'data_asset_app'),
     environment: <String, String>{'FLUTTER_DART_DATA_ASSETS': 'true'},
   );
+}
+
+/// Seconds per `integration.shard` file on this host, keyed by path relative
+/// to `packages/flutter_tools` with forward slashes. Null after reporting an
+/// error if the file is missing or invalid.
+Map<String, int>? _loadIntegrationTestDurations() {
+  final file = File(path.join(flutterRoot, 'dev', 'bots', 'tool_integration_test_durations.json'));
+  void fail(String reason) {
+    foundError(<String>[
+      '$red$reason$reset',
+      'Run: dart dev/bots/update_tool_integration_test_durations.dart',
+    ]);
+  }
+
+  if (!file.existsSync()) {
+    fail('${file.path} is missing.');
+    return null;
+  }
+  try {
+    final hosts = json.decode(file.readAsStringSync()) as Map<String, Object?>;
+    return Map<String, int>.from(hosts[Platform.operatingSystem]! as Map<String, Object?>);
+  } on FormatException catch (e) {
+    fail('${file.path} is not valid JSON: $e');
+  } on TypeError catch (e) {
+    fail('${file.path} is not {host: {file: seconds}} or lacks "${Platform.operatingSystem}": $e');
+  }
+  return null;
 }
 
 Future<void> _runWidgetPreviewScaffoldToolTests() async {

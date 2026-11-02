@@ -5399,8 +5399,8 @@
           },
           "stack_spill_bytes": 0,
           "thread_occupancy": 100,
-          "uniform_registers_used": 6,
-          "work_registers_used": 20
+          "uniform_registers_used": 8,
+          "work_registers_used": 21
         }
       }
     },
@@ -5444,7 +5444,7 @@
             ]
           },
           "thread_occupancy": 100,
-          "uniform_registers_used": 1,
+          "uniform_registers_used": 2,
           "work_registers_used": 2
         }
       }
@@ -9583,8 +9583,8 @@
           },
           "stack_spill_bytes": 0,
           "thread_occupancy": 100,
-          "uniform_registers_used": 10,
-          "work_registers_used": 9
+          "uniform_registers_used": 14,
+          "work_registers_used": 10
         }
       }
     }

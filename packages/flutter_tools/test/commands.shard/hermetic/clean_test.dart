@@ -39,7 +39,7 @@ void main() {
       Cache.disableLocking();
       xcodeProjectInterpreter = FakeXcodeProjectInterpreter();
       xcode = Xcode.test(
-        processManager: FakeProcessManager.any(),
+        toolContext: FakeToolContext.macosHost(processManager: FakeProcessManager.any()),
         xcodeProjectInterpreter: xcodeProjectInterpreter,
       );
     });
@@ -787,10 +787,7 @@ CleanCommand createCleanCommand({
     verbose: verbose,
     xcode:
         xcode ??
-        Xcode.test(
-          processManager: resolvedProcessManager,
-          toolContext: FakeToolContext.macosHost(processManager: resolvedProcessManager),
-        ),
+        Xcode.test(toolContext: FakeToolContext.macosHost(processManager: resolvedProcessManager)),
     xcodeProjectInterpreter: xcodeProjectInterpreter ?? FakeXcodeProjectInterpreter(),
   );
 }
