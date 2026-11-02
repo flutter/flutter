@@ -64,7 +64,7 @@ targets:
       config_name: linux_android_emulator
       dependencies: >-
         [
-          {"dependency": "goldctl", "version": "git_revision:031e93819017b95c3f2dfe463189c7b8d02f2f83"}
+          {"dependency": "goldctl", "version": "git_revision:7f66c9b9efb2826e72c61bb2f50cdc20b635dea7"}
         ]
     timeout: 90
 
@@ -236,7 +236,7 @@ targets:
       config_name: linux_host_engine
       dependencies: >-
         [
-          {"dependency": "goldctl", "version": "git_revision:031e93819017b95c3f2dfe463189c7b8d02f2f83"}
+          {"dependency": "goldctl", "version": "git_revision:7f66c9b9efb2826e72c61bb2f50cdc20b635dea7"}
         ]
     # Do not remove(https://github.com/flutter/flutter/issues/144644)
     # Scheduler will fail to get the platform
@@ -277,7 +277,7 @@ targets:
       config_name: linux_host_engine_test
       dependencies: >-
         [
-          {"dependency": "goldctl", "version": "git_revision:031e93819017b95c3f2dfe463189c7b8d02f2f83"}
+          {"dependency": "goldctl", "version": "git_revision:7f66c9b9efb2826e72c61bb2f50cdc20b635dea7"}
         ]
     # Do not remove(https://github.com/flutter/flutter/issues/144644)
     # Scheduler will fail to get the platform
@@ -479,7 +479,7 @@ targets:
       config_name: mac_host_engine
       dependencies: >-
         [
-          {"dependency": "goldctl", "version": "git_revision:031e93819017b95c3f2dfe463189c7b8d02f2f83"}
+          {"dependency": "goldctl", "version": "git_revision:7f66c9b9efb2826e72c61bb2f50cdc20b635dea7"}
         ]
       $flutter/osx_sdk : >-
         {

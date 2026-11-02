@@ -343,11 +343,13 @@ VisualStudioFixture setUpVisualStudio() {
   final FileSystem fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
   final logger = BufferLogger.test();
   final visualStudio = VisualStudio(
-    fileSystem: fileSystem,
-    platform: windowsPlatform,
-    logger: logger,
-    processManager: processManager,
-    osUtils: FakeOperatingSystemUtils(),
+    toolContext: FakeToolContext(
+      fs: fileSystem,
+      platform: windowsPlatform,
+      logger: logger,
+      processManager: processManager,
+      os: FakeOperatingSystemUtils(),
+    ),
   );
   return VisualStudioFixture(visualStudio, fileSystem, processManager, logger);
 }
@@ -372,11 +374,13 @@ void main() {
   group('Visual Studio', () {
     testWithoutContext('isInstalled throws when PROGRAMFILES(X86) env not set', () {
       final visualStudio = VisualStudio(
-        logger: BufferLogger.test(),
-        fileSystem: MemoryFileSystem.test(style: FileSystemStyle.windows),
-        platform: FakePlatform(operatingSystem: 'windows'),
-        processManager: FakeProcessManager.any(),
-        osUtils: FakeOperatingSystemUtils(),
+        toolContext: FakeToolContext(
+          logger: BufferLogger.test(),
+          fs: MemoryFileSystem.test(style: FileSystemStyle.windows),
+          platform: FakePlatform(operatingSystem: 'windows'),
+          processManager: FakeProcessManager.any(),
+          os: FakeOperatingSystemUtils(),
+        ),
       );
 
       expect(
@@ -421,11 +425,13 @@ void main() {
       setMockAnyVisualStudioInstallation(null, fileSystem, fakeProcessManager, null, exception);
 
       final visualStudio = VisualStudio(
-        logger: BufferLogger.test(),
-        fileSystem: fileSystem,
-        platform: windowsPlatform,
-        processManager: fakeProcessManager,
-        osUtils: FakeOperatingSystemUtils(),
+        toolContext: FakeToolContext(
+          logger: BufferLogger.test(),
+          fs: fileSystem,
+          platform: windowsPlatform,
+          processManager: fakeProcessManager,
+          os: FakeOperatingSystemUtils(),
+        ),
       );
 
       expect(visualStudio.isInstalled, false);
@@ -443,11 +449,13 @@ void main() {
       setMockAnyVisualStudioInstallation(null, fileSystem, fakeProcessManager, 1);
 
       final visualStudio = VisualStudio(
-        logger: BufferLogger.test(),
-        fileSystem: fileSystem,
-        platform: windowsPlatform,
-        processManager: fakeProcessManager,
-        osUtils: FakeOperatingSystemUtils(),
+        toolContext: FakeToolContext(
+          logger: BufferLogger.test(),
+          fs: fileSystem,
+          platform: windowsPlatform,
+          processManager: fakeProcessManager,
+          os: FakeOperatingSystemUtils(),
+        ),
       );
 
       expect(visualStudio.isInstalled, false);

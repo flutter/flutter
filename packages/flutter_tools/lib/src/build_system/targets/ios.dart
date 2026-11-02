@@ -46,7 +46,7 @@ abstract class AotAssemblyBase extends Target {
     final snapshotter = AOTSnapshotter(
       fileSystem: environment.fileSystem,
       logger: environment.logger,
-      xcode: globals.xcode!,
+      xcode: globals.xcode,
       artifacts: environment.artifacts,
       processManager: environment.processManager,
     );
@@ -600,6 +600,7 @@ class DebugIosLLDBInit extends Target {
           'ensure debug mode works, please complete instructions found in '
           '"Embed a Flutter module in your iOS app > Use CocoaPods > Set LLDB Init File" '
           'section of https://docs.flutter.dev/to/ios-add-to-app-embed-setup.',
+          logger: environment.logger,
         );
       }
     }
@@ -855,6 +856,7 @@ Future<void> _updateMinimumOSVersion(File infoPlist, Environment environment) as
   if (result.exitCode != 0) {
     printXcodeWarning(
       'Failed to update MinimumOSVersion in ${infoPlist.path}. This may cause AppStore validation failures. Please file an issue at https://github.com/flutter/flutter/issues/new/choose',
+      logger: environment.logger,
     );
   }
 }

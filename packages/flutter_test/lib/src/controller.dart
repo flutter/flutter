@@ -6,6 +6,7 @@
 ///
 /// @docImport 'package:flutter/scheduler.dart';
 /// @docImport 'package:flutter_driver/flutter_driver.dart';
+/// @docImport 'package:flutter_test/flutter_test.dart' as flutter_test;
 ///
 /// @docImport 'binding.dart';
 /// @docImport 'finders.dart';
