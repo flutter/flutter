@@ -12,7 +12,6 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/depfile.dart';
 import 'package:flutter_tools/src/bundle.dart';
 import 'package:flutter_tools/src/bundle_builder.dart';
-import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/context_runner.dart';
 import 'package:flutter_tools/src/dart/package_map.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
@@ -57,8 +56,6 @@ Future<void> run(List<String> args) async {
     globals.printError('Missing option! All options must be specified.');
     exit(1);
   }
-  Cache.flutterRoot = globals.platform.environment['FLUTTER_ROOT'];
-
   final assetDir = argResults[_kOptionAsset] as String;
   final AssetBundle? assets = await buildAssets(
     manifestPath: argResults[_kOptionManifest] as String? ?? defaultManifestPath,

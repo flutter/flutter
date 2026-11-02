@@ -572,7 +572,7 @@ void main() {
           final FlutterProject project = FlutterProject.fromDirectory(
             globals.fs.directory(projectPath),
           );
-          await project.android.ensureReadyForPlatformSpecificTooling();
+          await project.android.ensureReadyForPlatformSpecificTooling(cache: FakeCache());
 
           writeManifestMetadata(
             projectPath: projectPath,
@@ -606,7 +606,7 @@ void main() {
           final FlutterProject project = FlutterProject.fromDirectory(
             globals.fs.directory(projectPath),
           );
-          await project.android.ensureReadyForPlatformSpecificTooling();
+          await project.android.ensureReadyForPlatformSpecificTooling(cache: FakeCache());
 
           writeManifestMetadata(
             projectPath: projectPath,

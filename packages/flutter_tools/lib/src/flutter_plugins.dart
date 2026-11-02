@@ -21,7 +21,6 @@ import 'base/template.dart';
 import 'base/time.dart';
 import 'base/utils.dart';
 import 'base/version.dart';
-import 'cache.dart';
 import 'context/tool_context.dart';
 import 'convert.dart';
 import 'dart/language_version.dart';
@@ -2140,6 +2139,7 @@ Future<void> generateMainDartWithPluginRegistrant(
   FlutterProject rootProject,
   PackageConfig packageConfig,
   File mainFile, {
+  required String flutterRoot,
   required Logger logger,
   required TemplateRenderer templateRenderer,
 }) async {
@@ -2152,7 +2152,7 @@ Future<void> generateMainDartWithPluginRegistrant(
   final LanguageVersion entrypointVersion = determineLanguageVersion(
     mainFile,
     packageConfig.packageOf(mainFile.absolute.uri),
-    Cache.flutterRoot!,
+    flutterRoot,
   );
   final templateContext = <String, Object>{
     'dartLanguageVersion': entrypointVersion.toString(),

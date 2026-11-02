@@ -73,6 +73,7 @@ class BuildMacOSFrameworkCommand extends BuildFrameworkCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     final ToolContext(
+      :Cache cache,
       :Config config,
       :FileSystem fs,
       :Logger logger,
@@ -292,7 +293,7 @@ end
         outputDir: macosBuildOutput,
         buildDir: project.dartTool.childDirectory('flutter_build'),
         cacheDir: cache.getRoot(),
-        flutterRootDir: fs.directory(Cache.flutterRoot),
+        flutterRootDir: fs.directory(cache.flutterRoot),
         defines: <String, String>{
           kTargetFile: targetFile,
           kTargetPlatform: TargetPlatform.darwin.getName(),
