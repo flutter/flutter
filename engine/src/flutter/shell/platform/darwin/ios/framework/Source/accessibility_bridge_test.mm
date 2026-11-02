@@ -687,6 +687,73 @@ void UpdateRootSemantics(flutter::AccessibilityBridge* bridge, std::string label
   XCTAssertEqual([child accessibilityContainer], scrollableContainer);
 }
 
+- (void)testRootScrollableSemanticsWithChildren {
+  flutter::MockDelegate mock_delegate;
+  auto thread_task_runner = CreateNewThread("AccessibilityBridgeTest");
+  flutter::TaskRunners runners(/*label=*/self.name.UTF8String,
+                               /*platform=*/thread_task_runner,
+                               /*raster=*/thread_task_runner,
+                               /*ui=*/thread_task_runner,
+                               /*io=*/thread_task_runner);
+
+  FlutterPlatformViewsController* flutterPlatformViewsController =
+      [[FlutterPlatformViewsController alloc] init];
+  flutterPlatformViewsController.taskRunner =
+      [[FlutterFMLTaskRunner alloc] initWithTaskRunner:thread_task_runner];
+  auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
+      /*delegate=*/mock_delegate,
+      /*platform_views_controller=*/flutterPlatformViewsController,
+      /*task_runners=*/runners,
+      /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
+  id engine = OCMClassMock([FlutterEngine class]);
+  id mockFlutterViewController = OCMClassMock([FlutterViewController class]);
+  FlutterView* flutterView = [[FlutterView alloc] initWithDelegate:engine
+                                                            opaque:YES
+                                                   enableWideGamut:NO];
+  flutterView.frame = CGRectMake(0, 0, 100, 200);
+  UIWindow* window = [[UIWindow alloc] initWithFrame:CGRectMake(0, 0, 100, 200)];
+  [window addSubview:flutterView];
+  StubLoadedView(mockFlutterViewController, flutterView);
+  auto bridge = std::make_unique<flutter::AccessibilityBridge>(
+      /*view_controller=*/mockFlutterViewController,
+      /*platform_view=*/platform_view.get(),
+      /*platform_views_controller=*/flutterPlatformViewsController);
+
+  flutter::SemanticsNodeUpdates nodes;
+  flutter::SemanticsNode rootNode;
+  rootNode.id = 0;
+  rootNode.flags.hasImplicitScrolling = true;
+  rootNode.actions = flutter::kVerticalScrollSemanticsActions |
+                     static_cast<int32_t>(flutter::SemanticsAction::kScrollToOffset);
+  rootNode.rect = SkRect::MakeXYWH(0, 0, 100, 200);
+  rootNode.scrollExtentMax = 100.0;
+  rootNode.scrollPosition = 0.0;
+  rootNode.childrenInTraversalOrder.push_back(1);
+  rootNode.childrenInHitTestOrder.push_back(1);
+
+  flutter::SemanticsNode childNode;
+  childNode.id = 1;
+  childNode.rect = SkRect::MakeXYWH(0, 10, 100, 50);
+  childNode.label = "child label";
+
+  nodes[0] = rootNode;
+  nodes[1] = childNode;
+  flutter::CustomAccessibilityActionUpdates actions;
+  bridge->UpdateSemantics(/*nodes=*/nodes, /*actions=*/actions);
+
+  XCTAssertEqual(flutterView.accessibilityElements.count, 1u);
+  id rootContainer = flutterView.accessibilityElements[0];
+  XCTAssertTrue([rootContainer isKindOfClass:[FlutterSemanticsScrollView class]]);
+  XCTAssertEqual([rootContainer accessibilityContainer], flutterView);
+  XCTAssertEqual([rootContainer accessibilityElementCount], 1);
+  id child = [rootContainer accessibilityElementAtIndex:0];
+  XCTAssertEqual([child accessibilityContainer], rootContainer);
+  XCTAssertEqual([rootContainer _accessibilityHitTest:CGPointMake(10, 10) withEvent:nil], child);
+
+  bridge->SetViewController(nil, flutterView);
+  XCTAssertNil(flutterView.accessibilityElements);
+}
+
 - (void)testScrollableSemanticsDeallocated {
   flutter::MockDelegate mock_delegate;
   auto thread_task_runner = CreateNewThread("AccessibilityBridgeTest");

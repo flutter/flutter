@@ -995,7 +995,8 @@ const float kFloatCompareEpsilon = 0.001;
   flutter::SemanticsNode node;
   node.id = 1;
   node.flags.hasImplicitScrolling = true;
-  node.actions = flutter::kVerticalScrollSemanticsActions;
+  node.actions = flutter::kVerticalScrollSemanticsActions |
+                 static_cast<int32_t>(flutter::SemanticsAction::kScrollToOffset);
   node.rect = SkRect::MakeXYWH(0, 0, 100, 200);
   node.scrollExtentMax = 100.0;
   node.scrollPosition = 0.0;
@@ -1028,6 +1029,7 @@ const float kFloatCompareEpsilon = 0.001;
   [childObject accessibilityBridgeDidFinishUpdate];
 
   FlutterSemanticsScrollView* scrollView = [scrollable nativeAccessibility];
+  XCTAssertFalse(scrollable.isAccessibilityElement);
   XCTAssertFalse(scrollView.isAccessibilityElement);
   XCTAssertEqual(scrollable.accessibilityContainer, scrollView);
   XCTAssertEqual(childObject.accessibilityContainer, scrollView);
@@ -1057,7 +1059,11 @@ const float kFloatCompareEpsilon = 0.001;
 
   // Even when a scroll child's rect is inside the scrollable's viewport, if it
   // is marked hidden (e.g. obscured behind a pinned header or overlay), it must
-  // not be returned by _accessibilityHitTest:withEvent:.
+  // not be returned by _accessibilityHitTest:withEvent: (even if the scrollable
+  // itself has a label).
+  node.label = "scrollable label";
+  [scrollable setSemanticsNode:&node];
+  XCTAssertFalse(scrollable.isAccessibilityElement);
   childNode.rect = SkRect::MakeXYWH(0, 50, 100, 50);
   childNode.flags.isHidden = true;
   [childObject setSemanticsNode:&childNode];
@@ -1096,6 +1102,48 @@ const float kFloatCompareEpsilon = 0.001;
                  childObject);
   XCTAssertEqual([scrollable _accessibilityHitTest:pointInBridgeView withEvent:nil], childObject);
   XCTAssertEqual([scrollView _accessibilityHitTest:pointInScrollView withEvent:nil], childObject);
+}
+
+- (void)testRootFlutterScrollableSemanticsObjectWithChildren {
+  flutter::testing::MockAccessibilityBridge* mock = new flutter::testing::MockAccessibilityBridge();
+  mock->isVoiceOverRunningValue = true;
+  fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(mock);
+  fml::WeakPtr<flutter::AccessibilityBridgeIos> bridge = factory.GetWeakPtr();
+
+  flutter::SemanticsNode rootNode;
+  rootNode.id = 0;
+  rootNode.flags.hasImplicitScrolling = true;
+  rootNode.actions = flutter::kVerticalScrollSemanticsActions |
+                     static_cast<int32_t>(flutter::SemanticsAction::kScrollToOffset);
+  rootNode.rect = SkRect::MakeXYWH(0, 0, 100, 200);
+  rootNode.scrollExtentMax = 100.0;
+  rootNode.scrollPosition = 0.0;
+  rootNode.childrenInTraversalOrder.push_back(1);
+
+  flutter::SemanticsNode childNode;
+  childNode.id = 1;
+  childNode.rect = SkRect::MakeXYWH(0, 10, 100, 50);
+  childNode.label = "root scrollable child";
+
+  FlutterScrollableSemanticsObject* rootScrollable =
+      [[FlutterScrollableSemanticsObject alloc] initWithBridge:bridge uid:0];
+  [rootScrollable setSemanticsNode:&rootNode];
+
+  FlutterSemanticsObject* childObject = [[FlutterSemanticsObject alloc] initWithBridge:bridge
+                                                                                   uid:1];
+  [childObject setSemanticsNode:&childNode];
+
+  rootScrollable.children = @[ childObject ];
+  rootScrollable.childrenInHitTestOrder = @[ childObject ];
+  [rootScrollable accessibilityBridgeDidFinishUpdate];
+  [childObject accessibilityBridgeDidFinishUpdate];
+
+  FlutterSemanticsScrollView* scrollView = [rootScrollable nativeAccessibility];
+  XCTAssertEqual(rootScrollable.accessibilityContainer, scrollView);
+  XCTAssertEqual([scrollView accessibilityContainer], mock->view());
+  XCTAssertEqual(childObject.accessibilityContainer, scrollView);
+  XCTAssertEqual([scrollView accessibilityElementCount], 1);
+  XCTAssertEqual([scrollView accessibilityElementAtIndex:0], childObject);
 }
 
 - (void)testFlutterScrollableSemanticsObjectNoScrollBarOrContentInsets {

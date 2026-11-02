@@ -188,6 +188,13 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
   return _scrollView;
 }
 
+- (BOOL)isAccessibilityElement {
+  if ([self hasChildren]) {
+    return NO;
+  }
+  return [super isAccessibilityElement];
+}
+
 - (id)accessibilityContainer {
   if ([self hasChildren]) {
     if (!self.bridge) {
@@ -221,9 +228,11 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
 
 - (void)updateScrollViewGeometry {
   // In order to make iOS think this UIScrollView is scrollable, the following
-  // requirements must be true.
+  // requirements must be true:
   // 1. contentSize must be bigger than the frame size.
-  // 2. The scrollable isAccessibilityElement must return YES
+  // 2. Consistent with a regular UIScrollView, either isAccessibilityElement
+  //    returns YES (when it has no children) or it acts as an accessibility
+  //    container for its children.
   //
   // Once the requirements are met, the iOS uses contentOffset to determine
   // what scroll actions are available. e.g. If the view scrolls vertically and
@@ -358,6 +367,9 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
 #pragma mark - Semantic object property accesser
 
 - (NSArray<SemanticsObject*>*)children {
+  if (_inDealloc) {
+    return nil;
+  }
   return [_children copy];
 }
 
@@ -626,18 +638,16 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
   }
   // Search children in hit test order.
   for (SemanticsObject* child in [self childrenInHitTestOrder]) {
-    if ([child containsPointInBridgeViewCoordinates:point]) {
-      id childSearchResult = [child search:point];
-      if (childSearchResult != nil) {
-        return childSearchResult;
-      }
+    id childSearchResult = [child search:point];
+    if (childSearchResult != nil) {
+      return childSearchResult;
     }
   }
   // Check if the current semantic object should be returned. Hidden elements
   // (e.g. off-screen or obscured scroll children that still report a non-empty
   // accessibilityFrame for VoiceOver linear navigation) cannot gain focus via
   // touch exploration.
-  if (!self.node.flags.isHidden && [self isFocusable]) {
+  if (!self.node.flags.isHidden && [self isAccessibilityElement]) {
     return self.nativeAccessibility;
   }
   return nil;
