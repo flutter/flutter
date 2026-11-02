@@ -1078,6 +1078,24 @@ const float kFloatCompareEpsilon = 0.001;
                  childObject);
   XCTAssertEqual([scrollable _accessibilityHitTest:inViewportPoint withEvent:nil], childObject);
   XCTAssertEqual([scrollView _accessibilityHitTest:inViewportPoint withEvent:nil], childObject);
+
+  // When the scroll view has a non-zero origin within `bridgeView`, UIKit
+  // passes `point` to `FlutterSemanticsScrollView._accessibilityHitTest:withEvent:`
+  // in `scrollView` local coordinates, whereas `SemanticsObject` hit-testing
+  // expects `bridgeView` coordinates.
+  node.transform = SkM44::Translate(0, 60);
+  [scrollable setSemanticsNode:&node];
+  [scrollable accessibilityBridgeDidFinishUpdate];
+  CGRect translatedChildFrame = childObject.accessibilityFrame;
+  CGPoint pointInBridgeView =
+      CGPointMake(CGRectGetMidX(translatedChildFrame), CGRectGetMidY(translatedChildFrame));
+  CGPoint pointInScrollView = [scrollView convertPoint:pointInBridgeView fromView:mock->view()];
+  XCTAssertNotEqual(pointInScrollView.y, pointInBridgeView.y);
+  XCTAssertEqual([parentObject _accessibilityHitTest:pointInBridgeView withEvent:nil], childObject);
+  XCTAssertEqual([parentContainer _accessibilityHitTest:pointInBridgeView withEvent:nil],
+                 childObject);
+  XCTAssertEqual([scrollable _accessibilityHitTest:pointInBridgeView withEvent:nil], childObject);
+  XCTAssertEqual([scrollView _accessibilityHitTest:pointInScrollView withEvent:nil], childObject);
 }
 
 - (void)testFlutterScrollableSemanticsObjectNoScrollBarOrContentInsets {

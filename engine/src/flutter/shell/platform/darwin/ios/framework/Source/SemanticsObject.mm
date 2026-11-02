@@ -608,19 +608,25 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
   return label;
 }
 
-- (bool)containsPoint:(CGPoint)point {
-  // The point is in global coordinates, so use the global rect here.
-  return CGRectContainsPoint([self globalRect], point);
+- (bool)containsPointInBridgeViewCoordinates:(CGPoint)point {
+  UIView* containerView = [self bridgeView];
+  if (!containerView) {
+    return false;
+  }
+  CGPoint globalPoint = UIAccessibilityConvertFrameToScreenCoordinates(
+                            CGRectMake(point.x, point.y, 0, 0), containerView)
+                            .origin;
+  return CGRectContainsPoint([self globalRect], globalPoint);
 }
 
 // Finds the first eligiable semantics object in hit test order.
 - (id)search:(CGPoint)point {
-  if (![self containsPoint:point]) {
+  if (![self containsPointInBridgeViewCoordinates:point]) {
     return nil;
   }
   // Search children in hit test order.
   for (SemanticsObject* child in [self childrenInHitTestOrder]) {
-    if ([child containsPoint:point]) {
+    if ([child containsPointInBridgeViewCoordinates:point]) {
       id childSearchResult = [child search:point];
       if (childSearchResult != nil) {
         return childSearchResult;
@@ -644,6 +650,14 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
 // goes to the smallest object before IOS 16, but to the top-left object in
 // IOS 16. Overrides this method to focus the first eligiable semantics
 // object in hit test order.
+//
+// `point` is in the local coordinate space of `bridgeView` (`FlutterView`),
+// because UIKit only converts hit-test points when traversing into a `UIView`
+// or `CALayer` child and passes `bridgeView`'s local coordinates unchanged to
+// non-view accessibility elements (`SemanticsObjectContainer` / `SemanticsObject`).
+//
+// TODO(LongCatIsLooong): Replace this private override with a public equivalent.
+// https://github.com/flutter/flutter/issues/195775.
 - (id)_accessibilityHitTest:(CGPoint)point withEvent:(UIEvent*)event {
   if (!self.bridge) {
     return nil;

@@ -26,10 +26,12 @@ FLUTTER_ASSERT_ARC
 }
 
 - (id)_accessibilityHitTest:(CGPoint)point withEvent:(UIEvent*)event {
-  CGPoint pointInScreenCoordinates =
-      UIAccessibilityConvertFrameToScreenCoordinates(CGRectMake(point.x, point.y, 0, 0), self)
-          .origin;
-  return [self.semanticsObject _accessibilityHitTest:pointInScreenCoordinates withEvent:event];
+  UIView* bridgeView = self.semanticsObject.bridgeView;
+  if (!bridgeView) {
+    return nil;
+  }
+  CGPoint pointInBridgeView = [self convertPoint:point toView:bridgeView];
+  return [self.semanticsObject _accessibilityHitTest:pointInBridgeView withEvent:event];
 }
 
 // The following methods are explicitly forwarded to the wrapped SemanticsObject because the
