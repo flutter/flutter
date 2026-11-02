@@ -303,7 +303,7 @@ class AssembleCommand extends FlutterCommand {
       defines: _parseDefines([...getValue(_define), ...decodedDefines]),
       inputs: _parseDefines(getValue(_input)),
       cacheDir: cache.getRoot(),
-      flutterRootDir: fs.directory(Cache.flutterRoot),
+      flutterRootDir: fs.directory(cache.flutterRoot),
       artifacts: artifacts,
       fileSystem: fs,
       logger: logger,
