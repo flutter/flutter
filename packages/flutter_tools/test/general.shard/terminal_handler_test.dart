@@ -54,6 +54,15 @@ final listViews = FakeVmServiceRequest(
   },
 );
 
+final fakeFlutterViewWithoutIsolate = FlutterView(id: 'a', uiIsolate: null);
+
+final listViewsWithoutIsolate = FakeVmServiceRequest(
+  method: kListViewsMethod,
+  jsonResponse: <String, Object>{
+    'views': <Object>[fakeFlutterViewWithoutIsolate.toJson()],
+  },
+);
+
 void main() {
   testWithoutContext('keyboard input handling single help character', () async {
     final testRunner = TestRunner();
@@ -413,6 +422,87 @@ void main() {
       );
       await terminalHandler.processTerminalInput('f');
     });
+
+    testWithoutContext('debugDump* with null vmService does not crash', () async {
+      final TerminalHandler terminalHandler = setUpTerminalHandler(
+        <FakeVmServiceRequest>[],
+        nullVmService: true,
+      );
+      expect(await terminalHandler.residentRunner.debugDumpApp(), isFalse);
+      expect(await terminalHandler.residentRunner.debugDumpRenderTree(), isFalse);
+      expect(await terminalHandler.residentRunner.debugDumpLayerTree(), isFalse);
+      expect(await terminalHandler.residentRunner.debugDumpFocusTree(), isFalse);
+      expect(
+        await terminalHandler.residentRunner.debugDumpSemanticsTreeInTraversalOrder(),
+        isFalse,
+      );
+      expect(
+        await terminalHandler.residentRunner.debugDumpSemanticsTreeInInverseHitTestOrder(),
+        isFalse,
+      );
+    });
+
+    testWithoutContext('debugDump* with null uiIsolate does not crash', () async {
+      final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[
+        for (var i = 0; i < 6; i++) listViewsWithoutIsolate,
+      ]);
+      expect(await terminalHandler.residentRunner.debugDumpApp(), isFalse);
+      expect(await terminalHandler.residentRunner.debugDumpRenderTree(), isFalse);
+      expect(await terminalHandler.residentRunner.debugDumpLayerTree(), isFalse);
+      expect(await terminalHandler.residentRunner.debugDumpFocusTree(), isFalse);
+      expect(
+        await terminalHandler.residentRunner.debugDumpSemanticsTreeInTraversalOrder(),
+        isFalse,
+      );
+      expect(
+        await terminalHandler.residentRunner.debugDumpSemanticsTreeInInverseHitTestOrder(),
+        isFalse,
+      );
+    });
+
+    testWithoutContext(
+      'debugDump* in profile mode dumps supported trees and skips debug-only trees',
+      () async {
+        final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[
+          listViews,
+          const FakeVmServiceRequest(
+            method: 'ext.flutter.debugDumpApp',
+            args: <String, Object>{'isolateId': '1'},
+            jsonResponse: <String, Object>{'data': 'WIDGET DATA'},
+          ),
+          listViews,
+          const FakeVmServiceRequest(
+            method: 'ext.flutter.debugDumpRenderTree',
+            args: <String, Object>{'isolateId': '1'},
+            jsonResponse: <String, Object>{'data': 'RENDER DATA'},
+          ),
+          listViews,
+          const FakeVmServiceRequest(
+            method: 'ext.flutter.debugDumpSemanticsTreeInTraversalOrder',
+            args: <String, Object>{'isolateId': '1'},
+            jsonResponse: <String, Object>{'data': 'SEMANTICS DATA 1'},
+          ),
+          listViews,
+          const FakeVmServiceRequest(
+            method: 'ext.flutter.debugDumpSemanticsTreeInInverseHitTestOrder',
+            args: <String, Object>{'isolateId': '1'},
+            jsonResponse: <String, Object>{'data': 'SEMANTICS DATA 2'},
+          ),
+        ], buildMode: BuildMode.profile);
+        expect(await terminalHandler.residentRunner.debugDumpApp(), isTrue);
+        expect(await terminalHandler.residentRunner.debugDumpRenderTree(), isTrue);
+        expect(
+          await terminalHandler.residentRunner.debugDumpSemanticsTreeInTraversalOrder(),
+          isTrue,
+        );
+        expect(
+          await terminalHandler.residentRunner.debugDumpSemanticsTreeInInverseHitTestOrder(),
+          isTrue,
+        );
+        expect(await terminalHandler.residentRunner.debugDumpLayerTree(), isFalse);
+        expect(await terminalHandler.residentRunner.debugDumpFocusTree(), isFalse);
+      },
+    );
 
     testWithoutContext('o,O - debugTogglePlatform', () async {
       final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[

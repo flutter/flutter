@@ -45,10 +45,17 @@
 @interface TextInputTestViewController : FlutterViewController
 @end
 
-@implementation TextInputTestViewController
-- (nonnull FlutterView*)createFlutterViewWithMTLDevice:(id<MTLDevice>)device
-                                          commandQueue:(id<MTLCommandQueue>)commandQueue {
-  return OCMClassMock([NSView class]);
+@implementation TextInputTestViewController {
+  FlutterView* _flutterViewMock;
+}
+
+- (void)loadView {
+  self.view = [[NSView alloc] initWithFrame:NSZeroRect];
+  _flutterViewMock = OCMClassMock([FlutterView class]);
+}
+
+- (FlutterView*)flutterView {
+  return _flutterViewMock;
 }
 @end
 
