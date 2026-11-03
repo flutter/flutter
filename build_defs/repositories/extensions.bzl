@@ -18,8 +18,9 @@ through `--repo_env`). The repositories have the same layout either way.
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 load("//engine/src/flutter/build/bazel/toolchains/emscripten:lto_libraries.bzl", "emsdk_lto_libraries")
 load(":deps.lock.bzl", "CIPD_DEPS", "GIT_DEPS")
+load(":flutter_bin_cache.bzl", "PREBUILT_ENGINE_ENV")
 load(":host_files.bzl", "host_files")
-load(":host_platform.bzl", "host_platform", "host_platform_values")
+load(":host_platform.bzl", "BIN_CACHE_DART_SDK", "host_platform", "host_platform_values")
 load(":macos_sdk.bzl", "macos_sdk")
 load(":repositories.bzl", "cipd_package", "engine_version_repository", "synced_repository")
 
@@ -598,6 +599,17 @@ def _cipd_platform(mctx):
 def _fetch_toolchains(mctx):
     return mctx.getenv(_FETCH_TOOLCHAINS_ENV, "") not in ("", "0", "false", "no")
 
+def _prebuilt_engine(mctx):
+    """Whether the build takes the engine from bin/cache (--config=prebuilt_engine).
+
+    Set through --repo_env by the configuration that points the test rules
+    at the prebuilt engine (flutter_bin_cache.bzl): HOST_DART_SDK, the name
+    every Dart rule uses, is then the flutter tool's Dart SDK repository
+    (bin/cache/dart-sdk, below) rather than the gclient-synced prebuilt's,
+    so that a checkout without the engine's dependencies has one.
+    """
+    return mctx.getenv(PREBUILT_ENGINE_ENV, "") not in ("", "0", "false", "no")
+
 def _cipd_pin(path):
     entry = CIPD_DEPS.get(path)
     if entry == None:
@@ -688,8 +700,17 @@ def _synced_deps_impl(mctx):
     # a Mac's emoji font, for the text tests' fixtures; empty elsewhere.
     host_files(name = "host_files")
 
+    # The flutter tool's Dart SDK, HOST_DART_SDK under --config=prebuilt_engine
+    # (host_platform.bzl's BIN_CACHE_DART_SDK; fetched only when named).
+    synced_repository(
+        name = BIN_CACHE_DART_SDK.lstrip("@"),
+        path = "bin/cache/dart-sdk",
+        build_file = _TOOL_REPOSITORIES[host["HOST_DART_SDK"].lstrip("@")].build_file,
+        missing_hint = "`bin/flutter precache` (the flutter tool's Dart SDK, for --config=prebuilt_engine)",
+    )
+
     # The host itself, as constants (host_platform.bzl).
-    host_platform(name = "host_platform")
+    host_platform(name = "host_platform", prebuilt_engine = _prebuilt_engine(mctx))
     return _metadata(mctx)
 
 def _metadata(mctx):

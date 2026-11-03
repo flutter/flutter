@@ -246,7 +246,7 @@ flutter_test_prelude = rule(
             doc = "The package configuration for the compile (pub_package_config, execroot layout).",
         ),
         "platform": attr.label(
-            default = "//engine/src/flutter/lib/snapshot:strong_platform",
+            default = "//build_defs/engine:strong_platform",
             allow_files = True,
             doc = "The platform kernel's directory contents (flutter_patched_sdk).",
         ),
@@ -342,7 +342,7 @@ flutter_test_kernel = rule(
                   "whose packages' files the compile reads.",
         ),
         "platform": attr.label(
-            default = "//engine/src/flutter/lib/snapshot:strong_platform",
+            default = "//build_defs/engine:strong_platform",
             allow_files = True,
             doc = "The platform kernel's directory contents (flutter_patched_sdk).",
         ),
@@ -433,9 +433,14 @@ exec "$root/{flutter_tester}" \\
             path = file.short_path
             if path.startswith("../"):
                 path = path.split("/", 2)[2]
+            if target.label.package:
+                path = paths.relativize(path, target.label.package)
             cache[paths.join("bin/cache", directory, path)] = file
+
+    # The tester itself is among the files: a built one brings its runfiles
+    # (merged below), a prebuilt one is a plain file (//build_defs/engine).
     runfiles = ctx.runfiles(
-        files = [kernel, fonts_conf, ctx.file.icudtl, ctx.file.runtime_package_config, compiled.test, compiled.pubspec] + ctx.files.data,
+        files = [kernel, fonts_conf, ctx.executable.flutter_tester, ctx.file.icudtl, ctx.file.runtime_package_config, compiled.test, compiled.pubspec] + ctx.files.data,
         transitive_files = assets[DefaultInfo].files if assets != None else None,
         symlinks = cache,
     ).merge(ctx.attr.flutter_tester[DefaultInfo].default_runfiles)
@@ -489,13 +494,16 @@ flutter_test = rule(
             doc = "The package configuration for the run (pub_package_config, runfiles layout).",
         ),
         "flutter_tester": attr.label(
-            default = "//engine/src/flutter/shell/testing:flutter_tester",
+            default = "//build_defs/engine:flutter_tester",
+            # A file as well as a rule: the prebuilt engine's binary
+            # (//build_defs/engine, --config=prebuilt_engine).
+            allow_single_file = True,
             executable = True,
             cfg = "target",
             doc = "The flutter_tester to run on.",
         ),
         "icudtl": attr.label(
-            default = "@icu//:icudata",
+            default = "//build_defs/engine:icudtl",
             allow_single_file = True,
             doc = "ICU's data file.",
         ),
