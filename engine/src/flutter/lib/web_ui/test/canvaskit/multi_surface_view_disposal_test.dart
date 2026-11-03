@@ -73,6 +73,21 @@ void testMain() {
       hostElement.remove();
     }
 
+    int Function() countDeleteContextCalls() {
+      final originalDeleteContext = canvasKit['deleteContext']! as JSFunction;
+      var calls = 0;
+      void wrappedDeleteContext(JSNumber handle) {
+        calls++;
+        originalDeleteContext.callAsFunction(canvasKit, handle);
+      }
+
+      canvasKit['deleteContext'] = wrappedDeleteContext.toJS;
+      addTearDown(() {
+        canvasKit['deleteContext'] = originalDeleteContext;
+      });
+      return () => calls;
+    }
+
     Future<void> renderBlueBox(EngineFlutterView view) async {
       final recorder = ui.PictureRecorder();
       ui.Canvas(recorder).drawRect(
@@ -205,7 +220,180 @@ void testMain() {
         reason: 'Live view GL context handles changed. $diagnostics',
       );
     });
+
+    test('disposing software-rendered views does not touch WebGL or fail on post-disposal recovery calls', () async {
+      CkSurface.debugForceGLFailure = true;
+      addTearDown(() {
+        CkSurface.debugForceGLFailure = false;
+      });
+      final _WebGlContextCounter counter = _installWebGlContextCounter();
+      addTearDown(counter.restore);
+      final int Function() deleteContextCalls = countDeleteContextCalls();
+
+      final EngineFlutterView renderedView = createAndRegisterView();
+      await renderBlueBox(renderedView);
+      final renderedRasterizer =
+          renderer.rasterizers[renderedView.viewId]! as MultiSurfaceViewRasterizer;
+      final renderedSurface = renderedRasterizer.displayFactory.baseCanvas as CkOnscreenSurface;
+      final renderedCanvas = renderedSurface.canvas as DomHTMLCanvasElement;
+
+      final EngineFlutterView unflushedView = createAndRegisterView();
+      final unflushedRasterizer =
+          renderer.rasterizers[unflushedView.viewId]! as MultiSurfaceViewRasterizer;
+      final unflushedSurface = unflushedRasterizer.displayFactory.baseCanvas as CkOnscreenSurface;
+      await unflushedSurface.initialized;
+      final unflushedCanvas = unflushedSurface.canvas as DomHTMLCanvasElement;
+
+      expect(renderedSurface.isSoftware, isTrue);
+      expect(renderedSurface.glContext, -1);
+      expect(renderedSurface.skSurface, isNotNull);
+      expect(unflushedSurface.isSoftware, isTrue);
+      expect(unflushedSurface.glContext, -1);
+
+      disposeAndRemoveView(renderedView);
+      disposeAndRemoveView(unflushedView);
+
+      expect(renderedSurface.isDisposed, isTrue);
+      expect(renderedSurface.skSurface, isNull);
+      expect(renderedSurface.glContext, -1);
+      expect(unflushedSurface.isDisposed, isTrue);
+      expect(unflushedSurface.skSurface, isNull);
+      expect(unflushedSurface.glContext, -1);
+      expect(counter.createdCount, 0);
+      expect(deleteContextCalls(), 0);
+      expect(unflushedCanvas.getContext('2d'), isNotNull);
+
+      renderedSurface.onContextLost();
+      await renderedSurface.recreateContextForCanvas(createDomCanvasElement(width: 10, height: 10));
+
+      expect(renderedSurface.canvas.strictEquals(renderedCanvas).toDart, isTrue);
+      expect(renderedSurface.skSurface, isNull);
+      expect(counter.createdCount, 0);
+      expect(deleteContextCalls(), 0);
+    });
+
+    test('disposing MultiSurfaceRasterizer directly cleans up rendered views without allocating unrendered surfaces', () async {
+      final EngineFlutterView renderedViewA = createAndRegisterView();
+      final EngineFlutterView renderedViewB = createAndRegisterView();
+      final EngineFlutterView unrenderedView = createAndRegisterView();
+      await renderBlueBox(renderedViewA);
+      await renderBlueBox(renderedViewB);
+
+      final rasterizerA = renderer.rasterizers[renderedViewA.viewId]! as MultiSurfaceViewRasterizer;
+      final cachedOverlay = rasterizerA.getOverlay() as CkOnscreenSurface;
+      await cachedOverlay.initialized;
+      rasterizerA.releaseOverlay(cachedOverlay);
+
+      final rasterizerB = renderer.rasterizers[renderedViewB.viewId]! as MultiSurfaceViewRasterizer;
+      final unrenderedRasterizer =
+          renderer.rasterizers[unrenderedView.viewId]! as MultiSurfaceViewRasterizer;
+      expect(unrenderedRasterizer.displayFactory.hasBaseCanvas, isFalse);
+
+      final multiSurfaceRasterizer = renderer.rasterizer as MultiSurfaceRasterizer;
+      final extraSurface =
+          multiSurfaceRasterizer.createPictureToImageSurface() as CkOnscreenSurface;
+      await extraSurface.initialized;
+
+      final trackedSurfaces = <CkOnscreenSurface>[
+        extraSurface,
+        renderer.pictureToImageSurface as CkOnscreenSurface,
+      ];
+      rasterizerA.displayFactory.forEachCanvas(
+        (OnscreenSurface s) => trackedSurfaces.add(s as CkOnscreenSurface),
+      );
+      rasterizerB.displayFactory.forEachCanvas(
+        (OnscreenSurface s) => trackedSurfaces.add(s as CkOnscreenSurface),
+      );
+      final List<WebGLContext> trackedContexts = trackedSurfaces
+          .map(
+            (CkOnscreenSurface s) => (s.canvas as DomHTMLCanvasElement).getGlContext(webGLVersion),
+          )
+          .toList();
+
+      final _WebGlContextCounter counter = _installWebGlContextCounter();
+      addTearDown(counter.restore);
+
+      multiSurfaceRasterizer.dispose();
+
+      expect(counter.createdCount, 0);
+      expect(unrenderedRasterizer.displayFactory.hasBaseCanvas, isFalse);
+      expect(unrenderedRasterizer.displayFactory.debugSurfaceCount, 0);
+      for (var i = 0; i < trackedSurfaces.length; i++) {
+        expect(trackedSurfaces[i].isDisposed, isTrue);
+        expect(trackedSurfaces[i].skSurface, isNull);
+        expect(trackedSurfaces[i].glContext, -1);
+        expect(trackedContexts[i].isContextLost(), isTrue);
+      }
+    });
+
+    test('surface disposal is idempotent, detaches from SurfaceProvider, and ignores post-disposal context recreation', () async {
+      final customRasterizer = MultiSurfaceRasterizer(_TrackingCkOnscreenSurface.new);
+      renderer.debugOverrideRasterizer(customRasterizer);
+      final int Function() deleteContextCalls = countDeleteContextCalls();
+
+      final EngineFlutterView disposedView = createAndRegisterView();
+      final EngineFlutterView liveView = createAndRegisterView();
+      await renderBlueBox(disposedView);
+      await renderBlueBox(liveView);
+
+      final disposedBase =
+          (renderer.rasterizers[disposedView.viewId]! as MultiSurfaceViewRasterizer)
+                  .displayFactory
+                  .baseCanvas
+              as _TrackingCkOnscreenSurface;
+      final liveBase =
+          (renderer.rasterizers[liveView.viewId]! as MultiSurfaceViewRasterizer)
+                  .displayFactory
+                  .baseCanvas
+              as _TrackingCkOnscreenSurface;
+      final initialCanvas = disposedBase.canvas as DomHTMLCanvasElement;
+
+      customRasterizer.setResourceCacheMaxBytes(1000000);
+      expect(disposedBase.resourceCacheLimitUpdates, 1);
+      expect(liveBase.resourceCacheLimitUpdates, 1);
+
+      final ui.VoidCallback? providerOnDispose = disposedBase.onDispose;
+      var onDisposeCount = 0;
+      disposedBase.onDispose = () {
+        onDisposeCount++;
+        providerOnDispose?.call();
+      };
+
+      disposeAndRemoveView(disposedView);
+      final int deleteCallsAfterFirstDispose = deleteContextCalls();
+
+      expect(disposedBase.isDisposed, isTrue);
+      expect(onDisposeCount, 1);
+      expect(deleteCallsAfterFirstDispose, 2);
+
+      disposedBase.dispose();
+      expect(onDisposeCount, 1);
+      expect(deleteContextCalls(), deleteCallsAfterFirstDispose);
+
+      customRasterizer.setResourceCacheMaxBytes(2000000);
+      expect(disposedBase.resourceCacheLimitUpdates, 1);
+      expect(liveBase.resourceCacheLimitUpdates, 2);
+
+      final DomHTMLCanvasElement replacementCanvas = createDomCanvasElement(width: 20, height: 20);
+      await disposedBase.recreateContextForCanvas(replacementCanvas);
+      expect(disposedBase.canvas.strictEquals(initialCanvas).toDart, isTrue);
+      expect(replacementCanvas.isConnected, isFalse);
+      expect(disposedBase.skSurface, isNull);
+      expect(disposedBase.glContext, -1);
+    });
   }, skip: _skipContextLoss);
+}
+
+final class _TrackingCkOnscreenSurface extends CkOnscreenSurface {
+  _TrackingCkOnscreenSurface(super.canvasProvider);
+
+  int resourceCacheLimitUpdates = 0;
+
+  @override
+  void setSkiaResourceCacheMaxBytes(int bytes) {
+    resourceCacheLimitUpdates++;
+    super.setSkiaResourceCacheMaxBytes(bytes);
+  }
 }
 
 final class _SurfaceSnapshot {
