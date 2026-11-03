@@ -1733,9 +1733,14 @@ Caused by: java.lang.ClassCastException: class com.android.build.gradle.internal
       expect(
         unwrappedBox,
         contains(
-          'Gradle identifies the build script or project under "* Where:" or '
-          '"* What went wrong:" above.',
+          'To see whether your app or any of its plugins still apply kotlin-android, the app '
+          'must build. Flutter then logs a warning naming each project that still applies the '
+          'kotlin-android plugin.',
         ),
+      );
+      expect(
+        unwrappedBox,
+        isNot(contains('Gradle identifies the build script or project under "* Where:"')),
       );
       expect(
         testLogger.statusText,
@@ -1755,12 +1760,16 @@ Caused by: java.lang.ClassCastException: class com.android.build.gradle.internal
       );
       expect(
         unwrappedBox,
+        contains('If your app applies kotlin-android, migrate it to built-in Kotlin.'),
+      );
+      expect(
+        unwrappedBox,
         contains(
-          'Otherwise, set android.builtInKotlin=true in android/gradle.properties and remove '
-          "any 'org.jetbrains.kotlin.android' (kotlin-android) declaration from the app's "
-          'Gradle build script.',
+          'Once your app and all of its Flutter plugins are migrated to built-in Kotlin, set '
+          'android.builtInKotlin=true in android/gradle.properties.',
         ),
       );
+      expect(unwrappedBox, isNot(contains('Otherwise, set android.builtInKotlin=true')));
       expect(testLogger.statusText, contains(kMigrateToBuiltInKotlinDocsUrl));
     });
 
@@ -1786,7 +1795,10 @@ Caused by: java.lang.ClassCastException: class com.android.build.gradle.internal
       );
       expect(
         unwrapBoxText(testLogger.statusText),
-        contains('set android.builtInKotlin=true in .android/gradle.properties'),
+        contains(
+          'Once your app and all of its Flutter plugins are migrated to built-in Kotlin, set '
+          'android.builtInKotlin=true in .android/gradle.properties.',
+        ),
       );
       expect(testLogger.statusText, isNot(contains('in android/gradle.properties')));
     });
@@ -1814,12 +1826,35 @@ Caused by: java.lang.ClassCastException: class com.android.build.gradle.internal
       expect(
         unwrappedBox,
         contains(
+          'To see whether your app or any of its plugins still apply kotlin-android, the app '
+          'must build. Flutter then logs a warning naming each project that still applies the '
+          'kotlin-android plugin.',
+        ),
+      );
+      expect(
+        unwrappedBox,
+        contains(
           'android/gradle.properties already sets android.newDsl=false; to build now, remove '
           'any android.newDsl=true override in ~/.gradle/gradle.properties or -Pandroid.newDsl '
           'command-line flags.',
         ),
       );
+      expect(
+        unwrappedBox,
+        contains('If your app applies kotlin-android, migrate it to built-in Kotlin.'),
+      );
+      expect(
+        unwrappedBox,
+        contains(
+          'Once your app and all of its Flutter plugins are migrated to built-in Kotlin, set '
+          'android.builtInKotlin=true in android/gradle.properties.',
+        ),
+      );
       expect(unwrappedBox, isNot(contains('To build now, set android.newDsl=false')));
+      expect(
+        unwrappedBox,
+        isNot(contains('Gradle identifies the build script or project under "* Where:"')),
+      );
     });
   });
 

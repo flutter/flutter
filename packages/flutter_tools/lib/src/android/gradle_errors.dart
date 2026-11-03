@@ -1053,14 +1053,15 @@ final kotlinAndroidPluginWithNewDslErrorHandler = GradleHandledError(
           'Flutter applies kotlin-android automatically when android.builtInKotlin=false is set '
           'in $gradlePropertiesPath, or a Gradle build script in the app or in a Flutter plugin '
           'may apply kotlin-android directly.\n'
-          'Gradle identifies the build script or project under "* Where:" or "* What went wrong:" '
-          'above.\n\n'
+          'To see whether your app or any of its plugins still apply kotlin-android, the app '
+          'must build. Flutter then logs a warning naming each project that still applies the '
+          'kotlin-android plugin.\n\n'
           '$optOutInstructions\n\n'
           'If a Flutter plugin applies kotlin-android, upgrade the Flutter plugin or file an '
           'issue with the plugin asking for built-in Kotlin support.\n'
-          'Otherwise, set android.builtInKotlin=true in $gradlePropertiesPath and remove any '
-          "'org.jetbrains.kotlin.android' (kotlin-android) declaration from the app's Gradle "
-          'build script.\n'
+          'If your app applies kotlin-android, migrate it to built-in Kotlin.\n'
+          'Once your app and all of its Flutter plugins are migrated to built-in Kotlin, set '
+          'android.builtInKotlin=true in $gradlePropertiesPath.\n'
           'For migration instructions, see: $kMigrateToBuiltInKotlinDocsUrl',
           title: _boxTitle,
         );
