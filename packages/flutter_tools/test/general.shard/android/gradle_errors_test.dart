@@ -1789,18 +1789,19 @@ Caused by: java.lang.ClassCastException: class com.android.build.gradle.internal
         usesAndroidX: true, // Unused by kotlinAndroidPluginWithNewDslErrorHandler.
       );
 
+      final String unwrappedBox = unwrapBoxText(testLogger.statusText);
       expect(
-        testLogger.statusText,
+        unwrappedBox,
         contains('To build now, set android.newDsl=false in .android/gradle.properties.'),
       );
       expect(
-        unwrapBoxText(testLogger.statusText),
+        unwrappedBox,
         contains(
           'Once your app and all of its Flutter plugins are migrated to built-in Kotlin, set '
           'android.builtInKotlin=true in .android/gradle.properties.',
         ),
       );
-      expect(testLogger.statusText, isNot(contains('in android/gradle.properties')));
+      expect(unwrappedBox, isNot(contains('in android/gradle.properties')));
     });
 
     testWithoutContext('notes external override without redundant set instruction when gradle.properties already sets android.newDsl=false', () async {
@@ -2189,18 +2190,20 @@ FAILURE: Build failed with an exception.
         usesAndroidX: true, // Unused by legacyVariantApiErrorHandler.
       );
 
+      final String unwrappedBox = unwrapBoxText(testLogger.statusText);
       expect(
-        unwrapBoxText(testLogger.statusText),
+        unwrappedBox,
         contains(
           r"> Could not get unknown property 'applicationVariants' for object of type com.android.build.gradle.internal.dsl.ApplicationExtensionImpl$AgpDecorated.",
         ),
       );
-      expect(testLogger.statusText, isNot(contains('ProcessException:')));
-      expect(testLogger.statusText, isNot(contains('Run with --stacktrace')));
+      expect(unwrappedBox, isNot(contains('ProcessException:')));
+      expect(unwrappedBox, isNot(contains('Run with --stacktrace')));
       expect(
-        testLogger.statusText,
+        unwrappedBox,
         contains('To build now, set android.newDsl=false in .android/gradle.properties.'),
       );
+      expect(unwrappedBox, isNot(contains('in android/gradle.properties')));
     });
 
     testWithoutContext('prints matched error line, android.newDsl=false workaround, and variant API migration link', () async {

@@ -1093,6 +1093,8 @@ final _runtimeConfirmedNewDslPatterns = <RegExp>[
   ),
 ];
 
+// Script-level patterns can also match script typos when `android.newDsl=false`, so
+// `legacyVariantApiErrorHandler` suppresses the box when `gradle.properties` opts out.
 final _ambiguousScriptNewDslPatterns = <RegExp>[
   // Groovy `android { sourceSets { applicationVariants.all {} } }` or `libraryVariants.all {}`.
   RegExp(r'on source set (?:application|library) variants of type com\.android\.build\.'),
