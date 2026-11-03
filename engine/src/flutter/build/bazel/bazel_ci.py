@@ -280,11 +280,31 @@ def build_options(engine_src):
   build per task from nothing and keeps nothing (bazel_home): no cache.
   """
   if on_bot():
-    return []
+    return bot_sandbox_options()
   return [
       '--disk_cache=' + os.path.join(bazel_home(engine_src), 'disk_cache'),
       '--experimental_disk_cache_gc_max_size=' + DISK_CACHE_GC_MAX_SIZE,
   ]
+
+
+# Where a bot's sandboxes go when the machine has the memory for it: a
+# tmpfs, so that the symlink forest every sandboxed action lays and the
+# stash Bazel keeps of them cost no disk operations. A bot's disk is a
+# network one whose metadata rate is low: the presubmit runs of PR #195825
+# spent 20 minutes and more removing an output root (the first ones in the
+# recipe's clobber of the checkout, then in swarming's cleanup of the task
+# directory), most of it the sandboxes' trees.
+BOT_SANDBOX_BASE = '/dev/shm'
+BOT_SANDBOX_BASE_MIN_BYTES = 16 * 1024**3
+
+
+def bot_sandbox_options():
+  """`--sandbox_base=/dev/shm` when the bot has a tmpfs of 16 GB or more there."""
+  if not os.path.isdir(BOT_SANDBOX_BASE):
+    return []
+  if shutil.disk_usage(BOT_SANDBOX_BASE).total < BOT_SANDBOX_BASE_MIN_BYTES:
+    return []
+  return ['--sandbox_base=' + BOT_SANDBOX_BASE]
 
 
 def ninja_escape(text):
