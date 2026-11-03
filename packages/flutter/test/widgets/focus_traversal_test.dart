@@ -1308,6 +1308,76 @@ void main() {
       },
       variant: KeySimulatorTransitModeVariant.all(),
     );
+
+    for (final forward in <bool>[true, false]) {
+      testWidgets(
+        'Tab traversal leaves the Flutter view at the ${forward ? 'end' : 'start'} of scrollable focusable content.',
+        (WidgetTester tester) async {
+          final scope = FocusScopeNode(
+            traversalEdgeBehavior: TraversalEdgeBehavior.leaveFlutterView,
+          );
+          addTearDown(scope.dispose);
+          final nodes = List<FocusNode>.generate(
+            3,
+            (int index) => FocusNode(debugLabel: 'Item $index'),
+          );
+          addTearDown(() {
+            for (final node in nodes) {
+              node.dispose();
+            }
+          });
+          final initialOffset = forward ? 0.0 : 2000.0;
+          final controller = ScrollController(initialScrollOffset: initialOffset);
+          addTearDown(controller.dispose);
+
+          await tester.pumpWidget(
+            TestWidgetsApp(
+              home: FocusScope(
+                node: scope,
+                child: Center(
+                  child: SizedBox(
+                    height: 300,
+                    width: 200,
+                    child: SingleChildScrollView(
+                      controller: controller,
+                      child: Column(
+                        children: <Widget>[
+                          if (!forward) const SizedBox(height: 2000),
+                          for (final node in nodes)
+                            Focus(focusNode: node, child: const SizedBox(height: 100, width: 200)),
+                          if (forward) const SizedBox(height: 2000),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          );
+
+          final FocusNode edgeNode = forward ? nodes.last : nodes.first;
+          edgeNode.requestFocus();
+          await tester.pump();
+          expect(edgeNode.hasPrimaryFocus, isTrue);
+          expect(controller.offset, initialOffset);
+
+          if (!forward) {
+            await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
+          }
+          // The original Tab must reach the platform, not just unfocus a frame later.
+          expect(await tester.sendKeyEvent(LogicalKeyboardKey.tab), isFalse);
+          if (!forward) {
+            await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
+          }
+          await tester.pumpAndSettle();
+
+          expect(scope.hasPrimaryFocus, isTrue);
+          expect(scope.focusedChild, isNull);
+          expect(controller.offset, initialOffset);
+        },
+        variant: KeySimulatorTransitModeVariant.all(),
+      );
+    }
   });
 
   group(OrderedTraversalPolicy, () {

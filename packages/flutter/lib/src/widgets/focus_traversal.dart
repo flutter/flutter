@@ -587,7 +587,8 @@ abstract class FocusTraversalPolicy with Diagnosticable {
   /// and then finds the node after the current first focus of the scope if
   /// forward is true, and the node before it if forward is false.
   ///
-  /// Returns true if a node requested focus.
+  /// Returns true if a node requested focus or traversal was deferred to reveal
+  /// more descendants.
   @protected
   bool _moveFocus(FocusNode currentNode, {required bool forward, bool allowScroll = true}) {
     final FocusScopeNode nearestScope = currentNode.nearestScope!;
@@ -616,8 +617,10 @@ abstract class FocusTraversalPolicy with Diagnosticable {
     // focus tree may not contain a node for the item that comes after the last
     // built one yet. Scroll the viewport to build it, and retry the traversal
     // once the new frame has been laid out, rather than immediately applying
-    // the edge behavior of the scope.
+    // the edge behavior of the scope. Do not defer leaveFlutterView: the original
+    // key event must remain unhandled synchronously to reach platform UI.
     if (allowScroll &&
+        nearestScope.traversalEdgeBehavior != TraversalEdgeBehavior.leaveFlutterView &&
         focusedChild == (forward ? sortedNodes.last : sortedNodes.first) &&
         _scrollToRevealMoreDescendants(sortedNodes, focusedChild, forward: forward)) {
       return true;
