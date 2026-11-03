@@ -10,6 +10,7 @@ Run from this directory: `python3 bazel_ci_test.py`; CI runs it as
 //engine/src/flutter/build/bazel:bazel_ci_test.
 """
 
+import collections
 import json
 import os
 import sys
@@ -145,6 +146,11 @@ class MatchBuildTest(unittest.TestCase):
     self.assertIn('has no Bazel configuration: --fancy', str(raised.exception))
 
 
+def shutil_usage(total):
+  """A shutil.disk_usage result of `total` bytes."""
+  return collections.namedtuple('usage', 'total used free')(total, 0, total)
+
+
 class BuildDirectoryTest(unittest.TestCase):
 
   def setUp(self):
@@ -236,10 +242,20 @@ class BuildDirectoryTest(unittest.TestCase):
         description['startup_options'],
         ['--output_user_root=/b/s/w/ir/tmp/t/bazel_ci/output', '--max_idle_secs=300']
     )
-    self.assertEqual(description['build_options'], [])
+    self.assertEqual(description['build_options'], bazel_ci.bot_sandbox_options())
+    self.assertIn(description['build_options'], [[], ['--sandbox_base=/dev/shm']])
     self.assertEqual(
         description['environment'], {'BAZELISK_HOME': '/b/s/w/ir/tmp/t/bazel_ci/bazelisk'}
     )
+    # The sandboxes go to the tmpfs when it is there and large enough.
+    with unittest.mock.patch.object(bazel_ci.os.path, 'isdir', return_value=True), \
+        unittest.mock.patch.object(bazel_ci.shutil, 'disk_usage') as usage:
+      usage.return_value = shutil_usage(64 * 1024**3)
+      self.assertEqual(bazel_ci.bot_sandbox_options(), ['--sandbox_base=/dev/shm'])
+      usage.return_value = shutil_usage(8 * 1024**3)
+      self.assertEqual(bazel_ci.bot_sandbox_options(), [])
+    with unittest.mock.patch.object(bazel_ci.os.path, 'isdir', return_value=False):
+      self.assertEqual(bazel_ci.bot_sandbox_options(), [])
     with unittest.mock.patch.dict(os.environ,
                                   {'LUCI_CONTEXT': '/b/s/w/ir/tmp/t/luci_context.json'}):
       os.environ.pop('TMPDIR', None)

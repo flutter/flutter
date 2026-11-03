@@ -104,7 +104,15 @@ Steps 2 and 4 are scripts of this repository; step 3 runs whatever
   root `.bazelrc`) keeps the output readable in a log. A bot's Bazel
   server exits five minutes after its last command (`--max_idle_secs`):
   the recipe's process cleanup does not know the detached JVM, which would
-  otherwise idle for hours into the bot's next task.
+  otherwise idle for hours into the bot's next task. A bot's sandboxes go
+  to `/dev/shm` when it has 16 GB or more there (`--sandbox_base`): a bot's
+  disk is a network one with a low metadata rate, and the symlink forests
+  the sandboxes lay -- and the stash Bazel keeps of them -- made removing
+  an output root a matter of 20 minutes and more (the recipe's clobber of
+  the checkout on the first presubmit runs, swarming's cleanup of the task
+  directory since; the 85-minute `ci/wasm_release` build then overran its
+  orchestrator, which cocoon gives master's 120-minute timeout, not the
+  PR's 240).
 - **The install runs once per build.** The edge has no inputs ninja could
   compare, so `tools/gn --bazel` removes the previous run's
   `bazel_install.stamp` when it writes the directory; a second `ninja` in the
