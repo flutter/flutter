@@ -9,6 +9,7 @@ import 'dart:typed_data';
 import 'package:archive/archive.dart';
 import 'package:path/path.dart' as path;
 
+import '../bazel.dart';
 import '../run_command.dart';
 import '../utils.dart';
 import 'run_test_harness_tests.dart';
@@ -18,69 +19,158 @@ Future<void> frameworkTestsRunner() async {
     '--track-widget-creation',
     '--no-track-widget-creation',
   ];
+  final String flutterPackage = path.join(flutterRoot, 'packages', 'flutter');
 
   Future<void> runWidgets() async {
-    printProgress('${green}Running packages/flutter tests $reset for ${cyan}test/widgets/$reset');
-    for (final trackWidgetCreationOption in trackWidgetCreationAlternatives) {
-      await runFlutterTest(
-        path.join(flutterRoot, 'packages', 'flutter'),
-        options: <String>[trackWidgetCreationOption],
-        tests: <String>[path.join('test', 'widgets') + path.separator],
-      );
+    final String gallery = path.join(flutterRoot, 'dev', 'integration_tests', 'flutter_gallery');
+    Future<void> runWidgetTests(List<String> tests) async {
+      for (final trackWidgetCreationOption in trackWidgetCreationAlternatives) {
+        await runFlutterTest(
+          flutterPackage,
+          options: <String>[trackWidgetCreationOption],
+          tests: tests,
+        );
+      }
     }
+
     // Try compiling code outside of the packages/flutter directory with and without --track-widget-creation
-    for (final trackWidgetCreationOption in trackWidgetCreationAlternatives) {
-      await runFlutterTest(
-        path.join(flutterRoot, 'dev', 'integration_tests', 'flutter_gallery'),
-        options: <String>[trackWidgetCreationOption],
-        fatalWarnings: false, // until we've migrated video_player
+    Future<void> runGalleryTests(List<String> tests) async {
+      for (final trackWidgetCreationOption in trackWidgetCreationAlternatives) {
+        await runFlutterTest(
+          gallery,
+          options: <String>[trackWidgetCreationOption],
+          fatalWarnings: false, // until we've migrated video_player
+          tests: tests,
+        );
+      }
+    }
+
+    // Run release mode tests (see packages/flutter/test_release/README.md)
+    Future<void> runReleaseTests(List<String> tests) {
+      return runFlutterTest(
+        flutterPackage,
+        options: <String>['--dart-define=dart.vm.product=true'],
+        tests: tests,
       );
     }
-    // Run release mode tests (see packages/flutter/test_release/README.md)
-    await runFlutterTest(
-      path.join(flutterRoot, 'packages', 'flutter'),
-      options: <String>['--dart-define=dart.vm.product=true'],
-      tests: <String>['test_release${path.separator}'],
-    );
+
     // Run profile mode tests (see packages/flutter/test_profile/README.md)
-    await runFlutterTest(
-      path.join(flutterRoot, 'packages', 'flutter'),
-      options: <String>[
-        '--dart-define=dart.vm.product=false',
-        '--dart-define=dart.vm.profile=true',
-      ],
-      tests: <String>['test_profile${path.separator}'],
-    );
+    Future<void> runProfileTests(List<String> tests) {
+      return runFlutterTest(
+        flutterPackage,
+        options: <String>[
+          '--dart-define=dart.vm.product=false',
+          '--dart-define=dart.vm.profile=true',
+        ],
+        tests: tests,
+      );
+    }
+
+    printProgress('${green}Running packages/flutter tests $reset for ${cyan}test/widgets/$reset');
+    if (useBazel) {
+      final shard = BazelShard();
+      shard.cover(
+        <String>['//packages/flutter/test/widgets:widgets'],
+        root: flutterPackage,
+        files: testFilesUnder(flutterPackage, path.join('test', 'widgets')),
+        orElse: runWidgetTests,
+      );
+      // The same files once more without creation locations: the
+      // --no-track-widget-creation build (the gallery's suite is the
+      // tracked build alone).
+      shard.addSuites(<String>[
+        '//packages/flutter/test/widgets:widgets_without_creation_locations',
+      ]);
+      shard.cover(
+        <String>['//dev/integration_tests/flutter_gallery/test:tests'],
+        root: gallery,
+        files: testFilesUnder(gallery),
+        orElse: runGalleryTests,
+      );
+      shard.cover(
+        <String>['//packages/flutter/test_release:tests'],
+        root: flutterPackage,
+        files: testFilesUnder(flutterPackage, 'test_release'),
+        orElse: runReleaseTests,
+      );
+      shard.cover(
+        <String>['//packages/flutter/test_profile:tests'],
+        root: flutterPackage,
+        files: testFilesUnder(flutterPackage, 'test_profile'),
+        orElse: runProfileTests,
+      );
+      await shard.run();
+      return;
+    }
+    await runWidgetTests(<String>[path.join('test', 'widgets') + path.separator]);
+    await runGalleryTests(const <String>[]);
+    await runReleaseTests(<String>['test_release${path.separator}']);
+    await runProfileTests(<String>['test_profile${path.separator}']);
   }
 
   Future<void> runImpeller() async {
     printProgress('${green}Running packages/flutter tests $reset in Impeller$reset');
-    await runFlutterTest(
-      path.join(flutterRoot, 'packages', 'flutter'),
-      options: <String>['--enable-impeller'],
-    );
+    if (useBazel) {
+      final shard = BazelShard();
+      shard.addSuites(<String>['//:framework_tests_impeller']);
+      await shard.run();
+      return;
+    }
+    await runFlutterTest(flutterPackage, options: <String>['--enable-impeller']);
   }
 
   Future<void> runLibraries() async {
-    final List<String> tests = Directory(path.join(flutterRoot, 'packages', 'flutter', 'test'))
+    final List<Directory> directories = Directory(path.join(flutterPackage, 'test'))
         .listSync(followLinks: false)
         .whereType<Directory>()
         .where((Directory dir) => !dir.path.endsWith('widgets'))
+        .toList();
+    final List<String> tests = directories
         .map<String>((Directory dir) => path.join('test', path.basename(dir.path)) + path.separator)
         .toList();
     printProgress(
       '${green}Running packages/flutter tests$reset for $cyan${tests.join(", ")}$reset',
     );
-    for (final trackWidgetCreationOption in trackWidgetCreationAlternatives) {
-      await runFlutterTest(
-        path.join(flutterRoot, 'packages', 'flutter'),
-        options: <String>[trackWidgetCreationOption],
-        tests: tests,
-      );
+    Future<void> runLibraryTests(List<String> tests) async {
+      for (final trackWidgetCreationOption in trackWidgetCreationAlternatives) {
+        await runFlutterTest(
+          flutterPackage,
+          options: <String>[trackWidgetCreationOption],
+          tests: tests,
+        );
+      }
     }
+
+    if (useBazel) {
+      final shard = BazelShard();
+      final elsewhere = <String>[];
+      for (final dir in directories) {
+        final String name = path.basename(dir.path);
+        if (!File(path.join(dir.path, 'BUILD.bazel')).existsSync()) {
+          // test/dart: a browser's test, which flutter_tester reports skipped.
+          elsewhere.add(path.join('test', name) + path.separator);
+          continue;
+        }
+        shard.cover(
+          <String>['//packages/flutter/test/$name:$name'],
+          root: flutterPackage,
+          files: testFilesUnder(flutterPackage, path.join('test', name)),
+          orElse: runLibraryTests,
+        );
+      }
+      if (elsewhere.isNotEmpty) {
+        printProgress(
+          '$yellow${elsewhere.join(', ')} have no Bazel package and run as without --bazel.$reset',
+        );
+        await runLibraryTests(elsewhere);
+      }
+      await shard.run();
+      return;
+    }
+    await runLibraryTests(tests);
   }
 
-  Future<void> runExampleTests() async {
+  Future<void> runExampleTests(BazelShard? shard) async {
     await runCommand(flutter, <String>[
       'config',
       '--enable-${Platform.operatingSystem}-desktop',
@@ -97,6 +187,18 @@ Future<void> frameworkTestsRunner() async {
       if (entity is! Directory || !Directory(path.join(entity.path, 'test')).existsSync()) {
         continue;
       }
+      if (shard != null && File(path.join(entity.path, 'test', 'BUILD.bazel')).existsSync()) {
+        final String package = path.posix.joinAll(
+          path.split(path.relative(entity.path, from: flutterRoot)),
+        );
+        shard.cover(
+          <String>['//$package/test:tests'],
+          root: entity.path,
+          files: testFilesUnder(entity.path),
+          orElse: (List<String> tests) => runFlutterTest(entity.path, tests: tests),
+        );
+        continue;
+      }
       await runFlutterTest(entity.path);
     }
   }
@@ -105,7 +207,26 @@ Future<void> frameworkTestsRunner() async {
     final String tracingDirectory = path.join(flutterRoot, 'dev', 'tracing_tests');
 
     // run the tests for debug mode
-    await runFlutterTest(tracingDirectory, options: <String>['--enable-vmservice']);
+    Future<void> runDebugTests(List<String> tests) {
+      return runFlutterTest(
+        tracingDirectory,
+        options: <String>['--enable-vmservice'],
+        tests: tests,
+      );
+    }
+
+    if (useBazel) {
+      final shard = BazelShard();
+      shard.cover(
+        <String>['//dev/tracing_tests/test:tests'],
+        root: tracingDirectory,
+        files: testFilesUnder(tracingDirectory),
+        orElse: runDebugTests,
+      );
+      await shard.run();
+    } else {
+      await runDebugTests(const <String>[]);
+    }
 
     Future<List<String>> verifyTracingAppBuild({
       required String modeArgument,
@@ -285,31 +406,111 @@ Future<void> frameworkTestsRunner() async {
     printProgress(
       '${green}Running package tests$reset for directories other than packages/flutter',
     );
+    // Under --bazel, the packages' tests gather into one `bazelisk test` at
+    // the end; the steps that are not a package's tests run as they are.
+    final BazelShard? shard = useBazel ? BazelShard() : null;
+
+    // `flutter test` of [package]'s [directory] -- or, under Bazel, its suite
+    // [suite].
+    Future<void> flutterPackageTests(
+      String suite,
+      String package, {
+      List<String> options = const <String>[],
+      bool fatalWarnings = true,
+      String directory = 'test',
+    }) async {
+      Future<void> run(List<String> tests) {
+        return runFlutterTest(
+          package,
+          options: options,
+          fatalWarnings: fatalWarnings,
+          tests: tests,
+        );
+      }
+
+      if (shard == null) {
+        await run(directory == 'test' ? const <String>[] : <String>[directory]);
+        return;
+      }
+      shard.cover(
+        <String>[suite],
+        root: package,
+        files: testFilesUnder(package, directory),
+        orElse: run,
+        whole: directory == 'test',
+      );
+    }
+
+    // `dart test` of [package] -- or, under Bazel, its suite [suite].
+    Future<void> dartPackageTests(
+      String suite,
+      String package, {
+      bool ensurePrecompiledTool = true,
+    }) async {
+      Future<void> run(List<String>? testPaths) {
+        return runDartTest(
+          package,
+          testPaths: testPaths,
+          ensurePrecompiledTool: ensurePrecompiledTool,
+        );
+      }
+
+      if (shard == null) {
+        await run(null);
+        return;
+      }
+      shard.cover(<String>[suite], root: package, files: testFilesUnder(package), orElse: run);
+    }
+
     await testHarnessTestsRunner();
-    await runExampleTests();
-    await runDartTest(path.join(flutterRoot, 'dev', 'bots'));
-    await runDartTest(
+    await runExampleTests(shard);
+    await dartPackageTests('//dev/bots:tests', path.join(flutterRoot, 'dev', 'bots'));
+    await dartPackageTests(
+      '//dev/devicelab:tests',
       path.join(flutterRoot, 'dev', 'devicelab'),
       ensurePrecompiledTool: false, // See https://github.com/flutter/flutter/issues/86209
     );
-    await runDartTest(path.join(flutterRoot, 'dev', 'packages_autoroller'));
+    await dartPackageTests(
+      '//dev/packages_autoroller:tests',
+      path.join(flutterRoot, 'dev', 'packages_autoroller'),
+    );
     // TODO(gspencergoog): Remove the exception for fatalWarnings once https://github.com/flutter/flutter/issues/113782 has landed.
     await runFlutterTest(
       path.join(flutterRoot, 'dev', 'integration_tests', 'android_semantics_testing'),
       fatalWarnings: false,
     );
-    await runDartTest(path.join(flutterRoot, 'dev', 'flutter_analyzer_plugin'));
-    await runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'ui'));
-    await runFlutterTest(path.join(flutterRoot, 'dev', 'manual_tests'));
-    await runFlutterTest(path.join(flutterRoot, 'dev', 'tools'));
-    await runFlutterTest(path.join(flutterRoot, 'dev', 'tools', 'vitool'));
-    await runFlutterTest(path.join(flutterRoot, 'dev', 'tools', 'gen_keycodes'));
-    await runFlutterTest(path.join(flutterRoot, 'dev', 'benchmarks', 'test_apps', 'stocks'));
-    await runFlutterTest(
-      path.join(flutterRoot, 'packages', 'flutter_driver'),
-      tests: <String>[path.join('test', 'src', 'real_tests')],
+    await dartPackageTests(
+      '//dev/flutter_analyzer_plugin:tests',
+      path.join(flutterRoot, 'dev', 'flutter_analyzer_plugin'),
     );
-    await runFlutterTest(
+    await flutterPackageTests(
+      '//dev/integration_tests/ui/test:tests',
+      path.join(flutterRoot, 'dev', 'integration_tests', 'ui'),
+    );
+    await flutterPackageTests(
+      '//dev/manual_tests/test:tests',
+      path.join(flutterRoot, 'dev', 'manual_tests'),
+    );
+    await flutterPackageTests('//dev/tools:tests', path.join(flutterRoot, 'dev', 'tools'));
+    await flutterPackageTests(
+      '//dev/tools/vitool/test:tests',
+      path.join(flutterRoot, 'dev', 'tools', 'vitool'),
+    );
+    await flutterPackageTests(
+      '//dev/tools/gen_keycodes:tests',
+      path.join(flutterRoot, 'dev', 'tools', 'gen_keycodes'),
+    );
+    await flutterPackageTests(
+      '//dev/benchmarks/test_apps/stocks/test:tests',
+      path.join(flutterRoot, 'dev', 'benchmarks', 'test_apps', 'stocks'),
+    );
+    await flutterPackageTests(
+      '//packages/flutter_driver/test:tests',
+      path.join(flutterRoot, 'packages', 'flutter_driver'),
+      directory: path.join('test', 'src', 'real_tests'),
+    );
+    await flutterPackageTests(
+      '//packages/integration_test/test:tests',
       path.join(flutterRoot, 'packages', 'integration_test'),
       options: <String>[
         '--enable-vmservice',
@@ -317,10 +518,22 @@ Future<void> frameworkTestsRunner() async {
         '--exclude-tags=web',
       ],
     );
-    await runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_goldens'));
-    await runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_localizations'));
-    await runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_test'));
-    await runFlutterTest(path.join(flutterRoot, 'packages', 'fuchsia_remote_debug_protocol'));
+    await flutterPackageTests(
+      '//packages/flutter_goldens/test:tests',
+      path.join(flutterRoot, 'packages', 'flutter_goldens'),
+    );
+    await flutterPackageTests(
+      '//packages/flutter_localizations/test:tests',
+      path.join(flutterRoot, 'packages', 'flutter_localizations'),
+    );
+    await flutterPackageTests(
+      '//packages/flutter_test/test:tests',
+      path.join(flutterRoot, 'packages', 'flutter_test'),
+    );
+    await flutterPackageTests(
+      '//packages/fuchsia_remote_debug_protocol:tests',
+      path.join(flutterRoot, 'packages', 'fuchsia_remote_debug_protocol'),
+    );
     const httpClientWarning =
         'Warning: At least one test in this suite creates an HttpClient. When running a test suite that uses\n'
         'TestWidgetsFlutterBinding, all HTTP requests will return status code 400, and no network request\n'
@@ -342,6 +555,7 @@ Future<void> frameworkTestsRunner() async {
         return null;
       },
     );
+    await shard?.run();
   }
 
   await selectSubshard(<String, ShardRunner>{
