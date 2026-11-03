@@ -29,7 +29,7 @@ Future<void> processPodsIfNeeded(
   bool forceCocoaPodsOnly = false,
   bool forceSwiftPM = false,
 }) async {
-  final ToolContext(:FileSystem fs, :Logger logger) = toolContext;
+  final ToolContext(:Cache cache, :FileSystem fs, :Logger logger) = toolContext;
   final FlutterProject project = xcodeProject.parent;
 
   // When using Swift Package Manager, the Podfile may not exist so if there
@@ -96,7 +96,7 @@ Future<void> processPodsIfNeeded(
       xcodeProject.podfile.path,
       if (xcodeProject.flutterPluginSwiftPackageManifest.existsSync())
         xcodeProject.flutterPluginSwiftPackageManifest.path,
-      fs.path.join(Cache.flutterRoot!, 'packages', 'flutter_tools', 'bin', 'podhelper.rb'),
+      fs.path.join(cache.flutterRoot, 'packages', 'flutter_tools', 'bin', 'podhelper.rb'),
     ],
     fileSystem: fs,
     logger: logger,

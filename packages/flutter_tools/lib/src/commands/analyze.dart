@@ -236,11 +236,8 @@ class AnalyzeCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final ToolContext(
-      fs: FileSystem fileSystem,
-      :Logger logger,
-      :FlutterProjectFactory projectFactory,
-    ) = toolContext;
+    final ToolContext(:FileSystem fs, :Logger logger, :FlutterProjectFactory projectFactory) =
+        toolContext;
 
     if (boolArg('android')) {
       final AndroidAnalyzeOption option;
@@ -263,11 +260,11 @@ class AnalyzeCommand extends FlutterCommand {
       } else {
         throwToolExit('No argument is provided to analyze. Use -h to see available commands.');
       }
-      final Set<String> items = findDirectories(argResults!, fileSystem);
+      final Set<String> items = findDirectories(argResults!, fs);
       final String directoryPath;
       if (items.isEmpty) {
         // user did not specify any path
-        directoryPath = fileSystem.currentDirectory.path;
+        directoryPath = fs.currentDirectory.path;
       } else if (items.length > 1) {
         // if the user sends more than one path
         throwToolExit('The Android analyze can process only one directory path');
@@ -275,7 +272,7 @@ class AnalyzeCommand extends FlutterCommand {
         directoryPath = items.first;
       }
       await AndroidAnalyze(
-        fileSystem: fileSystem,
+        fileSystem: fs,
         option: option,
         userPath: directoryPath,
         buildVariant: buildVariant,
@@ -308,11 +305,11 @@ class AnalyzeCommand extends FlutterCommand {
       } else {
         throwToolExit('No argument is provided to analyze. Use -h to see available commands.');
       }
-      final Set<String> items = findDirectories(argResults!, fileSystem);
+      final Set<String> items = findDirectories(argResults!, fs);
       final String directoryPath;
       if (items.isEmpty) {
         // user did not specify any path
-        directoryPath = fileSystem.currentDirectory.path;
+        directoryPath = fs.currentDirectory.path;
       } else if (items.length > 1) {
         // if the user sends more than one path
         throwToolExit('The iOS analyze can process only one directory path');
@@ -320,7 +317,7 @@ class AnalyzeCommand extends FlutterCommand {
         directoryPath = items.first;
       }
       await IOSAnalyze(
-        project: projectFactory.fromDirectory(fileSystem.directory(directoryPath)),
+        project: projectFactory.fromDirectory(fs.directory(directoryPath)),
         option: option,
         configuration: configuration,
         target: target,
@@ -332,10 +329,10 @@ class AnalyzeCommand extends FlutterCommand {
         throwToolExit('flag --watch is not compatible with --suggestions');
       }
       if (workingDirectory == null) {
-        final Set<String> items = findDirectories(argResults!, fileSystem);
+        final Set<String> items = findDirectories(argResults!, fs);
         if (items.isEmpty) {
           // user did not specify any path
-          directoryPath = fileSystem.currentDirectory.path;
+          directoryPath = fs.currentDirectory.path;
           logger.printTrace('Showing suggestions for current directory: $directoryPath');
         } else if (items.length > 1) {
           // if the user sends more than one path
