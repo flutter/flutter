@@ -34,7 +34,9 @@ void testMain() {
 
     test('getCanvas', () {
       final factory = DisplayCanvasFactory<DisplayCanvas>(createCanvas: () => DummyDisplayCanvas());
+      expect(factory.hasBaseCanvas, isFalse);
       expect(factory.baseCanvas, isNotNull);
+      expect(factory.hasBaseCanvas, isTrue);
 
       expect(factory.debugSurfaceCount, equals(1));
 
@@ -104,6 +106,22 @@ void testMain() {
       expectDisposed(originalFactory.baseCanvas);
       overlays.forEach(expectDisposed);
       expect(originalFactory.debugSurfaceCount, 1);
+    });
+
+    test('dispose without accessing baseCanvas does not allocate canvas', () {
+      var createdCount = 0;
+      final factory = DisplayCanvasFactory<DisplayCanvas>(
+        createCanvas: () {
+          createdCount++;
+          return DummyDisplayCanvas();
+        },
+      );
+      expect(factory.hasBaseCanvas, isFalse);
+      expect(createdCount, 0);
+
+      factory.dispose();
+      expect(factory.hasBaseCanvas, isFalse);
+      expect(createdCount, 0);
     });
   });
 }
