@@ -51,6 +51,9 @@ abstract base class DeviceService extends ToolExtensionService {
   /// RPC parameter key for the target device ID.
   static const String deviceIdParam = 'deviceId';
 
+  /// RPC parameter key for the optional application package identifier.
+  static const String appIdParam = 'appId';
+
   /// RPC parameter key for the serialized [ExtensionFlutterProject].
   static const String projectParam = 'project';
 
@@ -59,6 +62,9 @@ abstract base class DeviceService extends ToolExtensionService {
 
   /// RPC parameter key for debugging options.
   static const String debuggingOptionsParam = 'debuggingOptions';
+
+  /// RPC parameter key indicating whether the launched binary is a prebuilt application.
+  static const String prebuiltApplicationParam = 'prebuiltApplication';
 
   /// RPC response key for the VM service URI.
   static const String vmServiceUriKey = 'vmServiceUri';
@@ -83,12 +89,16 @@ abstract base class DeviceService extends ToolExtensionService {
   /// using the given [debuggingOptions].
   ///
   /// [executableUri] is guaranteed to be an absolute `file:` URI pointing to
-  /// the built application binary or bundle. Returns `true` once the
-  /// application process has been started, or `false` if launching failed.
+  /// the built application binary or bundle. When [prebuiltApplication] is
+  /// `true`, [executableUri] points to a prebuilt package supplied by the user
+  /// (for example via `--use-application-binary`) rather than an output from an
+  /// in-session build. Returns `true` once the application process has been
+  /// started, or `false` if launching failed.
   Future<bool> launchApp({
     required ExtensionDebuggingOptions debuggingOptions,
     required String deviceId,
     required Uri executableUri,
+    bool prebuiltApplication = false,
   });
 
   /// Returns the VM Service URI for a running application on [deviceId].
@@ -107,12 +117,15 @@ abstract base class DeviceService extends ToolExtensionService {
 
   /// Starts streaming log output for the device identified by [deviceId].
   ///
+  /// When [appId] is provided, implementations may filter the device log stream
+  /// to entries originating from the specified application package.
+  ///
   /// Invoked by the host tool when a log consumer (such as `flutter logs` or
   /// `flutter run`) begins reading logs from [deviceId]. Implementations should
   /// return once log streaming has been initiated rather than awaiting the
   /// lifetime of the stream, and forward each log line (without a trailing
   /// newline) to the host by calling [emitLogLine].
-  Future<void> startLogStream({required String deviceId}) async {}
+  Future<void> startLogStream({required String deviceId, String? appId}) async {}
 
   /// Stops streaming log output for the device identified by [deviceId].
   ///
@@ -181,9 +194,14 @@ abstract base class DeviceService extends ToolExtensionService {
     final String deviceId = _parseDeviceId(params);
     final String executableUriStr;
     final Map<String, Object?> optionsMap;
+    final bool prebuiltApplication;
     try {
       executableUriStr = params.requiredField<String>(executableUriParam);
       optionsMap = params.requiredField<Map<String, Object?>>(debuggingOptionsParam);
+      prebuiltApplication = params.optionalField<bool>(
+        prebuiltApplicationParam,
+        defaultValue: false,
+      );
     } on FormatException catch (e) {
       throw RpcException.invalidParams(e.message);
     }
@@ -193,6 +211,7 @@ abstract base class DeviceService extends ToolExtensionService {
       debuggingOptions: debuggingOptions,
       deviceId: deviceId,
       executableUri: executableUri,
+      prebuiltApplication: prebuiltApplication,
     );
   }
 
@@ -228,7 +247,17 @@ abstract base class DeviceService extends ToolExtensionService {
   }
 
   Future<Object?> _startLogStreamRpc(Map<String, Object?> params) async {
-    await startLogStream(deviceId: _parseDeviceId(params));
+    final String deviceId = _parseDeviceId(params);
+    final String? appId;
+    try {
+      appId = params.nullableField<String>(appIdParam);
+    } on FormatException catch (e) {
+      throw RpcException.invalidParams(e.message);
+    }
+    if (appId != null && appId.isEmpty) {
+      throw RpcException.invalidParams('Parameter "$appIdParam" must not be empty.');
+    }
+    await startLogStream(deviceId: deviceId, appId: appId);
     return null;
   }
 

@@ -30,6 +30,7 @@ Directory resolveExtensionOutputDir({
   required FileSystem fileSystem,
   required Directory projectDir,
   required ExtensionBuildTarget target,
+  String? targetPlatform,
 }) {
   for (final RegExpMatch match in _placeholderRegex.allMatches(target.outputDir)) {
     final String? placeholder = match[0];
@@ -43,7 +44,7 @@ Directory resolveExtensionOutputDir({
       .replaceAll(BuiltInPlaceholders.outputDir, buildOutputDir.path)
       .replaceAll(BuiltInPlaceholders.projectDir, projectDir.path)
       .replaceAll(BuiltInPlaceholders.buildMode, buildMode.cliName)
-      .replaceAll(BuiltInPlaceholders.targetPlatform, target.targetPlatform);
+      .replaceAll(BuiltInPlaceholders.targetPlatform, targetPlatform ?? target.targetPlatform);
   if (fileSystem.path.isRelative(outputPath)) {
     outputPath = fileSystem.path.join(projectDir.path, outputPath);
   }
@@ -59,13 +60,16 @@ Map<String, String> resolveExtensionBuildTargetArtifacts({
   required Artifacts artifacts,
   required BuildMode buildMode,
   required ExtensionBuildTarget target,
+  String? targetPlatform,
 }) {
-  final TargetPlatform? targetPlatform = _tryResolveTargetPlatform(target.targetPlatform);
+  final TargetPlatform? resolvedPlatform = _tryResolveTargetPlatform(
+    targetPlatform ?? target.targetPlatform,
+  );
   final resolvedArtifacts = <String, String>{};
   for (final ExtensionArtifact artifact in target.artifacts) {
     resolvedArtifacts[artifact.name] = artifacts.getArtifactPath(
       _resolveArtifact(artifact),
-      platform: targetPlatform,
+      platform: resolvedPlatform,
       mode: buildMode,
     );
   }

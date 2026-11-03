@@ -36,7 +36,10 @@ void main() {
       ),
     );
 
-    final linuxApp = PrebuiltLinuxApp(executable: 'foo');
+    final linuxApp = PrebuiltLinuxApp(
+      applicationPackage: MemoryFileSystem.test().file('foo'),
+      executable: 'foo',
+    );
     expect(await device.targetPlatform, TargetPlatform.linux_x64);
     expect(device.name, 'Linux');
     expect(await device.installApp(linuxApp), true);

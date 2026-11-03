@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:collection/collection.dart';
 import 'package:meta/meta.dart';
 
 import 'build.dart';
@@ -190,7 +191,16 @@ class TargetDevice {
 /// tool extension target device.
 @immutable
 class ExtensionDebuggingOptions {
-  const ExtensionDebuggingOptions({required this.buildMode, required this.debuggingEnabled});
+  const ExtensionDebuggingOptions({
+    required this.buildMode,
+    required this.debuggingEnabled,
+    this.dartEntrypointArgs = const <String>[],
+    this.deviceVmServicePort,
+    this.engineSwitches = const <String>[],
+    this.hostVmServicePort,
+    this.route,
+    this.uninstallFirst = false,
+  });
 
   /// Deserializes [ExtensionDebuggingOptions] from a JSON-serializable map.
   ///
@@ -198,7 +208,22 @@ class ExtensionDebuggingOptions {
   factory ExtensionDebuggingOptions.fromJson(Map<String, Object?> json) {
     final BuildMode buildMode = _parseBuildMode(json.requiredField<String>(buildModeKey), json);
     final bool debuggingEnabled = json.requiredField<bool>(debuggingEnabledKey);
-    return ExtensionDebuggingOptions(buildMode: buildMode, debuggingEnabled: debuggingEnabled);
+    final List<String> dartEntrypointArgs = json.stringIterable(dartEntrypointArgsKey).toList();
+    final int? deviceVmServicePort = json.nullableField<int>(deviceVmServicePortKey);
+    final List<String> engineSwitches = json.stringIterable(engineSwitchesKey).toList();
+    final int? hostVmServicePort = json.nullableField<int>(hostVmServicePortKey);
+    final String? route = json.nullableField<String>(routeKey);
+    final bool uninstallFirst = json.optionalField<bool>(uninstallFirstKey, defaultValue: false);
+    return ExtensionDebuggingOptions(
+      buildMode: buildMode,
+      dartEntrypointArgs: dartEntrypointArgs,
+      debuggingEnabled: debuggingEnabled,
+      deviceVmServicePort: deviceVmServicePort,
+      engineSwitches: engineSwitches,
+      hostVmServicePort: hostVmServicePort,
+      route: route,
+      uninstallFirst: uninstallFirst,
+    );
   }
 
   static BuildMode _parseBuildMode(String modeName, Map<String, Object?> json) {
@@ -212,33 +237,98 @@ class ExtensionDebuggingOptions {
   /// Map key for [buildMode].
   static const String buildModeKey = 'buildMode';
 
+  /// Map key for [dartEntrypointArgs].
+  static const String dartEntrypointArgsKey = 'dartEntrypointArgs';
+
   /// Map key for [debuggingEnabled].
   static const String debuggingEnabledKey = 'debuggingEnabled';
+
+  /// Map key for [deviceVmServicePort].
+  static const String deviceVmServicePortKey = 'deviceVmServicePort';
+
+  /// Map key for [engineSwitches].
+  static const String engineSwitchesKey = 'engineSwitches';
+
+  /// Map key for [hostVmServicePort].
+  static const String hostVmServicePortKey = 'hostVmServicePort';
+
+  /// Map key for [route].
+  static const String routeKey = 'route';
+
+  /// Map key for [uninstallFirst].
+  static const String uninstallFirstKey = 'uninstallFirst';
 
   /// The compilation mode for the application launch.
   final BuildMode buildMode;
 
+  /// Command-line arguments forwarded to the Dart entrypoint (`main(List<String> args)`).
+  final List<String> dartEntrypointArgs;
+
   /// Whether debugging and VM Service discovery are enabled for this launch.
   final bool debuggingEnabled;
+
+  /// The port on the target device where the Dart VM Service should listen, if specified.
+  final int? deviceVmServicePort;
+
+  /// Flutter engine CLI switches computed by the host tool for this launch
+  /// (for example, `'enable-dart-profiling=true'` or `'start-paused=true'`).
+  final List<String> engineSwitches;
+
+  /// The port on the host machine to bind for the Dart VM Service, if specified.
+  final int? hostVmServicePort;
+
+  /// The initial navigation route when launching the application, if specified.
+  final String? route;
+
+  /// Whether the application should be uninstalled from the device before installing and launching.
+  final bool uninstallFirst;
 
   /// Serializes the debugging options to a JSON-serializable map.
   Map<String, Object?> toMap() => <String, Object?>{
     buildModeKey: buildMode.cliName,
+    if (dartEntrypointArgs.isNotEmpty) dartEntrypointArgsKey: dartEntrypointArgs,
     debuggingEnabledKey: debuggingEnabled,
+    deviceVmServicePortKey: ?deviceVmServicePort,
+    if (engineSwitches.isNotEmpty) engineSwitchesKey: engineSwitches,
+    hostVmServicePortKey: ?hostVmServicePort,
+    routeKey: ?route,
+    if (uninstallFirst) uninstallFirstKey: uninstallFirst,
   };
 
   @override
   String toString() =>
-      'ExtensionDebuggingOptions(buildMode: $buildMode, debuggingEnabled: $debuggingEnabled)';
+      'ExtensionDebuggingOptions(buildMode: $buildMode, '
+      'debuggingEnabled: $debuggingEnabled, '
+      'dartEntrypointArgs: $dartEntrypointArgs, '
+      'deviceVmServicePort: $deviceVmServicePort, '
+      'engineSwitches: $engineSwitches, '
+      'hostVmServicePort: $hostVmServicePort, '
+      'route: $route, '
+      'uninstallFirst: $uninstallFirst)';
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other is ExtensionDebuggingOptions &&
             other.buildMode == buildMode &&
-            other.debuggingEnabled == debuggingEnabled);
+            const ListEquality<String>().equals(other.dartEntrypointArgs, dartEntrypointArgs) &&
+            other.debuggingEnabled == debuggingEnabled &&
+            other.deviceVmServicePort == deviceVmServicePort &&
+            const ListEquality<String>().equals(other.engineSwitches, engineSwitches) &&
+            other.hostVmServicePort == hostVmServicePort &&
+            other.route == route &&
+            other.uninstallFirst == uninstallFirst);
   }
 
   @override
-  int get hashCode => Object.hash(buildMode, debuggingEnabled);
+  int get hashCode => Object.hash(
+    buildMode,
+    Object.hashAll(dartEntrypointArgs),
+    debuggingEnabled,
+    deviceVmServicePort,
+    Object.hashAll(engineSwitches),
+    hostVmServicePort,
+    route,
+    uninstallFirst,
+  );
 }
