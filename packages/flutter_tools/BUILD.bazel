@@ -452,17 +452,14 @@ dart_package_tests(
     # create_test compiles the tool's snapshot itself first (the test
     # renames the facsimile's aside and builds its own with the SDK's
     # dart), then creates, analyzes and tests some hundred projects: 20
-    # minutes on a loaded machine.
-    sizes = {"test/commands.shard/permeable/create_test.dart": "enormous"},
-    tests = glob(
-        ["test/commands.shard/permeable/**/*_test.dart"],
-        exclude = [
-            # Does not compile at this checkout: #192831 and #193447 crossed
-            # (WidgetPreviewCommand's constructor); upstream reverted the
-            # latter in #193968. Restore it on the next rebase.
-            "test/commands.shard/permeable/widget_preview/widget_preview_test.dart",
-        ],
-    ),
+    # minutes on a loaded machine. widget_preview_test creates a project
+    # and resolves it with the real pub for each of its cases: 45 s a
+    # case, 20 minutes a file.
+    sizes = {
+        "test/commands.shard/permeable/create_test.dart": "enormous",
+        "test/commands.shard/permeable/widget_preview/widget_preview_test.dart": "enormous",
+    },
+    tests = glob(["test/commands.shard/permeable/**/*_test.dart"]),
 )
 
 # The integration shard's test files by name, for dev/bots'
