@@ -2186,7 +2186,8 @@ class FakeMDnsClient extends Fake implements MDnsClient {
 }
 
 class TestDeviceManager extends DeviceManager {
-  TestDeviceManager({required super.logger});
+  TestDeviceManager({required super.logger, FileSystem? fileSystem})
+    : super(fileSystem: fileSystem ?? MemoryFileSystem.test());
   List<Device> devices = <Device>[];
 
   @override
