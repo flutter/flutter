@@ -25,6 +25,7 @@ class HoldingRasterizer extends ViewRasterizer {
 
   Completer<void>? rasterizeStarted;
   Completer<void>? rasterizeCompleter;
+  final List<int> rasterizedPictureCounts = <int>[];
 
   /// Simulated engine work performed after [ViewRasterizer.draw] begins but
   /// before [rasterize] is called.
@@ -46,6 +47,7 @@ class HoldingRasterizer extends ViewRasterizer {
     List<ui.Picture> pictures,
     FrameTimingRecorder? recorder,
   ) async {
+    rasterizedPictureCounts.add(pictures.length);
     // Like the production rasterizers, raster start is not recorded here: it
     // is recorded by [ViewRasterizer.draw] before the engine's preroll,
     // measure, and paint passes.
@@ -88,6 +90,16 @@ HoldingRasterizer createAndInstallHoldingRasterizer(EngineFlutterView view) {
     view.debugForceResize();
   });
   return holdingRasterizer;
+}
+
+ui.Picture createTestPicture() {
+  final recorder = ui.PictureRecorder();
+  final canvas = ui.Canvas(recorder, const ui.Rect.fromLTWH(0, 0, 100, 100));
+  canvas.drawRect(
+    const ui.Rect.fromLTWH(0, 0, 50, 50),
+    ui.Paint()..color = const ui.Color(0xFF00FF00),
+  );
+  return recorder.endRecording();
 }
 
 void testMain() {
@@ -483,4 +495,121 @@ void testMain() {
     expect(timing.rasterDuration, greaterThanOrEqualTo(minimumMeasuredEngineWork));
     expect(timing.buildDuration, lessThan(engineWork));
   });
+  test('queued scene with root picture retains picture after caller calls scene.dispose() immediately after render', () async {
+    final EngineFlutterView view = EnginePlatformDispatcher.instance.implicitView!;
+    final HoldingRasterizer holdingRasterizer = createAndInstallHoldingRasterizer(view);
+
+    final frame1Started = Completer<void>();
+    final frame1Hold = Completer<void>();
+    holdingRasterizer.rasterizeStarted = frame1Started;
+    holdingRasterizer.rasterizeCompleter = frame1Hold;
+
+    // Frame 1
+    final builder1 = ui.SceneBuilder();
+    builder1.addPicture(ui.Offset.zero, createTestPicture());
+    final ui.Scene scene1 = builder1.build();
+    addTearDown(scene1.dispose);
+    final Future<void> frame1Done = renderer.renderScene(scene1, view);
+
+    // Wait until Frame 1 is holding in rasterize.
+    await frame1Started.future;
+
+    // Frame 2 is submitted while Frame 1 is in-flight, and disposed immediately.
+    final builder2 = ui.SceneBuilder();
+    builder2.addPicture(ui.Offset.zero, createTestPicture());
+    final ui.Scene scene2 = builder2.build();
+    final Future<void> frame2Done = renderer.renderScene(scene2, view);
+    scene2.dispose();
+
+    // Release Frame 1, and ensure Frame 2 does not hold.
+    holdingRasterizer.rasterizeCompleter = null;
+    holdingRasterizer.rasterizeStarted = null;
+    frame1Hold.complete();
+
+    await Future.wait([frame1Done, frame2Done]);
+
+    expect(holdingRasterizer.rasterizedPictureCounts, <int>[1, 1]);
+  });
+
+  test('queued scene with nested OffsetEngineLayer retains picture after layer.dispose() before raster', () async {
+    final EngineFlutterView view = EnginePlatformDispatcher.instance.implicitView!;
+    final HoldingRasterizer holdingRasterizer = createAndInstallHoldingRasterizer(view);
+
+    final frame1Started = Completer<void>();
+    final frame1Hold = Completer<void>();
+    holdingRasterizer.rasterizeStarted = frame1Started;
+    holdingRasterizer.rasterizeCompleter = frame1Hold;
+
+    // Frame 1
+    final builder1 = ui.SceneBuilder();
+    builder1.addPicture(ui.Offset.zero, createTestPicture());
+    final ui.Scene scene1 = builder1.build();
+    addTearDown(scene1.dispose);
+    final Future<void> frame1Done = renderer.renderScene(scene1, view);
+
+    // Wait until Frame 1 is holding in rasterize.
+    await frame1Started.future;
+
+    // Frame 2 has a nested OffsetEngineLayer which is disposed before raster.
+    final builder2 = ui.SceneBuilder();
+    final ui.OffsetEngineLayer offsetLayer = builder2.pushOffset(10, 10);
+    builder2.addPicture(ui.Offset.zero, createTestPicture());
+    builder2.pop();
+    final ui.Scene scene2 = builder2.build();
+    final Future<void> frame2Done = renderer.renderScene(scene2, view);
+    offsetLayer.dispose();
+    addTearDown(scene2.dispose);
+
+    // Release Frame 1, and ensure Frame 2 does not hold.
+    holdingRasterizer.rasterizeCompleter = null;
+    holdingRasterizer.rasterizeStarted = null;
+    frame1Hold.complete();
+
+    await Future.wait([frame1Done, frame2Done]);
+
+    expect(holdingRasterizer.rasterizedPictureCounts, <int>[1, 1]);
+  });
+
+  test(
+    'layer reuse across queued frames via SceneBuilder.addRetained rasterizes pictures completely',
+    () async {
+      final EngineFlutterView view = EnginePlatformDispatcher.instance.implicitView!;
+      final HoldingRasterizer holdingRasterizer = createAndInstallHoldingRasterizer(view);
+
+      final frame1Started = Completer<void>();
+      final frame1Hold = Completer<void>();
+      holdingRasterizer.rasterizeStarted = frame1Started;
+      holdingRasterizer.rasterizeCompleter = frame1Hold;
+
+      // Frame 1
+      final builder1 = ui.SceneBuilder();
+      final ui.OffsetEngineLayer offsetLayer = builder1.pushOffset(10, 10);
+      builder1.addPicture(ui.Offset.zero, createTestPicture());
+      builder1.pop();
+      final ui.Scene scene1 = builder1.build();
+      final Future<void> frame1Done = renderer.renderScene(scene1, view);
+
+      // Wait until Frame 1 is holding in rasterize.
+      await frame1Started.future;
+
+      // Frame 2 reuses offsetLayer via addRetained while Frame 1 is in-flight.
+      final builder2 = ui.SceneBuilder();
+      builder2.addRetained(offsetLayer);
+      final ui.Scene scene2 = builder2.build();
+      final Future<void> frame2Done = renderer.renderScene(scene2, view);
+
+      scene1.dispose();
+      offsetLayer.dispose();
+      addTearDown(scene2.dispose);
+
+      // Release Frame 1, and ensure Frame 2 does not hold.
+      holdingRasterizer.rasterizeCompleter = null;
+      holdingRasterizer.rasterizeStarted = null;
+      frame1Hold.complete();
+
+      await Future.wait([frame1Done, frame2Done]);
+
+      expect(holdingRasterizer.rasterizedPictureCounts, <int>[1, 1]);
+    },
+  );
 }
