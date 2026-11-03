@@ -237,6 +237,16 @@ void main() {
       expect(result.stdout, isNot(contains('//packages/flutter_tools:commands_shard_hermetic')));
     }, testOn: 'posix');
 
+    test('--no-bazel runs a shard through the tools', () async {
+      final ProcessResult result = await runScript(
+        <String, String>{'SHARD': 'tool_tests', 'SUBSHARD': 'general'},
+        <String>['--dry-run', '--no-bazel'],
+      );
+      expectExitCode(result, 0);
+      expect(result.stdout, contains('|> bin/cache/dart-sdk/bin/dart'));
+      expect(result.stdout, isNot(contains('bazelisk')));
+    }, testOn: 'posix');
+
     test('--bazel refuses a local engine', () async {
       // Not a dry run: --dry-run makes errors non-fatal. The refusal comes
       // before anything runs.
