@@ -2106,7 +2106,9 @@ extension type SkFontVariation._(JSObject _) implements JSObject {
 
 extension type SkTypeface(JSObject _) implements JSObject {
   /// Returns the family name of the typeface.
-  external String? getFamilyName();
+  external String getFamilyName();
+
+  external void delete();
 }
 
 @JS('window.flutterCanvasKit.Font')
@@ -2388,14 +2390,12 @@ extension type SkPartialImageInfo._(JSObject _) implements JSObject {
 
 @JS('window.flutterCanvasKit.RuntimeEffect')
 extension type SkRuntimeEffect(JSObject _) implements JSObject {
-  @JS('makeShader')
-  external SkShader? _makeShader(JSAny uniforms);
-  SkShader? makeShader(SkFloat32List uniforms) => _makeShader(uniforms.toJSAnyShallow);
+  external SkShader? makeShader(JSFloat32Array uniforms);
 
   @JS('makeShaderWithChildren')
-  external SkShader? _makeShaderWithChildren(JSAny uniforms, JSAny children);
-  SkShader? makeShaderWithChildren(SkFloat32List uniforms, List<Object?> children) =>
-      _makeShaderWithChildren(uniforms.toJSAnyShallow, children.toJSAnyShallow);
+  external SkShader? _makeShaderWithChildren(JSFloat32Array uniforms, JSAny children);
+  SkShader? makeShaderWithChildren(JSFloat32Array uniforms, List<Object?> children) =>
+      _makeShaderWithChildren(uniforms, children.toJSAnyShallow);
 }
 
 @JS('window.flutterCanvasKit.RuntimeEffect.Make')
