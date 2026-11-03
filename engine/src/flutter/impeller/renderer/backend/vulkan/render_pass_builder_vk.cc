@@ -202,6 +202,22 @@ vk::UniqueRenderPass RenderPassBuilderVK::Build(
                           vk::AccessFlagBits::eColorAttachmentWrite;
   deps[0].dstStageMask = vk::PipelineStageFlagBits::eColorAttachmentOutput;
   deps[0].dstAccessMask = vk::AccessFlagBits::eColorAttachmentWrite;
+  if (depth_stencil_.has_value()) {
+    // A depth/stencil attachment (for example a cached stencil buffer shared
+    // between passes) may have been written by an earlier render pass. That
+    // pass's depth/stencil writes and storeOp happen in the fragment test
+    // stages, so they must be included in the source scope. This pass's
+    // layout transition and loadOp also access the attachment in the fragment
+    // test stages, so they must be included in the destination scope.
+    constexpr vk::PipelineStageFlags kFragmentTestStages =
+        vk::PipelineStageFlagBits::eEarlyFragmentTests |
+        vk::PipelineStageFlagBits::eLateFragmentTests;
+    deps[0].srcStageMask |= kFragmentTestStages;
+    deps[0].srcAccessMask |= vk::AccessFlagBits::eDepthStencilAttachmentWrite;
+    deps[0].dstStageMask |= kFragmentTestStages;
+    deps[0].dstAccessMask |= vk::AccessFlagBits::eDepthStencilAttachmentRead |
+                             vk::AccessFlagBits::eDepthStencilAttachmentWrite;
+  }
   deps[0].dependencyFlags = kSelfDependencyFlags;
 
   // Self dependency for reading back the framebuffer, necessary for
