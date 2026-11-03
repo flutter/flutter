@@ -444,5 +444,35 @@ TEST(DisplayListSkConversions, ToSkRSTransform) {
   }
 }
 
+TEST(DisplayListSkConversions, ToSkStretchImageFilter) {
+  const DlRect stretch_bounds = DlRect::MakeLTRB(10, 20, 310, 620);
+
+  // Positive overscroll anchors at the top-left of stretch_bounds (10, 20)
+  // and scales by (1 + |0.2|, 1 + |0.5|) = (1.2, 1.5).
+  DlStretchImageFilter positive_filter(0.2f, 0.5f, 0.7f, stretch_bounds);
+  sk_sp<SkImageFilter> sk_positive = ToSk(positive_filter);
+  ASSERT_NE(sk_positive, nullptr);
+  SkIRect positive_bounds = sk_positive->filterBounds(
+      SkIRect::MakeLTRB(10, 20, 310, 620), SkMatrix::I(),
+      SkImageFilter::kForward_MapDirection);
+  EXPECT_EQ(positive_bounds, SkIRect::MakeLTRB(10, 20, 370, 920));
+
+  // Negative overscroll anchors at the bottom-right of stretch_bounds
+  // (310, 620) and scales by (1 + |-0.2|, 1 + |-0.5|) = (1.2, 1.5).
+  DlStretchImageFilter negative_filter(-0.2f, -0.5f, 0.7f, stretch_bounds);
+  sk_sp<SkImageFilter> sk_negative = ToSk(negative_filter);
+  ASSERT_NE(sk_negative, nullptr);
+  SkIRect negative_bounds = sk_negative->filterBounds(
+      SkIRect::MakeLTRB(10, 20, 310, 620), SkMatrix::I(),
+      SkImageFilter::kForward_MapDirection);
+  EXPECT_EQ(negative_bounds, SkIRect::MakeLTRB(-50, -280, 310, 620));
+
+  // Empty bounds or zero overscroll returns nullptr.
+  DlStretchImageFilter empty_bounds_filter(0.2f, 0.5f, 0.7f, DlRect());
+  EXPECT_EQ(ToSk(empty_bounds_filter), nullptr);
+  DlStretchImageFilter zero_overscroll_filter(0.0f, 0.0f, 0.7f, stretch_bounds);
+  EXPECT_EQ(ToSk(zero_overscroll_filter), nullptr);
+}
+
 }  // namespace testing
 }  // namespace flutter

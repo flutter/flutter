@@ -13,5 +13,6 @@
 #include "flutter/display_list/effects/image_filters/dl_local_matrix_image_filter.h"
 #include "flutter/display_list/effects/image_filters/dl_matrix_image_filter.h"
 #include "flutter/display_list/effects/image_filters/dl_runtime_effect_image_filter.h"
+#include "flutter/display_list/effects/image_filters/dl_stretch_image_filter.h"
 
 #endif  // FLUTTER_DISPLAY_LIST_EFFECTS_DL_IMAGE_FILTERS_H_

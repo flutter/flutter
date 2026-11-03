@@ -21,6 +21,7 @@
 #include "impeller/entity/contents/filters/matrix_filter_contents.h"
 #include "impeller/entity/contents/filters/morphology_filter_contents.h"
 #include "impeller/entity/contents/filters/runtime_effect_filter_contents.h"
+#include "impeller/entity/contents/filters/stretch_filter_contents.h"
 #include "impeller/entity/contents/filters/yuv_to_rgb_filter_contents.h"
 #include "impeller/entity/contents/texture_contents.h"
 #include "impeller/entity/entity.h"
@@ -114,6 +115,20 @@ std::shared_ptr<FilterContents> FilterContents::MakeRuntimeEffect(
   filter->SetRuntimeStage(std::move(runtime_stage));
   filter->SetUniforms(std::move(uniforms));
   filter->SetTextureInputs(std::move(texture_inputs));
+  return filter;
+}
+
+std::shared_ptr<FilterContents> FilterContents::MakeStretch(
+    FilterInput::Ref input,
+    Scalar overscroll_x,
+    Scalar overscroll_y,
+    Scalar interpolation_strength,
+    const Rect& stretch_bounds) {
+  auto filter = std::make_shared<impeller::StretchFilterContents>();
+  filter->SetInputs({std::move(input)});
+  filter->SetOverscroll(overscroll_x, overscroll_y);
+  filter->SetInterpolationStrength(interpolation_strength);
+  filter->SetStretchBounds(stretch_bounds);
   return filter;
 }
 

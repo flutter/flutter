@@ -10,9 +10,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
-import 'basic.dart';
 import 'framework.dart';
-import 'image_filter.dart';
 
 /// A widget that applies a stretching visual effect to its child.
 ///
@@ -73,60 +71,23 @@ class StretchEffect extends StatelessWidget {
   /// The child widget that the stretching overscroll effect applies to.
   final Widget child;
 
-  AlignmentGeometry _getAlignment(TextDirection direction) {
-    final bool isForward = stretchStrength > 0;
-
-    if (axis == Axis.vertical) {
-      return isForward ? AlignmentDirectional.topCenter : AlignmentDirectional.bottomCenter;
-    }
-
-    // RTL horizontal.
-    if (direction == TextDirection.rtl) {
-      return isForward ? AlignmentDirectional.centerEnd : AlignmentDirectional.centerStart;
-    } else {
-      return isForward ? AlignmentDirectional.centerStart : AlignmentDirectional.centerEnd;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
-    if (ui.ImageFilter.isShaderFilterSupported) {
-      return _StretchOverscrollEffect(stretchStrength: stretchStrength, axis: axis, child: child);
-    }
-
-    final TextDirection textDirection = Directionality.of(context);
-    var x = 1.0;
-    var y = 1.0;
-
-    switch (axis) {
-      case Axis.horizontal:
-        x += stretchStrength.abs();
-      case Axis.vertical:
-        y += stretchStrength.abs();
-    }
-
-    return Transform(
-      alignment: _getAlignment(textDirection),
-      transform: Matrix4.diagonal3Values(x, y, 1.0),
-      filterQuality: stretchStrength == 0 ? null : FilterQuality.medium,
-      child: child,
-    );
+    return _StretchOverscrollEffect(stretchStrength: stretchStrength, axis: axis, child: child);
   }
 }
 
-/// A widget that replicates the native Android stretch overscroll effect.
+/// A widget that applies an overscroll stretch effect using [ui.ImageFilter.stretch].
 ///
 /// This widget is used in the [StretchEffect] widget and creates
 /// a stretch visual feedback when the user overscrolls at the edges.
-///
-/// Only supported when using the Impeller rendering engine.
-class _StretchOverscrollEffect extends StatefulWidget {
+class _StretchOverscrollEffect extends SingleChildRenderObjectWidget {
   /// Creates a [_StretchOverscrollEffect] widget that applies a stretch
   /// effect when the user overscrolls horizontally or vertically.
   const _StretchOverscrollEffect({
     this.stretchStrength = 0.0,
     required this.axis,
-    required this.child,
+    required super.child,
   }) : assert(
          stretchStrength >= -1.0 && stretchStrength <= 1.0,
          'stretchStrength must be between -1.0 and 1.0',
@@ -135,7 +96,7 @@ class _StretchOverscrollEffect extends StatefulWidget {
   /// The overscroll strength applied for the stretching effect.
   ///
   /// The value should be between -1.0 and 1.0 inclusive.
-  /// For horizontal axis, Positive values apply a pull from
+  /// For horizontal axis, positive values apply a pull from
   /// left to right, while negative values pull from right to left.
   final double stretchStrength;
 
@@ -144,113 +105,90 @@ class _StretchOverscrollEffect extends StatefulWidget {
   /// Determines the direction of the stretch, either horizontal or vertical.
   final Axis axis;
 
-  /// The child widget that the stretching overscroll effect applies to.
-  final Widget child;
+  @override
+  RenderObject createRenderObject(BuildContext context) {
+    return _RenderStretchOverscrollEffect(
+      stretchStrength: stretchStrength,
+      axis: axis,
+    );
+  }
 
   @override
-  State<_StretchOverscrollEffect> createState() => _StretchOverscrollEffectState();
+  void updateRenderObject(BuildContext context, RenderObject renderObject) {
+    (renderObject as _RenderStretchOverscrollEffect)
+      ..stretchStrength = stretchStrength
+      ..axis = axis;
+  }
 }
 
-class _StretchOverscrollEffectState extends State<_StretchOverscrollEffect> {
-  ui.FragmentShader? _fragmentShader;
-
-  /// The maximum scale multiplier applied during a stretch effect.
-  static const double maxStretchIntensity = 1.0;
+class _RenderStretchOverscrollEffect extends RenderProxyBox {
+  _RenderStretchOverscrollEffect({
+    required double stretchStrength,
+    required Axis axis,
+  }) : _stretchStrength = stretchStrength,
+       _axis = axis;
 
   /// The strength of the interpolation used for smoothing the effect.
   static const double interpolationStrength = 0.7;
 
-  /// A no-op [ui.ImageFilter] that uses the identity matrix.
-  static final ui.ImageFilter _emptyFilter = ui.ImageFilter.matrix(Matrix4.identity().storage);
+  Size? _previousSize;
 
-  @override
-  void dispose() {
-    _fragmentShader?.dispose();
-    super.dispose();
+  bool get _isStretchNeeded => _stretchStrength.abs() > precisionErrorTolerance;
+
+  double get stretchStrength => _stretchStrength;
+  double _stretchStrength;
+  set stretchStrength(double value) {
+    if (value == _stretchStrength) {
+      return;
+    }
+    final bool wasRepaintBoundary = isRepaintBoundary;
+    _stretchStrength = value;
+    if (isRepaintBoundary != wasRepaintBoundary) {
+      markNeedsCompositingBitsUpdate();
+      markNeedsPaint();
+    } else if (_isStretchNeeded) {
+      markNeedsCompositedLayerUpdate();
+    }
+  }
+
+  Axis get axis => _axis;
+  Axis _axis;
+  set axis(Axis value) {
+    if (value == _axis) {
+      return;
+    }
+    _axis = value;
+    if (_isStretchNeeded) {
+      markNeedsCompositedLayerUpdate();
+    }
   }
 
   @override
-  void initState() {
-    super.initState();
-    _StretchEffectShader.initializeShader();
-  }
+  bool get alwaysNeedsCompositing => child != null && _isStretchNeeded;
 
   @override
-  Widget build(BuildContext context) {
-    final bool isShaderNeeded = widget.stretchStrength.abs() > precisionErrorTolerance;
+  bool get isRepaintBoundary => alwaysNeedsCompositing;
 
-    final ui.ImageFilter imageFilter;
-
-    if (_StretchEffectShader._initialized) {
-      _fragmentShader?.dispose();
-      _fragmentShader = _StretchEffectShader._program!.fragmentShader();
-      _fragmentShader!.setFloat(2, maxStretchIntensity);
-      if (widget.axis == Axis.vertical) {
-        _fragmentShader!.setFloat(3, 0.0);
-        _fragmentShader!.setFloat(4, widget.stretchStrength);
-      } else {
-        _fragmentShader!.setFloat(3, widget.stretchStrength);
-        _fragmentShader!.setFloat(4, 0.0);
+  @override
+  void performLayout() {
+    super.performLayout();
+    if (_previousSize != size) {
+      _previousSize = size;
+      if (_isStretchNeeded) {
+        markNeedsCompositedLayerUpdate();
       }
-      _fragmentShader!.setFloat(5, interpolationStrength);
-
-      imageFilter = ui.ImageFilter.shader(_fragmentShader!);
-    } else {
-      _fragmentShader?.dispose();
-      _fragmentShader = null;
-
-      imageFilter = _emptyFilter;
     }
+  }
 
-    return ImageFiltered(
-      imageFilter: imageFilter,
-      enabled: isShaderNeeded,
-      // A nearly-transparent pixels is used to ensure the shader gets applied,
-      // even when the child is visually transparent or has no paint operations.
-      child: CustomPaint(
-        painter: isShaderNeeded ? _StretchEffectPainter() : null,
-        child: widget.child,
-      ),
+  @override
+  OffsetLayer updateCompositedLayer({required covariant ImageFilterLayer? oldLayer}) {
+    final ImageFilterLayer layer = oldLayer ?? ImageFilterLayer();
+    layer.imageFilter = ui.ImageFilter.stretch(
+      overscrollX: _axis == Axis.horizontal ? _stretchStrength : 0.0,
+      overscrollY: _axis == Axis.vertical ? _stretchStrength : 0.0,
+      interpolationStrength: interpolationStrength,
+      bounds: Offset.zero & size,
     );
-  }
-}
-
-/// A [CustomPainter] that draws nearly transparent pixels at the four corners.
-///
-/// This ensures the fragment shader covers the entire canvas by forcing
-/// painting operations on all edges, preventing shader optimization skips.
-class _StretchEffectPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = const Color.fromARGB(1, 0, 0, 0)
-      ..style = PaintingStyle.fill;
-
-    canvas.drawPoints(ui.PointMode.points, <Offset>[
-      Offset.zero,
-      Offset(size.width - 1, 0),
-      Offset(0, size.height - 1),
-      Offset(size.width - 1, size.height - 1),
-    ], paint);
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}
-
-class _StretchEffectShader {
-  static bool _initCalled = false;
-  static bool _initialized = false;
-  static ui.FragmentProgram? _program;
-
-  static void initializeShader() {
-    if (!_initCalled) {
-      ui.FragmentProgram.fromAsset('shaders/stretch_effect.frag')
-          .then((ui.FragmentProgram program) {
-            _program = program;
-            _initialized = true;
-          });
-      _initCalled = true;
-    }
+    return layer;
   }
 }

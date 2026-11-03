@@ -4,6 +4,10 @@
 
 #include "flutter/flow/embedded_views.h"
 
+#include <algorithm>
+
+#include "flutter/display_list/effects/image_filters/dl_stretch_image_filter.h"
+
 namespace flutter {
 
 DisplayListEmbedderViewSlice::DisplayListEmbedderViewSlice(DlRect view_bounds) {
@@ -118,6 +122,16 @@ void MutatorsStack::PushPlatformViewClipPath(const DlPath& path) {
   vector_.push_back(element);
 }
 
+void MutatorsStack::PushStretchEffect(DlScalar overscroll_x,
+                                      DlScalar overscroll_y,
+                                      DlScalar interpolation_strength,
+                                      const DlRect& stretch_rect) {
+  std::shared_ptr<Mutator> element =
+      std::make_shared<Mutator>(StretchEffectMutation(
+          overscroll_x, overscroll_y, interpolation_strength, stretch_rect));
+  vector_.push_back(element);
+}
+
 void MutatorsStack::Pop() {
   vector_.pop_back();
 }
@@ -146,6 +160,26 @@ MutatorsStack::Begin() const {
 const std::vector<std::shared_ptr<Mutator>>::const_iterator MutatorsStack::End()
     const {
   return vector_.end();
+}
+
+DlRect EmbeddedViewParams::mappedBoundingRect() const {
+  DlRect rect = final_bounding_rect_;
+  // Iterate from innermost (Bottom/rbegin) to outermost (Top/rend) so nested
+  // stretch mutations compose in child-to-parent order.
+  for (auto it = mutators_stack_.Bottom(); it != mutators_stack_.Top(); ++it) {
+    const auto& mutator = *it;
+    if (mutator->GetType() == MutatorType::kStretchEffect) {
+      const auto& stretch = mutator->GetStretchEffectMutation();
+      rect = DlStretchImageFilter::MapRect(
+          rect, stretch.stretch_rect, stretch.overscroll_x,
+          stretch.overscroll_y, stretch.interpolation_strength);
+    }
+  }
+  return rect;
+}
+
+DlRect EmbeddedViewParams::stretchedBoundingRect() const {
+  return final_bounding_rect_.Union(mappedBoundingRect());
 }
 
 }  // namespace flutter

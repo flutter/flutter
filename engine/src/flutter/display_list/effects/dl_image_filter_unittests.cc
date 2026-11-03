@@ -1024,5 +1024,114 @@ TEST(DisplayListImageFilter, RuntimeEffectModifiesTransparentBlack) {
   EXPECT_FALSE(filter_a.modifies_transparent_black());
 }
 
+TEST(DisplayListImageFilter, StretchConstructor) {
+  DlStretchImageFilter filter(0.1f, -0.2f, 0.7f,
+                              DlRect::MakeLTRB(10, 20, 310, 620));
+  EXPECT_EQ(filter.type(), DlImageFilterType::kStretch);
+  EXPECT_NE(filter.asStretch(), nullptr);
+  EXPECT_FLOAT_EQ(filter.overscroll_x(), 0.1f);
+  EXPECT_FLOAT_EQ(filter.overscroll_y(), -0.2f);
+  EXPECT_FLOAT_EQ(filter.interpolation_strength(), 0.7f);
+  EXPECT_EQ(filter.stretch_bounds(), DlRect::MakeLTRB(10, 20, 310, 620));
+  EXPECT_FALSE(filter.modifies_transparent_black());
+}
+
+TEST(DisplayListImageFilter, StretchSharedMakeReturnsNullWhenInactive) {
+  EXPECT_EQ(DlImageFilter::MakeStretch(0.0f, 0.0f, 0.7f,
+                                       DlRect::MakeLTRB(0, 0, 300, 600)),
+            nullptr);
+  auto active = DlImageFilter::MakeStretch(0.0f, 0.25f, 0.7f,
+                                           DlRect::MakeLTRB(0, 0, 300, 600));
+  ASSERT_NE(active, nullptr);
+  ASSERT_NE(active->asStretch(), nullptr);
+  EXPECT_FLOAT_EQ(active->asStretch()->overscroll_y(), 0.25f);
+}
+
+TEST(DisplayListImageFilter, StretchEquality) {
+  DlStretchImageFilter filter_a(0.1f, 0.2f, 0.7f,
+                                DlRect::MakeLTRB(0, 0, 300, 600));
+  DlStretchImageFilter filter_b(0.1f, 0.2f, 0.7f,
+                                DlRect::MakeLTRB(0, 0, 300, 600));
+  DlStretchImageFilter filter_c(0.1f, 0.3f, 0.7f,
+                                DlRect::MakeLTRB(0, 0, 300, 600));
+  DlStretchImageFilter filter_d(0.1f, 0.2f, 0.7f,
+                                DlRect::MakeLTRB(0, 0, 300, 500));
+  // Small overscroll increments (< 1e-3f) during drag start/settle must compare
+  // unequal so ImageFilterLayer::Diff marks the layer dirty.
+  DlStretchImageFilter filter_small_delta(0.1f, 0.20005f, 0.7f,
+                                          DlRect::MakeLTRB(0, 0, 300, 600));
+
+  EXPECT_EQ(filter_a, filter_b);
+  EXPECT_NE(filter_a, filter_c);
+  EXPECT_NE(filter_a, filter_d);
+  EXPECT_NE(filter_a, filter_small_delta);
+  TestEquals(filter_a, filter_b);
+  TestNotEquals(filter_a, filter_c, "Different overscroll_y");
+  TestNotEquals(filter_a, filter_d, "Different stretch_bounds");
+  TestNotEquals(filter_a, filter_small_delta, "Small overscroll_y delta");
+}
+
+TEST(DisplayListImageFilter, StretchBoundsCalculations) {
+  const DlRect stretch_bounds = DlRect::MakeLTRB(0, 0, 300, 600);
+  DlStretchImageFilter filter(0.0f, 0.2f, 0.7f, stretch_bounds);
+
+  // When stretch_bounds is non-empty, local and device bounds expand to
+  // include the full stretch container (as well as its matrix-scaled bounds)
+  // so multi-slice SaveLayers preserve the viewport coordinate space and
+  // enclose Skia's MatrixTransform approximation.
+  const DlRect slice_local = DlRect::MakeLTRB(0, 400, 300, 600);
+  DlRect mapped_local;
+  EXPECT_EQ(filter.map_local_bounds(slice_local, mapped_local), &mapped_local);
+  EXPECT_EQ(mapped_local, DlRect::MakeLTRB(0, 0, 300, 720));
+
+  const DlMatrix ctm = DlMatrix::MakeScale({2.0f, 2.0f, 1.0f});
+  const DlIRect slice_device = DlIRect::MakeLTRB(0, 800, 600, 1200);
+  DlIRect mapped_device;
+  EXPECT_EQ(filter.map_device_bounds(slice_device, ctm, mapped_device),
+            &mapped_device);
+  EXPECT_EQ(mapped_device, DlIRect::MakeLTRB(0, 0, 600, 1440));
+
+  DlIRect input_device;
+  EXPECT_EQ(filter.get_input_device_bounds(slice_device, ctm, input_device),
+            &input_device);
+  EXPECT_EQ(input_device, DlIRect::MakeLTRB(0, 0, 600, 1200));
+
+  // Edges outside stretch_bounds (norm < 0 or norm > 1) remain at identity,
+  // while edges inside stretch_bounds are stretched.
+  const DlRect overflowing_rect = DlRect::MakeLTRB(-20, -40, 150, 300);
+  const DlRect mapped_overflow = DlStretchImageFilter::MapRect(
+      overflowing_rect, stretch_bounds, 0.2f, 0.3f, 0.7f);
+  EXPECT_FLOAT_EQ(mapped_overflow.GetLeft(), -20.0f);
+  EXPECT_FLOAT_EQ(mapped_overflow.GetTop(), -40.0f);
+  EXPECT_FLOAT_EQ(mapped_overflow.GetRight(),
+                  DlStretchImageFilter::ComputeStretchedNormalizedPosition(
+                      0.5f, 0.2f, 0.7f) *
+                      300.0f);
+  EXPECT_FLOAT_EQ(mapped_overflow.GetBottom(),
+                  DlStretchImageFilter::ComputeStretchedNormalizedPosition(
+                      0.5f, 0.3f, 0.7f) *
+                      600.0f);
+}
+
+TEST(DisplayListImageFilter,
+     StretchSaveLayerPreservesStretchBoundsForSlicedContent) {
+  const DlRect stretch_bounds = DlRect::MakeLTRB(0, 0, 300, 600);
+  auto filter = DlImageFilter::MakeStretch(0.0f, 0.2f, 0.7f, stretch_bounds);
+  ASSERT_NE(filter, nullptr);
+
+  DlPaint save_paint;
+  save_paint.setImageFilter(filter);
+
+  DisplayListBuilder builder;
+  builder.SaveLayer(stretch_bounds, &save_paint);
+  // Draw only a post-PlatformView slice in the bottom third of the viewport.
+  builder.DrawRect(DlRect::MakeLTRB(0, 400, 300, 600), DlPaint());
+  builder.Restore();
+
+  auto display_list = builder.Build();
+  EXPECT_TRUE(display_list->GetBounds().Contains(stretch_bounds));
+  EXPECT_EQ(display_list->GetBounds(), DlRect::MakeLTRB(0, 0, 300, 720));
+}
+
 }  // namespace testing
 }  // namespace flutter

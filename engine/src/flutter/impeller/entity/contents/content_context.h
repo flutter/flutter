@@ -190,6 +190,7 @@ class ContentContext {
   PipelineRef GetRSuperellipseBlurPipeline(ContentContextOptions opts) const;
   PipelineRef GetSolidFillPipeline(ContentContextOptions opts) const;
   PipelineRef GetSrgbToLinearFilterPipeline(ContentContextOptions opts) const;
+  PipelineRef GetStretchFilterPipeline(ContentContextOptions opts) const;
   PipelineRef GetSweepGradientFillPipeline(ContentContextOptions opts) const;
   PipelineRef GetSweepGradientSSBOFillPipeline( ContentContextOptions opts) const;
   PipelineRef GetSweepGradientUniformFillPipeline(ContentContextOptions opts) const;

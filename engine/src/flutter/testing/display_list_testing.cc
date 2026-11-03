@@ -627,6 +627,15 @@ void DisplayListStreamDispatcher::out(const DlImageFilter& filter) {
       os_ << runtime_effect->uniform_data()->size() << " uniform bytes)";
       break;
     }
+    case DlImageFilterType::kStretch: {
+      const DlStretchImageFilter* stretch = filter.asStretch();
+      FML_DCHECK(stretch);
+      os_ << "DlStretchImageFilter(" << stretch->overscroll_x() << ", "
+          << stretch->overscroll_y() << ", "
+          << stretch->interpolation_strength() << ", "
+          << stretch->stretch_bounds() << ")";
+      break;
+    }
   }
 }
 void DisplayListStreamDispatcher::out(const DlImageFilter* filter) {

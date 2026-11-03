@@ -51,6 +51,7 @@
 #include "impeller/entity/solid_fill.frag.h"
 #include "impeller/entity/solid_fill.vert.h"
 #include "impeller/entity/srgb_to_linear_filter.frag.h"
+#include "impeller/entity/stretch_filter.frag.h"
 #include "impeller/entity/sweep_gradient_fill.frag.h"
 #include "impeller/entity/sweep_gradient_ssbo_fill.frag.h"
 #include "impeller/entity/sweep_gradient_uniform_fill.frag.h"
@@ -148,6 +149,7 @@ using RSuperellipseBlurPipeline = RenderPipelineHandle<RrectLikeBlurVertexShader
 using ShadowVerticesShader = RenderPipelineHandle<ShadowVerticesVertexShader, ShadowVerticesFragmentShader>;
 using SolidFillPipeline = RenderPipelineHandle<SolidFillVertexShader, SolidFillFragmentShader>;
 using SrgbToLinearFilterPipeline = RenderPipelineHandle<FilterPositionVertexShader, SrgbToLinearFilterFragmentShader>;
+using StretchFilterPipeline = RenderPipelineHandle<FilterPositionVertexShader, StretchFilterFragmentShader>;
 using SweepGradientFillPipeline = GradientPipelineHandle<SweepGradientFillFragmentShader>;
 using SweepGradientSSBOFillPipeline = GradientPipelineHandle<SweepGradientSsboFillFragmentShader>;
 using SweepGradientUniformFillPipeline = GradientPipelineHandle<SweepGradientUniformFillFragmentShader>;

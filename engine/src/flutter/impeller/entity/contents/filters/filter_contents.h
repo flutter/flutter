@@ -81,6 +81,13 @@ class FilterContents : public Contents {
       std::shared_ptr<std::vector<uint8_t>> uniforms,
       std::vector<RuntimeEffectContents::TextureInput> texture_inputs);
 
+  static std::shared_ptr<FilterContents> MakeStretch(
+      FilterInput::Ref input,
+      Scalar overscroll_x,
+      Scalar overscroll_y,
+      Scalar interpolation_strength,
+      const Rect& stretch_bounds);
+
   FilterContents();
 
   ~FilterContents() override;

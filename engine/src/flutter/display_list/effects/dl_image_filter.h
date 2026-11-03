@@ -32,6 +32,7 @@ enum class DlImageFilterType {
   kColorFilter,
   kCompose,
   kLocalMatrix,
+  kStretch,
 };
 
 class DlBlurImageFilter;
@@ -42,6 +43,7 @@ class DlRuntimeEffectImageFilter;
 class DlColorFilterImageFilter;
 class DlComposeImageFilter;
 class DlLocalMatrixImageFilter;
+class DlStretchImageFilter;
 
 class DlImageFilter : public DlAttribute<DlImageFilter, DlImageFilterType> {
  public:
@@ -76,6 +78,12 @@ class DlImageFilter : public DlAttribute<DlImageFilter, DlImageFilterType> {
   static std::shared_ptr<DlImageFilter> MakeCompose(
       const std::shared_ptr<DlImageFilter>& outer,
       const std::shared_ptr<DlImageFilter>& inner);
+
+  static std::shared_ptr<DlImageFilter> MakeStretch(
+      DlScalar overscroll_x,
+      DlScalar overscroll_y,
+      DlScalar interpolation_strength = 0.7f,
+      const DlRect& stretch_bounds = DlRect());
 
   // Return a DlBlurImageFilter pointer to this object iff it is a Blur
   // type of ImageFilter, otherwise return nullptr.
@@ -115,6 +123,10 @@ class DlImageFilter : public DlAttribute<DlImageFilter, DlImageFilterType> {
   virtual const DlRuntimeEffectImageFilter* asRuntimeEffectFilter() const {
     return nullptr;
   }
+
+  // Return a DlStretchImageFilter pointer to this object iff it is a Stretch
+  // type of ImageFilter, otherwise return nullptr.
+  virtual const DlStretchImageFilter* asStretch() const { return nullptr; }
 
   // Return a boolean indicating whether the image filtering operation will
   // modify transparent black. This is typically used to determine if applying
