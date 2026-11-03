@@ -311,7 +311,7 @@ if (enable_unittests) {
     }
 
     if (impeller_enable_opengles) {
-      sources += [ "compositing/scene_impeller_gles_unittests.cc" ]
+      sources += [ "impeller_gles_without_surface_unittests.cc" ]
 
       deps += [
         "//flutter/impeller/entity:entity_shaders",
