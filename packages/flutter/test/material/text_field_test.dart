@@ -6,10 +6,12 @@
 //   This file is run as part of a reduced test set in CI on Mac and Windows
 //   machines.
 // no-shuffle:
-// TODO(122950): Remove this tag once this test's state leaks/test
-// dependencies have been fixed.
-// https://github.com/flutter/flutter/issues/122950
-// Fails with "flutter test --test-randomize-ordering-seed=20230318"
+//   Reverts https://github.com/flutter/flutter/pull/193550 on the 3.50 release
+//   branch because Theme._kFallbackTheme caches the first test variant's
+//   defaultTargetPlatform (https://github.com/flutter/flutter/issues/194008,
+//   fixed on master after the 3.50 branch cut in
+//   https://github.com/flutter/flutter/pull/194256), breaking theme-less
+//   TextField tests under shuffled seeds such as 20261103.
 @Tags(<String>['reduced-test-set', 'no-shuffle'])
 library;
 
