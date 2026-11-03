@@ -144,7 +144,7 @@ void main() {
             null,
             outputPath: '/build/',
             packageConfig: PackageConfig.empty,
-            fs: MemoryFileSystem(),
+            fs: MemoryFileSystem.test(),
             projectRootPath: '',
           ),
         ),
@@ -152,6 +152,60 @@ void main() {
           message: 'Unable to find dartaotruntime binary at Artifact.engineDartAotRuntime',
         ),
       );
+      expect(fakeProcessManager, hasNoRemainingExpectations);
+    },
+  );
+
+  testWithoutContext(
+    'incremental compile runs the frontend server from source with the Dart binary '
+    'when frontendServerStarterPath is provided',
+    () async {
+      // The starter script is run with dart, so dartaotruntime is not required.
+      fakeProcessManager.excludedExecutables.add('Artifact.engineDartAotRuntime');
+      fakeProcessManager.addCommand(
+        FakeCommand(
+          command: <String>[
+            'Artifact.engineDartBinary',
+            '/path/to/frontend_server_starter.dart',
+            ...frontendServerCommand.skip(2),
+            '--initialize-from-dill',
+            expectedCachePath,
+            '--verbosity=error',
+          ],
+          stdout: 'result abc\nline1\nline2\nabc\nabc /path/to/main.dart.dill 0',
+          stdin: frontendServerStdIn,
+        ),
+      );
+      final generatorWithStarter = DefaultResidentCompiler(
+        'sdkroot',
+        buildInfo: const BuildInfo(
+          BuildMode.debug,
+          null,
+          trackWidgetCreation: true,
+          treeShakeIcons: false,
+          packageConfigPath: '.dart_tool/package_config.json',
+          frontendServerStarterPath: '/path/to/frontend_server_starter.dart',
+        ),
+        logger: testLogger,
+        processManager: fakeProcessManager,
+        artifacts: Artifacts.test(),
+        platform: FakePlatform(),
+        fileSystem: MemoryFileSystem.test(),
+        stdoutHandler: generatorStdoutHandler,
+        shutdownHooks: FakeShutdownHooks(),
+        config: Config.test(),
+      );
+
+      final CompilerOutput? output = await generatorWithStarter.recompile(
+        Uri.parse('/path/to/main.dart'),
+        null,
+        outputPath: '/build/',
+        packageConfig: PackageConfig.empty,
+        fs: MemoryFileSystem.test(),
+        projectRootPath: '',
+      );
+      expect(frontendServerStdIn.getAndClear(), 'compile /path/to/main.dart\n');
+      expect(output?.outputFilename, equals('/path/to/main.dart.dill'));
       expect(fakeProcessManager, hasNoRemainingExpectations);
     },
   );
