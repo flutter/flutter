@@ -1157,12 +1157,12 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   /// meaningfully.
   ///
   /// To limit the cost of a rebuild, keep the [State] that calls [setState] as
-  /// close to the widgets that actually change as possible, rather than at the
+  /// close as possible to the widgets that actually change, rather than at the
   /// top of a large subtree. When the changing state lives in a [Listenable]
-  /// (such as a [ChangeNotifier], a [ValueNotifier], or an [Animation]), a
+  /// (such as a [ChangeNotifier], an [Animation], or a [ValueNotifier]), a
   /// [ListenableBuilder], an [AnimatedBuilder], or a [ValueListenableBuilder]
-  /// can rebuild only the part of the subtree that depends on it, without
-  /// requiring a listener that calls [setState] in a higher-level [State].
+  /// can rebuild only the part of the subtree that depends on it, without a
+  /// [setState] call in the enclosing [State].
   ///
   /// See also:
   ///
@@ -1170,7 +1170,8 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   ///    performance considerations that are relevant here.
   ///  * [ListenableBuilder], [AnimatedBuilder], and [ValueListenableBuilder],
   ///    which rebuild a part of the widget tree when a [Listenable] notifies
-  ///    its listeners, without needing a [setState] call.
+  ///    its listeners, so the enclosing [State] does not need to call
+  ///    [setState].
   @protected
   void setState(VoidCallback fn) {
     assert(() {
