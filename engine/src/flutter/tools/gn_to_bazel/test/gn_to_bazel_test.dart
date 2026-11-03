@@ -9193,6 +9193,70 @@ test_suite(
       expect(runTestsEngineSuitesMac, isNot(contains('txt_unittests')));
     });
 
+    test(
+      "run_tests.py's Vulkan synchronization validation list is read into impeller's appendix",
+      () {
+        // The parser: one quoted string per line, comments and commented-out
+        // entries skipped, order kept; an unclosed or non-string list refused.
+        const script = '''
+# A list.
+VULKAN_SYNC_VALIDATION_TESTS = [
+    # Blits.
+    'Play/BlitPassTest.CanResizeTextures/Vulkan',
+    ## TODO: barrier.
+    # 'Play/RendererTest.CanBlitTextureToBuffer/Vulkan',
+    'Compute/ComputeTest.MultiStageInputAndOutput/Vulkan',  # compute
+    'Play/TypographerTest.GlyphAtlasTextureWillGrowTilMaxTextureSize/Vulkan'
+]
+
+OTHER = [
+    42,
+]
+''';
+        expect(vulkanSyncValidationTests(script), <String>[
+          'Play/BlitPassTest.CanResizeTextures/Vulkan',
+          'Compute/ComputeTest.MultiStageInputAndOutput/Vulkan',
+          'Play/TypographerTest.GlyphAtlasTextureWillGrowTilMaxTextureSize/Vulkan',
+        ]);
+        expect(() => runTestsStringList(script, 'OTHER'), throwsFormatException);
+        expect(() => runTestsStringList(script, 'MISSING'), throwsFormatException);
+        expect(() => runTestsStringList("X = [\n  'a',\n", 'X'), throwsFormatException);
+        // The appendix, from a tree whose run_tests.py is the script above.
+        final Directory root = Directory.systemTemp.createTempSync('run_tests_lists');
+        addTearDown(() => root.deleteSync(recursive: true));
+        File(p.join(root.path, '.gn'))
+            .writeAsStringSync('buildconfig = "//build/config/BUILDCONFIG.gn"\n');
+        File(p.join(root.path, runTestsScript))
+          ..createSync(recursive: true)
+          ..writeAsStringSync(script);
+        final String appendix = impellerAppendix(GnSourceTree(root.path, gnBinary: 'gn'));
+        expect(
+          appendix,
+          startsWith('load("//build_defs/testing:testing.bzl", "flutter_display_test_variant")\n'),
+        );
+        expect(appendix, contains('name = "impeller_vulkan_sync_validation_unittests",'));
+        expect(
+          appendix,
+          contains(
+            '"--gtest_filter=Play/BlitPassTest.CanResizeTextures/Vulkan:'
+            'Compute/ComputeTest.MultiStageInputAndOutput/Vulkan:'
+            'Play/TypographerTest.GlyphAtlasTextureWillGrowTilMaxTextureSize/Vulkan",',
+          ),
+        );
+        expect(appendix, contains('"--enable_vulkan_sync_validation",'));
+        expect(appendix, contains('test = ":impeller_unittests",'));
+        // The checkout's own script has the list, and the type names the variant.
+        final String real = File(
+          p.join(Directory.current.path, '..', '..', 'testing', 'run_tests.py'),
+        ).readAsStringSync();
+        expect(vulkanSyncValidationTests(real), isNotEmpty);
+        expect(real, contains("if 'impeller-vulkan-sync-validation' in types:"));
+        expect(runTestsTypeSuites['impeller-vulkan-sync-validation'], <String>[
+          '//engine/src/flutter/impeller:impeller_vulkan_sync_validation_unittests',
+        ]);
+      },
+    );
+
     test("the Mac's builds: a platform each, their names kept or prefixed", () {
       final Map<String, BuilderConfig> loaded = configs(<String, String>{
         'linux_host_engine.json':
@@ -9463,7 +9527,7 @@ flutter_dart_tests(
           evaluation,
           gnPackage: file.gnPackage,
           skipTargets: file.skip.keys.toSet(),
-          appendix: file.appendix,
+          appendix: file.appendix ?? file.appendixFrom?.call(tree),
           layout: mainRepositoryLayout,
           implicitDeps: file.implicitDeps,
           tree: tree,
