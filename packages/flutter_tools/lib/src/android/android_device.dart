@@ -826,8 +826,7 @@ class AndroidDevice extends Device {
 
   @override
   Future<void> dispose() async {
-    _logReader?._stop();
-    _pastLogReader?._stop();
+    await Future.wait(<Future<void>>[?_logReader?.dispose(), ?_pastLogReader?.dispose()]);
   }
 }
 
@@ -1205,14 +1204,15 @@ class AdbLogReader extends DeviceLogReader {
     }
   }
 
-  void _stop() {
-    _linesController.close();
+  Future<void> _stop() async {
+    final Future<void> closed = _linesController.close();
     _adbProcess.kill();
+    await closed;
   }
 
   @override
-  void dispose() {
-    _stop();
+  Future<void> dispose() async {
+    await _stop();
   }
 }
 
