@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:crypto/crypto.dart';
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
@@ -10,6 +11,8 @@ import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
+import '../build_system/depfile.dart';
+import '../convert.dart';
 import 'project_extension_finder.dart';
 
 /// Signature for compiling a [DiscoveredProjectExtension] to a runnable Kernel (`.dill`) URI.
@@ -36,15 +39,28 @@ class ExtensionKernelCompiler {
     required this._logger,
     required this._platform,
     required this._processManager,
-  });
+  }) : _depfileService = DepfileService(fileSystem: _fileSystem, logger: _logger);
 
-  /// Environment variable overriding the shared Dart data directory.
+  /// Environment variable overriding the shared Dart data directory
+  /// (per `package:dart_data_home`).
   static const String kDartDataHomeEnv = 'DART_DATA_HOME';
 
   /// Environment variable overriding the Pub cache directory.
   static const String kPubCacheEnv = 'PUB_CACHE';
 
+  static const String _kLocalAppDataEnv = 'LOCALAPPDATA';
+  static const String _kHomeEnv = 'HOME';
+  static const String _kXdgStateHomeEnv = 'XDG_STATE_HOME';
+  static const String _kDartDirectoryName = 'Dart';
+  static const String _kExtensionsDataDirectoryName = 'flutter_tool_extensions';
+  static const String _kCacheSubdirectoryName = 'cache';
+  static const String _kPubDirectoryName = 'Pub';
+  static const String _kPubCacheSubdirectoryName = 'Cache';
+  static const String _kPosixPubCacheDirectoryName = '.pub-cache';
+  static const String _kUnknownSdkVersion = 'unknown';
+
   final Artifacts _artifacts;
+  final DepfileService _depfileService;
   final FileSystem _fileSystem;
   final Directory _flutterRoot;
   final Logger _logger;
@@ -198,20 +214,22 @@ class ExtensionKernelCompiler {
         _fileSystem.path.equals(normalizedPubCache, rootPath);
   }
 
+  /// Resolves the Pub cache directory following `SystemCache.defaultDir` in
+  /// `package:pub` (`PUB_CACHE`, `%LOCALAPPDATA%\Pub\Cache` on Windows, or
+  /// `$HOME/.pub-cache` on POSIX).
   Directory? _resolvePubCacheDirectory() {
     if (_nonEmptyEnv(kPubCacheEnv) case final String pubCacheEnv) {
       return _fileSystem.directory(pubCacheEnv);
     }
     if (_platform.isWindows) {
-      final String? localAppData = _nonEmptyEnv('LOCALAPPDATA') ?? _nonEmptyEnv('APPDATA');
-      if (localAppData != null) {
-        return _fileSystem.directory(localAppData).childDirectory('Pub').childDirectory('Cache');
+      if (_nonEmptyEnv(_kLocalAppDataEnv) case final String localAppData) {
+        return _fileSystem
+            .directory(localAppData)
+            .childDirectory(_kPubDirectoryName)
+            .childDirectory(_kPubCacheSubdirectoryName);
       }
-    } else {
-      final String? home = _nonEmptyEnv('HOME');
-      if (home != null) {
-        return _fileSystem.directory(home).childDirectory('.pub-cache');
-      }
+    } else if (_nonEmptyEnv(_kHomeEnv) case final String home) {
+      return _fileSystem.directory(home).childDirectory(_kPosixPubCacheDirectoryName);
     }
     return null;
   }
@@ -240,30 +258,38 @@ class ExtensionKernelCompiler {
     return (localDill, false);
   }
 
+  /// Resolves the shared cache directory for compiled `.dill` files, matching
+  /// the directory layout of `getDartDataHome('flutter_tool_extensions')` from
+  /// `package:dart_data_home` and `BaseDirectories('Dart').stateHome` from
+  /// `package:cli_util` while using the injected [Platform] and [FileSystem].
   Directory? _resolveSharedCacheDirectory() {
+    Directory? baseDir;
     if (_nonEmptyEnv(kDartDataHomeEnv) case final String dartDataHome) {
-      return _fileSystem
-          .directory(dartDataHome)
-          .childDirectory('flutter_tool_extensions')
-          .childDirectory('cache');
-    }
-    if (_platform.isWindows) {
-      final String? localAppData = _nonEmptyEnv('LOCALAPPDATA') ?? _nonEmptyEnv('APPDATA');
-      if (localAppData != null) {
-        return _fileSystem
-            .directory(localAppData)
-            .childDirectory('flutter_tool_extensions')
-            .childDirectory('cache');
+      baseDir = _fileSystem.directory(dartDataHome);
+    } else if (_platform.isWindows) {
+      if (_nonEmptyEnv(_kLocalAppDataEnv) case final String localAppData) {
+        baseDir = _fileSystem.directory(localAppData).childDirectory(_kDartDirectoryName);
       }
-    }
-    final String? home = _nonEmptyEnv('HOME') ?? _nonEmptyEnv('USERPROFILE');
-    if (home != null) {
-      return _fileSystem
+    } else if (_platform.isMacOS) {
+      if (_nonEmptyEnv(_kHomeEnv) case final String home) {
+        baseDir = _fileSystem
+            .directory(home)
+            .childDirectory('Library')
+            .childDirectory('Application Support')
+            .childDirectory(_kDartDirectoryName);
+      }
+    } else if (_nonEmptyEnv(_kXdgStateHomeEnv) case final String xdgStateHome) {
+      baseDir = _fileSystem.directory(xdgStateHome).childDirectory(_kDartDirectoryName);
+    } else if (_nonEmptyEnv(_kHomeEnv) case final String home) {
+      baseDir = _fileSystem
           .directory(home)
-          .childDirectory('.flutter_tool_extensions')
-          .childDirectory('cache');
+          .childDirectory('.local')
+          .childDirectory('state')
+          .childDirectory(_kDartDirectoryName);
     }
-    return null;
+    return baseDir
+        ?.childDirectory(_kExtensionsDataDirectoryName)
+        .childDirectory(_kCacheSubdirectoryName);
   }
 
   String? _nonEmptyEnv(String key) {
@@ -275,20 +301,11 @@ class ExtensionKernelCompiler {
     final File versionFile = _resolveDartSdkVersionFile();
     final String sdkVersion = versionFile.existsSync()
         ? versionFile.readAsStringSync().trim()
-        : 'unknown';
+        : _kUnknownSdkVersion;
     final String rootPath = _fileSystem.directory(extension.rootUri).absolute.path;
-    final int combinedHash = _fnv1a32('$sdkVersion|$rootPath');
+    final combinedHash = sha256.convert(utf8.encode('$sdkVersion|$rootPath')).toString();
     final String sanitizedVersion = sdkVersion.replaceAll(RegExp(r'[^a-zA-Z0-9._-]'), '_');
-    return '$sanitizedVersion-${combinedHash.toRadixString(16).padLeft(8, '0')}';
-  }
-
-  static int _fnv1a32(String input) {
-    var hash = 0x811c9dc5;
-    for (final int unit in input.codeUnits) {
-      hash ^= unit;
-      hash = (hash * 0x01000193) & 0xffffffff;
-    }
-    return hash;
+    return '$sanitizedVersion-$combinedHash';
   }
 
   bool _needsRecompilation({
@@ -317,73 +334,18 @@ class ExtensionKernelCompiler {
       return true;
     }
 
-    final List<String> dependencies = parseDepfileDependencies(depFile.readAsStringSync());
-    if (dependencies.isEmpty) {
+    final Depfile depfile = _depfileService.parse(depFile);
+    if (depfile.inputs.isEmpty) {
       return true;
     }
 
-    for (final depPath in dependencies) {
-      final File sourceFile = _fileSystem.file(depPath);
+    for (final File sourceFile in depfile.inputs) {
       if (!sourceFile.existsSync() || sourceFile.lastModifiedSync().isAfter(dillModified)) {
         return true;
       }
     }
 
     return false;
-  }
-
-  /// Parses dependency file paths from a Makefile-style `.d` depfile emitted by
-  /// `dart compile kernel --depfile`.
-  @visibleForTesting
-  static List<String> parseDepfileDependencies(String content) {
-    // Strip line continuations.
-    final String normalized = content.replaceAll('\\\r\n', ' ').replaceAll('\\\n', ' ');
-    // Locate the target separator ': ' (avoiding Windows drive letters like 'C:\').
-    var colonIndex = -1;
-    for (var i = 0; i < normalized.length; i++) {
-      if (normalized[i] == ':') {
-        final bool isNextWhitespaceOrEnd =
-            i + 1 == normalized.length ||
-            normalized[i + 1] == ' ' ||
-            normalized[i + 1] == '\t' ||
-            normalized[i + 1] == '\n' ||
-            normalized[i + 1] == '\r';
-        if (isNextWhitespaceOrEnd) {
-          colonIndex = i;
-          break;
-        }
-      }
-    }
-    if (colonIndex < 0 || colonIndex + 1 >= normalized.length) {
-      return const <String>[];
-    }
-
-    final String rhs = normalized.substring(colonIndex + 1);
-    final results = <String>[];
-    final current = StringBuffer();
-    var i = 0;
-    while (i < rhs.length) {
-      final String ch = rhs[i];
-      if (ch == r'\' && i + 1 < rhs.length && rhs[i + 1] == ' ') {
-        current.write(' ');
-        i += 2;
-        continue;
-      }
-      if (ch == ' ' || ch == '\t' || ch == '\r' || ch == '\n') {
-        if (current.isNotEmpty) {
-          results.add(current.toString());
-          current.clear();
-        }
-        i++;
-        continue;
-      }
-      current.write(ch);
-      i++;
-    }
-    if (current.isNotEmpty) {
-      results.add(current.toString());
-    }
-    return results;
   }
 
   File _resolveDartSdkVersionFile() {
