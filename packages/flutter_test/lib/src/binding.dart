@@ -2975,6 +2975,15 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   /// This property is independent of [framePolicy], which controls how frames
   /// are scheduled.
   ///
+  /// Setting this to false clears existing crosshairs and removes them on the
+  /// next frame painted according to [framePolicy]. With
+  /// [LiveTestWidgetsFlutterBindingFramePolicy.onlyPumps], this requires a call
+  /// to [pump].
+  ///
+  /// Setting this back to true does not restore cleared crosshairs. Crosshairs
+  /// appear again after test pointer events with [PointerEvent.down] set to true,
+  /// such as [PointerDownEvent] or [PointerMoveEvent].
+  ///
   /// Defaults to true.
   bool get showTestPointerCrosshairs => _showTestPointerCrosshairs;
   bool _showTestPointerCrosshairs = true;
@@ -3168,7 +3177,8 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   ///
   /// If the [pointerEventSource] is [TestBindingEventSource.test], then
   /// the event is forwarded to [GestureBinding.dispatchEvent] as usual;
-  /// additionally, down pointers are painted on the screen.
+  /// additionally, down pointers are painted on the screen when
+  /// [showTestPointerCrosshairs] is true.
   ///
   /// If the [pointerEventSource] is [TestBindingEventSource.device], then
   /// the event, after being transformed to the local coordinate system, is

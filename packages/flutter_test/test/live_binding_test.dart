@@ -53,6 +53,7 @@ void main() {
     final TestGesture hiddenGesture = await tester.startGesture(position);
     await tester.pump();
     final ui.Image imageWithoutCrosshair = await _captureRenderView(binding);
+    addTearDown(imageWithoutCrosshair.dispose);
 
     await hiddenGesture.up();
     await tester.pump();
@@ -62,10 +63,12 @@ void main() {
     final TestGesture visibleGesture = await tester.startGesture(position);
     await tester.pump();
     final ui.Image imageWithCrosshair = await _captureRenderView(binding);
+    addTearDown(imageWithCrosshair.dispose);
 
     binding.showTestPointerCrosshairs = false;
     await tester.pump();
     final ui.Image imageAfterDisablingCrosshair = await _captureRenderView(binding);
+    addTearDown(imageAfterDisablingCrosshair.dispose);
 
     expect(
       await _colorAtLogicalPosition(imageWithoutCrosshair, binding.renderView, position),
@@ -80,9 +83,6 @@ void main() {
       const Color(0xFFFFFFFF),
     );
 
-    imageWithoutCrosshair.dispose();
-    imageWithCrosshair.dispose();
-    imageAfterDisablingCrosshair.dispose();
     await visibleGesture.up();
     await tester.pump();
     expect(tapCount, 2);
