@@ -122,6 +122,7 @@ class UpgradeCommand extends FlutterCommand {
       gitTagVersion: GitTagVersion.determine(
         platform,
         git: git,
+        logger: logger,
         workingDirectory: _commandRunner.workingDirectory,
       ),
       flutterVersion: workingDirectory == null

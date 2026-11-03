@@ -285,7 +285,6 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
         cache: globals.cache,
         clock: globals.systemClock,
         logger: globals.logger,
-        outputPreferences: globals.outputPreferences,
         validatorsProviderBuilder: _createDoctorValidatorsProvider,
       ),
       DoctorValidatorsProvider: _createDoctorValidatorsProvider,

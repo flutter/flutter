@@ -83,6 +83,14 @@ void main() {
       fileSystem: fileSystem,
       engineVersion: '2',
       analytics: fakeAnalytics,
+      projectFactory: FlutterProjectFactory(
+        config: Config.test(directory: fileSystem.currentDirectory, logger: logger),
+        fileSystem: fileSystem,
+        logger: logger,
+        xcodeProjectInterpreter: FakeXcodeProjectInterpreter(
+          schemes: <String>['Runner', 'strawberry'],
+        ),
+      ),
       xcode: Xcode.test(
         toolContext: FakeToolContext(
           fs: fileSystem,
@@ -285,18 +293,7 @@ void main() {
         ),
       ]);
 
-      await const DebugIosApplicationBundle().build(
-        environment.copyWith(
-          projectFactory: FlutterProjectFactory(
-            config: Config.test(directory: fileSystem.currentDirectory, logger: logger),
-            fileSystem: fileSystem,
-            logger: logger,
-            xcodeProjectInterpreter: FakeXcodeProjectInterpreter(
-              schemes: <String>['Runner', 'strawberry'],
-            ),
-          ),
-        ),
-      );
+      await const DebugIosApplicationBundle().build(environment);
 
       expect(
         logger.errorText,
@@ -376,18 +373,7 @@ void main() {
         ),
       ]);
 
-      await const DebugIosApplicationBundle().build(
-        environment.copyWith(
-          projectFactory: FlutterProjectFactory(
-            config: Config.test(directory: fileSystem.currentDirectory, logger: logger),
-            fileSystem: fileSystem,
-            logger: logger,
-            xcodeProjectInterpreter: FakeXcodeProjectInterpreter(
-              schemes: <String>['Runner', 'strawberry'],
-            ),
-          ),
-        ),
-      );
+      await const DebugIosApplicationBundle().build(environment);
       expect(processManager, hasNoRemainingExpectations);
 
       expect(frameworkDirectoryBinary, exists);
@@ -487,18 +473,7 @@ void main() {
           ],
         ),
       ]);
-      await const DebugIosApplicationBundle().build(
-        environment.copyWith(
-          projectFactory: FlutterProjectFactory(
-            config: Config.test(directory: fileSystem.currentDirectory, logger: logger),
-            fileSystem: fileSystem,
-            logger: logger,
-            xcodeProjectInterpreter: FakeXcodeProjectInterpreter(
-              schemes: <String>['Runner', 'strawberry'],
-            ),
-          ),
-        ),
-      );
+      await const DebugIosApplicationBundle().build(environment);
 
       expect(
         fileSystem.file('${frameworkDirectory.path}/flutter_assets/assets/common/image.png'),
@@ -519,8 +494,6 @@ void main() {
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
       Platform: () => macPlatform,
-      XcodeProjectInterpreter: () =>
-          FakeXcodeProjectInterpreter(schemes: <String>['Runner', 'strawberry']),
     },
   );
 
@@ -610,18 +583,7 @@ void main() {
         ),
       ]);
 
-      await const DebugIosApplicationBundle().build(
-        environment.copyWith(
-          projectFactory: FlutterProjectFactory(
-            config: Config.test(directory: fileSystem.currentDirectory, logger: logger),
-            fileSystem: fileSystem,
-            logger: logger,
-            xcodeProjectInterpreter: FakeXcodeProjectInterpreter(
-              schemes: <String>['Runner', 'strawberry'],
-            ),
-          ),
-        ),
-      );
+      await const DebugIosApplicationBundle().build(environment);
       expect(processManager, hasNoRemainingExpectations);
 
       expect(frameworkDirectoryBinary, exists);

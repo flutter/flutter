@@ -348,7 +348,7 @@ class Environment {
     required Platform platform,
     required Analytics analytics,
     required FlutterProjectFactory projectFactory,
-    Xcode? xcode,
+    required Xcode? xcode,
     String? engineVersion,
     required bool generateDartPluginRegistry,
     Directory? buildDir,
@@ -424,7 +424,6 @@ class Environment {
     required Artifacts artifacts,
     required ProcessManager processManager,
   }) {
-    final Platform resolvedPlatform = platform ?? FakePlatform();
     return Environment(
       projectDir: projectDir ?? testDirectory,
       packageConfigPath: packageConfigPath ?? '.dart_tool/package_config.json',
@@ -438,7 +437,7 @@ class Environment {
       logger: logger,
       artifacts: artifacts,
       processManager: processManager,
-      platform: resolvedPlatform,
+      platform: platform ?? FakePlatform(),
       analytics: analytics ?? const NoOpAnalytics(),
       projectFactory:
           projectFactory ??
@@ -470,17 +469,13 @@ class Environment {
     required this.artifacts,
     required this.analytics,
     required this.projectFactory,
-    this.xcode,
+    required this.xcode,
     this.engineVersion,
     required this.inputs,
     required this.generateDartPluginRegistry,
   });
 
-  Environment copyWith({
-    Directory? outputDir,
-    FlutterProjectFactory? projectFactory,
-    Xcode? xcode,
-  }) {
+  Environment copyWith({Directory? outputDir}) {
     return Environment._(
       outputDir: outputDir ?? this.outputDir,
       projectDir: projectDir,
@@ -496,8 +491,8 @@ class Environment {
       processManager: processManager,
       platform: platform,
       analytics: analytics,
-      projectFactory: projectFactory ?? this.projectFactory,
-      xcode: xcode ?? this.xcode,
+      projectFactory: projectFactory,
+      xcode: xcode,
       engineVersion: engineVersion,
       inputs: inputs,
       generateDartPluginRegistry: generateDartPluginRegistry,
@@ -592,8 +587,11 @@ class Environment {
 
   final Analytics analytics;
 
+  /// The factory used by build targets to instantiate [FlutterProject]s.
   final FlutterProjectFactory projectFactory;
 
+  /// The [Xcode] instance used by Darwin build targets, or `null` for
+  /// non-Darwin builds that do not run Darwin targets.
   final Xcode? xcode;
 
   /// The version of the current engine, or `null` if built with a local engine.

@@ -28,7 +28,6 @@ import 'src/device.dart';
 import 'src/doctor.dart';
 import 'src/emulator.dart';
 import 'src/experimental/extension_discovery.dart';
-import 'src/experimental/extension_manager.dart';
 import 'src/features.dart';
 import 'src/globals.dart' as globals;
 import 'src/reporting/crash_reporting.dart';
@@ -119,15 +118,6 @@ Future<int> run(
       overrides: <Type, Generator>{DeviceManager: () => toolDeps.deviceManager},
       body: () async {
         final ToolContext(:Cache cache, :Logger logger) = toolDeps.toolContext;
-        DoctorValidatorsProvider createDoctorValidatorsProvider({
-          ExtensionManager? extensionManager,
-        }) => DoctorValidatorsProvider.create(
-          appleContext: toolDeps.appleContext,
-          deviceManager: toolDeps.deviceManager,
-          extensionManager: extensionManager,
-          featureFlags: toolDeps.featureFlags,
-          toolContext: toolDeps.toolContext,
-        );
         final runner = FlutterCommandRunner(
           analytics: toolDeps.analytics,
           deviceManager: toolDeps.deviceManager,
@@ -227,7 +217,7 @@ Future<int> run(
                 getVersion,
                 shutdownHooks,
                 cache: cache,
-                doctorValidatorsProviderBuilder: createDoctorValidatorsProvider,
+                doctorValidatorsProviderBuilder: toolDeps.doctor.validatorsProviderBuilder,
                 usingLocalEngine: usingLocalEngine,
                 analytics: toolDeps.analytics,
                 featureFlags: featureFlags,
@@ -250,7 +240,7 @@ Future<int> run(
               getVersion,
               shutdownHooks,
               cache: cache,
-              doctorValidatorsProviderBuilder: createDoctorValidatorsProvider,
+              doctorValidatorsProviderBuilder: toolDeps.doctor.validatorsProviderBuilder,
               usingLocalEngine: usingLocalEngine,
               analytics: toolDeps.analytics,
               featureFlags: featureFlags,
@@ -419,7 +409,6 @@ Future<int> _handleToolErrorImpl(
           cache: cache,
           clock: globals.systemClock,
           logger: doctorLogger,
-          outputPreferences: globals.outputPreferences,
           validatorsProviderBuilder: doctorValidatorsProviderBuilder,
         ),
       );

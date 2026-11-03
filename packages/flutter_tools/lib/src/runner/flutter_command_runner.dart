@@ -6,7 +6,6 @@ import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:completion/completion.dart';
 import 'package:file/file.dart';
-import 'package:meta/meta.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../artifacts.dart';
@@ -314,10 +313,6 @@ class FlutterCommandRunner extends CommandRunner<void> {
   /// The [Analytics] instance.
   Analytics get analytics => _analytics;
 
-  /// The [DeviceManager] instance, if provided.
-  @protected
-  DeviceManager? get deviceManager => _deviceManager;
-
   /// The [ToolContext] instance.
   ToolContext get toolContext => _toolContext;
 
@@ -617,7 +612,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
         // See if the user specified a specific device.
         final specifiedDeviceId = topLevelResults[FlutterGlobalOptions.kDeviceIdOption] as String?;
         if (specifiedDeviceId != null) {
-          deviceManager?.specifiedDeviceId = specifiedDeviceId;
+          _deviceManager?.specifiedDeviceId = specifiedDeviceId;
         }
 
         final bool topLevelMachineFlag =

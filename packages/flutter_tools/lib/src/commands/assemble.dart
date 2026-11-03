@@ -104,7 +104,7 @@ class AssembleCommand extends FlutterCommand {
     required this._buildSystem,
     required this._featureFlags,
     required ToolContext super.toolContext,
-    this._xcode,
+    required this._xcode,
     super.verboseHelp = false,
   }) {
     requiresPubspecYaml();

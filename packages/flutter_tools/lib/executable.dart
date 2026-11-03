@@ -372,7 +372,6 @@ List<FlutterCommand> generateCommands({
     ScreenshotCommand(toolContext: toolContext),
     ShellCompletionCommand(toolContext: toolContext),
     TestCommand(
-      analytics: toolDependencies.analytics,
       templateRenderer: const MustacheTemplateRenderer(),
       toolContext: toolContext,
       verboseHelp: verboseHelp,

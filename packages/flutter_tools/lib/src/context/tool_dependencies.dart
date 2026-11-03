@@ -682,7 +682,6 @@ class ToolDependencies {
           cache: finalCache,
           clock: finalSystemClock,
           logger: finalLogger,
-          outputPreferences: finalOutputPreferences,
           validatorsProviderBuilder: ({ExtensionManager? extensionManager}) =>
               DoctorValidatorsProvider.create(
                 appleContext: appleContext,

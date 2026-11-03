@@ -27,7 +27,7 @@ import 'test_config.dart';
 
 /// A web compiler for the test runner.
 class WebTestCompiler {
-  WebTestCompiler({this._analytics = const NoOpAnalytics(), required this._toolContext});
+  WebTestCompiler({required this._analytics, required this._toolContext});
 
   final Analytics _analytics;
   final ToolContext _toolContext;

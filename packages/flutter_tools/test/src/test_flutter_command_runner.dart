@@ -13,6 +13,7 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/create.dart';
 import 'package:flutter_tools/src/context/tool_context.dart';
+import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/isolated/mustache_template.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
@@ -66,10 +67,12 @@ Future<String> createProject(
 class TestFlutterCommandRunner extends FlutterCommandRunner {
   TestFlutterCommandRunner({
     Analytics? analytics,
+    DeviceManager? deviceManager,
     FeatureFlags? featureFlags,
     ToolContext? toolContext,
   }) : super(
          analytics: analytics ?? _defaultAnalytics(),
+         deviceManager: deviceManager ?? _defaultDeviceManager(),
          featureFlags: featureFlags ?? _defaultFeatureFlags(),
          toolContext: toolContext ?? const DelegatingToolContext(),
        );
@@ -79,6 +82,14 @@ class TestFlutterCommandRunner extends FlutterCommandRunner {
       return context.get<Analytics>() ?? const NoOpAnalytics();
     } on UnsupportedError {
       return const NoOpAnalytics();
+    }
+  }
+
+  static DeviceManager? _defaultDeviceManager() {
+    try {
+      return context.get<DeviceManager>();
+    } on UnsupportedError {
+      return null;
     }
   }
 

@@ -58,6 +58,7 @@ void main() {
         featureFlags: TestFeatureFlags(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         toolContext: toolContext,
+        xcode: null,
       ),
     );
     await commandRunner.run(<String>['assemble', '-o Output', 'debug_macos_bundle_flutter_assets']);
@@ -76,6 +77,7 @@ void main() {
           expect(environment.defines, containsPair('FooBar', 'fizz=2'));
         }),
         toolContext: toolContext,
+        xcode: null,
       ),
     );
     await commandRunner.run(<String>[
@@ -99,6 +101,7 @@ void main() {
           expect(environment.defines, const {'DeferredComponents': 'false'});
         }),
         toolContext: toolContext,
+        xcode: null,
       ),
     );
     await commandRunner.run(<String>[
@@ -121,6 +124,7 @@ void main() {
         expect(environment.inputs, containsPair('Foo', 'Bar.txt'));
       }),
       toolContext: toolContext,
+      xcode: null,
     );
     final CommandRunner<void> commandRunner = createTestCommandRunner(command);
     await commandRunner.run(<String>[
@@ -139,6 +143,7 @@ void main() {
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       toolContext: toolContext,
       featureFlags: TestFeatureFlags(isMacOSEnabled: true),
+      xcode: null,
     );
     final CommandRunner<void> commandRunner = createTestCommandRunner(command);
     await commandRunner.run(<String>[
@@ -157,6 +162,7 @@ void main() {
       featureFlags: TestFeatureFlags(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       toolContext: toolContext,
+      xcode: null,
     );
     final CommandRunner<void> commandRunner = createTestCommandRunner(command, fakeAnalytics);
     await commandRunner.run(<String>[
@@ -183,6 +189,7 @@ void main() {
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       toolContext: toolContext,
       featureFlags: TestFeatureFlags(isMacOSEnabled: true),
+      xcode: null,
     );
     final CommandRunner<void> commandRunner = createTestCommandRunner(command, fakeAnalytics);
     await commandRunner.run(<String>[
@@ -212,6 +219,7 @@ void main() {
         featureFlags: TestFeatureFlags(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         toolContext: toolContext,
+        xcode: null,
       ),
     );
 
@@ -229,6 +237,7 @@ void main() {
           featureFlags: TestFeatureFlags(),
           buildSystem: TestBuildSystem.all(BuildResult(success: true)),
           toolContext: toolContext,
+          xcode: null,
         ),
       );
 
@@ -252,6 +261,7 @@ void main() {
           featureFlags: TestFeatureFlags(),
           buildSystem: TestBuildSystem.all(BuildResult(success: true)),
           toolContext: toolContext,
+          xcode: null,
         ),
       );
 
@@ -310,6 +320,7 @@ void main() {
         featureFlags: TestFeatureFlags(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         toolContext: toolContext,
+        xcode: null,
       ),
     );
 
@@ -329,6 +340,7 @@ void main() {
           ),
         ),
         toolContext: toolContext,
+        xcode: null,
       ),
     );
 
@@ -359,6 +371,7 @@ void main() {
           ),
         ),
         toolContext: toolContext,
+        xcode: null,
       ),
     );
 
@@ -400,6 +413,7 @@ void main() {
             expect(environment.engineVersion, isNull);
           }),
           toolContext: localToolContext,
+          xcode: null,
         ),
       );
       await commandRunner.run(<String>[
@@ -442,6 +456,7 @@ void main() {
           expect(environment.engineVersion, isNull);
         }),
         toolContext: localToolContext,
+        xcode: null,
       ),
     );
     await commandRunner.run(<String>[
@@ -484,6 +499,7 @@ void main() {
           featureFlags: TestFeatureFlags(),
           buildSystem: buildSystem,
           toolContext: toolContext,
+          xcode: null,
         ),
       );
       await commandRunner.run(<String>[
@@ -563,6 +579,7 @@ void main() {
         featureFlags: TestFeatureFlags(),
         buildSystem: TestBuildSystem.error(null),
         toolContext: toolContext,
+        xcode: null,
       ),
     );
 
@@ -580,6 +597,7 @@ void main() {
         buildSystem: TestBuildSystem.error(null),
         toolContext: toolContext,
         verboseHelp: true,
+        xcode: null,
       ),
     );
 
@@ -604,6 +622,7 @@ void main() {
         featureFlags: TestFeatureFlags(),
         buildSystem: TestBuildSystem.error(null),
         toolContext: emptyToolContext,
+        xcode: null,
       ),
     );
 
