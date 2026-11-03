@@ -139,12 +139,15 @@ void main() {
 
   group('ExtensionBuildTarget', () {
     test('serializes and deserializes correctly with all fields', () {
-      const target = ExtensionBuildTarget(
+      final target = ExtensionBuildTarget(
         description: 'A custom Linux build target.',
         name: 'custom-linux-build',
         targetPlatform: 'linux-x64',
-        artifacts: <ExtensionArtifact>{BuiltInArtifacts.icuData, BuiltInArtifacts.genSnapshot},
-        hostArtifacts: <ExtensionHostArtifact>{BuiltInHostArtifacts.impellerc},
+        artifacts: const <ExtensionArtifact>{
+          BuiltInArtifacts.icuData,
+          BuiltInArtifacts.genSnapshot,
+        },
+        hostArtifacts: const <ExtensionHostArtifact>{BuiltInHostArtifacts.impellerc},
         outputDir: '{OUTPUT_DIR}/linux',
       );
 
@@ -179,7 +182,7 @@ void main() {
     });
 
     test('supports platform-agnostic target with null targetPlatform', () {
-      const target = ExtensionBuildTarget(
+      final target = ExtensionBuildTarget(
         description: 'A platform-agnostic build target.',
         name: 'custom-agnostic-build',
         outputDir: '{OUTPUT_DIR}/agnostic',
@@ -306,21 +309,27 @@ void main() {
     });
 
     test('equality and hashCode distinguish different targets and ignore artifact set order', () {
-      const target1 = ExtensionBuildTarget(
+      final target1 = ExtensionBuildTarget(
         description: 'Target 1',
         name: 'target-1',
         outputDir: '{OUTPUT_DIR}/target-1',
         targetPlatform: 'linux-x64',
-        artifacts: <ExtensionArtifact>{BuiltInArtifacts.icuData, BuiltInArtifacts.genSnapshot},
+        artifacts: const <ExtensionArtifact>{
+          BuiltInArtifacts.icuData,
+          BuiltInArtifacts.genSnapshot,
+        },
       );
-      const target1Reordered = ExtensionBuildTarget(
+      final target1Reordered = ExtensionBuildTarget(
         description: 'Target 1',
         name: 'target-1',
         outputDir: '{OUTPUT_DIR}/target-1',
         targetPlatform: 'linux-x64',
-        artifacts: <ExtensionArtifact>{BuiltInArtifacts.genSnapshot, BuiltInArtifacts.icuData},
+        artifacts: const <ExtensionArtifact>{
+          BuiltInArtifacts.genSnapshot,
+          BuiltInArtifacts.icuData,
+        },
       );
-      const target2 = ExtensionBuildTarget(
+      final target2 = ExtensionBuildTarget(
         description: 'Target 2',
         name: 'target-2',
         outputDir: '{OUTPUT_DIR}/target-2',
@@ -598,6 +607,390 @@ void main() {
         }),
         throwsFormatException,
       );
+    });
+  });
+
+  group('BuildFlag and BuildOption', () {
+    test('BuildFlag serializes, deserializes, and implements equality and hashCode', () {
+      const flag = BuildFlag(
+        help: 'Enable custom bundling.',
+        name: 'bundle-custom',
+        abbr: 'b',
+        defaultsTo: true,
+        negatable: false,
+      );
+      final Map<String, Object?> map = flag.toMap();
+      expect(map[BuildFlag.nameKey], 'bundle-custom');
+      expect(map[BuildFlag.helpKey], 'Enable custom bundling.');
+      expect(map[BuildFlag.abbrKey], 'b');
+      expect(map[BuildFlag.defaultsToKey], isTrue);
+      expect(map[BuildFlag.negatableKey], isFalse);
+
+      final parsed = BuildFlag.fromJson(map);
+      expect(parsed, equals(flag));
+      expect(parsed.hashCode, equals(flag.hashCode));
+      expect(parsed.toString(), contains('bundle-custom'));
+
+      const defaultFlag = BuildFlag(help: 'Default flag', name: 'default-flag');
+      expect(defaultFlag.defaultsTo, isFalse);
+      expect(defaultFlag.negatable, isTrue);
+      expect(defaultFlag.abbr, isNull);
+      expect(BuildFlag.fromJson(defaultFlag.toMap()), equals(defaultFlag));
+      expect(defaultFlag, isNot(equals(flag)));
+    });
+
+    test('BuildFlag.fromJson and listFromJson validate input', () {
+      expect(
+        () => BuildFlag.fromJson(const <String, Object?>{
+          'name': '',
+          'help': 'h',
+          'defaultsTo': false,
+          'negatable': true,
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => BuildFlag.fromJson(const <String, Object?>{
+          'name': 'flag',
+          'help': 'h',
+          'abbr': 'ab',
+          'defaultsTo': false,
+          'negatable': true,
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => BuildFlag.fromJson(const <String, Object?>{
+          'name': 'flag',
+          'help': 'h',
+          'negatable': true,
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => BuildFlag.fromJson(const <String, Object?>{
+          'name': 'flag',
+          'help': 'h',
+          'defaultsTo': false,
+        }),
+        throwsFormatException,
+      );
+      expect(BuildFlag.listFromJson(null), isEmpty);
+      expect(() => BuildFlag.listFromJson('invalid'), throwsFormatException);
+      expect(() => BuildFlag.listFromJson(<Object?>[123]), throwsFormatException);
+    });
+
+    test('BuildOption serializes, deserializes, and implements equality and hashCode', () {
+      const option = BuildOption(
+        help: 'Select compression format.',
+        name: 'compression',
+        abbr: 'c',
+        allowed: <String>['gzip', 'xz'],
+        allowedHelp: <String, String>{'gzip': 'Fast compression', 'xz': 'High ratio'},
+        defaultsTo: 'gzip',
+        mandatory: true,
+        valueHelp: 'format',
+      );
+      final Map<String, Object?> map = option.toMap();
+      expect(map[BuildOption.nameKey], 'compression');
+      expect(map[BuildOption.helpKey], 'Select compression format.');
+      expect(map[BuildOption.abbrKey], 'c');
+      expect(map[BuildOption.allowedKey], equals(const <String>['gzip', 'xz']));
+      expect(
+        map[BuildOption.allowedHelpKey],
+        equals(const <String, String>{'gzip': 'Fast compression', 'xz': 'High ratio'}),
+      );
+      expect(map[BuildOption.defaultsToKey], 'gzip');
+      expect(map[BuildOption.mandatoryKey], isTrue);
+      expect(map[BuildOption.valueHelpKey], 'format');
+
+      final parsed = BuildOption.fromJson(map);
+      expect(parsed, equals(option));
+      expect(parsed.hashCode, equals(option.hashCode));
+      expect(parsed.toString(), contains('compression'));
+
+      const defaultOption = BuildOption(help: 'Default option', name: 'default-option');
+      expect(defaultOption.mandatory, isFalse);
+      expect(defaultOption.defaultsTo, isNull);
+      expect(defaultOption.allowed, isNull);
+      expect(BuildOption.fromJson(defaultOption.toMap()), equals(defaultOption));
+      expect(defaultOption, isNot(equals(option)));
+    });
+
+    test('BuildOption.fromJson and listFromJson validate input', () {
+      expect(
+        () => BuildOption.fromJson(const <String, Object?>{
+          'name': '',
+          'help': 'h',
+          'mandatory': false,
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => BuildOption.fromJson(const <String, Object?>{
+          'name': 'opt',
+          'help': 'h',
+          'abbr': 'ab',
+          'mandatory': false,
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => BuildOption.fromJson(const <String, Object?>{'name': 'opt', 'help': 'h'}),
+        throwsFormatException,
+      );
+      expect(
+        () => BuildOption.fromJson(const <String, Object?>{
+          'name': 'opt',
+          'help': 'h',
+          'mandatory': false,
+          'allowedHelp': 'not-a-map',
+        }),
+        throwsFormatException,
+      );
+      expect(BuildOption.listFromJson(null), isEmpty);
+      expect(() => BuildOption.listFromJson('invalid'), throwsFormatException);
+      expect(() => BuildOption.listFromJson(<Object?>[123]), throwsFormatException);
+    });
+
+    test('ExtensionBuildTarget supports buildFlags, buildOptions, and targetPlatforms', () {
+      final target = ExtensionBuildTarget(
+        description: 'Multi-arch target',
+        name: 'custom-multi',
+        outputDir: '{OUTPUT_DIR}/{TARGET_PLATFORM}/{BUILD_MODE}',
+        targetPlatform: 'linux-x64',
+        targetPlatforms: const <String>{'linux-x64', 'linux-arm64'},
+        buildFlags: const <BuildFlag>[BuildFlag(help: 'Sign package', name: 'sign')],
+        buildOptions: const <BuildOption>[BuildOption(help: 'Output format', name: 'format')],
+      );
+      expect(target.targetPlatforms, equals(const <String>{'linux-x64', 'linux-arm64'}));
+
+      final parsed = ExtensionBuildTarget.fromJson(target.toMap());
+      expect(parsed, equals(target));
+      expect(parsed.hashCode, equals(target.hashCode));
+      expect(parsed.buildFlags, hasLength(1));
+      expect(parsed.buildOptions, hasLength(1));
+      expect(parsed.targetPlatforms, equals(const <String>{'linux-x64', 'linux-arm64'}));
+
+      final singlePlatformTarget = ExtensionBuildTarget(
+        description: 'Single-arch target',
+        name: 'custom-single',
+        outputDir: '{OUTPUT_DIR}/single',
+        targetPlatform: 'linux-x64',
+      );
+      expect(singlePlatformTarget.targetPlatforms, equals(const <String>{'linux-x64'}));
+
+      final agnosticTarget = ExtensionBuildTarget(
+        description: 'Agnostic target',
+        name: 'custom-agnostic',
+        outputDir: '{OUTPUT_DIR}/agnostic',
+      );
+      expect(agnosticTarget.targetPlatforms, isEmpty);
+
+      expect(
+        () => ExtensionBuildTarget(
+          description: 'Empty platform in targetPlatforms',
+          name: 'custom-empty-platform',
+          outputDir: '{OUTPUT_DIR}/invalid',
+          targetPlatforms: const <String>{'linux-x64', ''},
+        ),
+        throwsA(isA<AssertionError>()),
+      );
+      expect(
+        () => ExtensionBuildTarget(
+          description: 'Mismatched targetPlatform and targetPlatforms',
+          name: 'custom-mismatch',
+          outputDir: '{OUTPUT_DIR}/invalid',
+          targetPlatform: 'linux-x64',
+          targetPlatforms: const <String>{'linux-arm64'},
+        ),
+        throwsA(isA<AssertionError>()),
+      );
+      expect(
+        () => ExtensionBuildTarget.fromJson(const <String, Object?>{
+          'description': 'Invalid targetPlatforms',
+          'name': 'custom-invalid',
+          'outputDir': '{OUTPUT_DIR}/invalid',
+          'targetPlatforms': <Object?>['linux-x64', ''],
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => ExtensionBuildTarget.fromJson(const <String, Object?>{
+          'description': 'Mismatched targetPlatform and targetPlatforms',
+          'name': 'custom-mismatch',
+          'outputDir': '{OUTPUT_DIR}/invalid',
+          'targetPlatform': 'linux-x64',
+          'targetPlatforms': <Object?>['linux-arm64'],
+        }),
+        throwsFormatException,
+      );
+    });
+  });
+
+  group('ExtensionBuildContext and ExtensionAssembleContext', () {
+    test('ExtensionBuildContext serializes, deserializes, and checks equality', () {
+      final context = ExtensionBuildContext(
+        buildMode: .release,
+        flutterRoot: Uri.parse('file:///flutter/'),
+        mainPath: 'lib/main.dart',
+        outputDir: Uri.parse('file:///project/build/custom/'),
+        projectRoot: Uri.parse('file:///project/'),
+        resolvedArtifacts: const <String, String>{'icuData': '/flutter/icudtl.dat'},
+        trackWidgetCreation: false,
+        treeShakeIcons: true,
+        buildFlags: const <String, bool>{'sign': true},
+        buildName: '1.2.3',
+        buildNumber: '45',
+        buildOptions: const <String, String?>{'format': 'ipk', 'optional-opt': null},
+        codeSizeDirectory: Uri.parse('file:///project/build/code_size/'),
+        configuration: const <String, String?>{'enable-custom': 'true', 'sdk-path': '/opt/sdk'},
+        dartDefines: const <String, String>{'API_URL': 'https://example.com'},
+        dartObfuscation: true,
+        extraFrontEndOptions: const <String>['--enable-experiment=test'],
+        extraGenSnapshotOptions: const <String>['--deterministic'],
+        flavor: 'prod',
+        splitDebugInfo: Uri.parse('file:///project/build/symbols/'),
+        targetDeviceId: 'device-123',
+        targetPlatform: 'linux-arm64',
+      );
+
+      final Map<String, Object?> map = context.toMap();
+      final parsed = ExtensionBuildContext.fromJson(map);
+      expect(parsed, equals(context));
+      expect(parsed.hashCode, equals(context.hashCode));
+      expect(parsed.toString(), contains('ExtensionBuildContext('));
+    });
+
+    test('ExtensionBuildContext validates directory file: URIs and required bools', () {
+      expect(
+        () => ExtensionBuildContext(
+          buildMode: .debug,
+          flutterRoot: Uri.parse('file:///flutter/'),
+          mainPath: 'lib/main.dart',
+          outputDir: Uri.parse('file:///project/build/'),
+          projectRoot: Uri.parse('file:///project/'),
+          resolvedArtifacts: const <String, String>{},
+          trackWidgetCreation: true,
+          treeShakeIcons: false,
+          codeSizeDirectory: Uri.parse('http://example.com/size/'),
+        ),
+        throwsA(isA<AssertionError>()),
+      );
+      expect(
+        () => ExtensionBuildContext(
+          buildMode: .debug,
+          flutterRoot: Uri.parse('file:///flutter/'),
+          mainPath: 'lib/main.dart',
+          outputDir: Uri.parse('file:///project/build/'),
+          projectRoot: Uri.parse('file:///project/'),
+          resolvedArtifacts: const <String, String>{},
+          trackWidgetCreation: true,
+          treeShakeIcons: false,
+          codeSizeDirectory: Uri.parse('file:///project/code_size_without_slash'),
+        ),
+        throwsA(isA<AssertionError>()),
+      );
+      expect(
+        () => ExtensionBuildContext(
+          buildMode: .debug,
+          flutterRoot: Uri.parse('file:///flutter/'),
+          mainPath: 'lib/main.dart',
+          outputDir: Uri.parse('file:///project/build/'),
+          projectRoot: Uri.parse('file:///project/'),
+          resolvedArtifacts: const <String, String>{},
+          trackWidgetCreation: true,
+          treeShakeIcons: false,
+          splitDebugInfo: Uri.parse('file:///project/symbols_without_slash'),
+        ),
+        throwsA(isA<AssertionError>()),
+      );
+      expect(
+        () => ExtensionBuildContext(
+          buildMode: .debug,
+          flutterRoot: Uri.parse('file:///flutter/'),
+          mainPath: 'lib/main.dart',
+          outputDir: Uri.parse('file:///project/build/'),
+          projectRoot: Uri.parse('file:///project/'),
+          resolvedArtifacts: const <String, String>{},
+          trackWidgetCreation: true,
+          treeShakeIcons: false,
+          splitDebugInfo: Uri.parse('relative/symbols/'),
+        ),
+        throwsA(isA<AssertionError>()),
+      );
+      final validBaseMap = <String, Object?>{
+        'buildMode': 'debug',
+        'dartObfuscation': false,
+        'flutterRoot': 'file:///flutter/',
+        'mainPath': 'lib/main.dart',
+        'outputDir': 'file:///project/build/',
+        'projectRoot': 'file:///project/',
+        'resolvedArtifacts': const <String, Object?>{},
+        'trackWidgetCreation': true,
+        'treeShakeIcons': false,
+      };
+      expect(
+        () => ExtensionBuildContext.fromJson(<String, Object?>{
+          ...validBaseMap,
+          'codeSizeDirectory': 'file:///project/size_no_slash',
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => ExtensionBuildContext.fromJson(<String, Object?>{
+          ...validBaseMap,
+          'splitDebugInfo': 'file:///project/symbols_no_slash',
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => ExtensionBuildContext.fromJson(<String, Object?>{
+          ...validBaseMap,
+          'trackWidgetCreation': null,
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => ExtensionBuildContext.fromJson(<String, Object?>{
+          ...validBaseMap,
+          'treeShakeIcons': null,
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => ExtensionBuildContext.fromJson(<String, Object?>{
+          ...validBaseMap,
+          'dartObfuscation': null,
+        }),
+        throwsFormatException,
+      );
+    });
+
+    test('ExtensionAssembleContext serializes, deserializes, and checks equality', () {
+      final context = ExtensionAssembleContext(
+        buildDir: Uri.parse('file:///project/.dart_tool/flutter_build/1234/'),
+        buildMode: .debug,
+        flutterRoot: Uri.parse('file:///flutter/'),
+        mainPath: 'lib/main.dart',
+        outputDir: Uri.parse('file:///project/build/'),
+        projectRoot: Uri.parse('file:///project/'),
+        resolvedArtifacts: const <String, String>{},
+        trackWidgetCreation: true,
+        treeShakeIcons: false,
+        configuration: const <String, String?>{'custom-opt': 'val'},
+        dartDefines: const <String, String>{'FOO': 'bar'},
+        extraDefines: const <String, String>{'CustomDefine': '42'},
+        flavor: 'dev',
+        targetPlatform: 'linux-x64',
+      );
+
+      final Map<String, Object?> map = context.toMap();
+      final parsed = ExtensionAssembleContext.fromJson(map);
+      expect(parsed, equals(context));
+      expect(parsed.hashCode, equals(context.hashCode));
+      expect(parsed.toString(), contains('ExtensionAssembleContext('));
+      expect(parsed.extraDefines, equals(const <String, String>{'CustomDefine': '42'}));
     });
   });
 }

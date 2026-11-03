@@ -10,65 +10,28 @@ import 'package:meta/meta.dart';
 
 import 'protocol_base/service.dart';
 
-/// Context passed to an extension target's [BuildTarget.build] method.
-@immutable
-class ExtensionBuildContext {
-  const ExtensionBuildContext({
-    required this.buildMode,
-    required this.flutterRoot,
-    required this.mainPath,
-    required this.outputDir,
-    required this.projectRoot,
-    required this.resolvedArtifacts,
-  });
-
-  /// The compilation mode for the build.
-  final BuildMode buildMode;
-
-  /// The absolute directory URI (ending with `/`) to the Flutter SDK root directory.
-  final Uri flutterRoot;
-
-  /// The path to the main entrypoint file (typically `lib/main.dart`).
-  final String mainPath;
-
-  /// The absolute directory URI (ending with `/`) where final build outputs should be placed.
-  final Uri outputDir;
-
-  /// The absolute directory URI (ending with `/`) to the root directory of the Flutter project being built.
-  final Uri projectRoot;
-
-  /// A map of resolved engine artifact names to their absolute paths on the host.
-  ///
-  /// Keys correspond to [ExtensionArtifact.name] or [ExtensionHostArtifact.name] values.
-  final Map<String, String> resolvedArtifacts;
-}
-
-/// Context passed to an extension target's [AssembleTarget.build] method.
-@immutable
-class ExtensionAssembleContext extends ExtensionBuildContext {
-  const ExtensionAssembleContext({
-    required this.buildDir,
-    required super.buildMode,
-    required super.flutterRoot,
-    required super.mainPath,
-    required super.outputDir,
-    required super.projectRoot,
-    required super.resolvedArtifacts,
-  });
-
-  /// The absolute directory URI (ending with `/`) used for intermediate build
-  /// artifacts (matching [BuiltInPlaceholders.buildDir]).
-  final Uri buildDir;
-}
-
 /// Abstract target for a custom `flutter build <subcommand>` target.
 ///
 /// Extensions should extend this class to contribute top-level `flutter build`
 /// subcommands via [BuildService.buildTargets].
 @immutable
 abstract class BuildTarget {
-  const BuildTarget({required this.description, required this.outputDir, this.targetPlatform})
-    : assert(targetPlatform == null || targetPlatform != '');
+  BuildTarget({
+    required this.description,
+    required this.outputDir,
+    this.targetPlatform,
+    this._targetPlatforms = const <String>{},
+  }) : assert(targetPlatform == null || targetPlatform != ''),
+       assert(
+         _targetPlatforms.every((String platform) => platform.isNotEmpty),
+         'targetPlatforms must not contain empty platform names.',
+       ),
+       assert(
+         targetPlatform == null ||
+             _targetPlatforms.isEmpty ||
+             _targetPlatforms.contains(targetPlatform),
+         'targetPlatforms must contain targetPlatform when both are specified.',
+       );
 
   /// The user-readable name of the target (exposed as `flutter build <name>`).
   String get name;
@@ -76,7 +39,7 @@ abstract class BuildTarget {
   /// Description of what this target builds.
   final String description;
 
-  /// The target platform identifier (e.g. `'linux-x64'`, `'custom-embedder-arm64'`),
+  /// The default target platform identifier (e.g. `'linux-x64'`, `'custom-embedder-arm64'`),
   /// or `null` if this target is platform-agnostic.
   ///
   /// This is an open [String] rather than an enum so that extensions for custom
@@ -84,6 +47,18 @@ abstract class BuildTarget {
   /// Used to substitute [BuiltInPlaceholders.targetPlatform] in [outputDir], and as the
   /// default artifact platform when it matches a built-in Flutter target platform.
   final String? targetPlatform;
+
+  final Set<String> _targetPlatforms;
+
+  /// The set of target platform identifiers supported by this build target.
+  ///
+  /// Defaults to `{targetPlatform!}` when [targetPlatform] is non-null, or `{}`
+  /// when platform-agnostic. Override or pass `targetPlatforms` to declare
+  /// multiple supported target platforms (for example, `{'linux-x64', 'linux-arm64'}`),
+  /// which causes `flutter build <name>` to expose a `--target-platform` option.
+  Set<String> get targetPlatforms => _targetPlatforms.isNotEmpty
+      ? _targetPlatforms
+      : (targetPlatform != null ? <String>{targetPlatform!} : const <String>{});
 
   /// The directory pattern used by `flutter build` to determine this target's
   /// output directory, for example
@@ -98,6 +73,12 @@ abstract class BuildTarget {
   /// Engine artifacts required by this build target, resolved for [targetPlatform]
   /// and the active [BuildMode].
   Set<ExtensionArtifact> get artifacts => const <ExtensionArtifact>{};
+
+  /// Custom boolean CLI flags exposed on `flutter build <name>`.
+  List<BuildFlag> get buildFlags => const <BuildFlag>[];
+
+  /// Custom string CLI options exposed on `flutter build <name>`.
+  List<BuildOption> get buildOptions => const <BuildOption>[];
 
   /// Host-side build tool or library artifacts required by this build target.
   Set<ExtensionHostArtifact> get hostArtifacts => const <ExtensionHostArtifact>{};
@@ -177,28 +158,80 @@ abstract base class BuildService extends ToolExtensionService {
   static const String assembleMethod = 'build.assemble';
 
   /// RPC parameter key for the intermediate build directory (used by [assembleMethod]).
-  static const String buildDirParam = 'buildDir';
+  static const String buildDirParam = ExtensionAssembleContext.buildDirKey;
+
+  /// RPC parameter key for custom boolean build flags.
+  static const String buildFlagsParam = ExtensionBuildContext.buildFlagsKey;
 
   /// RPC parameter key for the build mode.
-  static const String buildModeParam = 'buildMode';
+  static const String buildModeParam = ExtensionBuildContext.buildModeKey;
+
+  /// RPC parameter key for the build name.
+  static const String buildNameParam = ExtensionBuildContext.buildNameKey;
+
+  /// RPC parameter key for the build number.
+  static const String buildNumberParam = ExtensionBuildContext.buildNumberKey;
+
+  /// RPC parameter key for custom string build options.
+  static const String buildOptionsParam = ExtensionBuildContext.buildOptionsKey;
+
+  /// RPC parameter key for the code size analysis output directory URI.
+  static const String codeSizeDirectoryParam = ExtensionBuildContext.codeSizeDirectoryKey;
+
+  /// RPC parameter key for the extension's owned `flutter config` snapshot.
+  static const String configurationParam = ExtensionBuildContext.configurationKey;
+
+  /// RPC parameter key for compile-time Dart defines.
+  static const String dartDefinesParam = ExtensionBuildContext.dartDefinesKey;
+
+  /// RPC parameter key for whether Dart symbol obfuscation is enabled.
+  static const String dartObfuscationParam = ExtensionBuildContext.dartObfuscationKey;
+
+  /// RPC parameter key for non-standard `flutter assemble` defines.
+  static const String extraDefinesParam = ExtensionAssembleContext.extraDefinesKey;
+
+  /// RPC parameter key for extra front-end compiler options.
+  static const String extraFrontEndOptionsParam = ExtensionBuildContext.extraFrontEndOptionsKey;
+
+  /// RPC parameter key for extra `gen_snapshot` options.
+  static const String extraGenSnapshotOptionsParam =
+      ExtensionBuildContext.extraGenSnapshotOptionsKey;
+
+  /// RPC parameter key for the application flavor.
+  static const String flavorParam = ExtensionBuildContext.flavorKey;
 
   /// RPC parameter key for the Flutter SDK root directory.
-  static const String flutterRootParam = 'flutterRoot';
+  static const String flutterRootParam = ExtensionBuildContext.flutterRootKey;
 
   /// RPC parameter key for the main entrypoint path.
-  static const String mainPathParam = 'mainPath';
+  static const String mainPathParam = ExtensionBuildContext.mainPathKey;
 
   /// RPC parameter key for the output directory.
-  static const String outputDirParam = 'outputDir';
+  static const String outputDirParam = ExtensionBuildContext.outputDirKey;
 
   /// RPC parameter key for the project root path.
-  static const String projectRootParam = 'projectRoot';
+  static const String projectRootParam = ExtensionBuildContext.projectRootKey;
 
   /// RPC parameter key for the map of resolved engine artifacts.
-  static const String resolvedArtifactsParam = 'resolvedArtifacts';
+  static const String resolvedArtifactsParam = ExtensionBuildContext.resolvedArtifactsKey;
+
+  /// RPC parameter key for the split debug info directory URI.
+  static const String splitDebugInfoParam = ExtensionBuildContext.splitDebugInfoKey;
+
+  /// RPC parameter key for the target device ID.
+  static const String targetDeviceIdParam = ExtensionBuildContext.targetDeviceIdKey;
 
   /// RPC parameter key for the target name.
   static const String targetNameParam = 'targetName';
+
+  /// RPC parameter key for the active target platform identifier.
+  static const String targetPlatformParam = ExtensionBuildContext.targetPlatformKey;
+
+  /// RPC parameter key for whether widget creation tracking is enabled.
+  static const String trackWidgetCreationParam = ExtensionBuildContext.trackWidgetCreationKey;
+
+  /// RPC parameter key for whether icon tree shaking is enabled.
+  static const String treeShakeIconsParam = ExtensionBuildContext.treeShakeIconsKey;
 
   static const String _getBuildTargetsRpcMethod = 'getBuildTargets';
   static const String _getAssembleTargetsRpcMethod = 'getAssembleTargets';
@@ -232,11 +265,14 @@ abstract base class BuildService extends ToolExtensionService {
         .map(
           (BuildTarget target) => ExtensionBuildTarget(
             artifacts: target.artifacts,
+            buildFlags: target.buildFlags,
+            buildOptions: target.buildOptions,
             description: target.description,
             hostArtifacts: target.hostArtifacts,
             name: target.name,
             outputDir: target.outputDir,
             targetPlatform: target.targetPlatform,
+            targetPlatforms: target.targetPlatforms,
           ).toMap(),
         )
         .toList();
@@ -258,83 +294,31 @@ abstract base class BuildService extends ToolExtensionService {
         .toList();
   }
 
-  static Uri _requireAbsoluteDirectoryUri(Map<String, Object?> params, String key) {
-    final String raw = params.requiredField<String>(key);
-    final Uri? uri = Uri.tryParse(raw);
-    if (uri == null || !uri.hasAbsolutePath) {
-      throw RpcException.invalidParams('Missing or invalid "$key" parameter.');
-    }
-    return uri.path.endsWith('/') ? uri : uri.replace(path: '${uri.path}/');
-  }
-
   static (String targetName, ExtensionBuildContext context) _parseBuildRequest(
     Map<String, Object?> params,
   ) {
     final String targetName;
-    final Uri projectRootUri;
-    final String mainPath;
-    final String buildMode;
-    final Uri outputDirUri;
-    final Uri flutterRootUri;
-    final Map<String, Object?> rawResolvedArtifacts;
+    final ExtensionBuildContext context;
     try {
       targetName = params.requiredField<String>(targetNameParam);
-      projectRootUri = _requireAbsoluteDirectoryUri(params, projectRootParam);
-      mainPath = params.requiredField<String>(mainPathParam);
-      buildMode = params.requiredField<String>(buildModeParam);
-      outputDirUri = _requireAbsoluteDirectoryUri(params, outputDirParam);
-      flutterRootUri = _requireAbsoluteDirectoryUri(params, flutterRootParam);
-      rawResolvedArtifacts = params.requiredField<Map<String, Object?>>(resolvedArtifactsParam);
+      context = ExtensionBuildContext.fromJson(params);
     } on FormatException catch (e) {
       throw RpcException.invalidParams(e.message);
     }
-
-    final BuildMode mode;
-    try {
-      mode = BuildMode.fromCliName(buildMode);
-    } on ArgumentError {
-      throw RpcException.invalidParams('Missing or invalid "$buildModeParam" parameter.');
-    }
-
-    final resolvedArtifacts = <String, String>{};
-    try {
-      for (final String key in rawResolvedArtifacts.keys) {
-        resolvedArtifacts[key] = rawResolvedArtifacts.requiredField<String>(key);
-      }
-    } on FormatException catch (e) {
-      throw RpcException.invalidParams('Invalid "$resolvedArtifactsParam" parameter: ${e.message}');
-    }
-
-    final context = ExtensionBuildContext(
-      buildMode: mode,
-      flutterRoot: flutterRootUri,
-      mainPath: mainPath,
-      outputDir: outputDirUri,
-      projectRoot: projectRootUri,
-      resolvedArtifacts: resolvedArtifacts,
-    );
     return (targetName, context);
   }
 
   static (String targetName, ExtensionAssembleContext context) _parseAssembleRequest(
     Map<String, Object?> params,
   ) {
-    final (String targetName, ExtensionBuildContext buildContext) = _parseBuildRequest(params);
-    final Uri buildDirUri;
+    final String targetName;
+    final ExtensionAssembleContext context;
     try {
-      buildDirUri = _requireAbsoluteDirectoryUri(params, buildDirParam);
+      targetName = params.requiredField<String>(targetNameParam);
+      context = ExtensionAssembleContext.fromJson(params);
     } on FormatException catch (e) {
       throw RpcException.invalidParams(e.message);
     }
-    final context = ExtensionAssembleContext(
-      buildDir: buildDirUri,
-      buildMode: buildContext.buildMode,
-      flutterRoot: buildContext.flutterRoot,
-      mainPath: buildContext.mainPath,
-      outputDir: buildContext.outputDir,
-      projectRoot: buildContext.projectRoot,
-      resolvedArtifacts: buildContext.resolvedArtifacts,
-    );
     return (targetName, context);
   }
 

@@ -4,6 +4,7 @@
 
 import 'dart:isolate';
 
+import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
@@ -56,22 +57,54 @@ final class _RecordingExtensionBuildManager extends ExtensionBuildManager {
     required Uri projectRoot,
     required Map<String, String> resolvedArtifacts,
     required String targetName,
+    Map<String, bool> buildFlags = const <String, bool>{},
+    String? buildName,
+    String? buildNumber,
+    Map<String, String?> buildOptions = const <String, String?>{},
+    Uri? codeSizeDirectory,
+    Map<String, String?>? configuration,
+    Map<String, String> dartDefines = const <String, String>{},
+    bool dartObfuscation = false,
+    List<String> extraFrontEndOptions = const <String>[],
+    List<String> extraGenSnapshotOptions = const <String>[],
+    String? flavor,
+    Uri? splitDebugInfo,
+    String? targetDeviceId,
+    String? targetPlatform,
+    bool? trackWidgetCreation,
+    bool? treeShakeIcons,
   }) async {
     lastBuildArgs = <String, Object?>{
+      'buildFlags': buildFlags,
       'buildMode': buildMode,
+      'buildName': buildName,
+      'buildNumber': buildNumber,
+      'buildOptions': buildOptions,
+      'codeSizeDirectory': codeSizeDirectory,
+      'configuration': configuration,
+      'dartDefines': dartDefines,
+      'dartObfuscation': dartObfuscation,
+      'extraFrontEndOptions': extraFrontEndOptions,
+      'extraGenSnapshotOptions': extraGenSnapshotOptions,
+      'flavor': flavor,
       'flutterRoot': flutterRoot,
       'mainPath': mainPath,
       'outputDir': outputDir,
       'projectRoot': projectRoot,
       'resolvedArtifacts': resolvedArtifacts,
+      'splitDebugInfo': splitDebugInfo,
+      'targetDeviceId': targetDeviceId,
       'targetName': targetName,
+      'targetPlatform': targetPlatform,
+      'trackWidgetCreation': trackWidgetCreation,
+      'treeShakeIcons': treeShakeIcons,
     };
     return const ExtensionBuildResult(success: true);
   }
 }
 
 final class _TestBuildTarget extends BuildTarget {
-  const _TestBuildTarget({
+  _TestBuildTarget({
     required super.description,
     required this.name,
     this.artifacts = const <ExtensionArtifact>{},
@@ -133,7 +166,7 @@ final class _TestAssembleTarget extends AssembleTarget {
 
 final class _SucceedingBuildService extends BuildService {
   @override
-  List<BuildTarget> get buildTargets => const <BuildTarget>[
+  List<BuildTarget> get buildTargets => <BuildTarget>[
     _TestBuildTarget(
       description: 'Hermetic custom build target.',
       name: 'custom-hermetic-build',
@@ -168,7 +201,7 @@ void _succeedingBuildExtensionEntryPoint(SendPort sendPort) {
 
 final class _FailingAndConflictingBuildService extends BuildService {
   @override
-  List<BuildTarget> get buildTargets => const <BuildTarget>[
+  List<BuildTarget> get buildTargets => <BuildTarget>[
     _TestBuildTarget(
       description: 'Failing custom build target.',
       name: 'failing-build',
@@ -179,12 +212,12 @@ final class _FailingAndConflictingBuildService extends BuildService {
       description: 'Custom build target with custom embedder platform.',
       name: 'custom-platform-build',
       targetPlatform: 'custom-embedder-arm64',
-      artifacts: <ExtensionArtifact>{BuiltInArtifacts.icuData},
+      artifacts: const <ExtensionArtifact>{BuiltInArtifacts.icuData},
     ),
     _TestBuildTarget(
       description: 'Custom build target with unsupported artifact.',
       name: 'unsupported-artifact-build',
-      artifacts: <ExtensionArtifact>{ExtensionArtifact('unsupported-artifact')},
+      artifacts: const <ExtensionArtifact>{ExtensionArtifact('unsupported-artifact')},
     ),
     _TestBuildTarget(description: 'Conflicting bundle target.', name: 'bundle'),
     _TestBuildTarget(description: 'Empty target name that should be skipped.', name: ''),
@@ -219,7 +252,7 @@ void _failingBuildExtensionEntryPoint(SendPort sendPort) {
 
 final class _FirstDuplicateBuildService extends BuildService {
   @override
-  List<BuildTarget> get buildTargets => const <BuildTarget>[
+  List<BuildTarget> get buildTargets => <BuildTarget>[
     _TestBuildTarget(description: 'First extension shared target.', name: 'shared-target'),
   ];
 
@@ -242,7 +275,7 @@ void _firstDuplicateExtensionEntryPoint(SendPort sendPort) {
 
 final class _SecondDuplicateBuildService extends BuildService {
   @override
-  List<BuildTarget> get buildTargets => const <BuildTarget>[
+  List<BuildTarget> get buildTargets => <BuildTarget>[
     _TestBuildTarget(
       description: 'Second extension shared target.',
       name: 'shared-target',
@@ -285,6 +318,163 @@ void _throwingQueryExtensionEntryPoint(SendPort sendPort) {
     <ToolExtensionService>[_ThrowingQueryBuildService()],
     supportedPlatforms: const <String>{'linux'},
   );
+}
+
+final class _TestConfigService extends ConfigurationExtension {
+  @override
+  String get title => 'Test Custom Embedder Configuration';
+
+  @override
+  Future<List<FeatureFlag>> getFeatureFlags() async => const <FeatureFlag>[
+    FeatureFlag(
+      help: 'Enable custom embedder support.',
+      enabledByDefault: true,
+      name: 'enable-custom-embedder',
+    ),
+  ];
+
+  @override
+  Future<List<ConfigOption>> getConfigurations() async => const <ConfigOption>[
+    ConfigOption(
+      help: 'Path to custom embedder SDK.',
+      name: 'custom-embedder-sdk',
+      value: '/default/sdk',
+    ),
+  ];
+}
+
+final class _SecondaryConfigService extends ConfigurationExtension {
+  @override
+  String get title => 'Secondary Embedder Configuration';
+
+  @override
+  Future<List<ConfigOption>> getConfigurations() async => const <ConfigOption>[
+    ConfigOption(
+      help: 'Path to secondary embedder SDK.',
+      name: 'secondary-embedder-sdk',
+      value: '/default/secondary-sdk',
+    ),
+  ];
+}
+
+final class _CapturingBuildTarget extends BuildTarget {
+  _CapturingBuildTarget(this._capturePort)
+    : super(
+        description: 'Capturing build target.',
+        outputDir:
+            '${BuiltInPlaceholders.outputDir}/captured/${BuiltInPlaceholders.targetPlatform}/${BuiltInPlaceholders.buildMode}',
+        targetPlatform: 'linux-x64',
+        targetPlatforms: const <String>{'linux-x64', 'linux-arm64'},
+      );
+
+  final SendPort _capturePort;
+
+  @override
+  String get name => 'capturing-build';
+
+  @override
+  List<BuildFlag> get buildFlags => const <BuildFlag>[
+    BuildFlag(help: 'Sign the output bundle.', name: 'sign-bundle', abbr: 's'),
+    BuildFlag(help: 'Collides with built-in --pub.', name: 'pub'),
+    BuildFlag(help: 'Collides with built-in -t.', name: 'collide-abbr', abbr: 't'),
+  ];
+
+  @override
+  List<BuildOption> get buildOptions => const <BuildOption>[
+    BuildOption(
+      help: 'Select bundle format.',
+      name: 'bundle-format',
+      allowed: <String>['ipk', 'tar'],
+      defaultsTo: 'ipk',
+    ),
+    BuildOption(help: 'Collides with built-in --flavor.', name: 'flavor'),
+  ];
+
+  @override
+  Future<ExtensionBuildResult> build(ExtensionBuildContext context) async {
+    _capturePort.send(context.toMap());
+    return const ExtensionBuildResult(success: true);
+  }
+}
+
+final class _CapturingAssembleTarget extends AssembleTarget {
+  const _CapturingAssembleTarget(this._capturePort, {this.targetName = 'capturing-assemble'})
+    : super(description: 'Capturing assemble target.', targetPlatform: 'linux-x64');
+
+  final SendPort _capturePort;
+  final String targetName;
+
+  @override
+  String get name => targetName;
+
+  @override
+  List<ExtensionSource> get inputs => <ExtensionSource>[
+    ExtensionSource.pattern('${BuiltInPlaceholders.projectDir}/pubspec.yaml'),
+  ];
+
+  @override
+  List<ExtensionSource> get outputs => <ExtensionSource>[
+    ExtensionSource.pattern('${BuiltInPlaceholders.outputDir}/captured.out'),
+  ];
+
+  @override
+  Future<ExtensionBuildResult> build(ExtensionAssembleContext context) async {
+    _capturePort.send(context.toMap());
+    return const ExtensionBuildResult(success: true);
+  }
+}
+
+final class _CapturingBuildService extends BuildService {
+  _CapturingBuildService(this._capturePort, {this.assembleTargetName = 'capturing-assemble'});
+
+  final SendPort _capturePort;
+  final String assembleTargetName;
+
+  @override
+  List<BuildTarget> get buildTargets => <BuildTarget>[_CapturingBuildTarget(_capturePort)];
+
+  @override
+  List<AssembleTarget> get assembleTargets => <AssembleTarget>[
+    _CapturingAssembleTarget(_capturePort, targetName: assembleTargetName),
+  ];
+}
+
+ExtensionEntryPoint _createCapturingExtensionEntryPoint(SendPort capturePort) {
+  return (SendPort sendPort) {
+    ToolExtensionEntryPoint.run(
+      sendPort,
+      <ToolExtensionService>[_TestConfigService(), _CapturingBuildService(capturePort)],
+      supportedPlatforms: const <String>{'linux'},
+    );
+  };
+}
+
+ExtensionEntryPoint _createSecondaryCapturingExtensionEntryPoint(SendPort capturePort) {
+  return (SendPort sendPort) {
+    ToolExtensionEntryPoint.run(
+      sendPort,
+      <ToolExtensionService>[
+        _SecondaryConfigService(),
+        _CapturingBuildService(capturePort, assembleTargetName: 'secondary-capturing-assemble'),
+      ],
+      supportedPlatforms: const <String>{'linux'},
+    );
+  };
+}
+
+final class _DeviceIdExtensionBuildSubCommand extends ExtensionBuildSubCommand {
+  _DeviceIdExtensionBuildSubCommand({
+    required super.buildManager,
+    required super.target,
+    required super.toolContext,
+    required super.verboseHelp,
+  });
+
+  static final ArgResults _deviceGlobalResults = (ArgParser()..addOption('device-id', abbr: 'd'))
+      .parse(<String>['-d', 'custom-device-1']);
+
+  @override
+  ArgResults? get globalResults => _deviceGlobalResults;
 }
 
 void main() {
@@ -876,50 +1066,39 @@ void main() {
       },
     );
 
-    testUsingContext(
-      'ExtensionBuildSubCommand forwards flutterRoot, outputDir, and resolvedArtifacts in build parameters',
-      () async {
-        final fakeBuildManager = _RecordingExtensionBuildManager();
-        const target = ExtensionBuildTarget(
-          description: 'Custom hermetic build target.',
-          name: 'custom-hermetic-build',
-          outputDir:
-              '${BuiltInPlaceholders.outputDir}/custom/${BuiltInPlaceholders.targetPlatform}/${BuiltInPlaceholders.buildMode}',
-          targetPlatform: 'linux-x64',
-        );
+    testWithoutContext('ExtensionBuildSubCommand forwards flutterRoot, outputDir, and resolvedArtifacts in build parameters', () async {
+      final fakeBuildManager = _RecordingExtensionBuildManager();
+      final target = ExtensionBuildTarget(
+        description: 'Custom hermetic build target.',
+        name: 'custom-hermetic-build',
+        outputDir:
+            '${BuiltInPlaceholders.outputDir}/custom/${BuiltInPlaceholders.targetPlatform}/${BuiltInPlaceholders.buildMode}',
+        targetPlatform: 'linux-x64',
+      );
 
-        final subCommand = ExtensionBuildSubCommand(
-          buildManager: fakeBuildManager,
-          target: target,
-          toolContext: FakeToolContext(fs: fs, logger: testLogger),
-          verboseHelp: false,
-        );
+      final subCommand = ExtensionBuildSubCommand(
+        buildManager: fakeBuildManager,
+        target: target,
+        toolContext: FakeToolContext(fs: fs, logger: BufferLogger.test()),
+        verboseHelp: false,
+      );
 
-        final FlutterCommandResult result = await subCommand.runCommand();
-        expect(result.exitStatus, ExitStatus.success);
+      final FlutterCommandResult result = await subCommand.runCommand();
+      expect(result.exitStatus, ExitStatus.success);
 
-        expect(fakeBuildManager.lastBuildArgs, isNotNull);
-        expect(fakeBuildManager.lastBuildArgs!['targetName'], equals('custom-hermetic-build'));
-        expect(
-          fakeBuildManager.lastBuildArgs!['flutterRoot'],
-          equals(fs.directory('/flutter').uri),
-        );
-        expect(
-          fakeBuildManager.lastBuildArgs!['outputDir'],
-          equals(fs.directory('/build/custom/linux-x64/release').uri),
-        );
-        expect(fakeBuildManager.lastBuildArgs!['resolvedArtifacts'], isA<Map<String, String>>());
-      },
-      overrides: <Type, Generator>{
-        FeatureFlags: () => TestFeatureFlags(isToolExtensionsEnabled: true),
-        FileSystem: () => fs,
-        ProcessManager: () => FakeProcessManager.any(),
-      },
-    );
+      expect(fakeBuildManager.lastBuildArgs, isNotNull);
+      expect(fakeBuildManager.lastBuildArgs!['targetName'], equals('custom-hermetic-build'));
+      expect(fakeBuildManager.lastBuildArgs!['flutterRoot'], equals(fs.directory('/flutter').uri));
+      expect(
+        fakeBuildManager.lastBuildArgs!['outputDir'],
+        equals(fs.directory('/build/custom/linux-x64/release').uri),
+      );
+      expect(fakeBuildManager.lastBuildArgs!['resolvedArtifacts'], isA<Map<String, String>>());
+    });
 
     testWithoutContext('ExtensionBuildSubCommand resolves {OUTPUT_DIR} using custom build-dir from Config', () async {
       final buildManager = _RecordingExtensionBuildManager();
-      const target = ExtensionBuildTarget(
+      final target = ExtensionBuildTarget(
         description: 'Custom hermetic build target.',
         name: 'custom-hermetic-build',
         outputDir:
@@ -946,7 +1125,7 @@ void main() {
       'ExtensionBuildSubCommand throws ToolExit when outputDir contains unsupported placeholder',
       () async {
         final buildManager = _RecordingExtensionBuildManager();
-        const target = ExtensionBuildTarget(
+        final target = ExtensionBuildTarget(
           description: 'Custom hermetic build target.',
           name: 'custom-hermetic-build',
           outputDir: '${BuiltInPlaceholders.buildDir}/custom',
@@ -1126,5 +1305,251 @@ void main() {
         ProcessManager: () => FakeProcessManager.any(),
       },
     );
+
+    testWithoutContext('ExtensionBuildSubCommand registers custom flags, options, and multi-arch --target-platform and forwards full ExtensionBuildContext', () async {
+      final captureReceivePort = ReceivePort();
+      addTearDown(captureReceivePort.close);
+      final capturedContexts = <ExtensionBuildContext>[];
+      captureReceivePort.listen((Object? message) {
+        if (message case final Map<String, Object?> map) {
+          capturedContexts.add(ExtensionBuildContext.fromJson(map));
+        }
+      });
+
+      final logger = BufferLogger.test();
+      final config = Config.test()..setValue('custom-embedder-sdk', '/opt/custom-sdk');
+      final featureFlags = TestFeatureFlags(isToolExtensionsEnabled: true);
+      final manager = ExtensionManager(
+        hostPlatform: HostPlatform.linux_x64,
+        logger: logger,
+        entryPoints: <ExtensionEntryPoint>[
+          _createCapturingExtensionEntryPoint(captureReceivePort.sendPort),
+        ],
+        featureFlags: featureFlags,
+      );
+      final buildManager = ExtensionBuildManager(
+        config: config,
+        extensionManager: manager,
+        featureFlags: featureFlags,
+        logger: logger,
+      );
+      final toolContext = FakeToolContext(
+        artifacts: Artifacts.test(fileSystem: fs),
+        cache: Cache.test(processManager: FakeProcessManager.any()),
+        config: config,
+        fs: fs,
+        logger: logger,
+        processManager: FakeProcessManager.any(),
+      );
+
+      final ExtensionBuildTarget target = (await buildManager.getBuildTargets()).singleWhere(
+        (ExtensionBuildTarget t) => t.name == 'capturing-build',
+      );
+      final subCommand = ExtensionBuildSubCommand(
+        buildManager: buildManager,
+        target: target,
+        toolContext: toolContext,
+        verboseHelp: false,
+      );
+
+      final CommandRunner<void> commandRunner = createTestCommandRunner(
+        subCommand,
+        null,
+        toolContext,
+        featureFlags,
+      );
+      await commandRunner.run(<String>[
+        'capturing-build',
+        '--no-pub',
+        '--release',
+        '--target-platform=linux-arm64',
+        '--sign-bundle',
+        '--bundle-format=tar',
+        '--flavor=production',
+        '--build-name=3.4.5',
+        '--build-number=12',
+        '--dart-define=ENV=prod',
+        '--obfuscate',
+        '--split-debug-info=rel_symbols',
+        '--extra-front-end-options=--fe1,--fe2',
+        '--extra-gen-snapshot-options=--gs1',
+        '--no-tree-shake-icons',
+        '--no-track-widget-creation',
+      ]);
+
+      expect(
+        logger.warningText,
+        allOf(
+          contains('Skipping custom build flag "--pub" on build target "capturing-build"'),
+          contains('Skipping custom build flag "--collide-abbr" on build target "capturing-build"'),
+          contains('Skipping custom build option "--flavor" on build target "capturing-build"'),
+        ),
+      );
+
+      expect(capturedContexts, hasLength(1));
+      final ExtensionBuildContext captured = capturedContexts.single;
+      expect(captured.buildMode, BuildMode.release);
+      expect(captured.targetPlatform, 'linux-arm64');
+      expect(captured.outputDir, fs.directory('/build/captured/linux-arm64/release').uri);
+      expect(captured.buildFlags, equals(const <String, bool>{'sign-bundle': true}));
+      expect(captured.buildOptions, equals(const <String, String?>{'bundle-format': 'tar'}));
+      expect(captured.flavor, 'production');
+      expect(captured.buildName, '3.4.5');
+      expect(captured.buildNumber, '12');
+      expect(captured.dartDefines, containsPair('ENV', 'prod'));
+      expect(captured.dartDefines, containsPair('FLUTTER_APP_FLAVOR', 'production'));
+      expect(captured.dartObfuscation, isTrue);
+      expect(captured.splitDebugInfo, Uri.parse('file:///rel_symbols/'));
+      expect(captured.codeSizeDirectory, isNull);
+      expect(captured.extraFrontEndOptions, equals(const <String>['--fe1', '--fe2']));
+      expect(captured.extraGenSnapshotOptions, equals(const <String>['--gs1']));
+      expect(captured.treeShakeIcons, isFalse);
+      expect(captured.trackWidgetCreation, isFalse);
+      expect(captured.targetDeviceId, isNull);
+      expect(
+        captured.configuration,
+        equals(const <String, String?>{
+          'enable-custom-embedder': 'true',
+          'custom-embedder-sdk': '/opt/custom-sdk',
+        }),
+      );
+
+      await commandRunner.run(<String>[
+        'capturing-build',
+        '--no-pub',
+        '--release',
+        '--analyze-size',
+        '--code-size-directory=rel_code_size',
+      ]);
+      expect(capturedContexts, hasLength(2));
+      expect(capturedContexts[1].codeSizeDirectory, Uri.parse('file:///rel_code_size/'));
+      expect(capturedContexts[1].trackWidgetCreation, isTrue);
+      expect(capturedContexts[1].treeShakeIcons, isTrue);
+
+      final deviceSubCommand = _DeviceIdExtensionBuildSubCommand(
+        buildManager: buildManager,
+        target: target,
+        toolContext: toolContext,
+        verboseHelp: false,
+      );
+      await createTestCommandRunner(
+        deviceSubCommand,
+        null,
+        toolContext,
+        featureFlags,
+      ).run(<String>['capturing-build', '--no-pub']);
+      expect(capturedContexts, hasLength(3));
+      expect(capturedContexts[2].targetDeviceId, 'custom-device-1');
+
+      await manager.dispose();
+    });
+
+    testWithoutContext('AssembleCommand hashes extension configuration into Environment.defines and isolates configurations across multiple extensions', () async {
+      final captureReceivePort = ReceivePort();
+      addTearDown(captureReceivePort.close);
+      final capturedAssembleContexts = <ExtensionAssembleContext>[];
+      captureReceivePort.listen((Object? message) {
+        if (message case final Map<String, Object?> map) {
+          capturedAssembleContexts.add(ExtensionAssembleContext.fromJson(map));
+        }
+      });
+
+      final logger = BufferLogger.test();
+      final config = Config.test()
+        ..setValue('custom-embedder-sdk', '/sdk/v1')
+        ..setValue('secondary-embedder-sdk', '/secondary/v1');
+      final featureFlags = TestFeatureFlags(isToolExtensionsEnabled: true);
+      final manager = ExtensionManager(
+        hostPlatform: HostPlatform.linux_x64,
+        logger: logger,
+        entryPoints: <ExtensionEntryPoint>[
+          _createCapturingExtensionEntryPoint(captureReceivePort.sendPort),
+          _createSecondaryCapturingExtensionEntryPoint(captureReceivePort.sendPort),
+        ],
+        featureFlags: featureFlags,
+      );
+      final buildManager = ExtensionBuildManager(
+        config: config,
+        extensionManager: manager,
+        featureFlags: featureFlags,
+        logger: logger,
+      );
+
+      final recordedBuildDirs = <String>[];
+      final pendingTargetBuilds = <Future<void>>[];
+      Future<void> runAssemble(List<String> targetNames) async {
+        final command = AssembleCommand(
+          buildSystem: TestBuildSystem.all(BuildResult(success: true), (
+            Target target,
+            Environment environment,
+          ) {
+            recordedBuildDirs.add(environment.buildDir.path);
+            if (target is CompositeTarget) {
+              for (final Target dep in target.dependencies) {
+                pendingTargetBuilds.add(dep.build(environment));
+              }
+            } else {
+              pendingTargetBuilds.add(target.build(environment));
+            }
+          }),
+          extensionBuildManager: buildManager,
+          featureFlags: featureFlags,
+          toolContext: FakeToolContext(
+            artifacts: Artifacts.test(fileSystem: fs),
+            cache: Cache.test(processManager: FakeProcessManager.any()),
+            config: config,
+            fs: fs,
+            logger: logger,
+            processManager: FakeProcessManager.any(),
+          ),
+        );
+        final CommandRunner<void> runner = createTestCommandRunner(command);
+        await runner.run(<String>[
+          'assemble',
+          '-o',
+          '/out',
+          '-d',
+          'BuildMode=debug',
+          '-d',
+          'CustomKey=CustomVal',
+          ...targetNames,
+        ]);
+        await Future.wait(pendingTargetBuilds);
+        pendingTargetBuilds.clear();
+        await pumpEventQueue();
+      }
+
+      await runAssemble(<String>['capturing-assemble']);
+      config.setValue('custom-embedder-sdk', '/sdk/v2');
+      await runAssemble(<String>['capturing-assemble']);
+
+      expect(recordedBuildDirs, hasLength(2));
+      expect(recordedBuildDirs[0], isNot(equals(recordedBuildDirs[1])));
+      expect(capturedAssembleContexts, hasLength(2));
+      expect(capturedAssembleContexts[0].configuration['custom-embedder-sdk'], equals('/sdk/v1'));
+      expect(capturedAssembleContexts[1].configuration['custom-embedder-sdk'], equals('/sdk/v2'));
+      expect(
+        capturedAssembleContexts[0].extraDefines,
+        equals(const <String, String>{'CustomKey': 'CustomVal'}),
+      );
+
+      // Multi-extension assemble run: CompositeTarget wraps both ExtensionTargets,
+      // and each extension receives only its own ConfigurationExtension keys.
+      capturedAssembleContexts.clear();
+      await runAssemble(<String>['capturing-assemble', 'secondary-capturing-assemble']);
+      expect(capturedAssembleContexts, hasLength(2));
+      expect(
+        capturedAssembleContexts.map((ExtensionAssembleContext c) => c.configuration),
+        unorderedEquals(<Map<String, String?>>[
+          const <String, String?>{
+            'enable-custom-embedder': 'true',
+            'custom-embedder-sdk': '/sdk/v2',
+          },
+          const <String, String?>{'secondary-embedder-sdk': '/secondary/v1'},
+        ]),
+      );
+
+      await manager.dispose();
+    });
   });
 }

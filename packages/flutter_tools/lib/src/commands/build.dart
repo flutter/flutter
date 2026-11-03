@@ -285,16 +285,88 @@ class ExtensionBuildSubCommand extends BuildSubCommand {
          toolContext: toolContext,
        ) {
     registerOptionBundle(const BuildModeOptionsBundle());
+    registerOptionBundle(const CommonBuildOptionsBundle());
+    registerOptionBundle(const DartCompileOptionsBundle());
     argParser.addDescriptors(const <OptionDescriptor<Object?>>[
-      CommonOptions.target,
-      CommonOptions.pub,
+      BuildInfoOptions.flavor,
+      BuildInfoOptions.splitDebugInfo,
+      BuildInfoOptions.obfuscate,
+      BuildInfoOptions.extraFrontEndOptions,
+      BuildInfoOptions.extraGenSnapshotOptions,
+      BuildInfoOptions.trackWidgetCreation,
+      BuildInfoOptions.analyzeSize,
+      BuildInfoOptions.codeSizeDirectory,
+      BuildInfoOptions.performanceMeasurementFile,
     ], verboseHelp: verboseHelp);
+
+    if (target.targetPlatforms.length > 1) {
+      argParser.addOption(
+        _targetPlatformOption,
+        allowed: target.targetPlatforms,
+        defaultsTo: target.targetPlatform ?? target.targetPlatforms.first,
+        help: 'The target platform for which the app is compiled.',
+      );
+    }
+
+    for (final BuildFlag flag in target.buildFlags) {
+      if (_hasOptionOrAbbrCollision(name: flag.name, abbr: flag.abbr)) {
+        logger.printWarning(
+          'Skipping custom build flag "--${flag.name}" on build target "${target.name}" '
+          'because an option or abbreviation with that name already exists.',
+        );
+        continue;
+      }
+      argParser.addFlag(
+        flag.name,
+        abbr: flag.abbr,
+        defaultsTo: flag.defaultsTo,
+        help: flag.help,
+        negatable: flag.negatable,
+      );
+      _registeredFlagNames.add(flag.name);
+    }
+
+    for (final BuildOption option in target.buildOptions) {
+      if (_hasOptionOrAbbrCollision(name: option.name, abbr: option.abbr)) {
+        logger.printWarning(
+          'Skipping custom build option "--${option.name}" on build target "${target.name}" '
+          'because an option or abbreviation with that name already exists.',
+        );
+        continue;
+      }
+      argParser.addOption(
+        option.name,
+        abbr: option.abbr,
+        allowed: option.allowed,
+        allowedHelp: option.allowedHelp,
+        defaultsTo: option.defaultsTo,
+        help: option.help,
+        mandatory: option.mandatory,
+        valueHelp: option.valueHelp,
+      );
+      _registeredOptionNames.add(option.name);
+    }
   }
 
+  static const String _targetPlatformOption = 'target-platform';
+  static const String _deviceIdGlobalOption = 'device-id';
+
   final ExtensionBuildManager _buildManager;
+  final _registeredFlagNames = <String>{};
+  final _registeredOptionNames = <String>{};
 
   /// The custom build target definition provided by the tool extension.
   final ExtensionBuildTarget target;
+
+  bool _hasOptionOrAbbrCollision({required String name, String? abbr}) {
+    if (argParser.options.containsKey(name)) {
+      return true;
+    }
+    if (abbr != null && argParser.findByAbbreviation(abbr) != null) {
+      return true;
+    }
+    return false;
+  }
 
   @override
   ToolContext get toolContext => super.toolContext!;
@@ -310,27 +382,69 @@ class ExtensionBuildSubCommand extends BuildSubCommand {
     final ToolContext(:Artifacts artifacts, :Config config, :FileSystem fs) = toolContext;
     final Directory projectDir = fs.currentDirectory;
     final BuildInfo buildInfo = await getBuildInfo();
+    final String? selectedTargetPlatform = target.targetPlatforms.length > 1
+        ? stringArg(_targetPlatformOption)
+        : (target.targetPlatform ?? target.targetPlatforms.firstOrNull);
     final Directory outputDir = resolveExtensionOutputDir(
       buildMode: buildInfo.mode,
       buildOutputDir: projectDir.childDirectory(getBuildDirectory(config, fs)),
       fileSystem: fs,
       projectDir: projectDir,
       target: target,
+      targetPlatform: selectedTargetPlatform,
     );
     final Map<String, String> resolvedArtifacts = resolveExtensionBuildTargetArtifacts(
       artifacts: artifacts,
       buildMode: buildInfo.mode,
       target: target,
+      targetPlatform: selectedTargetPlatform,
     );
 
+    final buildFlags = <String, bool>{
+      for (final String flagName in _registeredFlagNames) flagName: boolArg(flagName),
+    };
+    final buildOptions = <String, String?>{
+      for (final String optionName in _registeredOptionNames) optionName: stringArg(optionName),
+    };
+    final String? targetDeviceId = switch (globalResults?[_deviceIdGlobalOption]) {
+      final String id when id.isNotEmpty => id,
+      final List<String> ids when ids.isNotEmpty => ids.first,
+      _ => null,
+    };
+    final Uri? splitDebugInfo = switch (buildInfo.splitDebugInfoPath) {
+      final String raw when raw.isNotEmpty =>
+        (fs.path.isRelative(raw) ? projectDir.childDirectory(raw) : fs.directory(raw)).uri,
+      _ => null,
+    };
+    final Uri? codeSizeDirectory = switch (buildInfo.codeSizeDirectory) {
+      final String raw when raw.isNotEmpty =>
+        (fs.path.isRelative(raw) ? projectDir.childDirectory(raw) : fs.directory(raw)).uri,
+      _ => null,
+    };
+
     final ExtensionBuildResult result = await _buildManager.build(
+      buildFlags: buildFlags,
       buildMode: buildInfo.mode,
+      buildName: buildInfo.buildName,
+      buildNumber: buildInfo.buildNumber,
+      buildOptions: buildOptions,
+      codeSizeDirectory: codeSizeDirectory,
+      dartDefines: parseExtensionDartDefines(buildInfo.dartDefines),
+      dartObfuscation: buildInfo.dartObfuscation,
+      extraFrontEndOptions: buildInfo.extraFrontEndOptions,
+      extraGenSnapshotOptions: buildInfo.extraGenSnapshotOptions,
+      flavor: buildInfo.flavor,
       flutterRoot: fs.directory(Cache.flutterRoot).uri,
       mainPath: targetFile,
       outputDir: outputDir.uri,
       projectRoot: projectDir.uri,
       resolvedArtifacts: resolvedArtifacts,
+      splitDebugInfo: splitDebugInfo,
+      targetDeviceId: targetDeviceId,
       targetName: target.name,
+      targetPlatform: selectedTargetPlatform,
+      trackWidgetCreation: buildInfo.trackWidgetCreation,
+      treeShakeIcons: buildInfo.treeShakeIcons,
     );
 
     if (result.success) {

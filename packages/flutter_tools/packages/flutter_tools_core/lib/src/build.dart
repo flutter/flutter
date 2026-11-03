@@ -7,6 +7,7 @@ import 'package:meta/meta.dart';
 import 'build_system/constants.dart';
 import 'build_system/source.dart';
 import 'json_utils.dart';
+import 'project.dart';
 
 export 'build_system/constants.dart';
 export 'build_system/depfile.dart';
@@ -84,17 +85,716 @@ enum BuildMode {
   String toString() => cliName;
 }
 
+/// A boolean CLI flag declared by a custom [ExtensionBuildTarget].
+@immutable
+class BuildFlag {
+  const BuildFlag({
+    required this.help,
+    required this.name,
+    this.abbr,
+    this.defaultsTo = false,
+    this.negatable = true,
+  }) : assert(name != ''),
+       assert(abbr == null || abbr.length == 1);
+
+  /// Deserializes a [BuildFlag] from a JSON-serializable map.
+  factory BuildFlag.fromJson(Map<String, Object?> json) {
+    final String name = json.requiredField<String>(nameKey);
+    if (name.isEmpty) {
+      throw const FormatException('Invalid "$nameKey" in BuildFlag: must not be empty.');
+    }
+    final String? abbr = json.nullableField<String>(abbrKey);
+    if (abbr != null && abbr.length != 1) {
+      throw const FormatException('Invalid "$abbrKey" in BuildFlag: must be a single character.');
+    }
+    return BuildFlag(
+      help: json.requiredField<String>(helpKey),
+      name: name,
+      abbr: abbr,
+      defaultsTo: json.requiredField<bool>(defaultsToKey),
+      negatable: json.requiredField<bool>(negatableKey),
+    );
+  }
+
+  /// Map key for [abbr].
+  static const String abbrKey = 'abbr';
+
+  /// Map key for [defaultsTo].
+  static const String defaultsToKey = 'defaultsTo';
+
+  /// Map key for [help].
+  static const String helpKey = 'help';
+
+  /// Map key for [name].
+  static const String nameKey = 'name';
+
+  /// Map key for [negatable].
+  static const String negatableKey = 'negatable';
+
+  /// Deserializes a list of [BuildFlag] objects from JSON.
+  static List<BuildFlag> listFromJson(Object? raw) {
+    if (raw == null) {
+      return const <BuildFlag>[];
+    }
+    if (raw is! List<Object?>) {
+      throw FormatException('Invalid BuildFlag list: expected List, got ${raw.runtimeType}.');
+    }
+    return <BuildFlag>[
+      for (final Object? item in raw)
+        if (item case final Map<String, Object?> map)
+          BuildFlag.fromJson(map)
+        else
+          throw FormatException(
+            'Invalid BuildFlag element: expected Map<String, Object?>, got ${item.runtimeType}.',
+          ),
+    ];
+  }
+
+  /// Optional single-character abbreviation for this flag.
+  final String? abbr;
+
+  /// The default boolean value for this flag when not specified on the CLI.
+  final bool defaultsTo;
+
+  /// Help text displayed in `flutter build <target> --help`.
+  final String help;
+
+  /// The CLI flag name (without leading `--`).
+  final String name;
+
+  /// Whether this flag supports `--no-<name>`.
+  final bool negatable;
+
+  /// Serializes this [BuildFlag] to a JSON-serializable map.
+  Map<String, Object?> toMap() => <String, Object?>{
+    abbrKey: ?abbr,
+    defaultsToKey: defaultsTo,
+    helpKey: help,
+    nameKey: name,
+    negatableKey: negatable,
+  };
+
+  @override
+  String toString() =>
+      'BuildFlag(name: $name, help: $help, abbr: $abbr, '
+      'defaultsTo: $defaultsTo, negatable: $negatable)';
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is BuildFlag &&
+            other.abbr == abbr &&
+            other.defaultsTo == defaultsTo &&
+            other.help == help &&
+            other.name == name &&
+            other.negatable == negatable);
+  }
+
+  @override
+  int get hashCode => Object.hash(abbr, defaultsTo, help, name, negatable);
+}
+
+/// A string-valued CLI option declared by a custom [ExtensionBuildTarget].
+@immutable
+class BuildOption {
+  const BuildOption({
+    required this.help,
+    required this.name,
+    this.abbr,
+    this.allowed,
+    this.allowedHelp,
+    this.defaultsTo,
+    this.mandatory = false,
+    this.valueHelp,
+  }) : assert(name != ''),
+       assert(abbr == null || abbr.length == 1);
+
+  /// Deserializes a [BuildOption] from a JSON-serializable map.
+  factory BuildOption.fromJson(Map<String, Object?> json) {
+    final String name = json.requiredField<String>(nameKey);
+    if (name.isEmpty) {
+      throw const FormatException('Invalid "$nameKey" in BuildOption: must not be empty.');
+    }
+    final String? abbr = json.nullableField<String>(abbrKey);
+    if (abbr != null && abbr.length != 1) {
+      throw const FormatException('Invalid "$abbrKey" in BuildOption: must be a single character.');
+    }
+    final List<String>? allowed = json.containsKey(allowedKey) && json[allowedKey] != null
+        ? json.stringIterable(allowedKey).toList()
+        : null;
+    final Map<String, Object?>? rawAllowedHelp = json.nullableField<Map<String, Object?>>(
+      allowedHelpKey,
+    );
+    final Map<String, String>? allowedHelp = rawAllowedHelp != null
+        ? _parseStringMap(rawAllowedHelp, allowedHelpKey)
+        : null;
+    return BuildOption(
+      help: json.requiredField<String>(helpKey),
+      name: name,
+      abbr: abbr,
+      allowed: allowed,
+      allowedHelp: allowedHelp,
+      defaultsTo: json.nullableField<String>(defaultsToKey),
+      mandatory: json.requiredField<bool>(mandatoryKey),
+      valueHelp: json.nullableField<String>(valueHelpKey),
+    );
+  }
+
+  /// Map key for [abbr].
+  static const String abbrKey = 'abbr';
+
+  /// Map key for [allowed].
+  static const String allowedKey = 'allowed';
+
+  /// Map key for [allowedHelp].
+  static const String allowedHelpKey = 'allowedHelp';
+
+  /// Map key for [defaultsTo].
+  static const String defaultsToKey = 'defaultsTo';
+
+  /// Map key for [help].
+  static const String helpKey = 'help';
+
+  /// Map key for [mandatory].
+  static const String mandatoryKey = 'mandatory';
+
+  /// Map key for [name].
+  static const String nameKey = 'name';
+
+  /// Map key for [valueHelp].
+  static const String valueHelpKey = 'valueHelp';
+
+  /// Deserializes a list of [BuildOption] objects from JSON.
+  static List<BuildOption> listFromJson(Object? raw) {
+    if (raw == null) {
+      return const <BuildOption>[];
+    }
+    if (raw is! List<Object?>) {
+      throw FormatException('Invalid BuildOption list: expected List, got ${raw.runtimeType}.');
+    }
+    return <BuildOption>[
+      for (final Object? item in raw)
+        if (item case final Map<String, Object?> map)
+          BuildOption.fromJson(map)
+        else
+          throw FormatException(
+            'Invalid BuildOption element: expected Map<String, Object?>, got ${item.runtimeType}.',
+          ),
+    ];
+  }
+
+  /// Optional single-character abbreviation for this option.
+  final String? abbr;
+
+  /// Optional list of allowed string values for this option.
+  final List<String>? allowed;
+
+  /// Optional map from allowed values to their help descriptions.
+  final Map<String, String>? allowedHelp;
+
+  /// Optional default string value when not specified on the CLI.
+  final String? defaultsTo;
+
+  /// Help text displayed in `flutter build <target> --help`.
+  final String help;
+
+  /// Whether this option must be provided by the user.
+  final bool mandatory;
+
+  /// The CLI option name (without leading `--`).
+  final String name;
+
+  /// Optional placeholder name for the option value in `--help` output.
+  final String? valueHelp;
+
+  /// Serializes this [BuildOption] to a JSON-serializable map.
+  Map<String, Object?> toMap() => <String, Object?>{
+    abbrKey: ?abbr,
+    allowedKey: ?allowed,
+    allowedHelpKey: ?allowedHelp,
+    defaultsToKey: ?defaultsTo,
+    helpKey: help,
+    mandatoryKey: mandatory,
+    nameKey: name,
+    valueHelpKey: ?valueHelp,
+  };
+
+  @override
+  String toString() =>
+      'BuildOption(name: $name, help: $help, abbr: $abbr, defaultsTo: $defaultsTo, '
+      'allowed: $allowed, allowedHelp: $allowedHelp, valueHelp: $valueHelp, '
+      'mandatory: $mandatory)';
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is BuildOption &&
+            other.abbr == abbr &&
+            _nullableListEquals(other.allowed, allowed) &&
+            _nullableMapEquals(other.allowedHelp, allowedHelp) &&
+            other.defaultsTo == defaultsTo &&
+            other.help == help &&
+            other.mandatory == mandatory &&
+            other.name == name &&
+            other.valueHelp == valueHelp);
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    abbr,
+    allowed == null ? null : Object.hashAll(allowed!),
+    allowedHelp == null ? null : _mapHash(allowedHelp!),
+    defaultsTo,
+    help,
+    mandatory,
+    name,
+    valueHelp,
+  );
+}
+
+/// Context passed to an extension target's `BuildTarget.build` method.
+@immutable
+class ExtensionBuildContext {
+  ExtensionBuildContext({
+    required this.buildMode,
+    required this.flutterRoot,
+    required this.mainPath,
+    required this.outputDir,
+    required this.projectRoot,
+    required this.resolvedArtifacts,
+    required this.trackWidgetCreation,
+    required this.treeShakeIcons,
+    this.buildFlags = const <String, bool>{},
+    this.buildName,
+    this.buildNumber,
+    this.buildOptions = const <String, String?>{},
+    this.codeSizeDirectory,
+    this.configuration = const <String, String?>{},
+    this.dartDefines = const <String, String>{},
+    this.dartObfuscation = false,
+    this.extraFrontEndOptions = const <String>[],
+    this.extraGenSnapshotOptions = const <String>[],
+    this.flavor,
+    this.splitDebugInfo,
+    this.targetDeviceId,
+    this.targetPlatform,
+  }) : assert(
+         codeSizeDirectory == null || codeSizeDirectory.isValidDirectoryUri,
+         'codeSizeDirectory must be an absolute file:// directory URI ending with "/".',
+       ),
+       assert(
+         splitDebugInfo == null || splitDebugInfo.isValidDirectoryUri,
+         'splitDebugInfo must be an absolute file:// directory URI ending with "/".',
+       );
+
+  /// Deserializes an [ExtensionBuildContext] from a JSON-serializable map.
+  factory ExtensionBuildContext.fromJson(Map<String, Object?> json) {
+    final String rawBuildMode = json.requiredField<String>(buildModeKey);
+    final BuildMode mode;
+    try {
+      mode = BuildMode.fromCliName(rawBuildMode);
+    } on ArgumentError {
+      throw const FormatException('Missing or invalid "$buildModeKey" parameter.');
+    }
+
+    return ExtensionBuildContext(
+      buildMode: mode,
+      flutterRoot: _parseDirectoryUri(json, flutterRootKey),
+      mainPath: json.requiredField<String>(mainPathKey),
+      outputDir: _parseDirectoryUri(json, outputDirKey),
+      projectRoot: _parseDirectoryUri(json, projectRootKey),
+      resolvedArtifacts: _parseRequiredStringMap(json, resolvedArtifactsKey),
+      trackWidgetCreation: json.requiredField<bool>(trackWidgetCreationKey),
+      treeShakeIcons: json.requiredField<bool>(treeShakeIconsKey),
+      buildFlags: _parseOptionalBoolMap(json, buildFlagsKey),
+      buildName: json.nullableField<String>(buildNameKey),
+      buildNumber: json.nullableField<String>(buildNumberKey),
+      buildOptions: _parseOptionalNullableStringMap(json, buildOptionsKey),
+      codeSizeDirectory: _parseOptionalDirectoryUri(json, codeSizeDirectoryKey),
+      configuration: _parseOptionalNullableStringMap(json, configurationKey),
+      dartDefines: _parseOptionalStringMap(json, dartDefinesKey),
+      dartObfuscation: json.requiredField<bool>(dartObfuscationKey),
+      extraFrontEndOptions: json.stringIterable(extraFrontEndOptionsKey).toList(),
+      extraGenSnapshotOptions: json.stringIterable(extraGenSnapshotOptionsKey).toList(),
+      flavor: json.nullableField<String>(flavorKey),
+      splitDebugInfo: _parseOptionalDirectoryUri(json, splitDebugInfoKey),
+      targetDeviceId: json.nullableField<String>(targetDeviceIdKey),
+      targetPlatform: json.nullableField<String>(targetPlatformKey),
+    );
+  }
+
+  /// Map key for [buildFlags].
+  static const String buildFlagsKey = 'buildFlags';
+
+  /// Map key for [buildMode].
+  static const String buildModeKey = 'buildMode';
+
+  /// Map key for [buildName].
+  static const String buildNameKey = 'buildName';
+
+  /// Map key for [buildNumber].
+  static const String buildNumberKey = 'buildNumber';
+
+  /// Map key for [buildOptions].
+  static const String buildOptionsKey = 'buildOptions';
+
+  /// Map key for [codeSizeDirectory].
+  static const String codeSizeDirectoryKey = 'codeSizeDirectory';
+
+  /// Map key for [configuration].
+  static const String configurationKey = 'configuration';
+
+  /// Map key for [dartDefines].
+  static const String dartDefinesKey = 'dartDefines';
+
+  /// Map key for [dartObfuscation].
+  static const String dartObfuscationKey = 'dartObfuscation';
+
+  /// Map key for [extraFrontEndOptions].
+  static const String extraFrontEndOptionsKey = 'extraFrontEndOptions';
+
+  /// Map key for [extraGenSnapshotOptions].
+  static const String extraGenSnapshotOptionsKey = 'extraGenSnapshotOptions';
+
+  /// Map key for [flavor].
+  static const String flavorKey = 'flavor';
+
+  /// Map key for [flutterRoot].
+  static const String flutterRootKey = 'flutterRoot';
+
+  /// Map key for [mainPath].
+  static const String mainPathKey = 'mainPath';
+
+  /// Map key for [outputDir].
+  static const String outputDirKey = 'outputDir';
+
+  /// Map key for [projectRoot].
+  static const String projectRootKey = 'projectRoot';
+
+  /// Map key for [resolvedArtifacts].
+  static const String resolvedArtifactsKey = 'resolvedArtifacts';
+
+  /// Map key for [splitDebugInfo].
+  static const String splitDebugInfoKey = 'splitDebugInfo';
+
+  /// Map key for [targetDeviceId].
+  static const String targetDeviceIdKey = 'targetDeviceId';
+
+  /// Map key for [targetPlatform].
+  static const String targetPlatformKey = 'targetPlatform';
+
+  /// Map key for [trackWidgetCreation].
+  static const String trackWidgetCreationKey = 'trackWidgetCreation';
+
+  /// Map key for [treeShakeIcons].
+  static const String treeShakeIconsKey = 'treeShakeIcons';
+
+  /// Values of custom [BuildFlag]s registered by the build target.
+  final Map<String, bool> buildFlags;
+
+  /// The compilation mode for the build.
+  final BuildMode buildMode;
+
+  /// The user-visible build name (e.g. `'1.0.0'`), if specified.
+  final String? buildName;
+
+  /// The build number (e.g. `'42'`), if specified.
+  final String? buildNumber;
+
+  /// Values of custom [BuildOption]s registered by the build target.
+  final Map<String, String?> buildOptions;
+
+  /// Directory `file:` URI where code size analysis files should be written, if requested.
+  final Uri? codeSizeDirectory;
+
+  /// Snapshot of the extension's owned `flutter config` settings.
+  final Map<String, String?> configuration;
+
+  /// Compile-time environment declarations passed via `--dart-define` and `--dart-define-from-file`.
+  final Map<String, String> dartDefines;
+
+  /// Whether Dart symbol obfuscation (`--obfuscate`) is enabled.
+  final bool dartObfuscation;
+
+  /// Additional options passed to the Dart front-end compiler (`--extra-front-end-options`).
+  final List<String> extraFrontEndOptions;
+
+  /// Additional options passed to `gen_snapshot` (`--extra-gen-snapshot-options`).
+  final List<String> extraGenSnapshotOptions;
+
+  /// The application flavor (`--flavor`), if specified.
+  final String? flavor;
+
+  /// The absolute directory URI (ending with `/`) to the Flutter SDK root directory.
+  final Uri flutterRoot;
+
+  /// The path to the main entrypoint file (typically `lib/main.dart`).
+  final String mainPath;
+
+  /// The absolute directory URI (ending with `/`) where final build outputs should be placed.
+  final Uri outputDir;
+
+  /// The absolute directory URI (ending with `/`) to the root directory of the Flutter project being built.
+  final Uri projectRoot;
+
+  /// A map of resolved engine artifact names to their absolute paths on the host.
+  ///
+  /// Keys correspond to [ExtensionArtifact.name] or [ExtensionHostArtifact.name] values.
+  final Map<String, String> resolvedArtifacts;
+
+  /// Directory `file:` URI where split debug symbols (`--split-debug-info`) should be written, if requested.
+  final Uri? splitDebugInfo;
+
+  /// The target device ID when building for a specific device (`-d`), if known.
+  final String? targetDeviceId;
+
+  /// The active target platform identifier for this build (e.g. `'linux-x64'`).
+  final String? targetPlatform;
+
+  /// Whether widget creation locations are tracked by the kernel transformer.
+  final bool trackWidgetCreation;
+
+  /// Whether icon font tree shaking (`--tree-shake-icons`) is enabled.
+  final bool treeShakeIcons;
+
+  /// Serializes this [ExtensionBuildContext] to a JSON-serializable map.
+  Map<String, Object?> toMap() => <String, Object?>{
+    if (buildFlags.isNotEmpty) buildFlagsKey: buildFlags,
+    buildModeKey: buildMode.cliName,
+    buildNameKey: ?buildName,
+    buildNumberKey: ?buildNumber,
+    if (buildOptions.isNotEmpty) buildOptionsKey: buildOptions,
+    codeSizeDirectoryKey: ?codeSizeDirectory?.toString(),
+    if (configuration.isNotEmpty) configurationKey: configuration,
+    if (dartDefines.isNotEmpty) dartDefinesKey: dartDefines,
+    dartObfuscationKey: dartObfuscation,
+    if (extraFrontEndOptions.isNotEmpty) extraFrontEndOptionsKey: extraFrontEndOptions,
+    if (extraGenSnapshotOptions.isNotEmpty) extraGenSnapshotOptionsKey: extraGenSnapshotOptions,
+    flavorKey: ?flavor,
+    flutterRootKey: flutterRoot.toString(),
+    mainPathKey: mainPath,
+    outputDirKey: outputDir.toString(),
+    projectRootKey: projectRoot.toString(),
+    resolvedArtifactsKey: resolvedArtifacts,
+    splitDebugInfoKey: ?splitDebugInfo?.toString(),
+    targetDeviceIdKey: ?targetDeviceId,
+    targetPlatformKey: ?targetPlatform,
+    trackWidgetCreationKey: trackWidgetCreation,
+    treeShakeIconsKey: treeShakeIcons,
+  };
+
+  @override
+  String toString() =>
+      'ExtensionBuildContext(buildMode: $buildMode, flutterRoot: $flutterRoot, '
+      'mainPath: $mainPath, outputDir: $outputDir, projectRoot: $projectRoot, '
+      'resolvedArtifacts: $resolvedArtifacts, trackWidgetCreation: $trackWidgetCreation, '
+      'treeShakeIcons: $treeShakeIcons, targetPlatform: $targetPlatform, '
+      'flavor: $flavor, buildName: $buildName, buildNumber: $buildNumber, '
+      'dartDefines: $dartDefines, dartObfuscation: $dartObfuscation, '
+      'splitDebugInfo: $splitDebugInfo, codeSizeDirectory: $codeSizeDirectory, '
+      'extraFrontEndOptions: $extraFrontEndOptions, '
+      'extraGenSnapshotOptions: $extraGenSnapshotOptions, '
+      'targetDeviceId: $targetDeviceId, configuration: $configuration, '
+      'buildFlags: $buildFlags, buildOptions: $buildOptions)';
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == ExtensionBuildContext &&
+            other is ExtensionBuildContext &&
+            _sameBuildFields(other));
+  }
+
+  bool _sameBuildFields(ExtensionBuildContext other) {
+    return other.buildMode == buildMode &&
+        other.flutterRoot == flutterRoot &&
+        other.mainPath == mainPath &&
+        other.outputDir == outputDir &&
+        other.projectRoot == projectRoot &&
+        _mapEquals(other.resolvedArtifacts, resolvedArtifacts) &&
+        other.trackWidgetCreation == trackWidgetCreation &&
+        other.treeShakeIcons == treeShakeIcons &&
+        _mapEquals(other.buildFlags, buildFlags) &&
+        other.buildName == buildName &&
+        other.buildNumber == buildNumber &&
+        _mapEquals(other.buildOptions, buildOptions) &&
+        other.codeSizeDirectory == codeSizeDirectory &&
+        _mapEquals(other.configuration, configuration) &&
+        _mapEquals(other.dartDefines, dartDefines) &&
+        other.dartObfuscation == dartObfuscation &&
+        _listEquals(other.extraFrontEndOptions, extraFrontEndOptions) &&
+        _listEquals(other.extraGenSnapshotOptions, extraGenSnapshotOptions) &&
+        other.flavor == flavor &&
+        other.splitDebugInfo == splitDebugInfo &&
+        other.targetDeviceId == targetDeviceId &&
+        other.targetPlatform == targetPlatform;
+  }
+
+  int get _buildFieldsHash => Object.hashAll(<Object?>[
+    buildMode,
+    flutterRoot,
+    mainPath,
+    outputDir,
+    projectRoot,
+    _mapHash(resolvedArtifacts),
+    trackWidgetCreation,
+    treeShakeIcons,
+    _mapHash(buildFlags),
+    buildName,
+    buildNumber,
+    _mapHash(buildOptions),
+    codeSizeDirectory,
+    _mapHash(configuration),
+    _mapHash(dartDefines),
+    dartObfuscation,
+    Object.hashAll(extraFrontEndOptions),
+    Object.hashAll(extraGenSnapshotOptions),
+    flavor,
+    splitDebugInfo,
+    targetDeviceId,
+    targetPlatform,
+  ]);
+
+  @override
+  int get hashCode => _buildFieldsHash;
+}
+
+/// Context passed to an extension target's `AssembleTarget.build` method.
+@immutable
+class ExtensionAssembleContext extends ExtensionBuildContext {
+  ExtensionAssembleContext({
+    required this.buildDir,
+    required super.buildMode,
+    required super.flutterRoot,
+    required super.mainPath,
+    required super.outputDir,
+    required super.projectRoot,
+    required super.resolvedArtifacts,
+    required super.trackWidgetCreation,
+    required super.treeShakeIcons,
+    super.buildFlags,
+    super.buildName,
+    super.buildNumber,
+    super.buildOptions,
+    super.codeSizeDirectory,
+    super.configuration,
+    super.dartDefines,
+    super.dartObfuscation,
+    this.extraDefines = const <String, String>{},
+    super.extraFrontEndOptions,
+    super.extraGenSnapshotOptions,
+    super.flavor,
+    super.splitDebugInfo,
+    super.targetDeviceId,
+    super.targetPlatform,
+  });
+
+  /// Deserializes an [ExtensionAssembleContext] from a JSON-serializable map.
+  factory ExtensionAssembleContext.fromJson(Map<String, Object?> json) {
+    final baseContext = ExtensionBuildContext.fromJson(json);
+    final Uri buildDir = _parseDirectoryUri(json, buildDirKey);
+    return ExtensionAssembleContext(
+      buildDir: buildDir,
+      buildMode: baseContext.buildMode,
+      flutterRoot: baseContext.flutterRoot,
+      mainPath: baseContext.mainPath,
+      outputDir: baseContext.outputDir,
+      projectRoot: baseContext.projectRoot,
+      resolvedArtifacts: baseContext.resolvedArtifacts,
+      trackWidgetCreation: baseContext.trackWidgetCreation,
+      treeShakeIcons: baseContext.treeShakeIcons,
+      buildFlags: baseContext.buildFlags,
+      buildName: baseContext.buildName,
+      buildNumber: baseContext.buildNumber,
+      buildOptions: baseContext.buildOptions,
+      codeSizeDirectory: baseContext.codeSizeDirectory,
+      configuration: baseContext.configuration,
+      dartDefines: baseContext.dartDefines,
+      dartObfuscation: baseContext.dartObfuscation,
+      extraDefines: _parseOptionalStringMap(json, extraDefinesKey),
+      extraFrontEndOptions: baseContext.extraFrontEndOptions,
+      extraGenSnapshotOptions: baseContext.extraGenSnapshotOptions,
+      flavor: baseContext.flavor,
+      splitDebugInfo: baseContext.splitDebugInfo,
+      targetDeviceId: baseContext.targetDeviceId,
+      targetPlatform: baseContext.targetPlatform,
+    );
+  }
+
+  /// Map key for [buildDir].
+  static const String buildDirKey = 'buildDir';
+
+  /// Map key for [extraDefines].
+  static const String extraDefinesKey = 'extraDefines';
+
+  /// The absolute directory URI (ending with `/`) used for intermediate build
+  /// artifacts (matching [BuiltInPlaceholders.buildDir]).
+  final Uri buildDir;
+
+  /// Non-standard `-dKey=Value` defines passed to `flutter assemble` or produced
+  /// by upstream assemble targets.
+  final Map<String, String> extraDefines;
+
+  @override
+  Map<String, Object?> toMap() => <String, Object?>{
+    ...super.toMap(),
+    buildDirKey: buildDir.toString(),
+    if (extraDefines.isNotEmpty) extraDefinesKey: extraDefines,
+  };
+
+  @override
+  String toString() =>
+      'ExtensionAssembleContext(buildDir: $buildDir, buildMode: $buildMode, '
+      'flutterRoot: $flutterRoot, mainPath: $mainPath, outputDir: $outputDir, '
+      'projectRoot: $projectRoot, resolvedArtifacts: $resolvedArtifacts, '
+      'trackWidgetCreation: $trackWidgetCreation, treeShakeIcons: $treeShakeIcons, '
+      'targetPlatform: $targetPlatform, flavor: $flavor, buildName: $buildName, '
+      'buildNumber: $buildNumber, dartDefines: $dartDefines, '
+      'dartObfuscation: $dartObfuscation, splitDebugInfo: $splitDebugInfo, '
+      'codeSizeDirectory: $codeSizeDirectory, '
+      'extraFrontEndOptions: $extraFrontEndOptions, '
+      'extraGenSnapshotOptions: $extraGenSnapshotOptions, '
+      'targetDeviceId: $targetDeviceId, configuration: $configuration, '
+      'buildFlags: $buildFlags, buildOptions: $buildOptions, '
+      'extraDefines: $extraDefines)';
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is ExtensionAssembleContext &&
+            _sameBuildFields(other) &&
+            other.buildDir == buildDir &&
+            _mapEquals(other.extraDefines, extraDefines));
+  }
+
+  @override
+  int get hashCode => Object.hash(_buildFieldsHash, buildDir, _mapHash(extraDefines));
+}
+
 /// Representation of a custom `flutter build` subcommand target provided by a tool extension.
 @immutable
 class ExtensionBuildTarget {
-  const ExtensionBuildTarget({
+  ExtensionBuildTarget({
     required this.description,
     required this.name,
     required this.outputDir,
-    this.targetPlatform,
     this.artifacts = const <ExtensionArtifact>{},
+    this.buildFlags = const <BuildFlag>[],
+    this.buildOptions = const <BuildOption>[],
     this.hostArtifacts = const <ExtensionHostArtifact>{},
-  }) : assert(targetPlatform == null || targetPlatform != '');
+    this.targetPlatform,
+    this._targetPlatforms = const <String>{},
+  }) : assert(targetPlatform == null || targetPlatform != ''),
+       assert(
+         _targetPlatforms.every((String platform) => platform.isNotEmpty),
+         'targetPlatforms must not contain empty platform names.',
+       ),
+       assert(
+         targetPlatform == null ||
+             _targetPlatforms.isEmpty ||
+             _targetPlatforms.contains(targetPlatform),
+         'targetPlatforms must contain targetPlatform when both are specified.',
+       );
 
   /// Deserializes an [ExtensionBuildTarget] from a JSON-serializable map.
   factory ExtensionBuildTarget.fromJson(Map<String, Object?> json) {
@@ -104,23 +804,45 @@ class ExtensionBuildTarget {
         'Invalid "$targetPlatformKey" in ExtensionBuildTarget: must not be empty.',
       );
     }
+    final Set<String> targetPlatforms = json.stringIterable(targetPlatformsKey).toSet();
+    if (targetPlatforms.any((String platform) => platform.isEmpty)) {
+      throw const FormatException(
+        'Invalid "$targetPlatformsKey" in ExtensionBuildTarget: platform names must not be empty.',
+      );
+    }
+    if (targetPlatform != null &&
+        targetPlatforms.isNotEmpty &&
+        !targetPlatforms.contains(targetPlatform)) {
+      throw const FormatException(
+        'Invalid "$targetPlatformsKey" in ExtensionBuildTarget: must contain "$targetPlatformKey" when both are specified.',
+      );
+    }
     return ExtensionBuildTarget(
       description: json.requiredField<String>(descriptionKey),
       name: json.requiredField<String>(nameKey),
       outputDir: json.requiredField<String>(outputDirKey),
-      targetPlatform: targetPlatform,
       artifacts: <ExtensionArtifact>{
         for (final String name in json.stringIterable(artifactsKey)) ExtensionArtifact(name),
       },
+      buildFlags: BuildFlag.listFromJson(json[buildFlagsKey]),
+      buildOptions: BuildOption.listFromJson(json[buildOptionsKey]),
       hostArtifacts: <ExtensionHostArtifact>{
         for (final String name in json.stringIterable(hostArtifactsKey))
           ExtensionHostArtifact(name),
       },
+      targetPlatform: targetPlatform,
+      targetPlatforms: targetPlatforms,
     );
   }
 
   /// Map key for [artifacts].
   static const String artifactsKey = 'artifacts';
+
+  /// Map key for [buildFlags].
+  static const String buildFlagsKey = 'buildFlags';
+
+  /// Map key for [buildOptions].
+  static const String buildOptionsKey = 'buildOptions';
 
   /// Map key for [description].
   static const String descriptionKey = 'description';
@@ -136,6 +858,9 @@ class ExtensionBuildTarget {
 
   /// Map key for [targetPlatform].
   static const String targetPlatformKey = 'targetPlatform';
+
+  /// Map key for [targetPlatforms].
+  static const String targetPlatformsKey = 'targetPlatforms';
 
   /// Deserializes a list of [ExtensionBuildTarget] objects from RPC response data.
   static List<ExtensionBuildTarget> listFromJson(Object? rpcResult) {
@@ -154,7 +879,7 @@ class ExtensionBuildTarget {
   /// The name of this build target (e.g. `'custom-apk'`).
   final String name;
 
-  /// The target platform identifier (e.g. `'linux-x64'`, `'custom-embedder-arm64'`),
+  /// The default target platform identifier (e.g. `'linux-x64'`, `'custom-embedder-arm64'`),
   /// or `null` if this target is platform-agnostic.
   ///
   /// This is an open [String] rather than an enum so that extensions for custom
@@ -163,9 +888,27 @@ class ExtensionBuildTarget {
   /// default artifact platform when it matches a built-in Flutter target platform.
   final String? targetPlatform;
 
+  final Set<String> _targetPlatforms;
+
+  /// The set of target platform identifiers supported by this build target.
+  ///
+  /// Defaults to `{targetPlatform!}` when [targetPlatform] is non-null and no
+  /// explicit `targetPlatforms` set was provided, or `{}` when platform-agnostic.
+  /// When [targetPlatforms] contains more than one platform, `flutter build <name>`
+  /// registers a `--target-platform` CLI option allowing the user to select among them.
+  Set<String> get targetPlatforms => _targetPlatforms.isNotEmpty
+      ? _targetPlatforms
+      : (targetPlatform != null ? <String>{targetPlatform!} : const <String>{});
+
   /// Engine artifacts required by this build target, resolved for [targetPlatform]
   /// and the active [BuildMode].
   final Set<ExtensionArtifact> artifacts;
+
+  /// Custom boolean CLI flags exposed on `flutter build <name>`.
+  final List<BuildFlag> buildFlags;
+
+  /// Custom string CLI options exposed on `flutter build <name>`.
+  final List<BuildOption> buildOptions;
 
   /// Host-side build tool or library artifacts required by this build target.
   final Set<ExtensionHostArtifact> hostArtifacts;
@@ -185,7 +928,11 @@ class ExtensionBuildTarget {
     descriptionKey: description,
     nameKey: name,
     targetPlatformKey: ?targetPlatform,
+    if (targetPlatforms.isNotEmpty) targetPlatformsKey: targetPlatforms.toList(),
     artifactsKey: artifacts.map((ExtensionArtifact a) => a.name).toList(),
+    if (buildFlags.isNotEmpty) buildFlagsKey: buildFlags.map((BuildFlag f) => f.toMap()).toList(),
+    if (buildOptions.isNotEmpty)
+      buildOptionsKey: buildOptions.map((BuildOption o) => o.toMap()).toList(),
     hostArtifactsKey: hostArtifacts.map((ExtensionHostArtifact a) => a.name).toList(),
     outputDirKey: outputDir,
   };
@@ -193,8 +940,10 @@ class ExtensionBuildTarget {
   @override
   String toString() =>
       'ExtensionBuildTarget(name: $name, targetPlatform: $targetPlatform, '
-      'description: $description, artifacts: $artifacts, '
-      'hostArtifacts: $hostArtifacts, outputDir: $outputDir)';
+      'targetPlatforms: $targetPlatforms, description: $description, '
+      'artifacts: $artifacts, hostArtifacts: $hostArtifacts, '
+      'buildFlags: $buildFlags, buildOptions: $buildOptions, '
+      'outputDir: $outputDir)';
 
   @override
   bool operator ==(Object other) {
@@ -203,8 +952,11 @@ class ExtensionBuildTarget {
             other.description == description &&
             other.name == name &&
             other.targetPlatform == targetPlatform &&
+            _setEquals(other.targetPlatforms, targetPlatforms) &&
             other.outputDir == outputDir &&
             _setEquals(other.artifacts, artifacts) &&
+            _listEquals(other.buildFlags, buildFlags) &&
+            _listEquals(other.buildOptions, buildOptions) &&
             _setEquals(other.hostArtifacts, hostArtifacts));
   }
 
@@ -213,8 +965,11 @@ class ExtensionBuildTarget {
     description,
     name,
     targetPlatform,
+    Object.hashAllUnordered(targetPlatforms),
     outputDir,
     Object.hashAllUnordered(artifacts),
+    Object.hashAll(buildFlags),
+    Object.hashAll(buildOptions),
     Object.hashAllUnordered(hostArtifacts),
   );
 }
@@ -454,6 +1209,107 @@ class ExtensionBuildResult {
     ]),
   );
 }
+
+Uri _parseDirectoryUri(Map<String, Object?> json, String key) {
+  final String raw = json.requiredField<String>(key);
+  final Uri? uri = Uri.tryParse(raw);
+  if (uri == null || !uri.hasAbsolutePath || (uri.hasScheme && !uri.isScheme('file'))) {
+    throw FormatException('Missing or invalid "$key" parameter.');
+  }
+  return uri.path.endsWith('/') ? uri : uri.replace(path: '${uri.path}/');
+}
+
+Uri? _parseOptionalDirectoryUri(Map<String, Object?> json, String key) {
+  final String? raw = json.nullableField<String>(key);
+  if (raw == null) {
+    return null;
+  }
+  final Uri? uri = Uri.tryParse(raw);
+  if (uri == null || !uri.isValidDirectoryUri) {
+    throw FormatException(
+      'Invalid "$key": expected trailing-slash-terminated absolute file: URI, got "$raw".',
+    );
+  }
+  return uri;
+}
+
+Map<String, String> _parseRequiredStringMap(Map<String, Object?> json, String key) {
+  final Map<String, Object?> raw = json.requiredField<Map<String, Object?>>(key);
+  return _parseStringMap(raw, key);
+}
+
+Map<String, String> _parseOptionalStringMap(Map<String, Object?> json, String key) {
+  final Map<String, Object?>? raw = json.nullableField<Map<String, Object?>>(key);
+  if (raw == null) {
+    return const <String, String>{};
+  }
+  return _parseStringMap(raw, key);
+}
+
+Map<String, String> _parseStringMap(Map<String, Object?> raw, String key) {
+  final result = <String, String>{};
+  for (final MapEntry(key: String entryKey, :Object? value) in raw.entries) {
+    if (value is! String) {
+      throw FormatException(
+        'Invalid "$key" parameter: Invalid "$entryKey": expected String, got ${value.runtimeType}.',
+      );
+    }
+    result[entryKey] = value;
+  }
+  return result;
+}
+
+Map<String, String?> _parseOptionalNullableStringMap(Map<String, Object?> json, String key) {
+  final Map<String, Object?>? raw = json.nullableField<Map<String, Object?>>(key);
+  if (raw == null) {
+    return const <String, String?>{};
+  }
+  final result = <String, String?>{};
+  for (final MapEntry(key: String entryKey, :Object? value) in raw.entries) {
+    if (value != null && value is! String) {
+      throw FormatException(
+        'Invalid "$key" entry for "$entryKey": expected String?, got ${value.runtimeType}.',
+      );
+    }
+    result[entryKey] = value as String?;
+  }
+  return result;
+}
+
+Map<String, bool> _parseOptionalBoolMap(Map<String, Object?> json, String key) {
+  final Map<String, Object?>? raw = json.nullableField<Map<String, Object?>>(key);
+  if (raw == null) {
+    return const <String, bool>{};
+  }
+  final result = <String, bool>{};
+  for (final MapEntry(key: String entryKey, :Object? value) in raw.entries) {
+    if (value is! bool) {
+      throw FormatException(
+        'Invalid "$key" entry for "$entryKey": expected bool, got ${value.runtimeType}.',
+      );
+    }
+    result[entryKey] = value;
+  }
+  return result;
+}
+
+bool _nullableListEquals<T>(List<T>? a, List<T>? b) {
+  if (a == null || b == null) {
+    return a == b;
+  }
+  return _listEquals(a, b);
+}
+
+bool _nullableMapEquals<K, V>(Map<K, V>? a, Map<K, V>? b) {
+  if (a == null || b == null) {
+    return a == b;
+  }
+  return _mapEquals(a, b);
+}
+
+int _mapHash<K, V>(Map<K, V> map) => Object.hashAllUnordered(<int>[
+  for (final MapEntry(:K key, :V value) in map.entries) Object.hash(key, value),
+]);
 
 bool _listEquals<T>(List<T> a, List<T> b) {
   if (identical(a, b)) {

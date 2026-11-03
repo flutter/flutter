@@ -616,6 +616,7 @@ class ToolDependencies {
     );
 
     final extensionBuildManager = ExtensionBuildManager(
+      config: finalConfig,
       extensionManager: extensionManager,
       featureFlags: finalFeatureFlags,
       logger: finalLogger,

@@ -29,13 +29,22 @@ const String _kGeneratedConfigCmake = 'generated_config.cmake';
 /// Top-level Linux build target contributed by the prototype extension.
 // TODO(bkonyi): Support target-platform agnostic BuildTargets, https://github.com/flutter/flutter/issues/194810.
 class CustomLinuxBuildTarget extends BuildTarget {
-  const CustomLinuxBuildTarget()
+  CustomLinuxBuildTarget()
     : super(
         description: 'A custom Linux build target from prototype extension.',
         outputDir:
             '${BuiltInPlaceholders.outputDir}/linux_extension/x64/${BuiltInPlaceholders.buildMode}',
         targetPlatform: _kLinuxX64Platform,
       );
+
+  /// Custom build flag to write a build metadata marker file in the output directory.
+  static const String bundleMetadataFlag = 'bundle-metadata';
+
+  /// Custom build option to specify a custom bundle label in the metadata marker file.
+  static const String bundleLabelOption = 'bundle-label';
+
+  /// Marker filename written when [bundleMetadataFlag] is enabled.
+  static const String bundleMetadataFileName = 'build_metadata.txt';
 
   @override
   String get name => LinuxBuildService.customLinuxBuildTargetName;
@@ -46,6 +55,23 @@ class CustomLinuxBuildTarget extends BuildTarget {
     LinuxArtifacts.linuxDesktopPath,
     BuiltInArtifacts.icuData,
   };
+
+  @override
+  List<BuildFlag> get buildFlags => const <BuildFlag>[
+    BuildFlag(
+      help: 'Whether to write a build metadata file to the output directory.',
+      name: bundleMetadataFlag,
+    ),
+  ];
+
+  @override
+  List<BuildOption> get buildOptions => const <BuildOption>[
+    BuildOption(
+      help: 'Optional label written to the build metadata file.',
+      name: bundleLabelOption,
+      valueHelp: 'label',
+    ),
+  ];
 
   @override
   Future<ExtensionBuildResult> build(ExtensionBuildContext context) async {
@@ -98,6 +124,16 @@ list(APPEND FLUTTER_TOOL_ENVIRONMENT
       outputDir.createSync(recursive: true);
     }
 
+    if (context.buildFlags[bundleMetadataFlag] ?? false) {
+      final metadataFile = File('${outputDir.path}/$bundleMetadataFileName');
+      await metadataFile.writeAsString(
+        'label=${context.buildOptions[bundleLabelOption] ?? ''}\n'
+        'flavor=${context.flavor ?? ''}\n'
+        'buildMode=${context.buildMode.cliName}\n'
+        'targetPlatform=${context.targetPlatform ?? _kLinuxX64Platform}\n',
+      );
+    }
+
     // TODO(bkonyi): Route extension build output through the host logger.
     stdout.writeln('Running cmake...');
     final int cmakeExitCode = await _runProcess(
@@ -106,7 +142,7 @@ list(APPEND FLUTTER_TOOL_ENVIRONMENT
         '-G',
         'Ninja',
         '-DCMAKE_BUILD_TYPE=${context.buildMode.uppercaseName}',
-        '-DFLUTTER_TARGET_PLATFORM=$_kLinuxX64Platform',
+        '-DFLUTTER_TARGET_PLATFORM=${context.targetPlatform ?? _kLinuxX64Platform}',
         '${projectDir.path}/linux',
       ],
       workingDirectory: outputDir.path,
@@ -234,7 +270,7 @@ final class LinuxBuildService extends BuildService {
   static const String customLinuxBuildTargetName = 'custom-linux-build';
 
   @override
-  List<BuildTarget> get buildTargets => const <BuildTarget>[CustomLinuxBuildTarget()];
+  List<BuildTarget> get buildTargets => <BuildTarget>[CustomLinuxBuildTarget()];
 
   @override
   List<AssembleTarget> get assembleTargets => const <AssembleTarget>[

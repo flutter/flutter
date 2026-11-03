@@ -8,10 +8,97 @@ import '../../artifacts.dart';
 import '../../base/common.dart';
 import '../../base/file_system.dart';
 import '../../build_info.dart';
+import '../../convert.dart';
 import '../../experimental/extension_build_manager.dart';
 import '../build_system.dart';
 import '../depfile.dart';
 import '../exceptions.dart';
+
+/// The build define key used to hash an extension's owned `flutter config`
+/// values into [Environment.defines] so configuration changes invalidate
+/// cached `flutter assemble` outputs.
+const kExtensionConfigDefines = 'ExtensionConfigDefines';
+
+const _standardAssembleDefineKeys = <String>{
+  kBuildMode,
+  kBuildName,
+  kBuildNumber,
+  kCodeSizeDirectory,
+  kDartDefines,
+  kDartObfuscation,
+  kDeferredComponents,
+  kExtensionConfigDefines,
+  kExtraFrontEndOptions,
+  kExtraGenSnapshotOptions,
+  kFileSystemRoots,
+  kFileSystemScheme,
+  kFlavor,
+  kFrontendServerStarterPath,
+  kIconTreeShakerFlag,
+  kSplitDebugInfo,
+  kTargetFile,
+  kTargetPlatform,
+  kTrackWidgetCreation,
+  kUseLocalCanvasKitFlag,
+};
+
+/// Encodes [configuration] deterministically (sorted by key) into a JSON
+/// string suitable for [Environment.defines].
+String encodeExtensionConfigDefines(Map<String, String?> configuration) {
+  final List<String> sortedKeys = configuration.keys.toList()..sort();
+  final sorted = <String, String?>{for (final String key in sortedKeys) key: configuration[key]};
+  return json.encode(sorted);
+}
+
+/// Encodes per-target extension configurations deterministically (sorted by
+/// target name and configuration key) into a JSON string suitable for
+/// [Environment.defines].
+String encodeTargetExtensionConfigDefines(Map<String, Map<String, String?>> targetConfigurations) {
+  final List<String> sortedTargets = targetConfigurations.keys.toList()..sort();
+  final sorted = <String, Map<String, String?>>{};
+  for (final targetName in sortedTargets) {
+    final Map<String, String?> config = targetConfigurations[targetName]!;
+    final List<String> sortedKeys = config.keys.toList()..sort();
+    sorted[targetName] = <String, String?>{for (final String key in sortedKeys) key: config[key]};
+  }
+  return json.encode(sorted);
+}
+
+/// Decodes a [kExtensionConfigDefines] JSON string back into a configuration map.
+///
+/// Supports both a flat `Map<String, String?>` encoding and a per-target
+/// `Map<String, Map<String, String?>>` encoding (when [targetName] is provided).
+Map<String, String?>? decodeExtensionConfigDefines(String? encoded, {String? targetName}) {
+  if (encoded == null || encoded.isEmpty) {
+    return null;
+  }
+  try {
+    final Object? decoded = json.decode(encoded);
+    if (decoded case final Map<String, Object?> map) {
+      final bool isPerTargetMap =
+          map.isNotEmpty && map.values.every((Object? value) => value is Map<String, Object?>);
+      if (isPerTargetMap) {
+        if (targetName == null) {
+          return null;
+        }
+        if (map[targetName] case final Map<String, Object?> targetMap) {
+          return <String, String?>{
+            for (final MapEntry(:String key, :Object? value) in targetMap.entries)
+              if (value == null || value is String) key: value as String?,
+          };
+        }
+        return null;
+      }
+      return <String, String?>{
+        for (final MapEntry(:String key, :Object? value) in map.entries)
+          if (value == null || value is String) key: value as String?,
+      };
+    }
+  } on FormatException {
+    // Ignore malformed JSON defines.
+  }
+  return null;
+}
 
 /// Resolves a build target dependency by its [dependency] name.
 typedef DependencyResolverCallback = Target Function(String dependency);
@@ -125,15 +212,75 @@ class ExtensionTarget extends Target {
       target: assembleTarget,
     );
 
+    final String targetPlatform = defines[kTargetPlatform] ?? assembleTarget.targetPlatform;
+    final String? flavor = defines[kFlavor];
+    final String? buildName = defines[kBuildName];
+    final String? buildNumber = defines[kBuildNumber];
+    final Map<String, String> dartDefines = parseExtensionDartDefines(
+      decodeDartDefines(defines, kDartDefines),
+    );
+    final dartObfuscation = defines[kDartObfuscation] == 'true';
+    final String? rawSplitDebugInfo = defines[kSplitDebugInfo];
+    final Uri? splitDebugInfo = switch (rawSplitDebugInfo) {
+      final String raw when raw.isNotEmpty =>
+        (fileSystem.path.isRelative(raw)
+                ? projectDir.childDirectory(raw)
+                : fileSystem.directory(raw))
+            .uri,
+      _ => null,
+    };
+    final String? rawCodeSizeDir = defines[kCodeSizeDirectory];
+    final Uri? codeSizeDirectory = switch (rawCodeSizeDir) {
+      final String raw when raw.isNotEmpty =>
+        (fileSystem.path.isRelative(raw)
+                ? projectDir.childDirectory(raw)
+                : fileSystem.directory(raw))
+            .uri,
+      _ => null,
+    };
+    final List<String> extraFrontEndOptions = decodeCommaSeparated(defines, kExtraFrontEndOptions);
+    final List<String> extraGenSnapshotOptions = decodeCommaSeparated(
+      defines,
+      kExtraGenSnapshotOptions,
+    );
+    final trackWidgetCreation = defines[kTrackWidgetCreation] != null
+        ? defines[kTrackWidgetCreation] == 'true'
+        : mode == BuildMode.debug;
+    final bool treeShakeIcons = defines[kIconTreeShakerFlag] != null
+        ? defines[kIconTreeShakerFlag] == 'true'
+        : mode.isPrecompiled;
+    final Map<String, String?>? configuration = decodeExtensionConfigDefines(
+      defines[kExtensionConfigDefines],
+      targetName: assembleTarget.name,
+    );
+    final extraDefines = <String, String>{
+      for (final MapEntry(:String key, :String value) in defines.entries)
+        if (!_standardAssembleDefineKeys.contains(key)) key: value,
+    };
+
     final ExtensionBuildResult result = await _buildManager.assemble(
       buildDir: buildDir.uri,
       buildMode: mode,
+      buildName: buildName,
+      buildNumber: buildNumber,
+      codeSizeDirectory: codeSizeDirectory,
+      configuration: configuration,
+      dartDefines: dartDefines,
+      dartObfuscation: dartObfuscation,
+      extraDefines: extraDefines,
+      extraFrontEndOptions: extraFrontEndOptions,
+      extraGenSnapshotOptions: extraGenSnapshotOptions,
+      flavor: flavor,
       flutterRoot: environment.flutterRootDir.uri,
       mainPath: mainPath,
       outputDir: outputDir.uri,
       projectRoot: projectDir.uri,
       resolvedArtifacts: resolvedArtifacts,
+      splitDebugInfo: splitDebugInfo,
       targetName: assembleTarget.name,
+      targetPlatform: targetPlatform,
+      trackWidgetCreation: trackWidgetCreation,
+      treeShakeIcons: treeShakeIcons,
     );
 
     if (!result.success) {
@@ -179,7 +326,9 @@ Directory resolveExtensionOutputDir({
   required FileSystem fileSystem,
   required Directory projectDir,
   required ExtensionBuildTarget target,
+  String? targetPlatform,
 }) {
+  final String? resolvedTargetPlatform = targetPlatform ?? target.targetPlatform;
   for (final RegExpMatch match in _placeholderRegex.allMatches(target.outputDir)) {
     final String? placeholder = match[0];
     if (!_supportedOutputDirPlaceholders.contains(placeholder)) {
@@ -187,7 +336,7 @@ Directory resolveExtensionOutputDir({
         'Unsupported placeholder "$placeholder" in outputDir "${target.outputDir}" for build target "${target.name}".',
       );
     }
-    if (placeholder == BuiltInPlaceholders.targetPlatform && target.targetPlatform == null) {
+    if (placeholder == BuiltInPlaceholders.targetPlatform && resolvedTargetPlatform == null) {
       throwToolExit(
         'Placeholder "${BuiltInPlaceholders.targetPlatform}" in outputDir "${target.outputDir}" '
         'requires targetPlatform to be set on build target "${target.name}".',
@@ -198,8 +347,8 @@ Directory resolveExtensionOutputDir({
       .replaceAll(BuiltInPlaceholders.outputDir, buildOutputDir.path)
       .replaceAll(BuiltInPlaceholders.projectDir, projectDir.path)
       .replaceAll(BuiltInPlaceholders.buildMode, buildMode.cliName);
-  if (target.targetPlatform case final String targetPlatform) {
-    outputPath = outputPath.replaceAll(BuiltInPlaceholders.targetPlatform, targetPlatform);
+  if (resolvedTargetPlatform != null) {
+    outputPath = outputPath.replaceAll(BuiltInPlaceholders.targetPlatform, resolvedTargetPlatform);
   }
   if (fileSystem.path.isRelative(outputPath)) {
     outputPath = fileSystem.path.join(projectDir.path, outputPath);
@@ -216,13 +365,16 @@ Map<String, String> resolveExtensionBuildTargetArtifacts({
   required Artifacts artifacts,
   required BuildMode buildMode,
   required ExtensionBuildTarget target,
+  String? targetPlatform,
 }) {
-  final TargetPlatform? targetPlatform = _tryResolveTargetPlatform(target.targetPlatform);
+  final TargetPlatform? resolvedPlatform = _tryResolveTargetPlatform(
+    targetPlatform ?? target.targetPlatform,
+  );
   final resolvedArtifacts = <String, String>{};
   for (final ExtensionArtifact artifact in target.artifacts) {
     resolvedArtifacts[artifact.name] = artifacts.getArtifactPath(
       _resolveArtifact(artifact),
-      platform: targetPlatform,
+      platform: resolvedPlatform,
       mode: buildMode,
     );
   }

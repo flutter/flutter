@@ -288,7 +288,9 @@ class AssembleCommand extends FlutterCommand {
     return false;
   }
 
-  late final Environment _environment = _createEnvironment();
+  final _extensionDefines = <String, String>{};
+  Environment? _cachedEnvironment;
+  Environment get _environment => _cachedEnvironment ??= _createEnvironment();
 
   /// The environmental configuration for a build invocation.
   Environment _createEnvironment() {
@@ -372,13 +374,55 @@ class AssembleCommand extends FlutterCommand {
     if (wasParsed(BuildInfoOptions.extraFrontEndOptions)) {
       results[kExtraFrontEndOptions] = getValue(BuildInfoOptions.extraFrontEndOptions).join(',');
     }
+    results.addAll(_extensionDefines);
     return results;
+  }
+
+  static void _collectExtensionTargets(
+    Target root,
+    Set<String> visited,
+    List<ExtensionTarget> out,
+  ) {
+    if (!visited.add(root.name)) {
+      return;
+    }
+    if (root is ExtensionTarget) {
+      out.add(root);
+    }
+    for (final Target dep in root.dependencies) {
+      _collectExtensionTargets(dep, visited, out);
+    }
   }
 
   @override
   Future<FlutterCommandResult> runCommand() async {
     final ToolContext(:FileSystem fs, :Logger logger) = _toolContext;
     final List<Target> targets = await createTargets();
+    if (_extensionBuildManager case final ExtensionBuildManager extensionBuildManager?) {
+      final visited = <String>{
+        for (final Target defaultTarget in _kDefaultTargets) defaultTarget.name,
+      };
+      final extensionTargets = <ExtensionTarget>[];
+      for (final target in targets) {
+        _collectExtensionTargets(target, visited, extensionTargets);
+      }
+      if (extensionTargets.isNotEmpty) {
+        final targetConfigs = <String, Map<String, String?>>{};
+        for (final extTarget in extensionTargets) {
+          final Map<String, String?> config = await extensionBuildManager
+              .getAssembleTargetConfiguration(extTarget.name);
+          if (config.isNotEmpty) {
+            targetConfigs[extTarget.name] = config;
+          }
+        }
+        if (targetConfigs.isNotEmpty) {
+          _extensionDefines[kExtensionConfigDefines] = encodeTargetExtensionConfigDefines(
+            targetConfigs,
+          );
+          _cachedEnvironment = null;
+        }
+      }
+    }
     final nonDeferredTargets = <Target>[];
     final List<Target> deferredTargets = <AndroidAotDeferredComponentsBundle>[];
     for (final target in targets) {
