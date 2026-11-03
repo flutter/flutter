@@ -35,8 +35,6 @@ void testMain() {
         <String, Object?>{'canvasKitForceMultiSurfaceRasterizer': true}.jsify()
             as JsFlutterConfiguration?,
       );
-      renderer.pictureToImageSurface.dispose();
-      renderer.rasterizer.dispose();
       CanvasKitRenderer.instance.debugResetRasterizer();
     });
 
@@ -50,8 +48,6 @@ void testMain() {
       }
       createdHostElements.clear();
       debugOverrideJsConfiguration(null);
-      renderer.pictureToImageSurface.dispose();
-      renderer.rasterizer.dispose();
       CanvasKitRenderer.instance.debugResetRasterizer();
     });
 
