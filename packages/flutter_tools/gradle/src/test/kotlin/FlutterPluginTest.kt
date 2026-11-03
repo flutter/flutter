@@ -30,9 +30,11 @@ import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.mockkObject
+import io.mockk.mockkStatic
 import io.mockk.slot
 import io.mockk.unmockkAll
 import io.mockk.verify
+import io.mockk.verifyOrder
 import org.gradle.api.Action
 import org.gradle.api.GradleException
 import org.gradle.api.NamedDomainObjectContainer
@@ -86,6 +88,66 @@ class FlutterPluginTest {
         assertContains(registeredPrintTasks, "kgpVersion")
         assertContains(registeredPrintTasks, "printBuildVariants")
         assertContains(registeredPrintTasks, "printNdkVersion")
+    }
+
+    @Test
+    fun `FlutterPlugin apply checks dependency versions before configuring project`(
+        @TempDir tempDir: Path
+    ) {
+        val env = setupTestProjectEnvironment(tempDir)
+        val project = env.project
+        val mockApplicationExtension = setupMockApplicationExtension(project)
+        val mockComponentsExtension = setupMockComponentsExtension(project)
+        setupMockNativePluginLoader(project, env.flutterExtension)
+        mockkStatic(FlutterPluginUtils::class)
+        mockkStatic(DependencyVersionChecker::class)
+        every { DependencyVersionChecker.checkDependencyVersions(project) } just Runs
+
+        FlutterPlugin().apply(project)
+
+        verifyOrder {
+            FlutterPluginUtils.detectApplyingKotlinGradlePlugin(project)
+            DependencyVersionChecker.checkDependencyVersions(project)
+            project.tasks.register("javaVersion", PrintTask::class.java, any())
+            mockComponentsExtension.finalizeDsl(any<(Any) -> Unit>())
+            mockComponentsExtension.onVariants(any(), any<(Variant) -> Unit>())
+            mockApplicationExtension.defaultConfig
+            mockApplicationExtension.buildTypes
+        }
+    }
+
+    @Test
+    fun `FlutterPlugin apply rethrows DependencyValidationException and logs other exceptions`(
+        @TempDir tempDir: Path
+    ) {
+        val env = setupTestProjectEnvironment(tempDir)
+        val project = env.project
+        setupMockApplicationExtension(project)
+        setupMockComponentsExtension(project)
+        setupMockNativePluginLoader(project, env.flutterExtension)
+        mockkStatic(DependencyVersionChecker::class)
+
+        val validationException = DependencyValidationException("Unsupported AGP version")
+        every { DependencyVersionChecker.checkDependencyVersions(project) } throws validationException
+
+        val thrown =
+            assertThrows<DependencyValidationException> {
+                FlutterPlugin().apply(project)
+            }
+        assertEquals(validationException, thrown)
+
+        val unexpectedException = IllegalStateException("Unexpected failure")
+        every { DependencyVersionChecker.checkDependencyVersions(project) } throws unexpectedException
+
+        FlutterPlugin().apply(project)
+
+        verify {
+            project.logger.error(
+                "Warning: Flutter was unable to detect project Gradle, Java, " +
+                    "AGP, and KGP versions. Skipping dependency version checking. Error was: " +
+                    unexpectedException
+            )
+        }
     }
 
     @Test
@@ -768,6 +830,7 @@ class FlutterPluginTest {
         every { project.rootProject } returns project
         every { project.state.failure as Throwable? } returns null
         every { project.configurations.named("api") } returns mockk()
+        every { project.gradle.gradleVersion } returns DependencyVersionChecker.warnGradleVersion.toString()
 
         val flutterExtension = FlutterExtension()
         every { project.extensions.create("flutter", any<Class<*>>()) } returns flutterExtension
@@ -839,6 +902,9 @@ class FlutterPluginTest {
     private fun setupMockComponentsExtension(project: Project): AndroidComponentsExtension<Any, VariantBuilder, Variant> {
         val mockAndroidComponentsExtension =
             mockk<AndroidComponentsExtension<Any, VariantBuilder, Variant>>(relaxed = true)
+        every {
+            mockAndroidComponentsExtension.pluginVersion
+        } returns DependencyVersionChecker.warnAGPVersion
         every {
             project.extensions.getByType(AndroidComponentsExtension::class.java)
         } returns (mockAndroidComponentsExtension as AndroidComponentsExtension<*, *, *>)

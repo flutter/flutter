@@ -4,8 +4,8 @@
 
 #include "impeller/renderer/backend/gles/proc_table_gles.h"
 
-#include <format>
 #include <sstream>
+#include <string>
 
 #include "GLES3/gl3.h"
 #include "impeller/base/allocation.h"
@@ -13,6 +13,7 @@
 #include "impeller/base/validation.h"
 #include "impeller/renderer/backend/gles/capabilities_gles.h"
 #include "impeller/renderer/capabilities.h"
+#include "third_party/abseil-cpp/absl/strings/str_cat.h"
 
 namespace impeller {
 
@@ -322,9 +323,8 @@ std::string ProcTableGLES::DescribeCurrentFramebuffer() const {
     return "The default framebuffer (FBO0) was bound.";
   }
   if (IsFramebuffer(framebuffer) == GL_FALSE) {
-    return std::format(
-        "The framebuffer binding ({}) was not a valid framebuffer.",
-        framebuffer);
+    return absl::StrCat("The framebuffer binding (", framebuffer,
+                        ") was not a valid framebuffer.");
   }
 
   GLenum status = CheckFramebufferStatus(GL_FRAMEBUFFER);

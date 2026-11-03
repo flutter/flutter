@@ -546,7 +546,7 @@ class AndroidDevice extends Device {
     if (!prebuiltApplication ||
         _androidSdk.licensesAvailable && _androidSdk.latestVersion == null) {
       _logger.printTrace('Building APK');
-      final FlutterProject project = FlutterProject.current();
+      final FlutterProject project = FlutterProject.current(_fileSystem, logger: _logger);
 
       final releaseManifestEngineShellArgs = <String>[
         if (debuggingOptions.buildInfo.mode == BuildMode.release) ...<String>[
@@ -1056,7 +1056,7 @@ class AdbLogReader extends DeviceLogReader {
 
   @override
   Future<void> provideVmService(FlutterVmService connectedVmService) async {
-    final VM? vm = await connectedVmService.getVmGuarded();
+    final VM? vm = await connectedVmService.getVmGuarded(logger: _logger);
     if (vm == null) {
       _logger.printError(
         'An error occurred when setting up filtering for adb logs. '

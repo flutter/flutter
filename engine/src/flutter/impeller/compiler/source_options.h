@@ -39,6 +39,11 @@ struct SourceOptions {
   /// Only used on OpenGLES targets.
   bool require_framebuffer_fetch = false;
 
+  /// @brief Whether to minify the generated GLSL shader source.
+  ///
+  /// Only used on OpenGL/OpenGLES targets.
+  bool minify = false;
+
   SourceOptions();
 
   ~SourceOptions();
