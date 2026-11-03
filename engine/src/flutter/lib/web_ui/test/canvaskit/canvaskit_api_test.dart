@@ -377,12 +377,12 @@ half4 main(vec2 fragCoord) {
     final SkRuntimeEffect? invalidEffect = MakeRuntimeEffect(kInvalidSkSlProgram);
     expect(invalidEffect, isNull);
 
-    final SkFloat32List emptyUniforms = mallocFloat32List(0);
+    final JSFloat32Array emptyUniforms = Float32List(0).toJS;
     final SkShader? shader = effect!.makeShader(emptyUniforms);
     expect(shader, isNotNull);
 
     // mismatched uniforms returns null.
-    final SkFloat32List mismatchedUniforms = mallocFloat32List(1);
+    final JSFloat32Array mismatchedUniforms = Float32List(1).toJS;
     final SkShader? invalidShader = effect.makeShader(mismatchedUniforms);
 
     expect(invalidShader, isNull);
@@ -395,8 +395,7 @@ return u_color;
 }
 ''';
 
-    final SkFloat32List uniforms = mallocFloat32List(4);
-    final Float32List uniformData = uniforms.toTypedArray();
+    final uniformData = Float32List(4);
 
     uniformData[0] = 1.0;
     uniformData[1] = 0.0;
@@ -404,7 +403,7 @@ return u_color;
     uniformData[3] = 1.0;
 
     final SkShader? shaderWithUniform = MakeRuntimeEffect(kSkSlProgramWithUniforms)!
-        .makeShader(uniforms);
+        .makeShader(uniformData.toJS);
 
     expect(shaderWithUniform, isNotNull);
   });
@@ -1540,7 +1539,7 @@ void _paragraphTests() {
     final SkParagraphStyle paragraphStyle = canvasKit.ParagraphStyle(props);
     final SkParagraphBuilder builder = canvasKit.ParagraphBuilder.MakeFromFontCollection(
       paragraphStyle,
-      (CanvasKitRenderer.instance.fontCollection as SkiaFontCollection).skFontCollection,
+      CanvasKitRenderer.instance.ckFontCollection.skFontCollection,
     );
 
     builder.addText('Hello');
@@ -1678,7 +1677,7 @@ void _paragraphTests() {
     final SkParagraphStyle paragraphStyle = canvasKit.ParagraphStyle(props);
     final SkParagraphBuilder builder = canvasKit.ParagraphBuilder.MakeFromFontCollection(
       paragraphStyle,
-      (CanvasKitRenderer.instance.fontCollection as SkiaFontCollection).skFontCollection,
+      CanvasKitRenderer.instance.ckFontCollection.skFontCollection,
     );
     builder.addText('hello');
 

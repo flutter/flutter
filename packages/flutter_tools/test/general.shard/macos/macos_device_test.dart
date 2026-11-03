@@ -304,6 +304,7 @@ FlutterProject setUpFlutterProject(Directory directory) {
   final flutterProjectFactory = FlutterProjectFactory(
     fileSystem: directory.fileSystem,
     logger: BufferLogger.test(),
+    config: FakeConfig(),
   );
   return flutterProjectFactory.fromDirectory(directory);
 }

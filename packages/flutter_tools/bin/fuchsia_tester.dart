@@ -148,7 +148,7 @@ Future<void> run(List<String> args, Directory tempDir) async {
       // setting libraryNames to null.
       final Set<String>? libraryNames = coverageDirectory != null
           ? null
-          : <String>{FlutterProject.current().manifest.appName};
+          : <String>{FlutterProject.current(globals.fs, logger: globals.logger).manifest.appName};
       final String packagesPath = globals.fs.path.normalize(
         globals.fs.path.absolute(argResults[_kOptionPackages] as String),
       );

@@ -763,7 +763,6 @@ Future<Codec> instantiateImageCodecWithSize(
         buffer._list!,
         targetWidth: targetSize.width,
         targetHeight: targetSize.height,
-        allowUpscaling: false,
       );
     }
   } finally {
@@ -1081,12 +1080,7 @@ class ImageDescriptor {
       throw StateError('Object is disposed');
     }
     if (_width == null) {
-      return instantiateImageCodec(
-        _data!,
-        targetWidth: targetWidth,
-        targetHeight: targetHeight,
-        allowUpscaling: false,
-      );
+      return instantiateImageCodec(_data!, targetWidth: targetWidth, targetHeight: targetHeight);
     }
 
     return createBmp(_data!, width, height, _rowBytes ?? width, _format!);

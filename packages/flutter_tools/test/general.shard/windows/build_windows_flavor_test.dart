@@ -182,7 +182,11 @@ void main() {
         os: FakeOperatingSystemUtils(),
         platform: windowsPlatform,
         processManager: processManager,
-        projectFactory: FlutterProjectFactory(fileSystem: fileSystem, logger: BufferLogger.test()),
+        projectFactory: FlutterProjectFactory(
+          fileSystem: fileSystem,
+          logger: BufferLogger.test(),
+          config: FakeConfig(),
+        ),
       );
       final command = BuildWindowsCommand(
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
@@ -231,7 +235,11 @@ void main() {
         os: FakeOperatingSystemUtils(),
         platform: windowsPlatform,
         processManager: processManager,
-        projectFactory: FlutterProjectFactory(fileSystem: fileSystem, logger: BufferLogger.test()),
+        projectFactory: FlutterProjectFactory(
+          fileSystem: fileSystem,
+          logger: BufferLogger.test(),
+          config: FakeConfig(),
+        ),
       );
       final command = BuildWindowsCommand(
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),

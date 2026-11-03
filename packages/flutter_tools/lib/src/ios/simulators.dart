@@ -780,9 +780,9 @@ class IOSSimulator extends Device {
 
   @override
   Future<void> dispose() async {
-    for (final DeviceLogReader logReader in _logReaders.values) {
-      logReader.dispose();
-    }
+    await Future.wait(<Future<void>>[
+      for (final DeviceLogReader logReader in _logReaders.values) logReader.dispose(),
+    ]);
     await _portForwarder?.dispose();
   }
 
@@ -1155,7 +1155,7 @@ class _IOSSimulatorLogReader extends SharedIOSDeviceLogReader {
   }
 
   @override
-  void dispose() {
+  Future<void> dispose() async {
     _stop();
   }
 

@@ -1018,10 +1018,10 @@ packages:
     dependency: transitive
     description:
       name: skills_lint
-      sha256: "5daeff89c8c9d812cfa811e119ae88a32bb81d28c73aa7e899155885b2e63a63"
+      sha256: b7af62b95189d9f80c397c13133bb9a5dfae079cc18a7e3236ab3ea2d79edc41
       url: "https://pub.dev"
     source: hosted
-    version: "0.5.1"
+    version: "0.5.3"
   sky_engine:
     dependency: transitive
     description: flutter
@@ -1107,6 +1107,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.3.1"
+  tar:
+    dependency: transitive
+    description:
+      name: tar
+      sha256: af61a6382fb7a702b93a7b400492405793e0ebf3d2bea5d698d5ca39823ca46f
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.3"
   term_glyph:
     dependency: "direct main"
     description:

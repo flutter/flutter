@@ -461,7 +461,7 @@ class ChromiumLauncher {
           throwToolExit(
             'Failed to launch browser. Make sure you are using an up-to-date '
             'Chrome or Edge. Otherwise, consider using -d web-server instead '
-            'and filing an issue at https://github.com/flutter/flutter/issues.\n'
+            'and filing an issue at https://github.com/flutter/flutter/issues\n'
             'Error: $error',
           );
         }

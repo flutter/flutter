@@ -25,6 +25,7 @@ import 'package:vm_service/vm_service.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
+import '../../src/fakes.dart' show FakeConfig;
 
 void main() {
   testWithoutContext('AndroidDevice stores the requested id', () {
@@ -202,6 +203,7 @@ flutter:
     final FlutterProject flutterProject = FlutterProjectFactory(
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
+      config: FakeConfig(),
     ).fromDirectory(fileSystem.currentDirectory);
     final AndroidDevice device = setUpAndroidDevice(fileSystem: fileSystem);
 
@@ -215,6 +217,7 @@ flutter:
     final FlutterProject flutterProject = FlutterProjectFactory(
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
+      config: FakeConfig(),
     ).fromDirectory(fileSystem.currentDirectory);
 
     final AndroidDevice device = setUpAndroidDevice(fileSystem: fileSystem);
@@ -228,6 +231,7 @@ flutter:
     final FlutterProject flutterProject = FlutterProjectFactory(
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
+      config: FakeConfig(),
     ).fromDirectory(fileSystem.currentDirectory);
 
     final AndroidDevice device = setUpAndroidDevice(fileSystem: fileSystem);

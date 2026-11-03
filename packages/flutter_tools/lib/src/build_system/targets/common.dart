@@ -14,6 +14,7 @@ import '../../context_runner.dart' show GlobalToolContext;
 import '../../dart/package_map.dart';
 import '../../darwin/darwin.dart';
 import '../../devfs.dart';
+import '../../globals.dart' as globals show projectFactory;
 import '../../isolated/native_assets/dart_hook_result.dart';
 import '../../project.dart';
 import '../../windows/visual_studio.dart';
@@ -328,7 +329,10 @@ class KernelSnapshot extends Target {
     );
 
     if (darwinPlatform != null) {
-      final FlutterProject flutterProject = FlutterProject.fromDirectory(environment.projectDir);
+      // TODO(bkonyi): Inject FlutterProjectFactory through Environment.
+      final FlutterProject flutterProject = globals.projectFactory.fromDirectory(
+        environment.projectDir,
+      );
       final XcodeBasedProject xcodeProject = darwinPlatform.xcodeProject(flutterProject);
       flavor = await xcodeProject.parseFlavorFromConfiguration(environment);
     } else {
