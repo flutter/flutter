@@ -1282,11 +1282,17 @@ abstract class FlutterCommand extends Command<void> {
   }) {
     return project.regeneratePlatformSpecificTooling(
       toolContext: toolContext!,
+      analytics: _analytics,
+      cocoaPods: globals.cocoaPods,
       deprecationBehavior: deprecationBehavior,
+      featureFlags: featureFlags,
+      gradleUtils: globals.gradleUtils,
+      plistParser: globals.plistParser,
       releaseMode: releaseMode,
       pubspecCache: pubspecCache,
       packageGraph: packageGraph,
       packageConfig: packageConfig,
+      templateRenderer: globals.templateRenderer,
     );
   }
 
