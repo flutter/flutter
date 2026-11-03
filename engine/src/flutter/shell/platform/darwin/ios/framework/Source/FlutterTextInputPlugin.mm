@@ -3261,20 +3261,15 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
   BOOL isSecureTextEntry = [dictionary[kSecureTextEntry] boolValue];
   UIKeyboardType keyboardType = ToUIKeyboardType(dictionary[kKeyboardType]);
   UIReturnKeyType returnKeyType = ToUIReturnKeyType(dictionary[kInputAction]);
-  for (UIView* view in self.textInputViews) {
-    if ([view isKindOfClass:[FlutterTextInputView class]]) {
-      FlutterTextInputView* inputView = (FlutterTextInputView*)view;
-      // Keyboard traits alter the keyboard layout (e.g. the return-key action button), so the
-      // keyboard needs to be reloaded for the changes to take effect.
-      // https://github.com/flutter/flutter/issues/122139
-      if (inputView.isSecureTextEntry != isSecureTextEntry ||
-          inputView.keyboardType != keyboardType || inputView.returnKeyType != returnKeyType) {
-        inputView.secureTextEntry = isSecureTextEntry;
-        inputView.keyboardType = keyboardType;
-        inputView.returnKeyType = returnKeyType;
-        [inputView reloadInputViews];
-      }
-    }
+  // Keyboard traits alter the keyboard layout (e.g. the return-key action button), so the
+  // keyboard needs to be reloaded for the changes to take effect.
+  // https://github.com/flutter/flutter/issues/122139
+  if (_activeView.isSecureTextEntry != isSecureTextEntry ||
+      _activeView.keyboardType != keyboardType || _activeView.returnKeyType != returnKeyType) {
+    _activeView.secureTextEntry = isSecureTextEntry;
+    _activeView.keyboardType = keyboardType;
+    _activeView.returnKeyType = returnKeyType;
+    [_activeView reloadInputViews];
   }
 }
 
