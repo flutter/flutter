@@ -449,6 +449,7 @@ class JvmInvoker {
 
  private:
   JNIEnv* test_env_ = nullptr;
+  jweak test_java_object_ = nullptr;
   fml::jni::JavaObjectWeakGlobalRef java_object_;
   std::atomic<size_t> on_first_frame_count_{0};
 

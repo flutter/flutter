@@ -312,18 +312,181 @@ bool JvmInvoker::RegisterMethodIds(JNIEnv* env) {
   return true;
 }
 
-JvmInvoker::JvmInvoker(JNIEnv* env, jobject flutter_jni) {
-#if FML_OS_ANDROID
-  test_env_ = (env != nullptr && env->functions != nullptr &&
-               env->functions->GetJavaVM == nullptr)
-                  ? env
-                  : nullptr;
-#else
-  test_env_ = env;
-#endif
-  if (env != nullptr && flutter_jni != nullptr) {
-    AttachToJava(env, flutter_jni);
+namespace {
+
+class ScopedJniObject {
+ public:
+  ScopedJniObject(JNIEnv* env,
+                  JNIEnv* test_env,
+                  jweak test_java_object,
+                  const fml::jni::JavaObjectWeakGlobalRef& java_object)
+      : env_(env),
+        scoped_ref_((env != nullptr && test_env == nullptr)
+                        ? java_object.get(env)
+                        : fml::jni::ScopedJavaLocalRef<jobject>()),
+        is_test_env_(test_env != nullptr) {
+    if (env_ == nullptr) {
+      return;
+    }
+    if (is_test_env_) {
+      if (test_java_object != nullptr) {
+        obj_ = (env_->functions != nullptr &&
+                env_->functions->NewLocalRef != nullptr)
+                   ? env_->NewLocalRef(test_java_object)
+                   : test_java_object;
+      }
+    } else {
+      obj_ = scoped_ref_.obj();
+    }
   }
+
+  ~ScopedJniObject() {
+    if (is_test_env_ && env_ != nullptr && obj_ != nullptr &&
+        env_->functions != nullptr &&
+        env_->functions->DeleteLocalRef != nullptr) {
+      env_->DeleteLocalRef(obj_);
+    }
+  }
+
+  jobject obj() const { return obj_; }
+  bool is_null() const { return obj_ == nullptr; }
+
+  ScopedJniObject(const ScopedJniObject&) = delete;
+  ScopedJniObject& operator=(const ScopedJniObject&) = delete;
+
+ private:
+  JNIEnv* env_ = nullptr;
+  jobject obj_ = nullptr;
+  fml::jni::ScopedJavaLocalRef<jobject> scoped_ref_;
+  bool is_test_env_ = false;
+};
+
+class ScopedJniObjectArray {
+ public:
+  ScopedJniObjectArray(JNIEnv* env,
+                       JNIEnv* test_env,
+                       const std::vector<std::string>& strings)
+      : env_(env),
+        scoped_ref_((env != nullptr && test_env == nullptr)
+                        ? fml::jni::VectorToStringArray(env, strings)
+                        : fml::jni::ScopedJavaLocalRef<jobjectArray>()),
+        is_test_env_(test_env != nullptr) {
+    if (env_ == nullptr) {
+      return;
+    }
+    if (is_test_env_) {
+      if (env_->functions == nullptr || env_->functions->FindClass == nullptr ||
+          env_->functions->NewObjectArray == nullptr ||
+          env_->functions->NewStringUTF == nullptr ||
+          env_->functions->SetObjectArrayElement == nullptr) {
+        return;
+      }
+      jclass string_clazz = env_->FindClass("java/lang/String");
+      obj_ = env_->NewObjectArray(static_cast<jsize>(strings.size()),
+                                  string_clazz, nullptr);
+      for (size_t i = 0; i < strings.size(); ++i) {
+        jstring item = env_->NewStringUTF(strings[i].c_str());
+        env_->SetObjectArrayElement(obj_, static_cast<jsize>(i), item);
+        if (item != nullptr && env_->functions->DeleteLocalRef != nullptr) {
+          env_->DeleteLocalRef(item);
+        }
+      }
+      if (string_clazz != nullptr &&
+          env_->functions->DeleteLocalRef != nullptr) {
+        env_->DeleteLocalRef(string_clazz);
+      }
+    } else {
+      obj_ = scoped_ref_.obj();
+    }
+  }
+
+  ~ScopedJniObjectArray() {
+    if (is_test_env_ && env_ != nullptr && obj_ != nullptr &&
+        env_->functions != nullptr &&
+        env_->functions->DeleteLocalRef != nullptr) {
+      env_->DeleteLocalRef(obj_);
+    }
+  }
+
+  jobjectArray obj() const { return obj_; }
+
+  ScopedJniObjectArray(const ScopedJniObjectArray&) = delete;
+  ScopedJniObjectArray& operator=(const ScopedJniObjectArray&) = delete;
+
+ private:
+  JNIEnv* env_ = nullptr;
+  jobjectArray obj_ = nullptr;
+  fml::jni::ScopedJavaLocalRef<jobjectArray> scoped_ref_;
+  bool is_test_env_ = false;
+};
+
+std::vector<std::string> ConvertJniStringArrayToVector(JNIEnv* env,
+                                                       JNIEnv* test_env,
+                                                       jobjectArray array) {
+  if (env == nullptr || array == nullptr) {
+    return {};
+  }
+  if (test_env != nullptr) {
+    std::vector<std::string> out;
+    if (env->functions == nullptr ||
+        env->functions->GetArrayLength == nullptr ||
+        env->functions->GetObjectArrayElement == nullptr ||
+        env->functions->GetStringUTFChars == nullptr ||
+        env->functions->ReleaseStringUTFChars == nullptr) {
+      return out;
+    }
+    jsize length = env->GetArrayLength(array);
+    if (length <= 0) {
+      return out;
+    }
+    out.reserve(static_cast<size_t>(length));
+    for (jsize i = 0; i < length; ++i) {
+      jstring jstr = static_cast<jstring>(env->GetObjectArrayElement(array, i));
+      if (jstr != nullptr) {
+        const char* chars = env->GetStringUTFChars(jstr, nullptr);
+        if (chars != nullptr) {
+          out.emplace_back(chars);
+          env->ReleaseStringUTFChars(jstr, chars);
+        } else {
+          out.emplace_back("");
+        }
+        if (env->functions->DeleteLocalRef != nullptr) {
+          env->DeleteLocalRef(jstr);
+        }
+      } else {
+        out.emplace_back("");
+      }
+    }
+    return out;
+  }
+  return fml::jni::StringArrayToVector(env, array);
+}
+
+bool CheckJniException(JNIEnv* env, JNIEnv* test_env) {
+  if (env == nullptr) {
+    return true;
+  }
+  if (test_env != nullptr) {
+    if (env->functions == nullptr ||
+        env->functions->ExceptionCheck == nullptr ||
+        env->ExceptionCheck() == JNI_FALSE) {
+      return true;
+    }
+    if (env->functions->ExceptionDescribe != nullptr) {
+      env->ExceptionDescribe();
+    }
+    if (env->functions->ExceptionClear != nullptr) {
+      env->ExceptionClear();
+    }
+    return false;
+  }
+  return fml::jni::CheckException(env);
+}
+
+}  // namespace
+
+JvmInvoker::JvmInvoker(JNIEnv* env, jobject flutter_jni) {
+  AttachToJava(env, flutter_jni);
 }
 
 JvmInvoker::~JvmInvoker() {
@@ -331,6 +494,7 @@ JvmInvoker::~JvmInvoker() {
 }
 
 void JvmInvoker::AttachToJava(JNIEnv* env, jobject flutter_jni) {
+  DetachFromJava();
 #if FML_OS_ANDROID
   test_env_ = (env != nullptr && env->functions != nullptr &&
                env->functions->GetJavaVM == nullptr)
@@ -340,16 +504,35 @@ void JvmInvoker::AttachToJava(JNIEnv* env, jobject flutter_jni) {
   test_env_ = env;
 #endif
   if (env != nullptr && flutter_jni != nullptr) {
-    java_object_ = fml::jni::JavaObjectWeakGlobalRef(env, flutter_jni);
+    if (test_env_ != nullptr) {
+      test_java_object_ = (env->functions != nullptr &&
+                           env->functions->NewWeakGlobalRef != nullptr)
+                              ? env->NewWeakGlobalRef(flutter_jni)
+                              : flutter_jni;
+    } else {
+      java_object_ = fml::jni::JavaObjectWeakGlobalRef(env, flutter_jni);
+    }
   }
 }
 
 void JvmInvoker::DetachFromJava() {
+  if (test_env_ != nullptr) {
+    if (test_java_object_ != nullptr && test_env_->functions != nullptr &&
+        test_env_->functions->DeleteWeakGlobalRef != nullptr) {
+      test_env_->DeleteWeakGlobalRef(test_java_object_);
+    }
+    test_java_object_ = nullptr;
+    test_env_ = nullptr;
+    return;
+  }
+  test_java_object_ = nullptr;
   java_object_.reset();
-  test_env_ = nullptr;
 }
 
 bool JvmInvoker::IsAttached() const {
+  if (test_env_ != nullptr) {
+    return test_java_object_ != nullptr;
+  }
   if (java_object_.is_empty()) {
     return false;
   }
@@ -380,6 +563,20 @@ fml::jni::ScopedJavaLocalRef<jobject> JvmInvoker::GetFlutterJni(
   if (env == nullptr) {
     return fml::jni::ScopedJavaLocalRef<jobject>();
   }
+  if (test_env_ != nullptr) {
+#if FML_OS_ANDROID
+    return fml::jni::ScopedJavaLocalRef<jobject>();
+#else
+    if (test_java_object_ == nullptr) {
+      return fml::jni::ScopedJavaLocalRef<jobject>();
+    }
+    jobject local =
+        (env->functions != nullptr && env->functions->NewLocalRef != nullptr)
+            ? env->NewLocalRef(test_java_object_)
+            : test_java_object_;
+    return fml::jni::ScopedJavaLocalRef<jobject>(env, local);
+#endif
+  }
   return java_object_.get(env);
 }
 
@@ -392,7 +589,7 @@ void JvmInvoker::HandlePlatformMessage(const std::string& channel,
   if (env == nullptr) {
     return;
   }
-  auto java_object = java_object_.get(env);
+  ScopedJniObject java_object(env, test_env_, test_java_object_, java_object_);
   if (java_object.is_null() || g_handle_platform_message_method == nullptr) {
     return;
   }
@@ -428,7 +625,7 @@ void JvmInvoker::HandlePlatformMessage(const std::string& channel,
   if (java_channel != nullptr) {
     env->DeleteLocalRef(java_channel);
   }
-  fml::jni::CheckException(env);
+  CheckJniException(env, test_env_);
 }
 
 void JvmInvoker::HandlePlatformMessageResponse(int32_t response_id,
@@ -438,7 +635,7 @@ void JvmInvoker::HandlePlatformMessageResponse(int32_t response_id,
   if (env == nullptr) {
     return;
   }
-  auto java_object = java_object_.get(env);
+  ScopedJniObject java_object(env, test_env_, test_java_object_, java_object_);
   if (java_object.is_null() ||
       g_handle_platform_message_response_method == nullptr) {
     return;
@@ -465,7 +662,7 @@ void JvmInvoker::HandlePlatformMessageResponse(int32_t response_id,
   if (direct_buffer != nullptr) {
     env->DeleteLocalRef(direct_buffer);
   }
-  fml::jni::CheckException(env);
+  CheckJniException(env, test_env_);
 }
 
 void JvmInvoker::UpdateSemantics(JNIEnv* env,
@@ -478,13 +675,13 @@ void JvmInvoker::UpdateSemantics(JNIEnv* env,
   if (env == nullptr) {
     return;
   }
-  auto java_object = java_object_.get(env);
+  ScopedJniObject java_object(env, test_env_, test_java_object_, java_object_);
   if (java_object.is_null() || g_update_semantics_method == nullptr) {
     return;
   }
   env->CallVoidMethod(java_object.obj(), g_update_semantics_method, buffer,
                       strings, string_Attribute_args);
-  fml::jni::CheckException(env);
+  CheckJniException(env, test_env_);
 }
 
 void JvmInvoker::UpdateSemantics(
@@ -495,13 +692,13 @@ void JvmInvoker::UpdateSemantics(
   if (env == nullptr || buffer.empty()) {
     return;
   }
-  auto java_object = java_object_.get(env);
+  ScopedJniObject java_object(env, test_env_, test_java_object_, java_object_);
   if (java_object.is_null() || g_update_semantics_method == nullptr) {
     return;
   }
   jobject direct_buffer = env->NewDirectByteBuffer(
       const_cast<uint8_t*>(buffer.data()), buffer.size());
-  auto java_strings = fml::jni::VectorToStringArray(env, strings);
+  ScopedJniObjectArray java_strings(env, test_env_, strings);
   jclass bb_class = env->FindClass("java/nio/ByteBuffer");
   jobjectArray java_attr_args = nullptr;
   if (bb_class != nullptr) {
@@ -528,7 +725,7 @@ void JvmInvoker::UpdateSemantics(
   if (direct_buffer != nullptr) {
     env->DeleteLocalRef(direct_buffer);
   }
-  fml::jni::CheckException(env);
+  CheckJniException(env, test_env_);
 }
 
 void JvmInvoker::UpdateCustomAccessibilityActions(
@@ -538,21 +735,21 @@ void JvmInvoker::UpdateCustomAccessibilityActions(
   if (env == nullptr || buffer.empty()) {
     return;
   }
-  auto java_object = java_object_.get(env);
+  ScopedJniObject java_object(env, test_env_, test_java_object_, java_object_);
   if (java_object.is_null() ||
       g_set_custom_accessibility_actions_method == nullptr) {
     return;
   }
   jobject direct_buffer = env->NewDirectByteBuffer(
       const_cast<uint8_t*>(buffer.data()), buffer.size());
-  auto java_strings = fml::jni::VectorToStringArray(env, strings);
+  ScopedJniObjectArray java_strings(env, test_env_, strings);
   env->CallVoidMethod(java_object.obj(),
                       g_set_custom_accessibility_actions_method, direct_buffer,
                       java_strings.obj());
   if (direct_buffer != nullptr) {
     env->DeleteLocalRef(direct_buffer);
   }
-  fml::jni::CheckException(env);
+  CheckJniException(env, test_env_);
 }
 
 void JvmInvoker::AsyncWaitForVsync(int64_t baton) {
@@ -564,7 +761,7 @@ void JvmInvoker::SetApplicationLocale(const std::string& locale) {
   if (env == nullptr || test_env_ != nullptr) {
     return;
   }
-  auto java_object = java_object_.get(env);
+  ScopedJniObject java_object(env, test_env_, test_java_object_, java_object_);
   if (java_object.is_null()) {
     return;
   }
@@ -586,7 +783,7 @@ void JvmInvoker::SetApplicationLocale(const std::string& locale) {
   if (java_locale != nullptr) {
     env->DeleteLocalRef(java_locale);
   }
-  fml::jni::CheckException(env);
+  CheckJniException(env, test_env_);
 }
 
 void JvmInvoker::SetSemanticsTreeEnabled(bool enabled) {
@@ -594,7 +791,7 @@ void JvmInvoker::SetSemanticsTreeEnabled(bool enabled) {
   if (env == nullptr || test_env_ != nullptr) {
     return;
   }
-  auto java_object = java_object_.get(env);
+  ScopedJniObject java_object(env, test_env_, test_java_object_, java_object_);
   if (java_object.is_null()) {
     return;
   }
@@ -612,7 +809,7 @@ void JvmInvoker::SetSemanticsTreeEnabled(bool enabled) {
   }
   env->CallVoidMethod(java_object.obj(), g_set_semantics_tree_enabled_method,
                       static_cast<jboolean>(enabled ? JNI_TRUE : JNI_FALSE));
-  fml::jni::CheckException(env);
+  CheckJniException(env, test_env_);
 }
 
 std::unique_ptr<std::vector<std::string>>
@@ -622,23 +819,22 @@ JvmInvoker::ComputePlatformResolvedLocale(
   if (env == nullptr) {
     return nullptr;
   }
-  auto java_object = java_object_.get(env);
+  ScopedJniObject java_object(env, test_env_, test_java_object_, java_object_);
   if (java_object.is_null() ||
       g_compute_platform_resolved_locale_method == nullptr) {
     return nullptr;
   }
 
-  auto java_locales =
-      fml::jni::VectorToStringArray(env, supported_locales_data);
+  ScopedJniObjectArray java_locales(env, test_env_, supported_locales_data);
   jobjectArray result_array = static_cast<jobjectArray>(env->CallObjectMethod(
       java_object.obj(), g_compute_platform_resolved_locale_method,
       java_locales.obj()));
-  if (!fml::jni::CheckException(env) || result_array == nullptr) {
+  if (!CheckJniException(env, test_env_) || result_array == nullptr) {
     return nullptr;
   }
 
   auto out = std::make_unique<std::vector<std::string>>(
-      fml::jni::StringArrayToVector(env, result_array));
+      ConvertJniStringArrayToVector(env, test_env_, result_array));
   env->DeleteLocalRef(result_array);
   return out;
 }
@@ -649,12 +845,12 @@ void JvmInvoker::OnFirstFrame() {
   if (env == nullptr) {
     return;
   }
-  auto java_object = java_object_.get(env);
+  ScopedJniObject java_object(env, test_env_, test_java_object_, java_object_);
   if (java_object.is_null() || g_on_first_frame_method == nullptr) {
     return;
   }
   env->CallVoidMethod(java_object.obj(), g_on_first_frame_method);
-  fml::jni::CheckException(env);
+  CheckJniException(env, test_env_);
 }
 
 void JvmInvoker::OnEngineRestart() {
@@ -662,12 +858,12 @@ void JvmInvoker::OnEngineRestart() {
   if (env == nullptr) {
     return;
   }
-  auto java_object = java_object_.get(env);
+  ScopedJniObject java_object(env, test_env_, test_java_object_, java_object_);
   if (java_object.is_null() || g_on_engine_restart_method == nullptr) {
     return;
   }
   env->CallVoidMethod(java_object.obj(), g_on_engine_restart_method);
-  fml::jni::CheckException(env);
+  CheckJniException(env, test_env_);
 }
 
 void JvmInvoker::CreatePlatformView(int32_t view_id,
@@ -867,7 +1063,7 @@ void JvmInvoker::OnPlatformViewDisplay(
   if (env == nullptr) {
     return;
   }
-  auto java_object = java_object_.get(env);
+  ScopedJniObject java_object(env, test_env_, test_java_object_, java_object_);
   if (java_object.is_null() || g_on_display_platform_view_method == nullptr) {
     return;
   }
@@ -882,7 +1078,7 @@ void JvmInvoker::OnPlatformViewDisplay(
   if (stack != nullptr) {
     env->DeleteLocalRef(stack);
   }
-  fml::jni::CheckException(env);
+  CheckJniException(env, test_env_);
 }
 
 void JvmInvoker::OnDisplayPlatformView2(
@@ -904,7 +1100,7 @@ void JvmInvoker::OnDisplayPlatformView2(
   if (env == nullptr) {
     return;
   }
-  auto java_object = java_object_.get(env);
+  ScopedJniObject java_object(env, test_env_, test_java_object_, java_object_);
   if (java_object.is_null() || g_on_display_platform_view2_method == nullptr) {
     return;
   }
@@ -919,7 +1115,7 @@ void JvmInvoker::OnDisplayPlatformView2(
   if (stack != nullptr) {
     env->DeleteLocalRef(stack);
   }
-  fml::jni::CheckException(env);
+  CheckJniException(env, test_env_);
 }
 
 void JvmInvoker::HidePlatformView2(int32_t view_id) {
@@ -927,12 +1123,12 @@ void JvmInvoker::HidePlatformView2(int32_t view_id) {
   if (env == nullptr) {
     return;
   }
-  auto java_object = java_object_.get(env);
+  ScopedJniObject java_object(env, test_env_, test_java_object_, java_object_);
   if (java_object.is_null() || g_hide_platform_view2_method == nullptr) {
     return;
   }
   env->CallVoidMethod(java_object.obj(), g_hide_platform_view2_method, view_id);
-  fml::jni::CheckException(env);
+  CheckJniException(env, test_env_);
 }
 
 jobject JvmInvoker::CreateOverlaySurface() {
@@ -940,13 +1136,13 @@ jobject JvmInvoker::CreateOverlaySurface() {
   if (env == nullptr) {
     return nullptr;
   }
-  auto java_object = java_object_.get(env);
+  ScopedJniObject java_object(env, test_env_, test_java_object_, java_object_);
   if (java_object.is_null() || g_create_overlay_surface_method == nullptr) {
     return nullptr;
   }
   jobject res =
       env->CallObjectMethod(java_object.obj(), g_create_overlay_surface_method);
-  fml::jni::CheckException(env);
+  CheckJniException(env, test_env_);
   return res;
 }
 
@@ -955,13 +1151,13 @@ jobject JvmInvoker::CreateOverlaySurface2() {
   if (env == nullptr) {
     return nullptr;
   }
-  auto java_object = java_object_.get(env);
+  ScopedJniObject java_object(env, test_env_, test_java_object_, java_object_);
   if (java_object.is_null() || g_create_overlay_surface2_method == nullptr) {
     return nullptr;
   }
   jobject res = env->CallObjectMethod(java_object.obj(),
                                       g_create_overlay_surface2_method);
-  fml::jni::CheckException(env);
+  CheckJniException(env, test_env_);
   return res;
 }
 
@@ -970,12 +1166,12 @@ void JvmInvoker::DestroyOverlaySurfaces() {
   if (env == nullptr) {
     return;
   }
-  auto java_object = java_object_.get(env);
+  ScopedJniObject java_object(env, test_env_, test_java_object_, java_object_);
   if (java_object.is_null() || g_destroy_overlay_surfaces_method == nullptr) {
     return;
   }
   env->CallVoidMethod(java_object.obj(), g_destroy_overlay_surfaces_method);
-  fml::jni::CheckException(env);
+  CheckJniException(env, test_env_);
 }
 
 void JvmInvoker::DestroyOverlaySurface2() {
@@ -983,12 +1179,12 @@ void JvmInvoker::DestroyOverlaySurface2() {
   if (env == nullptr) {
     return;
   }
-  auto java_object = java_object_.get(env);
+  ScopedJniObject java_object(env, test_env_, test_java_object_, java_object_);
   if (java_object.is_null() || g_destroy_overlay_surface2_method == nullptr) {
     return;
   }
   env->CallVoidMethod(java_object.obj(), g_destroy_overlay_surface2_method);
-  fml::jni::CheckException(env);
+  CheckJniException(env, test_env_);
 }
 
 void JvmInvoker::ShowOverlaySurface2() {
@@ -996,12 +1192,12 @@ void JvmInvoker::ShowOverlaySurface2() {
   if (env == nullptr) {
     return;
   }
-  auto java_object = java_object_.get(env);
+  ScopedJniObject java_object(env, test_env_, test_java_object_, java_object_);
   if (java_object.is_null() || g_show_overlay_surface2_method == nullptr) {
     return;
   }
   env->CallVoidMethod(java_object.obj(), g_show_overlay_surface2_method);
-  fml::jni::CheckException(env);
+  CheckJniException(env, test_env_);
 }
 
 void JvmInvoker::HideOverlaySurface2() {
@@ -1009,12 +1205,12 @@ void JvmInvoker::HideOverlaySurface2() {
   if (env == nullptr) {
     return;
   }
-  auto java_object = java_object_.get(env);
+  ScopedJniObject java_object(env, test_env_, test_java_object_, java_object_);
   if (java_object.is_null() || g_hide_overlay_surface2_method == nullptr) {
     return;
   }
   env->CallVoidMethod(java_object.obj(), g_hide_overlay_surface2_method);
-  fml::jni::CheckException(env);
+  CheckJniException(env, test_env_);
 }
 
 void JvmInvoker::OnBeginFrame() {
@@ -1022,12 +1218,12 @@ void JvmInvoker::OnBeginFrame() {
   if (env == nullptr) {
     return;
   }
-  auto java_object = java_object_.get(env);
+  ScopedJniObject java_object(env, test_env_, test_java_object_, java_object_);
   if (java_object.is_null() || g_on_begin_frame_method == nullptr) {
     return;
   }
   env->CallVoidMethod(java_object.obj(), g_on_begin_frame_method);
-  fml::jni::CheckException(env);
+  CheckJniException(env, test_env_);
 }
 
 void JvmInvoker::OnEndFrame() {
@@ -1035,12 +1231,12 @@ void JvmInvoker::OnEndFrame() {
   if (env == nullptr) {
     return;
   }
-  auto java_object = java_object_.get(env);
+  ScopedJniObject java_object(env, test_env_, test_java_object_, java_object_);
   if (java_object.is_null() || g_on_end_frame_method == nullptr) {
     return;
   }
   env->CallVoidMethod(java_object.obj(), g_on_end_frame_method);
-  fml::jni::CheckException(env);
+  CheckJniException(env, test_env_);
 }
 
 void JvmInvoker::EndFrame2() {
@@ -1048,12 +1244,12 @@ void JvmInvoker::EndFrame2() {
   if (env == nullptr) {
     return;
   }
-  auto java_object = java_object_.get(env);
+  ScopedJniObject java_object(env, test_env_, test_java_object_, java_object_);
   if (java_object.is_null() || g_end_frame2_method == nullptr) {
     return;
   }
   env->CallVoidMethod(java_object.obj(), g_end_frame2_method);
-  fml::jni::CheckException(env);
+  CheckJniException(env, test_env_);
 }
 
 double JvmInvoker::GetScaledFontSize(double unscaled_font_size,
@@ -1063,7 +1259,7 @@ double JvmInvoker::GetScaledFontSize(double unscaled_font_size,
   if (env == nullptr) {
     return kUnsupportedFontScaleResult;
   }
-  auto java_object = java_object_.get(env);
+  ScopedJniObject java_object(env, test_env_, test_java_object_, java_object_);
   if (java_object.is_null() || g_get_scaled_font_size_method == nullptr) {
     return kUnsupportedFontScaleResult;
   }
@@ -1071,7 +1267,7 @@ double JvmInvoker::GetScaledFontSize(double unscaled_font_size,
       env->CallFloatMethod(java_object.obj(), g_get_scaled_font_size_method,
                            static_cast<jfloat>(unscaled_font_size),
                            static_cast<jint>(configuration_id));
-  if (!fml::jni::CheckException(env)) {
+  if (!CheckJniException(env, test_env_)) {
     return kUnsupportedFontScaleResult;
   }
   return static_cast<double>(res);
@@ -1082,14 +1278,14 @@ bool JvmInvoker::RequestDartDeferredLibrary(int32_t loading_unit_id) {
   if (env == nullptr) {
     return false;
   }
-  auto java_object = java_object_.get(env);
+  ScopedJniObject java_object(env, test_env_, test_java_object_, java_object_);
   if (java_object.is_null() ||
       g_request_dart_deferred_library_method == nullptr) {
     return false;
   }
   env->CallVoidMethod(java_object.obj(), g_request_dart_deferred_library_method,
                       static_cast<jint>(loading_unit_id));
-  return fml::jni::CheckException(env);
+  return CheckJniException(env, test_env_);
 }
 
 namespace {
