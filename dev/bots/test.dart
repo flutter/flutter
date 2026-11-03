@@ -37,9 +37,12 @@
 //
 //  --test-randomize-ordering-seed=<n> sets the shuffle seed for reproducing runs.
 //
-//  --bazel runs the framework_tests and tool shards' tests under Bazel, on
-//  the prebuilt engine in bin/cache (see bazel.dart). A SHARD or SUBSHARD name
-//  ending in _bazel (SUBSHARD=widgets_bazel) does the same for that shard.
+// On a Linux or macOS host the framework_tests and tool shards run their
+// tests under Bazel, on the prebuilt engine in bin/cache (see bazel.dart).
+//
+//  --no-bazel runs them through `flutter test` and `dart test` instead, as
+//  Windows does; --bazel asks for Bazel whatever the host, as does a SHARD or
+//  SUBSHARD name ending in _bazel (SUBSHARD=widgets_bazel).
 //
 // All other arguments are treated as arguments to pass to the flutter tool when
 // running tests.
@@ -120,6 +123,8 @@ Future<void> main(List<String> args) async {
         printProgress('--dry-run enabled. Tests will not actually be executed.');
       } else if (arg == '--bazel') {
         enableBazel();
+      } else if (arg == '--no-bazel') {
+        disableBazel();
       } else {
         flutterTestArgs.add(arg);
       }
