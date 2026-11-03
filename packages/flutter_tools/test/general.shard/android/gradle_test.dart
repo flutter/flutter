@@ -32,6 +32,13 @@ flutter:
 void main() {
   Cache.flutterRoot = getFlutterRoot();
 
+  testWithoutContext('Debug symbol stripping error should end with the issue URL', () {
+    expect(
+      failedToStripDebugSymbolsErrorMessage,
+      endsWith('https://github.com/flutter/flutter/issues'),
+    );
+  });
+
   group('build artifacts', () {
     late FileSystem fileSystem;
 

@@ -24,9 +24,12 @@ void main() {
     );
   }
 
-  testWithoutContext('Flutter tool bug instructions should not end with a dot', () {
+  testWithoutContext('Flutter tool bug instructions should end with the issue URL', () {
     final userMessages = UserMessages();
-    expect(userMessages.flutterToolBugInstructions, isNot(endsWith('.')));
+    expect(
+      userMessages.flutterToolBugInstructions,
+      endsWith('https://github.com/flutter/flutter/issues'),
+    );
   });
 
   testWithoutContext('Android installation instructions', () {

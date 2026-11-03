@@ -70,7 +70,7 @@ Release app bundle failed to strip debug symbols from native libraries.
 Please run flutter doctor and ensure that the Android toolchain does not
 report any issues.
 
-Otherwise, file an issue at https://github.com/flutter/flutter/issues.''';
+Otherwise, file an issue at https://github.com/flutter/flutter/issues''';
 
 typedef _OutputParser = void Function(String line);
 
