@@ -191,9 +191,15 @@ the test for real, and so does the command from `engine/src`.
   output root: incremental when the bot has built the configuration before,
   from scratch otherwise (the first `ci/host_debug_unopt` on a fresh 32-core
   bot: the wrapped Dart SDK build alone is 15–25 minutes; the whole build and
-  its tests on the order of two hours, which is why the switched targets'
-  timeouts are 240 minutes). Disk: an output root of a test build is tens
-  of gigabytes.
+  its tests on the order of two hours). Two timeouts apply: the target's in
+  `.ci.yaml` (the orchestrator's; 240 for the switched targets) and each
+  build's own `timeout` key in the builder file, which the recipe gives the
+  drone (`shard_util`; 60 minutes when the key is absent) -- the Bazel
+  builds say 240. The first presubmit run (PR #195825, 8-core try bots,
+  cold): `ci/host_release` 5 minutes, the desktop and Android builds 24–27,
+  `ci/host_debug` 40, `ci/wasm_release` past 60 (36,000 of 39,000 actions
+  on a 32-core bot when the default timeout cut it). Disk: an output root
+  of a test build is tens of gigabytes.
 - Presubmit: the switched builders run on every PR as they did under GN,
   which is the point. A new `.ci.yaml` target cannot do that: cocoon admits
   it only as `bringup: true`, which runs in postsubmit on the staging pool

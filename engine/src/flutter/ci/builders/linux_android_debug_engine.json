@@ -49,6 +49,7 @@
                 "--bazel"
             ],
             "name": "ci/android_debug",
+            "timeout": 240,
             "description": "Produces debug mode artifacts to target 32-bit arm Android from a Linux host.",
             "ninja": {
                 "config": "ci/android_debug",
@@ -98,6 +99,7 @@
                 "--bazel"
             ],
             "name": "ci/android_debug_arm64",
+            "timeout": 240,
             "description": "Produces debug mode artifacts to target 64-bit arm Android from a Linux host.",
             "ninja": {
                 "config": "ci/android_debug_arm64",
@@ -144,6 +146,7 @@
                 "--bazel"
             ],
             "name": "ci/android_debug_x64",
+            "timeout": 240,
             "description": "Produces debug mode artifacts to target x64 Android from a Linux host.",
             "ninja": {
                 "config": "ci/android_debug_x64",
@@ -190,6 +193,7 @@
                 "--bazel"
             ],
             "name": "ci/android_debug_riscv64",
+            "timeout": 240,
             "description": "Produces debug mode artifacts to target riscv64 Android from a Linux host.",
             "ninja": {
                 "config": "ci/android_debug_riscv64",

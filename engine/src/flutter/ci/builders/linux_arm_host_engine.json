@@ -50,6 +50,7 @@
                 "--bazel"
             ],
             "name": "ci/linux_debug_arm64",
+            "timeout": 240,
             "description": "Produces debug mode artifacts to target arm64 Linux from a Linux host.",
             "ninja": {
                 "config": "ci/linux_debug_arm64",
