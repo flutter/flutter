@@ -600,8 +600,8 @@ void main() {
             'genSnapshot': '/cache/shadowed-gen-snapshot',
           },
         );
-        const target = ExtensionBuildTarget(
-          artifacts: <ExtensionArtifact>{
+        final target = ExtensionBuildTarget(
+          artifacts: const <ExtensionArtifact>{
             BuiltInArtifacts.genSnapshot,
             ExtensionArtifact('custom-ext-artifact'),
           },

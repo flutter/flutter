@@ -13,7 +13,7 @@ void main() {
   const testTargetPlatform = 'linux-x64';
 
   final testArtifacts = <ArtifactDependency>[
-    ArtifactDependency(
+    ArtifactDependency.remote(
       name: testArtifactName,
       sha256: testSha256,
       url: Uri.parse('https://example.com/linux-x64/artifacts.zip'),
@@ -23,14 +23,14 @@ void main() {
   ];
 
   group('LinuxArtifactService', () {
-    test('defaults to empty artifact list when none are configured', () async {
+    test('defaults to const empty artifact list when none are configured', () async {
       final service = LinuxArtifactService();
       expect(
         await service.listRequiredArtifacts(
           engineVersion: testEngineVersion,
           hostPlatform: HostPlatform.linux_x64,
         ),
-        isEmpty,
+        same(const <ArtifactDependency>[]),
       );
     });
 

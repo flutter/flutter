@@ -604,6 +604,14 @@ class FakeCache extends Fake implements Cache {
   @override
   bool includeAllPlatforms = false;
 
+  String? _flutterRoot;
+
+  @override
+  String get flutterRoot => _flutterRoot ?? '';
+
+  @override
+  set flutterRoot(String? value) => _flutterRoot = value;
+
   @override
   late final OperatingSystemUtils osUtils = FakeOperatingSystemUtils();
 }

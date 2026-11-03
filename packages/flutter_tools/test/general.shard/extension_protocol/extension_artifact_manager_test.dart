@@ -33,7 +33,7 @@ final class _FakeArtifactService extends ArtifactService {
   final SendPort? targetPlatformsObserver;
 
   @override
-  Future<List<ArtifactDependency>> downloadArtifacts({
+  Future<List<ArtifactDependency>> listRequiredArtifacts({
     required String engineVersion,
     required HostPlatform hostPlatform,
     Set<String>? targetPlatforms,
@@ -78,7 +78,7 @@ void main() {
       osUtils = FakeOperatingSystemUtils();
     });
 
-    test('resolves shared cache directory from cacheDir override, DART_DATA_HOME, HOME, and LOCALAPPDATA', () {
+    test('resolves shared cache directory from cacheDir override, DART_DATA_HOME, HOME, and LOCALAPPDATA, and throws ToolExit when unset', () {
       final manager = ExtensionManager(
         hostPlatform: HostPlatform.linux_x64,
         logger: logger,
@@ -87,7 +87,7 @@ void main() {
       expect(manager.hostPlatformName, 'linux');
 
       final customHostManager = ExtensionManager(
-        hostPlatform: const HostPlatform('freebsd-x64', 'x64'),
+        hostPlatform: HostPlatform('freebsd-x64', 'x64'),
         logger: logger,
         featureFlags: TestFeatureFlags(),
       );
@@ -180,6 +180,22 @@ void main() {
         withWindowsUserProfile.artifactsCacheDirectory.path,
         r'C:\Users\user\.flutter_tool_extensions\artifacts',
       );
+
+      final withNoEnv = ExtensionArtifactManager(
+        extensionManager: manager,
+        featureFlags: TestFeatureFlags(),
+        toolContext: FakeToolContext(fs: fs, logger: logger, os: osUtils, platform: FakePlatform()),
+      );
+      expect(
+        () => withNoEnv.artifactsCacheDirectory,
+        throwsA(
+          isA<ToolExit>().having(
+            (ToolExit e) => e.message,
+            'message',
+            contains('Unable to determine shared cache directory for tool extension artifacts'),
+          ),
+        ),
+      );
     });
 
     test('does nothing when tool extensions feature flag is disabled', () async {
@@ -217,7 +233,7 @@ void main() {
           sendPort,
           <ToolExtensionService>[
             _FakeArtifactService(<ArtifactDependency>[
-              ArtifactDependency(
+              ArtifactDependency.remote(
                 name: 'my_custom_bin',
                 sha256: contentSha256,
                 url: Uri.parse('https://example.com/my_custom_bin'),
@@ -265,13 +281,13 @@ void main() {
 
       expect(downloadCount, 1);
       final File artifactFile = fs.file(
-        '/dart_data/flutter_tool_extensions/artifacts/custom_ext/fake_engine_revision/my_custom_bin',
+        '/dart_data/flutter_tool_extensions/artifacts/custom_ext/$contentSha256/my_custom_bin',
       );
       expect(resolved, <String, String>{'my_custom_bin': artifactFile.path});
       expect(artifactFile.existsSync(), isTrue);
       expect(artifactFile.readAsBytesSync(), equals(content));
       final File stampFile = fs.file(
-        '/dart_data/flutter_tool_extensions/artifacts/custom_ext/fake_engine_revision/.my_custom_bin.sha256',
+        '/dart_data/flutter_tool_extensions/artifacts/custom_ext/$contentSha256/.my_custom_bin.sha256',
       );
       expect(stampFile.existsSync(), isTrue);
       expect(stampFile.readAsStringSync(), contentSha256);
@@ -298,86 +314,83 @@ void main() {
       expect(stampFile.readAsStringSync(), contentSha256);
     });
 
-    test(
-      'unzips .zip artifacts into engineVersion-keyed directory and writes stamp file',
-      () async {
-        final List<int> zipContent = utf8.encode('fake zip archive bytes');
-        final zipSha256 = sha256.convert(zipContent).toString();
+    test('unzips .zip artifacts into sha256-keyed directory and writes stamp file', () async {
+      final List<int> zipContent = utf8.encode('fake zip archive bytes');
+      final zipSha256 = sha256.convert(zipContent).toString();
 
-        void entryPoint(SendPort sendPort) {
-          ToolExtensionEntryPoint.run(
-            sendPort,
-            <ToolExtensionService>[
-              _FakeArtifactService(<ArtifactDependency>[
-                ArtifactDependency(
-                  name: 'engine_bundle',
-                  sha256: zipSha256,
-                  url: Uri.parse('https://example.com/engine_bundle.zip'),
-                  hostPlatform: HostPlatform.linux_x64,
-                  targetPlatform: 'custom-embedder-arm64',
-                ),
-              ]),
-            ],
-            extensionName: 'embedder_ext',
-            supportedPlatforms: const <String>{'linux'},
-          );
-        }
+      void entryPoint(SendPort sendPort) {
+        ToolExtensionEntryPoint.run(
+          sendPort,
+          <ToolExtensionService>[
+            _FakeArtifactService(<ArtifactDependency>[
+              ArtifactDependency.remote(
+                name: 'engine_bundle',
+                sha256: zipSha256,
+                url: Uri.parse('https://example.com/engine_bundle.zip'),
+                hostPlatform: HostPlatform.linux_x64,
+                targetPlatform: 'custom-embedder-arm64',
+              ),
+            ]),
+          ],
+          extensionName: 'embedder_ext',
+          supportedPlatforms: const <String>{'linux'},
+        );
+      }
 
-        final manager = ExtensionManager(
-          hostPlatform: HostPlatform.linux_x64,
+      final manager = ExtensionManager(
+        hostPlatform: HostPlatform.linux_x64,
+        logger: logger,
+        featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
+        entryPoints: <ExtensionEntryPoint>[entryPoint],
+      );
+      addTearDown(manager.dispose);
+
+      var downloadCount = 0;
+      final httpClient = _FakeHttpClient((Uri url) async {
+        downloadCount++;
+        return _FakeHttpClientResponse(HttpStatus.ok, zipContent);
+      });
+      final unzipOsUtils = _UnzipTrackingOsUtils();
+
+      final Directory customCacheDir = fs.directory('/custom/cache');
+      final artifactManager = ExtensionArtifactManager(
+        cacheDir: customCacheDir,
+        extensionManager: manager,
+        featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
+        httpClient: httpClient,
+        toolContext: FakeToolContext(
+          cache: FakeCache(engineRevision: 'engine_rev_123', fileSystem: fs),
+          fs: fs,
           logger: logger,
-          featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
-          entryPoints: <ExtensionEntryPoint>[entryPoint],
-        );
-        addTearDown(manager.dispose);
+          os: unzipOsUtils,
+          platform: FakePlatform(),
+        ),
+      );
 
-        var downloadCount = 0;
-        final httpClient = _FakeHttpClient((Uri url) async {
-          downloadCount++;
-          return _FakeHttpClientResponse(HttpStatus.ok, zipContent);
-        });
-        final unzipOsUtils = _UnzipTrackingOsUtils();
+      final Map<String, String> resolved = await artifactManager.ensureArtifactsDownloaded(
+        targetPlatforms: const <String>{'custom-embedder-arm64'},
+      );
 
-        final Directory customCacheDir = fs.directory('/custom/cache');
-        final artifactManager = ExtensionArtifactManager(
-          cacheDir: customCacheDir,
-          extensionManager: manager,
-          featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
-          httpClient: httpClient,
-          toolContext: FakeToolContext(
-            cache: FakeCache(engineRevision: 'engine_rev_123', fileSystem: fs),
-            fs: fs,
-            logger: logger,
-            os: unzipOsUtils,
-            platform: FakePlatform(),
-          ),
-        );
+      expect(downloadCount, 1);
+      expect(unzipOsUtils.unzipCount, 1);
+      final Directory destDir = customCacheDir
+          .childDirectory('embedder_ext')
+          .childDirectory(zipSha256);
+      final Directory extractedDir = destDir.childDirectory('engine_bundle');
+      final File stampFile = destDir.childFile('.engine_bundle.sha256');
+      expect(resolved, <String, String>{'engine_bundle': extractedDir.path});
+      expect(extractedDir.existsSync(), isTrue);
+      expect(extractedDir.childFile('extracted.txt').existsSync(), isTrue);
+      expect(stampFile.existsSync(), isTrue);
+      expect(stampFile.readAsStringSync(), zipSha256);
 
-        final Map<String, String> resolved = await artifactManager.ensureArtifactsDownloaded(
-          targetPlatforms: const <String>{'custom-embedder-arm64'},
-        );
-
-        expect(downloadCount, 1);
-        expect(unzipOsUtils.unzipCount, 1);
-        final Directory engineDir = customCacheDir
-            .childDirectory('embedder_ext')
-            .childDirectory('engine_rev_123');
-        final Directory extractedDir = engineDir.childDirectory('engine_bundle');
-        final File stampFile = engineDir.childFile('.engine_bundle.sha256');
-        expect(resolved, <String, String>{'engine_bundle': extractedDir.path});
-        expect(extractedDir.existsSync(), isTrue);
-        expect(extractedDir.childFile('extracted.txt').existsSync(), isTrue);
-        expect(stampFile.existsSync(), isTrue);
-        expect(stampFile.readAsStringSync(), zipSha256);
-
-        // Subsequent call hits verified stamp and does not re-download.
-        await artifactManager.ensureArtifactsDownloaded(
-          targetPlatforms: const <String>{'custom-embedder-arm64'},
-        );
-        expect(downloadCount, 1);
-        expect(unzipOsUtils.unzipCount, 1);
-      },
-    );
+      // Subsequent call hits verified stamp and does not re-download.
+      await artifactManager.ensureArtifactsDownloaded(
+        targetPlatforms: const <String>{'custom-embedder-arm64'},
+      );
+      expect(downloadCount, 1);
+      expect(unzipOsUtils.unzipCount, 1);
+    });
 
     test(
       'concurrent ensureArtifactsDownloaded calls for same artifact are safe and deduplicated',
@@ -390,7 +403,7 @@ void main() {
             sendPort,
             <ToolExtensionService>[
               _FakeArtifactService(<ArtifactDependency>[
-                ArtifactDependency(
+                ArtifactDependency.remote(
                   name: 'concurrent_bin',
                   sha256: contentSha256,
                   url: Uri.parse('https://example.com/concurrent_bin'),
@@ -451,7 +464,7 @@ void main() {
         expect(downloadCount, 1);
         final File cachedFile = cacheDir
             .childDirectory('concurrent_ext')
-            .childDirectory('fake_engine_revision')
+            .childDirectory(contentSha256)
             .childFile('concurrent_bin');
         expect(cachedFile.existsSync(), isTrue);
         expect(cachedFile.readAsBytesSync(), equals(content));
@@ -466,7 +479,7 @@ void main() {
           sendPort,
           <ToolExtensionService>[
             _FakeArtifactService(<ArtifactDependency>[
-              ArtifactDependency(
+              ArtifactDependency.remote(
                 name: 'bad_bin',
                 sha256: '0000000000000000000000000000000000000000000000000000000000000000',
                 url: Uri.parse('https://example.com/bad_bin'),
@@ -543,7 +556,7 @@ void main() {
           <ToolExtensionService>[
             LinuxArtifactService(
               artifacts: <ArtifactDependency>[
-                ArtifactDependency(
+                ArtifactDependency.remote(
                   name: 'linux-x64-custom-artifact',
                   sha256: expectedSha,
                   url: Uri.parse('https://example.com/linux-x64/artifacts'),
@@ -567,13 +580,13 @@ void main() {
       addTearDown(manager.dispose);
 
       final Directory cacheDir = fs.directory('/shared_cache');
-      final Directory engineDir = cacheDir
+      final Directory destDir = cacheDir
           .childDirectory('flutter_tools_extension_linux_prototype')
-          .childDirectory('fake_engine_revision');
-      engineDir.childFile('linux-x64-custom-artifact')
+          .childDirectory(expectedSha);
+      destDir.childFile('linux-x64-custom-artifact')
         ..createSync(recursive: true)
         ..writeAsBytesSync(content);
-      engineDir.childFile('.linux-x64-custom-artifact.sha256')
+      destDir.childFile('.linux-x64-custom-artifact.sha256')
         ..createSync(recursive: true)
         ..writeAsStringSync(expectedSha);
 
@@ -605,21 +618,21 @@ void main() {
 
         final ExtensionEntryPoint entryPoint = _createMultiTargetEntryPoint(
           artifacts: <ArtifactDependency>[
-            ArtifactDependency(
+            ArtifactDependency.remote(
               name: 'linux_bin',
               sha256: contentSha256,
               url: Uri.parse('https://example.com/linux_bin'),
               hostPlatform: HostPlatform.linux_x64,
               targetPlatform: 'linux-x64',
             ),
-            ArtifactDependency(
+            ArtifactDependency.remote(
               name: 'embedder_bin',
               sha256: contentSha256,
               url: Uri.parse('https://example.com/embedder_bin'),
               hostPlatform: HostPlatform.linux_x64,
               targetPlatform: 'custom-embedder-arm64',
             ),
-            ArtifactDependency(
+            ArtifactDependency.remote(
               name: 'unselected_bin',
               sha256: contentSha256,
               url: Uri.parse('https://example.com/unselected_bin'),
@@ -682,7 +695,7 @@ void main() {
           sendPort,
           <ToolExtensionService>[
             _FakeArtifactService(<ArtifactDependency>[
-              ArtifactDependency(
+              ArtifactDependency.remote(
                 name: 'shared_bin',
                 sha256: contentSha256,
                 url: Uri.parse('https://example.com/ext1/shared_bin'),
@@ -700,7 +713,7 @@ void main() {
           sendPort,
           <ToolExtensionService>[
             _FakeArtifactService(<ArtifactDependency>[
-              ArtifactDependency(
+              ArtifactDependency.remote(
                 name: 'shared_bin',
                 sha256: contentSha256,
                 url: Uri.parse('https://example.com/ext2/shared_bin'),
@@ -737,13 +750,117 @@ void main() {
       );
 
       final Map<String, String> resolved = await artifactManager.ensureArtifactsDownloaded();
-      expect(resolved['shared_bin'], '/collision_cache/first_ext/fake_engine_revision/shared_bin');
+      expect(resolved['shared_bin'], '/collision_cache/first_ext/$contentSha256/shared_bin');
       expect(downloadedUrls, <Uri>[Uri.parse('https://example.com/ext1/shared_bin')]);
       expect(
         logger.warningText,
         contains(
           'Artifact "shared_bin" from extension "second_ext" conflicts with an '
           'artifact of the same name from another extension and will be ignored.',
+        ),
+      );
+    });
+
+    test('resolves LocalArtifactDependency directly on disk and throws ToolExit when localUri or stampUri is missing', () async {
+      final File localEngineBin = fs.file('/local/engine/out/host_debug_unopt/gen_snapshot')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('local gen_snapshot binary');
+      final Directory localEngineDir = fs.directory('/local/engine/out/host_debug_unopt')
+        ..createSync(recursive: true);
+      final File localEngineStamp = localEngineDir.childFile('.stamp')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('stamp_v1');
+
+      void localEntryPoint(SendPort sendPort) {
+        ToolExtensionEntryPoint.run(
+          sendPort,
+          <ToolExtensionService>[
+            _FakeArtifactService(<ArtifactDependency>[
+              ArtifactDependency.local(
+                name: 'local_gen_snapshot',
+                localUri: localEngineBin.uri,
+                hostPlatform: HostPlatform.linux_x64,
+                targetPlatform: 'custom-embedder-arm64',
+              ),
+              ArtifactDependency.local(
+                name: 'local_engine_dir',
+                localUri: localEngineDir.uri,
+                stampUri: localEngineStamp.uri,
+                hostPlatform: HostPlatform.linux_x64,
+                targetPlatform: 'custom-embedder-arm64',
+              ),
+            ]),
+          ],
+          extensionName: 'local_ext',
+          supportedPlatforms: const <String>{'linux'},
+        );
+      }
+
+      final manager = ExtensionManager(
+        hostPlatform: HostPlatform.linux_x64,
+        logger: logger,
+        featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
+        entryPoints: <ExtensionEntryPoint>[localEntryPoint],
+      );
+      addTearDown(manager.dispose);
+
+      var downloadCount = 0;
+      final httpClient = _FakeHttpClient((Uri url) async {
+        downloadCount++;
+        return _FakeHttpClientResponse(HttpStatus.ok, const <int>[]);
+      });
+
+      final Directory cacheDir = fs.directory('/unused_cache');
+      final artifactManager = ExtensionArtifactManager(
+        cacheDir: cacheDir,
+        extensionManager: manager,
+        featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
+        httpClient: httpClient,
+        toolContext: FakeToolContext(fs: fs, logger: logger, os: osUtils, platform: FakePlatform()),
+      );
+
+      final Map<String, String> resolved = await artifactManager.ensureArtifactsDownloaded(
+        targetPlatforms: const <String>{'custom-embedder-arm64'},
+      );
+      expect(downloadCount, 0);
+      expect(cacheDir.existsSync(), isFalse);
+      expect(resolved, <String, String>{
+        'local_gen_snapshot': '/local/engine/out/host_debug_unopt/gen_snapshot',
+        'local_engine_dir': '/local/engine/out/host_debug_unopt',
+      });
+
+      // Deleting the stamp file should cause resolution to fail with ToolExit.
+      localEngineStamp.deleteSync();
+      await expectLater(
+        artifactManager.ensureArtifactsDownloaded(
+          targetPlatforms: const <String>{'custom-embedder-arm64'},
+        ),
+        throwsA(
+          isA<ToolExit>().having(
+            (ToolExit e) => e.message,
+            'message',
+            contains(
+              'Stamp file for local artifact "local_engine_dir" for extension "local_ext" was not found at "/local/engine/out/host_debug_unopt/.stamp".',
+            ),
+          ),
+        ),
+      );
+
+      // Deleting the local artifact file should also fail with ToolExit.
+      localEngineStamp.writeAsStringSync('stamp_v2');
+      localEngineBin.deleteSync();
+      await expectLater(
+        artifactManager.ensureArtifactsDownloaded(
+          targetPlatforms: const <String>{'custom-embedder-arm64'},
+        ),
+        throwsA(
+          isA<ToolExit>().having(
+            (ToolExit e) => e.message,
+            'message',
+            contains(
+              'Local artifact "local_gen_snapshot" for extension "local_ext" was not found at "/local/engine/out/host_debug_unopt/gen_snapshot".',
+            ),
+          ),
         ),
       );
     });
