@@ -1119,9 +1119,12 @@ FlutterEmbedderNative::FlutterEmbedderNative(
 #endif
 #if FLUTTER_HAS_ANDROID_SURFACE_CONTROL
           if (surface_control_) {
+            surface_control_->DestroyOverlaySurfaces(
+                kOverlayVulkanViewIdOffset);
             surface_control_->SurfaceDestroyed(kAndroidImplicitViewId);
           }
 #endif
+          DestroyAndroidOverlayEGLSurfaces();
           DestroyAndroidWindowSurface();
         }
 #if FML_OS_ANDROID
@@ -1135,6 +1138,12 @@ FlutterEmbedderNative::FlutterEmbedderNative(
     });
     if (window != nullptr) {
       ScheduleFrame();
+    } else {
+#if FLUTTER_HAS_ANDROID_PLATFORM_VIEWS_CONTROLLER
+      if (platform_views_controller_) {
+        platform_views_controller_->DestroyOverlaySurfaces();
+      }
+#endif
     }
   };
   surface_callbacks.on_window_destroyed = [this]() {
@@ -1158,6 +1167,7 @@ FlutterEmbedderNative::FlutterEmbedderNative(
 #endif
 #if FLUTTER_HAS_ANDROID_SURFACE_CONTROL
         if (surface_control_) {
+          surface_control_->DestroyOverlaySurfaces(kOverlayVulkanViewIdOffset);
           surface_control_->SurfaceDestroyed(kAndroidImplicitViewId);
         }
 #endif
@@ -1172,6 +1182,11 @@ FlutterEmbedderNative::FlutterEmbedderNative(
 #endif
       }
     });
+#if FLUTTER_HAS_ANDROID_PLATFORM_VIEWS_CONTROLLER
+    if (platform_views_controller_) {
+      platform_views_controller_->DestroyOverlaySurfaces();
+    }
+#endif
     NotifyLowMemoryWarning();
   };
   surface_callbacks.on_metrics_changed = [this](size_t width, size_t height) {
@@ -3801,7 +3816,20 @@ void FlutterEmbedderNative::RunOnRasterThreadSynchronously(
       },
       &context);
   if (res == kSuccess) {
-    context.latch.Wait();
+    // Wait interval when draining the platform message loop while waiting for
+    // a synchronous raster task to complete.
+    constexpr int64_t kPlatformLoopDrainIntervalMs = 1;
+    auto platform_runner =
+        task_runners_ ? task_runners_->GetPlatformTaskRunner() : nullptr;
+    if ((!platform_runner || platform_runner->RunsTasksOnCurrentThread()) &&
+        fml::MessageLoop::IsInitializedForCurrentThread()) {
+      while (context.latch.WaitWithTimeout(
+          fml::TimeDelta::FromMilliseconds(kPlatformLoopDrainIntervalMs))) {
+        fml::MessageLoop::GetCurrent().RunExpiredTasksNow();
+      }
+    } else {
+      context.latch.Wait();
+    }
   } else {
     task();
   }

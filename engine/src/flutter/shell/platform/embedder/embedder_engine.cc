@@ -271,6 +271,17 @@ bool EmbedderEngine::SendPlatformMessage(
   }
 
   auto platform_view = shell_->GetPlatformView();
+  auto platform_task_runner = GetTaskRunners().GetPlatformTaskRunner();
+  if (platform_task_runner &&
+      !platform_task_runner->RunsTasksOnCurrentThread()) {
+    platform_task_runner->PostTask(fml::MakeCopyable(
+        [platform_view, message = std::move(message)]() mutable {
+          if (platform_view) {
+            platform_view->DispatchPlatformMessage(std::move(message));
+          }
+        }));
+    return true;
+  }
   if (!platform_view) {
     return false;
   }

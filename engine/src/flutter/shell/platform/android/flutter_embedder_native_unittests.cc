@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#define FML_USED_ON_EMBEDDER
+
 #include "flutter/shell/platform/android/flutter_embedder_native.h"
 
 #include <atomic>
@@ -12,7 +14,10 @@
 #include <vector>
 
 #include "flutter/common/vulkan_driver_info.h"
+#include "flutter/fml/message_loop.h"
+#include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/shell/platform/android/android_engine_group.h"
+#include "flutter/shell/platform/android/android_platform_views_controller.h"
 #include "flutter/shell/platform/android/android_rendering_selector.h"
 #include "flutter/shell/platform/android/android_vm_init.h"
 #include "flutter/shell/platform/android/android_vsync_waiter.h"
@@ -1486,6 +1491,82 @@ TEST_F(FlutterEmbedderNativeTest,
   const AndroidVMArgs args_false = ParseCommandLineIntoVMArgs(
       {"flutter", "--enable-vulkan-validation=false"});
   EXPECT_FALSE(args_false.enable_vulkan_validation);
+}
+
+TEST_F(FlutterEmbedderNativeTest,
+       SurfaceDestroyedDestroysAllocatedPlatformViewOverlaySurfaces) {
+  FlutterEmbedderNative embedder(&proc_table_);
+  ASSERT_NE(embedder.GetPlatformViewsController(), nullptr);
+  embedder.GetPlatformViewsController()->SetProvider(
+      std::make_shared<InMemoryPlatformViewsProvider>());
+
+  constexpr uintptr_t kFakeSurfaceAddress = 0x4001;
+  auto fake_surface = reinterpret_cast<jobject>(kFakeSurfaceAddress);
+  embedder.SurfaceCreated(nullptr, fake_surface);
+
+  std::optional<int32_t> overlay_id =
+      embedder.GetPlatformViewsController()->CreateOverlaySurface();
+  ASSERT_TRUE(overlay_id.has_value());
+  EXPECT_EQ(
+      embedder.GetPlatformViewsController()->GetActiveOverlaySurfacesCount(),
+      1u);
+
+  embedder.SurfaceDestroyed();
+  EXPECT_EQ(
+      embedder.GetPlatformViewsController()->GetActiveOverlaySurfacesCount(),
+      0u);
+}
+
+TEST_F(
+    FlutterEmbedderNativeTest,
+    RunOnRasterThreadSynchronouslyDrainsPlatformMessageLoopToPreventDeadlock) {
+  fml::MessageLoop::EnsureInitializedForCurrentThread();
+  fml::RefPtr<fml::TaskRunner> platform_runner =
+      fml::MessageLoop::GetCurrent().GetTaskRunner();
+
+  std::atomic<bool> platform_task_executed{false};
+  FlutterEngineProcTable custom_table = proc_table_;
+  struct CrossThreadTestState {
+    fml::RefPtr<fml::TaskRunner> platform_runner;
+    std::atomic<bool>* platform_task_executed = nullptr;
+  };
+  static CrossThreadTestState s_cross_thread_state;
+  s_cross_thread_state.platform_runner = platform_runner;
+  s_cross_thread_state.platform_task_executed = &platform_task_executed;
+
+  custom_table.PostRenderThreadTask =
+      [](FLUTTER_API_SYMBOL(FlutterEngine) engine, VoidCallback callback,
+         void* callback_data) {
+        (void)engine;
+        std::thread([callback, callback_data]() {
+          // Simulate an in-flight raster frame (e.g. PresentView or
+          // EnsureOverlaySurfaceAllocated) waiting synchronously on a platform
+          // thread task before the posted render thread task can run.
+          fml::AutoResetWaitableEvent platform_latch;
+          s_cross_thread_state.platform_runner->PostTask([&platform_latch]() {
+            if (s_cross_thread_state.platform_task_executed != nullptr) {
+              s_cross_thread_state.platform_task_executed->store(true);
+            }
+            platform_latch.Signal();
+          });
+          platform_latch.Wait();
+          if (callback != nullptr) {
+            callback(callback_data);
+          }
+        }).detach();
+        return kSuccess;
+      };
+
+  FlutterEmbedderNative embedder(&custom_table);
+  ASSERT_TRUE(embedder.RunBundleAndSnapshotFromLibrary(
+      nullptr, "/data/app/flutter_assets", "main", "package:app/main.dart",
+      nullptr, {}, kTestPrimaryEngineId));
+
+  constexpr uintptr_t kFakeSurfaceAddress = 0x4002;
+  auto fake_surface = reinterpret_cast<jobject>(kFakeSurfaceAddress);
+  embedder.SurfaceCreated(nullptr, fake_surface);
+
+  EXPECT_TRUE(platform_task_executed.load());
 }
 
 }  // namespace testing

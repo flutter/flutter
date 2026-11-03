@@ -188,7 +188,10 @@ struct MockVulkanEnv {
       kVkQueueGraphicsBit | kVkQueueComputeBit | kVkQueueTransferBit;
   uint32_t support_ycbcr_feature = 1u;
   uint32_t support_16bit_storage_feature = 1u;
+  uint32_t support_image_compression_control_feature = 1u;
+  uint32_t support_astc_hdr_feature = 1u;
   bool include_ahb_device_extension = true;
+  bool include_optional_impeller_device_extensions = false;
   bool include_surface_instance_extension = true;
   bool fail_swapchain_with_native_window_in_use_once = false;
   bool fail_acquire_next_image = false;
@@ -213,6 +216,11 @@ struct MockVulkanEnv {
   VkExtent2DCompat last_swapchain_extent = {0, 0};
   std::vector<std::string> created_instance_layers;
   std::vector<std::string> created_instance_extensions;
+  std::vector<std::string> created_device_extensions;
+  uint32_t enabled_image_compression_control_feature = 0u;
+  uint32_t enabled_astc_hdr_feature = 0u;
+  uint32_t enabled_sampler_anisotropy_feature = 0u;
+  uint32_t enabled_robust_buffer_access_feature = 0u;
 };
 
 MockVulkanEnv* g_vk_env = nullptr;
@@ -366,6 +374,17 @@ void StubVkGetPhysicalDeviceQueueFamilyProperties(
 void StubVkGetPhysicalDeviceFeatures2(
     void* /*physical_device*/,
     VkPhysicalDeviceFeatures2Compat* features) {
+  if (features != nullptr) {
+    // Populate all base features as supported by the hardware to verify that
+    // `InitializeVulkanOnRasterThreadLocked` retains only Impeller's 5 base
+    // features (`fillModeNonSolid`, `samplerAnisotropy`,
+    // `textureCompressionETC2`, `textureCompressionASTC_LDR`,
+    // `textureCompressionBC`) and masks out unneeded base features like
+    // `robustBufferAccess` (index 0).
+    for (size_t i = 0; i < 55; ++i) {
+      features->features.features[i] = 1u;
+    }
+  }
   void* next = features != nullptr ? features->pNext : nullptr;
   while (next != nullptr) {
     auto* header = static_cast<uint32_t*>(next);
@@ -383,6 +402,25 @@ void StubVkGetPhysicalDeviceFeatures2(
       storage->uniformAndStorageBuffer16BitAccess =
           g_vk_env != nullptr ? g_vk_env->support_16bit_storage_feature : 1u;
       next = storage->pNext;
+    } else if (
+        *header ==
+        kVkStructureTypePhysicalDeviceImageCompressionControlFeaturesExt) {
+      auto* icc = static_cast<
+          VkPhysicalDeviceImageCompressionControlFeaturesEXTCompat*>(next);
+      icc->imageCompressionControl =
+          g_vk_env != nullptr
+              ? g_vk_env->support_image_compression_control_feature
+              : 1u;
+      next = icc->pNext;
+    } else if (
+        *header ==
+        kVkStructureTypePhysicalDeviceTextureCompressionAstcHdrFeatures) {
+      auto* astc =
+          static_cast<VkPhysicalDeviceTextureCompressionASTCHDRFeaturesCompat*>(
+              next);
+      astc->textureCompressionASTC_HDR =
+          g_vk_env != nullptr ? g_vk_env->support_astc_hdr_feature : 1u;
+      next = astc->pNext;
     } else {
       break;
     }
@@ -406,6 +444,13 @@ int32_t StubVkEnumerateDeviceExtensionProperties(
   if (g_vk_env == nullptr || g_vk_env->include_ahb_device_extension) {
     exts.emplace_back("VK_ANDROID_external_memory_android_hardware_buffer");
   }
+  if (g_vk_env != nullptr &&
+      g_vk_env->include_optional_impeller_device_extensions) {
+    exts.emplace_back("VK_EXT_pipeline_creation_feedback");
+    exts.emplace_back("VK_KHR_portability_subset");
+    exts.emplace_back("VK_EXT_image_compression_control");
+    exts.emplace_back("VK_EXT_texture_compression_astc_hdr");
+  }
   if (props == nullptr) {
     *count = static_cast<uint32_t>(exts.size());
     return kVkSuccess;
@@ -423,9 +468,62 @@ int32_t StubVkEnumerateDeviceExtensionProperties(
 }
 
 int32_t StubVkCreateDevice(void* /*physical_device*/,
-                           const VkDeviceCreateInfoCompat* /*create_info*/,
+                           const VkDeviceCreateInfoCompat* create_info,
                            const void* /*allocator*/,
                            void** device_out) {
+  if (g_vk_env != nullptr && create_info != nullptr) {
+    g_vk_env->created_device_extensions.clear();
+    for (uint32_t i = 0; i < create_info->enabledExtensionCount; ++i) {
+      if (create_info->ppEnabledExtensionNames != nullptr &&
+          create_info->ppEnabledExtensionNames[i] != nullptr) {
+        g_vk_env->created_device_extensions.emplace_back(
+            create_info->ppEnabledExtensionNames[i]);
+      }
+    }
+    const void* next = create_info->pNext;
+    while (next != nullptr) {
+      const auto* header = static_cast<const uint32_t*>(next);
+      if (*header == kVkStructureTypePhysicalDeviceFeatures2) {
+        const auto* f2 =
+            static_cast<const VkPhysicalDeviceFeatures2Compat*>(next);
+        g_vk_env->enabled_robust_buffer_access_feature =
+            f2->features.features[0];
+        g_vk_env->enabled_sampler_anisotropy_feature =
+            f2->features.features[kVkFeatureIndexSamplerAnisotropy];
+        next = f2->pNext;
+      } else if (*header ==
+                 kVkStructureTypePhysicalDeviceSamplerYcbcrConversionFeatures) {
+        const auto* ycbcr = static_cast<
+            const VkPhysicalDeviceSamplerYcbcrConversionFeaturesCompat*>(next);
+        next = ycbcr->pNext;
+      } else if (*header ==
+                 kVkStructureTypePhysicalDevice16BitStorageFeatures) {
+        const auto* storage =
+            static_cast<const VkPhysicalDevice16BitStorageFeaturesCompat*>(
+                next);
+        next = storage->pNext;
+      } else if (
+          *header ==
+          kVkStructureTypePhysicalDeviceImageCompressionControlFeaturesExt) {
+        const auto* icc = static_cast<
+            const VkPhysicalDeviceImageCompressionControlFeaturesEXTCompat*>(
+            next);
+        g_vk_env->enabled_image_compression_control_feature =
+            icc->imageCompressionControl;
+        next = icc->pNext;
+      } else if (
+          *header ==
+          kVkStructureTypePhysicalDeviceTextureCompressionAstcHdrFeatures) {
+        const auto* astc = static_cast<
+            const VkPhysicalDeviceTextureCompressionASTCHDRFeaturesCompat*>(
+            next);
+        g_vk_env->enabled_astc_hdr_feature = astc->textureCompressionASTC_HDR;
+        next = astc->pNext;
+      } else {
+        break;
+      }
+    }
+  }
   *device_out = reinterpret_cast<void*>(0x7003);
   return kVkSuccess;
 }
@@ -1429,6 +1527,62 @@ TEST(
 
   child.reset();
   g_vk_env = nullptr;
+}
+
+TEST(AndroidSurfaceControlTest,
+     OptionalImpellerDeviceExtensionsAndFeaturesEnabledWhenSupported) {
+  MockVulkanEnv vk_env;
+  vk_env.include_optional_impeller_device_extensions = true;
+  vk_env.support_image_compression_control_feature = 1u;
+  vk_env.support_astc_hdr_feature = 1u;
+  g_vk_env = &vk_env;
+
+  AndroidSurfaceControl controller(CreateMockVulkanLibraryLoader());
+  FlutterRendererConfig resolved = {};
+  ASSERT_TRUE(controller.ResolveRendererConfig(&resolved));
+  ASSERT_EQ(resolved.type, kVulkan);
+
+  auto has_dev_ext = [&vk_env](const char* name) {
+    for (const auto& ext : vk_env.created_device_extensions) {
+      if (ext == name) {
+        return true;
+      }
+    }
+    return false;
+  };
+  EXPECT_TRUE(has_dev_ext("VK_EXT_image_compression_control"));
+  EXPECT_TRUE(has_dev_ext("VK_EXT_texture_compression_astc_hdr"));
+  EXPECT_TRUE(has_dev_ext("VK_EXT_pipeline_creation_feedback"));
+  EXPECT_TRUE(has_dev_ext("VK_KHR_portability_subset"));
+
+  EXPECT_EQ(vk_env.enabled_image_compression_control_feature, 1u);
+  EXPECT_EQ(vk_env.enabled_astc_hdr_feature, 1u);
+  EXPECT_EQ(vk_env.enabled_sampler_anisotropy_feature, 1u);
+  EXPECT_EQ(vk_env.enabled_robust_buffer_access_feature, 0u);
+
+  g_vk_env = nullptr;
+}
+
+TEST(AndroidSurfaceControlTest,
+     DestroyOverlaySurfacesRemovesOnlyViewsAtOrAboveThreshold) {
+  constexpr FlutterViewId kOverlayViewIdOffset = 100000;
+  constexpr FlutterViewId kOverlayViewId0 = kOverlayViewIdOffset + 0;
+  constexpr uintptr_t kDummyOverlayWindow = 0x3333;
+
+  AndroidSurfaceControl controller(CreateMockVulkanLibraryLoader());
+  EXPECT_TRUE(controller.SurfaceCreated(
+      kPrimaryViewId, reinterpret_cast<void*>(kDummyNativeWindow1), nullptr,
+      kTestSurfaceWidth, kTestSurfaceHeight));
+  EXPECT_TRUE(controller.SurfaceCreated(
+      kOverlayViewId0, reinterpret_cast<void*>(kDummyOverlayWindow), nullptr,
+      kTestSurfaceWidth, kTestSurfaceHeight));
+
+  EXPECT_TRUE(controller.HasSurface(kPrimaryViewId));
+  EXPECT_TRUE(controller.HasSurface(kOverlayViewId0));
+
+  controller.DestroyOverlaySurfaces(kOverlayViewIdOffset);
+  EXPECT_TRUE(controller.HasSurface(kPrimaryViewId));
+  EXPECT_FALSE(controller.HasSurface(kOverlayViewId0));
 }
 
 }  // namespace testing

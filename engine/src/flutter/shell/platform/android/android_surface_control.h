@@ -217,6 +217,9 @@ inline constexpr uint32_t kVkStructureTypeCommandBufferAllocateInfo = 40;
 inline constexpr uint32_t kVkStructureTypeCommandBufferBeginInfo = 42;
 inline constexpr uint32_t kVkStructureTypeImageMemoryBarrier = 45;
 inline constexpr uint32_t kVkStructureTypePhysicalDeviceFeatures2 = 1000059000;
+inline constexpr uint32_t
+    kVkStructureTypePhysicalDeviceTextureCompressionAstcHdrFeatures =
+        1000066000;
 inline constexpr uint32_t kVkStructureTypePhysicalDevice16BitStorageFeatures =
     1000083000;
 inline constexpr uint32_t kVkStructureTypeExportSemaphoreCreateInfo =
@@ -224,6 +227,9 @@ inline constexpr uint32_t kVkStructureTypeExportSemaphoreCreateInfo =
 inline constexpr uint32_t kVkStructureTypeSemaphoreGetFdInfoKhr = 1000079001;
 inline constexpr uint32_t
     kVkStructureTypePhysicalDeviceSamplerYcbcrConversionFeatures = 1000156004;
+inline constexpr uint32_t
+    kVkStructureTypePhysicalDeviceImageCompressionControlFeaturesExt =
+        1000338000;
 inline constexpr uint32_t kVkStructureTypeAndroidSurfaceCreateInfoKhr =
     1000008000;
 inline constexpr uint32_t kVkStructureTypeSwapchainCreateInfoKhr = 1000001000;
@@ -470,6 +476,14 @@ struct VkQueueFamilyPropertiesCompat {
   VkExtent3DCompat minImageTransferGranularity;
 };
 
+// Base feature indices within `VkPhysicalDeviceFeatures` matching Vulkan 1.0
+// `vulkan_core.h` and `CapabilitiesVK::GetEnabledDeviceFeatures`.
+inline constexpr size_t kVkFeatureIndexFillModeNonSolid = 13;
+inline constexpr size_t kVkFeatureIndexSamplerAnisotropy = 19;
+inline constexpr size_t kVkFeatureIndexTextureCompressionEtc2 = 20;
+inline constexpr size_t kVkFeatureIndexTextureCompressionAstcLdr = 21;
+inline constexpr size_t kVkFeatureIndexTextureCompressionBc = 22;
+
 struct VkPhysicalDeviceFeaturesCompat {
   uint32_t features[55];
 };
@@ -493,6 +507,18 @@ struct VkPhysicalDevice16BitStorageFeaturesCompat {
   uint32_t uniformAndStorageBuffer16BitAccess;
   uint32_t storagePushConstant16;
   uint32_t storageInputOutput16;
+};
+
+struct VkPhysicalDeviceImageCompressionControlFeaturesEXTCompat {
+  uint32_t sType;
+  void* pNext;
+  uint32_t imageCompressionControl;
+};
+
+struct VkPhysicalDeviceTextureCompressionASTCHDRFeaturesCompat {
+  uint32_t sType;
+  void* pNext;
+  uint32_t textureCompressionASTC_HDR;
 };
 
 struct VkDeviceQueueCreateInfoCompat {
@@ -794,6 +820,10 @@ class AndroidSurfaceControl {
 
   /// @brief Convenience overload for the implicit view (`view_id = 0`).
   void SurfaceDestroyed();
+
+  /// @brief Destroys all overlay swapchains and surfaces with `view_id >=
+  /// min_overlay_view_id`.
+  void DestroyOverlaySurfaces(FlutterViewId min_overlay_view_id);
 
   /// @brief Handles Android `onTrimMemory` callbacks by dispatching
   /// `proc_table_.NotifyLowMemoryWarning(engine_)` when level >=

@@ -85,12 +85,17 @@ constexpr std::array<const char*, 6> kRequiredDeviceExtensions = {
     "VK_KHR_dedicated_allocation",
 };
 
-// Optional external sync extensions enabled when supported by the driver.
-constexpr std::array<const char*, 4> kOptionalSyncDeviceExtensions = {
+// Optional external sync and Impeller device extensions enabled when supported
+// by the driver (`CapabilitiesVK::GetEnabledDeviceExtensions`).
+constexpr std::array<const char*, 8> kOptionalSyncDeviceExtensions = {
     "VK_KHR_external_fence",
     "VK_KHR_external_fence_fd",
     "VK_KHR_external_semaphore",
     "VK_KHR_external_semaphore_fd",
+    "VK_EXT_pipeline_creation_feedback",
+    "VK_KHR_portability_subset",
+    "VK_EXT_image_compression_control",
+    "VK_EXT_texture_compression_astc_hdr",
 };
 
 bool HasExtension(const std::vector<VkExtensionPropertiesCompat>& available,
@@ -776,12 +781,34 @@ bool AndroidSurfaceControl::InitializeVulkanOnRasterThreadLocked() {
     return false;
   }
 
-  // Query and chain physical device features (`samplerYcbcrConversion` and
-  // `uniformAndStorageBuffer16BitAccess`).
+  // Query and chain physical device features (`samplerYcbcrConversion`,
+  // `uniformAndStorageBuffer16BitAccess`, and optional Impeller features
+  // matching `CapabilitiesVK::GetEnabledDeviceFeatures`).
+  const bool has_image_compression_control =
+      HasExtension(dev_exts, "VK_EXT_image_compression_control");
+  const bool has_astc_hdr =
+      HasExtension(dev_exts, "VK_EXT_texture_compression_astc_hdr");
+
+  VkPhysicalDeviceTextureCompressionASTCHDRFeaturesCompat astc_hdr_features =
+      {};
+  astc_hdr_features.sType =
+      kVkStructureTypePhysicalDeviceTextureCompressionAstcHdrFeatures;
+  astc_hdr_features.pNext = nullptr;
+
+  VkPhysicalDeviceImageCompressionControlFeaturesEXTCompat
+      image_compression_control_features = {};
+  image_compression_control_features.sType =
+      kVkStructureTypePhysicalDeviceImageCompressionControlFeaturesExt;
+  image_compression_control_features.pNext =
+      has_astc_hdr ? &astc_hdr_features : nullptr;
+
   VkPhysicalDevice16BitStorageFeaturesCompat storage_16bit_features = {};
   storage_16bit_features.sType =
       kVkStructureTypePhysicalDevice16BitStorageFeatures;
-  storage_16bit_features.pNext = nullptr;
+  storage_16bit_features.pNext =
+      has_image_compression_control
+          ? static_cast<void*>(&image_compression_control_features)
+          : (has_astc_hdr ? static_cast<void*>(&astc_hdr_features) : nullptr);
   storage_16bit_features.uniformAndStorageBuffer16BitAccess = kVkTrue;
 
   VkPhysicalDeviceSamplerYcbcrConversionFeaturesCompat ycbcr_features = {};
@@ -805,6 +832,25 @@ bool AndroidSurfaceControl::InitializeVulkanOnRasterThreadLocked() {
           AndroidVulkanResolutionStatus::kRequiredFeaturesUnsupported;
       return false;
     }
+
+    // Retain only the 5 base features and 16-bit storage sub-feature that
+    // Impeller's `CapabilitiesVK::GetEnabledDeviceFeatures` enables.
+    const VkPhysicalDeviceFeaturesCompat supported_base = features2.features;
+    std::memset(&features2.features, 0, sizeof(features2.features));
+    features2.features.features[kVkFeatureIndexFillModeNonSolid] =
+        supported_base.features[kVkFeatureIndexFillModeNonSolid];
+    features2.features.features[kVkFeatureIndexSamplerAnisotropy] =
+        supported_base.features[kVkFeatureIndexSamplerAnisotropy];
+    features2.features.features[kVkFeatureIndexTextureCompressionEtc2] =
+        supported_base.features[kVkFeatureIndexTextureCompressionEtc2];
+    features2.features.features[kVkFeatureIndexTextureCompressionAstcLdr] =
+        supported_base.features[kVkFeatureIndexTextureCompressionAstcLdr];
+    features2.features.features[kVkFeatureIndexTextureCompressionBc] =
+        supported_base.features[kVkFeatureIndexTextureCompressionBc];
+
+    storage_16bit_features.storageBuffer16BitAccess = kVkFalse;
+    storage_16bit_features.storagePushConstant16 = kVkFalse;
+    storage_16bit_features.storageInputOutput16 = kVkFalse;
   }
 
   const float queue_priority = kDefaultQueuePriority;
@@ -1053,6 +1099,20 @@ void AndroidSurfaceControl::SurfaceDestroyed(FlutterViewId view_id) {
 
 void AndroidSurfaceControl::SurfaceDestroyed() {
   SurfaceDestroyed(kAndroidImplicitViewId);
+}
+
+void AndroidSurfaceControl::DestroyOverlaySurfaces(
+    FlutterViewId min_overlay_view_id) {
+  std::lock_guard<std::mutex> lock(shared_vk_->mutex);
+  for (auto it = view_surfaces_.begin(); it != view_surfaces_.end();) {
+    if (it->first >= min_overlay_view_id) {
+      DestroyVulkanSwapchainLocked(it->second);
+      DestroyVulkanSurfaceLocked(it->second);
+      it = view_surfaces_.erase(it);
+    } else {
+      ++it;
+    }
+  }
 }
 
 void AndroidSurfaceControl::OnTrimMemory(int level) {

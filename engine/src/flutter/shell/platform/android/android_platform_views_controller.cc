@@ -533,7 +533,7 @@ std::optional<int32_t> DefaultPlatformViewsProvider::CreateOverlaySurface() {
             env->DeleteLocalRef(overlay_clazz);
             env->DeleteLocalRef(overlay_surface);
           }
-          if (id_ok) {
+          if (id_ok && (!IsRealJniEnv(env) || window != nullptr)) {
             std::lock_guard<std::mutex> lock(mutex_);
 #if FML_OS_ANDROID
             auto prev_it = overlay_windows_.find(static_cast<int32_t>(id));
@@ -556,6 +556,10 @@ std::optional<int32_t> DefaultPlatformViewsProvider::CreateOverlaySurface() {
         env->functions->DeleteLocalRef != nullptr) {
       env->DeleteLocalRef(overlay_surface);
     }
+  }
+
+  if (IsRealJniEnv(env)) {
+    return std::nullopt;
   }
 
   std::lock_guard<std::mutex> lock(mutex_);
@@ -2076,6 +2080,7 @@ bool AndroidPlatformViewsController::DestroyOverlaySurfaces() {
     active_overlay_surfaces_.clear();
     per_view_overlay_cursor_.clear();
     per_view_overlay_shown_.clear();
+    per_view_visible_platform_views_.clear();
   }
   if (!provider) {
     return false;

@@ -4795,6 +4795,34 @@ TEST(EmbedderTestNoFixture,
   }
 }
 
+TEST_F(EmbedderTest, CanNotifyLowMemoryWarningFromNonPlatformThread) {
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface(DlISize(1, 1));
+  builder.SetDartEntrypoint("null_platform_messages");
+
+  fml::AutoResetWaitableEvent ready;
+  context.AddFfiNativeCallback(
+      "SignalNativeTest", CREATE_FFI_LAMBDA([&ready]() { ready.Signal(); }));
+  context.AddFfiNativeCallback(
+      "SignalNativeMessage",
+      CREATE_FFI_LAMBDA([](Dart_NativeArguments args) {}));
+
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+  ready.Wait();
+
+  // Dispatch FlutterEngineNotifyLowMemoryWarning from a non-platform thread
+  // (e.g., as AndroidSurfaceControl::SurfaceDestroyed does on the raster
+  // thread when tearing down the last surface).
+  fml::AutoResetWaitableEvent non_platform_done;
+  CreateNewThread()->PostTask([&]() {
+    EXPECT_EQ(FlutterEngineNotifyLowMemoryWarning(engine.get()), kSuccess);
+    non_platform_done.Signal();
+  });
+  non_platform_done.Wait();
+}
+
 }  // namespace testing
 }  // namespace flutter
 
