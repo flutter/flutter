@@ -574,8 +574,19 @@ class ScrollableState extends State<Scrollable>
   ScrollPhysics? get resolvedPhysics => _physics;
   ScrollPhysics? _physics;
 
-  /// The [ScrollBehavior] used by this scrollable, including an inherited
-  /// [ScrollConfiguration] when [Scrollable.scrollBehavior] is null.
+  /// The [ScrollBehavior] this scrollable is currently using.
+  ///
+  /// This is [Scrollable.scrollBehavior] if one was provided, otherwise the
+  /// behavior of the nearest enclosing [ScrollConfiguration]. It is resolved
+  /// when dependencies or the widget change, and configures gestures, physics,
+  /// and pointer scroll handling (see [ScrollBehavior.pointerAxisModifiers]).
+  ///
+  /// [RawScrollbar] uses this to match the scrollable's mouse wheel handling
+  /// when the pointer is over the scrollbar.
+  ///
+  /// See also:
+  ///
+  ///  * [resolvedPhysics], the [ScrollPhysics] derived from this behavior.
   ScrollBehavior get resolvedScrollBehavior => _configuration;
 
   /// An [Offset] that represents the absolute distance from the origin, or 0,

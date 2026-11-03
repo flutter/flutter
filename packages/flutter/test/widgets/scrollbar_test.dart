@@ -2995,7 +2995,6 @@ The provided ScrollController cannot be shared by multiple ScrollView widgets.''
     );
     await tester.pumpAndSettle();
     await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
-    addTearDown(() => tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft));
 
     final mouse = TestPointer(1, ui.PointerDeviceKind.mouse);
     mouse.hover(const Offset(798.0, 15.0));
@@ -3012,6 +3011,48 @@ The provided ScrollController cannot be shared by multiple ScrollView widgets.''
     await tester.sendEventToBinding(trackpad.scroll(const Offset(0.0, 30.0)));
     await tester.pumpAndSettle();
     expect(scrollController.offset, 60.0);
+
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+    await tester.sendEventToBinding(mouse.scroll(const Offset(0.0, 30.0)));
+    await tester.pumpAndSettle();
+    expect(scrollController.offset, 90.0);
+  }, variant: TargetPlatformVariant.all());
+
+  testWidgets('The bar reverses mouse wheel deltas with an axis modifier', (
+    WidgetTester tester,
+  ) async {
+    final scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: RawScrollbar(
+            thumbVisibility: true,
+            thickness: 24.0,
+            controller: scrollController,
+            child: ListView.builder(
+              controller: scrollController,
+              scrollDirection: Axis.horizontal,
+              reverse: true,
+              itemCount: 200,
+              itemBuilder: (_, _) => const SizedBox(width: 120.0),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    scrollController.jumpTo(100.0);
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
+    addTearDown(() => tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft));
+
+    final pointer = TestPointer(1, ui.PointerDeviceKind.mouse);
+    pointer.hover(const Offset(15.0, 598.0));
+    await tester.sendEventToBinding(pointer.scroll(const Offset(0.0, 30.0)));
+    await tester.pumpAndSettle();
+    expect(scrollController.offset, 70.0);
   }, variant: TargetPlatformVariant.all());
 
   testWidgets('The bar uses default Shift modifiers without a ScrollConfiguration', (
