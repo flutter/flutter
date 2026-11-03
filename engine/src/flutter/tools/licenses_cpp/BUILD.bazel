@@ -105,6 +105,12 @@ cc_test(
         "src/license_checker_unittests.cc",
     ],
     copts = CHROMIUM_CODE_COPTS,
+    env = {
+        "GIT_AUTHOR_NAME": "licenses_cpp_testrunner",
+        "GIT_AUTHOR_EMAIL": "licenses_cpp_testrunner@example.com",
+        "GIT_COMMITTER_NAME": "licenses_cpp_testrunner",
+        "GIT_COMMITTER_EMAIL": "licenses_cpp_testrunner@example.com",
+    },
     local_defines = FLUTTER_LOCAL_DEFINES,
     deps = [
         ":licenses",

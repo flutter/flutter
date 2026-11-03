@@ -252,6 +252,22 @@ const Map<String, TestRun> testRuns = <String, TestRun>{
   // (vulkan_validation_env), which flutter_display_test sets. The ColorWheel
   // playground run (--enable_playground, flutter/flutter#134852) is macOS's.
   //
+  // The license checker's tests commit to a git repository they create
+  // (`git commit` from the test, through the shell); git wants an author
+  // identity, which it reads from the environment or the user's
+  // configuration -- run_tests.py's run has the machine's, a Bazel test's
+  // environment has nothing of the sort (a bot's: "empty ident name", the
+  // first presubmit run of the suite). An identity of its own.
+  '//flutter/tools/licenses_cpp:licenses_cpp_testrunner': TestRun(
+    args: <String>[],
+    data: <String>[],
+    env: <String, String>{
+      'GIT_AUTHOR_NAME': 'licenses_cpp_testrunner',
+      'GIT_AUTHOR_EMAIL': 'licenses_cpp_testrunner@example.com',
+      'GIT_COMMITTER_NAME': 'licenses_cpp_testrunner',
+      'GIT_COMMITTER_EMAIL': 'licenses_cpp_testrunner@example.com',
+    },
+  ),
   // run_tests.py (Linux): the GTK shell's suite runs with GLib's criticals
   // fatal, so that a g_critical in the shell fails the test.
   '//flutter/shell/platform/linux:flutter_linux_unittests': TestRun(
