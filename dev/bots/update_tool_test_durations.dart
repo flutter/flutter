@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Regenerates `dev/bots/tool_integration_test_durations.json` from the
-// per-test durations that recent postsubmit `tool_integration_tests` builds
-// reported to ResultDB. setUpAll/tearDownAll time is not reported, so files
-// with heavy fixtures read a little low.
+// Regenerates `dev/bots/tool_test_durations.json` from the per-test
+// durations that recent postsubmit builds reported to ResultDB.
+// setUpAll/tearDownAll time is not reported, so files with heavy fixtures read
+// a little low.
 //
-//   dart dev/bots/update_tool_integration_test_durations.dart [--builds=N]
+//   dart dev/bots/update_tool_test_durations.dart [--builds=N]
 
 import 'dart:convert';
 import 'dart:io';
@@ -31,10 +31,25 @@ const String _resultdb = 'https://results.api.luci.app/prpc/luci.resultdb.v1.';
 const Map<String, String> _hostByPrefix = <String, String>{
   'Linux': 'linux',
   'Mac': 'macos',
+  'Mac_arm64': 'macos',
   'Windows': 'windows',
 };
 
-final RegExp _builderName = RegExp(r'^(Linux|Mac|Windows) tool_integration_tests_\d+(_\d+)?$');
+/// A `packages/flutter_tools/test/<name>.shard` directory and the prod
+/// builders that run it.
+typedef ToolShard = ({String name, RegExp builderName});
+
+final List<ToolShard> _shards = <ToolShard>[
+  (
+    name: 'integration',
+    builderName: RegExp(r'^(Linux|Mac|Windows) tool_integration_tests_\d+(_\d+)?$'),
+  ),
+  (
+    name: 'commands',
+    builderName: RegExp(r'^(Linux|Mac_arm64|Windows) tool_tests_commands(_\d+_\d+)?$'),
+  ),
+  (name: 'web', builderName: RegExp(r'^(Linux|Mac|Windows) web_tool_tests(_\d+_\d+)?$')),
+];
 
 final http.Client _client = http.Client();
 
@@ -49,34 +64,49 @@ Future<void> main(List<String> arguments) async {
   }
   final int builds = int.parse(args.option('builds')!);
 
-  final output = File(
-    path.join(flutterRoot, 'dev', 'bots', 'tool_integration_test_durations.json'),
-  );
-
-  final sampled = <String, DurationsByFile>{};
-  for (final MapEntry(key: host, value: builders) in (await _buildersByHost()).entries) {
-    if (builders.isEmpty) {
-      throw StateError('No tool_integration_tests builders found for $host');
+  final output = File(path.join(flutterRoot, 'dev', 'bots', 'tool_test_durations.json'));
+  final DurationsByHost previous = _readExisting(output);
+  final List<String> prodBuilders = await _listProdBuilders();
+  final result = <String, DurationsByFile>{};
+  for (final ToolShard shard in _shards) {
+    final sampled = <String, DurationsByFile>{};
+    for (final MapEntry(key: host, value: builders) in _buildersByHost(
+      shard,
+      prodBuilders,
+    ).entries) {
+      if (builders.isEmpty) {
+        throw StateError('No ${shard.name} builders found for $host');
+      }
+      sampled[host] = await _sampleDurations(shard, builders, builds);
     }
-    sampled[host] = await _sampleDurations(builders, builds);
+    // Reconcile per shard so unsampled files get their own shard's median.
+    for (final MapEntry(key: host, value: durations) in _reconcile(
+      sampled,
+      _localTestFiles(shard),
+      previous,
+    ).entries) {
+      (result[host] ??= <String, int>{}).addAll(durations);
+    }
   }
   _client.close();
 
-  final List<String> localFiles = _localTestFiles();
-  final DurationsByHost result = _reconcile(sampled, localFiles, _readExisting(output));
-  output.writeAsStringSync('${const JsonEncoder.withIndent('  ').convert(result)}\n');
-  stderr.writeln('Wrote ${output.path} (${localFiles.length} files)');
+  final sorted = <String, DurationsByFile>{
+    for (final MapEntry(key: host, value: durations) in result.entries)
+      host: <String, int>{
+        for (final file in durations.keys.toList()..sort()) file: durations[file]!,
+      },
+  };
+  output.writeAsStringSync('${const JsonEncoder.withIndent('  ').convert(sorted)}\n');
+  stderr.writeln('Wrote ${output.path} (${sorted.values.first.length} files)');
 }
 
-/// Prod `tool_integration_tests` builder names by host.
-///
-/// The local .ci.yaml may not match prod, so ask Buildbucket.
-Future<Map<String, List<String>>> _buildersByHost() async {
+/// The [prodBuilders] that run [shard], by host.
+Map<String, List<String>> _buildersByHost(ToolShard shard, List<String> prodBuilders) {
   final buildersByHost = <String, List<String>>{
     for (final String host in _hostByPrefix.values) host: <String>[],
   };
-  for (final String builder in await _listProdBuilders()) {
-    final Match? m = _builderName.firstMatch(builder);
+  for (final builder in prodBuilders) {
+    final Match? m = shard.builderName.firstMatch(builder);
     if (m != null) {
       buildersByHost[_hostByPrefix[m.group(1)]!]!.add(builder);
     }
@@ -85,12 +115,12 @@ Future<Map<String, List<String>>> _buildersByHost() async {
 }
 
 /// Returns the median duration per file over the last [builds] successful builds of [builders].
-Future<DurationsByFile> _sampleDurations(List<String> builders, int builds) async {
+Future<DurationsByFile> _sampleDurations(ToolShard shard, List<String> builders, int builds) async {
   final samples = <String, List<int>>{};
   for (final builder in builders..sort()) {
     stderr.writeln('Fetching $builds builds of $builder');
     for (final String invocation in await _recentInvocations(builder, builds)) {
-      final DurationsByFile fileDurations = await _fileDurations(invocation);
+      final DurationsByFile fileDurations = await _fileDurations(shard, invocation);
       for (final MapEntry(key: file, value: seconds) in fileDurations.entries) {
         samples.putIfAbsent(file, () => <int>[]).add(seconds);
       }
@@ -101,10 +131,10 @@ Future<DurationsByFile> _sampleDurations(List<String> builders, int builds) asyn
   };
 }
 
-/// `integration.shard` test files in the tree, relative to `packages/flutter_tools`.
-List<String> _localTestFiles() {
+/// Test files of [shard] in the tree, relative to `packages/flutter_tools`.
+List<String> _localTestFiles(ToolShard shard) {
   final String toolsRoot = path.join(flutterRoot, 'packages', 'flutter_tools');
-  return Directory(path.join(toolsRoot, 'test', 'integration.shard'))
+  return Directory(path.join(toolsRoot, 'test', '${shard.name}.shard'))
       .listSync(recursive: true)
       .whereType<File>()
       .map((File f) => path.posix.joinAll(path.split(path.relative(f.path, from: toolsRoot))))
@@ -147,6 +177,8 @@ DurationsByHost _readExisting(File file) {
 }
 
 /// Names of all builders in the `flutter/prod` bucket.
+///
+/// The local .ci.yaml may not match prod, so ask Buildbucket.
 Future<List<String>> _listProdBuilders() async {
   final names = <String>[];
   String? pageToken;
@@ -209,10 +241,9 @@ Future<List<String>> _recentInvocations(String builder, int count) async {
   ];
 }
 
-const String _integrationShard = 'packages/flutter_tools/test/integration.shard/';
-
-/// Whole seconds per `integration.shard` file in [invocation].
-Future<DurationsByFile> _fileDurations(String invocation) async {
+/// Whole seconds per [shard] file in [invocation].
+Future<DurationsByFile> _fileDurations(ToolShard shard, String invocation) async {
+  final prefix = 'packages/flutter_tools/test/${shard.name}.shard/';
   final seconds = <String, double>{};
   String? pageToken;
   do {
@@ -229,7 +260,7 @@ Future<DurationsByFile> _fileDurations(String invocation) async {
               'testIdStructured': {'moduleName': final String file},
               'duration': final String duration,
             }
-            when file.startsWith(_integrationShard)) {
+            when file.startsWith(prefix)) {
           final String key = file.substring('packages/flutter_tools/'.length);
           seconds[key] =
               (seconds[key] ?? 0) + double.parse(duration.substring(0, duration.length - 1));
