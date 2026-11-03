@@ -46,6 +46,20 @@ load("//build_defs/cc:copts.bzl", "ANDROID_TOOLCHAIN_WARNING_FLAGS", "MACOS_TOOL
 # Flags GN passes to every C and C++ compile on Linux
 # (//build/config/compiler:compiler, :runtime_library, //build/config/gcc,
 # //build/config/clang:extra_warnings, the `default_warning_flags`).
+# `__FILE__` as GN's build prints it. GN compiles from out/<config>/ and a
+# source's path is `../../flutter/shell/...`, which fml's logging strips to
+# `flutter/shell/...` (`[INFO:flutter/shell/...]`); Bazel compiles from the
+# execution root, the repository's root, where the same source is
+# `engine/src/flutter/shell/...`. The macro prefix map takes the two
+# directories off, so that a log line, a check failure and anything else
+# that prints `__FILE__` reads the same under both -- the devicelab's
+# android_intent_parsing_test looks for `[INFO:flutter` in logcat (the
+# first presubmit run of the Bazel-built Android engine, PR #195825).
+# Debug info keeps the execution-root paths (GN's
+# -fdebug-prefix-map=<checkout>/engine/src/= strips an absolute prefix that
+# Bazel's never have).
+FILE_PREFIX_FLAGS = ["-fmacro-prefix-map=engine/src/="]
+
 _COMMON_COMPILE_FLAGS = [
     # Keep paths as spelled on the command line: clang is invoked through a
     # symlink and must report its builtin headers under that path, not under
@@ -55,7 +69,7 @@ _COMMON_COMPILE_FLAGS = [
     "-fstack-protector",
     "--param=ssp-buffer-size=8",
     "-pipe",
-]
+] + FILE_PREFIX_FLAGS
 
 def _warning_compile_flags(default_warning_flags):
     return [
@@ -102,14 +116,14 @@ _MAC_COMPILE_FLAGS = [
     "-no-canonical-prefixes",
     "-fno-strict-aliasing",
     "-fstack-protector-all",
-] + _MAC_WARNING_COMPILE_FLAGS
+] + FILE_PREFIX_FLAGS + _MAC_WARNING_COMPILE_FLAGS
 
 # iOS's (//build/config/compiler:compiler under is_ios): the Mac's without
 # the stack protector, which GN gives neither iOS nor the web.
 _IOS_COMPILE_FLAGS = [
     "-no-canonical-prefixes",
     "-fno-strict-aliasing",
-] + _MAC_WARNING_COMPILE_FLAGS
+] + FILE_PREFIX_FLAGS + _MAC_WARNING_COMPILE_FLAGS
 
 # The architecture (//build/config/compiler:compiler), per target CPU:
 # x64's `-m64 -march=x86-64`, arm64's `--target=aarch64-linux-gnu` with the

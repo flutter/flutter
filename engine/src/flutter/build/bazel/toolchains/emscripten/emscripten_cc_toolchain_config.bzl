@@ -59,6 +59,8 @@ load("//build_defs/cc:copts.bzl", "WASM_DEFAULT_WARNING_FLAGS")
 _WASM_COMPILE_FLAGS = [
     "-fno-strict-aliasing",
     "-fcolor-diagnostics",
+    # `__FILE__` as GN prints it (cc_toolchain_config.bzl's FILE_PREFIX_FLAGS).
+    "-fmacro-prefix-map=engine/src/=",
 ] + [flag for flag in WASM_DEFAULT_WARNING_FLAGS if flag != "-Werror"] + [
     "-Wstring-conversion",
     "-Wnewline-eof",
