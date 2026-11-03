@@ -169,7 +169,7 @@ class ExtensionPlugin {
 /// Representation of a custom `flutter build` subcommand target provided by a tool extension.
 @immutable
 class ExtensionBuildTarget {
-  const ExtensionBuildTarget({
+  ExtensionBuildTarget({
     required this.description,
     required this.name,
     required this.outputDir,
@@ -178,16 +178,20 @@ class ExtensionBuildTarget {
     this.hostArtifacts = const <ExtensionHostArtifact>{},
     this.nativeAssetsConfig,
     this.pluginPlatformKey,
-  });
+  }) : assert(isValidName(name), 'Invalid build target name "$name". $_invalidNameMessage');
 
   /// Deserializes an [ExtensionBuildTarget] from a JSON-serializable map.
   factory ExtensionBuildTarget.fromJson(Map<String, Object?> json) {
+    final String name = json.requiredField<String>(nameKey);
+    if (!isValidName(name)) {
+      throw FormatException('Invalid "$nameKey" field: "$name". $_invalidNameMessage');
+    }
     final Map<String, Object?>? rawNativeAssetsConfig = json.nullableField<Map<String, Object?>>(
       nativeAssetsConfigKey,
     );
     return ExtensionBuildTarget(
       description: json.requiredField<String>(descriptionKey),
-      name: json.requiredField<String>(nameKey),
+      name: name,
       outputDir: json.requiredField<String>(outputDirKey),
       targetPlatform: json.requiredField<String>(targetPlatformKey),
       artifacts: <ExtensionArtifact>{
@@ -203,6 +207,18 @@ class ExtensionBuildTarget {
       pluginPlatformKey: json.nullableField<String>(pluginPlatformKeyKey),
     );
   }
+
+  static final _validNamePattern = RegExp(r'^[a-z][a-z0-9_-]*$');
+  static const String _invalidNameMessage =
+      'Build target names must start with a lowercase ASCII letter and contain '
+      'only lowercase ASCII letters, digits, underscores, and hyphens.';
+
+  /// Returns whether [name] is a valid build target name.
+  ///
+  /// A valid target name must start with a lowercase ASCII letter (`a-z`) and
+  /// may contain only lowercase ASCII letters, digits (`0-9`), underscores
+  /// (`_`), and hyphens (`-`).
+  static bool isValidName(String name) => _validNamePattern.hasMatch(name);
 
   /// Map key for [artifacts].
   static const String artifactsKey = 'artifacts';
@@ -243,6 +259,8 @@ class ExtensionBuildTarget {
   final String description;
 
   /// The name of this build target (e.g. `'custom-apk'`).
+  ///
+  /// Must match [isValidName].
   final String name;
 
   /// The target platform identifier (e.g. `'linux-x64'`, `'custom-embedder-arm64'`).
@@ -460,18 +478,39 @@ class ExtensionAssembleTarget {
 /// Representation of a build result returned by a tool extension.
 @immutable
 class ExtensionBuildResult {
-  const ExtensionBuildResult({required this.success, this.errorMessage});
+  const ExtensionBuildResult({required this.success, this.errorMessage, this.executableUri});
 
   /// Deserializes an [ExtensionBuildResult] from a JSON-serializable map.
+  ///
+  /// Throws a [FormatException] if [executableUriKey] is present and is not a
+  /// valid absolute `file:` URI.
   factory ExtensionBuildResult.fromJson(Map<String, Object?> json) {
     return ExtensionBuildResult(
       success: json.optionalField<bool>(successKey, defaultValue: false),
       errorMessage: json.nullableField<String>(errorMessageKey),
+      executableUri: _parseExecutableUri(json),
+    );
+  }
+
+  static Uri? _parseExecutableUri(Map<String, Object?> json) {
+    final String? raw = json.nullableField<String>(executableUriKey);
+    if (raw == null) {
+      return null;
+    }
+    final Uri? uri = Uri.tryParse(raw);
+    if (uri != null && uri.isValidFileUri) {
+      return uri;
+    }
+    throw const FormatException(
+      'Invalid "$executableUriKey" in ExtensionBuildResult: must be an absolute file:// URI.',
     );
   }
 
   /// Map key for [errorMessage].
   static const String errorMessageKey = 'errorMessage';
+
+  /// Map key for [executableUri].
+  static const String executableUriKey = 'executableUri';
 
   /// Map key for [success].
   static const String successKey = 'success';
@@ -482,25 +521,32 @@ class ExtensionBuildResult {
   /// Optional error message if the build failed.
   final String? errorMessage;
 
+  /// Optional absolute `file:` URI to the built application executable or bundle.
+  final Uri? executableUri;
+
   /// Serializes the build result to a JSON-serializable map.
   Map<String, Object?> toMap() => <String, Object?>{
     successKey: success,
     errorMessageKey: ?errorMessage,
+    executableUriKey: ?executableUri?.toString(),
   };
 
   @override
-  String toString() => 'ExtensionBuildResult(success: $success, errorMessage: $errorMessage)';
+  String toString() =>
+      'ExtensionBuildResult(success: $success, errorMessage: $errorMessage, '
+      'executableUri: $executableUri)';
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other is ExtensionBuildResult &&
             other.success == success &&
-            other.errorMessage == errorMessage);
+            other.errorMessage == errorMessage &&
+            other.executableUri == executableUri);
   }
 
   @override
-  int get hashCode => Object.hash(success, errorMessage);
+  int get hashCode => Object.hash(success, errorMessage, executableUri);
 }
 
 bool _listEquals<T>(List<T> a, List<T> b) {

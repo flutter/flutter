@@ -65,6 +65,7 @@ import 'package:flutter_tools/src/version.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
+import 'common.dart';
 import 'context.dart';
 
 class FakeDyldEnvironmentArtifact extends ArtifactSet {
@@ -1093,9 +1094,22 @@ class FakeArtifacts extends Fake implements Artifacts {
 }
 
 class FakeCache extends Fake implements Cache {
-  FakeCache({FileSystem? fileSystem}) : _fileSystem = fileSystem ?? MemoryFileSystem.test();
+  FakeCache({FileSystem? fileSystem, this._flutterRoot, this.olderThanToolsStamp})
+    : _fileSystem = fileSystem ?? MemoryFileSystem.test();
 
   final FileSystem _fileSystem;
+  String? _flutterRoot;
+  final bool? olderThanToolsStamp;
+
+  @override
+  String get flutterRoot => _flutterRoot ?? getFlutterRoot();
+
+  @override
+  set flutterRoot(String? value) => _flutterRoot = value;
+
+  @override
+  bool isOlderThanToolsStamp(FileSystemEntity entity) =>
+      olderThanToolsStamp ?? !entity.existsSync();
 
   @override
   Future<void> lock() async {}
@@ -1291,6 +1305,7 @@ class FakeToolContext extends Fake implements ToolContext {
     this._cache,
     this._config,
     this._customDevicesConfig,
+    this._fileSystemUtils,
     this._flutterVersion,
     this._fs,
     this._git,
@@ -1314,11 +1329,41 @@ class FakeToolContext extends Fake implements ToolContext {
     this._userMessages,
   });
 
+  factory FakeToolContext.macosHost({
+    required ProcessManager processManager,
+    Cache? cache,
+    Config? config,
+    String? flutterRoot,
+    FileSystem? fs,
+    Logger? logger,
+    Platform? platform,
+  }) {
+    final FileSystem fileSystem = fs ?? MemoryFileSystem.test();
+    final Logger log = logger ?? BufferLogger.test();
+    final Platform hostPlatform =
+        platform ?? FakePlatform(operatingSystem: 'macos', environment: <String, String>{});
+    return FakeToolContext(
+      cache: cache ?? FakeCache(fileSystem: fileSystem, flutterRoot: flutterRoot),
+      config: config ?? Config.test(),
+      fs: fileSystem,
+      logger: log,
+      os: OperatingSystemUtils(
+        fileSystem: fileSystem,
+        logger: log,
+        platform: hostPlatform,
+        processManager: processManager,
+      ),
+      platform: hostPlatform,
+      processManager: processManager,
+    );
+  }
+
   final Artifacts? _artifacts;
   final BotDetector? _botDetector;
   final Cache? _cache;
   final Config? _config;
   final CustomDevicesConfig? _customDevicesConfig;
+  final FileSystemUtils? _fileSystemUtils;
   final FlutterVersion? _flutterVersion;
   final FileSystem? _fs;
   final Git? _git;
@@ -1342,7 +1387,11 @@ class FakeToolContext extends Fake implements ToolContext {
   final UserMessages? _userMessages;
 
   @override
-  late final Artifacts artifacts = _artifacts ?? FakeArtifacts(fileSystem: fs);
+  late final Artifacts artifacts = switch (_artifacts) {
+    final DeferredArtifacts deferredArtifacts => deferredArtifacts,
+    final Artifacts providedArtifacts => DeferredArtifacts(providedArtifacts),
+    null => DeferredArtifacts(FakeArtifacts(fileSystem: fs)),
+  };
 
   @override
   late final BotDetector botDetector = _botDetector ?? const FakeBotDetector(false);
@@ -1356,7 +1405,7 @@ class FakeToolContext extends Fake implements ToolContext {
   @override
   late final CustomDevicesConfig customDevicesConfig =
       _customDevicesConfig ??
-      CustomDevicesConfig.test(fileSystem: fs, logger: logger, platform: platform);
+      CustomDevicesConfig.test(cache: cache, fileSystem: fs, logger: logger, platform: platform);
 
   @override
   late final FlutterVersion flutterVersion = _flutterVersion ?? FakeFlutterVersion();
@@ -1371,11 +1420,11 @@ class FakeToolContext extends Fake implements ToolContext {
   late final LocalEngineLocator localEngineLocator =
       _localEngineLocator ??
       LocalEngineLocator(
-        userMessages: userMessages,
+        fileSystem: fs,
+        flutterRoot: cache.flutterRoot,
         logger: logger,
         platform: platform,
-        fileSystem: fs,
-        flutterRoot: Cache.flutterRoot ?? '',
+        userMessages: userMessages,
       );
 
   @override
@@ -1416,7 +1465,16 @@ class FakeToolContext extends Fake implements ToolContext {
 
   @override
   late final FlutterProjectFactory projectFactory =
-      _projectFactory ?? FlutterProjectFactory(fileSystem: fs, logger: logger);
+      _projectFactory ??
+      FlutterProjectFactory(
+        config: config,
+        featureFlags: TestFeatureFlags(),
+        fileSystem: fs,
+        logger: logger,
+        plistParser: FakePlistParser(),
+        xcode: FakeXcode(),
+        xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+      );
 
   @override
   late final ShutdownHooks shutdownHooks = _shutdownHooks ?? ShutdownHooks();
@@ -1437,7 +1495,8 @@ class FakeToolContext extends Fake implements ToolContext {
   late final UserMessages userMessages = _userMessages ?? UserMessages();
 
   @override
-  FileSystemUtils get fileSystemUtils => FileSystemUtils(fileSystem: fs, platform: platform);
+  late final FileSystemUtils fileSystemUtils =
+      _fileSystemUtils ?? FileSystemUtils(fileSystem: fs, platform: platform);
 }
 
 /// A [ToolContext] that dynamically delegates to [globals] for use in [testUsingContext].
@@ -1526,11 +1585,11 @@ class DelegatingToolContext with Fake implements ToolContext {
       _localEngineLocator ??
       globals.localEngineLocator ??
       LocalEngineLocator(
-        userMessages: userMessages,
+        fileSystem: fs,
+        flutterRoot: cache.flutterRoot,
         logger: logger,
         platform: platform,
-        fileSystem: fs,
-        flutterRoot: Cache.flutterRoot ?? '',
+        userMessages: userMessages,
       );
 
   @override

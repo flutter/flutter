@@ -8,7 +8,6 @@ import 'dart:typed_data';
 import 'package:convert/convert.dart';
 import 'package:crypto/crypto.dart';
 import 'package:meta/meta.dart';
-import 'package:process/process.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 import 'package:xml/xml.dart';
 
@@ -20,7 +19,6 @@ import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/net.dart';
-import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/project_migrator.dart';
 import '../base/terminal.dart';
@@ -165,50 +163,35 @@ const kMaxRetryTime = Duration(seconds: 10);
 /// An implementation of the [AndroidBuilder] that delegates to gradle.
 class AndroidGradleBuilder implements AndroidBuilder {
   AndroidGradleBuilder({
-    required this._analytics,
+    required Analytics analytics,
     required AndroidStudio? androidStudio,
-    required this._artifacts,
-    required FileSystem fileSystem,
     required GradleUtils gradleUtils,
     required Java? java,
-    required Logger logger,
-    required Platform platform,
-    required ProcessManager processManager,
-    required this._toolContext,
+    required ToolContext toolContext,
     AndroidSdk? androidSdk,
-  }) : _androidContext = AndroidContext(
-         androidSdkBuilder: () => androidSdk,
-         androidStudioBuilder: () => androidStudio,
-         gradleUtilsBuilder: () => gradleUtils,
-         javaBuilder: () => java,
-       ),
-       _fileSystem = fileSystem,
-       _logger = logger,
-       _fileSystemUtils = FileSystemUtils(fileSystem: fileSystem, platform: platform),
-       _processUtils = ProcessUtils(logger: logger, processManager: processManager);
+  }) : this.fromContexts(
+         analytics: analytics,
+         androidContext: AndroidContext(
+           androidSdkBuilder: () => androidSdk,
+           androidStudioBuilder: () => androidStudio,
+           gradleUtilsBuilder: () => gradleUtils,
+           javaBuilder: () => java,
+         ),
+         toolContext: toolContext,
+       );
 
   AndroidGradleBuilder.fromContexts({
     required this._analytics,
     required this._androidContext,
-    required ToolContext toolContext,
-  }) : _artifacts = toolContext.artifacts,
-       _fileSystem = toolContext.fs,
-       _logger = toolContext.logger,
-       _fileSystemUtils = toolContext.fileSystemUtils,
-       _processUtils = toolContext.processUtils,
-       _toolContext = toolContext;
+    required this._toolContext,
+  });
 
   final Analytics _analytics;
   final AndroidContext _androidContext;
   late final Java? _java = _androidContext.java;
-  final Logger _logger;
-  final FileSystem _fileSystem;
-  final Artifacts _artifacts;
   late final GradleUtils _gradleUtils = _androidContext.gradleUtils;
   late final AndroidStudio? _androidStudio = _androidContext.androidStudio;
   late final AndroidSdk? _androidSdk = _androidContext.androidSdk;
-  final FileSystemUtils _fileSystemUtils;
-  final ProcessUtils _processUtils;
   final ToolContext _toolContext;
 
   /// Builds the AAR and POM files for the current Flutter module or plugin.
@@ -221,9 +204,8 @@ class AndroidGradleBuilder implements AndroidBuilder {
     String? outputDirectoryPath,
     required String buildNumber,
   }) async {
-    Directory outputDirectory = _fileSystem.directory(
-      outputDirectoryPath ?? project.android.buildDirectory,
-    );
+    final ToolContext(:FileSystem fs, :Logger logger) = _toolContext;
+    Directory outputDirectory = fs.directory(outputDirectoryPath ?? project.android.buildDirectory);
     if (project.isModule) {
       // Module projects artifacts are located in `build/host`.
       outputDirectory = outputDirectory.childDirectory('host');
@@ -246,8 +228,8 @@ class AndroidGradleBuilder implements AndroidBuilder {
       androidPackage: project.manifest.androidPackage,
       repoDirectory: getRepoDirectory(outputDirectory),
       buildNumber: buildNumber,
-      logger: _logger,
-      fileSystem: _fileSystem,
+      logger: logger,
+      fileSystem: fs,
     );
   }
 
@@ -306,6 +288,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
     int? maxRetries,
     _OutputParser? outputParser,
   }) async {
+    final ToolContext(:Logger logger, :ProcessUtils processUtils) = _toolContext;
     final bool usesAndroidX = isAppUsingAndroidX(project.android.hostAppGradleRoot);
     final String? agpVersion = gradle.getAgpVersion(
       project.android.hostAppGradleRoot,
@@ -355,7 +338,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
       return printOutput ? line : null;
     }
 
-    final Status status = _logger.startProgress("Running Gradle task '$taskName'...");
+    final Status status = logger.startProgress("Running Gradle task '$taskName'...");
     final command = <String>[
       gradleExecutablePath,
       ...options, // suppresses gradle output.
@@ -365,7 +348,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
 
     var exitCode = 1;
     try {
-      exitCode = await _processUtils.stream(
+      exitCode = await processUtils.stream(
         command,
         workingDirectory: project.android.hostAppGradleRoot.path,
         allowReentrantFlutter: true,
@@ -409,7 +392,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
               kMaxRetryTime.inMilliseconds,
             );
             retry += 1;
-            _logger.printStatus('Retrying Gradle Build: #$retry, wait time: ${waitTime}ms');
+            logger.printStatus('Retrying Gradle Build: #$retry, wait time: ${waitTime}ms');
             await Future<void>.delayed(Duration(milliseconds: waitTime));
             exitCode = await _runGradleTask(
               taskName,
@@ -467,22 +450,23 @@ class AndroidGradleBuilder implements AndroidBuilder {
     AndroidBuildInfo androidBuildInfo,
   ) async {
     if (!androidBuildInfo.buildInfo.androidGradleConfig.skipBuildDependencyValidation) {
+      final Logger logger = _toolContext.logger;
       final Version? javaVersionObj = _java?.version;
       final String? javaVersion = javaVersionObj != null
           ? '${javaVersionObj.major}.${javaVersionObj.minor}.${javaVersionObj.patch}'
           : null;
       final String? gradleVersion = await getGradleVersionFromFile(
         project.android.hostAppGradleRoot,
-        _logger,
+        logger,
       );
       if (javaVersion != null && gradleVersion != null) {
         if (!gradle.validateJavaAndGradle(
-          _logger,
+          logger,
           javaVersion: javaVersion,
           gradleVersion: gradleVersion,
         )) {
           final JavaGradleCompat? compat = gradle.getValidGradleVersionRangeForJavaVersion(
-            _logger,
+            logger,
             javaV: javaVersion,
           );
           final gradleRangeMax = compat != null && compat.gradleMax != null
@@ -524,23 +508,30 @@ To fix this, you can either:
     int retry = 0,
     @visibleForTesting int? maxRetries,
   }) async {
+    final ToolContext(
+      :Artifacts artifacts,
+      :Cache cache,
+      :FileSystemUtils fileSystemUtils,
+      :FileSystem fs,
+      :Logger logger,
+    ) = _toolContext;
     if (!project.android.isSupportedVersion) {
-      _exitWithUnsupportedProjectMessage(_logger.terminal, _analytics);
+      _exitWithUnsupportedProjectMessage(logger.terminal, _analytics);
     }
 
     final migrators = <ProjectMigrator>[
-      TopLevelGradleBuildFileMigration(project.android, _logger),
+      TopLevelGradleBuildFileMigration(project.android, logger),
       AndroidStudioJavaGradleConflictMigration(
-        _logger,
+        logger,
         project: project.android,
         androidStudio: _androidStudio,
         java: globals.java,
       ),
-      MinSdkVersionMigration(project.android, _logger),
-      MultidexRemovalMigration(project.android, _logger),
-      CmakeAndroid16kPagesMigration(project.android, _logger),
-      DisableBuiltInKotlinMigration(project.android, _logger),
-      DisableNewDslMigration(project.android, _logger),
+      MinSdkVersionMigration(project.android, logger),
+      MultidexRemovalMigration(project.android, logger),
+      CmakeAndroid16kPagesMigration(project.android, logger),
+      DisableBuiltInKotlinMigration(project.android, logger),
+      DisableNewDslMigration(project.android, logger),
     ];
 
     final migration = ProjectMigration(migrators);
@@ -553,8 +544,9 @@ To fix this, you can either:
       analytics: _analytics,
       androidSdk: _androidSdk,
       buildInfo: androidBuildInfo.buildInfo,
-      fileSystemUtils: _fileSystemUtils,
-      logger: _logger,
+      cache: cache,
+      fileSystemUtils: fileSystemUtils,
+      logger: logger,
     );
 
     final options = <String>[];
@@ -572,7 +564,7 @@ To fix this, you can either:
         ? getBundleTaskFor(buildInfo)
         : getAssembleTaskFor(buildInfo);
 
-    if (_logger.isVerbose) {
+    if (logger.isVerbose) {
       options.add('--full-stacktrace');
       options.add('--info');
       options.add('-Pverbose=true');
@@ -585,14 +577,14 @@ To fix this, you can either:
     if (buildInfo.androidGradleConfig.skipBuildDependencyValidation) {
       options.add('-PskipDependencyChecks=true');
     }
-    final LocalEngineInfo? localEngineInfo = _artifacts.localEngineInfo;
+    final LocalEngineInfo? localEngineInfo = artifacts.localEngineInfo;
     if (localEngineInfo != null) {
       final Directory localEngineRepo = _getLocalEngineRepo(
         engineOutPath: localEngineInfo.targetOutPath,
         androidBuildInfo: androidBuildInfo,
-        fileSystem: _fileSystem,
+        fileSystem: fs,
       );
-      _logger.printTrace(
+      logger.printTrace(
         'Using local engine: ${localEngineInfo.targetOutPath}\n'
         'Local Maven repo: ${localEngineRepo.path}',
       );
@@ -641,7 +633,7 @@ To fix this, you can either:
         options.add('-Pdeferred-component-names=${componentNames.join(',')}');
         // Multi-apk applications cannot use shrinking. This is only relevant when using
         // android dynamic feature modules.
-        _logger.printStatus(
+        logger.printStatus(
           'Shrinking has been disabled for this build due to deferred components. Shrinking is '
           'not available for multi-apk applications. This limitation is expected to be removed '
           'when Gradle plugin 4.2+ is available in Flutter.',
@@ -691,7 +683,7 @@ To fix this, you can either:
     }
 
     if (isBuildingBundle) {
-      final File bundleFile = findBundleFile(project, buildInfo, _logger, _analytics);
+      final File bundleFile = findBundleFile(project, buildInfo, logger, _analytics);
 
       if ((buildInfo.mode == BuildMode.release) &&
           !(await _isAabStrippedOfDebugSymbols(
@@ -710,16 +702,16 @@ To fix this, you can either:
         await _performCodeSizeAnalysis('aab', bundleFile, androidBuildInfo);
       }
 
-      _logger.printStatus(
-        '${_logger.terminal.successMark} '
-        'Built ${_fileSystem.path.relative(bundleFile.path)}$appSize',
+      logger.printStatus(
+        '${logger.terminal.successMark} '
+        'Built ${fs.path.relative(bundleFile.path)}$appSize',
         color: TerminalColor.green,
       );
       return;
     }
     // Gradle produced APKs.
     final Iterable<String> apkFilesPaths = project.isModule
-        ? findApkFilesModule(project, androidBuildInfo, _logger, _analytics)
+        ? findApkFilesModule(project, androidBuildInfo, logger, _analytics)
         : listApkPaths(androidBuildInfo);
     final Directory apkDirectory = getApkDirectory(project);
 
@@ -729,22 +721,22 @@ To fix this, you can either:
         _exitWithExpectedFileNotFound(
           project: project,
           fileExtension: '.apk',
-          logger: _logger,
+          logger: logger,
           analytics: _analytics,
         );
       }
 
       final String filename = apkFile.basename;
-      _logger.printTrace('Calculate SHA1: $apkDirectory/$filename');
+      logger.printTrace('Calculate SHA1: $apkDirectory/$filename');
       final File apkShaFile = apkDirectory.childFile('$filename.sha1');
       apkShaFile.writeAsStringSync(calculateSha(apkFile));
 
       final appSize = (buildInfo.mode == BuildMode.debug)
           ? '' // Don't display the size when building a debug variant.
           : ' (${getSizeAsPlatformMB(apkFile.lengthSync())})';
-      _logger.printStatus(
-        '${_logger.terminal.successMark} '
-        'Built ${_fileSystem.path.relative(apkFile.path)}$appSize',
+      logger.printStatus(
+        '${logger.terminal.successMark} '
+        'Built ${fs.path.relative(apkFile.path)}$appSize',
         color: TerminalColor.green,
       );
 
@@ -765,35 +757,36 @@ To fix this, you can either:
     String aabPath,
     Iterable<CpuArch> targetArchs,
   ) async {
+    final ToolContext(:Logger logger, :ProcessUtils processUtils) = _toolContext;
     if (_androidSdk == null) {
-      _logger.printTrace(
+      logger.printTrace(
         'Failed to find android sdk when checking final appbundle for debug symbols.',
       );
       return false;
     }
     final AndroidSdk androidSdk = _androidSdk;
     if (!androidSdk.cmdlineToolsAvailable) {
-      _logger.printTrace(
+      logger.printTrace(
         'Failed to find cmdline-tools when checking final appbundle for debug symbols.',
       );
       return false;
     }
     final String? apkAnalyzerPath = androidSdk.getCmdlineToolsPath(apkAnalyzerBinaryName);
     if (apkAnalyzerPath == null) {
-      _logger.printTrace(
+      logger.printTrace(
         'Failed to find apkanalyzer when checking final appbundle for debug symbols.',
       );
       return false;
     }
 
-    final RunResult result = await _processUtils.run(
+    final RunResult result = await processUtils.run(
       <String>[apkAnalyzerPath, 'files', 'list', aabPath],
       workingDirectory: project.android.hostAppGradleRoot.path,
       environment: _java?.environment,
     );
 
     if (result.exitCode != 0) {
-      _logger.printTrace(
+      logger.printTrace(
         'apkanalyzer finished with exit code 0 when checking final appbundle for debug symbols.\n'
         'stderr was: ${result.stderr}\n'
         'and stdout was: ${result.stdout}',
@@ -805,14 +798,14 @@ To fix this, you can either:
     // one architecture, assume AGP succeeded in stripping.
     if (!(result.stdout.contains('libflutter.so.sym') ||
         result.stdout.contains('libflutter.so.dbg'))) {
-      _logger.printTrace(
+      logger.printTrace(
         'libflutter.so.sym or libflutter.so.dbg not present when checking final appbundle for debug symbols.',
       );
       return false;
     }
 
     if (!(result.stdout.contains('libapp.so.sym') || result.stdout.contains('libapp.so.dbg'))) {
-      _logger.printTrace(
+      logger.printTrace(
         'libapp.so.sym or libapp.so.dbg not present when checking final appbundle for debug symbols.',
       );
       return false;
@@ -826,17 +819,15 @@ To fix this, you can either:
     File zipFile,
     AndroidBuildInfo androidBuildInfo,
   ) async {
-    final sizeAnalyzer = SizeAnalyzer(
-      fileSystem: _fileSystem,
-      logger: _logger,
-      analytics: _analytics,
-    );
+    final ToolContext(:FileSystemUtils fileSystemUtils, :FileSystem fs, :Logger logger) =
+        _toolContext;
+    final sizeAnalyzer = SizeAnalyzer(fileSystem: fs, logger: logger, analytics: _analytics);
     final String archName = androidBuildInfo.targetArchs.single.androidArchName;
     final BuildInfo buildInfo = androidBuildInfo.buildInfo;
-    final File aotSnapshot = _fileSystem
+    final File aotSnapshot = fs
         .directory(buildInfo.codeSizeDirectory)
         .childFile('snapshot.$archName.json');
-    final File precompilerTrace = _fileSystem
+    final File precompilerTrace = fs
         .directory(buildInfo.codeSizeDirectory)
         .childFile('trace.$archName.json');
     final Map<String, Object?> output = await sizeAnalyzer.analyzeZipSizeAndAotSnapshot(
@@ -845,17 +836,17 @@ To fix this, you can either:
       precompilerTrace: precompilerTrace,
       kind: kind,
     );
-    final File outputFile = _fileSystemUtils.getUniqueFile(
-      _fileSystem.directory(_fileSystemUtils.homeDirPath).childDirectory('.flutter-devtools'),
+    final File outputFile = fileSystemUtils.getUniqueFile(
+      fs.directory(fileSystemUtils.homeDirPath).childDirectory('.flutter-devtools'),
       '$kind-code-size-analysis',
       'json',
     )..writeAsStringSync(jsonEncode(output));
     // This message is used as a sentinel in analyze_apk_size_test.dart
-    _logger.printStatus(
+    logger.printStatus(
       'A summary of your ${kind.toUpperCase()} analysis can be found at: ${outputFile.path}',
     );
 
-    _logger.printStatus(
+    logger.printStatus(
       '\nTo analyze your app size in Dart DevTools, run the following command:\n'
       'dart devtools --appSizeBase=${outputFile.path}',
     );
@@ -874,6 +865,13 @@ To fix this, you can either:
     required Directory outputDirectory,
     required String buildNumber,
   }) async {
+    final ToolContext(
+      :Artifacts artifacts,
+      :Cache cache,
+      :FileSystem fs,
+      :Logger logger,
+      :ProcessUtils processUtils,
+    ) = _toolContext;
     final FlutterManifest manifest = project.manifest;
     if (!manifest.isModule) {
       throwToolExit('AARs can only be built for module projects.');
@@ -881,10 +879,10 @@ To fix this, you can either:
 
     final BuildInfo buildInfo = androidBuildInfo.buildInfo;
     final String aarTask = getAarTaskFor(buildInfo);
-    final Status status = _logger.startProgress("Running Gradle task '$aarTask'...");
+    final Status status = logger.startProgress("Running Gradle task '$aarTask'...");
 
-    final String flutterRoot = _fileSystem.path.absolute(Cache.flutterRoot!);
-    final String initScript = _fileSystem.path.join(
+    final String flutterRoot = fs.path.absolute(cache.flutterRoot);
+    final String initScript = fs.path.join(
       flutterRoot,
       'packages',
       'flutter_tools',
@@ -899,7 +897,7 @@ To fix this, you can either:
       '-Pis-plugin=${manifest.isPlugin}',
       '-PbuildNumber=$buildNumber',
     ];
-    if (_logger.isVerbose) {
+    if (logger.isVerbose) {
       command.add('--full-stacktrace');
       command.add('--info');
       command.add('-Pverbose=true');
@@ -916,20 +914,20 @@ To fix this, you can either:
     command.addAll(androidBuildInfo.toGradleConfig());
     command.addAll(_getAndroidNdkProvisioningProperties());
     if (buildInfo.dartObfuscation && buildInfo.mode != BuildMode.release) {
-      _logger.printStatus(
+      logger.printStatus(
         'Dart obfuscation is not supported in ${buildInfo.mode.uppercaseFriendlyName}'
         ' mode, building as un-obfuscated.',
       );
     }
 
-    final LocalEngineInfo? localEngineInfo = _artifacts.localEngineInfo;
+    final LocalEngineInfo? localEngineInfo = artifacts.localEngineInfo;
     if (localEngineInfo != null) {
       final Directory localEngineRepo = _getLocalEngineRepo(
         engineOutPath: localEngineInfo.targetOutPath,
         androidBuildInfo: androidBuildInfo,
-        fileSystem: _fileSystem,
+        fileSystem: fs,
       );
-      _logger.printTrace(
+      logger.printTrace(
         'Using local engine: ${localEngineInfo.targetOutPath}\n'
         'Local Maven repo: ${localEngineRepo.path}',
       );
@@ -962,7 +960,7 @@ To fix this, you can either:
     final sw = Stopwatch()..start();
     RunResult result;
     try {
-      result = await _processUtils.run(
+      result = await processUtils.run(
         command,
         workingDirectory: project.android.hostAppGradleRoot.path,
         allowReentrantFlutter: true,
@@ -981,8 +979,8 @@ To fix this, you can either:
     );
 
     if (result.exitCode != 0) {
-      _logger.printStatus(result.stdout, wrap: false);
-      _logger.printError(result.stderr, wrap: false);
+      logger.printStatus(result.stdout, wrap: false);
+      logger.printError(result.stderr, wrap: false);
       await _checkJavaAndGradleCompatibility(project, androidBuildInfo);
       throwToolExit(
         'Gradle task $aarTask failed with exit code ${result.exitCode}.',
@@ -991,13 +989,13 @@ To fix this, you can either:
     }
     final Directory repoDirectory = getRepoDirectory(outputDirectory);
     if (!repoDirectory.existsSync()) {
-      _logger.printStatus(result.stdout, wrap: false);
-      _logger.printError(result.stderr, wrap: false);
+      logger.printStatus(result.stdout, wrap: false);
+      logger.printError(result.stderr, wrap: false);
       throwToolExit('Gradle task $aarTask failed to produce $repoDirectory.', exitCode: exitCode);
     }
-    _logger.printStatus(
-      '${_logger.terminal.successMark} '
-      'Built ${_fileSystem.path.relative(repoDirectory.path)}',
+    logger.printStatus(
+      '${logger.terminal.successMark} '
+      'Built ${fs.path.relative(repoDirectory.path)}',
       color: TerminalColor.green,
     );
   }
@@ -1035,7 +1033,7 @@ To fix this, you can either:
         },
       );
     } on Error catch (error) {
-      _logger.printError(error.toString());
+      _toolContext.logger.printError(error.toString());
     }
 
     if (exitCode != 0) {
@@ -1082,7 +1080,7 @@ To fix this, you can either:
         gradleExecutablePath: _gradleUtils.getExecutable(project),
       );
     } on Error catch (error) {
-      _logger.printError(error.toString());
+      _toolContext.logger.printError(error.toString());
     }
 
     if (exitCode != 0) {

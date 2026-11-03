@@ -13,6 +13,7 @@
 #include "impeller/renderer/backend/gles/pipeline_gles.h"
 #include "impeller/renderer/backend/gles/shader_function_gles.h"
 #include "impeller/renderer/pipeline_descriptor.h"
+#include "third_party/abseil-cpp/absl/strings/str_cat.h"
 
 namespace impeller {
 
@@ -181,9 +182,9 @@ absl::Status PipelineLibraryGLES::PendingProgram::CompileShaders() {
   }
 
   gl.SetDebugLabel(DebugResourceType::kShader, vert_shader_,
-                   std::format("{} Vertex Shader", desc_.GetLabel()));
+                   absl::StrCat(desc_.GetLabel(), " Vertex Shader"));
   gl.SetDebugLabel(DebugResourceType::kShader, frag_shader_,
-                   std::format("{} Fragment Shader", desc_.GetLabel()));
+                   absl::StrCat(desc_.GetLabel(), " Fragment Shader"));
 
   gl.ShaderSourceMapping(vert_shader_, *vert_mapping,
                          desc_.GetSpecializationConstants());
@@ -459,7 +460,11 @@ void PipelineLibraryGLES::RemovePipelinesWithEntryPoint(
   PipelineMap::iterator it = pipelines_.begin();
   while (it != pipelines_.end()) {
     const PipelineDescriptor& desc = it->first;
-    if (desc.GetEntrypointForStage(function->GetStage())->IsEqual(*function)) {
+    // Pipelines without an entry point for the function's stage, such as every
+    // render pipeline when a compute function is removed, never use it.
+    const std::shared_ptr<const ShaderFunction> entrypoint =
+        desc.GetEntrypointForStage(function->GetStage());
+    if (entrypoint && entrypoint->IsEqual(*function)) {
       const std::shared_ptr<const ShaderFunction>& vert_function =
           desc.GetEntrypointForStage(ShaderStage::kVertex);
       const std::shared_ptr<const ShaderFunction>& frag_function =

@@ -5,6 +5,7 @@
 #ifndef FLUTTER_IMPELLER_RENDERER_BACKEND_GLES_CAPABILITIES_GLES_H_
 #define FLUTTER_IMPELLER_RENDERER_BACKEND_GLES_CAPABILITIES_GLES_H_
 
+#include <array>
 #include <cstddef>
 
 #include "impeller/base/backend_cast.h"
@@ -186,6 +187,9 @@ class CapabilitiesGLES final
 
   // |Capabilities|
   bool NeedsPartitionedHostBuffer() const override;
+
+  // |Capabilities|
+  ComputeLimits GetComputeLimits() const override;
 
  private:
   bool supports_texture_to_texture_blits_ = false;

@@ -11,6 +11,7 @@ import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
+import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/build_info.dart' hide BuildMode;
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/targets/assets.dart';
@@ -131,7 +132,6 @@ platforms:
         pluginYaml,
         null,
         const <String>[],
-        fileSystem: fileSystem,
         isDevDependency: false,
       );
 
@@ -171,7 +171,6 @@ platforms:
         null,
         const <String>['url_launcher_custom'],
         appDependencies: const <String>{'url_launcher'},
-        fileSystem: fileSystem,
         isDevDependency: false,
       );
 
@@ -187,7 +186,6 @@ platforms:
         null,
         const <String>[],
         appDependencies: const <String>{'url_launcher'},
-        fileSystem: fileSystem,
         isDevDependency: false,
       );
 
@@ -203,7 +201,6 @@ platforms:
         null,
         const <String>[],
         appDependencies: const <String>{'android_only'},
-        fileSystem: fileSystem,
         isDevDependency: false,
       );
 
@@ -212,6 +209,7 @@ platforms:
       // Standard built-in resolution ignores custom_embedder unless requested.
       final List<PluginInterfaceResolution> builtInResolutions = resolvePlatformImplementation(
         allPlugins,
+        logger: logger,
         selectDartPluginsOnly: false,
       );
       expect(
@@ -222,6 +220,8 @@ platforms:
       final List<ExtensionPlugin> resolvedExtensionPlugins = resolveExtensionPluginsForPlatform(
         allPlugins,
         'custom_embedder',
+        fileSystem: fileSystem,
+        logger: logger,
         quiet: true,
       );
       expect(
@@ -250,7 +250,6 @@ platforms:
 ''') as YamlMap,
             null,
             const <String>[],
-            fileSystem: fileSystem,
             isDevDependency: false,
           ),
           throwsToolExit(message: 'Invalid "bad-key" plugin specification.'),
@@ -267,7 +266,6 @@ platforms:
 ''') as YamlMap,
             null,
             const <String>[],
-            fileSystem: fileSystem,
             isDevDependency: false,
           ),
           throwsToolExit(
@@ -289,7 +287,6 @@ platforms:
 ''') as YamlMap,
             null,
             const <String>[],
-            fileSystem: fileSystem,
             isDevDependency: false,
           ),
           throwsToolExit(
@@ -532,7 +529,9 @@ environment:
       final customTarget = assetTarget as CustomCodeAssetTarget;
       expect(customTarget.os, OS.linux);
       expect(customTarget.architecture, Architecture.riscv64);
-      await customTarget.setCCompilerConfig();
+      await customTarget.setCCompilerConfig(
+        processUtils: ProcessUtils(processManager: FakeProcessManager.empty(), logger: logger),
+      );
       expect(
         customTarget.cCompilerConfigSync?.compiler,
         Uri.file('/toolchain/bin/riscv64-linux-gnu-gcc'),
@@ -751,7 +750,9 @@ environment:
       expect(customTarget.os, OS.fromString('custom_os'));
       expect(customTarget.os.name, 'custom_os');
       expect(customTarget.architecture, Architecture.arm64);
-      await customTarget.setCCompilerConfig();
+      await customTarget.setCCompilerConfig(
+        processUtils: ProcessUtils(processManager: FakeProcessManager.empty(), logger: logger),
+      );
       expect(
         customTarget.cCompilerConfigSync?.compiler,
         Uri.file('/opt/custom-sdk/llvm/bin/clang'),

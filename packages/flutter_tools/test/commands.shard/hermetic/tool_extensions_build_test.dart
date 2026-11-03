@@ -117,7 +117,6 @@ final class _FailingAndConflictingBuildService extends BuildService {
       errorMessage: 'Custom build compilation error.',
     ),
     _TestBuildTarget(description: 'Conflicting bundle target.', name: 'bundle'),
-    _TestBuildTarget(description: 'Empty target name that should be skipped.', name: ''),
   ];
 }
 
@@ -125,6 +124,33 @@ void _failingBuildExtensionEntryPoint(SendPort sendPort) {
   ToolExtensionEntryPoint.run(
     sendPort,
     <ToolExtensionService>[_FailingAndConflictingBuildService()],
+    supportedPlatforms: const <String>{'linux'},
+  );
+}
+
+final class _InvalidTargetBuildService extends ToolExtensionService {
+  @override
+  String get namespace => BuildService.serviceNamespace;
+
+  @override
+  Future<Map<String, ExtensionRpcHandler>> initialize() async {
+    return <String, ExtensionRpcHandler>{
+      'getBuildTargets': (_) async => <Map<String, Object?>>[
+        <String, Object?>{
+          'description': 'Target with invalid name',
+          'name': 'Invalid-Name',
+          'outputDir': '{OUTPUT_DIR}',
+          'targetPlatform': 'linux-x64',
+        },
+      ],
+    };
+  }
+}
+
+void _invalidTargetBuildExtensionEntryPoint(SendPort sendPort) {
+  ToolExtensionEntryPoint.run(
+    sendPort,
+    <ToolExtensionService>[_InvalidTargetBuildService()],
     supportedPlatforms: const <String>{'linux'},
   );
 }
@@ -180,7 +206,6 @@ void _throwingQueryExtensionEntryPoint(SendPort sendPort) {
 void main() {
   setUpAll(() {
     Cache.disableLocking();
-    Cache.flutterRoot = '/flutter';
   });
 
   group('Tool Extensions Build Integration - Disabled', () {
@@ -284,16 +309,14 @@ void main() {
 
   group('Tool Extensions Build Integration - Enabled', () {
     late MemoryFileSystem fs;
+    late Cache cache;
 
     setUp(() {
-      final String? oldFlutterRoot = Cache.flutterRoot;
-      addTearDown(() => Cache.flutterRoot = oldFlutterRoot);
-      Cache.flutterRoot = '/flutter';
-
       fs = MemoryFileSystem.test();
       fs.directory('/flutter').createSync(recursive: true);
       fs.file('/pubspec.yaml').createSync();
       fs.file('/lib/main.dart').createSync(recursive: true);
+      cache = FakeCache(fileSystem: fs, flutterRoot: '/flutter');
     });
 
     testUsingContext(
@@ -492,6 +515,36 @@ void main() {
       },
     );
 
+    testWithoutContext(
+      'ExtensionBuildManager logs warning when extension returns invalid build target name',
+      () async {
+        final logger = BufferLogger.test();
+        final featureFlags = TestFeatureFlags(isToolExtensionsEnabled: true);
+        final manager = ExtensionManager(
+          hostPlatform: HostPlatform.linux_x64,
+          logger: logger,
+          entryPoints: <ExtensionEntryPoint>[_invalidTargetBuildExtensionEntryPoint],
+          featureFlags: featureFlags,
+        );
+        final buildManager = ExtensionBuildManager(
+          extensionManager: manager,
+          featureFlags: featureFlags,
+          logger: logger,
+        );
+
+        final List<ExtensionBuildTarget> targets = await buildManager.getBuildTargets();
+        expect(targets, isEmpty);
+        expect(
+          logger.warningText,
+          contains(
+            'Failed to query build targets from extension: FormatException: Invalid "name" field: "Invalid-Name".',
+          ),
+        );
+
+        await manager.dispose();
+      },
+    );
+
     testUsingContext(
       'BuildCommand includes custom subcommand and can run it when feature flag enabled',
       () async {
@@ -515,7 +568,7 @@ void main() {
           extensionBuildManager: buildManager,
           featureFlags: featureFlags,
           templateRenderer: FakeTemplateRenderer(),
-          toolContext: FakeToolContext(fs: fs, logger: testLogger),
+          toolContext: FakeToolContext(cache: cache, fs: fs, logger: testLogger),
         );
 
         final CommandRunner<void> commandRunner = createTestCommandRunner(command);
@@ -537,7 +590,7 @@ void main() {
       'ExtensionBuildSubCommand forwards flutterRoot, outputDir, and resolvedArtifacts in build parameters',
       () async {
         final fakeBuildManager = _RecordingExtensionBuildManager();
-        const target = ExtensionBuildTarget(
+        final target = ExtensionBuildTarget(
           description: 'Custom hermetic build target.',
           name: 'custom-hermetic-build',
           outputDir:
@@ -548,7 +601,7 @@ void main() {
         final subCommand = ExtensionBuildSubCommand(
           buildManager: fakeBuildManager,
           target: target,
-          toolContext: FakeToolContext(fs: fs, logger: testLogger),
+          toolContext: FakeToolContext(cache: cache, fs: fs, logger: testLogger),
           verboseHelp: false,
         );
 
@@ -576,7 +629,7 @@ void main() {
 
     testWithoutContext('ExtensionBuildSubCommand resolves {OUTPUT_DIR} using custom build-dir from Config', () async {
       final buildManager = _RecordingExtensionBuildManager();
-      const target = ExtensionBuildTarget(
+      final target = ExtensionBuildTarget(
         description: 'Custom hermetic build target.',
         name: 'custom-hermetic-build',
         outputDir:
@@ -587,7 +640,12 @@ void main() {
       final subCommand = ExtensionBuildSubCommand(
         buildManager: buildManager,
         target: target,
-        toolContext: FakeToolContext(config: config, fs: fs, logger: BufferLogger.test()),
+        toolContext: FakeToolContext(
+          cache: cache,
+          config: config,
+          fs: fs,
+          logger: BufferLogger.test(),
+        ),
         verboseHelp: false,
       );
 
@@ -603,7 +661,7 @@ void main() {
       'ExtensionBuildSubCommand throws ToolExit when outputDir contains unsupported placeholder',
       () async {
         final buildManager = _RecordingExtensionBuildManager();
-        const target = ExtensionBuildTarget(
+        final target = ExtensionBuildTarget(
           description: 'Custom hermetic build target.',
           name: 'custom-hermetic-build',
           outputDir: '${BuiltInPlaceholders.buildDir}/custom',
@@ -612,7 +670,7 @@ void main() {
         final subCommand = ExtensionBuildSubCommand(
           buildManager: buildManager,
           target: target,
-          toolContext: FakeToolContext(fs: fs, logger: BufferLogger.test()),
+          toolContext: FakeToolContext(cache: cache, fs: fs, logger: BufferLogger.test()),
           verboseHelp: false,
         );
 
@@ -648,7 +706,7 @@ void main() {
           extensionBuildManager: buildManager,
           featureFlags: featureFlags,
           templateRenderer: FakeTemplateRenderer(),
-          toolContext: FakeToolContext(fs: fs, logger: testLogger),
+          toolContext: FakeToolContext(cache: cache, fs: fs, logger: testLogger),
         );
 
         final CommandRunner<void> commandRunner = createTestCommandRunner(command);
@@ -665,7 +723,6 @@ void main() {
           ),
         );
         expect(command.subcommands['bundle'], isA<BuildBundleCommand>());
-        expect(command.subcommands.containsKey(''), isFalse);
 
         await manager.dispose();
       },
@@ -699,7 +756,7 @@ void main() {
           extensionBuildManager: buildManager,
           featureFlags: featureFlags,
           templateRenderer: FakeTemplateRenderer(),
-          toolContext: FakeToolContext(fs: fs, logger: testLogger),
+          toolContext: FakeToolContext(cache: cache, fs: fs, logger: testLogger),
         );
 
         final CommandRunner<void> commandRunner = createTestCommandRunner(command);
