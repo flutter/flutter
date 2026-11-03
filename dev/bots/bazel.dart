@@ -41,7 +41,9 @@ import 'dart:typed_data';
 import 'package:crypto/crypto.dart';
 import 'package:path/path.dart' as path;
 
+import 'luci_resultdb.dart';
 import 'run_command.dart';
+import 'tool_subsharding.dart';
 import 'utils.dart';
 
 /// The bazelisk release [findBazelisk] downloads when the host has none: the
@@ -338,7 +340,8 @@ class BazelShard {
   }
 
   /// Runs the shard: one `bazelisk query` for the suites' tests, the steps
-  /// of the files without one, then one `bazelisk test` of the rest.
+  /// of the files without one, one `bazelisk test` of the rest, and the
+  /// results to ResultDB.
   Future<void> run() async {
     // test.dart passes --local-engine* through to `flutter test`.
     if (flutterTestArgs.any((String argument) => argument.startsWith('--local-engine'))) {
@@ -357,6 +360,16 @@ class BazelShard {
       return;
     }
     final targets = <String>[..._suites];
+    // The test targets the run covers, for the results afterwards: the whole
+    // suites' tests, and the covered files' targets.
+    final ran = <String>{};
+    if (_suites.isNotEmpty && !dryRun) {
+      final Set<String>? tests = await _queryTests(bazelisk, _suites);
+      if (tests == null) {
+        return;
+      }
+      ran.addAll(tests);
+    }
     if (_covered.isNotEmpty) {
       Set<String>? available;
       if (!dryRun) {
@@ -378,6 +391,7 @@ class BazelShard {
             remainder.add(file);
           }
         }
+        ran.addAll(under);
         if (remainder.isEmpty && covered.whole) {
           targets.addAll(covered.suites);
         } else {
@@ -402,6 +416,56 @@ class BazelShard {
       workingDirectory: flutterRoot,
       environment: bazelEnvironment(),
     );
+    if (!dryRun) {
+      await _reportToResultDb(bazelisk, ran);
+    }
+  }
+
+  /// The per-case results of [labels] to LUCI ResultDB, as `flutter test`'s
+  /// and `dart test`'s go ([reportTestResultsToResultDb]): each test target
+  /// wrote package:test's JSON reporter to its undeclared outputs
+  /// (build_defs/dart/dart_test.bzl, flutter_test.bzl:
+  /// `test.outputs/test_results.json` under bazel-testlogs), whatever its
+  /// outcome and whether it ran or was cached. A no-op off LUCI.
+  Future<void> _reportToResultDb(String bazelisk, Set<String> labels) async {
+    final ResultDbRecorder? recorder = ResultDbRecorder.fromEnvironment();
+    if (recorder == null) {
+      print('ResultDB is not available; skipping test result reporting.');
+      return;
+    }
+    try {
+      final String? testlogs = await _bazelInfo(bazelisk, 'bazel-testlogs');
+      if (testlogs == null) {
+        return;
+      }
+      final BazelTestResults results = bazelTestResults(testlogs, labels);
+      if (results.results.isNotEmpty) {
+        await recorder.reportTestResults(results.results);
+      }
+      print(
+        'Reported ${results.results.length} test result(s) of ${results.files} test target(s) to ResultDB'
+        '${results.missing == 0 ? '' : ' (${results.missing} target(s) left no results)'}.',
+      );
+    } catch (error) {
+      print('Failed to report test results to ResultDB: $error');
+    } finally {
+      recorder.close();
+    }
+  }
+
+  /// `bazelisk info <key>`. Null, an error reported, when it fails.
+  Future<String?> _bazelInfo(String bazelisk, String key) async {
+    final CommandResult result = await runCommand(
+      bazelisk,
+      <String>[...bazelStartupOptions(), 'info', if (isLuci) '--config=ci', key],
+      workingDirectory: flutterRoot,
+      environment: bazelEnvironment(),
+      outputMode: OutputMode.capture,
+    );
+    if (result.exitCode != 0) {
+      return null;
+    }
+    return result.flattenedStdout!.trim().split('\n').last.trim();
   }
 
   /// The tests of [suites], by label. Null, an error reported, when the
@@ -428,6 +492,88 @@ class BazelShard {
         if (line.trim().startsWith('//') || line.trim().startsWith('@')) line.trim(),
     };
   }
+}
+
+/// What [bazelTestResults] read: the results, how many targets' files they
+/// came from, and how many targets had none.
+class BazelTestResults {
+  BazelTestResults(this.results, this.files, this.missing);
+
+  final List<LuciTestResult> results;
+  final int files;
+  final int missing;
+}
+
+/// The ResultDB results of the test targets [labels] from their JSON
+/// reporter files under [testlogs] ([bazelTestResultsFile]). A target
+/// without one (not built, or incompatible and skipped) is counted and
+/// passed over; a file that does not parse (a run cut short) is reported
+/// and passed over. [root] is the repository root ([flutterRoot]).
+BazelTestResults bazelTestResults(String testlogs, Set<String> labels, {String? root}) {
+  root ??= flutterRoot;
+  final results = <LuciTestResult>[];
+  var files = 0;
+  var missing = 0;
+  for (final String label in labels.toList()..sort()) {
+    final File json = bazelTestResultsFile(testlogs, label);
+    if (!json.existsSync()) {
+      missing++;
+      continue;
+    }
+    try {
+      final parsed = TestFileReporterResults.fromFile(json);
+      results.addAll(
+        convertToLuciTestResultsFormat(
+          parsed,
+          workingDirectory: bazelSuiteWorkingDirectory(label, parsed, root: root),
+          rootDirectory: root,
+        ),
+      );
+      files++;
+    } on FormatException catch (error) {
+      print('Could not read ${json.path} ($label): $error');
+    }
+  }
+  return BazelTestResults(results, files, missing);
+}
+
+/// The JSON reporter file of the test target [label] under [testlogs]
+/// (`bazel info bazel-testlogs`): `<package>/<name>/test.outputs/test_results.json`.
+File bazelTestResultsFile(String testlogs, String label) {
+  final String package = bazelPackageOf(label);
+  final String name = label.substring(label.indexOf(':') + 1);
+  return File(
+    path.joinAll(<String>[
+      testlogs,
+      ...path.posix.split(package),
+      name,
+      'test.outputs',
+      'test_results.json',
+    ]),
+  );
+}
+
+/// The directory [parsed]'s suite paths are relative to: the test's package
+/// directory when they resolve there (a dart_test's runner runs in it and
+/// names its suite `test/<file>`), else the repository root (a flutter_test's
+/// bootstrap names the suite by its repository path). Null for an absolute
+/// path. [root] is the repository root ([flutterRoot]).
+String? bazelSuiteWorkingDirectory(String label, TestFileReporterResults parsed, {String? root}) {
+  root ??= flutterRoot;
+  final String packageDirectory = path.join(root, bazelPackageOf(label));
+  for (final TestSpecs suite in parsed.allTestSpecs.values) {
+    if (suite.path.isEmpty) {
+      continue;
+    }
+    if (path.isAbsolute(suite.path)) {
+      return null;
+    }
+    if (File(path.join(packageDirectory, suite.path)).existsSync()) {
+      return packageDirectory;
+    }
+    return root;
+  }
+  return root;
 }
 
 /// `flutter precache` of the artifact sets the tool's tests want from
