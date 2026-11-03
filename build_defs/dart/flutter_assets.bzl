@@ -90,7 +90,18 @@ def _flutter_test_assets_impl(ctx):
     )
 
     # The shader_lib include directory: the package's source directory.
-    shader_lib = ctx.attr._shader_lib.label.package
+    # The shader library's include root: the directory above its flutter/
+    # (impellerc's `#include "flutter/runtime_effect.glsl"`), wherever the
+    # library's files are -- the tree's package, or the prebuilt engine's
+    # shader_lib (//build_defs/engine).
+    markers = [
+        f
+        for f in ctx.attr._shader_lib[DefaultInfo].files.to_list()
+        if f.path.endswith("/flutter/runtime_effect.glsl")
+    ]
+    if len(markers) != 1:
+        fail("%s: the shader library should hold one flutter/runtime_effect.glsl, not %d" % (ctx.label, len(markers)))
+    shader_lib = markers[0].dirname.rsplit("/", 1)[0]
     for target, entry in ctx.attr.shaders.items():
         sources = target[DefaultInfo].files.to_list()
         if len(sources) != 1:
@@ -160,12 +171,15 @@ flutter_test_assets = rule(
         ),
         "_python_runtime": attr.label(default = "@cpython3//:runtime"),
         "_impellerc": attr.label(
-            default = "//engine/src/flutter/impeller/compiler:impellerc",
+            default = "//build_defs/engine:impellerc",
+            # A file as well as a rule: the prebuilt engine's binary
+            # (//build_defs/engine, --config=prebuilt_engine).
+            allow_single_file = True,
             executable = True,
             cfg = "exec",
         ),
         "_shader_lib": attr.label(
-            default = "//engine/src/flutter/impeller/compiler/shader_lib:all_files",
+            default = "//build_defs/engine:shader_lib",
             allow_files = True,
         ),
     },

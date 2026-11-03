@@ -86,8 +86,18 @@ def host_platform_values(os_name, arch):
         "HOST_NDK_PREBUILT": "%s-x86_64" % spec.ndk_host,
     }
 
+# The repository of the flutter tool's Dart SDK (bin/cache/dart-sdk, the
+# same layout and overlay as the gclient-synced prebuilt), which stands in
+# for the host's under --config=prebuilt_engine (flutter_bin_cache.bzl): a
+# repository of its own rather than another path of the host's, so that
+# switching configurations leaves the tree's actions, which depend on the
+# host's, as they are.
+BIN_CACHE_DART_SDK = "@dart_sdk_bin_cache"
+
 def _host_platform_impl(rctx):
     values = host_platform_values(rctx.os.name, rctx.os.arch)
+    if rctx.attr.prebuilt_engine:
+        values["HOST_DART_SDK"] = BIN_CACHE_DART_SDK
     rctx.file("BUILD.bazel", "# The host that runs the build (build_defs/repositories/host_platform.bzl).\n")
     rctx.file("host.bzl", "".join([
         "%s = %r\n" % (name, value)
@@ -97,5 +107,10 @@ def _host_platform_impl(rctx):
 host_platform = repository_rule(
     implementation = _host_platform_impl,
     doc = "The host's OS, CPU, constraints and prebuilt repositories as constants, host.bzl.",
+    attrs = {
+        "prebuilt_engine": attr.bool(
+            doc = "Name the flutter tool's Dart SDK (bin/cache/dart-sdk) as HOST_DART_SDK: --config=prebuilt_engine.",
+        ),
+    },
     local = True,
 )
