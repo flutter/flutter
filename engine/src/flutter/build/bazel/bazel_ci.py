@@ -204,15 +204,35 @@ def find_bazelisk(engine_src):
   )
 
 
-def bazel_home(engine_src):
-  """The directory under the checkout that keeps Bazel's state between runs.
+def on_bot():
+  """Whether this runs on a LUCI bot (the recipe sets LUCI_CONTEXT)."""
+  return 'LUCI_CONTEXT' in os.environ
 
-  The recipe clobbers `out/` before every build and the bot's home may not
-  survive a task; an ignored directory of the checkout (.bazel_ci, in the
-  root .gitignore) does, in the bot's `builder` cache, so a bot's second
-  build is incremental. The output root is under it, and so is bazelisk's
+
+def bazel_home(engine_src):
+  """The directory that keeps Bazel's state for a build of this checkout.
+
+  On a bot, the task's temporary directory (`TMPDIR`, which the recipe
+  engine sets for every step of a build; swarming removes it with the
+  task), under `bazel_ci`. Nothing under the checkout outlives a build there: the recipe
+  force-mounts the `builder` cache at the start of every build, clobbering
+  the checkout and whatever is beneath it -- and an output root left
+  beneath it made the next build's clobber take an hour (the first
+  presubmit runs, PR #195825). A developer's state goes under the
+  checkout's `.bazel_ci/` (ignored by git), where it persists; BAZEL_CI_HOME
+  overrides both. The output root is under it, and so is bazelisk's
   download of Bazel.
   """
+  override = os.environ.get('BAZEL_CI_HOME')
+  if override:
+    return override
+  if on_bot():
+    # The recipe engine points TMPDIR at the task's temporary directory;
+    # failing that, LUCI_CONTEXT names a file in it.
+    task_tmp = os.environ.get('TMPDIR') or os.path.dirname(
+        os.path.abspath(os.environ['LUCI_CONTEXT'])
+    )
+    return os.path.join(task_tmp, 'bazel_ci')
   return os.path.join(repo_root(engine_src), '.bazel_ci')
 
 
@@ -233,21 +253,24 @@ DISK_CACHE_GC_MAX_SIZE = '40G'
 
 
 def build_options(engine_src):
-  """The options of every build command: the disk cache under the checkout's .bazel_ci.
+  """The options of every build command: a developer's disk cache under .bazel_ci.
 
-  A builder file's builds run one after another in one checkout, and the
-  flags that tell them apart -- asan, unoptimized, dart_debug -- reach the
-  exec configuration too (Bazel keeps a build setting's value across the
-  exec transition), whose output directory does not spell them: each
-  switch overwrites the host tools' outputs (impellerc's closure: half of a
-  cold build) and the next build of the other value compiles them again.
-  The first end-to-end run of the recipe's sequence paid it (10-31: the
-  second install of ci/host_debug_unopt after ci/host_debug rebuilt the
-  exec configuration, 10 minutes). A disk cache under .bazel_ci -- the
-  checkout's, persisting with it, bounded -- serves every such repeat, and
-  a bot's later builds of the same inputs; the root .bazelrc's home-
-  directory cache is a developer's.
+  A developer runs a builder file's builds one after another in one
+  checkout, and the flags that tell them apart -- asan, unoptimized,
+  dart_debug -- reach the exec configuration too (Bazel keeps a build
+  setting's value across the exec transition), whose output directory
+  does not spell them: each switch overwrites the host tools' outputs
+  (impellerc's closure: half of a cold build) and the next build of the
+  other value compiles them again. The first end-to-end run of the
+  recipe's sequence paid it (10-31: the second install of
+  ci/host_debug_unopt after ci/host_debug rebuilt the exec configuration,
+  10 minutes). A disk cache under .bazel_ci -- the checkout's, persisting
+  with it, bounded -- serves every such repeat; the root .bazelrc's
+  home-directory cache is the developer's own builds'. A bot builds one
+  build per task from nothing and keeps nothing (bazel_home): no cache.
   """
+  if on_bot():
+    return []
   return [
       '--disk_cache=' + os.path.join(bazel_home(engine_src), 'disk_cache'),
       '--experimental_disk_cache_gc_max_size=' + DISK_CACHE_GC_MAX_SIZE,
