@@ -45,6 +45,7 @@
                 "--bazel"
             ],
             "name": "ci/host_debug_ddm",
+            "timeout": 240,
             "description": "Produces debug mode Linux host-side tooling with dynamic modules enabled.",
             "ninja": {
                 "config": "ci/host_debug_ddm",

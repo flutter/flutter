@@ -48,6 +48,7 @@
                 "--bazel"
             ],
             "name": "ci/android_release_arm64_size_exp",
+            "timeout": 240,
             "description": "Produces experimental release mode artifacts to target 64-bit arm Android from a Linux host with dynamic modules enabled.",
             "ninja": {
                 "config": "ci/android_release_arm64_size_exp",
@@ -102,6 +103,7 @@
                 "--bazel"
             ],
             "name": "ci/android_debug_arm64_size_exp",
+            "timeout": 240,
             "description": "Produces experimental debug mode artifacts to target 64-bit arm Android from a Linux host with dynamic modules enabled.",
             "ninja": {
                 "config": "ci/android_debug_arm64_size_exp",
