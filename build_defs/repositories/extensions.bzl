@@ -22,7 +22,7 @@ load(":flutter_bin_cache.bzl", "PREBUILT_ENGINE_ENV")
 load(":host_files.bzl", "host_files")
 load(":host_platform.bzl", "BIN_CACHE_DART_SDK", "host_platform", "host_platform_values")
 load(":macos_sdk.bzl", "macos_sdk")
-load(":repositories.bzl", "cipd_package", "engine_version_repository", "synced_repository")
+load(":repositories.bzl", "cipd_download_url", "cipd_package", "engine_version_repository", "synced_repository")
 
 _OVERLAYS = "//engine/src/flutter/build/bazel/third_party"
 
@@ -646,10 +646,16 @@ def _sysroot_repositories(mctx, fetch):
                 build_file = spec.build_file,
             )
         else:
+            # The checkout's, and the same tarball when the checkout has none
+            # (synced_repository's fallback: a bare checkout on the prebuilt
+            # engine).
             synced_repository(
                 name = name,
                 path = _SYSROOTS_DIR + "/" + entry["SysrootDir"],
                 build_file = spec.build_file,
+                fallback_url = entry["URL"] + "/" + entry["Sha256Sum"],
+                fallback_sha256 = entry["Sha256Sum"],
+                fallback_type = "tar.xz",
             )
 
 def _synced_deps_impl(mctx):
@@ -688,7 +694,21 @@ def _synced_deps_impl(mctx):
         if fetch:
             _download_cipd_package(name, pin["package"], pin["version"], platform, spec.build_file, strip_prefix = subdir)
         else:
-            synced_repository(name = name, path = path + ("/" + subdir if subdir else ""), build_file = spec.build_file)
+            # The checkout's copy, and the CIPD package when the checkout has
+            # none (synced_repository's fallback): a checkout without
+            # `gclient sync` running the tests on the prebuilt engine
+            # (--config=prebuilt_engine) still wants cpython3 for the pub
+            # repositories and the package configurations, and the desktop
+            # shard clang and the sysroots.
+            package = pin["package"].replace("${platform}", platform)
+            synced_repository(
+                name = name,
+                path = path + ("/" + subdir if subdir else ""),
+                build_file = spec.build_file,
+                fallback_url = cipd_download_url(package, pin["version"]),
+                fallback_sha256 = _CIPD_SHA256.get((package, pin["version"]), ""),
+                fallback_strip_prefix = subdir,
+            )
 
     _sysroot_repositories(mctx, fetch)
 
