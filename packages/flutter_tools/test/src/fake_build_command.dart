@@ -181,11 +181,7 @@ BuildCommand createFakeBuildCommand({
     verboseHelp: verboseHelp,
   );
   final ApplicationPackageFactory packageFactory =
-      applicationPackageFactory ??
-      FakeIOSApplicationPackageFactory(
-        fileSystem: fs,
-        projectFactory: targetToolContext.projectFactory,
-      );
+      applicationPackageFactory ?? FakeIOSApplicationPackageFactory(toolContext: targetToolContext);
   command.applicationPackages = packageFactory;
   for (final Command<void> subcommand in command.subcommands.values) {
     if (subcommand is FlutterCommand) {
@@ -196,10 +192,9 @@ BuildCommand createFakeBuildCommand({
 }
 
 class FakeIOSApplicationPackageFactory extends Fake implements ApplicationPackageFactory {
-  FakeIOSApplicationPackageFactory({required this.fileSystem, this.projectFactory});
+  FakeIOSApplicationPackageFactory({required this.toolContext});
 
-  final FileSystem fileSystem;
-  final FlutterProjectFactory? projectFactory;
+  final ToolContext toolContext;
 
   @override
   Future<ApplicationPackage?> getPackageForPlatform(
@@ -210,17 +205,11 @@ class FakeIOSApplicationPackageFactory extends Fake implements ApplicationPackag
     if (platform != TargetPlatform.ios) {
       return null;
     }
-    final FlutterProject project =
-        projectFactory?.fromDirectory(fileSystem.currentDirectory) ??
-        FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
+    final ToolContext(:FileSystem fs, :FlutterProjectFactory projectFactory) = toolContext;
+    final FlutterProject project = projectFactory.fromDirectory(fs.currentDirectory);
     if (!project.ios.exists) {
       return null;
     }
-    return BuildableIOSApp(
-      project.ios,
-      'com.example.test',
-      'Runner',
-      toolContext: FakeToolContext(fs: fileSystem),
-    );
+    return BuildableIOSApp(project.ios, 'com.example.test', 'Runner', toolContext: toolContext);
   }
 }

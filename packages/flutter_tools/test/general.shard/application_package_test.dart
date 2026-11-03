@@ -46,8 +46,7 @@ void main() {
       sdk = FakeAndroidSdk();
       fakeProcessManager = FakeProcessManager.empty();
       fs = MemoryFileSystem.test();
-      cache = Cache.test(processManager: FakeProcessManager.any());
-      Cache.flutterRoot = '../..';
+      cache = Cache.test(flutterRoot: '../..', processManager: FakeProcessManager.any());
       sdk.licensesAvailable = true;
       final FlutterProject project = FlutterProject.fromDirectoryTest(fs.currentDirectory);
       fs
@@ -911,7 +910,9 @@ void main() {
 
     testUsingContext('returns template app icon dirname for Contents.json', () async {
       final iosApp = BuildableIOSApp(
-        IosProject.fromFlutter(FlutterProject.fromDirectory(fileSystem.currentDirectory)),
+        IosProject.fromFlutter(
+          FlutterProject.fromDirectory(fileSystem.currentDirectory, logger: testLogger),
+        ),
         'com.foo.bar',
         'Runner',
         toolContext: toolContext,
@@ -924,7 +925,7 @@ void main() {
       expect(
         iosApp.templateAppIconDirNameForContentsJson,
         fileSystem.path.join(
-          Cache.flutterRoot!,
+          getFlutterRoot(),
           'packages',
           'flutter_tools',
           'templates',
@@ -936,7 +937,7 @@ void main() {
     }, overrides: overrides);
 
     testUsingContext('returns template app icon dirname for images', () async {
-      final String toolsDir = fileSystem.path.join(Cache.flutterRoot!, 'packages', 'flutter_tools');
+      final String toolsDir = fileSystem.path.join(getFlutterRoot(), 'packages', 'flutter_tools');
       final String packageConfigPath = fileSystem.path.join(
         toolsDir,
         '.dart_tool',
@@ -958,7 +959,9 @@ void main() {
 }
 ''');
       final iosApp = BuildableIOSApp(
-        IosProject.fromFlutter(FlutterProject.fromDirectory(fileSystem.currentDirectory)),
+        IosProject.fromFlutter(
+          FlutterProject.fromDirectory(fileSystem.currentDirectory, logger: testLogger),
+        ),
         'com.foo.bar',
         'Runner',
         toolContext: toolContext,
@@ -997,7 +1000,9 @@ void main() {
 
     testUsingContext('returns template launch image dirname for Contents.json', () async {
       final iosApp = BuildableIOSApp(
-        IosProject.fromFlutter(FlutterProject.fromDirectory(fileSystem.currentDirectory)),
+        IosProject.fromFlutter(
+          FlutterProject.fromDirectory(fileSystem.currentDirectory, logger: testLogger),
+        ),
         'com.foo.bar',
         'Runner',
         toolContext: toolContext,
@@ -1010,7 +1015,7 @@ void main() {
       expect(
         iosApp.templateLaunchImageDirNameForContentsJson,
         fileSystem.path.join(
-          Cache.flutterRoot!,
+          getFlutterRoot(),
           'packages',
           'flutter_tools',
           'templates',
@@ -1022,7 +1027,7 @@ void main() {
     }, overrides: overrides);
 
     testUsingContext('returns template launch image dirname for images', () async {
-      final String toolsDir = fileSystem.path.join(Cache.flutterRoot!, 'packages', 'flutter_tools');
+      final String toolsDir = fileSystem.path.join(getFlutterRoot(), 'packages', 'flutter_tools');
       final String packageConfigPath = fileSystem.path.join(
         toolsDir,
         '.dart_tool',
@@ -1044,7 +1049,9 @@ void main() {
 }
 ''');
       final iosApp = BuildableIOSApp(
-        IosProject.fromFlutter(FlutterProject.fromDirectory(fileSystem.currentDirectory)),
+        IosProject.fromFlutter(
+          FlutterProject.fromDirectory(fileSystem.currentDirectory, logger: testLogger),
+        ),
         'com.foo.bar',
         'Runner',
         toolContext: toolContext,
@@ -1361,7 +1368,7 @@ flutter:
   module:
     androidPackage: com.example
 ''');
-  return FlutterProject.fromDirectory(directory);
+  return FlutterProject.fromDirectory(directory, logger: globals.logger);
 }
 
 const String _aaptDataWithActivityAlias = '''
