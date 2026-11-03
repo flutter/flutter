@@ -3322,7 +3322,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
     _children?.forEach(_redepthChild);
   }
 
-  void _updateChildMergeFlagRecursively(SemanticsNode child) {
+  void _updateChildMergeFlag(SemanticsNode child) {
     if (child.parent != this) {
       // While the tree is being rebuilt bottom-up, `_children` can still list
       // a node that a deeper node has already adopted in this pass (see
@@ -3335,7 +3335,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
   }
 
   void _updateChildrenMergeFlags() {
-    _children?.forEach(_updateChildMergeFlagRecursively);
+    _children?.forEach(_updateChildMergeFlag);
   }
 
   void _adoptChild(SemanticsNode child) {
@@ -3358,7 +3358,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
     // still possible that this child was an extra node introduced in
     // RenderObject.assembleSemanticsNode. We have to make sure their
     // `isMergedIntoParent` is updated correctly.
-    _updateChildMergeFlagRecursively(child);
+    _updateChildMergeFlag(child);
   }
 
   void _dropChild(SemanticsNode child) {

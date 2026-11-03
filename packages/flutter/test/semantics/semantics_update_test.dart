@@ -923,6 +923,8 @@ class _EmbedderSemanticsTree {
   }
 }
 
+/// A test widget that allows toggling the merging of its descendants' semantics
+/// without replacing the underlying render object.
 class _ToggleableMergeSemantics extends SingleChildRenderObjectWidget {
   const _ToggleableMergeSemantics({required this.isMerging, super.child});
 
