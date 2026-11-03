@@ -951,6 +951,8 @@ TEST_F(FlutterEngineTest, CanGetEngineForId) {
   if (!engineId.has_value()) {
     return;
   }
+  id<FlutterPluginRegistrar> registrar = [engine registrarForPlugin:@"MyPlugin"];
+  EXPECT_EQ(registrar.engineIdentifier, *engineId);
   EXPECT_EQ(engine, [FlutterEngine engineForIdentifier:*engineId]);
   ShutDownEngine();
 }
@@ -1302,17 +1304,23 @@ TEST_F(FlutterEngineTest, UnregistersPluginsOnEngineDestruction) {
   [NSApplication sharedApplication].delegate = fakeAppDelegate;
 
   FakeAppDelegatePlugin* plugin = [[FakeAppDelegatePlugin alloc] init];
+  int64_t engineId = 0;
+  id<FlutterPluginRegistrar> registrar = nil;
 
   @autoreleasepool {
     FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"test" project:nil];
+    engineId = reinterpret_cast<int64_t>((__bridge void*)engine);
+    EXPECT_NE(engineId, 0);
 
-    [[engine registrarForPlugin:@"TestPlugin"] addApplicationDelegate:plugin];
+    registrar = [engine registrarForPlugin:@"TestPlugin"];
+    [registrar addApplicationDelegate:plugin];
     EXPECT_TRUE([fakeAppDelegate hasDelegate:plugin]);
   }
 
   // When the engine is released, it should unregister any plugins it had
-  // registered on its behalf.
+  // registered on its behalf, while the registrar retains its engineIdentifier.
   EXPECT_FALSE([fakeAppDelegate hasDelegate:plugin]);
+  EXPECT_EQ(registrar.engineIdentifier, engineId);
 
   [NSApplication sharedApplication].delegate = previousDelegate;
 }

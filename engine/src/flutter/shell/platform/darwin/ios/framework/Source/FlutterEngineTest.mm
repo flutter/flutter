@@ -319,14 +319,25 @@ id CreateMockViewControllerOnScreen(CGSize screenNativeSize, CGFloat screenScale
 
 - (void)testNotifyPluginOfDealloc {
   id plugin = OCMProtocolMock(@protocol(FlutterPlugin));
-  OCMStub([plugin detachFromEngineForRegistrar:[OCMArg any]]);
+  __block int64_t detachedEngineId = 0;
+  OCMStub([plugin detachFromEngineForRegistrar:[OCMArg any]]).andDo(^(NSInvocation* invocation) {
+    __unsafe_unretained NSObject<FlutterPluginRegistrar>* detachedRegistrar = nil;
+    [invocation getArgument:&detachedRegistrar atIndex:2];
+    detachedEngineId = detachedRegistrar.engineIdentifier;
+  });
+  int64_t engineId = 0;
+  NSObject<FlutterPluginRegistrar>* registrar = nil;
   @autoreleasepool {
     FlutterDartProject* project = [[FlutterDartProject alloc] init];
     FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"engine" project:project];
-    NSObject<FlutterPluginRegistrar>* registrar = [engine registrarForPlugin:@"plugin"];
+    engineId = engine.engineIdentifier;
+    XCTAssertTrue(engineId != 0);
+    registrar = [engine registrarForPlugin:@"plugin"];
     [registrar publish:plugin];
   }
   OCMVerify([plugin detachFromEngineForRegistrar:[OCMArg any]]);
+  XCTAssertEqual(detachedEngineId, engineId);
+  XCTAssertEqual(registrar.engineIdentifier, engineId);
 }
 
 - (void)testGetViewControllerFromRegistrar {
@@ -421,11 +432,15 @@ id CreateMockViewControllerOnScreen(CGSize screenNativeSize, CGFloat screenScale
   [engine run];
   int64_t id1 = engine.engineIdentifier;
   XCTAssertTrue(id1 != 0);
+  NSObject<FlutterPluginRegistrar>* registrar1 = [engine registrarForPlugin:@"foo"];
+  XCTAssertEqual(registrar1.engineIdentifier, id1);
   FlutterEngine* spawn = [engine spawnWithEntrypoint:nil
                                           libraryURI:nil
                                         initialRoute:nil
                                       entrypointArgs:nil];
   int64_t id2 = spawn.engineIdentifier;
+  NSObject<FlutterPluginRegistrar>* registrar2 = [spawn registrarForPlugin:@"foo"];
+  XCTAssertEqual(registrar2.engineIdentifier, id2);
   XCTAssertEqual([FlutterEngine engineForIdentifier:id1], engine);
   XCTAssertEqual([FlutterEngine engineForIdentifier:id2], spawn);
 }
@@ -1170,6 +1185,8 @@ id CreateMockViewControllerOnScreen(CGSize screenNativeSize, CGFloat screenScale
 
   NSObject<FlutterApplicationRegistrar>* registrar = [mockEngine registrarForApplication:pluginKey];
 
+  XCTAssertTrue([registrar respondsToSelector:@selector(engineIdentifier)]);
+  XCTAssertEqual(registrar.engineIdentifier, engine.engineIdentifier);
   XCTAssertTrue([registrar respondsToSelector:@selector(messenger)]);
   XCTAssertTrue([registrar respondsToSelector:@selector(textures)]);
   XCTAssertTrue([registrar respondsToSelector:@selector(registerViewFactory:withId:)]);

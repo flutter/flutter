@@ -324,6 +324,7 @@ constexpr char kTextPlainFormat[] = "text/plain";
 @implementation FlutterEngineRegistrar {
   NSString* _pluginKey;
   __weak FlutterEngine* _flutterEngine;
+  int64_t _engineIdentifier;
 }
 
 @dynamic view;
@@ -333,12 +334,17 @@ constexpr char kTextPlainFormat[] = "text/plain";
   if (self) {
     _pluginKey = [pluginKey copy];
     _flutterEngine = flutterEngine;
+    _engineIdentifier = reinterpret_cast<int64_t>((__bridge void*)flutterEngine);
     _publishedValue = [NSNull null];
   }
   return self;
 }
 
 #pragma mark - FlutterPluginRegistrar
+
+- (int64_t)engineIdentifier {
+  return _engineIdentifier;
+}
 
 - (id<FlutterBinaryMessenger>)messenger {
   return _flutterEngine.binaryMessenger;

@@ -24,6 +24,9 @@ struct _FlPluginRegistrarImpl {
 
   // Texture registrar in use.
   FlTextureRegistrar* texture_registrar;
+
+  // Engine identifier.
+  int64_t engine_id;
 };
 
 static void fl_plugin_registrar_impl_iface_init(
@@ -72,11 +75,17 @@ static FlView* get_view(FlPluginRegistrar* registrar) {
   return view;
 }
 
+static int64_t get_engine_id(FlPluginRegistrar* registrar) {
+  FlPluginRegistrarImpl* self = FL_PLUGIN_REGISTRAR_IMPL(registrar);
+  return self->engine_id;
+}
+
 static void fl_plugin_registrar_impl_iface_init(
     FlPluginRegistrarInterface* iface) {
   iface->get_messenger = get_messenger;
   iface->get_texture_registrar = get_texture_registrar;
   iface->get_view = get_view;
+  iface->get_engine_id = get_engine_id;
 }
 
 static void fl_plugin_registrar_impl_init(FlPluginRegistrarImpl* self) {}
@@ -84,7 +93,8 @@ static void fl_plugin_registrar_impl_init(FlPluginRegistrarImpl* self) {}
 FlPluginRegistrar* fl_plugin_registrar_new(
     FlView* view,
     FlBinaryMessenger* messenger,
-    FlTextureRegistrar* texture_registrar) {
+    FlTextureRegistrar* texture_registrar,
+    int64_t engine_id) {
   g_return_val_if_fail(view == nullptr || FL_IS_VIEW(view), nullptr);
   g_return_val_if_fail(FL_IS_BINARY_MESSENGER(messenger), nullptr);
   g_return_val_if_fail(FL_IS_TEXTURE_REGISTRAR(texture_registrar), nullptr);
@@ -99,6 +109,7 @@ FlPluginRegistrar* fl_plugin_registrar_new(
   self->messenger = FL_BINARY_MESSENGER(g_object_ref(messenger));
   self->texture_registrar =
       FL_TEXTURE_REGISTRAR(g_object_ref(texture_registrar));
+  self->engine_id = engine_id;
 
   return FL_PLUGIN_REGISTRAR(self);
 }
@@ -121,4 +132,11 @@ G_MODULE_EXPORT FlView* fl_plugin_registrar_get_view(FlPluginRegistrar* self) {
   g_return_val_if_fail(FL_IS_PLUGIN_REGISTRAR(self), nullptr);
 
   return FL_PLUGIN_REGISTRAR_GET_IFACE(self)->get_view(self);
+}
+
+G_MODULE_EXPORT int64_t
+fl_plugin_registrar_get_engine_id(FlPluginRegistrar* self) {
+  g_return_val_if_fail(FL_IS_PLUGIN_REGISTRAR(self), 0);
+
+  return FL_PLUGIN_REGISTRAR_GET_IFACE(self)->get_engine_id(self);
 }
