@@ -3447,6 +3447,34 @@ public class AccessibilityBridgeTest {
     }
   }
 
+  @Test
+  public void itSetsVisibleToUserFalseForHiddenNodes() {
+    AccessibilityBridge accessibilityBridge = setUpBridge();
+
+    TestSemanticsNode root = new TestSemanticsNode();
+    root.id = 0;
+
+    TestSemanticsNode visibleNode = new TestSemanticsNode();
+    visibleNode.id = 1;
+    visibleNode.label = "visible";
+    root.children.add(visibleNode);
+
+    TestSemanticsNode hiddenNode = new TestSemanticsNode();
+    hiddenNode.id = 2;
+    hiddenNode.label = "hidden";
+    hiddenNode.addFlag(AccessibilityBridge.Flag.IS_HIDDEN);
+    root.children.add(hiddenNode);
+
+    TestSemanticsUpdate testSemanticsUpdate = root.toUpdate();
+    testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
+
+    AccessibilityNodeInfo visibleNodeInfo = accessibilityBridge.createAccessibilityNodeInfo(1);
+    assertTrue(visibleNodeInfo.isVisibleToUser());
+
+    AccessibilityNodeInfo hiddenNodeInfo = accessibilityBridge.createAccessibilityNodeInfo(2);
+    assertFalse(hiddenNodeInfo.isVisibleToUser());
+  }
+
   /// The encoding for semantics is described in platform_view_android.cc
   class TestSemanticsUpdate {
     TestSemanticsUpdate(ByteBuffer buffer, String[] strings, ByteBuffer[] stringAttributeArgs) {

@@ -159,6 +159,12 @@ class JsCompilerConfig extends WebCompilerConfig {
     };
     return jsonEncode(settings);
   }
+
+  @override
+  Map<String, Object> get buildEventAnalyticsValues => <String, Object>{
+    ...super.buildEventAnalyticsValues,
+    'deprecatedJsInterop': ?deprecatedJsInterop?.toString(),
+  };
 }
 
 /// Configuration for the Wasm compiler.
