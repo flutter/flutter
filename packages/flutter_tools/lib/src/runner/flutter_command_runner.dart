@@ -24,6 +24,7 @@ import '../base/time.dart';
 import '../base/user_messages.dart';
 import '../base/utils.dart';
 import '../cache.dart';
+import '../context/android_context.dart';
 import '../context/tool_context.dart';
 import '../convert.dart';
 import '../device.dart';
@@ -71,13 +72,13 @@ class FlutterCommandRunner extends CommandRunner<void> {
   FlutterCommandRunner({
     required ToolContext toolContext,
     this._analytics = const NoOpAnalytics(),
+    this._androidContext,
     this._cocoaPods,
     this._deviceManager,
     this._doctor,
     this._extensionManager,
     bool verboseHelp = false,
     this._featureFlags,
-    this._gradleUtils,
     this._plistParser,
     this._templateRenderer,
   }) : _toolContext = toolContext,
@@ -315,12 +316,12 @@ class FlutterCommandRunner extends CommandRunner<void> {
   }
 
   final Analytics _analytics;
+  final AndroidContext? _androidContext;
   final CocoaPods? _cocoaPods;
   final DeviceManager? _deviceManager;
   final Doctor? _doctor;
   final ExtensionManager? _extensionManager;
   final FeatureFlags? _featureFlags;
-  final GradleUtils? _gradleUtils;
   final PlistParser? _plistParser;
   final TemplateRenderer? _templateRenderer;
   final ToolContext _toolContext;
@@ -337,8 +338,8 @@ class FlutterCommandRunner extends CommandRunner<void> {
   /// The [Doctor] instance, if provided.
   Doctor? get doctor => _doctor;
 
-  /// The [GradleUtils] instance, if provided.
-  GradleUtils? get gradleUtils => _gradleUtils;
+  /// The [GradleUtils] instance from [AndroidContext], if provided.
+  GradleUtils? get gradleUtils => _androidContext?.gradleUtils;
 
   /// The [PlistParser] instance, if provided.
   PlistParser? get plistParser => _plistParser;

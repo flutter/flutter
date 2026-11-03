@@ -938,10 +938,6 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
   @visibleForTesting
   BuildSystem get buildSystem => _buildSystem;
 
-  @visibleForTesting
-  @override
-  ToolContext get toolContext => super.toolContext;
-
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => const <DevelopmentArtifact>{
     DevelopmentArtifact.iOS,
