@@ -351,6 +351,19 @@ const String kFloatSkSl = r'''
 }
 ''';
 
+// Hand-written shader without any uniforms that outputs opaque green.
+const String kNoUniformsSkSl = r'''
+{
+  "format_version": 2,
+  "sksl": {
+    "entrypoint": "no_uniforms_fragment_main",
+    "shader": "half4 main(float2 iFragCoord)\n{\n    return half4(0.0, 1.0, 0.0, 1.0);\n}\n",
+    "stage": 1,
+    "uniforms": []
+  }
+}
+''';
+
 // Simple shader with a vec2 uniform
 // Generated from engine/src/flutter/lib/ui/fixtures/shaders/uniforms/vec2_uniform.frag
 // For changes, update that file and regenerate using impellerc.
@@ -845,6 +858,7 @@ Future<void> testMain() async {
     assetScope.setAsset('texture_shader', ByteData.sublistView(utf8.encode(kTextureShaderSksl)));
     assetScope.setAsset('many_arrays', ByteData.sublistView(utf8.encode(kManyArraysSksl)));
     assetScope.setAsset('ink_sparkle', ByteData.sublistView(utf8.encode(kInkSparkleSksl)));
+    assetScope.setAsset('no_uniforms', ByteData.sublistView(utf8.encode(kNoUniformsSkSl)));
     assetScope.setAsset('float_uniform', ByteData.sublistView(utf8.encode(kFloatSkSl)));
     assetScope.setAsset('vec2_uniform', ByteData.sublistView(utf8.encode(kVec2SkSl)));
     assetScope.setAsset('vec3_uniform', ByteData.sublistView(utf8.encode(kVec3SkSl)));
@@ -962,6 +976,248 @@ Future<void> testMain() async {
   test('fragment shader with space in name loads correctly', () async {
     assetScope.setAsset('voronoi%20shader', ByteData.sublistView(utf8.encode(kVoronoiShaderSksl)));
     await expectLater(ui.FragmentProgram.fromAsset('voronoi shader'), completes);
+  }, skip: isWimp); // https://github.com/flutter/flutter/issues/175431
+
+  // Regression test for https://github.com/flutter/flutter/issues/193221.
+  //
+  // A picture must keep the uniform values a fragment shader had when it was
+  // drawn, independent of the shader object's lifetime. CanvasKit used to
+  // build the recorded SkShader directly on top of the FragmentShader's
+  // malloc'd uniform buffer, so `FragmentShader.dispose` freed memory that the
+  // picture still read from, and rasterizing the picture afterwards (for
+  // example with `Picture.toImage`) sampled garbage instead of the recorded
+  // color. This test disposes the shader right after recording and then
+  // checks that the picture still renders the recorded color, renders the same
+  // pixels on every rasterization, and renders the same pixels when nested
+  // inside another picture after the original picture is disposed.
+  test(
+    'disposing a fragment shader after recording does not change the recorded picture',
+    () async {
+      final ui.FragmentProgram program = await renderer.createFragmentProgram('vec4_uniform');
+      final ui.FragmentShader shader = program.fragmentShader();
+      shader.getUniformVec4('color_rgba').set(1.0, 0.0, 0.0, 1.0);
+      final recorder = ui.PictureRecorder();
+      ui.Canvas(recorder)
+          .drawRect(const ui.Rect.fromLTWH(0, 0, 10, 10), ui.Paint()..shader = shader);
+      final ui.Picture picture = recorder.endRecording();
+      shader.dispose();
+
+      final ByteData firstRaster = await _rasterizePicture(picture, width: 10, height: 10);
+      final ByteData secondRaster = await _rasterizePicture(picture, width: 10, height: 10);
+
+      // Nest the picture in another picture and drop the original one.
+      final outerRecorder = ui.PictureRecorder();
+      ui.Canvas(outerRecorder).drawPicture(picture);
+      final ui.Picture outerPicture = outerRecorder.endRecording();
+      picture.dispose();
+      final ByteData nested = await _rasterizePicture(outerPicture, width: 10, height: 10);
+      outerPicture.dispose();
+
+      expect(_rgbaAt(firstRaster, width: 10, x: 5, y: 5), <int>[255, 0, 0, 255]);
+      expect(Uint8List.sublistView(secondRaster), Uint8List.sublistView(firstRaster));
+      expect(Uint8List.sublistView(nested), Uint8List.sublistView(firstRaster));
+    },
+    skip: isWimp, // https://github.com/flutter/flutter/issues/175431
+  );
+
+  // Regression test for https://github.com/flutter/flutter/issues/193221.
+  //
+  // When a disposed shader's uniform buffer was freed while a picture still
+  // referenced it, the allocator could hand the same memory to the next
+  // shader. Its uniform writes then silently changed what the earlier draw in
+  // the picture rendered. This test records a red draw, disposes its shader,
+  // records a blue draw with a new shader, and checks that both boxes keep
+  // their own color.
+  test('disposed fragment shader uniforms are not reused by later shaders in a picture', () async {
+    final ui.FragmentProgram program = await renderer.createFragmentProgram('vec4_uniform');
+    final recorder = ui.PictureRecorder();
+    final canvas = ui.Canvas(recorder);
+
+    final ui.FragmentShader redShader = program.fragmentShader();
+    redShader.getUniformVec4('color_rgba').set(1.0, 0.0, 0.0, 1.0);
+    canvas.drawRect(const ui.Rect.fromLTWH(0, 0, 10, 10), ui.Paint()..shader = redShader);
+    redShader.dispose();
+
+    // Created after the red shader is disposed. If disposing a shader released
+    // memory still referenced by the picture, this shader could reuse it.
+    final ui.FragmentShader blueShader = program.fragmentShader();
+    blueShader.getUniformVec4('color_rgba').set(0.0, 0.0, 1.0, 1.0);
+    canvas.drawRect(const ui.Rect.fromLTWH(10, 0, 10, 10), ui.Paint()..shader = blueShader);
+
+    final ui.Picture picture = recorder.endRecording();
+    final ByteData pixels = await _rasterizePicture(picture, width: 20, height: 10);
+    picture.dispose();
+    blueShader.dispose();
+
+    expect(_rgbaAt(pixels, width: 20, x: 5, y: 5), <int>[
+      255,
+      0,
+      0,
+      255,
+    ], reason: 'left box should be red');
+    expect(_rgbaAt(pixels, width: 20, x: 15, y: 5), <int>[
+      0,
+      0,
+      255,
+      255,
+    ], reason: 'right box should be blue');
+  }, skip: isWimp); // https://github.com/flutter/flutter/issues/175431
+
+  // Regression test for https://github.com/flutter/flutter/issues/193221.
+  //
+  // Same as the disposal test above, but for a shader that also has an image
+  // sampler, which CanvasKit builds through a different code path
+  // (`makeShaderWithChildren`). Disposing the shader and its image after
+  // recording must not change the pixels the picture renders, so this test
+  // compares against the same draw rasterized while everything was still
+  // alive.
+  test('disposing a fragment shader with image sampler does not corrupt sampled picture', () async {
+    final ui.Image image = _createOvalGradientImage(imageDimension: 16);
+    final ui.FragmentProgram program = await renderer.createFragmentProgram('texture_shader');
+    final ui.FragmentShader shader = program.fragmentShader();
+    shader.getUniformFloat('u_size', 0).set(10);
+    shader.getUniformFloat('u_size', 1).set(10);
+    shader.setImageSampler(0, image);
+
+    ui.Picture recordTexturedRect() {
+      final recorder = ui.PictureRecorder();
+      final canvas = ui.Canvas(recorder);
+      canvas.drawRect(const ui.Rect.fromLTWH(0, 0, 10, 10), ui.Paint()..shader = shader);
+      return recorder.endRecording();
+    }
+
+    // Rendered while the shader and image are still alive.
+    final ui.Picture expectedPicture = recordTexturedRect();
+    final ByteData expectedPixels = await _rasterizePicture(expectedPicture, width: 10, height: 10);
+    expectedPicture.dispose();
+
+    final ui.Picture picture = recordTexturedRect();
+    shader.dispose();
+    image.dispose();
+    final ByteData pixels = await _rasterizePicture(picture, width: 10, height: 10);
+    picture.dispose();
+
+    // The center of the image lies inside the gradient oval, not on the black background.
+    expect(_rgbaAt(expectedPixels, width: 10, x: 5, y: 5), isNot(<int>[0, 0, 0, 255]));
+    expect(Uint8List.sublistView(pixels), Uint8List.sublistView(expectedPixels));
+  }, skip: isWimp); // https://github.com/flutter/flutter/issues/175431
+
+  // Regression test for https://github.com/flutter/flutter/issues/193221.
+  //
+  // Each draw must capture the uniform values the shader had at the time of
+  // that draw. When recorded shaders shared the FragmentShader's mutable
+  // uniform buffer, changing a uniform after a draw also changed every earlier
+  // draw of the same shader in the picture. This test draws one box per color
+  // with a single shader and Paint, updating the uniform between draws, and
+  // checks that every box keeps the color it was drawn with.
+  test(
+    'every draw of a repeatedly mutated fragment shader keeps its own uniforms',
+    () async {
+      final ui.FragmentProgram program = await renderer.createFragmentProgram('vec4_uniform');
+      final ui.FragmentShader shader = program.fragmentShader();
+      final ui.UniformVec4Slot color = shader.getUniformVec4('color_rgba');
+      final paint = ui.Paint()..shader = shader;
+      const colors = <List<int>>[
+        <int>[255, 0, 0, 255],
+        <int>[0, 255, 0, 255],
+        <int>[0, 0, 255, 255],
+        <int>[255, 255, 0, 255],
+        <int>[0, 255, 255, 255],
+      ];
+      final int width = colors.length * 10;
+
+      final recorder = ui.PictureRecorder();
+      final canvas = ui.Canvas(recorder);
+      for (var i = 0; i < colors.length; i++) {
+        final List<int> rgba = colors[i];
+        color.set(rgba[0] / 255, rgba[1] / 255, rgba[2] / 255, rgba[3] / 255);
+        canvas.drawRect(ui.Rect.fromLTWH(i * 10.0, 0, 10, 10), paint);
+      }
+      final ui.Picture picture = recorder.endRecording();
+      shader.dispose();
+
+      final ByteData pixels = await _rasterizePicture(picture, width: width, height: 10);
+      picture.dispose();
+
+      for (var i = 0; i < colors.length; i++) {
+        expect(
+          _rgbaAt(pixels, width: width, x: i * 10 + 5, y: 5),
+          colors[i],
+          reason: 'box $i',
+        );
+      }
+    },
+    // Skwasm (including Wimp, https://github.com/flutter/flutter/issues/175431)
+    // currently shares the uniform buffer with shaders already recorded in a
+    // picture, so later uniform changes affect earlier draws.
+    skip: isSkwasm,
+  );
+
+  // Regression test for https://github.com/flutter/flutter/issues/193221.
+  //
+  // Like the uniform test above, but for image samplers: `setImageSampler`
+  // disposes the image shader that an earlier draw recorded, and that draw
+  // must keep sampling its original image. This test draws with a red image,
+  // swaps in a blue image, draws again, and checks that each box samples the
+  // image that was set when it was drawn.
+  test('replacing an image sampler between draws keeps the sampler each draw used', () async {
+    final ui.Image redImage = _createSolidColorImage(const ui.Color(0xFFFF0000), imageDimension: 4);
+    final ui.Image blueImage = _createSolidColorImage(
+      const ui.Color(0xFF0000FF),
+      imageDimension: 8,
+    );
+    final ui.FragmentProgram program = await renderer.createFragmentProgram('texture_shader');
+    final ui.FragmentShader shader = program.fragmentShader();
+    shader.getUniformFloat('u_size', 0).set(20);
+    shader.getUniformFloat('u_size', 1).set(10);
+    final paint = ui.Paint()..shader = shader;
+
+    final recorder = ui.PictureRecorder();
+    final canvas = ui.Canvas(recorder);
+    shader.setImageSampler(0, redImage);
+    canvas.drawRect(const ui.Rect.fromLTWH(0, 0, 10, 10), paint);
+    // Replacing the sampler disposes the image shader the first draw recorded.
+    shader.setImageSampler(0, blueImage);
+    canvas.drawRect(const ui.Rect.fromLTWH(10, 0, 10, 10), paint);
+    final ui.Picture picture = recorder.endRecording();
+    shader.dispose();
+    redImage.dispose();
+    blueImage.dispose();
+
+    final ByteData pixels = await _rasterizePicture(picture, width: 20, height: 10);
+    picture.dispose();
+
+    expect(_rgbaAt(pixels, width: 20, x: 5, y: 5), <int>[
+      255,
+      0,
+      0,
+      255,
+    ], reason: 'left box should sample the first image');
+    expect(_rgbaAt(pixels, width: 20, x: 15, y: 5), <int>[
+      0,
+      0,
+      255,
+      255,
+    ], reason: 'right box should sample the replacement image');
+  }, skip: isWimp); // https://github.com/flutter/flutter/issues/175431
+
+  // Regression test for https://github.com/flutter/flutter/issues/193221.
+  //
+  // Edge case for the disposal fix: a shader with no uniforms has an empty
+  // uniform buffer, and disposing it after recording must still leave a picture
+  // that renders the shader's output.
+  test('a disposed fragment shader without uniforms still renders its picture', () async {
+    final ui.FragmentProgram program = await renderer.createFragmentProgram('no_uniforms');
+    final ui.FragmentShader shader = program.fragmentShader();
+    final recorder = ui.PictureRecorder();
+    ui.Canvas(recorder).drawRect(const ui.Rect.fromLTWH(0, 0, 10, 10), ui.Paint()..shader = shader);
+    final ui.Picture picture = recorder.endRecording();
+    shader.dispose();
+
+    final ByteData pixels = await _rasterizePicture(picture, width: 10, height: 10);
+    picture.dispose();
+
+    expect(_rgbaAt(pixels, width: 10, x: 5, y: 5), <int>[0, 255, 0, 255]);
   }, skip: isWimp); // https://github.com/flutter/flutter/issues/175431
 
   group('fragmentShader uniforms', () {
@@ -2095,6 +2351,35 @@ ui.Image _createOvalGradientImage({required int imageDimension}) {
   } finally {
     picture.dispose();
   }
+}
+
+ui.Image _createSolidColorImage(ui.Color color, {required int imageDimension}) {
+  final recorder = ui.PictureRecorder();
+  ui.Canvas(recorder).drawPaint(ui.Paint()..color = color);
+  final ui.Picture picture = recorder.endRecording();
+  try {
+    return picture.toImageSync(imageDimension, imageDimension);
+  } finally {
+    picture.dispose();
+  }
+}
+
+Future<ByteData> _rasterizePicture(
+  ui.Picture picture, {
+  required int width,
+  required int height,
+}) async {
+  final ui.Image image = await picture.toImage(width, height);
+  try {
+    return (await image.toByteData())!;
+  } finally {
+    image.dispose();
+  }
+}
+
+List<int> _rgbaAt(ByteData pixels, {required int width, required int x, required int y}) {
+  final int offset = (y * width + x) * 4;
+  return Uint8List.sublistView(pixels, offset, offset + 4).toList();
 }
 
 ui.Image _imageFromShader({required ui.Shader shader, required int imageDimension}) {
