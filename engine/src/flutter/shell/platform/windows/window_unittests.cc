@@ -30,6 +30,176 @@ TEST(MockWindow, GetDpiAfterCreate) {
   ASSERT_TRUE(window.GetDpi() > 0);
 }
 
+TEST(MockWindow, DirectManipulationDoesNotCreateAnIdleTimer) {
+  MockWindow window;
+  ASSERT_NE(window.GetWindowHandle(), nullptr);
+  EXPECT_FALSE(KillTimer(window.GetWindowHandle(), 1));
+}
+
+// Exercise the actual HWND timer together with the interaction callback. No
+// physical touchpad or timing-dependent sleeps are required.
+class DirectManipulationPollingTest : public ::testing::Test {
+ protected:
+  void SetUp() override {
+    ASSERT_NE(window_.GetWindowHandle(), nullptr);
+    auto owner = std::make_unique<MockDirectManipulationOwner>(&window_);
+    owner_ = owner.get();
+    handler_ = fml::MakeRefCounted<DirectManipulationEventHandler>(owner_);
+    window_.SetDirectManipulationOwner(std::move(owner));
+  }
+
+  void Interact(DIRECTMANIPULATION_INTERACTION_TYPE interaction) {
+    EXPECT_EQ(handler_->OnInteraction(nullptr, interaction), S_OK);
+  }
+
+  // The timer ID is part of FlutterWindow's WM_TIMER dispatch contract.
+  static constexpr UINT_PTR kTimerId = 1;
+  MockWindow window_;
+  MockDirectManipulationOwner* owner_ = nullptr;
+  fml::RefPtr<DirectManipulationEventHandler> handler_;
+};
+
+TEST_F(DirectManipulationPollingTest, InitiallyIdleHasNoTimer) {
+  EXPECT_FALSE(KillTimer(window_.GetWindowHandle(), kTimerId));
+  EXPECT_CALL(*owner_, Update()).Times(0);
+  window_.InjectWindowMessage(WM_TIMER, kTimerId, 0);
+}
+
+TEST_F(DirectManipulationPollingTest,
+       DispatchesUpdatesOnlyDuringAnInteraction) {
+  Interact(DIRECTMANIPULATION_INTERACTION_BEGIN);
+  Interact(DIRECTMANIPULATION_INTERACTION_BEGIN);
+  EXPECT_CALL(*owner_, Update()).Times(1);
+  window_.InjectWindowMessage(WM_TIMER, kTimerId, 0);
+  ASSERT_TRUE(::testing::Mock::VerifyAndClearExpectations(owner_));
+
+  EXPECT_CALL(*owner_, Update()).Times(1);
+  Interact(DIRECTMANIPULATION_INTERACTION_TYPE_MANIPULATION);
+  window_.InjectWindowMessage(WM_TIMER, kTimerId, 0);
+  ASSERT_TRUE(::testing::Mock::VerifyAndClearExpectations(owner_));
+
+  EXPECT_CALL(*owner_, Update()).Times(0);
+  Interact(DIRECTMANIPULATION_INTERACTION_END);
+  EXPECT_FALSE(KillTimer(window_.GetWindowHandle(), kTimerId));
+  window_.InjectWindowMessage(WM_TIMER, kTimerId, 0);
+
+  Interact(DIRECTMANIPULATION_INTERACTION_END);
+  EXPECT_FALSE(KillTimer(window_.GetWindowHandle(), kTimerId));
+  // KillTimer does not remove WM_TIMER messages that were already queued.
+  window_.InjectWindowMessage(WM_TIMER, kTimerId, 0);
+}
+
+TEST_F(DirectManipulationPollingTest, CanStartAnotherInteraction) {
+  for (int i = 0; i < 2; ++i) {
+    Interact(DIRECTMANIPULATION_INTERACTION_BEGIN);
+    // KillTimer confirms registration and removes the timer. END must still
+    // reset the polling state so that the next BEGIN can create another timer.
+    EXPECT_TRUE(KillTimer(window_.GetWindowHandle(), kTimerId));
+    Interact(DIRECTMANIPULATION_INTERACTION_END);
+  }
+}
+
+TEST_F(DirectManipulationPollingTest, DestroyedWindowIgnoresLateInteraction) {
+  // A native parent can destroy the child before its FlutterWindow is released.
+  // A late interaction must not enable updates if its timer cannot be created.
+  HWND hwnd = window_.GetWindowHandle();
+  ASSERT_TRUE(DestroyWindow(hwnd));
+  ASSERT_FALSE(IsWindow(hwnd));
+
+  EXPECT_CALL(*owner_, Update()).Times(0);
+  Interact(DIRECTMANIPULATION_INTERACTION_BEGIN);
+  window_.InjectWindowMessage(WM_TIMER, kTimerId, 0);
+}
+
+TEST_F(DirectManipulationPollingTest,
+       ManipulationAndUnmatchedEndDoNotStartPolling) {
+  EXPECT_CALL(*owner_, Update()).Times(0);
+  Interact(DIRECTMANIPULATION_INTERACTION_TYPE_MANIPULATION);
+  EXPECT_FALSE(KillTimer(window_.GetWindowHandle(), kTimerId));
+  window_.InjectWindowMessage(WM_TIMER, kTimerId, 0);
+
+  Interact(DIRECTMANIPULATION_INTERACTION_END);
+  EXPECT_FALSE(KillTimer(window_.GetWindowHandle(), kTimerId));
+  window_.InjectWindowMessage(WM_TIMER, kTimerId, 0);
+}
+
+TEST_F(DirectManipulationPollingTest, UnrelatedTimerDoesNotPoll) {
+  Interact(DIRECTMANIPULATION_INTERACTION_BEGIN);
+  EXPECT_CALL(*owner_, Update()).Times(0);
+  window_.InjectWindowMessage(WM_TIMER, kTimerId + 1, 0);
+  Interact(DIRECTMANIPULATION_INTERACTION_END);
+}
+
+TEST_F(DirectManipulationPollingTest,
+       ParentVisibilityChangesDoNotStartPolling) {
+  HWND parent =
+      CreateWindowEx(0, L"STATIC", L"", WS_OVERLAPPED, 0, 0, 100, 100, nullptr,
+                     nullptr, GetModuleHandle(nullptr), nullptr);
+  ASSERT_NE(parent, nullptr);
+  HWND child = window_.GetWindowHandle();
+  SetParent(child, parent);
+  EXPECT_EQ(GetParent(child), parent);
+  EXPECT_FALSE(IsWindowVisible(child));
+  EXPECT_FALSE(KillTimer(child, kTimerId));
+
+  ShowWindow(parent, SW_SHOWNOACTIVATE);
+  EXPECT_TRUE(IsWindowVisible(child));
+  EXPECT_FALSE(KillTimer(child, kTimerId));
+  ShowWindow(parent, SW_HIDE);
+  EXPECT_FALSE(IsWindowVisible(child));
+  EXPECT_FALSE(KillTimer(child, kTimerId));
+  ShowWindow(parent, SW_SHOWNOACTIVATE);
+  EXPECT_TRUE(IsWindowVisible(child));
+  EXPECT_FALSE(KillTimer(child, kTimerId));
+
+  Interact(DIRECTMANIPULATION_INTERACTION_BEGIN);
+  EXPECT_TRUE(KillTimer(child, kTimerId));
+  Interact(DIRECTMANIPULATION_INTERACTION_END);
+  SetParent(child, HWND_MESSAGE);
+  DestroyWindow(parent);
+}
+
+TEST_F(DirectManipulationPollingTest,
+       OwnerShutdownStopsPollingAndPreventsRestart) {
+  Interact(DIRECTMANIPULATION_INTERACTION_BEGIN);
+  owner_->Destroy();
+  EXPECT_FALSE(KillTimer(window_.GetWindowHandle(), kTimerId));
+  EXPECT_CALL(*owner_, Update()).Times(0);
+  window_.InjectWindowMessage(WM_TIMER, kTimerId, 0);
+  // This separately constructed handler still references the live owner, but
+  // the owner must no longer forward requests after releasing its OS resources.
+  Interact(DIRECTMANIPULATION_INTERACTION_BEGIN);
+  EXPECT_FALSE(KillTimer(window_.GetWindowHandle(), kTimerId));
+}
+
+TEST(MockWindow, StopsPollingAndShutsDownOwnerBeforeDestroyingWindow) {
+  class CheckingOwner : public MockDirectManipulationOwner {
+   public:
+    explicit CheckingOwner(FlutterWindow* window)
+        : MockDirectManipulationOwner(window),
+          hwnd_(window->GetWindowHandle()) {}
+
+    ~CheckingOwner() override {
+      EXPECT_TRUE(IsWindow(hwnd_));
+      EXPECT_FALSE(KillTimer(hwnd_, 1));
+      // Destroy must also sever the owner's link to the still-live window.
+      SetNeedsUpdate(true);
+      EXPECT_FALSE(KillTimer(hwnd_, 1));
+    }
+
+   private:
+    HWND hwnd_;
+  };
+
+  MockWindow window;
+  ASSERT_NE(window.GetWindowHandle(), nullptr);
+  auto owner = std::make_unique<CheckingOwner>(&window);
+  EXPECT_CALL(*owner, Update()).Times(1);
+  window.SetDirectManipulationOwner(std::move(owner));
+  window.SetDirectManipulationNeedsUpdate(true);
+  window.InjectWindowMessage(WM_TIMER, 1, 0);
+}
+
 TEST(MockWindow, VerticalScroll) {
   MockWindow window;
   const int scroll_amount = 10;
