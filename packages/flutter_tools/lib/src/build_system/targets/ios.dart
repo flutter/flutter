@@ -454,7 +454,10 @@ class _IssueLaunchRootViewControllerAccess extends Target {
 
   @override
   Future<void> build(Environment environment) async {
-    final FlutterProject flutterProject = FlutterProject.fromDirectory(environment.projectDir);
+    final FlutterProject flutterProject = FlutterProject.fromDirectory(
+      environment.projectDir,
+      logger: environment.logger,
+    );
     if (flutterProject.ios.appDelegateSwift.existsSync()) {
       await checkForLaunchRootViewControllerAccessDeprecationSwift(
         environment.logger,
@@ -583,7 +586,10 @@ class DebugIosLLDBInit extends Target {
     // Also, this cannot check for a specific path/name for the LLDB Init File
     // since Flutter's LLDB Init file may be imported from within a user's
     // custom LLDB Init File.
-    final FlutterProject flutterProject = FlutterProject.fromDirectory(environment.projectDir);
+    final FlutterProject flutterProject = FlutterProject.fromDirectory(
+      environment.projectDir,
+      logger: environment.logger,
+    );
     if (flutterProject.isModule) {
       var anyLLDBInitFound = false;
       await for (final FileSystemEntity entity in xcodeProjectDir.list(recursive: true)) {
@@ -600,6 +606,7 @@ class DebugIosLLDBInit extends Target {
           'ensure debug mode works, please complete instructions found in '
           '"Embed a Flutter module in your iOS app > Use CocoaPods > Set LLDB Init File" '
           'section of https://docs.flutter.dev/to/ios-add-to-app-embed-setup.',
+          logger: environment.logger,
         );
       }
     }
@@ -706,7 +713,10 @@ abstract class IosAssetBundle extends Target {
           .copySync(dsymOutputBinary.path);
     }
 
-    final FlutterProject flutterProject = FlutterProject.fromDirectory(environment.projectDir);
+    // TODO(bkonyi): Inject FlutterProjectFactory through Environment.
+    final FlutterProject flutterProject = globals.projectFactory.fromDirectory(
+      environment.projectDir,
+    );
     final String? flavor = await flutterProject.ios.parseFlavorFromConfiguration(environment);
 
     // Copy the assets.
@@ -855,6 +865,7 @@ Future<void> _updateMinimumOSVersion(File infoPlist, Environment environment) as
   if (result.exitCode != 0) {
     printXcodeWarning(
       'Failed to update MinimumOSVersion in ${infoPlist.path}. This may cause AppStore validation failures. Please file an issue at https://github.com/flutter/flutter/issues/new/choose',
+      logger: environment.logger,
     );
   }
 }

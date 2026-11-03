@@ -427,9 +427,8 @@ void main() {
       () async {
         // Since crash reporting calls the doctor, which checks for the devtools
         // version file in the cache, write a version file to the memory fs.
-        Cache.flutterRoot = '/path/to/flutter';
-        final Directory devtoolsDir = globals.fs.directory(
-          '${Cache.flutterRoot}/bin/cache/dart-sdk/bin/resources/devtools',
+        final Directory devtoolsDir = fileSystem.directory(
+          '/path/to/flutter/bin/cache/dart-sdk/bin/resources/devtools',
         )..createSync(recursive: true);
         devtoolsDir.childFile('version.json').writeAsStringSync('{"version": "1.2.3"}');
 
@@ -488,6 +487,12 @@ void main() {
         );
       },
       overrides: <Type, Generator>{
+        Cache: () => Cache.test(
+          rootOverride: fileSystem.directory('/path/to/flutter'),
+          flutterRoot: '/path/to/flutter',
+          fileSystem: fileSystem,
+          processManager: FakeProcessManager.any(),
+        ),
         Platform: () => FakePlatform(
           environment: <String, String>{'FLUTTER_ANALYTICS_LOG_FILE': 'test', 'FLUTTER_ROOT': '/'},
         ),
@@ -536,9 +541,8 @@ void main() {
         () async {
           // Since crash reporting calls the doctor, which checks for the devtools
           // version file in the cache, write a version file to the memory fs.
-          Cache.flutterRoot = '/path/to/flutter';
-          final Directory devtoolsDir = globals.fs.directory(
-            '${Cache.flutterRoot}/bin/cache/dart-sdk/bin/resources/devtools',
+          final Directory devtoolsDir = fileSystem.directory(
+            '/path/to/flutter/bin/cache/dart-sdk/bin/resources/devtools',
           )..createSync(recursive: true);
           devtoolsDir.childFile('version.json').writeAsStringSync('{"version": "1.2.3"}');
 
@@ -596,6 +600,12 @@ void main() {
           expect(await sentDetails.doctorText.text, contains('[!] Flutter'));
         },
         overrides: <Type, Generator>{
+          Cache: () => Cache.test(
+            rootOverride: fileSystem.directory('/path/to/flutter'),
+            flutterRoot: '/path/to/flutter',
+            fileSystem: fileSystem,
+            processManager: FakeProcessManager.any(),
+          ),
           Platform: () => FakePlatform(
             environment: <String, String>{
               'FLUTTER_ANALYTICS_LOG_FILE': 'test',
@@ -898,6 +908,9 @@ void main() {
       overrides: <Type, Generator>{
         Analytics: () => fakeAnalytics,
         FileSystem: () => MemoryFileSystem.test(),
+        // Don't inherit DASH__SUPPRESS_ANALYTICS from the test runner's
+        // environment, which would block telemetry changes.
+        Platform: () => FakePlatform(),
         ProcessManager: () => FakeProcessManager.any(),
       },
     );
@@ -928,6 +941,9 @@ void main() {
       overrides: <Type, Generator>{
         Analytics: () => fakeAnalytics,
         FileSystem: () => MemoryFileSystem.test(),
+        // Don't inherit DASH__SUPPRESS_ANALYTICS from the test runner's
+        // environment, which would block telemetry changes.
+        Platform: () => FakePlatform(),
         ProcessManager: () => FakeProcessManager.any(),
       },
     );
@@ -963,6 +979,9 @@ void main() {
       overrides: <Type, Generator>{
         Analytics: () => fakeAnalytics,
         FileSystem: () => MemoryFileSystem.test(),
+        // Don't inherit DASH__SUPPRESS_ANALYTICS from the test runner's
+        // environment, which would block telemetry changes.
+        Platform: () => FakePlatform(),
         ProcessManager: () => FakeProcessManager.any(),
       },
     );
@@ -993,6 +1012,9 @@ void main() {
       overrides: <Type, Generator>{
         Analytics: () => fakeAnalytics,
         FileSystem: () => MemoryFileSystem.test(),
+        // Don't inherit DASH__SUPPRESS_ANALYTICS from the test runner's
+        // environment, which would block telemetry changes.
+        Platform: () => FakePlatform(),
         ProcessManager: () => FakeProcessManager.any(),
       },
     );
@@ -1022,9 +1044,44 @@ void main() {
       overrides: <Type, Generator>{
         Analytics: () => fakeAnalytics,
         FileSystem: () => MemoryFileSystem.test(),
+        // Don't inherit DASH__SUPPRESS_ANALYTICS from the test runner's
+        // environment, which would block telemetry changes.
+        Platform: () => FakePlatform(),
         ProcessManager: () => FakeProcessManager.any(),
       },
     );
+
+    for (final enable in const <bool>[true, false]) {
+      final flag = enable ? '--enable-analytics' : '--disable-analytics';
+      testUsingContext(
+        '$flag warns and does not change telemetry when DASH__SUPPRESS_ANALYTICS=true',
+        () async {
+          setExitFunctionForTests((int exitCode) {});
+          await globals.analytics.setTelemetry(!enable);
+
+          await runner.run(
+            <String>[flag],
+            (ToolDependencies toolDependencies) => <FlutterCommand>[],
+            // This flutterVersion disables crash reporting.
+            flutterVersion: '[user-branch]/',
+            shutdownHooks: ShutdownHooks(),
+          );
+
+          expect(globals.analytics.telemetryEnabled, !enable);
+          expect(fakeAnalytics.sentEvents, isEmpty);
+          expect(testLogger.warningText, contains('DASH__SUPPRESS_ANALYTICS=true is set'));
+          expect(testLogger.statusText, isNot(contains('Analytics reporting')));
+        },
+        overrides: <Type, Generator>{
+          Analytics: () => fakeAnalytics,
+          FileSystem: () => MemoryFileSystem.test(),
+          Platform: () => FakePlatform(
+            environment: <String, String>{DashEnvVar.suppressAnalytics.name: 'true'},
+          ),
+          ProcessManager: () => FakeProcessManager.any(),
+        },
+      );
+    }
   });
 }
 
@@ -1190,6 +1247,12 @@ class _ErrorOnCanRunFakeProcessManager extends Fake implements FakeProcessManage
 }
 
 class FakeCache extends Fake implements Cache {
+  @override
+  String get flutterRoot => '/path/to/sdk/flutter';
+
+  @override
+  set flutterRoot(String? value) {}
+
   @override
   Future<void> lock() async {}
 

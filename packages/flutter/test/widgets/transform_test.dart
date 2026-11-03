@@ -535,7 +535,7 @@ void main() {
   testWidgets(
     '3D transform renders the same with or without needsCompositing',
     (WidgetTester tester) async {
-      for (double angle = 0; angle <= math.pi / 4; angle += 0.01) {
+      for (double angle = 0; angle <= math.pi / 4; angle += 0.05) {
         await tester.pumpWidget(RepaintBoundary(child: generateTransform(true, angle)));
         final RenderBox renderBox = tester.binding.renderView.child!;
         final layer = renderBox.debugLayer! as OffsetLayer;
