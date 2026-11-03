@@ -1555,6 +1555,7 @@ public class TextInputPluginTest {
   // setMessageHandler is deprecated.
   @Test
   @Config(qualifiers = "xhdpi")
+  // Sets the density to 2, so that the test verifies that the density is applied.
   public void inputConnection_reportsCaretRectInCursorAnchorInfo() throws JSONException {
     TestImm testImm = Shadow.extract(ctx.getSystemService(Context.INPUT_METHOD_SERVICE));
     View testView = new View(ctx);
@@ -1687,6 +1688,45 @@ public class TextInputPluginTest {
   @SuppressWarnings("deprecation")
   // setMessageHandler is deprecated.
   @Test
+  public void clearTextInputClient_clearsCaretRect() throws JSONException {
+    TestImm testImm = Shadow.extract(ctx.getSystemService(Context.INPUT_METHOD_SERVICE));
+    View testView = new View(ctx);
+    ArgumentCaptor<BinaryMessenger.BinaryMessageHandler> binaryMessageHandlerCaptor =
+        ArgumentCaptor.forClass(BinaryMessenger.BinaryMessageHandler.class);
+    DartExecutor mockBinaryMessenger = mock(DartExecutor.class);
+    TextInputPlugin textInputPlugin =
+        new TextInputPlugin(
+            testView,
+            new TextInputChannel(mockBinaryMessenger),
+            new ScribeChannel(mock(DartExecutor.class)),
+            mock(PlatformViewsController.class),
+            mock(PlatformViewsController2.class));
+    verify(mockBinaryMessenger, times(1))
+        .setMessageHandler(any(String.class), binaryMessageHandlerCaptor.capture());
+    BinaryMessenger.BinaryMessageHandler binaryMessageHandler =
+        binaryMessageHandlerCaptor.getValue();
+    textInputPlugin.setTextInputClient(0, textConfiguration());
+    textInputPlugin.setTextInputEditingState(
+        testView, new TextInputChannel.TextEditState("text", 4, 4, -1, -1));
+    InputConnection connection =
+        textInputPlugin.createInputConnection(
+            testView, mock(KeyboardManager.class), new EditorInfo());
+    sendEditableSizeAndTransform(binaryMessageHandler, 200, 40, translation(0, 0));
+    sendCaretRect(binaryMessageHandler, 5, 2, 2, 16);
+    connection.requestCursorUpdates(InputConnection.CURSOR_UPDATE_IMMEDIATE);
+    assertEquals(5, testImm.getLastCursorAnchorInfo().getInsertionMarkerHorizontal(), 0);
+
+    // The input method may keep using the input connection of the cleared client, which must not
+    // report the caret rect of the cleared client anymore.
+    textInputPlugin.clearTextInputClient();
+    connection.requestCursorUpdates(InputConnection.CURSOR_UPDATE_IMMEDIATE);
+
+    assertTrue(Float.isNaN(testImm.getLastCursorAnchorInfo().getInsertionMarkerHorizontal()));
+  }
+
+  @SuppressWarnings("deprecation")
+  // setMessageHandler is deprecated.
+  @Test
   public void setTextInputClient_doesNotSendCaretRectToPreviousInputConnection()
       throws JSONException {
     TestImm testImm = Shadow.extract(ctx.getSystemService(Context.INPUT_METHOD_SERVICE));
@@ -1726,6 +1766,7 @@ public class TextInputPluginTest {
   // setMessageHandler is deprecated.
   @Test
   @Config(qualifiers = "xhdpi")
+  // Sets the density to 2, so that the test verifies that the density is applied.
   public void inputConnection_convertsEditableTransformForCursorAnchorInfo() throws JSONException {
     TestImm testImm = Shadow.extract(ctx.getSystemService(Context.INPUT_METHOD_SERVICE));
     View testView = new View(ctx);
