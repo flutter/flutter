@@ -1207,29 +1207,36 @@ dev/bots and the general shard **303 of 303** in 5 min 51, the widgets tree
 **390 of 390** in 3 min 05, and `test.dart --bazel` of the general shard
 end to end -- the repository rules fetched without a complaint.
 
-### `dev/bots/test.dart --bazel`: the shards under Bazel
+### `dev/bots/test.dart`: the shards under Bazel
 
 `dart dev/bots/test.dart` is what the framework's and the tool's CI shards
 run (the flutter_drone recipe sets `SHARD` and `SUBSHARD` and runs it, and
-sets nothing else). `--bazel` -- or a `SHARD` or `SUBSHARD` value ending in
-`_bazel`, `SUBSHARD=widgets_bazel`, which is how a `.ci.yaml` target opts in
-with no change to the recipe (`dev/bots/utils.dart`'s
-`shardNameFromEnvironment` strips the suffix) -- makes the framework_tests
-shard (widgets, libraries, impeller, slow, misc), the tool_tests shard's
-general subshard, tool_tests_commands, web_tool_tests and
-tool_integration_tests run their tests under Bazel on the prebuilt engine
-(`dev/bots/bazel.dart`):
+sets nothing else). On a Linux or macOS host the framework_tests shard
+(widgets, libraries, impeller, slow, misc), the tool_tests shard's general
+subshard, tool_tests_commands, web_tool_tests and tool_integration_tests
+run their tests under Bazel on the prebuilt engine (`dev/bots/bazel.dart`;
+`useBazel` in `utils.dart`) -- by default, which is how PR #195825's
+presubmit runs the existing shards under Bazel with no `.ci.yaml` change
+(the user's call, 11-03). `--no-bazel` runs a shard through `flutter test`
+and `dart test` as before; Windows does so always (no bazelisk release is
+pinned for it), and so does a shard run with `REDUCED_TEST_SET` (the
+recipe's tag filter, which Bazel's targets cannot honor). `--bazel`, or a
+`SHARD` or `SUBSHARD` value ending in `_bazel` (`SUBSHARD=widgets_bazel`;
+`shardNameFromEnvironment` strips the suffix), asks for Bazel whatever the
+default:
 
 ```sh
-SHARD=framework_tests SUBSHARD=widgets bin/cache/dart-sdk/bin/dart dev/bots/test.dart --bazel
-SHARD=tool_tests_commands SUBSHARD=1_3_bazel bin/cache/dart-sdk/bin/dart dev/bots/test.dart   # the same slice as 1_3
-bin/cache/dart-sdk/bin/dart dev/bots/test.dart --bazel --dry-run    # every shard: the targets each would run
+SHARD=framework_tests SUBSHARD=widgets bin/cache/dart-sdk/bin/dart dev/bots/test.dart             # under Bazel on Linux and macOS
+SHARD=framework_tests SUBSHARD=widgets bin/cache/dart-sdk/bin/dart dev/bots/test.dart --no-bazel  # flutter test, as before
+SHARD=tool_tests_commands SUBSHARD=1_3 bin/cache/dart-sdk/bin/dart dev/bots/test.dart             # the slice's files, as targets
+bin/cache/dart-sdk/bin/dart dev/bots/test.dart --dry-run                                           # every shard: the targets each would run
 ```
 
 One `bazelisk test --config=prebuilt_engine --keep_going --test_output=errors
 --skip_incompatible_explicit_targets` runs a shard's targets from the
 repository root (`--config=ci` too on a bot; the other shards -- web,
-analyze, docs, Android, customer testing -- ignore the flag). A shard's
+analyze, docs, Android, customer testing -- have no Bazel path and run as
+they always did). A shard's
 steps map to the suites the root `BUILD.bazel` gathers: the `flutter test`
 or `dart test` of a package to its `tests` suite, each packages/flutter test
 directory to its own, the tool's shards to theirs. Because a BUILD file
@@ -1286,17 +1293,22 @@ SHA-256) into that directory -- a flutter_drone bot has none of the first
 three. `dev/bots/test/bazel_test.dart` tests the name and path functions,
 `test_test.dart` the `_bazel` names and `--bazel` through `--dry-run`.
 
-A CI target for a shard under Bazel is a `.ci.yaml` entry with the same
-recipe and `shard`, and `subshard: <name>_bazel` (or `shard: <name>_bazel`
-for the numbered-subshard shards), which must start as `bringup: true`
-(cocoon refuses a new target otherwise) and so runs in postsubmit only;
-none is added here. A stand-in for the bot (a fresh output root, 8 CPUs,
-no disk cache, 11-03): the widgets subshard under `--bazel` takes 16 min 15
-end to end -- 802 Bazel tests in 15 min, the kernels compiled per test from
-the prelude where `flutter test` compiles them in one incremental session
--- against about 11 min for the legacy shard on CI. Whether the bot's disk
-cache under `~/.cache` persists between tasks (it would take the compiles
-out) is the open question.
+With the default on, the existing `.ci.yaml` targets are the CI targets
+(a separate target per shard would have had to start as `bringup: true`,
+which cocoon runs in postsubmit only). A flutter_drone bot is a bare
+checkout -- git, no `gclient sync` -- so the tools of DEPS the test rules
+still need there come down as the packages DEPS names: `synced_repository`
+downloads its CIPD package or tarball when the checkout has not got the
+directory (`fallback_url`; cpython3 for the pub repositories and the
+package configurations, clang and the sysroots for the desktop shard),
+which a bare worktree of this checkout verified end to end. A stand-in for
+the bot's time (a fresh output root, 8 CPUs, no disk cache, 11-03): the
+widgets subshard under Bazel takes 16 min 15 end to end -- 802 Bazel tests
+in 15 min, the kernels compiled per test from the prelude where `flutter
+test` compiles them in one incremental session -- against about 11 min for
+the legacy shard on CI. Whether the bot's disk cache under `~/.cache`
+persists between tasks (it would take the compiles out) is the open
+question.
 
 ## The web engine's unit tests: felt's suites
 
