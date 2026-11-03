@@ -6,6 +6,7 @@ import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
 
+import '../../common/matchers.dart';
 import '../../common/test_initialization.dart';
 
 void main() {
@@ -176,12 +177,6 @@ void testMain() {
         },
       );
 
-      factory.dispose();
-      factory.dispose();
-      expect(factory.hasBaseCanvas, isFalse);
-      expect(factory.debugSurfaceCount, 0);
-      expect(createdCount, 0);
-
       final DummyDisplayCanvas base = factory.baseCanvas;
       final DummyDisplayCanvas cached = factory.getCanvas();
       final DummyDisplayCanvas live = factory.getCanvas();
@@ -190,12 +185,6 @@ void testMain() {
       expect(createdCount, 3);
 
       factory.dispose();
-      expect(factory.hasBaseCanvas, isFalse);
-      expect(factory.debugSurfaceCount, 0);
-      expect(base.disposeCount, 1);
-      expect(cached.disposeCount, 1);
-      expect(live.disposeCount, 1);
-
       factory.dispose();
       expect(factory.hasBaseCanvas, isFalse);
       expect(factory.debugSurfaceCount, 0);
@@ -203,6 +192,23 @@ void testMain() {
       expect(base.disposeCount, 1);
       expect(cached.disposeCount, 1);
       expect(live.disposeCount, 1);
+    });
+
+    test('does not create canvases after dispose', () {
+      var createdCount = 0;
+      final factory = DisplayCanvasFactory<DummyDisplayCanvas>(
+        createCanvas: () {
+          createdCount++;
+          return DummyDisplayCanvas();
+        },
+      );
+
+      factory.dispose();
+      expect(() => factory.baseCanvas, throwsAssertionError);
+      expect(factory.getCanvas, throwsAssertionError);
+      expect(factory.hasBaseCanvas, isFalse);
+      expect(factory.debugSurfaceCount, 0);
+      expect(createdCount, 0);
     });
   });
 }

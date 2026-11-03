@@ -23,7 +23,12 @@ class DisplayCanvasFactory<T extends DisplayCanvas> {
   /// The base canvas to paint on. This is the default canvas which will be
   /// painted to. If there are no platform views, then this canvas will render
   /// the entire scene.
-  T get baseCanvas => _baseCanvas ??= (createCanvas()..initialize());
+  ///
+  /// Must not be called after [dispose].
+  T get baseCanvas {
+    assert(!_isDisposed, 'Attempting to get the base canvas of a disposed factory');
+    return _baseCanvas ??= (createCanvas()..initialize());
+  }
 
   /// Whether [baseCanvas] has been created and not yet disposed.
   @visibleForTesting
@@ -50,7 +55,10 @@ class DisplayCanvasFactory<T extends DisplayCanvas> {
 
   /// Gets a display canvas from the cache or creates a new one if there are
   /// none in the cache.
+  ///
+  /// Must not be called after [dispose].
   T getCanvas() {
+    assert(!_isDisposed, 'Attempting to get a canvas from a disposed factory');
     if (_cache.isNotEmpty) {
       final T canvas = _cache.removeLast();
       _liveCanvases.add(canvas);
@@ -123,8 +131,17 @@ class DisplayCanvasFactory<T extends DisplayCanvas> {
     return false;
   }
 
+  bool _isDisposed = false;
+
   /// Dispose all canvases created by this factory.
+  ///
+  /// After this is called, the factory must not be used to create canvases.
+  /// Calling this more than once has no effect.
   void dispose() {
+    if (_isDisposed) {
+      return;
+    }
+    _isDisposed = true;
     for (final T canvas in _cache) {
       canvas.dispose();
       canvas.hostElement.remove();
