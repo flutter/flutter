@@ -37,4 +37,4 @@
 
 ## 7. Namespace & Environment Hygiene
 - **Namespace Internal Properties**: Prefix all internal Gradle properties, project extensions, and system properties with `flutter.internal.` (e.g., `flutter.internal.agpVersion`) to prevent collisions with customer app configurations.
-- **Matrix Verification**: Verify compatibility against the full matrix of supported AGP versions (AGP 8.x through 9.x) and Gradle versions.
+- **Matrix Verification**: Verify compatibility against the full matrix of supported AGP and Gradle versions defined in `DependencyVersionChecker.kt`.

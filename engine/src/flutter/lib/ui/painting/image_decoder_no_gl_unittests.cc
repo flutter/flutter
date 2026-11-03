@@ -122,7 +122,7 @@ TEST(ImageDecoderNoGLTest, ImpellerUploadTracksSchedulingReceipt) {
       .WillOnce([receipt](const std::shared_ptr<impeller::CommandBuffer>&,
                           const impeller::CommandQueue::CompletionCallback&) {
         return impeller::CommandQueue::SubmitResult{
-            .status = fml::Status(),
+            .status = absl::OkStatus(),
             .scheduling_receipt = receipt,
         };
       });
