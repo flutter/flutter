@@ -57,17 +57,8 @@ class SkwasmCallbackHandler {
     return completer.future;
   }
 
-  /// Drops the pending callback registered for [callbackId] so that a later
-  /// native callback with that id is ignored by [handleCallback].
-  void unregisterCallback(int callbackId) {
-    _pendingCallbacks.remove(callbackId);
-  }
-
   void handleCallback(WasmI32 callbackId, WasmI32 context, WasmExternRef? jsContext) {
-    final (Completer<JSAny>, Zone)? record = _pendingCallbacks.remove(callbackId.toIntUnsigned());
-    if (record == null) {
-      return;
-    }
+    final (Completer<JSAny>, Zone) record = _pendingCallbacks.remove(callbackId.toIntUnsigned())!;
     final Completer<JSAny> completer = record.$1;
     final Zone zone = record.$2;
     zone.run(() {
@@ -90,7 +81,7 @@ typedef RenderResult = ({
   int rasterEndMicros,
 });
 
-class SkwasmSurface implements OffscreenSurface {
+class SkwasmSurface extends OffscreenSurface {
   factory SkwasmSurface(OffscreenCanvasProvider canvasProvider) {
     final SurfaceHandle handle = withStackScope<SurfaceHandle>((StackScope scope) {
       return surfaceCreate();
@@ -108,11 +99,6 @@ class SkwasmSurface implements OffscreenSurface {
 
   final OffscreenCanvasProvider _canvasProvider;
 
-  bool _disposed = false;
-
-  @override
-  ui.VoidCallback? onDispose;
-
   @override
   bool get supportsPngEncoding => false;
   late DomOffscreenCanvas _canvas;
@@ -122,14 +108,10 @@ class SkwasmSurface implements OffscreenSurface {
   Completer<void> _initializedCompleter;
   bool _initializationFailed = false;
   Completer<void>? _handledContextLostEvent;
-  CallbackId? _contextLostCallbackId;
 
   /// Handles the context lost event by acquiring a new canvas and recreating the
   /// context.
   void onContextLost() {
-    if (_disposed) {
-      return;
-    }
     if (!_initializedCompleter.isCompleted) {
       _initializedCompleter.complete();
     }
@@ -153,12 +135,6 @@ class SkwasmSurface implements OffscreenSurface {
       // should release its reference to the canvas and unregister any listeners
       // attached to it.
       _canvasProvider.releaseCanvas(_canvas);
-      if (_disposed) {
-        return;
-      }
-      if (_contextLostCallbackId != null) {
-        SkwasmCallbackHandler.instance.unregisterCallback(_contextLostCallbackId!);
-      }
       final int contextLostId = (contextLostCallbackId as JSNumber).toDartInt;
       if (contextLostId == 0) {
         // Skwasm could not create a WebGL context for the canvas, so this
@@ -180,25 +156,17 @@ class SkwasmSurface implements OffscreenSurface {
       if (!_initializedCompleter.isCompleted) {
         _initializedCompleter.complete();
       }
-      _contextLostCallbackId = contextLostId;
-      SkwasmCallbackHandler.instance.registerCallback(contextLostId).then((_) {
-        if (_contextLostCallbackId == contextLostId) {
-          _contextLostCallbackId = null;
-        }
-        onContextLost();
-      });
+      SkwasmCallbackHandler.instance
+          .registerCallback(contextLostId)
+          .then((_) {
+            onContextLost();
+          });
     });
   }
 
   @override
-  Future<ByteData?> rasterizeImage(ui.Image image, ui.ImageByteFormat format) async {
-    if (_disposed) {
-      return null;
-    }
+  Future<ByteData> rasterizeImage(ui.Image image, ui.ImageByteFormat format) async {
     await initialized;
-    if (_disposed) {
-      return null;
-    }
 
     final EngineImage engineImage;
     final SkwasmImage skwasmImage;
@@ -221,12 +189,6 @@ class SkwasmSurface implements OffscreenSurface {
         (await SkwasmCallbackHandler.instance.registerCallback(callbackId) as JSNumber).toDartInt;
 
     final SkDataHandle dataHandle = SkDataHandle.fromAddress(context);
-    if (_disposed) {
-      if (context != 0) {
-        skDataDispose(dataHandle);
-      }
-      return null;
-    }
     final int byteCount = skDataGetSize(dataHandle);
     final Pointer<Uint8> dataPointer = skDataGetConstPointer(dataHandle).cast<Uint8>();
 
@@ -246,28 +208,11 @@ class SkwasmSurface implements OffscreenSurface {
 
   @override
   void setSkiaResourceCacheMaxBytes(int bytes) {
-    if (_disposed) {
-      return;
-    }
     surfaceSetResourceCacheLimitBytes(handle, bytes);
   }
 
   @override
-  void dispose() {
-    if (_disposed) {
-      return;
-    }
-    _disposed = true;
-    if (!_initializedCompleter.isCompleted) {
-      _initializedCompleter.complete();
-    }
-    if (_contextLostCallbackId != null) {
-      SkwasmCallbackHandler.instance.unregisterCallback(_contextLostCallbackId!);
-      _contextLostCallbackId = null;
-    }
-    _canvasProvider.releaseCanvas(_canvas);
-    onDispose?.call();
-    onDispose = null;
+  void disposeResources() {
     surfaceDestroy(handle);
   }
 
@@ -276,13 +221,10 @@ class SkwasmSurface implements OffscreenSurface {
     BitmapSize size,
     List<ui.Picture> pictures,
   ) async {
-    if (_initializationFailed || _disposed) {
+    if (_initializationFailed) {
       return <DomImageBitmap>[];
     }
     await initialized;
-    if (_disposed) {
-      return <DomImageBitmap>[];
-    }
     // The size is sent along with the pictures, so the raster thread resizes and
     // renders in a single message. Messages are processed in order, so no other
     // operation can resize the surface in between.
@@ -305,16 +247,8 @@ class SkwasmSurface implements OffscreenSurface {
     });
     final rasterResult =
         (await SkwasmCallbackHandler.instance.registerCallback(callbackId)) as RasterResult;
-    final List<DomImageBitmap> imageBitmaps = rasterResult.imageBitmaps.toDart
-        .cast<DomImageBitmap>();
-    if (_disposed) {
-      for (final bitmap in imageBitmaps) {
-        bitmap.close();
-      }
-      return <DomImageBitmap>[];
-    }
     final RenderResult result = (
-      imageBitmaps: imageBitmaps,
+      imageBitmaps: rasterResult.imageBitmaps.toDart.cast<DomImageBitmap>(),
       rasterStartMicros: (rasterResult.rasterStartMilliseconds * 1000).toInt(),
       rasterEndMicros: (rasterResult.rasterEndMilliseconds * 1000).toInt(),
     );
@@ -323,15 +257,9 @@ class SkwasmSurface implements OffscreenSurface {
 
   @override
   Future<void> recreateContextForCanvas(DomEventTarget newCanvas) async {
-    if (_disposed) {
-      return;
-    }
     _canvas = newCanvas as DomOffscreenCanvas;
     _initialize();
     await initialized;
-    if (_disposed) {
-      return;
-    }
     final BitmapSize lastSize = _currentSize;
     // Reset _currentSize to force `setSize` to actually size the underlying
     // Surface.
@@ -341,13 +269,10 @@ class SkwasmSurface implements OffscreenSurface {
 
   @override
   Future<void> setSize(BitmapSize size) async {
-    if (_initializationFailed || _disposed) {
+    if (_initializationFailed) {
       return;
     }
     await initialized;
-    if (_disposed) {
-      return;
-    }
     final double devicePixelRatio = EngineFlutterDisplay.instance.devicePixelRatio;
     if (_currentSize == size && devicePixelRatio == _currentDevicePixelRatio) {
       return;
@@ -359,16 +284,13 @@ class SkwasmSurface implements OffscreenSurface {
   }
 
   @override
-  int get glContext => _disposed ? -1 : surfaceGetGlContext(handle);
+  int get glContext => surfaceGetGlContext(handle);
 
   @override
   Future<void> get initialized => _initializedCompleter.future;
 
   @override
   Future<void> triggerContextLoss() async {
-    if (_disposed) {
-      return;
-    }
     _handledContextLostEvent = Completer<void>();
     final int callbackId = surfaceTriggerContextLoss(handle);
     await SkwasmCallbackHandler.instance.registerCallback(callbackId);

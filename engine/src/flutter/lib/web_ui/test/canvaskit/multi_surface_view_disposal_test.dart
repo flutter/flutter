@@ -229,7 +229,7 @@ void testMain() {
       );
     }, skip: _skipContextLoss);
 
-    test('disposing software-rendered views does not touch WebGL or fail on post-disposal recovery calls', () async {
+    test('disposing software-rendered views does not touch WebGL', () async {
       CkSurface.debugForceGLFailure = true;
       addTearDown(() {
         CkSurface.debugForceGLFailure = false;
@@ -270,14 +270,7 @@ void testMain() {
       expect(counter.createdCount, 0);
       expect(deleteContextCalls(), 0);
       expect(unflushedCanvas.getContext('2d'), isNotNull);
-
-      renderedSurface.onContextLost();
-      await renderedSurface.recreateContextForCanvas(createDomCanvasElement(width: 10, height: 10));
-
       expect(renderedSurface.canvas.strictEquals(renderedCanvas).toDart, isTrue);
-      expect(renderedSurface.skSurface, isNull);
-      expect(counter.createdCount, 0);
-      expect(deleteContextCalls(), 0);
     });
 
     test('disposing MultiSurfaceRasterizer directly cleans up rendered views without allocating unrendered surfaces', () async {
@@ -334,7 +327,7 @@ void testMain() {
       }
     }, skip: _skipContextLoss);
 
-    test('surface disposal is idempotent, detaches from SurfaceProvider, and ignores post-disposal context recreation', () async {
+    test('surface disposal is idempotent and detaches from SurfaceProvider', () async {
       renderer.pictureToImageSurface.dispose();
       renderer.rasterizer.dispose();
       final customRasterizer = MultiSurfaceRasterizer(_TrackingCkOnscreenSurface.new);
@@ -357,7 +350,6 @@ void testMain() {
                   .displayFactory
                   .baseCanvas
               as _TrackingCkOnscreenSurface;
-      final initialCanvas = disposedBase.canvas as DomHTMLCanvasElement;
 
       customRasterizer.setResourceCacheMaxBytes(1000000);
       expect(disposedBase.resourceCacheLimitUpdates, 1);
@@ -386,13 +378,6 @@ void testMain() {
       customRasterizer.setResourceCacheMaxBytes(2000000);
       expect(disposedBase.resourceCacheLimitUpdates, 1);
       expect(liveBase.resourceCacheLimitUpdates, 2);
-
-      final DomHTMLCanvasElement replacementCanvas = createDomCanvasElement(width: 20, height: 20);
-      await disposedBase.recreateContextForCanvas(replacementCanvas);
-      expect(disposedBase.canvas.strictEquals(initialCanvas).toDart, isTrue);
-      expect(replacementCanvas.isConnected, isFalse);
-      expect(disposedBase.skSurface, isNull);
-      expect(disposedBase.glContext, -1);
     });
 
     test(
@@ -433,21 +418,6 @@ void testMain() {
         expect(viewRasterizer.displayFactory.hasBaseCanvas, isFalse);
         expect(viewRasterizer.displayFactory.debugSurfaceCount, 0);
         expect(baseSurface.isDisposed, isTrue);
-        expect(baseSurface.skSurface, isNull);
-        expect(baseSurface.glContext, -1);
-
-        final recorder = ui.PictureRecorder();
-        ui.Canvas(recorder).drawRect(
-          const ui.Rect.fromLTWH(0, 0, 10, 10),
-          ui.Paint()..color = const ui.Color(0xFFFF0000),
-        );
-        final ui.Picture picture = recorder.endRecording();
-        addTearDown(picture.dispose);
-
-        baseSurface.setSize(const BitmapSize(50, 50));
-        await baseSurface.rasterizeToCanvas(picture);
-
-        expect(counter.createdCount, 0);
         expect(baseSurface.skSurface, isNull);
         expect(baseSurface.glContext, -1);
       },

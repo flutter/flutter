@@ -76,12 +76,6 @@ abstract class CkSurface extends Surface {
   int get glContext => _glContext;
   int _glContext = -1;
 
-  bool _disposed = false;
-
-  /// Whether this surface has been disposed.
-  @visibleForTesting
-  bool get isDisposed => _disposed;
-
   /// The canvas object that this surface is rendering to.
   @visibleForTesting
   DomEventTarget get canvas => _canvas;
@@ -130,9 +124,6 @@ abstract class CkSurface extends Surface {
   /// [handledContextLossEvent] completes only once the graphics context has
   /// been recreated (or recovery has failed).
   void onContextLost() {
-    if (_disposed) {
-      return;
-    }
     assert(!isSoftware, 'Received a webglcontextlost event while in software rendering mode.');
     final DomEventTarget newCanvas = _canvasProvider.acquireCanvas(
       _currentSize,
@@ -271,22 +262,15 @@ abstract class CkSurface extends Surface {
 
   /// Releases the current [canvas], along with its WebGL context and the Skia
   /// objects backed by it.
-  ///
-  /// Unless this surface is being disposed, the caller must assign a new
-  /// [canvas] afterwards.
   void _releaseCanvas() {
     _skSurface?.dispose();
     _skSurface = null;
     try {
       _grContext?.releaseResourcesAndAbandonContext();
+      _grContext?.delete();
     } catch (_) {
       // Releasing GPU resources may throw if the WebGL context was already
       // lost (for example, when called from `onContextLost`).
-    }
-    try {
-      _grContext?.delete();
-    } catch (_) {
-      // Deleting the Embind wrapper may throw if it was already deleted.
     }
     _grContext = null;
 
@@ -299,20 +283,10 @@ abstract class CkSurface extends Surface {
     // `getContext` when initial context creation failed could allocate a new
     // WebGL context just to lose it.
     if (_glContext > 0) {
-      // Explicitly lose the WebGL context via `WEBGL_lose_context` so the
-      // browser immediately frees its hardware context slot (avoiding active
-      // context LRU eviction across views; see
-      // https://github.com/flutter/flutter/issues/195025), then delete the
-      // handle from Emscripten's `GL.contexts` table so CanvasKit drops its JS
-      // reference to the canvas and context.
       _destroyGlContext(oldCanvas);
-      try {
-        canvasKit.deleteContext(_glContext.toDouble());
-      } catch (_) {
-        // Deleting the handle may throw if Emscripten already dropped it. Keep
-        // going so disposal still runs `onDispose` and releases sibling
-        // surfaces.
-      }
+      // Remove the context from CanvasKit's context table so CanvasKit doesn't
+      // keep the canvas alive.
+      canvasKit.deleteContext(_glContext.toDouble());
     }
     _glContext = -1;
     _canvasHasWebGlContext = false;
@@ -336,9 +310,6 @@ abstract class CkSurface extends Surface {
 
   @override
   void setSize(BitmapSize size) {
-    if (_disposed) {
-      return;
-    }
     final double devicePixelRatio = EngineFlutterDisplay.instance.devicePixelRatio;
     // A zero-sized canvas cannot back a WebGL SkSurface and would force the
     // surface into a permanent software fallback, so never go below 1x1.
@@ -377,9 +348,6 @@ abstract class CkSurface extends Surface {
 
   @override
   Future<void> recreateContextForCanvas(DomEventTarget newCanvas) async {
-    if (_disposed) {
-      return;
-    }
     _replaceCanvas(newCanvas);
   }
 
@@ -392,35 +360,18 @@ abstract class CkSurface extends Surface {
   }
 
   @override
-  void dispose() {
-    if (_disposed) {
-      return;
-    }
-    _disposed = true;
-
+  void disposeResources() {
     _releaseCanvas();
-
-    onDispose?.call();
-    onDispose = null;
   }
 
   @override
   void setSkiaResourceCacheMaxBytes(int bytes) {
-    if (_disposed) {
-      return;
-    }
     _grContext?.setResourceCacheLimitBytes(bytes.toDouble());
   }
 
   @override
   Future<ByteData?> rasterizeImage(ui.Image image, ui.ImageByteFormat format) async {
-    if (_disposed) {
-      return null;
-    }
     await _initialized.future;
-    if (_disposed) {
-      return null;
-    }
 
     final EngineImage engineImage;
     final SkImage skImage;
@@ -488,13 +439,7 @@ abstract class CkSurface extends Surface {
 
   @override
   Future<void> rasterizeToCanvas(ui.Picture picture) async {
-    if (_disposed) {
-      return;
-    }
     await _initialized.future;
-    if (_disposed) {
-      return;
-    }
     _drawPicture(picture as CkPicture);
   }
 
@@ -508,9 +453,6 @@ abstract class CkSurface extends Surface {
 
   @override
   Future<void> triggerContextLoss() async {
-    if (_disposed) {
-      return;
-    }
     _handledContextLostEvent = Completer<void>();
     _webGlContextOf(canvas).loseContextExtension.loseContext();
   }
@@ -538,13 +480,7 @@ class CkOffscreenSurface extends CkSurface implements OffscreenSurface {
     BitmapSize size,
     List<ui.Picture> pictures,
   ) async {
-    if (_disposed) {
-      return <DomImageBitmap>[];
-    }
     await _initialized.future;
-    if (_disposed) {
-      return <DomImageBitmap>[];
-    }
     // Everything from here until all bitmaps have been requested must be
     // synchronous so that no other operation can resize or draw into the
     // canvas in between. `createImageBitmap` copies the canvas contents at the
@@ -556,14 +492,7 @@ class CkOffscreenSurface extends CkSurface implements OffscreenSurface {
       _drawPicture(picture as CkPicture);
       bitmapFutures.add(createImageBitmap(_canvas));
     }
-    final bitmaps = await Future.wait(bitmapFutures);
-    if (_disposed) {
-      for (final bitmap in bitmaps) {
-        bitmap.close();
-      }
-      return <DomImageBitmap>[];
-    }
-    return bitmaps;
+    return Future.wait(bitmapFutures);
   }
 
   @override
@@ -572,13 +501,7 @@ class CkOffscreenSurface extends CkSurface implements OffscreenSurface {
     List<ui.Picture> pictures,
     void Function(int index, DomCanvasImageSource source) onRendered,
   ) async {
-    if (_disposed) {
-      return;
-    }
     await _initialized.future;
-    if (_disposed) {
-      return;
-    }
     // Everything from here on must be synchronous so that no other operation
     // can resize or draw into the canvas while `onRendered` reads from it.
     setSize(size);

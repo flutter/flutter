@@ -71,68 +71,18 @@ class MultiSurfaceViewRasterizer extends ViewRasterizer {
   /// The [OnscreenSurfaceProvider] used to allocate display surfaces for [view].
   final OnscreenSurfaceProvider surfaceProvider;
 
-  bool _disposed = false;
-
-  // Shadows `ViewRasterizer._lastRenderedLayerTree`, which is private to
-  // another library, because [draw] is overridden below.
-  LayerTree? _lastRenderedLayerTree;
-
   @override
   late final DisplayCanvasFactory<OnscreenSurface> displayFactory =
       DisplayCanvasFactory<OnscreenSurface>(createCanvas: surfaceProvider.createSurface);
 
-  // Mirrors `ViewRasterizer.draw`, but bails out if the view is disposed
-  // before the frame starts or while `prepareToDraw` is awaited, so a removed
-  // view never resurrects surfaces (and WebGL contexts) for a stale frame.
-  // See https://github.com/flutter/flutter/issues/195025.
-  @override
-  Future<void> draw(LayerTree layerTree, FrameTimingRecorder? recorder) async {
-    final ui.Size frameSize = view.physicalSize;
-    if (_disposed || frameSize.isEmpty) {
-      // Nothing to draw. Record all the draw steps as happening instantly so
-      // we don't crash when submitting frame timings.
-      recorder?.recordRasterStart();
-      recorder?.recordRasterFinish();
-      return;
-    }
-
-    // Round the frame size, which may be slightly imprecise when the
-    // `devicePixelRatio` isn't an integer.
-    final bitmapSize = BitmapSize.fromSize(frameSize);
-
-    currentFrameSize = bitmapSize;
-    viewEmbedder.frameSize = currentFrameSize;
-    final Frame compositorFrame = context.acquireFrame(viewEmbedder);
-
-    recorder?.recordRasterStart();
-    compositorFrame.raster(layerTree, currentFrameSize);
-    _lastRenderedLayerTree = layerTree;
-
-    await prepareToDraw();
-    if (_disposed) {
-      recorder?.recordRasterFinish();
-      return;
-    }
-    await viewEmbedder.submitFrame(recorder);
-  }
-
   @override
   Future<void> prepareToDraw() async {
-    if (_disposed) {
-      return;
-    }
     await displayFactory.baseCanvas.setSize(currentFrameSize);
   }
 
   /// Rasterizes the given [picture] directly to the given [canvas].
   Future<void> rasterizeToCanvas(OnscreenSurface canvas, ui.Picture picture) async {
-    if (_disposed) {
-      return;
-    }
     await canvas.setSize(currentFrameSize);
-    if (_disposed) {
-      return;
-    }
     return canvas.rasterizeToCanvas(picture);
   }
 
@@ -145,10 +95,20 @@ class MultiSurfaceViewRasterizer extends ViewRasterizer {
     if (displayCanvases.length != pictures.length) {
       throw ArgumentError('Called rasterize() with a different number of canvases and pictures.');
     }
+<<<<<<< HEAD
     if (_disposed) {
       recorder?.recordRasterFinish();
       return;
     }
+||||||| parent of e32638d (refactor(web): centralize surface and view rasterizer disposal in base classes)
+    recorder?.recordRasterStart();
+    if (_disposed) {
+      recorder?.recordRasterFinish();
+      return;
+    }
+=======
+    recorder?.recordRasterStart();
+>>>>>>> e32638d (refactor(web): centralize surface and view rasterizer disposal in base classes)
     final rasterizeFutures = <Future<void>>[];
     for (var i = 0; i < displayCanvases.length; i++) {
       rasterizeFutures.add(rasterizeToCanvas(displayCanvases[i] as OnscreenSurface, pictures[i]));
@@ -158,24 +118,7 @@ class MultiSurfaceViewRasterizer extends ViewRasterizer {
   }
 
   @override
-  Map<String, dynamic>? dumpDebugInfo() {
-    if (kDebugMode) {
-      return _lastRenderedLayerTree?.dumpDebugInfo();
-    }
-    return null;
-  }
-
-  @override
   void dispose() {
-    if (_disposed) {
-      return;
-    }
-    _disposed = true;
-    _lastRenderedLayerTree = null;
-    // Complete any render queued for this view so callers awaiting
-    // `renderScene` for a removed view don't hang.
-    queue.next?.completer.complete();
-    queue.next = null;
     rasterizer._removeViewRasterizer(view);
     displayFactory.dispose();
     super.dispose();

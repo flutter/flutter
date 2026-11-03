@@ -69,8 +69,9 @@ abstract class ViewRasterizer {
     final BitmapSize bitmapSize = frameSize.isEmpty
         ? BitmapSize.zero
         : BitmapSize.fromSize(frameSize);
-    if (bitmapSize.isEmpty) {
-      // Available drawing area is empty (or rounds to 0 physical pixels). Skip drawing.
+    if (_isDisposed || bitmapSize.isEmpty) {
+      // The view was disposed or the available drawing area is empty (or
+      // rounds to 0 physical pixels). Skip drawing.
       // Record all the draw steps as happening instantly so we don't crash
       // when submitting frame timings.
       recorder?.recordRasterStart();
@@ -90,6 +91,12 @@ abstract class ViewRasterizer {
 
     final Stopwatch? presentationTimer = Profiler.isBenchmarkMode ? (Stopwatch()..start()) : null;
     await prepareToDraw();
+    if (_isDisposed) {
+      // The view was disposed while preparing to draw. Don't submit the frame,
+      // which would allocate new display canvases for the disposed view.
+      recorder?.recordRasterFinish();
+      return;
+    }
     await viewEmbedder.submitFrame(recorder);
     if (presentationTimer != null) {
       presentationTimer.stop();
@@ -136,8 +143,13 @@ abstract class ViewRasterizer {
     displayFactory.removeCanvasesFromDom();
   }
 
+  bool _isDisposed = false;
+
   /// Disposes this rasterizer.
+  ///
+  /// After this is called, [draw] does nothing.
   void dispose() {
+    _isDisposed = true;
     viewEmbedder.dispose();
   }
 
