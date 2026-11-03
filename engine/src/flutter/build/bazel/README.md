@@ -1257,9 +1257,18 @@ Bazel shards want the engine's Android artifacts or a Mac). What differs
 from `flutter test` by design: the gallery and the libraries run once, with
 creation locations (the Bazel tree builds the no-tracking variant for
 test/widgets only); `REDUCED_TEST_SET` is ignored
-(Bazel runs every test of a target; a note says so); the per-case results
-go to Bazel's test.xml and not to ResultDB (`flutter test`'s JSON reporter
-does); `--local-engine` is refused (the config is the prebuilt engine).
+(Bazel runs every test of a target; a note says so); `--local-engine` is
+refused (the config is the prebuilt engine). The per-case results reach
+LUCI's ResultDB as `flutter test`'s and `dart test`'s do: every `dart_test`
+and `flutter_test` target writes package:test's JSON reporter -- the
+`--file-reporter=json:` stream -- to its undeclared outputs
+(`bazel-testlogs/<package>/<name>/test.outputs/test_results.json`; the
+dart_test launcher passes the flag, the flutter_test bootstrap adds a
+`JsonReporter` beside the direct one and names the suite by the test's
+repository path), and after the run test.dart reads the files of the
+targets it ran -- cached or not, passed or not -- and posts them through
+the same `ResultDbRecorder` (`BazelShard`'s `_reportToResultDb`;
+`bazelTestResults`), a no-op off LUCI.
 Before the tool's commands, integration and web shards, test.dart runs
 `flutter precache --<host desktop> --web` (the sets the facsimile lays and
 the sandboxed tool cannot fetch).
