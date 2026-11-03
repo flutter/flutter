@@ -6,7 +6,7 @@ import 'dart:ffi' show Abi;
 
 import 'package:archive/archive.dart';
 import 'package:file/file.dart';
-import 'package:flutter_tools_core/flutter_tools_core.dart' as tools_core;
+import 'package:flutter_tools_core/flutter_tools_core.dart' show HostPlatform;
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
@@ -16,6 +16,8 @@ import 'io.dart';
 import 'logger.dart';
 import 'platform.dart';
 import 'process.dart';
+
+export 'package:flutter_tools_core/flutter_tools_core.dart' show HostPlatform;
 
 /// Utilities for interacting with the host operating system.
 abstract class OperatingSystemUtils {
@@ -628,6 +630,3 @@ String? findProjectRoot(FileSystem fileSystem, [String? directory]) {
     currentDirectory = currentDirectory.parent;
   }
 }
-
-/// Host platforms that Flutter tools can be executed on.
-typedef HostPlatform = tools_core.HostPlatform;

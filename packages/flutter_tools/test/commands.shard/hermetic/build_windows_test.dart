@@ -54,12 +54,10 @@ void main() {
 
   setUpAll(() {
     Cache.disableLocking();
-    Cache.flutterRoot = '';
   });
 
   setUp(() {
     fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
-    Cache.flutterRoot = flutterRoot;
     logger = BufferLogger.test();
     processManager = FakeProcessManager.empty();
     fakeAnalytics = getInitializedFakeAnalyticsInstance(

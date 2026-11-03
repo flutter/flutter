@@ -13,7 +13,7 @@ final class LinuxArtifactService extends ArtifactService {
   final List<ArtifactDependency> _artifacts;
 
   @override
-  Future<List<ArtifactDependency>> downloadArtifacts({
+  Future<List<ArtifactDependency>> listRequiredArtifacts({
     required String engineVersion,
     required HostPlatform hostPlatform,
     Set<String>? targetPlatforms,

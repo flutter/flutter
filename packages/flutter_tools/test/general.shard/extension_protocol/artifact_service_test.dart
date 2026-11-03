@@ -19,7 +19,7 @@ const String _testSha256 = 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495
 
 final class _TestArtifactService extends ArtifactService {
   @override
-  Future<List<ArtifactDependency>> downloadArtifacts({
+  Future<List<ArtifactDependency>> listRequiredArtifacts({
     required String engineVersion,
     required HostPlatform hostPlatform,
     Set<String>? targetPlatforms,
@@ -47,7 +47,7 @@ void main() {
       logger = BufferLogger.test();
     });
 
-    test('registers artifact capability and handles downloadArtifacts RPC', () async {
+    test('registers artifact capability and handles listRequiredArtifacts RPC', () async {
       void entryPoint(SendPort sendPort) {
         ToolExtensionEntryPoint.run(
           sendPort,
@@ -64,7 +64,7 @@ void main() {
       expect(conn.extensionName, 'test_artifact_ext');
 
       final Object? response = await conn.sendRequest(
-        ArtifactService.downloadArtifactsMethod,
+        ArtifactService.listRequiredArtifactsMethod,
         params: <String, Object?>{
           ArtifactService.engineVersionParam: _testEngineVersion,
           ArtifactService.hostPlatformParam: HostPlatform.linux_x64.cliName,
@@ -85,7 +85,7 @@ void main() {
       expect(deps.last.targetPlatform, 'linux-arm64');
 
       final Object? customHostResponse = await conn.sendRequest(
-        ArtifactService.downloadArtifactsMethod,
+        ArtifactService.listRequiredArtifactsMethod,
         params: <String, Object?>{
           ArtifactService.engineVersionParam: _testEngineVersion,
           ArtifactService.hostPlatformParam: 'freebsd-x64',
@@ -96,7 +96,7 @@ void main() {
         customHostResponse,
       );
       expect(customHostDeps, hasLength(1));
-      expect(customHostDeps.single.hostPlatform, const HostPlatform('freebsd-x64', 'x64'));
+      expect(customHostDeps.single.hostPlatform, HostPlatform('freebsd-x64', 'x64'));
     });
 
     test('throws RpcException on missing or invalid engineVersion or hostPlatform', () async {
@@ -109,7 +109,7 @@ void main() {
 
       await expectLater(
         conn.sendRequest(
-          ArtifactService.downloadArtifactsMethod,
+          ArtifactService.listRequiredArtifactsMethod,
           params: const <String, Object?>{},
         ),
         throwsA(
@@ -123,7 +123,7 @@ void main() {
 
       await expectLater(
         conn.sendRequest(
-          ArtifactService.downloadArtifactsMethod,
+          ArtifactService.listRequiredArtifactsMethod,
           params: const <String, Object?>{
             ArtifactService.engineVersionParam: '   ',
             ArtifactService.hostPlatformParam: 'linux-x64',
@@ -140,7 +140,7 @@ void main() {
 
       await expectLater(
         conn.sendRequest(
-          ArtifactService.downloadArtifactsMethod,
+          ArtifactService.listRequiredArtifactsMethod,
           params: const <String, Object?>{
             ArtifactService.engineVersionParam: _testEngineVersion,
             ArtifactService.hostPlatformParam: 'invalid/host',
@@ -157,7 +157,7 @@ void main() {
 
       await expectLater(
         conn.sendRequest(
-          ArtifactService.downloadArtifactsMethod,
+          ArtifactService.listRequiredArtifactsMethod,
           params: const <String, Object?>{
             ArtifactService.engineVersionParam: _testEngineVersion,
             ArtifactService.hostPlatformParam: 'linux-x64',
@@ -200,7 +200,7 @@ void main() {
       addTearDown(conn.dispose);
 
       final Object? linuxResponse = await conn.sendRequest(
-        ArtifactService.downloadArtifactsMethod,
+        ArtifactService.listRequiredArtifactsMethod,
         params: <String, Object?>{
           ArtifactService.engineVersionParam: _testEngineVersion,
           ArtifactService.hostPlatformParam: HostPlatform.linux_x64.cliName,
@@ -214,7 +214,7 @@ void main() {
       expect(linuxDeps.first.targetPlatform, 'linux-x64');
 
       final Object? macosResponse = await conn.sendRequest(
-        ArtifactService.downloadArtifactsMethod,
+        ArtifactService.listRequiredArtifactsMethod,
         params: <String, Object?>{
           ArtifactService.engineVersionParam: _testEngineVersion,
           ArtifactService.hostPlatformParam: HostPlatform.darwin_x64.cliName,

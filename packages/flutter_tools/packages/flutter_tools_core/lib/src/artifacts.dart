@@ -17,7 +17,12 @@ final class HostPlatform {
   /// Creates a [HostPlatform] with the given lowercase `<os>-<arch>` [cliName]
   /// (e.g. `'linux-x64'` or `'freebsd-x64'`) and architecture [platformName]
   /// matching the `<arch>` segment (e.g. `'x64'`).
-  const HostPlatform(this.cliName, this.platformName)
+  HostPlatform(this.cliName, this.platformName)
+    : assert(cliName.isNotEmpty),
+      assert(platformName.isNotEmpty),
+      assert(cliName.endsWith('-$platformName'));
+
+  const HostPlatform._(this.cliName, this.platformName)
     : assert(cliName.length > 0),
       assert(platformName.length > 0);
 
@@ -30,13 +35,13 @@ final class HostPlatform {
     return tryFromName(name) ?? (throw FormatException('Invalid host platform: "$name"'));
   }
 
-  static const darwin_x64 = HostPlatform('darwin-x64', 'x64');
-  static const darwin_arm64 = HostPlatform('darwin-arm64', 'arm64');
-  static const linux_x64 = HostPlatform('linux-x64', 'x64');
-  static const linux_arm64 = HostPlatform('linux-arm64', 'arm64');
-  static const linux_riscv64 = HostPlatform('linux-riscv64', 'riscv64');
-  static const windows_x64 = HostPlatform('windows-x64', 'x64');
-  static const windows_arm64 = HostPlatform('windows-arm64', 'arm64');
+  static const darwin_x64 = HostPlatform._('darwin-x64', 'x64');
+  static const darwin_arm64 = HostPlatform._('darwin-arm64', 'arm64');
+  static const linux_x64 = HostPlatform._('linux-x64', 'x64');
+  static const linux_arm64 = HostPlatform._('linux-arm64', 'arm64');
+  static const linux_riscv64 = HostPlatform._('linux-riscv64', 'riscv64');
+  static const windows_x64 = HostPlatform._('windows-x64', 'x64');
+  static const windows_arm64 = HostPlatform._('windows-arm64', 'arm64');
 
   /// Standard built-in host platforms supported by the Flutter tool.
   static const values = <HostPlatform>[
@@ -119,7 +124,7 @@ class ArtifactDependency {
     this.hostPlatform,
     this.targetPlatform,
   }) : assert(
-         isValidSinglePathSegment(name),
+         _isValidSinglePathSegment(name),
          'Invalid artifact dependency name (expected a single path segment): "$name"',
        ),
        assert(
@@ -136,7 +141,7 @@ class ArtifactDependency {
   /// Throws a [FormatException] if any required field is missing or invalid.
   factory ArtifactDependency.fromJson(Map<String, Object?> json) {
     final String name = json.requiredField<String>(nameKey);
-    if (!isValidSinglePathSegment(name)) {
+    if (!_isValidSinglePathSegment(name)) {
       throw FormatException('Invalid artifact dependency name: "$name"');
     }
     final String sha256 = json.requiredField<String>(sha256Key);
@@ -164,19 +169,12 @@ class ArtifactDependency {
   static const String _httpsScheme = 'https';
   static const String _zipExtension = '.zip';
   static final RegExp _sha256RegExp = RegExp(r'^[a-fA-F0-9]{64}$');
+  static final RegExp _singlePathSegmentRegExp = RegExp(r'^[A-Za-z0-9._-]+$');
 
   static bool _isValidSha256(String value) => _sha256RegExp.hasMatch(value);
 
-  /// Returns whether [value] is a non-empty single path segment without
-  /// directory traversal or path separators.
-  static bool isValidSinglePathSegment(String value) {
-    final String trimmed = value.trim();
-    return trimmed.isNotEmpty &&
-        trimmed == value &&
-        value != '.' &&
-        value != '..' &&
-        !value.contains('/') &&
-        !value.contains(r'\');
+  static bool _isValidSinglePathSegment(String value) {
+    return _singlePathSegmentRegExp.hasMatch(value) && !value.endsWith('.');
   }
 
   /// Map key for [hostPlatform].
@@ -195,14 +193,24 @@ class ArtifactDependency {
   static const String urlKey = 'url';
 
   /// Deserializes a list of [ArtifactDependency] objects from RPC response data.
+  ///
+  /// Throws a [FormatException] if [rpcResult] is not a list or contains invalid
+  /// entries.
   static List<ArtifactDependency> listFromJson(Object? rpcResult) {
-    if (rpcResult case final List<Object?> list) {
-      return <ArtifactDependency>[
-        for (final item in list)
-          if (item case final Map<String, Object?> map) ArtifactDependency.fromJson(map),
-      ];
+    if (rpcResult is! List<Object?>) {
+      throw FormatException(
+        'Invalid artifact dependency list: expected a List, got ${rpcResult.runtimeType}.',
+      );
     }
-    return const <ArtifactDependency>[];
+    return <ArtifactDependency>[
+      for (final Object? item in rpcResult)
+        if (item is Map<String, Object?>)
+          ArtifactDependency.fromJson(item)
+        else
+          throw FormatException(
+            'Invalid artifact dependency entry: expected a Map<String, Object?>, got ${item.runtimeType}.',
+          ),
+    ];
   }
 
   /// The unique single-segment identifier of the artifact within the extension.

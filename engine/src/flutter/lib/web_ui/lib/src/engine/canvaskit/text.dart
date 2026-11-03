@@ -7,15 +7,9 @@ import 'dart:typed_data';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
-SkStrutStyleProperties _toSkStrutStyleProperties(
-  EngineStrutStyle style,
-  ui.TextHeightBehavior? paragraphHeightBehavior,
-) {
+SkStrutStyleProperties _toSkStrutStyleProperties(EngineStrutStyle style) {
   final skStrutStyle = SkStrutStyleProperties();
-  skStrutStyle.fontFamilies = _computeCombinedFontFamilies(
-    style.effectiveFontFamily,
-    style.effectiveFontFamilyFallback,
-  );
+  skStrutStyle.fontFamilies = _computeCombinedFontFamilies(style.effectiveFontFamilies);
 
   if (style.fontSize != null) {
     skStrutStyle.fontSize = style.fontSize;
@@ -25,15 +19,8 @@ SkStrutStyleProperties _toSkStrutStyleProperties(
     skStrutStyle.heightMultiplier = style.height;
   }
 
-  final ui.TextLeadingDistribution? effectiveLeadingDistribution =
-      style.leadingDistribution ?? paragraphHeightBehavior?.leadingDistribution;
-  switch (effectiveLeadingDistribution) {
-    case null:
-      break;
-    case ui.TextLeadingDistribution.even:
-      skStrutStyle.halfLeading = true;
-    case ui.TextLeadingDistribution.proportional:
-      skStrutStyle.halfLeading = false;
+  if (style.halfLeading != null) {
+    skStrutStyle.halfLeading = style.halfLeading;
   }
 
   if (style.leading != null) {
@@ -86,9 +73,9 @@ SkParagraphStyle _toSkParagraphStyle(EngineParagraphStyle style) {
     properties.ellipsis = ellipsis;
   }
 
-  final EngineStrutStyle? strutStyle = style.strutStyle;
+  final EngineStrutStyle? strutStyle = style.effectiveStrutStyle;
   if (strutStyle != null) {
-    properties.strutStyle = _toSkStrutStyleProperties(strutStyle, textHeightBehavior);
+    properties.strutStyle = _toSkStrutStyleProperties(strutStyle);
   }
 
   properties.replaceTabCharacters = true;
@@ -175,23 +162,15 @@ SkTextStyleProperties _toSkTextStyleProperties(EngineTextStyle style) {
     properties.heightMultiplier = height;
   }
 
-  switch (style.leadingDistribution) {
-    case null:
-      break;
-    case ui.TextLeadingDistribution.even:
-      properties.halfLeading = true;
-    case ui.TextLeadingDistribution.proportional:
-      properties.halfLeading = false;
+  if (style.halfLeading != null) {
+    properties.halfLeading = style.halfLeading;
   }
 
   if (locale != null) {
     properties.locale = locale.toLanguageTag();
   }
 
-  properties.fontFamilies = _computeCombinedFontFamilies(
-    style.effectiveFontFamily,
-    style.effectiveFontFamilyFallback,
-  );
+  properties.fontFamilies = _computeCombinedFontFamilies(style.effectiveFontFamilies);
 
   if (fontWeight != null || fontStyle != null) {
     properties.fontStyle = _toSkFontStyle(fontWeight, fontStyle);
@@ -521,15 +500,9 @@ class CkParagraphBuilder implements BackendParagraphBuilder {
   }
 }
 
-List<String> _computeCombinedFontFamilies(String? fontFamily, [List<String>? fontFamilyFallback]) {
-  final fontFamilies = <String>[];
-  if (fontFamily != null) {
-    fontFamilies.add(fontFamily);
-  }
-  if (fontFamilyFallback != null &&
-      !fontFamilyFallback.every((String font) => fontFamily == font)) {
-    fontFamilies.addAll(fontFamilyFallback);
-  }
-  fontFamilies.addAll(renderer.fontCollection.fontFallbackManager.globalFontFallbacks);
-  return fontFamilies;
+List<String> _computeCombinedFontFamilies(List<String> effectiveFontFamilies) {
+  return <String>[
+    ...effectiveFontFamilies,
+    ...renderer.fontCollection.fontFallbackManager.globalFontFallbacks,
+  ];
 }

@@ -205,6 +205,11 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
 
   FlutterFMLTaskRunner* _platformTaskRunnerWrapper;
   FlutterFMLTaskRunner* _rasterTaskRunnerWrapper;
+
+  // The display information last sent to the framework by `updateDisplays`.
+  BOOL _hasSentDisplays;
+  CGSize _lastSentScreenNativeSize;
+  CGFloat _lastSentScreenScale;
 }
 
 - (int64_t)engineIdentifier {
@@ -832,6 +837,8 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
 - (void)adoptShell:(std::unique_ptr<flutter::Shell>)shell {
   FML_DCHECK(shell);
   _shell = std::move(shell);
+  // A new shell has not received any display information yet.
+  _hasSentDisplays = NO;
   _platformTaskRunnerWrapper = [[FlutterFMLTaskRunner alloc]
       initWithTaskRunner:_shell->GetTaskRunners().GetPlatformTaskRunner()];
   _rasterTaskRunnerWrapper = [[FlutterFMLTaskRunner alloc]
@@ -1025,13 +1032,37 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
     // Tests may do this.
     return;
   }
+  // Prefer the screen that the view is on. Fallback to main screen if not available (e.g. the
+  // Flutter view hasn't been added to any screen).
+  UIScreen* screen = self.viewController.viewIfLoaded.window.windowScene.screen;
+  if (!screen) {
+    if (_hasSentDisplays) {
+      // Keep the last reported display, rather than regressing to a guess.
+      return;
+    }
+    // The framework can read the display information as soon as the isolate launches, before any
+    // view is on screen (e.g. a headless or pre-warmed engine). Use `UIScreen.mainScreen` as a
+    // best-effort guess until the view is in a window.
+    screen = UIScreen.mainScreen;
+  }
+  CGSize screen_size = screen.nativeBounds.size;
+  CGFloat scale = screen.scale;
+  if (_hasSentDisplays && CGSizeEqualToSize(screen_size, _lastSentScreenNativeSize) &&
+      scale == _lastSentScreenScale) {
+    return;
+  }
+  _hasSentDisplays = YES;
+  _lastSentScreenNativeSize = screen_size;
+  _lastSentScreenScale = scale;
+  [self sendDisplayWithScreenNativeSize:screen_size scale:scale];
+}
+
+- (void)sendDisplayWithScreenNativeSize:(CGSize)screenNativeSize scale:(CGFloat)scale {
   auto vsync_waiter = _shell->GetVsyncWaiter().lock();
   auto vsync_waiter_ios = std::static_pointer_cast<flutter::VsyncWaiterIOS>(vsync_waiter);
   std::vector<std::unique_ptr<flutter::Display>> displays;
-  auto screen_size = UIScreen.mainScreen.nativeBounds.size;
-  auto scale = UIScreen.mainScreen.scale;
   displays.push_back(std::make_unique<flutter::VariableRefreshRateDisplay>(
-      0, vsync_waiter_ios, screen_size.width, screen_size.height, scale));
+      0, vsync_waiter_ios, screenNativeSize.width, screenNativeSize.height, scale));
   _shell->OnDisplayUpdates(std::move(displays));
 }
 
