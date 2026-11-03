@@ -65,7 +65,7 @@ void main() {
       emittedLines.add(line);
     }, onDone: onDone.complete);
     await null;
-    logReader.dispose();
+    await logReader.dispose();
     await onDone.future;
     expect(emittedLines, const <String>['W/flutter($appPid): Hello there!']);
   });
@@ -96,7 +96,7 @@ void main() {
       emittedLines.add(line);
     }, onDone: onDone.complete);
     await null;
-    logReader.dispose();
+    await logReader.dispose();
     await onDone.future;
     expect(emittedLines, const <String>['W/flutter($appPid): Hello there!']);
   });
@@ -128,7 +128,7 @@ void main() {
       emittedLines.add(line);
     }, onDone: onDone.complete);
     await null;
-    logReader.dispose();
+    await logReader.dispose();
     await onDone.future;
     expect(emittedLines, const <String>['W/flutter($appPid): Hello there!']);
   });
@@ -159,7 +159,7 @@ void main() {
       emittedLines.add(line);
     }, onDone: onDone.complete);
     await null;
-    logReader.dispose();
+    await logReader.dispose();
     await onDone.future;
     expect(emittedLines, const <String>['W/flutter($appPid): Hello there!']);
   });
@@ -262,7 +262,7 @@ void main() {
     final onDone = Completer<void>.sync();
     logReader.logLines.listen((String _) {}, onDone: onDone.complete);
 
-    logReader.dispose();
+    await logReader.dispose();
     await onDone.future;
   });
 
@@ -294,7 +294,7 @@ void main() {
       ]),
     );
 
-    logReader.dispose();
+    await logReader.dispose();
   });
 }
 
