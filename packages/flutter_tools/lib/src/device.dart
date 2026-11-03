@@ -797,6 +797,10 @@ abstract class Device {
   /// from the VM Service.
   bool get supportsFlutterExit => true;
 
+  /// Whether the device supports installing and uninstalling application
+  /// packages.
+  bool get supportsInstall => true;
+
   /// Whether the device supports taking screenshots of a running flutter
   /// application.
   bool get supportsScreenshot => false;

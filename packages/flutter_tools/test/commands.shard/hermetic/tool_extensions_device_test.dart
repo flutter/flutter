@@ -18,6 +18,7 @@ import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/devices.dart';
+import 'package:flutter_tools/src/commands/install.dart';
 import 'package:flutter_tools/src/commands/logs.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/experimental/extension_build_manager.dart';
@@ -47,7 +48,7 @@ final class _TestBuildTarget extends BuildTarget {
     required super.description,
     required this.name,
     this.errorMessage,
-    this.executableUri,
+    this.eventSendPort,
     super.outputDir = '${BuiltInPlaceholders.outputDir}/custom',
     this.shouldSucceed = true,
     super.targetPlatform = 'linux-x64',
@@ -57,35 +58,48 @@ final class _TestBuildTarget extends BuildTarget {
   final String name;
 
   final String? errorMessage;
-  final Uri? executableUri;
+  final SendPort? eventSendPort;
   final bool shouldSucceed;
 
   @override
   Future<ExtensionBuildResult> build(ExtensionBuildContext context) async {
+    eventSendPort?.send(<String, Object?>{'event': 'build', 'buildMode': context.buildMode.name});
     return shouldSucceed
-        ? ExtensionBuildResult(success: true, executableUri: executableUri)
+        ? ExtensionBuildResult(
+            success: true,
+            executableUri: Uri.parse('file:///tmp/fake_bundle/${context.buildMode.name}/app'),
+          )
         : ExtensionBuildResult(success: false, errorMessage: errorMessage ?? 'Build failed.');
   }
 }
 
 final class _FakeTestBuildService extends BuildService {
+  _FakeTestBuildService({this.eventSendPort});
+
+  final SendPort? eventSendPort;
+
   @override
   List<BuildTarget> get buildTargets => <BuildTarget>[
     _TestBuildTarget(
       description: 'Fake test build target',
+      eventSendPort: eventSendPort,
       name: 'fake-test-build',
-      executableUri: Uri.parse('file:///tmp/fake_bundle/app'),
     ),
-    const _TestBuildTarget(
+    _TestBuildTarget(
       description: 'Fake failing build target',
+      errorMessage: 'Simulated build error',
+      eventSendPort: eventSendPort,
       name: 'fake-failing-build',
       shouldSucceed: false,
-      errorMessage: 'Simulated build error',
     ),
   ];
 }
 
 final class _FakeTestDeviceService extends DeviceService {
+  _FakeTestDeviceService({this.eventSendPort});
+
+  final SendPort? eventSendPort;
+  final _installedBundles = <String, Uri>{};
   final _runningDevices = <String>{};
 
   @override
@@ -98,6 +112,7 @@ final class _FakeTestDeviceService extends DeviceService {
         buildTarget: 'fake-test-build',
         ephemeral: false,
         sdkNameAndVersion: 'Fake OS 1.0',
+        supportsInstall: true,
         targetPlatform: 'linux-x64',
       ),
       TargetDevice(
@@ -112,6 +127,7 @@ final class _FakeTestDeviceService extends DeviceService {
         name: 'Failing Build Device',
         buildTarget: 'fake-failing-build',
         ephemeral: false,
+        supportsInstall: true,
       ),
       TargetDevice(
         category: Category.desktop,
@@ -137,6 +153,42 @@ final class _FakeTestDeviceService extends DeviceService {
   }) async => deviceId == 'fake_test_device';
 
   @override
+  Future<bool> installApp({required Uri bundleUri, required String deviceId}) async {
+    if (deviceId == 'fake_test_device') {
+      _installedBundles[deviceId] = bundleUri;
+      eventSendPort?.send(<String, Object?>{'event': 'install', 'bundleUri': bundleUri.toString()});
+      return true;
+    }
+    return false;
+  }
+
+  @override
+  Future<bool> isAppInstalled({
+    required String deviceId,
+    required ExtensionFlutterProject project,
+    String? appId,
+  }) async {
+    if (deviceId == 'fake_test_device') {
+      return _installedBundles.containsKey(deviceId) &&
+          appId == 'test_app' &&
+          project.appName == 'test_app';
+    }
+    return false;
+  }
+
+  @override
+  Future<bool> uninstallApp({
+    required String deviceId,
+    required ExtensionFlutterProject project,
+    String? appId,
+  }) async {
+    if (deviceId == 'fake_test_device' && appId == 'test_app' && project.appName == 'test_app') {
+      return _installedBundles.remove(deviceId) != null;
+    }
+    return false;
+  }
+
+  @override
   Future<bool> launchApp({
     required ExtensionDebuggingOptions debuggingOptions,
     required String deviceId,
@@ -144,7 +196,7 @@ final class _FakeTestDeviceService extends DeviceService {
   }) async {
     if (deviceId == 'fake_test_device') {
       final bool launched =
-          executableUri == Uri.file('/tmp/fake_bundle/app') &&
+          executableUri == Uri.file('/tmp/fake_bundle/debug/app') &&
           debuggingOptions ==
               const ExtensionDebuggingOptions(buildMode: .debug, debuggingEnabled: true);
       if (launched) {
@@ -229,6 +281,19 @@ void _fakeAppLaunchExtensionEntryPoint(SendPort sendPort) {
     <ToolExtensionService>[_FakeTestBuildService(), _FakeTestDeviceService()],
     supportedPlatforms: const <String>{'linux'},
   );
+}
+
+ExtensionEntryPoint _createInstallTestEntryPoint(SendPort eventSendPort) {
+  return (SendPort sendPort) {
+    ToolExtensionEntryPoint.run(
+      sendPort,
+      <ToolExtensionService>[
+        _FakeTestBuildService(eventSendPort: eventSendPort),
+        _FakeTestDeviceService(eventSendPort: eventSendPort),
+      ],
+      supportedPlatforms: const <String>{'linux'},
+    );
+  };
 }
 
 void main() {
@@ -637,6 +702,160 @@ flutter:
           expect(await missingVmServiceDevice.stopApp(null), isFalse);
         },
       );
+    });
+
+    group('InstallCommand on ExtensionBackedDevice', () {
+      late MemoryFileSystem fileSystem;
+      late ReceivePort eventPort;
+      late List<String> recordedBuildModes;
+      late List<Uri> installedBundleUris;
+      ExtensionManager? installExtensionManager;
+
+      setUp(() {
+        fileSystem = MemoryFileSystem.test();
+        fileSystem.currentDirectory.childFile('pubspec.yaml').writeAsStringSync('name: test_app\n');
+        recordedBuildModes = <String>[];
+        installedBundleUris = <Uri>[];
+        eventPort = ReceivePort();
+        eventPort.listen((Object? message) {
+          if (message case {'event': 'build', 'buildMode': final String buildMode}) {
+            recordedBuildModes.add(buildMode);
+          } else if (message case {'event': 'install', 'bundleUri': final String bundleUri}) {
+            installedBundleUris.add(Uri.parse(bundleUri));
+          }
+        });
+      });
+
+      tearDown(() async {
+        eventPort.close();
+        await installExtensionManager?.dispose();
+        installExtensionManager = null;
+      });
+
+      Map<Type, Generator> installOverrides() => <Type, Generator>{
+        Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+        FileSystem: () => fileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
+        FeatureFlags: () => TestFeatureFlags(isToolExtensionsEnabled: true),
+        DeviceManager: () {
+          final featureFlags = TestFeatureFlags(isToolExtensionsEnabled: true);
+          installExtensionManager = ExtensionManager(
+            entryPoints: <ExtensionEntryPoint>[_createInstallTestEntryPoint(eventPort.sendPort)],
+            featureFlags: featureFlags,
+            hostPlatform: HostPlatform.linux_x64,
+            logger: testLogger,
+          );
+          return TestDeviceManager(
+            discoverers: <DeviceDiscovery>[
+              ExtensionDevices(
+                extensionBuildManager: ExtensionBuildManager(
+                  extensionManager: installExtensionManager!,
+                  featureFlags: featureFlags,
+                  logger: testLogger,
+                ),
+                extensionManager: installExtensionManager!,
+                fileSystem: fileSystem,
+                logger: testLogger,
+              ),
+            ],
+          );
+        },
+      };
+
+      InstallCommand createInstallCommand() => InstallCommand(
+        toolContext: FakeToolContext(
+          cache: Cache.test(processManager: FakeProcessManager.any()),
+          fs: fileSystem,
+          logger: testLogger,
+          processManager: FakeProcessManager.any(),
+          projectFactory: FlutterProjectFactory(fileSystem: fileSystem, logger: testLogger),
+        ),
+        verboseHelp: false,
+      );
+
+      testUsingContext('installs prebuilt binary with --use-application-binary and forwards project to isAppInstalled and uninstallApp', () async {
+        final File prebuiltFile = fileSystem.file('prebuilt.bin')..createSync();
+        final InstallCommand command = createInstallCommand();
+        final CommandRunner<void> runner = createTestCommandRunner(command);
+
+        await runner.run(<String>[
+          'install',
+          '-d',
+          'fake_test_device',
+          '--use-application-binary=prebuilt.bin',
+        ]);
+        await pumpEventQueue();
+        expect(
+          testLogger.statusText,
+          contains('Installing prebuilt.bin to Fake Test Extension Device...'),
+        );
+        expect(recordedBuildModes, isEmpty);
+        expect(installedBundleUris, <Uri>[prebuiltFile.absolute.uri]);
+
+        // Running install a second time detects the installed app and uninstalls it first.
+        testLogger.clear();
+        await runner.run(<String>[
+          'install',
+          '-d',
+          'fake_test_device',
+          '--use-application-binary=prebuilt.bin',
+        ]);
+        await pumpEventQueue();
+        expect(testLogger.statusText, contains('Uninstalling old version...'));
+        expect(recordedBuildModes, isEmpty);
+        expect(installedBundleUris, <Uri>[prebuiltFile.absolute.uri, prebuiltFile.absolute.uri]);
+
+        // Running with --uninstall-only uninstalls the app.
+        testLogger.clear();
+        await runner.run(<String>['install', '-d', 'fake_test_device', '--uninstall-only']);
+        expect(
+          testLogger.statusText,
+          contains('Uninstalling test_app from Fake Test Extension Device...'),
+        );
+      }, overrides: installOverrides());
+
+      testUsingContext(
+        'builds via TargetDevice.buildTarget and installs when --use-application-binary is omitted',
+        () async {
+          final InstallCommand command = createInstallCommand();
+          final CommandRunner<void> runner = createTestCommandRunner(command);
+
+          await runner.run(<String>['install', '-d', 'fake_test_device']);
+          await pumpEventQueue();
+          expect(
+            testLogger.statusText,
+            contains('Installing test_app to Fake Test Extension Device...'),
+          );
+          expect(recordedBuildModes, <String>['release']);
+          expect(installedBundleUris, <Uri>[Uri.file('/tmp/fake_bundle/release/app')]);
+        },
+        overrides: installOverrides(),
+      );
+
+      testUsingContext(
+        'throws ToolExit when extension build target fails during install',
+        () async {
+          final InstallCommand command = createInstallCommand();
+          final CommandRunner<void> runner = createTestCommandRunner(command);
+
+          await expectLater(
+            runner.run(<String>['install', '-d', 'failing_build_device']),
+            throwsToolExit(message: 'Install failed'),
+          );
+          expect(testLogger.errorText, contains('Build failed: Simulated build error'));
+        },
+        overrides: installOverrides(),
+      );
+
+      testUsingContext('throws ToolExit when extension device has supportsInstall false', () async {
+        final InstallCommand command = createInstallCommand();
+        final CommandRunner<void> runner = createTestCommandRunner(command);
+
+        await expectLater(
+          runner.run(<String>['install', '-d', 'no_target_device']),
+          throwsToolExit(message: 'flutter install is not supported on No Target Device'),
+        );
+      }, overrides: installOverrides());
     });
   });
 }

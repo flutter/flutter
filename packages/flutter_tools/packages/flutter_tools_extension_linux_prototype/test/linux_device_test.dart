@@ -34,6 +34,68 @@ void main() {
       expect(device.sdkNameAndVersion, 'Custom Linux 1.0.0');
       expect(device.ephemeral, isFalse);
       expect(device.isSupported, isTrue);
+      expect(device.supportsInstall, isTrue);
+    });
+
+    test('installApp, isAppInstalled, and uninstallApp mirror DesktopDevice behavior', () async {
+      final Directory tempDir = Directory.systemTemp.createTempSync('linux_device_install_test.');
+      addTearDown(() => tempDir.deleteSync(recursive: true));
+
+      final bundleFile = File('${tempDir.path}/app_bundle')..writeAsStringSync('binary');
+      final project = ExtensionFlutterProject(
+        appName: 'test_app',
+        buildDirectory: tempDir.uri.resolve('build/'),
+        directory: Uri.directory(tempDir.path),
+      );
+      final service = LinuxDeviceService();
+
+      expect(
+        await service.installApp(
+          bundleUri: Uri.file('${tempDir.path}/missing_bundle'),
+          deviceId: LinuxDeviceService.customLinuxDeviceId,
+        ),
+        isFalse,
+      );
+      expect(
+        await service.installApp(bundleUri: bundleFile.uri, deviceId: 'unknown_device'),
+        isFalse,
+      );
+      expect(
+        await service.installApp(
+          bundleUri: bundleFile.uri,
+          deviceId: LinuxDeviceService.customLinuxDeviceId,
+        ),
+        isTrue,
+      );
+
+      expect(
+        await service.isAppInstalled(
+          appId: 'test_app',
+          deviceId: LinuxDeviceService.customLinuxDeviceId,
+          project: project,
+        ),
+        isTrue,
+      );
+      expect(
+        await service.isAppInstalled(
+          appId: 'test_app',
+          deviceId: 'unknown_device',
+          project: project,
+        ),
+        isFalse,
+      );
+      expect(
+        await service.uninstallApp(
+          appId: 'test_app',
+          deviceId: LinuxDeviceService.customLinuxDeviceId,
+          project: project,
+        ),
+        isTrue,
+      );
+      expect(
+        await service.uninstallApp(appId: 'test_app', deviceId: 'unknown_device', project: project),
+        isFalse,
+      );
     });
 
     test('isSupportedForProject checks for linux/ directory and matching deviceId', () async {
@@ -224,6 +286,19 @@ void main() {
           'Missing required "${DeviceService.deviceIdParam}" (expected String).',
         ),
       );
+
+      final ExtensionRpcHandler uninstallAppHandler = handlers['uninstallApp']!;
+      final ExtensionRpcHandler isAppInstalledHandler = handlers['isAppInstalled']!;
+      for (final handler in <ExtensionRpcHandler>[uninstallAppHandler, isAppInstalledHandler]) {
+        await expectLater(
+          handler(<String, Object?>{
+            DeviceService.deviceIdParam: LinuxDeviceService.customLinuxDeviceId,
+          }),
+          _throwsInvalidParams(
+            'Missing required "${DeviceService.projectParam}" (expected Map<String, Object?>).',
+          ),
+        );
+      }
     });
 
     test('launchApp, getVmServiceUri, and stopApp manage process lifecycle and parse VM Service URI with base64url padding', () async {

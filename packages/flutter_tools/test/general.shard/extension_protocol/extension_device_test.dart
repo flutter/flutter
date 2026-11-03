@@ -133,13 +133,13 @@ final class _TestDeviceService extends DeviceService {
   });
 
   final Future<bool> Function(String deviceId, Uri bundleUri)? onInstallApp;
-  final Future<bool> Function(String deviceId, String? appId, ExtensionFlutterProject? project)?
+  final Future<bool> Function(String deviceId, String? appId, ExtensionFlutterProject project)?
   onIsAppInstalled;
   final Future<void> Function(String deviceId, Uri outputFileUri, Duration? duration)?
   onStartScreenRecording;
   final Future<Uri> Function(String deviceId)? onStopScreenRecording;
   final Future<void> Function(String deviceId, Uri outputFileUri)? onTakeScreenshot;
-  final Future<bool> Function(String deviceId, String? appId, ExtensionFlutterProject? project)?
+  final Future<bool> Function(String deviceId, String? appId, ExtensionFlutterProject project)?
   onUninstallApp;
 
   @override
@@ -175,8 +175,8 @@ final class _TestDeviceService extends DeviceService {
   @override
   Future<bool> uninstallApp({
     required String deviceId,
+    required ExtensionFlutterProject project,
     String? appId,
-    ExtensionFlutterProject? project,
   }) async {
     if (onUninstallApp case final callback?) {
       return callback(deviceId, appId, project);
@@ -187,8 +187,8 @@ final class _TestDeviceService extends DeviceService {
   @override
   Future<bool> isAppInstalled({
     required String deviceId,
+    required ExtensionFlutterProject project,
     String? appId,
-    ExtensionFlutterProject? project,
   }) async {
     if (onIsAppInstalled case final callback?) {
       return callback(deviceId, appId, project);
@@ -896,31 +896,29 @@ void main() {
                     return true;
                   },
                   onIsAppInstalled:
-                      (String deviceId, String? appId, ExtensionFlutterProject? project) async {
+                      (String deviceId, String? appId, ExtensionFlutterProject project) async {
                         eventsSendPort.send(<String, Object?>{
                           'method': 'isAppInstalled',
                           'deviceId': deviceId,
                           'appId': appId,
-                          'projectName': project?.appName,
+                          'projectName': project.appName,
                         });
                         return (appId != null && installedApps.contains(appId)) ||
-                            (project != null && installedApps.contains(project.appName));
+                            installedApps.contains(project.appName);
                       },
                   onUninstallApp:
-                      (String deviceId, String? appId, ExtensionFlutterProject? project) async {
+                      (String deviceId, String? appId, ExtensionFlutterProject project) async {
                         eventsSendPort.send(<String, Object?>{
                           'method': 'uninstallApp',
                           'deviceId': deviceId,
                           'appId': appId,
-                          'projectName': project?.appName,
+                          'projectName': project.appName,
                         });
                         var removed = false;
                         if (appId != null) {
                           removed = installedApps.remove(appId) || removed;
                         }
-                        if (project != null) {
-                          removed = installedApps.remove(project.appName) || removed;
-                        }
+                        removed = installedApps.remove(project.appName) || removed;
                         return removed;
                       },
                 ),
@@ -946,16 +944,25 @@ void main() {
           directory: Uri.directory('/tmp/project/'),
         );
 
-        expect(await client.isAppInstalled(appId: appId, deviceId: deviceId), isFalse);
+        expect(
+          await client.isAppInstalled(appId: appId, deviceId: deviceId, project: project),
+          isFalse,
+        );
         expect(await client.installApp(bundleUri: bundleUri, deviceId: deviceId), isTrue);
 
-        expect(await client.isAppInstalled(appId: appId, deviceId: deviceId), isTrue);
+        expect(
+          await client.isAppInstalled(appId: appId, deviceId: deviceId, project: project),
+          isTrue,
+        );
         expect(await client.isAppInstalled(deviceId: deviceId, project: project), isTrue);
         expect(
           await client.uninstallApp(appId: appId, deviceId: deviceId, project: project),
           isTrue,
         );
-        expect(await client.isAppInstalled(appId: appId, deviceId: deviceId), isFalse);
+        expect(
+          await client.isAppInstalled(appId: appId, deviceId: deviceId, project: project),
+          isFalse,
+        );
         expect(await client.isAppInstalled(deviceId: deviceId, project: project), isFalse);
         await pumpEventQueue();
 
@@ -1077,12 +1084,23 @@ void main() {
       final client = ExtensionDeviceClient(conn, logger: logger);
 
       const deviceId = 'default-device';
+      final project = ExtensionFlutterProject(
+        appName: 'default_app',
+        buildDirectory: Uri.directory('/tmp/project/build/'),
+        directory: Uri.directory('/tmp/project/'),
+      );
       expect(
         await client.installApp(bundleUri: Uri.file('/tmp/app.bundle'), deviceId: deviceId),
         isFalse,
       );
-      expect(await client.uninstallApp(appId: 'com.example.app', deviceId: deviceId), isFalse);
-      expect(await client.isAppInstalled(appId: 'com.example.app', deviceId: deviceId), isFalse);
+      expect(
+        await client.uninstallApp(appId: 'com.example.app', deviceId: deviceId, project: project),
+        isFalse,
+      );
+      expect(
+        await client.isAppInstalled(appId: 'com.example.app', deviceId: deviceId, project: project),
+        isFalse,
+      );
 
       await expectLater(
         client.takeScreenshot(deviceId: deviceId, outputFileUri: Uri.file('/tmp/out.png')),
@@ -1159,7 +1177,12 @@ void main() {
           throwsA(_isInvalidParamsRpcException()),
         );
 
-        // uninstallApp & isAppInstalled: empty deviceId, empty appId, neither appId nor project, invalid project.
+        // uninstallApp & isAppInstalled: empty deviceId, empty appId, missing project, invalid project.
+        const validProjectMap = <String, Object?>{
+          ExtensionFlutterProject.appNameKey: 'my_app',
+          ExtensionFlutterProject.buildDirectoryKey: 'file:///tmp/my_app/build/',
+          ExtensionFlutterProject.directoryKey: 'file:///tmp/my_app/',
+        };
         for (final method in const <String>[
           DeviceService.uninstallAppMethod,
           DeviceService.isAppInstalledMethod,
@@ -1170,6 +1193,7 @@ void main() {
               params: <String, Object?>{
                 DeviceService.deviceIdParam: '',
                 DeviceService.appIdParam: 'com.example.app',
+                DeviceService.projectParam: validProjectMap,
               },
             ),
             throwsA(_isInvalidParamsRpcException()),
@@ -1180,6 +1204,7 @@ void main() {
               params: <String, Object?>{
                 DeviceService.deviceIdParam: 'device-1',
                 DeviceService.appIdParam: '',
+                DeviceService.projectParam: validProjectMap,
               },
             ),
             throwsA(_isInvalidParamsRpcException()),
@@ -1187,7 +1212,10 @@ void main() {
           await expectLater(
             conn.sendRequest(
               method,
-              params: <String, Object?>{DeviceService.deviceIdParam: 'device-1'},
+              params: <String, Object?>{
+                DeviceService.deviceIdParam: 'device-1',
+                DeviceService.appIdParam: 'com.example.app',
+              },
             ),
             throwsA(_isInvalidParamsRpcException()),
           );
@@ -1344,21 +1372,19 @@ void main() {
                   return false;
                 },
                 onIsAppInstalled:
-                    (String deviceId, String? appId, ExtensionFlutterProject? project) async {
-                      eventsSendPort.send(<String, Object?>{'projectName': project?.appName});
+                    (String deviceId, String? appId, ExtensionFlutterProject project) async {
+                      eventsSendPort.send(<String, Object?>{'projectName': project.appName});
                       return (appId != null && installedApps.contains(appId)) ||
-                          (project != null && installedApps.contains(project.appName));
+                          installedApps.contains(project.appName);
                     },
                 onUninstallApp:
-                    (String deviceId, String? appId, ExtensionFlutterProject? project) async {
-                      eventsSendPort.send(<String, Object?>{'projectName': project?.appName});
+                    (String deviceId, String? appId, ExtensionFlutterProject project) async {
+                      eventsSendPort.send(<String, Object?>{'projectName': project.appName});
                       var removed = false;
                       if (appId != null) {
                         removed = installedApps.remove(appId) || removed;
                       }
-                      if (project != null) {
-                        removed = installedApps.remove(project.appName) || removed;
-                      }
+                      removed = installedApps.remove(project.appName) || removed;
                       return removed;
                     },
                 onTakeScreenshot: (String deviceId, Uri outputFileUri) async {},
@@ -1380,7 +1406,7 @@ void main() {
       addTearDown(conn.dispose);
       final client = ExtensionDeviceClient(conn, logger: logger);
 
-      final builtBundleUri = Uri.file('/build/output/custom_bundle.ipk');
+      final builtBundleUri = Uri.file('/build/output/custom_bundle.bin');
       final _FakeExtensionBuildManager buildManager = _createBuildManager(
         buildResult: ExtensionBuildResult(executableUri: builtBundleUri, success: true),
         logger: logger,
@@ -1440,12 +1466,9 @@ void main() {
       expect(buildManager.buildCalls.single.targetName, 'custom-linux-build');
       expect(receivedInstallUris.last, equals(builtBundleUri));
 
-      // Calling uninstallApp with a plain ApplicationPackage inside a Flutter project
-      // directory also resolves and forwards ExtensionFlutterProject (e.g. IntegrationTestTestDevice.kill).
-      final plainApp = _FakeNonPrebuiltApplicationPackage(id: '');
-      expect(await device.isAppInstalled(plainApp), isTrue);
-      expect(await device.uninstallApp(plainApp), isTrue);
-      expect(await device.isAppInstalled(plainApp), isFalse);
+      expect(await device.isAppInstalled(extensionApp), isTrue);
+      expect(await device.uninstallApp(extensionApp), isTrue);
+      expect(await device.isAppInstalled(extensionApp), isFalse);
       expect(receivedProjectNames, contains('test_project_app'));
 
       final File screenshotFile = fs.file('/captures/screen.png');
@@ -1502,90 +1525,176 @@ void main() {
       },
     );
 
-    testWithoutContext(
-      'isAppInstalled, installApp, and uninstallApp catch errors and log warning',
-      () async {
-        void failingEntryPoint(SendPort sendPort) {
-          unawaited(
-            ToolExtensionEntryPoint.run(
-              sendPort,
-              <ToolExtensionService>[
-                _TestDeviceService(
-                  onInstallApp: (String _, Uri _) async {
-                    throw StateError('Simulated install failure');
-                  },
-                  onIsAppInstalled: (String _, String? _, ExtensionFlutterProject? _) async {
-                    throw StateError('Simulated isAppInstalled failure');
-                  },
-                  onUninstallApp: (String _, String? _, ExtensionFlutterProject? _) async {
-                    throw StateError('Simulated uninstall failure');
-                  },
-                ),
-              ],
-              extensionName: 'failing_device_extension',
-              supportedPlatforms: const <String>{'linux'},
-            ),
-          );
-        }
-
-        final ExtensionConnection conn = await ExtensionConnection.spawn(
-          failingEntryPoint,
-          logger: logger,
-        );
-        addTearDown(conn.dispose);
-        final client = ExtensionDeviceClient(conn, logger: logger);
-
-        const targetDevice = TargetDevice(
-          category: Category.mobile,
-          id: 'ext-device-fail',
-          name: 'Failing Extension Device',
-        );
-        final device = ExtensionBackedDevice(
-          buildManager: _createBuildManager(logger: logger),
-          connection: conn,
-          deviceService: client,
-          fileSystem: fs,
-          logger: logger,
-          targetDevice: targetDevice,
-        );
-
-        expect(device.supportsInstall, isFalse);
-        expect(device.supportsScreenshot, isFalse);
-        expect(device.supportsScreenRecording, isFalse);
-
-        final File bundleFile = fs.file('/build/app.apk')..createSync(recursive: true);
-        final app = _FakePrebuiltApplicationPackage(
-          id: 'com.example.app',
-          applicationPackage: bundleFile,
-        );
-
-        expect(await device.isAppInstalled(app), isFalse);
-        expect(
-          logger.warningText,
-          contains(
-            'Failed to check if application "com.example.app" is installed on '
-            '"ext-device-fail" ("failing_device_extension")',
+    testWithoutContext('isAppInstalled, installApp, and uninstallApp handle !supportsInstall, catch RPC and peer-exit exceptions, and propagate host errors', () async {
+      void failingEntryPoint(SendPort sendPort) {
+        unawaited(
+          ToolExtensionEntryPoint.run(
+            sendPort,
+            <ToolExtensionService>[
+              _TestDeviceService(
+                onInstallApp: (String _, Uri _) async {
+                  throw StateError('Simulated install failure');
+                },
+                onIsAppInstalled: (String _, String? _, ExtensionFlutterProject _) async {
+                  throw StateError('Simulated isAppInstalled failure');
+                },
+                onUninstallApp: (String _, String? _, ExtensionFlutterProject _) async {
+                  throw StateError('Simulated uninstall failure');
+                },
+              ),
+            ],
+            extensionName: 'failing_device_extension',
+            supportedPlatforms: const <String>{'linux'},
           ),
         );
+      }
 
-        expect(await device.installApp(app), isFalse);
-        expect(
-          logger.warningText,
-          contains(
-            'Failed to install application "com.example.app" on '
-            '"ext-device-fail" ("failing_device_extension")',
+      final ExtensionConnection conn = await ExtensionConnection.spawn(
+        failingEntryPoint,
+        logger: logger,
+      );
+      addTearDown(conn.dispose);
+      final client = ExtensionDeviceClient(conn, logger: logger);
+
+      final File bundleFile = fs.file('/build/app.apk')..createSync(recursive: true);
+      final app = _FakePrebuiltApplicationPackage(
+        id: 'com.example.app',
+        applicationPackage: bundleFile,
+      );
+
+      // When supportsInstall is false, installApp and uninstallApp return true and
+      // isAppInstalled returns false without calling the extension (matching DesktopDevice).
+      final unsupportedInstallDevice = ExtensionBackedDevice(
+        buildManager: _createBuildManager(logger: logger),
+        connection: conn,
+        deviceService: client,
+        fileSystem: fs,
+        logger: logger,
+        targetDevice: const TargetDevice(
+          category: Category.desktop,
+          id: 'ext-device-no-install',
+          name: 'No Install Extension Device',
+        ),
+      );
+      expect(unsupportedInstallDevice.supportsInstall, isFalse);
+      expect(unsupportedInstallDevice.supportsScreenshot, isFalse);
+      expect(unsupportedInstallDevice.supportsScreenRecording, isFalse);
+      expect(await unsupportedInstallDevice.isAppInstalled(app), isFalse);
+      expect(await unsupportedInstallDevice.installApp(app), isTrue);
+      expect(await unsupportedInstallDevice.uninstallApp(app), isTrue);
+      expect(logger.warningText, isEmpty);
+
+      const targetDevice = TargetDevice(
+        category: Category.mobile,
+        id: 'ext-device-fail',
+        name: 'Failing Extension Device',
+        supportsInstall: true,
+      );
+      final device = ExtensionBackedDevice(
+        buildManager: _createBuildManager(logger: logger),
+        connection: conn,
+        deviceService: client,
+        fileSystem: fs,
+        logger: logger,
+        targetDevice: targetDevice,
+      );
+
+      expect(await device.isAppInstalled(app), isFalse);
+      expect(
+        logger.warningText,
+        contains(
+          'Failed to check if application "com.example.app" is installed on '
+          '"ext-device-fail" ("failing_device_extension")',
+        ),
+      );
+
+      expect(await device.installApp(app), isFalse);
+      expect(
+        logger.warningText,
+        contains(
+          'Failed to install application "com.example.app" on '
+          '"ext-device-fail" ("failing_device_extension")',
+        ),
+      );
+
+      expect(await device.uninstallApp(app), isFalse);
+      expect(
+        logger.warningText,
+        contains(
+          'Failed to uninstall application "com.example.app" from '
+          '"ext-device-fail" ("failing_device_extension")',
+        ),
+      );
+
+      // When the extension isolate exits unexpectedly during installApp, both installApp
+      // and a subsequent isAppInstalled catch ExtensionConnectionException and log warnings.
+      void exitingEntryPoint(SendPort sendPort) {
+        unawaited(
+          ToolExtensionEntryPoint.run(
+            sendPort,
+            <ToolExtensionService>[
+              _TestDeviceService(
+                onInstallApp: (String _, Uri _) async {
+                  Isolate.exit();
+                },
+              ),
+            ],
+            extensionName: 'exiting_device_extension',
+            supportedPlatforms: const <String>{'linux'},
           ),
         );
+      }
 
-        expect(await device.uninstallApp(app), isFalse);
-        expect(
-          logger.warningText,
-          contains(
-            'Failed to uninstall application "com.example.app" from '
-            '"ext-device-fail" ("failing_device_extension")',
-          ),
-        );
-      },
-    );
+      final ExtensionConnection exitingConn = await ExtensionConnection.spawn(
+        exitingEntryPoint,
+        logger: logger,
+      );
+      addTearDown(exitingConn.dispose);
+      final exitingDevice = ExtensionBackedDevice(
+        buildManager: _createBuildManager(logger: logger),
+        connection: exitingConn,
+        deviceService: ExtensionDeviceClient(exitingConn, logger: logger),
+        fileSystem: fs,
+        logger: logger,
+        targetDevice: targetDevice,
+      );
+
+      logger.clear();
+      expect(await exitingDevice.installApp(app), isFalse);
+      expect(
+        logger.warningText,
+        contains(
+          'Failed to install application "com.example.app" on '
+          '"ext-device-fail" ("exiting_device_extension")',
+        ),
+      );
+      logger.clear();
+      expect(await exitingDevice.isAppInstalled(app), isFalse);
+      expect(
+        logger.warningText,
+        contains(
+          'Failed to check if application "com.example.app" is installed on '
+          '"ext-device-fail" ("exiting_device_extension")',
+        ),
+      );
+
+      final directErrorDevice = ExtensionBackedDevice(
+        buildManager: _createBuildManager(logger: logger),
+        connection: conn,
+        deviceService: _TestDeviceService(
+          onInstallApp: (String _, Uri _) => Future<bool>.error(StateError('Host bug')),
+          onIsAppInstalled: (String _, String? _, ExtensionFlutterProject _) =>
+              Future<bool>.error(StateError('Host bug')),
+          onUninstallApp: (String _, String? _, ExtensionFlutterProject _) =>
+              Future<bool>.error(StateError('Host bug')),
+        ),
+        fileSystem: fs,
+        logger: logger,
+        targetDevice: targetDevice,
+      );
+      await expectLater(directErrorDevice.isAppInstalled(app), throwsStateError);
+      await expectLater(directErrorDevice.installApp(app), throwsStateError);
+      await expectLater(directErrorDevice.uninstallApp(app), throwsStateError);
+    });
   });
 }

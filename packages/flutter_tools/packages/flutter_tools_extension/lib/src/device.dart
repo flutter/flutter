@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'build.dart';
+library;
+
 import 'package:flutter_tools_core/flutter_tools_core.dart';
 import 'package:flutter_tools_core/json.dart';
 import 'package:json_rpc_2/json_rpc_2.dart' show RpcException;
@@ -17,12 +20,12 @@ abstract base class DeviceService extends ToolExtensionService {
 
   static const String _getDevicesRpcMethod = 'getDevices';
   static const String _isSupportedForProjectRpcMethod = 'isSupportedForProject';
-  static const _installAppRpcMethod = 'installApp';
-  static const _uninstallAppRpcMethod = 'uninstallApp';
-  static const _isAppInstalledRpcMethod = 'isAppInstalled';
-  static const _takeScreenshotRpcMethod = 'takeScreenshot';
-  static const _startScreenRecordingRpcMethod = 'startScreenRecording';
-  static const _stopScreenRecordingRpcMethod = 'stopScreenRecording';
+  static const String _installAppRpcMethod = 'installApp';
+  static const String _uninstallAppRpcMethod = 'uninstallApp';
+  static const String _isAppInstalledRpcMethod = 'isAppInstalled';
+  static const String _takeScreenshotRpcMethod = 'takeScreenshot';
+  static const String _startScreenRecordingRpcMethod = 'startScreenRecording';
+  static const String _stopScreenRecordingRpcMethod = 'stopScreenRecording';
   static const String _launchAppRpcMethod = 'launchApp';
   static const String _getVmServiceUriRpcMethod = 'getVmServiceUri';
   static const String _stopAppRpcMethod = 'stopApp';
@@ -37,22 +40,24 @@ abstract base class DeviceService extends ToolExtensionService {
       '$serviceNamespace.$_isSupportedForProjectRpcMethod';
 
   /// RPC method identifier to install an application bundle on a target device.
-  static const installAppMethod = '$serviceNamespace.$_installAppRpcMethod';
+  static const String installAppMethod = '$serviceNamespace.$_installAppRpcMethod';
 
   /// RPC method identifier to uninstall an application from a target device.
-  static const uninstallAppMethod = '$serviceNamespace.$_uninstallAppRpcMethod';
+  static const String uninstallAppMethod = '$serviceNamespace.$_uninstallAppRpcMethod';
 
   /// RPC method identifier to check whether an application is installed on a target device.
-  static const isAppInstalledMethod = '$serviceNamespace.$_isAppInstalledRpcMethod';
+  static const String isAppInstalledMethod = '$serviceNamespace.$_isAppInstalledRpcMethod';
 
   /// RPC method identifier to capture a screenshot from a target device.
-  static const takeScreenshotMethod = '$serviceNamespace.$_takeScreenshotRpcMethod';
+  static const String takeScreenshotMethod = '$serviceNamespace.$_takeScreenshotRpcMethod';
 
   /// RPC method identifier to start a screen recording on a target device.
-  static const startScreenRecordingMethod = '$serviceNamespace.$_startScreenRecordingRpcMethod';
+  static const String startScreenRecordingMethod =
+      '$serviceNamespace.$_startScreenRecordingRpcMethod';
 
   /// RPC method identifier to stop an active screen recording on a target device.
-  static const stopScreenRecordingMethod = '$serviceNamespace.$_stopScreenRecordingRpcMethod';
+  static const String stopScreenRecordingMethod =
+      '$serviceNamespace.$_stopScreenRecordingRpcMethod';
 
   /// RPC method identifier to launch an application on a target device.
   static const String launchAppMethod = '$serviceNamespace.$_launchAppRpcMethod';
@@ -80,16 +85,16 @@ abstract base class DeviceService extends ToolExtensionService {
   static const String projectParam = 'project';
 
   /// RPC parameter key for the application bundle URI.
-  static const bundleUriParam = 'bundleUri';
+  static const String bundleUriParam = 'bundleUri';
 
   /// RPC parameter key for the application package identifier.
-  static const appIdParam = 'appId';
+  static const String appIdParam = 'appId';
 
   /// RPC parameter key for the capture output file URI.
-  static const outputFileUriParam = 'outputFileUri';
+  static const String outputFileUriParam = 'outputFileUri';
 
   /// RPC parameter key for the optional screen recording duration in milliseconds.
-  static const durationMsParam = 'durationMs';
+  static const String durationMsParam = 'durationMs';
 
   /// RPC parameter key for the executable URI to launch.
   static const String executableUriParam = 'executableUri';
@@ -118,31 +123,31 @@ abstract base class DeviceService extends ToolExtensionService {
 
   /// Installs the application bundle at [bundleUri] onto the device with [deviceId].
   ///
-  /// [bundleUri] is guaranteed to be an absolute `file:` URI pointing to the
-  /// built application binary or bundle. Returns `true` if installation
-  /// succeeded, or `false` if installation failed or is unsupported.
+  /// [bundleUri] is guaranteed to be an absolute `file:` URI pointing to either
+  /// the prebuilt application binary (when `--use-application-binary` is
+  /// supplied) or the [ExtensionBuildResult.executableUri] returned by
+  /// [BuildTarget.build] for the device's [TargetDevice.buildTarget]. Returns
+  /// `true` if installation succeeded, or `false` if installation failed or is
+  /// unsupported.
   Future<bool> installApp({required Uri bundleUri, required String deviceId}) async => false;
 
-  /// Uninstalls the application identified by [appId] or [project] from the
-  /// device with [deviceId].
+  /// Uninstalls the application for [project] (optionally identified by
+  /// [appId]) from the device with [deviceId].
   ///
-  /// At least one of [appId] or [project] is guaranteed to be non-null. Returns
-  /// `true` if uninstallation succeeded, or `false` if uninstallation failed or
-  /// is unsupported.
+  /// Returns `true` if uninstallation succeeded, or `false` if uninstallation
+  /// failed or is unsupported.
   Future<bool> uninstallApp({
     required String deviceId,
+    required ExtensionFlutterProject project,
     String? appId,
-    ExtensionFlutterProject? project,
   }) async => false;
 
-  /// Returns whether the application identified by [appId] or [project] is
-  /// currently installed on the device with [deviceId].
-  ///
-  /// At least one of [appId] or [project] is guaranteed to be non-null.
+  /// Returns whether the application for [project] (optionally identified by
+  /// [appId]) is currently installed on the device with [deviceId].
   Future<bool> isAppInstalled({
     required String deviceId,
+    required ExtensionFlutterProject project,
     String? appId,
-    ExtensionFlutterProject? project,
   }) async => false;
 
   /// Captures a screenshot from the device with [deviceId] and writes it to
@@ -279,41 +284,38 @@ abstract base class DeviceService extends ToolExtensionService {
   }
 
   Future<bool> _uninstallAppRpc(Map<String, Object?> params) async {
-    final (String deviceId, String? appId, ExtensionFlutterProject? project) = _parseAppTarget(
+    final (String deviceId, ExtensionFlutterProject project, String? appId) = _parseAppTarget(
       params,
     );
     return uninstallApp(appId: appId, deviceId: deviceId, project: project);
   }
 
   Future<bool> _isAppInstalledRpc(Map<String, Object?> params) async {
-    final (String deviceId, String? appId, ExtensionFlutterProject? project) = _parseAppTarget(
+    final (String deviceId, ExtensionFlutterProject project, String? appId) = _parseAppTarget(
       params,
     );
     return isAppInstalled(appId: appId, deviceId: deviceId, project: project);
   }
 
-  (String deviceId, String? appId, ExtensionFlutterProject? project) _parseAppTarget(
+  (String deviceId, ExtensionFlutterProject project, String? appId) _parseAppTarget(
     Map<String, Object?> params,
   ) {
     final String deviceId = _parseDeviceId(params);
+    final ExtensionFlutterProject project;
     final String? appId;
-    final ExtensionFlutterProject? project;
     try {
+      final Map<String, Object?> projectMap = params.requiredField<Map<String, Object?>>(
+        projectParam,
+      );
+      project = ExtensionFlutterProject.fromJson(projectMap);
       appId = params.nullableField<String>(appIdParam);
       if (appId != null && appId.isEmpty) {
         throw const FormatException('Invalid "$appIdParam": must not be empty.');
       }
-      final Map<String, Object?>? projectMap = params.nullableField<Map<String, Object?>>(
-        projectParam,
-      );
-      project = projectMap != null ? ExtensionFlutterProject.fromJson(projectMap) : null;
-      if (appId == null && project == null) {
-        throw const FormatException('Either "$appIdParam" or "$projectParam" must be provided.');
-      }
     } on FormatException catch (e) {
       throw RpcException.invalidParams(e.message);
     }
-    return (deviceId, appId, project);
+    return (deviceId, project, appId);
   }
 
   Future<void> _takeScreenshotRpc(Map<String, Object?> params) async {

@@ -102,13 +102,13 @@ class TargetDevice {
   static const String sdkNameAndVersionKey = 'sdkNameAndVersion';
 
   /// Map key for [supportsInstall].
-  static const supportsInstallKey = 'supportsInstall';
+  static const String supportsInstallKey = 'supportsInstall';
 
   /// Map key for [supportsScreenshot].
-  static const supportsScreenshotKey = 'supportsScreenshot';
+  static const String supportsScreenshotKey = 'supportsScreenshot';
 
   /// Map key for [supportsScreenRecording].
-  static const supportsScreenRecordingKey = 'supportsScreenRecording';
+  static const String supportsScreenRecordingKey = 'supportsScreenRecording';
 
   /// Map key for [targetPlatform].
   static const String targetPlatformKey = 'targetPlatform';

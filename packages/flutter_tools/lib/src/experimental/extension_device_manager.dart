@@ -119,6 +119,9 @@ final class ExtensionDeviceClient extends DeviceService {
         DeviceService.bundleUriParam: bundleUri.toString(),
         DeviceService.deviceIdParam: deviceId,
       },
+      // TODO(bkonyi): Support heartbeat / liveness monitoring for long-running RPCs,
+      // https://github.com/flutter/flutter/issues/193955.
+      timeout: null,
     );
     if (rawResult case final bool installed) {
       return installed;
@@ -133,11 +136,11 @@ final class ExtensionDeviceClient extends DeviceService {
   @override
   Future<bool> uninstallApp({
     required String deviceId,
+    required ExtensionFlutterProject project,
     String? appId,
-    ExtensionFlutterProject? project,
   }) async {
     _logger.printTrace(
-      'ExtensionDeviceClient uninstalling app "${appId ?? project?.appName}" from "$deviceId" via RPC '
+      'ExtensionDeviceClient uninstalling app "${appId ?? project.appName}" from "$deviceId" via RPC '
       '("${DeviceService.uninstallAppMethod}")...',
     );
     final Object? rawResult = await connection.sendRequest(
@@ -145,8 +148,11 @@ final class ExtensionDeviceClient extends DeviceService {
       params: <String, Object?>{
         DeviceService.appIdParam: ?appId,
         DeviceService.deviceIdParam: deviceId,
-        DeviceService.projectParam: ?project?.toMap(),
+        DeviceService.projectParam: project.toMap(),
       },
+      // TODO(bkonyi): Support heartbeat / liveness monitoring for long-running RPCs,
+      // https://github.com/flutter/flutter/issues/193955.
+      timeout: null,
     );
     if (rawResult case final bool uninstalled) {
       return uninstalled;
@@ -161,11 +167,11 @@ final class ExtensionDeviceClient extends DeviceService {
   @override
   Future<bool> isAppInstalled({
     required String deviceId,
+    required ExtensionFlutterProject project,
     String? appId,
-    ExtensionFlutterProject? project,
   }) async {
     _logger.printTrace(
-      'ExtensionDeviceClient checking if app "${appId ?? project?.appName}" is installed on "$deviceId" via RPC '
+      'ExtensionDeviceClient checking if app "${appId ?? project.appName}" is installed on "$deviceId" via RPC '
       '("${DeviceService.isAppInstalledMethod}")...',
     );
     final Object? rawResult = await connection.sendRequest(
@@ -173,7 +179,7 @@ final class ExtensionDeviceClient extends DeviceService {
       params: <String, Object?>{
         DeviceService.appIdParam: ?appId,
         DeviceService.deviceIdParam: deviceId,
-        DeviceService.projectParam: ?project?.toMap(),
+        DeviceService.projectParam: project.toMap(),
       },
     );
     if (rawResult case final bool installed) {
@@ -198,6 +204,9 @@ final class ExtensionDeviceClient extends DeviceService {
         DeviceService.deviceIdParam: deviceId,
         DeviceService.outputFileUriParam: outputFileUri.toString(),
       },
+      // TODO(bkonyi): Support heartbeat / liveness monitoring for long-running RPCs,
+      // https://github.com/flutter/flutter/issues/193955.
+      timeout: null,
     );
   }
 
@@ -218,6 +227,9 @@ final class ExtensionDeviceClient extends DeviceService {
         DeviceService.durationMsParam: ?duration?.inMilliseconds,
         DeviceService.outputFileUriParam: outputFileUri.toString(),
       },
+      // TODO(bkonyi): Support heartbeat / liveness monitoring for long-running RPCs,
+      // https://github.com/flutter/flutter/issues/193955.
+      timeout: null,
     );
   }
 
@@ -230,21 +242,26 @@ final class ExtensionDeviceClient extends DeviceService {
     final Object? rawResult = await connection.sendRequest(
       DeviceService.stopScreenRecordingMethod,
       params: <String, Object?>{DeviceService.deviceIdParam: deviceId},
+      // TODO(bkonyi): Support heartbeat / liveness monitoring for long-running RPCs,
+      // https://github.com/flutter/flutter/issues/193955.
+      timeout: null,
     );
     if (rawResult case final String rawUri) {
       final Uri? uri = Uri.tryParse(rawUri);
       if (uri != null && uri.isValidFileUri) {
         return uri;
       }
-      throw FormatException(
-        'ExtensionDeviceClient received invalid file URI for '
-        '"${DeviceService.stopScreenRecordingMethod}": "$rawUri".',
-      );
+      final message =
+          'ExtensionDeviceClient received invalid file URI for '
+          '"${DeviceService.stopScreenRecordingMethod}": "$rawUri".';
+      _logger.printError(message);
+      throw FormatException(message);
     }
-    throw FormatException(
-      'ExtensionDeviceClient received invalid response for '
-      '"${DeviceService.stopScreenRecordingMethod}": expected String, got ${rawResult.runtimeType}.',
-    );
+    final message =
+        'ExtensionDeviceClient received invalid response for '
+        '"${DeviceService.stopScreenRecordingMethod}": expected String, got ${rawResult.runtimeType}.';
+    _logger.printError(message);
+    throw FormatException(message);
   }
 
   @override
@@ -520,6 +537,7 @@ class ExtensionDevices extends PollingDeviceDiscovery {
     this._artifacts,
     this._cache,
     this._config,
+    this._projectFactory,
   }) : super('tool_extension');
 
   final Artifacts? _artifacts;
@@ -529,6 +547,7 @@ class ExtensionDevices extends PollingDeviceDiscovery {
   final ExtensionManager _extensionManager;
   final FileSystem _fileSystem;
   final Logger _logger;
+  final FlutterProjectFactory? _projectFactory;
   final _devicesByKey = <(ExtensionConnection, String), ExtensionBackedDevice>{};
 
   @override
@@ -594,6 +613,7 @@ class ExtensionDevices extends PollingDeviceDiscovery {
             deviceService: service,
             fileSystem: _fileSystem,
             logger: _logger,
+            projectFactory: _projectFactory,
             targetDevice: targetDevice,
           );
           _devicesByKey[key] = device;
@@ -648,7 +668,11 @@ class ExtensionBackedDevice extends Device {
     this._artifacts,
     this._cache,
     this._config,
-  }) : super(
+    FlutterProjectFactory? projectFactory,
+  }) : _projectFactory =
+           projectFactory ??
+           FlutterProjectFactory(config: _config, fileSystem: _fileSystem, logger: logger),
+       super(
          _targetDevice.id,
          category: _targetDevice.category,
          ephemeral: _targetDevice.ephemeral,
@@ -662,6 +686,7 @@ class ExtensionBackedDevice extends Device {
   final ExtensionConnection connection;
   final DeviceService _deviceService;
   final FileSystem _fileSystem;
+  final FlutterProjectFactory _projectFactory;
   TargetDevice _targetDevice;
   Future<ExtensionDeviceLogReader>? _logReader;
   bool _disposed = false;
@@ -671,6 +696,7 @@ class ExtensionBackedDevice extends Device {
 
   /// Whether this device supports installing and uninstalling application
   /// packages via `flutter install`.
+  @override
   bool get supportsInstall => _targetDevice.supportsInstall;
 
   @override
@@ -747,6 +773,9 @@ class ExtensionBackedDevice extends Device {
 
   @override
   Future<bool> installApp(ApplicationPackage app, {String? userIdentifier}) async {
+    if (!supportsInstall) {
+      return true;
+    }
     final Uri? bundleUri;
     if (app case PrebuiltApplicationPackage(:final applicationPackage)) {
       bundleUri = applicationPackage.absolute.uri;
@@ -757,9 +786,9 @@ class ExtensionBackedDevice extends Device {
         ExtensionApplicationPackage(:final BuildInfo buildInfo) => buildInfo.mode,
         _ => BuildMode.debug,
       };
-      final FlutterProject? project = switch (app) {
+      final FlutterProject project = switch (app) {
         ExtensionApplicationPackage(:final FlutterProject project) => project,
-        _ => null,
+        _ => _projectFactory.fromDirectory(_fileSystem.currentDirectory),
       };
       bundleUri = await _buildForDevice(
         buildMode: buildMode,
@@ -772,7 +801,7 @@ class ExtensionBackedDevice extends Device {
     }
     try {
       return await _deviceService.installApp(bundleUri: bundleUri, deviceId: id);
-    } on Object catch (err, stack) {
+    } on Exception catch (err, stack) {
       logger.printWarning(
         'Failed to install application "${app.id}" on "$id" '
         '("${connection.extensionName}"): $err',
@@ -923,35 +952,24 @@ class ExtensionBackedDevice extends Device {
     return _deviceService.stopApp(deviceId: id);
   }
 
-  ExtensionFlutterProject? _resolveExtensionProject(ApplicationPackage app) {
-    if (app case ExtensionApplicationPackage(:final FlutterProject project)) {
-      return project.toExtensionProject();
-    }
-    final Directory currentDir = _fileSystem.currentDirectory;
-    if (currentDir.childFile('pubspec.yaml').existsSync()) {
-      try {
-        final FlutterProject project = FlutterProjectFactory(
-          config: _config,
-          fileSystem: _fileSystem,
-          logger: logger,
-        ).fromDirectory(currentDir);
-        return project.toExtensionProject();
-      } on Object catch (err, stack) {
-        logger.printTrace(
-          'Failed to resolve FlutterProject from "${currentDir.path}": $err\n$stack',
-        );
-      }
-    }
-    return null;
+  ExtensionFlutterProject _resolveExtensionProject(ApplicationPackage app) {
+    final FlutterProject project = switch (app) {
+      ExtensionApplicationPackage(:final FlutterProject project) => project,
+      _ => _projectFactory.fromDirectory(_fileSystem.currentDirectory),
+    };
+    return project.toExtensionProject();
   }
 
   @override
   Future<bool> uninstallApp(ApplicationPackage app, {String? userIdentifier}) async {
+    if (!supportsInstall) {
+      return true;
+    }
     final String? appId = app.id.isNotEmpty ? app.id : null;
-    final ExtensionFlutterProject? project = _resolveExtensionProject(app);
+    final ExtensionFlutterProject project = _resolveExtensionProject(app);
     try {
       return await _deviceService.uninstallApp(appId: appId, deviceId: id, project: project);
-    } on Object catch (err, stack) {
+    } on Exception catch (err, stack) {
       logger.printWarning(
         'Failed to uninstall application "${app.id}" from "$id" '
         '("${connection.extensionName}"): $err',
@@ -963,11 +981,14 @@ class ExtensionBackedDevice extends Device {
 
   @override
   Future<bool> isAppInstalled(ApplicationPackage app, {String? userIdentifier}) async {
+    if (!supportsInstall) {
+      return false;
+    }
     final String? appId = app.id.isNotEmpty ? app.id : null;
-    final ExtensionFlutterProject? project = _resolveExtensionProject(app);
+    final ExtensionFlutterProject project = _resolveExtensionProject(app);
     try {
       return await _deviceService.isAppInstalled(appId: appId, deviceId: id, project: project);
-    } on Object catch (err, stack) {
+    } on Exception catch (err, stack) {
       logger.printWarning(
         'Failed to check if application "${app.id}" is installed on "$id" '
         '("${connection.extensionName}"): $err',

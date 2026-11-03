@@ -8,8 +8,11 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
+import '../build_info.dart';
 import '../context/tool_context.dart';
 import '../device.dart';
+import '../experimental/extension_device_manager.dart';
+import '../project.dart';
 import '../runner/flutter_command.dart';
 
 class InstallCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
@@ -62,6 +65,9 @@ class InstallCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts
     if (device == null) {
       throwToolExit('No target device found');
     }
+    if (!device!.supportsInstall) {
+      throwToolExit('flutter install is not supported on ${device!.displayName}');
+    }
     if (userIdentifier != null && device is! AndroidDevice) {
       throwToolExit('--${FlutterOptions.kDeviceUser} is only supported for Android');
     }
@@ -73,11 +79,24 @@ class InstallCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts
   @override
   Future<FlutterCommandResult> runCommand() async {
     final Device targetDevice = device!;
-    final ApplicationPackage? package = await applicationPackages?.getPackageForPlatform(
-      await targetDevice.targetPlatform,
-      applicationBinary: _applicationBinary,
-      buildInfo: await getBuildInfo(),
-    );
+    final BuildInfo buildInfo = await getBuildInfo();
+    final ApplicationPackage? package;
+    if (targetDevice is ExtensionBackedDevice) {
+      final ToolContext(:FileSystem fs, :FlutterProjectFactory projectFactory) = toolContext;
+      final FlutterProject currentProject = projectFactory.fromDirectory(fs.currentDirectory);
+      package = ExtensionApplicationPackage(
+        id: currentProject.manifest.appName,
+        applicationBinary: _applicationBinary,
+        buildInfo: buildInfo,
+        project: currentProject,
+      );
+    } else {
+      package = await applicationPackages?.getPackageForPlatform(
+        await targetDevice.targetPlatform,
+        applicationBinary: _applicationBinary,
+        buildInfo: buildInfo,
+      );
+    }
     if (package == null) {
       throwToolExit('Could not find or build package');
     }
