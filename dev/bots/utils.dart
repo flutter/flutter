@@ -425,6 +425,10 @@ String get shuffleSeed {
 // properly when overriding the local engine (for example, because some platform
 // dependent targets are only built on some engines).
 // See https://github.com/flutter/flutter/issues/72368
+/// package:test's exit code when no test ran: every file given was one the
+/// platform does not run (`@TestOn('browser')` under the VM).
+const int kNoTestsRanExitCode = 79;
+
 Future<void> runDartTest(
   String workingDirectory, {
   List<String>? testPaths,
@@ -439,6 +443,7 @@ Future<void> runDartTest(
   bool collectMetrics = false,
   List<String>? tags,
   bool runSkipped = false,
+  bool allowNoTests = false,
 }) async {
   // TODO(matanlurey): Consider Platform.numberOfProcessors instead.
   // See https://github.com/flutter/flutter/issues/161399.
@@ -487,10 +492,14 @@ Future<void> runDartTest(
     args,
     workingDirectory: workingDirectory,
     environment: environment,
+    acceptedExitCodes: allowNoTests ? const <int>{kNoTestsRanExitCode} : const <int>{},
     removeLine: useBuildRunner ? (String line) => line.startsWith('[INFO]') : null,
   );
 
   if (dryRun) {
+    return;
+  }
+  if (allowNoTests && !metricFile.existsSync()) {
     return;
   }
 
@@ -524,6 +533,10 @@ Future<void> runDartTest(
   metricFile.deleteSync();
 }
 
+/// `flutter test` in [workingDirectory]. With [allowNoTests], a run that
+/// finds no test is not a failure (package:test's [kNoTestsRanExitCode]):
+/// for a list of [tests] that may all be files the host skips whole, as a
+/// shard's remainder under `--bazel` can be (bazel.dart).
 Future<void> runFlutterTest(
   String workingDirectory, {
   String? script,
@@ -535,6 +548,7 @@ Future<void> runFlutterTest(
   List<String> tests = const <String>[],
   bool shuffleTests = true,
   bool fatalWarnings = true,
+  bool allowNoTests = false,
 }) async {
   assert(
     !printOutput || outputChecker == null,
@@ -587,6 +601,7 @@ Future<void> runFlutterTest(
     args,
     workingDirectory: workingDirectory,
     expectNonZeroExit: expectFailure,
+    acceptedExitCodes: allowNoTests ? const <int>{kNoTestsRanExitCode} : const <int>{},
     outputMode: outputMode,
     environment: environment,
   );
@@ -605,8 +620,8 @@ Future<void> runFlutterTest(
         workingDirectory: workingDirectory,
         expectFailure: expectFailure,
       );
+      metricFile.deleteSync();
     }
-    metricFile.deleteSync();
   }
 
   if (outputChecker != null) {
