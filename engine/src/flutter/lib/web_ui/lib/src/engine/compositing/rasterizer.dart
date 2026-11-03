@@ -82,6 +82,9 @@ abstract class ViewRasterizer {
     viewEmbedder.frameSize = currentFrameSize;
     final Frame compositorFrame = context.acquireFrame(viewEmbedder);
 
+    // Raster time includes the engine's preroll, measure, composition
+    // optimization, and paint passes, as well as rasterizing the pictures.
+    recorder?.recordRasterStart();
     compositorFrame.raster(layerTree, currentFrameSize, recorder);
     _lastRenderedLayerTree = layerTree;
 

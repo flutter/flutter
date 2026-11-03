@@ -26,8 +26,19 @@ class HoldingRasterizer extends ViewRasterizer {
   Completer<void>? rasterizeStarted;
   Completer<void>? rasterizeCompleter;
 
+  /// Simulated engine work performed after [ViewRasterizer.draw] begins but
+  /// before [rasterize] is called.
+  Duration prepareToDrawDelay = Duration.zero;
+
+  /// The time, in microseconds, at which [rasterize] was last entered.
+  int? lastRasterizeEnteredMicros;
+
   @override
-  Future<void> prepareToDraw() async {}
+  Future<void> prepareToDraw() async {
+    if (prepareToDrawDelay > Duration.zero) {
+      await Future<void>.delayed(prepareToDrawDelay);
+    }
+  }
 
   @override
   Future<void> rasterize(
@@ -35,7 +46,10 @@ class HoldingRasterizer extends ViewRasterizer {
     List<ui.Picture> pictures,
     FrameTimingRecorder? recorder,
   ) async {
-    recorder?.recordRasterStart();
+    // Like the production rasterizers, raster start is not recorded here: it
+    // is recorded by [ViewRasterizer.draw] before the engine's preroll,
+    // measure, and paint passes.
+    lastRasterizeEnteredMicros = (domWindow.performance.now() * 1000).toInt();
     if (rasterizeStarted != null && !rasterizeStarted!.isCompleted) {
       rasterizeStarted!.complete();
     }
@@ -432,4 +446,41 @@ void testMain() {
       expect(frame2Timing.rasterDuration, greaterThanOrEqualTo(Duration.zero));
     },
   );
+
+  test('raster duration includes engine work done before pictures are rasterized', () async {
+    final EngineFlutterView view = EnginePlatformDispatcher.instance.implicitView!;
+    final HoldingRasterizer holdingRasterizer = createAndInstallHoldingRasterizer(view);
+    const engineWork = Duration(milliseconds: 50);
+    // Allow for coarse timer resolution in the browser.
+    const minimumMeasuredEngineWork = Duration(milliseconds: 40);
+    holdingRasterizer.prepareToDrawDelay = engineWork;
+
+    FrameTimingRecorder.recordCurrentFrameNumber(601);
+    FrameTimingRecorder.recordCurrentFrameVsync();
+    FrameTimingRecorder.recordCurrentFrameBuildStart();
+    final ui.Scene scene = ui.SceneBuilder().build();
+    addTearDown(scene.dispose);
+    await renderer.renderScene(scene, view);
+
+    final allTimings = <ui.FrameTiming>[
+      ...reportedTimings,
+      ...FrameTimingRecorder.debugFrameTimings,
+    ];
+    expect(allTimings, hasLength(1));
+    final ui.FrameTiming timing = allTimings.single;
+    expect(timing.frameNumber, 601);
+
+    final int buildFinish = timing.timestampInMicroseconds(ui.FramePhase.buildFinish);
+    final int rasterStart = timing.timestampInMicroseconds(ui.FramePhase.rasterStart);
+    expect(rasterStart, greaterThanOrEqualTo(buildFinish));
+    // Raster start is recorded before the engine's preroll, measure, and paint
+    // passes, not when the pictures are handed to [ViewRasterizer.rasterize].
+    expect(rasterStart, lessThanOrEqualTo(holdingRasterizer.lastRasterizeEnteredMicros!));
+    expect(
+      holdingRasterizer.lastRasterizeEnteredMicros! - rasterStart,
+      greaterThanOrEqualTo(minimumMeasuredEngineWork.inMicroseconds),
+    );
+    expect(timing.rasterDuration, greaterThanOrEqualTo(minimumMeasuredEngineWork));
+    expect(timing.buildDuration, lessThan(engineWork));
+  });
 }
