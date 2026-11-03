@@ -1117,9 +1117,8 @@ multiple_windows' (a package outside the pub workspace: its dependencies
 named as `roots`, since the lock's tables do not know them) -- 1,644 files
 and 22,676 cases, every `flutter test` tree of the framework_tests shard a
 Linux host runs -- plus the Impeller, no-tracking and release/profile runs,
-flutter_tools' general shard (271 files) and commands shard (the hermetic
-half whole, 67; the permeable half but for the one file that does not
-compile at this checkout, 10) and its integration shard where a Linux host
+flutter_tools' general shard (277 files) and commands shard (the hermetic
+half, 68; the permeable half, 11) and its integration shard where a Linux host
 can run it (73 of 117 files), its desktop shard (13 more) and its Android
 shard (25, with the network; one file is macOS's), its web shard
 (18 files, on the pinned Chrome) and, on a Mac host, its apple shard (the
