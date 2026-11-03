@@ -2432,7 +2432,21 @@ abstract class PopupRoute<T> extends ModalRoute<T> {
 ///   of changes to the [Navigator]'s session history.
 class RouteObserver<R extends Route<dynamic>> extends NavigatorObserver {
   final Map<R, Set<RouteAware>> _listeners = <R, Set<RouteAware>>{};
-  final Expando<bool> _coveredRoutes = Expando<bool>();
+  final Expando<R> _routeAbove = Expando<R>();
+  final Expando<R> _routeBelow = Expando<R>();
+
+  void _unlinkRoute(R route) {
+    final R? below = _routeBelow[route];
+    final R? above = _routeAbove[route];
+    if (below != null) {
+      _routeAbove[below] = above;
+    }
+    if (above != null) {
+      _routeBelow[above] = below;
+    }
+    _routeBelow[route] = null;
+    _routeAbove[route] = null;
+  }
 
   /// Whether this observer is managing changes for the specified route.
   ///
@@ -2456,7 +2470,7 @@ class RouteObserver<R extends Route<dynamic>> extends NavigatorObserver {
     final Set<RouteAware> subscribers = _listeners.putIfAbsent(route, () => <RouteAware>{});
     if (subscribers.add(routeAware)) {
       routeAware.didPush();
-      if (_coveredRoutes[route] == true) {
+      if (_routeAbove[route] != null) {
         routeAware.didPushNext();
       }
     }
@@ -2481,8 +2495,10 @@ class RouteObserver<R extends Route<dynamic>> extends NavigatorObserver {
 
   @override
   void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) {
+    if (route is R) {
+      _unlinkRoute(route);
+    }
     if (route is R && previousRoute is R) {
-      _coveredRoutes[previousRoute] = null;
       final List<RouteAware>? previousSubscribers = _listeners[previousRoute]?.toList();
 
       if (previousSubscribers != null) {
@@ -2504,7 +2520,13 @@ class RouteObserver<R extends Route<dynamic>> extends NavigatorObserver {
   @override
   void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
     if (route is R && previousRoute is R) {
-      _coveredRoutes[previousRoute] = true;
+      final R? above = _routeAbove[previousRoute];
+      _routeAbove[previousRoute] = route;
+      _routeBelow[route] = previousRoute;
+      _routeAbove[route] = above;
+      if (above != null) {
+        _routeBelow[above] = route;
+      }
       final Set<RouteAware>? previousSubscribers = _listeners[previousRoute];
 
       if (previousSubscribers != null) {
@@ -2517,17 +2539,28 @@ class RouteObserver<R extends Route<dynamic>> extends NavigatorObserver {
 
   @override
   void didRemove(Route<dynamic> route, Route<dynamic>? previousRoute) {
-    if (route is R && previousRoute is R) {
-      _coveredRoutes[previousRoute] = _coveredRoutes[route];
-      _coveredRoutes[route] = null;
+    if (route is R) {
+      _unlinkRoute(route);
     }
   }
 
   @override
   void didReplace({Route<dynamic>? newRoute, Route<dynamic>? oldRoute}) {
-    if (newRoute is R && oldRoute is R) {
-      _coveredRoutes[newRoute] = _coveredRoutes[oldRoute];
-      _coveredRoutes[oldRoute] = null;
+    if (oldRoute is R && newRoute is R) {
+      final R? below = _routeBelow[oldRoute];
+      final R? above = _routeAbove[oldRoute];
+      _routeBelow[newRoute] = below;
+      _routeAbove[newRoute] = above;
+      if (below != null) {
+        _routeAbove[below] = newRoute;
+      }
+      if (above != null) {
+        _routeBelow[above] = newRoute;
+      }
+      _routeBelow[oldRoute] = null;
+      _routeAbove[oldRoute] = null;
+    } else if (oldRoute is R) {
+      _unlinkRoute(oldRoute);
     }
   }
 }
