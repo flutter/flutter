@@ -40,6 +40,7 @@ final class LinuxDeviceService extends DeviceService {
         buildTarget: LinuxBuildService.customLinuxBuildTargetName,
         ephemeral: false,
         sdkNameAndVersion: 'Custom Linux 1.0.0',
+        supportsInstall: true,
         targetPlatform: 'linux-x64',
       ),
     ];
@@ -54,6 +55,38 @@ final class LinuxDeviceService extends DeviceService {
       return false;
     }
     return Directory.fromUri(project.directory.resolve('linux')).existsSync();
+  }
+
+  // Since the host and target devices are the same on desktop, verify the
+  // bundle exists without copying it.
+  @override
+  Future<bool> installApp({required Uri bundleUri, required String deviceId}) async {
+    if (deviceId != customLinuxDeviceId) {
+      return false;
+    }
+    return File.fromUri(bundleUri).existsSync();
+  }
+
+  // Since the host and target devices are the same on desktop, no work needs
+  // to be done to uninstall the application.
+  @override
+  Future<bool> uninstallApp({
+    required String deviceId,
+    required ExtensionFlutterProject project,
+    String? appId,
+  }) async {
+    return deviceId == customLinuxDeviceId;
+  }
+
+  // Since the host and target devices are the same on desktop, no work needs
+  // to be done to install the application.
+  @override
+  Future<bool> isAppInstalled({
+    required String deviceId,
+    required ExtensionFlutterProject project,
+    String? appId,
+  }) async {
+    return deviceId == customLinuxDeviceId;
   }
 
   @override

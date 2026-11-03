@@ -24,6 +24,30 @@ import 'extension_build_manager.dart';
 import 'extension_discovery.dart';
 import 'extension_manager.dart';
 
+/// An [ApplicationPackage] for a tool extension target device.
+class ExtensionApplicationPackage extends ApplicationPackage {
+  /// Creates an [ExtensionApplicationPackage].
+  ExtensionApplicationPackage({
+    required super.id,
+    this.applicationBinary,
+    this.buildInfo,
+    this.project,
+  });
+
+  /// An optional prebuilt application binary or bundle file.
+  final File? applicationBinary;
+
+  /// Build configuration used when building the application prior to
+  /// installation if [applicationBinary] is not provided.
+  final BuildInfo? buildInfo;
+
+  /// The [FlutterProject] associated with this application, if available.
+  final FlutterProject? project;
+
+  @override
+  String? get name => applicationBinary?.basename ?? project?.manifest.appName ?? id;
+}
+
 /// A host-side [DeviceService] client adapter delegating RPC queries to an [ExtensionConnection].
 final class ExtensionDeviceClient extends DeviceService {
   /// Creates an [ExtensionDeviceClient] wrapping the host [connection].
@@ -81,6 +105,163 @@ final class ExtensionDeviceClient extends DeviceService {
       );
     }
     return false;
+  }
+
+  @override
+  Future<bool> installApp({required Uri bundleUri, required String deviceId}) async {
+    _logger.printTrace(
+      'ExtensionDeviceClient installing app "$bundleUri" on "$deviceId" via RPC '
+      '("${DeviceService.installAppMethod}")...',
+    );
+    final Object? rawResult = await connection.sendRequest(
+      DeviceService.installAppMethod,
+      params: <String, Object?>{
+        DeviceService.bundleUriParam: bundleUri.toString(),
+        DeviceService.deviceIdParam: deviceId,
+      },
+      // TODO(bkonyi): Support heartbeat / liveness monitoring for long-running RPCs,
+      // https://github.com/flutter/flutter/issues/193955.
+      timeout: null,
+    );
+    if (rawResult case final bool installed) {
+      return installed;
+    }
+    _logger.printError(
+      'ExtensionDeviceClient received invalid response for "${DeviceService.installAppMethod}": '
+      'expected bool, got ${rawResult.runtimeType}.',
+    );
+    return false;
+  }
+
+  @override
+  Future<bool> uninstallApp({
+    required String deviceId,
+    required ExtensionFlutterProject project,
+    String? appId,
+  }) async {
+    _logger.printTrace(
+      'ExtensionDeviceClient uninstalling app "${appId ?? project.appName}" from "$deviceId" via RPC '
+      '("${DeviceService.uninstallAppMethod}")...',
+    );
+    final Object? rawResult = await connection.sendRequest(
+      DeviceService.uninstallAppMethod,
+      params: <String, Object?>{
+        DeviceService.appIdParam: ?appId,
+        DeviceService.deviceIdParam: deviceId,
+        DeviceService.projectParam: project.toMap(),
+      },
+      // TODO(bkonyi): Support heartbeat / liveness monitoring for long-running RPCs,
+      // https://github.com/flutter/flutter/issues/193955.
+      timeout: null,
+    );
+    if (rawResult case final bool uninstalled) {
+      return uninstalled;
+    }
+    _logger.printError(
+      'ExtensionDeviceClient received invalid response for "${DeviceService.uninstallAppMethod}": '
+      'expected bool, got ${rawResult.runtimeType}.',
+    );
+    return false;
+  }
+
+  @override
+  Future<bool> isAppInstalled({
+    required String deviceId,
+    required ExtensionFlutterProject project,
+    String? appId,
+  }) async {
+    _logger.printTrace(
+      'ExtensionDeviceClient checking if app "${appId ?? project.appName}" is installed on "$deviceId" via RPC '
+      '("${DeviceService.isAppInstalledMethod}")...',
+    );
+    final Object? rawResult = await connection.sendRequest(
+      DeviceService.isAppInstalledMethod,
+      params: <String, Object?>{
+        DeviceService.appIdParam: ?appId,
+        DeviceService.deviceIdParam: deviceId,
+        DeviceService.projectParam: project.toMap(),
+      },
+    );
+    if (rawResult case final bool installed) {
+      return installed;
+    }
+    _logger.printError(
+      'ExtensionDeviceClient received invalid response for "${DeviceService.isAppInstalledMethod}": '
+      'expected bool, got ${rawResult.runtimeType}.',
+    );
+    return false;
+  }
+
+  @override
+  Future<void> takeScreenshot({required String deviceId, required Uri outputFileUri}) async {
+    _logger.printTrace(
+      'ExtensionDeviceClient taking screenshot on "$deviceId" to "$outputFileUri" via RPC '
+      '("${DeviceService.takeScreenshotMethod}")...',
+    );
+    await connection.sendRequest(
+      DeviceService.takeScreenshotMethod,
+      params: <String, Object?>{
+        DeviceService.deviceIdParam: deviceId,
+        DeviceService.outputFileUriParam: outputFileUri.toString(),
+      },
+      // TODO(bkonyi): Support heartbeat / liveness monitoring for long-running RPCs,
+      // https://github.com/flutter/flutter/issues/193955.
+      timeout: null,
+    );
+  }
+
+  @override
+  Future<void> startScreenRecording({
+    required String deviceId,
+    required Uri outputFileUri,
+    Duration? duration,
+  }) async {
+    _logger.printTrace(
+      'ExtensionDeviceClient starting screen recording on "$deviceId" to "$outputFileUri" via RPC '
+      '("${DeviceService.startScreenRecordingMethod}")...',
+    );
+    await connection.sendRequest(
+      DeviceService.startScreenRecordingMethod,
+      params: <String, Object?>{
+        DeviceService.deviceIdParam: deviceId,
+        DeviceService.durationMsParam: ?duration?.inMilliseconds,
+        DeviceService.outputFileUriParam: outputFileUri.toString(),
+      },
+      // TODO(bkonyi): Support heartbeat / liveness monitoring for long-running RPCs,
+      // https://github.com/flutter/flutter/issues/193955.
+      timeout: null,
+    );
+  }
+
+  @override
+  Future<Uri> stopScreenRecording({required String deviceId}) async {
+    _logger.printTrace(
+      'ExtensionDeviceClient stopping screen recording on "$deviceId" via RPC '
+      '("${DeviceService.stopScreenRecordingMethod}")...',
+    );
+    final Object? rawResult = await connection.sendRequest(
+      DeviceService.stopScreenRecordingMethod,
+      params: <String, Object?>{DeviceService.deviceIdParam: deviceId},
+      // TODO(bkonyi): Support heartbeat / liveness monitoring for long-running RPCs,
+      // https://github.com/flutter/flutter/issues/193955.
+      timeout: null,
+    );
+    if (rawResult case final String rawUri) {
+      final Uri? uri = Uri.tryParse(rawUri);
+      if (uri != null && uri.isValidFileUri) {
+        return uri;
+      }
+      final message =
+          'ExtensionDeviceClient received invalid file URI for '
+          '"${DeviceService.stopScreenRecordingMethod}": "$rawUri".';
+      _logger.printError(message);
+      throw FormatException(message);
+    }
+    final message =
+        'ExtensionDeviceClient received invalid response for '
+        '"${DeviceService.stopScreenRecordingMethod}": expected String, got ${rawResult.runtimeType}.';
+    _logger.printError(message);
+    throw FormatException(message);
   }
 
   @override
@@ -356,6 +537,7 @@ class ExtensionDevices extends PollingDeviceDiscovery {
     this._artifacts,
     this._cache,
     this._config,
+    this._projectFactory,
   }) : super('tool_extension');
 
   final Artifacts? _artifacts;
@@ -365,6 +547,7 @@ class ExtensionDevices extends PollingDeviceDiscovery {
   final ExtensionManager _extensionManager;
   final FileSystem _fileSystem;
   final Logger _logger;
+  final FlutterProjectFactory? _projectFactory;
   final _devicesByKey = <(ExtensionConnection, String), ExtensionBackedDevice>{};
 
   @override
@@ -430,6 +613,7 @@ class ExtensionDevices extends PollingDeviceDiscovery {
             deviceService: service,
             fileSystem: _fileSystem,
             logger: _logger,
+            projectFactory: _projectFactory,
             targetDevice: targetDevice,
           );
           _devicesByKey[key] = device;
@@ -484,7 +668,11 @@ class ExtensionBackedDevice extends Device {
     this._artifacts,
     this._cache,
     this._config,
-  }) : super(
+    FlutterProjectFactory? projectFactory,
+  }) : _projectFactory =
+           projectFactory ??
+           FlutterProjectFactory(config: _config, fileSystem: _fileSystem, logger: logger),
+       super(
          _targetDevice.id,
          category: _targetDevice.category,
          ephemeral: _targetDevice.ephemeral,
@@ -498,12 +686,18 @@ class ExtensionBackedDevice extends Device {
   final ExtensionConnection connection;
   final DeviceService _deviceService;
   final FileSystem _fileSystem;
+  final FlutterProjectFactory _projectFactory;
   TargetDevice _targetDevice;
   Future<ExtensionDeviceLogReader>? _logReader;
   bool _disposed = false;
 
   @override
   String get name => _targetDevice.name;
+
+  /// Whether this device supports installing and uninstalling application
+  /// packages via `flutter install`.
+  @override
+  bool get supportsInstall => _targetDevice.supportsInstall;
 
   @override
   Future<bool> isSupported() async => _targetDevice.isSupported;
@@ -578,34 +772,55 @@ class ExtensionBackedDevice extends Device {
   Future<bool> isLatestBuildInstalled(ApplicationPackage app) async => false;
 
   @override
-  Future<bool> installApp(ApplicationPackage app, {String? userIdentifier}) async => true;
-
-  @override
-  Future<LaunchResult> startApp(
-    ApplicationPackage? package, {
-    required DebuggingOptions debuggingOptions,
-    bool ipv6 = false,
-    String? mainPath,
-    Map<String, Object?>? platformArgs,
-    bool prebuiltApplication = false,
-    String? route,
-    String? userIdentifier,
-  }) async {
-    // TODO(bkonyi): Forward additional BuildInfo and DebuggingOptions fields
-    // (e.g. dartDefines, flavor), https://github.com/flutter/flutter/issues/190753.
-    final BuildMode buildMode = debuggingOptions.buildInfo.mode;
-
-    if (prebuiltApplication) {
-      logger.printError(
-        'Prebuilt application bundles are not supported yet for tool extension devices.',
-      );
-      return LaunchResult.failed();
+  Future<bool> installApp(ApplicationPackage app, {String? userIdentifier}) async {
+    if (!supportsInstall) {
+      return true;
     }
+    final Uri? bundleUri;
+    if (app case PrebuiltApplicationPackage(:final applicationPackage)) {
+      bundleUri = applicationPackage.absolute.uri;
+    } else if (app case ExtensionApplicationPackage(applicationBinary: final File binary)) {
+      bundleUri = binary.absolute.uri;
+    } else {
+      final BuildMode buildMode = switch (app) {
+        ExtensionApplicationPackage(:final BuildInfo buildInfo) => buildInfo.mode,
+        _ => BuildMode.debug,
+      };
+      final FlutterProject project = switch (app) {
+        ExtensionApplicationPackage(:final FlutterProject project) => project,
+        _ => _projectFactory.fromDirectory(_fileSystem.currentDirectory),
+      };
+      bundleUri = await _buildForDevice(
+        buildMode: buildMode,
+        operationDescription: 'installing applications',
+        project: project,
+      );
+      if (bundleUri == null) {
+        return false;
+      }
+    }
+    try {
+      return await _deviceService.installApp(bundleUri: bundleUri, deviceId: id);
+    } on Exception catch (err, stack) {
+      logger.printWarning(
+        'Failed to install application "${app.id}" on "$id" '
+        '("${connection.extensionName}"): $err',
+      );
+      logger.printTrace('$stack');
+      return false;
+    }
+  }
 
+  Future<Uri?> _buildForDevice({
+    required BuildMode buildMode,
+    required String operationDescription,
+    String? mainPath,
+    FlutterProject? project,
+  }) async {
     final String? buildTargetName = _targetDevice.buildTarget;
     if (buildTargetName == null) {
-      logger.printError('Device $name does not specify a buildTarget for launching applications.');
-      return LaunchResult.failed();
+      logger.printError('Device $name does not specify a buildTarget for $operationDescription.');
+      return null;
     }
 
     final String targetMainPath = mainPath ?? 'lib/main.dart';
@@ -617,10 +832,10 @@ class ExtensionBackedDevice extends Device {
         .firstOrNull;
     if (target == null) {
       logger.printError('No tool extension provides build target "$buildTargetName" for $name.');
-      return LaunchResult.failed();
+      return null;
     }
 
-    final Directory projectDir = _fileSystem.currentDirectory;
+    final Directory projectDir = project?.directory ?? _fileSystem.currentDirectory;
     final Directory buildOutputDir = projectDir.childDirectory(
       _config != null ? getBuildDirectory(_config, _fileSystem) : 'build',
     );
@@ -663,13 +878,46 @@ class ExtensionBackedDevice extends Device {
             ? 'Build failed: $errorMessage'
             : 'Build failed.',
       );
-      return LaunchResult.failed();
+      return null;
     }
     final Uri? executableUri = result.executableUri;
     if (executableUri == null || !executableUri.isValidFileUri) {
       logger.printError(
         'Extension build target "$buildTargetName" did not return a valid executableUri.',
       );
+      return null;
+    }
+    return executableUri;
+  }
+
+  @override
+  Future<LaunchResult> startApp(
+    ApplicationPackage? package, {
+    required DebuggingOptions debuggingOptions,
+    bool ipv6 = false,
+    String? mainPath,
+    Map<String, Object?>? platformArgs,
+    bool prebuiltApplication = false,
+    String? route,
+    String? userIdentifier,
+  }) async {
+    // TODO(bkonyi): Forward additional BuildInfo and DebuggingOptions fields
+    // (e.g. dartDefines, flavor), https://github.com/flutter/flutter/issues/190753.
+    final BuildMode buildMode = debuggingOptions.buildInfo.mode;
+
+    if (prebuiltApplication) {
+      logger.printError(
+        'Prebuilt application bundles are not supported yet for tool extension devices.',
+      );
+      return LaunchResult.failed();
+    }
+
+    final Uri? executableUri = await _buildForDevice(
+      buildMode: buildMode,
+      mainPath: mainPath,
+      operationDescription: 'launching applications',
+    );
+    if (executableUri == null) {
       return LaunchResult.failed();
     }
 
@@ -704,9 +952,73 @@ class ExtensionBackedDevice extends Device {
     return _deviceService.stopApp(deviceId: id);
   }
 
-  @override
-  Future<bool> uninstallApp(ApplicationPackage app, {String? userIdentifier}) async => true;
+  ExtensionFlutterProject _resolveExtensionProject(ApplicationPackage app) {
+    final FlutterProject project = switch (app) {
+      ExtensionApplicationPackage(:final FlutterProject project) => project,
+      _ => _projectFactory.fromDirectory(_fileSystem.currentDirectory),
+    };
+    return project.toExtensionProject();
+  }
 
   @override
-  Future<bool> isAppInstalled(ApplicationPackage app, {String? userIdentifier}) async => false;
+  Future<bool> uninstallApp(ApplicationPackage app, {String? userIdentifier}) async {
+    if (!supportsInstall) {
+      return true;
+    }
+    final String? appId = app.id.isNotEmpty ? app.id : null;
+    final ExtensionFlutterProject project = _resolveExtensionProject(app);
+    try {
+      return await _deviceService.uninstallApp(appId: appId, deviceId: id, project: project);
+    } on Exception catch (err, stack) {
+      logger.printWarning(
+        'Failed to uninstall application "${app.id}" from "$id" '
+        '("${connection.extensionName}"): $err',
+      );
+      logger.printTrace('$stack');
+      return false;
+    }
+  }
+
+  @override
+  Future<bool> isAppInstalled(ApplicationPackage app, {String? userIdentifier}) async {
+    if (!supportsInstall) {
+      return false;
+    }
+    final String? appId = app.id.isNotEmpty ? app.id : null;
+    final ExtensionFlutterProject project = _resolveExtensionProject(app);
+    try {
+      return await _deviceService.isAppInstalled(appId: appId, deviceId: id, project: project);
+    } on Exception catch (err, stack) {
+      logger.printWarning(
+        'Failed to check if application "${app.id}" is installed on "$id" '
+        '("${connection.extensionName}"): $err',
+      );
+      logger.printTrace('$stack');
+      return false;
+    }
+  }
+
+  @override
+  bool get supportsScreenshot => _targetDevice.supportsScreenshot;
+
+  /// Whether the device supports recording the screen of a running Flutter
+  /// application.
+  bool get supportsScreenRecording => _targetDevice.supportsScreenRecording;
+
+  @override
+  Future<void> takeScreenshot(File outputFile) =>
+      _deviceService.takeScreenshot(deviceId: id, outputFileUri: outputFile.absolute.uri);
+
+  /// Starts recording the device screen to [outputFile], optionally stopping
+  /// automatically after [duration].
+  Future<void> startScreenRecording(File outputFile, {Duration? duration}) =>
+      _deviceService.startScreenRecording(
+        deviceId: id,
+        duration: duration,
+        outputFileUri: outputFile.absolute.uri,
+      );
+
+  /// Stops an active screen recording on the device and returns the [Uri] of
+  /// the recorded output file.
+  Future<Uri> stopScreenRecording() => _deviceService.stopScreenRecording(deviceId: id);
 }

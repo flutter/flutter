@@ -217,6 +217,9 @@ class FakeIOSDevice extends Fake implements IOSDevice {
   Future<TargetPlatform> get targetPlatform async => TargetPlatform.ios;
 
   @override
+  bool get supportsInstall => true;
+
+  @override
   Future<bool> isAppInstalled(ApplicationPackage app, {String? userIdentifier}) async => false;
 
   @override
@@ -238,6 +241,9 @@ class FakeAndroidDevice extends Fake implements AndroidDevice {
 
   @override
   Future<TargetPlatform> get targetPlatform async => TargetPlatform.android_arm;
+
+  @override
+  bool get supportsInstall => true;
 
   @override
   Future<bool> isAppInstalled(ApplicationPackage app, {String? userIdentifier}) async =>

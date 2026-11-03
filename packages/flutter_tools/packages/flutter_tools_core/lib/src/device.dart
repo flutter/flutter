@@ -52,6 +52,9 @@ class TargetDevice {
     this.ephemeral = true,
     this.isSupported = true,
     this.sdkNameAndVersion,
+    this.supportsInstall = false,
+    this.supportsScreenRecording = false,
+    this.supportsScreenshot = false,
     this.targetPlatform,
   });
 
@@ -67,6 +70,12 @@ class TargetDevice {
       ephemeral: json.optionalField<bool>(ephemeralKey, defaultValue: true),
       isSupported: json.optionalField<bool>(isSupportedKey, defaultValue: true),
       sdkNameAndVersion: json.nullableField<String>(sdkNameAndVersionKey),
+      supportsInstall: json.optionalField<bool>(supportsInstallKey, defaultValue: false),
+      supportsScreenRecording: json.optionalField<bool>(
+        supportsScreenRecordingKey,
+        defaultValue: false,
+      ),
+      supportsScreenshot: json.optionalField<bool>(supportsScreenshotKey, defaultValue: false),
       targetPlatform: json.nullableField<String>(targetPlatformKey),
     );
   }
@@ -92,6 +101,15 @@ class TargetDevice {
   /// Map key for [sdkNameAndVersion].
   static const String sdkNameAndVersionKey = 'sdkNameAndVersion';
 
+  /// Map key for [supportsInstall].
+  static const String supportsInstallKey = 'supportsInstall';
+
+  /// Map key for [supportsScreenshot].
+  static const String supportsScreenshotKey = 'supportsScreenshot';
+
+  /// Map key for [supportsScreenRecording].
+  static const String supportsScreenRecordingKey = 'supportsScreenRecording';
+
   /// Map key for [targetPlatform].
   static const String targetPlatformKey = 'targetPlatform';
 
@@ -116,7 +134,8 @@ class TargetDevice {
   final String name;
 
   /// The [ExtensionBuildTarget.name] of the extension build target used to
-  /// build an application for this device during `flutter run`.
+  /// build an application for this device during `flutter run` or
+  /// `flutter install`.
   ///
   /// Must match [ExtensionBuildTarget.isValidName].
   final String? buildTarget;
@@ -137,6 +156,17 @@ class TargetDevice {
   /// Operating system SDK name and version string (e.g. `'Custom Linux 1.0.0'`).
   final String? sdkNameAndVersion;
 
+  /// Whether the device supports installing and uninstalling application
+  /// packages via `DeviceService.installApp` and `DeviceService.uninstallApp`.
+  final bool supportsInstall;
+
+  /// Whether the device supports capturing screenshots via `DeviceService.takeScreenshot`.
+  final bool supportsScreenshot;
+
+  /// Whether the device supports screen recording via
+  /// `DeviceService.startScreenRecording` and `DeviceService.stopScreenRecording`.
+  final bool supportsScreenRecording;
+
   /// Target platform identifier string (e.g. `'linux-x64'`, `'linux-arm64'`, `'android-arm64'`).
   final String? targetPlatform;
 
@@ -149,6 +179,9 @@ class TargetDevice {
     ephemeralKey: ephemeral,
     isSupportedKey: isSupported,
     sdkNameAndVersionKey: ?sdkNameAndVersion,
+    supportsInstallKey: supportsInstall,
+    supportsScreenshotKey: supportsScreenshot,
+    supportsScreenRecordingKey: supportsScreenRecording,
     targetPlatformKey: ?targetPlatform,
   };
 
@@ -157,7 +190,10 @@ class TargetDevice {
       'TargetDevice(id: $id, name: $name, category: $category, '
       'targetPlatform: $targetPlatform, sdkNameAndVersion: $sdkNameAndVersion, '
       'ephemeral: $ephemeral, isSupported: $isSupported, '
-      'buildTarget: $buildTarget)';
+      'buildTarget: $buildTarget, '
+      'supportsInstall: $supportsInstall, '
+      'supportsScreenshot: $supportsScreenshot, '
+      'supportsScreenRecording: $supportsScreenRecording)';
 
   @override
   bool operator ==(Object other) {
@@ -170,6 +206,9 @@ class TargetDevice {
             other.ephemeral == ephemeral &&
             other.isSupported == isSupported &&
             other.sdkNameAndVersion == sdkNameAndVersion &&
+            other.supportsInstall == supportsInstall &&
+            other.supportsScreenshot == supportsScreenshot &&
+            other.supportsScreenRecording == supportsScreenRecording &&
             other.targetPlatform == targetPlatform);
   }
 
@@ -182,6 +221,9 @@ class TargetDevice {
     ephemeral,
     isSupported,
     sdkNameAndVersion,
+    supportsInstall,
+    supportsScreenshot,
+    supportsScreenRecording,
     targetPlatform,
   );
 }

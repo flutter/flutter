@@ -34,6 +34,7 @@ import 'macos/macos_device.dart';
 import 'macos/macos_ipad_device.dart';
 import 'macos/macos_workflow.dart';
 import 'macos/xcdevice.dart';
+import 'project.dart';
 import 'tester/flutter_tester.dart';
 import 'web/web_device.dart';
 import 'windows/windows_device.dart';
@@ -67,6 +68,7 @@ class FlutterDeviceManager extends DeviceManager {
       :Logger logger,
       :Platform platform,
       :ProcessManager processManager,
+      :FlutterProjectFactory projectFactory,
       :UserMessages userMessages,
     ) = toolContext;
     deviceDiscoverers = <DeviceDiscovery>[
@@ -128,6 +130,7 @@ class FlutterDeviceManager extends DeviceManager {
         artifacts: artifacts,
         cache: cache,
         config: config,
+        projectFactory: projectFactory,
       ),
     ];
   }
