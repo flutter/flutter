@@ -12,11 +12,14 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.res.AssetManager;
+import android.graphics.Rect;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import io.flutter.embedding.engine.FlutterJNI;
 import io.flutter.embedding.engine.dart.DartExecutor;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
+import java.util.Arrays;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Test;
@@ -67,6 +70,31 @@ public class PlatformChannelTest {
     fakePlatformChannel.parsingMethodCallHandler.onMethodCall(methodCall, mockResult);
 
     assertEquals(expectedContent, valueCapture.getValue());
+    verify(mockResult).success(null);
+  }
+
+  @Test
+  public void platformChannel_setSystemGestureExclusionRectsMessage() throws JSONException {
+    FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
+    DartExecutor dartExecutor = new DartExecutor(mockFlutterJNI, mock(AssetManager.class));
+    PlatformChannel fakePlatformChannel = new PlatformChannel(dartExecutor);
+    PlatformChannel.PlatformMessageHandler mockMessageHandler =
+        mock(PlatformChannel.PlatformMessageHandler.class);
+    fakePlatformChannel.setPlatformMessageHandler(mockMessageHandler);
+
+    JSONArray arguments = new JSONArray();
+    arguments.put(
+        new JSONObject().put("left", 0).put("top", 100).put("right", 48).put("bottom", 148));
+    arguments.put(
+        new JSONObject().put("left", 1032).put("top", 200).put("right", 1080).put("bottom", 248));
+    MethodCall methodCall =
+        new MethodCall("SystemChrome.setSystemGestureExclusionRects", arguments);
+    MethodChannel.Result mockResult = mock(MethodChannel.Result.class);
+    fakePlatformChannel.parsingMethodCallHandler.onMethodCall(methodCall, mockResult);
+
+    verify(mockMessageHandler)
+        .setSystemGestureExclusionRects(
+            Arrays.asList(new Rect(0, 100, 48, 148), new Rect(1032, 200, 1080, 248)));
     verify(mockResult).success(null);
   }
 }

@@ -23,6 +23,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import android.app.Activity;
@@ -32,6 +33,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.AssetFileDescriptor;
+import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Build;
 import android.view.HapticFeedbackConstants;
@@ -50,6 +52,9 @@ import io.flutter.embedding.engine.systemchannels.PlatformChannel.ClipboardConte
 import io.flutter.embedding.engine.systemchannels.PlatformChannel.SystemChromeStyle;
 import io.flutter.plugin.platform.PlatformPlugin.PlatformPluginDelegate;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -959,5 +964,43 @@ public class PlatformPluginTest {
         PlatformChannel.HapticFeedbackType.ERROR_NOTIFICATION);
     verify(fakeDecorView).performHapticFeedback(HapticFeedbackConstants.REJECT);
     clearInvocations(fakeDecorView);
+  }
+
+  @Config(sdk = API_LEVELS.API_29)
+  @Test
+  public void setSystemGestureExclusionRects() {
+    View fakeDecorView = mock(View.class);
+    Window fakeWindow = mock(Window.class);
+    Activity mockActivity = mock(Activity.class);
+    when(fakeWindow.getDecorView()).thenReturn(fakeDecorView);
+    when(mockActivity.getWindow()).thenReturn(fakeWindow);
+    PlatformPlugin platformPlugin = new PlatformPlugin(mockActivity, mockPlatformChannel);
+
+    List<Rect> rects = Arrays.asList(new Rect(0, 100, 48, 148), new Rect(1032, 200, 1080, 248));
+    platformPlugin.mPlatformMessageHandler.setSystemGestureExclusionRects(rects);
+    verify(fakeDecorView).setSystemGestureExclusionRects(rects);
+
+    // An empty list clears the exclusion rects.
+    platformPlugin.mPlatformMessageHandler.setSystemGestureExclusionRects(
+        Collections.<Rect>emptyList());
+    verify(fakeDecorView).setSystemGestureExclusionRects(Collections.<Rect>emptyList());
+  }
+
+  @Config(sdk = API_LEVELS.API_28)
+  @Test
+  public void setSystemGestureExclusionRectsDoesNothingBeforeApi29() {
+    View fakeDecorView = mock(View.class);
+    Window fakeWindow = mock(Window.class);
+    Activity mockActivity = mock(Activity.class);
+    when(fakeWindow.getDecorView()).thenReturn(fakeDecorView);
+    when(mockActivity.getWindow()).thenReturn(fakeWindow);
+    PlatformPlugin platformPlugin = new PlatformPlugin(mockActivity, mockPlatformChannel);
+    clearInvocations(fakeDecorView);
+
+    platformPlugin.mPlatformMessageHandler.setSystemGestureExclusionRects(
+        Arrays.asList(new Rect(0, 100, 48, 148)));
+    // View.setSystemGestureExclusionRects doesn't exist before API 29, so it
+    // can't be referenced here. Verify the decor view isn't touched instead.
+    verifyNoInteractions(fakeDecorView);
   }
 }

