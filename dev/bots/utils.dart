@@ -102,24 +102,38 @@ bool? _dryRun;
 
 /// Whether the shards run their tests under Bazel where they can.
 ///
-/// When `true` (`test.dart --bazel`, or a [kShardKey] or [kSubshardKey] value
-/// ending in [kBazelSuffix]), the framework_tests and tool shards compile and
-/// run the tests that have Bazel targets with `bazelisk test
-/// --config=prebuilt_engine` -- the repository's Bazel rules against the
-/// engine artifacts in bin/cache -- in place of `flutter test` and `dart
-/// test`, and run the rest as they do otherwise. See bazel.dart.
-bool get useBazel => _useBazel;
-bool _useBazel = false;
+/// When `true`, the framework_tests and tool shards compile and run the tests
+/// that have Bazel targets with `bazelisk test --config=prebuilt_engine` --
+/// the repository's Bazel rules against the engine artifacts in bin/cache --
+/// in place of `flutter test` and `dart test`, and run the rest as they do
+/// otherwise. See bazel.dart.
+///
+/// On by default on a Linux or macOS host (`test.dart --no-bazel` turns it
+/// off; `--bazel` and a [kShardKey] or [kSubshardKey] value ending in
+/// [kBazelSuffix] turn it on): the hosts the prebuilt engine, bazelisk's
+/// release and the test rules are proven on. Off on Windows, and for a shard
+/// run with `REDUCED_TEST_SET` (the recipe's tag filter, which Bazel's
+/// targets cannot honor).
+bool get useBazel => _useBazel ?? _useBazelByDefault;
+bool? _useBazel;
+final bool _useBazelByDefault =
+    (Platform.isLinux || Platform.isMacOS) && Platform.environment['REDUCED_TEST_SET'] != 'True';
 
 /// Switches [useBazel] to `true`.
 void enableBazel() {
   _useBazel = true;
 }
 
+/// Switches [useBazel] to `false` (`--no-bazel`).
+void disableBazel() {
+  _useBazel = false;
+}
+
 /// The suffix of a [kShardKey] or [kSubshardKey] value that asks for the
 /// shard under Bazel: `SUBSHARD=widgets_bazel` runs the widgets subshard as
-/// `--bazel` would. This is how a .ci.yaml target opts in: the flutter_drone
-/// recipe passes the names through as they are, and nothing else.
+/// `--bazel` would, whatever the default. A .ci.yaml target can opt in
+/// that way: the flutter_drone recipe passes the names through as they are,
+/// and nothing else.
 const String kBazelSuffix = '_bazel';
 
 /// The shard or subshard name the environment variable [key] holds, with
