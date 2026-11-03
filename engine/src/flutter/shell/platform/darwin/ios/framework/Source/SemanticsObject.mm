@@ -615,20 +615,14 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
   return label;
 }
 
-- (bool)containsPointInBridgeViewCoordinates:(CGPoint)point {
-  UIView* containerView = [self bridgeView];
-  if (!containerView) {
-    return false;
-  }
-  CGPoint globalPoint = UIAccessibilityConvertFrameToScreenCoordinates(
-                            CGRectMake(point.x, point.y, 0, 0), containerView)
-                            .origin;
-  return CGRectContainsPoint([self globalRect], globalPoint);
+- (bool)containsPoint:(CGPoint)point {
+  // The point is in global coordinates, so use the global rect here.
+  return CGRectContainsPoint([self globalRect], point);
 }
 
 // Finds the first eligiable semantics object in hit test order.
 - (id)search:(CGPoint)point {
-  if (![self containsPointInBridgeViewCoordinates:point]) {
+  if (![self containsPoint:point]) {
     return nil;
   }
   // Search children in hit test order.
@@ -664,10 +658,14 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
 // TODO(LongCatIsLooong): Replace this private override with a public equivalent.
 // https://github.com/flutter/flutter/issues/195775.
 - (id)_accessibilityHitTest:(CGPoint)point withEvent:(UIEvent*)event {
-  if (!self.bridge) {
+  UIView* containerView = [self bridgeView];
+  if (!containerView) {
     return nil;
   }
-  return [self search:point];
+  CGPoint globalPoint = UIAccessibilityConvertFrameToScreenCoordinates(
+                            CGRectMake(point.x, point.y, 0, 0), containerView)
+                            .origin;
+  return [self search:globalPoint];
 }
 
 // iOS calls this method when this item is swipe-to-focusd in VoiceOver.
