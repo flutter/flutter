@@ -311,7 +311,7 @@ void main() {
           // Gradle Plugin only consumes it for application projects: injecting into a module
           // (aar) manifest would conflict with an explicit value in the add-to-app host's
           // manifest and fail the host build in the manifest merger.
-          expect(androidBuildInfo.buildInfo.androidEnableHcpp, isTrue);
+          expect(androidBuildInfo.buildInfo.androidGradleConfig.enableHcpp, isTrue);
         }
       },
       overrides: <Type, Generator>{FeatureFlags: () => TestFeatureFlags(isHcppEnabled: true)},
@@ -572,7 +572,7 @@ void main() {
           final FlutterProject project = FlutterProject.fromDirectory(
             globals.fs.directory(projectPath),
           );
-          await project.android.ensureReadyForPlatformSpecificTooling();
+          await project.android.ensureReadyForPlatformSpecificTooling(cache: FakeCache());
 
           writeManifestMetadata(
             projectPath: projectPath,
@@ -606,7 +606,7 @@ void main() {
           final FlutterProject project = FlutterProject.fromDirectory(
             globals.fs.directory(projectPath),
           );
-          await project.android.ensureReadyForPlatformSpecificTooling();
+          await project.android.ensureReadyForPlatformSpecificTooling(cache: FakeCache());
 
           writeManifestMetadata(
             projectPath: projectPath,

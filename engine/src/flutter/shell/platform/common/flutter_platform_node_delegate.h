@@ -172,7 +172,7 @@ class FlutterPlatformNodeDelegate : public ui::AXPlatformNodeDelegateBase {
   virtual const ui::AXTree::Selection GetUnignoredSelection() const override;
 
  private:
-  ui::AXNode* ax_node_;
+  ui::AXNode* ax_node_ = nullptr;
   std::weak_ptr<OwnerBridge> bridge_;
   ui::AXUniqueId unique_id_;
 };

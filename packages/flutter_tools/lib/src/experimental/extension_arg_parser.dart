@@ -110,6 +110,7 @@ mixin ExtensionArgParserMixin on FlutterCommand {
   }
 
   /// Returns the base static `ArgParser` for this command, initializing it if needed.
+  @override
   ArgParser get baseArgParser {
     if (_baseArgParser != null) {
       return _baseArgParser!;

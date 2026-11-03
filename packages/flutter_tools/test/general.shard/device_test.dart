@@ -13,6 +13,8 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/project.dart';
+import 'package:flutter_tools/src/web/compile.dart';
+import 'package:flutter_tools/src/web/devfs_config.dart';
 import 'package:test/fake.dart';
 
 import '../src/common.dart';
@@ -667,6 +669,25 @@ void main() {
         enableFlutterGpu: true,
         enableDartProfiling: false,
         enableEmbedderApi: true,
+        webConfig: const WebDebugConfig(
+          enableExposeUrl: true,
+          useSseForDebugProxy: false,
+          useSseForDebugBackend: false,
+          useSseForInjectedClient: false,
+          runHeadless: true,
+          browserDebugPort: 9222,
+          browserFlags: <String>['--flag1', '--flag2'],
+          enableExpressionEvaluation: true,
+          launchUrl: 'http://localhost:8080/app',
+          crossOriginIsolation: true,
+          renderer: WebRendererMode.skwasm,
+          useWasm: true,
+          devServerConfig: WebDevServerConfig(
+            port: 9000,
+            host: '127.0.0.1',
+            headers: <String, String>{'k': 'v'},
+          ),
+        ),
       );
       final String jsonString = json.encode(original.toJson());
       final Map<String, dynamic> decoded = castStringKeyedMap(json.decode(jsonString))!;
@@ -682,6 +703,52 @@ void main() {
       expect(deserialized.enableFlutterGpu, original.enableFlutterGpu);
       expect(deserialized.enableDartProfiling, original.enableDartProfiling);
       expect(deserialized.enableEmbedderApi, original.enableEmbedderApi);
+
+      expect(deserialized.webConfig.enableExposeUrl, true);
+      expect(deserialized.webConfig.useSseForDebugProxy, false);
+      expect(deserialized.webConfig.useSseForDebugBackend, false);
+      expect(deserialized.webConfig.useSseForInjectedClient, false);
+      expect(deserialized.webConfig.runHeadless, true);
+      expect(deserialized.webConfig.browserDebugPort, 9222);
+      expect(deserialized.webConfig.browserFlags, <String>['--flag1', '--flag2']);
+      expect(deserialized.webConfig.enableExpressionEvaluation, true);
+      expect(deserialized.webConfig.launchUrl, 'http://localhost:8080/app');
+      expect(deserialized.webConfig.crossOriginIsolation, true);
+      expect(deserialized.webConfig.renderer, WebRendererMode.skwasm);
+      expect(deserialized.webConfig.useWasm, true);
+      expect(deserialized.webConfig.devServerConfig?.port, 9000);
+      expect(deserialized.webConfig.devServerConfig?.host, '127.0.0.1');
+      expect(deserialized.webConfig.devServerConfig?.headers, <String, String>{'k': 'v'});
+    });
+
+    testWithoutContext('WebDebugConfig defaults and useWasm defaulting', () {
+      const defaultConfig = WebDebugConfig();
+      expect(defaultConfig.enableExposeUrl, isFalse);
+      expect(defaultConfig.useSseForDebugProxy, isTrue);
+      expect(defaultConfig.useSseForDebugBackend, isTrue);
+      expect(defaultConfig.useSseForInjectedClient, isTrue);
+      expect(defaultConfig.runHeadless, isFalse);
+      expect(defaultConfig.browserDebugPort, isNull);
+      expect(defaultConfig.browserFlags, isEmpty);
+      expect(defaultConfig.enableExpressionEvaluation, isFalse);
+      expect(defaultConfig.launchUrl, isNull);
+      expect(defaultConfig.crossOriginIsolation, isFalse);
+      expect(defaultConfig.renderer, WebRendererMode.canvaskit);
+      expect(defaultConfig.useWasm, isFalse);
+      expect(defaultConfig.devServerConfig, isNull);
+
+      const wasmConfig = WebDebugConfig(useWasm: true);
+      expect(wasmConfig.useWasm, isTrue);
+      expect(wasmConfig.crossOriginIsolation, isTrue);
+      expect(wasmConfig.renderer, WebRendererMode.skwasm);
+
+      const customRendererConfig = WebDebugConfig(
+        useWasm: true,
+        renderer: WebRendererMode.canvaskit,
+        crossOriginIsolation: false,
+      );
+      expect(customRendererConfig.renderer, WebRendererMode.canvaskit);
+      expect(customRendererConfig.crossOriginIsolation, isFalse);
     });
   });
 
