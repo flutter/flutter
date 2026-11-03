@@ -230,6 +230,10 @@ void main() {
           'packages/flutter/test/widgets/y_test.dart',
         ]);
         expect(results.results.map((LuciTestResult result) => result.status), everyElement('PASS'));
+        expect(results.results.map((LuciTestResult result) => result.resultId), <String>[
+          '0-0',
+          '1-0',
+        ]);
       } finally {
         root.deleteSync(recursive: true);
       }

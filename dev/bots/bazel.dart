@@ -522,13 +522,24 @@ BazelTestResults bazelTestResults(String testlogs, Set<String> labels, {String? 
     }
     try {
       final parsed = TestFileReporterResults.fromFile(json);
-      results.addAll(
-        convertToLuciTestResultsFormat(
+      // The result ids are numbered per file; two targets of one file (a
+      // test and its no-creation-locations build) would repeat them for the
+      // same test id, so each file's are prefixed with its ordinal: unique
+      // within the one request all of them go out in.
+      results.addAll(<LuciTestResult>[
+        for (final LuciTestResult result in convertToLuciTestResultsFormat(
           parsed,
           workingDirectory: bazelSuiteWorkingDirectory(label, parsed, root: root),
           rootDirectory: root,
-        ),
-      );
+        ))
+          LuciTestResult(
+            testId: result.testId,
+            resultId: '$files-${result.resultId}',
+            expected: result.expected,
+            status: result.status,
+            duration: result.duration,
+          ),
+      ]);
       files++;
     } on FormatException catch (error) {
       print('Could not read ${json.path} ($label): $error');
