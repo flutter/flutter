@@ -21,6 +21,12 @@ PlaygroundSwitches::PlaygroundSwitches(const fml::CommandLine& args) {
     enable_playground = true;
   }
   enable_vulkan_validation = args.HasOption("enable_vulkan_validation");
+  enable_vulkan_sync_validation =
+      args.HasOption("enable_vulkan_sync_validation");
+  if (enable_vulkan_sync_validation) {
+    // Synchronization validation is a feature of the validation layers.
+    enable_vulkan_validation = true;
+  }
   use_swiftshader = args.HasOption("use_swiftshader");
   use_angle = args.HasOption("use_angle");
 #if FML_OS_MACOSX
