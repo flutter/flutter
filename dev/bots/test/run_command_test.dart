@@ -62,4 +62,33 @@ void main() {
       resetErrorStatus();
     }
   }, skip: !io.Platform.isLinux); // [intended] See comments above.
+
+  test('an accepted exit code is not a failure', () async {
+    final List<Object?> log = <String>[];
+    final PrintCallback oldPrint = print;
+    print = log.add;
+    try {
+      final CommandResult result = await runCommand(
+        '/usr/bin/sh',
+        <String>['-c', 'exit $kNoTestsRanExitCode'],
+        acceptedExitCodes: const <int>{kNoTestsRanExitCode},
+      );
+      expect(result.exitCode, kNoTestsRanExitCode);
+      expect(hasError, isFalse);
+      expect(log, <Object>[
+        startsWith('RUNNING:'),
+        'workingDirectory: null, executable: /usr/bin/sh, arguments: [-c, exit $kNoTestsRanExitCode]',
+        startsWith('ELAPSED TIME:'),
+      ]);
+      await runCommand(
+        '/usr/bin/sh',
+        <String>['-c', 'exit 1'],
+        acceptedExitCodes: const <int>{kNoTestsRanExitCode},
+      );
+      expect(hasError, isTrue);
+    } finally {
+      print = oldPrint;
+      resetErrorStatus();
+    }
+  }, skip: !io.Platform.isLinux); // [intended] See comments above.
 }

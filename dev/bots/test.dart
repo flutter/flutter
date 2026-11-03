@@ -201,10 +201,11 @@ const List<String> _bazelIntegrationShards = <String>[
 const String _bazelWebShard = '//packages/flutter_tools:web_shard';
 
 Future<void> _runGeneralToolTests() async {
-  Future<void> runTests(List<String> testPaths) {
+  Future<void> runTests(List<String> testPaths, {bool allowNoTests = false}) {
     return runDartTest(
       _toolsPath,
       testPaths: testPaths,
+      allowNoTests: allowNoTests,
       enableFlutterToolAsserts: false,
 
       // Detect unit test time regressions (poor time delay handling, etc).
@@ -220,7 +221,7 @@ Future<void> _runGeneralToolTests() async {
       <String>[_bazelGeneralShard],
       root: _toolsPath,
       files: testFilesUnder(_toolsPath, path.join('test', 'general.shard')),
-      orElse: runTests,
+      orElse: (List<String> testPaths) => runTests(testPaths, allowNoTests: true),
     );
     await shard.run();
     return;
@@ -240,8 +241,13 @@ Future<void> _runCommandsToolTests() async {
     }
   }
 
-  Future<void> runTests(List<String> testPaths) {
-    return runDartTest(_toolsPath, forceSingleCore: true, testPaths: testPaths);
+  Future<void> runTests(List<String> testPaths, {bool allowNoTests = false}) {
+    return runDartTest(
+      _toolsPath,
+      forceSingleCore: true,
+      testPaths: testPaths,
+      allowNoTests: allowNoTests,
+    );
   }
 
   final List<String> testPaths = selectIndexOfTotalSubshard<String>(allTests);
@@ -255,7 +261,7 @@ Future<void> _runCommandsToolTests() async {
       root: _toolsPath,
       files: testPaths,
       whole: false,
-      orElse: runTests,
+      orElse: (List<String> testPaths) => runTests(testPaths, allowNoTests: true),
     );
     await shard.run();
     return;
@@ -275,12 +281,13 @@ Future<void> _runWebToolTests() async {
     }
   }
 
-  Future<void> runTests(List<String> testPaths) {
+  Future<void> runTests(List<String> testPaths, {bool allowNoTests = false}) {
     return runDartTest(
       _toolsPath,
       forceSingleCore: true,
       testPaths: testPaths,
       includeLocalEngineEnv: true,
+      allowNoTests: allowNoTests,
     );
   }
 
@@ -293,7 +300,7 @@ Future<void> _runWebToolTests() async {
       root: _toolsPath,
       files: testPaths,
       whole: false,
-      orElse: runTests,
+      orElse: (List<String> testPaths) => runTests(testPaths, allowNoTests: true),
     );
     await shard.run();
     return;
@@ -324,12 +331,13 @@ Future<void> _runIntegrationToolTests() async {
     return durations[path.posix.joinAll(path.split(testPath))] ?? defaultDuration;
   }
 
-  Future<void> runTests(List<String> testPaths) {
+  Future<void> runTests(List<String> testPaths, {bool allowNoTests = false}) {
     return runDartTest(
       _toolsPath,
       forceSingleCore: true,
       testPaths: testPaths,
       collectMetrics: true,
+      allowNoTests: allowNoTests,
     );
   }
 
@@ -344,7 +352,7 @@ Future<void> _runIntegrationToolTests() async {
       root: _toolsPath,
       files: testPaths,
       whole: false,
-      orElse: runTests,
+      orElse: (List<String> testPaths) => runTests(testPaths, allowNoTests: true),
     );
     await shard.run();
   } else {

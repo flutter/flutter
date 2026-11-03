@@ -226,6 +226,11 @@ String? _discoverBestNdkPath() {
 /// If the process exits with a non-zero exit code and `expectNonZeroExit` is
 /// false, calls foundError (which does not terminate execution!).
 ///
+/// `acceptedExitCodes` are exit codes that are not failures whatever
+/// `expectNonZeroExit` and `expectedExitCode` say: package:test's 79 ("no
+/// tests ran") for a run of test files the platform skips whole, see
+/// [runFlutterTest]'s `allowNoTests`.
+///
 /// `outputListener` is called for every line of standard output from the
 /// process, and is given the [io.Process] object. This can be used to interrupt
 /// an indefinitely running process, for example, by waiting until the process
@@ -242,6 +247,7 @@ Future<CommandResult> runCommand(
   Map<String, String>? environment,
   bool expectNonZeroExit = false,
   int? expectedExitCode,
+  Set<int> acceptedExitCodes = const <int>{},
   String? failureMessage,
   OutputMode outputMode = OutputMode.print,
   bool Function(String)? removeLine,
@@ -277,8 +283,11 @@ Future<CommandResult> runCommand(
     await command._savedStderr,
   );
 
-  if ((result.exitCode == 0) == expectNonZeroExit ||
-      (expectedExitCode != null && result.exitCode != expectedExitCode)) {
+  final bool unexpected =
+      !acceptedExitCodes.contains(result.exitCode) &&
+      ((result.exitCode == 0) == expectNonZeroExit ||
+          (expectedExitCode != null && result.exitCode != expectedExitCode));
+  if (unexpected) {
     // Print the output when we get unexpected results (unless output was
     // printed already).
     switch (outputMode) {

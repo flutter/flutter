@@ -1234,7 +1234,10 @@ each file's target name from its path (`bazelTestTarget`: `//<package>:` and
 the path relative to the package, `.dart` dropped, slashes to underscores,
 as `dart_tests` and `flutter_tests` name them), asks one `bazelisk query
 tests(set(<suites>))` which exist, runs those under Bazel and the rest
-through `flutter test`/`dart test` as without `--bazel`, saying which --
+through `flutter test`/`dart test` as without `--bazel`, saying which (a
+remainder of nothing but files the host skips whole -- test/widgets' two
+browser tests -- is no failure: package:test's exit 79, no tests ran, is
+accepted for a remainder) --
 so a shard covers the same files either way, and a new test directory
 without a BUILD file is loud, not lost. The steps that are not a package's
 tests run as they are: the test harness checks (test.dart testing itself),
@@ -1272,11 +1275,13 @@ A CI target for a shard under Bazel is a `.ci.yaml` entry with the same
 recipe and `shard`, and `subshard: <name>_bazel` (or `shard: <name>_bazel`
 for the numbered-subshard shards), which must start as `bringup: true`
 (cocoon refuses a new target otherwise) and so runs in postsubmit only;
-none is added here. Those first runs are the measurement that is missing:
-the kernels compile per test (3 s a file from the prelude, on the shard's 8
-cores) where `flutter test` compiles them in one incremental session, so a
-shard's wall time is the open question, as is the bot's disk cache between
-tasks.
+none is added here. A stand-in for the bot (a fresh output root, 8 CPUs,
+no disk cache, 11-03): the widgets subshard under `--bazel` takes 16 min 15
+end to end -- 802 Bazel tests in 15 min, the kernels compiled per test from
+the prelude where `flutter test` compiles them in one incremental session
+-- against about 11 min for the legacy shard on CI. Whether the bot's disk
+cache under `~/.cache` persists between tasks (it would take the compiles
+out) is the open question.
 
 ## The web engine's unit tests: felt's suites
 
