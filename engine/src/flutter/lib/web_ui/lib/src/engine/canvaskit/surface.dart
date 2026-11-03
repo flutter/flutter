@@ -79,6 +79,7 @@ abstract class CkSurface extends Surface {
   bool _disposed = false;
 
   /// Whether this surface has been disposed.
+  @visibleForTesting
   bool get isDisposed => _disposed;
 
   /// The canvas object that this surface is rendering to.
@@ -298,8 +299,20 @@ abstract class CkSurface extends Surface {
     // `getContext` when initial context creation failed could allocate a new
     // WebGL context just to lose it.
     if (_glContext > 0) {
+      // Explicitly lose the WebGL context via `WEBGL_lose_context` so the
+      // browser immediately frees its hardware context slot (avoiding active
+      // context LRU eviction across views; see
+      // https://github.com/flutter/flutter/issues/195025), then delete the
+      // handle from Emscripten's `GL.contexts` table so CanvasKit drops its JS
+      // reference to the canvas and context.
       _destroyGlContext(oldCanvas);
-      canvasKit.deleteContext(_glContext.toDouble());
+      try {
+        canvasKit.deleteContext(_glContext.toDouble());
+      } catch (_) {
+        // Deleting the handle may throw if Emscripten already dropped it. Keep
+        // going so disposal still runs `onDispose` and releases sibling
+        // surfaces.
+      }
     }
     _glContext = -1;
     _canvasHasWebGlContext = false;
@@ -495,6 +508,9 @@ abstract class CkSurface extends Surface {
 
   @override
   Future<void> triggerContextLoss() async {
+    if (_disposed) {
+      return;
+    }
     _handledContextLostEvent = Completer<void>();
     _webGlContextOf(canvas).loseContextExtension.loseContext();
   }

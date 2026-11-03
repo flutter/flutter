@@ -17,6 +17,11 @@ class DisplayCanvasFactory<T extends DisplayCanvas> {
   /// create new display canvases.
   final T Function() createCanvas;
 
+  // Kept nullable (rather than `late final`) so `forEachCanvas`,
+  // `releaseCanvas`, `isLive`, and `dispose` can check whether `baseCanvas` was
+  // materialized without lazily allocating a surface/WebGL context for
+  // unrendered views, and so `baseCanvas` can be re-created after `dispose()`
+  // (for example, on hot restart).
   T? _baseCanvas;
 
   /// The base canvas to paint on. This is the default canvas which will be
@@ -24,7 +29,7 @@ class DisplayCanvasFactory<T extends DisplayCanvas> {
   /// the entire scene.
   T get baseCanvas => _baseCanvas ??= (createCanvas()..initialize());
 
-  /// Whether the base canvas has been initialized. Used in tests.
+  /// Whether [baseCanvas] has been created and not yet disposed.
   @visibleForTesting
   bool get hasBaseCanvas => _baseCanvas != null;
 

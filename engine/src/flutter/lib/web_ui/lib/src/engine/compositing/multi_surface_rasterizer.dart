@@ -35,7 +35,7 @@ class MultiSurfaceRasterizer extends Rasterizer {
       <EngineFlutterView, MultiSurfaceViewRasterizer>{};
 
   /// Removes the [view] rasterizer from the registry.
-  void removeViewRasterizer(EngineFlutterView view) {
+  void _removeViewRasterizer(EngineFlutterView view) {
     _viewRasterizers.remove(view);
   }
 
@@ -59,28 +59,45 @@ class MultiSurfaceRasterizer extends Rasterizer {
   }
 }
 
+/// A [ViewRasterizer] for a single [EngineFlutterView] managed by a
+/// [MultiSurfaceRasterizer], rendering directly onto one or more onscreen
+/// [Surface]s.
 class MultiSurfaceViewRasterizer extends ViewRasterizer {
   MultiSurfaceViewRasterizer(super.view, this.rasterizer, this.surfaceProvider);
 
+  /// The owning [MultiSurfaceRasterizer] that tracks this view rasterizer.
   final MultiSurfaceRasterizer rasterizer;
+
+  /// The [OnscreenSurfaceProvider] used to allocate display surfaces for [view].
   final OnscreenSurfaceProvider surfaceProvider;
 
   bool _disposed = false;
+
+  // Shadows `ViewRasterizer._lastRenderedLayerTree`, which is private to
+  // another library, because [draw] is overridden below.
   LayerTree? _lastRenderedLayerTree;
 
   @override
   late final DisplayCanvasFactory<OnscreenSurface> displayFactory =
       DisplayCanvasFactory<OnscreenSurface>(createCanvas: surfaceProvider.createSurface);
 
+  // Mirrors `ViewRasterizer.draw`, but bails out if the view is disposed
+  // before the frame starts or while `prepareToDraw` is awaited, so a removed
+  // view never resurrects surfaces (and WebGL contexts) for a stale frame.
+  // See https://github.com/flutter/flutter/issues/195025.
   @override
   Future<void> draw(LayerTree layerTree, FrameTimingRecorder? recorder) async {
     final ui.Size frameSize = view.physicalSize;
     if (_disposed || frameSize.isEmpty) {
+      // Nothing to draw. Record all the draw steps as happening instantly so
+      // we don't crash when submitting frame timings.
       recorder?.recordRasterStart();
       recorder?.recordRasterFinish();
       return;
     }
 
+    // Round the frame size, which may be slightly imprecise when the
+    // `devicePixelRatio` isn't an integer.
     final bitmapSize = BitmapSize.fromSize(frameSize);
 
     currentFrameSize = bitmapSize;
@@ -155,9 +172,11 @@ class MultiSurfaceViewRasterizer extends ViewRasterizer {
     }
     _disposed = true;
     _lastRenderedLayerTree = null;
+    // Complete any render queued for this view so callers awaiting
+    // `renderScene` for a removed view don't hang.
     queue.next?.completer.complete();
     queue.next = null;
-    rasterizer.removeViewRasterizer(view);
+    rasterizer._removeViewRasterizer(view);
     displayFactory.dispose();
     super.dispose();
   }

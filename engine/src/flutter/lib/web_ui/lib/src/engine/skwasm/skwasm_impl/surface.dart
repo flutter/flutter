@@ -57,6 +57,8 @@ class SkwasmCallbackHandler {
     return completer.future;
   }
 
+  /// Drops the pending callback registered for [callbackId] so that a later
+  /// native callback with that id is ignored by [handleCallback].
   void unregisterCallback(int callbackId) {
     _pendingCallbacks.remove(callbackId);
   }

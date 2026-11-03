@@ -143,7 +143,7 @@ void testMain() {
       expect(baseSurface.skSurface, isNull);
       expect(baseSurface.glContext, -1);
       expect(gl.isContextLost(), isTrue);
-    });
+    }, skip: _skipContextLoss);
 
     test('repeated removeView/addView cycles do not evict the live view context', () async {
       final _WebGlContextCounter counter = _installWebGlContextCounter();
@@ -152,12 +152,12 @@ void testMain() {
       EngineFlutterView activeView = createAndRegisterView();
       await renderBlueBox(activeView);
 
-      final contextsAfterEachPress = <int>[];
+      final contextsAfterEachCycle = <int>[];
       for (var i = 0; i < 10; i++) {
         disposeAndRemoveView(activeView);
         activeView = createAndRegisterView();
         await renderBlueBox(activeView);
-        contextsAfterEachPress.add(counter.createdCount);
+        contextsAfterEachCycle.add(counter.createdCount);
       }
 
       final liveRasterizer = renderer.rasterizers[activeView.viewId]! as MultiSurfaceViewRasterizer;
@@ -191,7 +191,7 @@ void testMain() {
           .toList();
 
       final diagnostics =
-          'WebGL contexts created after each press: $contextsAfterEachPress; '
+          'WebGL contexts created after each cycle: $contextsAfterEachCycle; '
           'created while idle for 500ms: $contextsCreatedWhileIdle; '
           'non-lost WebGL contexts on the page: $nonLostWebGlContexts; '
           'live view surfaces: ${liveSnapshots.length}; '
@@ -227,7 +227,7 @@ void testMain() {
         everyElement(isFalse),
         reason: 'Live view GL context handles changed. $diagnostics',
       );
-    });
+    }, skip: _skipContextLoss);
 
     test('disposing software-rendered views does not touch WebGL or fail on post-disposal recovery calls', () async {
       CkSurface.debugForceGLFailure = true;
@@ -332,7 +332,7 @@ void testMain() {
         expect(trackedSurfaces[i].glContext, -1);
         expect(trackedContexts[i].isContextLost(), isTrue);
       }
-    });
+    }, skip: _skipContextLoss);
 
     test('surface disposal is idempotent, detaches from SurfaceProvider, and ignores post-disposal context recreation', () async {
       renderer.pictureToImageSurface.dispose();
@@ -375,6 +375,8 @@ void testMain() {
 
       expect(disposedBase.isDisposed, isTrue);
       expect(onDisposeCount, 1);
+      // One `deleteContext` call each for the view's base canvas and the
+      // overlay used to composite its scene.
       expect(deleteCallsAfterFirstDispose, 2);
 
       disposedBase.dispose();
@@ -450,7 +452,7 @@ void testMain() {
         expect(baseSurface.glContext, -1);
       },
     );
-  }, skip: _skipContextLoss);
+  });
 }
 
 final class _TrackingCkOnscreenSurface extends CkOnscreenSurface {

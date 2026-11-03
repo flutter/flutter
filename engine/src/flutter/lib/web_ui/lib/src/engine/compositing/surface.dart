@@ -25,6 +25,8 @@ abstract class SurfaceProvider<C extends Surface, D extends CanvasProvider> {
 
   final List<C> _createdSurfaces = <C>[];
 
+  /// Creates a new [Surface], applies any configured resource cache limit, and
+  /// tracks it until either the surface or this provider is disposed.
   C createSurface() {
     final C surface = surfaceCreateFn(_canvasProvider);
     if (_resourceCacheMaxBytes != null) {
@@ -35,8 +37,10 @@ abstract class SurfaceProvider<C extends Surface, D extends CanvasProvider> {
     return surface;
   }
 
+  /// Disposes all live surfaces created by this provider and clears its
+  /// tracking list.
   void dispose() {
-    for (final surface in List<C>.from(_createdSurfaces)) {
+    for (final surface in List<C>.of(_createdSurfaces)) {
       surface.dispose();
     }
     _createdSurfaces.clear();
@@ -68,6 +72,9 @@ abstract class Surface {
   FutureOr<void> setSize(BitmapSize size);
 
   /// Converts a `ui.Image` into a `ByteData` object in the specified format.
+  ///
+  /// Returns `null` if this surface is disposed before rasterization
+  /// completes.
   Future<ByteData?> rasterizeImage(ui.Image image, ui.ImageByteFormat format);
 
   /// Whether this surface supports rasterizing an image directly into PNG format.
@@ -86,8 +93,8 @@ abstract class Surface {
   /// Disposes of the surface and its resources.
   void dispose();
 
-  /// Callback invoked when the surface is disposed, allowing providers to
-  /// remove references to the surface.
+  /// Callback owned by [SurfaceProvider] and invoked when the surface is
+  /// disposed so the provider can unregister it from its tracking list.
   ui.VoidCallback? onDispose;
 
   /// A [Future] which completes when the [Surface] is initialized and ready to
@@ -125,6 +132,9 @@ abstract class OffscreenSurface extends Surface {
   ///
   /// Resizing, rendering, and capturing the bitmaps happen atomically with
   /// respect to every other operation on this surface.
+  ///
+  /// Returns an empty list (closing any bitmaps already produced) if this
+  /// surface is disposed before rasterization completes.
   Future<List<DomImageBitmap>> rasterizeToImageBitmaps(BitmapSize size, List<ui.Picture> pictures);
 
   /// Resizes this surface to [size] and rasterizes each of the given [pictures]
