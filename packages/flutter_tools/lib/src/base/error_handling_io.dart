@@ -627,25 +627,15 @@ class ErrorHandlingFile extends ForwardingFileSystemEntity<File, io.File> with F
     // directly.
     await _run<void>(
       () async {
-        RandomAccessFile? source;
-        RandomAccessFile? sink;
+        IOSink? sink;
         try {
-          source = await delegate.open();
-          sink = await resultFile.open(mode: FileMode.writeOnly);
-          // 64k is the same sized buffer used by dart:io for `File.openRead`.
-          final buffer = Uint8List(64 * 1024);
-          final int totalBytes = await source.length();
-          var bytes = 0;
-          while (bytes < totalBytes) {
-            final int chunkLength = await source.readInto(buffer);
-            await sink.writeFrom(buffer, 0, chunkLength);
-            bytes += chunkLength;
-          }
+          sink = resultFile.openWrite();
+          await sink.addStream(delegate.openRead());
+          await sink.flush();
         } on FileSystemException {
           ErrorHandlingFileSystem.deleteIfExists(resultFile, recursive: true);
           rethrow;
         } finally {
-          await source?.close();
           await sink?.close();
         }
       },
