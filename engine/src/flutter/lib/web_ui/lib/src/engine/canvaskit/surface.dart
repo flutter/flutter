@@ -278,10 +278,14 @@ abstract class CkSurface extends Surface {
     _skSurface = null;
     try {
       _grContext?.releaseResourcesAndAbandonContext();
-      _grContext?.delete();
     } catch (_) {
       // Releasing GPU resources may throw if the WebGL context was already
       // lost (for example, when called from `onContextLost`).
+    }
+    try {
+      _grContext?.delete();
+    } catch (_) {
+      // Deleting the Embind wrapper may throw if it was already deleted.
     }
     _grContext = null;
 
@@ -319,6 +323,9 @@ abstract class CkSurface extends Surface {
 
   @override
   void setSize(BitmapSize size) {
+    if (_disposed) {
+      return;
+    }
     final double devicePixelRatio = EngineFlutterDisplay.instance.devicePixelRatio;
     // A zero-sized canvas cannot back a WebGL SkSurface and would force the
     // surface into a permanent software fallback, so never go below 1x1.
@@ -386,12 +393,21 @@ abstract class CkSurface extends Surface {
 
   @override
   void setSkiaResourceCacheMaxBytes(int bytes) {
+    if (_disposed) {
+      return;
+    }
     _grContext?.setResourceCacheLimitBytes(bytes.toDouble());
   }
 
   @override
   Future<ByteData?> rasterizeImage(ui.Image image, ui.ImageByteFormat format) async {
+    if (_disposed) {
+      return null;
+    }
     await _initialized.future;
+    if (_disposed) {
+      return null;
+    }
 
     final EngineImage engineImage;
     final SkImage skImage;
@@ -459,7 +475,13 @@ abstract class CkSurface extends Surface {
 
   @override
   Future<void> rasterizeToCanvas(ui.Picture picture) async {
+    if (_disposed) {
+      return;
+    }
     await _initialized.future;
+    if (_disposed) {
+      return;
+    }
     _drawPicture(picture as CkPicture);
   }
 
@@ -500,7 +522,13 @@ class CkOffscreenSurface extends CkSurface implements OffscreenSurface {
     BitmapSize size,
     List<ui.Picture> pictures,
   ) async {
+    if (_disposed) {
+      return <DomImageBitmap>[];
+    }
     await _initialized.future;
+    if (_disposed) {
+      return <DomImageBitmap>[];
+    }
     // Everything from here until all bitmaps have been requested must be
     // synchronous so that no other operation can resize or draw into the
     // canvas in between. `createImageBitmap` copies the canvas contents at the
@@ -512,7 +540,14 @@ class CkOffscreenSurface extends CkSurface implements OffscreenSurface {
       _drawPicture(picture as CkPicture);
       bitmapFutures.add(createImageBitmap(_canvas));
     }
-    return Future.wait(bitmapFutures);
+    final bitmaps = await Future.wait(bitmapFutures);
+    if (_disposed) {
+      for (final bitmap in bitmaps) {
+        bitmap.close();
+      }
+      return <DomImageBitmap>[];
+    }
+    return bitmaps;
   }
 
   @override
@@ -521,7 +556,13 @@ class CkOffscreenSurface extends CkSurface implements OffscreenSurface {
     List<ui.Picture> pictures,
     void Function(int index, DomCanvasImageSource source) onRendered,
   ) async {
+    if (_disposed) {
+      return;
+    }
     await _initialized.future;
+    if (_disposed) {
+      return;
+    }
     // Everything from here on must be synchronous so that no other operation
     // can resize or draw into the canvas while `onRendered` reads from it.
     setSize(size);

@@ -38,6 +38,8 @@ void testMain() {
             }.jsify()
             as JsFlutterConfiguration?,
       );
+      renderer.pictureToImageSurface.dispose();
+      renderer.rasterizer.dispose();
       CanvasKitRenderer.instance.debugResetRasterizer();
     });
 
@@ -51,6 +53,8 @@ void testMain() {
       }
       createdHostElements.clear();
       debugOverrideJsConfiguration(null);
+      renderer.pictureToImageSurface.dispose();
+      renderer.rasterizer.dispose();
       CanvasKitRenderer.instance.debugResetRasterizer();
     });
 
@@ -88,7 +92,7 @@ void testMain() {
       return () => calls;
     }
 
-    Future<void> renderBlueBox(EngineFlutterView view) async {
+    ui.Scene buildBlueScene() {
       final recorder = ui.PictureRecorder();
       ui.Canvas(recorder).drawRect(
         const ui.Rect.fromLTWH(0, 0, 100, 100),
@@ -97,7 +101,11 @@ void testMain() {
       final ui.Picture picture = recorder.endRecording();
       final builder = ui.SceneBuilder()..addPicture(ui.Offset.zero, picture);
       picture.dispose();
-      final ui.Scene scene = builder.build();
+      return builder.build();
+    }
+
+    Future<void> renderBlueBox(EngineFlutterView view) async {
+      final ui.Scene scene = buildBlueScene();
       try {
         await renderer.renderScene(scene, view);
       } finally {
@@ -327,7 +335,10 @@ void testMain() {
     });
 
     test('surface disposal is idempotent, detaches from SurfaceProvider, and ignores post-disposal context recreation', () async {
+      renderer.pictureToImageSurface.dispose();
+      renderer.rasterizer.dispose();
       final customRasterizer = MultiSurfaceRasterizer(_TrackingCkOnscreenSurface.new);
+      addTearDown(customRasterizer.dispose);
       renderer.debugOverrideRasterizer(customRasterizer);
       final int Function() deleteContextCalls = countDeleteContextCalls();
 
@@ -381,6 +392,64 @@ void testMain() {
       expect(disposedBase.skSurface, isNull);
       expect(disposedBase.glContext, -1);
     });
+
+    test(
+      'disposing a view mid-render completes queued renders without allocating zombie surfaces',
+      () async {
+        EnginePlatformDispatcher.instance.onReportTimings = (_) {};
+        addTearDown(() {
+          EnginePlatformDispatcher.instance.onReportTimings = null;
+          FrameTimingRecorder.debugResetFrameTimings();
+        });
+
+        final EngineFlutterView view = createAndRegisterView();
+        final viewRasterizer = renderer.rasterizers[view.viewId]! as MultiSurfaceViewRasterizer;
+
+        final ui.Scene scene1 = buildBlueScene();
+        final ui.Scene scene2 = buildBlueScene();
+        addTearDown(() {
+          scene1.dispose();
+          scene2.dispose();
+        });
+
+        final Future<void> render1 = renderer.renderScene(scene1, view);
+        expect(viewRasterizer.displayFactory.hasBaseCanvas, isTrue);
+        final baseSurface = viewRasterizer.displayFactory.baseCanvas as CkOnscreenSurface;
+        final Future<void> render2 = renderer.renderScene(scene2, view);
+        expect(viewRasterizer.queue.current, isNotNull);
+        expect(viewRasterizer.queue.next, isNotNull);
+
+        final _WebGlContextCounter counter = _installWebGlContextCounter();
+        addTearDown(counter.restore);
+
+        disposeAndRemoveView(view);
+
+        await Future.wait<void>(<Future<void>>[render1, render2])
+            .timeout(const Duration(seconds: 2));
+
+        expect(counter.createdCount, 0);
+        expect(viewRasterizer.displayFactory.hasBaseCanvas, isFalse);
+        expect(viewRasterizer.displayFactory.debugSurfaceCount, 0);
+        expect(baseSurface.isDisposed, isTrue);
+        expect(baseSurface.skSurface, isNull);
+        expect(baseSurface.glContext, -1);
+
+        final recorder = ui.PictureRecorder();
+        ui.Canvas(recorder).drawRect(
+          const ui.Rect.fromLTWH(0, 0, 10, 10),
+          ui.Paint()..color = const ui.Color(0xFFFF0000),
+        );
+        final ui.Picture picture = recorder.endRecording();
+        addTearDown(picture.dispose);
+
+        baseSurface.setSize(const BitmapSize(50, 50));
+        await baseSurface.rasterizeToCanvas(picture);
+
+        expect(counter.createdCount, 0);
+        expect(baseSurface.skSurface, isNull);
+        expect(baseSurface.glContext, -1);
+      },
+    );
   }, skip: _skipContextLoss);
 }
 

@@ -126,11 +126,14 @@ class DisplayCanvasFactory<T extends DisplayCanvas> {
   void dispose() {
     for (final T canvas in _cache) {
       canvas.dispose();
+      canvas.hostElement.remove();
     }
     for (final T canvas in _liveCanvases) {
       canvas.dispose();
+      canvas.hostElement.remove();
     }
     _baseCanvas?.dispose();
+    _baseCanvas?.hostElement.remove();
     _baseCanvas = null;
     _liveCanvases.clear();
     _cache.clear();

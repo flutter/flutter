@@ -93,8 +93,9 @@ void testMain() {
           renderer.rasterizers[implicitView.viewId]!.displayFactory;
 
       // Cause the surface and its canvas to be attached to the page
-      implicitView.dom.sceneHost.prepend(originalFactory.baseCanvas.hostElement);
-      expect(originalFactory.baseCanvas.isConnected, isTrue);
+      final DisplayCanvas baseCanvas = originalFactory.baseCanvas;
+      implicitView.dom.sceneHost.prepend(baseCanvas.hostElement);
+      expect(baseCanvas.isConnected, isTrue);
 
       // Create a few overlay canvases
       final overlays = <DisplayCanvas>[];
@@ -107,9 +108,10 @@ void testMain() {
 
       // Trigger hot restart clean-up logic and check that we indeed clean up.
       debugEmulateHotRestart();
-      expectDisposed(originalFactory.baseCanvas);
+      expectDisposed(baseCanvas);
       overlays.forEach(expectDisposed);
-      expect(originalFactory.debugSurfaceCount, 1);
+      expect(originalFactory.hasBaseCanvas, isFalse);
+      expect(originalFactory.debugSurfaceCount, 0);
     });
 
     test('dispose without accessing baseCanvas does not allocate canvas', () {
