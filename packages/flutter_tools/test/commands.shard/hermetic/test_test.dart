@@ -11,6 +11,7 @@ import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/base/async_guard.dart';
 import 'package:flutter_tools/src/base/common.dart';
+import 'package:flutter_tools/src/base/error_handling_io.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -1702,6 +1703,90 @@ dev_dependencies:
     },
   );
 
+  testWithoutContext(
+    'copies NativeAssetsManifest.json when File.copy throws PathExistsException on Windows',
+    () async {
+      final exceptionHandler = FileExceptionHandler();
+      final windowsMemoryFs = MemoryFileSystem.test(
+        style: FileSystemStyle.windows,
+        opHandle: exceptionHandler.opHandle,
+      );
+      final Platform windowsPlatform = FakePlatform(operatingSystem: 'windows');
+      final errorHandlingFs = ErrorHandlingFileSystem(
+        delegate: windowsMemoryFs,
+        platform: windowsPlatform,
+      );
+
+      final Directory package = windowsMemoryFs.directory('package');
+      package.childFile('pubspec.yaml')
+        ..createSync(recursive: true)
+        ..writeAsStringSync(_pubspecContents);
+      writePackageConfigFiles(
+        directory: package,
+        packages: <String, String>{
+          'test_api':
+              'file:///C:/path/to/pubcache/.pub-cache/hosted/pub.dartlang.org/test_api-0.2.19',
+          'integration_test': 'file:///C:/path/to/flutter/packages/integration_test',
+        },
+        mainLibName: 'my_app',
+        devDependencies: <String>['test_api', 'integration_test'],
+      );
+      package.childDirectory('test').childFile('some_test.dart').createSync(recursive: true);
+      windowsMemoryFs.currentDirectory = package.path;
+
+      const manifestContents = '{"format-version":[1,0,0],"native-assets":{}}';
+      final File nativeAssetsManifestFile =
+          windowsMemoryFs.file(
+              windowsMemoryFs.path.join('build', 'native_assets', 'windows', 'native_assets.json'),
+            )
+            ..createSync(recursive: true)
+            ..writeAsStringSync(manifestContents);
+      final File copiedNativeAssetsManifest =
+          windowsMemoryFs.file(
+              windowsMemoryFs.path.join('build', 'unit_test_assets', 'NativeAssetsManifest.json'),
+            )
+            ..createSync(recursive: true)
+            ..writeAsStringSync('{"stale":true}');
+
+      exceptionHandler.addError(
+        nativeAssetsManifestFile,
+        FileSystemOp.copy,
+        FileSystemException(
+          "Cannot copy file to '${copiedNativeAssetsManifest.path}'",
+          nativeAssetsManifestFile.path,
+          const OSError('Cannot create a file when that file already exists.', 183),
+        ),
+      );
+
+      final nativeAssetsBuilder = _FakeNativeAssetsBuilderWithDataAssets(
+        FlutterHookResult(
+          buildStart: DateTime.now(),
+          buildEnd: DateTime.now(),
+          dataAssets: const <HookAsset>[],
+          dependencies: const <Uri>[],
+        ),
+        nativeAssetsManifest: nativeAssetsManifestFile.uri,
+      );
+      final testCommand = TestCommand(
+        templateRenderer: const MustacheTemplateRenderer(),
+        toolContext: FakeToolContext(
+          fs: errorHandlingFs,
+          logger: logger,
+          platform: windowsPlatform,
+          processManager: FakeProcessManager.empty(),
+        ),
+        testRunner: FakeFlutterTestRunner(0),
+        nativeAssetsBuilder: nativeAssetsBuilder,
+      );
+      final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
+
+      await commandRunner.run(const <String>['test', '--no-pub', '--no-test-assets']);
+
+      expect(copiedNativeAssetsManifest, exists);
+      expect(copiedNativeAssetsManifest.readAsStringSync(), manifestContents);
+    },
+  );
+
   group('Fatal Logs', () {
     testUsingContext(
       "doesn't fail when --fatal-warnings is set and no warning output",
@@ -2434,16 +2519,18 @@ class _FakeDeviceManager extends DeviceManager {
 
 class _FakeNativeAssetsBuilderWithDataAssets extends Fake
     implements TestCompilerNativeAssetsBuilder {
-  _FakeNativeAssetsBuilderWithDataAssets(this.hookResult);
+  _FakeNativeAssetsBuilderWithDataAssets(this.hookResult, {this.nativeAssetsManifest});
 
   FlutterHookResult hookResult;
+  final Uri? nativeAssetsManifest;
 
   @override
-  Future<Uri?> build(BuildInfo buildInfo, {required ToolContext toolContext}) async => null;
+  Future<Uri?> build(BuildInfo buildInfo, {required ToolContext toolContext}) async =>
+      nativeAssetsManifest;
 
   @override
   Future<TestCompilerNativeAssetsBuildResult> buildWithHookResult(
     BuildInfo buildInfo, {
     required ToolContext toolContext,
-  }) async => (nativeAssetsManifest: null, flutterHookResult: hookResult);
+  }) async => (nativeAssetsManifest: nativeAssetsManifest, flutterHookResult: hookResult);
 }

@@ -1855,6 +1855,102 @@ Please ensure that the SDK and/or project is installed in a location that has re
     );
   });
 
+  group('Copy', () {
+    const eaccess = 13;
+    late FileExceptionHandler exceptionHandler;
+    late ErrorHandlingFileSystem fileSystem;
+
+    setUp(() {
+      exceptionHandler = FileExceptionHandler();
+      fileSystem = ErrorHandlingFileSystem(
+        delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
+        platform: linuxPlatform,
+      );
+    });
+
+    testWithoutContext('copy handles error if open on source file fails', () async {
+      final File source = fileSystem.file('source');
+
+      exceptionHandler.addError(
+        source,
+        FileSystemOp.open,
+        FileSystemException('', source.path, const OSError('', eaccess)),
+      );
+
+      const expectedMessage =
+          'Flutter failed to copy source to dest due to source location error.\n'
+          'Please ensure that the SDK and/or project is installed in a location that has read/write permissions for the current user.\n'
+          'Try running:\n'
+          r'  sudo chown -R $(whoami) /source';
+      await expectLater(
+        () => fileSystem.file('source').copy('dest'),
+        throwsToolExit(message: expectedMessage),
+      );
+    });
+
+    testWithoutContext('copy handles error if create on destination file fails', () async {
+      fileSystem.file('source').createSync();
+      final File dest = fileSystem.file('dest');
+
+      exceptionHandler.addError(
+        dest,
+        FileSystemOp.create,
+        FileSystemException('', dest.path, const OSError('', eaccess)),
+      );
+
+      const expectedMessage =
+          'Flutter failed to create file at "dest".\n'
+          'Please ensure that the SDK and/or project is installed in a location that has read/write permissions for the current user.';
+      await expectLater(
+        () => fileSystem.file('source').copy('dest'),
+        throwsToolExit(message: expectedMessage),
+      );
+    });
+
+    // dart:io is able to clobber read-only files.
+    testWithoutContext('copy will copy even if the destination is not writable', () async {
+      fileSystem.file('source').createSync();
+      final File dest = fileSystem.file('dest');
+
+      exceptionHandler.addError(
+        dest,
+        FileSystemOp.open,
+        FileSystemException('', dest.path, const OSError('', eaccess)),
+      );
+
+      expect(dest, isNot(exists));
+      await fileSystem.file('source').copy('dest');
+      expect(dest, exists);
+    });
+
+    testWithoutContext('copy will copy if there are no exceptions', () async {
+      fileSystem.file('source').createSync();
+      final File dest = fileSystem.file('dest');
+
+      expect(dest, isNot(exists));
+      await fileSystem.file('source').copy('dest');
+      expect(dest, exists);
+    });
+
+    testWithoutContext(
+      'copy can directly copy bytes if both files can be opened but copy fails',
+      () async {
+        final expectedBytes = List<int>.generate(64 * 1024 + 3, (int i) => i.isEven ? 0 : 1);
+        final File source = fileSystem.file('source')..writeAsBytesSync(expectedBytes);
+        final File dest = fileSystem.file('dest');
+
+        exceptionHandler.addError(
+          source,
+          FileSystemOp.copy,
+          FileSystemException('', dest.path, const OSError('', eaccess)),
+        );
+
+        await source.copy('dest');
+        expect(dest.readAsBytesSync(), expectedBytes);
+      },
+    );
+  });
+
   group('Async I/O wrapping', () {
     late FileExceptionHandler exceptionHandler;
     late ErrorHandlingFileSystem fileSystem;

@@ -596,14 +596,65 @@ class ErrorHandlingFile extends ForwardingFileSystemEntity<File, io.File> with F
     );
   }
 
+  /// This copy method attempts to handle file system errors from both reading
+  /// and writing the copied file.
   @override
   Future<File> copy(String newPath) async {
-    return _run<File>(
-      () async => wrapFile(await delegate.copy(newPath)),
+    final File resultFile = fileSystem.file(newPath);
+    // First check if the source file can be read. If not, bail through error
+    // handling.
+    await _run<void>(
+      () async => (await delegate.open()).close(),
       platform: _platform,
-      failureMessage: 'Flutter failed to copy file from "${delegate.path}" to "$newPath"',
-      posixPermissionSuggestion: _posixPermissionSuggestion(<String>[delegate.path]),
+      failureMessage: 'Flutter failed to copy $path to $newPath due to source location error',
+      posixPermissionSuggestion: _posixPermissionSuggestion(<String>[path]),
     );
+    // Next check if the destination file can be written. If not, bail through
+    // error handling.
+    await _run<void>(
+      () => resultFile.create(recursive: true),
+      platform: _platform,
+      failureMessage: 'Flutter failed to copy $path to $newPath due to destination location error',
+    );
+    // If both of the above checks passed, attempt to copy the file and catch
+    // any thrown errors.
+    try {
+      return wrapFile(await delegate.copy(newPath));
+    } on FileSystemException {
+      // Proceed below
+    }
+    // If the copy failed but both of the above checks passed, copy the bytes
+    // directly.
+    await _run<void>(
+      () async {
+        RandomAccessFile? source;
+        RandomAccessFile? sink;
+        try {
+          source = await delegate.open();
+          sink = await resultFile.open(mode: FileMode.writeOnly);
+          // 64k is the same sized buffer used by dart:io for `File.openRead`.
+          final buffer = Uint8List(64 * 1024);
+          final int totalBytes = await source.length();
+          var bytes = 0;
+          while (bytes < totalBytes) {
+            final int chunkLength = await source.readInto(buffer);
+            await sink.writeFrom(buffer, 0, chunkLength);
+            bytes += chunkLength;
+          }
+        } on FileSystemException {
+          ErrorHandlingFileSystem.deleteIfExists(resultFile, recursive: true);
+          rethrow;
+        } finally {
+          await source?.close();
+          await sink?.close();
+        }
+      },
+      platform: _platform,
+      failureMessage: 'Flutter failed to copy $path to $newPath due to unknown error',
+      posixPermissionSuggestion: _posixPermissionSuggestion(<String>[path, resultFile.parent.path]),
+    );
+    // The original copy failed, but the manual copy worked.
+    return wrapFile(resultFile);
   }
 
   String _posixPermissionSuggestion(List<String> paths) =>
