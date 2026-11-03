@@ -37,6 +37,10 @@
 //
 //  --test-randomize-ordering-seed=<n> sets the shuffle seed for reproducing runs.
 //
+//  --bazel runs the framework_tests and tool shards' tests under Bazel, on
+//  the prebuilt engine in bin/cache (see bazel.dart). A SHARD or SUBSHARD name
+//  ending in _bazel (SUBSHARD=widgets_bazel) does the same for that shard.
+//
 // All other arguments are treated as arguments to pass to the flutter tool when
 // running tests.
 
@@ -49,6 +53,7 @@ import 'dart:math' as math;
 
 import 'package:path/path.dart' as path;
 
+import 'bazel.dart';
 import 'run_command.dart';
 import 'suite_runners/run_add_to_app_life_cycle_tests.dart';
 import 'suite_runners/run_analyze_tests.dart';
@@ -113,6 +118,8 @@ Future<void> main(List<String> args) async {
       } else if (arg == '--dry-run') {
         dryRunArgSet = true;
         printProgress('--dry-run enabled. Tests will not actually be executed.');
+      } else if (arg == '--bazel') {
+        enableBazel();
       } else {
         flutterTestArgs.add(arg);
       }
@@ -181,17 +188,44 @@ Future<void> main(List<String> args) async {
 
 final String _toolsPath = path.join(flutterRoot, 'packages', 'flutter_tools');
 
-Future<void> _runGeneralToolTests() async {
-  await runDartTest(
-    _toolsPath,
-    testPaths: <String>[path.join('test', 'general.shard')],
-    enableFlutterToolAsserts: false,
+/// The tool's test suites under Bazel, by shard (packages/flutter_tools/BUILD.bazel).
+const String _bazelGeneralShard = '//packages/flutter_tools:general_shard';
+const List<String> _bazelCommandsShards = <String>[
+  '//packages/flutter_tools:commands_shard_hermetic',
+  '//packages/flutter_tools:commands_shard_permeable',
+];
+const List<String> _bazelIntegrationShards = <String>[
+  '//packages/flutter_tools:integration_shard',
+  '//packages/flutter_tools:desktop_shard',
+];
+const String _bazelWebShard = '//packages/flutter_tools:web_shard';
 
-    // Detect unit test time regressions (poor time delay handling, etc).
-    // This overrides the 15 minute default for tools tests.
-    // See the README.md and dart_test.yaml files in the flutter_tools package.
-    perTestTimeout: const Duration(seconds: 2),
-  );
+Future<void> _runGeneralToolTests() async {
+  Future<void> runTests(List<String> testPaths) {
+    return runDartTest(
+      _toolsPath,
+      testPaths: testPaths,
+      enableFlutterToolAsserts: false,
+
+      // Detect unit test time regressions (poor time delay handling, etc).
+      // This overrides the 15 minute default for tools tests.
+      // See the README.md and dart_test.yaml files in the flutter_tools package.
+      perTestTimeout: const Duration(seconds: 2),
+    );
+  }
+
+  if (useBazel) {
+    final shard = BazelShard();
+    shard.cover(
+      <String>[_bazelGeneralShard],
+      root: _toolsPath,
+      files: testFilesUnder(_toolsPath, path.join('test', 'general.shard')),
+      orElse: runTests,
+    );
+    await shard.run();
+    return;
+  }
+  await runTests(<String>[path.join('test', 'general.shard')]);
 }
 
 Future<void> _runCommandsToolTests() async {
@@ -206,11 +240,27 @@ Future<void> _runCommandsToolTests() async {
     }
   }
 
-  await runDartTest(
-    _toolsPath,
-    forceSingleCore: true,
-    testPaths: selectIndexOfTotalSubshard<String>(allTests),
-  );
+  Future<void> runTests(List<String> testPaths) {
+    return runDartTest(_toolsPath, forceSingleCore: true, testPaths: testPaths);
+  }
+
+  final List<String> testPaths = selectIndexOfTotalSubshard<String>(allTests);
+  if (useBazel) {
+    // The permeable half runs the tool over the cache's facsimile: the
+    // desktop's and the web's engine artifacts must be in bin/cache.
+    await precacheForBazelToolTests();
+    final shard = BazelShard();
+    shard.cover(
+      _bazelCommandsShards,
+      root: _toolsPath,
+      files: testPaths,
+      whole: false,
+      orElse: runTests,
+    );
+    await shard.run();
+    return;
+  }
+  await runTests(testPaths);
 }
 
 Future<void> _runWebToolTests() async {
@@ -224,12 +274,31 @@ Future<void> _runWebToolTests() async {
       allTests.add(file.path);
     }
   }
-  await runDartTest(
-    _toolsPath,
-    forceSingleCore: true,
-    testPaths: selectIndexOfTotalSubshard<String>(allTests),
-    includeLocalEngineEnv: true,
-  );
+
+  Future<void> runTests(List<String> testPaths) {
+    return runDartTest(
+      _toolsPath,
+      forceSingleCore: true,
+      testPaths: testPaths,
+      includeLocalEngineEnv: true,
+    );
+  }
+
+  final List<String> testPaths = selectIndexOfTotalSubshard<String>(allTests);
+  if (useBazel) {
+    await precacheForBazelToolTests();
+    final shard = BazelShard();
+    shard.cover(
+      <String>[_bazelWebShard],
+      root: _toolsPath,
+      files: testPaths,
+      whole: false,
+      orElse: runTests,
+    );
+    await shard.run();
+    return;
+  }
+  await runTests(testPaths);
 }
 
 // TODO(jmagman): https://github.com/flutter/flutter/issues/189302 remove when it gets to stable.
@@ -255,12 +324,32 @@ Future<void> _runIntegrationToolTests() async {
     return durations[path.posix.joinAll(path.split(testPath))] ?? defaultDuration;
   }
 
-  await runDartTest(
-    _toolsPath,
-    forceSingleCore: true,
-    testPaths: selectWeightedSubshard<String>(allTests, weight: weight),
-    collectMetrics: true,
-  );
+  Future<void> runTests(List<String> testPaths) {
+    return runDartTest(
+      _toolsPath,
+      forceSingleCore: true,
+      testPaths: testPaths,
+      collectMetrics: true,
+    );
+  }
+
+  final List<String> testPaths = selectWeightedSubshard<String>(allTests, weight: weight);
+  if (useBazel) {
+    // The tests build through the tool from the cache's facsimile: the
+    // desktop's and the web's engine artifacts must be in bin/cache.
+    await precacheForBazelToolTests();
+    final shard = BazelShard();
+    shard.cover(
+      _bazelIntegrationShards,
+      root: _toolsPath,
+      files: testPaths,
+      whole: false,
+      orElse: runTests,
+    );
+    await shard.run();
+  } else {
+    await runTests(testPaths);
+  }
 
   await runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'hook_user_defines'));
   await runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'link_hook'));

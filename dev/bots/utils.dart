@@ -100,6 +100,39 @@ void enableDryRun() {
 
 bool? _dryRun;
 
+/// Whether the shards run their tests under Bazel where they can.
+///
+/// When `true` (`test.dart --bazel`, or a [kShardKey] or [kSubshardKey] value
+/// ending in [kBazelSuffix]), the framework_tests and tool shards compile and
+/// run the tests that have Bazel targets with `bazelisk test
+/// --config=prebuilt_engine` -- the repository's Bazel rules against the
+/// engine artifacts in bin/cache -- in place of `flutter test` and `dart
+/// test`, and run the rest as they do otherwise. See bazel.dart.
+bool get useBazel => _useBazel;
+bool _useBazel = false;
+
+/// Switches [useBazel] to `true`.
+void enableBazel() {
+  _useBazel = true;
+}
+
+/// The suffix of a [kShardKey] or [kSubshardKey] value that asks for the
+/// shard under Bazel: `SUBSHARD=widgets_bazel` runs the widgets subshard as
+/// `--bazel` would. This is how a .ci.yaml target opts in: the flutter_drone
+/// recipe passes the names through as they are, and nothing else.
+const String kBazelSuffix = '_bazel';
+
+/// The shard or subshard name the environment variable [key] holds, with
+/// [kBazelSuffix] stripped (and [useBazel] enabled) when it ends in it.
+String? shardNameFromEnvironment(String key) {
+  final String? name = Platform.environment[key];
+  if (name == null || !name.endsWith(kBazelSuffix)) {
+    return name;
+  }
+  enableBazel();
+  return name.substring(0, name.length - kBazelSuffix.length);
+}
+
 const int kESC = 0x1B;
 const int kOpenSquareBracket = 0x5B;
 const int kCSIParameterRangeStart = 0x30;
@@ -766,12 +799,12 @@ List<T> _selectSubshard<T>(
   String subshardKey,
   List<T> Function(int index, int total) select,
 ) {
-  final String? subshardName = Platform.environment[subshardKey];
+  final String? subshardName = shardNameFromEnvironment(subshardKey);
   if (subshardName == null) {
     print('$subshardKey environment variable is missing, skipping sharding');
     return tests;
   }
-  printProgress('$bold$subshardKey=$subshardName$reset');
+  printProgress('$bold$subshardKey=${Platform.environment[subshardKey]}$reset');
   final Match? match = RegExp(r'^(\d+)_(\d+)$').firstMatch(subshardName);
   if (match == null) {
     foundError(<String>[
@@ -797,14 +830,14 @@ Future<void> _runFromList(
   int positionInTaskName,
 ) async {
   try {
-    final String? item = Platform.environment[key];
+    final String? item = shardNameFromEnvironment(key);
     if (item == null) {
       for (final String currentItem in items.keys) {
         printProgress('$bold$key=$currentItem$reset');
         await items[currentItem]!();
       }
     } else {
-      printProgress('$bold$key=$item$reset');
+      printProgress('$bold$key=${Platform.environment[key]}$reset');
       if (!items.containsKey(item)) {
         foundError(<String>[
           '${red}Invalid $name: $item$reset',
