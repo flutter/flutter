@@ -26,12 +26,13 @@ FLUTTER_ASSERT_ARC
 }
 
 - (id)_accessibilityHitTest:(CGPoint)point withEvent:(UIEvent*)event {
-  UIView* bridgeView = self.semanticsObject.bridgeView;
+  SemanticsObject* semanticsObject = self.semanticsObject;
+  UIView* bridgeView = semanticsObject.bridgeView;
   if (!bridgeView) {
     return nil;
   }
   CGPoint pointInBridgeView = [self convertPoint:point toView:bridgeView];
-  return [self.semanticsObject _accessibilityHitTest:pointInBridgeView withEvent:event];
+  return [semanticsObject _accessibilityHitTest:pointInBridgeView withEvent:event];
 }
 
 // The following methods are explicitly forwarded to the wrapped SemanticsObject because the
@@ -39,20 +40,21 @@ FLUTTER_ASSERT_ARC
 // UIScrollView class, the base class.
 
 - (BOOL)isAccessibilityElement {
-  flutter::AccessibilityBridgeIos* bridge = self.semanticsObject.bridge;
+  SemanticsObject* semanticsObject = self.semanticsObject;
+  flutter::AccessibilityBridgeIos* bridge = semanticsObject.bridge;
   if (!bridge) {
     return NO;
   }
 
-  if ([self.semanticsObject hasChildren]) {
+  if ([semanticsObject hasChildren]) {
     return NO;
   }
 
   if (bridge->isVoiceOverRunning()) {
-    return self.semanticsObject.accessibilityLabel.length > 0;
+    return semanticsObject.accessibilityLabel.length > 0;
   }
 
-  if (self.semanticsObject.isAccessibilityElement) {
+  if (semanticsObject.isAccessibilityElement) {
     return YES;
   }
 
@@ -117,18 +119,19 @@ FLUTTER_ASSERT_ARC
 }
 
 - (id)accessibilityContainer {
-  if (!self.semanticsObject.bridge) {
+  SemanticsObject* semanticsObject = self.semanticsObject;
+  if (!semanticsObject.bridge) {
     return nil;
   }
-  if ([self.semanticsObject hasChildren]) {
+  if ([semanticsObject hasChildren]) {
     // When `semanticsObject` has children, this scroll view itself serves as
     // `semanticsObject.accessibilityContainer` (replacing `SemanticsObjectContainer`), so its own
     // parent container in the accessibility hierarchy is `semanticsObject.parent`'s container.
-    return ([self.semanticsObject uid] == kRootNodeId)
-               ? self.semanticsObject.bridgeView
-               : self.semanticsObject.parent.accessibilityContainer;
+    return ([semanticsObject uid] == kRootNodeId)
+               ? semanticsObject.bridgeView
+               : semanticsObject.parent.accessibilityContainer;
   }
-  return self.semanticsObject.accessibilityContainer;
+  return semanticsObject.accessibilityContainer;
 }
 
 - (NSInteger)accessibilityElementCount {
@@ -136,10 +139,11 @@ FLUTTER_ASSERT_ARC
 }
 
 - (nullable id)accessibilityElementAtIndex:(NSInteger)index {
-  if (index < 0 || index >= self.accessibilityElementCount) {
+  NSArray<SemanticsObject*>* children = self.semanticsObject.children;
+  if (index < 0 || index >= static_cast<NSInteger>(children.count)) {
     return nil;
   }
-  SemanticsObject* child = self.semanticsObject.children[index];
+  SemanticsObject* child = children[index];
   if ([child hasChildren]) {
     return child.accessibilityContainer;
   }
