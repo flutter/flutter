@@ -437,10 +437,14 @@ static std::optional<GLenum> ToRenderBufferFormat(PixelFormat format) {
   FML_UNREACHABLE();
 }
 
-TextureGLES::Type TextureGLES::ComputeTypeForBinding(GLenum target) const {
-  // When binding to a GL_READ_FRAMEBUFFER, any multisampled
-  // textures must be bound as single sampled.
-  if (target == GL_READ_FRAMEBUFFER && type_ == Type::kTextureMultisampled) {
+TextureGLES::Type TextureGLES::ComputeTypeForBinding(GLenum target,
+                                                     bool for_reading) const {
+  // A multisampled texture that is read rather than drawn into is bound as
+  // single sampled: its texture level holds the resolved samples. Binding
+  // GL_READ_FRAMEBUFFER says so by itself; OpenGL ES 2 only has
+  // GL_FRAMEBUFFER, so a readback says so through |for_reading|.
+  if ((for_reading || target == GL_READ_FRAMEBUFFER) &&
+      type_ == Type::kTextureMultisampled) {
     return Type::kTexture;
   }
   return type_;
@@ -796,7 +800,8 @@ bool TextureGLES::EnsureSliceMipLevelStorage(size_t slice, size_t mip_level) {
 bool TextureGLES::SetAsFramebufferAttachment(GLenum target,
                                              AttachmentType attachment_type,
                                              uint32_t mip_level,
-                                             uint32_t slice) {
+                                             uint32_t slice,
+                                             bool for_reading) {
   if (!IsValid()) {
     return false;
   }
@@ -817,7 +822,7 @@ bool TextureGLES::SetAsFramebufferAttachment(GLenum target,
   }
   const GLint level = static_cast<GLint>(mip_level);
 
-  switch (ComputeTypeForBinding(target)) {
+  switch (ComputeTypeForBinding(target, for_reading)) {
     case Type::kTexture: {
       // Cube maps attach a specific face; 2D textures attach the 2D target.
       GLenum textarget =
