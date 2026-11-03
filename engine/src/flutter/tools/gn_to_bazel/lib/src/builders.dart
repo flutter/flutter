@@ -338,6 +338,8 @@ const String ltoSetting = '//engine/src/flutter/build/bazel:lto';
 /// `dart-host` the Dart packages' own tests (build_dart_host_test_list),
 /// `benchmarks` the engine benchmarks (run_engine_benchmarks),
 /// `font-subset` font-subset's test, `impeller` the Impeller suite alone,
+/// `impeller-vulkan-sync-validation` its hand-picked tests under the
+/// layers' synchronization validation (run_tests_lists.dart's variant),
 /// `java` the Android embedding's Robolectric tests (run_java_tests: Gradle in
 /// shell/platform/android/test_runner over the build's flutter.jar; the
 /// Bazel suite runs the same classes under an Android configuration,
@@ -360,6 +362,9 @@ const Map<String, List<String>> runTestsTypeSuites = <String, List<String>>{
   'benchmarks': <String>['//engine/src/flutter:benchmarks'],
   'font-subset': <String>['//engine/src/flutter/tools/font_subset:font_subset_test'],
   'impeller': <String>['//engine/src/flutter/impeller:impeller_unittests'],
+  'impeller-vulkan-sync-validation': <String>[
+    '//engine/src/flutter/impeller:impeller_vulkan_sync_validation_unittests',
+  ],
   'impeller-golden': <String>['//engine/src/flutter/impeller/golden_tests:impeller_golden_tests'],
   'java': <String>['//engine/src/flutter/shell/platform/android:java_tests'],
   'objc': <String>['//engine/src/flutter/testing/ios:ios_unit_tests'],
@@ -913,7 +918,7 @@ List<BuilderBuild> builderBuilds(Map<String, BuilderConfig> configs) {
   // A CI build with the developer's name and other flags keeps its `ci/`.
   final developers = <String, BuilderBuild>{
     for (final build in builds)
-      if (build.file == 'local_engine.json') build.configName: build,
+      if (developerFiles.contains(build.file)) build.configName: build,
   };
   for (final build in builds) {
     final BuilderBuild? developer = developers[build.configName];
@@ -926,8 +931,14 @@ List<BuilderBuild> builderBuilds(Map<String, BuilderConfig> configs) {
   return builds;
 }
 
+/// The developer's builder files: local_engine.json and, since the split of
+/// the configurations most contributors build into their own file,
+/// local_engine_common.json. Their builds name the developer's
+/// configurations (`host_debug`, `host_debug_unopt`, ...).
+const List<String> developerFiles = <String>['local_engine.json', 'local_engine_common.json'];
+
 /// The builds of [host]'s builder files, by file name and build order, then
-/// local_engine.json's builds of that host.
+/// the developer's files' builds of that host.
 List<Build> _buildsOf(Map<String, BuilderConfig> configs, BuilderHost host) {
   final prefix = host == BuilderHost.linux ? 'linux_' : 'mac_';
   final developer = host == BuilderHost.linux ? 'linux/' : 'macos/';
@@ -938,9 +949,10 @@ List<Build> _buildsOf(Map<String, BuilderConfig> configs, BuilderHost host) {
       configs.keys.where((String f) => f.startsWith(prefix) && !isBazelVariant(f)).toList()..sort();
   return <Build>[
     for (final file in files) ...configs[file]!.builds,
-    if (configs.containsKey('local_engine'))
-      for (final Build build in configs['local_engine']!.builds)
-        if (build.name.startsWith(developer)) build,
+    for (final String developerFile in developerFiles)
+      if (configs.containsKey(p.basenameWithoutExtension(developerFile)))
+        for (final Build build in configs[p.basenameWithoutExtension(developerFile)]!.builds)
+          if (build.name.startsWith(developer)) build,
   ];
 }
 

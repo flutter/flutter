@@ -199,10 +199,6 @@ build:wasm_release --compilation_mode=opt --//engine/src/flutter/common:runtime_
 #   --runtime-mode debug --android --android-cpu=riscv64 --no-stripped --no-lto --rbe --no-goma
 # The same configuration as linux_android_debug_engine.json's ci/android_debug_riscv64, above.
 
-# local_engine.json: linux/android_debug_unopt_arm64
-#   --runtime-mode debug --unoptimized --android --android-cpu=arm64 --no-stripped --no-lto --rbe --no-goma
-build:android_debug_unopt_arm64 --compilation_mode=dbg --//engine/src/flutter/common:runtime_mode=debug --platforms=//engine/src/flutter/build/bazel/toolchains:android_arm64_debug --//engine/src/flutter/build/bazel:stripped=false
-
 # local_engine.json: linux/android_debug_unopt_x64
 #   --runtime-mode debug --unoptimized --android --android-cpu=x64 --no-stripped --no-lto --rbe --no-goma
 build:android_debug_unopt_x64 --compilation_mode=dbg --//engine/src/flutter/common:runtime_mode=debug --platforms=//engine/src/flutter/build/bazel/toolchains:android_x64_debug --//engine/src/flutter/build/bazel:stripped=false
@@ -219,10 +215,6 @@ build:android_release_arm64 --compilation_mode=opt --//engine/src/flutter/common
 #   --runtime-mode debug --no-stripped --no-lto --rbe --no-goma
 build:host_debug --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=debug --platforms=//engine/src/flutter/build/bazel/toolchains:linux_x64_debug --//engine/src/flutter/build/bazel:stripped=false
 
-# local_engine.json: linux/host_debug_unopt
-#   --runtime-mode debug --unoptimized --no-stripped --no-lto --rbe --no-goma
-build:host_debug_unopt --compilation_mode=dbg --//engine/src/flutter/common:runtime_mode=debug --platforms=//engine/src/flutter/build/bazel/toolchains:linux_x64_debug --//engine/src/flutter/build/bazel:stripped=false
-
 # local_engine.json: linux/host_profile
 #   --runtime-mode profile --no-stripped --no-lto --rbe --no-goma
 build:host_profile --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=profile --platforms=//engine/src/flutter/build/bazel/toolchains:linux_x64_profile --//engine/src/flutter/build/bazel:stripped=false
@@ -235,7 +227,15 @@ build:host_release --compilation_mode=opt --//engine/src/flutter/common:runtime_
 #   --web --runtime-mode=release --no-rbe --no-goma
 # The same configuration as linux_web_engine_build.json's ci/wasm_release, above.
 
-# local_engine.json: linux/wasm_debug_unopt
+# local_engine_common.json: linux/android_debug_unopt_arm64
+#   --runtime-mode debug --unoptimized --android --android-cpu=arm64 --no-stripped --no-lto --rbe --no-goma
+build:android_debug_unopt_arm64 --compilation_mode=dbg --//engine/src/flutter/common:runtime_mode=debug --platforms=//engine/src/flutter/build/bazel/toolchains:android_arm64_debug --//engine/src/flutter/build/bazel:stripped=false
+
+# local_engine_common.json: linux/host_debug_unopt
+#   --runtime-mode debug --unoptimized --no-stripped --no-lto --rbe --no-goma
+build:host_debug_unopt --compilation_mode=dbg --//engine/src/flutter/common:runtime_mode=debug --platforms=//engine/src/flutter/build/bazel/toolchains:linux_x64_debug --//engine/src/flutter/build/bazel:stripped=false
+
+# local_engine_common.json: linux/wasm_debug_unopt
 #   --web --runtime-mode=debug --unoptimized --no-rbe --no-goma
 build:wasm_debug_unopt --compilation_mode=dbg --//engine/src/flutter/common:runtime_mode=debug --platforms=//engine/src/flutter/build/bazel/toolchains/emscripten:wasm32_emscripten_debug
 
@@ -451,10 +451,6 @@ build:ios_release --compilation_mode=opt --//engine/src/flutter/common:runtime_m
 #   --ios --simulator --runtime-mode debug --no-stripped --no-lto --xcode-symlinks --rbe --no-goma
 build:ios_debug_sim --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=debug --platforms=//engine/src/flutter/build/bazel/toolchains:ios_sim_x64_debug --//engine/src/flutter/build/bazel:stripped=false
 
-# local_engine.json: macos/ios_debug_sim_unopt_arm64
-#   --ios --simulator --simulator-cpu=arm64 --runtime-mode debug --unoptimized --no-stripped --no-lto --xcode-symlinks --rbe --no-goma
-build:ios_debug_sim_unopt_arm64 --compilation_mode=dbg --//engine/src/flutter/common:runtime_mode=debug --platforms=//engine/src/flutter/build/bazel/toolchains:ios_sim_arm64_debug --//engine/src/flutter/build/bazel:stripped=false
-
 # local_engine.json: macos/android_debug_arm64
 #   --runtime-mode debug --android --android-cpu=arm64 --no-stripped --no-lto --xcode-symlinks --rbe --no-goma
 # The same configuration as linux_android_debug_engine.json's ci/android_debug_arm64, above.
@@ -465,7 +461,7 @@ build:ios_debug_sim_unopt_arm64 --compilation_mode=dbg --//engine/src/flutter/co
 
 # local_engine.json: macos/android_debug_unopt_arm64
 #   --runtime-mode debug --unoptimized --android --android-cpu=arm64 --no-stripped --no-lto --xcode-symlinks --rbe --no-goma
-# The same configuration as local_engine.json's linux/android_debug_unopt_arm64, above.
+# The same configuration as local_engine_common.json's linux/android_debug_unopt_arm64, above.
 
 # local_engine.json: macos/android_profile_arm64
 #   --runtime-mode profile --android --android-cpu=arm64 --no-stripped --no-lto --xcode-symlinks --rbe --no-goma
@@ -478,10 +474,6 @@ build:ios_debug_sim_unopt_arm64 --compilation_mode=dbg --//engine/src/flutter/co
 # local_engine.json: macos/host_debug
 #   --runtime-mode debug --no-stripped --no-lto --xcode-symlinks --rbe --no-goma
 build:mac_host_debug --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=debug --platforms=//engine/src/flutter/build/bazel/toolchains:macos_x64_debug --//engine/src/flutter/build/bazel:stripped=false
-
-# local_engine.json: macos/host_debug_unopt_arm64
-#   --runtime-mode debug --unopt --mac-cpu arm64 --xcode-symlinks --rbe --no-goma
-# The same configuration as mac_unopt.json's ci/host_debug_unopt_arm64, above.
 
 # local_engine.json: macos/host_profile_arm64
 #   --runtime-mode profile --no-lto --mac-cpu arm64 --xcode-symlinks --rbe --no-goma
@@ -505,7 +497,15 @@ build:mac_host_release --compilation_mode=opt --//engine/src/flutter/common:runt
 
 # local_engine.json: macos/wasm_debug_unopt
 #   --web --runtime-mode=debug --unoptimized --no-rbe --no-goma
-# The same configuration as local_engine.json's linux/wasm_debug_unopt, above.
+# The same configuration as local_engine_common.json's linux/wasm_debug_unopt, above.
+
+# local_engine_common.json: macos/ios_debug_sim_unopt_arm64
+#   --ios --simulator --simulator-cpu=arm64 --runtime-mode debug --unoptimized --no-stripped --no-lto --xcode-symlinks --rbe --no-goma
+build:ios_debug_sim_unopt_arm64 --compilation_mode=dbg --//engine/src/flutter/common:runtime_mode=debug --platforms=//engine/src/flutter/build/bazel/toolchains:ios_sim_arm64_debug --//engine/src/flutter/build/bazel:stripped=false
+
+# local_engine_common.json: macos/host_debug_unopt_arm64
+#   --runtime-mode debug --unopt --mac-cpu arm64 --xcode-symlinks --rbe --no-goma
+# The same configuration as mac_unopt.json's ci/host_debug_unopt_arm64, above.
 
 # Not configurations: the builds of these files that are not builds of this
 # scope -- another platform's, or a test-only build with no tools/gn step.

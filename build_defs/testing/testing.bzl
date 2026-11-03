@@ -831,6 +831,50 @@ def flutter_display_test(name, size = None, timeout = None, shard_count = None, 
         visibility = visibility,
     )
 
+def flutter_display_test_variant(name, test, size = None, timeout = None, shard_count = None, flaky = None, args = [], data = [], env = {}, vulkan_validation = True, session_bus = False, tags = [], visibility = None, **kwargs):
+    """A flutter_display_test's binary run again as another test, with other arguments.
+
+    What testing/run_tests.py does when it runs one suite's binary under two
+    names: the hand-picked Vulkan synchronization validation tests of
+    impeller_unittests (`--type impeller-vulkan-sync-validation`) beside the
+    suite itself (`--type impeller`). The variant is declared in the
+    suite's package (the binary is private to it) and runs the binary whole,
+    under the display, like the suite.
+
+    Args:
+      name: name of the variant.
+      test: the flutter_display_test whose binary runs (`:impeller_unittests`).
+      size: the test's size.
+      timeout: the test's timeout.
+      shard_count: the test's shards.
+      flaky: the test's flaky attribute.
+      args: arguments of the binary.
+      data: runfiles of the test (the suite's GPU test backends, say).
+      env: environment of the test.
+      vulkan_validation: as flutter_display_test's.
+      session_bus: as flutter_display_test's.
+      tags: tags of the test.
+      visibility: visibility of the test.
+      **kwargs: the test's common attributes (target_compatible_with, ...).
+    """
+    _display_test(
+        name = name,
+        binary = test + "_binary",
+        size = size,
+        timeout = timeout,
+        shard_count = shard_count,
+        flaky = flaky,
+        args = args,
+        data = data,
+        env = env,
+        vulkan_validation = vulkan_validation,
+        session_bus = session_bus,
+        gtest_parallel = False,
+        tags = tags,
+        visibility = visibility,
+        **kwargs
+    )
+
 # ---------------------------------------------------------------------------
 # The Dart tests: testing/dart under flutter_tester
 # ---------------------------------------------------------------------------

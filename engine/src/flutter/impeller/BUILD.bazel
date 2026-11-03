@@ -7,7 +7,7 @@
 load("@bazel_skylib//lib:selects.bzl", "selects")
 load("@rules_cc//cc:defs.bzl", "cc_library")
 load("//build_defs/cc:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
-load("//build_defs/testing:testing.bzl", "flutter_display_test", "flutter_gpu_test_backends")
+load("//build_defs/testing:testing.bzl", "flutter_display_test", "flutter_display_test_variant", "flutter_gpu_test_backends")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -245,4 +245,28 @@ selects.config_setting_group(
         ":when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan",
         "//engine/src/flutter/testing:unittests_enabled",
     ],
+)
+
+# What GN has no words for; maintained in the converter's manifest
+# (tools/gn_to_bazel/lib/src/manifest.dart).
+
+# run_tests.py --type impeller-vulkan-sync-validation: the hand-picked tests
+# of its VULKAN_SYNC_VALIDATION_TESTS (the converter reads the script's list;
+# tools/gn_to_bazel/lib/src/run_tests_lists.dart) with the Vulkan validation
+# layers' synchronization validation on, under the display and the validation
+# environment, as the suite above runs.
+flutter_display_test_variant(
+    name = "impeller_vulkan_sync_validation_unittests",
+    size = "large",
+    args = [
+        "--gtest_filter=Play/BlitPassTest.CanBlitSmallRegionToUninitializedTexture/Vulkan:Play/BlitPassTest.CanResizeTextures/Vulkan:Play/TypographerTest.GlyphAtlasTextureWillGrowTilMaxTextureSize/Vulkan:Play/RendererTest.CanSepiaToneWithSubpasses/Vulkan:Play/EntityPassTargetTest.SwapWithMSAAImplicitResolve/Vulkan:Compute/ComputeTest.MultiStageInputAndOutput/Vulkan",
+        "--",
+        "--enable_vulkan_sync_validation",
+    ],
+    data = [":gpu_test_backends"],
+    target_compatible_with = select({
+        "//engine/src/flutter/testing:unittests_enabled": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    test = ":impeller_unittests",
 )
