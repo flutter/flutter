@@ -1192,14 +1192,20 @@ Limits. The tool's iOS and Android engine directories (`_APPLE_CACHE_FILES`,
 the android shard's `cache_files`) still come from the tree under either
 configuration: the apple and android shards want an engine checkout
 (`flutter precache --ios --android` would serve them the same way; not done).
-The framework's tests have been run this way on Linux only (a Mac's
-`darwin-x64` directory is named, not exercised). Measured (11-02, Linux,
+Measured (11-02, Linux,
 engine `c5ec59d0…` from `flutter precache --linux --web`): the three root
 suites analyze under the config (2,557 targets; the tree's 2,799);
 `//packages/flutter/test/animation:animation //dev/bots:tests` 24 of 24
 pass; the tool's general and commands shards and the widgets tree:
 **745 of 745 pass** (277 general, 68 hermetic, 10 permeable, 390 widgets;
-37 min at `--local_test_jobs=4`, create_test's 18 min the critical path).
+37 min at `--local_test_jobs=4`, create_test's 18 min the critical path);
+the tool's integration and desktop shards (11-03): **74 of 74 pass** in
+36 min. On a Mac
+(Apple Silicon, 11-03, after `flutter precache --macos --web`: the
+`darwin-x64` universal engine directory, the arm64 Dart SDK): animation,
+dev/bots and the general shard **303 of 303** in 5 min 51, the widgets tree
+**390 of 390** in 3 min 05, and `test.dart --bazel` of the general shard
+end to end -- the repository rules fetched without a complaint.
 
 ### `dev/bots/test.dart --bazel`: the shards under Bazel
 
