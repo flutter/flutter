@@ -1268,13 +1268,28 @@ abstract class BoxScrollView extends ScrollView {
 /// ```
 /// {@end-tool}
 ///
-/// ## Using a ListView inside a Column
+/// ## Selection of list items
+///
+/// [ListView] has no built-in notion of a selected item or items. For a small
+/// example of how a caller might wire up basic item selection, see
+/// [ListTile.selected].
+///
+/// {@tool dartpad}
+/// This example shows a custom implementation of [ListTile] selection in a [ListView] or [GridView].
+/// Long press any [ListTile] to enable selection mode.
+///
+/// ** See code in examples/api/lib/widgets/scroll_view/list_view.0.dart **
+/// {@end-tool}
+///
+/// ## Troubleshooting
+///
+/// ### Using a ListView inside a Column
 ///
 /// A [ListView] that does not [shrinkWrap] expands to fill the available space
 /// in its [scrollDirection]. A [Column] gives its non-flex children unbounded
 /// height constraints, so a vertical [ListView] placed directly inside a
-/// [Column] has no maximum height to expand to, and throws an error about
-/// "Vertical viewport was given unbounded height" during layout.
+/// [Column] has no maximum height to expand to, and fails during layout with a
+/// "Vertical viewport was given unbounded height" error.
 ///
 /// There are several ways to give the [ListView] a bounded height:
 ///
@@ -1285,12 +1300,14 @@ abstract class BoxScrollView extends ScrollView {
 ///  * Wrap the [ListView] in a [SizedBox] or [ConstrainedBox] with a fixed or
 ///    maximum height.
 ///  * Set [shrinkWrap] to true, so that the [ListView] sizes itself to its
-///    contents. Because all of the children must be laid out, this gives up
-///    lazy building and is expensive for long lists. If the contents are
-///    taller than the [Column], the [Column] overflows instead of the list
-///    scrolling, unless the [ListView] is also wrapped in a [Flexible]. Even
-///    then lazy building is still lost, so this is best reserved for short
-///    lists that need to shrink to fit when there are few items.
+///    contents. Directly inside a [Column] the list has no maximum height, so
+///    it lays out every child: lazy building is lost, and long lists are
+///    expensive. If the contents are taller than the [Column], the [Column]
+///    overflows instead of the list scrolling. Wrapping the shrink-wrapped
+///    [ListView] in a [Flexible] gives it a maximum height, so it scrolls and
+///    builds lazily again, but it still pays the extra layout cost described
+///    at [shrinkWrap]. Prefer [Expanded] unless the list must shrink to fit
+///    when it has only a few items.
 ///
 /// The same applies to a horizontal [ListView] inside a [Row], which needs a
 /// bounded width. To make a [ListView] scroll together with other widgets,
@@ -1319,19 +1336,6 @@ abstract class BoxScrollView extends ScrollView {
 /// ```
 /// {@end-tool}
 ///
-/// ## Selection of list items
-///
-/// [ListView] has no built-in notion of a selected item or items. For a small
-/// example of how a caller might wire up basic item selection, see
-/// [ListTile.selected].
-///
-/// {@tool dartpad}
-/// This example shows a custom implementation of [ListTile] selection in a [ListView] or [GridView].
-/// Long press any [ListTile] to enable selection mode.
-///
-/// ** See code in examples/api/lib/widgets/scroll_view/list_view.0.dart **
-/// {@end-tool}
-///
 /// {@macro flutter.widgets.BoxScroll.scrollBehaviour}
 ///
 /// {@macro flutter.widgets.ScrollView.PageStorage}
@@ -1350,6 +1354,7 @@ abstract class BoxScrollView extends ScrollView {
 ///  * [ScrollNotification] and [NotificationListener], which can be used to watch
 ///    the scroll position without using a [ScrollController].
 ///  * The [catalog of layout widgets](https://docs.flutter.dev/ui/widgets/layout).
+///  * [Common Flutter errors: Vertical viewport was given unbounded height](https://docs.flutter.dev/testing/common-errors#vertical-viewport-was-given-unbounded-height)
 ///  * Cookbook: [Use lists](https://docs.flutter.dev/cookbook/lists/basic-list)
 ///  * Cookbook: [Work with long lists](https://docs.flutter.dev/cookbook/lists/long-lists)
 ///  * Cookbook: [Create a horizontal list](https://docs.flutter.dev/cookbook/lists/horizontal-list)
