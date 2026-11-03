@@ -205,6 +205,48 @@ void main() {
       expectExitCode(result, 0);
       expect(result.stdout, contains('|> bin/flutter'));
     }, testOn: 'posix');
+
+    test('a _bazel subshard runs the subshard under Bazel', () async {
+      final ProcessResult result = await runScript(
+        <String, String>{'SHARD': 'framework_tests', 'SUBSHARD': 'widgets_bazel'},
+        <String>['--dry-run'],
+      );
+      expectExitCode(result, 0);
+      expect(result.stdout, contains('SUBSHARD=widgets_bazel'));
+      expect(result.stdout, contains(RegExp(r'\|> \S*bazelisk')));
+      expect(result.stdout, contains('--config=prebuilt_engine'));
+      expect(result.stdout, contains('//packages/flutter/test/widgets:widgets'));
+      expect(
+        result.stdout,
+        contains('//packages/flutter/test/widgets:widgets_without_creation_locations'),
+      );
+      expect(result.stdout, contains('//packages/flutter/test_release:tests'));
+      expect(result.stdout, isNot(contains('--track-widget-creation')));
+    }, testOn: 'posix');
+
+    test('_bazel names on a shard and a numbered subshard run its files under Bazel', () async {
+      final ProcessResult result = await runScript(
+        <String, String>{'SHARD': 'tool_tests_commands_bazel', 'SUBSHARD': '1_3_bazel'},
+        <String>['--dry-run'],
+      );
+      expectExitCode(result, 0);
+      expect(result.stdout, contains('SHARD=tool_tests_commands_bazel'));
+      expect(result.stdout, contains(RegExp(r'Selecting subshard 1 of 3 \(tests 1-\d+ of \d+\)')));
+      expect(result.stdout, contains('precache'));
+      expect(result.stdout, contains('//packages/flutter_tools:test_commands.shard_'));
+      expect(result.stdout, isNot(contains('//packages/flutter_tools:commands_shard_hermetic')));
+    }, testOn: 'posix');
+
+    test('--bazel refuses a local engine', () async {
+      // Not a dry run: --dry-run makes errors non-fatal. The refusal comes
+      // before anything runs.
+      final ProcessResult result = await runScript(
+        <String, String>{'SHARD': 'tool_tests', 'SUBSHARD': 'general'},
+        <String>['--bazel', '--local-engine=host_debug_unopt'],
+      );
+      expectExitCode(result, 1);
+      expect(result.stdout, contains('cannot take --local-engine'));
+    }, testOn: 'posix');
   });
 
   test('selectTestsForSubShard distributes tests amongst subshards correctly', () async {
