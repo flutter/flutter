@@ -133,6 +133,9 @@ void main() {
           command: <String>['xattr', '-r', '-d', 'com.apple.FinderInfo', appFrameworkPath],
         ),
         FakeCommand(
+          command: <String>['xattr', '-r', '-d', 'com.apple.ResourceFork', appFrameworkPath],
+        ),
+        FakeCommand(
           command: <String>['xattr', '-r', '-d', 'com.apple.provenance', appFrameworkPath],
         ),
         FakeCommand(
@@ -186,6 +189,9 @@ void main() {
         ),
         FakeCommand(
           command: <String>['xattr', '-r', '-d', 'com.apple.FinderInfo', appFrameworkPath],
+        ),
+        FakeCommand(
+          command: <String>['xattr', '-r', '-d', 'com.apple.ResourceFork', appFrameworkPath],
         ),
         FakeCommand(
           command: <String>['xattr', '-r', '-d', 'com.apple.provenance', appFrameworkPath],
@@ -261,6 +267,9 @@ void main() {
           command: <String>['xattr', '-r', '-d', 'com.apple.FinderInfo', frameworkBinary.path],
         ),
         FakeCommand(
+          command: <String>['xattr', '-r', '-d', 'com.apple.ResourceFork', frameworkBinary.path],
+        ),
+        FakeCommand(
           command: <String>['xattr', '-r', '-d', 'com.apple.provenance', frameworkBinary.path],
         ),
         FakeCommand(
@@ -331,6 +340,15 @@ void main() {
             '-r',
             '-d',
             'com.apple.FinderInfo',
+            frameworkDirectoryBinary.path,
+          ],
+        ),
+        FakeCommand(
+          command: <String>[
+            'xattr',
+            '-r',
+            '-d',
+            'com.apple.ResourceFork',
             frameworkDirectoryBinary.path,
           ],
         ),
@@ -432,6 +450,15 @@ void main() {
             '-r',
             '-d',
             'com.apple.FinderInfo',
+            frameworkDirectoryBinary.path,
+          ],
+        ),
+        FakeCommand(
+          command: <String>[
+            'xattr',
+            '-r',
+            '-d',
+            'com.apple.ResourceFork',
             frameworkDirectoryBinary.path,
           ],
         ),
@@ -551,6 +578,15 @@ void main() {
             'xattr',
             '-r',
             '-d',
+            'com.apple.ResourceFork',
+            frameworkDirectoryBinary.path,
+          ],
+        ),
+        FakeCommand(
+          command: <String>[
+            'xattr',
+            '-r',
+            '-d',
             'com.apple.provenance',
             frameworkDirectoryBinary.path,
           ],
@@ -636,6 +672,15 @@ void main() {
             'xattr',
             '-r',
             '-d',
+            'com.apple.ResourceFork',
+            frameworkDirectoryBinary.path,
+          ],
+        ),
+        FakeCommand(
+          command: <String>[
+            'xattr',
+            '-r',
+            '-d',
             'com.apple.provenance',
             frameworkDirectoryBinary.path,
           ],
@@ -706,6 +751,15 @@ void main() {
             '-r',
             '-d',
             'com.apple.FinderInfo',
+            frameworkDirectoryBinary.path,
+          ],
+        ),
+        FakeCommand(
+          command: <String>[
+            'xattr',
+            '-r',
+            '-d',
+            'com.apple.ResourceFork',
             frameworkDirectoryBinary.path,
           ],
         ),

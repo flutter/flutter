@@ -1065,6 +1065,9 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
           command: <String>['xattr', '-r', '-d', 'com.apple.FinderInfo', projectDirectory.path],
         ),
         FakeCommand(
+          command: <String>['xattr', '-r', '-d', 'com.apple.ResourceFork', projectDirectory.path],
+        ),
+        FakeCommand(
           command: <String>['xattr', '-r', '-d', 'com.apple.provenance', projectDirectory.path],
         ),
       ]);
@@ -1084,6 +1087,10 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
           exitCode: 1,
         ),
         FakeCommand(
+          command: <String>['xattr', '-r', '-d', 'com.apple.ResourceFork', projectDirectory.path],
+          exitCode: 1,
+        ),
+        FakeCommand(
           command: <String>['xattr', '-r', '-d', 'com.apple.provenance', projectDirectory.path],
           exitCode: 1,
         ),
@@ -1095,6 +1102,7 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
         logger,
       );
       expect(logger.traceText, contains('Failed to remove com.apple.FinderInfo'));
+      expect(logger.traceText, contains('Failed to remove com.apple.ResourceFork'));
       expect(logger.traceText, contains('Failed to remove com.apple.provenance'));
       expect(processManager, hasNoRemainingExpectations);
     });
@@ -1139,6 +1147,15 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
               'xattr',
               '-r',
               '-d',
+              'com.apple.ResourceFork',
+              '/app_name/pubspec.yaml',
+            ],
+          ),
+          const FakeCommand(
+            command: <String>[
+              'xattr',
+              '-r',
+              '-d',
               'com.apple.provenance',
               '/app_name/pubspec.yaml',
             ],
@@ -1147,11 +1164,17 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
             command: <String>['xattr', '-r', '-d', 'com.apple.FinderInfo', '/app_name/lib'],
           ),
           const FakeCommand(
+            command: <String>['xattr', '-r', '-d', 'com.apple.ResourceFork', '/app_name/lib'],
+          ),
+          const FakeCommand(
             command: <String>['xattr', '-r', '-d', 'com.apple.provenance', '/app_name/lib'],
           ),
           // iOS Build directory files FinderInfo
           const FakeCommand(
             command: <String>['xattr', '-r', '-d', 'com.apple.FinderInfo', 'build/ios/iphoneos'],
+          ),
+          const FakeCommand(
+            command: <String>['xattr', '-r', '-d', 'com.apple.ResourceFork', 'build/ios/iphoneos'],
           ),
           const FakeCommand(
             command: <String>['xattr', '-r', '-d', 'com.apple.provenance', 'build/ios/iphoneos'],
@@ -1162,6 +1185,15 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
               '-r',
               '-d',
               'com.apple.FinderInfo',
+              'build/ios/Release-iphoneos',
+            ],
+          ),
+          const FakeCommand(
+            command: <String>[
+              'xattr',
+              '-r',
+              '-d',
+              'com.apple.ResourceFork',
               'build/ios/Release-iphoneos',
             ],
           ),

@@ -844,21 +844,28 @@ Future<void> removeExtendedAttributesForProject({
 
 /// Extended attributes can cause code signing errors. Remove them.
 ///
-/// Attributes like `com.apple.FinderInfo` and `com.apple.provenance` are added
-/// by Finder, cloud storage services (OneDrive, iCloud, Dropbox), or when files
-/// are downloaded. These must be removed before code signing.
+/// Attributes like `com.apple.FinderInfo`, `com.apple.ResourceFork` and
+/// `com.apple.provenance` are added by Finder, cloud storage services (OneDrive,
+/// iCloud, Dropbox), or when files are downloaded. These must be removed before
+/// code signing.
 ///
 /// See: https://developer.apple.com/library/archive/qa/qa1940/_index.html
 /// See: https://github.com/flutter/flutter/issues/180351
+/// See: https://github.com/flutter/flutter/issues/195866
 Future<void> removeExtendedAttributes(
   FileSystemEntity projectDirectory,
   ProcessUtils processUtils,
   Logger logger,
 ) async {
   // Remove specific extended attributes that cause code signing failures.
-  // We remove com.apple.FinderInfo and com.apple.provenance, but preserve
-  // com.apple.xcode.CreatedByBuildSystem which Xcode uses to manage build directories.
-  const attributesToRemove = <String>{'com.apple.FinderInfo', 'com.apple.provenance'};
+  // We remove com.apple.FinderInfo, com.apple.ResourceFork and com.apple.provenance,
+  // but preserve com.apple.xcode.CreatedByBuildSystem which Xcode uses to manage
+  // build directories.
+  const attributesToRemove = <String>{
+    'com.apple.FinderInfo',
+    'com.apple.ResourceFork',
+    'com.apple.provenance',
+  };
 
   for (final attribute in attributesToRemove) {
     final bool success = await processUtils.exitsHappy(<String>[
