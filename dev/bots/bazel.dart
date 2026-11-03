@@ -21,11 +21,12 @@
 // build is needed. The test files of a shard that have no Bazel target (a
 // BUILD file's exclusions: tests of the repository's own scripts, a
 // browser's) run through `flutter test` and `dart test` as they do without
-// --bazel, so that a shard covers the same files either way; the steps that
-// are not a package's tests (the test harness checks, `dart fix` goldens,
-// Gradle unit tests, app builds) run as before as well. One `bazelisk test`
-// runs a shard's targets; numbered subshards slice the same file lists as
-// without --bazel.
+// --bazel (a remainder of nothing but files the host skips whole is no
+// failure: `allowNoTests`), so that a shard covers the same files either
+// way; the steps that are not a package's tests (the test harness checks,
+// `dart fix` goldens, Gradle unit tests, app builds) run as before as well.
+// One `bazelisk test` runs a shard's targets; numbered subshards slice the
+// same file lists as without --bazel.
 //
 // Bazel's state goes where engine/src/flutter/build/bazel/bazel_ci.py keeps
 // it for this checkout (.bazel_ci/ for a developer, the task's temporary

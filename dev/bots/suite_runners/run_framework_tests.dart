@@ -23,39 +23,42 @@ Future<void> frameworkTestsRunner() async {
 
   Future<void> runWidgets() async {
     final String gallery = path.join(flutterRoot, 'dev', 'integration_tests', 'flutter_gallery');
-    Future<void> runWidgetTests(List<String> tests) async {
+    Future<void> runWidgetTests(List<String> tests, {bool allowNoTests = false}) async {
       for (final trackWidgetCreationOption in trackWidgetCreationAlternatives) {
         await runFlutterTest(
           flutterPackage,
           options: <String>[trackWidgetCreationOption],
           tests: tests,
+          allowNoTests: allowNoTests,
         );
       }
     }
 
     // Try compiling code outside of the packages/flutter directory with and without --track-widget-creation
-    Future<void> runGalleryTests(List<String> tests) async {
+    Future<void> runGalleryTests(List<String> tests, {bool allowNoTests = false}) async {
       for (final trackWidgetCreationOption in trackWidgetCreationAlternatives) {
         await runFlutterTest(
           gallery,
           options: <String>[trackWidgetCreationOption],
           fatalWarnings: false, // until we've migrated video_player
           tests: tests,
+          allowNoTests: allowNoTests,
         );
       }
     }
 
     // Run release mode tests (see packages/flutter/test_release/README.md)
-    Future<void> runReleaseTests(List<String> tests) {
+    Future<void> runReleaseTests(List<String> tests, {bool allowNoTests = false}) {
       return runFlutterTest(
         flutterPackage,
         options: <String>['--dart-define=dart.vm.product=true'],
         tests: tests,
+        allowNoTests: allowNoTests,
       );
     }
 
     // Run profile mode tests (see packages/flutter/test_profile/README.md)
-    Future<void> runProfileTests(List<String> tests) {
+    Future<void> runProfileTests(List<String> tests, {bool allowNoTests = false}) {
       return runFlutterTest(
         flutterPackage,
         options: <String>[
@@ -63,6 +66,7 @@ Future<void> frameworkTestsRunner() async {
           '--dart-define=dart.vm.profile=true',
         ],
         tests: tests,
+        allowNoTests: allowNoTests,
       );
     }
 
@@ -73,7 +77,7 @@ Future<void> frameworkTestsRunner() async {
         <String>['//packages/flutter/test/widgets:widgets'],
         root: flutterPackage,
         files: testFilesUnder(flutterPackage, path.join('test', 'widgets')),
-        orElse: runWidgetTests,
+        orElse: (List<String> tests) => runWidgetTests(tests, allowNoTests: true),
       );
       // The same files once more without creation locations: the
       // --no-track-widget-creation build (the gallery's suite is the
@@ -85,19 +89,19 @@ Future<void> frameworkTestsRunner() async {
         <String>['//dev/integration_tests/flutter_gallery/test:tests'],
         root: gallery,
         files: testFilesUnder(gallery),
-        orElse: runGalleryTests,
+        orElse: (List<String> tests) => runGalleryTests(tests, allowNoTests: true),
       );
       shard.cover(
         <String>['//packages/flutter/test_release:tests'],
         root: flutterPackage,
         files: testFilesUnder(flutterPackage, 'test_release'),
-        orElse: runReleaseTests,
+        orElse: (List<String> tests) => runReleaseTests(tests, allowNoTests: true),
       );
       shard.cover(
         <String>['//packages/flutter/test_profile:tests'],
         root: flutterPackage,
         files: testFilesUnder(flutterPackage, 'test_profile'),
-        orElse: runProfileTests,
+        orElse: (List<String> tests) => runProfileTests(tests, allowNoTests: true),
       );
       await shard.run();
       return;
@@ -131,12 +135,13 @@ Future<void> frameworkTestsRunner() async {
     printProgress(
       '${green}Running packages/flutter tests$reset for $cyan${tests.join(", ")}$reset',
     );
-    Future<void> runLibraryTests(List<String> tests) async {
+    Future<void> runLibraryTests(List<String> tests, {bool allowNoTests = false}) async {
       for (final trackWidgetCreationOption in trackWidgetCreationAlternatives) {
         await runFlutterTest(
           flutterPackage,
           options: <String>[trackWidgetCreationOption],
           tests: tests,
+          allowNoTests: allowNoTests,
         );
       }
     }
@@ -155,7 +160,7 @@ Future<void> frameworkTestsRunner() async {
           <String>['//packages/flutter/test/$name:$name'],
           root: flutterPackage,
           files: testFilesUnder(flutterPackage, path.join('test', name)),
-          orElse: runLibraryTests,
+          orElse: (List<String> tests) => runLibraryTests(tests, allowNoTests: true),
         );
       }
       if (elsewhere.isNotEmpty) {
@@ -195,7 +200,8 @@ Future<void> frameworkTestsRunner() async {
           <String>['//$package/test:tests'],
           root: entity.path,
           files: testFilesUnder(entity.path),
-          orElse: (List<String> tests) => runFlutterTest(entity.path, tests: tests),
+          orElse: (List<String> tests) =>
+              runFlutterTest(entity.path, tests: tests, allowNoTests: true),
         );
         continue;
       }
@@ -207,11 +213,12 @@ Future<void> frameworkTestsRunner() async {
     final String tracingDirectory = path.join(flutterRoot, 'dev', 'tracing_tests');
 
     // run the tests for debug mode
-    Future<void> runDebugTests(List<String> tests) {
+    Future<void> runDebugTests(List<String> tests, {bool allowNoTests = false}) {
       return runFlutterTest(
         tracingDirectory,
         options: <String>['--enable-vmservice'],
         tests: tests,
+        allowNoTests: allowNoTests,
       );
     }
 
@@ -221,7 +228,7 @@ Future<void> frameworkTestsRunner() async {
         <String>['//dev/tracing_tests/test:tests'],
         root: tracingDirectory,
         files: testFilesUnder(tracingDirectory),
-        orElse: runDebugTests,
+        orElse: (List<String> tests) => runDebugTests(tests, allowNoTests: true),
       );
       await shard.run();
     } else {
@@ -419,12 +426,13 @@ Future<void> frameworkTestsRunner() async {
       bool fatalWarnings = true,
       String directory = 'test',
     }) async {
-      Future<void> run(List<String> tests) {
+      Future<void> run(List<String> tests, {bool allowNoTests = false}) {
         return runFlutterTest(
           package,
           options: options,
           fatalWarnings: fatalWarnings,
           tests: tests,
+          allowNoTests: allowNoTests,
         );
       }
 
@@ -436,7 +444,7 @@ Future<void> frameworkTestsRunner() async {
         <String>[suite],
         root: package,
         files: testFilesUnder(package, directory),
-        orElse: run,
+        orElse: (List<String> tests) => run(tests, allowNoTests: true),
         whole: directory == 'test',
       );
     }
@@ -447,11 +455,12 @@ Future<void> frameworkTestsRunner() async {
       String package, {
       bool ensurePrecompiledTool = true,
     }) async {
-      Future<void> run(List<String>? testPaths) {
+      Future<void> run(List<String>? testPaths, {bool allowNoTests = false}) {
         return runDartTest(
           package,
           testPaths: testPaths,
           ensurePrecompiledTool: ensurePrecompiledTool,
+          allowNoTests: allowNoTests,
         );
       }
 
@@ -459,7 +468,12 @@ Future<void> frameworkTestsRunner() async {
         await run(null);
         return;
       }
-      shard.cover(<String>[suite], root: package, files: testFilesUnder(package), orElse: run);
+      shard.cover(
+        <String>[suite],
+        root: package,
+        files: testFilesUnder(package),
+        orElse: (List<String> testPaths) => run(testPaths, allowNoTests: true),
+      );
     }
 
     await testHarnessTestsRunner();

@@ -204,6 +204,11 @@ String? _discoverBestNdkPath() {
 /// retry loops or readiness probes) can inspect [CommandResult.exitCode]
 /// directly.
 ///
+/// `acceptedExitCodes` are exit codes that are not failures whatever
+/// `expectNonZeroExit` and `expectedExitCode` say: package:test's 79 ("no
+/// tests ran") for a run of test files the platform skips whole, see
+/// [runFlutterTest]'s `allowNoTests`.
+///
 /// `outputListener` is called for every line of standard output from the
 /// process, and `stderrListener` is called for every line of standard error.
 /// Both are given the [io.Process] object, which can be used to interrupt an
@@ -219,7 +224,10 @@ Future<CommandResult> runCommand(
   List<String> arguments, {
   String? workingDirectory,
   Map<String, String>? environment,
-  ExpectedExit expectedExit = ExpectedExit.zero,
+  bool checkExitCode = true,
+  bool expectNonZeroExit = false,
+  int? expectedExitCode,
+  Set<int> acceptedExitCodes = const <int>{},
   String? failureMessage,
   OutputMode outputMode = OutputMode.print,
   bool Function(String)? removeLine,
@@ -257,7 +265,11 @@ Future<CommandResult> runCommand(
     await command._savedStderr,
   );
 
-  if (!expectedExit.matches(result.exitCode)) {
+  final bool unexpected =
+      !acceptedExitCodes.contains(result.exitCode) &&
+      ((result.exitCode == 0) == expectNonZeroExit ||
+          (expectedExitCode != null && result.exitCode != expectedExitCode));
+  if (unexpected) {
     // Print the output when we get unexpected results (unless output was
     // printed already).
     switch (outputMode) {
