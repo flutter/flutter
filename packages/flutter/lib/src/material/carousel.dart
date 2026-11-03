@@ -599,8 +599,11 @@ class _CarouselViewState extends State<CarouselView> {
   }
 
   Widget _buildCarouselItem(int index) {
+    if (widget.children.isEmpty) {
+      return const SizedBox.shrink();
+    }
     // For infinite scrolling, wrap the index to the actual children range.
-    if (widget.infinite && widget.children.isNotEmpty) {
+    if (widget.infinite) {
       index = index % widget.children.length;
     }
     final CarouselViewThemeData carouselTheme = CarouselViewTheme.of(context);
@@ -665,12 +668,17 @@ class _CarouselViewState extends State<CarouselView> {
   }
 
   Widget _buildSliverCarousel(ThemeData theme) {
-    // Determine the child count and builder based on whether we're using lazy loading
-    final int? childCount = widget.infinite
-        ? null
-        : widget.itemBuilder != null
+    // Determine the child count and builder based on whether we're using lazy loading.
+    // If the carousel has 0 items, childCount must be 0 regardless of whether
+    // infinite scrolling is enabled, preventing RangeError or invalid builder calls.
+    final int? explicitChildCount = widget.itemBuilder != null
         ? widget.itemCount
         : widget.children.length;
+    final int? childCount = explicitChildCount == 0
+        ? 0
+        : widget.infinite
+        ? null
+        : explicitChildCount;
 
     NullableIndexedWidgetBuilder effectiveBuilder;
     if (widget.itemBuilder != null) {
@@ -1274,7 +1282,7 @@ class _RenderSliverWeightedCarousel extends RenderSliverFixedExtentBoxAdaptor {
     )
     double itemExtent,
   ) {
-    if (infinite) {
+    if (infinite && childManager.childCount != 0) {
       return double.infinity;
     }
     return childManager.childCount * maxChildExtent;
@@ -1964,12 +1972,16 @@ class CarouselController extends ScrollController {
       return;
     }
 
+    final int? itemCount = _getItemCount();
+    if (itemCount == 0) {
+      return;
+    }
+
     final bool hasFlexWeights = _carouselState!._flexWeights?.isNotEmpty ?? false;
-    if (_carouselState!.widget.itemBuilder != null) {
-      final int? itemCount = _carouselState!.widget.itemCount;
-      index = itemCount != null ? index.clamp(0, itemCount - 1) : 0;
+    if (itemCount != null) {
+      index = index.clamp(0, itemCount - 1);
     } else {
-      index = index.clamp(0, _carouselState!.widget.children.length - 1);
+      index = 0;
     }
 
     await Future.wait<void>(<Future<void>>[
@@ -2000,10 +2012,10 @@ class CarouselController extends ScrollController {
     int leadingIndex = carouselState._consumeMaxWeight ? index : index - maxWeightIndex;
     if (carouselState.widget.itemBuilder != null) {
       final int? itemCount = carouselState.widget.itemCount;
-      leadingIndex = itemCount != null ? leadingIndex.clamp(0, itemCount - 1) : 0;
+      leadingIndex = itemCount != null && itemCount > 0 ? leadingIndex.clamp(0, itemCount - 1) : 0;
     } else {
       final int itemCount = carouselState.widget.children.length;
-      leadingIndex = leadingIndex.clamp(0, itemCount - 1);
+      leadingIndex = itemCount > 0 ? leadingIndex.clamp(0, itemCount - 1) : 0;
     }
 
     final double targetInFirstCycle = dimension * (weights.first / totalWeight) * leadingIndex;

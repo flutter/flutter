@@ -2929,6 +2929,162 @@ void main() {
 
     expect(position.pixels, 0.0);
   });
+
+  group('Empty children handling in CarouselView and CarouselController', () {
+    testWidgets('CarouselView with infinite: true and empty children does not crash', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(
+            body: CarouselView(itemExtent: 200.0, infinite: true, children: <Widget>[]),
+          ),
+        ),
+      );
+
+      expect(tester.takeException(), isNull);
+      expect(find.byType(CarouselView), findsOneWidget);
+    });
+
+    testWidgets('CarouselView.weighted with infinite: true and empty children does not crash', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(
+            body: CarouselView.weighted(
+              flexWeights: <int>[1, 7, 1],
+              infinite: true,
+              children: <Widget>[],
+            ),
+          ),
+        ),
+      );
+
+      expect(tester.takeException(), isNull);
+      expect(find.byType(CarouselView), findsOneWidget);
+    });
+
+    testWidgets('CarouselView.builder with infinite: true and itemCount: 0 does not build items', (
+      WidgetTester tester,
+    ) async {
+      final builtIndices = <int>[];
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: CarouselView.builder(
+              itemExtent: 200.0,
+              infinite: true,
+              itemCount: 0,
+              itemBuilder: (BuildContext context, int index) {
+                builtIndices.add(index);
+                return Text('Item $index');
+              },
+            ),
+          ),
+        ),
+      );
+
+      expect(tester.takeException(), isNull);
+      expect(builtIndices, isEmpty);
+      expect(find.textContaining('Item'), findsNothing);
+    });
+
+    testWidgets(
+      'CarouselView.weightedBuilder with infinite: true and itemCount: 0 does not build items',
+      (WidgetTester tester) async {
+        final builtIndices = <int>[];
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: CarouselView.weightedBuilder(
+                flexWeights: const <int>[1, 7, 1],
+                infinite: true,
+                itemCount: 0,
+                itemBuilder: (BuildContext context, int index) {
+                  builtIndices.add(index);
+                  return Text('Item $index');
+                },
+              ),
+            ),
+          ),
+        );
+
+        expect(tester.takeException(), isNull);
+        expect(builtIndices, isEmpty);
+        expect(find.textContaining('Item'), findsNothing);
+      },
+    );
+
+    testWidgets('CarouselController.animateToItem safely no-ops on empty CarouselView', (
+      WidgetTester tester,
+    ) async {
+      final controller = CarouselController();
+      addTearDown(controller.dispose);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: CarouselView(
+              controller: controller,
+              itemExtent: 200.0,
+              children: const <Widget>[],
+            ),
+          ),
+        ),
+      );
+
+      await controller.animateToItem(0);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('CarouselController.animateToItem safely no-ops on empty CarouselView.weighted', (
+      WidgetTester tester,
+    ) async {
+      final controller = CarouselController();
+      addTearDown(controller.dispose);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: CarouselView.weighted(
+              controller: controller,
+              flexWeights: const <int>[1, 7, 1],
+              children: const <Widget>[],
+            ),
+          ),
+        ),
+      );
+
+      await controller.animateToItem(0);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('CarouselController.animateToItem safely no-ops on empty CarouselView.builder', (
+      WidgetTester tester,
+    ) async {
+      final controller = CarouselController();
+      addTearDown(controller.dispose);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: CarouselView.builder(
+              controller: controller,
+              itemExtent: 200.0,
+              itemCount: 0,
+              itemBuilder: (BuildContext context, int index) => Text('Item $index'),
+            ),
+          ),
+        ),
+      );
+
+      await controller.animateToItem(0);
+      expect(tester.takeException(), isNull);
+    });
+  });
 }
 
 Finder getItem(int index) {
