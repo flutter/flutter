@@ -372,7 +372,7 @@ class DesktopLogReader extends DeviceLogReader {
   String get name => 'desktop';
 
   @override
-  void dispose() {
+  Future<void> dispose() async {
     // Nothing to dispose.
   }
 
@@ -415,9 +415,9 @@ class SingleLaunchLogReader extends DeviceLogReader {
   String get name => 'desktop (single launch)';
 
   @override
-  void dispose() {
-    unawaited(_subscription.cancel());
-    unawaited(_controller.close());
+  Future<void> dispose() async {
+    await _subscription.cancel();
+    await _controller.close();
   }
 
   @override
