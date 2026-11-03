@@ -10,11 +10,7 @@ void main(List<String> args) async {
     if (input.config.buildAssetTypes.contains('data_assets/data')) {
       final Uri file = input.packageRoot.resolve('data/translations.json');
       output.assets.data.add(
-        DataAsset(
-          package: input.packageName,
-          name: 'data/translations.json',
-          file: file,
-        ),
+        DataAsset(package: input.packageName, name: 'data/translations.json', file: file),
         routing: input.config.linkingEnabled ? ToLinkHook(input.packageName) : const ToAppBundle(),
       );
       output.dependencies.add(file);

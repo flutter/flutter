@@ -3,12 +3,11 @@
     {
       "cas_archive": false,
       "drone_dimensions": [
-        "os=Mac-15.7",
+        "os=Mac-15.7|Mac-26.6",
         "device_type=none"
       ],
       "gclient_variables": {
         "download_android_deps": false,
-        "download_jdk": false,
         "use_rbe": true
       },
       "gn": [
@@ -36,12 +35,11 @@
     {
       "cas_archive": false,
       "drone_dimensions": [
-        "os=Mac-15.7",
+        "os=Mac-15.7|Mac-26.6",
         "device_type=none"
       ],
       "gclient_variables": {
         "download_android_deps": false,
-        "download_jdk": false,
         "use_rbe": true
       },
       "gn": [
@@ -70,12 +68,11 @@
     {
       "cas_archive": false,
       "drone_dimensions": [
-        "os=Mac-15.7",
+        "os=Mac-15.7|Mac-26.6",
         "device_type=none"
       ],
       "gclient_variables": {
         "download_android_deps": false,
-        "download_jdk": false,
         "use_rbe": true
       },
       "gn": [
@@ -103,12 +100,11 @@
     {
       "cas_archive": false,
       "drone_dimensions": [
-        "os=Mac-15.7",
+        "os=Mac-15.7|Mac-26.6",
         "device_type=none"
       ],
       "gclient_variables": {
         "download_android_deps": false,
-        "download_jdk": false,
         "use_rbe": true
       },
       "gn": [
@@ -136,12 +132,11 @@
     {
       "cas_archive": false,
       "drone_dimensions": [
-        "os=Mac-15.7",
+        "os=Mac-15.7|Mac-26.6",
         "device_type=none"
       ],
       "gclient_variables": {
         "download_android_deps": false,
-        "download_jdk": false,
         "use_rbe": true
       },
       "gn": [
@@ -170,43 +165,7 @@
     {
       "cas_archive": false,
       "drone_dimensions": [
-        "os=Mac-15.7",
-        "device_type=none"
-      ],
-      "gclient_variables": {
-        "download_android_deps": false,
-        "download_jdk": false,
-        "use_rbe": true
-      },
-      "gn": [
-        "--ios",
-        "--simulator",
-        "--simulator-cpu=arm64",
-        "--runtime-mode",
-        "debug",
-        "--unoptimized",
-        "--no-stripped",
-        "--no-lto",
-        "--xcode-symlinks",
-        "--rbe",
-        "--no-goma"
-      ],
-      "name": "macos/ios_debug_sim_unopt_arm64",
-      "description": "Builds an unoptimized debug mode engine that targets the arm64 iOS simulator from a macOS host.",
-      "ninja": {
-        "config": "ios_debug_sim_unopt_arm64",
-        "targets": []
-      },
-      "properties": {
-        "$flutter/osx_sdk": {
-          "sdk_version": "17c52"
-        }
-      }
-    },
-    {
-      "cas_archive": false,
-      "drone_dimensions": [
-        "os=Mac-15.7",
+        "os=Mac-15.7|Mac-26.6",
         "device_type=none"
       ],
       "gclient_variables": {
@@ -301,33 +260,6 @@
         "debug",
         "--unoptimized",
         "--android",
-        "--android-cpu=arm64",
-        "--no-stripped",
-        "--no-lto",
-        "--rbe",
-        "--no-goma"
-      ],
-      "name": "linux/android_debug_unopt_arm64",
-      "description": "Builds an unoptimized debug mode engine that targets 64-bit arm Android from a Linux host.",
-      "ninja": {
-        "config": "android_debug_unopt_arm64",
-        "targets": []
-      }
-    },
-    {
-      "cas_archive": false,
-      "drone_dimensions": [
-        "os=Linux",
-        "device_type=none"
-      ],
-      "gclient_variables": {
-        "use_rbe": true
-      },
-      "gn": [
-        "--runtime-mode",
-        "debug",
-        "--unoptimized",
-        "--android",
         "--android-cpu=x64",
         "--no-stripped",
         "--no-lto",
@@ -370,7 +302,7 @@
     {
       "cas_archive": false,
       "drone_dimensions": [
-        "os=Mac-15.7",
+        "os=Mac-15.7|Mac-26.6",
         "device_type=none"
       ],
       "gclient_variables": {
@@ -403,7 +335,7 @@
     {
       "cas_archive": false,
       "drone_dimensions": [
-        "os=Mac-15.7",
+        "os=Mac-15.7|Mac-26.6",
         "device_type=none"
       ],
       "gclient_variables": {
@@ -436,7 +368,7 @@
     {
       "cas_archive": false,
       "drone_dimensions": [
-        "os=Mac-15.7",
+        "os=Mac-15.7|Mac-26.6",
         "device_type=none"
       ],
       "gclient_variables": {
@@ -520,7 +452,7 @@
     {
       "cas_archive": false,
       "drone_dimensions": [
-        "os=Mac-15.7",
+        "os=Mac-15.7|Mac-26.6",
         "device_type=none"
       ],
       "gclient_variables": {
@@ -604,12 +536,11 @@
     {
       "cas_archive": false,
       "drone_dimensions": [
-        "os=Mac-15.7",
+        "os=Mac-15.7|Mac-26.6",
         "device_type=none"
       ],
       "gclient_variables": {
         "download_android_deps": false,
-        "download_jdk": false,
         "use_rbe": true
       },
       "gn": [
@@ -636,45 +567,11 @@
     {
       "cas_archive": false,
       "drone_dimensions": [
-        "os=Mac-15.7",
+        "os=Mac-15.7|Mac-26.6",
         "device_type=none"
       ],
       "gclient_variables": {
         "download_android_deps": false,
-        "download_jdk": false,
-        "use_rbe": true
-      },
-      "gn": [
-        "--runtime-mode",
-        "debug",
-        "--unopt",
-        "--mac-cpu",
-        "arm64",
-        "--xcode-symlinks",
-        "--rbe",
-        "--no-goma"
-      ],
-      "name": "macos/host_debug_unopt_arm64",
-      "description": "Builds a debug mode engine for a macOS host on arm64.",
-      "ninja": {
-        "config": "host_debug_unopt_arm64",
-        "targets": []
-      },
-      "properties": {
-        "$flutter/osx_sdk": {
-          "sdk_version": "17c52"
-        }
-      }
-    },
-    {
-      "cas_archive": false,
-      "drone_dimensions": [
-        "os=Mac-15.7",
-        "device_type=none"
-      ],
-      "gclient_variables": {
-        "download_android_deps": false,
-        "download_jdk": false,
         "use_rbe": true
       },
       "gn": [
@@ -702,12 +599,11 @@
     {
       "cas_archive": false,
       "drone_dimensions": [
-        "os=Mac-15.7",
+        "os=Mac-15.7|Mac-26.6",
         "device_type=none"
       ],
       "gclient_variables": {
         "download_android_deps": false,
-        "download_jdk": false,
         "use_rbe": true
       },
       "gn": [
@@ -740,7 +636,6 @@
       ],
       "gclient_variables": {
         "download_android_deps": false,
-        "download_jdk": false,
         "use_rbe": true
       },
       "gn": [
@@ -761,39 +656,11 @@
     {
       "cas_archive": false,
       "drone_dimensions": [
-        "os=Linux",
-        "device_type=none"
-      ],
-      "gclient_variables": {
-        "download_android_deps": false,
-        "download_jdk": false,
-        "use_rbe": true
-      },
-      "gn": [
-        "--runtime-mode",
-        "debug",
-        "--unoptimized",
-        "--no-stripped",
-        "--no-lto",
-        "--rbe",
-        "--no-goma"
-      ],
-      "name": "linux/host_debug_unopt",
-      "description": "Builds an unoptimized debug mode engine for a Linux host.",
-      "ninja": {
-        "config": "host_debug_unopt",
-        "targets": []
-      }
-    },
-    {
-      "cas_archive": false,
-      "drone_dimensions": [
         "os=Windows-10",
         "device_type=none"
       ],
       "gclient_variables": {
         "download_android_deps": false,
-        "download_jdk": false,
         "use_rbe": true
       },
       "gn": [
@@ -814,39 +681,11 @@
     {
       "cas_archive": false,
       "drone_dimensions": [
-        "os=Windows-10",
+        "os=Mac-15.7|Mac-26.6",
         "device_type=none"
       ],
       "gclient_variables": {
         "download_android_deps": false,
-        "download_jdk": false,
-        "use_rbe": true
-      },
-      "gn": [
-        "--runtime-mode",
-        "debug",
-        "--unoptimized",
-        "--no-stripped",
-        "--no-lto",
-        "--rbe",
-        "--no-goma"
-      ],
-      "name": "windows/host_debug_unopt",
-      "description": "Builds an unoptimized debug mode engine for a Windows host.",
-      "ninja": {
-        "config": "host_debug_unopt",
-        "targets": []
-      }
-    },
-    {
-      "cas_archive": false,
-      "drone_dimensions": [
-        "os=Mac-15.7",
-        "device_type=none"
-      ],
-      "gclient_variables": {
-        "download_android_deps": false,
-        "download_jdk": false,
         "use_rbe": true
       },
       "gn": [
@@ -878,7 +717,6 @@
       ],
       "gclient_variables": {
         "download_android_deps": false,
-        "download_jdk": false,
         "use_rbe": true
       },
       "gn": [
@@ -904,7 +742,6 @@
       ],
       "gclient_variables": {
         "download_android_deps": false,
-        "download_jdk": false,
         "use_rbe": true
       },
       "gn": [
@@ -925,12 +762,11 @@
     {
       "cas_archive": false,
       "drone_dimensions": [
-        "os=Mac-15.7",
+        "os=Mac-15.7|Mac-26.6",
         "device_type=none"
       ],
       "gclient_variables": {
         "download_android_deps": false,
-        "download_jdk": false,
         "use_rbe": true
       },
       "gn": [
@@ -962,7 +798,6 @@
       ],
       "gclient_variables": {
         "download_android_deps": false,
-        "download_jdk": false,
         "use_rbe": true
       },
       "gn": [
@@ -989,7 +824,6 @@
       ],
       "gclient_variables": {
         "download_android_deps": false,
-        "download_jdk": false,
         "use_rbe": true
       },
       "gn": [
@@ -1016,7 +850,6 @@
       ],
       "gclient_variables": {
         "download_android_deps": false,
-        "download_jdk": false,
         "download_emsdk": true
       },
       "gn": [
@@ -1034,46 +867,20 @@
       "cas_archive": false
     },
     {
-      "name": "linux/wasm_debug_unopt",
-      "drone_dimensions": [
-        "device_type=none",
-        "os=Linux"
-      ],
-      "gclient_variables": {
-        "download_android_deps": false,
-        "download_jdk": false,
-        "download_emsdk": true
-      },
-      "gn": [
-        "--web",
-        "--runtime-mode=debug",
-        "--unoptimized",
-        "--no-rbe",
-        "--no-goma"
-      ],
-      "ninja": {
-        "config": "wasm_debug_unopt",
-        "targets": [
-          "flutter/web_sdk:flutter_web_sdk_archive"
-        ]
-      },
-      "cas_archive": false
-    },
-    {
       "name": "macos/wasm_release",
       "drone_dimensions": [
         "device_type=none",
-        "os=Mac-15.7"
+        "os=Mac-15.7|Mac-26.6",
+        "cpu=arm64"
       ],
       "gclient_variables": {
         "download_android_deps": false,
-        "download_jdk": false,
         "download_emsdk": true
       },
       "dependencies": [
         {
           "dependency": "open_jdk",
-          "version": "version:21"
+          "version": "version:25.0.2"
         }
       ],
       "gn": [
@@ -1099,17 +906,17 @@
       "name": "macos/wasm_debug_unopt",
       "drone_dimensions": [
         "device_type=none",
-        "os=Mac-15.7"
+        "os=Mac-15.7|Mac-26.6",
+        "cpu=arm64"
       ],
       "gclient_variables": {
         "download_android_deps": false,
-        "download_jdk": false,
         "download_emsdk": true
       },
       "dependencies": [
         {
           "dependency": "open_jdk",
-          "version": "version:21"
+          "version": "version:25.0.2"
         }
       ],
       "gn": [

@@ -31,6 +31,13 @@ struct _FlViewRendererSubsurface {
   // Wayland subsurface the frame is rendered into.
   FlSubsurface* subsurface;
 
+  // The surface the subsurface was created on, and its Wayland object ID. Not
+  // owned by this object, they are only used to detect when GTK has replaced
+  // the surface. Both are compared because GTK may allocate the replacement at
+  // the same address.
+  struct wl_surface* parent_surface;
+  uint32_t parent_surface_id;
+
   // Manages the EGL context and surface used to present frames to the
   // subsurface.
   FlSubsurfaceEGL* egl;
@@ -95,7 +102,23 @@ static void wait_for_frame(FlViewRendererSubsurface* self,
   }
 }
 
-// Gets the EGL display the engine renders to. The subsurface shares this
+// Gets the Wayland surface of the window this widget is inside, or nullptr if
+// it doesn't have one.
+static struct wl_surface* get_parent_surface(GtkWidget* widget) {
+  GdkWindow* window = gtk_widget_get_window(gtk_widget_get_toplevel(widget));
+  if (window == nullptr || !GDK_IS_WAYLAND_WINDOW(window)) {
+    return nullptr;
+  }
+  return gdk_wayland_window_get_wl_surface(window);
+}
+
+// Gets the Wayland object ID of @surface, or zero if it doesn't exist.
+static uint32_t get_surface_id(struct wl_surface* surface) {
+  return surface == nullptr
+             ? 0
+             : wl_proxy_get_id(reinterpret_cast<struct wl_proxy*>(surface));
+}
+
 // Move the subsurface to match the position of the widget in the toplevel.
 static void update_subsurface_position(FlViewRendererSubsurface* self) {
   if (self->subsurface == nullptr) {
@@ -106,6 +129,69 @@ static void update_subsurface_position(FlViewRendererSubsurface* self) {
   gint x, y;
   gtk_widget_translate_coordinates(widget, toplevel, 0, 0, &x, &y);
   fl_subsurface_set_position(self->subsurface, x, y);
+}
+
+// Make a subsurface on @parent_surface and an EGL context that presents frames
+// to it. Must be called with the frame mutex held, as the raster thread
+// presents to these objects.
+static void create_subsurface(FlViewRendererSubsurface* self,
+                              struct wl_surface* parent_surface) {
+  GtkWidget* widget = GTK_WIDGET(self);
+
+  FlWaylandDisplay* wayland_display =
+      fl_wayland_display_get_for_display(gtk_widget_get_display(widget));
+  if (wayland_display == nullptr) {
+    return;
+  }
+
+  self->subsurface =
+      fl_wayland_display_create_subsurface(wayland_display, parent_surface);
+  update_subsurface_position(self);
+
+  GtkAllocation allocation;
+  gtk_widget_get_allocation(widget, &allocation);
+  self->egl = fl_subsurface_egl_new(
+      fl_engine_get_opengl_manager(self->engine), self->subsurface,
+      allocation.width, allocation.height, gtk_widget_get_scale_factor(widget));
+}
+
+// GTK destroys the window's Wayland surface when it is hidden and makes a new
+// one if it is shown again. The subsurface belongs to the old surface, so it is
+// never shown again and using it is a protocol error. Detect this and move to
+// the new surface.
+static void update_parent_surface(FlViewRendererSubsurface* self) {
+  // Nothing to do before the widget is realized or after it is unrealized.
+  if (self->compositor == nullptr) {
+    return;
+  }
+
+  struct wl_surface* parent_surface = get_parent_surface(GTK_WIDGET(self));
+  uint32_t parent_surface_id = get_surface_id(parent_surface);
+  if (parent_surface == self->parent_surface &&
+      parent_surface_id == self->parent_surface_id) {
+    return;
+  }
+
+  // Drop the old subsurface. The surface it was on may already be destroyed,
+  // in which case there is nothing to replace it with until the window is
+  // shown again.
+  g_mutex_lock(&self->frame_mutex);
+  g_clear_object(&self->egl);
+  g_clear_object(&self->subsurface);
+  self->parent_surface = parent_surface;
+  self->parent_surface_id = parent_surface_id;
+  if (parent_surface != nullptr) {
+    create_subsurface(self, parent_surface);
+  }
+  g_mutex_unlock(&self->frame_mutex);
+
+  if (parent_surface == nullptr) {
+    return;
+  }
+
+  // The new subsurface has nothing in it, so ask for the frame to be rendered
+  // again.
+  fl_engine_schedule_frame(self->engine);
 }
 
 // Redraw the view from the GTK thread.
@@ -147,32 +233,16 @@ static void fl_view_renderer_subsurface_realize(GtkWidget* widget) {
     return;
   }
 
-  FlWaylandDisplay* wayland_display =
-      fl_wayland_display_get_for_display(gdk_display);
-  if (wayland_display == nullptr) {
-    return;
-  }
-
-  // Create a subsurface on the toplevel's surface.
-  GdkWindow* toplevel_window =
-      gtk_widget_get_window(gtk_widget_get_toplevel(widget));
-  self->subsurface = fl_wayland_display_create_subsurface(
-      wayland_display, gdk_wayland_window_get_wl_surface(toplevel_window));
-  update_subsurface_position(self);
-
-  GtkAllocation allocation;
-  gtk_widget_get_allocation(widget, &allocation);
-  gint scale_factor = gtk_widget_get_scale_factor(widget);
-  self->egl = fl_subsurface_egl_new(fl_engine_get_opengl_manager(self->engine),
-                                    self->subsurface, allocation.width,
-                                    allocation.height, scale_factor);
-
   // The subsurface's EGL context shares resources with the engine, so the
   // engine's frame texture is accessed directly without using EGLImage.
   self->task_runner =
       FL_TASK_RUNNER(g_object_ref(fl_engine_get_task_runner(self->engine)));
   self->compositor =
       fl_compositor_opengl_new(fl_engine_get_opengl_manager(self->engine));
+
+  // Create a subsurface on the toplevel's surface. This asks for a frame, as
+  // any rendered before this point were dropped.
+  update_parent_surface(self);
 }
 
 // Implements GtkWidget::unrealize.
@@ -190,9 +260,18 @@ static void fl_view_renderer_subsurface_unrealize(GtkWidget* widget) {
   // the engine and is left untouched by FlSubsurfaceEGL.
   g_clear_object(&self->egl);
   g_clear_object(&self->subsurface);
+  self->parent_surface = nullptr;
+  self->parent_surface_id = 0;
   g_mutex_unlock(&self->frame_mutex);
 
   GTK_WIDGET_CLASS(fl_view_renderer_subsurface_parent_class)->unrealize(widget);
+}
+
+// Implements GtkWidget::map.
+static void fl_view_renderer_subsurface_map(GtkWidget* widget) {
+  GTK_WIDGET_CLASS(fl_view_renderer_subsurface_parent_class)->map(widget);
+
+  update_parent_surface(FL_VIEW_RENDERER_SUBSURFACE(widget));
 }
 
 // Implements GtkWidget::draw.
@@ -217,18 +296,18 @@ static void fl_view_renderer_subsurface_size_allocate(
 
   FlViewRendererSubsurface* self = FL_VIEW_RENDERER_SUBSURFACE(widget);
 
-  if (self->subsurface == nullptr) {
-    return;
-  }
-
-  gint scale_factor = gtk_widget_get_scale_factor(widget);
-  size_t width = allocation->width * scale_factor;
-  size_t height = allocation->height * scale_factor;
-
+  update_parent_surface(self);
   update_subsurface_position(self);
+
+  // Hold frame_mutex while resizing, as the raster thread uses the sizes this
+  // updates when it presents a frame.
+  g_mutex_lock(&self->frame_mutex);
   if (self->egl != nullptr) {
-    fl_subsurface_egl_resize(self->egl, width, height);
+    gint scale_factor = gtk_widget_get_scale_factor(widget);
+    fl_subsurface_egl_resize(self->egl, allocation->width * scale_factor,
+                             allocation->height * scale_factor);
   }
+  g_mutex_unlock(&self->frame_mutex);
 }
 
 // Runs after the size_allocate default handler and, crucially, after FlView has
@@ -384,6 +463,7 @@ static void fl_view_renderer_subsurface_class_init(
   GtkWidgetClass* widget_class = GTK_WIDGET_CLASS(klass);
   widget_class->realize = fl_view_renderer_subsurface_realize;
   widget_class->unrealize = fl_view_renderer_subsurface_unrealize;
+  widget_class->map = fl_view_renderer_subsurface_map;
   widget_class->draw = fl_view_renderer_subsurface_draw;
   widget_class->size_allocate = fl_view_renderer_subsurface_size_allocate;
 

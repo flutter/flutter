@@ -7,6 +7,8 @@
 @Tags(<String>['reduced-test-set'])
 library;
 
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/rendering.dart';
@@ -425,9 +427,11 @@ void main() {
     );
 
     var nextPageCompleted = false;
-    controller
-        .nextPage(duration: const Duration(milliseconds: 150), curve: Curves.ease)
-        .then((_) => nextPageCompleted = true);
+    unawaited(
+      controller
+          .nextPage(duration: const Duration(milliseconds: 150), curve: Curves.ease)
+          .then((_) => nextPageCompleted = true),
+    );
 
     expect(nextPageCompleted, false);
     await tester.pump(const Duration(milliseconds: 200));
@@ -436,9 +440,11 @@ void main() {
     expect(nextPageCompleted, true);
 
     var previousPageCompleted = false;
-    controller
-        .previousPage(duration: const Duration(milliseconds: 150), curve: Curves.ease)
-        .then((_) => previousPageCompleted = true);
+    unawaited(
+      controller
+          .previousPage(duration: const Duration(milliseconds: 150), curve: Curves.ease)
+          .then((_) => previousPageCompleted = true),
+    );
 
     expect(previousPageCompleted, false);
     await tester.pump(const Duration(milliseconds: 200));
@@ -1019,6 +1025,43 @@ void main() {
       ),
     );
     expect(controller2.page, 0);
+  });
+
+  testWidgets('PageView ignores a non-double value in PageStorage', (WidgetTester tester) async {
+    final bucket = PageStorageBucket();
+    const key = PageStorageKey<String>('PageView');
+    // Another widget under the same key saved a bool in the slot the PageView
+    // restores from.
+    await tester.pumpWidget(
+      PageStorage(
+        bucket: bucket,
+        child: Builder(
+          key: key,
+          builder: (BuildContext context) {
+            bucket.writeState(context, true);
+            return const SizedBox();
+          },
+        ),
+      ),
+    );
+
+    final controller = PageController();
+    addTearDown(controller.dispose);
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: PageStorage(
+          bucket: bucket,
+          child: PageView(
+            key: key,
+            controller: controller,
+            children: const <Widget>[Placeholder(), Placeholder(), Placeholder()],
+          ),
+        ),
+      ),
+    );
+    expect(tester.takeException(), isNull);
+    expect(controller.page, 0);
   });
 
   testWidgets('PageView exposes semantics of children', (WidgetTester tester) async {

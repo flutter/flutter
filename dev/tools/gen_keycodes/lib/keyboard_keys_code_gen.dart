@@ -11,7 +11,7 @@ import 'physical_key_data.dart';
 import 'utils.dart';
 
 /// Given an [input] string, wraps the text at 80 characters and prepends each
-/// line with the [prefix] string. Use for generated comments.
+/// line with `'  /// '`, using [wrapString]. Use for generated comments.
 String _wrapString(String input) {
   return wrapString(input, prefix: '  /// ');
 }

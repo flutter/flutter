@@ -238,5 +238,23 @@ TEST_P(AiksTest, CanRenderSkewedRectHairline) {
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
+// https://github.com/flutter/flutter/pull/192267#issuecomment-5605951249
+TEST_P(AiksTest, CanRenderTransformedRectWithNearVerticalEdgeHairline) {
+  DisplayListBuilder builder;
+  builder.Scale(GetContentScale().x, GetContentScale().y);
+  builder.DrawColor(DlColor::kBlack(), DlBlendMode::kSrc);
+
+  RenderParameters params{
+      .render_type = RenderType::kRectangle,
+      .center = GetWindowBounds().GetCenter(),
+      .scale_x = 1.552f,
+      .skew_x = 0.458f,
+      .degrees = 33.75f,
+  };
+  RenderPrimitiveWithStroke(builder, params);
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
 }  // namespace testing
 }  // namespace impeller

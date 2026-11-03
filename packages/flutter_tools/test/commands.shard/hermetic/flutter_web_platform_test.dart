@@ -2,14 +2,19 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:convert';
 
+import 'package:fake_async/fake_async.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/isolated/mustache_template.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/test/flutter_web_platform.dart';
 import 'package:flutter_tools/src/web/chrome.dart';
@@ -17,7 +22,10 @@ import 'package:flutter_tools/src/web/compile.dart';
 import 'package:flutter_tools/src/web/memory_fs.dart';
 import 'package:flutter_tools/src/web/module_metadata.dart';
 import 'package:shelf/shelf.dart' as shelf;
+import 'package:stream_channel/stream_channel.dart';
 import 'package:test_core/backend.dart';
+import 'package:web_socket_channel/web_socket_channel.dart';
+import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart' hide StackTrace;
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -57,6 +65,53 @@ class _RecordingChromiumLauncher extends ChromiumLauncher {
   }
 }
 
+/// A [WebSocketSink] that forwards to a plain [StreamSink].
+class FakeWebSocketSink implements WebSocketSink {
+  FakeWebSocketSink(this._sink);
+
+  final StreamSink<Object?> _sink;
+
+  @override
+  void add(Object? data) => _sink.add(data);
+
+  @override
+  void addError(Object error, [StackTrace? stackTrace]) => _sink.addError(error, stackTrace);
+
+  @override
+  Future<void> addStream(Stream<Object?> stream) => _sink.addStream(stream);
+
+  @override
+  Future<void> close([int? closeCode, String? closeReason]) => _sink.close();
+
+  @override
+  Future<void> get done => _sink.done;
+}
+
+/// A [WebSocketChannel] whose incoming stream is driven by the test.
+class FakeWebSocketChannel extends StreamChannelMixin<Object?> implements WebSocketChannel {
+  FakeWebSocketChannel(this.controller) : sink = FakeWebSocketSink(controller.foreign.sink);
+
+  final StreamChannelController<Object?> controller;
+
+  @override
+  Stream<Object?> get stream => controller.foreign.stream;
+
+  @override
+  final WebSocketSink sink;
+
+  @override
+  int? get closeCode => null;
+
+  @override
+  String? get closeReason => null;
+
+  @override
+  String? get protocol => null;
+
+  @override
+  Future<void> get ready async {}
+}
+
 class FakeServer implements shelf.Server {
   shelf.Handler? mountedHandler;
 
@@ -90,9 +145,7 @@ void main() {
     operatingSystemUtils = FakeOperatingSystemUtils();
     tempDir = fileSystem.systemTempDirectory.createTempSync('flutter_web_platform_test.');
 
-    for (final artifact in <HostArtifact>[
-      HostArtifact.webPrecompiledDdcLibraryBundleCanvaskitSdk,
-    ]) {
+    for (final artifact in <HostArtifact>[HostArtifact.webPrecompiledDDCCanarySdk]) {
       final artifactFile = artifacts.getHostArtifact(artifact) as File;
       artifactFile.createSync();
       artifactFile.writeAsStringSync(artifact.name);
@@ -117,28 +170,29 @@ void main() {
       final server = FakeServer();
       final FlutterWebPlatform webPlatform = await FlutterWebPlatform.start(
         'ProjectRoot',
-        flutterProject: FlutterProject.fromDirectoryTest(tempDir),
+        buildDirectory: fileSystem.directory('build'),
         buildInfo: const BuildInfo(
           BuildMode.debug,
           '',
           packageConfigPath: '.dart_tool/package_config.json',
           treeShakeIcons: false,
-          extraFrontEndOptions: <String>['--dartdevc-module-format=ddc', '--canary'],
-          webEnableHotReload: true,
         ),
-        webMemoryFS: WebMemoryFS(),
-        fileSystem: fileSystem,
-        buildDirectory: fileSystem.directory('build'),
-        logger: logger,
         chromiumLauncher: chromiumLauncher,
+        crossOriginIsolation: false,
+        flutterProject: FlutterProject.fromDirectoryTest(tempDir),
         flutterTesterBinPath: artifacts.getArtifactPath(Artifact.flutterTester),
-        artifacts: artifacts,
-        processManager: processManager,
-        webRenderer: WebRendererMode.canvaskit,
+        toolContext: FakeToolContext(
+          artifacts: artifacts,
+          fs: fileSystem,
+          logger: logger,
+          processManager: processManager,
+        ),
         useWasm: false,
+        webMemoryFS: WebMemoryFS(),
+        webRenderer: WebRendererMode.canvaskit,
         serverFactory: () async => server,
         testPackageUri: Uri.parse('test'),
-        crossOriginIsolation: false,
+        templateRenderer: const MustacheTemplateRenderer(),
       );
       final shelf.Handler? handler = server.mountedHandler;
       expect(handler, isNotNull);
@@ -147,7 +201,7 @@ void main() {
         shelf.Request('GET', Uri.parse('http://localhost/dart_sdk.js')),
       );
       final String contents = await response.readAsString();
-      expect(contents, HostArtifact.webPrecompiledDdcLibraryBundleCanvaskitSdk.name);
+      expect(contents, HostArtifact.webPrecompiledDDCCanarySdk.name);
       await webPlatform.close();
     },
     overrides: <Type, Generator>{
@@ -189,28 +243,29 @@ void main() {
 
       final FlutterWebPlatform webPlatform = await FlutterWebPlatform.start(
         'ProjectRoot',
-        flutterProject: FlutterProject.fromDirectoryTest(tempDir),
+        buildDirectory: fileSystem.directory('build'),
         buildInfo: const BuildInfo(
           BuildMode.debug,
           '',
           packageConfigPath: '.dart_tool/package_config.json',
           treeShakeIcons: false,
-          extraFrontEndOptions: <String>['--dartdevc-module-format=ddc', '--canary'],
-          webEnableHotReload: true,
         ),
-        webMemoryFS: webMemoryFS,
-        fileSystem: fileSystem,
-        buildDirectory: fileSystem.directory('build'),
-        logger: logger,
         chromiumLauncher: chromiumLauncher,
+        crossOriginIsolation: false,
+        flutterProject: FlutterProject.fromDirectoryTest(tempDir),
         flutterTesterBinPath: artifacts.getArtifactPath(Artifact.flutterTester),
-        artifacts: artifacts,
-        processManager: processManager,
-        webRenderer: WebRendererMode.canvaskit,
+        toolContext: FakeToolContext(
+          artifacts: artifacts,
+          fs: fileSystem,
+          logger: logger,
+          processManager: processManager,
+        ),
         useWasm: false,
+        webMemoryFS: webMemoryFS,
+        webRenderer: WebRendererMode.canvaskit,
         serverFactory: () async => server,
         testPackageUri: Uri.parse('test'),
-        crossOriginIsolation: false,
+        templateRenderer: const MustacheTemplateRenderer(),
       );
       final shelf.Handler? handler = server.mountedHandler;
       expect(handler, isNotNull);
@@ -260,27 +315,29 @@ void main() {
       final server = FakeServer();
       final FlutterWebPlatform webPlatform = await FlutterWebPlatform.start(
         'ProjectRoot',
-        flutterProject: FlutterProject.fromDirectoryTest(tempDir),
+        buildDirectory: fileSystem.directory('build'),
         buildInfo: const BuildInfo(
           BuildMode.debug,
           '',
           packageConfigPath: '.dart_tool/package_config.json',
           treeShakeIcons: false,
-          webEnableHotReload: true,
         ),
-        webMemoryFS: WebMemoryFS(),
-        fileSystem: fileSystem,
-        buildDirectory: fileSystem.directory('build'),
-        logger: logger,
         chromiumLauncher: recordingLauncher,
+        crossOriginIsolation: false,
+        flutterProject: FlutterProject.fromDirectoryTest(tempDir),
         flutterTesterBinPath: artifacts.getArtifactPath(Artifact.flutterTester),
-        artifacts: artifacts,
-        processManager: processManager,
-        webRenderer: WebRendererMode.canvaskit,
+        toolContext: FakeToolContext(
+          artifacts: artifacts,
+          fs: fileSystem,
+          logger: logger,
+          processManager: processManager,
+        ),
         useWasm: false,
+        webMemoryFS: WebMemoryFS(),
+        webRenderer: WebRendererMode.canvaskit,
         serverFactory: () async => server,
         testPackageUri: Uri.parse('test'),
-        crossOriginIsolation: false,
+        templateRenderer: const MustacheTemplateRenderer(),
       );
 
       final suitePlatform = SuitePlatform(Runtime.chrome);
@@ -306,4 +363,134 @@ void main() {
       Logger: () => logger,
     },
   );
+
+  BrowserManager createBrowserManager(
+    StreamChannelController<Object?> controller,
+    Process process,
+  ) {
+    final chromiumLauncher = ChromiumLauncher(
+      fileSystem: fileSystem,
+      platform: platform,
+      processManager: processManager,
+      operatingSystemUtils: operatingSystemUtils,
+      browserFinder: (Platform platform, FileSystem fileSystem) => 'chrome',
+      logger: logger,
+    );
+    final chromium = Chromium(
+      0,
+      ChromeConnection('localhost', 1234),
+      chromiumLauncher: chromiumLauncher,
+      process: process,
+      logger: logger,
+    );
+    return BrowserManager.test(
+      chromium,
+      Runtime.chrome,
+      FakeWebSocketChannel(controller),
+      logger,
+      const SystemClock(),
+    );
+  }
+
+  testWithoutContext('BrowserManager reports a disconnect and starts cleanup at once', () {
+    // Regression test for https://github.com/flutter/flutter/issues/191920.
+    FakeAsync().run((FakeAsync time) {
+      logger = BufferLogger.test(verbose: true);
+      final exitCode = Completer<int>();
+      final controller = StreamChannelController<Object?>();
+      createBrowserManager(controller, FakeProcess(exitCode: exitCode.future));
+
+      controller.local.sink.close();
+      time.flushMicrotasks();
+
+      expect(logger.errorText, contains('closed its connection to the test host unexpectedly'));
+      expect(logger.traceText, contains('Shutting down Chromium.'));
+
+      exitCode.complete(0);
+      time.flushMicrotasks();
+    });
+  });
+
+  testWithoutContext('BrowserManager reports an exit code delivered after cleanup starts', () {
+    // Regression test for https://github.com/flutter/flutter/issues/191920.
+    FakeAsync().run((FakeAsync time) {
+      final exitCode = Completer<int>();
+      final controller = StreamChannelController<Object?>();
+      createBrowserManager(controller, FakeProcess(exitCode: exitCode.future));
+
+      // A dying process takes its connection with it, and the connection is
+      // seen to close before the exit code arrives.
+      controller.local.sink.close();
+      time.flushMicrotasks();
+      // The exit notification can be delivered after cleanup starts. It must
+      // not depend on an arbitrary grace period after the channel closes.
+      time.elapse(const Duration(seconds: 2));
+      exitCode.complete(-9);
+      time.flushMicrotasks();
+
+      expect(logger.errorText, contains('closed its connection to the test host unexpectedly'));
+      expect(
+        logger.errorText,
+        contains('exited with code -9 after disconnecting from the test host'),
+      );
+    });
+  });
+
+  testWithoutContext('BrowserManager reports a process exit before the connection closes', () {
+    FakeAsync().run((FakeAsync time) {
+      final exitCode = Completer<int>();
+      final controller = StreamChannelController<Object?>();
+      createBrowserManager(controller, FakeProcess(exitCode: exitCode.future));
+
+      exitCode.complete(-9);
+      time.flushMicrotasks();
+
+      expect(logger.errorText, contains('exited unexpectedly with code -9'));
+
+      controller.local.sink.close();
+      time.flushMicrotasks();
+
+      expect(logger.errorText, contains('closed its connection to the test host unexpectedly'));
+    });
+  });
+
+  testWithoutContext(
+    'BrowserManager does not diagnose an intentional shutdown as a disconnect',
+    () {
+      FakeAsync().run((FakeAsync time) {
+        final exitCode = Completer<int>();
+        final controller = StreamChannelController<Object?>();
+        final BrowserManager manager = createBrowserManager(
+          controller,
+          FakeProcess(exitCode: exitCode.future),
+        );
+
+        manager.close();
+        controller.local.sink.close();
+        time.flushMicrotasks();
+        exitCode.complete(-15);
+        time.flushMicrotasks();
+
+        expect(logger.errorText, isEmpty);
+      });
+    },
+  );
+
+  testWithoutContext('BrowserManager does not report a clean exit after cleanup', () {
+    FakeAsync().run((FakeAsync time) {
+      final exitCode = Completer<int>();
+      final controller = StreamChannelController<Object?>();
+      createBrowserManager(controller, FakeProcess(exitCode: exitCode.future));
+
+      controller.local.sink.close();
+      time.flushMicrotasks();
+      // A healthy browser may exit normally when closed after its page dies.
+      exitCode.complete(0);
+      time.flushMicrotasks();
+
+      expect(logger.errorText, contains('closed its connection to the test host unexpectedly'));
+      expect(logger.errorText, isNot(contains('exited with code')));
+      expect(logger.errorText, isNot(contains('exited unexpectedly')));
+    });
+  });
 }

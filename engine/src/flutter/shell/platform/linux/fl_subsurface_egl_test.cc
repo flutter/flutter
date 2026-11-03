@@ -21,6 +21,11 @@ constexpr size_t kWidth = 100;
 constexpr size_t kHeight = 200;
 constexpr gint kScale = 2;
 
+// The native window, and so the buffer frames are drawn into, is created in
+// device pixels.
+constexpr size_t kBufferWidth = kWidth * kScale;
+constexpr size_t kBufferHeight = kHeight * kScale;
+
 class FlSubsurfaceEGLTest : public flutter::testing::WaylandTest {
  protected:
   void SetUp() override {
@@ -122,9 +127,10 @@ TEST_F(FlSubsurfaceEGLTest, PresentResizes) {
   g_autoptr(FlSubsurfaceEGL) egl = CreateEGL();
   ASSERT_NE(egl, nullptr);
 
-  EXPECT_CALL(wayland, EGLWindowResize(kWidth, kHeight));
+  EXPECT_CALL(wayland, EGLWindowResize(kBufferWidth + 50, kBufferHeight + 50));
 
-  fl_subsurface_egl_present(egl, 1, kWidth, kHeight, nullptr);
+  fl_subsurface_egl_present(egl, 1, kBufferWidth + 50, kBufferHeight + 50,
+                            nullptr);
 }
 
 // Drivers without glBlitFramebuffer draw the frame with a shader instead.
@@ -141,117 +147,127 @@ TEST_F(FlSubsurfaceEGLTest, PresentWithoutBlit) {
   fl_subsurface_egl_present(egl, 1, kWidth, kHeight, nullptr);
 }
 
-// A frame that fills the surface is written to the whole surface.
-TEST_F(FlSubsurfaceEGLTest, PresentMatchingSurface) {
-  epoxy.egl_surface_width = kWidth;
-  epoxy.egl_surface_height = kHeight;
-
+// A frame the same size as the buffer is written to the whole buffer and
+// presented with a single swap.
+TEST_F(FlSubsurfaceEGLTest, PresentMatchingBuffer) {
   g_autoptr(FlSubsurfaceEGL) egl = CreateEGL();
   ASSERT_NE(egl, nullptr);
 
-  EXPECT_CALL(epoxy, glBlitFramebuffer(0, 0, kWidth, kHeight, 0, 0, kWidth,
-                                       kHeight, ::testing::_, ::testing::_));
+  EXPECT_CALL(epoxy, glBlitFramebuffer(0, 0, kBufferWidth, kBufferHeight, 0, 0,
+                                       kBufferWidth, kBufferHeight,
+                                       ::testing::_, ::testing::_));
+  EXPECT_CALL(epoxy, eglSwapBuffers).Times(1);
 
-  fl_subsurface_egl_present(egl, 1, kWidth, kHeight, nullptr);
+  fl_subsurface_egl_present(egl, 1, kBufferWidth, kBufferHeight, nullptr);
 }
 
-// OpenGL puts the origin at the bottom left of the surface but Wayland puts it
-// at the top left, so a frame that doesn't fill a taller surface has to be
-// moved up to stay where the window expects it. Writing it at the OpenGL
-// origin would leave it below where it belongs.
-TEST_F(FlSubsurfaceEGLTest, PresentTallerSurface) {
-  epoxy.egl_surface_width = kWidth;
-  epoxy.egl_surface_height = kHeight + 50;
+// The buffer a frame is drawn into is acquired when the previous frame is
+// swapped, so a resize doesn't reach it. A frame of a new size swaps the stale
+// buffer away unused so the frame is drawn into one of the right size, which
+// is the only chance a window that is sized to its content gets.
+TEST_F(FlSubsurfaceEGLTest, PresentDifferentSizeSwapsStaleBuffer) {
+  g_autoptr(FlSubsurfaceEGL) egl = CreateEGL();
+  ASSERT_NE(egl, nullptr);
 
+  EXPECT_CALL(epoxy, eglSwapBuffers).Times(2);
+
+  fl_subsurface_egl_present(egl, 1, kBufferWidth + 50, kBufferHeight + 50,
+                            nullptr);
+}
+
+// The whole frame is still written, rather than being aligned against the size
+// of the buffer that was swapped away.
+TEST_F(FlSubsurfaceEGLTest, PresentDifferentSizeWritesWholeFrame) {
   g_autoptr(FlSubsurfaceEGL) egl = CreateEGL();
   ASSERT_NE(egl, nullptr);
 
   EXPECT_CALL(epoxy,
-              glBlitFramebuffer(0, 0, kWidth, kHeight, 0, 50, kWidth,
-                                kHeight + 50, ::testing::_, ::testing::_));
+              glBlitFramebuffer(0, 0, kBufferWidth + 50, kBufferHeight + 50, 0,
+                                0, kBufferWidth + 50, kBufferHeight + 50,
+                                ::testing::_, ::testing::_));
 
-  fl_subsurface_egl_present(egl, 1, kWidth, kHeight, nullptr);
+  fl_subsurface_egl_present(egl, 1, kBufferWidth + 50, kBufferHeight + 50,
+                            nullptr);
 }
 
-// The origins only differ vertically, so a frame that doesn't fill a wider
-// surface is left where it is.
-TEST_F(FlSubsurfaceEGLTest, PresentWiderSurface) {
-  epoxy.egl_surface_width = kWidth + 50;
-  epoxy.egl_surface_height = kHeight;
-
-  g_autoptr(FlSubsurfaceEGL) egl = CreateEGL();
-  ASSERT_NE(egl, nullptr);
-
-  EXPECT_CALL(epoxy, glBlitFramebuffer(0, 0, kWidth, kHeight, 0, 0, kWidth,
-                                       kHeight, ::testing::_, ::testing::_));
-
-  fl_subsurface_egl_present(egl, 1, kWidth, kHeight, nullptr);
-}
-
-// A frame bigger than the surface has its bottom rows dropped, as that's the
-// end the window is being clipped at in Wayland's coordinates. Writing it from
-// the OpenGL origin would drop the top rows instead and shift the contents up.
-TEST_F(FlSubsurfaceEGLTest, PresentShorterSurface) {
-  epoxy.egl_surface_width = kWidth;
-  epoxy.egl_surface_height = kHeight - 50;
-
-  g_autoptr(FlSubsurfaceEGL) egl = CreateEGL();
-  ASSERT_NE(egl, nullptr);
-
-  EXPECT_CALL(epoxy,
-              glBlitFramebuffer(0, 50, kWidth, kHeight, 0, 0, kWidth,
-                                kHeight - 50, ::testing::_, ::testing::_));
-
-  fl_subsurface_egl_present(egl, 1, kWidth, kHeight, nullptr);
-}
-
-// The shader path clips the same way, using a viewport that starts off the
-// bottom of the surface.
-TEST_F(FlSubsurfaceEGLTest, PresentShorterSurfaceWithoutBlit) {
+// The shader path writes the whole frame in the same way.
+TEST_F(FlSubsurfaceEGLTest, PresentDifferentSizeWithoutBlit) {
   EXPECT_CALL(epoxy, epoxy_gl_version).WillRepeatedly(::testing::Return(20));
   EXPECT_CALL(epoxy, epoxy_has_gl_extension(::testing::_))
       .WillRepeatedly(::testing::Return(false));
-  epoxy.egl_surface_width = kWidth;
-  epoxy.egl_surface_height = kHeight - 50;
 
   g_autoptr(FlSubsurfaceEGL) egl = CreateEGL();
   ASSERT_NE(egl, nullptr);
 
-  EXPECT_CALL(epoxy, glViewport(0, -50, kWidth, kHeight));
+  EXPECT_CALL(epoxy, glViewport(0, 0, kBufferWidth + 50, kBufferHeight + 50));
 
-  fl_subsurface_egl_present(egl, 1, kWidth, kHeight, nullptr);
+  fl_subsurface_egl_present(egl, 1, kBufferWidth + 50, kBufferHeight + 50,
+                            nullptr);
 }
 
-// The frame is moved up the same way when it's drawn with the shader.
-TEST_F(FlSubsurfaceEGLTest, PresentTallerSurfaceWithoutBlit) {
-  EXPECT_CALL(epoxy, epoxy_gl_version).WillRepeatedly(::testing::Return(20));
-  EXPECT_CALL(epoxy, epoxy_has_gl_extension(::testing::_))
-      .WillRepeatedly(::testing::Return(false));
-  epoxy.egl_surface_width = kWidth;
-  epoxy.egl_surface_height = kHeight + 50;
-
+// A resize from the window leaves the buffer stale in the same way, so the
+// next frame swaps it away before drawing.
+TEST_F(FlSubsurfaceEGLTest, PresentAfterResizeSwapsStaleBuffer) {
   g_autoptr(FlSubsurfaceEGL) egl = CreateEGL();
   ASSERT_NE(egl, nullptr);
 
-  EXPECT_CALL(epoxy, glViewport(0, 50, kWidth, kHeight));
+  fl_subsurface_egl_resize(egl, kBufferWidth + 50, kBufferHeight + 50);
 
-  fl_subsurface_egl_present(egl, 1, kWidth, kHeight, nullptr);
+  EXPECT_CALL(wayland, EGLWindowResize).Times(0);
+  EXPECT_CALL(epoxy, eglSwapBuffers).Times(2);
+
+  fl_subsurface_egl_present(egl, 1, kBufferWidth + 50, kBufferHeight + 50,
+                            nullptr);
 }
 
-// If the surface size isn't known, e.g. because it couldn't be queried, the
-// frame is written from the origin rather than being aligned against a size
-// that would drop all of it.
-TEST_F(FlSubsurfaceEGLTest, PresentUnknownSurfaceSize) {
-  epoxy.egl_surface_width = 0;
-  epoxy.egl_surface_height = 0;
-
+// Once the buffer has caught up with the frame size, frames are presented with
+// a single swap again.
+TEST_F(FlSubsurfaceEGLTest, PresentSecondFrameOfNewSize) {
   g_autoptr(FlSubsurfaceEGL) egl = CreateEGL();
   ASSERT_NE(egl, nullptr);
 
-  EXPECT_CALL(epoxy, glBlitFramebuffer(0, 0, kWidth, kHeight, 0, 0, kWidth,
-                                       kHeight, ::testing::_, ::testing::_));
+  fl_subsurface_egl_present(egl, 1, kBufferWidth + 50, kBufferHeight + 50,
+                            nullptr);
 
-  fl_subsurface_egl_present(egl, 1, kWidth, kHeight, nullptr);
+  EXPECT_CALL(epoxy, eglSwapBuffers).Times(1);
+
+  fl_subsurface_egl_present(egl, 1, kBufferWidth + 50, kBufferHeight + 50,
+                            nullptr);
+}
+
+// Wayland requires buffer sizes to be an integer multiple of the buffer scale,
+// so a frame that isn't a whole number of logical pixels, which a view that
+// hasn't been allocated yet can produce, is rounded up.
+TEST_F(FlSubsurfaceEGLTest, PresentRoundsUpToBufferScale) {
+  g_autoptr(FlSubsurfaceEGL) egl = CreateEGL();
+  ASSERT_NE(egl, nullptr);
+
+  EXPECT_CALL(wayland, EGLWindowResize(kScale, kScale));
+
+  fl_subsurface_egl_present(egl, 1, 1, 1, nullptr);
+}
+
+// A rounded up frame doesn't fill the buffer, and OpenGL puts the origin at the
+// bottom left while Wayland puts it at the top left, so the frame is written at
+// the top of the buffer rather than at the OpenGL origin.
+TEST_F(FlSubsurfaceEGLTest, PresentRoundedFrameWritesAtTopOfBuffer) {
+  g_autoptr(FlSubsurfaceEGL) egl = CreateEGL();
+  ASSERT_NE(egl, nullptr);
+
+  EXPECT_CALL(epoxy, glBlitFramebuffer(0, 0, 1, 1, 0, kScale - 1, 1, kScale,
+                                       ::testing::_, ::testing::_));
+
+  fl_subsurface_egl_present(egl, 1, 1, 1, nullptr);
+}
+
+// A resize from the window is rounded up in the same way.
+TEST_F(FlSubsurfaceEGLTest, ResizeRoundsUpToBufferScale) {
+  g_autoptr(FlSubsurfaceEGL) egl = CreateEGL();
+  ASSERT_NE(egl, nullptr);
+
+  EXPECT_CALL(wayland, EGLWindowResize(kScale, kScale));
+
+  fl_subsurface_egl_resize(egl, 1, 1);
 }
 
 // The native window is released with the object.

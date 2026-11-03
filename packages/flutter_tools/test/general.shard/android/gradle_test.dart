@@ -30,7 +30,12 @@ flutter:
 ''';
 
 void main() {
-  Cache.flutterRoot = getFlutterRoot();
+  testWithoutContext('Debug symbol stripping error should end with the issue URL', () {
+    expect(
+      failedToStripDebugSymbolsErrorMessage,
+      endsWith('https://github.com/flutter/flutter/issues'),
+    );
+  });
 
   group('build artifacts', () {
     late FileSystem fileSystem;
@@ -282,7 +287,10 @@ void main() {
       expect(
         () {
           gradle_utils.updateLocalProperties(
+            cache: Cache.test(processManager: FakeProcessManager.any()),
             project: FlutterProject.fromDirectoryTest(globals.fs.currentDirectory),
+            analytics: globals.analytics,
+            logger: globals.logger,
           );
         },
         throwsToolExit(
@@ -337,6 +345,7 @@ void main() {
       manifestFile.writeAsStringSync(manifest);
 
       gradle_utils.updateLocalProperties(
+        cache: Cache.test(processManager: FakeProcessManager.any()),
         project: FlutterProject.fromDirectoryTest(globals.fs.directory('path/to/project')),
         buildInfo: buildInfo,
         requireAndroidSdk: false,

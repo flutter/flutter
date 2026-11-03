@@ -9,15 +9,20 @@ import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/create.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/isolated/mustache_template.dart';
+import 'package:flutter_tools/src/project.dart';
+import 'package:flutter_tools/src/template.dart';
 
 import '../commands.shard/permeable/utils/project_testing_utils.dart';
 import '../src/common.dart';
 import '../src/context.dart';
+import '../src/fakes.dart';
 import '../src/test_flutter_command_runner.dart';
 import 'test_utils.dart';
 
@@ -83,6 +88,7 @@ void main() {
     },
     overrides: <Type, Generator>{
       Pub: () => Pub.test(
+        flutterRoot: getFlutterRoot(),
         fileSystem: globals.fs,
         logger: globals.logger,
         processManager: globals.processManager,
@@ -90,6 +96,7 @@ void main() {
         platform: globals.platform,
         stdio: globals.stdio,
       ),
+      TemplatePathProvider: () => const TemplatePathProvider(flutterRoot: '../..'),
     },
   );
 
@@ -139,6 +146,7 @@ void main() {
     },
     overrides: <Type, Generator>{
       Pub: () => Pub.test(
+        flutterRoot: getFlutterRoot(),
         fileSystem: globals.fs,
         logger: globals.logger,
         processManager: globals.processManager,
@@ -146,6 +154,7 @@ void main() {
         platform: globals.platform,
         stdio: globals.stdio,
       ),
+      TemplatePathProvider: () => const TemplatePathProvider(flutterRoot: '../..'),
     },
   );
 
@@ -175,6 +184,7 @@ void main() {
     },
     overrides: <Type, Generator>{
       Pub: () => Pub.test(
+        flutterRoot: getFlutterRoot(),
         fileSystem: globals.fs,
         logger: globals.logger,
         processManager: globals.processManager,
@@ -182,6 +192,7 @@ void main() {
         platform: globals.platform,
         stdio: globals.stdio,
       ),
+      TemplatePathProvider: () => const TemplatePathProvider(flutterRoot: '../..'),
     },
   );
 
@@ -211,6 +222,7 @@ void main() {
     },
     overrides: <Type, Generator>{
       Pub: () => Pub.test(
+        flutterRoot: getFlutterRoot(),
         fileSystem: globals.fs,
         logger: globals.logger,
         processManager: globals.processManager,
@@ -218,6 +230,7 @@ void main() {
         platform: globals.platform,
         stdio: globals.stdio,
       ),
+      TemplatePathProvider: () => const TemplatePathProvider(flutterRoot: '../..'),
     },
   );
 
@@ -260,6 +273,7 @@ void main() {
     },
     overrides: <Type, Generator>{
       Pub: () => Pub.test(
+        flutterRoot: getFlutterRoot(),
         fileSystem: globals.fs,
         logger: globals.logger,
         processManager: globals.processManager,
@@ -267,13 +281,35 @@ void main() {
         platform: globals.platform,
         stdio: globals.stdio,
       ),
+      TemplatePathProvider: () => const TemplatePathProvider(flutterRoot: '../..'),
     },
   );
 }
 
 Future<void> _createProject(Directory dir, List<String> createArgs) async {
-  Cache.flutterRoot = '../..';
-  final command = CreateCommand();
+  final FileSystem fs = dir.fileSystem;
+  final logger = BufferLogger.test();
+  final command = CreateCommand(
+    androidContext: FakeAndroidContext(),
+    appleContext: FakeAppleContext(),
+    templateRenderer: const MustacheTemplateRenderer(),
+    toolContext: FakeToolContext(
+      fs: fs,
+      logger: logger,
+      platform: platform,
+      processManager: processManager,
+      cache: Cache.test(
+        rootOverride: fs.directory('../..'),
+        flutterRoot: '../..',
+        fileSystem: fs,
+        logger: logger,
+        platform: platform,
+        processManager: processManager,
+      ),
+      flutterVersion: FakeFlutterVersion(),
+      projectFactory: FlutterProjectFactory(fileSystem: fs, logger: logger, config: FakeConfig()),
+    ),
+  );
   final CommandRunner<void> runner = createTestCommandRunner(command);
   await runner.run(<String>['create', ...createArgs, dir.path]);
 }

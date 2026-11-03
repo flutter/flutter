@@ -19,7 +19,6 @@ import '../../base/platform.dart';
 import '../../build_info.dart';
 import '../../convert.dart';
 import '../../devfs.dart';
-import '../../globals.dart' as globals;
 import '../build_system.dart';
 import '../depfile.dart';
 
@@ -147,21 +146,12 @@ class DevelopmentShaderCompiler {
 /// impellerc.
 class ShaderCompiler {
   ShaderCompiler({
-    required this._processManager,
-    required this._logger,
-    required FileSystem fileSystem,
     required this._artifacts,
-    Platform? platform,
-  }) : _fs = fileSystem,
-       _platform = platform ?? _lookupPlatform();
-
-  static Platform _lookupPlatform() {
-    try {
-      return globals.platform;
-    } on UnsupportedError {
-      return const LocalPlatform();
-    }
-  }
+    required FileSystem fileSystem,
+    required this._logger,
+    required this._platform,
+    required this._processManager,
+  }) : _fs = fileSystem;
 
   final ProcessManager _processManager;
   final Logger _logger;
@@ -169,18 +159,11 @@ class ShaderCompiler {
   final Artifacts _artifacts;
   final Platform _platform;
   bool _hasLoggedSecurityBlockError = false;
+  final Set<String> _loggedWarningShaders = <String>{};
 
   List<String> _shaderTargetsFromTargetPlatform(TargetPlatform targetPlatform) {
-    switch (targetPlatform) {
-      case TargetPlatform.android_x64:
-      case TargetPlatform.android_arm:
-      case TargetPlatform.android_arm64:
-      case TargetPlatform.android:
-      case TargetPlatform.linux_x64:
-      case TargetPlatform.linux_arm64:
-      case TargetPlatform.linux_riscv64:
-      case TargetPlatform.windows_x64:
-      case TargetPlatform.windows_arm64:
+    switch (targetPlatform.os) {
+      case .android || .linux || .windows:
         return <String>[
           '--sksl',
           '--runtime-stage-gles',
@@ -188,20 +171,18 @@ class ShaderCompiler {
           '--runtime-stage-vulkan',
         ];
 
-      case TargetPlatform.ios:
+      case .ios:
         return <String>['--runtime-stage-metal'];
-      case TargetPlatform.darwin:
+      case .macos:
         return <String>['--sksl', '--runtime-stage-metal'];
 
-      case TargetPlatform.fuchsia_arm64:
-      case TargetPlatform.fuchsia_x64:
-      case TargetPlatform.tester:
+      case .fuchsia || .tester:
         return <String>['--sksl', '--runtime-stage-vulkan'];
 
-      case TargetPlatform.web_javascript:
+      case .web:
         return <String>['--sksl'];
 
-      case TargetPlatform.unsupported:
+      case .unsupported:
         TargetPlatform.throwUnsupportedTarget();
     }
   }
@@ -311,6 +292,12 @@ class ShaderCompiler {
           );
         }
         return false;
+      }
+      final String? stderr = (result.stderr as String?)?.trim();
+      if (stderr != null && stderr.isNotEmpty) {
+        if (_loggedWarningShaders.add(input.path)) {
+          _logger.printBox(stderr, title: 'Shader Warning');
+        }
       }
     } on _SecurityPolicyBlockException catch (_) {
       _logSecurityBlockError(impellerc.path);

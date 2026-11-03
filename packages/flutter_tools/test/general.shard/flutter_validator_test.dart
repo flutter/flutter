@@ -648,6 +648,67 @@ void main() {
     );
   });
 
+  testWithoutContext(
+    'allows flutter and dart binaries from a symlinked Flutter SDK on Windows',
+    () async {
+      const flutterRoot = r'C:\sdk\flutter_current';
+      const realFlutterRoot = r'C:\sdk\real_flutter';
+      const osName = 'Microsoft Windows';
+      final FileSystem fs = MemoryFileSystem.test(style: FileSystemStyle.windows);
+      fs.directory(fs.path.join(realFlutterRoot, 'bin')).createSync(recursive: true);
+      fs.file(fs.path.join(realFlutterRoot, 'bin', 'flutter')).createSync();
+      fs.file(fs.path.join(realFlutterRoot, 'bin', 'dart')).createSync();
+      fs.link(flutterRoot).createSync(realFlutterRoot);
+
+      final flutterValidator = FlutterValidator(
+        platform: FakePlatform(operatingSystem: 'windows', localeName: 'en_US.UTF-8'),
+        flutterVersion: () => FakeFlutterVersion(frameworkVersion: '1.0.0', branch: 'beta'),
+        devToolsVersion: () => '2.8.0',
+        artifacts: Artifacts.test(),
+        fileSystem: fs,
+        processManager: FakeProcessManager.empty(),
+        operatingSystemUtils: FakeOperatingSystemUtils(
+          name: osName,
+          fs: fs,
+          whichLookup: <String, File>{
+            'flutter': fs.file(fs.path.join(flutterRoot, 'bin', 'flutter')),
+            'dart': fs.file(fs.path.join(flutterRoot, 'bin', 'dart')),
+          },
+        ),
+        flutterRoot: () => flutterRoot,
+        featureFlags: TestFeatureFlags(),
+      );
+
+      final ValidationResult result = await flutterValidator.validate();
+      expect(
+        result,
+        _matchDoctorValidation(
+          validationType: ValidationType.success,
+          statusInfo: 'Channel beta, 1.0.0, on $osName, locale en_US.UTF-8',
+          messages: contains(
+            const ValidationMessage(
+              r'Flutter version 1.0.0 on channel beta at C:\sdk\flutter_current',
+            ),
+          ),
+        ),
+      );
+      expect(
+        result.messages.where(
+          (ValidationMessage message) =>
+              message.message.contains('Warning: `flutter` on your path resolves to'),
+        ),
+        isEmpty,
+      );
+      expect(
+        result.messages.where(
+          (ValidationMessage message) =>
+              message.message.contains('Warning: `dart` on your path resolves to'),
+        ),
+        isEmpty,
+      );
+    },
+  );
+
   testWithoutContext('detects flutter and dart from outside flutter sdk', () async {
     final FileSystem fs = MemoryFileSystem.test();
     final flutterValidator = FlutterValidator(

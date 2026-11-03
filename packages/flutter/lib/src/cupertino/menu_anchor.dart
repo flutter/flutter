@@ -1519,7 +1519,7 @@ class _FocusLastAction extends ContextAction<_FocusLastIntent> {
 ///
 /// The default thickness of the divider is 1 physical pixel.
 class _CupertinoMenuImplicitDivider extends StatelessWidget {
-  /// Draws a [_CupertinoMenuImplicitDivider] below a [child].
+  /// Draws a [_CupertinoMenuImplicitDivider] below a menu item.
   const _CupertinoMenuImplicitDivider();
 
   /// The default color applied to the [_CupertinoMenuImplicitDivider] with
@@ -1942,7 +1942,8 @@ class CupertinoMenuItem extends StatelessWidget implements CupertinoMenuEntry {
   );
 
   /// Resolves the title [TextStyle] in response to
-  /// [CupertinoThemeData.brightness], [isDestructiveAction], and [enabled].
+  /// [CupertinoThemeData.brightness], [isDestructiveAction], and whether
+  /// [onPressed] is null.
   //
   // Approximated from the iOS and iPadOS 18.5 simulators.
   TextStyle _resolveDefaultTextStyle(BuildContext context, TextScaler textScaler) {

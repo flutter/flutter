@@ -45,6 +45,7 @@ AccessibilityBridge::AccessibilityBridge(
     __weak FlutterPlatformViewsController* platform_views_controller,
     std::unique_ptr<IosDelegate> ios_delegate)
     : view_controller_(view_controller),
+      accessibility_element_init_container_([[UIView alloc] initWithFrame:CGRectZero]),
       platform_view_(platform_view),
       platform_views_controller_(platform_views_controller),
       objects_([[NSMutableDictionary alloc] init]),
@@ -69,8 +70,27 @@ AccessibilityBridge::~AccessibilityBridge() {
   clearState();
 }
 
+void AccessibilityBridge::SetViewController(FlutterViewController* viewController,
+                                            FlutterView* previousView) {
+  if (viewController) {
+    FML_DCHECK(viewController.platformViewsController == platform_views_controller_)
+        << "A reattached FlutterViewController must belong to the same FlutterEngine.";
+  }
+  view_controller_ = viewController;
+  UIView* currentView = ViewIfLoaded();
+  if (previousView != currentView) {
+    ClearAccessibilityElementsIfOwnedByBridge(previousView);
+  }
+  UpdateAccessibilityElementsForCurrentView();
+  NotifySemanticsObjectsViewChanged();
+}
+
 UIView<UITextInput>* AccessibilityBridge::textInputView() {
   return [[platform_view_->GetOwnerViewController().engine textInputPlugin] textInputView];
+}
+
+bool AccessibilityBridge::HasSemantics() const {
+  return objects_[@(kRootNodeId)] != nil;
 }
 
 void AccessibilityBridge::AccessibilityObjectDidBecomeFocused(int32_t id) {
@@ -94,6 +114,12 @@ void AccessibilityBridge::UpdateSemantics(
     const flutter::CustomAccessibilityAction& action = entry.second;
     actions_[action.id] = action;
   }
+  // The semantics cache is updated even while the owner view is not loaded. UIKit
+  // accessibility notifications are only useful once there is a loaded view with
+  // accessibility elements to inspect.
+  BOOL shouldPostAccessibilityNotifications =
+      view_controller_ && ViewIfLoaded() &&
+      !ios_delegate_->IsFlutterViewControllerPresentingModalViewController(view_controller_);
   for (const auto& entry : nodes) {
     const flutter::SemanticsNode& node = entry.second;
     SemanticsObject* object = GetOrCreateObject(node.id, nodes);
@@ -139,7 +165,7 @@ void AccessibilityBridge::UpdateSemantics(
       object.accessibilityCustomActions = accessibilityCustomActions;
     }
 
-    if (needsAnnouncement) {
+    if (needsAnnouncement && shouldPostAccessibilityNotifications) {
       // Try to be more polite - iOS 11+ supports
       // UIAccessibilitySpeechAttributeQueueAnnouncement which should avoid
       // interrupting system notifications or other elements.
@@ -161,10 +187,7 @@ void AccessibilityBridge::UpdateSemantics(
   SemanticsObject* lastAdded = nil;
 
   if (root) {
-    if (!view_controller_.view.accessibilityElements) {
-      view_controller_.view.accessibilityElements =
-          @[ [root accessibilityContainer] ?: [NSNull null] ];
-    }
+    UpdateAccessibilityElementsForCurrentView();
     NSMutableArray<SemanticsObject*>* newRoutes = [[NSMutableArray alloc] init];
     [root collectRoutes:newRoutes];
     // Finds the last route that is not in the previous routes.
@@ -196,7 +219,8 @@ void AccessibilityBridge::UpdateSemantics(
       previous_routes_.push_back([route uid]);
     }
   } else {
-    view_controller_.viewIfLoaded.accessibilityElements = nil;
+    UIView* view = ViewIfLoaded();
+    ClearAccessibilityElementsIfOwnedByBridge(view);
   }
 
   NSMutableArray<NSNumber*>* doomed_uids = [NSMutableArray arrayWithArray:objects_.allKeys];
@@ -209,32 +233,34 @@ void AccessibilityBridge::UpdateSemantics(
     [object accessibilityBridgeDidFinishUpdate];
   }
 
-  if (!ios_delegate_->IsFlutterViewControllerPresentingModalViewController(view_controller_)) {
-    layoutChanged = layoutChanged || [doomed_uids count] > 0;
+  if (!shouldPostAccessibilityNotifications) {
+    return;
+  }
 
-    if (routeChanged) {
-      NSString* routeName = [lastAdded routeName];
-      ios_delegate_->PostAccessibilityNotification(UIAccessibilityScreenChangedNotification,
-                                                   routeName);
-    }
+  layoutChanged = layoutChanged || [doomed_uids count] > 0;
 
-    if (layoutChanged) {
-      SemanticsObject* next = FindNextFocusableIfNecessary();
-      SemanticsObject* lastFocused = [objects_ objectForKey:@(last_focused_semantics_object_id_)];
-      // Only specify the focus item if the new focus is different, avoiding double focuses on the
-      // same item. See: https://github.com/flutter/flutter/issues/104176. If there is a route
-      // change, we always refocus.
-      ios_delegate_->PostAccessibilityNotification(
-          UIAccessibilityLayoutChangedNotification,
-          (routeChanged || next != lastFocused) ? next.nativeAccessibility : NULL);
-    } else if (scrollOccured) {
-      // TODO(chunhtai): figure out what string to use for notification. At this
-      // point, it is guarantee the previous focused object is still in the tree
-      // so that we don't need to worry about focus lost. (e.g. "Screen 0 of 3")
-      ios_delegate_->PostAccessibilityNotification(
-          UIAccessibilityPageScrolledNotification,
-          FindNextFocusableIfNecessary().nativeAccessibility);
-    }
+  if (routeChanged) {
+    NSString* routeName = [lastAdded routeName];
+    ios_delegate_->PostAccessibilityNotification(UIAccessibilityScreenChangedNotification,
+                                                 routeName);
+  }
+
+  if (layoutChanged) {
+    SemanticsObject* next = FindNextFocusableIfNecessary();
+    SemanticsObject* lastFocused = [objects_ objectForKey:@(last_focused_semantics_object_id_)];
+    // Only specify the focus item if the new focus is different, avoiding double focuses on the
+    // same item. See: https://github.com/flutter/flutter/issues/104176. If there is a route
+    // change, we always refocus.
+    ios_delegate_->PostAccessibilityNotification(
+        UIAccessibilityLayoutChangedNotification,
+        (routeChanged || next != lastFocused) ? next.nativeAccessibility : NULL);
+  } else if (scrollOccured) {
+    // TODO(chunhtai): figure out what string to use for notification. At this
+    // point, it is guarantee the previous focused object is still in the tree
+    // so that we don't need to worry about focus lost. (e.g. "Screen 0 of 3")
+    ios_delegate_->PostAccessibilityNotification(
+        UIAccessibilityPageScrolledNotification,
+        FindNextFocusableIfNecessary().nativeAccessibility);
   }
 }
 
@@ -374,6 +400,51 @@ void AccessibilityBridge::HandleEvent(NSDictionary<NSString*, id>* annotatedEven
 
 fml::WeakPtr<AccessibilityBridge> AccessibilityBridge::GetWeakPtr() {
   return weak_factory_.GetWeakPtr();
+}
+
+bool AccessibilityBridge::AccessibilityElementsWereInstalledByBridge(NSArray* elements) const {
+  if (elements.count != 1) {
+    return false;
+  }
+  id element = elements.firstObject;
+  if (![element isKindOfClass:[SemanticsObjectContainer class]]) {
+    return false;
+  }
+  SemanticsObject* semanticsObject = ((SemanticsObjectContainer*)element).semanticsObject;
+  return semanticsObject && semanticsObject.bridge == this;
+}
+
+void AccessibilityBridge::ClearAccessibilityElementsIfOwnedByBridge(UIView* view) {
+  if (!view) {
+    return;
+  }
+  if (AccessibilityElementsWereInstalledByBridge(view.accessibilityElements)) {
+    view.accessibilityElements = nil;
+  }
+}
+
+void AccessibilityBridge::UpdateAccessibilityElementsForCurrentView() {
+  UIView* view = ViewIfLoaded();
+  if (!view) {
+    return;
+  }
+  SemanticsObject* root = objects_[@(kRootNodeId)];
+  if (!root) {
+    view.accessibilityElements = nil;
+    return;
+  }
+  id accessibilityContainer = [root accessibilityContainer];
+  if (!accessibilityContainer) {
+    view.accessibilityElements = nil;
+    return;
+  }
+  view.accessibilityElements = @[ accessibilityContainer ];
+}
+
+void AccessibilityBridge::NotifySemanticsObjectsViewChanged() {
+  for (SemanticsObject* object in objects_.allValues) {
+    [object accessibilityBridgeDidChangeView];
+  }
 }
 
 void AccessibilityBridge::clearState() {

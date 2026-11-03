@@ -6,9 +6,9 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../convert.dart';
-import '../globals.dart' as globals;
 import 'async_guard.dart';
 import 'exit.dart';
 import 'io.dart';
@@ -183,6 +183,10 @@ abstract class ProcessUtils {
   ///
   /// If [timeout] is supplied, the command will be retried [timeoutRetries] times
   /// if it times out.
+  ///
+  /// The child process's stdout and stderr are decoded with [encoding], which
+  /// defaults to the system encoding. When [timeout] is supplied, they are
+  /// always decoded as UTF-8.
   Future<RunResult> run(
     List<String> cmd, {
     bool throwOnError = false,
@@ -192,6 +196,7 @@ abstract class ProcessUtils {
     Map<String, String>? environment,
     Duration? timeout,
     int timeoutRetries = 0,
+    Encoding encoding = systemEncoding,
   });
 
   /// Run the command and block waiting for its result.
@@ -352,6 +357,7 @@ class _DefaultProcessUtils implements ProcessUtils {
     Map<String, String>? environment,
     Duration? timeout,
     int timeoutRetries = 0,
+    Encoding encoding = systemEncoding,
   }) async {
     if (cmd.isEmpty) {
       throw ArgumentError('cmd must be a non-empty list');
@@ -368,6 +374,8 @@ class _DefaultProcessUtils implements ProcessUtils {
         cmd,
         workingDirectory: workingDirectory,
         environment: _environment(allowReentrantFlutter, environment),
+        stdoutEncoding: encoding,
+        stderrEncoding: encoding,
       );
       final runResult = RunResult(results, cmd);
       _logger.printTrace(runResult.toString());
@@ -666,26 +674,31 @@ class _DefaultProcessUtils implements ProcessUtils {
   }
 }
 
-Future<int> exitWithHooks(int code, {required ShutdownHooks shutdownHooks}) async {
-  if (globals.analytics.shouldShowMessage) {
-    globals.logger.printStatus(globals.analytics.getConsentMessage);
-    globals.analytics.clientShowedMessage();
+Future<int> exitWithHooks(
+  int code, {
+  required Analytics analytics,
+  required Logger logger,
+  required ShutdownHooks shutdownHooks,
+}) async {
+  if (analytics.shouldShowMessage) {
+    logger.printStatus(analytics.getConsentMessage);
+    analytics.clientShowedMessage();
 
     // This trace is searched for in tests.
-    globals.logger.printTrace('Showed analytics consent message.');
+    logger.printTrace('Showed analytics consent message.');
   }
 
   // Run shutdown hooks before flushing logs
-  await shutdownHooks.runShutdownHooks(globals.logger);
+  await shutdownHooks.runShutdownHooks(logger);
 
   final completer = Completer<void>();
 
-  await globals.analytics.close();
+  await analytics.close();
 
   // Give the task / timer queue one cycle through before we hard exit.
   Timer.run(() {
     try {
-      globals.printTrace('exiting with code $code');
+      logger.printTrace('exiting with code $code');
       exit(code);
       completer.complete();
       // This catches all exceptions because the error is propagated on the
