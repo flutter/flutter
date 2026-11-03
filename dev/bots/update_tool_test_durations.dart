@@ -39,16 +39,12 @@ const Map<String, String> _hostByPrefix = <String, String>{
 /// builders that run it.
 typedef ToolShard = ({String name, RegExp builderName});
 
+RegExp _builderName(String pattern) => RegExp('^(${_hostByPrefix.keys.join('|')}) $pattern\$');
+
 final List<ToolShard> _shards = <ToolShard>[
-  (
-    name: 'integration',
-    builderName: RegExp(r'^(Linux|Mac|Windows) tool_integration_tests_\d+(_\d+)?$'),
-  ),
-  (
-    name: 'commands',
-    builderName: RegExp(r'^(Linux|Mac_arm64|Windows) tool_tests_commands(_\d+_\d+)?$'),
-  ),
-  (name: 'web', builderName: RegExp(r'^(Linux|Mac|Windows) web_tool_tests(_\d+_\d+)?$')),
+  (name: 'integration', builderName: _builderName(r'tool_integration_tests_\d+(_\d+)?')),
+  (name: 'commands', builderName: _builderName(r'tool_tests_commands(_\d+_\d+)?')),
+  (name: 'web', builderName: _builderName(r'web_tool_tests(_\d+_\d+)?')),
 ];
 
 final http.Client _client = http.Client();
