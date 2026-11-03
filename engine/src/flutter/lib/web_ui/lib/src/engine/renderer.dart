@@ -93,6 +93,11 @@ abstract class Renderer {
       return;
     }
     final ViewRasterizer rasterizer = rasterizers.remove(viewId)!;
+    if (rasterizer.queue.next case final RenderRequest next) {
+      if (next.scene is LayerScene) {
+        (next.scene as LayerScene).rootLayer.release();
+      }
+    }
     rasterizer.dispose();
   }
 
@@ -374,10 +379,18 @@ abstract class Renderer {
     // [renderQueue.next]; recording build finish now ensures queue waiting time
     // is not mistakenly counted as build time.
     recorder?.recordBuildFinish();
+    if (scene is LayerScene) {
+      scene.rootLayer.retain();
+    }
     if (renderQueue.current != null) {
       // If a scene is already queued up, drop it and queue this one up instead
       // so that the scene view always displays the most recently requested scene.
-      renderQueue.next?.completer.complete();
+      if (renderQueue.next case final RenderRequest dropped) {
+        if (dropped.scene is LayerScene) {
+          (dropped.scene as LayerScene).rootLayer.release();
+        }
+        dropped.completer.complete();
+      }
       final completer = Completer<void>();
       renderQueue.next = (scene: scene, size: size, completer: completer, recorder: recorder);
       return completer.future;
@@ -396,6 +409,10 @@ abstract class Renderer {
       current.completer.complete();
     } catch (error, stackTrace) {
       current.completer.completeError(error, stackTrace);
+    } finally {
+      if (current.scene is LayerScene) {
+        (current.scene as LayerScene).rootLayer.release();
+      }
     }
     renderQueue.current = renderQueue.next;
     renderQueue.next = null;
@@ -423,6 +440,14 @@ abstract class Renderer {
   void dispose() {
     _onViewCreatedListener.cancel();
     _onViewDisposedListener.cancel();
+    for (final ViewRasterizer rasterizer in rasterizers.values) {
+      if (rasterizer.queue.next case final RenderRequest next) {
+        if (next.scene is LayerScene) {
+          (next.scene as LayerScene).rootLayer.release();
+        }
+      }
+      rasterizer.dispose();
+    }
     rasterizer.dispose();
     pictureToImageSurface.dispose();
   }
@@ -433,6 +458,11 @@ abstract class Renderer {
     _onViewCreatedListener.cancel();
     _onViewDisposedListener.cancel();
     for (final ViewRasterizer rasterizer in rasterizers.values) {
+      if (rasterizer.queue.next case final RenderRequest next) {
+        if (next.scene is LayerScene) {
+          (next.scene as LayerScene).rootLayer.release();
+        }
+      }
       rasterizer.dispose();
     }
     rasterizers.clear();
