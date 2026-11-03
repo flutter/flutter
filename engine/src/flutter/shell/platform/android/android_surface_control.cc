@@ -236,11 +236,14 @@ AndroidVulkanResolutionStatus AndroidSurfaceControl::EvaluateSystemProperties(
   if (props.has_qemu_pipe || props.ro_hardware == "goldfish" ||
       props.ro_hardware == "ranchu" || props.ro_hardware == "qemu" ||
       props.ro_product_model.find("gphone") != std::string::npos) {
+    FML_LOG(INFO) << "Emulator detected, falling back to OpenGLES.";
     return AndroidVulkanResolutionStatus::kEmulatorDetected;
   }
 
   // Huawei device fallback (`ro.com.google.clientidbase == "android-huawei"`).
   if (props.ro_clientidbase == "android-huawei") {
+    FML_LOG(INFO) << "Huawei device detected (ro.com.google.clientidbase="
+                  << props.ro_clientidbase << "), falling back to OpenGLES.";
     return AndroidVulkanResolutionStatus::kHuaweiClientIdRejected;
   }
 
@@ -248,6 +251,11 @@ AndroidVulkanResolutionStatus AndroidSurfaceControl::EvaluateSystemProperties(
   // `ro.vendor.mediatek.platform` is non-empty).
   if (!props.ro_mediatek_platform.empty() && props.vendor_api_level > 0 &&
       props.vendor_api_level < kMinMediaTekVendorApiLevel) {
+    FML_LOG(INFO) << "MediaTek vendor API level " << props.vendor_api_level
+                  << " is below " << kMinMediaTekVendorApiLevel
+                  << " (ro.vendor.mediatek.platform="
+                  << props.ro_mediatek_platform
+                  << "), falling back to OpenGLES.";
     return AndroidVulkanResolutionStatus::kMediaTekVendorSdkTooLow;
   }
 
@@ -255,6 +263,9 @@ AndroidVulkanResolutionStatus AndroidSurfaceControl::EvaluateSystemProperties(
   if (!props.ro_product_board.empty()) {
     for (const char* bad_soc : kBadSocs) {
       if (props.ro_product_board == bad_soc) {
+        FML_LOG(INFO) << "Known bad SoC encountered (ro.product.board="
+                      << props.ro_product_board
+                      << "), falling back to OpenGLES.";
         return AndroidVulkanResolutionStatus::kBadSocBoardRejected;
       }
     }
@@ -654,6 +665,8 @@ bool AndroidSurfaceControl::InitializeVulkanOnRasterThreadLocked() {
       shared_vk_->vk_physical_device, &phys_props);
   const flutter::VulkanDriverInfo driver_info(phys_props);
   if (driver_info.IsKnownBadDriver()) {
+    FML_LOG(INFO) << "Known bad Vulkan driver encountered.";
+    driver_info.DumpToLog();
     shared_vk_->last_vulkan_status =
         AndroidVulkanResolutionStatus::kKnownBadVulkanDriver;
     return false;
