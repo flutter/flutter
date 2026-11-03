@@ -428,10 +428,10 @@ class WidgetsApp extends StatefulWidget {
   /// {@template flutter.widgets.WidgetsApp.router}
   /// Unlike the default constructor, which configures a [Navigator] from
   /// [home], [routes], and [onGenerateRoute], this constructor configures a
-  /// [Router]. A [Router] lets the app take part in the platform's routing:
-  /// it parses the route information the platform provides (a deep link, or
-  /// the address bar on the web) and reports the app's own route changes back
-  /// to the platform.
+  /// [Router]. A [Router] gives the app full control over how it takes part
+  /// in the platform's routing: it parses the route information the platform
+  /// provides (a deep link, or the address bar on the web) into app state,
+  /// and reports the app's own route changes back to the platform.
   ///
   /// The [Router] is configured in one of two ways:
   ///
@@ -460,14 +460,18 @@ class WidgetsApp extends StatefulWidget {
   ///    created, so that platform back navigation (such as the Android system
   ///    back button) pops the app's routes.
   ///
+  /// A [routerConfig] gets none of these defaults: the [Router] uses only the
+  /// delegates that the [RouterConfig] provides. For example, if its
+  /// [RouterConfig.backButtonDispatcher] is null, platform back navigation
+  /// does not reach its [RouterConfig.routerDelegate].
+  ///
   /// Every other argument behaves as it does on the default constructor.
-  /// [Navigator] specific arguments, such as [navigatorKey], [home], [routes],
+  /// [Navigator]-specific arguments, such as [navigatorKey], [home], [routes],
   /// [initialRoute], and [onGenerateRoute], are not available here, since
   /// building the navigating widget is the [routerDelegate]'s job.
   ///
   /// See also:
   ///
-  ///  * [WidgetsApp.new], which configures a [Navigator] instead of a [Router].
   ///  * [Router], which describes each of these delegates, how they are
   ///    chained together, and the asynchrony involved.
   ///  * [RouterConfig], which bundles the delegates into a single object.
@@ -477,6 +481,7 @@ class WidgetsApp extends StatefulWidget {
   ///  * <https://docs.flutter.dev/ui/navigation>, an overview of the routing
   ///    options a Flutter app has.
   /// {@endtemplate}
+  ///  * [WidgetsApp.new], which configures a [Navigator] instead of a [Router].
   WidgetsApp.router({
     super.key,
     this.routeInformationProvider,
