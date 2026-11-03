@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:crypto/crypto.dart';
+import 'package:dart_data_home/dart_data_home.dart';
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
@@ -41,17 +42,11 @@ class ExtensionKernelCompiler {
     required this._processManager,
   }) : _depfileService = DepfileService(fileSystem: _fileSystem, logger: _logger);
 
-  /// Environment variable overriding the shared Dart data directory
-  /// (per `package:dart_data_home`).
-  static const String kDartDataHomeEnv = 'DART_DATA_HOME';
-
   /// Environment variable overriding the Pub cache directory.
   static const String kPubCacheEnv = 'PUB_CACHE';
 
   static const String _kLocalAppDataEnv = 'LOCALAPPDATA';
   static const String _kHomeEnv = 'HOME';
-  static const String _kXdgStateHomeEnv = 'XDG_STATE_HOME';
-  static const String _kDartDirectoryName = 'Dart';
   static const String _kExtensionsDataDirectoryName = 'flutter_tool_extensions';
   static const String _kCacheSubdirectoryName = 'cache';
   static const String _kPubDirectoryName = 'Pub';
@@ -243,10 +238,9 @@ class ExtensionKernelCompiler {
 
   (File dillFile, bool isImmutableCache) _resolveDillTarget(DiscoveredProjectExtension extension) {
     if (isPubCacheExtension(extension)) {
-      if (_resolveSharedCacheDirectory() case final Directory cacheDir) {
-        final String sdkKey = _computeSdkAndPackageKey(extension);
-        return (cacheDir.childFile('${extension.name}-$sdkKey.dill'), true);
-      }
+      final Directory cacheDir = _resolveSharedCacheDirectory();
+      final String sdkKey = _computeSdkAndPackageKey(extension);
+      return (cacheDir.childFile('${extension.name}-$sdkKey.dill'), true);
     }
     final File localDill = _fileSystem
         .directory(extension.workspaceRootPath)
@@ -258,38 +252,31 @@ class ExtensionKernelCompiler {
     return (localDill, false);
   }
 
-  /// Resolves the shared cache directory for compiled `.dill` files, matching
-  /// the directory layout of `getDartDataHome('flutter_tool_extensions')` from
-  /// `package:dart_data_home` and `BaseDirectories('Dart').stateHome` from
-  /// `package:cli_util` while using the injected [Platform] and [FileSystem].
-  Directory? _resolveSharedCacheDirectory() {
-    Directory? baseDir;
-    if (_nonEmptyEnv(kDartDataHomeEnv) case final String dartDataHome) {
-      baseDir = _fileSystem.directory(dartDataHome);
-    } else if (_platform.isWindows) {
-      if (_nonEmptyEnv(_kLocalAppDataEnv) case final String localAppData) {
-        baseDir = _fileSystem.directory(localAppData).childDirectory(_kDartDirectoryName);
+  /// Resolves the shared cache directory for compiled `.dill` files via
+  /// [getDartDataHome] from `package:dart_data_home`, falling back to
+  /// `<flutterRoot>/bin/cache/flutter_tool_extensions/cache` if the required OS
+  /// environment variables are unset.
+  Directory _resolveSharedCacheDirectory() {
+    final environment = <String, String>{
+      for (final MapEntry(:String key, :String value) in _platform.environment.entries)
+        if (value.trim().isNotEmpty) key: value.trim(),
+    };
+    try {
+      String dataHomePath = getDartDataHome(
+        _kExtensionsDataDirectoryName,
+        environment: environment,
+      );
+      if (_fileSystem.path.separator == '/') {
+        dataHomePath = dataHomePath.replaceAll(r'\', '/');
       }
-    } else if (_platform.isMacOS) {
-      if (_nonEmptyEnv(_kHomeEnv) case final String home) {
-        baseDir = _fileSystem
-            .directory(home)
-            .childDirectory('Library')
-            .childDirectory('Application Support')
-            .childDirectory(_kDartDirectoryName);
-      }
-    } else if (_nonEmptyEnv(_kXdgStateHomeEnv) case final String xdgStateHome) {
-      baseDir = _fileSystem.directory(xdgStateHome).childDirectory(_kDartDirectoryName);
-    } else if (_nonEmptyEnv(_kHomeEnv) case final String home) {
-      baseDir = _fileSystem
-          .directory(home)
-          .childDirectory('.local')
-          .childDirectory('state')
-          .childDirectory(_kDartDirectoryName);
+      return _fileSystem.directory(dataHomePath).childDirectory(_kCacheSubdirectoryName);
+    } on Exception {
+      return _flutterRoot
+          .childDirectory('bin')
+          .childDirectory('cache')
+          .childDirectory(_kExtensionsDataDirectoryName)
+          .childDirectory(_kCacheSubdirectoryName);
     }
-    return baseDir
-        ?.childDirectory(_kExtensionsDataDirectoryName)
-        .childDirectory(_kCacheSubdirectoryName);
   }
 
   String? _nonEmptyEnv(String key) {

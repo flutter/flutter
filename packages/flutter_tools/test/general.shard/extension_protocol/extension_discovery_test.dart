@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:isolate';
 
+import 'package:dart_data_home/dart_data_home.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -1197,77 +1198,91 @@ services:
       },
     );
 
-    testWithoutContext(
-      'recompiles pub-cache extensions when no shared cache directory resolves',
-      () async {
-        final fs = MemoryFileSystem.test();
-        final artifacts = Artifacts.test(fileSystem: fs);
-        final String dartBinary = artifacts.getArtifactPath(Artifact.engineDartBinary);
-        final File packageConfigFile = fs.file('/workspace/app/.dart_tool/package_config.json')
+    testWithoutContext('falls back to <flutterRoot>/bin/cache/flutter_tool_extensions/cache when OS data home environment variables are unset', () async {
+      final fs = MemoryFileSystem.test();
+      final artifacts = Artifacts.test(fileSystem: fs);
+      final String dartBinary = artifacts.getArtifactPath(Artifact.engineDartBinary);
+      final File packageConfigFile = fs.file('/workspace/app/.dart_tool/package_config.json')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('{"configVersion":2,"packages":[]}');
+
+      DiscoveredProjectExtension extensionAt(String version) {
+        final Directory dir = fs.directory('/pub/hosted/pub.dev/hosted_ext-$version');
+        dir.childFile('bin/hosted_ext.dart')
           ..createSync(recursive: true)
-          ..writeAsStringSync('{"configVersion":2,"packages":[]}');
-        const dillPath =
-            '/workspace/app/.dart_tool/flutter_tools/extensions/hosted_ext/extension.dill';
-
-        DiscoveredProjectExtension extensionAt(String version) {
-          final Directory dir = fs.directory('/pub/hosted/pub.dev/hosted_ext-$version');
-          dir.childFile('bin/hosted_ext.dart')
-            ..createSync(recursive: true)
-            ..writeAsStringSync('void main() {}');
-          return DiscoveredProjectExtension(
+          ..writeAsStringSync('void main() {}');
+        return DiscoveredProjectExtension(
+          name: 'hosted_ext',
+          rootUri: Uri.directory(dir.path),
+          packageUri: Uri.directory(dir.childDirectory('lib').path),
+          packageConfigUri: packageConfigFile.uri,
+          workspaceRootPath: '/workspace/app',
+          config: ExtensionPackageConfig(
             name: 'hosted_ext',
-            rootUri: Uri.directory(dir.path),
-            packageUri: Uri.directory(dir.childDirectory('lib').path),
-            packageConfigUri: packageConfigFile.uri,
-            workspaceRootPath: '/workspace/app',
-            config: ExtensionPackageConfig(
-              name: 'hosted_ext',
-              services: const <String>['diagnostics'],
-            ),
-          );
-        }
-
-        FakeCommand compileCommand(DiscoveredProjectExtension extension, List<int> kernel) {
-          return FakeCommand(
-            command: <String>[
-              dartBinary,
-              'compile',
-              'kernel',
-              '--packages=${packageConfigFile.path}',
-              '--output=$dillPath.tmp',
-              '--depfile=$dillPath.d.tmp',
-              fs.file(extension.entrypointUri).path,
-            ],
-            onRun: (_) => fs.file('$dillPath.tmp')
-              ..createSync(recursive: true)
-              ..writeAsBytesSync(kernel),
-          );
-        }
-
-        final DiscoveredProjectExtension v1 = extensionAt('1.0.0');
-        final DiscoveredProjectExtension v2 = extensionAt('1.1.0');
-        final processManager = FakeProcessManager.list(<FakeCommand>[
-          compileCommand(v1, const <int>[1]),
-          compileCommand(v2, const <int>[2]),
-        ]);
-        final compiler = ExtensionKernelCompiler(
-          artifacts: artifacts,
-          fileSystem: fs,
-          flutterRoot: fs.directory('/flutter'),
-          logger: BufferLogger.test(),
-          platform: FakePlatform(environment: const <String, String>{'PUB_CACHE': '/pub'}),
-          processManager: processManager,
+            services: const <String>['diagnostics'],
+          ),
         );
+      }
 
-        expect(compiler.isPubCacheExtension(v1), isTrue);
-        expect(compiler.resolveDillFile(v1).path, dillPath);
-        await compiler.compile(v1);
-        final Uri upgradedDill = await compiler.compile(v2);
+      final DiscoveredProjectExtension v1 = extensionAt('1.0.0');
+      final DiscoveredProjectExtension v2 = extensionAt('1.1.0');
+      final processManager = FakeProcessManager.empty();
+      final compiler = ExtensionKernelCompiler(
+        artifacts: artifacts,
+        fileSystem: fs,
+        flutterRoot: fs.directory('/flutter'),
+        logger: BufferLogger.test(),
+        platform: FakePlatform(
+          environment: const <String, String>{'PUB_CACHE': '/pub', 'DART_DATA_HOME': '   '},
+        ),
+        processManager: processManager,
+      );
 
-        expect(fs.file(upgradedDill).readAsBytesSync(), const <int>[2]);
-        expect(processManager, hasNoRemainingExpectations);
-      },
-    );
+      final File v1Dill = compiler.resolveDillFile(v1);
+      final File v2Dill = compiler.resolveDillFile(v2);
+      expect(compiler.isPubCacheExtension(v1), isTrue);
+      expect(
+        v1Dill.path,
+        startsWith('/flutter/bin/cache/flutter_tool_extensions/cache/hosted_ext-unknown-'),
+      );
+      expect(
+        v2Dill.path,
+        startsWith('/flutter/bin/cache/flutter_tool_extensions/cache/hosted_ext-unknown-'),
+      );
+      expect(v1Dill.path, isNot(v2Dill.path));
+
+      FakeCommand compileCommand(
+        DiscoveredProjectExtension extension,
+        File targetDill,
+        List<int> kernel,
+      ) {
+        return FakeCommand(
+          command: <String>[
+            dartBinary,
+            'compile',
+            'kernel',
+            '--packages=${packageConfigFile.path}',
+            '--output=${targetDill.path}.tmp',
+            '--depfile=${targetDill.path}.d.tmp',
+            fs.file(extension.entrypointUri).path,
+          ],
+          onRun: (_) => fs.file('${targetDill.path}.tmp')
+            ..createSync(recursive: true)
+            ..writeAsBytesSync(kernel),
+        );
+      }
+
+      processManager.addCommands(<FakeCommand>[
+        compileCommand(v1, v1Dill, const <int>[1]),
+        compileCommand(v2, v2Dill, const <int>[2]),
+      ]);
+
+      await compiler.compile(v1);
+      final Uri upgradedDill = await compiler.compile(v2);
+
+      expect(fs.file(upgradedDill).readAsBytesSync(), const <int>[2]);
+      expect(processManager, hasNoRemainingExpectations);
+    });
 
     testWithoutContext(
       'cleans up temporary files and throws ExtensionCompileException on failure',
@@ -1339,108 +1354,94 @@ services:
       },
     );
 
-    testWithoutContext('resolveDillFile resolves OS default Dart state directories when DART_DATA_HOME is unset', () {
-      DiscoveredProjectExtension extensionOn(FileSystem fs, String pubCacheExtPath) {
-        final Directory dir = fs.directory(pubCacheExtPath);
-        return DiscoveredProjectExtension(
-          name: 'hosted_ext',
-          rootUri: dir.uri,
-          packageUri: dir.childDirectory('lib').uri,
-          packageConfigUri: fs.file('/workspace/app/.dart_tool/package_config.json').uri,
-          workspaceRootPath: '/workspace/app',
-          config: ExtensionPackageConfig(
+    testWithoutContext(
+      'resolveDillFile resolves default getDartDataHome directory when DART_DATA_HOME is unset',
+      () {
+        DiscoveredProjectExtension extensionOn(FileSystem fs, String pubCacheExtPath) {
+          final Directory dir = fs.directory(pubCacheExtPath);
+          return DiscoveredProjectExtension(
             name: 'hosted_ext',
-            services: const <String>['diagnostics'],
-          ),
+            rootUri: dir.uri,
+            packageUri: dir.childDirectory('lib').uri,
+            packageConfigUri: fs.file('/workspace/app/.dart_tool/package_config.json').uri,
+            workspaceRootPath: '/workspace/app',
+            config: ExtensionPackageConfig(
+              name: 'hosted_ext',
+              services: const <String>['diagnostics'],
+            ),
+          );
+        }
+
+        final fs = MemoryFileSystem.test();
+        const defaultEnvironment = <String, String>{
+          'PUB_CACHE': '/pub',
+          'HOME': '/home/test',
+          'LOCALAPPDATA': '/local_app_data',
+        };
+        final String expectedDefaultDataHome = getDartDataHome(
+          'flutter_tool_extensions',
+          environment: defaultEnvironment,
+        ).replaceAll(r'\', '/');
+        final defaultCompiler = ExtensionKernelCompiler(
+          artifacts: Artifacts.test(fileSystem: fs),
+          fileSystem: fs,
+          flutterRoot: fs.directory('/flutter'),
+          logger: BufferLogger.test(),
+          platform: FakePlatform(environment: defaultEnvironment),
+          processManager: FakeProcessManager.empty(),
         );
-      }
+        expect(
+          defaultCompiler
+              .resolveDillFile(extensionOn(fs, '/pub/hosted/pub.dev/hosted_ext-1.0.0'))
+              .path,
+          startsWith('${expectedDefaultDataHome}cache/hosted_ext-'),
+        );
 
-      final linuxFs = MemoryFileSystem.test();
-      final linuxXdgCompiler = ExtensionKernelCompiler(
-        artifacts: Artifacts.test(fileSystem: linuxFs),
-        fileSystem: linuxFs,
-        flutterRoot: linuxFs.directory('/flutter'),
-        logger: BufferLogger.test(),
-        platform: FakePlatform(
-          environment: const <String, String>{
-            'HOME': '/home/test',
-            'XDG_STATE_HOME': '/custom_xdg_state',
-          },
-        ),
-        processManager: FakeProcessManager.empty(),
-      );
-      expect(
-        linuxXdgCompiler
-            .resolveDillFile(
-              extensionOn(linuxFs, '/home/test/.pub-cache/hosted/pub.dev/hosted_ext-1.0.0'),
-            )
-            .path,
-        startsWith('/custom_xdg_state/Dart/flutter_tool_extensions/cache/hosted_ext-'),
-      );
+        const xdgEnvironment = <String, String>{
+          'PUB_CACHE': '/pub',
+          'HOME': '/home/test',
+          'LOCALAPPDATA': '/local_app_data',
+          'XDG_STATE_HOME': '/custom_xdg_state',
+        };
+        final String expectedXdgDataHome = getDartDataHome(
+          'flutter_tool_extensions',
+          environment: xdgEnvironment,
+        ).replaceAll(r'\', '/');
+        final xdgCompiler = ExtensionKernelCompiler(
+          artifacts: Artifacts.test(fileSystem: fs),
+          fileSystem: fs,
+          flutterRoot: fs.directory('/flutter'),
+          logger: BufferLogger.test(),
+          platform: FakePlatform(environment: xdgEnvironment),
+          processManager: FakeProcessManager.empty(),
+        );
+        expect(
+          xdgCompiler.resolveDillFile(extensionOn(fs, '/pub/hosted/pub.dev/hosted_ext-1.0.0')).path,
+          startsWith('${expectedXdgDataHome}cache/hosted_ext-'),
+        );
 
-      final linuxHomeCompiler = ExtensionKernelCompiler(
-        artifacts: Artifacts.test(fileSystem: linuxFs),
-        fileSystem: linuxFs,
-        flutterRoot: linuxFs.directory('/flutter'),
-        logger: BufferLogger.test(),
-        platform: FakePlatform(environment: const <String, String>{'HOME': '/home/test'}),
-        processManager: FakeProcessManager.empty(),
-      );
-      expect(
-        linuxHomeCompiler
-            .resolveDillFile(
-              extensionOn(linuxFs, '/home/test/.pub-cache/hosted/pub.dev/hosted_ext-1.0.0'),
-            )
-            .path,
-        startsWith('/home/test/.local/state/Dart/flutter_tool_extensions/cache/hosted_ext-'),
-      );
-
-      final macosCompiler = ExtensionKernelCompiler(
-        artifacts: Artifacts.test(fileSystem: linuxFs),
-        fileSystem: linuxFs,
-        flutterRoot: linuxFs.directory('/flutter'),
-        logger: BufferLogger.test(),
-        platform: FakePlatform(
-          operatingSystem: 'macos',
-          environment: const <String, String>{'HOME': '/Users/test'},
-        ),
-        processManager: FakeProcessManager.empty(),
-      );
-      expect(
-        macosCompiler
-            .resolveDillFile(
-              extensionOn(linuxFs, '/Users/test/.pub-cache/hosted/pub.dev/hosted_ext-1.0.0'),
-            )
-            .path,
-        startsWith(
-          '/Users/test/Library/Application Support/Dart/flutter_tool_extensions/cache/hosted_ext-',
-        ),
-      );
-
-      final windowsFs = MemoryFileSystem.test(style: FileSystemStyle.windows);
-      final windowsCompiler = ExtensionKernelCompiler(
-        artifacts: Artifacts.test(fileSystem: windowsFs),
-        fileSystem: windowsFs,
-        flutterRoot: windowsFs.directory(r'C:\flutter'),
-        logger: BufferLogger.test(),
-        platform: FakePlatform(
-          operatingSystem: 'windows',
-          environment: const <String, String>{'LOCALAPPDATA': r'C:\Users\test\AppData\Local'},
-        ),
-        processManager: FakeProcessManager.empty(),
-      );
-      expect(
-        windowsCompiler
-            .resolveDillFile(
-              extensionOn(
-                windowsFs,
-                r'C:\Users\test\AppData\Local\Pub\Cache\hosted\pub.dev\hosted_ext-1.0.0',
-              ),
-            )
-            .path,
-        startsWith(r'C:\Users\test\AppData\Local\Dart\flutter_tool_extensions\cache\hosted_ext-'),
-      );
-    });
+        final emptyEnvCompiler = ExtensionKernelCompiler(
+          artifacts: Artifacts.test(fileSystem: fs),
+          fileSystem: fs,
+          flutterRoot: fs.directory('/flutter'),
+          logger: BufferLogger.test(),
+          platform: FakePlatform(),
+          processManager: FakeProcessManager.empty(),
+        );
+        expect(
+          emptyEnvCompiler.isPubCacheExtension(
+            extensionOn(fs, '/pub/hosted/pub.dev/hosted_ext-1.0.0'),
+          ),
+          isFalse,
+        );
+        expect(
+          emptyEnvCompiler
+              .resolveDillFile(extensionOn(fs, '/pub/hosted/pub.dev/hosted_ext-1.0.0'))
+              .path,
+          '/workspace/app/.dart_tool/flutter_tools/extensions/hosted_ext/extension.dill',
+        );
+      },
+    );
 
     testWithoutContext('invalidates cached local kernel when depfile dependency with escaped spaces changes', () async {
       final fs = MemoryFileSystem.test();
