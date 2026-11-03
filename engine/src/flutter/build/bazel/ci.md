@@ -86,18 +86,22 @@ Steps 2 and 4 are scripts of this repository; step 3 runs whatever
   landed two directories above it (`repo_root` of a root), and the tests
   rebuilt the build in a second output root -- outside the bot's cache,
   25 GB under a developer's home.
-- **Bazel's state** -- the output root, bazelisk's download, the disk cache --
-  lives under the checkout's `.bazel_ci/` (ignored by git, in the bot's
-  `builder` cache), not under `out/` (which the recipe clobbers) or the bot's
-  home (which may not outlive the task): a bot's second build of a
-  configuration is incremental. `--config=ci` (the root `.bazelrc`) keeps the
-  output readable in a log; `bazel_ci.py` puts the disk cache under
-  `.bazel_ci/disk_cache` (capped at 40 GB) because a builder file's builds
-  run one after another in one checkout and the flags that tell them apart
-  (asan, unoptimized, dart_debug) reach the exec configuration, whose output
-  directory does not spell them -- without the cache each switch rebuilds the
-  host tools (the first end-to-end run paid 10 minutes for it between
-  `ci/host_debug` and a second `ci/host_debug_unopt`).
+- **Bazel's state** -- the output root, bazelisk's download -- lives, on a
+  bot, in the task's temporary directory (`TMPDIR`, which the recipe engine
+  sets for every step; swarming removes it with the task). Nothing under
+  the checkout outlives a build: the recipe force-mounts the `builder`
+  cache at the start of every build (`repo_util`: `mount_cache('builder',
+  force=True)` clobbers it and downloads a fresh checkout from CAS), and
+  an output root left under the checkout made the next build's clobber
+  take an hour (the first presubmit runs). A developer's state goes under
+  the checkout's `.bazel_ci/` (ignored by git), with a disk cache capped at
+  40 GB, because a developer runs a builder file's builds one after another
+  in one checkout and the flags that tell them apart (asan, unoptimized,
+  dart_debug) reach the exec configuration, whose output directory does
+  not spell them -- without the cache each switch rebuilds the host tools
+  (10 minutes between `ci/host_debug` and a second `ci/host_debug_unopt`
+  on 10-31). `BAZEL_CI_HOME` overrides the location. `--config=ci` (the
+  root `.bazelrc`) keeps the output readable in a log.
 - **The install runs once per build.** The edge has no inputs ninja could
   compare, so `tools/gn --bazel` removes the previous run's
   `bazel_install.stamp` when it writes the directory; a second `ninja` in the
@@ -187,11 +191,12 @@ the test for real, and so does the command from `engine/src`.
   drone has the installed directory, laid out as GN lays it, and not the
   Bazel outputs, so the Bazel builds keep their tests local to the
   builder's drone.
-- No remote cache and no remote execution. The bot builds from its `.bazel_ci`
-  output root: incremental when the bot has built the configuration before,
-  from scratch otherwise (the first `ci/host_debug_unopt` on a fresh 32-core
-  bot: the wrapped Dart SDK build alone is 15–25 minutes; the whole build and
-  its tests on the order of two hours). Two timeouts apply: the target's in
+- No remote cache and no remote execution, and no state between builds
+  (the recipe clobbers the checkout; a named cache for Bazel's output root
+  is an infra change, below): every build is from scratch (the first
+  `ci/host_debug_unopt` on a fresh 32-core bot: the wrapped Dart SDK build
+  alone is 15–25 minutes; the whole build and its tests on the order of
+  two hours). Two timeouts apply: the target's in
   `.ci.yaml` (the orchestrator's; 240 for the switched targets) and each
   build's own `timeout` key in the builder file, which the recipe gives the
   drone (`shard_util`; 60 minutes when the key is absent) -- the Bazel
@@ -226,12 +231,15 @@ simpler, faster and better reported:
    uploader), so that every test case is a result in LUCI rather than a line
    in a step log, with history, flake detection and the tree-closing rules
    that come with it. Failed tests' logs stop being copied by hand.
-3. **bazelisk and Bazel from the recipe's dependencies.** `flutter_deps`
-   provides tools by CIPD package (`open_jdk`, `goldctl`, ...); `bazelisk`
-   joins them, and Bazel's own release is fetched once into a named cache
-   rather than per checkout, with `BAZELISK_HOME` and `--output_user_root` set
-   by the recipe to named caches the infra sizes and evicts (today they are
-   directories of the checkout cache the scripts chose).
+3. **bazelisk and Bazel from the recipe's dependencies, and a named cache
+   for the output root.** `flutter_deps` provides tools by CIPD package
+   (`open_jdk`, `goldctl`, ...); `bazelisk` joins them, and Bazel's own
+   release is fetched once into a named cache rather than per task, with
+   `BAZELISK_HOME` and `--output_user_root` set by the recipe to named
+   caches the infra sizes and evicts -- the one place on a bot that
+   outlives a build, which the recipe's clobber of the `builder` cache
+   today denies to anything under the checkout. With it a bot's second
+   build of a configuration is incremental; today every build is cold.
 4. **A remote cache, and later remote execution.** `--remote_cache` against a
    GCS bucket or a RBE CAS, with `--google_default_credentials` under the
    bot's service account, makes a fresh bot's build mostly a download and

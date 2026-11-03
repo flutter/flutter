@@ -15,6 +15,7 @@ import os
 import sys
 import tempfile
 import unittest
+import unittest.mock
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import bazel_ci  # pylint: disable=wrong-import-position
@@ -219,6 +220,39 @@ class BuildDirectoryTest(unittest.TestCase):
     os.makedirs(out_dir)
     self.assertEqual(bazel_ci.run_install(out_dir), 1)
     self.assertEqual(bazel_ci.main(['bazel_ci.py']), 2)
+
+  def test_a_bots_state_is_in_the_tasks_temporary_directory(self):
+    # The recipe clobbers the builder cache (the checkout) at the start of
+    # every build: Bazel's state goes where swarming cleans up after the
+    # task, and there is no disk cache to keep.
+    root = os.path.join(self.tmp.name, 'checkout')
+    out_dir = os.path.join(self.engine_src, 'out', 'ci', 'host_debug_unopt')
+    with unittest.mock.patch.dict(
+        os.environ,
+        {'LUCI_CONTEXT': '/b/s/w/ir/tmp/t/luci_context.json', 'TMPDIR': '/b/s/w/ir/tmp/t'}):
+      bazel_ci.write_build_directory(self.engine_src, HOST_DEBUG_UNOPT, out_dir, '/tools/bazelisk')
+      description = bazel_ci.read_build_directory(out_dir)
+    self.assertEqual(
+        description['startup_options'], ['--output_user_root=/b/s/w/ir/tmp/t/bazel_ci/output']
+    )
+    self.assertEqual(description['build_options'], [])
+    self.assertEqual(
+        description['environment'], {'BAZELISK_HOME': '/b/s/w/ir/tmp/t/bazel_ci/bazelisk'}
+    )
+    with unittest.mock.patch.dict(os.environ,
+                                  {'LUCI_CONTEXT': '/b/s/w/ir/tmp/t/luci_context.json'}):
+      os.environ.pop('TMPDIR', None)
+      self.assertEqual(bazel_ci.bazel_home(self.engine_src), '/b/s/w/ir/tmp/t/bazel_ci')
+    with unittest.mock.patch.dict(os.environ, {'BAZEL_CI_HOME': '/elsewhere'}):
+      self.assertEqual(bazel_ci.bazel_home(self.engine_src), '/elsewhere')
+    # A developer: under the checkout, with the disk cache.
+    with unittest.mock.patch.dict(os.environ):
+      os.environ.pop('LUCI_CONTEXT', None)
+      os.environ.pop('BAZEL_CI_HOME', None)
+      self.assertEqual(bazel_ci.bazel_home(self.engine_src), f'{root}/.bazel_ci')
+      self.assertEqual(
+          bazel_ci.build_options(self.engine_src)[0], f'--disk_cache={root}/.bazel_ci/disk_cache'
+      )
 
   def test_shell_quoting_of_a_path_with_a_space(self):
     self.assertEqual(bazel_ci.shell_quote('/a b/c'), "'/a b/c'")
