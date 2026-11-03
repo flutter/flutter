@@ -393,7 +393,15 @@ export FLUTTER_ROOT="$root"
 # in by `cache` and `cache_files`.
 mkdir -p "$root/bin/cache"
 {pub_cache_env}{tool_env}{browser_env}{tools_env}{display_env}{writable}cd "{package}"
-{run}"$root/{dart}" --packages="$root/{runner_config}" "$root/{runner}" --precompiled="$PWD" {args} "{test}" "$@"
+# The runner's JSON reporter to Bazel's undeclared outputs
+# (test.outputs/test_results.json), as `dart test --file-reporter=json:`
+# writes it, for dev/bots' ResultDB reporting of a shard under Bazel
+# (test.dart --bazel). An array that may be empty, as bash 3.2 allows it.
+results=()
+if [ -n "${{TEST_UNDECLARED_OUTPUTS_DIR:-}}" ]; then
+  results=("--file-reporter=json:$TEST_UNDECLARED_OUTPUTS_DIR/test_results.json")
+fi
+{run}"$root/{dart}" --packages="$root/{runner_config}" "$root/{runner}" --precompiled="$PWD" {args} ${{results[@]+"${{results[@]}}"}} "{test}" "$@"
 """.format(
             tools_env = tools_env,
             display_env = display_env,
