@@ -241,9 +241,19 @@ def bazel_environment(engine_src):
   return {'BAZELISK_HOME': os.path.join(bazel_home(engine_src), 'bazelisk')}
 
 
+# How long a bot's Bazel server outlives its last command. The recipe's
+# process cleanup does not know the server (a detached JVM of several
+# gigabytes), which would otherwise idle for hours into the bot's next
+# task; the steps of one build (install, then the tests) are minutes apart.
+BOT_SERVER_IDLE_SECS = 300
+
+
 def startup_options(engine_src):
-  """Bazel's startup options: the output root under the checkout's .bazel_ci."""
-  return ['--output_user_root=' + os.path.join(bazel_home(engine_src), 'output')]
+  """Bazel's startup options: the output root under bazel_home; a bot's server idle limit."""
+  options = ['--output_user_root=' + os.path.join(bazel_home(engine_src), 'output')]
+  if on_bot():
+    options.append(f'--max_idle_secs={BOT_SERVER_IDLE_SECS}')
+  return options
 
 
 # The cap on the disk cache under .bazel_ci (Bazel's idle server collects
