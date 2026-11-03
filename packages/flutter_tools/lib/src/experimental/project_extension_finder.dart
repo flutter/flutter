@@ -216,6 +216,9 @@ class ProjectExtensionFinder {
     );
     final rawExtensions = <({String package, Uri rootUri, Uri packageUri, Object? config})>[];
     for (final Package pkg in packageConfig.packages) {
+      if (!directDependencies.contains(pkg.name)) {
+        continue;
+      }
       final Directory rootDir = _fileSystem.directory(pkg.root);
       final File configFile = rootDir
           .childDirectory('extension')
@@ -272,8 +275,15 @@ class ProjectExtensionFinder {
         continue;
       }
       try {
+        final stringKeyedConfig = <String, Object?>{};
+        for (final MapEntry(:Object? key, :Object? value) in config.entries) {
+          if (key is! String) {
+            throw const FormatException('config.yaml keys must be strings.');
+          }
+          stringKeyedConfig[key] = value;
+        }
         final parsedConfig = ExtensionPackageConfig.fromMap(
-          config.cast<String, Object?>(),
+          stringKeyedConfig,
           packageName: package,
         );
         seenNames.add(package);

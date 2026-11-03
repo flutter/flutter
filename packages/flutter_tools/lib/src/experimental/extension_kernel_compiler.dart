@@ -69,9 +69,8 @@ class ExtensionKernelCompiler {
       );
     }
 
-    final File dillFile = resolveDillFile(extension);
+    final (File dillFile, bool isImmutableCache) = _resolveDillTarget(extension);
     final File depFile = _fileSystem.file('${dillFile.path}.d');
-    final bool isImmutableCache = isPubCacheExtension(extension);
 
     if (_isCachedDillValid(
       depFile: depFile,
@@ -124,11 +123,12 @@ class ExtensionKernelCompiler {
           );
         }
 
-        if (!tempDillFile.existsSync()) {
+        if (!tempDillFile.existsSync() || tempDillFile.lengthSync() == 0) {
+          _tryDeleteFile(tempDillFile);
           _tryDeleteFile(tempDepFile);
           throw ExtensionCompileException(
             'Failed to compile extension "${extension.name}" to kernel: '
-            'compiler exited 0 but did not produce "${tempDillFile.path}".',
+            'compiler exited 0 but did not produce a non-empty "${tempDillFile.path}".',
           );
         }
 
@@ -183,51 +183,61 @@ class ExtensionKernelCompiler {
   }
 
   /// Determines whether [extension]'s package root resides inside `$PUB_CACHE`
-  /// (checking [kPubCacheEnv] first, then standard `.pub-cache` and Windows
-  /// `Pub/Cache` directory segments).
+  /// (checking [kPubCacheEnv] first, then the platform default Pub cache path).
   @visibleForTesting
   bool isPubCacheExtension(DiscoveredProjectExtension extension) {
+    final Directory? pubCacheDir = _resolvePubCacheDirectory();
+    if (pubCacheDir == null) {
+      return false;
+    }
     final String rootPath = _fileSystem.path.normalize(
       _fileSystem.directory(extension.rootUri).absolute.path,
     );
-    final String? pubCacheEnv = _nonEmptyEnv(kPubCacheEnv);
-    if (pubCacheEnv != null) {
-      final String normalizedPubCache = _fileSystem.path.normalize(
-        _fileSystem.directory(pubCacheEnv).absolute.path,
-      );
-      if (_fileSystem.path.isWithin(normalizedPubCache, rootPath) ||
-          _fileSystem.path.equals(normalizedPubCache, rootPath)) {
-        return true;
+    final String normalizedPubCache = _fileSystem.path.normalize(pubCacheDir.absolute.path);
+    return _fileSystem.path.isWithin(normalizedPubCache, rootPath) ||
+        _fileSystem.path.equals(normalizedPubCache, rootPath);
+  }
+
+  Directory? _resolvePubCacheDirectory() {
+    if (_nonEmptyEnv(kPubCacheEnv) case final String pubCacheEnv) {
+      return _fileSystem.directory(pubCacheEnv);
+    }
+    if (_platform.isWindows) {
+      final String? localAppData = _nonEmptyEnv('LOCALAPPDATA') ?? _nonEmptyEnv('APPDATA');
+      if (localAppData != null) {
+        return _fileSystem.directory(localAppData).childDirectory('Pub').childDirectory('Cache');
+      }
+    } else {
+      final String? home = _nonEmptyEnv('HOME');
+      if (home != null) {
+        return _fileSystem.directory(home).childDirectory('.pub-cache');
       }
     }
-    final List<String> segments = _fileSystem.path.split(rootPath);
-    if (segments.contains('.pub-cache')) {
-      return true;
-    }
-    for (var i = 0; i < segments.length - 1; i++) {
-      if (segments[i] == 'Pub' && segments[i + 1] == 'Cache') {
-        return true;
-      }
-    }
-    return false;
+    return null;
   }
 
   /// Resolves the target `.dill` cache [File] for [extension].
   @visibleForTesting
   File resolveDillFile(DiscoveredProjectExtension extension) {
+    final (File dillFile, _) = _resolveDillTarget(extension);
+    return dillFile;
+  }
+
+  (File dillFile, bool isImmutableCache) _resolveDillTarget(DiscoveredProjectExtension extension) {
     if (isPubCacheExtension(extension)) {
       if (_resolveSharedCacheDirectory() case final Directory cacheDir) {
         final String sdkKey = _computeSdkAndPackageKey(extension);
-        return cacheDir.childFile('${extension.name}-$sdkKey.dill');
+        return (cacheDir.childFile('${extension.name}-$sdkKey.dill'), true);
       }
     }
-    return _fileSystem
+    final File localDill = _fileSystem
         .directory(extension.workspaceRootPath)
         .childDirectory('.dart_tool')
         .childDirectory('flutter_tools')
         .childDirectory('extensions')
         .childDirectory(extension.name)
         .childFile('extension.dill');
+    return (localDill, false);
   }
 
   Directory? _resolveSharedCacheDirectory() {
@@ -287,7 +297,7 @@ class ExtensionKernelCompiler {
     required File entrypointFile,
     required File packageConfigFile,
   }) {
-    if (!dillFile.existsSync() || !depFile.existsSync()) {
+    if (!dillFile.existsSync() || !depFile.existsSync() || dillFile.lengthSync() == 0) {
       return true;
     }
 

@@ -658,12 +658,96 @@ services:
         expect(discovered.map((DiscoveredProjectExtension e) => e.name), const <String>[
           'direct_ext',
         ]);
-        expect(
-          logger.traceText,
-          contains('ignoring transitive extension package "transitive_ext"'),
-        );
       },
     );
+
+    testWithoutContext('logs warning and skips extension when config.yaml has non-string keys or invalid field types', () async {
+      final fs = MemoryFileSystem.test();
+      final logger = BufferLogger.test();
+      final Directory projectDir = fs.directory('/workspace/app')..createSync(recursive: true);
+      projectDir.childFile('pubspec.yaml').writeAsStringSync('''
+name: app
+dependencies:
+  non_string_key_ext: ^1.0.0
+  invalid_type_ext: ^1.0.0
+  valid_ext: ^1.0.0
+''');
+
+      final Directory nonStringKeyDir = fs.directory('/workspace/non_string_key_ext')
+        ..createSync(recursive: true);
+      nonStringKeyDir.childFile('extension/flutter_tools/config.yaml')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('''
+name: non_string_key_ext
+123: invalid_key
+services:
+  - diagnostics
+''');
+
+      final Directory invalidTypeDir = fs.directory('/workspace/invalid_type_ext')
+        ..createSync(recursive: true);
+      invalidTypeDir.childFile('extension/flutter_tools/config.yaml')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('''
+name: invalid_type_ext
+services: 42
+''');
+
+      final Directory validDir = fs.directory('/workspace/valid_ext')..createSync(recursive: true);
+      validDir.childFile('extension/flutter_tools/config.yaml')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('''
+name: valid_ext
+services:
+  - diagnostics
+''');
+
+      projectDir.childFile('.dart_tool/package_config.json')
+        ..createSync(recursive: true)
+        ..writeAsStringSync(
+          jsonEncode(<String, Object?>{
+            'configVersion': 2,
+            'packages': <Map<String, Object?>>[
+              <String, Object?>{'name': 'app', 'rootUri': '../', 'packageUri': 'lib/'},
+              <String, Object?>{
+                'name': 'non_string_key_ext',
+                'rootUri': '../../non_string_key_ext',
+                'packageUri': 'lib/',
+              },
+              <String, Object?>{
+                'name': 'invalid_type_ext',
+                'rootUri': '../../invalid_type_ext',
+                'packageUri': 'lib/',
+              },
+              <String, Object?>{
+                'name': 'valid_ext',
+                'rootUri': '../../valid_ext',
+                'packageUri': 'lib/',
+              },
+            ],
+          }),
+        );
+
+      final finder = ProjectExtensionFinder(fileSystem: fs, logger: logger);
+      final List<DiscoveredProjectExtension> discovered = await finder.findProjectExtensions(
+        startDirectory: projectDir,
+      );
+
+      expect(discovered.map((DiscoveredProjectExtension e) => e.name), const <String>['valid_ext']);
+      expect(
+        logger.warningText,
+        contains(
+          'Skipping extension "non_string_key_ext": invalid extension/flutter_tools/config.yaml '
+          '(config.yaml keys must be strings.).',
+        ),
+      );
+      expect(
+        logger.warningText,
+        contains(
+          'Skipping extension "invalid_type_ext": invalid extension/flutter_tools/config.yaml',
+        ),
+      );
+    });
 
     testWithoutContext(
       'includes direct dependencies from Pub workspace root pubspec.yaml',
@@ -763,6 +847,19 @@ services:
           ..createSync(recursive: true)
           ..writeAsStringSync('void main(List<String> args, Object? message) {}');
 
+        final Directory transitiveDir = tempDir.childDirectory('transitive_ext')
+          ..createSync(recursive: true);
+        transitiveDir.childFile('extension/flutter_tools/config.yaml')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('''
+name: transitive_ext
+services:
+  - diagnostics
+''');
+        transitiveDir.childFile('bin/transitive_ext.dart')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('void main(List<String> args, Object? message) {}');
+
         projectDir.childFile('.dart_tool/package_config.json')
           ..createSync(recursive: true)
           ..writeAsStringSync(
@@ -773,6 +870,11 @@ services:
                 <String, Object?>{
                   'name': 'local_ext',
                   'rootUri': '../../local_ext',
+                  'packageUri': 'lib/',
+                },
+                <String, Object?>{
+                  'name': 'transitive_ext',
+                  'rootUri': '../../transitive_ext',
                   'packageUri': 'lib/',
                 },
               ],
@@ -787,6 +889,10 @@ services:
         expect(discovered, hasLength(1));
         expect(discovered.single.name, 'local_ext');
         expect(discovered.single.config.services, const <String>{'diagnostics'});
+        expect(
+          logger.traceText,
+          contains('ignoring transitive extension package "transitive_ext"'),
+        );
       },
     );
   });
@@ -866,6 +972,23 @@ services:
             dill.setLastModifiedSync(DateTime.utc(2026, 1, 1, 3));
           },
         ),
+        FakeCommand(
+          command: <String>[
+            dartBinary,
+            'compile',
+            'kernel',
+            '--packages=${packageConfigFile.path}',
+            '--output=$expectedTempDillPath',
+            '--depfile=$expectedTempDepfilePath',
+            entrypointFile.path,
+          ],
+          onRun: (_) {
+            final File dill = fs.file(expectedTempDillPath)
+              ..createSync(recursive: true)
+              ..writeAsBytesSync(<int>[7, 8, 9]);
+            dill.setLastModifiedSync(DateTime.utc(2026, 1, 1, 5));
+          },
+        ),
       ]);
 
       final compiler = ExtensionKernelCompiler(
@@ -898,7 +1021,92 @@ services:
       helperFile.setLastModifiedSync(DateTime.utc(2026, 1, 1, 2));
       final Uri recompiledDillUri = await compiler.compile(extension);
       expect(fs.file(recompiledDillUri).readAsBytesSync(), const <int>[4, 5, 6]);
+
+      // 4. Truncating the .dill file to 0 bytes invalidates the cache even with a fresh timestamp.
+      fs.file(expectedDillPath)
+        ..writeAsBytesSync(const <int>[])
+        ..setLastModifiedSync(DateTime.utc(2026, 1, 1, 4));
+      final Uri emptyRecompiledDillUri = await compiler.compile(extension);
+      expect(fs.file(emptyRecompiledDillUri).readAsBytesSync(), const <int>[7, 8, 9]);
       expect(processManager, hasNoRemainingExpectations);
+    });
+
+    testWithoutContext('isPubCacheExtension resolves default pub-cache directory and does not misclassify local paths', () {
+      final posixFs = MemoryFileSystem.test();
+      final posixCompiler = ExtensionKernelCompiler(
+        artifacts: Artifacts.test(fileSystem: posixFs),
+        fileSystem: posixFs,
+        flutterRoot: posixFs.directory('/flutter'),
+        logger: BufferLogger.test(),
+        platform: FakePlatform(environment: const <String, String>{'HOME': '/Users/user'}),
+        processManager: FakeProcessManager.empty(),
+      );
+
+      DiscoveredProjectExtension extensionAt(FileSystem fs, String rootPath) {
+        final Directory dir = fs.directory(rootPath);
+        return DiscoveredProjectExtension(
+          name: 'my_ext',
+          rootUri: dir.uri,
+          packageUri: dir.childDirectory('lib').uri,
+          packageConfigUri: fs.file('/workspace/app/.dart_tool/package_config.json').uri,
+          workspaceRootPath: '/workspace/app',
+          config: ExtensionPackageConfig(name: 'my_ext', services: const <String>['diagnostics']),
+        );
+      }
+
+      expect(
+        posixCompiler.isPubCacheExtension(
+          extensionAt(posixFs, '/Users/user/.pub-cache/hosted/pub.dev/my_ext-1.0.0'),
+        ),
+        isTrue,
+      );
+      expect(
+        posixCompiler.isPubCacheExtension(
+          extensionAt(posixFs, '/Users/user/Projects/.pub-cache-test/my_ext'),
+        ),
+        isFalse,
+      );
+      expect(
+        posixCompiler.isPubCacheExtension(
+          extensionAt(posixFs, '/Users/user/Projects/Pub/Cache/my_ext'),
+        ),
+        isFalse,
+      );
+      expect(
+        posixCompiler.isPubCacheExtension(
+          extensionAt(posixFs, '/Users/user/Projects/.pub-cache/my_ext'),
+        ),
+        isFalse,
+      );
+
+      final windowsFs = MemoryFileSystem.test(style: FileSystemStyle.windows);
+      final windowsCompiler = ExtensionKernelCompiler(
+        artifacts: Artifacts.test(fileSystem: windowsFs),
+        fileSystem: windowsFs,
+        flutterRoot: windowsFs.directory(r'C:\flutter'),
+        logger: BufferLogger.test(),
+        platform: FakePlatform(
+          operatingSystem: 'windows',
+          environment: const <String, String>{'LOCALAPPDATA': r'C:\Users\user\AppData\Local'},
+        ),
+        processManager: FakeProcessManager.empty(),
+      );
+
+      expect(
+        windowsCompiler.isPubCacheExtension(
+          extensionAt(
+            windowsFs,
+            r'C:\Users\user\AppData\Local\Pub\Cache\hosted\pub.dev\my_ext-1.0.0',
+          ),
+        ),
+        isTrue,
+      );
+      expect(
+        windowsCompiler.isPubCacheExtension(
+          extensionAt(windowsFs, r'C:\Users\user\Projects\Pub\Cache\my_ext'),
+        ),
+        isFalse,
+      );
     });
 
     testWithoutContext(
@@ -985,6 +1193,78 @@ services:
         final Uri dill2 = await compiler.compile(extension);
         expect(dill2, targetDill.uri);
         expect(compileInvocations, 1);
+        expect(processManager, hasNoRemainingExpectations);
+      },
+    );
+
+    testWithoutContext(
+      'recompiles pub-cache extensions when no shared cache directory resolves',
+      () async {
+        final fs = MemoryFileSystem.test();
+        final artifacts = Artifacts.test(fileSystem: fs);
+        final String dartBinary = artifacts.getArtifactPath(Artifact.engineDartBinary);
+        final File packageConfigFile = fs.file('/workspace/app/.dart_tool/package_config.json')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('{"configVersion":2,"packages":[]}');
+        const dillPath =
+            '/workspace/app/.dart_tool/flutter_tools/extensions/hosted_ext/extension.dill';
+
+        DiscoveredProjectExtension extensionAt(String version) {
+          final Directory dir = fs.directory('/pub/hosted/pub.dev/hosted_ext-$version');
+          dir.childFile('bin/hosted_ext.dart')
+            ..createSync(recursive: true)
+            ..writeAsStringSync('void main() {}');
+          return DiscoveredProjectExtension(
+            name: 'hosted_ext',
+            rootUri: Uri.directory(dir.path),
+            packageUri: Uri.directory(dir.childDirectory('lib').path),
+            packageConfigUri: packageConfigFile.uri,
+            workspaceRootPath: '/workspace/app',
+            config: ExtensionPackageConfig(
+              name: 'hosted_ext',
+              services: const <String>['diagnostics'],
+            ),
+          );
+        }
+
+        FakeCommand compileCommand(DiscoveredProjectExtension extension, List<int> kernel) {
+          return FakeCommand(
+            command: <String>[
+              dartBinary,
+              'compile',
+              'kernel',
+              '--packages=${packageConfigFile.path}',
+              '--output=$dillPath.tmp',
+              '--depfile=$dillPath.d.tmp',
+              fs.file(extension.entrypointUri).path,
+            ],
+            onRun: (_) => fs.file('$dillPath.tmp')
+              ..createSync(recursive: true)
+              ..writeAsBytesSync(kernel),
+          );
+        }
+
+        final DiscoveredProjectExtension v1 = extensionAt('1.0.0');
+        final DiscoveredProjectExtension v2 = extensionAt('1.1.0');
+        final processManager = FakeProcessManager.list(<FakeCommand>[
+          compileCommand(v1, const <int>[1]),
+          compileCommand(v2, const <int>[2]),
+        ]);
+        final compiler = ExtensionKernelCompiler(
+          artifacts: artifacts,
+          fileSystem: fs,
+          flutterRoot: fs.directory('/flutter'),
+          logger: BufferLogger.test(),
+          platform: FakePlatform(environment: const <String, String>{'PUB_CACHE': '/pub'}),
+          processManager: processManager,
+        );
+
+        expect(compiler.isPubCacheExtension(v1), isTrue);
+        expect(compiler.resolveDillFile(v1).path, dillPath);
+        await compiler.compile(v1);
+        final Uri upgradedDill = await compiler.compile(v2);
+
+        expect(fs.file(upgradedDill).readAsBytesSync(), const <int>[2]);
         expect(processManager, hasNoRemainingExpectations);
       },
     );
