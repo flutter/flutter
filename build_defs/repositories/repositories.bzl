@@ -254,7 +254,7 @@ def _synced_repository_impl(rctx):
     if not source.exists or not source.is_dir:
         fail(
             "synced_repository(%s): %s does not exist. It is populated by " % (rctx.name, source) +
-            "`gclient sync`; run it from the repository root (see DEPS).",
+            (rctx.attr.missing_hint or "`gclient sync`; run it from the repository root (see DEPS)") + ".",
         )
 
     _link_tree(rctx, source, overlaying, rctx.attr.exclude, rctx.attr.links)
@@ -322,6 +322,9 @@ synced_repository = repository_rule(
         "links": attr.string_dict(
             doc = "Directories of other repositories put at paths of the tree (path relative to `path` " +
                   "to the directory's label), in place of the synced tree's entry (see _link_tree).",
+        ),
+        "missing_hint": attr.string(
+            doc = "What populates `path`, for the error when it is absent; `gclient sync` by default.",
         ),
     },
     # The repository only symlinks into the checkout, so it must be re-created

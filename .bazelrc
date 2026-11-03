@@ -88,6 +88,17 @@ common:ci --color=no --curses=no --show_timestamps --show_progress_rate_limit=30
 build:ci --verbose_failures
 test:ci --test_output=errors --keep_going --test_summary=short
 
+# The prebuilt engine for the framework's and the tool's tests: the
+# artifacts the flutter tool downloaded into bin/cache (`bin/flutter
+# precache`; build_defs/repositories/flutter_bin_cache.bzl) in place of the
+# engine the tree builds -- //build_defs/engine's aliases take the prebuilt
+# side, and the host's Dart SDK repository is bin/cache/dart-sdk. For a
+# checkout without the engine's dependencies (no `gclient sync`), and for
+# one that has them but would rather not build the engine for a framework
+# test run.
+build:prebuilt_engine --//build_defs/engine:source=prebuilt
+build:prebuilt_engine --repo_env=FLUTTER_BAZEL_PREBUILT_ENGINE=1
+
 # The builders' configurations (`--config=host_debug`, ...), generated from
 # ci/builders/linux_*.json by tools/gn_to_bazel.
 import %workspace%/engine/src/flutter/ci/builders/configs.bazelrc

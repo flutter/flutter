@@ -105,18 +105,30 @@ _CACHE_FILES = {
 # the packages under FLUTTER_ROOT/packages, the engine's sky_engine package
 # under bin/cache/pkg (the analyzer reads dart:ui from it) -- and a pub cache
 # of the hosted packages they reach.
+# The tree's package is a directory artifact (one entry of `cache_files`);
+# bin/cache's, under --config=prebuilt_engine, is its files, laid through
+# `cache` (flutter_bin_cache.bzl).
 _PUB_FILES = {
     "//engine/src/flutter/sky/packages/sky_engine:package": "pkg/sky_engine",
 }
 
-_PUB_CACHE_FILES = _CACHE_FILES | _PUB_FILES | {
+_PREBUILT_PUB_CACHE = {
+    "@flutter_bin_cache//pkg/sky_engine:package": "pkg/sky_engine",
+}
+
+_PUB_CACHE_FILES_BASE = _CACHE_FILES | {
     "//bin/internal:flutter_version_json": "flutter.version.json",
 }
+
+_PUB_CACHE_FILES = select({
+    "//build_defs/engine:prebuilt": _PUB_CACHE_FILES_BASE,
+    "//conditions:default": _PUB_CACHE_FILES_BASE | _PUB_FILES,
+})
 
 # The same with the engine's revision in the stamps and the version file,
 # for a facsimile that carries the engine's directories: the revision the
 # build stamps into them.
-_VERSIONED_CACHE_FILES = _PUB_FILES | {
+_VERSIONED_CACHE_FILES = {
     "//bin/internal:versioned_engine_stamp": "engine.stamp",
     "//bin/internal:versioned_engine_stamp_json": "engine_stamp.json",
     "//bin/internal:versioned_engine_stamp_stamp": "engine_stamp.stamp",
@@ -124,7 +136,12 @@ _VERSIONED_CACHE_FILES = _PUB_FILES | {
 }
 
 # The Gradle wrapper `flutter create` copies into an Android project.
-_PUB_CACHE = _CACHE | {"@gradle_wrapper//:wrapper": "artifacts/gradle_wrapper"}
+_PUB_CACHE_BASE = _CACHE | {"@gradle_wrapper//:wrapper": "artifacts/gradle_wrapper"}
+
+_PUB_CACHE = select({
+    "//build_defs/engine:prebuilt": _PUB_CACHE_BASE | _PREBUILT_PUB_CACHE,
+    "//conditions:default": _PUB_CACHE_BASE,
+})
 
 _SDK_PACKAGES = [
     "//:pubspec.lock",
@@ -264,13 +281,28 @@ _IOS_USB_CACHE = {
     for artifact in IOS_USB_ARTIFACTS
 } if HOST_OS == "mac" else {}
 
-_TOOL_CACHE_FILES = _VERSIONED_CACHE_FILES | {
-    ":flutter_tools_snapshot": "flutter_tools.snapshot",
+# The engine's directories in the facsimile's cache: the tree's archive
+# directories (build/archives; tree artifacts, one path each) -- or, under
+# --config=prebuilt_engine, bin/cache's own files at their paths
+# (flutter_bin_cache.bzl; laid through `cache` with no directory).
+_TREE_ENGINE_CACHE_FILES = {
     "//engine/src/flutter/build/archives:host_engine_directory": "artifacts/engine/" + _HOST_ENGINE,
     "//engine/src/flutter/build/archives:host_engine_profile_directory": "artifacts/engine/" + _HOST_ENGINE + "-profile",
     "//engine/src/flutter/build/archives:host_engine_release_directory": "artifacts/engine/" + _HOST_ENGINE + "-release",
     "//engine/src/flutter/build/archives:common_engine_directory": "artifacts/engine/common",
     "//engine/src/flutter/web_sdk:web_sdk_directory": "flutter_web_sdk",
+}
+
+_PREBUILT_ENGINE_CACHE = {
+    "@flutter_bin_cache//:host_engine": "",
+    "@flutter_bin_cache//:host_engine_profile": "",
+    "@flutter_bin_cache//:host_engine_release": "",
+    "@flutter_bin_cache//:common_engine": "",
+    "@flutter_bin_cache//:web_sdk": "",
+}
+
+_TOOL_CACHE_FILES_BASE = _VERSIONED_CACHE_FILES | {
+    ":flutter_tools_snapshot": "flutter_tools.snapshot",
     "//bin/internal:flutter_sdk_stamp": "flutter_sdk.stamp",
     "//bin/internal:flutter_web_sdk_stamp": "flutter_web_sdk.stamp",
     "//bin/internal:font_subset_stamp": "font-subset.stamp",
@@ -278,10 +310,22 @@ _TOOL_CACHE_FILES = _VERSIONED_CACHE_FILES | {
     "//bin/internal:gradle_wrapper_stamp": "gradle_wrapper.stamp",
 } | _HOST_SDK_STAMP | _IOS_USB_STAMPS
 
-_TOOL_CACHE = _PUB_CACHE | {
+# The facsimile's single files: with the engine's directories from the tree,
+# or without them under the prebuilt engine (whose files `cache` lays).
+_TOOL_CACHE_FILES = select({
+    "//build_defs/engine:prebuilt": _TOOL_CACHE_FILES_BASE,
+    "//conditions:default": _TOOL_CACHE_FILES_BASE | _TREE_ENGINE_CACHE_FILES | _PUB_FILES,
+})
+
+_TOOL_CACHE_BASE = _PUB_CACHE_BASE | {
     "@material_fonts//:fonts": "artifacts/material_fonts",
-    "//engine/src/flutter/lib/gpu:dart_sources": "pkg/flutter_gpu",
+    "//build_defs/engine:flutter_gpu": "pkg/flutter_gpu",
 } | _IOS_USB_CACHE
+
+_TOOL_CACHE = select({
+    "//build_defs/engine:prebuilt": _TOOL_CACHE_BASE | _PREBUILT_PUB_CACHE | _PREBUILT_ENGINE_CACHE,
+    "//conditions:default": _TOOL_CACHE_BASE,
+})
 
 # The apple shard's facsimile adds the iOS engine artifacts on a Mac host
 # (`flutter precache --ios`: artifacts/engine/ios{,-profile,-release} --
@@ -289,12 +333,19 @@ _TOOL_CACHE = _PUB_CACHE | {
 # safe one, gen_snapshot_arm64 -- and the ios-sdk stamp), which only its
 # tests ask the tool for (DevelopmentArtifact.iOS): the device and both
 # simulator builds of the engine per mode, hours the first time.
-_APPLE_CACHE_FILES = _TOOL_CACHE_FILES | ({
+# (The iOS engines come from the tree under either configuration for now:
+# bin/cache's, `flutter precache --ios`, is a later step.)
+_IOS_ENGINE_CACHE_FILES = {
     "//engine/src/flutter/build/archives:ios_engine_directory": "artifacts/engine/ios",
     "//engine/src/flutter/build/archives:ios_engine_profile_directory": "artifacts/engine/ios-profile",
     "//engine/src/flutter/build/archives:ios_engine_release_directory": "artifacts/engine/ios-release",
     "//bin/internal:ios_sdk_stamp": "ios-sdk.stamp",
-} if HOST_OS == "mac" else {})
+} if HOST_OS == "mac" else {}
+
+_APPLE_CACHE_FILES = select({
+    "//build_defs/engine:prebuilt": _TOOL_CACHE_FILES_BASE | _IOS_ENGINE_CACHE_FILES,
+    "//conditions:default": _TOOL_CACHE_FILES_BASE | _TREE_ENGINE_CACHE_FILES | _PUB_FILES | _IOS_ENGINE_CACHE_FILES,
+})
 
 _TOOL_SDK_FILES = {
     ":flutter_launcher": "bin/flutter",
@@ -412,6 +463,14 @@ dart_package_tests(
             "test/commands.shard/permeable/widget_preview/widget_preview_test.dart",
         ],
     ),
+)
+
+# The integration shard's test files by name, for dev/bots'
+# tool_integration_test_durations_test (which checks the durations file
+# lists exactly them).
+filegroup(
+    name = "integration_shard_test_files",
+    srcs = glob(["test/integration.shard/**/*_test.dart"]),
 )
 
 # The projects the integration shard's tests run the tool in or copy:
@@ -846,7 +905,13 @@ dart_package_tests(
     size = "enormous",
     srcs = _HARNESS,
     cache = _TOOL_CACHE,
-    cache_files = _TOOL_CACHE_FILES | _ANDROID_CACHE_FILES,
+    # (The Android gen_snapshots come from the tree under either
+    # configuration for now: bin/cache's, `flutter precache --android`, is a
+    # later step.)
+    cache_files = select({
+        "//build_defs/engine:prebuilt": _TOOL_CACHE_FILES_BASE | _ANDROID_CACHE_FILES,
+        "//conditions:default": _TOOL_CACHE_FILES_BASE | _TREE_ENGINE_CACHE_FILES | _PUB_FILES | _ANDROID_CACHE_FILES,
+    }),
     data = glob(["test/integration.shard/test_data/**"]) + _SDK_PACKAGES + _TOOL_DATA + _INTEGRATION_PROJECTS + [
         # analyze_size_test builds hello_world for Android.
         "//examples/hello_world:project",

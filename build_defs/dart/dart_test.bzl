@@ -474,7 +474,7 @@ mkdir -p "$root/bin/cache"
             path = file.short_path
             if path.startswith("../"):
                 path = path.split("/", 2)[2]
-            elif target.label.package:
+            if target.label.package:
                 path = paths.relativize(path, target.label.package)
             path = paths.join(directory, path) if directory else path
             if unless_present and path in present:

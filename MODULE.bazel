@@ -54,6 +54,7 @@ use_repo(
     "cpu_features",
     "cpython3",
     "dart",
+    "dart_sdk_bin_cache",
     "dart_sdk_linux_arm64",
     "dart_sdk_linux_x64",
     "dart_sdk_macos_arm64",
@@ -143,6 +144,12 @@ use_repo(
     "ios_usb_openssl",
     "material_fonts",
 )
+
+# bin/cache's prebuilt engine artifacts, for --config=prebuilt_engine
+# (build_defs/repositories/flutter_bin_cache.bzl; the aliases in
+# //build_defs/engine choose between them and the tree's engine).
+flutter_bin_cache = use_extension("//build_defs/repositories:flutter_bin_cache.bzl", "flutter_bin_cache_extension")
+use_repo(flutter_bin_cache, "flutter_bin_cache")
 
 # The browsers the web tests drive, at the versions the web engine's
 # lib/web_ui/dev/package_lock.yaml pins (build_defs/repositories/browsers.bzl):

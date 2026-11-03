@@ -228,7 +228,7 @@ dart_kernel = rule(
             doc = "The kernel file (GN's kernel_output).",
         ),
         "platform": attr.label(
-            default = "//engine/src/flutter/lib/snapshot:strong_platform",
+            default = "//build_defs/engine:strong_platform",
             allow_files = True,
             doc = "The platform kernel's directory contents (GN's --sdk-root, flutter_patched_sdk).",
         ),

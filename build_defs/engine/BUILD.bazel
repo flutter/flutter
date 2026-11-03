@@ -1,0 +1,88 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# The engine as the framework's and the tool's tests consume it: built from
+# the tree (the default), or the prebuilt artifacts the flutter tool
+# downloaded into bin/cache (build_defs/repositories/flutter_bin_cache.bzl).
+# Every test rule names these aliases rather than the engine's targets, so
+# that `--//build_defs/engine:source=prebuilt` (`--config=prebuilt_engine`,
+# which also points the host's Dart SDK repository at bin/cache/dart-sdk)
+# runs the tests in a checkout without the engine's dependencies -- a
+# framework developer's, a flutter_drone bot's -- and, in one with them,
+# without building the engine first.
+
+load("@bazel_skylib//rules:common_settings.bzl", "string_flag")
+
+package(default_visibility = ["//visibility:public"])
+
+string_flag(
+    name = "source",
+    build_setting_default = "tree",
+    values = [
+        "tree",
+        "prebuilt",
+    ],
+)
+
+config_setting(
+    name = "prebuilt",
+    flag_values = {":source": "prebuilt"},
+)
+
+# flutter_tester, the engine every Flutter test runs on (flutter_test.bzl).
+alias(
+    name = "flutter_tester",
+    actual = select({
+        ":prebuilt": "@flutter_bin_cache//:flutter_tester",
+        "//conditions:default": "//engine/src/flutter/shell/testing:flutter_tester",
+    }),
+)
+
+# ICU's data file flutter_tester loads (--icu-data-file-path).
+alias(
+    name = "icudtl",
+    actual = select({
+        ":prebuilt": "@flutter_bin_cache//:icudtl",
+        "//conditions:default": "@icu//:icudata",
+    }),
+)
+
+# The platform kernels the frontend server compiles a test against
+# (flutter_patched_sdk; kernel.bzl's --sdk-root).
+alias(
+    name = "strong_platform",
+    actual = select({
+        ":prebuilt": "@flutter_bin_cache//:flutter_patched_sdk",
+        "//conditions:default": "//engine/src/flutter/lib/snapshot:strong_platform",
+    }),
+)
+
+# The shader compiler and its library, for a test's shader assets
+# (flutter_assets.bzl).
+alias(
+    name = "impellerc",
+    actual = select({
+        ":prebuilt": "@flutter_bin_cache//:impellerc",
+        "//conditions:default": "//engine/src/flutter/impeller/compiler:impellerc",
+    }),
+)
+
+alias(
+    name = "shader_lib",
+    actual = select({
+        ":prebuilt": "@flutter_bin_cache//:shader_lib",
+        "//conditions:default": "//engine/src/flutter/impeller/compiler/shader_lib:all_files",
+    }),
+)
+
+# Flutter GPU's package, as the tool's cache holds it (pkg/flutter_gpu;
+# dart:ui's, pkg/sky_engine, is a directory artifact from the tree and
+# files from bin/cache, which the tool's BUILD file lays each its own way).
+alias(
+    name = "flutter_gpu",
+    actual = select({
+        ":prebuilt": "@flutter_bin_cache//pkg/flutter_gpu:package",
+        "//conditions:default": "//engine/src/flutter/lib/gpu:dart_sources",
+    }),
+)
