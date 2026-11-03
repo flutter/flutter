@@ -233,7 +233,8 @@ class BuildDirectoryTest(unittest.TestCase):
       bazel_ci.write_build_directory(self.engine_src, HOST_DEBUG_UNOPT, out_dir, '/tools/bazelisk')
       description = bazel_ci.read_build_directory(out_dir)
     self.assertEqual(
-        description['startup_options'], ['--output_user_root=/b/s/w/ir/tmp/t/bazel_ci/output']
+        description['startup_options'],
+        ['--output_user_root=/b/s/w/ir/tmp/t/bazel_ci/output', '--max_idle_secs=300']
     )
     self.assertEqual(description['build_options'], [])
     self.assertEqual(

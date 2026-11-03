@@ -101,7 +101,10 @@ Steps 2 and 4 are scripts of this repository; step 3 runs whatever
   not spell them -- without the cache each switch rebuilds the host tools
   (10 minutes between `ci/host_debug` and a second `ci/host_debug_unopt`
   on 10-31). `BAZEL_CI_HOME` overrides the location. `--config=ci` (the
-  root `.bazelrc`) keeps the output readable in a log.
+  root `.bazelrc`) keeps the output readable in a log. A bot's Bazel
+  server exits five minutes after its last command (`--max_idle_secs`):
+  the recipe's process cleanup does not know the detached JVM, which would
+  otherwise idle for hours into the bot's next task.
 - **The install runs once per build.** The edge has no inputs ninja could
   compare, so `tools/gn --bazel` removes the previous run's
   `bazel_install.stamp` when it writes the directory; a second `ninja` in the
