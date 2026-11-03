@@ -653,6 +653,8 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
     lastClientTransform = null;
     lastClientBounds = null;
     lastCaretRect = null;
+    // The input method may still be using the current input connection.
+    updateEditableGeometry();
     // When the IME is hidden, we need to restart the input method manager to accomodate
     // some keyboards like the Samsung keyboard that may be caching old state.
     WindowInsetsCompat insets = ViewCompat.getRootWindowInsets(mView);
