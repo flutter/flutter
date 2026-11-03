@@ -11,7 +11,6 @@
 
 #include <glib-object.h>
 #include <gmodule.h>
-#include <stdint.h>
 
 #include "fl_binary_messenger.h"
 #include "fl_texture_registrar.h"
@@ -34,8 +33,6 @@ struct _FlPluginRegistrarInterface {
   FlTextureRegistrar* (*get_texture_registrar)(FlPluginRegistrar* registrar);
 
   FlView* (*get_view)(FlPluginRegistrar* registrar);
-
-  int64_t (*get_engine_id)(FlPluginRegistrar* registrar);
 };
 
 /**
@@ -75,17 +72,6 @@ FlTextureRegistrar* fl_plugin_registrar_get_texture_registrar(
  * Returns: (allow-none): an #FlView or %NULL if running in headless mode.
  */
 FlView* fl_plugin_registrar_get_view(FlPluginRegistrar* registrar);
-
-/**
- * fl_plugin_registrar_get_engine_id:
- * @registrar: an #FlPluginRegistrar.
- *
- * Gets the unique identifier for the #FlEngine associated with this registrar.
- * This corresponds to `PlatformDispatcher.instance.engineId` in Dart.
- *
- * Returns: an engine identifier.
- */
-int64_t fl_plugin_registrar_get_engine_id(FlPluginRegistrar* registrar);
 
 G_END_DECLS
 

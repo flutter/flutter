@@ -143,14 +143,6 @@ class PluginRegistrarWindows : public PluginRegistrar {
         /*user_data=*/new std::function<void()>(std::move(callback)));
   }
 
-  // Returns the unique identifier for the engine associated with this
-  // registrar.
-  //
-  // This corresponds to PlatformDispatcher.instance.engineId in Dart.
-  int64_t GetEngineId() const {
-    return FlutterDesktopPluginRegistrarGetEngineId(registrar());
-  }
-
  private:
   // A FlutterDesktopWindowProcCallback implementation that forwards back to
   // a PluginRegistarWindows instance provided as |user_data|.

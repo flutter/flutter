@@ -388,11 +388,6 @@ void FlutterDesktopPluginRegistrarPostPlatformThreadTask(
                                              callback, on_cancel, user_data);
 }
 
-int64_t FlutterDesktopPluginRegistrarGetEngineId(
-    FlutterDesktopPluginRegistrarRef registrar) {
-  return reinterpret_cast<int64_t>(registrar->engine);
-}
-
 UINT FlutterDesktopGetDpiForHWND(HWND hwnd) {
   return flutter::GetDpiForHWND(hwnd);
 }

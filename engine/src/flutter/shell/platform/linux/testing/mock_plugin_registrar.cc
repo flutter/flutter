@@ -49,16 +49,11 @@ static FlView* get_view(FlPluginRegistrar* registrar) {
   return NULL;
 }
 
-static int64_t get_engine_id(FlPluginRegistrar* registrar) {
-  return 0;
-}
-
 static void fl_mock_plugin_registrar_iface_init(
     FlPluginRegistrarInterface* iface) {
   iface->get_messenger = get_messenger;
   iface->get_texture_registrar = get_texture_registrar;
   iface->get_view = get_view;
-  iface->get_engine_id = get_engine_id;
 }
 
 static void fl_mock_plugin_registrar_init(FlMockPluginRegistrar* self) {}

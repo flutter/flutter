@@ -28,5 +28,4 @@ TEST(FlPluginRegistrarTest, FlMockRegistrar) {
   EXPECT_EQ(fl_plugin_registrar_get_messenger(registrar), messenger);
   EXPECT_EQ(fl_plugin_registrar_get_texture_registrar(registrar),
             texture_registrar);
-  EXPECT_EQ(fl_plugin_registrar_get_engine_id(registrar), 0);
 }

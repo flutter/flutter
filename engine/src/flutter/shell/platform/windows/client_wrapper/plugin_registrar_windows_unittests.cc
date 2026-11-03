@@ -32,7 +32,6 @@ class TestWindowsApi : public testing::StubFlutterWindowsApi {
               PluginRegistrarGetViewById,
               (FlutterDesktopViewId),
               (override));
-  MOCK_METHOD(int64_t, PluginRegistrarGetEngineId, (), (override));
 
   void PluginRegistrarUnregisterTopLevelWindowProcDelegate(
       FlutterDesktopWindowProcCallback delegate) override {
@@ -347,18 +346,6 @@ TEST(PluginRegistrarWindowsTest, PostPlatformThreadTaskOnCancel) {
   test_api->post_task_on_cancel()(test_api->post_task_user_data());
   EXPECT_FALSE(called);
   EXPECT_TRUE(weak_token.expired());
-}
-
-TEST(PluginRegistrarWindowsTest, GetEngineId) {
-  auto windows_api = std::make_unique<TestWindowsApi>();
-  EXPECT_CALL(*windows_api, PluginRegistrarGetView)
-      .WillRepeatedly(Return(nullptr));
-  EXPECT_CALL(*windows_api, PluginRegistrarGetEngineId).WillOnce(Return(42));
-  testing::ScopedStubFlutterWindowsApi scoped_api_stub(std::move(windows_api));
-  PluginRegistrarWindows registrar(
-      reinterpret_cast<FlutterDesktopPluginRegistrarRef>(1));
-
-  EXPECT_EQ(registrar.GetEngineId(), 42);
 }
 
 }  // namespace flutter

@@ -16,7 +16,6 @@ G_BEGIN_DECLS
  * headless mode.
  * @messenger: the #FlBinaryMessenger to communicate with.
  * @texture_registrar: the #FlTextureRegistrar to communicate with.
- * @engine_id: the identifier of the #FlEngine associated with this registrar.
  *
  * Creates a new #FlPluginRegistrar.
  *
@@ -25,8 +24,7 @@ G_BEGIN_DECLS
 FlPluginRegistrar* fl_plugin_registrar_new(
     FlView* view,
     FlBinaryMessenger* messenger,
-    FlTextureRegistrar* texture_registrar,
-    int64_t engine_id);
+    FlTextureRegistrar* texture_registrar);
 
 G_END_DECLS
 

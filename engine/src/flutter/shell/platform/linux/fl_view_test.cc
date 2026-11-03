@@ -36,32 +36,6 @@ TEST_F(FlViewTest, GetEngine) {
   EXPECT_NE(engine, nullptr);
 }
 
-TEST_F(FlViewTest, PluginRegistrar) {
-  FlView* view = fl_view_new(project);
-  FlEngine* engine = fl_view_get_engine(view);
-
-  int64_t engine_id = 0;
-  fl_engine_get_embedder_api(engine)->Initialize = MOCK_ENGINE_PROC(
-      Initialize,
-      ([&engine_id](size_t version, const FlutterRendererConfig* config,
-                    const FlutterProjectArgs* args, void* user_data,
-                    FLUTTER_API_SYMBOL(FlutterEngine)* engine_out) {
-        engine_id = args->engine_id;
-        return kSuccess;
-      }));
-  fl_engine_get_embedder_api(engine)->RunInitialized =
-      MOCK_ENGINE_PROC(RunInitialized, ([](auto engine) { return kSuccess; }));
-
-  StartEngine(engine);
-  EXPECT_NE(engine_id, 0);
-
-  g_autoptr(FlPluginRegistrar) registrar =
-      fl_plugin_registry_get_registrar_for_plugin(FL_PLUGIN_REGISTRY(view),
-                                                  "test");
-  EXPECT_EQ(fl_plugin_registrar_get_view(registrar), view);
-  EXPECT_EQ(fl_plugin_registrar_get_engine_id(registrar), engine_id);
-}
-
 TEST_F(FlViewTest, StateUpdateDoesNotHappenInInit) {
   FlView* view = fl_view_new(project);
   // Check that creating a view doesn't try to query the window state in

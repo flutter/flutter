@@ -132,9 +132,6 @@ class StubFlutterWindowsApi {
                                                      VoidCallback on_cancel,
                                                      void* user_data) {}
 
-  // Called for FlutterDesktopPluginRegistrarGetEngineId.
-  virtual int64_t PluginRegistrarGetEngineId() { return 0; }
-
   // Called for FlutterDesktopEngineProcessExternalWindowMessage.
   virtual bool EngineProcessExternalWindowMessage(
       FlutterDesktopEngineRef engine,
