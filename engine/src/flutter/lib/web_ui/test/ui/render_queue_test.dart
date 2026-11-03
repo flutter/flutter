@@ -15,6 +15,8 @@ void main() {
   internalBootstrapBrowserTest(() => testMain);
 }
 
+/// A test [ViewRasterizer] that simulates in-flight rasterization using
+/// completers to pause and resume execution.
 class HoldingRasterizer extends ViewRasterizer {
   HoldingRasterizer(super.view, this.displayFactory);
 
@@ -44,6 +46,7 @@ class HoldingRasterizer extends ViewRasterizer {
   }
 }
 
+/// A dummy [DisplayCanvas] implementation for unit tests.
 class FakeDisplayCanvas extends DisplayCanvas {
   @override
   final DomElement hostElement = domDocument.createElement('div');
@@ -53,6 +56,24 @@ class FakeDisplayCanvas extends DisplayCanvas {
   void initialize() {}
   @override
   void dispose() {}
+}
+
+HoldingRasterizer createAndInstallHoldingRasterizer(EngineFlutterView view) {
+  view.debugPhysicalSizeOverride = const ui.Size(100, 100);
+  view.debugForceResize();
+
+  final displayFactory = DisplayCanvasFactory<DisplayCanvas>(
+    createCanvas: () => FakeDisplayCanvas(),
+  );
+  final holdingRasterizer = HoldingRasterizer(view, displayFactory);
+  final ViewRasterizer originalRasterizer = renderer.rasterizers[view.viewId]!;
+  renderer.rasterizers[view.viewId] = holdingRasterizer;
+  addTearDown(() {
+    renderer.rasterizers[view.viewId] = originalRasterizer;
+    view.debugPhysicalSizeOverride = null;
+    view.debugForceResize();
+  });
+  return holdingRasterizer;
 }
 
 void testMain() {
@@ -81,20 +102,7 @@ void testMain() {
     'build duration of queued frame does not include wait time behind in-flight rasterization',
     () async {
       final EngineFlutterView view = EnginePlatformDispatcher.instance.implicitView!;
-      view.debugPhysicalSizeOverride = const ui.Size(100, 100);
-      view.debugForceResize();
-
-      final displayFactory = DisplayCanvasFactory<DisplayCanvas>(
-        createCanvas: () => FakeDisplayCanvas(),
-      );
-      final holdingRasterizer = HoldingRasterizer(view, displayFactory);
-      final ViewRasterizer originalRasterizer = renderer.rasterizers[view.viewId]!;
-      renderer.rasterizers[view.viewId] = holdingRasterizer;
-      addTearDown(() {
-        renderer.rasterizers[view.viewId] = originalRasterizer;
-        view.debugPhysicalSizeOverride = null;
-        view.debugForceResize();
-      });
+      final HoldingRasterizer holdingRasterizer = createAndInstallHoldingRasterizer(view);
 
       final frame1Started = Completer<void>();
       final frame1Hold = Completer<void>();
@@ -148,20 +156,7 @@ void testMain() {
     'dropped frame request completer completes and timing is discarded when overwritten',
     () async {
       final EngineFlutterView view = EnginePlatformDispatcher.instance.implicitView!;
-      view.debugPhysicalSizeOverride = const ui.Size(100, 100);
-      view.debugForceResize();
-
-      final displayFactory = DisplayCanvasFactory<DisplayCanvas>(
-        createCanvas: () => FakeDisplayCanvas(),
-      );
-      final holdingRasterizer = HoldingRasterizer(view, displayFactory);
-      final ViewRasterizer originalRasterizer = renderer.rasterizers[view.viewId]!;
-      renderer.rasterizers[view.viewId] = holdingRasterizer;
-      addTearDown(() {
-        renderer.rasterizers[view.viewId] = originalRasterizer;
-        view.debugPhysicalSizeOverride = null;
-        view.debugForceResize();
-      });
+      final HoldingRasterizer holdingRasterizer = createAndInstallHoldingRasterizer(view);
 
       final frame1Started = Completer<void>();
       final frame1Hold = Completer<void>();
@@ -277,20 +272,7 @@ void testMain() {
 
   test('multiple rapid scene submissions complete intermediate dropped frame completers and discard timings', () async {
     final EngineFlutterView view = EnginePlatformDispatcher.instance.implicitView!;
-    view.debugPhysicalSizeOverride = const ui.Size(100, 100);
-    view.debugForceResize();
-
-    final displayFactory = DisplayCanvasFactory<DisplayCanvas>(
-      createCanvas: () => FakeDisplayCanvas(),
-    );
-    final holdingRasterizer = HoldingRasterizer(view, displayFactory);
-    final ViewRasterizer originalRasterizer = renderer.rasterizers[view.viewId]!;
-    renderer.rasterizers[view.viewId] = holdingRasterizer;
-    addTearDown(() {
-      renderer.rasterizers[view.viewId] = originalRasterizer;
-      view.debugPhysicalSizeOverride = null;
-      view.debugForceResize();
-    });
+    final HoldingRasterizer holdingRasterizer = createAndInstallHoldingRasterizer(view);
 
     final frame1Started = Completer<void>();
     final frame1Hold = Completer<void>();
@@ -361,20 +343,7 @@ void testMain() {
     'rendering queued scenes with frame timings disabled succeeds without null dereferences',
     () async {
       final EngineFlutterView view = EnginePlatformDispatcher.instance.implicitView!;
-      view.debugPhysicalSizeOverride = const ui.Size(100, 100);
-      view.debugForceResize();
-
-      final displayFactory = DisplayCanvasFactory<DisplayCanvas>(
-        createCanvas: () => FakeDisplayCanvas(),
-      );
-      final holdingRasterizer = HoldingRasterizer(view, displayFactory);
-      final ViewRasterizer originalRasterizer = renderer.rasterizers[view.viewId]!;
-      renderer.rasterizers[view.viewId] = holdingRasterizer;
-      addTearDown(() {
-        renderer.rasterizers[view.viewId] = originalRasterizer;
-        view.debugPhysicalSizeOverride = null;
-        view.debugForceResize();
-      });
+      final HoldingRasterizer holdingRasterizer = createAndInstallHoldingRasterizer(view);
 
       // Disable frame timings
       EnginePlatformDispatcher.instance.onReportTimings = null;
@@ -416,20 +385,7 @@ void testMain() {
     'queued frame with empty dimensions waiting behind in-flight frame records timings cleanly',
     () async {
       final EngineFlutterView view = EnginePlatformDispatcher.instance.implicitView!;
-      view.debugPhysicalSizeOverride = const ui.Size(100, 100);
-      view.debugForceResize();
-
-      final displayFactory = DisplayCanvasFactory<DisplayCanvas>(
-        createCanvas: () => FakeDisplayCanvas(),
-      );
-      final holdingRasterizer = HoldingRasterizer(view, displayFactory);
-      final ViewRasterizer originalRasterizer = renderer.rasterizers[view.viewId]!;
-      renderer.rasterizers[view.viewId] = holdingRasterizer;
-      addTearDown(() {
-        renderer.rasterizers[view.viewId] = originalRasterizer;
-        view.debugPhysicalSizeOverride = null;
-        view.debugForceResize();
-      });
+      final HoldingRasterizer holdingRasterizer = createAndInstallHoldingRasterizer(view);
 
       final frame1Started = Completer<void>();
       final frame1Hold = Completer<void>();
