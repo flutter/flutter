@@ -15,7 +15,7 @@ vars = {
   'skia_git': 'https://skia.googlesource.com',
   'llvm_git': 'https://llvm.googlesource.com',
   'dart_ai_rev': '9c96bfe5f091c9451eff5b59c9bffeb2e806b875',
-  'skia_revision': '866b61ca92c9f92c0f0b8de2d050fae11a32c3ec',
+  'skia_revision': 'c733ad3e37cb68659930080c4ccc6182482780c0',
 
   # Do not download the Emscripten SDK by default.
   # This prevents us from downloading the Emscripten toolchain for builds
@@ -196,7 +196,7 @@ vars = {
   # The version / instance id of the cipd:chromium/fuchsia/test-scripts which
   # will be used altogether with fuchsia-sdk to setup the build / test
   # environment.
-  'fuchsia_test_scripts_version': 'xl1LWBuppzu-BnOzVyF3HP5W3cHt5kr_fs6XE4_CtaMC',
+  'fuchsia_test_scripts_version': 'B6zarykZp6PKWRuegA6pqw5RIWgWbqOV3Hq4z7ZTZhAC',
 
   # The version / instance id of the cipd:chromium/fuchsia/gn-sdk which will be
   # used altogether with fuchsia-sdk to generate gn based build rules.
