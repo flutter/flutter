@@ -220,4 +220,260 @@ void testMain() {
       expect(allTimings, hasLength(2));
     },
   );
+
+  test(
+    'rendering scene to view with empty dimensions completes cleanly and records frame timings',
+    () async {
+      final EngineFlutterView view = EnginePlatformDispatcher.instance.implicitView!;
+      view.debugPhysicalSizeOverride = ui.Size.zero;
+      view.debugForceResize();
+      addTearDown(() {
+        view.debugPhysicalSizeOverride = null;
+        view.debugForceResize();
+      });
+
+      FrameTimingRecorder.recordCurrentFrameNumber(201);
+      FrameTimingRecorder.recordCurrentFrameVsync();
+      FrameTimingRecorder.recordCurrentFrameBuildStart();
+      final ui.Scene scene1 = ui.SceneBuilder().build();
+      addTearDown(scene1.dispose);
+
+      final Future<void> frame1Done = renderer.renderScene(scene1, view);
+      await expectLater(frame1Done, completes);
+
+      final allTimings = <ui.FrameTiming>[
+        ...reportedTimings,
+        ...FrameTimingRecorder.debugFrameTimings,
+      ];
+      expect(allTimings, hasLength(1));
+      final ui.FrameTiming timing1 = allTimings.single;
+      expect(timing1.frameNumber, 201);
+      expect(timing1.buildDuration, greaterThanOrEqualTo(Duration.zero));
+      expect(timing1.rasterDuration, greaterThanOrEqualTo(Duration.zero));
+
+      // Test zero-width non-zero height
+      FrameTimingRecorder.recordCurrentFrameNumber(202);
+      FrameTimingRecorder.recordCurrentFrameVsync();
+      FrameTimingRecorder.recordCurrentFrameBuildStart();
+      view.debugPhysicalSizeOverride = const ui.Size(0, 50);
+      view.debugForceResize();
+      final ui.Scene scene2 = ui.SceneBuilder().build();
+      addTearDown(scene2.dispose);
+
+      final Future<void> frame2Done = renderer.renderScene(scene2, view);
+      await expectLater(frame2Done, completes);
+
+      final allTimings2 = <ui.FrameTiming>[
+        ...reportedTimings,
+        ...FrameTimingRecorder.debugFrameTimings,
+      ];
+      expect(allTimings2, hasLength(2));
+      final ui.FrameTiming timing2 = allTimings2[1];
+      expect(timing2.frameNumber, 202);
+      expect(timing2.buildDuration, greaterThanOrEqualTo(Duration.zero));
+      expect(timing2.rasterDuration, greaterThanOrEqualTo(Duration.zero));
+    },
+  );
+
+  test('multiple rapid scene submissions complete intermediate dropped frame completers and discard timings', () async {
+    final EngineFlutterView view = EnginePlatformDispatcher.instance.implicitView!;
+    view.debugPhysicalSizeOverride = const ui.Size(100, 100);
+    view.debugForceResize();
+
+    final displayFactory = DisplayCanvasFactory<DisplayCanvas>(
+      createCanvas: () => FakeDisplayCanvas(),
+    );
+    final holdingRasterizer = HoldingRasterizer(view, displayFactory);
+    final ViewRasterizer originalRasterizer = renderer.rasterizers[view.viewId]!;
+    renderer.rasterizers[view.viewId] = holdingRasterizer;
+    addTearDown(() {
+      renderer.rasterizers[view.viewId] = originalRasterizer;
+      view.debugPhysicalSizeOverride = null;
+      view.debugForceResize();
+    });
+
+    final frame1Started = Completer<void>();
+    final frame1Hold = Completer<void>();
+    holdingRasterizer.rasterizeStarted = frame1Started;
+    holdingRasterizer.rasterizeCompleter = frame1Hold;
+
+    // Frame 1: in flight
+    FrameTimingRecorder.recordCurrentFrameNumber(301);
+    FrameTimingRecorder.recordCurrentFrameVsync();
+    FrameTimingRecorder.recordCurrentFrameBuildStart();
+    final ui.Scene scene1 = ui.SceneBuilder().build();
+    addTearDown(scene1.dispose);
+    final Future<void> frame1Done = renderer.renderScene(scene1, view);
+
+    await frame1Started.future;
+
+    // Frames 2, 3, 4 submitted rapidly in sequence while Frame 1 is held
+    final droppedFutures = <Future<void>>[];
+    for (var i = 302; i <= 304; i++) {
+      FrameTimingRecorder.recordCurrentFrameNumber(i);
+      FrameTimingRecorder.recordCurrentFrameVsync();
+      FrameTimingRecorder.recordCurrentFrameBuildStart();
+      final ui.Scene scene = ui.SceneBuilder().build();
+      addTearDown(scene.dispose);
+      droppedFutures.add(renderer.renderScene(scene, view));
+    }
+
+    // Frame 5: the final winning frame
+    FrameTimingRecorder.recordCurrentFrameNumber(305);
+    FrameTimingRecorder.recordCurrentFrameVsync();
+    FrameTimingRecorder.recordCurrentFrameBuildStart();
+    final ui.Scene scene5 = ui.SceneBuilder().build();
+    addTearDown(scene5.dispose);
+    final Future<void> frame5Done = renderer.renderScene(scene5, view);
+
+    // All intermediate dropped frames (302, 303, 304) must have completed
+    for (final dropped in droppedFutures) {
+      await expectLater(dropped, completes);
+    }
+
+    // Delay while Frame 1 is still in flight to ensure Frame 5 build duration isn't inflated
+    await Future<void>.delayed(const Duration(milliseconds: 100));
+
+    // Release Frame 1
+    holdingRasterizer.rasterizeCompleter = null;
+    holdingRasterizer.rasterizeStarted = null;
+    frame1Hold.complete();
+
+    await Future.wait([frame1Done, frame5Done]);
+
+    final allTimings = <ui.FrameTiming>[
+      ...reportedTimings,
+      ...FrameTimingRecorder.debugFrameTimings,
+    ];
+    final List<int> reportedFrameNumbers = allTimings.map((t) => t.frameNumber).toList();
+    expect(reportedFrameNumbers, contains(301));
+    expect(reportedFrameNumbers, contains(305));
+    expect(reportedFrameNumbers, isNot(contains(302)));
+    expect(reportedFrameNumbers, isNot(contains(303)));
+    expect(reportedFrameNumbers, isNot(contains(304)));
+    expect(allTimings, hasLength(2));
+
+    final ui.FrameTiming frame5Timing = allTimings.firstWhere((t) => t.frameNumber == 305);
+    expect(frame5Timing.buildDuration, lessThan(const Duration(milliseconds: 50)));
+  });
+
+  test(
+    'rendering queued scenes with frame timings disabled succeeds without null dereferences',
+    () async {
+      final EngineFlutterView view = EnginePlatformDispatcher.instance.implicitView!;
+      view.debugPhysicalSizeOverride = const ui.Size(100, 100);
+      view.debugForceResize();
+
+      final displayFactory = DisplayCanvasFactory<DisplayCanvas>(
+        createCanvas: () => FakeDisplayCanvas(),
+      );
+      final holdingRasterizer = HoldingRasterizer(view, displayFactory);
+      final ViewRasterizer originalRasterizer = renderer.rasterizers[view.viewId]!;
+      renderer.rasterizers[view.viewId] = holdingRasterizer;
+      addTearDown(() {
+        renderer.rasterizers[view.viewId] = originalRasterizer;
+        view.debugPhysicalSizeOverride = null;
+        view.debugForceResize();
+      });
+
+      // Disable frame timings
+      EnginePlatformDispatcher.instance.onReportTimings = null;
+
+      final frame1Started = Completer<void>();
+      final frame1Hold = Completer<void>();
+      holdingRasterizer.rasterizeStarted = frame1Started;
+      holdingRasterizer.rasterizeCompleter = frame1Hold;
+
+      final ui.Scene scene1 = ui.SceneBuilder().build();
+      addTearDown(scene1.dispose);
+      final Future<void> frame1Done = renderer.renderScene(scene1, view);
+
+      await frame1Started.future;
+
+      final ui.Scene scene2 = ui.SceneBuilder().build();
+      addTearDown(scene2.dispose);
+      final Future<void> frame2Done = renderer.renderScene(scene2, view);
+
+      final ui.Scene scene3 = ui.SceneBuilder().build();
+      addTearDown(scene3.dispose);
+      final Future<void> frame3Done = renderer.renderScene(scene3, view);
+
+      // Frame 2 is dropped and completed
+      await expectLater(frame2Done, completes);
+
+      holdingRasterizer.rasterizeCompleter = null;
+      holdingRasterizer.rasterizeStarted = null;
+      frame1Hold.complete();
+
+      await Future.wait([frame1Done, frame3Done]);
+
+      expect(reportedTimings, isEmpty);
+      expect(FrameTimingRecorder.debugFrameTimings, isEmpty);
+    },
+  );
+
+  test(
+    'queued frame with empty dimensions waiting behind in-flight frame records timings cleanly',
+    () async {
+      final EngineFlutterView view = EnginePlatformDispatcher.instance.implicitView!;
+      view.debugPhysicalSizeOverride = const ui.Size(100, 100);
+      view.debugForceResize();
+
+      final displayFactory = DisplayCanvasFactory<DisplayCanvas>(
+        createCanvas: () => FakeDisplayCanvas(),
+      );
+      final holdingRasterizer = HoldingRasterizer(view, displayFactory);
+      final ViewRasterizer originalRasterizer = renderer.rasterizers[view.viewId]!;
+      renderer.rasterizers[view.viewId] = holdingRasterizer;
+      addTearDown(() {
+        renderer.rasterizers[view.viewId] = originalRasterizer;
+        view.debugPhysicalSizeOverride = null;
+        view.debugForceResize();
+      });
+
+      final frame1Started = Completer<void>();
+      final frame1Hold = Completer<void>();
+      holdingRasterizer.rasterizeStarted = frame1Started;
+      holdingRasterizer.rasterizeCompleter = frame1Hold;
+
+      // Frame 1
+      FrameTimingRecorder.recordCurrentFrameNumber(501);
+      FrameTimingRecorder.recordCurrentFrameVsync();
+      FrameTimingRecorder.recordCurrentFrameBuildStart();
+      final ui.Scene scene1 = ui.SceneBuilder().build();
+      addTearDown(scene1.dispose);
+      final Future<void> frame1Done = renderer.renderScene(scene1, view);
+
+      await frame1Started.future;
+
+      // View physical size becomes empty before Frame 2 is queued
+      view.debugPhysicalSizeOverride = ui.Size.zero;
+      view.debugForceResize();
+
+      FrameTimingRecorder.recordCurrentFrameNumber(502);
+      FrameTimingRecorder.recordCurrentFrameVsync();
+      FrameTimingRecorder.recordCurrentFrameBuildStart();
+      final ui.Scene scene2 = ui.SceneBuilder().build();
+      addTearDown(scene2.dispose);
+      final Future<void> frame2Done = renderer.renderScene(scene2, view);
+
+      await Future<void>.delayed(const Duration(milliseconds: 100));
+
+      // Release Frame 1
+      holdingRasterizer.rasterizeCompleter = null;
+      holdingRasterizer.rasterizeStarted = null;
+      frame1Hold.complete();
+
+      await Future.wait([frame1Done, frame2Done]);
+
+      final allTimings = <ui.FrameTiming>[
+        ...reportedTimings,
+        ...FrameTimingRecorder.debugFrameTimings,
+      ];
+      expect(allTimings, hasLength(2));
+      final ui.FrameTiming frame2Timing = allTimings.firstWhere((t) => t.frameNumber == 502);
+      expect(frame2Timing.buildDuration, lessThan(const Duration(milliseconds: 50)));
+      expect(frame2Timing.rasterDuration, greaterThanOrEqualTo(Duration.zero));
+    },
+  );
 }
