@@ -214,7 +214,9 @@ public class PlatformViewWrapperTest {
     final PlatformViewRenderTarget renderTarget = mock(PlatformViewRenderTarget.class);
     when(renderTarget.getSurface()).thenReturn(surface);
     when(surface.lockHardwareCanvas()).thenReturn(canvas);
-    doThrow(new IllegalStateException("Surface released")).when(surface).unlockCanvasAndPost(canvas);
+    doThrow(new IllegalStateException("Surface released"))
+        .when(surface)
+        .unlockCanvasAndPost(canvas);
     final PlatformViewWrapper wrapper = new PlatformViewWrapper(ctx, renderTarget);
 
     wrapper.draw(canvas);
