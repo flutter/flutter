@@ -170,6 +170,57 @@ flutter:
     expect(processManager, hasNoRemainingExpectations);
   });
 
+  testWithoutContext('throws ToolExit when dart format fails', () async {
+    final File arbFile = fileSystem.file(fileSystem.path.join('lib', 'l10n', 'app_en.arb'))
+      ..createSync(recursive: true);
+    arbFile.writeAsStringSync('''
+{
+  "helloWorld": "Hello, World!",
+  "@helloWorld": {
+    "description": "Sample description"
+  }
+}''');
+    final File pubspecFile = fileSystem.file('pubspec.yaml')..createSync();
+    pubspecFile.writeAsStringSync(BasicProjectWithFlutterGen().pubspec);
+    final processManager = FakeProcessManager.list(<FakeCommand>[
+      const FakeCommand(
+        command: <String>[
+          'Artifact.engineDartBinary',
+          'format',
+          '/lib/l10n/app_localizations_en.dart',
+          '/lib/l10n/app_localizations.dart',
+        ],
+        exitCode: 65,
+        stdout: 'Formatted no files in 0.00 seconds.',
+        stderr: 'Could not format because the source could not be parsed.',
+      ),
+    ]);
+
+    final command = GenerateLocalizationsCommand(
+      toolContext: FakeToolContext(
+        artifacts: artifacts,
+        fs: fileSystem,
+        logger: logger,
+        processManager: processManager,
+      ),
+    );
+
+    await expectLater(
+      createTestCommandRunner(command).run(<String>['gen-l10n', '--format']),
+      throwsToolExit(
+        message: '''
+`dart format` failed with exit code 65
+
+stdout:
+Formatted no files in 0.00 seconds.
+
+stderr:
+Could not format because the source could not be parsed.''',
+      ),
+    );
+    expect(processManager, hasNoRemainingExpectations);
+  });
+
   testWithoutContext('dart format is not run when --no-format is passed', () async {
     final File arbFile = fileSystem.file(fileSystem.path.join('lib', 'l10n', 'app_en.arb'))
       ..createSync(recursive: true);

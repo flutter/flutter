@@ -15,6 +15,7 @@ import 'package:flutter_tools/src/localizations/localizations_utils.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
+import '../src/fake_process_manager.dart';
 
 const defaultTemplateArbFileName = 'app_en.arb';
 const defaultOutputFileString = 'output-localization-file.dart';
@@ -1000,6 +1001,51 @@ class AppLocalizationsEn extends AppLocalizations {
   String get title => 'Title';
 }
 ''');
+    });
+
+    testWithoutContext('throws ToolExit when dart format fails', () async {
+      _standardFlutterDirectoryL10nSetup(fs);
+      final processManager = FakeProcessManager.list(<FakeCommand>[
+        const FakeCommand(
+          command: <String>[
+            'Artifact.engineDartBinary',
+            'format',
+            '/lib/l10n/app_localizations_en.dart',
+            '/lib/l10n/app_localizations_es.dart',
+            '/lib/l10n/app_localizations.dart',
+          ],
+          exitCode: 65,
+          stdout: 'Formatted no files in 0.00 seconds.',
+          stderr: 'Could not format because the source could not be parsed.',
+        ),
+      ]);
+
+      await expectLater(
+        generateLocalizations(
+          fileSystem: fs,
+          options: LocalizationOptions(
+            arbDir: Uri.directory(defaultL10nPath).path,
+            outputDir: Uri.directory(defaultL10nPath, windows: false).path,
+            templateArbFile: Uri.file(defaultTemplateArbFileName, windows: false).path,
+          ),
+          logger: BufferLogger.test(),
+          projectDir: fs.currentDirectory,
+          dependenciesDir: fs.currentDirectory,
+          artifacts: artifacts,
+          processManager: processManager,
+        ),
+        throwsToolExit(
+          message: '''
+`dart format` failed with exit code 65
+
+stdout:
+Formatted no files in 0.00 seconds.
+
+stderr:
+Could not format because the source could not be parsed.''',
+        ),
+      );
+      expect(processManager, hasNoRemainingExpectations);
     });
   });
 

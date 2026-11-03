@@ -93,11 +93,11 @@ Future<LocalizationsGenerator> generateLocalizations({
     final command = <String>[dartBinary, 'format', ...formatFileList];
     final ProcessResult result = await processManager.run(command);
     if (result.exitCode != 0) {
-      throw ProcessException(dartBinary, command, '''
+      throwToolExit('''
 `dart format` failed with exit code ${result.exitCode}
 
 stdout:\n${result.stdout}\n
-stderr:\n${result.stderr}''', result.exitCode);
+stderr:\n${result.stderr}''');
     }
   }
 
