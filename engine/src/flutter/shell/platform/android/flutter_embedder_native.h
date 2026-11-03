@@ -488,6 +488,37 @@ class FlutterEmbedderNative {
     int32_t response_id = 0;
   };
 
+  struct SharedAndroidEGLState {
+    mutable std::mutex mutex;
+    void* display = nullptr;
+    void* config = nullptr;
+    void* context = nullptr;
+    void* resource_context = nullptr;
+    void* pbuffer_surface = nullptr;
+    void* resource_pbuffer_surface = nullptr;
+  };
+
+  struct OverlayEglSurfaceEntry {
+    void* native_window = nullptr;
+    void* egl_surface = nullptr;
+  };
+
+  struct SurfaceTextureEntry {
+    jobject wrapper_global_ref = nullptr;
+    uint32_t gl_texture_id = 0;
+    bool attached = false;
+    std::shared_ptr<AndroidVulkanExternalTexture> last_vulkan_texture;
+  };
+
+  struct ImageTextureEntry {
+    jobject entry_global_ref = nullptr;
+    bool reset_on_background = false;
+    uint32_t gl_texture_id = 0;
+    void* egl_image = nullptr;
+    std::shared_ptr<AndroidHardwareBuffer> last_ahb;
+    std::shared_ptr<AndroidVulkanExternalTexture> last_vulkan_texture;
+  };
+
   void HandlePlatformMessageFromEngine(const FlutterPlatformMessage* message);
   void HandleSemanticsUpdateFromEngine(const FlutterSemanticsUpdate2* update);
   bool ResolveRendererConfig(FlutterRendererConfig* config_out);
@@ -526,89 +557,52 @@ class FlutterEmbedderNative {
   void FlushPreLaunchStartupState();
   void FlushPendingStartupState();
 
-  FlutterEngineProcTable proc_table_{};
+  std::function<void()> pending_viewport_metrics_callback_;
   FLUTTER_API_SYMBOL(FlutterEngine) engine_ = nullptr;
   int64_t engine_id_ = 0;
-  bool use_engine_owned_task_runners_ = true;
-  bool is_using_mock_proc_table_ = false;
-  bool enable_surface_control_ = false;
-  std::atomic<bool> first_frame_presented_{false};
-  std::shared_ptr<std::atomic<bool>> alive_flag_ =
-      std::make_shared<std::atomic<bool>>(true);
-
-  std::shared_ptr<JvmInvoker> jvm_invoker_;
   std::unique_ptr<AndroidTaskRunners> task_runners_;
   std::unique_ptr<AndroidVsyncWaiter> vsync_waiter_;
   std::unique_ptr<AndroidCompositor> compositor_;
   std::unique_ptr<AndroidPlatformViewsController> platform_views_controller_;
   std::unique_ptr<AndroidSurfaceControl> surface_control_;
   std::unique_ptr<APKAssetProvider> asset_provider_;
-  std::shared_ptr<AndroidEngineGroup> engine_group_;
   std::unique_ptr<AndroidSurfaceManager> surface_manager_;
-
-  FlutterCustomAssetResolver custom_asset_resolver_{};
-  FlutterImageDecoderRegistration image_decoder_registration_{};
-
-  mutable std::mutex native_window_mutex_;
   void* native_window_ = nullptr;
   size_t surface_width_ = 0;
   size_t surface_height_ = 0;
   double last_pixel_ratio_ = kDefaultInitialPixelRatio;
-  int32_t last_display_id_ = 0;
-
-  struct SharedAndroidEGLState {
-    mutable std::mutex mutex;
-    void* display = nullptr;
-    void* config = nullptr;
-    void* context = nullptr;
-    void* resource_context = nullptr;
-    void* pbuffer_surface = nullptr;
-    void* resource_pbuffer_surface = nullptr;
-  };
+  void* egl_window_surface_ = nullptr;
+  std::unique_ptr<SurfaceTextureGlToAhbBlitter> surface_texture_blitter_;
+  std::shared_ptr<std::atomic<bool>> alive_flag_ =
+      std::make_shared<std::atomic<bool>>(true);
+  std::shared_ptr<JvmInvoker> jvm_invoker_;
+  std::shared_ptr<AndroidEngineGroup> engine_group_;
   std::shared_ptr<SharedAndroidEGLState> shared_egl_ =
       std::make_shared<SharedAndroidEGLState>();
-  void* egl_window_surface_ = nullptr;
-
-  struct OverlayEglSurfaceEntry {
-    void* native_window = nullptr;
-    void* egl_surface = nullptr;
-  };
-  std::unordered_map<int32_t, OverlayEglSurfaceEntry> egl_overlay_surfaces_;
-
-  struct SurfaceTextureEntry {
-    jobject wrapper_global_ref = nullptr;
-    uint32_t gl_texture_id = 0;
-    bool attached = false;
-    std::shared_ptr<AndroidVulkanExternalTexture> last_vulkan_texture;
-  };
-
-  struct ImageTextureEntry {
-    jobject entry_global_ref = nullptr;
-    bool reset_on_background = false;
-    uint32_t gl_texture_id = 0;
-    void* egl_image = nullptr;
-    std::shared_ptr<AndroidHardwareBuffer> last_ahb;
-    std::shared_ptr<AndroidVulkanExternalTexture> last_vulkan_texture;
-  };
-
-  mutable std::mutex textures_mutex_;
-  std::unordered_map<int64_t, SurfaceTextureEntry> surface_textures_;
-  std::unordered_map<int64_t, ImageTextureEntry> image_textures_;
   std::shared_ptr<AndroidHardwareBufferProvider> ahb_provider_;
   std::shared_ptr<DefaultAndroidVulkanTextureProvider> vk_texture_provider_;
-  std::unique_ptr<SurfaceTextureGlToAhbBlitter> surface_texture_blitter_;
-
-  std::mutex pending_startup_mutex_;
   std::vector<PendingPlatformMessage> pending_platform_messages_;
-  std::function<void()> pending_viewport_metrics_callback_;
-  std::optional<bool> pending_semantics_enabled_;
-  std::optional<int32_t> pending_accessibility_features_;
   std::string initial_route_;
-
-  std::mutex response_mutex_;
-  int32_t next_engine_response_id_ = 1;
+  FlutterCustomAssetResolver custom_asset_resolver_{};
+  FlutterImageDecoderRegistration image_decoder_registration_{};
+  std::unordered_map<int32_t, OverlayEglSurfaceEntry> egl_overlay_surfaces_;
+  std::unordered_map<int64_t, SurfaceTextureEntry> surface_textures_;
+  std::unordered_map<int64_t, ImageTextureEntry> image_textures_;
   std::unordered_map<int32_t, const FlutterPlatformMessageResponseHandle*>
       pending_engine_responses_;
+  mutable std::mutex native_window_mutex_;
+  mutable std::mutex textures_mutex_;
+  std::mutex pending_startup_mutex_;
+  std::mutex response_mutex_;
+  FlutterEngineProcTable proc_table_{};
+  int32_t last_display_id_ = 0;
+  int32_t next_engine_response_id_ = 1;
+  std::optional<int32_t> pending_accessibility_features_;
+  bool use_engine_owned_task_runners_ = true;
+  bool is_using_mock_proc_table_ = false;
+  bool enable_surface_control_ = false;
+  std::atomic<bool> first_frame_presented_{false};
+  std::optional<bool> pending_semantics_enabled_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(FlutterEmbedderNative);
 };

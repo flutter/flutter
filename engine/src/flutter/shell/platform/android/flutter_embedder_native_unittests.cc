@@ -11,6 +11,7 @@
 #include <memory>
 #include <string>
 #include <thread>
+#include <type_traits>
 #include <vector>
 
 #include "flutter/common/vulkan_driver_info.h"
@@ -945,11 +946,11 @@ TEST_F(FlutterEmbedderNativeTest,
     jobject set_field_value_obj = nullptr;
     bool queried_long_obj_field = false;
   };
-  static FakeSpawnJniState* s_state = nullptr;
-  FakeSpawnJniState state;
-  s_state = &state;
+  static FakeSpawnJniState s_state;
+  s_state = FakeSpawnJniState{};
 
-  JNINativeInterface_ table{};
+  std::remove_const_t<std::remove_pointer_t<decltype(JNIEnv::functions)>>
+      table{};
   table.ExceptionCheck = [](JNIEnv*) -> jboolean { return JNI_FALSE; };
   table.ExceptionClear = [](JNIEnv*) {};
   table.DeleteLocalRef = [](JNIEnv*, jobject) {};
@@ -958,60 +959,60 @@ TEST_F(FlutterEmbedderNativeTest,
   table.NewLocalRef = [](JNIEnv*, jobject obj) -> jobject { return obj; };
   table.FindClass = [](JNIEnv*, const char* name) -> jclass {
     if (std::string(name) == "io/flutter/embedding/engine/FlutterJNI") {
-      return s_state->flutter_jni_cls;
+      return s_state.flutter_jni_cls;
     }
     if (std::string(name) == "java/lang/Long") {
-      return s_state->long_cls;
+      return s_state.long_cls;
     }
     return nullptr;
   };
   table.GetMethodID = [](JNIEnv*, jclass clazz, const char* name,
                          const char* sig) -> jmethodID {
-    if (clazz == s_state->flutter_jni_cls && std::string(name) == "<init>" &&
+    if (clazz == s_state.flutter_jni_cls && std::string(name) == "<init>" &&
         std::string(sig) == "()V") {
-      return s_state->flutter_jni_ctor;
+      return s_state.flutter_jni_ctor;
     }
     return nullptr;
   };
   table.GetFieldID = [](JNIEnv*, jclass clazz, const char* name,
                         const char* sig) -> jfieldID {
-    if (clazz == s_state->flutter_jni_cls &&
+    if (clazz == s_state.flutter_jni_cls &&
         std::string(name) == "nativeShellHolderId" &&
         std::string(sig) == "Ljava/lang/Long;") {
-      s_state->queried_long_obj_field = true;
-      return s_state->shell_holder_obj_fid;
+      s_state.queried_long_obj_field = true;
+      return s_state.shell_holder_obj_fid;
     }
     return nullptr;
   };
   table.NewObjectV = [](JNIEnv*, jclass clazz, jmethodID methodID,
                         va_list) -> jobject {
-    if (clazz == s_state->flutter_jni_cls &&
-        methodID == s_state->flutter_jni_ctor) {
-      return s_state->new_flutter_jni_obj;
+    if (clazz == s_state.flutter_jni_cls &&
+        methodID == s_state.flutter_jni_ctor) {
+      return s_state.new_flutter_jni_obj;
     }
     return nullptr;
   };
   table.GetStaticMethodID = [](JNIEnv*, jclass clazz, const char* name,
                                const char* sig) -> jmethodID {
-    if (clazz == s_state->long_cls && std::string(name) == "valueOf" &&
+    if (clazz == s_state.long_cls && std::string(name) == "valueOf" &&
         std::string(sig) == "(J)Ljava/lang/Long;") {
-      return s_state->long_value_of;
+      return s_state.long_value_of;
     }
     return nullptr;
   };
   table.CallStaticObjectMethodV = [](JNIEnv*, jclass clazz, jmethodID methodID,
                                      va_list args) -> jobject {
-    if (clazz == s_state->long_cls && methodID == s_state->long_value_of) {
-      s_state->boxed_long_value = va_arg(args, jlong);
-      return s_state->boxed_long_obj;
+    if (clazz == s_state.long_cls && methodID == s_state.long_value_of) {
+      s_state.boxed_long_value = va_arg(args, jlong);
+      return s_state.boxed_long_obj;
     }
     return nullptr;
   };
   table.SetObjectField = [](JNIEnv*, jobject obj, jfieldID fieldID,
                             jobject val) {
-    s_state->set_field_target_obj = obj;
-    s_state->set_field_fid = fieldID;
-    s_state->set_field_value_obj = val;
+    s_state.set_field_target_obj = obj;
+    s_state.set_field_fid = fieldID;
+    s_state.set_field_value_obj = val;
   };
 
   JNIEnv fake_env{};
@@ -1037,15 +1038,15 @@ TEST_F(FlutterEmbedderNativeTest,
   jobject spawned_jni =
       spawn_fn(&fake_env, nullptr, reinterpret_cast<jlong>(&parent), nullptr,
                nullptr, nullptr, nullptr, kTestSpawnedEngineId);
-  EXPECT_EQ(spawned_jni, state.new_flutter_jni_obj);
-  EXPECT_TRUE(state.queried_long_obj_field);
-  EXPECT_NE(state.boxed_long_value, 0);
-  EXPECT_EQ(state.set_field_target_obj, state.new_flutter_jni_obj);
-  EXPECT_EQ(state.set_field_fid, state.shell_holder_obj_fid);
-  EXPECT_EQ(state.set_field_value_obj, state.boxed_long_obj);
+  EXPECT_EQ(spawned_jni, s_state.new_flutter_jni_obj);
+  EXPECT_TRUE(s_state.queried_long_obj_field);
+  EXPECT_NE(s_state.boxed_long_value, 0);
+  EXPECT_EQ(s_state.set_field_target_obj, s_state.new_flutter_jni_obj);
+  EXPECT_EQ(s_state.set_field_fid, s_state.shell_holder_obj_fid);
+  EXPECT_EQ(s_state.set_field_value_obj, s_state.boxed_long_obj);
 
-  destroy_fn(&fake_env, nullptr, state.boxed_long_value);
-  s_state = nullptr;
+  destroy_fn(&fake_env, nullptr, s_state.boxed_long_value);
+  s_state = FakeSpawnJniState{};
 }
 
 // =============================================================================
@@ -1524,15 +1525,17 @@ TEST_F(
   fml::RefPtr<fml::TaskRunner> platform_runner =
       fml::MessageLoop::GetCurrent().GetTaskRunner();
 
-  std::atomic<bool> platform_task_executed{false};
   FlutterEngineProcTable custom_table = proc_table_;
   struct CrossThreadTestState {
     fml::RefPtr<fml::TaskRunner> platform_runner;
-    std::atomic<bool>* platform_task_executed = nullptr;
+    std::atomic<bool> platform_task_executed{false};
   };
   static CrossThreadTestState s_cross_thread_state;
   s_cross_thread_state.platform_runner = platform_runner;
-  s_cross_thread_state.platform_task_executed = &platform_task_executed;
+  s_cross_thread_state.platform_task_executed.store(false);
+  struct CrossThreadCleanup {
+    ~CrossThreadCleanup() { s_cross_thread_state.platform_runner = nullptr; }
+  } cleanup;
 
   custom_table.PostRenderThreadTask =
       [](FLUTTER_API_SYMBOL(FlutterEngine) engine, VoidCallback callback,
@@ -1544,9 +1547,7 @@ TEST_F(
           // thread task before the posted render thread task can run.
           fml::AutoResetWaitableEvent platform_latch;
           s_cross_thread_state.platform_runner->PostTask([&platform_latch]() {
-            if (s_cross_thread_state.platform_task_executed != nullptr) {
-              s_cross_thread_state.platform_task_executed->store(true);
-            }
+            s_cross_thread_state.platform_task_executed.store(true);
             platform_latch.Signal();
           });
           platform_latch.Wait();
@@ -1566,7 +1567,7 @@ TEST_F(
   auto fake_surface = reinterpret_cast<jobject>(kFakeSurfaceAddress);
   embedder.SurfaceCreated(nullptr, fake_surface);
 
-  EXPECT_TRUE(platform_task_executed.load());
+  EXPECT_TRUE(s_cross_thread_state.platform_task_executed.load());
 }
 
 }  // namespace testing

@@ -561,7 +561,7 @@ void AndroidTaskRunners::SetThreadPriorityCallback(
       break;
     }
     case FlutterThreadPriority::kDisplay: {
-      fml::RequestAffinity(fml::CpuAffinity::kNotLittle);
+      fml::RequestAffinity(fml::CpuAffinity::kNotEfficiency);
       if (::setpriority(PRIO_PROCESS, kCurrentThreadPriorityTarget,
                         kAndroidDisplayThreadNiceValue) != 0) {
         FML_LOG(ERROR) << "Failed to set UI task runner priority";
@@ -569,7 +569,7 @@ void AndroidTaskRunners::SetThreadPriorityCallback(
       break;
     }
     case FlutterThreadPriority::kRaster: {
-      fml::RequestAffinity(fml::CpuAffinity::kNotLittle);
+      fml::RequestAffinity(fml::CpuAffinity::kNotEfficiency);
       if (::setpriority(PRIO_PROCESS, kCurrentThreadPriorityTarget,
                         kAndroidRasterThreadNiceValue) != 0) {
         if (::setpriority(PRIO_PROCESS, kCurrentThreadPriorityTarget,
@@ -817,20 +817,20 @@ FlutterEmbedderNative* FlutterEmbedderNative::GetActiveInstance() {
 FlutterEmbedderNative::FlutterEmbedderNative(
     const FlutterEngineProcTable* proc_table,
     bool use_engine_owned_task_runners)
-    : proc_table_(ResolveProcTable(proc_table)),
+    : compositor_(std::make_unique<AndroidCompositor>()),
+      jvm_invoker_(std::make_shared<JvmInvoker>()),
+      proc_table_(ResolveProcTable(proc_table)),
       use_engine_owned_task_runners_(use_engine_owned_task_runners),
       is_using_mock_proc_table_(proc_table != nullptr ||
-                                HasGlobalProcTableOverride()),
-      jvm_invoker_(std::make_shared<JvmInvoker>()),
-      compositor_(std::make_unique<AndroidCompositor>()),
-      asset_provider_(
-          is_using_mock_proc_table_
-              ? std::make_unique<APKAssetProvider>()
-              : std::make_unique<APKAssetProvider>(nullptr, nullptr, "")),
-      engine_group_(std::make_shared<AndroidEngineGroup>(nullptr,
-                                                         nullptr,
-                                                         &proc_table_)) {
+                                HasGlobalProcTableOverride()) {
   TRACE_EVENT0("flutter", "FlutterEmbedderNative::FlutterEmbedderNative");
+
+  asset_provider_ =
+      is_using_mock_proc_table_
+          ? std::make_unique<APKAssetProvider>()
+          : std::make_unique<APKAssetProvider>(nullptr, nullptr, "");
+  engine_group_ =
+      std::make_shared<AndroidEngineGroup>(nullptr, nullptr, &proc_table_);
 
   auto initial_vm_args = AndroidVMInit::GetGlobalVMArgs();
   if (initial_vm_args.has_value()) {
