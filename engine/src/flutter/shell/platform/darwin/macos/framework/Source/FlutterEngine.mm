@@ -324,7 +324,6 @@ constexpr char kTextPlainFormat[] = "text/plain";
 @implementation FlutterEngineRegistrar {
   NSString* _pluginKey;
   __weak FlutterEngine* _flutterEngine;
-  int64_t _engineIdentifier;
 }
 
 @dynamic view;
@@ -334,7 +333,6 @@ constexpr char kTextPlainFormat[] = "text/plain";
   if (self) {
     _pluginKey = [pluginKey copy];
     _flutterEngine = flutterEngine;
-    _engineIdentifier = reinterpret_cast<int64_t>((__bridge void*)flutterEngine);
     _publishedValue = [NSNull null];
   }
   return self;
@@ -343,7 +341,7 @@ constexpr char kTextPlainFormat[] = "text/plain";
 #pragma mark - FlutterPluginRegistrar
 
 - (int64_t)engineIdentifier {
-  return _engineIdentifier;
+  return _flutterEngine.engineIdentifier;
 }
 
 - (id<FlutterBinaryMessenger>)messenger {
@@ -745,7 +743,7 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
     [FlutterLogger logDirect:[NSString stringWithUTF8String:log.c_str()]];
   };
 
-  flutterArguments.engine_id = reinterpret_cast<int64_t>((__bridge void*)self);
+  flutterArguments.engine_id = self.engineIdentifier;
   BOOL enableWideGamut = _project.enableWideGamut;
   if (std::find(switches.begin(), switches.end(), "--enable-impeller=false") != switches.end()) {
     enableWideGamut = NO;
@@ -1387,6 +1385,10 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
     NSLog(@"Failed to shut down Flutter engine: error %d", result);
   }
   _engine = nullptr;
+}
+
+- (int64_t)engineIdentifier {
+  return reinterpret_cast<int64_t>((__bridge void*)self);
 }
 
 + (FlutterEngine*)engineForIdentifier:(int64_t)identifier {

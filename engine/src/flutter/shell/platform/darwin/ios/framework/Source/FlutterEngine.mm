@@ -93,7 +93,6 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
 @interface FlutterEngineBaseRegistrar : NSObject <FlutterBaseRegistrar>
 
 @property(nonatomic, weak) FlutterEngine* flutterEngine;
-@property(nonatomic, readonly) int64_t engineIdentifier;
 @property(nonatomic, readonly) NSString* key;
 
 - (instancetype)initWithKey:(NSString*)key flutterEngine:(FlutterEngine*)flutterEngine;
@@ -1758,8 +1757,11 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
   NSAssert(self, @"Super init cannot be nil");
   _key = [key copy];
   _flutterEngine = flutterEngine;
-  _engineIdentifier = flutterEngine.engineIdentifier;
   return self;
+}
+
+- (int64_t)engineIdentifier {
+  return _flutterEngine.engineIdentifier;
 }
 
 - (NSObject<FlutterBinaryMessenger>*)messenger {

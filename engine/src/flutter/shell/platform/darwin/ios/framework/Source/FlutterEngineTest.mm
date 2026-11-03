@@ -319,25 +319,14 @@ id CreateMockViewControllerOnScreen(CGSize screenNativeSize, CGFloat screenScale
 
 - (void)testNotifyPluginOfDealloc {
   id plugin = OCMProtocolMock(@protocol(FlutterPlugin));
-  __block int64_t detachedEngineId = 0;
-  OCMStub([plugin detachFromEngineForRegistrar:[OCMArg any]]).andDo(^(NSInvocation* invocation) {
-    __unsafe_unretained NSObject<FlutterPluginRegistrar>* detachedRegistrar = nil;
-    [invocation getArgument:&detachedRegistrar atIndex:2];
-    detachedEngineId = detachedRegistrar.engineIdentifier;
-  });
-  int64_t engineId = 0;
-  NSObject<FlutterPluginRegistrar>* registrar = nil;
+  OCMStub([plugin detachFromEngineForRegistrar:[OCMArg any]]);
   @autoreleasepool {
     FlutterDartProject* project = [[FlutterDartProject alloc] init];
     FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"engine" project:project];
-    engineId = engine.engineIdentifier;
-    XCTAssertTrue(engineId != 0);
-    registrar = [engine registrarForPlugin:@"plugin"];
+    NSObject<FlutterPluginRegistrar>* registrar = [engine registrarForPlugin:@"plugin"];
     [registrar publish:plugin];
   }
   OCMVerify([plugin detachFromEngineForRegistrar:[OCMArg any]]);
-  XCTAssertEqual(detachedEngineId, engineId);
-  XCTAssertEqual(registrar.engineIdentifier, engineId);
 }
 
 - (void)testGetViewControllerFromRegistrar {
