@@ -252,6 +252,26 @@ def _synced_repository_impl(rctx):
 
     source = checkout_root(rctx).get_child(rctx.attr.path)
     if not source.exists or not source.is_dir:
+        if rctx.attr.fallback_url and not converting:
+            # A tool of DEPS in a checkout without it (no `gclient sync`: a
+            # framework developer's, a flutter_drone bot's running the tests
+            # on the prebuilt engine): the same package from where DEPS
+            # would have fetched it. Noted, since it is not what the name says.
+            print("synced_repository(%s): %s is not in the checkout; downloading %s instead." % (
+                rctx.name,
+                rctx.attr.path,
+                rctx.attr.fallback_url,
+            ))  # buildifier: disable=print
+            rctx.download_and_extract(
+                url = rctx.attr.fallback_url,
+                type = rctx.attr.fallback_type,
+                sha256 = rctx.attr.fallback_sha256,
+                canonical_id = rctx.attr.fallback_url,
+                stripPrefix = rctx.attr.fallback_strip_prefix,
+            )
+            _write_build_file(rctx, rctx.attr.build_file, rctx.attr.build_file_content)
+            _mark_repository_boundary(rctx)
+            return
         fail(
             "synced_repository(%s): %s does not exist. It is populated by " % (rctx.name, source) +
             (rctx.attr.missing_hint or "`gclient sync`; run it from the repository root (see DEPS)") + ".",
@@ -326,9 +346,26 @@ synced_repository = repository_rule(
         "missing_hint": attr.string(
             doc = "What populates `path`, for the error when it is absent; `gclient sync` by default.",
         ),
+        "fallback_url": attr.string(
+            doc = "An archive to download and extract in place of `path` when it is absent (a CIPD " +
+                  "package's zip, cipd_download_url; a sysroot's tarball): the tools of DEPS in a " +
+                  "checkout without them. Not with gn_build_files.",
+        ),
+        "fallback_type": attr.string(
+            default = "zip",
+            doc = "The archive's type, as download_and_extract takes it (`zip`, `tar.xz`).",
+        ),
+        "fallback_sha256": attr.string(
+            doc = "The archive's sha256; without it the download is unverified and not shared through " +
+                  "the repository cache.",
+        ),
+        "fallback_strip_prefix": attr.string(
+            doc = "A directory of the archive that becomes the repository's root.",
+        ),
     },
     # The repository only symlinks into the checkout, so it must be re-created
-    # when the checkout layout changes rather than restored from a cache.
+    # when the checkout layout changes rather than restored from a cache (a
+    # fallback download comes back from the repository cache).
     local = True,
 )
 
