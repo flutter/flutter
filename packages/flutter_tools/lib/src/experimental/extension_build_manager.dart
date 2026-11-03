@@ -61,6 +61,9 @@ base class ExtensionBuildManager {
                 BuildService.getBuildTargetsMethod,
               );
               return (connection, ExtensionBuildTarget.listFromJson(result));
+            } on ToolExtensionException catch (e) {
+              _logger.printWarning('Extension "${connection.extensionName}": ${e.message}');
+              return (connection, const <ExtensionBuildTarget>[]);
             } on Object catch (e) {
               _logger.printWarning('Failed to query build targets from extension: $e');
               return (connection, const <ExtensionBuildTarget>[]);
@@ -156,6 +159,8 @@ base class ExtensionBuildManager {
         success: false,
         errorMessage: 'Invalid build result from extension.',
       );
+    } on ToolExtensionException catch (e) {
+      return ExtensionBuildResult(success: false, errorMessage: e.message);
     } on Object catch (e) {
       _logger.printTrace('Failed to run build from extension: $e');
       return ExtensionBuildResult(success: false, errorMessage: e.toString());

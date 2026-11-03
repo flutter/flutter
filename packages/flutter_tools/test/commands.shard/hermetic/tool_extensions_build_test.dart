@@ -202,6 +202,37 @@ void _throwingQueryExtensionEntryPoint(SendPort sendPort) {
   );
 }
 
+final class _DomainErrorBuildTarget extends BuildTarget {
+  const _DomainErrorBuildTarget()
+    : super(
+        description: 'Custom target throwing ToolExtensionException',
+        outputDir: '${BuiltInPlaceholders.outputDir}/custom_os',
+        targetPlatform: 'linux-x64',
+      );
+
+  @override
+  String get name => 'custom-os-bundle';
+
+  @override
+  Future<ExtensionBuildResult> build(ExtensionBuildContext context) async {
+    throw const ToolExtensionException('Custom compiler missing.');
+  }
+}
+
+final class _DomainErrorBuildService extends BuildService {
+  @override
+  List<BuildTarget> get buildTargets => const <BuildTarget>[_DomainErrorBuildTarget()];
+}
+
+void _domainErrorBuildExtensionEntryPoint(SendPort sendPort) {
+  ToolExtensionEntryPoint.run(
+    sendPort,
+    <ToolExtensionService>[_DomainErrorBuildService()],
+    extensionName: 'custom_build_ext',
+    supportedPlatforms: const <String>{'linux'},
+  );
+}
+
 void main() {
   setUpAll(() {
     Cache.disableLocking();
@@ -772,5 +803,35 @@ void main() {
         ProcessManager: () => FakeProcessManager.any(),
       },
     );
+
+    testWithoutContext('ExtensionBuildManager.build returns failed ExtensionBuildResult when build target throws ToolExtensionException', () async {
+      final logger = BufferLogger.test();
+      final featureFlags = TestFeatureFlags(isToolExtensionsEnabled: true);
+      final manager = ExtensionManager(
+        hostPlatform: HostPlatform.linux_x64,
+        logger: logger,
+        entryPoints: <ExtensionEntryPoint>[_domainErrorBuildExtensionEntryPoint],
+        featureFlags: featureFlags,
+      );
+      addTearDown(manager.dispose);
+
+      final buildManager = ExtensionBuildManager(
+        extensionManager: manager,
+        featureFlags: featureFlags,
+        logger: logger,
+      );
+
+      final ExtensionBuildResult result = await buildManager.build(
+        buildMode: .debug,
+        flutterRoot: Uri.directory('/flutter'),
+        mainPath: 'lib/main.dart',
+        outputDir: Uri.directory('/project/build/custom_os'),
+        projectRoot: Uri.directory('/project'),
+        resolvedArtifacts: const <String, String>{},
+        targetName: 'custom-os-bundle',
+      );
+      expect(result.success, isFalse);
+      expect(result.errorMessage, 'Custom compiler missing.');
+    });
   });
 }

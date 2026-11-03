@@ -50,6 +50,12 @@ abstract class ToolExtensionService {
   }
 
   /// Cleans up resources held by the service when the extension is shut down.
+  ///
+  /// Invoked by `ToolExtensionEntryPoint.run` when the host tool sends an
+  /// `extension.shutdown` RPC on CLI exit or connection disposal. Runs
+  /// concurrently across all registered services in the isolate via
+  /// `Future.wait`, with a bounded grace period of approximately 2 seconds on
+  /// the host before the extension isolate is terminated.
   Future<void> shutdown() async {}
 }
 

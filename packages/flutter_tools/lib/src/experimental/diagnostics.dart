@@ -97,6 +97,8 @@ class DiagnosticsExtensionClient extends DiagnosticsExtension {
       } else {
         _logger.printTrace('DiagnosticsExtensionClient received invalid title response: $response');
       }
+    } on ToolExtensionException catch (err) {
+      _logger.printWarning('Extension "${connection.extensionName}": ${err.message}');
     } on Object catch (err, stack) {
       _logger.printTrace('DiagnosticsExtensionClient failed to fetch title: $err\n$stack');
     }
@@ -127,6 +129,12 @@ class DiagnosticsExtensionClient extends DiagnosticsExtension {
       _logger.printTrace(
         'DiagnosticsExtensionClient received invalid diagnostics response: $response',
       );
+    } on ToolExtensionException catch (err) {
+      return <ValidationResult>[
+        ValidationResult(ValidationType.missing, <ValidationMessage>[
+          ValidationMessage.error(err.message),
+        ]),
+      ];
     } on Object catch (err, stack) {
       _logger.printTrace('DiagnosticsExtensionClient failed to run diagnostics: $err\n$stack');
     }
