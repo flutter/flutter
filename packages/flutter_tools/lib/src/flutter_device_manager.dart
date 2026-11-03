@@ -53,7 +53,7 @@ class FlutterDeviceManager extends DeviceManager {
     required this._templateRenderer,
     required this._toolContext,
     required this._windowsWorkflow,
-  }) : super(logger: _toolContext.logger);
+  }) : super(fileSystem: _toolContext.fs, logger: _toolContext.logger);
 
   final Analytics _analytics;
   final AndroidSdk? Function() _androidSdkBuilder;
