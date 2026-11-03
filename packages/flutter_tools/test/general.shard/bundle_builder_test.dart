@@ -64,10 +64,6 @@ BundleBuilder createBundleBuilder({
 
 // Tests for BundleBuilder.
 void main() {
-  setUp(() {
-    Cache.flutterRoot = getFlutterRoot();
-  });
-
   testWithoutContext('Copies assets to expected directory after building', () async {
     final fileSystem = MemoryFileSystem.test();
     final BuildSystem buildSystem = TestBuildSystem.all(BuildResult(success: true), (

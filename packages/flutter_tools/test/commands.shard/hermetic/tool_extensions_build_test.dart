@@ -205,7 +205,6 @@ void _throwingQueryExtensionEntryPoint(SendPort sendPort) {
 void main() {
   setUpAll(() {
     Cache.disableLocking();
-    Cache.flutterRoot = '/flutter';
   });
 
   group('Tool Extensions Build Integration - Disabled', () {
@@ -309,16 +308,14 @@ void main() {
 
   group('Tool Extensions Build Integration - Enabled', () {
     late MemoryFileSystem fs;
+    late Cache cache;
 
     setUp(() {
-      final String? oldFlutterRoot = Cache.flutterRoot;
-      addTearDown(() => Cache.flutterRoot = oldFlutterRoot);
-      Cache.flutterRoot = '/flutter';
-
       fs = MemoryFileSystem.test();
       fs.directory('/flutter').createSync(recursive: true);
       fs.file('/pubspec.yaml').createSync();
       fs.file('/lib/main.dart').createSync(recursive: true);
+      cache = FakeCache(fileSystem: fs, flutterRoot: '/flutter');
     });
 
     testUsingContext(
@@ -570,7 +567,7 @@ void main() {
           extensionBuildManager: buildManager,
           featureFlags: featureFlags,
           templateRenderer: FakeTemplateRenderer(),
-          toolContext: FakeToolContext(fs: fs, logger: testLogger),
+          toolContext: FakeToolContext(cache: cache, fs: fs, logger: testLogger),
         );
 
         final CommandRunner<void> commandRunner = createTestCommandRunner(command);
@@ -603,7 +600,7 @@ void main() {
         final subCommand = ExtensionBuildSubCommand(
           buildManager: fakeBuildManager,
           target: target,
-          toolContext: FakeToolContext(fs: fs, logger: testLogger),
+          toolContext: FakeToolContext(cache: cache, fs: fs, logger: testLogger),
           verboseHelp: false,
         );
 
@@ -642,7 +639,12 @@ void main() {
       final subCommand = ExtensionBuildSubCommand(
         buildManager: buildManager,
         target: target,
-        toolContext: FakeToolContext(config: config, fs: fs, logger: BufferLogger.test()),
+        toolContext: FakeToolContext(
+          cache: cache,
+          config: config,
+          fs: fs,
+          logger: BufferLogger.test(),
+        ),
         verboseHelp: false,
       );
 
@@ -667,7 +669,7 @@ void main() {
         final subCommand = ExtensionBuildSubCommand(
           buildManager: buildManager,
           target: target,
-          toolContext: FakeToolContext(fs: fs, logger: BufferLogger.test()),
+          toolContext: FakeToolContext(cache: cache, fs: fs, logger: BufferLogger.test()),
           verboseHelp: false,
         );
 
@@ -703,7 +705,7 @@ void main() {
           extensionBuildManager: buildManager,
           featureFlags: featureFlags,
           templateRenderer: FakeTemplateRenderer(),
-          toolContext: FakeToolContext(fs: fs, logger: testLogger),
+          toolContext: FakeToolContext(cache: cache, fs: fs, logger: testLogger),
         );
 
         final CommandRunner<void> commandRunner = createTestCommandRunner(command);
@@ -753,7 +755,7 @@ void main() {
           extensionBuildManager: buildManager,
           featureFlags: featureFlags,
           templateRenderer: FakeTemplateRenderer(),
-          toolContext: FakeToolContext(fs: fs, logger: testLogger),
+          toolContext: FakeToolContext(cache: cache, fs: fs, logger: testLogger),
         );
 
         final CommandRunner<void> commandRunner = createTestCommandRunner(command);

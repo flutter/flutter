@@ -218,7 +218,6 @@ void main() {
     testUsingContext(
       'sends timing events to analytics',
       () async {
-        Cache.flutterRoot = '/flutter';
         fileSystem.file('pubspec.yaml').createSync();
         writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
         fileSystem.file(fileSystem.path.join('linux', 'CMakeLists.txt'))
@@ -245,6 +244,7 @@ void main() {
         final device = LinuxDevice(
           analytics: fakeAnalytics,
           toolContext: FakeToolContext(
+            cache: Cache.test(processManager: FakeProcessManager.any(), flutterRoot: '/flutter'),
             fs: fileSystem,
             logger: BufferLogger.test(),
             os: FakeOperatingSystemUtils(),
