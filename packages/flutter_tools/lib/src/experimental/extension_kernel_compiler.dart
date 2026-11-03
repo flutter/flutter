@@ -8,6 +8,7 @@ import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
 import '../artifacts.dart';
+import '../base/error_handling_io.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
@@ -110,9 +111,8 @@ class ExtensionKernelCompiler {
 
         final File tempDillFile = _fileSystem.file('${dillFile.path}.tmp');
         final File tempDepFile = _fileSystem.file('${depFile.path}.tmp');
-        final String dartExecutable = _resolveDartExecutable();
         final command = <String>[
-          dartExecutable,
+          _artifacts.getArtifactPath(Artifact.engineDartBinary),
           'compile',
           'kernel',
           '--packages=${packageConfigFile.path}',
@@ -126,8 +126,8 @@ class ExtensionKernelCompiler {
         );
         final ProcessResult result = await _processManager.run(command);
         if (result.exitCode != 0) {
-          _tryDeleteFile(tempDillFile);
-          _tryDeleteFile(tempDepFile);
+          ErrorHandlingFileSystem.deleteIfExists(tempDillFile);
+          ErrorHandlingFileSystem.deleteIfExists(tempDepFile);
           throw ExtensionCompileException(
             'Failed to compile extension "${extension.name}" to kernel '
             '(exit code ${result.exitCode}):\n${result.stderr}',
@@ -135,8 +135,8 @@ class ExtensionKernelCompiler {
         }
 
         if (!tempDillFile.existsSync() || tempDillFile.lengthSync() == 0) {
-          _tryDeleteFile(tempDillFile);
-          _tryDeleteFile(tempDepFile);
+          ErrorHandlingFileSystem.deleteIfExists(tempDillFile);
+          ErrorHandlingFileSystem.deleteIfExists(tempDepFile);
           throw ExtensionCompileException(
             'Failed to compile extension "${extension.name}" to kernel: '
             'compiler exited 0 but did not produce a non-empty "${tempDillFile.path}".',
@@ -180,17 +180,6 @@ class ExtensionKernelCompiler {
       return true;
     }
     return false;
-  }
-
-  static void _tryDeleteFile(File file) {
-    if (!file.existsSync()) {
-      return;
-    }
-    try {
-      file.deleteSync();
-    } on FileSystemException {
-      // Best-effort cleanup of incomplete kernel output.
-    }
   }
 
   /// Determines whether [extension]'s package root resides inside `$PUB_CACHE`
@@ -262,13 +251,10 @@ class ExtensionKernelCompiler {
         if (value.trim().isNotEmpty) key: value.trim(),
     };
     try {
-      String dataHomePath = getDartDataHome(
+      final String dataHomePath = getDartDataHome(
         _kExtensionsDataDirectoryName,
         environment: environment,
       );
-      if (_fileSystem.path.separator == '/') {
-        dataHomePath = dataHomePath.replaceAll(r'\', '/');
-      }
       return _fileSystem.directory(dataHomePath).childDirectory(_kCacheSubdirectoryName);
     } on Exception {
       return _flutterRoot
@@ -304,44 +290,24 @@ class ExtensionKernelCompiler {
     if (!dillFile.existsSync() || !depFile.existsSync() || dillFile.lengthSync() == 0) {
       return true;
     }
-
-    final DateTime dillModified = dillFile.lastModifiedSync();
-
-    if (packageConfigFile.existsSync() &&
-        packageConfigFile.lastModifiedSync().isAfter(dillModified)) {
-      return true;
-    }
-
-    if (entrypointFile.existsSync() && entrypointFile.lastModifiedSync().isAfter(dillModified)) {
-      return true;
-    }
-
-    final File sdkVersionFile = _resolveDartSdkVersionFile();
-    if (sdkVersionFile.existsSync() && sdkVersionFile.lastModifiedSync().isAfter(dillModified)) {
-      return true;
-    }
-
     final Depfile depfile = _depfileService.parse(depFile);
     if (depfile.inputs.isEmpty) {
       return true;
     }
-
-    for (final File sourceFile in depfile.inputs) {
-      if (!sourceFile.existsSync() || sourceFile.lastModifiedSync().isAfter(dillModified)) {
+    final DateTime dillModified = dillFile.lastModifiedSync();
+    for (final file in <File>[packageConfigFile, entrypointFile, _resolveDartSdkVersionFile()]) {
+      if (file.existsSync() && file.lastModifiedSync().isAfter(dillModified)) {
         return true;
       }
     }
-
-    return false;
+    return depfile.inputs.any(
+      (File input) => !input.existsSync() || input.lastModifiedSync().isAfter(dillModified),
+    );
   }
 
-  File _resolveDartSdkVersionFile() {
-    return _flutterRoot
-        .childDirectory('bin')
-        .childDirectory('cache')
-        .childDirectory('dart-sdk')
-        .childFile('version');
-  }
-
-  String _resolveDartExecutable() => _artifacts.getArtifactPath(Artifact.engineDartBinary);
+  File _resolveDartSdkVersionFile() => _flutterRoot
+      .childDirectory('bin')
+      .childDirectory('cache')
+      .childDirectory('dart-sdk')
+      .childFile('version');
 }

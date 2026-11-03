@@ -6,12 +6,15 @@ import 'package:extension_discovery/extension_discovery.dart' as ext_discovery;
 import 'package:flutter_tools_core/flutter_tools_core.dart';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config_types.dart';
+import 'package:pubspec_parse/pubspec_parse.dart';
 import 'package:yaml/yaml.dart';
 
 import '../base/error_handling_io.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../dart/package_map.dart';
+
+typedef _RawExtension = ({String package, Uri rootUri, Uri packageUri, Object? config});
 
 /// Metadata for a project-scoped tool extension discovered via
 /// `.dart_tool/package_config.json` and `extension/flutter_tools/config.yaml`.
@@ -57,8 +60,6 @@ class ProjectExtensionFinder {
   static const String kTargetPackageName = 'flutter_tools';
 
   static const String _kPubspecFileName = 'pubspec.yaml';
-  static const String _kDependenciesKey = 'dependencies';
-  static const String _kDevDependenciesKey = 'dev_dependencies';
 
   final FileSystem _fileSystem;
   final Logger _logger;
@@ -96,50 +97,52 @@ class ProjectExtensionFinder {
     }
 
     final Uri packageConfigUri = packageConfigFile.absolute.uri;
-    if (_isBackedByLocalFileSystem(_fileSystem)) {
-      try {
-        final List<ext_discovery.Extension> rawExtensions = await ext_discovery.findExtensions(
-          kTargetPackageName,
-          packageConfig: packageConfigUri,
-        );
-        return _filterAndValidateDiscoveredExtensions(
-          rawExtensions: <({String package, Uri rootUri, Uri packageUri, Object? config})>[
-            for (final ext_discovery.Extension ext in rawExtensions)
-              (
-                package: ext.package,
-                rootUri: ext.rootUri,
-                packageUri: ext.rootUri.resolveUri(ext.packageUri),
-                config: ext.config,
-              ),
-          ],
+    final List<_RawExtension> rawExtensions =
+        await _tryFindWithExtensionDiscovery(packageConfigUri) ??
+        await _readExtensionsFromFileSystem(
+          packageConfigFile: packageConfigFile,
           directDependencies: directDependencies,
-          packageConfigUri: packageConfigUri,
-          workspaceRootPath: workspaceRoot.path,
         );
-      } on Exception catch (error) {
-        _logger.printTrace(
-          'ProjectExtensionFinder: findExtensions failed for "$packageConfigUri" ($error); '
-          'falling back to FileSystem scan.',
-        );
-      }
-    }
-
-    return _findExtensionsFromFileSystem(
-      packageConfigFile: packageConfigFile,
+    return _filterAndValidateDiscoveredExtensions(
+      rawExtensions: rawExtensions,
       directDependencies: directDependencies,
+      packageConfigUri: packageConfigUri,
       workspaceRootPath: workspaceRoot.path,
     );
   }
 
-  static bool _isBackedByLocalFileSystem(FileSystem fs) {
-    if (fs is LocalFileSystem) {
-      return true;
+  Future<List<_RawExtension>?> _tryFindWithExtensionDiscovery(Uri packageConfigUri) async {
+    if (!_isBackedByLocalFileSystem(_fileSystem)) {
+      return null;
     }
-    if (fs is ErrorHandlingFileSystem) {
-      return _isBackedByLocalFileSystem(fs.fileSystem);
+    try {
+      final List<ext_discovery.Extension> extensions = await ext_discovery.findExtensions(
+        kTargetPackageName,
+        packageConfig: packageConfigUri,
+      );
+      return <_RawExtension>[
+        for (final ext_discovery.Extension ext in extensions)
+          (
+            package: ext.package,
+            rootUri: ext.rootUri,
+            packageUri: ext.rootUri.resolveUri(ext.packageUri),
+            config: ext.config,
+          ),
+      ];
+    } on Exception catch (error) {
+      _logger.printTrace(
+        'ProjectExtensionFinder: findExtensions failed for "$packageConfigUri" ($error); '
+        'falling back to FileSystem scan.',
+      );
+      return null;
     }
-    return false;
   }
+
+  static bool _isBackedByLocalFileSystem(FileSystem fs) => switch (fs) {
+    LocalFileSystem() => true,
+    ErrorHandlingFileSystem(:final FileSystem fileSystem) => _isBackedByLocalFileSystem(fileSystem),
+    _ => false,
+  };
 
   /// Collects direct `dependencies` and `dev_dependencies` package names from
   /// the active project's `pubspec.yaml` and the workspace root's `pubspec.yaml`.
@@ -148,73 +151,56 @@ class ProjectExtensionFinder {
     required Directory workspaceRoot,
   }) {
     final dependencies = <String>{};
-
     final File? projectPubspec = _findNearestPubspec(startDir: searchDir, stopAtDir: workspaceRoot);
     if (projectPubspec != null) {
       _extractPubspecDependencies(projectPubspec, dependencies);
     }
-
     final File workspacePubspec = workspaceRoot.childFile(_kPubspecFileName);
     if (workspacePubspec.existsSync() &&
         (projectPubspec == null ||
             !_fileSystem.path.equals(projectPubspec.path, workspacePubspec.path))) {
       _extractPubspecDependencies(workspacePubspec, dependencies);
     }
-
     return dependencies;
   }
 
   File? _findNearestPubspec({required Directory startDir, required Directory stopAtDir}) {
     Directory current = _fileSystem.directory(_fileSystem.path.normalize(startDir.absolute.path));
     final String normalizedStopPath = _fileSystem.path.normalize(stopAtDir.absolute.path);
-
     while (true) {
       final File candidate = current.childFile(_kPubspecFileName);
       if (candidate.existsSync()) {
         return candidate;
       }
-      if (_fileSystem.path.equals(current.path, normalizedStopPath)) {
+      if (_fileSystem.path.equals(current.path, normalizedStopPath) ||
+          _fileSystem.path.equals(current.parent.path, current.path)) {
         return null;
       }
-      final Directory parent = current.parent;
-      if (_fileSystem.path.equals(parent.path, current.path)) {
-        return null;
-      }
-      current = parent;
+      current = current.parent;
     }
   }
 
   void _extractPubspecDependencies(File pubspecFile, Set<String> outDependencies) {
     try {
-      final Object? parsed = loadYaml(pubspecFile.readAsStringSync());
-      if (parsed is! YamlMap) {
-        return;
-      }
-      for (final sectionKey in const <String>[_kDependenciesKey, _kDevDependenciesKey]) {
-        if (parsed[sectionKey] case final YamlMap sectionMap) {
-          for (final Object? key in sectionMap.keys) {
-            if (key is String && key.isNotEmpty) {
-              outDependencies.add(key);
-            }
-          }
-        }
-      }
+      final pubspec = Pubspec.parse(pubspecFile.readAsStringSync(), lenient: true);
+      outDependencies
+        ..addAll(pubspec.dependencies.keys)
+        ..addAll(pubspec.devDependencies.keys);
     } on Exception catch (error) {
       _logger.printTrace('ProjectExtensionFinder: failed to parse "${pubspecFile.path}": $error');
     }
   }
 
-  Future<List<DiscoveredProjectExtension>> _findExtensionsFromFileSystem({
+  Future<List<_RawExtension>> _readExtensionsFromFileSystem({
     required Set<String> directDependencies,
     required File packageConfigFile,
-    required String workspaceRootPath,
   }) async {
     final PackageConfig packageConfig = await loadPackageConfigWithLogging(
       packageConfigFile,
       logger: _logger,
       throwOnError: false,
     );
-    final rawExtensions = <({String package, Uri rootUri, Uri packageUri, Object? config})>[];
+    final rawExtensions = <_RawExtension>[];
     for (final Package pkg in packageConfig.packages) {
       if (!directDependencies.contains(pkg.name)) {
         continue;
@@ -228,12 +214,11 @@ class ProjectExtensionFinder {
         continue;
       }
       try {
-        final Object? rawYaml = loadYaml(configFile.readAsStringSync());
         rawExtensions.add((
           package: pkg.name,
           rootUri: rootDir.absolute.uri,
           packageUri: _fileSystem.directory(pkg.packageUriRoot).absolute.uri,
-          config: rawYaml,
+          config: loadYaml(configFile.readAsStringSync()),
         ));
       } on Exception catch (error) {
         _logger.printWarning(
@@ -241,18 +226,13 @@ class ProjectExtensionFinder {
         );
       }
     }
-    return _filterAndValidateDiscoveredExtensions(
-      rawExtensions: rawExtensions,
-      directDependencies: directDependencies,
-      packageConfigUri: packageConfigFile.absolute.uri,
-      workspaceRootPath: workspaceRootPath,
-    );
+    return rawExtensions;
   }
 
   List<DiscoveredProjectExtension> _filterAndValidateDiscoveredExtensions({
     required Set<String> directDependencies,
     required Uri packageConfigUri,
-    required List<({String package, Uri rootUri, Uri packageUri, Object? config})> rawExtensions,
+    required List<_RawExtension> rawExtensions,
     required String workspaceRootPath,
   }) {
     final discovered = <DiscoveredProjectExtension>[];
