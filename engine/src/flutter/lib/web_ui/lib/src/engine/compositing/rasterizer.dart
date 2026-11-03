@@ -65,7 +65,6 @@ abstract class ViewRasterizer {
       // Available drawing area is empty. Skip drawing.
       // Record all the draw steps as happening instantly so we don't crash
       // when submitting frame timings.
-      recorder?.recordBuildFinish();
       recorder?.recordRasterStart();
       recorder?.recordRasterFinish();
       return;
