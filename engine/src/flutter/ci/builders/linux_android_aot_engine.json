@@ -47,6 +47,7 @@
                 "--bazel"
             ],
             "name": "ci/android_profile",
+            "timeout": 240,
             "description": "Produces profile mode artifacts to target 32-bit arm Android from a Linux host.",
             "ninja": {
                 "config": "ci/android_profile",
@@ -94,6 +95,7 @@
                 "--bazel"
             ],
             "name": "ci/android_release",
+            "timeout": 240,
             "description": "Produces release mode artifacts to target 32-bit arm Android from a Linux host.",
             "ninja": {
                 "config": "ci/android_release",
@@ -142,6 +144,7 @@
                 "--bazel"
             ],
             "name": "ci/android_release_arm64",
+            "timeout": 240,
             "description": "Produces release mode artifacts to target 64-bit arm Android from a Linux host.",
             "ninja": {
                 "config": "ci/android_release_arm64",
@@ -205,6 +208,7 @@
                 "--bazel"
             ],
             "name": "ci/android_profile_arm64",
+            "timeout": 240,
             "description": "Produces profile mode artifacts to target 64-bit arm Android from a Linux host.",
             "ninja": {
                 "config": "ci/android_profile_arm64",
@@ -253,6 +257,7 @@
                 "--bazel"
             ],
             "name": "ci/android_profile_x64",
+            "timeout": 240,
             "description": "Produces profile mode artifacts to target x64 Android from a Linux host.",
             "ninja": {
                 "config": "ci/android_profile_x64",
@@ -301,6 +306,7 @@
                 "--bazel"
             ],
             "name": "ci/android_release_x64",
+            "timeout": 240,
             "description": "Produces release mode artifacts to target x64 Android from a Linux host.",
             "ninja": {
                 "config": "ci/android_release_x64",
@@ -349,6 +355,7 @@
                 "--bazel"
             ],
             "name": "ci/android_profile_riscv64",
+            "timeout": 240,
             "description": "Produces profile mode artifacts to target riscv64 Android from a Linux host.",
             "ninja": {
                 "config": "ci/android_profile_riscv64",
@@ -397,6 +404,7 @@
                 "--bazel"
             ],
             "name": "ci/android_release_riscv64",
+            "timeout": 240,
             "description": "Produces release mode artifacts to target riscv64 Android from a Linux host.",
             "ninja": {
                 "config": "ci/android_release_riscv64",

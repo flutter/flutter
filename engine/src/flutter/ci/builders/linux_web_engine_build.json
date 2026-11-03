@@ -13,6 +13,7 @@
   "builds": [
     {
       "name": "ci/wasm_release",
+      "timeout": 240,
       "drone_dimensions": [
         "device_type=none",
         "os=Linux",

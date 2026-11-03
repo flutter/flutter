@@ -112,7 +112,7 @@
                     "script": "flutter/tools/gn_test.py"
                 }
             ],
-            "timeout": 120
+            "timeout": 240
         },
         {
             "archives": [],
@@ -139,6 +139,7 @@
                 "--bazel"
             ],
             "name": "ci/host_debug_unopt_impeller_tests",
+            "timeout": 240,
             "description": "Builds a debug mode unopt Linux engine with swiftshader. Runs Impeller unit tests.",
             "ninja": {
                 "config": "ci/host_debug_unopt_impeller_tests",
@@ -184,6 +185,7 @@
                 "--bazel"
             ],
             "name": "ci/android_embedder_debug_unopt",
+            "timeout": 240,
             "description": "Builds embedder artifacts targeting 32-bit arm Android.",
             "ninja": {
                 "config": "ci/android_embedder_debug_unopt",
@@ -214,6 +216,7 @@
                 "--bazel"
             ],
             "name": "ci/android_debug_arm64_validation_layers",
+            "timeout": 240,
             "description": "Builds a debug mode engine targeting 64-bit arm Android with Vulkan validation layers.",
             "ninja": {
                 "config": "ci/android_debug_arm64_validation_layers",
@@ -248,6 +251,7 @@
                 "--bazel"
             ],
             "name": "ci/android_debug_unopt",
+            "timeout": 240,
             "description": "Builds a debug mode unopt engine targeting 32-bit arm Android. Runs host-side Java unit tests and malioc.",
             "ninja": {
                 "config": "ci/android_debug_unopt",
@@ -294,6 +298,7 @@
                 "--bazel"
             ],
             "name": "ci/host_release_licenses",
+            "timeout": 240,
             "description": "Runs the license_cpp script.",
             "ninja": {
                 "config": "ci/host_release_licenses",
@@ -337,6 +342,7 @@
                 "--bazel"
             ],
             "name": "ci/android_debug_test",
+            "timeout": 240,
             "description": "Produces debug mode artifacts to target 32-bit arm Android from a Linux host.",
             "ninja": {
                 "config": "ci/android_debug_test",

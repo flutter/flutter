@@ -27,6 +27,7 @@
                 "--bazel"
             ],
             "name": "ci/host_debug_test",
+            "timeout": 240,
             "description": "Builds host-side unit tests for Linux.",
             "ninja": {
                 "config": "ci/host_debug_test",
@@ -75,6 +76,7 @@
                 "--bazel"
             ],
             "name": "ci/host_profile_test",
+            "timeout": 240,
             "description": "Builds host-side unit tests for Linux.",
             "ninja": {
                 "config": "ci/host_profile_test",
@@ -129,6 +131,7 @@
                 "--bazel"
             ],
             "name": "ci/host_release_test",
+            "timeout": 240,
             "description": "Builds host-side unit tests and benchmarks for Linux.",
             "ninja": {
                 "config": "ci/host_release_test",
