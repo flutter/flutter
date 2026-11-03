@@ -4,7 +4,7 @@
 
 import 'dart:async';
 
-import 'package:dap_adapters/dap_adapters.dart';
+import 'package:dds/dap.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
