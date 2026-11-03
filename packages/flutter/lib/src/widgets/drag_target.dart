@@ -874,6 +874,10 @@ class _DragAvatar<T extends Object> extends Drag {
     required this.ignoringFeedbackPointer,
     required this.viewId,
   }) : _position = initialPosition {
+    final box = overlayState.context.findRenderObject()! as RenderBox;
+    _globalDragStartPoint = dragStartPoint == Offset.zero
+        ? Offset.zero
+        : box.localToGlobal(dragStartPoint) - box.localToGlobal(Offset.zero);
     _entry = OverlayEntry(builder: _build);
     overlayState.insert(_entry!);
     updateDrag(initialPosition);
@@ -881,7 +885,9 @@ class _DragAvatar<T extends Object> extends Drag {
 
   final T? data;
   final Axis? axis;
+  // Feedback layout uses the overlay's coordinates, while callbacks use global coordinates.
   final Offset dragStartPoint;
+  late final Offset _globalDragStartPoint;
   final Widget? feedback;
   final Offset feedbackOffset;
   final DragUpdateCallback? onDragUpdate;
@@ -919,7 +925,7 @@ class _DragAvatar<T extends Object> extends Drag {
   }
 
   void updateDrag(Offset globalPosition) {
-    _lastOffset = globalPosition - dragStartPoint;
+    _lastOffset = globalPosition - _globalDragStartPoint;
     if (overlayState.mounted) {
       final box = overlayState.context.findRenderObject()! as RenderBox;
       final Offset overlaySpaceOffset = box.globalToLocal(globalPosition);

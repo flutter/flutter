@@ -3858,6 +3858,110 @@ void main() {
     }
   });
 
+  for (final accept in <bool>[true, false]) {
+    testWidgets('Drag and drop - global callback offsets with nested scales (accept: $accept)', (
+      WidgetTester tester,
+    ) async {
+      final Key sourceKey = UniqueKey();
+      final Key feedbackKey = UniqueKey();
+      final Key targetKey = UniqueKey();
+      final moves = <DragTargetDetails<int>>[];
+      final accepted = <DragTargetDetails<int>>[];
+      final ended = <DraggableDetails>[];
+      final canceled = <Offset>[];
+      await tester.pumpWidget(
+        Transform.scale(
+          scale: 2.0,
+          alignment: Alignment.topLeft,
+          child: TestWidgetsApp(
+            home: Stack(
+              children: <Widget>[
+                Positioned(
+                  left: 20.0,
+                  top: 30.0,
+                  child: Transform.scale(
+                    scale: 0.5,
+                    alignment: Alignment.topLeft,
+                    child: Draggable<int>(
+                      data: 42,
+                      feedback: SizedBox(key: feedbackKey, width: 40.0, height: 20.0),
+                      onDragEnd: ended.add,
+                      onDraggableCanceled: (Velocity velocity, Offset offset) {
+                        canceled.add(offset);
+                      },
+                      child: Container(
+                        key: sourceKey,
+                        width: 200.0,
+                        height: 200.0,
+                        color: const Color(0xFF0000FF),
+                      ),
+                    ),
+                  ),
+                ),
+                Positioned(
+                  left: 200.0,
+                  top: 150.0,
+                  child: DragTarget<int>(
+                    onWillAcceptWithDetails: (DragTargetDetails<int> details) => accept,
+                    onMove: moves.add,
+                    onAcceptWithDetails: accepted.add,
+                    builder:
+                        (
+                          BuildContext context,
+                          List<int?> candidateData,
+                          List<dynamic> rejectedData,
+                        ) {
+                          return SizedBox(key: targetKey, width: 100.0, height: 100.0);
+                        },
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+      final Finder source = find.byKey(sourceKey);
+      final Finder feedback = find.byKey(feedbackKey);
+      final Offset sourceTopLeft = tester.getTopLeft(source);
+      final Offset start = tester.getCenter(source);
+      final Offset anchor = start - sourceTopLeft;
+      final TestGesture gesture = await tester.startGesture(start);
+      await tester.pump();
+      expect(tester.getTopLeft(feedback), sourceTopLeft);
+
+      final Offset target = tester.getCenter(find.byKey(targetKey));
+      await gesture.moveTo(target);
+      await tester.pump();
+      expect(moves, hasLength(1));
+      expect(moves.single.data, 42);
+      expect(moves.single.offset, target - anchor);
+      expect(tester.getTopLeft(feedback), target - anchor);
+
+      final Offset drop = target + const Offset(10.0, 0.0);
+      await gesture.moveTo(drop);
+      await tester.pump();
+      expect(moves, hasLength(2));
+      expect(moves.last.offset, drop - anchor);
+      expect(tester.getTopLeft(feedback), drop - anchor);
+
+      await gesture.up();
+      await tester.pump();
+      expect(ended, hasLength(1));
+      expect(ended.single.offset, drop - anchor);
+      expect(ended.single.wasAccepted, accept);
+      if (accept) {
+        expect(accepted, hasLength(1));
+        expect(accepted.single.data, 42);
+        expect(accepted.single.offset, drop - anchor);
+        expect(canceled, isEmpty);
+      } else {
+        expect(accepted, isEmpty);
+        expect(canceled, <Offset>[drop - anchor]);
+      }
+      expect(feedback, findsNothing);
+    });
+  }
+
   testWidgets('Drag and drop - feedback matches pointer in rotated WidgetsApp', (
     WidgetTester tester,
   ) async {
