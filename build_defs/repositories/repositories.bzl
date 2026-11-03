@@ -170,6 +170,9 @@ def _link_tree(rctx, source, overlaying, exclude, links):
             else:
                 rctx.symlink(child, child_relative)
 
+# For repository rules of this package's kind elsewhere (flutter_bin_cache.bzl).
+link_tree = _link_tree
+
 # ---------------------------------------------------------------------------
 # synced_repository
 # ---------------------------------------------------------------------------
