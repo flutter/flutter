@@ -28,6 +28,7 @@ import '../devfs.dart';
 import '../device.dart';
 import '../device_port_forwarder.dart';
 import '../device_vm_service_discovery_for_attach.dart';
+import '../features.dart';
 import '../macos/cocoapods.dart';
 import '../macos/xcode.dart';
 import '../project.dart';
@@ -626,6 +627,7 @@ class IOSSimulator extends Device {
       analytics: _analytics,
       app: app,
       buildInfo: buildInfo,
+      featureFlags: featureFlags,
       plistParser: _plistParser,
       templateRenderer: _templateRenderer,
       toolContext: toolContext,

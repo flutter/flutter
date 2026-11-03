@@ -62,7 +62,6 @@ const String _kCodesignIdentityFile = '.codesign_identity';
 /// Create a swift package that can be used to embed a Flutter app inside a native iOS or macOS app.
 class BuildSwiftPackage extends BuildSubCommand {
   BuildSwiftPackage({
-    required this._analytics,
     required this._buildSystem,
     required this._cocoaPods,
     required this._codesign,
@@ -115,7 +114,6 @@ class BuildSwiftPackage extends BuildSubCommand {
 
   final BuildSystem _buildSystem;
   final Xcode? _xcode;
-  final Analytics _analytics;
   final TemplateRenderer _templateRenderer;
   final FeatureFlags _featureFlags;
   final DarwinAddToAppCodesigning _codesign;
@@ -207,9 +205,10 @@ class BuildSwiftPackage extends BuildSubCommand {
   }
 
   late BuildSwiftPackageUtils utils = BuildSwiftPackageUtils(
-    analytics: _analytics,
+    analytics: analytics,
     buildSystem: _buildSystem,
     cocoaPods: _cocoaPods,
+    featureFlags: _featureFlags,
     flutterRoot: toolContext.cache.flutterRoot,
     project: project,
     templateRenderer: _templateRenderer,
@@ -1583,6 +1582,7 @@ class CocoaPodPluginDependencies {
       _targetPlatform.buildDirectory(config: config, fileSystem: fileSystem),
       buildInfo.mode,
       cocoaPods: _utils.cocoaPods,
+      featureFlags: _utils.featureFlags,
       templateRenderer: _utils.templateRenderer,
       toolContext: _utils.toolContext,
       // Normal module builds (like when running "flutter build ios" with a module), do not support
@@ -2167,6 +2167,7 @@ class BuildSwiftPackageUtils {
     required this.analytics,
     required this.buildSystem,
     required this.cocoaPods,
+    required this.featureFlags,
     required this.flutterRoot,
     required this.project,
     required this.templateRenderer,
@@ -2177,6 +2178,7 @@ class BuildSwiftPackageUtils {
   final Analytics analytics;
   final BuildSystem buildSystem;
   final CocoaPods cocoaPods;
+  final FeatureFlags featureFlags;
   final String flutterRoot;
   final FlutterProject project;
   final TemplateRenderer templateRenderer;

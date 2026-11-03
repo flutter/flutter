@@ -234,6 +234,7 @@ Future<void> buildMacOS({
     buildDirectoryPath,
     buildInfo.mode,
     cocoaPods: cocoaPods,
+    featureFlags: featureFlags,
     templateRenderer: templateRenderer,
     toolContext: toolContext,
   );

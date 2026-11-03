@@ -121,6 +121,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   required BuildableIOSApp app,
   required BuildInfo buildInfo,
   required CocoaPods cocoaPods,
+  required FeatureFlags featureFlags,
   required PlistParser plistParser,
   required TemplateRenderer templateRenderer,
   required ToolContext toolContext,
@@ -396,6 +397,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     buildDirectoryPath,
     buildInfo.mode,
     cocoaPods: cocoaPods,
+    featureFlags: featureFlags,
     templateRenderer: templateRenderer,
     toolContext: toolContext,
   );

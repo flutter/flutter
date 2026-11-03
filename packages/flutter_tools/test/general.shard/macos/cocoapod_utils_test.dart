@@ -103,6 +103,7 @@ void main() {
               fs.currentDirectory.childDirectory('build').path,
               BuildMode.debug,
               cocoaPods: cocoaPods,
+              featureFlags: TestFeatureFlags(),
               templateRenderer: const MustacheTemplateRenderer(),
               toolContext: toolContext,
             );
@@ -129,6 +130,7 @@ void main() {
               fs.currentDirectory.childDirectory('build').path,
               BuildMode.debug,
               cocoaPods: cocoaPods,
+              featureFlags: TestFeatureFlags(),
               templateRenderer: const MustacheTemplateRenderer(),
               toolContext: toolContext,
             );
@@ -154,6 +156,7 @@ void main() {
               fs.currentDirectory.childDirectory('build').path,
               BuildMode.debug,
               cocoaPods: cocoaPods,
+              featureFlags: TestFeatureFlags(),
               templateRenderer: const MustacheTemplateRenderer(),
               toolContext: toolContext,
             );
@@ -178,6 +181,7 @@ void main() {
               fs.currentDirectory.childDirectory('build').path,
               BuildMode.debug,
               cocoaPods: cocoaPods,
+              featureFlags: TestFeatureFlags(),
               templateRenderer: const MustacheTemplateRenderer(),
               toolContext: toolContext,
             );
@@ -206,6 +210,7 @@ void main() {
               fs.currentDirectory.childDirectory('build').path,
               BuildMode.debug,
               cocoaPods: cocoaPods,
+              featureFlags: TestFeatureFlags(),
               templateRenderer: const MustacheTemplateRenderer(),
               toolContext: toolContext,
             );
@@ -231,6 +236,7 @@ void main() {
               fs.currentDirectory.childDirectory('build').path,
               BuildMode.debug,
               cocoaPods: cocoaPods,
+              featureFlags: TestFeatureFlags(),
               templateRenderer: const MustacheTemplateRenderer(),
               toolContext: toolContext,
             );
@@ -257,6 +263,7 @@ void main() {
               fs.currentDirectory.childDirectory('build').path,
               BuildMode.debug,
               cocoaPods: cocoaPods,
+              featureFlags: TestFeatureFlags(),
               templateRenderer: const MustacheTemplateRenderer(),
               toolContext: toolContext,
               forceCocoaPodsOnly: true,
@@ -292,6 +299,7 @@ void main() {
               fs.currentDirectory.childDirectory('build').path,
               BuildMode.debug,
               cocoaPods: cocoaPods,
+              featureFlags: TestFeatureFlags(),
               templateRenderer: const MustacheTemplateRenderer(),
               toolContext: toolContext,
               forceSwiftPM: true,
@@ -330,6 +338,7 @@ void main() {
               fs.currentDirectory.childDirectory('build').path,
               BuildMode.debug,
               cocoaPods: cocoaPods,
+              featureFlags: TestFeatureFlags(),
               templateRenderer: const MustacheTemplateRenderer(),
               toolContext: toolContext,
             );
@@ -356,6 +365,7 @@ void main() {
               fs.currentDirectory.childDirectory('build').path,
               BuildMode.debug,
               cocoaPods: cocoaPods,
+              featureFlags: TestFeatureFlags(),
               templateRenderer: const MustacheTemplateRenderer(),
               toolContext: toolContext,
             );
@@ -381,6 +391,7 @@ void main() {
               fs.currentDirectory.childDirectory('build').path,
               BuildMode.debug,
               cocoaPods: cocoaPods,
+              featureFlags: TestFeatureFlags(),
               templateRenderer: const MustacheTemplateRenderer(),
               toolContext: toolContext,
             );
@@ -405,6 +416,7 @@ void main() {
               fs.currentDirectory.childDirectory('build').path,
               BuildMode.debug,
               cocoaPods: cocoaPods,
+              featureFlags: TestFeatureFlags(),
               templateRenderer: const MustacheTemplateRenderer(),
               toolContext: toolContext,
             );
@@ -433,6 +445,7 @@ void main() {
               fs.currentDirectory.childDirectory('build').path,
               BuildMode.debug,
               cocoaPods: cocoaPods,
+              featureFlags: TestFeatureFlags(),
               templateRenderer: const MustacheTemplateRenderer(),
               toolContext: toolContext,
             );
@@ -458,6 +471,7 @@ void main() {
               fs.currentDirectory.childDirectory('build').path,
               BuildMode.debug,
               cocoaPods: cocoaPods,
+              featureFlags: TestFeatureFlags(),
               templateRenderer: const MustacheTemplateRenderer(),
               toolContext: toolContext,
             );
@@ -485,6 +499,7 @@ void main() {
               fs.currentDirectory.childDirectory('build').path,
               BuildMode.debug,
               cocoaPods: cocoaPods,
+              featureFlags: TestFeatureFlags(),
               templateRenderer: const MustacheTemplateRenderer(),
               toolContext: toolContext,
               forceCocoaPodsOnly: true,

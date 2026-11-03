@@ -325,6 +325,7 @@ void main() {
       final bool supported = BuildIOSCommand(
         appleContext: FakeAppleContext(),
         buildSystem: FakeBuildSystem(),
+        featureFlags: TestFeatureFlags(),
         templateRenderer: FakeTemplateRenderer(),
         toolContext: FakeToolContext(logger: BufferLogger.test()),
         verboseHelp: false,
@@ -1610,10 +1611,40 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
       },
     );
 
-    testUsingContext(
+    BuildCommand createTestBuildCommand({
+      required FileSystem fileSystem,
+      required Logger logger,
+      required OperatingSystemUtils osUtils,
+    }) {
+      return createFakeBuildCommand(
+        androidSdk: FakeAndroidSdk(),
+        artifacts: FakeArtifacts(),
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        cache: FakeCache(),
+        config: FakeConfig(),
+        fileSystem: fileSystem,
+        fileSystemUtils: FileSystemUtils(fileSystem: fileSystem, platform: macosPlatform),
+        flutterVersion: FakeFlutterVersion(),
+        logger: logger,
+        osUtils: osUtils,
+        platform: macosPlatform,
+        plistParser: testPlistUtils,
+        processManager: processManager,
+        templateRenderer: FakeTemplateRenderer(),
+        terminal: FakeTerminal(),
+        xcode: FakeXcode(),
+        xcodeProjectInterpreter: FakeXcodeProjectInterpreterWithBuildSettings(),
+      );
+    }
+
+    testWithoutContext(
       'Do not crash if temporary build directory is deleted before cleanup.',
       () async {
-        final BuildCommand command = createBuildCommand();
+        final BuildCommand command = createTestBuildCommand(
+          fileSystem: fileSystem,
+          logger: logger,
+          osUtils: FakeOperatingSystemUtils(),
+        );
         processManager.addCommands(<FakeCommand>[
           setUpFakeXcodeBuildHandler(
             simulator: true,
@@ -1635,38 +1666,15 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
         );
         expect(processManager.hasRemainingExpectations, isFalse);
       },
-      overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
-        Logger: () => logger,
-        ProcessManager: () => processManager,
-        Pub: ThrowingPub.new,
-        Platform: () => macosPlatform,
-        XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
-        Artifacts: () => Artifacts.test(),
-      },
     );
 
-    testUsingContext(
+    testWithoutContext(
       'Do not crash if temporary build directory is deleted before cleanup in terminal session.',
       () async {
-        final BuildCommand command = createFakeBuildCommand(
-          androidSdk: FakeAndroidSdk(),
-          buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        final BuildCommand command = createTestBuildCommand(
           fileSystem: fileSystem,
           logger: _TerminalBufferLogger(),
           osUtils: _PipeOperatingSystemUtils(fileSystem),
-          config: FakeConfig(),
-          platform: macosPlatform,
-          fileSystemUtils: FileSystemUtils(fileSystem: fileSystem, platform: macosPlatform),
-          terminal: FakeTerminal(),
-          plistParser: testPlistUtils,
-          processManager: processManager,
-          templateRenderer: FakeTemplateRenderer(),
-          xcode: FakeXcode(),
-          xcodeProjectInterpreter: FakeXcodeProjectInterpreterWithBuildSettings(),
-          artifacts: FakeArtifacts(),
-          cache: FakeCache(),
-          flutterVersion: FakeFlutterVersion(),
         );
         final Directory tempDir = fileSystem.directory(_xcBundleDirectoryPath).parent;
         final File pipeFile = tempDir.childFile('pipe_to_stdout');
@@ -1693,97 +1701,59 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
         expect(pipeFile, isNot(exists));
         expect(processManager.hasRemainingExpectations, isFalse);
       },
-      overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
-        Logger: () => logger,
-        ProcessManager: () => processManager,
-        Pub: ThrowingPub.new,
-        Platform: () => macosPlatform,
-        XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
-        Artifacts: () => Artifacts.test(),
-      },
     );
 
-    testUsingContext(
-      'Do not crash or recreate pipe if temporary build directory is deleted after existsSync in terminal session.',
-      () async {
-        var deleteOnNextPipeWrite = false;
-        fileSystem = MemoryFileSystem.test(
-          opHandle: (String path, FileSystemOp op) {
-            if (deleteOnNextPipeWrite &&
-                op == FileSystemOp.write &&
-                path.endsWith('pipe_to_stdout')) {
-              deleteOnNextPipeWrite = false;
-              fileSystem.directory(_xcBundleDirectoryPath).parent.deleteSync(recursive: true);
-              throw FileSystemException(
-                'Cannot open file',
-                path,
-                const OSError('No such file or directory', 2),
-              );
-            }
+    testWithoutContext('Do not crash or recreate pipe if temporary build directory is deleted after existsSync in terminal session.', () async {
+      var deleteOnNextPipeWrite = false;
+      fileSystem = MemoryFileSystem.test(
+        opHandle: (String path, FileSystemOp op) {
+          if (deleteOnNextPipeWrite &&
+              op == FileSystemOp.write &&
+              path.endsWith('pipe_to_stdout')) {
+            deleteOnNextPipeWrite = false;
+            fileSystem.directory(_xcBundleDirectoryPath).parent.deleteSync(recursive: true);
+            throw FileSystemException(
+              'Cannot open file',
+              path,
+              const OSError('No such file or directory', 2),
+            );
+          }
+        },
+      );
+      final errorHandlingFileSystem = ErrorHandlingFileSystem(
+        delegate: fileSystem,
+        platform: macosPlatform,
+      );
+      final BuildCommand command = createTestBuildCommand(
+        fileSystem: errorHandlingFileSystem,
+        logger: _TerminalBufferLogger(),
+        osUtils: _PipeOperatingSystemUtils(errorHandlingFileSystem),
+      );
+      final Directory tempDir = errorHandlingFileSystem.directory(_xcBundleDirectoryPath).parent;
+      final File pipeFile = tempDir.childFile('pipe_to_stdout');
+      processManager.addCommand(
+        setUpFakeXcodeBuildHandler(
+          simulator: true,
+          exitCode: 1,
+          scriptOutputStreamFile: pipeFile.path,
+          onRun: (_) {
+            expect(pipeFile, exists);
+            deleteOnNextPipeWrite = true;
           },
-        );
-        final errorHandlingFileSystem = ErrorHandlingFileSystem(
-          delegate: fileSystem,
-          platform: macosPlatform,
-        );
-        final BuildCommand command = createFakeBuildCommand(
-          androidSdk: FakeAndroidSdk(),
-          buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-          fileSystem: errorHandlingFileSystem,
-          logger: _TerminalBufferLogger(),
-          osUtils: _PipeOperatingSystemUtils(errorHandlingFileSystem),
-          config: FakeConfig(),
-          platform: macosPlatform,
-          fileSystemUtils: FileSystemUtils(
-            fileSystem: errorHandlingFileSystem,
-            platform: macosPlatform,
-          ),
-          terminal: FakeTerminal(),
-          plistParser: testPlistUtils,
-          processManager: processManager,
-          templateRenderer: FakeTemplateRenderer(),
-          xcode: FakeXcode(),
-          xcodeProjectInterpreter: FakeXcodeProjectInterpreterWithBuildSettings(),
-          artifacts: FakeArtifacts(),
-          cache: FakeCache(),
-          flutterVersion: FakeFlutterVersion(),
-        );
-        final Directory tempDir = errorHandlingFileSystem.directory(_xcBundleDirectoryPath).parent;
-        final File pipeFile = tempDir.childFile('pipe_to_stdout');
-        processManager.addCommand(
-          setUpFakeXcodeBuildHandler(
-            simulator: true,
-            exitCode: 1,
-            scriptOutputStreamFile: pipeFile.path,
-            onRun: (_) {
-              expect(pipeFile, exists);
-              deleteOnNextPipeWrite = true;
-            },
-          ),
-        );
+        ),
+      );
 
-        createMinimalMockProjectFiles();
+      createMinimalMockProjectFiles();
 
-        await expectLater(
-          createTestCommandRunner(command)
-              .run(const <String>['build', 'ios', '--simulator', '--no-pub']),
-          throwsToolExit(message: 'Encountered error while building for simulator.'),
-        );
-        expect(tempDir, isNot(exists));
-        expect(pipeFile, isNot(exists));
-        expect(processManager.hasRemainingExpectations, isFalse);
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => ErrorHandlingFileSystem(delegate: fileSystem, platform: macosPlatform),
-        Logger: () => logger,
-        ProcessManager: () => processManager,
-        Pub: ThrowingPub.new,
-        Platform: () => macosPlatform,
-        XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
-        Artifacts: () => Artifacts.test(),
-      },
-    );
+      await expectLater(
+        createTestCommandRunner(command)
+            .run(const <String>['build', 'ios', '--simulator', '--no-pub']),
+        throwsToolExit(message: 'Encountered error while building for simulator.'),
+      );
+      expect(tempDir, isNot(exists));
+      expect(pipeFile, isNot(exists));
+      expect(processManager.hasRemainingExpectations, isFalse);
+    });
   });
 }
 
