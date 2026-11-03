@@ -1376,6 +1376,7 @@ void main() {
       wrapped.onMetricsChanged = () => notifications.add('metrics');
       wrapped.onTextScaleFactorChanged = () => notifications.add('textScaleFactor');
       wrapped.onPlatformBrightnessChanged = () => notifications.add('platformBrightness');
+      wrapped.onAlwaysUse24HourFormatChanged = () => notifications.add('alwaysUse24HourFormat');
       wrapped.onAccessibilityFeaturesChanged = () => notifications.add('accessibilityFeatures');
 
       for (final MapEntry<String, _MetricChange> entry in _perMetricChange.entries) {
@@ -1383,10 +1384,7 @@ void main() {
         notifications.clear();
         debugSetViewMetricsOverride(1, entry.value(_fullyPopulated));
         expect(notifications.toSet(), switch (entry.key) {
-          // dart:ui has no callback of its own for the 24 hour format: it
-          // reports it through the configuration notification, and the
-          // framework re-reads it when the view metrics change.
-          'alwaysUse24HourFormat' => <String>{'configuration', 'metrics'},
+          'alwaysUse24HourFormat' => <String>{'configuration', 'alwaysUse24HourFormat', 'metrics'},
           'textScaling' => <String>{'configuration', 'textScaleFactor'},
           'platformBrightness' => <String>{'configuration', 'platformBrightness'},
           final String metric when viewMetrics.contains(metric) => <String>{'metrics'},

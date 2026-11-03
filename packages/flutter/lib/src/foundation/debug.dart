@@ -1215,6 +1215,8 @@ void _debugNotifyViewMetricsOverrideChanged(_Changes changes) {
     if (platformConfiguration) (ui.PlatformDispatcher d) => d.onPlatformConfigurationChanged,
     if (changes.textScaling) (ui.PlatformDispatcher d) => d.onTextScaleFactorChanged,
     if (changes.platformBrightness) (ui.PlatformDispatcher d) => d.onPlatformBrightnessChanged,
+    if (changes.alwaysUse24HourFormat)
+      (ui.PlatformDispatcher d) => d.onAlwaysUse24HourFormatChanged,
     if (changes.accessibilityFeatures)
       (ui.PlatformDispatcher d) => d.onAccessibilityFeaturesChanged,
     if (changes.viewMetrics) (ui.PlatformDispatcher d) => d.onMetricsChanged,

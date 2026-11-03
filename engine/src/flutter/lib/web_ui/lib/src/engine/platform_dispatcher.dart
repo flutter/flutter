@@ -1062,6 +1062,9 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   /// The setting indicating whether time should always be shown in the 24-hour
   /// format.
   ///
+  /// The [onAlwaysUse24HourFormatChanged] callback is called whenever this
+  /// value changes.
+  ///
   /// This option is used by [showTimePicker].
   @override
   bool get alwaysUse24HourFormat => configuration.alwaysUse24HourFormat;

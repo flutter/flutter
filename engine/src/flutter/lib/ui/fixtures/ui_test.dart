@@ -1544,33 +1544,36 @@ void hooksTests() async {
 
   await test('onAlwaysUse24HourFormatChanged is not invoked when unrelated user settings change', () {
     int calls = 0;
+    final bool initialFormat = PlatformDispatcher.instance.alwaysUse24HourFormat;
     PlatformDispatcher.instance.onAlwaysUse24HourFormatChanged = () {
       calls++;
     };
 
-    // Initial setting.
+    // Toggle alwaysUse24HourFormat to trigger callback once.
     _callHook(
       '_updateUserSettingsData',
       1,
-      '{"textScaleFactor": 1.0, "platformBrightness": "light", "alwaysUse24HourFormat": false}',
+      '{"textScaleFactor": 1.0, "platformBrightness": "light", "alwaysUse24HourFormat": ${!initialFormat}}',
     );
     expectEquals(calls, 1);
 
-    // Unrelated user setting changes (platformBrightness and textScaleFactor).
+    // Unrelated user setting changes (platformBrightness and textScaleFactor) without changing alwaysUse24HourFormat.
     _callHook(
       '_updateUserSettingsData',
       1,
-      '{"textScaleFactor": 1.5, "platformBrightness": "dark", "alwaysUse24HourFormat": false}',
+      '{"textScaleFactor": 1.5, "platformBrightness": "dark", "alwaysUse24HourFormat": ${!initialFormat}}',
     );
     expectEquals(calls, 1);
 
-    // alwaysUse24HourFormat changes.
+    // alwaysUse24HourFormat changes back.
     _callHook(
       '_updateUserSettingsData',
       1,
-      '{"textScaleFactor": 1.5, "platformBrightness": "dark", "alwaysUse24HourFormat": true}',
+      '{"textScaleFactor": 1.5, "platformBrightness": "dark", "alwaysUse24HourFormat": $initialFormat}',
     );
     expectEquals(calls, 2);
+
+    PlatformDispatcher.instance.onAlwaysUse24HourFormatChanged = null;
   });
 
   await test('onFrameDataChanged preserves callback zone', () {
