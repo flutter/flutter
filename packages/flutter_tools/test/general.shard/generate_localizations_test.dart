@@ -3613,4 +3613,95 @@ String helloNameAndAge({required String name, required int age}) {
       ),
     );
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/195904.
+  testWithoutContext('throws an exception when placeholder name is invalid', () {
+    const numericPlaceholderArb = '''
+{
+  "handsPlayed": "Hands played: {count}",
+  "@handsPlayed": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "No": {
+        "type": "String"
+      },
+      "1": {
+        "type": "String"
+      }
+    }
+  }
+}''';
+    expect(
+      () => setupLocalizations(<String, String>{'en': numericPlaceholderArb}),
+      throwsA(
+        isA<L10nException>().having(
+          (L10nException e) => e.message,
+          'message',
+          contains('Invalid placeholder name "1" in message "handsPlayed".'),
+        ),
+      ),
+    );
+    expect(fs.file(fs.path.join(defaultL10nPath, defaultOutputFileString)).existsSync(), isFalse);
+
+    const emptyPlaceholderArb = '''
+{
+  "greeting": "Hello",
+  "@greeting": {
+    "placeholders": {
+      "": {
+        "type": "String"
+      }
+    }
+  }
+}''';
+    expect(
+      () => setupLocalizations(<String, String>{'en': emptyPlaceholderArb}),
+      throwsA(
+        isA<L10nException>().having(
+          (L10nException e) => e.message,
+          'message',
+          contains('Invalid placeholder name "" in message "greeting".'),
+        ),
+      ),
+    );
+
+    const invalidCharPlaceholderArb = '''
+{
+  "greeting": "Hello",
+  "@greeting": {
+    "placeholders": {
+      "user-name": {
+        "type": "String"
+      }
+    }
+  }
+}''';
+    expect(
+      () => setupLocalizations(<String, String>{'en': invalidCharPlaceholderArb}),
+      throwsA(
+        isA<L10nException>().having(
+          (L10nException e) => e.message,
+          'message',
+          contains('Invalid placeholder name "user-name" in message "greeting".'),
+        ),
+      ),
+    );
+
+    const reservedWordPlaceholderArb = '''
+{
+  "greeting": "Hello {default}"
+}''';
+    expect(
+      () => setupLocalizations(<String, String>{'en': reservedWordPlaceholderArb}),
+      throwsA(
+        isA<L10nException>().having(
+          (L10nException e) => e.message,
+          'message',
+          contains('Invalid placeholder name "default" in message "greeting".'),
+        ),
+      ),
+    );
+  });
 }

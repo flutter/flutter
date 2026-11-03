@@ -221,6 +221,58 @@ Could not format because the source could not be parsed.''',
     expect(processManager, hasNoRemainingExpectations);
   });
 
+  testWithoutContext(
+    'throws ToolExit before running dart format when placeholder name is invalid',
+    () async {
+      final File arbFile = fileSystem.file(fileSystem.path.join('lib', 'l10n', 'app_en.arb'))
+        ..createSync(recursive: true);
+      arbFile.writeAsStringSync('''
+{
+  "handsPlayed": "Hands played: {count}",
+  "@handsPlayed": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "No": {
+        "type": "String"
+      },
+      "1": {
+        "type": "String"
+      }
+    }
+  }
+}''');
+      final File pubspecFile = fileSystem.file('pubspec.yaml')..createSync();
+      pubspecFile.writeAsStringSync(BasicProjectWithFlutterGen().pubspec);
+      final processManager = FakeProcessManager.empty();
+
+      final command = GenerateLocalizationsCommand(
+        toolContext: FakeToolContext(
+          artifacts: artifacts,
+          fs: fileSystem,
+          logger: logger,
+          processManager: processManager,
+        ),
+      );
+
+      await expectLater(
+        createTestCommandRunner(command).run(<String>['gen-l10n', '--format']),
+        throwsToolExit(
+          message:
+              'Invalid placeholder name "1" in message "handsPlayed". '
+              'Placeholder names must be valid Dart identifiers: they cannot be empty, '
+              'start with a number, contain non-alphanumeric characters, or be a '
+              'Dart reserved word.',
+        ),
+      );
+      final Directory outputDirectory = fileSystem.directory(fileSystem.path.join('lib', 'l10n'));
+      expect(outputDirectory.childFile('app_localizations_en.dart').existsSync(), isFalse);
+      expect(outputDirectory.childFile('app_localizations.dart').existsSync(), isFalse);
+      expect(processManager, hasNoRemainingExpectations);
+    },
+  );
+
   testWithoutContext('dart format is not run when --no-format is passed', () async {
     final File arbFile = fileSystem.file(fileSystem.path.join('lib', 'l10n', 'app_en.arb'))
       ..createSync(recursive: true);
