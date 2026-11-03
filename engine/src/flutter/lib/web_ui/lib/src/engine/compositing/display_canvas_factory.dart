@@ -17,11 +17,7 @@ class DisplayCanvasFactory<T extends DisplayCanvas> {
   /// create new display canvases.
   final T Function() createCanvas;
 
-  // Kept nullable (rather than `late final`) so `forEachCanvas`,
-  // `releaseCanvas`, `isLive`, and `dispose` can check whether `baseCanvas` was
-  // materialized without lazily allocating a surface/WebGL context for
-  // unrendered views, and so `baseCanvas` can be re-created after `dispose()`
-  // (for example, on hot restart).
+  // Nullable so we can check for the base canvas without lazily creating it.
   T? _baseCanvas;
 
   /// The base canvas to paint on. This is the default canvas which will be

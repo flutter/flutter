@@ -32,10 +32,7 @@ void testMain() {
 
     setUp(() {
       debugOverrideJsConfiguration(
-        <String, Object?>{
-              'fontFallbackBaseUrl': 'assets/fallback_fonts/',
-              'canvasKitForceMultiSurfaceRasterizer': true,
-            }.jsify()
+        <String, Object?>{'canvasKitForceMultiSurfaceRasterizer': true}.jsify()
             as JsFlutterConfiguration?,
       );
       renderer.pictureToImageSurface.dispose();
