@@ -38,7 +38,7 @@ uses either way.
 """
 
 load("//build_defs/repositories:host_platform.bzl", "host_platform_values")
-load("//build_defs/repositories:repositories.bzl", "checkout_root")
+load("//build_defs/repositories:repositories.bzl", "checkout_root", "link_tree")
 
 # The environment variable --config=prebuilt_engine sets (--repo_env), read
 # by the synced_deps extension to point the host's Dart SDK repository at
@@ -107,25 +107,26 @@ def _flutter_bin_cache_impl(rctx):
             ))
         present.append(artifact_set.stamp)
 
-    # The cache's files, symlinked by top-level entry (the tool's lockfile
-    # and stamps included: harmless, and a glob never sees them) -- except
-    # pkg/, whose packages get a BUILD file each (a package's files are
-    # laid relative to it, as the tree's sky_engine:package is), so its
-    # entries are linked one level down.
-    for child in cache.readdir():
-        if child.basename == "pkg":
-            for package in child.readdir():
-                if package.basename in _PACKAGES:
-                    for entry in package.readdir():
-                        rctx.symlink(entry, "pkg/%s/%s" % (package.basename, entry.basename))
-                    rctx.file("pkg/%s/BUILD.bazel" % package.basename, _PACKAGE_BUILD_FILE.format(name = package.basename))
-                else:
-                    rctx.symlink(package, "pkg/" + package.basename)
-            continue
-        rctx.symlink(child, child.basename)
+    # The cache's files, symlinked as a synced tree is (repositories.bzl's
+    # link_tree, overlaying): entries whole, but a directory that holds a
+    # BUILD file is re-created with its entries linked one by one and the
+    # BUILD file left out. The engine's artifacts.zip carries the build files
+    # beside the shader library's sources (shader_lib/BUILD.gn as GN ships
+    # them, shader_lib/BUILD.bazel since the tree has those too), and a
+    # BUILD file inside the cache would make its directory a package of its
+    # own, which the globs below could not see into (the first presubmit
+    # runs of the shards under Bazel, 11-03: "glob pattern
+    # 'artifacts/engine/linux-x64/shader_lib/**' didn't match anything").
+    # pkg/'s two packages get a BUILD file each (a package's files are laid
+    # relative to it, as the tree's sky_engine:package is): naming those
+    # paths as excluded makes pkg/ and the package directories real
+    # directories the files can be written into, rather than links into the
+    # cache.
+    link_tree(rctx, cache, True, ["pkg/%s/BUILD.bazel" % name for name in _PACKAGES], {})
     for name in _PACKAGES:
         if not rctx.path("pkg/" + name).exists:
             fail("flutter_bin_cache: bin/cache/pkg/%s is missing: %s." % (name, hint))
+        rctx.file("pkg/%s/BUILD.bazel" % name, _PACKAGE_BUILD_FILE.format(name = name))
 
     host = host_engine_directory(rctx.os.name, rctx.os.arch)
     rctx.file("BUILD.bazel", _BUILD_FILE.format(
