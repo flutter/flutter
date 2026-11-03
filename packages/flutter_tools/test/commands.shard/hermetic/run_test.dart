@@ -2443,7 +2443,8 @@ server:
 }
 
 class TestDeviceManager extends DeviceManager {
-  TestDeviceManager({required super.logger});
+  TestDeviceManager({required super.logger, FileSystem? fileSystem})
+    : super(fileSystem: fileSystem ?? MemoryFileSystem.test());
   List<Device> devices = <Device>[];
 
   @override
@@ -2736,7 +2737,6 @@ class CapturingAppDomain extends AppDomain {
         analytics: const analytics.NoOpAnalytics(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         buildTargets: const BuildTargetsImpl(),
-        toolContext: const DelegatingToolContext(),
         xcode: null,
       );
 

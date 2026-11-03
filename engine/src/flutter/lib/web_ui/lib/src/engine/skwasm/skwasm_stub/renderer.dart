@@ -16,6 +16,10 @@ class SkwasmRenderer extends Renderer {
   bool get supportsResizingAnimatedImages =>
       throw UnimplementedError('Skwasm not implemented on this platform.');
 
+  @override
+  bool get supportsAnimatedImages =>
+      throw UnimplementedError('Skwasm not implemented on this platform.');
+
   bool get isWimp => false;
 
   @override

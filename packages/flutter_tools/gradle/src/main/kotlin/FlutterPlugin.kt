@@ -45,6 +45,30 @@ class FlutterPlugin : Plugin<Project> {
     override fun apply(project: Project) {
         this.project = project
 
+        FlutterPluginUtils.detectApplyingKotlinGradlePlugin(project)
+
+        // Validate that the provided Gradle, Java, AGP, and KGP versions are all within our
+        // supported range. This runs before any task registration or extension configuration so
+        // that unsupported dependency versions fail with DependencyVersionChecker's diagnostic
+        // rather than a runtime error when calling AGP or Gradle APIs.
+        val shouldSkipDependencyChecks: Boolean =
+            project.hasProperty("skipDependencyChecks") &&
+                project.properties["skipDependencyChecks"]?.toString()?.toBoolean() == true
+        if (!shouldSkipDependencyChecks) {
+            try {
+                DependencyVersionChecker.checkDependencyVersions(project)
+            } catch (e: DependencyValidationException) {
+                throw e
+            } catch (e: Exception) {
+                // Possible bug in dependency checking code - warn and do not block build.
+                project.logger.error(
+                    "Warning: Flutter was unable to detect project Gradle, Java, " +
+                        "AGP, and KGP versions. Skipping dependency version checking. Error was: " +
+                        e
+                )
+            }
+        }
+
         val rootProject = project.rootProject
         if (FlutterPluginUtils.isFlutterAppProject(project)) {
             addTaskForLockfileGeneration(rootProject)
@@ -160,34 +184,6 @@ class FlutterPlugin : Plugin<Project> {
         val flutterExecutableName = getExecutableNameForPlatform("flutter")
         flutterExecutable =
             Paths.get(flutterRoot!!.absolutePath, "bin", flutterExecutableName).toFile()
-
-        // Validate that the provided Gradle, Java, AGP, and KGP versions are all within our
-        // supported range.
-        val shouldSkipDependencyChecks: Boolean =
-            project.hasProperty("skipDependencyChecks") &&
-                (
-                    project.properties["skipDependencyChecks"].toString().toBoolean()
-                )
-        if (!shouldSkipDependencyChecks) {
-            try {
-                DependencyVersionChecker.checkDependencyVersions(project)
-            } catch (e: Exception) {
-                if (!project.hasProperty("usesUnsupportedDependencyVersions") ||
-                    !(project.properties["usesUnsupportedDependencyVersions"] as Boolean)
-                ) {
-                    // Possible bug in dependency checking code - warn and do not block build.
-                    project.logger.error(
-                        "Warning: Flutter was unable to detect project Gradle, Java, " +
-                            "AGP, and KGP versions. Skipping dependency version checking. Error was: " +
-                            e
-                    )
-                } else {
-                    // If usesUnsupportedDependencyVersions is set, the exception was thrown by us
-                    // in the dependency version checker plugin so re-throw it here.
-                    throw e
-                }
-            }
-        }
 
         BaseApplicationNameHandler.setBaseName(project)
         val flutterProguardRules =
@@ -357,9 +353,6 @@ class FlutterPlugin : Plugin<Project> {
                 projectToAddTasksTo,
                 getPluginHandler(projectToAddTasksTo).getPluginList()
             )
-            FlutterPluginUtils.detectApplyingKotlinGradlePlugin(
-                projectToAddTasksTo
-            )
             return
         }
         // Flutter host module project (Add-to-app).
@@ -368,9 +361,6 @@ class FlutterPlugin : Plugin<Project> {
         FlutterPluginUtils.detectLowCompileSdkVersionOrNdkVersion(
             projectToAddTasksTo,
             getPluginHandler(projectToAddTasksTo).getPluginList()
-        )
-        FlutterPluginUtils.detectApplyingKotlinGradlePlugin(
-            projectToAddTasksTo
         )
     }
 
