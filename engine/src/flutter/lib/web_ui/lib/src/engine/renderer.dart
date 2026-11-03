@@ -93,12 +93,28 @@ abstract class Renderer {
       return;
     }
     final ViewRasterizer rasterizer = rasterizers.remove(viewId)!;
+    _disposeRasterizer(rasterizer);
+  }
+
+  void _disposeRasterizer(ViewRasterizer rasterizer) {
     if (rasterizer.queue.next case final RenderRequest next) {
-      if (next.scene is LayerScene) {
-        (next.scene as LayerScene).rootLayer.release();
-      }
+      rasterizer.queue.next = null;
+      _releaseScene(next.scene);
+      next.completer.complete();
     }
     rasterizer.dispose();
+  }
+
+  void _retainScene(ui.Scene scene) {
+    if (scene case final LayerScene layerScene) {
+      layerScene.retain();
+    }
+  }
+
+  void _releaseScene(ui.Scene scene) {
+    if (scene case final LayerScene layerScene) {
+      layerScene.release();
+    }
   }
 
   /// Creates a native paint for a single draw call from [paint].
@@ -379,16 +395,16 @@ abstract class Renderer {
     // [renderQueue.next]; recording build finish now ensures queue waiting time
     // is not mistakenly counted as build time.
     recorder?.recordBuildFinish();
-    if (scene is LayerScene) {
-      scene.rootLayer.retain();
-    }
+    // Retain the scene while it is queued or being rasterized.
+    // The framework typically calls scene.dispose() immediately after submitting
+    // to window.render(), so this retention protects child picture layers from
+    // being disposed prematurely before rasterization completes.
+    _retainScene(scene);
     if (renderQueue.current != null) {
       // If a scene is already queued up, drop it and queue this one up instead
       // so that the scene view always displays the most recently requested scene.
       if (renderQueue.next case final RenderRequest dropped) {
-        if (dropped.scene is LayerScene) {
-          (dropped.scene as LayerScene).rootLayer.release();
-        }
+        _releaseScene(dropped.scene);
         dropped.completer.complete();
       }
       final completer = Completer<void>();
@@ -410,9 +426,7 @@ abstract class Renderer {
     } catch (error, stackTrace) {
       current.completer.completeError(error, stackTrace);
     } finally {
-      if (current.scene is LayerScene) {
-        (current.scene as LayerScene).rootLayer.release();
-      }
+      _releaseScene(current.scene);
     }
     renderQueue.current = renderQueue.next;
     renderQueue.next = null;
@@ -440,14 +454,7 @@ abstract class Renderer {
   void dispose() {
     _onViewCreatedListener.cancel();
     _onViewDisposedListener.cancel();
-    for (final ViewRasterizer rasterizer in rasterizers.values) {
-      if (rasterizer.queue.next case final RenderRequest next) {
-        if (next.scene is LayerScene) {
-          (next.scene as LayerScene).rootLayer.release();
-        }
-      }
-      rasterizer.dispose();
-    }
+    rasterizers.values.forEach(_disposeRasterizer);
     rasterizer.dispose();
     pictureToImageSurface.dispose();
   }
@@ -457,14 +464,7 @@ abstract class Renderer {
   void debugClear() {
     _onViewCreatedListener.cancel();
     _onViewDisposedListener.cancel();
-    for (final ViewRasterizer rasterizer in rasterizers.values) {
-      if (rasterizer.queue.next case final RenderRequest next) {
-        if (next.scene is LayerScene) {
-          (next.scene as LayerScene).rootLayer.release();
-        }
-      }
-      rasterizer.dispose();
-    }
+    rasterizers.values.forEach(_disposeRasterizer);
     rasterizers.clear();
     _setUpViewListeners();
   }

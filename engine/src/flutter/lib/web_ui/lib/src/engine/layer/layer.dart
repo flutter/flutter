@@ -25,6 +25,10 @@ abstract class Layer implements ui.EngineLayer {
 
 /// A layer that contains child layers.
 abstract class ContainerLayer extends Layer {
+  /// Creates a [ContainerLayer].
+  ///
+  /// If [isEngineLayer] is true, this layer is initially retained on behalf of
+  /// the caller's [ui.EngineLayer] handle. Calling [dispose] releases that handle.
   ContainerLayer({bool isEngineLayer = false}) {
     if (isEngineLayer) {
       retain();
@@ -35,11 +39,17 @@ abstract class ContainerLayer extends Layer {
   bool _isDisposed = false;
   bool _isHandleDisposed = false;
 
+  /// Increments the reference count of this container layer, preventing it
+  /// and its child layers from being disposed prematurely.
   void retain() {
     assert(!_isDisposed, 'Cannot retain a disposed ContainerLayer');
     _refCount++;
   }
 
+  /// Decrements the reference count of this container layer.
+  ///
+  /// When the reference count reaches zero, this layer is marked disposed and
+  /// recursively releases child [ContainerLayer]s and disposes child [PictureLayer]s.
   void release() {
     assert(_refCount > 0, 'Cannot release a ContainerLayer with refCount == 0');
     _refCount--;
@@ -52,6 +62,7 @@ abstract class ContainerLayer extends Layer {
           child.dispose();
         }
       }
+      children.clear();
     }
   }
 
@@ -85,6 +96,12 @@ abstract class ContainerLayer extends Layer {
 /// to [LayerSceneBuilder] without requiring a [ContainerLayer].
 class RootLayer extends ContainerLayer {
   RootLayer() : super(isEngineLayer: false);
+
+  @override
+  void dispose() {
+    // RootLayer is not an external EngineLayer handle. Its lifecycle is managed
+    // exclusively by LayerScene and Renderer via retain() and release().
+  }
 
   @override
   R accept<R>(LayerVisitor<R> visitor) {

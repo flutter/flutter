@@ -25,6 +25,8 @@ class HoldingRasterizer extends ViewRasterizer {
 
   Completer<void>? rasterizeStarted;
   Completer<void>? rasterizeCompleter;
+
+  /// The count of non-culled pictures delivered to [rasterize] for each frame.
   final List<int> rasterizedPictureCounts = <int>[];
 
   /// Simulated engine work performed after [ViewRasterizer.draw] begins but
@@ -92,6 +94,7 @@ HoldingRasterizer createAndInstallHoldingRasterizer(EngineFlutterView view) {
   return holdingRasterizer;
 }
 
+/// Creates a simple non-empty test picture for render queue assertions.
 ui.Picture createTestPicture() {
   final recorder = ui.PictureRecorder();
   final canvas = ui.Canvas(recorder, const ui.Rect.fromLTWH(0, 0, 100, 100));
@@ -872,4 +875,41 @@ void testMain() {
       expect(holdingRasterizer.rasterizedPictureCounts, <int>[1, 0]);
     },
   );
+
+  test('clearing renderer while frame is in-flight and next is queued completes next and cleans up cleanly', () async {
+    final EngineFlutterView view = EnginePlatformDispatcher.instance.implicitView!;
+    final HoldingRasterizer holdingRasterizer = createAndInstallHoldingRasterizer(view);
+
+    final frame1Started = Completer<void>();
+    final frame1Hold = Completer<void>();
+    holdingRasterizer.rasterizeStarted = frame1Started;
+    holdingRasterizer.rasterizeCompleter = frame1Hold;
+
+    final builder1 = ui.SceneBuilder();
+    builder1.addPicture(ui.Offset.zero, createTestPicture());
+    final ui.Scene scene1 = builder1.build();
+    addTearDown(scene1.dispose);
+    final Future<void> frame1Done = renderer.renderScene(scene1, view);
+
+    await frame1Started.future;
+
+    final builder2 = ui.SceneBuilder();
+    builder2.addPicture(ui.Offset.zero, createTestPicture());
+    final ui.Scene scene2 = builder2.build();
+    addTearDown(scene2.dispose);
+    final Future<void> frame2Done = renderer.renderScene(scene2, view);
+
+    // Call debugClear() while Frame 1 is holding and Frame 2 is in renderQueue.next.
+    renderer.debugClear();
+
+    // Frame 2 was dropped by teardown; its completer must complete.
+    await expectLater(frame2Done, completes);
+
+    // Release Frame 1.
+    holdingRasterizer.rasterizeCompleter = null;
+    holdingRasterizer.rasterizeStarted = null;
+    frame1Hold.complete();
+
+    await frame1Done;
+  });
 }
