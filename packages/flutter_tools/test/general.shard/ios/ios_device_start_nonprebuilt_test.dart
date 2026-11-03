@@ -111,7 +111,7 @@ void main() {
       ], logger);
       fakeXcodeProjectInterpreter = FakeXcodeProjectInterpreter(projectInfo: projectInfo);
       xcode = Xcode.test(
-        processManager: FakeProcessManager.any(),
+        toolContext: FakeToolContext.macosHost(processManager: FakeProcessManager.any()),
         xcodeProjectInterpreter: fakeXcodeProjectInterpreter,
       );
       fakeAnalytics = getInitializedFakeAnalyticsInstance(
@@ -123,16 +123,25 @@ void main() {
     testUsingContext(
       'missing TARGET_BUILD_DIR',
       () async {
+        final xcodeProjectInterpreter = FakeXcodeProjectInterpreter(
+          buildSettings: const <String, String>{
+            'WRAPPER_NAME': 'My Super Awesome App.app',
+            'DEVELOPMENT_TEAM': '3333CCCC33',
+          },
+          projectInfo: projectInfo,
+        );
         final IOSDevice iosDevice = setUpIOSDevice(
           fileSystem: fileSystem,
           processManager: processManager,
           logger: logger,
           artifacts: artifacts,
+          analytics: fakeAnalytics,
+          xcode: xcode,
+          xcodeProjectInterpreter: xcodeProjectInterpreter,
         );
         setUpIOSProject(fileSystem);
-        final FlutterProject flutterProject = FlutterProject.fromDirectory(
-          fileSystem.currentDirectory,
-        );
+        final FlutterProject flutterProject = const DelegatingToolContext().projectFactory
+            .fromDirectory(fileSystem.currentDirectory);
         final buildableIOSApp = BuildableIOSApp(
           flutterProject.ios,
           'flutter',
@@ -178,7 +187,6 @@ void main() {
           projectInfo: projectInfo,
         ),
         Xcode: () => xcode,
-        Analytics: () => fakeAnalytics,
         Artifacts: () => artifacts,
       },
     );
@@ -191,11 +199,11 @@ void main() {
           processManager: FakeProcessManager.any(),
           logger: logger,
           artifacts: artifacts,
+          xcode: xcode,
         );
         setUpIOSProject(fileSystem);
-        final FlutterProject flutterProject = FlutterProject.fromDirectory(
-          fileSystem.currentDirectory,
-        );
+        final FlutterProject flutterProject = const DelegatingToolContext().projectFactory
+            .fromDirectory(fileSystem.currentDirectory);
         final buildableIOSApp = BuildableIOSApp(
           flutterProject.ios,
           'flutter',
@@ -233,11 +241,12 @@ void main() {
           logger: logger,
           artifacts: artifacts,
           analytics: fakeExactAnalytics,
+          xcode: xcode,
+          xcodeProjectInterpreter: fakeXcodeProjectInterpreter,
         );
         setUpIOSProject(fileSystem);
-        final FlutterProject flutterProject = FlutterProject.fromDirectory(
-          fileSystem.currentDirectory,
-        );
+        final FlutterProject flutterProject = const DelegatingToolContext().projectFactory
+            .fromDirectory(fileSystem.currentDirectory);
         final buildableIOSApp = BuildableIOSApp(
           flutterProject.ios,
           'flutter',
@@ -289,13 +298,25 @@ void main() {
         expect(fileSystem.directory('build/ios/iphoneos'), exists);
         expect(launchResult.started, true);
         expect(processManager, hasNoRemainingExpectations);
-        expect(fakeExactAnalytics.sentEvents, [
-          Event.appleUsageEvent(
-            workflow: 'ios-physical-deployment',
-            parameter: IOSDeploymentMethod.iosDeployLaunch.name,
-            result: 'release success',
+        expect(fakeExactAnalytics.sentEvents, hasLength(2));
+        expect(
+          analyticsTimingEventExists(
+            sentEvents: fakeExactAnalytics.sentEvents,
+            workflow: 'build',
+            variableName: 'xcode-ios',
           ),
-        ]);
+          true,
+        );
+        expect(
+          fakeExactAnalytics.sentEvents,
+          contains(
+            Event.appleUsageEvent(
+              workflow: 'ios-physical-deployment',
+              parameter: IOSDeploymentMethod.iosDeployLaunch.name,
+              result: 'release success',
+            ),
+          ),
+        );
       },
       overrides: <Type, Generator>{
         ProcessManager: () => processManager,
@@ -322,11 +343,12 @@ void main() {
           artifacts: artifacts,
           analytics: fakeExactAnalytics,
           os: FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_x64),
+          xcode: xcode,
+          xcodeProjectInterpreter: fakeXcodeProjectInterpreter,
         );
         setUpIOSProject(fileSystem);
-        final FlutterProject flutterProject = FlutterProject.fromDirectory(
-          fileSystem.currentDirectory,
-        );
+        final FlutterProject flutterProject = const DelegatingToolContext().projectFactory
+            .fromDirectory(fileSystem.currentDirectory);
         final buildableIOSApp = BuildableIOSApp(
           flutterProject.ios,
           'flutter',
@@ -407,13 +429,25 @@ void main() {
         expect(fileSystem.directory('build/ios/iphoneos'), exists);
         expect(launchResult.started, true);
         expect(processManager, hasNoRemainingExpectations);
-        expect(fakeExactAnalytics.sentEvents, [
-          Event.appleUsageEvent(
-            workflow: 'ios-physical-deployment',
-            parameter: IOSDeploymentMethod.iosDeployLaunch.name,
-            result: 'release success',
+        expect(fakeExactAnalytics.sentEvents, hasLength(2));
+        expect(
+          analyticsTimingEventExists(
+            sentEvents: fakeExactAnalytics.sentEvents,
+            workflow: 'build',
+            variableName: 'xcode-ios',
           ),
-        ]);
+          true,
+        );
+        expect(
+          fakeExactAnalytics.sentEvents,
+          contains(
+            Event.appleUsageEvent(
+              workflow: 'ios-physical-deployment',
+              parameter: IOSDeploymentMethod.iosDeployLaunch.name,
+              result: 'release success',
+            ),
+          ),
+        );
       },
       overrides: <Type, Generator>{
         ProcessManager: () => processManager,
@@ -439,7 +473,7 @@ void main() {
           xcodeVersion: Version(26, 0, 0),
         );
         xcode = Xcode.test(
-          processManager: FakeProcessManager.any(),
+          toolContext: FakeToolContext.macosHost(processManager: FakeProcessManager.any()),
           xcodeProjectInterpreter: fakeXcodeProjectInterpreter,
         );
         fakeArtifacts = FakeArtifacts(
@@ -456,11 +490,12 @@ void main() {
             logger: logger,
             artifacts: fakeArtifacts,
             os: FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_x64),
+            xcode: xcode,
+            xcodeProjectInterpreter: fakeXcodeProjectInterpreter,
           );
           setUpIOSProject(fileSystem);
-          final FlutterProject flutterProject = FlutterProject.fromDirectory(
-            fileSystem.currentDirectory,
-          );
+          final FlutterProject flutterProject = const DelegatingToolContext().projectFactory
+              .fromDirectory(fileSystem.currentDirectory);
           final buildableIOSApp = BuildableIOSApp(
             flutterProject.ios,
             'flutter',
@@ -564,11 +599,12 @@ void main() {
             logger: logger,
             artifacts: fakeArtifacts,
             os: FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_x64),
+            xcode: xcode,
+            xcodeProjectInterpreter: fakeXcodeProjectInterpreter,
           );
           setUpIOSProject(fileSystem);
-          final FlutterProject flutterProject = FlutterProject.fromDirectory(
-            fileSystem.currentDirectory,
-          );
+          final FlutterProject flutterProject = const DelegatingToolContext().projectFactory
+              .fromDirectory(fileSystem.currentDirectory);
           final buildableIOSApp = BuildableIOSApp(
             flutterProject.ios,
             'flutter',
@@ -647,11 +683,12 @@ void main() {
           logger: logger,
           artifacts: artifacts,
           analytics: fakeExactAnalytics,
+          xcode: xcode,
+          xcodeProjectInterpreter: fakeXcodeProjectInterpreter,
         );
         setUpIOSProject(fileSystem);
-        final FlutterProject flutterProject = FlutterProject.fromDirectory(
-          fileSystem.currentDirectory,
-        );
+        final FlutterProject flutterProject = const DelegatingToolContext().projectFactory
+            .fromDirectory(fileSystem.currentDirectory);
         final buildableIOSApp = BuildableIOSApp(
           flutterProject.ios,
           'flutter',
@@ -706,13 +743,25 @@ void main() {
               );
               expect(launchResult.started, true);
               expect(processManager, hasNoRemainingExpectations);
-              expect(fakeExactAnalytics.sentEvents, [
-                Event.appleUsageEvent(
-                  workflow: 'ios-physical-deployment',
-                  parameter: IOSDeploymentMethod.iosDeployLaunch.name,
-                  result: 'release success',
+              expect(fakeExactAnalytics.sentEvents, hasLength(2));
+              expect(
+                analyticsTimingEventExists(
+                  sentEvents: fakeExactAnalytics.sentEvents,
+                  workflow: 'build',
+                  variableName: 'xcode-ios',
                 ),
-              ]);
+                true,
+              );
+              expect(
+                fakeExactAnalytics.sentEvents,
+                contains(
+                  Event.appleUsageEvent(
+                    workflow: 'ios-physical-deployment',
+                    parameter: IOSDeploymentMethod.iosDeployLaunch.name,
+                    result: 'release success',
+                  ),
+                ),
+              );
             }),
           ),
         );
@@ -757,7 +806,7 @@ void main() {
         xcodeVersion: Version(16, 0, 0),
       );
       xcode = Xcode.test(
-        processManager: FakeProcessManager.any(),
+        toolContext: FakeToolContext.macosHost(processManager: FakeProcessManager.any()),
         xcodeProjectInterpreter: fakeXcodeProjectInterpreter,
       );
     });
@@ -775,11 +824,12 @@ void main() {
             isCoreDevice: true,
             coreDeviceControl: FakeIOSCoreDeviceControl(),
             analytics: fakeExactAnalytics,
+            xcode: xcode,
+            xcodeProjectInterpreter: fakeXcodeProjectInterpreter,
           );
           setUpIOSProject(fileSystem);
-          final FlutterProject flutterProject = FlutterProject.fromDirectory(
-            fileSystem.currentDirectory,
-          );
+          final FlutterProject flutterProject = const DelegatingToolContext().projectFactory
+              .fromDirectory(fileSystem.currentDirectory);
           final buildableIOSApp = BuildableIOSApp(
             flutterProject.ios,
             'flutter',
@@ -799,13 +849,25 @@ void main() {
           expect(fileSystem.directory('build/ios/iphoneos'), exists);
           expect(launchResult.started, true);
           expect(processManager, hasNoRemainingExpectations);
-          expect(fakeExactAnalytics.sentEvents, [
-            Event.appleUsageEvent(
-              workflow: 'ios-physical-deployment',
-              parameter: IOSDeploymentMethod.coreDeviceWithoutDebugger.name,
-              result: 'release success',
+          expect(fakeExactAnalytics.sentEvents, hasLength(2));
+          expect(
+            analyticsTimingEventExists(
+              sentEvents: fakeExactAnalytics.sentEvents,
+              workflow: 'build',
+              variableName: 'xcode-ios',
             ),
-          ]);
+            true,
+          );
+          expect(
+            fakeExactAnalytics.sentEvents,
+            contains(
+              Event.appleUsageEvent(
+                workflow: 'ios-physical-deployment',
+                parameter: IOSDeploymentMethod.coreDeviceWithoutDebugger.name,
+                result: 'release success',
+              ),
+            ),
+          );
         },
         overrides: <Type, Generator>{
           ProcessManager: () => FakeProcessManager.any(),
@@ -833,11 +895,12 @@ void main() {
             coreDeviceControl: FakeIOSCoreDeviceControl(installSuccess: false),
             coreDeviceLauncher: FakeIOSCoreDeviceLauncher(launchResult: false),
             analytics: fakeExactAnalytics,
+            xcode: xcode,
+            xcodeProjectInterpreter: fakeXcodeProjectInterpreter,
           );
           setUpIOSProject(fileSystem);
-          final FlutterProject flutterProject = FlutterProject.fromDirectory(
-            fileSystem.currentDirectory,
-          );
+          final FlutterProject flutterProject = const DelegatingToolContext().projectFactory
+              .fromDirectory(fileSystem.currentDirectory);
           final buildableIOSApp = BuildableIOSApp(
             flutterProject.ios,
             'flutter',
@@ -857,13 +920,25 @@ void main() {
           expect(fileSystem.directory('build/ios/iphoneos'), exists);
           expect(launchResult.started, false);
           expect(processManager, hasNoRemainingExpectations);
-          expect(fakeExactAnalytics.sentEvents, [
-            Event.appleUsageEvent(
-              workflow: 'ios-physical-deployment',
-              parameter: IOSDeploymentMethod.coreDeviceWithoutDebugger.name,
-              result: 'launch failed',
+          expect(fakeExactAnalytics.sentEvents, hasLength(2));
+          expect(
+            analyticsTimingEventExists(
+              sentEvents: fakeExactAnalytics.sentEvents,
+              workflow: 'build',
+              variableName: 'xcode-ios',
             ),
-          ]);
+            true,
+          );
+          expect(
+            fakeExactAnalytics.sentEvents,
+            contains(
+              Event.appleUsageEvent(
+                workflow: 'ios-physical-deployment',
+                parameter: IOSDeploymentMethod.coreDeviceWithoutDebugger.name,
+                result: 'launch failed',
+              ),
+            ),
+          );
         },
         overrides: <Type, Generator>{
           ProcessManager: () => FakeProcessManager.any(),
@@ -888,11 +963,12 @@ void main() {
             artifacts: artifacts,
             isCoreDevice: true,
             coreDeviceControl: FakeIOSCoreDeviceControl(launchSuccess: false),
+            xcode: xcode,
+            xcodeProjectInterpreter: fakeXcodeProjectInterpreter,
           );
           setUpIOSProject(fileSystem);
-          final FlutterProject flutterProject = FlutterProject.fromDirectory(
-            fileSystem.currentDirectory,
-          );
+          final FlutterProject flutterProject = const DelegatingToolContext().projectFactory
+              .fromDirectory(fileSystem.currentDirectory);
           final buildableIOSApp = BuildableIOSApp(
             flutterProject.ios,
             'flutter',
@@ -939,11 +1015,12 @@ void main() {
             isCoreDevice: true,
             coreDeviceControl: coreDeviceControl,
             analytics: fakeExactAnalytics,
+            xcode: xcode,
+            xcodeProjectInterpreter: fakeXcodeProjectInterpreter,
           );
           setUpIOSProject(fileSystem);
-          final FlutterProject flutterProject = FlutterProject.fromDirectory(
-            fileSystem.currentDirectory,
-          );
+          final FlutterProject flutterProject = const DelegatingToolContext().projectFactory
+              .fromDirectory(fileSystem.currentDirectory);
           final buildableIOSApp = BuildableIOSApp(
             flutterProject.ios,
             'flutter',
@@ -965,13 +1042,25 @@ void main() {
           expect(processManager, hasNoRemainingExpectations);
           expect(coreDeviceControl.argumentsUsedForLaunch, isNotNull);
           expect(coreDeviceControl.argumentsUsedForLaunch, contains('--enable-dart-profiling'));
-          expect(fakeExactAnalytics.sentEvents, [
-            Event.appleUsageEvent(
-              workflow: 'ios-physical-deployment',
-              parameter: IOSDeploymentMethod.coreDeviceWithoutDebugger.name,
-              result: 'release success',
+          expect(fakeExactAnalytics.sentEvents, hasLength(2));
+          expect(
+            analyticsTimingEventExists(
+              sentEvents: fakeExactAnalytics.sentEvents,
+              workflow: 'build',
+              variableName: 'xcode-ios',
             ),
-          ]);
+            true,
+          );
+          expect(
+            fakeExactAnalytics.sentEvents,
+            contains(
+              Event.appleUsageEvent(
+                workflow: 'ios-physical-deployment',
+                parameter: IOSDeploymentMethod.coreDeviceWithoutDebugger.name,
+                result: 'release success',
+              ),
+            ),
+          );
         },
         overrides: <Type, Generator>{
           ProcessManager: () => FakeProcessManager.any(),
@@ -998,6 +1087,8 @@ void main() {
             artifacts: artifacts,
             isCoreDevice: true,
             coreDeviceControl: FakeIOSCoreDeviceControl(),
+            xcode: xcode,
+            xcodeProjectInterpreter: fakeXcodeProjectInterpreter,
             xcodeDebug: FakeXcodeDebug(
               expectedProject: XcodeDebugProject(
                 scheme: 'Runner',
@@ -1011,9 +1102,8 @@ void main() {
           );
 
           setUpIOSProject(fileSystem);
-          final FlutterProject flutterProject = FlutterProject.fromDirectory(
-            fileSystem.currentDirectory,
-          );
+          final FlutterProject flutterProject = const DelegatingToolContext().projectFactory
+              .fromDirectory(fileSystem.currentDirectory);
           final buildableIOSApp = BuildableIOSApp(
             flutterProject.ios,
             'flutter',
@@ -1078,6 +1168,8 @@ void main() {
             artifacts: artifacts,
             isCoreDevice: true,
             coreDeviceControl: FakeIOSCoreDeviceControl(),
+            xcode: xcode,
+            xcodeProjectInterpreter: fakeXcodeProjectInterpreter,
             xcodeDebug: FakeXcodeDebug(
               expectedProject: XcodeDebugProject(
                 scheme: 'Runner',
@@ -1091,9 +1183,8 @@ void main() {
           );
 
           setUpIOSProject(fileSystem);
-          final FlutterProject flutterProject = FlutterProject.fromDirectory(
-            fileSystem.currentDirectory,
-          );
+          final FlutterProject flutterProject = const DelegatingToolContext().projectFactory
+              .fromDirectory(fileSystem.currentDirectory);
           final buildableIOSApp = BuildableIOSApp(
             flutterProject.ios,
             'flutter',
@@ -1161,7 +1252,7 @@ void main() {
             xcodeVersion: Version(16, 0, 0),
           );
           xcode = Xcode.test(
-            processManager: FakeProcessManager.any(),
+            toolContext: FakeToolContext.macosHost(processManager: FakeProcessManager.any()),
             xcodeProjectInterpreter: fakeXcodeProjectInterpreter,
           );
         });
@@ -1177,6 +1268,8 @@ void main() {
               artifacts: artifacts,
               isCoreDevice: true,
               coreDeviceControl: FakeIOSCoreDeviceControl(),
+              xcode: xcode,
+              xcodeProjectInterpreter: fakeXcodeProjectInterpreter,
               xcodeDebug: FakeXcodeDebug(
                 expectedProject: XcodeDebugProject(
                   scheme: flavor,
@@ -1192,9 +1285,8 @@ void main() {
             );
 
             setUpIOSProject(fileSystem, scheme: flavor);
-            final FlutterProject flutterProject = FlutterProject.fromDirectory(
-              fileSystem.currentDirectory,
-            );
+            final FlutterProject flutterProject = const DelegatingToolContext().projectFactory
+                .fromDirectory(fileSystem.currentDirectory);
             final buildableIOSApp = BuildableIOSApp(
               flutterProject.ios,
               'flutter',
@@ -1262,6 +1354,8 @@ void main() {
             artifacts: artifacts,
             isCoreDevice: true,
             coreDeviceControl: FakeIOSCoreDeviceControl(),
+            xcode: xcode,
+            xcodeProjectInterpreter: fakeXcodeProjectInterpreter,
             xcodeDebug: FakeXcodeDebug(
               expectedProject: XcodeDebugProject(
                 scheme: 'Runner',
@@ -1278,9 +1372,8 @@ void main() {
           );
 
           setUpIOSProject(fileSystem);
-          final FlutterProject flutterProject = FlutterProject.fromDirectory(
-            fileSystem.currentDirectory,
-          );
+          final FlutterProject flutterProject = const DelegatingToolContext().projectFactory
+              .fromDirectory(fileSystem.currentDirectory);
           final buildableIOSApp = BuildableIOSApp(
             flutterProject.ios,
             'flutter',
@@ -1357,11 +1450,11 @@ void main() {
             artifacts: artifacts,
             isCoreDevice: true,
             coreDeviceControl: FakeIOSCoreDeviceControl(),
+            xcode: xcode,
           );
           setUpIOSProject(fileSystem);
-          final FlutterProject flutterProject = FlutterProject.fromDirectory(
-            fileSystem.currentDirectory,
-          );
+          final FlutterProject flutterProject = const DelegatingToolContext().projectFactory
+              .fromDirectory(fileSystem.currentDirectory);
           final buildableIOSApp = BuildableIOSApp(
             flutterProject.ios,
             'flutter',
@@ -1413,11 +1506,12 @@ void main() {
             artifacts: artifacts,
             isCoreDevice: true,
             coreDeviceControl: FakeIOSCoreDeviceControl(),
+            xcode: xcode,
+            xcodeProjectInterpreter: fakeXcodeProjectInterpreter,
           );
           setUpIOSProject(fileSystem, createWorkspace: false);
-          final FlutterProject flutterProject = FlutterProject.fromDirectory(
-            fileSystem.currentDirectory,
-          );
+          final FlutterProject flutterProject = const DelegatingToolContext().projectFactory
+              .fromDirectory(fileSystem.currentDirectory);
           final buildableIOSApp = BuildableIOSApp(
             flutterProject.ios,
             'flutter',
@@ -1470,11 +1564,12 @@ void main() {
             artifacts: artifacts,
             isCoreDevice: true,
             coreDeviceControl: FakeIOSCoreDeviceControl(),
+            xcode: xcode,
+            xcodeProjectInterpreter: fakeXcodeProjectInterpreter,
           );
           setUpIOSProject(fileSystem);
-          final FlutterProject flutterProject = FlutterProject.fromDirectory(
-            fileSystem.currentDirectory,
-          );
+          final FlutterProject flutterProject = const DelegatingToolContext().projectFactory
+              .fromDirectory(fileSystem.currentDirectory);
           final buildableIOSApp = BuildableIOSApp(
             flutterProject.ios,
             'flutter',
@@ -1557,18 +1652,20 @@ name: my_app
 }
 
 IOSDevice setUpIOSDevice({
+  required Xcode xcode,
+  XcodeProjectInterpreter? xcodeProjectInterpreter,
   String sdkVersion = '13.0.1',
   FileSystem? fileSystem,
   Logger? logger,
   ProcessManager? processManager,
   Artifacts? artifacts,
+  OperatingSystemUtils? os,
   bool isCoreDevice = false,
   IOSCoreDeviceControl? coreDeviceControl,
   IOSCoreDeviceLauncher? coreDeviceLauncher,
   FakeXcodeDebug? xcodeDebug,
   CpuArch cpuArchitecture = CpuArch.arm64,
-  FakeExactAnalytics? analytics,
-  OperatingSystemUtils? os,
+  Analytics? analytics,
 }) {
   artifacts ??= Artifacts.test();
   final cache = Cache.test(
@@ -1592,10 +1689,12 @@ IOSDevice setUpIOSDevice({
     name: 'iPhone 1',
     sdkVersion: sdkVersion,
     toolContext: toolContext,
-    xcode: FakeXcode(),
+    xcode: xcode,
+    xcodeProjectInterpreter: xcodeProjectInterpreter ?? FakeXcodeProjectInterpreter(),
     iProxy: IProxy.test(logger: logger, processManager: processManager ?? FakeProcessManager.any()),
     iosDeploy: IOSDeploy(toolContext: toolContext),
     analytics: analytics ?? FakeExactAnalytics(),
+    cocoaPods: FakeCocoaPods(),
     iMobileDevice: IMobileDevice(
       logger: logger,
       processManager: processManager ?? FakeProcessManager.any(),
@@ -1604,6 +1703,7 @@ IOSDevice setUpIOSDevice({
     ),
     coreDeviceControl: coreDeviceControl ?? FakeIOSCoreDeviceControl(),
     coreDeviceLauncher: coreDeviceLauncher ?? FakeIOSCoreDeviceLauncher(),
+    plistParser: FakePlistParser(),
     xcodeDebug: xcodeDebug ?? FakeXcodeDebug(),
     cpuArch: cpuArchitecture,
     connectionInterface: DeviceConnectionInterface.attached,

@@ -238,18 +238,22 @@ absl::StatusOr<ContextVK::DeviceSelection> ContextVK::SelectDevice(
   vk::StructureChain<vk::InstanceCreateInfo, vk::ValidationFeaturesEXT>
       instance_chain;
 
-  if (!caps->AreValidationsEnabled()) {
-    instance_chain.unlink<vk::ValidationFeaturesEXT>();
+  // Synchronization validation adds significant CPU overhead so it is only
+  // enabled when explicitly requested.
+  std::vector<vk::ValidationFeatureEnableEXT> enabled_validations;
+  if (caps->AreValidationsEnabled() && settings.enable_sync_validation) {
+    enabled_validations.push_back(
+        vk::ValidationFeatureEnableEXT::eSynchronizationValidation);
   }
 
-  std::vector<vk::ValidationFeatureEnableEXT> enabled_validations = {
-      vk::ValidationFeatureEnableEXT::eSynchronizationValidation,
-  };
+  if (enabled_validations.empty()) {
+    instance_chain.unlink<vk::ValidationFeaturesEXT>();
+  } else {
+    auto& validation = instance_chain.get<vk::ValidationFeaturesEXT>();
+    validation.setEnabledValidationFeatures(enabled_validations);
+  }
 
-  auto validation = instance_chain.get<vk::ValidationFeaturesEXT>();
-  validation.setEnabledValidationFeatures(enabled_validations);
-
-  auto instance_info = instance_chain.get<vk::InstanceCreateInfo>();
+  auto& instance_info = instance_chain.get<vk::InstanceCreateInfo>();
   instance_info.setPEnabledLayerNames(enabled_layers_c);
   instance_info.setPEnabledExtensionNames(enabled_extensions_c);
   instance_info.setPApplicationInfo(&application_info);
