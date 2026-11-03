@@ -16,25 +16,32 @@ import '../json_utils.dart';
 /// URIs together so partial compiler configurations cannot be constructed.
 @immutable
 class ExtensionCCompilerConfig {
-  const ExtensionCCompilerConfig({
+  ExtensionCCompilerConfig({
     required this.ar,
     required this.cc,
     required this.ld,
     this.envScript,
-    this.envScriptArgs,
-  });
+    this.envScriptArgs = const <String>[],
+  }) : assert(
+         envScript != null || envScriptArgs.isEmpty,
+         'Cannot provide envScriptArgs without envScript.',
+       );
 
   /// Deserializes an [ExtensionCCompilerConfig] from a JSON-serializable map.
   factory ExtensionCCompilerConfig.fromJson(Map<String, Object?> json) {
     final String? rawEnvScript = json.nullableField<String>(envScriptKey);
+    final List<String> envScriptArgs = json.stringIterable(envScriptArgsKey).toList();
+    if (rawEnvScript == null && envScriptArgs.isNotEmpty) {
+      throw const FormatException(
+        'Cannot specify "$envScriptArgsKey" without "$envScriptKey" in ExtensionCCompilerConfig.',
+      );
+    }
     return ExtensionCCompilerConfig(
       ar: _parseAbsoluteUri(json.requiredField<String>(arKey), arKey),
       cc: _parseAbsoluteUri(json.requiredField<String>(ccKey), ccKey),
       ld: _parseAbsoluteUri(json.requiredField<String>(ldKey), ldKey),
       envScript: rawEnvScript != null ? _parseAbsoluteUri(rawEnvScript, envScriptKey) : null,
-      envScriptArgs: json[envScriptArgsKey] != null
-          ? json.stringIterable(envScriptArgsKey).toList()
-          : null,
+      envScriptArgs: envScriptArgs,
     );
   }
 
@@ -66,8 +73,8 @@ class ExtensionCCompilerConfig {
   /// environment setup script for the compiler toolchain.
   final Uri? envScript;
 
-  /// Optional arguments passed to [envScript] on Windows.
-  final List<String>? envScriptArgs;
+  /// Arguments passed to [envScript] on Windows.
+  final List<String> envScriptArgs;
 
   static Uri _parseAbsoluteUri(String rawValue, String fieldName) {
     if (rawValue.isEmpty) {
@@ -88,7 +95,7 @@ class ExtensionCCompilerConfig {
     ccKey: cc.toString(),
     ldKey: ld.toString(),
     if (envScript != null) envScriptKey: envScript.toString(),
-    envScriptArgsKey: ?envScriptArgs,
+    if (envScriptArgs.isNotEmpty) envScriptArgsKey: envScriptArgs,
   };
 
   @override
@@ -212,8 +219,8 @@ class ExtensionNativeAssetsConfig {
         cCompilerLdDefine: compiler.ld.toFilePath(),
         if (compiler.envScript case final Uri envScript)
           cCompilerEnvScriptDefine: envScript.toFilePath(),
-        if (compiler.envScriptArgs case final List<String> args when args.isNotEmpty)
-          cCompilerEnvScriptArgsDefine: jsonEncode(args),
+        if (compiler.envScriptArgs.isNotEmpty)
+          cCompilerEnvScriptArgsDefine: jsonEncode(compiler.envScriptArgs),
       },
     };
   }

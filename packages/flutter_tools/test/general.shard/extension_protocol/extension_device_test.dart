@@ -14,6 +14,7 @@ import 'package:flutter_tools/src/experimental/extension_build_manager.dart';
 import 'package:flutter_tools/src/experimental/extension_device_manager.dart';
 import 'package:flutter_tools/src/experimental/extension_discovery.dart';
 import 'package:flutter_tools/src/experimental/extension_manager.dart';
+import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools_core/flutter_tools_core.dart' hide BuildMode, Category;
 import 'package:flutter_tools_extension/flutter_tools_extension.dart';
 import 'package:json_rpc_2/error_code.dart' as error_code;
@@ -122,7 +123,9 @@ final class _FakeExtensionBuildManager extends ExtensionBuildManager {
   _FakeExtensionBuildManager({
     required super.extensionManager,
     required super.featureFlags,
+    required super.fileSystem,
     required super.logger,
+    required super.projectFactory,
     List<ExtensionBuildTarget>? targets,
   }) : _targets =
            targets ??
@@ -167,10 +170,13 @@ ExtensionBuildManager _createBuildManager({
   if (extensionManager == null) {
     addTearDown(manager.dispose);
   }
+  final fs = MemoryFileSystem.test();
   return _FakeExtensionBuildManager(
     extensionManager: manager,
     featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
+    fileSystem: fs,
     logger: logger,
+    projectFactory: FlutterProjectFactory(config: FakeConfig(), fileSystem: fs, logger: logger),
     targets: targets,
   );
 }

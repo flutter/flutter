@@ -11,6 +11,30 @@ import 'package:test/test.dart';
 
 void main() {
   group('LinuxBuildService', () {
+    test(
+      'BuildService resolveNativeAssetsConfig RPC returns serialized ExtensionNativeAssetsConfig',
+      () async {
+        final service = _CustomNativeAssetsBuildService();
+        final Map<String, ExtensionRpcHandler> handlers = await service.initialize();
+        final Object? result = await handlers['resolveNativeAssetsConfig']!(<String, Object?>{
+          BuildService.buildModeParam: 'release',
+          BuildService.flutterRootParam: '/flutter',
+          BuildService.mainPathParam: 'lib/main.dart',
+          BuildService.outputDirParam: '/project/build/custom',
+          BuildService.projectRootParam: '/project',
+          BuildService.resolvedArtifactsParam: const <String, String>{},
+          BuildService.targetNameParam: 'custom-native-assets-target',
+        });
+
+        expect(result, isA<Map<String, Object?>>());
+        final parsed = ExtensionNativeAssetsConfig.fromJson(result! as Map<String, Object?>);
+        expect(parsed.targetOs, 'custom_os');
+        expect(parsed.targetArchitecture, 'arm64');
+        expect(parsed.cCompilerConfig?.cc, Uri.file('/opt/release-sdk/bin/clang'));
+        await service.shutdown();
+      },
+    );
+
     test('buildTargets and assembleTargets return prototype Linux targets', () {
       final service = LinuxBuildService();
       final LinuxBuildService(
@@ -28,49 +52,54 @@ void main() {
       );
     });
 
-    test(
-      'initialize registers getBuildTargets, getAssembleTargets, build, and assemble RPC handlers',
-      () async {
-        final service = LinuxBuildService();
-        expect(service.namespace, BuildService.serviceNamespace);
+    test('initialize registers getBuildTargets, getAssembleTargets, resolveNativeAssetsConfig, build, and assemble RPC handlers', () async {
+      final service = LinuxBuildService();
+      expect(service.namespace, BuildService.serviceNamespace);
 
-        final Map<String, ExtensionRpcHandler> handlers = await service.initialize();
-        expect(
-          handlers.keys,
-          containsAll(<String>['getBuildTargets', 'getAssembleTargets', 'build', 'assemble']),
-        );
+      final Map<String, ExtensionRpcHandler> handlers = await service.initialize();
+      expect(
+        handlers.keys,
+        containsAll(<String>[
+          'getBuildTargets',
+          'getAssembleTargets',
+          'resolveNativeAssetsConfig',
+          'build',
+          'assemble',
+        ]),
+      );
 
-        final Object? buildTargetsResult = await handlers['getBuildTargets']!(
-          const <String, Object?>{},
-        );
-        final List<ExtensionBuildTarget> buildTargets = ExtensionBuildTarget.listFromJson(
-          buildTargetsResult,
-        );
-        expect(buildTargets, hasLength(1));
-        expect(buildTargets.single.name, LinuxBuildService.customLinuxBuildTargetName);
-        expect(
-          buildTargets.single.outputDir,
-          '${BuiltInPlaceholders.outputDir}/linux_extension/x64/${BuiltInPlaceholders.buildMode}',
-        );
-        expect(
-          buildTargets.single.artifacts,
-          equals(const <ExtensionArtifact>{
-            LinuxArtifacts.linuxHeaders,
-            LinuxArtifacts.linuxDesktopPath,
-            BuiltInArtifacts.icuData,
-          }),
-        );
+      final Object? buildTargetsResult = await handlers['getBuildTargets']!(
+        const <String, Object?>{},
+      );
+      final List<ExtensionBuildTarget> buildTargets = ExtensionBuildTarget.listFromJson(
+        buildTargetsResult,
+      );
+      expect(buildTargets, hasLength(1));
+      expect(buildTargets.single.name, LinuxBuildService.customLinuxBuildTargetName);
+      expect(
+        buildTargets.single.outputDir,
+        '${BuiltInPlaceholders.outputDir}/linux_extension/x64/${BuiltInPlaceholders.buildMode}',
+      );
+      expect(
+        buildTargets.single.artifacts,
+        equals(const <ExtensionArtifact>{
+          LinuxArtifacts.linuxHeaders,
+          LinuxArtifacts.linuxDesktopPath,
+          BuiltInArtifacts.icuData,
+        }),
+      );
 
-        final Object? assembleTargetsResult = await handlers['getAssembleTargets']!(
-          const <String, Object?>{},
-        );
-        final List<ExtensionAssembleTarget> assembleTargets = ExtensionAssembleTarget.listFromJson(
-          assembleTargetsResult,
-        );
-        expect(assembleTargets, hasLength(1));
-        expect(assembleTargets.single.name, 'custom-linux-assemble-only-debug');
+      final Object? assembleTargetsResult = await handlers['getAssembleTargets']!(
+        const <String, Object?>{},
+      );
+      final List<ExtensionAssembleTarget> assembleTargets = ExtensionAssembleTarget.listFromJson(
+        assembleTargetsResult,
+      );
+      expect(assembleTargets, hasLength(1));
+      expect(assembleTargets.single.name, 'custom-linux-assemble-only-debug');
 
-        final Object? missingCmakeResultObj = await handlers['build']!(<String, Object?>{
+      final Object? defaultNativeAssetsResult = await handlers['resolveNativeAssetsConfig']!(
+        <String, Object?>{
           BuildService.buildModeParam: 'debug',
           BuildService.flutterRootParam: '/flutter',
           BuildService.mainPathParam: 'lib/main.dart',
@@ -78,14 +107,12 @@ void main() {
           BuildService.projectRootParam: '/project',
           BuildService.resolvedArtifactsParam: const <String, String>{},
           BuildService.targetNameParam: LinuxBuildService.customLinuxBuildTargetName,
-        });
-        final missingCmakeResult = ExtensionBuildResult.fromJson(
-          missingCmakeResultObj! as Map<String, Object?>,
-        );
-        expect(missingCmakeResult.success, isFalse);
-        expect(missingCmakeResult.errorMessage, contains('Missing linux/CMakeLists.txt'));
+        },
+      );
+      expect(defaultNativeAssetsResult, isNull);
 
-        final Object? unknownBuildTargetResultObj = await handlers['build']!(<String, Object?>{
+      await expectLater(
+        () => handlers['resolveNativeAssetsConfig']!(<String, Object?>{
           BuildService.buildModeParam: 'debug',
           BuildService.flutterRootParam: '/flutter',
           BuildService.mainPathParam: 'lib/main.dart',
@@ -93,37 +120,67 @@ void main() {
           BuildService.projectRootParam: '/project',
           BuildService.resolvedArtifactsParam: const <String, String>{},
           BuildService.targetNameParam: 'unknown-target',
-        });
-        final unknownBuildResult = ExtensionBuildResult.fromJson(
-          unknownBuildTargetResultObj! as Map<String, Object?>,
-        );
-        expect(unknownBuildResult.success, isFalse);
-        expect(unknownBuildResult.errorMessage, contains('Unknown build target: unknown-target'));
+        }),
+        throwsA(
+          isA<Exception>().having(
+            (Exception e) => e.toString(),
+            'toString',
+            allOf(contains('-32602'), contains('Unknown build target: unknown-target')),
+          ),
+        ),
+      );
 
-        final Object? unknownAssembleTargetResultObj = await handlers['assemble']!(
-          <String, Object?>{
-            BuildService.buildDirParam: '/project/.dart_tool/flutter_build',
-            BuildService.buildModeParam: 'debug',
-            BuildService.flutterRootParam: '/flutter',
-            BuildService.mainPathParam: 'lib/main.dart',
-            BuildService.outputDirParam: '/project/build/linux_extension/x64/debug',
-            BuildService.projectRootParam: '/project',
-            BuildService.resolvedArtifactsParam: const <String, String>{},
-            BuildService.targetNameParam: 'unknown-assemble-target',
-          },
-        );
-        final unknownAssembleResult = ExtensionBuildResult.fromJson(
-          unknownAssembleTargetResultObj! as Map<String, Object?>,
-        );
-        expect(unknownAssembleResult.success, isFalse);
-        expect(
-          unknownAssembleResult.errorMessage,
-          contains('Unknown assemble target: unknown-assemble-target'),
-        );
+      final Object? missingCmakeResultObj = await handlers['build']!(<String, Object?>{
+        BuildService.buildModeParam: 'debug',
+        BuildService.flutterRootParam: '/flutter',
+        BuildService.mainPathParam: 'lib/main.dart',
+        BuildService.outputDirParam: '/project/build/linux_extension/x64/debug',
+        BuildService.projectRootParam: '/project',
+        BuildService.resolvedArtifactsParam: const <String, String>{},
+        BuildService.targetNameParam: LinuxBuildService.customLinuxBuildTargetName,
+      });
+      final missingCmakeResult = ExtensionBuildResult.fromJson(
+        missingCmakeResultObj! as Map<String, Object?>,
+      );
+      expect(missingCmakeResult.success, isFalse);
+      expect(missingCmakeResult.errorMessage, contains('Missing linux/CMakeLists.txt'));
 
-        await service.shutdown();
-      },
-    );
+      final Object? unknownBuildTargetResultObj = await handlers['build']!(<String, Object?>{
+        BuildService.buildModeParam: 'debug',
+        BuildService.flutterRootParam: '/flutter',
+        BuildService.mainPathParam: 'lib/main.dart',
+        BuildService.outputDirParam: '/project/build/linux_extension/x64/debug',
+        BuildService.projectRootParam: '/project',
+        BuildService.resolvedArtifactsParam: const <String, String>{},
+        BuildService.targetNameParam: 'unknown-target',
+      });
+      final unknownBuildResult = ExtensionBuildResult.fromJson(
+        unknownBuildTargetResultObj! as Map<String, Object?>,
+      );
+      expect(unknownBuildResult.success, isFalse);
+      expect(unknownBuildResult.errorMessage, contains('Unknown build target: unknown-target'));
+
+      final Object? unknownAssembleTargetResultObj = await handlers['assemble']!(<String, Object?>{
+        BuildService.buildDirParam: '/project/.dart_tool/flutter_build',
+        BuildService.buildModeParam: 'debug',
+        BuildService.flutterRootParam: '/flutter',
+        BuildService.mainPathParam: 'lib/main.dart',
+        BuildService.outputDirParam: '/project/build/linux_extension/x64/debug',
+        BuildService.projectRootParam: '/project',
+        BuildService.resolvedArtifactsParam: const <String, String>{},
+        BuildService.targetNameParam: 'unknown-assemble-target',
+      });
+      final unknownAssembleResult = ExtensionBuildResult.fromJson(
+        unknownAssembleTargetResultObj! as Map<String, Object?>,
+      );
+      expect(unknownAssembleResult.success, isFalse);
+      expect(
+        unknownAssembleResult.errorMessage,
+        contains('Unknown assemble target: unknown-assemble-target'),
+      );
+
+      await service.shutdown();
+    });
 
     test('CustomLinuxAssembleOnlyDebug copies artifacts and application binary', () async {
       final Directory tempDir = Directory.systemTemp.createTempSync('linux_build_test.');
@@ -313,25 +370,34 @@ void main() {
 
       for (final (String description, Map<String, Object?> overrides, String expectedMessage)
           in commonInvalidCases) {
-        test('throws RpcException on $description for build and assemble', () async {
-          final service = LinuxBuildService();
-          final Map<String, ExtensionRpcHandler> handlers = await service.initialize();
-          final ExtensionRpcHandler buildHandler = handlers['build']!;
-          final ExtensionRpcHandler assembleHandler = handlers['assemble']!;
+        test(
+          'throws RpcException on $description for build, assemble, and resolveNativeAssetsConfig',
+          () async {
+            final service = LinuxBuildService();
+            final Map<String, ExtensionRpcHandler> handlers = await service.initialize();
+            final ExtensionRpcHandler buildHandler = handlers['build']!;
+            final ExtensionRpcHandler assembleHandler = handlers['assemble']!;
+            final ExtensionRpcHandler resolveNativeAssetsConfigHandler =
+                handlers['resolveNativeAssetsConfig']!;
 
-          for (final handler in <ExtensionRpcHandler>[buildHandler, assembleHandler]) {
-            await expectLater(
-              () => handler(<String, Object?>{...validParams, ...overrides}),
-              throwsA(
-                isA<Exception>().having(
-                  (Exception e) => e.toString(),
-                  'toString',
-                  allOf(contains('-32602'), contains(expectedMessage)),
+            for (final handler in <ExtensionRpcHandler>[
+              buildHandler,
+              assembleHandler,
+              resolveNativeAssetsConfigHandler,
+            ]) {
+              await expectLater(
+                () => handler(<String, Object?>{...validParams, ...overrides}),
+                throwsA(
+                  isA<Exception>().having(
+                    (Exception e) => e.toString(),
+                    'toString',
+                    allOf(contains('-32602'), contains(expectedMessage)),
+                  ),
                 ),
-              ),
-            );
-          }
-        });
+              );
+            }
+          },
+        );
       }
 
       final assembleOnlyInvalidCases =
@@ -369,4 +435,41 @@ void main() {
       }
     });
   });
+}
+
+final class _CustomNativeAssetsBuildTarget extends BuildTarget {
+  const _CustomNativeAssetsBuildTarget()
+    : super(
+        description: 'Custom native assets build target.',
+        outputDir: '{OUTPUT_DIR}/custom',
+        targetPlatform: 'custom-arm64',
+      );
+
+  @override
+  String get name => 'custom-native-assets-target';
+
+  @override
+  Future<ExtensionNativeAssetsConfig?> resolveNativeAssetsConfig(
+    ExtensionBuildContext context,
+  ) async {
+    return ExtensionNativeAssetsConfig(
+      targetArchitecture: 'arm64',
+      targetOs: 'custom_os',
+      cCompilerConfig: ExtensionCCompilerConfig(
+        ar: Uri.file('/opt/${context.buildMode.cliName}-sdk/bin/llvm-ar'),
+        cc: Uri.file('/opt/${context.buildMode.cliName}-sdk/bin/clang'),
+        ld: Uri.file('/opt/${context.buildMode.cliName}-sdk/bin/ld.lld'),
+      ),
+    );
+  }
+
+  @override
+  Future<ExtensionBuildResult> build(ExtensionBuildContext context) async {
+    return const ExtensionBuildResult(success: true);
+  }
+}
+
+final class _CustomNativeAssetsBuildService extends BuildService {
+  @override
+  List<BuildTarget> get buildTargets => const <BuildTarget>[_CustomNativeAssetsBuildTarget()];
 }

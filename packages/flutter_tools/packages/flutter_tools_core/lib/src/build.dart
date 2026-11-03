@@ -6,7 +6,6 @@ import 'package:collection/collection.dart';
 import 'package:meta/meta.dart';
 
 import 'build_system/constants.dart';
-import 'build_system/native_assets.dart';
 import 'build_system/source.dart';
 import 'json_utils.dart';
 
@@ -176,7 +175,6 @@ class ExtensionBuildTarget {
     required this.targetPlatform,
     this.artifacts = const <ExtensionArtifact>{},
     this.hostArtifacts = const <ExtensionHostArtifact>{},
-    this.nativeAssetsConfig,
     this.pluginPlatformKey,
   }) : assert(isValidName(name), 'Invalid build target name "$name". $_invalidNameMessage');
 
@@ -186,9 +184,6 @@ class ExtensionBuildTarget {
     if (!isValidName(name)) {
       throw FormatException('Invalid "$nameKey" field: "$name". $_invalidNameMessage');
     }
-    final Map<String, Object?>? rawNativeAssetsConfig = json.nullableField<Map<String, Object?>>(
-      nativeAssetsConfigKey,
-    );
     return ExtensionBuildTarget(
       description: json.requiredField<String>(descriptionKey),
       name: name,
@@ -201,9 +196,6 @@ class ExtensionBuildTarget {
         for (final String name in json.stringIterable(hostArtifactsKey))
           ExtensionHostArtifact(name),
       },
-      nativeAssetsConfig: rawNativeAssetsConfig != null
-          ? ExtensionNativeAssetsConfig.fromJson(rawNativeAssetsConfig)
-          : null,
       pluginPlatformKey: json.nullableField<String>(pluginPlatformKeyKey),
     );
   }
@@ -231,9 +223,6 @@ class ExtensionBuildTarget {
 
   /// Map key for [name].
   static const String nameKey = 'name';
-
-  /// Map key for [nativeAssetsConfig].
-  static const String nativeAssetsConfigKey = 'nativeAssetsConfig';
 
   /// Map key for [outputDir].
   static const String outputDirKey = 'outputDir';
@@ -279,10 +268,6 @@ class ExtensionBuildTarget {
   /// Host-side build tool or library artifacts required by this build target.
   final Set<ExtensionHostArtifact> hostArtifacts;
 
-  /// Optional Dart hooks (`native_assets`) target OS, architecture, and compiler
-  /// configuration for custom targets.
-  final ExtensionNativeAssetsConfig? nativeAssetsConfig;
-
   /// The directory pattern used by `flutter build` to determine this target's
   /// output directory, for example
   /// `'${BuiltInPlaceholders.outputDir}/custom/${BuiltInPlaceholders.targetPlatform}/${BuiltInPlaceholders.buildMode}'`.
@@ -304,7 +289,6 @@ class ExtensionBuildTarget {
     targetPlatformKey: targetPlatform,
     artifactsKey: artifacts.map((ExtensionArtifact a) => a.name).toList(),
     hostArtifactsKey: hostArtifacts.map((ExtensionHostArtifact a) => a.name).toList(),
-    nativeAssetsConfigKey: ?nativeAssetsConfig?.toMap(),
     outputDirKey: outputDir,
     pluginPlatformKeyKey: ?pluginPlatformKey,
   };
@@ -314,7 +298,6 @@ class ExtensionBuildTarget {
       'ExtensionBuildTarget(name: $name, targetPlatform: $targetPlatform, '
       'description: $description, artifacts: $artifacts, '
       'hostArtifacts: $hostArtifacts, outputDir: $outputDir, '
-      'nativeAssetsConfig: $nativeAssetsConfig, '
       'pluginPlatformKey: $pluginPlatformKey)';
 
   @override
@@ -325,7 +308,6 @@ class ExtensionBuildTarget {
             other.name == name &&
             other.targetPlatform == targetPlatform &&
             other.outputDir == outputDir &&
-            other.nativeAssetsConfig == nativeAssetsConfig &&
             other.pluginPlatformKey == pluginPlatformKey &&
             _setEquals(other.artifacts, artifacts) &&
             _setEquals(other.hostArtifacts, hostArtifacts));
@@ -337,7 +319,6 @@ class ExtensionBuildTarget {
     name,
     targetPlatform,
     outputDir,
-    nativeAssetsConfig,
     pluginPlatformKey,
     Object.hashAllUnordered(artifacts),
     Object.hashAllUnordered(hostArtifacts),

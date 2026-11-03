@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:args/args.dart';
+import 'package:flutter_tools_core/flutter_tools_core.dart'
+    show ExtensionBuildTarget, ExtensionNativeAssetsConfig;
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 import 'package:unified_analytics/unified_analytics.dart';
@@ -19,6 +21,7 @@ import '../build_system/targets/android.dart';
 import '../build_system/targets/assets.dart';
 import '../build_system/targets/common.dart';
 import '../build_system/targets/deferred_components.dart';
+import '../build_system/targets/extension.dart';
 import '../build_system/targets/ios.dart';
 import '../build_system/targets/linux.dart';
 import '../build_system/targets/macos.dart';
@@ -27,6 +30,7 @@ import '../build_system/targets/windows.dart';
 import '../cache.dart';
 import '../context/tool_context.dart';
 import '../convert.dart';
+import '../experimental/extension_build_manager.dart';
 import '../features.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart';
@@ -105,6 +109,7 @@ class AssembleCommand extends FlutterCommand {
     required this._buildSystem,
     required this._featureFlags,
     required ToolContext super.toolContext,
+    this._extensionBuildManager,
     super.verboseHelp = false,
   }) {
     requiresPubspecYaml();
@@ -184,7 +189,9 @@ class AssembleCommand extends FlutterCommand {
   );
 
   final BuildSystem _buildSystem;
+  final ExtensionBuildManager? _extensionBuildManager;
   final FeatureFlags _featureFlags;
+  var _extensionDefinesResolved = false;
 
   @override
   ToolContext get toolContext => super.toolContext!;
@@ -220,8 +227,11 @@ class AssembleCommand extends FlutterCommand {
     try {
       targetPlatform = TargetPlatform.fromName(platform);
     } on Exception {
+      await _resolveExtensionEnvironmentDefines();
       final String? extensionTargetOs = _environment.defines[kExtensionTargetOs];
-      if (extensionTargetOs != null && extensionTargetOs.trim().isNotEmpty) {
+      final String? extensionPluginPlatformKey = _environment.defines[kExtensionPluginPlatformKey];
+      if ((extensionTargetOs != null && extensionTargetOs.trim().isNotEmpty) ||
+          (extensionPluginPlatformKey != null && extensionPluginPlatformKey.trim().isNotEmpty)) {
         return super.requiredArtifacts;
       }
       rethrow;
@@ -231,6 +241,75 @@ class AssembleCommand extends FlutterCommand {
       return <DevelopmentArtifact>{artifact};
     }
     return super.requiredArtifacts;
+  }
+
+  Future<void> _resolveExtensionEnvironmentDefines() async {
+    if (_extensionDefinesResolved || !_featureFlags.isToolExtensionsEnabled) {
+      return;
+    }
+    _extensionDefinesResolved = true;
+    final ExtensionBuildManager? buildManager = _extensionBuildManager;
+    if (buildManager == null) {
+      return;
+    }
+    final String? platform = _environment.defines[kTargetPlatform];
+    if (platform == null || platform.isEmpty) {
+      return;
+    }
+    try {
+      TargetPlatform.fromName(platform);
+      return;
+    } on Exception {
+      // Custom target platform; query extension build targets below.
+    }
+    final List<ExtensionBuildTarget> buildTargets = await buildManager.getBuildTargets();
+    final ExtensionBuildTarget? matchedTarget =
+        buildTargets.where((ExtensionBuildTarget t) => t.name == platform).firstOrNull ??
+        buildTargets.where((ExtensionBuildTarget t) => t.targetPlatform == platform).firstOrNull;
+    if (matchedTarget == null) {
+      return;
+    }
+    final String? buildModeName = _environment.defines[kBuildMode];
+    final BuildMode buildMode;
+    if (buildModeName == null || buildModeName.isEmpty) {
+      buildMode = BuildMode.debug;
+    } else {
+      try {
+        buildMode = BuildMode.fromCliName(buildModeName);
+      } on ArgumentError {
+        throwToolExit('Invalid "$kBuildMode" define: "$buildModeName".');
+      }
+    }
+    final String mainPath = _environment.defines[kTargetFile] ?? 'lib/main.dart';
+    final Map<String, String> resolvedArtifacts = resolveExtensionBuildTargetArtifacts(
+      artifacts: _environment.artifacts,
+      buildMode: buildMode,
+      target: matchedTarget,
+    );
+    final ExtensionNativeAssetsConfig? nativeAssetsConfig = await buildManager
+        .resolveNativeAssetsConfig(
+          buildMode: buildMode,
+          flutterRoot: _environment.flutterRootDir.uri,
+          mainPath: mainPath,
+          outputDir: _environment.outputDir.uri,
+          projectRoot: _environment.projectDir.uri,
+          resolvedArtifacts: resolvedArtifacts,
+          targetName: matchedTarget.name,
+        );
+    final Map<String, String> extensionDefines = buildManager.environmentDefinesForTarget(
+      matchedTarget.name,
+      nativeAssetsConfig: nativeAssetsConfig,
+    );
+    var addedDefines = false;
+    for (final MapEntry(:String key, :String value) in extensionDefines.entries) {
+      _environment.defines.putIfAbsent(key, () {
+        addedDefines = true;
+        return value;
+      });
+    }
+    if (addedDefines) {
+      _cachedEnvironment = _createEnvironment(definesOverride: _environment.defines);
+    }
   }
 
   /// The target(s) we are building.
@@ -271,10 +350,11 @@ class AssembleCommand extends FlutterCommand {
     return false;
   }
 
-  late final Environment _environment = _createEnvironment();
+  Environment? _cachedEnvironment;
+  Environment get _environment => _cachedEnvironment ??= _createEnvironment();
 
   /// The environmental configuration for a build invocation.
-  Environment _createEnvironment() {
+  Environment _createEnvironment({Map<String, String>? definesOverride}) {
     final ToolContext(
       :Artifacts artifacts,
       :Cache cache,
@@ -311,7 +391,7 @@ class AssembleCommand extends FlutterCommand {
       buildDir: project.directory.childDirectory('.dart_tool').childDirectory('flutter_build'),
       projectDir: project.directory,
       packageConfigPath: packageConfigPath(),
-      defines: _parseDefines([...getValue(_define), ...decodedDefines]),
+      defines: definesOverride ?? _parseDefines([...getValue(_define), ...decodedDefines]),
       inputs: _parseDefines(getValue(_input)),
       cacheDir: cache.getRoot(),
       flutterRootDir: fs.directory(cache.flutterRoot),
@@ -365,6 +445,7 @@ class AssembleCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
+    await _resolveExtensionEnvironmentDefines();
     final ToolContext(:FileSystem fs, :Logger logger) = toolContext;
     final List<Target> targets = createTargets();
     final nonDeferredTargets = <Target>[];

@@ -2,8 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:isolate';
 
+import 'package:args/command_runner.dart';
 import 'package:code_assets/code_assets.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
@@ -18,9 +20,13 @@ import 'package:flutter_tools/src/build_system/targets/assets.dart';
 import 'package:flutter_tools/src/build_system/targets/common.dart';
 import 'package:flutter_tools/src/build_system/targets/dart_plugin_registrant.dart';
 import 'package:flutter_tools/src/build_system/targets/native_assets.dart';
+import 'package:flutter_tools/src/commands/assemble.dart';
+import 'package:flutter_tools/src/commands/build.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
+import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/experimental/extension_build_manager.dart';
+import 'package:flutter_tools/src/experimental/extension_device_manager.dart';
 import 'package:flutter_tools/src/experimental/extension_discovery.dart';
 import 'package:flutter_tools/src/experimental/extension_manager.dart';
 import 'package:flutter_tools/src/features.dart';
@@ -30,7 +36,9 @@ import 'package:flutter_tools/src/isolated/native_assets/targets.dart';
 import 'package:flutter_tools/src/platform_plugins.dart';
 import 'package:flutter_tools/src/plugins.dart';
 import 'package:flutter_tools/src/project.dart';
-import 'package:flutter_tools_core/flutter_tools_core.dart';
+import 'package:flutter_tools/src/runner/flutter_command.dart';
+import 'package:flutter_tools_core/flutter_tools_core.dart' hide Category;
+import 'package:flutter_tools_core/flutter_tools_core.dart' as core show Category;
 import 'package:flutter_tools_extension/flutter_tools_extension.dart';
 import 'package:yaml/yaml.dart';
 
@@ -39,8 +47,47 @@ import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
 import '../../src/package_config.dart';
+import '../../src/test_build_system.dart';
+import '../../src/test_flutter_command_runner.dart';
 import '../../src/throwing_pub.dart';
 import '../isolated/fake_native_assets_build_runner.dart';
+
+final class _ThrowingNativeAssetsBuildTarget extends BuildTarget {
+  const _ThrowingNativeAssetsBuildTarget()
+    : super(
+        description: 'Build target that fails to resolve native assets config.',
+        outputDir: '{OUTPUT_DIR}/failing_hooks',
+        targetPlatform: 'custom-arm64',
+      );
+
+  @override
+  String get name => 'failing-hooks-target';
+
+  @override
+  Future<ExtensionNativeAssetsConfig?> resolveNativeAssetsConfig(
+    ExtensionBuildContext context,
+  ) async {
+    throw StateError('Toolchain lookup failed');
+  }
+
+  @override
+  Future<ExtensionBuildResult> build(ExtensionBuildContext context) async {
+    return const ExtensionBuildResult(success: true);
+  }
+}
+
+final class _ThrowingNativeAssetsBuildService extends BuildService {
+  @override
+  List<BuildTarget> get buildTargets => const <BuildTarget>[_ThrowingNativeAssetsBuildTarget()];
+}
+
+void _throwingNativeAssetsExtensionEntryPoint(SendPort sendPort) {
+  ToolExtensionEntryPoint.run(
+    sendPort,
+    <ToolExtensionService>[_ThrowingNativeAssetsBuildService()],
+    supportedPlatforms: const <String>{'linux'},
+  );
+}
 
 final class _PluginCapturingBuildTarget extends BuildTarget {
   const _PluginCapturingBuildTarget(this._pluginsPort)
@@ -56,23 +103,28 @@ final class _PluginCapturingBuildTarget extends BuildTarget {
   String get name => 'custom-pkg';
 
   @override
-  ExtensionNativeAssetsConfig? get nativeAssetsConfig => ExtensionNativeAssetsConfig(
-    targetArchitecture: 'arm64',
-    targetOs: 'custom_os',
-    cCompilerConfig: ExtensionCCompilerConfig(
-      ar: Uri.file('/opt/custom-sdk/llvm/bin/llvm-ar'),
-      cc: Uri.file('/opt/custom-sdk/llvm/bin/clang'),
-      ld: Uri.file('/opt/custom-sdk/llvm/bin/ld.lld'),
-    ),
-  );
+  String? get pluginPlatformKey => 'custom_os';
 
   @override
-  String? get pluginPlatformKey => 'custom_os';
+  Future<ExtensionNativeAssetsConfig?> resolveNativeAssetsConfig(
+    ExtensionBuildContext context,
+  ) async {
+    _pluginsPort.send(context.plugins);
+    return ExtensionNativeAssetsConfig(
+      targetArchitecture: 'arm64',
+      targetOs: 'custom_os',
+      cCompilerConfig: ExtensionCCompilerConfig(
+        ar: Uri.file('/opt/custom-sdk/llvm/bin/llvm-ar'),
+        cc: Uri.file('/opt/custom-sdk/llvm/bin/clang'),
+        ld: Uri.file('/opt/custom-sdk/llvm/bin/ld.lld'),
+      ),
+    );
+  }
 
   @override
   Future<ExtensionBuildResult> build(ExtensionBuildContext context) async {
     _pluginsPort.send(context.plugins);
-    return const ExtensionBuildResult(success: true);
+    return ExtensionBuildResult(success: true, executableUri: Uri.file('/tmp/custom_pkg/app'));
   }
 }
 
@@ -85,10 +137,48 @@ final class _PluginCapturingBuildService extends BuildService {
   List<BuildTarget> get buildTargets => <BuildTarget>[_PluginCapturingBuildTarget(_pluginsPort)];
 }
 
+final class _PluginCapturingDeviceService extends DeviceService {
+  @override
+  Future<List<TargetDevice>> getDevices() async {
+    return const <TargetDevice>[
+      TargetDevice(
+        category: core.Category.desktop,
+        id: 'custom-pkg-device',
+        name: 'Custom Pkg Device',
+        buildTarget: 'custom-pkg',
+        ephemeral: false,
+        targetPlatform: 'custom-arm64',
+      ),
+    ];
+  }
+
+  @override
+  Future<bool> isSupportedForProject({
+    required String deviceId,
+    required ExtensionFlutterProject project,
+  }) async => true;
+
+  @override
+  Future<bool> launchApp({
+    required ExtensionDebuggingOptions debuggingOptions,
+    required String deviceId,
+    required Uri executableUri,
+  }) async => true;
+
+  @override
+  Future<Uri?> getVmServiceUri({required String deviceId}) async => null;
+
+  @override
+  Future<bool> stopApp({required String deviceId}) async => true;
+}
+
 void _pluginCapturingExtensionEntryPoint(SendPort sendPort, SendPort pluginsPort) {
   ToolExtensionEntryPoint.run(
     sendPort,
-    <ToolExtensionService>[_PluginCapturingBuildService(pluginsPort)],
+    <ToolExtensionService>[
+      _PluginCapturingBuildService(pluginsPort),
+      _PluginCapturingDeviceService(),
+    ],
     supportedPlatforms: const <String>{'linux'},
   );
 }
@@ -396,8 +486,18 @@ environment:
       },
     );
 
-    testWithoutContext('ExtensionBuildManager resolves plugins for pluginPlatformKey and maps nativeAssetsConfig to defines', () async {
+    ({
+      ExtensionBuildManager buildManager,
+      List<ExtensionPlugin> expectedCustomPlugins,
+      ExtensionManager extensionManager,
+      FeatureFlags featureFlags,
+      StreamIterator<Object?> pluginsEvents,
+      Directory projectDir,
+    })
+    setUpCustomPluginProject() {
       final Directory projectDir = fileSystem.directory('/project')..createSync(recursive: true);
+      fileSystem.directory('/flutter').createSync(recursive: true);
+      fileSystem.currentDirectory = projectDir;
       writePackageConfigFiles(
         directory: projectDir,
         mainLibName: 'my_app',
@@ -414,6 +514,7 @@ dependencies:
   camera_custom: 1.0.0
   url_launcher_linux: 1.0.0
 ''');
+      projectDir.childDirectory('lib').childFile('main.dart').createSync(recursive: true);
       fileSystem.directory('/camera_custom').childFile('pubspec.yaml')
         ..createSync(recursive: true)
         ..writeAsStringSync('''
@@ -444,6 +545,8 @@ environment:
 
       final pluginsPort = ReceivePort();
       addTearDown(pluginsPort.close);
+      final pluginsEvents = StreamIterator<Object?>(pluginsPort);
+      addTearDown(pluginsEvents.cancel);
       final featureFlags = TestFeatureFlags(isToolExtensionsEnabled: true);
       final extensionManager = ExtensionManager(
         entryPoints: <ExtensionEntryPoint>[_createPluginCapturingEntryPoint(pluginsPort.sendPort)],
@@ -457,12 +560,60 @@ environment:
         featureFlags: featureFlags,
         fileSystem: fileSystem,
         logger: logger,
+        projectFactory: FlutterProjectFactory(
+          config: FakeConfig(),
+          fileSystem: fileSystem,
+          logger: logger,
+        ),
       );
 
-      final List<ExtensionBuildTarget> targets = await buildManager.getBuildTargets();
-      expect(targets, hasLength(1));
+      final expectedCustomPlugins = <ExtensionPlugin>[
+        ExtensionPlugin(
+          name: 'camera_custom',
+          path: Uri.directory('/camera_custom'),
+          configuration: const <String, Object?>{
+            'pluginClass': 'CameraCustomPlugin',
+            'archivePath': 'pkg/camera.pkg',
+          },
+        ),
+      ];
+
+      return (
+        buildManager: buildManager,
+        expectedCustomPlugins: expectedCustomPlugins,
+        extensionManager: extensionManager,
+        featureFlags: featureFlags,
+        pluginsEvents: pluginsEvents,
+        projectDir: projectDir,
+      );
+    }
+
+    testWithoutContext('ExtensionBuildManager.resolveNativeAssetsConfig resolves filtered plugins and environmentDefinesForTarget', () async {
+      final (
+        :ExtensionBuildManager buildManager,
+        :List<ExtensionPlugin> expectedCustomPlugins,
+        extensionManager: _,
+        featureFlags: _,
+        :StreamIterator<Object?> pluginsEvents,
+        :Directory projectDir,
+      ) = setUpCustomPluginProject();
+
+      final ExtensionNativeAssetsConfig? resolvedConfig = await buildManager
+          .resolveNativeAssetsConfig(
+            buildMode: BuildMode.release,
+            flutterRoot: fileSystem.directory('/flutter').uri,
+            mainPath: 'lib/main.dart',
+            outputDir: fileSystem.directory('/project/build/custom_pkg').uri,
+            projectRoot: projectDir.uri,
+            resolvedArtifacts: const <String, String>{},
+            targetName: 'custom-pkg',
+          );
+      expect(resolvedConfig, isNotNull);
+      expect(await pluginsEvents.moveNext(), isTrue);
+      expect(pluginsEvents.current, equals(expectedCustomPlugins));
+
       expect(
-        buildManager.environmentDefinesForTarget('custom-pkg'),
+        buildManager.environmentDefinesForTarget('custom-pkg', nativeAssetsConfig: resolvedConfig),
         equals(<String, String>{
           kExtensionTargetOs: 'custom_os',
           kExtensionTargetArch: 'arm64',
@@ -472,30 +623,185 @@ environment:
           kExtensionPluginPlatformKey: 'custom_os',
         }),
       );
+    });
 
-      final ExtensionBuildResult result = await buildManager.build(
-        buildMode: BuildMode.release,
-        flutterRoot: fileSystem.directory('/flutter').uri,
-        mainPath: 'lib/main.dart',
-        outputDir: fileSystem.directory('/project/build/custom_pkg').uri,
-        projectRoot: projectDir.uri,
-        resolvedArtifacts: const <String, String>{},
-        targetName: 'custom-pkg',
-      );
-      expect(result.success, isTrue);
-      expect(
-        await pluginsPort.first,
-        equals(<ExtensionPlugin>[
-          ExtensionPlugin(
-            name: 'camera_custom',
-            path: Uri.directory('/camera_custom'),
-            configuration: const <String, Object?>{
-              'pluginClass': 'CameraCustomPlugin',
-              'archivePath': 'pkg/camera.pkg',
-            },
+    testWithoutContext(
+      'ExtensionBuildManager.resolveNativeAssetsConfig throws ToolExit when extension fails',
+      () async {
+        final Directory projectDir = fileSystem.directory('/project')..createSync(recursive: true);
+        fileSystem.directory('/flutter').createSync(recursive: true);
+        final featureFlags = TestFeatureFlags(isToolExtensionsEnabled: true);
+        final extensionManager = ExtensionManager(
+          entryPoints: <ExtensionEntryPoint>[_throwingNativeAssetsExtensionEntryPoint],
+          featureFlags: featureFlags,
+          hostPlatform: HostPlatform.linux_x64,
+          logger: logger,
+        );
+        addTearDown(extensionManager.dispose);
+        final buildManager = ExtensionBuildManager(
+          extensionManager: extensionManager,
+          featureFlags: featureFlags,
+          fileSystem: fileSystem,
+          logger: logger,
+          projectFactory: FlutterProjectFactory(
+            config: FakeConfig(),
+            fileSystem: fileSystem,
+            logger: logger,
           ),
-        ]),
+        );
+
+        await expectLater(
+          buildManager.resolveNativeAssetsConfig(
+            buildMode: BuildMode.release,
+            flutterRoot: fileSystem.directory('/flutter').uri,
+            mainPath: 'lib/main.dart',
+            outputDir: fileSystem.directory('/project/build/failing_hooks').uri,
+            projectRoot: projectDir.uri,
+            resolvedArtifacts: const <String, String>{},
+            targetName: 'failing-hooks-target',
+          ),
+          throwsToolExit(
+            message: 'Failed to resolve native assets config from extension for target "failing-hooks-target"',
+          ),
+        );
+      },
+    );
+
+    testWithoutContext(
+      'ExtensionBuildManager.build resolves and forwards filtered plugins for pluginPlatformKey',
+      () async {
+        final (
+          :ExtensionBuildManager buildManager,
+          :List<ExtensionPlugin> expectedCustomPlugins,
+          extensionManager: _,
+          featureFlags: _,
+          :StreamIterator<Object?> pluginsEvents,
+          :Directory projectDir,
+        ) = setUpCustomPluginProject();
+
+        final ExtensionBuildResult result = await buildManager.build(
+          buildMode: BuildMode.release,
+          flutterRoot: fileSystem.directory('/flutter').uri,
+          mainPath: 'lib/main.dart',
+          outputDir: fileSystem.directory('/project/build/custom_pkg').uri,
+          projectRoot: projectDir.uri,
+          resolvedArtifacts: const <String, String>{},
+          targetName: 'custom-pkg',
+        );
+        expect(result.success, isTrue);
+        expect(await pluginsEvents.moveNext(), isTrue);
+        expect(pluginsEvents.current, equals(expectedCustomPlugins));
+      },
+    );
+
+    testWithoutContext(
+      'ExtensionBuildSubCommand forwards filtered plugins to extension build target',
+      () async {
+        final (
+          :ExtensionBuildManager buildManager,
+          :List<ExtensionPlugin> expectedCustomPlugins,
+          extensionManager: _,
+          featureFlags: _,
+          :StreamIterator<Object?> pluginsEvents,
+          projectDir: _,
+        ) = setUpCustomPluginProject();
+
+        final List<ExtensionBuildTarget> targets = await buildManager.getBuildTargets();
+        expect(targets, hasLength(1));
+
+        final cache = FakeCache(fileSystem: fileSystem, flutterRoot: '/flutter');
+        final subCommand = ExtensionBuildSubCommand(
+          buildManager: buildManager,
+          target: targets.single,
+          toolContext: FakeToolContext(cache: cache, fs: fileSystem, logger: logger),
+          verboseHelp: false,
+        );
+        final FlutterCommandResult subCommandResult = await subCommand.runCommand();
+        expect(subCommandResult.exitStatus, ExitStatus.success);
+        expect(await pluginsEvents.moveNext(), isTrue);
+        expect(pluginsEvents.current, equals(expectedCustomPlugins));
+      },
+    );
+
+    testWithoutContext(
+      'ExtensionBackedDevice.startApp forwards filtered plugins to extension build target',
+      () async {
+        final (
+          :ExtensionBuildManager buildManager,
+          :List<ExtensionPlugin> expectedCustomPlugins,
+          :ExtensionManager extensionManager,
+          featureFlags: _,
+          :StreamIterator<Object?> pluginsEvents,
+          projectDir: _,
+        ) = setUpCustomPluginProject();
+
+        final discovery = ExtensionDevices(
+          extensionBuildManager: buildManager,
+          extensionManager: extensionManager,
+          fileSystem: fileSystem,
+          logger: logger,
+        );
+        final List<Device> devices = await discovery.devices();
+        expect(devices, hasLength(1));
+        final LaunchResult launchResult = await devices.single.startApp(
+          null,
+          mainPath: 'lib/main.dart',
+          debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
+        );
+        expect(launchResult.started, isTrue);
+        expect(await pluginsEvents.moveNext(), isTrue);
+        expect(pluginsEvents.current, equals(expectedCustomPlugins));
+      },
+    );
+
+    testUsingContext('AssembleCommand resolves nativeAssetsConfig and environmentDefinesForTarget for custom extension targetPlatform', () async {
+      final (
+        :ExtensionBuildManager buildManager,
+        :List<ExtensionPlugin> expectedCustomPlugins,
+        extensionManager: _,
+        :FeatureFlags featureFlags,
+        :StreamIterator<Object?> pluginsEvents,
+        projectDir: _,
+      ) = setUpCustomPluginProject();
+
+      Environment? capturedEnvironment;
+      final buildSystem = TestBuildSystem.all(BuildResult(success: true), (
+        Target target,
+        Environment environment,
+      ) {
+        capturedEnvironment = environment;
+      });
+      final cache = FakeCache(fileSystem: fileSystem, flutterRoot: '/flutter');
+      final assembleCommand = AssembleCommand(
+        buildSystem: buildSystem,
+        extensionBuildManager: buildManager,
+        featureFlags: featureFlags,
+        toolContext: FakeToolContext(cache: cache, fs: fileSystem, logger: logger),
       );
+      final CommandRunner<void> commandRunner = createTestCommandRunner(assembleCommand);
+      await commandRunner.run(<String>[
+        'assemble',
+        '--output=/project/build/custom_pkg',
+        '-dTargetPlatform=custom-arm64',
+        '-dBuildMode=release',
+        'copy_assets',
+      ]);
+
+      expect(await pluginsEvents.moveNext(), isTrue);
+      expect(pluginsEvents.current, equals(expectedCustomPlugins));
+      expect(capturedEnvironment, isNotNull);
+      expect(capturedEnvironment!.defines[kExtensionTargetOs], 'custom_os');
+      expect(capturedEnvironment!.defines[kExtensionTargetArch], 'arm64');
+      expect(capturedEnvironment!.defines[kExtensionCCompilerCc], '/opt/custom-sdk/llvm/bin/clang');
+      expect(
+        capturedEnvironment!.defines[kExtensionCCompilerAr],
+        '/opt/custom-sdk/llvm/bin/llvm-ar',
+      );
+      expect(
+        capturedEnvironment!.defines[kExtensionCCompilerLd],
+        '/opt/custom-sdk/llvm/bin/ld.lld',
+      );
+      expect(capturedEnvironment!.defines[kExtensionPluginPlatformKey], 'custom_os');
     });
   });
 

@@ -4,12 +4,14 @@
 
 import 'package:args/command_runner.dart';
 import 'package:flutter_tools/src/base/config.dart';
+import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/config.dart';
+import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/experimental/extension_build_manager.dart';
@@ -19,6 +21,7 @@ import 'package:flutter_tools/src/experimental/extension_manager.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/flutter_features.dart';
 import 'package:flutter_tools/src/flutter_features_config.dart';
+import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
 import 'package:flutter_tools_extension_linux_prototype/flutter_tools_extension_linux_prototype.dart';
@@ -263,15 +266,18 @@ void main() {
           featureFlags: featureFlags,
         );
         final toolContext = FakeToolContext(logger: logger);
+        final ToolContext(:FileSystem fs, :FlutterProjectFactory projectFactory) = toolContext;
         final buildManager = ExtensionBuildManager(
           extensionManager: manager,
           featureFlags: featureFlags,
+          fileSystem: fs,
           logger: logger,
+          projectFactory: projectFactory,
         );
         final discovery = ExtensionDevices(
           extensionBuildManager: buildManager,
           extensionManager: manager,
-          fileSystem: toolContext.fs,
+          fileSystem: fs,
           logger: logger,
         );
         final probeCommand = _ExtensionDevicesProbeCommand(

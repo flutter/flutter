@@ -151,15 +151,6 @@ void main() {
           BuiltInArtifacts.genSnapshot,
         },
         hostArtifacts: const <ExtensionHostArtifact>{BuiltInHostArtifacts.impellerc},
-        nativeAssetsConfig: ExtensionNativeAssetsConfig(
-          targetArchitecture: 'arm64',
-          targetOs: 'linux',
-          cCompilerConfig: ExtensionCCompilerConfig(
-            ar: Uri.file('/usr/bin/aarch64-linux-gnu-ar'),
-            cc: Uri.file('/usr/bin/aarch64-linux-gnu-gcc'),
-            ld: Uri.file('/usr/bin/aarch64-linux-gnu-ld'),
-          ),
-        ),
         pluginPlatformKey: 'linux',
       );
 
@@ -171,7 +162,6 @@ void main() {
       expect(map[ExtensionBuildTarget.hostArtifactsKey], equals(<String>['impellerc']));
       expect(map[ExtensionBuildTarget.outputDirKey], '{OUTPUT_DIR}/linux');
       expect(map[ExtensionBuildTarget.pluginPlatformKeyKey], 'linux');
-      expect(map[ExtensionBuildTarget.nativeAssetsConfigKey], isA<Map<String, Object?>>());
 
       final parsed = ExtensionBuildTarget.fromJson(map);
       expect(parsed, equals(target));
@@ -179,7 +169,6 @@ void main() {
       expect(parsed.toString(), contains('custom-linux-build'));
       expect(parsed.toString(), contains('outputDir: {OUTPUT_DIR}/linux'));
       expect(parsed.toString(), contains('pluginPlatformKey: linux'));
-      expect(parsed.toString(), contains('nativeAssetsConfig:'));
     });
 
     test('deserializes with defaults when optional fields are missing', () {
@@ -195,7 +184,6 @@ void main() {
       expect(parsed.artifacts, isEmpty);
       expect(parsed.hostArtifacts, isEmpty);
       expect(parsed.outputDir, '{OUTPUT_DIR}/linux');
-      expect(parsed.nativeAssetsConfig, isNull);
       expect(parsed.pluginPlatformKey, isNull);
     });
 
@@ -256,13 +244,6 @@ void main() {
         () => ExtensionBuildTarget.fromJson(<String, Object?>{
           ...validRequired,
           'hostArtifacts': 'invalid',
-        }),
-        throwsFormatException,
-      );
-      expect(
-        () => ExtensionBuildTarget.fromJson(<String, Object?>{
-          ...validRequired,
-          'nativeAssetsConfig': 'not-a-map',
         }),
         throwsFormatException,
       );
@@ -660,6 +641,19 @@ void main() {
       final parsed = ExtensionNativeAssetsConfig.fromJson(jsonMap);
       expect(parsed, equals(config));
       expect(parsed.cCompilerConfig, isNull);
+
+      final compilerWithoutEnvArgs = ExtensionCCompilerConfig(
+        ar: Uri.file('/usr/bin/llvm-ar'),
+        cc: Uri.file('/usr/bin/clang'),
+        ld: Uri.file('/usr/bin/ld.lld'),
+      );
+      expect(compilerWithoutEnvArgs.envScriptArgs, isEmpty);
+      final Map<String, Object?> compilerMap = compilerWithoutEnvArgs.toMap();
+      expect(compilerMap.containsKey(ExtensionCCompilerConfig.envScriptArgsKey), isFalse);
+      final parsedCompiler = ExtensionCCompilerConfig.fromJson(compilerMap);
+      expect(parsedCompiler.envScriptArgs, equals(const <String>[]));
+      expect(parsedCompiler, equals(compilerWithoutEnvArgs));
+      expect(parsedCompiler.hashCode, equals(compilerWithoutEnvArgs.hashCode));
     });
 
     test('fromJson throws FormatException on invalid fields', () {
@@ -702,9 +696,36 @@ void main() {
           'ar': 'file:///usr/bin/llvm-ar',
           'cc': 'file:///usr/bin/clang',
           'ld': 'file:///usr/bin/ld.lld',
+          'envScriptArgs': 'not-a-list',
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => ExtensionCCompilerConfig.fromJson(const <String, Object?>{
+          'ar': 'file:///usr/bin/llvm-ar',
+          'cc': 'file:///usr/bin/clang',
+          'ld': 'file:///usr/bin/ld.lld',
           'envScriptArgs': <Object?>[123],
         }),
         throwsFormatException,
+      );
+      expect(
+        () => ExtensionCCompilerConfig.fromJson(const <String, Object?>{
+          'ar': 'file:///usr/bin/llvm-ar',
+          'cc': 'file:///usr/bin/clang',
+          'ld': 'file:///usr/bin/ld.lld',
+          'envScriptArgs': <Object?>['--arch', 'arm64'],
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => ExtensionCCompilerConfig(
+          ar: Uri.file('/usr/bin/llvm-ar'),
+          cc: Uri.file('/usr/bin/clang'),
+          ld: Uri.file('/usr/bin/ld.lld'),
+          envScriptArgs: const <String>['--arch', 'arm64'],
+        ),
+        throwsA(isA<AssertionError>()),
       );
     });
 

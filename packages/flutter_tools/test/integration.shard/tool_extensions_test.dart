@@ -7,6 +7,7 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 
 import '../src/common.dart';
+import '../src/package_config.dart';
 import 'test_utils.dart';
 
 void main() {
@@ -189,5 +190,123 @@ void main() {
     expect(result.exitCode, isNot(0));
     expect(result.stderr, contains('is not an allowed value for option "--template"'));
     expect(projectDir.existsSync(), isFalse);
+  });
+
+  testWithoutContext('flutter assemble with custom TargetPlatform and ExtensionPluginPlatformKey generates custom platform Dart plugin registrant', () async {
+    final Directory workspaceDir = tempHome.childDirectory('custom_assemble_workspace')
+      ..createSync(recursive: true);
+    final Directory projectDir = workspaceDir.childDirectory('my_app')..createSync(recursive: true);
+    final Directory customPluginDir = workspaceDir.childDirectory('path_provider_custom_os')
+      ..createSync(recursive: true);
+    final Directory otherPluginDir = workspaceDir.childDirectory('path_provider_other')
+      ..createSync(recursive: true);
+    final Directory flutterStubDir = workspaceDir.childDirectory('flutter_stub')
+      ..createSync(recursive: true);
+    flutterStubDir
+        .childDirectory('lib')
+        .childDirectory('src')
+        .childFile('dart_plugin_registrant.dart')
+        .createSync(recursive: true);
+
+    customPluginDir.childFile('pubspec.yaml').writeAsStringSync('''
+name: path_provider_custom_os
+environment:
+  sdk: ^3.7.0-0
+  flutter: ">=1.20.0"
+flutter:
+  plugin:
+    implements: path_provider
+    platforms:
+      custom_os:
+        dartPluginClass: PathProviderCustomOs
+''');
+    customPluginDir.childDirectory('lib').childFile('path_provider_custom_os.dart')
+      ..createSync(recursive: true)
+      ..writeAsStringSync('''
+class PathProviderCustomOs {
+  static void registerWith() {}
+}
+''');
+
+    otherPluginDir.childFile('pubspec.yaml').writeAsStringSync('''
+name: path_provider_other
+environment:
+  sdk: ^3.7.0-0
+  flutter: ">=1.20.0"
+flutter:
+  plugin:
+    implements: path_provider
+    platforms:
+      other_os:
+        dartPluginClass: PathProviderOther
+''');
+    otherPluginDir.childDirectory('lib').childFile('path_provider_other.dart')
+      ..createSync(recursive: true)
+      ..writeAsStringSync('''
+class PathProviderOther {
+  static void registerWith() {}
+}
+''');
+
+    projectDir.childFile('pubspec.yaml').writeAsStringSync('''
+name: my_app
+environment:
+  sdk: ^3.7.0-0
+dependencies:
+  path_provider_custom_os:
+    path: ../path_provider_custom_os
+  path_provider_other:
+    path: ../path_provider_other
+flutter:
+  uses-material-design: false
+''');
+    projectDir.childDirectory('lib').childFile('main.dart')
+      ..createSync(recursive: true)
+      ..writeAsStringSync('void main() {}\n');
+    writePackageConfigFiles(
+      directory: projectDir,
+      mainLibName: 'my_app',
+      packages: <String, String>{
+        'flutter': flutterStubDir.path,
+        'path_provider_custom_os': customPluginDir.path,
+        'path_provider_other': otherPluginDir.path,
+      },
+    );
+
+    final Directory outputDir = projectDir.childDirectory('build').childDirectory('custom_out');
+    final ProcessResult result = await processManager.run(
+      <String>[
+        flutterBin,
+        'assemble',
+        '--no-version-check',
+        '--output=${outputDir.path}',
+        '-dTargetPlatform=custom-arm64',
+        '-dExtensionTargetOs=custom_os',
+        '-dExtensionTargetArch=arm64',
+        '-dExtensionPluginPlatformKey=custom_os',
+        '-dBuildMode=debug',
+        '-dTargetFile=lib/main.dart',
+        'copy_assets',
+      ],
+      workingDirectory: projectDir.path,
+      environment: <String, String>{...baseEnv, 'FLUTTER_TOOL_EXTENSIONS': 'true'},
+    );
+
+    expect(result.exitCode, 0, reason: 'stdout: ${result.stdout}\nstderr: ${result.stderr}');
+    final File registrantFile = projectDir
+        .childDirectory('.dart_tool')
+        .childDirectory('flutter_build')
+        .childFile('dart_plugin_registrant.dart');
+    expect(registrantFile.existsSync(), isTrue);
+    final String registrantContent = registrantFile.readAsStringSync();
+    expect(
+      registrantContent,
+      contains("const String.fromEnvironment('FLUTTER_CUSTOM_PLATFORM') == 'custom_os'"),
+    );
+    expect(
+      registrantContent,
+      contains('path_provider_custom_os.PathProviderCustomOs.registerWith()'),
+    );
+    expect(registrantContent, isNot(contains('PathProviderOther')));
   });
 }

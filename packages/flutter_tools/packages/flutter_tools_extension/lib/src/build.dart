@@ -113,13 +113,16 @@ abstract class BuildTarget {
   /// Host-side build tool or library artifacts required by this build target.
   Set<ExtensionHostArtifact> get hostArtifacts => const <ExtensionHostArtifact>{};
 
-  /// Optional Dart hooks (`native_assets`) target OS, architecture, and compiler
-  /// configuration for custom targets.
-  ExtensionNativeAssetsConfig? get nativeAssetsConfig => null;
-
   /// Optional platform key under `flutter.plugin.platforms.<key>` in `pubspec.yaml`
   /// used to resolve plugins for this target (e.g. `'linux'`, `'custom_platform'`).
   String? get pluginPlatformKey => null;
+
+  /// Resolves the cross-compilation configuration passed to Dart Build Hooks
+  /// (`package:code_assets`) for the current build [context], or returns
+  /// `null` if native asset hooks are not configured by this target.
+  Future<ExtensionNativeAssetsConfig?> resolveNativeAssetsConfig(
+    ExtensionBuildContext context,
+  ) async => null;
 
   /// Performs the actual compilation/build steps in the extension process/isolate.
   ///
@@ -182,6 +185,10 @@ abstract base class BuildService extends ToolExtensionService {
   /// RPC method identifier to query contributed `flutter assemble` targets.
   static const String getAssembleTargetsMethod = 'build.getAssembleTargets';
 
+  /// RPC method identifier to dynamically resolve native assets hook configuration
+  /// for a contributed `flutter build` target.
+  static const String resolveNativeAssetsConfigMethod = 'build.resolveNativeAssetsConfig';
+
   /// RPC method identifier to trigger a custom `flutter build` target.
   static const String buildMethod = 'build.build';
 
@@ -217,6 +224,7 @@ abstract base class BuildService extends ToolExtensionService {
 
   static const String _getBuildTargetsRpcMethod = 'getBuildTargets';
   static const String _getAssembleTargetsRpcMethod = 'getAssembleTargets';
+  static const String _resolveNativeAssetsConfigRpcMethod = 'resolveNativeAssetsConfig';
   static const String _buildRpcMethod = 'build';
   static const String _assembleRpcMethod = 'assemble';
 
@@ -234,6 +242,7 @@ abstract base class BuildService extends ToolExtensionService {
     return <String, ExtensionRpcHandler>{
       _getBuildTargetsRpcMethod: _getBuildTargetsRpc,
       _getAssembleTargetsRpcMethod: _getAssembleTargetsRpc,
+      _resolveNativeAssetsConfigRpcMethod: _resolveNativeAssetsConfigRpc,
       _buildRpcMethod: _buildRpc,
       _assembleRpcMethod: _assembleRpc,
     };
@@ -250,7 +259,6 @@ abstract base class BuildService extends ToolExtensionService {
             description: target.description,
             hostArtifacts: target.hostArtifacts,
             name: target.name,
-            nativeAssetsConfig: target.nativeAssetsConfig,
             outputDir: target.outputDir,
             pluginPlatformKey: target.pluginPlatformKey,
             targetPlatform: target.targetPlatform,
@@ -359,6 +367,18 @@ abstract base class BuildService extends ToolExtensionService {
       resolvedArtifacts: buildContext.resolvedArtifacts,
     );
     return (targetName, context);
+  }
+
+  Future<Map<String, Object?>?> _resolveNativeAssetsConfigRpc(Map<String, Object?> params) async {
+    final (String targetName, ExtensionBuildContext context) = _parseBuildRequest(params);
+    final BuildTarget? target = buildTargets
+        .where((BuildTarget t) => t.name == targetName)
+        .firstOrNull;
+    if (target == null) {
+      throw RpcException.invalidParams('Unknown build target: $targetName');
+    }
+    final ExtensionNativeAssetsConfig? config = await target.resolveNativeAssetsConfig(context);
+    return config?.toMap();
   }
 
   Future<Map<String, Object?>> _buildRpc(Map<String, Object?> params) async {
