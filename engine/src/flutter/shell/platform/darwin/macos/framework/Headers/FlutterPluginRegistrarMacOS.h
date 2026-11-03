@@ -32,7 +32,7 @@ FLUTTER_DARWIN_EXPORT
  *
  * This corresponds to `PlatformDispatcher.instance.engineId` in Dart.
  */
-@property(readonly) int64_t engineIdentifier;
+@property(nonatomic, readonly) int64_t engineIdentifier;
 
 /**
  * The binary messenger used for creating channels to communicate with the Flutter engine.

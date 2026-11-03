@@ -294,7 +294,7 @@ typedef enum {
  *
  * This corresponds to `PlatformDispatcher.instance.engineId` in Dart.
  */
-@property(readonly) int64_t engineIdentifier;
+@property(nonatomic, readonly) int64_t engineIdentifier;
 
 /**
  * Returns a `FlutterBinaryMessenger` for creating Dart/iOS communication
