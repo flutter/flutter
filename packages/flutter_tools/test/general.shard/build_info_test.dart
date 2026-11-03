@@ -114,7 +114,7 @@ void main() {
     expect(CpuArch.fromHostPlatform(HostPlatform.linux_x64), CpuArch.x64);
     expect(CpuArch.fromHostPlatform(HostPlatform.darwin_arm64), CpuArch.arm64);
     expect(CpuArch.fromHostPlatform(HostPlatform.linux_riscv64), CpuArch.riscv64);
-    expect(CpuArch.fromHostPlatform(const HostPlatform('freebsd-x64', 'x64')), CpuArch.x64);
+    expect(CpuArch.fromHostPlatform(HostPlatform('freebsd-x64', 'x64')), CpuArch.x64);
   });
 
   testWithoutContext('getNameForTargetPlatform on Darwin arches', () {

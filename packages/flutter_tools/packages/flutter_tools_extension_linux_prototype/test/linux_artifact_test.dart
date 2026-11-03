@@ -26,7 +26,7 @@ void main() {
     test('defaults to empty artifact list when none are configured', () async {
       final service = LinuxArtifactService();
       expect(
-        await service.downloadArtifacts(
+        await service.listRequiredArtifacts(
           engineVersion: testEngineVersion,
           hostPlatform: HostPlatform.linux_x64,
         ),
@@ -36,7 +36,7 @@ void main() {
 
     test('returns configured Linux x64 artifact when host and target match', () async {
       final service = LinuxArtifactService(artifacts: testArtifacts);
-      final List<ArtifactDependency> deps = await service.downloadArtifacts(
+      final List<ArtifactDependency> deps = await service.listRequiredArtifacts(
         engineVersion: testEngineVersion,
         hostPlatform: HostPlatform.linux_x64,
         targetPlatforms: const <String>{testTargetPlatform},
@@ -49,7 +49,7 @@ void main() {
 
     test('matches targetPlatforms prefix such as linux or multiple targetPlatforms', () async {
       final service = LinuxArtifactService(artifacts: testArtifacts);
-      final List<ArtifactDependency> deps = await service.downloadArtifacts(
+      final List<ArtifactDependency> deps = await service.listRequiredArtifacts(
         engineVersion: testEngineVersion,
         hostPlatform: HostPlatform.linux_x64,
         targetPlatforms: const <String>{'android', 'linux'},
@@ -61,14 +61,14 @@ void main() {
     test('filters out artifacts on non-matching hostPlatform or targetPlatforms', () async {
       final service = LinuxArtifactService(artifacts: testArtifacts);
       expect(
-        await service.downloadArtifacts(
+        await service.listRequiredArtifacts(
           engineVersion: testEngineVersion,
           hostPlatform: HostPlatform.darwin_arm64,
         ),
         isEmpty,
       );
       expect(
-        await service.downloadArtifacts(
+        await service.listRequiredArtifacts(
           engineVersion: testEngineVersion,
           hostPlatform: HostPlatform.linux_x64,
           targetPlatforms: const <String>{'android-arm64'},
