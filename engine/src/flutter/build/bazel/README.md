@@ -1136,6 +1136,72 @@ runtime modes or a device. The compile's defines for
 the SDK version are fixed words (`-DFLUTTER_VERSION=bazel`...), so a kernel
 is the same on every commit and the cache holds across them.
 
+### The same tests on the prebuilt engine: `--config=prebuilt_engine`
+
+Everything above runs the tests on the engine the tree builds -- an engine
+checkout (gclient), its toolchains, and the first build of flutter_tester,
+impellerc and the platform kernels. A framework developer's checkout and a
+flutter_drone bot (the framework's and the tool's CI shards, which the
+flutter/flutter_drone recipe runs from a bare checkout with
+`FLUTTER_PREBUILT_ENGINE_VERSION` naming the engine) have neither; what
+they have is the prebuilt engine the flutter tool downloads into
+`bin/cache` -- the same flutter_tester, Dart SDK, impellerc and platform
+kernels `flutter test` runs them with. `--config=prebuilt_engine` (the root
+`.bazelrc`) points the rules there:
+
+```sh
+bin/flutter precache                       # the default artifact sets: the framework's tests
+bin/flutter precache --linux --web         # and the host desktop's profile/release engines and the web SDK: the tool's shards
+bazelisk test --config=prebuilt_engine //packages/flutter/test/widgets:widgets //dev/bots:tests
+bazelisk test --config=prebuilt_engine //packages/flutter_tools:general_shard
+```
+
+The config is two flags. `--//build_defs/engine:source=prebuilt` switches
+the alias package `//build_defs/engine` -- `flutter_tester`, `icudtl`,
+`strong_platform`, `impellerc`, `shader_lib`, `flutter_gpu`: the one set of
+labels every test rule's defaults name (`flutter_test.bzl`, `kernel.bzl`,
+`flutter_assets.bzl`) -- from the tree's targets to `@flutter_bin_cache`'s
+files, and the tool's test facsimile from the tree's engine directories and
+sky_engine to the cache's `artifacts/engine/<host>{,-profile,-release}`,
+`artifacts/engine/common`, `flutter_web_sdk` and `pkg/sky_engine`
+(`packages/flutter_tools/BUILD.bazel`: `select()` over
+`//build_defs/engine:prebuilt` for `cache`, `cache_files` and the Apple and
+Android shards' cache). `--repo_env=FLUTTER_BAZEL_PREBUILT_ENGINE=1` makes
+the host's Dart SDK repository (`HOST_DART_SDK`, the name every Dart rule
+uses) `@dart_sdk_bin_cache`, `bin/cache/dart-sdk` under the prebuilt SDK's
+overlay BUILD file, instead of the engine checkout's `prebuilts/<host>/dart-sdk`
+(`host_platform.bzl`, `extensions.bzl`: a repository of its own rather than
+the one name re-pointed, so that a tree build in the same output base keeps
+its actions). `@flutter_bin_cache`
+(`build_defs/repositories/flutter_bin_cache.bzl`, a local repository rule
+like the gclient-synced trees' `synced_repository`) symlinks `bin/cache`'s
+entries in place -- `pkg/sky_engine` and `pkg/flutter_gpu` one level down,
+with a `package` filegroup each, since a package's files are laid relative
+to it -- behind a check of the stamps the tool writes beside each artifact
+set: `flutter_sdk.stamp`, `engine-dart-sdk.stamp` and `font-subset.stamp`
+must be there and equal `engine.stamp`, `linux-sdk.stamp`, `macos-sdk.stamp`
+and `flutter_web_sdk.stamp` must equal it when there (their filegroups are
+empty otherwise), or the fetch fails and says which `flutter precache` flag
+to run -- a stale cache is never an engine of another version by mistake.
+The rules take the prebuilt plain files where the tree gives built targets
+(`allow_single_file` on the executable attributes, the source-file
+executables added to runfiles by hand, cache paths relativized by package
+for an external repository), and the shader include root is found from
+`flutter/runtime_effect.glsl` wherever shader_lib lives.
+
+Limits. The tool's iOS and Android engine directories (`_APPLE_CACHE_FILES`,
+the android shard's `cache_files`) still come from the tree under either
+configuration: the apple and android shards want an engine checkout
+(`flutter precache --ios --android` would serve them the same way; not done).
+The framework's tests have been run this way on Linux only (a Mac's
+`darwin-x64` directory is named, not exercised). Measured (11-02, Linux,
+engine `c5ec59d0…` from `flutter precache --linux --web`): the three root
+suites analyze under the config (2,557 targets; the tree's 2,799);
+`//packages/flutter/test/animation:animation //dev/bots:tests` 24 of 24
+pass; the tool's general and commands shards and the widgets tree:
+**745 of 745 pass** (277 general, 68 hermetic, 10 permeable, 390 widgets;
+37 min at `--local_test_jobs=4`, create_test's 18 min the critical path).
+
 ## The web engine's unit tests: felt's suites
 
 `lib/web_ui/test` -- 189 files in six test sets (`engine`, `ui`, `canvaskit`,
