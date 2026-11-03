@@ -2861,5 +2861,36 @@ TEST_P(AiksTest, DrawImageFromYUVTextures) {
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
+// Regression test for https://github.com/flutter/flutter/issues/195859.
+// Renders two green circles side by side. Both are drawn at x=-100 inside a
+// SaveLayer whose image filter translates them +300 on-screen. The left one
+// is drawn directly; the right one is drawn through DrawDisplayList (a nested
+// DisplayList with an RTree, like a dart:ui Picture). If only the left circle
+// is visible, the nested DisplayList was culled against the root render
+// target instead of the subpass.
+TEST_P(AiksTest, DrawDisplayListInTranslatedSaveLayerIsNotCulled) {
+  DlPaint green;
+  green.setColor(DlColor::kGreen());
+
+  DisplayListBuilder inner_builder(/*prepare_rtree=*/true);
+  inner_builder.DrawCircle(DlPoint(-100, 300), 80, green);
+  auto inner_dl = inner_builder.Build();
+
+  DisplayListBuilder builder;
+  builder.Scale(GetContentScale().x, GetContentScale().y);
+
+  DlPaint paint;
+  paint.setImageFilter(DlImageFilter::MakeMatrix(
+      DlMatrix::MakeTranslation({300, 0}), DlImageSampling::kLinear));
+  builder.SaveLayer(std::nullopt, &paint);
+  // Control: drawn directly, not subject to DisplayList culling.
+  builder.DrawCircle(DlPoint(-100, 100), 80, green);
+  // Drawn through DrawDisplayList; was culled before the fix.
+  builder.DrawDisplayList(inner_dl, 1.0f);
+  builder.Restore();
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
 }  // namespace testing
 }  // namespace impeller

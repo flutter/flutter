@@ -153,7 +153,13 @@ class Canvas {
 
   /// @brief Return the culling bounds of the current render target, or nullopt
   ///        if there is no coverage.
-  std::optional<Rect> GetLocalCoverageLimit() const;
+  ///
+  /// @param clamp_to_root  If true (default), the result is intersected with
+  ///        the root render target size. Pass false when the result is used
+  ///        as a cull rect (e.g. DrawDisplayList): inside a subpass, content
+  ///        outside the root RT may still be moved on-screen by an ancestor
+  ///        image filter.
+  std::optional<Rect> GetLocalCoverageLimit(bool clamp_to_root = true) const;
 
   void Save(uint32_t total_content_depth = kMaxDepth);
 
