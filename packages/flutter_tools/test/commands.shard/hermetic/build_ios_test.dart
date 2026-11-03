@@ -9,6 +9,7 @@ import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/context.dart';
+import 'package:flutter_tools/src/base/error_handling_io.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
@@ -1687,10 +1688,93 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
               .run(const <String>['build', 'ios', '--simulator', '--no-pub']),
           throwsToolExit(message: 'Encountered error while building for simulator.'),
         );
+        expect(tempDir, isNot(exists));
+        expect(pipeFile, isNot(exists));
         expect(processManager.hasRemainingExpectations, isFalse);
       },
       overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
+        Logger: () => logger,
+        ProcessManager: () => processManager,
+        Pub: ThrowingPub.new,
+        Platform: () => macosPlatform,
+        XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+        Artifacts: () => Artifacts.test(),
+      },
+    );
+
+    testUsingContext(
+      'Do not crash or recreate pipe if temporary build directory is deleted after existsSync in terminal session.',
+      () async {
+        var deleteOnNextPipeWrite = false;
+        fileSystem = MemoryFileSystem.test(
+          opHandle: (String path, FileSystemOp op) {
+            if (deleteOnNextPipeWrite &&
+                op == FileSystemOp.write &&
+                path.endsWith('pipe_to_stdout')) {
+              deleteOnNextPipeWrite = false;
+              fileSystem.directory(_xcBundleDirectoryPath).parent.deleteSync(recursive: true);
+              throw FileSystemException(
+                'Cannot open file',
+                path,
+                const OSError('No such file or directory', 2),
+              );
+            }
+          },
+        );
+        final errorHandlingFileSystem = ErrorHandlingFileSystem(
+          delegate: fileSystem,
+          platform: macosPlatform,
+        );
+        final BuildCommand command = createFakeBuildCommand(
+          androidSdk: FakeAndroidSdk(),
+          buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+          fileSystem: errorHandlingFileSystem,
+          logger: _TerminalBufferLogger(),
+          osUtils: _PipeOperatingSystemUtils(errorHandlingFileSystem),
+          config: FakeConfig(),
+          platform: macosPlatform,
+          fileSystemUtils: FileSystemUtils(
+            fileSystem: errorHandlingFileSystem,
+            platform: macosPlatform,
+          ),
+          terminal: FakeTerminal(),
+          plistParser: testPlistUtils,
+          processManager: processManager,
+          templateRenderer: FakeTemplateRenderer(),
+          xcode: FakeXcode(),
+          xcodeProjectInterpreter: FakeXcodeProjectInterpreterWithBuildSettings(),
+          artifacts: FakeArtifacts(),
+          cache: FakeCache(),
+          flutterVersion: FakeFlutterVersion(),
+        );
+        final Directory tempDir = errorHandlingFileSystem.directory(_xcBundleDirectoryPath).parent;
+        final File pipeFile = tempDir.childFile('pipe_to_stdout');
+        processManager.addCommand(
+          setUpFakeXcodeBuildHandler(
+            simulator: true,
+            exitCode: 1,
+            scriptOutputStreamFile: pipeFile.path,
+            onRun: (_) {
+              expect(pipeFile, exists);
+              deleteOnNextPipeWrite = true;
+            },
+          ),
+        );
+
+        createMinimalMockProjectFiles();
+
+        await expectLater(
+          createTestCommandRunner(command)
+              .run(const <String>['build', 'ios', '--simulator', '--no-pub']),
+          throwsToolExit(message: 'Encountered error while building for simulator.'),
+        );
+        expect(tempDir, isNot(exists));
+        expect(pipeFile, isNot(exists));
+        expect(processManager.hasRemainingExpectations, isFalse);
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => ErrorHandlingFileSystem(delegate: fileSystem, platform: macosPlatform),
         Logger: () => logger,
         ProcessManager: () => processManager,
         Pub: ThrowingPub.new,

@@ -593,9 +593,19 @@ Future<XcodeBuildResult> buildXcodeProject({
     );
 
     // Notifies listener that no more output is coming. The temporary directory
-    // may have been deleted mid-build (e.g. by fatal-signal temp cleanup).
-    if (scriptOutputPipeFile != null && scriptOutputPipeFile.existsSync()) {
-      scriptOutputPipeFile.writeAsStringSync('all done');
+    // may have been deleted mid-build (e.g. by fatal-signal temp cleanup), or
+    // may be removed between existsSync and writeAsStringSync.
+    if (scriptOutputPipeFile != null) {
+      try {
+        ErrorHandlingFileSystem.noExitOnFailure(() {
+          if (scriptOutputPipeFile!.existsSync()) {
+            scriptOutputPipeFile.writeAsStringSync('all done');
+          }
+        });
+      } on FileSystemException {
+        // Ignore if the temporary directory or pipe was deleted after the
+        // existsSync check.
+      }
     }
     buildSubStatus?.stop();
     buildSubStatus = null;
