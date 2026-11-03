@@ -7,8 +7,14 @@ import 'dart:async';
 import 'package:flutter_tools_core/flutter_tools_core.dart';
 import 'package:flutter_tools_extension/flutter_tools_extension.dart';
 
+import '../base/common.dart';
+import '../base/file_system.dart';
 import '../base/logger.dart';
+import '../build_info.dart' show kExtensionPluginPlatformKey;
 import '../features.dart';
+import '../flutter_plugins.dart';
+import '../plugins.dart';
+import '../project.dart';
 import 'extension_discovery.dart';
 import 'extension_manager.dart';
 
@@ -17,18 +23,111 @@ base class ExtensionBuildManager {
   ExtensionBuildManager({
     required this._extensionManager,
     required this._featureFlags,
+    required this._fileSystem,
     required this._logger,
+    required this._projectFactory,
   });
 
   final ExtensionManager _extensionManager;
   final FeatureFlags _featureFlags;
+  final FileSystem _fileSystem;
   final Logger _logger;
+  final FlutterProjectFactory _projectFactory;
 
   List<ExtensionBuildTarget>? _cachedTargets;
   final _targetToConnection = <String, ExtensionConnection>{};
+  final _targetsByName = <String, ExtensionBuildTarget>{};
 
   /// Retrieve the cached build targets synchronously.
   List<ExtensionBuildTarget> get cachedTargets => _cachedTargets ?? const <ExtensionBuildTarget>[];
+
+  /// Returns the `flutter assemble` environment defines for [targetName],
+  /// including `kExtensionTargetOs`, `kExtensionTargetArch`, `kExtensionCCompiler*`
+  /// from [nativeAssetsConfig], and `kExtensionPluginPlatformKey` when configured
+  /// on the [ExtensionBuildTarget].
+  Map<String, String> environmentDefinesForTarget(
+    String targetName, {
+    ExtensionNativeAssetsConfig? nativeAssetsConfig,
+  }) {
+    final ExtensionBuildTarget? target = _targetsByName[targetName];
+    if (target == null) {
+      return const <String, String>{};
+    }
+    return <String, String>{
+      ...?nativeAssetsConfig?.toEnvironmentDefines(),
+      if (target.pluginPlatformKey case final String key when key.isNotEmpty)
+        kExtensionPluginPlatformKey: key,
+    };
+  }
+
+  /// Queries the active extension for the Dart hooks (`native_assets`) configuration
+  /// for [targetName] given the current build context.
+  ///
+  /// Returns `null` if tool extensions are disabled, no extension handles
+  /// [targetName], or the target does not configure native asset hooks.
+  /// Throws a [ToolExit] if the extension fails to resolve the configuration or
+  /// returns a malformed payload.
+  Future<ExtensionNativeAssetsConfig?> resolveNativeAssetsConfig({
+    required BuildMode buildMode,
+    required Uri flutterRoot,
+    required String mainPath,
+    required Uri outputDir,
+    required Uri projectRoot,
+    required Map<String, String> resolvedArtifacts,
+    required String targetName,
+  }) async {
+    _validateRequestUris(flutterRoot: flutterRoot, outputDir: outputDir, projectRoot: projectRoot);
+    if (!_featureFlags.isToolExtensionsEnabled) {
+      return null;
+    }
+
+    try {
+      await _extensionManager.ensureInitialized();
+    } on Object catch (e) {
+      throwToolExit('Failed to initialize extension manager: $e');
+    }
+
+    if (_cachedTargets == null) {
+      await getBuildTargets();
+    }
+
+    final ExtensionConnection? connection = _targetToConnection[targetName];
+    if (connection == null) {
+      return null;
+    }
+
+    final Map<String, Object?> params = await _createBuildRequestParams(
+      buildMode: buildMode,
+      flutterRoot: flutterRoot,
+      mainPath: mainPath,
+      outputDir: outputDir,
+      projectRoot: projectRoot,
+      resolvedArtifacts: resolvedArtifacts,
+      targetName: targetName,
+    );
+
+    try {
+      final Object? result = await connection.sendRequest(
+        BuildService.resolveNativeAssetsConfigMethod,
+        params: params,
+      );
+      if (result == null) {
+        return null;
+      }
+      if (result case final Map<String, Object?> resultMap) {
+        return ExtensionNativeAssetsConfig.fromJson(resultMap);
+      }
+      throwToolExit(
+        'Invalid native assets config response from extension for target "$targetName".',
+      );
+    } on ToolExit {
+      rethrow;
+    } on Object catch (e) {
+      throwToolExit(
+        'Failed to resolve native assets config from extension for target "$targetName": $e',
+      );
+    }
+  }
 
   /// Retrieve build targets by routing `build.getBuildTargets` to active tool extensions.
   Future<List<ExtensionBuildTarget>> getBuildTargets() async {
@@ -48,6 +147,7 @@ base class ExtensionBuildManager {
 
     final targets = <ExtensionBuildTarget>[];
     _targetToConnection.clear();
+    _targetsByName.clear();
     final connections = <ExtensionConnection>[
       for (final connection in _extensionManager.connections)
         if (connection.capabilities.services.contains(BuildService.serviceNamespace)) connection,
@@ -78,6 +178,7 @@ base class ExtensionBuildManager {
         }
         targets.add(target);
         _targetToConnection[target.name] = connection;
+        _targetsByName[target.name] = target;
       }
     }
 
@@ -95,15 +196,7 @@ base class ExtensionBuildManager {
     required Map<String, String> resolvedArtifacts,
     required String targetName,
   }) async {
-    if (!projectRoot.hasAbsolutePath) {
-      throw ArgumentError.value(projectRoot, 'projectRoot', 'Must be an absolute path.');
-    }
-    if (!outputDir.hasAbsolutePath) {
-      throw ArgumentError.value(outputDir, 'outputDir', 'Must be an absolute path.');
-    }
-    if (!flutterRoot.hasAbsolutePath) {
-      throw ArgumentError.value(flutterRoot, 'flutterRoot', 'Must be an absolute path.');
-    }
+    _validateRequestUris(flutterRoot: flutterRoot, outputDir: outputDir, projectRoot: projectRoot);
     if (!_featureFlags.isToolExtensionsEnabled) {
       return const ExtensionBuildResult(
         success: false,
@@ -133,18 +226,20 @@ base class ExtensionBuildManager {
       );
     }
 
+    final Map<String, Object?> params = await _createBuildRequestParams(
+      buildMode: buildMode,
+      flutterRoot: flutterRoot,
+      mainPath: mainPath,
+      outputDir: outputDir,
+      projectRoot: projectRoot,
+      resolvedArtifacts: resolvedArtifacts,
+      targetName: targetName,
+    );
+
     try {
       final Object? result = await connection.sendRequest(
         BuildService.buildMethod,
-        params: <String, Object?>{
-          BuildService.buildModeParam: buildMode.cliName,
-          BuildService.flutterRootParam: flutterRoot.toString(),
-          BuildService.mainPathParam: mainPath,
-          BuildService.outputDirParam: outputDir.toString(),
-          BuildService.projectRootParam: projectRoot.toString(),
-          BuildService.resolvedArtifactsParam: resolvedArtifacts,
-          BuildService.targetNameParam: targetName,
-        },
+        params: params,
         // TODO(bkonyi): Support heartbeat / liveness monitoring for long-running RPCs,
         // https://github.com/flutter/flutter/issues/193955.
         timeout: null,
@@ -160,5 +255,79 @@ base class ExtensionBuildManager {
       _logger.printTrace('Failed to run build from extension: $e');
       return ExtensionBuildResult(success: false, errorMessage: e.toString());
     }
+  }
+
+  void _validateRequestUris({
+    required Uri flutterRoot,
+    required Uri outputDir,
+    required Uri projectRoot,
+  }) {
+    if (!projectRoot.hasAbsolutePath) {
+      throw ArgumentError.value(projectRoot, 'projectRoot', 'Must be an absolute path.');
+    }
+    if (!outputDir.hasAbsolutePath) {
+      throw ArgumentError.value(outputDir, 'outputDir', 'Must be an absolute path.');
+    }
+    if (!flutterRoot.hasAbsolutePath) {
+      throw ArgumentError.value(flutterRoot, 'flutterRoot', 'Must be an absolute path.');
+    }
+  }
+
+  Future<Map<String, Object?>> _createBuildRequestParams({
+    required BuildMode buildMode,
+    required Uri flutterRoot,
+    required String mainPath,
+    required Uri outputDir,
+    required Uri projectRoot,
+    required Map<String, String> resolvedArtifacts,
+    required String targetName,
+  }) async {
+    final ExtensionBuildTarget? target = _targetsByName[targetName];
+    final List<ExtensionPlugin> resolvedPlugins = await _resolvePluginsForTarget(
+      projectRoot,
+      target?.pluginPlatformKey,
+    );
+    return <String, Object?>{
+      BuildService.buildModeParam: buildMode.cliName,
+      BuildService.flutterRootParam: flutterRoot.toString(),
+      BuildService.mainPathParam: mainPath,
+      BuildService.outputDirParam: outputDir.toString(),
+      if (resolvedPlugins.isNotEmpty)
+        BuildService.pluginsParam: <Map<String, Object?>>[
+          for (final ExtensionPlugin plugin in resolvedPlugins) plugin.toMap(),
+        ],
+      BuildService.projectRootParam: projectRoot.toString(),
+      BuildService.resolvedArtifactsParam: resolvedArtifacts,
+      BuildService.targetNameParam: targetName,
+    };
+  }
+
+  Future<List<ExtensionPlugin>> _resolvePluginsForTarget(
+    Uri projectRoot,
+    String? pluginPlatformKey,
+  ) async {
+    if (pluginPlatformKey == null || pluginPlatformKey.isEmpty) {
+      return const <ExtensionPlugin>[];
+    }
+    final Directory projectDir = _fileSystem.directory(projectRoot);
+    if (!projectDir.childFile('pubspec.yaml').existsSync()) {
+      return const <ExtensionPlugin>[];
+    }
+    final FlutterProject project = _projectFactory.fromDirectory(projectDir);
+    final List<Plugin> foundPlugins = await findPlugins(
+      project,
+      logger: _logger,
+      throwOnError: false,
+    );
+    if (foundPlugins.isEmpty) {
+      return const <ExtensionPlugin>[];
+    }
+    return resolveExtensionPluginsForPlatform(
+      foundPlugins,
+      pluginPlatformKey,
+      fileSystem: _fileSystem,
+      logger: _logger,
+      quiet: true,
+    );
   }
 }

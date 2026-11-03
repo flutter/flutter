@@ -1145,6 +1145,38 @@ const kXcodeBuildScriptValuePrepare = 'prepare';
 /// Expects value of "true".
 const kBuildSwiftPackage = 'BuildSwiftPackage';
 
+/// The target operating system for Dart build/link hooks on a custom extension target.
+const String kExtensionTargetOs = tools_core.ExtensionNativeAssetsConfig.targetOsDefine;
+
+/// The target CPU architecture for Dart build/link hooks on a custom extension target.
+const String kExtensionTargetArch = tools_core.ExtensionNativeAssetsConfig.targetArchDefine;
+
+/// Optional C compiler (`cc`) path for Dart build/link hooks on an extension target.
+const String kExtensionCCompilerCc = tools_core.ExtensionNativeAssetsConfig.cCompilerCcDefine;
+
+/// Optional archiver (`ar`) path for Dart build/link hooks on an extension target.
+const String kExtensionCCompilerAr = tools_core.ExtensionNativeAssetsConfig.cCompilerArDefine;
+
+/// Optional linker (`ld`) path for Dart build/link hooks on an extension target.
+const String kExtensionCCompilerLd = tools_core.ExtensionNativeAssetsConfig.cCompilerLdDefine;
+
+/// Optional compiler environment setup script path for Dart build/link hooks on an extension target.
+const String kExtensionCCompilerEnvScript =
+    tools_core.ExtensionNativeAssetsConfig.cCompilerEnvScriptDefine;
+
+/// Optional JSON-encoded arguments for [kExtensionCCompilerEnvScript].
+const String kExtensionCCompilerEnvScriptArgs =
+    tools_core.ExtensionNativeAssetsConfig.cCompilerEnvScriptArgsDefine;
+
+/// Optional platform key under `flutter.plugin.platforms.<key>` used to resolve
+/// Dart plugins on an extension target.
+const kExtensionPluginPlatformKey = 'ExtensionPluginPlatformKey';
+
+/// Compile-time Dart environment define (`-DFLUTTER_CUSTOM_PLATFORM=<platform>`)
+/// used by `dart_plugin_registrant.dart` to select Dart plugin implementations
+/// for a custom extension target platform.
+const kFlutterCustomPlatformDartDefine = 'FLUTTER_CUSTOM_PLATFORM';
+
 final Converter<String, String> _defineEncoder = utf8.encoder.fuse(base64.encoder);
 final Converter<String, String> _defineDecoder = base64.decoder.fuse(utf8.decoder);
 

@@ -231,6 +231,22 @@ void _fakeAppLaunchExtensionEntryPoint(SendPort sendPort) {
   );
 }
 
+ExtensionBuildManager _createTestBuildManager({
+  required ExtensionManager extensionManager,
+  required FeatureFlags featureFlags,
+  required Logger logger,
+  FileSystem? fileSystem,
+}) {
+  final FileSystem fs = fileSystem ?? MemoryFileSystem.test();
+  return ExtensionBuildManager(
+    extensionManager: extensionManager,
+    featureFlags: featureFlags,
+    fileSystem: fs,
+    logger: logger,
+    projectFactory: FlutterProjectFactory(config: FakeConfig(), fileSystem: fs, logger: logger),
+  );
+}
+
 void main() {
   setUpAll(() {
     Cache.disableLocking();
@@ -248,7 +264,7 @@ void main() {
           featureFlags: featureFlags,
         );
         final discovery = ExtensionDevices(
-          extensionBuildManager: ExtensionBuildManager(
+          extensionBuildManager: _createTestBuildManager(
             extensionManager: manager,
             featureFlags: featureFlags,
             logger: testLogger,
@@ -279,7 +295,7 @@ void main() {
         final testDeviceManager = TestDeviceManager(
           discoverers: <DeviceDiscovery>[
             ExtensionDevices(
-              extensionBuildManager: ExtensionBuildManager(
+              extensionBuildManager: _createTestBuildManager(
                 extensionManager: manager,
                 featureFlags: featureFlags,
                 logger: testLogger,
@@ -382,7 +398,7 @@ flutter:
           featureFlags: featureFlags,
         );
         final discovery = ExtensionDevices(
-          extensionBuildManager: ExtensionBuildManager(
+          extensionBuildManager: _createTestBuildManager(
             extensionManager: manager,
             featureFlags: featureFlags,
             logger: testLogger,
@@ -427,7 +443,7 @@ flutter:
         final testDeviceManager = TestDeviceManager(
           discoverers: <DeviceDiscovery>[
             ExtensionDevices(
-              extensionBuildManager: ExtensionBuildManager(
+              extensionBuildManager: _createTestBuildManager(
                 extensionManager: manager,
                 featureFlags: featureFlags,
                 logger: testLogger,
@@ -498,7 +514,7 @@ flutter:
           return TestDeviceManager(
             discoverers: <DeviceDiscovery>[
               ExtensionDevices(
-                extensionBuildManager: ExtensionBuildManager(
+                extensionBuildManager: _createTestBuildManager(
                   extensionManager: logsExtensionManager!,
                   featureFlags: featureFlags,
                   logger: testLogger,
@@ -529,9 +545,10 @@ flutter:
         addTearDown(manager.dispose);
 
         final discovery = ExtensionDevices(
-          extensionBuildManager: ExtensionBuildManager(
+          extensionBuildManager: _createTestBuildManager(
             extensionManager: manager,
             featureFlags: featureFlags,
+            fileSystem: fileSystem,
             logger: logger,
           ),
           extensionManager: manager,

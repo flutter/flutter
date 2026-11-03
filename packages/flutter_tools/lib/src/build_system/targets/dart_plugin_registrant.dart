@@ -29,6 +29,15 @@ class DartPluginRegistrantTarget extends Target {
     this.templateRenderer = const MustacheTemplateRenderer(),
   }) : _project = project;
 
+  static const _builtInPlatformKeys = <String>{
+    'android',
+    'ios',
+    'linux',
+    'macos',
+    'web',
+    'windows',
+  };
+
   final FlutterProject? _project;
   final TemplateRenderer templateRenderer;
 
@@ -46,11 +55,23 @@ class DartPluginRegistrantTarget extends Target {
     final String targetFilePath =
         environment.defines[kTargetFile] ?? environment.fileSystem.path.join('lib', 'main.dart');
     final File mainFile = environment.fileSystem.file(targetFilePath);
+    final String? rawPluginPlatformKey = environment.defines[kExtensionPluginPlatformKey]?.trim();
+    final String? customPlatformKey =
+        (rawPluginPlatformKey != null && rawPluginPlatformKey.isNotEmpty)
+        ? rawPluginPlatformKey
+        : environment.defines[kExtensionTargetOs]?.trim().toLowerCase();
+    final extraPlatformKeys = <String>{
+      if (customPlatformKey != null &&
+          customPlatformKey.isNotEmpty &&
+          !_builtInPlatformKeys.contains(customPlatformKey))
+        customPlatformKey,
+    };
 
     await generateMainDartWithPluginRegistrant(
       project,
       packageConfig,
       mainFile,
+      extraPlatformKeys: extraPlatformKeys,
       flutterRoot: environment.flutterRootDir.path,
       logger: environment.logger,
       templateRenderer: templateRenderer,
@@ -63,9 +84,24 @@ class DartPluginRegistrantTarget extends Target {
       return true;
     }
     final String? platformName = environment.defines[kTargetPlatform];
-    final TargetPlatform? targetPlatform = platformName == null
-        ? null
-        : TargetPlatform.fromName(platformName);
+    TargetPlatform? targetPlatform;
+    if (platformName != null) {
+      try {
+        targetPlatform = TargetPlatform.fromName(platformName);
+      } on Exception {
+        final String? extensionTargetOs = environment.defines[kExtensionTargetOs];
+        final String? extensionPluginPlatformKey = environment.defines[kExtensionPluginPlatformKey];
+        final bool hasExtensionPlatform =
+            (extensionTargetOs != null && extensionTargetOs.trim().isNotEmpty) ||
+            (extensionPluginPlatformKey != null && extensionPluginPlatformKey.trim().isNotEmpty);
+        if (!hasExtensionPlatform) {
+          rethrow;
+        }
+        // Custom extension target platforms are not part of the built-in
+        // TargetPlatform enum and should still generate a Dart plugin
+        // registrant when extension platform defines are present.
+      }
+    }
     // TODO(stuartmorgan): Investigate removing this check entirely; ideally the
     // source generation step shouldn't be platform dependent, and the generated
     // code should just do the right thing on every platform.

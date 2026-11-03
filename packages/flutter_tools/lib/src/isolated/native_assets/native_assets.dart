@@ -498,7 +498,10 @@ Future<List<File>> installCodeAssets({
   required Uri nativeAssetsFileUri,
   required Uri targetUri,
 }) async {
-  final OS targetOS = getNativeOSFromTargetPlatform(targetPlatform);
+  final OS targetOS = getNativeOSFromTargetPlatform(
+    targetPlatform,
+    environmentDefines: environmentDefines,
+  );
   final flutterTester = targetPlatform == TargetPlatform.tester;
   final BuildMode buildMode = _getBuildMode(environmentDefines, flutterTester);
 
@@ -777,6 +780,12 @@ Map<FlutterCodeAsset, FlutterCodeAssetTargetLocation> assetTargetLocationsForOS(
     OS.macOS => assetTargetLocationsMacOS(codeAssets, absolutePath, logger: logger),
     OS.iOS => assetTargetLocationsIOS(codeAssets, logger: logger),
     OS.android => assetTargetLocationsAndroid(codeAssets),
+    // Custom extension operating systems bundle dynamic libraries as
+    // standalone shared objects inside the target output directory.
+    final OS customOs when !OS.values.contains(customOs) => _assetTargetLocationsWindowsLinux(
+      codeAssets,
+      absolutePath,
+    ),
     _ => throw UnimplementedError('This should be unreachable.'),
   };
 }
@@ -865,6 +874,16 @@ Future<List<File>> _copyNativeCodeAssetsForOS(
         assetTargetLocations,
         fileSystem,
       );
+    case final OS customOs when !OS.values.contains(customOs):
+      // Custom extension operating systems copy bundled dynamic libraries
+      // directly into the target bundle directory.
+      assert(codesignIdentity == null);
+      installedFiles = await _copyNativeCodeAssetsToBundleOnWindowsLinux(
+        targetUri,
+        assetTargetLocations,
+        buildMode,
+        fileSystem,
+      );
     default:
       throw StateError('This should be unreachable.');
   }
@@ -947,7 +966,15 @@ Never _throwNativeAssetsLinkFailed() {
   throwToolExit('Linking native assets failed. See the logs for more details.');
 }
 
-OS getNativeOSFromTargetPlatform(TargetPlatform platform) {
+OS getNativeOSFromTargetPlatform(
+  TargetPlatform platform, {
+  Map<String, String>? environmentDefines,
+}) {
+  if (environmentDefines != null) {
+    if (resolveCustomNativeTarget(environmentDefines) case (final OS os, _)) {
+      return os;
+    }
+  }
   switch (platform.os) {
     case .ios:
       return OS.iOS;
