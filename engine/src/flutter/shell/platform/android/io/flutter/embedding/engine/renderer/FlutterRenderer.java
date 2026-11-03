@@ -26,6 +26,7 @@ import androidx.annotation.RequiresApi;
 import androidx.annotation.VisibleForTesting;
 import io.flutter.Log;
 import io.flutter.embedding.engine.FlutterJNI;
+import io.flutter.embedding.engine.systemchannels.ScreenshotChannel;
 import io.flutter.view.TextureRegistry;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
@@ -38,6 +39,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Consumer;
 
 /**
  * Represents the rendering responsibilities of a {@code FlutterEngine}.
@@ -92,8 +94,11 @@ public class FlutterRenderer implements TextureRegistry {
   @VisibleForTesting public static boolean debugDisableSurfaceClear = false;
 
   private static final String TAG = "FlutterRenderer";
+  // Implicit view ID used for the default Android FlutterView.
+  private static final long IMPLICIT_VIEW_ID = 0L;
 
   @NonNull private final FlutterJNI flutterJNI;
+  @Nullable private ScreenshotChannel screenshotChannel;
   @NonNull private final AtomicLong nextTextureId = new AtomicLong(0L);
   @Nullable private Surface surface;
   private boolean isDisplayingFlutterUi = false;
@@ -120,7 +125,13 @@ public class FlutterRenderer implements TextureRegistry {
       };
 
   public FlutterRenderer(@NonNull FlutterJNI flutterJNI) {
+    this(flutterJNI, null);
+  }
+
+  public FlutterRenderer(
+      @NonNull FlutterJNI flutterJNI, @Nullable ScreenshotChannel screenshotChannel) {
     this.flutterJNI = flutterJNI;
+    this.screenshotChannel = screenshotChannel;
     this.flutterJNI.addIsDisplayingFlutterUiListener(flutterUiDisplayListener);
   }
 
@@ -1339,8 +1350,43 @@ public class FlutterRenderer implements TextureRegistry {
         viewportMetrics.displayCornerRadiusBottomLeft);
   }
 
+  /**
+   * Synchronously captures the current Flutter UI into a {@link Bitmap}.
+   *
+   * @deprecated Use {@link #getBitmapAsync(Consumer)} instead.
+   */
+  @Deprecated
   public Bitmap getBitmap() {
     return flutterJNI.getBitmap();
+  }
+
+  /**
+   * Asynchronously captures the current Flutter UI of the default view into a {@link Bitmap}.
+   *
+   * <p>Must be called on the Android main thread. The {@code callback} is invoked on the Android
+   * main thread once the Dart UI isolate renders the root {@code OffsetLayer} via {@code toImage()}
+   * and returns the pixel buffer, or with {@code null} if capture fails.
+   *
+   * <p>Do not block the Android main thread waiting for {@code callback}, as the Dart isolate runs
+   * on the main thread and platform channel responses are delivered via the main {@link Looper}.
+   */
+  public void getBitmapAsync(@NonNull Consumer<Bitmap> callback) {
+    getBitmapAsync(IMPLICIT_VIEW_ID, callback);
+  }
+
+  /**
+   * Asynchronously captures the current Flutter UI of the specified {@code viewId} into a {@link
+   * Bitmap}.
+   */
+  public void getBitmapAsync(long viewId, @NonNull Consumer<Bitmap> callback) {
+    if (Looper.myLooper() != Looper.getMainLooper()) {
+      throw new IllegalStateException("getBitmapAsync must be called on the main thread.");
+    }
+    if (screenshotChannel == null || !flutterJNI.isAttached()) {
+      handler.post(() -> callback.accept(null));
+      return;
+    }
+    screenshotChannel.captureView(viewId, callback);
   }
 
   public void dispatchPointerDataPacket(@NonNull ByteBuffer buffer, int position) {
