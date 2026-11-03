@@ -78,7 +78,7 @@ void testMain() {
       expect(_isSameJsObject(surface.canvas, glCanvas), isFalse);
       _expectSingleCanvasIn(surface);
 
-      // Once in software mode, the untainted canvas is reused on resize.
+      // Once in software mode, the canvas is reused on resize.
       final DomEventTarget softwareCanvas = surface.canvas;
       surface.setSize(const BitmapSize(20, 20));
       expect(_isSameJsObject(surface.canvas, softwareCanvas), isTrue);
@@ -194,6 +194,13 @@ void testMain() {
       expect(surface.skSurface, isNull);
       _expectSingleCanvasIn(surface);
     });
+
+    test('onContextLost asserts when surface is in software mode', () async {
+      CkSurface.debugForceGLFailure = true;
+      final CkOnscreenSurface surface = await createOnscreenSurface();
+      expect(surface.isSoftware, isTrue);
+      expect(surface.onContextLost, throwsA(isA<AssertionError>()));
+    });
   });
 
   group('CkOffscreenSurface WebGL failure recovery', () {
@@ -237,7 +244,7 @@ void testMain() {
     );
 
     test(
-      'offscreen canvas buffer clamping recovery does not re-taint canvas in software mode',
+      'offscreen canvas buffer clamping recovery does not bind WebGL in software mode',
       () async {
         final CkOffscreenSurface surface = await createOffscreenSurface();
         surface.setSize(const BitmapSize(100, 100));
