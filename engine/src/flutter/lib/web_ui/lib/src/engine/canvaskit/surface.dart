@@ -76,6 +76,11 @@ abstract class CkSurface extends Surface {
   int get glContext => _glContext;
   int _glContext = -1;
 
+  bool _disposed = false;
+
+  /// Whether this surface has been disposed.
+  bool get isDisposed => _disposed;
+
   /// The canvas object that this surface is rendering to.
   @visibleForTesting
   DomEventTarget get canvas => _canvas;
@@ -118,15 +123,13 @@ abstract class CkSurface extends Surface {
   /// The underlying Skia graphics context.
   SkGrContext? _grContext;
 
-  bool _isDisposed = false;
-
   /// Handles the `webglcontextlost` event by acquiring a new canvas and
   /// recreating the Skia context and surface on it.
   ///
   /// [handledContextLossEvent] completes only once the graphics context has
   /// been recreated (or recovery has failed).
   void onContextLost() {
-    if (_isDisposed) {
+    if (_disposed) {
       return;
     }
     assert(!isSoftware, 'Received a webglcontextlost event while in software rendering mode.');
@@ -268,7 +271,7 @@ abstract class CkSurface extends Surface {
   /// Releases the current [canvas], along with its WebGL context and the Skia
   /// objects backed by it.
   ///
-  /// Unless the surface is being disposed, the caller must assign a new
+  /// Unless this surface is being disposed, the caller must assign a new
   /// [canvas] afterwards.
   void _releaseCanvas() {
     _skSurface?.dispose();
@@ -292,6 +295,7 @@ abstract class CkSurface extends Surface {
     // WebGL context just to lose it.
     if (_glContext > 0) {
       _destroyGlContext(oldCanvas);
+      canvasKit.deleteContext(_glContext.toDouble());
     }
     _glContext = -1;
     _canvasHasWebGlContext = false;
@@ -353,6 +357,9 @@ abstract class CkSurface extends Surface {
 
   @override
   Future<void> recreateContextForCanvas(DomEventTarget newCanvas) async {
+    if (_disposed) {
+      return;
+    }
     _replaceCanvas(newCanvas);
   }
 
@@ -366,9 +373,15 @@ abstract class CkSurface extends Surface {
 
   @override
   void dispose() {
-    _isDisposed = true;
-    _skSurface?.dispose();
-    _skSurface = null;
+    if (_disposed) {
+      return;
+    }
+    _disposed = true;
+
+    _releaseCanvas();
+
+    onDispose?.call();
+    onDispose = null;
   }
 
   @override
@@ -624,7 +637,7 @@ class CkOffscreenSurface extends CkSurface implements OffscreenSurface {
 
   @override
   void dispose() {
-    if (_isDisposed) {
+    if (_disposed) {
       return;
     }
     _releaseCanvas();

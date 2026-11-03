@@ -136,6 +136,7 @@ extension type CanvasKit(JSObject _) implements JSObject {
     DomOffscreenCanvas canvas,
     SkWebGLContextOptions options,
   );
+  external void deleteContext(double glContext);
   external SkGrContext? MakeGrContext(double glContext);
   external SkSurface? MakeOnScreenGLSurface(
     SkGrContext grContext,

@@ -34,9 +34,14 @@ class MultiSurfaceRasterizer extends Rasterizer {
   final Map<EngineFlutterView, MultiSurfaceViewRasterizer> _viewRasterizers =
       <EngineFlutterView, MultiSurfaceViewRasterizer>{};
 
+  /// Removes the [view] rasterizer from the registry.
+  void removeViewRasterizer(EngineFlutterView view) {
+    _viewRasterizers.remove(view);
+  }
+
   @override
   void dispose() {
-    for (final MultiSurfaceViewRasterizer viewRasterizer in _viewRasterizers.values) {
+    for (final viewRasterizer in List<MultiSurfaceViewRasterizer>.of(_viewRasterizers.values)) {
       viewRasterizer.dispose();
     }
     _viewRasterizers.clear();
@@ -90,5 +95,12 @@ class MultiSurfaceViewRasterizer extends ViewRasterizer {
     }
     await Future.wait<void>(rasterizeFutures);
     recorder?.recordRasterFinish();
+  }
+
+  @override
+  void dispose() {
+    rasterizer.removeViewRasterizer(view);
+    displayFactory.dispose();
+    super.dispose();
   }
 }

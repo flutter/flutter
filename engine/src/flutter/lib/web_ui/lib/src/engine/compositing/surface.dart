@@ -31,11 +31,12 @@ abstract class SurfaceProvider<C extends Surface, D extends CanvasProvider> {
       surface.setSkiaResourceCacheMaxBytes(_resourceCacheMaxBytes!);
     }
     _createdSurfaces.add(surface);
+    surface.onDispose = () => _createdSurfaces.remove(surface);
     return surface;
   }
 
   void dispose() {
-    for (final C surface in _createdSurfaces) {
+    for (final surface in List<C>.from(_createdSurfaces)) {
       surface.dispose();
     }
     _createdSurfaces.clear();
@@ -84,6 +85,10 @@ abstract class Surface {
 
   /// Disposes of the surface and its resources.
   void dispose();
+
+  /// Callback invoked when the surface is disposed, allowing providers to
+  /// remove references to the surface.
+  ui.VoidCallback? onDispose;
 
   /// A [Future] which completes when the [Surface] is initialized and ready to
   /// render pictures.
