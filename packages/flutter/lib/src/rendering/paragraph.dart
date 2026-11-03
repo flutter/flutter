@@ -1539,8 +1539,8 @@ class _SelectableFragment
   // example, a [RenderListWheelViewport] paints the item that overlaps the
   // magnifier twice: once magnified and once cylindrically. These handles are
   // used to detect that case: while a leader layer of an earlier paint of the
-  // same frame is still attached, pushing another one would leave the link with
-  // more than one leader.
+  // same frame still has a parent, pushing another one would leave the link
+  // with more than one leader, even before the layer tree is attached.
   final LayerHandle<LeaderLayer> _startHandleLeaderLayer = LayerHandle<LeaderLayer>();
   final LayerHandle<LeaderLayer> _endHandleLeaderLayer = LayerHandle<LeaderLayer>();
 
@@ -3691,12 +3691,10 @@ class _SelectableFragment
     }
   }
 
-  // Whether the leader layer pushed by an earlier paint is still part of the
-  // layer tree, which means the paragraph is being painted more than once in
-  // the same frame. The layer tree is torn down and rebuilt before a paint, so
-  // a leader layer that is still attached can only come from the current frame.
+  // Repainting a container removes its old children before painting them again.
+  // Parentage also detects leaders painted into a new, not-yet-attached subtree.
   static bool _isLeaderLayerStillInLayerTree(LayerHandle<LeaderLayer> handle) {
-    return handle.layer?.attached ?? false;
+    return handle.layer?.parent != null;
   }
 
   @override

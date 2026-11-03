@@ -1125,6 +1125,48 @@ void main() {
       expect(endLink.leader, isNull);
     });
 
+    test('repeated paints before attachment keep a single leader for each selection handle', () {
+      final registrar = TestSelectionRegistrar();
+      final paragraph = RenderParagraph(
+        const TextSpan(text: '1234567'),
+        textDirection: TextDirection.ltr,
+        registrar: registrar,
+      );
+      layout(paragraph);
+      final startLink = LayerLink();
+      final endLink = LayerLink();
+      final Selectable selectable = registrar.selectables.single;
+      selectable.dispatchSelectionEvent(const SelectAllSelectionEvent());
+      selectable.pushHandleLayers(startLink, endLink);
+      final root = ContainerLayer();
+      addTearDown(() {
+        selectable.pushHandleLayers(null, null);
+        root.removeAllChildren();
+        if (root.attached) {
+          root.detach();
+        }
+      });
+
+      // A new repaint boundary paints its children before its layer is attached.
+      final context = PaintingContext(root, paragraph.paintBounds);
+      paragraph.paint(context, Offset.zero);
+      paragraph.paint(context, Offset.zero);
+      context.addLayer(ContainerLayer());
+
+      final leaders = <LeaderLayer>[];
+      for (Layer? layer = root.firstChild; layer != null; layer = layer.nextSibling) {
+        if (layer is LeaderLayer) {
+          leaders.add(layer);
+        }
+      }
+      expect(leaders.where((LeaderLayer layer) => layer.link == startLink), hasLength(1));
+      expect(leaders.where((LeaderLayer layer) => layer.link == endLink), hasLength(1));
+
+      root.attach(Object());
+      expect(startLink.leader, same(leaders[0]));
+      expect(endLink.leader, same(leaders[1]));
+    });
+
     // Regression test for https://github.com/flutter/flutter/issues/182776.
     test('paints selection highlights outside fade layer and handles after text', () async {
       final registrar = TestSelectionRegistrar();
