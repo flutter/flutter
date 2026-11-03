@@ -1202,6 +1202,83 @@ pass; the tool's general and commands shards and the widgets tree:
 **745 of 745 pass** (277 general, 68 hermetic, 10 permeable, 390 widgets;
 37 min at `--local_test_jobs=4`, create_test's 18 min the critical path).
 
+### `dev/bots/test.dart --bazel`: the shards under Bazel
+
+`dart dev/bots/test.dart` is what the framework's and the tool's CI shards
+run (the flutter_drone recipe sets `SHARD` and `SUBSHARD` and runs it, and
+sets nothing else). `--bazel` -- or a `SHARD` or `SUBSHARD` value ending in
+`_bazel`, `SUBSHARD=widgets_bazel`, which is how a `.ci.yaml` target opts in
+with no change to the recipe (`dev/bots/utils.dart`'s
+`shardNameFromEnvironment` strips the suffix) -- makes the framework_tests
+shard (widgets, libraries, impeller, slow, misc), the tool_tests shard's
+general subshard, tool_tests_commands, web_tool_tests and
+tool_integration_tests run their tests under Bazel on the prebuilt engine
+(`dev/bots/bazel.dart`):
+
+```sh
+SHARD=framework_tests SUBSHARD=widgets bin/cache/dart-sdk/bin/dart dev/bots/test.dart --bazel
+SHARD=tool_tests_commands SUBSHARD=1_3_bazel bin/cache/dart-sdk/bin/dart dev/bots/test.dart   # the same slice as 1_3
+bin/cache/dart-sdk/bin/dart dev/bots/test.dart --bazel --dry-run    # every shard: the targets each would run
+```
+
+One `bazelisk test --config=prebuilt_engine --keep_going --test_output=errors
+--skip_incompatible_explicit_targets` runs a shard's targets from the
+repository root (`--config=ci` too on a bot; the other shards -- web,
+analyze, docs, Android, customer testing -- ignore the flag). A shard's
+steps map to the suites the root `BUILD.bazel` gathers: the `flutter test`
+or `dart test` of a package to its `tests` suite, each packages/flutter test
+directory to its own, the tool's shards to theirs. Because a BUILD file
+leaves some files out by name, test.dart does not assume a suite is a
+directory: `BazelShard.cover` lists the step's test files as the step would
+(the same directory walks, the same numbered-subshard slices), computes
+each file's target name from its path (`bazelTestTarget`: `//<package>:` and
+the path relative to the package, `.dart` dropped, slashes to underscores,
+as `dart_tests` and `flutter_tests` name them), asks one `bazelisk query
+tests(set(<suites>))` which exist, runs those under Bazel and the rest
+through `flutter test`/`dart test` as without `--bazel`, saying which --
+so a shard covers the same files either way, and a new test directory
+without a BUILD file is loud, not lost. The steps that are not a package's
+tests run as they are: the test harness checks (test.dart testing itself),
+`flutter config` and examples_smoke_test, the `dart fix` goldens, the
+private tests, integration_test's Gradle unit test and the tracing app
+builds (the slow subshard is mostly these), android_semantics_testing and
+examples/image_list (no BUILD file), packages/flutter/test/dart (a
+browser's test), the bindings_test_failure check, the tool's native-asset
+example apps, and the integration shard's Android and Apple files (their
+Bazel shards want the engine's Android artifacts or a Mac). What differs
+from `flutter test` by design: the gallery and the libraries run once, with
+creation locations (the Bazel tree builds the no-tracking variant for
+test/widgets only); `REDUCED_TEST_SET` is ignored
+(Bazel runs every test of a target; a note says so); the per-case results
+go to Bazel's test.xml and not to ResultDB (`flutter test`'s JSON reporter
+does); `--local-engine` is refused (the config is the prebuilt engine).
+Before the tool's commands, integration and web shards, test.dart runs
+`flutter precache --<host desktop> --web` (the sets the facsimile lays and
+the sandboxed tool cannot fetch).
+
+Bazel's state goes where `bazel_ci.py` keeps it for this checkout, so that
+the two share a server and its caches: `.bazel_ci/` in the checkout for a
+developer (git ignores it), the task's temporary directory on a bot
+(`--max_idle_secs=300` there, and `--sandbox_base=/dev/shm` when the bot has
+16 GB of it, as bazel_ci does), `BAZEL_CI_HOME` overriding both; the root
+`.bazelrc`'s disk cache under `~/.cache` applies as for any build. bazelisk
+is what `BAZELISK` names, else the one on `PATH`, else the engine checkout's
+`third_party/bazelisk` (DEPS' `download_bazelisk`), else a download of the
+release DEPS pins (1.30.0, the asset for the host's ABI, checked against its
+SHA-256) into that directory -- a flutter_drone bot has none of the first
+three. `dev/bots/test/bazel_test.dart` tests the name and path functions,
+`test_test.dart` the `_bazel` names and `--bazel` through `--dry-run`.
+
+A CI target for a shard under Bazel is a `.ci.yaml` entry with the same
+recipe and `shard`, and `subshard: <name>_bazel` (or `shard: <name>_bazel`
+for the numbered-subshard shards), which must start as `bringup: true`
+(cocoon refuses a new target otherwise) and so runs in postsubmit only;
+none is added here. Those first runs are the measurement that is missing:
+the kernels compile per test (3 s a file from the prelude, on the shard's 8
+cores) where `flutter test` compiles them in one incremental session, so a
+shard's wall time is the open question, as is the bot's disk cache between
+tasks.
+
 ## The web engine's unit tests: felt's suites
 
 `lib/web_ui/test` -- 189 files in six test sets (`engine`, `ui`, `canvaskit`,
