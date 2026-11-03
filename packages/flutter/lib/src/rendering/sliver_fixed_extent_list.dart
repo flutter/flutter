@@ -269,6 +269,13 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
   @visibleForTesting
   @protected
   double? itemExtentOf(int index) {
+    if (index < 0) {
+      return null;
+    }
+    final int? childCount = childManager.estimatedChildCount;
+    if (childCount != null && index >= childCount) {
+      return null;
+    }
     if (itemExtentBuilder == null) {
       return itemExtent;
     }
@@ -560,14 +567,25 @@ class RenderSliverVariedExtentList extends RenderSliverFixedExtentBoxAdaptor {
   }
 
   double? _getOrCreateItemOffset(int index) {
+    if (index <= 0) {
+      return 0.0;
+    }
     if (index < _itemOffsetCache.length) {
       return _itemOffsetCache[index];
+    }
+    final int? childCount = childManager.estimatedChildCount;
+    if (childCount != null && index > childCount) {
+      return null;
     }
     if (_endIndex != null && index > _endIndex!) {
       return null;
     }
     final SliverLayoutDimensions dimensions = layoutDimensions;
     for (int i = _itemExtentCache.length; i < index; i++) {
+      if (childCount != null && i >= childCount) {
+        _endIndex = i;
+        return null;
+      }
       final double? extent = itemExtentBuilder(i, dimensions);
       if (extent == null) {
         _endIndex = i;
@@ -581,6 +599,13 @@ class RenderSliverVariedExtentList extends RenderSliverFixedExtentBoxAdaptor {
 
   @override
   double? itemExtentOf(int index) {
+    if (index < 0) {
+      return null;
+    }
+    final int? childCount = childManager.estimatedChildCount;
+    if (childCount != null && index >= childCount) {
+      return null;
+    }
     if (index < _itemExtentCache.length) {
       return _itemExtentCache[index];
     }
@@ -620,6 +645,9 @@ class RenderSliverVariedExtentList extends RenderSliverFixedExtentBoxAdaptor {
     double itemExtent,
     int index,
   ) {
+    if (index <= 0) {
+      return 0.0;
+    }
     final int? childCount = childManager.estimatedChildCount;
     var clampedIndex = index;
     if (childCount != null && clampedIndex > childCount) {
@@ -668,7 +696,7 @@ class RenderSliverVariedExtentList extends RenderSliverFixedExtentBoxAdaptor {
     if (scrollOffset <= 0.0) {
       return 0;
     }
-    _ensureItemOffsetsFor(scrollOffset);
+    _ensureItemOffsetsFor(scrollOffset, findMax: findMax);
 
     var low = 0;
     int high = _itemOffsetCache.length - 1;
@@ -692,10 +720,12 @@ class RenderSliverVariedExtentList extends RenderSliverFixedExtentBoxAdaptor {
     return math.max(0, result - 1);
   }
 
-  void _ensureItemOffsetsFor(double scrollOffset) {
+  void _ensureItemOffsetsFor(double scrollOffset, {required bool findMax}) {
     int index = _itemOffsetCache.length - 1;
     final int? childCount = childManager.estimatedChildCount;
-    while (_itemOffsetCache[index] <= scrollOffset + precisionErrorTolerance) {
+    while (findMax
+        ? _itemOffsetCache[index] < scrollOffset - precisionErrorTolerance
+        : _itemOffsetCache[index] <= scrollOffset + precisionErrorTolerance) {
       if (childCount != null && index >= childCount) {
         break;
       }

@@ -813,4 +813,83 @@ void main() {
     expect(calledNodes.toSet().length, calledNodes.length);
     expect(calledNodes.isNotEmpty, isTrue);
   });
+
+  testWidgets(
+    'TreeSliver with default animations memoizes treeRowExtentBuilder per frame across concurrent toggles and scroll',
+    (WidgetTester tester) async {
+      final calledNodes = <TreeSliverNode<Object?>>[];
+      final tree = <TreeSliverNode<String>>[
+        TreeSliverNode<String>(
+          'First',
+          children: List<TreeSliverNode<String>>.generate(
+            10,
+            (int index) => TreeSliverNode<String>('first_$index'),
+          ),
+        ),
+        TreeSliverNode<String>(
+          'Second',
+          expanded: true,
+          children: List<TreeSliverNode<String>>.generate(
+            10,
+            (int index) => TreeSliverNode<String>('second_$index'),
+          ),
+        ),
+        ...List<TreeSliverNode<String>>.generate(
+          20,
+          (int index) => TreeSliverNode<String>('tail_$index'),
+        ),
+      ];
+      final controller = ScrollController();
+      addTearDown(controller.dispose);
+
+      await tester.pumpWidget(
+        _buildTestWidget(
+          CustomScrollView(
+            controller: controller,
+            slivers: <Widget>[
+              TreeSliver<String>(
+                tree: tree,
+                treeRowExtentBuilder:
+                    (TreeSliverNode<Object?> node, SliverLayoutDimensions dimensions) {
+                      calledNodes.add(node);
+                      return 40.0;
+                    },
+              ),
+            ],
+          ),
+        ),
+      );
+      expect(calledNodes.isNotEmpty, isTrue);
+      expect(calledNodes.toSet().length, calledNodes.length);
+
+      // Tap first parent to start expand animation.
+      calledNodes.clear();
+      await tester.tap(find.byType(Icon).first);
+      await tester.pump(const Duration(milliseconds: 50));
+      expect(calledNodes.isNotEmpty, isTrue);
+      expect(calledNodes.toSet().length, calledNodes.length);
+
+      // Mid-animation: toggle second parent and scroll.
+      calledNodes.clear();
+      await tester.tap(find.byType(Icon).last);
+      controller.jumpTo(80.0);
+      await tester.pump(const Duration(milliseconds: 50));
+      expect(calledNodes.isNotEmpty, isTrue);
+      expect(calledNodes.toSet().length, calledNodes.length);
+
+      // Settle remaining animation frames, asserting uniqueness on each frame.
+      calledNodes.clear();
+      void verifyEachFrame(Duration _) {
+        expect(calledNodes.toSet().length, calledNodes.length);
+        calledNodes.clear();
+        if (tester.binding.hasScheduledFrame) {
+          tester.binding.addPostFrameCallback(verifyEachFrame);
+        }
+      }
+
+      tester.binding.addPostFrameCallback(verifyEachFrame);
+      await tester.pumpAndSettle();
+      expect(calledNodes.toSet().length, calledNodes.length);
+    },
+  );
 }
