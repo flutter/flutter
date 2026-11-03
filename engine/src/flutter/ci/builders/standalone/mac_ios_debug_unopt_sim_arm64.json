@@ -1,13 +1,5 @@
 {
     "cas_archive": false,
-    "properties": {
-        "$flutter/osx_sdk": {
-            "runtime_versions": [
-                "ios-26-2_17c52"
-            ],
-            "sdk_version": "17c52"
-        }
-    },
     "drone_dimensions": [
         "device_type=none",
         "os=Mac-15.7|Mac-26.6",

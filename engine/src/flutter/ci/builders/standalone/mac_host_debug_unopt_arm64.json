@@ -30,11 +30,6 @@
         "config": "ci/host_debug_unopt_arm64",
         "targets": []
     },
-    "properties": {
-        "$flutter/osx_sdk": {
-            "sdk_version": "17c52"
-        }
-    },
     "tests": [
         {
             "language": "python3",

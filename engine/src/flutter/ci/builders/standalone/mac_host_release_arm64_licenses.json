@@ -30,11 +30,6 @@
             "flutter/tools/licenses_cpp:licenses_cpp_testrunner"
         ]
     },
-    "properties": {
-        "$flutter/osx_sdk": {
-            "sdk_version": "17c52"
-        }
-    },
     "tests": [
         {
             "name": "Run license_cpp unittests",

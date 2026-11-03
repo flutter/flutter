@@ -29,11 +29,6 @@
         "config": "ci/host_profile_arm64_tests",
         "targets": []
     },
-    "properties": {
-        "$flutter/osx_sdk": {
-            "sdk_version": "17c52"
-        }
-    },
     "tests": [
         {
             "language": "python3",
