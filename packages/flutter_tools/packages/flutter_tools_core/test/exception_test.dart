@@ -11,8 +11,20 @@ void main() {
       const exception = ToolExtensionException('Custom SDK path does not exist.');
 
       expect(exception.message, 'Custom SDK path does not exist.');
+      expect(exception.code, ToolExtensionException.domainErrorCode);
       expect(ToolExtensionException.domainErrorCode, -32001);
+      expect(ToolExtensionException.nonInteractiveErrorCode, -32002);
       expect(exception.toString(), 'ToolExtensionException: Custom SDK path does not exist.');
+    });
+
+    test('supports custom error code such as nonInteractiveErrorCode (-32002)', () {
+      const exception = ToolExtensionException(
+        'Cannot prompt in non-interactive mode.',
+        code: ToolExtensionException.nonInteractiveErrorCode,
+      );
+
+      expect(exception.message, 'Cannot prompt in non-interactive mode.');
+      expect(exception.code, -32002);
     });
   });
 }

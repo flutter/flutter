@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import '../convert.dart';
 import '../features.dart';
 import 'io.dart' as io;
@@ -355,22 +357,37 @@ class AnsiTerminal implements Terminal {
   @override
   bool get stdinHasTerminal => _stdio.stdinHasTerminal;
 
+  Stream<List<int>>? _broadcastStdIn;
+
+  Stream<List<int>> get _stdinBroadcastStream {
+    return _broadcastStdIn ??= _stdio.stdin.asBroadcastStream(
+      onListen: (StreamSubscription<List<int>> subscription) => subscription.resume(),
+      onCancel: (StreamSubscription<List<int>> subscription) => subscription.pause(),
+    );
+  }
+
   Stream<String>? _broadcastStdInString;
 
   @override
   Stream<String> get keystrokes {
-    return _broadcastStdInString ??= _stdio.stdin
+    return _broadcastStdInString ??= _stdinBroadcastStream
         .transform<String>(const AsciiDecoder(allowInvalid: true))
-        .asBroadcastStream();
+        .asBroadcastStream(
+          onListen: (StreamSubscription<String> subscription) => subscription.resume(),
+          onCancel: (StreamSubscription<String> subscription) => subscription.pause(),
+        );
   }
 
   Stream<String>? _broadcastStdInLines;
 
   @override
   Future<String> readLine() {
-    return (_broadcastStdInLines ??= _stdio.stdin
+    return (_broadcastStdInLines ??= _stdinBroadcastStream
             .transform<String>(utf8AllowMalformedLineDecoder)
-            .asBroadcastStream())
+            .asBroadcastStream(
+              onListen: (StreamSubscription<String> subscription) => subscription.resume(),
+              onCancel: (StreamSubscription<String> subscription) => subscription.pause(),
+            ))
         .first;
   }
 

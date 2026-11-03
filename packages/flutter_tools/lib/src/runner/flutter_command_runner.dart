@@ -339,6 +339,9 @@ class FlutterCommandRunner extends CommandRunner<void> {
     }
 
     _machineFlagPresentInAnyCliArg = args.contains('--${FlutterGlobalOptions.kMachineFlag}');
+    if (_machineFlagPresentInAnyCliArg) {
+      _extensionManager?.enableMachineMode();
+    }
     await _initializeDynamicOptions(args);
     await super.run(args);
     if (exitWithCodeOne) {
@@ -369,11 +372,19 @@ class FlutterCommandRunner extends CommandRunner<void> {
               .command ??
           current;
     }
+    var initializedAny = false;
     while (current != null) {
       if (current case final FlutterCommand flutterCommand) {
         await flutterCommand.initializeDynamicOptions();
+        initializedAny = true;
       }
       current = current.parent;
+    }
+    if (initializedAny) {
+      final OutputPreferences outputPreferences = _toolContext.outputPreferences;
+      _updateArgParser(
+        wrapColumn: outputPreferences.wrapText ? outputPreferences.wrapColumn : null,
+      );
     }
   }
 

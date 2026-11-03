@@ -241,6 +241,32 @@ void main() {
       expect(await terminalUnderTest.readLine(), '11');
     });
 
+    testWithoutContext(
+      'promptForCharInput and readLine share a single-subscription stdin stream',
+      () async {
+        final stdio = FakeStdio()
+          .._stdin = Stream<List<int>>.fromIterable(<List<int>>[
+            <int>[50], // '2'
+            <int>[115, 101, 99, 114, 101, 116, 10], // 'secret\n'
+          ]);
+        terminalUnderTest = AnsiTerminal(stdio: stdio, platform: const LocalPlatform())
+          ..usesTerminalUi = true;
+        final bufferLogger = BufferLogger(
+          terminal: terminalUnderTest,
+          outputPreferences: OutputPreferences.test(),
+        );
+
+        final String choice = await terminalUnderTest.promptForCharInput(
+          <String>['1', '2', 'q'],
+          prompt: 'Choose option',
+          logger: bufferLogger,
+          displayAcceptedCharacters: false,
+        );
+        expect(choice, '2');
+        expect(await terminalUnderTest.readLine(), 'secret');
+      },
+    );
+
     testWithoutContext('Does not set single char mode when a terminal is not attached', () {
       final Stdio stdio = FakeStdio()..stdinHasTerminal = false;
       final ansiTerminal = AnsiTerminal(stdio: stdio, platform: const LocalPlatform());

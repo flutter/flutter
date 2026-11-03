@@ -6,8 +6,11 @@ import 'dart:async';
 
 import 'package:flutter_tools_extension/flutter_tools_extension.dart';
 
+import '../base/config.dart';
+import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/os.dart';
+import '../base/terminal.dart';
 import '../features.dart';
 import 'config.dart';
 import 'diagnostics.dart';
@@ -22,16 +25,22 @@ class ExtensionManager {
     required this.hostPlatform,
     required Logger logger,
     this._entryPoints = const <ExtensionEntryPoint>[],
+    this._config,
     ExtensionDiscovery? discovery,
+    Stdio? stdio,
+    Terminal? terminal,
   }) : _logger = logger,
-       _discovery = discovery ?? ExtensionDiscovery(logger: logger);
+       _discovery = discovery ?? ExtensionDiscovery(logger: logger),
+       _prompter = ExtensionTerminalPrompter(logger: logger, stdio: stdio, terminal: terminal);
 
   /// The active [HostPlatform].
   final HostPlatform hostPlatform;
+  final Config? _config;
   final Logger _logger;
   final ExtensionDiscovery _discovery;
   final List<ExtensionEntryPoint> _entryPoints;
   final FeatureFlags _featureFlags;
+  final ExtensionTerminalPrompter _prompter;
   bool get isInitialized => _isInitialized;
   bool _isInitialized = false;
   bool _isDisabled = false;
@@ -39,6 +48,14 @@ class ExtensionManager {
   final _diagnosticsExtensions = <DiagnosticsExtension>[];
   final _configurationExtensions = <ConfigurationExtension>[];
   final _deviceExtensions = <DeviceService>[];
+
+  /// Marks the current CLI invocation as running in `--machine` mode so
+  /// interactive terminal prompt RPCs (`terminal.promptForOption` and
+  /// `terminal.promptForInput`) fail fast with
+  /// `ToolExtensionException.nonInteractiveErrorCode`.
+  void enableMachineMode() {
+    _prompter.enableMachineMode();
+  }
 
   /// Disables tool extension initialization for the current CLI invocation
   /// (for example, when `--no-extensions` is passed).
@@ -111,17 +128,46 @@ class ExtensionManager {
         await client.fetchTitle();
         _diagnosticsExtensions.add(client);
       }
+      ConfigurationExtensionClient? configClient;
       if (connection.capabilities.services.contains(ConfigurationExtension.serviceNamespace)) {
-        final client = ConfigurationExtensionClient(connection, logger: _logger);
-        await client.fetchTitle();
-        _configurationExtensions.add(client);
+        configClient = ConfigurationExtensionClient(connection, logger: _logger);
+        await configClient.fetchTitle();
+        _configurationExtensions.add(configClient);
       }
       if (connection.capabilities.services.contains(DeviceService.serviceNamespace)) {
         final client = ExtensionDeviceClient(connection, logger: _logger);
         _deviceExtensions.add(client);
       }
+      _registerHostRpcHandlers(connection, configClient: configClient);
     }
     _isInitialized = true;
+  }
+
+  void _registerHostRpcHandlers(
+    ExtensionConnection connection, {
+    ConfigurationExtensionClient? configClient,
+  }) {
+    connection.registerRequestHandler(ToolExtensionService.getConfigurationValuesMethod, (
+      Map<String, Object?> _,
+    ) async {
+      final Config? config = _config;
+      if (config == null || configClient == null) {
+        return const <String, Object?>{};
+      }
+      return ExtensionConfiguration.resolveConfigurationValues(
+        config: config,
+        extension: configClient,
+        extensionName: connection.extensionName,
+      );
+    });
+    connection.registerRequestHandler(
+      ToolExtensionService.promptForOptionMethod,
+      _prompter.handlePromptForOption,
+    );
+    connection.registerRequestHandler(
+      ToolExtensionService.promptForInputMethod,
+      _prompter.handlePromptForInput,
+    );
   }
 
   /// Active [DiagnosticsExtension] proxies for extensions supporting `'diagnostics'`.

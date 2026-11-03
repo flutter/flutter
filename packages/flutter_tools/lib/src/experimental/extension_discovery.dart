@@ -129,6 +129,25 @@ class ExtensionConnection {
     return controller.stream;
   }
 
+  /// Registers a host-side JSON-RPC 2.0 request handler for [method] invoked by
+  /// the extension isolate.
+  void registerRequestHandler(String method, ExtensionRpcHandler handler) {
+    if (_isDisposed) {
+      throw StateError('ExtensionConnection has been disposed.');
+    }
+    _peer.registerMethod(method, (json_rpc.Parameters params) async {
+      final Object? rawValue = params.value;
+      final Map<String, Object?> paramMap = rawValue is Map<String, Object?>
+          ? rawValue
+          : const <String, Object?>{};
+      try {
+        return await handler(paramMap);
+      } on ToolExtensionException catch (error) {
+        throw json_rpc.RpcException(error.code, error.message);
+      }
+    });
+  }
+
   /// Sends an RPC request to the extension isolate.
   Future<Object?> sendRequest(
     String method, {
@@ -145,8 +164,9 @@ class ExtensionConnection {
       _logger.printTrace('ExtensionConnection received response for RPC request "$method".');
       return result;
     } on json_rpc.RpcException catch (error) {
-      if (error.code == ToolExtensionException.domainErrorCode) {
-        throw ToolExtensionException(error.message);
+      if (error.code == ToolExtensionException.domainErrorCode ||
+          error.code == ToolExtensionException.nonInteractiveErrorCode) {
+        throw ToolExtensionException(error.message, code: error.code);
       }
       _logger.printTrace('ExtensionConnection RPC request "$method" failed with error: $error');
       rethrow;

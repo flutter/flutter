@@ -98,7 +98,9 @@ class ToolExtensionEntryPoint {
     final peer = json_rpc.Peer.withoutJson(channel);
 
     for (final service in services) {
-      service.notificationSender = peer.sendNotification;
+      service
+        ..notificationSender = peer.sendNotification
+        ..requestSender = peer.sendRequest;
     }
 
     peer.registerMethod(getCapabilitiesMethod, () {
@@ -139,7 +141,7 @@ class ToolExtensionEntryPoint {
             '[ToolExtensionIsolate] RPC request "$fullMethod" threw ToolExtensionException: '
             '${error.message}',
           );
-          throw json_rpc.RpcException(ToolExtensionException.domainErrorCode, error.message);
+          throw json_rpc.RpcException(error.code, error.message);
         } on Object catch (error, stackTrace) {
           logger?.call(
             '[ToolExtensionIsolate] RPC request "$fullMethod" failed: $error\n$stackTrace',
