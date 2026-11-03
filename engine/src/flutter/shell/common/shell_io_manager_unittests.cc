@@ -75,7 +75,9 @@ TEST_F(ShellIOManagerTest,
         return false;
       }
 
-      codec = fml::MakeRefCounted<MultiFrameCodec>(std::move(gif_generator));
+      const SkISize gif_size = gif_generator->GetInfo().dimensions();
+      codec = fml::MakeRefCounted<MultiFrameCodec>(std::move(gif_generator),
+                                                   gif_size);
       codec->getNextFrame(closure);
       isolate_latch.Signal();
       return true;

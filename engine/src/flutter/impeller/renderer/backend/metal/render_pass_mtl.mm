@@ -7,7 +7,7 @@
 #include "flutter/fml/closure.h"
 #include "flutter/fml/logging.h"
 #include "flutter/fml/make_copyable.h"
-#include "fml/status.h"
+#include "third_party/abseil-cpp/absl/status/status.h"
 
 #include "impeller/base/backend_cast.h"
 #include "impeller/core/formats.h"
@@ -323,9 +323,9 @@ bool RenderPassMTL::SetIndexBuffer(BufferView index_buffer,
 }
 
 // |RenderPass|
-fml::Status RenderPassMTL::Draw() {
+absl::Status RenderPassMTL::Draw() {
   if (!has_valid_pipeline_) {
-    return fml::Status(fml::StatusCode::kCancelled, "Invalid pipeline.");
+    return absl::Status(absl::StatusCode::kCancelled, "Invalid pipeline.");
   }
 
   if (!index_buffer_) {
@@ -374,7 +374,7 @@ fml::Status RenderPassMTL::Draw() {
   has_valid_pipeline_ = false;
   has_label_ = false;
 
-  return fml::Status();
+  return absl::OkStatus();
 }
 
 // |RenderPass|

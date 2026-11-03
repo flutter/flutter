@@ -402,7 +402,7 @@ DownsamplePassArgs CalculateDownsamplePassArgs(
 
 /// Makes a subpass that will render the scaled down input and add the
 /// transparent gutter required for the blur halo.
-fml::StatusOr<RenderTarget> MakeDownsampleSubpass(
+absl::StatusOr<RenderTarget> MakeDownsampleSubpass(
     const ContentContext& renderer,
     const std::shared_ptr<CommandBuffer>& command_buffer,
     const std::shared_ptr<Texture>& input_texture,
@@ -549,7 +549,7 @@ fml::StatusOr<RenderTarget> MakeDownsampleSubpass(
   }
 }
 
-fml::StatusOr<RenderTarget> MakeBlurSubpass(
+absl::StatusOr<RenderTarget> MakeBlurSubpass(
     const ContentContext& renderer,
     const std::shared_ptr<CommandBuffer>& command_buffer,
     const RenderTarget& input_pass,
@@ -881,7 +881,7 @@ std::optional<Entity> GaussianBlurFilterContents::RenderFilter(
       blur_info.scaled_sigma, blur_info.padding, input_snapshot.value(),
       source_expanded_coverage_hint, source_bounds, inputs[0], snapshot_entity);
 
-  fml::StatusOr<RenderTarget> pass1_out = MakeDownsampleSubpass(
+  absl::StatusOr<RenderTarget> pass1_out = MakeDownsampleSubpass(
       renderer, command_buffer_1, input_snapshot->texture,
       input_snapshot->sampler_descriptor, downsample_pass_args, tile_mode_);
 
@@ -900,7 +900,7 @@ std::optional<Entity> GaussianBlurFilterContents::RenderFilter(
     return std::nullopt;
   }
 
-  fml::StatusOr<RenderTarget> pass2_out = MakeBlurSubpass(
+  absl::StatusOr<RenderTarget> pass2_out = MakeBlurSubpass(
       renderer, command_buffer_2, /*input_pass=*/pass1_out.value(),
       input_snapshot->sampler_descriptor,
       BlurParameters{
@@ -930,7 +930,7 @@ std::optional<Entity> GaussianBlurFilterContents::RenderFilter(
                                ? std::optional<RenderTarget>(pass1_out.value())
                                : std::optional<RenderTarget>(std::nullopt);
 
-  fml::StatusOr<RenderTarget> pass3_out = MakeBlurSubpass(
+  absl::StatusOr<RenderTarget> pass3_out = MakeBlurSubpass(
       renderer, command_buffer_3, /*input_pass=*/pass2_out.value(),
       input_snapshot->sampler_descriptor,
       BlurParameters{

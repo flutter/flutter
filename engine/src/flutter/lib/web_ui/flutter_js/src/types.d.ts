@@ -27,8 +27,6 @@ export interface WasmApplicationBuild extends ApplicationBuildBase {
 export type ApplicationBuild = JSApplicationBuild | WasmApplicationBuild;
 
 export interface BuildConfig {
-  /** @deprecated Flutter's service worker is deprecated and will be removed in a future Flutter release*/
-  serviceWorkerVersion: string;
   engineRevision: string;
   useLocalCanvasKit?: boolean;
   builds: ApplicationBuild[];
@@ -96,13 +94,6 @@ export interface FlutterConfiguration {
    * should return a Promise that resolves when all callback promises resolve.
    */
   wasmDeferredModulesLoader?: DeferredWasmModulesLoader;
-}
-
-/** @deprecated Flutter's service worker is deprecated and will be removed in a future Flutter release*/
-export interface ServiceWorkerSettings {
-  serviceWorkerVersion: string;
-  serviceWorkerUrl?: string;
-  timeoutMillis?: number;
 }
 
 export interface AppRunner {

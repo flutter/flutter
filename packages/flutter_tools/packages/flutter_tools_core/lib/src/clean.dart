@@ -4,6 +4,8 @@
 
 import 'package:meta/meta.dart';
 
+import 'json_utils.dart';
+
 // TODO(bkonyi): Include ExtensionFlutterProject on CleanEnvironment once
 // https://github.com/flutter/flutter/pull/193749 lands so extensions can
 // inspect project metadata (such as isModule or isPlugin) during clean.
@@ -22,25 +24,10 @@ class CleanEnvironment {
   /// Throws a [FormatException] if required fields are missing or are not
   /// valid trailing-slash-terminated absolute `file:` directory URIs.
   factory CleanEnvironment.fromJson(Map<String, Object?> json) {
-    if (json case {
-      projectRootKey: final String projectRootStr,
-      buildDirKey: final String buildDirStr,
-    }) {
-      final Uri? projectRootUri = _parseDirectoryUri(projectRootStr);
-      final Uri? buildDirUri = _parseDirectoryUri(buildDirStr);
-      if (projectRootUri != null && buildDirUri != null) {
-        return CleanEnvironment(buildDir: buildDirUri, projectRoot: projectRootUri);
-      }
-    }
-    throw FormatException('Invalid CleanEnvironment JSON: $json');
-  }
-
-  static Uri? _parseDirectoryUri(String rawUri) {
-    final Uri? uri = Uri.tryParse(rawUri);
-    if (uri != null && uri.isScheme('file') && uri.hasAbsolutePath && uri.path.endsWith('/')) {
-      return uri;
-    }
-    return null;
+    return CleanEnvironment(
+      buildDir: json.directoryUri(buildDirKey),
+      projectRoot: json.directoryUri(projectRootKey),
+    );
   }
 
   /// Map key for [buildDir].

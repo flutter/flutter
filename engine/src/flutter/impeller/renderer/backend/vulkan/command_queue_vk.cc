@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "fml/status.h"
+#include "third_party/abseil-cpp/absl/status/status.h"
 
 #include "impeller/renderer/backend/vulkan/command_queue_vk.h"
 
@@ -20,12 +20,12 @@ CommandQueueVK::CommandQueueVK(const std::weak_ptr<ContextVK>& context)
 
 CommandQueueVK::~CommandQueueVK() = default;
 
-fml::Status CommandQueueVK::Submit(
+absl::Status CommandQueueVK::Submit(
     const std::vector<std::shared_ptr<CommandBuffer>>& buffers,
     const CompletionCallback& completion_callback) {
   if (buffers.empty()) {
-    return fml::Status(fml::StatusCode::kInvalidArgument,
-                       "No command buffers provided.");
+    return absl::Status(absl::StatusCode::kInvalidArgument,
+                        "No command buffers provided.");
   }
   // Success or failure, you only get to submit once.
   fml::ScopedCleanupClosure reset([&]() {
@@ -41,8 +41,8 @@ fml::Status CommandQueueVK::Submit(
   for (const std::shared_ptr<CommandBuffer>& buffer : buffers) {
     CommandBufferVK& command_buffer = CommandBufferVK::Cast(*buffer);
     if (!command_buffer.EndCommandBuffer()) {
-      return fml::Status(fml::StatusCode::kCancelled,
-                         "Failed to end command buffer.");
+      return absl::Status(absl::StatusCode::kCancelled,
+                          "Failed to end command buffer.");
     }
     vk_buffers.push_back(command_buffer.GetCommandBuffer());
     tracked_objects.push_back(std::move(command_buffer.tracked_objects_));
@@ -51,12 +51,13 @@ fml::Status CommandQueueVK::Submit(
   auto context = context_.lock();
   if (!context) {
     VALIDATION_LOG << "Device lost.";
-    return fml::Status(fml::StatusCode::kCancelled, "Device lost.");
+    return absl::Status(absl::StatusCode::kCancelled, "Device lost.");
   }
   auto [fence_result, fence] = context->GetDevice().createFenceUnique({});
   if (fence_result != vk::Result::eSuccess) {
     VALIDATION_LOG << "Failed to create fence: " << vk::to_string(fence_result);
-    return fml::Status(fml::StatusCode::kCancelled, "Failed to create fence.");
+    return absl::Status(absl::StatusCode::kCancelled,
+                        "Failed to create fence.");
   }
 
   // This will be called immediately by FenceWaiterVK::AddFence.
@@ -69,9 +70,9 @@ fml::Status CommandQueueVK::Submit(
       std::string submit_error =
           "Failed to submit command: " + vk::to_string(status);
       VALIDATION_LOG << submit_error;
-      return fml::Status(fml::StatusCode::kCancelled, submit_error);
+      return absl::Status(absl::StatusCode::kCancelled, submit_error);
     }
-    return fml::Status();
+    return absl::OkStatus();
   };
 
   std::shared_ptr<GpuSubmissionTracker> tracker =
@@ -100,7 +101,7 @@ fml::Status CommandQueueVK::Submit(
     return fence_status;
   }
   reset.Release();
-  return fml::Status();
+  return absl::OkStatus();
 }
 
 CommandQueue::SubmitResult CommandQueueVK::SubmitWithReceipt(

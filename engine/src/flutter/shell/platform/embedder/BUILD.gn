@@ -8,6 +8,7 @@ import("//flutter/common/config.gni")
 import("//flutter/impeller/tools/impeller.gni")
 import("//flutter/shell/gpu/gpu.gni")
 import("//flutter/shell/platform/embedder/embedder.gni")
+import("//flutter/testing/symbols/check_forbidden_native_symbols.gni")
 import("//flutter/testing/testing.gni")
 
 declare_args() {
@@ -456,10 +457,12 @@ if (enable_unittests) {
   }
 }
 
+_flutter_engine_output_name = "flutter_engine"
+
 shared_library("flutter_engine_library") {
   visibility = [ ":*" ]
 
-  output_name = "flutter_engine"
+  output_name = _flutter_engine_output_name
 
   ldflags = []
   if (is_mac && !embedder_for_target) {
@@ -473,6 +476,19 @@ shared_library("flutter_engine_library") {
   deps = [ ":embedder" ]
 
   public_configs = [ "//flutter:config" ]
+}
+
+if (is_linux || is_android || is_mac) {
+  check_forbidden_native_symbols("check_native_symbols") {
+    visibility = [ ":*" ]
+    deps = [ ":flutter_engine_library" ]
+    _out_dir = get_label_info(":flutter_engine_library", "root_out_dir")
+    if (is_mac) {
+      library = "$_out_dir/lib$_flutter_engine_output_name.dylib"
+    } else {
+      library = "$_out_dir/lib$_flutter_engine_output_name.so"
+    }
+  }
 }
 
 copy("copy_headers") {
@@ -582,6 +598,9 @@ group("flutter_engine") {
       ":copy_headers",
       ":flutter_engine_library",
     ]
+    if (is_linux || is_android || is_mac) {
+      deps += [ ":check_native_symbols" ]
+    }
 
     # For the Mac, the dylib is packaged in a framework with the appropriate
     # headers.
