@@ -547,7 +547,6 @@ void main() {
           find.byType(RepaintBoundary).first,
           matchesReferenceImage(imageWithCompositing),
         );
-        await tester.pump();
       }
     },
     skip: isBrowser, // due to https://github.com/flutter/flutter/issues/49857
