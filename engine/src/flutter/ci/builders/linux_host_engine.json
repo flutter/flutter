@@ -49,6 +49,7 @@
                 "--bazel"
             ],
             "name": "ci/host_debug",
+            "timeout": 240,
             "description": "Produces debug mode Linux host-side tooling.",
             "ninja": {
                 "config": "ci/host_debug",
@@ -101,6 +102,7 @@
                 "--bazel"
             ],
             "name": "ci/host_release",
+            "timeout": 240,
             "description": "Produces flutter_patched_sdk_product.zip shared by all Flutter release builds.",
             "ninja": {
                 "config": "ci/host_release",
