@@ -1376,6 +1376,9 @@
           "types": {
             "impeller": [
               "//engine/src/flutter/impeller:impeller_unittests"
+            ],
+            "impeller-vulkan-sync-validation": [
+              "//engine/src/flutter/impeller:impeller_vulkan_sync_validation_unittests"
             ]
           },
           "binaries": [],
@@ -1668,35 +1671,6 @@
       },
       {
         "file": "local_engine.json",
-        "name": "linux/android_debug_unopt_arm64",
-        "gn": [
-          "--runtime-mode",
-          "debug",
-          "--unoptimized",
-          "--android",
-          "--android-cpu=arm64",
-          "--no-stripped",
-          "--no-lto",
-          "--rbe",
-          "--no-goma"
-        ],
-        "build_directory": null,
-        "config": "android_debug_unopt_arm64",
-        "unsupported": [],
-        "install": null,
-        "ninja_targets": [],
-        "ninja_targets_not_built": [],
-        "ninja_targets_tested": [],
-        "tests": {
-          "suite": null,
-          "types": {},
-          "binaries": [],
-          "scripts": [],
-          "missing": []
-        }
-      },
-      {
-        "file": "local_engine.json",
         "name": "linux/android_debug_unopt_x64",
         "gn": [
           "--runtime-mode",
@@ -1808,33 +1782,6 @@
       },
       {
         "file": "local_engine.json",
-        "name": "linux/host_debug_unopt",
-        "gn": [
-          "--runtime-mode",
-          "debug",
-          "--unoptimized",
-          "--no-stripped",
-          "--no-lto",
-          "--rbe",
-          "--no-goma"
-        ],
-        "build_directory": null,
-        "config": "host_debug_unopt",
-        "unsupported": [],
-        "install": null,
-        "ninja_targets": [],
-        "ninja_targets_not_built": [],
-        "ninja_targets_tested": [],
-        "tests": {
-          "suite": null,
-          "types": {},
-          "binaries": [],
-          "scripts": [],
-          "missing": []
-        }
-      },
-      {
-        "file": "local_engine.json",
         "name": "linux/host_profile",
         "gn": [
           "--runtime-mode",
@@ -1913,7 +1860,63 @@
         }
       },
       {
-        "file": "local_engine.json",
+        "file": "local_engine_common.json",
+        "name": "linux/android_debug_unopt_arm64",
+        "gn": [
+          "--runtime-mode",
+          "debug",
+          "--unoptimized",
+          "--android",
+          "--android-cpu=arm64",
+          "--no-stripped",
+          "--no-lto",
+          "--rbe",
+          "--no-goma"
+        ],
+        "build_directory": null,
+        "config": "android_debug_unopt_arm64",
+        "unsupported": [],
+        "install": null,
+        "ninja_targets": [],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [],
+        "tests": {
+          "suite": null,
+          "types": {},
+          "binaries": [],
+          "scripts": [],
+          "missing": []
+        }
+      },
+      {
+        "file": "local_engine_common.json",
+        "name": "linux/host_debug_unopt",
+        "gn": [
+          "--runtime-mode",
+          "debug",
+          "--unoptimized",
+          "--no-stripped",
+          "--no-lto",
+          "--rbe",
+          "--no-goma"
+        ],
+        "build_directory": null,
+        "config": "host_debug_unopt",
+        "unsupported": [],
+        "install": null,
+        "ninja_targets": [],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [],
+        "tests": {
+          "suite": null,
+          "types": {},
+          "binaries": [],
+          "scripts": [],
+          "missing": []
+        }
+      },
+      {
+        "file": "local_engine_common.json",
         "name": "linux/wasm_debug_unopt",
         "gn": [
           "--web",
@@ -3859,37 +3862,6 @@
       },
       {
         "file": "local_engine.json",
-        "name": "macos/ios_debug_sim_unopt_arm64",
-        "gn": [
-          "--ios",
-          "--simulator",
-          "--simulator-cpu=arm64",
-          "--runtime-mode",
-          "debug",
-          "--unoptimized",
-          "--no-stripped",
-          "--no-lto",
-          "--xcode-symlinks",
-          "--rbe",
-          "--no-goma"
-        ],
-        "build_directory": null,
-        "config": "ios_debug_sim_unopt_arm64",
-        "unsupported": [],
-        "install": null,
-        "ninja_targets": [],
-        "ninja_targets_not_built": [],
-        "ninja_targets_tested": [],
-        "tests": {
-          "suite": null,
-          "types": {},
-          "binaries": [],
-          "scripts": [],
-          "missing": []
-        }
-      },
-      {
-        "file": "local_engine.json",
         "name": "macos/android_debug_arm64",
         "gn": [
           "--runtime-mode",
@@ -4064,34 +4036,6 @@
       },
       {
         "file": "local_engine.json",
-        "name": "macos/host_debug_unopt_arm64",
-        "gn": [
-          "--runtime-mode",
-          "debug",
-          "--unopt",
-          "--mac-cpu",
-          "arm64",
-          "--xcode-symlinks",
-          "--rbe",
-          "--no-goma"
-        ],
-        "build_directory": null,
-        "config": "host_debug_unopt_arm64",
-        "unsupported": [],
-        "install": null,
-        "ninja_targets": [],
-        "ninja_targets_not_built": [],
-        "ninja_targets_tested": [],
-        "tests": {
-          "suite": null,
-          "types": {},
-          "binaries": [],
-          "scripts": [],
-          "missing": []
-        }
-      },
-      {
-        "file": "local_engine.json",
         "name": "macos/host_profile_arm64",
         "gn": [
           "--runtime-mode",
@@ -4243,6 +4187,65 @@
         "ninja_targets": [
           "flutter/web_sdk:flutter_web_sdk_archive"
         ],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [],
+        "tests": {
+          "suite": null,
+          "types": {},
+          "binaries": [],
+          "scripts": [],
+          "missing": []
+        }
+      },
+      {
+        "file": "local_engine_common.json",
+        "name": "macos/ios_debug_sim_unopt_arm64",
+        "gn": [
+          "--ios",
+          "--simulator",
+          "--simulator-cpu=arm64",
+          "--runtime-mode",
+          "debug",
+          "--unoptimized",
+          "--no-stripped",
+          "--no-lto",
+          "--xcode-symlinks",
+          "--rbe",
+          "--no-goma"
+        ],
+        "build_directory": null,
+        "config": "ios_debug_sim_unopt_arm64",
+        "unsupported": [],
+        "install": null,
+        "ninja_targets": [],
+        "ninja_targets_not_built": [],
+        "ninja_targets_tested": [],
+        "tests": {
+          "suite": null,
+          "types": {},
+          "binaries": [],
+          "scripts": [],
+          "missing": []
+        }
+      },
+      {
+        "file": "local_engine_common.json",
+        "name": "macos/host_debug_unopt_arm64",
+        "gn": [
+          "--runtime-mode",
+          "debug",
+          "--unopt",
+          "--mac-cpu",
+          "arm64",
+          "--xcode-symlinks",
+          "--rbe",
+          "--no-goma"
+        ],
+        "build_directory": null,
+        "config": "host_debug_unopt_arm64",
+        "unsupported": [],
+        "install": null,
+        "ninja_targets": [],
         "ninja_targets_not_built": [],
         "ninja_targets_tested": [],
         "tests": {

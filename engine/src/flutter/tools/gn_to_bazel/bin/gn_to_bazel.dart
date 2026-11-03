@@ -209,7 +209,7 @@ Future<int> run(List<String> arguments) async {
         evaluation,
         gnPackage: gnPackage,
         skipTargets: skip,
-        appendix: manifest?.appendix,
+        appendix: manifest?.appendix ?? manifest?.appendixFrom?.call(tree),
         layout: layout,
         implicitDeps: manifest?.implicitDeps ?? const <String>[],
         tree: tree,

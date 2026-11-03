@@ -755,11 +755,14 @@ install(
     }),
 )
 
-# ci/host_debug_unopt_impeller_tests's tests: run_tests.py --type impeller.
+# ci/host_debug_unopt_impeller_tests's tests: run_tests.py --type impeller,impeller-vulkan-sync-validation.
 test_suite(
     name = "host_debug_unopt_impeller_tests_tests",
     tags = ["manual"],
-    tests = ["//engine/src/flutter/impeller:impeller_unittests"],
+    tests = [
+        "//engine/src/flutter/impeller:impeller_unittests",
+        "//engine/src/flutter/impeller:impeller_vulkan_sync_validation_unittests",
+    ],
 )
 
 # linux_unopt.json: ci/android_embedder_debug_unopt
@@ -892,9 +895,6 @@ install(
 # local_engine.json: linux/android_debug_riscv64
 #   ninja's default target, everything: bazel build --config=android_debug_riscv64 //engine/src/flutter:local_engine
 
-# local_engine.json: linux/android_debug_unopt_arm64
-#   ninja's default target, everything: bazel build --config=android_debug_unopt_arm64 //engine/src/flutter:local_engine
-
 # local_engine.json: linux/android_debug_unopt_x64
 #   ninja's default target, everything: bazel build --config=android_debug_unopt_x64 //engine/src/flutter:local_engine
 
@@ -907,9 +907,6 @@ install(
 # local_engine.json: linux/host_debug
 #   ninja's default target, everything: bazel build --config=host_debug //engine/src/flutter:local_engine
 
-# local_engine.json: linux/host_debug_unopt
-#   ninja's default target, everything: bazel build --config=host_debug_unopt //engine/src/flutter:local_engine
-
 # local_engine.json: linux/host_profile
 #   ninja's default target, everything: bazel build --config=host_profile //engine/src/flutter:local_engine
 
@@ -920,7 +917,13 @@ install(
 #   bazel run --config=wasm_release :wasm_release
 # The same install as linux_web_engine_build.json's ci/wasm_release, above.
 
-# local_engine.json: linux/wasm_debug_unopt
+# local_engine_common.json: linux/android_debug_unopt_arm64
+#   ninja's default target, everything: bazel build --config=android_debug_unopt_arm64 //engine/src/flutter:local_engine
+
+# local_engine_common.json: linux/host_debug_unopt
+#   ninja's default target, everything: bazel build --config=host_debug_unopt //engine/src/flutter:local_engine
+
+# local_engine_common.json: linux/wasm_debug_unopt
 #   bazel run --config=wasm_debug_unopt :wasm_debug_unopt
 install(
     name = "wasm_debug_unopt",
@@ -1731,9 +1734,6 @@ test_suite(
 # local_engine.json: macos/ios_debug_sim
 #   ninja's default target, everything: bazel build --config=ios_debug_sim //engine/src/flutter:local_engine
 
-# local_engine.json: macos/ios_debug_sim_unopt_arm64
-#   ninja's default target, everything: bazel build --config=ios_debug_sim_unopt_arm64 //engine/src/flutter:local_engine
-
 # local_engine.json: macos/android_debug_arm64
 #   ninja's default target, everything: bazel build --config=android_debug_arm64 //engine/src/flutter:local_engine
 
@@ -1751,9 +1751,6 @@ test_suite(
 
 # local_engine.json: macos/host_debug
 #   ninja's default target, everything: bazel build --config=mac_host_debug //engine/src/flutter:local_engine
-
-# local_engine.json: macos/host_debug_unopt_arm64
-#   ninja's default target, everything: bazel build --config=host_debug_unopt_arm64 //engine/src/flutter:local_engine
 
 # local_engine.json: macos/host_profile_arm64
 #   ninja's default target, everything: bazel build --config=host_profile_arm64 //engine/src/flutter:local_engine
@@ -1773,4 +1770,10 @@ test_suite(
 
 # local_engine.json: macos/wasm_debug_unopt
 #   bazel run --config=wasm_debug_unopt :wasm_debug_unopt
-# The same install as local_engine.json's linux/wasm_debug_unopt, above.
+# The same install as local_engine_common.json's linux/wasm_debug_unopt, above.
+
+# local_engine_common.json: macos/ios_debug_sim_unopt_arm64
+#   ninja's default target, everything: bazel build --config=ios_debug_sim_unopt_arm64 //engine/src/flutter:local_engine
+
+# local_engine_common.json: macos/host_debug_unopt_arm64
+#   ninja's default target, everything: bazel build --config=host_debug_unopt_arm64 //engine/src/flutter:local_engine
