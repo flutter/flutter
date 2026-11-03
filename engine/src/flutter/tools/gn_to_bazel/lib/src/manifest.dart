@@ -14,8 +14,10 @@
 library;
 
 import 'bazel_mapping.dart';
+import 'gn_ast.dart';
 import 'gn_eval.dart';
 import 'mirrored_lists.dart';
+import 'run_tests_lists.dart';
 
 /// A manifest's file condition ([ConvertedFile.condition]) as a
 /// [Condition]: always for null, the variable, or the disjunction of the
@@ -35,6 +37,7 @@ final class ConvertedFile {
     this.gnPackage, {
     this.skip = const <String, String>{},
     this.appendix,
+    this.appendixFrom,
     this.implicitDeps = const <String>[],
     this.condition,
     this.unconvertedDeps = const <String>[],
@@ -58,6 +61,11 @@ final class ConvertedFile {
   /// Starlark appended verbatim to the generated file: what the GN file has
   /// no way to express.
   final String? appendix;
+
+  /// An appendix computed from the source tree when the file is generated
+  /// (a list another file of the checkout keeps, say: run_tests_lists.dart),
+  /// for a file with no literal [appendix].
+  final String Function(GnSourceTree tree)? appendixFrom;
 
   /// Bazel labels added to the `deps` of every target of the file that
   /// compiles something: what GN leaves implicit. GN does not track the
@@ -1539,6 +1547,9 @@ ios_xctest(
     // assumes the flag for GLFW's sake) are the suites' data here
     // (gpuBackendTests): the file keeps the argument's empty default.
     assume: <String, GnValue>{'glfw_vulkan_library': GnStringValue('')},
+    // run_tests.py's Vulkan synchronization validation run of the suite,
+    // with the script's own list of tests (run_tests_lists.dart).
+    appendixFrom: impellerAppendix,
   ),
   // The per-component suites (base_unittests, geometry_unittests, ...) are
   // source_sets GN links into the one impeller_unittests binary above, and
