@@ -112,48 +112,56 @@ Future<bool> setInstallNamesDylib(
   required ProcessUtils processUtils,
   bool keepInstallNameIfItDoesNotFit = false,
 }) async {
-  final changeDependencies = <String>[
+  final RunResult setInstallNamesResult = await _runInstallNameTool(
+    dylibFile,
+    oldToNewInstallNames,
+    newInstallName: newInstallName,
+    processUtils: processUtils,
+  );
+  if (setInstallNamesResult.exitCode == 0) {
+    return true;
+  }
+  RunResult? changeDependenciesResult;
+  if (keepInstallNameIfItDoesNotFit &&
+      setInstallNamesResult.stderr.contains(_loadCommandsDoNotFit)) {
+    changeDependenciesResult = await _runInstallNameTool(
+      dylibFile,
+      oldToNewInstallNames,
+      processUtils: processUtils,
+    );
+    if (changeDependenciesResult.exitCode == 0) {
+      return false;
+    }
+  }
+  throwToolExit(
+    'Failed to change install names in $dylibFile'
+    '${changeDependenciesResult == null ? '' : ', also after keeping its install name'}:\n'
+    'id -> $newInstallName\n'
+    'dependencies -> $newInstallName\n'
+    '${setInstallNamesResult.stderr}'
+    '${changeDependenciesResult == null ? '' : '\n${changeDependenciesResult.stderr}'}',
+  );
+}
+
+/// Runs `install_name_tool` on [dylibFile] with a `-change` for each entry of
+/// [oldToNewInstallNames], and with `-id` when [newInstallName] is given.
+Future<RunResult> _runInstallNameTool(
+  File dylibFile,
+  Map<String, String> oldToNewInstallNames, {
+  required ProcessUtils processUtils,
+  String? newInstallName,
+}) {
+  return processUtils.run(<String>[
+    'xcrun',
+    'install_name_tool',
+    if (newInstallName != null) ...<String>['-id', newInstallName],
     for (final MapEntry<String, String> entry in oldToNewInstallNames.entries) ...<String>[
       '-change',
       entry.key,
       entry.value,
     ],
-  ];
-  final RunResult setInstallNamesResult = await processUtils.run(<String>[
-    'xcrun',
-    'install_name_tool',
-    '-id',
-    newInstallName,
-    ...changeDependencies,
     dylibFile.path,
   ]);
-  if (setInstallNamesResult.exitCode == 0) {
-    return true;
-  }
-  if (keepInstallNameIfItDoesNotFit &&
-      setInstallNamesResult.stderr.contains(_loadCommandsDoNotFit)) {
-    final RunResult changeDependenciesResult = await processUtils.run(<String>[
-      'xcrun',
-      'install_name_tool',
-      ...changeDependencies,
-      dylibFile.path,
-    ]);
-    if (changeDependenciesResult.exitCode == 0) {
-      return false;
-    }
-    throwToolExit(
-      'Failed to change install names in $dylibFile, also after keeping its '
-      'install name because $newInstallName did not fit:\n'
-      '${setInstallNamesResult.stderr}\n'
-      '${changeDependenciesResult.stderr}',
-    );
-  }
-  throwToolExit(
-    'Failed to change install names in $dylibFile:\n'
-    'id -> $newInstallName\n'
-    'dependencies -> $newInstallName\n'
-    '${setInstallNamesResult.stderr}',
-  );
 }
 
 /// What `install_name_tool` prints when a dylib's header has no room for the
