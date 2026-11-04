@@ -35,12 +35,19 @@ import subprocess
 import sys
 
 # The flags of a build that say where it runs rather than what it builds:
-# the recipe appends `--no-goma --no-rbe` to an official build's; `--bazel`
-# is this mode's own, and so are `--bazel-rbe` and `--no-bazel-rbe` (RBE_FLAGS:
-# whether the Bazel build's actions run on Flutter's RBE instance, rbe_options).
-# They are left out when a flag list is matched against the builder files'.
+# the recipe appends `--no-goma --no-rbe` to an official build's;
+# `--xcode-symlinks` is how a Mac build under reclient reaches Xcode (the
+# Mac builder files carry it in presubmit and not in their
+# postsubmit_overrides, which otherwise name the same build); `--bazel` is
+# this mode's own, and so are `--bazel-rbe` and `--no-bazel-rbe` (RBE_FLAGS:
+# whether the Bazel build's actions run on Flutter's RBE instance,
+# rbe_options). They are left out when a flag list is matched against the
+# builder files'.
 RBE_FLAGS = {'--bazel-rbe': True, '--no-bazel-rbe': False}
-INFRA_FLAGS = frozenset(['--bazel', '--rbe', '--no-rbe', '--goma', '--no-goma', *RBE_FLAGS])
+INFRA_FLAGS = frozenset([
+    '--bazel', '--rbe', '--no-rbe', '--goma', '--no-goma', '--xcode-symlinks',
+    '--no-xcode-symlinks', *RBE_FLAGS
+])
 
 # The value flags of the same kind: the recipe appends reproxy's address
 # (`--rbe-server-address=unix://...`) to a build with --rbe.
