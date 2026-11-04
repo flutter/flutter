@@ -228,29 +228,20 @@
           "parameters": [
             "test",
             "--copy-artifacts",
-            "--suite=chrome-dart2js-canvaskit-ui",
-            "--suite=chrome-full-dart2js-canvaskit-ui",
+            "--suite=chrome-dart2js-webparagraph-ui",
             "--suite=chrome-dart2js-canvaskit-canvaskit",
+            "--suite=chrome-dart2js-canvaskit-ui",
             "--suite=chrome-full-dart2js-canvaskit-canvaskit",
-            "--suite=chrome-dart2js-webparagraph-ui"
-          ],
-          "script": "flutter/lib/web_ui/dev/felt"
-        },
-        {
-          "name": "run suite chrome-dart2js-canvaskit-ui",
-          "parameters": [
-            "test",
-            "--run",
-            "--suite=chrome-dart2js-canvaskit-ui"
-          ],
-          "script": "flutter/lib/web_ui/dev/felt"
-        },
-        {
-          "name": "run suite chrome-full-dart2js-canvaskit-ui",
-          "parameters": [
-            "test",
-            "--run",
             "--suite=chrome-full-dart2js-canvaskit-ui"
+          ],
+          "script": "flutter/lib/web_ui/dev/felt"
+        },
+        {
+          "name": "run suite chrome-dart2js-webparagraph-ui",
+          "parameters": [
+            "test",
+            "--run",
+            "--suite=chrome-dart2js-webparagraph-ui"
           ],
           "script": "flutter/lib/web_ui/dev/felt"
         },
@@ -264,6 +255,15 @@
           "script": "flutter/lib/web_ui/dev/felt"
         },
         {
+          "name": "run suite chrome-dart2js-canvaskit-ui",
+          "parameters": [
+            "test",
+            "--run",
+            "--suite=chrome-dart2js-canvaskit-ui"
+          ],
+          "script": "flutter/lib/web_ui/dev/felt"
+        },
+        {
           "name": "run suite chrome-full-dart2js-canvaskit-canvaskit",
           "parameters": [
             "test",
@@ -273,11 +273,11 @@
           "script": "flutter/lib/web_ui/dev/felt"
         },
         {
-          "name": "run suite chrome-dart2js-webparagraph-ui",
+          "name": "run suite chrome-full-dart2js-canvaskit-ui",
           "parameters": [
             "test",
             "--run",
-            "--suite=chrome-dart2js-webparagraph-ui"
+            "--suite=chrome-full-dart2js-canvaskit-ui"
           ],
           "script": "flutter/lib/web_ui/dev/felt"
         }
@@ -369,10 +369,10 @@
         "download_android_deps": false
       },
       "dependencies": [
-        "web_tests/test_bundles/dart2wasm-skwasm-ui",
-        "web_tests/test_bundles/dart2wasm-skwasm-skwasm",
         "web_tests/test_bundles/dart2js-canvaskit-engine",
         "web_tests/test_bundles/dart2wasm-canvaskit-engine",
+        "web_tests/test_bundles/dart2wasm-skwasm-ui",
+        "web_tests/test_bundles/dart2wasm-skwasm-skwasm",
         "web_tests/test_bundles/fallbacks"
       ],
       "test_dependencies": [
