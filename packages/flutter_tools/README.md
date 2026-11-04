@@ -45,7 +45,16 @@ To run the analyzer on Flutter Tools, in this directory run:
 $ flutter analyze
 ```
 
+### Changing dependencies
+
+After editing `pubspec.yaml`, run `flutter update-packages` from the
+repository root. See [Adding dependencies to the Flutter Tool](../../docs/tool/README.md#adding-dependencies-to-the-flutter-tool)
+for the policy on new packages.
+
 ### Code conventions
+
+These apply to new code. Existing code does not follow all of them. If a
+change needs an exception, say why in a comment at the site.
 
 #### Dependency injection
 
@@ -61,8 +70,21 @@ $ flutter analyze
 
 #### Host I/O
 
-- Do not import `dart:io`. Import `package:flutter_tools/src/base/io.dart`,
-  which exports the subset of `dart:io` that can be faked in tests.
+- Some imports are banned in favor of a wrapper that can be faked in
+  tests. `test/integration.shard/forbidden_imports_test.dart` enforces
+  the list:
+
+  | Instead of                 | Use                            |
+  | -------------------------- | ------------------------------ |
+  | `dart:io`                  | `lib/src/base/io.dart`         |
+  | `dart:convert`             | `lib/src/convert.dart`         |
+  | `package:path`             | `fileSystem.path`              |
+  | `package:file/local.dart`  | `lib/src/base/file_system.dart` |
+  | `package:http`             | `lib/src/base/io.dart`         |
+
+  A file that has to use the raw import marks the line with
+  `// flutter_ignore: dart_io_import` (or `dart_convert_import`,
+  `package_path_import`, `package_http_import`).
 - Build paths with `fileSystem.path.join(...)`, not string concatenation.
   Concatenated paths break on Windows.
 - Use `ErrorHandlingFileSystem.deleteIfExists(entity)` instead of
@@ -92,9 +114,11 @@ $ flutter analyze
 - Use `logger.startProgress(...)` or `logger.startSpinner(...)` for
   long-running work. `startSpinner` has a `slowWarningCallback`, so a
   separate timer is not needed.
-- Under `--machine` (used by `flutter daemon` and IDEs), stdout must be
-  valid JSON. Human-readable text goes to stderr or behind a `!machine`
-  check.
+- Write output through the injected `Logger`, not `print` or
+  `stdio.stdoutWrite`. Under `--machine` (used by `flutter daemon` and
+  IDEs) the logger is replaced with one that turns each message into a
+  JSON event, and anything written to stdout directly corrupts that
+  stream.
 - When a PR adds or changes an error or warning, include the CLI output
   in the PR description.
 
@@ -173,17 +197,25 @@ subprocesses. Use the fakes in `test/src/`:
   `FakeProcessManager.empty()` for subprocesses. Do not write a separate
   `ProcessManager` fake. After the code under test runs, check
   `expect(processManager, hasNoRemainingExpectations)` to catch an early
-  exit.
+  exit. Inject a `ProcessManager`, not a `ProcessUtils`;
+  `testUsingContext` fails if `ProcessUtils` is overridden.
 - `BufferLogger.test()` for the logger. Assert on `logger.statusText`,
   `logger.errorText`, `logger.warningText`, or `logger.traceText`.
 - `FakePlatform(operatingSystem: ..., environment: ...)` for the
   platform.
+- `FakeAsync` from `package:fake_async` for code that uses timers or
+  `Future.delayed`, so the test does not wait in real time.
 - `getInitializedFakeAnalyticsInstance(...)` for analytics when the code
   under test reports events.
 - `throwsToolExit(message: ...)` to assert user-facing failures.
 - `package:file_testing` matchers (`exists`, `isNot(exists)`) for file
   assertions.
 - `printOnFailure` instead of `print` for diagnostic output.
+
+Test file names end in `_test.dart`; the test runner skips other names.
+`dev/bots/analyze.dart` fails if a file in a `*.shard/` directory calls
+`test`, `testUsingContext`, or `testWithoutContext` and does not have
+that suffix.
 
 A test that needs the real file system, a real subprocess, or more than
 two seconds belongs in `integration.shard`.
