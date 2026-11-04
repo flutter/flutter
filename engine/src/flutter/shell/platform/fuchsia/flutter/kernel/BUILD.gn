@@ -30,6 +30,7 @@ generated_file("vm_isolate_snapshot") {
   contents = ""
   outputs = [ "$target_gen_dir/vm_isolate_snapshot.bin" ]
 }
+
 generated_file("vm_isolate_snapshot_product") {
   contents = ""
   outputs = [ "$target_gen_dir/vm_isolate_snapshot_product.bin" ]

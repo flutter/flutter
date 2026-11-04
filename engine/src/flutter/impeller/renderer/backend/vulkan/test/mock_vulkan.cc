@@ -55,7 +55,7 @@ struct MockSurfaceKHR {};
 struct MockImage {};
 
 struct MockSwapchainKHR {
-  std::array<MockImage, 3> images;
+  std::array<MockImage, 3> images{};
   size_t current_image = 0;
 };
 

@@ -8,16 +8,15 @@ import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
 import 'application_package.dart';
-import 'base/file_system.dart';
+import 'base/bot_detector.dart';
 import 'base/io.dart';
 import 'base/logger.dart';
-import 'base/os.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
+import 'context/tool_context.dart';
 import 'devfs.dart';
 import 'device.dart';
 import 'device_port_forwarder.dart';
-import 'globals.dart' as globals;
 import 'macos/macos_device.dart';
 import 'protocol_discovery.dart';
 import 'vmservice.dart';
@@ -29,12 +28,8 @@ abstract class DesktopDevice extends Device {
     super.id, {
     required PlatformType super.platformType,
     required super.ephemeral,
-    required super.logger,
-    required this._processManager,
-    required this._fileSystem,
-    required this._operatingSystemUtils,
-  }) : _logger = logger,
-       super(category: Category.desktop);
+    required ToolContext super.toolContext,
+  }) : super(category: Category.desktop, logger: toolContext.logger);
 
   /// How long [dispose] waits for tracked processes to report their exit, since a
   /// crashed app's exit can arrive after the VM service disconnect that
@@ -42,17 +37,13 @@ abstract class DesktopDevice extends Device {
   @visibleForTesting
   static const kExitReportGracePeriod = Duration(milliseconds: 500);
 
-  final Logger _logger;
-  final ProcessManager _processManager;
-  final FileSystem _fileSystem;
-  final OperatingSystemUtils _operatingSystemUtils;
   final _runningProcesses = <Process>{};
   final _pendingExitChecks = <Future<void>>{};
   final _deviceLogReader = DesktopLogReader();
 
   @override
   DevFSWriter createDevFSWriter(ApplicationPackage? app, String? userIdentifier) {
-    return LocalDevFSWriter(fileSystem: _fileSystem);
+    return LocalDevFSWriter(fileSystem: toolContext.fs);
   }
 
   // Since the host and target devices are the same, no work needs to be done
@@ -85,7 +76,7 @@ abstract class DesktopDevice extends Device {
   DevicePortForwarder get portForwarder => const NoOpDevicePortForwarder();
 
   @override
-  Future<String> get sdkNameAndVersion async => _operatingSystemUtils.name;
+  Future<String> get sdkNameAndVersion async => toolContext.os.name;
 
   @override
   bool supportsRuntimeMode(BuildMode buildMode) => buildMode != BuildMode.jitRelease;
@@ -105,10 +96,12 @@ abstract class DesktopDevice extends Device {
     String? mainPath,
     String? route,
     required DebuggingOptions debuggingOptions,
-    Map<String, dynamic> platformArgs = const <String, dynamic>{},
+    Map<String, Object?> platformArgs = const <String, Object>{},
     bool prebuiltApplication = false,
     String? userIdentifier,
   }) async {
+    final ToolContext(:BotDetector botDetector, :Logger logger, :ProcessManager processManager) =
+        toolContext;
     if (!prebuiltApplication) {
       await buildForDevice(
         buildInfo: debuggingOptions.buildInfo,
@@ -122,19 +115,19 @@ abstract class DesktopDevice extends Device {
     final bool traceStartup = platformArgs['trace-startup'] as bool? ?? false;
     final String? executable = executablePathForDevice(package, buildInfo);
     if (executable == null) {
-      _logger.printError('Unable to find executable to run');
+      logger.printError('Unable to find executable to run');
       return LaunchResult.failed();
     }
 
     Process process;
     final command = <String>[executable, ...debuggingOptions.dartEntrypointArgs];
     try {
-      process = await _processManager.start(
+      process = await processManager.start(
         command,
         environment: _computeEnvironment(debuggingOptions, traceStartup, route),
       );
     } on ProcessException catch (e) {
-      _logger.printError('Unable to start executable "${command.join(' ')}": $e');
+      logger.printError('Unable to start executable "${command.join(' ')}": $e');
       rethrow;
     }
     _runningProcesses.add(process);
@@ -158,12 +151,12 @@ abstract class DesktopDevice extends Device {
       devicePort: debuggingOptions.deviceVmServicePort,
       hostPort: debuggingOptions.hostVmServicePort,
       ipv6: debuggingOptions.ipv6,
-      logger: _logger,
+      logger: logger,
     );
     try {
       Timer? timer;
       if (this is MacOSDevice) {
-        if (await globals.isRunningOnBot) {
+        if (await botDetector.isRunningOnBot) {
           const defaultTimeout = 5;
           timer = Timer(const Duration(minutes: defaultTimeout), () {
             // As of macOS 14, if sandboxing is enabled and the app is not codesigned,
@@ -182,7 +175,7 @@ abstract class DesktopDevice extends Device {
                   'sandboxing. Flutter will attempt to disable sandboxing if '
                   'the `--ci` flag is provided.';
             }
-            _logger.printError(
+            logger.printError(
               'The Dart VM Service was not discovered after $defaultTimeout '
               'minutes. If the app has sandboxing enabled and is not '
               'codesigned or codesigning changed, this may be caused by a '
@@ -200,12 +193,12 @@ abstract class DesktopDevice extends Device {
         onAttached(package, buildInfo, process);
         return LaunchResult.succeeded(vmServiceUri: vmServiceUri);
       }
-      _logger.printError(
+      logger.printError(
         'Error waiting for a debug connection: '
         'The log reader stopped unexpectedly, or never started.',
       );
     } on Exception catch (error) {
-      _logger.printError('Error waiting for a debug connection: $error');
+      logger.printError('Error waiting for a debug connection: $error');
     } finally {
       await vmServiceDiscovery.cancel();
     }
@@ -214,11 +207,12 @@ abstract class DesktopDevice extends Device {
 
   @override
   Future<bool> stopApp(ApplicationPackage? app, {String? userIdentifier}) async {
+    final ProcessManager processManager = toolContext.processManager;
     var succeeded = true;
     // Walk a copy of _runningProcesses, since the exit handler removes from the
     // set.
     for (final process in Set<Process>.of(_runningProcesses)) {
-      succeeded &= _processManager.killPid(process.pid);
+      succeeded &= processManager.killPid(process.pid);
     }
     return succeeded;
   }
@@ -407,7 +401,7 @@ class DesktopLogReader extends DeviceLogReader {
   String get name => 'desktop';
 
   @override
-  void dispose() {
+  Future<void> dispose() async {
     // Nothing to dispose.
   }
 
@@ -451,9 +445,9 @@ class SingleLaunchLogReader extends DeviceLogReader {
   String get name => 'desktop (single launch)';
 
   @override
-  void dispose() {
-    unawaited(_subscription.cancel());
-    unawaited(_controller.close());
+  Future<void> dispose() async {
+    await _subscription.cancel();
+    await _controller.close();
   }
 
   @override

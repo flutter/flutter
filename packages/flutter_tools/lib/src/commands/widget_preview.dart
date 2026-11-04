@@ -15,7 +15,6 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
-import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/terminal.dart';
@@ -161,8 +160,11 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
     }
     _analysisServerFactoryOverride = analysisServerFactoryOverride;
     addPubOptions();
-    addMachineOutputFlag(verboseHelp: verbose);
-    addDevToolsOptions(verboseHelp: verbose);
+    argParser.addDescriptors(<OptionDescriptor<Object?>>[
+      CommonOptions.machine,
+      DebuggingOptionDescriptors.enableDevTools,
+      DebuggingOptionDescriptors.devToolsServerAddress(),
+    ], verboseHelp: verbose);
     argParser
       ..addFlag(
         kWebServer,
@@ -245,8 +247,6 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
 
   ShutdownHooks get shutdownHooks => toolContext.shutdownHooks;
 
-  OperatingSystemUtils get os => toolContext.os;
-
   ProcessManager get processManager => toolContext.processManager;
 
   Artifacts get artifacts => toolContext.artifacts;
@@ -278,21 +278,15 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
   );
 
   late final _lspPreviewDetector = LspPreviewDetector(
-    platform: platform,
-    previewAnalytics: previewAnalytics,
-    project: rootProject,
-    logger: logger,
-    fs: fs,
+    dtd: _dtdService,
     onChangeDetected: onChangeDetected,
     onPubspecChangeDetected: _onPubspecChangeDetected,
-    onNonDartFileChangeDetected: _onNonDartFileChangeDetected,
-    shutdownHooks: shutdownHooks,
-    dtd: _dtdService,
-    processManager: processManager,
-    terminal: terminal,
+    previewAnalytics: previewAnalytics,
+    project: rootProject,
     suppressAnalytics: !analytics.okToSend,
+    toolContext: toolContext,
     analysisServerFactory: _analysisServerFactoryOverride,
-    artifacts: artifacts,
+    onNonDartFileChangeDetected: _onNonDartFileChangeDetected,
   );
 
   late final Future<AnalysisServer> Function()? _analysisServerFactoryOverride;
@@ -371,7 +365,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
           organization: 'flutter',
           projectName: kWidgetPreviewScaffoldName,
           titleCaseProjectName: 'Widget Preview Scaffold',
-          flutterRoot: Cache.flutterRoot!,
+          flutterRoot: cache.flutterRoot,
           dartSdkVersionBounds: '^${cache.dartSdkBuild}',
           web: true,
         ),
