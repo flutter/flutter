@@ -302,9 +302,10 @@ the test for real, and so does the command from `engine/src`.
   builds, which only that disk cache can serve, never were hits in it
   until 503: zlib's input tree carried the checkout's `.git`, which every
   sync rewrites, so their action keys changed from task to task
-  (gn_build.py prints its input trees' digests with its timing line, 501,
+  (gn_build.py printed its input trees' digests with its timing line, 501,
   which is how three drones of one presubmit showed the one directory
-  that differed). Sent to a worker as they are
+  that differed; 511 took the diagnostic out again, its cause found and its
+  cost 38 s a wrap). Sent to a worker as they are
   (`--modify_execution_info=GnBuild=-no-remote-exec --remote_timeout=3600`
   on a `--config=rbe` build, plus a `git` stub on the action's PATH, the
   image having none and Dart's `tools/make_version.py` running git whatever
