@@ -888,7 +888,10 @@ DevTools listening on ws://127.0.0.1:12345/devtools/browser/
 
     await expectToolExitLater(
       chromiumLauncher.launch('example_url', skipCheck: true, headless: true),
-      contains('Failed to launch browser.'),
+      allOf(
+        contains('Failed to launch browser.'),
+        contains('https://github.com/flutter/flutter/issues\n'),
+      ),
     );
     expect(logger.errorText, contains('nothing in the std error indicating glibc error'));
   });

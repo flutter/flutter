@@ -104,7 +104,7 @@ platform_properties:
         [
           {"dependency": "android_sdk", "version": "version:37v2"},
           {"dependency": "android_virtual_device", "version": "android_35_google_apis_x64.textpb"},
-          {"dependency": "avd_cipd_version", "version": "build_id:8719362231152674241"},
+          {"dependency": "avd_cipd_version", "version": "build_id:8670032186093418337"},
           {"dependency": "open_jdk", "version": "version:25.0.2"},
           {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
           {"dependency": "cmake", "version": "build_id:8787856497187628321"},
@@ -892,10 +892,7 @@ targets:
           {"dependency": "goldctl", "version": "git_revision:7f66c9b9efb2826e72c61bb2f50cdc20b635dea7"},
           {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
           {"dependency": "cmake", "version": "build_id:8787856497187628321"},
-          {"dependency": "ninja", "version": "version:1.9.0"},
-          {"dependency": "open_jdk", "version": "version:25.0.2"},
-          {"dependency": "android_sdk", "version": "version:37v2"},
-          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
+          {"dependency": "ninja", "version": "version:1.9.0"}
         ]
       shard: framework_tests
       subshard: misc
@@ -3759,15 +3756,6 @@ targets:
         ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: rrect_blur_perf__timeline_summary
 
-  - name: Mac_ios rrect_blur_perf_ios__timeline_summary
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab", "ios", "mac"]
-      task_name: rrect_blur_perf_ios__timeline_summary
-
   - name: Linux_pixel_7pro draw_arcs_all_fill_styles_perf__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -3777,14 +3765,15 @@ targets:
         ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: draw_arcs_all_fill_styles_perf__timeline_summary
 
-  - name: Mac_ios draw_arcs_all_fill_styles_perf_ios__timeline_summary
+  - name: Mac_ios impeller_primitives_perf_suite_ios__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
+    bringup: true
     timeout: 60
     properties:
       tags: >
         ["devicelab", "ios", "mac"]
-      task_name: draw_arcs_all_fill_styles_perf_ios__timeline_summary
+      task_name: impeller_primitives_perf_suite_ios__timeline_summary
 
   - name: Linux_pixel_7pro draw_arcs_all_stroke_styles_perf__timeline_summary
     recipe: devicelab/devicelab_drone
@@ -3794,15 +3783,6 @@ targets:
       tags: >
         ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: draw_arcs_all_stroke_styles_perf__timeline_summary
-
-  - name: Mac_ios draw_arcs_all_stroke_styles_perf_ios__timeline_summary
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab", "ios", "mac"]
-      task_name: draw_arcs_all_stroke_styles_perf_ios__timeline_summary
 
   # Uses Impeller.
   - name: Linux_pixel_7pro animated_blur_backdrop_filter_perf_opengles__timeline_summary
@@ -3833,60 +3813,6 @@ targets:
       tags: >
         ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: draw_vertices_perf__timeline_summary
-
-  - name: Mac_ios draw_vertices_perf_ios__timeline_summary
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab", "ios", "mac"]
-      task_name: draw_vertices_perf_ios__timeline_summary
-
-  - name: Mac_ios draw_atlas_perf_ios__timeline_summary
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab", "ios", "mac"]
-      task_name: draw_atlas_perf_ios__timeline_summary
-
-  - name: Mac_ios static_path_tessellation_perf_ios__timeline_summary
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab", "ios", "mac"]
-      task_name: static_path_tessellation_perf_ios__timeline_summary
-
-  - name: Mac_ios dynamic_path_tessellation_perf_ios__timeline_summary
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab", "ios", "mac"]
-      task_name: dynamic_path_tessellation_perf_ios__timeline_summary
-
-  - name: Mac_ios static_path_stroke_tessellation_perf_ios__timeline_summary
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab", "ios", "mac"]
-      task_name: static_path_stroke_tessellation_perf_ios__timeline_summary
-
-  - name: Mac_ios dynamic_path_stroke_tessellation_perf_ios__timeline_summary
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab", "ios", "mac"]
-      task_name: dynamic_path_stroke_tessellation_perf_ios__timeline_summary
 
   - name: Mac_benchmark animated_complex_opacity_perf_macos__e2e_summary
     presubmit: false
@@ -4367,10 +4293,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "goldctl", "version": "git_revision:7f66c9b9efb2826e72c61bb2f50cdc20b635dea7"},
-          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
-          {"dependency": "open_jdk", "version": "version:25.0.2"},
-          {"dependency": "android_sdk", "version": "version:37v2"},
-          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
+          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
         ]
       shard: framework_tests
       subshard: misc
@@ -6029,15 +5952,6 @@ targets:
         ["devicelab", "ios", "mac"]
       task_name: animated_blur_backdrop_filter_perf_ios__timeline_summary
 
-  - name: Mac_ios draw_points_perf_ios__timeline_summary
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab", "ios", "mac"]
-      task_name: draw_points_perf_ios__timeline_summary
-
   - name: Mac_ios spell_check_test
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -6433,10 +6347,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "goldctl", "version": "git_revision:7f66c9b9efb2826e72c61bb2f50cdc20b635dea7"},
-          {"dependency": "vs_build", "version": "version:vs2019"},
-          {"dependency": "open_jdk", "version": "version:25.0.2"},
-          {"dependency": "android_sdk", "version": "version:37v2"},
-          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
+          {"dependency": "vs_build", "version": "version:vs2019"}
         ]
       shard: framework_tests
       subshard: misc
@@ -6466,10 +6377,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "goldctl", "version": "git_revision:7f66c9b9efb2826e72c61bb2f50cdc20b635dea7"},
-          {"dependency": "vs_build", "version": "version:vs2019"},
-          {"dependency": "open_jdk", "version": "version:25.0.2"},
-          {"dependency": "android_sdk", "version": "version:37v2"},
-          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
+          {"dependency": "vs_build", "version": "version:vs2019"}
         ]
       shard: framework_tests
       subshard: misc
