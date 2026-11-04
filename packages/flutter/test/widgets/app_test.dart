@@ -452,17 +452,37 @@ void main() {
     testWidgets('WidgetsApp.router router config handles back without an explicit dispatcher '
         '(route information: $provideRouteInformation)', (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/166733.
-      final delegate = SimpleNavigatorRouterDelegate(
-        builder: (BuildContext context, RouteInformation information) {
-          return Text(information.uri.toString());
-        },
-        onPopPage: (Route<void> route, void result, SimpleNavigatorRouterDelegate delegate) {
-          delegate.routeInformation = RouteInformation(uri: Uri.parse('popped'));
-          return route.didPop(result);
-        },
+      var systemPopCount = 0;
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (
+        MethodCall call,
+      ) async {
+        if (call.method == 'SystemNavigator.pop') {
+          systemPopCount += 1;
+        }
+        return null;
+      });
+      final navigatorKey = GlobalKey<NavigatorState>();
+      var showInitialPage = true;
+      late final _TestRouterDelegate delegate;
+      delegate = _TestRouterDelegate(
+        builder: (BuildContext context, RouteInformation? information) => Navigator(
+          key: navigatorKey,
+          pages: <Page<void>>[
+            const TestPage<void>(child: Text('popped')),
+            if (showInitialPage)
+              TestPage<void>(
+                key: const ValueKey<String>('initial'),
+                child: Text(information?.uri.toString() ?? 'initial'),
+              ),
+          ],
+          onDidRemovePage: (Page<Object?> page) {
+            showInitialPage = false;
+            delegate.notifyListeners();
+          },
+        ),
+        onPopRoute: () => navigatorKey.currentState!.maybePop(),
       );
       addTearDown(delegate.dispose);
-      delegate.routeInformation = RouteInformation(uri: Uri.parse('initial'));
       final PlatformRouteInformationProvider? provider = provideRouteInformation
           ? PlatformRouteInformationProvider(
               initialRouteInformation: RouteInformation(uri: Uri.parse('initial')),
@@ -472,15 +492,26 @@ void main() {
         addTearDown(provider.dispose);
       }
 
-      await tester.pumpWidget(
-        WidgetsApp.router(
+      Widget buildApp() {
+        return WidgetsApp.router(
           routerConfig: RouterConfig<RouteInformation>(
             routerDelegate: delegate,
             routeInformationProvider: provider,
             routeInformationParser: provideRouteInformation ? SimpleRouteInformationParser() : null,
           ),
           color: const Color(0xFF123456),
-        ),
+        );
+      }
+
+      await tester.pumpWidget(buildApp());
+      final BackButtonDispatcher? defaultDispatcher = tester
+          .widget<Router<Object>>(find.byType(Router<Object>))
+          .backButtonDispatcher;
+      expect(defaultDispatcher, isA<RootBackButtonDispatcher>());
+      await tester.pumpWidget(buildApp());
+      expect(
+        tester.widget<Router<Object>>(find.byType(Router<Object>)).backButtonDispatcher,
+        same(defaultDispatcher),
       );
       expect(find.text('initial'), findsOneWidget);
 
@@ -494,6 +525,12 @@ void main() {
       );
       await tester.pumpAndSettle();
       expect(find.text('popped'), findsOneWidget);
+      expect(find.text('initial'), findsNothing);
+      expect(systemPopCount, 0);
+
+      await tester.binding.handlePopRoute();
+      await tester.pumpAndSettle();
+      expect(systemPopCount, 1);
     });
   }
 
@@ -618,6 +655,131 @@ void main() {
     await tester.pumpWidget(const SizedBox.shrink());
     expect(defaultDispatcher.hasCallbacks, isFalse);
     expect(explicitDispatcher.hasCallbacks, isFalse);
+  });
+
+  for (final changeCallback in <bool>[false, true]) {
+    testWidgets('WidgetsApp.router swaps dispatchers with a BackButtonListener '
+        '(change callback: $changeCallback)', (WidgetTester tester) async {
+      final calls = <String>[];
+      Future<bool> record(String name) {
+        calls.add(name);
+        return SynchronousFuture<bool>(false);
+      }
+
+      ValueGetter<Future<bool>> callback = () => record('listener');
+      final delegate = _TestRouterDelegate(
+        builder: (BuildContext context, RouteInformation? information) {
+          return BackButtonListener(onBackButtonPressed: callback, child: const SizedBox.shrink());
+        },
+        onPopRoute: () => record('router'),
+      );
+      addTearDown(delegate.dispose);
+      final explicitDispatcher = RootBackButtonDispatcher();
+      final configDispatcher = RootBackButtonDispatcher();
+      BackButtonDispatcher? previousDispatcher;
+      Future<BackButtonDispatcher> switchTo(
+        String name, {
+        BackButtonDispatcher? dispatcher,
+        bool useConfig = true,
+      }) async {
+        if (changeCallback) {
+          callback = () => record(name);
+        }
+        await tester.pumpWidget(
+          useConfig
+              ? WidgetsApp.router(
+                  routerConfig: RouterConfig<RouteInformation>(
+                    routerDelegate: delegate,
+                    backButtonDispatcher: dispatcher,
+                  ),
+                  color: const Color(0xFF123456),
+                )
+              : WidgetsApp.router(
+                  routerDelegate: delegate,
+                  backButtonDispatcher: dispatcher,
+                  color: const Color(0xFF123456),
+                ),
+        );
+        final BackButtonDispatcher current = tester
+            .widget<Router<Object>>(find.byType(Router<Object>))
+            .backButtonDispatcher!;
+        if (dispatcher != null) {
+          expect(current, same(dispatcher));
+        }
+        expect(previousDispatcher?.hasCallbacks, isNot(true));
+        previousDispatcher = current;
+        await tester.binding.handlePopRoute();
+        await tester.pump();
+        expect(calls, <String>[if (changeCallback) name else 'listener', 'router']);
+        calls.clear();
+        return current;
+      }
+
+      final BackButtonDispatcher firstDefault = await switchTo('default');
+      final State<StatefulWidget> listenerState = tester.state(find.byType(BackButtonListener));
+      await switchTo('delegates', dispatcher: explicitDispatcher, useConfig: false);
+      await switchTo('config', dispatcher: configDispatcher);
+      expect(await switchTo('default after config'), isNot(same(firstDefault)));
+      await switchTo('config again', dispatcher: configDispatcher);
+      await switchTo('delegates again', dispatcher: explicitDispatcher, useConfig: false);
+      await switchTo('default after delegates');
+      expect(tester.state(find.byType(BackButtonListener)), same(listenerState));
+      await tester.pumpWidget(const SizedBox.shrink());
+      expect(previousDispatcher!.hasCallbacks, isFalse);
+    });
+  }
+
+  testWidgets('WidgetsApp.router unregisters dispatchers with a nested BackButtonListener', (
+    WidgetTester tester,
+  ) async {
+    final calls = <String>[];
+    Future<bool> record(String name) {
+      calls.add(name);
+      return SynchronousFuture<bool>(false);
+    }
+
+    Future<bool> listenerCallback() => record('listener');
+    final innerDelegate = _TestRouterDelegate(
+      builder: (BuildContext context, RouteInformation? information) =>
+          BackButtonListener(onBackButtonPressed: listenerCallback, child: const SizedBox.shrink()),
+      onPopRoute: () => record('inner'),
+    );
+    final outerDelegate = _TestRouterDelegate(
+      builder: (BuildContext context, RouteInformation? information) => Router<RouteInformation>(
+        routerDelegate: innerDelegate,
+        backButtonDispatcher: Router.of(context).backButtonDispatcher!
+            .createChildBackButtonDispatcher(),
+      ),
+      onPopRoute: () => record('outer'),
+    );
+    addTearDown(innerDelegate.dispose);
+    addTearDown(outerDelegate.dispose);
+    Future<RootBackButtonDispatcher> pumpApp([RootBackButtonDispatcher? dispatcher]) async {
+      await tester.pumpWidget(
+        WidgetsApp.router(
+          routerConfig: RouterConfig<RouteInformation>(
+            routerDelegate: outerDelegate,
+            backButtonDispatcher: dispatcher,
+          ),
+          color: const Color(0xFF123456),
+        ),
+      );
+      await tester.binding.handlePopRoute();
+      await tester.pump();
+      expect(calls, <String>['listener', 'inner', 'outer']);
+      calls.clear();
+      return tester.widget<Router<Object>>(find.byType(Router<Object>)).backButtonDispatcher!
+          as RootBackButtonDispatcher;
+    }
+
+    final RootBackButtonDispatcher defaultDispatcher = await pumpApp();
+    final explicitDispatcher = RootBackButtonDispatcher();
+    await pumpApp(explicitDispatcher);
+    expect(defaultDispatcher.hasCallbacks, isFalse);
+    expect(tester.binding.removeObserver(defaultDispatcher), isFalse);
+    await tester.pumpWidget(const SizedBox.shrink());
+    expect(explicitDispatcher.hasCallbacks, isFalse);
+    expect(tester.binding.removeObserver(explicitDispatcher), isFalse);
   });
 
   testWidgets('WidgetsApp.router has correct default', (WidgetTester tester) async {
@@ -1240,6 +1402,26 @@ class SimpleRouteInformationParser extends RouteInformationParser<RouteInformati
   RouteInformation restoreRouteInformation(RouteInformation configuration) {
     return configuration;
   }
+}
+
+class _TestRouterDelegate extends RouterDelegate<RouteInformation> with ChangeNotifier {
+  _TestRouterDelegate({required this.builder, required this.onPopRoute});
+
+  final Widget Function(BuildContext context, RouteInformation? information) builder;
+  final ValueGetter<Future<bool>> onPopRoute;
+  RouteInformation? _routeInformation;
+
+  @override
+  Future<void> setNewRoutePath(RouteInformation configuration) {
+    _routeInformation = configuration;
+    return SynchronousFuture<void>(null);
+  }
+
+  @override
+  Future<bool> popRoute() => onPopRoute();
+
+  @override
+  Widget build(BuildContext context) => builder(context, _routeInformation);
 }
 
 class SimpleNavigatorRouterDelegate extends RouterDelegate<RouteInformation>

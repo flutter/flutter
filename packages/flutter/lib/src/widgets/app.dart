@@ -608,8 +608,9 @@ class WidgetsApp extends StatefulWidget {
   ///
   /// This object will be used by the underlying [Router].
   ///
-  /// If this is not provided, the widgets app will create a
-  /// [RootBackButtonDispatcher] by default.
+  /// If neither this property nor [RouterConfig.backButtonDispatcher] is
+  /// provided, this widget creates and owns a default [RootBackButtonDispatcher].
+  /// A supplied dispatcher remains owned by its creator.
   ///
   /// See also:
   ///
@@ -643,8 +644,10 @@ class WidgetsApp extends StatefulWidget {
   /// [routeInformationParser], [routeInformationProvider], [routerDelegate],
   /// and [backButtonDispatcher], must all be null.
   ///
-  /// If [RouterConfig.backButtonDispatcher] is null, a
-  /// [RootBackButtonDispatcher] is used to handle system back button requests.
+  /// If [RouterConfig.backButtonDispatcher] is null, this widget creates and
+  /// owns a [RootBackButtonDispatcher] to handle system back button requests.
+  /// It stops using the default when a dispatcher is supplied. The supplied
+  /// dispatcher remains owned by its creator.
   ///
   /// See also:
   ///
@@ -1515,6 +1518,8 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
       if (widget.backButtonDispatcher == null &&
           widget.routerConfig?.backButtonDispatcher == null) {
         _defaultBackButtonDispatcher ??= RootBackButtonDispatcher();
+      } else {
+        _defaultBackButtonDispatcher = null;
       }
     } else if (_usesNavigator) {
       assert(!_usesRouterWithDelegates && !_usesRouterWithConfig);
