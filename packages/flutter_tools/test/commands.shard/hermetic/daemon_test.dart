@@ -10,9 +10,9 @@ import 'package:fake_async/fake_async.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_device.dart';
+import 'package:flutter_tools/src/android/android_workflow.dart';
 import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/artifacts.dart';
-import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/base/dds.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/utils.dart';
@@ -21,14 +21,18 @@ import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/commands/daemon.dart';
 import 'package:flutter_tools/src/daemon.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/features.dart';
+import 'package:flutter_tools/src/ios/ios_workflow.dart';
 import 'package:flutter_tools/src/isolated/build_targets.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/vmservice.dart';
+import 'package:flutter_tools/src/windows/windows_workflow.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
+import '../../src/context.dart';
 import '../../src/fake_devices.dart';
 import '../../src/fakes.dart';
 import '../../src/test_build_system.dart';
@@ -79,14 +83,12 @@ void main() {
   group('daemon', () {
     late FakeDaemonStreams daemonStreams;
     late DaemonConnection daemonConnection;
-    late FakeApplicationPackageFactory applicationPackageFactory;
     setUp(() {
       BufferLogger bufferLogger;
       bufferLogger = BufferLogger.test();
       notifyingLogger = NotifyingLogger(verbose: false, parent: bufferLogger);
       daemonStreams = FakeDaemonStreams();
       daemonConnection = DaemonConnection(daemonStreams: daemonStreams, logger: bufferLogger);
-      applicationPackageFactory = FakeApplicationPackageFactory();
     });
 
     tearDown(() async {
@@ -95,19 +97,16 @@ void main() {
       await daemonConnection.dispose();
     });
 
-    test('daemon.version command should succeed', () async {
+    testUsingContext('daemon.version command should succeed', () async {
       daemon = Daemon(
         daemonConnection,
         analytics: const NoOpAnalytics(),
-        applicationPackageFactory: applicationPackageFactory,
-        assetBundleFactory: _FakeAssetBundleFactory(),
         buildSystem: buildSystem,
         buildTargets: buildTargets,
-        devtoolsLauncher: FakeDevtoolsLauncher(),
-        toolContext: FakeToolContext(),
+        toolContext: const DelegatingToolContext(),
         xcode: null,
         notifyingLogger: notifyingLogger,
-        featureFlags: TestFeatureFlags(),
+        featureFlags: featureFlags,
       );
       daemonStreams.inputs.add(
         DaemonMessage(<String, Object?>{'id': 0, 'method': 'daemon.version'}),
@@ -118,16 +117,13 @@ void main() {
       expect(response.data['result'], isA<String>());
     });
 
-    test('daemon.getSupportedPlatforms command should succeed', () async {
+    testWithoutContext('daemon.getSupportedPlatforms command should succeed', () async {
       final fs = LocalFileSystemBlockingSetCurrentDirectory();
       daemon = Daemon(
         daemonConnection,
         analytics: const NoOpAnalytics(),
-        applicationPackageFactory: applicationPackageFactory,
-        assetBundleFactory: _FakeAssetBundleFactory(),
         buildSystem: buildSystem,
         buildTargets: buildTargets,
-        devtoolsLauncher: FakeDevtoolsLauncher(),
         toolContext: FakeToolContext(fs: fs),
         xcode: null,
         notifyingLogger: notifyingLogger,
@@ -233,15 +229,12 @@ void main() {
       });
     });
 
-    test('printError should send daemon.logMessage event', () async {
+    testWithoutContext('printError should send daemon.logMessage event', () async {
       daemon = Daemon(
         daemonConnection,
         analytics: const NoOpAnalytics(),
-        applicationPackageFactory: applicationPackageFactory,
-        assetBundleFactory: _FakeAssetBundleFactory(),
         buildSystem: buildSystem,
         buildTargets: buildTargets,
-        devtoolsLauncher: FakeDevtoolsLauncher(),
         toolContext: FakeToolContext(),
         xcode: null,
         notifyingLogger: notifyingLogger,
@@ -262,15 +255,12 @@ void main() {
       expect(logMessage['message'], 'daemon.logMessage test');
     });
 
-    test('printWarning should send daemon.logMessage event', () async {
+    testWithoutContext('printWarning should send daemon.logMessage event', () async {
       daemon = Daemon(
         daemonConnection,
         analytics: const NoOpAnalytics(),
-        applicationPackageFactory: applicationPackageFactory,
-        assetBundleFactory: _FakeAssetBundleFactory(),
         buildSystem: buildSystem,
         buildTargets: buildTargets,
-        devtoolsLauncher: FakeDevtoolsLauncher(),
         toolContext: FakeToolContext(),
         xcode: null,
         notifyingLogger: notifyingLogger,
@@ -291,16 +281,13 @@ void main() {
       expect(logMessage['message'], 'daemon.logMessage test');
     });
 
-    test('printStatus should log to stdout when logToStdout is enabled', () async {
+    testWithoutContext('printStatus should log to stdout when logToStdout is enabled', () async {
       final StringBuffer buffer = await capturedConsolePrint(() {
         daemon = Daemon(
           daemonConnection,
           analytics: const NoOpAnalytics(),
-          applicationPackageFactory: applicationPackageFactory,
-          assetBundleFactory: _FakeAssetBundleFactory(),
           buildSystem: buildSystem,
           buildTargets: buildTargets,
-          devtoolsLauncher: FakeDevtoolsLauncher(),
           toolContext: FakeToolContext(),
           xcode: null,
           notifyingLogger: notifyingLogger,
@@ -314,16 +301,13 @@ void main() {
       expect(buffer.toString().trim(), 'daemon.logMessage test');
     });
 
-    test('printBox should log to stdout when logToStdout is enabled', () async {
+    testWithoutContext('printBox should log to stdout when logToStdout is enabled', () async {
       final StringBuffer buffer = await capturedConsolePrint(() {
         daemon = Daemon(
           daemonConnection,
           analytics: const NoOpAnalytics(),
-          applicationPackageFactory: applicationPackageFactory,
-          assetBundleFactory: _FakeAssetBundleFactory(),
           buildSystem: buildSystem,
           buildTargets: buildTargets,
-          devtoolsLauncher: FakeDevtoolsLauncher(),
           toolContext: FakeToolContext(),
           xcode: null,
           notifyingLogger: notifyingLogger,
@@ -337,53 +321,50 @@ void main() {
       expect(buffer.toString().trim(), contains('Sample title: This is the box message'));
     });
 
-    test('printTrace should send daemon.logMessage event when notifyVerbose is enabled', () async {
-      daemon = Daemon(
-        daemonConnection,
-        analytics: const NoOpAnalytics(),
-        applicationPackageFactory: applicationPackageFactory,
-        assetBundleFactory: _FakeAssetBundleFactory(),
-        buildSystem: buildSystem,
-        buildTargets: buildTargets,
-        devtoolsLauncher: FakeDevtoolsLauncher(),
-        toolContext: FakeToolContext(),
-        xcode: null,
-        notifyingLogger: notifyingLogger,
-        featureFlags: TestFeatureFlags(),
-      );
-      notifyingLogger.notifyVerbose = false;
-      notifyingLogger.printTrace('daemon.logMessage test 1');
-      notifyingLogger.notifyVerbose = true;
-      notifyingLogger.printTrace('daemon.logMessage test 2');
-      final DaemonMessage response = await daemonStreams.outputs.stream.firstWhere((
-        DaemonMessage message,
-      ) {
-        return message.data['event'] == 'daemon.logMessage' &&
-            (message.data['params']! as Map<String, Object?>)['level'] == 'trace';
-      });
-      expect(response.data['id'], isNull);
-      expect(response.data['event'], 'daemon.logMessage');
-      final Map<String, String> logMessage = castStringKeyedMap(response.data['params'])!
-          .cast<String, String>();
-      expect(logMessage['level'], 'trace');
-      expect(logMessage['message'], 'daemon.logMessage test 2');
-    });
+    testWithoutContext(
+      'printTrace should send daemon.logMessage event when notifyVerbose is enabled',
+      () async {
+        daemon = Daemon(
+          daemonConnection,
+          analytics: const NoOpAnalytics(),
+          buildSystem: buildSystem,
+          buildTargets: buildTargets,
+          toolContext: FakeToolContext(),
+          xcode: null,
+          notifyingLogger: notifyingLogger,
+          featureFlags: TestFeatureFlags(),
+        );
+        notifyingLogger.notifyVerbose = false;
+        notifyingLogger.printTrace('daemon.logMessage test 1');
+        notifyingLogger.notifyVerbose = true;
+        notifyingLogger.printTrace('daemon.logMessage test 2');
+        final DaemonMessage response = await daemonStreams.outputs.stream.firstWhere((
+          DaemonMessage message,
+        ) {
+          return message.data['event'] == 'daemon.logMessage' &&
+              (message.data['params']! as Map<String, Object?>)['level'] == 'trace';
+        });
+        expect(response.data['id'], isNull);
+        expect(response.data['event'], 'daemon.logMessage');
+        final Map<String, String> logMessage = castStringKeyedMap(response.data['params'])!
+            .cast<String, String>();
+        expect(logMessage['level'], 'trace');
+        expect(logMessage['message'], 'daemon.logMessage test 2');
+      },
+    );
 
-    test(
+    testUsingContext(
       'daemon.setNotifyVerbose command should update the notify verbose status to true',
       () async {
         daemon = Daemon(
           daemonConnection,
           analytics: const NoOpAnalytics(),
-          applicationPackageFactory: applicationPackageFactory,
-          assetBundleFactory: _FakeAssetBundleFactory(),
           buildSystem: buildSystem,
           buildTargets: buildTargets,
-          devtoolsLauncher: FakeDevtoolsLauncher(),
-          toolContext: FakeToolContext(),
+          toolContext: const DelegatingToolContext(),
           xcode: null,
           notifyingLogger: notifyingLogger,
-          featureFlags: TestFeatureFlags(),
+          featureFlags: featureFlags,
         );
         expect(notifyingLogger.notifyVerbose, false);
 
@@ -399,21 +380,18 @@ void main() {
       },
     );
 
-    test(
+    testUsingContext(
       'daemon.setNotifyVerbose command should update the notify verbose status to false',
       () async {
         daemon = Daemon(
           daemonConnection,
           analytics: const NoOpAnalytics(),
-          applicationPackageFactory: applicationPackageFactory,
-          assetBundleFactory: _FakeAssetBundleFactory(),
           buildSystem: buildSystem,
           buildTargets: buildTargets,
-          devtoolsLauncher: FakeDevtoolsLauncher(),
-          toolContext: FakeToolContext(),
+          toolContext: const DelegatingToolContext(),
           xcode: null,
           notifyingLogger: notifyingLogger,
-          featureFlags: TestFeatureFlags(),
+          featureFlags: featureFlags,
         );
         notifyingLogger.notifyVerbose = false;
 
@@ -429,19 +407,16 @@ void main() {
       },
     );
 
-    test('daemon.shutdown command should stop daemon', () async {
+    testUsingContext('daemon.shutdown command should stop daemon', () async {
       daemon = Daemon(
         daemonConnection,
         analytics: const NoOpAnalytics(),
-        applicationPackageFactory: applicationPackageFactory,
-        assetBundleFactory: _FakeAssetBundleFactory(),
         buildSystem: buildSystem,
         buildTargets: buildTargets,
-        devtoolsLauncher: FakeDevtoolsLauncher(),
-        toolContext: FakeToolContext(),
+        toolContext: const DelegatingToolContext(),
         xcode: null,
         notifyingLogger: notifyingLogger,
-        featureFlags: TestFeatureFlags(),
+        featureFlags: featureFlags,
       );
       daemonStreams.inputs.add(
         DaemonMessage(<String, Object?>{'id': 0, 'method': 'daemon.shutdown'}),
@@ -452,19 +427,16 @@ void main() {
       });
     });
 
-    test('app.restart without an appId should report an error', () async {
+    testUsingContext('app.restart without an appId should report an error', () async {
       daemon = Daemon(
         daemonConnection,
         analytics: const NoOpAnalytics(),
-        applicationPackageFactory: applicationPackageFactory,
-        assetBundleFactory: _FakeAssetBundleFactory(),
         buildSystem: buildSystem,
         buildTargets: buildTargets,
-        devtoolsLauncher: FakeDevtoolsLauncher(),
-        toolContext: FakeToolContext(),
+        toolContext: const DelegatingToolContext(),
         xcode: null,
         notifyingLogger: notifyingLogger,
-        featureFlags: TestFeatureFlags(),
+        featureFlags: featureFlags,
       );
 
       daemonStreams.inputs.add(DaemonMessage(<String, Object?>{'id': 0, 'method': 'app.restart'}));
@@ -473,21 +445,18 @@ void main() {
       expect(response.data['error'], contains('appId is required'));
     });
 
-    test(
+    testUsingContext(
       'ext.flutter.debugPaint via service extension without an appId should report an error',
       () async {
         daemon = Daemon(
           daemonConnection,
           analytics: const NoOpAnalytics(),
-          applicationPackageFactory: applicationPackageFactory,
-          assetBundleFactory: _FakeAssetBundleFactory(),
           buildSystem: buildSystem,
           buildTargets: buildTargets,
-          devtoolsLauncher: FakeDevtoolsLauncher(),
-          toolContext: FakeToolContext(),
+          toolContext: const DelegatingToolContext(),
           xcode: null,
           notifyingLogger: notifyingLogger,
-          featureFlags: TestFeatureFlags(),
+          featureFlags: featureFlags,
         );
 
         daemonStreams.inputs.add(
@@ -503,19 +472,16 @@ void main() {
       },
     );
 
-    test('app.stop without appId should report an error', () async {
+    testUsingContext('app.stop without appId should report an error', () async {
       daemon = Daemon(
         daemonConnection,
         analytics: const NoOpAnalytics(),
-        applicationPackageFactory: applicationPackageFactory,
-        assetBundleFactory: _FakeAssetBundleFactory(),
         buildSystem: buildSystem,
         buildTargets: buildTargets,
-        devtoolsLauncher: FakeDevtoolsLauncher(),
-        toolContext: FakeToolContext(),
+        toolContext: const DelegatingToolContext(),
         xcode: null,
         notifyingLogger: notifyingLogger,
-        featureFlags: TestFeatureFlags(),
+        featureFlags: featureFlags,
       );
 
       daemonStreams.inputs.add(DaemonMessage(<String, Object?>{'id': 0, 'method': 'app.stop'}));
@@ -524,19 +490,16 @@ void main() {
       expect(response.data['error'], contains('appId is required'));
     });
 
-    test('device.getDevices should respond with list', () async {
+    testUsingContext('device.getDevices should respond with list', () async {
       daemon = Daemon(
         daemonConnection,
         analytics: const NoOpAnalytics(),
-        applicationPackageFactory: applicationPackageFactory,
-        assetBundleFactory: _FakeAssetBundleFactory(),
         buildSystem: buildSystem,
         buildTargets: buildTargets,
-        devtoolsLauncher: FakeDevtoolsLauncher(),
-        toolContext: FakeToolContext(),
+        toolContext: const DelegatingToolContext(),
         xcode: null,
         notifyingLogger: notifyingLogger,
-        featureFlags: TestFeatureFlags(),
+        featureFlags: featureFlags,
       );
       daemonStreams.inputs.add(
         DaemonMessage(<String, Object?>{'id': 0, 'method': 'device.getDevices'}),
@@ -546,19 +509,16 @@ void main() {
       expect(response.data['result'], isList);
     });
 
-    test('device.getDevices reports available devices', () async {
+    testUsingContext('device.getDevices reports available devices', () async {
       daemon = Daemon(
         daemonConnection,
         analytics: const NoOpAnalytics(),
-        applicationPackageFactory: applicationPackageFactory,
-        assetBundleFactory: _FakeAssetBundleFactory(),
         buildSystem: buildSystem,
         buildTargets: buildTargets,
-        devtoolsLauncher: FakeDevtoolsLauncher(),
-        toolContext: FakeToolContext(),
+        toolContext: const DelegatingToolContext(),
         xcode: null,
         notifyingLogger: notifyingLogger,
-        featureFlags: TestFeatureFlags(),
+        featureFlags: featureFlags,
       );
       final discoverer = FakePollingDeviceDiscovery();
       daemon.deviceDomain.addDeviceDiscoverer(discoverer);
@@ -573,79 +533,82 @@ void main() {
       expect(result, isNotEmpty);
     });
 
-    test('should send device.added event when device is discovered', () async {
-      daemon = Daemon(
-        daemonConnection,
-        analytics: const NoOpAnalytics(),
-        applicationPackageFactory: applicationPackageFactory,
-        assetBundleFactory: _FakeAssetBundleFactory(),
-        buildSystem: buildSystem,
-        buildTargets: buildTargets,
-        devtoolsLauncher: FakeDevtoolsLauncher(),
-        toolContext: FakeToolContext(),
-        xcode: null,
-        notifyingLogger: notifyingLogger,
-        featureFlags: TestFeatureFlags(),
-      );
+    testUsingContext(
+      'should send device.added event when device is discovered',
+      () async {
+        daemon = Daemon(
+          daemonConnection,
+          analytics: const NoOpAnalytics(),
+          buildSystem: buildSystem,
+          buildTargets: buildTargets,
+          toolContext: const DelegatingToolContext(),
+          xcode: null,
+          notifyingLogger: notifyingLogger,
+          featureFlags: featureFlags,
+        );
 
-      final discoverer = FakePollingDeviceDiscovery();
-      daemon.deviceDomain.addDeviceDiscoverer(discoverer);
-      discoverer.addDevice(FakeAndroidDevice());
+        final discoverer = FakePollingDeviceDiscovery();
+        daemon.deviceDomain.addDeviceDiscoverer(discoverer);
+        discoverer.addDevice(FakeAndroidDevice());
 
-      final names = <Map<String, Object?>>[];
-      await daemonStreams.outputs.stream.skipWhile(_isConnectedEvent).take(1).forEach((
-        DaemonMessage response,
-      ) async {
-        expect(response.data['event'], 'device.added');
-        expect(response.data['params'], isMap);
+        final names = <Map<String, Object?>>[];
+        await daemonStreams.outputs.stream.skipWhile(_isConnectedEvent).take(1).forEach((
+          DaemonMessage response,
+        ) async {
+          expect(response.data['event'], 'device.added');
+          expect(response.data['params'], isMap);
 
-        final Map<String, Object?> params = castStringKeyedMap(response.data['params'])!;
-        names.add(params);
-      });
-      await daemonStreams.outputs.close();
-      expect(
-        names,
-        containsAll(const <Map<String, Object?>>[
-          <String, Object?>{
-            'id': 'device',
-            'name': 'android device',
-            'platform': 'android-arm',
-            'emulator': false,
-            'category': 'mobile',
-            'platformType': 'android',
-            'cpuArch': 'armv7',
-            'ephemeral': false,
-            'emulatorId': 'device',
-            'sdk': 'Android 12',
-            'isConnected': true,
-            'connectionInterface': 'attached',
-            'capabilities': <String, Object?>{
-              'hotReload': true,
-              'hotRestart': true,
-              'screenshot': true,
-              'fastStart': false,
-              'flutterExit': true,
-              'hardwareRendering': true,
-              'startPaused': true,
+          final Map<String, Object?> params = castStringKeyedMap(response.data['params'])!;
+          names.add(params);
+        });
+        await daemonStreams.outputs.close();
+        expect(
+          names,
+          containsAll(const <Map<String, Object?>>[
+            <String, Object?>{
+              'id': 'device',
+              'name': 'android device',
+              'platform': 'android-arm',
+              'emulator': false,
+              'category': 'mobile',
+              'platformType': 'android',
+              'cpuArch': 'armv7',
+              'ephemeral': false,
+              'emulatorId': 'device',
+              'sdk': 'Android 12',
+              'isConnected': true,
+              'connectionInterface': 'attached',
+              'capabilities': <String, Object?>{
+                'hotReload': true,
+                'hotRestart': true,
+                'screenshot': true,
+                'screenRecording': true,
+                'fastStart': false,
+                'flutterExit': true,
+                'hardwareRendering': true,
+                'startPaused': true,
+              },
             },
-          },
-        ]),
-      );
-    });
+          ]),
+        );
+      },
+      overrides: <Type, Generator>{
+        AndroidWorkflow: () => FakeAndroidWorkflow(),
+        IOSWorkflow: () => FakeIOSWorkflow(),
+        WindowsWorkflow: () => FakeWindowsWorkflow(),
+      },
+    );
 
-    test('device.discoverDevices should respond with list', () async {
+    testUsingContext('device.discoverDevices should respond with list', () async {
       daemon = Daemon(
         daemonConnection,
         analytics: const NoOpAnalytics(),
-        applicationPackageFactory: applicationPackageFactory,
-        assetBundleFactory: _FakeAssetBundleFactory(),
         buildSystem: buildSystem,
         buildTargets: buildTargets,
-        devtoolsLauncher: FakeDevtoolsLauncher(),
-        toolContext: FakeToolContext(),
+        toolContext: const DelegatingToolContext(),
         xcode: null,
         notifyingLogger: notifyingLogger,
-        featureFlags: TestFeatureFlags(),
+        featureFlags: featureFlags,
       );
       daemonStreams.inputs.add(
         DaemonMessage(<String, Object?>{'id': 0, 'method': 'device.discoverDevices'}),
@@ -655,19 +618,16 @@ void main() {
       expect(response.data['result'], isList);
     });
 
-    test('device.discoverDevices reports available devices', () async {
+    testUsingContext('device.discoverDevices reports available devices', () async {
       daemon = Daemon(
         daemonConnection,
         analytics: const NoOpAnalytics(),
-        applicationPackageFactory: applicationPackageFactory,
-        assetBundleFactory: _FakeAssetBundleFactory(),
         buildSystem: buildSystem,
         buildTargets: buildTargets,
-        devtoolsLauncher: FakeDevtoolsLauncher(),
-        toolContext: FakeToolContext(),
+        toolContext: const DelegatingToolContext(),
         xcode: null,
         notifyingLogger: notifyingLogger,
-        featureFlags: TestFeatureFlags(),
+        featureFlags: featureFlags,
       );
       final discoverer = FakePollingDeviceDiscovery();
       daemon.deviceDomain.addDeviceDiscoverer(discoverer);
@@ -683,19 +643,16 @@ void main() {
       expect(discoverer.discoverDevicesCalled, true);
     });
 
-    test('device.supportsRuntimeMode returns correct value', () async {
+    testUsingContext('device.supportsRuntimeMode returns correct value', () async {
       daemon = Daemon(
         daemonConnection,
         analytics: const NoOpAnalytics(),
-        applicationPackageFactory: applicationPackageFactory,
-        assetBundleFactory: _FakeAssetBundleFactory(),
         buildSystem: buildSystem,
         buildTargets: buildTargets,
-        devtoolsLauncher: FakeDevtoolsLauncher(),
-        toolContext: FakeToolContext(),
+        toolContext: const DelegatingToolContext(),
         xcode: null,
         notifyingLogger: notifyingLogger,
-        featureFlags: TestFeatureFlags(),
+        featureFlags: featureFlags,
       );
       final discoverer = FakePollingDeviceDiscovery();
       daemon.deviceDomain.addDeviceDiscoverer(discoverer);
@@ -715,19 +672,16 @@ void main() {
       expect(device.supportsRuntimeModeCalledBuildMode, BuildMode.profile);
     });
 
-    test('device.logReader.start and .stop starts and stops log reader', () async {
+    testUsingContext('device.logReader.start and .stop starts and stops log reader', () async {
       daemon = Daemon(
         daemonConnection,
         analytics: const NoOpAnalytics(),
-        applicationPackageFactory: applicationPackageFactory,
-        assetBundleFactory: _FakeAssetBundleFactory(),
         buildSystem: buildSystem,
         buildTargets: buildTargets,
-        devtoolsLauncher: FakeDevtoolsLauncher(),
-        toolContext: FakeToolContext(),
+        toolContext: const DelegatingToolContext(),
         xcode: null,
         notifyingLogger: notifyingLogger,
-        featureFlags: TestFeatureFlags(),
+        featureFlags: featureFlags,
       );
       final discoverer = FakePollingDeviceDiscovery();
       daemon.deviceDomain.addDeviceDiscoverer(discoverer);
@@ -772,19 +726,21 @@ void main() {
     });
 
     group('device.startApp and .stopApp', () {
-      test('device.startApp and .stopApp starts and stops an app', () async {
+      late FakeApplicationPackageFactory applicationPackageFactory;
+      setUp(() {
+        applicationPackageFactory = FakeApplicationPackageFactory();
+      });
+
+      testUsingContext('device.startApp and .stopApp starts and stops an app', () async {
         daemon = Daemon(
           daemonConnection,
           analytics: const NoOpAnalytics(),
-          applicationPackageFactory: applicationPackageFactory,
-          assetBundleFactory: _FakeAssetBundleFactory(),
           buildSystem: buildSystem,
           buildTargets: buildTargets,
-          devtoolsLauncher: FakeDevtoolsLauncher(),
-          toolContext: FakeToolContext(),
+          toolContext: const DelegatingToolContext(),
           xcode: null,
           notifyingLogger: notifyingLogger,
-          featureFlags: TestFeatureFlags(),
+          featureFlags: featureFlags,
         );
         final discoverer = FakePollingDeviceDiscovery();
         daemon.deviceDomain.addDeviceDiscoverer(discoverer);
@@ -851,24 +807,21 @@ void main() {
         expect(device.stopAppPackage, applicationPackage);
         final stopAppResult = stopAppResponse.data['result'] as bool?;
         expect(stopAppResult, true);
-      });
+      }, overrides: <Type, Generator>{ApplicationPackageFactory: () => applicationPackageFactory});
     });
 
-    test(
+    testUsingContext(
       'device.startDartDevelopmentService and .shutdownDartDevelopmentService starts and stops DDS',
       () async {
         daemon = Daemon(
           daemonConnection,
           analytics: const NoOpAnalytics(),
-          applicationPackageFactory: applicationPackageFactory,
-          assetBundleFactory: _FakeAssetBundleFactory(),
           buildSystem: buildSystem,
           buildTargets: buildTargets,
-          devtoolsLauncher: FakeDevtoolsLauncher(),
-          toolContext: FakeToolContext(),
+          toolContext: const DelegatingToolContext(),
           xcode: null,
           notifyingLogger: notifyingLogger,
-          featureFlags: TestFeatureFlags(),
+          featureFlags: featureFlags,
         );
         final discoverer = FakePollingDeviceDiscovery();
         daemon.deviceDomain.addDeviceDiscoverer(discoverer);
@@ -934,19 +887,16 @@ void main() {
       },
     );
 
-    test('device.getDiagnostics returns correct value', () async {
+    testUsingContext('device.getDiagnostics returns correct value', () async {
       daemon = Daemon(
         daemonConnection,
         analytics: const NoOpAnalytics(),
-        applicationPackageFactory: applicationPackageFactory,
-        assetBundleFactory: _FakeAssetBundleFactory(),
         buildSystem: buildSystem,
         buildTargets: buildTargets,
-        devtoolsLauncher: FakeDevtoolsLauncher(),
-        toolContext: FakeToolContext(),
+        toolContext: const DelegatingToolContext(),
         xcode: null,
         notifyingLogger: notifyingLogger,
-        featureFlags: TestFeatureFlags(),
+        featureFlags: featureFlags,
       );
       final discoverer1 = FakePollingDeviceDiscovery();
       discoverer1.diagnostics = <String>['fake diagnostic 1', 'fake diagnostic 2'];
@@ -967,19 +917,16 @@ void main() {
       ]);
     });
 
-    test('emulator.launch without an emulatorId should report an error', () async {
+    testUsingContext('emulator.launch without an emulatorId should report an error', () async {
       daemon = Daemon(
         daemonConnection,
         analytics: const NoOpAnalytics(),
-        applicationPackageFactory: applicationPackageFactory,
-        assetBundleFactory: _FakeAssetBundleFactory(),
         buildSystem: buildSystem,
         buildTargets: buildTargets,
-        devtoolsLauncher: FakeDevtoolsLauncher(),
-        toolContext: FakeToolContext(),
+        toolContext: const DelegatingToolContext(),
         xcode: null,
         notifyingLogger: notifyingLogger,
-        featureFlags: TestFeatureFlags(),
+        featureFlags: featureFlags,
       );
 
       daemonStreams.inputs.add(
@@ -990,19 +937,16 @@ void main() {
       expect(response.data['error'], contains('emulatorId is required'));
     });
 
-    test('emulator.launch coldboot parameter must be boolean', () async {
+    testUsingContext('emulator.launch coldboot parameter must be boolean', () async {
       daemon = Daemon(
         daemonConnection,
         analytics: const NoOpAnalytics(),
-        applicationPackageFactory: applicationPackageFactory,
-        assetBundleFactory: _FakeAssetBundleFactory(),
         buildSystem: buildSystem,
         buildTargets: buildTargets,
-        devtoolsLauncher: FakeDevtoolsLauncher(),
-        toolContext: FakeToolContext(),
+        toolContext: const DelegatingToolContext(),
         xcode: null,
         notifyingLogger: notifyingLogger,
-        featureFlags: TestFeatureFlags(),
+        featureFlags: featureFlags,
       );
       final params = <String, Object?>{'emulatorId': 'device', 'coldBoot': 1};
       daemonStreams.inputs.add(
@@ -1013,19 +957,16 @@ void main() {
       expect(response.data['error'], contains('coldBoot is not a bool'));
     });
 
-    test('emulator.getEmulators should respond with list', () async {
+    testUsingContext('emulator.getEmulators should respond with list', () async {
       daemon = Daemon(
         daemonConnection,
         analytics: const NoOpAnalytics(),
-        applicationPackageFactory: applicationPackageFactory,
-        assetBundleFactory: _FakeAssetBundleFactory(),
         buildSystem: buildSystem,
         buildTargets: buildTargets,
-        devtoolsLauncher: FakeDevtoolsLauncher(),
-        toolContext: FakeToolContext(),
+        toolContext: const DelegatingToolContext(),
         xcode: null,
         notifyingLogger: notifyingLogger,
-        featureFlags: TestFeatureFlags(),
+        featureFlags: featureFlags,
       );
       daemonStreams.inputs.add(
         DaemonMessage(<String, Object?>{'id': 0, 'method': 'emulator.getEmulators'}),
@@ -1035,22 +976,19 @@ void main() {
       expect(response.data['result'], isList);
     });
 
-    test('daemon can send exposeUrl requests to the client', () async {
+    testUsingContext('daemon can send exposeUrl requests to the client', () async {
       const originalUrl = 'http://localhost:1234/';
       const mappedUrl = 'https://publichost:4321/';
 
       daemon = Daemon(
         daemonConnection,
         analytics: const NoOpAnalytics(),
-        applicationPackageFactory: applicationPackageFactory,
-        assetBundleFactory: _FakeAssetBundleFactory(),
         buildSystem: buildSystem,
         buildTargets: buildTargets,
-        devtoolsLauncher: FakeDevtoolsLauncher(),
-        toolContext: FakeToolContext(),
+        toolContext: const DelegatingToolContext(),
         xcode: null,
         notifyingLogger: notifyingLogger,
-        featureFlags: TestFeatureFlags(),
+        featureFlags: featureFlags,
       );
 
       // Respond to any requests from the daemon to expose a URL.
@@ -1072,48 +1010,47 @@ void main() {
       expect(exposedUrl, equals(mappedUrl));
     });
 
-    test('devtools.serve command should return host and port on success', () async {
+    testUsingContext(
+      'devtools.serve command should return host and port on success',
+      () async {
+        daemon = Daemon(
+          daemonConnection,
+          analytics: const NoOpAnalytics(),
+          buildSystem: buildSystem,
+          buildTargets: buildTargets,
+          toolContext: const DelegatingToolContext(),
+          xcode: null,
+          notifyingLogger: notifyingLogger,
+          featureFlags: featureFlags,
+        );
+
+        daemonStreams.inputs.add(
+          DaemonMessage(<String, Object?>{'id': 0, 'method': 'devtools.serve'}),
+        );
+        final DaemonMessage response = await daemonStreams.outputs.stream.firstWhere(
+          (DaemonMessage response) => response.data['id'] == 0,
+        );
+        final result = response.data['result']! as Map<String, Object?>;
+        expect(result, isNotEmpty);
+        expect(result['host'], '127.0.0.1');
+        expect(result['port'], 1234);
+      },
+      overrides: <Type, Generator>{
+        DevtoolsLauncher: () =>
+            FakeDevtoolsLauncher(serverAddress: DevToolsServerAddress('127.0.0.1', 1234)),
+      },
+    );
+
+    testUsingContext('devtools.serve command should return null fields if null returned', () async {
       daemon = Daemon(
         daemonConnection,
         analytics: const NoOpAnalytics(),
-        applicationPackageFactory: applicationPackageFactory,
-        assetBundleFactory: _FakeAssetBundleFactory(),
         buildSystem: buildSystem,
         buildTargets: buildTargets,
-        devtoolsLauncher: FakeDevtoolsLauncher(
-          serverAddress: DevToolsServerAddress('127.0.0.1', 1234),
-        ),
-        toolContext: FakeToolContext(),
+        toolContext: const DelegatingToolContext(),
         xcode: null,
         notifyingLogger: notifyingLogger,
-        featureFlags: TestFeatureFlags(),
-      );
-
-      daemonStreams.inputs.add(
-        DaemonMessage(<String, Object?>{'id': 0, 'method': 'devtools.serve'}),
-      );
-      final DaemonMessage response = await daemonStreams.outputs.stream.firstWhere(
-        (DaemonMessage response) => response.data['id'] == 0,
-      );
-      final result = response.data['result']! as Map<String, Object?>;
-      expect(result, isNotEmpty);
-      expect(result['host'], '127.0.0.1');
-      expect(result['port'], 1234);
-    });
-
-    test('devtools.serve command should return null fields if null returned', () async {
-      daemon = Daemon(
-        daemonConnection,
-        analytics: const NoOpAnalytics(),
-        applicationPackageFactory: applicationPackageFactory,
-        assetBundleFactory: _FakeAssetBundleFactory(),
-        buildSystem: buildSystem,
-        buildTargets: buildTargets,
-        devtoolsLauncher: FakeDevtoolsLauncher(),
-        toolContext: FakeToolContext(),
-        xcode: null,
-        notifyingLogger: notifyingLogger,
-        featureFlags: TestFeatureFlags(),
+        featureFlags: featureFlags,
       );
 
       daemonStreams.inputs.add(
@@ -1126,9 +1063,9 @@ void main() {
       expect(result, isNotEmpty);
       expect(result['host'], null);
       expect(result['port'], null);
-    });
+    }, overrides: <Type, Generator>{DevtoolsLauncher: () => FakeDevtoolsLauncher()});
 
-    test(
+    testUsingContext(
       'proxy.connect tries to connect to an ipv4 address and proxies the connection correctly',
       () async {
         final ioOverrides = TestIOOverrides();
@@ -1148,15 +1085,12 @@ void main() {
           daemon = Daemon(
             daemonConnection,
             analytics: const NoOpAnalytics(),
-            applicationPackageFactory: applicationPackageFactory,
-            assetBundleFactory: _FakeAssetBundleFactory(),
             buildSystem: buildSystem,
             buildTargets: buildTargets,
-            devtoolsLauncher: FakeDevtoolsLauncher(),
-            toolContext: FakeToolContext(),
+            toolContext: const DelegatingToolContext(),
             xcode: null,
             notifyingLogger: notifyingLogger,
-            featureFlags: TestFeatureFlags(),
+            featureFlags: featureFlags,
           );
           daemonStreams.inputs.add(
             DaemonMessage(<String, Object?>{
@@ -1220,7 +1154,7 @@ void main() {
       },
     );
 
-    test('proxy.connect connects to ipv6 if ipv4 failed', () async {
+    testUsingContext('proxy.connect connects to ipv6 if ipv4 failed', () async {
       final ioOverrides = TestIOOverrides();
       await io.IOOverrides.runWithIOOverrides(() async {
         final socket = FakeSocket();
@@ -1239,15 +1173,12 @@ void main() {
         daemon = Daemon(
           daemonConnection,
           analytics: const NoOpAnalytics(),
-          applicationPackageFactory: applicationPackageFactory,
-          assetBundleFactory: _FakeAssetBundleFactory(),
           buildSystem: buildSystem,
           buildTargets: buildTargets,
-          devtoolsLauncher: FakeDevtoolsLauncher(),
-          toolContext: FakeToolContext(),
+          toolContext: const DelegatingToolContext(),
           xcode: null,
           notifyingLogger: notifyingLogger,
-          featureFlags: TestFeatureFlags(),
+          featureFlags: featureFlags,
         );
         daemonStreams.inputs.add(
           DaemonMessage(<String, Object?>{
@@ -1267,7 +1198,7 @@ void main() {
       }, ioOverrides);
     });
 
-    test('proxy.connect fails if both ipv6 and ipv4 failed', () async {
+    testUsingContext('proxy.connect fails if both ipv6 and ipv4 failed', () async {
       final ioOverrides = TestIOOverrides();
       await io.IOOverrides.runWithIOOverrides(() async {
         ioOverrides.connectCallback = (Object? host, int port) =>
@@ -1276,15 +1207,12 @@ void main() {
         daemon = Daemon(
           daemonConnection,
           analytics: const NoOpAnalytics(),
-          applicationPackageFactory: applicationPackageFactory,
-          assetBundleFactory: _FakeAssetBundleFactory(),
           buildSystem: buildSystem,
           buildTargets: buildTargets,
-          devtoolsLauncher: FakeDevtoolsLauncher(),
-          toolContext: FakeToolContext(),
+          toolContext: const DelegatingToolContext(),
           xcode: null,
           notifyingLogger: notifyingLogger,
-          featureFlags: TestFeatureFlags(),
+          featureFlags: featureFlags,
         );
         daemonStreams.inputs.add(
           DaemonMessage(<String, Object?>{
@@ -1303,16 +1231,13 @@ void main() {
       }, ioOverrides);
     });
 
-    test('app.start throws DaemonException if app fails to start early', () async {
+    testWithoutContext('app.start throws DaemonException if app fails to start early', () async {
       final fs = MemoryFileSystem.test();
       daemon = Daemon(
         daemonConnection,
         analytics: const NoOpAnalytics(),
-        applicationPackageFactory: applicationPackageFactory,
-        assetBundleFactory: _FakeAssetBundleFactory(),
         buildSystem: buildSystem,
         buildTargets: buildTargets,
-        devtoolsLauncher: FakeDevtoolsLauncher(),
         toolContext: FakeToolContext(fs: fs),
         xcode: null,
         notifyingLogger: notifyingLogger,
@@ -1348,16 +1273,13 @@ void main() {
       );
     });
 
-    test('app.restart sent before the app has started waits for startup', () async {
+    testWithoutContext('app.restart sent before the app has started waits for startup', () async {
       final fs = MemoryFileSystem.test();
       daemon = Daemon(
         daemonConnection,
         analytics: const NoOpAnalytics(),
-        applicationPackageFactory: applicationPackageFactory,
-        assetBundleFactory: _FakeAssetBundleFactory(),
         buildSystem: buildSystem,
         buildTargets: buildTargets,
-        devtoolsLauncher: FakeDevtoolsLauncher(),
         toolContext: FakeToolContext(fs: fs),
         xcode: null,
         notifyingLogger: notifyingLogger,
@@ -1409,180 +1331,180 @@ void main() {
       exitApp.complete();
     });
 
-    test('app.restart sent before the app has started reports an error if startup fails', () async {
-      final fs = MemoryFileSystem.test();
-      daemon = Daemon(
-        daemonConnection,
-        analytics: const NoOpAnalytics(),
-        applicationPackageFactory: applicationPackageFactory,
-        assetBundleFactory: _FakeAssetBundleFactory(),
-        buildSystem: buildSystem,
-        buildTargets: buildTargets,
-        devtoolsLauncher: FakeDevtoolsLauncher(),
-        toolContext: FakeToolContext(fs: fs),
-        xcode: null,
-        notifyingLogger: notifyingLogger,
-        featureFlags: TestFeatureFlags(),
-      );
-      final runner = FakeRestartableResidentRunner();
-      final exitApp = Completer<void>();
+    testWithoutContext(
+      'app.restart sent before the app has started reports an error if startup fails',
+      () async {
+        final fs = MemoryFileSystem.test();
+        daemon = Daemon(
+          daemonConnection,
+          analytics: const NoOpAnalytics(),
+          buildSystem: buildSystem,
+          buildTargets: buildTargets,
+          toolContext: FakeToolContext(fs: fs),
+          xcode: null,
+          notifyingLogger: notifyingLogger,
+          featureFlags: TestFeatureFlags(),
+        );
+        final runner = FakeRestartableResidentRunner();
+        final exitApp = Completer<void>();
 
-      final Future<AppInstance> launched = daemon.appDomain.launch(
-        runner,
-        ({
-          Completer<DebugConnectionInfo>? connectionInfoCompleter,
-          Completer<void>? appStartedCompleter,
-        }) async {
-          // App exits without ever completing appStartedCompleter.
-          await exitApp.future;
-        },
-        FakeAndroidDevice(),
-        null, // projectDirectory
-        true, // enableHotReload
-        fs.directory('/'), // cwd
-        LaunchMode.run,
-        MachineOutputLogger(parent: notifyingLogger),
-      );
+        final Future<AppInstance> launched = daemon.appDomain.launch(
+          runner,
+          ({
+            Completer<DebugConnectionInfo>? connectionInfoCompleter,
+            Completer<void>? appStartedCompleter,
+          }) async {
+            // App exits without ever completing appStartedCompleter.
+            await exitApp.future;
+          },
+          FakeAndroidDevice(),
+          null, // projectDirectory
+          true, // enableHotReload
+          fs.directory('/'), // cwd
+          LaunchMode.run,
+          MachineOutputLogger(parent: notifyingLogger),
+        );
 
-      final DaemonMessage startEvent = await daemonStreams.outputs.stream.firstWhere(
-        (DaemonMessage message) => message.data['event'] == 'app.start',
-      );
-      final appId = (startEvent.data['params']! as Map<String, Object?>)['appId']! as String;
+        final DaemonMessage startEvent = await daemonStreams.outputs.stream.firstWhere(
+          (DaemonMessage message) => message.data['event'] == 'app.start',
+        );
+        final appId = (startEvent.data['params']! as Map<String, Object?>)['appId']! as String;
 
-      final Future<OperationResult> restarted = daemon.appDomain.restart(<String, Object?>{
-        'appId': appId,
-      })!;
+        final Future<OperationResult> restarted = daemon.appDomain.restart(<String, Object?>{
+          'appId': appId,
+        })!;
 
-      exitApp.complete();
+        exitApp.complete();
 
-      final Matcher matcher = throwsA(
-        isA<DaemonException>().having(
-          (DaemonException e) => e.message,
-          'message',
-          'App failed to start',
-        ),
-      );
-      await expectLater(() => launched, matcher);
-      // The pending restart gets an error rather than hanging forever.
-      await expectLater(() => restarted, matcher);
-      expect(runner.restartCount, 0);
-    });
-
-    test('a pending app.restart gets an error when startup throws a non-Exception', () async {
-      final fs = MemoryFileSystem.test();
-      daemon = Daemon(
-        daemonConnection,
-        analytics: const NoOpAnalytics(),
-        applicationPackageFactory: applicationPackageFactory,
-        assetBundleFactory: _FakeAssetBundleFactory(),
-        buildSystem: buildSystem,
-        buildTargets: buildTargets,
-        devtoolsLauncher: FakeDevtoolsLauncher(),
-        toolContext: FakeToolContext(fs: fs),
-        xcode: null,
-        notifyingLogger: notifyingLogger,
-        featureFlags: TestFeatureFlags(),
-      );
-      final runner = FakeRestartableResidentRunner();
-      final failStartup = Completer<void>();
-
-      final Future<AppInstance> launched = daemon.appDomain.launch(
-        runner,
-        ({
-          Completer<DebugConnectionInfo>? connectionInfoCompleter,
-          Completer<void>? appStartedCompleter,
-        }) async {
-          await failStartup.future;
-          // An Error, not an Exception, so `launch` does not convert it into
-          // a `stop` event. The `finally` that assigns currentDirectory can
-          // throw a TypeError this way.
-          throw StateError('startup blew up');
-        },
-        FakeAndroidDevice(),
-        null, // projectDirectory
-        true, // enableHotReload
-        fs.directory('/'), // cwd
-        LaunchMode.run,
-        MachineOutputLogger(parent: notifyingLogger),
-      );
-
-      final DaemonMessage startEvent = await daemonStreams.outputs.stream.firstWhere(
-        (DaemonMessage message) => message.data['event'] == 'app.start',
-      );
-      final appId = (startEvent.data['params']! as Map<String, Object?>)['appId']! as String;
-
-      final Future<OperationResult> restarted = daemon.appDomain.restart(<String, Object?>{
-        'appId': appId,
-      })!;
-
-      failStartup.complete();
-
-      await expectLater(() => launched, throwsStateError);
-      // Without settling `started` on this path the restart would hang.
-      await expectLater(() => restarted, throwsStateError);
-      expect(runner.restartCount, 0);
-    });
-
-    test('a failed start does not fault a runner listener that has no error handler', () async {
-      final fs = MemoryFileSystem.test();
-      daemon = Daemon(
-        daemonConnection,
-        analytics: const NoOpAnalytics(),
-        applicationPackageFactory: applicationPackageFactory,
-        assetBundleFactory: _FakeAssetBundleFactory(),
-        buildSystem: buildSystem,
-        buildTargets: buildTargets,
-        devtoolsLauncher: FakeDevtoolsLauncher(),
-        toolContext: FakeToolContext(fs: fs),
-        xcode: null,
-        notifyingLogger: notifyingLogger,
-        featureFlags: TestFeatureFlags(),
-      );
-      final exitApp = Completer<void>();
-      var listenerFired = false;
-
-      final Future<AppInstance> launched = daemon.appDomain.launch(
-        FakeRestartableResidentRunner(),
-        ({
-          Completer<DebugConnectionInfo>? connectionInfoCompleter,
-          Completer<void>? appStartedCompleter,
-        }) async {
-          // HotRunner.run attaches exactly this shape of listener for its
-          // startup analytics, with no onError. Completing the runner's
-          // completer with an error would fault it.
-          unawaited(
-            appStartedCompleter?.future.then((_) {
-              listenerFired = true;
-            }),
-          );
-          // App exits without ever completing appStartedCompleter.
-          await exitApp.future;
-        },
-        FakeAndroidDevice(),
-        null, // projectDirectory
-        true, // enableHotReload
-        fs.directory('/'), // cwd
-        LaunchMode.run,
-        MachineOutputLogger(parent: notifyingLogger),
-      );
-
-      exitApp.complete();
-
-      await expectLater(
-        () => launched,
-        throwsA(
+        final Matcher matcher = throwsA(
           isA<DaemonException>().having(
             (DaemonException e) => e.message,
             'message',
             'App failed to start',
           ),
-        ),
-      );
+        );
+        await expectLater(() => launched, matcher);
+        // The pending restart gets an error rather than hanging forever.
+        await expectLater(() => restarted, matcher);
+        expect(runner.restartCount, 0);
+      },
+    );
 
-      // Let any unhandled async error reach the test zone.
-      await pumpEventQueue();
-      expect(listenerFired, isFalse);
-    });
+    testWithoutContext(
+      'a pending app.restart gets an error when startup throws a non-Exception',
+      () async {
+        final fs = MemoryFileSystem.test();
+        daemon = Daemon(
+          daemonConnection,
+          analytics: const NoOpAnalytics(),
+          buildSystem: buildSystem,
+          buildTargets: buildTargets,
+          toolContext: FakeToolContext(fs: fs),
+          xcode: null,
+          notifyingLogger: notifyingLogger,
+          featureFlags: TestFeatureFlags(),
+        );
+        final runner = FakeRestartableResidentRunner();
+        final failStartup = Completer<void>();
+
+        final Future<AppInstance> launched = daemon.appDomain.launch(
+          runner,
+          ({
+            Completer<DebugConnectionInfo>? connectionInfoCompleter,
+            Completer<void>? appStartedCompleter,
+          }) async {
+            await failStartup.future;
+            // An Error, not an Exception, so `launch` does not convert it into
+            // a `stop` event. The `finally` that assigns currentDirectory can
+            // throw a TypeError this way.
+            throw StateError('startup blew up');
+          },
+          FakeAndroidDevice(),
+          null, // projectDirectory
+          true, // enableHotReload
+          fs.directory('/'), // cwd
+          LaunchMode.run,
+          MachineOutputLogger(parent: notifyingLogger),
+        );
+
+        final DaemonMessage startEvent = await daemonStreams.outputs.stream.firstWhere(
+          (DaemonMessage message) => message.data['event'] == 'app.start',
+        );
+        final appId = (startEvent.data['params']! as Map<String, Object?>)['appId']! as String;
+
+        final Future<OperationResult> restarted = daemon.appDomain.restart(<String, Object?>{
+          'appId': appId,
+        })!;
+
+        failStartup.complete();
+
+        await expectLater(() => launched, throwsStateError);
+        // Without settling `started` on this path the restart would hang.
+        await expectLater(() => restarted, throwsStateError);
+        expect(runner.restartCount, 0);
+      },
+    );
+
+    testWithoutContext(
+      'a failed start does not fault a runner listener that has no error handler',
+      () async {
+        final fs = MemoryFileSystem.test();
+        daemon = Daemon(
+          daemonConnection,
+          analytics: const NoOpAnalytics(),
+          buildSystem: buildSystem,
+          buildTargets: buildTargets,
+          toolContext: FakeToolContext(fs: fs),
+          xcode: null,
+          notifyingLogger: notifyingLogger,
+          featureFlags: TestFeatureFlags(),
+        );
+        final exitApp = Completer<void>();
+        var listenerFired = false;
+
+        final Future<AppInstance> launched = daemon.appDomain.launch(
+          FakeRestartableResidentRunner(),
+          ({
+            Completer<DebugConnectionInfo>? connectionInfoCompleter,
+            Completer<void>? appStartedCompleter,
+          }) async {
+            // HotRunner.run attaches exactly this shape of listener for its
+            // startup analytics, with no onError. Completing the runner's
+            // completer with an error would fault it.
+            unawaited(
+              appStartedCompleter?.future.then((_) {
+                listenerFired = true;
+              }),
+            );
+            // App exits without ever completing appStartedCompleter.
+            await exitApp.future;
+          },
+          FakeAndroidDevice(),
+          null, // projectDirectory
+          true, // enableHotReload
+          fs.directory('/'), // cwd
+          LaunchMode.run,
+          MachineOutputLogger(parent: notifyingLogger),
+        );
+
+        exitApp.complete();
+
+        await expectLater(
+          () => launched,
+          throwsA(
+            isA<DaemonException>().having(
+              (DaemonException e) => e.message,
+              'message',
+              'App failed to start',
+            ),
+          ),
+        );
+
+        // Let any unhandled async error reach the test zone.
+        await pumpEventQueue();
+        expect(listenerFired, isFalse);
+      },
+    );
   });
 
   group('notifyingLogger', () {
@@ -1595,13 +1517,13 @@ void main() {
       bufferLogger.clear();
     });
 
-    test('outputs trace messages in verbose mode', () async {
+    testUsingContext('outputs trace messages in verbose mode', () async {
       final logger = NotifyingLogger(verbose: true, parent: bufferLogger);
       logger.printTrace('test');
       expect(bufferLogger.errorText, contains('test'));
     });
 
-    test('ignores trace messages in non-verbose mode', () async {
+    testUsingContext('ignores trace messages in non-verbose mode', () async {
       final logger = NotifyingLogger(verbose: false, parent: bufferLogger);
 
       final Future<LogMessage> messageResult = logger.onMessage.first;
@@ -1615,7 +1537,7 @@ void main() {
       expect(bufferLogger.errorText, isEmpty);
     });
 
-    test('sends trace messages in notify verbose mode', () async {
+    testUsingContext('sends trace messages in notify verbose mode', () async {
       final logger = NotifyingLogger(verbose: false, parent: bufferLogger, notifyVerbose: true);
 
       final Future<LogMessage> messageResult = logger.onMessage.first;
@@ -1628,7 +1550,7 @@ void main() {
       expect(bufferLogger.errorText, isEmpty);
     });
 
-    test('buffers messages sent before a subscription', () async {
+    testUsingContext('buffers messages sent before a subscription', () async {
       final logger = NotifyingLogger(verbose: false, parent: bufferLogger);
 
       logger.printStatus('hello');
@@ -1639,7 +1561,7 @@ void main() {
       expect(message.message, 'hello');
     });
 
-    test('responds to .supportsColor', () async {
+    testWithoutContext('responds to .supportsColor', () async {
       final logger = NotifyingLogger(verbose: false, parent: bufferLogger);
       expect(logger.supportsColor, isFalse);
     });
@@ -1653,7 +1575,7 @@ void main() {
       queue = DebounceOperationQueue<int, String>();
     });
 
-    test('debounces/merges same operation type and returns same result', () async {
+    testWithoutContext('debounces/merges same operation type and returns same result', () async {
       await _runFakeAsync((FakeAsync time) async {
         final operations = <Future<int>>[
           queue.queueAndDebounce('OP1', debounceDuration, () async => 1),
@@ -1667,7 +1589,7 @@ void main() {
       });
     });
 
-    test('does not merge results outside of the debounce duration', () async {
+    testWithoutContext('does not merge results outside of the debounce duration', () async {
       await _runFakeAsync((FakeAsync time) async {
         final operations = <Future<int>>[
           queue.queueAndDebounce('OP1', debounceDuration, () async => 1),
@@ -1682,7 +1604,7 @@ void main() {
       });
     });
 
-    test('does not merge results of different operations', () async {
+    testWithoutContext('does not merge results of different operations', () async {
       await _runFakeAsync((FakeAsync time) async {
         final operations = <Future<int>>[
           queue.queueAndDebounce('OP1', debounceDuration, () async => 1),
@@ -1696,7 +1618,7 @@ void main() {
       });
     });
 
-    test('does not run any operations concurrently', () async {
+    testWithoutContext('does not run any operations concurrently', () async {
       // Crete a function that's slow, but throws if another instance of the
       // function is running.
       var isRunning = false;
@@ -1725,13 +1647,11 @@ void main() {
   });
 
   group('DaemonCommand', () {
-    test('has correct properties', () {
+    testWithoutContext('has correct properties', () {
       final command = DaemonCommand(
         androidContext: FakeAndroidContext(),
-        assetBundleFactory: _FakeAssetBundleFactory(),
         buildSystem: buildSystem,
         buildTargets: buildTargets,
-        devtoolsLauncher: FakeDevtoolsLauncher(),
         toolContext: FakeToolContext(),
         xcode: null,
       );
@@ -1742,10 +1662,8 @@ void main() {
 
       final hiddenCommand = DaemonCommand(
         androidContext: FakeAndroidContext(),
-        assetBundleFactory: _FakeAssetBundleFactory(),
         buildSystem: buildSystem,
         buildTargets: buildTargets,
-        devtoolsLauncher: FakeDevtoolsLauncher(),
         toolContext: FakeToolContext(),
         xcode: null,
         hidden: true,
@@ -1758,6 +1676,27 @@ void main() {
 bool _notEvent(DaemonMessage message) => message.data['event'] == null;
 
 bool _isConnectedEvent(DaemonMessage message) => message.data['event'] == 'daemon.connected';
+
+class FakeWindowsWorkflow extends Fake implements WindowsWorkflow {
+  FakeWindowsWorkflow({this.canListDevices = true});
+
+  @override
+  final bool canListDevices;
+}
+
+class FakeAndroidWorkflow extends Fake implements AndroidWorkflow {
+  FakeAndroidWorkflow({this.canListDevices = true});
+
+  @override
+  final bool canListDevices;
+}
+
+class FakeIOSWorkflow extends Fake implements IOSWorkflow {
+  FakeIOSWorkflow({this.canListDevices = true});
+
+  @override
+  final bool canListDevices;
+}
 
 class FakeAndroidDevice extends Fake implements AndroidDevice {
   @override
@@ -1807,6 +1746,9 @@ class FakeAndroidDevice extends Fake implements AndroidDevice {
 
   @override
   bool get supportsScreenshot => true;
+
+  @override
+  bool get supportsScreenRecording => true;
 
   @override
   bool get supportsFlutterExit => true;
@@ -2025,5 +1967,3 @@ class FakeRestartableResidentRunner extends FakeResidentRunner {
     return OperationResult.ok;
   }
 }
-
-class _FakeAssetBundleFactory extends Fake implements AssetBundleFactory {}
