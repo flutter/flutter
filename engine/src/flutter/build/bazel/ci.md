@@ -238,20 +238,30 @@ the test for real, and so does the command from `engine/src`.
   proxy around ninja as the recipe ran it around a GN build (`gn_build.py`'s
   Reproxy: `bootstrap --re_proxy=reproxy --cfg=reclient-linux.cfg`, a socket
   of its own under the sandbox's /tmp, logs and the dependency cache under
-  the action's scratch, Application Default Credentials -- a bot's
-  metadata server -- and `bootstrap --shutdown`), GN's `use_rbe` with the
+  the action's scratch, and `bootstrap --shutdown`), GN's `use_rbe` with the
   engine's `rewrapper-linux-x64.cfg` and `remote_local_fallback`, 80 ninja
   jobs a core; @reclient and @reclient_cfgs (the two DEPS packages
   gclient's `use_rbe` syncs, back on in the Linux Bazel builders' files for
   that) are laid under the GN root where rbe.gni and the Linux toolchain's
   wrapper scripts expect them. The flag is
   `--//engine/src/flutter/build/bazel:wrap_rbe`, which bazel_ci.py adds
-  with `--config=rbe`; without it, or when the proxy cannot start (a
-  developer's sandbox has no credentials unless
-  `--action_env=GOOGLE_APPLICATION_CREDENTIALS=<the gcloud ADC file>` reaches
-  it -- not `--action_env=HOME`, which makes the Dart SDK's own `dart
-  compile` write telemetry into a read-only home), the wrap compiles
-  locally and says so in its log. Measured from a workstation in the
+  with `--config=rbe`. The proxy's credentials: a Bazel action sees none
+  of the task's environment, so bazel_ci.py writes the task's emulated
+  metadata server (`GCE_METADATA_HOST=127.0.0.1:<port>` and its two
+  aliases, `RBE_use_gce_credentials=true`) to
+  `~/.cache/flutter_engine_bazel/wrap_rbe_env.json` before every Bazel
+  command on a bot, and gn_build.py gives it to the proxy, read at run
+  time rather than as an input (the port would otherwise re-key the wrap
+  every task) -- the first presubmit with 510 had every wrap fail with
+  "insufficient authentication scopes": reclient's Application Default
+  Credentials had found the VM's own metadata server. A developer's
+  sandbox has `--action_env=GOOGLE_APPLICATION_CREDENTIALS=<the gcloud ADC
+  file>` instead (not `--action_env=HOME`, which makes the Dart SDK's own
+  `dart compile` write telemetry into a read-only home). Without the file
+  or the variable, or when the proxy cannot start, the wrap compiles
+  locally and says so in its log (a proxy without credentials fails every
+  compile outright; `remote_local_fallback` does not cover
+  Unauthenticated). Measured from a workstation in the
   sandbox: the Dart runtime's 2,252 compiles all through the proxy, 77 s of
   ninja when they are reclient cache hits (about 2.5 minutes when they
   execute), the action 2:20 with its tree, digests and the local Dart
