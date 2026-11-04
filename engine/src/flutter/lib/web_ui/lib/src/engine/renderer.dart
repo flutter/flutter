@@ -97,7 +97,8 @@ abstract class Renderer {
   }
 
   void _disposeRasterizer(ViewRasterizer rasterizer) {
-    if (rasterizer.queue.next case final RenderRequest next) {
+    final RenderRequest? next = rasterizer.queue.next;
+    if (next != null) {
       rasterizer.queue.next = null;
       _releaseScene(next.scene);
       next.completer.complete();
@@ -106,15 +107,11 @@ abstract class Renderer {
   }
 
   void _retainScene(ui.Scene scene) {
-    if (scene case final LayerScene layerScene) {
-      layerScene.retain();
-    }
+    (scene as LayerScene).retain();
   }
 
   void _releaseScene(ui.Scene scene) {
-    if (scene case final LayerScene layerScene) {
-      layerScene.release();
-    }
+    (scene as LayerScene).release();
   }
 
   /// Creates a native paint for a single draw call from [paint].
@@ -403,7 +400,8 @@ abstract class Renderer {
     if (renderQueue.current != null) {
       // If a scene is already queued up, drop it and queue this one up instead
       // so that the scene view always displays the most recently requested scene.
-      if (renderQueue.next case final RenderRequest dropped) {
+      final RenderRequest? dropped = renderQueue.next;
+      if (dropped != null) {
         _releaseScene(dropped.scene);
         dropped.completer.complete();
       }

@@ -498,6 +498,7 @@ void testMain() {
     expect(timing.rasterDuration, greaterThanOrEqualTo(minimumMeasuredEngineWork));
     expect(timing.buildDuration, lessThan(engineWork));
   });
+
   test('queued scene with root picture retains picture after caller calls scene.dispose() immediately after render', () async {
     final EngineFlutterView view = EnginePlatformDispatcher.instance.implicitView!;
     final HoldingRasterizer holdingRasterizer = createAndInstallHoldingRasterizer(view);
