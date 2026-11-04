@@ -100,10 +100,19 @@ abstract class CkSurface extends Surface {
   /// The underlying Skia graphics context.
   SkGrContext? _grContext;
 
+  bool _isDisposed = false;
+
   /// Handles the context lost event by acquiring a new canvas and recreating
   /// the graphics context.
   void onContextLost() {
-    _handledContextLostEvent?.complete();
+    if (_isDisposed) {
+      return;
+    }
+    if (_handledContextLostEvent case final Completer<void> completer) {
+      if (!completer.isCompleted) {
+        completer.complete();
+      }
+    }
     final DomEventTarget newCanvas = _canvasProvider.acquireCanvas(
       _currentSize,
       onContextLost: onContextLost,
@@ -256,6 +265,7 @@ abstract class CkSurface extends Surface {
 
   @override
   void dispose() {
+    _isDisposed = true;
     _skSurface?.dispose();
     _skSurface = null;
   }
@@ -533,6 +543,25 @@ class CkOffscreenSurface extends CkSurface implements OffscreenSurface {
     _handledContextLostEvent = Completer<void>();
     final WebGLContext gl = (canvas as DomOffscreenCanvas).getGlContext(webGLVersion);
     gl.loseContextExtension.loseContext();
+  }
+
+  @override
+  void dispose() {
+    if (_isDisposed) {
+      return;
+    }
+    final DomEventTarget currentCanvas = canvas;
+    _canvasProvider.releaseCanvas(currentCanvas as DomOffscreenCanvas);
+    if (supportsWebGl) {
+      final WebGLContext gl = currentCanvas.getGlContext(webGLVersion);
+      if (!gl.isContextLost()) {
+        gl.loseContextExtension.loseContext();
+      }
+    }
+    _grContext?.releaseResourcesAndAbandonContext();
+    _grContext?.delete();
+    _grContext = null;
+    super.dispose();
   }
 }
 

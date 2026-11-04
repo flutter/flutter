@@ -453,8 +453,15 @@ void testMain() {
 
         // Calling dispose immediately after setSize.
         surface.setSize(const BitmapSize(500, 500));
+        final disposedCanvas = surface.canvas as DomOffscreenCanvas;
         surface.dispose();
         expect(surface.skSurface, isNull);
+
+        // Disposing releases the canvas, removes the context loss listener,
+        // and explicitly loses the WebGL context.
+        final WebGLContext gl = disposedCanvas.getGlContext(webGLVersion);
+        expect(gl.isContextLost(), isTrue);
+        await Future<void>.delayed(const Duration(milliseconds: 50));
 
         // Calling dispose twice should be safe and idempotent.
         surface.dispose();
@@ -468,6 +475,21 @@ void testMain() {
         expect(onscreenSurface.skSurface, isNull);
         onscreenSurface.dispose();
         expect(onscreenSurface.skSurface, isNull);
+      });
+
+      test('context loss after already completed triggerContextLoss does not throw', () async {
+        final surface = CkOffscreenSurface(OffscreenCanvasProvider());
+        await surface.initialized;
+        surface.setSize(const BitmapSize(100, 100));
+
+        await surface.triggerContextLoss();
+        await surface.handledContextLossEvent;
+
+        // A second context loss event on the newly acquired canvas must not
+        // attempt to re-complete the already-completed completer.
+        expect(() => surface.onContextLost(), returnsNormally);
+
+        surface.dispose();
       });
 
       test('zero / minimum dimension boundary sizing followed by picture rasterization', () async {
