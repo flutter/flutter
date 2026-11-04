@@ -140,8 +140,12 @@ void testMain() {
       for (final (ImageFilter filter, String description) in cases) {
         expect(filter.debugShortDescription, description);
         expect(filter.toString(), 'ImageFilter.$description');
-        final f = filter as EngineBlurImageFilter;
-        final copy = ImageFilter.blur(sigmaX: f.sigmaX, sigmaY: f.sigmaY, tileMode: f.tileMode);
+        final blurFilter = filter as EngineBlurImageFilter;
+        final copy = ImageFilter.blur(
+          sigmaX: blurFilter.sigmaX,
+          sigmaY: blurFilter.sigmaY,
+          tileMode: blurFilter.tileMode,
+        );
         expect(filter == copy, !description.contains('bounds:'), reason: description);
       }
     });

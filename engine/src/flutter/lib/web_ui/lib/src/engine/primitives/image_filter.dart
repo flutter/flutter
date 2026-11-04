@@ -175,7 +175,9 @@ class EngineBlurImageFilter extends EngineImageFilter {
 
   @override
   String get debugShortDescription =>
-      'blur($sigmaX, $sigmaY, ${tileModeString(tileMode)}${bounds == null ? '' : ', bounds: $bounds'})';
+      'blur($sigmaX, $sigmaY, ${tileModeString(tileMode)}${_boundsString()})';
+
+  String _boundsString() => bounds == null ? '' : ', bounds: $bounds';
 }
 
 class EngineMatrixImageFilter extends EngineImageFilter {
