@@ -2855,6 +2855,44 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
   XCTAssertEqualObjects(inputView.passwordRules.passwordRulesDescriptor, @"required: [-a]];");
 }
 
+- (void)testUpdatePasswordRules {
+  NSMutableDictionary* config = self.mutablePasswordTemplateCopy;
+  [config setValue:@{
+    @"uniqueIdentifier" : @"field1",
+    @"hints" : @[ @"newPassword" ],
+    @"editingValue" : @{@"text" : @""},
+  }
+            forKey:@"autofill"];
+  [self setClientId:123 configuration:config];
+
+  FlutterTextInputView* inputView = OCMPartialMock(self.installedInputViews[0]);
+  __block int callCount = 0;
+  OCMStub([inputView reloadInputViews]).andDo(^(NSInvocation* invocation) {
+    callCount++;
+  });
+  XCTAssertNil(inputView.passwordRules);
+
+  [config setValue:@{
+    @"uniqueIdentifier" : @"field1",
+    @"hints" : @[ @"newPassword" ],
+    @"editingValue" : @{@"text" : @""},
+    @"passwordRules" : @{@"minLength" : @16},
+  }
+            forKey:@"autofill"];
+  [self updateConfig:config];
+  XCTAssertEqualObjects(inputView.passwordRules.passwordRulesDescriptor, @"minlength: 16;");
+  XCTAssertEqual(callCount, 1);
+
+  // Same rules again do not reload the input views.
+  [self updateConfig:config];
+  XCTAssertEqual(callCount, 1);
+
+  [config removeObjectForKey:@"autofill"];
+  [self updateConfig:config];
+  XCTAssertNil(inputView.passwordRules);
+  XCTAssertEqual(callCount, 2);
+}
+
 - (void)testPasswordRulesIgnoresMalformedValues {
   FlutterTextInputView* inputView = [self inputViewWithPasswordRules:@{
     @"required" : @[ @[ @"unknown", @42, @{@"custom" : @""} ], @"upper", @[ @"digit" ] ],

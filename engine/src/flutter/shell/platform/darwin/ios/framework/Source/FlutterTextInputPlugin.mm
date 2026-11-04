@@ -3388,6 +3388,20 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
       }
     }
   }
+
+  // The password rules of the focused field can change while it is focused,
+  // for example when the app fetches them from a server.
+  id autofill = dictionary[kAutofillProperties];
+  UITextInputPasswordRules* passwordRules =
+      [autofill isKindOfClass:[NSDictionary class]]
+          ? ToUITextInputPasswordRules(autofill[kAutofillPasswordRules])
+          : nil;
+  NSString* oldDescriptor = _activeView.passwordRules.passwordRulesDescriptor;
+  NSString* newDescriptor = passwordRules.passwordRulesDescriptor;
+  if (oldDescriptor != newDescriptor && ![oldDescriptor isEqualToString:newDescriptor]) {
+    _activeView.passwordRules = passwordRules;
+    [_activeView reloadInputViews];
+  }
 }
 
 #pragma mark UIIndirectScribbleInteractionDelegate
