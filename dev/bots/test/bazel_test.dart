@@ -129,6 +129,44 @@ void main() {
     });
   });
 
+  group('bazelRbeOptions', () {
+    test('is --config=rbe on a Linux bot and nowhere else', () {
+      const none = <String, String>{};
+      expect(bazelRbeOptions(onBot: true, onLinux: true, environment: none), <String>[
+        '--config=rbe',
+      ]);
+      expect(bazelRbeOptions(onBot: true, onLinux: false, environment: none), isEmpty);
+      expect(bazelRbeOptions(onBot: false, onLinux: true, environment: none), isEmpty);
+    });
+
+    test('is switched off for a run by $kBazelRbeEnvironmentVariable', () {
+      for (final no in <String>['0', 'false', 'no']) {
+        expect(
+          bazelRbeOptions(
+            onBot: true,
+            onLinux: true,
+            environment: <String, String>{kBazelRbeEnvironmentVariable: no},
+          ),
+          isEmpty,
+        );
+      }
+      expect(
+        bazelRbeOptions(
+          onBot: true,
+          onLinux: true,
+          environment: <String, String>{kBazelRbeEnvironmentVariable: '1'},
+        ),
+        <String>['--config=rbe'],
+      );
+    });
+
+    test('is what bazelTestOptions gives a bot', () {
+      final List<String> options = bazelTestOptions();
+      expect(options.contains('--config=rbe'), bazelRbeOptions().isNotEmpty);
+      expect(options, contains('--config=prebuilt_engine'));
+    });
+  });
+
   group('the results of a run', () {
     test("bazelTestResultsFile is the target's JSON reporter under bazel-testlogs", () {
       expect(
