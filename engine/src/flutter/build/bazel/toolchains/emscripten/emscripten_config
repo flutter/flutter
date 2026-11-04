@@ -21,3 +21,18 @@ BINARYEN_ROOT = _bin
 NODE_JS = os.path.join(_root, os.environ["EM_NODE"])
 CACHE = os.path.join(EMSCRIPTEN_ROOT, "cache")
 FROZEN_CACHE = True
+
+# The Closure compiler of `--closure=1`, named outright rather than found:
+# emcc's default is node_modules/.bin/google-closure-compiler, npm's symlink
+# to ../google-closure-compiler/cli.js, which holds on this machine but not
+# on a remote worker (the root .bazelrc's build:rbe), where Bazel lays a
+# source symlink as a copy of its target -- a cli.js at the .bin path,
+# whose `require('./lib/utils')` then finds nothing, and emcc's fallback,
+# the Java compiler, finds no Java. The script at its own path resolves its
+# modules and the native compiler beside them anywhere. The flag emcc adds
+# to its default (tools/building.py's get_closure_compiler) is kept.
+CLOSURE_COMPILER = [
+    NODE_JS,
+    "--max_old_space_size=8192",
+    os.path.join(EMSCRIPTEN_ROOT, "node_modules", "google-closure-compiler", "cli.js"),
+]
