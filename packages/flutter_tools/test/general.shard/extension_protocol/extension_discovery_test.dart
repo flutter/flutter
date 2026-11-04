@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io' as io;
 import 'dart:isolate';
 
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -11,6 +12,7 @@ import 'package:flutter_tools/src/base/signals.dart';
 import 'package:flutter_tools/src/experimental/extension_discovery.dart';
 import 'package:flutter_tools_core/flutter_tools_core.dart';
 import 'package:flutter_tools_extension/flutter_tools_extension.dart';
+import 'package:json_rpc_2/json_rpc_2.dart' as json_rpc;
 import 'package:test/test.dart';
 import 'package:yaml/yaml.dart';
 
@@ -117,6 +119,73 @@ class _AsyncErrorService extends ToolExtensionService {
 
 void _asyncErrorExtensionEntryPoint(SendPort sendPort) {
   unawaited(ToolExtensionEntryPoint.run(sendPort, <ToolExtensionService>[_AsyncErrorService()]));
+}
+
+class _ProtocolHardeningService extends ToolExtensionService {
+  @override
+  String get namespace => 'hardening';
+
+  @override
+  Future<Map<String, ExtensionRpcHandler>> initialize() async {
+    return <String, ExtensionRpcHandler>{
+      'throwUserError': (Map<String, Object?> _) {
+        throw const ToolExtensionException('Missing custom SDK at /opt/custom_sdk');
+      },
+      'callProcessExit': (Map<String, Object?> _) {
+        io.exit(42);
+      },
+    };
+  }
+}
+
+void _protocolHardeningEntryPoint(SendPort sendPort) {
+  unawaited(
+    ToolExtensionEntryPoint.run(sendPort, <ToolExtensionService>[_ProtocolHardeningService()]),
+  );
+}
+
+class _ExitInInitService extends ToolExtensionService {
+  @override
+  String get namespace => 'exit_init';
+
+  @override
+  Future<Map<String, ExtensionRpcHandler>> initialize() async {
+    io.exit(1);
+  }
+}
+
+void _exitInInitEntryPoint(SendPort sendPort) {
+  unawaited(ToolExtensionEntryPoint.run(sendPort, <ToolExtensionService>[_ExitInInitService()]));
+}
+
+class _ShutdownTrackingService extends ToolExtensionService {
+  _ShutdownTrackingService(this.namespace, {this.throwOnShutdown = false});
+
+  @override
+  final String namespace;
+  final bool throwOnShutdown;
+
+  @override
+  Future<Map<String, ExtensionRpcHandler>> initialize() async {
+    return <String, ExtensionRpcHandler>{'ping': (Map<String, Object?> _) => 'pong'};
+  }
+
+  @override
+  Future<void> shutdown() async {
+    sendNotification('lifecycle.shutdown', <String, Object?>{'service': namespace});
+    if (throwOnShutdown) {
+      throw StateError('Simulated shutdown failure in $namespace');
+    }
+  }
+}
+
+void _shutdownTrackingEntryPoint(SendPort sendPort) {
+  unawaited(
+    ToolExtensionEntryPoint.run(sendPort, <ToolExtensionService>[
+      _ShutdownTrackingService('service_a', throwOnShutdown: true),
+      _ShutdownTrackingService('service_b'),
+    ]),
+  );
 }
 
 void main() {
@@ -270,6 +339,21 @@ void main() {
             (StateError e) => e.message,
             'message',
             contains('Reserved RPC method registered: "extension.getCapabilities"'),
+          ),
+        ),
+      );
+      await pumpEventQueue();
+      expect(messages, isEmpty);
+
+      await expectLater(
+        ToolExtensionEntryPoint.run(receivePort.sendPort, <ToolExtensionService>[
+          _DummyService('extension', 'shutdown'),
+        ]),
+        throwsA(
+          isA<StateError>().having(
+            (StateError e) => e.message,
+            'message',
+            contains('Reserved RPC method registered: "extension.shutdown"'),
           ),
         ),
       );
@@ -528,6 +612,87 @@ void main() {
         ),
       );
       expect(logger.errorText, contains('Simulated unhandled async error'));
+    });
+
+    test('ToolExtensionException with domainErrorCode (-32001) translates to ToolExtensionException on sendRequest', () async {
+      final logger = BufferLogger.test();
+      final ExtensionConnection connection = await ExtensionConnection.spawn(
+        _protocolHardeningEntryPoint,
+        logger: logger,
+      );
+      addTearDown(connection.dispose);
+
+      await expectLater(
+        connection.sendRequest('hardening.throwUserError'),
+        throwsA(
+          isA<ToolExtensionException>().having(
+            (ToolExtensionException e) => e.message,
+            'message',
+            'Missing custom SDK at /opt/custom_sdk',
+          ),
+        ),
+      );
+    });
+
+    test('IOOverrides exit guard intercepts exit() inside extension RPC handler without killing host process', () async {
+      final logger = BufferLogger.test();
+      final ExtensionConnection connection = await ExtensionConnection.spawn(
+        _protocolHardeningEntryPoint,
+        logger: logger,
+      );
+      addTearDown(connection.dispose);
+
+      await expectLater(
+        connection.sendRequest('hardening.callProcessExit'),
+        throwsA(
+          isA<json_rpc.RpcException>().having(
+            (json_rpc.RpcException e) => e.message,
+            'message',
+            contains(
+              'Unsupported operation: Tool extensions must not call exit(42); '
+              'throw ToolExtensionException instead.',
+            ),
+          ),
+        ),
+      );
+    });
+
+    test('IOOverrides exit guard intercepts exit() during service initialize without killing host process', () async {
+      final logger = BufferLogger.test();
+      await expectLater(
+        ExtensionConnection.spawn(_exitInInitEntryPoint, logger: logger),
+        throwsA(
+          isA<StateError>().having(
+            (StateError e) => e.message,
+            'message',
+            contains(
+              'Tool extensions must not call exit(1); throw ToolExtensionException instead.',
+            ),
+          ),
+        ),
+      );
+    });
+
+    test('ExtensionConnection.dispose sends extension.shutdown and isolates per-service shutdown failures', () async {
+      final logger = BufferLogger.test();
+      final ExtensionConnection connection = await ExtensionConnection.spawn(
+        _shutdownTrackingEntryPoint,
+        logger: logger,
+      );
+
+      final shutdownServices = <String>[];
+      final StreamSubscription<Map<String, Object?>> subscription = connection
+          .onNotification('lifecycle.shutdown')
+          .listen((Map<String, Object?> event) {
+            if (event['service'] case final String serviceName) {
+              shutdownServices.add(serviceName);
+            }
+          });
+      addTearDown(subscription.cancel);
+
+      await connection.dispose();
+      expect(shutdownServices, unorderedEquals(const <String>['service_a', 'service_b']));
+      expect(logger.traceText, isNot(contains('did not complete cleanly')));
     });
   });
 }

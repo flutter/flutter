@@ -41,6 +41,9 @@ class ExtensionConfiguration {
   final List<ConfigurationExtension> extensions;
   final Logger _logger;
 
+  String _extensionIdentifier(ConfigurationExtension ext) =>
+      ext is ConfigurationExtensionClient ? ext.connection.extensionName : ext.title;
+
   /// Retrieves feature flags provided by all registered extensions.
   Future<List<FeatureFlag>> fetchFeatureFlags() async {
     _logger.printTrace(
@@ -50,6 +53,9 @@ class ExtensionConfiguration {
       extensions.map((ConfigurationExtension ext) async {
         try {
           return await ext.getFeatureFlags();
+        } on ToolExtensionException catch (err) {
+          _logger.printWarning('Extension "${_extensionIdentifier(ext)}": ${err.message}');
+          return const <FeatureFlag>[];
         } on Object catch (err, stack) {
           _logger.printTrace(
             'Failed to fetch feature flags from extension "${ext.title}": $err\n$stack',
@@ -72,6 +78,9 @@ class ExtensionConfiguration {
       extensions.map((ConfigurationExtension ext) async {
         try {
           return await ext.getConfigurations();
+        } on ToolExtensionException catch (err) {
+          _logger.printWarning('Extension "${_extensionIdentifier(ext)}": ${err.message}');
+          return const <ConfigOption>[];
         } on Object catch (err, stack) {
           _logger.printTrace(
             'Failed to fetch config options from extension "${ext.title}": $err\n$stack',
@@ -101,6 +110,9 @@ class ExtensionConfiguration {
           final List<FeatureFlag> flags = await ext.getFeatureFlags();
           final List<ConfigOption> options = await ext.getConfigurations();
           return ExtensionSettingsGroup(title: title, featureFlags: flags, configOptions: options);
+        } on ToolExtensionException catch (err) {
+          _logger.printWarning('Extension "${_extensionIdentifier(ext)}": ${err.message}');
+          return null;
         } on Object catch (err, stack) {
           _logger.printTrace(
             'Failed to fetch settings from extension "${ext.title}": $err\n$stack',
@@ -148,6 +160,8 @@ class ConfigurationExtensionClient extends ConfigurationExtension {
           'ConfigurationExtensionClient received invalid title response: $response',
         );
       }
+    } on ToolExtensionException catch (err) {
+      _logger.printWarning('Extension "${connection.extensionName}": ${err.message}');
     } on Object catch (err, stack) {
       _logger.printTrace('ConfigurationExtensionClient failed to fetch title: $err\n$stack');
     }
@@ -175,6 +189,8 @@ class ConfigurationExtensionClient extends ConfigurationExtension {
       _logger.printTrace(
         'ConfigurationExtensionClient received invalid or null $entityName response: $rawResult',
       );
+    } on ToolExtensionException {
+      rethrow;
     } on Object catch (err, stack) {
       _logger.printTrace('ConfigurationExtensionClient failed to get $entityName: $err\n$stack');
     }

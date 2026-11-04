@@ -73,6 +73,27 @@ void _secondaryExtensionEntryPoint(SendPort sendPort) {
   ToolExtensionEntryPoint.run(sendPort, <ToolExtensionService>[_SecondaryConfigurationExtension()]);
 }
 
+class _DomainErrorConfigurationExtension extends ConfigurationExtension {
+  @override
+  String get title => 'Custom Config';
+
+  @override
+  Future<List<FeatureFlag>> getFeatureFlags() async {
+    throw const ToolExtensionException('Config failed with actionable user error.');
+  }
+
+  @override
+  Future<List<ConfigOption>> getConfigurations() async {
+    throw const ToolExtensionException('Config options failed with actionable user error.');
+  }
+}
+
+void _domainErrorConfigEntryPoint(SendPort sendPort) {
+  ToolExtensionEntryPoint.run(sendPort, <ToolExtensionService>[
+    _DomainErrorConfigurationExtension(),
+  ], extensionName: 'custom_config_ext');
+}
+
 void main() {
   group('ExtensionConfiguration Host Integration', () {
     testWithoutContext(
@@ -223,5 +244,52 @@ void main() {
         expect(await clientWithInvalid.getConfigurations(), isEmpty);
       },
     );
+
+    testWithoutContext('ExtensionConfiguration logs warning with extension name and skips extension on ToolExtensionException', () async {
+      final logger = BufferLogger.test();
+      final manager = ExtensionManager(
+        featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
+        hostPlatform: HostPlatform.linux_x64,
+        logger: logger,
+      );
+      addTearDown(manager.dispose);
+      await manager.initialize(
+        entryPoints: <ExtensionEntryPoint>[
+          _domainErrorConfigEntryPoint,
+          _secondaryExtensionEntryPoint,
+        ],
+      );
+
+      final config = ExtensionConfiguration(
+        extensions: manager.configurationExtensions,
+        logger: logger,
+      );
+
+      final List<FeatureFlag> flags = await config.fetchFeatureFlags();
+      expect(flags.map((FeatureFlag f) => f.name), const <String>['enable-secondary-feature']);
+      expect(
+        logger.warningText,
+        contains('Extension "custom_config_ext": Config failed with actionable user error.'),
+      );
+
+      logger.clear();
+      final List<ConfigOption> options = await config.fetchConfigurations();
+      expect(options.map((ConfigOption o) => o.name), const <String>['secondary-config-key']);
+      expect(
+        logger.warningText,
+        contains(
+          'Extension "custom_config_ext": Config options failed with actionable user error.',
+        ),
+      );
+
+      logger.clear();
+      final List<ExtensionSettingsGroup> groups = await config.fetchExtensionSettings();
+      expect(groups, hasLength(1));
+      expect(groups.single.title, 'Secondary Configuration Extension');
+      expect(
+        logger.warningText,
+        contains('Extension "custom_config_ext": Config failed with actionable user error.'),
+      );
+    });
   });
 }

@@ -2,7 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+import 'dart:isolate';
+
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
@@ -10,10 +14,54 @@ import 'package:flutter_tools/src/experimental/extension_discovery.dart';
 import 'package:flutter_tools/src/experimental/extension_manager.dart';
 import 'package:flutter_tools/src/experimental/templates.dart';
 import 'package:flutter_tools_core/flutter_tools_core.dart';
+import 'package:flutter_tools_extension/flutter_tools_extension.dart';
 import 'package:flutter_tools_extension_linux_prototype/flutter_tools_extension_linux_prototype.dart';
 import 'package:test/test.dart';
 
 import '../../src/fakes.dart';
+
+final class _DomainErrorProjectTemplate extends ProjectTemplate {
+  @override
+  String get name => 'custom-os-app';
+
+  @override
+  bool get hidden => false;
+
+  @override
+  Set<String> get templateDependencies => const <String>{};
+
+  @override
+  Set<String> get templateSources => const <String>{};
+
+  @override
+  String get templatePath => 'package:flutter_tools/templates/app';
+
+  @override
+  Future<Map<String, Object?>> generateTemplateParameters(
+    Map<String, Object?> toolParameters,
+  ) async {
+    throw const ToolExtensionException('Template parameter generation failed.');
+  }
+}
+
+final class _DomainErrorTemplateService extends TemplateService {
+  @override
+  Set<ProjectTemplate> get projectTemplates => <ProjectTemplate>{_DomainErrorProjectTemplate()};
+
+  @override
+  Set<String> get appPlatformTemplates => const <String>{};
+
+  @override
+  Set<String> get pluginPlatformTemplates => const <String>{};
+}
+
+void _domainErrorTemplateEntryPoint(SendPort sendPort) {
+  unawaited(
+    ToolExtensionEntryPoint.run(sendPort, <ToolExtensionService>[
+      _DomainErrorTemplateService(),
+    ], extensionName: 'custom_template_ext'),
+  );
+}
 
 void main() {
   group('ExtensionTemplateManager', () {
@@ -162,5 +210,42 @@ void main() {
         throwsArgumentError,
       );
     });
+
+    test(
+      'generateTemplateParameters throws ToolExit when extension throws ToolExtensionException',
+      () async {
+        final featureFlags = TestFeatureFlags(isToolExtensionsEnabled: true);
+        final manager = ExtensionManager(
+          hostPlatform: HostPlatform.linux_x64,
+          logger: logger,
+          featureFlags: featureFlags,
+        );
+        addTearDown(manager.dispose);
+        await manager.initialize(
+          entryPoints: <ExtensionEntryPoint>[_domainErrorTemplateEntryPoint],
+        );
+
+        final templateManager = ExtensionTemplateManager(
+          extensionManager: manager,
+          fileSystem: fs,
+          logger: logger,
+          featureFlags: featureFlags,
+          flutterRoot: '/flutter',
+        );
+
+        await expectLater(
+          templateManager.generateTemplateParameters('custom-os-app', const <String, Object?>{
+            'projectName': 'my_app',
+          }),
+          throwsA(
+            isA<ToolExit>().having(
+              (ToolExit e) => e.message,
+              'message',
+              'Template parameter generation failed.',
+            ),
+          ),
+        );
+      },
+    );
   });
 }
