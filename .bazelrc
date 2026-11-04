@@ -100,13 +100,21 @@ test:ci --test_output=errors --keep_going --test_summary=short
 # this instance a client cannot write a locally run action's result to the
 # cache (the bots' service account included), only a worker can, so a build
 # that only reads the cache (--remote_cache alone) finds nothing of its own.
-# What stays on the machine: the wrapped GN builds (gn_build.bzl's
-# no-remote-exec: their inputs are a synced tree, and they take an hour)
-# and the tests (the engine's want a display, a GPU or a device). Linux
-# hosts only: the workers are Linux x64 and so must the execution platform
-# be; bazel_ci.py and test.dart add the config on a Linux bot. Measured
-# from a workstation: fml_unittests' 676 actions in 93 s (critical path 60),
-# then all hits from a fresh output base.
+# The tests run on the workers too, the headless ones: the framework's
+# under flutter_tester and the pure-Dart packages', which is most of a
+# framework shard -- what a bot then downloads of a test is its logs and
+# its results, not its kernel (50 MB each, 40 GB a shard). What stays on
+# the machine: the wrapped GN builds (gn_build.bzl's no-remote-exec: their
+# inputs are a synced tree, and they take an hour), the tests tagged
+# no-remote-exec (dart_test.bzl, flutter_test.bzl: those that may reach the
+# network, drive a browser or a display, or run a tool of the host -- the
+# workers have no network and nothing of the host; every one of the tool's
+# shards), and the engine's suites (run_tests.py keeps them on the machine:
+# a display, a GPU, a device). Linux hosts only: the workers are Linux x64
+# and so must the execution platform be; bazel_ci.py and test.dart add the
+# config on a Linux bot. Measured from a workstation: fml_unittests' 676
+# actions in 93 s (critical path 60), then all hits from a fresh output
+# base.
 build:rbe --remote_executor=grpcs://remotebuildexecution.googleapis.com
 build:rbe --remote_instance_name=projects/flutter-rbe-prod/instances/default
 build:rbe --google_default_credentials
@@ -114,7 +122,11 @@ build:rbe --remote_default_exec_properties=container-image=docker://gcr.io/cloud
 build:rbe --remote_default_exec_properties=OSFamily=Linux
 build:rbe --jobs=200
 build:rbe --remote_timeout=600
-build:rbe --strategy=TestRunner=sandboxed,local
+# No symlink forest for a test that runs on a worker (its runfiles go to
+# the worker as inputs); one is laid when a local test or `bazel run` needs
+# it. //:framework_tests //:dart_tests are 2,111 forests of 650 to 5,500
+# links each, minutes of a bot's network disk.
+build:rbe --nobuild_runfile_links
 
 # The prebuilt engine for the framework's and the tool's tests: the
 # artifacts the flutter tool downloaded into bin/cache (`bin/flutter

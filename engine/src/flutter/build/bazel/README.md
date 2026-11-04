@@ -1318,13 +1318,33 @@ Silicon 9 min 46. Those times are the 8-core bot compiling every kernel
 itself; on a Linux bot the shard now builds with `--config=rbe`
 (`bazelRbeOptions`, the config bazel_ci.py gives the engine builders: the
 kernel compiles on Flutter's RBE workers, 200 at a time, cached there for
-the next build of the same inputs; the tests on the bot, their kernels
-downloaded; a Mac builds locally, the workers being Linux x64). On the
+the next build of the same inputs; a Mac builds locally, the workers being
+Linux x64). On the
 same 8-core bots (PR #195825 at 497, 11-03), the `run test.dart` step:
 libraries 8:44 → 5:39, misc 16:41 → 10:25, widgets 11:34 → 8:33,
 tool_tests_general 5:25 → 3:34, tool_tests_commands 12:20 → 9:57,
 web_tool_tests 9:59 → 9:21; the tool_integration slices (12–16 min) and
-slow unchanged, their time being the tests themselves. The workers are
+slow unchanged, their time being the tests themselves. Those runs still
+ran every test on the bot, each one's kernel downloaded first (50 MB,
+40 GB a shard). Since 505 the headless tests run on the workers as well --
+the framework's under `flutter_tester` and the pure-Dart packages' -- and
+the bot downloads their logs and results alone (`--remote_download_toplevel`,
+the default, leaves a test's runfiles where they are); `build:rbe` also
+lays no runfiles symlink forest for them (`--nobuild_runfile_links`; one
+is laid when a local test needs it). A test stays on the bot by tag:
+`flutter_tests`' `network = True` suites, and `dart_tests`' `network`,
+`browser`, `browser_driver`, `browser_files`, `display`, `tools`,
+`unsandboxed` and `host` (a per-file list: dev/tools' engine-version tests
+run `git`, which a worker's image lacks; devicelab's runner_test starts
+thirty VMs against a minute), which is every shard of the tool's and four
+pure-Dart files. Measured from a workstation (fresh output base,
+`//:framework_tests //:dart_tests`, 2,111 tests): 774 s elapsed, of which
+the gallery smoke test's 484 s on a worker is the critical path and every
+other test was done by +6:35; per test a median of 4 s on the workers; no
+`.dill` in the output base afterwards. Again without the smoke test, the
+forests off and the four `host` files local: 2,110 tests in 479 s
+(critical path 215 s), 15,469 processes against 17,581, every test
+passing. The workers are
 2-vCPU Debian 11 machines whose clock is UTC, which is why archives are
 zipped on the bot (build_defs/dist/zip_bundle.bzl). `test.dart --no-bazel-rbe` keeps a shard's
 build on the machine and `--bazel-rbe` asks for RBE off a bot (a Linux

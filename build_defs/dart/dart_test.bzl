@@ -666,7 +666,7 @@ dart_test = rule(
     } | KERNEL_TOOL_ATTRS,
 )
 
-def dart_tests(name, tests, size = "medium", tags = [], network = False, large = [], sizes = {}, flaky = [], cases = {}, unsandboxed = [], resolved_tmpdir = [], runner_args = [], suffix = "", **kwargs):
+def dart_tests(name, tests, size = "medium", tags = [], network = False, large = [], sizes = {}, flaky = [], cases = {}, unsandboxed = [], resolved_tmpdir = [], host = [], runner_args = [], suffix = "", **kwargs):
     """One dart_test per test file, and a test_suite of them.
 
     Args:
@@ -693,6 +693,13 @@ def dart_tests(name, tests, size = "medium", tags = [], network = False, large =
       resolved_tmpdir: test files given TMPDIR with its symbolic links
         resolved (dart_test's resolved_tmpdir): the widget_preview tests
         that watch a directory.
+      host: test files that run on the machine alone, never on a remote
+        worker (`no-remote-exec`) when the rest of the suite does
+        (build:rbe): those that run a program of the host by name
+        (dev/tools' engine-version tests run `git`, which a worker's image
+        lacks) or time themselves against the machine (devicelab's
+        runner_test starts thirty Dart VMs at once and gives them a minute,
+        which two vCPUs overrun).
       runner_args: further runner arguments for every file.
       suffix: appended to each file's target name (which is the file's path
         otherwise), for a second suite over some of the same files: the
@@ -700,15 +707,23 @@ def dart_tests(name, tests, size = "medium", tags = [], network = False, large =
         cases the apple shard runs.
       **kwargs: dart_test's attributes, the same for every file.
     """
-    test_tags = list(tags) + ([] if network else ["block-network"])
+
+    # Off the remote workers (build:rbe), which have no network, no
+    # browser's display and nothing of the host: a test that may reach the
+    # network, drives a browser or a display, runs a tool of the host, or
+    # runs outside the sandbox. The rest -- the hermetic Dart tests -- run
+    # there.
+    local = network or any([kwargs.get(key) for key in ("browser", "browser_driver", "browser_files", "display", "tools")])
+    test_tags = list(tags) + (["no-remote-exec"] if local else []) + ([] if network else ["block-network"])
     targets = []
     for test in tests:
         test_name = test.removesuffix(".dart").replace("/", "_") + suffix
+        own_tags = (["no-sandbox"] if test in unsandboxed else []) + (["no-remote-exec"] if not local and (test in unsandboxed or test in host) else [])
         dart_test(
             name = test_name,
             test = test,
             size = sizes.get(test, "large" if test in large else size),
-            tags = test_tags + (["no-sandbox"] if test in unsandboxed else []),
+            tags = test_tags + own_tags,
             flaky = test in flaky,
             resolved_tmpdir = test in resolved_tmpdir,
             runner_args = runner_args + (["--name=" + cases[test]] if test in cases else []),
@@ -753,7 +768,7 @@ def dart_package_tests(
       compile_args: further frontend server arguments, for the prelude and
         the tests alike.
       **kwargs: dart_tests' other arguments (size, large, sizes, flaky, cases, unsandboxed, resolved_tmpdir,
-        suffix, tags, network, runner_args, deps, cache, cache_files, sdk_files, sdk_trees, writable,
+        host, suffix, tags, network, runner_args, deps, cache, cache_files, sdk_files, sdk_trees, writable,
         pub_cache, browser, browser_files, browser_driver, tools, display).
     """
     workspace_packages = {":sources": package} | packages

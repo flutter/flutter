@@ -609,7 +609,11 @@ def flutter_tests(name, tests, size = "medium", tags = [], network = False, flak
     """
     if test_configs and "test_config" in kwargs:
         fail("%s: give test_config (one configuration for every test) or test_configs (the tree's, by directory), not both" % name)
-    test_tags = list(tags) + ([] if network else ["block-network"])
+
+    # A test that may reach the network stays off the remote workers
+    # (build:rbe), which have none; the rest run there, flutter_tester being
+    # headless and its fontconfig its own (the launcher's fonts.conf).
+    test_tags = list(tags) + (["no-remote-exec"] if network else ["block-network"])
     variants = [("", {})] + ([("_impeller", {"impeller": True})] if impeller else [])
     targets = {variant_suffix: [] for variant_suffix, _ in variants}
     compile_attrs = {key: value for key, value in kwargs.items() if key in _KERNEL_ATTRS}

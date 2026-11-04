@@ -45,8 +45,9 @@
 //  SUBSHARD name ending in _bazel (SUBSHARD=widgets_bazel).
 //
 //  On a Linux bot the Bazel build runs its actions on Flutter's RBE instance
-//  (the kernel compiles; the tests stay on the bot). --no-bazel-rbe keeps
-//  the whole build on the machine, as does FLUTTER_BAZEL_RBE=0 in the
+//  (the kernel compiles, and the headless tests: the framework's and the
+//  pure-Dart packages'; the tool's shards stay on the bot). --no-bazel-rbe
+//  keeps the whole build on the machine, as does FLUTTER_BAZEL_RBE=0 in the
 //  environment; --bazel-rbe asks for RBE on a Linux host that is no bot
 //  (gcloud credentials for the instance needed). A Mac builds locally.
 //

@@ -365,6 +365,34 @@ class TestSuitesTest(unittest.TestCase):
       bazel_ci.test_suites(description, ['engine', 'java'])
     self.assertIn('runs no java tests under Bazel (its types: dart, engine)', str(raised.exception))
 
+  def test_the_engines_tests_run_on_the_machine(self):
+    # TEST_OPTIONS keeps the engine's suites off the RBE workers (a display,
+    # a GPU, a device), before whatever the step adds and the suites.
+    description = {
+        'file': 'f',
+        'name': 'n',
+        'tests': HOST_DEBUG_UNOPT['tests'],
+        'bazelisk': '/tools/bazelisk',
+        'startup_options': [],
+        'build_options': ['--config=rbe'],
+        'config': 'ci_host_debug_unopt',
+        'repo_root': '/checkout',
+        'environment': {},
+    }
+    with unittest.mock.patch.object(bazel_ci.subprocess, 'run') as run:
+      run.return_value.returncode = 3
+      self.assertEqual(
+          bazel_ci.run_tests(description, ['engine'], extra_arguments=['--runs_per_test=2']), 3
+      )
+    command = run.call_args.args[0]
+    self.assertEqual(
+        command[command.index('--config=ci_host_debug_unopt') + 1:], [
+            '--strategy=TestRunner=sandboxed,local', '--runs_per_test=2',
+            '//engine/src/flutter/fml:fml_unittests', '//engine/src/flutter/flow:flow_unittests'
+        ]
+    )
+    self.assertEqual(run.call_args.kwargs['cwd'], '/checkout')
+
 
 class RealTableTest(unittest.TestCase):
   """The checked-in table: every configured Linux build matches its own flags."""
