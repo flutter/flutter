@@ -295,15 +295,16 @@ static NSString* ToPasswordRulesDescriptor(id rules) {
   if (allowed) {
     [descriptor appendFormat:@"allowed: %@; ", allowed];
   }
-  NSDictionary<NSString*, NSString*>* lengthProperties = @{
-    @"minLength" : @"minlength",
-    @"maxLength" : @"maxlength",
-    @"maxConsecutive" : @"max-consecutive",
-  };
-  for (NSString* key in @[ @"minLength", @"maxLength", @"maxConsecutive" ]) {
-    id value = rules[key];
+  // Pairs of framework keys and password rules properties, in descriptor order.
+  NSArray<NSArray<NSString*>*>* lengthProperties = @[
+    @[ @"minLength", @"minlength" ],
+    @[ @"maxLength", @"maxlength" ],
+    @[ @"maxConsecutive", @"max-consecutive" ],
+  ];
+  for (NSArray<NSString*>* property in lengthProperties) {
+    id value = rules[property[0]];
     if ([value isKindOfClass:[NSNumber class]] && [value integerValue] > 0) {
-      [descriptor appendFormat:@"%@: %ld; ", lengthProperties[key], (long)[value integerValue]];
+      [descriptor appendFormat:@"%@: %ld; ", property[1], (long)[value integerValue]];
     }
   }
   if (descriptor.length == 0) {
