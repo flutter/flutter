@@ -376,7 +376,7 @@ class _FakeScreenRecording implements ScreenRecording {
 }
 
 class _TestDeviceManager extends DeviceManager {
-  _TestDeviceManager({required super.logger});
+  _TestDeviceManager({required super.logger}) : super(fileSystem: MemoryFileSystem.test());
   List<Device> devices = <Device>[];
 
   @override
