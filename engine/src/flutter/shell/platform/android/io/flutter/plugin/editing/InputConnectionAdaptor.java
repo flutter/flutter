@@ -177,21 +177,24 @@ public class InputConnectionAdaptor extends BaseInputConnection
   }
 
   /**
-   * The {@link TextAttribute#isTextSuggestionSelected()} value of the current IME call, or null if
-   * the IME called an overload without a {@code TextAttribute}.
+   * The {@link TextAttribute} passed with the IME call currently being handled, or null if the IME
+   * called a method that does not take one.
    *
-   * <p>The 3-arg {@code TextAttribute} overloads are {@code default} methods on {@link
-   * android.view.inputmethod.InputConnection} that delegate to the 2-arg overloads, so the 3-arg
-   * overrides below only record this value and the 2-arg overrides do the actual work. That way
-   * every IME call, with or without a {@code TextAttribute}, goes through one code path.
+   * <p>Only set for the duration of a single {@code commitText} or {@code setComposingText} call.
    */
-  @Nullable private Boolean mCallSuggestionSelected = null;
+  @Nullable private TextAttribute mCurrentTextAttribute = null;
 
   /**
-   * Whether the current composing text is a conversion suggestion the user selected. A commit
-   * without a {@code TextAttribute} keeps this state, matching a platform {@code EditText}.
+   * Whether the text in the composing region is a conversion suggestion the user selected, e.g. 漢字
+   * picked from the IME's candidate list for かんじ.
+   *
+   * <p>Unlike {@link #mCurrentTextAttribute}, this outlives a single IME call: it is set when the
+   * composing text is set and read when that text is later committed. Gboard, for example, selects
+   * a candidate with {@code setComposingText(text, 1, TextAttribute)} but commits it with {@code
+   * commitText(text, 1)}, which has no {@code TextAttribute}. A platform {@code EditText} still
+   * reports that commit as a selected suggestion, and so do we.
    */
-  private boolean mComposingSuggestionSelected = false;
+  private boolean mIsComposingTextSelectedSuggestion = false;
 
   /**
    * Reports the type of an IME text change to the {@link AccessibilityBridge}, which attaches it to
@@ -216,9 +219,10 @@ public class InputConnectionAdaptor extends BaseInputConnection
   public boolean commitText(CharSequence text, int newCursorPosition) {
     final boolean result = super.commitText(text, newCursorPosition);
     if (Build.VERSION.SDK_INT >= API_LEVELS.API_37) {
-      recordImeTextChange(committedTypes());
+      recordImeTextChange(getCommittedTextChangeTypes());
     }
-    mComposingSuggestionSelected = false;
+    // Committing ends the composition, so there is no longer a composing suggestion.
+    mIsComposingTextSelectedSuggestion = false;
     return result;
   }
 
@@ -226,13 +230,16 @@ public class InputConnectionAdaptor extends BaseInputConnection
   @RequiresApi(API_LEVELS.API_33)
   public boolean commitText(
       @NonNull CharSequence text, int newCursorPosition, @Nullable TextAttribute textAttribute) {
-    final Boolean previous = mCallSuggestionSelected;
-    mCallSuggestionSelected = suggestionSelected(textAttribute);
+    final TextAttribute previous = mCurrentTextAttribute;
+    mCurrentTextAttribute = textAttribute;
     try {
-      // The default implementation calls through to commitText(CharSequence, int).
+      // BaseInputConnection does not override this overload, so this calls
+      // InputConnection#commitText(CharSequence, int, TextAttribute), whose default
+      // implementation calls commitText(CharSequence, int) above. That method records the
+      // change type using mCurrentTextAttribute.
       return super.commitText(text, newCursorPosition, textAttribute);
     } finally {
-      mCallSuggestionSelected = previous;
+      mCurrentTextAttribute = previous;
     }
   }
 
@@ -267,21 +274,21 @@ public class InputConnectionAdaptor extends BaseInputConnection
     } else {
       result = super.setComposingText(text, newCursorPosition);
     }
+    final boolean isSelectedSuggestion = isTextSuggestionSelected(mCurrentTextAttribute);
     if (Build.VERSION.SDK_INT >= API_LEVELS.API_37) {
       int changeTypes;
       if (text.length() == 0) {
-        changeTypes = committedTypes();
+        changeTypes = getCommittedTextChangeTypes();
       } else {
         changeTypes = AccessibilityEvent.TEXT_CHANGE_TYPE_IN_COMPOSITION;
-        if (Boolean.TRUE.equals(mCallSuggestionSelected)) {
+        if (isSelectedSuggestion) {
           // Matches what a platform EditText reports when a candidate is selected.
           changeTypes |= AccessibilityEvent.TEXT_CHANGE_TYPE_CONVERSION_SUGGESTION_SELECTED_BY_IME;
         }
       }
       recordImeTextChange(changeTypes);
     }
-    mComposingSuggestionSelected =
-        text.length() != 0 && Boolean.TRUE.equals(mCallSuggestionSelected);
+    mIsComposingTextSelectedSuggestion = text.length() != 0 && isSelectedSuggestion;
     endBatchEdit();
     return result;
   }
@@ -290,31 +297,40 @@ public class InputConnectionAdaptor extends BaseInputConnection
   @RequiresApi(API_LEVELS.API_33)
   public boolean setComposingText(
       @NonNull CharSequence text, int newCursorPosition, @Nullable TextAttribute textAttribute) {
-    final Boolean previous = mCallSuggestionSelected;
-    mCallSuggestionSelected = suggestionSelected(textAttribute);
+    final TextAttribute previous = mCurrentTextAttribute;
+    mCurrentTextAttribute = textAttribute;
     try {
-      // The default implementation calls through to setComposingText(CharSequence, int).
+      // BaseInputConnection does not override this overload, so this calls
+      // InputConnection#setComposingText(CharSequence, int, TextAttribute), whose default
+      // implementation calls setComposingText(CharSequence, int) above. That method records the
+      // change type using mCurrentTextAttribute.
       return super.setComposingText(text, newCursorPosition, textAttribute);
     } finally {
-      mCallSuggestionSelected = previous;
+      mCurrentTextAttribute = previous;
     }
   }
 
-  private static boolean suggestionSelected(@Nullable TextAttribute textAttribute) {
+  /** Whether {@code textAttribute} says the IME's text is a conversion suggestion it selected. */
+  private static boolean isTextSuggestionSelected(@Nullable TextAttribute textAttribute) {
     return Build.VERSION.SDK_INT >= API_LEVELS.API_37
         && textAttribute != null
         && textAttribute.isTextSuggestionSelected();
   }
 
   /**
-   * The change types for a commit. A commit made with a {@code TextAttribute} reports that
-   * attribute's suggestion state; a commit without one keeps the state of the composing text.
+   * Returns the text change types for a commit.
+   *
+   * <p>A commit made with a {@link TextAttribute} reports that attribute's suggestion state. A
+   * commit without one reports the state of the composing text it commits; see {@link
+   * #mIsComposingTextSelectedSuggestion}.
    */
-  private int committedTypes() {
-    final boolean selected =
-        mCallSuggestionSelected != null ? mCallSuggestionSelected : mComposingSuggestionSelected;
+  private int getCommittedTextChangeTypes() {
+    final boolean isSelectedSuggestion =
+        mCurrentTextAttribute != null
+            ? isTextSuggestionSelected(mCurrentTextAttribute)
+            : mIsComposingTextSelectedSuggestion;
     int types = AccessibilityEvent.TEXT_CHANGE_TYPE_COMMITTED_BY_IME;
-    if (selected) {
+    if (isSelectedSuggestion) {
       types |= AccessibilityEvent.TEXT_CHANGE_TYPE_CONVERSION_SUGGESTION_SELECTED_BY_IME;
     }
     return types;
@@ -323,7 +339,8 @@ public class InputConnectionAdaptor extends BaseInputConnection
   @Override
   public boolean finishComposingText() {
     final boolean result = super.finishComposingText();
-    mComposingSuggestionSelected = false;
+    // Finishing ends the composition, so there is no longer a composing suggestion.
+    mIsComposingTextSelectedSuggestion = false;
     return result;
   }
 

@@ -94,20 +94,36 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     }
   }
 
+  /**
+   * IME text changes to the input-focused text field that the framework has not reported back in a
+   * semantics update yet, oldest first.
+   *
+   * <p>The IME edits the text on the platform side first; the framework then updates its {@code
+   * TextEditingValue} and, in a later frame, sends a semantics update with the new value. When that
+   * update arrives, {@link #createTextChangedEvent} matches its value against this queue to find
+   * the change types to report.
+   */
   private final Queue<ImeTextChange> imeTextChanges = new ArrayDeque<>();
 
-  // Caps the queue to avoid unbounded growth when entries never match a semantics update, e.g.
-  // when Dart text formatters rewrite the text. Large enough to hold several keystrokes that are
-  // batched into a single frame.
+  // Caps imeTextChanges to avoid unbounded growth when entries never match a semantics update,
+  // e.g. when Dart text formatters rewrite the text. Large enough to hold several keystrokes that
+  // are batched into a single frame.
   private static final int MAX_IME_TEXT_CHANGES = 20;
 
   /**
    * Records the type of a text change the IME just made to the input-focused text field.
    *
-   * <p>The type is attached to the {@link AccessibilityEvent#TYPE_VIEW_TEXT_CHANGED} event sent
-   * when the framework's semantics update for {@code text} arrives. If the IME committed or
-   * selected a suggestion without changing the text, no semantics update will arrive, so the event
-   * is sent right away instead.
+   * <p>Normally the change is queued in {@link #imeTextChanges}, and its type is attached to the
+   * {@link AccessibilityEvent#TYPE_VIEW_TEXT_CHANGED} event this bridge already sends when the
+   * framework's semantics update for {@code text} arrives.
+   *
+   * <p>The exception is an IME that commits text, or selects a suggestion, without changing it,
+   * e.g. committing the composing text 漢字 as 漢字. The framework's semantics are then unchanged, so
+   * no semantics update and no text change event would follow. Android expects an event in this
+   * case, so it is sent right away instead.
+   *
+   * <p>This is internal to the embedding and is only public because {@link
+   * io.flutter.plugin.editing.InputConnectionAdaptor} is in another package.
    *
    * @param text the full text of the field after the change.
    * @param types a bit mask of {@code AccessibilityEvent.TEXT_CHANGE_TYPE_*} values.
@@ -126,6 +142,9 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     final int finalizingTypes =
         AccessibilityEvent.TEXT_CHANGE_TYPE_COMMITTED_BY_IME
             | AccessibilityEvent.TEXT_CHANGE_TYPE_CONVERSION_SUGGESTION_SELECTED_BY_IME;
+    // If the IME finalized text that matches what the framework already reports, no semantics
+    // update will follow, so send the event now. It is not queued, so no second event is sent if
+    // a later semantics update for this field arrives.
     if ((types & finalizingTypes) != 0 && text.equals(currentValue)) {
       AccessibilityEvent event =
           obtainAccessibilityEvent(node.id, AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED);
@@ -1829,10 +1848,10 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     e.setBeforeText(oldValue);
     e.getText().add(newValue);
 
-    // Attach the types of the IME changes that led to this value. Several IME changes can be
-    // folded into one semantics update (e.g. a Korean IME committing one syllable and starting
-    // the next in a single batch edit), so combine the types of every queued change up to and
-    // including the last one that matches the new value.
+    // Attach the types of the IME changes that led to this value. The framework sends at most one
+    // semantics update per frame, so several IME changes can be folded into one update (e.g. an
+    // IME that commits text and starts a new composition in one batch edit). Combine the types of
+    // every queued change up to and including the last one that matches the new value.
     int changeTypes = 0;
     if (Build.VERSION.SDK_INT >= API_LEVELS.API_37) {
       int elementsToPoll = 0;
@@ -1858,8 +1877,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       }
     }
     if (i >= oldValue.length() && i >= newValue.length()) {
-      // Text did not change. Still report it if the IME finalized it.
-      return changeTypes != 0 ? e : null;
+      return null; // Text did not change
     }
     int firstDifference = i;
     e.setFromIndex(firstDifference);

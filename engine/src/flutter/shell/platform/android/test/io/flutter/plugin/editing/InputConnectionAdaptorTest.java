@@ -1457,6 +1457,19 @@ public class InputConnectionAdaptorTest {
   }
 
   @Test
+  public void commitText_withNullTextAttribute_keepsSuggestionSelectedFromComposingText() {
+    View mockView = mock(View.class);
+    AccessibilityBridge mockBridge = mockBridgeFor(mockView);
+    InputConnectionAdaptor adaptor =
+        sampleInputConnectionAdaptorWithView(mockView, sampleEditable(0, 0, ""));
+
+    adaptor.setComposingText("漢字", 1, textAttribute(true));
+    adaptor.commitText("漢字", 1, null);
+
+    verify(mockBridge).addImeTextChange("漢字", COMMITTED_BY_IME | SUGGESTION_SELECTED);
+  }
+
+  @Test
   public void commitText_withTextAttribute_usesItsSuggestionSelectedValue() {
     View mockView = mock(View.class);
     AccessibilityBridge mockBridge = mockBridgeFor(mockView);
