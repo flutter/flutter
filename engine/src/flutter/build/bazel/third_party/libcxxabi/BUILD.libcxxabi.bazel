@@ -62,12 +62,28 @@ cc_library(
         "@platforms//os:macos": [],
         "//conditions:default": ["src/cxa_thread_atexit.cpp"],
     }),
+    additional_linker_inputs = select({
+        "@platforms//os:ios": ["lib/new-delete.exp"],
+        "//conditions:default": [],
+    }),
     # chromium_code's flags, as GN builds libc++abi (see @libcxx).
     copts = CHROMIUM_CODE_COPTS + ["-frtti"] + select({
         "@platforms//os:android": [],
         "//conditions:default": ["-fexceptions"],
     }),
     implementation_deps = ["@libcxx//:src_headers"],
+    # GN's libcxxabi_config on iOS: the global operator new and delete,
+    # which libc++'s new.cpp defines in this library, stay out of a
+    # framework's exports (lib/new-delete.exp lists their variants). A link
+    # flag of the library, so that it reaches every link that depends on it,
+    # as GN's public config does -- the iOS Flutter.framework, whose release
+    # binary the builders' Verify-export-symbols generator checks (the first
+    # Bazel builds on the Mac pool exported __Znwm and its eleven siblings,
+    # 11-04).
+    linkopts = select({
+        "@platforms//os:ios": ["-Wl,-unexported_symbols_list,$(execpath lib/new-delete.exp)"],
+        "//conditions:default": [],
+    }),
     linkstatic = True,
     local_defines = FLUTTER_LOCAL_DEFINES + [
         "_LIBCPP_BUILDING_LIBRARY",
