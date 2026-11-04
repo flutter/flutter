@@ -4,6 +4,7 @@
 
 import 'package:code_assets/code_assets.dart';
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/process.dart';
@@ -357,6 +358,9 @@ void main() {
       stderr: stderr,
     );
 
+    Matcher throwsToolExitWith(Matcher message) =>
+        throwsA(isA<ToolExit>().having((ToolExit e) => e.message, 'message', message));
+
     FakeCommand changeOnlyDependencies({int exitCode = 0, String stderr = ''}) => FakeCommand(
       command: const <String>['xcrun', 'install_name_tool', ...changeDependencies, dylibPath],
       exitCode: exitCode,
@@ -410,7 +414,9 @@ void main() {
           oldToNewInstallNames,
           processUtils: processUtils,
         ),
-        throwsToolExit(message: 'larger updated load commands do not fit'),
+        throwsToolExitWith(
+          allOf(contains('larger updated load commands do not fit'), isNot(contains('also after'))),
+        ),
       );
       expect(processManager, hasNoRemainingExpectations);
     });
@@ -430,16 +436,19 @@ void main() {
             processUtils: processUtils,
             keepInstallNameIfItDoesNotFit: true,
           ),
-          throwsToolExit(message: 'is not a Mach-O file'),
+          throwsToolExitWith(
+            allOf(contains('is not a Mach-O file'), isNot(contains('also after'))),
+          ),
         );
         expect(processManager, hasNoRemainingExpectations);
       },
     );
 
     testWithoutContext('fails when the dependencies cannot be changed either', () async {
+      final String doesNotFitEither = doesNotFit.replaceFirst('arm64', 'x86_64');
       processManager.addCommands(<FakeCommand>[
         setId(exitCode: 1, stderr: doesNotFit),
-        changeOnlyDependencies(exitCode: 1, stderr: doesNotFit),
+        changeOnlyDependencies(exitCode: 1, stderr: doesNotFitEither),
       ]);
 
       await expectLater(
@@ -450,7 +459,16 @@ void main() {
           processUtils: processUtils,
           keepInstallNameIfItDoesNotFit: true,
         ),
-        throwsToolExit(message: 'also after keeping its install name'),
+        throwsToolExitWith(
+          equals(
+            'Failed to change install names in $dylibFile, also after keeping its install name:\n'
+            'id -> $newInstallName\n'
+            'dependencies -> $newInstallName\n'
+            '$doesNotFit\n'
+            'After keeping the install name:\n'
+            '$doesNotFitEither',
+          ),
+        ),
       );
       expect(processManager, hasNoRemainingExpectations);
     });

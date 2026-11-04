@@ -387,11 +387,18 @@ extension on BuildInput {
 
 /// Links the main library of the package from [addDynamicallyLinkedNativeLibrary]
 /// like a vendor's prebuilt dylib often is: with plain `clang`, a short install
-/// name, and no `-headerpad_max_install_names`. (`CBuilder` links with
-/// `-encryptable`, which leaves plenty of room.)
+/// name, and no `-headerpad_max_install_names`, so its header keeps the
+/// default 32 free bytes. (`CBuilder` links with `-encryptable`, which leaves
+/// plenty of room.)
 ///
-/// Its header then has no room for the absolute path that `flutter test` gives
-/// code assets on macOS. Only works on macOS.
+/// The library depends on `add`, which `CBuilder` links without an install
+/// name, so `add` is referenced by its long path in the hook's output
+/// directory, and rewriting that to the shorter path under `build/` frees
+/// about 40 bytes. The install name is `@rpath/m.dylib`, so short that the
+/// absolute path `flutter test` gives code assets on macOS still does not fit
+/// for any package root. (A vendor's library that references its siblings by
+/// `@rpath/` names grows on that rewrite instead, and fails.) Only works on
+/// macOS.
 Future<void> linkMainLibraryWithoutHeaderRoom(
   String packageName,
   Directory packageDirectory,
@@ -432,7 +439,7 @@ void main(List<String> args) async {
       '-L${input.outputDirectory.toFilePath()}',
       '-ladd',
       '-install_name',
-      '@rpath/lib$packageName.dylib',
+      '@rpath/m.dylib',
       '-o',
       library.toFilePath(),
     ]);
@@ -467,7 +474,7 @@ void expectTesterKeptInstallName(String packageName, Directory packageDirectory)
     '-D',
     mainLibrary.path,
   ]);
-  expect(installName.stdout.toString(), contains('@rpath/lib$packageName.dylib'));
+  expect(installName.stdout.toString(), contains('@rpath/m.dylib'));
   final ProcessResult dependencies = processManager.runSync(<String>[
     'otool',
     '-L',

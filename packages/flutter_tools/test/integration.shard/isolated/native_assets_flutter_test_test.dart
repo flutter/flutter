@@ -62,10 +62,7 @@ void main() {
         }
         // Without the warning the header had room after all, and this test
         // would not exercise the fallback.
-        expect(
-          result.stderr.join('\n'),
-          contains('keeps its install name "@rpath/lib$packageName.dylib"'),
-        );
+        expect(result.stderr.join('\n'), contains('keeps its install name "@rpath/m.dylib"'));
         expectTesterKeptInstallName(packageName, packageDirectory);
       });
     },

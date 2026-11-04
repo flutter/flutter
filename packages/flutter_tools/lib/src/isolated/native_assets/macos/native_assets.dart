@@ -173,17 +173,22 @@ Future<List<File>> copyNativeCodeAssetsMacOS(
 /// referenced in dependent libraries are updated to match the new install name,
 /// so that the referenced library can be found the dynamic linker.
 ///
-/// A dylib whose header has no room for its absolute path, such as a prebuilt
-/// one linked without `-headerpad_max_install_names`, keeps its own install
-/// name, and [logger] prints a warning. Its dependents and the native assets
-/// manifest still use the absolute path. dyld matches a load against the path
-/// an image was loaded from, so every load of that path gets the same image,
-/// also after a later run replaced the file. App builds must not do this:
-/// there the manifest entry is the install name, which has to match
-/// (https://github.com/flutter/flutter/issues/190799).
+/// A dylib whose header has no room for the new load commands, such as a
+/// prebuilt one linked without `-headerpad_max_install_names`, keeps its own
+/// install name, and [logger] prints a warning. Its dependents and the native
+/// assets manifest still use the absolute path. dyld matches a load against
+/// the path an image was loaded from, so every load of that path gets the same
+/// image. After a later run replaced the file this holds only for a canonical
+/// path, since dyld records an image under its real path, so a dylib keeps its
+/// install name only in a directory without symlinks. The kept install name
+/// also stays visible to dyld for the rest of the process: a later load of
+/// that `@rpath/` name, or of its bare file name, gets this image. App builds
+/// must not keep install names: there the manifest entry is the install name,
+/// which has to match (https://github.com/flutter/flutter/issues/190799).
 ///
-/// A dylib without room whose own dependencies are code assets still fails,
-/// because their absolute paths do not fit in its header either.
+/// A dylib without room still fails if changing its references to other code
+/// assets makes its load commands larger, as for a prebuilt that references
+/// them by `@rpath/` names.
 ///
 /// Code signing is also done here.
 Future<List<File>> copyNativeCodeAssetsMacOSFlutterTester(
@@ -233,21 +238,26 @@ Future<List<File>> copyNativeCodeAssetsMacOSFlutterTester(
 
   for (final (:File dylibFile, :String newInstallName, :String assetId, :String oldInstallName)
       in dylibs) {
+    // Through a symlink, a file replaced under a running tester would load as
+    // a second copy unless its install name is the path it is loaded from.
+    final Directory directory = dylibFile.parent;
+    final canonical = directory.resolveSymbolicLinksSync() == directory.path;
     final bool installNameSet = await setInstallNamesDylib(
       dylibFile,
       newInstallName,
       oldToNewInstallNames,
       processUtils: processUtils,
-      keepInstallNameIfItDoesNotFit: true,
+      keepInstallNameIfItDoesNotFit: canonical,
     );
     if (!installNameSet) {
       // Not fatal: the asset loads correctly, so `--fatal-warnings` should not
-      // fail the run of a package that cannot relink a vendor's dylib.
+      // fail the run of a package that cannot relink a vendor's dylib. (Under
+      // `-v`, VerboseLogger still counts every warning, `fatal` or not.)
       logger.printWarning(
         'Code asset "$assetId" keeps its install name "$oldInstallName", because '
-        'the header of ${dylibFile.basename} has no room for its path. The asset '
-        'still loads. Linking the dylib with -headerpad_max_install_names avoids '
-        'this.',
+        'the header of ${dylibFile.basename} has no room for its new install name '
+        'and dependency paths. The asset still loads. Linking the dylib with '
+        '-headerpad_max_install_names avoids this.',
         fatal: false,
       );
     }

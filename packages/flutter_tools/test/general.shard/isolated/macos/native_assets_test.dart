@@ -575,6 +575,57 @@ void main() {
       },
     );
 
+    testWithoutContext('flutter tester does not keep the install name through a symlink', () async {
+      if (const LocalPlatform().isWindows) {
+        return; // Backslashes in commands, but we will never run these commands on Windows.
+      }
+      // The build directory is a symlink: a dylib replaced under a running tester would
+      // load as a second copy if it kept its install name.
+      fileSystem.directory('/real_build/native_assets/macos').createSync(recursive: true);
+      fileSystem.link('/linked_build').createSync('/real_build');
+      const barPath = '/linked_build/native_assets/macos/libbar.dylib';
+      processManager.addCommands(<FakeCommand>[
+        const FakeCommand(
+          command: <String>['xcrun', 'lipo', '-create', '-output', barPath, 'arm64/libbar.dylib'],
+        ),
+        const FakeCommand(
+          command: <String>['xcrun', 'otool', '-D', barPath],
+          stdout: '$barPath (architecture arm64):\n@rpath/libbar.dylib',
+        ),
+        const FakeCommand(
+          command: <String>[
+            'xcrun',
+            'install_name_tool',
+            '-id',
+            barPath,
+            '-change',
+            '@rpath/libbar.dylib',
+            barPath,
+            barPath,
+          ],
+          exitCode: 1,
+          stderr: doesNotFit,
+        ),
+      ]);
+
+      await expectLater(
+        copyNativeCodeAssetsMacOSFlutterTester(
+          Uri.directory('/linked_build/native_assets/macos/'),
+          <Uri, List<FlutterCodeAsset>>{
+            Uri.file('libbar.dylib'): <FlutterCodeAsset>[codeAsset('bar')],
+          },
+          null,
+          BuildMode.debug,
+          fileSystem,
+          logger: logger,
+          processUtils: ProcessUtils(processManager: processManager, logger: logger),
+        ),
+        throwsToolExit(message: 'larger updated load commands do not fit'),
+      );
+      expect(processManager, hasNoRemainingExpectations);
+      expect(logger.warningText, isEmpty);
+    });
+
     testWithoutContext('app builds still fail when the install name does not fit', () async {
       if (const LocalPlatform().isWindows) {
         return; // Backslashes in commands, but we will never run these commands on Windows.

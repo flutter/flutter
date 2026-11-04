@@ -84,10 +84,11 @@ Future<void> lipoDylibs(
 
 /// Sets the install names in a dylib with a Mach-O format.
 ///
-/// On macOS and iOS, opening a dylib at runtime fails if the path inside the
-/// dylib itself does not correspond to the path that the file is at. Therefore,
-/// native assets copied into their final location also need their install name
-/// updated with the `install_name_tool`.
+/// On macOS and iOS, native assets copied into their final location need their
+/// install names updated with the `install_name_tool`: a dylib finds its
+/// dependencies by the install names in its load commands, and in app builds
+/// the native assets manifest refers to a code asset by its install name
+/// (https://github.com/flutter/flutter/issues/190799).
 ///
 /// [oldToNewInstallNames] is a map from old to new install names, that should
 /// be applied to the dependencies of the dylib. Entries in this map for
@@ -123,7 +124,7 @@ Future<bool> setInstallNamesDylib(
   }
   RunResult? changeDependenciesResult;
   if (keepInstallNameIfItDoesNotFit &&
-      setInstallNamesResult.stderr.contains(_loadCommandsDoNotFit)) {
+      setInstallNamesResult.stderr.contains(_kLoadCommandsDoNotFit)) {
     changeDependenciesResult = await _runInstallNameTool(
       dylibFile,
       oldToNewInstallNames,
@@ -139,7 +140,7 @@ Future<bool> setInstallNamesDylib(
     'id -> $newInstallName\n'
     'dependencies -> $newInstallName\n'
     '${setInstallNamesResult.stderr}'
-    '${changeDependenciesResult == null ? '' : '\n${changeDependenciesResult.stderr}'}',
+    '${changeDependenciesResult == null ? '' : '\nAfter keeping the install name:\n${changeDependenciesResult.stderr}'}',
   );
 }
 
@@ -169,7 +170,7 @@ Future<RunResult> _runInstallNameTool(
 ///
 /// If a later version words this differently, the fallback in
 /// [setInstallNamesDylib] no longer applies and the tool exits as before.
-const _loadCommandsDoNotFit = 'larger updated load commands do not fit';
+const _kLoadCommandsDoNotFit = 'larger updated load commands do not fit';
 
 Future<Set<String>> getInstallNamesDylib(
   File dylibFile, {
