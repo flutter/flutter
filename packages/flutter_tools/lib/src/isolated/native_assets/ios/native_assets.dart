@@ -25,9 +25,9 @@ IOSSdk getIOSSdk(EnvironmentType environmentType) {
 /// Extract the [Architecture] from a [CpuArch].
 Architecture getNativeIOSArchitecture(CpuArch cpuArch) {
   return switch (cpuArch) {
-    CpuArch.armv7 => Architecture.arm,
-    CpuArch.arm64 => Architecture.arm64,
-    CpuArch.x64 => Architecture.x64,
+    .armv7 => Architecture.arm,
+    .arm64 => Architecture.arm64,
+    .x64 => Architecture.x64,
     _ => throw Exception('Unknown iOS CPU arch: $cpuArch.'),
   };
 }

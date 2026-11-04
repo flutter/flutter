@@ -50,7 +50,7 @@ final class CpuArch {
   static const riscv64 = CpuArch._('riscv64');
 
   /// Standard built-in CPU architectures supported by the Flutter tool.
-  static const values = <CpuArch>[unknown, armv7, arm64, x86, x64, riscv64];
+  static const values = <CpuArch>[.unknown, .armv7, .arm64, .x86, .x64, .riscv64];
 
   static final RegExp _validNameRegExp = RegExp(r'^[a-z0-9]+$');
 
@@ -63,12 +63,12 @@ final class CpuArch {
   /// if [name] is invalid.
   static CpuArch? tryFromName(String name) {
     return switch (name) {
-      'unknown' => unknown,
-      'armv7' => armv7,
-      'arm64' => arm64,
-      'x86' => x86,
-      'x64' || 'x86_64' => x64,
-      'riscv64' => riscv64,
+      'unknown' => .unknown,
+      'armv7' => .armv7,
+      'arm64' => .arm64,
+      'x86' => .x86,
+      'x64' || 'x86_64' => .x64,
+      'riscv64' => .riscv64,
       _ when _validNameRegExp.hasMatch(name) => CpuArch(name),
       _ => null,
     };
@@ -81,11 +81,11 @@ final class CpuArch {
   /// instructions are then built into architecture-specific binaries, which are
   /// merged into a universal binary using the `lipo` tool.
   String get dartName => switch (this) {
-    armv7 => 'armv7',
-    arm64 => 'arm64',
-    x86 => 'x86',
-    x64 => 'x64',
-    riscv64 => 'riscv64',
+    .armv7 => 'armv7',
+    .arm64 => 'arm64',
+    .x86 => 'x86',
+    .x64 => 'x64',
+    .riscv64 => 'riscv64',
     _ => throw UnsupportedError('Unexpected CPU arch $this'),
   };
 
@@ -96,26 +96,26 @@ final class CpuArch {
   /// directories on iOS and macOS. This differs from [dartName] for [x64],
   /// which maps to `x86_64` here.
   String get darwinArchName => switch (this) {
-    armv7 => 'armv7',
-    arm64 => 'arm64',
-    x64 => 'x86_64',
+    .armv7 => 'armv7',
+    .arm64 => 'arm64',
+    .x64 => 'x86_64',
     _ => throw UnsupportedError('Unexpected Darwin CPU arch $this'),
   };
 
   /// The name of the Android ABI (as used in `jniLibs` directories) for this
   /// architecture.
   String get androidArchName => switch (this) {
-    armv7 => 'armeabi-v7a',
-    arm64 => 'arm64-v8a',
-    x64 => 'x86_64',
+    .armv7 => 'armeabi-v7a',
+    .arm64 => 'arm64-v8a',
+    .x64 => 'x86_64',
     _ => throw UnsupportedError('Unexpected Android CPU arch $this'),
   };
 
   /// The `TargetPlatform` name of the Android platform for this architecture.
   String get androidPlatformName => switch (this) {
-    armv7 => 'android-arm',
-    arm64 => 'android-arm64',
-    x64 => 'android-x64',
+    .armv7 => 'android-arm',
+    .arm64 => 'android-arm64',
+    .x64 => 'android-x64',
     _ => throw UnsupportedError('Unexpected Android CPU arch $this'),
   };
 
@@ -180,13 +180,13 @@ final class HostPlatform {
 
   /// Standard built-in host platforms supported by the Flutter tool.
   static const values = <HostPlatform>[
-    darwin_x64,
-    darwin_arm64,
-    linux_x64,
-    linux_arm64,
-    linux_riscv64,
-    windows_x64,
-    windows_arm64,
+    .darwin_x64,
+    .darwin_arm64,
+    .linux_x64,
+    .linux_arm64,
+    .linux_riscv64,
+    .windows_x64,
+    .windows_arm64,
   ];
 
   static final RegExp _validOsNameRegExp = RegExp(r'^[a-z0-9]+$');
@@ -236,13 +236,13 @@ final class HostPlatform {
   /// values in [values]. Returns `null` if no match is found.
   static HostPlatform? fromOsAndArch(String os, String arch) {
     return switch ((os, arch.toLowerCase())) {
-      ('macos', 'x64') => darwin_x64,
-      ('macos', 'arm64') => darwin_arm64,
-      ('linux', 'x64') => linux_x64,
-      ('linux', 'arm64') => linux_arm64,
-      ('linux', 'riscv64') => linux_riscv64,
-      ('windows', 'x64') => windows_x64,
-      ('windows', 'arm64') => windows_arm64,
+      ('macos', 'x64') => .darwin_x64,
+      ('macos', 'arm64') => .darwin_arm64,
+      ('linux', 'x64') => .linux_x64,
+      ('linux', 'arm64') => .linux_arm64,
+      ('linux', 'riscv64') => .linux_riscv64,
+      ('windows', 'x64') => .windows_x64,
+      ('windows', 'arm64') => .windows_arm64,
       _ => null,
     };
   }

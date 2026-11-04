@@ -190,9 +190,9 @@ class AndroidDevice extends Device {
   @override
   late final Future<TargetPlatform> targetPlatform = () async {
     return switch (await cpuArch) {
-      CpuArch.arm64 => TargetPlatform.android_arm64,
-      CpuArch.armv7 => TargetPlatform.android_arm,
-      CpuArch.x64 => TargetPlatform.android_x64,
+      .arm64 => TargetPlatform.android_arm64,
+      .armv7 => TargetPlatform.android_arm,
+      .x64 => TargetPlatform.android_x64,
       _ => TargetPlatform.unsupported,
     };
   }();
@@ -532,9 +532,9 @@ class AndroidDevice extends Device {
     var builtPackage = package;
     final CpuArch cpuArch = await this.cpuArch;
     switch (cpuArch) {
-      case CpuArch.armv7:
-      case CpuArch.arm64:
-      case CpuArch.x64:
+      case .armv7:
+      case .arm64:
+      case .x64:
         break;
       default:
         _logger.printError('Android platforms are only supported.');
