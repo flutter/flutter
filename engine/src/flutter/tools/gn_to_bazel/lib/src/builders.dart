@@ -865,6 +865,20 @@ final class BuilderBuild {
       '${bazelFlags.join(' ')} | ${ninjaTargets.join(' ')} | ${testTypes.join(',')} '
       '${binaryTests.join(',')} ${scriptTests.join(',')} ${otherTests.join(';')}';
 
+  /// Whether this is a CI build under Bazel (`--bazel` among its flags)
+  /// that names no ninja target -- GN's default target, everything (the
+  /// Mac's test builds and iOS simulator builds) -- which gets an install
+  /// of everything (build_defs/dist/everything.bzl: what the root group
+  /// lays out, by platform), since the recipe's later steps read the
+  /// directory as GN leaves it. A build still under GN (clang-tidy's) or a
+  /// developer's build of everything (local_engine.json) gets none: the
+  /// tool reads the local engine's manifest instead.
+  bool get isEverythingInstalled =>
+      ninjaTargets.isEmpty &&
+      unsupported.isEmpty &&
+      gn.contains('--bazel') &&
+      !file.startsWith('local_engine');
+
   /// Whether this is a build of everything with no tests (the developer's
   /// builds of local_engine.json): it gets no install and no suite, so it
   /// is the same build as any of its name with the same flags.
@@ -969,7 +983,8 @@ bool isBazelVariant(String file) => file.endsWith('_bazel');
 /// The `tools/gn` flags of a build as a Bazel variant's are matched against
 /// the original's: `--x=v` as `--x v`, without the flags that say where the
 /// build runs (`--bazel`, `--bazel-rbe`, `--no-bazel-rbe`, `--rbe`, `--no-rbe`,
-/// `--goma`, `--no-goma`; what bazel_ci.py's normalized_flags does on the bot).
+/// `--goma`, `--no-goma`, `--xcode-symlinks`, `--no-xcode-symlinks`; what
+/// bazel_ci.py's normalized_flags does on the bot).
 List<String> _matchedFlags(List<String> gn) {
   const infrastructure = <String>{
     '--bazel',
@@ -979,6 +994,8 @@ List<String> _matchedFlags(List<String> gn) {
     '--no-rbe',
     '--goma',
     '--no-goma',
+    '--xcode-symlinks',
+    '--no-xcode-symlinks',
   };
   final out = <String>[];
   for (final flag in gn) {
@@ -1059,7 +1076,7 @@ List<String> bazelBuildErrors(List<BuilderBuild> builds) {
         "${build.file}'s ${build.name} carries --bazel but has no Bazel configuration "
         '(${build.unsupported.join('; ')})',
       );
-    } else if (build.ninjaTargets.isEmpty) {
+    } else if (build.ninjaTargets.isEmpty && !build.isEverythingInstalled) {
       errors.add(
         "${build.file}'s ${build.name} carries --bazel but builds ninja's default target, "
         'which has no install',
@@ -1175,6 +1192,32 @@ String configsBazelrc(List<BuilderBuild> builds, {List<LeftOutBuild> leftOut = c
     }
   }
   return out.toString();
+}
+
+/// An install of everything (build_defs/dist/everything.bzl) for [build], a
+/// CI build that names no ninja target, into its directory, compatible with
+/// its host alone as every builder's install is.
+void _everythingInstallInto(StringBuffer out, BuilderBuild build) {
+  final String hostSetting = switch (build.host) {
+    BuilderHost.linux => '//engine/src/flutter/build/bazel:host_os_is_linux',
+    BuilderHost.mac => '//engine/src/flutter/build/bazel:host_os_is_mac',
+  };
+  out
+    ..writeln('install(')
+    ..writeln('    name = "${build.configName}",')
+    ..writeln('    testonly = True,')
+    ..writeln('    contents = everything_contents(),');
+  if (build.buildDirectory != null) {
+    out.writeln('    directory = "${build.buildDirectory}",');
+  }
+  out
+    ..writeln('    files = everything_files(),')
+    ..writeln('    target_compatible_with = select({')
+    ..writeln('        "$hostSetting": [],')
+    ..writeln('        "//conditions:default": ["@platforms//:incompatible"],')
+    ..writeln('    }),')
+    ..writeln('    trees = everything_trees(),')
+    ..writeln(')');
 }
 
 /// What a build's ninja targets amount to for its install: the Bazel labels
@@ -1340,6 +1383,9 @@ String buildersBuildFile(
     ..writeln('# steps (scripts of the checkout) listed. The suites are manual: each stands')
     ..writeln('# for one builder, named; a wildcard run of the tree has the tests themselves.')
     ..writeln()
+    ..writeln(
+      'load("//build_defs/dist:everything.bzl", "everything_contents", "everything_files", "everything_trees")',
+    )
     ..writeln('load("//build_defs/dist:install.bzl", "install")')
     ..writeln()
     ..writeln('package(default_visibility = ["//visibility:public"])')
@@ -1370,6 +1416,30 @@ String buildersBuildFile(
       ..writeln()
       ..writeln('# ${build.file}: ${build.name}');
     if (build.ninjaTargets.isEmpty) {
+      if (build.isEverythingInstalled) {
+        // GN's default target, everything, for a CI build: an install of
+        // what the root group lays out (build_defs/dist/everything.bzl, the
+        // local engine's contents), since the recipe's later steps read the
+        // directory -- the iOS xcframework generator takes Flutter.framework
+        // from each simulator build's, the test steps run the suite.
+        out.writeln("#   ninja's default target, everything:");
+        out.writeln('#   bazel run --config=${build.configName} :${build.configName}');
+        final (BuilderBuild, String)? earlier = installs[build.configName];
+        if (earlier != null) {
+          if (earlier.$2 != 'everything') {
+            throw FormatException(
+              "${build.file}'s ${build.name} and ${earlier.$1.file}'s ${earlier.$1.name} would both be "
+              'the install :${build.configName} with different contents: everything against ${earlier.$2}',
+            );
+          }
+          out.writeln("# The same install as ${earlier.$1.file}'s ${earlier.$1.name}, above.");
+        } else {
+          installs[build.configName] = (build, 'everything');
+          _everythingInstallInto(out, build);
+        }
+        _testSuiteInto(out, build, convertedTests, suites, packageConditions: packageConditions);
+        continue;
+      }
       // GN's default target: the whole build, which the flutter tool reads
       // where Bazel builds it, through the root package's local engine
       // manifest; no install. Its tests (the Mac's test builds name no
@@ -1492,7 +1562,9 @@ String buildersJson(
       packageConditions: packageConditions,
     );
     final bool configured = build.unsupported.isEmpty;
-    final bool installed = configured && build.ninjaTargets.isNotEmpty && resolved.isNotEmpty;
+    final bool installed =
+        configured &&
+        (build.isEverythingInstalled || (build.ninjaTargets.isNotEmpty && resolved.isNotEmpty));
     final bool hasSuite =
         types.values.any((List<String> l) => l.isNotEmpty) ||
         binaries.isNotEmpty ||

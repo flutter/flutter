@@ -25,6 +25,7 @@
 # steps (scripts of the checkout) listed. The suites are manual: each stands
 # for one builder, named; a wildcard run of the tree has the tests themselves.
 
+load("//build_defs/dist:everything.bzl", "everything_contents", "everything_files", "everything_trees")
 load("//build_defs/dist:install.bzl", "install")
 
 package(default_visibility = ["//visibility:public"])
@@ -1292,10 +1293,36 @@ install(
 )
 
 # mac_ios_engine.json: ci/ios_debug_sim
-#   ninja's default target, everything: bazel build --config=ci_ios_debug_sim //engine/src/flutter:local_engine
+#   ninja's default target, everything:
+#   bazel run --config=ci_ios_debug_sim :ci_ios_debug_sim
+install(
+    name = "ci_ios_debug_sim",
+    testonly = True,
+    contents = everything_contents(),
+    directory = "ci/ios_debug_sim",
+    files = everything_files(),
+    target_compatible_with = select({
+        "//engine/src/flutter/build/bazel:host_os_is_mac": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    trees = everything_trees(),
+)
 
 # mac_ios_engine.json: ci/ios_debug_sim_arm64
-#   ninja's default target, everything: bazel build --config=ios_debug_sim_arm64 //engine/src/flutter:local_engine
+#   ninja's default target, everything:
+#   bazel run --config=ios_debug_sim_arm64 :ios_debug_sim_arm64
+install(
+    name = "ios_debug_sim_arm64",
+    testonly = True,
+    contents = everything_contents(),
+    directory = "ci/ios_debug_sim_arm64",
+    files = everything_files(),
+    target_compatible_with = select({
+        "//engine/src/flutter/build/bazel:host_os_is_mac": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    trees = everything_trees(),
+)
 
 # mac_ios_engine.json: ci/ios_debug
 #   bazel run --config=ci_ios_debug :ci_ios_debug
@@ -1346,10 +1373,36 @@ install(
 )
 
 # mac_ios_engine.json: ci/ios_debug_sim_extension_safe
-#   ninja's default target, everything: bazel build --config=ios_debug_sim_extension_safe //engine/src/flutter:local_engine
+#   ninja's default target, everything:
+#   bazel run --config=ios_debug_sim_extension_safe :ios_debug_sim_extension_safe
+install(
+    name = "ios_debug_sim_extension_safe",
+    testonly = True,
+    contents = everything_contents(),
+    directory = "ci/ios_debug_sim_extension_safe",
+    files = everything_files(),
+    target_compatible_with = select({
+        "//engine/src/flutter/build/bazel:host_os_is_mac": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    trees = everything_trees(),
+)
 
 # mac_ios_engine.json: ci/ios_debug_sim_arm64_extension_safe
-#   ninja's default target, everything: bazel build --config=ios_debug_sim_arm64_extension_safe //engine/src/flutter:local_engine
+#   ninja's default target, everything:
+#   bazel run --config=ios_debug_sim_arm64_extension_safe :ios_debug_sim_arm64_extension_safe
+install(
+    name = "ios_debug_sim_arm64_extension_safe",
+    testonly = True,
+    contents = everything_contents(),
+    directory = "ci/ios_debug_sim_arm64_extension_safe",
+    files = everything_files(),
+    target_compatible_with = select({
+        "//engine/src/flutter/build/bazel:host_os_is_mac": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    trees = everything_trees(),
+)
 
 # mac_ios_engine.json: ci/ios_debug_extension_safe
 #   bazel run --config=ios_debug_extension_safe :ios_debug_extension_safe
@@ -1400,10 +1453,36 @@ install(
 )
 
 # mac_ios_engine_ddm.json: ci/ios_debug_sim_ddm
-#   ninja's default target, everything: bazel build --config=ios_debug_sim_ddm //engine/src/flutter:local_engine
+#   ninja's default target, everything:
+#   bazel run --config=ios_debug_sim_ddm :ios_debug_sim_ddm
+install(
+    name = "ios_debug_sim_ddm",
+    testonly = True,
+    contents = everything_contents(),
+    directory = "ci/ios_debug_sim_ddm",
+    files = everything_files(),
+    target_compatible_with = select({
+        "//engine/src/flutter/build/bazel:host_os_is_mac": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    trees = everything_trees(),
+)
 
 # mac_ios_engine_ddm.json: ci/ios_debug_sim_arm64_ddm
-#   ninja's default target, everything: bazel build --config=ios_debug_sim_arm64_ddm //engine/src/flutter:local_engine
+#   ninja's default target, everything:
+#   bazel run --config=ios_debug_sim_arm64_ddm :ios_debug_sim_arm64_ddm
+install(
+    name = "ios_debug_sim_arm64_ddm",
+    testonly = True,
+    contents = everything_contents(),
+    directory = "ci/ios_debug_sim_arm64_ddm",
+    files = everything_files(),
+    target_compatible_with = select({
+        "//engine/src/flutter/build/bazel:host_os_is_mac": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    trees = everything_trees(),
+)
 
 # mac_ios_engine_ddm.json: ci/ios_debug_ddm
 #   bazel run --config=ios_debug_ddm :ios_debug_ddm
@@ -1438,7 +1517,20 @@ install(
 )
 
 # mac_unopt.json: ci/host_debug_arm64_tests
-#   ninja's default target, everything: bazel build --config=host_debug_arm64_tests //engine/src/flutter:local_engine
+#   ninja's default target, everything:
+#   bazel run --config=host_debug_arm64_tests :host_debug_arm64_tests
+install(
+    name = "host_debug_arm64_tests",
+    testonly = True,
+    contents = everything_contents(),
+    directory = "ci/host_debug_arm64_tests",
+    files = everything_files(),
+    target_compatible_with = select({
+        "//engine/src/flutter/build/bazel:host_os_is_mac": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    trees = everything_trees(),
+)
 
 # ci/host_debug_arm64_tests's tests: run_tests.py --type dart,dart-host,engine,font-subset.
 test_suite(
@@ -1487,7 +1579,20 @@ test_suite(
 )
 
 # mac_unopt.json: ci/host_profile_arm64_tests
-#   ninja's default target, everything: bazel build --config=host_profile_arm64_tests //engine/src/flutter:local_engine
+#   ninja's default target, everything:
+#   bazel run --config=host_profile_arm64_tests :host_profile_arm64_tests
+install(
+    name = "host_profile_arm64_tests",
+    testonly = True,
+    contents = everything_contents(),
+    directory = "ci/host_profile_arm64_tests",
+    files = everything_files(),
+    target_compatible_with = select({
+        "//engine/src/flutter/build/bazel:host_os_is_mac": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    trees = everything_trees(),
+)
 
 # ci/host_profile_arm64_tests's tests: run_tests.py --type dart,dart-host,engine.
 test_suite(
@@ -1535,7 +1640,20 @@ test_suite(
 )
 
 # mac_unopt.json: ci/host_release_arm64_tests
-#   ninja's default target, everything: bazel build --config=host_release_arm64_tests //engine/src/flutter:local_engine
+#   ninja's default target, everything:
+#   bazel run --config=host_release_arm64_tests :host_release_arm64_tests
+install(
+    name = "host_release_arm64_tests",
+    testonly = True,
+    contents = everything_contents(),
+    directory = "ci/host_release_arm64_tests",
+    files = everything_files(),
+    target_compatible_with = select({
+        "//engine/src/flutter/build/bazel:host_os_is_mac": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    trees = everything_trees(),
+)
 
 # ci/host_release_arm64_tests's tests: run_tests.py --type dart,dart-host,engine.
 test_suite(
@@ -1605,7 +1723,20 @@ test_suite(
 )
 
 # mac_unopt.json: ci/mac_release_arm64_tests
-#   ninja's default target, everything: bazel build --config=mac_release_arm64_tests //engine/src/flutter:local_engine
+#   ninja's default target, everything:
+#   bazel run --config=mac_release_arm64_tests :mac_release_arm64_tests
+install(
+    name = "mac_release_arm64_tests",
+    testonly = True,
+    contents = everything_contents(),
+    directory = "ci/mac_release_arm64_tests",
+    files = everything_files(),
+    target_compatible_with = select({
+        "//engine/src/flutter/build/bazel:host_os_is_mac": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    trees = everything_trees(),
+)
 
 # ci/mac_release_arm64_tests's tests: run_tests.py --type impeller-golden.
 test_suite(
@@ -1615,7 +1746,20 @@ test_suite(
 )
 
 # mac_unopt.json: ci/host_debug_unopt_arm64
-#   ninja's default target, everything: bazel build --config=host_debug_unopt_arm64 //engine/src/flutter:local_engine
+#   ninja's default target, everything:
+#   bazel run --config=host_debug_unopt_arm64 :host_debug_unopt_arm64
+install(
+    name = "host_debug_unopt_arm64",
+    testonly = True,
+    contents = everything_contents(),
+    directory = "ci/host_debug_unopt_arm64",
+    files = everything_files(),
+    target_compatible_with = select({
+        "//engine/src/flutter/build/bazel:host_os_is_mac": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    trees = everything_trees(),
+)
 
 # ci/host_debug_unopt_arm64's tests: run_tests.py --type dart,dart-host,engine,impeller-golden.
 # ci/host_debug_unopt_arm64's steps that run a script of the checkout, as Bazel tests: //engine/src/flutter:gn_test.

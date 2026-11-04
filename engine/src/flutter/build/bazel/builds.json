@@ -1953,9 +1953,10 @@
           "--runtime-mode",
           "profile",
           "--android",
-          "--rbe",
+          "--no-rbe",
           "--no-goma",
-          "--xcode-symlinks"
+          "--xcode-symlinks",
+          "--bazel"
         ],
         "build_directory": "ci/android_profile",
         "config": "mac_android_profile",
@@ -1985,9 +1986,10 @@
           "profile",
           "--android",
           "--android-cpu=arm64",
-          "--rbe",
+          "--no-rbe",
           "--no-goma",
-          "--xcode-symlinks"
+          "--xcode-symlinks",
+          "--bazel"
         ],
         "build_directory": "ci/android_profile_arm64",
         "config": "mac_android_profile_arm64",
@@ -2017,9 +2019,10 @@
           "profile",
           "--android",
           "--android-cpu=x64",
-          "--rbe",
+          "--no-rbe",
           "--no-goma",
-          "--xcode-symlinks"
+          "--xcode-symlinks",
+          "--bazel"
         ],
         "build_directory": "ci/android_profile_x64",
         "config": "mac_android_profile_x64",
@@ -2048,9 +2051,10 @@
           "--runtime-mode",
           "release",
           "--android",
-          "--rbe",
+          "--no-rbe",
           "--no-goma",
-          "--xcode-symlinks"
+          "--xcode-symlinks",
+          "--bazel"
         ],
         "build_directory": "ci/android_release",
         "config": "mac_android_release",
@@ -2080,9 +2084,10 @@
           "release",
           "--android",
           "--android-cpu=arm64",
-          "--rbe",
+          "--no-rbe",
           "--no-goma",
-          "--xcode-symlinks"
+          "--xcode-symlinks",
+          "--bazel"
         ],
         "build_directory": "ci/android_release_arm64",
         "config": "mac_android_release_arm64",
@@ -2112,9 +2117,10 @@
           "release",
           "--android",
           "--android-cpu=x64",
-          "--rbe",
+          "--no-rbe",
           "--no-goma",
-          "--xcode-symlinks"
+          "--xcode-symlinks",
+          "--bazel"
         ],
         "build_directory": "ci/android_release_x64",
         "config": "mac_android_release_x64",
@@ -2205,9 +2211,10 @@
           "--prebuilt-dart-sdk",
           "--build-embedder-examples",
           "--use-glfw-swiftshader",
-          "--rbe",
+          "--no-rbe",
           "--no-goma",
-          "--xcode-symlinks"
+          "--xcode-symlinks",
+          "--bazel"
         ],
         "build_directory": "ci/host_debug_framework",
         "config": "host_debug_framework",
@@ -2239,9 +2246,10 @@
           "--prebuilt-dart-sdk",
           "--build-embedder-examples",
           "--use-glfw-swiftshader",
-          "--rbe",
+          "--no-rbe",
           "--no-goma",
-          "--xcode-symlinks"
+          "--xcode-symlinks",
+          "--bazel"
         ],
         "build_directory": "ci/host_debug",
         "config": "ci_mac_host_debug",
@@ -2274,9 +2282,10 @@
           "--prebuilt-dart-sdk",
           "--build-embedder-examples",
           "--use-glfw-swiftshader",
-          "--rbe",
+          "--no-rbe",
           "--no-goma",
-          "--xcode-symlinks"
+          "--xcode-symlinks",
+          "--bazel"
         ],
         "build_directory": "ci/host_debug_gen_snapshot",
         "config": "host_debug_gen_snapshot",
@@ -2306,9 +2315,10 @@
           "--no-lto",
           "--prebuilt-dart-sdk",
           "--build-embedder-examples",
-          "--rbe",
+          "--no-rbe",
           "--no-goma",
-          "--xcode-symlinks"
+          "--xcode-symlinks",
+          "--bazel"
         ],
         "build_directory": "ci/host_profile",
         "config": "ci_mac_host_profile",
@@ -2338,9 +2348,10 @@
           "--no-lto",
           "--prebuilt-dart-sdk",
           "--build-embedder-examples",
-          "--rbe",
+          "--no-rbe",
           "--no-goma",
-          "--xcode-symlinks"
+          "--xcode-symlinks",
+          "--bazel"
         ],
         "build_directory": "ci/host_profile_framework",
         "config": "host_profile_framework",
@@ -2370,9 +2381,10 @@
           "--no-lto",
           "--prebuilt-dart-sdk",
           "--build-embedder-examples",
-          "--rbe",
+          "--no-rbe",
           "--no-goma",
-          "--xcode-symlinks"
+          "--xcode-symlinks",
+          "--bazel"
         ],
         "build_directory": "ci/host_profile_gen_snapshot",
         "config": "host_profile_gen_snapshot",
@@ -2403,9 +2415,10 @@
           "--prebuilt-dart-sdk",
           "--build-embedder-examples",
           "--use-glfw-swiftshader",
-          "--rbe",
+          "--no-rbe",
           "--no-goma",
-          "--xcode-symlinks"
+          "--xcode-symlinks",
+          "--bazel"
         ],
         "build_directory": "ci/host_release",
         "config": "ci_mac_host_release",
@@ -2437,9 +2450,10 @@
           "--prebuilt-dart-sdk",
           "--build-embedder-examples",
           "--use-glfw-swiftshader",
-          "--rbe",
+          "--no-rbe",
           "--no-goma",
-          "--xcode-symlinks"
+          "--xcode-symlinks",
+          "--bazel"
         ],
         "build_directory": "ci/host_release_framework",
         "config": "host_release_framework",
@@ -2470,9 +2484,10 @@
           "--prebuilt-dart-sdk",
           "--build-embedder-examples",
           "--use-glfw-swiftshader",
-          "--rbe",
+          "--no-rbe",
           "--no-goma",
-          "--xcode-symlinks"
+          "--xcode-symlinks",
+          "--bazel"
         ],
         "build_directory": "ci/host_release_gen_snapshot",
         "config": "host_release_gen_snapshot",
@@ -2504,9 +2519,10 @@
           "debug",
           "--no-lto",
           "--prebuilt-dart-sdk",
-          "--rbe",
+          "--no-rbe",
           "--no-goma",
-          "--xcode-symlinks"
+          "--xcode-symlinks",
+          "--bazel"
         ],
         "build_directory": "ci/mac_debug_arm64",
         "config": "mac_debug_arm64",
@@ -2540,9 +2556,10 @@
           "debug",
           "--no-lto",
           "--prebuilt-dart-sdk",
-          "--rbe",
+          "--no-rbe",
           "--no-goma",
-          "--xcode-symlinks"
+          "--xcode-symlinks",
+          "--bazel"
         ],
         "build_directory": "ci/mac_debug_framework_arm64",
         "config": "mac_debug_framework_arm64",
@@ -2575,9 +2592,10 @@
           "debug",
           "--no-lto",
           "--prebuilt-dart-sdk",
-          "--rbe",
+          "--no-rbe",
           "--no-goma",
-          "--xcode-symlinks"
+          "--xcode-symlinks",
+          "--bazel"
         ],
         "build_directory": "ci/mac_debug_gen_snapshot_arm64",
         "config": "mac_debug_gen_snapshot_arm64",
@@ -2609,9 +2627,10 @@
           "profile",
           "--no-lto",
           "--prebuilt-dart-sdk",
-          "--rbe",
+          "--no-rbe",
           "--no-goma",
-          "--xcode-symlinks"
+          "--xcode-symlinks",
+          "--bazel"
         ],
         "build_directory": "ci/mac_profile_arm64",
         "config": "mac_profile_arm64",
@@ -2643,9 +2662,10 @@
           "profile",
           "--no-lto",
           "--prebuilt-dart-sdk",
-          "--rbe",
+          "--no-rbe",
           "--no-goma",
-          "--xcode-symlinks"
+          "--xcode-symlinks",
+          "--bazel"
         ],
         "build_directory": "ci/mac_profile_framework_arm64",
         "config": "mac_profile_framework_arm64",
@@ -2677,9 +2697,10 @@
           "profile",
           "--no-lto",
           "--prebuilt-dart-sdk",
-          "--rbe",
+          "--no-rbe",
           "--no-goma",
-          "--xcode-symlinks"
+          "--xcode-symlinks",
+          "--bazel"
         ],
         "build_directory": "ci/mac_profile_gen_snapshot_arm64",
         "config": "mac_profile_gen_snapshot_arm64",
@@ -2711,10 +2732,11 @@
           "release",
           "--no-lto",
           "--prebuilt-dart-sdk",
-          "--rbe",
+          "--no-rbe",
           "--no-goma",
           "--xcode-symlinks",
-          "--use-glfw-swiftshader"
+          "--use-glfw-swiftshader",
+          "--bazel"
         ],
         "build_directory": "ci/mac_release_arm64",
         "config": "mac_release_arm64",
@@ -2747,10 +2769,11 @@
           "release",
           "--no-lto",
           "--prebuilt-dart-sdk",
-          "--rbe",
+          "--no-rbe",
           "--no-goma",
           "--xcode-symlinks",
-          "--use-glfw-swiftshader"
+          "--use-glfw-swiftshader",
+          "--bazel"
         ],
         "build_directory": "ci/mac_release_framework_arm64",
         "config": "mac_release_framework_arm64",
@@ -2782,10 +2805,11 @@
           "release",
           "--no-lto",
           "--prebuilt-dart-sdk",
-          "--rbe",
+          "--no-rbe",
           "--no-goma",
           "--xcode-symlinks",
-          "--use-glfw-swiftshader"
+          "--use-glfw-swiftshader",
+          "--bazel"
         ],
         "build_directory": "ci/mac_release_gen_snapshot_arm64",
         "config": "mac_release_gen_snapshot_arm64",
@@ -2815,14 +2839,15 @@
           "debug",
           "--simulator",
           "--no-lto",
-          "--rbe",
+          "--no-rbe",
           "--no-goma",
-          "--xcode-symlinks"
+          "--xcode-symlinks",
+          "--bazel"
         ],
         "build_directory": "ci/ios_debug_sim",
         "config": "ci_ios_debug_sim",
         "unsupported": [],
-        "install": null,
+        "install": "//engine/src/flutter/ci/builders:ci_ios_debug_sim",
         "ninja_targets": [],
         "ninja_targets_not_built": [],
         "ninja_targets_tested": [],
@@ -2846,14 +2871,15 @@
           "--simulator",
           "--simulator-cpu=arm64",
           "--no-lto",
-          "--rbe",
+          "--no-rbe",
           "--no-goma",
-          "--xcode-symlinks"
+          "--xcode-symlinks",
+          "--bazel"
         ],
         "build_directory": "ci/ios_debug_sim_arm64",
         "config": "ios_debug_sim_arm64",
         "unsupported": [],
-        "install": null,
+        "install": "//engine/src/flutter/ci/builders:ios_debug_sim_arm64",
         "ninja_targets": [],
         "ninja_targets_not_built": [],
         "ninja_targets_tested": [],
@@ -2874,9 +2900,10 @@
           "--ios",
           "--runtime-mode",
           "debug",
-          "--rbe",
+          "--no-rbe",
           "--no-goma",
-          "--xcode-symlinks"
+          "--xcode-symlinks",
+          "--bazel"
         ],
         "build_directory": "ci/ios_debug",
         "config": "ci_ios_debug",
@@ -2905,9 +2932,10 @@
           "--ios",
           "--runtime-mode",
           "profile",
-          "--rbe",
+          "--no-rbe",
           "--no-goma",
-          "--xcode-symlinks"
+          "--xcode-symlinks",
+          "--bazel"
         ],
         "build_directory": "ci/ios_profile",
         "config": "ci_ios_profile",
@@ -2936,9 +2964,10 @@
           "--ios",
           "--runtime-mode",
           "release",
-          "--rbe",
+          "--no-rbe",
           "--no-goma",
-          "--xcode-symlinks"
+          "--xcode-symlinks",
+          "--bazel"
         ],
         "build_directory": "ci/ios_release",
         "config": "ci_ios_release",
@@ -2970,14 +2999,15 @@
           "--simulator",
           "--no-lto",
           "--darwin-extension-safe",
-          "--rbe",
+          "--no-rbe",
           "--no-goma",
-          "--xcode-symlinks"
+          "--xcode-symlinks",
+          "--bazel"
         ],
         "build_directory": "ci/ios_debug_sim_extension_safe",
         "config": "ios_debug_sim_extension_safe",
         "unsupported": [],
-        "install": null,
+        "install": "//engine/src/flutter/ci/builders:ios_debug_sim_extension_safe",
         "ninja_targets": [],
         "ninja_targets_not_built": [],
         "ninja_targets_tested": [],
@@ -3002,14 +3032,15 @@
           "--simulator-cpu=arm64",
           "--no-lto",
           "--darwin-extension-safe",
-          "--rbe",
+          "--no-rbe",
           "--no-goma",
-          "--xcode-symlinks"
+          "--xcode-symlinks",
+          "--bazel"
         ],
         "build_directory": "ci/ios_debug_sim_arm64_extension_safe",
         "config": "ios_debug_sim_arm64_extension_safe",
         "unsupported": [],
-        "install": null,
+        "install": "//engine/src/flutter/ci/builders:ios_debug_sim_arm64_extension_safe",
         "ninja_targets": [],
         "ninja_targets_not_built": [],
         "ninja_targets_tested": [],
@@ -3031,9 +3062,10 @@
           "--runtime-mode",
           "debug",
           "--darwin-extension-safe",
-          "--rbe",
+          "--no-rbe",
           "--no-goma",
-          "--xcode-symlinks"
+          "--xcode-symlinks",
+          "--bazel"
         ],
         "build_directory": "ci/ios_debug_extension_safe",
         "config": "ios_debug_extension_safe",
@@ -3063,9 +3095,10 @@
           "--runtime-mode",
           "profile",
           "--darwin-extension-safe",
-          "--rbe",
+          "--no-rbe",
           "--no-goma",
-          "--xcode-symlinks"
+          "--xcode-symlinks",
+          "--bazel"
         ],
         "build_directory": "ci/ios_profile_extension_safe",
         "config": "ios_profile_extension_safe",
@@ -3095,9 +3128,10 @@
           "--runtime-mode",
           "release",
           "--darwin-extension-safe",
-          "--rbe",
+          "--no-rbe",
           "--no-goma",
-          "--xcode-symlinks"
+          "--xcode-symlinks",
+          "--bazel"
         ],
         "build_directory": "ci/ios_release_extension_safe",
         "config": "ios_release_extension_safe",
@@ -3128,15 +3162,16 @@
           "debug",
           "--simulator",
           "--no-lto",
-          "--rbe",
+          "--no-rbe",
           "--no-goma",
           "--xcode-symlinks",
-          "--gn-args=dart_dynamic_modules=true"
+          "--gn-args=dart_dynamic_modules=true",
+          "--bazel"
         ],
         "build_directory": "ci/ios_debug_sim_ddm",
         "config": "ios_debug_sim_ddm",
         "unsupported": [],
-        "install": null,
+        "install": "//engine/src/flutter/ci/builders:ios_debug_sim_ddm",
         "ninja_targets": [],
         "ninja_targets_not_built": [],
         "ninja_targets_tested": [],
@@ -3160,15 +3195,16 @@
           "--simulator",
           "--simulator-cpu=arm64",
           "--no-lto",
-          "--rbe",
+          "--no-rbe",
           "--no-goma",
           "--xcode-symlinks",
-          "--gn-args=dart_dynamic_modules=true"
+          "--gn-args=dart_dynamic_modules=true",
+          "--bazel"
         ],
         "build_directory": "ci/ios_debug_sim_arm64_ddm",
         "config": "ios_debug_sim_arm64_ddm",
         "unsupported": [],
-        "install": null,
+        "install": "//engine/src/flutter/ci/builders:ios_debug_sim_arm64_ddm",
         "ninja_targets": [],
         "ninja_targets_not_built": [],
         "ninja_targets_tested": [],
@@ -3189,10 +3225,11 @@
           "--ios",
           "--runtime-mode",
           "debug",
-          "--rbe",
+          "--no-rbe",
           "--no-goma",
           "--xcode-symlinks",
-          "--gn-args=dart_dynamic_modules=true"
+          "--gn-args=dart_dynamic_modules=true",
+          "--bazel"
         ],
         "build_directory": "ci/ios_debug_ddm",
         "config": "ios_debug_ddm",
@@ -3221,10 +3258,11 @@
           "--ios",
           "--runtime-mode",
           "release",
-          "--rbe",
+          "--no-rbe",
           "--no-goma",
           "--xcode-symlinks",
-          "--gn-args=dart_dynamic_modules=true"
+          "--gn-args=dart_dynamic_modules=true",
+          "--bazel"
         ],
         "build_directory": "ci/ios_release_ddm",
         "config": "ios_release_ddm",
@@ -3258,14 +3296,15 @@
           "--prebuilt-dart-sdk",
           "--build-embedder-examples",
           "--use-glfw-swiftshader",
-          "--rbe",
+          "--no-rbe",
           "--no-goma",
-          "--xcode-symlinks"
+          "--xcode-symlinks",
+          "--bazel"
         ],
         "build_directory": "ci/host_debug_arm64_tests",
         "config": "host_debug_arm64_tests",
         "unsupported": [],
-        "install": null,
+        "install": "//engine/src/flutter/ci/builders:host_debug_arm64_tests",
         "ninja_targets": [],
         "ninja_targets_not_built": [],
         "ninja_targets_tested": [],
@@ -3337,14 +3376,15 @@
           "--no-lto",
           "--prebuilt-dart-sdk",
           "--build-embedder-examples",
-          "--rbe",
+          "--no-rbe",
           "--no-goma",
-          "--xcode-symlinks"
+          "--xcode-symlinks",
+          "--bazel"
         ],
         "build_directory": "ci/host_profile_arm64_tests",
         "config": "host_profile_arm64_tests",
         "unsupported": [],
-        "install": null,
+        "install": "//engine/src/flutter/ci/builders:host_profile_arm64_tests",
         "ninja_targets": [],
         "ninja_targets_not_built": [],
         "ninja_targets_tested": [],
@@ -3414,14 +3454,15 @@
           "--prebuilt-dart-sdk",
           "--build-embedder-examples",
           "--use-glfw-swiftshader",
-          "--rbe",
+          "--no-rbe",
           "--no-goma",
-          "--xcode-symlinks"
+          "--xcode-symlinks",
+          "--bazel"
         ],
         "build_directory": "ci/host_release_arm64_tests",
         "config": "host_release_arm64_tests",
         "unsupported": [],
-        "install": null,
+        "install": "//engine/src/flutter/ci/builders:host_release_arm64_tests",
         "ninja_targets": [],
         "ninja_targets_not_built": [],
         "ninja_targets_tested": [],
@@ -3488,9 +3529,10 @@
           "--mac-cpu",
           "arm64",
           "--no-lto",
-          "--rbe",
+          "--no-rbe",
           "--no-goma",
-          "--xcode-symlinks"
+          "--xcode-symlinks",
+          "--bazel"
         ],
         "build_directory": "ci/host_release_arm64_licenses",
         "config": "host_release_arm64_licenses",
@@ -3527,15 +3569,16 @@
           "release",
           "--no-lto",
           "--prebuilt-dart-sdk",
-          "--rbe",
+          "--no-rbe",
           "--no-goma",
           "--xcode-symlinks",
-          "--use-glfw-swiftshader"
+          "--use-glfw-swiftshader",
+          "--bazel"
         ],
         "build_directory": "ci/mac_release_arm64_tests",
         "config": "mac_release_arm64_tests",
         "unsupported": [],
-        "install": null,
+        "install": "//engine/src/flutter/ci/builders:mac_release_arm64_tests",
         "ninja_targets": [],
         "ninja_targets_not_built": [],
         "ninja_targets_tested": [],
@@ -3564,15 +3607,16 @@
           "--prebuilt-dart-sdk",
           "--mac-cpu",
           "arm64",
-          "--rbe",
+          "--no-rbe",
           "--no-goma",
           "--xcode-symlinks",
-          "--use-glfw-swiftshader"
+          "--use-glfw-swiftshader",
+          "--bazel"
         ],
         "build_directory": "ci/host_debug_unopt_arm64",
         "config": "host_debug_unopt_arm64",
         "unsupported": [],
-        "install": null,
+        "install": "//engine/src/flutter/ci/builders:host_debug_unopt_arm64",
         "ninja_targets": [],
         "ninja_targets_not_built": [],
         "ninja_targets_tested": [],
@@ -3645,11 +3689,12 @@
           "--no-lto",
           "--simulator-cpu",
           "arm64",
-          "--rbe",
+          "--no-rbe",
           "--no-goma",
           "--xcode-symlinks",
           "--target-dir",
-          "ci/ios_debug_unopt_sim_arm64"
+          "ci/ios_debug_unopt_sim_arm64",
+          "--bazel"
         ],
         "build_directory": "ci/ios_debug_unopt_sim_arm64",
         "config": "ios_debug_unopt_sim_arm64",
@@ -3688,11 +3733,12 @@
           "--simulator-cpu",
           "arm64",
           "--darwin-extension-safe",
-          "--rbe",
+          "--no-rbe",
           "--no-goma",
           "--xcode-symlinks",
           "--target-dir",
-          "ci/ios_debug_unopt_sim_arm64_extension_safe"
+          "ci/ios_debug_unopt_sim_arm64_extension_safe",
+          "--bazel"
         ],
         "build_directory": "ci/ios_debug_unopt_sim_arm64_extension_safe",
         "config": "ios_debug_unopt_sim_arm64_extension_safe",
