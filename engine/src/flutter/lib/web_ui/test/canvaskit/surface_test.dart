@@ -169,26 +169,34 @@ void testMain() {
         surface.setSize(const BitmapSize(4960, 7016));
         final DomEventTarget freshCanvas = surface.canvas;
 
-        expect(
-          identical(freshCanvas, clampedCanvas),
-          isFalse,
-          reason: 'A clamped drawing buffer should be recovered on a freshly acquired canvas',
-        );
-        expect(
-          clampedGl.isContextLost(),
-          isTrue,
-          reason:
-              'The WebGL context of the replaced canvas should be explicitly lost so that '
-              'the browser frees its context slot',
-        );
+        if (isChromium) {
+          expect(
+            identical(freshCanvas, clampedCanvas),
+            isFalse,
+            reason: 'A clamped drawing buffer should be recovered on a freshly acquired canvas',
+          );
+          expect(
+            clampedGl.isContextLost(),
+            isTrue,
+            reason:
+                'The WebGL context of the replaced canvas should be explicitly lost so that '
+                'the browser frees its context slot',
+          );
 
-        // Give any pending `webglcontextlost` event a chance to be dispatched.
-        await Future<void>.delayed(const Duration(milliseconds: 50));
-        expect(
-          identical(surface.canvas, freshCanvas),
-          isTrue,
-          reason: 'Losing the replaced context must not trigger context-lost recovery',
-        );
+          // Give any pending `webglcontextlost` event a chance to be dispatched.
+          await Future<void>.delayed(const Duration(milliseconds: 50));
+          expect(
+            identical(surface.canvas, freshCanvas),
+            isTrue,
+            reason: 'Losing the replaced context must not trigger context-lost recovery',
+          );
+        } else {
+          expect(
+            identical(freshCanvas, clampedCanvas),
+            isTrue,
+            reason: 'Non-clamping browsers should preserve the canvas in-place',
+          );
+        }
         expect(surface.supportsWebGl, isTrue);
 
         final recorder = ui.PictureRecorder();
@@ -330,11 +338,13 @@ void testMain() {
           resizeTrackingReplacements(const BitmapSize(5000, 5000));
         }
 
-        expect(
-          replacedContexts,
-          isNotEmpty,
-          reason: 'Growing to 4960x7016 should clamp and replace the canvas',
-        );
+        if (isChromium) {
+          expect(
+            replacedContexts,
+            isNotEmpty,
+            reason: 'Growing to 4960x7016 should clamp and replace the canvas',
+          );
+        }
         final int liveReplacedContexts = replacedContexts
             .where((WebGLContext gl) => !gl.isContextLost())
             .length;
@@ -392,35 +402,39 @@ void testMain() {
         surface.dispose();
       });
 
-      test('context loss after a clamped resize is recovered on a new canvas', () async {
-        final surface = CkOffscreenSurface(OffscreenCanvasProvider());
-        await surface.initialized;
-        surface.setSize(const BitmapSize(100, 100));
-        final DomEventTarget originalCanvas = surface.canvas;
-        surface.setSize(const BitmapSize(4960, 7016));
-        final DomEventTarget swappedCanvas = surface.canvas;
-        expect(identical(swappedCanvas, originalCanvas), isFalse);
+      test(
+        'context loss after a clamped resize is recovered on a new canvas',
+        () async {
+          final surface = CkOffscreenSurface(OffscreenCanvasProvider());
+          await surface.initialized;
+          surface.setSize(const BitmapSize(100, 100));
+          final DomEventTarget originalCanvas = surface.canvas;
+          surface.setSize(const BitmapSize(4960, 7016));
+          final DomEventTarget swappedCanvas = surface.canvas;
+          expect(identical(swappedCanvas, originalCanvas), isFalse);
 
-        await surface.triggerContextLoss();
-        await Future<void>.delayed(const Duration(milliseconds: 50));
-        expect(
-          identical(surface.canvas, swappedCanvas),
-          isFalse,
-          reason: 'The swapped-in canvas should recover from context loss',
-        );
-        expect(surface.supportsWebGl, isTrue);
+          await surface.triggerContextLoss();
+          await Future<void>.delayed(const Duration(milliseconds: 50));
+          expect(
+            identical(surface.canvas, swappedCanvas),
+            isFalse,
+            reason: 'The swapped-in canvas should recover from context loss',
+          );
+          expect(surface.supportsWebGl, isTrue);
 
-        surface.setSize(const BitmapSize(200, 200));
-        final recorder = ui.PictureRecorder();
-        ui.Canvas(recorder).drawRect(
-          const ui.Rect.fromLTWH(0, 0, 200, 200),
-          ui.Paint()..color = const ui.Color(0xFF0000FF),
-        );
-        await surface.rasterizeToCanvas(recorder.endRecording());
-        expect(readSurfacePixel(surface, 199, 199), <int>[0, 0, 255, 255]);
+          surface.setSize(const BitmapSize(200, 200));
+          final recorder = ui.PictureRecorder();
+          ui.Canvas(recorder).drawRect(
+            const ui.Rect.fromLTWH(0, 0, 200, 200),
+            ui.Paint()..color = const ui.Color(0xFF0000FF),
+          );
+          await surface.rasterizeToCanvas(recorder.endRecording());
+          expect(readSurfacePixel(surface, 199, 199), <int>[0, 0, 255, 255]);
 
-        surface.dispose();
-      });
+          surface.dispose();
+        },
+        skip: !isChromium, // WebGL drawing buffer clamping at 4960x7016 is specific to Chromium.
+      );
 
       test('lifecycle & disposal during/after resize behaves cleanly and idempotently', () async {
         final surface = CkOffscreenSurface(OffscreenCanvasProvider());
