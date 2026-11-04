@@ -660,54 +660,73 @@ void main() {
     });
 
     testWithoutContext('startScreenRecording respects duration', () async {
-      final xcode = Xcode.test(
-        toolContext: FakeToolContext.macosHost(processManager: FakeProcessManager.any()),
-      );
-      final Logger logger = BufferLogger.test();
-      final fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
-        const FakeCommand(
-          command: <String>[
-            'xcrun',
-            'simctl',
-            'io',
-            'x',
-            'recordVideo',
-            '--codec',
-            'h264',
-            '--force',
-            'recording.mp4',
-          ],
-          stderr: 'Recording started\n',
-        ),
-      ]);
+      fakeAsync((FakeAsync async) {
+        final xcode = Xcode.test(
+          toolContext: FakeToolContext.macosHost(processManager: FakeProcessManager.any()),
+        );
+        final Logger logger = BufferLogger.test();
+        final completer = Completer<void>();
+        final fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
+          FakeCommand(
+            command: const <String>[
+              'xcrun',
+              'simctl',
+              'io',
+              'x',
+              'recordVideo',
+              '--codec',
+              'h264',
+              '--force',
+              'recording.mp4',
+            ],
+            stderr: 'Recording started\n',
+            completer: completer,
+          ),
+        ]);
 
-      final simControl = SimControl(
-        processManager: fakeProcessManager,
-        logger: logger,
-        xcode: xcode,
-      );
-      final deviceUnderTest = IOSSimulator(
-        'x',
-        cpuArch: CpuArch.x64,
-        name: 'iPhone SE',
-        simControl: simControl,
-        simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3',
-        analytics: const NoOpAnalytics(),
-        cocoaPods: FakeCocoaPods(),
-        xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-        plistParser: FakePlistParser(),
-        templateRenderer: FakeTemplateRenderer(),
-        toolContext: FakeToolContext(fs: fileSystem, logger: logger),
-        xcode: FakeXcode(),
-      );
+        final simControl = SimControl(
+          processManager: fakeProcessManager,
+          logger: logger,
+          xcode: xcode,
+        );
+        final deviceUnderTest = IOSSimulator(
+          'x',
+          cpuArch: CpuArch.x64,
+          name: 'iPhone SE',
+          simControl: simControl,
+          simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3',
+          analytics: const NoOpAnalytics(),
+          cocoaPods: FakeCocoaPods(),
+          xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+          plistParser: FakePlistParser(),
+          templateRenderer: FakeTemplateRenderer(),
+          toolContext: FakeToolContext(fs: fileSystem, logger: logger),
+          xcode: FakeXcode(),
+        );
 
-      final File recording = MemoryFileSystem.test().file('recording.mp4');
-      final ScreenRecording screenRecording = await deviceUnderTest.startScreenRecording(
-        recording,
-        duration: const Duration(seconds: 5),
-      );
-      await screenRecording.done;
-      expect(fakeProcessManager, hasNoRemainingExpectations);
+        final File recording = MemoryFileSystem.test().file('recording.mp4');
+        late ScreenRecording screenRecording;
+        deviceUnderTest
+            .startScreenRecording(recording, duration: const Duration(seconds: 5))
+            .then((ScreenRecording r) => screenRecording = r);
+        async.flushMicrotasks();
+
+        var isDone = false;
+        screenRecording.done.then((_) => isDone = true);
+
+        // Before the duration elapses the recording keeps running.
+        async.elapse(const Duration(seconds: 4));
+        expect(isDone, isFalse);
+
+        // Duration elapses: the tool sends SIGINT; the fake process only
+        // exits once the completer resolves, with an exit code from SIGINT.
+        async.elapse(const Duration(seconds: 2));
+        expect(isDone, isFalse);
+        completer.complete();
+        async.flushTimers();
+        expect(isDone, isTrue);
+        expect(fakeProcessManager, hasNoRemainingExpectations);
+      });
     });
   });
 

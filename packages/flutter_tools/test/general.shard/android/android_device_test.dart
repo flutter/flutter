@@ -640,15 +640,28 @@ Uptime: 441088659 Realtime: 521464097
       completer: completer,
     );
 
+    FakeCommand screenrecord({
+      String timeLimit = '180',
+      int exitCode = 0,
+      String stderr = '',
+      Completer<void>? completer,
+    }) => adb(
+      <String>['shell', 'exec', 'screenrecord', '--time-limit', timeLimit, recordingPath],
+      exitCode: exitCode,
+      stderr: stderr,
+      completer: completer,
+    );
+
+    // Waits for screenrecord to finish finalizing the MP4 on the device.
+    final FakeCommand waitForScreenrecord = adb(<String>[
+      'shell',
+      'while pidof screenrecord > /dev/null; do sleep 0.1; done',
+    ]);
+
     List<FakeCommand> recordingCommands({String timeLimit = '180', int exitCode = 0}) =>
         <FakeCommand>[
-          adb(<String>[
-            'shell',
-            'screenrecord',
-            '--time-limit',
-            timeLimit,
-            recordingPath,
-          ], exitCode: exitCode),
+          screenrecord(timeLimit: timeLimit, exitCode: exitCode),
+          waitForScreenrecord,
           adb(<String>['pull', recordingPath, outputFile.path]),
           adb(<String>['shell', 'rm', recordingPath]),
         ];
@@ -863,11 +876,7 @@ Uptime: 441088659 Realtime: 521464097
 
     testWithoutContext('startScreenRecording handles screenrecord failure', () async {
       final fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
-        adb(
-          <String>['shell', 'screenrecord', '--time-limit', '180', recordingPath],
-          exitCode: 1,
-          stderr: 'screenrecord failed: unsupported resolution',
-        ),
+        screenrecord(exitCode: 1, stderr: 'screenrecord failed: unsupported resolution'),
         adb(<String>['shell', 'rm', recordingPath]),
       ]);
       final AndroidDevice device = setUpAndroidDevice(
@@ -886,17 +895,11 @@ Uptime: 441088659 Realtime: 521464097
       expect(fakeProcessManager, hasNoRemainingExpectations);
     });
 
-    testWithoutContext('startScreenRecording stop() sends pkill -2 to device', () async {
+    testWithoutContext('startScreenRecording stop() interrupts adb and pulls recording', () async {
       final completer = Completer<void>();
       final fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
-        adb(<String>[
-          'shell',
-          'screenrecord',
-          '--time-limit',
-          '180',
-          recordingPath,
-        ], completer: completer),
-        adb(<String>['shell', 'pkill', '-2', 'screenrecord']),
+        screenrecord(completer: completer),
+        waitForScreenrecord,
         adb(<String>['pull', recordingPath, outputFile.path]),
         adb(<String>['shell', 'rm', recordingPath]),
       ]);
@@ -925,15 +928,11 @@ Uptime: 441088659 Realtime: 521464097
       });
     }
 
-    testWithoutContext('startScreenRecording on Windows accepts -1 exit code from pkill', () async {
+    testWithoutContext('startScreenRecording on Windows accepts -1 exit code from kill', () async {
       final completer = Completer<void>();
       final fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
-        adb(
-          <String>['shell', 'screenrecord', '--time-limit', '180', recordingPath],
-          exitCode: -1,
-          completer: completer,
-        ),
-        adb(<String>['shell', 'pkill', '-2', 'screenrecord']),
+        screenrecord(exitCode: -1, completer: completer),
+        waitForScreenrecord,
         adb(<String>['pull', recordingPath, outputFile.path]),
         adb(<String>['shell', 'rm', recordingPath]),
       ]);

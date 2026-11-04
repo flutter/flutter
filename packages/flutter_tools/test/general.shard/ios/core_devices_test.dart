@@ -4193,7 +4193,6 @@ class FakeIOSCoreDeviceControl extends Fake implements IOSCoreDeviceControl {
     this.launchResult,
     this.terminateSuccess = true,
     this.runningProcesses = const <IOSCoreDeviceRunningProcess>[],
-    this.takeScreenshotSuccess = true,
   });
 
   bool installSuccess;
@@ -4205,11 +4204,10 @@ class FakeIOSCoreDeviceControl extends Fake implements IOSCoreDeviceControl {
   int? processTerminated;
   List<IOSCoreDeviceRunningProcess> runningProcesses;
   bool get terminateProcessCalled => processTerminated != null;
-  bool takeScreenshotSuccess;
 
   @override
   Future<bool> takeScreenshot({required String deviceId, required String destination}) async {
-    return takeScreenshotSuccess;
+    return true;
   }
 
   @override
