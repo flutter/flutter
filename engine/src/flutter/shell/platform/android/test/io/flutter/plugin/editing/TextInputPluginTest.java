@@ -87,7 +87,6 @@ import org.robolectric.shadow.api.Shadow;
 import org.robolectric.shadows.ShadowAutofillManager;
 import org.robolectric.shadows.ShadowBuild;
 import org.robolectric.shadows.ShadowInputMethodManager;
-import org.robolectric.util.ReflectionHelpers;
 
 @Config(shadows = {TextInputPluginTest.TestImm.class, TextInputPluginTest.TestAfm.class})
 @RunWith(AndroidJUnit4.class)
@@ -1609,7 +1608,10 @@ public class TextInputPluginTest {
         textInputPlugin.createInputConnection(testView, mock(KeyboardManager.class), editorInfo);
 
     assertEquals(
-        InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_URI, editorInfo.inputType);
+        InputType.TYPE_CLASS_TEXT
+            | InputType.TYPE_TEXT_VARIATION_URI
+            | InputType.TYPE_TEXT_FLAG_ENABLE_TEXT_SUGGESTION_SELECTED,
+        editorInfo.inputType);
   }
 
   @Test
@@ -1649,7 +1651,9 @@ public class TextInputPluginTest {
         textInputPlugin.createInputConnection(testView, mock(KeyboardManager.class), editorInfo);
 
     assertEquals(
-        InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS,
+        InputType.TYPE_CLASS_TEXT
+            | InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS
+            | InputType.TYPE_TEXT_FLAG_ENABLE_TEXT_SUGGESTION_SELECTED,
         editorInfo.inputType);
   }
 
@@ -1693,7 +1697,8 @@ public class TextInputPluginTest {
         InputType.TYPE_CLASS_TEXT
             | InputType.TYPE_TEXT_FLAG_MULTI_LINE
             | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS
-            | InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD,
+            | InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD
+            | InputType.TYPE_TEXT_FLAG_ENABLE_TEXT_SUGGESTION_SELECTED,
         editorInfo.inputType);
   }
 
@@ -3207,47 +3212,62 @@ public class TextInputPluginTest {
 
   @Test
   public void testTextInputPlugin_createInputConnection_enablesTextSuggestionSelectedOnAPI37() {
-    int originalSdkInt = Build.VERSION.SDK_INT;
-    try {
-      ReflectionHelpers.setStaticField(Build.VERSION.class, "SDK_INT", API_LEVELS.API_37);
+    EditorInfo editorInfo = createEditorInfoFor(TextInputChannel.TextInputType.TEXT);
 
-      View testView = new View(ctx);
-      TextInputChannel textInputChannel = new TextInputChannel(mock(DartExecutor.class));
-      ScribeChannel scribeChannel = new ScribeChannel(mock(DartExecutor.class));
-      TextInputPlugin textInputPlugin =
-          new TextInputPlugin(
-              testView,
-              textInputChannel,
-              scribeChannel,
-              mock(PlatformViewsController.class),
-              mock(PlatformViewsController2.class));
-      TextInputChannel.Configuration configuration =
-          new TextInputChannel.Configuration(
-              false,
-              false,
-              false,
-              false,
-              false,
-              TextInputChannel.TextCapitalization.NONE,
-              new TextInputChannel.InputType(
-                  TextInputChannel.TextInputType.TEXT, false, false, false),
-              null,
-              null,
-              null,
-              null,
-              null,
-              null);
-      textInputPlugin.setTextInputClient(0, configuration);
+    assertEquals(
+        TYPE_TEXT_FLAG_ENABLE_TEXT_SUGGESTION_SELECTED,
+        editorInfo.inputType & TYPE_TEXT_FLAG_ENABLE_TEXT_SUGGESTION_SELECTED);
+  }
 
-      EditorInfo editorInfo = new EditorInfo();
-      textInputPlugin.createInputConnection(testView, mock(KeyboardManager.class), editorInfo);
+  @Test
+  public void testTextInputPlugin_createInputConnection_doesNotSetTextFlagOnNonTextClasses() {
+    for (TextInputChannel.TextInputType type :
+        new TextInputChannel.TextInputType[] {
+          TextInputChannel.TextInputType.NUMBER,
+          TextInputChannel.TextInputType.PHONE,
+          TextInputChannel.TextInputType.DATETIME,
+          TextInputChannel.TextInputType.NONE,
+        }) {
+      EditorInfo editorInfo = createEditorInfoFor(type);
 
       assertEquals(
-          TYPE_TEXT_FLAG_ENABLE_TEXT_SUGGESTION_SELECTED,
+          "inputType for " + type,
+          0,
           editorInfo.inputType & TYPE_TEXT_FLAG_ENABLE_TEXT_SUGGESTION_SELECTED);
-    } finally {
-      ReflectionHelpers.setStaticField(Build.VERSION.class, "SDK_INT", originalSdkInt);
     }
+  }
+
+  private EditorInfo createEditorInfoFor(TextInputChannel.TextInputType type) {
+    View testView = new View(ctx);
+    TextInputChannel textInputChannel = new TextInputChannel(mock(DartExecutor.class));
+    ScribeChannel scribeChannel = new ScribeChannel(mock(DartExecutor.class));
+    TextInputPlugin textInputPlugin =
+        new TextInputPlugin(
+            testView,
+            textInputChannel,
+            scribeChannel,
+            mock(PlatformViewsController.class),
+            mock(PlatformViewsController2.class));
+    TextInputChannel.Configuration configuration =
+        new TextInputChannel.Configuration(
+            false,
+            false,
+            false,
+            false,
+            false,
+            TextInputChannel.TextCapitalization.NONE,
+            new TextInputChannel.InputType(type, false, false, false),
+            null,
+            null,
+            null,
+            null,
+            null,
+            null);
+    textInputPlugin.setTextInputClient(0, configuration);
+
+    EditorInfo editorInfo = new EditorInfo();
+    textInputPlugin.createInputConnection(testView, mock(KeyboardManager.class), editorInfo);
+    return editorInfo;
   }
 
   @Config(sdk = API_LEVELS.API_36)

@@ -345,8 +345,10 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
             configuration.textCapitalization);
     outAttrs.imeOptions = EditorInfo.IME_FLAG_NO_FULLSCREEN;
 
-    if (Build.VERSION.SDK_INT >= API_LEVELS.API_37) {
-      outAttrs.inputType |= android.text.InputType.TYPE_TEXT_FLAG_ENABLE_TEXT_SUGGESTION_SELECTED;
+    // TYPE_TEXT_FLAG_* flags are only valid for TYPE_CLASS_TEXT.
+    if (Build.VERSION.SDK_INT >= API_LEVELS.API_37
+        && (outAttrs.inputType & InputType.TYPE_MASK_CLASS) == InputType.TYPE_CLASS_TEXT) {
+      outAttrs.inputType |= InputType.TYPE_TEXT_FLAG_ENABLE_TEXT_SUGGESTION_SELECTED;
     }
 
     if (Build.VERSION.SDK_INT >= API_LEVELS.API_26

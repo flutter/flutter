@@ -96,15 +96,49 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
 
   private final Queue<ImeTextChange> imeTextChanges = new ArrayDeque<>();
 
-  public void addImeTextChange(String text, int type) {
-    // Cap the queue at 20 items to prevent memory leaks in the edge case where Dart text
-    // formatters aggressively alter the text, preventing queue items from ever matching
-    // the semantics update and being naturally dequeued. 20 is large enough to safely
-    // hold multiple rapid keystrokes that are batched into a single frame.
-    if (imeTextChanges.size() > 20) {
+  // Caps the queue to avoid unbounded growth when entries never match a semantics update, e.g.
+  // when Dart text formatters rewrite the text. Large enough to hold several keystrokes that are
+  // batched into a single frame.
+  private static final int MAX_IME_TEXT_CHANGES = 20;
+
+  /**
+   * Records the type of a text change the IME just made to the input-focused text field.
+   *
+   * <p>The type is attached to the {@link AccessibilityEvent#TYPE_VIEW_TEXT_CHANGED} event sent
+   * when the framework's semantics update for {@code text} arrives. If the IME committed or
+   * selected a suggestion without changing the text, no semantics update will arrive, so the event
+   * is sent right away instead.
+   *
+   * @param text the full text of the field after the change.
+   * @param types a bit mask of {@code AccessibilityEvent.TEXT_CHANGE_TYPE_*} values.
+   */
+  public void addImeTextChange(@NonNull String text, int types) {
+    if (Build.VERSION.SDK_INT < API_LEVELS.API_37) {
+      return;
+    }
+    final SemanticsNode node = inputFocusedSemanticsNode;
+    if (node == null || !node.hasFlag(Flag.IS_FOCUSED) || node.hasFlag(Flag.IS_OBSCURED)) {
+      // No focused field to attach the change to. Obscured fields report a masked value, so
+      // the text would never match.
+      return;
+    }
+    final String currentValue = node.value != null ? node.value : "";
+    final int finalizingTypes =
+        AccessibilityEvent.TEXT_CHANGE_TYPE_COMMITTED_BY_IME
+            | AccessibilityEvent.TEXT_CHANGE_TYPE_CONVERSION_SUGGESTION_SELECTED_BY_IME;
+    if ((types & finalizingTypes) != 0 && text.equals(currentValue)) {
+      AccessibilityEvent event =
+          obtainAccessibilityEvent(node.id, AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED);
+      event.setBeforeText(currentValue);
+      event.getText().add(currentValue);
+      event.setTextChangeTypes(types);
+      sendAccessibilityEvent(event);
+      return;
+    }
+    if (imeTextChanges.size() >= MAX_IME_TEXT_CHANGES) {
       imeTextChanges.poll();
     }
-    imeTextChanges.add(new ImeTextChange(text, type));
+    imeTextChanges.add(new ImeTextChange(text, types));
   }
 
   private static final String TAG = "AccessibilityBridge";
@@ -1730,6 +1764,12 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
         sendAccessibilityEvent(event);
       }
 
+      if (object.hadFlag(Flag.IS_FOCUSED) && !object.hasFlag(Flag.IS_FOCUSED)) {
+        // The field lost input focus. inputFocusedSemanticsNode is not reset in this case, so
+        // clear pending IME changes here; they no longer apply to any field.
+        imeTextChanges.clear();
+      }
+
       // If the object is the input-focused node, then tell the reader about it, but only if
       // it has changed since the last update.
       if (inputFocusedSemanticsNode != null
@@ -1789,8 +1829,11 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     e.setBeforeText(oldValue);
     e.getText().add(newValue);
 
-    // Determine the type of change that occurred by analyzing the IME change history.
-    Integer changeType = null;
+    // Attach the types of the IME changes that led to this value. Several IME changes can be
+    // folded into one semantics update (e.g. a Korean IME committing one syllable and starting
+    // the next in a single batch edit), so combine the types of every queued change up to and
+    // including the last one that matches the new value.
+    int changeTypes = 0;
     if (Build.VERSION.SDK_INT >= API_LEVELS.API_37) {
       int elementsToPoll = 0;
       int index = 0;
@@ -1800,16 +1843,11 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
           elementsToPoll = index;
         }
       }
-
       for (int j = 0; j < elementsToPoll; j++) {
-        ImeTextChange change = imeTextChanges.poll();
-        if (change.text.equals(newValue)) {
-          changeType = change.type;
-        }
+        changeTypes |= imeTextChanges.poll().type;
       }
-
-      if (changeType != null) {
-        e.setTextChangeTypes(changeType);
+      if (changeTypes != 0) {
+        e.setTextChangeTypes(changeTypes);
       }
     }
 
@@ -1820,11 +1858,8 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       }
     }
     if (i >= oldValue.length() && i >= newValue.length()) {
-      if (changeType != null) {
-        return e;
-      } else {
-        return null; // Text did not change
-      }
+      // Text did not change. Still report it if the IME finalized it.
+      return changeTypes != 0 ? e : null;
     }
     int firstDifference = i;
     e.setFromIndex(firstDifference);

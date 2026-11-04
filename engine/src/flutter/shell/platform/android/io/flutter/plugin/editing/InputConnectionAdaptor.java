@@ -31,6 +31,8 @@ import android.view.inputmethod.InputContentInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.view.inputmethod.TextAttribute;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.core.view.inputmethod.InputConnectionCompat;
 import io.flutter.Log;
 import io.flutter.embedding.engine.FlutterJNI;
@@ -175,47 +177,63 @@ public class InputConnectionAdaptor extends BaseInputConnection
   }
 
   /**
-   * Translates the IME's text change state into an Android AccessibilityEvent change type, and
-   * queues it into the AccessibilityBridge.
+   * The {@link TextAttribute#isTextSuggestionSelected()} value of the current IME call, or null if
+   * the IME called an overload without a {@code TextAttribute}.
    *
-   * @param textAttribute the TextAttribute passed in with the text change, or null if none.
-   * @param isComposing true if the text is still in the composition phase, false if the text has
-   *     been finalized by the user.
-   * @param newValue the new text string value.
+   * <p>The 3-arg {@code TextAttribute} overloads are {@code default} methods on {@link
+   * android.view.inputmethod.InputConnection} that delegate to the 2-arg overloads, so the 3-arg
+   * overrides below only record this value and the 2-arg overrides do the actual work. That way
+   * every IME call, with or without a {@code TextAttribute}, goes through one code path.
    */
-  private void updateTextChangeType(
-      TextAttribute textAttribute, boolean isComposing, String newValue) {
-    if (Build.VERSION.SDK_INT >= API_LEVELS.API_37) {
-      boolean isSuggestion = textAttribute != null && textAttribute.isTextSuggestionSelected();
-      int changeType;
-      if (isSuggestion) {
-        changeType = AccessibilityEvent.TEXT_CHANGE_TYPE_CONVERSION_SUGGESTION_SELECTED_BY_IME;
-      } else if (isComposing) {
-        changeType = AccessibilityEvent.TEXT_CHANGE_TYPE_IN_COMPOSITION;
-      } else {
-        changeType = AccessibilityEvent.TEXT_CHANGE_TYPE_COMMITTED_BY_IME;
-      }
+  @Nullable private Boolean mCallSuggestionSelected = null;
 
-      if (mFlutterView != null) {
-        AccessibilityNodeProvider provider = mFlutterView.getAccessibilityNodeProvider();
-        if (provider instanceof AccessibilityBridge) {
-          ((AccessibilityBridge) provider).addImeTextChange(newValue, changeType);
-        }
-      }
+  /**
+   * Whether the current composing text is a conversion suggestion the user selected. A commit
+   * without a {@code TextAttribute} keeps this state, matching a platform {@code EditText}.
+   */
+  private boolean mComposingSuggestionSelected = false;
+
+  /**
+   * Reports the type of an IME text change to the {@link AccessibilityBridge}, which attaches it to
+   * the resulting {@link AccessibilityEvent#TYPE_VIEW_TEXT_CHANGED} event via {@link
+   * AccessibilityEvent#setTextChangeTypes(int)}.
+   *
+   * @param changeTypes a bit mask of {@code AccessibilityEvent.TEXT_CHANGE_TYPE_*} values.
+   */
+  private void recordImeTextChange(int changeTypes) {
+    if (Build.VERSION.SDK_INT < API_LEVELS.API_37 || mFlutterView == null) {
+      return;
+    }
+    // The provider is only an AccessibilityBridge while accessibility is enabled, so check it
+    // before doing any other work.
+    AccessibilityNodeProvider provider = mFlutterView.getAccessibilityNodeProvider();
+    if (provider instanceof AccessibilityBridge) {
+      ((AccessibilityBridge) provider).addImeTextChange(mEditable.toString(), changeTypes);
     }
   }
 
   @Override
   public boolean commitText(CharSequence text, int newCursorPosition) {
     final boolean result = super.commitText(text, newCursorPosition);
+    if (Build.VERSION.SDK_INT >= API_LEVELS.API_37) {
+      recordImeTextChange(committedTypes());
+    }
+    mComposingSuggestionSelected = false;
     return result;
   }
 
   @Override
-  public boolean commitText(CharSequence text, int newCursorPosition, TextAttribute textAttribute) {
-    final boolean result = super.commitText(text, newCursorPosition, textAttribute);
-    updateTextChangeType(textAttribute, false, mEditable.toString());
-    return result;
+  @RequiresApi(API_LEVELS.API_33)
+  public boolean commitText(
+      @NonNull CharSequence text, int newCursorPosition, @Nullable TextAttribute textAttribute) {
+    final Boolean previous = mCallSuggestionSelected;
+    mCallSuggestionSelected = suggestionSelected(textAttribute);
+    try {
+      // The default implementation calls through to commitText(CharSequence, int).
+      return super.commitText(text, newCursorPosition, textAttribute);
+    } finally {
+      mCallSuggestionSelected = previous;
+    }
   }
 
   @Override
@@ -241,13 +259,6 @@ public class InputConnectionAdaptor extends BaseInputConnection
   }
 
   @Override
-  public boolean setComposingRegion(int start, int end, TextAttribute textAttribute) {
-    final boolean result = super.setComposingRegion(start, end, textAttribute);
-    updateTextChangeType(textAttribute, true, mEditable.toString());
-    return result;
-  }
-
-  @Override
   public boolean setComposingText(CharSequence text, int newCursorPosition) {
     boolean result;
     beginBatchEdit();
@@ -256,28 +267,63 @@ public class InputConnectionAdaptor extends BaseInputConnection
     } else {
       result = super.setComposingText(text, newCursorPosition);
     }
+    if (Build.VERSION.SDK_INT >= API_LEVELS.API_37) {
+      int changeTypes;
+      if (text.length() == 0) {
+        changeTypes = committedTypes();
+      } else {
+        changeTypes = AccessibilityEvent.TEXT_CHANGE_TYPE_IN_COMPOSITION;
+        if (Boolean.TRUE.equals(mCallSuggestionSelected)) {
+          // Matches what a platform EditText reports when a candidate is selected.
+          changeTypes |= AccessibilityEvent.TEXT_CHANGE_TYPE_CONVERSION_SUGGESTION_SELECTED_BY_IME;
+        }
+      }
+      recordImeTextChange(changeTypes);
+    }
+    mComposingSuggestionSelected =
+        text.length() != 0 && Boolean.TRUE.equals(mCallSuggestionSelected);
     endBatchEdit();
     return result;
   }
 
   @Override
+  @RequiresApi(API_LEVELS.API_33)
   public boolean setComposingText(
-      CharSequence text, int newCursorPosition, TextAttribute textAttribute) {
-    boolean result;
-    beginBatchEdit();
-    if (text.length() == 0) {
-      result = super.commitText(text, newCursorPosition, textAttribute);
-    } else {
-      result = super.setComposingText(text, newCursorPosition, textAttribute);
+      @NonNull CharSequence text, int newCursorPosition, @Nullable TextAttribute textAttribute) {
+    final Boolean previous = mCallSuggestionSelected;
+    mCallSuggestionSelected = suggestionSelected(textAttribute);
+    try {
+      // The default implementation calls through to setComposingText(CharSequence, int).
+      return super.setComposingText(text, newCursorPosition, textAttribute);
+    } finally {
+      mCallSuggestionSelected = previous;
     }
-    updateTextChangeType(textAttribute, true, mEditable.toString());
-    endBatchEdit();
-    return result;
+  }
+
+  private static boolean suggestionSelected(@Nullable TextAttribute textAttribute) {
+    return Build.VERSION.SDK_INT >= API_LEVELS.API_37
+        && textAttribute != null
+        && textAttribute.isTextSuggestionSelected();
+  }
+
+  /**
+   * The change types for a commit. A commit made with a {@code TextAttribute} reports that
+   * attribute's suggestion state; a commit without one keeps the state of the composing text.
+   */
+  private int committedTypes() {
+    final boolean selected =
+        mCallSuggestionSelected != null ? mCallSuggestionSelected : mComposingSuggestionSelected;
+    int types = AccessibilityEvent.TEXT_CHANGE_TYPE_COMMITTED_BY_IME;
+    if (selected) {
+      types |= AccessibilityEvent.TEXT_CHANGE_TYPE_CONVERSION_SUGGESTION_SELECTED_BY_IME;
+    }
+    return types;
   }
 
   @Override
   public boolean finishComposingText() {
     final boolean result = super.finishComposingText();
+    mComposingSuggestionSelected = false;
     return result;
   }
 
