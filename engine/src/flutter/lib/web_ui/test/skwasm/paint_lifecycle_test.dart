@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:ffi';
-import 'dart:typed_data';
 
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';

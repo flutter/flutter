@@ -96,7 +96,7 @@ abstract class Renderer {
     rasterizer.dispose();
   }
 
-  ui.Paint createPaint();
+  BackendPaint createPaint(EnginePaint paint, {required ui.TileMode defaultBlurTileMode});
 
   BackendVertices createVertices(
     ui.VertexMode mode,
