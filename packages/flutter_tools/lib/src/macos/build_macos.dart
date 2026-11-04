@@ -272,22 +272,6 @@ Future<void> buildMacOS({
     _ => throw UnimplementedError('Unsupported platform'),
   };
 
-  // Determine the build destination specifier for xcodebuild.
-  // This does not prevent some versions of xcodebuild from building a fat binary
-  // even if set to 'platform=macOS,arch=arm64';
-  final String destination;
-  // The archtectures to specify in xcode project's build setting.
-  final String? archs;
-  if (buildInfo.isDebug) {
-    // Debug builds default to current host architecture
-    destination = 'platform=${XcodeSdk.MacOSX.displayName},arch=$hostArch';
-    archs = null;
-  } else {
-    // Release builds default to universal binary unless isMacOSArm64OnlyEnabled is set.
-    destination = XcodeSdk.MacOSX.genericPlatform;
-    archs = featureFlags.isMacOSArm64OnlyEnabled ? 'arm64' : null;
-  }
-
   // Get EXCLUDED_ARCHS from Xcode project build settings
   // This allows developers to exclude specific architectures (e.g., x86_64)
   // when dependencies don't support them
@@ -295,6 +279,27 @@ Future<void> buildMacOS({
     null || '' => null,
     final String excludedArches => excludedArches,
   };
+
+  // Determine the build destination specifier for xcodebuild.
+  // This does not prevent some versions of xcodebuild from building a fat binary
+  // even if set to 'platform=macOS,arch=arm64';
+  final String destination;
+  // The archtectures to specify in xcode project's build setting.
+  final String? archs;
+  if (buildInfo.isDebug) {
+    // Debug builds default to current host architecture, unless the project
+    // excludes it. xcodebuild has no destination for an excluded architecture,
+    // so fall back to the generic destination and let Xcode pick one.
+    final bool hostArchExcluded = excludedArchs?.split(RegExp(r'\s+')).contains(hostArch) ?? false;
+    destination = hostArchExcluded
+        ? XcodeSdk.MacOSX.genericPlatform
+        : 'platform=${XcodeSdk.MacOSX.displayName},arch=$hostArch';
+    archs = null;
+  } else {
+    // Release builds default to universal binary unless isMacOSArm64OnlyEnabled is set.
+    destination = XcodeSdk.MacOSX.genericPlatform;
+    archs = featureFlags.isMacOSArm64OnlyEnabled ? 'arm64' : null;
+  }
 
   final bool binaryContainsX86Slice =
       archs == null && (excludedArchs == null || !excludedArchs.contains('x86_64'));
