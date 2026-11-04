@@ -252,6 +252,17 @@ def _zip_bundle_impl(ctx):
         env = {"PYTHONDONTWRITEBYTECODE": "1"},
         mnemonic = "ZipBundle",
         progress_message = "Zipping %{output}",
+        # On the machine that builds, never a remote worker: zip.py stores
+        # each entry's mtime as a DOS timestamp, a local time with no zone,
+        # and `unzip` on the machine that installs the archive reads it in
+        # that machine's zone. GN's archives are zipped and unzipped on bots
+        # of one zone. A worker's clock is UTC; the first builds on RBE
+        # (build:rbe, 11-03) gave sky_engine.zip's pubspec.yaml a time seven
+        # hours ahead of the Pacific bots that unzipped it, and pub's
+        # resolution checks took the file for newer than every lockfile. A
+        # fixed timestamp would be no better: the tool embeds frameworks with
+        # `rsync -a`, whose quick check is size and mtime.
+        execution_requirements = {"no-remote-exec": "1"},
     )
     return [
         DefaultInfo(files = depset([output])),
