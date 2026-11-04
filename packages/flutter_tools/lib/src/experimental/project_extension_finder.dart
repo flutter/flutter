@@ -6,7 +6,6 @@ import 'package:extension_discovery/extension_discovery.dart' as ext_discovery;
 import 'package:flutter_tools_core/flutter_tools_core.dart';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config_types.dart';
-import 'package:pubspec_parse/pubspec_parse.dart';
 import 'package:yaml/yaml.dart';
 
 import '../base/error_handling_io.dart';
@@ -60,6 +59,7 @@ class ProjectExtensionFinder {
   static const String kTargetPackageName = 'flutter_tools';
 
   static const String _kPubspecFileName = 'pubspec.yaml';
+  static const _kDependencyKeys = <String>['dependencies', 'dev_dependencies'];
 
   final FileSystem _fileSystem;
   final Logger _logger;
@@ -182,10 +182,15 @@ class ProjectExtensionFinder {
 
   void _extractPubspecDependencies(File pubspecFile, Set<String> outDependencies) {
     try {
-      final pubspec = Pubspec.parse(pubspecFile.readAsStringSync(), lenient: true);
-      outDependencies
-        ..addAll(pubspec.dependencies.keys)
-        ..addAll(pubspec.devDependencies.keys);
+      final Object? parsed = loadYaml(pubspecFile.readAsStringSync());
+      if (parsed is YamlMap) {
+        for (final String key in _kDependencyKeys) {
+          final Object? section = parsed[key];
+          if (section is YamlMap) {
+            outDependencies.addAll(section.keys.whereType<String>());
+          }
+        }
+      }
     } on Exception catch (error) {
       _logger.printTrace('ProjectExtensionFinder: failed to parse "${pubspecFile.path}": $error');
     }

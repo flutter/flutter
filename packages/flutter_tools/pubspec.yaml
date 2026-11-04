@@ -21,7 +21,7 @@ dependencies:
   dap_adapters: 1.1.0
   dart_data_home: 0.1.1
   dds: 5.4.0
-  dwds: 27.2.0
+  dwds: 27.2.1
   code_builder: 4.13.0
   collection: 1.19.1
   completion: 1.0.2
@@ -66,7 +66,7 @@ dependencies:
   http_multi_server: 3.2.3
   convert: 3.1.2
   async: 2.13.1
-  unified_analytics: 8.3.0
+  unified_analytics: 8.4.0
   pubspec_parse: 1.7.0
 
   graphs: 2.3.2
@@ -141,4 +141,4 @@ dartdoc:
   # Exclude this package from the hosted API docs.
   nodoc: true
 
-# PUBSPEC CHECKSUM: cdgo2c
+# PUBSPEC CHECKSUM: 7t5s6a
