@@ -84,8 +84,9 @@ class EnginePaint implements ui.Paint {
 
   /// The mask filter to apply when drawing with this paint.
   ///
-  /// Null unless `webOnlySigma.isFinite && webOnlySigma > 0`, because a blur
-  /// with a zero, negative or infinite sigma draws nothing on the backends.
+  /// Null unless `webOnlySigma.isFinite && webOnlySigma > 0`. Skia cannot
+  /// create a blur mask filter for any other sigma, so the shape is drawn
+  /// without a mask filter instead.
   EngineMaskFilter? get effectiveMaskFilter {
     final localMaskFilter = maskFilter as EngineMaskFilter?;
     if (localMaskFilter == null) {

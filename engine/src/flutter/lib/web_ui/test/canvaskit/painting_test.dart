@@ -80,8 +80,8 @@ void testMain() {
 
       final PaintConsumers consumers = await PaintConsumers.create();
       final ui.Picture picture = consumers.record();
-      // Each paint consumer creates at least one SkPaint.
-      expect(counter.created, greaterThanOrEqualTo(11));
+      // Each canvas draw call creates at least one SkPaint.
+      expect(counter.created, greaterThanOrEqualTo(PaintConsumers.canvasPaintDrawCount));
       expect(counter.live, 0, reason: 'after recording');
 
       final ui.Image rendered = await picture.toImage(20, 20);

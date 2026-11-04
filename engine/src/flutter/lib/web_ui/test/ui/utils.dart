@@ -23,6 +23,8 @@ Picture drawPicture(void Function(Canvas) drawCommands) {
 /// Draws with every [Canvas] method that takes a [Paint], and with paragraphs
 /// whose styles have foreground and background paints.
 ///
+/// [record] makes [canvasPaintDrawCount] draw calls that each take a [Paint].
+///
 /// Used to check that the native paints created for these draws are freed.
 class PaintConsumers {
   PaintConsumers._(this._image, this._vertices, this._paragraphs);
@@ -59,6 +61,9 @@ class PaintConsumers {
     return PaintConsumers._(image, vertices, paragraphs);
   }
 
+  /// The number of draw calls in [record] that take a [Paint].
+  static const int canvasPaintDrawCount = 21;
+
   final Image _image;
   final Vertices _vertices;
   final List<Paragraph> _paragraphs;
@@ -80,10 +85,23 @@ class PaintConsumers {
       ])
       ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 2)
       ..colorFilter = const ColorFilter.mode(Color(0x80FFFFFF), BlendMode.srcOver)
+      ..invertColors = true
       ..imageFilter = ImageFilter.blur(sigmaX: 1, sigmaY: 1);
     const rect = Rect.fromLTRB(0, 0, 10, 10);
     return drawPicture((Canvas canvas) {
+      canvas.drawLine(Offset.zero, const Offset(10, 10), paint);
+      canvas.drawPaint(paint);
       canvas.drawRect(rect, paint);
+      canvas.drawRRect(RRect.fromRectXY(rect, 2, 2), paint);
+      canvas.drawRSuperellipse(RSuperellipse.fromRectXY(rect, 2, 2), paint);
+      canvas.drawDRRect(
+        RRect.fromRectXY(rect, 2, 2),
+        RRect.fromRectXY(rect.deflate(3), 1, 1),
+        paint,
+      );
+      canvas.drawOval(rect, paint);
+      canvas.drawCircle(const Offset(5, 5), 5, paint);
+      canvas.drawArc(rect, 0, 1, true, paint);
       canvas.drawPath(path, paint);
       canvas.drawImage(_image, Offset.zero, paint);
       canvas.drawImageRect(_image, const Rect.fromLTRB(0, 0, 4, 4), rect, paint);
@@ -98,7 +116,17 @@ class PaintConsumers {
         paint,
       );
       canvas.drawVertices(_vertices, BlendMode.srcOver, paint);
+      canvas.drawRawAtlas(
+        _image,
+        Float32List.fromList(<double>[1, 0, 0, 0]),
+        Float32List.fromList(<double>[0, 0, 4, 4]),
+        null,
+        null,
+        null,
+        paint,
+      );
       canvas.drawPoints(PointMode.points, const <Offset>[Offset(1, 1)], paint);
+      canvas.drawRawPoints(PointMode.points, Float32List.fromList(<double>[1, 1]), paint);
       canvas.saveLayer(rect, paint);
       canvas.restore();
       canvas.saveLayer(null, paint);
@@ -115,6 +143,7 @@ class PaintConsumers {
     });
   }
 
+  /// Disposes the image, vertices and paragraphs created by [create].
   void dispose() {
     for (final Paragraph paragraph in _paragraphs) {
       paragraph.dispose();

@@ -96,6 +96,9 @@ abstract class Renderer {
     rasterizer.dispose();
   }
 
+  /// Creates a native paint for a single draw call from [paint].
+  ///
+  /// The caller owns the result and must dispose it after the draw call.
   BackendPaint createPaint(EnginePaint paint, {required ui.TileMode defaultBlurTileMode});
 
   BackendVertices createVertices(

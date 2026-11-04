@@ -92,8 +92,7 @@ class SkwasmCanvas implements LayerCanvas {
         engineFilter.getBackendFilter(defaultBlurTileMode: ui.TileMode.mirror) as SkwasmImageFilter;
     final ImageFilterHandle nativeFilterHandle = backendFilter.nativeFilter;
 
-    final backendPaint =
-        (paint as EnginePaint).createBackendPaint(/*ui.TileMode.decal*/) as SkwasmPaint;
+    final backendPaint = (paint as EnginePaint).createBackendPaint() as SkwasmPaint;
     if (bounds != null) {
       withStackScope((StackScope s) {
         canvasSaveLayer(

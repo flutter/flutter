@@ -336,8 +336,8 @@ class CkCanvas implements LayerCanvas {
   @override
   void drawRSuperellipse(ui.RSuperellipse rsuperellipse, ui.Paint paint) {
     _tracker?.recordPaint(paint);
-    final backendPaint = (paint as EnginePaint).createBackendPaint() as CkPaint;
     final (ui.Path path, ui.Offset offset) = rsuperellipse.toPathOffset();
+    final backendPaint = (paint as EnginePaint).createBackendPaint() as CkPaint;
     translate(offset.dx, offset.dy);
     skCanvas.drawPath(
       ((path as EnginePath).backendPath as CkPath).skiaObject,
@@ -452,8 +452,7 @@ class CkCanvas implements LayerCanvas {
         engineFilter.getBackendFilter(defaultBlurTileMode: ui.TileMode.mirror) as CkImageFilter;
     final SkImageFilter? skFilter = backendFilter.nativeFilter;
 
-    final backendPaint =
-        (paint as EnginePaint?)?.createBackendPaint(/*ui.TileMode.decal*/) as CkPaint?;
+    final backendPaint = (paint as EnginePaint?)?.createBackendPaint() as CkPaint?;
     skCanvas.saveLayer(
       backendPaint?.skiaObject,
       bounds == null ? null : toSkRect(bounds),
