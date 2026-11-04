@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:js_interop';
+import 'dart:math' as math;
 import 'dart:typed_data';
 
 import 'package:meta/meta.dart';
@@ -198,14 +199,21 @@ abstract class CkSurface extends Surface {
   @override
   void setSize(BitmapSize size) {
     final double devicePixelRatio = EngineFlutterDisplay.instance.devicePixelRatio;
+    final clampedSize = BitmapSize(math.max(1, size.width), math.max(1, size.height));
     if (_skSurface != null &&
-        _currentSize == size &&
+        _currentSize == clampedSize &&
         devicePixelRatio == _currentDevicePixelRatio) {
       return;
     }
+    final BitmapSize previousSize = _currentSize;
     _currentDevicePixelRatio = devicePixelRatio;
-    _currentSize = size;
-    _resizeCanvas(size);
+    _currentSize = clampedSize;
+    try {
+      _resizeCanvas(clampedSize);
+    } catch (_) {
+      _currentSize = previousSize;
+      rethrow;
+    }
   }
 
   /// Resizes the underlying canvas to [size] and recreates the Skia surface.
@@ -389,6 +397,11 @@ class CkOffscreenSurface extends CkSurface implements OffscreenSurface {
   /// Resizes the offscreen canvas to [size], preserving fast in-place resizing
   /// unless the browser's physical WebGL drawing buffer is clamped.
   ///
+  /// The requested dimensions are first validated against the context's
+  /// `GL_MAX_TEXTURE_SIZE`. If either dimension exceeds it, an
+  /// [UnsupportedError] is thrown before the canvas is touched, so the
+  /// existing surface remains usable at its previous size.
+  ///
   /// For standard sizes, modifying `canvas.width` and `canvas.height` in-place
   /// updates the drawing buffer without recreating the WebGL context or
   /// churning GPU resources.
@@ -399,12 +412,11 @@ class CkOffscreenSurface extends CkSurface implements OffscreenSurface {
   /// `gl.drawingBufferHeight` down to fit within its GPU memory budget (WebGL
   /// Spec Section 2.2).
   ///
-  /// When a drawing buffer clamp is detected, we acquire a brand-new
-  /// [DomOffscreenCanvas] and recreate the WebGL context, allowing the browser
-  /// to allocate the full buffer upfront. If even the fresh canvas is clamped
-  /// (i.e. requested dimensions exceed hardware/driver limits), an
-  /// [UnsupportedError] is thrown rather than silently returning an image with
-  /// transparent unbacked pixels.
+  /// When a drawing buffer clamp is detected, the old canvas is released and
+  /// its WebGL context is explicitly lost so the browser frees the context
+  /// slot immediately, the Skia objects bound to it are torn down, and a
+  /// brand-new [DomOffscreenCanvas] is acquired with a fresh WebGL context,
+  /// allowing the browser to allocate the full buffer upfront.
   @override
   void _resizeCanvas(BitmapSize size) {
     if (!supportsWebGl) {
@@ -413,8 +425,16 @@ class CkOffscreenSurface extends CkSurface implements OffscreenSurface {
       return;
     }
 
-    _canvasProvider.resizeCanvas(canvas, size);
     final WebGLContext gl = (canvas as DomOffscreenCanvas).getGlContext(webGLVersion);
+    final int maxTextureSize = gl.getParameter(_kGlMaxTextureSize);
+    if (size.width > maxTextureSize || size.height > maxTextureSize) {
+      throw UnsupportedError(
+        'Requested dimensions ${size.width}x${size.height} exceed '
+        'GL_MAX_TEXTURE_SIZE ($maxTextureSize).',
+      );
+    }
+
+    _canvasProvider.resizeCanvas(canvas, size);
 
     if (gl.drawingBufferWidth >= size.width && gl.drawingBufferHeight >= size.height) {
       _recreateSkSurface();
@@ -422,21 +442,27 @@ class CkOffscreenSurface extends CkSurface implements OffscreenSurface {
     }
 
     final DomEventTarget oldCanvas = canvas;
+    final WebGLContext oldGl = (oldCanvas as DomOffscreenCanvas).getGlContext(webGLVersion);
+    // Release the canvas first so that its `webglcontextlost` listener is
+    // removed and [onContextLost] does not fire for the deliberate loss below.
+    _canvasProvider.releaseCanvas(oldCanvas);
+    oldGl.loseContextExtension.loseContext();
+
+    _skSurface?.dispose();
+    _skSurface = null;
+    _grContext?.releaseResourcesAndAbandonContext();
+    _grContext?.delete();
+    _grContext = null;
+
     final DomEventTarget newCanvas = _canvasProvider.acquireCanvas(
       size,
       onContextLost: onContextLost,
     );
-    _canvasProvider.releaseCanvas(oldCanvas);
     unawaited(recreateContextForCanvas(newCanvas));
-
-    final WebGLContext freshGl = (newCanvas as DomOffscreenCanvas).getGlContext(webGLVersion);
-    if (freshGl.drawingBufferWidth < size.width || freshGl.drawingBufferHeight < size.height) {
-      throw UnsupportedError(
-        'Requested image size (${size.width}x${size.height}) exceeds browser WebGL capabilities. '
-        'The physical drawing buffer was clamped to (${freshGl.drawingBufferWidth}x${freshGl.drawingBufferHeight}).',
-      );
-    }
   }
+
+  /// The `GL_MAX_TEXTURE_SIZE` WebGL parameter enum.
+  static const int _kGlMaxTextureSize = 0x0D33;
 
   @override
   Future<void> triggerContextLoss() async {
