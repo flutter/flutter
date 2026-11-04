@@ -16,7 +16,6 @@ import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
-import '../../src/context.dart';
 import '../../src/fakes.dart';
 
 void main() {
@@ -333,7 +332,6 @@ platform :osx, '12.0'
     late FakeMacOSProject project;
     late File infoPlistFile;
     late FakePlistParser fakePlistParser;
-    late FlutterProjectFactory flutterProjectFactory;
 
     setUp(() {
       memoryFileSystem = MemoryFileSystem();
@@ -342,27 +340,18 @@ platform :osx, '12.0'
       project = FakeMacOSProject();
       infoPlistFile = memoryFileSystem.file('Info.plist');
       project.defaultHostInfoPlist = infoPlistFile;
-      flutterProjectFactory = FlutterProjectFactory(
-        fileSystem: memoryFileSystem,
-        logger: testLogger,
-      );
     });
 
     void testWithMocks(String description, Future<void> Function() testMethod) {
-      testUsingContext(
-        description,
-        testMethod,
-        overrides: <Type, Generator>{
-          FileSystem: () => memoryFileSystem,
-          ProcessManager: () => FakeProcessManager.any(),
-          PlistParser: () => fakePlistParser,
-          FlutterProjectFactory: () => flutterProjectFactory,
-        },
-      );
+      testWithoutContext(description, testMethod);
     }
 
     testWithMocks('skipped if files are missing', () async {
-      final macOSProjectMigration = FlutterApplicationMigration(project, testLogger);
+      final macOSProjectMigration = FlutterApplicationMigration(
+        project,
+        testLogger,
+        plistParser: fakePlistParser,
+      );
       await macOSProjectMigration.migrate();
       expect(infoPlistFile.existsSync(), isFalse);
 
@@ -371,7 +360,11 @@ platform :osx, '12.0'
     });
 
     testWithMocks('skipped if no NSPrincipalClass key exists to upgrade', () async {
-      final macOSProjectMigration = FlutterApplicationMigration(project, testLogger);
+      final macOSProjectMigration = FlutterApplicationMigration(
+        project,
+        testLogger,
+        plistParser: fakePlistParser,
+      );
       infoPlistFile.writeAsStringSync('contents'); // Just so it exists: parser is a fake.
       await macOSProjectMigration.migrate();
       expect(
@@ -386,7 +379,11 @@ platform :osx, '12.0'
 
     testWithMocks('skipped if already de-upgraded (or never migrated)', () async {
       fakePlistParser.setProperty(PlistParser.kNSPrincipalClassKey, 'NSApplication');
-      final macOSProjectMigration = FlutterApplicationMigration(project, testLogger);
+      final macOSProjectMigration = FlutterApplicationMigration(
+        project,
+        testLogger,
+        plistParser: fakePlistParser,
+      );
       infoPlistFile.writeAsStringSync('contents'); // Just so it exists: parser is a fake.
       await macOSProjectMigration.migrate();
       expect(
@@ -401,7 +398,11 @@ platform :osx, '12.0'
 
     testWithMocks('Info.plist migrated to use NSApplication', () async {
       fakePlistParser.setProperty(PlistParser.kNSPrincipalClassKey, 'FlutterApplication');
-      final macOSProjectMigration = FlutterApplicationMigration(project, testLogger);
+      final macOSProjectMigration = FlutterApplicationMigration(
+        project,
+        testLogger,
+        plistParser: fakePlistParser,
+      );
       infoPlistFile.writeAsStringSync('contents'); // Just so it exists: parser is a fake.
       await macOSProjectMigration.migrate();
       expect(
@@ -423,7 +424,11 @@ platform :osx, '12.0'
     testWithMocks('Skip if NSPrincipalClass is not NSApplication', () async {
       const differentApp = 'DIFFERENTApplication';
       fakePlistParser.setProperty(PlistParser.kNSPrincipalClassKey, differentApp);
-      final macOSProjectMigration = FlutterApplicationMigration(project, testLogger);
+      final macOSProjectMigration = FlutterApplicationMigration(
+        project,
+        testLogger,
+        plistParser: fakePlistParser,
+      );
       infoPlistFile.writeAsStringSync('contents'); // Just so it exists: parser is a fake.
       await macOSProjectMigration.migrate();
       expect(

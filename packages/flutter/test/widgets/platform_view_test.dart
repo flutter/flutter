@@ -2,9 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-@TestOn('!chrome')
-library;
-
 import 'dart:async';
 import 'dart:ui';
 
@@ -4397,10 +4394,9 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    // This file runs on non-web platforms, so we expect `HtmlElementView` to
-    // fail.
+    // `HtmlElementView` is only supported on web, so we expect it to fail.
     final dynamic exception = tester.takeException();
     expect(exception, isUnimplementedError);
     expect(exception.toString(), contains('HtmlElementView is only available on Flutter Web'));
-  });
+  }, skip: kIsWeb); // [intended] Tests non-web UnimplementedError.
 }
