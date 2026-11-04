@@ -8,6 +8,7 @@
 
 load("@bazel_skylib//lib:selects.bzl", "selects")
 load("@rules_cc//cc:defs.bzl", "cc_library")
+load("//build_defs/dist:everything.bzl", "everything_assemble", "everything_contents", "everything_files", "everything_trees")
 load("//build_defs/dist:local_engine.bzl", "local_engine")
 load("//build_defs/testing:checkout_script_test.bzl", "checkout_script_test")
 
@@ -504,105 +505,17 @@ filegroup(
 # what each CI build of ci/builders/{linux,mac}_*.json builds, into its
 # --target-dir, under its `--config` (an `install` into GN's layout, which
 # the recipes read) -- are generated into ci/builders/BUILD.bazel.
-# What a host build lays out, a Linux host's and a Mac's alike: the targets
-# that place their own files (BuildDirectoryInfo) -- the sky_engine package
-# (gen/dart-pkg/sky_engine: the targets of sky/packages/sky_engine) and
-# impellerc's GLSL library, which GN's shader_lib group copies beside the
-# compiler (shader_lib/flutter/runtime_effect.glsl, shader_lib/impeller/
-# *.glsl; the flutter tool hands the directory to impellerc as --include
-# when it compiles a package's shaders) -- and the files by the directory
-# that holds them under the build root (a shared library by its GN target,
-# lib<name>.so or .dylib by the platform).
-_LOCAL_ENGINE_HOST_CONTENTS = [
-    "//engine/src/flutter/impeller/compiler/shader_lib/flutter",
-    "//engine/src/flutter/impeller/compiler/shader_lib/impeller",
-    "//engine/src/flutter/sky/packages/sky_engine",
-]
-
-_LOCAL_ENGINE_HOST_FILES = {
-    "//engine/src/flutter/build/bazel/dart_wrap:gen_snapshot": "",
-    "//engine/src/flutter/flutter_frontend_server:frontend_server": "gen",
-    "//engine/src/flutter/impeller/compiler:impellerc": "",
-    "//engine/src/flutter/impeller/tessellator:tessellator_shared": "",
-    "//engine/src/flutter/lib/snapshot:flutter_patched_sdk/platform_strong.dill": "flutter_patched_sdk",
-    "//engine/src/flutter/lib/snapshot:flutter_patched_sdk/vm_outline_strong.dill": "flutter_patched_sdk",
-    "//engine/src/flutter/lib/snapshot:isolate_snapshot.bin": "gen/flutter/lib/snapshot",
-    "//engine/src/flutter/lib/snapshot:isolate_snapshot_instructions.bin": "gen/flutter/lib/snapshot",
-    "//engine/src/flutter/lib/snapshot:vm_isolate_snapshot.bin": "gen/flutter/lib/snapshot",
-    "//engine/src/flutter/lib/snapshot:vm_snapshot_instructions.bin": "gen/flutter/lib/snapshot",
-    "//engine/src/flutter/shell/platform/embedder:copy_headers": "",
-    "//engine/src/flutter/shell/platform/embedder:flutter_engine_library": "",
-    "//engine/src/flutter/shell/testing:flutter_tester": "",
-    "//engine/src/flutter/tools/font_subset:font-subset": "",
-    "//engine/src/flutter/tools/path_ops:path_ops": "",
-    # copy("copy_icudata"): the full data file, where artifacts.zip
-    # carries the trimmed flutter/icudtl.dat.
-    "@icu//:icudata": "",
-}
-
-# The Dart SDK's tree, at its paths.
-_LOCAL_ENGINE_HOST_TREES = ["//engine/src/flutter/build/archives:dart_sdk_archive_dart-sdk"]
-
+# What the directory holds is GN's default target, everything, as
+# build_defs/dist/everything.bzl spells it by platform -- the same
+# contents, files and trees an install of a CI build that names no ninja
+# target lays out (ci/builders/BUILD.bazel) -- and the host build's
+# directories assembled for the tool to read as directories.
 local_engine(
     name = "local_engine",
     # The root group is testonly (GN's `testonly = true`).
     testonly = True,
-    # The host build's assembled directories; an Android or iOS build has
-    # neither (its contents are the root group's).
-    assemble = select({
-        "@platforms//os:android": [],
-        "@platforms//os:ios": [],
-        "//conditions:default": [
-            "gen/dart-pkg/sky_engine",
-            "shader_lib",
-        ],
-    }),
-    # The targets that place their own files (BuildDirectoryInfo).
-    contents = select({
-        # GN's default target is the root group `flutter` (engine/src's
-        # //:default depends on //flutter alone): the Android shell with its
-        # jars and archives, the host gen_snapshot, the snapshots, the
-        # Impeller SDK, the embedder archive. The Maven tree and the dist
-        # archives are not in it; the builders name them as targets. An iOS
-        # build's is the root group too: Flutter.framework and
-        # Flutter.xcframework, the host's universal gen_snapshot halves and
-        # the snapshots (generate_snapshot_bins), the scenario app in debug
-        # and profile -- what the flutter tool reads of an iOS engine
-        # (Flutter.xcframework, gen_snapshot_arm64, flutter_patched_sdk, the
-        # isolate snapshots), with its host tools from the Mac's host build
-        # (--local-engine-host).
-        "@platforms//os:android": [":flutter"],
-        "@platforms//os:ios": [":flutter"],
-        # A Mac's host build lays FlutterMacOS.framework and its xcframework
-        # at the build root besides (shell/platform/darwin/macos's `macos`
-        # group, what the root reaches through shell/platform:platform).
-        "@platforms//os:macos": _LOCAL_ENGINE_HOST_CONTENTS + [
-            "//engine/src/flutter/shell/platform/darwin/macos:macos",
-        ],
-        "//conditions:default": _LOCAL_ENGINE_HOST_CONTENTS,
-    }),
-    # The files by the directory that holds them, under the build root.
-    files = select({
-        # copy("copy_icudata"): ICU's data file for the target at the build
-        # root (android/icudtl.dat; @icu's filegroup selects it), as GN's
-        # icudata group lays it.
-        "@platforms//os:android": {"@icu//:icudata": ""},
-        # ICU's data is inside Flutter.framework on iOS.
-        "@platforms//os:ios": {},
-        "@platforms//os:macos": _LOCAL_ENGINE_HOST_FILES,
-        # A Linux host's adds the GTK embedding's library (its headers are
-        # a tree below).
-        "//conditions:default": _LOCAL_ENGINE_HOST_FILES | {
-            "//engine/src/flutter/shell/platform/linux:flutter_linux_gtk": "",
-        },
-    }),
-    # The trees: the Dart SDK, and on Linux the GTK headers, at their paths.
-    trees = select({
-        "@platforms//os:android": [],
-        "@platforms//os:ios": [],
-        "@platforms//os:macos": _LOCAL_ENGINE_HOST_TREES,
-        "//conditions:default": _LOCAL_ENGINE_HOST_TREES + [
-            "//engine/src/flutter/shell/platform/linux:flutter_gtk_publish_headers_linux",
-        ],
-    }),
+    assemble = everything_assemble(),
+    contents = everything_contents(),
+    files = everything_files(),
+    trees = everything_trees(),
 )

@@ -19,7 +19,8 @@
       ],
       "gclient_variables": {
         "download_android_deps": false,
-        "use_rbe": true
+        "use_rbe": false,
+        "download_bazelisk": true
       },
       "gn": [
         "--target-dir",
@@ -29,12 +30,14 @@
         "debug",
         "--simulator",
         "--no-lto",
-        "--rbe",
+        "--no-rbe",
         "--no-goma",
         "--xcode-symlinks",
-        "--gn-args=dart_dynamic_modules=true"
+        "--gn-args=dart_dynamic_modules=true",
+        "--bazel"
       ],
       "name": "ci/ios_debug_sim_ddm",
+      "timeout": 240,
       "description": "Produces debug mode artifacts to target the x64 iOS simulator.",
       "ninja": {
         "config": "ci/ios_debug_sim_ddm"
@@ -50,7 +53,8 @@
           "--no-lto",
           "--no-rbe",
           "--no-goma",
-          "--gn-args=dart_dynamic_modules=true"
+          "--gn-args=dart_dynamic_modules=true",
+          "--bazel"
         ]
       },
       "properties": {
@@ -67,7 +71,8 @@
       ],
       "gclient_variables": {
         "download_android_deps": false,
-        "use_rbe": true
+        "use_rbe": false,
+        "download_bazelisk": true
       },
       "gn": [
         "--target-dir",
@@ -78,12 +83,14 @@
         "--simulator",
         "--simulator-cpu=arm64",
         "--no-lto",
-        "--rbe",
+        "--no-rbe",
         "--no-goma",
         "--xcode-symlinks",
-        "--gn-args=dart_dynamic_modules=true"
+        "--gn-args=dart_dynamic_modules=true",
+        "--bazel"
       ],
       "name": "ci/ios_debug_sim_arm64_ddm",
+      "timeout": 240,
       "description": "Produces debug mode artifacts to target the arm64 iOS simulator.",
       "ninja": {
         "config": "ci/ios_debug_sim_arm64_ddm"
@@ -100,7 +107,8 @@
           "--no-lto",
           "--no-rbe",
           "--no-goma",
-          "--gn-args=dart_dynamic_modules=true"
+          "--gn-args=dart_dynamic_modules=true",
+          "--bazel"
         ]
       },
       "properties": {
@@ -117,7 +125,8 @@
       ],
       "gclient_variables": {
         "download_android_deps": false,
-        "use_rbe": true
+        "use_rbe": false,
+        "download_bazelisk": true
       },
       "gn": [
         "--target-dir",
@@ -125,12 +134,14 @@
         "--ios",
         "--runtime-mode",
         "debug",
-        "--rbe",
+        "--no-rbe",
         "--no-goma",
         "--xcode-symlinks",
-        "--gn-args=dart_dynamic_modules=true"
+        "--gn-args=dart_dynamic_modules=true",
+        "--bazel"
       ],
       "name": "ci/ios_debug_ddm",
+      "timeout": 240,
       "description": "Produces debug mode artifacts to target iOS.",
       "ninja": {
         "config": "ci/ios_debug_ddm",
@@ -148,7 +159,8 @@
           "debug",
           "--no-rbe",
           "--no-goma",
-          "--gn-args=dart_dynamic_modules=true"
+          "--gn-args=dart_dynamic_modules=true",
+          "--bazel"
         ]
       },
       "properties": {
@@ -165,7 +177,8 @@
       ],
       "gclient_variables": {
         "download_android_deps": false,
-        "use_rbe": true
+        "use_rbe": false,
+        "download_bazelisk": true
       },
       "gn": [
         "--target-dir",
@@ -173,12 +186,14 @@
         "--ios",
         "--runtime-mode",
         "release",
-        "--rbe",
+        "--no-rbe",
         "--no-goma",
         "--xcode-symlinks",
-        "--gn-args=dart_dynamic_modules=true"
+        "--gn-args=dart_dynamic_modules=true",
+        "--bazel"
       ],
       "name": "ci/ios_release_ddm",
+      "timeout": 240,
       "description": "Produces release mode artifacts to target iOS.",
       "ninja": {
         "config": "ci/ios_release_ddm",
@@ -196,7 +211,8 @@
           "release",
           "--no-rbe",
           "--no-goma",
-          "--gn-args=dart_dynamic_modules=true"
+          "--gn-args=dart_dynamic_modules=true",
+          "--bazel"
         ]
       },
       "properties": {
