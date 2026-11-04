@@ -9109,9 +9109,11 @@ test_suite(
         // linux_host_engine.json as a Linux builder that builds with Bazel in
         // place: --bazel is a flag of where the build runs, like --no-rbe, so
         // the configuration is the one the other flags name; a build with a
-        // flag the converter has no setting for, or with no ninja targets
-        // (ninja's default, no install), fails the check -- what tools/gn
-        // --bazel would refuse on the bot.
+        // flag the converter has no setting for fails the check -- what
+        // tools/gn --bazel would refuse on the bot. A build with no ninja
+        // targets (ninja's default, everything) gets an install of everything
+        // (build_defs/dist/everything.bzl), as the Mac's test and simulator
+        // builds need.
         final Map<String, BuilderConfig> loaded = configs(<String, String>{
           'linux_host_engine.json':
               '''
@@ -9136,11 +9138,17 @@ test_suite(
         const noConfiguration =
             "linux_host_engine.json's ci/host_fancy carries --bazel but has no Bazel configuration "
             "(--fancy (not in the converter's table of tools/gn flags))";
-        const noInstall =
-            "linux_host_engine.json's ci/host_default carries --bazel but builds ninja's default "
-            'target, which has no install';
-        expect(bazelBuildErrors(builds), <String>[noConfiguration, noInstall]);
+        expect(bazelBuildErrors(builds), <String>[noConfiguration]);
         expect(bazelVariantErrors(loaded, builds), isEmpty);
+        final BuilderBuild everything = builds.singleWhere(
+          (BuilderBuild b) => b.name == 'ci/host_default',
+        );
+        expect(everything.isEverythingInstalled, isTrue);
+        expect(
+          builds.singleWhere((BuilderBuild b) => b.name == 'ci/host_gn').isEverythingInstalled,
+          isFalse,
+          reason: 'a build still under GN gets no install of everything',
+        );
         // `run_tests.py --type binaries` names the test executables among the
         // build's ninja targets, as the executable step of the GN form did.
         final table = jsonDecode(
@@ -9171,6 +9179,17 @@ test_suite(
         expect(tests['types'], isEmpty);
         expect(tests['missing'], isEmpty);
         expect(tests['suite'], '//engine/src/flutter/ci/builders:host_licenses_tests');
+        final defaultBuild =
+            linux.singleWhere(
+                  (Object? b) => (b! as Map<String, Object?>)['name'] == 'ci/host_default',
+                )!
+                as Map<String, Object?>;
+        expect(defaultBuild['install'], '//engine/src/flutter/ci/builders:host_default');
+        expect(defaultBuild['ninja_targets'], isEmpty);
+        final gnBuild =
+            linux.singleWhere((Object? b) => (b! as Map<String, Object?>)['name'] == 'ci/host_gn')!
+                as Map<String, Object?>;
+        expect(gnBuild['install'], isNull);
       },
     );
 
