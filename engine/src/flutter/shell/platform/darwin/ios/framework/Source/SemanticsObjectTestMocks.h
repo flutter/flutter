@@ -56,6 +56,8 @@ class MockAccessibilityBridge : public AccessibilityBridgeIos {
   void AccessibilityObjectDidBecomeFocused(int32_t id) override {}
   void AccessibilityObjectDidLoseFocus(int32_t id) override {}
   FlutterPlatformViewsController* GetPlatformViewsController() const override { return nil; }
+  SemanticsObject* GetPendingFocusTarget() const override { return pending_focus_target_; }
+  void SetPendingFocusTarget(SemanticsObject* target) override { pending_focus_target_ = target; }
   std::vector<SemanticsActionObservation> observations;
   bool isViewLoaded = true;
   bool isVoiceOverRunningValue = false;
@@ -64,6 +66,7 @@ class MockAccessibilityBridge : public AccessibilityBridgeIos {
  private:
   UIView* view_;
   UIWindow* window_;
+  __weak SemanticsObject* pending_focus_target_;
 };
 
 class MockAccessibilityBridgeNoWindow : public AccessibilityBridgeIos {
@@ -90,12 +93,15 @@ class MockAccessibilityBridgeNoWindow : public AccessibilityBridgeIos {
   void AccessibilityObjectDidLoseFocus(int32_t id) override {}
   NSString* GetDefaultLocale() override { return nil; }
   FlutterPlatformViewsController* GetPlatformViewsController() const override { return nil; }
+  SemanticsObject* GetPendingFocusTarget() const override { return pending_focus_target_; }
+  void SetPendingFocusTarget(SemanticsObject* target) override { pending_focus_target_ = target; }
   std::vector<SemanticsActionObservation> observations;
   bool isViewLoaded = true;
   bool isVoiceOverRunningValue = false;
 
  private:
   UIView* view_;
+  __weak SemanticsObject* pending_focus_target_;
 };
 }  // namespace testing
 }  // namespace flutter

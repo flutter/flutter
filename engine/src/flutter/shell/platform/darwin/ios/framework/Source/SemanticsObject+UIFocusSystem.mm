@@ -84,21 +84,10 @@ static SemanticsObject* RootOf(SemanticsObject* object) {
   return root;
 }
 
-// The item that Tab / Shift+Tab should focus next, keyed by FlutterView, until
-// the focus update to it has been requested.
-static NSMapTable<UIView*, SemanticsObject*>* PendingFocusTargets() {
-  static NSMapTable<UIView*, SemanticsObject*>* targets;
-  static dispatch_once_t once;
-  dispatch_once(&once, ^{
-    targets = [NSMapTable weakToWeakObjectsMapTable];
-  });
-  return targets;
-}
-
 static void ClearPendingFocusTarget(SemanticsObject* object) {
-  UIView* view = object.bridgeView;
-  if (view) {
-    [PendingFocusTargets() removeObjectForKey:view];
+  flutter::AccessibilityBridgeIos* bridge = object.bridge;
+  if (bridge) {
+    bridge->SetPendingFocusTarget(nil);
   }
 }
 
@@ -107,11 +96,11 @@ static BOOL IsAttached(SemanticsObject* object) {
   return object.bridge && RootOf(object).uid == kRootNodeId;
 }
 
-// The pending target of `object`'s FlutterView, or nil if there is none or it
-// was removed from the semantics tree.
+// The pending Tab navigation target of `object`'s bridge, or nil if there is
+// none or it was removed from the semantics tree.
 static SemanticsObject* PendingFocusTarget(SemanticsObject* object) {
-  UIView* view = object.bridgeView;
-  SemanticsObject* target = view ? [PendingFocusTargets() objectForKey:view] : nil;
+  flutter::AccessibilityBridgeIos* bridge = object.bridge;
+  SemanticsObject* target = bridge ? bridge->GetPendingFocusTarget() : nil;
   if (target && !IsAttached(target)) {
     ClearPendingFocusTarget(object);
     return nil;
@@ -164,14 +153,19 @@ static void RequestFocusToPendingTarget(SemanticsObject* target) {
 // offscreen; once it is focused, -didUpdateFocusInContext: asks the framework
 // to scroll it into view.
 static void MoveFocusTo(SemanticsObject* target) {
-  UIView* view = target.bridgeView;
-  if (!view) {
+  flutter::AccessibilityBridgeIos* bridge = target.bridge;
+  if (!bridge) {
     return;
   }
-  [PendingFocusTargets() setObject:target forKey:view];
+  bridge->SetPendingFocusTarget(target);
   // Wait until the focus engine has finished rejecting the current update.
+  // Capture weakly so a torn-down tree is not kept alive by the block.
+  __weak SemanticsObject* weakTarget = target;
   dispatch_async(dispatch_get_main_queue(), ^{
-    RequestFocusToPendingTarget(target);
+    SemanticsObject* strongTarget = weakTarget;
+    if (strongTarget) {
+      RequestFocusToPendingTarget(strongTarget);
+    }
   });
 }
 
