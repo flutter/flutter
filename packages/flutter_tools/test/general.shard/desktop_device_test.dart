@@ -594,12 +594,11 @@ void main() {
     var exitCheckFinished = false;
     int? receivedExitCode;
     final FakeDesktopDevice device = setUpDesktopDevice(processManager: processManager);
-    device.onProcessExitedCallback =
-        (ApplicationPackage package, BuildInfo buildInfo, Process process, int exitCode) async {
-          receivedExitCode = exitCode;
-          await exitCheckCompleter.future;
-          exitCheckFinished = true;
-        };
+    device.onProcessExitedCallback = (Process process, int exitCode) async {
+      receivedExitCode = exitCode;
+      await exitCheckCompleter.future;
+      exitCheckFinished = true;
+    };
 
     final package = FakeApplicationPackage();
     final LaunchResult result = await device.startApp(
@@ -678,12 +677,11 @@ void main() {
       var exitCheckFinished = false;
       int? receivedExitCode;
       final FakeDesktopDevice device = setUpDesktopDevice(processManager: processManager);
-      device.onProcessExitedCallback =
-          (ApplicationPackage package, BuildInfo buildInfo, Process process, int exitCode) async {
-            receivedExitCode = exitCode;
-            await exitCheckCompleter.future;
-            exitCheckFinished = true;
-          };
+      device.onProcessExitedCallback = (Process process, int exitCode) async {
+        receivedExitCode = exitCode;
+        await exitCheckCompleter.future;
+        exitCheckFinished = true;
+      };
 
       var startAppFinished = false;
       final Future<LaunchResult> startAppFuture = device
@@ -751,16 +749,11 @@ class FakeDesktopDevice extends DesktopDevice {
 
   final bool nullExecutablePathForDevice;
 
-  Future<void> Function(ApplicationPackage, BuildInfo, Process, int)? onProcessExitedCallback;
+  Future<void> Function(Process, int)? onProcessExitedCallback;
 
   @override
-  Future<void> onProcessExited(
-    ApplicationPackage package,
-    BuildInfo buildInfo,
-    Process process,
-    int exitCode,
-  ) async {
-    await onProcessExitedCallback?.call(package, buildInfo, process, exitCode);
+  Future<void> onProcessExited(Process process, int exitCode) async {
+    await onProcessExitedCallback?.call(process, exitCode);
   }
 
   @override

@@ -7,7 +7,6 @@ import 'dart:async';
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
-import '../application_package.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
@@ -132,19 +131,13 @@ class MacOSDevice extends DesktopDevice {
   }
 
   @override
-  Future<void> onProcessExited(
-    ApplicationPackage package,
-    BuildInfo buildInfo,
-    Process process,
-    int exitCode,
-  ) async {
+  Future<void> onProcessExited(Process process, int exitCode) async {
     if (exitCode != kSigabrtExitCode) {
       return;
     }
     final String? crashMessage = await _querySystemLogsForPrivacyCrash(process.pid);
     if (crashMessage != null) {
-      final String? bundlePath = package is MacOSApp ? package.applicationBundle(buildInfo) : null;
-      _printPrivacyDiagnostic(crashMessage, bundlePath: bundlePath);
+      _printPrivacyDiagnostic(crashMessage);
     }
   }
 
@@ -190,7 +183,7 @@ class MacOSDevice extends DesktopDevice {
     return null;
   }
 
-  void _printPrivacyDiagnostic(String line, {String? bundlePath}) {
+  void _printPrivacyDiagnostic(String line) {
     final String? key = _privacyKeyPattern.firstMatch(line)?.group(1);
     final keyNotice = key != null ? ' (requiring $key)' : '';
     final keyDetail = key != null
@@ -198,28 +191,24 @@ class MacOSDevice extends DesktopDevice {
         : 'Even if the usage description key is already present in '
               'macos/Runner/Info.plist, ';
     final String requiredKeyDescription = key ?? 'the required usage description key';
-    final runCommand = bundlePath != null ? 'open "$bundlePath"' : 'open <path-to-app-bundle>';
 
     _logger.printError('''
 
 ════════════════════════════════════════════════════════════════════════════════
 macOS Privacy Permission Crash Detected
 ════════════════════════════════════════════════════════════════════════════════
-The application crashed while requesting access to privacy-sensitive data$keyNotice.
+The application crashed while requesting access to protected resources$keyNotice.
 
-When launched from an IDE (such as VS Code or Android Studio) or terminal via
-"flutter run", macOS Transparency, Consent, and Control (TCC) attributes
-permission requests to the parent IDE or terminal process rather than the
-application bundle.
+When launched from an IDE (such as VS Code or Android Studio) or custom terminal
+via "flutter run", protected resource requests are made to the parent IDE or
+terminal process rather than the application bundle.
 
 ${keyDetail}macOS terminates the process if the parent process lacks the usage
 description.
 
 Workaround:
 1. Ensure $requiredKeyDescription is present in macos/Runner/Info.plist.
-2. Run the project directly from Xcode, or launch the application bundle
-   directly from Finder or Terminal:
-   $runCommand
+2. Run the project directly from Xcode, or 'flutter run' using the default macOS Terminal app.
 
 See https://github.com/flutter/flutter/issues/70374 for more details.
 ════════════════════════════════════════════════════════════════════════════════

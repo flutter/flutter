@@ -286,7 +286,7 @@ void main() {
           operatingSystemUtils: FakeOperatingSystemUtils(),
           processManager: processManager,
         );
-        final package = FakeMacOSApp(bundlePath: '/path/to/MyFlutterApp.app');
+        final package = FakeMacOSApp();
 
         final LaunchResult result = await device.startApp(
           package,
@@ -309,7 +309,16 @@ void main() {
         expect(disposeFinished, true);
 
         expect(logger.errorText, contains('macOS Privacy Permission Crash Detected'));
-        expect(logger.errorText, contains('requiring NSSpeechRecognitionUsageDescription'));
+        expect(
+          logger.errorText,
+          contains(
+            'access to protected resources (requiring NSSpeechRecognitionUsageDescription).',
+          ),
+        );
+        expect(
+          logger.errorText,
+          contains('protected resource requests are made to the parent IDE or\nterminal process'),
+        );
         expect(
           logger.errorText,
           contains('Even if NSSpeechRecognitionUsageDescription is already present'),
@@ -320,56 +329,66 @@ void main() {
             '1. Ensure NSSpeechRecognitionUsageDescription is present in macos/Runner/Info.plist.',
           ),
         );
-        expect(logger.errorText, contains('open "/path/to/MyFlutterApp.app"'));
+        expect(
+          logger.errorText,
+          contains(
+            "2. Run the project directly from Xcode, or 'flutter run' using the default macOS Terminal app.",
+          ),
+        );
         expect(logger.errorText, contains('https://github.com/flutter/flutter/issues/70374'));
         expect(processManager, hasNoRemainingExpectations);
       },
     );
 
-    testWithoutContext(
-      'detects privacy crash with alternative phrasing and fallback bundle path',
-      () async {
-        final logger = BufferLogger.test();
-        final processManager = FakeProcessManager.list(<FakeCommand>[
-          const FakeCommand(
-            command: <String>['release/executable'],
-            exitCode: MacOSDevice.kSigabrtExitCode,
-          ),
-          FakeCommand(
-            command: logShowCommand,
-            stdout: jsonEncode(<String, Object?>{
-              'processID': 10000,
-              'eventMessage':
-                  '${MacOSDevice.kMacOSPrivacyCrashPattern}. '
-                  "The app's Info.plist must contain an NSPhotoLibraryUsageDescription key "
-                  'with a string value explaining to the user how the app uses this data.',
-            }),
-          ),
-        ]);
-        final device = MacOSDevice(
-          fileSystem: MemoryFileSystem.test(),
-          logger: logger,
-          operatingSystemUtils: FakeOperatingSystemUtils(),
-          processManager: processManager,
-        );
-        final package = FakeMacOSApp(bundlePath: null);
+    testWithoutContext('detects privacy crash with alternative phrasing', () async {
+      final logger = BufferLogger.test();
+      final processManager = FakeProcessManager.list(<FakeCommand>[
+        const FakeCommand(
+          command: <String>['release/executable'],
+          exitCode: MacOSDevice.kSigabrtExitCode,
+        ),
+        FakeCommand(
+          command: logShowCommand,
+          stdout: jsonEncode(<String, Object?>{
+            'processID': 10000,
+            'eventMessage':
+                '${MacOSDevice.kMacOSPrivacyCrashPattern}. '
+                "The app's Info.plist must contain an NSPhotoLibraryUsageDescription key "
+                'with a string value explaining to the user how the app uses this data.',
+          }),
+        ),
+      ]);
+      final device = MacOSDevice(
+        fileSystem: MemoryFileSystem.test(),
+        logger: logger,
+        operatingSystemUtils: FakeOperatingSystemUtils(),
+        processManager: processManager,
+      );
+      final package = FakeMacOSApp();
 
-        final LaunchResult result = await device.startApp(
-          package,
-          debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
-          prebuiltApplication: true,
-        );
-        expect(result.started, true);
+      final LaunchResult result = await device.startApp(
+        package,
+        debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
+        prebuiltApplication: true,
+      );
+      expect(result.started, true);
 
-        await pumpEventQueue();
-        await device.dispose();
+      await pumpEventQueue();
+      await device.dispose();
 
-        expect(logger.errorText, contains('macOS Privacy Permission Crash Detected'));
-        expect(logger.errorText, contains('requiring NSPhotoLibraryUsageDescription'));
-        expect(logger.errorText, contains('open <path-to-app-bundle>'));
-        expect(processManager, hasNoRemainingExpectations);
-      },
-    );
+      expect(logger.errorText, contains('macOS Privacy Permission Crash Detected'));
+      expect(
+        logger.errorText,
+        contains('access to protected resources (requiring NSPhotoLibraryUsageDescription).'),
+      );
+      expect(
+        logger.errorText,
+        contains(
+          "2. Run the project directly from Xcode, or 'flutter run' using the default macOS Terminal app.",
+        ),
+      );
+      expect(processManager, hasNoRemainingExpectations);
+    });
 
     testWithoutContext(
       'detects privacy crash without key name and prints fallback diagnostic',
@@ -405,7 +424,7 @@ void main() {
         await device.dispose();
 
         expect(logger.errorText, contains('macOS Privacy Permission Crash Detected'));
-        expect(logger.errorText, contains('access to privacy-sensitive data.'));
+        expect(logger.errorText, contains('access to protected resources.'));
         expect(logger.errorText, isNot(contains('requiring')));
         expect(
           logger.errorText,
@@ -417,6 +436,12 @@ void main() {
           logger.errorText,
           contains(
             '1. Ensure the required usage description key is present in macos/Runner/Info.plist.',
+          ),
+        );
+        expect(
+          logger.errorText,
+          contains(
+            "2. Run the project directly from Xcode, or 'flutter run' using the default macOS Terminal app.",
           ),
         );
         expect(processManager, hasNoRemainingExpectations);
@@ -586,13 +611,6 @@ FlutterProject setUpFlutterProject(Directory directory) {
 }
 
 class FakeMacOSApp extends Fake implements MacOSApp {
-  FakeMacOSApp({this.bundlePath = 'release/bundle.app'});
-
-  final String? bundlePath;
-
-  @override
-  String? applicationBundle(BuildInfo buildInfo) => bundlePath;
-
   @override
   String executable(BuildInfo buildInfo) {
     return switch (buildInfo) {

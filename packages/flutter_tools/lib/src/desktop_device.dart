@@ -143,7 +143,7 @@ abstract class DesktopDevice extends Device {
     _runningProcesses.add(process);
     final Future<void> exitFuture = process.exitCode.then((int exitCode) async {
       _runningProcesses.remove(process);
-      final Future<void> exitCheck = onProcessExited(package, buildInfo, process, exitCode);
+      final Future<void> exitCheck = onProcessExited(process, exitCode);
       _pendingExitChecks.add(exitCheck);
       try {
         await exitCheck;
@@ -261,12 +261,7 @@ abstract class DesktopDevice extends Device {
   /// await the returned future, so overrides should bound any asynchronous
   /// work with a short timeout.
   @protected
-  Future<void> onProcessExited(
-    ApplicationPackage package,
-    BuildInfo buildInfo,
-    Process process,
-    int exitCode,
-  ) async {}
+  Future<void> onProcessExited(Process process, int exitCode) async {}
 
   /// Computes a set of environment variables used to pass debugging information
   /// to the engine without interfering with application level command line
