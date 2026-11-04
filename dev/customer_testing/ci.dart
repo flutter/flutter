@@ -57,8 +57,8 @@ void main(List<String> args) async {
     io.exitCode = 1;
     return;
   }
-  final List<Glob> includes = (parsedArgs['include'] as List<String>).map(Glob.new).toList();
-  final List<Glob> excludes = (parsedArgs['exclude'] as List<String>).map(Glob.new).toList();
+  final List<Glob> includes = parsedArgs.multiOption('include').map(Glob.new).toList();
+  final List<Glob> excludes = parsedArgs.multiOption('exclude').map(Glob.new).toList();
 
   final String flutterRootPath = p.canonicalize('../../');
   final testsCacheDir = io.Directory(p.join(flutterRootPath, 'bin', 'cache', 'pkg', 'tests'));
@@ -110,9 +110,9 @@ void main(List<String> args) async {
           .listSync()
           .whereType<io.File>()
           .map((io.File file) => p.basename(file.path))
-          .where((String name) => p.extension(name) == '.test')
           .where((String name) {
-            return (includes.isEmpty || includes.any((Glob glob) => glob.matches(name))) &&
+            return p.extension(name) == '.test' &&
+                (includes.isEmpty || includes.any((Glob glob) => glob.matches(name))) &&
                 !excludes.any((Glob glob) => glob.matches(name));
           })
           .map((String name) => p.posix.joinAll(<String>[...p.split(registryDir.path), name]))
