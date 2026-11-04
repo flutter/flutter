@@ -5,14 +5,11 @@
 import 'dart:async';
 import 'dart:isolate';
 
-import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/signals.dart';
 import 'package:flutter_tools/src/experimental/extension_discovery.dart';
 import 'package:flutter_tools_core/flutter_tools_core.dart';
 import 'package:flutter_tools_extension/flutter_tools_extension.dart';
 import 'package:test/test.dart';
-import 'package:yaml/yaml.dart';
 
 void _dummyExtensionEntryPoint(SendPort sendPort) {
   unawaited(ToolExtensionEntryPoint.run(sendPort, <ToolExtensionService>[]));
@@ -284,69 +281,30 @@ void main() {
       );
     });
 
-    test('ExtensionConnection.spawnUri spawns extension script and completes handshake', () async {
+    test('ExtensionConnection.spawn completes handshake and matches expectedConfig', () async {
       final logger = BufferLogger.test();
-      final Uri? libUri = await Isolate.resolvePackageUri(
-        Uri.parse(
-          'package:flutter_tools_extension_linux_prototype/flutter_tools_extension_linux_prototype.dart',
-        ),
-      );
-      expect(libUri, isNotNull);
-      final Uri entrypointUri = libUri!.resolve(
-        '../bin/flutter_tools_extension_linux_prototype.dart',
-      );
-      final Uri? packageConfigUri = await Isolate.packageConfig;
-      expect(packageConfigUri, isNotNull);
-
-      final fs = LocalFileSystem.test(signals: LocalSignals.instance);
-      addTearDown(fs.dispose);
-      final Uri configUri = libUri.resolve('../extension/flutter_tools/config.yaml');
-      final rawYaml = loadYaml(fs.file(configUri).readAsStringSync()) as YamlMap;
-      final expectedConfig = ExtensionPackageConfig.fromMap(
-        rawYaml.cast<String, Object?>(),
-        packageName: 'flutter_tools_extension_linux_prototype',
-      );
-
-      final ExtensionConnection connection = await ExtensionConnection.spawnUri(
-        entrypointUri,
-        expectedConfig: expectedConfig,
+      final ExtensionConnection connection = await ExtensionConnection.spawn(
+        _dummyExtensionEntryPoint,
+        expectedConfig: ExtensionPackageConfig(name: 'test_extension'),
         logger: logger,
-        packageConfigUri: packageConfigUri!,
-        extensionName: 'flutter_tools_extension_linux_prototype',
       );
       addTearDown(connection.dispose);
 
-      expect(connection.extensionName, 'flutter_tools_extension_linux_prototype');
-      expect(
-        connection.capabilities.services,
-        containsAll(const <String>['diagnostics', 'config', 'build', 'template']),
-      );
+      expect(connection.extensionName, 'test_extension');
+      expect(connection.capabilities.services, isEmpty);
     });
 
-    test('ExtensionConnection.spawnUri throws StateError when expectedConfig does not match capabilities', () async {
+    test('ExtensionConnection.spawn throws StateError when expectedConfig does not match capabilities', () async {
       final logger = BufferLogger.test();
-      final Uri? libUri = await Isolate.resolvePackageUri(
-        Uri.parse(
-          'package:flutter_tools_extension_linux_prototype/flutter_tools_extension_linux_prototype.dart',
-        ),
-      );
-      expect(libUri, isNotNull);
-      final Uri entrypointUri = libUri!.resolve(
-        '../bin/flutter_tools_extension_linux_prototype.dart',
-      );
-      final Uri? packageConfigUri = await Isolate.packageConfig;
-      expect(packageConfigUri, isNotNull);
-
       await expectLater(
-        ExtensionConnection.spawnUri(
-          entrypointUri,
+        ExtensionConnection.spawn(
+          _dummyExtensionEntryPoint,
           expectedConfig: ExtensionPackageConfig(
-            name: 'flutter_tools_extension_linux_prototype',
+            name: 'test_extension',
             hostPlatforms: const <String>{'linux'},
             services: const <String>{'diagnostics'},
           ),
           logger: logger,
-          packageConfigUri: packageConfigUri!,
         ),
         throwsA(
           isA<StateError>().having(
@@ -360,22 +318,13 @@ void main() {
       );
 
       await expectLater(
-        ExtensionConnection.spawnUri(
-          entrypointUri,
+        ExtensionConnection.spawn(
+          _dummyExtensionEntryPoint,
           expectedConfig: ExtensionPackageConfig(
-            name: 'flutter_tools_extension_linux_prototype',
+            name: 'test_extension',
             hostPlatforms: const <String>{'macos'},
-            services: const <String>{
-              'diagnostics',
-              'config',
-              'template',
-              'device',
-              'build',
-              'clean',
-            },
           ),
           logger: logger,
-          packageConfigUri: packageConfigUri,
         ),
         throwsA(
           isA<StateError>().having(

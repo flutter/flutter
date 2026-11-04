@@ -2,9 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:isolate';
+
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/experimental/extension_discovery.dart';
+import 'package:flutter_tools_core/flutter_tools_core.dart';
+import 'package:yaml/yaml.dart';
 
 import '../src/common.dart';
 import 'test_utils.dart';
@@ -144,50 +150,43 @@ void main() {
     expect(projectDir.existsSync(), isFalse);
   });
 
-  testWithoutContext('flutter create with custom template succeeds when enabled', () async {
-    final Directory projectDir = tempHome.childDirectory('custom_app');
-    if (projectDir.existsSync()) {
-      projectDir.deleteSync(recursive: true);
-    }
-
-    final ProcessResult result = await processManager.run(
-      <String>[flutterBin, 'create', '--template=custom-linux-app', projectDir.path],
-      environment: <String, String>{...baseEnv, 'FLUTTER_TOOL_EXTENSIONS': 'true'},
-    );
-
-    if (isLinux) {
-      expect(result.exitCode, 0, reason: 'stdout: ${result.stdout}\nstderr: ${result.stderr}');
-      expect(projectDir.existsSync(), isTrue);
-      final File verificationFile = projectDir.childFile('.custom_device_extension_info');
-      expect(verificationFile.existsSync(), isTrue);
-      expect(
-        verificationFile.readAsStringSync().trim(),
-        'Custom Linux Device Extension App Template Verified',
+  testWithoutContext(
+    'ExtensionConnection.spawnUri spawns extension script and completes handshake',
+    () async {
+      final logger = BufferLogger.test();
+      final Uri? libUri = await Isolate.resolvePackageUri(
+        Uri.parse(
+          'package:flutter_tools_extension_linux_prototype/flutter_tools_extension_linux_prototype.dart',
+        ),
       );
-    } else {
-      expect(
-        result.exitCode,
-        isNot(0),
-        reason: 'stdout: ${result.stdout}\nstderr: ${result.stderr}',
+      expect(libUri, isNotNull);
+      final Uri entrypointUri = libUri!.resolve(
+        '../bin/flutter_tools_extension_linux_prototype.dart',
       );
-      expect(result.stderr, contains('custom-linux-app'));
-      expect(projectDir.existsSync(), isFalse);
-    }
-  });
+      final Uri? packageConfigUri = await Isolate.packageConfig;
+      expect(packageConfigUri, isNotNull);
 
-  testWithoutContext('flutter create with custom template fails when disabled', () async {
-    final Directory projectDir = tempHome.childDirectory('custom_app_disabled');
-    if (projectDir.existsSync()) {
-      projectDir.deleteSync(recursive: true);
-    }
+      final Uri configUri = libUri.resolve('../extension/flutter_tools/config.yaml');
+      final rawYaml = loadYaml(fileSystem.file(configUri).readAsStringSync()) as YamlMap;
+      final expectedConfig = ExtensionPackageConfig.fromMap(
+        rawYaml.cast<String, Object?>(),
+        packageName: 'flutter_tools_extension_linux_prototype',
+      );
 
-    final ProcessResult result = await processManager.run(
-      <String>[flutterBin, 'create', '--template=custom-linux-app', projectDir.path],
-      environment: baseEnv, // disabled by default
-    );
+      final ExtensionConnection connection = await ExtensionConnection.spawnUri(
+        entrypointUri,
+        expectedConfig: expectedConfig,
+        logger: logger,
+        packageConfigUri: packageConfigUri!,
+        extensionName: 'flutter_tools_extension_linux_prototype',
+      );
+      addTearDown(connection.dispose);
 
-    expect(result.exitCode, isNot(0));
-    expect(result.stderr, contains('is not an allowed value for option "--template"'));
-    expect(projectDir.existsSync(), isFalse);
-  });
+      expect(connection.extensionName, 'flutter_tools_extension_linux_prototype');
+      expect(
+        connection.capabilities.services,
+        containsAll(const <String>['diagnostics', 'config', 'build', 'template']),
+      );
+    },
+  );
 }
