@@ -588,7 +588,7 @@ class EnginePath implements ui.Path, Collectable {
     final pathCopy2 = EnginePath.fromEnginePath(path2);
     return EnginePath._(
       pathCopy1.constructors,
-      pathCopy1._fillType,
+      null,
       [],
       combineSource: (operation, pathCopy1, pathCopy2),
     );
@@ -616,10 +616,12 @@ class EnginePath implements ui.Path, Collectable {
   /// The constructors used to instantiate backend-specific path and builder implementations.
   BackendPathConstructors constructors;
 
-  ui.PathFillType _fillType;
+  // Combined paths inherit the backend operation's fill rule when first built,
+  // unless the caller explicitly sets a fill type before then.
+  ui.PathFillType? _fillType;
 
   @override
-  ui.PathFillType get fillType => _fillType;
+  ui.PathFillType get fillType => _fillType ?? _backendPathBuilder.fillType;
 
   @override
   set fillType(ui.PathFillType fillType) {
@@ -657,7 +659,7 @@ class EnginePath implements ui.Path, Collectable {
       builder = constructors.createNew();
     }
 
-    builder.fillType = _fillType;
+    builder.fillType = _fillType ??= builder.fillType;
     for (final PathCommand command in _commands) {
       command.apply(builder);
     }
