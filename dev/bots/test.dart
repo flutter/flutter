@@ -44,6 +44,12 @@
 //  Windows does; --bazel asks for Bazel whatever the host, as does a SHARD or
 //  SUBSHARD name ending in _bazel (SUBSHARD=widgets_bazel).
 //
+//  On a Linux bot the Bazel build runs its actions on Flutter's RBE instance
+//  (the kernel compiles; the tests stay on the bot). --no-bazel-rbe keeps
+//  the whole build on the machine, as does FLUTTER_BAZEL_RBE=0 in the
+//  environment; --bazel-rbe asks for RBE on a Linux host that is no bot
+//  (gcloud credentials for the instance needed). A Mac builds locally.
+//
 // All other arguments are treated as arguments to pass to the flutter tool when
 // running tests.
 
@@ -125,6 +131,10 @@ Future<void> main(List<String> args) async {
         enableBazel();
       } else if (arg == '--no-bazel') {
         disableBazel();
+      } else if (arg == '--bazel-rbe') {
+        enableBazelRbe();
+      } else if (arg == '--no-bazel-rbe') {
+        disableBazelRbe();
       } else {
         flutterTestArgs.add(arg);
       }
