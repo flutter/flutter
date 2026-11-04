@@ -230,6 +230,11 @@ const Map<String, GnFlag> gnFlags = <String, GnFlag>{
   // tools/gn --bazel: the build runs under Bazel through the unchanged recipe
   // (build/bazel/ci.md); the configuration is the one the other flags name.
   '--bazel': GnFlag(GnFlagEffect.ignored, note: 'where the build runs'),
+  // tools/gn --bazel's own: whether the build's actions run on Flutter's RBE
+  // instance (bazel_ci.py's rbe_options; a Linux bot's default), which a
+  // builder file may say per build for a comparison of the two.
+  '--bazel-rbe': GnFlag(GnFlagEffect.ignored, note: 'where the build runs'),
+  '--no-bazel-rbe': GnFlag(GnFlagEffect.ignored, note: 'where the build runs'),
   '--build-embedder-examples': GnFlag(
     GnFlagEffect.ignored,
     note: 'adds targets to the build, which a configuration cannot name',
@@ -963,10 +968,18 @@ bool isBazelVariant(String file) => file.endsWith('_bazel');
 
 /// The `tools/gn` flags of a build as a Bazel variant's are matched against
 /// the original's: `--x=v` as `--x v`, without the flags that say where the
-/// build runs (`--bazel`, `--rbe`, `--no-rbe`, `--goma`, `--no-goma`; what
-/// bazel_ci.py's normalized_flags does on the bot).
+/// build runs (`--bazel`, `--bazel-rbe`, `--no-bazel-rbe`, `--rbe`, `--no-rbe`,
+/// `--goma`, `--no-goma`; what bazel_ci.py's normalized_flags does on the bot).
 List<String> _matchedFlags(List<String> gn) {
-  const infrastructure = <String>{'--bazel', '--rbe', '--no-rbe', '--goma', '--no-goma'};
+  const infrastructure = <String>{
+    '--bazel',
+    '--bazel-rbe',
+    '--no-bazel-rbe',
+    '--rbe',
+    '--no-rbe',
+    '--goma',
+    '--no-goma',
+  };
   final out = <String>[];
   for (final flag in gn) {
     if (infrastructure.contains(flag)) {

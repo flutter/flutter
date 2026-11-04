@@ -214,9 +214,17 @@ the test for real, and so does the command from `engine/src`.
   properties, their `rbe_jobs` as `--jobs=200`,
   `--google_default_credentials`: the emulated GCE metadata server every
   LUCI bot has, which is how reclient authenticates there too), which
-  bazel_ci.py adds to every build on a Linux bot (`FLUTTER_BAZEL_RBE=0`
-  turns it off for a run; a Mac builds locally, the workers being Linux
-  x64). The compiles, links, kernel compiles and snapshots run on the
+  bazel_ci.py adds to every build on a Linux bot (a Mac builds locally,
+  the workers being Linux x64). Three ways to turn it off, so that the two
+  can be compared on the bots: `--no-bazel-rbe` among a build's `gn` flags
+  in its builder file (an infrastructure flag like `--bazel`, matched away;
+  `--bazel-rbe` asks for RBE anywhere, a developer's Linux checkout
+  included, given `gcloud auth application-default login`),
+  `FLUTTER_BAZEL_RBE=0` in the environment of a run, and `RBE_ON_BOTS` in
+  bazel_ci.py, the default a Linux bot gets without either; test.dart's
+  shards have the same three (`--bazel-rbe` / `--no-bazel-rbe`, the
+  variable, `kBazelRbeOnBots` in dev/bots/bazel.dart). The compiles,
+  links, kernel compiles and snapshots run on the
   workers, 200 at a time where a try bot has 8 cores, and their results
   stay in the instance's cache for every later build, so a bot's build
   repeats nothing another bot has done since the inputs last changed. What
