@@ -74,8 +74,7 @@ static BOOL IsInImplicitlyScrollingContainer(SemanticsObject* object) {
 // around before reaching the end of the list. To fix that, the object losing
 // focus checks the proposed item against the framework's semantics traversal
 // order (see -shouldUpdateFocusInContext:). If they differ, it rejects the
-// update, asks the framework to scroll the correct item into view, and then
-// requests a focus update to it.
+// update and requests a focus update to the correct item instead.
 
 static SemanticsObject* RootOf(SemanticsObject* object) {
   SemanticsObject* root = object;
@@ -85,38 +84,15 @@ static SemanticsObject* RootOf(SemanticsObject* object) {
   return root;
 }
 
-// The number of semantics updates to wait for the framework to scroll the
-// target into view before requesting focus anyway, for example when the
-// target is clipped by something other than its scrollable.
-static const int kMaxSemanticsUpdatesToWaitForScroll = 3;
-
-// How long to wait for the framework to scroll the target into view before
-// requesting focus anyway, in case no semantics update arrives at all.
-static const int64_t kMaxWaitForScrollNanoseconds = 300 * NSEC_PER_MSEC;
-
-// The item that Tab / Shift+Tab should focus next, while waiting for the
-// framework to scroll it into view.
-@interface FlutterPendingFocusTarget : NSObject
-@property(nonatomic, weak) SemanticsObject* target;
-@property(nonatomic) int updatesLeft;
-@end
-
-@implementation FlutterPendingFocusTarget
-@end
-
-// The pending targets, keyed by FlutterView.
-static NSMapTable<UIView*, FlutterPendingFocusTarget*>* PendingFocusTargets() {
-  static NSMapTable<UIView*, FlutterPendingFocusTarget*>* targets;
+// The item that Tab / Shift+Tab should focus next, keyed by FlutterView, until
+// the focus update to it has been requested.
+static NSMapTable<UIView*, SemanticsObject*>* PendingFocusTargets() {
+  static NSMapTable<UIView*, SemanticsObject*>* targets;
   static dispatch_once_t once;
   dispatch_once(&once, ^{
-    targets = [NSMapTable weakToStrongObjectsMapTable];
+    targets = [NSMapTable weakToWeakObjectsMapTable];
   });
   return targets;
-}
-
-static FlutterPendingFocusTarget* PendingFocusTargetEntry(SemanticsObject* object) {
-  UIView* view = object.bridgeView;
-  return view ? [PendingFocusTargets() objectForKey:view] : nil;
 }
 
 static void ClearPendingFocusTarget(SemanticsObject* object) {
@@ -134,7 +110,8 @@ static BOOL IsAttached(SemanticsObject* object) {
 // The pending target of `object`'s FlutterView, or nil if there is none or it
 // was removed from the semantics tree.
 static SemanticsObject* PendingFocusTarget(SemanticsObject* object) {
-  SemanticsObject* target = PendingFocusTargetEntry(object).target;
+  UIView* view = object.bridgeView;
+  SemanticsObject* target = view ? [PendingFocusTargets() objectForKey:view] : nil;
   if (target && !IsAttached(target)) {
     ClearPendingFocusTarget(object);
     return nil;
@@ -183,54 +160,20 @@ static void RequestFocusToPendingTarget(SemanticsObject* target) {
   ClearPendingFocusTarget(target);
 }
 
+// Records `target` and requests a focus update to it. The target may still be
+// offscreen; once it is focused, -didUpdateFocusInContext: asks the framework
+// to scroll it into view.
 static void MoveFocusTo(SemanticsObject* target) {
   UIView* view = target.bridgeView;
   if (!view) {
     return;
   }
-  FlutterPendingFocusTarget* entry = [[FlutterPendingFocusTarget alloc] init];
-  entry.target = target;
-  entry.updatesLeft = kMaxSemanticsUpdatesToWaitForScroll;
-  [PendingFocusTargets() setObject:entry forKey:view];
-
-  flutter::AccessibilityBridgeIos* bridge = target.bridge;
-  if (bridge && IsInImplicitlyScrollingContainer(target)) {
-    bridge->DispatchSemanticsAction(target.uid, flutter::SemanticsAction::kShowOnScreen);
-  }
-  if (!target.node.flags.isHidden) {
-    // No scroll is needed, so a semantics update may never arrive.
-    dispatch_async(dispatch_get_main_queue(), ^{
-      RequestFocusToPendingTarget(target);
-    });
-    return;
-  }
-  // Otherwise, -focusSystemDidFinishSemanticsUpdate requests focus once the
-  // target has been scrolled into view. Fall back to a timeout in case the
-  // scroll changes nothing and no semantics update arrives.
-  dispatch_after(dispatch_time(DISPATCH_TIME_NOW, kMaxWaitForScrollNanoseconds),
-                 dispatch_get_main_queue(), ^{
-                   RequestFocusToPendingTarget(target);
-                 });
+  [PendingFocusTargets() setObject:target forKey:view];
+  // Wait until the focus engine has finished rejecting the current update.
+  dispatch_async(dispatch_get_main_queue(), ^{
+    RequestFocusToPendingTarget(target);
+  });
 }
-
-@implementation SemanticsObject (FlutterFocusSystemUpdates)
-
-- (void)focusSystemDidFinishSemanticsUpdate {
-  FlutterPendingFocusTarget* entry = PendingFocusTargetEntry(self);
-  SemanticsObject* target = PendingFocusTarget(self);
-  if (!target) {
-    return;
-  }
-  entry.updatesLeft--;
-  if (!target.node.flags.isHidden || entry.updatesLeft <= 0) {
-    // Let the scroll view geometry settle before asking the focus system.
-    dispatch_async(dispatch_get_main_queue(), ^{
-      RequestFocusToPendingTarget(target);
-    });
-  }
-}
-
-@end
 
 @implementation SemanticsObject (UIFocusSystem)
 
@@ -253,13 +196,12 @@ static void MoveFocusTo(SemanticsObject* target) {
   if (context.previouslyFocusedItem != self || !bridge || bridge->isVoiceOverRunning()) {
     return YES;
   }
-  // Tab and Shift+Tab move with the Next and Previous headings. When the focus
-  // engine runs out of candidates, it wraps around with the First and Last
-  // headings instead. Requested focus updates use UIFocusHeadingNone.
+
   UIFocusHeading heading = context.focusHeading;
   BOOL forward = (heading & (UIFocusHeadingNext | UIFocusHeadingFirst)) != 0;
   BOOL backward = (heading & (UIFocusHeadingPrevious | UIFocusHeadingLast)) != 0;
   if (forward == backward) {
+    // This is not a tab or shift-tab command, leave it to the system.
     return YES;
   }
   // Let focus leave the FlutterView, e.g. to native views in add-to-app. This
@@ -269,13 +211,19 @@ static void MoveFocusTo(SemanticsObject* target) {
                     ((SemanticsObject*)proposed).bridge == bridge)) {
     return YES;
   }
-  // If an earlier Tab is still waiting for its target to scroll into view,
-  // continue from that target so quick key presses stay in order.
+  // If an earlier Tab's focus request has not run yet, continue from its
+  // target so quick key presses stay in order.
   SemanticsObject* pending = PendingFocusTarget(self);
   SemanticsObject* expected = FocusableNeighbor(pending ?: self, forward);
   if (!expected || (!pending && proposed == expected)) {
     return YES;
   }
+
+  // FKA tabs picked a wrong item. This can happen if it think the next
+  // item is too far off the screen and would wrap around to the beginning
+  // or end of the focusable items on screen.
+  //
+  // Veto the update and manually shift focus to the correct target.
   MoveFocusTo(expected);
   return NO;
 }
@@ -344,8 +292,8 @@ static void MoveFocusTo(SemanticsObject* target) {
 - (BOOL)canBecomeFocused {
   // Hidden nodes inside an implicitly scrolling container are clipped,
   // offscreen items. Keep them focusable so keyboard navigation can reach
-  // them; Tab navigation scrolls them into view (see
-  // -shouldUpdateFocusInContext:).
+  // them; focusing one scrolls it into view (see
+  // -didUpdateFocusInContext:withAnimationCoordinator:).
   // Nodes clipped by any other container (e.g. a PageView that disallows
   // implicit scrolling) must not receive focus.
   if (self.node.flags.isHidden && !IsInImplicitlyScrollingContainer(self)) {
