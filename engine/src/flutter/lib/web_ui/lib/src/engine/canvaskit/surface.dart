@@ -212,7 +212,7 @@ abstract class CkSurface extends Surface {
     _currentDevicePixelRatio = devicePixelRatio;
     _currentSize = clampedSize;
     try {
-      _resizeCanvas(clampedSize);
+      _resizeCanvas(clampedSize, previousSize);
     } catch (_) {
       // Keep the recorded state in sync with the surface that is still in use.
       _currentSize = previousSize;
@@ -223,10 +223,13 @@ abstract class CkSurface extends Surface {
 
   /// Resizes the underlying canvas to [size] and recreates the Skia surface.
   ///
+  /// [previousSize] is the size the surface had before this call. If this
+  /// method throws, the surface must be left usable at [previousSize].
+  ///
   /// Subclasses in this library may override this if their underlying canvas
   /// type requires re-allocation or context recreation instead of in-place
   /// dimension updates.
-  void _resizeCanvas(BitmapSize size) {
+  void _resizeCanvas(BitmapSize size, BitmapSize previousSize) {
     _canvasProvider.resizeCanvas(canvas, size);
     _recreateSkSurface();
   }
@@ -418,22 +421,25 @@ class CkOffscreenSurface extends CkSurface implements OffscreenSurface {
   /// https://github.com/flutter/flutter/issues/182476). A newly created context
   /// is not subject to this cap.
   ///
-  /// When a drawing buffer clamp is detected, the old canvas is released and
-  /// its WebGL context is explicitly lost so the browser frees the context
-  /// slot immediately, the Skia objects bound to it are torn down, and a
-  /// brand-new [DomOffscreenCanvas] is acquired with a fresh WebGL context,
-  /// allowing the browser to allocate the full buffer upfront. A context that
-  /// is already lost (e.g. its `webglcontextlost` event is still pending)
-  /// reports a zero-sized drawing buffer and is recovered the same way.
+  /// When a drawing buffer clamp is detected, the old canvas is replaced with a
+  /// brand-new [DomOffscreenCanvas] and a fresh WebGL context (see
+  /// [_replaceCanvas]), allowing the browser to allocate the full buffer
+  /// upfront. A context that is already lost (e.g. its `webglcontextlost`
+  /// event is still pending) reports a zero-sized drawing buffer and is
+  /// recovered the same way.
+  ///
+  /// If the fresh context's drawing buffer is still smaller than [size], the
+  /// surface is moved to another fresh canvas at [previousSize] and an
+  /// [UnsupportedError] is thrown instead of silently rendering clipped
+  /// output.
   @override
-  void _resizeCanvas(BitmapSize size) {
+  void _resizeCanvas(BitmapSize size, BitmapSize previousSize) {
     if (!supportsWebGl) {
-      super._resizeCanvas(size);
+      super._resizeCanvas(size, previousSize);
       return;
     }
 
-    final DomEventTarget oldCanvas = canvas;
-    final WebGLContext gl = (oldCanvas as DomOffscreenCanvas).getGlContext(webGLVersion);
+    final WebGLContext gl = (canvas as DomOffscreenCanvas).getGlContext(webGLVersion);
     // A lost context reports no parameters; skip validation and let the
     // zero-sized drawing buffer below route to recovery on a fresh canvas.
     if (!gl.isContextLost()) {
@@ -446,12 +452,43 @@ class CkOffscreenSurface extends CkSurface implements OffscreenSurface {
       }
     }
 
-    _canvasProvider.resizeCanvas(oldCanvas, size);
+    _canvasProvider.resizeCanvas(canvas, size);
 
     if (gl.drawingBufferWidth >= size.width && gl.drawingBufferHeight >= size.height) {
       _recreateSkSurface();
       return;
     }
+
+    _replaceCanvas(size);
+
+    // If creating the new context failed, the surface has fallen back to
+    // software rendering, which has no drawing buffer to check.
+    if (supportsWebGl) {
+      final WebGLContext newGl = (canvas as DomOffscreenCanvas).getGlContext(webGLVersion);
+      final int bufferWidth = newGl.drawingBufferWidth;
+      final int bufferHeight = newGl.drawingBufferHeight;
+      if (bufferWidth < size.width || bufferHeight < size.height) {
+        // Use another fresh canvas rather than shrinking this one in place, so
+        // that a previous size above the resize cap is not clamped either.
+        _currentSize = previousSize;
+        _replaceCanvas(previousSize);
+        throw UnsupportedError(
+          'Requested dimensions ${size.width}x${size.height} exceed the WebGL '
+          'drawing buffer allocated by the browser (${bufferWidth}x$bufferHeight).',
+        );
+      }
+    }
+  }
+
+  /// Replaces the current canvas with a new one of [size] backed by a fresh
+  /// WebGL context.
+  ///
+  /// The old canvas is released and its WebGL context is explicitly lost so
+  /// the browser frees the context slot immediately, and the Skia objects
+  /// bound to it are torn down before the new canvas is acquired.
+  void _replaceCanvas(BitmapSize size) {
+    final DomEventTarget oldCanvas = canvas;
+    final WebGLContext gl = (oldCanvas as DomOffscreenCanvas).getGlContext(webGLVersion);
 
     // Release the canvas first so that its `webglcontextlost` listener is
     // removed and [onContextLost] does not fire for the deliberate loss below.
@@ -474,6 +511,8 @@ class CkOffscreenSurface extends CkSurface implements OffscreenSurface {
       size,
       onContextLost: onContextLost,
     );
+    // `recreateContextForCanvas` never awaits, so the new canvas, GL context
+    // and Skia objects are all in place by the time this call returns.
     unawaited(recreateContextForCanvas(newCanvas));
   }
 

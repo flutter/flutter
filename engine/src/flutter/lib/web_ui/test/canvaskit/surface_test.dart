@@ -550,11 +550,19 @@ void testMain() {
         final int maxTextureSize = lostGl.getParameter(lostGl.maxTextureSize);
 
         // The lost context cannot report its limits, so the request is not
-        // validated and is recovered on a fresh canvas instead.
+        // validated upfront and is retried on a fresh canvas instead. Its
+        // drawing buffer cannot reach the requested height either, so the
+        // request is rejected and the surface stays on a fresh canvas at its
+        // previous size.
         await surface.triggerContextLoss();
-        expect(() => surface.setSize(BitmapSize(100, maxTextureSize + 1)), returnsNormally);
+        expect(
+          () => surface.setSize(BitmapSize(100, maxTextureSize + 1)),
+          throwsA(isA<UnsupportedError>()),
+        );
         final freshCanvas = surface.canvas as DomOffscreenCanvas;
         expect(identical(freshCanvas, lostCanvas), isFalse);
+        expect(freshCanvas.width, 100);
+        expect(freshCanvas.height, 100);
         expect(freshCanvas.getGlContext(webGLVersion).isContextLost(), isFalse);
         expect(surface.supportsWebGl, isTrue);
 
@@ -579,6 +587,82 @@ void testMain() {
 
         surface.dispose();
       });
+
+      test(
+        'a fresh drawing buffer smaller than requested throws and keeps the previous size',
+        () async {
+          const requestedSize = BitmapSize(300, 200);
+          final provider = _UndersizedOffscreenCanvasProvider(requestedSize);
+          final surface = CkOffscreenSurface(provider);
+          await surface.initialized;
+          surface.setSize(const BitmapSize(100, 100));
+          final DomEventTarget originalCanvas = surface.canvas;
+
+          expect(
+            () => surface.setSize(requestedSize),
+            throwsA(
+              isA<UnsupportedError>().having(
+                (UnsupportedError e) => e.message,
+                'message',
+                'Requested dimensions 300x200 exceed the WebGL drawing buffer '
+                    'allocated by the browser (299x200).',
+              ),
+            ),
+          );
+
+          // The clamped in-place resize was retried on a fresh canvas, and the
+          // surface was then moved to another fresh canvas at the previous size.
+          expect(provider.acquiredSizes, <BitmapSize>[
+            const BitmapSize(1, 1),
+            requestedSize,
+            const BitmapSize(100, 100),
+          ]);
+          final currentCanvas = surface.canvas as DomOffscreenCanvas;
+          expect(identical(currentCanvas, provider.acquiredCanvases.last), isTrue);
+          expect(currentCanvas.width, 100);
+          expect(currentCanvas.height, 100);
+          final WebGLContext currentGl = currentCanvas.getGlContext(webGLVersion);
+          expect(currentGl.isContextLost(), isFalse);
+          expect(currentGl.drawingBufferWidth, 100);
+          expect(currentGl.drawingBufferHeight, 100);
+          expect(surface.supportsWebGl, isTrue);
+
+          // Every replaced canvas gave up its WebGL context right away.
+          expect(identical(originalCanvas, provider.acquiredCanvases.first), isTrue);
+          for (final DomOffscreenCanvas replaced in provider.acquiredCanvases.take(2)) {
+            expect(replaced.getGlContext(webGLVersion).isContextLost(), isTrue);
+          }
+
+          // The recorded size matches the canvas in use, so asking for the
+          // previous size again is a no-op.
+          surface.setSize(const BitmapSize(100, 100));
+          expect(identical(surface.canvas, currentCanvas), isTrue);
+
+          final recorder = ui.PictureRecorder();
+          ui.Canvas(recorder).drawRect(
+            const ui.Rect.fromLTWH(0, 0, 100, 100),
+            ui.Paint()..color = const ui.Color(0xFF0000FF),
+          );
+          await surface.rasterizeToCanvas(recorder.endRecording());
+          expect(readSurfacePixel(surface, 99, 99), <int>[0, 0, 255, 255]);
+
+          // Asking for the same size again is rejected again rather than
+          // silently rendering clipped.
+          expect(() => surface.setSize(requestedSize), throwsA(isA<UnsupportedError>()));
+
+          surface.setSize(const BitmapSize(150, 150));
+          expect(surface.supportsWebGl, isTrue);
+          final recorder2 = ui.PictureRecorder();
+          ui.Canvas(recorder2).drawRect(
+            const ui.Rect.fromLTWH(0, 0, 150, 150),
+            ui.Paint()..color = const ui.Color(0xFF0000FF),
+          );
+          await surface.rasterizeToCanvas(recorder2.endRecording());
+          expect(readSurfacePixel(surface, 149, 149), <int>[0, 0, 255, 255]);
+
+          surface.dispose();
+        },
+      );
 
       test(
         'rasterizeToImageBitmaps while a context loss is pending captures the picture',
@@ -650,5 +734,39 @@ List<int> readSurfacePixel(CkSurface surface, int x, int y) {
     return snapshot.readPixels(x.toDouble(), y.toDouble(), imageInfo)!.toList();
   } finally {
     snapshot.delete();
+  }
+}
+
+/// An [OffscreenCanvasProvider] that allocates canvases one pixel narrower than
+/// requested whenever [undersizedSize] is requested, emulating a browser that
+/// cannot allocate a drawing buffer that large even for a fresh WebGL context.
+class _UndersizedOffscreenCanvasProvider extends OffscreenCanvasProvider {
+  _UndersizedOffscreenCanvasProvider(this.undersizedSize);
+
+  final BitmapSize undersizedSize;
+
+  /// The sizes passed to [acquireCanvas], in order.
+  final List<BitmapSize> acquiredSizes = <BitmapSize>[];
+
+  /// The canvases returned by [acquireCanvas], in order.
+  final List<DomOffscreenCanvas> acquiredCanvases = <DomOffscreenCanvas>[];
+
+  BitmapSize _allocatedSize(BitmapSize size) =>
+      size == undersizedSize ? BitmapSize(size.width - 1, size.height) : size;
+
+  @override
+  DomOffscreenCanvas acquireCanvas(BitmapSize size, {required ui.VoidCallback onContextLost}) {
+    final DomOffscreenCanvas canvas = super.acquireCanvas(
+      _allocatedSize(size),
+      onContextLost: onContextLost,
+    );
+    acquiredSizes.add(size);
+    acquiredCanvases.add(canvas);
+    return canvas;
+  }
+
+  @override
+  void resizeCanvas(DomOffscreenCanvas canvas, BitmapSize size) {
+    super.resizeCanvas(canvas, _allocatedSize(size));
   }
 }
