@@ -75,5 +75,38 @@ void testMain() {
       expect(filter3, isNot(equals(filter2)));
       expect(filter3, filter3);
     });
+
+    test('blur bounds participate in ==, hashCode and description', () {
+      const bounds1 = Rect.fromLTRB(0.5, 1.5, 10.5, 20.5);
+      const bounds2 = Rect.fromLTRB(0.5, 1.5, 10.5, 30.5);
+      ImageFilter blur({Rect? bounds}) =>
+          ImageFilter.blur(sigmaX: 2.5, sigmaY: 3.5, tileMode: TileMode.decal, bounds: bounds);
+
+      final ImageFilter unbounded = blur();
+      final ImageFilter bounded1a = blur(bounds: bounds1);
+      final ImageFilter bounded1b = blur(bounds: bounds1);
+      final ImageFilter bounded2 = blur(bounds: bounds2);
+
+      expect(bounded1a, bounded1b);
+      expect(bounded1a.hashCode, bounded1b.hashCode);
+      expect(bounded1a, isNot(equals(bounded2)));
+      expect(bounded2, isNot(equals(bounded1a)));
+      expect(bounded1a, isNot(equals(unbounded)));
+      expect(unbounded, isNot(equals(bounded1a)));
+
+      final cases = <(ImageFilter, String)>[
+        (unbounded, 'blur(2.5, 3.5, decal)'),
+        (bounded1a, 'blur(2.5, 3.5, decal, bounds: Rect.fromLTRB(0.5, 1.5, 10.5, 20.5))'),
+        (bounded2, 'blur(2.5, 3.5, decal, bounds: Rect.fromLTRB(0.5, 1.5, 10.5, 30.5))'),
+        (
+          ImageFilter.blur(sigmaX: 2.5, sigmaY: 3.5, bounds: bounds1),
+          'blur(2.5, 3.5, unspecified, bounds: Rect.fromLTRB(0.5, 1.5, 10.5, 20.5))',
+        ),
+      ];
+      for (final (ImageFilter filter, String description) in cases) {
+        expect(filter.debugShortDescription, description);
+        expect(filter.toString(), 'ImageFilter.$description');
+      }
+    });
   });
 }
