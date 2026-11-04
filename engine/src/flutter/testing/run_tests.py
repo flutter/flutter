@@ -227,6 +227,7 @@ VULKAN_SYNC_VALIDATION_TESTS = [
     'Play/TypographerTest.GlyphAtlasTextureWillGrowTilMaxTextureSize/Vulkan',
     # Render passes, offscreen targets, MSAA, depth/stencil and subpasses.
     'Play/RendererTest.CanRenderToTexture/Vulkan',
+    'Play/RendererTest.CachesRenderPassAndFramebufferMixed/Vulkan',
     'Play/RendererTest.CanSepiaToneWithSubpasses/Vulkan',
     'Play/EntityPassTargetTest.SwapWithMSAAImplicitResolve/Vulkan',
     # Compute.

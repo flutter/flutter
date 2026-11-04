@@ -15,7 +15,7 @@ vars = {
   'skia_git': 'https://skia.googlesource.com',
   'llvm_git': 'https://llvm.googlesource.com',
   'dart_ai_rev': '9c96bfe5f091c9451eff5b59c9bffeb2e806b875',
-  'skia_revision': '3eeafac94f070836c48384ccef85a90c369139a3',
+  'skia_revision': '4691f21cfda1663b7dca6f0c0c9f3ecee89186e0',
 
   # Do not download the Emscripten SDK by default.
   # This prevents us from downloading the Emscripten toolchain for builds
@@ -196,7 +196,7 @@ vars = {
   # The version / instance id of the cipd:chromium/fuchsia/test-scripts which
   # will be used altogether with fuchsia-sdk to setup the build / test
   # environment.
-  'fuchsia_test_scripts_version': 'B6zarykZp6PKWRuegA6pqw5RIWgWbqOV3Hq4z7ZTZhAC',
+  'fuchsia_test_scripts_version': 'Jo-ZgQSNDuPsjlZ4sB-U6cItneMqP6YJj0u-a3ne05UC',
 
   # The version / instance id of the cipd:chromium/fuchsia/gn-sdk which will be
   # used altogether with fuchsia-sdk to generate gn based build rules.
@@ -839,7 +839,7 @@ deps = {
      'packages': [
        {
         'package': 'fuchsia/sdk/core/linux-amd64',
-        'version': 'T_-6-6X1lDMghhAvX0Kd43mRm1wTrMA5iNnuCKs0gz4C'
+        'version': 'p0HDXLISPIElJfSz7FIV0fJZJRc3d4cPzOfXp9yFcz8C'
        }
      ],
      'condition': 'download_fuchsia_deps and not download_fuchsia_sdk',
