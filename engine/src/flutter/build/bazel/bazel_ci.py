@@ -322,8 +322,21 @@ def rbe_flag(flags):
   return value
 
 
+# With --config=rbe, the wrapped GN builds' compiles go to the workers too
+# (the Dart runtime, the GL stack: build_defs/gn/gn_build.bzl's rbe --
+# reclient's proxy around ninja, as the recipe ran it around a GN build),
+# which takes the Dart runtime's wrap from 442 s to a few minutes on an
+# 8-core bot. The flag rather than the config carries it so that a build
+# with --config=rbe alone (test.dart's shards, which wrap nothing) does not
+# fetch reclient and the engine's configurations for it (@reclient,
+# @reclient_cfgs: gclient's use_rbe syncs them on a bot; a developer's
+# checkout without them falls back to the CIPD packages, the second of
+# which is Googlers-only).
+WRAP_RBE_FLAG = '--//engine/src/flutter/build/bazel:wrap_rbe'
+
+
 def rbe_options(rbe=None):
-  """`--config=rbe` on a Linux host: as the flags say (`rbe`), else a bot's default.
+  """`--config=rbe` and WRAP_RBE_FLAG on a Linux host: as the flags say (`rbe`), else a bot's.
 
   A bot's default is RBE_ON_BOTS unless FLUTTER_BAZEL_RBE=0; a developer's
   is off. Never on another host: the workers are Linux x64.
@@ -332,7 +345,7 @@ def rbe_options(rbe=None):
     return []
   if rbe is None:
     rbe = on_bot() and RBE_ON_BOTS and os.environ.get(RBE_ENV, '1') not in ('0', 'false', 'no')
-  return ['--config=rbe'] if rbe else []
+  return ['--config=rbe', WRAP_RBE_FLAG] if rbe else []
 
 
 # Where a bot's sandboxes go when the machine has the memory for it: a
