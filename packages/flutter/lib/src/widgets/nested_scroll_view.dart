@@ -1846,22 +1846,22 @@ class _NestedGroupedBallisticActivity extends BallisticScrollActivity {
 
   @override
   void resetActivity() {
-    group.coordinator.goBallistic(group.restartVelocity(simulation.position));
+    group.coordinator.goBallistic(
+      group.restartVelocity(simulation.position),
+      // A lifecycle restart shares the leader's velocity only with unfinished
+      // participants. Settled bodies must not rejoin the fling, unless their
+      // new bounds require recovery. New gestures still start every body.
+      settledBodies: <_NestedScrollPosition>{
+        for (final entry in group._simulations.entries)
+          if (entry.value._done && entry.value.outerFinished && !entry.key.outOfRange) entry.key,
+      },
+    );
   }
 
   @override
   void applyNewDimensions() {
     if (!group.updateDimensions()) {
-      group.coordinator.goBallistic(
-        group.restartVelocity(simulation.position),
-        // A layout restart shares the leader's velocity only with unfinished
-        // participants. Settled bodies must not rejoin the fling, unless their
-        // new bounds require recovery. New gestures still start every body.
-        settledBodies: <_NestedScrollPosition>{
-          for (final entry in group._simulations.entries)
-            if (entry.value._done && entry.value.outerFinished && !entry.key.outOfRange) entry.key,
-        },
-      );
+      resetActivity();
     }
   }
 }
@@ -2000,7 +2000,12 @@ class _NestedCoordinatedSimulation extends Simulation {
     double terminalOuter = _outerPixels;
     if (_velocity > 0.0 && _outerPixels < outerMetrics.maxScrollExtent) {
       terminalOuter = outerMetrics.maxScrollExtent;
-      _phases.add(_NestedPhase.header(end: _pixels + terminalOuter - _outerPixels));
+      // Build the boundary from the destination header and stationary body.
+      // Adding then subtracting the current header offset can round below the
+      // next body's minimum and turn a forward fling into overscroll recovery.
+      _phases.add(
+        _NestedPhase.header(end: terminalOuter + (_innerPixels - innerMetrics.minScrollExtent)),
+      );
     } else if (_velocity < 0.0 && _outerPixels > outerMetrics.minScrollExtent) {
       if (_innerPixels > innerMetrics.minScrollExtent) {
         _phases.add(_NestedPhase.body(end: _outerPixels));
@@ -2127,6 +2132,12 @@ class _NestedCoordinatedSimulation extends Simulation {
     }
     if (_independentOuter) {
       return true;
+    }
+    if ((inner.pixels - _innerPixels).abs() > precisionErrorTolerance) {
+      // Layout may correct a stationary body when its content shrinks. A
+      // matching combined trajectory would still restore the old body offset.
+      // Restart from the corrected position instead.
+      return false;
     }
     final double newMax = outer.maxScrollExtent + inner.maxScrollExtent - inner.minScrollExtent;
     if ((newMax - combinedMax).abs() <= precisionErrorTolerance) {

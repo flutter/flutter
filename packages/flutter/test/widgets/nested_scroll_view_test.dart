@@ -384,10 +384,11 @@ void main() {
     expect(offsets[1], closeTo(offsets[0], 1));
   });
 
-  for (final resizedExtent in <double>[150, 250]) {
+  for (final resizedExtent in <double?>[null, 150, 250]) {
     const velocity = 1000.0;
     testWidgets(
-      'NestedScrollView preserves settled recovery during an attached header resize ($resizedExtent)',
+      'NestedScrollView preserves settled recovery during '
+      '${resizedExtent == null ? 'an activity reset' : 'an attached header resize ($resizedExtent)'}',
       (WidgetTester tester) async {
         final key = GlobalKey<NestedScrollViewState>();
         late StateSetter rebuild;
@@ -437,14 +438,18 @@ void main() {
         expect(outer.pixels, inExclusiveRange(0, 200));
         expect(bodies[0].pixels, 0);
         final double peerOffset = bodies[2].pixels;
-        rebuild(() {
-          headerExtent = resizedExtent;
-        });
+        if (resizedExtent == null) {
+          bodies[1].activity!.resetActivity();
+        } else {
+          rebuild(() {
+            headerExtent = resizedExtent;
+          });
+        }
         await tester.pump();
         expect(key.currentState!.innerController.positions.toList(), bodies);
         for (var i = 0; i < 400; i++) {
           await tester.pump(const Duration(milliseconds: 8));
-          expect(bodies[0].pixels, 0, reason: 'a resize must not revive the settled body');
+          expect(bodies[0].pixels, 0, reason: 'a restart must not revive the settled body');
           expect(bodies[0].activity!.velocity, 0);
           expect(outer.pixels, inInclusiveRange(outer.minScrollExtent, outer.maxScrollExtent));
           if (outer.activity!.velocity != 0) {
@@ -1455,6 +1460,42 @@ void main() {
     }
   }
 
+  testWidgets(
+    'NestedScrollView continues a forward fling from a fractional header offset',
+    (WidgetTester tester) async {
+      final key = GlobalKey<NestedScrollViewState>();
+      tester.view.physicalSize = const Size(400, 800);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      await tester.pumpWidget(_buildBallisticTestWidget(key, headerExtent: 400));
+      await tester.dragFrom(const Offset(200, 650), const Offset(0, -210.8));
+      await tester.pumpAndSettle();
+      await tester.flingFrom(const Offset(200, 500), const Offset(0, -80), 1000);
+      await tester.pump();
+
+      final ScrollPosition outer = key.currentState!.outerController.position;
+      final ScrollPosition inner = key.currentState!.innerController.position;
+      expect(outer.pixels, moreOrLessEquals(290.8));
+      expect(inner.pixels, 0);
+      for (var frame = 0; frame < 100; frame += 1) {
+        await tester.pump(const Duration(milliseconds: 8));
+      }
+      expect(outer.pixels, moreOrLessEquals(outer.maxScrollExtent));
+      expect(
+        inner.pixels,
+        greaterThan(50),
+        reason: 'The body must receive the remaining fling after the header collapses.',
+      );
+      await tester.pumpAndSettle();
+      expect(tester.binding.transientCallbackCount, 0);
+      expect(tester.takeException(), isNull);
+    },
+    variant: const TargetPlatformVariant(<TargetPlatform>{
+      TargetPlatform.android,
+      TargetPlatform.iOS,
+    }),
+  );
+
   testWidgets('NestedScrollView collapses the header before moving a scrolled body', (
     WidgetTester tester,
   ) async {
@@ -1495,6 +1536,72 @@ void main() {
     expect(tester.binding.transientCallbackCount, 0);
     expect(tester.takeException(), isNull);
   });
+
+  for (final multiple in <bool>[false, true]) {
+    testWidgets(
+      'NestedScrollView preserves a body layout correction during header motion ($multiple)',
+      (WidgetTester tester) async {
+        final key = GlobalKey<NestedScrollViewState>();
+        late StateSetter rebuild;
+        var itemCount = 100;
+        await tester.pumpWidget(
+          StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              rebuild = setState;
+              return _buildBallisticTestWidget(
+                key,
+                physics: const BouncingScrollPhysics(),
+                body: Row(
+                  children: <Widget>[
+                    for (var i = 0; i < (multiple ? 2 : 1); i += 1)
+                      Expanded(
+                        child: ListView.builder(
+                          primary: true,
+                          physics: const BouncingScrollPhysics(),
+                          itemExtent: 50,
+                          itemCount: i == 0 ? itemCount : 100,
+                          itemBuilder: (BuildContext context, int index) => const SizedBox.expand(),
+                        ),
+                      ),
+                  ],
+                ),
+              );
+            },
+          ),
+        );
+        final ScrollPosition outer = key.currentState!.outerController.position;
+        final List<ScrollPosition> bodies = key.currentState!.innerController.positions.toList();
+        outer.jumpTo(100);
+        await tester.pumpAndSettle();
+        for (final body in bodies) {
+          body.setPixels(100);
+        }
+        _flingBallisticBody(bodies.first, 1000);
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 16));
+        expect(outer.pixels, inExclusiveRange(100, 200));
+        expect(bodies.first.pixels, 100);
+        rebuild(() {
+          itemCount = 11;
+        });
+        await tester.pump();
+        final double correctedOffset = bodies.first.pixels;
+        expect(correctedOffset, lessThan(100));
+        expect(bodies.first.outOfRange, isFalse);
+        await tester.pump(const Duration(milliseconds: 16));
+        expect(outer.pixels, inExclusiveRange(100, 200));
+        expect(
+          bodies.first.pixels,
+          lessThanOrEqualTo(correctedOffset),
+          reason: 'The trajectory must not restore the body offset from before layout.',
+        );
+        await tester.pumpAndSettle();
+        expect(bodies.first.outOfRange, isFalse);
+        expect(tester.binding.transientCallbackCount, 0);
+        expect(tester.takeException(), isNull);
+      },
+    );
+  }
 
   for (final multiple in <bool>[false, true]) {
     for (final replaceOuter in <bool>[false, true]) {
