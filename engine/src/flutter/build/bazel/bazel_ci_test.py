@@ -92,9 +92,15 @@ class NormalizedFlagsTest(unittest.TestCase):
         bazel_ci.normalized_flags([
             '--bazel', '--target-dir', 'ci/x', '--rbe', '--no-goma', '--no-rbe',
             '--rbe-server-address=unix:///tmp/rbe/reproxy.sock', '--gn-args=engine_version="abc"',
-            '--android-cpu=arm64'
+            '--android-cpu=arm64', '--no-bazel-rbe'
         ]), ['--target-dir', 'ci/x', '--android-cpu', 'arm64']
     )
+
+  def test_the_rbe_flags_are_read_and_the_last_wins(self):
+    self.assertIsNone(bazel_ci.rbe_flag(['--bazel', '--target-dir', 'ci/x', '--no-rbe']))
+    self.assertIs(bazel_ci.rbe_flag(['--bazel', '--no-bazel-rbe']), False)
+    self.assertIs(bazel_ci.rbe_flag(['--bazel', '--bazel-rbe']), True)
+    self.assertIs(bazel_ci.rbe_flag(['--no-bazel-rbe', '--bazel-rbe']), True)
 
   def test_other_gn_args_stay(self):
     self.assertEqual(
@@ -238,21 +244,35 @@ class BuildDirectoryTest(unittest.TestCase):
         {'LUCI_CONTEXT': '/b/s/w/ir/tmp/t/luci_context.json', 'TMPDIR': '/b/s/w/ir/tmp/t'}):
       bazel_ci.write_build_directory(self.engine_src, HOST_DEBUG_UNOPT, out_dir, '/tools/bazelisk')
       description = bazel_ci.read_build_directory(out_dir)
+      rbe = ['--config=rbe'] if sys.platform.startswith('linux') else []
+      self.assertEqual(
+          description['build_options'],
+          bazel_ci.rbe_options() + bazel_ci.bot_sandbox_options()
+      )
+      self.assertIn(description['build_options'], [rbe, rbe + ['--sandbox_base=/dev/shm']])
+      # RBE is a bot's default on Linux (RBE_ON_BOTS), never a Mac's; the
+      # environment and the flags switch it for a run.
+      with unittest.mock.patch.dict(os.environ, {bazel_ci.RBE_ENV: '0'}):
+        self.assertEqual(bazel_ci.rbe_options(), [])
+        self.assertEqual(bazel_ci.rbe_options(True), rbe)
+      with unittest.mock.patch.dict(os.environ, {bazel_ci.RBE_ENV: '1'}):
+        self.assertEqual(bazel_ci.rbe_options(), rbe)
+        self.assertEqual(bazel_ci.rbe_options(False), [])
+      with unittest.mock.patch.object(bazel_ci, 'RBE_ON_BOTS', False):
+        self.assertEqual(bazel_ci.rbe_options(), [])
+        self.assertEqual(bazel_ci.rbe_options(True), rbe)
+      # --no-bazel-rbe among a build's flags reaches the description.
+      bazel_ci.write_build_directory(
+          self.engine_src, HOST_DEBUG_UNOPT, out_dir, '/tools/bazelisk', rbe=False
+      )
+      self.assertNotIn('--config=rbe', bazel_ci.read_build_directory(out_dir)['build_options'])
     self.assertEqual(
         description['startup_options'],
         ['--output_user_root=/b/s/w/ir/tmp/t/bazel_ci/output', '--max_idle_secs=300']
     )
-    self.assertEqual(
-        description['build_options'],
-        bazel_ci.rbe_options() + bazel_ci.bot_sandbox_options()
-    )
-    rbe = ['--config=rbe'] if sys.platform.startswith('linux') else []
-    self.assertIn(description['build_options'], [rbe, rbe + ['--sandbox_base=/dev/shm']])
-    # RBE can be switched off for a run; a Mac never has it.
-    with unittest.mock.patch.dict(os.environ, {bazel_ci.RBE_ENV: '0'}):
-      self.assertEqual(bazel_ci.rbe_options(), [])
-    with unittest.mock.patch.dict(os.environ, {bazel_ci.RBE_ENV: '1'}):
-      self.assertEqual(bazel_ci.rbe_options(), rbe)
+    # A developer's build has no RBE unless asked (--bazel-rbe).
+    self.assertNotIn('--config=rbe', bazel_ci.build_options(self.engine_src))
+    self.assertEqual(bazel_ci.build_options(self.engine_src, rbe=True)[:1], rbe)
     self.assertEqual(
         description['environment'], {'BAZELISK_HOME': '/b/s/w/ir/tmp/t/bazel_ci/bazelisk'}
     )
