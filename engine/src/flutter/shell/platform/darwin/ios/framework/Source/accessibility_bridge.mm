@@ -451,6 +451,7 @@ void AccessibilityBridge::clearState() {
   [objects_ removeAllObjects];
   previous_route_id_ = 0;
   previous_routes_.clear();
+  pending_focus_target_ = nil;
   view_controller_.viewIfLoaded.accessibilityElements = nil;
 }
 
