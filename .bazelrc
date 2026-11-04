@@ -76,6 +76,16 @@ build --notrim_test_configuration
 build --disk_cache=~/.cache/flutter_engine_bazel
 build --experimental_disk_cache_gc_max_size=20G
 
+# The repository cache -- the files repository rules download: Chrome for
+# Testing (@chrome), the browser's Debian sysroot (debian_runtime: 151
+# .debs from snapshot.debian.org), the Dart SDK of a checkout without one
+# -- beside the disk cache rather than under the output user root, so that
+# on a bot, whose output root is the task's and gone with it, it lives in
+# the home directory that outlasts the task: a warm bot downloads nothing,
+# and a 503 from snapshot.debian.org (web_tool_tests at 505, 11-04) fails
+# no run that has the files.
+common --repository_cache=~/.cache/flutter_engine_bazel/repository_cache
+
 # CI's invocations (tools/gn --bazel and testing/run_tests.py on a bot,
 # through engine/src/flutter/build/bazel/bazel_ci.py; see ci.md there): plain
 # output for a log, a progress line every 30 s rather than five a second,
