@@ -784,27 +784,38 @@ void main() {
 
   test('RenderSliverFixedExtentBoxAdaptor and RenderSliverVariedExtentList out-of-bounds and boundary queries', () {
     final heights = <double>[100.0, 100.0, 100.0, 100.0, 100.0];
-    final children = List<RenderBox>.generate(
+    final fixedChildren = List<RenderBox>.generate(
       heights.length,
       (int index) => RenderSizedBox(Size(400.0, heights[index])),
     );
 
-    // Fixed extent list out-of-bounds checks.
+    // Fixed extent list out-of-bounds checks (5 * 100.0 = 500.0 < 600.0 viewport).
     final fixedChildManager = TestRenderSliverBoxChildManager(
-      children: children,
+      children: fixedChildren,
       estimatedChildCount: heights.length,
     );
     final RenderSliverFixedExtentList fixedList = fixedChildManager
         .createRenderSliverFixedExtentList(100.0);
+    final fixedRoot = RenderViewport(
+      crossAxisDirection: AxisDirection.right,
+      offset: ViewportOffset.zero(),
+      cacheExtent: 0,
+      children: <RenderSliver>[fixedList],
+    );
+    layout(fixedRoot);
     expect(fixedList.itemExtentOf(-1), isNull);
     expect(fixedList.itemExtentOf(heights.length), isNull);
     expect(fixedList.itemExtentOf(0), 100.0);
     expect(fixedList.itemExtentOf(heights.length - 1), 100.0);
 
     // Base adaptor with itemExtentBuilder out-of-bounds checks.
+    final baseChildren = List<RenderBox>.generate(
+      heights.length,
+      (int index) => RenderSizedBox(Size(400.0, heights[index])),
+    );
     final baseCalls = <int>[];
     final baseChildManager = TestRenderSliverBoxChildManager(
-      children: children,
+      children: baseChildren,
       estimatedChildCount: heights.length,
     );
     final ExtentOfTrackingSliverFixedExtentBoxAdaptor baseList = baseChildManager
@@ -854,6 +865,9 @@ void main() {
 
     // Exact viewport-end boundary (600px / 100px = 6 items: indices 0..5).
     expect(calledIndices, <int>[0, 1, 2, 3, 4, 5]);
+
+    // Boundary at itemOffset + precisionErrorTolerance includes trailing child 6.
+    expect(variedList.getMaxChildIndexForScrollOffset(600.0 + precisionErrorTolerance, 0.0), 6);
 
     // Negative and >= childCount queries return 0.0 / null without invoking builder.
     calledIndices.clear();

@@ -677,12 +677,26 @@ void main() {
   });
 
   testWidgets('TreeSliver empty tree', (WidgetTester tester) async {
+    final calledNodes = <TreeSliverNode<Object?>>[];
     final tree = <TreeSliverNode<String>>[];
     await tester.pumpWidget(
-      _buildTestWidget(CustomScrollView(slivers: <Widget>[TreeSliver<String>(tree: tree)])),
+      _buildTestWidget(
+        CustomScrollView(
+          slivers: <Widget>[
+            TreeSliver<String>(
+              tree: tree,
+              treeRowExtentBuilder:
+                  (TreeSliverNode<Object?> node, SliverLayoutDimensions dimensions) {
+                    calledNodes.add(node);
+                    return 40.0;
+                  },
+            ),
+          ],
+        ),
+      ),
     );
     expect(find.byType(CustomScrollView), findsOneWidget);
-    // Should not throw.
+    expect(calledNodes, isEmpty);
   });
 
   testWidgets('TreeSliver expand/collapse with mixed row heights', (WidgetTester tester) async {

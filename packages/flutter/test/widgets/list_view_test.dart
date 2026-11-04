@@ -1030,6 +1030,37 @@ void main() {
     expect(calledIndices.contains(5), isTrue);
   });
 
+  testWidgets(
+    'ListView.builder with shrinkWrap and itemExtentBuilder inside SingleChildScrollView',
+    (WidgetTester tester) async {
+      final heights = <double>[40.0, 50.0, 60.0, 70.0, 80.0];
+      final calledIndices = <int>[];
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: SingleChildScrollView(
+            child: ListView.builder(
+              shrinkWrap: true,
+              itemCount: heights.length,
+              itemExtentBuilder: (int index, SliverLayoutDimensions dimensions) {
+                calledIndices.add(index);
+                return heights[index];
+              },
+              itemBuilder: (BuildContext context, int index) {
+                return SizedBox(height: heights[index], child: Text('Item $index'));
+              },
+            ),
+          ),
+        ),
+      );
+
+      expect(find.text('Item 0'), findsOneWidget);
+      expect(find.text('Item 4'), findsOneWidget);
+      expect(find.text('Item 5'), findsNothing);
+      expect(calledIndices, <int>[0, 1, 2, 3, 4]);
+    },
+  );
+
   // Regression test for https://github.com/flutter/flutter/pull/131393
   testWidgets('itemExtentBuilder test', (WidgetTester tester) async {
     final controller = ScrollController();
