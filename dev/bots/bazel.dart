@@ -263,7 +263,7 @@ List<String> testFilesUnder(String root, [String directory = 'test']) {
 /// slashes to underscores (build_defs/dart/dart_test.bzl's dart_tests,
 /// flutter_test.bzl's flutter_tests, which declare one target per file).
 String bazelTestTarget(String package, String file) {
-  final String packageDirectory = path.join(flutterRoot, package);
+  final String packageDirectory = bazelPackageDirectory(package);
   final String absolute = path.join(flutterRoot, file);
   if (!path.isWithin(packageDirectory, absolute)) {
     throw ArgumentError('$file is not under //$package.');
@@ -275,6 +275,13 @@ String bazelTestTarget(String package, String file) {
     throw ArgumentError('$file is not a Dart file.');
   }
   return '//$package:${relative.substring(0, relative.length - '.dart'.length).replaceAll('/', '_')}';
+}
+
+/// The directory of the Bazel package [package] (`packages/flutter_tools`)
+/// under [root] (the repository root, [flutterRoot]), in the host's
+/// separators: a label's segments are always slash-separated.
+String bazelPackageDirectory(String package, {String? root}) {
+  return path.joinAll(<String>[root ?? flutterRoot, ...path.posix.split(package)]);
 }
 
 /// The package of a target label: `//packages/flutter_tools:general_shard` is
@@ -588,7 +595,7 @@ File bazelTestResultsFile(String testlogs, String label) {
 /// path. [root] is the repository root ([flutterRoot]).
 String? bazelSuiteWorkingDirectory(String label, TestFileReporterResults parsed, {String? root}) {
   root ??= flutterRoot;
-  final String packageDirectory = path.join(root, bazelPackageOf(label));
+  final String packageDirectory = bazelPackageDirectory(bazelPackageOf(label), root: root);
   for (final TestSpecs suite in parsed.allTestSpecs.values) {
     if (suite.path.isEmpty) {
       continue;
