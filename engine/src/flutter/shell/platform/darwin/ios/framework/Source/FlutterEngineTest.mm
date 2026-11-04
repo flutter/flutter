@@ -320,11 +320,15 @@ FLUTTER_ASSERT_ARC
   [engine run];
   int64_t id1 = engine.engineIdentifier;
   XCTAssertTrue(id1 != 0);
+  NSObject<FlutterPluginRegistrar>* registrar1 = [engine registrarForPlugin:@"foo"];
+  XCTAssertEqual(registrar1.engineIdentifier, id1);
   FlutterEngine* spawn = [engine spawnWithEntrypoint:nil
                                           libraryURI:nil
                                         initialRoute:nil
                                       entrypointArgs:nil];
   int64_t id2 = spawn.engineIdentifier;
+  NSObject<FlutterPluginRegistrar>* registrar2 = [spawn registrarForPlugin:@"foo"];
+  XCTAssertEqual(registrar2.engineIdentifier, id2);
   XCTAssertEqual([FlutterEngine engineForIdentifier:id1], engine);
   XCTAssertEqual([FlutterEngine engineForIdentifier:id2], spawn);
 }
@@ -707,6 +711,8 @@ FLUTTER_ASSERT_ARC
 
   NSObject<FlutterApplicationRegistrar>* registrar = [mockEngine registrarForApplication:pluginKey];
 
+  XCTAssertTrue([registrar respondsToSelector:@selector(engineIdentifier)]);
+  XCTAssertEqual(registrar.engineIdentifier, engine.engineIdentifier);
   XCTAssertTrue([registrar respondsToSelector:@selector(messenger)]);
   XCTAssertTrue([registrar respondsToSelector:@selector(textures)]);
   XCTAssertTrue([registrar respondsToSelector:@selector(registerViewFactory:withId:)]);

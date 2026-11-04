@@ -1669,6 +1669,10 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
   return self;
 }
 
+- (int64_t)engineIdentifier {
+  return _flutterEngine.engineIdentifier;
+}
+
 - (NSObject<FlutterBinaryMessenger>*)messenger {
   return _flutterEngine.binaryMessenger;
 }
