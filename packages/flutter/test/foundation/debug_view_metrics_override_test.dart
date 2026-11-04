@@ -1294,6 +1294,7 @@ void main() {
       wrapped.onPlatformConfigurationChanged = () => notifications.add('configuration');
       wrapped.onTextScaleFactorChanged = () => notifications.add('textScaleFactor');
       wrapped.onPlatformBrightnessChanged = () => notifications.add('platformBrightness');
+      wrapped.onAlwaysUse24HourFormatChanged = () => notifications.add('alwaysUse24HourFormat');
       wrapped.onAccessibilityFeaturesChanged = () => notifications.add('accessibilityFeatures');
       wrapped.onMetricsChanged = () => notifications.add('metrics');
 
@@ -1318,9 +1319,9 @@ void main() {
         'accessibilityFeatures',
       ]);
 
-      // The 24 hour format has no callback of its own: the configuration
-      // notification is the only one that names it, and onMetricsChanged is
-      // what tells the framework to re-read it.
+      // The 24 hour format announces onAlwaysUse24HourFormatChanged and
+      // onPlatformConfigurationChanged, and onMetricsChanged is what tells the
+      // framework to re-read it.
       notifications.clear();
       debugSetViewMetricsOverride(
         1,
@@ -1332,7 +1333,7 @@ void main() {
           alwaysUse24HourFormat: true,
         ),
       );
-      expect(notifications, <String>['configuration', 'metrics']);
+      expect(notifications, <String>['configuration', 'alwaysUse24HourFormat', 'metrics']);
 
       // A table that scales differently but reports the same factor is still a
       // change of text scaling.

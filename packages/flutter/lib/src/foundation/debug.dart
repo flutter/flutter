@@ -680,8 +680,8 @@ class DebugViewMetricsOverride with Diagnosticable {
 
   // The metrics dart:ui delivers through PlatformDispatcher.onMetricsChanged,
   // plus alwaysUse24HourFormat, which dart:ui reports through
-  // PlatformDispatcher.onPlatformConfigurationChanged because it has no
-  // callback of its own.
+  // PlatformDispatcher.onAlwaysUse24HourFormatChanged (as well as
+  // onPlatformConfigurationChanged).
   //
   // This grouping, `_accessibilityFeatures`, and the standalone `textScaling`
   // and `platformBrightness` are what `_changesFrom`, and so == and hashCode,
@@ -723,8 +723,8 @@ class DebugViewMetricsOverride with Diagnosticable {
   // override and [other]: the view metrics (onMetricsChanged), the text scaling
   // table (onTextScaleFactorChanged), the brightness
   // (onPlatformBrightnessChanged), the accessibility flags
-  // (onAccessibilityFeaturesChanged), and the 24 hour format, which is one of
-  // the view metrics but is also announced through
+  // (onAccessibilityFeaturesChanged), and the 24 hour format (onAlwaysUse24HourFormatChanged),
+  // which is one of the view metrics but is also announced through
   // onPlatformConfigurationChanged.
   //
   // The one definition of "changed" that == and the replay of dart:ui
@@ -1196,9 +1196,9 @@ ui.FlutterView debugViewWithMetricsOverrides(ui.FlutterView view) {
 // changed on every wrapped dispatcher, so that the framework re-reads them as
 // it would after a platform change: the platform configuration first when a
 // platform-wide setting changed, then the callback of each group that changed,
-// in the order dart:ui uses. alwaysUse24HourFormat has no callback of its own
-// and rides onMetricsChanged, the one notification the framework treats as
-// "re-read everything about this view".
+// in the order dart:ui uses. alwaysUse24HourFormat is announced through
+// onAlwaysUse24HourFormatChanged, and also rides onMetricsChanged, the one
+// notification the framework treats as "re-read everything about this view".
 //
 // Like the engine, this does not let one callback's failure cancel the ones
 // after it, or the framework would be left reading a metric it was never told

@@ -1540,6 +1540,8 @@ void hooksTests() async {
     );
     expectIdentical(runZoneAlwaysUse24HourFormat, innerZone);
     expectEquals(alwaysUse24HourFormat, false);
+
+    PlatformDispatcher.instance.onAlwaysUse24HourFormatChanged = null;
   });
 
   await test('onAlwaysUse24HourFormatChanged is not invoked when unrelated user settings change', () {
