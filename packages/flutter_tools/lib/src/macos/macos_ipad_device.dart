@@ -308,7 +308,7 @@ class MacOSDesignedForIPadDevice extends DesktopDevice {
 
   @override
   Future<void> dispose() async {
-    _logReader.dispose();
+    await _logReader.dispose();
     await super.dispose();
   }
 
@@ -463,9 +463,9 @@ class _MacOSDesignedForIPadLogReader extends DeviceLogReader {
   }
 
   @override
-  void dispose() {
+  Future<void> dispose() async {
     for (final StreamSubscription<vm_service.Event> subscription in _subscriptions) {
-      unawaited(subscription.cancel());
+      await subscription.cancel();
     }
     _subscriptions.clear();
   }
