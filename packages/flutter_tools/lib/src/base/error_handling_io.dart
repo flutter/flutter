@@ -1187,10 +1187,12 @@ T _runSync<T>(
 /// arguments only for the C runtime's `CommandLineToArgvW` rules, never for
 /// `cmd.exe`. As a result these characters in an argument are interpreted by
 /// `cmd.exe` as command syntax rather than as literal data.
-const String _windowsShellMetacharacters = r'&|<>^"%!()';
-
 bool _isWindowsBatchFile(String executable) {
-  final String lower = executable.toLowerCase();
+  // Strip surrounding quotes/whitespace first: a quoted path such as
+  // `"C:\dir with space\gradlew.bat"` ends in `"`, which would otherwise hide
+  // the `.bat`/`.cmd` extension and bypass this guard.
+  final String sanitized = executable.trim().replaceAll('"', '');
+  final String lower = sanitized.toLowerCase();
   return lower.endsWith('.bat') || lower.endsWith('.cmd');
 }
 
@@ -1219,24 +1221,39 @@ void _checkForWindowsBatchInjection(
   }
   for (final Object argument in command.skip(1)) {
     final value = argument.toString();
-    for (final int rune in value.runes) {
-      final bool isNewline = rune == 0x0a || rune == 0x0d;
-      if (isNewline || _windowsShellMetacharacters.contains(String.fromCharCode(rune))) {
-        final String shown = switch (rune) {
-          0x0a => r'\n',
-          0x0d => r'\r',
-          _ => String.fromCharCode(rune),
-        };
-        throwToolExit(
-          'Refusing to run "$executable": the argument "$value" contains a '
-          'character ("$shown") that is unsafe to pass to a Windows batch file '
-          'or shell.\n'
-          'On Windows, batch files run through cmd.exe, which would interpret '
-          'this character as a command rather than as text — a command-injection '
-          'risk (the "BatBadBut" issue, CVE-2024-24576). Remove the character '
-          'from the offending input (for example a project path, --target, or '
-          'build name) and try again.',
-        );
+    // All cmd.exe metacharacters of concern are single ASCII code units, so
+    // iterate code units with a switch to avoid rune decoding and per-character
+    // String allocations on this hot path.
+    for (var i = 0; i < value.length; i++) {
+      final int codeUnit = value.codeUnitAt(i);
+      switch (codeUnit) {
+        case 0x0a: // \n
+        case 0x0d: // \r
+        case 0x21: // !
+        case 0x22: // "
+        case 0x25: // %
+        case 0x26: // &
+        case 0x28: // (
+        case 0x29: // )
+        case 0x3c: // <
+        case 0x3e: // >
+        case 0x5e: // ^
+        case 0x7c: // |
+          final String shown = switch (codeUnit) {
+            0x0a => r'\n',
+            0x0d => r'\r',
+            _ => String.fromCharCode(codeUnit),
+          };
+          throwToolExit(
+            'Refusing to run "$executable": the argument "$value" contains a '
+            'character ("$shown") that is unsafe to pass to a Windows batch file '
+            'or shell.\n'
+            'On Windows, batch files run through cmd.exe, which would interpret '
+            'this character as a command rather than as text — a command-injection '
+            'risk (the "BatBadBut" issue, CVE-2024-24576). Remove the character '
+            'from the offending input (for example a project path, --target, or '
+            'build name) and try again.',
+          );
       }
     }
   }

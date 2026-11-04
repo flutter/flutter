@@ -2101,6 +2101,17 @@ Please ensure that the SDK and/or project is installed in a location that has re
       }
     });
 
+    testWithoutContext('rejects metacharacters even when the .bat path is quoted on Windows', () {
+      final ProcessManager processManager = createProcessManager(
+        delegate: FakeProcessManager.any(),
+        platform: windowsPlatform,
+      );
+      expect(
+        () => processManager.start(<String>[r'"C:\dir with space\gradlew.bat"', 'x&calc']),
+        throwsToolExit(message: 'unsafe to pass to a Windows batch file'),
+      );
+    });
+
     testWithoutContext('rejects metacharacters for any executable when runInShell is true on Windows', () {
       final ProcessManager processManager = createProcessManager(
         delegate: FakeProcessManager.any(),
