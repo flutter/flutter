@@ -238,18 +238,29 @@ the test for real, and so does the command from `engine/src`.
   `--remote_cache` and local execution finds nothing of its own, ever.
   Measured from a workstation before the bots (11-03): `fml_unittests`'
   676 actions in 93 s on the workers (critical path 60 s), then 38 s from
-  a fresh output base, every action a hit. The first run on the bots (PR
-  #195825 at 495, 8-core try bots, a third of the actions hits from the
-  workstation's probes): `ci/host_debug` 4 min 42 s for its build step
-  (3,064 actions on the workers, 2,834 hits, 2 local), `ci/host_release`
-  2:05, the Android builds 5:33–8:08, `ci/linux_debug_arm64` 7:12 --
-  against 18–40 minutes building locally; `ci/wasm_release` did 38,921 of
-  its 38,930 actions in 16 minutes (85 before). Two findings, both the
-  worker's environment: the desktop builds' impellerc linked the
-  sysroot's libfontconfig (the fontconfig flag reaching the exec
-  configuration; 496 builds the tool without it), and emcc's Closure
-  compiler was npm's `.bin` symlink, which a worker gets as a copy (497
-  names the script's own path). A bot's home directory, it turned out,
+  a fresh output base, every action a hit. The first runs on the bots (PR
+  #195825 at 495 and 497): `ci/host_debug` 4:11–4:42 for its build step,
+  `ci/host_release` 1:38–2:05, the Android builds 4:16–8:08,
+  `ci/linux_debug_arm64` 6:33–7:12, `ci/wasm_release` 9:16 -- with the
+  caveat that the try pool mixes 8-core and 32-core bots and every RBE run
+  landed on a 32-core one. Against the same 32-core bots building locally
+  (492: 4:23–8:07, wasm 12:02 at 480) RBE is roughly a wash for these
+  builds: with the compiles hits or remote, the critical path is the two
+  wrapped GN builds (the Dart runtime and the GL stack, `ninja -j32` for
+  84–155 s each, local, never a cache hit across tasks) and the install.
+  Against the 8-core bots of 480 (18–40 minutes building locally) the
+  gain is large, but no RBE run has landed on one yet; the shards, all on
+  8-core bots, are the like-for-like measurement (README: 23–35% off the
+  kernel-compile-heavy ones). The workers are 2-vCPU Debian 11 machines,
+  clock in UTC. Three findings, all the worker's environment: the desktop
+  builds' impellerc linked the sysroot's libfontconfig (the fontconfig
+  flag reaching the exec configuration; 496 builds the tool without it),
+  emcc's Closure compiler was npm's `.bin` symlink, which a worker gets as
+  a copy (497 names the script's own path), and an archive zipped on a
+  worker carries UTC in its zone-less DOS timestamps, seven hours ahead of
+  the Pacific bots that unzip it -- pub took sky_engine's pubspec for newer
+  than every lockfile (500 zips on the bot). A bot's home directory, it
+  turned out,
   survives its tasks, so the root `.bazelrc`'s disk cache under `~/.cache`
   had already been warming repeat builds on the same bot (492's
   `host_debug_unopt_impeller_tests` found 6,113 of its actions there, 3
