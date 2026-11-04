@@ -101,14 +101,31 @@ Future<void> testMain() async {
       return response.asUint8List();
     }
 
+    Future<Uint8List> animatedWebp() => fetchBytes('/test_images/stoplight.webp');
+    Future<Uint8List> staticWebp() => fetchBytes('/test_images/baby_tux.webp');
+    Future<Uint8List> animatedGif() async => _createTestGif();
+    Future<Uint8List> staticGif() async => _createTestGif(numFrames: 1);
+
     final fixtures = <(String, Future<Uint8List> Function(), ImageType)>[
-      ('animated WebP', () => fetchBytes('/test_images/stoplight.webp'), ImageType.animatedWebp),
-      ('static WebP', () => fetchBytes('/test_images/baby_tux.webp'), ImageType.webp),
-      ('animated GIF', () async => _createTestGif(), ImageType.animatedGif),
-      ('static GIF', () async => _createTestGif(numFrames: 1), ImageType.gif),
+      ('animated WebP', animatedWebp, ImageType.animatedWebp),
+      ('static WebP', staticWebp, ImageType.webp),
+      ('animated GIF', animatedGif, ImageType.animatedGif),
+      ('static GIF', staticGif, ImageType.gif),
+      // The test server does not serve .avif files, so use an in-memory 'ftyp'
+      // box, which is all that AVIF detection looks at.
+      (
+        'AVIF',
+        () async => Uint8List.fromList(<int>[
+          ...<int>[0x00, 0x00, 0x00, 0x14],
+          ...'ftypavif'.codeUnits,
+          ...<int>[0x00, 0x00, 0x00, 0x00],
+          ...'avif'.codeUnits,
+        ]),
+        ImageType.avif,
+      ),
     ];
 
-    const paddings = <(int, int)>[(32, 0), (0, 16), (32, 16), (48, 16)];
+    const paddings = <(int, int)>[(32, 0), (0, 16), (32, 16), (48, 16), (3, 1)];
 
     for (final (String name, Future<Uint8List> Function() loadBytes, ImageType expected)
         in fixtures) {
@@ -126,6 +143,33 @@ Future<void> testMain() async {
           expect(detectImageType(view), expected);
         });
       }
+    }
+
+    final staticAfterAnimated =
+        <(String, Future<Uint8List> Function(), Future<Uint8List> Function(), ImageType)>[
+          ('static WebP', animatedWebp, staticWebp, ImageType.webp),
+          ('static GIF', animatedGif, staticGif, ImageType.gif),
+        ];
+
+    for (final (
+          String name,
+          Future<Uint8List> Function() loadPreceding,
+          Future<Uint8List> Function() loadBytes,
+          ImageType expected,
+        )
+        in staticAfterAnimated) {
+      test('$name stored right after an animated image in the same buffer', () async {
+        final Uint8List preceding = await loadPreceding();
+        final Uint8List source = await loadBytes();
+        final backing = Uint8List(preceding.length + source.length)
+          ..setAll(0, preceding)
+          ..setAll(preceding.length, source);
+        final view = Uint8List.sublistView(backing, preceding.length);
+        expect(view.offsetInBytes, preceding.length);
+        expect(view.length, source.length);
+
+        expect(detectImageType(view), expected);
+      });
     }
   });
 }
