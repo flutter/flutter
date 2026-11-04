@@ -194,4 +194,44 @@ void main() {
     expect(homePainter.count, homePaintCount);
     expect(_lastRegions(), <int, Set<Rect>>{1: <Rect>{}});
   });
+
+  testWidgets('render boxes that have never been laid out are skipped', (
+    WidgetTester tester,
+  ) async {
+    enablePass(tester);
+    const button = Rect.fromLTWH(20, 30, 80, 40);
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Overlay(
+          initialEntries: <OverlayEntry>[
+            // Offstage beneath the opaque entry from the start, so the overlay
+            // keeps it in its child list but never lays it out.
+            OverlayEntry(
+              maintainState: true,
+              builder: (_) => const ClipRect(child: Listener(behavior: HitTestBehavior.opaque)),
+            ),
+            OverlayEntry(
+              opaque: true,
+              builder: (_) => Stack(
+                children: <Widget>[
+                  _platformView(1),
+                  Positioned.fromRect(
+                    rect: button,
+                    child: const Listener(behavior: HitTestBehavior.opaque),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isNull);
+    expect(_lastRegions(), <int, Set<Rect>>{
+      1: <Rect>{button},
+    });
+  });
 }

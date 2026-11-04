@@ -68,7 +68,8 @@ typedef _PlatformViewHitTestGroup = ({int viewId, Rect platformViewRect, List<Re
 ///   so the rectangles are in the same coordinate space as the root (physical
 ///   pixels when [root] is a [RenderView]).
 /// * Subtrees that cannot receive pointer events are skipped: offstage
-///   subtrees ([RenderOffstage]) are not visited at all, and render objects
+///   subtrees ([RenderOffstage]) and render boxes that have never been laid
+///   out are not visited at all, and render objects
 ///   under an ignoring [RenderIgnorePointer] or an absorbing
 ///   [RenderAbsorbPointer] never claim a region. A platform view in such a
 ///   subtree still starts a group, because the browser still delivers pointer
@@ -208,6 +209,12 @@ Float64List? computeHitTestRegions(RenderObject root) {
     // Descend into the children in child order, accumulating each child's
     // paint transform and clip.
     node.visitChildren((RenderObject child) {
+      // A box that has never been laid out (for example, an overlay entry
+      // that has been offstage since it was inserted) is not painted, and
+      // computing its clip or its children's transforms may read its size.
+      if (child is RenderBox && !child.hasSize) {
+        return;
+      }
       var childClip = clip;
       final Rect? localClip = node.describeApproximatePaintClip(child);
       if (localClip != null) {
