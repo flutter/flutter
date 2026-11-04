@@ -85,9 +85,14 @@ void testMain() {
         const BitmapSize(32, 24),
         <ui.Picture>[picture],
       );
-      expect(bitmaps.single.width, 32);
-      expect(bitmaps.single.height, 24);
-      bitmaps.single.close();
+      try {
+        expect(bitmaps.single.width, 32);
+        expect(bitmaps.single.height, 24);
+      } finally {
+        for (final bitmap in bitmaps) {
+          bitmap.close();
+        }
+      }
     } finally {
       picture.dispose();
       surface.dispose();

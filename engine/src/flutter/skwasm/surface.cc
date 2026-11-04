@@ -49,6 +49,8 @@ namespace {
 // would result in an unrecoverable busy-spin on the main browser thread.
 std::atomic<bool> g_raster_thread_initialized{false};
 unsigned long g_raster_thread = 0;
+
+// Main thread only: callback IDs are shared across all surfaces.
 uint32_t g_next_callback_id = 0;
 
 uint32_t NextCallbackId() {
@@ -113,8 +115,8 @@ uint32_t Skwasm::Surface::SetCanvas(SkwasmObject canvas) {
   assert(emscripten_is_main_browser_thread());
   uint32_t callback_id = NextCallbackId();
 
-  // Allocated here instead of on the worker so that callback IDs are unique
-  // across all surfaces sharing the callback handler.
+  // Allocated here instead of on the worker so that g_next_callback_id is
+  // only ever modified on the main thread.
   context_lost_callback_id_ = NextCallbackId();
 
   skwasm_dispatchTransferCanvas(GetRasterThread(), this, canvas, callback_id);
@@ -206,6 +208,7 @@ uint32_t Skwasm::Surface::RenderPictures(flutter::DisplayList** pictures,
                                          int height,
                                          bool capture_image_bitmaps) {
   assert(emscripten_is_main_browser_thread());
+  assert(capture_image_bitmaps || count == 1);
   uint32_t callback_id = NextCallbackId();
   std::unique_ptr<sk_sp<flutter::DisplayList>[]> picture_pointers =
       std::make_unique<sk_sp<flutter::DisplayList>[]>(count);
