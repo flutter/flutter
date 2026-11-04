@@ -43,7 +43,8 @@
                 "--android",
                 "--android-cpu=arm",
                 "--no-lto",
-                "--rbe"
+                "--rbe",
+                "--no-goma"
             ],
             "name": "ci/android_debug",
             "description": "Produces debug mode artifacts to target 32-bit arm Android from a Linux host.",
@@ -89,7 +90,8 @@
                 "--android",
                 "--android-cpu=arm64",
                 "--no-lto",
-                "--rbe"
+                "--rbe",
+                "--no-goma"
             ],
             "name": "ci/android_debug_arm64",
             "description": "Produces debug mode artifacts to target 64-bit arm Android from a Linux host.",
@@ -132,7 +134,8 @@
                 "--android",
                 "--android-cpu=x64",
                 "--no-lto",
-                "--rbe"
+                "--rbe",
+                "--no-goma"
             ],
             "name": "ci/android_debug_x64",
             "description": "Produces debug mode artifacts to target x64 Android from a Linux host.",
@@ -175,7 +178,8 @@
                 "--android",
                 "--android-cpu=riscv64",
                 "--no-lto",
-                "--rbe"
+                "--rbe",
+                "--no-goma"
             ],
             "name": "ci/android_debug_riscv64",
             "description": "Produces debug mode artifacts to target riscv64 Android from a Linux host.",

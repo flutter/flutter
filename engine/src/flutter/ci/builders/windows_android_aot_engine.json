@@ -28,6 +28,7 @@
                 "--runtime-mode",
                 "profile",
                 "--android",
+                "--no-goma",
                 "--rbe"
             ],
             "name": "ci\\android_profile",
@@ -65,6 +66,7 @@
                 "profile",
                 "--android",
                 "--android-cpu=arm64",
+                "--no-goma",
                 "--rbe"
             ],
             "name": "ci\\android_profile_arm64",
@@ -102,6 +104,7 @@
                 "profile",
                 "--android",
                 "--android-cpu=x64",
+                "--no-goma",
                 "--rbe"
             ],
             "name": "ci\\android_profile_x64",
@@ -138,6 +141,7 @@
                 "--runtime-mode",
                 "release",
                 "--android",
+                "--no-goma",
                 "--rbe"
             ],
             "name": "ci\\android_release",
@@ -175,6 +179,7 @@
                 "release",
                 "--android",
                 "--android-cpu=arm64",
+                "--no-goma",
                 "--rbe"
             ],
             "name": "ci\\android_release_arm64",
@@ -212,6 +217,7 @@
                 "release",
                 "--android",
                 "--android-cpu=x64",
+                "--no-goma",
                 "--rbe"
             ],
             "name": "ci\\android_release_x64",
