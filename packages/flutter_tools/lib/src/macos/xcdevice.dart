@@ -59,7 +59,7 @@ class XCDevice {
     required Platform platform,
     required IProxy iproxy,
     required FileSystem fileSystem,
-    required Analytics analytics,
+    required this._analytics,
     required ShutdownHooks shutdownHooks,
     @visibleForTesting IOSCoreDeviceControl? coreDeviceControl,
     XcodeDebug? xcodeDebug,
@@ -95,8 +95,7 @@ class XCDevice {
              fileSystem: fileSystem,
            ),
        _iProxy = iproxy,
-       _xcode = xcode,
-       _analytics = analytics {
+       _xcode = xcode {
     shutdownHooks.addShutdownHook(dispose);
 
     _setupDeviceIdentifierByEventStream();

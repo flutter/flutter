@@ -15,9 +15,8 @@ import '../version.dart';
 import 'upgrade.dart' show precacheArtifacts;
 
 class ChannelCommand extends FlutterCommand {
-  ChannelCommand({required ToolContext toolContext, bool verboseHelp = false})
-    : _toolContext = toolContext,
-      super(toolContext: toolContext) {
+  ChannelCommand({required ToolContext super.toolContext, super.verboseHelp = false})
+    : _toolContext = toolContext {
     argParser.addFlag(
       'all',
       abbr: 'a',

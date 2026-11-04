@@ -55,8 +55,6 @@ impeller_component("renderer") {
     "pipeline.h",
     "pipeline_builder.cc",
     "pipeline_builder.h",
-    "pipeline_compile_queue.cc",
-    "pipeline_compile_queue.h",
     "pipeline_descriptor.cc",
     "pipeline_descriptor.h",
     "pipeline_library.cc",
@@ -100,7 +98,6 @@ impeller_component("renderer") {
 
   deps = [
     "//flutter/fml",
-    "//third_party/abseil-cpp/absl/container:linked_hash_map",
     "//third_party/abseil-cpp/absl/strings",
   ]
 }
@@ -113,7 +110,6 @@ template("renderer_unittests_component") {
     "command_buffer_scheduling_receipt_unittests.cc",
     "command_queue_unittests.cc",
     "device_buffer_unittests.cc",
-    "pipeline_compile_queue_unittests.cc",
     "pipeline_descriptor_unittests.cc",
     "pipeline_library_unittests.cc",
     "pool_unittests.cc",

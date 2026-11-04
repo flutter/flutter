@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:ffi' show Abi;
+
 import 'package:file/file.dart';
 import 'package:process/process.dart';
 import 'package:unified_analytics/unified_analytics.dart';
@@ -99,16 +100,14 @@ class CocoaPods {
   CocoaPods({
     required FileSystem fileSystem,
     required ProcessManager processManager,
-    required XcodeProjectInterpreter xcodeProjectInterpreter,
+    required this._xcodeProjectInterpreter,
     required Logger logger,
     required Platform platform,
-    required Analytics analytics,
+    required this._analytics,
     Abi? currentAbi,
   }) : _fileSystem = fileSystem,
        _processManager = processManager,
-       _xcodeProjectInterpreter = xcodeProjectInterpreter,
        _logger = logger,
-       _analytics = analytics,
        _processUtils = ProcessUtils(processManager: processManager, logger: logger),
        _operatingSystemUtils = OperatingSystemUtils(
          fileSystem: fileSystem,

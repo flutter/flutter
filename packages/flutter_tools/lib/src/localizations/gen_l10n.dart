@@ -345,9 +345,8 @@ String _generateLookupByScriptCode(
             _addSpaces(
               localesWithScriptCodes
                   .map((LocaleInfo locale) {
-                    return generateSwitchClauseTemplate(
-                      locale,
-                    ).replaceAll('@(case)', locale.scriptCode!);
+                    return generateSwitchClauseTemplate(locale)
+                        .replaceAll('@(case)', locale.scriptCode!);
                   })
                   .join('\n'),
               spaces: 8,
@@ -389,9 +388,8 @@ String _generateLookupByCountryCode(
             _addSpaces(
               localesWithCountryCodes
                   .map((LocaleInfo locale) {
-                    return generateSwitchClauseTemplate(
-                      locale,
-                    ).replaceAll('@(case)', locale.countryCode!);
+                    return generateSwitchClauseTemplate(locale)
+                        .replaceAll('@(case)', locale.countryCode!);
                   })
                   .join('\n'),
               spaces: 4,

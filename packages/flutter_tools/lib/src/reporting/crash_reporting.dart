@@ -56,12 +56,10 @@ class CrashDetails {
 /// Reports information about the crash to the user.
 class CrashReporter {
   CrashReporter({
-    required FileSystem fileSystem,
-    required Logger logger,
-    required FlutterProjectFactory flutterProjectFactory,
-  }) : _fileSystem = fileSystem,
-       _logger = logger,
-       _flutterProjectFactory = flutterProjectFactory;
+    required this._fileSystem,
+    required this._logger,
+    required this._flutterProjectFactory,
+  });
 
   final FileSystem _fileSystem;
   final Logger _logger;
@@ -116,15 +114,11 @@ class CrashReporter {
 class CrashReportSender {
   CrashReportSender({
     http.Client? client,
-    required Platform platform,
-    required Logger logger,
-    required OperatingSystemUtils operatingSystemUtils,
-    required Analytics analytics,
-  }) : _client = client ?? http.Client(),
-       _platform = platform,
-       _logger = logger,
-       _operatingSystemUtils = operatingSystemUtils,
-       _analytics = analytics;
+    required this._platform,
+    required this._logger,
+    required this._operatingSystemUtils,
+    required this._analytics,
+  }) : _client = client ?? http.Client();
 
   final http.Client _client;
   final Platform _platform;

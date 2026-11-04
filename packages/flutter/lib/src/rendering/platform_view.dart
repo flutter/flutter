@@ -5,6 +5,7 @@
 /// @docImport 'package:flutter/widgets.dart';
 library;
 
+import 'dart:async';
 import 'dart:ui' as ui show SemanticsHitTestBehavior;
 
 import 'package:flutter/foundation.dart';
@@ -79,9 +80,8 @@ class RenderAndroidView extends PlatformViewRenderBox {
     required AndroidViewController viewController,
     required PlatformViewHitTestBehavior hitTestBehavior,
     required Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers,
-    Clip clipBehavior = Clip.hardEdge,
+    this._clipBehavior = Clip.hardEdge,
   }) : _viewController = viewController,
-       _clipBehavior = clipBehavior,
        super(
          controller: viewController,
          hitTestBehavior: hitTestBehavior,
@@ -303,10 +303,10 @@ class RenderAndroidView extends PlatformViewRenderBox {
 abstract class RenderDarwinPlatformView<T extends DarwinPlatformViewController> extends RenderBox {
   /// Creates a render object for a platform view.
   RenderDarwinPlatformView({
-    required T viewController,
+    required this._viewController,
     required this.hitTestBehavior,
     required Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers,
-  }) : _viewController = viewController {
+  }) {
     updateGestureRecognizers(gestureRecognizers);
   }
 
@@ -582,8 +582,9 @@ typedef _HandlePointerEvent = Future<void> Function(PointerEvent event);
 class _PlatformViewGestureRecognizer extends OneSequenceGestureRecognizer {
   _PlatformViewGestureRecognizer(
     _HandlePointerEvent handlePointerEvent,
-    this.gestureRecognizerFactories,
-  ) {
+    this.gestureRecognizerFactories, {
+    this.onRejectGesture,
+  }) {
     team = GestureArenaTeam()..captain = this;
     _gestureRecognizers = gestureRecognizerFactories.map((
       Factory<OneSequenceGestureRecognizer> recognizerFactory,
@@ -605,7 +606,20 @@ class _PlatformViewGestureRecognizer extends OneSequenceGestureRecognizer {
     _handlePointerEvent = handlePointerEvent;
   }
 
+  final void Function(int? gestureId)? onRejectGesture;
+
   late _HandlePointerEvent _handlePointerEvent;
+
+  // Maps active pointer IDs to the embedderId of the pointer down event.
+  //
+  // On Android, the engine assigns each MotionEvent a unique motionEventId tracked by
+  // MotionEventTracker, which is passed to the framework as PointerEvent.embedderId.
+  //
+  // When Flutter wins the gesture arena, this embedderId is passed as `gestureId` to the
+  // platform side to correlate with the active MotionEvent sequence via MotionEventTracker.
+  // If the gestureId is invalid or does not match (e.g. on non-Android embedders), the
+  // optimization safely degrades to standard buffered touch dispatch.
+  final Map<int, int> _gestureIds = <int, int>{};
 
   // Maps a pointer to a list of its cached pointer events.
   // Before the arena for a pointer is resolved all events are cached here, if we win the arena
@@ -625,6 +639,7 @@ class _PlatformViewGestureRecognizer extends OneSequenceGestureRecognizer {
 
   @override
   void addAllowedPointer(PointerDownEvent event) {
+    _gestureIds[event.pointer] = event.embedderId;
     super.addAllowedPointer(event);
     for (final OneSequenceGestureRecognizer recognizer in _gestureRecognizers) {
       recognizer.addPointer(event);
@@ -655,8 +670,12 @@ class _PlatformViewGestureRecognizer extends OneSequenceGestureRecognizer {
 
   @override
   void rejectGesture(int pointer) {
+    final int? gestureId = _gestureIds[pointer];
     stopTrackingPointer(pointer);
     cachedEvents.remove(pointer);
+    if (gestureId != null && gestureId != 0) {
+      onRejectGesture?.call(gestureId);
+    }
   }
 
   void _cacheEvent(PointerEvent event) {
@@ -672,11 +691,13 @@ class _PlatformViewGestureRecognizer extends OneSequenceGestureRecognizer {
 
   @override
   void stopTrackingPointer(int pointer) {
+    _gestureIds.remove(pointer);
     super.stopTrackingPointer(pointer);
     forwardedPointers.remove(pointer);
   }
 
   void reset() {
+    _gestureIds.clear();
     forwardedPointers.forEach(super.stopTrackingPointer);
     forwardedPointers.clear();
     cachedEvents.keys.forEach(super.stopTrackingPointer);
@@ -737,7 +758,15 @@ class PlatformViewRenderBox extends RenderBox with _PlatformViewGestureMixin {
   /// Any active gesture arena the `PlatformView` participates in is rejected when the
   /// set of gesture recognizers is changed.
   void updateGestureRecognizers(Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers) {
-    _updateGestureRecognizersWithCallBack(gestureRecognizers, _controller.dispatchPointerEvent);
+    _updateGestureRecognizersWithCallBack(
+      gestureRecognizers,
+      _controller.dispatchPointerEvent,
+      onRejectGesture: (int? gestureId) {
+        if (gestureId != null) {
+          _controller.rejectGesture(gestureId: gestureId).ignore();
+        }
+      },
+    );
   }
 
   @override
@@ -794,8 +823,9 @@ mixin _PlatformViewGestureMixin on RenderBox implements MouseTrackerAnnotation {
   /// set of gesture recognizers is changed.
   void _updateGestureRecognizersWithCallBack(
     Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers,
-    _HandlePointerEvent handlePointerEvent,
-  ) {
+    _HandlePointerEvent handlePointerEvent, {
+    void Function(int? gestureId)? onRejectGesture,
+  }) {
     assert(
       _factoriesTypeSet(gestureRecognizers).length == gestureRecognizers.length,
       'There were multiple gesture recognizer factories for the same type, there must only be a single '
@@ -808,7 +838,11 @@ mixin _PlatformViewGestureMixin on RenderBox implements MouseTrackerAnnotation {
       return;
     }
     _gestureRecognizer?.dispose();
-    _gestureRecognizer = _PlatformViewGestureRecognizer(handlePointerEvent, gestureRecognizers);
+    _gestureRecognizer = _PlatformViewGestureRecognizer(
+      handlePointerEvent,
+      gestureRecognizers,
+      onRejectGesture: onRejectGesture,
+    );
     _handlePointerEvent = handlePointerEvent;
   }
 

@@ -4,6 +4,7 @@
 
 #include "flutter/lib/ui/painting/image_decoder_impeller.h"
 
+#include <cmath>
 #include <format>
 #include <memory>
 
@@ -76,6 +77,18 @@ bool IsWideGamut(const SkColorSpace* color_space) {
   return area > kSrgbGamutArea;
 }
 
+bool IsHdr(const SkColorSpace* color_space) {
+  if (!color_space || color_space->isSRGB()) {
+    return false;
+  }
+  skcms_TransferFunction fn;
+  color_space->transferFn(&fn);
+  skcms_TFType type = skcms_TransferFunction_getType(&fn);
+  return type == skcms_TFType_PQ || type == skcms_TFType_PQish ||
+         type == skcms_TFType_HLG || type == skcms_TFType_HLGish ||
+         type == skcms_TFType_HLGinvish;
+}
+
 absl::StatusOr<ImageDecoderImpeller::ImageInfo> ToImageInfo(
     const SkImageInfo& sk_image_format) {
   const std::optional<impeller::PixelFormat> pixel_format =
@@ -121,8 +134,10 @@ absl::StatusOr<SkImageInfo> CreateImageInfo(
     const SkISize& decode_size,
     bool supports_wide_gamut,
     ImageDecoder::TargetPixelFormat target_format) {
-  const bool is_wide_gamut =
-      supports_wide_gamut ? IsWideGamut(base_image_info.colorSpace()) : false;
+  const SkColorSpace* color_space = base_image_info.colorSpace();
+  const bool is_hdr = IsHdr(color_space);
+  const bool is_extended_range =
+      supports_wide_gamut && (IsWideGamut(color_space) || is_hdr);
   SkAlphaType alpha_type =
       ChooseCompatibleAlphaType(base_image_info.alphaType());
   if (target_format != ImageDecoder::TargetPixelFormat::kDontCare) {
@@ -135,12 +150,13 @@ absl::StatusOr<SkImageInfo> CreateImageInfo(
         .makeColorType(target_skia_color_type.value())
         .makeAlphaType(alpha_type)
         .makeColorSpace(SkColorSpace::MakeSRGB());
-  } else if (is_wide_gamut) {
-    // Use 10-bit for opaque images (less memory: 4 bytes vs 8 bytes per pixel).
-    // Use F16 for images with alpha channel.
-    SkColorType color_type = alpha_type == SkAlphaType::kOpaque_SkAlphaType
-                                 ? kBGR_101010x_XR_SkColorType
-                                 : kRGBA_F16_SkColorType;
+  } else if (is_extended_range) {
+    // Use 10-bit for opaque SDR images (less memory: 4 bytes vs 8 bytes per
+    // pixel). Use F16 for HDR images or images with alpha channel.
+    SkColorType color_type =
+        (!is_hdr && alpha_type == SkAlphaType::kOpaque_SkAlphaType)
+            ? kBGR_101010x_XR_SkColorType
+            : kRGBA_F16_SkColorType;
     return base_image_info.makeWH(decode_size.width(), decode_size.height())
         .makeColorType(color_type)
         .makeAlphaType(alpha_type)
@@ -346,11 +362,22 @@ ImageDecoderImpeller::DecompressTexture(
 
   const SkISize source_size = SkISize::Make(descriptor->image_info().width,
                                             descriptor->image_info().height);
-  const SkISize target_size =
-      SkISize::Make(std::min(max_texture_size.width,
-                             static_cast<int64_t>(options.target_width)),
-                    std::min(max_texture_size.height,
-                             static_cast<int64_t>(options.target_height)));
+  SkISize target_size =
+      SkISize::Make(options.target_width, options.target_height);
+  // Shrink both sides by the same factor so the aspect ratio is kept, but
+  // never below one pixel.
+  if (options.target_width > max_texture_size.width ||
+      options.target_height > max_texture_size.height) {
+    const double scale = std::min(static_cast<double>(max_texture_size.width) /
+                                      std::max(options.target_width, 1u),
+                                  static_cast<double>(max_texture_size.height) /
+                                      std::max(options.target_height, 1u));
+    target_size = SkISize::Make(
+        std::max(1,
+                 static_cast<int>(std::lround(options.target_width * scale))),
+        std::max(1,
+                 static_cast<int>(std::lround(options.target_height * scale))));
+  }
 
   // Fast path for when the input requires no decompressing or conversion.
   if (!descriptor->is_compressed() && source_size == target_size &&

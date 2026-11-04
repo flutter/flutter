@@ -1579,6 +1579,40 @@ public class AccessibilityBridgeTest {
     assertEquals(ACCESSIBILITY_FEATURE_NO_ANNOUNCE, featuresCaptor.getValue().intValue());
   }
 
+  @Config(sdk = API_LEVELS.API_34)
+  @TargetApi(API_LEVELS.API_34)
+  @Test
+  public void itUnregistersHighContrastObserverOnRelease() {
+    AccessibilityChannel mockChannel = mock(AccessibilityChannel.class);
+    AccessibilityManager mockManager = mock(AccessibilityManager.class);
+    View mockRootView = mock(View.class);
+    Context context = mock(Context.class);
+    UiModeManager mockUiModeManager = mock(UiModeManager.class);
+
+    when(mockRootView.getContext()).thenReturn(context);
+    when(context.getSystemService(Context.UI_MODE_SERVICE)).thenReturn(mockUiModeManager);
+    when(context.getMainExecutor())
+        .thenReturn(RuntimeEnvironment.getApplication().getMainExecutor());
+
+    AccessibilityBridge accessibilityBridge =
+        setUpBridge(
+            /* rootAccessibilityView= */ mockRootView,
+            /* accessibilityChannel= */ mockChannel,
+            /* accessibilityManager= */ mockManager,
+            /* contentResolver= */ null,
+            /* accessibilityViewEmbedder= */ null,
+            /* platformViewsAccessibilityDelegate= */ null);
+
+    ArgumentCaptor<UiModeManager.ContrastChangeListener> listenerCaptor =
+        ArgumentCaptor.forClass(UiModeManager.ContrastChangeListener.class);
+    verify(mockUiModeManager).addContrastChangeListener(any(), listenerCaptor.capture());
+    UiModeManager.ContrastChangeListener listener = listenerCaptor.getValue();
+
+    accessibilityBridge.release();
+
+    verify(mockUiModeManager).removeContrastChangeListener(listener);
+  }
+
   @Config(sdk = API_LEVELS.API_33)
   @TargetApi(API_LEVELS.API_33)
   @Test
@@ -2711,6 +2745,58 @@ public class AccessibilityBridgeTest {
     assertEquals(0.0f, nodeInfo.getRangeInfo().getMin(), 1e-4f);
     assertEquals(100.0f, nodeInfo.getRangeInfo().getMax(), 1e-4f);
     assertEquals(50.0f, nodeInfo.getRangeInfo().getCurrent(), 1e-4f);
+  }
+
+  @Test
+  public void itAddsRangeInfoToSlider_withPercentage() {
+    AccessibilityBridge accessibilityBridge = setUpBridge();
+    TestSemanticsNode testSemanticsNode = new TestSemanticsNode();
+    testSemanticsNode.role = AccessibilityBridge.Role.SLIDER.value;
+    testSemanticsNode.value = "50%";
+    testSemanticsNode.minValue = "0.0";
+    testSemanticsNode.maxValue = "5.0";
+    TestSemanticsUpdate testSemanticsUpdate = testSemanticsNode.toUpdate();
+    testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
+    AccessibilityNodeInfo nodeInfo = accessibilityBridge.createAccessibilityNodeInfo(0);
+    assertEquals("android.widget.SeekBar", nodeInfo.getClassName().toString());
+    assertNotNull(nodeInfo.getRangeInfo());
+    assertEquals(0.0f, nodeInfo.getRangeInfo().getMin(), 1e-4f);
+    assertEquals(5.0f, nodeInfo.getRangeInfo().getMax(), 1e-4f);
+    assertEquals(2.5f, nodeInfo.getRangeInfo().getCurrent(), 1e-4f);
+  }
+
+  @Test
+  @Config(sdk = 24)
+  public void itAddsActionSetProgressForSlider() {
+    AccessibilityBridge accessibilityBridge = setUpBridge();
+    TestSemanticsNode testSemanticsNode = new TestSemanticsNode();
+    testSemanticsNode.role = AccessibilityBridge.Role.SLIDER.value;
+    testSemanticsNode.value = "50%";
+    TestSemanticsUpdate testSemanticsUpdate = testSemanticsNode.toUpdate();
+    testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
+    AccessibilityNodeInfo nodeInfo = accessibilityBridge.createAccessibilityNodeInfo(0);
+    assertEquals("android.widget.SeekBar", nodeInfo.getClassName().toString());
+    assertTrue(
+        nodeInfo
+            .getActionList()
+            .contains(AccessibilityNodeInfo.AccessibilityAction.ACTION_SET_PROGRESS));
+  }
+
+  @Test
+  @Config(sdk = 24)
+  public void itOmitsActionSetProgressForProgressBar() {
+    AccessibilityBridge accessibilityBridge = setUpBridge();
+    TestSemanticsNode testSemanticsNode = new TestSemanticsNode();
+    testSemanticsNode.role = AccessibilityBridge.Role.PROGRESS_BAR.value;
+    testSemanticsNode.value = "50";
+    TestSemanticsUpdate testSemanticsUpdate = testSemanticsNode.toUpdate();
+    testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
+    AccessibilityNodeInfo nodeInfo = accessibilityBridge.createAccessibilityNodeInfo(0);
+    assertEquals("android.widget.ProgressBar", nodeInfo.getClassName().toString());
+    assertFalse(
+        nodeInfo
+            .getActionList()
+            .contains(AccessibilityNodeInfo.AccessibilityAction.ACTION_SET_PROGRESS));
   }
 
   @Test

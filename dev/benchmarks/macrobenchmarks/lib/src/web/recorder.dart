@@ -182,9 +182,7 @@ abstract class Recorder {
 /// }
 /// ```
 abstract class RawRecorder extends Recorder {
-  RawRecorder({required String name, bool useCustomWarmUp = false})
-    : _useCustomWarmUp = useCustomWarmUp,
-      super._(name, false);
+  RawRecorder({required String name, this._useCustomWarmUp = false}) : super._(name, false);
 
   /// Whether to delimit warm-up frames in a custom way.
   final bool _useCustomWarmUp;
@@ -271,17 +269,18 @@ abstract class SceneBuilderRecorder extends Recorder {
         rethrow;
       }
     };
-    PlatformDispatcher.instance.onDrawFrame = () {
+    PlatformDispatcher.instance.onDrawFrame = () async {
       try {
-        _profile!.recordAsync('drawFrameDuration', () async {
+        await _profile!.recordAsync('drawFrameDuration', () async {
           final sceneBuilder = SceneBuilder();
           onDrawFrame(sceneBuilder);
-          _profile!.recordAsync('sceneBuildDuration', () async {
-            final Scene scene = sceneBuilder.build();
-            _profile!.recordAsync('windowRenderDuration', () async {
-              // On the web, render is asynchronous.
-              await (PlatformDispatcher.instance as dynamic).render(scene);
-            }, reported: false);
+          late final Scene scene;
+          _profile!.record('sceneBuildDuration', () {
+            scene = sceneBuilder.build();
+          }, reported: false);
+          await _profile!.recordAsync('windowRenderDuration', () async {
+            // On the web, render is asynchronous.
+            await (PlatformDispatcher.instance as dynamic).render(scene);
           }, reported: false);
         }, reported: true);
         endMeasureFrame();
@@ -1269,7 +1268,7 @@ bool _isMeasuringFrame = false;
 /// [WidgetBuildRecorder] only measures frames that build widgets, and ignores
 /// frames that clear the screen.
 ///
-/// Warm-up frames are not measured. If [profile.isWarmingUp] is true,
+/// Warm-up frames are not measured. If [Profile.isWarmingUp] is true,
 /// this function does nothing.
 void startMeasureFrame(Profile profile) {
   if (_calledStartMeasureFrame) {
@@ -1290,7 +1289,7 @@ void startMeasureFrame(Profile profile) {
 /// See [startMeasureFrame] for details on what this instrumentation is used
 /// for.
 ///
-/// Warm-up frames are not measured. If [profile.isWarmingUp] was true
+/// Warm-up frames are not measured. If [Profile.isWarmingUp] was true
 /// when the corresponding [startMeasureFrame] was called,
 /// this function does nothing.
 void endMeasureFrame() {

@@ -673,9 +673,9 @@ void main() async {
   });
 
   test('toImage and toImageSync have identical contents', () async {
-    // Note: on linux this stil seems to be different.
-    // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/108835
-    if (Platform.isLinux) {
+    // Note: on linux or vulkan this still seems to be different.
+    // TODO(andywolff): https://github.com/flutter/flutter/issues/193029
+    if (Platform.isLinux || impellerBackend == 'vulkan') {
       return;
     }
 
@@ -761,8 +761,17 @@ void main() async {
     final Image tofuImage = await drawText('>\b<');
 
     // The tab's image should be identical to the space's image but not the tofu's image.
-    final bool tabToSpaceComparison = await comparer.fuzzyCompareImages(tabImage, spaceImage);
-    final bool tabToTofuComparison = await comparer.fuzzyCompareImages(tabImage, tofuImage);
+    // Allow a small color delta for anti-aliasing variations across consecutive passes.
+    final bool tabToSpaceComparison = await comparer.fuzzyCompareImages(
+      tabImage,
+      spaceImage,
+      maxColorDelta: 2.0,
+    );
+    final bool tabToTofuComparison = await comparer.fuzzyCompareImages(
+      tabImage,
+      tofuImage,
+      maxColorDelta: 2.0,
+    );
 
     expect(tabToSpaceComparison, isTrue);
     expect(tabToTofuComparison, isFalse);

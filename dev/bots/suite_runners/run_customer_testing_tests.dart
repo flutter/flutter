@@ -27,9 +27,8 @@ Future<void> customerTestingRunner() async {
   if (revision != null) {
     await runCommand('git', <String>['checkout', revision], workingDirectory: flutterRoot);
   }
-  final String winScript = path.join(flutterRoot, 'dev', 'customer_testing', 'ci.bat');
   await runCommand(
-    Platform.isWindows ? winScript : './ci.sh',
+    path.join(flutterRoot, 'dev', 'customer_testing', Platform.isWindows ? 'ci.bat' : 'ci.sh'),
     <String>[],
     workingDirectory: path.join(flutterRoot, 'dev', 'customer_testing'),
   );

@@ -995,17 +995,15 @@ class IosDeviceDiscovery implements DeviceDiscovery {
 
   @override
   Future<List<String>> discoverDevices() async {
-    final results =
-        json.decode(
-              await eval(path.join(flutterDirectory.path, 'bin', 'flutter'), <String>[
-                'devices',
-                '--machine',
-                '--suppress-analytics',
-                '--device-timeout',
-                '5',
-              ]),
-            )
-            as List<dynamic>;
+    final results = json.decode(
+      await eval(path.join(flutterDirectory.path, 'bin', 'flutter'), <String>[
+        'devices',
+        '--machine',
+        '--suppress-analytics',
+        '--device-timeout',
+        '5',
+      ]),
+    ) as List<dynamic>;
 
     // [
     //   {

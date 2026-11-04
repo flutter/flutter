@@ -144,8 +144,7 @@ Future<_EventStats> _activateFlutterObjectsAndReturnCountOfEvents() async {
   result.creations++;
 
   element.makeInactive();
-  result.creations +=
-      4; // 1 for the new BuildOwner, 1 for the new FocusManager, 1 for the new FocusScopeNode, 1 for the new _HighlightModeManager
+  result.creations += 4; // 1 for the new BuildOwner, 1 for the new FocusManager, 1 for the new FocusScopeNode, 1 for the new _HighlightModeManager
   // ignore: invalid_use_of_visible_for_overriding_member
   element.unmount();
   result.disposals += 2; // 1 for the old BuildOwner, 1 for the element

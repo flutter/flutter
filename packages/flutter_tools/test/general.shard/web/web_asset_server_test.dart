@@ -17,6 +17,7 @@ import 'package:flutter_tools/src/isolated/release_asset_server.dart';
 import 'package:flutter_tools/src/isolated/web_asset_server.dart';
 import 'package:flutter_tools/src/web/compile.dart';
 import 'package:flutter_tools/src/web/devfs_config.dart';
+import 'package:flutter_tools/src/web/devfs_proxy.dart';
 import 'package:flutter_tools/src/web/web_constants.dart';
 import 'package:shelf/shelf.dart';
 
@@ -770,5 +771,207 @@ void main() {
         },
       );
     });
+    testWithoutContext('release asset server returns 404 for missing static file asset requests across all static cases', () async {
+      final assetServer = ReleaseAssetServer(
+        Uri.base,
+        fileSystem: fileSystem,
+        platform: platform,
+        flutterRoot: '/flutter',
+        webBuildDirectory: 'build/web',
+        needsCoopCoep: true,
+      );
+
+      // Populate build/web with index.html only
+      fileSystem.file('build/web/index.html')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('<html></html>');
+
+      // Case 1: assets/ prefix missing
+      final Response assetsResponse = await assetServer.handle(
+        Request('GET', Uri.parse('http://localhost:8080/assets/icons/missing.png')),
+      );
+      expect(assetsResponse.statusCode, equals(404));
+
+      // Case 2: canvaskit/ prefix missing
+      final Response canvaskitResponse = await assetServer.handle(
+        Request('GET', Uri.parse('http://localhost:8080/canvaskit/skwasm.wasm')),
+      );
+      expect(canvaskitResponse.statusCode, equals(404));
+
+      // Case 3: *.wasm file missing
+      final Response wasmResponse = await assetServer.handle(
+        Request('GET', Uri.parse('http://localhost:8080/main.dart.wasm')),
+      );
+      expect(wasmResponse.statusCode, equals(404));
+
+      // Case 4: *.mjs file missing
+      final Response mjsResponse = await assetServer.handle(
+        Request('GET', Uri.parse('http://localhost:8080/main.dart.mjs')),
+      );
+      expect(mjsResponse.statusCode, equals(404));
+
+      // Case 5: *.js file missing
+      final Response jsResponse = await assetServer.handle(
+        Request('GET', Uri.parse('http://localhost:8080/main.dart.js')),
+      );
+      expect(jsResponse.statusCode, equals(404));
+
+      // Case 6: *.css file missing
+      final Response cssResponse = await assetServer.handle(
+        Request('GET', Uri.parse('http://localhost:8080/styles.css')),
+      );
+      expect(cssResponse.statusCode, equals(404));
+
+      // Case 7: *.json file missing
+      final Response jsonResponse = await assetServer.handle(
+        Request('GET', Uri.parse('http://localhost:8080/manifest.json')),
+      );
+      expect(jsonResponse.statusCode, equals(404));
+
+      // Case 8: *.ico file missing
+      final Response icoResponse = await assetServer.handle(
+        Request('GET', Uri.parse('http://localhost:8080/favicon.ico')),
+      );
+      expect(icoResponse.statusCode, equals(404));
+
+      // Case 9: *.map file missing
+      final Response mapResponse = await assetServer.handle(
+        Request('GET', Uri.parse('http://localhost:8080/main.dart.js.map')),
+      );
+      expect(mapResponse.statusCode, equals(404));
+    });
+
+    testWithoutContext('release asset server serves index.html SPA fallback for route paths without file extensions', () async {
+      final assetServer = ReleaseAssetServer(
+        Uri.base,
+        fileSystem: fileSystem,
+        platform: platform,
+        flutterRoot: '/flutter',
+        webBuildDirectory: 'build/web',
+        needsCoopCoep: false,
+      );
+
+      fileSystem.file('build/web/index.html')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('<html>index</html>');
+
+      // Client-side route paths like /settings, /assets, or /canvaskit must fall back to index.html
+      for (final route in <String>['/settings', '/assets', '/canvaskit']) {
+        final Response routeResponse = await assetServer.handle(
+          Request('GET', Uri.parse('http://localhost:8080$route')),
+        );
+
+        expect(routeResponse.statusCode, equals(200));
+        expect(routeResponse.headers['Content-Type'], equals('text/html'));
+        expect(await routeResponse.readAsString(), equals('<html>index</html>'));
+      }
+    });
+
+    for (final (String label, BuildInfo buildInfo, bool isWasm, WebRendererMode webRenderer)
+        in <(String, BuildInfo, bool, WebRendererMode)>[
+          ('debug with isWasm: true', BuildInfo.debug, true, WebRendererMode.skwasm),
+          ('release with isWasm: false', BuildInfo.release, false, WebRendererMode.canvaskit),
+        ]) {
+      testUsingContext(
+        'applies proxy rules instead of falling back to index.html ($label)',
+        () async {
+          fileSystem.file('build/web/index.html')
+            ..createSync(recursive: true)
+            ..writeAsStringSync('<html>index</html>');
+
+          final HttpServer backendServer = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
+          backendServer.listen((HttpRequest request) async {
+            if (request.uri.path == '/get') {
+              request.response
+                ..statusCode = HttpStatus.ok
+                ..headers.set('content-type', 'application/json')
+                ..write('{"method":"${request.method}","proxied":true}');
+              await request.response.close();
+            } else {
+              request.response.statusCode = HttpStatus.notFound;
+              await request.response.close();
+            }
+          });
+
+          final logger = BufferLogger.test();
+          WebAssetServer? server;
+          final client = HttpClient();
+          try {
+            server = await WebAssetServer.start(
+              null,
+              null,
+              false,
+              false,
+              false,
+              buildInfo,
+              false,
+              const DartDevelopmentServiceConfiguration(enable: false),
+              Uri.base,
+              null,
+              crossOriginIsolation: false,
+              webDevServerConfig: WebDevServerConfig(
+                host: 'localhost',
+                proxy: <ProxyRule>[
+                  PrefixProxyRule(
+                    prefix: '/get',
+                    target: 'http://localhost:${backendServer.port}/',
+                  ),
+                ],
+              ),
+              webRenderer: webRenderer,
+              isWasm: isWasm,
+              useLocalCanvasKit: false,
+              fileSystem: fileSystem,
+              logger: logger,
+              platform: platform,
+            );
+            server.markReady();
+
+            // 1. Proxied GET request should reach backendServer instead of returning index.html.
+            final HttpClientRequest getRequest = await client.getUrl(
+              Uri.parse('http://localhost:${server.selectedPort}/get'),
+            );
+            final HttpClientResponse getResponse = await getRequest.close();
+            expect(getResponse.statusCode, HttpStatus.ok);
+            expect(await utf8.decoder.bind(getResponse).join(), '{"method":"GET","proxied":true}');
+            expect(
+              logger.statusText,
+              contains(
+                '[proxyMiddleware] Matched "/get". '
+                'Requesting "http://localhost:${backendServer.port}/get"',
+              ),
+            );
+
+            // 2. Proxied POST request should also be forwarded instead of 404ing in ReleaseAssetServer.
+            final HttpClientRequest postRequest = await client.postUrl(
+              Uri.parse('http://localhost:${server.selectedPort}/get'),
+            );
+            final HttpClientResponse postResponse = await postRequest.close();
+            expect(postResponse.statusCode, HttpStatus.ok);
+            expect(
+              await utf8.decoder.bind(postResponse).join(),
+              '{"method":"POST","proxied":true}',
+            );
+
+            // 3. Unmatched SPA route still falls back to index.html.
+            final HttpClientRequest spaRequest = await client.getUrl(
+              Uri.parse('http://localhost:${server.selectedPort}/unmatched-route'),
+            );
+            final HttpClientResponse spaResponse = await spaRequest.close();
+            expect(spaResponse.statusCode, HttpStatus.ok);
+            expect(await utf8.decoder.bind(spaResponse).join(), '<html>index</html>');
+          } finally {
+            client.close();
+            await server?.dispose();
+            await backendServer.close(force: true);
+          }
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => fileSystem,
+          Platform: () => platform,
+          ProcessManager: () => FakeProcessManager.any(),
+        },
+      );
+    }
   });
 }

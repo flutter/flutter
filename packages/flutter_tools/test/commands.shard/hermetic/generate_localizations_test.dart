@@ -78,9 +78,9 @@ flutter:
   generate: true''');
     final command = GenerateLocalizationsCommand(toolContext: toolContext);
     expect(
-      () => createTestCommandRunner(
-        command,
-      ).run(<String>['gen-l10n', '--header="some header', '--header-file="header.txt"']),
+      () =>
+          createTestCommandRunner(command)
+              .run(<String>['gen-l10n', '--header="some header', '--header-file="header.txt"']),
       throwsToolExit(),
     );
   });
@@ -459,8 +459,7 @@ format: false
     expect(
       () async => createTestCommandRunner(command).run(<String>['gen-l10n']),
       throwsToolExit(
-        message:
-            'Attempted to generate localizations code without having the flutter: generate flag turned on.',
+        message: 'Attempted to generate localizations code without having the flutter: generate flag turned on.',
       ),
     );
   });
@@ -492,8 +491,7 @@ format: false
     expect(
       () async => createTestCommandRunner(command).run(<String>['gen-l10n']),
       throwsToolExit(
-        message:
-            'Attempted to generate localizations code without having the flutter: generate flag turned on.',
+        message: 'Attempted to generate localizations code without having the flutter: generate flag turned on.',
       ),
     );
   });

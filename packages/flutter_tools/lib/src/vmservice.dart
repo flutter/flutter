@@ -44,14 +44,18 @@ const kFlutterMemoryInfoServiceName = 'flutterMemoryInfo';
 /// The error response code from an unrecoverable compilation failure.
 const kIsolateReloadBarred = 1005;
 
+/// Used to build RegExp instances which can detect the VM service message.
+final kVMServiceMessageRegExp = RegExp(
+  r'The Dart VM service is listening on ((http|//)[a-zA-Z0-9:/=_\-\.\[\]]+)',
+);
+
 /// Override `WebSocketConnector` in [context] to use a different constructor
 /// for [io.WebSocket]s (used by tests).
-typedef WebSocketConnector =
-    Future<io.WebSocket> Function(
-      String url, {
-      io.CompressionOptions compression,
-      required Logger logger,
-    });
+typedef WebSocketConnector = Future<io.WebSocket> Function(
+  String url, {
+  io.CompressionOptions compression,
+  required Logger logger,
+});
 
 typedef PrintStructuredErrorLogMethod = void Function(vm_service.Event);
 
@@ -80,20 +84,19 @@ typedef ReloadSources = Future<void> Function(String isolateId, {bool force, boo
 
 typedef Restart = Future<void> Function({bool pause});
 
-typedef CompileExpression =
-    Future<String> Function(
-      String isolateId,
-      String expression,
-      List<String> definitions,
-      List<String> definitionTypes,
-      List<String> typeDefinitions,
-      List<String> typeBounds,
-      List<String> typeDefaults,
-      String libraryUri,
-      String? klass,
-      String? method,
-      bool isStatic,
-    );
+typedef CompileExpression = Future<String> Function(
+  String isolateId,
+  String expression,
+  List<String> definitions,
+  List<String> definitionTypes,
+  List<String> typeDefinitions,
+  List<String> typeBounds,
+  List<String> typeDefaults,
+  String libraryUri,
+  String? klass,
+  String? method,
+  bool isStatic,
+);
 
 Future<io.WebSocket> _defaultOpenChannel(
   String url, {
@@ -157,18 +160,17 @@ Future<io.WebSocket> _defaultOpenChannel(
 
 /// Override `VMServiceConnector` in [context] to return a different
 /// [vm_service.VmService] from [connectToVmService] (used by tests).
-typedef VMServiceConnector =
-    Future<FlutterVmService> Function(
-      Uri httpUri, {
-      ReloadSources? reloadSources,
-      Restart? restart,
-      CompileExpression? compileExpression,
-      FlutterProject? flutterProject,
-      PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
-      io.CompressionOptions compression,
-      Device? device,
-      required Logger logger,
-    });
+typedef VMServiceConnector = Future<FlutterVmService> Function(
+  Uri httpUri, {
+  ReloadSources? reloadSources,
+  Restart? restart,
+  CompileExpression? compileExpression,
+  FlutterProject? flutterProject,
+  PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
+  io.CompressionOptions compression,
+  Device? device,
+  required Logger logger,
+});
 
 /// Set up the VM Service client by attaching services for each of the provided
 /// callbacks.
@@ -375,11 +377,54 @@ Future<vm_service.VmService> createVmServiceDelegate(
     compression: compression,
     logger: logger,
   );
+  // Guard against unhandled socket errors on the WebSocket's `done` future.
+  // When a socket reset or low-level connection reset occurs, `channel.done`
+  // can complete with an unhandled SocketException or WebSocketException.
+  unawaited(
+    channel.done.handleError((Object error, StackTrace stackTrace) {
+      logger.printTrace('VM service WebSocket done error: $error\n$stackTrace');
+    }),
+  );
+  // Guard the incoming stream from raising unhandled socket errors into the Zone.
+  // vm_service.VmService's inStream.listen does not provide an onError callback,
+  // so any stream errors (such as SocketException on connection reset) must be handled here.
+  final Stream<Object?> inStream = channel.handleError((Object error, StackTrace stackTrace) {
+    logger.printTrace('VM service WebSocket error: $error\n$stackTrace');
+  });
+  void handleWriteError(Object error, StackTrace stackTrace) {
+    logger.printTrace('Failed to send VM service message: $error\n$stackTrace');
+    try {
+      unawaited(channel.close().handleError((Object _, StackTrace _) {}));
+    } on Exception {
+      // Ignore errors while closing a failed channel.
+    } on StateError {
+      // Ignore errors while closing a failed channel.
+    }
+  }
+
   return vm_service.VmService(
-    channel,
-    channel.add,
+    inStream,
+    (String message) {
+      try {
+        channel.add(message);
+      } on Exception catch (error, stackTrace) {
+        handleWriteError(error, stackTrace);
+      } on StateError catch (error, stackTrace) {
+        handleWriteError(error, stackTrace);
+      }
+    },
     disposeHandler: () async {
-      await channel.close();
+      void logCloseError(Object error, StackTrace stackTrace) {
+        logger.printTrace('Error closing VM service channel: $error\n$stackTrace');
+      }
+
+      try {
+        await channel.close();
+      } on Exception catch (error, stackTrace) {
+        logCloseError(error, stackTrace);
+      } on StateError catch (error, stackTrace) {
+        logCloseError(error, stackTrace);
+      }
     },
   );
 }

@@ -14,6 +14,7 @@
 library;
 
 import 'dart:ui' as ui;
+
 import 'package:clock/clock.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -337,8 +338,6 @@ class SemanticsController {
   //
   // TODO(quncheng): If this method is modified, please also update the copy of
   // this method located in `packages/flutter/lib/src/widgets/_accessibility_evaluations.dart`.
-  // This private method will be removed once the feature flag
-  // `isAccessibilityEvaluationsEnabled` is turned on.
   bool _isImportantForAccessibility(SemanticsNode node) {
     if (node.isMergedIntoParent) {
       // If this node is merged, all its information are present on an ancestor

@@ -198,10 +198,8 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
 }
 
 class Doctor {
-  Doctor({required Logger logger, required SystemClock clock, Analytics? analytics})
-    : _logger = logger,
-      _clock = clock,
-      _analytics = analytics ?? globals.analytics;
+  Doctor({required this._logger, required this._clock, Analytics? analytics})
+    : _analytics = analytics ?? globals.analytics;
 
   final Logger _logger;
   final SystemClock _clock;
@@ -284,7 +282,7 @@ class Doctor {
         // We're generating a summary, so drop the stack trace.
         result = ValidationResult.crash(exception);
       }
-      lineBuffer.write('${result.coloredLeadingBox} ${validator.title}: ');
+      lineBuffer.write('${result.coloredLeadingBox(_logger.terminal)} ${validator.title}: ');
       switch (result.type) {
         case ValidationType.crash:
           lineBuffer.write('the doctor check crashed without a result.');
@@ -357,7 +355,8 @@ class Doctor {
     bool sendEvent = true,
     ExtensionManager? extensionManager,
   }) async {
-    final bool showColor = globals.terminal.supportsColor;
+    final Terminal terminal = _logger.terminal;
+    final bool showColor = terminal.supportsColor;
     if (androidLicenses && androidLicenseValidator != null) {
       return androidLicenseValidator.runLicenseManager();
     }
@@ -449,7 +448,7 @@ class Doctor {
         return ' [$formatted]';
       }();
 
-      final String leadingBox = showColor ? result.coloredLeadingBox : result.leadingBox;
+      final String leadingBox = showColor ? result.coloredLeadingBox(terminal) : result.leadingBox;
       if (result.statusInfo != null) {
         _logger.printStatus(
           '$leadingBox ${validator.title} (${result.statusInfo})$executionDuration',
@@ -466,7 +465,9 @@ class Doctor {
         if (!message.isInformation || verbose) {
           var hangingIndent = 2;
           var indent = 4;
-          final String indicator = showColor ? message.coloredIndicator : message.indicator;
+          final String indicator = showColor
+              ? message.coloredIndicator(terminal)
+              : message.indicator;
           for (final String line
               in '$indicator ${showPii ? message.message : message.piiStrippedMessage}'.split(
                 '\n',
@@ -498,13 +499,13 @@ class Doctor {
 
     if (issues > 0) {
       _logger.printStatus(
-        '${showColor ? globals.terminal.color('!', TerminalColor.yellow) : '!'}'
+        '${showColor ? terminal.color('!', TerminalColor.yellow) : '!'}'
         ' Doctor found issues in $issues categor${issues > 1 ? "ies" : "y"}.',
         hangingIndent: 2,
       );
     } else {
       _logger.printStatus(
-        '${showColor ? globals.terminal.color('•', TerminalColor.green) : '•'}'
+        '${showColor ? terminal.color('•', TerminalColor.green) : '•'}'
         ' No issues found!',
         hangingIndent: 2,
       );
@@ -530,25 +531,16 @@ class Doctor {
 /// specific commit information.
 class FlutterValidator extends DoctorValidator {
   FlutterValidator({
-    required Platform platform,
-    required FlutterVersion Function() flutterVersion,
-    required String Function() devToolsVersion,
-    required FileSystem fileSystem,
-    required Artifacts artifacts,
-    required ProcessManager processManager,
-    required String Function() flutterRoot,
-    required OperatingSystemUtils operatingSystemUtils,
-    required FeatureFlags featureFlags,
-  }) : _flutterVersion = flutterVersion,
-       _devToolsVersion = devToolsVersion,
-       _platform = platform,
-       _fileSystem = fileSystem,
-       _artifacts = artifacts,
-       _processManager = processManager,
-       _flutterRoot = flutterRoot,
-       _operatingSystemUtils = operatingSystemUtils,
-       _featureFlags = featureFlags,
-       super('Flutter');
+    required this._platform,
+    required this._flutterVersion,
+    required this._devToolsVersion,
+    required this._fileSystem,
+    required this._artifacts,
+    required this._processManager,
+    required this._flutterRoot,
+    required this._operatingSystemUtils,
+    required this._featureFlags,
+  }) : super('Flutter');
 
   final Platform _platform;
   final FlutterVersion Function() _flutterVersion;
@@ -750,7 +742,13 @@ class FlutterValidator extends DoctorValidator {
       );
     }
     final String resolvedFlutterPath = flutterBin.resolveSymbolicLinksSync();
-    if (!_filePathContainsDirPath(flutterRoot, resolvedFlutterPath)) {
+    var resolvedFlutterRoot = flutterRoot;
+    try {
+      resolvedFlutterRoot = _fileSystem.directory(flutterRoot).resolveSymbolicLinksSync();
+    } on FileSystemException {
+      // If the root does not exist or cannot be resolved, retain the un-resolved path.
+    }
+    if (!_filePathContainsDirPath(resolvedFlutterRoot, resolvedFlutterPath)) {
       final hint =
           'Warning: `$binary` on your path resolves to '
           '$resolvedFlutterPath, which is not inside your current Flutter '
@@ -827,9 +825,9 @@ class DeviceValidator extends DoctorValidator {
     );
     var installedMessages = <ValidationMessage>[];
     if (devices.isNotEmpty) {
-      installedMessages = (await Device.descriptions(
-        devices,
-      )).map<ValidationMessage>((String msg) => ValidationMessage(msg)).toList();
+      installedMessages = (await Device.descriptions(devices))
+          .map<ValidationMessage>((String msg) => ValidationMessage(msg))
+          .toList();
     }
 
     var diagnosticMessages = <ValidationMessage>[];

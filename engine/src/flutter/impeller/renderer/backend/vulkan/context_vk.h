@@ -7,6 +7,7 @@
 
 #include <format>
 #include <memory>
+#include <optional>
 
 #include "flutter/fml/concurrent_message_loop.h"
 #include "flutter/fml/mapping.h"
@@ -14,7 +15,9 @@
 #include "impeller/base/backend_cast.h"
 #include "impeller/core/formats.h"
 #include "impeller/core/runtime_types.h"
+#include "impeller/renderer/backend/vulkan/capabilities_vk.h"
 #include "impeller/renderer/backend/vulkan/command_pool_vk.h"
+#include "impeller/renderer/backend/vulkan/debug_report_vk.h"
 #include "impeller/renderer/backend/vulkan/device_holder_vk.h"
 #include "impeller/renderer/backend/vulkan/driver_info_vk.h"
 #include "impeller/renderer/backend/vulkan/pipeline_library_vk.h"
@@ -26,6 +29,7 @@
 #include "impeller/renderer/command_buffer.h"
 #include "impeller/renderer/command_queue.h"
 #include "impeller/renderer/context.h"
+#include "third_party/abseil-cpp/absl/status/statusor.h"
 
 namespace impeller {
 
@@ -34,7 +38,6 @@ bool HasValidationLayers();
 class CommandEncoderFactoryVK;
 class CommandEncoderVK;
 class CommandPoolRecyclerVK;
-class DebugReportVK;
 class FenceWaiterVK;
 class ResourceManagerVK;
 class SurfaceContextVK;
@@ -64,6 +67,8 @@ class IdleWaiterVK : public IdleWaiter {
 class ContextVK final : public Context,
                         public BackendCast<ContextVK, Context>,
                         public std::enable_shared_from_this<ContextVK> {
+  struct DeviceHolderImpl;
+
  public:
   // Mutable tracker for command buffer submission bookkeeping.
   const std::shared_ptr<GpuSubmissionTracker>& GetMutableSubmissionTracker()
@@ -96,12 +101,33 @@ class ContextVK final : public Context,
     Settings() = default;
 
     Settings(Settings&&) = default;
+    Settings& operator=(Settings&&) = default;
+  };
+
+  /// Holds the Vulkan instance, selected physical device, and its
+  /// `DriverInfoVK` produced by `SelectDevice`, before the logical device,
+  /// allocator, pipeline cache, shader modules, or worker threads are created.
+  struct DeviceSelection {
+    Settings settings;
+    std::shared_ptr<CapabilitiesVK> caps;
+    std::shared_ptr<DeviceHolderImpl> device_holder;
+    std::unique_ptr<DebugReportVK> debug_report;
+    std::unique_ptr<DriverInfoVK> driver_info;
+
+    /// Finish initializing the `ContextVK` for the selected physical device.
+    /// Consumes this `DeviceSelection`.
+    std::shared_ptr<ContextVK> CreateContext();
   };
 
   /// Choose the number of worker threads the context_vk will create.
   ///
   /// Visible for testing.
   static size_t ChooseThreadCountForWorkers(size_t hardware_concurrency);
+
+  /// Initialize the Vulkan instance and select a physical device, returning its
+  /// `DriverInfoVK` so the caller can inspect or reject the device before the
+  /// remainder of context setup runs.
+  static absl::StatusOr<DeviceSelection> SelectDevice(Settings settings);
 
   static std::shared_ptr<ContextVK> Create(Settings settings);
 
@@ -316,7 +342,7 @@ class ContextVK final : public Context,
 
   explicit ContextVK(const Flags& flags);
 
-  void Setup(Settings settings);
+  void Setup(DeviceSelection selection);
 
   ContextVK(const ContextVK&) = delete;
 

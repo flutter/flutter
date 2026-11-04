@@ -8,18 +8,16 @@ import 'package:flutter_api_samples/material/scrollbar/scrollbar.0.dart'
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets(
-    'Scrollbar.0 works well on all platforms',
-    (WidgetTester tester) async {
-      await tester.pumpWidget(const example.ScrollbarExampleApp());
+  testWidgets('Scrollbar.0 works well on all platforms', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const example.ScrollbarExampleApp());
 
-      final Finder buttonFinder = find.byType(Scrollbar);
-      await tester.drag(buttonFinder.last, const Offset(0, 100.0));
+    final Finder buttonFinder = find.byType(Scrollbar);
+    await tester.drag(buttonFinder.last, const Offset(0, 100.0));
 
-      expect(tester.takeException(), isNull);
-    },
-    variant: TargetPlatformVariant.all(),
-  );
+    expect(tester.takeException(), isNull);
+  }, variant: TargetPlatformVariant.all());
 
   testWidgets('The scrollbar should be painted when the user scrolls', (
     WidgetTester tester,

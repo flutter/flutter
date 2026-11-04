@@ -389,6 +389,7 @@ abstract class Renderer {
     ui.StrutStyle? strutStyle,
     String? ellipsis,
     ui.Locale? locale,
+    ui.Hyphens? hyphens,
   });
 
   ui.StrutStyle createStrutStyle({

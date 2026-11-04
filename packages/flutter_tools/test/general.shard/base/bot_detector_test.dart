@@ -165,25 +165,22 @@ void main() {
         expect(persistentToolState.isRunningOnBot, isNull);
       });
 
-      testWithoutContext(
-        'overrides cached false when CI environment variable is set at runtime without mutating cache',
-        () async {
-          // Simulate an image bake where isRunningOnBot evaluated to false and cached to disk:
-          persistentToolState.setIsRunningOnBot(false);
-          expect(persistentToolState.isRunningOnBot, isFalse);
+      testWithoutContext('overrides cached false when CI environment variable is set at runtime without mutating cache', () async {
+        // Simulate an image bake where isRunningOnBot evaluated to false and cached to disk:
+        persistentToolState.setIsRunningOnBot(false);
+        expect(persistentToolState.isRunningOnBot, isFalse);
 
-          fakePlatform.environment['GITHUB_ACTIONS'] = 'true';
+        fakePlatform.environment['GITHUB_ACTIONS'] = 'true';
 
-          final botDetector = BotDetector(
-            platform: fakePlatform,
-            httpClientFactory: () => FakeHttpClient.list(<FakeRequest>[]),
-            persistentToolState: persistentToolState,
-          );
+        final botDetector = BotDetector(
+          platform: fakePlatform,
+          httpClientFactory: () => FakeHttpClient.list(<FakeRequest>[]),
+          persistentToolState: persistentToolState,
+        );
 
-          expect(await botDetector.isRunningOnBot, isTrue);
-          expect(persistentToolState.isRunningOnBot, isFalse);
-        },
-      );
+        expect(await botDetector.isRunningOnBot, isTrue);
+        expect(persistentToolState.isRunningOnBot, isFalse);
+      });
 
       testWithoutContext(
         'running with CI=true does not poison persistentToolState for subsequent runs',

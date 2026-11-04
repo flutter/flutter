@@ -631,6 +631,38 @@ DevTools listening on ws://127.0.0.1:12345/devtools/browser/
   });
 
   testWithoutContext(
+    'can override default headless window-size (1024x1024) via webBrowserFlags',
+    () async {
+      // When webBrowserFlags specifies a --window-size flag, ChromiumLauncher should
+      // pass that flag without appending the default '--window-size=1024,1024' flag.
+      processManager.addCommand(
+        const FakeCommand(
+          command: <String>[
+            'example_chrome',
+            '--user-data-dir=/.tmp_rand0/flutter_tools_chrome_device.rand0',
+            '--remote-debugging-port=12345',
+            ...kChromeArgs,
+            '--no-sandbox',
+            '--headless',
+            '--window-size=800,600',
+            'example_url',
+          ],
+          stderr: kDevtoolsStderr,
+        ),
+      );
+
+      await expectReturnsNormallyLater(
+        chromeLauncher.launch(
+          'example_url',
+          skipCheck: true,
+          headless: true,
+          webBrowserFlags: <String>['--window-size=800,600'],
+        ),
+      );
+    },
+  );
+
+  testWithoutContext(
     'can seed chrome temp directory with existing session data, excluding Cache folder',
     () async {
       final exitCompleter = Completer<void>.sync();
@@ -801,6 +833,115 @@ DevTools listening on ws://127.0.0.1:12345/devtools/browser/
       contains('Failed to launch browser.'),
     );
     expect(logger.errorText, contains('nothing in the std error indicating glibc error'));
+  });
+
+  group('Chrome stays alive without reporting DevTools listening', () {
+    // Regression tests for https://github.com/flutter/flutter/issues/192013.
+    const devToolsServerFailureStderr =
+        '[ERROR:net/socket/socket_posix.cc:153] bind() failed: Address already in use (48)\n'
+        '[ERROR:content/browser/devtools/devtools_http_handler.cc:313] '
+        'Cannot start http server for devtools.\n';
+
+    List<String> headlessArgs(int port) => <String>[
+      'example_chrome',
+      '--user-data-dir=/.tmp_rand0/flutter_tools_chrome_device.rand0',
+      '--remote-debugging-port=$port',
+      ...kChromeArgs,
+      '--no-sandbox',
+      '--headless',
+      '--window-size=1024,1024',
+      'example_url',
+    ];
+
+    ChromiumLauncher createLauncher(OperatingSystemUtils osUtils, Logger logger) {
+      return ChromiumLauncher(
+        fileSystem: fileSystem,
+        platform: platform,
+        processManager: processManager,
+        operatingSystemUtils: osUtils,
+        browserFinder: findChromeExecutable,
+        logger: logger,
+      );
+    }
+
+    testWithoutContext('retries on a fresh port when the DevTools server fails to start', () async {
+      // A Chrome that never exits on its own.
+      final neverExits = Completer<void>();
+      processManager.addCommand(
+        FakeCommand(
+          command: headlessArgs(12345),
+          stderr: devToolsServerFailureStderr,
+          completer: neverExits,
+        ),
+      );
+      processManager.addCommand(FakeCommand(command: headlessArgs(12346), stderr: kDevtoolsStderr));
+
+      final ChromiumLauncher launcher = createLauncher(
+        _SequentialPortOperatingSystemUtils(12345),
+        BufferLogger.test(),
+      );
+      final Chromium chrome = await launcher.launch('example_url', skipCheck: true, headless: true);
+
+      expect(chrome.debugPort, 12346);
+      expect(processManager, hasNoRemainingExpectations);
+    });
+
+    testWithoutContext('gives up when the DevTools server repeatedly fails to start', () async {
+      final neverExits = Completer<void>();
+      for (var i = 0; i < 4; i++) {
+        processManager.addCommand(
+          FakeCommand(
+            command: headlessArgs(12345),
+            stderr: devToolsServerFailureStderr,
+            completer: neverExits,
+          ),
+        );
+      }
+
+      final logger = BufferLogger.test();
+      await expectToolExitLater(
+        createLauncher(
+          operatingSystemUtils,
+          logger,
+        ).launch('example_url', skipCheck: true, headless: true, debugPort: 12345),
+        contains('Chrome failed to start the DevTools server on port 12345.'),
+      );
+      expect(logger.errorText, contains('Cannot start http server for devtools'));
+      expect(processManager, hasNoRemainingExpectations);
+    });
+
+    testWithoutContext('times out when Chrome never reports DevTools listening', () async {
+      final neverExits = Completer<void>();
+      for (var i = 0; i < 4; i++) {
+        processManager.addCommand(
+          FakeCommand(command: headlessArgs(12345), stderr: 'unrelated', completer: neverExits),
+        );
+      }
+
+      // Results are captured inside the FakeAsync zone: futures completed there
+      // deliver their callbacks via FakeAsync's microtask queue, so awaiting
+      // them from outside would never complete.
+      Object? error;
+      var completed = false;
+      FakeAsync().run((FakeAsync time) {
+        createLauncher(operatingSystemUtils, BufferLogger.test())
+            .launch('example_url', skipCheck: true, headless: true)
+            .then<void>((_) => completed = true, onError: (Object e) => error = e);
+        for (var i = 0; i < 4; i++) {
+          time.flushMicrotasks();
+          expect(error, isNull, reason: 'attempt ${i + 1} should still be waiting');
+          time.elapse(kDevToolsListeningTimeout + const Duration(seconds: 2));
+        }
+        time.flushMicrotasks();
+      });
+
+      expect(completed, isFalse);
+      await expectToolExitLater(
+        Future<void>.error(error!),
+        contains('Chrome did not report "DevTools listening" within'),
+      );
+      expect(processManager, hasNoRemainingExpectations);
+    });
   });
 
   testWithoutContext('Logs an error and exits if connection check fails.', () async {
@@ -1153,4 +1294,14 @@ class FakeWipConnection extends Fake implements WipConnection {
       throw const io.WebSocketException('test');
     }
   }
+}
+
+/// Returns [_nextPort], [_nextPort] + 1, ... on successive [findFreePort] calls.
+class _SequentialPortOperatingSystemUtils extends FakeOperatingSystemUtils {
+  _SequentialPortOperatingSystemUtils(this._nextPort);
+
+  int _nextPort;
+
+  @override
+  Future<int> findFreePort({bool ipv6 = false}) async => _nextPort++;
 }

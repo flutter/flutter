@@ -11,8 +11,10 @@
 
 part of ui;
 
-typedef DrainChannelCallback =
-    Future<void> Function(ByteData? data, PlatformMessageResponseCallback callback);
+typedef DrainChannelCallback = Future<void> Function(
+  ByteData? data,
+  PlatformMessageResponseCallback callback,
+);
 
 typedef ChannelCallback = void Function(ByteData? data, PlatformMessageResponseCallback callback);
 

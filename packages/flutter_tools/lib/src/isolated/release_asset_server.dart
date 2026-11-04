@@ -18,17 +18,13 @@ import 'web_server_utilities.dart';
 class ReleaseAssetServer {
   ReleaseAssetServer(
     this.entrypoint, {
-    required FileSystem fileSystem,
-    required String? webBuildDirectory,
-    required String? flutterRoot,
-    required Platform platform,
-    required bool needsCoopCoep,
+    required this._fileSystem,
+    required this._webBuildDirectory,
+    required this._flutterRoot,
+    required this._platform,
+    required this._needsCoopCoep,
     this.basePath = '',
-  }) : _fileSystem = fileSystem,
-       _platform = platform,
-       _flutterRoot = flutterRoot,
-       _webBuildDirectory = webBuildDirectory,
-       _needsCoopCoep = needsCoopCoep;
+  });
 
   final Uri entrypoint;
   final String? _flutterRoot;
@@ -51,6 +47,16 @@ class ReleaseAssetServer {
   // them. The web build output directory is unrestricted because it only
   // contains generated, publishable assets.
   static const Set<String> _sourceMapExtensions = <String>{'.dart', '.map'};
+
+  static const Set<String> _staticAssetExtensions = <String>{
+    '.wasm',
+    '.mjs',
+    '.js',
+    '.css',
+    '.json',
+    '.ico',
+    '.map',
+  };
 
   // Locations where source files, assets, or source maps may be located, paired
   // with the set of file extensions allowed to be served from each location. An
@@ -111,7 +117,24 @@ class ReleaseAssetServer {
       );
     }
 
+    // Requests for specific compiled web build artifacts (.wasm, .mjs, .js, assets/, canvaskit/)
+    // that do not exist on disk must return 404 Not Found so browser entrypoint fallback
+    // functions properly. SPA index.html fallback is preserved for navigation routes and
+    // unallowed project path fallthroughs.
+    final String cleanPath = requestPath.startsWith('/') ? requestPath.substring(1) : requestPath;
+    final String extension = _fileSystem.path.extension(cleanPath);
+    final bool isMissingStaticAsset =
+        _staticAssetExtensions.contains(extension) ||
+        cleanPath.startsWith('assets/') ||
+        cleanPath.startsWith('canvaskit/');
+    if (isMissingStaticAsset) {
+      return shelf.Response.notFound('');
+    }
+
     final File file = _fileSystem.file(_fileSystem.path.join(_webBuildDirectory!, 'index.html'));
+    if (!file.existsSync()) {
+      return shelf.Response.notFound('');
+    }
     return shelf.Response.ok(
       file.readAsBytesSync(),
       headers: <String, String>{

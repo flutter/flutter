@@ -128,11 +128,10 @@ class PlatformViewAndroidJNIImpl final : public PlatformViewAndroidJNI {
                                       int configuration_id) const override;
 
   // New Platform View Support.
-  ASurfaceTransaction* createTransaction() override;
+  ASurfaceTransaction* createTransaction(
+      std::function<void()>& out_publish_callback) override;
 
   void swapTransaction() override;
-
-  void applyTransaction() override;
 
   std::unique_ptr<PlatformViewAndroidJNI::OverlayMetadata>
   createOverlaySurface2() override;

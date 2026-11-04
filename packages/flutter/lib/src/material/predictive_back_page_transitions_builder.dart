@@ -92,9 +92,8 @@ class PredictiveBackPageTransitionsBuilder extends PageTransitionsBuilder {
               );
             }
 
-            return FadeForwardsPageTransitionsBuilder(
-              backgroundColor: fallbackColor,
-            ).buildTransitions(route, context, animation, secondaryAnimation, child);
+            return FadeForwardsPageTransitionsBuilder(backgroundColor: fallbackColor)
+                .buildTransitions(route, context, animation, secondaryAnimation, child);
           },
     );
   }
@@ -169,21 +168,19 @@ class PredictiveBackFullscreenPageTransitionsBuilder extends PageTransitionsBuil
               );
             }
 
-            return ZoomPageTransitionsBuilder(
-              backgroundColor: fallbackColor,
-            ).buildTransitions(route, context, animation, secondaryAnimation, child);
+            return ZoomPageTransitionsBuilder(backgroundColor: fallbackColor)
+                .buildTransitions(route, context, animation, secondaryAnimation, child);
           },
     );
   }
 }
 
-typedef _PredictiveBackGestureDetectorWidgetBuilder =
-    Widget Function(
-      BuildContext context,
-      _PredictiveBackPhase phase,
-      PredictiveBackEvent? startBackEvent,
-      PredictiveBackEvent? currentBackEvent,
-    );
+typedef _PredictiveBackGestureDetectorWidgetBuilder = Widget Function(
+  BuildContext context,
+  _PredictiveBackPhase phase,
+  PredictiveBackEvent? startBackEvent,
+  PredictiveBackEvent? currentBackEvent,
+);
 
 /// The phases of a predictive back gesture.
 enum _PredictiveBackPhase {
@@ -605,32 +602,34 @@ class _PredictiveBackFullscreenPageTransitionState
   ]);
 
   final ConstantTween<double> _secondaryScaleTweenCurrent = ConstantTween<double>(_kScaleStart);
-  final TweenSequence<double> _secondaryTweenScale =
-      TweenSequence<double>(<TweenSequenceItem<double>>[
-        TweenSequenceItem<double>(
-          tween: Tween<double>(begin: _kScaleCommit, end: _kScaleStart),
-          weight: _kWeightPreCommit,
-        ),
-        TweenSequenceItem<double>(
-          tween: Tween<double>(begin: _kScaleStart, end: _kScaleStart),
-          weight: _kWeightPostCommit,
-        ),
-      ]);
+  final TweenSequence<double> _secondaryTweenScale = TweenSequence<double>(
+    <TweenSequenceItem<double>>[
+      TweenSequenceItem<double>(
+        tween: Tween<double>(begin: _kScaleCommit, end: _kScaleStart),
+        weight: _kWeightPreCommit,
+      ),
+      TweenSequenceItem<double>(
+        tween: Tween<double>(begin: _kScaleStart, end: _kScaleStart),
+        weight: _kWeightPostCommit,
+      ),
+    ],
+  );
 
   final ConstantTween<double> _secondaryOpacityTweenCurrent = ConstantTween<double>(
     _kOpacityFullyOpened,
   );
-  final TweenSequence<double> _secondaryOpacityTween =
-      TweenSequence<double>(<TweenSequenceItem<double>>[
-        TweenSequenceItem<double>(
-          tween: Tween<double>(begin: _kOpacityFullyOpened, end: _kOpacityStartTransition),
-          weight: _kWeightPreCommit,
-        ),
-        TweenSequenceItem<double>(
-          tween: Tween<double>(begin: _kOpacityFullyOpened, end: _kOpacityFullyOpened),
-          weight: _kWeightPostCommit,
-        ),
-      ]);
+  final TweenSequence<double> _secondaryOpacityTween = TweenSequence<double>(
+    <TweenSequenceItem<double>>[
+      TweenSequenceItem<double>(
+        tween: Tween<double>(begin: _kOpacityFullyOpened, end: _kOpacityStartTransition),
+        weight: _kWeightPreCommit,
+      ),
+      TweenSequenceItem<double>(
+        tween: Tween<double>(begin: _kOpacityFullyOpened, end: _kOpacityFullyOpened),
+        weight: _kWeightPostCommit,
+      ),
+    ],
+  );
 
   late Animatable<Offset> _primaryPositionTween;
   late Animatable<Offset> _secondaryPositionTween;

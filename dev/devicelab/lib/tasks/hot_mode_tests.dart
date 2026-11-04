@@ -71,14 +71,12 @@ TaskFunction createHotModeTest({
       mkdirs(_editedFlutterGalleryDir);
       recursiveCopy(flutterGalleryDir, _editedFlutterGalleryDir);
 
-      final String rootPubspec = File(
-        path.join(flutterDirectory.path, 'pubspec.yaml'),
-      ).readAsStringSync();
+      final String rootPubspec = File(path.join(flutterDirectory.path, 'pubspec.yaml'))
+          .readAsStringSync();
       final yamlEditor = YamlEditor(rootPubspec);
       yamlEditor.update(<String>['workspace'], <String>['edited_flutter_gallery']);
-      File(
-        path.join(_editedFlutterGalleryDir.parent.path, 'pubspec.yaml'),
-      ).writeAsStringSync(yamlEditor.toString());
+      File(path.join(_editedFlutterGalleryDir.parent.path, 'pubspec.yaml'))
+          .writeAsStringSync(yamlEditor.toString());
 
       try {
         await inDirectory<void>(_editedFlutterGalleryDir, () async {

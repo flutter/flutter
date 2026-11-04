@@ -191,9 +191,8 @@ class _TaskRunner {
       IOSink? sink;
       try {
         if (device != null && device.canStreamLogs && hostAgent.dumpDirectory != null) {
-          sink = File(
-            path.join(hostAgent.dumpDirectory!.path, '${device.deviceId}.log'),
-          ).openWrite();
+          sink = File(path.join(hostAgent.dumpDirectory!.path, '${device.deviceId}.log'))
+              .openWrite();
           await device.startLoggingToSink(sink);
         }
 

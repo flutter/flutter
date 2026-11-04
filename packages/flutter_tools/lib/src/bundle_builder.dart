@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:meta/meta.dart';
 import 'package:pool/pool.dart';
 import 'package:process/process.dart';
 
@@ -11,6 +10,7 @@ import 'asset.dart' hide defaultManifestPath;
 import 'base/common.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
+import 'base/platform.dart';
 import 'build_info.dart';
 import 'build_system/build_system.dart';
 import 'build_system/depfile.dart';
@@ -38,7 +38,7 @@ class BundleBuilder {
     String? applicationKernelFilePath,
     String? depfilePath,
     String? assetDirPath,
-    @visibleForTesting BuildSystem? buildSystem,
+    BuildSystem? buildSystem,
   }) async {
     project ??= FlutterProject.current();
     mainPath ??= defaultMainPath;
@@ -141,6 +141,7 @@ Future<void> writeBundle(
   required Logger logger,
   required Directory projectDir,
   required BuildMode buildMode,
+  required Platform platform,
 }) async {
   if (bundleDir.existsSync()) {
     try {
@@ -159,6 +160,7 @@ Future<void> writeBundle(
     logger: logger,
     fileSystem: fileSystem,
     artifacts: artifacts,
+    platform: platform,
   );
 
   final assetTransformer = AssetTransformer(

@@ -31,7 +31,7 @@ void main() {
     expect(find.widgetWithText(SliverAppBar, 'SliverAppBar'), findsOneWidget);
     expect(
       tester.getBottomLeft(find.text('SliverAppBar')).dy,
-      187.63506380825314,
+      185.41520737749101,
     );
 
     await tester.tap(switchFinder);

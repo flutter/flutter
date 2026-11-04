@@ -50,10 +50,9 @@ abstract class ChromiumDevice extends WebDevice {
   ChromiumDevice({
     required String name,
     required this.chromeLauncher,
-    required FileSystem fileSystem,
+    required this._fileSystem,
     required super.logger,
-  }) : _fileSystem = fileSystem,
-       _logger = logger,
+  }) : _logger = logger,
        super(name);
 
   final ChromiumLauncher chromeLauncher;
@@ -127,12 +126,18 @@ abstract class ChromiumDevice extends WebDevice {
   }) async {
     // See [ResidentWebRunner.run] in flutter_tools/lib/src/resident_web_runner.dart
     // for the web initialization and server logic.
+    final WebDebugConfig(
+      :String? launchUrl,
+      :bool runHeadless,
+      :int? browserDebugPort,
+      :List<String> browserFlags,
+    ) = debuggingOptions.webConfig;
     String url;
-    if (debuggingOptions.webLaunchUrl != null) {
-      if (_isLaunchUrlValid(debuggingOptions.webLaunchUrl!)) {
-        url = debuggingOptions.webLaunchUrl!;
+    if (launchUrl != null) {
+      if (_isLaunchUrlValid(launchUrl)) {
+        url = launchUrl;
       } else {
-        throwToolExit('"${debuggingOptions.webLaunchUrl}" is not a valid HTTP URL.');
+        throwToolExit('"$launchUrl" is not a valid HTTP URL.');
       }
     } else {
       url = platformArgs['uri']! as String;
@@ -144,9 +149,9 @@ abstract class ChromiumDevice extends WebDevice {
         cacheDir: _fileSystem.currentDirectory
             .childDirectory('.dart_tool')
             .childDirectory('chrome-device'),
-        headless: debuggingOptions.webRunHeadless,
-        debugPort: debuggingOptions.webBrowserDebugPort,
-        webBrowserFlags: debuggingOptions.webBrowserFlags,
+        headless: runHeadless,
+        debugPort: browserDebugPort,
+        webBrowserFlags: browserFlags,
       );
     }
     _logger.sendEvent('app.webLaunchUrl', <String, Object>{'url': url, 'launched': launchChrome});
@@ -187,14 +192,12 @@ abstract class ChromiumDevice extends WebDevice {
 /// The Google Chrome browser based on Chromium.
 class GoogleChromeDevice extends ChromiumDevice {
   GoogleChromeDevice({
-    required Platform platform,
-    required ProcessManager processManager,
+    required this._platform,
+    required this._processManager,
     required ChromiumLauncher chromiumLauncher,
     required super.logger,
     required super.fileSystem,
-  }) : _platform = platform,
-       _processManager = processManager,
-       super(name: 'chrome', chromeLauncher: chromiumLauncher);
+  }) : super(name: 'chrome', chromeLauncher: chromiumLauncher);
 
   final Platform _platform;
   final ProcessManager _processManager;
@@ -247,9 +250,8 @@ class MicrosoftEdgeDevice extends ChromiumDevice {
     required ChromiumLauncher chromiumLauncher,
     required super.logger,
     required super.fileSystem,
-    required ProcessManager processManager,
-  }) : _processManager = processManager,
-       super(name: 'edge', chromeLauncher: chromiumLauncher);
+    required this._processManager,
+  }) : super(name: 'edge', chromeLauncher: chromiumLauncher);
 
   final ProcessManager _processManager;
 
@@ -302,9 +304,8 @@ class WebDevices extends PollingDeviceDiscovery {
     required Logger logger,
     required Platform platform,
     required ProcessManager processManager,
-    required FeatureFlags featureFlags,
-  }) : _featureFlags = featureFlags,
-       _webServerDevice = WebServerDevice(logger: logger),
+    required this._featureFlags,
+  }) : _webServerDevice = WebServerDevice(logger: logger),
        super(GoogleChromeDevice.kChromeDeviceName) {
     final operatingSystemUtils = OperatingSystemUtils(
       fileSystem: fileSystem,

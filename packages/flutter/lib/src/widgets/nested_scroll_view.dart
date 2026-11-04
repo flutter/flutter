@@ -36,8 +36,10 @@ import 'viewport.dart';
 /// [SliverAppBar.forceElevated] property to ensure that the app bar shows a
 /// shadow, since it would otherwise not necessarily be aware that it had
 /// content ostensibly below it.
-typedef NestedScrollViewHeaderSliversBuilder =
-    List<Widget> Function(BuildContext context, bool innerBoxIsScrolled);
+typedef NestedScrollViewHeaderSliversBuilder = List<Widget> Function(
+  BuildContext context,
+  bool innerBoxIsScrolled,
+);
 
 /// A scrolling view inside of which can be nested other scrolling views, with
 /// their scroll positions being intrinsically linked.
@@ -1754,8 +1756,7 @@ class RenderSliverOverlapAbsorber extends RenderSliver
   /// [SliverOverlapAbsorberHandle].
   ///
   /// The [sliver] must be a [RenderSliver].
-  RenderSliverOverlapAbsorber({required SliverOverlapAbsorberHandle handle, RenderSliver? sliver})
-    : _handle = handle {
+  RenderSliverOverlapAbsorber({required this._handle, RenderSliver? sliver}) {
     child = sliver;
   }
 
@@ -1898,8 +1899,8 @@ class SliverOverlapInjector extends SingleChildRenderObjectWidget {
 /// that it will always be laid out before the [RenderSliverOverlapInjector]
 /// during a particular frame.
 class RenderSliverOverlapInjector extends RenderSliver {
-  /// Creates a sliver that is as tall as the value of the given [handle]'s extent.
-  RenderSliverOverlapInjector({required SliverOverlapAbsorberHandle handle}) : _handle = handle;
+  /// Creates a sliver that is as tall as the value of the given [_handle]'s extent.
+  RenderSliverOverlapInjector({required this._handle});
 
   double? _currentLayoutExtent;
   double? _currentMaxExtent;
@@ -2081,9 +2082,9 @@ class RenderNestedScrollViewViewport extends RenderViewport {
     super.anchor,
     super.children,
     super.center,
-    required SliverOverlapAbsorberHandle handle,
+    required this._handle,
     super.clipBehavior,
-  }) : _handle = handle;
+  });
 
   /// The object to notify when [markNeedsLayout] is called.
   SliverOverlapAbsorberHandle get handle => _handle;

@@ -150,7 +150,7 @@ abstract class CustomPainter extends Listenable {
   /// Creates a custom painter.
   ///
   /// The painter will repaint whenever `repaint` notifies its listeners.
-  const CustomPainter({Listenable? repaint}) : _repaint = repaint;
+  const CustomPainter({this._repaint});
 
   final Listenable? _repaint;
 
@@ -382,16 +382,13 @@ class CustomPainterSemantics {
 class RenderCustomPaint extends RenderProxyBox {
   /// Creates a render object that delegates its painting.
   RenderCustomPaint({
-    CustomPainter? painter,
-    CustomPainter? foregroundPainter,
-    Size preferredSize = Size.zero,
+    this._painter,
+    this._foregroundPainter,
+    this._preferredSize = Size.zero,
     this.isComplex = false,
     this.willChange = false,
     RenderBox? child,
-  }) : _painter = painter,
-       _foregroundPainter = foregroundPainter,
-       _preferredSize = preferredSize,
-       super(child);
+  }) : super(child);
 
   /// The background custom paint delegate.
   ///

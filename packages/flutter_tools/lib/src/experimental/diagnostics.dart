@@ -12,9 +12,8 @@ import 'extension_discovery.dart';
 /// A host [DoctorValidator] adapter that delegates diagnostic checks to a single tool extension.
 class ExtensionDoctorValidator extends DoctorValidator {
   /// Creates an [ExtensionDoctorValidator] for the given diagnostic [extension].
-  ExtensionDoctorValidator({required this.extension, required Logger logger})
-    : _logger = logger,
-      super(extension.title);
+  ExtensionDoctorValidator({required this.extension, required this._logger})
+    : super(extension.title);
 
   /// The active extension service executing diagnostic checks.
   final DiagnosticsExtension extension;
@@ -70,10 +69,9 @@ class DiagnosticsExtensionClient extends DiagnosticsExtension {
   /// Creates a [DiagnosticsExtensionClient] wrapping the host [connection].
   DiagnosticsExtensionClient(
     this.connection, {
-    required Logger logger,
-    String defaultTitle = 'Tool Extension Diagnostics',
-  }) : _defaultTitle = defaultTitle,
-       _logger = logger;
+    required this._logger,
+    this._defaultTitle = 'Tool Extension Diagnostics',
+  });
 
   /// The active extension isolate connection.
   final ExtensionConnection connection;

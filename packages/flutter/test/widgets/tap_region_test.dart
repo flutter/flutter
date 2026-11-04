@@ -22,8 +22,7 @@ import 'test_page_tester.dart';
 /// close enough to remain inside the test surface for the layouts these
 /// tests use.
 Future<void> _tapOutside(WidgetTester tester, Key regionKey) async {
-  final RenderBox renderBox =
-      tester.renderObject<RenderBox>(find.byKey(regionKey));
+  final RenderBox renderBox = tester.renderObject<RenderBox>(find.byKey(regionKey));
   final Rect rect = renderBox.localToGlobal(Offset.zero) & renderBox.size;
   final Offset tapPoint = rect.bottomRight + const Offset(1, 1);
   final Size surfaceSize = tester.view.physicalSize / tester.view.devicePixelRatio;
@@ -1093,9 +1092,8 @@ void main() {
                 behavior: HitTestBehavior.opaque,
                 onTap: () {
                   Navigator.of(tester.element(find.byKey(fabKey))).push(
-                    TestPage<void>(
-                      child: Center(child: tapRegion2),
-                    ).createRoute(tester.element(find.byKey(fabKey))),
+                    TestPage<void>(child: Center(child: tapRegion2))
+                        .createRoute(tester.element(find.byKey(fabKey))),
                   );
                 },
                 child: const SizedBox(width: 56, height: 56),

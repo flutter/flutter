@@ -131,7 +131,7 @@ Future<void> buildMacOS({
       hostPlatform: globals.platform,
       operatingSystemUtils: globals.os,
       flutterVersion: globals.flutterVersion,
-      reportCrashes: !await globals.isRunningOnBot
+      reportCrashes: !await globals.isRunningOnBot,
     ),
     SwiftPackageManagerGitignoreMigration(flutterProject, globals.logger),
     MetalAPIValidationMigrator.macos(flutterProject.macos, globals.logger),
@@ -353,9 +353,8 @@ Future<void> buildMacOS({
     }
     throwToolExit('Build process failed');
   }
-  final String? applicationBundle = MacOSApp.fromMacOSProject(
-    flutterProject.macos,
-  ).applicationBundle(buildInfo);
+  final String? applicationBundle = MacOSApp.fromMacOSProject(flutterProject.macos)
+      .applicationBundle(buildInfo);
   if (applicationBundle != null) {
     final Directory outputDirectory = globals.fs.directory(applicationBundle);
     // This output directory is the .app folder itself.

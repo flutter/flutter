@@ -753,6 +753,43 @@ void testMain() {
       expect(dormantForms[form.formIdentifier], form);
     });
 
+    // See https://github.com/flutter/flutter/issues/192102
+    test('TextInput.updateConfig preserves active autofill form', () {
+      final (form: EngineAutofillForm form, textField: SemanticTextField textField) =
+          activateGroup();
+      final DomHTMLFormElement formElement = form.formElement!;
+
+      // A `TextInput.updateConfig` message (e.g. toggling obscureText) only
+      // describes the focused field, so the decoded group has no 'fields' and
+      // no DOM form.
+      final focusedMap =
+          _autofillFields(<String>['username'], <String>['field1']).single['autofill']!
+              as Map<String, Object?>;
+      testTextEditing.configuration = InputConfiguration(
+        viewId: kImplicitViewId,
+        obscureText: true,
+        autofill: AutofillInfo.fromFrameworkMessage(focusedMap),
+        autofillGroup: EngineAutofillForm.fromFrameworkMessage(kImplicitViewId, focusedMap, null),
+      );
+      const TextInputUpdateConfig().run(testTextEditing);
+
+      // The live form is kept and the focused field stays linked to it.
+      expect(strategy.inputConfiguration.obscureText, isTrue);
+      expect(strategy.inputConfiguration.autofillGroup, same(form));
+      expect(form.formElement, same(formElement));
+      expect(textField.editableElement.getAttribute('form'), form.formDomId);
+
+      strategy.disable();
+
+      // On blur the form goes dormant instead of being dropped, so the next
+      // connection can reuse it.
+      expect(dormantForms[form.formIdentifier], same(form));
+      expect(form.formElement, same(formElement));
+      expect(formElement.isConnected, isTrue);
+      expect(textField.editableElement.getAttribute('form'), isNull);
+      expect(formElement.contains(form.elements['field1']), isTrue);
+    });
+
     // Focus A, autofill A, focus B, autofill a different credential, focus A
     // again, then assert each field is represented in the form exactly once
     // with its latest value and the focused field is linked by attribute (not
@@ -917,6 +954,8 @@ void testMain() {
       expect(textField.editableElement.getAttribute('form'), isNull);
     }, skip: !ui_web.browser.isSafari);
   });
+
+  _testIosMinimumFontSize();
 }
 
 /// Builds the `fields` list of a `TextInputConfiguration` autofill group, the
@@ -993,6 +1032,139 @@ SemanticsObject createTextFieldSemantics({
   );
   tester.apply();
   return tester.getSemanticsObject(0);
+}
+
+// Covers both orders in which the framework style and the semantic element can
+// arrive: the style queued before the element is activated, and the style
+// updated after it is already active.
+// See: https://github.com/flutter/flutter/issues/192327
+void _testIosMinimumFontSize() {
+  group('$SemanticTextField iOS minimum font size', () {
+    late HybridTextEditing testTextEditing;
+    late SemanticsTextEditingStrategy strategy;
+
+    setUp(() {
+      // Must be set before the element is created, because the floor is seeded
+      // at creation time.
+      debugEmulateIosSafari = true;
+      testTextEditing = HybridTextEditing();
+      SemanticsTextEditingStrategy.ensureInitialized(testTextEditing);
+      strategy = SemanticsTextEditingStrategy.instance;
+      testTextEditing.debugTextEditingStrategyOverride = strategy;
+      testTextEditing.configuration = singlelineConfig;
+      semantics()
+        ..debugOverrideTimestampFunction(() => _testTime)
+        ..semanticsEnabled = true;
+    });
+
+    tearDown(() {
+      if (strategy.isEnabled) {
+        strategy.disable();
+      }
+      cleanForms();
+      debugEmulateIosSafari = false;
+      semantics().semanticsEnabled = false;
+      domDocument.activeElement?.blur();
+    });
+
+    EditableTextStyle styleWithFontSize(double fontSize) => EditableTextStyle(
+      textDirection: ui.TextDirection.ltr,
+      fontSize: fontSize,
+      textAlign: ui.TextAlign.left,
+      fontFamily: 'Arial',
+      fontWeight: 'normal',
+      letterSpacing: null,
+      wordSpacing: null,
+      lineHeight: null,
+    );
+
+    test('seeds a newly created input with the minimum', () {
+      final SemanticsObject node = createTextFieldSemantics(value: 'hello');
+      final textField = node.semanticRole! as SemanticTextField;
+
+      expect(textField.editableElement.style.fontSize, '16px');
+    });
+
+    test('seeds a newly created textarea with the minimum', () {
+      testTextEditing.configuration = multilineConfig;
+      final SemanticsObject node = createTextFieldSemantics(value: 'hello', isMultiline: true);
+      final textField = node.semanticRole! as SemanticTextField;
+
+      expect(textField.editableElement.tagName.toLowerCase(), 'textarea');
+      expect(textField.editableElement.style.fontSize, '16px');
+    });
+
+    test('raises a framework font below the minimum', () {
+      strategy.enable(singlelineConfig, onChange: (_, _) {}, onAction: (_) {});
+      final SemanticsObject node = createTextFieldSemantics(value: 'hello', isFocused: true);
+      final textField = node.semanticRole! as SemanticTextField;
+
+      strategy.updateElementStyle(styleWithFontSize(12));
+
+      // The framework shorthand has just written 12px onto the element. Without
+      // the floor that value persists past blur and a later refocus would zoom.
+      expect(textField.editableElement.style.fontSize, '16px');
+    });
+
+    // Production order: the framework sends the style before `show`, so it is
+    // queued while the element is still detached and replayed at activation.
+    test('raises a queued framework font below the minimum', () {
+      strategy.enable(singlelineConfig, onChange: (_, _) {}, onAction: (_) {});
+      strategy.updateElementStyle(styleWithFontSize(12));
+
+      final SemanticsObject node = createTextFieldSemantics(value: 'hello', isFocused: true);
+      final textField = node.semanticRole! as SemanticTextField;
+
+      expect(textField.editableElement.style.fontSize, '16px');
+    });
+
+    test('preserves a queued framework font above the minimum', () {
+      strategy.enable(singlelineConfig, onChange: (_, _) {}, onAction: (_) {});
+      strategy.updateElementStyle(styleWithFontSize(24));
+
+      final SemanticsObject node = createTextFieldSemantics(value: 'hello', isFocused: true);
+      final textField = node.semanticRole! as SemanticTextField;
+
+      expect(textField.editableElement.style.fontSize, '24px');
+      // The floor sets `font-size` as a longhand after the framework's `font`
+      // shorthand. Assert a sibling property to catch a regression that reached
+      // for the shorthand instead and wiped the rest of the style.
+      expect(textField.editableElement.style.fontFamily, contains('Arial'));
+      expect(textField.editableElement.style.fontWeight, 'normal');
+    });
+
+    test('keeps a framework font above the minimum', () {
+      strategy.enable(singlelineConfig, onChange: (_, _) {}, onAction: (_) {});
+      final SemanticsObject node = createTextFieldSemantics(value: 'hello', isFocused: true);
+      final textField = node.semanticRole! as SemanticTextField;
+
+      strategy.updateElementStyle(styleWithFontSize(24));
+
+      expect(textField.editableElement.style.fontSize, '24px');
+    });
+  });
+
+  group('$SemanticTextField non-iOS font size', () {
+    setUp(() {
+      semantics()
+        ..debugOverrideTimestampFunction(() => _testTime)
+        ..semanticsEnabled = true;
+    });
+
+    tearDown(() {
+      semantics().semanticsEnabled = false;
+      domDocument.activeElement?.blur();
+    });
+
+    // Only the iOS minimum is platform-gated. A framework style still reaches
+    // the element everywhere; this field is never given one.
+    test('does not apply the minimum', () {
+      final SemanticsObject node = createTextFieldSemantics(value: 'hello');
+      final textField = node.semanticRole! as SemanticTextField;
+
+      expect(textField.editableElement.style.fontSize, isEmpty);
+    });
+  }, skip: isIosSafari);
 }
 
 /// Emulates sending of a message by the framework to the engine.

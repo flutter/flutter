@@ -284,11 +284,6 @@ CustomDevicesConfig get customDevicesConfig => context.get<CustomDevicesConfig>(
 PreRunValidator get preRunValidator =>
     context.get<PreRunValidator>() ?? const NoOpPreRunValidator();
 
-// Used to build RegExp instances which can detect the VM service message.
-final kVMServiceMessageRegExp = RegExp(
-  r'The Dart VM service is listening on ((http|//)[a-zA-Z0-9:/=_\-\.\[\]]+)',
-);
-
 /// Contains information about the JRE/JDK to use for Java-dependent operations.
 ///
 /// A value of `null` indicates that no installation of java could be found on

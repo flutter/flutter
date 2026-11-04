@@ -698,39 +698,33 @@ void main() {
       expect(visualStudio.cmakePath, isNull);
     });
 
-    testWithoutContext(
-      'cmakePath returns null when VS is present but with require components but installation is faulty',
-      () {
-        final VisualStudioFixture fixture = setUpVisualStudio();
-        final VisualStudio visualStudio = fixture.visualStudio;
+    testWithoutContext('cmakePath returns null when VS is present but with require components but installation is faulty', () {
+      final VisualStudioFixture fixture = setUpVisualStudio();
+      final VisualStudio visualStudio = fixture.visualStudio;
 
-        final response = Map<String, dynamic>.of(_defaultResponse)..['isRebootRequired'] = true;
-        setMockCompatibleVisualStudioInstallation(
-          response,
-          fixture.fileSystem,
-          fixture.processManager,
-        );
+      final response = Map<String, dynamic>.of(_defaultResponse)..['isRebootRequired'] = true;
+      setMockCompatibleVisualStudioInstallation(
+        response,
+        fixture.fileSystem,
+        fixture.processManager,
+      );
 
-        expect(visualStudio.cmakePath, isNull);
-      },
-    );
+      expect(visualStudio.cmakePath, isNull);
+    });
 
-    testWithoutContext(
-      'hasNecessaryComponents returns false when VS is present with required components but installation is faulty',
-      () {
-        final VisualStudioFixture fixture = setUpVisualStudio();
-        final VisualStudio visualStudio = fixture.visualStudio;
+    testWithoutContext('hasNecessaryComponents returns false when VS is present with required components but installation is faulty', () {
+      final VisualStudioFixture fixture = setUpVisualStudio();
+      final VisualStudio visualStudio = fixture.visualStudio;
 
-        final response = Map<String, dynamic>.of(_defaultResponse)..['isRebootRequired'] = true;
-        setMockCompatibleVisualStudioInstallation(
-          response,
-          fixture.fileSystem,
-          fixture.processManager,
-        );
+      final response = Map<String, dynamic>.of(_defaultResponse)..['isRebootRequired'] = true;
+      setMockCompatibleVisualStudioInstallation(
+        response,
+        fixture.fileSystem,
+        fixture.processManager,
+      );
 
-        expect(visualStudio.hasNecessaryComponents, false);
-      },
-    );
+      expect(visualStudio.hasNecessaryComponents, false);
+    });
 
     testWithoutContext(
       'VS metadata is available when VS is present, even if missing components',

@@ -82,7 +82,7 @@ class Chrome {
     // If the Chrome process quits before it was asked to quit, notify the
     // error listener.
     _chromeProcess.exitCode.then((int exitCode) {
-      if (!_isStopped) {
+      if (!_isStopped && exitCode != 0) {
         _onError('Chrome process exited prematurely with exit code $exitCode');
       }
     });
@@ -92,7 +92,7 @@ class Chrome {
   ///
   /// The [onError] callback is called with an error message when the Chrome
   /// process encounters an error. In particular, [onError] is called when the
-  /// Chrome process exits prematurely, i.e. before [stop] is called.
+  /// Chrome process exits prematurely, i.e. before [stop] or [disconnect] is called.
   static Future<Chrome> launch(
     ChromeOptions options, {
     String? workingDirectory,
@@ -167,7 +167,7 @@ class Chrome {
   ///
   /// The [onError] callback is called with an error message when the Chrome
   /// process encounters an error. In particular, [onError] is called when the
-  /// Chrome process exits prematurely, i.e. before [stop] is called.
+  /// Chrome process exits prematurely, i.e. before [stop] or [disconnect] is called.
   static Future<Chrome> connect(
     io.Process chromeProcess,
     ChromeOptions options, {
@@ -270,10 +270,40 @@ class Chrome {
     await _debugConnection?.page.reload(ignoreCache: ignoreCache);
   }
 
-  /// Stops the Chrome process.
-  void stop() {
+  /// Forces a full garbage collection (V8 + Oilpan) in the page.
+  ///
+  /// When the page reloads, the previous document is detached but stays
+  /// GC-reachable until the next major GC, together with ~2.5 GB of unlinked
+  /// `/dev/shm` segments it holds. Major GC cadence follows JS heap growth, not
+  /// shared-memory usage, so a few uncollected reloads (6 on the Linux bots,
+  /// where `/dev/shm` is a tmpfs capped at 50% of RAM) fill `/dev/shm` and
+  /// Chrome refuses response bodies with `net::ERR_INSUFFICIENT_RESOURCES`.
+  /// Collecting before each reload keeps at most one detached document alive.
+  ///
+  /// No-op when there is no debug connection.
+  Future<void> collectGarbage() async {
+    final WipConnection? debugConnection = _debugConnection;
+    if (debugConnection == null) {
+      return;
+    }
+    try {
+      await debugConnection
+          .sendCommand('HeapProfiler.collectGarbage')
+          .timeout(const Duration(seconds: 30));
+    } on Object catch (error) {
+      print('HeapProfiler.collectGarbage failed: $error');
+    }
+  }
+
+  /// Disconnects from the Chrome process without killing it.
+  void disconnect() {
     _isStopped = true;
     _tracingSubscription?.cancel();
+  }
+
+  /// Stops the Chrome process.
+  void stop() {
+    disconnect();
     _chromeProcess.kill();
   }
 }

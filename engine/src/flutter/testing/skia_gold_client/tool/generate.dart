@@ -78,9 +78,11 @@ void main(List<String> args) async {
     '${path.relative(output, from: relativeDir)}.',
   );
 
-  final List<String> sourceImages = Directory(
-    source,
-  ).listSync().whereType<File>().map((File file) => file.path).toList();
+  final List<String> sourceImages = Directory(source)
+      .listSync()
+      .whereType<File>()
+      .map((File file) => file.path)
+      .toList();
 
   // For each source image, write the annotation and save it in the output directory.
   for (final sourceImage in sourceImages) {

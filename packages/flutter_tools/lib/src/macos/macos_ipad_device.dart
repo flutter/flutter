@@ -72,8 +72,11 @@ class MacOSDesignedForIPadDevice extends DesktopDevice {
       appId: appId,
       deviceVmservicePort: filterDevicePort,
       hostVmservicePort: expectedHostPort,
-      usesIpv6: ipv6,
+      // Do not throw on error since DelegateVMServiceDiscoveryForAttach falls
+      // back to log-based protocol discovery.
+      throwOnError: false,
       useDeviceIPAsHost: false,
+      usesIpv6: ipv6,
     );
 
     return DelegateVMServiceDiscoveryForAttach(<VMServiceDiscoveryForAttach>[
@@ -119,19 +122,13 @@ class MacOSDesignedForIPadDevice extends DesktopDevice {
 
 class MacOSDesignedForIPadDevices extends PollingDeviceDiscovery {
   MacOSDesignedForIPadDevices({
-    required Platform platform,
-    required IOSWorkflow iosWorkflow,
-    required ProcessManager processManager,
-    required Logger logger,
-    required FileSystem fileSystem,
-    required OperatingSystemUtils operatingSystemUtils,
-  }) : _logger = logger,
-       _platform = platform,
-       _iosWorkflow = iosWorkflow,
-       _processManager = processManager,
-       _fileSystem = fileSystem,
-       _operatingSystemUtils = operatingSystemUtils,
-       super('Mac designed for iPad devices');
+    required this._platform,
+    required this._iosWorkflow,
+    required this._processManager,
+    required this._logger,
+    required this._fileSystem,
+    required this._operatingSystemUtils,
+  }) : super('Mac designed for iPad devices');
 
   final IOSWorkflow _iosWorkflow;
   final Platform _platform;

@@ -28,6 +28,8 @@ import '../base/utils.dart';
 import '../base/version.dart';
 import '../build_info.dart';
 import '../cache.dart';
+import '../context/android_context.dart';
+import '../context/tool_context.dart';
 import '../convert.dart';
 import '../flutter_manifest.dart';
 import '../globals.dart' as globals;
@@ -36,8 +38,8 @@ import 'android_builder.dart';
 import 'android_sdk.dart';
 import 'android_studio.dart';
 import 'gradle_errors.dart';
-import 'gradle_utils.dart';
 import 'gradle_utils.dart' as gradle;
+import 'gradle_utils.dart';
 import 'java.dart';
 import 'migrations/android_studio_java_gradle_conflict_migration.dart';
 import 'migrations/cmake_android_16k_pages_migration.dart';
@@ -163,37 +165,51 @@ const kMaxRetryTime = Duration(seconds: 10);
 /// An implementation of the [AndroidBuilder] that delegates to gradle.
 class AndroidGradleBuilder implements AndroidBuilder {
   AndroidGradleBuilder({
+    required this._analytics,
+    required AndroidStudio? androidStudio,
+    required this._artifacts,
+    required FileSystem fileSystem,
+    required GradleUtils gradleUtils,
     required Java? java,
     required Logger logger,
-    required ProcessManager processManager,
-    required FileSystem fileSystem,
-    required Artifacts artifacts,
-    required Analytics analytics,
-    required GradleUtils gradleUtils,
     required Platform platform,
-    required AndroidStudio? androidStudio,
+    required ProcessManager processManager,
+    required this._toolContext,
     AndroidSdk? androidSdk,
-  }) : _java = java,
-       _logger = logger,
+  }) : _androidContext = AndroidContext(
+         androidSdkBuilder: () => androidSdk,
+         androidStudioBuilder: () => androidStudio,
+         gradleUtilsBuilder: () => gradleUtils,
+         javaBuilder: () => java,
+       ),
        _fileSystem = fileSystem,
-       _artifacts = artifacts,
-       _analytics = analytics,
-       _gradleUtils = gradleUtils,
-       _androidStudio = androidStudio,
-       _androidSdk = androidSdk,
+       _logger = logger,
        _fileSystemUtils = FileSystemUtils(fileSystem: fileSystem, platform: platform),
        _processUtils = ProcessUtils(logger: logger, processManager: processManager);
 
-  final Java? _java;
+  AndroidGradleBuilder.fromContexts({
+    required this._analytics,
+    required this._androidContext,
+    required ToolContext toolContext,
+  }) : _artifacts = toolContext.artifacts,
+       _fileSystem = toolContext.fs,
+       _logger = toolContext.logger,
+       _fileSystemUtils = toolContext.fileSystemUtils,
+       _processUtils = toolContext.processUtils,
+       _toolContext = toolContext;
+
+  final Analytics _analytics;
+  final AndroidContext _androidContext;
+  late final Java? _java = _androidContext.java;
   final Logger _logger;
-  final ProcessUtils _processUtils;
   final FileSystem _fileSystem;
   final Artifacts _artifacts;
-  final Analytics _analytics;
-  final GradleUtils _gradleUtils;
+  late final GradleUtils _gradleUtils = _androidContext.gradleUtils;
+  late final AndroidStudio? _androidStudio = _androidContext.androidStudio;
+  late final AndroidSdk? _androidSdk = _androidContext.androidSdk;
   final FileSystemUtils _fileSystemUtils;
-  final AndroidStudio? _androidStudio;
-  final AndroidSdk? _androidSdk;
+  final ProcessUtils _processUtils;
+  final ToolContext _toolContext;
 
   /// Builds the AAR and POM files for the current Flutter module or plugin.
   @override
@@ -353,7 +369,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
         command,
         workingDirectory: project.android.hostAppGradleRoot.path,
         allowReentrantFlutter: true,
-        environment: _java?.environment,
+        environment: _java?.gradleEnvironment,
         mapFunction: consumeLog,
       );
     } on ProcessException catch (exception) {
@@ -375,8 +391,11 @@ class AndroidGradleBuilder implements AndroidBuilder {
         return exitCode;
       }
       final GradleBuildStatus status = await detectedGradleError!.handler(
+        gradleUtils: _gradleUtils,
+        java: _java,
         line: detectedGradleErrorLine!,
         project: project,
+        toolContext: _toolContext,
         usesAndroidX: usesAndroidX,
       );
 
@@ -443,8 +462,11 @@ class AndroidGradleBuilder implements AndroidBuilder {
   //    succeed despite an unsupported Java/Gradle version pair.
   // 3. This also helps address https://github.com/flutter/flutter/issues/167931
   //    by providing actionable version recommendations directly in the error.
-  Future<void> _checkJavaAndGradleCompatibility(FlutterProject project, BuildInfo buildInfo) async {
-    if (!buildInfo.androidSkipBuildDependencyValidation) {
+  Future<void> _checkJavaAndGradleCompatibility(
+    FlutterProject project,
+    AndroidBuildInfo androidBuildInfo,
+  ) async {
+    if (!androidBuildInfo.buildInfo.androidGradleConfig.skipBuildDependencyValidation) {
       final Version? javaVersionObj = _java?.version;
       final String? javaVersion = javaVersionObj != null
           ? '${javaVersionObj.major}.${javaVersionObj.minor}.${javaVersionObj.patch}'
@@ -526,7 +548,14 @@ To fix this, you can either:
 
     // The default Gradle script reads the version name and number
     // from the local.properties file.
-    updateLocalProperties(project: project, buildInfo: androidBuildInfo.buildInfo);
+    updateLocalProperties(
+      project: project,
+      analytics: _analytics,
+      androidSdk: _androidSdk,
+      buildInfo: androidBuildInfo.buildInfo,
+      fileSystemUtils: _fileSystemUtils,
+      logger: _logger,
+    );
 
     final options = <String>[];
 
@@ -550,10 +579,10 @@ To fix this, you can either:
     } else {
       options.add('-q');
     }
-    if (!buildInfo.androidGradleDaemon) {
+    if (!buildInfo.androidGradleConfig.gradleDaemon) {
       options.add('--no-daemon');
     }
-    if (buildInfo.androidSkipBuildDependencyValidation) {
+    if (buildInfo.androidGradleConfig.skipBuildDependencyValidation) {
       options.add('-PskipDependencyChecks=true');
     }
     final LocalEngineInfo? localEngineInfo = _artifacts.localEngineInfo;
@@ -621,15 +650,12 @@ To fix this, you can either:
         options.add('-Pshrink=false');
       }
     }
-    options.addAll(androidBuildInfo.buildInfo.toGradleConfig());
+    options.addAll(androidBuildInfo.toGradleConfig());
     if (buildInfo.fileSystemRoots.isNotEmpty) {
       options.add('-Pfilesystem-roots=${buildInfo.fileSystemRoots.join('|')}');
     }
     if (buildInfo.fileSystemScheme != null) {
       options.add('-Pfilesystem-scheme=${buildInfo.fileSystemScheme}');
-    }
-    if (androidBuildInfo.splitPerAbi) {
-      options.add('-Psplit-per-abi=true');
     }
 
     options.addAll(_getAndroidNdkProvisioningProperties());
@@ -657,7 +683,7 @@ To fix this, you can either:
     );
 
     if (exitCode != 0) {
-      await _checkJavaAndGradleCompatibility(project, androidBuildInfo.buildInfo);
+      await _checkJavaAndGradleCompatibility(project, androidBuildInfo);
       throwToolExit(
         'Gradle task $assembleTask failed with exit code $exitCode',
         exitCode: exitCode,
@@ -745,13 +771,14 @@ To fix this, you can either:
       );
       return false;
     }
-    if (!_androidSdk.cmdlineToolsAvailable) {
+    final AndroidSdk androidSdk = _androidSdk;
+    if (!androidSdk.cmdlineToolsAvailable) {
       _logger.printTrace(
         'Failed to find cmdline-tools when checking final appbundle for debug symbols.',
       );
       return false;
     }
-    final String? apkAnalyzerPath = _androidSdk.getCmdlineToolsPath(apkAnalyzerBinaryName);
+    final String? apkAnalyzerPath = androidSdk.getCmdlineToolsPath(apkAnalyzerBinaryName);
     if (apkAnalyzerPath == null) {
       _logger.printTrace(
         'Failed to find apkanalyzer when checking final appbundle for debug symbols.',
@@ -879,14 +906,14 @@ To fix this, you can either:
     } else {
       command.add('-q');
     }
-    if (!buildInfo.androidGradleDaemon) {
+    if (!buildInfo.androidGradleConfig.gradleDaemon) {
       command.add('--no-daemon');
     }
 
     if (target.isNotEmpty) {
       command.add('-Ptarget=$target');
     }
-    command.addAll(androidBuildInfo.buildInfo.toGradleConfig());
+    command.addAll(androidBuildInfo.toGradleConfig());
     command.addAll(_getAndroidNdkProvisioningProperties());
     if (buildInfo.dartObfuscation && buildInfo.mode != BuildMode.release) {
       _logger.printStatus(
@@ -939,7 +966,7 @@ To fix this, you can either:
         command,
         workingDirectory: project.android.hostAppGradleRoot.path,
         allowReentrantFlutter: true,
-        environment: _java?.environment,
+        environment: _java?.gradleEnvironment,
       );
     } finally {
       status.stop();
@@ -956,7 +983,7 @@ To fix this, you can either:
     if (result.exitCode != 0) {
       _logger.printStatus(result.stdout, wrap: false);
       _logger.printError(result.stderr, wrap: false);
-      await _checkJavaAndGradleCompatibility(project, androidBuildInfo.buildInfo);
+      await _checkJavaAndGradleCompatibility(project, androidBuildInfo);
       throwToolExit(
         'Gradle task $aarTask failed with exit code ${result.exitCode}.',
         exitCode: result.exitCode,

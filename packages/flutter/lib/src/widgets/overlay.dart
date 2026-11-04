@@ -31,13 +31,15 @@ import 'ticker_provider.dart';
 
 /// The signature of the widget builder callback used in
 /// [OverlayPortal.overlayChildLayoutBuilder].
-typedef OverlayChildLayoutBuilder =
-    Widget Function(BuildContext context, OverlayChildLayoutInfo info);
+typedef OverlayChildLayoutBuilder = Widget Function(
+  BuildContext context,
+  OverlayChildLayoutInfo info,
+);
 
 /// The additional layout information available to the
 /// [OverlayPortal.overlayChildLayoutBuilder] callback.
 extension type OverlayChildLayoutInfo._(
-  (Size childSize, Matrix4 childPaintTransform, Size overlaySize) _info
+  (Size childSize, Matrix4 childPaintTransform, Size overlaySize) _info,
 ) {
   /// The size of [OverlayPortal.child] in its own coordinates.
   Size get childSize => _info.$1;
@@ -114,11 +116,10 @@ class OverlayEntry implements Listenable {
   /// call [remove] on the overlay entry itself.
   OverlayEntry({
     required this.builder,
-    bool opaque = false,
-    bool maintainState = false,
+    this._opaque = false,
+    this._maintainState = false,
     this.canSizeOverlay = false,
-  }) : _opaque = opaque,
-       _maintainState = maintainState {
+  }) {
     assert(debugMaybeDispatchCreated('widgets', 'OverlayEntry', this));
   }
 
@@ -1195,15 +1196,12 @@ class _RenderTheater extends RenderBox
     with ContainerRenderObjectMixin<RenderBox, StackParentData>, _RenderTheaterMixin {
   _RenderTheater({
     List<RenderBox>? children,
-    required TextDirection textDirection,
+    required this._textDirection,
     int skipCount = 0,
-    Clip clipBehavior = Clip.hardEdge,
-    required bool alwaysSizeToContent,
+    this._clipBehavior = Clip.hardEdge,
+    required this._alwaysSizeToContent,
   }) : assert(skipCount >= 0),
-       _textDirection = textDirection,
-       _skipCount = skipCount,
-       _clipBehavior = clipBehavior,
-       _alwaysSizeToContent = alwaysSizeToContent {
+       _skipCount = skipCount {
     addAll(children);
   }
 
@@ -1393,7 +1391,7 @@ class _RenderTheater extends RenderBox
     final Size size = !alwaysSizeToContent && constraints.biggest.isFinite
         ? constraints.biggest
         : _findSizeDeterminingChild().getDryLayout(constraints);
-    final nonPositionedChildConstraints = BoxConstraints.tight(size);
+    final dryChildConstraints = BoxConstraints.tight(size);
     final Alignment alignment = theater._resolvedAlignment;
 
     BaselineOffset baselineOffset = BaselineOffset.noBaseline;
@@ -1403,7 +1401,7 @@ class _RenderTheater extends RenderBox
           _RenderTheaterMixin.baselineForChild(
             child,
             size,
-            nonPositionedChildConstraints,
+            dryChildConstraints,
             alignment,
             baseline,
           ),
@@ -1462,6 +1460,16 @@ class _RenderTheater extends RenderBox
   bool get sizedByParent => false;
 
   bool _layingOutSizeDeterminingChild = false;
+
+  // The `BoxConstraints` to use for laying out `_DeferredLayoutBox`es and other
+  // non-positioned and non-size-determining children.
+  //
+  // Adding a `_DeferredLayoutBox` child does not trigger a `_RenderTheater`
+  // relayout, so `_RenderTheater` must cache this value for
+  // `_RenderLayoutSurrogateProxyBox.performLayout` to set the correct
+  // `BoxConstraints` on the newly added `_DeferredLayoutBox`.
+  late BoxConstraints _nonPositionedChildConstraints;
+
   @override
   void performLayout() {
     RenderBox? sizeDeterminingChild;
@@ -1476,10 +1484,10 @@ class _RenderTheater extends RenderBox
     }
 
     // Equivalent to BoxConstraints used by RenderStack for StackFit.expand.
-    final nonPositionedChildConstraints = BoxConstraints.tight(size);
+    _nonPositionedChildConstraints = BoxConstraints.tight(size);
     for (final RenderBox child in _childrenInPaintOrder()) {
       if (child != sizeDeterminingChild) {
-        layoutChild(child, nonPositionedChildConstraints);
+        layoutChild(child, _nonPositionedChildConstraints);
       }
     }
   }
@@ -1685,7 +1693,7 @@ class _RenderTheater extends RenderBox
 class OverlayPortalController {
   /// Creates an [OverlayPortalController], optionally with a String identifier
   /// `debugLabel`.
-  OverlayPortalController({String? debugLabel}) : _debugLabel = debugLabel;
+  OverlayPortalController({this._debugLabel});
 
   _OverlayPortalState? _attachTarget;
 
@@ -2798,11 +2806,7 @@ class _RenderLayoutSurrogateProxyBox extends RenderProxyBox {
     // constraints of the deferred child and resize / put it in the dirty list if
     // needed.
     if (!theater._layingOutSizeDeterminingChild) {
-      final BoxConstraints theaterConstraints = theater.constraints;
-      final Size boxSize = theaterConstraints.biggest.isFinite
-          ? theaterConstraints.biggest
-          : theater.size;
-      deferredChild._doLayoutFrom(this, constraints: BoxConstraints.tight(boxSize));
+      deferredChild._doLayoutFrom(this, constraints: theater._nonPositionedChildConstraints);
     }
   }
 }

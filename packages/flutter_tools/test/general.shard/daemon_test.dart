@@ -4,9 +4,11 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/daemon.dart';
+import 'package:test/fake.dart';
 
 import '../src/common.dart';
 
@@ -402,7 +404,40 @@ void main() {
         ),
       );
     });
+
+    testWithoutContext(
+      'DaemonStreams.fromSocket guards socket.done against socket reset errors',
+      () async {
+        final doneCompleter = Completer<void>();
+        final socket = FakeSocket(done: doneCompleter.future);
+        DaemonStreams.fromSocket(socket, logger: bufferLogger);
+
+        doneCompleter.completeError(
+          const SocketException(
+            'Error event raised in event handler : error condition has been reset',
+            port: 0,
+          ),
+        );
+        await pumpEventQueue();
+
+        expect(
+          bufferLogger.traceText,
+          contains(
+            'Socket error: SocketException: Error event raised in event handler : error condition has been reset, port = 0',
+          ),
+        );
+      },
+    );
   });
+}
+
+class FakeSocket extends Fake implements Socket {
+  FakeSocket({Future<void>? done}) : _done = done ?? Completer<void>().future;
+
+  final Future<void> _done;
+
+  @override
+  Future<void> get done => _done;
 }
 
 class _DaemonMessageAndBinary {

@@ -7,6 +7,7 @@
 
 #include <memory>
 
+#include "display_list/dl_paint.h"
 #include "display_list/effects/dl_color_filter.h"
 #include "display_list/effects/dl_color_sources.h"
 #include "display_list/effects/dl_image_filter.h"
@@ -85,7 +86,7 @@ struct Paint {
   Style style = Style::kFill;
   BlendMode blend_mode = BlendMode::kSrcOver;
   bool invert_colors = false;
-  bool anti_alias = true;
+  bool anti_alias = flutter::DlPaint::kDefaultAntiAlias;
 
   std::optional<MaskBlurDescriptor> mask_blur_descriptor;
 

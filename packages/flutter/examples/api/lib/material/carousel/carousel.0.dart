@@ -164,18 +164,16 @@ class HeroLayoutCard extends StatelessWidget {
                 imageInfo.title,
                 overflow: .clip,
                 softWrap: false,
-                style: Theme.of(
-                  context,
-                ).textTheme.headlineLarge?.copyWith(color: Colors.white),
+                style: Theme.of(context).textTheme.headlineLarge
+                    ?.copyWith(color: Colors.white),
               ),
               const SizedBox(height: 10),
               Text(
                 imageInfo.subtitle,
                 overflow: .clip,
                 softWrap: false,
-                style: Theme.of(
-                  context,
-                ).textTheme.bodyMedium?.copyWith(color: Colors.white),
+                style: Theme.of(context).textTheme.bodyMedium
+                    ?.copyWith(color: Colors.white),
               ),
             ],
           ),

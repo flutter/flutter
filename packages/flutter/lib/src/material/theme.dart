@@ -132,9 +132,8 @@ class Theme extends StatelessWidget {
     final ThemeData theme =
         inheritedTheme?.theme.data ??
         (inheritedCupertinoTheme != null
-            ? CupertinoBasedMaterialThemeData(
-                themeData: inheritedCupertinoTheme.theme.data,
-              ).materialTheme
+            ? CupertinoBasedMaterialThemeData(themeData: inheritedCupertinoTheme.theme.data)
+                  .materialTheme
             : _kFallbackTheme);
     return ThemeData.localize(theme, theme.typography.geometryThemeFor(category));
   }

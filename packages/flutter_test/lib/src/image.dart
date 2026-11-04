@@ -3,7 +3,9 @@
 // found in the LICENSE file.
 
 /// @docImport 'package:fake_async/fake_async.dart';
+/// @docImport 'package:flutter/widgets.dart';
 ///
+/// @docImport 'binding.dart';
 /// @docImport 'test_compat.dart';
 /// @docImport 'widget_tester.dart';
 library;
@@ -12,6 +14,9 @@ import 'dart:async';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
+import 'package:flutter/painting.dart';
+
+import 'binding.dart';
 import 'test_async_utils.dart';
 
 final Map<int, ui.Image> _cache = <int, ui.Image>{};
@@ -59,4 +64,67 @@ Future<ui.Image> _createImage(int width, int height) async {
     },
   );
   return completer.future;
+}
+
+/// Precaches an [ImageProvider] during testing.
+///
+/// In a widget test, image decoding operations (such as [MemoryImage],
+/// [NetworkImage], and [ExactAssetImage]) run asynchronously outside the test's
+/// [FakeAsync] zone.
+///
+/// Calling [precacheTestImage] resolves the image stream in a real async zone
+/// (via [TestWidgetsFlutterBinding.runAsync]), loading the decoded image into
+/// [imageCache] before the widget tree is pumped.
+///
+/// Can be called before [WidgetTester.pumpWidget] inside a [testWidgets] body,
+/// or inside [setUp] / [setUpAll].
+///
+/// If [onError] is provided, it will be invoked if an error occurs while
+/// precaching. Otherwise, any error will complete the returned future with that error.
+Future<void> precacheTestImage(
+  ImageProvider provider, {
+  ImageConfiguration configuration = ImageConfiguration.empty,
+  ImageErrorListener? onError,
+}) {
+  final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
+  Object? caughtError;
+  StackTrace? caughtStackTrace;
+
+  Future<void> resolveImage() async {
+    final completer = Completer<void>.sync();
+    final ImageStream stream = provider.resolve(configuration);
+    late final ImageStreamListener listener;
+    listener = ImageStreamListener(
+      (ImageInfo info, bool syncCall) {
+        info.dispose();
+        if (!completer.isCompleted) {
+          stream.removeListener(listener);
+          completer.complete();
+        }
+      },
+      onError: (Object error, StackTrace? stackTrace) {
+        if (!completer.isCompleted) {
+          stream.removeListener(listener);
+          if (onError != null) {
+            onError(error, stackTrace);
+          } else {
+            caughtError = error;
+            caughtStackTrace = stackTrace;
+          }
+          completer.complete();
+        }
+      },
+    );
+    stream.addListener(listener);
+    await completer.future;
+  }
+
+  Future<void> doPrecache() async {
+    await binding.runAsync<void>(resolveImage);
+    if (caughtError != null) {
+      Error.throwWithStackTrace(caughtError!, caughtStackTrace ?? StackTrace.current);
+    }
+  }
+
+  return TestAsyncUtils.guard(doPrecache);
 }

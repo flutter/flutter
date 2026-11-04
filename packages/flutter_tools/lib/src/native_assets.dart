@@ -2,13 +2,22 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'asset.dart';
 import 'build_info.dart';
 import 'project.dart';
+
+typedef TestCompilerNativeAssetsBuildResult = ({
+  Uri? nativeAssetsManifest,
+  FlutterHookResult? flutterHookResult,
+});
 
 /// An interface to enable overriding native assets build logic in other
 /// build systems.
 abstract class TestCompilerNativeAssetsBuilder {
   Future<Uri?> build(BuildInfo buildInfo);
+
+  Future<TestCompilerNativeAssetsBuildResult> buildWithHookResult(BuildInfo buildInfo) async =>
+      (nativeAssetsManifest: await build(buildInfo), flutterHookResult: null);
 
   /// Returns the Windows native assets build directory.
   ///

@@ -308,8 +308,8 @@ final class IOSAssetTarget extends CodeAssetTarget {
     if (sdkRoot == null) {
       throw MissingDefineException(kSdkRoot, 'native_assets');
     }
-    final EnvironmentType? environmentType = xcode.environmentTypeFromSdkroot(sdkRoot, fileSystem);
-    return IOSCodeConfig(targetVersion: targetIOSVersion, targetSdk: getIOSSdk(environmentType!));
+    final EnvironmentType environmentType = xcode.environmentTypeFromSdkroot(sdkRoot, fileSystem);
+    return IOSCodeConfig(targetVersion: targetIOSVersion, targetSdk: getIOSSdk(environmentType));
   }
 
   @override

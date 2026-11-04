@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/dds.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
@@ -21,6 +22,8 @@ import 'package:vm_service/vm_service.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
+import '../src/fakes.dart';
+import 'resident_runner_helpers.dart' show createColdRunner;
 
 void main() {
   testUsingContext('Exits with code 2 when HttpException is thrown '
@@ -42,7 +45,7 @@ void main() {
       ),
     ];
 
-    final int exitCode = await ColdRunner(
+    final int exitCode = await createColdRunner(
       devices,
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       target: 'main.dart',
@@ -59,7 +62,7 @@ void main() {
 
       final devices = <FlutterDevice>[flutterDevice1, flutterDevice2];
 
-      await ColdRunner(
+      await createColdRunner(
         devices,
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
         target: 'main.dart',
@@ -86,7 +89,7 @@ void main() {
       final flutterDevice = FakeFlutterDevice(device)..runColdCode = 1;
       final devices = <FlutterDevice>[flutterDevice];
       final File applicationBinary = MemoryFileSystem.test().file('binary');
-      final int result = await ColdRunner(
+      final int result = await createColdRunner(
         devices,
         applicationBinary: applicationBinary,
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
@@ -103,7 +106,7 @@ void main() {
         final flutterDevice = FakeFlutterDevice(device);
         final devices = <FlutterDevice>[flutterDevice];
         final File applicationBinary = MemoryFileSystem.test().file('binary');
-        final int result = await ColdRunner(
+        final int result = await createColdRunner(
           devices,
           applicationBinary: applicationBinary,
           debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
@@ -136,7 +139,7 @@ void main() {
         final flutterDevice = FakeFlutterDevice(device);
         final devices = <FlutterDevice>[flutterDevice];
         final File applicationBinary = MemoryFileSystem.test().file('binary');
-        final int result = await ColdRunner(
+        final int result = await createColdRunner(
           devices,
           applicationBinary: applicationBinary,
           debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
@@ -260,8 +263,9 @@ class TestFlutterDevice extends FlutterDevice {
     required ResidentCompiler generator,
     Future<Uri>? vmServiceUri,
   }) : super(
-         targetPlatform: .unsupported,
          device,
+         toolContext: DelegatingToolContext(artifacts: Artifacts.test()),
+         targetPlatform: .unsupported,
          buildInfo: BuildInfo.debug,
          generator: generator,
          developmentShaderCompiler: const FakeShaderCompiler(),

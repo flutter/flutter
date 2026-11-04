@@ -2797,9 +2797,8 @@ void main() {
       // Theme's IconTheme
       await tester.pumpWidget(
         MaterialApp(
-          theme: ThemeData.from(
-            colorScheme: const ColorScheme.light(),
-          ).copyWith(iconTheme: const IconThemeData(color: Colors.red, size: 37)),
+          theme: ThemeData.from(colorScheme: const ColorScheme.light())
+              .copyWith(iconTheme: const IconThemeData(color: Colors.red, size: 37)),
           home: IconButton(icon: const Icon(Icons.account_box), onPressed: () {}),
         ),
       );
@@ -2895,9 +2894,8 @@ void main() {
     ) async {
       await tester.pumpWidget(
         MaterialApp(
-          theme: ThemeData.from(
-            colorScheme: const ColorScheme.dark(),
-          ).copyWith(iconTheme: const IconThemeData(color: Colors.white)),
+          theme: ThemeData.from(colorScheme: const ColorScheme.dark())
+              .copyWith(iconTheme: const IconThemeData(color: Colors.white)),
           home: IconButton(icon: const Icon(Icons.account_box), onPressed: () {}),
         ),
       );

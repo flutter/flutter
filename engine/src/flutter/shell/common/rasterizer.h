@@ -250,6 +250,12 @@ class Rasterizer final : public SnapshotDelegate,
   void NotifyLowMemoryWarning() const;
 
   //----------------------------------------------------------------------------
+  /// @brief      Clears any cached render targets and textures associated with
+  ///             the current surface.
+  ///
+  void ClearRenderTargetCache() const;
+
+  //----------------------------------------------------------------------------
   /// @brief      Gets a weak pointer to the rasterizer. The rasterizer may only
   ///             be accessed on the raster task runner.
   ///

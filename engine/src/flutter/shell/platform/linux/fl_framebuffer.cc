@@ -93,7 +93,10 @@ static void attach_depth_stencil(GLuint depth_stencil) {
                             GL_RENDERBUFFER, depth_stencil);
 }
 
-FlFramebuffer* fl_framebuffer_new(GLint format, size_t width, size_t height) {
+FlFramebuffer* fl_framebuffer_new(GLint format,
+                                  size_t width,
+                                  size_t height,
+                                  gboolean depth_stencil) {
   FlFramebuffer* self =
       FL_FRAMEBUFFER(g_object_new(fl_framebuffer_get_type(), nullptr));
 
@@ -108,10 +111,12 @@ FlFramebuffer* fl_framebuffer_new(GLint format, size_t width, size_t height) {
   glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
                          self->texture_id, 0);
 
-  glGenRenderbuffers(1, &self->depth_stencil);
-  glBindRenderbuffer(GL_RENDERBUFFER, self->depth_stencil);
-  glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);
-  attach_depth_stencil(self->depth_stencil);
+  if (depth_stencil) {
+    glGenRenderbuffers(1, &self->depth_stencil);
+    glBindRenderbuffer(GL_RENDERBUFFER, self->depth_stencil);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);
+    attach_depth_stencil(self->depth_stencil);
+  }
 
   return self;
 }

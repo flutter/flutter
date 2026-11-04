@@ -28,9 +28,8 @@ Future<void> main() async {
         projectDir,
       );
 
-      final String rootPubspec = File(
-        path.join(flutterDirectory.path, 'pubspec.yaml'),
-      ).readAsStringSync();
+      final String rootPubspec = File(path.join(flutterDirectory.path, 'pubspec.yaml'))
+          .readAsStringSync();
       final yamlEditor = YamlEditor(rootPubspec);
       yamlEditor.update(<String>['workspace'], <String>['app_with_extensions']);
       File(path.join(rootDir.path, 'pubspec.yaml'))

@@ -26,6 +26,7 @@ import '../protocol_discovery.dart';
 import '../vmservice.dart';
 import 'android_builder.dart';
 import 'android_console.dart';
+import 'android_engine_cli_flags.dart';
 import 'android_sdk.dart';
 import 'application_package.dart';
 import 'gradle_utils.dart' as gradle_utils;
@@ -64,16 +65,12 @@ class AndroidDevice extends Device {
     this.deviceCodeName,
     required super.logger,
     required ProcessManager processManager,
-    required Platform platform,
-    required AndroidSdk androidSdk,
-    required FileSystem fileSystem,
-    AndroidConsoleSocketFactory androidConsoleSocketFactory = kAndroidConsoleSocketFactory,
+    required this._platform,
+    required this._androidSdk,
+    required this._fileSystem,
+    this._androidConsoleSocketFactory = kAndroidConsoleSocketFactory,
   }) : _logger = logger,
        _processManager = processManager,
-       _androidSdk = androidSdk,
-       _platform = platform,
-       _fileSystem = fileSystem,
-       _androidConsoleSocketFactory = androidConsoleSocketFactory,
        _processUtils = ProcessUtils(logger: logger, processManager: processManager),
        super(category: Category.mobile, platformType: PlatformType.android, ephemeral: true);
 
@@ -227,26 +224,10 @@ class AndroidDevice extends Device {
 
   @override
   Future<bool> supportsRuntimeMode(BuildMode buildMode) async {
-    switch (await targetPlatform) {
-      case TargetPlatform.android_arm:
-      case TargetPlatform.android_arm64:
-      case TargetPlatform.android_x64:
-        return buildMode != BuildMode.jitRelease;
-      case TargetPlatform.android:
-      case TargetPlatform.darwin:
-      case TargetPlatform.fuchsia_arm64:
-      case TargetPlatform.fuchsia_x64:
-      case TargetPlatform.ios:
-      case TargetPlatform.linux_arm64:
-      case TargetPlatform.linux_riscv64:
-      case TargetPlatform.linux_x64:
-      case TargetPlatform.tester:
-      case TargetPlatform.web_javascript:
-      case TargetPlatform.windows_x64:
-      case TargetPlatform.windows_arm64:
-      case TargetPlatform.unsupported:
-        throw UnsupportedError('Invalid target platform for Android');
+    if ((await targetPlatform).os != .android) {
+      throw UnsupportedError('Invalid target platform for Android');
     }
+    return buildMode != BuildMode.jitRelease;
   }
 
   @override
@@ -570,8 +551,9 @@ class AndroidDevice extends Device {
       final releaseManifestEngineShellArgs = <String>[
         if (debuggingOptions.buildInfo.mode == BuildMode.release) ...<String>[
           ...debuggingOptions.getAndroidLaunchArguments(),
-          if (platformArgs['trace-startup'] as bool? ?? false) '--trace-startup',
-          if (route != null) '--route=$route',
+          if (platformArgs[AndroidEngineCliFlags.traceStartup] as bool? ?? false)
+            '--${AndroidEngineCliFlags.traceStartup}',
+          if (route != null) '--${AndroidEngineCliFlags.route}=$route',
         ],
       ];
 
@@ -588,12 +570,10 @@ class AndroidDevice extends Device {
       );
       // Package has been built, so we can get the updated application ID and
       // activity name from the .apk.
-      builtPackage =
-          await ApplicationPackageFactory.instance!.getPackageForPlatform(
-                devicePlatform,
-                buildInfo: debuggingOptions.buildInfo,
-              )
-              as AndroidApk?;
+      builtPackage = await ApplicationPackageFactory.instance!.getPackageForPlatform(
+        devicePlatform,
+        buildInfo: debuggingOptions.buildInfo,
+      ) as AndroidApk?;
     }
     // There was a failure parsing the android project information.
     if (builtPackage == null) {
@@ -607,7 +587,7 @@ class AndroidDevice extends Device {
       return LaunchResult.failed();
     }
 
-    final bool traceStartup = platformArgs['trace-startup'] as bool? ?? false;
+    final bool traceStartup = platformArgs[AndroidEngineCliFlags.traceStartup] as bool? ?? false;
     ProtocolDiscovery? vmServiceDiscovery;
 
     if (debuggingOptions.debuggingEnabled) {
@@ -634,9 +614,11 @@ class AndroidDevice extends Device {
       '-a', 'android.intent.action.MAIN',
       '-c', 'android.intent.category.LAUNCHER',
       '-f', '0x20000000', // FLAG_ACTIVITY_SINGLE_TOP
-      ...debuggingOptions.getAndroidLaunchArgumentsAsIntentExtras(),
-      if (traceStartup) ...<String>['--ez', 'trace-startup', 'true'],
-      if (route != null) ...<String>['--es', 'route', route],
+      if (debuggingOptions.buildInfo.mode != BuildMode.release) ...<String>[
+        ...debuggingOptions.getAndroidLaunchArgumentsAsIntentExtras(),
+        if (traceStartup) ...<String>['--ez', AndroidEngineCliFlags.traceStartup, 'true'],
+        if (route != null) ...<String>['--es', AndroidEngineCliFlags.route, route],
+      ],
       if (debuggingOptions.debuggingEnabled && userIdentifier != null) ...<String>[
         '--user',
         userIdentifier,
@@ -820,14 +802,7 @@ class AndroidDevice extends Device {
 
   @override
   Future<bool> isSupported() async {
-    final TargetPlatform platform = await targetPlatform;
-    return switch (platform) {
-      TargetPlatform.android ||
-      TargetPlatform.android_arm ||
-      TargetPlatform.android_arm64 ||
-      TargetPlatform.android_x64 => true,
-      _ => false,
-    };
+    return (await targetPlatform).os == .android;
   }
 
   @override
@@ -1246,11 +1221,9 @@ class AndroidDevicePortForwarder extends DevicePortForwarder {
   AndroidDevicePortForwarder({
     required ProcessManager processManager,
     required Logger logger,
-    required String deviceId,
-    required String adbPath,
-  }) : _deviceId = deviceId,
-       _adbPath = adbPath,
-       _logger = logger,
+    required this._deviceId,
+    required this._adbPath,
+  }) : _logger = logger,
        _processUtils = ProcessUtils(logger: logger, processManager: processManager);
 
   final String _deviceId;

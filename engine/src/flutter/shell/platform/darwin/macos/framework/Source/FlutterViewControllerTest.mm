@@ -97,6 +97,14 @@ static const FlutterKeyEvent kDefaultFlutterKeyEvent = {};
 }
 @end
 
+// Matches an encoded JSON message whose content equals that of |expected|.
+static id JSONMessageWithContentOf(NSData* expected) {
+  id expectedContent = [[FlutterJSONMessageCodec sharedInstance] decode:expected];
+  return [OCMArg checkWithBlock:^BOOL(NSData* message) {
+    return [[[FlutterJSONMessageCodec sharedInstance] decode:message] isEqual:expectedContent];
+  }];
+}
+
 @interface FlutterViewControllerTestObjC : NSObject
 - (bool)testKeyEventsAreSentToFramework:(id)mockEngine;
 - (bool)testKeyEventsArePropagatedIfNotHandled:(id)mockEngine;
@@ -384,7 +392,7 @@ TEST_F(FlutterViewControllerTest, testViewControllerIsReleased) {
   @try {
     OCMVerify(  // NOLINT(google-objc-avoid-throwing-exception)
         [binaryMessengerMock sendOnChannel:@"flutter/keyevent"
-                                   message:encodedKeyEvent
+                                   message:JSONMessageWithContentOf(encodedKeyEvent)
                                binaryReply:[OCMArg any]]);
   } @catch (...) {
     return false;
@@ -536,7 +544,7 @@ TEST_F(FlutterViewControllerTest, testViewControllerIsReleased) {
   NSEvent* event = [NSEvent eventWithCGEvent:cgEvent];
   OCMExpect(  // NOLINT(google-objc-avoid-throwing-exception)
       [binaryMessengerMock sendOnChannel:@"flutter/keyevent"
-                                 message:encodedKeyEvent
+                                 message:JSONMessageWithContentOf(encodedKeyEvent)
                              binaryReply:[OCMArg any]])
       .andDo((^(NSInvocation* invocation) {
         FlutterBinaryReply handler;
@@ -554,7 +562,7 @@ TEST_F(FlutterViewControllerTest, testViewControllerIsReleased) {
         [responderMock keyDown:[OCMArg any]]);
     OCMVerify(  // NOLINT(google-objc-avoid-throwing-exception)
         [binaryMessengerMock sendOnChannel:@"flutter/keyevent"
-                                   message:encodedKeyEvent
+                                   message:JSONMessageWithContentOf(encodedKeyEvent)
                                binaryReply:[OCMArg any]]);
   } @catch (...) {
     return false;
@@ -612,7 +620,7 @@ TEST_F(FlutterViewControllerTest, testViewControllerIsReleased) {
   NSEvent* event = [NSEvent eventWithCGEvent:cgEvent];
   OCMExpect(  // NOLINT(google-objc-avoid-throwing-exception)
       [binaryMessengerMock sendOnChannel:@"flutter/keyevent"
-                                 message:encodedKeyEvent
+                                 message:JSONMessageWithContentOf(encodedKeyEvent)
                              binaryReply:[OCMArg any]])
       .andDo((^(NSInvocation* invocation) {
         FlutterBinaryReply handler;
@@ -628,7 +636,7 @@ TEST_F(FlutterViewControllerTest, testViewControllerIsReleased) {
   @try {
     OCMVerify(  // NOLINT(google-objc-avoid-throwing-exception)
         [binaryMessengerMock sendOnChannel:@"flutter/keyevent"
-                                   message:encodedKeyEvent
+                                   message:JSONMessageWithContentOf(encodedKeyEvent)
                                binaryReply:[OCMArg any]]);
   } @catch (NSException* e) {
     NSLog(@"%@", e.reason);
@@ -669,7 +677,7 @@ TEST_F(FlutterViewControllerTest, testViewControllerIsReleased) {
   NSEvent* event = [NSEvent eventWithCGEvent:cgEvent];
   OCMExpect(  // NOLINT(google-objc-avoid-throwing-exception)
       [binaryMessengerMock sendOnChannel:@"flutter/keyevent"
-                                 message:encodedKeyEvent
+                                 message:JSONMessageWithContentOf(encodedKeyEvent)
                              binaryReply:[OCMArg any]])
       .andDo((^(NSInvocation* invocation) {
         FlutterBinaryReply handler;
@@ -687,7 +695,7 @@ TEST_F(FlutterViewControllerTest, testViewControllerIsReleased) {
         never(), [responderMock keyDown:[OCMArg any]]);
     OCMVerify(  // NOLINT(google-objc-avoid-throwing-exception)
         [binaryMessengerMock sendOnChannel:@"flutter/keyevent"
-                                   message:encodedKeyEvent
+                                   message:JSONMessageWithContentOf(encodedKeyEvent)
                                binaryReply:[OCMArg any]]);
   } @catch (...) {
     return false;

@@ -59,8 +59,11 @@ typedef PlatformMessageResponseCallback = void Function(ByteData? data);
   'Migrate to ChannelBuffers.setListener instead. '
   'This feature was deprecated after v3.11.0-20.0.pre.',
 )
-typedef PlatformMessageCallback =
-    void Function(String name, ByteData? data, PlatformMessageResponseCallback? callback);
+typedef PlatformMessageCallback = void Function(
+  String name,
+  ByteData? data,
+  PlatformMessageResponseCallback? callback,
+);
 
 // Signature for _setNeedsReportTimings.
 typedef _SetNeedsReportTimingsFunc = void Function(bool value);
@@ -637,6 +640,21 @@ class PlatformDispatcher {
 
   @Native<Void Function(Bool)>(symbol: 'PlatformConfigurationNativeApi::SetNeedsReportTimings')
   external static void __nativeSetNeedsReportTimings(bool value);
+
+  /// Resets the engine's internal caches.
+  ///
+  /// This is primarily intended for test harnesses to ensure test isolation
+  /// and prevent cached offscreen render targets or other transient engine
+  /// state from leaking across consecutive tests.
+  ///
+  /// Production applications should not invoke this method directly. Doing so
+  /// can cause unnecessary texture reallocation churn and frame hitches.
+  /// Production applications should instead rely on platform low-memory
+  /// notifications, which automatically purge caches under memory pressure.
+  void resetInternalState() => _resetInternalState();
+
+  @Native<Void Function()>(symbol: 'PlatformConfigurationNativeApi::ResetInternalState')
+  external static void _resetInternalState();
 
   // Called from the engine, via hooks.dart
   void _reportTimings(List<int> timings) {

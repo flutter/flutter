@@ -561,8 +561,7 @@ class SliverGridParentData extends SliverMultiBoxAdaptorParentData {
 class RenderSliverGrid extends RenderSliverMultiBoxAdaptor {
   /// Creates a sliver that contains multiple box children that whose size and
   /// position are determined by a delegate.
-  RenderSliverGrid({required super.childManager, required SliverGridDelegate gridDelegate})
-    : _gridDelegate = gridDelegate;
+  RenderSliverGrid({required super.childManager, required this._gridDelegate});
 
   @override
   void setupParentData(RenderObject child) {

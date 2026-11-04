@@ -86,7 +86,7 @@ linter:
     # - close_sinks # not reliable enough
     - collection_methods_unrelated_type
     - combinators_ordering
-    # - comment_references # blocked on https://github.com/dart-lang/linter/issues/1142
+    # - comment_references # blocked on https://github.com/dart-lang/sdk/issues/64540
     - conditional_uri_does_not_exist
     # - constant_identifier_names # needs an opt-out https://github.com/dart-lang/linter/issues/204
     - control_flow_in_finally
@@ -207,7 +207,7 @@ linter:
     - type_annotate_public_apis
     - type_init_formals
     - type_literal_in_constant_pattern
-    # - unawaited_futures # too many false positives, especially with the way AnimationController works
+    - unawaited_futures
     # - unintended_html_in_doc_comment # blocked on https://github.com/dart-lang/linter/issues/5065
     # - unnecessary_async # not yet tested
     - unnecessary_await_in_return

@@ -26,7 +26,7 @@ This plugin replaces legacy regex-based and manual AST scripts (previously locat
     - [`no_bad_imports_in_flutter`](#no_bad_imports_in_flutter)
     - [`protect_public_state_subtypes`](#protect_public_state_subtypes)
     - [`render_box_intrinsics`](#render_box_intrinsics)
-    - [`null_initialized_debug_expensive_fields`](#null_initialized_debug_expensive_fields)
+    - [`lazy_initialized_debug_expensive_fields`](#lazy_initialized_debug_expensive_fields)
   - [Testing Rules](#testing-rules)
     - [`skip_test_comments`](#skip_test_comments)
     - [`integration_test_timeouts`](#integration_test_timeouts)
@@ -103,7 +103,7 @@ The analyzer requires all `analysis_options.yaml` files referencing `flutter_ana
 | [`no_bad_imports_in_flutter`](#no_bad_imports_in_flutter) | `ERROR` | Enabled | `packages/flutter/lib/src/` | Enforce layer hierarchy, prevent cycles, and forbid meta imports outside foundation. |
 | [`protect_public_state_subtypes`](#protect_public_state_subtypes) | `ERROR` | Enabled | `packages/flutter` | Require `@protected` on overridden lifecycle methods in public `State` classes. |
 | [`render_box_intrinsics`](#render_box_intrinsics) | `ERROR` | Enabled | `packages/flutter/lib/src/rendering/` | Disallow calling `compute*` intrinsic methods directly (use `get*`). |
-| [`null_initialized_debug_expensive_fields`](#null_initialized_debug_expensive_fields) | `ERROR` | Enabled | `packages/flutter` | Require `@_debugOnly` fields to be conditionally initialized via `kDebugMode ? <value> : null;`. |
+| [`lazy_initialized_debug_expensive_fields`](#lazy_initialized_debug_expensive_fields) | `ERROR` | Enabled | `packages/flutter` | Require `@_debugOnly` fields to be lazy initialized (declared as `late final` with an initializer). |
 | [`skip_test_comments`](#skip_test_comments) | `ERROR` | Enabled | Test files | Require justification comments (e.g. `// [intended]` or issue link) for skipped tests. |
 | [`integration_test_timeouts`](#integration_test_timeouts) | `ERROR` | Enabled | `test_driver/` files | Require integration test files under `test_driver/` to set `timeout: Timeout.none`. |
 
@@ -317,11 +317,11 @@ final double width = child.getMinIntrinsicWidth(height);
 
 ---
 
-#### `null_initialized_debug_expensive_fields`
+#### `lazy_initialized_debug_expensive_fields`
 - **Severity**: `ERROR`
 - **Scope**: `packages/flutter`
-- **Description**: Requires all fields annotated with `@_debugOnly` to be conditionally initialized via `kDebugMode ? <value> : null;`.
-- **Rationale**: Expensive diagnostic objects and debug trackers must not allocate heap memory or execute costly initialization logic in profile and release builds. Initializing them with `kDebugMode ? <value> : null` enables the compiler and tree-shaker to eliminate both the field and its initializer in release builds.
+- **Description**: Requires all non-static fields annotated with `@_debugOnly` to be lazy initialized (declared as `late` with an initializer).
+- **Rationale**: Expensive debug fields must not allocate heap memory or execute costly initialization logic in profile and release builds. Declaring them as `late` ensures lazy evaluation on first read (which can happen only in `assert(...)` blocks).
 
 ```dart
 // BAD:
@@ -330,7 +330,7 @@ List<StackTrace> _creationStackTraces = <StackTrace>[];
 
 // GOOD:
 @_debugOnly
-List<StackTrace>? _creationStackTraces = kDebugMode ? <StackTrace>[] : null;
+late List<StackTrace> _creationStackTraces = <StackTrace>[];
 ```
 
 ---
@@ -467,19 +467,18 @@ class FlutterAnalyzerPlugin extends Plugin {
 
 ### 3. Writing Unit Tests
 
-Rules must be covered by reflective tests using `package:analyzer_testing`:
+Rules must be covered by unit tests using `package:analyzer_testing` and `package:test`:
 
 1. Create a test file in `dev/flutter_analyzer_plugin/test/<rule_name>_test.dart`.
-2. Extend `AnalysisRuleTest` and annotate the class with `@reflectiveTest`.
+2. Extend `AnalysisRuleTest`.
 3. Register the rule in `setUp()` using `Registry.ruleRegistry.registerWarningRule(...)` and define test cases using `assertDiagnostics()`.
 
 ```dart
 import 'package:analyzer/src/lint/registry.dart';
 import 'package:analyzer_testing/analysis_rule/analysis_rule.dart';
 import 'package:flutter_analyzer_plugin/src/rules/my_custom_rule.dart';
-import 'package:test_reflective_loader/test_reflective_loader.dart';
+import 'package:test/test.dart';
 
-@reflectiveTest
 class MyCustomRuleTest extends AnalysisRuleTest {
   @override
   void setUp() {
@@ -490,34 +489,39 @@ class MyCustomRuleTest extends AnalysisRuleTest {
 
   @override
   String get analysisRule => MyCustomRule.code.name;
+}
 
-  Future<void> test_disallowedPattern() async {
-    await assertDiagnostics(
+void main() {
+  late MyCustomRuleTest testSuite;
+
+  setUp(() {
+    testSuite = MyCustomRuleTest();
+    testSuite.setUp();
+  });
+
+  tearDown(() => testSuite.tearDown());
+
+  test('disallowed pattern', () async {
+    await testSuite.assertDiagnostics(
       '''
 void test() {
   badFunction();
 }
 ''',
       <ExpectedDiagnostic>[
-        lint(16, 13),
+        testSuite.lint(16, 13),
       ],
     );
-  }
+  });
 
-  Future<void> test_allowedPattern() async {
-    await assertNoDiagnostics(
+  test('allowed pattern', () async {
+    await testSuite.assertNoDiagnostics(
       '''
 void test() {
   goodFunction();
 }
 ''',
     );
-  }
-}
-
-void main() {
-  defineReflectiveSuite(() {
-    defineReflectiveTests(MyCustomRuleTest);
   });
 }
 ```
@@ -526,16 +530,17 @@ void main() {
 
 ### 4. Running Unit Tests
 
-Because tests use `test_reflective_loader` (which depends on `dart:mirrors`), tests must be executed with the standalone Dart VM SDK rather than `flutter test`:
+Run unit tests using `flutter test` (or `dart test`):
 
 ```bash
 # 1. Resolve plugin dependencies
 cd dev/flutter_analyzer_plugin
 ../../bin/flutter pub get
 
-# 2. Run unit tests using the Dart SDK
-../../bin/cache/dart-sdk/bin/dart test test/my_custom_rule_test.dart
+# 2. Run unit tests
+../../bin/flutter test test/my_custom_rule_test.dart
 ```
+
 
 ---
 

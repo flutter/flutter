@@ -28,9 +28,8 @@ class SkwasmRenderer extends Renderer {
   final SkwasmFontCollection fontCollection = SkwasmFontCollection();
 
   @override
-  ui.Canvas createCanvas(ui.PictureRecorder recorder, [ui.Rect? cullRect]) {
-    return SkwasmCanvas(recorder as SkwasmPictureRecorder, cullRect ?? ui.Rect.largest);
-  }
+  ui.Canvas createCanvas(ui.PictureRecorder recorder, [ui.Rect? cullRect]) =>
+      SkwasmCanvas(recorder, cullRect);
 
   @override
   BackendImageFilter createBlurImageFilter({
@@ -179,6 +178,7 @@ class SkwasmRenderer extends Renderer {
     ui.StrutStyle? strutStyle,
     String? ellipsis,
     ui.Locale? locale,
+    ui.Hyphens? hyphens,
   }) => SkwasmParagraphStyle(
     textAlign: textAlign,
     textDirection: textDirection,
@@ -192,6 +192,7 @@ class SkwasmRenderer extends Renderer {
     strutStyle: strutStyle,
     ellipsis: ellipsis,
     locale: locale,
+    hyphens: hyphens,
   );
 
   @override
@@ -378,8 +379,8 @@ class SkwasmRenderer extends Renderer {
           'strutStyleCount': counts[6],
           'textStyleCount': counts[7],
           'animatedImageCount': counts[8],
-          'countourMeasureIterCount': counts[9],
-          'countourMeasureCount': counts[10],
+          'contourMeasureIterCount': counts[9],
+          'contourMeasureCount': counts[10],
           'dataCount': counts[11],
           'colorFilterCount': counts[12],
           'imageFilterCount': counts[13],
