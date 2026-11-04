@@ -1301,14 +1301,20 @@ still need there come down as the packages DEPS names: `synced_repository`
 downloads its CIPD package or tarball when the checkout has not got the
 directory (`fallback_url`; cpython3 for the pub repositories and the
 package configurations, clang and the sysroots for the desktop shard),
-which a bare worktree of this checkout verified end to end. A stand-in for
-the bot's time (a fresh output root, 8 CPUs, no disk cache, 11-03): the
-widgets subshard under Bazel takes 16 min 15 end to end -- 802 Bazel tests
-in 15 min, the kernels compiled per test from the prelude where `flutter
-test` compiles them in one incremental session -- against about 11 min for
-the legacy shard on CI. Whether the bot's disk cache under `~/.cache`
-persists between tasks (it would take the compiles out) is the open
-question.
+which a bare worktree of this checkout verified end to end, and which the
+first presubmit runs confirmed, after three findings of theirs (489: the
+engine's artifacts.zip carries shader_lib's BUILD files, which must not
+make packages inside the cache repository; 491: the tool shards see
+JAVA_HOME and ANDROID_HOME, the desktop shard gets the pinned Chrome). On
+the bots (PR #195825, 11-03), start to finish of the whole build: Linux
+framework_tests_widgets 15 min (802 tests; about 11 under `flutter test`),
+libraries 12, misc 18, slow 8, tool_tests_general 6, tool_tests_commands
+13, web_tool_tests 14, the integration slices 14-18; Mac widgets 13,
+impeller 17, misc 19, tool_tests_general 12 -- with every case in
+ResultDB ("Reported 12,764 test result(s) of 532 test target(s)" for
+libraries). A stand-in on a workstation (a fresh output root, 8 CPUs, no
+disk cache) had given 16 min 15 for widgets, the Mac tester's Apple
+Silicon 9 min 46.
 
 ## The web engine's unit tests: felt's suites
 
@@ -2673,9 +2679,18 @@ switch and back -- is a cache hit for every action: measured at 78 s against
 configuration included. It also covers a case the local action cache does
 not: setting a Starlark flag (`--//engine/src/flutter/impeller/tools:
 enable_vulkan=false`) and setting it back re-runs the affected actions
-(`fml`'s 674 compiles) without the disk cache, and takes 7 s with it. CI
-will use `--remote_cache` instead; the local cache is the same mechanism
-without the network.
+(`fml`'s 674 compiles) without the disk cache, and takes 7 s with it. On
+CI a Linux bot does not cache but executes remotely, on Flutter's RBE
+instance (`build:rbe` in the root `.bazelrc`: the reclient instance of the
+GN builds, the builders' debian11 image, 200 jobs, Application Default
+Credentials -- a bot's emulated GCE metadata server, a developer's `gcloud
+auth application-default login`; bazel_ci.py adds the config to a Linux
+bot's engine builds, ci.md says how and what stays on the bot). Execution
+rather than a shared cache because of the instance's IAM: only a worker
+writes the action cache, so a locally run action is never a hit for
+anyone. Measured from a workstation: `fml_unittests`' 676 actions in 93 s
+on the workers, then 38 s from a fresh output base with every action a
+hit. The local disk cache is the same mechanism without the network.
 
 The sandbox is the other measured cost. With the toolchain's header trees as
 directory inputs (see the toolchain section) a compile has ~4,200 inputs,
