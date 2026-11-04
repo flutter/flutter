@@ -429,7 +429,7 @@ class CkOffscreenSurface extends CkSurface implements OffscreenSurface {
     _canvasProvider.releaseCanvas(oldCanvas);
     unawaited(recreateContextForCanvas(newCanvas));
 
-    final WebGLContext freshGl = (canvas as DomOffscreenCanvas).getGlContext(webGLVersion);
+    final WebGLContext freshGl = (newCanvas as DomOffscreenCanvas).getGlContext(webGLVersion);
     if (freshGl.drawingBufferWidth < size.width || freshGl.drawingBufferHeight < size.height) {
       throw UnsupportedError(
         'Requested image size (${size.width}x${size.height}) exceeds browser WebGL capabilities. '
