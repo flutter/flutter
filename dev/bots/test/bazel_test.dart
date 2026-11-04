@@ -130,13 +130,15 @@ void main() {
   });
 
   group('bazelRbeOptions', () {
-    test('is --config=rbe on a Linux bot and nowhere else', () {
-      const none = <String, String>{};
+    const none = <String, String>{};
+
+    test('is --config=rbe on a Linux bot and nowhere else by default', () {
       expect(bazelRbeOptions(onBot: true, onLinux: true, environment: none), <String>[
         '--config=rbe',
       ]);
       expect(bazelRbeOptions(onBot: true, onLinux: false, environment: none), isEmpty);
       expect(bazelRbeOptions(onBot: false, onLinux: true, environment: none), isEmpty);
+      expect(kBazelRbeOnBots, isTrue);
     });
 
     test('is switched off for a run by $kBazelRbeEnvironmentVariable', () {
@@ -158,6 +160,24 @@ void main() {
         ),
         <String>['--config=rbe'],
       );
+    });
+
+    test('follows --bazel-rbe and --no-bazel-rbe on a Linux host, bot or not', () {
+      expect(bazelRbeOptions(onBot: true, onLinux: true, environment: none, rbe: false), isEmpty);
+      expect(bazelRbeOptions(onBot: false, onLinux: true, environment: none, rbe: true), <String>[
+        '--config=rbe',
+      ]);
+      // The flag outranks the environment; the host outranks the flag.
+      expect(
+        bazelRbeOptions(
+          onBot: true,
+          onLinux: true,
+          environment: <String, String>{kBazelRbeEnvironmentVariable: '0'},
+          rbe: true,
+        ),
+        <String>['--config=rbe'],
+      );
+      expect(bazelRbeOptions(onBot: true, onLinux: false, environment: none, rbe: true), isEmpty);
     });
 
     test('is what bazelTestOptions gives a bot', () {
