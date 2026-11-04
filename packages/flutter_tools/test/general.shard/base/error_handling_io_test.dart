@@ -2063,6 +2063,109 @@ Please ensure that the SDK and/or project is installed in a location that has re
       expect(fileSystem.typeSync(file.path, followLinks: false), FileSystemEntityType.notFound);
     });
   });
+
+  group('ErrorHandlingProcessManager Windows batch command-injection guard', () {
+    const dangerousArguments = <String>[
+      'x&calc',
+      'x|whoami',
+      'x>out',
+      'x<in',
+      'x^y',
+      'x"y',
+      r'x%USERPROFILE%',
+      'x!y!',
+      r'x(y)',
+    ];
+
+    testWithoutContext('rejects cmd.exe metacharacters in arguments to a .bat/.cmd target on Windows', () {
+      final ProcessManager processManager = createProcessManager(
+        delegate: FakeProcessManager.any(),
+        platform: windowsPlatform,
+      );
+      for (final argument in dangerousArguments) {
+        expect(
+          () => processManager.start(<String>['gradlew.bat', argument]),
+          throwsToolExit(message: 'unsafe to pass to a Windows batch file'),
+          reason: 'start() should reject argument "$argument"',
+        );
+        expect(
+          () => processManager.run(<String>['apkanalyzer.CMD', argument]),
+          throwsToolExit(message: 'unsafe to pass to a Windows batch file'),
+          reason: 'run() should reject argument "$argument"',
+        );
+        expect(
+          () => processManager.runSync(<String>['tool.bat', argument]),
+          throwsToolExit(message: 'unsafe to pass to a Windows batch file'),
+          reason: 'runSync() should reject argument "$argument"',
+        );
+      }
+    });
+
+    testWithoutContext('rejects metacharacters for any executable when runInShell is true on Windows', () {
+      final ProcessManager processManager = createProcessManager(
+        delegate: FakeProcessManager.any(),
+        platform: windowsPlatform,
+      );
+      expect(
+        () => processManager.run(<String>['some-exe', 'x&calc'], runInShell: true),
+        throwsToolExit(message: 'BatBadBut'),
+      );
+    });
+
+    testWithoutContext('rejects newline characters in batch arguments on Windows', () {
+      final ProcessManager processManager = createProcessManager(
+        delegate: FakeProcessManager.any(),
+        platform: windowsPlatform,
+      );
+      expect(
+        () => processManager.start(<String>['gradlew.bat', 'line1\nline2']),
+        throwsToolExit(message: 'unsafe to pass to a Windows batch file'),
+      );
+    });
+
+    testWithoutContext('allows safe arguments to a .bat target on Windows', () async {
+      final fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
+        const FakeCommand(
+          command: <String>['gradlew.bat', '-Ptarget=lib/main.dart', '-PbuildNumber=1', 'assembleRelease'],
+        ),
+      ]);
+      final ProcessManager processManager = createProcessManager(
+        delegate: fakeProcessManager,
+        platform: windowsPlatform,
+      );
+      await processManager.run(<String>[
+        'gradlew.bat',
+        '-Ptarget=lib/main.dart',
+        '-PbuildNumber=1',
+        'assembleRelease',
+      ]);
+      expect(fakeProcessManager, hasNoRemainingExpectations);
+    });
+
+    testWithoutContext('does not guard non-batch executables without a shell on Windows', () async {
+      final fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
+        const FakeCommand(command: <String>['foo.exe', 'x&y']),
+      ]);
+      final ProcessManager processManager = createProcessManager(
+        delegate: fakeProcessManager,
+        platform: windowsPlatform,
+      );
+      await processManager.run(<String>['foo.exe', 'x&y']);
+      expect(fakeProcessManager, hasNoRemainingExpectations);
+    });
+
+    testWithoutContext('does not guard batch-looking commands on non-Windows platforms', () async {
+      final fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
+        const FakeCommand(command: <String>['gradlew.bat', 'x&y']),
+      ]);
+      final ProcessManager processManager = createProcessManager(
+        delegate: fakeProcessManager,
+        platform: linuxPlatform,
+      );
+      await processManager.run(<String>['gradlew.bat', 'x&y']);
+      expect(fakeProcessManager, hasNoRemainingExpectations);
+    });
+  });
 }
 
 class FakeSignalProcessManager extends Fake implements ProcessManager {
