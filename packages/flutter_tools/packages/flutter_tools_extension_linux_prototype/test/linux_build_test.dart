@@ -304,6 +304,33 @@ void main() {
               },
               'Invalid "${BuildService.resolvedArtifactsParam}" parameter: Invalid "genSnapshot": expected String, got int.',
             ),
+            (
+              'non-map dartDefines',
+              <String, Object?>{BuildService.dartDefinesParam: 'not_a_map'},
+              'Invalid "${BuildService.dartDefinesParam}": expected Map<String, Object?>, got String.',
+            ),
+            (
+              'non-string dartDefines value',
+              <String, Object?>{
+                BuildService.dartDefinesParam: <String, Object?>{'FOO': 123},
+              },
+              'Invalid "FOO" value: expected String, got int.',
+            ),
+            (
+              'non-string flavor',
+              <String, Object?>{BuildService.flavorParam: 123},
+              'Invalid "${BuildService.flavorParam}": expected String?, got int.',
+            ),
+            (
+              'non-string targetDeviceId',
+              <String, Object?>{BuildService.targetDeviceIdParam: 123},
+              'Invalid "${BuildService.targetDeviceIdParam}": expected String?, got int.',
+            ),
+            (
+              'non-string targetPlatform',
+              <String, Object?>{BuildService.targetPlatformParam: 123},
+              'Invalid "${BuildService.targetPlatformParam}": expected String?, got int.',
+            ),
           ];
 
       for (final (String description, Map<String, Object?> overrides, String expectedMessage)

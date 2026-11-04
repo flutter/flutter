@@ -190,4 +190,73 @@ void main() {
     expect(result.stderr, contains('is not an allowed value for option "--template"'));
     expect(projectDir.existsSync(), isFalse);
   });
+
+  testWithoutContext('flutter run --use-application-binary launches prebuilt binary on extension device with engine switches and entrypoint args', () async {
+    final Directory projectDir = tempHome.childDirectory('custom_app_prebuilt');
+    if (projectDir.existsSync()) {
+      projectDir.deleteSync(recursive: true);
+    }
+    final ProcessResult createResult = await processManager.run(<String>[
+      flutterBin,
+      'create',
+      '--no-pub',
+      '--platforms=linux',
+      projectDir.path,
+    ], environment: baseEnv);
+    expect(
+      createResult.exitCode,
+      0,
+      reason: 'stdout: ${createResult.stdout}\nstderr: ${createResult.stderr}',
+    );
+
+    final File envOutFile = projectDir.childFile('prebuilt_env.txt');
+    final File prebuiltScript = projectDir.childFile('prebuilt_app.sh')
+      ..writeAsStringSync('''
+#!/bin/sh
+echo "ARGS=\$*" > "${envOutFile.path}"
+echo "SWITCHES=\$FLUTTER_ENGINE_SWITCHES" >> "${envOutFile.path}"
+echo "SWITCH_1=\$FLUTTER_ENGINE_SWITCH_1" >> "${envOutFile.path}"
+echo "SWITCH_2=\$FLUTTER_ENGINE_SWITCH_2" >> "${envOutFile.path}"
+exit 0
+''');
+    if (isLinux) {
+      await processManager.run(<String>['chmod', '+x', prebuiltScript.path]);
+    }
+
+    final ProcessResult runResult = await processManager.run(
+      <String>[
+        flutterBin,
+        'run',
+        '-d',
+        'custom_linux_device',
+        '--release',
+        '--no-resident',
+        '--no-pub',
+        '--use-application-binary=${prebuiltScript.path}',
+        '--route=/custom-route',
+        '--dart-entrypoint-args=--custom-arg',
+      ],
+      workingDirectory: projectDir.path,
+      environment: <String, String>{...baseEnv, 'FLUTTER_TOOL_EXTENSIONS': 'true'},
+    );
+
+    if (isLinux) {
+      expect(
+        runResult.exitCode,
+        0,
+        reason: 'stdout: ${runResult.stdout}\nstderr: ${runResult.stderr}',
+      );
+      expect(
+        envOutFile.existsSync(),
+        isTrue,
+        reason: 'stdout: ${runResult.stdout}\nstderr: ${runResult.stderr}',
+      );
+      final String captured = envOutFile.readAsStringSync();
+      expect(captured, contains('ARGS=--custom-arg'));
+      expect(captured, contains('SWITCH_1=enable-dart-profiling=true'));
+      expect(captured, contains('SWITCH_2=route=/custom-route'));
+    } else {
+      expect(runResult.exitCode, isNot(0));
+    }
+  });
 }

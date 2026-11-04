@@ -111,17 +111,56 @@ void main() {
   });
 
   group('ExtensionDebuggingOptions', () {
-    test('serializes and deserializes correctly', () {
-      const options = ExtensionDebuggingOptions(buildMode: .debug, debuggingEnabled: true);
-      final Map<String, Object?> map = options.toMap();
-      expect(map['buildMode'], 'debug');
-      expect(map['debuggingEnabled'], isTrue);
+    test('serializes and deserializes correctly with default and optional fields', () {
+      const defaultOptions = ExtensionDebuggingOptions(buildMode: .debug, debuggingEnabled: true);
+      final Map<String, Object?> defaultMap = defaultOptions.toMap();
+      expect(defaultMap[ExtensionDebuggingOptions.buildModeKey], 'debug');
+      expect(defaultMap[ExtensionDebuggingOptions.debuggingEnabledKey], isTrue);
+      expect(defaultMap.containsKey(ExtensionDebuggingOptions.dartEntrypointArgsKey), isFalse);
+      expect(defaultMap.containsKey(ExtensionDebuggingOptions.engineSwitchesKey), isFalse);
+      expect(defaultMap.containsKey(ExtensionDebuggingOptions.uninstallFirstKey), isFalse);
+      expect(defaultMap.containsKey(ExtensionDebuggingOptions.deviceVmServicePortKey), isFalse);
+      expect(defaultMap.containsKey(ExtensionDebuggingOptions.hostVmServicePortKey), isFalse);
+      expect(defaultMap.containsKey(ExtensionDebuggingOptions.routeKey), isFalse);
 
-      final parsed = ExtensionDebuggingOptions.fromJson(map);
-      expect(parsed, equals(options));
-      expect(parsed.hashCode, equals(options.hashCode));
-      expect(parsed.toString(), contains('buildMode: debug'));
-      expect(parsed.toString(), contains('debuggingEnabled: true'));
+      final parsedDefault = ExtensionDebuggingOptions.fromJson(defaultMap);
+      expect(parsedDefault, equals(defaultOptions));
+      expect(parsedDefault.hashCode, equals(defaultOptions.hashCode));
+      expect(parsedDefault.toString(), contains('buildMode: debug'));
+      expect(parsedDefault.toString(), contains('debuggingEnabled: true'));
+
+      const fullOptions = ExtensionDebuggingOptions(
+        buildMode: .profile,
+        dartEntrypointArgs: <String>['--foo', 'bar'],
+        debuggingEnabled: true,
+        deviceVmServicePort: 8181,
+        engineSwitches: <String>['enable-dart-profiling=true', 'start-paused=true'],
+        hostVmServicePort: 8282,
+        route: '/home',
+        uninstallFirst: true,
+      );
+      final Map<String, Object?> fullMap = fullOptions.toMap();
+      expect(fullMap[ExtensionDebuggingOptions.buildModeKey], 'profile');
+      expect(
+        fullMap[ExtensionDebuggingOptions.dartEntrypointArgsKey],
+        equals(<String>['--foo', 'bar']),
+      );
+      expect(fullMap[ExtensionDebuggingOptions.debuggingEnabledKey], isTrue);
+      expect(fullMap[ExtensionDebuggingOptions.deviceVmServicePortKey], 8181);
+      expect(
+        fullMap[ExtensionDebuggingOptions.engineSwitchesKey],
+        equals(<String>['enable-dart-profiling=true', 'start-paused=true']),
+      );
+      expect(fullMap[ExtensionDebuggingOptions.hostVmServicePortKey], 8282);
+      expect(fullMap[ExtensionDebuggingOptions.routeKey], '/home');
+      expect(fullMap[ExtensionDebuggingOptions.uninstallFirstKey], isTrue);
+
+      final parsedFull = ExtensionDebuggingOptions.fromJson(fullMap);
+      expect(parsedFull, equals(fullOptions));
+      expect(parsedFull.hashCode, equals(fullOptions.hashCode));
+      expect(parsedFull, isNot(equals(defaultOptions)));
+      expect(parsedFull.toString(), contains('route: /home'));
+      expect(parsedFull.toString(), contains('uninstallFirst: true'));
     });
 
     test('validates fields and throws FormatException when missing or invalid', () {
@@ -148,6 +187,54 @@ void main() {
         () => ExtensionDebuggingOptions.fromJson(const <String, Object?>{
           'buildMode': 'debug',
           'debuggingEnabled': 'not_a_bool',
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => ExtensionDebuggingOptions.fromJson(const <String, Object?>{
+          'buildMode': 'debug',
+          'debuggingEnabled': true,
+          'engineSwitches': <Object?>[123],
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => ExtensionDebuggingOptions.fromJson(const <String, Object?>{
+          'buildMode': 'debug',
+          'debuggingEnabled': true,
+          'dartEntrypointArgs': 'not_a_list',
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => ExtensionDebuggingOptions.fromJson(const <String, Object?>{
+          'buildMode': 'debug',
+          'debuggingEnabled': true,
+          'deviceVmServicePort': '8181',
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => ExtensionDebuggingOptions.fromJson(const <String, Object?>{
+          'buildMode': 'debug',
+          'debuggingEnabled': true,
+          'hostVmServicePort': '8282',
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => ExtensionDebuggingOptions.fromJson(const <String, Object?>{
+          'buildMode': 'debug',
+          'debuggingEnabled': true,
+          'route': 42,
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => ExtensionDebuggingOptions.fromJson(const <String, Object?>{
+          'buildMode': 'debug',
+          'debuggingEnabled': true,
+          'uninstallFirst': 'yes',
         }),
         throwsFormatException,
       );

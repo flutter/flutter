@@ -171,6 +171,7 @@ Directory resolveExtensionOutputDir({
   required FileSystem fileSystem,
   required Directory projectDir,
   required ExtensionBuildTarget target,
+  String? targetPlatform,
 }) {
   for (final RegExpMatch match in _placeholderRegex.allMatches(target.outputDir)) {
     final String? placeholder = match[0];
@@ -184,7 +185,7 @@ Directory resolveExtensionOutputDir({
       .replaceAll(BuiltInPlaceholders.outputDir, buildOutputDir.path)
       .replaceAll(BuiltInPlaceholders.projectDir, projectDir.path)
       .replaceAll(BuiltInPlaceholders.buildMode, buildMode.cliName)
-      .replaceAll(BuiltInPlaceholders.targetPlatform, target.targetPlatform);
+      .replaceAll(BuiltInPlaceholders.targetPlatform, targetPlatform ?? target.targetPlatform);
   if (fileSystem.path.isRelative(outputPath)) {
     outputPath = fileSystem.path.join(projectDir.path, outputPath);
   }
@@ -209,20 +210,22 @@ Map<String, String> resolveExtensionBuildTargetArtifacts({
   required Artifacts artifacts,
   required BuildMode buildMode,
   required ExtensionBuildTarget target,
+  String? targetPlatform,
 }) {
-  final TargetPlatform? targetPlatform = _tryResolveTargetPlatform(target.targetPlatform);
+  final String targetPlatformName = targetPlatform ?? target.targetPlatform;
+  final TargetPlatform? resolvedPlatform = _tryResolveTargetPlatform(targetPlatformName);
   final resolvedArtifacts = <String, String>{};
   for (final ExtensionArtifact artifact in target.artifacts) {
     final Artifact resolvedArtifact = _resolveArtifact(artifact);
-    if (targetPlatform == null && !_targetPlatformIndependentArtifacts.contains(artifact)) {
+    if (resolvedPlatform == null && !_targetPlatformIndependentArtifacts.contains(artifact)) {
       throwToolExit(
         'Artifact "${artifact.name}" requires a built-in target platform, '
-        'but build target "${target.name}" targets out-of-tree platform "${target.targetPlatform}".',
+        'but build target "${target.name}" targets out-of-tree platform "$targetPlatformName".',
       );
     }
     resolvedArtifacts[artifact.name] = artifacts.getArtifactPath(
       resolvedArtifact,
-      platform: targetPlatform,
+      platform: resolvedPlatform,
       mode: buildMode,
     );
   }

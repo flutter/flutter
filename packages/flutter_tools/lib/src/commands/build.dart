@@ -276,10 +276,14 @@ class ExtensionBuildSubCommand extends BuildSubCommand {
          outputPreferences: toolContext.outputPreferences,
          toolContext: toolContext,
        ) {
-    registerOptionBundle(const BuildModeOptionsBundle());
+    registerOptionBundles(const <OptionBundle>[
+      BuildModeOptionsBundle(),
+      DartCompileOptionsBundle(),
+    ]);
     argParser.addDescriptors(const <OptionDescriptor<Object?>>[
       CommonOptions.target,
       CommonOptions.pub,
+      BuildInfoOptions.flavor,
     ], verboseHelp: verboseHelp);
   }
 
@@ -318,12 +322,15 @@ class ExtensionBuildSubCommand extends BuildSubCommand {
 
     final ExtensionBuildResult result = await _buildManager.build(
       buildMode: buildInfo.mode,
+      dartDefines: parseExtensionDartDefines(buildInfo.dartDefines),
+      flavor: buildInfo.flavor,
       flutterRoot: fs.directory(cache.flutterRoot).uri,
       mainPath: targetFile,
       outputDir: outputDir.uri,
       projectRoot: projectDir.uri,
       resolvedArtifacts: resolvedArtifacts,
       targetName: target.name,
+      targetPlatform: target.targetPlatform,
     );
 
     if (result.success) {

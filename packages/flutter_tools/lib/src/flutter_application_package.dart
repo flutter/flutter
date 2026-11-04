@@ -8,6 +8,8 @@ import 'application_package.dart';
 import 'base/file_system.dart';
 import 'build_info.dart';
 import 'context/tool_context.dart';
+import 'experimental/extension_device_manager.dart';
+import 'features.dart';
 import 'ios/application_package.dart';
 import 'ios/plist_parser.dart';
 import 'linux/application_package.dart';
@@ -21,13 +23,15 @@ import 'windows/application_package.dart';
 class FlutterApplicationPackageFactory extends ApplicationPackageFactory {
   FlutterApplicationPackageFactory({
     required this._androidSdk,
-    required this._toolContext,
+    required this._featureFlags,
     required this._plistParser,
+    required this._toolContext,
   });
 
   final AndroidSdk? _androidSdk;
-  final ToolContext _toolContext;
+  final FeatureFlags _featureFlags;
   final PlistParser _plistParser;
+  final ToolContext _toolContext;
 
   FlutterProject _currentProject() {
     final ToolContext(:FileSystem fs, :FlutterProjectFactory projectFactory) = _toolContext;
@@ -95,6 +99,13 @@ class FlutterApplicationPackageFactory extends ApplicationPackageFactory {
         return applicationBinary == null
             ? WindowsApp.fromWindowsProject(_currentProject().windows, toolContext: _toolContext)
             : WindowsApp.fromPrebuiltApp(applicationBinary, toolContext: _toolContext);
+      case .unsupported when _featureFlags.isToolExtensionsEnabled:
+        final FlutterProject currentProject = _currentProject();
+        final String appName = currentProject.manifest.appName;
+        final String id = appName.isNotEmpty ? appName : currentProject.directory.basename;
+        return applicationBinary == null
+            ? ExtensionApplicationPackage(id: id)
+            : PrebuiltExtensionApplicationPackage(applicationPackage: applicationBinary, id: id);
       case .fuchsia || .unsupported:
         TargetPlatform.throwUnsupportedTarget();
     }

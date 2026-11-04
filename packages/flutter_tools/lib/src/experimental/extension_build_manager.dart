@@ -164,23 +164,31 @@ base class ExtensionBuildManager {
     required Uri projectRoot,
     required Map<String, String> resolvedArtifacts,
     required String targetName,
+    Map<String, String> dartDefines = const <String, String>{},
+    String? flavor,
+    String? targetDeviceId,
+    String? targetPlatform,
   }) {
     return _executeBuildRpc(
       buildMode: buildMode,
       connectionMap: _buildTargetToConnection,
+      dartDefines: dartDefines,
       ensureTargetsLoaded: () async {
         if (_cachedBuildTargets == null) {
           await getBuildTargets();
         }
       },
+      flavor: flavor,
       flutterRoot: flutterRoot,
       mainPath: mainPath,
       outputDir: outputDir,
       projectRoot: projectRoot,
       resolvedArtifacts: resolvedArtifacts,
       rpcMethod: BuildService.buildMethod,
+      targetDeviceId: targetDeviceId,
       targetKind: 'build',
       targetName: targetName,
+      targetPlatform: targetPlatform,
     );
   }
 
@@ -228,6 +236,10 @@ base class ExtensionBuildManager {
     required String targetKind,
     required String targetName,
     Uri? buildDir,
+    Map<String, String> dartDefines = const <String, String>{},
+    String? flavor,
+    String? targetDeviceId,
+    String? targetPlatform,
   }) async {
     if (!projectRoot.hasAbsolutePath) {
       throw ArgumentError.value(projectRoot, 'projectRoot', 'Must be an absolute path.');
@@ -274,12 +286,16 @@ base class ExtensionBuildManager {
         params: <String, Object?>{
           BuildService.buildDirParam: ?buildDir?.toString(),
           BuildService.buildModeParam: buildMode.cliName,
+          if (dartDefines.isNotEmpty) BuildService.dartDefinesParam: dartDefines,
+          BuildService.flavorParam: ?flavor,
           BuildService.flutterRootParam: flutterRoot.toString(),
           BuildService.mainPathParam: mainPath,
           BuildService.outputDirParam: outputDir.toString(),
           BuildService.projectRootParam: projectRoot.toString(),
           BuildService.resolvedArtifactsParam: resolvedArtifacts,
+          BuildService.targetDeviceIdParam: ?targetDeviceId,
           BuildService.targetNameParam: targetName,
+          BuildService.targetPlatformParam: ?targetPlatform,
         },
         // TODO(bkonyi): Support heartbeat / liveness monitoring for long-running RPCs,
         // https://github.com/flutter/flutter/issues/193955.
@@ -297,4 +313,22 @@ base class ExtensionBuildManager {
       return ExtensionBuildResult(success: false, errorMessage: e.toString());
     }
   }
+}
+
+/// Parses a list of `KEY=VALUE` `--dart-define` strings from `BuildInfo.dartDefines`
+/// into a key-value map.
+Map<String, String> parseExtensionDartDefines(List<String> dartDefines) {
+  if (dartDefines.isEmpty) {
+    return const <String, String>{};
+  }
+  final parsed = <String, String>{};
+  for (final define in dartDefines) {
+    final int separatorIndex = define.indexOf('=');
+    if (separatorIndex > 0) {
+      parsed[define.substring(0, separatorIndex)] = define.substring(separatorIndex + 1);
+    } else if (separatorIndex < 0 && define.isNotEmpty) {
+      parsed[define] = '';
+    }
+  }
+  return parsed;
 }

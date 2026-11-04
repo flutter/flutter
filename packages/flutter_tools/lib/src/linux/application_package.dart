@@ -21,7 +21,10 @@ abstract class LinuxApp extends ApplicationPackage {
   ///
   /// `applicationBinary` is the path to the executable.
   factory LinuxApp.fromPrebuiltApp(FileSystemEntity applicationBinary) {
-    return PrebuiltLinuxApp(executable: applicationBinary.path);
+    return PrebuiltLinuxApp(
+      applicationPackage: applicationBinary,
+      executable: applicationBinary.path,
+    );
   }
 
   @override
@@ -30,12 +33,14 @@ abstract class LinuxApp extends ApplicationPackage {
   String executable(BuildMode buildMode, [String? flavor]);
 }
 
-class PrebuiltLinuxApp extends LinuxApp {
-  PrebuiltLinuxApp({required String executable})
-    : _executable = executable,
-      super(projectBundleId: executable);
+class PrebuiltLinuxApp extends LinuxApp implements PrebuiltApplicationPackage {
+  PrebuiltLinuxApp({required this.applicationPackage, required this._executable})
+    : super(projectBundleId: _executable);
 
   final String _executable;
+
+  @override
+  final FileSystemEntity applicationPackage;
 
   @override
   String executable(BuildMode buildMode, [String? flavor]) => _executable;

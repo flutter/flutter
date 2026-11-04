@@ -56,15 +56,23 @@ final class _RecordingExtensionBuildManager extends ExtensionBuildManager {
     required Uri projectRoot,
     required Map<String, String> resolvedArtifacts,
     required String targetName,
+    Map<String, String> dartDefines = const <String, String>{},
+    String? flavor,
+    String? targetDeviceId,
+    String? targetPlatform,
   }) async {
     lastBuildArgs = <String, Object?>{
       'buildMode': buildMode,
+      'dartDefines': dartDefines,
+      'flavor': flavor,
       'flutterRoot': flutterRoot,
       'mainPath': mainPath,
       'outputDir': outputDir,
       'projectRoot': projectRoot,
       'resolvedArtifacts': resolvedArtifacts,
+      'targetDeviceId': targetDeviceId,
       'targetName': targetName,
+      'targetPlatform': targetPlatform,
     };
     return const ExtensionBuildResult(success: true);
   }
@@ -75,6 +83,7 @@ final class _TestBuildTarget extends BuildTarget {
     required super.description,
     required this.name,
     this.artifacts = const <ExtensionArtifact>{},
+    this.contextSendPort,
     this.errorMessage,
     super.outputDir = '${BuiltInPlaceholders.outputDir}/custom',
     this.shouldSucceed = true,
@@ -87,11 +96,19 @@ final class _TestBuildTarget extends BuildTarget {
   @override
   final Set<ExtensionArtifact> artifacts;
 
+  final SendPort? contextSendPort;
   final String? errorMessage;
   final bool shouldSucceed;
 
   @override
   Future<ExtensionBuildResult> build(ExtensionBuildContext context) async {
+    contextSendPort?.send(<String, Object?>{
+      'buildMode': context.buildMode.cliName,
+      'dartDefines': context.dartDefines,
+      'flavor': context.flavor,
+      'targetDeviceId': context.targetDeviceId,
+      'targetPlatform': context.targetPlatform,
+    });
     return shouldSucceed
         ? const ExtensionBuildResult(success: true)
         : ExtensionBuildResult(success: false, errorMessage: errorMessage ?? 'Build failed.');
@@ -126,9 +143,14 @@ final class _TestAssembleTarget extends AssembleTarget {
 }
 
 final class _SucceedingBuildService extends BuildService {
+  _SucceedingBuildService({this.contextSendPort});
+
+  final SendPort? contextSendPort;
+
   @override
-  List<BuildTarget> get buildTargets => const <BuildTarget>[
+  List<BuildTarget> get buildTargets => <BuildTarget>[
     _TestBuildTarget(
+      contextSendPort: contextSendPort,
       description: 'Hermetic custom build target.',
       name: 'custom-hermetic-build',
       outputDir: '${BuiltInPlaceholders.outputDir}/hermetic/${BuiltInPlaceholders.buildMode}',
@@ -741,11 +763,22 @@ void main() {
     testUsingContext(
       'BuildCommand includes custom subcommand and can run it when feature flag enabled',
       () async {
+        final contextPort = ReceivePort();
+        addTearDown(contextPort.close);
+        final SendPort contextSendPort = contextPort.sendPort;
+        void capturingEntryPoint(SendPort sendPort) {
+          ToolExtensionEntryPoint.run(
+            sendPort,
+            <ToolExtensionService>[_SucceedingBuildService(contextSendPort: contextSendPort)],
+            supportedPlatforms: const <String>{'linux'},
+          );
+        }
+
         final featureFlags = TestFeatureFlags(isToolExtensionsEnabled: true);
         final manager = ExtensionManager(
           hostPlatform: HostPlatform.linux_x64,
           logger: testLogger,
-          entryPoints: <ExtensionEntryPoint>[_succeedingBuildExtensionEntryPoint],
+          entryPoints: <ExtensionEntryPoint>[capturingEntryPoint],
           featureFlags: featureFlags,
         );
         final buildManager = ExtensionBuildManager(
@@ -771,10 +804,49 @@ void main() {
 
         final CommandRunner<void> commandRunner = createTestCommandRunner(command);
 
-        await commandRunner.run(<String>['build', 'custom-hermetic-build', '--no-pub']);
+        final Stream<Map<String, Object?>> capturedContexts = contextPort
+            .cast<Map<String, Object?>>()
+            .asBroadcastStream();
+        final Future<Map<String, Object?>> firstContextFuture = capturedContexts.first;
+        await commandRunner.run(<String>[
+          'build',
+          'custom-hermetic-build',
+          '--no-pub',
+          '--dart-define=FOO=BAR',
+          '--flavor=staging',
+        ]);
 
         expect(command.subcommands.containsKey('custom-hermetic-build'), isTrue);
         expect(command.subcommands.containsKey('custom-hermetic-assemble-only'), isFalse);
+        final Map<String, Object?> capturedContext = await firstContextFuture;
+        expect(capturedContext['buildMode'], equals('release'));
+        expect(capturedContext['dartDefines'], containsPair('FOO', 'BAR'));
+        expect(capturedContext['dartDefines'], containsPair('FLUTTER_APP_FLAVOR', 'staging'));
+        expect(capturedContext['flavor'], equals('staging'));
+        expect(capturedContext['targetDeviceId'], isNull);
+        expect(capturedContext['targetPlatform'], equals('linux-x64'));
+
+        final Future<Map<String, Object?>> secondContextFuture = capturedContexts.first;
+        final ExtensionBuildResult directBuildResult = await buildManager.build(
+          buildMode: .debug,
+          dartDefines: const <String, String>{'DEVICE_DEFINE': '1'},
+          flavor: 'dev',
+          flutterRoot: fs.directory('/flutter').uri,
+          mainPath: 'lib/main.dart',
+          outputDir: fs.directory('/build/custom').uri,
+          projectRoot: fs.directory('/').uri,
+          resolvedArtifacts: const <String, String>{},
+          targetDeviceId: 'custom_device_1',
+          targetName: 'custom-hermetic-build',
+          targetPlatform: 'custom-arm64',
+        );
+        expect(directBuildResult.success, isTrue);
+        final Map<String, Object?> secondContext = await secondContextFuture;
+        expect(secondContext['buildMode'], equals('debug'));
+        expect(secondContext['dartDefines'], equals(<String, String>{'DEVICE_DEFINE': '1'}));
+        expect(secondContext['flavor'], equals('dev'));
+        expect(secondContext['targetDeviceId'], equals('custom_device_1'));
+        expect(secondContext['targetPlatform'], equals('custom-arm64'));
 
         await manager.dispose();
       },
