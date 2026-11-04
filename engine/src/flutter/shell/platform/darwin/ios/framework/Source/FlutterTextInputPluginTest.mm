@@ -2855,6 +2855,16 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
   XCTAssertEqualObjects(inputView.passwordRules.passwordRulesDescriptor, @"required: [-a]];");
 }
 
+- (void)testPasswordRulesCustomCharacterClassIgnoresNonAsciiPrintableCharacters {
+  FlutterTextInputView* inputView = [self inputViewWithPasswordRules:@{
+    @"required" : @[ @[ @{@"custom" : @"é€"} ], @[ @{@"custom" : @"aé_\n"} ] ],
+    @"minLength" : @12,
+  }];
+
+  XCTAssertEqualObjects(inputView.passwordRules.passwordRulesDescriptor,
+                        @"required: [a_]; minlength: 12;");
+}
+
 - (void)testUpdatePasswordRules {
   NSMutableDictionary* config = self.mutablePasswordTemplateCopy;
   [config setValue:@{

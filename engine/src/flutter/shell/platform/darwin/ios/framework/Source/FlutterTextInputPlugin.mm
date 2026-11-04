@@ -220,31 +220,22 @@ static UIReturnKeyType ToUIReturnKeyType(NSString* inputType) {
 
 // Converts a custom character set to a password rules custom character class,
 // for example "[-_]". The password rules syntax requires "-" to be the first
-// character of the class and "]" to be the last one.
+// character of the class and "]" to be the last one. Characters that are not
+// ASCII printable are not supported and are ignored. Returns nil if no
+// supported character is left.
 static NSString* ToPasswordRulesCustomCharacterClass(NSString* characters) {
-  NSMutableString* result = [NSMutableString stringWithString:@"["];
-  BOOL hasDash = NO;
-  BOOL hasClosingBracket = NO;
-  NSMutableString* others = [NSMutableString string];
-  for (NSUInteger i = 0; i < characters.length; i++) {
-    unichar character = [characters characterAtIndex:i];
-    if (character == '-') {
-      hasDash = YES;
-    } else if (character == ']') {
-      hasClosingBracket = YES;
-    } else {
-      [others appendFormat:@"%C", character];
-    }
+  NSMutableCharacterSet* others =
+      [NSMutableCharacterSet characterSetWithRange:NSMakeRange(0x20, 0x7F - 0x20)];
+  [others removeCharactersInString:@"-]"];
+  NSString* otherCharacters = [[characters componentsSeparatedByCharactersInSet:others.invertedSet]
+      componentsJoinedByString:@""];
+  BOOL hasDash = [characters containsString:@"-"];
+  BOOL hasClosingBracket = [characters containsString:@"]"];
+  if (!hasDash && !hasClosingBracket && otherCharacters.length == 0) {
+    return nil;
   }
-  if (hasDash) {
-    [result appendString:@"-"];
-  }
-  [result appendString:others];
-  if (hasClosingBracket) {
-    [result appendString:@"]"];
-  }
-  [result appendString:@"]"];
-  return result;
+  return [NSString stringWithFormat:@"[%@%@%@]", hasDash ? @"-" : @"", otherCharacters,
+                                    hasClosingBracket ? @"]" : @""];
 }
 
 // Converts a character class sent by the framework to its password rules
