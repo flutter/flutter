@@ -155,8 +155,12 @@ void disableBazelRbe() {
 /// bot's engine builds. A shard's kernel compiles -- one per test file,
 /// against the prebuilt platform -- run on the workers, 200 at a time, and
 /// stay in the instance's cache for every later build of the same inputs
-/// (a retry, a rebase that touches nothing of theirs); the tests stay on
-/// the bot (the config's TestRunner strategy), their kernels downloaded.
+/// (a retry, a rebase that touches nothing of theirs); so do the headless
+/// tests, the framework's under flutter_tester and the pure-Dart packages',
+/// of which the bot then downloads the logs and the results, not the
+/// kernels. The tests tagged no-remote-exec stay on the bot (dart_test.bzl,
+/// flutter_test.bzl: those that may reach the network, drive a browser or
+/// a display, or run a tool of the host -- every shard of the tool's).
 /// Never on another host: the workers are Linux x64. Otherwise as the flags
 /// say ([rbe]: `--bazel-rbe` / `--no-bazel-rbe`), else on a bot unless
 /// [kBazelRbeEnvironmentVariable] says `0` -- [kBazelRbeOnBots] -- and never

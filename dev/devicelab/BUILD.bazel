@@ -33,6 +33,10 @@ dart_package_tests(
     # The Dart SDK, which run_test, runner_test and build_test_task_test run
     # on the package's scripts as ../../bin/cache/dart-sdk/bin/dart.
     cache = {HOST_DART_SDK + "//:dart": "dart-sdk"},
+    # runner_test starts thirty of those VMs at once and gives each a minute
+    # to report (a regression test of a shutdown race): the machine's CPUs,
+    # not a remote worker's two.
+    host = ["test/runner_test.dart"],
     package = "flutter_devicelab",
     # adb_test needs an Android SDK's platform-tools/adb at ANDROID_HOME
     # (devices.dart checks it can run), which CI's machines have; run_test and

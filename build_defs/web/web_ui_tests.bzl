@@ -475,7 +475,9 @@ def web_ui_test_suite(name, suite, bundle, tests, test_set, size = "large", tags
             bundle = ":bundles/%s/%s" % (bundle, stem),
             suite = suite,
             size = size,
-            tags = tags + (["requires-network"] if test in network else ["block-network"]),
+            # A browser's test: on the machine, never a remote worker
+            # (build:rbe runs the headless tests there).
+            tags = tags + ["no-remote-exec"] + (["requires-network"] if test in network else ["block-network"]),
             **kwargs
         )
         names.append(":" + target)
