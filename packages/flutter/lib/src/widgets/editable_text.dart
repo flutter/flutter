@@ -1944,7 +1944,9 @@ class EditableText extends StatefulWidget {
   /// {@macro flutter.services.AutofillConfiguration.passwordRules}
   ///
   /// Has no effect when autofill is disabled, i.e. when [autofillHints] is
-  /// null.
+  /// null, or when [autofillClient] is not null. A custom [autofillClient]
+  /// provides its own [AutofillConfiguration], which should include the
+  /// password rules instead.
   final PasswordRules? passwordRules;
 
   /// The [AutofillClient] that controls this input field's autofill behavior.
