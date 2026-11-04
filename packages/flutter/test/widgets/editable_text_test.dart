@@ -710,6 +710,65 @@ void main() {
     expect(render.backgroundCursorColor, Colors.green);
   });
 
+  testWidgets('passwordRules is sent in the autofill configuration', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: EditableText(
+            controller: controller,
+            backgroundCursorColor: Colors.grey,
+            focusNode: focusNode,
+            style: textStyle,
+            cursorColor: cursorColor,
+            autofillHints: const <String>[AutofillHints.newPassword],
+            passwordRules: const PasswordRules(
+              required: <Set<PasswordCharacterClass>>[
+                <PasswordCharacterClass>{PasswordCharacterClass.digit},
+              ],
+              minLength: 12,
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.showKeyboard(find.byType(EditableText));
+
+    expect(
+      tester.testTextInput.setClientArgs!['autofill'],
+      containsPair('passwordRules', <String, Object>{
+        'required': <List<Object>>[
+          <Object>['digit'],
+        ],
+        'minLength': 12,
+      }),
+    );
+  });
+
+  testWidgets('passwordRules is not sent when autofill is disabled', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: EditableText(
+            controller: controller,
+            backgroundCursorColor: Colors.grey,
+            focusNode: focusNode,
+            style: textStyle,
+            cursorColor: cursorColor,
+            autofillHints: null,
+            passwordRules: const PasswordRules(minLength: 12),
+          ),
+        ),
+      ),
+    );
+    await tester.showKeyboard(find.byType(EditableText));
+
+    expect(tester.testTextInput.setClientArgs!['autofill'], isNull);
+  });
+
   testWidgets('text keyboard is requested when maxLines is default', (WidgetTester tester) async {
     await tester.pumpWidget(
       MediaQuery(

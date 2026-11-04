@@ -923,6 +923,7 @@ class EditableText extends StatefulWidget {
     )
     ToolbarOptions? toolbarOptions,
     this.autofillHints = const <String>[],
+    this.passwordRules,
     this.autofillClient,
     this.clipBehavior = Clip.hardEdge,
     this.restorationId,
@@ -1940,6 +1941,12 @@ class EditableText extends StatefulWidget {
   /// {@macro flutter.services.AutofillConfiguration.autofillHints}
   final Iterable<String>? autofillHints;
 
+  /// {@macro flutter.services.AutofillConfiguration.passwordRules}
+  ///
+  /// Has no effect when autofill is disabled, i.e. when [autofillHints] is
+  /// null.
+  final PasswordRules? passwordRules;
+
   /// The [AutofillClient] that controls this input field's autofill behavior.
   ///
   /// When null, this widget's [EditableTextState] will be used as the
@@ -2475,6 +2482,9 @@ class EditableText extends StatefulWidget {
     );
     properties.add(
       DiagnosticsProperty<Iterable<String>>('autofillHints', autofillHints, defaultValue: null),
+    );
+    properties.add(
+      DiagnosticsProperty<PasswordRules>('passwordRules', passwordRules, defaultValue: null),
     );
     properties.add(
       DiagnosticsProperty<TextHeightBehavior>(
@@ -5410,6 +5420,7 @@ class EditableTextState extends State<EditableText>
             uniqueIdentifier: autofillId,
             autofillHints: autofillHints,
             currentEditingValue: currentTextEditingValue,
+            passwordRules: widget.passwordRules,
           )
         : AutofillConfiguration.disabled;
 

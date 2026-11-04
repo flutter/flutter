@@ -2796,6 +2796,136 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
   XCTAssertNil(inputView.textContentType);
 }
 
+- (FlutterTextInputView*)inputViewWithPasswordRules:(id)passwordRules {
+  NSMutableDictionary* autofill = [@{
+    @"uniqueIdentifier" : @"field1",
+    @"hints" : @[ @"newPassword" ],
+    @"editingValue" : @{@"text" : @""},
+  } mutableCopy];
+  [autofill setValue:passwordRules forKey:@"passwordRules"];
+  NSMutableDictionary* config = self.mutablePasswordTemplateCopy;
+  [config setValue:autofill forKey:@"autofill"];
+
+  FlutterTextInputView* inputView = [[FlutterTextInputView alloc] initWithOwner:textInputPlugin];
+  [inputView configureWithDictionary:config];
+  return inputView;
+}
+
+- (void)testPasswordRulesFromAutofillConfiguration {
+  NSMutableDictionary* config = self.mutablePasswordTemplateCopy;
+  [config setValue:@{
+    @"uniqueIdentifier" : @"field1",
+    @"hints" : @[ @"newPassword" ],
+    @"editingValue" : @{@"text" : @""},
+    @"passwordRules" : @{
+      @"required" : @[ @[ @"upper" ], @[ @"digit" ] ],
+      @"minLength" : @12,
+    },
+  }
+            forKey:@"autofill"];
+
+  [self setClientId:123 configuration:config];
+
+  FlutterTextInputView* inputView = self.installedInputViews[0];
+  XCTAssertEqualObjects(inputView.textContentType, UITextContentTypeNewPassword);
+  XCTAssertEqualObjects(inputView.passwordRules.passwordRulesDescriptor,
+                        @"required: upper; required: digit; minlength: 12;");
+}
+
+- (void)testPasswordRulesDescriptorWithAllRules {
+  FlutterTextInputView* inputView = [self inputViewWithPasswordRules:@{
+    @"required" : @[ @[ @"upper", @"lower" ], @[ @"digit" ] ],
+    @"allowed" : @[ @"special", @"asciiPrintable", @"unicode", @{@"custom" : @"_-"} ],
+    @"minLength" : @8,
+    @"maxLength" : @64,
+    @"maxConsecutive" : @2,
+  }];
+
+  XCTAssertEqualObjects(inputView.passwordRules.passwordRulesDescriptor,
+                        @"required: upper, lower; required: digit; "
+                        @"allowed: special, ascii-printable, unicode, [-_]; "
+                        @"minlength: 8; maxlength: 64; max-consecutive: 2;");
+}
+
+- (void)testPasswordRulesCustomCharacterClassOrdersDashAndClosingBracket {
+  FlutterTextInputView* inputView = [self inputViewWithPasswordRules:@{
+    @"required" : @[ @[ @{@"custom" : @"]a-"} ] ],
+  }];
+
+  XCTAssertEqualObjects(inputView.passwordRules.passwordRulesDescriptor, @"required: [-a]];");
+}
+
+- (void)testPasswordRulesIgnoresMalformedValues {
+  FlutterTextInputView* inputView = [self inputViewWithPasswordRules:@{
+    @"required" : @[ @[ @"unknown", @42, @{@"custom" : @""} ], @"upper", @[ @"digit" ] ],
+    @"allowed" : @"lower",
+    @"minLength" : @"12",
+    @"maxLength" : @0,
+  }];
+
+  XCTAssertEqualObjects(inputView.passwordRules.passwordRulesDescriptor, @"required: digit;");
+}
+
+- (void)testPasswordRulesNilWhenEmptyOrMalformed {
+  XCTAssertNil([self inputViewWithPasswordRules:@{}].passwordRules);
+  XCTAssertNil([self inputViewWithPasswordRules:@"minlength: 12;"].passwordRules);
+  XCTAssertNil([self inputViewWithPasswordRules:@{@"required" : @[ @[] ]}].passwordRules);
+}
+
+- (void)testPasswordRulesNilWhenNotProvided {
+  NSMutableDictionary* config = self.mutablePasswordTemplateCopy;
+  [config setValue:@{
+    @"uniqueIdentifier" : @"field1",
+    @"hints" : @[ @"newPassword" ],
+    @"editingValue" : @{@"text" : @""},
+  }
+            forKey:@"autofill"];
+
+  [self setClientId:123 configuration:config];
+
+  FlutterTextInputView* inputView = self.installedInputViews[0];
+  XCTAssertNil(inputView.passwordRules);
+}
+
+- (void)testPasswordRulesClearedOnReconfigure {
+  FlutterTextInputView* inputView = [[FlutterTextInputView alloc] initWithOwner:textInputPlugin];
+
+  NSMutableDictionary* config = self.mutablePasswordTemplateCopy;
+  [config setValue:@{
+    @"uniqueIdentifier" : @"field1",
+    @"hints" : @[ @"newPassword" ],
+    @"editingValue" : @{@"text" : @""},
+    @"passwordRules" : @{@"minLength" : @20},
+  }
+            forKey:@"autofill"];
+  [inputView configureWithDictionary:config];
+  XCTAssertNotNil(inputView.passwordRules);
+
+  // Autofill info without password rules.
+  [config setValue:@{
+    @"uniqueIdentifier" : @"field1",
+    @"hints" : @[ @"newPassword" ],
+    @"editingValue" : @{@"text" : @""},
+  }
+            forKey:@"autofill"];
+  [inputView configureWithDictionary:config];
+  XCTAssertNil(inputView.passwordRules);
+
+  // Autofill disabled.
+  [config setValue:@{
+    @"uniqueIdentifier" : @"field1",
+    @"hints" : @[ @"newPassword" ],
+    @"editingValue" : @{@"text" : @""},
+    @"passwordRules" : @{@"minLength" : @20},
+  }
+            forKey:@"autofill"];
+  [inputView configureWithDictionary:config];
+  XCTAssertNotNil(inputView.passwordRules);
+  [config removeObjectForKey:@"autofill"];
+  [inputView configureWithDictionary:config];
+  XCTAssertNil(inputView.passwordRules);
+}
+
 - (void)testAutofillContext {
   NSMutableDictionary* field1 = self.mutableTemplateCopy;
 
