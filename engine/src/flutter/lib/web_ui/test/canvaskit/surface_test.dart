@@ -161,7 +161,35 @@ void testMain() {
       await surface.initialized;
 
       surface.setSize(const BitmapSize(100, 100));
+      final DomEventTarget clampedCanvas = surface.canvas;
+      final WebGLContext clampedGl = (clampedCanvas as DomOffscreenCanvas).getGlContext(
+        webGLVersion,
+      );
+
       surface.setSize(const BitmapSize(4960, 7016));
+      final DomEventTarget freshCanvas = surface.canvas;
+
+      expect(
+        identical(freshCanvas, clampedCanvas),
+        isFalse,
+        reason: 'A clamped drawing buffer should be recovered on a freshly acquired canvas',
+      );
+      expect(
+        clampedGl.isContextLost(),
+        isTrue,
+        reason:
+            'The WebGL context of the replaced canvas should be explicitly lost so that '
+            'the browser frees its context slot',
+      );
+
+      // Give any pending `webglcontextlost` event a chance to be dispatched.
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+      expect(
+        identical(surface.canvas, freshCanvas),
+        isTrue,
+        reason: 'Losing the replaced context must not trigger context-lost recovery',
+      );
+      expect(surface.supportsWebGl, isTrue);
 
       final recorder = ui.PictureRecorder();
       final canvas = ui.Canvas(recorder);
@@ -235,14 +263,68 @@ void testMain() {
         final surface = CkOffscreenSurface(OffscreenCanvasProvider());
         await surface.initialized;
 
-        final WebGLContext gl = (surface.canvas as DomOffscreenCanvas).getGlContext(2);
+        surface.setSize(const BitmapSize(100, 100));
+        final healthyCanvas = surface.canvas as DomOffscreenCanvas;
+        final SkSurface? healthySkSurface = surface.skSurface;
+
+        final WebGLContext gl = healthyCanvas.getGlContext(webGLVersion);
         final int maxTextureSize = gl.getParameter(0x0D33); // GL_MAX_TEXTURE_SIZE
         final int oversized = maxTextureSize + 1000;
 
         expect(
           () => surface.setSize(BitmapSize(oversized, oversized)),
-          throwsA(isA<UnsupportedError>()),
+          throwsA(
+            isA<UnsupportedError>().having(
+              (UnsupportedError e) => e.message,
+              'message',
+              'Requested dimensions ${oversized}x$oversized exceed '
+                  'GL_MAX_TEXTURE_SIZE ($maxTextureSize).',
+            ),
+          ),
         );
+
+        // The oversized request is rejected upfront, leaving the healthy
+        // surface untouched.
+        expect(
+          identical(surface.canvas, healthyCanvas),
+          isTrue,
+          reason: 'An oversized request must not replace the existing canvas',
+        );
+        expect(healthyCanvas.width, 100);
+        expect(healthyCanvas.height, 100);
+        expect(
+          identical(surface.skSurface, healthySkSurface),
+          isTrue,
+          reason: 'An oversized request must not recreate the existing SkSurface',
+        );
+        expect(gl.isContextLost(), isFalse);
+        expect(surface.supportsWebGl, isTrue);
+
+        // The surface's recorded size is rolled back, so requesting the
+        // previous size again is a no-op.
+        surface.setSize(const BitmapSize(100, 100));
+        expect(
+          identical(surface.skSurface, healthySkSurface),
+          isTrue,
+          reason: 'Re-requesting the size from before the failed resize should be a no-op',
+        );
+        expect(identical(surface.canvas, healthyCanvas), isTrue);
+
+        final paint = ui.Paint()..color = const ui.Color(0xFF0000FF);
+        final recorder1 = ui.PictureRecorder();
+        ui.Canvas(recorder1).drawRect(const ui.Rect.fromLTWH(0, 0, 100, 100), paint);
+        await surface.rasterizeToCanvas(recorder1.endRecording());
+        expect(readSurfacePixel(surface, 99, 99), <int>[0, 0, 255, 255]);
+
+        // Subsequent normal resizes keep rendering via WebGL on the same canvas.
+        surface.setSize(const BitmapSize(150, 150));
+        expect(identical(surface.canvas, healthyCanvas), isTrue);
+        expect(surface.supportsWebGl, isTrue);
+
+        final recorder2 = ui.PictureRecorder();
+        ui.Canvas(recorder2).drawRect(const ui.Rect.fromLTWH(0, 0, 150, 150), paint);
+        await surface.rasterizeToCanvas(recorder2.endRecording());
+        expect(readSurfacePixel(surface, 149, 149), <int>[0, 0, 255, 255]);
 
         surface.dispose();
       },
@@ -254,10 +336,41 @@ void testMain() {
         await surface.initialized;
 
         // Rapid ping-pong resizing between small (10x10) and large (5000x5000) dimensions.
-        for (var i = 0; i < 15; i++) {
-          surface.setSize(const BitmapSize(10, 10));
-          surface.setSize(const BitmapSize(5000, 5000));
+        // Track the WebGL contexts of every canvas the surface replaces.
+        final replacedContexts = <WebGLContext>[];
+        void resizeTrackingReplacements(BitmapSize size) {
+          final DomEventTarget before = surface.canvas;
+          surface.setSize(size);
+          if (!identical(surface.canvas, before)) {
+            replacedContexts.add((before as DomOffscreenCanvas).getGlContext(webGLVersion));
+          }
         }
+
+        for (var i = 0; i < 15; i++) {
+          // 4960x7016 is large enough to clamp an in-place resized drawing
+          // buffer and force the canvas to be replaced.
+          resizeTrackingReplacements(const BitmapSize(10, 10));
+          resizeTrackingReplacements(const BitmapSize(4960, 7016));
+          resizeTrackingReplacements(const BitmapSize(10, 10));
+          resizeTrackingReplacements(const BitmapSize(5000, 5000));
+        }
+
+        expect(
+          replacedContexts,
+          isNotEmpty,
+          reason: 'Growing to 4960x7016 should clamp and replace the canvas',
+        );
+        final int liveReplacedContexts = replacedContexts
+            .where((WebGLContext gl) => !gl.isContextLost())
+            .length;
+        expect(
+          liveReplacedContexts,
+          0,
+          reason:
+              'All ${replacedContexts.length} replaced canvases should have had their WebGL '
+              'contexts explicitly lost, but $liveReplacedContexts are still alive',
+        );
+        expect(surface.supportsWebGl, isTrue);
 
         final recorder = ui.PictureRecorder();
         final canvas = ui.Canvas(recorder);
@@ -355,8 +468,16 @@ void testMain() {
           snapshot1.delete();
         }
 
-        // Zero dimension boundary: 0x0
+        // Zero dimension boundary: 0x0 is clamped to 1x1.
         surface.setSize(BitmapSize.zero);
+        expect(
+          surface.supportsWebGl,
+          isTrue,
+          reason: 'Sizing to 0x0 must not poison the surface into software fallback',
+        );
+        final zeroSizedCanvas = surface.canvas as DomOffscreenCanvas;
+        expect(zeroSizedCanvas.width, 1);
+        expect(zeroSizedCanvas.height, 1);
         final recorder0 = ui.PictureRecorder();
         final canvas0 = ui.Canvas(recorder0);
         final paint0 = ui.Paint()..color = const ui.Color(0xFF00FF00);
@@ -364,6 +485,15 @@ void testMain() {
         final ui.Picture picture0 = recorder0.endRecording();
         await surface.rasterizeToCanvas(picture0);
         expect(surface.skSurface, isNotNull);
+
+        final SkImage snapshot0 = surface.skSurface!.makeImageSnapshot();
+        try {
+          expect(snapshot0.width(), 1);
+          expect(snapshot0.height(), 1);
+        } finally {
+          snapshot0.delete();
+        }
+        expect(surface.supportsWebGl, isTrue);
 
         surface.dispose();
       });
@@ -381,4 +511,22 @@ ui.Size getCssSize(DomHTMLCanvasElement canvas) {
   final double width = double.parse(cssWidth.substring(0, cssWidth.length - 2).trim());
   final double height = double.parse(cssHeight.substring(0, cssHeight.length - 2).trim());
   return ui.Size(width, height);
+}
+
+/// Reads back the RGBA bytes of the pixel at ([x], [y]) from the current Skia
+/// surface of [surface].
+List<int> readSurfacePixel(CkSurface surface, int x, int y) {
+  final SkImage snapshot = surface.skSurface!.makeImageSnapshot();
+  try {
+    final imageInfo = SkImageInfo(
+      alphaType: canvasKit.AlphaType.Premul,
+      colorType: canvasKit.ColorType.RGBA_8888,
+      colorSpace: SkColorSpaceSRGB,
+      width: 1,
+      height: 1,
+    );
+    return snapshot.readPixels(x.toDouble(), y.toDouble(), imageInfo)!.toList();
+  } finally {
+    snapshot.delete();
+  }
 }
