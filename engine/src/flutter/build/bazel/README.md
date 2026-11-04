@@ -1319,8 +1319,14 @@ itself; on a Linux bot the shard now builds with `--config=rbe`
 (`bazelRbeOptions`, the config bazel_ci.py gives the engine builders: the
 kernel compiles on Flutter's RBE workers, 200 at a time, cached there for
 the next build of the same inputs; the tests on the bot, their kernels
-downloaded; a Mac builds locally, the workers being Linux x64), whose
-times the next presubmit gives. `test.dart --no-bazel-rbe` keeps a shard's
+downloaded; a Mac builds locally, the workers being Linux x64). On the
+same 8-core bots (PR #195825 at 497, 11-03), the `run test.dart` step:
+libraries 8:44 → 5:39, misc 16:41 → 10:25, widgets 11:34 → 8:33,
+tool_tests_general 5:25 → 3:34, tool_tests_commands 12:20 → 9:57,
+web_tool_tests 9:59 → 9:21; the tool_integration slices (12–16 min) and
+slow unchanged, their time being the tests themselves. The workers are
+2-vCPU Debian 11 machines whose clock is UTC, which is why archives are
+zipped on the bot (build_defs/dist/zip_bundle.bzl). `test.dart --no-bazel-rbe` keeps a shard's
 build on the machine and `--bazel-rbe` asks for RBE off a bot (a Linux
 host with `gcloud` credentials for the instance), `FLUTTER_BAZEL_RBE=0`
 in the environment is the former for a run, and `kBazelRbeOnBots`
