@@ -864,6 +864,7 @@ class AndroidDevice extends Device {
     const remotePath = '/data/local/tmp/flutter_recording.mp4';
     final args = <String>[
       'shell',
+      'exec',
       'screenrecord',
       '--time-limit',
       '${effectiveDuration.inSeconds}',
@@ -889,6 +890,14 @@ class AndroidDevice extends Device {
               : 'screenrecord failed with exit code $recordExitCode.';
           throwToolExit(errorMsg);
         }
+        // `adb` exits as soon as it's stopped, but `screenrecord` keeps
+        // finalizing the MP4 on the device after adbd sends it SIGHUP.
+        await _processUtils.run(
+          adbCommandForDevice(<String>[
+            'shell',
+            'while pidof screenrecord > /dev/null; do sleep 0.1; done',
+          ]),
+        );
         final RunResult pullResult = await _processUtils.run(
           adbCommandForDevice(<String>['pull', remotePath, outputFile.path]),
         );
@@ -909,21 +918,7 @@ class AndroidDevice extends Device {
       }
     }
 
-    return ScreenRecording(
-      process,
-      runRecording(),
-      signalStop: () async {
-        // adb does not forward SIGINT to the device; send it directly to the
-        // on-device screenrecord process so the MP4 moov atom is finalized.
-        try {
-          await _processUtils.run(
-            adbCommandForDevice(<String>['shell', 'pkill', '-2', 'screenrecord']),
-          );
-        } on Exception {
-          // Best effort: screenrecord may have already exited.
-        }
-      },
-    );
+    return ScreenRecording(process, runRecording());
   }
 
   @override

@@ -1068,8 +1068,7 @@ class IOSCoreDeviceControl {
     Duration? duration,
     File? jsonOutput,
   }) async {
-    final ToolContext(:ProcessUtils processUtils) = _toolContext;
-    return processUtils.start(<String>[
+    return _toolContext.processUtils.start(<String>[
       ..._xcode.xcrunCommand(),
       'devicectl',
       'device',

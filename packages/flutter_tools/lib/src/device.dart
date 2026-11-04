@@ -924,8 +924,8 @@ abstract class Device {
 /// A screen recording started by [Device.startScreenRecording].
 ///
 /// Platforms return `ScreenRecording(process, runRecording())`, optionally
-/// passing a custom `signalStop` (e.g. Android sends `pkill -2 screenrecord`
-/// instead of signalling the local `adb` process).
+/// passing a custom `signalStop` to override the default SIGINT sent to the
+/// recording process.
 class ScreenRecording {
   ScreenRecording(Process process, this.done, {Future<void> Function()? signalStop})
     : _signalStop = signalStop ?? (() async => ProcessSignal.sigint.kill(process));
