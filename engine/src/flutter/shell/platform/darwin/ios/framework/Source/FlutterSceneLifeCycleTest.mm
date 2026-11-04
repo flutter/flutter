@@ -1543,6 +1543,29 @@ FLUTTER_ASSERT_ARC
 
     OCMVerify(times(1), [viewControllerEngine updateDisplays]);
     OCMVerify(times(1), [registeredEngine updateDisplays]);
+  } else {
+    XCTSkip(@"windowScene:didUpdateEffectiveGeometry: requires iOS 26.");
+  }
+}
+
+- (void)testWindowSceneDidUpdateEffectiveGeometryWithNilPreviousGeometryUpdatesDisplays {
+  if (@available(iOS 26.0, *)) {
+    FlutterPluginSceneLifeCycleDelegate* delegate =
+        [[FlutterPluginSceneLifeCycleDelegate alloc] init];
+
+    id mocks = [self mocksForEvents];
+    id mockEngine = mocks[@"mockEngine"];
+    id mockScene = mocks[@"mockScene"];
+    [delegate registerSceneLifeCycleWithFlutterEngine:mockEngine scene:mockScene];
+
+    // UIKit declares `previousEffectiveGeometry` as nonnull, but passes `nil` on the first call
+    // while the scene is being created. Passing a literal `nil` here would trigger `-Wnonnull`.
+    UIWindowSceneGeometry* previousEffectiveGeometry = nil;
+    [delegate windowScene:mockScene didUpdateEffectiveGeometry:previousEffectiveGeometry];
+
+    OCMVerify(times(1), [mockEngine updateDisplays]);
+  } else {
+    XCTSkip(@"windowScene:didUpdateEffectiveGeometry: requires iOS 26.");
   }
 }
 
@@ -1561,6 +1584,33 @@ FLUTTER_ASSERT_ARC
         didUpdateEffectiveGeometry:OCMClassMock([UIWindowSceneGeometry class])];
 
     OCMVerify(never(), [mockEngine updateDisplays]);
+  } else {
+    XCTSkip(@"windowScene:didUpdateEffectiveGeometry: requires iOS 26.");
+  }
+}
+
+- (void)testWindowSceneDidUpdateEffectiveGeometryUpdatesDisplaysOfEnginesInSingleScene {
+  if (@available(iOS 26.0, *)) {
+    id mockApplication = OCMClassMock([UIApplication class]);
+    OCMStub([mockApplication sharedApplication]).andReturn(mockApplication);
+    OCMStub([mockApplication supportsMultipleScenes]).andReturn(NO);
+
+    FlutterPluginSceneLifeCycleDelegate* delegate =
+        [[FlutterPluginSceneLifeCycleDelegate alloc] init];
+
+    // In a single-scene app, every engine registers itself for the single scene when created.
+    id mockEngine = OCMClassMock([FlutterEngine class]);
+    [FlutterPluginSceneLifeCycleDelegate registerEngineForSingleScene:mockEngine];
+
+    id mockScene = OCMClassMock([UIWindowScene class]);
+    [delegate windowScene:mockScene
+        didUpdateEffectiveGeometry:OCMClassMock([UIWindowSceneGeometry class])];
+
+    OCMVerify(times(1), [mockEngine updateDisplays]);
+
+    [mockApplication stopMocking];
+  } else {
+    XCTSkip(@"windowScene:didUpdateEffectiveGeometry: requires iOS 26.");
   }
 }
 

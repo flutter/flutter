@@ -263,21 +263,12 @@ API_AVAILABLE(ios(13.0))
 /**
  * Updates the display information of the Flutter engines associated with `windowScene`.
  *
- * Call this from `-[UIWindowSceneDelegate windowScene:didUpdateEffectiveGeometry:]`. That callback
- * is always called when a `UIWindowScene` moves between screens (e.g. between the outer and inner
- * displays of a device with multiple built-in displays), even if no Flutter view's size changes.
+ * Call this from `-[UIWindowSceneDelegate windowScene:didUpdateEffectiveGeometry:]`. UIKit calls
+ * that method whenever a `UIWindowScene` moves between screens, even if no Flutter view changes
+ * size. `FlutterSceneDelegate` forwards this automatically.
  *
- * UIKit declares `previousEffectiveGeometry` as nonnull, but passes `nil` for it on the initial
- * call while the scene is being created. This is a UIKit bug. If Apple fixes it by marking the
- * parameter nullable, that is a breaking change for every Swift implementer of
- * `UIWindowSceneDelegate`, and this method will change to match.
- *
- * This parameter is still intentionally nonnull to match UIKit, rather than nullable:
- * - This method then only changes when UIKit's does, so Flutter never introduces a breaking change
- *   here on its own. If it were nullable, Swift callers could pass an optional, and changing it to
- *   nonnull later (e.g. if Apple stops passing `nil`) would break them.
- * - Like the other methods of this class, it mirrors the UIKit callback exactly, so forwarding is
- *   a direct pass-through with matching types.
+ * `previousEffectiveGeometry` is nonnull to match UIKit, but UIKit passes `nil` on the first call
+ * while the scene is being created. This method ignores it.
  */
 - (void)windowScene:(UIWindowScene*)windowScene
     didUpdateEffectiveGeometry:(UIWindowSceneGeometry*)previousEffectiveGeometry
