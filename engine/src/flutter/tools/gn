@@ -1315,6 +1315,20 @@ def parse_args(args):
       'be those of a build of ci/builders/*.json, whose Bazel configuration and install '
       'target `ninja -C <dir> <targets>` then runs (flutter/build/bazel/ci.md).',
   )
+  parser.add_argument(
+      '--bazel-rbe',
+      dest='bazel_rbe',
+      default=None,
+      action='store_true',
+      help="With --bazel: run the build's actions on Flutter's RBE instance (the root "
+      ".bazelrc's build:rbe; Linux hosts only), which is a Linux bot's default.",
+  )
+  parser.add_argument(
+      '--no-bazel-rbe',
+      dest='bazel_rbe',
+      action='store_false',
+      help='With --bazel: build on this machine alone, RBE off (flutter/build/bazel/ci.md).',
+  )
 
   return parser.parse_args(args)
 
@@ -1353,7 +1367,7 @@ def bazel_main(argv, args):
     print(error, file=sys.stderr)
     return 1
   out_dir = os.path.join(SRC_ROOT, get_out_dir(args))
-  written = bazel_ci.write_build_directory(SRC_ROOT, build, out_dir, bazelisk)
+  written = bazel_ci.write_build_directory(SRC_ROOT, build, out_dir, bazelisk, args.bazel_rbe)
   print(
       'Generating Bazel build files in: %s (%s, --config=%s, %s)' %
       (out_dir, build['file'], build['config'], build['install'])
