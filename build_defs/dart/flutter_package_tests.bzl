@@ -108,7 +108,7 @@ def flutter_package_tests(
       cache: the SDK-cache paths; the Dart SDK and the fonts by default.
       test_configs: the tree's `flutter_test_config.dart` and `pubspec.yaml`
         files; a glob of both by default (flutter_tests' test_configs).
-      **kwargs: flutter_tests' other arguments (flaky, size, tags, network,
+      **kwargs: flutter_tests' other arguments (flaky, large, shards, size, tags, network,
         vm_service).
     """
     package_label = "//" + (directory if directory != None else "packages/" + package)
