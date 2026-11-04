@@ -282,7 +282,18 @@ the test for real, and so does the command from `engine/src`.
   sync rewrites, so their action keys changed from task to task
   (gn_build.py prints its input trees' digests with its timing line, 501,
   which is how three drones of one presubmit showed the one directory
-  that differed). No reclient: the
+  that differed). Sent to a worker as they are
+  (`--modify_execution_info=GnBuild=-no-remote-exec --remote_timeout=3600`
+  on a `--config=rbe` build, plus a `git` stub on the action's PATH, the
+  image having none and Dart's `tools/make_version.py` running git whatever
+  its arguments say -- a dozen lines in gn_build.py, kept out of the tree
+  since every change to that file costs the pool its cached wraps), the
+  Dart runtime's wrap took 51 minutes on a 2-vCPU worker (11-04, from a
+  workstation) against 442 s on an 8-core bot:
+  not a route. What would take the wraps off a cold bot: reclient inside
+  the wrap (the GN build's compiles on the workers, as the recipe ran them
+  before), prebuilts of the engine's Dart runtime per roll, or the Dart
+  runtime and the GL stack built by Bazel. No reclient: the
   Bazel builds carry `--no-rbe` and `use_rbe: false`, so the recipe starts
   no reproxy; Bazel speaks to RBE itself. Two timeouts apply: the target's in
   `.ci.yaml` (the orchestrator's; 240 for the switched targets) and each
