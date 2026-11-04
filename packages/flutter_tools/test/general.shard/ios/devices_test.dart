@@ -764,7 +764,9 @@ void main() {
           xcode: FakeXcode(currentVersion: Version(27, 0, 0)),
         );
 
-        fakeCoreDeviceControl.takeScreenshotException = Exception(
+        fakeCoreDeviceControl.takeScreenshotException = const ProcessException(
+          'xcrun',
+          <String>['devicectl'],
           'ERROR: A connection to this device could not be established. (com.apple.dt.CoreDeviceError error 4000 (0xFA0))',
         );
         await expectLater(
