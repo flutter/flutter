@@ -394,7 +394,10 @@ void main() {
       await expectLater(
         () => chromiumDevice.startApp(
           null,
-          debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug, webLaunchUrl: url),
+          debuggingOptions: DebuggingOptions.enabled(
+            BuildInfo.debug,
+            webConfig: WebDebugConfig(launchUrl: url),
+          ),
           platformArgs: <String, Object?>{'uri': url},
         ),
         matcher,

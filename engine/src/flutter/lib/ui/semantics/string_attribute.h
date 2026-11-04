@@ -36,7 +36,7 @@ struct StringAttribute {
   virtual ~StringAttribute() = default;
   int32_t start = -1;
   int32_t end = -1;
-  StringAttributeType type;
+  StringAttributeType type = StringAttributeType::kSpellOut;
 };
 
 //------------------------------------------------------------------------------

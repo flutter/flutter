@@ -10,91 +10,37 @@ import 'dart:typed_data';
 import 'package:ui/src/engine.dart';
 import 'package:ui/src/engine/skwasm/skwasm_impl.dart';
 import 'package:ui/ui.dart' as ui;
-import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
-const String _kWeightAxisTag = 'wght';
-
-final List<String> _testFonts = <String>['FlutterTest', 'Ahem'];
-List<String> _computeEffectiveFontFamilies(List<String> fontFamilies) {
-  if (!ui_web.TestEnvironment.instance.forceTestFonts) {
-    return fontFamilies;
-  }
-  final Iterable<String> filteredFonts = fontFamilies.where(_testFonts.contains);
-  return filteredFonts.isEmpty ? _testFonts : filteredFonts.toList();
-}
-
-int getFourByteTag(String s) {
+int _getFourByteTag(String s) {
   assert(s.length == 4);
   return s.codeUnitAt(0) << 24 | s.codeUnitAt(1) << 16 | s.codeUnitAt(2) << 8 | s.codeUnitAt(3);
 }
 
-class SkwasmLineMetrics implements ui.LineMetrics {
-  SkwasmLineMetrics({
-    required this.hardBreak,
-    required this.ascent,
-    required this.descent,
-    required this.unscaledAscent,
-    required this.height,
-    required this.width,
-    required this.left,
-    required this.baseline,
-    required this.lineNumber,
-    this.startIndex = 0,
-    this.endIndex = 0,
-  });
-
-  factory SkwasmLineMetrics._fromHandle(LineMetricsHandle handle) {
-    return SkwasmLineMetrics(
-      hardBreak: lineMetricsGetHardBreak(handle),
-      ascent: lineMetricsGetAscent(handle),
-      descent: lineMetricsGetDescent(handle),
-      unscaledAscent: lineMetricsGetUnscaledAscent(handle),
-      height: lineMetricsGetHeight(handle),
-      width: lineMetricsGetWidth(handle),
-      left: lineMetricsGetLeft(handle),
-      baseline: lineMetricsGetBaseline(handle),
-      lineNumber: lineMetricsGetLineNumber(handle),
-      startIndex: lineMetricsGetStartIndex(handle),
-      endIndex: lineMetricsGetEndIndex(handle),
-    );
-  }
-
-  @override
-  final bool hardBreak;
-
-  @override
-  final double ascent;
-
-  @override
-  final double descent;
-
-  @override
-  final double unscaledAscent;
-
-  @override
-  final double height;
-
-  @override
-  final double width;
-
-  @override
-  final double left;
-
-  @override
-  final double baseline;
-
-  @override
-  final int lineNumber;
-
-  final int startIndex;
-  final int endIndex;
+EngineLineMetrics _createLineMetricsFromHandle(LineMetricsHandle handle) {
+  return EngineLineMetrics(
+    hardBreak: lineMetricsGetHardBreak(handle),
+    ascent: lineMetricsGetAscent(handle),
+    descent: lineMetricsGetDescent(handle),
+    unscaledAscent: lineMetricsGetUnscaledAscent(handle),
+    height: lineMetricsGetHeight(handle),
+    width: lineMetricsGetWidth(handle),
+    left: lineMetricsGetLeft(handle),
+    baseline: lineMetricsGetBaseline(handle),
+    lineNumber: lineMetricsGetLineNumber(handle),
+    startIndex: lineMetricsGetStartIndex(handle),
+    endIndex: lineMetricsGetEndIndex(handle),
+  );
 }
 
-class SkwasmParagraph extends SkwasmObjectWrapper<RawParagraph> implements ui.Paragraph {
-  SkwasmParagraph(ParagraphHandle handle)
-    : super(handle, (ParagraphHandle h) => paragraphDispose(h), 'Paragraph');
+class SkwasmParagraph implements BackendParagraph {
+  SkwasmParagraph(this.handle);
 
-  bool _hasCheckedForMissingCodePoints = false;
+  final ParagraphHandle handle;
+
+  @override
+  void dispose() {
+    paragraphDispose(handle);
+  }
 
   @override
   double get width => paragraphGetWidth(handle);
@@ -130,26 +76,26 @@ class SkwasmParagraph extends SkwasmObjectWrapper<RawParagraph> implements ui.Pa
   }
 
   @override
-  void layout(ui.ParagraphConstraints constraints) {
-    paragraphLayout(handle, constraints.width);
-    if (!ui_web.TestEnvironment.instance.disableFontFallbacks && !_hasCheckedForMissingCodePoints) {
-      _hasCheckedForMissingCodePoints = true;
-      final int missingCodePointCount = paragraphGetUnresolvedCodePoints(handle, nullptr, 0);
-      if (missingCodePointCount > 0) {
-        withStackScope((StackScope scope) {
-          final Pointer<Uint32> codePointBuffer = scope.allocUint32Array(missingCodePointCount);
-          final int returnedCodePointCount = paragraphGetUnresolvedCodePoints(
-            handle,
-            codePointBuffer,
-            missingCodePointCount,
-          );
-          assert(missingCodePointCount == returnedCodePointCount);
-          FallbackFontService.instance.addMissingCodePoints(
-            codePointBuffer.toUint32List(missingCodePointCount),
-          );
-        });
-      }
+  void layout(double width) {
+    paragraphLayout(handle, width);
+  }
+
+  @override
+  List<int> getUnresolvedCodePoints() {
+    final int missingCodePointCount = paragraphGetUnresolvedCodePoints(handle, nullptr, 0);
+    if (missingCodePointCount == 0) {
+      return const <int>[];
     }
+    return withStackScope((StackScope scope) {
+      final Pointer<Uint32> codePointBuffer = scope.allocUint32Array(missingCodePointCount);
+      final int returnedCodePointCount = paragraphGetUnresolvedCodePoints(
+        handle,
+        codePointBuffer,
+        missingCodePointCount,
+      );
+      assert(missingCodePointCount == returnedCodePointCount);
+      return codePointBuffer.toUint32List(missingCodePointCount);
+    });
   }
 
   List<ui.TextBox> _convertTextBoxList(TextBoxListHandle listHandle) {
@@ -235,46 +181,11 @@ class SkwasmParagraph extends SkwasmObjectWrapper<RawParagraph> implements ui.Pa
   }
 
   @override
-  ui.TextRange getWordBoundary(ui.TextPosition position) => withStackScope((StackScope scope) {
+  ui.TextRange getWordBoundary(int characterPosition) => withStackScope((StackScope scope) {
     final Pointer<Int32> outRange = scope.allocInt32Array(2);
-    final int characterPosition = switch (position.affinity) {
-      ui.TextAffinity.upstream => position.offset - 1,
-      ui.TextAffinity.downstream => position.offset,
-    };
     paragraphGetWordBoundary(handle, characterPosition, outRange);
     return ui.TextRange(start: outRange[0], end: outRange[1]);
   });
-
-  @override
-  ui.TextRange getLineBoundary(ui.TextPosition position) {
-    final List<SkwasmLineMetrics> metrics = computeLineMetrics();
-    final ui.TextRange line = _lineBoundaryAtOffset(metrics, position.offset);
-
-    // A line's endIndex equals the next line's startIndex at a soft wrap, so
-    // the lookup above cannot tell the two apart on its own and always answers
-    // with the earlier line, as if the affinity were upstream. A downstream
-    // position sitting exactly on that seam belongs to the next line instead.
-    // This mirrors the native implementation in `lib/ui/text.dart`.
-    final ui.TextRange nextLine = _lineBoundaryAtOffset(metrics, position.offset + 1);
-    if (nextLine.isValid &&
-        position.affinity == ui.TextAffinity.downstream &&
-        line != nextLine &&
-        position.offset == line.end &&
-        line.end == nextLine.start) {
-      return nextLine;
-    }
-    return line;
-  }
-
-  // The line containing [offset], treating both line bounds as inclusive.
-  static ui.TextRange _lineBoundaryAtOffset(List<SkwasmLineMetrics> metrics, int offset) {
-    for (final line in metrics) {
-      if (offset >= line.startIndex && offset <= line.endIndex) {
-        return ui.TextRange(start: line.startIndex, end: line.endIndex);
-      }
-    }
-    return ui.TextRange.empty;
-  }
 
   @override
   List<ui.TextBox> getBoxesForPlaceholders() {
@@ -285,29 +196,29 @@ class SkwasmParagraph extends SkwasmObjectWrapper<RawParagraph> implements ui.Pa
   }
 
   @override
-  List<SkwasmLineMetrics> computeLineMetrics() {
+  List<EngineLineMetrics> computeLineMetrics() {
     final int lineCount = paragraphGetLineCount(handle);
-    return List<SkwasmLineMetrics>.generate(lineCount, (int index) {
+    return List<EngineLineMetrics>.generate(lineCount, (int index) {
       final LineMetricsHandle metricsHandle = paragraphGetLineMetricsAtIndex(handle, index);
-      final metrics = SkwasmLineMetrics._fromHandle(metricsHandle);
+      final EngineLineMetrics metrics = _createLineMetricsFromHandle(metricsHandle);
       lineMetricsDispose(metricsHandle);
       return metrics;
     });
   }
 
   @override
-  ui.LineMetrics? getLineMetricsAt(int index) {
-    final LineMetricsHandle metricsHandle = paragraphGetLineMetricsAtIndex(handle, index);
+  EngineLineMetrics? getLineMetricsAt(int lineNumber) {
+    final LineMetricsHandle metricsHandle = paragraphGetLineMetricsAtIndex(handle, lineNumber);
     if (metricsHandle == nullptr) {
       return null;
     }
-    final metrics = SkwasmLineMetrics._fromHandle(metricsHandle);
+    final EngineLineMetrics metrics = _createLineMetricsFromHandle(metricsHandle);
     lineMetricsDispose(metricsHandle);
     return metrics;
   }
 }
 
-void withScopedFontList(
+void _withScopedFontList(
   List<String> fontFamilies,
   void Function(Pointer<SkStringHandle>, int) callback,
 ) {
@@ -338,651 +249,226 @@ class SkwasmNativeTextStyle extends SkwasmObjectWrapper<RawTextStyle> {
   }
 }
 
-class SkwasmTextStyle implements ui.TextStyle {
-  SkwasmTextStyle({
-    this.color,
-    this.decoration,
-    this.decorationColor,
-    this.decorationStyle,
-    this.decorationThickness,
-    this.fontWeight,
-    this.fontStyle,
-    this.textBaseline,
-    this.fontFamily,
-    this.fontFamilyFallback,
-    this.fontSize,
-    this.letterSpacing,
-    this.wordSpacing,
-    this.height,
-    this.leadingDistribution,
-    this.locale,
-    this.background,
-    this.foreground,
-    this.shadows,
-    this.fontFeatures,
-    this.fontVariations,
-  }) : assert(
-         color == null || foreground == null,
-         'Cannot provide both a color and a foreground\n'
-         'The color argument is just a shorthand for "foreground: Paint()..color = color".',
-       );
-
-  void applyToNative(SkwasmNativeTextStyle style) {
-    final TextStyleHandle handle = style.handle;
-    if (color != null) {
-      textStyleSetColor(handle, color!.value);
-    }
-    if (decoration != null) {
-      textStyleSetDecoration(handle, decoration!.maskValue);
-    }
-    if (decorationColor != null) {
-      textStyleSetDecorationColor(handle, decorationColor!.value);
-    }
-    if (decorationStyle != null) {
-      textStyleSetDecorationStyle(handle, decorationStyle!.index);
-    }
-    if (decorationThickness != null) {
-      textStyleSetDecorationThickness(handle, decorationThickness!);
-    }
-    if (fontWeight != null || fontStyle != null) {
-      textStyleSetFontStyle(
-        handle,
-        (fontWeight ?? ui.FontWeight.normal).value,
-        (fontStyle ?? ui.FontStyle.normal).index,
-      );
-    }
-    if (textBaseline != null) {
-      textStyleSetTextBaseline(handle, textBaseline!.index);
-    }
-
-    final List<String> effectiveFontFamilies = _computeEffectiveFontFamilies(fontFamilies);
-    if (effectiveFontFamilies.isNotEmpty) {
-      withScopedFontList(
-        effectiveFontFamilies,
-        (Pointer<SkStringHandle> families, int count) =>
-            textStyleAddFontFamilies(handle, families, count),
-      );
-    }
-
-    if (fontSize != null) {
-      textStyleSetFontSize(handle, fontSize!);
-    }
-    if (letterSpacing != null) {
-      textStyleSetLetterSpacing(handle, letterSpacing!);
-    }
-    if (wordSpacing != null) {
-      textStyleSetWordSpacing(handle, wordSpacing!);
-    }
-    if (height != null) {
-      textStyleSetHeight(handle, height!);
-    }
-    if (leadingDistribution != null) {
-      textStyleSetHalfLeading(handle, leadingDistribution == ui.TextLeadingDistribution.even);
-    }
-    if (locale != null) {
-      final SkStringHandle localeHandle = skStringFromDartString(locale!.toLanguageTag());
-      textStyleSetLocale(handle, localeHandle);
-      skStringFree(localeHandle);
-    }
-    if (background != null) {
-      final PaintHandle backgroundPaint = (background! as SkwasmPaint).toRawPaint();
-      textStyleSetBackground(handle, backgroundPaint);
-      paintDispose(backgroundPaint);
-    }
-    if (foreground != null) {
-      final PaintHandle foregroundPaint = (foreground! as SkwasmPaint).toRawPaint();
-      textStyleSetForeground(handle, foregroundPaint);
-      paintDispose(foregroundPaint);
-    }
-    if (shadows != null) {
-      for (final ui.Shadow shadow in shadows!) {
-        textStyleAddShadow(
-          handle,
-          shadow.color.value,
-          shadow.offset.dx,
-          shadow.offset.dy,
-          shadow.blurSigma,
-        );
-      }
-    }
-    if (fontFeatures != null) {
-      for (final ui.FontFeature feature in fontFeatures!) {
-        final SkStringHandle featureName = skStringFromDartString(feature.feature);
-        textStyleAddFontFeature(handle, featureName, feature.value);
-        skStringFree(featureName);
-      }
-    }
-
-    Iterable<ui.FontVariation> allFontVariations;
-    if (fontVariations != null &&
-        fontVariations!.any((ui.FontVariation v) => v.axis == _kWeightAxisTag)) {
-      allFontVariations = fontVariations!;
-    } else {
-      final int weightValue = fontWeight?.value ?? ui.FontWeight.normal.value;
-      final weightVariation = <ui.FontVariation>[
-        ui.FontVariation(_kWeightAxisTag, weightValue.toDouble()),
-      ];
-      if (fontVariations == null) {
-        allFontVariations = weightVariation;
-      } else {
-        allFontVariations = fontVariations!.followedBy(weightVariation);
-      }
-    }
-    final int variationCount = allFontVariations.length;
-    withStackScope((StackScope scope) {
-      final Pointer<Uint32> axisBuffer = scope.allocUint32Array(variationCount);
-      final Pointer<Float> valueBuffer = scope.allocFloatArray(variationCount);
-      var i = 0;
-      for (final variation in allFontVariations) {
-        axisBuffer[i] = getFourByteTag(variation.axis);
-        valueBuffer[i] = variation.value;
-        i++;
-      }
-      textStyleSetFontVariations(handle, axisBuffer, valueBuffer, variationCount);
-    });
+void _applyTextStyleToNative(EngineTextStyle style, SkwasmNativeTextStyle nativeStyle) {
+  final TextStyleHandle handle = nativeStyle.handle;
+  if (style.color != null) {
+    textStyleSetColor(handle, style.color!.value);
+  }
+  if (style.decoration != null) {
+    textStyleSetDecoration(handle, style.decoration!.maskValue);
+  }
+  if (style.decorationColor != null) {
+    textStyleSetDecorationColor(handle, style.decorationColor!.value);
+  }
+  if (style.decorationStyle != null) {
+    textStyleSetDecorationStyle(handle, style.decorationStyle!.index);
+  }
+  if (style.decorationThickness != null) {
+    textStyleSetDecorationThickness(handle, style.decorationThickness!);
+  }
+  if (style.fontWeight != null || style.fontStyle != null) {
+    textStyleSetFontStyle(
+      handle,
+      (style.fontWeight ?? ui.FontWeight.normal).value,
+      (style.fontStyle ?? ui.FontStyle.normal).index,
+    );
+  }
+  if (style.textBaseline != null) {
+    textStyleSetTextBaseline(handle, style.textBaseline!.index);
   }
 
-  List<String> get fontFamilies => <String>[?fontFamily, ...?fontFamilyFallback];
-
-  final ui.Color? color;
-  final ui.TextDecoration? decoration;
-  final ui.Color? decorationColor;
-  final ui.TextDecorationStyle? decorationStyle;
-  final double? decorationThickness;
-  final ui.FontWeight? fontWeight;
-  final ui.FontStyle? fontStyle;
-  final ui.TextBaseline? textBaseline;
-  final String? fontFamily;
-  final List<String>? fontFamilyFallback;
-  final double? fontSize;
-  final double? letterSpacing;
-  final double? wordSpacing;
-  final double? height;
-  final ui.TextLeadingDistribution? leadingDistribution;
-  final ui.Locale? locale;
-  final ui.Paint? background;
-  final ui.Paint? foreground;
-  final List<ui.Shadow>? shadows;
-  final List<ui.FontFeature>? fontFeatures;
-  final List<ui.FontVariation>? fontVariations;
-
-  @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) {
-      return true;
-    }
-    return other is SkwasmTextStyle &&
-        other.color == color &&
-        other.decoration == decoration &&
-        other.decorationColor == decorationColor &&
-        other.decorationStyle == decorationStyle &&
-        other.fontWeight == fontWeight &&
-        other.fontStyle == fontStyle &&
-        other.textBaseline == textBaseline &&
-        other.leadingDistribution == leadingDistribution &&
-        other.fontFamily == fontFamily &&
-        other.fontSize == fontSize &&
-        other.letterSpacing == letterSpacing &&
-        other.wordSpacing == wordSpacing &&
-        other.height == height &&
-        other.decorationThickness == decorationThickness &&
-        other.locale == locale &&
-        other.background == background &&
-        other.foreground == foreground &&
-        listEquals<ui.Shadow>(other.shadows, shadows) &&
-        listEquals<String>(other.fontFamilyFallback, fontFamilyFallback) &&
-        listEquals<ui.FontFeature>(other.fontFeatures, fontFeatures) &&
-        listEquals<ui.FontVariation>(other.fontVariations, fontVariations);
-  }
-
-  @override
-  int get hashCode {
-    final List<ui.Shadow>? shadows = this.shadows;
-    final List<ui.FontFeature>? fontFeatures = this.fontFeatures;
-    final List<ui.FontVariation>? fontVariations = this.fontVariations;
-    final List<String>? fontFamilyFallback = this.fontFamilyFallback;
-    return Object.hash(
-      color,
-      decoration,
-      decorationColor,
-      decorationStyle,
-      fontWeight,
-      fontStyle,
-      textBaseline,
-      leadingDistribution,
-      fontFamily,
-      fontFamilyFallback == null ? null : Object.hashAll(fontFamilyFallback),
-      fontSize,
-      letterSpacing,
-      wordSpacing,
-      height,
-      locale,
-      background,
-      foreground,
-      shadows == null ? null : Object.hashAll(shadows),
-      decorationThickness,
-      // Object.hash goes up to 20 arguments, but we have 21
-      Object.hash(
-        fontFeatures == null ? null : Object.hashAll(fontFeatures),
-        fontVariations == null ? null : Object.hashAll(fontVariations),
-      ),
+  final List<String> effectiveFontFamilies = style.effectiveFontFamilies;
+  if (effectiveFontFamilies.isNotEmpty) {
+    _withScopedFontList(
+      effectiveFontFamilies,
+      (Pointer<SkStringHandle> families, int count) =>
+          textStyleAddFontFamilies(handle, families, count),
     );
   }
 
-  @override
-  String toString() {
-    var result = super.toString();
-    assert(() {
-      final List<String>? fontFamilyFallback = this.fontFamilyFallback;
-      final double? fontSize = this.fontSize;
-      final double? height = this.height;
-      result =
-          'TextStyle('
-          'color: ${color ?? "unspecified"}, '
-          'decoration: ${decoration ?? "unspecified"}, '
-          'decorationColor: ${decorationColor ?? "unspecified"}, '
-          'decorationStyle: ${decorationStyle ?? "unspecified"}, '
-          'decorationThickness: ${decorationThickness ?? "unspecified"}, '
-          'fontWeight: ${fontWeight ?? "unspecified"}, '
-          'fontStyle: ${fontStyle ?? "unspecified"}, '
-          'textBaseline: ${textBaseline ?? "unspecified"}, '
-          'fontFamily: ${fontFamily ?? "unspecified"}, '
-          'fontFamilyFallback: ${fontFamilyFallback != null && fontFamilyFallback.isNotEmpty ? fontFamilyFallback : "unspecified"}, '
-          'fontSize: ${fontSize != null ? fontSize.toStringAsFixed(1) : "unspecified"}, '
-          'letterSpacing: ${letterSpacing != null ? "${letterSpacing}x" : "unspecified"}, '
-          'wordSpacing: ${wordSpacing != null ? "${wordSpacing}x" : "unspecified"}, '
-          'height: ${height != null ? "${height.toStringAsFixed(1)}x" : "unspecified"}, '
-          'leadingDistribution: ${leadingDistribution ?? "unspecified"}, '
-          'locale: ${locale ?? "unspecified"}, '
-          'background: ${background ?? "unspecified"}, '
-          'foreground: ${foreground ?? "unspecified"}, '
-          'shadows: ${shadows ?? "unspecified"}, '
-          'fontFeatures: ${fontFeatures ?? "unspecified"}, '
-          'fontVariations: ${fontVariations ?? "unspecified"}'
-          ')';
-      return true;
-    }());
-    return result;
+  if (style.fontSize != null) {
+    textStyleSetFontSize(handle, style.fontSize!);
   }
+  if (style.letterSpacing != null) {
+    textStyleSetLetterSpacing(handle, style.letterSpacing!);
+  }
+  if (style.wordSpacing != null) {
+    textStyleSetWordSpacing(handle, style.wordSpacing!);
+  }
+  if (style.height != null) {
+    textStyleSetHeight(handle, style.height!);
+  }
+  if (style.halfLeading != null) {
+    textStyleSetHalfLeading(handle, style.halfLeading!);
+  }
+  if (style.locale != null) {
+    final SkStringHandle localeHandle = skStringFromDartString(style.locale!.toLanguageTag());
+    textStyleSetLocale(handle, localeHandle);
+    skStringFree(localeHandle);
+  }
+  if (style.background != null) {
+    final PaintHandle backgroundPaint = (style.background! as SkwasmPaint).toRawPaint();
+    textStyleSetBackground(handle, backgroundPaint);
+    paintDispose(backgroundPaint);
+  }
+  if (style.foreground != null) {
+    final PaintHandle foregroundPaint = (style.foreground! as SkwasmPaint).toRawPaint();
+    textStyleSetForeground(handle, foregroundPaint);
+    paintDispose(foregroundPaint);
+  }
+  if (style.shadows != null) {
+    for (final ui.Shadow shadow in style.shadows!) {
+      textStyleAddShadow(
+        handle,
+        shadow.color.value,
+        shadow.offset.dx,
+        shadow.offset.dy,
+        shadow.blurSigma,
+      );
+    }
+  }
+  if (style.fontFeatures != null) {
+    for (final ui.FontFeature feature in style.fontFeatures!) {
+      final SkStringHandle featureName = skStringFromDartString(feature.feature);
+      textStyleAddFontFeature(handle, featureName, feature.value);
+      skStringFree(featureName);
+    }
+  }
+
+  final List<ui.FontVariation> effectiveFontVariations = style.effectiveFontVariations;
+  final int variationCount = effectiveFontVariations.length;
+  withStackScope((StackScope scope) {
+    final Pointer<Uint32> axisBuffer = scope.allocUint32Array(variationCount);
+    final Pointer<Float> valueBuffer = scope.allocFloatArray(variationCount);
+    for (var i = 0; i < variationCount; i++) {
+      final ui.FontVariation variation = effectiveFontVariations[i];
+      axisBuffer[i] = _getFourByteTag(variation.axis);
+      valueBuffer[i] = variation.value;
+    }
+    textStyleSetFontVariations(handle, axisBuffer, valueBuffer, variationCount);
+  });
 }
 
-final class SkwasmStrutStyle implements ui.StrutStyle {
-  SkwasmStrutStyle({
-    String? fontFamily,
-    List<String>? fontFamilyFallback,
-    double? fontSize,
-    double? height,
-    double? leading,
-    ui.FontWeight? fontWeight,
-    ui.FontStyle? fontStyle,
-    bool? forceStrutHeight,
-    ui.TextLeadingDistribution? leadingDistribution,
-  }) : _fontFamily = fontFamily,
-       _fontFamilyFallback = fontFamilyFallback,
-       _fontSize = fontSize,
-       _height = height,
-       _leading = leading,
-       _fontWeight = fontWeight,
-       _fontStyle = fontStyle,
-       _forceStrutHeight = forceStrutHeight,
-       _leadingDistribution = leadingDistribution;
-
-  final String? _fontFamily;
-  final List<String>? _fontFamilyFallback;
-  final double? _fontSize;
-  final double? _height;
-  final double? _leading;
-  final ui.FontWeight? _fontWeight;
-  final ui.FontStyle? _fontStyle;
-  final bool? _forceStrutHeight;
-  final ui.TextLeadingDistribution? _leadingDistribution;
-
-  StrutStyleHandle createNativeHandle() {
-    final StrutStyleHandle handle = strutStyleCreate();
-    final List<String> effectiveFontFamilies = _computeEffectiveFontFamilies(<String>[
-      ?_fontFamily,
-      ...?_fontFamilyFallback,
-    ]);
-    if (effectiveFontFamilies.isNotEmpty) {
-      withScopedFontList(
-        effectiveFontFamilies,
-        (Pointer<SkStringHandle> families, int count) =>
-            strutStyleSetFontFamilies(handle, families, count),
-      );
-    }
-    if (_fontSize != null) {
-      strutStyleSetFontSize(handle, _fontSize);
-    }
-    if (_height != null && _height != ui.kTextHeightNone) {
-      strutStyleSetHeight(handle, _height);
-    }
-    if (_leadingDistribution != null) {
-      strutStyleSetHalfLeading(handle, _leadingDistribution == ui.TextLeadingDistribution.even);
-    }
-    if (_leading != null) {
-      strutStyleSetLeading(handle, _leading);
-    }
-    if (_fontWeight != null || _fontStyle != null) {
-      strutStyleSetFontStyle(
-        handle,
-        (_fontWeight ?? ui.FontWeight.normal).value,
-        (_fontStyle ?? ui.FontStyle.normal).index,
-      );
-    }
-    if (_forceStrutHeight != null) {
-      strutStyleSetForceStrutHeight(handle, _forceStrutHeight);
-    }
-    return handle;
-  }
-
-  @override
-  bool operator ==(Object other) {
-    return other is SkwasmStrutStyle &&
-        other._fontFamily == _fontFamily &&
-        other._fontSize == _fontSize &&
-        other._height == _height &&
-        other._leading == _leading &&
-        other._leadingDistribution == _leadingDistribution &&
-        other._fontWeight == _fontWeight &&
-        other._fontStyle == _fontStyle &&
-        other._forceStrutHeight == _forceStrutHeight &&
-        listEquals<String>(other._fontFamilyFallback, _fontFamilyFallback);
-  }
-
-  @override
-  int get hashCode {
-    final List<String>? fontFamilyFallback = _fontFamilyFallback;
-    return Object.hash(
-      _fontFamily,
-      fontFamilyFallback != null ? Object.hashAll(fontFamilyFallback) : null,
-      _fontSize,
-      _height,
-      _leading,
-      _leadingDistribution,
-      _fontWeight,
-      _fontStyle,
-      _forceStrutHeight,
+StrutStyleHandle _createNativeStrutStyle(EngineStrutStyle style) {
+  final StrutStyleHandle handle = strutStyleCreate();
+  final List<String> effectiveFontFamilies = style.effectiveFontFamilies;
+  if (effectiveFontFamilies.isNotEmpty) {
+    _withScopedFontList(
+      effectiveFontFamilies,
+      (Pointer<SkStringHandle> families, int count) =>
+          strutStyleSetFontFamilies(handle, families, count),
     );
   }
-
-  @override
-  String toString() {
-    var result = super.toString();
-    assert(() {
-      final List<String>? fontFamilyFallback = _fontFamilyFallback;
-      final double? fontSize = _fontSize;
-      final double? height = _height;
-      final double? leading = _leading;
-      result =
-          'StrutStyle('
-          'fontFamily: ${_fontFamily ?? "unspecified"}, '
-          'fontFamilyFallback: ${_fontFamilyFallback ?? "unspecified"}, '
-          'fontFamilyFallback: ${fontFamilyFallback != null && fontFamilyFallback.isNotEmpty ? fontFamilyFallback : "unspecified"}, '
-          'fontSize: ${fontSize != null ? fontSize.toStringAsFixed(1) : "unspecified"}, '
-          'height: ${height != null ? "${height.toStringAsFixed(1)}x" : "unspecified"}, '
-          'leading: ${leading != null ? "${leading.toStringAsFixed(1)}x" : "unspecified"}, '
-          'fontWeight: ${_fontWeight ?? "unspecified"}, '
-          'fontStyle: ${_fontStyle ?? "unspecified"}, '
-          'forceStrutHeight: ${_forceStrutHeight ?? "unspecified"}, '
-          'leadingDistribution: ${_leadingDistribution ?? "unspecified"}, '
-          ')';
-      return true;
-    }());
-    return result;
+  if (style.fontSize != null) {
+    strutStyleSetFontSize(handle, style.fontSize!);
   }
-}
-
-class SkwasmParagraphStyle implements ui.ParagraphStyle {
-  SkwasmParagraphStyle({
-    ui.TextAlign? textAlign,
-    ui.TextDirection? textDirection,
-    int? maxLines,
-    String? fontFamily,
-    double? fontSize,
-    double? height,
-    ui.TextHeightBehavior? textHeightBehavior,
-    ui.FontWeight? fontWeight,
-    ui.FontStyle? fontStyle,
-    ui.StrutStyle? strutStyle,
-    String? ellipsis,
-    ui.Locale? locale,
-    ui.Hyphens? hyphens,
-  }) : _textAlign = textAlign,
-       _textDirection = textDirection,
-       _maxLines = maxLines,
-       _fontFamily = fontFamily,
-       _fontSize = fontSize,
-       _height = height,
-       _textHeightBehavior = textHeightBehavior,
-       _fontWeight = fontWeight,
-       _fontStyle = fontStyle,
-       _strutStyle = strutStyle,
-       _ellipsis = ellipsis,
-       _locale = locale,
-       _hyphens = hyphens;
-
-  (ParagraphStyleHandle, SkwasmNativeTextStyle) createNative() {
-    final ParagraphStyleHandle handle = paragraphStyleCreate();
-    if (_textAlign != null) {
-      paragraphStyleSetTextAlign(handle, _textAlign.index);
-    }
-    if (_textDirection != null) {
-      paragraphStyleSetTextDirection(handle, _textDirection.index);
-    }
-    if (_maxLines != null) {
-      paragraphStyleSetMaxLines(handle, _maxLines);
-    }
-    if (_height != null && _height != ui.kTextHeightNone) {
-      paragraphStyleSetHeight(handle, _height);
-    }
-    if (_textHeightBehavior != null) {
-      paragraphStyleSetTextHeightBehavior(
-        handle,
-        _textHeightBehavior.applyHeightToFirstAscent,
-        _textHeightBehavior.applyHeightToLastDescent,
-      );
-    }
-    if (_ellipsis != null) {
-      final SkStringHandle ellipsisHandle = skStringFromDartString(_ellipsis);
-      paragraphStyleSetEllipsis(handle, ellipsisHandle);
-      skStringFree(ellipsisHandle);
-    }
-    if (_strutStyle != null) {
-      _strutStyle as SkwasmStrutStyle;
-      final StrutStyleHandle strutStyleHandle = _strutStyle.createNativeHandle();
-      paragraphStyleSetStrutStyle(handle, strutStyleHandle);
-      strutStyleDispose(strutStyleHandle);
-    }
-    final SkwasmNativeTextStyle textStyle = (renderer.fontCollection as SkwasmFontCollection)
-        .defaultTextStyle
-        .copy();
-    final TextStyleHandle textStyleHandle = textStyle.handle;
-
-    final List<String> effectiveFontFamilies = _computeEffectiveFontFamilies(<String>[
-      ?_fontFamily,
-    ]);
-    if (effectiveFontFamilies.isNotEmpty) {
-      withScopedFontList(
-        effectiveFontFamilies,
-        (Pointer<SkStringHandle> families, int count) =>
-            textStyleAddFontFamilies(textStyleHandle, families, count),
-      );
-    }
-    if (_fontSize != null) {
-      textStyleSetFontSize(textStyleHandle, _fontSize);
-    }
-    if (_height != null) {
-      textStyleSetHeight(textStyleHandle, _height);
-    }
-    if (_fontWeight != null || _fontStyle != null) {
-      textStyleSetFontStyle(
-        textStyleHandle,
-        (_fontWeight ?? ui.FontWeight.normal).value,
-        (_fontStyle ?? ui.FontStyle.normal).index,
-      );
-    }
-    withStackScope((StackScope scope) {
-      final Pointer<Uint32> axisBuffer = scope.allocUint32Array(1);
-      final Pointer<Float> valueBuffer = scope.allocFloatArray(1);
-      axisBuffer[0] = getFourByteTag(_kWeightAxisTag);
-      final int weightValue = _fontWeight?.value ?? ui.FontWeight.normal.value;
-      valueBuffer[0] = weightValue.toDouble();
-      textStyleSetFontVariations(textStyleHandle, axisBuffer, valueBuffer, 1);
-    });
-    if (_textHeightBehavior != null) {
-      textStyleSetHalfLeading(
-        textStyleHandle,
-        _textHeightBehavior.leadingDistribution == ui.TextLeadingDistribution.even,
-      );
-    }
-    if (_locale != null) {
-      final SkStringHandle localeHandle = skStringFromDartString(_locale.toLanguageTag());
-      textStyleSetLocale(textStyleHandle, localeHandle);
-      skStringFree(localeHandle);
-    }
-    paragraphStyleSetTextStyle(handle, textStyleHandle);
-    paragraphStyleSetApplyRoundingHack(handle, false);
-    return (handle, textStyle);
+  if (style.height != null) {
+    strutStyleSetHeight(handle, style.height!);
   }
-
-  final ui.TextAlign? _textAlign;
-  final ui.TextDirection? _textDirection;
-  final ui.FontWeight? _fontWeight;
-  final ui.FontStyle? _fontStyle;
-  final int? _maxLines;
-  final String? _fontFamily;
-  final double? _fontSize;
-  final double? _height;
-  final ui.TextHeightBehavior? _textHeightBehavior;
-  final ui.StrutStyle? _strutStyle;
-  final String? _ellipsis;
-  final ui.Locale? _locale;
-  // TODO(dbebawy): hyphens is accepted and stored but not honored here yet.
-  // Neither Hyphens.manual nor Hyphens.hidden takes effect on Skwasm until a
-  // renderSoftHyphens setter is exposed on the Skwasm ParagraphStyle binding
-  // (the native engine wires this via SkParagraph::setRenderSoftHyphens).
-  // https://github.com/flutter/flutter/issues/193506
-  // Customizing the hyphen string is separate future work:
-  // https://github.com/flutter/flutter/issues/189617
-  final ui.Hyphens? _hyphens;
-
-  @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) {
-      return true;
-    }
-    if (other.runtimeType != runtimeType) {
-      return false;
-    }
-    return other is SkwasmParagraphStyle &&
-        other._textAlign == _textAlign &&
-        other._textDirection == _textDirection &&
-        other._fontWeight == _fontWeight &&
-        other._fontStyle == _fontStyle &&
-        other._maxLines == _maxLines &&
-        other._fontFamily == _fontFamily &&
-        other._fontSize == _fontSize &&
-        other._height == _height &&
-        other._textHeightBehavior == _textHeightBehavior &&
-        other._strutStyle == _strutStyle &&
-        other._ellipsis == _ellipsis &&
-        other._locale == _locale &&
-        other._hyphens == _hyphens;
+  if (style.halfLeading != null) {
+    strutStyleSetHalfLeading(handle, style.halfLeading!);
   }
-
-  @override
-  int get hashCode {
-    return Object.hash(
-      _textAlign,
-      _textDirection,
-      _fontWeight,
-      _fontStyle,
-      _maxLines,
-      _fontFamily,
-      _fontSize,
-      _height,
-      _textHeightBehavior,
-      _strutStyle,
-      _ellipsis,
-      _locale,
-      _hyphens,
+  if (style.leading != null) {
+    strutStyleSetLeading(handle, style.leading!);
+  }
+  if (style.fontWeight != null || style.fontStyle != null) {
+    strutStyleSetFontStyle(
+      handle,
+      (style.fontWeight ?? ui.FontWeight.normal).value,
+      (style.fontStyle ?? ui.FontStyle.normal).index,
     );
   }
-
-  @override
-  String toString() {
-    var result = super.toString();
-    assert(() {
-      final double? fontSize = _fontSize;
-      final double? height = _height;
-      result =
-          'ParagraphStyle('
-          'textAlign: ${_textAlign ?? "unspecified"}, '
-          'textDirection: ${_textDirection ?? "unspecified"}, '
-          'fontWeight: ${_fontWeight ?? "unspecified"}, '
-          'fontStyle: ${_fontStyle ?? "unspecified"}, '
-          'maxLines: ${_maxLines ?? "unspecified"}, '
-          'textHeightBehavior: ${_textHeightBehavior ?? "unspecified"}, '
-          'fontFamily: ${_fontFamily ?? "unspecified"}, '
-          'fontSize: ${fontSize != null ? fontSize.toStringAsFixed(1) : "unspecified"}, '
-          'height: ${height != null ? "${height.toStringAsFixed(1)}x" : "unspecified"}, '
-          'strutStyle: ${_strutStyle ?? "unspecified"}, '
-          'ellipsis: ${_ellipsis != null ? '"$_ellipsis"' : "unspecified"}, '
-          'locale: ${_locale ?? "unspecified"}, '
-          'hyphens: ${_hyphens ?? "unspecified"}'
-          ')';
-      return true;
-    }());
-    return result;
+  if (style.forceStrutHeight != null) {
+    strutStyleSetForceStrutHeight(handle, style.forceStrutHeight!);
   }
+  return handle;
 }
 
-class SkwasmParagraphBuilder extends SkwasmObjectWrapper<RawParagraphBuilder>
-    implements ui.ParagraphBuilder {
-  factory SkwasmParagraphBuilder(SkwasmParagraphStyle style, SkwasmFontCollection collection) {
-    final (ParagraphStyleHandle paragraphStyleHandle, SkwasmNativeTextStyle nativeTextStyle) = style
-        .createNative();
+ParagraphStyleHandle _createNativeParagraphStyle(
+  EngineParagraphStyle style,
+  SkwasmFontCollection collection,
+) {
+  final ParagraphStyleHandle handle = paragraphStyleCreate();
+  if (style.textAlign != null) {
+    paragraphStyleSetTextAlign(handle, style.textAlign!.index);
+  }
+  if (style.textDirection != null) {
+    paragraphStyleSetTextDirection(handle, style.textDirection!.index);
+  }
+  if (style.maxLines != null) {
+    paragraphStyleSetMaxLines(handle, style.maxLines!);
+  }
+  if (style.height != null) {
+    paragraphStyleSetHeight(handle, style.height!);
+  }
+  if (style.textHeightBehavior != null) {
+    paragraphStyleSetTextHeightBehavior(
+      handle,
+      style.textHeightBehavior!.applyHeightToFirstAscent,
+      style.textHeightBehavior!.applyHeightToLastDescent,
+    );
+  }
+  if (style.ellipsis != null) {
+    final SkStringHandle ellipsisHandle = skStringFromDartString(style.ellipsis!);
+    paragraphStyleSetEllipsis(handle, ellipsisHandle);
+    skStringFree(ellipsisHandle);
+  }
+  final EngineStrutStyle? strutStyle = style.effectiveStrutStyle;
+  if (strutStyle != null) {
+    final StrutStyleHandle strutStyleHandle = _createNativeStrutStyle(strutStyle);
+    paragraphStyleSetStrutStyle(handle, strutStyleHandle);
+    strutStyleDispose(strutStyleHandle);
+  }
+  final SkwasmNativeTextStyle textStyle = collection.defaultTextStyle.copy();
+  _applyTextStyleToNative(style.getTextStyle(), textStyle);
+  paragraphStyleSetTextStyle(handle, textStyle.handle);
+  textStyle.dispose();
+  paragraphStyleSetApplyRoundingHack(handle, false);
+  // Like the native engine, render soft hyphens unless they are hidden.
+  paragraphStyleSetRenderSoftHyphens(handle, style.hyphens != ui.Hyphens.hidden);
+  return handle;
+}
+
+class SkwasmParagraphBuilder implements BackendParagraphBuilder {
+  factory SkwasmParagraphBuilder(EngineParagraphStyle style, SkwasmFontCollection collection) {
+    final ParagraphStyleHandle paragraphStyleHandle = _createNativeParagraphStyle(
+      style,
+      collection,
+    );
     final builder = SkwasmParagraphBuilder._(
       paragraphBuilderCreate(paragraphStyleHandle, collection.handle),
-      style,
-      nativeTextStyle,
+      collection,
     );
     paragraphStyleDispose(paragraphStyleHandle);
     return builder;
   }
 
-  SkwasmParagraphBuilder._(
-    ParagraphBuilderHandle handle,
-    this.style,
-    SkwasmNativeTextStyle baseTextStyle,
-  ) : super(handle, (ParagraphBuilderHandle h) => paragraphBuilderDispose(h), 'ParagraphBuilder') {
-    textStyleStack.add(baseTextStyle);
-  }
+  SkwasmParagraphBuilder._(this.handle, this.fontCollection);
 
-  final SkwasmParagraphStyle style;
-  final List<SkwasmNativeTextStyle> textStyleStack = <SkwasmNativeTextStyle>[];
+  final ParagraphBuilderHandle handle;
+  final SkwasmFontCollection fontCollection;
 
   @override
-  List<double> placeholderScales = <double>[];
+  void dispose() {
+    paragraphBuilderDispose(handle);
+  }
 
   @override
   void addPlaceholder(
     double width,
     double height,
-    ui.PlaceholderAlignment alignment, {
-    double scale = 1.0,
-    double? baselineOffset,
-    ui.TextBaseline? baseline,
-  }) {
+    ui.PlaceholderAlignment alignment,
+    double baselineOffset,
+    ui.TextBaseline baseline,
+  ) {
     paragraphBuilderAddPlaceholder(
       handle,
-      width * scale,
-      height * scale,
+      width,
+      height,
       alignment.index,
-      (baselineOffset ?? height) * scale,
-      (baseline ?? ui.TextBaseline.alphabetic).index,
+      baselineOffset,
+      baseline.index,
     );
-    placeholderScales.add(scale);
   }
 
   @override
@@ -1091,36 +577,24 @@ class SkwasmParagraphBuilder extends SkwasmObjectWrapper<RawParagraphBuilder>
   }
 
   @override
-  ui.Paragraph build() {
+  SkwasmParagraph build() {
     if (!skwasmIsHeavy()) {
       _addSegmenterData();
     }
-    final paragraph = SkwasmParagraph(paragraphBuilderBuild(handle));
-    while (textStyleStack.isNotEmpty) {
-      final SkwasmNativeTextStyle style = textStyleStack.removeLast();
-      style.dispose();
-    }
-    dispose();
-    return paragraph;
+    return SkwasmParagraph(paragraphBuilderBuild(handle));
   }
 
   @override
-  int get placeholderCount => placeholderScales.length;
-
-  @override
   void pop() {
-    final SkwasmNativeTextStyle style = textStyleStack.removeLast();
-    style.dispose();
     paragraphBuilderPop(handle);
   }
 
   @override
-  void pushStyle(ui.TextStyle textStyle) {
-    textStyle as SkwasmTextStyle;
-    final SkwasmNativeTextStyle nativeStyle = textStyleStack.last.copy();
-    textStyle.applyToNative(nativeStyle);
-    textStyleStack.add(nativeStyle);
+  void pushStyle(EngineTextStyle mergedStyle) {
+    final SkwasmNativeTextStyle nativeStyle = fontCollection.defaultTextStyle.copy();
+    _applyTextStyleToNative(mergedStyle, nativeStyle);
     paragraphBuilderPushStyle(handle, nativeStyle.handle);
+    nativeStyle.dispose();
   }
 }
 

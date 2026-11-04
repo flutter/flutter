@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:js_interop';
 import 'dart:typed_data';
 
 import 'package:meta/meta.dart';
@@ -50,14 +51,14 @@ class CkFragmentProgram implements ui.FragmentProgram {
 
 class CkFragmentShader extends BackendFragmentShader implements CkShader {
   CkFragmentShader(this.name, this.effect, this._program)
-    : floats = mallocFloat32List(_program.floatCount + _program.textureCount * 2),
+    : floats = Float32List(_program.floatCount + _program.textureCount * 2),
       samplers = List<SkShader?>.filled(_program.textureCount, null),
       lastFloatIndex = _program.floatCount;
 
   final String name;
   final SkRuntimeEffect effect;
   final int lastFloatIndex;
-  final SkFloat32List floats;
+  final Float32List floats;
   final List<SkShader?> samplers;
   final CkFragmentProgram _program;
 
@@ -72,9 +73,15 @@ class CkFragmentShader extends BackendFragmentShader implements CkShader {
     assert(!_debugDisposed, 'FragmentShader has been disposed of.');
     ref?.dispose();
 
+    // Pass the uniforms as a plain JS typed array (not CanvasKit-malloc'd
+    // memory) so that CanvasKit copies them into a buffer owned by the new
+    // SkShader. Otherwise pictures that recorded this shader would alias the
+    // mutable staging buffer and observe later `setFloat` calls or `dispose`.
+    // See https://github.com/flutter/flutter/issues/193221.
+    final JSFloat32Array uniformData = floats.toJS;
     final SkShader? result = samplers.isEmpty
-        ? effect.makeShader(floats)
-        : effect.makeShaderWithChildren(floats, samplers);
+        ? effect.makeShader(uniformData)
+        : effect.makeShaderWithChildren(uniformData, samplers);
     if (result == null) {
       throw Exception(
         'Invalid uniform data for shader $name:'
@@ -90,7 +97,7 @@ class CkFragmentShader extends BackendFragmentShader implements CkShader {
   @override
   void setFloat(int index, double value) {
     assert(!_debugDisposed, 'FragmentShader has been disposed of.');
-    floats.toTypedArray()[index] = value;
+    floats[index] = value;
   }
 
   @override
@@ -110,7 +117,6 @@ class CkFragmentShader extends BackendFragmentShader implements CkShader {
     }());
     ref?.dispose();
     ref = null;
-    free(floats);
   }
 
   bool _debugDisposed = false;
@@ -392,7 +398,7 @@ class _CkUniformVec4Slot implements ui.UniformVec4Slot {
 class _CkUniformMat2Slot implements ui.UniformMat2Slot {
   _CkUniformMat2Slot._(this._m00, this._m10, this._m01, this._m11);
 
-  // Set the elemnts of the matrix in column-major order.
+  // Set the elements of the matrix in column-major order.
   @override
   void set(double m00, double m10, double m01, double m11) {
     _m00.set(m00);
@@ -401,7 +407,7 @@ class _CkUniformMat2Slot implements ui.UniformMat2Slot {
     _m11.set(m11);
   }
 
-  // The elements of the matrix. Where mij referes to the ith row and the jth column.
+  // The elements of the matrix. Where mij refers to the ith row and the jth column.
   final CkUniformFloatSlot _m00, _m10; // Column 0
   final CkUniformFloatSlot _m01, _m11; // Column 1
 }

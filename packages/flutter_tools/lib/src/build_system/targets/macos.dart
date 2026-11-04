@@ -12,7 +12,7 @@ import '../../base/process.dart';
 import '../../build_info.dart';
 import '../../darwin/darwin.dart';
 import '../../devfs.dart';
-import '../../globals.dart' as globals show xcode;
+import '../../globals.dart' as globals show projectFactory, xcode;
 import '../../isolated/native_assets/dart_hook_result.dart';
 import '../../project.dart';
 import '../build_system.dart';
@@ -295,7 +295,7 @@ class CompileMacOSFramework extends Target {
     final snapshotter = AOTSnapshotter(
       fileSystem: environment.fileSystem,
       logger: environment.logger,
-      xcode: globals.xcode!,
+      xcode: globals.xcode,
       artifacts: environment.artifacts,
       processManager: environment.processManager,
     );
@@ -443,7 +443,10 @@ abstract class MacOSBundleFlutterAssets extends Target {
         .childDirectory('flutter_assets');
     assetDirectory.createSync(recursive: true);
 
-    final FlutterProject flutterProject = FlutterProject.fromDirectory(environment.projectDir);
+    // TODO(bkonyi): Inject FlutterProjectFactory through Environment.
+    final FlutterProject flutterProject = globals.projectFactory.fromDirectory(
+      environment.projectDir,
+    );
     final String? flavor = await flutterProject.macos.parseFlavorFromConfiguration(environment);
 
     final DartHooksResult dartHookResult = await LinkHooks.loadHookResult(environment);

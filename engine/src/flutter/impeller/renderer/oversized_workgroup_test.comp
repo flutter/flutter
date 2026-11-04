@@ -1,0 +1,18 @@
+// Copyright 2013 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+// A workgroup of 1024 x 1024 invocations, more than any device supports.
+// Creating a pipeline from this shader must fail.
+layout(local_size_x = 1024, local_size_y = 1024) in;
+
+layout(std430) buffer;
+
+layout(binding = 0) writeonly buffer OutputData {
+  uint data[];
+}
+output_data;
+
+void main() {
+  output_data.data[gl_LocalInvocationIndex] = gl_LocalInvocationIndex;
+}
