@@ -1881,7 +1881,7 @@ class FakeDeviceLogReader implements DeviceLogReader {
   bool disposeCalled = false;
 
   @override
-  void dispose() {
+  Future<void> dispose() async {
     disposeCalled = true;
   }
 

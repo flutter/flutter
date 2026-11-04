@@ -16,10 +16,11 @@ abstract base class ArtifactService extends ToolExtensionService {
   /// Service namespace identifier for artifacts.
   static const String serviceNamespace = 'artifact';
 
-  static const String _downloadArtifactsRpcMethod = 'downloadArtifacts';
+  static const String _listRequiredArtifactsRpcMethod = 'listRequiredArtifacts';
 
   /// RPC method identifier to query contributed artifact dependencies.
-  static const String downloadArtifactsMethod = '$serviceNamespace.$_downloadArtifactsRpcMethod';
+  static const String listRequiredArtifactsMethod =
+      '$serviceNamespace.$_listRequiredArtifactsRpcMethod';
 
   /// RPC parameter key for the Flutter engine version (revision).
   static const String engineVersionParam = 'engineVersion';
@@ -37,12 +38,16 @@ abstract base class ArtifactService extends ToolExtensionService {
   /// extension for the given [engineVersion], [hostPlatform], and optional
   /// [targetPlatforms].
   ///
+  /// The Flutter tool is responsible for downloading, verifying (`sha256`), and
+  /// caching each returned [ArtifactDependency] on the host; extensions only
+  /// declare the required artifact descriptors.
+  ///
   /// [targetPlatforms] contains [String] identifiers rather than `TargetPlatform`
   /// values so extensions can match custom out-of-tree embedder identifiers
   /// (e.g. `'tizen-arm64'`) as well as built-in platform names or OS prefixes
   /// (e.g. `'linux'`). When `null`, artifacts for all target platforms supported
   /// on [hostPlatform] should be returned.
-  Future<List<ArtifactDependency>> downloadArtifacts({
+  Future<List<ArtifactDependency>> listRequiredArtifacts({
     required String engineVersion,
     required HostPlatform hostPlatform,
     Set<String>? targetPlatforms,
@@ -51,14 +56,16 @@ abstract base class ArtifactService extends ToolExtensionService {
   /// Initializes the service by registering RPC methods with the extension provider.
   @override
   Future<Map<String, ExtensionRpcHandler>> initialize() async {
-    return <String, ExtensionRpcHandler>{_downloadArtifactsRpcMethod: _downloadArtifactsRpc};
+    return <String, ExtensionRpcHandler>{
+      _listRequiredArtifactsRpcMethod: _listRequiredArtifactsRpc,
+    };
   }
 
   /// Shuts down the service and cleans up any resources.
   @override
   Future<void> shutdown() async {}
 
-  Future<List<Map<String, Object?>>> _downloadArtifactsRpc(Map<String, Object?> params) async {
+  Future<List<Map<String, Object?>>> _listRequiredArtifactsRpc(Map<String, Object?> params) async {
     final String engineVersion;
     final HostPlatform hostPlatform;
     final Set<String>? targetPlatforms;
@@ -75,7 +82,7 @@ abstract base class ArtifactService extends ToolExtensionService {
     } on FormatException catch (e) {
       throw RpcException.invalidParams(e.message);
     }
-    final List<ArtifactDependency> deps = await downloadArtifacts(
+    final List<ArtifactDependency> deps = await listRequiredArtifacts(
       engineVersion: engineVersion,
       hostPlatform: hostPlatform,
       targetPlatforms: targetPlatforms,

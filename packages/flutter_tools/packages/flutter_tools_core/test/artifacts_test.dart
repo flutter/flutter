@@ -158,20 +158,23 @@ void main() {
     test('validates name, url scheme, and 64-character hex sha256 in constructor', () {
       expect(
         () => ArtifactDependency(
-          name: 'custom-engine-bin',
+          name: 'custom_engine-1.0.bin',
           sha256: validSha256.toUpperCase(),
           url: Uri.parse('https://example.com/artifacts/engine.zip'),
         ),
         returnsNormally,
       );
-      expect(
-        () => ArtifactDependency(
-          name: '../evil',
-          sha256: validSha256,
-          url: Uri.parse('https://example.com/artifacts/engine.zip'),
-        ),
-        throwsA(isA<AssertionError>()),
-      );
+      for (final invalidName in <String>['../evil', 'foo.', 'foo ', '.', '..']) {
+        expect(
+          () => ArtifactDependency(
+            name: invalidName,
+            sha256: validSha256,
+            url: Uri.parse('https://example.com/artifacts/engine.zip'),
+          ),
+          throwsA(isA<AssertionError>()),
+          reason: 'Expected "$invalidName" to fail assertion',
+        );
+      }
       expect(
         () => ArtifactDependency(
           name: 'custom-engine-bin',
@@ -215,13 +218,15 @@ void main() {
       expect(deserialized.targetPlatform, isNull);
     });
 
-    test('listFromJson parses valid entries and returns empty list on non-list', () {
+    test('listFromJson parses valid entries and throws FormatException on invalid payloads', () {
       final List<ArtifactDependency> list = ArtifactDependency.listFromJson(<Object?>[
         <String, Object?>{'name': 'a', 'url': 'https://example.com/a.zip', 'sha256': validSha256},
       ]);
       expect(list, hasLength(1));
       expect(list.first.name, 'a');
-      expect(ArtifactDependency.listFromJson(null), isEmpty);
+      expect(() => ArtifactDependency.listFromJson(null), throwsFormatException);
+      expect(() => ArtifactDependency.listFromJson('not-a-list'), throwsFormatException);
+      expect(() => ArtifactDependency.listFromJson(<Object?>['not-a-map']), throwsFormatException);
     });
 
     test('matchesPlatforms matches exact targetPlatform and OS prefix', () {
