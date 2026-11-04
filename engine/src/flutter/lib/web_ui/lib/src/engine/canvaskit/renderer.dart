@@ -27,9 +27,15 @@ class CanvasKitRenderer extends Renderer {
   /// Whether the renderer is using software rendering.
   bool get isSoftware => _pictureToImageSurface.isSoftware;
 
+  /// The CanvasKit font registry behind [fontCollection].
+  ///
+  /// Not used when `WebParagraph` is enabled, in which case [fontCollection]
+  /// is a [WebFontCollection] and text is laid out by the browser.
+  late final CkFontCollection ckFontCollection = CkFontCollection();
+
   late final FlutterFontCollection _fontCollection = isWebParagraphEnabled
       ? WebFontCollection()
-      : SkiaFontCollection();
+      : EngineFontCollection(ckFontCollection);
 
   @override
   FlutterFontCollection get fontCollection => _fontCollection;
@@ -288,6 +294,9 @@ class CanvasKitRenderer extends Renderer {
   bool get supportsResizingAnimatedImages => false;
 
   @override
+  bool get supportsAnimatedImages => true;
+
+  @override
   BackendImage decodeBackendImageFromPixels(
     Uint8List pixels, {
     required int width,
@@ -332,7 +341,7 @@ class CanvasKitRenderer extends Renderer {
 
   @override
   BackendParagraphBuilder createParagraphBuilder(EngineParagraphStyle style) =>
-      CkParagraphBuilder(style);
+      CkParagraphBuilder(style, ckFontCollection);
 
   @override
   WebParagraphPainter createWebParagraphPainter(WebParagraph paragraph) =>

@@ -3,56 +3,12 @@
 // found in the LICENSE file.
 
 import '../../base/file_system.dart';
-import '../../base/utils.dart';
 
-/// The caching strategy for the generated service worker.
-enum ServiceWorkerStrategy implements CliEnum {
-  /// Download the app shell eagerly and all other assets lazily.
-  /// Prefer the offline cached version.
-  offlineFirst,
-
-  /// Do not generate a service worker,
-  none;
-
-  @override
-  String get cliName => kebabCase(name);
-
-  static ServiceWorkerStrategy? fromCliName(String? value) => value == null
-      ? null
-      : values.singleWhere(
-          (ServiceWorkerStrategy element) => element.cliName == value,
-          orElse: () => throw ArgumentError.value(value, 'value', 'Not supported.'),
-        );
-
-  @override
-  String get helpText => switch (this) {
-    offlineFirst =>
-      'Attempt to cache the application shell eagerly and then lazily '
-          'cache all subsequent assets as they are loaded. When making a '
-          'network request for an asset, the offline cache will be '
-          'preferred.',
-    none =>
-      'Generate a service worker with no body. This is useful for local '
-          'testing or in cases where the service worker caching '
-          'functionality is not desirable',
-  };
-}
-
-/// Generate a service worker with an app-specific cache name a map of
-/// resource files.
-///
-/// The tool embeds file hashes directly into the worker so that the byte for byte
-/// invalidation will automatically reactivate workers whenever a new
-/// version is deployed.
-String generateServiceWorker(
-  String fileGeneratorsPath, {
-  required FileSystem fileSystem,
-  required ServiceWorkerStrategy serviceWorkerStrategy,
-}) {
-  if (serviceWorkerStrategy == ServiceWorkerStrategy.none) {
-    return '';
-  }
-
+/// Generates a self-unregistering `flutter_service_worker.js` cleanup stub
+/// so browsers upgrading from older Flutter releases (`<= 3.38`) that had
+/// an active caching service worker can update, unregister the old worker,
+/// and purge legacy caches instead of getting stuck on a 404.
+String generateServiceWorker(String fileGeneratorsPath, {required FileSystem fileSystem}) {
   final String flutterServiceWorkerJsPath = fileSystem.path.join(
     fileGeneratorsPath,
     'js',

@@ -20,6 +20,7 @@ import 'package:flutter_tools/src/macos/macos_device.dart';
 import 'package:flutter_tools/src/project.dart';
 
 import 'package:test/fake.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
@@ -453,7 +454,7 @@ void main() {
       expect(receivedLines, <String>['first line', 'second line']);
 
       await subscription.cancel();
-      logReader.dispose();
+      await logReader.dispose();
     });
 
     testWithoutContext('dispose does not close logLines', () async {
@@ -463,7 +464,7 @@ void main() {
       final receivedLines = <String>[];
       final StreamSubscription<String> subscription = logReader.logLines.listen(receivedLines.add);
 
-      logReader.dispose();
+      await logReader.dispose();
 
       final process = FakeProcess(
         stdout: Stream<List<int>>.fromIterable(<List<int>>[utf8.encode('still here\n')]),
@@ -655,7 +656,13 @@ class FakeOperatingSystemUtils extends Fake implements OperatingSystemUtils {
 }
 
 class FakeMacOSDevice extends MacOSDevice {
-  FakeMacOSDevice({required super.toolContext});
+  FakeMacOSDevice({required super.toolContext})
+    : super(
+        analytics: const NoOpAnalytics(),
+        appleContext: FakeAppleContext(),
+        featureFlags: TestFeatureFlags(),
+        templateRenderer: FakeTemplateRenderer(),
+      );
 
   @override
   String get name => 'dummy';

@@ -136,7 +136,7 @@ std::optional<Entity> DirectionalMorphologyFilterContents::RenderFilter(
     return std::nullopt;
   }
 
-  fml::StatusOr<RenderTarget> render_target =
+  absl::StatusOr<RenderTarget> render_target =
       renderer.MakeSubpass("Directional Morphology Filter",  //
                            ISize::Ceil(coverage.GetSize()),  //
                            command_buffer,                   //
