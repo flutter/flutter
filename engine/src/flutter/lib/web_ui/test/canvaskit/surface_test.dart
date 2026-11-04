@@ -682,6 +682,105 @@ void testMain() {
       }
 
       test(
+        'a rejected request keeps a previous size above the resize cap at full resolution',
+        () async {
+          const previousSize = BitmapSize(4960, 7016);
+          const rejectedSize = BitmapSize(4960, 7100);
+          final provider = _UndersizedOffscreenCanvasProvider(
+            rejectedSize,
+            const BitmapSize(4960, 7099),
+          );
+          final surface = CkOffscreenSurface(provider);
+          await surface.initialized;
+          surface.setSize(const BitmapSize(100, 100));
+          // Reaching this size needs a fresh canvas, and shrinking an existing
+          // context back to it in place would clamp its drawing buffer again.
+          surface.setSize(previousSize);
+
+          expect(() => surface.setSize(rejectedSize), throwsA(isA<UnsupportedError>()));
+
+          expect(provider.acquiredSizes.last, previousSize);
+          final currentCanvas = surface.canvas as DomOffscreenCanvas;
+          expect(identical(currentCanvas, provider.acquiredCanvases.last), isTrue);
+          final WebGLContext currentGl = currentCanvas.getGlContext(webGLVersion);
+          expect(currentGl.drawingBufferWidth, 4960);
+          expect(currentGl.drawingBufferHeight, 7016);
+          expect(surface.skSurface!.width(), 4960);
+          expect(surface.skSurface!.height(), 7016);
+
+          final recorder = ui.PictureRecorder();
+          ui.Canvas(recorder).drawRect(
+            const ui.Rect.fromLTWH(0, 0, 4960, 7016),
+            ui.Paint()..color = const ui.Color(0xFFFF0000),
+          );
+          await surface.rasterizeToCanvas(recorder.endRecording());
+          expect(readSurfacePixel(surface, 4955, 7010), <int>[255, 0, 0, 255]);
+
+          surface.dispose();
+        },
+        skip: !isChromium, // The in-place resize cap is specific to Chromium.
+      );
+
+      test(
+        'rasterizeToImageBitmaps rejects an undersized buffer and keeps the previous size',
+        () async {
+          final provider = _UndersizedOffscreenCanvasProvider(
+            requestedSize,
+            const BitmapSize(299, 200),
+          );
+          final surface = CkOffscreenSurface(provider);
+          await surface.initialized;
+          const previousSize = BitmapSize(100, 100);
+          surface.setSize(previousSize);
+
+          final recorder = ui.PictureRecorder();
+          ui.Canvas(recorder).drawRect(
+            const ui.Rect.fromLTWH(90, 90, 10, 10),
+            ui.Paint()..color = const ui.Color(0xFF00FF00),
+          );
+          final ui.Picture picture = recorder.endRecording();
+
+          await expectLater(
+            surface.rasterizeToImageBitmaps(requestedSize, <ui.Picture>[picture]),
+            throwsA(isA<UnsupportedError>()),
+          );
+
+          // The deliberately lost contexts of the replaced canvases must not
+          // trigger context-lost recovery once their events are dispatched.
+          final DomEventTarget restoredCanvas = surface.canvas;
+          await Future<void>.delayed(const Duration(milliseconds: 50));
+          expect(identical(surface.canvas, restoredCanvas), isTrue);
+
+          // A real context loss recovers at the previous size, not the
+          // rejected one.
+          await surface.triggerContextLoss();
+          await surface.handledContextLossEvent;
+          final recoveredCanvas = surface.canvas as DomOffscreenCanvas;
+          expect(identical(recoveredCanvas, restoredCanvas), isFalse);
+          expect(provider.acquiredSizes.last, previousSize);
+          expect(recoveredCanvas.width, 100);
+          expect(recoveredCanvas.height, 100);
+          expect(surface.supportsWebGl, isTrue);
+
+          final List<DomImageBitmap> bitmaps = await surface.rasterizeToImageBitmaps(
+            previousSize,
+            <ui.Picture>[picture],
+          );
+          final DomImageBitmap bitmap = bitmaps.single;
+          expect(bitmap.width, 100);
+          expect(bitmap.height, 100);
+          final DomCanvasRenderingContext2D sampler = createDomCanvasElement(
+            width: 1,
+            height: 1,
+          ).context2D;
+          sampler.drawImage(bitmap, 95, 95, 1, 1, 0, 0, 1, 1);
+          expect(sampler.getImageData(0, 0, 1, 1).data, <int>[0, 255, 0, 255]);
+
+          surface.dispose();
+        },
+      );
+
+      test(
         'rasterizeToImageBitmaps while a context loss is pending captures the picture',
         () async {
           final surface = CkOffscreenSurface(OffscreenCanvasProvider());
