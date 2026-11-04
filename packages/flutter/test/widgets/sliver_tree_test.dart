@@ -1113,6 +1113,127 @@ void main() {
     });
   });
 
+  for (final expanding in <bool>[true, false]) {
+    testWidgets('TreeSliver can shrink while ${expanding ? 'expanding' : 'collapsing'}', (
+      WidgetTester tester,
+    ) async {
+      final controller = TreeSliverController();
+      final first = TreeSliverNode<String>('First');
+      final parent = TreeSliverNode<String>(
+        'Parent',
+        expanded: !expanding,
+        children: <TreeSliverNode<String>>[
+          TreeSliverNode<String>('Child 0'),
+          TreeSliverNode<String>('Child 1'),
+        ],
+      );
+
+      Widget buildTree(List<TreeSliverNode<String>> tree) {
+        return Directionality(
+          textDirection: TextDirection.ltr,
+          child: CustomScrollView(
+            slivers: <Widget>[TreeSliver<String>(tree: tree, controller: controller)],
+          ),
+        );
+      }
+
+      await tester.pumpWidget(buildTree(<TreeSliverNode<String>>[first, parent]));
+      controller.toggleNode(parent);
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 50));
+      await tester.pumpWidget(buildTree(<TreeSliverNode<String>>[first]));
+
+      expect(tester.takeException(), isNull);
+      expect(find.text('First'), findsOneWidget);
+      expect(controller.isActive(parent), isFalse);
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+    });
+  }
+
+  testWidgets('TreeSliver animations must follow their parent', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: CustomScrollView(
+          slivers: <Widget>[
+            TreeSliver<String>(tree: <TreeSliverNode<String>>[TreeSliverNode<String>('Parent')]),
+          ],
+        ),
+      ),
+    );
+    final RenderTreeSliver renderTree = tester.renderObject<RenderTreeSliver>(
+      find.byType(TreeSliver<String>),
+    );
+    renderTree.activeAnimations = <UniqueKey, TreeSliverNodesAnimation>{
+      UniqueKey(): (fromIndex: 0, toIndex: 0, value: 0.5),
+    };
+    await tester.pump();
+    expect(tester.takeException(), isAssertionError);
+    renderTree.activeAnimations = <UniqueKey, TreeSliverNodesAnimation>{};
+    await tester.pump();
+  });
+
+  testWidgets('Hidden node animations stop rebuilding and laying out the tree', (
+    WidgetTester tester,
+  ) async {
+    final controller = TreeSliverController();
+    final child = TreeSliverNode<String>(
+      'Child',
+      children: <TreeSliverNode<String>>[TreeSliverNode<String>('Grandchild')],
+    );
+    final parent = TreeSliverNode<String>(
+      'Parent',
+      expanded: true,
+      children: <TreeSliverNode<String>>[child],
+    );
+    final tree = <TreeSliverNode<String>>[parent, TreeSliverNode<String>('Tail')];
+    var builds = 0;
+    var layouts = 0;
+
+    Widget buildTree(Duration duration) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: CustomScrollView(
+          slivers: <Widget>[
+            TreeSliver<String>(
+              tree: tree,
+              controller: controller,
+              toggleAnimationStyle: AnimationStyle(curve: Curves.linear, duration: duration),
+              treeRowExtentBuilder: (_, _) {
+                layouts += 1;
+                return 40.0;
+              },
+              treeNodeBuilder:
+                  (
+                    BuildContext context,
+                    TreeSliverNode<Object?> node,
+                    AnimationStyle animationStyle,
+                  ) {
+                    builds += 1;
+                    return Text(node.content.toString());
+                  },
+            ),
+          ],
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildTree(const Duration(milliseconds: 400)));
+    controller.expandNode(child);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+    await tester.pumpWidget(buildTree(const Duration(milliseconds: 200)));
+    controller.collapseNode(parent);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 210));
+    expect(controller.isActive(child), isFalse);
+    builds = 0;
+    layouts = 0;
+    await tester.pump(const Duration(milliseconds: 50));
+    expect(<int>[builds, layouts, tester.binding.transientCallbackCount], <int>[0, 0, 0]);
+  });
+
   testWidgets('TreeSliver can handle rapid taps while collapsing', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/170757.
     final controller = TreeSliverController();
@@ -1185,17 +1306,22 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 50));
     expect(tester.takeException(), isNull);
+    // The collapsing child overlaps the parent, but is clipped below its trailing edge.
+    expect(tester.getRect(find.text('alpha')).contains(position), isTrue);
+    expect(find.text('Second').hitTestable(), findsOneWidget);
     await tester.tapAt(position);
     await tester.pumpAndSettle();
 
-    expect(parent.isExpanded, isFalse);
-    expect(find.text('alpha'), findsNothing);
+    expect(parent.isExpanded, isTrue);
+    expect(parent.children.first.isExpanded, isFalse);
+    expect(find.text('alpha'), findsOneWidget);
     expect(find.text('Fourth'), findsOneWidget);
   });
 
   for (final childStartsFirst in <bool>[false, true]) {
+    final animationOrder = childStartsFirst ? 'child' : 'parent';
     testWidgets(
-      'Hidden node animations do not move visible nodes (${childStartsFirst ? 'child' : 'parent'} animates first)',
+      'Hidden node animations do not move visible nodes ($animationOrder animates first)',
       (WidgetTester tester) async {
         final controller = TreeSliverController();
         final child = TreeSliverNode<String>(
@@ -1257,7 +1383,13 @@ void main() {
         expect(find.text('Child'), findsNothing);
         expect(tester.getTopLeft(find.text('Tail')).dy, 40.0);
 
-        // Reopening the parent restores its child's in-progress expansion.
+        // Advance the child's unfinished animation while it is hidden.
+        await tester.pump(const Duration(milliseconds: 20));
+        expect(tester.takeException(), isNull);
+        expect(tester.getTopLeft(find.text('Tail')).dy, 40.0);
+        expect(tester.binding.transientCallbackCount, 0);
+
+        // Reopening the parent preserves its child's expanded state.
         controller.expandNode(parent);
         await tester.pumpAndSettle();
         expect(tester.takeException(), isNull);
