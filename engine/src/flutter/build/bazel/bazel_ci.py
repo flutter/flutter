@@ -404,6 +404,37 @@ def install_command(description):
   )
 
 
+# What the wrapped GN builds' reclient proxy needs of a bot's task
+# environment, which a Bazel action does not see: LUCI's emulated metadata
+# server (GCE_METADATA_HOST=127.0.0.1:<the task's port>, and the two names
+# reclient's and Google's clients also read) and the switch to credentials
+# from it rather than Application Default Credentials, which inside the
+# sandbox find the VM's own metadata server and an account without the
+# scopes (every wrapped build of the first presubmit with route 1, 11-04).
+# Written before every Bazel command on a bot to a fixed path beside the
+# user's caches, which gn_build.py reads at run time (WRAP_RBE_ENV_FILE
+# there; not an action input, so the port is not in the action's key). No
+# secrets in it: a loopback address and two switches.
+WRAP_RBE_ENV_FILE = os.path.join('.cache', 'flutter_engine_bazel', 'wrap_rbe_env.json')
+WRAP_RBE_ENV_METADATA = ('GCE_METADATA_HOST', 'GCE_METADATA_IP', 'GCE_METADATA_ROOT')
+
+
+def write_wrap_rbe_env(home=None, environ=None):
+  """Writes WRAP_RBE_ENV_FILE from a bot's environment; its path, or None without the server."""
+  environ = os.environ if environ is None else environ
+  if not on_bot() or not environ.get('GCE_METADATA_HOST'):
+    return None
+  values = {name: environ[name] for name in WRAP_RBE_ENV_METADATA if environ.get(name)}
+  values['RBE_use_gce_credentials'] = 'true'
+  values['RBE_use_application_default_credentials'] = 'false'
+  path = os.path.join(home or os.path.expanduser('~'), WRAP_RBE_ENV_FILE)
+  os.makedirs(os.path.dirname(path), exist_ok=True)
+  with open(path, 'w', encoding='utf-8') as env_file:
+    json.dump(values, env_file, indent=2, sort_keys=True)
+    env_file.write('\n')
+  return path
+
+
 def run_install(out_dir):
   """Runs the install of the build directory `out_dir` (its bazel.json); the exit status.
 
@@ -427,6 +458,7 @@ def run_install(out_dir):
     return 1
   command = install_command(description)
   print(' '.join(shell_quote(w) for w in command), flush=True)
+  write_wrap_rbe_env()
   result = subprocess.run(
       command,
       cwd=description['repo_root'],
@@ -608,6 +640,7 @@ def run_tests(description, types, logs_dir=None, extra_arguments=()):
   command = described_command(description, 'test', TEST_OPTIONS + list(extra_arguments) + suites)
   print('run_tests.py: ' + ' '.join(shell_quote(w) for w in command), file=sys.stderr)
   sys.stderr.flush()
+  write_wrap_rbe_env()
   result = subprocess.run(
       command,
       cwd=description['repo_root'],
