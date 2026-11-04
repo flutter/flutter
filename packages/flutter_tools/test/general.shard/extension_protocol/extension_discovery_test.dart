@@ -1010,10 +1010,12 @@ dependencies:
       'caches immutable PUB_CACHE extension under DART_DATA_HOME/flutter_tool_extensions/cache',
       () async {
         final MemoryFileSystem fs = _hostStyleMemoryFs();
-        final String flutterRootPath = fs.directory('/flutter').absolute.path;
-        final String workspaceAppPath = fs.directory('/workspace/app').absolute.path;
-        final String pubCachePath = fs.directory('/home/test/.pub-cache').absolute.path;
-        final String customDataPath = fs.directory('/custom_data').absolute.path;
+        final String root = fs.currentDirectory.path;
+        final String flutterRootPath = fs.path.join(root, 'flutter');
+        final String workspaceAppPath = fs.path.join(root, 'workspace', 'app');
+        final String homePath = fs.path.join(root, 'home', 'test');
+        final String pubCachePath = fs.path.join(homePath, '.pub-cache');
+        final String customDataPath = fs.path.join(root, 'custom_data');
         final String extRootPath = fs.path.join(
           pubCachePath,
           'hosted',
@@ -1038,7 +1040,7 @@ dependencies:
           fs,
           flutterRootPath: flutterRootPath,
           environment: <String, String>{
-            'HOME': fs.directory('/home/test').absolute.path,
+            'HOME': homePath,
             'PUB_CACHE': pubCachePath,
             'DART_DATA_HOME': customDataPath,
           },
@@ -1169,9 +1171,10 @@ dependencies:
       'resolveDillFile resolves default getDartDataHome directory when DART_DATA_HOME is unset',
       () {
         final MemoryFileSystem fs = _hostStyleMemoryFs();
-        final String pubCachePath = fs.directory('/pub').absolute.path;
-        final String workspaceAppPath = fs.directory('/workspace/app').absolute.path;
-        final String flutterRootPath = fs.directory('/flutter').absolute.path;
+        final String root = fs.currentDirectory.path;
+        final String pubCachePath = fs.path.join(root, 'pub');
+        final String workspaceAppPath = fs.path.join(root, 'workspace', 'app');
+        final String flutterRootPath = fs.path.join(root, 'flutter');
         final String extPath = fs.path.join(pubCachePath, 'hosted', 'pub.dev', 'hosted_ext-1.0.0');
         final DiscoveredProjectExtension extension = _discoveredExtension(
           fs,
@@ -1182,8 +1185,8 @@ dependencies:
 
         final defaultEnvironment = <String, String>{
           'PUB_CACHE': pubCachePath,
-          'HOME': fs.directory('/home/test').absolute.path,
-          'LOCALAPPDATA': fs.directory('/local_app_data').absolute.path,
+          'HOME': fs.path.join(root, 'home', 'test'),
+          'LOCALAPPDATA': fs.path.join(root, 'local_app_data'),
         };
         final String expectedDefaultDataHome = getDartDataHome(
           'flutter_tool_extensions',
@@ -1201,7 +1204,7 @@ dependencies:
 
         final xdgEnvironment = <String, String>{
           ...defaultEnvironment,
-          'XDG_STATE_HOME': fs.directory('/custom_xdg_state').absolute.path,
+          'XDG_STATE_HOME': fs.path.join(root, 'custom_xdg_state'),
         };
         final String expectedXdgDataHome = getDartDataHome(
           'flutter_tool_extensions',
