@@ -75,8 +75,7 @@ $ flutter analyze
   of the per-platform variants in `build_info.dart` instead of a
   hardcoded `'build'`.
 - `process.kill()` sends `SIGTERM`. Use `SIGKILL` only when you have a
-  reason to. Every wait on an external process or device (`xcodebuild`,
-  `devicectl`, mDNS, `adb`) needs a timeout.
+  reason to.
 
 #### Errors and output
 
