@@ -123,8 +123,9 @@ applies. In addition:
 - Declare regular expressions as `static final RegExp` fields with a
   comment that says what they match and gives an example. Use several
   small regexes instead of one large one.
-- Use exhaustive `switch` statements over enums such as `TargetPlatform`
-  and `CpuArch` so new values fail to compile until handled.
+- Use exhaustive `switch` statements, with no `default` case, over enums
+  such as `TargetPlatform` and `CpuArch` so new values fail to compile
+  until handled.
 
 ### Writing tests
 

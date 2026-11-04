@@ -24,7 +24,7 @@ the PR description so the reviewer can weigh in.
    `BufferLogger.test()` for the logger.
 5. Build paths with `fileSystem.path.join(...)`. Use `getBuildDirectory()`
    instead of a hardcoded `'build'`. Use
-   `ErrorHandlingFileSystem.deleteIfExists` to delete.
+   `ErrorHandlingFileSystem.deleteIfExists(entity)` to delete.
 6. Failures caused by the user's project or environment exit through
    `throwToolExit(...)` with a message that says what failed and what the
    user can do about it. Catch specific exception types
