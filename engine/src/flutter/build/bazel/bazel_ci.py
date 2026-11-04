@@ -277,14 +277,34 @@ def build_options(engine_src):
   10 minutes). A disk cache under .bazel_ci -- the checkout's, persisting
   with it, bounded -- serves every such repeat; the root .bazelrc's
   home-directory cache is the developer's own builds'. A bot builds one
-  build per task from nothing and keeps nothing (bazel_home): no cache.
+  build per task from nothing and keeps nothing (bazel_home): no disk cache;
+  a Linux bot runs on RBE instead (rbe_options).
   """
   if on_bot():
-    return bot_sandbox_options()
+    return rbe_options() + bot_sandbox_options()
   return [
       '--disk_cache=' + os.path.join(bazel_home(engine_src), 'disk_cache'),
       '--experimental_disk_cache_gc_max_size=' + DISK_CACHE_GC_MAX_SIZE,
   ]
+
+
+# A Linux bot's builds run their actions on Flutter's RBE instance (the
+# root .bazelrc's build:rbe: the reclient instance of the GN builds, its
+# debian11 image, 200 jobs, the bot's GCE credentials) and so share their
+# results: a build repeats nothing another bot has done since the inputs
+# changed. The wrapped GN builds and the tests stay on the bot. A Mac bot
+# builds locally: the workers are Linux. FLUTTER_BAZEL_RBE=0 turns it off
+# for a run.
+RBE_ENV = 'FLUTTER_BAZEL_RBE'
+
+
+def rbe_options():
+  """`--config=rbe` on a Linux bot, unless FLUTTER_BAZEL_RBE says no."""
+  if not sys.platform.startswith('linux'):
+    return []
+  if os.environ.get(RBE_ENV, '1') in ('0', 'false', 'no'):
+    return []
+  return ['--config=rbe']
 
 
 # Where a bot's sandboxes go when the machine has the memory for it: a

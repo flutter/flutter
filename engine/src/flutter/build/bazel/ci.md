@@ -202,12 +202,37 @@ the test for real, and so does the command from `engine/src`.
   drone has the installed directory, laid out as GN lays it, and not the
   Bazel outputs, so the Bazel builds keep their tests local to the
   builder's drone.
-- No remote cache and no remote execution, and no state between builds
-  (the recipe clobbers the checkout; a named cache for Bazel's output root
-  is an infra change, below): every build is from scratch (the first
-  `ci/host_debug_unopt` on a fresh 32-core bot: the wrapped Dart SDK build
-  alone is 15–25 minutes; the whole build and its tests on the order of
-  two hours). Two timeouts apply: the target's in
+- Remote execution on a Linux bot, and no state between builds on the bot
+  itself (the recipe clobbers the checkout; a named cache for Bazel's
+  output root is an infra change, below). A Linux bot's builds run their
+  actions on Flutter's RBE instance -- the one the GN builds' reclient
+  uses, named in the builders' `$flutter/rbe` property -- as the root
+  `.bazelrc`'s `build:rbe`
+  (`--remote_executor=grpcs://remotebuildexecution.googleapis.com`,
+  `--remote_instance_name=projects/flutter-rbe-prod/instances/default`,
+  the builders' debian11 `container-image` as the default execution
+  properties, their `rbe_jobs` as `--jobs=200`,
+  `--google_default_credentials`: the emulated GCE metadata server every
+  LUCI bot has, which is how reclient authenticates there too), which
+  bazel_ci.py adds to every build on a Linux bot (`FLUTTER_BAZEL_RBE=0`
+  turns it off for a run; a Mac builds locally, the workers being Linux
+  x64). The compiles, links, kernel compiles and snapshots run on the
+  workers, 200 at a time where a try bot has 8 cores, and their results
+  stay in the instance's cache for every later build, so a bot's build
+  repeats nothing another bot has done since the inputs last changed. What
+  stays on the bot: the wrapped GN builds (the Dart runtime, the GL stack:
+  `gn_build.bzl`'s `no-remote-exec`, their inputs being a synced tree -- so
+  the Dart runtime's 15–25 minutes of a cold builder stay until a named
+  cache takes them) and the tests (a display, a GPU, a device). Execution
+  rather than a cache alone because of the instance's IAM: a client -- the
+  bots' service account included -- reads the action cache but only a
+  worker writes it (`remotebuildexecution.actions.update`), so a build with
+  `--remote_cache` and local execution finds nothing of its own, ever.
+  Measured from a workstation before the bots (11-03): `fml_unittests`'
+  676 actions in 93 s on the workers (critical path 60 s), then 38 s from
+  a fresh output base, every action a hit. No reclient: the Bazel builds
+  carry `--no-rbe` and `use_rbe: false`, so the recipe starts no reproxy;
+  Bazel speaks to RBE itself. Two timeouts apply: the target's in
   `.ci.yaml` (the orchestrator's; 240 for the switched targets) and each
   build's own `timeout` key in the builder file, which the recipe gives the
   drone (`shard_util`; 60 minutes when the key is absent) -- the Bazel
@@ -251,13 +276,14 @@ simpler, faster and better reported:
    outlives a build, which the recipe's clobber of the `builder` cache
    today denies to anything under the checkout. With it a bot's second
    build of a configuration is incremental; today every build is cold.
-4. **A remote cache, and later remote execution.** `--remote_cache` against a
-   GCS bucket or a RBE CAS, with `--google_default_credentials` under the
-   bot's service account, makes a fresh bot's build mostly a download and
-   lets try builds share the postsubmit's artifacts; `--bes_backend` gives
-   invocation pages. RBE execution (`--remote_executor`) replaces reclient
-   for the C++ actions. Both need infra outside this repository (buckets,
-   credentials, a pool), which is why v1 has neither.
+4. **The rest of remote execution.** The execution itself is in, above: the
+   RBE instance needed nothing outside this repository, since every bot
+   already holds the credentials for reclient. What a recipe change adds:
+   `--bes_backend` for invocation pages beside the step log; the wrapped GN
+   builds taken out of the bot's critical path (a named cache for the
+   output root, or the Dart runtime as a prebuilt the recipe fetches); and
+   the Mac builders' actions on the Linux workers once the toolchains
+   cross-compile for a Mac host, or on a Mac pool of the instance.
 5. **Archives from `bazel-bin`, no install.** The install exists to lay out
    GN's directory for the recipe's `archives` paths and generators. A recipe
    that asks Bazel for the artifacts (`bazel build //engine/src/flutter/

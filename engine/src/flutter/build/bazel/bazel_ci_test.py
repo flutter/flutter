@@ -242,8 +242,17 @@ class BuildDirectoryTest(unittest.TestCase):
         description['startup_options'],
         ['--output_user_root=/b/s/w/ir/tmp/t/bazel_ci/output', '--max_idle_secs=300']
     )
-    self.assertEqual(description['build_options'], bazel_ci.bot_sandbox_options())
-    self.assertIn(description['build_options'], [[], ['--sandbox_base=/dev/shm']])
+    self.assertEqual(
+        description['build_options'],
+        bazel_ci.rbe_options() + bazel_ci.bot_sandbox_options()
+    )
+    rbe = ['--config=rbe'] if sys.platform.startswith('linux') else []
+    self.assertIn(description['build_options'], [rbe, rbe + ['--sandbox_base=/dev/shm']])
+    # RBE can be switched off for a run; a Mac never has it.
+    with unittest.mock.patch.dict(os.environ, {bazel_ci.RBE_ENV: '0'}):
+      self.assertEqual(bazel_ci.rbe_options(), [])
+    with unittest.mock.patch.dict(os.environ, {bazel_ci.RBE_ENV: '1'}):
+      self.assertEqual(bazel_ci.rbe_options(), rbe)
     self.assertEqual(
         description['environment'], {'BAZELISK_HOME': '/b/s/w/ir/tmp/t/bazel_ci/bazelisk'}
     )
