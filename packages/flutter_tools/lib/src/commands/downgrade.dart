@@ -40,7 +40,7 @@ String downgradePositionalArgumentErrorMessage(List<String> args) {
 /// Additionally, if they had switched channels to stable before trying to downgrade,
 /// the command would fail since there was no previously recorded stable version.
 class DowngradeCommand extends FlutterCommand {
-  DowngradeCommand({required ToolContext super.toolContext, super.verboseHelp = false}) {
+  DowngradeCommand({required super.toolContext, super.verboseHelp = false}) {
     argParser.addOption(
       'working-directory',
       hide: !verboseHelp,
@@ -57,9 +57,6 @@ class DowngradeCommand extends FlutterCommand {
       help: 'Show the downgrade prompt.',
     );
   }
-
-  @override
-  ToolContext get toolContext => super.toolContext!;
 
   @override
   String get description => 'Downgrade Flutter to the last active version for the current channel.';
