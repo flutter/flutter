@@ -94,3 +94,22 @@ class MissingDefineException implements Exception {
         'but it was not provided';
   }
 }
+
+/// An exception thrown when an extension-defined assemble target fails.
+class ExtensionAssembleException implements Exception {
+  const ExtensionAssembleException(this.target, {this.errorMessage});
+
+  /// The name of the assemble target that failed.
+  final String target;
+
+  /// The optional failure message returned by the tool extension.
+  final String? errorMessage;
+
+  @override
+  String toString() {
+    final String? message = errorMessage;
+    return message != null && message.isNotEmpty
+        ? 'Extension assemble target "$target" failed: $message'
+        : 'Extension assemble target "$target" failed.';
+  }
+}
