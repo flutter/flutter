@@ -67,6 +67,8 @@ def _bootstrap(ctx, test_uri):
         "import 'package:path/path.dart' as p;",
         "import 'package:test_api/backend.dart' show Metadata, Runtime, SuitePlatform;",
         "import 'package:test_api/src/backend/declarer.dart';",
+        "import 'package:test_api/src/backend/group.dart';",
+        "import 'package:test_api/src/backend/test.dart';",
         "import 'package:test_api/src/backend/invoker.dart';",
         "import 'package:test_core/src/runner/engine.dart';",
         "import 'package:test_core/src/runner/plugin/environment.dart';",
@@ -93,13 +95,53 @@ def _bootstrap(ctx, test_uri):
         "// events to Bazel's undeclared outputs (test.outputs/test_results.json),",
         "// as `flutter test --file-reporter=json:` does, for dev/bots' ResultDB",
         "// reporting of a shard under Bazel (test.dart --bazel).",
+        "// Bazel's test sharding (shard_count: TEST_TOTAL_SHARDS, TEST_SHARD_INDEX,",
+        "// the status file a sharding test must touch) as test_core shards a suite,",
+        "// contiguous slices of the tests in declaration order; and `bazel test",
+        "// --test_filter=<regex>` (TESTBRIDGE_TEST_ONLY) as `flutter test --name`,",
+        "// over the full names. Either leaves the file's groups and set-ups as they",
+        "// are around the tests it keeps.",
+        "Group? selectTests(Group group) {",
+        "  final Map<String, String> env = Platform.environment;",
+        "  Group? selected = group;",
+        "  final String? only = env['TESTBRIDGE_TEST_ONLY'];",
+        "  if (only != null && only.isNotEmpty) {",
+        "    final RegExp pattern = RegExp(only);",
+        "    selected = selected.filter((Test test) => pattern.hasMatch(test.name));",
+        "  }",
+        "  final int? totalShards = int.tryParse(env['TEST_TOTAL_SHARDS'] ?? '');",
+        "  final int? shardIndex = int.tryParse(env['TEST_SHARD_INDEX'] ?? '');",
+        "  if (totalShards != null && shardIndex != null && totalShards > 1) {",
+        "    final String? status = env['TEST_SHARD_STATUS_FILE'];",
+        "    if (status != null) {",
+        "      File(status).writeAsStringSync('');",
+        "    }",
+        "    if (selected != null) {",
+        "      final double shardSize = selected.testCount / totalShards;",
+        "      final int start = (shardSize * shardIndex).round();",
+        "      final int end = (shardSize * (shardIndex + 1)).round();",
+        "      int index = -1;",
+        "      selected = selected.filter((Test test) {",
+        "        index++;",
+        "        return index >= start && index < end;",
+        "      });",
+        "    }",
+        "  }",
+        "  return selected;",
+        "}",
+        "",
         "Future<bool> runTests(FutureOr<void> Function() testMain) async {",
         "  final declarer = Declarer(metadata: Metadata(chainStackTraces: true));",
         "  await declarer.declare(testMain);",
+        "  final Group? selected = selectTests(declarer.build());",
+        "  if (selected == null) {",
+        "    print('No tests of %s selected (the shard, or --test_filter).');" % test.short_path,
+        "    return true;",
+        "  }",
         "  final suite = RunnerSuite(",
         "    const PluginEnvironment(),",
         "    SuiteConfiguration.empty,",
-        "    declarer.build(),",
+        "    selected,",
         "    SuitePlatform(Runtime.vm, compiler: null, os: currentOSGuess),",
         "    path: '%s'," % test.short_path,
         "  );",
@@ -565,7 +607,7 @@ def nearest_test_config(test, test_configs):
         directory = paths.dirname(directory)
     return None
 
-def flutter_tests(name, tests, size = "medium", tags = [], network = False, flaky = [], large = [], test_configs = [], impeller = False, suffix = "", **kwargs):
+def flutter_tests(name, tests, size = "medium", tags = [], network = False, flaky = [], large = [], shards = {}, test_configs = [], impeller = False, suffix = "", **kwargs):
     """One flutter_test per test file, and a test_suite of them.
 
     Args:
@@ -581,6 +623,14 @@ def flutter_tests(name, tests, size = "medium", tags = [], network = False, flak
         than the medium's 5): the few that take minutes under a full run's
         load (material/text_field_test's 412 cases: 128–221 s, and over
         300 s when the Impeller runs double the load).
+      shards: test files to a shard count: Bazel runs the file that many
+        times at once, each run a contiguous slice of its tests in
+        declaration order (as test_core's --total-shards slices a suite; the
+        bootstrap reads TEST_TOTAL_SHARDS and TEST_SHARD_INDEX), for the
+        file whose tests take minutes on their own and set a shard's floor
+        (the gallery's smoke test: three tests, each visiting every demo).
+        Each run reports under bazel-testlogs' `<test>/shard_<i>_of_<n>/`,
+        which dev/bots' ResultDB reader follows.
       network: whether the tests may reach the network. Off by default
         (`block-network`): flutter_goldens then skips the golden
         comparisons instead of fetching Skia Gold's expectations, as it
@@ -638,6 +688,7 @@ def flutter_tests(name, tests, size = "medium", tags = [], network = False, flak
                 tags = test_tags,
                 flaky = test in flaky,
                 timeout = "short" if test in flaky else None,
+                shard_count = shards.get(test),
                 **(run_attrs | variant)
             )
             targets[variant_suffix].append(":" + test_name + variant_suffix)
