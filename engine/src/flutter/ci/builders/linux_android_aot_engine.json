@@ -31,7 +31,7 @@
                 "os=Linux"
             ],
             "gclient_variables": {
-                "use_rbe": false,
+                "use_rbe": true,
                 "download_bazelisk": true
             },
             "gn": [
@@ -79,7 +79,7 @@
                 "os=Linux"
             ],
             "gclient_variables": {
-                "use_rbe": false,
+                "use_rbe": true,
                 "download_bazelisk": true
             },
             "gn": [
@@ -128,7 +128,7 @@
                 "os=Linux"
             ],
             "gclient_variables": {
-                "use_rbe": false,
+                "use_rbe": true,
                 "download_bazelisk": true
             },
             "gn": [
@@ -192,7 +192,7 @@
                 "os=Linux"
             ],
             "gclient_variables": {
-                "use_rbe": false,
+                "use_rbe": true,
                 "download_bazelisk": true
             },
             "gn": [
@@ -241,7 +241,7 @@
                 "os=Linux"
             ],
             "gclient_variables": {
-                "use_rbe": false,
+                "use_rbe": true,
                 "download_bazelisk": true
             },
             "gn": [
@@ -290,7 +290,7 @@
                 "os=Linux"
             ],
             "gclient_variables": {
-                "use_rbe": false,
+                "use_rbe": true,
                 "download_bazelisk": true
             },
             "gn": [
@@ -339,7 +339,7 @@
                 "os=Linux"
             ],
             "gclient_variables": {
-                "use_rbe": false,
+                "use_rbe": true,
                 "download_bazelisk": true
             },
             "gn": [
@@ -388,7 +388,7 @@
                 "os=Linux"
             ],
             "gclient_variables": {
-                "use_rbe": false,
+                "use_rbe": true,
                 "download_bazelisk": true
             },
             "gn": [

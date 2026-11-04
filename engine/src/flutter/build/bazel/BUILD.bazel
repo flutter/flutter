@@ -336,6 +336,26 @@ config_setting(
     flag_values = {":lto": "True"},
 )
 
+# The wrapped GN builds' compiles on Flutter's RBE workers through reclient
+# (build_defs/gn/gn_build.bzl's rbe: @reclient and @reclient_cfgs laid under
+# the GN root, GN's use_rbe, gn_build.py's reproxy around ninja), what the
+# recipe did around a GN build on a bot. Off by default: bazel_ci.py turns
+# it on with --config=rbe (a Linux bot, or --bazel-rbe), whose credentials
+# the proxy needs -- Application Default Credentials: a bot's metadata
+# server; for a developer's sandbox,
+# --action_env=GOOGLE_APPLICATION_CREDENTIALS=<gcloud's ADC file> (not HOME:
+# the Dart SDK's own `dart compile` would write telemetry into it). Without
+# them the wrap goes on locally and says so.
+bool_flag(
+    name = "wrap_rbe",
+    build_setting_default = False,
+)
+
+config_setting(
+    name = "wrap_rbe_enabled",
+    flag_values = {":wrap_rbe": "True"},
+)
+
 # tools/gn's stripped_symbols: on unless --no-stripped, which only the
 # developer's local_engine.json configurations pass (and off for Android,
 # where GN strips elsewhere). GN's Linux toolchains write every executable

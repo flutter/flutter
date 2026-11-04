@@ -1,0 +1,18 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Root BUILD file of @reclient_cfgs: the engine's reclient configurations
+# and wrapper scripts (DEPS: flutter/build/rbe, the flutter_internal CIPD
+# package `rbe/reclient_cfgs`, synced with gclient's use_rbe) -- the
+# rewrapper configuration GN's rbe_cfg names, the proxy's configuration
+# bootstrap takes (reclient-<os>.cfg), and the local and remote compiler
+# wrappers the Linux toolchain names by path. Laid under the GN root of a
+# wrapped build at flutter/build/rbe (gn_build.bzl's rbe).
+
+package(default_visibility = ["//visibility:public"])
+
+filegroup(
+    name = "all_files",
+    srcs = glob(["**"]),
+)

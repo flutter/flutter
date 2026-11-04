@@ -233,7 +233,29 @@ the test for real, and so does the command from `engine/src`.
   `ninja -j8` 442 s for the Dart runtime on an 8-core bot, 84–155 s on 32
   cores, unless the bot's own disk cache has them, below) and the engine's
   tests (a display, a GPU, a device: run_tests.py's `TEST_OPTIONS`,
-  `--strategy=TestRunner=sandboxed,local`). The framework shards' tests are
+  `--strategy=TestRunner=sandboxed,local`). The wrapped builds run on the
+  bot, but their compiles do not, since 510: the action runs reclient's
+  proxy around ninja as the recipe ran it around a GN build (`gn_build.py`'s
+  Reproxy: `bootstrap --re_proxy=reproxy --cfg=reclient-linux.cfg`, a socket
+  of its own under the sandbox's /tmp, logs and the dependency cache under
+  the action's scratch, Application Default Credentials -- a bot's
+  metadata server -- and `bootstrap --shutdown`), GN's `use_rbe` with the
+  engine's `rewrapper-linux-x64.cfg` and `remote_local_fallback`, 80 ninja
+  jobs a core; @reclient and @reclient_cfgs (the two DEPS packages
+  gclient's `use_rbe` syncs, back on in the Linux Bazel builders' files for
+  that) are laid under the GN root where rbe.gni and the Linux toolchain's
+  wrapper scripts expect them. The flag is
+  `--//engine/src/flutter/build/bazel:wrap_rbe`, which bazel_ci.py adds
+  with `--config=rbe`; without it, or when the proxy cannot start (a
+  developer's sandbox has no credentials unless
+  `--action_env=GOOGLE_APPLICATION_CREDENTIALS=<the gcloud ADC file>` reaches
+  it -- not `--action_env=HOME`, which makes the Dart SDK's own `dart
+  compile` write telemetry into a read-only home), the wrap compiles
+  locally and says so in its log. Measured from a workstation in the
+  sandbox: the Dart runtime's 2,252 compiles all through the proxy, 77 s of
+  ninja when they are reclient cache hits (about 2.5 minutes when they
+  execute), the action 2:20 with its tree, digests and the local Dart
+  snapshot steps. The framework shards' tests are
   another matter: the headless ones -- the framework's under
   `flutter_tester`, the pure-Dart packages' -- run on the workers too
   (505), and the bot downloads their logs and results rather than their

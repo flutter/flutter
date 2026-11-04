@@ -35,11 +35,24 @@ load("//build_defs/gn:build_directory.bzl", "GnBuildInfo")
 
 _SCRATCH_SUFFIX = ".gn"
 
-def _tree_entries(ctx):
+# The configurations of @reclient_cfgs a Linux host's wrapped build takes
+# (tools/gn's rbe_cfg: rewrapper-<buildtools dir>.cfg; the recipe's bootstrap
+# cfg): the proxy's, and the rewrapper's GN names.
+_BOOTSTRAP_CFG = "reclient-linux.cfg"
+_REWRAPPER_CFG = "rewrapper-linux-x64.cfg"
+
+# Where the two trees sit under the GN root: buildtools' reclient (rbe.gni's
+# default rbe_dir) and flutter/build/rbe (the toolchain's wrapper scripts).
+RBE_TREE = {
+    "@reclient//:all_files": "flutter/buildtools/linux-x64/reclient",
+    "@reclient_cfgs//:all_files": "flutter/build/rbe",
+}
+
+def _tree_entries(tree):
     """The symlink tree spec: for each `tree` target, its files and where they go."""
     entries = []
     inputs = []
-    for target, gn_path in ctx.attr.tree.items():
+    for target, gn_path in tree.items():
         files = target[DefaultInfo].files.to_list()
         if not files:
             fail("gn_build: %s provides no files" % target.label)
@@ -96,12 +109,51 @@ def _gn_build_impl(ctx):
         archives[ctx.actions.declare_file(paths.join(name, file_name))] = label
     compile_commands = ctx.actions.declare_file(paths.join(name, "compile_commands.json"))
 
-    entries, tree_inputs = _tree_entries(ctx)
+    entries, tree_inputs = _tree_entries(ctx.attr.tree)
     entries.append(struct(
         path = root_target_dir,
         base = paths.dirname(ctx.file.build_file.path),
         files = [ctx.file.build_file.path],
     ))
+
+    # The compiles on the RBE workers through reclient (the wrap_rbe flag,
+    # through the macro's rbe_tree): reclient and the engine's configurations
+    # for it under the GN root where GN's rbe.gni and the Linux toolchain name
+    # them, and for gn_build.py the proxy's binaries and configuration and
+    # GN's arguments -- use_rbe, the rewrapper configuration of this host,
+    # and the recipe's strategy on a bot, remote with a local fallback.
+    rbe = None
+    if ctx.attr.rbe_tree:
+        rbe_entries, rbe_inputs = _tree_entries(ctx.attr.rbe_tree)
+        entries.extend(rbe_entries)
+        tree_inputs.extend(rbe_inputs)
+        reclient_dir = None
+        bootstrap_cfg = None
+        rewrapper_cfg = None
+        for entry in rbe_entries:
+            for path in entry.files:
+                name = paths.basename(path)
+                if name == "bootstrap":
+                    reclient_dir = paths.dirname(path)
+                elif name == _BOOTSTRAP_CFG:
+                    bootstrap_cfg = path
+                elif name == _REWRAPPER_CFG:
+                    rewrapper_cfg = "//" + entry.path + "/" + name
+        if not reclient_dir or not bootstrap_cfg or not rewrapper_cfg:
+            fail("%s: rbe_tree must hold reclient's bootstrap and the configurations %s and %s" % (
+                ctx.label,
+                _BOOTSTRAP_CFG,
+                _REWRAPPER_CFG,
+            ))
+        rbe = struct(
+            reclient_dir = reclient_dir,
+            bootstrap_cfg = bootstrap_cfg,
+            gn_args = {
+                "rbe_cfg": "\"%s\"" % rewrapper_cfg,
+                "rbe_exec_strategy": "\"remote_local_fallback\"",
+                "use_rbe": "true",
+            },
+        )
 
     params = dict(
         scratch = scratch,
@@ -123,6 +175,8 @@ def _gn_build_impl(ctx):
         # (and its cache entries) as they were.
         params["install_names"] = install_names
         params["install_name_tool"] = ctx.file.install_name_tool.path
+    if rbe:
+        params["rbe"] = rbe
     params_file = ctx.actions.declare_file(name + ".params.json")
     ctx.actions.write(params_file, json.encode_indent(struct(**params)))
 
@@ -246,6 +300,11 @@ _gn_build = rule(
             doc = "Environment variables for the wrapped build, besides PATH and Python's: what " +
                   "its scripts read (ANGLE's commit id, for one).",
         ),
+        "rbe_tree": attr.label_keyed_string_dict(
+            allow_files = True,
+            doc = "reclient and its configurations, mapped like `tree`, when the compiles go to the " +
+                  "RBE workers (RBE_TREE under the wrap_rbe flag; the gn_build macro sets it); empty otherwise.",
+        ),
         "_script": attr.label(
             default = ":gn_build.py",
             allow_single_file = True,
@@ -300,6 +359,10 @@ def gn_build(name, outs = [], out_paths = None, archives = {}, visibility = None
         name = name,
         outs = paths_by_name,
         archives = archives,
+        rbe_tree = select({
+            "//engine/src/flutter/build/bazel:wrap_rbe_enabled": RBE_TREE,
+            "//conditions:default": {},
+        }),
         visibility = visibility,
         **kwargs
     )
