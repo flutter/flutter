@@ -1018,6 +1018,9 @@ extension type WebGLContext._(JSObject _) implements JSObject {
   @JS('STENCIL_BITS')
   external int get stencilBits;
 
+  @JS('MAX_TEXTURE_SIZE')
+  external int get maxTextureSize;
+
   external JSAny? getExtension(String name);
 
   WebGLLoseContextExtension get loseContextExtension {

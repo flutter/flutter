@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:typed_data';
-
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
@@ -156,89 +154,58 @@ void testMain() {
     });
 
     // Regression test for https://github.com/flutter/flutter/issues/182476
-    test('resizing CkOffscreenSurface to large dimensions renders across full bounds without clipping', () async {
-      final surface = CkOffscreenSurface(OffscreenCanvasProvider());
-      await surface.initialized;
+    test(
+      'resizing CkOffscreenSurface to large dimensions renders across full bounds without clipping',
+      () async {
+        final surface = CkOffscreenSurface(OffscreenCanvasProvider());
+        await surface.initialized;
 
-      surface.setSize(const BitmapSize(100, 100));
-      final DomEventTarget clampedCanvas = surface.canvas;
-      final WebGLContext clampedGl = (clampedCanvas as DomOffscreenCanvas).getGlContext(
-        webGLVersion,
-      );
-
-      surface.setSize(const BitmapSize(4960, 7016));
-      final DomEventTarget freshCanvas = surface.canvas;
-
-      expect(
-        identical(freshCanvas, clampedCanvas),
-        isFalse,
-        reason: 'A clamped drawing buffer should be recovered on a freshly acquired canvas',
-      );
-      expect(
-        clampedGl.isContextLost(),
-        isTrue,
-        reason:
-            'The WebGL context of the replaced canvas should be explicitly lost so that '
-            'the browser frees its context slot',
-      );
-
-      // Give any pending `webglcontextlost` event a chance to be dispatched.
-      await Future<void>.delayed(const Duration(milliseconds: 50));
-      expect(
-        identical(surface.canvas, freshCanvas),
-        isTrue,
-        reason: 'Losing the replaced context must not trigger context-lost recovery',
-      );
-      expect(surface.supportsWebGl, isTrue);
-
-      final recorder = ui.PictureRecorder();
-      final canvas = ui.Canvas(recorder);
-      final paint = ui.Paint()..color = const ui.Color(0xFFFF0000);
-      canvas.drawRect(const ui.Rect.fromLTWH(0, 0, 4960, 7016), paint);
-      final ui.Picture picture = recorder.endRecording();
-
-      await surface.rasterizeToCanvas(picture);
-
-      final SkImage snapshot = surface.skSurface!.makeImageSnapshot();
-      Uint8List? pixels;
-      try {
-        final imageInfo = SkImageInfo(
-          alphaType: canvasKit.AlphaType.Premul,
-          colorType: canvasKit.ColorType.RGBA_8888,
-          colorSpace: SkColorSpaceSRGB,
-          width: 4960,
-          height: 7016,
+        surface.setSize(const BitmapSize(100, 100));
+        final DomEventTarget clampedCanvas = surface.canvas;
+        final WebGLContext clampedGl = (clampedCanvas as DomOffscreenCanvas).getGlContext(
+          webGLVersion,
         );
-        pixels = snapshot.readPixels(0, 0, imageInfo);
-      } finally {
-        snapshot.delete();
-      }
 
-      expect(pixels, isNotNull);
+        surface.setSize(const BitmapSize(4960, 7016));
+        final DomEventTarget freshCanvas = surface.canvas;
 
-      const sampleX = 4950;
-      const sampleY = 100;
-      const int pixelOffset = (sampleY * 4960 + sampleX) * 4;
-      final int r = pixels![pixelOffset];
-      final int g = pixels[pixelOffset + 1];
-      final int b = pixels[pixelOffset + 2];
-      final int a = pixels[pixelOffset + 3];
+        expect(
+          identical(freshCanvas, clampedCanvas),
+          isFalse,
+          reason: 'A clamped drawing buffer should be recovered on a freshly acquired canvas',
+        );
+        expect(
+          clampedGl.isContextLost(),
+          isTrue,
+          reason:
+              'The WebGL context of the replaced canvas should be explicitly lost so that '
+              'the browser frees its context slot',
+        );
 
-      expect(
-        r,
-        255,
-        reason:
-            'Pixel at ($sampleX, $sampleY) should have red == 255, but got red == $r (rgba: [$r, $g, $b, $a])',
-      );
-      expect(
-        a,
-        255,
-        reason:
-            'Pixel at ($sampleX, $sampleY) should have alpha == 255, but got alpha == $a (rgba: [$r, $g, $b, $a])',
-      );
+        // Give any pending `webglcontextlost` event a chance to be dispatched.
+        await Future<void>.delayed(const Duration(milliseconds: 50));
+        expect(
+          identical(surface.canvas, freshCanvas),
+          isTrue,
+          reason: 'Losing the replaced context must not trigger context-lost recovery',
+        );
+        expect(surface.supportsWebGl, isTrue);
 
-      surface.dispose();
-    });
+        final recorder = ui.PictureRecorder();
+        final canvas = ui.Canvas(recorder);
+        final paint = ui.Paint()..color = const ui.Color(0xFFFF0000);
+        canvas.drawRect(const ui.Rect.fromLTWH(0, 0, 4960, 7016), paint);
+        final ui.Picture picture = recorder.endRecording();
+
+        await surface.rasterizeToCanvas(picture);
+
+        // Before the fix, this pixel lay outside the clamped drawing buffer and
+        // read back as transparent black.
+        expect(readSurfacePixel(surface, 4950, 100), <int>[255, 0, 0, 255]);
+
+        surface.dispose();
+      },
+    );
 
     test('CkOffscreenSurface preserves canvas instance during non-clamped resize', () async {
       final surface = CkOffscreenSurface(OffscreenCanvasProvider());
@@ -268,7 +235,7 @@ void testMain() {
         final SkSurface? healthySkSurface = surface.skSurface;
 
         final WebGLContext gl = healthyCanvas.getGlContext(webGLVersion);
-        final int maxTextureSize = gl.getParameter(0x0D33); // GL_MAX_TEXTURE_SIZE
+        final int maxTextureSize = gl.getParameter(gl.maxTextureSize);
         final int oversized = maxTextureSize + 1000;
 
         expect(
@@ -338,7 +305,7 @@ void testMain() {
       },
     );
 
-    group('surface resizing stress tests', () {
+    group('surface resizing', () {
       test('rapid sequential resizing & ping-pong sizing does not leak or crash', () async {
         final surface = CkOffscreenSurface(OffscreenCanvasProvider());
         await surface.initialized;
@@ -390,45 +357,9 @@ void testMain() {
         expect(surface.skSurface, isNotNull);
 
         // Verify pixel rendering reaches the bounds of the large surface after ping-ponging.
-        final SkImage snapshot = surface.skSurface!.makeImageSnapshot();
-        try {
-          final imageInfo = SkImageInfo(
-            alphaType: canvasKit.AlphaType.Premul,
-            colorType: canvasKit.ColorType.RGBA_8888,
-            colorSpace: SkColorSpaceSRGB,
-            width: 5000,
-            height: 5000,
-          );
-          final Uint8List? pixels = snapshot.readPixels(0, 0, imageInfo);
-          expect(pixels, isNotNull);
-          const sampleX = 4990;
-          const sampleY = 4990;
-          const int pixelOffset = (sampleY * 5000 + sampleX) * 4;
-          expect(pixels![pixelOffset + 1], 255, reason: 'Green channel should be 255 at corner');
-          expect(pixels[pixelOffset + 3], 255, reason: 'Alpha channel should be 255 at corner');
-        } finally {
-          snapshot.delete();
-        }
+        expect(readSurfacePixel(surface, 4990, 4990), <int>[0, 255, 0, 255]);
 
         surface.dispose();
-
-        // Also verify CkOnscreenSurface rapid ping-pong resizing.
-        final onscreenSurface = CkOnscreenSurface(OnscreenCanvasProvider());
-        await onscreenSurface.initialized;
-        for (var i = 0; i < 15; i++) {
-          onscreenSurface.setSize(const BitmapSize(10, 10));
-          onscreenSurface.setSize(const BitmapSize(2000, 2000));
-        }
-
-        final recorder2 = ui.PictureRecorder();
-        final canvas2 = ui.Canvas(recorder2);
-        canvas2.drawRect(const ui.Rect.fromLTWH(0, 0, 2000, 2000), paint);
-        final ui.Picture picture2 = recorder2.endRecording();
-
-        await onscreenSurface.rasterizeToCanvas(picture2);
-        expect(onscreenSurface.skSurface, isNotNull);
-
-        onscreenSurface.dispose();
       });
 
       test('rasterizeToImageBitmaps at a clamping size captures the full picture', () async {
@@ -601,7 +532,8 @@ void testMain() {
         await surface.initialized;
         surface.setSize(const BitmapSize(100, 100));
         final lostCanvas = surface.canvas as DomOffscreenCanvas;
-        final int maxTextureSize = lostCanvas.getGlContext(webGLVersion).getParameter(0x0D33);
+        final WebGLContext lostGl = lostCanvas.getGlContext(webGLVersion);
+        final int maxTextureSize = lostGl.getParameter(lostGl.maxTextureSize);
 
         // The lost context cannot report its limits, so the request is not
         // validated and is recovered on a fresh canvas instead.

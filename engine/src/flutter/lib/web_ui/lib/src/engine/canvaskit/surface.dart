@@ -199,6 +199,8 @@ abstract class CkSurface extends Surface {
   @override
   void setSize(BitmapSize size) {
     final double devicePixelRatio = EngineFlutterDisplay.instance.devicePixelRatio;
+    // A zero-sized canvas cannot back a WebGL SkSurface and would force the
+    // surface into a permanent software fallback, so never go below 1x1.
     final clampedSize = BitmapSize(math.max(1, size.width), math.max(1, size.height));
     if (_skSurface != null &&
         _currentSize == clampedSize &&
@@ -206,20 +208,24 @@ abstract class CkSurface extends Surface {
       return;
     }
     final BitmapSize previousSize = _currentSize;
+    final double previousDevicePixelRatio = _currentDevicePixelRatio;
     _currentDevicePixelRatio = devicePixelRatio;
     _currentSize = clampedSize;
     try {
       _resizeCanvas(clampedSize);
     } catch (_) {
+      // Keep the recorded state in sync with the surface that is still in use.
       _currentSize = previousSize;
+      _currentDevicePixelRatio = previousDevicePixelRatio;
       rethrow;
     }
   }
 
   /// Resizes the underlying canvas to [size] and recreates the Skia surface.
   ///
-  /// Subclasses may override this if their underlying canvas type requires
-  /// re-allocation or context recreation instead of in-place dimension updates.
+  /// Subclasses in this library may override this if their underlying canvas
+  /// type requires re-allocation or context recreation instead of in-place
+  /// dimension updates.
   void _resizeCanvas(BitmapSize size) {
     _canvasProvider.resizeCanvas(canvas, size);
     _recreateSkSurface();
@@ -422,16 +428,16 @@ class CkOffscreenSurface extends CkSurface implements OffscreenSurface {
   @override
   void _resizeCanvas(BitmapSize size) {
     if (!supportsWebGl) {
-      _canvasProvider.resizeCanvas(canvas, size);
-      _recreateSkSurface();
+      super._resizeCanvas(size);
       return;
     }
 
-    final WebGLContext gl = (canvas as DomOffscreenCanvas).getGlContext(webGLVersion);
+    final DomEventTarget oldCanvas = canvas;
+    final WebGLContext gl = (oldCanvas as DomOffscreenCanvas).getGlContext(webGLVersion);
     // A lost context reports no parameters; skip validation and let the
     // zero-sized drawing buffer below route to recovery on a fresh canvas.
     if (!gl.isContextLost()) {
-      final int maxTextureSize = gl.getParameter(_kGlMaxTextureSize);
+      final int maxTextureSize = gl.getParameter(gl.maxTextureSize);
       if (size.width > maxTextureSize || size.height > maxTextureSize) {
         throw UnsupportedError(
           'Requested dimensions ${size.width}x${size.height} exceed '
@@ -440,23 +446,24 @@ class CkOffscreenSurface extends CkSurface implements OffscreenSurface {
       }
     }
 
-    _canvasProvider.resizeCanvas(canvas, size);
+    _canvasProvider.resizeCanvas(oldCanvas, size);
 
     if (gl.drawingBufferWidth >= size.width && gl.drawingBufferHeight >= size.height) {
       _recreateSkSurface();
       return;
     }
 
-    final DomEventTarget oldCanvas = canvas;
-    final WebGLContext oldGl = (oldCanvas as DomOffscreenCanvas).getGlContext(webGLVersion);
     // Release the canvas first so that its `webglcontextlost` listener is
     // removed and [onContextLost] does not fire for the deliberate loss below.
     _canvasProvider.releaseCanvas(oldCanvas);
     // An already-lost context holds no slot to free and exposes no extensions.
-    if (!oldGl.isContextLost()) {
-      oldGl.loseContextExtension.loseContext();
+    if (!gl.isContextLost()) {
+      gl.loseContextExtension.loseContext();
     }
 
+    // Unlike `recreateContextForCanvas`, which only drops its references,
+    // dispose the SkSurface before abandoning and deleting the GrContext so the
+    // Skia objects bound to the old context are freed now.
     _skSurface?.dispose();
     _skSurface = null;
     _grContext?.releaseResourcesAndAbandonContext();
@@ -469,9 +476,6 @@ class CkOffscreenSurface extends CkSurface implements OffscreenSurface {
     );
     unawaited(recreateContextForCanvas(newCanvas));
   }
-
-  /// The `GL_MAX_TEXTURE_SIZE` WebGL parameter enum.
-  static const int _kGlMaxTextureSize = 0x0D33;
 
   @override
   Future<void> triggerContextLoss() async {
