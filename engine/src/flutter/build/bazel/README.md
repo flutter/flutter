@@ -1344,7 +1344,11 @@ other test was done by +6:35; per test a median of 4 s on the workers; no
 `.dill` in the output base afterwards. Again without the smoke test, the
 forests off and the four `host` files local: 2,110 tests in 479 s
 (critical path 215 s), 15,469 processes against 17,581, every test
-passing. The workers are
+passing. On the 8-core bots (505's presubmit), the step once more:
+libraries 5:39 → 2:22, misc 10:25 → 7:24, widgets 8:33 → 8:15 (its floor
+is the gallery smoke test, eight minutes on a worker or a bot alike),
+slow 4:40; the tool shards as before, their tests on the bot by design.
+The workers are
 2-vCPU Debian 11 machines whose clock is UTC, which is why archives are
 zipped on the bot (build_defs/dist/zip_bundle.bzl). `test.dart --no-bazel-rbe` keeps a shard's
 build on the machine and `--bazel-rbe` asks for RBE off a bot (a Linux

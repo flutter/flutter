@@ -156,12 +156,35 @@ filegroup(
 )
 '''
 
+def _mirrors(url):
+    """The URLs to try for a .deb, in order: snapshot.debian.org's Cloudflare front, then the lock's.
+
+    snapshot.debian.org answers 503 ("No healthy backends") or takes
+    seconds a request now and then -- the web and tool-integration shards
+    at 505 (11-04) lost six runs to one such hour -- and
+    snapshot-cloudflare.debian.org serves the same archive (the same
+    bytes, checked against the lock's sha256) from a CDN that keeps what
+    it has served once, the files never changing; it goes first, the
+    origin second.
+    """
+    prefix = "https://snapshot.debian.org/"
+    if url.startswith(prefix):
+        return ["https://snapshot-cloudflare.debian.org/" + url[len(prefix):], url]
+    return [url]
+
+def _download(ctx, url, output, sha256):
+    """Downloads a .deb: each mirror in turn (Bazel's own order), three rounds."""
+    for _ in range(3):
+        if ctx.download(url = _mirrors(url), output = output, sha256 = sha256, allow_fail = True).success:
+            return
+    fail("%s: could not download %s (sha256 %s) from any mirror in three attempts" % (ctx.name, url, sha256))
+
 def _debian_runtime_sysroot_impl(ctx):
     ar = ctx.path(ctx.attr.llvm_ar)
     for package, entry in ctx.attr.packages.items():
         url, sha256 = entry
         deb = "%s.deb" % package
-        ctx.download(url = url, output = deb, sha256 = sha256)
+        _download(ctx, url, deb, sha256)
         result = ctx.execute([ar, "t", deb])
         if result.return_code != 0:
             fail("%s: llvm-ar failed on %s: %s" % (ctx.name, deb, result.stderr))
