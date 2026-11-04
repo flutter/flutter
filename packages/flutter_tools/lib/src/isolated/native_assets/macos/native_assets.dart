@@ -6,6 +6,7 @@ import 'package:code_assets/code_assets.dart';
 
 import '../../../base/file_system.dart';
 import '../../../base/logger.dart';
+import '../../../base/process.dart';
 import '../../../build_info.dart';
 import '../native_assets.dart';
 import '../native_assets_manifest.dart';
@@ -30,16 +31,20 @@ Architecture getNativeMacOSArchitecture(CpuArch cpuArch) {
 /// multi-architecture bundling.
 Map<Uri, List<FlutterCodeAsset>> fatAssetTargetLocationsMacOS(
   List<FlutterCodeAsset> nativeAssets,
-  Uri? absolutePath,
-) {
-  return fatAssetTargetLocations(assetTargetLocationsMacOS(nativeAssets, absolutePath));
+  Uri? absolutePath, {
+  required Logger logger,
+}) {
+  return fatAssetTargetLocations(
+    assetTargetLocationsMacOS(nativeAssets, absolutePath, logger: logger),
+  );
 }
 
 Map<FlutterCodeAsset, FlutterCodeAssetTargetLocation> assetTargetLocationsMacOS(
   List<FlutterCodeAsset> nativeAssets,
-  Uri? absolutePath,
-) {
-  return assetTargetLocationsApple(nativeAssets, absolutePath: absolutePath);
+  Uri? absolutePath, {
+  required Logger logger,
+}) {
+  return assetTargetLocationsApple(nativeAssets, absolutePath: absolutePath, logger: logger);
 }
 
 /// Copies native assets into a framework per dynamic library.
@@ -62,8 +67,10 @@ Future<List<File>> copyNativeCodeAssetsMacOS(
   Map<Uri, List<FlutterCodeAsset>> assetTargetLocations,
   String? codesignIdentity,
   BuildMode buildMode,
-  FileSystem fileSystem,
-) async {
+  FileSystem fileSystem, {
+  required Logger logger,
+  required ProcessUtils processUtils,
+}) async {
   assert(assetTargetLocations.isNotEmpty);
   final installedFiles = <File>[];
   final oldToNewInstallNames = <String, String>{};
@@ -108,11 +115,11 @@ Future<List<File>> copyNativeCodeAssetsMacOS(
         from: resourcesLink.parent.path,
       ),
     );
-    await lipoDylibs(dylibFile, sources);
+    await lipoDylibs(dylibFile, sources, processUtils: processUtils);
     if (buildMode != BuildMode.debug) {
       final dsymPath = '${frameworkDir.path}.dSYM';
-      await dsymutilDylib(dylibFile, dsymPath);
-      await stripDylib(dylibFile);
+      await dsymutilDylib(dylibFile, dsymPath, processUtils: processUtils);
+      await stripDylib(dylibFile, logger: logger, processUtils: processUtils);
       installedFiles.addAll(
         fileSystem.directory(dsymPath).listSync(recursive: true).whereType<File>(),
       );
@@ -126,7 +133,10 @@ Future<List<File>> copyNativeCodeAssetsMacOS(
     );
 
     final String newInstallName = frameworkInstallName(target);
-    final Set<String> oldInstallNames = await getInstallNamesDylib(dylibFile);
+    final Set<String> oldInstallNames = await getInstallNamesDylib(
+      dylibFile,
+      processUtils: processUtils,
+    );
     for (final oldInstallName in oldInstallNames) {
       oldToNewInstallNames[oldInstallName] = newInstallName;
     }
@@ -137,12 +147,17 @@ Future<List<File>> copyNativeCodeAssetsMacOS(
   }
 
   for (final (File dylibFile, String newInstallName, Directory frameworkDir) in dylibs) {
-    await setInstallNamesDylib(dylibFile, newInstallName, oldToNewInstallNames);
+    await setInstallNamesDylib(
+      dylibFile,
+      newInstallName,
+      oldToNewInstallNames,
+      processUtils: processUtils,
+    );
     // Do not code-sign the libraries here with identity. Code-signing
     // for bundled dylibs is done in `macos_assemble.sh embed` because the
     // "Flutter Assemble" target does not have access to the signing identity.
     if (codesignIdentity != null) {
-      await codesignDylib(codesignIdentity, buildMode, frameworkDir);
+      await codesignDylib(codesignIdentity, buildMode, frameworkDir, processUtils: processUtils);
     }
   }
   return installedFiles;
@@ -178,6 +193,7 @@ Future<List<File>> copyNativeCodeAssetsMacOSFlutterTester(
   BuildMode buildMode,
   FileSystem fileSystem, {
   required Logger logger,
+  required ProcessUtils processUtils,
 }) async {
   assert(assetTargetLocations.isNotEmpty);
   final installedFiles = <File>[];
@@ -197,10 +213,13 @@ Future<List<File>> copyNativeCodeAssetsMacOSFlutterTester(
     if (!targetParent.existsSync()) {
       await targetParent.create(recursive: true);
     }
-    await lipoDylibs(dylibFile, sources);
+    await lipoDylibs(dylibFile, sources, processUtils: processUtils);
     installedFiles.add(dylibFile);
     final String newInstallName = dylibFile.path;
-    final Set<String> oldInstallNames = await getInstallNamesDylib(dylibFile);
+    final Set<String> oldInstallNames = await getInstallNamesDylib(
+      dylibFile,
+      processUtils: processUtils,
+    );
     for (final oldInstallName in oldInstallNames) {
       oldToNewInstallNames[oldInstallName] = newInstallName;
     }
@@ -218,6 +237,7 @@ Future<List<File>> copyNativeCodeAssetsMacOSFlutterTester(
       dylibFile,
       newInstallName,
       oldToNewInstallNames,
+      processUtils: processUtils,
       keepInstallNameIfItDoesNotFit: true,
     );
     if (!installNameSet) {
@@ -231,7 +251,7 @@ Future<List<File>> copyNativeCodeAssetsMacOSFlutterTester(
         fatal: false,
       );
     }
-    await codesignDylib(codesignIdentity, buildMode, dylibFile);
+    await codesignDylib(codesignIdentity, buildMode, dylibFile, processUtils: processUtils);
   }
   return installedFiles;
 }

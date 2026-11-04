@@ -7,14 +7,15 @@ import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/common.dart';
+import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/targets/native_assets.dart';
 import 'package:flutter_tools/src/features.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/isolated/native_assets/dart_hook_result.dart';
 import 'package:flutter_tools/src/isolated/native_assets/macos/native_assets.dart'
     show copyNativeCodeAssetsMacOS, copyNativeCodeAssetsMacOSFlutterTester;
@@ -85,7 +86,23 @@ void main() {
         overrides: <Type, Generator>{
           FeatureFlags: () =>
               TestFeatureFlags(isNativeAssetsEnabled: true, isDartDataAssetsEnabled: true),
-          ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
+        },
+        () async {
+          if (const LocalPlatform().isWindows) {
+            return; // Backslashes in commands, but we will never run these commands on Windows.
+          }
+          if (flutterTester && !const LocalPlatform().isMacOS) {
+            // The [runFlutterSpecificDartBuild] will - when given
+            // `TargetPlatform.tester` - enable `flutter test` mode. That means if
+            // this test is run on linux, it's going to do a linux build.
+            // Though this test is mac-specific, so we skip that.
+            //
+            // Running the test in `!flutterTester` mode still works on linux as
+            // we explicitly tell it to do a mac build (instead of letting it
+            // choose the local build).
+            return;
+          }
+          processManager = FakeProcessManager.list(<FakeCommand>[
             if (flutterTester) ...<FakeCommand>[
               FakeCommand(
                 command: <Pattern>[
@@ -283,23 +300,7 @@ void main() {
                 ],
               ),
             ],
-          ]),
-        },
-        () async {
-          if (const LocalPlatform().isWindows) {
-            return; // Backslashes in commands, but we will never run these commands on Windows.
-          }
-          if (flutterTester && !const LocalPlatform().isMacOS) {
-            // The [runFlutterSpecificDartBuild] will - when given
-            // `TargetPlatform.tester` - enable `flutter test` mode. That means if
-            // this test is run on linux, it's going to do a linux build.
-            // Though this test is mac-specific, so we skip that.
-            //
-            // Running the test in `!flutterTester` mode still works on linux as
-            // we explicitly tell it to do a mac build (instead of letting it
-            // choose the local build).
-            return;
-          }
+          ]);
           final File packageConfig = environment.projectDir.childFile(
             '.dart_tool/package_config.json',
           );
@@ -348,6 +349,7 @@ void main() {
             targetPlatform: targetPlatform,
             projectUri: projectUri,
             fileSystem: fileSystem,
+            logger: logger,
             buildRunner: buildRunner,
             buildCodeAssets: BuildCodeAssetsOptions(
               appBuildDirectory: fileSystem.directory(projectUri),
@@ -367,14 +369,18 @@ void main() {
             targetPlatform: targetPlatform,
             projectUri: projectUri,
             fileSystem: fileSystem,
+            logger: logger,
+            processManager: processManager,
             nativeAssetsFileUri: nativeAssetsFileUri,
-            targetUri: projectUri.resolve('${getBuildDirectory()}/native_assets/macos/'),
+            targetUri: projectUri.resolve(
+              '${getBuildDirectory(Config.test(), fileSystem)}/native_assets/macos/',
+            ),
           );
           final expectedArchsBeingBuilt = flutterTester
               ? (isArm64 ? 'macos_arm64' : 'macos_x64')
               : 'macos_arm64, macos_x64';
           expect(
-            (globals.logger as BufferLogger).traceText,
+            logger.traceText,
             stringContainsInOrder(<String>[
               'Running build hooks for $expectedArchsBeingBuilt.',
               'Running build hooks for $expectedArchsBeingBuilt done.',
@@ -417,7 +423,7 @@ void main() {
           expect(buildRunner.buildInvocations, flutterTester ? 1 : 2);
           expect(buildRunner.linkInvocations, buildMode == BuildMode.release ? 2 : 0);
           // Every install name fit, so there is nothing to warn about.
-          expect((globals.logger as BufferLogger).warningText, isEmpty);
+          expect(logger.warningText, isEmpty);
 
           if (!flutterTester) {
             // Not running on the host system, so the code asset has been turned into a framework.
@@ -455,7 +461,7 @@ void main() {
       architecture: Architecture.arm64,
     );
 
-    testUsingContext(
+    testWithoutContext(
       'flutter tester keeps the install name of a dylib without header room for its path',
       () async {
         if (const LocalPlatform().isWindows) {
@@ -548,6 +554,7 @@ void main() {
           BuildMode.debug,
           fileSystem,
           logger: logger,
+          processUtils: ProcessUtils(processManager: processManager, logger: logger),
         );
 
         expect(installedFiles.map((File file) => file.path), <String>[buzPath, barPath]);
@@ -566,10 +573,9 @@ void main() {
         // The asset loads, so `--fatal-warnings` must not fail the run.
         expect(logger.hadWarningOutput, isFalse);
       },
-      overrides: <Type, Generator>{ProcessManager: () => processManager},
     );
 
-    testUsingContext('app builds still fail when the install name does not fit', () async {
+    testWithoutContext('app builds still fail when the install name does not fit', () async {
       if (const LocalPlatform().isWindows) {
         return; // Backslashes in commands, but we will never run these commands on Windows.
       }
@@ -607,21 +613,26 @@ void main() {
           null,
           BuildMode.debug,
           fileSystem,
+          logger: logger,
+          processUtils: ProcessUtils(processManager: processManager, logger: logger),
         ),
         throwsToolExit(message: 'larger updated load commands do not fit'),
       );
       expect(processManager, hasNoRemainingExpectations);
       expect(logger.warningText, isEmpty);
-    }, overrides: <Type, Generator>{ProcessManager: () => processManager});
+    });
   });
 
   // This logic is mocked in the other tests to avoid having test order
   // randomization causing issues with what processes are invoked.
   // Exercise the parsing of the process output in this separate test.
-  testUsingContext(
-    'NativeAssetsBuildRunnerImpl.cCompilerConfig normal installation',
-    overrides: <Type, Generator>{
-      ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
+  testWithoutContext('NativeAssetsBuildRunnerImpl.cCompilerConfig normal installation', () async {
+    if (!const LocalPlatform().isMacOS) {
+      return;
+    }
+
+    final processUtils = ProcessUtils(
+      processManager: FakeProcessManager.list(<FakeCommand>[
         for (final binary in <String>['clang', 'ar', 'ld'])
           FakeCommand(
             command: <Pattern>['xcrun', '--find', binary],
@@ -631,61 +642,63 @@ void main() {
 ''', // NOTE: explicitly test needing to trim new line
           ),
       ]),
-    },
-    () async {
-      if (!const LocalPlatform().isMacOS) {
-        return;
-      }
+      logger: logger,
+    );
+    final CCompilerConfig result = (await cCompilerConfigMacOS(
+      processUtils: processUtils,
+      throwIfNotFound: true,
+    ))!;
+    expect(
+      result.compiler,
+      Uri.file(
+        '/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang',
+      ),
+    );
+    expect(
+      result.archiver,
+      Uri.file(
+        '/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ar',
+      ),
+    );
+    expect(
+      result.linker,
+      Uri.file(
+        '/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ld',
+      ),
+    );
+  });
 
-      final CCompilerConfig result = (await cCompilerConfigMacOS(throwIfNotFound: true))!;
-      expect(
-        result.compiler,
-        Uri.file(
-          '/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang',
-        ),
-      );
-      expect(
-        result.archiver,
-        Uri.file(
-          '/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ar',
-        ),
-      );
-      expect(
-        result.linker,
-        Uri.file(
-          '/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ld',
-        ),
-      );
-    },
-  );
+  testWithoutContext('NativeAssetsBuildRunnerImpl.cCompilerConfig Nix installation', () async {
+    if (!const LocalPlatform().isMacOS) {
+      return;
+    }
 
-  testUsingContext(
-    'NativeAssetsBuildRunnerImpl.cCompilerConfig Nix installation',
-    overrides: <Type, Generator>{
-      ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
+    final processUtils = ProcessUtils(
+      processManager: FakeProcessManager.list(<FakeCommand>[
         for (final binary in <String>['clang', 'ar', 'ld'])
           FakeCommand(
             command: <Pattern>['xcrun', '--find', binary],
             stdout: '/nix/store/random-path-to-clang-wrapper/bin/$binary',
           ),
       ]),
-    },
-    () async {
-      if (!const LocalPlatform().isMacOS) {
-        return;
-      }
+      logger: logger,
+    );
+    final CCompilerConfig result = (await cCompilerConfigMacOS(
+      processUtils: processUtils,
+      throwIfNotFound: true,
+    ))!;
+    expect(result.compiler, Uri.file('/nix/store/random-path-to-clang-wrapper/bin/clang'));
+    expect(result.archiver, Uri.file('/nix/store/random-path-to-clang-wrapper/bin/ar'));
+    expect(result.linker, Uri.file('/nix/store/random-path-to-clang-wrapper/bin/ld'));
+  });
 
-      final CCompilerConfig result = (await cCompilerConfigMacOS(throwIfNotFound: true))!;
-      expect(result.compiler, Uri.file('/nix/store/random-path-to-clang-wrapper/bin/clang'));
-      expect(result.archiver, Uri.file('/nix/store/random-path-to-clang-wrapper/bin/ar'));
-      expect(result.linker, Uri.file('/nix/store/random-path-to-clang-wrapper/bin/ld'));
-    },
-  );
+  testWithoutContext('missing xcode when required', () async {
+    if (!const LocalPlatform().isMacOS) {
+      return;
+    }
 
-  testUsingContext(
-    'missing xcode when required',
-    overrides: <Type, Generator>{
-      ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
+    final processUtils = ProcessUtils(
+      processManager: FakeProcessManager.list(<FakeCommand>[
         for (final binary in <String>['clang', 'ar', 'ld'])
           FakeCommand(
             command: <Pattern>['xcrun', '--find', binary],
@@ -693,20 +706,21 @@ void main() {
             stderr: 'not found',
           ),
       ]),
-    },
-    () async {
-      if (!const LocalPlatform().isMacOS) {
-        return;
-      }
+      logger: logger,
+    );
+    await expectLater(
+      cCompilerConfigMacOS(processUtils: processUtils, throwIfNotFound: true),
+      throwsA(isA<ToolExit>()),
+    );
+  });
 
-      await expectLater(cCompilerConfigMacOS(throwIfNotFound: true), throwsA(isA<ToolExit>()));
-    },
-  );
+  testWithoutContext('missing xcode when not required', () async {
+    if (!const LocalPlatform().isMacOS) {
+      return;
+    }
 
-  testUsingContext(
-    'missing xcode when not required',
-    overrides: <Type, Generator>{
-      ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
+    final processUtils = ProcessUtils(
+      processManager: FakeProcessManager.list(<FakeCommand>[
         for (final binary in <String>['clang', 'ar', 'ld'])
           FakeCommand(
             command: <Pattern>['xcrun', '--find', binary],
@@ -714,13 +728,8 @@ void main() {
             stderr: 'not found',
           ),
       ]),
-    },
-    () async {
-      if (!const LocalPlatform().isMacOS) {
-        return;
-      }
-
-      expect(await cCompilerConfigMacOS(throwIfNotFound: false), isNull);
-    },
-  );
+      logger: logger,
+    );
+    expect(await cCompilerConfigMacOS(processUtils: processUtils, throwIfNotFound: false), isNull);
+  });
 }

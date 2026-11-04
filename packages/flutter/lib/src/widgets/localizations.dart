@@ -643,7 +643,9 @@ class _LocalizationsState extends State<Localizations> {
     if (_locale == locale) {
       return;
     }
-    WidgetsBinding.instance.platformDispatcher.setApplicationLocale(locale!);
+    if (widget.isApplicationLevel) {
+      WidgetsBinding.instance.platformDispatcher.setApplicationLocale(locale!);
+    }
     _locale = locale;
   }
 

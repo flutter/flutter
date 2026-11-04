@@ -5,6 +5,8 @@
 import 'package:code_assets/code_assets.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/isolated/native_assets/ios/native_assets.dart';
 import 'package:flutter_tools/src/isolated/native_assets/macos/native_assets.dart';
 import 'package:flutter_tools/src/isolated/native_assets/macos/native_assets_host.dart';
@@ -12,7 +14,6 @@ import 'package:flutter_tools/src/isolated/native_assets/native_assets.dart';
 import 'package:flutter_tools/src/isolated/native_assets/native_assets_manifest.dart';
 
 import '../../../src/common.dart';
-import '../../../src/context.dart';
 import '../../../src/fake_process_manager.dart';
 
 void main() {
@@ -146,10 +147,11 @@ void main() {
       architecture: Architecture.x64,
     );
 
-    final Map<Uri, List<FlutterCodeAsset>> result = fatAssetTargetLocationsMacOS(<FlutterCodeAsset>[
-      asset1,
-      asset2,
-    ], null);
+    final Map<Uri, List<FlutterCodeAsset>> result = fatAssetTargetLocationsMacOS(
+      <FlutterCodeAsset>[asset1, asset2],
+      null,
+      logger: BufferLogger.test(),
+    );
 
     expect(result.length, equals(1));
     final Uri path = result.keys.single;
@@ -199,12 +201,11 @@ void main() {
       architecture: Architecture.x64,
     );
 
-    final Map<Uri, List<FlutterCodeAsset>> result = fatAssetTargetLocationsMacOS(<FlutterCodeAsset>[
-      assetA1,
-      assetB1,
-      assetA2,
-      assetB2,
-    ], null);
+    final Map<Uri, List<FlutterCodeAsset>> result = fatAssetTargetLocationsMacOS(
+      <FlutterCodeAsset>[assetA1, assetB1, assetA2, assetB2],
+      null,
+      logger: BufferLogger.test(),
+    );
 
     expect(result.length, equals(2));
 
@@ -240,14 +241,18 @@ void main() {
     final assets = <FlutterCodeAsset>[asset];
 
     final Map<FlutterCodeAsset, FlutterCodeAssetTargetLocation> manifest =
-        assetTargetLocationsMacOS(assets, null);
+        assetTargetLocationsMacOS(assets, null, logger: BufferLogger.test());
     expect(
       (manifest[asset]!.runtimePath as NativeAssetAbsolutePath).path,
       equals('@rpath/my_asset.framework/my_asset'),
     );
 
     // The framework itself is still bundled without the install name prefix.
-    final Map<Uri, List<FlutterCodeAsset>> bundled = fatAssetTargetLocationsMacOS(assets, null);
+    final Map<Uri, List<FlutterCodeAsset>> bundled = fatAssetTargetLocationsMacOS(
+      assets,
+      null,
+      logger: BufferLogger.test(),
+    );
     expect(bundled.keys.single.path, equals('my_asset.framework/my_asset'));
   });
 
@@ -266,9 +271,11 @@ void main() {
     // The tester loads the dylib from where it was built instead of from a
     // bundle, and its install name is set to that same absolute path.
     final Map<FlutterCodeAsset, FlutterCodeAssetTargetLocation> manifest =
-        assetTargetLocationsMacOS(<FlutterCodeAsset>[
-          asset,
-        ], Uri.parse('file:///build/native_assets/macos/'));
+        assetTargetLocationsMacOS(
+          <FlutterCodeAsset>[asset],
+          Uri.parse('file:///build/native_assets/macos/'),
+          logger: BufferLogger.test(),
+        );
     expect(
       (manifest[asset]!.runtimePath as NativeAssetAbsolutePath).path,
       equals(Uri.parse('file:///build/native_assets/macos/libmy_asset.dylib').toFilePath()),
@@ -290,13 +297,17 @@ void main() {
 
     final Map<FlutterCodeAsset, FlutterCodeAssetTargetLocation> manifest = assetTargetLocationsIOS(
       assets,
+      logger: BufferLogger.test(),
     );
     expect(
       (manifest[asset]!.runtimePath as NativeAssetAbsolutePath).path,
       equals('@rpath/my_asset.framework/my_asset'),
     );
 
-    final Map<Uri, List<FlutterCodeAsset>> bundled = fatAssetTargetLocationsIOS(assets);
+    final Map<Uri, List<FlutterCodeAsset>> bundled = fatAssetTargetLocationsIOS(
+      assets,
+      logger: BufferLogger.test(),
+    );
     expect(bundled.keys.single.path, equals('my_asset.framework/my_asset'));
   });
 
@@ -324,10 +335,12 @@ void main() {
         '-headerpad_max_install_names)';
 
     late FakeProcessManager processManager;
+    late ProcessUtils processUtils;
     late File dylibFile;
 
     setUp(() {
       processManager = FakeProcessManager.empty();
+      processUtils = ProcessUtils(processManager: processManager, logger: BufferLogger.test());
       dylibFile = MemoryFileSystem.test().file(dylibPath);
     });
 
@@ -350,42 +363,59 @@ void main() {
       stderr: stderr,
     );
 
-    testUsingContext('sets the install name and changes the dependencies', () async {
+    testWithoutContext('sets the install name and changes the dependencies', () async {
       processManager.addCommand(setId());
-
-      expect(await setInstallNamesDylib(dylibFile, newInstallName, oldToNewInstallNames), isTrue);
-      expect(processManager, hasNoRemainingExpectations);
-    }, overrides: <Type, Generator>{ProcessManager: () => processManager});
-
-    testUsingContext('keeps the install name when the new one does not fit, if asked to', () async {
-      processManager.addCommands(<FakeCommand>[
-        setId(exitCode: 1, stderr: doesNotFit),
-        changeOnlyDependencies(),
-      ]);
 
       expect(
         await setInstallNamesDylib(
           dylibFile,
           newInstallName,
           oldToNewInstallNames,
-          keepInstallNameIfItDoesNotFit: true,
+          processUtils: processUtils,
         ),
-        isFalse,
+        isTrue,
       );
       expect(processManager, hasNoRemainingExpectations);
-    }, overrides: <Type, Generator>{ProcessManager: () => processManager});
+    });
 
-    testUsingContext('fails when the new install name does not fit, by default', () async {
+    testWithoutContext(
+      'keeps the install name when the new one does not fit, if asked to',
+      () async {
+        processManager.addCommands(<FakeCommand>[
+          setId(exitCode: 1, stderr: doesNotFit),
+          changeOnlyDependencies(),
+        ]);
+
+        expect(
+          await setInstallNamesDylib(
+            dylibFile,
+            newInstallName,
+            oldToNewInstallNames,
+            processUtils: processUtils,
+            keepInstallNameIfItDoesNotFit: true,
+          ),
+          isFalse,
+        );
+        expect(processManager, hasNoRemainingExpectations);
+      },
+    );
+
+    testWithoutContext('fails when the new install name does not fit, by default', () async {
       processManager.addCommand(setId(exitCode: 1, stderr: doesNotFit));
 
       await expectLater(
-        setInstallNamesDylib(dylibFile, newInstallName, oldToNewInstallNames),
+        setInstallNamesDylib(
+          dylibFile,
+          newInstallName,
+          oldToNewInstallNames,
+          processUtils: processUtils,
+        ),
         throwsToolExit(message: 'larger updated load commands do not fit'),
       );
       expect(processManager, hasNoRemainingExpectations);
-    }, overrides: <Type, Generator>{ProcessManager: () => processManager});
+    });
 
-    testUsingContext(
+    testWithoutContext(
       'fails on any other install_name_tool error, even if asked to keep the install name',
       () async {
         processManager.addCommand(
@@ -397,16 +427,16 @@ void main() {
             dylibFile,
             newInstallName,
             oldToNewInstallNames,
+            processUtils: processUtils,
             keepInstallNameIfItDoesNotFit: true,
           ),
           throwsToolExit(message: 'is not a Mach-O file'),
         );
         expect(processManager, hasNoRemainingExpectations);
       },
-      overrides: <Type, Generator>{ProcessManager: () => processManager},
     );
 
-    testUsingContext('fails when the dependencies cannot be changed either', () async {
+    testWithoutContext('fails when the dependencies cannot be changed either', () async {
       processManager.addCommands(<FakeCommand>[
         setId(exitCode: 1, stderr: doesNotFit),
         changeOnlyDependencies(exitCode: 1, stderr: doesNotFit),
@@ -417,11 +447,12 @@ void main() {
           dylibFile,
           newInstallName,
           oldToNewInstallNames,
+          processUtils: processUtils,
           keepInstallNameIfItDoesNotFit: true,
         ),
         throwsToolExit(message: 'also after keeping its install name'),
       );
       expect(processManager, hasNoRemainingExpectations);
-    }, overrides: <Type, Generator>{ProcessManager: () => processManager});
+    });
   });
 }

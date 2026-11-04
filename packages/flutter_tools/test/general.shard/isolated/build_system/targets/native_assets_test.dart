@@ -18,6 +18,7 @@ import 'package:flutter_tools/src/isolated/native_assets/native_assets.dart';
 
 import '../../../../src/common.dart';
 import '../../../../src/context.dart';
+import '../../../../src/fake_process_manager.dart';
 import '../../../../src/fakes.dart';
 import '../../../../src/package_config.dart';
 import '../../fake_native_assets_build_runner.dart';
@@ -226,9 +227,9 @@ void main() {
 
   testUsingContext(
     'NativeAssets with an asset',
-    overrides: <Type, Generator>{
-      FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
-      ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
+    overrides: <Type, Generator>{FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true)},
+    () async {
+      processManager.addCommands(<FakeCommand>[
         // Create the framework dylib.
         FakeCommand(
           command: const <Pattern>[
@@ -301,9 +302,7 @@ void main() {
             '/native_assets/foo.framework',
           ],
         ),
-      ]),
-    },
-    () async {
+      ]);
       writePackageConfigFiles(directory: iosEnvironment.projectDir, mainLibName: 'my_app');
 
       final codeAssets = <CodeAsset>[
@@ -380,6 +379,7 @@ void main() {
       );
 
       expect(nativeAssetsYaml, exists);
+      expect(processManager, hasNoRemainingExpectations);
     },
   );
 
