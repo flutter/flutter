@@ -20,7 +20,6 @@ execution root), so no path outside it ends up in a command line, in
 `build.ninja` or in an output.
 """
 
-import hashlib
 import json
 import os
 import pwd
@@ -235,73 +234,6 @@ def _link_tree(root, tree):
     return links
 
 
-# Files up to this size are digested whole; a larger one (a sysroot's or
-# clang's binaries, a gigabyte between them) by its size and its first and
-# last 64 KiB, which keeps the diagnostic to a few seconds. The files that
-# could differ between two tasks on a bot are small.
-_WHOLE_DIGEST_LIMIT = 1 << 20
-_SAMPLE = 1 << 16
-
-
-def _file_digest(path):
-    size = os.path.getsize(path)
-    digest = hashlib.sha256()
-    with open(path, "rb") as f:
-        if size <= _WHOLE_DIGEST_LIMIT:
-            digest.update(f.read())
-        else:
-            digest.update(str(size).encode())
-            digest.update(f.read(_SAMPLE))
-            f.seek(-_SAMPLE, os.SEEK_END)
-            digest.update(f.read(_SAMPLE))
-    return digest.digest()
-
-
-def _input_digests(tree):
-    """One line per tree and per first-level directory of it: file count, digest of (path, content) pairs.
-
-    Printed with the timing line so that two runs of the action on the bots
-    can be compared: the wrapped builds never hit the bots' disk cache across
-    tasks (PR #195825, 11-03) where the same inputs hit it across output bases
-    on a workstation, and the lines name the directory whose contents differ.
-    Costs a read of every input (a few seconds); to be removed once the cause
-    is found.
-    """
-    lines = []
-    for entry in tree:
-        base = entry["base"]
-        groups = {}
-        for path in sorted(entry["files"]):
-            rel = path[len(base) + 1:] if path.startswith(base + "/") else os.path.basename(path)
-            group = rel.split("/", 1)[0] if "/" in rel else "."
-            digest = hashlib.sha256()
-            try:
-                if os.path.isdir(path):
-                    for dirpath, dirnames, filenames in os.walk(path):
-                        dirnames.sort()
-                        for name in sorted(filenames):
-                            file_path = os.path.join(dirpath, name)
-                            digest.update(os.path.relpath(file_path, path).encode())
-                            digest.update(_file_digest(file_path))
-                else:
-                    digest.update(_file_digest(path))
-            except OSError as error:
-                digest.update(("unreadable: %s" % error).encode())
-            count, tree_digest = groups.get(group, (0, hashlib.sha256()))
-            tree_digest.update(rel.encode() + b"\0" + digest.digest())
-            groups[group] = (count + 1, tree_digest)
-        whole = hashlib.sha256()
-        for group in sorted(groups):
-            whole.update(groups[group][1].digest())
-        lines.append("gn_build inputs %s: %d files %s" % (
-            entry["path"] or ".", sum(c for c, _ in groups.values()), whole.hexdigest()[:16]))
-        if len(groups) > 1:
-            for group in sorted(groups):
-                count, tree_digest = groups[group]
-                lines.append("  %s/%s: %d %s" % (entry["path"] or ".", group, count, tree_digest.hexdigest()[:16]))
-    return lines
-
-
 def _root_path(root, tree, path):
     """Where an input appears inside the source root, or None if it is not linked there."""
     for entry in tree:
@@ -455,8 +387,6 @@ def main(argv):
     links = _link_tree(root, params["tree"])
     _prune_tree(root, links, keep=("out",))
     linked = time.monotonic()
-    digest_lines = _input_digests(params["tree"])
-    digested = time.monotonic()
 
     args = dict(params["gn_args"])
     env = None
@@ -474,15 +404,16 @@ def main(argv):
             reproxy = None
     args.setdefault("concurrent_toolchain_jobs", str(cpus))
     _write_args(out_dir, args)
+    prepared = time.monotonic()
     try:
-        return _build(params, scratch, root, out_dir, jobs, env, started, linked, digested, links, digest_lines)
+        return _build(params, scratch, root, out_dir, jobs, env, started, linked, prepared, links)
     finally:
         # Whatever happens to the build, the proxy does not outlive the action.
         if reproxy:
             reproxy.stop()
 
 
-def _build(params, scratch, root, out_dir, jobs, env, started, linked, digested, links, digest_lines):
+def _build(params, scratch, root, out_dir, jobs, env, started, linked, prepared, links):
     """`gn gen`, ninja, the outputs, the archives and the timing line; the exit status."""
 
     # GN records the script interpreter's path relative to the build
@@ -531,11 +462,10 @@ def _build(params, scratch, root, out_dir, jobs, env, started, linked, digested,
             json.dump(commands, f, indent=2)
     finished = time.monotonic()
 
-    _log("gn_build %s: %d links %.1fs, input digests %.1fs, gn gen %.1fs, ninja -j%d%s %.0fs, outputs %.1fs" % (
-        params["root_target"], len(links), linked - started, digested - linked, generated - digested,
+    _log("gn_build %s: %d links %.1fs, %sgn gen %.1fs, ninja -j%d%s %.0fs, outputs %.1fs" % (
+        params["root_target"], len(links), linked - started,
+        "reproxy %.1fs, " % (prepared - linked) if env else "", generated - prepared,
         jobs, " with RBE" if env else "", built - generated, finished - built))
-    for line in digest_lines:
-        _log(line)
     return 0
 
 
