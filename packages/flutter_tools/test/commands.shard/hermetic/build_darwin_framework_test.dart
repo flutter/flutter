@@ -17,6 +17,7 @@ import 'package:flutter_tools/src/commands/darwin_add_to_app.dart';
 import 'package:flutter_tools/src/context/apple_context.dart';
 import 'package:flutter_tools/src/darwin/darwin.dart';
 import 'package:flutter_tools/src/ios/plist_parser.dart';
+import 'package:flutter_tools/src/isolated/mustache_template.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:flutter_tools/src/xcode_project.dart';
 import 'package:test/fake.dart';
@@ -35,7 +36,6 @@ void main() {
 
   setUpAll(() {
     Cache.disableLocking();
-    Cache.flutterRoot = getFlutterRoot();
   });
 
   const storageBaseUrl = 'https://fake.googleapis.com';
@@ -204,8 +204,6 @@ void main() {
         const licenseText = 'This is the license!';
 
         setUp(() {
-          // cache.getLicenseFile() relies on the flutter root being set.
-          Cache.flutterRoot ??= getFlutterRoot();
           cache.getLicenseFile()
             ..createSync(recursive: true)
             ..writeAsStringSync(licenseText);
@@ -701,8 +699,6 @@ void main() {
         const licenseText = 'This is the license!';
 
         setUp(() {
-          // cache.getLicenseFile() relies on the flutter root being set.
-          Cache.flutterRoot ??= getFlutterRoot();
           cache.getLicenseFile()
             ..createSync(recursive: true)
             ..writeAsStringSync(licenseText);
@@ -1874,6 +1870,7 @@ BuildIOSFrameworkCommand createBuildIOSFrameworkCommand({
     appleContext: appleContext ?? FakeAppleContext(),
     buildSystem: buildSystem ?? TestBuildSystem.all(BuildResult(success: true)),
     codesign: codesign ?? FakeDarwinAddToAppCodesigning(),
+    templateRenderer: const MustacheTemplateRenderer(),
     toolContext: FakeToolContext(
       artifacts: artifacts,
       flutterVersion: flutterVersion,
@@ -1922,6 +1919,7 @@ BuildMacOSFrameworkCommand createBuildMacOSFrameworkCommand({
     appleContext: appleContext ?? FakeAppleContext(),
     buildSystem: buildSystem ?? TestBuildSystem.all(BuildResult(success: true)),
     codesign: codesign ?? FakeDarwinAddToAppCodesigning(),
+    templateRenderer: const MustacheTemplateRenderer(),
     toolContext: FakeToolContext(
       artifacts: artifacts,
       flutterVersion: flutterVersion,

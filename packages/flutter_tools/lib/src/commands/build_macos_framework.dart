@@ -38,6 +38,7 @@ class BuildMacOSFrameworkCommand extends BuildFrameworkCommand {
     required super.appleContext,
     required super.buildSystem,
     required super.codesign,
+    required super.templateRenderer,
     required super.toolContext,
     required super.verboseHelp,
   });
@@ -72,6 +73,7 @@ class BuildMacOSFrameworkCommand extends BuildFrameworkCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     final ToolContext(
+      :Cache cache,
       :Config config,
       :FileSystem fs,
       :Logger logger,
@@ -144,6 +146,9 @@ class BuildMacOSFrameworkCommand extends BuildFrameworkCommand {
           project.macos,
           getMacOSBuildDirectory(config: config, fileSystem: fs),
           buildInfo.mode,
+          cocoaPods: appleContext.cocoaPods,
+          templateRenderer: templateRenderer,
+          toolContext: toolContext,
           forceCocoaPodsOnly: true,
         );
         if (hasPlugins(project)) {
@@ -288,7 +293,7 @@ end
         outputDir: macosBuildOutput,
         buildDir: project.dartTool.childDirectory('flutter_build'),
         cacheDir: cache.getRoot(),
-        flutterRootDir: fs.directory(Cache.flutterRoot),
+        flutterRootDir: fs.directory(cache.flutterRoot),
         defines: <String, String>{
           kTargetFile: targetFile,
           kTargetPlatform: TargetPlatform.darwin.getName(),
