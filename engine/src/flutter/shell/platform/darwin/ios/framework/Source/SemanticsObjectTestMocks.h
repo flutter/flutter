@@ -58,7 +58,7 @@ class MockAccessibilityBridge : public AccessibilityBridgeIos {
   FlutterPlatformViewsController* GetPlatformViewsController() const override { return nil; }
   std::vector<SemanticsActionObservation> observations;
   bool isViewLoaded = true;
-  bool isVoiceOverRunningValue;
+  bool isVoiceOverRunningValue = false;
   NSString* mockedLocale;
 
  private:
@@ -92,7 +92,7 @@ class MockAccessibilityBridgeNoWindow : public AccessibilityBridgeIos {
   FlutterPlatformViewsController* GetPlatformViewsController() const override { return nil; }
   std::vector<SemanticsActionObservation> observations;
   bool isViewLoaded = true;
-  bool isVoiceOverRunningValue;
+  bool isVoiceOverRunningValue = false;
 
  private:
   UIView* view_;

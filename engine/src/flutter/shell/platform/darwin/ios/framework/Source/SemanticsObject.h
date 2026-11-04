@@ -136,6 +136,16 @@ constexpr float kScrollExtentMaxForInf = 1000;
 
 @end
 
+@interface SemanticsObject (FlutterFocusSystemUpdates)
+/**
+ * Called on the root object after the bridge applies a semantics update.
+ *
+ * Completes a pending Full Keyboard Access Tab navigation once its target has
+ * been scrolled into view. Implemented in SemanticsObject+UIFocusSystem.mm.
+ */
+- (void)focusSystemDidFinishSemanticsUpdate;
+@end
+
 /**
  * An implementation of UIAccessibilityCustomAction which also contains the
  * Flutter uid.

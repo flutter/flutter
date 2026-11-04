@@ -15,7 +15,6 @@ FLUTTER_ASSERT_ARC
   self = [super initWithFrame:CGRectZero];
   if (self) {
     _semanticsObject = semanticsObject;
-    _isDoingSystemScrolling = NO;
     self.delegate = self;
   }
   return self;
@@ -114,11 +113,13 @@ FLUTTER_ASSERT_ARC
 - (void)scrollViewWillEndDragging:(UIScrollView*)scrollView
                      withVelocity:(CGPoint)velocity
               targetContentOffset:(inout CGPoint*)targetContentOffset {
-  _isDoingSystemScrolling = YES;
-}
-
-- (void)scrollViewDidEndDecelerating:(UIScrollView*)scrollView {
-  _isDoingSystemScrolling = NO;
+  // This scroll view is not hit-testable, so this is the iOS focus
+  // engine (Full Keyboard Access) scrolling to reveal the focused item.
+  // Cancel it: the framework scrolls the item into view instead (see
+  // -[SemanticsObject didUpdateFocusInContext:withAnimationCoordinator:]), and
+  // this scroll view follows the framework's scroll offset. Letting both
+  // scroll makes them fight, and the focus highlight ends up offscreen.
+  *targetContentOffset = scrollView.contentOffset;
 }
 
 @end

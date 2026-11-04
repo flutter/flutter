@@ -217,10 +217,9 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
   // contentOffset is 0.0, only the scroll down action is available.
   _scrollView.frame = self.accessibilityFrame;
   _scrollView.contentSize = [self contentSizeInternal];
-  // See the documentation on `isDoingSystemScrolling`.
-  if (!_scrollView.isDoingSystemScrolling) {
-    [_scrollView setContentOffset:self.contentOffsetInternal animated:NO];
-  }
+  // The framework owns the scroll offset; this scroll view only mirrors it.
+  // See -[FlutterSemanticsScrollView scrollViewWillEndDragging:withVelocity:targetContentOffset:].
+  [_scrollView setContentOffset:self.contentOffsetInternal animated:NO];
 }
 
 - (float)scrollExtentMax {

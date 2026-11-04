@@ -55,6 +55,10 @@ const float kFloatCompareEpsilon = 0.001;
   XCTAssertNil([object parentFocusEnvironment]);
   XCTAssertNil([object coordinateSpace]);
   XCTAssertTrue(CGRectEqualToRect([object frame], CGRectZero));
+  id context = OCMClassMock([UIFocusUpdateContext class]);
+  OCMStub([context nextFocusedItem]).andReturn(object);
+  [object didUpdateFocusInContext:context
+         withAnimationCoordinator:OCMClassMock([UIFocusAnimationCoordinator class])];
 }
 
 - (void)testSetChildren {
@@ -1545,6 +1549,527 @@ const float kFloatCompareEpsilon = 0.001;
   XCTAssertTrue(CGRectEqualToRect(child.frame, CGRectMake(0, 0, 100, 100)));
 }
 
+- (void)testHiddenChildOfImplicitlyScrollingContainerCanBecomeFocused {
+  fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(
+      new flutter::testing::MockAccessibilityBridge());
+  fml::WeakPtr<flutter::AccessibilityBridgeIos> bridge = factory.GetWeakPtr();
+  FlutterScrollableSemanticsObject* scrollable =
+      [[FlutterScrollableSemanticsObject alloc] initWithBridge:bridge uid:0];
+  SemanticsObject* container = [[SemanticsObject alloc] initWithBridge:bridge uid:1];
+  SemanticsObject* child = [[SemanticsObject alloc] initWithBridge:bridge uid:2];
+  scrollable.children = @[ container ];
+  container.children = @[ child ];
+
+  flutter::SemanticsNode scrollableNode;
+  scrollableNode.flags.hasImplicitScrolling = true;
+  scrollableNode.scrollPosition = 0;
+  [scrollable setSemanticsNode:&scrollableNode];
+
+  // An offscreen item, nested below the scrollable, that can be tapped.
+  flutter::SemanticsNode childNode;
+  childNode.flags.isHidden = true;
+  childNode.actions = static_cast<int32_t>(flutter::SemanticsAction::kTap);
+  [child setSemanticsNode:&childNode];
+  XCTAssertTrue(child.canBecomeFocused);
+
+  // An offscreen item with no tap or focus action is not focusable.
+  childNode.actions = 0;
+  [child setSemanticsNode:&childNode];
+  XCTAssertFalse(child.canBecomeFocused);
+}
+
+- (void)testHiddenChildOutsideScrollContainerCannotBecomeFocused {
+  fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(
+      new flutter::testing::MockAccessibilityBridge());
+  fml::WeakPtr<flutter::AccessibilityBridgeIos> bridge = factory.GetWeakPtr();
+  SemanticsObject* parent = [[SemanticsObject alloc] initWithBridge:bridge uid:0];
+  SemanticsObject* child = [[SemanticsObject alloc] initWithBridge:bridge uid:1];
+  parent.children = @[ child ];
+
+  flutter::SemanticsNode childNode;
+  childNode.flags.isHidden = true;
+  childNode.actions = static_cast<int32_t>(flutter::SemanticsAction::kTap);
+  [child setSemanticsNode:&childNode];
+  XCTAssertFalse(child.canBecomeFocused);
+
+  childNode.actions = static_cast<int32_t>(flutter::SemanticsAction::kFocus);
+  [child setSemanticsNode:&childNode];
+  XCTAssertFalse(child.canBecomeFocused);
+}
+
+- (void)testHiddenChildOfNonImplicitlyScrollingContainerCannotBecomeFocused {
+  // Models a PageView (which disallows implicit scrolling) nested in a
+  // ListView (which allows it). Offscreen pages must not be focusable.
+  fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(
+      new flutter::testing::MockAccessibilityBridge());
+  fml::WeakPtr<flutter::AccessibilityBridgeIos> bridge = factory.GetWeakPtr();
+  FlutterScrollableSemanticsObject* outer =
+      [[FlutterScrollableSemanticsObject alloc] initWithBridge:bridge uid:0];
+  SemanticsObject* inner = [[SemanticsObject alloc] initWithBridge:bridge uid:1];
+  SemanticsObject* child = [[SemanticsObject alloc] initWithBridge:bridge uid:2];
+  outer.children = @[ inner ];
+  inner.children = @[ child ];
+
+  flutter::SemanticsNode outerNode;
+  outerNode.flags.hasImplicitScrolling = true;
+  outerNode.scrollPosition = 0;
+  [outer setSemanticsNode:&outerNode];
+
+  flutter::SemanticsNode innerNode;
+  innerNode.scrollPosition = 0;
+  [inner setSemanticsNode:&innerNode];
+
+  flutter::SemanticsNode childNode;
+  childNode.flags.isHidden = true;
+  childNode.actions = static_cast<int32_t>(flutter::SemanticsAction::kTap);
+  [child setSemanticsNode:&childNode];
+  XCTAssertFalse(child.canBecomeFocused);
+}
+
+- (void)testNodeWithOnlyFocusActionCanBecomeFocused {
+  fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(
+      new flutter::testing::MockAccessibilityBridge());
+  fml::WeakPtr<flutter::AccessibilityBridgeIos> bridge = factory.GetWeakPtr();
+  SemanticsObject* object = [[SemanticsObject alloc] initWithBridge:bridge uid:0];
+
+  flutter::SemanticsNode node;
+  node.actions = static_cast<int32_t>(flutter::SemanticsAction::kFocus);
+  [object setSemanticsNode:&node];
+  XCTAssertTrue(object.canBecomeFocused);
+}
+
+- (void)testDidUpdateFocusDispatchesFocusActionsToNextFocusedItem {
+  flutter::testing::MockAccessibilityBridge* mock = new flutter::testing::MockAccessibilityBridge();
+  fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(mock);
+  fml::WeakPtr<flutter::AccessibilityBridgeIos> bridge = factory.GetWeakPtr();
+  FlutterScrollableSemanticsObject* scrollable =
+      [[FlutterScrollableSemanticsObject alloc] initWithBridge:bridge uid:0];
+  SemanticsObject* child = [[SemanticsObject alloc] initWithBridge:bridge uid:1];
+  scrollable.children = @[ child ];
+
+  flutter::SemanticsNode scrollableNode;
+  scrollableNode.flags.hasImplicitScrolling = true;
+  scrollableNode.scrollPosition = 0;
+  [scrollable setSemanticsNode:&scrollableNode];
+
+  flutter::SemanticsNode childNode;
+  childNode.flags.isHidden = true;
+  childNode.actions = static_cast<int32_t>(flutter::SemanticsAction::kTap) |
+                      static_cast<int32_t>(flutter::SemanticsAction::kFocus) |
+                      static_cast<int32_t>(flutter::SemanticsAction::kDidGainAccessibilityFocus);
+  [child setSemanticsNode:&childNode];
+
+  id context = OCMClassMock([UIFocusUpdateContext class]);
+  OCMStub([context nextFocusedItem]).andReturn(child);
+  OCMStub([context previouslyFocusedItem]).andReturn(nil);
+  id coordinator = OCMClassMock([UIFocusAnimationCoordinator class]);
+
+  // The scrollable is in the focus chain but is not the focused item.
+  [scrollable didUpdateFocusInContext:context withAnimationCoordinator:coordinator];
+  XCTAssertEqual(mock->observations.size(), (size_t)0);
+
+  // The framework scrolls the focused item into view.
+  [child didUpdateFocusInContext:context withAnimationCoordinator:coordinator];
+  XCTAssertEqual(mock->observations.size(), (size_t)3);
+  XCTAssertEqual(mock->observations[0].id, 1);
+  XCTAssertEqual(mock->observations[0].action, flutter::SemanticsAction::kShowOnScreen);
+  XCTAssertEqual(mock->observations[1].id, 1);
+  XCTAssertEqual(mock->observations[1].action, flutter::SemanticsAction::kFocus);
+  XCTAssertEqual(mock->observations[2].id, 1);
+  XCTAssertEqual(mock->observations[2].action,
+                 flutter::SemanticsAction::kDidGainAccessibilityFocus);
+}
+
+// Builds root(0) -> scrollable(1) -> buttons 2, 3, 4, where button 4 is
+// scrolled offscreen. Used by the Tab navigation tests.
+static SemanticsObject* BuildTabNavigationTree(fml::WeakPtr<flutter::AccessibilityBridgeIos> bridge,
+                                               NSArray<SemanticsObject*>** buttons) {
+  SemanticsObject* root = [[SemanticsObject alloc] initWithBridge:bridge uid:0];
+  FlutterScrollableSemanticsObject* scrollable =
+      [[FlutterScrollableSemanticsObject alloc] initWithBridge:bridge uid:1];
+  root.children = @[ scrollable ];
+
+  flutter::SemanticsNode scrollableNode;
+  scrollableNode.id = 1;
+  scrollableNode.flags.hasImplicitScrolling = true;
+  scrollableNode.scrollPosition = 0;
+  [scrollable setSemanticsNode:&scrollableNode];
+
+  NSMutableArray<SemanticsObject*>* result = [NSMutableArray array];
+  for (int32_t uid = 2; uid <= 4; uid++) {
+    SemanticsObject* button = [[SemanticsObject alloc] initWithBridge:bridge uid:uid];
+    flutter::SemanticsNode node;
+    node.id = uid;
+    node.actions = static_cast<int32_t>(flutter::SemanticsAction::kTap);
+    node.flags.isHidden = uid == 4;
+    [button setSemanticsNode:&node];
+    [result addObject:button];
+  }
+  scrollable.children = result;
+  *buttons = result;
+  return root;
+}
+
+static id MockFocusContext(id previous, id next, UIFocusHeading heading) {
+  id context = OCMClassMock([UIFocusUpdateContext class]);
+  OCMStub([context previouslyFocusedItem]).andReturn(previous);
+  OCMStub([context nextFocusedItem]).andReturn(next);
+  OCMStub([context focusHeading]).andReturn(heading);
+  return context;
+}
+
+- (void)testTabAllowsFocusUpdateThatMatchesTraversalOrder {
+  flutter::testing::MockAccessibilityBridge* mock = new flutter::testing::MockAccessibilityBridge();
+  fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(mock);
+  NSArray<SemanticsObject*>* buttons;
+  SemanticsObject* root = BuildTabNavigationTree(factory.GetWeakPtr(), &buttons);
+
+  id context = MockFocusContext(buttons[0], buttons[1], UIFocusHeadingNext);
+  XCTAssertTrue([buttons[0] shouldUpdateFocusInContext:context]);
+  XCTAssertEqual(mock->observations.size(), (size_t)0);
+  XCTAssertNil(root.preferredFocusEnvironments);
+}
+
+- (void)testTabRedirectsEarlyWrapToOffscreenItem {
+  // The focus engine wraps around from the last visible item (button 3)
+  // because the next item (button 4) is offscreen.
+  flutter::testing::MockAccessibilityBridge* mock = new flutter::testing::MockAccessibilityBridge();
+  fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(mock);
+  NSArray<SemanticsObject*>* buttons;
+  SemanticsObject* root = BuildTabNavigationTree(factory.GetWeakPtr(), &buttons);
+
+  id context = MockFocusContext(buttons[1], buttons[0], UIFocusHeadingFirst);
+  XCTAssertFalse([buttons[1] shouldUpdateFocusInContext:context]);
+  XCTAssertEqual(mock->observations.size(), (size_t)1);
+  XCTAssertEqual(mock->observations[0].id, 4);
+  XCTAssertEqual(mock->observations[0].action, flutter::SemanticsAction::kShowOnScreen);
+  XCTAssertEqualObjects(root.preferredFocusEnvironments, @[ buttons[2] ]);
+  // Only the root redirects.
+  XCTAssertNil(buttons[0].preferredFocusEnvironments);
+
+  // Once the target receives focus, the redirect is cleared.
+  id gained = MockFocusContext(buttons[1], buttons[2], UIFocusHeadingNone);
+  [buttons[2] didUpdateFocusInContext:gained
+             withAnimationCoordinator:OCMClassMock([UIFocusAnimationCoordinator class])];
+  XCTAssertNil(root.preferredFocusEnvironments);
+}
+
+- (void)testTabContinuesFromPendingTargetAndWrapsAtTheEnd {
+  flutter::testing::MockAccessibilityBridge* mock = new flutter::testing::MockAccessibilityBridge();
+  fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(mock);
+  NSArray<SemanticsObject*>* buttons;
+  SemanticsObject* root = BuildTabNavigationTree(factory.GetWeakPtr(), &buttons);
+
+  // First Tab from button 3 targets button 4, which is still offscreen.
+  XCTAssertFalse([buttons[1]
+      shouldUpdateFocusInContext:MockFocusContext(buttons[1], buttons[0], UIFocusHeadingFirst)]);
+  XCTAssertEqualObjects(root.preferredFocusEnvironments, @[ buttons[2] ]);
+
+  // A second Tab before focus moves continues from button 4, the last item,
+  // and wraps around to button 2, even though the focus engine proposes it.
+  XCTAssertFalse([buttons[1]
+      shouldUpdateFocusInContext:MockFocusContext(buttons[1], buttons[0], UIFocusHeadingNext)]);
+  XCTAssertEqualObjects(root.preferredFocusEnvironments, @[ buttons[0] ]);
+}
+
+- (void)testShiftTabWrapsToLastItem {
+  flutter::testing::MockAccessibilityBridge* mock = new flutter::testing::MockAccessibilityBridge();
+  fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(mock);
+  NSArray<SemanticsObject*>* buttons;
+  SemanticsObject* root = BuildTabNavigationTree(factory.GetWeakPtr(), &buttons);
+
+  // The focus engine wraps to the last visible item (button 3), but the last
+  // item in traversal order is the offscreen button 4.
+  id context = MockFocusContext(buttons[0], buttons[1], UIFocusHeadingLast);
+  XCTAssertFalse([buttons[0] shouldUpdateFocusInContext:context]);
+  XCTAssertEqualObjects(root.preferredFocusEnvironments, @[ buttons[2] ]);
+}
+
+- (void)testTabFollowsTraversalOrderWhenFocusEngineOrderDiffers {
+  // The focus engine picks items geometrically, and its picks are unreliable
+  // while the framework is scrolling, so the traversal order wins.
+  flutter::testing::MockAccessibilityBridge* mock = new flutter::testing::MockAccessibilityBridge();
+  fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(mock);
+  NSArray<SemanticsObject*>* buttons;
+  SemanticsObject* root = BuildTabNavigationTree(factory.GetWeakPtr(), &buttons);
+
+  XCTAssertFalse([buttons[0]
+      shouldUpdateFocusInContext:MockFocusContext(buttons[0], buttons[2], UIFocusHeadingNext)]);
+  XCTAssertEqualObjects(root.preferredFocusEnvironments, @[ buttons[1] ]);
+}
+
+- (void)testTabRedirectsToOffscreenItemWhenFocusEngineFindsNoCandidate {
+  flutter::testing::MockAccessibilityBridge* mock = new flutter::testing::MockAccessibilityBridge();
+  fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(mock);
+  NSArray<SemanticsObject*>* buttons;
+  SemanticsObject* root = BuildTabNavigationTree(factory.GetWeakPtr(), &buttons);
+
+  XCTAssertFalse([buttons[1]
+      shouldUpdateFocusInContext:MockFocusContext(buttons[1], nil, UIFocusHeadingNext)]);
+  XCTAssertEqualObjects(root.preferredFocusEnvironments, @[ buttons[2] ]);
+}
+
+- (void)testTabAllowsFocusToLeaveTheFlutterView {
+  // For example, to a native view in an add-to-app screen.
+  flutter::testing::MockAccessibilityBridge* mock = new flutter::testing::MockAccessibilityBridge();
+  fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(mock);
+  NSArray<SemanticsObject*>* buttons;
+  SemanticsObject* root = BuildTabNavigationTree(factory.GetWeakPtr(), &buttons);
+  UIView* nativeView = [[UIView alloc] init];
+
+  XCTAssertTrue([buttons[1]
+      shouldUpdateFocusInContext:MockFocusContext(buttons[1], nativeView, UIFocusHeadingFirst)]);
+  XCTAssertEqual(mock->observations.size(), (size_t)0);
+  XCTAssertNil(root.preferredFocusEnvironments);
+}
+
+- (void)testPendingTabTargetIsClearedWhenFocusMovesElsewhere {
+  flutter::testing::MockAccessibilityBridge* mock = new flutter::testing::MockAccessibilityBridge();
+  fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(mock);
+  NSArray<SemanticsObject*>* buttons;
+  SemanticsObject* root = BuildTabNavigationTree(factory.GetWeakPtr(), &buttons);
+
+  XCTAssertFalse([buttons[1]
+      shouldUpdateFocusInContext:MockFocusContext(buttons[1], buttons[0], UIFocusHeadingFirst)]);
+  XCTAssertEqualObjects(root.preferredFocusEnvironments, @[ buttons[2] ]);
+
+  // The user clicks button 2 before the redirect completes.
+  id clicked = MockFocusContext(buttons[1], buttons[0], UIFocusHeadingNone);
+  [buttons[1] didUpdateFocusInContext:clicked
+             withAnimationCoordinator:OCMClassMock([UIFocusAnimationCoordinator class])];
+  XCTAssertNil(root.preferredFocusEnvironments);
+}
+
+- (void)testPendingTabTargetIsClearedWhenRemovedFromTree {
+  flutter::testing::MockAccessibilityBridge* mock = new flutter::testing::MockAccessibilityBridge();
+  fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(mock);
+  NSArray<SemanticsObject*>* buttons;
+  SemanticsObject* root = BuildTabNavigationTree(factory.GetWeakPtr(), &buttons);
+
+  XCTAssertFalse([buttons[1]
+      shouldUpdateFocusInContext:MockFocusContext(buttons[1], buttons[0], UIFocusHeadingFirst)]);
+  buttons[2].parent.children = @[ buttons[0], buttons[1] ];
+  XCTAssertNil(root.preferredFocusEnvironments);
+}
+
+- (void)testSemanticsUpdateRequestsFocusOnceTabTargetIsVisible {
+  flutter::testing::MockAccessibilityBridge* mock = new flutter::testing::MockAccessibilityBridge();
+  fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(mock);
+  NSArray<SemanticsObject*>* buttons;
+  SemanticsObject* root = BuildTabNavigationTree(factory.GetWeakPtr(), &buttons);
+  id focusSystem = OCMClassMock([UIFocusSystem class]);
+  OCMStub(ClassMethod([focusSystem focusSystemForEnvironment:root])).andReturn(focusSystem);
+  __block int requests = 0;
+  OCMStub([focusSystem requestFocusUpdateToEnvironment:root]).andDo(^(NSInvocation* invocation) {
+    requests++;
+  });
+
+  XCTAssertFalse([buttons[1]
+      shouldUpdateFocusInContext:MockFocusContext(buttons[1], buttons[0], UIFocusHeadingFirst)]);
+
+  // The framework has not scrolled yet.
+  [root focusSystemDidFinishSemanticsUpdate];
+  [[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:0.05]];
+  XCTAssertEqual(requests, 0);
+
+  // The framework scrolled button 4 into view.
+  flutter::SemanticsNode node;
+  node.id = 4;
+  node.actions = static_cast<int32_t>(flutter::SemanticsAction::kTap);
+  [buttons[2] setSemanticsNode:&node];
+  [root focusSystemDidFinishSemanticsUpdate];
+  [[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:0.05]];
+  XCTAssertEqual(requests, 1);
+  OCMVerify([focusSystem updateFocusIfNeeded]);
+  XCTAssertNil(root.preferredFocusEnvironments);
+  [focusSystem stopMocking];
+}
+
+- (void)testTabSkipsFocusableScrollableNode {
+  // A scrollable is represented by its scroll view in the focus system, which
+  // cannot be focused, so it must not become a Tab target.
+  flutter::testing::MockAccessibilityBridge* mock = new flutter::testing::MockAccessibilityBridge();
+  fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(mock);
+  NSArray<SemanticsObject*>* buttons;
+  SemanticsObject* root = BuildTabNavigationTree(factory.GetWeakPtr(), &buttons);
+  SemanticsObject* scrollable = buttons[0].parent;
+  flutter::SemanticsNode scrollableNode;
+  scrollableNode.id = 1;
+  scrollableNode.flags.hasImplicitScrolling = true;
+  scrollableNode.scrollPosition = 0;
+  scrollableNode.actions = static_cast<int32_t>(flutter::SemanticsAction::kTap);
+  [scrollable setSemanticsNode:&scrollableNode];
+
+  // Shift+Tab from button 2 wraps to button 4, not to the scrollable.
+  XCTAssertFalse([buttons[0]
+      shouldUpdateFocusInContext:MockFocusContext(buttons[0], buttons[1], UIFocusHeadingLast)]);
+  XCTAssertEqualObjects(root.preferredFocusEnvironments, @[ buttons[2] ]);
+}
+
+- (void)testTabRequestsFocusAfterTimeoutWithoutSemanticsUpdate {
+  flutter::testing::MockAccessibilityBridge* mock = new flutter::testing::MockAccessibilityBridge();
+  fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(mock);
+  NSArray<SemanticsObject*>* buttons;
+  SemanticsObject* root = BuildTabNavigationTree(factory.GetWeakPtr(), &buttons);
+  id focusSystem = OCMClassMock([UIFocusSystem class]);
+  OCMStub(ClassMethod([focusSystem focusSystemForEnvironment:root])).andReturn(focusSystem);
+  __block int requests = 0;
+  OCMStub([focusSystem requestFocusUpdateToEnvironment:root]).andDo(^(NSInvocation* invocation) {
+    requests++;
+  });
+
+  XCTAssertFalse([buttons[1]
+      shouldUpdateFocusInContext:MockFocusContext(buttons[1], buttons[0], UIFocusHeadingFirst)]);
+  [[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:0.1]];
+  XCTAssertEqual(requests, 0);
+  [[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:0.4]];
+  XCTAssertEqual(requests, 1);
+  XCTAssertNil(root.preferredFocusEnvironments);
+  [focusSystem stopMocking];
+}
+
+- (void)testTabRequestsFocusAfterMaxSemanticsUpdates {
+  flutter::testing::MockAccessibilityBridge* mock = new flutter::testing::MockAccessibilityBridge();
+  fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(mock);
+  NSArray<SemanticsObject*>* buttons;
+  SemanticsObject* root = BuildTabNavigationTree(factory.GetWeakPtr(), &buttons);
+  id focusSystem = OCMClassMock([UIFocusSystem class]);
+  OCMStub(ClassMethod([focusSystem focusSystemForEnvironment:root])).andReturn(focusSystem);
+  __block int requests = 0;
+  OCMStub([focusSystem requestFocusUpdateToEnvironment:root]).andDo(^(NSInvocation* invocation) {
+    requests++;
+  });
+
+  XCTAssertFalse([buttons[1]
+      shouldUpdateFocusInContext:MockFocusContext(buttons[1], buttons[0], UIFocusHeadingFirst)]);
+  // Button 4 stays hidden, e.g. clipped by something other than the list.
+  for (int i = 0; i < 3; i++) {
+    [root focusSystemDidFinishSemanticsUpdate];
+  }
+  [[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:0.05]];
+  XCTAssertEqual(requests, 1);
+  [focusSystem stopMocking];
+}
+
+- (void)testTabRequestsFocusImmediatelyForVisibleTarget {
+  flutter::testing::MockAccessibilityBridge* mock = new flutter::testing::MockAccessibilityBridge();
+  fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(mock);
+  NSArray<SemanticsObject*>* buttons;
+  SemanticsObject* root = BuildTabNavigationTree(factory.GetWeakPtr(), &buttons);
+  id focusSystem = OCMClassMock([UIFocusSystem class]);
+  OCMStub(ClassMethod([focusSystem focusSystemForEnvironment:root])).andReturn(focusSystem);
+  __block int requests = 0;
+  OCMStub([focusSystem requestFocusUpdateToEnvironment:root]).andDo(^(NSInvocation* invocation) {
+    requests++;
+  });
+
+  // The focus engine proposes button 4, but button 3 is next.
+  XCTAssertFalse([buttons[0]
+      shouldUpdateFocusInContext:MockFocusContext(buttons[0], buttons[2], UIFocusHeadingNext)]);
+  [[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:0.05]];
+  XCTAssertEqual(requests, 1);
+  [focusSystem stopMocking];
+}
+
+- (void)testShouldUpdateFocusIgnoresNonTabHeadings {
+  flutter::testing::MockAccessibilityBridge* mock = new flutter::testing::MockAccessibilityBridge();
+  fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(mock);
+  NSArray<SemanticsObject*>* buttons;
+  SemanticsObject* root = BuildTabNavigationTree(factory.GetWeakPtr(), &buttons);
+
+  XCTAssertTrue([buttons[1]
+      shouldUpdateFocusInContext:MockFocusContext(buttons[1], buttons[0], UIFocusHeadingDown)]);
+  XCTAssertTrue([buttons[1]
+      shouldUpdateFocusInContext:MockFocusContext(buttons[1], buttons[0], UIFocusHeadingNone)]);
+  // Only the item losing focus decides.
+  XCTAssertTrue([buttons[0]
+      shouldUpdateFocusInContext:MockFocusContext(buttons[1], buttons[0], UIFocusHeadingFirst)]);
+  XCTAssertEqual(mock->observations.size(), (size_t)0);
+  XCTAssertNil(root.preferredFocusEnvironments);
+}
+
+- (void)testShouldUpdateFocusDoesNothingWhenVoiceOverIsRunning {
+  flutter::testing::MockAccessibilityBridge* mock = new flutter::testing::MockAccessibilityBridge();
+  mock->isVoiceOverRunningValue = true;
+  fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(mock);
+  NSArray<SemanticsObject*>* buttons;
+  SemanticsObject* root = BuildTabNavigationTree(factory.GetWeakPtr(), &buttons);
+
+  XCTAssertTrue([buttons[1]
+      shouldUpdateFocusInContext:MockFocusContext(buttons[1], buttons[0], UIFocusHeadingFirst)]);
+  XCTAssertEqual(mock->observations.size(), (size_t)0);
+  XCTAssertNil(root.preferredFocusEnvironments);
+}
+
+- (void)testDidUpdateFocusDispatchesDidLoseFocusToPreviouslyFocusedItem {
+  flutter::testing::MockAccessibilityBridge* mock = new flutter::testing::MockAccessibilityBridge();
+  fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(mock);
+  fml::WeakPtr<flutter::AccessibilityBridgeIos> bridge = factory.GetWeakPtr();
+  SemanticsObject* object = [[SemanticsObject alloc] initWithBridge:bridge uid:3];
+
+  flutter::SemanticsNode node;
+  node.actions = static_cast<int32_t>(flutter::SemanticsAction::kTap) |
+                 static_cast<int32_t>(flutter::SemanticsAction::kDidLoseAccessibilityFocus);
+  [object setSemanticsNode:&node];
+
+  id context = OCMClassMock([UIFocusUpdateContext class]);
+  OCMStub([context nextFocusedItem]).andReturn(nil);
+  OCMStub([context previouslyFocusedItem]).andReturn(object);
+
+  [object didUpdateFocusInContext:context
+         withAnimationCoordinator:OCMClassMock([UIFocusAnimationCoordinator class])];
+  XCTAssertEqual(mock->observations.size(), (size_t)1);
+  XCTAssertEqual(mock->observations[0].id, 3);
+  XCTAssertEqual(mock->observations[0].action,
+                 flutter::SemanticsAction::kDidLoseAccessibilityFocus);
+}
+
+- (void)testDidUpdateFocusWithoutFocusActionsDispatchesNothing {
+  flutter::testing::MockAccessibilityBridge* mock = new flutter::testing::MockAccessibilityBridge();
+  fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(mock);
+  fml::WeakPtr<flutter::AccessibilityBridgeIos> bridge = factory.GetWeakPtr();
+  SemanticsObject* object = [[SemanticsObject alloc] initWithBridge:bridge uid:0];
+
+  flutter::SemanticsNode node;
+  node.actions = static_cast<int32_t>(flutter::SemanticsAction::kTap);
+  [object setSemanticsNode:&node];
+
+  id context = OCMClassMock([UIFocusUpdateContext class]);
+  OCMStub([context nextFocusedItem]).andReturn(object);
+  OCMStub([context previouslyFocusedItem]).andReturn(nil);
+
+  [object didUpdateFocusInContext:context
+         withAnimationCoordinator:OCMClassMock([UIFocusAnimationCoordinator class])];
+  XCTAssertEqual(mock->observations.size(), (size_t)0);
+}
+
+- (void)testDidUpdateFocusDispatchesNothingWhenVoiceOverIsRunning {
+  // VoiceOver's own focus callbacks already dispatch these actions.
+  flutter::testing::MockAccessibilityBridge* mock = new flutter::testing::MockAccessibilityBridge();
+  mock->isVoiceOverRunningValue = true;
+  fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(mock);
+  fml::WeakPtr<flutter::AccessibilityBridgeIos> bridge = factory.GetWeakPtr();
+  SemanticsObject* object = [[SemanticsObject alloc] initWithBridge:bridge uid:0];
+
+  flutter::SemanticsNode node;
+  node.actions = static_cast<int32_t>(flutter::SemanticsAction::kFocus) |
+                 static_cast<int32_t>(flutter::SemanticsAction::kDidGainAccessibilityFocus) |
+                 static_cast<int32_t>(flutter::SemanticsAction::kDidLoseAccessibilityFocus);
+  [object setSemanticsNode:&node];
+
+  id gainContext = OCMClassMock([UIFocusUpdateContext class]);
+  OCMStub([gainContext nextFocusedItem]).andReturn(object);
+  [object didUpdateFocusInContext:gainContext
+         withAnimationCoordinator:OCMClassMock([UIFocusAnimationCoordinator class])];
+
+  id loseContext = OCMClassMock([UIFocusUpdateContext class]);
+  OCMStub([loseContext previouslyFocusedItem]).andReturn(object);
+  [object didUpdateFocusInContext:loseContext
+         withAnimationCoordinator:OCMClassMock([UIFocusAnimationCoordinator class])];
+
+  XCTAssertEqual(mock->observations.size(), (size_t)0);
+}
+
 - (void)testUIFocusItemContainerConformance {
   fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(
       new flutter::testing::MockAccessibilityBridge());
@@ -1561,58 +2086,61 @@ const float kFloatCompareEpsilon = 0.001;
   XCTAssertTrue([itemsInRect containsObject:child2]);
 }
 
-- (void)testUIFocusItemScrollableContainerConformance {
+- (void)testFocusEngineScrollingIsCancelled {
+  // The framework scrolls focused items into view, so the focus engine's own
+  // scrolling of the mirror UIScrollView is cancelled and not forwarded.
   fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(
       new flutter::testing::MockAccessibilityBridge());
   fml::WeakPtr<flutter::testing::MockAccessibilityBridge> bridge = factory.GetWeakPtr();
   FlutterScrollableSemanticsObject* scrollable =
       [[FlutterScrollableSemanticsObject alloc] initWithBridge:bridge uid:5];
-
-  // setContentOffset
-  CGPoint p = CGPointMake(123.0, 456.0);
-  [scrollable.scrollView scrollViewWillEndDragging:scrollable.scrollView
-                                      withVelocity:CGPointZero
-                               targetContentOffset:&p];
-  scrollable.scrollView.contentOffset = p;
-  [scrollable.scrollView scrollViewDidEndDecelerating:scrollable.scrollView];
-  XCTAssertEqual(bridge->observations.size(), (size_t)1);
-  XCTAssertEqual(bridge->observations[0].id, 5);
-  XCTAssertEqual(bridge->observations[0].action, flutter::SemanticsAction::kScrollToOffset);
-
-  std::vector<uint8_t> args = bridge->observations[0].args;
-  XCTAssertEqual(args.size(), 3 * sizeof(CGFloat));
-
-  NSData* encoded = [NSData dataWithBytes:args.data() length:args.size()];
-  FlutterStandardTypedData* decoded = [[FlutterStandardMessageCodec sharedInstance] decode:encoded];
-  CGPoint point = CGPointZero;
-  memcpy(&point, decoded.data.bytes, decoded.data.length);
-  XCTAssertTrue(CGPointEqualToPoint(point, p));
-}
-
-- (void)testUIFocusItemScrollableContainerNoFeedbackLoops {
-  fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(
-      new flutter::testing::MockAccessibilityBridge());
-  fml::WeakPtr<flutter::testing::MockAccessibilityBridge> bridge = factory.GetWeakPtr();
-  FlutterScrollableSemanticsObject* scrollable =
-      [[FlutterScrollableSemanticsObject alloc] initWithBridge:bridge uid:5];
-
-  // setContentOffset
-  const CGPoint p = CGPointMake(0.0, 456.0);
-  scrollable.scrollView.contentOffset = p;
+  scrollable.scrollView.contentOffset = CGPointMake(0, 100);
   bridge->observations.clear();
 
-  const SkScalar scrollPosition = p.y + 0.0000000000000001;
-  flutter::SemanticsNode node;
-  node.flags.hasImplicitScrolling = true;
-  node.actions = flutter::kVerticalScrollSemanticsActions;
-  node.rect = SkRect::MakeXYWH(0, 0, 100, 200);
-  node.scrollExtentMax = 10000;
-  node.scrollPosition = scrollPosition;
-  node.transform = {1.0, 0, 0, 0, 0, 1.0, 0, 0, 0, 0, 1.0, 0, 0, scrollPosition, 0, 1.0};
-  [scrollable setSemanticsNode:&node];
+  CGPoint target = CGPointMake(0, 456);
+  [scrollable.scrollView scrollViewWillEndDragging:scrollable.scrollView
+                                      withVelocity:CGPointZero
+                               targetContentOffset:&target];
+  XCTAssertTrue(CGPointEqualToPoint(target, CGPointMake(0, 100)));
+
+  scrollable.scrollView.contentOffset = CGPointMake(0, 200);
+  XCTAssertEqual(bridge->observations.size(), (size_t)0);
+}
+
+- (void)testFocusItemFrameIgnoresUnforwardedScrollViewOffset {
+  // Item frames follow the framework, which positions the items, even if
+  // UIKit moves the mirror UIScrollView before the next semantics update.
+  fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(
+      new flutter::testing::MockAccessibilityBridge());
+  fml::WeakPtr<flutter::AccessibilityBridgeIos> bridge = factory.GetWeakPtr();
+  FlutterScrollableSemanticsObject* scrollable =
+      [[FlutterScrollableSemanticsObject alloc] initWithBridge:bridge uid:0];
+  SemanticsObject* child = [[SemanticsObject alloc] initWithBridge:bridge uid:1];
+  scrollable.children = @[ child ];
+
+  flutter::SemanticsNode scrollableNode;
+  scrollableNode.flags.hasImplicitScrolling = true;
+  scrollableNode.actions = flutter::kVerticalScrollSemanticsActions;
+  scrollableNode.rect = SkRect::MakeXYWH(0, 0, 100, 200);
+  scrollableNode.scrollExtentMax = 1000;
+  scrollableNode.scrollPosition = 300;
+  [scrollable setSemanticsNode:&scrollableNode];
   [scrollable accessibilityBridgeDidFinishUpdate];
 
-  XCTAssertEqual(bridge->observations.size(), (size_t)0);
+  flutter::SemanticsNode childNode;
+  childNode.flags.isHidden = true;
+  childNode.actions = static_cast<int32_t>(flutter::SemanticsAction::kTap);
+  childNode.rect = SkRect::MakeXYWH(0, 500, 100, 50);
+  [child setSemanticsNode:&childNode];
+
+  // After a framework update, the frame is in content coordinates.
+  const CGFloat frameworkOffsetY = scrollable.scrollView.contentOffset.y;
+  XCTAssertEqualWithAccuracy(child.frame.origin.y, 500 + frameworkOffsetY, kFloatCompareEpsilon);
+  const CGRect frameBefore = child.frame;
+
+  // The focus engine scrolls the scroll view, without a framework update.
+  scrollable.scrollView.contentOffset = CGPointMake(0, frameworkOffsetY + 200);
+  XCTAssertTrue(CGRectEqualToRect(child.frame, frameBefore));
 }
 
 - (void)testAccessibilityRespondsToUserInteraction {
