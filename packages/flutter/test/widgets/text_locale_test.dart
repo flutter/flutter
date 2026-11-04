@@ -58,6 +58,30 @@ void main() {
     expect(paragraphLocale(tester), isNull);
   });
 
+  // Only the user's first preferred locale is considered. When the app matches
+  // a lower preference instead, the app locale is still treated as a fallback.
+  //
+  // This is a deliberate trade-off. Here the app's own strings are Chinese, but
+  // text will render with the operating system's default locale (likely
+  // Japanese for this user), so Han characters in the app's strings may use
+  // Japanese glyph variants. Considering secondary preferences would avoid that,
+  // but it would also bring back the original bug for the more common case of
+  // a user with `[zh_CN, en_US]` using an English-only app: the app resolves to
+  // `en_US`, a secondary preference, and Han characters would again render with
+  // Japanese fonts. Apps can opt out with an explicit `WidgetsApp.locale` or
+  // `TextStyle.locale`.
+  testWidgets('RichText uses no locale when only a lower preference matches a CJK app locale', (
+    WidgetTester tester,
+  ) async {
+    setDeviceLocales(tester, const <Locale>[jaJP, zhCN]);
+    await tester.pumpWidget(
+      buildApp(supportedLocales: const <Locale>[enUS, zhCN], child: const Text('你好')),
+    );
+
+    expect(Localizations.localeOf(tester.element(find.byType(RichText))), zhCN);
+    expect(paragraphLocale(tester), isNull);
+  });
+
   testWidgets('RichText uses the app locale when the preferred locale is supported', (
     WidgetTester tester,
   ) async {
