@@ -64,7 +64,7 @@ alias(
     name = "impellerc",
     actual = select({
         ":prebuilt": "@flutter_bin_cache//:impellerc",
-        "//conditions:default": "//engine/src/flutter/impeller/compiler:impellerc",
+        "//conditions:default": "//build_defs/impeller:impellerc",
     }),
 )
 
