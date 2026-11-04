@@ -244,7 +244,7 @@ class BuildDirectoryTest(unittest.TestCase):
         {'LUCI_CONTEXT': '/b/s/w/ir/tmp/t/luci_context.json', 'TMPDIR': '/b/s/w/ir/tmp/t'}):
       bazel_ci.write_build_directory(self.engine_src, HOST_DEBUG_UNOPT, out_dir, '/tools/bazelisk')
       description = bazel_ci.read_build_directory(out_dir)
-      rbe = ['--config=rbe'] if sys.platform.startswith('linux') else []
+      rbe = ['--config=rbe', bazel_ci.WRAP_RBE_FLAG] if sys.platform.startswith('linux') else []
       self.assertEqual(
           description['build_options'],
           bazel_ci.rbe_options() + bazel_ci.bot_sandbox_options()
@@ -272,7 +272,7 @@ class BuildDirectoryTest(unittest.TestCase):
     )
     # A developer's build has no RBE unless asked (--bazel-rbe).
     self.assertNotIn('--config=rbe', bazel_ci.build_options(self.engine_src))
-    self.assertEqual(bazel_ci.build_options(self.engine_src, rbe=True)[:1], rbe)
+    self.assertEqual(bazel_ci.build_options(self.engine_src, rbe=True)[:len(rbe)], rbe)
     self.assertEqual(
         description['environment'], {'BAZELISK_HOME': '/b/s/w/ir/tmp/t/bazel_ci/bazelisk'}
     )

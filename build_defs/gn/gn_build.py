@@ -23,6 +23,8 @@ execution root), so no path outside it ends up in a command line, in
 import hashlib
 import json
 import os
+import pwd
+import re
 import shutil
 import subprocess
 import sys
@@ -35,22 +37,131 @@ def _log(message):
     print(message, file=sys.stderr)
 
 
-def _run(argv, cwd=None, log_path=None):
+def _run(argv, cwd=None, log_path=None, env=None):
     """Runs a command; on failure prints its output and exits."""
     if log_path:
         with open(log_path, "w") as log:
-            result = subprocess.run(argv, cwd=cwd, stdout=log, stderr=subprocess.STDOUT)
+            result = subprocess.run(argv, cwd=cwd, stdout=log, stderr=subprocess.STDOUT, env=env)
         if result.returncode != 0:
             with open(log_path, errors="replace") as log:
                 tail = log.readlines()[-200:]
             _log("".join(tail))
     else:
-        result = subprocess.run(argv, cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        result = subprocess.run(argv, cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, env=env)
         if result.returncode != 0:
             _log(result.stdout.decode(errors="replace"))
     if result.returncode != 0:
         _log("gn_build: command failed (%d): %s" % (result.returncode, " ".join(argv)))
         sys.exit(1)
+
+
+# ---------------------------------------------------------------------------
+# Remote compilation through reclient
+# ---------------------------------------------------------------------------
+
+
+class Reproxy:
+    """reclient's proxy, started around the wrapped build when the parameters ask for RBE (gn_build.bzl's rbe).
+
+    What the recipe does around a GN build on a bot (the rbe recipe module:
+    `bootstrap --re_proxy=reproxy --cfg=reclient-<os>.cfg`, the environment,
+    `bootstrap --shutdown`), done here around ninja, so that the wrapped
+    build's compiles go to the workers through the rewrapper GN puts in
+    front of the compiler (`use_rbe`: build/toolchain/rbe.gni). The proxy
+    listens on a socket of its own under /tmp (a sandboxed action's /tmp is
+    its own; the path has to be short, a Unix socket's limit being 108
+    bytes), logs and keeps its dependency cache under the scratch
+    directory, and authenticates as the configuration says -- Application
+    Default Credentials: a bot's metadata server, a developer's gcloud login
+    where HOME reaches the action. When it cannot start, the build goes on
+    without it, locally, and says so: a developer's sandbox has no
+    credentials, and a wrapped build is better slow than failed.
+    """
+
+    def __init__(self, params, scratch):
+        self.params = params
+        self.bootstrap = os.path.abspath(os.path.join(params["reclient_dir"], "bootstrap"))
+        self.reproxy = os.path.abspath(os.path.join(params["reclient_dir"], "reproxy"))
+        self.cfg = os.path.abspath(params["bootstrap_cfg"])
+        logs = os.path.abspath(os.path.join(scratch, "reproxy"))
+        tmp = os.path.join(logs, "tmp")
+        os.makedirs(tmp, exist_ok=True)
+        # The scanner refuses a temporary directory others could read.
+        os.chmod(tmp, 0o700)
+        self.logs = logs
+        self.env = dict(os.environ)
+        if not self.env.get("USER"):
+            # The strict action environment has no USER; the scanner compares
+            # it with the owner of its files.
+            self.env["USER"] = pwd.getpwuid(os.getuid()).pw_name
+        self.env.update({
+            "RBE_server_address": "unix:///tmp/reproxy-%d.sock" % os.getpid(),
+            "RBE_log_dir": logs,
+            "RBE_proxy_log_dir": logs,
+            "RBE_output_dir": logs,
+            "RBE_cache_dir": os.path.join(logs, "deps_cache"),
+            "RBE_log_format": "reducedtext",
+            # The dependency scanner's temporary files: left to itself it
+            # picks the user's runtime directory (/run/user/<uid>), which a
+            # sandbox mounts read-only, and every compile then falls back to
+            # the machine ("Failed to execute compiler to get c++ system
+            # include paths"); the directory must be the user's alone (0700).
+            "GOMA_TMP_DIR": tmp,
+            "TMPDIR": tmp,
+        })
+        self.started = False
+
+    def start(self):
+        """Starts the proxy; True when it runs."""
+        argv = [self.bootstrap, "--re_proxy=" + self.reproxy, "--cfg=" + self.cfg]
+        result = subprocess.run(argv, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, env=self.env)
+        if result.returncode != 0:
+            _log("gn_build: reproxy did not start (%d); the build runs without RBE:\n%s" % (
+                result.returncode, result.stdout.decode(errors="replace")[-4000:]))
+            return False
+        self.started = True
+        return True
+
+    def stop(self):
+        """Stops the proxy and logs what it did (rbe_metrics.txt)."""
+        if not self.started:
+            return
+        self.started = False
+        argv = [self.bootstrap, "--shutdown", "--cfg=" + self.cfg]
+        result = subprocess.run(argv, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, env=self.env)
+        if result.returncode != 0:
+            _log("gn_build: reproxy shutdown failed (%d):\n%s" % (
+                result.returncode, result.stdout.decode(errors="replace")[-4000:]))
+        metrics = os.path.join(self.logs, "rbe_metrics.txt")
+        if os.path.exists(metrics):
+            _log("gn_build: reproxy: " + _metrics_summary(metrics))
+
+
+def _metrics_summary(path):
+    """rbe_metrics.txt's record count and CompletionStatus counts as one line (a text proto: stats { name counts_by_value { name count } })."""
+    records = None
+    statuses = {}
+    stat = None
+    value = None
+    with open(path, errors="replace") as f:
+        for line in f:
+            match = re.match(r'^num_records: (\d+)', line)
+            if match:
+                records = int(match.group(1))
+                continue
+            match = re.match(r'^\tname: "([^"]+)"', line)
+            if match:
+                stat = match.group(1)
+                continue
+            match = re.match(r'^\t\tname: "([^"]+)"', line)
+            if match:
+                value = match.group(1)
+                continue
+            match = re.match(r'^\t\tcount: (\d+)', line)
+            if match and stat == "CompletionStatus" and value:
+                statuses[value] = int(match.group(1))
+    return "%s records; %s" % (
+        records, ", ".join("%s %d" % item for item in sorted(statuses.items())) or "no completion statuses")
 
 
 # ---------------------------------------------------------------------------
@@ -333,7 +444,8 @@ def main(argv):
     with open(argv[1]) as f:
         params = json.load(f)
 
-    jobs = os.cpu_count() or 1
+    cpus = os.cpu_count() or 1
+    jobs = cpus
     scratch = params["scratch"]
     root = os.path.join(scratch, "root")
     out_dir = os.path.join(root, "out", _OUT_DIR_NAME)
@@ -347,8 +459,31 @@ def main(argv):
     digested = time.monotonic()
 
     args = dict(params["gn_args"])
-    args.setdefault("concurrent_toolchain_jobs", str(jobs))
+    env = None
+    reproxy = None
+    if params.get("rbe"):
+        reproxy = Reproxy(params["rbe"], scratch)
+        if reproxy.start():
+            # The compiles on the workers: the recipe's job count (80 a core)
+            # and GN's RBE arguments (use_rbe, the rewrapper's configuration
+            # and strategy, from gn_build.bzl).
+            args.update(params["rbe"]["gn_args"])
+            jobs = cpus * 80
+            env = reproxy.env
+        else:
+            reproxy = None
+    args.setdefault("concurrent_toolchain_jobs", str(cpus))
     _write_args(out_dir, args)
+    try:
+        return _build(params, scratch, root, out_dir, jobs, env, started, linked, digested, links, digest_lines)
+    finally:
+        # Whatever happens to the build, the proxy does not outlive the action.
+        if reproxy:
+            reproxy.stop()
+
+
+def _build(params, scratch, root, out_dir, jobs, env, started, linked, digested, links, digest_lines):
+    """`gn gen`, ninja, the outputs, the archives and the timing line; the exit status."""
 
     # GN records the script interpreter's path relative to the build
     # directory when it is inside the root, so it is used through the symlink
@@ -367,6 +502,7 @@ def main(argv):
     _run(
         [params["ninja"], "-C", out_dir, "-j", str(jobs), params["ninja_target"]],
         log_path=os.path.join(scratch, "ninja.log"),
+        env=env,
     )
     built = time.monotonic()
 
@@ -395,9 +531,9 @@ def main(argv):
             json.dump(commands, f, indent=2)
     finished = time.monotonic()
 
-    _log("gn_build %s: %d links %.1fs, input digests %.1fs, gn gen %.1fs, ninja -j%d %.0fs, outputs %.1fs" % (
+    _log("gn_build %s: %d links %.1fs, input digests %.1fs, gn gen %.1fs, ninja -j%d%s %.0fs, outputs %.1fs" % (
         params["root_target"], len(links), linked - started, digested - linked, generated - digested,
-        jobs, built - generated, finished - built))
+        jobs, " with RBE" if env else "", built - generated, finished - built))
     for line in digest_lines:
         _log(line)
     return 0

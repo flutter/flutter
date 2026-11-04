@@ -96,6 +96,8 @@ use_repo(
     "process_runner",
     "rapidjson",
     "re2",
+    "reclient",
+    "reclient_cfgs",
     "shaderc",
     "skia",
     "spirv-cross",

@@ -528,6 +528,21 @@ _TOOL_REPOSITORIES = {
         path = "third_party/ninja",
         build_file = _OVERLAYS + ":ninja/BUILD.ninja.bazel",
     ),
+    # reclient (DEPS: use_rbe; the Linux x64 host's) and the engine's
+    # configurations for it (flutter/build/rbe, a flutter_internal CIPD
+    # package: Googlers and the bots), for a wrapped GN build whose compiles
+    # go to the RBE workers (gn_build.bzl's rbe; --//engine/src/flutter/
+    # build/bazel:wrap_rbe). Fetched only when that flag names them: a
+    # checkout synced without use_rbe falls back to the packages, the first
+    # public, the second not.
+    "reclient": struct(
+        path = "engine/src/flutter/buildtools/linux-x64/reclient",
+        build_file = _OVERLAYS + ":reclient/BUILD.reclient.bazel",
+    ),
+    "reclient_cfgs": struct(
+        path = "engine/src/flutter/build/rbe",
+        build_file = _OVERLAYS + ":reclient/BUILD.reclient_cfgs.bazel",
+    ),
 }
 
 # Debian sysroots, keyed by repository name. They are not DEPS entries: the
@@ -565,6 +580,8 @@ _CIPD_SHA256 = {
     ("fuchsia/third_party/clang/linux-amd64", "git_revision:07d67299a15ce03b053736e2d31a668ee0576987"): "6b657ccd9ca05c6b9e4458181ec71f1dbaf7122a5e6df7aaaec381a31ab34bd3",
     ("gn/gn/linux-amd64", "git_revision:81b24e01531ecf0eff12ec9359a555ec3944ec4e"): "cd330cb4f4e0d8e5c82ca3a583798ea5337fd01308952dbe227c9dd8bc51d854",
     ("infra/3pp/tools/ninja/linux-amd64", "version:2@1.11.1.chromium.4"): "55833d93abb510f908b2347235116717b10ba6eca19e426a01e6a66b8c3cfd86",
+    ("infra/rbe/client/linux-amd64", "re_client_version:0.185.0.db415f21-gomaip"): "003bf3eac433bd071450e97a2e6633f7f93046828c8be428a5c3938c63dd1764",
+    ("flutter_internal/rbe/reclient_cfgs", "Vk7WiSKwQdBHbCrZ9PtRl3po2WpRFQZSag9M6-sxF_0C"): "564ed68922b041d0476c2ad9f4fb51977a68d96a511506526a0f4cebeb3117fd",
     # cpython3: decoded from the instance ids `cipd describe` reports for
     # DEPS' version (the rule above).
     ("infra/3pp/tools/cpython3/linux-amd64", "version:3@3.11.9.chromium.38"): "b7b8a0a6d171b8918fda51aee1d6ffeb0c8a14c791fb1d0bc5d7454c8c9d949b",
