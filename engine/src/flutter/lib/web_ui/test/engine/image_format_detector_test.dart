@@ -125,6 +125,8 @@ Future<void> testMain() async {
       ),
     ];
 
+    // (leading, trailing) padding byte counts. (3, 1) places the view at an
+    // offset that is not 4-byte aligned within its buffer.
     const paddings = <(int, int)>[(32, 0), (0, 16), (32, 16), (48, 16), (3, 1)];
 
     for (final (String name, Future<Uint8List> Function() loadBytes, ImageType expected)
@@ -132,14 +134,11 @@ Future<void> testMain() async {
       for (final (int leading, int trailing) in paddings) {
         test('$name with $leading leading and $trailing trailing padding bytes', () async {
           final Uint8List source = await loadBytes();
-          final Uint8List view = createPaddedSubview(
+          final Uint8List view = _createPaddedSubview(
             source,
             leadingPadding: leading,
             trailingPadding: trailing,
           );
-          expect(view.offsetInBytes, leading);
-          expect(view.buffer.lengthInBytes, leading + source.length + trailing);
-
           expect(detectImageType(view), expected);
         });
       }
@@ -165,9 +164,6 @@ Future<void> testMain() async {
           ..setAll(0, preceding)
           ..setAll(preceding.length, source);
         final view = Uint8List.sublistView(backing, preceding.length);
-        expect(view.offsetInBytes, preceding.length);
-        expect(view.length, source.length);
-
         expect(detectImageType(view), expected);
       });
     }
@@ -175,21 +171,24 @@ Future<void> testMain() async {
 }
 
 /// Copies [source] into a larger buffer, surrounded by [leadingPadding] and
-/// [trailingPadding] bytes set to [sentinel], and returns a view of just the
-/// copied bytes.
-Uint8List createPaddedSubview(
+/// [trailingPadding] bytes set to 0xFF, and returns a view of just the copied
+/// bytes.
+Uint8List _createPaddedSubview(
   Uint8List source, {
-  int leadingPadding = 16,
-  int trailingPadding = 16,
-  int sentinel = 0xFF,
+  required int leadingPadding,
+  required int trailingPadding,
 }) {
-  final backing = Uint8List(leadingPadding + source.length + trailingPadding)
-    ..fillRange(0, leadingPadding + source.length + trailingPadding, sentinel)
+  const sentinel = 0xFF;
+  final int totalLength = leadingPadding + source.length + trailingPadding;
+  final backing = Uint8List(totalLength)
+    ..fillRange(0, totalLength, sentinel)
     ..setAll(leadingPadding, source);
   return Uint8List.sublistView(backing, leadingPadding, leadingPadding + source.length);
 }
 
-/// Generates a blank GIF to be used in tests.
+/// Generates a blank GIF with [numFrames] frames to be used in tests.
+///
+/// Pass `numFrames: 1` for a static GIF.
 Uint8List _createTestGif({int numFrames = 2}) {
   const width = 1;
   const height = 1;
