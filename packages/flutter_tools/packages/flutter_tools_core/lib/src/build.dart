@@ -510,13 +510,6 @@ class ExtensionBuildResult {
   }
 
   @override
-  int get hashCode => Object.hash(
-    success,
-    errorMessage,
-    executableUri,
-    Object.hashAllUnordered(<int>[
-      for (final MapEntry(:String key, :String value) in extraDefines.entries)
-        Object.hash(key, value),
-    ]),
-  );
+  int get hashCode =>
+      Object.hash(success, errorMessage, executableUri, _mapEquality.hash(extraDefines));
 }
