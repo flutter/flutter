@@ -42,6 +42,14 @@ dart_package_tests(
         "//engine:README.md",
         "//packages/flutter:README.md",
     ],
+    # The engine-version script tests make that checkout a repository with
+    # the machine's git (`git init`, commits): on the machine, where there
+    # is one.
+    host = [
+        "test/content_aware_hash_test.dart",
+        "test/last_engine_commit_test.dart",
+        "test/update_engine_version_test.dart",
+    ],
     package = "dev_tools",
     # validate_skills_test lints the checkout's agent skills (.agents), whose
     # links reach anywhere in the repository (.github, docs): a test of the
