@@ -412,11 +412,11 @@ class CkOffscreenSurface extends CkSurface implements OffscreenSurface {
   /// updates the drawing buffer without recreating the WebGL context or
   /// churning GPU resources.
   ///
-  /// However, when resizing an active context to very large dimensions
-  /// (e.g. 4960x7016, see https://github.com/flutter/flutter/issues/182476),
-  /// Chromium's `DrawingBuffer::Resize` may clamp `gl.drawingBufferWidth` or
-  /// `gl.drawingBufferHeight` down to fit within its GPU memory budget (WebGL
-  /// Spec Section 2.2).
+  /// However, when an existing context is resized, Chromium caps the drawing
+  /// buffer's area at 5760x5760 and scales both dimensions down to fit (e.g.
+  /// 4960x7016 becomes 4843x6850, see
+  /// https://github.com/flutter/flutter/issues/182476). A newly created context
+  /// is not subject to this cap.
   ///
   /// When a drawing buffer clamp is detected, the old canvas is released and
   /// its WebGL context is explicitly lost so the browser frees the context

@@ -414,7 +414,7 @@ void testMain() {
           expect(identical(swappedCanvas, originalCanvas), isFalse);
 
           await surface.triggerContextLoss();
-          await Future<void>.delayed(const Duration(milliseconds: 50));
+          await surface.handledContextLossEvent;
           expect(
             identical(surface.canvas, swappedCanvas),
             isFalse,
