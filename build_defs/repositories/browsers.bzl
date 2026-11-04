@@ -57,6 +57,13 @@ _CHROME_BUILDS = {
         chromedriver_sha256 = "25d09ebbca90628b480e95e0d1541818f8e7646d0b77fa81c6258fc13c0613d0",
         executable = "chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing",
     ),
+    # The Intel Macs of CI's Mac pool (`Mac web_tool_tests` ran there, 11-03).
+    "mac_x64": struct(
+        platform = "mac-x64",
+        chrome_sha256 = "00e368cc22d78ad4b92f4abb7c5877ee9090500431140a6ad49e880c61632c09",
+        chromedriver_sha256 = "fea60867b12a3cc4206ba4c9dea49d9ab6ef271653a450675526cc9afc09f0d4",
+        executable = "chrome-mac-x64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing",
+    ),
 }
 
 def _host_key(rctx):
