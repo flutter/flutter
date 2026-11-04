@@ -106,7 +106,7 @@ class AssembleCommand extends FlutterCommand {
   AssembleCommand({
     required this._buildSystem,
     required this._featureFlags,
-    required ToolContext super.toolContext,
+    required super.toolContext,
     required this._xcode,
     this._extensionBuildManager,
     super.verboseHelp = false,
@@ -191,9 +191,6 @@ class AssembleCommand extends FlutterCommand {
   final ExtensionBuildManager? _extensionBuildManager;
   final FeatureFlags _featureFlags;
   final Xcode? _xcode;
-
-  @override
-  ToolContext get toolContext => super.toolContext!;
 
   @override
   bool get hidden => !verboseHelp;

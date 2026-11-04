@@ -440,14 +440,14 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
 DoctorValidatorsProvider _createDoctorValidatorsProvider({ExtensionManager? extensionManager}) {
   return DoctorValidatorsProvider.create(
     appleContext: AppleContext(
-      cocoaPods: globals.cocoaPods!,
-      cocoapodsValidator: globals.cocoapodsValidator!,
-      iosSimulatorUtils: globals.iosSimulatorUtils!,
-      iosWorkflow: globals.iosWorkflow!,
-      plistParser: globals.plistParser,
-      xcdevice: globals.xcdevice!,
-      xcode: globals.xcode!,
-      xcodeProjectInterpreter: globals.xcodeProjectInterpreter!,
+      cocoaPodsBuilder: () => globals.cocoaPods!,
+      cocoapodsValidatorBuilder: () => globals.cocoapodsValidator!,
+      iosSimulatorUtilsBuilder: () => globals.iosSimulatorUtils!,
+      iosWorkflowBuilder: () => globals.iosWorkflow!,
+      plistParserBuilder: () => globals.plistParser,
+      xcdeviceBuilder: () => globals.xcdevice!,
+      xcodeBuilder: () => globals.xcode!,
+      xcodeProjectInterpreterBuilder: () => globals.xcodeProjectInterpreter!,
     ),
     deviceManager: globals.deviceManager,
     extensionManager: extensionManager,

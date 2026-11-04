@@ -375,9 +375,6 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         'Set "--no-uninstall" to keep the app installed on the device.',
   );
 
-  @override
-  ToolContext get toolContext => super.toolContext!;
-
   /// The interface for starting and configuring the tester.
   final TestWrapper testWrapper;
 
