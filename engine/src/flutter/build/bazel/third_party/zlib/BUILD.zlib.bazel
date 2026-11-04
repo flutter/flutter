@@ -346,6 +346,13 @@ filegroup(
             "BUILD.bazel",
             "REPO.bazel",
             "*.bzl",
+            # The checkout's git state is no input of the build -- and it
+            # differs with every sync: with it among the inputs, the wrapped
+            # GN builds (dart_wrap, gl_wrap) were never a disk-cache hit from
+            # one of a bot's tasks to the next (PR #195825, 11-03: the only
+            # input tree whose digest changed between drones was this one's
+            # .git, gn_build.py's input digests showed).
+            "**/.git/**",
             # Nor the bytecode caches a GN build in the same checkout
             # leaves beside the Python scripts it runs (Bazel's own runs
             # write none: PYTHONDONTWRITEBYTECODE).
