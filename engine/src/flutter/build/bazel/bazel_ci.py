@@ -295,13 +295,14 @@ def build_options(engine_src, rbe=None):
 # root .bazelrc's build:rbe: the reclient instance of the GN builds, its
 # debian11 image, 200 jobs, the bot's GCE credentials) and so share their
 # results: a build repeats nothing another bot has done since the inputs
-# changed. The wrapped GN builds and the tests stay on the bot. A Mac bot
-# builds locally: the workers are Linux. Three ways to say otherwise, for a
-# comparison of the two: `--no-bazel-rbe` among a build's tools/gn flags (a
-# builder file can carry it per build; `--bazel-rbe` asks for RBE anywhere,
-# a developer's checkout included, given credentials for the instance),
-# FLUTTER_BAZEL_RBE=0 in the environment for a run, and RBE_ON_BOTS, the
-# default a bot gets without either.
+# changed. The wrapped GN builds and the engine's tests (TEST_OPTIONS) stay
+# on the bot. A Mac bot builds locally: the workers are Linux. Three ways to
+# say otherwise, for a comparison of the two: `--no-bazel-rbe` among a
+# build's tools/gn flags (a builder file can carry it per build;
+# `--bazel-rbe` asks for RBE anywhere, a developer's checkout included,
+# given credentials for the instance), FLUTTER_BAZEL_RBE=0 in the
+# environment for a run, and RBE_ON_BOTS, the default a bot gets without
+# either.
 RBE_ON_BOTS = True
 RBE_ENV = 'FLUTTER_BAZEL_RBE'
 
@@ -570,13 +571,21 @@ def copy_failed_test_logs(description, logs_dir):
     print(f'run_tests.py: {copied} test log(s) copied to {logs_dir}', file=sys.stderr)
 
 
+# The engine's tests run on the machine, RBE or not (TEST_OPTIONS, before
+# the suites in run_tests' command): its suites want the display, the GPU
+# and the devices a bot has and a worker does not (the root .bazelrc's
+# build:rbe runs the headless Dart tests of the framework on the workers;
+# the engine's are left local as a whole rather than tagged one by one).
+TEST_OPTIONS = ['--strategy=TestRunner=sandboxed,local']
+
+
 def run_tests(description, types, logs_dir=None, extra_arguments=()):
   """`bazelisk test --config=<name> <suites>` for run_tests.py's `types`; the exit status."""
   suites = test_suites(description, types)
   if not suites:
     print('run_tests.py: nothing to run under Bazel for ' + ', '.join(types), file=sys.stderr)
     return 0
-  command = described_command(description, 'test', list(extra_arguments) + suites)
+  command = described_command(description, 'test', TEST_OPTIONS + list(extra_arguments) + suites)
   print('run_tests.py: ' + ' '.join(shell_quote(w) for w in command), file=sys.stderr)
   sys.stderr.flush()
   result = subprocess.run(

@@ -231,8 +231,18 @@ the test for real, and so does the command from `engine/src`.
   stays on the bot: the wrapped GN builds (the Dart runtime, the GL stack:
   `gn_build.bzl`'s `no-remote-exec`, their inputs being a synced tree --
   `ninja -j8` 442 s for the Dart runtime on an 8-core bot, 84–155 s on 32
-  cores, unless the bot's own disk cache has them, below) and the tests (a
-  display, a GPU, a device). Execution
+  cores, unless the bot's own disk cache has them, below) and the engine's
+  tests (a display, a GPU, a device: run_tests.py's `TEST_OPTIONS`,
+  `--strategy=TestRunner=sandboxed,local`). The framework shards' tests are
+  another matter: the headless ones -- the framework's under
+  `flutter_tester`, the pure-Dart packages' -- run on the workers too
+  (505), and the bot downloads their logs and results rather than their
+  kernels (50 MB each, 40 GB a shard); what stays on the bot there is
+  tagged `no-remote-exec` by `dart_test.bzl` and `flutter_test.bzl` (a
+  test that may reach the network, drives a browser or a display, runs a
+  tool of the host -- every shard of the tool's -- or is named in a suite's
+  `host` list: dev/tools' engine-version tests run `git`, devicelab's
+  runner_test starts thirty VMs). Execution
   rather than a cache alone because of the instance's IAM: a client -- the
   bots' service account included -- reads the action cache but only a
   worker writes it (`remotebuildexecution.actions.update`), so a build with
