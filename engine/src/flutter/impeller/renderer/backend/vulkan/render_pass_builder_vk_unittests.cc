@@ -215,7 +215,8 @@ TEST(RenderPassBuilder, ExternalDependencyCoversDepthStencilClear) {
                 VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT));
   EXPECT_EQ(
       external->dstAccessMask,
-      static_cast<VkAccessFlags>(VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT |
+      static_cast<VkAccessFlags>(VK_ACCESS_COLOR_ATTACHMENT_READ_BIT |
+                                 VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT |
                                  VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT |
                                  VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT));
 }
@@ -254,7 +255,8 @@ TEST(RenderPassBuilder, ExternalDependencyOmitsDepthStagesWithoutDepthStencil) {
             static_cast<VkPipelineStageFlags>(
                 VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT));
   EXPECT_EQ(external->dstAccessMask,
-            static_cast<VkAccessFlags>(VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT));
+            static_cast<VkAccessFlags>(VK_ACCESS_COLOR_ATTACHMENT_READ_BIT |
+                                       VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT));
 }
 
 }  // namespace testing
