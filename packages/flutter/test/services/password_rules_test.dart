@@ -125,6 +125,33 @@ void main() {
       expect(const PasswordRules(maxLength: 12), isNot(const PasswordRules(maxConsecutive: 12)));
     });
 
+    test('equality and hashCode compare custom character classes by value', () {
+      PasswordRules rulesWith(String characters) {
+        return PasswordRules(
+          required: <Set<PasswordCharacterClass>>[
+            <PasswordCharacterClass>{PasswordCharacterClass.custom(characters)},
+          ],
+          allowed: <PasswordCharacterClass>{PasswordCharacterClass.custom(characters)},
+        );
+      }
+
+      // Built at runtime, so the custom character classes are not identical.
+      final characters = String.fromCharCodes('-_'.codeUnits);
+      final PasswordRules rules1 = rulesWith(characters);
+      final PasswordRules rules2 = rulesWith(characters);
+
+      expect(identical(rules1.allowed.single, rules2.allowed.single), isFalse);
+      expect(rules1, rules2);
+      expect(rules1.hashCode, rules2.hashCode);
+      expect(rules1, isNot(rulesWith('_')));
+      expect(
+        const PasswordRules(
+          allowed: <PasswordCharacterClass>{PasswordCharacterClass.custom('upper')},
+        ),
+        isNot(const PasswordRules(allowed: <PasswordCharacterClass>{PasswordCharacterClass.upper})),
+      );
+    });
+
     test('toString', () {
       expect(const PasswordRules().toString(), 'PasswordRules()');
       expect(

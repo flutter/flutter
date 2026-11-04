@@ -14,8 +14,8 @@ import 'package:flutter/foundation.dart';
 /// [PasswordCharacterClass.custom] for a specific set of characters.
 ///
 /// Instances are compared by identity, so that they can be used in constant
-/// sets. Create custom character classes with `const` to compare them by
-/// value.
+/// sets. [PasswordRules] compares its character classes by value, so rules
+/// that use equivalent custom character classes are equal.
 @immutable
 final class PasswordCharacterClass {
   const PasswordCharacterClass._(this._name) : characters = null;
@@ -55,6 +55,9 @@ final class PasswordCharacterClass {
   final String? characters;
 
   Object _toJson() => _name ?? <String, String>{'custom': characters!};
+
+  // A value that is equal for equivalent character classes.
+  (String?, String?) get _key => (_name, characters);
 
   @override
   String toString() {
@@ -156,7 +159,7 @@ class PasswordRules {
     }
     return other is PasswordRules &&
         _requiredEquals(other.required, required) &&
-        setEquals(other.allowed, allowed) &&
+        setEquals(_keys(other.allowed), _keys(allowed)) &&
         other.minLength == minLength &&
         other.maxLength == maxLength &&
         other.maxConsecutive == maxConsecutive;
@@ -170,18 +173,27 @@ class PasswordRules {
       return false;
     }
     for (var i = 0; i < a.length; i += 1) {
-      if (!setEquals(a[i], b[i])) {
+      if (!setEquals(_keys(a[i]), _keys(b[i]))) {
         return false;
       }
     }
     return true;
   }
 
+  // Character classes are compared by value instead of identity.
+  static Set<(String?, String?)> _keys(Set<PasswordCharacterClass> classes) {
+    return <(String?, String?)>{for (final PasswordCharacterClass c in classes) c._key};
+  }
+
   @override
   int get hashCode {
     return Object.hash(
-      Object.hashAll(required.map(Object.hashAllUnordered)),
-      Object.hashAllUnordered(allowed),
+      Object.hashAll(
+        required.map((Set<PasswordCharacterClass> classes) {
+          return Object.hashAllUnordered(_keys(classes));
+        }),
+      ),
+      Object.hashAllUnordered(_keys(allowed)),
       minLength,
       maxLength,
       maxConsecutive,
