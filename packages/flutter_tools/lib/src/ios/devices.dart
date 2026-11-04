@@ -1418,7 +1418,7 @@ class IOSDevice extends Device {
     var success = false;
     try {
       success = await _coreDeviceControl.takeScreenshot(deviceId: id, destination: outputFile.path);
-    } on Exception catch (error) {
+    } on ProcessException catch (error) {
       _handleDevicectlError(error.toString(), 'take screenshot');
     }
     if (!success) {

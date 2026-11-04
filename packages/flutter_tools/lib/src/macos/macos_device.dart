@@ -130,6 +130,8 @@ class MacOSDevice extends DesktopDevice {
   @override
   bool get supportsScreenRecording => true;
 
+  // macOS `screencapture` captures the entire screen, not just the app window.
+  // There is no reliable cross-version API to capture a single window by PID.
   @override
   Future<void> takeScreenshot(File outputFile) async {
     final ProcessResult result = await toolContext.processManager.run(<String>[
