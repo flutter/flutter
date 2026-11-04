@@ -127,31 +127,58 @@ List<String> bazelTestOptions() {
   ];
 }
 
+/// Whether a Linux bot's shard builds on RBE when nothing says otherwise:
+/// the default [bazelRbeOptions] applies under `--bazel-rbe`,
+/// `--no-bazel-rbe` and [kBazelRbeEnvironmentVariable].
+const bool kBazelRbeOnBots = true;
+
 /// The environment variable that turns remote execution off for a run on a
 /// bot: `FLUTTER_BAZEL_RBE=0` (bazel_ci.py's RBE_ENV).
 const String kBazelRbeEnvironmentVariable = 'FLUTTER_BAZEL_RBE';
 
-/// `--config=rbe` on a Linux bot: the root .bazelrc's remote execution on
+bool? _bazelRbe;
+
+/// `--bazel-rbe`: the shard builds on RBE, bot or not (a developer needs
+/// `gcloud auth application-default login` for the instance; a Linux host
+/// either way).
+void enableBazelRbe() {
+  _bazelRbe = true;
+}
+
+/// `--no-bazel-rbe`: the shard builds on this machine alone.
+void disableBazelRbe() {
+  _bazelRbe = false;
+}
+
+/// `--config=rbe` on a Linux host: the root .bazelrc's remote execution on
 /// Flutter's RBE instance, what bazel_ci.py's rbe_options gives a Linux
 /// bot's engine builds. A shard's kernel compiles -- one per test file,
 /// against the prebuilt platform -- run on the workers, 200 at a time, and
 /// stay in the instance's cache for every later build of the same inputs
 /// (a retry, a rebase that touches nothing of theirs); the tests stay on
-/// the bot (the config's TestRunner strategy), their kernels downloaded. A
-/// Mac builds locally: the workers are Linux x64. Nothing for a developer,
-/// whose `gcloud` credentials the config would need; nothing when
-/// [kBazelRbeEnvironmentVariable] says `0`.
-List<String> bazelRbeOptions({bool? onBot, bool? onLinux, Map<String, String>? environment}) {
+/// the bot (the config's TestRunner strategy), their kernels downloaded.
+/// Never on another host: the workers are Linux x64. Otherwise as the flags
+/// say ([rbe]: `--bazel-rbe` / `--no-bazel-rbe`), else on a bot unless
+/// [kBazelRbeEnvironmentVariable] says `0` -- [kBazelRbeOnBots] -- and never
+/// for a developer unasked, whose `gcloud` credentials the config would need.
+List<String> bazelRbeOptions({
+  bool? onBot,
+  bool? onLinux,
+  Map<String, String>? environment,
+  bool? rbe,
+}) {
   onBot ??= isLuci;
   onLinux ??= Platform.isLinux;
   environment ??= Platform.environment;
-  if (!onBot || !onLinux) {
+  rbe ??= _bazelRbe;
+  if (!onLinux) {
     return const <String>[];
   }
-  if (const <String>{'0', 'false', 'no'}.contains(environment[kBazelRbeEnvironmentVariable])) {
-    return const <String>[];
-  }
-  return const <String>['--config=rbe'];
+  rbe ??=
+      onBot &&
+      kBazelRbeOnBots &&
+      !const <String>{'0', 'false', 'no'}.contains(environment[kBazelRbeEnvironmentVariable]);
+  return rbe ? const <String>['--config=rbe'] : const <String>[];
 }
 
 /// `--sandbox_base=/dev/shm` on a bot with a tmpfs of 16 GB or more there
