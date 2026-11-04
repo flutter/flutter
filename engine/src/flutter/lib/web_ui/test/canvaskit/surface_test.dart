@@ -595,6 +595,84 @@ void testMain() {
 
         surface.dispose();
       });
+
+      test('an oversized request while a context loss is pending keeps WebGL usable', () async {
+        final surface = CkOffscreenSurface(OffscreenCanvasProvider());
+        await surface.initialized;
+        surface.setSize(const BitmapSize(100, 100));
+        final lostCanvas = surface.canvas as DomOffscreenCanvas;
+        final int maxTextureSize = lostCanvas.getGlContext(webGLVersion).getParameter(0x0D33);
+
+        // The lost context cannot report its limits, so the request is not
+        // validated and is recovered on a fresh canvas instead.
+        await surface.triggerContextLoss();
+        expect(() => surface.setSize(BitmapSize(100, maxTextureSize + 1)), returnsNormally);
+        final freshCanvas = surface.canvas as DomOffscreenCanvas;
+        expect(identical(freshCanvas, lostCanvas), isFalse);
+        expect(freshCanvas.getGlContext(webGLVersion).isContextLost(), isFalse);
+        expect(surface.supportsWebGl, isTrue);
+
+        // Once the context is live again, oversized requests are rejected
+        // upfront without replacing the recovered canvas.
+        await Future<void>.delayed(const Duration(milliseconds: 50));
+        expect(
+          () => surface.setSize(BitmapSize(maxTextureSize + 1, 100)),
+          throwsA(isA<UnsupportedError>()),
+        );
+        expect(identical(surface.canvas, freshCanvas), isTrue);
+
+        surface.setSize(const BitmapSize(150, 150));
+        final recorder = ui.PictureRecorder();
+        ui.Canvas(recorder).drawRect(
+          const ui.Rect.fromLTWH(0, 0, 150, 150),
+          ui.Paint()..color = const ui.Color(0xFF0000FF),
+        );
+        await surface.rasterizeToCanvas(recorder.endRecording());
+        expect(surface.supportsWebGl, isTrue);
+        expect(readSurfacePixel(surface, 149, 149), <int>[0, 0, 255, 255]);
+
+        surface.dispose();
+      });
+
+      test(
+        'rasterizeToImageBitmaps while a context loss is pending captures the picture',
+        () async {
+          final surface = CkOffscreenSurface(OffscreenCanvasProvider());
+          await surface.initialized;
+          surface.setSize(const BitmapSize(100, 100));
+          final DomEventTarget lostCanvas = surface.canvas;
+          await surface.triggerContextLoss();
+
+          final recorder = ui.PictureRecorder();
+          ui.Canvas(recorder).drawRect(
+            const ui.Rect.fromLTWH(190, 190, 10, 10),
+            ui.Paint()..color = const ui.Color(0xFF00FF00),
+          );
+          final List<DomImageBitmap> bitmaps = await surface.rasterizeToImageBitmaps(
+            const BitmapSize(200, 200),
+            <ui.Picture>[recorder.endRecording()],
+          );
+
+          final DomImageBitmap bitmap = bitmaps.single;
+          expect(bitmap.width, 200);
+          expect(bitmap.height, 200);
+          final DomCanvasRenderingContext2D sampler = createDomCanvasElement(
+            width: 1,
+            height: 1,
+          ).context2D;
+          sampler.drawImage(bitmap, 195, 195, 1, 1, 0, 0, 1, 1);
+          expect(sampler.getImageData(0, 0, 1, 1).data, <int>[0, 255, 0, 255]);
+
+          // The loss was recovered by the resize, so the pending
+          // `webglcontextlost` event must not replace the canvas again.
+          final DomEventTarget recoveredCanvas = surface.canvas;
+          expect(identical(recoveredCanvas, lostCanvas), isFalse);
+          await Future<void>.delayed(const Duration(milliseconds: 50));
+          expect(identical(surface.canvas, recoveredCanvas), isTrue);
+
+          surface.dispose();
+        },
+      );
     });
   });
 }
