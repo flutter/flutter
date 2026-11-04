@@ -36,7 +36,8 @@ ImageType? detectImageType(Uint8List data) {
 
     // If we detect a WebP image, check if it is animated.
     if (format.imageType == ImageType.webp) {
-      if (_WebpHeaderReader(data.buffer.asByteData()).isAnimated()) {
+      if (_WebpHeaderReader(data.buffer.asByteData(data.offsetInBytes, data.lengthInBytes))
+          .isAnimated()) {
         return ImageType.animatedWebp;
       }
     }
@@ -44,7 +45,8 @@ ImageType? detectImageType(Uint8List data) {
     // We conservatively detected an animated GIF. Check if the GIF is actually
     // animated by reading the bytes.
     if (format.imageType == ImageType.animatedGif) {
-      if (_GifHeaderReader(data.buffer.asByteData()).isAnimated()) {
+      if (_GifHeaderReader(data.buffer.asByteData(data.offsetInBytes, data.lengthInBytes))
+          .isAnimated()) {
         return ImageType.animatedGif;
       } else {
         return ImageType.gif;
