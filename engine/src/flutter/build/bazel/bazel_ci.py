@@ -310,15 +310,15 @@ def rbe_flag(flags):
   """What the tools/gn flags say about RBE: True (--bazel-rbe), False (--no-bazel-rbe), None."""
   value = None
   for flag in flags:
-    if flag in RBE_FLAGS:
-      value = RBE_FLAGS[flag]
+    value = RBE_FLAGS.get(flag, value)
   return value
 
 
 def rbe_options(rbe=None):
-  """`--config=rbe` on a Linux host: as the flags say (`rbe`), else on a bot unless FLUTTER_BAZEL_RBE=0.
+  """`--config=rbe` on a Linux host: as the flags say (`rbe`), else a bot's default.
 
-  Never on another host: the workers are Linux x64.
+  A bot's default is RBE_ON_BOTS unless FLUTTER_BAZEL_RBE=0; a developer's
+  is off. Never on another host: the workers are Linux x64.
   """
   if not sys.platform.startswith('linux'):
     return []
