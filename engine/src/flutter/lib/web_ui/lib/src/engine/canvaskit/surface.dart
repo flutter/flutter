@@ -236,6 +236,12 @@ abstract class CkSurface extends Surface {
 
   @override
   Future<void> recreateContextForCanvas(DomEventTarget newCanvas) async {
+    _adoptCanvas(newCanvas);
+  }
+
+  /// Switches this surface to [newCanvas] and synchronously recreates the
+  /// GrContext and Skia surface for it at [_currentSize].
+  void _adoptCanvas(DomEventTarget newCanvas) {
     // The old Skia surface is now invalid and should be disposed.
     _skSurface?.dispose();
     _skSurface = null;
@@ -419,7 +425,8 @@ class CkOffscreenSurface extends CkSurface implements OffscreenSurface {
   /// buffer's area at 5760x5760 and scales both dimensions down to fit (e.g.
   /// 4960x7016 becomes 4843x6850, see
   /// https://github.com/flutter/flutter/issues/182476). A newly created context
-  /// is not subject to this cap.
+  /// is not subject to this cap, although other browser or GPU limits may still
+  /// give it a smaller buffer, which is checked below.
   ///
   /// When a drawing buffer clamp is detected, the old canvas is replaced with a
   /// brand-new [DomOffscreenCanvas] and a fresh WebGL context (see
@@ -470,7 +477,6 @@ class CkOffscreenSurface extends CkSurface implements OffscreenSurface {
       if (bufferWidth < size.width || bufferHeight < size.height) {
         // Use another fresh canvas rather than shrinking this one in place, so
         // that a previous size above the resize cap is not clamped either.
-        _currentSize = previousSize;
         _replaceCanvas(previousSize);
         throw UnsupportedError(
           'Requested dimensions ${size.width}x${size.height} exceed the WebGL '
@@ -480,13 +486,18 @@ class CkOffscreenSurface extends CkSurface implements OffscreenSurface {
     }
   }
 
-  /// Replaces the current canvas with a new one of [size] backed by a fresh
-  /// WebGL context.
+  /// Replaces the current canvas with a new one of [size] and attempts to
+  /// create a fresh WebGL context for it, falling back to software rendering
+  /// if that fails.
   ///
   /// The old canvas is released and its WebGL context is explicitly lost so
   /// the browser frees the context slot immediately, and the Skia objects
   /// bound to it are torn down before the new canvas is acquired.
+  ///
+  /// This also records [size] as the current size, because the new Skia
+  /// surface is created at [_currentSize].
   void _replaceCanvas(BitmapSize size) {
+    _currentSize = size;
     final DomEventTarget oldCanvas = canvas;
     final WebGLContext gl = (oldCanvas as DomOffscreenCanvas).getGlContext(webGLVersion);
 
@@ -498,7 +509,7 @@ class CkOffscreenSurface extends CkSurface implements OffscreenSurface {
       gl.loseContextExtension.loseContext();
     }
 
-    // Unlike `recreateContextForCanvas`, which only drops its references,
+    // Unlike `_adoptCanvas`, which only drops its references,
     // dispose the SkSurface before abandoning and deleting the GrContext so the
     // Skia objects bound to the old context are freed now.
     _skSurface?.dispose();
@@ -511,9 +522,10 @@ class CkOffscreenSurface extends CkSurface implements OffscreenSurface {
       size,
       onContextLost: onContextLost,
     );
-    // `recreateContextForCanvas` never awaits, so the new canvas, GL context
-    // and Skia objects are all in place by the time this call returns.
-    unawaited(recreateContextForCanvas(newCanvas));
+    // Adopt the canvas synchronously so that the new GL context and Skia
+    // objects are in place before the caller inspects the drawing buffer, and
+    // so that resizing stays atomic with the render that follows it.
+    _adoptCanvas(newCanvas);
   }
 
   @override

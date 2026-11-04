@@ -199,17 +199,18 @@ void testMain() {
         }
         expect(surface.supportsWebGl, isTrue);
 
-        final recorder = ui.PictureRecorder();
-        final canvas = ui.Canvas(recorder);
-        final paint = ui.Paint()..color = const ui.Color(0xFFFF0000);
-        canvas.drawRect(const ui.Rect.fromLTWH(0, 0, 4960, 7016), paint);
-        final ui.Picture picture = recorder.endRecording();
-
-        await surface.rasterizeToCanvas(picture);
-
         // Before the fix, this pixel lay outside the clamped drawing buffer and
         // read back as transparent black.
-        expect(readSurfacePixel(surface, 4950, 100), <int>[255, 0, 0, 255]);
+        expect(
+          await renderRectAndReadPixel(
+            surface,
+            const ui.Rect.fromLTWH(0, 0, 4960, 7016),
+            const ui.Color(0xFFFF0000),
+            4950,
+            100,
+          ),
+          <int>[255, 0, 0, 255],
+        );
 
         surface.dispose();
       },
@@ -293,21 +294,32 @@ void testMain() {
         );
         expect(identical(surface.canvas, healthyCanvas), isTrue);
 
-        final paint = ui.Paint()..color = const ui.Color(0xFF0000FF);
-        final recorder1 = ui.PictureRecorder();
-        ui.Canvas(recorder1).drawRect(const ui.Rect.fromLTWH(0, 0, 100, 100), paint);
-        await surface.rasterizeToCanvas(recorder1.endRecording());
-        expect(readSurfacePixel(surface, 99, 99), <int>[0, 0, 255, 255]);
+        expect(
+          await renderRectAndReadPixel(
+            surface,
+            const ui.Rect.fromLTWH(0, 0, 100, 100),
+            const ui.Color(0xFF0000FF),
+            99,
+            99,
+          ),
+          <int>[0, 0, 255, 255],
+        );
 
         // Subsequent normal resizes keep rendering via WebGL on the same canvas.
         surface.setSize(const BitmapSize(150, 150));
         expect(identical(surface.canvas, healthyCanvas), isTrue);
         expect(surface.supportsWebGl, isTrue);
 
-        final recorder2 = ui.PictureRecorder();
-        ui.Canvas(recorder2).drawRect(const ui.Rect.fromLTWH(0, 0, 150, 150), paint);
-        await surface.rasterizeToCanvas(recorder2.endRecording());
-        expect(readSurfacePixel(surface, 149, 149), <int>[0, 0, 255, 255]);
+        expect(
+          await renderRectAndReadPixel(
+            surface,
+            const ui.Rect.fromLTWH(0, 0, 150, 150),
+            const ui.Color(0xFF0000FF),
+            149,
+            149,
+          ),
+          <int>[0, 0, 255, 255],
+        );
 
         surface.dispose();
       },
@@ -318,7 +330,8 @@ void testMain() {
         final surface = CkOffscreenSurface(OffscreenCanvasProvider());
         await surface.initialized;
 
-        // Rapid ping-pong resizing between small (10x10) and large (5000x5000) dimensions.
+        // Rapid ping-pong resizing between small (10x10) and large (4960x7016 and
+        // 5000x5000) dimensions.
         // Track the WebGL contexts of every canvas the surface replaces.
         final replacedContexts = <WebGLContext>[];
         void resizeTrackingReplacements(BitmapSize size) {
@@ -357,17 +370,17 @@ void testMain() {
         );
         expect(surface.supportsWebGl, isTrue);
 
-        final recorder = ui.PictureRecorder();
-        final canvas = ui.Canvas(recorder);
-        final paint = ui.Paint()..color = const ui.Color(0xFF00FF00);
-        canvas.drawRect(const ui.Rect.fromLTWH(0, 0, 5000, 5000), paint);
-        final ui.Picture picture = recorder.endRecording();
-
-        await surface.rasterizeToCanvas(picture);
-        expect(surface.skSurface, isNotNull);
-
         // Verify pixel rendering reaches the bounds of the large surface after ping-ponging.
-        expect(readSurfacePixel(surface, 4990, 4990), <int>[0, 255, 0, 255]);
+        expect(
+          await renderRectAndReadPixel(
+            surface,
+            const ui.Rect.fromLTWH(0, 0, 5000, 5000),
+            const ui.Color(0xFF00FF00),
+            4990,
+            4990,
+          ),
+          <int>[0, 255, 0, 255],
+        );
 
         surface.dispose();
       });
@@ -392,12 +405,7 @@ void testMain() {
         final DomImageBitmap bitmap = bitmaps.single;
         expect(bitmap.width, 4960);
         expect(bitmap.height, 7016);
-        final DomCanvasRenderingContext2D sampler = createDomCanvasElement(
-          width: 1,
-          height: 1,
-        ).context2D;
-        sampler.drawImage(bitmap, 4955, 7010, 1, 1, 0, 0, 1, 1);
-        expect(sampler.getImageData(0, 0, 1, 1).data, <int>[0, 255, 0, 255]);
+        expect(readBitmapPixel(bitmap, 4955, 7010), <int>[0, 255, 0, 255]);
 
         surface.dispose();
       });
@@ -423,13 +431,16 @@ void testMain() {
           expect(surface.supportsWebGl, isTrue);
 
           surface.setSize(const BitmapSize(200, 200));
-          final recorder = ui.PictureRecorder();
-          ui.Canvas(recorder).drawRect(
-            const ui.Rect.fromLTWH(0, 0, 200, 200),
-            ui.Paint()..color = const ui.Color(0xFF0000FF),
+          expect(
+            await renderRectAndReadPixel(
+              surface,
+              const ui.Rect.fromLTWH(0, 0, 200, 200),
+              const ui.Color(0xFF0000FF),
+              199,
+              199,
+            ),
+            <int>[0, 0, 255, 255],
           );
-          await surface.rasterizeToCanvas(recorder.endRecording());
-          expect(readSurfacePixel(surface, 199, 199), <int>[0, 0, 255, 255]);
 
           surface.dispose();
         },
@@ -530,13 +541,16 @@ void testMain() {
 
         await Future<void>.delayed(const Duration(milliseconds: 50));
         surface.setSize(const BitmapSize(200, 200));
-        final recorder = ui.PictureRecorder();
-        ui.Canvas(recorder).drawRect(
-          const ui.Rect.fromLTWH(0, 0, 200, 200),
-          ui.Paint()..color = const ui.Color(0xFF0000FF),
+        expect(
+          await renderRectAndReadPixel(
+            surface,
+            const ui.Rect.fromLTWH(0, 0, 200, 200),
+            const ui.Color(0xFF0000FF),
+            199,
+            199,
+          ),
+          <int>[0, 0, 255, 255],
         );
-        await surface.rasterizeToCanvas(recorder.endRecording());
-        expect(readSurfacePixel(surface, 199, 199), <int>[0, 0, 255, 255]);
 
         surface.dispose();
       });
@@ -576,14 +590,17 @@ void testMain() {
         expect(identical(surface.canvas, freshCanvas), isTrue);
 
         surface.setSize(const BitmapSize(150, 150));
-        final recorder = ui.PictureRecorder();
-        ui.Canvas(recorder).drawRect(
-          const ui.Rect.fromLTWH(0, 0, 150, 150),
-          ui.Paint()..color = const ui.Color(0xFF0000FF),
+        expect(
+          await renderRectAndReadPixel(
+            surface,
+            const ui.Rect.fromLTWH(0, 0, 150, 150),
+            const ui.Color(0xFF0000FF),
+            149,
+            149,
+          ),
+          <int>[0, 0, 255, 255],
         );
-        await surface.rasterizeToCanvas(recorder.endRecording());
         expect(surface.supportsWebGl, isTrue);
-        expect(readSurfacePixel(surface, 149, 149), <int>[0, 0, 255, 255]);
 
         surface.dispose();
       });
@@ -645,13 +662,16 @@ void testMain() {
             surface.setSize(const BitmapSize(100, 100));
             expect(identical(surface.canvas, currentCanvas), isTrue);
 
-            final recorder = ui.PictureRecorder();
-            ui.Canvas(recorder).drawRect(
-              const ui.Rect.fromLTWH(0, 0, 100, 100),
-              ui.Paint()..color = const ui.Color(0xFF0000FF),
+            expect(
+              await renderRectAndReadPixel(
+                surface,
+                const ui.Rect.fromLTWH(0, 0, 100, 100),
+                const ui.Color(0xFF0000FF),
+                99,
+                99,
+              ),
+              <int>[0, 0, 255, 255],
             );
-            await surface.rasterizeToCanvas(recorder.endRecording());
-            expect(readSurfacePixel(surface, 99, 99), <int>[0, 0, 255, 255]);
 
             // Asking for the same size again is rejected again rather than
             // silently rendering clipped.
@@ -659,13 +679,16 @@ void testMain() {
 
             surface.setSize(const BitmapSize(150, 150));
             expect(surface.supportsWebGl, isTrue);
-            final recorder2 = ui.PictureRecorder();
-            ui.Canvas(recorder2).drawRect(
-              const ui.Rect.fromLTWH(0, 0, 150, 150),
-              ui.Paint()..color = const ui.Color(0xFF0000FF),
+            expect(
+              await renderRectAndReadPixel(
+                surface,
+                const ui.Rect.fromLTWH(0, 0, 150, 150),
+                const ui.Color(0xFF0000FF),
+                149,
+                149,
+              ),
+              <int>[0, 0, 255, 255],
             );
-            await surface.rasterizeToCanvas(recorder2.endRecording());
-            expect(readSurfacePixel(surface, 149, 149), <int>[0, 0, 255, 255]);
 
             // A software fallback has no drawing buffer to check, so if the fresh
             // context cannot be created the request goes through without error.
@@ -708,13 +731,16 @@ void testMain() {
           expect(surface.skSurface!.width(), 4960);
           expect(surface.skSurface!.height(), 7016);
 
-          final recorder = ui.PictureRecorder();
-          ui.Canvas(recorder).drawRect(
-            const ui.Rect.fromLTWH(0, 0, 4960, 7016),
-            ui.Paint()..color = const ui.Color(0xFFFF0000),
+          expect(
+            await renderRectAndReadPixel(
+              surface,
+              const ui.Rect.fromLTWH(0, 0, 4960, 7016),
+              const ui.Color(0xFFFF0000),
+              4955,
+              7010,
+            ),
+            <int>[255, 0, 0, 255],
           );
-          await surface.rasterizeToCanvas(recorder.endRecording());
-          expect(readSurfacePixel(surface, 4955, 7010), <int>[255, 0, 0, 255]);
 
           surface.dispose();
         },
@@ -769,12 +795,7 @@ void testMain() {
           final DomImageBitmap bitmap = bitmaps.single;
           expect(bitmap.width, 100);
           expect(bitmap.height, 100);
-          final DomCanvasRenderingContext2D sampler = createDomCanvasElement(
-            width: 1,
-            height: 1,
-          ).context2D;
-          sampler.drawImage(bitmap, 95, 95, 1, 1, 0, 0, 1, 1);
-          expect(sampler.getImageData(0, 0, 1, 1).data, <int>[0, 255, 0, 255]);
+          expect(readBitmapPixel(bitmap, 95, 95), <int>[0, 255, 0, 255]);
 
           surface.dispose();
         },
@@ -802,12 +823,7 @@ void testMain() {
           final DomImageBitmap bitmap = bitmaps.single;
           expect(bitmap.width, 200);
           expect(bitmap.height, 200);
-          final DomCanvasRenderingContext2D sampler = createDomCanvasElement(
-            width: 1,
-            height: 1,
-          ).context2D;
-          sampler.drawImage(bitmap, 195, 195, 1, 1, 0, 0, 1, 1);
-          expect(sampler.getImageData(0, 0, 1, 1).data, <int>[0, 255, 0, 255]);
+          expect(readBitmapPixel(bitmap, 195, 195), <int>[0, 255, 0, 255]);
 
           // The loss was recovered by the resize, so the pending
           // `webglcontextlost` event must not replace the canvas again.
@@ -853,13 +869,38 @@ List<int> readSurfacePixel(CkSurface surface, int x, int y) {
   }
 }
 
+/// Fills [rect] with [color] on [surface], renders it to the surface's canvas,
+/// and reads back the RGBA bytes of the pixel at ([x], [y]).
+Future<List<int>> renderRectAndReadPixel(
+  CkOffscreenSurface surface,
+  ui.Rect rect,
+  ui.Color color,
+  int x,
+  int y,
+) async {
+  final recorder = ui.PictureRecorder();
+  ui.Canvas(recorder).drawRect(rect, ui.Paint()..color = color);
+  await surface.rasterizeToCanvas(recorder.endRecording());
+  return readSurfacePixel(surface, x, y);
+}
+
+/// Reads back the RGBA bytes of the pixel at ([x], [y]) from [bitmap].
+List<int> readBitmapPixel(DomImageBitmap bitmap, int x, int y) {
+  final DomCanvasRenderingContext2D sampler = createDomCanvasElement(width: 1, height: 1).context2D;
+  sampler.drawImage(bitmap, x, y, 1, 1, 0, 0, 1, 1);
+  return sampler.getImageData(0, 0, 1, 1).data;
+}
+
 /// An [OffscreenCanvasProvider] that allocates canvases of [allocatedSize]
-/// whenever [undersizedSize] is requested, emulating a browser that cannot
+/// whenever [clampedRequest] is requested, emulating a browser that cannot
 /// allocate a drawing buffer that large even for a fresh WebGL context.
 class _UndersizedOffscreenCanvasProvider extends OffscreenCanvasProvider {
-  _UndersizedOffscreenCanvasProvider(this.undersizedSize, this.allocatedSize);
+  _UndersizedOffscreenCanvasProvider(this.clampedRequest, this.allocatedSize);
 
-  final BitmapSize undersizedSize;
+  /// The requested size that this provider allocates too small.
+  final BitmapSize clampedRequest;
+
+  /// The size actually allocated when [clampedRequest] is requested.
   final BitmapSize allocatedSize;
 
   /// The sizes passed to [acquireCanvas], in order.
@@ -868,7 +909,7 @@ class _UndersizedOffscreenCanvasProvider extends OffscreenCanvasProvider {
   /// The canvases returned by [acquireCanvas], in order.
   final List<DomOffscreenCanvas> acquiredCanvases = <DomOffscreenCanvas>[];
 
-  BitmapSize _allocatedSize(BitmapSize size) => size == undersizedSize ? allocatedSize : size;
+  BitmapSize _allocatedSize(BitmapSize size) => size == clampedRequest ? allocatedSize : size;
 
   @override
   DomOffscreenCanvas acquireCanvas(BitmapSize size, {required ui.VoidCallback onContextLost}) {
