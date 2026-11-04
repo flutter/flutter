@@ -544,7 +544,7 @@ class CkOffscreenSurface extends CkSurface implements OffscreenSurface {
   ///
   /// When a drawing buffer clamp is detected, the old canvas is replaced with a
   /// brand-new [DomOffscreenCanvas] and a fresh WebGL context (see
-  /// [_replaceCanvas]), allowing the browser to allocate the full buffer
+  /// [_replaceCanvasWithSize]), allowing the browser to allocate the full buffer
   /// upfront. A context that is already lost (e.g. its `webglcontextlost`
   /// event is still pending) reports a zero-sized drawing buffer and is
   /// recovered the same way.
@@ -580,7 +580,7 @@ class CkOffscreenSurface extends CkSurface implements OffscreenSurface {
       return;
     }
 
-    _replaceCanvas(size);
+    _replaceCanvasWithSize(size);
 
     // If creating the new context failed, the surface has fallen back to
     // software rendering, which has no drawing buffer to check.
@@ -591,7 +591,7 @@ class CkOffscreenSurface extends CkSurface implements OffscreenSurface {
       if (bufferWidth < size.width || bufferHeight < size.height) {
         // Use another fresh canvas rather than shrinking this one in place, so
         // that a previous size above the resize cap is not clamped either.
-        _replaceCanvas(previousSize);
+        _replaceCanvasWithSize(previousSize);
         throw UnsupportedError(
           'Requested dimensions ${size.width}x${size.height} exceed the WebGL '
           'drawing buffer allocated by the browser (${bufferWidth}x$bufferHeight).',
@@ -636,7 +636,7 @@ class CkOffscreenSurface extends CkSurface implements OffscreenSurface {
   ///
   /// This also records [size] as the current size, because the new Skia
   /// surface is created at [_currentSize].
-  void _replaceCanvas(BitmapSize size) {
+  void _replaceCanvasWithSize(BitmapSize size) {
     _currentSize = size;
     _releaseCanvasAndContext();
 
