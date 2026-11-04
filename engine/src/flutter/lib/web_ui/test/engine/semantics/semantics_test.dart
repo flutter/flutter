@@ -14,6 +14,7 @@ import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
+import '../../common/matchers.dart';
 import '../../common/rendering.dart';
 import '../../common/test_initialization.dart';
 import 'semantics_tester.dart';
@@ -819,6 +820,120 @@ void _testEngineSemanticsOwner() {
     expect(owner().debugSemanticsTree, isNotEmpty);
     semantics().semanticsEnabled = false;
     expect(owner().debugSemanticsTree, isEmpty);
+  });
+
+  // Regression tests for https://github.com/flutter/flutter/issues/193235.
+  //
+  // The framework must send a node before, or in the same update as, the
+  // parent that lists it. When it does not, the engine must not be left in a
+  // state where every later update fails as well.
+  group('update that lists a child that was never sent', () {
+    ui.SemanticsUpdate rootWithChildren(List<int> childIds, {bool sendChild1 = true}) {
+      final builder = ui.SemanticsUpdateBuilder();
+      updateNode(
+        builder,
+        transform: Matrix4.identity().toFloat64(),
+        rect: const ui.Rect.fromLTRB(0, 0, 20, 20),
+        childrenInHitTestOrder: Int32List.fromList(childIds),
+        childrenInTraversalOrder: Int32List.fromList(childIds),
+      );
+      if (sendChild1) {
+        updateNode(
+          builder,
+          id: 1,
+          label: 'one',
+          transform: Matrix4.identity().toFloat64(),
+          rect: const ui.Rect.fromLTRB(0, 0, 20, 20),
+        );
+      }
+      return builder.build();
+    }
+
+    test('asserts in debug mode but leaves the owner ready for the next update', () {
+      semantics().semanticsEnabled = true;
+
+      // Root lists children 1 and 2, but node 2 is never sent.
+      expect(() => owner().updateSemantics(rootWithChildren(<int>[1, 2])), throwsAssertionError);
+
+      // The failed update must not leave the owner mid-update.
+      expect(owner().phase, SemanticsUpdatePhase.idle);
+
+      // A subsequent, consistent update applies normally instead of failing
+      // again on the left-overs of the previous one.
+      owner().updateSemantics(rootWithChildren(<int>[1]));
+      expect(owner().phase, SemanticsUpdatePhase.idle);
+      expectSemanticsTree(owner(), '''
+<sem>
+    <sem><span>one</span></sem>
+</sem>''');
+
+      semantics().semanticsEnabled = false;
+    });
+
+    test('recovers when an existing node starts listing a child that was never sent', () {
+      semantics().semanticsEnabled = true;
+
+      // A valid tree first: root -> 1.
+      owner().updateSemantics(rootWithChildren(<int>[1]));
+      expectSemanticsTree(owner(), '''
+<sem>
+    <sem><span>one</span></sem>
+</sem>''');
+
+      // Root now lists an additional child 2 that is not part of the update.
+      // This is the shape produced by a parent that stops merging its
+      // descendants without the descendants being sent along.
+      expect(
+        () => owner().updateSemantics(rootWithChildren(<int>[1, 2], sendChild1: false)),
+        throwsAssertionError,
+      );
+      expect(owner().phase, SemanticsUpdatePhase.idle);
+
+      // Sending node 2 in a later update repairs the tree.
+      final builder = ui.SemanticsUpdateBuilder();
+      updateNode(
+        builder,
+        transform: Matrix4.identity().toFloat64(),
+        rect: const ui.Rect.fromLTRB(0, 0, 20, 20),
+        childrenInHitTestOrder: Int32List.fromList(<int>[1, 2]),
+        childrenInTraversalOrder: Int32List.fromList(<int>[1, 2]),
+      );
+      updateNode(
+        builder,
+        id: 2,
+        label: 'two',
+        transform: Matrix4.identity().toFloat64(),
+        rect: const ui.Rect.fromLTRB(0, 0, 20, 20),
+      );
+      owner().updateSemantics(builder.build());
+      expectSemanticsTree(owner(), '''
+<sem>
+    <sem><span>one</span></sem>
+    <sem><span>two</span></sem>
+</sem>''');
+
+      semantics().semanticsEnabled = false;
+    });
+
+    test('disabling semantics after the failure resets the owner cleanly', () {
+      semantics().semanticsEnabled = true;
+      expect(() => owner().updateSemantics(rootWithChildren(<int>[1, 2])), throwsAssertionError);
+
+      // reset() runs as part of disabling semantics.
+      semantics().semanticsEnabled = false;
+      expect(owner().debugSemanticsTree, isEmpty);
+      expect(owner().phase, SemanticsUpdatePhase.idle);
+
+      // Re-enabling starts from a clean slate.
+      semantics().semanticsEnabled = true;
+      owner().updateSemantics(rootWithChildren(<int>[1]));
+      expectSemanticsTree(owner(), '''
+<sem>
+    <sem><span>one</span></sem>
+</sem>''');
+
+      semantics().semanticsEnabled = false;
+    });
   });
 
   test('accepts standalone browser gestures', () {

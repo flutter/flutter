@@ -2094,6 +2094,25 @@ class SemanticsObject {
   /// The order children are currently rendered in.
   List<SemanticsObject>? _currentChildrenInRenderOrder;
 
+  /// Returns the child with the given [childId], or null if no node with that
+  /// id has been sent to the engine.
+  ///
+  /// The framework must send a node before, or in the same update as, the
+  /// parent that lists it. If it does not, debug builds assert so the mistake
+  /// is noticed, while release builds leave the missing child out and keep the
+  /// rest of the tree updating, instead of aborting the update half-way and
+  /// leaving the owner in a state from which no later update can recover (see
+  /// https://github.com/flutter/flutter/issues/193235).
+  SemanticsObject? _lookUpChild(int childId) {
+    final SemanticsObject? child = owner._semanticsTree[childId];
+    assert(
+      child != null,
+      'Semantics node #$id lists child #$childId, but no node with that id has '
+      'been sent to the engine.',
+    );
+    return child;
+  }
+
   /// Updates direct children of this node, if any.
   ///
   /// Specifies two orders of direct children:
@@ -2135,7 +2154,10 @@ class SemanticsObject {
     // is determined by the DOM order of elements.
     final childrenInRenderOrder = <SemanticsObject>[];
     for (var i = 0; i < childCount; i++) {
-      childrenInRenderOrder.add(owner._semanticsTree[childrenInTraversalOrder[i]]!);
+      final SemanticsObject? child = _lookUpChild(childrenInTraversalOrder[i]);
+      if (child != null) {
+        childrenInRenderOrder.add(child);
+      }
     }
 
     // The z-index determines hit testing. Technically, it also affects paint
@@ -2148,7 +2170,10 @@ class SemanticsObject {
     final bool zIndexMatters = childCount > 1;
     if (zIndexMatters) {
       for (var i = 0; i < childCount; i++) {
-        final SemanticsObject child = owner._semanticsTree[childrenInHitTestOrder[i]]!;
+        final SemanticsObject? child = _lookUpChild(childrenInHitTestOrder[i]);
+        if (child == null) {
+          continue;
+        }
 
         // Invert the z-index because hit-test order is inverted with respect to
         // paint order.
@@ -2594,7 +2619,10 @@ class SemanticsObject {
     final double translateY = -_rect!.top + verticalScrollAdjustment;
 
     for (final int childIndex in _childrenInTraversalOrder!) {
-      final SemanticsObject child = owner._semanticsTree[childIndex]!;
+      final SemanticsObject? child = _lookUpChild(childIndex);
+      if (child == null) {
+        continue;
+      }
 
       if (child.horizontalAdjustmentFromParent != translateX ||
           child.verticalAdjustmentFromParent != translateY) {
@@ -2734,8 +2762,11 @@ class SemanticsObject {
         'tree has been established. However, child #$childId does not have its '
         'SemanticsNode created at the time this method was called.',
       );
+      if (child == null) {
+        continue;
+      }
 
-      if (!child!._visitDepthFirstInTraversalOrder(callback)) {
+      if (!child._visitDepthFirstInTraversalOrder(callback)) {
         return false;
       }
     }
@@ -2769,8 +2800,11 @@ class SemanticsObject {
         'tree has been established. However, child #$childId does not have its '
         'SemanticsNode created at the time this method was called.',
       );
+      if (child == null) {
+        continue;
+      }
 
-      child!._visitDepthFirstInTraversalOrder(searchSubtree);
+      child._visitDepthFirstInTraversalOrder(searchSubtree);
     }
 
     return;
@@ -3355,41 +3389,49 @@ class EngineSemanticsOwner {
     // later used to fix the parent-child and sibling relationships between
     // objects.
     final List<SemanticsNodeUpdate> nodeUpdates = update._nodeUpdates!;
-    for (final nodeUpdate in nodeUpdates) {
-      final SemanticsObject object = getOrCreateObject(nodeUpdate.id);
-      object.updateSelf(nodeUpdate);
-    }
-
-    final nodesWithDirtyPositionsAndSizes = <SemanticsObject>{};
-    // Second, fix the tree structure. This is moved out into its own loop,
-    // because each object's own information must be updated first.
-    for (final nodeUpdate in nodeUpdates) {
-      final SemanticsObject object = _semanticsTree[nodeUpdate.id]!;
-      object.updateChildren();
-
-      if (object.isRectDirty ||
-          object.isTransformDirty ||
-          object.isScrollPositionDirty ||
-          object.isChildrenInTraversalOrderDirty) {
-        nodesWithDirtyPositionsAndSizes.add(object);
-
-        object.recomputeChildrenAdjustment(nodesWithDirtyPositionsAndSizes);
+    try {
+      for (final nodeUpdate in nodeUpdates) {
+        final SemanticsObject object = getOrCreateObject(nodeUpdate.id);
+        object.updateSelf(nodeUpdate);
       }
 
-      object._dirtyFields = 0;
-    }
+      final nodesWithDirtyPositionsAndSizes = <SemanticsObject>{};
+      // Second, fix the tree structure. This is moved out into its own loop,
+      // because each object's own information must be updated first.
+      for (final nodeUpdate in nodeUpdates) {
+        final SemanticsObject object = _semanticsTree[nodeUpdate.id]!;
+        try {
+          object.updateChildren();
 
-    for (final node in nodesWithDirtyPositionsAndSizes) {
-      node.recomputePositionAndSize();
-    }
+          if (object.isRectDirty ||
+              object.isTransformDirty ||
+              object.isScrollPositionDirty ||
+              object.isChildrenInTraversalOrderDirty) {
+            nodesWithDirtyPositionsAndSizes.add(object);
 
-    final SemanticsObject root = _semanticsTree[0]!;
-    if (_rootSemanticsElement == null) {
-      _rootSemanticsElement = root.element;
-      semanticsHost.append(root.element);
-    }
+            object.recomputeChildrenAdjustment(nodesWithDirtyPositionsAndSizes);
+          }
+        } finally {
+          object._dirtyFields = 0;
+        }
+      }
 
-    _finalizeTree();
+      for (final node in nodesWithDirtyPositionsAndSizes) {
+        node.recomputePositionAndSize();
+      }
+
+      final SemanticsObject root = _semanticsTree[0]!;
+      if (_rootSemanticsElement == null) {
+        _rootSemanticsElement = root.element;
+        semanticsHost.append(root.element);
+      }
+    } finally {
+      // Always reconcile attachments and detachments and leave the update
+      // phase, even if the update above threw. Otherwise the pending lists
+      // stay populated and poison every subsequent update for the rest of the
+      // session (https://github.com/flutter/flutter/issues/193235).
+      _finalizeTree();
+    }
 
     assert(() {
       // Validate that the node map only contains live elements, i.e. descendants
@@ -3461,19 +3503,31 @@ AFTER: $description
   /// they rely on the prior state of the tree. There is no distinction between
   /// a full update and partial update, so the failure may be cryptic.
   void reset() {
-    final List<int> keys = _semanticsTree.keys.toList();
-    final int len = keys.length;
-    for (var i = 0; i < len; i++) {
-      _detachObject(keys[i]);
+    try {
+      // Dispose every object directly rather than detaching them all and
+      // walking their child lists in _finalizeTree. The outcome is the same for
+      // a consistent tree, but a tree that is being reset because it has become
+      // inconsistent (see https://github.com/flutter/flutter/issues/193235)
+      // must not be able to make the reset itself fail.
+      for (final SemanticsObject object in _semanticsTree.values) {
+        object.dispose();
+      }
+      _phase = SemanticsUpdatePhase.postUpdate;
+      for (final ui.VoidCallback callback in _oneTimePostUpdateCallbacks) {
+        callback();
+      }
+    } finally {
+      // Clear everything even if a dispose or callback above threw, so that
+      // disabling and re-enabling semantics always starts from a clean slate.
+      _rootSemanticsElement?.remove();
+      _rootSemanticsElement = null;
+      _semanticsTree.clear();
+      _attachments.clear();
+      _detachments.clear();
+      _oneTimePostUpdateCallbacks.clear();
+      _hasNodeRequestingFocus = false;
+      _phase = SemanticsUpdatePhase.idle;
     }
-    _finalizeTree();
-    _rootSemanticsElement?.remove();
-    _rootSemanticsElement = null;
-    _semanticsTree.clear();
-    _attachments.clear();
-    _detachments.clear();
-    _phase = SemanticsUpdatePhase.idle;
-    _oneTimePostUpdateCallbacks.clear();
   }
 
   /// True, if any semantics node requested focus explicitly during the latest
