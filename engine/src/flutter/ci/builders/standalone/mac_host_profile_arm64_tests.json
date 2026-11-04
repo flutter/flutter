@@ -20,7 +20,6 @@
         "--prebuilt-dart-sdk",
         "--build-embedder-examples",
         "--rbe",
-        "--no-goma",
         "--xcode-symlinks"
     ],
     "name": "ci/host_profile_arm64_tests",

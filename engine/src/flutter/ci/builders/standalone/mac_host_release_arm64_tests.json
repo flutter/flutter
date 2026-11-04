@@ -21,7 +21,6 @@
         "--build-embedder-examples",
         "--use-glfw-swiftshader",
         "--rbe",
-        "--no-goma",
         "--xcode-symlinks"
     ],
     "name": "ci/host_release_arm64_tests",

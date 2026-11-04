@@ -20,7 +20,6 @@
         "--mac-cpu",
         "arm64",
         "--rbe",
-        "--no-goma",
         "--xcode-symlinks",
         "--use-glfw-swiftshader"
     ],
