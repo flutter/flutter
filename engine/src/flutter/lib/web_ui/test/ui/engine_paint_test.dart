@@ -143,6 +143,66 @@ Future<void> testMain() async {
     expect(pixels, <int>[_greenPixel]);
   });
 
+  test(
+    'a paint changed between draws in one picture draws each shape with its state then',
+    () async {
+      final paint = ui.Paint();
+      final List<int> pixels = await _readPixels(
+        drawPicture((ui.Canvas canvas) {
+          // 10x10 squares, 10px apart, on a 120x20 image.
+          void drawSquare(int index) =>
+              canvas.drawRect(ui.Rect.fromLTWH(index * 20.0, 5, 10, 10), paint);
+
+          paint
+            ..color = _red
+            ..colorFilter = _freshColorFilter(_green);
+          drawSquare(0);
+          paint
+            ..colorFilter = null
+            ..shader = ui.Gradient.linear(ui.Offset.zero, const ui.Offset(120, 0), const <ui.Color>[
+              ui.Color(0xFF0000FF),
+              ui.Color(0xFF0000FF),
+            ]);
+          drawSquare(1);
+          paint
+            ..shader = null
+            ..color = _white
+            ..imageFilter = _freshColorFilter(_green);
+          drawSquare(2);
+          paint
+            ..imageFilter = null
+            ..color = _red
+            ..maskFilter = const ui.MaskFilter.blur(ui.BlurStyle.normal, 2);
+          drawSquare(3);
+          paint
+            ..maskFilter = null
+            ..invertColors = true;
+          drawSquare(4);
+          paint.invertColors = false;
+          drawSquare(5);
+        }),
+        120,
+        20,
+        <(int, int)>[(5, 10), (25, 10), (45, 10), (58, 10), (85, 10), (92, 10), (105, 10)],
+      );
+      expect(pixels, <Object>[
+        _greenPixel,
+        // Gradients are dithered, so allow a small error.
+        predicate<int>(
+          (int p) => (p >> 24) <= 2 && (p >> 16 & 0xFF) <= 2 && (p >> 8 & 0xFF) >= 0xFD,
+          'close to blue',
+        ),
+        _greenPixel,
+        predicate<int>((int p) => (p & 0xFF) > 0 && (p & 0xFF) < 0xFF, 'a blurred edge'),
+        // Red with inverted colors.
+        0x00FFFFFF,
+        // The mask filter was cleared, so nothing is drawn outside the square.
+        0x00000000,
+        _redPixel,
+      ]);
+    },
+  );
+
   test('effectiveImageFilter follows imageFilter and is cached between changes', () {
     final paint = EnginePaint();
     expect(paint.effectiveImageFilter, isNull);
@@ -225,10 +285,9 @@ Future<void> testMain() async {
       ),
     ];
     for (final (:String name, :ui.TextStyle style, :int glyph, :int space) in cases) {
-      final builder =
-          ui.ParagraphBuilder(ui.ParagraphStyle(fontFamily: 'Ahem', fontSize: 20))
-            ..pushStyle(style)
-            ..addText('A A');
+      final builder = ui.ParagraphBuilder(ui.ParagraphStyle(fontFamily: 'Ahem', fontSize: 20))
+        ..pushStyle(style)
+        ..addText('A A');
       final ui.Paragraph paragraph = builder.build()
         ..layout(const ui.ParagraphConstraints(width: 100));
 
