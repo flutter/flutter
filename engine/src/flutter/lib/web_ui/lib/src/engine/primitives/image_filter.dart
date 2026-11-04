@@ -154,7 +154,12 @@ class EngineBlurImageFilter extends EngineImageFilter {
 
     _cachedTileMode = mode;
     return _cachedFilter = _cacheAndAttach(
-      renderer.createBlurImageFilter(sigmaX: sigmaX, sigmaY: sigmaY, tileMode: mode),
+      renderer.createBlurImageFilter(
+        sigmaX: sigmaX,
+        sigmaY: sigmaY,
+        tileMode: mode,
+        bounds: bounds,
+      ),
     );
   }
 

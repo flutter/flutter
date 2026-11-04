@@ -5,6 +5,7 @@
 #include "flutter/display_list/effects/dl_color_filter.h"
 #include "flutter/display_list/effects/dl_image_filter.h"
 #include "flutter/display_list/effects/dl_mask_filter.h"
+#include "flutter/display_list/effects/image_filters/dl_blur_image_filter.h"
 #include "flutter/skwasm/export.h"
 #include "flutter/skwasm/helpers.h"
 #include "flutter/skwasm/live_objects.h"
@@ -12,10 +13,13 @@
 SKWASM_EXPORT Skwasm::sp_wrapper<flutter::DlImageFilter>*
 imageFilter_createBlur(flutter::DlScalar sigma_x,
                        flutter::DlScalar sigma_y,
-                       flutter::DlTileMode tile_mode) {
+                       flutter::DlTileMode tile_mode,
+                       const flutter::DlRect* bounds) {
   Skwasm::live_image_filter_count++;
   return new Skwasm::sp_wrapper<flutter::DlImageFilter>(
-      flutter::DlImageFilter::MakeBlur(sigma_x, sigma_y, tile_mode));
+      flutter::DlBlurImageFilter::Make(
+          sigma_x, sigma_y, tile_mode,
+          bounds ? std::optional<flutter::DlRect>(*bounds) : std::nullopt));
 }
 
 SKWASM_EXPORT Skwasm::sp_wrapper<flutter::DlImageFilter>*

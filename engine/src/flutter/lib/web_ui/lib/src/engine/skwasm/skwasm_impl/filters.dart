@@ -50,8 +50,16 @@ class SkwasmBlurImageFilter extends SkwasmImageFilter {
     required double sigmaX,
     required double sigmaY,
     required ui.TileMode tileMode,
+    ui.Rect? bounds,
   }) {
-    _handle = imageFilterCreateBlur(sigmaX, sigmaY, tileMode.index);
+    _handle = withStackScope(
+      (StackScope s) => imageFilterCreateBlur(
+        sigmaX,
+        sigmaY,
+        tileMode.index,
+        bounds != null ? s.convertRectToNative(bounds) : nullptr,
+      ),
+    );
   }
 }
 
