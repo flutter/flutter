@@ -72,7 +72,7 @@ build --notrim_test_configuration
 # once per output base); with the cache a second cold build of the same
 # inputs -- after `bazel clean`, in another checkout, after a branch switch
 # and back -- is a hit for every action (measured: 78 s against 772 s for the
-# Phase 0 exit test). CI will point --remote_cache at a shared one instead.
+# Phase 0 exit test). CI runs on RBE instead (build:rbe below).
 build --disk_cache=~/.cache/flutter_engine_bazel
 build --experimental_disk_cache_gc_max_size=20G
 
@@ -87,6 +87,34 @@ build --experimental_disk_cache_gc_max_size=20G
 common:ci --color=no --curses=no --show_timestamps --show_progress_rate_limit=30 --announce_rc
 build:ci --verbose_failures
 test:ci --test_output=errors --keep_going --test_summary=short
+
+# Flutter's RBE instance (build:rbe): the one the GN builds' reclient uses,
+# projects/flutter-rbe-prod/instances/default (the builders' $flutter/rbe
+# property), running the actions -- the compiles, links, kernel compiles,
+# the Dart snapshots -- on its workers, 200 at a time (the builders'
+# rbe_jobs), in the builders' debian11 image, and caching the results for
+# every later build. Reached with Application Default Credentials: on a
+# LUCI bot the emulated GCE metadata server every bot has (the rbe recipe
+# module's RBE_use_gce_credentials), on a workstation `gcloud auth
+# application-default login`. Execution is what fills the cache here: on
+# this instance a client cannot write a locally run action's result to the
+# cache (the bots' service account included), only a worker can, so a build
+# that only reads the cache (--remote_cache alone) finds nothing of its own.
+# What stays on the machine: the wrapped GN builds (gn_build.bzl's
+# no-remote-exec: their inputs are a synced tree, and they take an hour)
+# and the tests (the engine's want a display, a GPU or a device). Linux
+# hosts only: the workers are Linux x64 and so must the execution platform
+# be; bazel_ci.py and test.dart add the config on a Linux bot. Measured
+# from a workstation: fml_unittests' 676 actions in 93 s (critical path 60),
+# then all hits from a fresh output base.
+build:rbe --remote_executor=grpcs://remotebuildexecution.googleapis.com
+build:rbe --remote_instance_name=projects/flutter-rbe-prod/instances/default
+build:rbe --google_default_credentials
+build:rbe --remote_default_exec_properties=container-image=docker://gcr.io/cloud-marketplace/google/debian11@sha256:69e2789c9f3d28c6a0f13b25062c240ee7772be1f5e6d41bb4680b63eae6b304
+build:rbe --remote_default_exec_properties=OSFamily=Linux
+build:rbe --jobs=200
+build:rbe --remote_timeout=600
+build:rbe --strategy=TestRunner=sandboxed,local
 
 # The prebuilt engine for the framework's and the tool's tests: the
 # artifacts the flutter tool downloaded into bin/cache (`bin/flutter
