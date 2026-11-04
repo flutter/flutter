@@ -416,7 +416,9 @@ class CkOffscreenSurface extends CkSurface implements OffscreenSurface {
   /// its WebGL context is explicitly lost so the browser frees the context
   /// slot immediately, the Skia objects bound to it are torn down, and a
   /// brand-new [DomOffscreenCanvas] is acquired with a fresh WebGL context,
-  /// allowing the browser to allocate the full buffer upfront.
+  /// allowing the browser to allocate the full buffer upfront. A context that
+  /// is already lost (e.g. its `webglcontextlost` event is still pending)
+  /// reports a zero-sized drawing buffer and is recovered the same way.
   @override
   void _resizeCanvas(BitmapSize size) {
     if (!supportsWebGl) {
@@ -426,12 +428,16 @@ class CkOffscreenSurface extends CkSurface implements OffscreenSurface {
     }
 
     final WebGLContext gl = (canvas as DomOffscreenCanvas).getGlContext(webGLVersion);
-    final int maxTextureSize = gl.getParameter(_kGlMaxTextureSize);
-    if (size.width > maxTextureSize || size.height > maxTextureSize) {
-      throw UnsupportedError(
-        'Requested dimensions ${size.width}x${size.height} exceed '
-        'GL_MAX_TEXTURE_SIZE ($maxTextureSize).',
-      );
+    // A lost context reports no parameters; skip validation and let the
+    // zero-sized drawing buffer below route to recovery on a fresh canvas.
+    if (!gl.isContextLost()) {
+      final int maxTextureSize = gl.getParameter(_kGlMaxTextureSize);
+      if (size.width > maxTextureSize || size.height > maxTextureSize) {
+        throw UnsupportedError(
+          'Requested dimensions ${size.width}x${size.height} exceed '
+          'GL_MAX_TEXTURE_SIZE ($maxTextureSize).',
+        );
+      }
     }
 
     _canvasProvider.resizeCanvas(canvas, size);
@@ -446,7 +452,10 @@ class CkOffscreenSurface extends CkSurface implements OffscreenSurface {
     // Release the canvas first so that its `webglcontextlost` listener is
     // removed and [onContextLost] does not fire for the deliberate loss below.
     _canvasProvider.releaseCanvas(oldCanvas);
-    oldGl.loseContextExtension.loseContext();
+    // An already-lost context holds no slot to free and exposes no extensions.
+    if (!oldGl.isContextLost()) {
+      oldGl.loseContextExtension.loseContext();
+    }
 
     _skSurface?.dispose();
     _skSurface = null;

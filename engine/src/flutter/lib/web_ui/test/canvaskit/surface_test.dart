@@ -572,6 +572,29 @@ void testMain() {
 
         surface.dispose();
       });
+
+      test('resizing while a context loss is pending does not throw', () async {
+        final surface = CkOffscreenSurface(OffscreenCanvasProvider());
+        await surface.initialized;
+        surface.setSize(const BitmapSize(100, 100));
+
+        // The context is lost synchronously, but `webglcontextlost` is
+        // dispatched later, so a frame may resize the surface in between.
+        await surface.triggerContextLoss();
+        expect(() => surface.setSize(const BitmapSize(200, 200)), returnsNormally);
+
+        await Future<void>.delayed(const Duration(milliseconds: 50));
+        surface.setSize(const BitmapSize(200, 200));
+        final recorder = ui.PictureRecorder();
+        ui.Canvas(recorder).drawRect(
+          const ui.Rect.fromLTWH(0, 0, 200, 200),
+          ui.Paint()..color = const ui.Color(0xFF0000FF),
+        );
+        await surface.rasterizeToCanvas(recorder.endRecording());
+        expect(readSurfacePixel(surface, 199, 199), <int>[0, 0, 255, 255]);
+
+        surface.dispose();
+      });
     });
   });
 }
