@@ -19,17 +19,18 @@ const bool _kUsingMSAA = bool.fromEnvironment('flutter.canvaskit.msaa');
 /// management and Skia object creation.
 abstract class CkSurface extends Surface {
   CkSurface(this._canvasProvider) {
-    _canvas = _canvasProvider.acquireCanvas(_currentSize, onContextLost: onContextLost);
+    _canvas = _canvasProvider.acquireCanvas(_initialCanvasSize, onContextLost: onContextLost);
     _maybeAttachCanvasToDom();
     _initialize();
   }
+
+  /// The size of the canvas acquired when the surface is created.
+  static const BitmapSize _initialCanvasSize = BitmapSize(1, 1);
 
   final CanvasProvider _canvasProvider;
 
   @override
   bool get supportsPngEncoding => true;
-
-  BitmapSize _currentSize = const BitmapSize(1, 1);
 
   /// The underlying Skia surface object.
   SkSurface? get skSurface => _skSurface;
@@ -94,6 +95,9 @@ abstract class CkSurface extends Surface {
   /// Returns the WebGL context for [canvas].
   WebGLContext _webGlContextOf(DomEventTarget canvas);
 
+  /// The current size of [canvas] in physical pixels.
+  BitmapSize get _canvasSize;
+
   /// A [Future] which completes when the [Surface] is initialized and ready to
   /// render pictures.
   @override
@@ -128,8 +132,11 @@ abstract class CkSurface extends Surface {
       return;
     }
     assert(!isSoftware, 'Received a webglcontextlost event while in software rendering mode.');
+    // Recover at the lost canvas's size, which may differ from the last
+    // requested size if a resize failed.
+    final BitmapSize size = _canvasSize;
     final DomEventTarget newCanvas = _canvasProvider.acquireCanvas(
-      _currentSize,
+      size,
       onContextLost: onContextLost,
     );
     try {
@@ -211,22 +218,63 @@ abstract class CkSurface extends Surface {
     _recreateSkSurface();
   }
 
-  void _recreateWebGlSkSurface() {
-    _skSurface?.dispose();
-    // Clear the disposed surface so that it is not disposed again if creating
-    // the new one throws.
+  /// Disposes the current [_skSurface], if any.
+  void _disposeSkSurface() {
+    // Clear the field before disposing so it never retains a deleted handle,
+    // even if `dispose` throws.
+    final SkSurface? previousSurface = _skSurface;
     _skSurface = null;
-    _skSurface = canvasKit.MakeOnScreenGLSurface(
-      _grContext!,
-      _currentSize.width.toDouble(),
-      _currentSize.height.toDouble(),
-      SkColorSpaceSRGB,
-      0,
-      0,
-    );
-    if (_skSurface == null) {
-      throw Exception('Failed to initialize CanvasKit SkSurface.');
+    if (previousSurface == null) {
+      return;
     }
+    try {
+      previousSurface.dispose();
+    } catch (e) {
+      // CanvasKit may throw bare JavaScript values (such as strings), which
+      // are not Dart errors. Convert those to a StateError and let Dart
+      // errors and exceptions propagate unchanged.
+      if (e is Error || e is Exception) {
+        rethrow;
+      }
+      throw StateError('Failed to dispose CanvasKit SkSurface: $e');
+    }
+  }
+
+  /// Replaces the current [_skSurface] with the surface returned by
+  /// [createSurface].
+  void _replaceSkSurface(SkSurface? Function() createSurface) {
+    _disposeSkSurface();
+    final SkSurface? newSurface;
+    try {
+      newSurface = createSurface();
+    } catch (e) {
+      // As in `_disposeSkSurface`, convert bare JavaScript throwables to a
+      // StateError.
+      if (e is Error || e is Exception) {
+        rethrow;
+      }
+      throw StateError('Failed to create CanvasKit SkSurface: $e');
+    }
+    if (newSurface == null) {
+      throw StateError('Failed to initialize CanvasKit SkSurface.');
+    }
+    _skSurface = newSurface;
+  }
+
+  /// Replaces the current [_skSurface] with a WebGL-backed surface sized to
+  /// [canvas].
+  void _recreateWebGlSkSurface() {
+    final BitmapSize size = _canvasSize;
+    _replaceSkSurface(
+      () => canvasKit.MakeOnScreenGLSurface(
+        _grContext!,
+        size.width.toDouble(),
+        size.height.toDouble(),
+        SkColorSpaceSRGB,
+        0,
+        0,
+      ),
+    );
   }
 
   /// Creates a software-rendered [SkSurface], replacing [canvas] first if it
@@ -241,33 +289,32 @@ abstract class CkSurface extends Surface {
         'WARNING: Falling back to CPU-only rendering. Reason: $_fallbackToSoftwareReason',
       );
     }
-    _skSurface?.dispose();
-    // Clear the disposed surface so that it is not disposed again if creating
-    // the new one throws.
-    _skSurface = null;
-    _skSurface = _createSoftwareSkSurface();
-    if (_skSurface == null) {
-      throw Exception('Failed to initialize CanvasKit SkSurface.');
-    }
+    _replaceSkSurface(_createSoftwareSkSurface);
   }
 
   /// Creates an SkSurface for software rendering. This is used when WebGl is not
   /// supported or when it fails to initialize.
-  SkSurface _createSoftwareSkSurface();
+  SkSurface? _createSoftwareSkSurface();
 
   /// Releases [canvas] and acquires a fresh one without a WebGL context so
   /// CanvasKit's software backend can obtain a 2D rendering context on it.
   void _swapCanvasForSoftwareRendering() {
+    // Read the size before releasing the current canvas.
+    final BitmapSize size = _canvasSize;
     _releaseCanvas();
-    _canvas = _canvasProvider.acquireCanvas(_currentSize, onContextLost: onContextLost);
+    _canvas = _canvasProvider.acquireCanvas(size, onContextLost: onContextLost);
     _maybeAttachCanvasToDom();
   }
 
   /// Releases the current [canvas], along with its WebGL context and the Skia
   /// objects backed by it.
   void _releaseCanvas() {
-    _skSurface?.dispose();
-    _skSurface = null;
+    try {
+      _disposeSkSurface();
+    } catch (_) {
+      // Releasing the canvas must complete even if disposing the surface
+      // throws; `_disposeSkSurface` has already cleared the field.
+    }
     try {
       _grContext?.releaseResourcesAndAbandonContext();
       _grContext?.delete();
@@ -317,23 +364,30 @@ abstract class CkSurface extends Surface {
     // A zero-sized canvas cannot back a WebGL SkSurface and would force the
     // surface into a permanent software fallback, so never go below 1x1.
     final clampedSize = BitmapSize(math.max(1, size.width), math.max(1, size.height));
-    if (_skSurface != null &&
-        _currentSize == clampedSize &&
+    final SkSurface? surface = _skSurface;
+    if (surface != null &&
+        surface.width().toInt() == clampedSize.width &&
+        surface.height().toInt() == clampedSize.height &&
         devicePixelRatio == _currentDevicePixelRatio) {
       return;
     }
-    final BitmapSize previousSize = _currentSize;
-    final double previousDevicePixelRatio = _currentDevicePixelRatio;
-    _currentDevicePixelRatio = devicePixelRatio;
-    _currentSize = clampedSize;
+    final BitmapSize previousSize = _canvasSize;
     try {
       _resizeCanvas(clampedSize, previousSize);
-    } catch (_) {
-      // Keep the recorded state in sync with the surface that is still in use.
-      _currentSize = previousSize;
-      _currentDevicePixelRatio = previousDevicePixelRatio;
+    } catch (e) {
+      // If the failure occurred during resize (and was not rejected upfront as
+      // unsupported before touching any resources), dispose the SkSurface so it
+      // never disagrees with its canvas or retains an invalid handle.
+      if (e is! UnsupportedError) {
+        try {
+          _disposeSkSurface();
+        } catch (_) {
+          // Preserve the primary resize error.
+        }
+      }
       rethrow;
     }
+    _currentDevicePixelRatio = devicePixelRatio;
   }
 
   /// Resizes the underlying canvas to [size] and recreates the Skia surface.
@@ -480,8 +534,8 @@ class CkOffscreenSurface extends CkSurface implements OffscreenSurface {
   }
 
   @override
-  SkSurface _createSoftwareSkSurface() {
-    return canvasKit.MakeOffscreenSWCanvasSurface(canvas as DomOffscreenCanvas);
+  SkSurface? _createSoftwareSkSurface() {
+    return canvasKit._makeOffscreenSWCanvasSurface(canvas as DomOffscreenCanvas);
   }
 
   @override
@@ -566,11 +620,12 @@ class CkOffscreenSurface extends CkSurface implements OffscreenSurface {
       return;
     }
 
-    final WebGLContext gl = (canvas as DomOffscreenCanvas).getGlContext(webGLVersion);
+    final DomEventTarget oldCanvas = canvas;
+    final WebGLContext initialGl = (oldCanvas as DomOffscreenCanvas).getGlContext(webGLVersion);
     // A lost context reports no parameters; skip validation and let the
     // zero-sized drawing buffer below route to recovery on a fresh canvas.
-    if (!gl.isContextLost()) {
-      final int maxTextureSize = gl.getParameter(gl.maxTextureSize);
+    if (!initialGl.isContextLost()) {
+      final int maxTextureSize = initialGl.getParameter(initialGl.maxTextureSize);
       if (size.width > maxTextureSize || size.height > maxTextureSize) {
         throw UnsupportedError(
           'Requested dimensions ${size.width}x${size.height} exceed '
@@ -579,7 +634,8 @@ class CkOffscreenSurface extends CkSurface implements OffscreenSurface {
       }
     }
 
-    _canvasProvider.resizeCanvas(canvas, size);
+    _canvasProvider.resizeCanvas(oldCanvas, size);
+    final WebGLContext gl = (oldCanvas as DomOffscreenCanvas).getGlContext(webGLVersion);
 
     if (gl.drawingBufferWidth >= size.width && gl.drawingBufferHeight >= size.height) {
       _recreateSkSurface();
@@ -606,6 +662,7 @@ class CkOffscreenSurface extends CkSurface implements OffscreenSurface {
     }
   }
 
+
   /// Replaces the current canvas with a new one of [size] and attempts to
   /// create a fresh WebGL context for it, falling back to software rendering
   /// if that fails.
@@ -623,6 +680,12 @@ class CkOffscreenSurface extends CkSurface implements OffscreenSurface {
     _maybeAttachCanvasToDom();
     _createSkiaObjects();
   }
+
+  @override
+  BitmapSize get _canvasSize {
+    final offscreenCanvas = canvas as DomOffscreenCanvas;
+    return BitmapSize((offscreenCanvas.width ?? 0).toInt(), (offscreenCanvas.height ?? 0).toInt());
+  }
 }
 
 /// The CanvasKit implementation of [OnscreenSurface].
@@ -635,8 +698,8 @@ class CkOnscreenSurface extends CkSurface implements OnscreenSurface {
   }
 
   @override
-  SkSurface _createSoftwareSkSurface() {
-    return canvasKit.MakeSWCanvasSurface(canvas as DomHTMLCanvasElement);
+  SkSurface? _createSoftwareSkSurface() {
+    return canvasKit._makeSWCanvasSurface(canvas as DomHTMLCanvasElement);
   }
 
   final DomElement _hostElement = createDomElement('flt-canvas-container');
@@ -653,6 +716,12 @@ class CkOnscreenSurface extends CkSurface implements OnscreenSurface {
   @override
   WebGLContext _webGlContextOf(DomEventTarget canvas) =>
       (canvas as DomHTMLCanvasElement).getGlContext(webGLVersion);
+
+  @override
+  BitmapSize get _canvasSize {
+    final htmlCanvas = canvas as DomHTMLCanvasElement;
+    return BitmapSize((htmlCanvas.width ?? 0).toInt(), (htmlCanvas.height ?? 0).toInt());
+  }
 
   @override
   bool get isConnected =>
@@ -684,4 +753,15 @@ class CkOnscreenSurface extends CkSurface implements OnscreenSurface {
       style.removeProperty('position');
     }
   }
+}
+
+/// Nullable bindings for `CanvasKit.MakeSWCanvasSurface`, which returns `null`
+/// when 2D context acquisition fails despite the non-nullable declaration in
+/// `canvaskit_api.dart`.
+extension _CanvasKitSoftwareSurfaceExtension on CanvasKit {
+  @JS('MakeSWCanvasSurface')
+  external SkSurface? _makeSWCanvasSurface(DomHTMLCanvasElement canvas);
+
+  @JS('MakeSWCanvasSurface')
+  external SkSurface? _makeOffscreenSWCanvasSurface(DomOffscreenCanvas canvas);
 }
