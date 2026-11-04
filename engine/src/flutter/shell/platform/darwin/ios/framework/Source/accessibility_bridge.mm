@@ -232,7 +232,6 @@ void AccessibilityBridge::UpdateSemantics(
   for (SemanticsObject* object in objects_.allValues) {
     [object accessibilityBridgeDidFinishUpdate];
   }
-  [root focusSystemDidFinishSemanticsUpdate];
 
   if (!shouldPostAccessibilityNotifications) {
     return;

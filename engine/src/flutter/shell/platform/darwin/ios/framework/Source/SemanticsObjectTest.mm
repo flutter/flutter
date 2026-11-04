@@ -1917,18 +1917,19 @@ static id MockFocusContext(id previous, id next, UIFocusHeading heading) {
 
   id context = MockFocusContext(buttons[1], buttons[0], UIFocusHeadingFirst);
   XCTAssertFalse([buttons[1] shouldUpdateFocusInContext:context]);
-  XCTAssertEqual(mock->observations.size(), (size_t)1);
-  XCTAssertEqual(mock->observations[0].id, 4);
-  XCTAssertEqual(mock->observations[0].action, flutter::SemanticsAction::kShowOnScreen);
   XCTAssertEqualObjects(root.preferredFocusEnvironments, @[ buttons[2] ]);
   // Only the root redirects.
   XCTAssertNil(buttons[0].preferredFocusEnvironments);
 
-  // Once the target receives focus, the redirect is cleared.
+  // Once the target receives focus, the redirect is cleared and the framework
+  // is asked to scroll it into view.
   id gained = MockFocusContext(buttons[1], buttons[2], UIFocusHeadingNone);
   [buttons[2] didUpdateFocusInContext:gained
              withAnimationCoordinator:OCMClassMock([UIFocusAnimationCoordinator class])];
   XCTAssertNil(root.preferredFocusEnvironments);
+  XCTAssertEqual(mock->observations.size(), (size_t)1);
+  XCTAssertEqual(mock->observations[0].id, 4);
+  XCTAssertEqual(mock->observations[0].action, flutter::SemanticsAction::kShowOnScreen);
 }
 
 - (void)testTabContinuesFromPendingTargetAndWrapsAtTheEnd {
@@ -2029,39 +2030,6 @@ static id MockFocusContext(id previous, id next, UIFocusHeading heading) {
   XCTAssertNil(root.preferredFocusEnvironments);
 }
 
-- (void)testSemanticsUpdateRequestsFocusOnceTabTargetIsVisible {
-  flutter::testing::MockAccessibilityBridge* mock = new flutter::testing::MockAccessibilityBridge();
-  fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(mock);
-  NSArray<SemanticsObject*>* buttons;
-  SemanticsObject* root = BuildTabNavigationTree(factory.GetWeakPtr(), &buttons);
-  id focusSystem = OCMClassMock([UIFocusSystem class]);
-  OCMStub(ClassMethod([focusSystem focusSystemForEnvironment:root])).andReturn(focusSystem);
-  __block int requests = 0;
-  OCMStub([focusSystem requestFocusUpdateToEnvironment:root]).andDo(^(NSInvocation* invocation) {
-    requests++;
-  });
-
-  XCTAssertFalse([buttons[1]
-      shouldUpdateFocusInContext:MockFocusContext(buttons[1], buttons[0], UIFocusHeadingFirst)]);
-
-  // The framework has not scrolled yet.
-  [root focusSystemDidFinishSemanticsUpdate];
-  [[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:0.05]];
-  XCTAssertEqual(requests, 0);
-
-  // The framework scrolled button 4 into view.
-  flutter::SemanticsNode node;
-  node.id = 4;
-  node.actions = static_cast<int32_t>(flutter::SemanticsAction::kTap);
-  [buttons[2] setSemanticsNode:&node];
-  [root focusSystemDidFinishSemanticsUpdate];
-  [[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:0.05]];
-  XCTAssertEqual(requests, 1);
-  OCMVerify([focusSystem updateFocusIfNeeded]);
-  XCTAssertNil(root.preferredFocusEnvironments);
-  [focusSystem stopMocking];
-}
-
 - (void)testTabSkipsFocusableScrollableNode {
   // A scrollable is represented by its scroll view in the focus system, which
   // cannot be focused, so it must not become a Tab target.
@@ -2083,68 +2051,28 @@ static id MockFocusContext(id previous, id next, UIFocusHeading heading) {
   XCTAssertEqualObjects(root.preferredFocusEnvironments, @[ buttons[2] ]);
 }
 
-- (void)testTabRequestsFocusAfterTimeoutWithoutSemanticsUpdate {
+- (void)testTabRequestsFocusUpdateFromRoot {
   flutter::testing::MockAccessibilityBridge* mock = new flutter::testing::MockAccessibilityBridge();
   fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(mock);
   NSArray<SemanticsObject*>* buttons;
   SemanticsObject* root = BuildTabNavigationTree(factory.GetWeakPtr(), &buttons);
   id focusSystem = OCMClassMock([UIFocusSystem class]);
   OCMStub(ClassMethod([focusSystem focusSystemForEnvironment:root])).andReturn(focusSystem);
-  __block int requests = 0;
+  __block NSArray* redirect = nil;
   OCMStub([focusSystem requestFocusUpdateToEnvironment:root]).andDo(^(NSInvocation* invocation) {
-    requests++;
+    // The root directs the update to the target while the request is made.
+    redirect = root.preferredFocusEnvironments;
   });
 
+  // The target (button 4) is still offscreen; the request is made anyway on
+  // the next run loop turn, not inside the focus engine's callback.
   XCTAssertFalse([buttons[1]
       shouldUpdateFocusInContext:MockFocusContext(buttons[1], buttons[0], UIFocusHeadingFirst)]);
-  [[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:0.1]];
-  XCTAssertEqual(requests, 0);
-  [[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:0.4]];
-  XCTAssertEqual(requests, 1);
+  XCTAssertNil(redirect);
+  [[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:0.05]];
+  XCTAssertEqualObjects(redirect, @[ buttons[2] ]);
+  OCMVerify([focusSystem updateFocusIfNeeded]);
   XCTAssertNil(root.preferredFocusEnvironments);
-  [focusSystem stopMocking];
-}
-
-- (void)testTabRequestsFocusAfterMaxSemanticsUpdates {
-  flutter::testing::MockAccessibilityBridge* mock = new flutter::testing::MockAccessibilityBridge();
-  fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(mock);
-  NSArray<SemanticsObject*>* buttons;
-  SemanticsObject* root = BuildTabNavigationTree(factory.GetWeakPtr(), &buttons);
-  id focusSystem = OCMClassMock([UIFocusSystem class]);
-  OCMStub(ClassMethod([focusSystem focusSystemForEnvironment:root])).andReturn(focusSystem);
-  __block int requests = 0;
-  OCMStub([focusSystem requestFocusUpdateToEnvironment:root]).andDo(^(NSInvocation* invocation) {
-    requests++;
-  });
-
-  XCTAssertFalse([buttons[1]
-      shouldUpdateFocusInContext:MockFocusContext(buttons[1], buttons[0], UIFocusHeadingFirst)]);
-  // Button 4 stays hidden, e.g. clipped by something other than the list.
-  for (int i = 0; i < 3; i++) {
-    [root focusSystemDidFinishSemanticsUpdate];
-  }
-  [[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:0.05]];
-  XCTAssertEqual(requests, 1);
-  [focusSystem stopMocking];
-}
-
-- (void)testTabRequestsFocusImmediatelyForVisibleTarget {
-  flutter::testing::MockAccessibilityBridge* mock = new flutter::testing::MockAccessibilityBridge();
-  fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(mock);
-  NSArray<SemanticsObject*>* buttons;
-  SemanticsObject* root = BuildTabNavigationTree(factory.GetWeakPtr(), &buttons);
-  id focusSystem = OCMClassMock([UIFocusSystem class]);
-  OCMStub(ClassMethod([focusSystem focusSystemForEnvironment:root])).andReturn(focusSystem);
-  __block int requests = 0;
-  OCMStub([focusSystem requestFocusUpdateToEnvironment:root]).andDo(^(NSInvocation* invocation) {
-    requests++;
-  });
-
-  // The focus engine proposes button 4, but button 3 is next.
-  XCTAssertFalse([buttons[0]
-      shouldUpdateFocusInContext:MockFocusContext(buttons[0], buttons[2], UIFocusHeadingNext)]);
-  [[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:0.05]];
-  XCTAssertEqual(requests, 1);
   [focusSystem stopMocking];
 }
 
