@@ -138,7 +138,7 @@ void _writeExtensionPackage(
   String? configYaml,
   String entrypointBody = 'void main(List<String> args, Object? message) {}',
 }) {
-  extDir.childFile('extension/flutter_tools/config.yaml')
+  extDir.childDirectory('extension').childDirectory('flutter_tools').childFile('config.yaml')
     ..createSync(recursive: true)
     ..writeAsStringSync(
       configYaml ??
@@ -148,7 +148,7 @@ services:
   - diagnostics
 ''',
     );
-  extDir.childFile('bin/$name.dart')
+  extDir.childDirectory('bin').childFile('$name.dart')
     ..createSync(recursive: true)
     ..writeAsStringSync(entrypointBody);
 }
@@ -157,7 +157,7 @@ File _writePackageConfig(
   Directory rootDir, [
   Map<String, String> packageRoots = const <String, String>{},
 ]) {
-  return rootDir.childFile('.dart_tool/package_config.json')
+  return rootDir.childDirectory('.dart_tool').childFile('package_config.json')
     ..createSync(recursive: true)
     ..writeAsStringSync(
       jsonEncode(<String, Object?>{
@@ -806,14 +806,14 @@ dev_dependencies:
   workspace_ext:
     path: packages/workspace_ext
 ''');
-        final Directory appDir = workspaceRoot.childDirectory('packages/app')
+        final Directory appDir = workspaceRoot.childDirectory('packages').childDirectory('app')
           ..createSync(recursive: true);
         appDir.childFile('pubspec.yaml').writeAsStringSync('''
 name: app
 resolution: workspace
 ''');
         _writeExtensionPackage(
-          workspaceRoot.childDirectory('packages/workspace_ext'),
+          workspaceRoot.childDirectory('packages').childDirectory('workspace_ext'),
           name: 'workspace_ext',
           configYaml: '''
 name: workspace_ext
@@ -892,9 +892,9 @@ dependencies:
 
       final Directory extDir = fs.directory('/workspace/my_ext');
       _writeExtensionPackage(extDir, name: 'my_ext');
-      final File entrypointFile = extDir.childFile('bin/my_ext.dart')
+      final File entrypointFile = extDir.childDirectory('bin').childFile('my_ext.dart')
         ..setLastModifiedSync(DateTime.utc(2026));
-      final File helperFile = extDir.childFile('lib/helper.dart')
+      final File helperFile = extDir.childDirectory('lib').childFile('helper.dart')
         ..createSync(recursive: true)
         ..writeAsStringSync('const int version = 1;')
         ..setLastModifiedSync(DateTime.utc(2026));
@@ -994,16 +994,19 @@ dependencies:
         ),
         isTrue,
       );
-      expect(
-        windowsCompiler.isPubCacheExtension(
-          _discoveredExtension(
-            windowsFs,
-            rootPath: r'C:\Users\user\Projects\Pub\Cache\my_ext',
-            workspaceRootPath: r'C:\workspace\app',
-          ),
-        ),
-        isFalse,
+      final DiscoveredProjectExtension windowsLocalExt = _discoveredExtension(
+        windowsFs,
+        rootPath: r'C:\Users\user\Projects\Pub\Cache\my_ext',
+        workspaceRootPath: r'C:\workspace\app',
       );
+      _writePackageConfig(windowsFs.directory(r'C:\workspace\app'));
+      _writeExtensionPackage(
+        windowsFs.directory(r'C:\Users\user\Projects\Pub\Cache\my_ext'),
+        name: 'my_ext',
+      );
+      expect(windowsCompiler.isPubCacheExtension(windowsLocalExt), isFalse);
+      expect(windowsFs.file(windowsLocalExt.entrypointUri).existsSync(), isTrue);
+      expect(windowsFs.file(windowsLocalExt.packageConfigUri).existsSync(), isTrue);
     });
 
     testWithoutContext(
@@ -1246,9 +1249,9 @@ dependencies:
 
       final Directory extDir = fs.directory('/workspace/my_ext');
       _writeExtensionPackage(extDir, name: 'my_ext');
-      final File entrypointFile = extDir.childFile('bin/my_ext.dart')
+      final File entrypointFile = extDir.childDirectory('bin').childFile('my_ext.dart')
         ..setLastModifiedSync(DateTime.utc(2026));
-      final File spacedHelperFile = extDir.childFile('lib/part one.dart')
+      final File spacedHelperFile = extDir.childDirectory('lib').childFile('part one.dart')
         ..createSync(recursive: true)
         ..writeAsStringSync('const int v = 1;')
         ..setLastModifiedSync(DateTime.utc(2026));
