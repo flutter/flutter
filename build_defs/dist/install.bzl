@@ -128,6 +128,7 @@ def _install_impl(ctx):
     # hold other entries' files (sky_engine's gen/dart-pkg), and runfiles
     # entries under a symlinked directory are dropped as obscured.
     staging = ctx.label.name + ".files"
+    targets_file = "%s/symlink_targets" % staging
     for index, (file, path) in enumerate(unique):
         source = "%s/%d" % (staging, index)
         if file.is_directory:
@@ -140,13 +141,11 @@ def _install_impl(ctx):
         elif file.is_symlink:
             # A symlink output (a framework bundle's `Versions/Current ->
             # A`, framework.bzl): the link itself, with its relative target,
-            # as GN's build directory has it. The runfiles entry is a link
-            # to the output (absolute) -- -RP copies a link rather than what
-            # it names -- or, should the runfiles tree carry the output's
-            # own target instead, that target, which the install links to.
+            # as GN's build directory has it. The target comes from the
+            # targets file (below), by the entry's index.
             lines.append(
-                'link="$(readlink "%s")"; case "$link" in /*) cp -RP "$link" "$dest/%s" ;; *) ln -s "$link" "$dest/%s" ;; esac' %
-                (source, path, path),
+                'link="$(awk -F "\t" -v i=%d \'$1 == i { print $2 }\' "%s")"; ln -s "$link" "$dest/%s"' %
+                (index, targets_file, path),
             )
         else:
             # -f besides the removal above, for a destination the shell
@@ -155,9 +154,39 @@ def _install_impl(ctx):
     lines.append('echo "%d files into $dest"' % len(unique))
     script = ctx.actions.declare_file(ctx.label.name + ".sh")
     ctx.actions.write(script, "\n".join(lines) + "\n", is_executable = True)
+
+    # The symlink outputs stay out of the runfiles. The runfiles manifest's
+    # writer reads such an output's target from the file system when it
+    # writes the manifest, before any action has run, so a symlink output
+    # that is not on disk yet -- a disk-cache hit in a fresh output base,
+    # which a build without the bytes (--remote_download_toplevel, the
+    # default) leaves unmaterialized -- fails the install with
+    # FileNotFoundException (the Mac's host_debug_unopt_arm64 install,
+    # 11-04: FlutterMacOS.framework/Versions/Current). Instead a spawn that
+    # takes the symlinks as inputs -- a spawn's inputs are fetched -- reads
+    # their targets into a file, by the entries' indices, which the
+    # runfiles carry as a plain file and the script reads back.
+    symlinks = [(index, file) for index, (file, _) in enumerate(unique) if file.is_symlink]
+    runfiles_symlinks = {"%s/%d" % (staging, index): file for index, (file, _) in enumerate(unique) if not file.is_symlink}
+    if symlinks:
+        targets = ctx.actions.declare_file(ctx.label.name + ".symlink_targets")
+        arguments = ctx.actions.args()
+        arguments.add(targets)
+        for index, file in symlinks:
+            arguments.add(str(index))
+            arguments.add(file)
+        ctx.actions.run_shell(
+            inputs = [file for _, file in symlinks],
+            outputs = [targets],
+            command = 'out="$1"; shift; : > "$out"; while [ $# -gt 0 ]; do printf "%s\\t%s\\n" "$1" "$(readlink "$2")" >> "$out"; shift 2; done',
+            arguments = [arguments],
+            mnemonic = "InstallSymlinkTargets",
+            progress_message = "Reading the symlink outputs of %{label}",
+        )
+        runfiles_symlinks[targets_file] = targets
     return [DefaultInfo(
         executable = script,
-        runfiles = ctx.runfiles(symlinks = {"%s/%d" % (staging, index): file for index, (file, _) in enumerate(unique)}),
+        runfiles = ctx.runfiles(symlinks = runfiles_symlinks),
     )]
 
 # The attributes naming an install's files, shared with local_engine.bzl.
