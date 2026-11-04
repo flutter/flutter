@@ -167,7 +167,7 @@ Future<void> frameworkTestsRunner() async {
         printProgress(
           '$yellow${elsewhere.join(', ')} have no Bazel package and run as without --bazel.$reset',
         );
-        await runLibraryTests(elsewhere);
+        await runLibraryTests(elsewhere, allowNoTests: true);
       }
       await shard.run();
       return;

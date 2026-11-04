@@ -739,6 +739,11 @@ dart_package_tests(
     name = "desktop_shard",
     size = "large",
     srcs = _HARNESS,
+    # The data-asset and record-use files run their app on chrome as well as
+    # on linux and flutter_tester (`flutter run -d chrome`): the pinned
+    # Chrome, as the integration shard has it. A machine with its own Chrome
+    # hid the want (the first presubmit run, 11-03).
+    browser = ":chrome",
     cache = _TOOL_CACHE,
     cache_files = _TOOL_CACHE_FILES,
     # Two files build for Android as well as Linux: their linux (and bundle)
