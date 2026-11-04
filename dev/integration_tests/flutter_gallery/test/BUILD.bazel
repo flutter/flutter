@@ -24,7 +24,10 @@ flutter_package_tests(
     assets = ["//dev/integration_tests/flutter_gallery:lib/gallery/example_code.dart"],
     directory = "dev/integration_tests/flutter_gallery",
     # The smoke test visits every demo twice (Android and iOS): over
-    # medium's five minutes here, within large's fifteen.
+    # medium's five minutes here, within large's fifteen -- and its three
+    # tests (the smoke test in its two platform variants, and once more with
+    # semantics), minutes each, run as three shards, so that the widgets
+    # shard's floor is one of them rather than all three in a row.
     large = ["smoke_test.dart"],
     package = "flutter_gallery",
     # pubspec.yaml's assets: flutter_gallery_assets' images, videos and fonts,
@@ -36,6 +39,7 @@ flutter_package_tests(
         "@pub//shrine_images:sources": "shrine_images",
     },
     packages = {"//packages/flutter_goldens:sources": "flutter_goldens"},
+    shards = {"smoke_test.dart": 3},
     tests = glob(["**/*_test.dart"]),
     # Dev dependencies of the driver and the device tests, and the web
     # implementations of the plugins, which no test reaches.
