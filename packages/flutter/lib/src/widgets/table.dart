@@ -25,7 +25,6 @@ export 'package:flutter/rendering.dart'
         MaxColumnWidth,
         MinColumnWidth,
         TableBorder,
-        TableBorderPainter,
         TableCellVerticalAlignment,
         TableColumnWidth;
 
@@ -122,7 +121,7 @@ class _TableElementRow {
 ///
 /// ```dart
 /// Table(
-///   border: TableBorderPainter.all(),
+///   border: TableBorder.all(),
 ///   children: const <TableRow>[
 ///     TableRow(
 ///       children: <Widget>[
@@ -284,9 +283,7 @@ class Table extends RenderObjectWidget {
 
   /// The style to use when painting the boundary and interior divisions of the table.
   ///
-  /// A [TableBorderPainter] skips the inner borders inside cells that span
-  /// several columns or rows. Any other [TableBorder] is painted without
-  /// taking spans into account.
+  /// {@macro flutter.rendering.RenderTable.border.spans}
   final TableBorder? border;
 
   /// How cells that do not explicitly specify a vertical alignment are aligned vertically.

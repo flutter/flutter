@@ -28,7 +28,7 @@ class TableExample extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Table(
-      border: TableBorderPainter.all(),
+      border: TableBorder.all(),
       columnWidths: const <int, TableColumnWidth>{
         0: IntrinsicColumnWidth(),
         1: FlexColumnWidth(),

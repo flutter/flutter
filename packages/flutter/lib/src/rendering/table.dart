@@ -4,6 +4,7 @@
 
 import 'dart:collection';
 import 'dart:math' as math;
+import 'dart:ui' as ui show ClipOp;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/semantics.dart';
@@ -552,9 +553,19 @@ class RenderTable extends RenderBox {
 
   /// The style to use when painting the boundary and interior divisions of the table.
   ///
-  /// A [TableBorderPainter] skips the inner borders inside cells that span
-  /// several columns or rows. Any other [TableBorder] is painted without
-  /// taking spans into account.
+  /// {@template flutter.rendering.RenderTable.border.spans}
+  /// The inner borders are not painted inside cells that span several columns
+  /// or rows. The border is painted as if the table had no spans, with the
+  /// inside of every spanning cell clipped out. The clip stops where the
+  /// borders around the cell begin: half the width of [TableBorder.verticalInside]
+  /// or [TableBorder.horizontalInside] away from a neighboring cell, and the
+  /// full width of the outer side at the edge of the table.
+  ///
+  /// A subclass of [TableBorder] that overrides [TableBorder.paint] is clipped
+  /// the same way. Anything it paints further inside a spanning cell, such as
+  /// a border that is wider or more blurred than its [BorderSide.width], is cut
+  /// off at that edge.
+  /// {@endtemplate}
   TableBorder? get border => _border;
   TableBorder? _border;
   set border(TableBorder? value) {
@@ -662,7 +673,7 @@ class RenderTable extends RenderBox {
     final childParentData = child.parentData! as TableCellParentData;
     return child.hasSize &&
         childParentData._isVisible &&
-        !(_cachedSpannedCells?._isSpanned(childParentData.x!, childParentData.y!) ?? false);
+        !(_cachedSpannedCells?.isCovered(childParentData.x!, childParentData.y!) ?? false);
   }
 
   final Map<int, _Index> _idToIndexMap = <int, _Index>{};
@@ -1349,14 +1360,14 @@ class RenderTable extends RenderBox {
   Iterable<double>? _columnLefts;
   late double _tableWidth;
 
-  // Records which cells are covered by a colSpan and/or rowSpan, used to skip
-  // the cells and the inner borders that fall inside a span while painting and
-  // hit testing. Set at the end of every layout and null when the table has no
-  // spanning cells. See [TableSpannedCells].
+  // Records the spanning cells and the cells they cover, used to skip the
+  // covered cells while painting and hit testing, and to clip the inner borders
+  // out of the spans. Set at the end of every layout and null when the table
+  // has no spanning cells. See [_SpannedCells].
   //
   // Row heights are not cached; they are computed on-the-fly as
   // _rowTops[i + 1] - _rowTops[i], which is O(1) per row.
-  TableSpannedCells? _cachedSpannedCells;
+  _SpannedCells? _cachedSpannedCells;
 
   /// Computes the visual x-position for a cell, adjusting for text direction
   /// and column span.
@@ -1500,10 +1511,10 @@ class RenderTable extends RenderBox {
       return;
     }
     final List<double> widths = _computeColumnWidths(constraints);
-    // Tracks which cells are covered by a colSpan and/or rowSpan so the inner
-    // borders that fall inside a span can be skipped while painting. See
-    // [TableSpannedCells].
-    final spannedCells = TableSpannedCells._(rows: rows, columns: columns);
+    // Tracks the spanning cells and the cells they cover, so that the covered
+    // cells are skipped and the inner borders are clipped out of the spans
+    // while painting. See [_SpannedCells].
+    final spannedCells = _SpannedCells(rows: rows, columns: columns);
     // Use typed lists for predictable memory layout and faster indexed access.
     final columnStartPositions = Float64List(columns);
     // For every row, how far down from the top of the table it has to reach so
@@ -1603,27 +1614,15 @@ class RenderTable extends RenderBox {
             }
             return true;
           }());
-          final int maxColSpan = math.min(colSpan, columns - x);
-          final int maxRowSpan = math.min(rowSpan, rows - y);
-          for (var dx = 0; dx < maxColSpan; dx++) {
-            for (var dy = 0; dy < maxRowSpan; dy++) {
-              if (dx == 0 && dy == 0) {
-                continue;
-              }
-              // dx > 0: this cell is covered by the horizontal (colSpan) extent.
-              // dy > 0: this cell is covered by the vertical (rowSpan) extent.
-              // Corner cells (dx > 0 AND dy > 0) are marked as both.
-              if (dx > 0) {
-                spannedCells._markColumnSpanned(x + dx, y + dy);
-              }
-              if (dy > 0) {
-                spannedCells._markRowSpanned(x + dx, y + dy);
-              }
-            }
-          }
+          spannedCells.add(
+            x: x,
+            y: y,
+            colSpan: math.min(colSpan, columns - x),
+            rowSpan: math.min(rowSpan, rows - y),
+          );
         }
 
-        final bool isHiddenCell = spannedCells._isSpanned(x, y);
+        final bool isHiddenCell = spannedCells.isCovered(x, y);
         assert(
           isHiddenCell == !childParentData._isVisible,
           'Cell at ($x, $y): a cell is covered by a span if and only if it is a '
@@ -1723,7 +1722,7 @@ class RenderTable extends RenderBox {
 
         final childParentData = child.parentData! as TableCellParentData;
         final int rowSpan = childParentData.rowSpan;
-        final bool isHiddenCell = spannedCells._isSpanned(x, y);
+        final bool isHiddenCell = spannedCells.isCovered(x, y);
         assert(
           isHiddenCell == !childParentData._isVisible,
           'Cell at ($x, $y): a cell is covered by a span if and only if it is a '
@@ -1782,9 +1781,9 @@ class RenderTable extends RenderBox {
     size = constraints.constrain(Size(_tableWidth, rowTop));
     assert(_rowTops.length == rows + 1);
 
-    // Publish the spanned-cell map for use during border painting, or clear it
-    // when the table has no spanning cells.
-    _cachedSpannedCells = spannedCells._hasSpannedCells ? spannedCells : null;
+    // Publish the spanning cells for use during painting and hit testing, or
+    // clear them when the table has no spanning cells.
+    _cachedSpannedCells = spannedCells.spans.isEmpty ? null : spannedCells;
   }
 
   @override
@@ -1859,19 +1858,92 @@ class RenderTable extends RenderBox {
       final borderRect = Rect.fromLTWH(offset.dx, offset.dy, _tableWidth, _rowTops.last);
       final Iterable<double> rows = _rowTops.getRange(1, _rowTops.length - 1);
       final Iterable<double> columns = _columnLefts!.skip(1);
+      final _SpannedCells? spannedCells = _cachedSpannedCells;
+      if (spannedCells == null) {
+        border!.paint(context.canvas, borderRect, rows: rows, columns: columns);
+      } else {
+        // The border paints its inner borders across the whole table, so the
+        // inside of every spanning cell is clipped out while it paints.
+        context.canvas.save();
+        _clipSpannedCells(context.canvas, borderRect, border!, spannedCells);
+        border!.paint(context.canvas, borderRect, rows: rows, columns: columns);
+        context.canvas.restore();
+      }
+    }
+  }
 
-      final TableBorder border = this.border!;
-      if (border is TableBorderPainter) {
-        border.paint(
-          context.canvas,
-          borderRect,
-          rows: rows,
-          columns: columns,
-          spannedCells: _cachedSpannedCells,
-          textDirection: textDirection,
+  // Clips the inside of every spanning cell out of the canvas, so that the
+  // inner borders that run through a span are not painted.
+  //
+  // The area that is clipped out stops where the borders around the span
+  // begin. Next to another cell that is half the width of the inner border,
+  // because inner borders are centered on the line between two cells. At the
+  // edge of the table it is the full width of the outer border, because outer
+  // borders are painted inside the table. Where a span reaches the edge of a
+  // table with rounded corners, the clipped area also stays inside the rounded
+  // outer border.
+  //
+  // The clips are not anti-aliased, so they keep or remove whole pixels. An
+  // anti-aliased clip would also fade the pixels that a border around the span
+  // only partly covers, which makes that border look lighter than the others.
+  void _clipSpannedCells(Canvas canvas, Rect rect, TableBorder border, _SpannedCells spannedCells) {
+    // The clipped area is shrunk by this fraction of a pixel, so that a pixel
+    // whose center lies exactly on its edge is kept.
+    const double kClipInset = 1.0 / 64.0;
+    // The left edges of the columns from left to right, and the right edge of
+    // the last column.
+    final columnEdges = <double>[..._columnLefts!, _tableWidth];
+    final double verticalInset = border.verticalInside.width / 2.0;
+    final double horizontalInset = border.horizontalInside.width / 2.0;
+    final RRect? insideOuterBorder = border.borderRadius == BorderRadius.zero
+        ? null
+        : EdgeInsets.fromLTRB(
+            border.left.width + kClipInset,
+            border.top.width + kClipInset,
+            border.right.width + kClipInset,
+            border.bottom.width + kClipInset,
+          ).deflateRRect(border.borderRadius.toRRect(rect));
+    for (final _Span span in spannedCells.spans) {
+      // The span covers the columns from leftColumn up to, but not including,
+      // rightColumn, counted from the left.
+      final int leftColumn = switch (textDirection) {
+        TextDirection.ltr => span.x,
+        TextDirection.rtl => columns - span.x - span.colSpan,
+      };
+      final int rightColumn = leftColumn + span.colSpan;
+      final int bottomRow = span.y + span.rowSpan;
+      final Rect interior = Rect.fromLTRB(
+        rect.left + columnEdges[leftColumn] + (leftColumn == 0 ? border.left.width : verticalInset),
+        rect.top + _rowTops[span.y] + (span.y == 0 ? border.top.width : horizontalInset),
+        rect.left +
+            columnEdges[rightColumn] -
+            (rightColumn == columns ? border.right.width : verticalInset),
+        rect.top +
+            _rowTops[bottomRow] -
+            (bottomRow == rows ? border.bottom.width : horizontalInset),
+      ).deflate(kClipInset);
+      if (interior.isEmpty) {
+        continue;
+      }
+      final bool touchesTableEdge =
+          leftColumn == 0 || rightColumn == columns || span.y == 0 || bottomRow == rows;
+      if (insideOuterBorder != null && touchesTableEdge) {
+        canvas.clipPath(
+          Path()
+            ..fillType = PathFillType.evenOdd
+            ..addRect(Rect.largest)
+            ..addPath(
+              Path.combine(
+                PathOperation.intersect,
+                Path()..addRect(interior),
+                Path()..addRRect(insideOuterBorder),
+              ),
+              Offset.zero,
+            ),
+          doAntiAlias: false,
         );
       } else {
-        border.paint(context.canvas, borderRect, rows: rows, columns: columns);
+        canvas.clipRect(interior, clipOp: ui.ClipOp.difference, doAntiAlias: false);
       }
     }
   }
@@ -1947,72 +2019,51 @@ class _Index {
   int get hashCode => Object.hash(y, x);
 }
 
-/// Records which cells in a table are covered ("hidden") by a spanning cell.
-///
-/// This is typically used by [TableBorderPainter] to decide whether to skip
-/// painting some of the cell dividers.
-///
-/// A cell can be covered in two independent ways, and both are tracked here:
-///
-///  * **column-spanned** – covered by a horizontal (colSpan) span from a
-///    preceding cell in the same row.
-///  * **row-spanned** – covered by a vertical (rowSpan) span from a cell above.
-///
-/// A cell in the interior of a rectangular span is both column- and row-spanned.
-class TableSpannedCells {
-  // Only [RenderTable] populates this map, during layout. Consumers such as
-  // [TableBorderPainter] receive it read-only, so painting can never mutate the flags
-  // that layout derived.
-  TableSpannedCells._({required int rows, required int columns})
+// A cell that spans several columns or rows: the cell at column x of row y,
+// which covers colSpan columns and rowSpan rows from there.
+typedef _Span = ({int x, int y, int colSpan, int rowSpan});
+
+// Records the cells of a table that span several columns or rows, and the
+// cells that they cover.
+//
+// Only [RenderTable] fills this, during layout.
+class _SpannedCells {
+  _SpannedCells({required int rows, required int columns})
     : _columns = columns,
-      // Both flags of every cell are packed into a single bitmap, 8 bits to a
-      // byte: `* 2` reserves both bits for every cell, `+ 7` rounds the total
-      // bit count up so a trailing partial byte is still allocated, and `>> 3`
-      // converts the bit count to a byte count (an integer divide by 8).
-      _bits = Uint8List((rows * columns * 2 + 7) >> 3);
+      // One bit for every cell: `+ 7` rounds the cell count up so a trailing
+      // partial byte is still allocated, and `>> 3` converts the bit count to
+      // a byte count (an integer divide by 8).
+      _coveredCells = Uint8List((rows * columns + 7) >> 3);
 
   final int _columns;
 
-  // The packed flags, in row-major order. See [_bitIndexFor].
-  final Uint8List _bits;
+  // Whether each cell is covered by a span, one bit per cell in row-major
+  // order.
+  final Uint8List _coveredCells;
 
-  // Whether any cell has been marked as covered by a span.
-  bool _hasSpannedCells = false;
+  // The spanning cells, in the order in which they were added.
+  final List<_Span> spans = <_Span>[];
 
-  // Each cell reserves two consecutive bits in [_bits]; these are their offsets
-  // within that pair.
-  static const int _columnSpanFlag = 0;
-  static const int _rowSpanFlag = 1;
-
-  // The absolute bit index of `flag` for the cell at (x, y). Cells are stored in
-  // row-major order and each cell owns two bits, hence the `* 2`.
-  int _bitIndexFor(int x, int y, int flag) => (y * _columns + x) * 2 + flag;
-
-  void _setFlag(int x, int y, int flag) {
-    final int bit = _bitIndexFor(x, y, flag);
-    // `bit >> 3` selects the byte holding the flag (bit ~/ 8) and `bit & 7` is
-    // the position within that byte (bit % 8).
-    _bits[bit >> 3] |= 1 << (bit & 7);
-    _hasSpannedCells = true;
+  // Adds the cell at (x, y) that spans colSpan columns and rowSpan rows, and
+  // marks every other cell that it covers.
+  void add({required int x, required int y, required int colSpan, required int rowSpan}) {
+    spans.add((x: x, y: y, colSpan: colSpan, rowSpan: rowSpan));
+    for (var dy = 0; dy < rowSpan; dy++) {
+      for (var dx = 0; dx < colSpan; dx++) {
+        if (dx == 0 && dy == 0) {
+          continue;
+        }
+        final int bit = (y + dy) * _columns + x + dx;
+        // `bit >> 3` selects the byte holding the flag (bit ~/ 8) and `bit & 7`
+        // is the position within that byte (bit % 8).
+        _coveredCells[bit >> 3] |= 1 << (bit & 7);
+      }
+    }
   }
 
-  bool _hasFlag(int x, int y, int flag) {
-    final int bit = _bitIndexFor(x, y, flag);
-    return _bits[bit >> 3] & (1 << (bit & 7)) != 0;
+  // Whether the cell at (x, y) is covered by a span.
+  bool isCovered(int x, int y) {
+    final int bit = y * _columns + x;
+    return _coveredCells[bit >> 3] & (1 << (bit & 7)) != 0;
   }
-
-  // Marks the cell at (x, y) as covered by a horizontal (colSpan) span.
-  void _markColumnSpanned(int x, int y) => _setFlag(x, y, _columnSpanFlag);
-
-  // Marks the cell at (x, y) as covered by a vertical (rowSpan) span.
-  void _markRowSpanned(int x, int y) => _setFlag(x, y, _rowSpanFlag);
-
-  // Whether the cell at (x, y) is covered by any span.
-  bool _isSpanned(int x, int y) => isColumnSpanned(x, y) || isRowSpanned(x, y);
-
-  /// Whether the cell at (`x`, `y`) is covered by a horizontal (colSpan) span.
-  bool isColumnSpanned(int x, int y) => _hasFlag(x, y, _columnSpanFlag);
-
-  /// Whether the cell at (`x`, `y`) is covered by a vertical (rowSpan) span.
-  bool isRowSpanned(int x, int y) => _hasFlag(x, y, _rowSpanFlag);
 }

@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show PathMetric;
+import 'dart:typed_data';
+import 'dart:ui' as ui show Image;
 
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -1044,153 +1045,236 @@ void main() {
   });
 
   group('Table borders with spans', () {
-    // A table with three 100x50 columns and two rows, whose first cell spans
-    // the first two columns:
-    //
-    //   +---------+----+
-    //   |    A    | B  |
-    //   +----+----+----+
-    //   | C  | D  | E  |
-    //   +----+----+----+
+    const borderColor = Color(0xFF0000FF);
+    const fillColor = Color(0xFF00FF00);
+    const transparent = Color(0x00000000);
+
+    // A table with three 100x50 columns and two rows. Every entry in `spans`
+    // maps the column and row of a cell to the number of columns and rows that
+    // it spans. The slots that a span covers are left empty.
     RenderTable spanningTable(
       TableBorder border, {
+      required Map<(int, int), (int, int)> spans,
       TextDirection textDirection = TextDirection.ltr,
     }) {
       final table = RenderTable(textDirection: textDirection, columns: 3, rows: 2, border: border);
-      final RenderBox spanningCell = sizedBox(200.0, 50.0);
-      spanningCell.parentData = TableCellParentData()..colSpan = 2;
-      table.setChild(0, 0, spanningCell);
-      table.setChild(2, 0, sizedBox(100.0, 50.0));
-      for (var x = 0; x < 3; x += 1) {
-        table.setChild(x, 1, sizedBox(100.0, 50.0));
+      final covered = <(int, int)>{};
+      spans.forEach(((int, int) cell, (int, int) span) {
+        for (var dy = 0; dy < span.$2; dy += 1) {
+          for (var dx = 0; dx < span.$1; dx += 1) {
+            if (dx != 0 || dy != 0) {
+              covered.add((cell.$1 + dx, cell.$2 + dy));
+            }
+          }
+        }
+      });
+      for (var y = 0; y < 2; y += 1) {
+        for (var x = 0; x < 3; x += 1) {
+          if (covered.contains((x, y))) {
+            continue;
+          }
+          final (int colSpan, int rowSpan) = spans[(x, y)] ?? (1, 1);
+          final RenderBox cell = sizedBox(100.0 * colSpan, 50.0 * rowSpan);
+          cell.parentData = TableCellParentData()
+            ..colSpan = colSpan
+            ..rowSpan = rowSpan;
+          table.setChild(x, y, cell);
+        }
       }
-      layout(table, constraints: const BoxConstraints.tightFor(width: 300.0));
       return table;
     }
 
-    // The inner borders of the table above when no border is skipped.
-    const allInnerBorders = <Rect>[
-      Rect.fromLTRB(100.0, 0.0, 100.0, 50.0),
-      Rect.fromLTRB(200.0, 0.0, 200.0, 50.0),
-      Rect.fromLTRB(100.0, 50.0, 100.0, 100.0),
-      Rect.fromLTRB(200.0, 50.0, 200.0, 100.0),
-      Rect.fromLTRB(0.0, 50.0, 100.0, 50.0),
-      Rect.fromLTRB(100.0, 50.0, 200.0, 50.0),
-      Rect.fromLTRB(200.0, 50.0, 300.0, 50.0),
-    ];
+    // Paints `table` at 300x100 and returns the color of the pixel at (x, y).
+    Future<Color Function(int x, int y)> paintPixels(RenderTable table) async {
+      final boundary = RenderRepaintBoundary(child: table);
+      layout(boundary, constraints: BoxConstraints.tight(const Size(300.0, 100.0)));
+      pumpFrame(phase: EnginePhase.composite);
+      final ui.Image image = await boundary.toImage();
+      addTearDown(image.dispose);
+      final ByteData bytes = (await image.toByteData())!;
+      return (int x, int y) {
+        final int offset = (x + y * image.width) * 4;
+        return Color.fromARGB(
+          bytes.getUint8(offset + 3),
+          bytes.getUint8(offset),
+          bytes.getUint8(offset + 1),
+          bytes.getUint8(offset + 2),
+        );
+      };
+    }
 
-    // The inner borders of the table above when they are painted without
-    // taking the span into account.
-    const unspannedInnerBorders = <Rect>[
-      Rect.fromLTRB(100.0, 0.0, 100.0, 100.0),
-      Rect.fromLTRB(200.0, 0.0, 200.0, 100.0),
-      Rect.fromLTRB(0.0, 50.0, 300.0, 50.0),
-    ];
+    // Two pixels wide, so that the borders cover whole pixels.
+    final border = TableBorder.all(width: 2.0, color: borderColor);
 
-    const inside = BorderSide();
-
-    test('TableBorderPainter skips the inner borders inside a span', () {
-      expect(
-        _innerBorderSegments(spanningTable(const TableBorderPainter.symmetric(inside: inside))),
-        unorderedEquals(<Rect>[
-          for (final Rect segment in allInnerBorders)
-            if (segment != const Rect.fromLTRB(100.0, 0.0, 100.0, 50.0)) segment,
-        ]),
+    test('clips the inner borders out of a colSpan', () async {
+      //   +---------+----+
+      //   |    A    | B  |
+      //   +----+----+----+
+      //   | C  | D  | E  |
+      //   +----+----+----+
+      final Color Function(int, int) pixel = await paintPixels(
+        spanningTable(border, spans: <(int, int), (int, int)>{(0, 0): (2, 1)}),
       );
+      // The vertical border inside A is clipped out, up to the borders around A.
+      expect(pixel(100, 25), transparent);
+      expect(pixel(100, 2), transparent);
+      expect(pixel(100, 1), borderColor);
+      expect(pixel(100, 48), transparent);
+      expect(pixel(100, 49), borderColor);
+      // The borders around A and the other cells are painted.
+      expect(pixel(199, 25), borderColor);
+      expect(pixel(200, 25), borderColor);
+      expect(pixel(100, 75), borderColor);
+      expect(pixel(150, 50), borderColor);
     });
 
-    test('TableBorderPainter skips the inner borders inside a span in RTL', () {
-      expect(
-        _innerBorderSegments(
-          spanningTable(
-            const TableBorderPainter.symmetric(inside: inside),
-            textDirection: TextDirection.rtl,
-          ),
+    test('paints the borders around a span like the other borders', () async {
+      // One pixel wide borders between two cells only partly cover the pixels
+      // on either side of the line between the cells.
+      final Color Function(int, int) pixel = await paintPixels(
+        spanningTable(
+          TableBorder.all(color: borderColor),
+          spans: <(int, int), (int, int)>{(0, 0): (2, 1)},
         ),
-        unorderedEquals(<Rect>[
-          for (final Rect segment in allInnerBorders)
-            if (segment != const Rect.fromLTRB(200.0, 0.0, 200.0, 50.0)) segment,
-        ]),
       );
+      expect(pixel(199, 25), isNot(transparent));
+      expect(pixel(199, 25), pixel(199, 75));
+      expect(pixel(150, 49), isNot(transparent));
+      expect(pixel(150, 49), pixel(250, 49));
     });
 
-    test('a TableBorder is painted without spans', () {
-      expect(
-        _innerBorderSegments(spanningTable(const TableBorder.symmetric(inside: inside))),
-        unorderedEquals(unspannedInnerBorders),
+    test('clips the inner borders out of a colSpan in RTL', () async {
+      //   +----+---------+
+      //   | B  |    A    |
+      //   +----+----+----+
+      //   | E  | D  | C  |
+      //   +----+----+----+
+      final Color Function(int, int) pixel = await paintPixels(
+        spanningTable(
+          border,
+          spans: <(int, int), (int, int)>{(0, 0): (2, 1)},
+          textDirection: TextDirection.rtl,
+        ),
       );
+      expect(pixel(200, 25), transparent);
+      expect(pixel(100, 25), borderColor);
+      expect(pixel(200, 75), borderColor);
     });
 
-    test('a TableBorder subclass is painted with its own paint method', () {
-      final log = <String>[];
-      final RenderTable table = spanningTable(_LegacyTableBorder(log));
-      final List<Rect> segments = _innerBorderSegments(table);
-      expect(log, <String>['paint']);
-      expect(segments, unorderedEquals(unspannedInnerBorders));
+    test('clips the inner borders out of a rowSpan', () async {
+      //   +----+----+----+
+      //   | A  | B  |    |
+      //   +----+----+ C  |
+      //   | D  | E  |    |
+      //   +----+----+----+
+      final Color Function(int, int) pixel = await paintPixels(
+        spanningTable(border, spans: <(int, int), (int, int)>{(2, 0): (1, 2)}),
+      );
+      // The horizontal border inside C is clipped out, up to the borders around C.
+      expect(pixel(250, 49), transparent);
+      expect(pixel(250, 50), transparent);
+      expect(pixel(201, 50), transparent);
+      expect(pixel(200, 50), borderColor);
+      expect(pixel(297, 50), transparent);
+      expect(pixel(298, 50), borderColor);
+      // The other borders are painted.
+      expect(pixel(150, 50), borderColor);
+      expect(pixel(200, 25), borderColor);
     });
 
-    test('RenderTable passes the spans and the text direction to a TableBorderPainter', () {
-      final calls = <(TableSpannedCells?, TextDirection)>[];
+    test('clips the inner borders out of overlapping spans', () async {
+      //   +----+----+----+
+      //   | A  |    | C  |
+      //   +----+ B  +----+
+      //   |   D     | E  |
+      //   +----+----+----+
+      final Color Function(int, int) pixel = await paintPixels(
+        spanningTable(border, spans: <(int, int), (int, int)>{(1, 0): (1, 2), (0, 1): (2, 1)}),
+      );
+      expect(pixel(150, 50), transparent);
+      expect(pixel(100, 75), transparent);
+      expect(pixel(100, 25), borderColor);
+      expect(pixel(50, 50), borderColor);
+      expect(pixel(200, 75), borderColor);
+      expect(pixel(250, 50), borderColor);
+    });
+
+    test('keeps the full width of thick borders around a span', () async {
+      final Color Function(int, int) pixel = await paintPixels(
+        spanningTable(
+          const TableBorder.symmetric(
+            inside: BorderSide(width: 6.0, color: borderColor),
+            outside: BorderSide(width: 4.0, color: borderColor),
+          ),
+          spans: <(int, int), (int, int)>{(0, 0): (2, 1)},
+        ),
+      );
+      expect(pixel(100, 25), transparent);
+      // The outer border above A is four pixels wide.
+      expect(pixel(100, 3), borderColor);
+      expect(pixel(100, 4), transparent);
+      // The inner borders below and to the right of A are six pixels wide,
+      // three of them inside A.
+      expect(pixel(100, 47), borderColor);
+      expect(pixel(100, 46), transparent);
+      expect(pixel(197, 25), borderColor);
+      expect(pixel(196, 25), transparent);
+    });
+
+    test('keeps the rounded corners of the outer border around a span', () async {
+      final Color Function(int, int) pixel = await paintPixels(
+        spanningTable(
+          TableBorder.all(
+            width: 2.0,
+            color: borderColor,
+            borderRadius: const BorderRadius.all(Radius.circular(10.0)),
+          ),
+          spans: <(int, int), (int, int)>{(0, 0): (2, 1)},
+        ),
+      );
+      expect(pixel(100, 25), transparent);
+      // A pixel on the rounded top left corner, inside the rectangle that A
+      // covers within the outer border.
+      expect(pixel(3, 3), borderColor);
+      expect(pixel(6, 6), transparent);
+    });
+
+    test('clips what a TableBorder subclass paints inside a span', () async {
+      final Color Function(int, int) pixel = await paintPixels(
+        spanningTable(
+          const _FillingTableBorder(fillColor),
+          spans: <(int, int), (int, int)>{(0, 0): (2, 1)},
+        ),
+      );
+      // The border has no sides, so all of A is clipped out.
+      expect(pixel(0, 0), transparent);
+      expect(pixel(100, 25), transparent);
+      expect(pixel(199, 49), transparent);
+      expect(pixel(200, 25), fillColor);
+      expect(pixel(100, 50), fillColor);
+    });
+
+    test('clips the border only when the table has spans', () {
+      final RenderTable plainTable = spanningTable(border, spans: const <(int, int), (int, int)>{});
+      layout(plainTable, constraints: const BoxConstraints.tightFor(width: 300.0));
+      expect(plainTable, paintsExactlyCountTimes(#save, 0));
+      expect(plainTable, paintsExactlyCountTimes(#clipRect, 0));
+
       final RenderTable table = spanningTable(
-        _RecordingTableBorderPainter(calls),
-        textDirection: TextDirection.rtl,
+        border,
+        spans: <(int, int), (int, int)>{(0, 0): (2, 1), (2, 0): (1, 2)},
       );
-      _innerBorderSegments(table);
-      final (TableSpannedCells? spannedCells, TextDirection textDirection) = calls.single;
-      expect(spannedCells, isNotNull);
-      expect(spannedCells!.isColumnSpanned(1, 0), isTrue);
-      expect(spannedCells.isColumnSpanned(2, 0), isFalse);
-      expect(textDirection, TextDirection.rtl);
-
-      // A table without spans passes no spans.
-      calls.clear();
-      final plainTable = RenderTable(
-        textDirection: TextDirection.ltr,
-        border: _RecordingTableBorderPainter(calls),
-        children: <List<RenderBox>>[
-          <RenderBox>[sizedBox(100.0, 50.0), sizedBox(100.0, 50.0)],
-        ],
-      );
-      layout(plainTable, constraints: const BoxConstraints.tightFor(width: 200.0));
-      _innerBorderSegments(plainTable);
-      expect(calls.single.$1, isNull);
+      layout(table, constraints: const BoxConstraints.tightFor(width: 300.0));
+      expect(table, paintsExactlyCountTimes(#clipRect, 2));
     });
   });
 }
 
-/// The line segments of the inner borders that [table] paints.
-List<Rect> _innerBorderSegments(RenderTable table) {
-  final canvas = _InnerBorderRecordingCanvas();
-  table.paint(TestRecordingPaintingContext(canvas), Offset.zero);
-  return canvas.segments;
-}
+/// A [TableBorder] without sides that fills the whole table with [color].
+class _FillingTableBorder extends TableBorder {
+  const _FillingTableBorder(this.color);
 
-/// Records the line segments of the stroked paths drawn on it, which are the
-/// inner borders of a table.
-///
-/// The segments are taken when the path is drawn, because [TableBorder] reuses
-/// its path for the vertical and the horizontal borders.
-class _InnerBorderRecordingCanvas extends TestRecordingCanvas {
-  final List<Rect> segments = <Rect>[];
-
-  @override
-  void drawPath(Path path, Paint paint) {
-    if (paint.style != PaintingStyle.stroke) {
-      return;
-    }
-    for (final PathMetric metric in path.computeMetrics()) {
-      segments.add(metric.extractPath(0.0, metric.length).getBounds());
-    }
-  }
-}
-
-/// A [TableBorder] subclass that overrides [TableBorder.paint] and doesn't
-/// know about spans.
-class _LegacyTableBorder extends TableBorder {
-  const _LegacyTableBorder(this.log)
-    : super(horizontalInside: const BorderSide(), verticalInside: const BorderSide());
-
-  final List<String> log;
+  final Color color;
 
   @override
   void paint(
@@ -1199,25 +1283,6 @@ class _LegacyTableBorder extends TableBorder {
     required Iterable<double> rows,
     required Iterable<double> columns,
   }) {
-    log.add('paint');
-    super.paint(canvas, rect, rows: rows, columns: columns);
-  }
-}
-
-class _RecordingTableBorderPainter extends TableBorderPainter {
-  const _RecordingTableBorderPainter(this.calls);
-
-  final List<(TableSpannedCells?, TextDirection)> calls;
-
-  @override
-  void paint(
-    Canvas canvas,
-    Rect rect, {
-    required Iterable<double> rows,
-    required Iterable<double> columns,
-    TableSpannedCells? spannedCells,
-    TextDirection textDirection = TextDirection.ltr,
-  }) {
-    calls.add((spannedCells, textDirection));
+    canvas.drawRect(rect, Paint()..color = color);
   }
 }
