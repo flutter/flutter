@@ -124,6 +124,9 @@ abstract class CkSurface extends Surface {
   /// [handledContextLossEvent] completes only once the graphics context has
   /// been recreated (or recovery has failed).
   void onContextLost() {
+    if (isDisposed) {
+      return;
+    }
     assert(!isSoftware, 'Received a webglcontextlost event while in software rendering mode.');
     final DomEventTarget newCanvas = _canvasProvider.acquireCanvas(
       _currentSize,
@@ -615,14 +618,7 @@ class CkOffscreenSurface extends CkSurface implements OffscreenSurface {
     _createSkiaObjects();
   }
 
-  @override
-  void dispose() {
-    if (_disposed) {
-      return;
-    }
-    _releaseCanvas();
-    super.dispose();
-  }
+
 }
 
 /// The CanvasKit implementation of [OnscreenSurface].
