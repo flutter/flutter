@@ -1658,6 +1658,66 @@ void main() {
     expect(validationCount, 2);
   });
 
+  testWidgets('Restored validator error updates to the current locale', (
+    WidgetTester tester,
+  ) async {
+    final formKey = GlobalKey<FormState>();
+    var locale = const Locale('en');
+    late BuildContext validatorContext;
+    var validationCount = 0;
+
+    String? validator(String? value) {
+      validationCount += 1;
+      return switch (Localizations.localeOf(validatorContext).languageCode) {
+        'de' => 'German error',
+        _ => 'English error',
+      };
+    }
+
+    await tester.pumpWidget(
+      WidgetsApp(
+        restorationScopeId: 'app',
+        color: const Color(0xFFFFFFFF),
+        builder: (BuildContext context, Widget? child) {
+          return Localizations.override(
+            context: context,
+            locale: locale,
+            child: Builder(
+              builder: (BuildContext context) {
+                validatorContext = context;
+                return Form(
+                  key: formKey,
+                  child: FormField<String>(
+                    restorationId: 'field',
+                    validator: validator,
+                    builder: (FormFieldState<String> state) {
+                      return Text(state.errorText ?? 'No error');
+                    },
+                  ),
+                );
+              },
+            ),
+          );
+        },
+      ),
+    );
+
+    expect(find.text('No error'), findsOneWidget);
+    expect(validationCount, 0);
+
+    expect(formKey.currentState!.validate(), isFalse);
+    await tester.pump();
+    expect(find.text('English error'), findsOneWidget);
+    expect(validationCount, 1);
+
+    locale = const Locale('de');
+    await tester.restartAndRestore();
+
+    expect(find.text('English error'), findsNothing);
+    expect(find.text('German error'), findsOneWidget);
+    expect(validationCount, 2);
+  });
+
   testWidgets('AutovalidateMode.onUnfocus', (WidgetTester tester) async {
     final formKey = GlobalKey<FormState>();
     String? errorText(String? value) => '$value/error';
