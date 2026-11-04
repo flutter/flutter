@@ -59,6 +59,26 @@ def _run(argv, cwd=None, log_path=None, env=None):
 # ---------------------------------------------------------------------------
 
 
+# The credentials the proxy runs with, when the action's environment (the
+# strict one: PATH and what --action_env adds) names none. A bot's task
+# authenticates through LUCI's emulated metadata server, whose address
+# (GCE_METADATA_HOST, a port of the task's) and RBE_use_gce_credentials
+# the recipe gives its own reproxy in the environment; a Bazel action sees
+# none of it, and reclient's Application Default Credentials then find the
+# VM's real metadata server and an account without the scopes (every
+# wrapped build of the first presubmit, 11-04). bazel_ci.py writes the
+# task's variables to this file, beside the user's caches, before every
+# Bazel command on a bot, and the proxy's environment takes them from here
+# -- read at run time, not an input of the action, so that the port does
+# not change the action's key from task to task. No secrets: an address
+# on the loopback interface and two switches.
+WRAP_RBE_ENV_FILE = os.path.join(".cache", "flutter_engine_bazel", "wrap_rbe_env.json")
+
+
+def _wrap_rbe_env_path():
+    return os.path.join(pwd.getpwuid(os.getuid()).pw_dir, WRAP_RBE_ENV_FILE)
+
+
 class Reproxy:
     """reclient's proxy, started around the wrapped build when the parameters ask for RBE (gn_build.bzl's rbe).
 
@@ -70,11 +90,13 @@ class Reproxy:
     listens on a socket of its own under /tmp (a sandboxed action's /tmp is
     its own; the path has to be short, a Unix socket's limit being 108
     bytes), logs and keeps its dependency cache under the scratch
-    directory, and authenticates as the configuration says -- Application
-    Default Credentials: a bot's metadata server, a developer's gcloud login
-    where HOME reaches the action. When it cannot start, the build goes on
-    without it, locally, and says so: a developer's sandbox has no
-    credentials, and a wrapped build is better slow than failed.
+    directory, and authenticates as its environment says: a bot's
+    metadata server (WRAP_RBE_ENV_FILE) or a developer's
+    GOOGLE_APPLICATION_CREDENTIALS (--action_env). Without either, or when
+    it cannot start, the build goes on without it, locally, and says so: a
+    proxy without credentials fails every compile outright
+    (`remote_local_fallback` does not cover Unauthenticated), and a wrapped
+    build is better slow than failed.
     """
 
     def __init__(self, params, scratch):
@@ -89,6 +111,14 @@ class Reproxy:
         os.chmod(tmp, 0o700)
         self.logs = logs
         self.env = dict(os.environ)
+        self.credentials = None
+        env_path = _wrap_rbe_env_path()
+        if os.path.exists(env_path):
+            with open(env_path) as f:
+                self.env.update({str(key): str(value) for key, value in json.load(f).items()})
+            self.credentials = env_path
+        elif self.env.get("GOOGLE_APPLICATION_CREDENTIALS"):
+            self.credentials = "GOOGLE_APPLICATION_CREDENTIALS"
         if not self.env.get("USER"):
             # The strict action environment has no USER; the scanner compares
             # it with the owner of its files.
@@ -112,6 +142,10 @@ class Reproxy:
 
     def start(self):
         """Starts the proxy; True when it runs."""
+        if not self.credentials:
+            _log("gn_build: no credentials for reproxy (neither %s nor GOOGLE_APPLICATION_CREDENTIALS in the "
+                 "action's environment); the build runs without RBE" % _wrap_rbe_env_path())
+            return False
         argv = [self.bootstrap, "--re_proxy=" + self.reproxy, "--cfg=" + self.cfg]
         result = subprocess.run(argv, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, env=self.env)
         if result.returncode != 0:

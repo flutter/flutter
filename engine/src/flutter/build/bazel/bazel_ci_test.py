@@ -365,6 +365,37 @@ class TestSuitesTest(unittest.TestCase):
       bazel_ci.test_suites(description, ['engine', 'java'])
     self.assertIn('runs no java tests under Bazel (its types: dart, engine)', str(raised.exception))
 
+  def test_the_wrap_rbe_env_file_carries_the_bots_metadata_server(self):
+    # On a bot with LUCI's emulated metadata server: the three names and the
+    # switch to GCE credentials; nothing off a bot, nothing without it.
+    environ = {
+        'LUCI_CONTEXT': '/b/s/w/ir/tmp/t/luci_context.json',
+        'GCE_METADATA_HOST': '127.0.0.1:38553',
+        'GCE_METADATA_IP': '127.0.0.1:38553',
+        'GCE_METADATA_ROOT': '127.0.0.1:38553',
+    }
+    with tempfile.TemporaryDirectory() as home:
+      with unittest.mock.patch.dict(os.environ, environ):
+        path = bazel_ci.write_wrap_rbe_env(home=home, environ=environ)
+      self.assertEqual(
+          path, os.path.join(home, '.cache', 'flutter_engine_bazel', 'wrap_rbe_env.json')
+      )
+      with open(path, encoding='utf-8') as env_file:
+        self.assertEqual(
+            json.load(env_file), {
+                'GCE_METADATA_HOST': '127.0.0.1:38553',
+                'GCE_METADATA_IP': '127.0.0.1:38553',
+                'GCE_METADATA_ROOT': '127.0.0.1:38553',
+                'RBE_use_gce_credentials': 'true',
+                'RBE_use_application_default_credentials': 'false',
+            }
+        )
+      with unittest.mock.patch.dict(os.environ, environ):
+        self.assertIsNone(bazel_ci.write_wrap_rbe_env(home=home, environ={'LUCI_CONTEXT': 'x'}))
+      with unittest.mock.patch.dict(os.environ):
+        os.environ.pop('LUCI_CONTEXT', None)
+        self.assertIsNone(bazel_ci.write_wrap_rbe_env(home=home, environ=environ))
+
   def test_the_engines_tests_run_on_the_machine(self):
     # TEST_OPTIONS keeps the engine's suites off the RBE workers (a display,
     # a GPU, a device), before whatever the step adds and the suites.
