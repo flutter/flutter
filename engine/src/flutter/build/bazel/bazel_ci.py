@@ -36,9 +36,11 @@ import sys
 
 # The flags of a build that say where it runs rather than what it builds:
 # the recipe appends `--no-goma --no-rbe` to an official build's; `--bazel`
-# is this mode's own. They are left out when a flag list is matched against
-# the builder files'.
-INFRA_FLAGS = frozenset(['--bazel', '--rbe', '--no-rbe', '--goma', '--no-goma'])
+# is this mode's own, and so are `--bazel-rbe` and `--no-bazel-rbe` (RBE_FLAGS:
+# whether the Bazel build's actions run on Flutter's RBE instance, rbe_options).
+# They are left out when a flag list is matched against the builder files'.
+RBE_FLAGS = {'--bazel-rbe': True, '--no-bazel-rbe': False}
+INFRA_FLAGS = frozenset(['--bazel', '--rbe', '--no-rbe', '--goma', '--no-goma', *RBE_FLAGS])
 
 # The value flags of the same kind: the recipe appends reproxy's address
 # (`--rbe-server-address=unix://...`) to a build with --rbe.
@@ -262,7 +264,7 @@ def startup_options(engine_src):
 DISK_CACHE_GC_MAX_SIZE = '40G'
 
 
-def build_options(engine_src):
+def build_options(engine_src, rbe=None):
   """The options of every build command: a developer's disk cache under .bazel_ci.
 
   A developer runs a builder file's builds one after another in one
@@ -278,11 +280,12 @@ def build_options(engine_src):
   with it, bounded -- serves every such repeat; the root .bazelrc's
   home-directory cache is the developer's own builds'. A bot builds one
   build per task from nothing and keeps nothing (bazel_home): no disk cache;
-  a Linux bot runs on RBE instead (rbe_options).
+  a Linux bot runs on RBE instead (rbe_options; `rbe` is the flags' say,
+  rbe_flag).
   """
   if on_bot():
-    return rbe_options() + bot_sandbox_options()
-  return [
+    return rbe_options(rbe) + bot_sandbox_options()
+  return rbe_options(rbe) + [
       '--disk_cache=' + os.path.join(bazel_home(engine_src), 'disk_cache'),
       '--experimental_disk_cache_gc_max_size=' + DISK_CACHE_GC_MAX_SIZE,
   ]
@@ -293,18 +296,35 @@ def build_options(engine_src):
 # debian11 image, 200 jobs, the bot's GCE credentials) and so share their
 # results: a build repeats nothing another bot has done since the inputs
 # changed. The wrapped GN builds and the tests stay on the bot. A Mac bot
-# builds locally: the workers are Linux. FLUTTER_BAZEL_RBE=0 turns it off
-# for a run.
+# builds locally: the workers are Linux. Three ways to say otherwise, for a
+# comparison of the two: `--no-bazel-rbe` among a build's tools/gn flags (a
+# builder file can carry it per build; `--bazel-rbe` asks for RBE anywhere,
+# a developer's checkout included, given credentials for the instance),
+# FLUTTER_BAZEL_RBE=0 in the environment for a run, and RBE_ON_BOTS, the
+# default a bot gets without either.
+RBE_ON_BOTS = True
 RBE_ENV = 'FLUTTER_BAZEL_RBE'
 
 
-def rbe_options():
-  """`--config=rbe` on a Linux bot, unless FLUTTER_BAZEL_RBE says no."""
+def rbe_flag(flags):
+  """What the tools/gn flags say about RBE: True (--bazel-rbe), False (--no-bazel-rbe), None."""
+  value = None
+  for flag in flags:
+    if flag in RBE_FLAGS:
+      value = RBE_FLAGS[flag]
+  return value
+
+
+def rbe_options(rbe=None):
+  """`--config=rbe` on a Linux host: as the flags say (`rbe`), else on a bot unless FLUTTER_BAZEL_RBE=0.
+
+  Never on another host: the workers are Linux x64.
+  """
   if not sys.platform.startswith('linux'):
     return []
-  if os.environ.get(RBE_ENV, '1') in ('0', 'false', 'no'):
-    return []
-  return ['--config=rbe']
+  if rbe is None:
+    rbe = on_bot() and RBE_ON_BOTS and os.environ.get(RBE_ENV, '1') not in ('0', 'false', 'no')
+  return ['--config=rbe'] if rbe else []
 
 
 # Where a bot's sandboxes go when the machine has the memory for it: a
@@ -425,8 +445,13 @@ def ninja_file(engine_src, build, out_dir, bazelisk):
   return '\n'.join(lines) + '\n'
 
 
-def write_build_directory(engine_src, build, out_dir, bazelisk):
-  """Writes build.ninja and bazel.json into `out_dir`; returns the paths written."""
+def write_build_directory(engine_src, build, out_dir, bazelisk, rbe=None):
+  """Writes build.ninja and bazel.json into `out_dir`; returns the paths written.
+
+  `rbe` is what the build's flags say about RBE (rbe_flag), recorded in the
+  description's build options: the install and the tests of the directory
+  run alike.
+  """
   os.makedirs(out_dir, exist_ok=True)
   # The install's edge has no inputs ninja could compare -- Bazel knows what
   # changed -- so its stamp alone would keep ninja from running it again
@@ -453,7 +478,7 @@ def write_build_directory(engine_src, build, out_dir, bazelisk):
       'bazelisk': bazelisk,
       'repo_root': repo_root(engine_src),
       'startup_options': startup_options(engine_src),
-      'build_options': build_options(engine_src),
+      'build_options': build_options(engine_src, rbe),
       'environment': bazel_environment(engine_src),
       'out_dir': out_dir,
   }
