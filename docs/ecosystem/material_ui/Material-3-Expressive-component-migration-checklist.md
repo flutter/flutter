@@ -137,7 +137,7 @@ Add a static `variantOf` method to the component theme widget. It returns the va
 
 With this, a nested component theme that doesn't set `variant` inherits it instead of resetting its subtree to Material 3. This covers themes that only override `style`, and themes that widgets add internally. For example, `ListTile`, `InputDecorator`, and `AppBar` wrap their children in an `IconButtonTheme` without a variant. An explicit `variant: StyleVariant.material3` still opts a subtree out. Only `variant` is inherited. `style` keeps its current behavior, where the closest theme replaces its ancestors.
 
-Use [`IconButtonTheme.variantOf`](https://github.com/flutter/packages/pull/13263) as the reference implementation.
+Use [`IconButtonTheme.variantOf`](https://github.com/flutter/packages/blob/main/packages/material_ui/lib/src/icon_button_theme.dart) as the reference implementation. [flutter/packages#13263](https://github.com/flutter/packages/pull/13263) added it, along with its docs and tests.
 
 Example:
 
