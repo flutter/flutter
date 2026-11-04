@@ -49,6 +49,9 @@ const kFlutterToolsScriptFileName =
     'flutter_tools.dart'; // in //flutter/packages/flutter_tools/bin/
 const kFlutterEnginePackageName = 'sky_engine';
 
+const _kDevToolsDirPath = 'dart-sdk/bin/resources/devtools';
+const _kDevToolsVersionJson = 'version.json';
+
 /// A tag for a set of development artifacts that need to be cached.
 class DevelopmentArtifact {
   const DevelopmentArtifact._(this.name, {this.feature});
@@ -454,39 +457,104 @@ class Cache {
     }
   }
 
-  String get devToolsVersion {
-    if (_devToolsVersion == null) {
-      const devToolsDirPath = 'dart-sdk/bin/resources/devtools';
-      final Directory devToolsDir = getCacheDir(devToolsDirPath, shouldCreate: false);
-      if (!devToolsDir.existsSync()) {
-        throw Exception('Could not find directory at ${devToolsDir.path}');
-      }
-      final versionFilePath = '${devToolsDir.path}/version.json';
-      final File versionFile = _fileSystem.file(versionFilePath);
-      if (!versionFile.existsSync()) {
-        throw Exception('Could not find file at $versionFilePath');
-      }
-      final dynamic data = jsonDecode(versionFile.readAsStringSync());
-      if (data is! Map<String, Object?>) {
-        throw Exception(
-          "Expected object of type 'Map<String, Object?>' but got one of type '${data.runtimeType}'",
-        );
-      }
-      final Object? version = data['version'];
-      if (version == null) {
-        throw Exception('Could not parse DevTools version from $version');
-      }
-      if (version is! String) {
-        throw Exception(
-          "Could not parse DevTools version. Expected object of type 'String', but got one of type '${version.runtimeType}'",
-        );
-      }
-      return _devToolsVersion = version;
-    }
-    return _devToolsVersion!;
-  }
+  /// The version of DevTools currently bundled in the Dart SDK cache.
+  ///
+  /// Invalidates the Dart SDK cache stamps and throws a [ToolExit] if
+  /// `version.json` is missing or malformed.
+  String get devToolsVersion => _devToolsVersion ??= _readDevToolsVersion();
 
   String? _devToolsVersion;
+
+  String _readDevToolsVersion() {
+    final File versionFile = getCacheDir(
+      _kDevToolsDirPath,
+      shouldCreate: false,
+    ).childFile(_kDevToolsVersionJson);
+    try {
+      final String devToolsVersionJson = ErrorHandlingFileSystem.noExitOnFailure(
+        versionFile.readAsStringSync,
+      );
+      if (jsonDecode(devToolsVersionJson) case {'version': final String version}
+          when version.trim().isNotEmpty) {
+        return version;
+      }
+    } on FileSystemException catch (e) {
+      _logger.printTrace('Failed to read DevTools version file: $e');
+    } on FormatException catch (e) {
+      _logger.printTrace('Failed to parse DevTools version file: $e');
+    }
+
+    final bool invalidated = invalidateDartSdkCache();
+    throwToolExit(
+      formatDartSdkCacheCorruptionMessage(
+        invalidated: invalidated,
+        message: 'Could not read the DevTools version from ${versionFile.path}.',
+        cacheDir: getRoot(),
+      ),
+    );
+  }
+
+  static const String _kEngineDartSdkStamp = 'engine-dart-sdk';
+  static const String _kFlutterToolsStamp = 'flutter_tools';
+
+  /// Invalidates the Dart SDK cache by deleting the stamp files that signal
+  /// the wrapper scripts (`shared.sh` and `shared.bat`) to re-download the
+  /// Dart SDK on the next command invocation.
+  ///
+  /// Returns `true` if at least one stamp file was deleted and both stamp files
+  /// are absent after the operation.
+  bool invalidateDartSdkCache() {
+    return invalidateDartSdkStampsAt(getRoot(), logger: _logger);
+  }
+
+  /// Statically invalidates the Dart SDK cache stamps in [cacheDir].
+  ///
+  /// Deletes both `engine-dart-sdk.stamp` (checked by `shared.bat`) and
+  /// `flutter_tools.stamp` (checked by `shared.sh`) so the next invocation
+  /// re-downloads the Dart SDK. Does not delete `dart-sdk/` in-process, as
+  /// the running Dart binary lives there and `update_dart_sdk.{sh,ps1}`
+  /// safely moves the existing directory aside.
+  ///
+  /// Returns `true` if at least one stamp file was deleted and both stamp files
+  /// are absent after the operation.
+  static bool invalidateDartSdkStampsAt(Directory cacheDir, {required Logger logger}) {
+    final stamps = <File>[
+      cacheDir.childFile('$_kEngineDartSdkStamp.stamp'),
+      cacheDir.childFile('$_kFlutterToolsStamp.stamp'),
+    ];
+    var deletedAny = false;
+    for (final stamp in stamps) {
+      try {
+        deletedAny =
+            ErrorHandlingFileSystem.noExitOnFailure(
+              () => ErrorHandlingFileSystem.deleteIfExists(stamp),
+            ) ||
+            deletedAny;
+      } on FileSystemException catch (e) {
+        logger.printTrace('Failed to delete ${stamp.basename}: $e');
+      }
+    }
+    return deletedAny && !stamps.any((File stamp) => stamp.existsSync());
+  }
+
+  /// Formats a consistent, actionable message for a missing, corrupted, or
+  /// incomplete Dart SDK cache.
+  static String formatDartSdkCacheCorruptionMessage({
+    required Directory cacheDir,
+    required bool invalidated,
+    required String message,
+  }) {
+    if (invalidated) {
+      return '''
+$message
+The Dart SDK cache appears to be incomplete (often caused by antivirus software quarantining files) and has been invalidated.
+Please re-run your command to automatically re-download the Dart SDK. If this issue persists, add your Flutter SDK directory to your antivirus exclusions.''';
+    }
+    return '''
+$message
+The Dart SDK cache appears to be incomplete or corrupted (often caused by antivirus software quarantining files).
+Please delete ${cacheDir.path} and re-run your command to re-download the Dart SDK. If this issue persists, add your Flutter SDK directory to your antivirus exclusions.''';
+  }
 
   /// The current version of Dart used to build Flutter and run the tool.
   String get dartSdkVersion {

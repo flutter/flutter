@@ -637,10 +637,18 @@ class _DefaultPub implements Pub {
       'dart',
     ]);
     if (!_processManager.canRun(sdkPath)) {
+      final Directory cacheDir = _fileSystem.directory(
+        _fileSystem.path.join(_flutterRoot, 'bin', 'cache'),
+      );
+      final bool invalidated = Cache.invalidateDartSdkStampsAt(cacheDir, logger: _logger);
       throwToolExit(
-        'Your Flutter SDK download may be corrupt or missing permissions to run. '
-        'Try re-downloading the Flutter SDK into a directory that has read/write '
-        'permissions for the current user.',
+        Cache.formatDartSdkCacheCorruptionMessage(
+          cacheDir: cacheDir,
+          invalidated: invalidated,
+          message:
+              'The Dart SDK at "$sdkPath" cannot be executed. '
+              'Check that the Flutter SDK directory has read and execute permissions for the current user.',
+        ),
       );
     }
     return <String>[sdkPath, 'pub', '--suppress-analytics'];

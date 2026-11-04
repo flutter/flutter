@@ -79,7 +79,15 @@ void main() {
 
       expect(
         () => validator.validate(),
-        throwsToolExit(message: 'Flutter SDK installation appears corrupted'),
+        throwsToolExit(
+          message:
+              'Flutter SDK installation appears corrupted: expected to find the '
+              'directory ${toolsDir.path} but it does not exist (often caused by '
+              'interrupted extraction or antivirus software quarantining files).\n'
+              'Please go to https://flutter.dev/setup for instructions on how to '
+              're-install Flutter. If this issue persists, add your Flutter SDK '
+              'directory to your antivirus exclusions.',
+        ),
       );
     });
   });

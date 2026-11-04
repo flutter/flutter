@@ -10,6 +10,7 @@ import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/error_handling_io.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -1752,6 +1753,258 @@ void main() {
     final dartSdkVersionFormat = RegExp(r'\d+\.\d+\.\d+(?:-\S+)?');
 
     expect(dartSdkVersionFormat.allMatches(currentDartSdkVersion).length, 1);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/188450.
+  group('Dart SDK cache integrity', () {
+    late FileExceptionHandler exceptionHandler;
+    late FileSystem fileSystem;
+    late BufferLogger logger;
+    late Cache cache;
+    late Directory dartSdkDir;
+    late File engineStamp;
+    late File toolsStamp;
+    late File versionFile;
+
+    setUp(() {
+      exceptionHandler = FileExceptionHandler();
+      final memFs = MemoryFileSystem.test(opHandle: exceptionHandler.opHandle);
+      fileSystem = ErrorHandlingFileSystem(delegate: memFs, platform: FakePlatform());
+      logger = BufferLogger.test();
+      cache = Cache.test(
+        fileSystem: fileSystem,
+        logger: logger,
+        processManager: FakeProcessManager.empty(),
+      );
+      dartSdkDir = cache.getCacheDir('dart-sdk', shouldCreate: false);
+      engineStamp = cache.getStampFileFor('engine-dart-sdk')..createSync(recursive: true);
+      toolsStamp = cache.getStampFileFor('flutter_tools')..createSync(recursive: true);
+      versionFile = (cache.getCacheDir(
+        'dart-sdk/bin/resources/devtools',
+        shouldCreate: false,
+      )..createSync(recursive: true)).childFile('version.json');
+    });
+
+    testWithoutContext('returns devToolsVersion when version.json is valid', () {
+      versionFile.writeAsStringSync('{"version": "2.3.4"}');
+
+      expect(cache.devToolsVersion, '2.3.4');
+      expect(engineStamp.existsSync(), isTrue);
+      expect(toolsStamp.existsSync(), isTrue);
+    });
+
+    testWithoutContext('invalidates stamps and throws ToolExit when version.json is missing', () {
+      expect(
+        () => cache.devToolsVersion,
+        throwsToolExit(message: 'Could not read the DevTools version from ${versionFile.path}.'),
+      );
+      expect(engineStamp.existsSync(), isFalse);
+      expect(toolsStamp.existsSync(), isFalse);
+      expect(dartSdkDir.existsSync(), isTrue);
+      expect(logger.traceText, contains('Failed to read DevTools version file'));
+    });
+
+    testWithoutContext(
+      'invalidates stamps and throws ToolExit when version.json cannot be read',
+      () {
+        versionFile.writeAsStringSync('{"version": "2.3.4"}');
+        exceptionHandler.addError(
+          versionFile,
+          FileSystemOp.read,
+          const FileSystemException('Permission denied', '', OSError('Permission denied', 13)),
+        );
+
+        expect(
+          () => cache.devToolsVersion,
+          throwsToolExit(message: 'Could not read the DevTools version from ${versionFile.path}.'),
+        );
+        expect(engineStamp.existsSync(), isFalse);
+        expect(toolsStamp.existsSync(), isFalse);
+        expect(dartSdkDir.existsSync(), isTrue);
+        expect(logger.traceText, contains('Failed to read DevTools version file'));
+      },
+    );
+
+    for (final content in const <String>[
+      '{invalid json}',
+      '[]',
+      '{"not-version": "1.0.0"}',
+      '{"version": null}',
+      '{"version": 123}',
+      '{"version": ""}',
+      '{"version": "   "}',
+    ]) {
+      testWithoutContext(
+        'invalidates stamps and throws ToolExit when version.json contains $content',
+        () {
+          versionFile.writeAsStringSync(content);
+
+          expect(
+            () => cache.devToolsVersion,
+            throwsToolExit(
+              message: 'Could not read the DevTools version from ${versionFile.path}.',
+            ),
+          );
+          expect(engineStamp.existsSync(), isFalse);
+          expect(toolsStamp.existsSync(), isFalse);
+          expect(dartSdkDir.existsSync(), isTrue);
+        },
+      );
+    }
+
+    testWithoutContext('instructs user to delete cache directory when stamps are already absent', () {
+      engineStamp.deleteSync();
+      toolsStamp.deleteSync();
+
+      expect(
+        () => cache.devToolsVersion,
+        throwsToolExit(
+          message:
+              'Please delete ${cache.getRoot().path} and re-run your command to re-download the Dart SDK.',
+        ),
+      );
+    });
+
+    testWithoutContext('instructs user to delete cache directory when stamp deletion fails on read-only cache', () {
+      exceptionHandler.addError(
+        engineStamp,
+        FileSystemOp.delete,
+        const FileSystemException(
+          'Read-only file system',
+          '',
+          OSError('Read-only file system', 30),
+        ),
+      );
+      exceptionHandler.addError(
+        toolsStamp,
+        FileSystemOp.delete,
+        const FileSystemException(
+          'Read-only file system',
+          '',
+          OSError('Read-only file system', 30),
+        ),
+      );
+
+      expect(
+        () => cache.devToolsVersion,
+        throwsToolExit(
+          message:
+              'Please delete ${cache.getRoot().path} and re-run your command to re-download the Dart SDK.',
+        ),
+      );
+      expect(logger.traceText, contains('Failed to delete engine-dart-sdk.stamp'));
+      expect(logger.traceText, contains('Failed to delete flutter_tools.stamp'));
+    });
+  });
+
+  group('Cache.invalidateDartSdkStampsAt', () {
+    late FileExceptionHandler exceptionHandler;
+    late FileSystem fileSystem;
+    late BufferLogger logger;
+    late Directory cacheDir;
+    late File engineStamp;
+    late File toolsStamp;
+
+    setUp(() {
+      exceptionHandler = FileExceptionHandler();
+      final memFs = MemoryFileSystem.test(opHandle: exceptionHandler.opHandle);
+      fileSystem = ErrorHandlingFileSystem(delegate: memFs, platform: FakePlatform());
+      logger = BufferLogger.test();
+      cacheDir = fileSystem.directory('/flutter/bin/cache')..createSync(recursive: true);
+      engineStamp = cacheDir.childFile('engine-dart-sdk.stamp')..createSync();
+      toolsStamp = cacheDir.childFile('flutter_tools.stamp')..createSync();
+    });
+
+    testWithoutContext('deletes both stamps when present and returns true', () {
+      expect(Cache.invalidateDartSdkStampsAt(cacheDir, logger: logger), isTrue);
+      expect(engineStamp.existsSync(), isFalse);
+      expect(toolsStamp.existsSync(), isFalse);
+    });
+
+    testWithoutContext('returns false when stamps are already absent', () {
+      engineStamp.deleteSync();
+      toolsStamp.deleteSync();
+
+      expect(Cache.invalidateDartSdkStampsAt(cacheDir, logger: logger), isFalse);
+    });
+
+    testWithoutContext(
+      'deletes second stamp and returns false if first stamp deletion throws FileSystemException',
+      () {
+        exceptionHandler.addError(
+          engineStamp,
+          FileSystemOp.delete,
+          const FileSystemException('Permission denied', '', OSError('Permission denied', 13)),
+        );
+
+        expect(Cache.invalidateDartSdkStampsAt(cacheDir, logger: logger), isFalse);
+        expect(logger.traceText, contains('Failed to delete engine-dart-sdk.stamp'));
+        expect(toolsStamp.existsSync(), isFalse);
+        expect(engineStamp.existsSync(), isTrue);
+      },
+    );
+
+    testWithoutContext(
+      'returns false and logs trace when all stamp deletions throw FileSystemException',
+      () {
+        exceptionHandler.addError(
+          engineStamp,
+          FileSystemOp.delete,
+          const FileSystemException('Permission denied', '', OSError('Permission denied', 13)),
+        );
+        exceptionHandler.addError(
+          toolsStamp,
+          FileSystemOp.delete,
+          const FileSystemException('Permission denied', '', OSError('Permission denied', 13)),
+        );
+
+        expect(Cache.invalidateDartSdkStampsAt(cacheDir, logger: logger), isFalse);
+        expect(logger.traceText, contains('Failed to delete engine-dart-sdk.stamp'));
+        expect(logger.traceText, contains('Failed to delete flutter_tools.stamp'));
+      },
+    );
+  });
+
+  group('Cache.formatDartSdkCacheCorruptionMessage', () {
+    testWithoutContext('formats message when invalidated: true', () {
+      final fileSystem = MemoryFileSystem.test();
+      final Directory cacheDir = fileSystem.directory('/flutter/bin/cache');
+      final String formatted = Cache.formatDartSdkCacheCorruptionMessage(
+        cacheDir: cacheDir,
+        invalidated: true,
+        message: 'Dart binary missing.',
+      );
+
+      expect(formatted, contains('Dart binary missing.'));
+      expect(
+        formatted,
+        contains(
+          'The Dart SDK cache appears to be incomplete (often caused by antivirus software quarantining files) and has been invalidated.\n'
+          'Please re-run your command to automatically re-download the Dart SDK. '
+          'If this issue persists, add your Flutter SDK directory to your antivirus exclusions.',
+        ),
+      );
+    });
+
+    testWithoutContext('formats message when invalidated: false with cacheDir', () {
+      final fileSystem = MemoryFileSystem.test();
+      final Directory cacheDir = fileSystem.directory('/flutter/bin/cache');
+      final String formatted = Cache.formatDartSdkCacheCorruptionMessage(
+        cacheDir: cacheDir,
+        invalidated: false,
+        message: 'Dart binary missing.',
+      );
+
+      expect(formatted, contains('Dart binary missing.'));
+      expect(
+        formatted,
+        contains(
+          'The Dart SDK cache appears to be incomplete or corrupted (often caused by antivirus software quarantining files).\n'
+          'Please delete ${cacheDir.path} and re-run your command to re-download the Dart SDK. '
+          'If this issue persists, add your Flutter SDK directory to your antivirus exclusions.',
+        ),
+      );
+    });
   });
 
   group('AndroidMavenArtifacts', () {

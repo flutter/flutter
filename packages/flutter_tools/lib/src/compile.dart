@@ -22,6 +22,7 @@ import 'base/process.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
 import 'bundle.dart';
+import 'cache.dart';
 import 'convert.dart';
 import 'dart/package_map.dart';
 
@@ -350,32 +351,14 @@ class KernelCompiler {
           );
     }
 
-    final List<String> commandToStartFrontendServer;
-    if (frontendServerStarterPath != null && frontendServerStarterPath.isNotEmpty) {
-      final String engineDartPath = _artifacts.getArtifactPath(
-        Artifact.engineDartBinary,
-        platform: platform,
-      );
-      if (!_processManager.canRun(engineDartPath)) {
-        throwToolExit('Unable to find Dart binary at $engineDartPath');
-      }
-      commandToStartFrontendServer = <String>[engineDartPath, frontendServerStarterPath];
-    } else {
-      final String engineDartAotRuntimePath = _artifacts.getArtifactPath(
-        Artifact.engineDartAotRuntime,
-        platform: platform,
-      );
-      if (!_processManager.canRun(engineDartAotRuntimePath)) {
-        throwToolExit('Unable to find dartaotruntime binary at $engineDartAotRuntimePath');
-      }
-      commandToStartFrontendServer = <String>[
-        engineDartAotRuntimePath,
-        _artifacts.getArtifactPath(
-          Artifact.frontendServerSnapshotForEngineDartSdk,
-          platform: platform,
-        ),
-      ];
-    }
+    final List<String> commandToStartFrontendServer = _commandToStartFrontendServer(
+      artifacts: _artifacts,
+      fileSystem: _fileSystem,
+      frontendServerStarterPath: frontendServerStarterPath,
+      logger: _logger,
+      platform: platform,
+      processManager: _processManager,
+    );
 
     final List<String> command =
         commandToStartFrontendServer +
@@ -436,6 +419,65 @@ class KernelCompiler {
     }
     return null;
   }
+}
+
+/// Returns the command used to start the frontend server.
+///
+/// When [frontendServerStarterPath] is provided, the frontend server is run
+/// from source with the Dart binary. Otherwise its AOT snapshot is run with
+/// `dartaotruntime`, which must be present in the Flutter cache. If it is not
+/// (for example because the cache is corrupted, partially downloaded, or
+/// quarantined by antivirus software), the tool exits with an actionable
+/// message instead of crashing when the process fails to start.
+List<String> _commandToStartFrontendServer({
+  required Artifacts artifacts,
+  required FileSystem fileSystem,
+  required String? frontendServerStarterPath,
+  required Logger logger,
+  required TargetPlatform? platform,
+  required ProcessManager processManager,
+}) {
+  if (frontendServerStarterPath != null && frontendServerStarterPath.isNotEmpty) {
+    final String engineDartPath = artifacts.getArtifactPath(
+      Artifact.engineDartBinary,
+      platform: platform,
+    );
+    if (!processManager.canRun(engineDartPath)) {
+      throwToolExit('Unable to find Dart binary at $engineDartPath');
+    }
+    return <String>[engineDartPath, frontendServerStarterPath];
+  }
+  final String engineDartAotRuntimePath = artifacts.getArtifactPath(
+    Artifact.engineDartAotRuntime,
+    platform: platform,
+  );
+  if (!processManager.canRun(engineDartAotRuntimePath)) {
+    if (artifacts.usesLocalArtifacts) {
+      if (artifacts.localEngineInfo != null) {
+        throwToolExit(
+          'Unable to find dartaotruntime binary at $engineDartAotRuntimePath. '
+          'Rebuild your local engine to generate the missing binary.',
+        );
+      }
+      throwToolExit('Unable to find dartaotruntime binary at $engineDartAotRuntimePath.');
+    }
+    // Derive the cache directory from the Dart SDK path's parent so that the
+    // public Artifacts interface does not require changes.
+    final String dartSdkDir = artifacts.getArtifactPath(Artifact.engineDartSdkPath);
+    final Directory cacheDir = fileSystem.directory(dartSdkDir).parent;
+    final bool invalidated = Cache.invalidateDartSdkStampsAt(cacheDir, logger: logger);
+    throwToolExit(
+      Cache.formatDartSdkCacheCorruptionMessage(
+        cacheDir: cacheDir,
+        invalidated: invalidated,
+        message: 'Unable to find dartaotruntime binary at $engineDartAotRuntimePath.',
+      ),
+    );
+  }
+  return <String>[
+    engineDartAotRuntimePath,
+    artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk, platform: platform),
+  ];
 }
 
 /// Class that allows to serialize compilation requests to the compiler.
@@ -765,6 +807,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
        fileSystemScheme = buildInfo.fileSystemScheme,
        assumeInitializeFromDillUpToDate = buildInfo.assumeInitializeFromDillUpToDate,
        frontendServerStarterPath = buildInfo.frontendServerStarterPath,
+       _fileSystem = fileSystem,
        _logger = logger,
        _stdoutHandler = stdoutHandler ?? StdoutHandler(logger: logger, fileSystem: fileSystem),
        dartDefines = buildInfo.dartDefines,
@@ -784,6 +827,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
   }
 
   final Logger _logger;
+  final FileSystem _fileSystem;
   final ProcessManager _processManager;
   final Artifacts artifacts;
   final Platform _platform;
@@ -958,21 +1002,14 @@ class DefaultResidentCompiler implements ResidentCompiler {
     final TargetPlatform? platform = (targetModel == TargetModel.dartdevc)
         ? TargetPlatform.web_javascript
         : null;
-    late final List<String> commandToStartFrontendServer;
-    if (frontendServerStarterPath != null && frontendServerStarterPath!.isNotEmpty) {
-      commandToStartFrontendServer = <String>[
-        artifacts.getArtifactPath(Artifact.engineDartBinary, platform: platform),
-        frontendServerStarterPath!,
-      ];
-    } else {
-      commandToStartFrontendServer = <String>[
-        artifacts.getArtifactPath(Artifact.engineDartAotRuntime, platform: platform),
-        artifacts.getArtifactPath(
-          Artifact.frontendServerSnapshotForEngineDartSdk,
-          platform: platform,
-        ),
-      ];
-    }
+    final List<String> commandToStartFrontendServer = _commandToStartFrontendServer(
+      artifacts: artifacts,
+      fileSystem: _fileSystem,
+      frontendServerStarterPath: frontendServerStarterPath,
+      logger: _logger,
+      platform: platform,
+      processManager: _processManager,
+    );
 
     final command = <String>[
       ...commandToStartFrontendServer,

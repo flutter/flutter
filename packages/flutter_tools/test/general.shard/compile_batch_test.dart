@@ -14,6 +14,7 @@ import 'package:package_config/package_config.dart';
 
 import '../src/common.dart';
 import '../src/fake_process_manager.dart';
+import '../src/fakes.dart';
 
 void main() {
   testWithoutContext('StdoutHandler can parse output for successful batch compilation', () async {
@@ -93,6 +94,212 @@ void main() {
       expect((await output)?.outputFilename, '');
     },
   );
+
+  testWithoutContext('KernelCompiler exits the tool and invalidates stamps when dartaotruntime cannot run', () async {
+    final fileSystem = MemoryFileSystem.test();
+    final Directory cacheDir = fileSystem.directory('/bin/cache')..createSync(recursive: true);
+    final File engineStamp = cacheDir.childFile('engine-dart-sdk.stamp')..createSync();
+    final File toolsStamp = cacheDir.childFile('flutter_tools.stamp')..createSync();
+    final logger = BufferLogger.test();
+    final stdoutHandler = StdoutHandler(logger: logger, fileSystem: fileSystem);
+
+    final kernelCompiler = KernelCompiler(
+      artifacts: FakeArtifacts(fileSystem: fileSystem, sdkPath: '/bin/cache/dart-sdk'),
+      fileSystem: fileSystem,
+      fileSystemRoots: <String>[],
+      fileSystemScheme: '',
+      logger: logger,
+      processManager: FakeProcessManager.empty()
+        ..excludedExecutables.add('Artifact.engineDartAotRuntime'),
+      stdoutHandler: stdoutHandler,
+    );
+
+    await expectLater(
+      kernelCompiler.compile(
+        sdkRoot: '/path/to/sdkroot',
+        mainPath: '/path/to/main.dart',
+        buildMode: BuildMode.debug,
+        trackWidgetCreation: false,
+        dartDefines: const <String>[],
+        packageConfig: PackageConfig.empty,
+        packagesPath: '.dart_tool/package_config.json',
+      ),
+      throwsToolExit(
+        message:
+            'Unable to find dartaotruntime binary at Artifact.engineDartAotRuntime.\n'
+            'The Dart SDK cache appears to be incomplete (often caused by antivirus '
+            'software quarantining files) and has been invalidated.\n'
+            'Please re-run your command to automatically re-download the Dart SDK. '
+            'If this issue persists, add your Flutter SDK directory to your antivirus exclusions.',
+      ),
+    );
+    expect(engineStamp.existsSync(), isFalse);
+    expect(toolsStamp.existsSync(), isFalse);
+  });
+
+  testWithoutContext('KernelCompiler exits the tool with cache deletion advice when stamps cannot be invalidated', () async {
+    final fileSystem = MemoryFileSystem.test();
+    final logger = BufferLogger.test();
+    final stdoutHandler = StdoutHandler(logger: logger, fileSystem: fileSystem);
+
+    final kernelCompiler = KernelCompiler(
+      artifacts: FakeArtifacts(fileSystem: fileSystem, sdkPath: '/bin/cache/dart-sdk'),
+      fileSystem: fileSystem,
+      fileSystemRoots: <String>[],
+      fileSystemScheme: '',
+      logger: logger,
+      processManager: FakeProcessManager.empty()
+        ..excludedExecutables.add('Artifact.engineDartAotRuntime'),
+      stdoutHandler: stdoutHandler,
+    );
+
+    await expectLater(
+      kernelCompiler.compile(
+        sdkRoot: '/path/to/sdkroot',
+        mainPath: '/path/to/main.dart',
+        buildMode: BuildMode.debug,
+        trackWidgetCreation: false,
+        dartDefines: const <String>[],
+        packageConfig: PackageConfig.empty,
+        packagesPath: '.dart_tool/package_config.json',
+      ),
+      throwsToolExit(
+        message:
+            'Unable to find dartaotruntime binary at Artifact.engineDartAotRuntime.\n'
+            'The Dart SDK cache appears to be incomplete or corrupted (often caused '
+            'by antivirus software quarantining files).\n'
+            'Please delete /bin/cache and re-run your command '
+            'to re-download the Dart SDK. '
+            'If this issue persists, add your Flutter SDK directory to your antivirus exclusions.',
+      ),
+    );
+  });
+
+  testWithoutContext('KernelCompiler exits the tool with engine rebuild advice when dartaotruntime cannot run on local engine', () async {
+    final fileSystem = MemoryFileSystem.test();
+    final logger = BufferLogger.test();
+    final stdoutHandler = StdoutHandler(logger: logger, fileSystem: fileSystem);
+
+    final kernelCompiler = KernelCompiler(
+      artifacts: Artifacts.testLocalEngine(
+        localEngine: 'host_debug',
+        localEngineHost: 'host_debug',
+        fileSystem: fileSystem,
+      ),
+      fileSystem: fileSystem,
+      fileSystemRoots: <String>[],
+      fileSystemScheme: '',
+      logger: logger,
+      processManager: FakeProcessManager.empty()
+        ..excludedExecutables.add('Artifact.engineDartAotRuntime'),
+      stdoutHandler: stdoutHandler,
+    );
+
+    await expectLater(
+      kernelCompiler.compile(
+        sdkRoot: '/path/to/sdkroot',
+        mainPath: '/path/to/main.dart',
+        buildMode: BuildMode.debug,
+        trackWidgetCreation: false,
+        dartDefines: const <String>[],
+        packageConfig: PackageConfig.empty,
+        packagesPath: '.dart_tool/package_config.json',
+      ),
+      throwsToolExit(
+        message:
+            'Unable to find dartaotruntime binary at Artifact.engineDartAotRuntime. '
+            'Rebuild your local engine to generate the missing binary.',
+      ),
+    );
+  });
+
+  testWithoutContext(
+    'KernelCompiler exits the tool when Dart binary cannot run with frontendServerStarterPath',
+    () async {
+      final fileSystem = MemoryFileSystem.test();
+      final logger = BufferLogger.test();
+      final stdoutHandler = StdoutHandler(logger: logger, fileSystem: fileSystem);
+
+      final kernelCompiler = KernelCompiler(
+        artifacts: Artifacts.test(fileSystem: fileSystem),
+        fileSystem: fileSystem,
+        fileSystemRoots: <String>[],
+        fileSystemScheme: '',
+        logger: logger,
+        processManager: FakeProcessManager.empty()
+          ..excludedExecutables.add('Artifact.engineDartBinary'),
+        stdoutHandler: stdoutHandler,
+      );
+
+      await expectLater(
+        kernelCompiler.compile(
+          sdkRoot: '/path/to/sdkroot',
+          mainPath: '/path/to/main.dart',
+          frontendServerStarterPath: '/path/to/frontend_server_starter.dart',
+          buildMode: BuildMode.debug,
+          trackWidgetCreation: false,
+          dartDefines: const <String>[],
+          packageConfig: PackageConfig.empty,
+          packagesPath: '.dart_tool/package_config.json',
+        ),
+        throwsToolExit(message: 'Unable to find Dart binary at Artifact.engineDartBinary'),
+      );
+    },
+  );
+
+  testWithoutContext('KernelCompiler runs the frontend server from source with the Dart binary '
+      'when frontendServerStarterPath is provided', () async {
+    final logger = BufferLogger.test();
+    final stdoutHandler = StdoutHandler(logger: logger, fileSystem: MemoryFileSystem.test());
+    final completer = Completer<void>();
+    final processManager = FakeProcessManager.list(<FakeCommand>[
+      FakeCommand(
+        command: const <String>[
+          'Artifact.engineDartBinary',
+          '/path/to/frontend_server_starter.dart',
+          '--sdk-root',
+          '/path/to/sdkroot/',
+          '--target=flutter',
+          '--no-print-incremental-dependencies',
+          '-Ddart.vm.profile=false',
+          '-Ddart.vm.product=false',
+          '--enable-asserts',
+          '--no-link-platform',
+          '--packages',
+          '.dart_tool/package_config.json',
+          '--verbosity=error',
+          'file:///path/to/main.dart',
+        ],
+        completer: completer,
+      ),
+    ])..excludedExecutables.add('Artifact.engineDartAotRuntime');
+
+    final kernelCompiler = KernelCompiler(
+      artifacts: Artifacts.test(),
+      fileSystem: MemoryFileSystem.test(),
+      fileSystemRoots: <String>[],
+      fileSystemScheme: '',
+      logger: logger,
+      processManager: processManager,
+      stdoutHandler: stdoutHandler,
+    );
+
+    final Future<CompilerOutput?> output = kernelCompiler.compile(
+      sdkRoot: '/path/to/sdkroot',
+      mainPath: '/path/to/main.dart',
+      frontendServerStarterPath: '/path/to/frontend_server_starter.dart',
+      buildMode: BuildMode.debug,
+      trackWidgetCreation: false,
+      dartDefines: const <String>[],
+      packageConfig: PackageConfig.empty,
+      packagesPath: '.dart_tool/package_config.json',
+    );
+    stdoutHandler.compilerOutput?.complete(const CompilerOutput('', 0, <Uri>[]));
+    completer.complete();
+
+    expect((await output)?.outputFilename, '');
+    expect(processManager, hasNoRemainingExpectations);
+  });
 
   testWithoutContext('KernelCompiler returns null if StdoutHandler returns null', () async {
     final logger = BufferLogger.test();

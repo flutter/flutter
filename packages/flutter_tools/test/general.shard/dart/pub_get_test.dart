@@ -21,7 +21,49 @@ import '../../src/fakes.dart';
 import '../../src/package_config.dart';
 
 void main() {
-  testWithoutContext('Throws a tool exit if pub cannot be run', () async {
+  testWithoutContext('Throws a tool exit and invalidates stamps if pub cannot be run', () async {
+    final processManager = FakeProcessManager.empty();
+    final logger = BufferLogger.test();
+    final fileSystem = MemoryFileSystem.test();
+    processManager.excludedExecutables.add('bin/cache/dart-sdk/bin/dart');
+
+    fileSystem.file('pubspec.yaml').createSync();
+    final File engineStamp = fileSystem.file('bin/cache/engine-dart-sdk.stamp')
+      ..createSync(recursive: true);
+    final File toolsStamp = fileSystem.file('bin/cache/flutter_tools.stamp')
+      ..createSync(recursive: true);
+
+    final pub = Pub.test(
+      flutterRoot: '',
+      fileSystem: fileSystem,
+      logger: logger,
+      processManager: processManager,
+      platform: FakePlatform(),
+      botDetector: const FakeBotDetector(false),
+      stdio: FakeStdio(),
+    );
+
+    await expectLater(
+      () => pub.get(
+        project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+        context: PubContext.pubGet,
+        checkUpToDate: true,
+      ),
+      throwsToolExit(
+        message:
+            'The Dart SDK at "bin/cache/dart-sdk/bin/dart" cannot be executed. '
+            'Check that the Flutter SDK directory has read and execute permissions for the current user.\n'
+            'The Dart SDK cache appears to be incomplete (often caused by antivirus '
+            'software quarantining files) and has been invalidated.\n'
+            'Please re-run your command to automatically re-download the Dart SDK. '
+            'If this issue persists, add your Flutter SDK directory to your antivirus exclusions.',
+      ),
+    );
+    expect(engineStamp.existsSync(), isFalse);
+    expect(toolsStamp.existsSync(), isFalse);
+  });
+
+  testWithoutContext('Throws a tool exit advising cache deletion if pub cannot be run and stamps are absent', () async {
     final processManager = FakeProcessManager.empty();
     final logger = BufferLogger.test();
     final fileSystem = MemoryFileSystem.test();
@@ -46,7 +88,13 @@ void main() {
         checkUpToDate: true,
       ),
       throwsToolExit(
-        message: 'Your Flutter SDK download may be corrupt or missing permissions to run',
+        message:
+            'The Dart SDK at "bin/cache/dart-sdk/bin/dart" cannot be executed. '
+            'Check that the Flutter SDK directory has read and execute permissions for the current user.\n'
+            'The Dart SDK cache appears to be incomplete or corrupted (often caused '
+            'by antivirus software quarantining files).\n'
+            'Please delete bin/cache and re-run your command to re-download the Dart SDK. '
+            'If this issue persists, add your Flutter SDK directory to your antivirus exclusions.',
       ),
     );
   });
