@@ -114,7 +114,7 @@ Map<String, String> bazelEnvironment() {
 /// `bazelisk test`'s options: the prebuilt engine; every target built and
 /// run whatever fails, failures' output only; the targets of another host
 /// skipped rather than refused (the tool's apple shard is declared on every
-/// host); the bots' .bazelrc config and sandbox location.
+/// host); the bots' .bazelrc config, remote execution and sandbox location.
 List<String> bazelTestOptions() {
   return <String>[
     if (isLuci) '--config=ci',
@@ -122,8 +122,36 @@ List<String> bazelTestOptions() {
     '--keep_going',
     '--test_output=errors',
     '--skip_incompatible_explicit_targets',
+    ...bazelRbeOptions(),
     ..._botSandboxOptions(),
   ];
+}
+
+/// The environment variable that turns remote execution off for a run on a
+/// bot: `FLUTTER_BAZEL_RBE=0` (bazel_ci.py's RBE_ENV).
+const String kBazelRbeEnvironmentVariable = 'FLUTTER_BAZEL_RBE';
+
+/// `--config=rbe` on a Linux bot: the root .bazelrc's remote execution on
+/// Flutter's RBE instance, what bazel_ci.py's rbe_options gives a Linux
+/// bot's engine builds. A shard's kernel compiles -- one per test file,
+/// against the prebuilt platform -- run on the workers, 200 at a time, and
+/// stay in the instance's cache for every later build of the same inputs
+/// (a retry, a rebase that touches nothing of theirs); the tests stay on
+/// the bot (the config's TestRunner strategy), their kernels downloaded. A
+/// Mac builds locally: the workers are Linux x64. Nothing for a developer,
+/// whose `gcloud` credentials the config would need; nothing when
+/// [kBazelRbeEnvironmentVariable] says `0`.
+List<String> bazelRbeOptions({bool? onBot, bool? onLinux, Map<String, String>? environment}) {
+  onBot ??= isLuci;
+  onLinux ??= Platform.isLinux;
+  environment ??= Platform.environment;
+  if (!onBot || !onLinux) {
+    return const <String>[];
+  }
+  if (const <String>{'0', 'false', 'no'}.contains(environment[kBazelRbeEnvironmentVariable])) {
+    return const <String>[];
+  }
+  return const <String>['--config=rbe'];
 }
 
 /// `--sandbox_base=/dev/shm` on a bot with a tmpfs of 16 GB or more there

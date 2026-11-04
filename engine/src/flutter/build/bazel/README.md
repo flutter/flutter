@@ -1314,7 +1314,13 @@ impeller 17, misc 19, tool_tests_general 12 -- with every case in
 ResultDB ("Reported 12,764 test result(s) of 532 test target(s)" for
 libraries). A stand-in on a workstation (a fresh output root, 8 CPUs, no
 disk cache) had given 16 min 15 for widgets, the Mac tester's Apple
-Silicon 9 min 46.
+Silicon 9 min 46. Those times are the 8-core bot compiling every kernel
+itself; on a Linux bot the shard now builds with `--config=rbe`
+(`bazelRbeOptions`, the config bazel_ci.py gives the engine builders: the
+kernel compiles on Flutter's RBE workers, 200 at a time, cached there for
+the next build of the same inputs; the tests on the bot, their kernels
+downloaded; `FLUTTER_BAZEL_RBE=0` turns it off; a Mac builds locally, the
+workers being Linux x64), whose times the next presubmit gives.
 
 ## The web engine's unit tests: felt's suites
 
