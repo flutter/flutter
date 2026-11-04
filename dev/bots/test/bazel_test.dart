@@ -188,22 +188,62 @@ void main() {
   });
 
   group('the results of a run', () {
-    test("bazelTestResultsFile is the target's JSON reporter under bazel-testlogs", () {
-      expect(
-        bazelTestResultsFile('/logs', '//packages/flutter_tools:test_general.shard_foo_test').path,
-        path.join(
-          '/logs',
+    test("bazelTestResultsFiles are the target's JSON reporter files under bazel-testlogs", () {
+      final Directory logs = Directory.systemTemp.createTempSync('bazel_test.');
+      try {
+        // A target that left none; one that ran whole; one that ran as three
+        // shards, of which the second left nothing, after an earlier run of
+        // two whose directories stayed.
+        expect(bazelTestResultsFiles(logs.path, '//packages/flutter_tools:test_a_test'), isEmpty);
+        final String whole = path.join(
+          logs.path,
           'packages',
           'flutter_tools',
           'test_general.shard_foo_test',
           'test.outputs',
           'test_results.json',
-        ),
-      );
-      expect(
-        bazelTestResultsFile('/logs', '//:something_test').path,
-        path.join('/logs', 'something_test', 'test.outputs', 'test_results.json'),
-      );
+        );
+        File(whole)
+          ..createSync(recursive: true)
+          ..writeAsStringSync('');
+        expect(
+          bazelTestResultsFiles(
+            logs.path,
+            '//packages/flutter_tools:test_general.shard_foo_test',
+          ).map((File file) => file.path),
+          <String>[whole],
+        );
+        String shard(int index) => path.join(
+          logs.path,
+          'something_test',
+          'shard_${index}_of_3',
+          'test.outputs',
+          'test_results.json',
+        );
+        for (final index in <int>[3, 1]) {
+          File(shard(index))
+            ..createSync(recursive: true)
+            ..writeAsStringSync('');
+        }
+        Directory(path.dirname(path.dirname(shard(2)))).createSync(recursive: true);
+        File(
+            path.join(
+              logs.path,
+              'something_test',
+              'shard_1_of_2',
+              'test.outputs',
+              'test_results.json',
+            ),
+          )
+          ..createSync(recursive: true)
+          ..writeAsStringSync('');
+        expect(
+          bazelTestResultsFiles(logs.path, '//:something_test').map((File file) => file.path),
+          <String>[shard(1), shard(3)],
+        );
+      } finally {
+        logs.deleteSync(recursive: true);
+      }
     });
 
     // A JSON reporter file naming one suite at [suitePath].
@@ -267,30 +307,54 @@ void main() {
         // flutter_test's (the suite by its repository path); a third target
         // left none.
         resultsOf(
-          bazelTestResultsFile(testlogs, '//dev/bots:test_x_test').parent
+          Directory(path.join(testlogs, 'dev', 'bots', 'test_x_test', 'test.outputs'))
             ..createSync(recursive: true),
           'test/x_test.dart',
         );
         resultsOf(
-          bazelTestResultsFile(testlogs, '//packages/flutter/test/widgets:y_test').parent
-            ..createSync(recursive: true),
+          Directory(
+            path.join(testlogs, 'packages', 'flutter', 'test', 'widgets', 'y_test', 'test.outputs'),
+          )..createSync(recursive: true),
           'packages/flutter/test/widgets/y_test.dart',
         );
+        // A sharded target: a file per shard, each its own ordinal.
+        for (final shard in <int>[1, 2]) {
+          resultsOf(
+            Directory(
+              path.join(
+                testlogs,
+                'packages',
+                'flutter',
+                'test',
+                'widgets',
+                'w_test',
+                'shard_${shard}_of_2',
+                'test.outputs',
+              ),
+            )..createSync(recursive: true),
+            'packages/flutter/test/widgets/w_test.dart',
+          );
+        }
         final BazelTestResults results = bazelTestResults(testlogs, <String>{
           '//dev/bots:test_x_test',
           '//packages/flutter/test/widgets:y_test',
+          '//packages/flutter/test/widgets:w_test',
           '//packages/flutter/test/widgets:z_test',
         }, root: root.path);
-        expect(results.files, 2);
+        expect(results.files, 4);
         expect(results.missing, 1);
         expect(results.results.map((LuciTestResult result) => result.testId.moduleName), <String>[
           'dev/bots/test/x_test.dart',
+          'packages/flutter/test/widgets/w_test.dart',
+          'packages/flutter/test/widgets/w_test.dart',
           'packages/flutter/test/widgets/y_test.dart',
         ]);
         expect(results.results.map((LuciTestResult result) => result.status), everyElement('PASS'));
         expect(results.results.map((LuciTestResult result) => result.resultId), <String>[
           '0-0',
           '1-0',
+          '2-0',
+          '3-0',
         ]);
       } finally {
         root.deleteSync(recursive: true);

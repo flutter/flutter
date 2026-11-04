@@ -924,7 +924,10 @@ offline, as flutter_goldens does wherever Gold is unreachable). Three macros
 give a tree in one call: `flutter_tests` (one kernel and one run per file,
 `<test>_impeller` runs too when asked, the nearest `flutter_test_config.dart`
 per file as flutter_tools' `findTestConfigFile` picks it, `flaky` and `large`
-files), `framework_tests` (`packages/flutter/test/framework_tests.bzl`: the
+files, `shards` -- a file's tests in Bazel shards, contiguous slices as
+test_core's `--total-shards` cuts them, for the gallery's smoke test whose
+two tests take minutes each; the bootstrap also honours `bazel test
+--test_filter=<regex>` over the tests' names), `framework_tests` (`packages/flutter/test/framework_tests.bzl`: the
 directories of packages/flutter/test over the tree's shared configurations,
 prelude, assets and helpers) and `flutter_package_tests`
 (`build_defs/dart/flutter_package_tests.bzl`: any other package, from its

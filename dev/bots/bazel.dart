@@ -36,6 +36,7 @@
 
 import 'dart:ffi' show Abi;
 import 'dart:io';
+import 'dart:math' as math;
 import 'dart:typed_data';
 
 import 'package:crypto/crypto.dart';
@@ -588,7 +589,7 @@ class BazelTestResults {
 }
 
 /// The ResultDB results of the test targets [labels] from their JSON
-/// reporter files under [testlogs] ([bazelTestResultsFile]). A target
+/// reporter files under [testlogs] ([bazelTestResultsFiles]). A target
 /// without one (not built, or incompatible and skipped) is counted and
 /// passed over; a file that does not parse (a run cut short) is reported
 /// and passed over. [root] is the repository root ([flutterRoot]).
@@ -598,53 +599,80 @@ BazelTestResults bazelTestResults(String testlogs, Set<String> labels, {String? 
   var files = 0;
   var missing = 0;
   for (final String label in labels.toList()..sort()) {
-    final File json = bazelTestResultsFile(testlogs, label);
-    if (!json.existsSync()) {
+    final List<File> jsons = bazelTestResultsFiles(testlogs, label);
+    if (jsons.isEmpty) {
       missing++;
       continue;
     }
-    try {
-      final parsed = TestFileReporterResults.fromFile(json);
-      // The result ids are numbered per file; two targets of one file (a
-      // test and its no-creation-locations build) would repeat them for the
-      // same test id, so each file's are prefixed with its ordinal: unique
-      // within the one request all of them go out in.
-      results.addAll(<LuciTestResult>[
-        for (final LuciTestResult result in convertToLuciTestResultsFormat(
-          parsed,
-          workingDirectory: bazelSuiteWorkingDirectory(label, parsed, root: root),
-          rootDirectory: root,
-        ))
-          LuciTestResult(
-            testId: result.testId,
-            resultId: '$files-${result.resultId}',
-            expected: result.expected,
-            status: result.status,
-            duration: result.duration,
-          ),
-      ]);
-      files++;
-    } on FormatException catch (error) {
-      print('Could not read ${json.path} ($label): $error');
+    for (final json in jsons) {
+      try {
+        final parsed = TestFileReporterResults.fromFile(json);
+        // The result ids are numbered per file; two targets of one file (a
+        // test and its no-creation-locations build) would repeat them for
+        // the same test id, as would a sharded target's shards, so each
+        // file's are prefixed with its ordinal: unique within the one
+        // request all of them go out in.
+        results.addAll(<LuciTestResult>[
+          for (final LuciTestResult result in convertToLuciTestResultsFormat(
+            parsed,
+            workingDirectory: bazelSuiteWorkingDirectory(label, parsed, root: root),
+            rootDirectory: root,
+          ))
+            LuciTestResult(
+              testId: result.testId,
+              resultId: '$files-${result.resultId}',
+              expected: result.expected,
+              status: result.status,
+              duration: result.duration,
+            ),
+        ]);
+        files++;
+      } on FormatException catch (error) {
+        print('Could not read ${json.path} ($label): $error');
+      }
     }
   }
   return BazelTestResults(results, files, missing);
 }
 
-/// The JSON reporter file of the test target [label] under [testlogs]
-/// (`bazel info bazel-testlogs`): `<package>/<name>/test.outputs/test_results.json`.
-File bazelTestResultsFile(String testlogs, String label) {
+/// The JSON reporter files of the test target [label] under [testlogs]
+/// (`bazel info bazel-testlogs`): `<package>/<name>/test.outputs/test_results.json`,
+/// or one per shard of a sharded target (`shard_count`),
+/// `<package>/<name>/shard_<i>_of_<n>/test.outputs/test_results.json`, in
+/// shard order -- of the largest `n` there, an earlier run's directories
+/// of another count being left behind in a persistent output base. Only
+/// the files that exist.
+List<File> bazelTestResultsFiles(String testlogs, String label) {
   final String package = bazelPackageOf(label);
   final String name = label.substring(label.indexOf(':') + 1);
-  return File(
-    path.joinAll(<String>[
-      testlogs,
-      ...path.posix.split(package),
-      name,
-      'test.outputs',
-      'test_results.json',
-    ]),
-  );
+  final target = Directory(path.joinAll(<String>[testlogs, ...path.posix.split(package), name]));
+  final whole = File(path.join(target.path, 'test.outputs', 'test_results.json'));
+  if (whole.existsSync()) {
+    return <File>[whole];
+  }
+  if (!target.existsSync()) {
+    return const <File>[];
+  }
+  final shard = RegExp(r'^shard_(\d+)_of_(\d+)$');
+  final shards = <int, Map<int, Directory>>{};
+  for (final FileSystemEntity entity in target.listSync()) {
+    final RegExpMatch? match = shard.firstMatch(path.basename(entity.path));
+    if (entity is Directory && match != null) {
+      shards.putIfAbsent(
+        int.parse(match.group(2)!),
+        () => <int, Directory>{},
+      )[int.parse(match.group(1)!)] = entity;
+    }
+  }
+  if (shards.isEmpty) {
+    return const <File>[];
+  }
+  final Map<int, Directory> latest = shards[shards.keys.reduce(math.max)]!;
+  return <File>[
+    for (final int index in latest.keys.toList()..sort())
+      if (File(path.join(latest[index]!.path, 'test.outputs', 'test_results.json')).existsSync())
+        File(path.join(latest[index]!.path, 'test.outputs', 'test_results.json')),
+  ];
 }
 
 /// The directory [parsed]'s suite paths are relative to: the test's package
