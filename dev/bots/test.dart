@@ -206,6 +206,15 @@ const List<String> _bazelIntegrationShards = <String>[
 ];
 const String _bazelWebShard = '//packages/flutter_tools:web_shard';
 
+/// What the tool's tests read from the host besides the SDK facsimile
+/// (BazelShard.passEnvironment): the Java and the Android SDK the project
+/// validator checks (analyze_suggestions_integration_test's General Info).
+const List<String> _bazelToolEnvironment = <String>[
+  'JAVA_HOME',
+  'ANDROID_HOME',
+  'ANDROID_SDK_ROOT',
+];
+
 Future<void> _runGeneralToolTests() async {
   Future<void> runTests(List<String> testPaths, {bool allowNoTests = false}) {
     return runDartTest(
@@ -223,6 +232,7 @@ Future<void> _runGeneralToolTests() async {
 
   if (useBazel) {
     final shard = BazelShard();
+    shard.passEnvironment(_bazelToolEnvironment);
     shard.cover(
       <String>[_bazelGeneralShard],
       root: _toolsPath,
@@ -256,6 +266,7 @@ Future<void> _runCommandsToolTests() async {
     // desktop's and the web's engine artifacts must be in bin/cache.
     await precacheForBazelToolTests();
     final shard = BazelShard();
+    shard.passEnvironment(_bazelToolEnvironment);
     shard.cover(
       _bazelCommandsShards,
       root: _toolsPath,
@@ -289,6 +300,7 @@ Future<void> _runWebToolTests() async {
   if (useBazel) {
     await precacheForBazelToolTests();
     final shard = BazelShard();
+    shard.passEnvironment(_bazelToolEnvironment);
     shard.cover(
       <String>[_bazelWebShard],
       root: _toolsPath,
@@ -332,6 +344,7 @@ Future<void> _runIntegrationToolTests() async {
     // desktop's and the web's engine artifacts must be in bin/cache.
     await precacheForBazelToolTests();
     final shard = BazelShard();
+    shard.passEnvironment(_bazelToolEnvironment);
     shard.cover(
       _bazelIntegrationShards,
       root: _toolsPath,

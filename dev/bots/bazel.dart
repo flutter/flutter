@@ -314,6 +314,16 @@ class _CoveredFiles {
 class BazelShard {
   final List<String> _suites = <String>[];
   final List<_CoveredFiles> _covered = <_CoveredFiles>[];
+  final List<String> _environment = <String>[];
+
+  /// Environment variables of this process the tests see (`--test_env`,
+  /// those that are set): what the step's tests read from the host under
+  /// `dart test`. The tool's integration tests check the project's Java and
+  /// Gradle through JAVA_HOME and the Android SDK through ANDROID_HOME,
+  /// which Bazel's test environment does not carry otherwise.
+  void passEnvironment(List<String> names) {
+    _environment.addAll(names.where(Platform.environment.containsKey));
+  }
 
   /// Suites that run whole, having no `flutter test` or `dart test` step to
   /// split against: a second build of files another step covers
@@ -412,7 +422,14 @@ class BazelShard {
     printProgress('${green}Running ${targets.length} Bazel targets$reset');
     await runCommand(
       bazelisk,
-      <String>[...bazelStartupOptions(), 'test', ...bazelTestOptions(), '--', ...targets],
+      <String>[
+        ...bazelStartupOptions(),
+        'test',
+        ...bazelTestOptions(),
+        for (final String name in _environment) '--test_env=$name',
+        '--',
+        ...targets,
+      ],
       workingDirectory: flutterRoot,
       environment: bazelEnvironment(),
     );
