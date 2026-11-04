@@ -302,7 +302,7 @@ impellerc_compile = rule(
             default = "Impellerc",
         ),
         "_impellerc": attr.label(
-            default = "//engine/src/flutter/impeller/compiler:impellerc",
+            default = "//build_defs/impeller:impellerc",
             executable = True,
             cfg = "exec",
         ),
@@ -836,7 +836,7 @@ impellerc_run = rule(
             default = "Impellerc",
         ),
         "_impellerc": attr.label(
-            default = "//engine/src/flutter/impeller/compiler:impellerc",
+            default = "//build_defs/impeller:impellerc",
             executable = True,
             cfg = "exec",
         ),
