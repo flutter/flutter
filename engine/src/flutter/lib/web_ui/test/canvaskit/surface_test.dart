@@ -300,6 +300,14 @@ void testMain() {
         expect(gl.isContextLost(), isFalse);
         expect(surface.supportsWebGl, isTrue);
 
+        // A single oversized dimension is rejected upfront as well.
+        expect(
+          () => surface.setSize(BitmapSize(100, maxTextureSize + 1)),
+          throwsA(isA<UnsupportedError>()),
+        );
+        expect(identical(surface.canvas, healthyCanvas), isTrue);
+        expect(healthyCanvas.height, 100);
+
         // The surface's recorded size is rolled back, so requesting the
         // previous size again is a no-op.
         surface.setSize(const BitmapSize(100, 100));
@@ -423,6 +431,66 @@ void testMain() {
         onscreenSurface.dispose();
       });
 
+      test('rasterizeToImageBitmaps at a clamping size captures the full picture', () async {
+        final surface = CkOffscreenSurface(OffscreenCanvasProvider());
+        await surface.initialized;
+        surface.setSize(const BitmapSize(100, 100));
+
+        // Only the bottom-right corner is painted, so a clamped (clipped or
+        // stretched) drawing buffer leaves the sampled corner pixel empty.
+        final recorder = ui.PictureRecorder();
+        ui.Canvas(recorder).drawRect(
+          const ui.Rect.fromLTWH(4950, 7006, 10, 10),
+          ui.Paint()..color = const ui.Color(0xFF00FF00),
+        );
+        final List<DomImageBitmap> bitmaps = await surface.rasterizeToImageBitmaps(
+          const BitmapSize(4960, 7016),
+          <ui.Picture>[recorder.endRecording()],
+        );
+
+        final DomImageBitmap bitmap = bitmaps.single;
+        expect(bitmap.width, 4960);
+        expect(bitmap.height, 7016);
+        final DomCanvasRenderingContext2D sampler = createDomCanvasElement(
+          width: 1,
+          height: 1,
+        ).context2D;
+        sampler.drawImage(bitmap, 4955, 7010, 1, 1, 0, 0, 1, 1);
+        expect(sampler.getImageData(0, 0, 1, 1).data, <int>[0, 255, 0, 255]);
+
+        surface.dispose();
+      });
+
+      test('context loss after a clamped resize is recovered on a new canvas', () async {
+        final surface = CkOffscreenSurface(OffscreenCanvasProvider());
+        await surface.initialized;
+        surface.setSize(const BitmapSize(100, 100));
+        final DomEventTarget originalCanvas = surface.canvas;
+        surface.setSize(const BitmapSize(4960, 7016));
+        final DomEventTarget swappedCanvas = surface.canvas;
+        expect(identical(swappedCanvas, originalCanvas), isFalse);
+
+        await surface.triggerContextLoss();
+        await Future<void>.delayed(const Duration(milliseconds: 50));
+        expect(
+          identical(surface.canvas, swappedCanvas),
+          isFalse,
+          reason: 'The swapped-in canvas should recover from context loss',
+        );
+        expect(surface.supportsWebGl, isTrue);
+
+        surface.setSize(const BitmapSize(200, 200));
+        final recorder = ui.PictureRecorder();
+        ui.Canvas(recorder).drawRect(
+          const ui.Rect.fromLTWH(0, 0, 200, 200),
+          ui.Paint()..color = const ui.Color(0xFF0000FF),
+        );
+        await surface.rasterizeToCanvas(recorder.endRecording());
+        expect(readSurfacePixel(surface, 199, 199), <int>[0, 0, 255, 255]);
+
+        surface.dispose();
+      });
+
       test('lifecycle & disposal during/after resize behaves cleanly and idempotently', () async {
         final surface = CkOffscreenSurface(OffscreenCanvasProvider());
         await surface.initialized;
@@ -494,6 +562,13 @@ void testMain() {
           snapshot0.delete();
         }
         expect(surface.supportsWebGl, isTrue);
+
+        // Negative dimensions are clamped per axis.
+        expect(() => surface.setSize(const BitmapSize(-5, 10)), returnsNormally);
+        expect(surface.supportsWebGl, isTrue);
+        final negativeSizedCanvas = surface.canvas as DomOffscreenCanvas;
+        expect(negativeSizedCanvas.width, 1);
+        expect(negativeSizedCanvas.height, 10);
 
         surface.dispose();
       });
