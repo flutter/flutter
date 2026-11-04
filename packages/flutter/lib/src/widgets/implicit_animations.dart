@@ -318,6 +318,7 @@ abstract class ImplicitlyAnimatedWidget extends StatefulWidget {
   /// See also:
   ///
   ///  * [AnimationController.animationBehavior], which describes the behaviors.
+  ///  * [AnimationBehavior], which describes the available behaviors.
   final AnimationBehavior animationBehavior;
 
   @override

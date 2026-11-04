@@ -31,7 +31,8 @@ import 'value_listenable_builder.dart';
 /// [Tween.end] of the old [tween], if that animation completed) to [Tween.end]
 /// of the new [tween].
 ///
-/// The animation is further customized by providing a [curve] and [duration].
+/// The animation is further customized by providing a [curve], [duration], and
+/// [animationBehavior].
 ///
 /// The current value of the animation along with the [child] is passed to
 /// the [builder] callback, which is expected to build a [Widget] based on the

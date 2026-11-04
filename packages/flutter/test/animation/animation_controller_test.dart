@@ -1072,7 +1072,9 @@ void main() {
 
     test('animationBehavior can be changed after construction', () {
       debugSemanticsDisableAnimations = true;
+      addTearDown(() => debugSemanticsDisableAnimations = null);
       final controller = AnimationController(vsync: const TestVSync());
+      addTearDown(controller.dispose);
       expect(controller.animationBehavior, AnimationBehavior.normal);
 
       controller.animationBehavior = AnimationBehavior.preserve;
@@ -1081,8 +1083,13 @@ void main() {
       tick(const Duration(milliseconds: 50));
       expect(controller.value, 0.5);
 
-      debugSemanticsDisableAnimations = null;
-      controller.dispose();
+      controller.animationBehavior = AnimationBehavior.normal;
+      controller.animateTo(0.0, duration: const Duration(milliseconds: 100));
+      tick(const Duration(milliseconds: 60));
+      // Runs at 5% of 100ms again.
+      tick(const Duration(milliseconds: 66));
+      expect(controller.value, 0.0);
+      expect(controller.isAnimating, isFalse);
     });
 
     test('changing animationBehavior does not affect a running animation', () {
