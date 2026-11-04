@@ -229,9 +229,10 @@ the test for real, and so does the command from `engine/src`.
   stay in the instance's cache for every later build, so a bot's build
   repeats nothing another bot has done since the inputs last changed. What
   stays on the bot: the wrapped GN builds (the Dart runtime, the GL stack:
-  `gn_build.bzl`'s `no-remote-exec`, their inputs being a synced tree -- so
-  the Dart runtime's 15–25 minutes of a cold builder stay until a named
-  cache takes them) and the tests (a display, a GPU, a device). Execution
+  `gn_build.bzl`'s `no-remote-exec`, their inputs being a synced tree --
+  `ninja -j8` 442 s for the Dart runtime on an 8-core bot, 84–155 s on 32
+  cores, unless the bot's own disk cache has them, below) and the tests (a
+  display, a GPU, a device). Execution
   rather than a cache alone because of the instance's IAM: a client -- the
   bots' service account included -- reads the action cache but only a
   worker writes it (`remotebuildexecution.actions.update`), so a build with
@@ -247,9 +248,9 @@ the test for real, and so does the command from `engine/src`.
   (492: 4:23–8:07, wasm 12:02 at 480) RBE is roughly a wash for these
   builds: with the compiles hits or remote, the critical path is the two
   wrapped GN builds (the Dart runtime and the GL stack, `ninja -j32` for
-  84–155 s each, local, never a cache hit across tasks) and the install.
-  Against the 8-core bots of 480 (18–40 minutes building locally) the
-  gain is large, but no RBE run has landed on one yet; the shards, all on
+  84–155 s each, local) and the install. On the 8-core bots the gain is
+  about half (500: `ci/android_release` 22:38 → 10:12, of which the Dart
+  runtime's wrap is 442 s); the shards, all on
   8-core bots, are the like-for-like measurement (README: 23–35% off the
   kernel-compile-heavy ones). The workers are 2-vCPU Debian 11 machines,
   clock in UTC. Three findings, all the worker's environment: the desktop
@@ -265,7 +266,13 @@ the test for real, and so does the command from `engine/src`.
   had already been warming repeat builds on the same bot (492's
   `host_debug_unopt_impeller_tests` found 6,113 of its actions there, 3
   minutes) -- an accident of the pool, not something to rely on; the
-  remote cache is shared by every bot and every build. No reclient: the
+  remote cache is shared by every bot and every build. The wrapped GN
+  builds, which only that disk cache can serve, never were hits in it
+  until 503: zlib's input tree carried the checkout's `.git`, which every
+  sync rewrites, so their action keys changed from task to task
+  (gn_build.py prints its input trees' digests with its timing line, 501,
+  which is how three drones of one presubmit showed the one directory
+  that differed). No reclient: the
   Bazel builds carry `--no-rbe` and `use_rbe: false`, so the recipe starts
   no reproxy; Bazel speaks to RBE itself. Two timeouts apply: the target's in
   `.ci.yaml` (the orchestrator's; 240 for the switched targets) and each
