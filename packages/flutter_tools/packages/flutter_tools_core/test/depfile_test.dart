@@ -35,6 +35,10 @@ void main() {
       final whitespaceParsed = ExtensionDepfile.parse('a.txt\n  : b.txt    c.txt\n\n');
       expect(whitespaceParsed.outputs, equals(<String>['a.txt']));
       expect(whitespaceParsed.inputs, equals(<String>['b.txt', 'c.txt']));
+
+      final multilineParsed = ExtensionDepfile.parse('out.o: \\\n  in1.c \\\r\n  in2.h\n');
+      expect(multilineParsed.outputs, equals(<String>['out.o']));
+      expect(multilineParsed.inputs, equals(<String>['in1.c', 'in2.h']));
     });
 
     test('parse throws FormatException on malformed depfile contents', () {

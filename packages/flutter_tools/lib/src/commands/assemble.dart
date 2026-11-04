@@ -5,12 +5,14 @@
 import 'package:args/args.dart';
 import 'package:flutter_tools_core/flutter_tools_core.dart' show ExtensionAssembleTarget;
 import 'package:meta/meta.dart';
+import 'package:process/process.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
+import '../base/platform.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
 import '../build_system/depfile.dart';
@@ -30,6 +32,7 @@ import '../experimental/extension_build_manager.dart';
 import '../features.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart';
+import '../version.dart';
 
 /// All currently implemented targets.
 var _kDefaultTargets = <Target>[
@@ -105,7 +108,7 @@ class AssembleCommand extends FlutterCommand {
     required ToolContext super.toolContext,
     this._extensionBuildManager,
     super.verboseHelp = false,
-  }) : _toolContext = toolContext {
+  }) {
     requiresPubspecYaml();
     argParser.addDescriptors(const <OptionDescriptor<Object?>>[
       _define,
@@ -185,10 +188,9 @@ class AssembleCommand extends FlutterCommand {
   final BuildSystem _buildSystem;
   final ExtensionBuildManager? _extensionBuildManager;
   final FeatureFlags _featureFlags;
-  final ToolContext _toolContext;
 
   @override
-  ToolContext get toolContext => _toolContext;
+  ToolContext get toolContext => super.toolContext!;
 
   @override
   bool get hidden => !verboseHelp;
@@ -239,9 +241,12 @@ class AssembleCommand extends FlutterCommand {
         when argumentResults.rest.any((String targetName) => !targetMap.containsKey(targetName))) {
       for (final ExtensionAssembleTarget target
           in await extensionBuildManager.getAssembleTargets()) {
+        final String extensionName = extensionBuildManager.extensionNameForAssembleTarget(
+          target.name,
+        );
         if (targetMap.containsKey(target.name)) {
-          _toolContext.logger.printWarning(
-            'Skipping custom assemble target "${target.name}" because a target with that name already exists.',
+          toolContext.logger.printWarning(
+            'Skipping custom assemble target "${target.name}" from extension "$extensionName" because a target with that name already exists.',
           );
           continue;
         }
@@ -252,7 +257,7 @@ class AssembleCommand extends FlutterCommand {
             final Target? dependency = targetMap[dependencyName];
             if (dependency == null) {
               throwToolExit(
-                'Target "$dependencyName" required by "${target.name}" not found. It might not be registered.',
+                'Target "$dependencyName" required by "${target.name}" from extension "$extensionName" not found. It might not be registered.',
               );
             }
             return dependency;
@@ -292,7 +297,15 @@ class AssembleCommand extends FlutterCommand {
 
   /// The environmental configuration for a build invocation.
   Environment _createEnvironment() {
-    final FileSystem fs = _toolContext.fs;
+    final ToolContext(
+      :Artifacts artifacts,
+      :Cache cache,
+      :FileSystem fs,
+      :FlutterVersion flutterVersion,
+      :Logger logger,
+      :Platform platform,
+      :ProcessManager processManager,
+    ) = toolContext;
     final FlutterProject project = this.project;
     String? output = getValue(_output);
     if (output == null) {
@@ -302,7 +315,6 @@ class AssembleCommand extends FlutterCommand {
     if (fs.path.isRelative(output)) {
       output = fs.path.join(project.directory.path, output);
     }
-    final Artifacts artifacts = _toolContext.artifacts;
 
     List<String> decodedDefines;
     try {
@@ -323,17 +335,15 @@ class AssembleCommand extends FlutterCommand {
       packageConfigPath: packageConfigPath(),
       defines: _parseDefines([...getValue(_define), ...decodedDefines]),
       inputs: _parseDefines(getValue(_input)),
-      cacheDir: _toolContext.cache.getRoot(),
-      flutterRootDir: fs.directory(Cache.flutterRoot),
+      cacheDir: cache.getRoot(),
+      flutterRootDir: fs.directory(cache.flutterRoot),
       artifacts: artifacts,
       fileSystem: fs,
-      logger: _toolContext.logger,
-      processManager: _toolContext.processManager,
+      logger: logger,
+      processManager: processManager,
       analytics: analytics,
-      platform: _toolContext.platform,
-      engineVersion: artifacts.usesLocalArtifacts
-          ? null
-          : _toolContext.flutterVersion.engineRevision,
+      platform: platform,
+      engineVersion: artifacts.usesLocalArtifacts ? null : flutterVersion.engineRevision,
       generateDartPluginRegistry: true,
     );
   }
@@ -377,7 +387,7 @@ class AssembleCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final ToolContext(:FileSystem fs, :Logger logger) = _toolContext;
+    final ToolContext(:FileSystem fs, :Logger logger) = toolContext;
     final List<Target> targets = await createTargets();
     final nonDeferredTargets = <Target>[];
     final List<Target> deferredTargets = <AndroidAotDeferredComponentsBundle>[];

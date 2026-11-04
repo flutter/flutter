@@ -39,6 +39,20 @@ base class ExtensionBuildManager {
   List<ExtensionAssembleTarget> get cachedAssembleTargets =>
       _cachedAssembleTargets ?? const <ExtensionAssembleTarget>[];
 
+  /// Returns the name of the extension that registered the custom `flutter build`
+  /// target [targetName], or [ExtensionConnection.defaultExtensionName] if no
+  /// extension registered it.
+  String extensionNameForBuildTarget(String targetName) =>
+      _buildTargetToConnection[targetName]?.extensionName ??
+      ExtensionConnection.defaultExtensionName;
+
+  /// Returns the name of the extension that registered the custom `flutter assemble`
+  /// target [targetName], or [ExtensionConnection.defaultExtensionName] if no
+  /// extension registered it.
+  String extensionNameForAssembleTarget(String targetName) =>
+      _assembleTargetToConnection[targetName]?.extensionName ??
+      ExtensionConnection.defaultExtensionName;
+
   /// Retrieve `flutter build` targets by routing `build.getBuildTargets` to active tool extensions.
   Future<List<ExtensionBuildTarget>> getBuildTargets() async {
     if (!_featureFlags.isToolExtensionsEnabled) {
@@ -126,9 +140,10 @@ base class ExtensionBuildManager {
         if (name.isEmpty) {
           continue;
         }
-        if (connectionMap.containsKey(name)) {
+        if (connectionMap[name] case final ExtensionConnection existingConnection) {
           _logger.printWarning(
-            'Skipping duplicate $targetKind target "$name" from extension "${connection.extensionName}".',
+            'Skipping duplicate $targetKind target "$name" from extension "${connection.extensionName}" '
+            '(already registered by extension "${existingConnection.extensionName}").',
           );
           continue;
         }

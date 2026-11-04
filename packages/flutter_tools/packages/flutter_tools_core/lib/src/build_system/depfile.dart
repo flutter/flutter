@@ -2,9 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport '../build.dart';
+library;
+
+import 'package:collection/collection.dart';
 import 'package:meta/meta.dart';
 
-import '../build.dart';
+const _listEquality = ListEquality<String>();
+final _lineContinuationRegex = RegExp(r'\\\r?\n');
 
 /// Representation of a `.d` dependency file containing [inputs] and [outputs]
 /// file paths for an [ExtensionAssembleTarget].
@@ -12,16 +17,25 @@ import '../build.dart';
 /// Extensions that declare [ExtensionAssembleTarget.depfiles] can use
 /// [ExtensionDepfile.format] to write `.d` files into their build directory
 /// and [ExtensionDepfile.parse] to read them back.
+///
+/// Relative paths written to a declared depfile are resolved relative to the
+/// project root directory and rewritten in place with normalized paths by the
+/// host after a successful build. Each declared depfile must be written on
+/// every successful build.
 @immutable
 class ExtensionDepfile {
   const ExtensionDepfile({this.inputs = const <String>[], this.outputs = const <String>[]});
 
   /// Parses `.d` depfile [contents] (`<outputs>: <inputs>`) into an [ExtensionDepfile].
   ///
+  /// Supports single-rule `<outputs>: <inputs>` files, including backslash-newline
+  /// (`\`) line continuations.
+  ///
   /// Throws a [FormatException] if [contents] does not contain a single `": "`
   /// separator between outputs and inputs.
   factory ExtensionDepfile.parse(String contents) {
-    final List<String> colonSeparated = contents.split(': ');
+    final String normalized = contents.replaceAll(_lineContinuationRegex, ' ');
+    final List<String> colonSeparated = normalized.split(': ');
     if (colonSeparated.length != 2) {
       throw const FormatException('Invalid depfile syntax: expected "<outputs>: <inputs>".');
     }
@@ -87,25 +101,10 @@ class ExtensionDepfile {
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other is ExtensionDepfile &&
-            _listEquals(other.inputs, inputs) &&
-            _listEquals(other.outputs, outputs));
+            _listEquality.equals(other.inputs, inputs) &&
+            _listEquality.equals(other.outputs, outputs));
   }
 
   @override
   int get hashCode => Object.hash(Object.hashAll(inputs), Object.hashAll(outputs));
-}
-
-bool _listEquals<T>(List<T> a, List<T> b) {
-  if (identical(a, b)) {
-    return true;
-  }
-  if (a.length != b.length) {
-    return false;
-  }
-  for (var i = 0; i < a.length; i++) {
-    if (a[i] != b[i]) {
-      return false;
-    }
-  }
-  return true;
 }

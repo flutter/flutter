@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:collection/collection.dart';
 import 'package:meta/meta.dart';
 
 import 'build_system/constants.dart';
@@ -11,6 +12,10 @@ import 'json_utils.dart';
 export 'build_system/constants.dart';
 export 'build_system/depfile.dart';
 export 'build_system/source.dart';
+
+const _listEquality = ListEquality<Object?>();
+const _mapEquality = MapEquality<String, String>();
+const _setEquality = SetEquality<Object?>();
 
 final _upperRegex = RegExp(r'[A-Z]');
 
@@ -87,17 +92,22 @@ enum BuildMode {
 /// Representation of a custom `flutter build` subcommand target provided by a tool extension.
 @immutable
 class ExtensionBuildTarget {
-  const ExtensionBuildTarget({
+  ExtensionBuildTarget({
     required this.description,
     required this.name,
     required this.outputDir,
     this.targetPlatform,
     this.artifacts = const <ExtensionArtifact>{},
     this.hostArtifacts = const <ExtensionHostArtifact>{},
-  }) : assert(targetPlatform == null || targetPlatform != '');
+  }) : assert(isValidName(name), 'Invalid build target name "$name". $_invalidNameMessage'),
+       assert(targetPlatform == null || targetPlatform != '');
 
   /// Deserializes an [ExtensionBuildTarget] from a JSON-serializable map.
   factory ExtensionBuildTarget.fromJson(Map<String, Object?> json) {
+    final String name = json.requiredField<String>(nameKey);
+    if (!isValidName(name)) {
+      throw FormatException('Invalid "$nameKey" field: "$name". $_invalidNameMessage');
+    }
     final String? targetPlatform = json.nullableField<String>(targetPlatformKey);
     if (targetPlatform != null && targetPlatform.isEmpty) {
       throw const FormatException(
@@ -106,7 +116,7 @@ class ExtensionBuildTarget {
     }
     return ExtensionBuildTarget(
       description: json.requiredField<String>(descriptionKey),
-      name: json.requiredField<String>(nameKey),
+      name: name,
       outputDir: json.requiredField<String>(outputDirKey),
       targetPlatform: targetPlatform,
       artifacts: <ExtensionArtifact>{
@@ -118,6 +128,18 @@ class ExtensionBuildTarget {
       },
     );
   }
+
+  static final _validNamePattern = RegExp(r'^[a-z][a-z0-9_-]*$');
+  static const String _invalidNameMessage =
+      'Build target names must start with a lowercase ASCII letter and contain '
+      'only lowercase ASCII letters, digits, underscores, and hyphens.';
+
+  /// Returns whether [name] is a valid build target name.
+  ///
+  /// A valid target name must start with a lowercase ASCII letter (`a-z`) and
+  /// may contain only lowercase ASCII letters, digits (`0-9`), underscores
+  /// (`_`), and hyphens (`-`).
+  static bool isValidName(String name) => _validNamePattern.hasMatch(name);
 
   /// Map key for [artifacts].
   static const String artifactsKey = 'artifacts';
@@ -152,6 +174,8 @@ class ExtensionBuildTarget {
   final String description;
 
   /// The name of this build target (e.g. `'custom-apk'`).
+  ///
+  /// Must match [isValidName].
   final String name;
 
   /// The target platform identifier (e.g. `'linux-x64'`, `'custom-embedder-arm64'`),
@@ -161,6 +185,12 @@ class ExtensionBuildTarget {
   /// embedders can declare platform identifiers that are not built into Flutter.
   /// Used to substitute [BuiltInPlaceholders.targetPlatform] in [outputDir], and as the
   /// default artifact platform when it matches a built-in Flutter target platform.
+  ///
+  /// When `null`, [outputDir] must not reference
+  /// [BuiltInPlaceholders.targetPlatform], and only target-platform-independent
+  /// engine artifacts ([BuiltInArtifacts.flutterPatchedSdkPath] and
+  /// [BuiltInArtifacts.icuData]) can be resolved in [artifacts].
+  // TODO(bkonyi): Support multi-platform BuildTargets and architecture placeholders, https://github.com/flutter/flutter/issues/194810.
   final String? targetPlatform;
 
   /// Engine artifacts required by this build target, resolved for [targetPlatform]
@@ -177,7 +207,8 @@ class ExtensionBuildTarget {
   /// Supports [BuiltInPlaceholders.outputDir] (the project's configured build
   /// output root from `flutter config --build-dir`, defaulting to
   /// `<project>/build`), [BuiltInPlaceholders.projectDir],
-  /// [BuiltInPlaceholders.buildMode], and [BuiltInPlaceholders.targetPlatform].
+  /// [BuiltInPlaceholders.buildMode], and [BuiltInPlaceholders.targetPlatform]
+  /// (when [targetPlatform] is non-null).
   final String outputDir;
 
   /// Serializes the build target to a JSON-serializable map.
@@ -204,8 +235,8 @@ class ExtensionBuildTarget {
             other.name == name &&
             other.targetPlatform == targetPlatform &&
             other.outputDir == outputDir &&
-            _setEquals(other.artifacts, artifacts) &&
-            _setEquals(other.hostArtifacts, hostArtifacts));
+            _setEquality.equals(other.artifacts, artifacts) &&
+            _setEquality.equals(other.hostArtifacts, hostArtifacts));
   }
 
   @override
@@ -222,7 +253,7 @@ class ExtensionBuildTarget {
 /// Representation of a custom `flutter assemble` target provided by a tool extension.
 @immutable
 class ExtensionAssembleTarget {
-  const ExtensionAssembleTarget({
+  ExtensionAssembleTarget({
     required this.description,
     required this.name,
     required this.targetPlatform,
@@ -230,20 +261,38 @@ class ExtensionAssembleTarget {
     this.depfiles = const <String>[],
     this.inputs = const <ExtensionSource>[],
     this.outputs = const <ExtensionSource>[],
-  });
+  }) : assert(depfiles.every(isValidDepfileName), _invalidDepfileNameMessage);
 
   /// Deserializes an [ExtensionAssembleTarget] from a JSON-serializable map.
   factory ExtensionAssembleTarget.fromJson(Map<String, Object?> json) {
+    final List<String> depfiles = json.stringIterable(depfilesKey).toList();
+    for (final depfileName in depfiles) {
+      if (!isValidDepfileName(depfileName)) {
+        throw FormatException(
+          'Invalid "$depfilesKey" element "$depfileName": $_invalidDepfileNameMessage',
+        );
+      }
+    }
     return ExtensionAssembleTarget(
       description: json.requiredField<String>(descriptionKey),
       name: json.requiredField<String>(nameKey),
       targetPlatform: json.requiredField<String>(targetPlatformKey),
       dependencies: json.stringIterable(dependenciesKey).toList(),
-      depfiles: json.stringIterable(depfilesKey).toList(),
+      depfiles: depfiles,
       inputs: _parseSources(json, inputsKey),
       outputs: _parseSources(json, outputsKey),
     );
   }
+
+  static const String _invalidDepfileNameMessage =
+      'Depfile names must be non-empty single file names without path separators.';
+
+  /// Returns whether [name] is a valid depfile file name within the build directory.
+  ///
+  /// A valid depfile name must be non-empty, must not be `'.'` or `'..'`, and
+  /// must not contain `/` or `\` path separators.
+  static bool isValidDepfileName(String name) =>
+      name.isNotEmpty && name != '.' && name != '..' && !name.contains('/') && !name.contains(r'\');
 
   static List<ExtensionSource> _parseSources(Map<String, Object?> json, String key) {
     final List<Object?> rawSources = json.optionalField<List<Object?>>(
@@ -265,7 +314,6 @@ class ExtensionAssembleTarget {
   static const String dependenciesKey = 'dependencies';
 
   /// Map key for [depfiles].
-  @visibleForTesting
   static const String depfilesKey = 'depfiles';
 
   /// Map key for [description].
@@ -311,6 +359,11 @@ class ExtensionAssembleTarget {
   final List<String> dependencies;
 
   /// Names of `.d` dependency files written by this target into the build directory.
+  ///
+  /// Each entry must match [isValidDepfileName] and must be written on every
+  /// successful build. Relative paths inside each depfile are resolved against
+  /// the project root directory and rewritten in place with normalized paths by
+  /// the host after a successful build.
   final List<String> depfiles;
 
   /// Input file patterns and artifacts.
@@ -344,10 +397,10 @@ class ExtensionAssembleTarget {
             other.description == description &&
             other.name == name &&
             other.targetPlatform == targetPlatform &&
-            _listEquals(other.dependencies, dependencies) &&
-            _listEquals(other.depfiles, depfiles) &&
-            _listEquals(other.inputs, inputs) &&
-            _listEquals(other.outputs, outputs));
+            _listEquality.equals(other.dependencies, dependencies) &&
+            _listEquality.equals(other.depfiles, depfiles) &&
+            _listEquality.equals(other.inputs, inputs) &&
+            _listEquality.equals(other.outputs, outputs));
   }
 
   @override
@@ -368,46 +421,47 @@ class ExtensionBuildResult {
   const ExtensionBuildResult({
     required this.success,
     this.errorMessage,
+    this.executableUri,
     this.extraDefines = const <String, String>{},
   });
 
   /// Deserializes an [ExtensionBuildResult] from a JSON-serializable map.
+  ///
+  /// Throws a [FormatException] if [executableUriKey] is present and is not a
+  /// valid absolute `file:` URI, or if [extraDefinesKey] is not a
+  /// `Map<String, String>`.
   factory ExtensionBuildResult.fromJson(Map<String, Object?> json) {
     return ExtensionBuildResult(
       success: json.optionalField<bool>(successKey, defaultValue: false),
       errorMessage: json.nullableField<String>(errorMessageKey),
-      extraDefines: _parseExtraDefines(json),
+      executableUri: _parseExecutableUri(json),
+      extraDefines: json[extraDefinesKey] != null
+          ? Map<String, String>.unmodifiable(json.stringMap(extraDefinesKey))
+          : const <String, String>{},
     );
   }
 
-  static Map<String, String> _parseExtraDefines(Map<String, Object?> json) {
-    final Object? raw = json[extraDefinesKey];
+  static Uri? _parseExecutableUri(Map<String, Object?> json) {
+    final String? raw = json.nullableField<String>(executableUriKey);
     if (raw == null) {
-      return const <String, String>{};
+      return null;
     }
-    if (raw is! Map<Object?, Object?>) {
-      throw FormatException(
-        'Invalid "$extraDefinesKey" field: expected Map<String, String>, got ${raw.runtimeType}.',
-      );
+    final Uri? uri = Uri.tryParse(raw);
+    if (uri != null && uri.isValidFileUri) {
+      return uri;
     }
-    final result = <String, String>{};
-    for (final MapEntry(:Object? key, :Object? value) in raw.entries) {
-      if (key is! String || value is! String) {
-        throw FormatException(
-          'Invalid "$extraDefinesKey" entry: expected String key and value, '
-          'got ${key.runtimeType}: ${value.runtimeType}.',
-        );
-      }
-      result[key] = value;
-    }
-    return result;
+    throw const FormatException(
+      'Invalid "$executableUriKey" in ExtensionBuildResult: must be an absolute file:// URI.',
+    );
   }
 
   /// Map key for [errorMessage].
   static const String errorMessageKey = 'errorMessage';
 
+  /// Map key for [executableUri].
+  static const String executableUriKey = 'executableUri';
+
   /// Map key for [extraDefines].
-  @visibleForTesting
   static const String extraDefinesKey = 'extraDefines';
 
   /// Map key for [success].
@@ -419,21 +473,31 @@ class ExtensionBuildResult {
   /// Optional error message if the build failed.
   final String? errorMessage;
 
-  /// Additional build defines produced by this target to be merged into the
-  /// build environment for downstream targets.
+  /// Optional absolute `file:` URI to the built application executable or bundle.
+  final Uri? executableUri;
+
+  /// Additional build defines produced by an `AssembleTarget` when it runs,
+  /// merged into the host build `Environment.defines` for downstream built-in
+  /// targets without overwriting existing or reserved defines.
+  ///
+  /// Note: these defines are only merged when the producing assemble target
+  /// executes (not when skipped on an incremental build) and are not currently
+  /// forwarded to extension targets via `ExtensionAssembleContext`.
+  // TODO(bkonyi): Persist extraDefines across skipped incremental builds and forward defines via ExtensionAssembleContext.
   final Map<String, String> extraDefines;
 
   /// Serializes the build result to a JSON-serializable map.
   Map<String, Object?> toMap() => <String, Object?>{
     successKey: success,
     errorMessageKey: ?errorMessage,
+    executableUriKey: ?executableUri?.toString(),
     if (extraDefines.isNotEmpty) extraDefinesKey: extraDefines,
   };
 
   @override
   String toString() =>
       'ExtensionBuildResult(success: $success, errorMessage: $errorMessage, '
-      'extraDefines: $extraDefines)';
+      'executableUri: $executableUri, extraDefines: $extraDefines)';
 
   @override
   bool operator ==(Object other) {
@@ -441,56 +505,18 @@ class ExtensionBuildResult {
         (other is ExtensionBuildResult &&
             other.success == success &&
             other.errorMessage == errorMessage &&
-            _mapEquals(other.extraDefines, extraDefines));
+            other.executableUri == executableUri &&
+            _mapEquality.equals(other.extraDefines, extraDefines));
   }
 
   @override
   int get hashCode => Object.hash(
     success,
     errorMessage,
+    executableUri,
     Object.hashAllUnordered(<int>[
       for (final MapEntry(:String key, :String value) in extraDefines.entries)
         Object.hash(key, value),
     ]),
   );
-}
-
-bool _listEquals<T>(List<T> a, List<T> b) {
-  if (identical(a, b)) {
-    return true;
-  }
-  if (a.length != b.length) {
-    return false;
-  }
-  for (var i = 0; i < a.length; i++) {
-    if (a[i] != b[i]) {
-      return false;
-    }
-  }
-  return true;
-}
-
-bool _mapEquals<K, V>(Map<K, V> a, Map<K, V> b) {
-  if (identical(a, b)) {
-    return true;
-  }
-  if (a.length != b.length) {
-    return false;
-  }
-  for (final MapEntry(:K key, :V value) in a.entries) {
-    if (!b.containsKey(key) || b[key] != value) {
-      return false;
-    }
-  }
-  return true;
-}
-
-bool _setEquals<T>(Set<T> a, Set<T> b) {
-  if (identical(a, b)) {
-    return true;
-  }
-  if (a.length != b.length) {
-    return false;
-  }
-  return a.containsAll(b);
 }

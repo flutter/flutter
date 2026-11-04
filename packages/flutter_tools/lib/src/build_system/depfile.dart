@@ -73,6 +73,12 @@ class DepfileService {
       _logger.printError('Invalid depfile: ${file.path}');
       return const Depfile(<File>[], <File>[]);
     }
+    return resolve(parsed, baseDirectory);
+  }
+
+  /// Resolves an [ExtensionDepfile] into a host [Depfile] with normalized [File]
+  /// paths, resolving relative paths against [baseDirectory] when provided.
+  Depfile resolve(ExtensionDepfile parsed, [Directory? baseDirectory]) {
     final List<File> inputs = _resolvePaths(parsed.inputs, baseDirectory);
     final List<File> outputs = _resolvePaths(parsed.outputs, baseDirectory);
     return Depfile(inputs, outputs);

@@ -9,11 +9,10 @@
 library flutter_tools_core;
 
 export 'src/build.dart';
-export 'src/build_system/depfile.dart';
 export 'src/clean.dart';
 export 'src/config.dart';
 export 'src/device.dart';
 export 'src/diagnostics.dart';
-export 'src/json_utils.dart';
+export 'src/extension_package_config.dart';
 export 'src/project.dart';
 export 'src/templates.dart';

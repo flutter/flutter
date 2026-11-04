@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:flutter_tools_core/flutter_tools_core.dart';
+import 'package:flutter_tools_core/json.dart';
 import 'package:json_rpc_2/json_rpc_2.dart';
 import 'package:meta/meta.dart';
 
@@ -71,6 +72,8 @@ abstract class BuildTarget {
     : assert(targetPlatform == null || targetPlatform != '');
 
   /// The user-readable name of the target (exposed as `flutter build <name>`).
+  ///
+  /// Must match [ExtensionBuildTarget.isValidName].
   String get name;
 
   /// Description of what this target builds.
@@ -83,6 +86,11 @@ abstract class BuildTarget {
   /// embedders can declare platform identifiers that are not built into Flutter.
   /// Used to substitute [BuiltInPlaceholders.targetPlatform] in [outputDir], and as the
   /// default artifact platform when it matches a built-in Flutter target platform.
+  ///
+  /// When `null`, [outputDir] must not reference
+  /// [BuiltInPlaceholders.targetPlatform], and only target-platform-independent
+  /// engine artifacts ([BuiltInArtifacts.flutterPatchedSdkPath] and
+  /// [BuiltInArtifacts.icuData]) can be resolved in [artifacts].
   final String? targetPlatform;
 
   /// The directory pattern used by `flutter build` to determine this target's
@@ -92,7 +100,8 @@ abstract class BuildTarget {
   /// Supports [BuiltInPlaceholders.outputDir] (the project's configured build
   /// output root from `flutter config --build-dir`, defaulting to
   /// `<project>/build`), [BuiltInPlaceholders.projectDir],
-  /// [BuiltInPlaceholders.buildMode], and [BuiltInPlaceholders.targetPlatform].
+  /// [BuiltInPlaceholders.buildMode], and [BuiltInPlaceholders.targetPlatform]
+  /// (when [targetPlatform] is non-null).
   final String outputDir;
 
   /// Engine artifacts required by this build target, resolved for [targetPlatform]
@@ -135,6 +144,11 @@ abstract class AssembleTarget {
   List<String> get dependencies => const <String>[];
 
   /// Names of `.d` dependency files written by this target into the build directory.
+  ///
+  /// Each entry must match [ExtensionAssembleTarget.isValidDepfileName] and must
+  /// be written on every successful build. Relative paths inside each depfile
+  /// are resolved against the project root directory and rewritten in place with
+  /// normalized paths by the host after a successful build.
   ///
   /// See also:
   ///
