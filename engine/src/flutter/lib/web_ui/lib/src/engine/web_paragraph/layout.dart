@@ -210,8 +210,9 @@ class TextLayout {
 
   void wrapText(double width) {
     lines.clear();
-    // The ellipsis belongs to the layout that truncated the text; a wider layout may not need it.
+    // Truncation state belongs to the previous width; a wider layout may fit within maxLines.
     ellipsisClusters = <WebCluster>[];
+    paragraph.didExceedMaxLines = false;
 
     // A paragraph that is empty or contains only characters without clusters has only the
     // trailing EmptyCluster and produces no lines.
@@ -428,9 +429,11 @@ class TextLayout {
 
         // This is the intersection of the bidi region + line + span.
         final ui.TextRange bidiLineSpanTextRange = bidiLineTextRange.intersect(span);
-        final ui.TextRange bidiLineSpanPhysicalTextRange = bidiLinePhysicalTextRange.intersect(
-          span,
-        );
+        final ui.TextRange rawPhysicalTextRange = bidiLinePhysicalTextRange.intersect(span);
+        // Disjoint intersections produce start > end; keep collapsed ranges within span bounds.
+        final bidiLineSpanPhysicalTextRange = rawPhysicalTextRange.start <= rawPhysicalTextRange.end
+            ? rawPhysicalTextRange
+            : ui.TextRange.collapsed(bidiLineSpanTextRange.start);
         final ClusterRange bidiLineSpanRange = _mapping.toClusterRange(
           bidiLineSpanTextRange.start,
           bidiLineSpanTextRange.end,
@@ -455,6 +458,7 @@ class TextLayout {
           );
           blockWidth = span.width;
         } else {
+          final textSpan = span as TextSpan;
           final ClusterRange physicalClusterRange = bidiLineSpanPhysicalTextRange.isNotEmpty
               ? _mapping.toClusterRange(
                   bidiLineSpanPhysicalTextRange.start,
@@ -466,25 +470,31 @@ class TextLayout {
               : allClusters[physicalClusterRange.end - 1];
           final double blockShiftFromSpanStart = firstVisualClusterInBlock.advance.left;
           // A re-layout only rearranges clusters measured once per span, so the block advance
-          // comes from their cached selection rects instead of a new browser query.
-          final ui.Rect blockSelection = bidiLineSpanPhysicalTextRange.isEmpty
-              ? ui.Rect.zero
-              : _clusterSelection(physicalClusterRange);
+          // comes from their cached selection rects unless negative spacing inverted cluster order.
+          final ui.Rect? blockAdvance;
+          if (textSpan.hasNonMonotonicNegativeSpacing) {
+            blockAdvance = null;
+          } else {
+            final ui.Rect blockSelection = bidiLineSpanPhysicalTextRange.isEmpty
+                ? ui.Rect.zero
+                : _clusterSelection(physicalClusterRange);
+            blockAdvance = ui.Rect.fromLTWH(
+              blockShiftFromLineStart,
+              blockSelection.top,
+              blockSelection.width,
+              blockSelection.height,
+            );
+          }
           line.visualBlocks.add(
             block = TextBlock(
-              span as TextSpan,
+              textSpan,
               bidiRun.bidiLevel,
               bidiLineSpanRange,
               bidiLineSpanTextRange,
               bidiLineSpanPhysicalTextRange,
               blockShiftFromLineStart,
               blockShiftFromSpanStart,
-              advance: ui.Rect.fromLTWH(
-                blockShiftFromLineStart,
-                blockSelection.top,
-                blockSelection.width,
-                blockSelection.height,
-              ),
+              advance: blockAdvance,
             ),
           );
 
@@ -495,15 +505,22 @@ class TextLayout {
             _mapping.toTextRange(textIntersection),
           );
           if (blockLineWhitespaces.start < blockLineWhitespaces.end) {
-            // Trailing whitespace clusters are cached like the rest, see the block advance.
-            final ui.TextRange physicalWhitespaces = bidiLineSpanPhysicalTextRange.intersect(
-              blockLineWhitespaces,
-            );
-            trailingSpacesWidth = physicalWhitespaces.start >= physicalWhitespaces.end
-                ? 0.0
-                : _clusterSelection(
-                    _mapping.toClusterRange(physicalWhitespaces.start, physicalWhitespaces.end),
-                  ).width;
+            if (textSpan.hasNonMonotonicNegativeSpacing) {
+              // Mixed positive and negative cluster advances require net endpoint selection.
+              trailingSpacesWidth = textSpan
+                  .getTextRangeSelectionInBlock(block, blockLineWhitespaces)
+                  .width;
+            } else {
+              // Trailing whitespace clusters are cached like the rest, see the block advance.
+              final ui.TextRange physicalWhitespaces = bidiLineSpanPhysicalTextRange.intersect(
+                blockLineWhitespaces,
+              );
+              trailingSpacesWidth = physicalWhitespaces.start >= physicalWhitespaces.end
+                  ? 0.0
+                  : _clusterSelection(
+                      _mapping.toClusterRange(physicalWhitespaces.start, physicalWhitespaces.end),
+                    ).width;
+            }
             (line.visualBlocks.last as TextBlock).clusterRangeWithoutWhitespaces = _mapping
                 .toClusterRange(blockLineNoWhitespaces.start, blockLineNoWhitespaces.end);
             (line.visualBlocks.last as TextBlock).whitespacesWidth = trailingSpacesWidth;
@@ -596,7 +613,7 @@ class TextLayout {
   }
 
   /// The union of the span-relative selection rects of the clusters in [range], which all
-  /// belong to one span; equals the span metrics' selection of the same text.
+  /// belong to one span without inverted negative-spacing advances.
   ui.Rect _clusterSelection(ClusterRange range) {
     // Callers guard empty text ranges before mapping, so an empty or inverted range is a bug.
     assert(range.start >= 0 && range.start < range.end && range.end <= allClusters.length);

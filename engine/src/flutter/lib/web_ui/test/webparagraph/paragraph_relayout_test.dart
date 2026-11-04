@@ -230,5 +230,99 @@ Future<void> testMain() async {
         paragraph.dispose();
       }
     });
+
+    test(
+      'clusterless character before styled hard line break does not invert physicalTextRange',
+      () {
+        final builder = WebParagraphBuilder(WebParagraphStyle(fontFamily: 'Roboto', fontSize: 20));
+        builder.pushStyle(WebTextStyle(color: const Color(0xFF000000)));
+        builder.addText('Hello\u200B');
+        builder.pushStyle(
+          WebTextStyle(color: const Color(0xFF000000), fontWeight: FontWeight.bold),
+        );
+        builder.addText('\nWorld');
+        final WebParagraph paragraph = builder.build();
+
+        paragraph.layout(const ParagraphConstraints(width: 500));
+        expect(paragraph.lines, hasLength(2));
+        var textBlocks = 0;
+        for (final TextLine line in paragraph.lines) {
+          for (final LineBlock block in line.visualBlocks) {
+            if (block is TextBlock) {
+              textBlocks++;
+              expect(block.physicalTextRange.start <= block.physicalTextRange.end, isTrue);
+              expect(block.advance, block.span.getBlockSelection(block));
+            }
+          }
+        }
+        expect(textBlocks, greaterThan(0));
+        expect(paragraph.paintBounds.isEmpty, isFalse);
+        final List<TextBox> fullBoxes = paragraph.getBoxesForRange(0, paragraph.text.length);
+        expect(fullBoxes, hasLength(3));
+        expect(fullBoxes[1].toRect().width, 0.0);
+        final List<TextBox> breakBoxes = paragraph.getBoxesForRange(5, 7);
+        expect(breakBoxes, hasLength(2));
+        for (final box in breakBoxes) {
+          expect(box.toRect().width, 0.0);
+        }
+        paragraph.dispose();
+      },
+    );
+
+    test(
+      'block and trailing-space advances match span metrics under mixed-width negative spacing',
+      () {
+        final WebParagraph paragraph = build(
+          (b) => b.addText('WWi   \nWWi'),
+          textStyle: WebTextStyle(color: const Color(0xFF000000), letterSpacing: -12),
+        );
+        for (final width in <double>[500, 120]) {
+          paragraph.layout(ParagraphConstraints(width: width));
+          var textBlocks = 0;
+          var whitespaceBlocks = 0;
+          for (final TextLine line in paragraph.lines) {
+            for (final LineBlock block in line.visualBlocks) {
+              if (block is TextBlock) {
+                textBlocks++;
+                expect(block.advance, block.span.getBlockSelection(block));
+                final TextRange whitespaces = block.textRange.intersect(line.whitespacesRange);
+                if (whitespaces.start < whitespaces.end) {
+                  whitespaceBlocks++;
+                  expect(
+                    block.whitespacesWidth,
+                    block.span.getTextRangeSelectionInBlock(block, whitespaces).width,
+                  );
+                }
+              }
+            }
+          }
+          expect(textBlocks, greaterThan(0));
+          expect(whitespaceBlocks, greaterThan(0));
+        }
+        paragraph.dispose();
+      },
+    );
+
+    test('a wider re-layout resets didExceedMaxLines when text fits within maxLines', () {
+      WebParagraph buildCapped() {
+        final builder = WebParagraphBuilder(
+          WebParagraphStyle(fontFamily: 'Roboto', fontSize: 20, maxLines: 1, ellipsis: '...'),
+        );
+        builder.pushStyle(WebTextStyle(color: const Color(0xFF000000)));
+        builder.addText('Fits in a wide line');
+        return builder.build();
+      }
+
+      final WebParagraph paragraph = buildCapped();
+      paragraph.layout(const ParagraphConstraints(width: 80));
+      expect(paragraph.didExceedMaxLines, isTrue);
+
+      paragraph.layout(const ParagraphConstraints(width: 500));
+      final WebParagraph fresh = buildCapped()..layout(const ParagraphConstraints(width: 500));
+      expect(fresh.didExceedMaxLines, isFalse);
+      expect(paragraph.didExceedMaxLines, isFalse);
+      paragraph.dispose();
+      fresh.dispose();
+    });
   });
 }

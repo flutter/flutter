@@ -779,6 +779,10 @@ class TextSpan extends ParagraphSpan {
     return _metrics.width;
   }
 
+  /// Whether negative spacing inverted visual cluster order, so block selections must query the
+  /// browser for net endpoint span rather than unioning unsigned per-cluster rects.
+  bool hasNonMonotonicNegativeSpacing = false;
+
   @override
   List<TextCluster> extractClusters() {
     // In default start alignment, each cluster's x is its left edge in LTR (in [0, width]) and
@@ -849,8 +853,9 @@ class TextSpan extends ParagraphSpan {
     }
 
     // Negative spacing can make a cluster's advance negative and invert visual x order, so keep
-    // per-cluster browser selection queries when the span is not monotonic.
+    // per-cluster and block browser selection queries when the span is not monotonic.
     if ((style.letterSpacing ?? 0.0) < 0.0 || (style.wordSpacing ?? 0.0) < 0.0) {
+      hasNonMonotonicNegativeSpacing = true;
       return <TextCluster>[
         for (final DomTextCluster cluster in domClusters) TextCluster(this, cluster),
       ];
