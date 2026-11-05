@@ -61,7 +61,7 @@ abstract class ViewRasterizer {
   /// for the view associated with this rasterizer.
   Future<void> draw(LayerTree layerTree, ui.Size frameSize, FrameTimingRecorder? recorder) async {
     // The [frameSize] may be slightly imprecise if the `devicePixelRatio` isn't
-    // an integer. For example, is you zoom to 110% in Chrome on a Macbook, the
+    // an integer. For example, if you zoom to 110% in Chrome on a Macbook, the
     // `devicePixelRatio` is `2.200000047683716`, so when the physical size is
     // computed by multiplying the logical size by the device pixel ratio, the
     // result is slightly imprecise as well. Nevertheless, the number should
