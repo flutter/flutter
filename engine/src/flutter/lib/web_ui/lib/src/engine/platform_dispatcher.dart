@@ -771,7 +771,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   ///    scheduling of frames.
   ///  * [RendererBinding], the Flutter framework class which manages layout and
   ///    painting.
-  Future<void> render(ui.Scene scene, [ui.FlutterView? view]) async {
+  Future<void> render(ui.Scene scene, [ui.FlutterView? view, ui.Size? size]) async {
     final target = (view ?? implicitView) as EngineFlutterView?;
     assert(target != null, 'Calling render without a FlutterView');
     if (target == null) {
@@ -784,7 +784,8 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     // view hasn't been rendered already in this scope.
     final bool shouldRender = _viewsRenderedInCurrentFrame?.add(target) ?? false;
     if (shouldRender) {
-      final Future<void> sceneRender = renderer.renderScene(scene, target);
+      final ui.Size frameSize = size ?? target.physicalSize;
+      final Future<void> sceneRender = renderer.renderScene(scene, target, size: frameSize);
       // The first frame ends while this render is still in flight, so remember
       // whether it belongs to it instead of asking again below.
       final bool isFirstFrameRender = _isBuildingFirstFrame;
