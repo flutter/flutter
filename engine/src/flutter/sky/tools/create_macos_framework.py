@@ -62,6 +62,12 @@ def main():
   fat_framework = os.path.join(dst, 'FlutterMacOS.framework')
   sky_utils.create_fat_macos_framework(args, dst, fat_framework, arm64_framework, x64_framework)
 
+  arm64_vmservice = os.path.join(arm64_out_dir, 'VMService.framework')
+  x64_vmservice = os.path.join(x64_out_dir, 'VMService.framework')
+  if os.path.isdir(arm64_vmservice) and os.path.isdir(x64_vmservice):
+    fat_vmservice = os.path.join(dst, 'VMService.framework')
+    sky_utils.create_fat_macos_framework(args, dst, fat_vmservice, arm64_vmservice, x64_vmservice)
+
   # Create XCFramework from the arm64 and x64 fat framework.
   xcframeworks = [fat_framework]
   dsyms = {fat_framework: fat_framework + '.dSYM'} if args.dsym else None
@@ -131,6 +137,12 @@ def zip_xcframework_archive(dst, args):
   without_entitlements = [
       'FlutterMacOS.xcframework/macos-arm64_x86_64/FlutterMacOS.framework/Versions/A/FlutterMacOS',
   ]
+
+  vmservice_framework = 'VMService.framework'
+  vmservice_binary = 'VMService.framework/Versions/A/VMService'
+  if os.path.exists(os.path.join(dst, vmservice_binary)):
+    without_entitlements.append(vmservice_binary)
+
   without_entitlements_file = os.path.join(dst, 'without_entitlements.txt')
   sky_utils.write_codesign_config(without_entitlements_file, without_entitlements)
 
@@ -150,6 +162,9 @@ def zip_xcframework_archive(dst, args):
       'without_entitlements.txt',
       'unsigned_binaries.txt',
   ]
+  if os.path.isdir(os.path.join(dst, vmservice_framework)):
+    zip_contents.append(vmservice_framework)
+
   sky_utils.assert_valid_codesign_config(
       dst, zip_contents, with_entitlements, without_entitlements, unsigned_binaries
   )

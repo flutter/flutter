@@ -195,15 +195,7 @@ public class FlutterAssembleToolHelper {
     }
 
     // Verify build mode of framework in TARGET_BUILD_DIR/FRAMEWORKS_FOLDER_PATH
-    let targetBuildDir = try FlutterToolHelper.findOrExit(
-      env: env,
-      key: "TARGET_BUILD_DIR"
-    )
-    let frameworksFolderPath = try FlutterToolHelper.findOrExit(
-      env: env,
-      key: "FRAMEWORKS_FOLDER_PATH"
-    )
-    let embeddedFrameworks = "\(targetBuildDir)/\(frameworksFolderPath)"
+    let embeddedFrameworks = try embeddedFrameworksDirectory(env: env)
     try verifyFrameworkBuildMode(
       buildDirectory: embeddedFrameworks,
       expectedBuildMode: expectedBuildMode,
@@ -217,6 +209,23 @@ public class FlutterAssembleToolHelper {
     FlutterToolHelper.xcodeNote(
       message: "Verification complete."
     )
+  }
+
+  /// Resolves the embedded frameworks directory (`$TARGET_BUILD_DIR/$FRAMEWORKS_FOLDER_PATH`).
+  ///
+  /// - Parameter env: A dictionary of environment variables.
+  /// - Returns: The path to the embedded frameworks directory.
+  /// - Throws: `XcodeErrorAndExit.error` if required environment variables are missing.
+  private static func embeddedFrameworksDirectory(env: [String: String]) throws -> String {
+    let targetBuildDir = try FlutterToolHelper.findOrExit(
+      env: env,
+      key: "TARGET_BUILD_DIR"
+    )
+    let frameworksFolderPath = try FlutterToolHelper.findOrExit(
+      env: env,
+      key: "FRAMEWORKS_FOLDER_PATH"
+    )
+    return "\(targetBuildDir)/\(frameworksFolderPath)"
   }
 
   /// Verifies the Flutter framework's build mode.
@@ -425,6 +434,25 @@ public class FlutterAssembleToolHelper {
         fileManager: fileManager,
         processManager: processManager
       )
+      let embeddedFrameworks = try embeddedFrameworksDirectory(env: env)
+      let embeddedVmServiceFrameworkPath = "\(embeddedFrameworks)/VMService.framework"
+      if targetBuildMode.lowercased() == "profile",
+        fileManager.fileExists(
+          atPath: "\(packagePath)/\(targetBuildMode)/Frameworks/VMService.xcframework"
+        )
+      {
+        try copyAndCodesignFramework(
+          frameworkName: "VMService",
+          packagePath: packagePath,
+          targetBuildMode: targetBuildMode,
+          targetPlatform: targetPlatform,
+          env: env,
+          fileManager: fileManager,
+          processManager: processManager
+        )
+      } else if fileManager.fileExists(atPath: embeddedVmServiceFrameworkPath) {
+        try fileManager.removeItem(atPath: embeddedVmServiceFrameworkPath)
+      }
       updated = true
     }
     if updated {
@@ -644,15 +672,7 @@ public class FlutterAssembleToolHelper {
       ])
     }
 
-    let targetBuildDir = try FlutterToolHelper.findOrExit(
-      env: env,
-      key: "TARGET_BUILD_DIR"
-    )
-    let frameworksFolderPath = try FlutterToolHelper.findOrExit(
-      env: env,
-      key: "FRAMEWORKS_FOLDER_PATH"
-    )
-    let embeddedFrameworks = "\(targetBuildDir)/\(frameworksFolderPath)"
+    let embeddedFrameworks = try embeddedFrameworksDirectory(env: env)
     do {
       // Find the framework for the platform
       let frameworkPath = try findPlatformFramework(
