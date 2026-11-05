@@ -7,6 +7,7 @@ import 'package:args/command_runner.dart';
 import 'package:flutter_tools/executable.dart' as executable;
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/android/android_studio.dart';
+import 'package:flutter_tools/src/base/template.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/build_targets.dart';
 import 'package:flutter_tools/src/cache.dart';
@@ -19,8 +20,10 @@ import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/emulator.dart';
 import 'package:flutter_tools/src/experimental/extension_build_manager.dart';
+import 'package:flutter_tools/src/experimental/extension_clean_manager.dart';
 import 'package:flutter_tools/src/experimental/extension_manager.dart';
 import 'package:flutter_tools/src/features.dart';
+import 'package:flutter_tools/src/isolated/mustache_template.dart';
 import 'package:flutter_tools/src/reporting/crash_reporting.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
@@ -507,8 +510,10 @@ class FakeToolDependencies extends Fake implements ToolDependencies {
     Doctor? doctor,
     EmulatorManager? emulatorManager,
     this.extensionBuildManager,
+    this.extensionCleanManager,
     this.extensionManager,
     FeatureFlags? featureFlags,
+    TemplateRenderer? templateRenderer,
     ToolContext? toolContext,
   }) : analytics = analytics ?? FakeAnalytics(),
        androidContext = androidContext ?? FakeAndroidContext(),
@@ -520,6 +525,7 @@ class FakeToolDependencies extends Fake implements ToolDependencies {
        doctor = doctor ?? FakeDoctor(),
        emulatorManager = emulatorManager ?? FakeEmulatorManager(),
        featureFlags = featureFlags ?? TestFeatureFlags(),
+       templateRenderer = templateRenderer ?? const MustacheTemplateRenderer(),
        toolContext = toolContext ?? FakeToolContext();
 
   @override
@@ -553,10 +559,16 @@ class FakeToolDependencies extends Fake implements ToolDependencies {
   final ExtensionBuildManager? extensionBuildManager;
 
   @override
+  final ExtensionCleanManager? extensionCleanManager;
+
+  @override
   final ExtensionManager? extensionManager;
 
   @override
   final FeatureFlags featureFlags;
+
+  @override
+  final TemplateRenderer templateRenderer;
 
   @override
   final ToolContext toolContext;

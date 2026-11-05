@@ -14,6 +14,7 @@
 #include "impeller/renderer/shader_function.h"
 #include "impeller/renderer/shader_key.h"
 #include "impeller/renderer/shader_library.h"
+#include "third_party/abseil-cpp/absl/strings/str_cat.h"
 #include "tonic/converter/dart_converter.h"
 
 namespace flutter {
@@ -47,7 +48,9 @@ fml::RefPtr<Shader> Shader::Make(
     std::vector<impeller::ShaderStageBufferLayout> layouts,
     std::unordered_map<std::string, UniformBinding> uniform_structs,
     std::unordered_map<std::string, TextureBinding> uniform_textures,
-    std::vector<impeller::DescriptorSetLayout> descriptor_set_layouts) {
+    std::vector<impeller::DescriptorSetLayout> descriptor_set_layouts,
+    absl::flat_hash_map<std::string, StorageBufferBinding> storage_buffers,
+    std::optional<std::array<uint32_t, 3>> workgroup_size) {
   auto shader = fml::MakeRefCounted<Shader>();
   shader->library_id_ = std::move(library_id);
   shader->entrypoint_ = std::move(entrypoint);
@@ -58,6 +61,8 @@ fml::RefPtr<Shader> Shader::Make(
   shader->uniform_structs_ = std::move(uniform_structs);
   shader->uniform_textures_ = std::move(uniform_textures);
   shader->descriptor_set_layouts_ = std::move(descriptor_set_layouts);
+  shader->storage_buffers_ = std::move(storage_buffers);
+  shader->workgroup_size_ = workgroup_size;
   shader->RebuildBindingOrder();
   return shader;
 }
@@ -111,6 +116,8 @@ void Shader::ResetFrom(Shader& other) {
   uniform_structs_ = std::move(other.uniform_structs_);
   uniform_textures_ = std::move(other.uniform_textures_);
   descriptor_set_layouts_ = std::move(other.descriptor_set_layouts_);
+  storage_buffers_ = std::move(other.storage_buffers_);
+  workgroup_size_ = other.workgroup_size_;
   RebuildBindingOrder();
   if (code_changed) {
     is_dirty_ = true;
@@ -118,21 +125,24 @@ void Shader::ResetFrom(Shader& other) {
 }
 
 bool Shader::RegisterSync(Context& context) {
-  auto& lib = *context.GetContext().GetShaderLibrary();
+  return RegisterSync(context.GetContext()).ok();
+}
+
+absl::Status Shader::RegisterSync(impeller::Context& context) {
+  auto& lib = *context.GetShaderLibrary();
   const std::string scoped_name = GetScopedName();
 
   std::shared_ptr<const impeller::ShaderFunction> existing =
       lib.GetFunction(scoped_name, stage_);
   if (existing && !is_dirty_) {
-    return true;  // Already registered and current.
+    return absl::OkStatus();  // Already registered and current.
   }
 
   // Dirty path: an earlier asset version still occupies the scoped slot.
   // Evict it (and any pipelines that referenced it) before registering the
   // new code mapping. Mirrors `RuntimeEffectContents::RegisterShader`.
   if (existing && is_dirty_) {
-    context.GetContext().GetPipelineLibrary()->RemovePipelinesWithEntryPoint(
-        existing);
+    context.GetPipelineLibrary()->RemovePipelinesWithEntryPoint(existing);
     lib.UnregisterFunction(scoped_name, stage_);
   }
 
@@ -144,10 +154,12 @@ bool Shader::RegisterSync(Context& context) {
         promise.set_value(result);
       }));
   if (!future.get()) {
-    return false;  // Registration failed.
+    return absl::InternalError(absl::StrCat("Failed to register the shader '",
+                                            entrypoint_,
+                                            "' with the shader library."));
   }
   is_dirty_ = false;
-  return true;
+  return absl::OkStatus();
 }
 
 std::shared_ptr<impeller::VertexDescriptor> Shader::CreateVertexDescriptor()
@@ -197,6 +209,19 @@ const Shader::TextureBinding* Shader::GetUniformTexture(
   return &uniform->second;
 }
 
+const Shader::StorageBufferBinding* Shader::GetStorageBuffer(
+    const std::string& name) const {
+  auto storage_buffer = storage_buffers_.find(name);
+  if (storage_buffer == storage_buffers_.end()) {
+    return nullptr;
+  }
+  return &storage_buffer->second;
+}
+
+const std::optional<std::array<uint32_t, 3>>& Shader::GetWorkgroupSize() const {
+  return workgroup_size_;
+}
+
 int Shader::GetUniformStructIndex(const std::string& name) const {
   const UniformBinding* binding = GetUniformStruct(name);
   if (binding == nullptr) {
@@ -238,6 +263,27 @@ const Shader::TextureBinding* Shader::GetUniformTextureAt(int index) const {
   return uniform_texture_order_[index];
 }
 
+int Shader::GetStorageBufferIndex(const std::string& name) const {
+  const StorageBufferBinding* binding = GetStorageBuffer(name);
+  if (binding == nullptr) {
+    return -1;
+  }
+  for (size_t i = 0; i < storage_buffer_order_.size(); i++) {
+    if (storage_buffer_order_[i] == binding) {
+      return static_cast<int>(i);
+    }
+  }
+  return -1;
+}
+
+const Shader::StorageBufferBinding* Shader::GetStorageBufferAt(
+    int index) const {
+  if (index < 0 || static_cast<size_t>(index) >= storage_buffer_order_.size()) {
+    return nullptr;
+  }
+  return storage_buffer_order_[index];
+}
+
 void Shader::RebuildBindingOrder() {
   uniform_struct_order_.clear();
   uniform_struct_order_.reserve(uniform_structs_.size());
@@ -248,6 +294,11 @@ void Shader::RebuildBindingOrder() {
   uniform_texture_order_.reserve(uniform_textures_.size());
   for (const auto& entry : uniform_textures_) {
     uniform_texture_order_.push_back(&entry.second);
+  }
+  storage_buffer_order_.clear();
+  storage_buffer_order_.reserve(storage_buffers_.size());
+  for (const auto& entry : storage_buffers_) {
+    storage_buffer_order_.push_back(&entry.second);
   }
 }
 
@@ -282,6 +333,35 @@ int InternalFlutterGpu_Shader_GetUniformTextureIndex(
     Dart_Handle texture_name_handle) {
   auto name = tonic::StdStringFromDart(texture_name_handle);
   return wrapper->GetUniformTextureIndex(name);
+}
+
+int InternalFlutterGpu_Shader_GetStorageBufferIndex(
+    flutter::gpu::Shader* wrapper,
+    Dart_Handle storage_buffer_name_handle) {
+  auto name = tonic::StdStringFromDart(storage_buffer_name_handle);
+  return wrapper->GetStorageBufferIndex(name);
+}
+
+int InternalFlutterGpu_Shader_GetStorageBufferSizeAt(
+    flutter::gpu::Shader* wrapper,
+    int storage_buffer_index) {
+  const auto* storage_buffer =
+      wrapper->GetStorageBufferAt(storage_buffer_index);
+  if (storage_buffer == nullptr) {
+    return -1;
+  }
+  return static_cast<int>(storage_buffer->size_in_bytes);
+}
+
+int InternalFlutterGpu_Shader_GetStorageBufferRuntimeArrayStrideAt(
+    flutter::gpu::Shader* wrapper,
+    int storage_buffer_index) {
+  const auto* storage_buffer =
+      wrapper->GetStorageBufferAt(storage_buffer_index);
+  if (storage_buffer == nullptr) {
+    return -1;
+  }
+  return static_cast<int>(storage_buffer->runtime_array_stride);
 }
 
 int InternalFlutterGpu_Shader_GetUniformMemberOffset(

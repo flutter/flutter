@@ -38,6 +38,7 @@ class ThreadHost;
     NS_SWIFT_UI_ACTOR;
 - (const flutter::ThreadHost&)threadHost;
 - (void)updateDisplays;
+- (void)sendDisplayWithScreenNativeSize:(CGSize)screenNativeSize scale:(CGFloat)scale;
 - (void)flutterTextInputView:(FlutterTextInputView*)textInputView
                performAction:(FlutterTextInputAction)action
                   withClient:(int)client;
