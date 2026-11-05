@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:args/args.dart';
@@ -306,7 +307,13 @@ Future<int> _builderOutputs(
 }) async {
   final String buildersDir = p.join(root, 'flutter/ci/builders');
   final loader = BuildConfigLoader(buildConfigsDir: Directory(buildersDir));
-  final Map<String, BuilderConfig> configs = loader.configs;
+  // The standalone builder files (ci/builders/standalone/*.json, one build
+  // each) as builder files of one build: the loader reads them as files
+  // with no builds.
+  final Map<String, BuilderConfig> configs = withStandaloneBuilds(
+    loader.configs,
+    (String path) => jsonDecode(File(path).readAsStringSync()) as Map<String, Object?>,
+  );
   if (loader.errors.isNotEmpty) {
     for (final String error in loader.errors) {
       stderr.writeln('error: $error');
@@ -362,7 +369,7 @@ Future<int> _builderOutputs(
     if (check) {
       if (!file.existsSync() || file.readAsStringSync() != output.value) {
         stderr.writeln(
-          '${output.key} is out of date with respect to flutter/ci/builders/{linux,mac}_*.json; '
+          '${output.key} is out of date with respect to flutter/ci/builders/{,standalone/}{linux,mac}_*.json; '
           'rerun tools/gn_to_bazel',
         );
         failures++;
@@ -370,7 +377,7 @@ Future<int> _builderOutputs(
     } else {
       file.writeAsStringSync(output.value);
       stdout.writeln(
-        'flutter/ci/builders/{linux,mac}_*.json -> ${output.key} (${builds.length} builds, '
+        'flutter/ci/builders/{,standalone/}{linux,mac}_*.json -> ${output.key} (${builds.length} builds, '
         '${builds.where((BuilderBuild b) => b.host == BuilderHost.linux).length} Linux and '
         '${builds.where((BuilderBuild b) => b.host == BuilderHost.mac).length} Mac, '
         '${builds.where((BuilderBuild b) => b.unsupported.isEmpty).length} with a configuration)',

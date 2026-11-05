@@ -8509,7 +8509,9 @@ cc_library(
       final Directory root = Directory.systemTemp.createTempSync('gn_to_bazel_builders');
       addTearDown(() => root.deleteSync(recursive: true));
       for (final MapEntry<String, String> file in files.entries) {
-        File(p.join(root.path, file.key)).writeAsStringSync(file.value);
+        File(p.join(root.path, file.key))
+          ..createSync(recursive: true)
+          ..writeAsStringSync(file.value);
       }
       final loader = BuildConfigLoader(buildConfigsDir: root);
       final Map<String, BuilderConfig> loaded = loader.configs;
@@ -9197,6 +9199,48 @@ test_suite(
           linux.singleWhere((Object? b) => (b! as Map<String, Object?>)['name'] == 'ci/host_gn')!
               as Map<String, Object?>;
       expect(gnBuild['install'], isNull);
+    });
+
+    test('a standalone builder file is one build, read as a builder file of that build', () {
+      // ci/builders/standalone/*.json: the engine_v2/builder recipe's form,
+      // the file one build (the Mac test builds since #195868). The loader
+      // reads it as a builder file with no builds; withStandaloneBuilds
+      // reads the build out of it, under the loader's key, so that the
+      // host's prefix and the build's --bazel checks apply as to any other.
+      final Map<String, BuilderConfig> loaded = configs(<String, String>{
+        'mac_host_engine.json':
+            '''
+{"builds": [
+  ${build('ci/host_debug', '--target-dir ci/host_debug --runtime-mode debug --no-lto --no-rbe --no-goma --xcode-symlinks --bazel', <String>['flutter/tools/font_subset'])}
+]}''',
+        'standalone/mac_host_debug_unopt_arm64.json': build(
+          'ci/host_debug_unopt_arm64',
+          '--target-dir ci/host_debug_unopt_arm64 --runtime-mode debug --unoptimized --no-lto --prebuilt-dart-sdk --mac-cpu arm64 --no-rbe --no-goma --xcode-symlinks --bazel',
+          <String>[],
+          tests: runTests('Host Tests for host_debug_unopt_arm64', 'dart,engine'),
+        ),
+        'standalone/linux_notes.json': '{"_comment": "nothing of a build"}',
+      });
+      expect(loaded['mac_host_debug_unopt_arm64']!.builds, isEmpty);
+      final Map<String, BuilderConfig> withBuilds = withStandaloneBuilds(
+        loaded,
+        (String path) => jsonDecode(File(path).readAsStringSync()) as Map<String, Object?>,
+      );
+      expect(withBuilds.keys, unorderedEquals(loaded.keys));
+      expect(withBuilds['mac_host_engine'], same(loaded['mac_host_engine']));
+      expect(withBuilds['linux_notes'], same(loaded['linux_notes']));
+      final BuilderConfig standalone = withBuilds['mac_host_debug_unopt_arm64']!;
+      expect(standalone.path, endsWith('standalone/mac_host_debug_unopt_arm64.json'));
+      expect(standalone.builds.map((Build b) => b.name), <String>['ci/host_debug_unopt_arm64']);
+      final List<BuilderBuild> builds = builderBuilds(withBuilds);
+      final BuilderBuild unopt = builds.singleWhere(
+        (BuilderBuild b) => b.name == 'ci/host_debug_unopt_arm64',
+      );
+      expect(unopt.file, 'mac_host_debug_unopt_arm64.json');
+      expect(unopt.host, BuilderHost.mac);
+      expect(unopt.isEverythingInstalled, isTrue);
+      expect(unopt.testTypes, <String>['dart', 'engine']);
+      expect(bazelBuildErrors(builds), isEmpty);
     });
 
     test('the engine type names executables run_tests.py runs', () {
