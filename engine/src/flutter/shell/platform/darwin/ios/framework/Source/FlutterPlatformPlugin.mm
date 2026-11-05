@@ -85,6 +85,21 @@ static void SetStatusBarStyleForSharedApplication(UIStatusBarStyle style) {
  * @brief Used to detect whether or not this device supports live text input from the camera.
  */
 @property(nonatomic, strong) UITextField* textField;
+
+/**
+ * @brief The system loupe shown by `Magnifier.showSystemMagnifier`, if any.
+ */
+@property(nonatomic, strong) UITextLoupeSession* loupeSession API_AVAILABLE(ios(17.0));
+
+/**
+ * @brief An invisible cursor at the framework's caret that the system loupe opens out of and
+ *        closes back into.
+ *
+ *        Without one, the loupe opens at full size with its content zoomed out, which shows a
+ *        small copy of the whole screen. It stays in the view after the loupe is hidden so that
+ *        the closing animation can still land in it.
+ */
+@property(nonatomic, strong) UIView* loupeCursorView;
 @end
 
 @implementation FlutterPlatformPlugin
@@ -172,6 +187,11 @@ static void SetStatusBarStyleForSharedApplication(UIStatusBarStyle style) {
   } else if ([method isEqualToString:@"ContextMenu.hideSystemContextMenu"]) {
     [self hideSystemContextMenu];
     result(nil);
+  } else if ([method isEqualToString:@"Magnifier.showSystemMagnifier"]) {
+    result(@([self showSystemMagnifier:args]));
+  } else if ([method isEqualToString:@"Magnifier.hideSystemMagnifier"]) {
+    [self hideSystemMagnifier];
+    result(nil);
   } else {
     result(FlutterMethodNotImplemented);
   }
@@ -194,6 +214,69 @@ static void SetStatusBarStyleForSharedApplication(UIStatusBarStyle style) {
     FlutterTextInputPlugin* textInputPlugin = [self.engine textInputPlugin];
     [textInputPlugin hideEditMenu];
   }
+}
+
+// Shows the system loupe at the gesture position, or moves it if it is already shown. The
+// arguments are in the coordinate space of the Flutter view. Returns whether the loupe is shown.
+- (BOOL)showSystemMagnifier:(NSDictionary*)args {
+  if (@available(iOS 17.0, *)) {
+    UIView* view = self.engine.viewController.viewIfLoaded;
+    if (!view) {
+      return NO;
+    }
+    NSDictionary* encodedPosition = args[@"position"];
+    NSDictionary* encodedCaretRect = args[@"caretRect"];
+    CGPoint position = CGPointMake([encodedPosition[@"x"] doubleValue],
+                                   [encodedPosition[@"y"] doubleValue]);
+    CGRect caretRect =
+        CGRectMake([encodedCaretRect[@"x"] doubleValue], [encodedCaretRect[@"y"] doubleValue],
+                   [encodedCaretRect[@"width"] doubleValue],
+                   [encodedCaretRect[@"height"] doubleValue]);
+    UIView* cursorView = [self placeLoupeCursorViewInView:view atRect:caretRect];
+    if (!self.loupeSession) {
+      // UIKit refuses a cursor taller than the loupe, so very large text begins without one.
+      self.loupeSession = [UITextLoupeSession beginLoupeSessionAtPoint:position
+                                                fromSelectionWidgetView:cursorView
+                                                                 inView:view];
+      if (!self.loupeSession) {
+        self.loupeSession = [UITextLoupeSession beginLoupeSessionAtPoint:position
+                                                  fromSelectionWidgetView:nil
+                                                                   inView:view];
+      }
+    }
+    [self.loupeSession moveToPoint:position withCaretRect:caretRect trackingCaret:YES];
+    return self.loupeSession != nil;
+  }
+  return NO;
+}
+
+- (void)hideSystemMagnifier {
+  if (@available(iOS 17.0, *)) {
+    [self.loupeSession invalidate];
+    self.loupeSession = nil;
+  }
+}
+
+// Moves the invisible loupe cursor to the caret. Returns nil before iOS 17.4, which has no public
+// cursor view.
+- (UIView*)placeLoupeCursorViewInView:(UIView*)view atRect:(CGRect)caretRect {
+  if (@available(iOS 17.4, *)) {
+    if (!self.loupeCursorView) {
+      UIStandardTextCursorView* cursorView = [[UIStandardTextCursorView alloc] init];
+      // The framework draws the caret. This view only shapes the loupe's animations.
+      cursorView.tintColor = UIColor.clearColor;
+      cursorView.userInteractionEnabled = NO;
+      cursorView.isAccessibilityElement = NO;
+      cursorView.accessibilityElementsHidden = YES;
+      self.loupeCursorView = cursorView;
+    }
+    if (self.loupeCursorView.superview != view) {
+      [view addSubview:self.loupeCursorView];
+    }
+    self.loupeCursorView.frame = caretRect;
+    return self.loupeCursorView;
+  }
+  return nil;
 }
 
 - (void)showShareViewController:(NSString*)content {
