@@ -338,9 +338,9 @@ WRAP_RBE_FLAG = '--//engine/src/flutter/build/bazel:wrap_rbe'
 
 
 def rbe_config():
-  """The RBE options of this host: Linux's `--config=rbe`, a Mac's `--config=rbe_mac`, each with the wrap; else none.
+  """This host's RBE options: Linux's `--config=rbe`, a Mac's `--config=rbe_mac`, with the wrap.
 
-  A Linux host runs everything on the workers; a Mac sends its
+  Else none. A Linux host runs everything on the workers; a Mac sends its
   C/C++/Objective-C compiles there through the Apple toolchains' remote
   mode (the root .bazelrc's build:rbe_mac) and keeps the rest -- the links,
   the Apple tools, Swift, Dart -- on the machine. Both wrap the GN builds'
