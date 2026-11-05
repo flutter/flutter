@@ -348,7 +348,7 @@ class CheckedModeBanner extends StatelessWidget {
     Widget result = child;
     assert(() {
       result = Banner(
-        message: 'DEBUG',
+        message: 'TEST',
         textDirection: TextDirection.ltr,
         location: BannerLocation.topEnd,
         child: result,
