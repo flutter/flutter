@@ -74,23 +74,79 @@ void testMain() {
       expect(paint.dispose, returnsNormally);
     });
 
+    test('the SkPaint counter sees a backend paint until it is disposed', () {
+      final counter = _SkPaintCounter.install();
+      addTearDown(() => counter.uninstall());
+
+      final BackendPaint paint = EnginePaint().createBackendPaint();
+      expect(
+        counter.created,
+        1,
+        reason: 'createBackendPaint constructs exactly one SkPaint through flutterCanvasKit.Paint.',
+      );
+      expect(
+        counter.live,
+        1,
+        reason: 'The SkPaint stays alive until its backend paint is disposed.',
+      );
+
+      paint.dispose();
+      expect(counter.live, 0, reason: 'dispose deletes the SkPaint.');
+
+      paint.dispose();
+      expect(
+        counter.live,
+        0,
+        reason: 'A second dispose must not call delete on the SkPaint again.',
+      );
+      expect(counter.created, 1, reason: 'dispose never constructs an SkPaint.');
+    });
+
     test('drawing with every paint consumer deletes every SkPaint it creates', () async {
       final counter = _SkPaintCounter.install();
       addTearDown(() => counter.uninstall());
 
       final PaintConsumers consumers = await PaintConsumers.create();
+      // One SkPaint to draw the image, plus a foreground and a background
+      // SkPaint for each of the three paragraphs.
+      const consumerSetupPaintCount = 7;
+      expect(
+        counter.created,
+        consumerSetupPaintCount,
+        reason:
+            'Drawing the image creates one SkPaint and each paragraph creates one for its '
+            'foreground and one for its background.',
+      );
+      expect(
+        counter.live,
+        0,
+        reason: 'The image draw and the paragraph builders delete their SkPaints when done.',
+      );
+
+      final int createdBeforeRecording = counter.created;
       final ui.Picture picture = consumers.record();
-      // Each canvas draw call creates at least one SkPaint.
-      expect(counter.created, greaterThanOrEqualTo(PaintConsumers.canvasPaintDrawCount));
-      expect(counter.live, 0, reason: 'after recording');
+      expect(
+        counter.created - createdBeforeRecording,
+        PaintConsumers.canvasPaintDrawCount,
+        reason: 'Each canvas draw call that takes a Paint creates exactly one SkPaint.',
+      );
+      expect(
+        counter.live,
+        0,
+        reason: 'Each canvas draw call deletes its SkPaint before returning.',
+      );
 
       final ui.Image rendered = await picture.toImage(20, 20);
-      expect(counter.live, 0, reason: 'after rendering');
+      expect(counter.live, 0, reason: 'Rendering a picture deletes any SkPaint it creates.');
 
       rendered.dispose();
       picture.dispose();
       consumers.dispose();
-      expect(counter.live, 0, reason: 'after disposing');
+      expect(
+        counter.live,
+        0,
+        reason: 'Pictures, images, paragraphs and vertices never own an SkPaint.',
+      );
     });
   });
 }

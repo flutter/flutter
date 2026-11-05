@@ -50,14 +50,26 @@ Future<void> testMain() async {
 
     final PaintConsumers consumers = await PaintConsumers.create();
     final ui.Picture picture = consumers.record();
-    expect(_livePaintCount(), baseline, reason: 'after recording');
+    expect(
+      _livePaintCount(),
+      baseline,
+      reason: 'Each draw call and paragraph builder frees the native paint it creates.',
+    );
 
     final ui.Image rendered = await picture.toImage(20, 20);
-    expect(_livePaintCount(), baseline, reason: 'after rendering');
+    expect(
+      _livePaintCount(),
+      baseline,
+      reason: 'Rendering a picture frees any native paint it creates.',
+    );
 
     rendered.dispose();
     picture.dispose();
     consumers.dispose();
-    expect(_livePaintCount(), baseline, reason: 'after disposing');
+    expect(
+      _livePaintCount(),
+      baseline,
+      reason: 'Pictures, images, paragraphs and vertices never own a native paint.',
+    );
   });
 }

@@ -106,7 +106,11 @@ Future<void> testMain() async {
       final paint = EnginePaint()
         ..color = const ui.Color(0xFF0000FF)
         ..maskFilter = maskFilter;
-      expect(paint.effectiveMaskFilter, blurs ? same(maskFilter) : isNull, reason: 'sigma $sigma');
+      expect(
+        paint.effectiveMaskFilter,
+        blurs ? same(maskFilter) : isNull,
+        reason: 'Skia can only build a blur mask filter for a finite, positive sigma ($sigma).',
+      );
 
       // A 20x20 rect in the middle of a 40x40 image. Without a blur, the
       // center is exactly the paint color and 5px outside the rect is empty.
@@ -119,9 +123,18 @@ Future<void> testMain() async {
         <(int, int)>[(20, 20), (5, 20)],
       );
       if (blurs) {
-        expect(pixels[1] & 0xFF, greaterThan(0), reason: 'sigma $sigma blurs outside the rect');
+        expect(
+          pixels[1] & 0xFF,
+          greaterThan(0),
+          reason: 'A blur with sigma $sigma spreads the color past the edge of the rect.',
+        );
       } else {
-        expect(pixels, <int>[_bluePixel, 0x00000000], reason: 'sigma $sigma draws a sharp rect');
+        expect(
+          pixels,
+          <int>[_bluePixel, 0x00000000],
+          reason:
+              'With sigma $sigma the rect is drawn without a mask filter, so its edge is sharp.',
+        );
       }
     }
   });
@@ -144,7 +157,7 @@ Future<void> testMain() async {
   });
 
   test(
-    'a paint changed between draws in one picture draws each shape with its state then',
+    'changing a paint between draws in one picture does not change shapes already drawn',
     () async {
       final paint = ui.Paint();
       final List<int> pixels = await _readPixels(
@@ -270,21 +283,25 @@ Future<void> testMain() async {
   );
 
   test('paragraph styles with only a foreground or only a background paint draw both', () async {
-    final cases = <({String name, ui.TextStyle style, int glyph, int space})>[
+    final cases = <({String reason, ui.TextStyle style, int glyph, int space})>[
       (
-        name: 'background only',
+        reason:
+            'With only a background paint, glyphs are drawn in the style color over the '
+            'background paint.',
         style: ui.TextStyle(color: _green, background: ui.Paint()..color = _red),
         glyph: _greenPixel,
         space: _redPixel,
       ),
       (
-        name: 'foreground only',
+        reason:
+            'With only a foreground paint, glyphs are drawn with the foreground paint over a '
+            'transparent background.',
         style: ui.TextStyle(foreground: ui.Paint()..color = _green),
         glyph: _greenPixel,
         space: _whitePixel,
       ),
     ];
-    for (final (:String name, :ui.TextStyle style, :int glyph, :int space) in cases) {
+    for (final (:String reason, :ui.TextStyle style, :int glyph, :int space) in cases) {
       final builder = ui.ParagraphBuilder(ui.ParagraphStyle(fontFamily: 'Ahem', fontSize: 20))
         ..pushStyle(style)
         ..addText('A A');
@@ -302,7 +319,7 @@ Future<void> testMain() async {
         <(int, int)>[(10, 10), (30, 10)],
       );
       paragraph.dispose();
-      expect(pixels, <int>[glyph, space], reason: name);
+      expect(pixels, <int>[glyph, space], reason: reason);
     }
   });
 }
