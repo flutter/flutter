@@ -565,7 +565,8 @@ static FlPluginRegistrar* fl_engine_get_registrar_for_plugin(
   FlEngine* self = FL_ENGINE(registry);
 
   return fl_plugin_registrar_new(nullptr, self->binary_messenger,
-                                 self->texture_registrar);
+                                 self->texture_registrar,
+                                 reinterpret_cast<int64_t>(self));
 }
 
 static void fl_engine_plugin_registry_iface_init(

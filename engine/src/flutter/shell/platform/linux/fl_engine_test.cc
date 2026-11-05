@@ -435,6 +435,10 @@ TEST_F(FlEngineTest, EngineId) {
   StartEngine();
   EXPECT_TRUE(engine_id != 0);
 
+  g_autoptr(FlPluginRegistrar) registrar =
+      fl_plugin_registry_get_registrar_for_plugin(FL_PLUGIN_REGISTRY(engine),
+                                                  "test");
+  EXPECT_EQ(fl_plugin_registrar_get_engine_id(registrar), engine_id);
   EXPECT_EQ(fl_engine_for_id(engine_id), engine);
 }
 
