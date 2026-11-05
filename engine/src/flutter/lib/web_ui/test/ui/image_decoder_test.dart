@@ -105,38 +105,36 @@ Future<void> testMain() async {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/160600
-  test('ImageDecoder-based codec decodes still AVIF images', () async {
-    if (!browserSupportsImageDecoder) {
-      return;
-    }
+  test(
+    'ImageDecoder-based codec decodes still AVIF images',
+    () async {
+      final HttpFetchResponse response = await httpFetch('/test_images/dog.avif');
+      final Uint8List avifBytes = (await response.payload.asByteBuffer()).asUint8List();
 
-    final HttpFetchResponse response = await httpFetch('/test_images/dog.avif');
-    final Uint8List avifBytes = (await response.payload.asByteBuffer()).asUint8List();
+      final ui.Codec codec = await renderer.instantiateImageCodec(avifBytes);
+      addTearDown(codec.dispose);
+      expect(codec.frameCount, 1);
 
-    final ui.Codec codec = await renderer.instantiateImageCodec(avifBytes);
-    expect(codec.frameCount, 1);
+      final ui.FrameInfo frame = await codec.getNextFrame();
+      addTearDown(frame.image.dispose);
+      expect(frame.image.width, 180);
+      expect(frame.image.height, 180);
+    },
+    skip: !browserSupportsImageDecoder,
+  );
 
-    final ui.FrameInfo frame = await codec.getNextFrame();
-    expect(frame.image.width, 180);
-    expect(frame.image.height, 180);
+  test(
+    'ImageDecoder-based codec reports multiple frames for animated AVIF images',
+    () async {
+      final HttpFetchResponse response = await httpFetch('/test_images/alphabetAnim.avif');
+      final Uint8List avifBytes = (await response.payload.asByteBuffer()).asUint8List();
 
-    frame.image.dispose();
-    codec.dispose();
-  });
-
-  test('ImageDecoder-based codec reports multiple frames for animated AVIF images', () async {
-    if (!browserSupportsImageDecoder) {
-      return;
-    }
-
-    final HttpFetchResponse response = await httpFetch('/test_images/alphabetAnim.avif');
-    final Uint8List avifBytes = (await response.payload.asByteBuffer()).asUint8List();
-
-    final ui.Codec codec = await renderer.instantiateImageCodec(avifBytes);
-    expect(codec.frameCount, greaterThan(1));
-
-    codec.dispose();
-  });
+      final ui.Codec codec = await renderer.instantiateImageCodec(avifBytes);
+      addTearDown(codec.dispose);
+      expect(codec.frameCount, greaterThan(1));
+    },
+    skip: !browserSupportsImageDecoder,
+  );
 
   test(
     '_BrowserEngineCodec.getNextFrame() throws StateError and cleans up if disposed during decode',
