@@ -1789,20 +1789,26 @@ abstract class WidgetController {
       startLocation,
       for (int t = 0; t <= intervals; t += 1) startLocation + offset * (t / intervals),
     ];
+    // All events of the gesture must target the same view: omitting the view
+    // id from any of them would silently dispatch it to a different view (or
+    // nowhere at all) in multi-view applications.
+    final int viewId =
+        view?.viewId ?? WidgetsBinding.instance.platformDispatcher.implicitView!.viewId;
     final records = <PointerEventRecord>[
       PointerEventRecord(Duration.zero, <PointerEvent>[
-        PointerAddedEvent(
+        PointerAddedEvent(position: startLocation, viewId: viewId),
+        PointerDownEvent(
           position: startLocation,
-          viewId: view?.viewId ?? WidgetsBinding.instance.platformDispatcher.implicitView!.viewId,
+          pointer: pointer,
+          buttons: buttons,
+          viewId: viewId,
         ),
-        PointerDownEvent(position: startLocation, pointer: pointer, buttons: buttons),
       ]),
       ...<PointerEventRecord>[
         for (int t = 0; t <= intervals; t += 1)
           PointerEventRecord(timeStamps[t], <PointerEvent>[
             PointerMoveEvent(
-              viewId:
-                  view?.viewId ?? WidgetsBinding.instance.platformDispatcher.implicitView!.viewId,
+              viewId: viewId,
               timeStamp: timeStamps[t],
               position: offsets[t + 1],
               delta: offsets[t + 1] - offsets[t],
@@ -1813,7 +1819,7 @@ abstract class WidgetController {
       ],
       PointerEventRecord(duration, <PointerEvent>[
         PointerUpEvent(
-          viewId: view?.viewId ?? WidgetsBinding.instance.platformDispatcher.implicitView!.viewId,
+          viewId: viewId,
           timeStamp: duration,
           position: offsets.last,
           pointer: pointer,
