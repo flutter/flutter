@@ -1111,18 +1111,26 @@ void main() {
   });
 
   group('macOS sandbox container DevFS redirection', () {
-    testWithoutContext(
-      'redirects macOS sandbox container URI to DARWIN_USER_TEMP_DIR and cleans up on destroy',
-      () async {
-        const containerId = 'com.example.myApp';
-        const darwinUserTempDir = '/var/folders/xx/yy/T';
-        const tempSubdir = 'appABC123';
-        const fsName = 'app';
-        const sandboxUri =
-            'file:///Users/tester/Library/Containers/$containerId/Data/tmp/$tempSubdir/$fsName/';
-        const compiledDillPath = 'build/app.dill';
-        const reloadDillPath = 'main.dart.dill';
+    const darwinUserTempDir = '/var/folders/xx/yy/T';
+    const tempSubdir = 'appABC123';
+    const fsName = 'app';
+    const compiledDillPath = 'build/app.dill';
+    const reloadDillPath = 'main.dart.dill';
 
+    for (final (String testName, String sandboxUri, String containerId)
+        in const <(String, String, String)>[
+          (
+            'redirects macOS sandbox container URI to DARWIN_USER_TEMP_DIR and cleans up on destroy',
+            'file:///Users/tester/Library/Containers/com.example.myApp/Data/tmp/$tempSubdir/$fsName/',
+            'com.example.myApp',
+          ),
+          (
+            'matches macOS sandbox container URI case-insensitively',
+            'file:///users/tester/library/containers/com.example.App/data/tmp/$tempSubdir/$fsName/',
+            'com.example.App',
+          ),
+        ]) {
+      testWithoutContext(testName, () async {
         final fileSystem = MemoryFileSystem.test();
         final Directory expectedContainerTempDir = fileSystem
             .directory(darwinUserTempDir)
@@ -1136,9 +1144,9 @@ void main() {
         ]);
         final fakeVmServiceHost = FakeVmServiceHost(
           requests: <VmServiceExpectation>[
-            const FakeVmServiceRequest(
+            FakeVmServiceRequest(
               method: '_createDevFS',
-              args: <String, Object>{'fsName': fsName},
+              args: const <String, Object>{'fsName': fsName},
               jsonResponse: <String, Object>{'uri': sandboxUri},
             ),
             const FakeVmServiceRequest(
@@ -1206,8 +1214,8 @@ void main() {
 
         expect(expectedSandboxTempDir, isNot(exists));
         expect(fakeVmServiceHost.hasRemainingExpectations, isFalse);
-      },
-    );
+      });
+    }
 
     testWithoutContext(
       'falls back to original URI when getconf DARWIN_USER_TEMP_DIR fails',

@@ -488,6 +488,7 @@ class DevFS {
   // e.g. `/Users/<user>/Library/Containers/<bundle-id>/Data/tmp/<temp-dir>/<fs-name>/`.
   static final _macOSSandboxContainerTempRegExp = RegExp(
     r'/Library/Containers/([^/]+)/Data/tmp/(.+)$',
+    caseSensitive: false,
   );
 
   // Sandboxed macOS apps return a DevFS path inside
