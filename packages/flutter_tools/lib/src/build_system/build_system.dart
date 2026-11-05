@@ -606,8 +606,13 @@ class Environment {
   final FlutterProjectFactory projectFactory;
 
   final AndroidSdk? Function()? _androidSdkBuilder;
+
+  /// The [AndroidSdk] used by Android build targets, lazily resolved on first
+  /// access.
   late final AndroidSdk? androidSdk = _androidSdkBuilder?.call();
 
+  /// The [VisualStudio] instance used by Windows build targets, or `null` for
+  /// non-Windows builds that do not run Windows targets.
   final VisualStudio? visualStudio;
 
   /// The [Xcode] instance used by Darwin build targets, or `null` for

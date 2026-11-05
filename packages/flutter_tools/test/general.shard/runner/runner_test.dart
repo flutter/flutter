@@ -22,7 +22,6 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart' as io;
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/net.dart';
-import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/signals.dart';
@@ -516,7 +515,7 @@ void main() {
           environment: <String, String>{'FLUTTER_ANALYTICS_LOG_FILE': 'test', 'FLUTTER_ROOT': '/'},
         ),
         FileSystem: () => fileSystem,
-        ProcessManager: () => FakeProcessManager.any(),
+        ProcessManager: _NoWhichProcessManager.new,
         UserMessages: () => CustomBugInstructions(),
         Artifacts: () => Artifacts.test(),
         CrashReporter: () => WaitingCrashReporter(Future<void>.value()),
@@ -632,7 +631,7 @@ void main() {
             },
           ),
           FileSystem: () => fileSystem,
-          ProcessManager: () => FakeProcessManager.any(),
+          ProcessManager: _NoWhichProcessManager.new,
           UserMessages: () => CustomBugInstructions(),
           Artifacts: () => Artifacts.test(),
           CrashReporter: () => WaitingCrashReporter(Future<void>.value()),
@@ -1016,7 +1015,6 @@ void main() {
               outputPreferences: loggerOutputPreferences,
             );
           },
-          OperatingSystemUtils: FakeOperatingSystemUtils.new,
           PersistentToolState: () => PersistentToolState.test(
             directory: fs.systemTempDirectory,
             logger: BufferLogger.test(),
@@ -1075,7 +1073,6 @@ void main() {
           FileSystem: () => fs,
           FlutterVersion: FakeFlutterVersion.new,
           Logger: BufferLogger.test,
-          OperatingSystemUtils: FakeOperatingSystemUtils.new,
           PersistentToolState: () => PersistentToolState.test(
             directory: fs.systemTempDirectory,
             logger: BufferLogger.test(),
@@ -1143,7 +1140,6 @@ void main() {
           FileSystem: () => fs,
           FlutterVersion: FakeFlutterVersion.new,
           Logger: BufferLogger.test,
-          OperatingSystemUtils: FakeOperatingSystemUtils.new,
           PersistentToolState: () => PersistentToolState.test(
             directory: fs.systemTempDirectory,
             logger: BufferLogger.test(),
@@ -1611,3 +1607,35 @@ class FakeCache extends Fake implements Cache {
 }
 
 class _FakeAndroidStudio extends Fake implements AndroidStudio {}
+
+/// Answers `which` lookups like a host where the binary is not on PATH, and
+/// delegates everything else to [FakeProcessManager.any].
+class _NoWhichProcessManager extends Fake implements ProcessManager {
+  final FakeProcessManager delegate = FakeProcessManager.any();
+
+  @override
+  bool canRun(Object? executable, {String? workingDirectory}) =>
+      delegate.canRun(executable, workingDirectory: workingDirectory);
+
+  @override
+  io.ProcessResult runSync(
+    List<Object> command, {
+    String? workingDirectory,
+    Map<String, String>? environment,
+    bool includeParentEnvironment = true,
+    bool runInShell = false,
+    covariant Object? stdoutEncoding = io.systemEncoding,
+    covariant Object? stderrEncoding = io.systemEncoding,
+  }) {
+    if (command.first == 'which') {
+      return io.ProcessResult(0, 1, '', '');
+    }
+    return delegate.runSync(
+      command,
+      workingDirectory: workingDirectory,
+      environment: environment,
+      includeParentEnvironment: includeParentEnvironment,
+      runInShell: runInShell,
+    );
+  }
+}

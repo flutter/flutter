@@ -892,7 +892,16 @@ class _SetCCompilerConfigTarget extends FakeFlutterNativeAssetsBuildRunner {
     required this.processManager,
     super.buildResult,
     super.packagesWithNativeAssetsResult,
-  });
+  }) : super(
+         visualStudio: VisualStudio(
+           toolContext: FakeToolContext(
+             fs: fileSystem,
+             logger: logger,
+             platform: platform,
+             processManager: processManager,
+           ),
+         ),
+       );
 
   final FileSystem fileSystem;
   final Logger logger;
@@ -905,14 +914,6 @@ class _SetCCompilerConfigTarget extends FakeFlutterNativeAssetsBuildRunner {
   Future<void> setCCompilerConfig(CodeAssetTarget target) async {
     await target.setCCompilerConfig(
       processUtils: ProcessUtils(processManager: processManager, logger: logger),
-      visualStudio: VisualStudio(
-        toolContext: FakeToolContext(
-          fs: fileSystem,
-          logger: logger,
-          platform: platform,
-          processManager: processManager,
-        ),
-      ),
     );
     didSetCCompilerConfig = true;
   }

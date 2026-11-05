@@ -92,6 +92,7 @@ class ToolDependencies {
   ToolDependencies({
     required this.analytics,
     required this.androidContext,
+    required this.androidWorkflow,
     required this.appleContext,
     required this.buildSystem,
     required this.buildTargets,
@@ -100,19 +101,14 @@ class ToolDependencies {
     required this.doctor,
     required this.emulatorManager,
     required this.featureFlags,
+    required this.macOSWorkflow,
     required this.templateRenderer,
     required this.toolContext,
-    this._androidWorkflow,
+    required this.windowsWorkflow,
     this.extensionBuildManager,
     this.extensionCleanManager,
     this.extensionManager,
-    this._macOSWorkflow,
-    this._windowsWorkflow,
   });
-
-  final AndroidWorkflow? _androidWorkflow;
-  final MacOSWorkflow? _macOSWorkflow;
-  final WindowsWorkflow? _windowsWorkflow;
 
   /// Telemetry and analytics reporter for command and feature usage.
   final Analytics analytics;
@@ -121,12 +117,7 @@ class ToolDependencies {
   final AndroidContext androidContext;
 
   /// Evaluates host readiness and toolchain requirements for Android workflows.
-  late final AndroidWorkflow androidWorkflow =
-      _androidWorkflow ??
-      AndroidWorkflow(
-        androidSdkBuilder: () => androidContext.androidSdk,
-        featureFlags: featureFlags,
-      );
+  final AndroidWorkflow androidWorkflow;
 
   /// Sub-context containing Apple platform services.
   final AppleContext appleContext;
@@ -162,8 +153,7 @@ class ToolDependencies {
   final FeatureFlags featureFlags;
 
   /// Evaluates host readiness and toolchain requirements for macOS workflows.
-  late final MacOSWorkflow macOSWorkflow =
-      _macOSWorkflow ?? MacOSWorkflow(featureFlags: featureFlags, platform: _platform);
+  final MacOSWorkflow macOSWorkflow;
 
   /// Renderer for mustache project and platform templates.
   final TemplateRenderer templateRenderer;
@@ -172,10 +162,7 @@ class ToolDependencies {
   final ToolContext toolContext;
 
   /// Evaluates host readiness and toolchain requirements for Windows workflows.
-  late final WindowsWorkflow windowsWorkflow =
-      _windowsWorkflow ?? WindowsWorkflow(featureFlags: featureFlags, platform: _platform);
-
-  Platform get _platform => toolContext.platform;
+  final WindowsWorkflow windowsWorkflow;
 
   /// Bootstraps the dependency graph and constructs all three contexts.
   ///
@@ -225,16 +212,8 @@ class ToolDependencies {
     Java? Function()? javaBuilder,
     LocalEngineLocator? localEngineLocator,
     Logger? logger,
-    Logger Function({
-      required OutputPreferences outputPreferences,
-      required Platform platform,
-      required Stdio stdio,
-      required AnsiTerminal terminal,
-    })?
-    loggerBuilder,
     MacOSWorkflow? macOSWorkflow,
     TestCompilerNativeAssetsBuilder? nativeAssetsBuilder,
-    OperatingSystemUtils? os,
     OutputPreferences? outputPreferences,
     PersistentToolState? persistentToolState,
     Platform? platform,
@@ -345,24 +324,17 @@ class ToolDependencies {
     // 3. Logger
     final Logger finalLogger =
         logger ??
-        (loggerBuilder != null
-            ? loggerBuilder(
-                outputPreferences: finalOutputPreferences,
-                platform: finalPlatform,
-                stdio: finalStdio,
+        (finalPlatform.isWindows
+            ? WindowsStdoutLogger(
                 terminal: finalTerminal,
+                stdio: finalStdio,
+                outputPreferences: finalOutputPreferences,
               )
-            : (finalPlatform.isWindows
-                  ? WindowsStdoutLogger(
-                      terminal: finalTerminal,
-                      stdio: finalStdio,
-                      outputPreferences: finalOutputPreferences,
-                    )
-                  : StdoutLogger(
-                      terminal: finalTerminal,
-                      stdio: finalStdio,
-                      outputPreferences: finalOutputPreferences,
-                    )));
+            : StdoutLogger(
+                terminal: finalTerminal,
+                stdio: finalStdio,
+                outputPreferences: finalOutputPreferences,
+              ));
 
     // 4. File System
     final finalFS = fs == null
@@ -451,14 +423,12 @@ class ToolDependencies {
           xcodeProjectInterpreterBuilder: () => finalXcodeProjectInterpreter,
         );
 
-    final OperatingSystemUtils finalOS =
-        os ??
-        OperatingSystemUtils(
-          fileSystem: finalFS,
-          logger: finalLogger,
-          platform: finalPlatform,
-          processManager: finalProcessManager,
-        );
+    final finalOS = OperatingSystemUtils(
+      fileSystem: finalFS,
+      logger: finalLogger,
+      platform: finalPlatform,
+      processManager: finalProcessManager,
+    );
 
     final Cache finalCache =
         cache ??

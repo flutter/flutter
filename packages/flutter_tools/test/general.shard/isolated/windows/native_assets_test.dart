@@ -295,14 +295,8 @@ void main() {
       environment: <String, String>{'PROGRAMFILES(X86)': r'C:\Program Files (x86)\'},
     );
 
-    testUsingContext(
+    testWithoutContext(
       'returns null when Visual Studio is not found and throwIfNotFound is false',
-      overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
-        Platform: () => windowsPlatform,
-        ProcessManager: () => FakeProcessManager.any(),
-        OperatingSystemUtils: () => FakeOperatingSystemUtils(),
-      },
       () async {
         final CCompilerConfig? result = await cCompilerConfigWindows(
           throwIfNotFound: false,
@@ -320,14 +314,8 @@ void main() {
       },
     );
 
-    testUsingContext(
+    testWithoutContext(
       'throws ToolExit when Visual Studio is not found and throwIfNotFound is true',
-      overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
-        Platform: () => windowsPlatform,
-        ProcessManager: () => FakeProcessManager.any(),
-        OperatingSystemUtils: () => FakeOperatingSystemUtils(),
-      },
       () async {
         await expectLater(
           cCompilerConfigWindows(
@@ -351,16 +339,14 @@ void main() {
       'WindowsAssetTarget.setCCompilerConfig throws StateError when visualStudio is null',
       () async {
         final target = WindowsAssetTarget(
-          supportedAssetTypes: const <SupportedAssetTypes>[SupportedAssetTypes.codeAssets],
           architecture: Architecture.x64,
+          supportedAssetTypes: const <SupportedAssetTypes>[SupportedAssetTypes.codeAssets],
+          visualStudio: null,
         );
-        final processUtils = ProcessUtils(
-          processManager: FakeProcessManager.empty(),
-          logger: BufferLogger.test(),
-        );
-
         await expectLater(
-          target.setCCompilerConfig(processUtils: processUtils),
+          target.setCCompilerConfig(
+            processUtils: ProcessUtils(processManager: FakeProcessManager.empty(), logger: logger),
+          ),
           throwsA(
             isA<StateError>().having(
               (StateError error) => error.message,
@@ -369,6 +355,28 @@ void main() {
             ),
           ),
         );
+      },
+    );
+
+    testUsingContext(
+      'runFlutterSpecificBuildHooks succeeds for data-only hooks on Windows when visualStudio is null',
+      () async {
+        final (:DartHooksResult buildResult, results: _) = await runFlutterSpecificBuildHooks(
+          environmentDefines: <String, String>{kBuildMode: BuildMode.debug.cliName},
+          targetPlatform: TargetPlatform.windows_x64,
+          projectUri: projectUri,
+          fileSystem: fileSystem,
+          logger: logger,
+          buildRunner: FakeFlutterNativeAssetsBuildRunner(
+            packagesWithNativeAssetsResult: <String>['bar'],
+          ),
+          buildCodeAssets: null,
+          buildDataAssets: true,
+        );
+        expect(buildResult.codeAssets, isEmpty);
+      },
+      overrides: <Type, Generator>{
+        FeatureFlags: () => TestFeatureFlags(isDartDataAssetsEnabled: true),
       },
     );
   });

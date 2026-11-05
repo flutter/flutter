@@ -80,13 +80,6 @@ Future<int> run(
   BuildTargets? buildTargets,
   List<ExtensionEntryPoint> extensionEntryPoints = const <ExtensionEntryPoint>[],
   String? flutterVersion,
-  Logger Function({
-    required OutputPreferences outputPreferences,
-    required Platform platform,
-    required Stdio stdio,
-    required AnsiTerminal terminal,
-  })?
-  loggerBuilder,
   bool muteCommandLogging = false,
   TestCompilerNativeAssetsBuilder? nativeAssetsBuilder,
   Map<Type, Generator>? overrides,
@@ -201,12 +194,10 @@ Future<int> run(
               : null,
           localEngineLocator: bootstrapContext.resolveOverride<LocalEngineLocator>(),
           logger: bootstrapContext.resolveOverride<Logger>(),
-          loggerBuilder: loggerBuilder,
           macOSWorkflow: bootstrapContext.resolveOverride<MacOSWorkflow>(),
           nativeAssetsBuilder:
               nativeAssetsBuilder ??
               bootstrapContext.resolveOverride<TestCompilerNativeAssetsBuilder>(),
-          os: bootstrapContext.resolveOverride<OperatingSystemUtils>(),
           outputPreferences: initialOutputPreferences,
           persistentToolState: bootstrapContext.resolveOverride<PersistentToolState>(),
           platform: initialPlatform,
