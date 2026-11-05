@@ -9,7 +9,7 @@
 
 load("@bazel_skylib//rules:copy_file.bzl", "copy_file")
 load("@bazel_skylib//rules:write_file.bzl", "write_file")
-load("@engine_version//:version.bzl", "CONTENT_HASH", "ENGINE_VERSION")
+load("@engine_version//:version.bzl", "CONTENT_HASH", "ENGINE_REALM", "ENGINE_VERSION")
 load("//build_defs/repositories:flutter_sdk_cache.bzl", "IOS_USB_ARTIFACTS")
 
 package(default_visibility = ["//visibility:public"])
@@ -103,12 +103,17 @@ filegroup(
 ]
 
 # The engine's storage realm beside the stamp (bin/cache/engine.realm, which
-# the bootstrap writes from bin/internal/engine.realm): empty, the default;
-# the Gradle plugin reads the file whether or not it needs a realm.
+# the bootstrap writes from Cocoon's FLUTTER_REALM on a bot: a presubmit's
+# engine artifacts live under flutter_archives_v2, not in the release
+# bucket): the checkout's, through @engine_version, so that a test's tool
+# downloading an artifact at run time (the integration shard's `flutter
+# build ios`) looks where the checkout's tool looks; empty, the default,
+# elsewhere. The Gradle plugin reads the file whether or not it needs a
+# realm.
 write_file(
     name = "engine_realm",
     out = "engine.realm",
-    content = [""],
+    content = [ENGINE_REALM],
 )
 
 # The cache's bookkeeping for the artifacts the tests' SDK facsimile lays
