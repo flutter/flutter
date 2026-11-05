@@ -62,8 +62,8 @@ Future<void> testMain() async {
   test('backend getters reflect the fields that were set', () {
     final defaults = EnginePaint();
     expect(defaults.colorValue, 0xFF000000);
-    expect(defaults.engineColorFilter, isNull);
-    expect(defaults.engineShader, isNull);
+    expect(defaults.colorFilter, isNull);
+    expect(defaults.shader, isNull);
     expect(defaults.effectiveMaskFilter, isNull);
     expect(defaults.effectiveImageFilter, isNull);
 
@@ -77,8 +77,8 @@ Future<void> testMain() async {
       ..colorFilter = colorFilter
       ..shader = shader;
     expect(paint.colorValue, 0xAABBCCDD);
-    expect(paint.engineColorFilter, same(colorFilter));
-    expect(paint.engineShader, same(shader));
+    expect(paint.colorFilter, same(colorFilter));
+    expect(paint.shader, same(shader));
   });
 
   test('createBackendPaint returns a new paint on every call', () {

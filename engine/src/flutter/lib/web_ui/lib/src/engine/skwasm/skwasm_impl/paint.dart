@@ -25,14 +25,14 @@ class SkwasmPaint implements BackendPaint {
         paint.strokeMiterLimit,
         paint.invertColors,
       ) {
-    final EngineColorFilter? colorFilter = paint.engineColorFilter;
+    final EngineColorFilter? colorFilter = paint.colorFilter;
     if (colorFilter != null) {
       final backendFilter = colorFilter.backendFilter as SkwasmColorFilter;
       paintSetColorFilter(handle, backendFilter.handle);
     }
 
     final ShaderHandle? shaderHandle =
-        (paint.engineShader?.getBackendShader(paint.filterQuality) as SkwasmShader?)?.handle;
+        (paint.shader?.getBackendShader(paint.filterQuality) as SkwasmShader?)?.handle;
     if (shaderHandle != null) {
       paintSetShader(handle, shaderHandle);
     }

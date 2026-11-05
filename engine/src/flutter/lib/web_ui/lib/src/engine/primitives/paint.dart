@@ -65,7 +65,7 @@ class EnginePaint implements ui.Paint {
   bool invertColors = false;
 
   @override
-  ui.Shader? get shader => _shader;
+  EngineShader? get shader => _shader;
   @override
   set shader(ui.Shader? value) {
     if (_shader == value) {
@@ -75,9 +75,6 @@ class EnginePaint implements ui.Paint {
   }
 
   EngineShader? _shader;
-
-  /// The shader of this paint.
-  EngineShader? get engineShader => _shader;
 
   @override
   ui.MaskFilter? maskFilter;
@@ -103,7 +100,7 @@ class EnginePaint implements ui.Paint {
   ui.FilterQuality filterQuality = ui.FilterQuality.none;
 
   @override
-  ui.ColorFilter? get colorFilter => _colorFilter;
+  EngineColorFilter? get colorFilter => _colorFilter;
   @override
   set colorFilter(ui.ColorFilter? value) {
     if (_colorFilter == value) {
@@ -113,9 +110,6 @@ class EnginePaint implements ui.Paint {
   }
 
   EngineColorFilter? _colorFilter;
-
-  /// The color filter of this paint.
-  EngineColorFilter? get engineColorFilter => _colorFilter;
 
   @override
   double strokeMiterLimit = _kStrokeMiterLimitDefault;

@@ -21,7 +21,7 @@ class CkPaint implements BackendPaint {
     skPaint.setColorInt(paint.colorValue);
     skPaint.setStrokeMiter(paint.strokeMiterLimit);
 
-    final EngineColorFilter? colorFilter = paint.engineColorFilter;
+    final EngineColorFilter? colorFilter = paint.colorFilter;
     SkColorFilter? composedSkColorFilter;
     if (paint.invertColors) {
       final SkColorFilter invertSkColorFilter =
@@ -39,7 +39,7 @@ class CkPaint implements BackendPaint {
       skPaint.setColorFilter((colorFilter.backendFilter as CkColorFilter).skiaObject);
     }
 
-    final shader = paint.engineShader?.getBackendShader(paint.filterQuality) as CkShader?;
+    final shader = paint.shader?.getBackendShader(paint.filterQuality) as CkShader?;
     if (shader != null) {
       skPaint.setShader(shader.skShader);
       if (shader.isGradient) {
