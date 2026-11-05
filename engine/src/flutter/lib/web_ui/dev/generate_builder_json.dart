@@ -108,6 +108,8 @@ class GenerateBuilderJsonCommand extends Command<bool> {
     ];
   }
 
+  // Shards Chrome suites by renderer, plus one shard for engine, fallbacks
+  // and force-st suites.
   Iterable<Map<String, Object?>> _getChromeTestSteps(
     List<TestSuite> suites,
     PackageLock packageLock,
@@ -130,7 +132,6 @@ class GenerateBuilderJsonCommand extends Command<bool> {
     ];
   }
 
-  // Splits Chrome suites across parallel drones grouped by test bundle.
   String _chromeShardName(TestSuite suite) {
     final String testSet = suite.testBundle.testSet.name;
     if (testSet == 'engine' ||
@@ -138,7 +139,7 @@ class GenerateBuilderJsonCommand extends Command<bool> {
         suite.runConfig.forceSingleThreadedSkwasm) {
       return 'engine, fallbacks and force-st';
     }
-    return suite.testBundle.compileConfigs.single.renderer.name;
+    return suite.testBundle.compileConfigs.first.renderer.name;
   }
 
   Map<String, Object?> _getTestStepForPlatformAndBrowser(
