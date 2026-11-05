@@ -349,6 +349,81 @@ Future<void> testMain() async {
       expect(GifHeaderReader(ByteData.sublistView(_createTestGif())).isAnimated(), isTrue);
     });
 
+    // The image descriptor, LZW minimum code size and image data of the first
+    // frame, used to append another frame.
+    final imageFrame = Uint8List.sublistView(staticGif, 63, 92);
+    // The plain text extension of `plainTextGif`, without the trailer.
+    final plainTextBlock = Uint8List.sublistView(plainTextGif, 13, plainTextGif.length - 1);
+
+    test('GIF with a reserved extension label between two frames is detected as a static GIF', () {
+      for (var label = 0xfa; label <= 0xfd; label++) {
+        final bytes = Uint8List.fromList(<int>[
+          ...firstFrame,
+          ...<int>[0x21, label, 0x03, 0x01, 0x02, 0x03, 0x00],
+          ...imageFrame,
+          0x3b,
+        ]);
+        expect(detectImageType(bytes), ImageType.gif, reason: 'label 0x${label.toRadixString(16)}');
+      }
+    });
+
+    test('1-frame GIF view whose buffer continues with a second frame is detected as static', () {
+      // The first 92 bytes of a 2-frame GIF are its complete first frame, so
+      // the second frame lies just past the end of the view.
+      final view = Uint8List.sublistView(_createTestGif(), 0, firstFrame.length);
+      expect(detectImageType(view), ImageType.gif);
+    });
+
+    test('1-frame GIF followed by only the first bytes of another block', () {
+      final cases = <(List<int>, ImageType)>[
+        (<int>[0x2c], ImageType.animatedGif),
+        (<int>[0x21, 0xf9], ImageType.animatedGif),
+        (<int>[0x21, 0x01], ImageType.animatedGif),
+        (<int>[0x21], ImageType.gif),
+        (<int>[0x21, 0xfe], ImageType.gif),
+      ];
+      for (final (List<int> trailing, ImageType expected) in cases) {
+        final bytes = Uint8List.fromList(<int>[...firstFrame, ...trailing]);
+        expect(detectImageType(bytes), expected, reason: 'trailing bytes $trailing');
+      }
+    });
+
+    test('GIF with a plain text extension as one of two frames is detected as animated', () {
+      final plainTextSecond = Uint8List.fromList(<int>[...firstFrame, ...plainTextBlock, 0x3b]);
+      expect(detectImageType(plainTextSecond), ImageType.animatedGif);
+      final plainTextFirst = Uint8List.fromList(<int>[
+        ...plainTextGif.sublist(0, plainTextGif.length - 1),
+        ...imageFrame,
+        0x3b,
+      ]);
+      expect(detectImageType(plainTextFirst), ImageType.animatedGif);
+    });
+
+    test('GIF with full-size color tables or an empty image before a second frame is animated', () {
+      final cases = <(String, List<int>)>[
+        (
+          // Packed fields 0x87 declare a 3 * 2^8 = 768-byte local color table.
+          'a full-size local color table',
+          <int>[
+            ...gifPrefix(72),
+            0x87,
+            ...List<int>.filled(768, 0),
+            ...Uint8List.sublistView(staticGif, 73, 92),
+          ],
+        ),
+        (
+          // Packed fields 0xf7 declare a 768-byte global color table.
+          'a full-size global color table',
+          <int>[...gifPrefix(10), 0xf7, 0, 0, ...List<int>.filled(768, 0), ...imageFrame],
+        ),
+        ('an image without data sub-blocks', <int>[...gifPrefix(74), 0x00]),
+      ];
+      for (final (String name, List<int> firstFrameBytes) in cases) {
+        final bytes = Uint8List.fromList(<int>[...firstFrameBytes, ...imageFrame, 0x3b]);
+        expect(detectImageType(bytes), ImageType.animatedGif, reason: name);
+      }
+    });
+
     final truncatedPayloads = <(String, Uint8List, ImageType)>[
       ('12-byte WebP header', Uint8List.sublistView(animatedWebpHeader, 0, 12), ImageType.webp),
       (
