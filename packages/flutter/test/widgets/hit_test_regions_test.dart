@@ -201,31 +201,37 @@ void main() {
     enablePass(tester);
     const button = Rect.fromLTWH(20, 30, 80, 40);
 
+    // Offstage beneath the opaque entry from the start, so the overlay keeps it
+    // in its child list but never lays it out.
+    final entry1 = OverlayEntry(
+      maintainState: true,
+      builder: (_) => const ClipRect(child: Listener(behavior: HitTestBehavior.opaque)),
+    );
+    final entry2 = OverlayEntry(
+      opaque: true,
+      builder: (_) => Stack(
+        children: <Widget>[
+          _platformView(1),
+          Positioned.fromRect(
+            rect: button,
+            child: const Listener(behavior: HitTestBehavior.opaque),
+          ),
+        ],
+      ),
+    );
+    addTearDown(() {
+      entry1
+        ..remove()
+        ..dispose();
+      entry2
+        ..remove()
+        ..dispose();
+    });
+
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
-        child: Overlay(
-          initialEntries: <OverlayEntry>[
-            // Offstage beneath the opaque entry from the start, so the overlay
-            // keeps it in its child list but never lays it out.
-            OverlayEntry(
-              maintainState: true,
-              builder: (_) => const ClipRect(child: Listener(behavior: HitTestBehavior.opaque)),
-            ),
-            OverlayEntry(
-              opaque: true,
-              builder: (_) => Stack(
-                children: <Widget>[
-                  _platformView(1),
-                  Positioned.fromRect(
-                    rect: button,
-                    child: const Listener(behavior: HitTestBehavior.opaque),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
+        child: Overlay(initialEntries: <OverlayEntry>[entry1, entry2]),
       ),
     );
 
