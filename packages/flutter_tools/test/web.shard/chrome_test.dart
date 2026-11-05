@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io' as io;
 
 import 'package:fake_async/fake_async.dart';
@@ -1251,6 +1252,206 @@ DevTools listening on ws://127.0.0.1:12345/devtools/browser/
       ),
     );
   });
+
+  group('Chromium crash diagnostics', () {
+    void addChromeProcessCommand(_ControllableProcess process) {
+      processManager.addCommand(
+        FakeCommand(
+          command: const <String>[
+            'example_chrome',
+            '--user-data-dir=/.tmp_rand0/flutter_tools_chrome_device.rand0',
+            '--remote-debugging-port=0',
+            ...kChromeArgs,
+            'example_url',
+          ],
+          process: process,
+        ),
+      );
+    }
+
+    testWithoutContext(
+      'logs produced after "DevTools listening" appear in crash diagnostics',
+      () async {
+        final process = _ControllableProcess(pid: 2468);
+        addChromeProcessCommand(process);
+
+        final Future<Chromium> launchFuture = chromeLauncher.launch('example_url', skipCheck: true);
+        process.emitStderr('Starting Chromium browser...');
+        process.emitStderr('DevTools listening on ws://127.0.0.1:12345/devtools/browser/abc');
+        final Chromium chrome = await launchFuture;
+
+        process.emitStdout('Post-launch diagnostic message from stdout');
+        process.emitStderr('Post-launch diagnostic message from stderr');
+        await pumpEventQueue();
+
+        process.crash();
+        await chrome.onExit;
+        await pumpEventQueue();
+
+        expect(
+          testLogger.errorText,
+          contains('Chrome process PID 2468 exited unexpectedly with code 1.'),
+        );
+        expect(testLogger.errorText, contains('Last 200 lines of Chrome output:'));
+        expect(testLogger.errorText, contains('[CHROME STDERR]: Starting Chromium browser...'));
+        expect(
+          testLogger.errorText,
+          contains('[CHROME STDOUT]: Post-launch diagnostic message from stdout'),
+        );
+        expect(
+          testLogger.errorText,
+          contains('[CHROME STDERR]: Post-launch diagnostic message from stderr'),
+        );
+      },
+    );
+
+    testWithoutContext('older log entries are evicted once 200-line limit is exceeded', () async {
+      final process = _ControllableProcess(pid: 3579);
+      addChromeProcessCommand(process);
+
+      final Future<Chromium> launchFuture = chromeLauncher.launch('example_url', skipCheck: true);
+      process.emitStderr('DevTools listening on ws://127.0.0.1:12345/devtools/browser/abc');
+      final Chromium chrome = await launchFuture;
+
+      for (var i = 0; i < 250; i++) {
+        process.emitStdout('line-$i');
+      }
+      await pumpEventQueue();
+
+      process.crash();
+      await chrome.onExit;
+      await pumpEventQueue();
+
+      expect(
+        testLogger.errorText,
+        contains('Chrome process PID 3579 exited unexpectedly with code 1.'),
+      );
+      expect(testLogger.errorText, contains('Last 200 lines of Chrome output:'));
+      // Older entries (first 50 lines and startup devtools listening) must be evicted.
+      for (var i = 0; i < 50; i++) {
+        expect(testLogger.errorText, isNot(contains('line-$i\n')));
+      }
+      expect(testLogger.errorText, isNot(contains('DevTools listening')));
+      // The most recent 200 lines must be present.
+      for (var i = 50; i < 250; i++) {
+        expect(testLogger.errorText, contains('[CHROME STDOUT]: line-$i\n'));
+      }
+      final int matchedLineCount = RegExp(r'\[CHROME STDOUT\]: line-\d+')
+          .allMatches(testLogger.errorText)
+          .length;
+      expect(matchedLineCount, 200);
+    });
+
+    testWithoutContext(
+      'the correct logs are associated with the correct Chromium process across retries',
+      () async {
+        final failedProcess = _ControllableProcess(pid: 1111);
+        final successfulProcess = _ControllableProcess(pid: 2222);
+
+        addChromeProcessCommand(failedProcess);
+        addChromeProcessCommand(successfulProcess);
+
+        final Future<Chromium> launchFuture = chromeLauncher.launch('example_url', skipCheck: true);
+
+        // Attempt 1 fails DevTools server startup.
+        failedProcess.emitStderr('Process 1 early diagnostic line');
+        failedProcess.emitStderr(
+          '[ERROR:content/browser/devtools/devtools_http_handler.cc:313] '
+          'Cannot start http server for devtools.',
+        );
+        await pumpEventQueue();
+
+        // Attempt 2 succeeds.
+        successfulProcess.emitStderr('Process 2 startup diagnostic line');
+        successfulProcess.emitStderr(
+          'DevTools listening on ws://127.0.0.1:12346/devtools/browser/abc',
+        );
+        final Chromium chrome = await launchFuture;
+
+        successfulProcess.emitStdout('Process 2 post-launch diagnostic line');
+        await pumpEventQueue();
+
+        successfulProcess.crash();
+        await chrome.onExit;
+        await pumpEventQueue();
+
+        expect(
+          testLogger.errorText,
+          contains('Chrome process PID 2222 exited unexpectedly with code 1.'),
+        );
+        expect(
+          testLogger.errorText,
+          contains('[CHROME STDERR]: Process 2 startup diagnostic line'),
+        );
+        expect(
+          testLogger.errorText,
+          contains('[CHROME STDOUT]: Process 2 post-launch diagnostic line'),
+        );
+        expect(testLogger.errorText, isNot(contains('Process 1 early diagnostic line')));
+      },
+    );
+
+    testWithoutContext('filters out Chromium D-Bus error lines from crash diagnostics', () async {
+      final process = _ControllableProcess(pid: 4444);
+      addChromeProcessCommand(process);
+
+      final Future<Chromium> launchFuture = chromeLauncher.launch('example_url', skipCheck: true);
+      process.emitStderr('DevTools listening on ws://127.0.0.1:12345/devtools/browser/abc');
+      final Chromium chrome = await launchFuture;
+
+      process.emitStderr('ERROR:dbus/bus.cc:123 Failed to connect to the bus');
+      process.emitStderr('Important error line after startup');
+      await pumpEventQueue();
+
+      process.crash();
+      await chrome.onExit;
+      await pumpEventQueue();
+
+      expect(
+        testLogger.errorText,
+        contains('Chrome process PID 4444 exited unexpectedly with code 1.'),
+      );
+      expect(testLogger.errorText, contains('[CHROME STDERR]: Important error line after startup'));
+      expect(testLogger.errorText, isNot(contains('ERROR:dbus/bus.cc')));
+      expect(testLogger.errorText, isNot(contains('Failed to connect to the bus')));
+    });
+
+    testWithoutContext('clean exit does not log unexpected crash diagnostics', () async {
+      final process = _ControllableProcess(pid: 5555);
+      addChromeProcessCommand(process);
+
+      final Future<Chromium> launchFuture = chromeLauncher.launch('example_url', skipCheck: true);
+      process.emitStderr('DevTools listening on ws://127.0.0.1:12345/devtools/browser/abc');
+      final Chromium chrome = await launchFuture;
+
+      process.emitStdout('Normal application log');
+      await pumpEventQueue();
+
+      process.exitCleanly();
+      await chrome.onExit;
+      await pumpEventQueue();
+
+      expect(testLogger.errorText, isNot(contains('exited unexpectedly')));
+      expect(testLogger.errorText, isNot(contains('Last 200 lines of Chrome output:')));
+    });
+
+    testWithoutContext('chrome.close does not log unexpected crash diagnostics', () async {
+      final process = _ControllableProcess(pid: 6666);
+      addChromeProcessCommand(process);
+
+      final Future<Chromium> launchFuture = chromeLauncher.launch('example_url', skipCheck: true);
+      process.emitStderr('DevTools listening on ws://127.0.0.1:12345/devtools/browser/abc');
+      final Chromium chrome = await launchFuture;
+
+      await chrome.close();
+      process.crash();
+      await chrome.onExit;
+      await pumpEventQueue();
+
+      expect(testLogger.errorText, isNot(contains('exited unexpectedly')));
+      expect(testLogger.errorText, isNot(contains('Last 200 lines of Chrome output:')));
+    });
+  });
 }
 
 /// Fake chrome connection that fails to get tabs a few times.
@@ -1365,5 +1566,60 @@ class _FailOnFindFreePortOperatingSystemUtils extends FakeOperatingSystemUtils {
     throw StateError(
       'OperatingSystemUtils.findFreePort should not be called when port-0 binding is used',
     );
+  }
+}
+
+class _ControllableProcess extends FakeProcess {
+  _ControllableProcess({super.pid = 1234})
+    : _stdoutController = StreamController<List<int>>(),
+      _stderrController = StreamController<List<int>>(),
+      _exitCompleter = Completer<int>();
+
+  final StreamController<List<int>> _stdoutController;
+  final StreamController<List<int>> _stderrController;
+  final Completer<int> _exitCompleter;
+
+  @override
+  Stream<List<int>> get stdout => _stdoutController.stream;
+
+  @override
+  Stream<List<int>> get stderr => _stderrController.stream;
+
+  @override
+  Future<int> get exitCode => _exitCompleter.future;
+
+  @override
+  bool kill([io.ProcessSignal signal = io.ProcessSignal.sigterm]) {
+    super.kill(signal);
+    if (!_exitCompleter.isCompleted) {
+      _stdoutController.close();
+      _stderrController.close();
+      _exitCompleter.complete(15);
+    }
+    return true;
+  }
+
+  void emitStdout(String line) {
+    _stdoutController.add(utf8.encode('$line\n'));
+  }
+
+  void emitStderr(String line) {
+    _stderrController.add(utf8.encode('$line\n'));
+  }
+
+  void crash([int code = 1]) {
+    _stdoutController.close();
+    _stderrController.close();
+    if (!_exitCompleter.isCompleted) {
+      _exitCompleter.complete(code);
+    }
+  }
+
+  void exitCleanly() {
+    _stdoutController.close();
+    _stderrController.close();
+    if (!_exitCompleter.isCompleted) {
+      _exitCompleter.complete(0);
+    }
   }
 }
