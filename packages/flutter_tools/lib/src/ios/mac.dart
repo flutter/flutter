@@ -28,7 +28,7 @@ import '../cache.dart';
 import '../context/tool_context.dart';
 import '../darwin/darwin.dart';
 import '../device.dart';
-import '../features.dart';
+import '../features.dart' show FeatureFlags;
 import '../flutter_manifest.dart';
 import '../macos/cocoapod_utils.dart';
 import '../macos/cocoapods.dart';
@@ -508,7 +508,12 @@ Future<XcodeBuildResult> buildXcodeProject({
       os.makePipe(scriptOutputPipeFile.path);
 
       Future<void> listenToScriptOutputLine() async {
-        final List<String> lines = await scriptOutputPipeFile!.readAsLines();
+        // The temporary directory may have been deleted mid-build (e.g. by
+        // fatal-signal temp cleanup), so there's nothing left to listen to.
+        if (!scriptOutputPipeFile!.existsSync()) {
+          return;
+        }
+        final List<String> lines = await scriptOutputPipeFile.readAsLines();
         var inWarningBlock = false;
         var inNoteBlock = false;
         for (final line in lines) {

@@ -1671,12 +1671,16 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
     testWithoutContext(
       'Do not crash if temporary build directory is deleted before cleanup in terminal session.',
       () async {
-        final BuildCommand command = createTestBuildCommand(
-          fileSystem: fileSystem,
-          logger: _TerminalBufferLogger(),
-          osUtils: _PipeOperatingSystemUtils(fileSystem),
+        final errorHandlingFileSystem = ErrorHandlingFileSystem(
+          delegate: fileSystem,
+          platform: macosPlatform,
         );
-        final Directory tempDir = fileSystem.directory(_xcBundleDirectoryPath).parent;
+        final BuildCommand command = createTestBuildCommand(
+          fileSystem: errorHandlingFileSystem,
+          logger: _TerminalBufferLogger(),
+          osUtils: _PipeOperatingSystemUtils(errorHandlingFileSystem),
+        );
+        final Directory tempDir = errorHandlingFileSystem.directory(_xcBundleDirectoryPath).parent;
         final File pipeFile = tempDir.childFile('pipe_to_stdout');
         processManager.addCommand(
           setUpFakeXcodeBuildHandler(
@@ -1727,7 +1731,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
       final BuildCommand command = createTestBuildCommand(
         fileSystem: errorHandlingFileSystem,
         logger: _TerminalBufferLogger(),
-        osUtils: _PipeOperatingSystemUtils(errorHandlingFileSystem),
+        osUtils: _PipeOperatingSystemUtils(errorHandlingFileSystem, initialContents: 'all done\n'),
       );
       final Directory tempDir = errorHandlingFileSystem.directory(_xcBundleDirectoryPath).parent;
       final File pipeFile = tempDir.childFile('pipe_to_stdout');
@@ -1792,12 +1796,16 @@ class _TerminalBufferLogger extends BufferLogger {
 }
 
 class _PipeOperatingSystemUtils extends FakeOperatingSystemUtils {
-  _PipeOperatingSystemUtils(this._fileSystem);
+  _PipeOperatingSystemUtils(this._fileSystem, {this.initialContents = ''});
 
   final FileSystem _fileSystem;
 
-  // Emulates a FIFO that already delivered the final 'all done' line, so the
-  // pipe listener in buildXcodeProject returns right away.
+  /// Defaults to an empty pipe file so the listener keeps re-reading until the
+  /// temporary directory is deleted. Pass 'all done\n' when deletion happens
+  /// after the build so the listener does not spin on microtasks and starve
+  /// FakeProcess timers.
+  final String initialContents;
+
   @override
-  File makePipe(String path) => _fileSystem.file(path)..writeAsStringSync('all done\n');
+  File makePipe(String path) => _fileSystem.file(path)..writeAsStringSync(initialContents);
 }

@@ -22,7 +22,7 @@ import '../context/apple_context.dart';
 import '../context/tool_context.dart';
 import '../convert.dart';
 import '../darwin/darwin.dart';
-import '../features.dart';
+import '../features.dart' show FeatureFlags;
 import '../flutter_plugins.dart';
 import '../ios/plist_parser.dart';
 import '../ios/xcodeproj.dart';

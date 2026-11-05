@@ -29,7 +29,7 @@ import '../context/tool_context.dart';
 import '../convert.dart';
 import '../darwin/darwin.dart';
 import '../doctor_validator.dart';
-import '../features.dart';
+import '../features.dart' show FeatureFlags;
 import '../ios/application_package.dart';
 import '../ios/code_signing.dart';
 import '../ios/mac.dart';
@@ -912,7 +912,7 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
   _BuildIOSSubCommand({
     required this._appleContext,
     required this._buildSystem,
-    required this.featureFlags,
+    required this._featureFlags,
     required this._templateRenderer,
     required ToolContext super.toolContext,
     required super.verboseHelp,
@@ -934,11 +934,7 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
 
   final AppleContext _appleContext;
   final BuildSystem _buildSystem;
-
-  /// Feature flags governing iOS builds.
-  @visibleForTesting
-  final FeatureFlags featureFlags;
-
+  final FeatureFlags _featureFlags;
   final TemplateRenderer _templateRenderer;
 
   @visibleForTesting
@@ -1041,7 +1037,7 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
       analytics: analytics,
       app: app,
       buildInfo: buildInfo,
-      featureFlags: featureFlags,
+      featureFlags: _featureFlags,
       plistParser: plistParser,
       templateRenderer: _templateRenderer,
       toolContext: toolContext,
