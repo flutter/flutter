@@ -273,12 +273,14 @@ FlutterProjectFactory get projectFactory {
   return context.get<FlutterProjectFactory>() ??
       FlutterProjectFactory(
         config: config,
-        featureFlags: featureFlags,
+        featureFlagsBuilder: () => featureFlags,
         fileSystem: fs,
         logger: logger,
         plistParser: plistParser,
-        xcode: xcode,
-        xcodeProjectInterpreter: xcodeProjectInterpreter,
+        // Lazy builders avoid an AppContext dependency cycle during early startup
+        // (e.g. Analytics -> Cache -> Xcode -> XcodeProjectInterpreter).
+        xcodeBuilder: () => xcode,
+        xcodeProjectInterpreterBuilder: () => xcodeProjectInterpreter,
       );
 }
 
