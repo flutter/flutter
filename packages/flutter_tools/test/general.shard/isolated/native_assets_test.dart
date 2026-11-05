@@ -804,7 +804,11 @@ environment:
             logger: logger,
             platform: const LocalPlatform(),
             processManager: processManager,
-            projectFactory: FlutterProjectFactory(fileSystem: hostFileSystem, logger: logger),
+            projectFactory: FlutterProjectFactory(
+              config: Config.test(),
+              fileSystem: hostFileSystem,
+              logger: logger,
+            ),
           ),
         );
         expect(nativeAssetsManifest, isNotNull);
@@ -863,7 +867,11 @@ environment:
             logger: logger,
             platform: const LocalPlatform(),
             processManager: processManager,
-            projectFactory: FlutterProjectFactory(fileSystem: hostFileSystem, logger: logger),
+            projectFactory: FlutterProjectFactory(
+              config: Config.test(),
+              fileSystem: hostFileSystem,
+              logger: logger,
+            ),
           ),
         );
         expect(nativeAssetsManifest, isNull);

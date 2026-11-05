@@ -29,7 +29,7 @@ import '../runner/flutter_command_runner.dart';
 class ConfigCommand extends FlutterCommand with ExtensionArgParserMixin {
   ConfigCommand({
     required this._androidContext,
-    required ToolContext super.toolContext,
+    required super.toolContext,
     required this.featureFlags,
     this._verboseHelp = false,
     this._extensionManager,
@@ -294,7 +294,7 @@ class ConfigCommand extends FlutterCommand with ExtensionArgParserMixin {
     }
 
     if (argResults!.wasParsed('linux-gtk-default')) {
-      _updateConfig('linux-gtk-default', stringArg('linux-gtk-default')!);
+      _updateConfig('linux-gtk-default', stringArg('linux-gtk-default'));
     }
 
     for (final Feature feature in featureFlags.allFeatures) {

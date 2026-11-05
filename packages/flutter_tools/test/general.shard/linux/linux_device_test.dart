@@ -18,7 +18,6 @@ import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
-import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
 import '../../src/package_config.dart';
 
@@ -219,7 +218,6 @@ void main() {
     testUsingContext(
       'sends timing events to analytics',
       () async {
-        Cache.flutterRoot = '/flutter';
         fileSystem.file('pubspec.yaml').createSync();
         writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
         fileSystem.file(fileSystem.path.join('linux', 'CMakeLists.txt'))
@@ -247,6 +245,7 @@ void main() {
         final device = LinuxDevice(
           analytics: fakeAnalytics,
           toolContext: FakeToolContext(
+            cache: Cache.test(processManager: FakeProcessManager.any(), flutterRoot: '/flutter'),
             fs: fileSystem,
             logger: BufferLogger.test(),
             os: FakeOperatingSystemUtils(),
@@ -286,6 +285,7 @@ FlutterProject setUpFlutterProject(Directory directory) {
   final flutterProjectFactory = FlutterProjectFactory(
     fileSystem: directory.fileSystem,
     logger: BufferLogger.test(),
+    config: FakeConfig(),
   );
   return flutterProjectFactory.fromDirectory(directory);
 }

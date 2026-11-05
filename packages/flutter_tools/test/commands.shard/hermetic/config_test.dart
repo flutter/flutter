@@ -7,7 +7,6 @@ import 'dart:convert';
 import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
-import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/android/android_studio.dart';
 import 'package:flutter_tools/src/android/java.dart';
@@ -181,17 +180,12 @@ void main() {
     });
 
     testWithoutContext('Can set linux-gtk-default', () async {
-      final ConfigCommand configCommand = createConfigCommand(
-        config: config,
-        logger: logger,
-        fileSystem: fs,
-        flutterVersion: fakeFlutterVersion,
-      );
+      final ConfigCommand configCommand = createConfigCommand();
       final CommandRunner<void> commandRunner = createRunner(configCommand);
 
       await commandRunner.run(<String>['config', '--linux-gtk-default=gtk4']);
 
-      expect(config.getValue('linux-gtk-default'), 'gtk4');
+      expect(defaultConfig.getValue('linux-gtk-default'), 'gtk4');
       expect(fakeAnalytics.sentEvents, isEmpty);
     });
 

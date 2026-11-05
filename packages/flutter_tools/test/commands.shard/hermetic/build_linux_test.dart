@@ -50,7 +50,6 @@ void main() {
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();
-    Cache.flutterRoot = _kTestFlutterRoot;
     logger = BufferLogger.test();
     processManager = FakeProcessManager.empty();
     fakeAnalytics = getInitializedFakeAnalyticsInstance(
@@ -81,7 +80,7 @@ void main() {
     String linuxGtkVersion = 'gtk3',
     void Function(List<String> command)? onRun,
   }) {
-    final String buildDirectory = linuxGtkVersion == 'gtk4' ? 'linux-gtk4' : 'linux';
+    final buildDirectory = linuxGtkVersion == 'gtk4' ? 'linux-gtk4' : 'linux';
     return FakeCommand(
       command: <String>[
         'cmake',
@@ -106,7 +105,7 @@ void main() {
     void Function(List<String> command)? onRun,
     String stdout = '',
   }) {
-    final String buildDirectory = linuxGtkVersion == 'gtk4' ? 'linux-gtk4' : 'linux';
+    final buildDirectory = linuxGtkVersion == 'gtk4' ? 'linux-gtk4' : 'linux';
     return FakeCommand(
       command: <String>['ninja', '-C', '/build/$buildDirectory/$target/$buildMode', 'install'],
       environment: environment,
@@ -135,7 +134,11 @@ void main() {
       os: osUtils ?? FakeOperatingSystemUtils(),
       platform: platform ?? linuxPlatform,
       processManager: processManager,
-      projectFactory: FlutterProjectFactory(fileSystem: fileSystem, logger: resolvedLogger),
+      projectFactory: FlutterProjectFactory(
+        fileSystem: fileSystem,
+        logger: resolvedLogger,
+        config: FakeConfig(),
+      ),
     );
     return BuildCommand(
       androidContext: FakeAndroidContext(),
@@ -168,7 +171,11 @@ void main() {
       os: osUtils ?? FakeOperatingSystemUtils(),
       platform: platform ?? linuxPlatform,
       processManager: processManager,
-      projectFactory: FlutterProjectFactory(fileSystem: fileSystem, logger: resolvedLogger),
+      projectFactory: FlutterProjectFactory(
+        fileSystem: fileSystem,
+        logger: resolvedLogger,
+        config: FakeConfig(),
+      ),
     );
     return BuildLinuxCommand(
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),

@@ -651,7 +651,6 @@ void _validateFlutter(YamlMap? yaml, List<String> errors, {required String packa
             'The "linux-gtk-default" value under "flutter: config:" must be either "gtk3" or "gtk4".',
           );
         }
-        break;
       case 'deferred-components':
         _validateDeferredComponents(kvp, errors);
       case 'disable-swift-package-manager':

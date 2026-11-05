@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_tools_core/flutter_tools_core.dart';
+import 'package:flutter_tools_core/flutter_tools_core.dart' hide BuildMode;
 import 'package:meta/meta.dart';
 
 import '../android/android_builder.dart';
@@ -207,8 +207,11 @@ class BuildCommand extends FlutterCommand {
             ),
           );
         } else {
+          final String extensionName = extensionBuildManager.extensionNameForBuildTarget(
+            target.name,
+          );
           toolContext.logger.printWarning(
-            'Skipping custom build target "${target.name}" because a subcommand with that name already exists.',
+            'Skipping custom build target "${target.name}" from extension "$extensionName" because a subcommand with that name already exists.',
           );
         }
       }
@@ -220,9 +223,6 @@ class BuildCommand extends FlutterCommand {
       addSubcommand(command);
     }
   }
-
-  @override
-  ToolContext get toolContext => super.toolContext!;
 
   @override
   final String name = 'build';
@@ -248,7 +248,7 @@ abstract class BuildSubCommand extends FlutterCommand {
     required this.logger,
     required super.verboseHelp,
     super.outputPreferences,
-    super.toolContext,
+    required super.toolContext,
   }) {
     requiresPubspecYaml();
     CommonOptions.fatalWarnings.addTo(argParser, verboseHelp: verboseHelp);
@@ -266,13 +266,9 @@ class ExtensionBuildSubCommand extends BuildSubCommand {
   ExtensionBuildSubCommand({
     required this._buildManager,
     required this.target,
-    required ToolContext toolContext,
+    required super.toolContext,
     required super.verboseHelp,
-  }) : super(
-         logger: toolContext.logger,
-         outputPreferences: toolContext.outputPreferences,
-         toolContext: toolContext,
-       ) {
+  }) : super(logger: toolContext.logger) {
     registerOptionBundle(const BuildModeOptionsBundle());
     argParser.addDescriptors(const <OptionDescriptor<Object?>>[
       CommonOptions.target,
@@ -286,9 +282,6 @@ class ExtensionBuildSubCommand extends BuildSubCommand {
   final ExtensionBuildTarget target;
 
   @override
-  ToolContext get toolContext => super.toolContext!;
-
-  @override
   String get name => target.name;
 
   @override
@@ -296,7 +289,8 @@ class ExtensionBuildSubCommand extends BuildSubCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final ToolContext(:Artifacts artifacts, :Config config, :FileSystem fs) = toolContext;
+    final ToolContext(:Artifacts artifacts, :Cache cache, :Config config, :FileSystem fs) =
+        toolContext;
     final Directory projectDir = fs.currentDirectory;
     final BuildInfo buildInfo = await getBuildInfo();
     final Directory outputDir = resolveExtensionOutputDir(
@@ -314,7 +308,7 @@ class ExtensionBuildSubCommand extends BuildSubCommand {
 
     final ExtensionBuildResult result = await _buildManager.build(
       buildMode: buildInfo.mode,
-      flutterRoot: fs.directory(Cache.flutterRoot).uri,
+      flutterRoot: fs.directory(cache.flutterRoot).uri,
       mainPath: targetFile,
       outputDir: outputDir.uri,
       projectRoot: projectDir.uri,

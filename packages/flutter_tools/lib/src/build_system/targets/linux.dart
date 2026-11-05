@@ -4,6 +4,7 @@
 
 import '../../artifacts.dart';
 import '../../base/file_system.dart';
+import '../../base/logger.dart';
 import '../../build_info.dart';
 import '../../convert.dart';
 import '../../devfs.dart';
@@ -17,12 +18,6 @@ import 'common.dart';
 import 'desktop.dart';
 import 'icon_tree_shaker.dart';
 import 'native_assets.dart';
-
-/// The only files/subdirectories we care out.
-const _kLinuxArtifacts = <String>[
-  'libflutter_linux_gtk.so',
-  'libflutter_linux_gtk4.so',
-];
 
 const _kLinuxGtk3Artifact = 'libflutter_linux_gtk.so';
 const _kLinuxGtk4Artifact = 'libflutter_linux_gtk4.so';
@@ -92,9 +87,7 @@ class UnpackLinux extends Target {
     );
     // Determine which artifact(s) to unpack based on the project's GTK variant.
     final String? linuxGtkVariant = environment.defines['FLUTTER_LINUX_GTK'];
-    final List<String> linuxArtifacts = <String>[
-      _linuxArtifactForGtkVariant(linuxGtkVariant),
-    ];
+    final linuxArtifacts = <String>[_linuxArtifactForGtkVariant(linuxGtkVariant)];
 
     final Depfile depfile = unpackDesktopArtifacts(
       fileSystem: environment.fileSystem,
@@ -154,7 +147,11 @@ abstract class BundleLinuxAssets extends Target {
           .childFile('app.dill')
           .copySync(outputDirectory.childFile('kernel_blob.bin').path);
     }
-    final String versionInfo = getVersionInfo(environment.defines);
+    final String versionInfo = getVersionInfo(
+      environment.defines,
+      fileSystem: environment.fileSystem,
+      logger: environment.logger,
+    );
     final DartHooksResult dartHookResult = await LinkHooks.loadHookResult(environment);
     final Depfile depfile = await copyAssets(
       environment,
@@ -177,9 +174,14 @@ abstract class BundleLinuxAssets extends Target {
   }
 
   /// Return json encoded string that contains data about version for package_info
-  String getVersionInfo(Map<String, String> defines) {
-    final versionInfo =
-        jsonDecode(FlutterProject.current().getVersionInfo()) as Map<String, dynamic>;
+  String getVersionInfo(
+    Map<String, String> defines, {
+    required FileSystem fileSystem,
+    required Logger logger,
+  }) {
+    final versionInfo = jsonDecode(
+      FlutterProject.current(fileSystem, logger: logger).getVersionInfo(),
+    ) as Map<String, Object?>;
 
     if (defines.containsKey(kBuildNumber)) {
       versionInfo['build_number'] = defines[kBuildNumber];

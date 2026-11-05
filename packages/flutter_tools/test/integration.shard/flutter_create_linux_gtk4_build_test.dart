@@ -44,10 +44,7 @@ void main() {
       );
 
       final File pubspec = projectRoot.childFile('pubspec.yaml');
-      expect(
-        pubspec.readAsStringSync(),
-        contains('linux-gtk-default: gtk4'),
-      );
+      expect(pubspec.readAsStringSync(), contains('linux-gtk-default: gtk4'));
     },
     skip: !platform.isLinux, // [intended] Linux builds only work on Linux.
   );
@@ -72,7 +69,7 @@ Future<void> _runFlutterSnapshot(List<String> flutterCommandArgs, Directory work
     'flutter_tools.snapshot',
   );
 
-  final List<String> args = <String>[
+  final args = <String>[
     dartBinary,
     flutterToolsSnapshotPath,
     ...getLocalEngineArguments(),

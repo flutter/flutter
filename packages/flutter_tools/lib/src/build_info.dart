@@ -327,7 +327,7 @@ class BuildInfo {
       kBuildName: ?buildName,
       kBuildNumber: ?buildNumber,
       if (useLocalCanvasKit) kUseLocalCanvasKitFlag: useLocalCanvasKit.toString(),
-      if (linuxGtkVersion != null) kLinuxGtkDartDefine: linuxGtkVersion!,
+      kLinuxGtkDartDefine: ?linuxGtkVersion,
     };
   }
 
@@ -353,7 +353,7 @@ class BuildInfo {
       'PACKAGE_CONFIG': packageConfigPath,
       'CODE_SIZE_DIRECTORY': ?codeSizeDirectory,
       'FLAVOR': ?flavor,
-      if (linuxGtkVersion != null) kLinuxGtkDartDefine: linuxGtkVersion!,
+      kLinuxGtkDartDefine: ?linuxGtkVersion,
     };
   }
 }
@@ -615,6 +615,7 @@ enum CpuArch {
       .darwin_x64 || .linux_x64 || .windows_x64 => .x64,
       .darwin_arm64 || .linux_arm64 || .windows_arm64 => .arm64,
       .linux_riscv64 => .riscv64,
+      _ => CpuArch.fromName(hostPlatform.platformName),
     };
   }
 
@@ -972,7 +973,7 @@ String getLinuxBuildDirectory(
     ).platformName,
   };
   final String subDirs = fileSystem.path.joinAll(<String>[
-    linuxGtkVersion == 'gtk4' ? 'linux-gtk4' : 'linux',
+    if (linuxGtkVersion == 'gtk4') 'linux-gtk4' else 'linux',
     arch,
     if (flavor != null && flavor.isNotEmpty) flavor,
   ]);

@@ -45,9 +45,8 @@ class PrebuiltLinuxApp extends LinuxApp {
 }
 
 class BuildableLinuxApp extends LinuxApp {
-  BuildableLinuxApp({required this.project, required ToolContext toolContext})
-    : _toolContext = toolContext,
-      super(projectBundleId: project.parent.manifest.appName);
+  BuildableLinuxApp({required this.project, required this._toolContext})
+    : super(projectBundleId: project.parent.manifest.appName);
 
   final LinuxProject project;
   final ToolContext _toolContext;
