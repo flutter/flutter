@@ -230,10 +230,10 @@ Future<void> testMain() async {
     //   74-91   image data sub-block (16 bytes) and block terminator
     //   92-112  comment extension
     //   113     trailer (0x3b)
-    final staticGif = _createTestGif(numFrames: 1);
+    final Uint8List staticGif = _createTestGif(numFrames: 1);
     Uint8List gifPrefix(int length) => Uint8List.sublistView(staticGif, 0, length);
     final Uint8List firstFrame = gifPrefix(92);
-    final Uint8List commentBlock = Uint8List.sublistView(staticGif, 92, 113);
+    final commentBlock = Uint8List.sublistView(staticGif, 92, 113);
     final applicationBlock = <int>[
       0x21, 0xff, 0x0b, ...'NETSCAPE2.0'.codeUnits, //
       0x03, 0x01, 0x00, 0x00, 0x00,
