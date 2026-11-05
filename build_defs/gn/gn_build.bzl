@@ -31,22 +31,60 @@ incrementally, which is the mode for iterating on the wrapped sources.
 """
 
 load("@bazel_skylib//lib:paths.bzl", "paths")
+load("@host_platform//:host.bzl", "HOST_BUILDTOOLS", "HOST_OS")
+load("@macos_sdk//:sdk.bzl", "IPHONEOS_SDK_PATH", "IPHONESIMULATOR_SDK_PATH")
 load("//build_defs/gn:build_directory.bzl", "GnBuildInfo")
 
 _SCRATCH_SUFFIX = ".gn"
 
-# The configurations of @reclient_cfgs a Linux host's wrapped build takes
-# (tools/gn's rbe_cfg: rewrapper-<buildtools dir>.cfg; the recipe's bootstrap
-# cfg): the proxy's, and the rewrapper's GN names.
-_BOOTSTRAP_CFG = "reclient-linux.cfg"
-_REWRAPPER_CFG = "rewrapper-linux-x64.cfg"
+# The configurations of @reclient_cfgs a wrapped build takes on this host
+# (tools/gn's rbe_cfg: rewrapper-<buildtools dir>.cfg; the recipe's
+# bootstrap cfg, reclient-<os>.cfg): the proxy's, and the rewrapper's GN
+# names. A Mac's rewrapper configuration runs the Linux x64 clang on the
+# workers in place of the Mac's (build/rbe/remote_wrapper.sh), as the Apple
+# toolchains' remote mode does for Bazel's own compiles.
+_BOOTSTRAP_CFG = "reclient-%s.cfg" % HOST_OS
+_REWRAPPER_CFG = "rewrapper-%s.cfg" % HOST_BUILDTOOLS
 
-# Where the two trees sit under the GN root: buildtools' reclient (rbe.gni's
-# default rbe_dir) and flutter/build/rbe (the toolchain's wrapper scripts).
-RBE_TREE = {
-    "@reclient//:all_files": "flutter/buildtools/linux-x64/reclient",
-    "@reclient_cfgs//:all_files": "flutter/build/rbe",
+# Where the trees sit under the GN root: buildtools' reclient (rbe.gni's
+# rbe_dir; tools/gn names the host's directory, as gn_build does below),
+# flutter/build/rbe (the toolchain's wrapper scripts), and on a Mac the
+# Xcode SDK views of @macos_sdk under flutter/prebuilts/SDKs -- where
+# gclient's hook and tools/gn --xcode-symlinks put the SDKs' symlinks for
+# GN's reclient build, since reclient takes no input from outside the
+# exec root: the Mac's wrapped build names them as its SDK paths, so that
+# -isysroot is a path under the GN root whose headers reclient can
+# upload. (The views' symlinks lead to the Xcode installation; reclient
+# follows them as it does GN's own symlinks.) The iOS views go when the
+# Xcode has the platforms (sdk.bzl says; an empty view cannot be laid).
+# The Linux x64 clang goes too: the Mac's rewrapper configuration names
+# its binaries and builtin headers as the inputs of every remote compile,
+# under flutter/buildtools/linux-x64/clang, where a Mac checkout has them.
+_RECLIENT_DIR = "flutter/buildtools/%s/reclient" % HOST_BUILDTOOLS
+_SDKS_DIR = "flutter/prebuilts/SDKs"
+_MAC_SDK_VIEWS = {
+    "@macos_sdk//:sdk": _SDKS_DIR,
+} | ({"@macos_sdk//:ios_sdk": _SDKS_DIR} if IPHONEOS_SDK_PATH else {}) | (
+    {"@macos_sdk//:ios_simulator_sdk": _SDKS_DIR} if IPHONESIMULATOR_SDK_PATH else {}
+)
+_MAC_RBE_TREE = _MAC_SDK_VIEWS | {
+    "@clang_linux_x64//:all_files": "flutter/buildtools/linux-x64/clang",
 }
+RBE_TREE = {
+    "@reclient//:all_files": _RECLIENT_DIR,
+    "@reclient_cfgs//:all_files": "flutter/build/rbe",
+} | (_MAC_RBE_TREE if HOST_OS == "mac" else {})
+
+# The GN arguments of a Mac's wrapped build under RBE (over the host's
+# MAC_HOST_GN_ARGS and IOS_TARGET_GN_ARGS, which name the Xcode's own SDK
+# paths): the SDK views laid under the GN root. The platform and toolchain
+# paths stay the Xcode's: what reads them (the Swift libraries, XCTest)
+# links and runs on the Mac.
+MAC_RBE_GN_ARGS = ({
+    "mac_sdk_path": '"//%s/MacOSX.sdk"' % _SDKS_DIR,
+} | ({"ios_device_sdk_path": '"//%s/iPhoneOS.sdk"' % _SDKS_DIR} if IPHONEOS_SDK_PATH else {}) | (
+    {"ios_simulator_sdk_path": '"//%s/iPhoneSimulator.sdk"' % _SDKS_DIR} if IPHONESIMULATOR_SDK_PATH else {}
+)) if HOST_OS == "mac" else {}
 
 def _tree_entries(tree):
     """The symlink tree spec: for each `tree` target, its files and where they go."""
@@ -150,9 +188,10 @@ def _gn_build_impl(ctx):
             bootstrap_cfg = bootstrap_cfg,
             gn_args = {
                 "rbe_cfg": "\"%s\"" % rewrapper_cfg,
+                "rbe_dir": "\"//%s\"" % _RECLIENT_DIR,
                 "rbe_exec_strategy": "\"remote_local_fallback\"",
                 "use_rbe": "true",
-            },
+            } | MAC_RBE_GN_ARGS,
         )
 
     params = dict(
