@@ -42,7 +42,8 @@
                 "--android-cpu",
                 "arm64",
                 "--no-dart-secure-socket",
-                "--rbe"
+                "--rbe",
+                "--no-goma"
             ],
             "name": "ci/android_release_arm64_size_exp",
             "description": "Produces experimental release mode artifacts to target 64-bit arm Android from a Linux host with dynamic modules enabled.",
@@ -93,7 +94,8 @@
                 "--android-cpu=arm64",
                 "--no-lto",
                 "--no-dart-secure-socket",
-                "--rbe"
+                "--rbe",
+                "--no-goma"
             ],
             "name": "ci/android_debug_arm64_size_exp",
             "description": "Produces experimental debug mode artifacts to target 64-bit arm Android from a Linux host with dynamic modules enabled.",
