@@ -7,11 +7,10 @@ import 'dart:isolate';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/os.dart';
-import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/experimental/extension_discovery.dart';
 import 'package:flutter_tools/src/experimental/extension_manager.dart';
 import 'package:flutter_tools/src/experimental/templates.dart';
+import 'package:flutter_tools_core/flutter_tools_core.dart';
 import 'package:flutter_tools_extension/flutter_tools_extension.dart';
 import 'package:flutter_tools_extension_linux_prototype/flutter_tools_extension_linux_prototype.dart';
 import 'package:flutter_tools_extension_linux_prototype/src/template.dart';
@@ -39,10 +38,6 @@ void _duplicateLinuxExtensionEntryPoint(SendPort sendPort) {
 }
 
 void main() {
-  setUpAll(() {
-    Cache.flutterRoot = '/flutter';
-  });
-
   group('ExtensionTemplateManager', () {
     late MemoryFileSystem fs;
     late BufferLogger logger;
@@ -67,6 +62,7 @@ void main() {
           fileSystem: fs,
           logger: logger,
           featureFlags: TestFeatureFlags(),
+          flutterRoot: '/flutter',
         );
 
         final Map<String, String> appTemplates = await templateManager.getAppPlatformTemplates();
@@ -103,6 +99,7 @@ void main() {
         fileSystem: fs,
         logger: logger,
         featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
+        flutterRoot: '/flutter',
       );
 
       final Map<String, String> appTemplates = await templateManager.getAppPlatformTemplates();
@@ -143,6 +140,7 @@ void main() {
         fileSystem: fs,
         logger: logger,
         featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
+        flutterRoot: '/flutter',
       );
 
       final inputParams = <String, Object?>{
@@ -187,6 +185,7 @@ void main() {
         fileSystem: fs,
         logger: logger,
         featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
+        flutterRoot: '/flutter',
       );
 
       final Map<String, String> appTemplates = await templateManager.getAppPlatformTemplates();
@@ -263,6 +262,7 @@ void main() {
         fileSystem: fs,
         logger: logger,
         featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
+        flutterRoot: '/flutter',
       );
 
       final Directory toolsDir = templateManager.resolveTemplateDirectory(

@@ -24,6 +24,7 @@ import '../ios/plist_parser.dart';
 import '../ios/xcodeproj.dart';
 import '../macos/cocoapod_utils.dart';
 import '../macos/xcode.dart';
+import '../project.dart';
 import '../runner/flutter_command.dart';
 import '../version.dart';
 import 'build_ios_framework.dart';
@@ -73,6 +74,7 @@ class BuildMacOSFrameworkCommand extends BuildFrameworkCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     final ToolContext(
+      :Cache cache,
       :Config config,
       :FileSystem fs,
       :Logger logger,
@@ -282,6 +284,7 @@ end
       :Logger logger,
       :Platform platform,
       :ProcessManager processManager,
+      :FlutterProjectFactory projectFactory,
     ) = toolContext;
 
     final Status status = logger.startProgress(' ├─Building App.xcframework...');
@@ -292,7 +295,7 @@ end
         outputDir: macosBuildOutput,
         buildDir: project.dartTool.childDirectory('flutter_build'),
         cacheDir: cache.getRoot(),
-        flutterRootDir: fs.directory(Cache.flutterRoot),
+        flutterRootDir: fs.directory(cache.flutterRoot),
         defines: <String, String>{
           kTargetFile: targetFile,
           kTargetPlatform: TargetPlatform.darwin.getName(),
@@ -307,6 +310,8 @@ end
         processManager: processManager,
         platform: platform,
         analytics: analytics,
+        projectFactory: projectFactory,
+        xcode: appleContext.xcode,
         engineVersion: artifacts.usesLocalArtifacts ? null : flutterVersion.engineRevision,
         generateDartPluginRegistry: true,
       );

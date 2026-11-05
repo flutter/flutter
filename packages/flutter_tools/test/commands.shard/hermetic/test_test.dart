@@ -59,7 +59,6 @@ void main() {
   late FakeToolContext toolContext;
 
   setUp(() {
-    Cache.flutterRoot = getFlutterRoot();
     fs = MemoryFileSystem.test(
       style: globals.platform.isWindows ? FileSystemStyle.windows : FileSystemStyle.posix,
     );
@@ -2414,7 +2413,8 @@ class _FakeTerminal extends Fake implements AnsiTerminal {
 }
 
 class _FakeDeviceManager extends DeviceManager {
-  _FakeDeviceManager(this._connectedDevices) : super(logger: testLogger);
+  _FakeDeviceManager(this._connectedDevices)
+    : super(logger: testLogger, fileSystem: MemoryFileSystem.test());
 
   final List<Device> _connectedDevices;
 

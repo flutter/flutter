@@ -46,8 +46,6 @@ const _kDefaultPlatformArgumentHelp =
 
 /// Common behavior for `flutter create` and `flutter widget-preview start` commands.
 mixin CreateBase on FlutterCommand {
-  ToolContext get _context => toolContext!;
-
   @protected
   TemplateRenderer get templateRenderer => const MustacheTemplateRenderer();
 
@@ -65,8 +63,7 @@ mixin CreateBase on FlutterCommand {
   @visibleForTesting
   Directory get projectDir {
     final String argProjectDir = argResults!.rest.first;
-    final Platform platform = _context.platform;
-    final FileSystem fs = _context.fs;
+    final ToolContext(:FileSystem fs, :Platform platform) = toolContext;
     if (platform.isWindows && kWindowsDrivePattern.hasMatch(argProjectDir)) {
       throwToolExit(
         'You attempted to create a flutter project at the path "$argProjectDir", which is the name of a drive. This '
@@ -81,7 +78,7 @@ mixin CreateBase on FlutterCommand {
   /// The normalized absolute path of [projectDir].
   @protected
   String get projectDirPath {
-    final FileSystem fs = _context.fs;
+    final FileSystem fs = toolContext.fs;
     return fs.path.normalize(projectDir.absolute.path);
   }
 
@@ -154,7 +151,7 @@ mixin CreateBase on FlutterCommand {
 
   /// Gets the flutter root directory.
   @protected
-  String get flutterRoot => Cache.flutterRoot!;
+  String get flutterRoot => toolContext.cache.flutterRoot;
 
   /// Determines the project type in an existing flutter project.
   ///
@@ -169,7 +166,7 @@ mixin CreateBase on FlutterCommand {
   @protected
   ParsedFlutterTemplateType? determineTemplateType() {
     assert(projectDir.existsSync() && projectDir.listSync().isNotEmpty);
-    final ToolContext(:FileSystem fs, :Logger logger) = _context;
+    final ToolContext(:FileSystem fs, :Logger logger) = toolContext;
     final File metadataFile = fs.file(fs.path.join(projectDir.absolute.path, '.metadata'));
     final projectMetadata = FlutterProjectMetadata(metadataFile, logger);
     final ParsedFlutterTemplateType? projectType = projectMetadata.projectType;
@@ -205,7 +202,7 @@ mixin CreateBase on FlutterCommand {
     String? organization = stringArg('org');
     if (!argResults!.wasParsed('org')) {
       if (projectDir.existsSync() && projectDir.listSync().isNotEmpty) {
-        final FlutterProject project = _context.projectFactory.fromDirectory(projectDir);
+        final FlutterProject project = toolContext.projectFactory.fromDirectory(projectDir);
         final Set<String> existingOrganizations = await project.organizationNames;
         if (existingOrganizations.length == 1) {
           organization = existingOrganizations.first;
@@ -226,7 +223,7 @@ mixin CreateBase on FlutterCommand {
   /// Throws with exit 2 if the project directory is illegal.
   @protected
   void validateProjectDir({bool overwrite = false}) {
-    final FileSystem fs = _context.fs;
+    final FileSystem fs = toolContext.fs;
     if (fs.path.isWithin(flutterRoot, projectDirPath)) {
       // Make exception for dev and examples to facilitate example project development.
       final String examplesDirectory = fs.path.join(flutterRoot, 'examples');
@@ -298,7 +295,7 @@ mixin CreateBase on FlutterCommand {
     String? projectName = stringArg('project-name');
 
     if (projectName == null) {
-      final FileSystem fs = _context.fs;
+      final FileSystem fs = toolContext.fs;
       final File pubspec = fs.directory(projectDirPath).childFile('pubspec.yaml');
 
       if (pubspec.existsSync()) {
@@ -361,7 +358,7 @@ mixin CreateBase on FlutterCommand {
     bool darwin = false,
     bool implementationTests = false,
   }) {
-    final FlutterVersion flutterVersion = _context.flutterVersion;
+    final FlutterVersion flutterVersion = toolContext.flutterVersion;
     final String projectNameUpperCamelCase = _createPluginClassName(projectName);
     final pluginClass = projectNameUpperCamelCase.endsWith('Plugin')
         ? projectNameUpperCamelCase
@@ -447,8 +444,7 @@ mixin CreateBase on FlutterCommand {
     bool overwrite = false,
     bool printStatusWhenWriting = true,
   }) async {
-    final FileSystem fs = _context.fs;
-    final Logger logger = _context.logger;
+    final ToolContext(:FileSystem fs, :Logger logger) = toolContext;
     final Template template = await Template.fromName(
       templateName,
       fileSystem: fs,
@@ -477,8 +473,7 @@ mixin CreateBase on FlutterCommand {
     bool overwrite = false,
     bool printStatusWhenWriting = true,
   }) async {
-    final FileSystem fs = _context.fs;
-    final Logger logger = _context.logger;
+    final ToolContext(:FileSystem fs, :Logger logger) = toolContext;
     final Template template = await Template.merged(
       names,
       directory,
@@ -509,6 +504,13 @@ mixin CreateBase on FlutterCommand {
     bool generateMetadata = true,
     FlutterTemplateType? projectType,
   }) async {
+    final ToolContext(
+      :Cache cache,
+      :FileSystem fs,
+      :FlutterVersion flutterVersion,
+      :Logger logger,
+      :FlutterProjectFactory projectFactory,
+    ) = toolContext;
     var generatedCount = 0;
     generatedCount += await renderMerged(
       <String>[...templateNames],
@@ -517,8 +519,8 @@ mixin CreateBase on FlutterCommand {
       overwrite: overwrite,
       printStatusWhenWriting: printStatusWhenWriting,
     );
-    _context.projectFactory.invalidate(directory);
-    final FlutterProject project = _context.projectFactory.fromDirectory(directory);
+    projectFactory.invalidate(directory);
+    final FlutterProject project = projectFactory.fromDirectory(directory);
     if (templateContext['android'] == true) {
       generatedCount += _injectGradleWrapper(project);
     }
@@ -533,7 +535,7 @@ mixin CreateBase on FlutterCommand {
 
     final platformsForMigrateConfig = <SupportedPlatform>[SupportedPlatform.root];
     if (androidPlatform) {
-      gradle.updateLocalProperties(project: project, requireAndroidSdk: false);
+      gradle.updateLocalProperties(project: project, requireAndroidSdk: false, cache: cache);
       platformsForMigrateConfig.add(SupportedPlatform.android);
     }
     if (iosPlatform) {
@@ -563,7 +565,6 @@ mixin CreateBase on FlutterCommand {
       platformsForMigrateConfig.add(SupportedPlatform.fuchsia);
     }
     if (generateMetadata) {
-      final ToolContext(:FileSystem fs, :FlutterVersion flutterVersion, :Logger logger) = _context;
       final File metadataFile = fs.file(fs.path.join(projectDir.absolute.path, '.metadata'));
       // Seed the migrate config with the platforms already tracked in an
       // existing .metadata file. Re-running `flutter create --platforms` must
@@ -664,9 +665,9 @@ mixin CreateBase on FlutterCommand {
 
   late final Set<Uri> _templateManifest = _computeTemplateManifest();
   Set<Uri> _computeTemplateManifest() {
-    final FileSystem fs = _context.fs;
+    final ToolContext(:Cache cache, :FileSystem fs) = toolContext;
     final String flutterToolsAbsolutePath = fs.path.join(
-      Cache.flutterRoot!,
+      cache.flutterRoot,
       'packages',
       'flutter_tools',
     );
@@ -695,8 +696,7 @@ mixin CreateBase on FlutterCommand {
 
   int _injectGradleWrapper(FlutterProject project) {
     var filesCreated = 0;
-    final Cache cache = _context.cache;
-    final OperatingSystemUtils os = _context.os;
+    final ToolContext(:Cache cache, :OperatingSystemUtils os) = toolContext;
     copyDirectory(
       cache.getArtifactDirectory('gradle_wrapper'),
       project.android.hostAppGradleRoot,
