@@ -6,10 +6,12 @@
 #define FLUTTER_SHELL_PLATFORM_WINDOWS_FLUTTER_PROJECT_BUNDLE_H_
 
 #include <filesystem>
+#include <optional>
 #include <string>
 #include <vector>
 
 #include "flutter/shell/platform/embedder/embedder.h"
+#include "flutter/shell/platform/windows/egl/manager.h"
 #include "flutter/shell/platform/windows/public/flutter_windows.h"
 
 namespace flutter {
@@ -100,6 +102,11 @@ class FlutterProjectBundle {
   // Returns whether the Flutter GPU API is enabled.
   bool enable_flutter_gpu() const { return enable_flutter_gpu_; }
 
+  // Returns the cap on the D3D11 feature level that ANGLE may use, if set.
+  std::optional<egl::D3DFeatureLevel> max_d3d_feature_level() const {
+    return max_d3d_feature_level_;
+  }
+
  private:
   std::filesystem::path assets_path_;
   std::filesystem::path icu_path_;
@@ -130,6 +137,11 @@ class FlutterProjectBundle {
 
   // Whether the Flutter GPU API is enabled.
   bool enable_flutter_gpu_ = false;
+
+  // Cap on the D3D11 feature level that ANGLE may use. Set from the
+  // FLUTTER_WINDOWS_MAX_D3D_FEATURE_LEVEL environment variable in debug and
+  // profile builds.
+  std::optional<egl::D3DFeatureLevel> max_d3d_feature_level_;
 };
 
 }  // namespace flutter

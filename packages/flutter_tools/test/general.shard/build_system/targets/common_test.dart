@@ -17,6 +17,7 @@ import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
+import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:test/fake.dart';
 
@@ -70,6 +71,22 @@ void main() {
       processManager: processManager,
       fileSystem: fileSystem,
       logger: logger,
+      projectFactory: FlutterProjectFactory(
+        config: Config.test(directory: fileSystem.currentDirectory, logger: logger),
+        fileSystem: fileSystem,
+        logger: logger,
+        xcodeProjectInterpreter: FakeXcodeProjectInterpreter(
+          schemes: <String>['Runner', 'chocolate'],
+        ),
+      ),
+      xcode: Xcode.test(
+        toolContext: FakeToolContext.macosHost(
+          fs: fileSystem,
+          logger: logger,
+          processManager: processManager,
+        ),
+        xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+      ),
     );
     iosEnvironment.buildDir.createSync(recursive: true);
   });
@@ -459,7 +476,7 @@ void main() {
     ]);
   });
 
-  testUsingContext(
+  testWithoutContext(
     'KernelSnapshot sets flavor in dartDefines from Xcode build configuration if ios app',
     () async {
       fileSystem.file('.dart_tool/package_config.json')
@@ -511,14 +528,9 @@ void main() {
 
       expect(processManager, hasNoRemainingExpectations);
     },
-    overrides: <Type, Generator>{
-      Config: () => Config.test(directory: fileSystem.currentDirectory),
-      XcodeProjectInterpreter: () =>
-          FakeXcodeProjectInterpreter(schemes: <String>['Runner', 'chocolate']),
-    },
   );
 
-  testUsingContext(
+  testWithoutContext(
     'KernelSnapshot sets flavor in dartDefines from Xcode build configuration if macos app',
     () async {
       fileSystem.file('.dart_tool/package_config.json')
@@ -568,11 +580,6 @@ void main() {
       );
 
       expect(processManager, hasNoRemainingExpectations);
-    },
-    overrides: <Type, Generator>{
-      Config: () => Config.test(directory: fileSystem.currentDirectory),
-      XcodeProjectInterpreter: () =>
-          FakeXcodeProjectInterpreter(schemes: <String>['Runner', 'chocolate']),
     },
   );
 
@@ -689,7 +696,7 @@ void main() {
     expect(processManager, hasNoRemainingExpectations);
   }, overrides: <Type, Generator>{FeatureFlags: () => TestFeatureFlags()});
 
-  testWithoutContext('AotElfProfile Produces correct output directory', () async {
+  testWithoutContext('AotSnapshotProfile Produces correct output directory', () async {
     final String build = androidEnvironment.buildDir.path;
     processManager.addCommands(<FakeCommand>[
       FakeCommand(
@@ -710,54 +717,57 @@ void main() {
     androidEnvironment.buildDir.childFile('app.dill').createSync(recursive: true);
     androidEnvironment.buildDir.childFile('native_assets.json').createSync();
 
-    await const AotElfProfile(TargetPlatform.android_arm).build(androidEnvironment);
+    await const AotSnapshotProfile(TargetPlatform.android_arm).build(androidEnvironment);
 
     expect(processManager, hasNoRemainingExpectations);
   });
 
-  testWithoutContext('AotElfRelease configures gen_snapshot with code size directory', () async {
-    androidEnvironment.defines[kCodeSizeDirectory] = 'code_size_1';
-    final String build = androidEnvironment.buildDir.path;
-    processManager.addCommands(<FakeCommand>[
-      FakeCommand(
-        command: <String>[
-          artifacts.getArtifactPath(
-            Artifact.genSnapshot,
-            platform: TargetPlatform.android_arm,
-            mode: BuildMode.profile,
-          ),
-          '--deterministic',
-          '--write-v8-snapshot-profile-to=code_size_1/snapshot.android-arm.json',
-          '--trace-precompiler-to=code_size_1/trace.android-arm.json',
-          kElfAot,
-          '--elf=$build/app.so',
-          '--no-use-integer-division',
-          '$build/app.dill',
-        ],
-      ),
-    ]);
-    androidEnvironment.buildDir.childFile('app.dill').createSync(recursive: true);
-    androidEnvironment.buildDir.childFile('native_assets.json').createSync();
+  testWithoutContext(
+    'AotSnapshotRelease configures gen_snapshot with code size directory',
+    () async {
+      androidEnvironment.defines[kCodeSizeDirectory] = 'code_size_1';
+      final String build = androidEnvironment.buildDir.path;
+      processManager.addCommands(<FakeCommand>[
+        FakeCommand(
+          command: <String>[
+            artifacts.getArtifactPath(
+              Artifact.genSnapshot,
+              platform: TargetPlatform.android_arm,
+              mode: BuildMode.profile,
+            ),
+            '--deterministic',
+            '--write-v8-snapshot-profile-to=code_size_1/snapshot.android-arm.json',
+            '--trace-precompiler-to=code_size_1/trace.android-arm.json',
+            kElfAot,
+            '--elf=$build/app.so',
+            '--no-use-integer-division',
+            '$build/app.dill',
+          ],
+        ),
+      ]);
+      androidEnvironment.buildDir.childFile('app.dill').createSync(recursive: true);
+      androidEnvironment.buildDir.childFile('native_assets.json').createSync();
 
-    await const AotElfRelease(TargetPlatform.android_arm).build(androidEnvironment);
+      await const AotSnapshotRelease(TargetPlatform.android_arm).build(androidEnvironment);
 
-    expect(processManager, hasNoRemainingExpectations);
-  });
+      expect(processManager, hasNoRemainingExpectations);
+    },
+  );
 
-  testWithoutContext('AotElfProfile throws error if missing build mode', () async {
+  testWithoutContext('AotSnapshotProfile throws error if missing build mode', () async {
     androidEnvironment.defines.remove(kBuildMode);
 
     expect(
-      const AotElfProfile(TargetPlatform.android_arm).build(androidEnvironment),
+      const AotSnapshotProfile(TargetPlatform.android_arm).build(androidEnvironment),
       throwsA(isA<MissingDefineException>()),
     );
   });
 
-  testWithoutContext('AotElfProfile throws error if missing target platform', () async {
+  testWithoutContext('AotSnapshotProfile throws error if missing target platform', () async {
     androidEnvironment.defines.remove(kTargetPlatform);
 
     expect(
-      const AotElfProfile(TargetPlatform.android_arm).build(androidEnvironment),
+      const AotSnapshotProfile(TargetPlatform.android_arm).build(androidEnvironment),
       throwsA(isA<MissingDefineException>()),
     );
   });
@@ -898,7 +908,7 @@ void main() {
       ),
     ]);
 
-    await const AotElfRelease(TargetPlatform.android_arm).build(androidEnvironment);
+    await const AotSnapshotRelease(TargetPlatform.android_arm).build(androidEnvironment);
 
     expect(processManager, hasNoRemainingExpectations);
   });
@@ -911,6 +921,9 @@ class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterprete
   final bool isInstalled;
 
   List<String> schemes;
+
+  @override
+  List<String> xcrunCommand() => <String>['xcrun'];
 
   @override
   Future<XcodeProjectInfo?> getInfo(

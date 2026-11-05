@@ -167,7 +167,7 @@ TEST(DisplayListColorSource, LinearGradientConstructor) {
 }
 
 TEST(DisplayListColorSource, LinearGradientARGBConstructor) {
-  std::array<DlScalar, kTestStopCount * 4> colors;
+  std::array<DlScalar, kTestStopCount * 4> colors{};
   for (int i = 0; i < kTestStopCount; ++i) {
     colors[i * 4 + 0] = kTestColors[i].getAlphaF();  //
     colors[i * 4 + 1] = kTestColors[i].getRedF();    //
@@ -311,7 +311,7 @@ TEST(DisplayListColorSource, RadialGradientConstructor) {
 }
 
 TEST(DisplayListColorSource, RadialGradientARGBConstructor) {
-  std::array<DlScalar, kTestStopCount * 4> colors;
+  std::array<DlScalar, kTestStopCount * 4> colors{};
   for (int i = 0; i < kTestStopCount; ++i) {
     colors[i * 4 + 0] = kTestColors[i].getAlphaF();  //
     colors[i * 4 + 1] = kTestColors[i].getRedF();    //
@@ -455,7 +455,7 @@ TEST(DisplayListColorSource, ConicalGradientConstructor) {
 }
 
 TEST(DisplayListColorSource, ConicalGradientARGBConstructor) {
-  std::array<DlScalar, kTestStopCount * 4> colors;
+  std::array<DlScalar, kTestStopCount * 4> colors{};
   for (int i = 0; i < kTestStopCount; ++i) {
     colors[i * 4 + 0] = kTestColors[i].getAlphaF();  //
     colors[i * 4 + 1] = kTestColors[i].getRedF();    //
@@ -617,7 +617,7 @@ TEST(DisplayListColorSource, SweepGradientConstructor) {
 }
 
 TEST(DisplayListColorSource, SweepGradientARGBConstructor) {
-  std::array<DlScalar, kTestStopCount * 4> colors;
+  std::array<DlScalar, kTestStopCount * 4> colors{};
   for (int i = 0; i < kTestStopCount; ++i) {
     colors[i * 4 + 0] = kTestColors[i].getAlphaF();  //
     colors[i * 4 + 1] = kTestColors[i].getRedF();    //

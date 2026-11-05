@@ -15,7 +15,7 @@ namespace flutter {
 class RRect {
  public:
   DlRoundRect rrect;
-  bool is_null;
+  bool is_null = false;
 };
 
 }  // namespace flutter

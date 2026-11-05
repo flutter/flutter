@@ -190,6 +190,21 @@ GenerateShaderBackendFB(TargetPlatform target_platform,
     return nullptr;
   }
 
+  // The runtime needs the workgroup size to dispatch on Metal and to validate
+  // it against device limits, so a bundled compute shader must declare it with
+  // a literal `local_size`.
+  if (const auto& workgroup_size = bundle_data->GetWorkgroupSize();
+      workgroup_size.has_value() &&
+      ((*workgroup_size)[0] == 0u || (*workgroup_size)[1] == 0u ||
+       (*workgroup_size)[2] == 0u)) {
+    std::cerr << "Compute shader \"" << shader_name
+              << "\" sizes its workgroup with a specialization constant "
+                 "(local_size_x_id, local_size_y_id or local_size_z_id). "
+                 "Bundled compute shaders must declare a literal local_size."
+              << std::endl;
+    return nullptr;
+  }
+
   result = bundle_data->CreateFlatbuffer();
   if (!result) {
     std::cerr << "Failed to create flatbuffer for bundled shader \""

@@ -23,6 +23,7 @@ import 'package:standard_message_codec/standard_message_codec.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
+import '../src/fakes.dart';
 import '../src/package_config.dart';
 
 void main() {
@@ -127,6 +128,9 @@ void main() {
             ],
           },
         );
+        expect(bundle.needsBuild(), isFalse);
+        dataAssetFile.deleteSync();
+        expect(bundle.needsBuild(), isTrue);
       },
       overrides: <Type, Generator>{
         FileSystem: () => testFileSystem,
@@ -389,6 +393,7 @@ flutter:
         final AssetBundle bundle = AssetBundleFactory.defaultInstance(
           logger: globals.logger,
           fileSystem: globals.fs,
+          flutterRoot: getFlutterRoot(),
           platform: globals.platform,
           splitDeferredAssets: true,
         ).createBundle();
@@ -501,6 +506,7 @@ flutter:
         final AssetBundle bundle = AssetBundleFactory.defaultInstance(
           logger: globals.logger,
           fileSystem: globals.fs,
+          flutterRoot: getFlutterRoot(),
           platform: globals.platform,
           splitDeferredAssets: true,
         ).createBundle();
@@ -815,15 +821,17 @@ flutter:
     await writeBundle(
       directory,
       const <String, AssetBundleEntry>{},
-      targetPlatform: TargetPlatform.android,
-      impellerStatus: ImpellerStatus.disabled,
-      processManager: globals.processManager,
-      fileSystem: globals.fs,
-      artifacts: globals.artifacts!,
-      logger: testLogger,
-      projectDir: globals.fs.currentDirectory,
       buildMode: BuildMode.debug,
-      platform: globals.platform,
+      impellerStatus: ImpellerStatus.disabled,
+      projectDir: globals.fs.currentDirectory,
+      targetPlatform: TargetPlatform.android,
+      toolContext: FakeToolContext(
+        artifacts: globals.artifacts,
+        fs: globals.fs,
+        logger: testLogger,
+        platform: globals.platform,
+        processManager: globals.processManager,
+      ),
     );
 
     expect(testLogger.warningText, contains('Expected Error Text'));
@@ -981,15 +989,17 @@ flutter:
         await writeBundle(
           output,
           bundle.entries,
-          targetPlatform: TargetPlatform.android,
-          impellerStatus: ImpellerStatus.disabled,
-          processManager: globals.processManager,
-          fileSystem: globals.fs,
-          artifacts: globals.artifacts!,
-          logger: testLogger,
-          projectDir: globals.fs.currentDirectory,
           buildMode: BuildMode.debug,
-          platform: globals.platform,
+          impellerStatus: ImpellerStatus.disabled,
+          projectDir: globals.fs.currentDirectory,
+          targetPlatform: TargetPlatform.android,
+          toolContext: FakeToolContext(
+            artifacts: globals.artifacts,
+            fs: globals.fs,
+            logger: testLogger,
+            platform: globals.platform,
+            processManager: globals.processManager,
+          ),
         );
       },
       overrides: <Type, Generator>{
@@ -1045,15 +1055,17 @@ flutter:
         await writeBundle(
           output,
           bundle.entries,
-          targetPlatform: TargetPlatform.web_javascript,
-          impellerStatus: ImpellerStatus.disabled,
-          processManager: globals.processManager,
-          fileSystem: globals.fs,
-          artifacts: globals.artifacts!,
-          logger: testLogger,
-          projectDir: globals.fs.currentDirectory,
           buildMode: BuildMode.debug,
-          platform: globals.platform,
+          impellerStatus: ImpellerStatus.disabled,
+          projectDir: globals.fs.currentDirectory,
+          targetPlatform: TargetPlatform.web_javascript,
+          toolContext: FakeToolContext(
+            artifacts: globals.artifacts,
+            fs: globals.fs,
+            logger: testLogger,
+            platform: globals.platform,
+            processManager: globals.processManager,
+          ),
         );
       },
       overrides: <Type, Generator>{
@@ -1208,15 +1220,17 @@ flutter:
         await writeBundle(
           output,
           bundle.entries,
-          targetPlatform: TargetPlatform.web_javascript,
-          impellerStatus: ImpellerStatus.disabled,
-          processManager: globals.processManager,
-          fileSystem: globals.fs,
-          artifacts: globals.artifacts!,
-          logger: testLogger,
-          projectDir: globals.fs.currentDirectory,
           buildMode: BuildMode.debug,
-          platform: globals.platform,
+          impellerStatus: ImpellerStatus.disabled,
+          projectDir: globals.fs.currentDirectory,
+          targetPlatform: TargetPlatform.web_javascript,
+          toolContext: FakeToolContext(
+            artifacts: globals.artifacts,
+            fs: globals.fs,
+            logger: testLogger,
+            platform: globals.platform,
+            processManager: globals.processManager,
+          ),
         );
         expect((globals.processManager as FakeProcessManager).hasRemainingExpectations, false);
       },

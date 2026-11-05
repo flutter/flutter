@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 /// @docImport 'package:flutter/widgets.dart';
+/// @docImport 'package:flutter_test/flutter_test.dart' as flutter_test;
 ///
 /// @docImport '_goldens_io.dart';
 /// @docImport 'binding.dart';
