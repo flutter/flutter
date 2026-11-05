@@ -2065,6 +2065,8 @@ void main() {
   testWidgets('ListWheelScrollView can resolve images during its first layout', (
     WidgetTester tester,
   ) async {
+    addTearDown(imageCache.clear);
+    addTearDown(imageCache.clearLiveImages);
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -2081,6 +2083,7 @@ void main() {
     );
     expect(tester.takeException(), isNull);
     expect(find.byType(Image), findsWidgets);
+    expect(imageCache.liveImageCount, greaterThan(0));
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/125997.
