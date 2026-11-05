@@ -992,7 +992,10 @@ class _WrappingOverlayState extends State<_WrappingOverlay> {
 /// Special version of a [Stack], that doesn't layout and render the first
 /// [skipCount] children.
 ///
-/// The first [skipCount] children are considered "offstage".
+/// The first [skipCount] children are considered "offstage". They are not
+/// painted and are not laid out with the theater's constraints. An offstage
+/// child that was previously laid out is kept as a relayout boundary, so it can
+/// still be laid out when it changes.
 class _Theater extends MultiChildRenderObjectWidget {
   const _Theater({
     this.skipCount = 0,
@@ -1178,12 +1181,6 @@ class _TheaterParentData extends StackParentData {
   // The OverlayEntry that directly created this child. This field is null for
   // children that are created by an OverlayPortal.
   OverlayEntry? overlayEntry;
-
-  // Whether this child was last laid out by the theater with non-tight
-  // constraints, which means it is not a relayout boundary. Such a child has to
-  // be laid out again to become a relayout boundary once it is offstage. See
-  // _RenderTheater.performLayout.
-  bool _needsRelayoutBoundaryWhenOffstage = false;
 
   /// A [OverlayPortal] makes its overlay child a render child of an ancestor
   /// [Overlay]. Currently, to make sure the overlay child is painted after its
@@ -1498,7 +1495,6 @@ class _RenderTheater extends RenderBox
       _layingOutSizeDeterminingChild = true;
       layoutChild(sizeDeterminingChild, constraints);
       _layingOutSizeDeterminingChild = false;
-      _updateNeedsRelayoutBoundaryWhenOffstage(sizeDeterminingChild);
       size = sizeDeterminingChild.size;
     }
 
@@ -1507,44 +1503,33 @@ class _RenderTheater extends RenderBox
     for (final RenderBox child in _childrenInPaintOrder()) {
       if (child != sizeDeterminingChild) {
         layoutChild(child, _nonPositionedChildConstraints);
-        _updateNeedsRelayoutBoundaryWhenOffstage(child);
       }
     }
 
-    // Offstage children are not laid out with the onstage children. An
-    // offstage child that was laid out with non-tight constraints while it was
-    // onstage (such as the size-determining child, or a positioned child) is
-    // not a relayout boundary, so once it is marked as needing layout it would
-    // stay dirty under a clean theater.
+    // Offstage children are not laid out with the onstage children, and their
+    // sizes can't affect the theater. An offstage child that was last laid out
+    // with non-tight constraints (such as a positioned child, or the
+    // size-determining child of an unconstrained theater) is not a relayout
+    // boundary, so once it is marked as needing layout it would stay dirty
+    // under a clean theater.
     //
     // Laying it out again with its previous constraints, without
-    // parentUsesSize, makes it a relayout boundary: the theater no longer
-    // depends on its size, so marking it as needing layout stops at the child
-    // and the PipelineOwner lays it out directly. Its size can't affect the
-    // theater while it is offstage, and it is laid out with fresh constraints
-    // and parentUsesSize again once it is back onstage.
+    // parentUsesSize, makes it a relayout boundary: later layout requests stop
+    // at the child and the PipelineOwner lays it out directly. Layout returns
+    // early for a clean child, so this only does real work for a dirty one.
+    // Children laid out with tight constraints, such as offstage routes, are
+    // already relayout boundaries and are skipped.
     //
-    // This only needs to happen once after the child goes offstage, so children
-    // that are already relayout boundaries, such as offstage routes laid out
-    // with tight constraints, are not laid out here.
+    // The size-determining child can be offstage when no onstage child can
+    // size the theater (see _findSizeDeterminingChild). It was laid out with
+    // parentUsesSize above, and is skipped too.
     RenderBox? child = firstChild;
     for (int toSkip = skipCount; toSkip > 0; toSkip--) {
       final childParentData = child!.parentData! as _TheaterParentData;
-      if (childParentData._needsRelayoutBoundaryWhenOffstage) {
-        childParentData._needsRelayoutBoundaryWhenOffstage = false;
-        if (child.hasSize) {
-          child.layout(child.constraints);
-        }
+      if (child != sizeDeterminingChild && child.hasSize && !child.constraints.isTight) {
+        child.layout(child.constraints);
       }
       child = childParentData.nextSibling;
-    }
-  }
-
-  void _updateNeedsRelayoutBoundaryWhenOffstage(RenderBox child) {
-    if (child.parentData case final _TheaterParentData childParentData) {
-      // layoutChild always lays out children with parentUsesSize, so a child is
-      // only a relayout boundary if its constraints are tight.
-      childParentData._needsRelayoutBoundaryWhenOffstage = !child.constraints.isTight;
     }
   }
 
