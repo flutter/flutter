@@ -17,7 +17,8 @@
         "--no-stripped",
         "--no-lto",
         "--xcode-symlinks",
-        "--rbe"
+        "--rbe",
+        "--no-goma"
       ],
       "name": "macos/ios_debug",
       "description": "Builds a debug mode engine that targets iOS from a macOS host.",
@@ -49,7 +50,8 @@
         "--no-stripped",
         "--no-lto",
         "--xcode-symlinks",
-        "--rbe"
+        "--rbe",
+        "--no-goma"
       ],
       "name": "macos/ios_debug_unopt",
       "description": "Builds an unoptimized debug mode engine that targets iOS from a macOS host.",
@@ -80,7 +82,8 @@
         "--no-stripped",
         "--no-lto",
         "--xcode-symlinks",
-        "--rbe"
+        "--rbe",
+        "--no-goma"
       ],
       "name": "macos/ios_profile",
       "description": "Builds a profile mode engine that targets iOS from a macOS host.",
@@ -111,7 +114,8 @@
         "--no-stripped",
         "--no-lto",
         "--xcode-symlinks",
-        "--rbe"
+        "--rbe",
+        "--no-goma"
       ],
       "name": "macos/ios_release",
       "description": "Builds a release mode engine that targets iOS from a macOS host.",
@@ -143,7 +147,8 @@
         "--no-stripped",
         "--no-lto",
         "--xcode-symlinks",
-        "--rbe"
+        "--rbe",
+        "--no-goma"
       ],
       "name": "macos/ios_debug_sim",
       "description": "Builds a debug mode engine that targets the x64 iOS simulator from a macOS host.",
@@ -174,7 +179,8 @@
         "--no-stripped",
         "--no-lto",
         "--xcode-symlinks",
-        "--rbe"
+        "--rbe",
+        "--no-goma"
       ],
       "name": "macos/android_debug_arm64",
       "description": "Builds a debug mode engine that targets 64-bit arm Android from a macOS host.",
@@ -204,7 +210,8 @@
         "--android-cpu=arm64",
         "--no-stripped",
         "--no-lto",
-        "--rbe"
+        "--rbe",
+        "--no-goma"
       ],
       "name": "linux/android_debug_arm64",
       "description": "Builds a debug mode engine that targets 64-bit arm Android from a Linux host.",
@@ -229,7 +236,8 @@
         "--android-cpu=riscv64",
         "--no-stripped",
         "--no-lto",
-        "--rbe"
+        "--rbe",
+        "--no-goma"
       ],
       "name": "linux/android_debug_riscv64",
       "description": "Builds a debug mode engine that targets riscv64 Android from a Linux host.",
@@ -255,7 +263,8 @@
         "--android-cpu=x64",
         "--no-stripped",
         "--no-lto",
-        "--rbe"
+        "--rbe",
+        "--no-goma"
       ],
       "name": "linux/android_debug_unopt_x64",
       "description": "Builds an unoptimized debug mode engine that targets 64-bit x64 Android from a Linux host.",
@@ -280,7 +289,8 @@
         "--android-cpu=arm64",
         "--no-stripped",
         "--no-lto",
-        "--rbe"
+        "--rbe",
+        "--no-goma"
       ],
       "name": "windows/android_debug_arm64",
       "description": "Builds a debug mode engine that targets 64-bit arm Android from a Windows host.",
@@ -307,7 +317,8 @@
         "--no-stripped",
         "--no-lto",
         "--xcode-symlinks",
-        "--rbe"
+        "--rbe",
+        "--no-goma"
       ],
       "name": "macos/android_debug_unopt",
       "description": "Builds a debug mode unopt engine that targets 32-bit arm Android from a macOS host.",
@@ -339,7 +350,8 @@
         "--no-stripped",
         "--no-lto",
         "--xcode-symlinks",
-        "--rbe"
+        "--rbe",
+        "--no-goma"
       ],
       "name": "macos/android_debug_unopt_arm64",
       "description": "Builds a debug mode unopt engine that targets 64-bit arm Android from a macOS host.",
@@ -370,7 +382,8 @@
         "--no-stripped",
         "--no-lto",
         "--xcode-symlinks",
-        "--rbe"
+        "--rbe",
+        "--no-goma"
       ],
       "name": "macos/android_profile_arm64",
       "description": "Builds a profile mode engine that targets 64-bit arm Android from a macOS host.",
@@ -400,7 +413,8 @@
         "--android-cpu=arm64",
         "--no-stripped",
         "--no-lto",
-        "--rbe"
+        "--rbe",
+        "--no-goma"
       ],
       "name": "linux/android_profile_arm64",
       "description": "Builds a profile mode engine that targets 64-bit arm Android from a Linux host.",
@@ -425,7 +439,8 @@
         "--android-cpu=arm64",
         "--no-stripped",
         "--no-lto",
-        "--rbe"
+        "--rbe",
+        "--no-goma"
       ],
       "name": "windows/android_profile_arm64",
       "description": "Builds a profile mode engine that targets 64-bit arm Android from a Windows host.",
@@ -451,7 +466,8 @@
         "--no-stripped",
         "--no-lto",
         "--xcode-symlinks",
-        "--rbe"
+        "--rbe",
+        "--no-goma"
       ],
       "name": "macos/android_release_arm64",
       "description": "Builds a release mode engine that targets 64-bit arm Android from a macOS host.",
@@ -481,7 +497,8 @@
         "--android-cpu=arm64",
         "--no-stripped",
         "--no-lto",
-        "--rbe"
+        "--rbe",
+        "--no-goma"
       ],
       "name": "linux/android_release_arm64",
       "description": "Builds a release mode engine that targets 64-bit arm Android from a Linux host.",
@@ -506,7 +523,8 @@
         "--android-cpu=arm64",
         "--no-stripped",
         "--no-lto",
-        "--rbe"
+        "--rbe",
+        "--no-goma"
       ],
       "name": "windows/android_release_arm64",
       "description": "Builds a release mode engine that targets 64-bit arm Android from a Windows host.",
@@ -531,7 +549,8 @@
         "--no-stripped",
         "--no-lto",
         "--xcode-symlinks",
-        "--rbe"
+        "--rbe",
+        "--no-goma"
       ],
       "name": "macos/host_debug",
       "description": "Builds a debug mode engine for a macOS host.",
@@ -562,7 +581,8 @@
         "--mac-cpu",
         "arm64",
         "--xcode-symlinks",
-        "--rbe"
+        "--rbe",
+        "--no-goma"
       ],
       "name": "macos/host_profile_arm64",
       "description": "Builds a profile mode engine for a macOS host on arm64.",
@@ -593,7 +613,8 @@
         "--mac-cpu",
         "arm64",
         "--xcode-symlinks",
-        "--rbe"
+        "--rbe",
+        "--no-goma"
       ],
       "name": "macos/host_release_arm64",
       "description": "Builds a release mode engine for a macOS host on arm64.",
@@ -622,7 +643,8 @@
         "debug",
         "--no-stripped",
         "--no-lto",
-        "--rbe"
+        "--rbe",
+        "--no-goma"
       ],
       "name": "linux/host_debug",
       "description": "Builds a debug mode engine for a Linux host.",
@@ -646,7 +668,8 @@
         "debug",
         "--no-stripped",
         "--no-lto",
-        "--rbe"
+        "--rbe",
+        "--no-goma"
       ],
       "name": "windows/host_debug",
       "description": "Builds a debug mode engine for a Windows host.",
@@ -671,7 +694,8 @@
         "--no-stripped",
         "--no-lto",
         "--xcode-symlinks",
-        "--rbe"
+        "--rbe",
+        "--no-goma"
       ],
       "name": "macos/host_profile",
       "description": "Builds a profile mode engine for a macOS host.",
@@ -700,7 +724,8 @@
         "profile",
         "--no-stripped",
         "--no-lto",
-        "--rbe"
+        "--rbe",
+        "--no-goma"
       ],
       "name": "linux/host_profile",
       "description": "Builds a profile mode engine for a Linux host.",
@@ -724,7 +749,8 @@
         "profile",
         "--no-stripped",
         "--no-lto",
-        "--rbe"
+        "--rbe",
+        "--no-goma"
       ],
       "name": "windows/host_profile",
       "description": "Builds a profile mode engine for a Windows host.",
@@ -749,7 +775,8 @@
         "--no-stripped",
         "--no-lto",
         "--xcode-symlinks",
-        "--rbe"
+        "--rbe",
+        "--no-goma"
       ],
       "name": "macos/host_release",
       "description": "Builds a release mode engine for a macOS host.",
@@ -779,6 +806,7 @@
         "--no-stripped",
         "--no-lto",
         "--rbe",
+        "--no-goma",
         "--xcode-symlinks"
       ],
       "name": "linux/host_release",
@@ -804,6 +832,7 @@
         "--no-stripped",
         "--no-lto",
         "--rbe",
+        "--no-goma",
         "--xcode-symlinks"
       ],
       "name": "windows/host_release",
@@ -826,7 +855,8 @@
       "gn": [
         "--web",
         "--runtime-mode=release",
-        "--no-rbe"
+        "--no-rbe",
+        "--no-goma"
       ],
       "ninja": {
         "config": "wasm_release",
@@ -856,7 +886,8 @@
       "gn": [
         "--web",
         "--runtime-mode=release",
-        "--no-rbe"
+        "--no-rbe",
+        "--no-goma"
       ],
       "ninja": {
         "config": "wasm_release",
@@ -892,7 +923,8 @@
         "--web",
         "--runtime-mode=debug",
         "--unoptimized",
-        "--no-rbe"
+        "--no-rbe",
+        "--no-goma"
       ],
       "ninja": {
         "config": "wasm_debug_unopt",
