@@ -183,6 +183,45 @@ class OptionalParameter {
   final Object value;
 }
 
+/// Dart reserved words that cannot be used as identifiers.
+///
+/// See https://dart.dev/language/keywords.
+const dartReservedWords = <String>{
+  'assert',
+  'break',
+  'case',
+  'catch',
+  'class',
+  'const',
+  'continue',
+  'default',
+  'do',
+  'else',
+  'enum',
+  'extends',
+  'false',
+  'final',
+  'finally',
+  'for',
+  'if',
+  'in',
+  'is',
+  'new',
+  'null',
+  'rethrow',
+  'return',
+  'super',
+  'switch',
+  'this',
+  'throw',
+  'true',
+  'try',
+  'var',
+  'void',
+  'while',
+  'with',
+};
+
 // One message parameter: one placeholder from an @foo entry in the template ARB file.
 //
 // Placeholders are specified as a JSON map with one entry for each placeholder.
@@ -247,49 +286,11 @@ class Placeholder {
   List<String> get dateFormatParts => format?.split(_dateFormatPartsDelimiter) ?? <String>[];
   bool get hasValidDateFormat => dateFormatParts.every(validDateFormats.contains);
 
-  // Dart reserved words that cannot be used as identifiers.
-  // See https://dart.dev/language/keywords.
-  static const _dartReservedWords = <String>{
-    'assert',
-    'break',
-    'case',
-    'catch',
-    'class',
-    'const',
-    'continue',
-    'default',
-    'do',
-    'else',
-    'enum',
-    'extends',
-    'false',
-    'final',
-    'finally',
-    'for',
-    'if',
-    'in',
-    'is',
-    'new',
-    'null',
-    'rethrow',
-    'return',
-    'super',
-    'switch',
-    'this',
-    'throw',
-    'true',
-    'try',
-    'var',
-    'void',
-    'while',
-    'with',
-  };
-
   static final RegExp _validNameRegExp = RegExp(r'^[a-zA-Z_$][a-zA-Z0-9_$]*$');
 
   /// Validates that [name] represents a valid Dart parameter identifier.
   static bool _isValidName(String name) {
-    if (name.isEmpty || _dartReservedWords.contains(name)) {
+    if (name == '_' || dartReservedWords.contains(name)) {
       return false;
     }
     return _validNameRegExp.hasMatch(name);
@@ -300,8 +301,8 @@ class Placeholder {
       throw L10nException(
         'Invalid placeholder name "$name" in message "$resourceId". '
         'Placeholder names must be valid Dart identifiers: they cannot be empty, '
-        'start with a number, contain non-alphanumeric characters, or be a '
-        'Dart reserved word.',
+        'be a single underscore, start with a number, contain non-alphanumeric '
+        'characters, or be a Dart reserved word.',
       );
     }
     return name;

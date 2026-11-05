@@ -944,6 +944,9 @@ class LocalizationsGenerator {
     if (name[0].contains(RegExp(r'\d'))) {
       return false;
     }
+    if (dartReservedWords.contains(name)) {
+      return false;
+    }
     return true;
   }
 
@@ -963,8 +966,9 @@ class LocalizationsGenerator {
         throw L10nException(
           'Invalid ARB resource name "$resourceId" in $templateArbFile.\n'
           'Resources names must be valid Dart method names: they have to be '
-          'camel case, cannot start with a number or underscore, and cannot '
-          'contain non-alphanumeric characters.',
+          'camel case, cannot start with a number or underscore, cannot '
+          'contain non-alphanumeric characters, and cannot be a Dart '
+          'reserved word.',
         );
       }
     }
@@ -982,6 +986,19 @@ class LocalizationsGenerator {
           ),
         )
         .toList();
+    if (useNamedParameters) {
+      for (final Message message in _allMessages) {
+        for (final String placeholderName in message.templatePlaceholders.keys) {
+          if (placeholderName.startsWith('_')) {
+            throw L10nException(
+              'Invalid placeholder name "$placeholderName" in message "${message.resourceId}". '
+              'Placeholder names cannot start with an underscore when '
+              '"use-named-parameters" is enabled.',
+            );
+          }
+        }
+      }
+    }
     hadErrors = _allMessages.any((Message message) => message.hadErrors);
     if (inputsAndOutputsListFile != null) {
       _addAllToFileList(

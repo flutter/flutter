@@ -3614,8 +3614,8 @@ String helloNameAndAge({required String name, required int age}) {
     );
   });
 
-  // Regression test for https://github.com/flutter/flutter/issues/195904.
-  testWithoutContext('throws an exception when placeholder name is invalid', () {
+  // Regression tests for https://github.com/flutter/flutter/issues/195904.
+  testWithoutContext('throws an exception when placeholder name is numeric', () {
     const numericPlaceholderArb = '''
 {
   "handsPlayed": "Hands played: {count}",
@@ -3644,7 +3644,9 @@ String helloNameAndAge({required String name, required int age}) {
       ),
     );
     expect(fs.file(fs.path.join(defaultL10nPath, defaultOutputFileString)).existsSync(), isFalse);
+  });
 
+  testWithoutContext('throws an exception when placeholder name is empty', () {
     const emptyPlaceholderArb = '''
 {
   "greeting": "Hello",
@@ -3666,8 +3668,13 @@ String helloNameAndAge({required String name, required int age}) {
         ),
       ),
     );
+    expect(fs.file(fs.path.join(defaultL10nPath, defaultOutputFileString)).existsSync(), isFalse);
+  });
 
-    const invalidCharPlaceholderArb = '''
+  testWithoutContext(
+    'throws an exception when placeholder name contains non-alphanumeric characters',
+    () {
+      const invalidCharPlaceholderArb = '''
 {
   "greeting": "Hello",
   "@greeting": {
@@ -3678,17 +3685,21 @@ String helloNameAndAge({required String name, required int age}) {
     }
   }
 }''';
-    expect(
-      () => setupLocalizations(<String, String>{'en': invalidCharPlaceholderArb}),
-      throwsA(
-        isA<L10nException>().having(
-          (L10nException e) => e.message,
-          'message',
-          contains('Invalid placeholder name "user-name" in message "greeting".'),
+      expect(
+        () => setupLocalizations(<String, String>{'en': invalidCharPlaceholderArb}),
+        throwsA(
+          isA<L10nException>().having(
+            (L10nException e) => e.message,
+            'message',
+            contains('Invalid placeholder name "user-name" in message "greeting".'),
+          ),
         ),
-      ),
-    );
+      );
+      expect(fs.file(fs.path.join(defaultL10nPath, defaultOutputFileString)).existsSync(), isFalse);
+    },
+  );
 
+  testWithoutContext('throws an exception when placeholder name is a Dart reserved word', () {
     const reservedWordPlaceholderArb = '''
 {
   "greeting": "Hello {default}"
@@ -3703,5 +3714,82 @@ String helloNameAndAge({required String name, required int age}) {
         ),
       ),
     );
+    expect(fs.file(fs.path.join(defaultL10nPath, defaultOutputFileString)).existsSync(), isFalse);
+  });
+
+  testWithoutContext('throws an exception when placeholder name is a single underscore', () {
+    const wildcardPlaceholderArb = '''
+{
+  "greeting": "Hello {_}"
+}''';
+    expect(
+      () => setupLocalizations(<String, String>{'en': wildcardPlaceholderArb}),
+      throwsA(
+        isA<L10nException>().having(
+          (L10nException e) => e.message,
+          'message',
+          contains('Invalid placeholder name "_" in message "greeting".'),
+        ),
+      ),
+    );
+    expect(fs.file(fs.path.join(defaultL10nPath, defaultOutputFileString)).existsSync(), isFalse);
+  });
+
+  testWithoutContext('throws an exception when placeholder name starts with an underscore and useNamedParameters is true', () {
+    const leadingUnderscorePlaceholderArb = '''
+{
+  "greeting": "Hello {_foo}"
+}''';
+    expect(
+      () => setupLocalizations(<String, String>{
+        'en': leadingUnderscorePlaceholderArb,
+      }, useNamedParameters: true),
+      throwsA(
+        isA<L10nException>().having(
+          (L10nException e) => e.message,
+          'message',
+          contains(
+            'Invalid placeholder name "_foo" in message "greeting". '
+            'Placeholder names cannot start with an underscore when '
+            '"use-named-parameters" is enabled.',
+          ),
+        ),
+      ),
+    );
+    expect(fs.file(fs.path.join(defaultL10nPath, defaultOutputFileString)).existsSync(), isFalse);
+  });
+
+  testWithoutContext(
+    'allows placeholder name starting with an underscore when useNamedParameters is false',
+    () {
+      const leadingUnderscorePlaceholderArb = '''
+{
+  "greeting": "Hello {_foo}"
+}''';
+      setupLocalizations(<String, String>{'en': leadingUnderscorePlaceholderArb});
+      final String localizationsFile = getGeneratedFileContent(locale: 'en');
+      expect(localizationsFile, contains('String greeting(Object _foo)'));
+    },
+  );
+
+  testWithoutContext('throws an exception when resource ID is a Dart reserved word', () {
+    const reservedWordResourceArb = '''
+{
+  "continue": "Continue"
+}''';
+    expect(
+      () => setupLocalizations(<String, String>{'en': reservedWordResourceArb}),
+      throwsA(
+        isA<L10nException>().having(
+          (L10nException e) => e.message,
+          'message',
+          allOf(
+            contains('Invalid ARB resource name "continue"'),
+            contains('cannot be a Dart reserved word'),
+          ),
+        ),
+      ),
+    );
+    expect(fs.file(fs.path.join(defaultL10nPath, defaultOutputFileString)).existsSync(), isFalse);
   });
 }
