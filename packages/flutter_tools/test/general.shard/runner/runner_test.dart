@@ -33,6 +33,7 @@ import 'package:flutter_tools/src/commands/devices.dart';
 import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/context/tool_dependencies.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/flutter_device_manager.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/plist_parser.dart';
@@ -43,6 +44,7 @@ import 'package:flutter_tools/src/macos/macos_workflow.dart';
 import 'package:flutter_tools/src/macos/xcdevice.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:flutter_tools/src/persistent_tool_state.dart';
+import 'package:flutter_tools/src/pre_run_validator.dart';
 import 'package:flutter_tools/src/reporting/crash_reporting.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/version.dart';
@@ -984,7 +986,6 @@ void main() {
     });
 
     test('Logger override achieves shared AnsiTerminal and OutputPreferences from bootstrap AppContext', () async {
-      fs.directory('/sdk/packages/flutter_tools').createSync(recursive: true);
       AnsiTerminal? loggerTerminal;
       OutputPreferences? loggerOutputPreferences;
       late final ToolDependencies capturedDependencies;
@@ -1032,16 +1033,17 @@ void main() {
       final ToolContext(
         :Logger logger,
         :OutputPreferences outputPreferences,
+        :PreRunValidator preRunValidator,
         :AnsiTerminal terminal,
       ) = capturedDependencies.toolContext;
       expect((logger as BufferLogger).errorText, isEmpty);
       expect(exitCode, 0);
+      expect(preRunValidator, isA<NoOpPreRunValidator>());
       expect(loggerTerminal, same(terminal));
       expect(loggerOutputPreferences, same(outputPreferences));
     });
 
     test('binds lazy AppleContext, AndroidContext, and workflows into inner AppContext', () async {
-      fs.directory('/sdk/packages/flutter_tools').createSync(recursive: true);
       var sdkEvaluations = 0;
       var xcdeviceEvaluations = 0;
       var xcodeEvaluations = 0;
@@ -1116,6 +1118,52 @@ void main() {
       expect(capturedDependencies.appleContext.xcode, same(fakeXcode));
       expect(xcodeEvaluations, 1);
       expect(command.resolvePlistParser(), same(fakePlistParser));
+    });
+
+    test('applies FeatureFlags to AnsiTerminal and honors preRunValidatorBuilder', () async {
+      late final ToolDependencies capturedDependencies;
+      final int exitCode = await runner.run(
+        <String>[_ContextRecordingFlutterCommand.commandName],
+        (ToolDependencies toolDependencies) {
+          capturedDependencies = toolDependencies;
+          return <FlutterCommand>[
+            _ContextRecordingFlutterCommand(toolContext: toolDependencies.toolContext),
+          ];
+        },
+        flutterVersion: '[user-branch]/',
+        preRunValidatorBuilder: PreRunValidator.new,
+        shutdownHooks: ShutdownHooks(),
+        templateRenderer: FakeTemplateRenderer(),
+        overrides: <Type, Generator>{
+          Analytics: () => const NoOpAnalytics(),
+          BotDetector: () => const FakeBotDetector(true),
+          Config: Config.test,
+          DeviceManager: FakeDeviceManager.new,
+          FeatureFlags: TestFeatureFlags.new,
+          FileSystem: () => fs,
+          FlutterVersion: FakeFlutterVersion.new,
+          Logger: BufferLogger.test,
+          OperatingSystemUtils: FakeOperatingSystemUtils.new,
+          PersistentToolState: () => PersistentToolState.test(
+            directory: fs.systemTempDirectory,
+            logger: BufferLogger.test(),
+          ),
+          Platform: () =>
+              FakePlatform(environment: <String, String>{'FLUTTER_ROOT': '/sdk', 'HOME': '/'}),
+          ProcessManager: FakeProcessManager.any,
+          Signals: FakeSignals.new,
+          io.Stdio: FakeStdio.new,
+          XcodeProjectInterpreter: FakeXcodeProjectInterpreter.new,
+        },
+      );
+
+      final ToolContext(:Logger logger, :AnsiTerminal terminal) = capturedDependencies.toolContext;
+      expect(terminal.isCliAnimationEnabled, isTrue);
+      expect(exitCode, 1);
+      expect(
+        (logger as BufferLogger).errorText,
+        contains('Flutter SDK installation appears corrupted'),
+      );
     });
   });
 

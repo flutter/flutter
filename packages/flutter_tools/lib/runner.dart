@@ -90,6 +90,8 @@ Future<int> run(
   bool muteCommandLogging = false,
   TestCompilerNativeAssetsBuilder? nativeAssetsBuilder,
   Map<Type, Generator>? overrides,
+  PreRunValidator Function({required Cache cache, required FileSystem fileSystem})?
+  preRunValidatorBuilder,
   bool? reportCrashes,
   TemplateRenderer? templateRenderer,
   bool verbose = false,
@@ -212,6 +214,9 @@ Future<int> run(
               ? () => bootstrapContext.resolveOverride<PlistParser>()
               : null,
           preRunValidator: bootstrapContext.resolveOverride<PreRunValidator>(),
+          preRunValidatorBuilder: bootstrapContext.hasOverride(PreRunValidator)
+              ? null
+              : preRunValidatorBuilder,
           processInfo: bootstrapContext.resolveOverride<ProcessInfo>(),
           processManager: bootstrapContext.resolveOverride<ProcessManager>(),
           projectFactory: bootstrapContext.resolveOverride<FlutterProjectFactory>(),
@@ -277,6 +282,7 @@ Future<int> run(
           :AnsiTerminal terminal,
           :UserMessages userMessages,
         ) = toolContext;
+        terminal.applyFeatureFlags(featureFlags);
         reportCrashes ??= !await botDetector.isRunningOnBot;
         DoctorValidatorsProvider createDoctorValidatorsProvider({
           ExtensionManager? extensionManager,

@@ -241,6 +241,8 @@ class ToolDependencies {
     PlistParser? plistParser,
     PlistParser? Function()? plistParserBuilder,
     PreRunValidator? preRunValidator,
+    PreRunValidator Function({required Cache cache, required FileSystem fileSystem})?
+    preRunValidatorBuilder,
     ProcessInfo? processInfo,
     ProcessManager? processManager,
     FlutterProjectFactory? projectFactory,
@@ -293,6 +295,10 @@ class ToolDependencies {
     assert(
       plistParser == null || plistParserBuilder == null,
       'Cannot provide both plistParser and plistParserBuilder to ToolDependencies.bootstrap.',
+    );
+    assert(
+      preRunValidator == null || preRunValidatorBuilder == null,
+      'Cannot provide both preRunValidator and preRunValidatorBuilder to ToolDependencies.bootstrap.',
     );
     assert(
       xcdevice == null || xcdeviceBuilder == null,
@@ -511,7 +517,6 @@ class ToolDependencies {
           ),
           platform: finalPlatform,
         );
-    finalTerminal.applyFeatureFlags(finalFeatureFlags);
 
     // 10. Remaining ToolContext Dependencies
     final BuildSystem finalBuildSystem =
@@ -538,7 +543,9 @@ class ToolDependencies {
         );
 
     final PreRunValidator finalPreRunValidator =
-        preRunValidator ?? PreRunValidator(cache: finalCache, fileSystem: finalFS);
+        preRunValidator ??
+        preRunValidatorBuilder?.call(cache: finalCache, fileSystem: finalFS) ??
+        const NoOpPreRunValidator();
 
     final ProcessInfo finalProcessInfo = processInfo ?? ProcessInfo(finalFS);
 

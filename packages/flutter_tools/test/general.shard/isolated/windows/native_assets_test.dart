@@ -178,27 +178,25 @@ void main() {
   // This logic is mocked in the other tests to avoid having test order
   // randomization causing issues with what processes are invoked.
   // Exercise the parsing of the process output in this separate test.
-  testUsingContext(
-    'NativeAssetsBuildRunnerImpl.cCompilerConfig',
-    overrides: <Type, Generator>{
-      ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
-        FakeCommand(
-          command: <Pattern>[
-            RegExp(r'(.*)vswhere.exe'),
-            '-format',
-            'json',
-            '-products',
-            '*',
-            '-utf8',
-            '-latest',
-            '-version',
-            '16',
-            '-requires',
-            'Microsoft.VisualStudio.Workload.NativeDesktop',
-            'Microsoft.VisualStudio.Component.VC.Tools.x86.x64',
-            'Microsoft.VisualStudio.Component.VC.CMake.Project',
-          ],
-          stdout: r'''
+  testWithoutContext('NativeAssetsBuildRunnerImpl.cCompilerConfig', () async {
+    final vswhereProcessManager = FakeProcessManager.list(<FakeCommand>[
+      FakeCommand(
+        command: <Pattern>[
+          RegExp(r'(.*)vswhere.exe'),
+          '-format',
+          'json',
+          '-products',
+          '*',
+          '-utf8',
+          '-latest',
+          '-version',
+          '16',
+          '-requires',
+          'Microsoft.VisualStudio.Workload.NativeDesktop',
+          'Microsoft.VisualStudio.Component.VC.Tools.x86.x64',
+          'Microsoft.VisualStudio.Component.VC.CMake.Project',
+        ],
+        stdout: r'''
 [
   {
     "instanceId": "491ec752",
@@ -250,41 +248,46 @@ void main() {
   }
 ]
 ''', // Newline at the end of the string.
-        ),
-      ]),
-      FileSystem: () => fileSystem,
-    },
-    () async {
-      if (!const LocalPlatform().isWindows) {
-        return;
-      }
+      ),
+    ]);
 
-      final Directory msvcBinDir = fileSystem.directory(
-        r'C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.35.32215\bin\Hostx64\x64',
-      );
-      await msvcBinDir.create(recursive: true);
+    final Directory msvcBinDir = fileSystem.directory(
+      r'C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.35.32215\bin\Hostx64\x64',
+    );
+    await msvcBinDir.create(recursive: true);
 
-      final CCompilerConfig result = (await cCompilerConfigWindows(
-        throwIfNotFound: true,
-        visualStudio: VisualStudio(
-          toolContext: FakeToolContext(
-            fs: fileSystem,
-            logger: logger,
-            platform: FakePlatform(
-              operatingSystem: 'windows',
-              environment: <String, String>{'PROGRAMFILES(X86)': r'C:\Program Files (x86)\'},
-            ),
-            processManager: processManager,
-          ),
+    final visualStudio = VisualStudio(
+      toolContext: FakeToolContext(
+        fs: fileSystem,
+        logger: logger,
+        os: FakeOperatingSystemUtils(hostPlatform: HostPlatform.windows_x64),
+        platform: FakePlatform(
+          operatingSystem: 'windows',
+          environment: <String, String>{'PROGRAMFILES(X86)': r'C:\Program Files (x86)\'},
         ),
-      ))!;
-      expect(result.compiler.toFilePath(), msvcBinDir.childFile('cl.exe').uri.toFilePath());
-      expect(result.archiver.toFilePath(), msvcBinDir.childFile('lib.exe').uri.toFilePath());
-      expect(result.linker.toFilePath(), msvcBinDir.childFile('link.exe').uri.toFilePath());
-      expect(result.windows.developerCommandPrompt?.script, isNotNull);
-      expect(result.windows.developerCommandPrompt?.arguments, isNotNull);
-    },
-  );
+        processManager: vswhereProcessManager,
+      ),
+    );
+    expect(visualStudio.clPath, msvcBinDir.childFile('cl.exe').path);
+    expect(visualStudio.libPath, msvcBinDir.childFile('lib.exe').path);
+    expect(visualStudio.linkPath, msvcBinDir.childFile('link.exe').path);
+    expect(visualStudio.vcvarsPath, isNotNull);
+    expect(vswhereProcessManager.hasRemainingExpectations, isFalse);
+
+    if (!const LocalPlatform().isWindows) {
+      return;
+    }
+
+    final CCompilerConfig result = (await cCompilerConfigWindows(
+      throwIfNotFound: true,
+      visualStudio: visualStudio,
+    ))!;
+    expect(result.compiler.toFilePath(), msvcBinDir.childFile('cl.exe').uri.toFilePath());
+    expect(result.archiver.toFilePath(), msvcBinDir.childFile('lib.exe').uri.toFilePath());
+    expect(result.linker.toFilePath(), msvcBinDir.childFile('link.exe').uri.toFilePath());
+    expect(result.windows.developerCommandPrompt?.script, isNotNull);
+    expect(result.windows.developerCommandPrompt?.arguments, isNotNull);
+  });
 
   group('cCompilerConfigWindows', () {
     final Platform windowsPlatform = FakePlatform(

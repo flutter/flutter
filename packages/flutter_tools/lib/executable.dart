@@ -62,6 +62,7 @@ import 'src/isolated/mustache_template.dart';
 import 'src/isolated/native_assets/test/native_assets.dart';
 import 'src/isolated/resident_web_runner.dart';
 import 'src/native_assets.dart';
+import 'src/pre_run_validator.dart';
 import 'src/project_validator.dart';
 import 'src/runner/flutter_command.dart';
 import 'src/runner/flutter_command_runner.dart';
@@ -151,6 +152,7 @@ Future<void> main(List<String> args) async {
       // on dwds.
       WebRunnerFactory: () => DwdsWebRunnerFactory(),
     },
+    preRunValidatorBuilder: PreRunValidator.new,
     shutdownHooks: LocalSignals.instance.shutdownHooks,
     templateRenderer: const MustacheTemplateRenderer(),
     verbose: verbose,
