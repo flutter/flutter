@@ -17,6 +17,14 @@ std::unique_ptr<EmbedderRenderTarget> CreateVulkanImpellerRenderTarget(
     const std::shared_ptr<impeller::AiksContext>& aiks_context,
     fml::ScopedCleanupClosure on_release) {
   const auto& store = backing_store.vulkan;
+  // The embedder has transferred its baton even if wrapping fails. Destroy it
+  // before collecting the backing store, just as on successful target teardown.
+  fml::ScopedCleanupClosure destruction(
+      [callback = store.destruction_callback, user_data = store.user_data] {
+        if (callback) {
+          callback(user_data);
+        }
+      });
   if (!aiks_context || !store.image || !store.image->image) {
     FML_LOG(ERROR) << "Embedder supplied null Vulkan backing image.";
     return nullptr;
@@ -49,16 +57,10 @@ std::unique_ptr<EmbedderRenderTarget> CreateVulkanImpellerRenderTarget(
   // The wrapped source is a presentation attachment: render passes leave its
   // image in GENERAL. The embedder must preserve that layout when reusing it.
   // Ownership stays with the embedder until the target's collection callback.
-  fml::closure destruction = [callback = store.destruction_callback,
-                              user_data = store.user_data] {
-    if (callback) {
-      callback(user_data);
-    }
-  };
   return std::make_unique<EmbedderRenderTargetImpeller>(
       backing_store, aiks_context,
       std::make_unique<impeller::RenderTarget>(surface->GetRenderTarget()),
-      on_release.Release(), std::move(destruction));
+      on_release.Release(), destruction.Release());
 }
 
 }  // namespace flutter
