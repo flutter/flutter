@@ -215,7 +215,10 @@ Future<void> testMain() async {
     test(
       'WebpHeaderReader.isAnimated() returns true for a VP8X header with the animation flag',
       () {
-        expect(WebpHeaderReader(ByteData.sublistView(animatedWebpHeader)).isAnimated(), isTrue);
+        final reader = WebpHeaderReader(ByteData.sublistView(animatedWebpHeader));
+        expect(reader.isAnimated(), isTrue);
+        // Calling again on the same reader gives the same answer.
+        expect(reader.isAnimated(), isTrue);
       },
     );
 
@@ -346,7 +349,10 @@ Future<void> testMain() async {
     }
 
     test('GifHeaderReader.isAnimated() returns true for a 2-frame GIF', () {
-      expect(GifHeaderReader(ByteData.sublistView(_createTestGif())).isAnimated(), isTrue);
+      final reader = GifHeaderReader(ByteData.sublistView(_createTestGif()));
+      expect(reader.isAnimated(), isTrue);
+      // Calling again on the same reader gives the same answer.
+      expect(reader.isAnimated(), isTrue);
     });
 
     // The image descriptor, LZW minimum code size and image data of the first
@@ -374,7 +380,7 @@ Future<void> testMain() async {
       expect(detectImageType(view), ImageType.gif);
     });
 
-    test('1-frame GIF followed by only the first bytes of another block', () {
+    test('1-frame GIF followed by a partial block is animated only if a graphic block starts', () {
       final cases = <(List<int>, ImageType)>[
         (<int>[0x2c], ImageType.animatedGif),
         (<int>[0x21, 0xf9], ImageType.animatedGif),

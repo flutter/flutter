@@ -191,6 +191,8 @@ class WebpHeaderReader {
   ///
   /// Returns [false] if the header is truncated or malformed.
   bool isAnimated() {
+    // Always parse from the start so repeated calls give the same answer.
+    _position = 0;
     try {
       // An animated WebP needs at least the 12-byte RIFF/WEBP header, the
       // 8-byte 'VP8X' chunk header and the 1-byte VP8X flags.
@@ -216,7 +218,12 @@ class WebpHeaderReader {
       final int headerByte = _readUint8();
       const int animatedMask = 1 << 1;
       return headerByte & animatedMask != 0;
-    } on RangeError {
+    } on ArgumentError {
+      // Backstop for any out-of-bounds read the checks above missed: treat
+      // the buffer as malformed rather than throwing. dart2wasm throws a
+      // RangeError here, while dart2js surfaces the native JS RangeError as an
+      // ArgumentError; RangeError is a subtype of ArgumentError, so this
+      // catches both.
       return false;
     }
   }
@@ -291,6 +298,8 @@ class GifHeaderReader {
   /// the start of another graphic block. Returns [false] if the GIF is
   /// truncated or malformed before that point.
   bool isAnimated() {
+    // Always parse from the start so repeated calls give the same answer.
+    _position = 0;
     try {
       // A GIF needs at least the 6-byte header and the 7-byte logical screen
       // descriptor.
@@ -330,7 +339,8 @@ class GifHeaderReader {
       }
 
       var framesFound = 0;
-      // Read the GIF until we either find 2 frames or reach the end of the GIF.
+      // Read the GIF until we find one complete frame followed by the start of
+      // another graphic block, or reach the end of the GIF.
       while (true) {
         if (!_maybeSkipSpecialPurposeBlocks()) {
           return false;
@@ -362,7 +372,12 @@ class GifHeaderReader {
         }
         framesFound++;
       }
-    } on RangeError {
+    } on ArgumentError {
+      // Backstop for any out-of-bounds read the checks above missed: treat
+      // the buffer as malformed rather than throwing. dart2wasm throws a
+      // RangeError here, while dart2js surfaces the native JS RangeError as an
+      // ArgumentError; RangeError is a subtype of ArgumentError, so this
+      // catches both.
       return false;
     }
   }
