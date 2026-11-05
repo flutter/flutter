@@ -221,18 +221,16 @@ class Doctor {
     required this._cache,
     required this._clock,
     required this._logger,
-    required this._outputPreferences,
-    required this._validatorsProviderBuilder,
+    required this.validatorsProviderBuilder,
   });
 
   final Cache _cache;
   final Logger _logger;
   final SystemClock _clock;
   final Analytics _analytics;
-  final OutputPreferences _outputPreferences;
-  final DoctorValidatorsProviderBuilder _validatorsProviderBuilder;
+  final DoctorValidatorsProviderBuilder validatorsProviderBuilder;
 
-  late final DoctorValidatorsProvider _validatorsProvider = _validatorsProviderBuilder();
+  late final DoctorValidatorsProvider _validatorsProvider = validatorsProviderBuilder();
 
   List<DoctorValidator> get validators => _validatorsProvider.validators;
 
@@ -243,7 +241,7 @@ class Doctor {
       await extensionManager.ensureInitialized();
     }
     final List<DoctorValidator> validatorList = extensionManager != null
-        ? _validatorsProviderBuilder(extensionManager: extensionManager).validators
+        ? validatorsProviderBuilder(extensionManager: extensionManager).validators
         : validators;
     return <ValidatorTask>[
       for (final DoctorValidator validator in validatorList)
@@ -282,75 +280,6 @@ class Doctor {
   }
 
   List<Workflow> get workflows => _validatorsProvider.workflows;
-
-  /// Print a summary of the state of the tooling, as well as how to get more info.
-  Future<void> summary() async {
-    _logger.printStatus(await _summaryText());
-  }
-
-  Future<String> _summaryText() async {
-    final buffer = StringBuffer();
-
-    var missingComponent = false;
-    var sawACrash = false;
-
-    for (final DoctorValidator validator in validators) {
-      final lineBuffer = StringBuffer();
-      ValidationResult result;
-      try {
-        result = await asyncGuard<ValidationResult>(() => validator.validateImpl());
-      } on Exception catch (exception) {
-        // We're generating a summary, so drop the stack trace.
-        result = ValidationResult.crash(exception);
-      }
-      lineBuffer.write('${result.coloredLeadingBox(_logger.terminal)} ${validator.title}: ');
-      switch (result.type) {
-        case ValidationType.crash:
-          lineBuffer.write('the doctor check crashed without a result.');
-          sawACrash = true;
-        case ValidationType.missing:
-          lineBuffer.write('is not installed.');
-        case ValidationType.partial:
-          lineBuffer.write('is partially installed; more components are available.');
-        case ValidationType.notAvailable:
-          lineBuffer.write('is not available.');
-        case ValidationType.success:
-          lineBuffer.write('is fully installed.');
-      }
-
-      if (result.statusInfo != null) {
-        lineBuffer.write(' (${result.statusInfo})');
-      }
-
-      buffer.write(
-        wrapText(
-          lineBuffer.toString(),
-          hangingIndent: result.leadingBox.length + 1,
-          columnWidth: _outputPreferences.wrapColumn,
-          shouldWrap: _outputPreferences.wrapText,
-        ),
-      );
-      buffer.writeln();
-
-      if (result.type != ValidationType.success) {
-        missingComponent = true;
-      }
-    }
-
-    if (sawACrash) {
-      buffer.writeln();
-      buffer.writeln('Run "flutter doctor" for information about why a doctor check crashed.');
-    }
-
-    if (missingComponent) {
-      buffer.writeln();
-      buffer.writeln(
-        'Run "flutter doctor" for information about installing additional components.',
-      );
-    }
-
-    return buffer.toString();
-  }
 
   Future<bool> checkRemoteArtifacts(String engineRevision) async {
     return _cache.areRemoteArtifactsAvailable(engineVersion: engineRevision);

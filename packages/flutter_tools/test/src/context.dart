@@ -328,7 +328,6 @@ class _ContextFakeDoctor extends Doctor {
         analytics: globals.analytics,
         cache: Cache.test(processManager: FakeProcessManager.any()),
         logger: logger,
-        outputPreferences: globals.outputPreferences,
         validatorsProviderBuilder: ({ExtensionManager? extensionManager}) =>
             context.get<DoctorValidatorsProvider>()!,
       );

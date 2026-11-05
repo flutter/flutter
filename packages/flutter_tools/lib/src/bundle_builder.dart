@@ -96,6 +96,7 @@ class BundleBuilder {
       analytics: _analytics,
       platform: hostPlatform,
       projectFactory: projectFactory,
+      xcode: null,
       generateDartPluginRegistry: true,
     );
     final Target target = buildInfo.mode == BuildMode.debug

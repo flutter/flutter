@@ -82,11 +82,13 @@ class TestFlutterCommandRunner extends FlutterCommandRunner {
     ToolContext? toolContext,
   }) : super(
          analytics: analytics ?? _defaultFromContext<Analytics>() ?? const NoOpAnalytics(),
+         androidContext: FakeAndroidContext(
+           gradleUtils: gradleUtils ?? _defaultFromContext<GradleUtils>(),
+         ),
          cocoaPods: cocoaPods ?? _defaultFromContext<CocoaPods>(),
          deviceManager: deviceManager ?? _defaultFromContext<DeviceManager>(),
          doctor: doctor ?? _defaultFromContext<Doctor>(),
          featureFlags: featureFlags ?? _defaultFromContext<FeatureFlags>(),
-         gradleUtils: gradleUtils ?? _defaultFromContext<GradleUtils>(),
          plistParser: plistParser ?? _defaultFromContext<PlistParser>(),
          templateRenderer:
              templateRenderer ??

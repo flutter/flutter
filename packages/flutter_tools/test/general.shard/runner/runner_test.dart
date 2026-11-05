@@ -29,6 +29,9 @@ import 'package:flutter_tools/src/context/tool_dependencies.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/flutter_device_manager.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/ios/simulators.dart';
+import 'package:flutter_tools/src/macos/cocoapods_validator.dart';
+import 'package:flutter_tools/src/macos/xcdevice.dart';
 import 'package:flutter_tools/src/reporting/crash_reporting.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:test/fake.dart';
@@ -871,6 +874,74 @@ void main() {
             return FakeJava();
           },
           ProcessManager: () => FakeProcessManager.any(),
+        },
+      );
+    });
+
+    group('lazy Apple dependency evaluation', () {
+      var cocoapodsValidatorEvaluations = 0;
+      var iosSimulatorUtilsEvaluations = 0;
+      var xcdeviceEvaluations = 0;
+
+      setUp(() {
+        cocoapodsValidatorEvaluations = 0;
+        iosSimulatorUtilsEvaluations = 0;
+        xcdeviceEvaluations = 0;
+      });
+
+      testUsingContext(
+        'does not eagerly evaluate CocoaPodsValidator, IOSSimulatorUtils, or XCDevice during bootstrap or generateCommands',
+        () async {
+          late final ToolDependencies capturedDependencies;
+          final command = _DeviceManagerRecordingFlutterCommand();
+          await runner.run(
+            <String>[command.name],
+            (ToolDependencies toolDependencies) {
+              capturedDependencies = toolDependencies;
+              return <FlutterCommand>[
+                ...generateCommands(
+                  toolDependencies: toolDependencies,
+                  verbose: false,
+                  verboseHelp: false,
+                ),
+                command,
+              ];
+            },
+            // This flutterVersion disables crash reporting.
+            flutterVersion: '[user-branch]/',
+            shutdownHooks: ShutdownHooks(),
+          );
+
+          expect(cocoapodsValidatorEvaluations, 0);
+          expect(iosSimulatorUtilsEvaluations, 0);
+          expect(xcdeviceEvaluations, 0);
+
+          expect(
+            capturedDependencies.appleContext.cocoapodsValidator,
+            isA<FakeCocoaPodsValidator>(),
+          );
+          expect(cocoapodsValidatorEvaluations, 1);
+          expect(capturedDependencies.appleContext.iosSimulatorUtils, isA<FakeIOSSimulatorUtils>());
+          expect(iosSimulatorUtilsEvaluations, 1);
+          expect(capturedDependencies.appleContext.xcdevice, isA<FakeXCDevice>());
+          expect(xcdeviceEvaluations, 1);
+        },
+        overrides: <Type, Generator>{
+          CocoaPodsValidator: () {
+            cocoapodsValidatorEvaluations++;
+            return FakeCocoaPodsValidator();
+          },
+          DeviceManager: () => null,
+          FileSystem: () => MemoryFileSystem.test(),
+          IOSSimulatorUtils: () {
+            iosSimulatorUtilsEvaluations++;
+            return FakeIOSSimulatorUtils();
+          },
+          ProcessManager: () => FakeProcessManager.any(),
+          XCDevice: () {
+            xcdeviceEvaluations++;
+            return FakeXCDevice();
+          },
         },
       );
     });

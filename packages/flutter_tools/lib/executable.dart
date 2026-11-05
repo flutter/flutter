@@ -222,6 +222,7 @@ List<FlutterCommand> generateCommands({
     AssembleCommand(
       androidContext: toolDependencies.androidContext,
       buildSystem: toolDependencies.buildSystem,
+      extensionBuildManager: toolDependencies.extensionBuildManager,
       featureFlags: featureFlags,
       toolContext: toolContext,
       verboseHelp: verboseHelp,
@@ -339,7 +340,6 @@ List<FlutterCommand> generateCommands({
     ScreenshotCommand(toolContext: toolContext),
     ShellCompletionCommand(toolContext: toolContext),
     TestCommand(
-      analytics: toolDependencies.analytics,
       templateRenderer: const MustacheTemplateRenderer(),
       toolContext: toolContext,
       verboseHelp: verboseHelp,

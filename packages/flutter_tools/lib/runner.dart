@@ -38,6 +38,7 @@ import 'src/base/user_messages.dart';
 import 'src/build_system/build_system.dart';
 import 'src/build_system/build_targets.dart';
 import 'src/cache.dart';
+import 'src/context/android_context.dart';
 import 'src/context/apple_context.dart';
 import 'src/context/tool_context.dart';
 import 'src/context/tool_dependencies.dart';
@@ -107,73 +108,95 @@ Future<int> run(
   final bool usingLocalEngine = args.any((a) => a.startsWith('--local-engine'));
 
   return runInContext<int>(() async {
-    final DoctorValidatorsProvider? overriddenDoctorValidatorsProvider = context
+    final AppContext bootstrapContext = context;
+    final DoctorValidatorsProvider? overriddenDoctorValidatorsProvider = bootstrapContext
         .resolveOverride<DoctorValidatorsProvider>();
-    final HttpClientFactory? httpClientFactory = context.resolveOverride<HttpClientFactory>();
+    final HttpClientFactory? httpClientFactory = bootstrapContext
+        .resolveOverride<HttpClientFactory>();
     final ToolDependencies toolDeps = await ToolDependencies.bootstrap(
-      analytics: context.resolveOverride<Analytics>(),
-      androidSdkBuilder: context.hasOverride(AndroidSdk)
-          ? () => context.resolveOverride<AndroidSdk>()
+      analytics: bootstrapContext.resolveOverride<Analytics>(),
+      androidSdkBuilder: bootstrapContext.hasOverride(AndroidSdk)
+          ? () => bootstrapContext.resolveOverride<AndroidSdk>()
           : null,
-      androidStudioBuilder: context.hasOverride(AndroidStudio)
-          ? () => context.resolveOverride<AndroidStudio>()
+      androidStudioBuilder: bootstrapContext.hasOverride(AndroidStudio)
+          ? () => bootstrapContext.resolveOverride<AndroidStudio>()
           : null,
-      androidWorkflow: context.resolveOverride<AndroidWorkflow>(),
-      artifacts: context.resolveOverride<Artifacts>(),
-      botDetector: context.resolveOverride<BotDetector>(),
-      buildSystem: context.resolveOverride<BuildSystem>(),
-      buildTargets: buildTargets ?? context.resolveOverride<BuildTargets>(),
-      cache: context.resolveOverride<Cache>(),
-      cocoaPods: context.resolveOverride<CocoaPods>(),
-      cocoapodsValidator: context.resolveOverride<CocoaPodsValidator>(),
-      config: context.resolveOverride<Config>(),
-      crashReporter: context.resolveOverride<CrashReporter>(),
-      customDevicesConfig: context.resolveOverride<CustomDevicesConfig>(),
-      deviceManager: context.resolveOverride<DeviceManager>(),
-      doctor: context.resolveOverride<Doctor>(),
+      androidWorkflow: bootstrapContext.resolveOverride<AndroidWorkflow>(),
+      artifacts: bootstrapContext.resolveOverride<Artifacts>(),
+      botDetector: bootstrapContext.resolveOverride<BotDetector>(),
+      buildSystem: bootstrapContext.resolveOverride<BuildSystem>(),
+      buildTargets: buildTargets ?? bootstrapContext.resolveOverride<BuildTargets>(),
+      cache: bootstrapContext.resolveOverride<Cache>(),
+      cocoaPodsBuilder: bootstrapContext.hasOverride(CocoaPods)
+          ? () => bootstrapContext.resolveOverride<CocoaPods>()
+          : null,
+      cocoapodsValidatorBuilder: bootstrapContext.hasOverride(CocoaPodsValidator)
+          ? () => bootstrapContext.resolveOverride<CocoaPodsValidator>()
+          : null,
+      config: bootstrapContext.resolveOverride<Config>(),
+      crashReporter: bootstrapContext.resolveOverride<CrashReporter>(),
+      customDevicesConfig: bootstrapContext.resolveOverride<CustomDevicesConfig>(),
+      deviceManager: bootstrapContext.resolveOverride<DeviceManager>(),
+      doctor: bootstrapContext.resolveOverride<Doctor>(),
       doctorValidatorsProvider: overriddenDoctorValidatorsProvider,
-      emulatorManager: context.resolveOverride<EmulatorManager>(),
+      emulatorManager: bootstrapContext.resolveOverride<EmulatorManager>(),
       extensionEntryPoints: extensionEntryPoints,
-      featureFlags: context.resolveOverride<FeatureFlags>(),
-      flutterVersion: context.resolveOverride<FlutterVersion>(),
-      fs: context.resolveOverride<FileSystem>(),
-      git: context.resolveOverride<Git>(),
-      gradleUtilsBuilder: context.hasOverride(GradleUtils)
-          ? () => context.resolveOverride<GradleUtils>()!
+      featureFlags: bootstrapContext.resolveOverride<FeatureFlags>(),
+      flutterVersion: bootstrapContext.resolveOverride<FlutterVersion>(),
+      fs: bootstrapContext.resolveOverride<FileSystem>(),
+      git: bootstrapContext.resolveOverride<Git>(),
+      gradleUtilsBuilder: bootstrapContext.hasOverride(GradleUtils)
+          ? () => bootstrapContext.resolveOverride<GradleUtils>()!
           : null,
       httpClientFactory: httpClientFactory,
-      iosSimulatorUtils: context.resolveOverride<IOSSimulatorUtils>(),
-      iosWorkflow: context.resolveOverride<IOSWorkflow>(),
-      javaBuilder: context.hasOverride(Java) ? () => context.resolveOverride<Java>() : null,
-      localEngineLocator: context.resolveOverride<LocalEngineLocator>(),
-      logger: context.resolveOverride<Logger>(),
+      iosSimulatorUtilsBuilder: bootstrapContext.hasOverride(IOSSimulatorUtils)
+          ? () => bootstrapContext.resolveOverride<IOSSimulatorUtils>()
+          : null,
+      iosWorkflowBuilder: bootstrapContext.hasOverride(IOSWorkflow)
+          ? () => bootstrapContext.resolveOverride<IOSWorkflow>()
+          : null,
+      javaBuilder: bootstrapContext.hasOverride(Java)
+          ? () => bootstrapContext.resolveOverride<Java>()
+          : null,
+      localEngineLocator: bootstrapContext.resolveOverride<LocalEngineLocator>(),
+      logger: bootstrapContext.resolveOverride<Logger>(),
       loggerBuilder: loggerBuilder,
-      macOSWorkflow: context.resolveOverride<MacOSWorkflow>(),
+      macOSWorkflow: bootstrapContext.resolveOverride<MacOSWorkflow>(),
       nativeAssetsBuilder:
-          nativeAssetsBuilder ?? context.resolveOverride<TestCompilerNativeAssetsBuilder>(),
-      os: context.resolveOverride<OperatingSystemUtils>(),
-      outputPreferences: context.resolveOverride<OutputPreferences>(),
-      persistentToolState: context.resolveOverride<PersistentToolState>(),
-      platform: context.resolveOverride<Platform>(),
-      plistParser: context.resolveOverride<PlistParser>(),
-      preRunValidator: context.resolveOverride<PreRunValidator>(),
-      processInfo: context.resolveOverride<ProcessInfo>(),
-      processManager: context.resolveOverride<ProcessManager>(),
-      projectFactory: context.resolveOverride<FlutterProjectFactory>(),
+          nativeAssetsBuilder ??
+          bootstrapContext.resolveOverride<TestCompilerNativeAssetsBuilder>(),
+      os: bootstrapContext.resolveOverride<OperatingSystemUtils>(),
+      outputPreferences: bootstrapContext.resolveOverride<OutputPreferences>(),
+      persistentToolState: bootstrapContext.resolveOverride<PersistentToolState>(),
+      platform: bootstrapContext.resolveOverride<Platform>(),
+      plistParserBuilder: bootstrapContext.hasOverride(PlistParser)
+          ? () => bootstrapContext.resolveOverride<PlistParser>()
+          : null,
+      preRunValidator: bootstrapContext.resolveOverride<PreRunValidator>(),
+      processInfo: bootstrapContext.resolveOverride<ProcessInfo>(),
+      processManager: bootstrapContext.resolveOverride<ProcessManager>(),
+      projectFactory: bootstrapContext.resolveOverride<FlutterProjectFactory>(),
       shutdownHooks: shutdownHooks,
-      signals: context.resolveOverride<Signals>(),
-      stdio: context.resolveOverride<Stdio>(),
-      systemClock: context.resolveOverride<SystemClock>(),
-      templateRenderer: templateRenderer ?? context.resolveOverride<TemplateRenderer>()!,
-      terminal: context.resolveOverride<AnsiTerminal>(),
-      userMessages: context.resolveOverride<UserMessages>(),
-      windowsWorkflow: context.resolveOverride<WindowsWorkflow>(),
-      xcdevice: context.resolveOverride<XCDevice>(),
-      xcode: context.resolveOverride<Xcode>(),
-      xcodeProjectInterpreter: context.resolveOverride<XcodeProjectInterpreter>(),
+      signals: bootstrapContext.resolveOverride<Signals>(),
+      stdio: bootstrapContext.resolveOverride<Stdio>(),
+      systemClock: bootstrapContext.resolveOverride<SystemClock>(),
+      templateRenderer: templateRenderer ?? bootstrapContext.resolveOverride<TemplateRenderer>()!,
+      terminal: bootstrapContext.resolveOverride<AnsiTerminal>(),
+      userMessages: bootstrapContext.resolveOverride<UserMessages>(),
+      windowsWorkflow: bootstrapContext.resolveOverride<WindowsWorkflow>(),
+      xcdeviceBuilder: bootstrapContext.hasOverride(XCDevice)
+          ? () => bootstrapContext.resolveOverride<XCDevice>()
+          : null,
+      xcodeBuilder: bootstrapContext.hasOverride(Xcode)
+          ? () => bootstrapContext.resolveOverride<Xcode>()
+          : null,
+      xcodeProjectInterpreterBuilder: bootstrapContext.hasOverride(XcodeProjectInterpreter)
+          ? () => bootstrapContext.resolveOverride<XcodeProjectInterpreter>()
+          : null,
     );
     final ToolDependencies(
       :Analytics analytics,
+      :AndroidContext androidContext,
       :AppleContext appleContext,
       :BuildSystem buildSystem,
       buildTargets: BuildTargets resolvedBuildTargets,
@@ -265,12 +288,12 @@ Future<int> run(
       body: () async {
         final runner = FlutterCommandRunner(
           analytics: analytics,
+          androidContext: androidContext,
           cocoaPods: appleContext.cocoaPods,
           deviceManager: deviceManager,
           doctor: doctor,
           extensionManager: extensionManager,
           featureFlags: featureFlags,
-          gradleUtilsBuilder: () => toolDeps.androidContext.gradleUtils,
           plistParser: appleContext.plistParser,
           templateRenderer: resolvedTemplateRenderer,
           toolContext: toolContext,
@@ -568,7 +591,6 @@ Future<int> _handleToolErrorImpl(
           cache: cache,
           clock: systemClock,
           logger: doctorLogger,
-          outputPreferences: outputPreferences,
           validatorsProviderBuilder: doctorValidatorsProviderBuilder,
         ),
       );

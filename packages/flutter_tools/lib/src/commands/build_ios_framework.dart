@@ -119,10 +119,6 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
   BuildSystem get buildSystem => _buildSystem;
 
   @protected
-  @override
-  ToolContext get toolContext => super.toolContext;
-
-  @protected
   Cache get cache => toolContext.cache;
 
   @protected

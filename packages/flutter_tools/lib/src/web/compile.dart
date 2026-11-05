@@ -132,6 +132,7 @@ class WebBuilder {
           platform: platform,
           analytics: _analytics,
           projectFactory: projectFactory,
+          xcode: null,
           cacheDir: cache.getRoot(),
           engineVersion: artifacts.usesLocalArtifacts ? null : flutterVersion.engineRevision,
           flutterRootDir: fileSystem.directory(cache.flutterRoot),
