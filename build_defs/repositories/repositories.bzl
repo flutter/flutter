@@ -462,6 +462,7 @@ ENGINE_VERSION = {engine_version}
 CONTENT_HASH = {content_hash}
 SKIA_VERSION = {skia_version}
 DART_VERSION = {dart_version}
+ENGINE_REALM = {engine_realm}
 """
 
 _VERSION_BUILD = """\
@@ -476,6 +477,13 @@ exports_files(["version.bzl"])
 # that must reproduce another's version strings).
 _ENGINE_VERSION_ENV = "FLUTTER_BAZEL_ENGINE_VERSION"
 _CONTENT_HASH_ENV = "FLUTTER_BAZEL_CONTENT_HASH"
+
+# The engine artifacts' storage realm: Cocoon's FLUTTER_REALM on a bot
+# (flutter_archives_v2 for a presubmit's engine, which is not in the release
+# bucket; bin/internal/update_engine_version.sh writes it to
+# bin/cache/engine.realm, which the tool reads under the storage base URL),
+# empty elsewhere.
+_ENGINE_REALM_ENV = "FLUTTER_REALM"
 
 def _git(rctx, root, args):
     result = rctx.execute(["git", "-C", str(root)] + args)
@@ -505,6 +513,26 @@ def _content_hash(rctx, root):
         fail("engine_version: %s failed: %s" % (command[-1], result.stderr))
     return result.stdout.strip()
 
+def _engine_realm(rctx, root):
+    """The engine artifacts' realm: FLUTTER_REALM, else the checkout's bin/cache/engine.realm, else empty.
+
+    What the tool's SDK facsimile writes as its bin/cache/engine.realm
+    (bin/internal:engine_realm): a tool test that downloads an engine
+    artifact at run time (`flutter build ios` of the integration shard's
+    ios_app_with_extensions_test) then looks in the bucket the checkout's
+    own tool looks in -- without it, a presubmit's engine (realm
+    flutter_archives_v2) is a 404 in the release bucket (the Mac
+    tool_integration_tests_10 shard, 11-05).
+    """
+    realm = rctx.getenv(_ENGINE_REALM_ENV)
+    if realm != None:
+        return realm.strip()
+    realm_file = root.get_child("bin", "cache", "engine.realm")
+    rctx.watch(realm_file)
+    if not realm_file.exists:
+        return ""
+    return rctx.read(realm_file).strip()
+
 def _engine_version_repository_impl(rctx):
     root = checkout_root(rctx)
     engine_version = rctx.getenv(_ENGINE_VERSION_ENV)
@@ -521,6 +549,7 @@ def _engine_version_repository_impl(rctx):
         content_hash = repr(content_hash),
         skia_version = repr(rctx.attr.skia_version),
         dart_version = repr(rctx.attr.dart_version),
+        engine_realm = repr(_engine_realm(rctx, root)),
     ))
     rctx.file("REPO.bazel", "")
 
@@ -535,7 +564,9 @@ build: `engine_version` is the checkout's `git rev-parse HEAD`,
 trees, which are their DEPS pins. This rule does the same at fetch time:
 the first two from git (re-read when HEAD moves; `FLUTTER_BAZEL_ENGINE_VERSION`
 and `FLUTTER_BAZEL_CONTENT_HASH` in the environment override them), the
-last two from deps.lock.bzl through the attributes.""",
+last two from deps.lock.bzl through the attributes; and ENGINE_REALM, the
+artifacts' storage realm (FLUTTER_REALM, else the checkout's
+bin/cache/engine.realm, else empty), for the tool's SDK facsimile.""",
     attrs = {
         "skia_version": attr.string(mandatory = True, doc = "Skia's DEPS revision."),
         "dart_version": attr.string(mandatory = True, doc = "The Dart SDK's DEPS revision."),
