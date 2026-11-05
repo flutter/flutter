@@ -666,6 +666,10 @@ void main() {
         );
         final Logger logger = BufferLogger.test();
         final completer = Completer<void>();
+        final fakeProcess = FakeProcess(
+          stderr: 'Recording started\n'.codeUnits,
+          completer: completer,
+        );
         final fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
           FakeCommand(
             command: const <String>[
@@ -679,8 +683,7 @@ void main() {
               '--force',
               'recording.mp4',
             ],
-            stderr: 'Recording started\n',
-            completer: completer,
+            process: fakeProcess,
           ),
         ]);
 
@@ -714,14 +717,17 @@ void main() {
         var isDone = false;
         screenRecording.done.then((_) => isDone = true);
 
-        // Before the duration elapses the recording keeps running.
+        // Before the duration elapses, no SIGINT and recording keeps running.
         async.elapse(const Duration(seconds: 4));
+        expect(fakeProcess.signals, isEmpty);
         expect(isDone, isFalse);
 
-        // Duration elapses: the tool sends SIGINT; the fake process only
-        // exits once the completer resolves, with an exit code from SIGINT.
+        // Duration elapses: the tool sends SIGINT to stop the recording.
         async.elapse(const Duration(seconds: 2));
+        expect(fakeProcess.signals.map((s) => s.toString()), contains('SIGINT'));
         expect(isDone, isFalse);
+
+        // Process exits after SIGINT; recording completes.
         completer.complete();
         async.flushTimers();
         expect(isDone, isTrue);

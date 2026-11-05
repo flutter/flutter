@@ -1434,7 +1434,8 @@ class IOSDevice extends Device {
     if (!_supportsDevicectl) {
       throwToolExit('Screen recording on physical iOS devices requires Xcode 27 or higher.');
     }
-    final Directory tempDirectory = toolContext.fs.systemTempDirectory.createTempSync('core_devices.');
+    final Directory tempDirectory =
+        toolContext.fs.systemTempDirectory.createTempSync('core_devices.');
     final File jsonOutputFile = tempDirectory.childFile('recording_results.json');
     final Process process;
     try {
