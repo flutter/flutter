@@ -71,6 +71,14 @@ void main() {
       processManager: processManager,
       fileSystem: fileSystem,
       logger: logger,
+      projectFactory: FlutterProjectFactory(
+        config: Config.test(directory: fileSystem.currentDirectory, logger: logger),
+        fileSystem: fileSystem,
+        logger: logger,
+        xcodeProjectInterpreter: FakeXcodeProjectInterpreter(
+          schemes: <String>['Runner', 'chocolate'],
+        ),
+      ),
       xcode: Xcode.test(
         toolContext: FakeToolContext.macosHost(
           fs: fileSystem,
@@ -468,7 +476,7 @@ void main() {
     ]);
   });
 
-  testUsingContext(
+  testWithoutContext(
     'KernelSnapshot sets flavor in dartDefines from Xcode build configuration if ios app',
     () async {
       fileSystem.file('.dart_tool/package_config.json')
@@ -510,16 +518,7 @@ void main() {
       ]);
 
       await const KernelSnapshot().build(
-        iosEnvironment.copyWith(
-            projectFactory: FlutterProjectFactory(
-              config: Config.test(directory: fileSystem.currentDirectory),
-              fileSystem: fileSystem,
-              logger: logger,
-              xcodeProjectInterpreter: FakeXcodeProjectInterpreter(
-                schemes: <String>['Runner', 'chocolate'],
-              ),
-            ),
-          )
+        iosEnvironment
           ..defines[kTargetPlatform] = TargetPlatform.ios.getName()
           ..defines[kBuildMode] = BuildMode.debug.cliName
           ..defines[kFlavor] = 'strawberry'
@@ -529,14 +528,9 @@ void main() {
 
       expect(processManager, hasNoRemainingExpectations);
     },
-    overrides: <Type, Generator>{
-      Config: () => Config.test(directory: fileSystem.currentDirectory),
-      XcodeProjectInterpreter: () =>
-          FakeXcodeProjectInterpreter(schemes: <String>['Runner', 'chocolate']),
-    },
   );
 
-  testUsingContext(
+  testWithoutContext(
     'KernelSnapshot sets flavor in dartDefines from Xcode build configuration if macos app',
     () async {
       fileSystem.file('.dart_tool/package_config.json')
@@ -577,16 +571,7 @@ void main() {
       ]);
 
       await const KernelSnapshot().build(
-        iosEnvironment.copyWith(
-            projectFactory: FlutterProjectFactory(
-              config: Config.test(directory: fileSystem.currentDirectory),
-              fileSystem: fileSystem,
-              logger: logger,
-              xcodeProjectInterpreter: FakeXcodeProjectInterpreter(
-                schemes: <String>['Runner', 'chocolate'],
-              ),
-            ),
-          )
+        iosEnvironment
           ..defines[kTargetPlatform] = TargetPlatform.darwin.getName()
           ..defines[kBuildMode] = BuildMode.debug.cliName
           ..defines[kFlavor] = 'strawberry'
@@ -595,11 +580,6 @@ void main() {
       );
 
       expect(processManager, hasNoRemainingExpectations);
-    },
-    overrides: <Type, Generator>{
-      Config: () => Config.test(directory: fileSystem.currentDirectory),
-      XcodeProjectInterpreter: () =>
-          FakeXcodeProjectInterpreter(schemes: <String>['Runner', 'chocolate']),
     },
   );
 

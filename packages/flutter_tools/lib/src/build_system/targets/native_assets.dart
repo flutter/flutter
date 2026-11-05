@@ -423,9 +423,7 @@ Future<FlutterNativeAssetsBuildRunner> createFlutterNativeAssetsBuildRunner(
     environment.processManager,
     runPackageName,
     pubspecPath,
-    androidSdk: (environment.defines[kTargetPlatform]?.startsWith('android') ?? false)
-        ? environment.androidSdk
-        : null,
+    androidSdkBuilder: () => environment.androidSdk,
     flutterRoot: environment.flutterRootDir.path,
     includeDevDependencies: includeDevDependencies,
     visualStudio: environment.visualStudio,

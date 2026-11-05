@@ -1036,6 +1036,7 @@ abstract class ResidentRunner extends ResidentHandlers {
     processManager: processManager,
     platform: platform,
     analytics: analytics,
+    androidSdkBuilder: null,
     projectFactory: toolContext.projectFactory,
     visualStudio: VisualStudio(toolContext: toolContext),
     xcode: xcode,

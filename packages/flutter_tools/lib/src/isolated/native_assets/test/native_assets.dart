@@ -109,6 +109,7 @@ Future<TestCompilerNativeAssetsBuildResult> testCompilerBuildNativeAssets(
     pubspecPath,
     flutterRoot: cache.flutterRoot,
     includeDevDependencies: true,
+    androidSdkBuilder: null,
     visualStudio: VisualStudio(toolContext: toolContext),
   );
 

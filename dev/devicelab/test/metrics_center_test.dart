@@ -39,6 +39,29 @@ void main() {
       expect(metricPoints[0].tags[kNameKey], 'test');
     });
 
+    test('merged score keys keep the original task name', () {
+      final results = <String, dynamic>{
+        'CommitBranch': 'master',
+        'CommitSha': 'abc',
+        'BuilderName': 'Mac_ios suite',
+        'ResultData': <String, dynamic>{
+          'a_perf/average_frame_build_time_millis': 1.5,
+          'b_perf/average_frame_build_time_millis': 2.5,
+        },
+        'BenchmarkScoreKeys': <String>[
+          'a_perf/average_frame_build_time_millis',
+          'b_perf/average_frame_build_time_millis',
+        ],
+      };
+      final List<MetricPoint> metricPoints = parse(results, <String, String>{}, 'suite');
+
+      expect(metricPoints.map((MetricPoint p) => p.tags[kNameKey]), <String>['a_perf', 'b_perf']);
+      expect(metricPoints.map((MetricPoint p) => p.tags[kSubResultKey]).toSet(), <String>{
+        'average_frame_build_time_millis',
+      });
+      expect(metricPoints.map((MetricPoint p) => p.value), <double>[1.5, 2.5]);
+    });
+
     test('without additional benchmark tags', () {
       final results = <String, dynamic>{
         'CommitBranch': 'master',

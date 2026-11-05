@@ -98,13 +98,12 @@ void main() {
   });
 
   group('doctor with overridden validators', () {
-    testUsingContext('validate non-verbose output format for run without issues', () async {
+    testWithoutContext('validate non-verbose output format for run without issues', () async {
       final doctor = Doctor(
         analytics: const NoOpAnalytics(),
         cache: Cache.test(processManager: fakeProcessManager),
         logger: logger,
         clock: const SystemClock(),
-        outputPreferences: OutputPreferences.test(),
         validatorsProviderBuilder: _fakeValidatorsProviderBuilder,
       );
       expect(await doctor.diagnose(verbose: false), isTrue);
@@ -149,7 +148,7 @@ void main() {
           '[✓] Another Passing Validator (with statusInfo)\n'
           '[☠] Crashing validator (the doctor check crashed)\n'
           '    ✗ Due to an error, the doctor check did not complete. If the error message below is not helpful, '
-          'please let us know about this issue at https://github.com/flutter/flutter/issues.\n'
+          'please let us know about this issue at https://github.com/flutter/flutter/issues\n'
           '    ✗ Bad state: fatal error\n'
           '[✓] Validators are fun (with statusInfo)\n'
           '[✓] Four score and seven validators ago (with statusInfo)\n'
@@ -199,7 +198,7 @@ void main() {
           '[✓] Another Passing Validator (with statusInfo)\n'
           '[☠] Async crashing validator (the doctor check crashed)\n'
           '    ✗ Due to an error, the doctor check did not complete. If the error message below is not helpful, '
-          'please let us know about this issue at https://github.com/flutter/flutter/issues.\n'
+          'please let us know about this issue at https://github.com/flutter/flutter/issues\n'
           '    ✗ Bad state: fatal error\n'
           '[✓] Validators are fun (with statusInfo)\n'
           '[✓] Four score and seven validators ago (with statusInfo)\n'
@@ -337,7 +336,7 @@ void main() {
       logger = BufferLogger.test(verbose: true);
     });
 
-    testUsingContext('PII separated, events only sent once', () async {
+    testWithoutContext('PII separated, events only sent once', () async {
       final fakeDate = DateTime(1995, 3, 3);
       final systemClock = SystemClock.fixed(fakeDate);
 
@@ -371,9 +370,9 @@ void main() {
           doctorInvocationId: systemClock.now().millisecondsSinceEpoch,
         ),
       ]);
-    }, overrides: <Type, Generator>{Analytics: () => analytics});
+    });
 
-    testUsingContext('without PII has same text and PII-stripped text', () async {
+    testWithoutContext('without PII has same text and PII-stripped text', () async {
       final Doctor fakeDoctor = FakePassingDoctor(logger);
       final doctorText = DoctorText(logger, doctor: fakeDoctor);
       final String piiText = await doctorText.text;
@@ -636,18 +635,17 @@ void main() {
       );
     });
 
-    testUsingContext('ensure fake is being used and initialized', () {
+    testWithoutContext('ensure fake is being used and initialized', () {
       expect(fakeAnalytics.sentEvents.length, 0);
       expect(fakeAnalytics.okToSend, true);
-    }, overrides: <Type, Generator>{Analytics: () => fakeAnalytics});
+    });
 
-    testUsingContext('contains installed', () async {
+    testWithoutContext('contains installed', () async {
       final doctor = Doctor(
         cache: Cache.test(processManager: fakeProcessManager),
         logger: logger,
         clock: fakeSystemClock,
         analytics: fakeAnalytics,
-        outputPreferences: OutputPreferences.test(),
         validatorsProviderBuilder: _fakeValidatorsProviderBuilder,
       );
       await doctor.diagnose(verbose: false);
@@ -665,7 +663,7 @@ void main() {
       expect(fakeAnalytics.sentEvents, contains(eventToFind));
     });
 
-    testUsingContext('contains installed and partial', () async {
+    testWithoutContext('contains installed and partial', () async {
       await FakePassingDoctor(
         logger,
         analytics: fakeAnalytics,
@@ -704,9 +702,9 @@ void main() {
           ),
         ]),
       );
-    }, overrides: <Type, Generator>{Analytics: () => fakeAnalytics});
+    });
 
-    testUsingContext('contains installed, missing and partial', () async {
+    testWithoutContext('contains installed, missing and partial', () async {
       await FakeDoctor(
         logger,
         analytics: fakeAnalytics,
@@ -750,9 +748,9 @@ void main() {
           ),
         ]),
       );
-    }, overrides: <Type, Generator>{Analytics: () => fakeAnalytics});
+    });
 
-    testUsingContext('events for grouped validators are properly decomposed', () async {
+    testWithoutContext('events for grouped validators are properly decomposed', () async {
       await FakeGroupedDoctor(
         logger,
         analytics: fakeAnalytics,
@@ -789,9 +787,9 @@ void main() {
           ),
         ]),
       );
-    }, overrides: <Type, Generator>{Analytics: () => fakeAnalytics});
+    });
 
-    testUsingContext('grouped validator subresult and subvalidators different lengths', () async {
+    testWithoutContext('grouped validator subresult and subvalidators different lengths', () async {
       final fakeDoctor = FakeGroupedDoctorWithCrash(
         logger,
         analytics: fakeAnalytics,
@@ -810,15 +808,15 @@ void main() {
       fakeAnalytics.send(testEvent);
       expect(fakeAnalytics.sentEvents, hasLength(1));
       expect(fakeAnalytics.sentEvents, contains(testEvent));
-    }, overrides: <Type, Generator>{Analytics: () => fakeAnalytics});
+    });
 
-    testUsingContext('sending events can be skipped', () async {
+    testWithoutContext('sending events can be skipped', () async {
       await FakePassingDoctor(
         logger,
         analytics: fakeAnalytics,
       ).diagnose(verbose: false, sendEvent: false);
       expect(fakeAnalytics.sentEvents, isEmpty);
-    }, overrides: <Type, Generator>{Analytics: () => fakeAnalytics});
+    });
   });
 
   group('DoctorCommand', () {
@@ -1068,7 +1066,6 @@ class FakeDoctor extends Doctor {
   }) : super(
          cache: Cache.test(processManager: FakeProcessManager.any()),
          logger: logger,
-         outputPreferences: OutputPreferences.test(),
          validatorsProviderBuilder: _fakeValidatorsProviderBuilder,
        );
 
@@ -1091,7 +1088,6 @@ class FakePassingDoctor extends Doctor {
   }) : super(
          cache: Cache.test(processManager: FakeProcessManager.any()),
          logger: logger,
-         outputPreferences: OutputPreferences.test(),
          validatorsProviderBuilder: _fakeValidatorsProviderBuilder,
        );
 
@@ -1114,7 +1110,6 @@ class FakeSinglePassingDoctor extends Doctor {
   }) : super(
          cache: Cache.test(processManager: FakeProcessManager.any()),
          logger: logger,
-         outputPreferences: OutputPreferences.test(),
          validatorsProviderBuilder: _fakeValidatorsProviderBuilder,
        );
 
@@ -1131,7 +1126,6 @@ class FakeQuietDoctor extends Doctor {
   }) : super(
          cache: Cache.test(processManager: FakeProcessManager.any()),
          logger: logger,
-         outputPreferences: OutputPreferences.test(),
          validatorsProviderBuilder: _fakeValidatorsProviderBuilder,
        );
 
@@ -1153,7 +1147,6 @@ class FakePiiDoctor extends Doctor {
   }) : super(
          cache: Cache.test(processManager: FakeProcessManager.any()),
          logger: logger,
-         outputPreferences: OutputPreferences.test(),
          validatorsProviderBuilder: _fakeValidatorsProviderBuilder,
        );
 
@@ -1170,7 +1163,6 @@ class FakeCrashingDoctor extends Doctor {
   }) : super(
          cache: Cache.test(processManager: FakeProcessManager.any()),
          logger: logger,
-         outputPreferences: OutputPreferences.test(),
          validatorsProviderBuilder: _fakeValidatorsProviderBuilder,
        );
 
@@ -1193,7 +1185,6 @@ class FakeAsyncStuckDoctor extends Doctor {
   }) : super(
          cache: Cache.test(processManager: FakeProcessManager.any()),
          logger: logger,
-         outputPreferences: OutputPreferences.test(),
          validatorsProviderBuilder: _fakeValidatorsProviderBuilder,
        );
 
@@ -1217,7 +1208,6 @@ class FakeAsyncCrashingDoctor extends Doctor {
   }) : super(
          cache: Cache.test(processManager: FakeProcessManager.any()),
          logger: logger,
-         outputPreferences: OutputPreferences.test(),
          validatorsProviderBuilder: _fakeValidatorsProviderBuilder,
        );
 
@@ -1302,7 +1292,6 @@ class FakeGroupedDoctor extends Doctor {
   }) : super(
          cache: Cache.test(processManager: FakeProcessManager.any()),
          logger: logger,
-         outputPreferences: OutputPreferences.test(),
          validatorsProviderBuilder: _fakeValidatorsProviderBuilder,
        );
 
@@ -1328,7 +1317,6 @@ class FakeGroupedDoctorWithCrash extends Doctor {
   }) : super(
          cache: Cache.test(processManager: FakeProcessManager.any()),
          logger: logger,
-         outputPreferences: OutputPreferences.test(),
          validatorsProviderBuilder: _fakeValidatorsProviderBuilder,
        );
 
@@ -1378,7 +1366,6 @@ class FakeGroupedDoctorWithStatus extends Doctor {
   }) : super(
          cache: Cache.test(processManager: FakeProcessManager.any()),
          logger: logger,
-         outputPreferences: OutputPreferences.test(),
          validatorsProviderBuilder: _fakeValidatorsProviderBuilder,
        );
 
@@ -1406,7 +1393,6 @@ class FakeSmallGroupDoctor extends Doctor {
        super(
          cache: Cache.test(processManager: FakeProcessManager.any()),
          logger: logger,
-         outputPreferences: OutputPreferences.test(),
          validatorsProviderBuilder: _fakeValidatorsProviderBuilder,
        );
 

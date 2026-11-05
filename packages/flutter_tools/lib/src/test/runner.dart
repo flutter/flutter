@@ -149,7 +149,7 @@ class TestExecutionSpecification {
 /// Launching the `flutter_tester` process from the test runner.
 interface class FlutterTestRunner {
   const FlutterTestRunner({
-    this._analytics = const NoOpAnalytics(),
+    required this._analytics,
     required this._templateRenderer,
     required this._toolContext,
   });

@@ -7,7 +7,6 @@ import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/config.dart';
@@ -95,7 +94,6 @@ void main() {
           cache: cache,
           clock: const SystemClock(),
           logger: logger,
-          outputPreferences: OutputPreferences.test(),
           validatorsProviderBuilder: ({ExtensionManager? extensionManager}) =>
               DoctorValidatorsProvider.create(
                 androidContext: FakeAndroidContext(),
@@ -176,7 +174,6 @@ void main() {
           cache: cache,
           clock: const SystemClock(),
           logger: logger,
-          outputPreferences: OutputPreferences.test(),
           validatorsProviderBuilder: ({ExtensionManager? extensionManager}) =>
               DoctorValidatorsProvider.create(
                 androidContext: FakeAndroidContext(),

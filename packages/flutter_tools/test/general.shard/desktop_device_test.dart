@@ -454,7 +454,7 @@ void main() {
       expect(receivedLines, <String>['first line', 'second line']);
 
       await subscription.cancel();
-      logReader.dispose();
+      await logReader.dispose();
     });
 
     testWithoutContext('dispose does not close logLines', () async {
@@ -464,7 +464,7 @@ void main() {
       final receivedLines = <String>[];
       final StreamSubscription<String> subscription = logReader.logLines.listen(receivedLines.add);
 
-      logReader.dispose();
+      await logReader.dispose();
 
       final process = FakeProcess(
         stdout: Stream<List<int>>.fromIterable(<List<int>>[utf8.encode('still here\n')]),

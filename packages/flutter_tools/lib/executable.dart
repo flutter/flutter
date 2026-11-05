@@ -14,8 +14,10 @@ import 'src/base/file_system.dart';
 import 'src/base/io.dart';
 import 'src/base/logger.dart';
 import 'src/base/platform.dart';
+import 'src/base/process.dart';
 import 'src/base/signals.dart';
 import 'src/base/terminal.dart';
+import 'src/base/time.dart';
 import 'src/build_system/targets/hook_runner_native.dart' show FlutterHookRunnerNative;
 import 'src/cache.dart';
 import 'src/commands/analyze.dart';
@@ -62,6 +64,7 @@ import 'src/isolated/mustache_template.dart';
 import 'src/isolated/native_assets/test/native_assets.dart';
 import 'src/isolated/resident_web_runner.dart';
 import 'src/native_assets.dart';
+import 'src/pre_run_validator.dart';
 import 'src/project_validator.dart';
 import 'src/runner/flutter_command.dart';
 import 'src/runner/flutter_command_runner.dart';
@@ -96,6 +99,36 @@ Future<void> main(List<String> args) async {
   final daemon = commandName == 'daemon';
   final widgetPreviews = commandName == WidgetPreviewCommand.kWidgetPreview;
   final bool runMachine = args.contains('--machine');
+  const Platform platform = LocalPlatform();
+  final stdio = Stdio();
+  final ShutdownHooks shutdownHooks = LocalSignals.instance.shutdownHooks;
+  final terminal = AnsiTerminal(
+    stdio: stdio,
+    platform: platform,
+    now: const SystemClock().now(),
+    // So that we don't animate anything before calling applyFeatureFlags, default
+    // the animations to disabled in real apps.
+    defaultCliAnimationEnabled: false,
+    shutdownHooks: shutdownHooks,
+  );
+  final outputPreferences = OutputPreferences(
+    wrapText: stdio.hasTerminal,
+    showColor: platform.stdoutSupportsAnsi,
+    stdio: stdio,
+  );
+  final Logger logger =
+      LoggerFactory(
+        outputPreferences: outputPreferences,
+        terminal: terminal,
+        stdio: stdio,
+      ).createLogger(
+        daemon: daemon,
+        machine: runMachine,
+        verbose: verbose && !muteCommandLogging,
+        prefixedErrors: prefixedErrors,
+        windows: platform.isWindows,
+        widgetPreviews: widgetPreviews,
+      );
 
   await runner.run(
     args,
@@ -122,36 +155,20 @@ Future<void> main(List<String> args) async {
     },
     buildTargets: const BuildTargetsImpl(),
     extensionEntryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
-    loggerBuilder:
-        ({
-          required OutputPreferences outputPreferences,
-          required Platform platform,
-          required Stdio stdio,
-          required AnsiTerminal terminal,
-        }) {
-          final loggerFactory = LoggerFactory(
-            outputPreferences: outputPreferences,
-            terminal: terminal,
-            stdio: stdio,
-          );
-          return loggerFactory.createLogger(
-            daemon: daemon,
-            machine: runMachine,
-            verbose: verbose && !muteCommandLogging,
-            prefixedErrors: prefixedErrors,
-            windows: platform.isWindows,
-            widgetPreviews: widgetPreviews,
-          );
-        },
     muteCommandLogging: muteCommandLogging,
     nativeAssetsBuilder: const TestCompilerNativeAssetsBuilderImpl(),
     overrides: <Type, Generator>{
+      AnsiTerminal: () => terminal,
       FlutterHookRunner: () => FlutterHookRunnerNative(),
+      Logger: () => logger,
+      OutputPreferences: () => outputPreferences,
+      Stdio: () => stdio,
       // The web runner is not supported in google3 because it depends
       // on dwds.
       WebRunnerFactory: () => DwdsWebRunnerFactory(),
     },
-    shutdownHooks: LocalSignals.instance.shutdownHooks,
+    preRunValidatorBuilder: PreRunValidator.new,
+    shutdownHooks: shutdownHooks,
     templateRenderer: const MustacheTemplateRenderer(),
     verbose: verbose,
     verboseHelp: verboseHelp,
@@ -180,7 +197,7 @@ String? findCommandName(List<String> args, {ToolContext? toolContext}) {
 
 class _FallbackToolContext implements ToolContext {
   @override
-  final OutputPreferences outputPreferences = OutputPreferences.test();
+  final OutputPreferences outputPreferences = OutputPreferences();
 
   @override
   Object? noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
@@ -222,6 +239,7 @@ List<FlutterCommand> generateCommands({
     AssembleCommand(
       androidContext: toolDependencies.androidContext,
       buildSystem: toolDependencies.buildSystem,
+      extensionBuildManager: toolDependencies.extensionBuildManager,
       featureFlags: featureFlags,
       toolContext: toolContext,
       verboseHelp: verboseHelp,
@@ -340,7 +358,6 @@ List<FlutterCommand> generateCommands({
     ScreenshotCommand(toolContext: toolContext),
     ShellCompletionCommand(toolContext: toolContext),
     TestCommand(
-      analytics: toolDependencies.analytics,
       templateRenderer: const MustacheTemplateRenderer(),
       toolContext: toolContext,
       verboseHelp: verboseHelp,

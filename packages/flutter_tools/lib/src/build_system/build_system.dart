@@ -349,13 +349,12 @@ class Environment {
     required ProcessManager processManager,
     required Platform platform,
     required Analytics analytics,
+    required AndroidSdk? Function()? androidSdkBuilder,
     required FlutterProjectFactory projectFactory,
-    AndroidSdk? androidSdk,
-    AndroidSdk? Function()? androidSdkBuilder,
-    VisualStudio? visualStudio,
-    Xcode? xcode,
-    String? engineVersion,
+    required VisualStudio? visualStudio,
+    required Xcode? xcode,
     required bool generateDartPluginRegistry,
+    String? engineVersion,
     Directory? buildDir,
     Map<String, String> defines = const <String, String>{},
     Map<String, String> inputs = const <String, String>{},
@@ -397,7 +396,6 @@ class Environment {
       platform: platform,
       analytics: analytics,
       projectFactory: projectFactory,
-      androidSdk: androidSdk,
       androidSdkBuilder: androidSdkBuilder,
       visualStudio: visualStudio,
       xcode: xcode,
@@ -458,7 +456,7 @@ class Environment {
             logger: logger,
             xcode: xcode,
           ),
-      androidSdk: androidSdk,
+      androidSdkBuilder: androidSdk != null ? () => androidSdk : null,
       visualStudio: visualStudio,
       xcode: xcode,
       engineVersion: engineVersion,
@@ -481,23 +479,16 @@ class Environment {
     required this.fileSystem,
     required this.artifacts,
     required this.analytics,
+    required this._androidSdkBuilder,
     required this.projectFactory,
-    this._androidSdk,
-    this._androidSdkBuilder,
-    this.visualStudio,
-    this.xcode,
-    this.engineVersion,
+    required this.visualStudio,
+    required this.xcode,
     required this.inputs,
     required this.generateDartPluginRegistry,
+    this.engineVersion,
   });
 
-  Environment copyWith({
-    AndroidSdk? androidSdk,
-    Directory? outputDir,
-    FlutterProjectFactory? projectFactory,
-    VisualStudio? visualStudio,
-    Xcode? xcode,
-  }) {
+  Environment copyWith({Directory? outputDir}) {
     return Environment._(
       outputDir: outputDir ?? this.outputDir,
       projectDir: projectDir,
@@ -513,11 +504,10 @@ class Environment {
       processManager: processManager,
       platform: platform,
       analytics: analytics,
-      projectFactory: projectFactory ?? this.projectFactory,
-      androidSdk: androidSdk ?? _androidSdk,
+      projectFactory: projectFactory,
       androidSdkBuilder: _androidSdkBuilder,
-      visualStudio: visualStudio ?? this.visualStudio,
-      xcode: xcode ?? this.xcode,
+      visualStudio: visualStudio,
+      xcode: xcode,
       engineVersion: engineVersion,
       inputs: inputs,
       generateDartPluginRegistry: generateDartPluginRegistry,
@@ -612,14 +602,21 @@ class Environment {
 
   final Analytics analytics;
 
+  /// The factory used by build targets to instantiate [FlutterProject]s.
   final FlutterProjectFactory projectFactory;
 
-  final AndroidSdk? _androidSdk;
   final AndroidSdk? Function()? _androidSdkBuilder;
-  late final AndroidSdk? androidSdk = _androidSdk ?? _androidSdkBuilder?.call();
 
+  /// The [AndroidSdk] used by Android build targets, lazily resolved on first
+  /// access.
+  late final AndroidSdk? androidSdk = _androidSdkBuilder?.call();
+
+  /// The [VisualStudio] instance used by Windows build targets, or `null` for
+  /// non-Windows builds that do not run Windows targets.
   final VisualStudio? visualStudio;
 
+  /// The [Xcode] instance used by Darwin build targets, or `null` for
+  /// non-Darwin builds that do not run Darwin targets.
   final Xcode? xcode;
 
   /// The version of the current engine, or `null` if built with a local engine.

@@ -259,6 +259,8 @@ FlutterProjectFactory get projectFactory {
         fileSystem: fs,
         logger: logger,
         plistParser: plistParser,
+        // Lazy builders avoid an AppContext dependency cycle during early startup
+        // (e.g. Analytics -> Cache -> Xcode -> XcodeProjectInterpreter).
         xcodeBuilder: () => xcode,
         xcodeProjectInterpreterBuilder: () => xcodeProjectInterpreter,
       );

@@ -68,6 +68,14 @@ void main() {
       fileSystem: fileSystem,
       engineVersion: '2',
       analytics: fakeAnalytics,
+      projectFactory: FlutterProjectFactory(
+        config: Config.test(directory: fileSystem.currentDirectory, logger: logger),
+        fileSystem: fileSystem,
+        logger: logger,
+        xcodeProjectInterpreter: FakeXcodeProjectInterpreter(
+          schemes: <String>['Runner', 'strawberry'],
+        ),
+      ),
       xcode: Xcode.test(
         toolContext: FakeToolContext(
           fs: fileSystem,
@@ -483,18 +491,7 @@ void main() {
         ..writeAsStringSync('testing');
       environment.buildDir.childFile('native_assets.json').createSync();
 
-      await const DebugMacOSBundleFlutterAssets().build(
-        environment.copyWith(
-          projectFactory: FlutterProjectFactory(
-            config: Config.test(directory: fileSystem.currentDirectory, logger: logger),
-            fileSystem: fileSystem,
-            logger: logger,
-            xcodeProjectInterpreter: FakeXcodeProjectInterpreter(
-              schemes: <String>['Runner', 'strawberry'],
-            ),
-          ),
-        ),
-      );
+      await const DebugMacOSBundleFlutterAssets().build(environment);
 
       expect(
         fileSystem
@@ -578,18 +575,7 @@ void main() {
       fileSystem.file('assets/strawberry/ice-cream.png').createSync(recursive: true);
       writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'example');
 
-      await const DebugMacOSBundleFlutterAssets().build(
-        environment.copyWith(
-          projectFactory: FlutterProjectFactory(
-            config: Config.test(directory: fileSystem.currentDirectory, logger: logger),
-            fileSystem: fileSystem,
-            logger: logger,
-            xcodeProjectInterpreter: FakeXcodeProjectInterpreter(
-              schemes: <String>['Runner', 'strawberry'],
-            ),
-          ),
-        ),
-      );
+      await const DebugMacOSBundleFlutterAssets().build(environment);
       final Directory frameworkDirectory = environment.outputDir.childDirectory(
         '/App.framework/Versions/A/Resources/',
       );
@@ -611,8 +597,6 @@ void main() {
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
-      XcodeProjectInterpreter: () =>
-          FakeXcodeProjectInterpreter(schemes: <String>['Runner', 'strawberry']),
     },
   );
 
