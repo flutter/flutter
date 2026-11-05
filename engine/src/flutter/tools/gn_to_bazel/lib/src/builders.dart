@@ -1064,7 +1064,14 @@ List<String> bazelVariantErrors(Map<String, BuilderConfig> configs, List<Builder
 /// The builds of the builder files that carry `--bazel` themselves (a Linux
 /// builder that builds with Bazel on the bot, build/bazel/ci.md) checked the
 /// way a variant's are: each must have a Bazel configuration and an install,
-/// or `tools/gn --bazel` fails on the bot. Returns the errors, one line each.
+/// or `tools/gn --bazel` fails on the bot, and no step of it may run a test
+/// executable straight from the build directory (`out/<dir>/<name>`): the
+/// install lays no test, `bazel test` runs them, and the recipe runs such a
+/// step's path as it is, with nothing of the Bazel build in between (the
+/// Mac licenses drone, 11-04: "licenses_cpp_testrunner not found"); the
+/// step is `testing/run_tests.py --variant <dir> --type binaries`, which
+/// runs the same executable as its Bazel test. Returns the errors, one line
+/// each.
 List<String> bazelBuildErrors(List<BuilderBuild> builds) {
   final errors = <String>[];
   for (final build in builds) {
@@ -1080,6 +1087,14 @@ List<String> bazelBuildErrors(List<BuilderBuild> builds) {
       errors.add(
         "${build.file}'s ${build.name} carries --bazel but builds ninja's default target, "
         'which has no install',
+      );
+    }
+    if (build.binaryTests.isNotEmpty) {
+      errors.add(
+        "${build.file}'s ${build.name} carries --bazel but a step of it runs "
+        '${build.binaryTests.join(', ')} from the build directory, which the install does not '
+        'lay (`bazel test` runs the tests): run the step as `flutter/testing/run_tests.py '
+        '--variant ${build.buildDirectory ?? build.name} --type binaries`',
       );
     }
   }
