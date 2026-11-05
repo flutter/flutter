@@ -604,6 +604,7 @@ enum CpuArch {
       .darwin_x64 || .linux_x64 || .windows_x64 => .x64,
       .darwin_arm64 || .linux_arm64 || .windows_arm64 => .arm64,
       .linux_riscv64 => .riscv64,
+      _ => CpuArch.fromName(hostPlatform.platformName),
     };
   }
 

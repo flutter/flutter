@@ -777,7 +777,7 @@ void main() {
           await _expectImageSize(resizedImage, const Size(25, 25));
         });
       });
-    }, skip: isBrowser); // https://github.com/flutter/flutter/issues/73120);
+    });
 
     test('policy=cover asserts when width or height is null', () {
       final rawImage = MemoryImage(Uint8List.fromList(kBlueSquarePng));
