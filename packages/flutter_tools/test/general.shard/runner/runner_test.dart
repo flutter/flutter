@@ -24,10 +24,14 @@ import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/devices.dart';
+import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/context/tool_dependencies.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/flutter_device_manager.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/ios/simulators.dart';
+import 'package:flutter_tools/src/macos/cocoapods_validator.dart';
+import 'package:flutter_tools/src/macos/xcdevice.dart';
 import 'package:flutter_tools/src/reporting/crash_reporting.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:test/fake.dart';
@@ -427,9 +431,8 @@ void main() {
       () async {
         // Since crash reporting calls the doctor, which checks for the devtools
         // version file in the cache, write a version file to the memory fs.
-        Cache.flutterRoot = '/path/to/flutter';
-        final Directory devtoolsDir = globals.fs.directory(
-          '${Cache.flutterRoot}/bin/cache/dart-sdk/bin/resources/devtools',
+        final Directory devtoolsDir = fileSystem.directory(
+          '/path/to/flutter/bin/cache/dart-sdk/bin/resources/devtools',
         )..createSync(recursive: true);
         devtoolsDir.childFile('version.json').writeAsStringSync('{"version": "1.2.3"}');
 
@@ -488,6 +491,12 @@ void main() {
         );
       },
       overrides: <Type, Generator>{
+        Cache: () => Cache.test(
+          rootOverride: fileSystem.directory('/path/to/flutter'),
+          flutterRoot: '/path/to/flutter',
+          fileSystem: fileSystem,
+          processManager: FakeProcessManager.any(),
+        ),
         Platform: () => FakePlatform(
           environment: <String, String>{'FLUTTER_ANALYTICS_LOG_FILE': 'test', 'FLUTTER_ROOT': '/'},
         ),
@@ -536,9 +545,8 @@ void main() {
         () async {
           // Since crash reporting calls the doctor, which checks for the devtools
           // version file in the cache, write a version file to the memory fs.
-          Cache.flutterRoot = '/path/to/flutter';
-          final Directory devtoolsDir = globals.fs.directory(
-            '${Cache.flutterRoot}/bin/cache/dart-sdk/bin/resources/devtools',
+          final Directory devtoolsDir = fileSystem.directory(
+            '/path/to/flutter/bin/cache/dart-sdk/bin/resources/devtools',
           )..createSync(recursive: true);
           devtoolsDir.childFile('version.json').writeAsStringSync('{"version": "1.2.3"}');
 
@@ -596,6 +604,12 @@ void main() {
           expect(await sentDetails.doctorText.text, contains('[!] Flutter'));
         },
         overrides: <Type, Generator>{
+          Cache: () => Cache.test(
+            rootOverride: fileSystem.directory('/path/to/flutter'),
+            flutterRoot: '/path/to/flutter',
+            fileSystem: fileSystem,
+            processManager: FakeProcessManager.any(),
+          ),
           Platform: () => FakePlatform(
             environment: <String, String>{
               'FLUTTER_ANALYTICS_LOG_FILE': 'test',
@@ -863,6 +877,74 @@ void main() {
         },
       );
     });
+
+    group('lazy Apple dependency evaluation', () {
+      var cocoapodsValidatorEvaluations = 0;
+      var iosSimulatorUtilsEvaluations = 0;
+      var xcdeviceEvaluations = 0;
+
+      setUp(() {
+        cocoapodsValidatorEvaluations = 0;
+        iosSimulatorUtilsEvaluations = 0;
+        xcdeviceEvaluations = 0;
+      });
+
+      testUsingContext(
+        'does not eagerly evaluate CocoaPodsValidator, IOSSimulatorUtils, or XCDevice during bootstrap or generateCommands',
+        () async {
+          late final ToolDependencies capturedDependencies;
+          final command = _DeviceManagerRecordingFlutterCommand();
+          await runner.run(
+            <String>[command.name],
+            (ToolDependencies toolDependencies) {
+              capturedDependencies = toolDependencies;
+              return <FlutterCommand>[
+                ...generateCommands(
+                  toolDependencies: toolDependencies,
+                  verbose: false,
+                  verboseHelp: false,
+                ),
+                command,
+              ];
+            },
+            // This flutterVersion disables crash reporting.
+            flutterVersion: '[user-branch]/',
+            shutdownHooks: ShutdownHooks(),
+          );
+
+          expect(cocoapodsValidatorEvaluations, 0);
+          expect(iosSimulatorUtilsEvaluations, 0);
+          expect(xcdeviceEvaluations, 0);
+
+          expect(
+            capturedDependencies.appleContext.cocoapodsValidator,
+            isA<FakeCocoaPodsValidator>(),
+          );
+          expect(cocoapodsValidatorEvaluations, 1);
+          expect(capturedDependencies.appleContext.iosSimulatorUtils, isA<FakeIOSSimulatorUtils>());
+          expect(iosSimulatorUtilsEvaluations, 1);
+          expect(capturedDependencies.appleContext.xcdevice, isA<FakeXCDevice>());
+          expect(xcdeviceEvaluations, 1);
+        },
+        overrides: <Type, Generator>{
+          CocoaPodsValidator: () {
+            cocoapodsValidatorEvaluations++;
+            return FakeCocoaPodsValidator();
+          },
+          DeviceManager: () => null,
+          FileSystem: () => MemoryFileSystem.test(),
+          IOSSimulatorUtils: () {
+            iosSimulatorUtilsEvaluations++;
+            return FakeIOSSimulatorUtils();
+          },
+          ProcessManager: () => FakeProcessManager.any(),
+          XCDevice: () {
+            xcdeviceEvaluations++;
+            return FakeXCDevice();
+          },
+        },
+      );
+    });
   });
 
   group('unified_analytics', () {
@@ -1076,6 +1158,9 @@ void main() {
 }
 
 class ArtifactsRecordingFlutterCommand extends FlutterCommand {
+  ArtifactsRecordingFlutterCommand({ToolContext? toolContext})
+    : super(toolContext: toolContext ?? const DelegatingToolContext());
+
   Artifacts? artifacts;
   bool ran = false;
 
@@ -1088,12 +1173,15 @@ class ArtifactsRecordingFlutterCommand extends FlutterCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     ran = true;
-    artifacts = toolContext?.artifacts;
+    artifacts = toolContext.artifacts;
     return FlutterCommandResult.success();
   }
 }
 
 class _DeviceManagerRecordingFlutterCommand extends FlutterCommand {
+  _DeviceManagerRecordingFlutterCommand({ToolContext? toolContext})
+    : super(toolContext: toolContext ?? const DelegatingToolContext());
+
   DeviceManager? deviceManager;
 
   @override
@@ -1104,13 +1192,14 @@ class _DeviceManagerRecordingFlutterCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    deviceManager = globals.deviceManager;
+    deviceManager = super.runner?.deviceManager;
     return FlutterCommandResult.success();
   }
 }
 
 class CrashingFlutterCommand extends FlutterCommand {
-  CrashingFlutterCommand({this._asyncCrash = false, this._completer});
+  CrashingFlutterCommand({this._asyncCrash = false, this._completer, ToolContext? toolContext})
+    : super(toolContext: toolContext ?? const DelegatingToolContext());
 
   final bool _asyncCrash;
   final Completer<void>? _completer;
@@ -1142,6 +1231,9 @@ class CrashingFlutterCommand extends FlutterCommand {
 }
 
 class MultipleExceptionCrashingFlutterCommand extends FlutterCommand {
+  MultipleExceptionCrashingFlutterCommand({ToolContext? toolContext})
+    : super(toolContext: toolContext ?? const DelegatingToolContext());
+
   final _completer = Completer<void>();
 
   @override
@@ -1170,6 +1262,9 @@ class MultipleExceptionCrashingFlutterCommand extends FlutterCommand {
 }
 
 class _GitNotFoundFlutterCommand extends FlutterCommand {
+  _GitNotFoundFlutterCommand({ToolContext? toolContext})
+    : super(toolContext: toolContext ?? const DelegatingToolContext());
+
   @override
   String get description => '';
 
@@ -1237,6 +1332,12 @@ class _ErrorOnCanRunFakeProcessManager extends Fake implements FakeProcessManage
 }
 
 class FakeCache extends Fake implements Cache {
+  @override
+  String get flutterRoot => '/path/to/sdk/flutter';
+
+  @override
+  set flutterRoot(String? value) {}
+
   @override
   Future<void> lock() async {}
 

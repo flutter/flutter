@@ -149,6 +149,25 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   int _counter = 0;
 
+  late final List<AnimationController> _controllers;
+
+  @override
+  void initState() {
+    super.initState();
+    _controllers = <AnimationController>[
+      for (int i = 0; i < images; i++)
+        AnimationController(duration: const Duration(milliseconds: 3600), vsync: this)..repeat(),
+    ];
+  }
+
+  @override
+  void dispose() {
+    for (final AnimationController controller in _controllers) {
+      controller.dispose();
+    }
+    super.dispose();
+  }
+
   void _incrementCounter() {
     setState(() {
       _counter++;
@@ -169,10 +188,6 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    final controllers = <AnimationController>[
-      for (int i = 0; i < images; i++)
-        AnimationController(duration: const Duration(milliseconds: 3600), vsync: this)..repeat(),
-    ];
     final completers = <Completer<bool>>[for (int i = 0; i < images; i++) Completer<bool>()];
     final List<Future<bool>> futures = completers
         .map((Completer<bool> completer) => completer.future)
@@ -189,7 +204,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Row(children: createImageList(images, completers, controllers)),
+            Row(children: createImageList(images, completers, _controllers)),
             const Text('You have pushed the button this many times:'),
             Text('$_counter', style: Theme.of(context).textTheme.headlineMedium),
           ],

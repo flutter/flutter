@@ -23,7 +23,6 @@ import 'package:path/path.dart' as path;
 
 import '../browser.dart';
 import '../run_command.dart';
-import '../service_worker_test.dart';
 import '../utils.dart';
 
 typedef ShardRunner = Future<void> Function();
@@ -163,6 +162,17 @@ class WebTestsSuite {
       () => _runWebE2eTest('deferred_loading_integration', buildMode: 'release', useWasm: false),
       () => _runWebE2eTest('deferred_loading_integration', buildMode: 'release', useWasm: true),
 
+      () => _runWebE2eTest(
+        'webdriver_pointer_actions_integration',
+        buildMode: 'profile',
+        useWasm: false,
+      ),
+      () => _runWebE2eTest(
+        'webdriver_pointer_actions_integration',
+        buildMode: 'profile',
+        useWasm: true,
+      ),
+
       () => _runWebTreeshakeTest(),
 
       () => _runFlutterDriverWebTest(
@@ -174,8 +184,6 @@ class WebTestsSuite {
       () => _runGalleryE2eWebTest('debug'),
       () => _runGalleryE2eWebTest('profile'),
       () => _runGalleryE2eWebTest('release'),
-      // TODO(mdebbar): This test is flaky: https://github.com/flutter/flutter/issues/178032
-      // () => runServiceWorkerCleanupTest(headless: true),
       () => _runWebStackTraceTest('profile', 'lib/stack_trace.dart'),
       () => _runWebStackTraceTest('release', 'lib/stack_trace.dart'),
       () => _runWebStackTraceTest('profile', 'lib/framework_stack_trace.dart'),
@@ -335,7 +343,7 @@ class WebTestsSuite {
     final String javaScript = mainDartJs.readAsStringSync();
 
     // Check that we're not looking at minified JS. Otherwise this test would result in false positive.
-    expect(javaScript.contains('RootElement'), true);
+    _expect(javaScript.contains('RootElement'), true);
 
     const word = 'debugFillProperties';
     var count = 0;
@@ -352,11 +360,11 @@ class WebTestsSuite {
 
     // The following are classes from `timeline.dart` that should be treeshaken
     // off unless the app (typically a benchmark) uses methods that need them.
-    expect(javaScript.contains('AggregatedTimedBlock'), false);
-    expect(javaScript.contains('AggregatedTimings'), false);
-    expect(javaScript.contains('_BlockBuffer'), false);
-    expect(javaScript.contains('_StringListChain'), false);
-    expect(javaScript.contains('_Float64ListChain'), false);
+    _expect(javaScript.contains('AggregatedTimedBlock'), false);
+    _expect(javaScript.contains('AggregatedTimings'), false);
+    _expect(javaScript.contains('_BlockBuffer'), false);
+    _expect(javaScript.contains('_StringListChain'), false);
+    _expect(javaScript.contains('_Float64ListChain'), false);
 
     const kMaxExpectedDebugFillProperties = 11;
     if (count > kMaxExpectedDebugFillProperties) {
@@ -445,6 +453,7 @@ class WebTestsSuite {
         '-d',
         'chrome',
         '--web-run-headless',
+        '--no-web-resources-cdn',
         '--dart-define=FLUTTER_WEB_USE_SKIA=false',
         ...additionalArguments,
         '-t',
@@ -655,5 +664,11 @@ class WebTestsSuite {
     if (!webDriverReady) {
       throw Exception('WebDriver not available.');
     }
+  }
+}
+
+void _expect(Object? actual, Object? expected) {
+  if (actual != expected) {
+    foundError(<String>['Expected: $expected', '  Actual: $actual', StackTrace.current.toString()]);
   }
 }
