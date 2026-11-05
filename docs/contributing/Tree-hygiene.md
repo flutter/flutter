@@ -59,6 +59,11 @@ The general process for submitting code to a Flutter repository is as follows:
    `clang-format` before submission (use `buildtools/<OS>/clang/bin/clang-format
    --style=file -i`).
 
+   Put unrelated changes in separate PRs. If a PR is reverted (see step 10),
+   everything in it is reverted, so a refactor bundled with a bug fix is lost
+   when the bug fix turns out to be wrong, and vice versa. Smaller PRs are also
+   faster to review.
+
 6. Submit this branch as a PR to the relevant Flutter repository.
    _(See also: [Signing commits](./Signing-commits.md))_
 

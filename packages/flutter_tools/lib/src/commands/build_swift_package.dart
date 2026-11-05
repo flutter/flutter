@@ -68,7 +68,7 @@ class BuildSwiftPackage extends BuildSubCommand {
     required this._codesign,
     required this._featureFlags,
     required this._templateRenderer,
-    required ToolContext super.toolContext,
+    required super.toolContext,
     required super.verboseHelp,
     required this._xcode,
   }) : super(logger: toolContext.logger) {
@@ -120,9 +120,6 @@ class BuildSwiftPackage extends BuildSubCommand {
   final FeatureFlags _featureFlags;
   final DarwinAddToAppCodesigning _codesign;
   final CocoaPods _cocoaPods;
-
-  @override
-  ToolContext get toolContext => super.toolContext!;
 
   @override
   bool get supported => toolContext.platform.isMacOS;
@@ -210,7 +207,7 @@ class BuildSwiftPackage extends BuildSubCommand {
     analytics: _analytics,
     buildSystem: _buildSystem,
     cocoaPods: _cocoaPods,
-    flutterRoot: Cache.flutterRoot!,
+    flutterRoot: toolContext.cache.flutterRoot,
     project: project,
     templateRenderer: _templateRenderer,
     toolContext: toolContext,
@@ -533,6 +530,7 @@ class FlutterPluginRegistrantSwiftPackage {
     required Directory sourceDirectory,
     required List<Plugin> plugins,
   }) async {
+    final Logger logger = _utils.toolContext.logger;
     ErrorHandlingFileSystem.deleteIfExists(
       sourceDirectory.childDirectory(kPluginSwiftPackageName),
       recursive: true,
@@ -545,6 +543,7 @@ class FlutterPluginRegistrantSwiftPackage {
         await writeIOSPluginRegistrant(
           _utils.project,
           plugins,
+          logger: logger,
           swiftPluginRegistrant: swiftFile,
           templateRenderer: _utils.templateRenderer,
         );
@@ -552,6 +551,7 @@ class FlutterPluginRegistrantSwiftPackage {
         await writeMacOSPluginRegistrant(
           _utils.project,
           plugins,
+          logger: logger,
           pluginRegistrantImplementation: swiftFile,
           templateRenderer: _utils.templateRenderer,
           // The registrant needs to be public to be accessible in the app, since it's within a
@@ -1228,6 +1228,7 @@ class AppFrameworkAndNativeAssetsDependencies {
       :Logger logger,
       platform: Platform hostPlatform,
       :ProcessManager processManager,
+      :FlutterProjectFactory projectFactory,
     ) = _utils.toolContext;
     final environment = Environment(
       projectDir: fileSystem.currentDirectory,
@@ -1249,6 +1250,8 @@ class AppFrameworkAndNativeAssetsDependencies {
       processManager: processManager,
       platform: hostPlatform,
       analytics: _utils.analytics,
+      projectFactory: projectFactory,
+      xcode: _utils.xcode,
       engineVersion: artifacts.usesLocalArtifacts ? null : flutterVersion.engineRevision,
       generateDartPluginRegistry: true,
     );
@@ -1516,6 +1519,7 @@ class CocoaPodPluginDependencies {
         await writeIOSPluginRegistrant(
           _utils.project,
           [],
+          logger: logger,
           templateRenderer: _utils.templateRenderer,
         );
       }
@@ -2178,4 +2182,12 @@ class BuildSwiftPackageUtils {
   final TemplateRenderer templateRenderer;
   final ToolContext toolContext;
   final Xcode xcode;
+
+  Artifacts get artifacts => toolContext.artifacts;
+  Cache get cache => toolContext.cache;
+  FileSystem get fileSystem => toolContext.fs;
+  FlutterVersion get flutterVersion => toolContext.flutterVersion;
+  Logger get logger => toolContext.logger;
+  Platform get platform => toolContext.platform;
+  ProcessManager get processManager => toolContext.processManager;
 }
