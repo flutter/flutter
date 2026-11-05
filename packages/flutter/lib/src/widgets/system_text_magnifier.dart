@@ -23,9 +23,9 @@ import 'overlay.dart';
 /// loupe, and displays nothing on other platforms and earlier iOS versions.
 ///
 /// Flutter typically draws the text magnifier itself, for example with
-/// [CupertinoTextMagnifier]. A magnifier drawn by Flutter can only magnify what
-/// Flutter draws. The system loupe magnifies the screen as the platform shows
-/// it, including platform views, and has the platform's current look.
+/// [CupertinoTextMagnifier], which approximates the platform's look. The
+/// system loupe is drawn by the platform, so it has the platform's current
+/// look and animations.
 ///
 /// Return this widget from [TextMagnifierConfiguration.magnifierBuilder]. It
 /// shows the loupe when it is inserted into the tree, moves it whenever
