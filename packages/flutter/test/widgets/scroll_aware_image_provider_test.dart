@@ -580,7 +580,16 @@ void main() {
       imageProvider: CustomStreamImageProvider(),
     );
 
-    expect(imageProvider.resolve(ImageConfiguration.empty), isA<CustomImageStream>());
+    const configuration = ImageConfiguration(size: Size(20, 30), devicePixelRatio: 2.0);
+
+    expect(
+      imageProvider.resolve(configuration),
+      isA<CustomImageStream>().having(
+        (CustomImageStream s) => s.configuration,
+        'configuration',
+        same(configuration),
+      ),
+    );
   });
 }
 

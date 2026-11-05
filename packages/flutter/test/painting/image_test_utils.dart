@@ -55,7 +55,12 @@ class TestImageProvider extends ImageProvider<TestImageProvider> {
 }
 
 /// An [ImageStream] subclass returned by [CustomStreamImageProvider.createStream].
-class CustomImageStream extends ImageStream {}
+class CustomImageStream extends ImageStream {
+  CustomImageStream(this.configuration);
+
+  /// The configuration passed to [CustomStreamImageProvider.createStream].
+  final ImageConfiguration configuration;
+}
 
 /// An image provider that returns a [CustomImageStream] from [createStream].
 ///
@@ -65,5 +70,5 @@ class CustomStreamImageProvider extends ImageProvider<Object> {
   Future<Object> obtainKey(ImageConfiguration configuration) => Completer<Object>().future;
 
   @override
-  ImageStream createStream(ImageConfiguration configuration) => CustomImageStream();
+  ImageStream createStream(ImageConfiguration configuration) => CustomImageStream(configuration);
 }
