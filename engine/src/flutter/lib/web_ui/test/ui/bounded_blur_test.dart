@@ -54,16 +54,17 @@ Future<List<int>> _probe(ui.ImageFilter filter, {double translateX = 0, int prob
 /// Expects the probe to be (nearly) pure opaque blue. The small tolerances
 /// absorb blur renormalization rounding.
 void _expectNoBleed(List<int> rgba) {
-  final reason = 'probe RGBA: $rgba';
+  const reason = 'a blur bounded to the blue half never samples the red half';
   expect(rgba[0], lessThanOrEqualTo(8), reason: reason);
   expect(rgba[2], greaterThanOrEqualTo(247), reason: reason);
   expect(rgba[3], 255, reason: reason);
 }
 
-/// Expects [actual] to match [expected] within 2 per channel.
-void _expectSameAs(List<int> actual, List<int> expected, String label) {
+/// Expects [actual] to match [expected] within 2 per channel, for the given
+/// [reason].
+void _expectSameAs(List<int> actual, List<int> expected, {required String reason}) {
   for (var i = 0; i < 4; i++) {
-    expect(actual[i], closeTo(expected[i], 2), reason: '$label: $actual vs $expected');
+    expect(actual[i], closeTo(expected[i], 2), reason: reason);
   }
 }
 
@@ -72,24 +73,12 @@ void testMain() {
 
   test('control: unbounded blur bleeds red across the edge', () async {
     final List<int> rgba = await _probe(_blur());
-    expect(rgba[0], greaterThan(40), reason: 'probe RGBA: $rgba');
+    expect(
+      rgba[0],
+      greaterThan(40),
+      reason: 'an unbounded sigma-8 blur mixes red into pixels 3px across the edge',
+    );
   });
-
-  // CanvasKit and skwasm-Skia draw bounded blurs as unbounded, like native
-  // Skia (https://github.com/flutter/flutter/issues/175899).
-  test('bounded blur does not bleed outside bounds', () async {
-    _expectNoBleed(await _probe(_blur(bounds: _blueRect)));
-  }, skip: !isWimp);
-
-  test('bounded blur honors the canvas transform', () async {
-    _expectNoBleed(await _probe(_blur(bounds: _blueRect), translateX: 10, probeX: 63));
-  }, skip: !isWimp);
-
-  test('fallback backends render bounded blur as unbounded', () async {
-    final List<int> bounded = await _probe(_blur(bounds: _blueRect));
-    final List<int> unbounded = await _probe(_blur());
-    _expectSameAs(bounded, unbounded, 'bounded vs unbounded');
-  }, skip: isWimp);
 
   test('zero-sigma blur with bounds draws content unblurred and unmasked', () async {
     final filter = ui.ImageFilter.blur(tileMode: ui.TileMode.decal, bounds: _blueRect);
@@ -102,42 +91,70 @@ void testMain() {
   test('blur with empty or inverted bounds renders like an unbounded blur', () async {
     final List<int> unbounded = await _probe(_blur());
     for (final bounds in <ui.Rect>[ui.Rect.zero, const ui.Rect.fromLTRB(100, 100, 50, 0)]) {
-      _expectSameAs(await _probe(_blur(bounds: bounds)), unbounded, '$bounds vs unbounded');
+      _expectSameAs(
+        await _probe(_blur(bounds: bounds)),
+        unbounded,
+        reason: 'empty or inverted bounds ($bounds) do not mask the blur',
+      );
     }
   });
 
-  test('a reused bounded blur stays bounded after backing a backdrop filter', () async {
-    final filter = ui.ImageFilter.blur(sigmaX: 8, sigmaY: 8, bounds: _blueRect);
-    _expectNoBleed(await _probe(filter));
-
-    final ui.Picture greenPicture = drawPicture((ui.Canvas canvas) {
-      canvas.drawRect(_blueRect, ui.Paint()..color = const ui.Color(0xFF00FF00));
+  group('wimp', () {
+    test('bounded blur does not bleed outside bounds', () async {
+      _expectNoBleed(await _probe(_blur(bounds: _blueRect)));
     });
-    final builder = ui.SceneBuilder();
-    builder.pushBackdropFilter(filter);
-    builder.addPicture(ui.Offset.zero, greenPicture);
-    builder.pop();
-    final ui.Scene scene = builder.build();
-    final ui.Image backdropImage = await scene.toImage(100, 100);
-    backdropImage.dispose();
-    scene.dispose();
-    greenPicture.dispose();
 
-    _expectNoBleed(await _probe(filter));
+    test('bounded blur honors the canvas transform', () async {
+      _expectNoBleed(await _probe(_blur(bounds: _blueRect), translateX: 10, probeX: 63));
+    });
+
+    test('a reused bounded blur stays bounded after backing a backdrop filter', () async {
+      final filter = ui.ImageFilter.blur(sigmaX: 8, sigmaY: 8, bounds: _blueRect);
+      _expectNoBleed(await _probe(filter));
+
+      final ui.Picture greenPicture = drawPicture((ui.Canvas canvas) {
+        canvas.drawRect(_blueRect, ui.Paint()..color = const ui.Color(0xFF00FF00));
+      });
+      final builder = ui.SceneBuilder();
+      builder.pushBackdropFilter(filter);
+      builder.addPicture(ui.Offset.zero, greenPicture);
+      builder.pop();
+      final ui.Scene scene = builder.build();
+      final ui.Image backdropImage = await scene.toImage(100, 100);
+      backdropImage.dispose();
+      scene.dispose();
+      greenPicture.dispose();
+
+      _expectNoBleed(await _probe(filter));
+    });
+
+    test('bounded blur stays bounded inside ImageFilter.compose', () async {
+      final filter = ui.ImageFilter.compose(
+        outer: ui.ImageFilter.matrix(
+          Float64List.fromList(<double>[
+            1, 0, 0, 0, //
+            0, 1, 0, 0, //
+            0, 0, 1, 0, //
+            0, 0, 0, 1, //
+          ]),
+        ),
+        inner: _blur(bounds: _blueRect),
+      );
+      _expectNoBleed(await _probe(filter));
+    });
   }, skip: !isWimp);
 
-  test('bounded blur stays bounded inside ImageFilter.compose', () async {
-    final filter = ui.ImageFilter.compose(
-      outer: ui.ImageFilter.matrix(
-        Float64List.fromList(<double>[
-          1, 0, 0, 0, //
-          0, 1, 0, 0, //
-          0, 0, 1, 0, //
-          0, 0, 0, 1, //
-        ]),
-      ),
-      inner: _blur(bounds: _blueRect),
-    );
-    _expectNoBleed(await _probe(filter));
-  }, skip: !isWimp);
+  // CanvasKit and skwasm-Skia draw bounded blurs as unbounded, like native
+  // Skia (https://github.com/flutter/flutter/issues/175899).
+  group('fallback backends', () {
+    test('render bounded blur as unbounded', () async {
+      final List<int> bounded = await _probe(_blur(bounds: _blueRect));
+      final List<int> unbounded = await _probe(_blur());
+      _expectSameAs(
+        bounded,
+        unbounded,
+        reason: 'fallback backends ignore blur bounds, like native Skia',
+      );
+    });
+  }, skip: isWimp);
 }
