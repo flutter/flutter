@@ -91,7 +91,7 @@ mergeInto(LibraryManager.library, {
             );
             return;
           case 'onInitialized':
-            _surface_onInitialized(data.surface, data.callbackId);
+            _surface_onInitialized(data.surface, data.callbackId, data.success);
             return;
           case 'resizeSurface':
             _surface_resizeOnWorker(data.surface, data.width, data.height, data.callbackId);
@@ -116,7 +116,8 @@ mergeInto(LibraryManager.library, {
               data.width,
               data.height,
               data.callbackId,
-              skwasm_getCurrentTimestamp());
+              skwasm_getCurrentTimestamp(),
+              data.captureImageBitmaps);
             return;
           case 'onRenderComplete':
             _surface_onRenderComplete(
@@ -220,11 +221,12 @@ mergeInto(LibraryManager.library, {
         callbackId,
       }, [canvas], threadId);
     };
-    _skwasm_reportInitialized = function (surfaceHandle, callbackId) {
+    _skwasm_reportInitialized = function (surfaceHandle, callbackId, success) {
       skwasm_postMessage({
         skwasmMessage: 'onInitialized',
         surface: surfaceHandle,
         callbackId,
+        success,
       }, []);
     };
 
@@ -252,7 +254,16 @@ mergeInto(LibraryManager.library, {
     };
 
     // Rendering
-    _skwasm_dispatchRenderPictures = function (threadId, surfaceHandle, pictures, pictureCount, width, height, callbackId) {
+    _skwasm_dispatchRenderPictures = function (
+      threadId,
+      surfaceHandle,
+      pictures,
+      pictureCount,
+      width,
+      height,
+      callbackId,
+      captureImageBitmaps
+    ) {
       skwasm_postMessage({
         skwasmMessage: 'renderPictures',
         surface: surfaceHandle,
@@ -261,6 +272,7 @@ mergeInto(LibraryManager.library, {
         width,
         height,
         callbackId,
+        captureImageBitmaps,
       }, [], threadId);
     };
     _skwasm_resolveAndPostImages = async function (surfaceHandle, imageBitmaps, rasterStart, callbackId) {
@@ -351,7 +363,15 @@ mergeInto(LibraryManager.library, {
         failIfMajorPerformanceCaveat: false,
         enableExtensionsByDefault: true,
       };
-      const contextHandle = GL.createContext(canvas, contextAttributes);
+      let contextHandle;
+      try {
+        contextHandle = GL.createContext(canvas, contextAttributes);
+      } catch (_) {
+        return 0;
+      }
+      if (!contextHandle) {
+        return 0;
+      }
       handleToCanvasMap.set(contextHandle, canvas);
 
       // Register an event listener for the context lost event.
