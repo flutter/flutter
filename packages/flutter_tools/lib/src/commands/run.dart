@@ -45,9 +45,10 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
   RunCommandBase({
     required this.buildSystem,
     required this.buildTargets,
-    required ToolContext super.toolContext,
+    required super.toolContext,
     required super.verboseHelp,
     super.outputPreferences,
+    super.deviceManager,
   }) {
     registerOptionBundles(const <OptionBundle>[
       BuildModeOptionsBundle(defaultToRelease: false),
@@ -102,9 +103,6 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
 
   final BuildSystem buildSystem;
   final BuildTargets buildTargets;
-
-  @override
-  ToolContext get toolContext => super.toolContext!;
 
   bool get traceStartup => getValue(DebuggingOptionDescriptors.traceStartup);
   bool get traceSystrace => getValue(DebuggingOptionDescriptors.traceSystrace);
@@ -335,7 +333,7 @@ class RunCommand extends RunCommandBase {
     this._androidWorkflow,
     this.deviceManager,
     super.verboseHelp = false,
-  }) {
+  }) : super(deviceManager: deviceManager) {
     requiresPubspecYaml();
     registerOptionBundles(const <OptionBundle>[
       FilesystemOptionsBundle(),
@@ -516,18 +514,16 @@ class RunCommand extends RunCommandBase {
 
     String? androidEmbeddingVersion;
     final hostLanguage = <String>[];
-    final ToolContext(:FileSystem fs, :FlutterProjectFactory projectFactory) = toolContext;
+    final FileSystem fs = toolContext.fs;
     if (anyAndroidDevices) {
-      final AndroidProject androidProject = projectFactory
-          .fromDirectory(fs.currentDirectory)
-          .android;
+      final AndroidProject androidProject = project.android;
       if (androidProject.existsSync()) {
         hostLanguage.add(androidProject.isKotlin ? 'kotlin' : 'java');
         androidEmbeddingVersion = androidProject.getEmbeddingVersion().toString().split('.').last;
       }
     }
     if (anyIOSDevices) {
-      final IosProject iosProject = projectFactory.fromDirectory(fs.currentDirectory).ios;
+      final IosProject iosProject = project.ios;
       if (iosProject.exists) {
         final Iterable<File> swiftFiles = iosProject.hostAppRoot
             .listSync(recursive: true, followLinks: false)

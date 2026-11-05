@@ -134,11 +134,13 @@ bool BlitPassVK::OnCopyTextureToTextureCommand(
     return true;
   }
 
+  // The layout transition must be ordered after the copy's transfer write
+  // (SYNC-HAZARD-WRITE-AFTER-WRITE).
   BarrierVK barrier;
   barrier.cmd_buffer = cmd_buffer;
   barrier.new_layout = vk::ImageLayout::eShaderReadOnlyOptimal;
-  barrier.src_access = {};
-  barrier.src_stage = vk::PipelineStageFlagBits::eTopOfPipe;
+  barrier.src_access = vk::AccessFlagBits::eTransferWrite;
+  barrier.src_stage = vk::PipelineStageFlagBits::eTransfer;
   barrier.dst_access = vk::AccessFlagBits::eShaderRead;
   barrier.dst_stage = vk::PipelineStageFlagBits::eFragmentShader;
 
@@ -425,7 +427,10 @@ bool BlitPassVK::OnGenerateMipmapCommand(std::shared_ptr<Texture> texture,
       /*image=*/image,
       /*src_access_mask=*/vk::AccessFlagBits::eTransferWrite |
           vk::AccessFlagBits::eColorAttachmentWrite,
-      /*dst_access_mask=*/vk::AccessFlagBits::eTransferRead,
+      // The blits below write mip levels 1..N while they are TransferDst, so
+      // the next access is a transfer write, not a read
+      // (SYNC-HAZARD-WRITE-AFTER-WRITE).
+      /*dst_access_mask=*/vk::AccessFlagBits::eTransferWrite,
       /*old_layout=*/src.GetLayout(),
       /*new_layout=*/vk::ImageLayout::eTransferDstOptimal,
       /*src_stage=*/vk::PipelineStageFlagBits::eTransfer |
