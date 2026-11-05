@@ -4230,6 +4230,7 @@ invalid JSON
               tempDir.deleteSync(recursive: true);
               expect(tempFile, isNot(exists));
             },
+            exitCode: 1,
           ),
         );
 
@@ -4238,7 +4239,7 @@ invalid JSON
         );
         expect(processes, isEmpty);
         expect(fakeProcessManager, hasNoRemainingExpectations);
-        expect(logger.traceText, contains('Error reading output file'));
+        expect(logger.traceText, contains('Error executing devicectl: ProcessException'));
       });
     });
 
