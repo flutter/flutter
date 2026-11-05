@@ -39,6 +39,7 @@ abstract class ViewRasterizer {
   /// The queue of render requests for this view.
   final RenderQueue queue = RenderQueue();
 
+  /// Whether this rasterizer has been disposed.
   bool get isDisposed => _isDisposed;
   bool _isDisposed = false;
 
@@ -122,10 +123,6 @@ abstract class ViewRasterizer {
     List<ui.Picture> pictures,
     FrameTimingRecorder? recorder,
   );
-
-  /// Publishes any staged canvas contents in the same task as the composition's
-  /// DOM update. Rasterizers that draw directly need no additional commit.
-  void commitFrame() {}
 
   /// Get a [DisplayCanvas] to use as an overlay.
   DisplayCanvas getOverlay() {
