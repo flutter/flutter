@@ -232,8 +232,8 @@ Future<bool> _runRetryLoop(String testDir) async {
       'flutter drive failed with exit code ${result.exitCode} on attempt $attempt/$maxAttempts.',
     );
 
-    // Intentionally scope retries strictly to blank-display compositor wedges, EGL
-    // initialization errors, or early app process crashes during VM service connection.
+    // Intentionally scope retries strictly to blank-display compositor wedges, fatal
+    // graphics initialization errors, or early app process crashes during VM service connection.
     // General test assertion or golden pixel mismatch failures must fail fast on attempt 1
     // so real visual regressions are not masked.
     final String? retryReason = await _detectRetryableFailureReason(
@@ -413,22 +413,58 @@ Future<String?> _detectRetryableFailureReason(
     if (driverOutput.contains('Captured screenshot is blank/empty')) 'blank display capture',
   ];
 
+  // Inspect logcat directly so fatal graphics errors are reported both when flutter drive
+  // disconnects before Dart surfaces a test exception and alongside blank captures or crashes.
   try {
     final _SubprocessResult logcatResult = await _runAdb(<String>['logcat', '-d']);
-    final bool hasEglError =
-        logcatResult.exitCode == 0 &&
-        (logcatResult.stdout.contains('EGL_NOT_INITIALIZED') ||
-            logcatResult.stdout.contains('EGL_BAD_CONFIG') ||
-            (driverOutput.contains('EglInitializationException') &&
-                logcatResult.stdout.contains(
-                  'Failed to choose config with EGL_SWAP_BEHAVIOR_PRESERVED',
-                )));
-    if (hasEglError) {
-      reasons.add('EGL error in logcat');
+    final String? fatalError = logcatResult.exitCode == 0
+        ? _firstFatalGraphicsLogcatError(logcatResult.stdout)
+        : null;
+    if (fatalError != null) {
+      reasons.add('fatal graphics error in logcat ($fatalError)');
     }
   } catch (e) {
     io.stderr.writeln('Warning: Failed to check logcat for EGL failure: $e');
   }
 
   return reasons.isEmpty ? null : reasons.join(' and ');
+}
+
+/// Returns the first unrecoverable EGL, Vulkan, or host-pipe graphics initialization error
+/// matched in [logcatOutput], ignoring benign Android HWUI capability-probe warnings.
+// Keep in sync with isFatalGraphicsPipelineError in FlutterActivityTest.kt.
+String? _firstFatalGraphicsLogcatError(String logcatOutput) {
+  const fatalPatterns = <String>[
+    'EGL_NOT_INITIALIZED',
+    'EGL_BAD_ALLOC',
+    'EGL_BAD_CONFIG',
+    'EGL_BAD_CONTEXT',
+    'EGL_BAD_DISPLAY',
+    'EGL_BAD_NATIVE_WINDOW',
+    'EGL_BAD_SURFACE',
+    'EGL_CONTEXT_LOST',
+    'Failed to create EGLSurface',
+    'Failed to initialize EGL',
+    'Unable to initialize EGL',
+    'Failed to establish connection with the host',
+    'vulkan: Failed to get host connection',
+    'Could not create Vulkan instance',
+    'Could not create surface from invalid Android context',
+  ];
+
+  for (final String line in LineSplitter.split(logcatOutput)) {
+    if (line.contains('eglInitialize(') && line.contains(') failed (')) {
+      return 'eglInitialize failed';
+    }
+    // Ignore Android HWUI capability-probe warnings logged unconditionally during normal
+    // display initialization on SwiftShader and headless emulators.
+    if (line.contains('EGL_SWAP_BEHAVIOR_PRESERVED') || line.contains('error = EGL_SUCCESS')) {
+      continue;
+    }
+    final String? matchedPattern = fatalPatterns.where(line.contains).firstOrNull;
+    if (matchedPattern != null) {
+      return matchedPattern;
+    }
+  }
+  return null;
 }

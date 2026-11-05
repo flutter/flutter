@@ -490,11 +490,17 @@ hardware, the test suite implements a two-layered recovery mechanism:
 ### A. Display Compositor & Process-Level Recovery
 * **Goal**: Recovers from emulator `SurfaceFlinger` display wedges (where
   QuickBoot snapshot restoration leaves `screencap` returning solid-black
-  frames) and process-level EGL or graphics context initialization failures that
-  occur when the Flutter Engine boots up.
+  frames) and fatal process-level EGL, Vulkan, or host-pipe graphics
+  initialization failures (such as `EGL_NOT_INITIALIZED`, `EGL_BAD_CONFIG`,
+  `eglInitialize(...) failed (...)`,
+  `Failed to establish connection with the host`, or
+  `vulkan: Failed to get host connection`), while ignoring benign HWUI
+  capability-probe warnings like
+  `Failed to choose config with EGL_SWAP_BEHAVIOR_PRESERVED` and
+  `error = EGL_SUCCESS`.
 * **Mechanism**:
   * **On Host (CI)**: If `flutter drive` fails due to a blank screenshot or
-    EGL graphics error in logcat, the host suite runner
+    fatal graphics error in logcat, the host suite runner
     ([`run_android_hardware_smoke_tests.dart`](../../../bots/suite_runners/run_android_hardware_smoke_tests.dart))
     restarts Android userspace (`adb shell stop` and `adb shell start`) so
     `SurfaceFlinger` rebinds cleanly against the active host renderer before
@@ -509,11 +515,11 @@ hardware, the test suite implements a two-layered recovery mechanism:
     suite starts. During instrumented execution, the JUnit runner
     ([`FlutterActivityTest.kt`](android/app/src/androidTest/java/com/example/android_hardware_smoke_test/FlutterActivityTest.kt))
     recreates the Activity scenario and retries **only** on blank screenshot
-    failures (up to 3 attempts). It does **not** retry on EGL or graphics
-    errors, because recreating the activity within the same application process
-    cannot recover from process-level initialization failures, so those fail
-    immediately alongside standard test failures (such as golden pixel
-    mismatches).
+    failures (up to 3 attempts). It does **not** retry on fatal graphics
+    pipeline errors, because recreating the activity within the same
+    application process cannot recover from process-level graphics
+    initialization failures, so those fail immediately on attempt 1 alongside
+    standard test failures (such as golden pixel mismatches).
 
 ### B. Screenshot-Level Retries (Blank Platform View Capture)
 * **Goal**: Prevents race conditions where a screenshot is taken before native
@@ -524,7 +530,7 @@ hardware, the test suite implements a two-layered recovery mechanism:
     host-side `NativeDriver`) checks the cropped image. If the cropped image is
     completely transparent or solid black, it retries the capture up to 3
     times, sleeping 200ms between attempts.
-  * **Short-circuiting**: If an EGL/graphics error is detected in the logcat
-    during screenshot attempts, the loop is terminated early (bypassing
-    remaining screenshot retries) to fail the test immediately and bubble the
-    failure up to the host runner as quickly as possible.
+  * **Short-circuiting**: If a fatal graphics error is detected in logcat
+    during on-device screenshot attempts, the loop terminates early (bypassing
+    remaining screenshot retries) so the test fails immediately with a clear
+    graphics pipeline diagnostic.
