@@ -528,7 +528,8 @@ _TOOL_REPOSITORIES = {
         path = "third_party/ninja",
         build_file = _OVERLAYS + ":ninja/BUILD.ninja.bazel",
     ),
-    # reclient (DEPS: use_rbe; the Linux x64 host's) and the engine's
+    # reclient (DEPS: use_rbe; this host's, under buildtools/<host>/: the
+    # Linux x64 bots' and a Mac's) and the engine's
     # configurations for it (flutter/build/rbe, a flutter_internal CIPD
     # package: Googlers and the bots), for a wrapped GN build whose compiles
     # go to the RBE workers (gn_build.bzl's rbe; --//engine/src/flutter/
@@ -536,7 +537,7 @@ _TOOL_REPOSITORIES = {
     # checkout synced without use_rbe falls back to the packages, the first
     # public, the second not.
     "reclient": struct(
-        path = "engine/src/flutter/buildtools/linux-x64/reclient",
+        path = "engine/src/flutter/buildtools/{host_buildtools}/reclient",
         build_file = _OVERLAYS + ":reclient/BUILD.reclient.bazel",
     ),
     "reclient_cfgs": struct(
@@ -581,6 +582,8 @@ _CIPD_SHA256 = {
     ("gn/gn/linux-amd64", "git_revision:81b24e01531ecf0eff12ec9359a555ec3944ec4e"): "cd330cb4f4e0d8e5c82ca3a583798ea5337fd01308952dbe227c9dd8bc51d854",
     ("infra/3pp/tools/ninja/linux-amd64", "version:2@1.11.1.chromium.4"): "55833d93abb510f908b2347235116717b10ba6eca19e426a01e6a66b8c3cfd86",
     ("infra/rbe/client/linux-amd64", "re_client_version:0.185.0.db415f21-gomaip"): "003bf3eac433bd071450e97a2e6633f7f93046828c8be428a5c3938c63dd1764",
+    ("infra/rbe/client/mac-arm64", "re_client_version:0.185.0.db415f21-gomaip"): "3033391e7e35c9a14b48a0fdeb608ed0dbf8b30897d157e06d0308975ddf6543",
+    ("infra/rbe/client/mac-amd64", "re_client_version:0.185.0.db415f21-gomaip"): "c103f2afacb79dede1333425547252eb18375dbfe48eb09f9ba95fe5797f6e2d",
     ("flutter_internal/rbe/reclient_cfgs", "Vk7WiSKwQdBHbCrZ9PtRl3po2WpRFQZSag9M6-sxF_0C"): "564ed68922b041d0476c2ad9f4fb51977a68d96a511506526a0f4cebeb3117fd",
     # cpython3: decoded from the instance ids `cipd describe` reports for
     # DEPS' version (the rule above).
@@ -702,7 +705,7 @@ def _synced_deps_impl(mctx):
     platform = _cipd_platform(mctx)
     host = host_platform_values(mctx.os.name, mctx.os.arch)
     for name, spec in _TOOL_REPOSITORIES.items():
-        path = spec.path.format(host_prebuilts = host["HOST_PREBUILTS"])
+        path = spec.path.format(host_prebuilts = host["HOST_PREBUILTS"], host_buildtools = host["HOST_BUILDTOOLS"])
         pin = _cipd_pin(path)
 
         # A package whose root is a directory inside it on a Mac (the JDK

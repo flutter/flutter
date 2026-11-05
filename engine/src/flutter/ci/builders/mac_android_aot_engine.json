@@ -30,7 +30,7 @@
             ],
             "gclient_variables": {
                 "download_android_deps": true,
-                "use_rbe": false,
+                "use_rbe": true,
                 "download_bazelisk": true
             },
             "gn": [
@@ -91,7 +91,7 @@
             ],
             "gclient_variables": {
                 "download_android_deps": true,
-                "use_rbe": false,
+                "use_rbe": true,
                 "download_bazelisk": true
             },
             "gn": [
@@ -154,7 +154,7 @@
             ],
             "gclient_variables": {
                 "download_android_deps": true,
-                "use_rbe": false,
+                "use_rbe": true,
                 "download_bazelisk": true
             },
             "gn": [
@@ -217,7 +217,7 @@
             ],
             "gclient_variables": {
                 "download_android_deps": true,
-                "use_rbe": false,
+                "use_rbe": true,
                 "download_bazelisk": true
             },
             "gn": [
@@ -278,7 +278,7 @@
             ],
             "gclient_variables": {
                 "download_android_deps": true,
-                "use_rbe": false,
+                "use_rbe": true,
                 "download_bazelisk": true
             },
             "gn": [
@@ -341,7 +341,7 @@
             ],
             "gclient_variables": {
                 "download_android_deps": true,
-                "use_rbe": false,
+                "use_rbe": true,
                 "download_bazelisk": true
             },
             "gn": [
