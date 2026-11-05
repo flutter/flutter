@@ -92,11 +92,19 @@ abstract class ViewRasterizer {
     compositorFrame.raster(layerTree, currentFrameSize, recorder);
     _lastRenderedLayerTree = layerTree;
 
+    final Stopwatch? presentationTimer = Profiler.isBenchmarkMode ? (Stopwatch()..start()) : null;
     await prepareToDraw();
     if (isDisposed) {
       return;
     }
     await viewEmbedder.submitFrame(recorder);
+    if (presentationTimer != null) {
+      presentationTimer.stop();
+      Profiler.instance.benchmark(
+        kProfilePresentationDuration,
+        presentationTimer.elapsedMicroseconds.toDouble(),
+      );
+    }
   }
 
   /// Do some initialization to prepare to draw a frame.

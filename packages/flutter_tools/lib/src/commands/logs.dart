@@ -9,14 +9,14 @@ import '../application_package.dart';
 import '../base/common.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
-import '../context/tool_context.dart';
+import '../build_info.dart';
 import '../device.dart';
 import '../runner/flutter_command.dart';
 
 /// Show log output for running Flutter apps.
 class LogsCommand extends FlutterCommand {
   LogsCommand({
-    required ToolContext super.toolContext,
+    required super.toolContext,
     ApplicationPackageFactory? applicationPackageFactory,
     ProcessSignal? sigint,
     ProcessSignal? sigterm,
@@ -35,9 +35,6 @@ class LogsCommand extends FlutterCommand {
 
   final ProcessSignal _sigint;
   final ProcessSignal _sigterm;
-
-  @override
-  ToolContext get toolContext => super.toolContext!;
 
   @override
   final name = 'logs';
@@ -73,9 +70,10 @@ class LogsCommand extends FlutterCommand {
       cachedDevice.clearLogs();
     }
 
-    final ApplicationPackage? app = await applicationPackages?.getPackageForPlatform(
-      await cachedDevice.targetPlatform,
-    );
+    final TargetPlatform targetPlatform = await cachedDevice.targetPlatform;
+    final ApplicationPackage? app = targetPlatform == .unsupported
+        ? null
+        : await applicationPackages?.getPackageForPlatform(targetPlatform);
 
     final bool filtering =
         argParser.options.containsKey('adb-log-filtering') && boolArg('adb-log-filtering');
