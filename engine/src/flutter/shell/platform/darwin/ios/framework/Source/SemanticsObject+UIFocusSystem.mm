@@ -184,32 +184,30 @@ static void MoveFocusTo(SemanticsObject* target) {
 }
 
 - (BOOL)shouldUpdateFocusInContext:(UIFocusUpdateContext*)context {
-  // Only the item that is losing focus decides, so the decision is made once
-  // per focus update.
   flutter::AccessibilityBridgeIos* bridge = self.bridge;
   if (context.previouslyFocusedItem != self || !bridge || bridge->isVoiceOverRunning()) {
     return YES;
   }
 
   UIFocusHeading heading = context.focusHeading;
+  // One of them will be yes if this is a tab navigation.
   BOOL forward = (heading & (UIFocusHeadingNext | UIFocusHeadingFirst)) != 0;
   BOOL backward = (heading & (UIFocusHeadingPrevious | UIFocusHeadingLast)) != 0;
   if (forward == backward) {
-    // This is not a tab or shift-tab command, leave it to the system.
+    // This is not a tab or shift-tab command. Let system handle it.
     return YES;
   }
-  // Let focus leave the FlutterView, e.g. to native views in add-to-app. This
-  // can skip offscreen Flutter items after the last visible one.
   id<UIFocusItem> proposed = context.nextFocusedItem;
   if (proposed && !([(NSObject*)proposed isKindOfClass:[SemanticsObject class]] &&
                     ((SemanticsObject*)proposed).bridge == bridge)) {
+    // The next focus is not in the same flutter view. Let system handle it.
     return YES;
   }
-  // If an earlier Tab's focus request has not run yet, continue from its
-  // target so quick key presses stay in order.
+
   SemanticsObject* pending = PendingFocusTarget(self);
   SemanticsObject* expected = FocusableNeighbor(pending ?: self, forward);
   if (!expected || (!pending && proposed == expected)) {
+    // System picked the same target as we expected. Let system handle it.
     return YES;
   }
 
