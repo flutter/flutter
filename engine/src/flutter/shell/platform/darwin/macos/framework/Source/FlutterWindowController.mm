@@ -22,11 +22,27 @@
   std::optional<flutter::Isolate> _isolate;
   FlutterWindowCreationRequest _creationRequest;
 
-  // Extra size constraints coming from the window positioner.
-  CGSize _positionerSizeConstraints;
+  // Window geometry pushed by the framework via
+  // InternalFlutter_Window_SetContentRect and
+  // InternalFlutter_Window_SetContentSize. Size changes are pending until they
+  // are applied in viewDidUpdateContents, i.e. on the surface commit, so that
+  // resizing the window and swapping in the corresponding surface happen in
+  // the same hop. Otherwise the window would be resized while the layer still
+  // presents a surface sized for the previous metrics. The pending rect is in
+  // Flutter global coordinates and its size is already clamped.
+  std::optional<FlutterWindowRect> _pendingContentRect;
+  std::optional<NSSize> _pendingContentSize;
 
-  // Set to true when first frame has been rendered.
-  BOOL _hasContent;
+  // Set when the view constraints changed while a size changing geometry is
+  // pending. The view metrics are regenerated once the geometry is applied:
+  // regenerating earlier would report a width and height outside the newly
+  // set constraints.
+  BOOL _constraintsDidChangePending;
+
+  // Set when the framework finished sizing the window to its content while a
+  // size change is pending. The sizing delegate is removed once the size has
+  // been applied.
+  BOOL _sizingCompletePending;
 }
 
 @property(readonly, nonatomic) NSWindow* window;
@@ -38,7 +54,9 @@
          flutterViewController:(FlutterViewController*)viewController
                creationRequest:(const FlutterWindowCreationRequest&)creationRequest;
 
-- (void)resetPositioner;
+- (void)setPendingContentRect:(FlutterWindowRect)contentRect;
+- (void)setPendingContentSize:(FlutterWindowSize)contentSize;
+- (void)sizingComplete;
 
 @end
 
@@ -162,18 +180,43 @@
     // Window is not sized to contents.
     return std::nullopt;
   }
-  NSSize screenSize = self.window.screen.visibleFrame.size;
-  double width = screenSize.width;
-  width = std::min(width, _creationRequest.constraints.max_width);
-  if (_positionerSizeConstraints.width > 0) {
-    width = std::min(width, _positionerSizeConstraints.width);
+  NSScreen* screen = self.window.parentWindow.screen ?: self.window.screen;
+  if (screen == nil) {
+    // The window is not on screen yet. Without a display there is no
+    // meaningful maximum; FlutterView.maximumContentSize falls back to the
+    // current bounds in that case, which keeps the metrics valid.
+    return std::nullopt;
   }
-  double height = screenSize.height;
-  height = std::min(height, _creationRequest.constraints.max_height);
-  if (_positionerSizeConstraints.height > 0) {
-    height = std::min(height, _positionerSizeConstraints.height);
+  NSSize screenSize = screen.visibleFrame.size;
+  double width = std::min(screenSize.width, _creationRequest.constraints.max_width);
+  double height = std::min(screenSize.height, _creationRequest.constraints.max_height);
+  // Keep the constraints feasible: the maximum must never go below the
+  // minimum, the engine rejects metrics otherwise.
+  std::optional<NSSize> minimumSize = [self minimumViewSize:view];
+  if (minimumSize) {
+    width = std::max(width, minimumSize->width);
+    height = std::max(height, minimumSize->height);
   }
   return NSMakeSize(width, height);
+}
+
+// Clamps a content size into the view size constraints. The applied window
+// size must never be outside the constraints that are reported with the
+// window metrics since the engine rejects those metrics.
+- (NSSize)clampContentSizeToConstraints:(NSSize)contentSize {
+  if (!_flutterViewController.flutterView.sizedToContents) {
+    return contentSize;
+  }
+  const FlutterWindowConstraints& constraints = _creationRequest.constraints;
+  // Without a screen there is no view maximum; the requested constraints
+  // still apply.
+  NSSize maximumSize = [self maximumViewSize:_flutterViewController.flutterView].value_or(
+      NSMakeSize(constraints.max_width, constraints.max_height));
+  contentSize.width =
+      std::max(std::min(contentSize.width, maximumSize.width), constraints.min_width);
+  contentSize.height =
+      std::max(std::min(contentSize.height, maximumSize.height), constraints.min_height);
+  return contentSize;
 }
 
 // Returns the frame that includes all screen. This is used to flip coordinates
@@ -197,92 +240,137 @@ static void FlipRect(NSRect& rect, const NSRect& globalScreenFrame) {
                   (rect.origin.y + rect.size.height);
 }
 
-- (void)updatePosition {
-  // This is called from Flutter though controller updatePosition. The logic is same
-  // as same as when the content changes so the implementation can be shared.
-  // All calls to updatePosition before the first surface is available are ignored.
-  if (_hasContent) {
-    [self viewDidUpdateContents:self.flutterViewController.flutterView
-                       withSize:self.flutterViewController.flutterView.bounds.size];
+- (NSSize)currentContentSize {
+  return [self.window contentRectForFrameRect:self.window.frame].size;
+}
+
+- (BOOL)hasPendingGeometry {
+  return _pendingContentRect || _pendingContentSize;
+}
+
+// Whether a size change must wait for the surface commit. Only views sized to
+// their contents need this; other views are resized through the resize
+// synchronizer, which waits for a frame of the new size by itself.
+- (BOOL)shouldDeferResizeTo:(NSSize)size {
+  return _flutterViewController.flutterView.sizedToContents &&
+         !NSEqualSizes(size, self.currentContentSize);
+}
+
+// Moves the window so that its content rect matches the given rect in Flutter
+// global coordinates.
+- (void)applyContentRect:(FlutterWindowRect)contentRect {
+  NSRect rect = contentRect.toNSRect();
+  FlipRect(rect, ComputeGlobalScreenFrame());
+  [self.window setFrame:[self.window frameRectForContentRect:rect] display:NO animate:NO];
+}
+
+- (void)setPendingContentRect:(FlutterWindowRect)contentRect {
+  NSSize size =
+      [self clampContentSizeToConstraints:NSMakeSize(contentRect.width, contentRect.height)];
+  contentRect.width = size.width;
+  contentRect.height = size.height;
+  if (![self shouldDeferResizeTo:size]) {
+    // Supersede any pending rect since this is the latest intent.
+    _pendingContentRect.reset();
+    [self applyContentRect:contentRect];
+    return;
+  }
+  // Defer until the surface is committed so that resizing the window and
+  // presenting the corresponding surface are synchronized.
+  _pendingContentRect = contentRect;
+}
+
+- (void)setPendingContentSize:(FlutterWindowSize)contentSize {
+  NSSize size =
+      [self clampContentSizeToConstraints:NSMakeSize(contentSize.width, contentSize.height)];
+  if (![self shouldDeferResizeTo:size]) {
+    // Supersede any pending size since this is the latest intent.
+    _pendingContentSize.reset();
+    [self.window setContentSize:size];
+    return;
+  }
+  // Size change: defer until the surface is committed, see
+  // setPendingContentRect:.
+  _pendingContentSize = size;
+}
+
+- (void)sizingComplete {
+  if (self.hasPendingGeometry) {
+    _sizingCompletePending = YES;
+  } else {
+    [self removeSizingDelegate];
+  }
+}
+
+// Hands the window size over to the user. The view metrics are regenerated so
+// that the framework lays out to the window size instead of the content.
+- (void)removeSizingDelegate {
+  FlutterView* view = _flutterViewController.flutterView;
+  view.sizingDelegate = nil;
+  [view constraintsDidChange];
+}
+
+// Applies the geometry pushed by the framework. This must only be called from
+// viewDidUpdateContents, i.e. when a surface has just been committed, so that
+// the window is never resized while the layer displays a surface that does not
+// match the new size.
+- (void)applyPendingGeometry {
+  if (_pendingContentSize) {
+    [self.window setContentSize:*_pendingContentSize];
+    _pendingContentSize.reset();
+  }
+  if (_pendingContentRect) {
+    [self applyContentRect:*_pendingContentRect];
+    _pendingContentRect.reset();
+  }
+  if (_sizingCompletePending) {
+    // Removing the sizing delegate regenerates the metrics, which also covers
+    // a pending constraints change.
+    _sizingCompletePending = NO;
+    _constraintsDidChangePending = NO;
+    [self removeSizingDelegate];
+  }
+  if (_constraintsDidChangePending) {
+    // The window size has been applied; it is safe to regenerate the view
+    // metrics now, they will be within the constraints.
+    _constraintsDidChangePending = NO;
+    [_flutterViewController.flutterView constraintsDidChange];
   }
 }
 
 - (void)viewDidUpdateContents:(FlutterView*)view withSize:(NSSize)newSize {
-  _hasContent = YES;
-  // There is no positioner associated with this window.
-  if (_creationRequest.on_get_window_position == nullptr) {
-    bool firstFrame = self.onFirstFrame != nil;
-    // Either missing initial size or always sized to content, resize the window
-    // based on content size.
-    if ((firstFrame && !_creationRequest.has_size) || !_creationRequest.resizable) {
-      [view.window setContentSize:newSize];
-    }
-    if (_creationRequest.resizable) {
-      view.sizingDelegate = nil;
-    }
-    if (firstFrame) {
-      self.onFirstFrame();
-      self.onFirstFrame = nil;
-    }
-  } else {
-    // For bordered windows the positioner needs size including the frame.
-    newSize =
-        [self.window frameRectForContentRect:NSMakeRect(0, 0, newSize.width, newSize.height)].size;
-
-    NSRect globalScreenFrame = ComputeGlobalScreenFrame();
-
-    NSRect parentRect =
-        [self.window.parentWindow contentRectForFrameRect:self.window.parentWindow.frame];
-    FlipRect(parentRect, globalScreenFrame);
-
-    NSRect screenRect = [self.window.screen visibleFrame];
-    FlipRect(screenRect, globalScreenFrame);
-
-    flutter::IsolateScope isolate_scope(*_isolate);
-    auto position = _creationRequest.on_get_window_position(
-        FlutterWindowSize::fromNSSize(newSize), FlutterWindowRect::fromNSRect(parentRect),
-        FlutterWindowRect::fromNSRect(screenRect));
-
-    if (position == nullptr) {
-      return;
-    }
-
-    NSRect positionRect = position->toNSRect();
-    FlipRect(positionRect, globalScreenFrame);
-
-    [self.window setFrame:positionRect display:NO animate:NO];
-
-    free(position);
-
-    // For windows sized to contents if the positioner size doesn't match actual size
-    // the requested size needs to be passed through constraints.
-    if (view.sizedToContents &&
-        (positionRect.size.width < newSize.width || positionRect.size.height < newSize.height)) {
-      // Positioner disagreed with content size, tighten the constraints and regenerate
-      // the frame.
-      _positionerSizeConstraints = positionRect.size;
-      [view constraintsDidChange];
-      return;
-    }
-
-    if (self.onFirstFrame) {
-      self.onFirstFrame();
-      self.onFirstFrame = nil;
-    }
+  // The framework owns the window geometry: it pushes the window position and
+  // size from the window controller's updateContentSize using
+  // InternalFlutter_Window_SetContentRect and
+  // InternalFlutter_Window_SetContentSize. Geometry that does not change the
+  // size is applied right away when it is pushed; geometry that changes the
+  // size is queued and applied here, on the surface commit, so that resizing
+  // the window and presenting the corresponding surface are synchronized.
+  [self applyPendingGeometry];
+  // Reveal the window once the pushed geometry has been applied. The reveal
+  // must not additionally wait for a surface that matches the window size:
+  // for content that resizes continuously the surface is always one frame
+  // behind the window size and the window would never be revealed.
+  if (!self.hasPendingGeometry && self.onFirstFrame) {
+    self.onFirstFrame();
+    self.onFirstFrame = nil;
   }
 }
 
 - (void)setConstraints:(FlutterWindowConstraints)constraints {
   if (_flutterViewController.flutterView.sizedToContents) {
     self->_creationRequest.constraints = constraints;
-    [_flutterViewController.flutterView constraintsDidChange];
+    if (self.hasPendingGeometry) {
+      // A size change is pending; regenerate the view metrics only once it has
+      // been applied, they would otherwise be outside the newly set
+      // constraints.
+      _constraintsDidChangePending = YES;
+    } else {
+      [_flutterViewController.flutterView constraintsDidChange];
+    }
   } else {
     [self.window flutterSetConstraints:constraints];
   }
-}
-
-- (void)resetPositioner {
-  _creationRequest.on_get_window_position = nil;
 }
 
 @end
@@ -640,10 +728,8 @@ static void FlipRect(NSRect& rect, const NSRect& globalScreenFrame) {
   window.alphaValue = 0.0;
 
   FML_DCHECK(owner.onFirstFrame == nil);
-  __weak __typeof(owner) weakOwner = owner;
   owner.onFirstFrame = ^{
     window.alphaValue = 1.0;
-    [weakOwner resetPositioner];
   };
 
   return controller.viewIdentifier;
@@ -674,8 +760,6 @@ static void FlipRect(NSRect& rect, const NSRect& globalScreenFrame) {
   if (parent != window.parentWindow) {
     [window.parentWindow removeChildWindow:window];
     [parent addChildWindow:window ordered:NSWindowAbove];
-    FlutterWindowOwner* owner = (FlutterWindowOwner*)window.delegate;
-    [owner updatePosition];
   }
 }
 
@@ -849,7 +933,8 @@ FlutterWindowSize InternalFlutter_Window_GetContentSize(void* window) {
 
 void InternalFlutter_Window_SetContentSize(void* window, const FlutterWindowSize* size) {
   NSWindow* w = (__bridge NSWindow*)window;
-  [w flutterSetContentSize:*size];
+  FlutterWindowOwner* owner = (FlutterWindowOwner*)w.delegate;
+  [owner setPendingContentSize:*size];
 }
 
 FLUTTER_DARWIN_EXPORT
@@ -925,33 +1010,10 @@ bool InternalFlutter_Window_IsActivated(void* window) {
   return w.isKeyWindow;
 }
 
-void InternalFlutter_Window_UpdatePosition(void* window) {
-  NSWindow* w = (__bridge NSWindow*)window;
-  FlutterWindowOwner* owner = (FlutterWindowOwner*)w.delegate;
-  [owner updatePosition];
-}
-
 void InternalFlutter_Window_Reparent(int64_t engineId, void* window, int64_t newParentId) {
   FlutterEngine* engine = [FlutterEngine engineForIdentifier:engineId];
   NSWindow* w = (__bridge NSWindow*)window;
   [engine.windowController reparentWindow:w newParentId:newParentId];
-}
-
-void* InternalFlutter_Window_GetParent(void* window) {
-  NSWindow* w = (__bridge NSWindow*)window;
-  return (__bridge void*)w.parentWindow;
-}
-
-FlutterWindowRect InternalFlutter_Window_FrameRectAsAnchorRect(void* window) {
-  NSWindow* w = (__bridge NSWindow*)window;
-  NSRect globalScreenFrame = ComputeGlobalScreenFrame();
-  NSRect frameRect = w.frame;
-  FlipRect(frameRect, globalScreenFrame);
-  NSRect contentRect = [w convertRectToScreen:w.contentView.bounds];
-  FlipRect(contentRect, globalScreenFrame);
-  return FlutterWindowRect::fromNSRect(NSMakeRect(frameRect.origin.x - contentRect.origin.x,
-                                                  frameRect.origin.y - contentRect.origin.y,
-                                                  frameRect.size.width, frameRect.size.height));
 }
 
 FlutterWindowOffset InternalFlutter_Window_GetOffsetInParent(void* window) {
@@ -972,6 +1034,42 @@ FlutterWindowOffset InternalFlutter_Window_GetOffsetInParent(void* window) {
       .x = childRect.origin.x - parentRect.origin.x,
       .y = childRect.origin.y - parentRect.origin.y,
   };
+}
+
+void InternalFlutter_Window_SetContentRect(void* window, const FlutterWindowRect* rect) {
+  NSWindow* w = (__bridge NSWindow*)window;
+  FlutterWindowOwner* owner = (FlutterWindowOwner*)w.delegate;
+  [owner setPendingContentRect:*rect];
+}
+
+FlutterWindowRect InternalFlutter_Window_ParentContentRect(void* window) {
+  NSWindow* w = (__bridge NSWindow*)window;
+  NSWindow* parent = w.parentWindow;
+  if (!parent) {
+    return {0, 0, 0, 0};
+  }
+  NSRect globalScreenFrame = ComputeGlobalScreenFrame();
+  NSRect parentRect = [parent contentRectForFrameRect:parent.frame];
+  FlipRect(parentRect, globalScreenFrame);
+  return FlutterWindowRect::fromNSRect(parentRect);
+}
+
+FlutterWindowRect InternalFlutter_Window_ScreenVisibleFrame(void* window) {
+  NSWindow* w = (__bridge NSWindow*)window;
+  NSScreen* screen = w.parentWindow.screen ?: w.screen;
+  if (!screen) {
+    return {0, 0, 0, 0};
+  }
+  NSRect globalScreenFrame = ComputeGlobalScreenFrame();
+  NSRect visibleFrame = screen.visibleFrame;
+  FlipRect(visibleFrame, globalScreenFrame);
+  return FlutterWindowRect::fromNSRect(visibleFrame);
+}
+
+void InternalFlutter_Window_SizingComplete(void* window) {
+  NSWindow* w = (__bridge NSWindow*)window;
+  FlutterWindowOwner* owner = (FlutterWindowOwner*)w.delegate;
+  [owner sizingComplete];
 }
 
 // NOLINTEND(google-objc-function-naming)

@@ -2,18 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: invalid_use_of_internal_member
-// ignore_for_file: implementation_imports
-
-import 'package:flutter/src/widgets/_window.dart';
 import 'package:material_ui/material_ui.dart';
 
 class PopupWindowContent extends StatefulWidget {
   /// Creates a popup window widget.
-  const PopupWindowContent({super.key, required this.controller});
-
-  /// Controller for this widget.
-  final PopupWindowController controller;
+  const PopupWindowContent({super.key});
 
   @override
   State<PopupWindowContent> createState() => _PopupWindowContentState();

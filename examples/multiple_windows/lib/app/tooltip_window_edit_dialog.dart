@@ -33,10 +33,6 @@ class _TooltipWindowEditDialog extends StatefulWidget {
 }
 
 class _TooltipWindowEditDialogState extends State<_TooltipWindowEditDialog> {
-  late final TextEditingController leftController;
-  late final TextEditingController topController;
-  late final TextEditingController widthController;
-  late final TextEditingController heightController;
   late final TextEditingController offsetXController;
   late final TextEditingController offsetYController;
 
@@ -44,12 +40,6 @@ class _TooltipWindowEditDialogState extends State<_TooltipWindowEditDialog> {
   WindowPositionerAnchor? childAnchor;
 
   void _init() {
-    // TooltipWindowController doesn't expose anchorRect as a getter,
-    // so we initialize with zero values that the user can edit.
-    leftController = TextEditingController(text: '0.0');
-    topController = TextEditingController(text: '0.0');
-    widthController = TextEditingController(text: '100.0');
-    heightController = TextEditingController(text: '100.0');
     offsetXController = TextEditingController(text: '0.0');
     offsetYController = TextEditingController(text: '0.0');
     parentAnchor = null;
@@ -72,27 +62,14 @@ class _TooltipWindowEditDialogState extends State<_TooltipWindowEditDialog> {
 
   @override
   void dispose() {
-    leftController.dispose();
-    topController.dispose();
-    widthController.dispose();
-    heightController.dispose();
     offsetXController.dispose();
     offsetYController.dispose();
     super.dispose();
   }
 
   void _onSave() {
-    final double? left = double.tryParse(leftController.text);
-    final double? top = double.tryParse(topController.text);
-    final double? width = double.tryParse(widthController.text);
-    final double? height = double.tryParse(heightController.text);
     final double? offsetX = double.tryParse(offsetXController.text);
     final double? offsetY = double.tryParse(offsetYController.text);
-
-    Rect? newRect;
-    if (left != null && top != null && width != null && height != null) {
-      newRect = Rect.fromLTWH(left, top, width, height);
-    }
 
     WindowPositioner? newPositioner;
     if (parentAnchor != null || childAnchor != null || offsetX != null || offsetY != null) {
@@ -103,8 +80,8 @@ class _TooltipWindowEditDialogState extends State<_TooltipWindowEditDialog> {
       );
     }
 
-    if (newRect != null || newPositioner != null) {
-      widget.controller.updatePosition(anchorRect: newRect, positioner: newPositioner);
+    if (newPositioner != null) {
+      widget.controller.updatePosition(positioner: newPositioner);
     }
 
     widget.onClose();
@@ -119,29 +96,6 @@ class _TooltipWindowEditDialogState extends State<_TooltipWindowEditDialog> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Anchor Rectangle', style: Theme.of(context).textTheme.titleSmall),
-            const SizedBox(height: 8),
-            TextField(
-              controller: leftController,
-              keyboardType: TextInputType.number,
-              decoration: const InputDecoration(labelText: 'Anchor Left'),
-            ),
-            TextField(
-              controller: topController,
-              keyboardType: TextInputType.number,
-              decoration: const InputDecoration(labelText: 'Anchor Top'),
-            ),
-            TextField(
-              controller: widthController,
-              keyboardType: TextInputType.number,
-              decoration: const InputDecoration(labelText: 'Anchor Width'),
-            ),
-            TextField(
-              controller: heightController,
-              keyboardType: TextInputType.number,
-              decoration: const InputDecoration(labelText: 'Anchor Height'),
-            ),
-            const SizedBox(height: 16),
             Text('Positioner', style: Theme.of(context).textTheme.titleSmall),
             const SizedBox(height: 8),
             DropdownButtonFormField<WindowPositionerAnchor>(

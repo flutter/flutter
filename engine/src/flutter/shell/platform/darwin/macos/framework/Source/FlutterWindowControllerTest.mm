@@ -16,12 +16,6 @@
 // CREATE_NATIVE_ENTRY is leaky.
 // NOLINTBEGIN(clang-analyzer-core.StackAddressEscape)
 
-// Test category declaring the internal method used to simulate the first frame
-// presentation. The implementation lives in FlutterView.mm.
-@interface FlutterView (TestingOnPresent)
-- (void)onPresent:(CGSize)frameSize withBlock:(dispatch_block_t)block delay:(NSTimeInterval)delay;
-@end
-
 namespace flutter::testing {
 
 class FlutterWindowControllerTest : public FlutterEngineTest {
@@ -69,20 +63,6 @@ class FlutterWindowControllerRetainTest : public ::testing::Test {};
 class FlutterWindowControllerSizeTest : public FlutterEngineTest {};
 
 const CFAbsoluteTime kTestTimeout = 30.0;
-
-// Runs the macOS run loop until the predicate evaluates to true or the given
-// timeout is exceeded. The predicate is checked after each run loop source has
-// been handled. ADD_FAILURE is called on timeout.
-static void RunLoopUntilPredicate(NSTimeInterval timeout, bool (^predicate)(void)) {
-  CFAbsoluteTime const deadline = CFAbsoluteTimeGetCurrent() + timeout;
-  while (!predicate()) {
-    CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0.05, true);
-    if (CFAbsoluteTimeGetCurrent() > deadline) {
-      ADD_FAILURE() << "Timed out waiting for run loop predicate.";
-      return;
-    }
-  }
-}
 
 TEST_F(FlutterWindowControllerTest, FixMoveRunLoopMode) {
   FlutterEngine* engine = GetFlutterEngine();
@@ -140,17 +120,6 @@ TEST_F(FlutterWindowControllerTest, CreateTooltipWindow) {
   int64_t parentViewId = InternalFlutter_WindowController_CreateRegularWindow(engineId, &request);
   EXPECT_EQ(parentViewId, 1);
 
-  auto position_callback = [](const FlutterWindowSize& child_size,
-                              const FlutterWindowRect& parent_rect,
-                              const FlutterWindowRect& output_rect) -> FlutterWindowRect* {
-    FlutterWindowRect* rect = static_cast<FlutterWindowRect*>(malloc(sizeof(FlutterWindowRect)));
-    rect->left = parent_rect.left + 10;
-    rect->top = parent_rect.top + 10;
-    rect->width = child_size.width;
-    rect->height = child_size.height;
-    return rect;
-  };
-
   request = FlutterWindowCreationRequest{
       .has_constraints = true,
       .constraints{
@@ -162,7 +131,6 @@ TEST_F(FlutterWindowControllerTest, CreateTooltipWindow) {
       .on_should_close = [] {},
       .on_will_close = [] {},
       .notify_listeners = [] {},
-      .on_get_window_position = position_callback,
   };
 
   const int64_t tooltipViewId =
@@ -186,17 +154,6 @@ TEST_F(FlutterWindowControllerTest, CreatePopupWindow) {
   int64_t parentViewId = InternalFlutter_WindowController_CreateRegularWindow(engineId, &request);
   EXPECT_EQ(parentViewId, 1);
 
-  auto position_callback = [](const FlutterWindowSize& child_size,
-                              const FlutterWindowRect& parent_rect,
-                              const FlutterWindowRect& output_rect) -> FlutterWindowRect* {
-    FlutterWindowRect* rect = static_cast<FlutterWindowRect*>(malloc(sizeof(FlutterWindowRect)));
-    rect->left = parent_rect.left + 10;
-    rect->top = parent_rect.top + 10;
-    rect->width = child_size.width;
-    rect->height = child_size.height;
-    return rect;
-  };
-
   request = FlutterWindowCreationRequest{
       .has_constraints = true,
       .constraints{
@@ -208,7 +165,6 @@ TEST_F(FlutterWindowControllerTest, CreatePopupWindow) {
       .on_should_close = [] {},
       .on_will_close = [] {},
       .notify_listeners = [] {},
-      .on_get_window_position = position_callback,
   };
 
   const int64_t tooltipViewId =
@@ -217,17 +173,6 @@ TEST_F(FlutterWindowControllerTest, CreatePopupWindow) {
 }
 
 TEST_F(FlutterWindowControllerTest, CreateSatelliteWindow) {
-  auto position_callback = [](const FlutterWindowSize& child_size,
-                              const FlutterWindowRect& parent_rect,
-                              const FlutterWindowRect& output_rect) -> FlutterWindowRect* {
-    FlutterWindowRect* rect = static_cast<FlutterWindowRect*>(malloc(sizeof(FlutterWindowRect)));
-    rect->left = parent_rect.left + 10;
-    rect->top = parent_rect.top + 10;
-    rect->width = child_size.width;
-    rect->height = child_size.height;
-    return rect;
-  };
-
   auto request = FlutterWindowCreationRequest{
       .has_size = true,
       .size = {.width = 800, .height = 600},
@@ -252,7 +197,6 @@ TEST_F(FlutterWindowControllerTest, CreateSatelliteWindow) {
       .on_should_close = [] {},
       .on_will_close = [] {},
       .notify_listeners = [] {},
-      .on_get_window_position = position_callback,
   };
 
   const int64_t satelliteViewId =
@@ -271,99 +215,6 @@ TEST_F(FlutterWindowControllerTest, CreateSatelliteWindow) {
 
   NSWindow* parentWindow = [engine viewControllerForIdentifier:parentViewId].view.window;
   EXPECT_EQ(satelliteWindow.parentWindow, parentWindow);
-}
-
-static int position_callback_calls = 0;
-
-TEST_F(FlutterWindowControllerTest, SatelliteWindowRunsPositionCallbackOnce) {
-  position_callback_calls = 0;
-  auto position_callback = [](const FlutterWindowSize& child_size,
-                              const FlutterWindowRect& parent_rect,
-                              const FlutterWindowRect& output_rect) -> FlutterWindowRect* {
-    position_callback_calls++;
-    FlutterWindowRect* rect = static_cast<FlutterWindowRect*>(malloc(sizeof(FlutterWindowRect)));
-    rect->left = parent_rect.left + 10;
-    rect->top = parent_rect.top + 10;
-    rect->width = child_size.width;
-    rect->height = child_size.height;
-    return rect;
-  };
-
-  auto request = FlutterWindowCreationRequest{
-      .has_size = true,
-      .size = {.width = 800, .height = 600},
-      .resizable = true,
-      .on_should_close = [] {},
-      .on_will_close = [] {},
-      .notify_listeners = [] {},
-  };
-
-  IsolateScope isolate_scope(isolate());
-  FlutterEngine* engine = GetFlutterEngine();
-  int64_t engineId = reinterpret_cast<int64_t>(engine);
-
-  int64_t parentViewId = InternalFlutter_WindowController_CreateRegularWindow(engineId, &request);
-  EXPECT_EQ(parentViewId, 1);
-
-  request = FlutterWindowCreationRequest{
-      .has_size = true,
-      .size = {.width = 200, .height = 100},
-      .resizable = false,
-      .parent_view_id = parentViewId,
-      .on_should_close = [] {},
-      .on_will_close = [] {},
-      .notify_listeners = [] {},
-      .on_get_window_position = position_callback,
-  };
-
-  const int64_t satelliteViewId =
-      InternalFlutter_WindowController_CreateSatelliteWindow(engineId, &request);
-  EXPECT_NE(satelliteViewId, 0);
-
-  ASSERT_NE([engine viewControllerForIdentifier:satelliteViewId], nil);
-  NSWindow* satelliteWindow = [engine viewControllerForIdentifier:satelliteViewId].view.window;
-  NSWindow* parentWindow = [engine viewControllerForIdentifier:parentViewId].view.window;
-  FlutterView* satelliteView = [engine viewControllerForIdentifier:satelliteViewId].flutterView;
-
-  NSRect parentContentRect = [parentWindow contentRectForFrameRect:parentWindow.frame];
-
-  // The satellite is hidden until it has been placed.
-  EXPECT_EQ(satelliteWindow.alphaValue, 0.0);
-  EXPECT_EQ(position_callback_calls, 0);
-
-  // Simulate the first frame: present the view content the same way the
-  // compositor does. The positioner is invoked and the window is revealed.
-  CGSize const frameSize = [satelliteView convertSizeToBacking:satelliteView.bounds.size];
-  [satelliteView onPresent:frameSize
-                 withBlock:^{
-                 }
-                     delay:0];
-  RunLoopUntilPredicate(1.0, ^{
-    return satelliteWindow.alphaValue == 1.0;
-  });
-
-  NSRect frame = satelliteWindow.frame;
-  EXPECT_EQ(position_callback_calls, 1);
-  EXPECT_EQ(satelliteWindow.alphaValue, 1.0);
-  EXPECT_NEAR(frame.origin.x, parentContentRect.origin.x + 10, 1);
-  EXPECT_NEAR(frame.origin.y + frame.size.height,
-              parentContentRect.origin.y + parentContentRect.size.height - 10, 1);
-
-  // After the initial placement, the position callback is not invoked again.
-  // User driven movement is retained.
-  NSRect userMovedFrame =
-      NSMakeRect(frame.origin.x + 5, frame.origin.y - 5, frame.size.width, frame.size.height);
-  [satelliteWindow setFrame:userMovedFrame display:NO];
-  [satelliteView onPresent:frameSize
-                 withBlock:^{
-                 }
-                     delay:0];
-  RunLoopUntilPredicate(1.0, ^{
-    return NSEqualRects(satelliteWindow.frame, userMovedFrame) == YES;
-  });
-
-  EXPECT_EQ(position_callback_calls, 1);
-  EXPECT_TRUE(NSEqualRects(satelliteWindow.frame, userMovedFrame));
 }
 
 TEST_F(FlutterWindowControllerTest, ReparentSatelliteWindow) {
@@ -579,70 +430,6 @@ TEST_F(FlutterWindowControllerTest, ClosesAllWindowsOnEngineRestart) {
   EXPECT_EQ(viewController3, nil);
 };
 
-TEST_F(FlutterWindowControllerTest, ViewMetricsRespectPositionCallbackConstraints) {
-  IsolateScope isolate_scope(isolate());
-  FlutterEngine* engine = GetFlutterEngine();
-  int64_t engineId = reinterpret_cast<int64_t>(engine);
-
-  // Create parent window.
-  auto parentRequest = FlutterWindowCreationRequest{
-      .has_size = true,
-      .size = {.width = 800, .height = 600},
-      .resizable = true,
-      .on_should_close = [] {},
-      .on_will_close = [] {},
-      .notify_listeners = [] {},
-  };
-  int64_t parentViewId =
-      InternalFlutter_WindowController_CreateRegularWindow(engineId, &parentRequest);
-  EXPECT_EQ(parentViewId, 1);
-
-  auto position_callback = [](const FlutterWindowSize& child_size,
-                              const FlutterWindowRect& parent_rect,
-                              const FlutterWindowRect& output_rect) -> FlutterWindowRect* {
-    FlutterWindowRect* rect = static_cast<FlutterWindowRect*>(malloc(sizeof(FlutterWindowRect)));
-    rect->left = parent_rect.left;
-    rect->top = parent_rect.top;
-    rect->width = 500;
-    rect->height = 400;
-    return rect;
-  };
-
-  auto tooltipRequest = FlutterWindowCreationRequest{
-      .has_constraints = true,
-      .constraints{
-          .min_width = 0,
-          .min_height = 0,
-          .max_width = 1000,
-          .max_height = 1000,
-      },
-      .parent_view_id = parentViewId,
-      .on_should_close = [] {},
-      .on_will_close = [] {},
-      .notify_listeners = [] {},
-      .on_get_window_position = position_callback,
-  };
-
-  const int64_t tooltipViewId =
-      InternalFlutter_WindowController_CreateTooltipWindow(engineId, &tooltipRequest);
-  EXPECT_NE(tooltipViewId, 0);
-
-  FlutterViewController* viewController = [engine viewControllerForIdentifier:tooltipViewId];
-  FlutterView* flutterView = viewController.flutterView;
-
-  EXPECT_EQ(flutterView.sizedToContents, YES);
-
-  CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0.1, false);
-
-  [flutterView.contentDelegate viewDidUpdateContents:flutterView withSize:NSMakeSize(1000, 1000)];
-
-  // The constraints from request are 1000x1000, but additional constraints came from the positioner
-  // and must be respected.
-  CGSize maxSize = flutterView.maximumContentSize;
-  EXPECT_LE(maxSize.width, 500);
-  EXPECT_LE(maxSize.height, 400);
-}
-
 TEST_F(FlutterWindowControllerTest, GetOffsetInParent) {
   NSWindow* parentWindow = [[NSWindow alloc] initWithContentRect:NSMakeRect(0, 0, 800, 600)
                                                        styleMask:NSWindowStyleMaskTitled
@@ -679,6 +466,191 @@ TEST_F(FlutterWindowControllerTest, GetOffsetInParent) {
   [parentWindow close];
 }
 
+// Returns the content rect of the window in Flutter global coordinates (top-left
+// origin over the union of all screens).
+static NSRect ContentRectInFlutterCoordinates(NSWindow* window) {
+  NSRect globalScreenFrame = NSZeroRect;
+  for (NSScreen* screen in [NSScreen screens]) {
+    globalScreenFrame = NSUnionRect(globalScreenFrame, screen.frame);
+  }
+  NSRect rect = [window contentRectForFrameRect:window.frame];
+  rect.origin.y = NSMaxY(globalScreenFrame) - NSMaxY(rect);
+  return rect;
+}
+
+// Simulates the commit of a surface, which is when pending size changes are
+// applied.
+static void CommitSurface(FlutterView* view) {
+  [view.contentDelegate viewDidUpdateContents:view withSize:view.bounds.size];
+}
+
+class FlutterWindowControllerGeometryTest : public FlutterWindowControllerTest {
+ protected:
+  void SetUp() override {
+    FlutterWindowControllerTest::SetUp();
+    engine_id_ = reinterpret_cast<int64_t>(GetFlutterEngine());
+    FlutterWindowCreationRequest request{
+        .has_size = true,
+        .size = {.width = 800, .height = 600},
+        .on_should_close = [] {},
+        .on_will_close = [] {},
+        .notify_listeners = [] {},
+    };
+    IsolateScope isolate_scope(isolate());
+    parent_view_id_ = InternalFlutter_WindowController_CreateRegularWindow(engine_id_, &request);
+  }
+
+  FlutterViewController* CreateTooltip(double max_width, double max_height) {
+    FlutterWindowCreationRequest request{
+        .has_constraints = true,
+        .constraints{.max_width = max_width, .max_height = max_height},
+        .parent_view_id = parent_view_id_,
+        .on_should_close = [] {},
+        .on_will_close = [] {},
+        .notify_listeners = [] {},
+    };
+    IsolateScope isolate_scope(isolate());
+    int64_t view_id = InternalFlutter_WindowController_CreateTooltipWindow(engine_id_, &request);
+    return [GetFlutterEngine() viewControllerForIdentifier:view_id];
+  }
+
+  int64_t engine_id_ = 0;
+  int64_t parent_view_id_ = 0;
+};
+
+TEST_F(FlutterWindowControllerGeometryTest, SetContentRectDefersResizeUntilCommit) {
+  FlutterViewController* controller = CreateTooltip(1000, 1000);
+  NSWindow* window = controller.view.window;
+  NSSize initialSize = ContentRectInFlutterCoordinates(window).size;
+
+  FlutterWindowRect rect{.left = 100, .top = 120, .width = 200, .height = 150};
+  InternalFlutter_Window_SetContentRect((__bridge void*)window, &rect);
+
+  // The size changes, so nothing is applied until the surface is committed.
+  EXPECT_TRUE(NSEqualSizes(ContentRectInFlutterCoordinates(window).size, initialSize));
+  EXPECT_EQ(window.alphaValue, 0.0);
+
+  CommitSurface(controller.flutterView);
+
+  EXPECT_TRUE(
+      NSEqualRects(ContentRectInFlutterCoordinates(window), NSMakeRect(100, 120, 200, 150)));
+  // The window is revealed once the geometry has been applied.
+  EXPECT_EQ(window.alphaValue, 1.0);
+}
+
+TEST_F(FlutterWindowControllerGeometryTest, SetContentRectMovesImmediately) {
+  FlutterViewController* controller = CreateTooltip(1000, 1000);
+  NSWindow* window = controller.view.window;
+
+  FlutterWindowRect rect{.left = 100, .top = 120, .width = 200, .height = 150};
+  InternalFlutter_Window_SetContentRect((__bridge void*)window, &rect);
+  CommitSurface(controller.flutterView);
+
+  // Same size: the move does not wait for a surface commit.
+  rect.left = 300;
+  rect.top = 50;
+  InternalFlutter_Window_SetContentRect((__bridge void*)window, &rect);
+  EXPECT_TRUE(NSEqualRects(ContentRectInFlutterCoordinates(window), NSMakeRect(300, 50, 200, 150)));
+}
+
+TEST_F(FlutterWindowControllerGeometryTest, SetContentRectSupersedesPendingResize) {
+  FlutterViewController* controller = CreateTooltip(1000, 1000);
+  NSWindow* window = controller.view.window;
+
+  FlutterWindowRect rect{.left = 100, .top = 120, .width = 200, .height = 150};
+  InternalFlutter_Window_SetContentRect((__bridge void*)window, &rect);
+  CommitSurface(controller.flutterView);
+
+  // Request a resize, then go back to the current size before the commit.
+  FlutterWindowRect resized{.left = 100, .top = 120, .width = 400, .height = 300};
+  InternalFlutter_Window_SetContentRect((__bridge void*)window, &resized);
+  InternalFlutter_Window_SetContentRect((__bridge void*)window, &rect);
+  CommitSurface(controller.flutterView);
+
+  EXPECT_TRUE(
+      NSEqualRects(ContentRectInFlutterCoordinates(window), NSMakeRect(100, 120, 200, 150)));
+}
+
+TEST_F(FlutterWindowControllerGeometryTest, SetContentRectClampsToConstraints) {
+  FlutterViewController* controller = CreateTooltip(300, 200);
+  NSWindow* window = controller.view.window;
+
+  FlutterWindowRect rect{.left = 100, .top = 120, .width = 500, .height = 400};
+  InternalFlutter_Window_SetContentRect((__bridge void*)window, &rect);
+  CommitSurface(controller.flutterView);
+
+  EXPECT_TRUE(
+      NSEqualRects(ContentRectInFlutterCoordinates(window), NSMakeRect(100, 120, 300, 200)));
+}
+
+TEST_F(FlutterWindowControllerGeometryTest, SetContentRectPositionsContentOfTitledWindow) {
+  FlutterWindowCreationRequest request{
+      .has_size = true,
+      .size = {.width = 200, .height = 100},
+      .parent_view_id = parent_view_id_,
+      .on_should_close = [] {},
+      .on_will_close = [] {},
+      .notify_listeners = [] {},
+  };
+  int64_t view_id = 0;
+  {
+    IsolateScope isolate_scope(isolate());
+    view_id = InternalFlutter_WindowController_CreateSatelliteWindow(engine_id_, &request);
+  }
+  NSWindow* window = [GetFlutterEngine() viewControllerForIdentifier:view_id].view.window;
+
+  // The rect describes the content area, the title bar is outside of it.
+  FlutterWindowRect rect{.left = 100, .top = 120, .width = 200, .height = 100};
+  InternalFlutter_Window_SetContentRect((__bridge void*)window, &rect);
+
+  EXPECT_TRUE(
+      NSEqualRects(ContentRectInFlutterCoordinates(window), NSMakeRect(100, 120, 200, 100)));
+  EXPECT_GT(window.frame.size.height, 100);
+}
+
+TEST_F(FlutterWindowControllerGeometryTest,
+       SetContentSizeAppliesImmediatelyWhenNotSizedToContents) {
+  NSWindow* window = [GetFlutterEngine() viewControllerForIdentifier:parent_view_id_].view.window;
+
+  // The resize synchronizer takes care of presenting a matching surface, so
+  // the size is applied right away instead of waiting for a commit.
+  FlutterWindowSize size{.width = 640, .height = 480};
+  InternalFlutter_Window_SetContentSize((__bridge void*)window, &size);
+
+  EXPECT_TRUE(NSEqualSizes(ContentRectInFlutterCoordinates(window).size, NSMakeSize(640, 480)));
+}
+
+TEST_F(FlutterWindowControllerGeometryTest, SizingCompleteWaitsForPendingResize) {
+  FlutterWindowCreationRequest request{
+      .has_constraints = true,
+      .constraints{.max_width = 1000, .max_height = 1000},
+      .resizable = true,
+      .on_should_close = [] {},
+      .on_will_close = [] {},
+      .notify_listeners = [] {},
+  };
+  int64_t view_id = 0;
+  {
+    IsolateScope isolate_scope(isolate());
+    view_id = InternalFlutter_WindowController_CreateRegularWindow(engine_id_, &request);
+  }
+  FlutterViewController* controller = [GetFlutterEngine() viewControllerForIdentifier:view_id];
+  NSWindow* window = controller.view.window;
+  EXPECT_TRUE(controller.flutterView.sizedToContents);
+
+  FlutterWindowSize size{.width = 300, .height = 200};
+  InternalFlutter_Window_SetContentSize((__bridge void*)window, &size);
+  InternalFlutter_Window_SizingComplete((__bridge void*)window);
+
+  // The view stays sized to contents until the pending size is applied.
+  EXPECT_TRUE(controller.flutterView.sizedToContents);
+
+  CommitSurface(controller.flutterView);
+
+  EXPECT_TRUE(NSEqualSizes(ContentRectInFlutterCoordinates(window).size, NSMakeSize(300, 200)));
+  EXPECT_FALSE(controller.flutterView.sizedToContents);
+}
+
 TEST_F(FlutterWindowControllerSizeTest, SizedToContentResizable) {
   FlutterWindowCreationRequest request{
       .has_size = false,
@@ -703,6 +675,13 @@ TEST_F(FlutterWindowControllerSizeTest, SizedToContentResizable) {
                          isolate = Isolate::Current();
                        }));
 
+  NSWindow* window = nil;
+  AddFfiNativeCallback("PushContentSize", CREATE_FFI_LAMBDA(([&](double width, double height) {
+                         FlutterWindowSize size{width, height};
+                         InternalFlutter_Window_SetContentSize((__bridge void*)window, &size);
+                         InternalFlutter_Window_SizingComplete((__bridge void*)window);
+                       })));
+
   auto engine = GetFlutterEngine();
   [engine runWithEntrypoint:@"testRenderSizedToContentResizable"];
 
@@ -719,7 +698,7 @@ TEST_F(FlutterWindowControllerSizeTest, SizedToContentResizable) {
   }
 
   auto controller = [engine viewControllerForIdentifier:viewId];
-  auto window = controller.view.window;
+  window = controller.view.window;
   CFAbsoluteTime startTime = CFAbsoluteTimeGetCurrent();
   double pixelRatio = [window backingScaleFactor];
   while (window.frame.size.width != 300 / pixelRatio &&
@@ -760,6 +739,12 @@ TEST_F(FlutterWindowControllerSizeTest, SizedToContentNotResizable) {
                          isolate = Isolate::Current();
                        }));
 
+  NSWindow* window = nil;
+  AddFfiNativeCallback("PushContentSize", CREATE_FFI_LAMBDA(([&](double width, double height) {
+                         FlutterWindowSize size{width, height};
+                         InternalFlutter_Window_SetContentSize((__bridge void*)window, &size);
+                       })));
+
   auto engine = GetFlutterEngine();
   [engine runWithEntrypoint:@"testRenderSizedToContent"];
 
@@ -776,7 +761,7 @@ TEST_F(FlutterWindowControllerSizeTest, SizedToContentNotResizable) {
   }
 
   auto controller = [engine viewControllerForIdentifier:viewId];
-  auto window = controller.view.window;
+  window = controller.view.window;
 
   CFAbsoluteTime startTime = CFAbsoluteTimeGetCurrent();
   double pixelRatio = [window backingScaleFactor];

@@ -189,7 +189,7 @@ class WindowingOwnerWin32 extends WindowingOwner {
   TooltipWindowController createTooltipWindowController({
     required TooltipWindowControllerDelegate delegate,
     required BoxConstraints constraints,
-    required Rect anchorRect,
+    required ValueGetter<Rect> anchorRect,
     required WindowPositioner positioner,
     required BaseWindowController parent,
   }) {
@@ -208,7 +208,7 @@ class WindowingOwnerWin32 extends WindowingOwner {
   PopupWindowController createPopupWindowController({
     required PopupWindowControllerDelegate delegate,
     required BoxConstraints constraints,
-    required Rect anchorRect,
+    required ValueGetter<Rect> anchorRect,
     required WindowPositioner positioner,
     required BaseWindowController parent,
   }) {
@@ -902,7 +902,7 @@ class TooltipWindowControllerWin32 extends TooltipWindowController
   final TooltipWindowControllerDelegate _delegate;
   final BaseWindowController _parent;
   WindowPositioner _positioner;
-  Rect _anchorRect;
+  final ValueGetter<Rect> _anchorRect;
   bool _destroyed = false;
 
   @override
@@ -913,7 +913,7 @@ class TooltipWindowControllerWin32 extends TooltipWindowController
   WindowPositioner get _placementPositioner => _positioner;
 
   @override
-  Rect? get _placementAnchorRect => _anchorRect;
+  Rect? get _placementAnchorRect => _anchorRect();
 
   /// Returns HWND pointer to the top level window.
   @override
@@ -951,11 +951,8 @@ class TooltipWindowControllerWin32 extends TooltipWindowController
   }
 
   @override
-  void updatePosition({Rect? anchorRect, WindowPositioner? positioner}) {
+  void updatePosition({WindowPositioner? positioner}) {
     _ensureNotDestroyed();
-    if (anchorRect != null) {
-      _anchorRect = anchorRect;
-    }
     if (positioner != null) {
       _positioner = positioner;
     }
@@ -1063,7 +1060,7 @@ class PopupWindowControllerWin32 extends PopupWindowController
   final PopupWindowControllerDelegate _delegate;
   final BaseWindowController _parent;
   WindowPositioner _positioner;
-  Rect _anchorRect;
+  final ValueGetter<Rect> _anchorRect;
   bool _destroyed = false;
 
   @override
@@ -1074,7 +1071,7 @@ class PopupWindowControllerWin32 extends PopupWindowController
   WindowPositioner get _placementPositioner => _positioner;
 
   @override
-  Rect? get _placementAnchorRect => _anchorRect;
+  Rect? get _placementAnchorRect => _anchorRect();
 
   /// Returns HWND pointer to the top level window.
   @internal
@@ -1112,11 +1109,8 @@ class PopupWindowControllerWin32 extends PopupWindowController
   }
 
   @override
-  void updatePosition({Rect? anchorRect, WindowPositioner? positioner}) {
+  void updatePosition({WindowPositioner? positioner}) {
     _ensureNotDestroyed();
-    if (anchorRect != null) {
-      _anchorRect = anchorRect;
-    }
     if (positioner != null) {
       _positioner = positioner;
     }

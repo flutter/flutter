@@ -46,7 +46,7 @@ class _TooltipButtonState extends State<TooltipButton> {
       final tracker = ElementPositionTracker(element: _tooltipButtonKey.currentContext!);
       late final WindowEntry entry;
       final controller = TooltipWindowController(
-        anchorRect: tracker.getGlobalRect()!,
+        anchorRect: () => tracker.getGlobalRect()!,
         positioner: windowSettings.positioner,
         delegate: _TooltipWindowControllerDelegate(
           onDestroyed: () {
@@ -65,9 +65,6 @@ class _TooltipButtonState extends State<TooltipButton> {
         controller: controller,
         builder: (BuildContext context) => TooltipWindowContent(controller: controller),
       );
-      tracker.onGlobalRectChange = (rect) {
-        controller.updatePosition(anchorRect: rect);
-      };
       setState(() {
         _tooltipEntry = entry;
         _tooltipTracker = tracker;
