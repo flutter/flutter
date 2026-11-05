@@ -506,23 +506,60 @@ void main() {
   testWidgets('SliverGridDelegateWithMaxCrossAxisExtent lays out with zero cross axis extent', (
     WidgetTester tester,
   ) async {
+    var width = 0.0;
+    late StateSetter setWidth;
+
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
-        child: Center(
-          child: SizedBox(
-            width: 0.0,
-            height: 100.0,
-            child: GridView.extent(
-              maxCrossAxisExtent: 200.0,
-              children: const <Widget>[SizedBox(), SizedBox(), SizedBox()],
-            ),
-          ),
+        child: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            setWidth = setState;
+            return Center(
+              child: SizedBox(
+                width: width,
+                height: 100.0,
+                child: GridView.extent(
+                  maxCrossAxisExtent: 200.0,
+                  children: const <Widget>[Text('0'), Text('1'), Text('2'), Text('3')],
+                ),
+              ),
+            );
+          },
         ),
       ),
     );
-    expect(tester.takeException(), isNull);
     expect(tester.getSize(find.byType(GridView)), const Size(0.0, 100.0));
+    expect(find.text('0'), findsNothing);
+
+    setWidth(() {
+      width = 800.0;
+    });
+    await tester.pump();
+    expect(tester.getSize(find.byType(GridView)), const Size(800.0, 100.0));
+    expect(tester.getSize(find.text('0')), const Size(200.0, 200.0));
+    expect(tester.getTopLeft(find.text('3')), const Offset(600.0, 250.0));
+
+    const delegate = SliverGridDelegateWithMaxCrossAxisExtent(maxCrossAxisExtent: 200.0);
+    expect(
+      () => delegate.getLayout(
+        const SliverConstraints(
+          axisDirection: AxisDirection.down,
+          growthDirection: GrowthDirection.forward,
+          userScrollDirection: ScrollDirection.idle,
+          scrollOffset: 0.0,
+          precedingScrollExtent: 0.0,
+          overlap: 0.0,
+          remainingPaintExtent: 100.0,
+          crossAxisExtent: -1.0,
+          crossAxisDirection: AxisDirection.right,
+          viewportMainAxisExtent: 100.0,
+          remainingCacheExtent: 100.0,
+          cacheOrigin: 0.0,
+        ),
+      ),
+      throwsAssertionError,
+    );
   });
 
   testWidgets('GridView in unbounded context', (WidgetTester tester) async {
