@@ -362,7 +362,7 @@ abstract mixin class WidgetsBindingObserver {
   /// An example of implementing this method is provided in the class-level
   /// documentation for the [WidgetsBindingObserver] class.
   ///
-  /// This method exposes notifications from [SystemChannels.lifecycle].
+  /// This method exposes changes to [PlatformDispatcher.appLifecycleState].
   ///
   /// See also:
   ///

@@ -879,6 +879,16 @@ class Engine final : public RuntimeDelegate {
   ///
   void SetAccessibilityFeatures(int32_t flags);
 
+  //----------------------------------------------------------------------------
+  /// @brief      Notifies the engine that the lifecycle state of the
+  ///             application has changed. This originates in the platform view
+  ///             and is forwarded to the engine here on the UI task runner by
+  ///             the shell.
+  ///
+  /// @param[in]  state  The lifecycle state.
+  ///
+  void SetAppLifecycleState(LifecycleState state);
+
   // |RuntimeDelegate|
   void ScheduleFrame(bool regenerate_layer_trees) override;
 

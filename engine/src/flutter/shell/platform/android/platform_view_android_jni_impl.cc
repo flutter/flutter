@@ -555,6 +555,19 @@ static void SetAccessibilityFeatures(JNIEnv* env,
   ANDROID_SHELL_HOLDER->GetPlatformView()->SetAccessibilityFeatures(flags);
 }
 
+static void SetAppLifecycleState(JNIEnv* env,
+                                 jobject jcaller,
+                                 jlong shell_holder,
+                                 jint state) {
+  if (state < static_cast<jint>(LifecycleState::kDetached) ||
+      state > static_cast<jint>(LifecycleState::kPaused)) {
+    FML_LOG(ERROR) << "Invalid lifecycle state " << state;
+    return;
+  }
+  ANDROID_SHELL_HOLDER->GetPlatformView()->SetAppLifecycleState(
+      static_cast<LifecycleState>(state));
+}
+
 static jboolean GetIsSoftwareRendering(JNIEnv* env, jobject jcaller) {
   return FlutterMain::Get().GetSettings().enable_software_rendering;
 }
@@ -862,6 +875,11 @@ bool RegisterApi(JNIEnv* env) {
           .name = "nativeSetAccessibilityFeatures",
           .signature = "(JI)V",
           .fnPtr = reinterpret_cast<void*>(&SetAccessibilityFeatures),
+      },
+      {
+          .name = "nativeSetAppLifecycleState",
+          .signature = "(JI)V",
+          .fnPtr = reinterpret_cast<void*>(&SetAppLifecycleState),
       },
       {
           .name = "nativeGetIsSoftwareRenderingEnabled",

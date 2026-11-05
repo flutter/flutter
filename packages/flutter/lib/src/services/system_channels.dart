@@ -378,10 +378,20 @@ abstract final class SystemChannels {
   /// [AppLifecycleState] enumeration. A handler can be registered using
   /// [BasicMessageChannel.setMessageHandler].
   ///
+  /// This channel is deprecated. The engine reports the lifecycle state
+  /// through [PlatformDispatcher.appLifecycleState] and
+  /// [PlatformDispatcher.onAppLifecycleStateChanged]. For compatibility, the
+  /// framework also delivers each state change as a message on this channel,
+  /// and messages sent directly to the framework on this channel (for example,
+  /// from tests) are still handled. New code should use
+  /// [WidgetsBindingObserver.didChangeAppLifecycleState] or an
+  /// [AppLifecycleListener] instead of setting a message handler on this
+  /// channel.
+  ///
   /// See also:
   ///
   ///  * [WidgetsBindingObserver.didChangeAppLifecycleState], which triggers
-  ///    whenever a message is received on this channel.
+  ///    whenever the lifecycle state changes.
   static const BasicMessageChannel<String?> lifecycle = BasicMessageChannel<String?>(
     'flutter/lifecycle',
     StringCodec(),

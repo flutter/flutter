@@ -11,6 +11,7 @@
 
 #include "flutter/fml/memory/weak_ptr.h"
 #include "flutter/fml/task_runner.h"
+#include "flutter/lib/ui/window/platform_configuration.h"
 #include "flutter/lib/ui/window/pointer_data_packet.h"
 #include "flutter/lib/ui/window/viewport_metrics.h"
 #include "flutter/shell/common/platform_view.h"
@@ -66,6 +67,9 @@ NS_ASSUME_NONNULL_BEGIN
        initialRoute:(nullable NSString*)initialRoute NS_SWIFT_UI_ACTOR;
 - (void)attachView;
 - (void)notifyLowMemory;
+
+/// Sets the lifecycle state of the application.
+- (void)setAppLifecycleState:(flutter::LifecycleState)state;
 
 /// Asynchronously waits until the first frame is presented or the timeout is exceeded, then invokes
 /// callback.

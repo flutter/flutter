@@ -419,7 +419,7 @@ class MultiPlatformViewBackgroundForegroundScenario extends Scenario
     required this.secondId,
   }) {
     _nextFrame = _firstFrame;
-    channelBuffers.setListener('flutter/lifecycle', _onPlatformMessage);
+    view.platformDispatcher.onAppLifecycleStateChanged = _onAppLifecycleStateChanged;
   }
 
   /// The platform view identifier to use for the first platform view.
@@ -497,29 +497,27 @@ class MultiPlatformViewBackgroundForegroundScenario extends Scenario
     scene.dispose();
   }
 
-  String _lastLifecycleState = '';
+  AppLifecycleState? _lastLifecycleState;
 
-  void _onPlatformMessage(ByteData? data, PlatformMessageResponseCallback? callback) {
-    final String message = utf8.decode(data!.buffer.asUint8List());
-
-    // The expected first event should be 'AppLifecycleState.resumed', but
-    // occasionally it will receive 'AppLifecycleState.inactive' first. Skip
-    // any messages until 'AppLifecycleState.resumed' is received.
-    if (_lastLifecycleState.isEmpty && message != 'AppLifecycleState.resumed') {
+  void _onAppLifecycleStateChanged() {
+    final AppLifecycleState? state = view.platformDispatcher.appLifecycleState;
+    // The expected first event should be AppLifecycleState.resumed, but
+    // occasionally it will receive AppLifecycleState.inactive first. Skip
+    // any states until AppLifecycleState.resumed is received.
+    if (_lastLifecycleState == null && state != AppLifecycleState.resumed) {
       return;
     }
-    if (_lastLifecycleState == 'AppLifecycleState.inactive' &&
-        message == 'AppLifecycleState.resumed') {
+    if (_lastLifecycleState == AppLifecycleState.inactive && state == AppLifecycleState.resumed) {
       _nextFrame = _secondFrame;
       view.platformDispatcher.scheduleFrame();
     }
 
-    _lastLifecycleState = message;
+    _lastLifecycleState = state;
   }
 
   @override
   void unmount() {
-    channelBuffers.clearListener('flutter/lifecycle');
+    view.platformDispatcher.onAppLifecycleStateChanged = null;
     super.unmount();
   }
 }

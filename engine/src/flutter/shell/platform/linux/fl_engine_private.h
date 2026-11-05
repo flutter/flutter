@@ -616,6 +616,16 @@ gboolean fl_engine_unregister_external_texture(FlEngine* engine,
 void fl_engine_update_accessibility_features(FlEngine* engine, int32_t flags);
 
 /**
+ * fl_engine_set_app_lifecycle_state:
+ * @engine: an #FlEngine.
+ * @state: the new lifecycle state of the application.
+ *
+ * Tells the Flutter engine the lifecycle state of the application has changed.
+ */
+void fl_engine_set_app_lifecycle_state(FlEngine* engine,
+                                       FlutterAppLifecycleState state);
+
+/**
  * fl_engine_request_app_exit:
  * @engine: an #FlEngine.
  *

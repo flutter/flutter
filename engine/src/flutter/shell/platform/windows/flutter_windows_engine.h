@@ -266,6 +266,9 @@ class FlutterWindowsEngine {
            FlutterAccessibilityMode::IAccessibleEx;
   }
 
+  // Informs the engine that the application lifecycle state has changed.
+  void SetAppLifecycleState(AppLifecycleState state);
+
   // Refresh accessibility features and send them to the engine.
   void UpdateAccessibilityFeatures();
 

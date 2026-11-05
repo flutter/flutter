@@ -359,7 +359,7 @@ public class FlutterEngine implements ViewUtils.DisplayUpdater {
 
     accessibilityChannel = new AccessibilityChannel(dartExecutor, flutterJNI);
     deferredComponentChannel = new DeferredComponentChannel(dartExecutor);
-    lifecycleChannel = new LifecycleChannel(dartExecutor);
+    lifecycleChannel = new LifecycleChannel(flutterJNI);
     localizationChannel = new LocalizationChannel(dartExecutor);
     mouseCursorChannel = new MouseCursorChannel(dartExecutor);
     navigationChannel = new NavigationChannel(dartExecutor);

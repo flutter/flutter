@@ -129,6 +129,10 @@ abstract class PlatformDispatcher {
 
   String get initialLifecycleState => '';
 
+  AppLifecycleState? get appLifecycleState;
+  VoidCallback? get onAppLifecycleStateChanged;
+  set onAppLifecycleStateChanged(VoidCallback? callback);
+
   bool get alwaysUse24HourFormat;
 
   double get textScaleFactor;

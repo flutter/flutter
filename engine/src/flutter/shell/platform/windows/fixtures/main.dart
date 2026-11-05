@@ -182,45 +182,16 @@ Future<void> exitTestCancel() async {
 }
 
 @pragma('vm:entry-point')
-Future<void> enableLifecycleTest() async {
-  final finished = Completer<ByteData?>();
-  ui.channelBuffers.setListener('flutter/lifecycle', (
-    ByteData? data,
-    ui.PlatformMessageResponseCallback callback,
-  ) async {
-    if (data != null) {
-      ui.PlatformDispatcher.instance.sendPlatformMessage('flutter/unittest', data, (
-        ByteData? reply,
-      ) {
-        finished.complete();
-      });
-    }
-  });
-  await finished.future;
-}
-
-@pragma('vm:entry-point')
-Future<void> enableLifecycleToFrom() async {
-  ui.channelBuffers.setListener('flutter/lifecycle', (
-    ByteData? data,
-    ui.PlatformMessageResponseCallback callback,
-  ) async {
-    if (data != null) {
-      ui.PlatformDispatcher.instance.sendPlatformMessage(
-        'flutter/unittest',
-        data,
-        (ByteData? reply) {},
-      );
-    }
-  });
-  final enabledLifecycle = Completer<ByteData?>();
-  ui.PlatformDispatcher.instance.sendPlatformMessage(
-    'flutter/platform',
-    ByteData.sublistView(utf8.encode('{"method":"System.initializationComplete"}')),
-    (ByteData? data) {
-      enabledLifecycle.complete(data);
-    },
-  );
+void reportAppLifecycleState() {
+  ui.PlatformDispatcher.instance.onAppLifecycleStateChanged = () {
+    final state = ui.PlatformDispatcher.instance.appLifecycleState.toString();
+    ui.PlatformDispatcher.instance.sendPlatformMessage(
+      'flutter/unittest',
+      ByteData.sublistView(utf8.encode(state)),
+      (ByteData? reply) {},
+    );
+  };
+  signal();
 }
 
 @pragma('vm:entry-point')

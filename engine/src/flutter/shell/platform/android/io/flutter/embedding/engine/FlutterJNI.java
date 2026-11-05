@@ -976,6 +976,21 @@ public class FlutterJNI {
   }
 
   private native void nativeSetAccessibilityFeatures(long nativeShellHolderId, int flags);
+
+  /**
+   * Sets the lifecycle state of the application.
+   *
+   * @param state the index of the state in the framework's {@code AppLifecycleState} enum.
+   */
+  @UiThread
+  public void setAppLifecycleState(int state) {
+    ensureRunningOnMainThread();
+    if (isAttached()) {
+      nativeSetAppLifecycleState(nativeShellHolderId, state);
+    }
+  }
+
+  private native void nativeSetAppLifecycleState(long nativeShellHolderId, int state);
   // ------ End Accessibility Support ----
 
   // ------ Start Texture Registration Support -----

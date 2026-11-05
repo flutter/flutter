@@ -157,6 +157,8 @@ bool RuntimeController::FlushRuntimeStateToIsolate() {
              platform_data_.accessibility_feature_flags_) &&
          SetUserSettingsData(platform_data_.user_settings_data) &&
          SetInitialLifecycleState(platform_data_.lifecycle_state) &&
+         (!platform_data_.app_lifecycle_state.has_value() ||
+          SetAppLifecycleState(platform_data_.app_lifecycle_state.value())) &&
          SetDisplays(platform_data_.displays);
 }
 
@@ -267,6 +269,37 @@ bool RuntimeController::SetInitialLifecycleState(const std::string& data) {
   if (auto* platform_configuration = GetPlatformConfigurationIfAvailable()) {
     platform_configuration->UpdateInitialLifecycleState(
         platform_data_.lifecycle_state);
+    return true;
+  }
+
+  return false;
+}
+
+bool RuntimeController::SetAppLifecycleState(LifecycleState state) {
+  platform_data_.app_lifecycle_state = state;
+
+  // Keep the deprecated initial lifecycle state up to date until it is
+  // removed.
+  switch (state) {
+    case LifecycleState::kDetached:
+      SetInitialLifecycleState("AppLifecycleState.detached");
+      break;
+    case LifecycleState::kResumed:
+      SetInitialLifecycleState("AppLifecycleState.resumed");
+      break;
+    case LifecycleState::kInactive:
+      SetInitialLifecycleState("AppLifecycleState.inactive");
+      break;
+    case LifecycleState::kHidden:
+      SetInitialLifecycleState("AppLifecycleState.hidden");
+      break;
+    case LifecycleState::kPaused:
+      SetInitialLifecycleState("AppLifecycleState.paused");
+      break;
+  }
+
+  if (auto* platform_configuration = GetPlatformConfigurationIfAvailable()) {
+    platform_configuration->UpdateAppLifecycleState(state);
     return true;
   }
 

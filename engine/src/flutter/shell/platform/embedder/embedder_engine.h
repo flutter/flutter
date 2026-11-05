@@ -68,6 +68,8 @@ class EmbedderEngine {
 
   bool SetAccessibilityFeatures(int32_t flags);
 
+  bool SetAppLifecycleState(LifecycleState state);
+
   bool DispatchSemanticsAction(int64_t view_id,
                                int node_id,
                                flutter::SemanticsAction action,
