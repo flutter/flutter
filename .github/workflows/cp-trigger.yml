@@ -26,7 +26,9 @@ jobs:
     name: Record cherry-pick request
     runs-on: ubuntu-latest
     # Evaluated before a runner is allocated, so other labels cost nothing.
-    if: github.event.label.name == format('cp{0} beta', ':') || github.event.label.name == format('cp{0} stable', ':')
+    if: >-
+      github.repository == 'flutter/flutter' &&
+      (github.event.label.name == format('cp{0} beta', ':') || github.event.label.name == format('cp{0} stable', ':'))
     steps:
       - name: Record PR number and channel
         env:

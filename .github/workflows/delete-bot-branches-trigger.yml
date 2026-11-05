@@ -28,6 +28,7 @@ jobs:
     runs-on: ubuntu-latest
     # Evaluated before a runner is allocated, so non-bot PRs cost nothing.
     if: |
+      github.repository == 'flutter/flutter' &&
       github.event.pull_request.head.repo != null &&
       github.event.pull_request.head.repo.owner.login == 'flutteractionsbot' &&
       github.event.pull_request.head.ref != 'master' &&

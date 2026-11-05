@@ -10,6 +10,12 @@
 # is bound to the triggering run's head commit, and the channel is checked
 # against the PR's labels. Everything else (merged state, merge commit, release
 # branch) is read from trusted sources here.
+#
+# It can also be run manually (`workflow_dispatch`) by anyone with write access,
+# e.g. for PRs merged before `cp-trigger.yml` existed, whose merge commits don't
+# contain the trigger workflow:
+#
+#   gh workflow run easy-cp.yml -R flutter/flutter -f pr_number=12345 -f channel=beta
 
 name: Cherry-pick Labeled PR to Release Branch
 
@@ -20,6 +26,19 @@ on:
   workflow_run: # zizmor: ignore[dangerous-triggers]
     workflows: [Cherry-pick Trigger]
     types: [completed]
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: 'Number of the merged pull request to cherry-pick'
+        required: true
+        type: number
+      channel:
+        description: 'Release channel to cherry-pick to'
+        required: true
+        type: choice
+        options:
+          - beta
+          - stable
   issues:
     types: [labeled]
 
@@ -49,16 +68,19 @@ jobs:
     # Runs where every job was skipped (i.e. a non-cp label) conclude as
     # `skipped`, so this check avoids allocating a runner for them.
     if: >-
-      github.event_name == 'workflow_run' &&
-      github.event.workflow_run.conclusion == 'success' &&
-      github.event.workflow_run.event == 'pull_request' &&
-      github.event.workflow_run.path == '.github/workflows/cp-trigger.yml'
+      github.repository == 'flutter/flutter' &&
+      (github.event_name == 'workflow_dispatch' ||
+       (github.event_name == 'workflow_run' &&
+        github.event.workflow_run.conclusion == 'success' &&
+        github.event.workflow_run.event == 'pull_request' &&
+        github.event.workflow_run.path == '.github/workflows/cp-trigger.yml'))
     permissions:
       actions: read
       contents: read
       pull-requests: read
     steps:
       - name: Download cherry-pick metadata
+        if: github.event_name == 'workflow_run'
         uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: cp-metadata
@@ -69,7 +91,10 @@ jobs:
       - name: Validate cherry-pick request
         id: validate
         env:
+          EVENT_NAME: ${{ github.event_name }}
           GH_TOKEN: ${{ github.token }}
+          INPUT_CHANNEL: ${{ inputs.channel }}
+          INPUT_PR_NUMBER: ${{ inputs.pr_number }}
           REPO: ${{ github.repository }}
           RUN_HEAD_REPO: ${{ github.event.workflow_run.head_repository.full_name }}
           RUN_HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
@@ -79,31 +104,39 @@ jobs:
           WORK="$RUNNER_TEMP/cp"
           mkdir -p "$WORK"
 
-          PR_NUMBER=$(jq -r '.pr_number // empty' "$METADATA")
+          if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
+            PR_NUMBER="$INPUT_PR_NUMBER"
+            CHANNEL="$INPUT_CHANNEL"
+          else
+            PR_NUMBER=$(jq -r '.pr_number // empty' "$METADATA")
+            CHANNEL=$(jq -r '.channel // empty' "$METADATA")
+          fi
           if ! [[ "$PR_NUMBER" =~ ^[1-9][0-9]*$ ]]; then
-            echo "::error::Artifact contains an invalid PR number."
+            echo "::error::Invalid PR number."
             exit 1
           fi
-
-          CHANNEL=$(jq -r '.channel // empty' "$METADATA")
           if [ "$CHANNEL" != "beta" ] && [ "$CHANNEL" != "stable" ]; then
-            echo "::error::Artifact contains an invalid channel."
+            echo "::error::Invalid channel."
             exit 1
           fi
 
-          # Bind the artifact to the pull request that actually triggered the run.
           gh api "repos/$REPO/pulls/$PR_NUMBER" > "$WORK/pr.json"
-          if [ "$(jq -r '.head.sha' "$WORK/pr.json")" != "$RUN_HEAD_SHA" ] ||
-             [ "$(jq -r '.head.repo.full_name // empty' "$WORK/pr.json")" != "$RUN_HEAD_REPO" ]; then
-            echo "::error::PR #$PR_NUMBER does not match the triggering workflow run."
-            exit 1
-          fi
 
-          # Ignore stale requests (e.g. re-runs after the label was removed).
-          if ! jq -e --arg label "cp: $CHANNEL" '.labels | any(.name == $label)' "$WORK/pr.json" > /dev/null; then
-            echo "::notice::PR #$PR_NUMBER no longer has the 'cp: $CHANNEL' label; nothing to do."
-            echo "action=none" >> "$GITHUB_OUTPUT"
-            exit 0
+          # A manual dispatch is itself the cherry-pick request. Otherwise, bind
+          # the artifact to the pull request that actually triggered the run, and
+          # ignore stale requests (e.g. re-runs after the label was removed).
+          if [ "$EVENT_NAME" = "workflow_run" ]; then
+            if [ "$(jq -r '.head.sha' "$WORK/pr.json")" != "$RUN_HEAD_SHA" ] ||
+               [ "$(jq -r '.head.repo.full_name // empty' "$WORK/pr.json")" != "$RUN_HEAD_REPO" ]; then
+              echo "::error::PR #$PR_NUMBER does not match the triggering workflow run."
+              exit 1
+            fi
+
+            if ! jq -e --arg label "cp: $CHANNEL" '.labels | any(.name == $label)' "$WORK/pr.json" > /dev/null; then
+              echo "::notice::PR #$PR_NUMBER no longer has the 'cp: $CHANNEL' label; nothing to do."
+              echo "action=none" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
           fi
 
           echo "pr_number=$PR_NUMBER" >> "$GITHUB_OUTPUT"
@@ -204,8 +237,9 @@ jobs:
           gh pr comment "$NEW_PR_NUMBER" -R flutter/flutter -b "${SUCCESS_MSG}"
         env:
           GH_TOKEN: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
-          # The user who applied the label (the actor of the triggering run).
-          ACTOR: ${{ github.event.workflow_run.actor.login }}
+          # The user who applied the label (the actor of the triggering run), or
+          # the user who dispatched this workflow manually.
+          ACTOR: ${{ github.event_name == 'workflow_dispatch' && github.actor || github.event.workflow_run.actor.login }}
           PR_URL: ${{ steps.create-pr.outputs.pr_url }}
 
       - name: Leave Comment on CP failure

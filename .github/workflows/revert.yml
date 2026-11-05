@@ -10,6 +10,12 @@
 # commit before use. Everything else (label, merged state, revert reason, merge
 # commit, etc.) is read from the GitHub API here, and the request is either
 # reverted or answered with a comment explaining why it can't be.
+#
+# It can also be run manually (`workflow_dispatch`) by anyone with write access,
+# e.g. for PRs merged before `revert-trigger.yml` existed, whose merge commits
+# don't contain the trigger workflow:
+#
+#   gh workflow run revert.yml -R flutter/flutter -f pr_number=12345
 
 name: Revert PR
 
@@ -20,6 +26,12 @@ on:
   workflow_run: # zizmor: ignore[dangerous-triggers]
     workflows: [Revert Trigger]
     types: [completed]
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: 'Number of the merged pull request to revert'
+        required: true
+        type: number
 
 permissions:
   contents: read
@@ -31,9 +43,11 @@ jobs:
     # Runs where every job was skipped (i.e. a non-revert label) conclude as
     # `skipped`, so this check avoids allocating a runner for them.
     if: >-
-      github.event.workflow_run.conclusion == 'success' &&
-      github.event.workflow_run.event == 'pull_request' &&
-      github.event.workflow_run.path == '.github/workflows/revert-trigger.yml'
+      github.repository == 'flutter/flutter' &&
+      (github.event_name == 'workflow_dispatch' ||
+       (github.event.workflow_run.conclusion == 'success' &&
+        github.event.workflow_run.event == 'pull_request' &&
+        github.event.workflow_run.path == '.github/workflows/revert-trigger.yml'))
     permissions:
       actions: read
       contents: read
@@ -41,6 +55,7 @@ jobs:
       pull-requests: read
     steps:
       - name: Download revert metadata
+        if: github.event_name == 'workflow_run'
         uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: revert-metadata
@@ -51,7 +66,9 @@ jobs:
       - name: Validate revert request
         id: validate
         env:
+          EVENT_NAME: ${{ github.event_name }}
           GH_TOKEN: ${{ github.token }}
+          INPUT_PR_NUMBER: ${{ inputs.pr_number }}
           REPO: ${{ github.repository }}
           RUN_HEAD_REPO: ${{ github.event.workflow_run.head_repository.full_name }}
           RUN_HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
@@ -61,25 +78,33 @@ jobs:
           WORK="$RUNNER_TEMP/revert"
           mkdir -p "$WORK"
 
-          PR_NUMBER=$(jq -r '.pr_number // empty' "$METADATA")
+          if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
+            PR_NUMBER="$INPUT_PR_NUMBER"
+          else
+            PR_NUMBER=$(jq -r '.pr_number // empty' "$METADATA")
+          fi
           if ! [[ "$PR_NUMBER" =~ ^[1-9][0-9]*$ ]]; then
-            echo "::error::Artifact contains an invalid PR number."
+            echo "::error::Invalid PR number."
             exit 1
           fi
 
-          # Bind the artifact to the pull request that actually triggered the run.
           gh api "repos/$REPO/pulls/$PR_NUMBER" > "$WORK/pr.json"
-          if [ "$(jq -r '.head.sha' "$WORK/pr.json")" != "$RUN_HEAD_SHA" ] ||
-             [ "$(jq -r '.head.repo.full_name // empty' "$WORK/pr.json")" != "$RUN_HEAD_REPO" ]; then
-            echo "::error::PR #$PR_NUMBER does not match the triggering workflow run."
-            exit 1
-          fi
 
-          # Ignore stale requests (e.g. re-runs after the label was removed).
-          if ! jq -e '.labels | any(.name == "revert")' "$WORK/pr.json" > /dev/null; then
-            echo "::notice::PR #$PR_NUMBER no longer has the revert label; nothing to do."
-            echo "action=none" >> "$GITHUB_OUTPUT"
-            exit 0
+          # A manual dispatch is itself the revert request. Otherwise, bind the
+          # artifact to the pull request that actually triggered the run, and
+          # ignore stale requests (e.g. re-runs after the label was removed).
+          if [ "$EVENT_NAME" = "workflow_run" ]; then
+            if [ "$(jq -r '.head.sha' "$WORK/pr.json")" != "$RUN_HEAD_SHA" ] ||
+               [ "$(jq -r '.head.repo.full_name // empty' "$WORK/pr.json")" != "$RUN_HEAD_REPO" ]; then
+              echo "::error::PR #$PR_NUMBER does not match the triggering workflow run."
+              exit 1
+            fi
+
+            if ! jq -e '.labels | any(.name == "revert")' "$WORK/pr.json" > /dev/null; then
+              echo "::notice::PR #$PR_NUMBER no longer has the revert label; nothing to do."
+              echo "action=none" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
           fi
 
           echo "pr_number=$PR_NUMBER" >> "$GITHUB_OUTPUT"
@@ -219,7 +244,8 @@ jobs:
           gh pr edit "$PR_NUMBER" -R "$REPO" --remove-label "revert"
         env:
           GH_TOKEN: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
-          # The user who applied the label (the actor of the triggering run).
-          INITIATOR: ${{ github.event.workflow_run.actor.login }}
+          # The user who applied the label (the actor of the triggering run), or
+          # the user who dispatched this workflow manually.
+          INITIATOR: ${{ github.event_name == 'workflow_dispatch' && github.actor || github.event.workflow_run.actor.login }}
           PR_NUMBER: ${{ steps.validate.outputs.pr_number }}
           REPO: ${{ github.repository }}

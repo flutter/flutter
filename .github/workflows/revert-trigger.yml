@@ -24,7 +24,7 @@ jobs:
     name: Record revert request
     runs-on: ubuntu-latest
     # Evaluated before a runner is allocated, so other labels cost nothing.
-    if: github.event.label.name == 'revert'
+    if: github.repository == 'flutter/flutter' && github.event.label.name == 'revert'
     steps:
       - name: Record PR number
         env:
