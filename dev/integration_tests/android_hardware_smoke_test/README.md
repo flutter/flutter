@@ -498,8 +498,12 @@ hardware, the test suite implements a two-layered recovery mechanism:
     ([`run_android_hardware_smoke_tests.dart`](../../../bots/suite_runners/run_android_hardware_smoke_tests.dart))
     restarts Android userspace (`adb shell stop` and `adb shell start`) so
     `SurfaceFlinger` rebinds cleanly against the active host renderer before
-    retrying (up to 2 attempts total). Standard test assertion and golden
-    mismatch failures fail immediately on attempt 1.
+    retrying (up to 2 attempts total). If the target app crashes during native
+    graphics initialization right after logging its Dart VM service URI, the
+    runner checks `adb shell pidof` when VM service connection stalls and
+    terminates the hung `flutter drive` process immediately so retry recovery
+    can proceed. Standard test assertion and golden mismatch failures fail
+    immediately on attempt 1.
   * **On Device (JUnit)**: On CI, the host `flutter drive` stage runs first and
     heals any QuickBoot `SurfaceFlinger` display wedge before the instrumented
     suite starts. During instrumented execution, the JUnit runner

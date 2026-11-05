@@ -16,6 +16,7 @@ import '../utils.dart';
 import 'run_android_engine_tests.dart';
 
 typedef _SubprocessResult = ({int exitCode, String stdout, String stderr});
+typedef _DriveAttemptResult = ({int exitCode, String output, bool terminatedDeadDrive});
 
 const Duration _adbSlowWarningInterval = Duration(seconds: 30);
 
@@ -38,6 +39,7 @@ Future<_SubprocessResult> _runUncheckedSubprocess(
   String? workingDirectory,
   OutputMode outputMode = OutputMode.print,
   Duration? slowWarningInterval,
+  void Function(String line, io.Process process)? onLine,
 }) async {
   final String relativeWorkingDir = path.relative(workingDirectory ?? io.Directory.current.path);
   final commandDescription =
@@ -64,8 +66,19 @@ Future<_SubprocessResult> _runUncheckedSubprocess(
           );
         });
 
-  final Future<String> savedStdout = _collectProcessStream(process.stdout, outputMode: outputMode);
-  final Future<String> savedStderr = _collectProcessStream(process.stderr, outputMode: outputMode);
+  final void Function(String line)? lineCallback = onLine == null
+      ? null
+      : (String line) => onLine(line, process);
+  final Future<String> savedStdout = _collectProcessStream(
+    process.stdout,
+    outputMode: outputMode,
+    onLine: lineCallback,
+  );
+  final Future<String> savedStderr = _collectProcessStream(
+    process.stderr,
+    outputMode: outputMode,
+    onLine: lineCallback,
+  );
 
   final int exitCode;
   try {
@@ -85,11 +98,16 @@ Future<_SubprocessResult> _runUncheckedSubprocess(
   return result;
 }
 
-Future<String> _collectProcessStream(Stream<List<int>> stream, {required OutputMode outputMode}) {
+Future<String> _collectProcessStream(
+  Stream<List<int>> stream, {
+  required OutputMode outputMode,
+  void Function(String line)? onLine,
+}) {
   return stream
       .transform<String>(const Utf8Decoder(allowMalformed: true))
       .transform(const LineSplitter())
       .map<String>((String line) {
+        onLine?.call(line);
         switch (outputMode) {
           case OutputMode.print:
             print(line);
@@ -204,14 +222,9 @@ Future<bool> _runRetryLoop(String testDir) async {
       if (attempt > 1) '--no-build',
     ];
 
-    // Run without automatic exit-code error recording so a transient failure on attempt 1
-    // does not set global hasError before the retry attempt has a chance to pass.
-    final _SubprocessResult result = await _runUncheckedSubprocess(
-      'flutter',
-      driveArgs,
-      workingDirectory: testDir,
-    );
-    if (result.exitCode == 0) {
+    final _DriveAttemptResult result = await _runFlutterDrive(testDir, driveArgs);
+    // Also check !terminatedDeadDrive because flutter_tools can catch SIGTERM and exit 0.
+    if (result.exitCode == 0 && !result.terminatedDeadDrive) {
       return true;
     }
 
@@ -219,11 +232,13 @@ Future<bool> _runRetryLoop(String testDir) async {
       'flutter drive failed with exit code ${result.exitCode} on attempt $attempt/$maxAttempts.',
     );
 
-    // Intentionally scope retries strictly to blank-display compositor wedges or EGL
-    // initialization errors. General test assertion or golden pixel mismatch failures
-    // must fail fast on attempt 1 so real visual regressions are not masked.
+    // Intentionally scope retries strictly to blank-display compositor wedges, EGL
+    // initialization errors, or early app process crashes during VM service connection.
+    // General test assertion or golden pixel mismatch failures must fail fast on attempt 1
+    // so real visual regressions are not masked.
     final String? retryReason = await _detectRetryableFailureReason(
-      '${result.stdout}\n${result.stderr}',
+      result.output,
+      terminatedDeadDrive: result.terminatedDeadDrive,
     );
     if (retryReason != null && attempt < maxAttempts) {
       // Restoring an emulator QuickBoot snapshot across a host renderer change can wedge
@@ -251,6 +266,66 @@ Future<bool> _runRetryLoop(String testDir) async {
   }
 
   return false;
+}
+
+/// Runs `flutter drive` without automatic exit-code error recording, terminating the driver
+/// process immediately if the target app crashes during native graphics startup while Dart VM
+/// service connection stalls against the closed `adb forward` port.
+Future<_DriveAttemptResult> _runFlutterDrive(String testDir, List<String> driveArgs) async {
+  const slowVmConnectPatterns = <String>[
+    'It is taking an unusually long time to connect to the VM',
+    'Connecting to the VM Service is taking longer than expected',
+    'Still attempting to connect to the VM Service',
+    'Exception attempting to connect to the VM Service',
+  ];
+
+  var checkingTargetProcess = false;
+  var terminatedDeadDrive = false;
+
+  void checkTargetAliveOnSlowVmConnect(String line, io.Process process) {
+    if (terminatedDeadDrive || checkingTargetProcess || !slowVmConnectPatterns.any(line.contains)) {
+      return;
+    }
+    checkingTargetProcess = true;
+    unawaited(() async {
+      try {
+        final _SubprocessResult pidResult = await _runAdb(<String>[
+          'shell',
+          'pidof',
+          'com.example.android_hardware_smoke_test',
+        ]);
+        if (!terminatedDeadDrive && (pidResult.exitCode != 0 || pidResult.stdout.trim().isEmpty)) {
+          terminatedDeadDrive = true;
+          io.stderr.writeln(
+            'Target process com.example.android_hardware_smoke_test exited while '
+            'FlutterDriver was connecting. Terminating hung flutter drive...',
+          );
+          // Send SIGKILL on POSIX because flutter_tools catches SIGTERM and exits 0.
+          if (io.Platform.isWindows) {
+            process.kill();
+          } else {
+            process.kill(io.ProcessSignal.sigkill);
+          }
+        }
+      } catch (e) {
+        io.stderr.writeln('Warning: Failed to check if target process is alive: $e');
+      } finally {
+        checkingTargetProcess = false;
+      }
+    }());
+  }
+
+  final _SubprocessResult result = await _runUncheckedSubprocess(
+    'flutter',
+    driveArgs,
+    workingDirectory: testDir,
+    onLine: checkTargetAliveOnSlowVmConnect,
+  );
+  return (
+    exitCode: result.exitCode,
+    output: '${result.stdout}\n${result.stderr}',
+    terminatedDeadDrive: terminatedDeadDrive,
+  );
 }
 
 /// Restarts Android userspace (`surfaceflinger` and `zygote`) via `adb shell stop` and
@@ -327,8 +402,12 @@ Future<void> _pollAdbUntil(
   }
 }
 
-Future<String?> _detectRetryableFailureReason(String driverOutput) async {
+Future<String?> _detectRetryableFailureReason(
+  String driverOutput, {
+  required bool terminatedDeadDrive,
+}) async {
   final reasons = <String>[
+    if (terminatedDeadDrive) 'target app crash during VM service connection',
     // Match blank-capture exceptions reported by driver_test.dart (errorBlankScreenshot
     // in constants.dart). Keep this substring in sync with both files.
     if (driverOutput.contains('Captured screenshot is blank/empty')) 'blank display capture',
