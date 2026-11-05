@@ -218,12 +218,11 @@ class WebpHeaderReader {
       final int headerByte = _readUint8();
       const int animatedMask = 1 << 1;
       return headerByte & animatedMask != 0;
-    } on ArgumentError {
-      // Backstop for any out-of-bounds read the checks above missed: treat
-      // the buffer as malformed rather than throwing. dart2wasm throws a
-      // RangeError here, while dart2js surfaces the native JS RangeError as an
-      // ArgumentError; RangeError is a subtype of ArgumentError, so this
-      // catches both.
+    } catch (_) {
+      // Backstop for anything the checks above missed: treat the buffer as
+      // malformed rather than throwing. This is a best-effort sniffer, and the
+      // error type of an out-of-bounds read differs between dart2js and
+      // dart2wasm.
       return false;
     }
   }
@@ -372,12 +371,11 @@ class GifHeaderReader {
         }
         framesFound++;
       }
-    } on ArgumentError {
-      // Backstop for any out-of-bounds read the checks above missed: treat
-      // the buffer as malformed rather than throwing. dart2wasm throws a
-      // RangeError here, while dart2js surfaces the native JS RangeError as an
-      // ArgumentError; RangeError is a subtype of ArgumentError, so this
-      // catches both.
+    } catch (_) {
+      // Backstop for anything the checks above missed: treat the buffer as
+      // malformed rather than throwing. This is a best-effort sniffer, and the
+      // error type of an out-of-bounds read differs between dart2js and
+      // dart2wasm.
       return false;
     }
   }
