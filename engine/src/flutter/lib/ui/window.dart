@@ -937,6 +937,7 @@ class AccessibilityFeatures {
   static const int _kNoAutoPlayAnimatedImagesIndex = 1 << 8;
   static const int _kNoAutoPlayVideosIndex = 1 << 9;
   static const int _kDeterministicCursorIndex = 1 << 10;
+  static const int _kPersistentScrollbarsIndex = 1 << 11;
 
   // A bitfield which represents each enabled feature.
   final int _index;
@@ -1018,6 +1019,14 @@ class AccessibilityFeatures {
   /// Only supported on iOS.
   bool get deterministicCursor => _kDeterministicCursorIndex & _index != 0;
 
+  /// The platform is requesting that scrollbars remain visible at all times,
+  /// rather than fading out when not in use.
+  ///
+  /// On macOS, this corresponds to System Settings > Appearance > "Show Scroll
+  /// Bars" set to "Always". On other platforms, this defaults to false until
+  /// an embedder reports the value.
+  bool get persistentScrollbars => _kPersistentScrollbarsIndex & _index != 0;
+
   @override
   String toString() {
     final features = <String>[];
@@ -1053,6 +1062,9 @@ class AccessibilityFeatures {
     }
     if (deterministicCursor) {
       features.add('deterministicCursor');
+    }
+    if (persistentScrollbars) {
+      features.add('persistentScrollbars');
     }
     return 'AccessibilityFeatures$features';
   }
