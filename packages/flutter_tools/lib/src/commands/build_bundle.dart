@@ -10,6 +10,7 @@ import '../base/file_system.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
 import '../bundle_builder.dart';
+import '../context/android_context.dart';
 import '../context/tool_context.dart';
 import '../features.dart';
 import '../isolated/build_targets.dart';
@@ -19,6 +20,7 @@ import 'build.dart';
 
 class BuildBundleCommand extends BuildSubCommand {
   BuildBundleCommand({
+    required this._androidContext,
     required this.buildSystem,
     required this.featureFlags,
     required super.toolContext,
@@ -79,6 +81,7 @@ class BuildBundleCommand extends BuildSubCommand {
       );
   }
 
+  final AndroidContext _androidContext;
   final BuildSystem buildSystem;
   final BundleBuilder? _bundleBuilder;
   final FeatureFlags featureFlags;
@@ -147,6 +150,7 @@ class BuildBundleCommand extends BuildSubCommand {
         _bundleBuilder ??
         BundleBuilder(
           analytics: analytics,
+          androidSdkBuilder: () => _androidContext.androidSdk,
           buildSystem: buildSystem,
           buildTargets: const BuildTargetsImpl(),
           toolContext: toolContext,
