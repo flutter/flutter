@@ -18,6 +18,12 @@ import 'channel.dart';
 ///  * `_callback_web.dart`, which has the web implementation
 CallbackManager get callbackManager => _singletonCallbackManager;
 
+/// The dart:io implementation of `viewportOrigin`.
+///
+/// Views are not embedded in a browser viewport off the web, so this always
+/// returns [Offset.zero].
+Offset viewportOrigin(FlutterView view) => Offset.zero;
+
 /// IOCallbackManager singleton.
 final _IOCallbackManager _singletonCallbackManager = _IOCallbackManager();
 
@@ -96,6 +102,11 @@ class _IOCallbackManager implements CallbackManager {
       throw StateError('Expected a list of bytes, but instead captureScreenshot returned null');
     }
     return <String, dynamic>{'screenshotName': screenshot, 'bytes': rawBytes};
+  }
+
+  @override
+  Future<void> pointerActions(List<WebDriverPointerAction> actions) async {
+    throw UnsupportedError('webDriverPointerActions is only supported on the web');
   }
 
   Future<dynamic> _onMethodChannelCall(MethodCall call) async {

@@ -557,6 +557,35 @@ TEST(RasterThreadMerger, MultipleMergersCanMergeSameThreadPair) {
   ASSERT_FALSE(raster_thread_merger2->IsMerged());
 }
 
+TEST(RasterThreadMerger, ExpiredLeaseCanDecrementWhileAnotherCallerIsMerged) {
+  TaskQueueWrapper queue1;
+  TaskQueueWrapper queue2;
+  const auto merger1 = RasterThreadMerger::CreateOrShareThreadMerger(
+      nullptr, queue1.GetTaskQueueId(), queue2.GetTaskQueueId());
+  const auto merger2 = RasterThreadMerger::CreateOrShareThreadMerger(
+      merger1, queue1.GetTaskQueueId(), queue2.GetTaskQueueId());
+
+  merger1->MergeWithLease(1);
+  ASSERT_EQ(merger1->DecrementLease(), RasterThreadStatus::kUnmergedNow);
+
+  // A second engine merges the queues before the first engine resumes drawing.
+  merger2->MergeWithLease(2);
+  ASSERT_TRUE(merger1->IsMerged());
+  ASSERT_EQ(merger1->DecrementLease(), RasterThreadStatus::kRemainsMerged);
+  ASSERT_EQ(merger1->DecrementLease(), RasterThreadStatus::kRemainsMerged);
+
+  // Drawing with an expired lease must not consume the second engine's lease.
+  ASSERT_EQ(merger2->DecrementLease(), RasterThreadStatus::kRemainsMerged);
+  ASSERT_EQ(merger1->DecrementLease(), RasterThreadStatus::kRemainsMerged);
+  ASSERT_EQ(merger2->DecrementLease(), RasterThreadStatus::kUnmergedNow);
+  ASSERT_FALSE(merger1->IsMerged());
+  ASSERT_FALSE(merger2->IsMerged());
+
+  // The first engine can acquire and consume a new lease normally.
+  merger1->MergeWithLease(1);
+  ASSERT_EQ(merger1->DecrementLease(), RasterThreadStatus::kUnmergedNow);
+}
+
 TEST(RasterThreadMerger, TheLastCallerOfMultipleMergersCanUnmergeNow) {
   TaskQueueWrapper queue1;
   TaskQueueWrapper queue2;

@@ -40,6 +40,10 @@ const String kProfilePrerollFrame = 'preroll_frame';
 /// to the renderer.
 const String kProfileApplyFrame = 'apply_frame';
 
+/// A benchmark metric that includes preparation and frame submission, including
+/// asynchronous rasterization.
+const String kProfilePresentationDuration = 'presentation_duration';
+
 final List<ui.VoidCallback> _hotRestartListeners = <ui.VoidCallback>[];
 
 /// Requests that [listener] is called just before hot restarting the app.
