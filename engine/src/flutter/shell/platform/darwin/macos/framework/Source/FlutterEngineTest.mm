@@ -1437,6 +1437,29 @@ TEST_F(FlutterEngineTest, ReportsHourFormat) {
   [channelMock stopMocking];
 }
 
+TEST_F(FlutterEngineTest, UpdateAccessibilityFeaturesReportsPersistentScrollbars) {
+  FlutterEngine* engine = GetFlutterEngine();
+  FlutterAccessibilityFeature reported_flags =
+      static_cast<FlutterAccessibilityFeature>(0);
+  engine.embedderAPI.UpdateAccessibilityFeatures = MOCK_ENGINE_PROC(
+      UpdateAccessibilityFeatures,
+      ([&reported_flags](auto engine, FlutterAccessibilityFeature flags) {
+        reported_flags = flags;
+        return kSuccess;
+      }));
+  EXPECT_TRUE([engine runWithEntrypoint:@"main"]);
+
+  // updateAccessibilityFeatures is called during runWithEntrypoint.
+  // Verify the persistentScrollbars bit reflects NSScroller.preferredScrollerStyle.
+  if ([NSScroller preferredScrollerStyle] == NSScrollerStyleLegacy) {
+    EXPECT_TRUE(reported_flags & kFlutterAccessibilityFeaturePersistentScrollbars);
+  } else {
+    EXPECT_FALSE(reported_flags & kFlutterAccessibilityFeaturePersistentScrollbars);
+  }
+
+  [engine shutDownEngine];
+}
+
 }  // namespace flutter::testing
 
 // NOLINTEND(clang-analyzer-core.StackAddressEscape)
