@@ -59,7 +59,7 @@ class NoImplicitViewPlatformDispatcher extends TestPlatformDispatcher {
 /// explanation when used when the `implicitView` is disabled (like in Flutter
 /// web when multi-view is enabled).
 ///
-/// See: multi_view_no_implicitView_binding_test.dart
+/// See: multi_view_no_implicit_view_binding_test.dart
 class NoImplicitViewWidgetsBinding extends AutomatedTestWidgetsFlutterBinding {
   late final NoImplicitViewPlatformDispatcher _platformDispatcher =
       NoImplicitViewPlatformDispatcher(platformDispatcher: super.platformDispatcher);

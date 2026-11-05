@@ -1351,6 +1351,7 @@ abstract class WidgetController {
           testPointer.move(
             startLocation + initialOffset,
             timeStamp: Duration(microseconds: timeStamp.round()),
+            view: view,
           ),
         );
         timeStamp += initialOffsetDelay.inMicroseconds;
@@ -1748,6 +1749,7 @@ abstract class WidgetController {
     bool warnIfMissed = true,
     FlutterView? view,
   }) {
+    final FlutterView? viewOfFinder = view ?? _maybeViewOf(finder);
     return timedDragFrom(
       getCenter(finder, warnIfMissed: warnIfMissed, callee: 'timedDrag'),
       offset,
@@ -1755,7 +1757,7 @@ abstract class WidgetController {
       pointer: pointer,
       buttons: buttons,
       frequency: frequency,
-      view: view,
+      view: viewOfFinder,
     );
   }
 
@@ -2473,18 +2475,23 @@ abstract class WidgetController {
     bool continuous = false,
   }) {
     return TestAsyncUtils.guard<void>(() async {
+      // The gesture is performed on the widget found by `view`, so its events
+      // must be dispatched to the view that widget renders into. In an
+      // application without an implicit view, falling back to the implicit
+      // view would crash.
+      final FlutterView? dragView = _maybeViewOf(view);
       TestGesture? gesture;
       while (maxIteration > 0 && finder.evaluate().isEmpty) {
         if (continuous) {
-          gesture ??= await startGesture(getCenter(view, warnIfMissed: true));
-          await gesture.moveBy(moveStep);
+          gesture ??= await startGesture(getCenter(view, warnIfMissed: true), view: dragView);
+          await gesture.moveBy(moveStep, view: dragView);
         } else {
           await drag(view, moveStep);
         }
         await pump(duration);
         maxIteration -= 1;
       }
-      await gesture?.up();
+      await gesture?.up(view: dragView);
       await Scrollable.ensureVisible(element(finder));
     });
   }

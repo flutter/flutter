@@ -762,7 +762,14 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
     return TestAsyncUtils.guard<void>(() async {
       final widget = binding.rootElement!.widget as RootWidget;
       final TestRestorationData restorationData = binding.restorationManager.restorationData;
-      runApp(Container(key: UniqueKey()));
+      // Like _resetTestTree in the binding: without an implicit view the tree
+      // cannot be taken down with runApp, so an empty ViewCollection is used
+      // to unmount the current tree instead.
+      if (binding.platformDispatcher.implicitView == null) {
+        runWidget(const ViewCollection(views: <Widget>[]));
+      } else {
+        runApp(Container(key: UniqueKey()));
+      }
       await pump();
       binding.restorationManager.restoreFrom(restorationData);
       binding.attachToBuildOwner(widget);
