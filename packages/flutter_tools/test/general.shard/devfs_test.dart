@@ -13,6 +13,7 @@ import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/base/config.dart';
+import 'package:flutter_tools/src/base/error_handling_io.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -1357,6 +1358,147 @@ void main() {
           expect(devFS.baseUri, Uri.parse(uriString));
           expect(fakeVmServiceHost.hasRemainingExpectations, isFalse);
         }
+      },
+    );
+
+    testWithoutContext(
+      'destroy suppresses ErrorHandlingFileSystem delete errors and still deletes remote DevFS',
+      () async {
+        const containerId = 'com.example.App';
+        const tempSubdir = 'sandbox_app_tmp';
+        const fsName = 'sandbox_app';
+        const sandboxUri =
+            'file:///Users/tester/Library/Containers/$containerId/Data/tmp/$tempSubdir/$fsName/';
+
+        final delegateFs = MemoryFileSystem.test(
+          opHandle: (String context, FileSystemOp operation) {
+            if (operation == FileSystemOp.delete && context.contains(tempSubdir)) {
+              throw FileSystemException(
+                'Permission denied',
+                context,
+                const OSError('Permission denied', 13),
+              );
+            }
+          },
+        );
+        final macOSPlatform = FakePlatform(operatingSystem: 'macos');
+        final fileSystem = ErrorHandlingFileSystem(delegate: delegateFs, platform: macOSPlatform);
+        final logger = BufferLogger.test();
+        final processManager = FakeProcessManager.list(<FakeCommand>[
+          const FakeCommand(
+            command: <String>['getconf', 'DARWIN_USER_TEMP_DIR'],
+            stdout: '$darwinUserTempDir\n',
+          ),
+        ]);
+        final fakeVmServiceHost = FakeVmServiceHost(
+          requests: <VmServiceExpectation>[
+            const FakeVmServiceRequest(
+              method: '_createDevFS',
+              args: <String, Object>{'fsName': fsName},
+              jsonResponse: <String, Object>{'uri': sandboxUri},
+            ),
+            const FakeVmServiceRequest(
+              method: '_deleteDevFS',
+              args: <String, Object>{'fsName': fsName},
+            ),
+          ],
+          httpAddress: Uri.parse('http://localhost'),
+        );
+        final devFS = DevFS(
+          fakeVmServiceHost.vmService,
+          fsName,
+          fileSystem.currentDirectory,
+          buildMode: .debug,
+          toolContext: FakeToolContext(
+            artifacts: Artifacts.test(),
+            fs: fileSystem,
+            logger: logger,
+            os: FakeOperatingSystemUtils(),
+            platform: macOSPlatform,
+            processManager: processManager,
+          ),
+          httpClient: FakeHttpClient.any(),
+        );
+
+        await devFS.create();
+        await devFS.destroy();
+
+        expect(processManager, hasNoRemainingExpectations);
+        expect(fakeVmServiceHost.hasRemainingExpectations, isFalse);
+        expect(
+          delegateFs
+              .directory(darwinUserTempDir)
+              .childDirectory(containerId)
+              .childDirectory(tempSubdir),
+          exists,
+        );
+        expect(
+          logger.traceText,
+          contains('DevFS: Failed to delete local sandbox DevFS directory:'),
+        );
+      },
+    );
+
+    testWithoutContext(
+      'destroy deletes local sandbox directory even when remote _deleteDevFS fails',
+      () async {
+        const containerId = 'com.example.App';
+        const tempSubdir = 'sandbox_app_tmp';
+        const fsName = 'sandbox_app';
+        const sandboxUri =
+            'file:///Users/tester/Library/Containers/$containerId/Data/tmp/$tempSubdir/$fsName/';
+
+        final fileSystem = MemoryFileSystem.test();
+        final processManager = FakeProcessManager.list(<FakeCommand>[
+          const FakeCommand(
+            command: <String>['getconf', 'DARWIN_USER_TEMP_DIR'],
+            stdout: '$darwinUserTempDir\n',
+          ),
+        ]);
+        final fakeVmServiceHost = FakeVmServiceHost(
+          requests: <VmServiceExpectation>[
+            const FakeVmServiceRequest(
+              method: '_createDevFS',
+              args: <String, Object>{'fsName': fsName},
+              jsonResponse: <String, Object>{'uri': sandboxUri},
+            ),
+            FakeVmServiceRequest(
+              method: '_deleteDevFS',
+              args: const <String, Object>{'fsName': fsName},
+              error: FakeRPCError(code: vm_service.RPCErrorKind.kServerError.code),
+            ),
+          ],
+          httpAddress: Uri.parse('http://localhost'),
+        );
+        final devFS = DevFS(
+          fakeVmServiceHost.vmService,
+          fsName,
+          fileSystem.currentDirectory,
+          buildMode: .debug,
+          toolContext: FakeToolContext(
+            artifacts: Artifacts.test(),
+            fs: fileSystem,
+            logger: BufferLogger.test(),
+            os: FakeOperatingSystemUtils(),
+            platform: FakePlatform(operatingSystem: 'macos'),
+            processManager: processManager,
+          ),
+          httpClient: FakeHttpClient.any(),
+        );
+
+        final Directory expectedSandboxTempDir = fileSystem
+            .directory(darwinUserTempDir)
+            .childDirectory(containerId)
+            .childDirectory(tempSubdir);
+
+        await devFS.create();
+        expect(expectedSandboxTempDir, exists);
+
+        await expectLater(devFS.destroy(), throwsA(isA<vm_service.RPCError>()));
+
+        expect(expectedSandboxTempDir, isNot(exists));
+        expect(processManager, hasNoRemainingExpectations);
+        expect(fakeVmServiceHost.hasRemainingExpectations, isFalse);
       },
     );
   });

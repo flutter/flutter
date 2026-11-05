@@ -11,6 +11,7 @@ import 'package:vm_service/vm_service.dart' as vm_service;
 import 'artifacts.dart';
 import 'asset.dart';
 import 'base/config.dart';
+import 'base/error_handling_io.dart';
 import 'base/file_system.dart';
 import 'base/io.dart';
 import 'base/logger.dart';
@@ -614,9 +615,13 @@ class DevFS {
     logger.printTrace('DevFS: Deleting filesystem on the device ($_baseUri)');
     final Directory? localSandboxTempDir = _localSandboxTempDir;
     _localSandboxTempDir = null;
-    if (localSandboxTempDir != null && localSandboxTempDir.existsSync()) {
+    if (localSandboxTempDir != null) {
       try {
-        localSandboxTempDir.deleteSync(recursive: true);
+        ErrorHandlingFileSystem.noExitOnFailure(() {
+          if (localSandboxTempDir.existsSync()) {
+            localSandboxTempDir.deleteSync(recursive: true);
+          }
+        });
       } on FileSystemException catch (error) {
         logger.printTrace('DevFS: Failed to delete local sandbox DevFS directory: $error');
       }
