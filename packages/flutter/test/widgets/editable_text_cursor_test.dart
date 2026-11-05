@@ -659,7 +659,7 @@ void main() {
     expect(tester.takeException(), null);
   });
 
-  testWidgets('Updating the floating cursor without a start moves the cursor', (
+  testWidgets('Updating the floating cursor without a start is ignored', (
     WidgetTester tester,
   ) async {
     const text = 'hello world this is fun and cool and awesome!';
@@ -692,14 +692,11 @@ void main() {
     final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
 
     // The start of the drag was sent to another text input client, so this
-    // field receives an update first. It is used as the origin.
+    // field receives updates first.
     editableTextState.updateFloatingCursor(
       RawFloatingCursorPoint(state: FloatingCursorDragState.Update, offset: const Offset(20, 20)),
     );
     expect(tester.takeException(), null);
-    expect(controller.selection.baseOffset, 29);
-
-    // Moves the cursor relative to that origin.
     editableTextState.updateFloatingCursor(
       RawFloatingCursorPoint(state: FloatingCursorDragState.Update, offset: const Offset(-250, 20)),
     );
@@ -710,11 +707,12 @@ void main() {
     );
 
     await tester.pumpAndSettle();
-    // The cursor has been set.
-    expect(controller.selection.baseOffset, 10);
+    // The updates were ignored, so the cursor did not move.
+    expect(controller.selection.baseOffset, 29);
+    expect(tester.takeException(), null);
   });
 
-  testWidgets('Updating the floating cursor after the reset animation does not crash', (
+  testWidgets('Updating the floating cursor after the reset animation is ignored', (
     WidgetTester tester,
   ) async {
     const text = 'hello world this is fun and cool and awesome!';
@@ -770,7 +768,7 @@ void main() {
     );
 
     await tester.pumpAndSettle();
-    // The late update is used as the origin, so the cursor did not move.
+    // The late update was ignored, so the cursor did not move.
     expect(controller.selection.baseOffset, 10);
     expect(tester.takeException(), null);
   });

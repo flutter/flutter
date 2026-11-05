@@ -3888,12 +3888,10 @@ class EditableTextState extends State<EditableText>
         // This field may not have received the start of the drag. For example,
         // the text input connection can move to this field in the middle of a
         // drag, or an update can arrive after the reset animation that follows
-        // the end of a drag has cleared the origin. In that case, start the
-        // drag from this point.
+        // the end of a drag has cleared the origin. Ignore the update, because
+        // starting a drag here could leave the floating cursor on screen if no
+        // end follows.
         if (_pointOffsetOrigin == null) {
-          updateFloatingCursor(
-            RawFloatingCursorPoint(state: FloatingCursorDragState.Start, offset: point.offset),
-          );
           return;
         }
         final Offset centeredPoint = point.offset! - _pointOffsetOrigin!;
