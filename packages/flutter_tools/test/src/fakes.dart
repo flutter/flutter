@@ -1158,7 +1158,10 @@ class FakeCocoaPodsValidator extends Fake implements CocoaPodsValidator {}
 
 class FakeIOSSimulatorUtils extends Fake implements IOSSimulatorUtils {}
 
-class FakeIOSWorkflow extends Fake implements IOSWorkflow {}
+class FakeIOSWorkflow extends Fake implements IOSWorkflow {
+  @override
+  bool get appliesToHostPlatform => false;
+}
 
 class FakeXCDevice extends Fake implements XCDevice {}
 

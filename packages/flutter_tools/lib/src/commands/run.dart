@@ -46,9 +46,10 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
   RunCommandBase({
     required this.buildSystem,
     required this.buildTargets,
-    required ToolContext super.toolContext,
+    required super.toolContext,
     required super.verboseHelp,
     super.outputPreferences,
+    super.deviceManager,
   }) {
     registerOptionBundles(const <OptionBundle>[
       BuildModeOptionsBundle(defaultToRelease: false),
@@ -103,9 +104,6 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
 
   final BuildSystem buildSystem;
   final BuildTargets buildTargets;
-
-  @override
-  ToolContext get toolContext => super.toolContext!;
 
   bool get traceStartup => getValue(DebuggingOptionDescriptors.traceStartup);
   bool get traceSystrace => getValue(DebuggingOptionDescriptors.traceSystrace);
@@ -336,7 +334,7 @@ class RunCommand extends RunCommandBase {
     this._androidWorkflow,
     this.deviceManager,
     super.verboseHelp = false,
-  }) {
+  }) : super(deviceManager: deviceManager) {
     requiresPubspecYaml();
     registerOptionBundles(const <OptionBundle>[
       FilesystemOptionsBundle(),

@@ -221,9 +221,7 @@ VULKAN_SYNC_VALIDATION_TESTS = [
     ## TODO(https://github.com/flutter/flutter/issues/194987):
     ## BlitPassVK::OnCopyTextureToBufferCommand barrier.
     # 'Play/RendererTest.CanBlitTextureToBuffer/Vulkan',
-    ## TODO(https://github.com/flutter/flutter/issues/194987):
-    ## BlitPassVK::OnGenerateMipmapCommand barrier.
-    # 'Play/RendererTest.CanGenerateMipmaps/Vulkan',
+    'Play/RendererTest.CanGenerateMipmaps/Vulkan',
     'Play/TypographerTest.GlyphAtlasTextureWillGrowTilMaxTextureSize/Vulkan',
     # Render passes, offscreen targets, MSAA, depth/stencil and subpasses.
     'Play/RendererTest.CanRenderToTexture/Vulkan',

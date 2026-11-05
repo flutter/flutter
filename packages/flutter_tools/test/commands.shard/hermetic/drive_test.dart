@@ -1056,6 +1056,7 @@ void main() {}
         buildTargets: const BuildTargetsImpl(),
         toolContext: createToolContext(),
       );
+      createTestCommandRunner(command);
 
       expect(await command.disablePortPublication, isTrue);
     },

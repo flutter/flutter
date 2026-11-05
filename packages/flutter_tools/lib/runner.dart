@@ -120,8 +120,14 @@ Future<int> run(
         final ToolContext(:Cache cache, :Logger logger) = toolDeps.toolContext;
         final runner = FlutterCommandRunner(
           analytics: toolDeps.analytics,
+          androidContext: toolDeps.androidContext,
+          cocoaPods: toolDeps.appleContext.cocoaPods,
+          deviceManager: toolDeps.deviceManager,
+          doctor: toolDeps.doctor,
           extensionManager: toolDeps.extensionManager,
           featureFlags: featureFlags,
+          plistParser: toolDeps.appleContext.plistParser,
+          templateRenderer: toolDeps.templateRenderer,
           toolContext: toolDeps.toolContext,
           verboseHelp: verboseHelp,
         );
@@ -216,6 +222,7 @@ Future<int> run(
                 getVersion,
                 shutdownHooks,
                 cache: cache,
+                doctorValidatorsProviderBuilder: toolDeps.doctor.validatorsProviderBuilder,
                 usingLocalEngine: usingLocalEngine,
                 analytics: toolDeps.analytics,
                 featureFlags: featureFlags,
@@ -238,6 +245,7 @@ Future<int> run(
               getVersion,
               shutdownHooks,
               cache: cache,
+              doctorValidatorsProviderBuilder: toolDeps.doctor.validatorsProviderBuilder,
               usingLocalEngine: usingLocalEngine,
               analytics: toolDeps.analytics,
               featureFlags: featureFlags,
@@ -266,6 +274,7 @@ Future<int> _handleToolError(
   String Function() getFlutterVersion,
   ShutdownHooks shutdownHooks, {
   required Cache cache,
+  required DoctorValidatorsProviderBuilder doctorValidatorsProviderBuilder,
   required bool usingLocalEngine,
   required Analytics analytics,
   required FeatureFlags featureFlags,
@@ -280,6 +289,7 @@ Future<int> _handleToolError(
     getFlutterVersion,
     shutdownHooks,
     cache: cache,
+    doctorValidatorsProviderBuilder: doctorValidatorsProviderBuilder,
     usingLocalEngine: usingLocalEngine,
     analytics: analytics,
     featureFlags: featureFlags,
@@ -296,6 +306,7 @@ Future<int> _handleToolErrorImpl(
   String Function() getFlutterVersion,
   ShutdownHooks shutdownHooks, {
   required Cache cache,
+  required DoctorValidatorsProviderBuilder doctorValidatorsProviderBuilder,
   required bool usingLocalEngine,
   required Analytics analytics,
   required FeatureFlags featureFlags,
@@ -396,7 +407,16 @@ Future<int> _handleToolErrorImpl(
         verbose: true /* Capture flutter doctor -v */,
       );
 
-      final doctorText = DoctorText(doctorLogger, cache: cache, clock: globals.systemClock);
+      final doctorText = DoctorText(
+        doctorLogger,
+        doctor: Doctor(
+          analytics: analytics,
+          cache: cache,
+          clock: globals.systemClock,
+          logger: doctorLogger,
+          validatorsProviderBuilder: doctorValidatorsProviderBuilder,
+        ),
+      );
 
       final details = CrashDetails(
         command: _crashCommand(args),
