@@ -675,9 +675,9 @@ FLUTTER_ASSERT_ARC
       @"position" : @{@"x" : @10, @"y" : @20},
       @"caretRect" : @{@"x" : @8, @"y" : @12, @"width" : @2, @"height" : @18},
     };
-    [plugin handleMethodCall:[FlutterMethodCall methodCallWithMethodName:
-                                                    @"Magnifier.showSystemMagnifier"
-                                                               arguments:firstArgs]
+    [plugin handleMethodCall:[FlutterMethodCall
+                                 methodCallWithMethodName:@"Magnifier.showSystemMagnifier"
+                                                arguments:firstArgs]
                       result:storeResult];
     XCTAssertEqualObjects(showResult, @YES);
     OCMVerify([mockLoupeSession moveToPoint:CGPointMake(10, 20)
@@ -701,9 +701,9 @@ FLUTTER_ASSERT_ARC
       @"position" : @{@"x" : @30, @"y" : @40},
       @"caretRect" : @{@"x" : @28, @"y" : @32, @"width" : @2, @"height" : @18},
     };
-    [plugin handleMethodCall:[FlutterMethodCall methodCallWithMethodName:
-                                                    @"Magnifier.showSystemMagnifier"
-                                                               arguments:secondArgs]
+    [plugin handleMethodCall:[FlutterMethodCall
+                                 methodCallWithMethodName:@"Magnifier.showSystemMagnifier"
+                                                arguments:secondArgs]
                       result:storeResult];
     XCTAssertEqualObjects(showResult, @YES);
     OCMVerify(never(), ClassMethod([mockLoupeSession beginLoupeSessionAtPoint:CGPointMake(30, 40)
@@ -714,9 +714,9 @@ FLUTTER_ASSERT_ARC
                               trackingCaret:YES]);
     XCTAssertTrue(CGRectEqualToRect(cursorView.frame, CGRectMake(28, 32, 2, 18)));
 
-    [plugin handleMethodCall:[FlutterMethodCall methodCallWithMethodName:
-                                                    @"Magnifier.hideSystemMagnifier"
-                                                               arguments:nil]
+    [plugin handleMethodCall:[FlutterMethodCall
+                                 methodCallWithMethodName:@"Magnifier.hideSystemMagnifier"
+                                                arguments:nil]
                       result:^(id result){
                       }];
     OCMVerify([mockLoupeSession invalidate]);
@@ -754,9 +754,9 @@ FLUTTER_ASSERT_ARC
       @"position" : @{@"x" : @10, @"y" : @20},
       @"caretRect" : @{@"x" : @8, @"y" : @0, @"width" : @4, @"height" : @300},
     };
-    [plugin handleMethodCall:[FlutterMethodCall methodCallWithMethodName:
-                                                    @"Magnifier.showSystemMagnifier"
-                                                               arguments:args]
+    [plugin handleMethodCall:[FlutterMethodCall
+                                 methodCallWithMethodName:@"Magnifier.showSystemMagnifier"
+                                                arguments:args]
                       result:^(id result) {
                         showResult = result;
                       }];
@@ -778,12 +778,12 @@ FLUTTER_ASSERT_ARC
     @"position" : @{@"x" : @10, @"y" : @20},
     @"caretRect" : @{@"x" : @8, @"y" : @12, @"width" : @2, @"height" : @18},
   };
-  [plugin handleMethodCall:[FlutterMethodCall methodCallWithMethodName:
-                                                  @"Magnifier.showSystemMagnifier"
-                                                             arguments:args]
-                    result:^(id result) {
-                      showResult = result;
-                    }];
+  [plugin
+      handleMethodCall:[FlutterMethodCall methodCallWithMethodName:@"Magnifier.showSystemMagnifier"
+                                                         arguments:args]
+                result:^(id result) {
+                  showResult = result;
+                }];
   XCTAssertEqualObjects(showResult, @NO);
 }
 

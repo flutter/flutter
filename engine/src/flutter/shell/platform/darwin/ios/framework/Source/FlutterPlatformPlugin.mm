@@ -226,22 +226,21 @@ static void SetStatusBarStyleForSharedApplication(UIStatusBarStyle style) {
     }
     NSDictionary* encodedPosition = args[@"position"];
     NSDictionary* encodedCaretRect = args[@"caretRect"];
-    CGPoint position = CGPointMake([encodedPosition[@"x"] doubleValue],
-                                   [encodedPosition[@"y"] doubleValue]);
-    CGRect caretRect =
-        CGRectMake([encodedCaretRect[@"x"] doubleValue], [encodedCaretRect[@"y"] doubleValue],
-                   [encodedCaretRect[@"width"] doubleValue],
-                   [encodedCaretRect[@"height"] doubleValue]);
+    CGPoint position =
+        CGPointMake([encodedPosition[@"x"] doubleValue], [encodedPosition[@"y"] doubleValue]);
+    CGRect caretRect = CGRectMake(
+        [encodedCaretRect[@"x"] doubleValue], [encodedCaretRect[@"y"] doubleValue],
+        [encodedCaretRect[@"width"] doubleValue], [encodedCaretRect[@"height"] doubleValue]);
     UIView* cursorView = [self placeLoupeCursorViewInView:view atRect:caretRect];
     if (!self.loupeSession) {
       // UIKit refuses a cursor taller than the loupe, so very large text begins without one.
       self.loupeSession = [UITextLoupeSession beginLoupeSessionAtPoint:position
-                                                fromSelectionWidgetView:cursorView
-                                                                 inView:view];
+                                               fromSelectionWidgetView:cursorView
+                                                                inView:view];
       if (!self.loupeSession) {
         self.loupeSession = [UITextLoupeSession beginLoupeSessionAtPoint:position
-                                                  fromSelectionWidgetView:nil
-                                                                   inView:view];
+                                                 fromSelectionWidgetView:nil
+                                                                  inView:view];
       }
     }
     [self.loupeSession moveToPoint:position withCaretRect:caretRect trackingCaret:YES];
