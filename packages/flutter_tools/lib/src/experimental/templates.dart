@@ -27,6 +27,9 @@ base class ExtensionTemplateManager {
     required this._logger,
   });
 
+  static const _appTemplateKind = 'app';
+  static const _pluginTemplateKind = 'plugin';
+
   final ExtensionManager _extensionManager;
   final FeatureFlags _featureFlags;
   final FileSystem _fileSystem;
@@ -35,6 +38,7 @@ base class ExtensionTemplateManager {
 
   Map<String, String>? _cachedAppPlatformTemplates;
   Map<String, String>? _cachedPluginPlatformTemplates;
+  Future<void>? _loadFuture;
   final _platformOwners = <String, ExtensionConnection>{};
 
   /// Retrieve the cached app platform templates synchronously.
@@ -52,10 +56,8 @@ base class ExtensionTemplateManager {
     if (!_featureFlags.isToolExtensionsEnabled) {
       return const <String, String>{};
     }
-    return _cachedAppPlatformTemplates ??= await _queryPlatformTemplates(
-      method: TemplateService.getAppPlatformTemplatesMethod,
-      templateKind: 'app',
-    );
+    await (_loadFuture ??= _loadPlatformTemplates());
+    return _cachedAppPlatformTemplates!;
   }
 
   /// Retrieve plugin platform templates by routing `template.getPluginPlatformTemplates` to active tool extensions.
@@ -65,19 +67,15 @@ base class ExtensionTemplateManager {
     if (!_featureFlags.isToolExtensionsEnabled) {
       return const <String, String>{};
     }
-    return _cachedPluginPlatformTemplates ??= await _queryPlatformTemplates(
-      method: TemplateService.getPluginPlatformTemplatesMethod,
-      templateKind: 'plugin',
-    );
+    await (_loadFuture ??= _loadPlatformTemplates());
+    return _cachedPluginPlatformTemplates!;
   }
 
-  Future<Map<String, String>> _queryPlatformTemplates({
-    required String method,
-    required String templateKind,
-  }) async {
+  Future<void> _loadPlatformTemplates() async {
     await _extensionManager.ensureInitialized();
 
-    final templates = <String, String>{};
+    final appTemplates = <String, String>{};
+    final pluginTemplates = <String, String>{};
     final List<ExtensionConnection> connections = _extensionManager.connections
         .where(
           (ExtensionConnection c) =>
@@ -85,31 +83,86 @@ base class ExtensionTemplateManager {
         )
         .toList();
 
-    for (final connection in connections) {
-      try {
-        final Object? rpcResult = await connection.sendRequest(method);
-        if (rpcResult is Map<String, Object?>) {
-          for (final MapEntry(:key, :value) in rpcResult.entries) {
-            if (value is String) {
-              if (templates.containsKey(key)) {
-                _logger.printWarning(
-                  'Duplicate $templateKind platform template "$key" provided by extension '
-                  '"${connection.extensionName}" (already registered by extension '
-                  '"${_platformOwners[key]?.extensionName}"). Ignoring subsequent template mapping.',
-                );
-              } else {
-                templates[key] = value;
-                _platformOwners.putIfAbsent(key, () => connection);
-              }
-            }
-          }
-        }
-      } on Object catch (e) {
-        _logger.printTrace('Failed to get results from extension for $method: $e');
-      }
+    final List<(ExtensionConnection, Object?, Object?)> results = await Future.wait(
+      connections.map((ExtensionConnection connection) async {
+        final (Object? appResult, Object? pluginResult) = await (
+          _requestPlatformTemplates(
+            connection: connection,
+            method: TemplateService.getAppPlatformTemplatesMethod,
+          ),
+          _requestPlatformTemplates(
+            connection: connection,
+            method: TemplateService.getPluginPlatformTemplatesMethod,
+          ),
+        ).wait;
+        return (connection, appResult, pluginResult);
+      }),
+    );
+
+    for (final (connection, appResult, pluginResult) in results) {
+      _collectPlatformTemplates(
+        connection: connection,
+        rpcResult: appResult,
+        targetMap: appTemplates,
+        templateKind: _appTemplateKind,
+      );
+      _collectPlatformTemplates(
+        connection: connection,
+        rpcResult: pluginResult,
+        targetMap: pluginTemplates,
+        templateKind: _pluginTemplateKind,
+      );
     }
 
-    return templates;
+    _cachedAppPlatformTemplates = appTemplates;
+    _cachedPluginPlatformTemplates = pluginTemplates;
+  }
+
+  Future<Object?> _requestPlatformTemplates({
+    required ExtensionConnection connection,
+    required String method,
+  }) async {
+    try {
+      return await connection.sendRequest(method);
+    } on Object catch (e) {
+      _logger.printTrace('Failed to get results from extension for $method: $e');
+      return null;
+    }
+  }
+
+  void _collectPlatformTemplates({
+    required ExtensionConnection connection,
+    required Object? rpcResult,
+    required Map<String, String> targetMap,
+    required String templateKind,
+  }) {
+    if (rpcResult is! Map<String, Object?>) {
+      return;
+    }
+    for (final MapEntry(:key, :value) in rpcResult.entries) {
+      if (value is! String) {
+        continue;
+      }
+      final ExtensionConnection? existingOwner = _platformOwners[key];
+      if (existingOwner != null && existingOwner != connection) {
+        if (targetMap.containsKey(key)) {
+          _logger.printWarning(
+            'Duplicate $templateKind platform template "$key" provided by extension '
+            '"${connection.extensionName}" (already registered by extension '
+            '"${existingOwner.extensionName}"). Ignoring subsequent template mapping.',
+          );
+        } else {
+          _logger.printWarning(
+            'Conflicting $templateKind platform template "$key" provided by extension '
+            '"${connection.extensionName}" (platform already registered by extension '
+            '"${existingOwner.extensionName}"). Ignoring subsequent template mapping.',
+          );
+        }
+      } else {
+        targetMap[key] = value;
+        _platformOwners[key] = connection;
+      }
+    }
   }
 
   /// Resolves a template package URI to a local directory.
@@ -162,14 +215,7 @@ base class ExtensionTemplateManager {
       return toolParameters;
     }
 
-    await _extensionManager.ensureInitialized();
-
-    if (_cachedAppPlatformTemplates == null) {
-      await getAppPlatformTemplates();
-    }
-    if (_cachedPluginPlatformTemplates == null) {
-      await getPluginPlatformTemplates();
-    }
+    await (_loadFuture ??= _loadPlatformTemplates());
 
     final ExtensionConnection? owner = _platformOwners[platformName];
     if (owner == null) {

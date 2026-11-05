@@ -16,8 +16,8 @@ import 'package:flutter_tools_extension_linux_prototype/flutter_tools_extension_
 import 'package:flutter_tools_extension_linux_prototype/src/template.dart';
 import 'package:json_rpc_2/error_code.dart' as error_code;
 import 'package:json_rpc_2/json_rpc_2.dart' as json_rpc;
-import 'package:test/test.dart';
 
+import '../../src/common.dart';
 import '../../src/fakes.dart';
 
 final class _DuplicateLinuxTemplateService extends TemplateService {
@@ -37,6 +37,65 @@ void _duplicateLinuxExtensionEntryPoint(SendPort sendPort) {
   );
 }
 
+final class _ConflictingPluginLinuxTemplateService extends TemplateService {
+  @override
+  Map<String, String> get pluginPlatformTemplates => const <String, String>{
+    LinuxTemplateService.customLinuxPlatformName:
+        'package:flutter_tools_extension_linux_prototype/templates/conflicting-plugin',
+  };
+
+  @override
+  Future<Map<String, Object?>> generatePlatformTemplateParameters({
+    required String platformName,
+    required Map<String, Object?> toolParameters,
+  }) async {
+    return <String, Object?>{...toolParameters, 'fromConflictingPluginExtension': true};
+  }
+}
+
+void _conflictingPluginLinuxExtensionEntryPoint(SendPort sendPort) {
+  ToolExtensionEntryPoint.run(
+    sendPort,
+    <ToolExtensionService>[_ConflictingPluginLinuxTemplateService()],
+    extensionName: 'conflicting_plugin_linux_extension',
+    supportedPlatforms: const <String>{'linux'},
+  );
+}
+
+final class _CombinedAppAndPluginLinuxTemplateService extends TemplateService {
+  static const appTemplateUri =
+      'package:flutter_tools_extension_linux_prototype/templates/combined-app';
+  static const pluginTemplateUri =
+      'package:flutter_tools_extension_linux_prototype/templates/combined-plugin';
+
+  @override
+  Map<String, String> get appPlatformTemplates => const <String, String>{
+    LinuxTemplateService.customLinuxPlatformName: appTemplateUri,
+  };
+
+  @override
+  Map<String, String> get pluginPlatformTemplates => const <String, String>{
+    LinuxTemplateService.customLinuxPlatformName: pluginTemplateUri,
+  };
+
+  @override
+  Future<Map<String, Object?>> generatePlatformTemplateParameters({
+    required String platformName,
+    required Map<String, Object?> toolParameters,
+  }) async {
+    return <String, Object?>{...toolParameters, 'combinedExtension': true};
+  }
+}
+
+void _combinedAppAndPluginLinuxExtensionEntryPoint(SendPort sendPort) {
+  ToolExtensionEntryPoint.run(
+    sendPort,
+    <ToolExtensionService>[_CombinedAppAndPluginLinuxTemplateService()],
+    extensionName: 'combined_linux_extension',
+    supportedPlatforms: const <String>{'linux'},
+  );
+}
+
 void main() {
   group('ExtensionTemplateManager', () {
     late MemoryFileSystem fs;
@@ -47,7 +106,7 @@ void main() {
       logger = BufferLogger.test();
     });
 
-    test(
+    testWithoutContext(
       'returns empty platform templates when tool extensions feature flag is disabled',
       () async {
         final manager = ExtensionManager(
@@ -55,6 +114,7 @@ void main() {
           logger: logger,
           featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
         );
+        addTearDown(manager.dispose);
         await manager.initialize(entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint]);
 
         final templateManager = ExtensionTemplateManager(
@@ -81,17 +141,16 @@ void main() {
               toolParameters: defaultParams,
             );
         expect(generatedParams, equals(defaultParams));
-
-        await manager.dispose();
       },
     );
 
-    test('queries platform templates over RPC and caches results', () async {
+    testWithoutContext('queries platform templates over RPC and caches results', () async {
       final manager = ExtensionManager(
         hostPlatform: HostPlatform.linux_x64,
         logger: logger,
         featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
       );
+      addTearDown(manager.dispose);
       await manager.initialize(entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint]);
 
       final templateManager = ExtensionTemplateManager(
@@ -123,56 +182,58 @@ void main() {
       final Map<String, String> cachedPluginCall = await templateManager
           .getPluginPlatformTemplates();
       expect(identical(cachedPluginCall, pluginTemplates), isTrue);
-
-      await manager.dispose();
     });
 
-    test('generatePlatformTemplateParameters delegates over RPC and augments parameters', () async {
+    testWithoutContext(
+      'generatePlatformTemplateParameters delegates over RPC and augments parameters',
+      () async {
+        final manager = ExtensionManager(
+          hostPlatform: HostPlatform.linux_x64,
+          logger: logger,
+          featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
+        );
+        addTearDown(manager.dispose);
+        await manager.initialize(entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint]);
+
+        final templateManager = ExtensionTemplateManager(
+          extensionManager: manager,
+          fileSystem: fs,
+          logger: logger,
+          featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
+          flutterRoot: '/flutter',
+        );
+
+        final inputParams = <String, Object?>{
+          'projectName': 'sample_linux_app',
+          'org': 'com.example',
+        };
+        final Map<String, Object?> result = await templateManager
+            .generatePlatformTemplateParameters(
+              platformName: LinuxTemplateService.customLinuxPlatformName,
+              toolParameters: inputParams,
+            );
+
+        expect(result['projectName'], 'sample_linux_app');
+        expect(result['org'], 'com.example');
+        expect(result['customLinux'], isTrue);
+
+        // Returns toolParameters unchanged when platformName is unknown.
+        final Map<String, Object?> unknownResult = await templateManager
+            .generatePlatformTemplateParameters(
+              platformName: 'unknown_platform',
+              toolParameters: inputParams,
+            );
+        expect(unknownResult, equals(inputParams));
+      },
+    );
+
+    testWithoutContext('logs warning when duplicate platform template is encountered', () async {
       final manager = ExtensionManager(
         hostPlatform: HostPlatform.linux_x64,
         logger: logger,
         featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
       );
-      await manager.initialize(entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint]);
-
-      final templateManager = ExtensionTemplateManager(
-        extensionManager: manager,
-        fileSystem: fs,
-        logger: logger,
-        featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
-        flutterRoot: '/flutter',
-      );
-
-      final inputParams = <String, Object?>{
-        'projectName': 'sample_linux_app',
-        'org': 'com.example',
-      };
-      final Map<String, Object?> result = await templateManager.generatePlatformTemplateParameters(
-        platformName: LinuxTemplateService.customLinuxPlatformName,
-        toolParameters: inputParams,
-      );
-
-      expect(result['projectName'], 'sample_linux_app');
-      expect(result['org'], 'com.example');
-      expect(result['customLinux'], isTrue);
-
-      // Returns toolParameters unchanged when platformName is unknown.
-      final Map<String, Object?> unknownResult = await templateManager
-          .generatePlatformTemplateParameters(
-            platformName: 'unknown_platform',
-            toolParameters: inputParams,
-          );
-      expect(unknownResult, equals(inputParams));
-
-      await manager.dispose();
-    });
-
-    test('logs warning when duplicate platform template is encountered', () async {
-      final manager = ExtensionManager(
-        hostPlatform: HostPlatform.linux_x64,
-        logger: logger,
-        featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
-      );
+      addTearDown(manager.dispose);
       await manager.initialize(
         entryPoints: <ExtensionEntryPoint>[
           linuxExtensionEntryPoint,
@@ -203,55 +264,173 @@ void main() {
           '"flutter_tools_extension_linux_prototype")',
         ),
       );
-
-      await manager.dispose();
     });
 
-    test('RPC parameter validation throws INVALID_PARAMS on invalid or missing params', () async {
+    testWithoutContext('logs warning and preserves owner when second extension registers plugin template for same platform', () async {
       final manager = ExtensionManager(
+        featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
         hostPlatform: HostPlatform.linux_x64,
         logger: logger,
+      );
+      addTearDown(manager.dispose);
+      await manager.initialize(
+        entryPoints: <ExtensionEntryPoint>[
+          linuxExtensionEntryPoint,
+          _conflictingPluginLinuxExtensionEntryPoint,
+        ],
+      );
+
+      final templateManager = ExtensionTemplateManager(
+        extensionManager: manager,
         featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
-      );
-      await manager.initialize(entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint]);
-
-      final ExtensionConnection connection = manager.connections.first;
-
-      await expectLater(
-        connection.sendRequest(
-          TemplateService.generatePlatformTemplateParametersMethod,
-          params: const <String, Object?>{},
-        ),
-        throwsA(
-          isA<json_rpc.RpcException>().having(
-            (json_rpc.RpcException e) => e.code,
-            'code',
-            equals(error_code.INVALID_PARAMS),
-          ),
-        ),
+        fileSystem: fs,
+        flutterRoot: '/flutter',
+        logger: logger,
       );
 
-      await expectLater(
-        connection.sendRequest(
-          TemplateService.generatePlatformTemplateParametersMethod,
-          params: const <String, Object?>{
-            'platformName': 123,
-            'toolParameters': <String, Object?>{},
-          },
-        ),
-        throwsA(
-          isA<json_rpc.RpcException>().having(
-            (json_rpc.RpcException e) => e.code,
-            'code',
-            equals(error_code.INVALID_PARAMS),
-          ),
+      // Query plugin templates first to verify ownership is deterministic regardless of call order.
+      final Map<String, String> pluginTemplates = await templateManager
+          .getPluginPlatformTemplates();
+      expect(pluginTemplates, isEmpty);
+      expect(
+        logger.warningText,
+        contains(
+          'Conflicting plugin platform template "custom_linux" provided by extension '
+          '"conflicting_plugin_linux_extension" (platform already registered by extension '
+          '"flutter_tools_extension_linux_prototype")',
         ),
       );
 
-      await manager.dispose();
+      final Map<String, String> appTemplates = await templateManager.getAppPlatformTemplates();
+      expect(
+        appTemplates,
+        equals(<String, String>{
+          LinuxTemplateService.customLinuxPlatformName: LinuxTemplateService.customLinuxTemplateUri,
+        }),
+      );
+
+      final Map<String, Object?> params = await templateManager.generatePlatformTemplateParameters(
+        platformName: LinuxTemplateService.customLinuxPlatformName,
+        toolParameters: const <String, Object?>{'projectName': 'my_app'},
+      );
+      expect(params['customLinux'], isTrue);
+      expect(params.containsKey('fromConflictingPluginExtension'), isFalse);
     });
 
-    test('resolveTemplateDirectory resolves package paths correctly', () {
+    testWithoutContext(
+      'allows single extension to register both app and plugin templates for same platform',
+      () async {
+        final manager = ExtensionManager(
+          featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
+          hostPlatform: HostPlatform.linux_x64,
+          logger: logger,
+        );
+        addTearDown(manager.dispose);
+        await manager.initialize(
+          entryPoints: <ExtensionEntryPoint>[_combinedAppAndPluginLinuxExtensionEntryPoint],
+        );
+
+        final templateManager = ExtensionTemplateManager(
+          extensionManager: manager,
+          featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
+          fileSystem: fs,
+          flutterRoot: '/flutter',
+          logger: logger,
+        );
+
+        final Map<String, String> appTemplates = await templateManager.getAppPlatformTemplates();
+        final Map<String, String> pluginTemplates = await templateManager
+            .getPluginPlatformTemplates();
+
+        expect(
+          appTemplates,
+          equals(<String, String>{
+            LinuxTemplateService.customLinuxPlatformName:
+                _CombinedAppAndPluginLinuxTemplateService.appTemplateUri,
+          }),
+        );
+        expect(
+          pluginTemplates,
+          equals(<String, String>{
+            LinuxTemplateService.customLinuxPlatformName:
+                _CombinedAppAndPluginLinuxTemplateService.pluginTemplateUri,
+          }),
+        );
+        expect(logger.warningText, isEmpty);
+
+        final Map<String, Object?> params = await templateManager
+            .generatePlatformTemplateParameters(
+              platformName: LinuxTemplateService.customLinuxPlatformName,
+              toolParameters: const <String, Object?>{'projectName': 'my_plugin'},
+            );
+        expect(params['combinedExtension'], isTrue);
+      },
+    );
+
+    testWithoutContext(
+      'RPC parameter validation throws INVALID_PARAMS on invalid or missing params',
+      () async {
+        final manager = ExtensionManager(
+          hostPlatform: HostPlatform.linux_x64,
+          logger: logger,
+          featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
+        );
+        addTearDown(manager.dispose);
+        await manager.initialize(entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint]);
+
+        final ExtensionConnection connection = manager.connections.first;
+
+        await expectLater(
+          connection.sendRequest(
+            TemplateService.generatePlatformTemplateParametersMethod,
+            params: const <String, Object?>{},
+          ),
+          throwsA(
+            isA<json_rpc.RpcException>().having(
+              (json_rpc.RpcException e) => e.code,
+              'code',
+              equals(error_code.INVALID_PARAMS),
+            ),
+          ),
+        );
+
+        await expectLater(
+          connection.sendRequest(
+            TemplateService.generatePlatformTemplateParametersMethod,
+            params: const <String, Object?>{
+              TemplateService.platformNameParam: 123,
+              TemplateService.toolParametersParam: <String, Object?>{},
+            },
+          ),
+          throwsA(
+            isA<json_rpc.RpcException>().having(
+              (json_rpc.RpcException e) => e.code,
+              'code',
+              equals(error_code.INVALID_PARAMS),
+            ),
+          ),
+        );
+
+        await expectLater(
+          connection.sendRequest(
+            TemplateService.generatePlatformTemplateParametersMethod,
+            params: const <String, Object?>{
+              TemplateService.platformNameParam: LinuxTemplateService.customLinuxPlatformName,
+              TemplateService.toolParametersParam: 'invalid',
+            },
+          ),
+          throwsA(
+            isA<json_rpc.RpcException>().having(
+              (json_rpc.RpcException e) => e.code,
+              'code',
+              equals(error_code.INVALID_PARAMS),
+            ),
+          ),
+        );
+      },
+    );
+
+    testWithoutContext('resolveTemplateDirectory resolves package paths correctly', () {
       final manager = ExtensionManager(
         hostPlatform: HostPlatform.linux_x64,
         logger: logger,
@@ -274,7 +453,7 @@ void main() {
       );
 
       final Directory protoDir = templateManager.resolveTemplateDirectory(
-        'package:flutter_tools_extension_linux_prototype/templates/custom-linux-app',
+        LinuxTemplateService.customLinuxTemplateUri,
       );
       expect(
         protoDir.path,
