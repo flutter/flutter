@@ -83,11 +83,10 @@ EntityPassClipStack::ClipStateResult EntityPassClipStack::RecordRestore(
   if (subpass_state.clip_coverage.back().coverage.has_value()) {
     FML_DCHECK(next_replay_index_ <=
                subpass_state.rendered_clip_entities.size());
-    // `rendered_clip_entities` is a sparse subset of `clip_coverage`:
-    // containing axis-aligned intersect rects push coverage without pushing a
-    // replay entity, while multi-clip scopes push multiple replay entities.
-    // Popping strictly where `clip_height > restore_height` evicts all clips
-    // from restored child scopes while preserving active ancestor clips.
+    // `RecordClip` omits replay entities for axis-aligned intersect rects that
+    // contain the current clip coverage, and a single `RecordRestore` can
+    // unwind multiple `RecordClip` calls at once. Popping all entries with
+    // `clip_height > restore_height` evicts only the restored scopes' clips.
     while (!subpass_state.rendered_clip_entities.empty() &&
            subpass_state.rendered_clip_entities.back().clip_height >
                restore_height) {
