@@ -116,7 +116,8 @@ mergeInto(LibraryManager.library, {
               data.width,
               data.height,
               data.callbackId,
-              skwasm_getCurrentTimestamp());
+              skwasm_getCurrentTimestamp(),
+              data.captureImageBitmaps);
             return;
           case 'onRenderComplete':
             _surface_onRenderComplete(
@@ -139,7 +140,7 @@ mergeInto(LibraryManager.library, {
             }
             associatedObjectsMap.delete(pointer);
             return;
-#if EXPORT_NAME === 'wimp'
+#if EXPORT_NAME === 'wimp' || EXPORT_NAME === 'wimp_heavy'
           // Impeller (wimp) caches textures on the worker's ContentContext, which
           // must be explicitly notified to evict them upon DlImage disposal.
           case 'disposeDlImage':
@@ -200,7 +201,7 @@ mergeInto(LibraryManager.library, {
       }, [], threadId);
     };
 
-#if EXPORT_NAME === 'wimp'
+#if EXPORT_NAME === 'wimp' || EXPORT_NAME === 'wimp_heavy'
     // Dispatches DlImage disposal to the raster worker thread. Only used by
     // Impeller (wimp) to evict cached textures from ContentContext.
     _skwasm_dispatchDisposeDlImage = function(threadId, image) {
@@ -252,7 +253,16 @@ mergeInto(LibraryManager.library, {
     };
 
     // Rendering
-    _skwasm_dispatchRenderPictures = function (threadId, surfaceHandle, pictures, pictureCount, width, height, callbackId) {
+    _skwasm_dispatchRenderPictures = function (
+      threadId,
+      surfaceHandle,
+      pictures,
+      pictureCount,
+      width,
+      height,
+      callbackId,
+      captureImageBitmaps
+    ) {
       skwasm_postMessage({
         skwasmMessage: 'renderPictures',
         surface: surfaceHandle,
@@ -261,6 +271,7 @@ mergeInto(LibraryManager.library, {
         width,
         height,
         callbackId,
+        captureImageBitmaps,
       }, [], threadId);
     };
     _skwasm_resolveAndPostImages = async function (surfaceHandle, imageBitmaps, rasterStart, callbackId) {
@@ -464,7 +475,7 @@ mergeInto(LibraryManager.library, {
   skwasm_dispatchRasterizeImage__deps: ['$skwasm_support_setup'],
   skwasm_postRasterizeResult: function() {},
   skwasm_postRasterizeResult__deps: ['$skwasm_support_setup'],
-#if EXPORT_NAME === 'wimp'
+#if EXPORT_NAME === 'wimp' || EXPORT_NAME === 'wimp_heavy'
   // DlImage disposal messaging is only used by Impeller (wimp) for texture cache eviction.
   skwasm_dispatchDisposeDlImage: function() {},
   skwasm_dispatchDisposeDlImage__deps: ['$skwasm_support_setup'],

@@ -16,6 +16,8 @@ import '../base/logger.dart';
 import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/terminal.dart';
+import '../build_system/build_system.dart';
+import '../build_system/build_targets.dart';
 import '../context/tool_context.dart';
 import '../convert.dart';
 import '../custom_devices/custom_device.dart';
@@ -37,9 +39,6 @@ class CustomDevicesCommand extends FlutterCommand {
   }
 
   final FeatureFlags _featureFlags;
-
-  @override
-  ToolContext get toolContext => super.toolContext!;
 
   @override
   String get description {
@@ -79,10 +78,7 @@ Requires the custom devices feature to be enabled. You can enable it using "flut
 /// to the subcommands, like backing up the config file & checking if the
 /// feature is enabled.
 abstract class CustomDevicesCommandBase extends FlutterCommand {
-  CustomDevicesCommandBase({required this.featureFlags, required ToolContext super.toolContext});
-
-  @override
-  ToolContext get toolContext => super.toolContext!;
+  CustomDevicesCommandBase({required this.featureFlags, required super.toolContext});
 
   @protected
   CustomDevicesConfig get customDevicesConfig => toolContext.customDevicesConfig;
@@ -267,7 +263,17 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
   /// Check this config by executing some of the commands, see if they run
   /// fine.
   Future<bool> _checkConfigWithLogging(CustomDeviceConfig config) async {
-    final device = CustomDevice(config: config, toolContext: toolContext);
+    final device = CustomDevice(
+      config: config,
+      analytics: analytics,
+      buildSystem: FlutterBuildSystem(
+        fileSystem: fileSystem,
+        logger: logger,
+        platform: toolContext.platform,
+      ),
+      buildTargets: const NoOpBuildTargets(),
+      toolContext: toolContext,
+    );
 
     var result = true;
 

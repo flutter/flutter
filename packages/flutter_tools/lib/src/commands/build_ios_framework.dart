@@ -13,6 +13,7 @@ import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
+import '../base/template.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
 import '../build_system/targets/ios.dart';
@@ -37,10 +38,10 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
     required this._appleContext,
     required this._buildSystem,
     required this.codesign,
-    required ToolContext super.toolContext,
+    required this.templateRenderer,
+    required super.toolContext,
     required super.verboseHelp,
-  }) : _toolContext = toolContext,
-       super(logger: toolContext.logger) {
+  }) : super(logger: toolContext.logger) {
     registerOptionBundle(const DarwinAddToAppOptionsBundle());
     argParser.addDescriptors(const <OptionDescriptor<Object?>>[
       debugMode,
@@ -107,10 +108,10 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
   );
 
   final DarwinAddToAppCodesigning codesign;
+  final TemplateRenderer templateRenderer;
 
   final AppleContext _appleContext;
   final BuildSystem _buildSystem;
-  final ToolContext _toolContext;
 
   AppleContext get appleContext => _appleContext;
 
@@ -118,17 +119,13 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
   BuildSystem get buildSystem => _buildSystem;
 
   @protected
-  @override
-  ToolContext get toolContext => _toolContext;
+  Cache get cache => toolContext.cache;
 
   @protected
-  Cache get cache => _toolContext.cache;
+  Platform get platform => toolContext.platform;
 
   @protected
-  Platform get platform => _toolContext.platform;
-
-  @protected
-  FlutterVersion get flutterVersion => _toolContext.flutterVersion;
+  FlutterVersion get flutterVersion => toolContext.flutterVersion;
 
   Future<List<BuildInfo>> getBuildInfos() async {
     return <BuildInfo>[
@@ -294,7 +291,7 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
     Directory hostAppRoot,
     PlistParser plistParser,
   ) async {
-    final ToolContext(:FileSystem fs, :Logger logger) = _toolContext;
+    final ToolContext(:FileSystem fs, :Logger logger) = toolContext;
 
     final File projectFile = hostAppRoot
         .childDirectory('Pods')
@@ -466,6 +463,7 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
     required super.appleContext,
     required super.buildSystem,
     required super.codesign,
+    required super.templateRenderer,
     required super.toolContext,
     required super.verboseHelp,
   }) {
@@ -517,8 +515,19 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
   bool get regeneratePlatformSpecificToolingDuringVerify => false;
 
   @override
+  bool get deprecated => true;
+
+  @override
+  String get deprecationWarning {
+    return '${toolContext.logger.terminal.warningMark} The "flutter build ios-framework" command is '
+        'deprecated and has been replaced by "flutter build swift-package --platform ios". '
+        'For more information, see: https://docs.flutter.dev/add-to-app/ios/project-setup\n';
+  }
+
+  @override
   Future<FlutterCommandResult> runCommand() async {
     final ToolContext(
+      :Cache cache,
       :Config config,
       :FileSystem fs,
       :Logger logger,
@@ -602,6 +611,9 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
           project.ios,
           getIosBuildDirectory(config: config, fileSystem: fs),
           buildInfo.mode,
+          cocoaPods: appleContext.cocoaPods,
+          templateRenderer: templateRenderer,
+          toolContext: toolContext,
           forceCocoaPodsOnly: true,
         );
         if (hasPlugins(project)) {
@@ -816,6 +828,7 @@ end
       :Logger logger,
       :Platform platform,
       :ProcessManager processManager,
+      :FlutterProjectFactory projectFactory,
     ) = toolContext;
     final AppleContext(:Xcode xcode) = appleContext;
 
@@ -836,7 +849,7 @@ end
           outputDir: outputBuildDirectory,
           buildDir: project.dartTool.childDirectory('flutter_build'),
           cacheDir: cache.getRoot(),
-          flutterRootDir: fs.directory(Cache.flutterRoot),
+          flutterRootDir: fs.directory(cache.flutterRoot),
           defines: <String, String>{
             kTargetFile: targetFile,
             kTargetPlatform: TargetPlatform.ios.getName(),
@@ -853,6 +866,8 @@ end
           processManager: processManager,
           platform: platform,
           analytics: analytics,
+          projectFactory: projectFactory,
+          xcode: xcode,
           engineVersion: artifacts.usesLocalArtifacts ? null : flutterVersion.engineRevision,
           generateDartPluginRegistry: true,
         );
@@ -971,7 +986,7 @@ end
           if (fs.path.extension(podFrameworkName) != '.framework') {
             continue;
           }
-          final String binaryName = toolContext.fs.path.basenameWithoutExtension(podFrameworkName);
+          final String binaryName = fs.path.basenameWithoutExtension(podFrameworkName);
 
           final frameworks = <Directory>[
             podProduct as Directory,

@@ -15,8 +15,11 @@ import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'base/process.dart';
+import 'context/tool_context.dart';
 import 'device.dart';
 import 'ios/ios_emulators.dart';
+import 'ios/ios_workflow.dart';
+import 'macos/xcode.dart';
 
 EmulatorManager? get emulatorManager => context.get<EmulatorManager>();
 
@@ -24,20 +27,24 @@ EmulatorManager? get emulatorManager => context.get<EmulatorManager>();
 class EmulatorManager {
   EmulatorManager({
     required AndroidWorkflow androidWorkflow,
-    required FileSystem fileSystem,
+    required IOSWorkflow? iosWorkflow,
     required this._javaBuilder,
-    required Logger logger,
-    required ProcessManager processManager,
-    AndroidSdk? Function()? androidSdkBuilder,
-  }) : _androidSdkBuilder = androidSdkBuilder,
-       _processUtils = ProcessUtils(logger: logger, processManager: processManager),
-       _androidEmulators = AndroidEmulators(
-         androidSdkBuilder: androidSdkBuilder,
-         androidWorkflow: androidWorkflow,
-         fileSystem: fileSystem,
-         logger: logger,
-         processManager: processManager,
-       ) {
+    required this._toolContext,
+    required Xcode? xcode,
+    this._androidSdkBuilder,
+  }) {
+    final ToolContext(:FileSystem fs, :Logger logger, :ProcessManager processManager) =
+        _toolContext;
+    _androidEmulators = AndroidEmulators(
+      androidSdkBuilder: _androidSdkBuilder,
+      androidWorkflow: androidWorkflow,
+      fileSystem: fs,
+      logger: logger,
+      processManager: processManager,
+    );
+    _emulatorDiscoverers.add(
+      IOSEmulators(iosWorkflow: iosWorkflow, toolContext: _toolContext, xcode: xcode),
+    );
     _emulatorDiscoverers.add(_androidEmulators);
   }
 
@@ -45,12 +52,12 @@ class EmulatorManager {
   late final AndroidSdk? _androidSdk = _androidSdkBuilder?.call();
   final Java? Function() _javaBuilder;
   late final Java? _java = _javaBuilder();
-  final AndroidEmulators _androidEmulators;
-  final ProcessUtils _processUtils;
+  late final AndroidEmulators _androidEmulators;
+  final ToolContext _toolContext;
 
   // Constructing EmulatorManager is cheap; they only do expensive work if some
   // of their methods are called.
-  final _emulatorDiscoverers = <EmulatorDiscovery>[IOSEmulators()];
+  final _emulatorDiscoverers = <EmulatorDiscovery>[];
 
   Future<List<Emulator>> getEmulatorsMatching(String searchText) async {
     final List<Emulator> emulators = await getAllAvailableEmulators();
@@ -158,7 +165,7 @@ class EmulatorManager {
           .trim();
     }
 
-    final RunResult runResult = await _processUtils.run(<String>[
+    final RunResult runResult = await _toolContext.processUtils.run(<String>[
       avdManagerPath,
       'create',
       'avd',
@@ -181,7 +188,10 @@ class EmulatorManager {
 
   Future<String?> _getPreferredAvailableDevice(String avdManagerPath) async {
     final args = <String>[avdManagerPath, 'list', 'device', '-c'];
-    final RunResult runResult = await _processUtils.run(args, environment: _java?.environment);
+    final RunResult runResult = await _toolContext.processUtils.run(
+      args,
+      environment: _java?.environment,
+    );
     if (runResult.exitCode != 0) {
       return null;
     }
@@ -205,7 +215,10 @@ class EmulatorManager {
     // It seems that to get the available list of images, we need to send a
     // request to create without the image and it'll provide us a list :-(
     final args = <String>[avdManagerPath, 'create', 'avd', '-n', 'temp'];
-    final RunResult runResult = await _processUtils.run(args, environment: _java?.environment);
+    final RunResult runResult = await _toolContext.processUtils.run(
+      args,
+      environment: _java?.environment,
+    );
 
     // Get the list of IDs that match our criteria
     final List<String> availableIDs = runResult.stderr

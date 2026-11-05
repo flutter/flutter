@@ -10,10 +10,10 @@
 #include "flutter/lib/gpu/render_pass.h"
 #include "flutter/lib/gpu/texture.h"
 #include "fml/memory/ref_ptr.h"
-#include "fml/status.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "impeller/renderer/testing/mocks.h"
+#include "third_party/abseil-cpp/absl/status/status.h"
 
 namespace flutter::gpu {
 namespace {
@@ -59,7 +59,7 @@ TEST(FlutterGpuCommandBufferTest,
             EXPECT_EQ(buffers.size(), 1u);
             callback(impeller::CommandBuffer::Status::kCompleted);
           },
-          Return(fml::Status())));
+          Return(absl::OkStatus())));
 
   EXPECT_TRUE(command_buffer.Submit(
       [&statuses](impeller::CommandBuffer::Status status) {
@@ -80,7 +80,7 @@ TEST(FlutterGpuCommandBufferTest, RejectsCompletionCallbacksAfterSubmit) {
   EXPECT_CALL(*context, GetBackendType)
       .WillOnce(Return(impeller::Context::BackendType::kMetal));
   EXPECT_CALL(*context, GetCommandQueue).WillOnce(Return(command_queue));
-  EXPECT_CALL(*command_queue, Submit(_, _)).WillOnce(Return(fml::Status()));
+  EXPECT_CALL(*command_queue, Submit(_, _)).WillOnce(Return(absl::OkStatus()));
 
   EXPECT_TRUE(command_buffer.Submit());
   EXPECT_FALSE(command_buffer.AddCompletionCallback(
@@ -106,8 +106,8 @@ TEST(FlutterGpuCommandBufferTest,
       .WillOnce(Return(impeller::Context::BackendType::kMetal));
   EXPECT_CALL(*context, GetCommandQueue).WillOnce(Return(command_queue));
   EXPECT_CALL(*command_queue, Submit(_, _))
-      .WillOnce(Return(fml::Status(fml::StatusCode::kInternal,
-                                   "Command queue submit failed.")));
+      .WillOnce(Return(absl::Status(absl::StatusCode::kInternal,
+                                    "Command queue submit failed.")));
 
   EXPECT_FALSE(command_buffer.Submit());
   EXPECT_EQ(statuses.size(), 1u);
@@ -191,7 +191,7 @@ TEST_F(FlutterGpuPassLifecycleTest,
     EXPECT_CALL(*blit_b, OnCopyTextureToTextureCommand).Times(2);
     // Submit ends the last pass only.
     EXPECT_CALL(*blit_b, EncodeCommands).WillOnce(Return(true));
-    EXPECT_CALL(*command_queue_, Submit).WillOnce(Return(fml::Status()));
+    EXPECT_CALL(*command_queue_, Submit).WillOnce(Return(absl::OkStatus()));
   }
 
   EXPECT_TRUE(Copy());
@@ -211,7 +211,7 @@ TEST_F(FlutterGpuPassLifecycleTest, EndEncodesThePassOnce) {
     EXPECT_CALL(*impeller_command_buffer_, OnCreateRenderPass)
         .WillOnce(Return(render_a));
     EXPECT_CALL(*render_a, OnEncodeCommands).WillOnce(Return(true));
-    EXPECT_CALL(*command_queue_, Submit).WillOnce(Return(fml::Status()));
+    EXPECT_CALL(*command_queue_, Submit).WillOnce(Return(absl::OkStatus()));
   }
 
   auto pass = fml::MakeRefCounted<RenderPass>();
@@ -233,7 +233,7 @@ TEST_F(FlutterGpuPassLifecycleTest,
     EXPECT_CALL(*impeller_command_buffer_, OnCreateRenderPass)
         .WillOnce(Return(render_b));
     EXPECT_CALL(*render_b, OnEncodeCommands).WillOnce(Return(true));
-    EXPECT_CALL(*command_queue_, Submit).WillOnce(Return(fml::Status()));
+    EXPECT_CALL(*command_queue_, Submit).WillOnce(Return(absl::OkStatus()));
   }
 
   auto pass_a = fml::MakeRefCounted<RenderPass>();
