@@ -58,6 +58,7 @@ import kotlin.io.path.writeText
 import kotlin.test.Test
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 class FlutterPluginTest {
     // Clear global singleton mocks to prevent mock state leaking into other tests in the same JVM.
@@ -249,6 +250,7 @@ class FlutterPluginTest {
             exception.message!!,
             "Flutter could not register its generated assets for variant 'debug'"
         )
+        assertTrue(exception.message!!.endsWith("https://github.com/flutter/flutter/issues"))
     }
 
     @Test
