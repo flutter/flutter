@@ -4,6 +4,7 @@
 
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/scheduler.dart';
 
 import 'box.dart';
 import 'layer.dart';
@@ -271,6 +272,11 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
       case RenderAnimatedSizeState.unstable:
         _layoutUnstable();
     }
+    // With a zero duration, forward() completes before it returns, so there
+    // is no animation left to track the child size against.
+    if (_controller.isCompleted) {
+      _state = RenderAnimatedSizeState.stable;
+    }
 
     size = _currentSize = constraints.constrain(_animatedSize!);
     alignChild();
@@ -296,7 +302,11 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
         return constraints.constrain(childSize);
       case RenderAnimatedSizeState.stable:
         if (_sizeTween.end != childSize) {
-          return constraints.constrain(_currentSize);
+          // performLayout restarts the animation, which completes at once
+          // with a zero duration.
+          return constraints.constrain(
+            _controller.duration == Duration.zero ? childSize : _currentSize,
+          );
         } else if (_controller.value == _controller.upperBound) {
           return constraints.constrain(childSize);
         }
@@ -390,7 +400,14 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
   }
 
   void _animationStatusListener(AnimationStatus status) {
-    if (status.isCompleted) {
+    if (!status.isCompleted) {
+      return;
+    }
+    // onEnd can call setState() or read the size, which is not allowed
+    // during layout.
+    if (_isForwardingDuringLayout) {
+      SchedulerBinding.instance.addPostFrameCallback((_) => _onEnd?.call());
+    } else {
       _onEnd?.call();
     }
   }

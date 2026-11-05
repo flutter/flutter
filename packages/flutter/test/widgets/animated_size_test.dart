@@ -488,7 +488,7 @@ void main() {
     });
 
     // Regression test for https://github.com/flutter/flutter/issues/71227
-    testWidgets('AnimatedSize with zero duration does not throw when the child size changes', (
+    testWidgets('with zero duration does not throw when the child size changes', (
       WidgetTester tester,
     ) async {
       Widget build(double size) {
@@ -513,34 +513,122 @@ void main() {
     });
 
     // Regression test for https://github.com/flutter/flutter/issues/71227
-    testWidgets(
-      'AnimatedSize with zero duration does not throw when re-laid out with the same child size',
-      (WidgetTester tester) async {
-        Widget build(double maxWidth) {
-          return Center(
-            child: ConstrainedBox(
-              constraints: BoxConstraints(maxWidth: maxWidth),
-              child: const AnimatedSize(
-                duration: Duration.zero,
-                child: SizedBox.square(dimension: 100.0),
-              ),
+    testWidgets('with zero duration does not throw when re-laid out with the same child size', (
+      WidgetTester tester,
+    ) async {
+      Widget build(double maxWidth) {
+        return Center(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(maxWidth: maxWidth),
+            child: const AnimatedSize(
+              duration: Duration.zero,
+              child: SizedBox.square(dimension: 100.0),
             ),
-          );
-        }
+          ),
+        );
+      }
 
-        await tester.pumpWidget(build(300.0));
-        final RenderAnimatedSize box = tester.renderObject(find.byType(AnimatedSize));
-        expect(box.state, RenderAnimatedSizeState.stable);
-        expect(box.debugController!.value, 0.0);
+      await tester.pumpWidget(build(300.0));
+      final RenderAnimatedSize box = tester.renderObject(find.byType(AnimatedSize));
+      expect(box.state, RenderAnimatedSizeState.stable);
+      expect(box.debugController!.value, 0.0);
 
-        // New constraints trigger a relayout, but the child is still 100x100, so
-        // the render object resumes (and synchronously completes) the animation.
-        await tester.pumpWidget(build(400.0));
-        expect(tester.takeException(), isNull);
-        expect(box.debugController!.value, 1.0);
-        expect(tester.getSize(find.byType(AnimatedSize)), const Size.square(100.0));
-      },
-    );
+      // New constraints trigger a relayout, but the child is still 100x100, so
+      // the render object resumes (and synchronously completes) the animation.
+      await tester.pumpWidget(build(400.0));
+      expect(tester.takeException(), isNull);
+      expect(box.debugController!.value, 1.0);
+      expect(tester.getSize(find.byType(AnimatedSize)), const Size.square(100.0));
+    });
+
+    testWidgets('with zero duration, dry layout matches layout when the child size changes', (
+      WidgetTester tester,
+    ) async {
+      Widget build(double maxWidth) {
+        return Center(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(maxWidth: maxWidth),
+            child: const AnimatedSize(
+              duration: Duration.zero,
+              child: SizedBox(width: double.infinity, height: 50.0),
+            ),
+          ),
+        );
+      }
+
+      await tester.pumpWidget(build(100.0));
+      final RenderBox box = tester.renderObject(find.byType(AnimatedSize));
+      expect(box.size, const Size(100.0, 50.0));
+
+      // With a zero duration, the size changes to the new child size at once.
+      const newConstraints = BoxConstraints(maxWidth: 200.0, maxHeight: 600.0);
+      expect(box.getDryLayout(newConstraints), const Size(200.0, 50.0));
+
+      await tester.pumpWidget(build(200.0));
+      expect(box.constraints, newConstraints);
+      expect(box.size, const Size(200.0, 50.0));
+    });
+
+    testWidgets('animates a size change that follows a zero duration size change', (
+      WidgetTester tester,
+    ) async {
+      var onEndCount = 0;
+      Widget build(Duration duration, double size) {
+        return Center(
+          child: AnimatedSize(
+            duration: duration,
+            onEnd: () => onEndCount += 1,
+            child: SizedBox.square(dimension: size),
+          ),
+        );
+      }
+
+      await tester.pumpWidget(build(Duration.zero, 100.0));
+      await tester.pumpWidget(build(Duration.zero, 200.0));
+      expect(tester.getSize(find.byType(AnimatedSize)), const Size.square(200.0));
+
+      onEndCount = 0;
+      await tester.pumpWidget(build(const Duration(milliseconds: 200), 300.0));
+      expect(tester.getSize(find.byType(AnimatedSize)), const Size.square(200.0));
+
+      await tester.pump(const Duration(milliseconds: 100));
+      expect(tester.getSize(find.byType(AnimatedSize)), const Size.square(250.0));
+      expect(onEndCount, 0);
+
+      await tester.pumpAndSettle();
+      expect(tester.getSize(find.byType(AnimatedSize)), const Size.square(300.0));
+      expect(onEndCount, 1);
+    });
+
+    testWidgets('with zero duration, calls onEnd after layout', (WidgetTester tester) async {
+      var dimension = 100.0;
+      final sizesAtEnd = <Size?>[];
+      late StateSetter setOuterState;
+      await tester.pumpWidget(
+        Center(
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              setOuterState = setState;
+              return AnimatedSize(
+                duration: Duration.zero,
+                onEnd: () {
+                  setState(() {});
+                  sizesAtEnd.add(context.size);
+                },
+                child: SizedBox.square(dimension: dimension),
+              );
+            },
+          ),
+        ),
+      );
+      expect(sizesAtEnd, isEmpty);
+
+      setOuterState(() => dimension = 200.0);
+      await tester.pump();
+      expect(tester.takeException(), isNull);
+      expect(sizesAtEnd, <Size>[const Size.square(200.0)]);
+      expect(tester.getSize(find.byType(AnimatedSize)), const Size.square(200.0));
+    });
   });
 
   testWidgets('AnimatedSize does not crash at zero size', (WidgetTester tester) async {
