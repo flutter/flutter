@@ -23,6 +23,9 @@ ui.ImageFilter _blur({ui.Rect? bounds}) =>
 /// Blurs red over the left half and blue over the right half of a 100x100
 /// picture with [filter], optionally shifted right by [translateX], and
 /// returns the RGBA of the pixel at ([probeX], 50).
+///
+/// The default probe sits 3px inside the blue half, where an unbounded
+/// sigma-8 blur visibly mixes in red from across the edge.
 Future<List<int>> _probe(ui.ImageFilter filter, {double translateX = 0, int probeX = 53}) async {
   final ui.Picture picture = drawPicture((ui.Canvas canvas) {
     canvas.translate(translateX, 0);
@@ -34,22 +37,34 @@ Future<List<int>> _probe(ui.ImageFilter filter, {double translateX = 0, int prob
     canvas.drawRect(_blueRect, ui.Paint()..color = const ui.Color(0xFF0000FF));
     canvas.restore();
   });
-  final ui.Image image = await picture.toImage(100, 100);
   try {
-    final ByteData data = (await image.toByteData())!;
-    final int offset = (50 * 100 + probeX) * 4;
-    return List<int>.generate(4, (int i) => data.getUint8(offset + i));
+    final ui.Image image = await picture.toImage(100, 100);
+    try {
+      final ByteData data = (await image.toByteData())!;
+      final int offset = (50 * 100 + probeX) * 4;
+      return List<int>.generate(4, (int i) => data.getUint8(offset + i));
+    } finally {
+      image.dispose();
+    }
   } finally {
-    image.dispose();
     picture.dispose();
   }
 }
 
+/// Expects the probe to be (nearly) pure opaque blue. The small tolerances
+/// absorb blur renormalization rounding.
 void _expectNoBleed(List<int> rgba) {
   final reason = 'probe RGBA: $rgba';
   expect(rgba[0], lessThanOrEqualTo(8), reason: reason);
   expect(rgba[2], greaterThanOrEqualTo(247), reason: reason);
   expect(rgba[3], 255, reason: reason);
+}
+
+/// Expects [actual] to match [expected] within 2 per channel.
+void _expectSameAs(List<int> actual, List<int> expected, String label) {
+  for (var i = 0; i < 4; i++) {
+    expect(actual[i], closeTo(expected[i], 2), reason: '$label: $actual vs $expected');
+  }
 }
 
 void testMain() {
@@ -73,13 +88,7 @@ void testMain() {
   test('fallback backends render bounded blur as unbounded', () async {
     final List<int> bounded = await _probe(_blur(bounds: _blueRect));
     final List<int> unbounded = await _probe(_blur());
-    for (var i = 0; i < 4; i++) {
-      expect(
-        bounded[i],
-        closeTo(unbounded[i], 2),
-        reason: 'bounded $bounded vs unbounded $unbounded',
-      );
-    }
+    _expectSameAs(bounded, unbounded, 'bounded vs unbounded');
   }, skip: isWimp);
 
   test('zero-sigma blur with bounds draws content unblurred and unmasked', () async {
@@ -93,10 +102,7 @@ void testMain() {
   test('blur with empty or inverted bounds renders like an unbounded blur', () async {
     final List<int> unbounded = await _probe(_blur());
     for (final bounds in <ui.Rect>[ui.Rect.zero, const ui.Rect.fromLTRB(100, 100, 50, 0)]) {
-      final List<int> rgba = await _probe(_blur(bounds: bounds));
-      for (var i = 0; i < 4; i++) {
-        expect(rgba[i], closeTo(unbounded[i], 2), reason: '$bounds: $rgba vs unbounded $unbounded');
-      }
+      _expectSameAs(await _probe(_blur(bounds: bounds)), unbounded, '$bounds vs unbounded');
     }
   });
 
@@ -104,19 +110,18 @@ void testMain() {
     final filter = ui.ImageFilter.blur(sigmaX: 8, sigmaY: 8, bounds: _blueRect);
     _expectNoBleed(await _probe(filter));
 
+    final ui.Picture greenPicture = drawPicture((ui.Canvas canvas) {
+      canvas.drawRect(_blueRect, ui.Paint()..color = const ui.Color(0xFF00FF00));
+    });
     final builder = ui.SceneBuilder();
     builder.pushBackdropFilter(filter);
-    builder.addPicture(
-      ui.Offset.zero,
-      drawPicture((ui.Canvas canvas) {
-        canvas.drawRect(_blueRect, ui.Paint()..color = const ui.Color(0xFF00FF00));
-      }),
-    );
+    builder.addPicture(ui.Offset.zero, greenPicture);
     builder.pop();
     final ui.Scene scene = builder.build();
     final ui.Image backdropImage = await scene.toImage(100, 100);
     backdropImage.dispose();
     scene.dispose();
+    greenPicture.dispose();
 
     _expectNoBleed(await _probe(filter));
   }, skip: !isWimp);
