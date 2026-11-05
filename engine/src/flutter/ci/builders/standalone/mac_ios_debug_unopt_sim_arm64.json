@@ -7,7 +7,8 @@
     ],
     "gclient_variables": {
         "download_android_deps": false,
-        "use_rbe": true
+        "use_rbe": true,
+        "download_bazelisk": true
     },
     "gn": [
         "--ios",
@@ -18,10 +19,12 @@
         "--no-lto",
         "--simulator-cpu",
         "arm64",
-        "--rbe",
+        "--no-rbe",
+        "--no-goma",
         "--xcode-symlinks",
         "--target-dir",
-        "ci/ios_debug_unopt_sim_arm64"
+        "ci/ios_debug_unopt_sim_arm64",
+        "--bazel"
     ],
     "name": "ci/ios_debug_unopt_sim_arm64",
     "description": "Builds a debug mode engine for arm64 iOS simulator. Runs unit tests and the scenario app tests.",

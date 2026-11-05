@@ -956,6 +956,41 @@ List<BuilderBuild> builderBuilds(Map<String, BuilderConfig> configs) {
 /// configurations (`host_debug`, `host_debug_unopt`, ...).
 const List<String> developerFiles = <String>['local_engine.json', 'local_engine_common.json'];
 
+/// The standalone builder files (`ci/builders/standalone/*.json`: the
+/// engine_v2/builder recipe's form, where the file is one build -- `name`,
+/// `gn`, `ninja`, `tests` at the top -- which BuildConfigLoader reads as a
+/// builder file with no builds) as builder files of that one build, so that
+/// the converter's outputs cover them as they cover the builds of
+/// `linux_*.json` and `mac_*.json`: the Mac test builds moved there from
+/// mac_unopt.json (#195868). Keyed as the loader keys them, by base name
+/// (`mac_host_debug_unopt_arm64`), which carries the host's prefix like
+/// any builder file's. [readJson] reads a file's JSON by path; a standalone
+/// file without a build at its top (none today) is left as the loader read
+/// it.
+Map<String, BuilderConfig> withStandaloneBuilds(
+  Map<String, BuilderConfig> configs,
+  Map<String, Object?> Function(String path) readJson,
+) {
+  final result = <String, BuilderConfig>{};
+  for (final MapEntry<String, BuilderConfig> entry in configs.entries) {
+    final BuilderConfig config = entry.value;
+    if (config.builds.isEmpty && p.basename(p.dirname(config.path)) == 'standalone') {
+      final Map<String, Object?> map = readJson(config.path);
+      if (map['name'] is String && map['gn'] is List<Object?>) {
+        result[entry.key] = BuilderConfig.fromJson(
+          path: config.path,
+          map: <String, Object?>{
+            'builds': <Object?>[map],
+          },
+        );
+        continue;
+      }
+    }
+    result[entry.key] = config;
+  }
+  return result;
+}
+
 /// The builds of [host]'s builder files, by file name and build order, then
 /// the developer's files' builds of that host.
 List<Build> _buildsOf(Map<String, BuilderConfig> configs, BuilderHost host) {
@@ -1150,7 +1185,9 @@ String configsBazelrc(List<BuilderBuild> builds, {List<LeftOutBuild> leftOut = c
     ..writeln('# Use of this source code is governed by a BSD-style license that can be')
     ..writeln('# found in the LICENSE file.')
     ..writeln()
-    ..writeln('# Generated from ci/builders/{linux,mac}_*.json by gn_to_bazel; do not edit.')
+    ..writeln(
+      '# Generated from ci/builders/{,standalone/}{linux,mac}_*.json by gn_to_bazel; do not edit.',
+    )
     ..writeln('#')
     ..writeln("# Each Linux and Mac build of the builder files -- the Linux x64 host's own,")
     ..writeln("# the web's, the Linux arm64 cross builds', Android's, the Mac's for either")
@@ -1375,7 +1412,9 @@ String buildersBuildFile(
     ..writeln('# Use of this source code is governed by a BSD-style license that can be')
     ..writeln('# found in the LICENSE file.')
     ..writeln()
-    ..writeln('# Generated from ci/builders/{linux,mac}_*.json by gn_to_bazel; do not edit.')
+    ..writeln(
+      '# Generated from ci/builders/{,standalone/}{linux,mac}_*.json by gn_to_bazel; do not edit.',
+    )
     ..writeln('#')
     ..writeln('# An install target per Linux and Mac build of the builder files (the Linux')
     ..writeln("# x64 host's own, the web's, the Linux arm64 cross builds', Android's, the")
@@ -1605,7 +1644,7 @@ String buildersJson(
     });
   }
   const encoder = JsonEncoder.withIndent('  ');
-  return '${encoder.convert(<String, Object?>{'_comment': 'Generated from ci/builders/{linux,mac}_*.json by gn_to_bazel; do not edit. '
+  return '${encoder.convert(<String, Object?>{'_comment': 'Generated from ci/builders/{,standalone/}{linux,mac}_*.json by gn_to_bazel; do not edit. '
       'The builds as tools/gn --bazel and testing/run_tests.py read them (build/bazel/ci.md).', 'builds': hosts})}\n';
 }
 

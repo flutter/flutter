@@ -7,7 +7,8 @@
     ],
     "gclient_variables": {
         "download_android_deps": false,
-        "use_rbe": true
+        "use_rbe": true,
+        "download_bazelisk": true
     },
     "gn": [
         "--target-dir",
@@ -19,9 +20,11 @@
         "--prebuilt-dart-sdk",
         "--mac-cpu",
         "arm64",
-        "--rbe",
+        "--no-rbe",
+        "--no-goma",
         "--xcode-symlinks",
-        "--use-glfw-swiftshader"
+        "--use-glfw-swiftshader",
+        "--bazel"
     ],
     "name": "ci/host_debug_unopt_arm64",
     "description": "Builds a debug mode unopt arm64 macOS engine and runs host-side tests.",

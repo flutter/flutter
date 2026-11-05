@@ -187,8 +187,13 @@ the test for real, and so does the command from `engine/src`.
   Bazel counterpart yet); `local_engine_builds` (local_engine.json's builds
   are `bazel build` targets without installs); the Fuchsia builders; the
   standalone files (`linux_license`, `linux_benchmarks`, `linux_clangd`);
-  Mac and Windows. A Mac's builds have their configurations and installs
-  (`mac_*.json`), and `tools/gn --bazel` knows the host: a Mac builder
+  Windows. The Mac engine builders build this way since 509
+  (`mac_host_engine`, `mac_android_aot_engine`, `mac_ios_engine` and
+  `_ddm`), and so do the eight standalone Mac test builders that replaced
+  `mac_unopt.json` (#195868, #196027: `ci/builders/standalone/mac_*.json`,
+  one build a file, which the converter reads as builder files of one
+  build -- `withStandaloneBuilds` -- since 524; `mac_clangd` stays GN).
+  `tools/gn --bazel` knows the host: a Mac builder
   switches as the Linux ones did, or as a `mac_*_bazel.json` variant first.
 - Steps left out of a Bazel build: the malioc diff (GN's Mali offline
   compiler analysis), and `linux_host_engine_test`'s benchmark-metrics dry
