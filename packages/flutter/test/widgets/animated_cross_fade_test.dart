@@ -640,7 +640,7 @@ void main() {
       expect(box.size, const Size(150.0, 150.0));
       expect(opacityOf(firstKey), moreOrLessEquals(0.5));
       expect(opacityOf(secondKey), moreOrLessEquals(0.5));
-      await tester.pump(const Duration(milliseconds: 100));
+      await tester.pumpAndSettle();
       expect(box.size, const Size(100.0, 100.0));
       expect(opacityOf(firstKey), 1.0);
       expect(opacityOf(secondKey), 0.0);
@@ -651,37 +651,56 @@ void main() {
       expect(box.size, const Size(150.0, 150.0));
       expect(opacityOf(firstKey), moreOrLessEquals(0.5));
       expect(opacityOf(secondKey), moreOrLessEquals(0.5));
+      await tester.pump(const Duration(milliseconds: 50));
+      expect(box.size, const Size(200.0, 200.0));
+      expect(opacityOf(firstKey), 0.0);
+      expect(opacityOf(secondKey), 1.0);
     },
   );
 
-  testWidgets('AnimatedCrossFade idle on first child resizes with duration', (
-    WidgetTester tester,
-  ) async {
-    Widget build(double size) {
-      return Directionality(
-        textDirection: TextDirection.ltr,
-        child: Center(
-          child: AnimatedCrossFade(
-            firstChild: SizedBox(width: size, height: size),
-            secondChild: const SizedBox(width: 50.0, height: 50.0),
-            duration: const Duration(milliseconds: 100),
-            reverseDuration: const Duration(milliseconds: 400),
-            crossFadeState: CrossFadeState.showFirst,
+  testWidgets(
+    'AnimatedCrossFade resizes the first child with duration after a reverse transition',
+    (WidgetTester tester) async {
+      final firstSize = ValueNotifier<double>(100.0);
+      addTearDown(firstSize.dispose);
+
+      Widget build(CrossFadeState state) {
+        return Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: AnimatedCrossFade(
+              // Resize the first child without a rebuild of AnimatedCrossFade.
+              firstChild: ValueListenableBuilder<double>(
+                valueListenable: firstSize,
+                builder: (BuildContext context, double size, Widget? child) {
+                  return SizedBox(width: size, height: size);
+                },
+              ),
+              secondChild: const SizedBox(width: 50.0, height: 50.0),
+              duration: const Duration(milliseconds: 100),
+              reverseDuration: const Duration(milliseconds: 400),
+              crossFadeState: state,
+            ),
           ),
-        ),
-      );
-    }
+        );
+      }
 
-    await tester.pumpWidget(build(100.0));
-    final RenderBox box = tester.renderObject(find.byType(AnimatedCrossFade));
-    expect(box.size, const Size(100.0, 100.0));
+      await tester.pumpWidget(build(CrossFadeState.showSecond));
+      final RenderBox box = tester.renderObject(find.byType(AnimatedCrossFade));
+      expect(box.size, const Size(50.0, 50.0));
 
-    await tester.pumpWidget(build(200.0));
-    await tester.pump(const Duration(milliseconds: 50));
-    expect(box.size, const Size(150.0, 150.0));
-    await tester.pump(const Duration(milliseconds: 50));
-    expect(box.size, const Size(200.0, 200.0));
-  });
+      await tester.pumpWidget(build(CrossFadeState.showFirst));
+      await tester.pumpAndSettle();
+      expect(box.size, const Size(100.0, 100.0));
+
+      firstSize.value = 200.0;
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 50));
+      expect(box.size, const Size(150.0, 150.0));
+      await tester.pump(const Duration(milliseconds: 50));
+      expect(box.size, const Size(200.0, 200.0));
+    },
+  );
 }
 
 class _TickerWatchingWidget extends StatefulWidget {
