@@ -1507,6 +1507,76 @@ void main() {
     semantics.dispose();
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/195985.
+  testWidgets(
+    'a pinned header pushed off screen by the end of its SliverMainAxisGroup leaves the semantics tree',
+    (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      final ScrollController controller = ScrollController();
+      addTearDown(controller.dispose);
+
+      // A pinned "Morning" header is pushed off the screen once the end of its
+      // group scrolls into view, while the "Afternoon" header stays pinned. The
+      // last "Morning" items remain inside the cache extent.
+      Future<void> verify({Axis scrollDirection = Axis.vertical, bool reverse = false}) async {
+        await tester.pumpWidget(
+          TestWidgetsApp(
+            home: Align(
+              alignment: Alignment.topLeft,
+              child: SizedBox(
+                height: VIEWPORT_HEIGHT,
+                width: VIEWPORT_WIDTH,
+                child: CustomScrollView(
+                  scrollDirection: scrollDirection,
+                  reverse: reverse,
+                  controller: controller,
+                  slivers: <Widget>[
+                    const SliverToBoxAdapter(child: SizedBox(height: 100, width: 100)),
+                    for (final String title in <String>['Morning', 'Afternoon'])
+                      SliverMainAxisGroup(
+                        slivers: <Widget>[
+                          SliverPersistentHeader(
+                            pinned: true,
+                            delegate: _SemanticsHeaderDelegate(title),
+                          ),
+                          SliverList.list(
+                            children: <Widget>[
+                              for (int i = 1; i <= (title == 'Morning' ? 8 : 30); i++)
+                                SizedBox(height: 60, width: 60, child: Text('$title item $i')),
+                            ],
+                          ),
+                        ],
+                      ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+
+        controller.jumpTo(700);
+        await tester.pump();
+
+        final List<String> labels = <String>[
+          for (final SemanticsNode node in tester.semantics.simulatedAccessibilityTraversal())
+            node.label,
+        ];
+        expect(labels, contains('Afternoon'));
+        expect(labels, isNot(contains('Morning')));
+        // The last "Morning" items are still in the cache extent and remain in
+        // the semantics tree.
+        expect(labels, contains('Morning item 8'));
+      }
+
+      await verify();
+      await verify(reverse: true);
+      await verify(scrollDirection: Axis.horizontal);
+      await verify(scrollDirection: Axis.horizontal, reverse: true);
+
+      handle.dispose();
+    },
+  );
+
   testWidgets(
     'nested SliverMainAxisGroup with multiple PinnedHeaderSlivers positions correctly on scroll',
     (WidgetTester tester) async {
@@ -1688,4 +1758,24 @@ class _SnapPersistentHeaderState extends State<_SnapPersistentHeader>
       delegate: TestDelegate(minExtent: 30, snap: true, tickerProvider: this),
     );
   }
+}
+
+class _SemanticsHeaderDelegate extends SliverPersistentHeaderDelegate {
+  _SemanticsHeaderDelegate(this.title);
+
+  final String title;
+
+  @override
+  double get minExtent => 50;
+
+  @override
+  double get maxExtent => 50;
+
+  @override
+  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+    return SizedBox(height: 50, child: Semantics(header: true, child: Text(title)));
+  }
+
+  @override
+  bool shouldRebuild(_SemanticsHeaderDelegate oldDelegate) => false;
 }
