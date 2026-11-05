@@ -157,20 +157,39 @@ filegroup(
 '''
 
 def _mirrors(url):
-    """The URLs to try for a .deb, in order: snapshot.debian.org's Cloudflare front, then the lock's.
+    """The URLs to try for a .deb, in order, all serving the same bytes (the lock's sha256 is the check).
 
-    snapshot.debian.org answers 503 ("No healthy backends") or takes
-    seconds a request now and then -- the web and tool-integration shards
-    at 505 (11-04) lost six runs to one such hour -- and
-    snapshot-cloudflare.debian.org serves the same archive (the same
-    bytes, checked against the lock's sha256) from a CDN that keeps what
-    it has served once, the files never changing; it goes first, the
-    origin second.
+    The lock names snapshot.debian.org, which answers 503 ("No healthy
+    backends") for hours at a time -- the web and tool-integration shards
+    lost two presubmits to it on 11-04, the second through its Cloudflare
+    front as well -- so the file is looked for first where Debian serves
+    its pool from a CDN (deb.debian.org, which still has most of these
+    bullseye versions) and in the archive of old releases
+    (archive.debian.org, which has them all), then at the snapshot's
+    Cloudflare front, then at the snapshot itself. A security update's
+    snapshot URL (archive/debian-security/.../pool/updates/main/...) is
+    looked for in the main pool, where the point releases folded them
+    (pool/main/...), and in the archived security pool.
     """
-    prefix = "https://snapshot.debian.org/"
-    if url.startswith(prefix):
-        return ["https://snapshot-cloudflare.debian.org/" + url[len(prefix):], url]
-    return [url]
+    prefix = "https://snapshot.debian.org/archive/"
+    if not url.startswith(prefix):
+        return [url]
+    rest = url[len(prefix):]  # <archive>/<timestamp>/pool/...
+    parts = rest.split("/", 2)
+    if len(parts) != 3 or not parts[2].startswith("pool/"):
+        return [url]
+    archive, pool = parts[0], parts[2]
+    main_pool = pool.replace("pool/updates/", "pool/", 1) if archive == "debian-security" else pool
+    mirrors = [
+        "https://deb.debian.org/debian/" + main_pool,
+        "https://archive.debian.org/debian/" + main_pool,
+    ]
+    if archive == "debian-security":
+        mirrors.append("https://archive.debian.org/debian-security/" + pool)
+    return mirrors + [
+        "https://snapshot-cloudflare.debian.org/archive/" + rest,
+        url,
+    ]
 
 def _download(ctx, url, output, sha256):
     """Downloads a .deb: each mirror in turn (Bazel's own order), three rounds."""
