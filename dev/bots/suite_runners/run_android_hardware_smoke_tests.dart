@@ -219,18 +219,28 @@ Future<bool> _runRetryLoop(String testDir) async {
       'flutter drive failed with exit code ${result.exitCode} on attempt $attempt/$maxAttempts.',
     );
 
-    final bool hasEglWarning = await _checkForTransientEglFailure(
+    // Intentionally scope retries strictly to blank-display compositor wedges or EGL
+    // initialization errors. General test assertion or golden pixel mismatch failures
+    // must fail fast on attempt 1 so real visual regressions are not masked.
+    final String? retryReason = await _detectRetryableFailureReason(
       '${result.stdout}\n${result.stderr}',
     );
-    if (hasEglWarning && attempt < maxAttempts) {
+    if (retryReason != null && attempt < maxAttempts) {
+      // Restoring an emulator QuickBoot snapshot across a host renderer change can wedge
+      // SurfaceFlinger into returning solid-black screencaps while offscreen app rendering
+      // still works. Re-running `flutter drive --no-build` alone only restarts the app
+      // process and cannot recover SurfaceFlinger, so restart Android userspace reactively
+      // here (avoiding pre-flight restart overhead on healthy runs).
       io.stderr.writeln(
-        'Attempt $attempt failed with EGL/graphics error. Retrying with clean engine cache...',
+        'Attempt $attempt failed due to $retryReason. '
+        'Restarting Android userspace before retry...',
       );
+      await _restartAndroidUserspace();
       continue;
     }
 
-    final failureSummary = hasEglWarning
-        ? 'INFRASTRUCTURE FAILURE: EGL / graphics driver pipeline collapsed on emulator after $maxAttempts attempts.'
+    final failureSummary = retryReason != null
+        ? 'Android Hardware Smoke Tests failed due to $retryReason after $maxAttempts attempts.'
         : 'Android Hardware Smoke Tests driver run failed with exit code ${result.exitCode}.';
     foundError(<String>[
       failureSummary,
@@ -243,24 +253,103 @@ Future<bool> _runRetryLoop(String testDir) async {
   return false;
 }
 
-Future<bool> _checkForTransientEglFailure(String driverOutput) async {
+/// Restarts Android userspace (`surfaceflinger` and `zygote`) via `adb shell stop` and
+/// `adb shell start` to rebind display composition against the host emulator renderer.
+///
+/// Skips restarting without recording an error if the connected device does not support
+/// `adb root` (such as a production `user`-build physical device).
+Future<void> _restartAndroidUserspace() async {
+  final _SubprocessResult rootResult = await _runAdb(<String>['root']);
+  if (rootResult.exitCode != 0 ||
+      '${rootResult.stdout}\n${rootResult.stderr}'.contains('cannot run as root')) {
+    io.stderr.writeln(
+      'Skipping Android userspace restart: adb root is not supported on this device.',
+    );
+    return;
+  }
+
+  await _runAdb(<String>['wait-for-device'], outputMode: OutputMode.print);
+
+  // Clear sys.boot_completed before stopping userspace because `adb shell stop` does
+  // not reset system properties, and polling would otherwise immediately read stale '1'.
+  // Poll to survive transient 'device offline' states while adbd cycles after adb root.
+  await _pollAdbUntil(<String>[
+    'shell',
+    'setprop',
+    'sys.boot_completed',
+    '0',
+  ], description: 'sys.boot_completed reset');
+  await _pollAdbUntil(
+    <String>['shell', 'stop'],
+    description: 'adb shell stop',
+    outputMode: OutputMode.print,
+  );
+  await _pollAdbUntil(
+    <String>['shell', 'start'],
+    description: 'adb shell start',
+    outputMode: OutputMode.print,
+  );
+  await _pollAdbUntil(
+    <String>['shell', 'getprop', 'sys.boot_completed'],
+    description: 'sys.boot_completed=1 after Android userspace restart',
+    pollInterval: const Duration(seconds: 1),
+    condition: (_SubprocessResult r) => r.stdout.trim() == '1',
+  );
+
+  await _runAdb(<String>['shell', 'input', 'keyevent', 'KEYCODE_WAKEUP']);
+  await _runAdb(<String>['shell', 'wm', 'dismiss-keyguard']);
+  // Allow the launcher surface to draw an initial frame after userspace comes back up.
+  await Future<void>.delayed(const Duration(seconds: 2));
+}
+
+Future<void> _pollAdbUntil(
+  List<String> arguments, {
+  required String description,
+  OutputMode outputMode = OutputMode.capture,
+  Duration pollInterval = const Duration(milliseconds: 500),
+  bool Function(_SubprocessResult result)? condition,
+}) async {
+  final stopwatch = Stopwatch()..start();
+  Duration nextWarning = _adbSlowWarningInterval;
+  while (true) {
+    final _SubprocessResult result = await _runAdb(arguments, outputMode: outputMode);
+    if (result.exitCode == 0 && (condition == null || condition(result))) {
+      return;
+    }
+    if (stopwatch.elapsed >= nextWarning) {
+      io.stderr.writeln(
+        'Warning: Waiting for $description is taking longer than expected '
+        '(${prettyPrintDuration(stopwatch.elapsed)} elapsed)...',
+      );
+      nextWarning += _adbSlowWarningInterval;
+    }
+    await Future<void>.delayed(pollInterval);
+  }
+}
+
+Future<String?> _detectRetryableFailureReason(String driverOutput) async {
+  final reasons = <String>[
+    // Match blank-capture exceptions reported by driver_test.dart (errorBlankScreenshot
+    // in constants.dart). Keep this substring in sync with both files.
+    if (driverOutput.contains('Captured screenshot is blank/empty')) 'blank display capture',
+  ];
+
   try {
     final _SubprocessResult logcatResult = await _runAdb(<String>['logcat', '-d']);
-    if (logcatResult.exitCode != 0) {
-      return false;
+    final bool hasEglError =
+        logcatResult.exitCode == 0 &&
+        (logcatResult.stdout.contains('EGL_NOT_INITIALIZED') ||
+            logcatResult.stdout.contains('EGL_BAD_CONFIG') ||
+            (driverOutput.contains('EglInitializationException') &&
+                logcatResult.stdout.contains(
+                  'Failed to choose config with EGL_SWAP_BEHAVIOR_PRESERVED',
+                )));
+    if (hasEglError) {
+      reasons.add('EGL error in logcat');
     }
-    final bool hasEglWarning =
-        logcatResult.stdout.contains('Failed to choose config with EGL_SWAP_BEHAVIOR_PRESERVED') ||
-        logcatResult.stdout.contains('EGL_NOT_INITIALIZED') ||
-        logcatResult.stdout.contains('EGL_BAD_CONFIG');
-    final bool hasRenderingError =
-        driverOutput.contains('blank/empty') ||
-        driverOutput.contains('BlankScreenshotException') ||
-        driverOutput.contains('EglInitializationException');
-
-    return hasEglWarning && hasRenderingError;
   } catch (e) {
     io.stderr.writeln('Warning: Failed to check logcat for EGL failure: $e');
-    return false;
   }
+
+  return reasons.isEmpty ? null : reasons.join(' and ');
 }
