@@ -143,6 +143,14 @@ Future<void> testMain() async {
     expect(frame.image.height, 180);
   }, skip: !browserSupportsImageDecoder);
 
+  test('ImageDecoder-based codec decodes animated AVIF images loaded from a URL', () async {
+    final ui.Codec codec = await renderer.instantiateImageCodecFromUrl(
+      Uri(path: '/test_images/alphabetAnim.avif'),
+    );
+    addTearDown(codec.dispose);
+    expect(codec.frameCount, greaterThan(1));
+  }, skip: !browserSupportsImageDecoder);
+
   test(
     '_BrowserEngineCodec.getNextFrame() throws StateError and cleans up if disposed during decode',
     () async {
