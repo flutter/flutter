@@ -2745,6 +2745,12 @@ class SemanticsObject {
 
   /// Recursively visits the tree rooted at `this` node in depth-first fashion
   /// in traversal order but can skip a subtree.
+  ///
+  /// Calls [searchSubtree] for `this` node, then for all of its descendants.
+  /// If [searchSubtree] returns false for a node, that node's descendants are
+  /// skipped, but the traversal continues with the node's siblings. This is
+  /// different from [_visitDepthFirstInTraversalOrder], which stops the entire
+  /// traversal as soon as the callback returns false.
   void _visitDepthFirstInTraversalOrderCanSkipSubtree(
     bool Function(SemanticsObject) searchSubtree,
   ) {
@@ -2770,7 +2776,11 @@ class SemanticsObject {
         'SemanticsNode created at the time this method was called.',
       );
 
-      child!._visitDepthFirstInTraversalOrder(searchSubtree);
+      // Recurse with the subtree-skipping variant. Recursing with
+      // _visitDepthFirstInTraversalOrder would turn a "skip this subtree" into
+      // "stop visiting this node's remaining siblings" for every node that is
+      // two or more levels below `this`.
+      child!._visitDepthFirstInTraversalOrderCanSkipSubtree(searchSubtree);
     }
 
     return;

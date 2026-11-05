@@ -143,6 +143,15 @@ public interface FlutterPlugin {
       return flutterEngine;
     }
 
+    /**
+     * Returns the unique identifier for the {@link FlutterEngine} associated with this binding.
+     *
+     * <p>This corresponds to {@code PlatformDispatcher.instance.engineId} in Dart.
+     */
+    public long getEngineId() {
+      return flutterEngine.getEngineId();
+    }
+
     @NonNull
     public BinaryMessenger getBinaryMessenger() {
       return binaryMessenger;

@@ -33,6 +33,7 @@ import 'base/time.dart';
 import 'base/user_messages.dart';
 import 'build_system/build_system.dart';
 import 'cache.dart';
+import 'context/apple_context.dart';
 import 'context/tool_context.dart';
 import 'custom_devices/custom_devices_config.dart';
 import 'dart/pub.dart';
@@ -40,6 +41,7 @@ import 'devfs.dart';
 import 'devtools_launcher.dart';
 import 'doctor.dart';
 import 'emulator.dart';
+import 'experimental/extension_manager.dart';
 import 'features.dart';
 import 'flutter_application_package.dart';
 import 'flutter_cache.dart';
@@ -278,13 +280,14 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
         logger: globals.logger,
         botDetector: globals.botDetector,
       ),
-      Doctor: () =>
-          Doctor(cache: globals.cache, logger: globals.logger, clock: globals.systemClock),
-      DoctorValidatorsProvider: () => DoctorValidatorsProvider.create(
+      Doctor: () => Doctor(
+        analytics: globals.analytics,
         cache: globals.cache,
-        featureFlags: featureFlags,
-        platform: globals.platform,
+        clock: globals.systemClock,
+        logger: globals.logger,
+        validatorsProviderBuilder: _createDoctorValidatorsProvider,
       ),
+      DoctorValidatorsProvider: _createDoctorValidatorsProvider,
       EmulatorManager: () => EmulatorManager(
         androidWorkflow: androidWorkflow!,
         iosWorkflow: globals.iosWorkflow,
@@ -309,8 +312,14 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
         ),
         platform: globals.platform,
       ),
-      FlutterVersion: () =>
-          FlutterVersion(fs: globals.fs, flutterRoot: globals.cache.flutterRoot, git: globals.git),
+      FlutterVersion: () => FlutterVersion(
+        cache: globals.cache,
+        fs: globals.fs,
+        flutterRoot: globals.cache.flutterRoot,
+        git: globals.git,
+        logger: globals.logger,
+        platform: globals.platform,
+      ),
       Git: () => Git(currentPlatform: globals.platform, runProcessWith: globals.processUtils),
       GradleUtils: () => GradleUtils(
         operatingSystemUtils: globals.os,
@@ -425,5 +434,25 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
         toolContext: const GlobalToolContext(),
       ),
     },
+  );
+}
+
+DoctorValidatorsProvider _createDoctorValidatorsProvider({ExtensionManager? extensionManager}) {
+  return DoctorValidatorsProvider.create(
+    appleContext: AppleContext(
+      cocoaPodsBuilder: () => globals.cocoaPods!,
+      cocoapodsValidatorBuilder: () => globals.cocoapodsValidator!,
+      iosSimulatorUtilsBuilder: () => globals.iosSimulatorUtils!,
+      iosWorkflowBuilder: () => globals.iosWorkflow!,
+      plistParserBuilder: () => globals.plistParser,
+      xcdeviceBuilder: () => globals.xcdevice!,
+      xcodeBuilder: () => globals.xcode!,
+      xcodeProjectInterpreterBuilder: () => globals.xcodeProjectInterpreter!,
+    ),
+    deviceManager: globals.deviceManager,
+    extensionManager: extensionManager,
+    featureFlags: featureFlags,
+    httpClientFactory: globals.httpClientFactory,
+    toolContext: const GlobalToolContext(),
   );
 }
