@@ -8,7 +8,9 @@
 #include <string>
 #include <utility>
 
+#include "flutter/fml/file.h"
 #include "flutter/fml/logging.h"
+#include "flutter/fml/paths.h"
 #include "flutter/fml/posix_wrappers.h"
 #include "flutter/fml/trace_event.h"
 #include "flutter/lib/io/dart_io.h"
@@ -969,6 +971,42 @@ bool DartIsolate::Shutdown() {
   return true;
 }
 
+static std::unique_ptr<fml::Mapping> ResolveVMServiceKernel(
+    const Settings& settings) {
+  constexpr const char* kKernelFileName = "vmservice_snapshot.dill";
+  std::vector<std::string> search_paths;
+  if (!settings.assets_path.empty()) {
+    search_paths.push_back(
+        fml::paths::JoinPaths({settings.assets_path, kKernelFileName}));
+  }
+  if (!settings.application_kernel_asset.empty()) {
+    search_paths.push_back(fml::paths::JoinPaths(
+        {fml::paths::GetDirectoryName(settings.application_kernel_asset),
+         kKernelFileName}));
+  }
+  if (auto directory = fml::paths::GetExecutableDirectoryPath();
+      directory.first) {
+    search_paths.push_back(
+        fml::paths::JoinPaths({directory.second, kKernelFileName}));
+    search_paths.push_back(
+        fml::paths::JoinPaths({directory.second, "..", kKernelFileName}));
+  }
+#if defined(OS_FUCHSIA)
+  search_paths.push_back(
+      fml::paths::JoinPaths({"/pkg/data/assets", kKernelFileName}));
+#endif
+  search_paths.push_back(kKernelFileName);
+
+  for (const auto& path : search_paths) {
+    if (fml::IsFile(path)) {
+      if (auto kernel = fml::FileMapping::CreateReadOnly(path)) {
+        return kernel;
+      }
+    }
+  }
+  return nullptr;
+}
+
 Dart_Isolate DartIsolate::DartCreateAndStartServiceIsolate(
     const char* package_root,
     const char* package_config,
@@ -990,6 +1028,8 @@ Dart_Isolate DartIsolate::DartCreateAndStartServiceIsolate(
   }
 
   flags->load_vmservice_library = true;
+  flags->is_system_isolate = true;
+  flags->is_service_isolate = true;
 
 #if (FLUTTER_RUNTIME_MODE != FLUTTER_RUNTIME_MODE_DEBUG)
   // TODO(68663): The service isolate in debug mode is always launched without
@@ -1019,7 +1059,27 @@ Dart_Isolate DartIsolate::DartCreateAndStartServiceIsolate(
     return nullptr;
   }
 
+  if (!Dart_IsPrecompiledRuntime()) {
+    std::unique_ptr<fml::Mapping> kernel = ResolveVMServiceKernel(settings);
+    if (!kernel) {
+      *error = fml::strdup("Could not load VM service kernel.");
+      if (!service_isolate->Shutdown()) {
+        FML_DLOG(ERROR) << "Could not shutdown VM service isolate.";
+      }
+      return nullptr;
+    }
+    auto config = IsolateConfiguration::CreateForKernel(std::move(kernel));
+    if (!config->PrepareIsolate(*service_isolate)) {
+      *error = fml::strdup("Could not prepare custom VM service isolate.");
+      if (!service_isolate->Shutdown()) {
+        FML_DLOG(ERROR) << "Could not shutdown VM service isolate.";
+      }
+      return nullptr;
+    }
+  }
+
   tonic::DartState::Scope scope(service_isolate);
+
   if (!DartServiceIsolate::Startup(
           settings.vm_service_host,            // server IP address
           settings.vm_service_port,            // server VM service port
@@ -1032,7 +1092,7 @@ Dart_Isolate DartIsolate::DartCreateAndStartServiceIsolate(
           error                                   // error (out)
           )) {
     // Error is populated by call to startup.
-    FML_DLOG(ERROR) << *error;
+    FML_LOG(ERROR) << "DartServiceIsolate::Startup failed: " << *error;
     return nullptr;
   }
 

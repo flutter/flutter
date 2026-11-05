@@ -520,6 +520,15 @@ abstract class MacOSBundleFlutterAssets extends Target {
         environment.fileSystem
             .file(isolateSnapshotData)
             .copySync(assetDirectory.childFile('isolate_snapshot_data').path);
+
+        final String vmserviceDill = environment.artifacts.getArtifactPath(
+          Artifact.vmserviceKernelDill,
+          platform: TargetPlatform.darwin,
+          mode: BuildMode.debug,
+        );
+        environment.fileSystem
+            .file(vmserviceDill)
+            .copySync(assetDirectory.childFile('vmservice_snapshot.dill').path);
       } on Exception catch (err) {
         throw Exception('Failed to copy precompiled runtimes: $err');
       }
@@ -560,8 +569,30 @@ abstract class MacOSBundleFlutterAssets extends Target {
         'the "${environment.outputDir.path}" directory and rerunning',
       );
     }
+
+    final Directory vmServiceRootDir = environment.outputDir.childDirectory(
+      _kVmServiceFrameworkName,
+    );
+    if (vmServiceRootDir.existsSync()) {
+      vmServiceRootDir.deleteSync(recursive: true);
+    }
+    if (buildMode == BuildMode.profile) {
+      final String vmServiceArtifactPath = environment.artifacts.getArtifactPath(
+        Artifact.vmserviceFramework,
+        platform: TargetPlatform.darwin,
+        mode: BuildMode.profile,
+      );
+      copyDirectory(
+        environment.fileSystem.directory(vmServiceArtifactPath),
+        vmServiceRootDir,
+        followLinks: false,
+      );
+    }
   }
 }
+
+const _kVmServiceFrameworkName = 'VMService.framework';
+const _kVmServiceExecutableName = 'VMService';
 
 /// Bundle the debug flutter assets into the App.framework.
 class DebugMacOSBundleFlutterAssets extends MacOSBundleFlutterAssets {
@@ -593,6 +624,11 @@ class DebugMacOSBundleFlutterAssets extends MacOSBundleFlutterAssets {
       platform: TargetPlatform.darwin,
       mode: BuildMode.debug,
     ),
+    const Source.artifact(
+      Artifact.vmserviceKernelDill,
+      platform: TargetPlatform.darwin,
+      mode: BuildMode.debug,
+    ),
   ];
 
   @override
@@ -606,6 +642,9 @@ class DebugMacOSBundleFlutterAssets extends MacOSBundleFlutterAssets {
     ),
     const Source.pattern(
       '{OUTPUT_DIR}/App.framework/Versions/A/Resources/flutter_assets/isolate_snapshot_data',
+    ),
+    const Source.pattern(
+      '{OUTPUT_DIR}/App.framework/Versions/A/Resources/flutter_assets/vmservice_snapshot.dill',
     ),
   ];
 }
@@ -629,12 +668,21 @@ class ProfileMacOSBundleFlutterAssets extends MacOSBundleFlutterAssets {
   List<Source> get inputs => <Source>[
     ...super.inputs,
     const Source.pattern('{BUILD_DIR}/App.framework.dSYM/Contents/Resources/DWARF/App'),
+    const Source.artifact(
+      Artifact.vmserviceFramework,
+      platform: TargetPlatform.darwin,
+      mode: BuildMode.profile,
+    ),
   ];
 
   @override
   List<Source> get outputs => <Source>[
     ...super.outputs,
     const Source.pattern('{OUTPUT_DIR}/App.framework.dSYM/Contents/Resources/DWARF/App'),
+    const Source.pattern(
+      '{OUTPUT_DIR}/$_kVmServiceFrameworkName/Versions/A/$_kVmServiceExecutableName',
+    ),
+    const Source.pattern('{OUTPUT_DIR}/$_kVmServiceFrameworkName/Versions/A/Resources/Info.plist'),
   ];
 }
 
