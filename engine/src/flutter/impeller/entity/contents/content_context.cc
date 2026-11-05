@@ -527,6 +527,327 @@ static std::unique_ptr<PipelineT> CreateDefaultPipeline(
   return std::make_unique<PipelineT>(context, desc);
 }
 
+bool ContentContext::CreateDefaultPipelines(const Context& context,
+                                            Pipelines& pipelines) {
+  // A warmed variant is only used if its options match, field for field, the
+  // options that the contents using it draw with. Those always start from
+  // `OptionsFromPass`, which compares depth with `kGreaterEqual`, and the
+  // passes they draw into are only multisampled if offscreen MSAA is supported
+  // (see `CreateRenderTarget` in canvas.cc).
+  const SampleCount pass_sample_count =
+      context.GetCapabilities()->SupportsOffscreenMSAA() ? SampleCount::kCount4
+                                                         : SampleCount::kCount1;
+  const PixelFormat default_color_format =
+      context.GetCapabilities()->GetDefaultColorFormat();
+  // For contents that draw triangle lists, such as text and shadows.
+  const auto options_triangle = ContentContextOptions{
+      .sample_count = pass_sample_count,
+      .depth_compare = CompareFunction::kGreaterEqual,
+      .primitive_type = PrimitiveType::kTriangle,
+      .color_attachment_pixel_format = default_color_format};
+  // For contents that draw triangle strips, which is what rectangle, rounded
+  // rectangle, circle, stroke, and convex path geometry produce.
+  const auto options_trianglestrip = ContentContextOptions{
+      .sample_count = pass_sample_count,
+      .depth_compare = CompareFunction::kGreaterEqual,
+      .primitive_type = PrimitiveType::kTriangleStrip,
+      .color_attachment_pixel_format = default_color_format};
+  // The same, for opaque contents. The canvas draws those with `kSrc` instead
+  // of `kSrcOver`, and color sources then also write depth (see
+  // `Canvas::AddRenderEntityToCurrentPass` and
+  // `ColorSourceContents::DrawGeometry`).
+  const auto options_opaque_trianglestrip = ContentContextOptions{
+      .sample_count = pass_sample_count,
+      .blend_mode = BlendMode::kSrc,
+      .depth_compare = CompareFunction::kGreaterEqual,
+      .primitive_type = PrimitiveType::kTriangleStrip,
+      .color_attachment_pixel_format = default_color_format,
+      .depth_write_enabled = true};
+  // For filters that draw into a subpass without MSAA or depth/stencil.
+  const auto options_no_msaa_no_depth_stencil = ContentContextOptions{
+      .sample_count = SampleCount::kCount1,
+      .depth_compare = CompareFunction::kGreaterEqual,
+      .primitive_type = PrimitiveType::kTriangleStrip,
+      .color_attachment_pixel_format = default_color_format,
+      .has_depth_stencil_attachments = false};
+  // The same, for filters that overwrite their subpass with `kSrc`.
+  const auto options_no_msaa_no_depth_stencil_src = ContentContextOptions{
+      .sample_count = SampleCount::kCount1,
+      .blend_mode = BlendMode::kSrc,
+      .depth_compare = CompareFunction::kGreaterEqual,
+      .primitive_type = PrimitiveType::kTriangleStrip,
+      .color_attachment_pixel_format = default_color_format,
+      .has_depth_stencil_attachments = false};
+  // Framebuffer blends compute the blended color themselves and write it with
+  // `kSrc`, see `FramebufferBlendContents`.
+  const auto options_framebuffer_blend = ContentContextOptions{
+      .sample_count = pass_sample_count,
+      .blend_mode = BlendMode::kSrc,
+      .depth_compare = CompareFunction::kGreaterEqual,
+      .primitive_type = PrimitiveType::kTriangleStrip,
+      .color_attachment_pixel_format = default_color_format};
+  const auto supports_decal = static_cast<Scalar>(
+      context.GetCapabilities()->SupportsDecalSamplerAddressMode());
+
+  // Futures for the following pipelines may block in case the first frame is
+  // rendered without the pipelines being ready. Put pipelines that are more
+  // likely to be used first.
+  {
+    pipelines.glyph_atlas.CreateDefault(
+        context, options_triangle,
+        {static_cast<Scalar>(
+            context.GetCapabilities()->GetDefaultGlyphAtlasFormat() ==
+            PixelFormat::kA8UNormInt)});
+    // Opaque solid fills far outnumber translucent ones, both in draws and in
+    // how many scenes use them.
+    pipelines.solid_fill.CreateDefault(context, options_opaque_trianglestrip);
+    pipelines.texture.CreateDefault(context, options_trianglestrip);
+    pipelines.fast_gradient.CreateDefault(context, options_triangle);
+    pipelines.circle.CreateDefault(context, options_trianglestrip);
+    if (context.GetFlags().use_sdfs) {
+      if (context.GetCapabilities()->SupportsSSBO()) {
+        pipelines.uber_sdf_ssbo.CreateDefault(context, options_trianglestrip);
+      } else {
+        pipelines.uber_sdf.CreateDefault(context, options_trianglestrip);
+      }
+      pipelines.complex_rse.CreateDefault(context, options_trianglestrip);
+    }
+
+    if (context.GetCapabilities()->SupportsSSBO()) {
+      pipelines.linear_gradient_ssbo_fill.CreateDefault(context,
+                                                        options_trianglestrip);
+      pipelines.radial_gradient_ssbo_fill.CreateDefault(context,
+                                                        options_trianglestrip);
+      pipelines.conical_gradient_ssbo_fill.CreateDefault(
+          context, options_trianglestrip, {3.0});
+      pipelines.conical_gradient_ssbo_fill_radial.CreateDefault(
+          context, options_trianglestrip, {1.0});
+      pipelines.conical_gradient_ssbo_fill_strip.CreateDefault(
+          context, options_trianglestrip, {2.0});
+      pipelines.conical_gradient_ssbo_fill_strip_and_radial.CreateDefault(
+          context, options_trianglestrip, {0.0});
+      pipelines.sweep_gradient_ssbo_fill.CreateDefault(context,
+                                                       options_trianglestrip);
+    } else {
+      pipelines.linear_gradient_uniform_fill.CreateDefault(
+          context, options_trianglestrip);
+      pipelines.radial_gradient_uniform_fill.CreateDefault(
+          context, options_trianglestrip);
+      pipelines.conical_gradient_uniform_fill.CreateDefault(
+          context, options_trianglestrip);
+      pipelines.conical_gradient_uniform_fill_radial.CreateDefault(
+          context, options_trianglestrip);
+      pipelines.conical_gradient_uniform_fill_strip.CreateDefault(
+          context, options_trianglestrip);
+      pipelines.conical_gradient_uniform_fill_strip_and_radial.CreateDefault(
+          context, options_trianglestrip);
+      pipelines.sweep_gradient_uniform_fill.CreateDefault(
+          context, options_trianglestrip);
+
+      pipelines.linear_gradient_fill.CreateDefault(context,
+                                                   options_trianglestrip);
+      pipelines.radial_gradient_fill.CreateDefault(context,
+                                                   options_trianglestrip);
+      pipelines.conical_gradient_fill.CreateDefault(context,
+                                                    options_trianglestrip);
+      pipelines.conical_gradient_fill_radial.CreateDefault(
+          context, options_trianglestrip);
+      pipelines.conical_gradient_fill_strip.CreateDefault(
+          context, options_trianglestrip);
+      pipelines.conical_gradient_fill_strip_and_radial.CreateDefault(
+          context, options_trianglestrip);
+      pipelines.sweep_gradient_fill.CreateDefault(context,
+                                                  options_trianglestrip);
+    }
+
+    /// Setup default clip pipeline.
+    auto clip_pipeline_descriptor =
+        ClipPipeline::Builder::MakeDefaultPipelineDescriptor(context);
+    if (!clip_pipeline_descriptor.has_value()) {
+      return false;
+    }
+    // Clips blend with `kDst` so that they never change the color, see
+    // `ClipContents::Render`. Every intersect clip that uses the stencil
+    // buffer, such as one to a rounded rectangle or a path, ends with this
+    // draw, which writes depth outside the clip shape.
+    const auto clip_options = ContentContextOptions{
+        .sample_count = pass_sample_count,
+        .blend_mode = BlendMode::kDst,
+        .depth_compare = CompareFunction::kGreaterEqual,
+        .stencil_mode =
+            ContentContextOptions::StencilMode::kCoverCompareInverted,
+        .primitive_type = PrimitiveType::kTriangleStrip,
+        .color_attachment_pixel_format = default_color_format,
+        .depth_write_enabled = true};
+    clip_options.ApplyToPipelineDescriptor(*clip_pipeline_descriptor);
+    // Disable write to all color attachments.
+    auto clip_color_attachments =
+        clip_pipeline_descriptor->GetColorAttachmentDescriptors();
+    for (auto& color_attachment : clip_color_attachments) {
+      color_attachment.second.write_mask = ColorWriteMaskBits::kNone;
+    }
+    clip_pipeline_descriptor->SetColorAttachmentDescriptors(
+        std::move(clip_color_attachments));
+    pipelines.clip.SetDefault(
+        *context.GetPipelineLibrary(), clip_options,
+        std::make_unique<ClipPipeline>(context, clip_pipeline_descriptor));
+    pipelines.texture_downsample.CreateDefault(
+        context, options_no_msaa_no_depth_stencil);
+    pipelines.texture_downsample_bounded.CreateDefault(
+        context, options_no_msaa_no_depth_stencil);
+    pipelines.rrect_blur.CreateDefault(context, options_trianglestrip);
+    pipelines.rsuperellipse_blur.CreateDefault(context, options_trianglestrip);
+    pipelines.texture_strict_src.CreateDefault(context, options_trianglestrip);
+    pipelines.tiled_texture.CreateDefault(context, options_trianglestrip,
+                                          {supports_decal});
+    pipelines.gaussian_blur.CreateDefault(
+        context, options_no_msaa_no_depth_stencil, {supports_decal});
+    pipelines.color_matrix_color_filter.CreateDefault(context,
+                                                      options_trianglestrip);
+    pipelines.shadow_vertices_.CreateDefault(context, options_triangle);
+    pipelines.vertices_uber_1_.CreateDefault(context, options_triangle,
+                                             {supports_decal});
+    pipelines.vertices_uber_2_.CreateDefault(context, options_triangle,
+                                             {supports_decal});
+    // Every porter-duff blend mode draws with this one pipeline. The blend
+    // mode is selected with uniforms, see `SetPorterDuffCoefficients`.
+    pipelines.porter_duff_blend.CreateDefault(context, options_trianglestrip,
+                                              {supports_decal});
+  }
+
+  if (context.GetCapabilities()->SupportsFramebufferFetch()) {
+    pipelines.framebuffer_blend_color.CreateDefault(
+        context, options_framebuffer_blend,
+        {static_cast<Scalar>(BlendSelectValues::kColor), supports_decal});
+    pipelines.framebuffer_blend_colorburn.CreateDefault(
+        context, options_framebuffer_blend,
+        {static_cast<Scalar>(BlendSelectValues::kColorBurn), supports_decal});
+    pipelines.framebuffer_blend_colordodge.CreateDefault(
+        context, options_framebuffer_blend,
+        {static_cast<Scalar>(BlendSelectValues::kColorDodge), supports_decal});
+    pipelines.framebuffer_blend_darken.CreateDefault(
+        context, options_framebuffer_blend,
+        {static_cast<Scalar>(BlendSelectValues::kDarken), supports_decal});
+    pipelines.framebuffer_blend_difference.CreateDefault(
+        context, options_framebuffer_blend,
+        {static_cast<Scalar>(BlendSelectValues::kDifference), supports_decal});
+    pipelines.framebuffer_blend_exclusion.CreateDefault(
+        context, options_framebuffer_blend,
+        {static_cast<Scalar>(BlendSelectValues::kExclusion), supports_decal});
+    pipelines.framebuffer_blend_hardlight.CreateDefault(
+        context, options_framebuffer_blend,
+        {static_cast<Scalar>(BlendSelectValues::kHardLight), supports_decal});
+    pipelines.framebuffer_blend_hue.CreateDefault(
+        context, options_framebuffer_blend,
+        {static_cast<Scalar>(BlendSelectValues::kHue), supports_decal});
+    pipelines.framebuffer_blend_lighten.CreateDefault(
+        context, options_framebuffer_blend,
+        {static_cast<Scalar>(BlendSelectValues::kLighten), supports_decal});
+    pipelines.framebuffer_blend_luminosity.CreateDefault(
+        context, options_framebuffer_blend,
+        {static_cast<Scalar>(BlendSelectValues::kLuminosity), supports_decal});
+    pipelines.framebuffer_blend_multiply.CreateDefault(
+        context, options_framebuffer_blend,
+        {static_cast<Scalar>(BlendSelectValues::kMultiply), supports_decal});
+    pipelines.framebuffer_blend_overlay.CreateDefault(
+        context, options_framebuffer_blend,
+        {static_cast<Scalar>(BlendSelectValues::kOverlay), supports_decal});
+    pipelines.framebuffer_blend_saturation.CreateDefault(
+        context, options_framebuffer_blend,
+        {static_cast<Scalar>(BlendSelectValues::kSaturation), supports_decal});
+    pipelines.framebuffer_blend_screen.CreateDefault(
+        context, options_framebuffer_blend,
+        {static_cast<Scalar>(BlendSelectValues::kScreen), supports_decal});
+    pipelines.framebuffer_blend_softlight.CreateDefault(
+        context, options_framebuffer_blend,
+        {static_cast<Scalar>(BlendSelectValues::kSoftLight), supports_decal});
+  } else {
+    pipelines.blend_color.CreateDefault(
+        context, options_trianglestrip,
+        {static_cast<Scalar>(BlendSelectValues::kColor), supports_decal});
+    pipelines.blend_colorburn.CreateDefault(
+        context, options_trianglestrip,
+        {static_cast<Scalar>(BlendSelectValues::kColorBurn), supports_decal});
+    pipelines.blend_colordodge.CreateDefault(
+        context, options_trianglestrip,
+        {static_cast<Scalar>(BlendSelectValues::kColorDodge), supports_decal});
+    pipelines.blend_darken.CreateDefault(
+        context, options_trianglestrip,
+        {static_cast<Scalar>(BlendSelectValues::kDarken), supports_decal});
+    pipelines.blend_difference.CreateDefault(
+        context, options_trianglestrip,
+        {static_cast<Scalar>(BlendSelectValues::kDifference), supports_decal});
+    pipelines.blend_exclusion.CreateDefault(
+        context, options_trianglestrip,
+        {static_cast<Scalar>(BlendSelectValues::kExclusion), supports_decal});
+    pipelines.blend_hardlight.CreateDefault(
+        context, options_trianglestrip,
+        {static_cast<Scalar>(BlendSelectValues::kHardLight), supports_decal});
+    pipelines.blend_hue.CreateDefault(
+        context, options_trianglestrip,
+        {static_cast<Scalar>(BlendSelectValues::kHue), supports_decal});
+    pipelines.blend_lighten.CreateDefault(
+        context, options_trianglestrip,
+        {static_cast<Scalar>(BlendSelectValues::kLighten), supports_decal});
+    pipelines.blend_luminosity.CreateDefault(
+        context, options_trianglestrip,
+        {static_cast<Scalar>(BlendSelectValues::kLuminosity), supports_decal});
+    pipelines.blend_multiply.CreateDefault(
+        context, options_trianglestrip,
+        {static_cast<Scalar>(BlendSelectValues::kMultiply), supports_decal});
+    pipelines.blend_overlay.CreateDefault(
+        context, options_trianglestrip,
+        {static_cast<Scalar>(BlendSelectValues::kOverlay), supports_decal});
+    pipelines.blend_saturation.CreateDefault(
+        context, options_trianglestrip,
+        {static_cast<Scalar>(BlendSelectValues::kSaturation), supports_decal});
+    pipelines.blend_screen.CreateDefault(
+        context, options_trianglestrip,
+        {static_cast<Scalar>(BlendSelectValues::kScreen), supports_decal});
+    pipelines.blend_softlight.CreateDefault(
+        context, options_trianglestrip,
+        {static_cast<Scalar>(BlendSelectValues::kSoftLight), supports_decal});
+  }
+
+  // Morphology filters only draw into a subpass without MSAA or depth/stencil.
+  pipelines.morphology_filter.CreateDefault(
+      context, options_no_msaa_no_depth_stencil_src, {supports_decal});
+  pipelines.linear_to_srgb_filter.CreateDefault(context, options_trianglestrip);
+  pipelines.srgb_to_linear_filter.CreateDefault(context, options_trianglestrip);
+  pipelines.yuv_to_rgb_filter.CreateDefault(context, options_trianglestrip);
+
+  if (context.GetBackendType() == Context::BackendType::kOpenGLES) {
+#if defined(IMPELLER_ENABLE_OPENGLES) && !defined(FML_OS_MACOSX) && \
+    !defined(FML_OS_EMSCRIPTEN)
+    // GLES only shader that is unsupported on macOS and web.
+    pipelines.tiled_texture_external.CreateDefault(context,
+                                                   options_trianglestrip);
+    pipelines.tiled_texture_uv_external.CreateDefault(context,
+                                                      options_trianglestrip);
+#endif  // !defined(FML_OS_MACOSX)
+
+#if defined(IMPELLER_ENABLE_OPENGLES)
+    // Only used by the Gaussian blur downsample, like `texture_downsample`.
+    pipelines.texture_downsample_gles.CreateDefault(
+        context, options_no_msaa_no_depth_stencil);
+#endif  // IMPELLER_ENABLE_OPENGLES
+  }
+
+  return true;
+}
+
+void ContentContext::WarmDefaultPipelines(const Context& context) {
+  if (!context.IsValid()) {
+    return;
+  }
+  TRACE_EVENT0("impeller", "ContentContext::WarmDefaultPipelines");
+  // The handles are discarded right away. The pipelines they requested stay
+  // in the context's pipeline library, compiled or in flight, where the
+  // ContentContexts created later on find them.
+  Pipelines pipelines;
+  CreateDefaultPipelines(context, pipelines);
+}
+
 ContentContext::ContentContext(
     std::shared_ptr<Context> context,
     std::shared_ptr<TypographerContext> typographer_context,
@@ -587,315 +908,8 @@ ContentContext::ContentContext(
     }
   }
 
-  // A warmed variant is only used if its options match, field for field, the
-  // options that the contents using it draw with. Those always start from
-  // `OptionsFromPass`, which compares depth with `kGreaterEqual`, and the
-  // passes they draw into are only multisampled if offscreen MSAA is supported
-  // (see `CreateRenderTarget` in canvas.cc).
-  const SampleCount pass_sample_count =
-      context_->GetCapabilities()->SupportsOffscreenMSAA()
-          ? SampleCount::kCount4
-          : SampleCount::kCount1;
-  const PixelFormat default_color_format =
-      context_->GetCapabilities()->GetDefaultColorFormat();
-  // For contents that draw triangle lists, such as text and shadows.
-  const auto options_triangle = ContentContextOptions{
-      .sample_count = pass_sample_count,
-      .depth_compare = CompareFunction::kGreaterEqual,
-      .primitive_type = PrimitiveType::kTriangle,
-      .color_attachment_pixel_format = default_color_format};
-  // For contents that draw triangle strips, which is what rectangle, rounded
-  // rectangle, circle, stroke, and convex path geometry produce.
-  const auto options_trianglestrip = ContentContextOptions{
-      .sample_count = pass_sample_count,
-      .depth_compare = CompareFunction::kGreaterEqual,
-      .primitive_type = PrimitiveType::kTriangleStrip,
-      .color_attachment_pixel_format = default_color_format};
-  // The same, for opaque contents. The canvas draws those with `kSrc` instead
-  // of `kSrcOver`, and color sources then also write depth (see
-  // `Canvas::AddRenderEntityToCurrentPass` and
-  // `ColorSourceContents::DrawGeometry`).
-  const auto options_opaque_trianglestrip = ContentContextOptions{
-      .sample_count = pass_sample_count,
-      .blend_mode = BlendMode::kSrc,
-      .depth_compare = CompareFunction::kGreaterEqual,
-      .primitive_type = PrimitiveType::kTriangleStrip,
-      .color_attachment_pixel_format = default_color_format,
-      .depth_write_enabled = true};
-  // For filters that draw into a subpass without MSAA or depth/stencil.
-  const auto options_no_msaa_no_depth_stencil = ContentContextOptions{
-      .sample_count = SampleCount::kCount1,
-      .depth_compare = CompareFunction::kGreaterEqual,
-      .primitive_type = PrimitiveType::kTriangleStrip,
-      .color_attachment_pixel_format = default_color_format,
-      .has_depth_stencil_attachments = false};
-  // The same, for filters that overwrite their subpass with `kSrc`.
-  const auto options_no_msaa_no_depth_stencil_src = ContentContextOptions{
-      .sample_count = SampleCount::kCount1,
-      .blend_mode = BlendMode::kSrc,
-      .depth_compare = CompareFunction::kGreaterEqual,
-      .primitive_type = PrimitiveType::kTriangleStrip,
-      .color_attachment_pixel_format = default_color_format,
-      .has_depth_stencil_attachments = false};
-  // Framebuffer blends compute the blended color themselves and write it with
-  // `kSrc`, see `FramebufferBlendContents`.
-  const auto options_framebuffer_blend = ContentContextOptions{
-      .sample_count = pass_sample_count,
-      .blend_mode = BlendMode::kSrc,
-      .depth_compare = CompareFunction::kGreaterEqual,
-      .primitive_type = PrimitiveType::kTriangleStrip,
-      .color_attachment_pixel_format = default_color_format};
-  const auto supports_decal = static_cast<Scalar>(
-      context_->GetCapabilities()->SupportsDecalSamplerAddressMode());
-
-  // Futures for the following pipelines may block in case the first frame is
-  // rendered without the pipelines being ready. Put pipelines that are more
-  // likely to be used first.
-  {
-    pipelines_->glyph_atlas.CreateDefault(
-        *context_, options_triangle,
-        {static_cast<Scalar>(
-            GetContext()->GetCapabilities()->GetDefaultGlyphAtlasFormat() ==
-            PixelFormat::kA8UNormInt)});
-    // Opaque solid fills far outnumber translucent ones, both in draws and in
-    // how many scenes use them.
-    pipelines_->solid_fill.CreateDefault(*context_,
-                                         options_opaque_trianglestrip);
-    pipelines_->texture.CreateDefault(*context_, options_trianglestrip);
-    pipelines_->fast_gradient.CreateDefault(*context_, options_triangle);
-    pipelines_->circle.CreateDefault(*context_, options_trianglestrip);
-    if (context_->GetFlags().use_sdfs) {
-      if (context_->GetCapabilities()->SupportsSSBO()) {
-        pipelines_->uber_sdf_ssbo.CreateDefault(*context_,
-                                                options_trianglestrip);
-      } else {
-        pipelines_->uber_sdf.CreateDefault(*context_, options_trianglestrip);
-      }
-      pipelines_->complex_rse.CreateDefault(*context_, options_trianglestrip);
-    }
-
-    if (context_->GetCapabilities()->SupportsSSBO()) {
-      pipelines_->linear_gradient_ssbo_fill.CreateDefault(
-          *context_, options_trianglestrip);
-      pipelines_->radial_gradient_ssbo_fill.CreateDefault(
-          *context_, options_trianglestrip);
-      pipelines_->conical_gradient_ssbo_fill.CreateDefault(
-          *context_, options_trianglestrip, {3.0});
-      pipelines_->conical_gradient_ssbo_fill_radial.CreateDefault(
-          *context_, options_trianglestrip, {1.0});
-      pipelines_->conical_gradient_ssbo_fill_strip.CreateDefault(
-          *context_, options_trianglestrip, {2.0});
-      pipelines_->conical_gradient_ssbo_fill_strip_and_radial.CreateDefault(
-          *context_, options_trianglestrip, {0.0});
-      pipelines_->sweep_gradient_ssbo_fill.CreateDefault(*context_,
-                                                         options_trianglestrip);
-    } else {
-      pipelines_->linear_gradient_uniform_fill.CreateDefault(
-          *context_, options_trianglestrip);
-      pipelines_->radial_gradient_uniform_fill.CreateDefault(
-          *context_, options_trianglestrip);
-      pipelines_->conical_gradient_uniform_fill.CreateDefault(
-          *context_, options_trianglestrip);
-      pipelines_->conical_gradient_uniform_fill_radial.CreateDefault(
-          *context_, options_trianglestrip);
-      pipelines_->conical_gradient_uniform_fill_strip.CreateDefault(
-          *context_, options_trianglestrip);
-      pipelines_->conical_gradient_uniform_fill_strip_and_radial.CreateDefault(
-          *context_, options_trianglestrip);
-      pipelines_->sweep_gradient_uniform_fill.CreateDefault(
-          *context_, options_trianglestrip);
-
-      pipelines_->linear_gradient_fill.CreateDefault(*context_,
-                                                     options_trianglestrip);
-      pipelines_->radial_gradient_fill.CreateDefault(*context_,
-                                                     options_trianglestrip);
-      pipelines_->conical_gradient_fill.CreateDefault(*context_,
-                                                      options_trianglestrip);
-      pipelines_->conical_gradient_fill_radial.CreateDefault(
-          *context_, options_trianglestrip);
-      pipelines_->conical_gradient_fill_strip.CreateDefault(
-          *context_, options_trianglestrip);
-      pipelines_->conical_gradient_fill_strip_and_radial.CreateDefault(
-          *context_, options_trianglestrip);
-      pipelines_->sweep_gradient_fill.CreateDefault(*context_,
-                                                    options_trianglestrip);
-    }
-
-    /// Setup default clip pipeline.
-    auto clip_pipeline_descriptor =
-        ClipPipeline::Builder::MakeDefaultPipelineDescriptor(*context_);
-    if (!clip_pipeline_descriptor.has_value()) {
-      return;
-    }
-    // Clips blend with `kDst` so that they never change the color, see
-    // `ClipContents::Render`. Every intersect clip that uses the stencil
-    // buffer, such as one to a rounded rectangle or a path, ends with this
-    // draw, which writes depth outside the clip shape.
-    const auto clip_options = ContentContextOptions{
-        .sample_count = pass_sample_count,
-        .blend_mode = BlendMode::kDst,
-        .depth_compare = CompareFunction::kGreaterEqual,
-        .stencil_mode =
-            ContentContextOptions::StencilMode::kCoverCompareInverted,
-        .primitive_type = PrimitiveType::kTriangleStrip,
-        .color_attachment_pixel_format = default_color_format,
-        .depth_write_enabled = true};
-    clip_options.ApplyToPipelineDescriptor(*clip_pipeline_descriptor);
-    // Disable write to all color attachments.
-    auto clip_color_attachments =
-        clip_pipeline_descriptor->GetColorAttachmentDescriptors();
-    for (auto& color_attachment : clip_color_attachments) {
-      color_attachment.second.write_mask = ColorWriteMaskBits::kNone;
-    }
-    clip_pipeline_descriptor->SetColorAttachmentDescriptors(
-        std::move(clip_color_attachments));
-    pipelines_->clip.SetDefault(
-        *context_->GetPipelineLibrary(), clip_options,
-        std::make_unique<ClipPipeline>(*context_, clip_pipeline_descriptor));
-    pipelines_->texture_downsample.CreateDefault(
-        *context_, options_no_msaa_no_depth_stencil);
-    pipelines_->texture_downsample_bounded.CreateDefault(
-        *context_, options_no_msaa_no_depth_stencil);
-    pipelines_->rrect_blur.CreateDefault(*context_, options_trianglestrip);
-    pipelines_->rsuperellipse_blur.CreateDefault(*context_,
-                                                 options_trianglestrip);
-    pipelines_->texture_strict_src.CreateDefault(*context_,
-                                                 options_trianglestrip);
-    pipelines_->tiled_texture.CreateDefault(*context_, options_trianglestrip,
-                                            {supports_decal});
-    pipelines_->gaussian_blur.CreateDefault(
-        *context_, options_no_msaa_no_depth_stencil, {supports_decal});
-    pipelines_->color_matrix_color_filter.CreateDefault(*context_,
-                                                        options_trianglestrip);
-    pipelines_->shadow_vertices_.CreateDefault(*context_, options_triangle);
-    pipelines_->vertices_uber_1_.CreateDefault(*context_, options_triangle,
-                                               {supports_decal});
-    pipelines_->vertices_uber_2_.CreateDefault(*context_, options_triangle,
-                                               {supports_decal});
-    // Every porter-duff blend mode draws with this one pipeline. The blend
-    // mode is selected with uniforms, see `SetPorterDuffCoefficients`.
-    pipelines_->porter_duff_blend.CreateDefault(
-        *context_, options_trianglestrip, {supports_decal});
-  }
-
-  if (context_->GetCapabilities()->SupportsFramebufferFetch()) {
-    pipelines_->framebuffer_blend_color.CreateDefault(
-        *context_, options_framebuffer_blend,
-        {static_cast<Scalar>(BlendSelectValues::kColor), supports_decal});
-    pipelines_->framebuffer_blend_colorburn.CreateDefault(
-        *context_, options_framebuffer_blend,
-        {static_cast<Scalar>(BlendSelectValues::kColorBurn), supports_decal});
-    pipelines_->framebuffer_blend_colordodge.CreateDefault(
-        *context_, options_framebuffer_blend,
-        {static_cast<Scalar>(BlendSelectValues::kColorDodge), supports_decal});
-    pipelines_->framebuffer_blend_darken.CreateDefault(
-        *context_, options_framebuffer_blend,
-        {static_cast<Scalar>(BlendSelectValues::kDarken), supports_decal});
-    pipelines_->framebuffer_blend_difference.CreateDefault(
-        *context_, options_framebuffer_blend,
-        {static_cast<Scalar>(BlendSelectValues::kDifference), supports_decal});
-    pipelines_->framebuffer_blend_exclusion.CreateDefault(
-        *context_, options_framebuffer_blend,
-        {static_cast<Scalar>(BlendSelectValues::kExclusion), supports_decal});
-    pipelines_->framebuffer_blend_hardlight.CreateDefault(
-        *context_, options_framebuffer_blend,
-        {static_cast<Scalar>(BlendSelectValues::kHardLight), supports_decal});
-    pipelines_->framebuffer_blend_hue.CreateDefault(
-        *context_, options_framebuffer_blend,
-        {static_cast<Scalar>(BlendSelectValues::kHue), supports_decal});
-    pipelines_->framebuffer_blend_lighten.CreateDefault(
-        *context_, options_framebuffer_blend,
-        {static_cast<Scalar>(BlendSelectValues::kLighten), supports_decal});
-    pipelines_->framebuffer_blend_luminosity.CreateDefault(
-        *context_, options_framebuffer_blend,
-        {static_cast<Scalar>(BlendSelectValues::kLuminosity), supports_decal});
-    pipelines_->framebuffer_blend_multiply.CreateDefault(
-        *context_, options_framebuffer_blend,
-        {static_cast<Scalar>(BlendSelectValues::kMultiply), supports_decal});
-    pipelines_->framebuffer_blend_overlay.CreateDefault(
-        *context_, options_framebuffer_blend,
-        {static_cast<Scalar>(BlendSelectValues::kOverlay), supports_decal});
-    pipelines_->framebuffer_blend_saturation.CreateDefault(
-        *context_, options_framebuffer_blend,
-        {static_cast<Scalar>(BlendSelectValues::kSaturation), supports_decal});
-    pipelines_->framebuffer_blend_screen.CreateDefault(
-        *context_, options_framebuffer_blend,
-        {static_cast<Scalar>(BlendSelectValues::kScreen), supports_decal});
-    pipelines_->framebuffer_blend_softlight.CreateDefault(
-        *context_, options_framebuffer_blend,
-        {static_cast<Scalar>(BlendSelectValues::kSoftLight), supports_decal});
-  } else {
-    pipelines_->blend_color.CreateDefault(
-        *context_, options_trianglestrip,
-        {static_cast<Scalar>(BlendSelectValues::kColor), supports_decal});
-    pipelines_->blend_colorburn.CreateDefault(
-        *context_, options_trianglestrip,
-        {static_cast<Scalar>(BlendSelectValues::kColorBurn), supports_decal});
-    pipelines_->blend_colordodge.CreateDefault(
-        *context_, options_trianglestrip,
-        {static_cast<Scalar>(BlendSelectValues::kColorDodge), supports_decal});
-    pipelines_->blend_darken.CreateDefault(
-        *context_, options_trianglestrip,
-        {static_cast<Scalar>(BlendSelectValues::kDarken), supports_decal});
-    pipelines_->blend_difference.CreateDefault(
-        *context_, options_trianglestrip,
-        {static_cast<Scalar>(BlendSelectValues::kDifference), supports_decal});
-    pipelines_->blend_exclusion.CreateDefault(
-        *context_, options_trianglestrip,
-        {static_cast<Scalar>(BlendSelectValues::kExclusion), supports_decal});
-    pipelines_->blend_hardlight.CreateDefault(
-        *context_, options_trianglestrip,
-        {static_cast<Scalar>(BlendSelectValues::kHardLight), supports_decal});
-    pipelines_->blend_hue.CreateDefault(
-        *context_, options_trianglestrip,
-        {static_cast<Scalar>(BlendSelectValues::kHue), supports_decal});
-    pipelines_->blend_lighten.CreateDefault(
-        *context_, options_trianglestrip,
-        {static_cast<Scalar>(BlendSelectValues::kLighten), supports_decal});
-    pipelines_->blend_luminosity.CreateDefault(
-        *context_, options_trianglestrip,
-        {static_cast<Scalar>(BlendSelectValues::kLuminosity), supports_decal});
-    pipelines_->blend_multiply.CreateDefault(
-        *context_, options_trianglestrip,
-        {static_cast<Scalar>(BlendSelectValues::kMultiply), supports_decal});
-    pipelines_->blend_overlay.CreateDefault(
-        *context_, options_trianglestrip,
-        {static_cast<Scalar>(BlendSelectValues::kOverlay), supports_decal});
-    pipelines_->blend_saturation.CreateDefault(
-        *context_, options_trianglestrip,
-        {static_cast<Scalar>(BlendSelectValues::kSaturation), supports_decal});
-    pipelines_->blend_screen.CreateDefault(
-        *context_, options_trianglestrip,
-        {static_cast<Scalar>(BlendSelectValues::kScreen), supports_decal});
-    pipelines_->blend_softlight.CreateDefault(
-        *context_, options_trianglestrip,
-        {static_cast<Scalar>(BlendSelectValues::kSoftLight), supports_decal});
-  }
-
-  // Morphology filters only draw into a subpass without MSAA or depth/stencil.
-  pipelines_->morphology_filter.CreateDefault(
-      *context_, options_no_msaa_no_depth_stencil_src, {supports_decal});
-  pipelines_->linear_to_srgb_filter.CreateDefault(*context_,
-                                                  options_trianglestrip);
-  pipelines_->srgb_to_linear_filter.CreateDefault(*context_,
-                                                  options_trianglestrip);
-  pipelines_->yuv_to_rgb_filter.CreateDefault(*context_, options_trianglestrip);
-
-  if (GetContext()->GetBackendType() == Context::BackendType::kOpenGLES) {
-#if defined(IMPELLER_ENABLE_OPENGLES) && !defined(FML_OS_MACOSX) && \
-    !defined(FML_OS_EMSCRIPTEN)
-    // GLES only shader that is unsupported on macOS and web.
-    pipelines_->tiled_texture_external.CreateDefault(*context_,
-                                                     options_trianglestrip);
-    pipelines_->tiled_texture_uv_external.CreateDefault(*context_,
-                                                        options_trianglestrip);
-#endif  // !defined(FML_OS_MACOSX)
-
-#if defined(IMPELLER_ENABLE_OPENGLES)
-    // Only used by the Gaussian blur downsample, like `texture_downsample`.
-    pipelines_->texture_downsample_gles.CreateDefault(
-        *context_, options_no_msaa_no_depth_stencil);
-#endif  // IMPELLER_ENABLE_OPENGLES
+  if (!CreateDefaultPipelines(*context_, *pipelines_)) {
+    return;
   }
 
   is_valid_ = true;

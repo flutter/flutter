@@ -34,6 +34,7 @@
 
 #include "fml/logging.h"
 #include "impeller/display_list/aiks_context.h"
+#include "impeller/entity/contents/content_context.h"
 #if IMPELLER_ENABLE_VULKAN  // b/258506856 for why this is behind an if
 #include "flutter/shell/platform/android/android_surface_vk_impeller.h"
 #include "flutter/shell/platform/android/image_external_texture_vk_impeller.h"
@@ -567,6 +568,20 @@ bool PlatformViewAndroid::IsSurfaceControlEnabled() const {
 void PlatformViewAndroid::SetupImpellerContext() {
   android_context_->SetupImpellerContext();
   android_surface_->SetupImpellerSurface();
+
+  // Start compiling the default pipelines now, on the raster thread where the
+  // surface's ContentContext will later look them up, instead of waiting for
+  // the first surface to be created. Compilation happens off this thread (on
+  // the IO thread for OpenGL ES, on worker threads for Vulkan), so no rendering
+  // context needs to be current here.
+  //
+  // The pipelines are keyed on the context's default color format, which the
+  // Vulkan swapchain may change once a surface exists. On Android it is always
+  // R8G8B8A8, so the pipelines warmed here are the ones the surface uses.
+  if (std::shared_ptr<impeller::Context> impeller_context =
+          android_context_->GetImpellerContext()) {
+    impeller::ContentContext::WarmDefaultPipelines(*impeller_context);
+  }
 }
 
 }  // namespace flutter

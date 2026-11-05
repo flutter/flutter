@@ -190,5 +190,43 @@ TEST_P(PipelineVariantRecordingTest,
 #endif
 }
 
+// Embedders warm the default pipelines as soon as they have a context, before
+// any ContentContext exists. That only helps if the warm-up requests every
+// pipeline that a ContentContext later warms itself.
+TEST_P(PipelineVariantRecordingTest,
+       WarmDefaultPipelinesRequestsEveryWarmedVariant) {
+  if (!IMPELLER_PIPELINE_VARIANT_RECORDER_IS_SUPPORTED()) {
+    GTEST_SKIP() << "Pipeline variant recording is only in debug builds.";
+  }
+  // Otherwise a ContentContext created earlier could have logged the pipelines.
+  // Some playgrounds (OpenGL ES) share one context between tests.
+  if (!GetContext()->GetPipelineLibrary()->GetPipelineUsage().empty()) {
+    GTEST_SKIP() << "The pipeline library has been used by an earlier test.";
+  }
+  ContentContext::WarmDefaultPipelines(*GetContext());
+  const PipelineUsageMap warmed_usage =
+      GetContext()->GetPipelineLibrary()->GetPipelineUsage();
+  ASSERT_FALSE(warmed_usage.empty());
+
+  ScopedObserver observer;
+  {
+    ContentContext content_context(GetContext(), GetTypographerContext());
+    ASSERT_TRUE(content_context.IsValid());
+  }
+
+  ASSERT_EQ(observer.GetReports().size(), 1u);
+  size_t warmed = 0u;
+  for (const RecordedPipelineVariant& variant : observer.GetReports()[0]) {
+    if (!variant.warmed) {
+      continue;
+    }
+    warmed++;
+    auto found = warmed_usage.find(variant.descriptor);
+    EXPECT_TRUE(found != warmed_usage.end() && found->second.eagerly_created)
+        << variant.descriptor.GetLabel();
+  }
+  EXPECT_GT(warmed, 0u);
+}
+
 }  // namespace testing
 }  // namespace impeller
