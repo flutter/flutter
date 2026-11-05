@@ -9103,95 +9103,101 @@ test_suite(
       ]);
     });
 
-    test(
-      "a builder file's own builds may carry --bazel; each needs a configuration and an install",
-      () {
-        // linux_host_engine.json as a Linux builder that builds with Bazel in
-        // place: --bazel is a flag of where the build runs, like --no-rbe, so
-        // the configuration is the one the other flags name; a build with a
-        // flag the converter has no setting for fails the check -- what
-        // tools/gn --bazel would refuse on the bot. A build with no ninja
-        // targets (ninja's default, everything) gets an install of everything
-        // (build_defs/dist/everything.bzl), as the Mac's test and simulator
-        // builds need.
-        final Map<String, BuilderConfig> loaded = configs(<String, String>{
-          'linux_host_engine.json':
-              '''
+    test("a builder file's own builds may carry --bazel; each needs a configuration and an install", () {
+      // linux_host_engine.json as a Linux builder that builds with Bazel in
+      // place: --bazel is a flag of where the build runs, like --no-rbe, so
+      // the configuration is the one the other flags name; a build with a
+      // flag the converter has no setting for fails the check -- what
+      // tools/gn --bazel would refuse on the bot. A build with no ninja
+      // targets (ninja's default, everything) gets an install of everything
+      // (build_defs/dist/everything.bzl), as the Mac's test and simulator
+      // builds need.
+      final Map<String, BuilderConfig> loaded = configs(<String, String>{
+        'linux_host_engine.json':
+            '''
 {"builds": [
   ${build('ci/host_debug', '--target-dir ci/host_debug --runtime-mode debug --no-lto --no-rbe --no-goma --bazel', <String>['flutter/tools/font_subset'])},
   ${build('ci/host_fancy', '--target-dir ci/host_fancy --runtime-mode release --fancy --no-rbe --bazel', <String>['flutter/tools/font_subset'])},
   ${build('ci/host_default', '--target-dir ci/host_default --runtime-mode release --no-rbe --bazel', <String>[])},
   ${build('ci/host_licenses', '--target-dir ci/host_licenses --runtime-mode release --no-rbe --no-goma --bazel', <String>['flutter/tools/licenses_cpp', 'flutter/tools/licenses_cpp:licenses_cpp_testrunner'], tests: runTests('Run license_cpp unittests', 'binaries'))},
+  ${build('ci/host_licenses_direct', '--target-dir ci/host_licenses_direct --runtime-mode release --no-lto --no-rbe --no-goma --bazel', <String>['flutter/tools/licenses_cpp', 'flutter/tools/licenses_cpp:licenses_cpp_testrunner'], tests: '{"name": "Run license_cpp unittests", "script": "out/ci/host_licenses_direct/licenses_cpp_testrunner"}')},
   ${build('ci/host_gn', '--target-dir ci/host_gn --runtime-mode release --rbe --no-goma', <String>[])}
 ]}''',
-        });
-        final List<BuilderBuild> builds = builderBuilds(loaded);
-        final BuilderBuild debug = builds.singleWhere(
-          (BuilderBuild b) => b.name == 'ci/host_debug',
-        );
-        expect(debug.unsupported, isEmpty);
-        expect(debug.bazelFlags, <String>[
-          '--compilation_mode=opt',
-          '--//engine/src/flutter/common:runtime_mode=debug',
-          '--platforms=//engine/src/flutter/build/bazel/toolchains:linux_x64_debug',
-        ]);
-        const noConfiguration =
-            "linux_host_engine.json's ci/host_fancy carries --bazel but has no Bazel configuration "
-            "(--fancy (not in the converter's table of tools/gn flags))";
-        expect(bazelBuildErrors(builds), <String>[noConfiguration]);
-        expect(bazelVariantErrors(loaded, builds), isEmpty);
-        final BuilderBuild everything = builds.singleWhere(
-          (BuilderBuild b) => b.name == 'ci/host_default',
-        );
-        expect(everything.isEverythingInstalled, isTrue);
-        expect(
-          builds.singleWhere((BuilderBuild b) => b.name == 'ci/host_gn').isEverythingInstalled,
-          isFalse,
-          reason: 'a build still under GN gets no install of everything',
-        );
-        // `run_tests.py --type binaries` names the test executables among the
-        // build's ninja targets, as the executable step of the GN form did.
-        final table = jsonDecode(
-          buildersJson(
-            builds,
-            <String, Set<String>>{
-              '//flutter/tools/font_subset': <String>{'font_subset'},
-              '//flutter/tools/licenses_cpp': <String>{'licenses_cpp'},
-            },
-            convertedTests: <String, Set<String>>{
-              '//flutter/tools/licenses_cpp': <String>{'licenses_cpp_testrunner'},
-            },
-          ),
-        ) as Map<String, Object?>;
-        final linux = (table['builds']! as Map<String, Object?>)['linux']! as List<Object?>;
-        final licenses =
-            linux.singleWhere(
-                  (Object? b) => (b! as Map<String, Object?>)['name'] == 'ci/host_licenses',
-                )!
-                as Map<String, Object?>;
-        expect(licenses['ninja_targets_tested'], <String>[
-          'flutter/tools/licenses_cpp:licenses_cpp_testrunner',
-        ]);
-        final tests = licenses['tests']! as Map<String, Object?>;
-        expect(tests['binaries'], <String>[
-          '//engine/src/flutter/tools/licenses_cpp:licenses_cpp_testrunner',
-        ]);
-        expect(tests['types'], isEmpty);
-        expect(tests['missing'], isEmpty);
-        expect(tests['suite'], '//engine/src/flutter/ci/builders:host_licenses_tests');
-        final defaultBuild =
-            linux.singleWhere(
-                  (Object? b) => (b! as Map<String, Object?>)['name'] == 'ci/host_default',
-                )!
-                as Map<String, Object?>;
-        expect(defaultBuild['install'], '//engine/src/flutter/ci/builders:host_default');
-        expect(defaultBuild['ninja_targets'], isEmpty);
-        final gnBuild =
-            linux.singleWhere((Object? b) => (b! as Map<String, Object?>)['name'] == 'ci/host_gn')!
-                as Map<String, Object?>;
-        expect(gnBuild['install'], isNull);
-      },
-    );
+      });
+      final List<BuilderBuild> builds = builderBuilds(loaded);
+      final BuilderBuild debug = builds.singleWhere((BuilderBuild b) => b.name == 'ci/host_debug');
+      expect(debug.unsupported, isEmpty);
+      expect(debug.bazelFlags, <String>[
+        '--compilation_mode=opt',
+        '--//engine/src/flutter/common:runtime_mode=debug',
+        '--platforms=//engine/src/flutter/build/bazel/toolchains:linux_x64_debug',
+      ]);
+      const noConfiguration =
+          "linux_host_engine.json's ci/host_fancy carries --bazel but has no Bazel configuration "
+          "(--fancy (not in the converter's table of tools/gn flags))";
+      // A step that runs the test executable straight from the build
+      // directory (the GN form of the licenses build): the recipe runs
+      // that path as it is, and the install lays no test -- the Mac
+      // licenses drone failed so, 11-04. The step has to be run_tests.py's
+      // binaries type.
+      const runFromDirectory =
+          "linux_host_engine.json's ci/host_licenses_direct carries --bazel but a step of it runs "
+          'licenses_cpp_testrunner from the build directory, which the install does not lay '
+          '(`bazel test` runs the tests): run the step as `flutter/testing/run_tests.py '
+          '--variant ci/host_licenses_direct --type binaries`';
+      expect(bazelBuildErrors(builds), <String>[noConfiguration, runFromDirectory]);
+      expect(bazelVariantErrors(loaded, builds), isEmpty);
+      final BuilderBuild everything = builds.singleWhere(
+        (BuilderBuild b) => b.name == 'ci/host_default',
+      );
+      expect(everything.isEverythingInstalled, isTrue);
+      expect(
+        builds.singleWhere((BuilderBuild b) => b.name == 'ci/host_gn').isEverythingInstalled,
+        isFalse,
+        reason: 'a build still under GN gets no install of everything',
+      );
+      // `run_tests.py --type binaries` names the test executables among the
+      // build's ninja targets, as the executable step of the GN form did.
+      final table = jsonDecode(
+        buildersJson(
+          builds,
+          <String, Set<String>>{
+            '//flutter/tools/font_subset': <String>{'font_subset'},
+            '//flutter/tools/licenses_cpp': <String>{'licenses_cpp'},
+          },
+          convertedTests: <String, Set<String>>{
+            '//flutter/tools/licenses_cpp': <String>{'licenses_cpp_testrunner'},
+          },
+        ),
+      ) as Map<String, Object?>;
+      final linux = (table['builds']! as Map<String, Object?>)['linux']! as List<Object?>;
+      final licenses =
+          linux.singleWhere(
+                (Object? b) => (b! as Map<String, Object?>)['name'] == 'ci/host_licenses',
+              )!
+              as Map<String, Object?>;
+      expect(licenses['ninja_targets_tested'], <String>[
+        'flutter/tools/licenses_cpp:licenses_cpp_testrunner',
+      ]);
+      final tests = licenses['tests']! as Map<String, Object?>;
+      expect(tests['binaries'], <String>[
+        '//engine/src/flutter/tools/licenses_cpp:licenses_cpp_testrunner',
+      ]);
+      expect(tests['types'], isEmpty);
+      expect(tests['missing'], isEmpty);
+      expect(tests['suite'], '//engine/src/flutter/ci/builders:host_licenses_tests');
+      final defaultBuild =
+          linux.singleWhere(
+                (Object? b) => (b! as Map<String, Object?>)['name'] == 'ci/host_default',
+              )!
+              as Map<String, Object?>;
+      expect(defaultBuild['install'], '//engine/src/flutter/ci/builders:host_default');
+      expect(defaultBuild['ninja_targets'], isEmpty);
+      final gnBuild =
+          linux.singleWhere((Object? b) => (b! as Map<String, Object?>)['name'] == 'ci/host_gn')!
+              as Map<String, Object?>;
+      expect(gnBuild['install'], isNull);
+    });
 
     test('the engine type names executables run_tests.py runs', () {
       // One-directional: every name of the tables is one the script runs

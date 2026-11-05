@@ -205,8 +205,15 @@
             },
             "tests": [
                 {
+                    "language": "python3",
                     "name": "Run license_cpp unittests",
-                    "script": "out/ci/host_release_arm64_licenses/licenses_cpp_testrunner"
+                    "script": "flutter/testing/run_tests.py",
+                    "parameters": [
+                        "--variant",
+                        "ci/host_release_arm64_licenses",
+                        "--type",
+                        "binaries"
+                    ]
                 },
                 {
                     "name": "Run license_cpp",

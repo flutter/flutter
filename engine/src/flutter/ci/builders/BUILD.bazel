@@ -1714,7 +1714,7 @@ install(
     }),
 )
 
-# ci/host_release_arm64_licenses's tests run from the build directory: licenses_cpp_testrunner.
+# ci/host_release_arm64_licenses's tests: run_tests.py --type binaries.
 # Other steps, scripts of the checkout: Run license_cpp.
 test_suite(
     name = "host_release_arm64_licenses_tests",
