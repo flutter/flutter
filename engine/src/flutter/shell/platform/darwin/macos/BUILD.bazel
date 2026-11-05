@@ -443,6 +443,7 @@ flutter_swift_library(
         "-F" + MACOS_PLATFORM_PATH + "/Developer/Library/Frameworks",  # !(is_ios) && is_mac
         "-I" + MACOS_PLATFORM_PATH + "/Developer/usr/lib",  # !(is_ios) && is_mac
     ],
+    tags = ["no-remote-exec"],
     target_compatible_with = select({
         "@platforms//os:macos": [],
         "//conditions:default": ["@platforms//:incompatible"],
@@ -471,6 +472,7 @@ cc_test(
         "-I" + MACOS_PLATFORM_PATH + "/Developer/usr/lib",  # from //flutter/shell/platform/darwin/common:swift_testing_main
     ],
     local_defines = FLUTTER_LOCAL_DEFINES,
+    tags = ["no-remote-exec"],
     target_compatible_with = select({
         "@platforms//os:macos": [],
         "//conditions:default": ["@platforms//:incompatible"],
@@ -539,6 +541,7 @@ flutter_objc_library(
         "//conditions:default": [],
     }) + MACOS_CFLAGS_OBJC,
     local_defines = FLUTTER_LOCAL_DEFINES,
+    tags = ["no-remote-exec"],
     target_compatible_with = select({
         "@platforms//os:macos": [],
         "//conditions:default": ["@platforms//:incompatible"],
@@ -604,6 +607,7 @@ cc_test(
     flaky = True,
     linkopts = ["-ObjC"],
     local_defines = FLUTTER_LOCAL_DEFINES,
+    tags = ["no-remote-exec"],
     target_compatible_with = select({
         "@platforms//os:macos": [],
         "//conditions:default": ["@platforms//:incompatible"],

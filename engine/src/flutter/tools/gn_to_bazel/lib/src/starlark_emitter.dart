@@ -334,6 +334,16 @@ final class _ListAttribute {
 }
 
 /// A generated rule.
+/// The constants of @macos_sdk's sdk.bzl that name the host's Xcode by
+/// absolute path (bazel_mapping.dart's referenceConstants for darwin_sdk.gni's
+/// platform paths): a compile flag around one of them reads the Xcode, so
+/// the compile is the Mac's (render's `no-remote-exec`).
+const List<String> _xcodePlatformConstants = <String>[
+  'MACOS_PLATFORM_PATH',
+  'IPHONESIMULATOR_PLATFORM_PATH',
+  'IPHONEOS_PLATFORM_PATH',
+];
+
 final class _Rule {
   _Rule(this.kind, this.name, List<String> comments) : comments = List<String>.of(comments);
 
@@ -6053,6 +6063,27 @@ final class _Emitter {
     for (final _Rule rule in rules) {
       if (rule.kind == 'cc_library' && _sharedLibraryOutputs.contains('lib${rule.name}.so')) {
         rule.scalars['linkstatic'] = 'True';
+      }
+    }
+    // A target whose compiles read the host's Xcode by absolute path --
+    // darwin/common's test_config and swift_testing_config name the
+    // platform's Developer directories (XCTest, the Testing framework) as
+    // `-F`/`-I` flags around the platform-path constants of @macos_sdk's
+    // sdk.bzl -- compiles on the Mac: a worker has no Xcode (the Apple
+    // toolchains' remote-compile mode, build/bazel:apple_remote_compiles,
+    // sends the compiles to Linux workers; the first iOS test build there
+    // stopped at `'XCTest/XCTest.h' file not found`, 11-05). The tag reaches
+    // the rule's actions (Bazel propagates tags to actions).
+    for (final _Rule rule in rules) {
+      final bool readsXcode = <String>['copts', 'swiftflags'].any(
+        (String attribute) =>
+            rule.lists[attribute]?.items.any(
+              (_Item item) => _xcodePlatformConstants.any(item.text.contains),
+            ) ??
+            false,
+      );
+      if (readsXcode) {
+        rule.list('tags').addUnique(Condition.always, const _Item('no-remote-exec'));
       }
     }
     // The rules first, into their own buffer: rendering a select() under a

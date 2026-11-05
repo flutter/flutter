@@ -303,6 +303,12 @@ _PREBUILT_ENGINE_CACHE = {
 
 _TOOL_CACHE_FILES_BASE = _VERSIONED_CACHE_FILES | {
     ":flutter_tools_snapshot": "flutter_tools.snapshot",
+    # The engine artifacts' storage realm (the checkout's, through
+    # @engine_version): a test's tool that downloads an artifact at run
+    # time -- the integration shard's `flutter build ios` -- looks under it,
+    # as the checkout's tool does; without the file the realm is empty and
+    # a presubmit's engine is a 404 in the release bucket.
+    "//bin/internal:engine_realm": "engine.realm",
     "//bin/internal:flutter_sdk_stamp": "flutter_sdk.stamp",
     "//bin/internal:flutter_web_sdk_stamp": "flutter_web_sdk.stamp",
     "//bin/internal:font_subset_stamp": "font-subset.stamp",
@@ -883,7 +889,6 @@ _ANDROID_CACHE_FILES = {
     ]
 } | {
     "//bin/internal:android_sdk_stamp": "android-sdk.stamp",
-    "//bin/internal:engine_realm": "engine.realm",
 }
 
 # The Android shard: the integration shard's files that build an app, a
