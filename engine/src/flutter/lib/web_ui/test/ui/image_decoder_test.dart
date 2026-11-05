@@ -260,6 +260,79 @@ Future<void> testMain() async {
     expect(disposeCalled, isTrue);
   });
 
+  test('BrowserImageDecoder.decodeFirstFrameSize keeps the first frame for getNextFrame', () async {
+    final HttpFetchResponse response = await httpFetch('/test_images/1x1.png');
+    final Uint8List pngBytes = (await response.payload.asByteBuffer()).asUint8List();
+    final decoder = BrowserImageDecoder(
+      contentType: 'image/png',
+      dataSource: pngBytes.toJS,
+      debugSource: 'test',
+    );
+    addTearDown(decoder.dispose);
+    await decoder.initialize();
+
+    final BitmapSize size = await decoder.decodeFirstFrameSize();
+    expect(size.width, 1);
+    expect(size.height, 1);
+    expect(decoder.debugPendingFrame, isNotNull);
+
+    final VideoFrame frame = await decoder.getNextFrame();
+    addTearDown(() => frame.close());
+    expect(decoder.debugPendingFrame, isNull);
+    expect(frame.displayWidth, 1);
+    expect(frame.displayHeight, 1);
+  }, skip: !browserSupportsImageDecoder);
+
+  test('BrowserImageDecoder.dispose closes the frame kept by decodeFirstFrameSize', () async {
+    final HttpFetchResponse response = await httpFetch('/test_images/1x1.png');
+    final Uint8List pngBytes = (await response.payload.asByteBuffer()).asUint8List();
+    final decoder = BrowserImageDecoder(
+      contentType: 'image/png',
+      dataSource: pngBytes.toJS,
+      debugSource: 'test',
+    );
+    await decoder.initialize();
+    await decoder.decodeFirstFrameSize();
+    final VideoFrame pendingFrame = decoder.debugPendingFrame!;
+
+    decoder.dispose();
+
+    expect(decoder.debugPendingFrame, isNull);
+    // A closed VideoFrame has no format.
+    expect(pendingFrame.format, isNull);
+  }, skip: !browserSupportsImageDecoder);
+
+  test('instantiateImageCodecWithSize returns the frames of an animated image in order', () async {
+    final HttpFetchResponse response = await httpFetch('/test_images/randPixelsAnim.gif');
+    final Uint8List gifBytes = (await response.payload.asByteBuffer()).asUint8List();
+
+    Future<List<Duration>> readFrameDurations(ui.Codec codec, {required int width}) async {
+      final durations = <Duration>[];
+      for (var i = 0; i < codec.frameCount; i++) {
+        final ui.FrameInfo frame = await codec.getNextFrame();
+        expect(frame.image.width, width);
+        durations.add(frame.duration);
+        frame.image.dispose();
+      }
+      return durations;
+    }
+
+    final ui.Codec unsizedCodec = await renderer.instantiateImageCodec(gifBytes);
+    addTearDown(unsizedCodec.dispose);
+    final ui.Codec sizedCodec = await ui.instantiateImageCodecWithSize(
+      await ui.ImmutableBuffer.fromUint8List(gifBytes),
+      getTargetSize: (int width, int height) => ui.TargetImageSize(width: width * 2),
+    );
+    addTearDown(sizedCodec.dispose);
+
+    expect(sizedCodec.frameCount, greaterThan(1));
+    expect(sizedCodec.frameCount, unsizedCodec.frameCount);
+    expect(
+      await readFrameDurations(sizedCodec, width: 32),
+      await readFrameDurations(unsizedCodec, width: 16),
+    );
+  }, skip: !browserSupportsImageDecoder);
+
   // Exercises the decode routing used when the browser has no `ImageDecoder`.
   // This is the path Safari and Firefox take, and the only place
   // `Renderer.supportsAnimatedImages` is consulted.
