@@ -109,7 +109,12 @@ Future<int> run(
   Future<int> handleError(Object error, StackTrace? stackTrace) {
     final deps = resolvedToolDeps;
     if (deps == null) {
-      Error.throwWithStackTrace(error, stackTrace ?? StackTrace.current);
+      return _alreadyHandlingToolError ??= _handleEarlyToolError(
+        error,
+        stackTrace,
+        shutdownHooks: shutdownHooks,
+        verbose: verbose,
+      );
     }
     return _handleToolError(
       error,
@@ -361,6 +366,103 @@ Future<int> run(
 /// doesn't leak when running tests.
 Future<int>? _alreadyHandlingToolError;
 
+Future<int>? _tryHandleKnownToolError(
+  Object error,
+  StackTrace? stackTrace, {
+  required Analytics analytics,
+  required Logger logger,
+  required ProcessManager processManager,
+  required ShutdownHooks shutdownHooks,
+  required bool verbose,
+}) {
+  if (error is UsageException) {
+    logger.printError('${error.message}\n');
+    logger.printError(
+      "Run 'flutter -h' (or 'flutter <command> -h') for available flutter commands and options.",
+    );
+    // Argument error exit code.
+    return exitWithHooks(64, analytics: analytics, logger: logger, shutdownHooks: shutdownHooks);
+  }
+  if (error is ToolExit) {
+    if (error.message != null) {
+      logger.printError(error.message!);
+    }
+    if (verbose) {
+      logger.printError('\n$stackTrace\n');
+    }
+    return exitWithHooks(
+      error.exitCode ?? 1,
+      analytics: analytics,
+      logger: logger,
+      shutdownHooks: shutdownHooks,
+    );
+  }
+  if (error is ProcessExit) {
+    // We've caught an exit code.
+    if (error.immediate) {
+      exit(error.exitCode);
+      return Future<int>.value(error.exitCode);
+    }
+    return exitWithHooks(
+      error.exitCode,
+      analytics: analytics,
+      logger: logger,
+      shutdownHooks: shutdownHooks,
+    );
+  }
+  if (error is ProcessException && _isErrorDueToGitMissing(error, processManager, logger)) {
+    logger.printError('${error.message}\n');
+    logger.printError(
+      'An error was encountered when trying to run git.\n'
+      "Please ensure git is installed and available in your system's search path. "
+      'See https://docs.flutter.dev/get-started for instructions on '
+      'installing git for your platform.',
+    );
+    return exitWithHooks(1, analytics: analytics, logger: logger, shutdownHooks: shutdownHooks);
+  }
+  return null;
+}
+
+Future<int> _handleEarlyToolError(
+  Object error,
+  StackTrace? stackTrace, {
+  required ShutdownHooks shutdownHooks,
+  required bool verbose,
+}) async {
+  const Platform platform = LocalPlatform();
+  final stdio = Stdio();
+  final terminal = AnsiTerminal(
+    stdio: stdio,
+    platform: platform,
+    now: const SystemClock().now(),
+    defaultCliAnimationEnabled: false,
+  );
+  final outputPreferences = OutputPreferences(
+    wrapText: stdio.hasTerminal,
+    showColor: platform.stdoutSupportsAnsi,
+    stdio: stdio,
+  );
+  final Logger logger = platform.isWindows
+      ? WindowsStdoutLogger(terminal: terminal, stdio: stdio, outputPreferences: outputPreferences)
+      : StdoutLogger(terminal: terminal, stdio: stdio, outputPreferences: outputPreferences);
+  const Analytics analytics = NoOpAnalytics();
+  const ProcessManager processManager = LocalProcessManager();
+  if (_tryHandleKnownToolError(
+        error,
+        stackTrace,
+        analytics: analytics,
+        logger: logger,
+        processManager: processManager,
+        shutdownHooks: shutdownHooks,
+        verbose: verbose,
+      )
+      case final Future<int> handled) {
+    return handled;
+  }
+  stdio.stderrWrite('\n$error\n$stackTrace\n');
+  return exitWithHooks(1, analytics: analytics, logger: logger, shutdownHooks: shutdownHooks);
+}
+
 Future<int> _handleToolError(
   Object error,
   StackTrace? stackTrace,
@@ -420,139 +522,108 @@ Future<int> _handleToolErrorImpl(
     :AnsiTerminal terminal,
     :UserMessages userMessages,
   ) = toolContext;
-  if (error is UsageException) {
-    logger.printError('${error.message}\n');
-    logger.printError(
-      "Run 'flutter -h' (or 'flutter <command> -h') for available flutter commands and options.",
+  if (_tryHandleKnownToolError(
+        error,
+        stackTrace,
+        analytics: analytics,
+        logger: logger,
+        processManager: processManager,
+        shutdownHooks: shutdownHooks,
+        verbose: verbose,
+      )
+      case final Future<int> handled) {
+    return handled;
+  }
+
+  // We've crashed; emit a log report.
+  stdio.stderrWrite('\n');
+  if (!reportCrashes) {
+    // Print the stack trace on the bots - don't write a crash report.
+    stdio.stderrWrite('$error\n');
+    stdio.stderrWrite('$stackTrace\n');
+
+    final String featureFlagsEnabled = featureFlags.allConfigurableFeatures
+        .where(featureFlags.isEnabled)
+        .map((Feature f) => f.configSetting)
+        .join(', ');
+    stdio.stderrWrite('Feature flags enabled: $featureFlagsEnabled\n');
+    return exitWithHooks(1, analytics: analytics, logger: logger, shutdownHooks: shutdownHooks);
+  }
+
+  // Flutter tool crash analytics benefits from the concrete Dart error type.
+  // The tool is not obfuscated, and collapsing unknown types to Object loses useful signal.
+  // ignore: avoid_type_to_string
+  analytics.send(Event.exception(exception: error.runtimeType.toString()));
+
+  if (!usingLocalEngine) {
+    await asyncGuard(
+      () async {
+        final crashReportSender = CrashReportSender(
+          platform: platform,
+          logger: logger,
+          operatingSystemUtils: os,
+          analytics: analytics,
+        );
+        await crashReportSender.sendReport(
+          error: error,
+          stackTrace: stackTrace!,
+          getFlutterVersion: getFlutterVersion,
+          command: args.join(' '),
+        );
+      },
+      onError: (Object error) {
+        logger.printError('Error sending crash report: $error');
+      },
     );
-    // Argument error exit code.
-    return exitWithHooks(64, analytics: analytics, logger: logger, shutdownHooks: shutdownHooks);
-  } else if (error is ToolExit) {
-    if (error.message != null) {
-      logger.printError(error.message!);
-    }
-    if (verbose) {
-      logger.printError('\n$stackTrace\n');
-    }
-    return exitWithHooks(
-      error.exitCode ?? 1,
+  }
+
+  logger.printError('Oops; flutter has exited unexpectedly: "$error".');
+
+  try {
+    final doctorLogger = BufferLogger(
+      terminal: terminal,
+      outputPreferences: outputPreferences,
+      verbose: true /* Capture flutter doctor -v */,
+    );
+
+    final doctorText = DoctorText(
+      doctorLogger,
+      doctor: Doctor(
+        analytics: analytics,
+        cache: cache,
+        clock: systemClock,
+        logger: doctorLogger,
+        validatorsProviderBuilder: doctorValidatorsProviderBuilder,
+      ),
+    );
+
+    final details = CrashDetails(
+      command: _crashCommand(args),
+      error: error,
+      stackTrace: stackTrace!,
+      doctorText: doctorText,
+    );
+    final File file = await _createLocalCrashReport(details, toolContext: toolContext);
+    await crashReporter.informUser(details, file);
+
+    return await exitWithHooks(
+      1,
       analytics: analytics,
       logger: logger,
       shutdownHooks: shutdownHooks,
     );
-  } else if (error is ProcessExit) {
-    // We've caught an exit code.
-    if (error.immediate) {
-      exit(error.exitCode);
-      return error.exitCode;
-    } else {
-      return exitWithHooks(
-        error.exitCode,
-        analytics: analytics,
-        logger: logger,
-        shutdownHooks: shutdownHooks,
-      );
-    }
-  } else if (error is ProcessException && _isErrorDueToGitMissing(error, processManager, logger)) {
-    logger.printError('${error.message}\n');
-    logger.printError(
-      'An error was encountered when trying to run git.\n'
-      "Please ensure git is installed and available in your system's search path. "
-      'See https://docs.flutter.dev/get-started for instructions on '
-      'installing git for your platform.',
+    // This catch catches all exceptions to ensure the message below is printed.
+    // ignore: avoid_catches_without_on_clauses
+  } catch (error, st) {
+    stdio.stderrWrite(
+      'Unable to generate crash report due to secondary error: $error\n$st\n'
+      '${userMessages.flutterToolBugInstructions}\n',
     );
-    return exitWithHooks(1, analytics: analytics, logger: logger, shutdownHooks: shutdownHooks);
-  } else {
-    // We've crashed; emit a log report.
-    stdio.stderrWrite('\n');
-    if (!reportCrashes) {
-      // Print the stack trace on the bots - don't write a crash report.
-      stdio.stderrWrite('$error\n');
-      stdio.stderrWrite('$stackTrace\n');
-
-      final String featureFlagsEnabled = featureFlags.allConfigurableFeatures
-          .where(featureFlags.isEnabled)
-          .map((Feature f) => f.configSetting)
-          .join(', ');
-      stdio.stderrWrite('Feature flags enabled: $featureFlagsEnabled\n');
-      return exitWithHooks(1, analytics: analytics, logger: logger, shutdownHooks: shutdownHooks);
-    }
-
-    // Flutter tool crash analytics benefits from the concrete Dart error type.
-    // The tool is not obfuscated, and collapsing unknown types to Object loses useful signal.
-    // ignore: avoid_type_to_string
-    analytics.send(Event.exception(exception: error.runtimeType.toString()));
-
-    if (!usingLocalEngine) {
-      await asyncGuard(
-        () async {
-          final crashReportSender = CrashReportSender(
-            platform: platform,
-            logger: logger,
-            operatingSystemUtils: os,
-            analytics: analytics,
-          );
-          await crashReportSender.sendReport(
-            error: error,
-            stackTrace: stackTrace!,
-            getFlutterVersion: getFlutterVersion,
-            command: args.join(' '),
-          );
-        },
-        onError: (Object error) {
-          logger.printError('Error sending crash report: $error');
-        },
-      );
-    }
-
-    logger.printError('Oops; flutter has exited unexpectedly: "$error".');
-
-    try {
-      final doctorLogger = BufferLogger(
-        terminal: terminal,
-        outputPreferences: outputPreferences,
-        verbose: true /* Capture flutter doctor -v */,
-      );
-
-      final doctorText = DoctorText(
-        doctorLogger,
-        doctor: Doctor(
-          analytics: analytics,
-          cache: cache,
-          clock: systemClock,
-          logger: doctorLogger,
-          validatorsProviderBuilder: doctorValidatorsProviderBuilder,
-        ),
-      );
-
-      final details = CrashDetails(
-        command: _crashCommand(args),
-        error: error,
-        stackTrace: stackTrace!,
-        doctorText: doctorText,
-      );
-      final File file = await _createLocalCrashReport(details, toolContext: toolContext);
-      await crashReporter.informUser(details, file);
-
-      return await exitWithHooks(
-        1,
-        analytics: analytics,
-        logger: logger,
-        shutdownHooks: shutdownHooks,
-      );
-      // This catch catches all exceptions to ensure the message below is printed.
-      // ignore: avoid_catches_without_on_clauses
-    } catch (error, st) {
-      stdio.stderrWrite(
-        'Unable to generate crash report due to secondary error: $error\n$st\n'
-        '${userMessages.flutterToolBugInstructions}\n',
-      );
-      // Any exception thrown here (including one thrown by `_exit()`) will
-      // get caught by our zone's `onError` handler. In order to avoid an
-      // infinite error loop, we throw an error that is recognized above
-      // and will trigger an immediate exit.
-      throw ProcessExit(1, immediate: true);
-    }
+    // Any exception thrown here (including one thrown by `_exit()`) will
+    // get caught by our zone's `onError` handler. In order to avoid an
+    // infinite error loop, we throw an error that is recognized above
+    // and will trigger an immediate exit.
+    throw ProcessExit(1, immediate: true);
   }
 }
 

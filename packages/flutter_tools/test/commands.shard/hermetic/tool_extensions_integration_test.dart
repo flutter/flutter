@@ -43,10 +43,10 @@ void main() {
           entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
           featureFlags: featureFlags,
         );
+        addTearDown(manager.dispose);
 
         await manager.ensureInitialized();
         expect(manager.connections, isEmpty);
-        await manager.dispose();
       },
     );
 
@@ -61,6 +61,7 @@ void main() {
           entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
           featureFlags: featureFlags,
         );
+        addTearDown(manager.dispose);
         final configCommand = ConfigCommand(
           androidContext: FakeAndroidContext(),
           toolContext: FakeToolContext(logger: logger),
@@ -71,8 +72,6 @@ void main() {
 
         await commandRunner.run(<String>['config', '--list']);
         expect(logger.statusText, isNot(contains('Extension Settings:')));
-
-        await manager.dispose();
       },
     );
 
@@ -87,6 +86,7 @@ void main() {
           entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
           featureFlags: featureFlags,
         );
+        addTearDown(manager.dispose);
         final cache = FakeCache();
         final doctor = Doctor(
           analytics: const NoOpAnalytics(),
@@ -105,8 +105,6 @@ void main() {
 
         await doctor.diagnose(extensionManager: manager);
         expect(logger.statusText, isNot(contains('Linux Custom Extension Prototype')));
-
-        await manager.dispose();
       },
     );
   });
@@ -123,10 +121,10 @@ void main() {
           entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
           featureFlags: featureFlags,
         );
+        addTearDown(manager.dispose);
 
         await manager.ensureInitialized();
         expect(manager.connections, isNotEmpty);
-        await manager.dispose();
       },
     );
 
@@ -141,6 +139,7 @@ void main() {
           entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
           featureFlags: featureFlags,
         );
+        addTearDown(manager.dispose);
         final configCommand = ConfigCommand(
           androidContext: FakeAndroidContext(),
           toolContext: FakeToolContext(logger: logger),
@@ -151,8 +150,6 @@ void main() {
 
         await commandRunner.run(<String>['config', '--list']);
         expect(logger.statusText, contains('Extension Settings:'));
-
-        await manager.dispose();
       },
     );
 
@@ -167,6 +164,7 @@ void main() {
           entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
           featureFlags: featureFlags,
         );
+        addTearDown(manager.dispose);
         final cache = FakeCache();
         final doctor = Doctor(
           analytics: const NoOpAnalytics(),
@@ -185,8 +183,6 @@ void main() {
 
         await doctor.diagnose(extensionManager: manager);
         expect(logger.statusText, contains('[✓] Linux Custom Extension Prototype'));
-
-        await manager.dispose();
       },
     );
   });
@@ -239,6 +235,7 @@ void main() {
           entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
           featureFlags: featureFlags,
         );
+        addTearDown(manager.dispose);
         final toolContext = FakeToolContext(logger: logger);
         final configCommand = ConfigCommand(
           androidContext: FakeAndroidContext(),
@@ -255,8 +252,6 @@ void main() {
         await runner.run(args);
         expect(logger.statusText, isNot(contains('Extension Settings:')));
         expect(manager.connections, isEmpty);
-
-        await manager.dispose();
       },
     );
 
@@ -282,6 +277,7 @@ void main() {
           entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
           featureFlags: featureFlags,
         );
+        addTearDown(manager.dispose);
         final toolContext = FakeToolContext(logger: logger);
         final buildManager = ExtensionBuildManager(
           extensionManager: manager,
@@ -307,8 +303,6 @@ void main() {
         await runner.run(const <String>['--no-extensions', 'probe-devices']);
         expect(probeCommand.discoveredDevices, isEmpty);
         expect(manager.connections, isEmpty);
-
-        await manager.dispose();
       },
     );
   });

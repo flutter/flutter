@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:process/process.dart';
-
 import '../android/android_workflow.dart' as android_workflow;
 import '../base/common.dart';
 import '../base/io.dart';
@@ -83,7 +81,6 @@ class DoctorCommand extends FlutterCommand {
         final ToolContext(
           :Logger logger,
           :Platform platform,
-          :ProcessManager processManager,
           :Stdio stdio,
           :UserMessages userMessages,
         ) = toolContext;
@@ -92,7 +89,7 @@ class DoctorCommand extends FlutterCommand {
           java: androidContext.java,
           logger: logger,
           platform: platform,
-          processManager: processManager,
+          processManager: toolContext.processManager,
           stdio: stdio,
           userMessages: userMessages,
         );

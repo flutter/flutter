@@ -27,7 +27,6 @@ import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:flutter_tools/src/platform_plugins.dart';
 import 'package:flutter_tools/src/plugins.dart';
 import 'package:flutter_tools/src/project.dart';
-import 'package:flutter_tools/src/version.dart';
 import 'package:test_api/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
@@ -88,7 +87,7 @@ void main() {
         artifacts: FakeArtifacts(_engineArtifactPath),
         cache: FakeCache(fs, _flutterRoot),
         config: Config.test(),
-        flutterVersion: FakeFlutterVersion(),
+        flutterVersion: FakeFlutterVersion(engineRevision: _engineVersion),
         fs: fs,
         logger: logger,
         platform: platform ?? FakePlatform(),
@@ -3418,7 +3417,7 @@ BuildSwiftPackageUtils _createTestUtils({
       artifacts: FakeArtifacts(_engineArtifactPath),
       cache: FakeCache(fs, _flutterRoot),
       config: Config.test(),
-      flutterVersion: FakeFlutterVersion(),
+      flutterVersion: FakeFlutterVersion(engineRevision: _engineVersion),
       fs: fs,
       logger: logger,
       platform: FakePlatform(),
@@ -3449,11 +3448,6 @@ class FakeXcode extends Fake implements Xcode {
 
   @override
   List<String> xcrunCommand() => ['xcrun'];
-}
-
-class FakeFlutterVersion extends Fake implements FlutterVersion {
-  @override
-  String get engineRevision => _engineVersion;
 }
 
 class FakeArtifacts extends Fake implements Artifacts {

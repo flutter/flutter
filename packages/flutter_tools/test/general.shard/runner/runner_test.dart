@@ -16,6 +16,7 @@ import 'package:flutter_tools/src/android/gradle_utils.dart';
 import 'package:flutter_tools/src/android/java.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/bot_detector.dart';
+import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/exit.dart';
@@ -184,7 +185,7 @@ void main() {
       Cache.enableLocking();
     });
 
-    testUsingContext('error handling crash report (synchronous crash)', () async {
+    testWithoutContext('error handling crash report (synchronous crash)', () async {
       final completer = Completer<void>();
       final shutdownHooks = ShutdownHooks();
       const args = <String>['crash'];
@@ -238,7 +239,7 @@ void main() {
       expect(fakeAnalytics.sentEvents, contains(Event.exception(exception: '_Exception')));
     });
 
-    testUsingContext('error handling crash report (local engine)', () async {
+    testWithoutContext('error handling crash report (local engine)', () async {
       fileSystem
           .directory('engine')
           .childDirectory('src')
@@ -300,7 +301,7 @@ void main() {
 
     // The artifacts commands are built with are chosen before the command line
     // is parsed, so they have to be rebuilt once a local engine is found.
-    testUsingContext('builds commands with the local engine the command line asks for', () async {
+    testWithoutContext('builds commands with the local engine the command line asks for', () async {
       fileSystem
           .directory('engine')
           .childDirectory('src')
@@ -362,7 +363,7 @@ void main() {
       expect(artifacts?.localEngineInfo?.targetOutPath, endsWith('engine/src/out/host_debug'));
     });
 
-    testUsingContext('error handling crash report (bot)', () async {
+    testWithoutContext('error handling crash report (bot)', () async {
       final completer = Completer<void>();
       final shutdownHooks = ShutdownHooks();
       const args = <String>['crash'];
@@ -427,7 +428,7 @@ void main() {
     // does, this test might fail to catch a regression of
     // https://github.com/flutter/flutter/issues/56406.
     final commandCompleter = Completer<void>();
-    testUsingContext('error handling crash report (asynchronous crash)', () async {
+    testWithoutContext('error handling crash report (asynchronous crash)', () async {
       final completer = Completer<void>();
       final shutdownHooks = ShutdownHooks();
       const args = <String>['crash'];
@@ -477,7 +478,7 @@ void main() {
       await completer.future;
     });
 
-    testUsingContext("doesn't send multiple events for additional asynchronous exceptions "
+    testWithoutContext("doesn't send multiple events for additional asynchronous exceptions "
         'thrown during shutdown', () async {
       // Regression test for https://github.com/flutter/flutter/issues/178318.
       var exceptionCount = 0;
@@ -542,7 +543,7 @@ void main() {
       expect(exceptionEvents, hasLength(1));
     });
 
-    testUsingContext('create local report', () async {
+    testWithoutContext('create local report', () async {
       // Since crash reporting calls the doctor, which checks for the devtools
       // version file in the cache, write a version file to the memory fs.
       final Directory devtoolsDir = fileSystem.directory(
@@ -668,7 +669,7 @@ void main() {
         inTestSetup = false;
       });
 
-      testUsingContext('create local report in temporary directory', () async {
+      testWithoutContext('create local report in temporary directory', () async {
         // Since crash reporting calls the doctor, which checks for the devtools
         // version file in the cache, write a version file to the memory fs.
         final Directory devtoolsDir = fileSystem.directory(
@@ -781,7 +782,7 @@ void main() {
       Cache.enableLocking();
     });
 
-    testUsingContext("catches ProcessException calling git because it's not available", () async {
+    testWithoutContext("catches ProcessException calling git because it's not available", () async {
       final logger = BufferLogger.test();
       final shutdownHooks = ShutdownHooks();
       await runner.run(
@@ -812,7 +813,7 @@ void main() {
       );
     });
 
-    testUsingContext(
+    testWithoutContext(
       'handles ProcessException calling git when ProcessManager.canRun fails',
       () async {
         final logger = BufferLogger.test();
@@ -846,7 +847,7 @@ void main() {
       },
     );
 
-    testUsingContext('do not print welcome on bots', () async {
+    testWithoutContext('do not print welcome on bots', () async {
       final logger = BufferLogger.test();
       final shutdownHooks = ShutdownHooks();
       await runner.run(
@@ -866,7 +867,7 @@ void main() {
       expect(logger.traceText, isNot(contains('Showed analytics consent message.')));
     });
 
-    testUsingContext('do not print download messages when --machine is provided', () async {
+    testWithoutContext('do not print download messages when --machine is provided', () async {
       // Regression test for https://github.com/flutter/flutter/issues/154119.
       final stdio = FakeStdio();
       final platform = FakePlatform(
@@ -918,7 +919,7 @@ void main() {
       expect(stdio.writtenToStderr.join(), isNot(contains('Downloading')));
     });
 
-    testUsingContext(
+    testWithoutContext(
       'binds bootstrapped DeviceManager into context for command execution',
       () async {
         late final ToolDependencies capturedDependencies;
@@ -957,7 +958,7 @@ void main() {
         javaEvaluations = 0;
       });
 
-      testUsingContext('does not eagerly evaluate AndroidSdk, AndroidStudio, GradleUtils, or Java during bootstrap or generateCommands', () async {
+      testWithoutContext('does not eagerly evaluate AndroidSdk, AndroidStudio, GradleUtils, or Java during bootstrap or generateCommands', () async {
         late final ToolDependencies capturedDependencies;
         late final _DeviceManagerRecordingFlutterCommand command;
         final shutdownHooks = ShutdownHooks();
@@ -1052,7 +1053,7 @@ void main() {
         xcdeviceEvaluations = 0;
       });
 
-      testUsingContext('does not eagerly evaluate CocoaPodsValidator, IOSSimulatorUtils, or XCDevice during bootstrap or generateCommands', () async {
+      testWithoutContext('does not eagerly evaluate CocoaPodsValidator, IOSSimulatorUtils, or XCDevice during bootstrap or generateCommands', () async {
         late final ToolDependencies capturedDependencies;
         late final _DeviceManagerRecordingFlutterCommand command;
         final shutdownHooks = ShutdownHooks();
@@ -1310,6 +1311,56 @@ void main() {
         contains('Flutter SDK installation appears corrupted'),
       );
     });
+
+    testWithoutContext('returns ToolExit exitCode and runs shutdown hooks when toolDependenciesBuilder throws ToolExit', () async {
+      int? capturedExitCode;
+      setExitFunctionForTests((int exitCode) {
+        capturedExitCode = exitCode;
+      });
+      var shutdownHookRan = false;
+      final shutdownHooks = ShutdownHooks()
+        ..addShutdownHook(() {
+          shutdownHookRan = true;
+        });
+
+      final int exitCode = await runner.run(
+        <String>['help'],
+        (ToolDependencies _) => <FlutterCommand>[],
+        shutdownHooks: shutdownHooks,
+        toolDependenciesBuilder: () => throwToolExit('Invalid FLUTTER_ROOT', exitCode: 2),
+      );
+
+      expect(exitCode, 2);
+      expect(capturedExitCode, 2);
+      expect(shutdownHookRan, isTrue);
+    });
+
+    testWithoutContext(
+      'returns exit code 1 and runs shutdown hooks when toolDependenciesBuilder throws StateError',
+      () async {
+        int? capturedExitCode;
+        setExitFunctionForTests((int exitCode) {
+          capturedExitCode = exitCode;
+        });
+        var shutdownHookRan = false;
+        final shutdownHooks = ShutdownHooks()
+          ..addShutdownHook(() {
+            shutdownHookRan = true;
+          });
+
+        final int exitCode = await runner.run(
+          <String>['help'],
+          (ToolDependencies _) => <FlutterCommand>[],
+          shutdownHooks: shutdownHooks,
+          toolDependenciesBuilder: () =>
+              Future<ToolDependencies>.error(StateError('unexpected bootstrap failure')),
+        );
+
+        expect(exitCode, 1);
+        expect(capturedExitCode, 1);
+        expect(shutdownHookRan, isTrue);
+      },
+    );
   });
 
   group('unified_analytics', () {
@@ -1325,7 +1376,7 @@ void main() {
       );
     });
 
-    testUsingContext('runner disable telemetry with flag', () async {
+    testWithoutContext('runner disable telemetry with flag', () async {
       setExitFunctionForTests((int exitCode) {});
 
       expect(fakeAnalytics.telemetryEnabled, true);
@@ -1352,7 +1403,7 @@ void main() {
       expect(fakeAnalytics.telemetryEnabled, false);
     });
 
-    testUsingContext(
+    testWithoutContext(
       '--enable-analytics and --disable-analytics enables/disables telemetry',
       () async {
         setExitFunctionForTests((int exitCode) {});
@@ -1394,7 +1445,7 @@ void main() {
       },
     );
 
-    testUsingContext(
+    testWithoutContext(
       '--enable-analytics and --disable-analytics send an event when telemetry is enabled/disabled',
       () async {
         setExitFunctionForTests((int exitCode) {});
@@ -1437,7 +1488,7 @@ void main() {
       },
     );
 
-    testUsingContext('--enable-analytics and --disable-analytics do not send an event when telemetry is already enabled/disabled', () async {
+    testWithoutContext('--enable-analytics and --disable-analytics do not send an event when telemetry is already enabled/disabled', () async {
       setExitFunctionForTests((int exitCode) {});
 
       await fakeAnalytics.setTelemetry(false);
@@ -1476,7 +1527,7 @@ void main() {
       expect(fakeAnalytics.sentEvents, isEmpty);
     });
 
-    testUsingContext('throw error when both flags passed', () async {
+    testWithoutContext('throw error when both flags passed', () async {
       setExitFunctionForTests((int exitCode) {});
 
       expect(fakeAnalytics.telemetryEnabled, true);
@@ -1508,7 +1559,7 @@ void main() {
 
     for (final enable in const <bool>[true, false]) {
       final flag = enable ? '--enable-analytics' : '--disable-analytics';
-      testUsingContext(
+      testWithoutContext(
         '$flag warns and does not change telemetry when DASH__SUPPRESS_ANALYTICS=true',
         () async {
           setExitFunctionForTests((int exitCode) {});

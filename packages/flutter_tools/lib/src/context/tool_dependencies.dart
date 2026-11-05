@@ -99,14 +99,14 @@ class ToolDependencies {
     required this.deviceManager,
     required this.doctor,
     required this.emulatorManager,
+    required this.extensionBuildManager,
+    required this.extensionCleanManager,
     required this.extensionManager,
     required this.featureFlags,
     required this.macOSWorkflow,
     required this.templateRenderer,
     required this.toolContext,
     required this.windowsWorkflow,
-    this.extensionBuildManager,
-    this.extensionCleanManager,
   });
 
   /// Telemetry and analytics reporter for command and feature usage.
@@ -140,10 +140,10 @@ class ToolDependencies {
   final EmulatorManager emulatorManager;
 
   /// Manager for querying custom build targets and executing builds via tool extensions.
-  final ExtensionBuildManager? extensionBuildManager;
+  final ExtensionBuildManager extensionBuildManager;
 
   /// Manager for delegating project-specific clean operations to tool extensions.
-  final ExtensionCleanManager? extensionCleanManager;
+  final ExtensionCleanManager extensionCleanManager;
 
   /// Manager for discovering and communicating with active tool extensions.
   final ExtensionManager extensionManager;
