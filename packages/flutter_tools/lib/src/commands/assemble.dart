@@ -106,11 +106,11 @@ var _kDefaultTargets = <Target>[
 /// system.
 class AssembleCommand extends FlutterCommand {
   AssembleCommand({
+    required this._androidContext,
     required this._buildSystem,
     required this._featureFlags,
     required super.toolContext,
     required this._xcode,
-    this._androidContext,
     this._extensionBuildManager,
     super.verboseHelp = false,
   }) {
@@ -190,7 +190,7 @@ class AssembleCommand extends FlutterCommand {
     help: 'The maximum number of concurrent tasks the build system will run.',
   );
 
-  final AndroidContext? _androidContext;
+  final AndroidContext _androidContext;
   final BuildSystem _buildSystem;
   final ExtensionBuildManager? _extensionBuildManager;
   final FeatureFlags _featureFlags;
@@ -347,7 +347,7 @@ class AssembleCommand extends FlutterCommand {
       logger: logger,
       processManager: processManager,
       analytics: analytics,
-      androidSdkBuilder: () => _androidContext?.androidSdk,
+      androidSdkBuilder: () => _androidContext.androidSdk,
       platform: platform,
       projectFactory: projectFactory,
       visualStudio: VisualStudio(toolContext: toolContext),

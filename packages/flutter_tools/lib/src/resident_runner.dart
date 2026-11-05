@@ -49,7 +49,6 @@ import 'run_cold.dart';
 import 'run_hot.dart';
 import 'version.dart';
 import 'vmservice.dart';
-import 'windows/visual_studio.dart';
 
 class FlutterDevice {
   FlutterDevice(
@@ -1036,8 +1035,9 @@ abstract class ResidentRunner extends ResidentHandlers {
     processManager: processManager,
     platform: platform,
     analytics: analytics,
+    androidSdkBuilder: null,
     projectFactory: toolContext.projectFactory,
-    visualStudio: VisualStudio(toolContext: toolContext),
+    visualStudio: null,
     xcode: xcode,
     projectDir: fileSystem.directory(projectRootPath),
     packageConfigPath: debuggingOptions.buildInfo.packageConfigPath,

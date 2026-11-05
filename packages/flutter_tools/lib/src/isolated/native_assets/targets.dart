@@ -270,9 +270,12 @@ class WindowsAssetTarget extends CodeAssetTarget {
     bool mustMatchAppBuild = true,
     VisualStudio? visualStudio,
   }) async {
+    if (visualStudio == null) {
+      throw StateError('VisualStudio is required to configure Windows native assets.');
+    }
     cCompilerConfigSync = await cCompilerConfigWindows(
       throwIfNotFound: mustMatchAppBuild,
-      visualStudio: visualStudio!,
+      visualStudio: visualStudio,
     );
   }
 }

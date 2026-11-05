@@ -102,11 +102,17 @@ class ToolDependencies {
     required this.featureFlags,
     required this.templateRenderer,
     required this.toolContext,
-    this.androidWorkflow,
+    this._androidWorkflow,
     this.extensionBuildManager,
     this.extensionCleanManager,
     this.extensionManager,
+    this._macOSWorkflow,
+    this._windowsWorkflow,
   });
+
+  final AndroidWorkflow? _androidWorkflow;
+  final MacOSWorkflow? _macOSWorkflow;
+  final WindowsWorkflow? _windowsWorkflow;
 
   /// Telemetry and analytics reporter for command and feature usage.
   final Analytics analytics;
@@ -115,7 +121,12 @@ class ToolDependencies {
   final AndroidContext androidContext;
 
   /// Evaluates host readiness and toolchain requirements for Android workflows.
-  final AndroidWorkflow? androidWorkflow;
+  late final AndroidWorkflow androidWorkflow =
+      _androidWorkflow ??
+      AndroidWorkflow(
+        androidSdkBuilder: () => androidContext.androidSdk,
+        featureFlags: featureFlags,
+      );
 
   /// Sub-context containing Apple platform services.
   final AppleContext appleContext;
@@ -150,11 +161,21 @@ class ToolDependencies {
   /// Feature flags that govern tool capabilities and rollouts.
   final FeatureFlags featureFlags;
 
+  /// Evaluates host readiness and toolchain requirements for macOS workflows.
+  late final MacOSWorkflow macOSWorkflow =
+      _macOSWorkflow ?? MacOSWorkflow(featureFlags: featureFlags, platform: _platform);
+
   /// Renderer for mustache project and platform templates.
   final TemplateRenderer templateRenderer;
 
   /// Core container holding host environment and SDK configuration dependencies.
   final ToolContext toolContext;
+
+  /// Evaluates host readiness and toolchain requirements for Windows workflows.
+  late final WindowsWorkflow windowsWorkflow =
+      _windowsWorkflow ?? WindowsWorkflow(featureFlags: featureFlags, platform: _platform);
+
+  Platform get _platform => toolContext.platform;
 
   /// Bootstraps the dependency graph and constructs all three contexts.
   ///
@@ -786,8 +807,10 @@ class ToolDependencies {
       extensionCleanManager: extensionCleanManager,
       extensionManager: extensionManager,
       featureFlags: finalFeatureFlags,
+      macOSWorkflow: finalMacOSWorkflow,
       templateRenderer: templateRenderer,
       toolContext: finalToolContext,
+      windowsWorkflow: finalWindowsWorkflow,
     );
   }
 }

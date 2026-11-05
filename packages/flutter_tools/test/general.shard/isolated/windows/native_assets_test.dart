@@ -13,12 +13,14 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/targets/native_assets.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/isolated/native_assets/dart_hook_result.dart';
 import 'package:flutter_tools/src/isolated/native_assets/native_assets.dart';
+import 'package:flutter_tools/src/isolated/native_assets/targets.dart';
 import 'package:flutter_tools/src/isolated/native_assets/windows/native_assets.dart'
     show cCompilerConfigWindows;
 import 'package:flutter_tools/src/windows/visual_studio.dart';
@@ -268,7 +270,10 @@ void main() {
           toolContext: FakeToolContext(
             fs: fileSystem,
             logger: logger,
-            platform: const LocalPlatform(),
+            platform: FakePlatform(
+              operatingSystem: 'windows',
+              environment: <String, String>{'PROGRAMFILES(X86)': r'C:\Program Files (x86)\'},
+            ),
             processManager: processManager,
           ),
         ),
@@ -335,6 +340,31 @@ void main() {
             ),
           ),
           throwsA(isA<ToolExit>()),
+        );
+      },
+    );
+
+    testWithoutContext(
+      'WindowsAssetTarget.setCCompilerConfig throws StateError when visualStudio is null',
+      () async {
+        final target = WindowsAssetTarget(
+          supportedAssetTypes: const <SupportedAssetTypes>[SupportedAssetTypes.codeAssets],
+          architecture: Architecture.x64,
+        );
+        final processUtils = ProcessUtils(
+          processManager: FakeProcessManager.empty(),
+          logger: BufferLogger.test(),
+        );
+
+        await expectLater(
+          target.setCCompilerConfig(processUtils: processUtils),
+          throwsA(
+            isA<StateError>().having(
+              (StateError error) => error.message,
+              'message',
+              contains('VisualStudio'),
+            ),
+          ),
         );
       },
     );

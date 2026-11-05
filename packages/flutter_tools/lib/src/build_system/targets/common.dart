@@ -15,6 +15,7 @@ import '../../darwin/darwin.dart';
 import '../../devfs.dart';
 import '../../isolated/native_assets/dart_hook_result.dart';
 import '../../project.dart';
+import '../../windows/visual_studio.dart';
 import '../build_system.dart';
 import '../depfile.dart';
 import '../exceptions.dart';
@@ -380,9 +381,16 @@ abstract class AotSnapshotBase extends Target {
     final targetPlatform = TargetPlatform.fromName(targetPlatformEnvironment);
     // TODO(team-windows): Support PE/COFF AOT snapshots for Windows Arm64.
     // See: https://github.com/flutter/flutter/issues/190897
-    final String? windowsLinkerPath = targetPlatform == TargetPlatform.windows_x64
-        ? environment.visualStudio?.linkPath
-        : null;
+    final String? windowsLinkerPath;
+    if (targetPlatform == TargetPlatform.windows_x64) {
+      final VisualStudio? visualStudio = environment.visualStudio;
+      if (visualStudio == null) {
+        throw StateError('VisualStudio is required to build Windows AOT snapshots.');
+      }
+      windowsLinkerPath = visualStudio.linkPath;
+    } else {
+      windowsLinkerPath = null;
+    }
     final snapshotter = AOTSnapshotter(
       fileSystem: environment.fileSystem,
       logger: environment.logger,

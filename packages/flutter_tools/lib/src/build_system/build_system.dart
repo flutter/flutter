@@ -349,12 +349,11 @@ class Environment {
     required ProcessManager processManager,
     required Platform platform,
     required Analytics analytics,
+    required AndroidSdk? Function()? androidSdkBuilder,
     required FlutterProjectFactory projectFactory,
+    required VisualStudio? visualStudio,
     required Xcode? xcode,
     required bool generateDartPluginRegistry,
-    AndroidSdk? androidSdk,
-    AndroidSdk? Function()? androidSdkBuilder,
-    VisualStudio? visualStudio,
     String? engineVersion,
     Directory? buildDir,
     Map<String, String> defines = const <String, String>{},
@@ -397,7 +396,6 @@ class Environment {
       platform: platform,
       analytics: analytics,
       projectFactory: projectFactory,
-      androidSdk: androidSdk,
       androidSdkBuilder: androidSdkBuilder,
       visualStudio: visualStudio,
       xcode: xcode,
@@ -458,7 +456,7 @@ class Environment {
             logger: logger,
             xcode: xcode,
           ),
-      androidSdk: androidSdk,
+      androidSdkBuilder: androidSdk != null ? () => androidSdk : null,
       visualStudio: visualStudio,
       xcode: xcode,
       engineVersion: engineVersion,
@@ -481,13 +479,12 @@ class Environment {
     required this.fileSystem,
     required this.artifacts,
     required this.analytics,
+    required this._androidSdkBuilder,
     required this.projectFactory,
+    required this.visualStudio,
     required this.xcode,
     required this.inputs,
     required this.generateDartPluginRegistry,
-    this._androidSdk,
-    this._androidSdkBuilder,
-    this.visualStudio,
     this.engineVersion,
   });
 
@@ -508,7 +505,6 @@ class Environment {
       platform: platform,
       analytics: analytics,
       projectFactory: projectFactory,
-      androidSdk: _androidSdk,
       androidSdkBuilder: _androidSdkBuilder,
       visualStudio: visualStudio,
       xcode: xcode,
@@ -609,9 +605,8 @@ class Environment {
   /// The factory used by build targets to instantiate [FlutterProject]s.
   final FlutterProjectFactory projectFactory;
 
-  final AndroidSdk? _androidSdk;
   final AndroidSdk? Function()? _androidSdkBuilder;
-  late final AndroidSdk? androidSdk = _androidSdk ?? _androidSdkBuilder?.call();
+  late final AndroidSdk? androidSdk = _androidSdkBuilder?.call();
 
   final VisualStudio? visualStudio;
 
