@@ -428,11 +428,12 @@ def main(argv):
     if params.get("rbe"):
         reproxy = Reproxy(params["rbe"], scratch)
         if reproxy.start():
-            # The compiles on the workers: the recipe's job count (80 a core)
-            # and GN's RBE arguments (use_rbe, the rewrapper's configuration
-            # and strategy, from gn_build.bzl).
+            # The compiles on the workers: the recipe's job count (80 a core;
+            # build_util's _calculate_j_value) and GN's RBE arguments
+            # (use_rbe, the rewrapper's configuration and strategy, from
+            # gn_build.bzl).
             args.update(params["rbe"]["gn_args"])
-            jobs = cpus * 80
+            jobs = _rbe_jobs(cpus)
             env = reproxy.env
         else:
             reproxy = None
@@ -445,6 +446,43 @@ def main(argv):
         # Whatever happens to the build, the proxy does not outlive the action.
         if reproxy:
             reproxy.stop()
+
+
+def _rbe_jobs(cpus):
+    """The ninja job count of a build whose compiles go to the workers, and the descriptors it takes.
+
+    80 a core, as the recipe runs a GN build under reclient, and on a Mac at
+    most 800 as the recipe caps it there (crbug.com/936864): ninja's Darwin
+    build waits on its jobs' pipes with pselect(2), which is bounded by
+    FD_SETSIZE, 1024 descriptors -- `ninja -j1280` on a 16-core Mac died
+    with "pipe: Too many open files" (the Mac tester's T76). A pipe per
+    job besides needs the process's descriptor limit raised: macOS's
+    default soft limit is 256.
+    """
+    jobs = cpus * 80
+    if sys.platform == "darwin":
+        jobs = min(jobs, 800)
+    _raise_descriptor_limit(jobs + 256)
+    return jobs
+
+
+def _raise_descriptor_limit(wanted):
+    """Raises the soft RLIMIT_NOFILE to `wanted` where it is lower, as far as the hard limit allows."""
+    try:
+        import resource  # pylint: disable=import-outside-toplevel
+    except ImportError:  # Not POSIX.
+        return
+    soft, hard = resource.getrlimit(resource.RLIMIT_NOFILE)
+    if soft == resource.RLIM_INFINITY or soft >= wanted:
+        return
+    new = wanted if hard == resource.RLIM_INFINITY else min(wanted, hard)
+    if new <= soft:
+        _log("gn_build: the descriptor limit stays at %d (hard limit %d); ninja wants %d" % (soft, hard, wanted))
+        return
+    try:
+        resource.setrlimit(resource.RLIMIT_NOFILE, (new, hard))
+    except (ValueError, OSError) as error:
+        _log("gn_build: could not raise the descriptor limit from %d to %d: %s" % (soft, new, error))
 
 
 def _build(params, scratch, root, out_dir, jobs, env, started, linked, prepared, links):
