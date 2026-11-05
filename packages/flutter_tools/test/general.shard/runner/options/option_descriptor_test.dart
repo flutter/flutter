@@ -848,7 +848,7 @@ void main() {
           DebuggingOptionDescriptors.dds,
           DebuggingOptionDescriptors.disableDds,
           DebuggingOptionDescriptors.enableDevTools,
-          DebuggingOptionDescriptors.devToolsServerAddressOption,
+          DebuggingOptionDescriptors.devToolsServerAddress,
           BuildInfoOptions.initializeFromDill,
           BuildInfoOptions.assumeInitializeFromDillUpToDate,
           BuildInfoOptions.nativeAssetsYamlFile,
@@ -870,35 +870,32 @@ void main() {
       },
     );
 
-    testWithoutContext(
-      'OptionBundle.register supports verboseHelp and hideOverride overrides',
-      () async {
-        final command = _FakeCommand(name: 'helper-test', description: 'Helper delegation test');
-        const FilesystemOptionsBundle().register(command, command.argParser, hideOverride: false);
-        const VmServicePortOptionsBundle(includeIpv6: false)
-            .register(command, command.argParser, verboseHelp: true);
-        const BuildModeOptionsBundle(
-          defaultToRelease: false,
-          excludeRelease: true,
-        ).register(command, command.argParser, verboseHelp: true);
+    testWithoutContext('OptionBundle.register supports verboseHelp and hide overrides', () async {
+      final command = _FakeCommand(name: 'helper-test', description: 'Helper delegation test');
+      const FilesystemOptionsBundle().register(command, command.argParser, hide: false);
+      const VmServicePortOptionsBundle(includeIpv6: false)
+          .register(command, command.argParser, verboseHelp: true);
+      const BuildModeOptionsBundle(
+        defaultToRelease: false,
+        excludeRelease: true,
+      ).register(command, command.argParser, verboseHelp: true);
 
-        expect(command.argParser.options['output-dill']!.hide, isFalse);
-        expect(command.argParser.options['vm-service-port']!.hide, isFalse);
-        expect(command.argParser.options, isNot(contains('ipv6')));
-        expect(command.getBuildMode(), BuildMode.debug);
-        expect(command.argParser.options.keys, containsAll(<String>['debug', 'profile']));
-        expect(command.argParser.options, isNot(contains('release')));
+      expect(command.argParser.options['output-dill']!.hide, isFalse);
+      expect(command.argParser.options['vm-service-port']!.hide, isFalse);
+      expect(command.argParser.options, isNot(contains('ipv6')));
+      expect(command.getBuildMode(), BuildMode.debug);
+      expect(command.argParser.options.keys, containsAll(<String>['debug', 'profile']));
+      expect(command.argParser.options, isNot(contains('release')));
 
-        final hiddenCommand = _FakeCommand(name: 'hidden-test', description: 'Hidden override');
-        const FilesystemOptionsBundle().register(
-          hiddenCommand,
-          hiddenCommand.argParser,
-          verboseHelp: true,
-          hideOverride: true,
-        );
-        expect(hiddenCommand.argParser.options['output-dill']!.hide, isTrue);
-      },
-    );
+      final hiddenCommand = _FakeCommand(name: 'hidden-test', description: 'Hidden override');
+      const FilesystemOptionsBundle().register(
+        hiddenCommand,
+        hiddenCommand.argParser,
+        verboseHelp: true,
+        hide: true,
+      );
+      expect(hiddenCommand.argParser.options['output-dill']!.hide, isTrue);
+    });
 
     testWithoutContext(
       'SafeArgResults.hasOption checks descriptor identity on argParser',
@@ -920,6 +917,40 @@ void main() {
         );
         CommonOptions.fatalWarnings.addTo(commandWithCommonFatalWarnings.argParser);
         expect(commandWithCommonFatalWarnings.hasOption(CommonOptions.fatalWarnings), isTrue);
+      },
+    );
+
+    testWithoutContext(
+      'addTo and addDescriptor help overrides customize usage while preserving descriptor identity',
+      () async {
+        const descriptor = StringOptionDescriptor(
+          name: 'custom-help-opt',
+          help: 'Default help text.',
+        );
+        final parser = ArgParser();
+        parser.addDescriptor(descriptor, help: 'Command-specific help text.');
+
+        expect(parser.options['custom-help-opt']!.help, 'Command-specific help text.');
+        expect(descriptor.isRegisteredOnParser(parser), isTrue);
+
+        final command = _FakeCommand(
+          name: 'attach-like',
+          description: 'Registers DdsAndDevToolsOptionsBundle without --devtools',
+          verboseHelp: true,
+          bundles: const <OptionBundle>[DdsAndDevToolsOptionsBundle(includeEnableDevTools: false)],
+        );
+        final CommandRunner<void> runner = createTestCommandRunner(command);
+        await runner.run(<String>[
+          'attach-like',
+          '--devtools-server-address=http://127.0.0.1:9100',
+        ]);
+
+        expect(
+          command.argParser.options[FlutterCommand.kDevToolsServerAddress]!.help,
+          DebuggingOptionDescriptors.devToolsServerAddressBaseHelp,
+        );
+        expect(command.hasOption(DebuggingOptionDescriptors.devToolsServerAddress), isTrue);
+        expect(command.devToolsServerAddress, Uri.parse('http://127.0.0.1:9100'));
       },
     );
   });
