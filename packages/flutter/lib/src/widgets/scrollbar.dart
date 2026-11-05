@@ -1448,6 +1448,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   // The last value of [MediaQueryData.persistentScrollbars] observed in
   // [didChangeDependencies].
   bool _platformPersistentScrollbars = false;
+  bool _isFirstDependenciesCheck = true;
 
   /// Overridable getter to indicate that the scrollbar should be visible, even
   /// when a scroll is not underway.
@@ -1513,10 +1514,17 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     final bool platformPersistentScrollbars = MediaQuery.persistentScrollbarsOf(context);
     if (platformPersistentScrollbars != _platformPersistentScrollbars) {
       _platformPersistentScrollbars = platformPersistentScrollbars;
-      // The resolved visibility can change without the widget changing, so the
-      // fade animation has to be updated here as well as in didUpdateWidget.
-      _updateFadeoutForVisibility(showScrollbar);
+      if (_isFirstDependenciesCheck && showScrollbar) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted && showScrollbar) {
+            _fadeoutAnimationController.value = 1.0;
+          }
+        });
+      } else {
+        _updateFadeoutForVisibility(showScrollbar);
+      }
     }
+    _isFirstDependenciesCheck = false;
     assert(_debugScheduleCheckHasValidScrollPosition());
   }
 
