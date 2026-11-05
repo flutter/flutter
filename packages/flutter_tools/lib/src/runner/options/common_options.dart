@@ -723,6 +723,7 @@ class AppleBuildOptionsBundle extends OptionBundle {
     BuildInfoOptions.performanceMeasurementFile,
     BuildInfoOptions.analyzeSize,
     BuildInfoOptions.codeSizeDirectory,
+    BuildInfoOptions.trackWidgetCreation,
   ];
 }
 
