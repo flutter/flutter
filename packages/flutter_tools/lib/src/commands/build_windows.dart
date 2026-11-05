@@ -28,7 +28,7 @@ class BuildWindowsCommand extends BuildSubCommand {
     required this._featureFlags,
     required this._visualStudio,
   }) : super(logger: toolContext.logger, outputPreferences: toolContext.outputPreferences) {
-    registerOptionBundles(const <OptionBundle>[DesktopBuildOptionsBundle()]);
+    registerOptionBundles(const <OptionBundle>[WindowsBuildOptionsBundle()]);
   }
 
   final BuildSystem buildSystem;
