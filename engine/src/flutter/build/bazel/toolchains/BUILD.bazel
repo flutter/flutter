@@ -954,3 +954,11 @@ filegroup(
     name = "empty",
     srcs = [],
 )
+
+# The Apple toolchains' compiler under build/bazel:apple_remote_compiles
+# (macos_toolchain.bzl): a script that runs the clang for the machine the
+# action executes on, the Mac's or a Linux worker's.
+filegroup(
+    name = "apple_clang_wrapper",
+    srcs = ["apple_clang_wrapper.sh"],
+)

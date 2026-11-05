@@ -244,14 +244,21 @@ class BuildDirectoryTest(unittest.TestCase):
         {'LUCI_CONTEXT': '/b/s/w/ir/tmp/t/luci_context.json', 'TMPDIR': '/b/s/w/ir/tmp/t'}):
       bazel_ci.write_build_directory(self.engine_src, HOST_DEBUG_UNOPT, out_dir, '/tools/bazelisk')
       description = bazel_ci.read_build_directory(out_dir)
-      rbe = ['--config=rbe', bazel_ci.WRAP_RBE_FLAG] if sys.platform.startswith('linux') else []
+      rbe = bazel_ci.rbe_config()
+      if sys.platform.startswith('linux'):
+        self.assertEqual(rbe, ['--config=rbe', bazel_ci.WRAP_RBE_FLAG])
+      elif sys.platform == 'darwin':
+        self.assertEqual(rbe, ['--config=rbe_mac'])
+      else:
+        self.assertEqual(rbe, [])
       self.assertEqual(
           description['build_options'],
           bazel_ci.rbe_options() + bazel_ci.bot_sandbox_options()
       )
       self.assertIn(description['build_options'], [rbe, rbe + ['--sandbox_base=/dev/shm']])
-      # RBE is a bot's default on Linux (RBE_ON_BOTS), never a Mac's; the
-      # environment and the flags switch it for a run.
+      # RBE is a bot's default (RBE_ON_BOTS) on Linux and on a Mac, each
+      # with its own config, never elsewhere; the environment and the flags
+      # switch it for a run.
       with unittest.mock.patch.dict(os.environ, {bazel_ci.RBE_ENV: '0'}):
         self.assertEqual(bazel_ci.rbe_options(), [])
         self.assertEqual(bazel_ci.rbe_options(True), rbe)
