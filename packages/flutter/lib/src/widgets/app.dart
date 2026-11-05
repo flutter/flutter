@@ -359,7 +359,7 @@ class WidgetsApp extends StatefulWidget {
     this.showPerformanceOverlay = false,
     this.showSemanticsDebugger = false,
     this.debugShowWidgetInspector = false,
-    this.debugShowCheckedModeBanner = true,
+    this.debugShowCheckedModeBanner = false,
     this.exitWidgetSelectionButtonBuilder,
     this.moveExitWidgetSelectionButtonBuilder,
     this.tapBehaviorButtonBuilder,
@@ -451,7 +451,7 @@ class WidgetsApp extends StatefulWidget {
     this.showPerformanceOverlay = false,
     this.showSemanticsDebugger = false,
     this.debugShowWidgetInspector = false,
-    this.debugShowCheckedModeBanner = true,
+    this.debugShowCheckedModeBanner = false,
     this.exitWidgetSelectionButtonBuilder,
     this.moveExitWidgetSelectionButtonBuilder,
     this.tapBehaviorButtonBuilder,
@@ -1261,7 +1261,7 @@ class WidgetsApp extends StatefulWidget {
   ///
   /// This is how `flutter run` turns off the banner when you take a screen shot
   /// with "s".
-  static bool debugAllowBannerOverride = true;
+  static bool debugAllowBannerOverride = false;
 
   static const Map<ShortcutActivator, Intent> _defaultShortcuts = <ShortcutActivator, Intent>{
     // Activation
