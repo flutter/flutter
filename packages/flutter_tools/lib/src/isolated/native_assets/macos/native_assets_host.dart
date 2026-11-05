@@ -335,7 +335,7 @@ Map<Architecture?, List<String>> parseOtoolArchitectureSections(String output) {
     'arm64': Architecture.arm64,
     'x86_64': Architecture.x64,
   };
-  final architectureHeaderPattern = RegExp(r'^[^(]+( \(architecture (.+)\))?:$');
+  final architectureHeaderPattern = RegExp(r'^.+?( \(architecture (\S+)\))?:$');
   final Iterator<String> lines = output.trim().split('\n').iterator;
   Architecture? currentArchitecture;
   final architectureSections = <Architecture?, List<String>>{};

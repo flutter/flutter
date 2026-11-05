@@ -119,6 +119,49 @@ void main() {
         },
       );
     });
+
+    test('path containing parentheses', () {
+      // Paths containing parentheses must not prevent the header line from
+      // being recognized (https://github.com/flutter/flutter/issues/196046).
+      expect(
+        parseOtoolArchitectureSections('''
+/Users/me/Projects (Local)/my_app/build/buz.framework/buz (architecture x86_64):
+@rpath/libfoo.dylib
+/Users/me/Projects (Local)/my_app/build/buz.framework/buz (architecture arm64):
+@rpath/libbar.dylib
+'''),
+        <Architecture, List<String>>{
+          Architecture.x64: <String>['@rpath/libfoo.dylib'],
+          Architecture.arm64: <String>['@rpath/libbar.dylib'],
+        },
+      );
+    });
+
+    test('path containing parentheses, single architecture not specified', () {
+      expect(
+        parseOtoolArchitectureSections('''
+/Users/me/Projects (Local)/my_app/build/buz.framework/buz:
+@rpath/libfoo.dylib
+'''),
+        <Architecture?, List<String>>{
+          null: <String>['@rpath/libfoo.dylib'],
+        },
+      );
+    });
+
+    test('path containing an architecture-like suffix mid-path', () {
+      // Only the final ' (architecture X)' before the colon is a real suffix;
+      // an earlier occurrence is part of the path.
+      expect(
+        parseOtoolArchitectureSections('''
+/a (architecture arm64)/b (architecture x86_64):
+@rpath/libfoo.dylib
+'''),
+        <Architecture, List<String>>{
+          Architecture.x64: <String>['@rpath/libfoo.dylib'],
+        },
+      );
+    });
   });
 
   test('fatAssetTargetLocations ignores cross-architecture conflicts', () {
