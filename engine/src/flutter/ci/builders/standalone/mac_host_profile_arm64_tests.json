@@ -32,14 +32,36 @@
     "tests": [
         {
             "language": "python3",
-            "name": "Host Tests for host_profile",
+            "name": "Engine unit tests for host_profile",
             "script": "flutter/testing/run_tests.py",
             "parameters": [
                 "--variant",
                 "ci/host_profile_arm64_tests",
                 "--type",
-                "dart,dart-host,engine",
+                "engine",
                 "--engine-capture-core-dump"
+            ]
+        },
+        {
+            "language": "python3",
+            "name": "Dart tests for host_profile",
+            "script": "flutter/testing/run_tests.py",
+            "parameters": [
+                "--variant",
+                "ci/host_profile_arm64_tests",
+                "--type",
+                "dart"
+            ]
+        },
+        {
+            "language": "python3",
+            "name": "Dart host tests for host_profile",
+            "script": "flutter/testing/run_tests.py",
+            "parameters": [
+                "--variant",
+                "ci/host_profile_arm64_tests",
+                "--type",
+                "dart-host"
             ]
         }
     ]
