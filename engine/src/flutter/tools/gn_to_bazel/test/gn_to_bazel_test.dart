@@ -4020,6 +4020,9 @@ executable("common_unittests") {
         ),
       );
       // A public listing: the flags inlined, the library a dependency.
+      // A compile that reads the Xcode by absolute path is the Mac's
+      // (no-remote-exec: the Apple toolchains' remote mode would send it
+      // to a Linux worker, which has no Xcode).
       expect(
         output,
         contains(
@@ -4031,8 +4034,21 @@ executable("common_unittests") {
           '        "-I" + MACOS_PLATFORM_PATH + "/Developer/usr/lib",\n'
           '    ],\n'
           '    local_defines = FLUTTER_LOCAL_DEFINES,\n'
+          '    tags = ["no-remote-exec"],\n'
           '    deps = [\n'
           '        ":test_config",\n',
+        ),
+      );
+      // The config's own library reads nothing: no tag.
+      expect(
+        output,
+        contains(
+          '    name = "test_config",\n'
+          '    linkopts = [\n'
+          '        "-F" + MACOS_PLATFORM_PATH + "/Developer/Library/Frameworks",\n'
+          '        "-L" + MACOS_PLATFORM_PATH + "/Developer/usr/lib",\n'
+          '    ],\n'
+          ')\n',
         ),
       );
       // A private listing inlines everything: the compile flags, the link
@@ -4069,7 +4085,8 @@ executable("common_unittests") {
           '    swiftflags = [\n'
           '        "-F" + MACOS_PLATFORM_PATH + "/Developer/Library/Frameworks",\n'
           '        "-I" + MACOS_PLATFORM_PATH + "/Developer/usr/lib",\n'
-          '    ],\n',
+          '    ],\n'
+          '    tags = ["no-remote-exec"],\n',
         ),
       );
       // A dependent of the public listing, in another file: the compile
@@ -4178,6 +4195,7 @@ executable("common_swift_unittests") {
             '        "-F" + MACOS_PLATFORM_PATH + "/Developer/Library/Frameworks",\n'
             '        "-I" + MACOS_PLATFORM_PATH + "/Developer/usr/lib",\n'
             '    ],\n'
+            '    tags = ["no-remote-exec"],\n'
             '    target_compatible_with = select({\n'
             '        "@platforms//os:ios": [],\n'
             '        "@platforms//os:macos": [],\n'

@@ -567,6 +567,7 @@ flutter_swift_library(
         ],
         "//conditions:default": [],
     }),
+    tags = ["no-remote-exec"],
     target_compatible_with = select({
         "@platforms//os:ios": [],
         "@platforms//os:macos": [],
@@ -731,6 +732,7 @@ flutter_swift_library(
         ],
         "//conditions:default": [],
     }),
+    tags = ["no-remote-exec"],
     target_compatible_with = select({
         "@platforms//os:ios": [],
         "@platforms//os:macos": [],
@@ -814,6 +816,7 @@ flutter_swift_library(
         ],
         "//conditions:default": [],
     }),
+    tags = ["no-remote-exec"],
     target_compatible_with = select({
         "@platforms//os:ios": [],
         "@platforms//os:macos": [],
@@ -870,6 +873,7 @@ cc_test(
         "//conditions:default": [],
     }),
     local_defines = FLUTTER_LOCAL_DEFINES,
+    tags = ["no-remote-exec"],
     target_compatible_with = select({
         "@platforms//os:ios": [],
         "@platforms//os:macos": [],
@@ -933,6 +937,7 @@ flutter_objc_library(
         "//conditions:default": FLUTTER_CFLAGS_OBJC,
     }),
     local_defines = FLUTTER_LOCAL_DEFINES,
+    tags = ["no-remote-exec"],
     target_compatible_with = select({
         "@platforms//os:ios": [],
         "@platforms//os:macos": [],
@@ -1034,6 +1039,7 @@ cc_test(
         "//conditions:default": [],
     }),
     local_defines = FLUTTER_LOCAL_DEFINES,
+    tags = ["no-remote-exec"],
     target_compatible_with = select({
         "@platforms//os:ios": [],
         "@platforms//os:macos": [],
