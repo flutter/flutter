@@ -81,4 +81,58 @@ void testMain() {
       );
     }
   }, skip: isWimp);
+
+  test('zero-sigma blur with bounds draws content unblurred and unmasked', () async {
+    final filter = ui.ImageFilter.blur(tileMode: ui.TileMode.decal, bounds: _blueRect);
+    expect(await _probe(filter, probeX: 47), <int>[255, 0, 0, 255]);
+    expect(await _probe(filter), <int>[0, 0, 255, 255]);
+  });
+
+  // Like native Impeller, empty or inverted bounds are not normalized and do
+  // not mask the output.
+  test('blur with empty or inverted bounds renders like an unbounded blur', () async {
+    final List<int> unbounded = await _probe(_blur());
+    for (final bounds in <ui.Rect>[ui.Rect.zero, const ui.Rect.fromLTRB(100, 100, 50, 0)]) {
+      final List<int> rgba = await _probe(_blur(bounds: bounds));
+      for (var i = 0; i < 4; i++) {
+        expect(rgba[i], closeTo(unbounded[i], 2), reason: '$bounds: $rgba vs unbounded $unbounded');
+      }
+    }
+  });
+
+  test('a reused bounded blur stays bounded after backing a backdrop filter', () async {
+    final filter = ui.ImageFilter.blur(sigmaX: 8, sigmaY: 8, bounds: _blueRect);
+    _expectNoBleed(await _probe(filter));
+
+    final builder = ui.SceneBuilder();
+    builder.pushBackdropFilter(filter);
+    builder.addPicture(
+      ui.Offset.zero,
+      drawPicture((ui.Canvas canvas) {
+        canvas.drawRect(_blueRect, ui.Paint()..color = const ui.Color(0xFF00FF00));
+      }),
+    );
+    builder.pop();
+    final ui.Scene scene = builder.build();
+    final ui.Image backdropImage = await scene.toImage(100, 100);
+    backdropImage.dispose();
+    scene.dispose();
+
+    _expectNoBleed(await _probe(filter));
+  }, skip: !isWimp);
+
+  test('bounded blur stays bounded inside ImageFilter.compose', () async {
+    final filter = ui.ImageFilter.compose(
+      outer: ui.ImageFilter.matrix(
+        Float64List.fromList(<double>[
+          1, 0, 0, 0, //
+          0, 1, 0, 0, //
+          0, 0, 1, 0, //
+          0, 0, 0, 1, //
+        ]),
+      ),
+      inner: _blur(bounds: _blueRect),
+    );
+    _expectNoBleed(await _probe(filter));
+  }, skip: !isWimp);
 }
