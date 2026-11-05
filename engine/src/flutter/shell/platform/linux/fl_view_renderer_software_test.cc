@@ -55,4 +55,17 @@ TEST_F(FlViewRendererSoftwareTest, RealizeSchedulesFrame) {
   gtk_widget_destroy(window);
 }
 
+TEST_F(FlViewRendererSoftwareTest, PresentLayersAfterDestroy) {
+  // Create a renderer and destroy it.
+  FlViewRendererSoftware* renderer =
+      fl_view_renderer_software_new(engine, FALSE);
+  g_object_ref_sink(renderer);
+  fl_gtk_widget_destroy(GTK_WIDGET(renderer));
+
+  // Present a frame on a destroyed widget.
+  fl_view_renderer_present_layers(FL_VIEW_RENDERER(renderer), nullptr, 0);
+
+  g_object_unref(renderer);
+}
+
 // NOLINTEND(clang-analyzer-core.StackAddressEscape)

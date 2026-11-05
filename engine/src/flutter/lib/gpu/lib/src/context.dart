@@ -46,6 +46,15 @@ base class GpuContext extends NativeFieldWrapperClass1 {
     return _getMinimumUniformByteAlignment();
   }
 
+  /// The minimum alignment of a [BufferView]'s offset when it is bound as a
+  /// storage buffer (see [ComputePass.bindStorageBuffer]).
+  ///
+  /// [HostBuffer.emplace] aligns every emplacement to both this and
+  /// [minimumUniformByteAlignment].
+  int get minimumStorageBufferByteAlignment {
+    return _getMinimumStorageBufferAlignment();
+  }
+
   /// Whether the backend supports multisample anti-aliasing for offscreen
   /// color and stencil attachments. A subset of OpenGLES-only devices do not
   /// support this functionality.
@@ -297,6 +306,113 @@ base class GpuContext extends NativeFieldWrapperClass1 {
     return CommandBuffer._(this);
   }
 
+  /// Creates a reusable group of uniform, texture and storage buffer
+  /// bindings.
+  ///
+  /// Every entry is resolved against its shader's reflection data here, so
+  /// binding the set later costs one slot assignment instead of per-resource
+  /// work on every draw. See [RenderPass.bindSet] and [ComputePass.bindSet].
+  ///
+  /// The keys come from [Shader.getUniformSlot] and
+  /// [Shader.getStorageBufferSlot], so a single set may span the vertex,
+  /// fragment and compute stages. Only compute shaders take
+  /// [storageBuffers]. Throws if a slot names a binding the shader does not
+  /// declare, if a [BufferView] runs past the end of its buffer, if a
+  /// [SamplerOptions] is invalid, or if a storage buffer view fails the
+  /// checks described on [StorageBufferSlot].
+  ///
+  /// ```dart
+  /// final gpu.BindingSet material = gpu.gpuContext.createBindingSet(
+  ///   uniforms: {vertex.getUniformSlot('FrameInfo'): frameInfo},
+  ///   textures: {
+  ///     fragment.getUniformSlot('base_color_texture'): gpu.TextureBinding(albedo),
+  ///   },
+  /// );
+  /// ```
+  BindingSet createBindingSet({
+    Map<UniformSlot, BufferView> uniforms = const <UniformSlot, BufferView>{},
+    Map<UniformSlot, TextureBinding> textures =
+        const <UniformSlot, TextureBinding>{},
+    Map<StorageBufferSlot, BufferView> storageBuffers =
+        const <StorageBufferSlot, BufferView>{},
+  }) {
+    return BindingSet._(this, uniforms, textures, storageBuffers);
+  }
+
+  /// Whether this context supports compute: [ComputePipeline],
+  /// [ComputePass] and storage buffers.
+  ///
+  /// True on Metal and Vulkan. False on OpenGL ES, where
+  /// [createComputePipeline] and [CommandBuffer.createComputePass] throw. An
+  /// app that uses compute checks this and takes its own non-compute path
+  /// where it is false.
+  bool get supportsCompute {
+    return _getSupportsCompute();
+  }
+
+  /// The most invocations (threads) one compute workgroup can run, across all
+  /// three dimensions of the shader's `local_size`.
+  ///
+  /// Every device that supports compute allows at least 128. Zero where
+  /// [supportsCompute] is false. A pipeline can allow fewer than this on
+  /// Metal, for example when its shader uses many registers, in which case
+  /// [createComputePipeline] throws.
+  int get maxComputeWorkgroupInvocations {
+    return _getMaximumComputeWorkgroupInvocations();
+  }
+
+  /// The largest `local_size` a compute shader can declare along each
+  /// dimension. The product of the three must also be at most
+  /// [maxComputeWorkgroupInvocations].
+  ///
+  /// Every device that supports compute allows at least 128 x 128 x 64.
+  /// Zero in every dimension where [supportsCompute] is false.
+  ComputeExtent get maxComputeWorkgroupSize {
+    return ComputeExtent(
+      _getMaximumComputeWorkgroupSize(0),
+      _getMaximumComputeWorkgroupSize(1),
+      _getMaximumComputeWorkgroupSize(2),
+    );
+  }
+
+  /// The most workgroups one [ComputePass.dispatch] can launch along each
+  /// dimension.
+  ///
+  /// Zero in every dimension where [supportsCompute] is false.
+  ComputeExtent get maxComputeWorkgroupCount {
+    return ComputeExtent(
+      _getMaximumComputeWorkgroupCount(0),
+      _getMaximumComputeWorkgroupCount(1),
+      _getMaximumComputeWorkgroupCount(2),
+    );
+  }
+
+  /// The most shared (workgroup) memory, in bytes, that a compute shader can
+  /// declare.
+  ///
+  /// Every device that supports compute allows at least 16384 bytes. Zero
+  /// where [supportsCompute] is false.
+  int get maxComputeSharedMemorySizeInBytes {
+    return _getMaximumComputeSharedMemorySize();
+  }
+
+  /// Creates a [ComputePipeline] that runs [computeShader].
+  ///
+  /// The shader is registered with the backend and its pipeline is built
+  /// here, so a shader the device cannot run fails now rather than at the
+  /// first dispatch. Throws an [UnsupportedError] if [supportsCompute] is
+  /// false. Throws if [computeShader] is not a compute shader, or if its
+  /// workgroup size exceeds the device limits, with the limit it exceeds.
+  ComputePipeline createComputePipeline(Shader computeShader) {
+    if (!supportsCompute) {
+      throw UnsupportedError(
+        'Compute is not supported by this GpuContext. Check '
+        'GpuContext.supportsCompute before creating a ComputePipeline.',
+      );
+    }
+    return ComputePipeline._(this, computeShader);
+  }
+
   RenderPipeline createRenderPipeline(
     Shader vertexShader,
     Shader fragmentShader, {
@@ -335,6 +451,36 @@ base class GpuContext extends NativeFieldWrapperClass1 {
     symbol: 'InternalFlutterGpu_Context_GetMinimumUniformByteAlignment',
   )
   external int _getMinimumUniformByteAlignment();
+
+  @Native<Int Function(Pointer<Void>)>(
+    symbol: 'InternalFlutterGpu_Context_GetMinimumStorageBufferAlignment',
+  )
+  external int _getMinimumStorageBufferAlignment();
+
+  @Native<Bool Function(Pointer<Void>)>(
+    symbol: 'InternalFlutterGpu_Context_GetSupportsCompute',
+  )
+  external bool _getSupportsCompute();
+
+  @Native<Uint32 Function(Pointer<Void>)>(
+    symbol: 'InternalFlutterGpu_Context_GetMaximumComputeWorkgroupInvocations',
+  )
+  external int _getMaximumComputeWorkgroupInvocations();
+
+  @Native<Uint32 Function(Pointer<Void>, Int)>(
+    symbol: 'InternalFlutterGpu_Context_GetMaximumComputeWorkgroupSize',
+  )
+  external int _getMaximumComputeWorkgroupSize(int dimension);
+
+  @Native<Uint32 Function(Pointer<Void>, Int)>(
+    symbol: 'InternalFlutterGpu_Context_GetMaximumComputeWorkgroupCount',
+  )
+  external int _getMaximumComputeWorkgroupCount(int dimension);
+
+  @Native<Int64 Function(Pointer<Void>)>(
+    symbol: 'InternalFlutterGpu_Context_GetMaximumComputeSharedMemorySize',
+  )
+  external int _getMaximumComputeSharedMemorySize();
 
   @Native<Bool Function(Pointer<Void>)>(
     symbol: 'InternalFlutterGpu_Context_GetSupportsOffscreenMSAA',

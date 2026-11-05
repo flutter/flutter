@@ -59,6 +59,25 @@ void main() {
     }
   });
 
+  // dart:ui only passes ParagraphStyle.hyphens through to the text layout. This
+  // checks that it gets there, by comparing layouts that differ only in that
+  // setting, without depending on how wide the hyphen is.
+  test('ParagraphStyle.hyphens is passed to the text layout', () {
+    double longestLine(Hyphens? hyphens) {
+      final builder = ParagraphBuilder(
+        ParagraphStyle(fontFamily: 'FlutterTest', fontSize: 10.0, hyphens: hyphens),
+      );
+      // Narrow enough that the line breaks at the soft hyphen.
+      builder.addText('abc\u00ADde');
+      final Paragraph paragraph = builder.build();
+      paragraph.layout(const ParagraphConstraints(width: 45.0));
+      return paragraph.longestLine;
+    }
+
+    expect(longestLine(Hyphens.manual), greaterThan(longestLine(Hyphens.hidden)));
+    expect(longestLine(null), longestLine(Hyphens.manual));
+  });
+
   test('predictably lays out a multi-line paragraph', () {
     for (final fontSize in <double>[10.0, 20.0, 30.0, 40.0]) {
       final builder = ParagraphBuilder(

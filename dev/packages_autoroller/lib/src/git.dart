@@ -11,7 +11,7 @@ import 'package:process/process.dart';
 /// The `Git` class is a relatively (compared to `Repository`) lightweight
 /// abstraction over invocations to the `git` cli tool. The main
 /// motivation for creating this class was so that it could be overridden in
-/// tests. However, now that tests rely on the [FakeProcessManager] this
+/// tests. However, now that tests rely on the `FakeProcessManager` this
 /// abstraction is redundant.
 final class Git {
   const Git(this.processManager);

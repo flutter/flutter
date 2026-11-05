@@ -458,6 +458,16 @@ class _OverlayEntryWidgetState extends State<_OverlayEntryWidget> {
 /// that it can resolve direction-sensitive coordinates of any
 /// [Positioned.directional] children.
 ///
+/// The widget an entry builds, or that [OverlayPortal] shows on this overlay,
+/// can be a [Positioned], in which case it is laid out and placed the way a
+/// positioned child of a [Stack] would be. See [Positioned] for the
+/// restrictions that apply. Where such a child leaves an axis unspecified, it
+/// is aligned on that axis as if [Stack.alignment] were
+/// [AlignmentDirectional.topStart] — this is not configurable. Children that
+/// are not positioned normally fill the overlay, as the children of a [Stack]
+/// with [StackFit.expand] do. See [OverlayEntry.canSizeOverlay] and
+/// [alwaysSizeToContent] for when a child sizes the overlay instead.
+///
 /// For widgets drawn in an [OverlayEntry], do not assume that the size of the
 /// [Overlay] is the size returned by [MediaQuery.sizeOf]. Nested overlays can
 /// have different sizes.
@@ -477,6 +487,8 @@ class _OverlayEntryWidgetState extends State<_OverlayEntryWidget> {
 ///  * [MaterialApp], which inserts an [Overlay] widget indirectly via its [Navigator].
 ///  * [CupertinoApp], which inserts an [Overlay] widget indirectly via its [Navigator].
 ///  * [Stack], which allows directly displaying a stack of widgets.
+///  * [Positioned], which the widget an entry builds can be, to position it
+///    within the overlay the same way it positions a child of a [Stack].
 class Overlay extends StatefulWidget {
   /// Creates an overlay.
   ///
@@ -1391,7 +1403,7 @@ class _RenderTheater extends RenderBox
     final Size size = !alwaysSizeToContent && constraints.biggest.isFinite
         ? constraints.biggest
         : _findSizeDeterminingChild().getDryLayout(constraints);
-    final nonPositionedChildConstraints = BoxConstraints.tight(size);
+    final dryChildConstraints = BoxConstraints.tight(size);
     final Alignment alignment = theater._resolvedAlignment;
 
     BaselineOffset baselineOffset = BaselineOffset.noBaseline;
@@ -1401,7 +1413,7 @@ class _RenderTheater extends RenderBox
           _RenderTheaterMixin.baselineForChild(
             child,
             size,
-            nonPositionedChildConstraints,
+            dryChildConstraints,
             alignment,
             baseline,
           ),
@@ -1460,6 +1472,16 @@ class _RenderTheater extends RenderBox
   bool get sizedByParent => false;
 
   bool _layingOutSizeDeterminingChild = false;
+
+  // The `BoxConstraints` to use for laying out `_DeferredLayoutBox`es and other
+  // non-positioned and non-size-determining children.
+  //
+  // Adding a `_DeferredLayoutBox` child does not trigger a `_RenderTheater`
+  // relayout, so `_RenderTheater` must cache this value for
+  // `_RenderLayoutSurrogateProxyBox.performLayout` to set the correct
+  // `BoxConstraints` on the newly added `_DeferredLayoutBox`.
+  late BoxConstraints _nonPositionedChildConstraints;
+
   @override
   void performLayout() {
     RenderBox? sizeDeterminingChild;
@@ -1474,10 +1496,10 @@ class _RenderTheater extends RenderBox
     }
 
     // Equivalent to BoxConstraints used by RenderStack for StackFit.expand.
-    final nonPositionedChildConstraints = BoxConstraints.tight(size);
+    _nonPositionedChildConstraints = BoxConstraints.tight(size);
     for (final RenderBox child in _childrenInPaintOrder()) {
       if (child != sizeDeterminingChild) {
-        layoutChild(child, nonPositionedChildConstraints);
+        layoutChild(child, _nonPositionedChildConstraints);
       }
     }
   }
@@ -1694,7 +1716,8 @@ class OverlayPortalController {
   int? _zOrderIndex;
   final String? _debugLabel;
 
-  static int _wallTime = kIsWeb
+  // TODO(kevmoo): Use double.minSafeInteger - 1 when the minimum Dart SDK is 3.15, https://github.com/flutter/flutter/issues/195202.
+  static int _wallTime = kIsWeb && !kIsWasm
       ? -9007199254740992 // -2^53
       : -1 << 63;
 
@@ -2796,11 +2819,7 @@ class _RenderLayoutSurrogateProxyBox extends RenderProxyBox {
     // constraints of the deferred child and resize / put it in the dirty list if
     // needed.
     if (!theater._layingOutSizeDeterminingChild) {
-      final BoxConstraints theaterConstraints = theater.constraints;
-      final Size boxSize = theaterConstraints.biggest.isFinite
-          ? theaterConstraints.biggest
-          : theater.size;
-      deferredChild._doLayoutFrom(this, constraints: BoxConstraints.tight(boxSize));
+      deferredChild._doLayoutFrom(this, constraints: theater._nonPositionedChildConstraints);
     }
   }
 }

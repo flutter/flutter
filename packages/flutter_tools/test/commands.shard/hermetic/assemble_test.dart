@@ -11,6 +11,7 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/assemble.dart';
+import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:unified_analytics/unified_analytics.dart';
@@ -22,8 +23,9 @@ import '../../src/test_build_system.dart';
 import '../../src/test_flutter_command_runner.dart';
 
 void main() {
-  Cache.disableLocking();
-  Cache.flutterRoot = '';
+  setUpAll(() {
+    Cache.disableLocking();
+  });
   final StackTrace stackTrace = StackTrace.current;
   late FakeAnalytics fakeAnalytics;
   late MemoryFileSystem fileSystem;
@@ -57,6 +59,7 @@ void main() {
         featureFlags: TestFeatureFlags(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         toolContext: toolContext,
+        xcode: null,
       ),
     );
     await commandRunner.run(<String>['assemble', '-o Output', 'debug_macos_bundle_flutter_assets']);
@@ -75,6 +78,7 @@ void main() {
           expect(environment.defines, containsPair('FooBar', 'fizz=2'));
         }),
         toolContext: toolContext,
+        xcode: null,
       ),
     );
     await commandRunner.run(<String>[
@@ -98,6 +102,7 @@ void main() {
           expect(environment.defines, const {'DeferredComponents': 'false'});
         }),
         toolContext: toolContext,
+        xcode: null,
       ),
     );
     await commandRunner.run(<String>[
@@ -120,6 +125,7 @@ void main() {
         expect(environment.inputs, containsPair('Foo', 'Bar.txt'));
       }),
       toolContext: toolContext,
+      xcode: null,
     );
     final CommandRunner<void> commandRunner = createTestCommandRunner(command);
     await commandRunner.run(<String>[
@@ -138,6 +144,7 @@ void main() {
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       toolContext: toolContext,
       featureFlags: TestFeatureFlags(isMacOSEnabled: true),
+      xcode: null,
     );
     final CommandRunner<void> commandRunner = createTestCommandRunner(command);
     await commandRunner.run(<String>[
@@ -156,6 +163,7 @@ void main() {
       featureFlags: TestFeatureFlags(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       toolContext: toolContext,
+      xcode: null,
     );
     final CommandRunner<void> commandRunner = createTestCommandRunner(command, fakeAnalytics);
     await commandRunner.run(<String>[
@@ -182,6 +190,7 @@ void main() {
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       toolContext: toolContext,
       featureFlags: TestFeatureFlags(isMacOSEnabled: true),
+      xcode: null,
     );
     final CommandRunner<void> commandRunner = createTestCommandRunner(command, fakeAnalytics);
     await commandRunner.run(<String>[
@@ -211,6 +220,7 @@ void main() {
         featureFlags: TestFeatureFlags(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         toolContext: toolContext,
+        xcode: null,
       ),
     );
 
@@ -228,6 +238,7 @@ void main() {
           featureFlags: TestFeatureFlags(),
           buildSystem: TestBuildSystem.all(BuildResult(success: true)),
           toolContext: toolContext,
+          xcode: null,
         ),
       );
 
@@ -251,6 +262,7 @@ void main() {
           featureFlags: TestFeatureFlags(),
           buildSystem: TestBuildSystem.all(BuildResult(success: true)),
           toolContext: toolContext,
+          xcode: null,
         ),
       );
 
@@ -309,6 +321,7 @@ void main() {
         featureFlags: TestFeatureFlags(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         toolContext: toolContext,
+        xcode: null,
       ),
     );
 
@@ -328,6 +341,7 @@ void main() {
           ),
         ),
         toolContext: toolContext,
+        xcode: null,
       ),
     );
 
@@ -358,6 +372,7 @@ void main() {
           ),
         ),
         toolContext: toolContext,
+        xcode: null,
       ),
     );
 
@@ -399,6 +414,7 @@ void main() {
             expect(environment.engineVersion, isNull);
           }),
           toolContext: localToolContext,
+          xcode: null,
         ),
       );
       await commandRunner.run(<String>[
@@ -408,6 +424,52 @@ void main() {
       ]);
     },
   );
+
+  testWithoutContext('flutter assemble propagates local-engine flags to environment when passed via CLI with DeferredArtifacts', () async {
+    fileSystem
+        .directory('engine')
+        .childDirectory('src')
+        .childDirectory('out')
+        .childDirectory('host_debug')
+        .createSync(recursive: true);
+    final deferredArtifacts = DeferredArtifacts(artifacts);
+    final localToolContext = FakeToolContext(
+      artifacts: deferredArtifacts,
+      cache: cache,
+      fs: fileSystem,
+      logger: logger,
+      processManager: FakeProcessManager.any(),
+    );
+    var buildInvoked = false;
+    final CommandRunner<void> commandRunner = createTestCommandRunner(
+      AssembleCommand(
+        featureFlags: TestFeatureFlags(),
+        buildSystem: TestBuildSystem.all(BuildResult(success: true), (
+          Target target,
+          Environment environment,
+        ) {
+          buildInvoked = true;
+          expect(environment.artifacts.usesLocalArtifacts, isTrue);
+          expect(
+            environment.artifacts.localEngineInfo?.targetOutPath,
+            endsWith(fileSystem.path.join('engine', 'src', 'out', 'host_debug')),
+          );
+          expect(environment.engineVersion, isNull);
+        }),
+        toolContext: localToolContext,
+        xcode: null,
+      ),
+    );
+    await commandRunner.run(<String>[
+      '--local-engine=host_debug',
+      '--local-engine-host=host_debug',
+      '--local-engine-src-path=./engine/src',
+      'assemble',
+      '-o Output',
+      'debug_macos_bundle_flutter_assets',
+    ]);
+    expect(buildInvoked, isTrue);
+  });
 
   testWithoutContext(
     'flutter assemble only writes input and output files when the values change',
@@ -438,6 +500,7 @@ void main() {
           featureFlags: TestFeatureFlags(),
           buildSystem: buildSystem,
           toolContext: toolContext,
+          xcode: null,
         ),
       );
       await commandRunner.run(<String>[
@@ -517,6 +580,7 @@ void main() {
         featureFlags: TestFeatureFlags(),
         buildSystem: TestBuildSystem.error(null),
         toolContext: toolContext,
+        xcode: null,
       ),
     );
 
@@ -534,6 +598,7 @@ void main() {
         buildSystem: TestBuildSystem.error(null),
         toolContext: toolContext,
         verboseHelp: true,
+        xcode: null,
       ),
     );
 
@@ -558,6 +623,7 @@ void main() {
         featureFlags: TestFeatureFlags(),
         buildSystem: TestBuildSystem.error(null),
         toolContext: emptyToolContext,
+        xcode: null,
       ),
     );
 
@@ -569,7 +635,8 @@ void main() {
 }
 
 final class _StubCommand extends FlutterCommand {
-  _StubCommand({super.toolContext});
+  _StubCommand({ToolContext? toolContext})
+    : super(toolContext: toolContext ?? const DelegatingToolContext());
 
   @override
   String get description => 'This is a stub';

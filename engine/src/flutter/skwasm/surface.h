@@ -58,12 +58,28 @@ class Surface {
   void ResizeOnWorker(int width, int height, uint32_t callback_id);
 
   // Rendering
-  uint32_t RenderPictures(flutter::DisplayList** picture, int count);
+  //
+  // The surface is resized to `width`x`height` on the worker as part of the
+  // same message that renders the pictures. This makes resize + render +
+  // capture atomic with respect to every other operation on this surface,
+  // which may be shared by multiple views and by image rasterization.
+  //
+  // When capture_image_bitmaps is false, count must be 1 because each picture
+  // clears the surface before drawing. The completion callback still runs,
+  // but returns no image bitmaps.
+  uint32_t RenderPictures(flutter::DisplayList** picture,
+                          int count,
+                          int width,
+                          int height,
+                          bool capture_image_bitmaps);
   void OnRenderComplete(uint32_t callback_id, SkwasmObject image_bitmap);
   void RenderPicturesOnWorker(sk_sp<flutter::DisplayList>* picture,
                               int picture_count,
+                              int width,
+                              int height,
                               uint32_t callback_id,
-                              double raster_start);
+                              double raster_start,
+                              bool capture_image_bitmaps);
 
   // Image Rasterization
   uint32_t RasterizeImage(flutter::DlImage* image, ImageByteFormat format);
@@ -91,9 +107,6 @@ class Surface {
   void RecreateSurface();
 
   CallbackHandler* callback_handler_ = nullptr;
-
-  // Main thread only
-  uint32_t current_callback_id_ = 0;
 
   int canvas_width_ = 0;
   int canvas_height_ = 0;

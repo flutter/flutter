@@ -406,7 +406,7 @@ void main() {
       '   The ImageConfiguration was:\n'
       '     ImageConfiguration(size: Size(100.0, 100.0))\n',
     );
-  }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/87364
+  });
 
   test('DecorationImage - error listener', () async {
     late String exception;
@@ -865,7 +865,7 @@ void main() {
     await delayedProvider.complete();
     await null;
     expect(placeholder.debugGetOpenHandleStackTraces()!.length, handleCountWithPlaceholder - 1);
-  }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/87442
+  });
 
   test('DecorationImage placeholder is included in equality and toString', () async {
     final ui.Image image = await createTestImage(width: 100, height: 100);
@@ -907,7 +907,7 @@ void main() {
     expect(info.image.debugGetOpenHandleStackTraces()!.length, baselineRefCount);
 
     info.dispose();
-  }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/87442
+  });
 
   test('BoxShadow.copyWith', () {
     expect(const BoxShadow(), isNot(const BoxShadow(color: Color(0xFF112233))));

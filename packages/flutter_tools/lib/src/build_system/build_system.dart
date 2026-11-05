@@ -11,6 +11,7 @@ import 'package:process/process.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../artifacts.dart';
+import '../base/config.dart';
 import '../base/error_handling_io.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
@@ -19,6 +20,8 @@ import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../convert.dart';
+import '../macos/xcode.dart';
+import '../project.dart';
 import 'depfile.dart';
 import 'exceptions.dart';
 import 'file_store.dart';
@@ -96,12 +99,12 @@ class BuildSystemConfig {
 ///
 /// ### Targets should only depend on files that are provided as inputs
 ///
-/// Example: gen_snapshot must be provided as an input to the aot_elf
+/// Example: gen_snapshot must be provided as an input to the aot_snapshot
 /// build steps, even though it isn't a source file. This ensures that changes
 /// to the gen_snapshot binary (during a local engine build) correctly
 /// trigger a corresponding build update.
 ///
-/// Example: aot_elf has a dependency on the dill and packages file
+/// Example: aot_snapshot has a dependency on the dill and packages file
 /// produced by the kernel_snapshot step.
 ///
 /// ### Targets should declare all outputs produced
@@ -344,6 +347,8 @@ class Environment {
     required ProcessManager processManager,
     required Platform platform,
     required Analytics analytics,
+    required FlutterProjectFactory projectFactory,
+    required Xcode? xcode,
     String? engineVersion,
     required bool generateDartPluginRegistry,
     Directory? buildDir,
@@ -386,6 +391,8 @@ class Environment {
       processManager: processManager,
       platform: platform,
       analytics: analytics,
+      projectFactory: projectFactory,
+      xcode: xcode,
       engineVersion: engineVersion,
       inputs: inputs,
       generateDartPluginRegistry: generateDartPluginRegistry,
@@ -409,6 +416,8 @@ class Environment {
     String? engineVersion,
     Platform? platform,
     Analytics? analytics,
+    FlutterProjectFactory? projectFactory,
+    Xcode? xcode,
     bool generateDartPluginRegistry = false,
     required FileSystem fileSystem,
     required Logger logger,
@@ -430,6 +439,15 @@ class Environment {
       processManager: processManager,
       platform: platform ?? FakePlatform(),
       analytics: analytics ?? const NoOpAnalytics(),
+      projectFactory:
+          projectFactory ??
+          FlutterProjectFactory(
+            config: Config.test(directory: projectDir ?? testDirectory, logger: logger),
+            fileSystem: fileSystem,
+            logger: logger,
+            xcode: xcode,
+          ),
+      xcode: xcode,
       engineVersion: engineVersion,
       generateDartPluginRegistry: generateDartPluginRegistry,
     );
@@ -450,6 +468,8 @@ class Environment {
     required this.fileSystem,
     required this.artifacts,
     required this.analytics,
+    required this.projectFactory,
+    required this.xcode,
     this.engineVersion,
     required this.inputs,
     required this.generateDartPluginRegistry,
@@ -471,6 +491,8 @@ class Environment {
       processManager: processManager,
       platform: platform,
       analytics: analytics,
+      projectFactory: projectFactory,
+      xcode: xcode,
       engineVersion: engineVersion,
       inputs: inputs,
       generateDartPluginRegistry: generateDartPluginRegistry,
@@ -564,6 +586,13 @@ class Environment {
   final FileSystem fileSystem;
 
   final Analytics analytics;
+
+  /// The factory used by build targets to instantiate [FlutterProject]s.
+  final FlutterProjectFactory projectFactory;
+
+  /// The [Xcode] instance used by Darwin build targets, or `null` for
+  /// non-Darwin builds that do not run Darwin targets.
+  final Xcode? xcode;
 
   /// The version of the current engine, or `null` if built with a local engine.
   final String? engineVersion;

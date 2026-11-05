@@ -52,14 +52,6 @@ typedef HitTestCallback = HitTestResponse Function(HitTestRequest request);
 /// [PlatformDispatcher.onPlatformMessage].
 typedef PlatformMessageResponseCallback = void Function(ByteData? data);
 
-/// Signature for [PlatformDispatcher.onTextureFrameAvailable].
-///
-/// The callback receives the ID of the texture that has a new frame available.
-typedef TextureFrameAvailableCallback = void Function(int textureId);
-
-/// Signature for [PlatformDispatcher.onMarkAllViewsNeedRender].
-typedef MarkAllViewsNeedRenderCallback = void Function();
-
 /// Deprecated. Migrate to [ChannelBuffers.setListener] instead.
 ///
 /// Signature for [PlatformDispatcher.onPlatformMessage].
@@ -649,51 +641,20 @@ class PlatformDispatcher {
   @Native<Void Function(Bool)>(symbol: 'PlatformConfigurationNativeApi::SetNeedsReportTimings')
   external static void __nativeSetNeedsReportTimings(bool value);
 
-  /// A callback that is invoked when a texture has a new frame available.
+  /// Resets the engine's internal caches.
   ///
-  /// The engine invokes this callback after a platform embedder notifies it
-  /// that a native texture has new content. The mechanism by which embedders
-  /// raise this notification is platform-specific and part of the embedder
-  /// API. The callback receives the ID of the texture that has a new frame.
+  /// This is primarily intended for test harnesses to ensure test isolation
+  /// and prevent cached offscreen render targets or other transient engine
+  /// state from leaking across consecutive tests.
   ///
-  /// The framework uses this to mark texture render objects as needing paint
-  /// when their backing texture has new content.
-  ///
-  /// See also:
-  ///
-  ///  * [TextureBox], which uses this to stay updated with texture changes.
-  TextureFrameAvailableCallback? get onTextureFrameAvailable => _onTextureFrameAvailable;
-  TextureFrameAvailableCallback? _onTextureFrameAvailable;
-  Zone _onTextureFrameAvailableZone = Zone.root;
-  set onTextureFrameAvailable(TextureFrameAvailableCallback? callback) {
-    _onTextureFrameAvailable = callback;
-    _onTextureFrameAvailableZone = Zone.current;
-  }
+  /// Production applications should not invoke this method directly. Doing so
+  /// can cause unnecessary texture reallocation churn and frame hitches.
+  /// Production applications should instead rely on platform low-memory
+  /// notifications, which automatically purge caches under memory pressure.
+  void resetInternalState() => _resetInternalState();
 
-  // Called from the engine, via hooks.dart
-  void _notifyTextureFrameAvailable(int textureId) {
-    _invoke1<int>(onTextureFrameAvailable, _onTextureFrameAvailableZone, textureId);
-  }
-
-  /// A callback that is invoked when the engine requires the application to
-  /// re-render all of its views.
-  ///
-  /// On the next [onBeginFrame] or [onDrawFrame], the application should
-  /// invoke [FlutterView.render] on all of its [views]. This callback
-  /// can be ignored if the application always renders all views on each
-  /// frame.
-  MarkAllViewsNeedRenderCallback? get onMarkAllViewsNeedRender => _onMarkAllViewsNeedRender;
-  MarkAllViewsNeedRenderCallback? _onMarkAllViewsNeedRender;
-  Zone _onMarkAllViewsNeedRenderZone = Zone.root;
-  set onMarkAllViewsNeedRender(MarkAllViewsNeedRenderCallback? callback) {
-    _onMarkAllViewsNeedRender = callback;
-    _onMarkAllViewsNeedRenderZone = Zone.current;
-  }
-
-  // Called from the engine, via hooks.dart
-  void _markAllViewsNeedRender() {
-    _invoke(onMarkAllViewsNeedRender, _onMarkAllViewsNeedRenderZone);
-  }
+  @Native<Void Function()>(symbol: 'PlatformConfigurationNativeApi::ResetInternalState')
+  external static void _resetInternalState();
 
   // Called from the engine, via hooks.dart
   void _reportTimings(List<int> timings) {

@@ -43,10 +43,6 @@ abstract class PersistentToolState {
   String? get lastActiveLicenseTermsHash;
   void setLastActiveLicenseTermsHash(String value); // Enforced nonnull setter.
 
-  /// Whether this client was already determined to be or not be a bot.
-  bool? get isRunningOnBot;
-  void setIsRunningOnBot(bool value); // Enforced nonnull setter.
-
   /// Whether the Intel Mac warning message should be displayed.
   ///
   /// This is typically set to false after the message has been shown once.
@@ -73,7 +69,6 @@ class _DefaultPersistentToolState implements PersistentToolState {
     Channel.beta: 'last-active-beta-version',
     Channel.stable: 'last-active-stable-version',
   };
-  static const _kBotKey = 'is-bot';
   static const _kLicenseHash = 'license-hash';
   static const _kHasShownIntelMacWarningKey = 'displayed-intel-warning-message';
 
@@ -113,14 +108,6 @@ class _DefaultPersistentToolState implements PersistentToolState {
 
   String? _versionKeyFor(Channel channel) {
     return _lastActiveVersionKeys[channel];
-  }
-
-  @override
-  bool? get isRunningOnBot => _config.getValue(_kBotKey) as bool?;
-
-  @override
-  void setIsRunningOnBot(bool value) {
-    _config.setValue(_kBotKey, value);
   }
 
   @override

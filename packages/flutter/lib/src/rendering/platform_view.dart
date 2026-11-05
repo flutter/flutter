@@ -14,7 +14,6 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 
-import 'binding.dart';
 import 'box.dart';
 import 'layer.dart';
 import 'object.dart';
@@ -251,27 +250,6 @@ class RenderAndroidView extends PlatformViewRenderBox {
     }
     _clipRectLayer.layer = null;
     _paintTexture(context, offset);
-  }
-
-  @override
-  void attach(PipelineOwner owner) {
-    super.attach(owner);
-    RendererBinding.instance.addTextureFrameAvailableCallback(_handleTextureFrameAvailable);
-  }
-
-  @override
-  void detach() {
-    RendererBinding.instance.removeTextureFrameAvailableCallback(_handleTextureFrameAvailable);
-    super.detach();
-  }
-
-  void _handleTextureFrameAvailable(int textureId) {
-    if (_viewController.requiresViewComposition) {
-      return;
-    }
-    if (textureId == _viewController.textureId) {
-      markNeedsPaint();
-    }
   }
 
   final LayerHandle<ClipRectLayer> _clipRectLayer = LayerHandle<ClipRectLayer>();
@@ -826,6 +804,7 @@ class PlatformViewRenderBox extends RenderBox with _PlatformViewGestureMixin {
 mixin _PlatformViewGestureMixin on RenderBox implements MouseTrackerAnnotation {
   /// How to behave during hit testing.
   // Changing _hitTestBehavior might affect which objects are considered hovered over.
+  // ignore: avoid_setters_without_getters
   set hitTestBehavior(PlatformViewHitTestBehavior value) {
     if (value != _hitTestBehavior) {
       _hitTestBehavior = value;

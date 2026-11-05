@@ -26,7 +26,7 @@
                 },
                 {
                     "dependency": "open_jdk",
-                    "version": "version:21"
+                    "version": "version:25.0.2"
                 }
             ],
             "name": "ci/android_emulator_debug_x64",
@@ -47,11 +47,11 @@
                     "test_dependencies": [
                         {
                             "dependency": "android_virtual_device",
-                            "version": "android_36_google_apis_x64.textpb"
+                            "version": "android_37_google_apis_ps16k_x64.textpb"
                         },
                         {
                             "dependency": "avd_cipd_version",
-                            "version": "build_id:8719362231152674241"
+                            "version": "build_id:8669307410622793521"
                         }
                     ],
                     "contexts": [

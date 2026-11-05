@@ -16,6 +16,10 @@ class SkwasmRenderer extends Renderer {
   bool get supportsResizingAnimatedImages =>
       throw UnimplementedError('Skwasm not implemented on this platform.');
 
+  @override
+  bool get supportsAnimatedImages =>
+      throw UnimplementedError('Skwasm not implemented on this platform.');
+
   bool get isWimp => false;
 
   @override
@@ -139,30 +143,12 @@ class SkwasmRenderer extends Renderer {
   }
 
   @override
-  ui.ParagraphBuilder createParagraphBuilder(ui.ParagraphStyle style) {
+  BackendParagraphBuilder createParagraphBuilder(EngineParagraphStyle style) {
     throw UnimplementedError('Skwasm not implemented on this platform.');
   }
 
   @override
   WebParagraphPainter createWebParagraphPainter(WebParagraph paragraph) {
-    throw UnimplementedError('Skwasm not implemented on this platform.');
-  }
-
-  @override
-  ui.ParagraphStyle createParagraphStyle({
-    ui.TextAlign? textAlign,
-    ui.TextDirection? textDirection,
-    int? maxLines,
-    String? fontFamily,
-    double? fontSize,
-    double? height,
-    ui.TextHeightBehavior? textHeightBehavior,
-    ui.FontWeight? fontWeight,
-    ui.FontStyle? fontStyle,
-    ui.StrutStyle? strutStyle,
-    String? ellipsis,
-    ui.Locale? locale,
-  }) {
     throw UnimplementedError('Skwasm not implemented on this platform.');
   }
 
@@ -173,48 +159,6 @@ class SkwasmRenderer extends Renderer {
 
   @override
   ui.SceneBuilder createSceneBuilder() {
-    throw UnimplementedError('Skwasm not implemented on this platform.');
-  }
-
-  @override
-  ui.StrutStyle createStrutStyle({
-    String? fontFamily,
-    List<String>? fontFamilyFallback,
-    double? fontSize,
-    double? height,
-    ui.TextLeadingDistribution? leadingDistribution,
-    double? leading,
-    ui.FontWeight? fontWeight,
-    ui.FontStyle? fontStyle,
-    bool? forceStrutHeight,
-  }) {
-    throw UnimplementedError('Skwasm not implemented on this platform.');
-  }
-
-  @override
-  ui.TextStyle createTextStyle({
-    ui.Color? color,
-    ui.TextDecoration? decoration,
-    ui.Color? decorationColor,
-    ui.TextDecorationStyle? decorationStyle,
-    double? decorationThickness,
-    ui.FontWeight? fontWeight,
-    ui.FontStyle? fontStyle,
-    ui.TextBaseline? textBaseline,
-    String? fontFamily,
-    List<String>? fontFamilyFallback,
-    double? fontSize,
-    double? letterSpacing,
-    double? wordSpacing,
-    double? height,
-    ui.TextLeadingDistribution? leadingDistribution,
-    ui.Locale? locale,
-    ui.Paint? background,
-    ui.Paint? foreground,
-    List<ui.Shadow>? shadows,
-    List<ui.FontFeature>? fontFeatures,
-    List<ui.FontVariation>? fontVariations,
-  }) {
     throw UnimplementedError('Skwasm not implemented on this platform.');
   }
 
@@ -270,19 +214,6 @@ class SkwasmRenderer extends Renderer {
   Future<ui.FragmentProgram> createFragmentProgram(String assetKey) {
     throw UnimplementedError('Skwasm not implemented on this platform.');
   }
-
-  @override
-  ui.LineMetrics createLineMetrics({
-    required bool hardBreak,
-    required double ascent,
-    required double descent,
-    required double unscaledAscent,
-    required double height,
-    required double width,
-    required double left,
-    required double baseline,
-    required int lineNumber,
-  }) => throw UnimplementedError('Skwasm not implemented on this platform.');
 
   @override
   void dumpDebugInfo() {
