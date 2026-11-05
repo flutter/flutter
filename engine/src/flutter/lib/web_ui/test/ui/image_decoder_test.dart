@@ -137,6 +137,25 @@ Future<void> testMain() async {
   );
 
   test(
+    'ImageDecoder-based codec decodes still AVIF images loaded from a URL',
+    () async {
+      // The test server serves .avif files as image/avif, so the response body
+      // is streamed directly to ImageDecoder instead of being sniffed.
+      final ui.Codec codec = await renderer.instantiateImageCodecFromUrl(
+        Uri(path: '/test_images/dog.avif'),
+      );
+      addTearDown(codec.dispose);
+      expect(codec.frameCount, 1);
+
+      final ui.FrameInfo frame = await codec.getNextFrame();
+      addTearDown(frame.image.dispose);
+      expect(frame.image.width, 180);
+      expect(frame.image.height, 180);
+    },
+    skip: !browserSupportsImageDecoder,
+  );
+
+  test(
     '_BrowserEngineCodec.getNextFrame() throws StateError and cleans up if disposed during decode',
     () async {
       if (!browserSupportsImageDecoder) {
