@@ -106,6 +106,7 @@ class UpgradeCommand extends FlutterCommand {
       :FlutterVersion flutterVersion,
       :FileSystem fs,
       :Git git,
+      :Logger logger,
       :Platform platform,
     ) = toolContext;
     final String? workingDirectory = stringArg('working-directory');
@@ -118,14 +119,17 @@ class UpgradeCommand extends FlutterCommand {
       gitTagVersion: GitTagVersion.determine(
         platform,
         git: git,
+        logger: logger,
         workingDirectory: _commandRunner.workingDirectory,
       ),
       flutterVersion: workingDirectory == null
           ? flutterVersion
           : FlutterVersion(
+              cache: cache,
               flutterRoot: _commandRunner.workingDirectory!,
               fs: fs,
               git: git,
+              logger: logger,
               platform: platform,
             ),
       verifyOnly: boolArg('verify-only'),
@@ -385,7 +389,8 @@ class UpgradeCommandRunner {
   /// Exits tool if HEAD isn't pointing to a branch, or there is no upstream.
   @visibleForTesting
   Future<FlutterVersion> fetchLatestVersion({required FlutterVersion localVersion}) async {
-    final ToolContext(:FileSystem fs, :Git git, :Platform platform) = _toolContext;
+    final ToolContext(:Cache cache, :FileSystem fs, :Git git, :Logger logger, :Platform platform) =
+        _toolContext;
     String revision;
     try {
       // Fetch upstream branch's commits and tags
@@ -432,10 +437,12 @@ class UpgradeCommandRunner {
     }
     return FlutterVersion.fromRevision(
       flutterRoot: workingDirectory!,
+      cache: cache,
       frameworkRevision: revision,
       fs: fs,
       git: git,
       platform: platform,
+      logger: logger,
     );
   }
 

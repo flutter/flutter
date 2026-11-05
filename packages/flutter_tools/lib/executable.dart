@@ -260,6 +260,7 @@ List<FlutterCommand> generateCommands({
       featureFlags: toolDependencies.featureFlags,
       toolContext: toolContext,
       verboseHelp: verboseHelp,
+      xcode: toolDependencies.appleContext.xcode,
     ),
     AttachCommand(
       buildSystem: toolDependencies.buildSystem,

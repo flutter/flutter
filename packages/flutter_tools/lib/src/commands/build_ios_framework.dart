@@ -828,6 +828,7 @@ end
       :Logger logger,
       :Platform platform,
       :ProcessManager processManager,
+      :FlutterProjectFactory projectFactory,
     ) = toolContext;
     final AppleContext(:Xcode xcode) = appleContext;
 
@@ -865,6 +866,8 @@ end
           processManager: processManager,
           platform: platform,
           analytics: analytics,
+          projectFactory: projectFactory,
+          xcode: xcode,
           engineVersion: artifacts.usesLocalArtifacts ? null : flutterVersion.engineRevision,
           generateDartPluginRegistry: true,
         );

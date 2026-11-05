@@ -818,6 +818,7 @@ void main() {
         extensionBuildManager: buildManager,
         featureFlags: featureFlags,
         toolContext: toolContext,
+        xcode: null,
       );
       final CommandRunner<void> defaultRunner = createTestCommandRunner(defaultCommand);
       await defaultRunner.run(<String>[
@@ -843,6 +844,7 @@ void main() {
         extensionBuildManager: buildManager,
         featureFlags: featureFlags,
         toolContext: toolContext,
+        xcode: null,
       );
       final CommandRunner<void> customRunner = createTestCommandRunner(customCommand);
       await customRunner.run(<String>[
@@ -896,6 +898,7 @@ void main() {
             logger: logger,
             processManager: FakeProcessManager.any(),
           ),
+          xcode: null,
         );
         final CommandRunner<void> runner = createTestCommandRunner(command);
 
@@ -1083,6 +1086,7 @@ void main() {
             logger: testLogger,
             processManager: FakeProcessManager.any(),
           ),
+          xcode: null,
         );
         final CommandRunner<void> assembleRunner = createTestCommandRunner(assembleCommand);
         await assembleRunner.run(<String>[

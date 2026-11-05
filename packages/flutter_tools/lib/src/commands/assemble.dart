@@ -30,6 +30,7 @@ import '../context/tool_context.dart';
 import '../convert.dart';
 import '../experimental/extension_build_manager.dart';
 import '../features.dart';
+import '../macos/xcode.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart';
 import '../version.dart';
@@ -106,6 +107,7 @@ class AssembleCommand extends FlutterCommand {
     required this._buildSystem,
     required this._featureFlags,
     required super.toolContext,
+    required this._xcode,
     this._extensionBuildManager,
     super.verboseHelp = false,
   }) {
@@ -188,6 +190,7 @@ class AssembleCommand extends FlutterCommand {
   final BuildSystem _buildSystem;
   final ExtensionBuildManager? _extensionBuildManager;
   final FeatureFlags _featureFlags;
+  final Xcode? _xcode;
 
   @override
   bool get hidden => !verboseHelp;
@@ -302,6 +305,7 @@ class AssembleCommand extends FlutterCommand {
       :Logger logger,
       :Platform platform,
       :ProcessManager processManager,
+      :FlutterProjectFactory projectFactory,
     ) = toolContext;
     final FlutterProject project = this.project;
     String? output = getValue(_output);
@@ -340,6 +344,8 @@ class AssembleCommand extends FlutterCommand {
       processManager: processManager,
       analytics: analytics,
       platform: platform,
+      projectFactory: projectFactory,
+      xcode: _xcode,
       engineVersion: artifacts.usesLocalArtifacts ? null : flutterVersion.engineRevision,
       generateDartPluginRegistry: true,
     );
