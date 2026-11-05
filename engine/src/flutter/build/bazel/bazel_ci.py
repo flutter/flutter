@@ -303,7 +303,9 @@ def build_options(engine_src, rbe=None):
 # debian11 image, 200 jobs, the bot's GCE credentials) and so share their
 # results: a build repeats nothing another bot has done since the inputs
 # changed. The wrapped GN builds and the engine's tests (TEST_OPTIONS) stay
-# on the bot. A Mac bot builds locally: the workers are Linux. Three ways to
+# on the bot. A Mac bot sends its C/C++/Objective-C compiles to the same
+# workers (build:rbe_mac, the Apple toolchains' remote mode) and keeps the
+# rest on the machine. Three ways to
 # say otherwise, for a comparison of the two: `--no-bazel-rbe` among a
 # build's tools/gn flags (a builder file can carry it per build;
 # `--bazel-rbe` asks for RBE anywhere, a developer's checkout included,
@@ -335,17 +337,35 @@ def rbe_flag(flags):
 WRAP_RBE_FLAG = '--//engine/src/flutter/build/bazel:wrap_rbe'
 
 
+def rbe_config():
+  """The RBE options of this host: Linux's `--config=rbe` with the wrap, a Mac's `--config=rbe_mac`, else none.
+
+  A Linux host runs everything on the workers and wraps the GN builds'
+  compiles with reclient's proxy; a Mac sends its C/C++/Objective-C
+  compiles there through the Apple toolchains' remote mode (the root
+  .bazelrc's build:rbe_mac) and keeps the rest -- the links, the Apple
+  tools, Swift, Dart -- on the machine. Any other host has no workers to
+  speak of.
+  """
+  if sys.platform.startswith('linux'):
+    return ['--config=rbe', WRAP_RBE_FLAG]
+  if sys.platform == 'darwin':
+    return ['--config=rbe_mac']
+  return []
+
+
 def rbe_options(rbe=None):
-  """`--config=rbe` and WRAP_RBE_FLAG on a Linux host: as the flags say (`rbe`), else a bot's.
+  """This host's RBE options (rbe_config) as the flags say (`rbe`), else a bot's.
 
   A bot's default is RBE_ON_BOTS unless FLUTTER_BAZEL_RBE=0; a developer's
-  is off. Never on another host: the workers are Linux x64.
+  is off. Never on a host without workers for it (Windows).
   """
-  if not sys.platform.startswith('linux'):
+  config = rbe_config()
+  if not config:
     return []
   if rbe is None:
     rbe = on_bot() and RBE_ON_BOTS and os.environ.get(RBE_ENV, '1') not in ('0', 'false', 'no')
-  return ['--config=rbe', WRAP_RBE_FLAG] if rbe else []
+  return config if rbe else []
 
 
 # Where a bot's sandboxes go when the machine has the memory for it: a

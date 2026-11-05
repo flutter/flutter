@@ -138,6 +138,37 @@ build:rbe --remote_timeout=600
 # links each, minutes of a bot's network disk.
 build:rbe --nobuild_runfile_links
 
+# A Mac's compiles on the same workers (build:rbe_mac): what GN's reclient
+# build does for the Mac builders -- the C/C++/Objective-C compiles go to
+# the Linux x64 workers, which run the Linux clang of the same revision over
+# the sources, the engine's libc++ headers and the Xcode SDK view
+# (build/bazel:apple_remote_compiles, toolchains/macos_toolchain.bzl,
+# apple_clang_wrapper.sh), and everything else stays on the Mac: the links,
+# archives, lipo, dsymutil, codesign, Swift, the Dart and impellerc tools,
+# python -- the Mac's binaries, which no worker can run. Hence the
+# strategies: the default list without `remote`, and `remote` first for the
+# two compile mnemonics alone, with the local fallback when the service
+# fails an action. The toolchain marks its own non-compile actions
+# no-remote-exec besides. Compiles that ran on a worker are in the cache
+# for every later build on any Mac bot; a locally run action's result is
+# not uploaded (this instance takes none from a client). The Merkle-tree
+# cache keeps the SDK view (35,000 files) from being hashed into every
+# action's input tree afresh. bazel_ci.py adds the config on a Mac bot.
+build:rbe_mac --remote_executor=grpcs://remotebuildexecution.googleapis.com
+build:rbe_mac --remote_instance_name=projects/flutter-rbe-prod/instances/default
+build:rbe_mac --google_default_credentials
+build:rbe_mac --remote_default_exec_properties=container-image=docker://gcr.io/cloud-marketplace/google/debian11@sha256:69e2789c9f3d28c6a0f13b25062c240ee7772be1f5e6d41bb4680b63eae6b304
+build:rbe_mac --remote_default_exec_properties=OSFamily=Linux
+build:rbe_mac --jobs=200
+build:rbe_mac --remote_timeout=600
+build:rbe_mac --//engine/src/flutter/build/bazel:apple_remote_compiles
+build:rbe_mac --spawn_strategy=worker,sandboxed,local
+build:rbe_mac --strategy=CppCompile=remote,worker,sandboxed,local
+build:rbe_mac --strategy=ObjcCompile=remote,worker,sandboxed,local
+build:rbe_mac --remote_local_fallback
+build:rbe_mac --noremote_upload_local_results
+build:rbe_mac --experimental_remote_merkle_tree_cache
+
 # The prebuilt engine for the framework's and the tool's tests: the
 # artifacts the flutter tool downloaded into bin/cache (`bin/flutter
 # precache`; build_defs/repositories/flutter_bin_cache.bzl) in place of the

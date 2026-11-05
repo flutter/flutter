@@ -51,6 +51,41 @@ _CPUS = {
 
 _MACOS = ["@platforms//os:macos"]
 
+# The compiles on Flutter's RBE workers (build/bazel:apple_remote_compiles,
+# the root .bazelrc's build:rbe_mac; apple_clang_wrapper.sh): under the
+# flag, the compile actions' tool is the wrapper, which runs the Mac's
+# clang on a Mac and the Linux x64 clang on a worker -- the same LLVM
+# revision, buildtools/linux-x64/clang, which a Mac checkout syncs for
+# GN's reclient build to do the same -- so the Linux clang's files join the
+# compiler's inputs (its builtin headers are a directory input and a
+# builtin include directory like the Mac clang's), and the links, archives,
+# strip and objcopy -- the Mac's binaries -- are marked no-remote-exec.
+# What goes to a worker besides is what every compile already has as
+# inputs: the sources and headers, the engine's libc++ headers, and the
+# Xcode SDK view (@macos_sdk), a directory input whose symlinks Bazel
+# resolves into the action's input tree.
+_REMOTE_COMPILES = "//engine/src/flutter/build/bazel:apple_remote_compiles_enabled"
+_REMOTE_CLANG = "@clang_linux_x64"
+_COMPILER_WRAPPER = "//engine/src/flutter/build/bazel/toolchains:apple_clang_wrapper"
+
+def _remote_compiler_files():
+    return select({
+        _REMOTE_COMPILES: [_REMOTE_CLANG + "//:compiler_files", _COMPILER_WRAPPER],
+        "//conditions:default": [],
+    })
+
+def _remote_attrs():
+    """The flutter_cc_toolchain_config attributes of the remote-compile mode: set under the flag, None otherwise."""
+    return dict(
+        remote_clang = select({_REMOTE_COMPILES: _REMOTE_CLANG + "//:bin/clang", "//conditions:default": None}),
+        remote_clangxx = select({_REMOTE_COMPILES: _REMOTE_CLANG + "//:bin/clang++", "//conditions:default": None}),
+        compiler_wrapper = select({_REMOTE_COMPILES: _COMPILER_WRAPPER, "//conditions:default": None}),
+        remote_resource_include_marker = select({
+            _REMOTE_COMPILES: _REMOTE_CLANG + "//:resource_include_marker",
+            "//conditions:default": None,
+        }),
+    )
+
 # iOS (build/toolchain/mac's ios_clang_arm, ios_clang_arm_sim and
 # ios_clang_x64_sim): the darwin triple per CPU, and the environment --
 # a device or the simulator, GN's use_ios_simulator -- which picks the SDK
@@ -111,7 +146,7 @@ def macos_clang_toolchain(name, exec_cpu, target_cpu, clang, sdk = "@macos_sdk//
             cxx_headers,
             clang + "//:compiler_files",
             sdk,
-        ],
+        ] + _remote_compiler_files(),
         target_compatible_with = _MACOS,
     )
     native.filegroup(
@@ -163,6 +198,7 @@ def macos_clang_toolchain(name, exec_cpu, target_cpu, clang, sdk = "@macos_sdk//
         target_libc = "macosx",
         target_system_name = target.triple,
         toolchain_identifier = name,
+        **_remote_attrs()
     )
     cc_toolchain(
         name = name,
@@ -217,7 +253,7 @@ def ios_clang_toolchain(name, exec_cpu, target_cpu, environment, clang, cxx_head
             cxx_headers,
             clang + "//:compiler_files",
             env.sdk,
-        ],
+        ] + _remote_compiler_files(),
         target_compatible_with = _IOS,
     )
     native.filegroup(
@@ -267,6 +303,7 @@ def ios_clang_toolchain(name, exec_cpu, target_cpu, environment, clang, cxx_head
         target_libc = "macosx",
         target_system_name = target.triple,
         toolchain_identifier = name,
+        **_remote_attrs()
     )
     cc_toolchain(
         name = name,

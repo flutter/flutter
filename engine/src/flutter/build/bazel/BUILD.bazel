@@ -357,6 +357,27 @@ config_setting(
     flag_values = {":wrap_rbe": "True"},
 )
 
+# The Apple toolchains' C/C++/Objective-C compiles on Flutter's RBE workers,
+# which are Linux x64 (toolchains/macos_toolchain.bzl, the root .bazelrc's
+# build:rbe_mac): the compiler tool becomes a wrapper that runs the Mac's
+# clang on a Mac and the Linux x64 clang of the same version where it
+# executes on a worker (buildtools/linux-x64/clang, which a Mac checkout
+# syncs for exactly this -- GN's reclient build does the same through
+# build/rbe/remote_wrapper.sh), the Linux clang joins the compiler's inputs,
+# and the Xcode SDK view already reaches every compile as a directory
+# input. Links, archives, lipo, dsymutil, codesign and Swift stay on the
+# Mac (build:rbe_mac's strategies). Off by default; bazel_ci.py turns it on
+# with --config=rbe_mac on a Mac bot.
+bool_flag(
+    name = "apple_remote_compiles",
+    build_setting_default = False,
+)
+
+config_setting(
+    name = "apple_remote_compiles_enabled",
+    flag_values = {":apple_remote_compiles": "True"},
+)
+
 # tools/gn's stripped_symbols: on unless --no-stripped, which only the
 # developer's local_engine.json configurations pass (and off for Android,
 # where GN strips elsewhere). GN's Linux toolchains write every executable

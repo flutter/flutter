@@ -33,6 +33,8 @@ load(
 load(
     "@rules_cc//cc:cc_toolchain_config_lib.bzl",
     "action_config",
+    "env_entry",
+    "env_set",
     "feature",
     "feature_set",
     "flag_group",
@@ -824,62 +826,123 @@ def _impl(ctx):
         "shared_flag",
     ]
 
-    clang = tool(tool = ctx.file.clang)
-    clangxx = tool(tool = ctx.file.clangxx)
+    # Remote compiles of an Apple toolchain (build/bazel:apple_remote_compiles,
+    # macos_toolchain.bzl): the compile actions' tool is the wrapper, which
+    # runs the Mac's clang on a Mac and the Linux x64 clang on a worker,
+    # finding both in the action's environment (exec-root relative paths,
+    # per action kind: clang for C and assembly, clang++ for C++ and
+    # Objective-C); everything else of the toolchain -- links, archives,
+    # strip, objcopy -- is the Mac's binaries and must not leave the Mac
+    # (no-remote-exec), whatever the strategies say.
+    remote = ctx.file.remote_clang != None
+    if remote and (ctx.file.remote_clangxx == None or ctx.file.compiler_wrapper == None):
+        fail("%s: remote_clang needs remote_clangxx and compiler_wrapper with it" % ctx.label)
+    local_only = ["no-remote-exec"] if remote else []
+    c_compile_actions = [
+        ACTION_NAMES.c_compile,
+        ACTION_NAMES.assemble,
+        ACTION_NAMES.preprocess_assemble,
+    ]
+    cxx_compile_actions = [
+        ACTION_NAMES.cpp_compile,
+        ACTION_NAMES.cpp_header_parsing,
+        ACTION_NAMES.cpp_module_compile,
+        ACTION_NAMES.cpp_module_codegen,
+        ACTION_NAMES.linkstamp_compile,
+    ]
+    objc_compile_actions = [
+        ACTION_NAMES.objc_compile,
+        ACTION_NAMES.objcpp_compile,
+    ]
+    if remote:
+        c_compiler = tool(tool = ctx.file.compiler_wrapper)
+        cxx_compiler = c_compiler
+        features.append(
+            feature(
+                name = "apple_remote_compiler",
+                enabled = True,
+                env_sets = [
+                    env_set(
+                        actions = c_compile_actions,
+                        env_entries = [
+                            env_entry(key = "FLUTTER_CLANG_HOST", value = ctx.file.clang.path),
+                            env_entry(key = "FLUTTER_CLANG_REMOTE", value = ctx.file.remote_clang.path),
+                        ],
+                    ),
+                    env_set(
+                        actions = cxx_compile_actions + objc_compile_actions,
+                        env_entries = [
+                            env_entry(key = "FLUTTER_CLANG_HOST", value = ctx.file.clangxx.path),
+                            env_entry(key = "FLUTTER_CLANG_REMOTE", value = ctx.file.remote_clangxx.path),
+                        ],
+                    ),
+                ],
+            ),
+        )
+    else:
+        c_compiler = tool(tool = ctx.file.clang)
+        cxx_compiler = tool(tool = ctx.file.clangxx)
+
+    clang = c_compiler
+    clangxx = cxx_compiler
+    linker = tool(tool = ctx.file.clangxx, execution_requirements = local_only)
     action_configs = [
         action_config(action_name = name, enabled = True, tools = [clang], implies = compile_implies)
-        for name in [
-            ACTION_NAMES.c_compile,
-            ACTION_NAMES.assemble,
-            ACTION_NAMES.preprocess_assemble,
-        ]
+        for name in c_compile_actions
     ] + [
         action_config(action_name = name, enabled = True, tools = [clangxx], implies = compile_implies)
-        for name in [
-            ACTION_NAMES.cpp_compile,
-            ACTION_NAMES.cpp_header_parsing,
-            ACTION_NAMES.cpp_module_compile,
-            ACTION_NAMES.cpp_module_codegen,
-            ACTION_NAMES.linkstamp_compile,
-        ]
+        for name in cxx_compile_actions
     ] + ([
         # Objective-C and Objective-C++ (objc_library's actions), through
         # clang++ as GN's `objc` and `objcxx` tools are, on a Mac alone:
         # objc_library asks whether the toolchain has the first of these,
         # and elsewhere it has not.
         action_config(action_name = name, enabled = True, tools = [clangxx], implies = compile_implies)
-        for name in [
-            ACTION_NAMES.objc_compile,
-            ACTION_NAMES.objcpp_compile,
-        ]
+        for name in objc_compile_actions
     ] if mac else []) + [
         action_config(
             action_name = ACTION_NAMES.cpp_link_executable,
             enabled = True,
-            tools = [clangxx],
+            tools = [linker],
             implies = executable_link_implies,
         ),
         action_config(
             action_name = ACTION_NAMES.cpp_link_dynamic_library,
             enabled = True,
-            tools = [clangxx],
+            tools = [linker],
             implies = dynamic_library_link_implies,
         ),
         action_config(
             action_name = ACTION_NAMES.cpp_link_nodeps_dynamic_library,
             enabled = True,
-            tools = [clangxx],
+            tools = [linker],
             implies = dynamic_library_link_implies,
         ),
         action_config(
             action_name = ACTION_NAMES.cpp_link_static_library,
             enabled = True,
-            tools = [tool(tool = ctx.file.ar)],
+            tools = [tool(tool = ctx.file.ar, execution_requirements = local_only)],
             implies = ["archiver_flags", "linker_param_file"],
         ),
-        action_config(action_name = ACTION_NAMES.strip, enabled = True, tools = [tool(tool = ctx.file.strip)]),
-        action_config(action_name = ACTION_NAMES.objcopy_embed_data, enabled = True, tools = [tool(tool = ctx.file.objcopy)]),
+        action_config(
+            action_name = ACTION_NAMES.strip,
+            enabled = True,
+            tools = [tool(tool = ctx.file.strip, execution_requirements = local_only)],
+        ),
+        action_config(
+            action_name = ACTION_NAMES.objcopy_embed_data,
+            enabled = True,
+            tools = [tool(tool = ctx.file.objcopy, execution_requirements = local_only)],
+        ),
     ]
+
+    # The builtin include directory of the worker's clang as well, when
+    # there is one: the dependency files of a remote compile name its
+    # headers (stddef.h, arm_neon.h), and the directory is an input through
+    # the toolchain's files like the Mac clang's.
+    resource_include_directories = ["%workspace%/" + ctx.file.resource_include_marker.dirname]
+    if ctx.file.remote_resource_include_marker != None:
+        resource_include_directories.append("%workspace%/" + ctx.file.remote_resource_include_marker.dirname)
 
     return cc_common.create_cc_toolchain_config_info(
         ctx = ctx,
@@ -905,9 +968,7 @@ def _impl(ctx):
         cxx_builtin_include_directories = builtin_include_directories + [
             "%workspace%/" + marker.dirname
             for marker in ctx.files.cxx_include_markers
-        ] + [
-            "%workspace%/" + ctx.file.resource_include_marker.dirname,
-        ],
+        ] + resource_include_directories,
     )
 
 flutter_cc_toolchain_config = rule(
@@ -920,6 +981,24 @@ flutter_cc_toolchain_config = rule(
         "target_libc": attr.string(mandatory = True, doc = "Informational, e.g. glibc_2.31 for a bullseye sysroot."),
         "clang": attr.label(mandatory = True, allow_single_file = True, doc = "The C compiler driver."),
         "clangxx": attr.label(mandatory = True, allow_single_file = True, doc = "The C++ compiler and linker driver."),
+        "remote_clang": attr.label(
+            allow_single_file = True,
+            doc = "An Apple toolchain whose compiles may run on a Linux x64 worker: the worker's C compiler driver " +
+                  "(@clang_linux_x64's, the same LLVM revision). With it the compile actions run `compiler_wrapper`, " +
+                  "which picks this or `clang` by the executing machine, and the links, archives, strip and objcopy " +
+                  "are marked no-remote-exec (the Mac's binaries).",
+        ),
+        "remote_clangxx": attr.label(allow_single_file = True, doc = "With remote_clang: the worker's C++ compiler driver."),
+        "compiler_wrapper": attr.label(
+            allow_single_file = True,
+            doc = "With remote_clang: the script the compile actions run (apple_clang_wrapper.sh), which execs " +
+                  "FLUTTER_CLANG_HOST on a Mac and FLUTTER_CLANG_REMOTE on Linux, both set by the toolchain.",
+        ),
+        "remote_resource_include_marker": attr.label(
+            allow_single_file = True,
+            doc = "With remote_clang: a file in the worker clang's builtin include directory, which becomes a " +
+                  "builtin include directory as the Mac clang's is.",
+        ),
         "ar": attr.label(mandatory = True, allow_single_file = True),
         "objcopy": attr.label(mandatory = True, allow_single_file = True),
         "strip": attr.label(mandatory = True, allow_single_file = True),
