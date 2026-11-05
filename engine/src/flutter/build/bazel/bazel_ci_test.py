@@ -248,7 +248,7 @@ class BuildDirectoryTest(unittest.TestCase):
       if sys.platform.startswith('linux'):
         self.assertEqual(rbe, ['--config=rbe', bazel_ci.WRAP_RBE_FLAG])
       elif sys.platform == 'darwin':
-        self.assertEqual(rbe, ['--config=rbe_mac'])
+        self.assertEqual(rbe, ['--config=rbe_mac', bazel_ci.WRAP_RBE_FLAG])
       else:
         self.assertEqual(rbe, [])
       self.assertEqual(
