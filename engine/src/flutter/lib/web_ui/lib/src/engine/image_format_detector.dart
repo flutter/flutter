@@ -177,8 +177,10 @@ bool isAvif(Uint8List data) {
 /// See https://developers.google.com/speed/webp/docs/riff_container
 @visibleForTesting
 class WebpHeaderReader {
+  /// Creates a [WebpHeaderReader] for the given [bytes].
   WebpHeaderReader(this.bytes);
 
+  /// The bytes of the WebP image.
   final ByteData bytes;
 
   /// The current position we are reading from in bytes.
@@ -281,8 +283,10 @@ class WebpHeaderReader {
 /// See https://www.w3.org/Graphics/GIF/spec-gif89a.txt
 @visibleForTesting
 class GifHeaderReader {
+  /// Creates a [GifHeaderReader] for the given [bytes].
   GifHeaderReader(this.bytes);
 
+  /// The bytes of the GIF image.
   final ByteData bytes;
 
   /// The current position we are reading from in bytes.
@@ -347,13 +351,6 @@ class GifHeaderReader {
         final bool isTrailer = _checkForTrailer();
         if (isTrailer) {
           return framesFound > 1;
-        }
-
-        // If we haven't reached the end, then the next block must either be a
-        // graphic block or a special-purpose block (comment extension or
-        // application extension).
-        if (!_maybeSkipSpecialPurposeBlocks()) {
-          return false;
         }
 
         if (framesFound >= 1) {
