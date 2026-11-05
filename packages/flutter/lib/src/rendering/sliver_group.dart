@@ -497,12 +497,12 @@ class RenderSliverMainAxisGroup extends RenderSliver
     }
   }
 
-  // Whether the end of the group has pushed this child back far enough that it
-  // only paints behind the slivers pinned above the group, or entirely off
-  // the viewport. This can only happen to pinned children, because
-  // performLayout pushes them out of view by correcting their paintOffset
-  // while their paintExtent stays positive, leaving them in the semantics
-  // tree although nothing of them is visible.
+  /// Whether the end of the group has pushed this child back far enough that it
+  /// only paints behind the slivers pinned above the group, or entirely off
+  /// the viewport. This can only happen to pinned children, because
+  /// performLayout pushes them out of view by correcting their paintOffset
+  /// while their paintExtent stays positive, leaving them in the semantics
+  /// tree although nothing of them is visible.
   bool _isPushedOutOfView(RenderSliver child) {
     final SliverGeometry childGeometry = child.geometry!;
     if (childGeometry.maxScrollObstructionExtent == 0 || childGeometry.paintExtent == 0) {
