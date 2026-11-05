@@ -217,8 +217,8 @@ the test for real, and so does the command from `engine/src`.
   properties, their `rbe_jobs` as `--jobs=200`,
   `--google_default_credentials`: the emulated GCE metadata server every
   LUCI bot has, which is how reclient authenticates there too), which
-  bazel_ci.py adds to every build on a Linux bot (a Mac builds locally,
-  the workers being Linux x64). Three ways to turn it off, so that the two
+  bazel_ci.py adds to every build on a Linux bot (a Mac sends its compiles
+  alone, below: the workers are Linux x64). Three ways to turn it off, so that the two
   can be compared on the bots: `--no-bazel-rbe` among a build's `gn` flags
   in its builder file (an infrastructure flag like `--bazel`, matched away;
   `--bazel-rbe` asks for RBE anywhere, a developer's Linux checkout
@@ -340,6 +340,54 @@ the test for real, and so does the command from `engine/src`.
   `ci/host_debug` 40, `ci/wasm_release` past 60 (36,000 of 39,000 actions
   on a 32-core bot when the default timeout cut it). Disk: an output root
   of a test build is tens of gigabytes.
+- A Mac bot's compiles on the same workers (519, 520; Q40 option B). The
+  Mac engine builders on Bazel compiled on the bots themselves
+  (mac_host_engine 44–67 minutes against GN+reclient's 34; mac_ios_engine
+  31–36 against 23), where GN's reclient build had long sent a Mac's
+  compiles to the Linux workers with the Linux clang of the same revision
+  (`build/rbe/remote_wrapper.sh` rewrites the compiler's path,
+  `rewrapper-mac-*.cfg` lists the Linux clang as inputs, `--xcode-symlinks`
+  puts the SDK under the checkout). The Bazel build does the same two ways.
+  Bazel's own compiles: `--//engine/src/flutter/build/bazel:apple_remote_compiles`
+  (`build:rbe_mac` in the root `.bazelrc`) turns the macOS and iOS
+  toolchains' compiler into `toolchains/apple_clang_wrapper.sh`, which
+  execs the clang the action's environment names for the machine it runs
+  on -- the Mac's under Darwin, `buildtools/linux-x64/clang` (which a Mac
+  checkout syncs) under Linux -- adds the Linux clang's files to the
+  compiler's inputs, and marks the toolchain's links, archives, strip and
+  objcopy `no-remote-exec`; the Xcode SDK view (@macos_sdk) was an input
+  already, a tracked directory of symlinks that Bazel resolves into the
+  worker's input tree (35,270 files / 484 MB for MacOSX.sdk, 9,000 / 80 MB
+  per iOS SDK, uploaded once per bot). The config's strategies send the
+  two compile mnemonics (CppCompile, ObjcCompile) to the workers first,
+  with the local fallback, and keep every other action on the Mac (the
+  links, lipo, dsymutil, codesign, Swift, Dart, impellerc, python: Mac
+  binaries), upload no local result, and keep the SDK's Merkle tree across
+  actions (`--experimental_remote_merkle_tree_cache`). The wrapped GN
+  builds: `wrap_rbe` on a Mac runs the Mac's reclient (`@reclient` is the
+  host's `buildtools/<host>/reclient`) with `reclient-mac.cfg` and
+  `rewrapper-mac-<cpu>.cfg`, and lays under the GN root what that
+  configuration needs -- the Linux clang under
+  `flutter/buildtools/linux-x64/clang` and the SDK views under
+  `flutter/prebuilts/SDKs/`, where GN's own symlinks go, named to GN as
+  `mac_sdk_path` and the iOS SDK paths so that `-isysroot` is a path under
+  the exec root. bazel_ci.py adds `--config=rbe_mac` and the wrap flag on
+  a Mac bot as it adds `--config=rbe` on a Linux one (the same three
+  switches), and the Mac Bazel builders' files say `use_rbe: true` again
+  for the sync (reclient, the cfgs, the Linux clang; `--no-rbe` stays, the
+  recipe starts no proxy). The bot's emulated metadata server is the same
+  on a Mac ("in all environments for uniformity", the rbe recipe module).
+  Measured on a 16-core Apple-silicon Mac before the pool (11-05): the
+  `ci_mac_host_debug` install 7:38 with 5,540 compiles on the workers and
+  673 actions local, against ~16 minutes for the same install locally;
+  `ci_ios_debug` 8:25 against 14:52 (5,122 remote); the Dart runtime's
+  wrap 423 s of ninja with every compile executed remotely (333 local on
+  16 cores), 91 s once reclient's cache has them; the GL backends' 196 s
+  against 283. `ninja -j1280` under reclient died on the Mac with "pipe:
+  Too many open files": the soft descriptor limit is 256 there and ninja's
+  Darwin build waits on its pipes with pselect(2), bounded by 1024, so
+  gn_build.py caps a Mac at 800 jobs as the recipe does (crbug.com/936864)
+  and raises the limit.
 - Presubmit: the switched builders run on every PR as they did under GN,
   which is the point. A new `.ci.yaml` target cannot do that: cocoon admits
   it only as `bringup: true`, which runs in postsubmit on the staging pool
