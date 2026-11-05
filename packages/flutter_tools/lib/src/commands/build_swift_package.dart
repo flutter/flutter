@@ -68,7 +68,7 @@ class BuildSwiftPackage extends BuildSubCommand {
     required this._codesign,
     required this._featureFlags,
     required this._templateRenderer,
-    required ToolContext super.toolContext,
+    required super.toolContext,
     required super.verboseHelp,
     required this._xcode,
   }) : super(logger: toolContext.logger) {
@@ -120,9 +120,6 @@ class BuildSwiftPackage extends BuildSubCommand {
   final FeatureFlags _featureFlags;
   final DarwinAddToAppCodesigning _codesign;
   final CocoaPods _cocoaPods;
-
-  @override
-  ToolContext get toolContext => super.toolContext!;
 
   @override
   bool get supported => toolContext.platform.isMacOS;
@@ -1231,6 +1228,7 @@ class AppFrameworkAndNativeAssetsDependencies {
       :Logger logger,
       platform: Platform hostPlatform,
       :ProcessManager processManager,
+      :FlutterProjectFactory projectFactory,
     ) = _utils.toolContext;
     final environment = Environment(
       projectDir: fileSystem.currentDirectory,
@@ -1252,6 +1250,10 @@ class AppFrameworkAndNativeAssetsDependencies {
       processManager: processManager,
       platform: hostPlatform,
       analytics: _utils.analytics,
+      androidSdkBuilder: null,
+      projectFactory: projectFactory,
+      visualStudio: null,
+      xcode: _utils.xcode,
       engineVersion: artifacts.usesLocalArtifacts ? null : flutterVersion.engineRevision,
       generateDartPluginRegistry: true,
     );
