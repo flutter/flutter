@@ -43,6 +43,7 @@
                 "--runtime-mode",
                 "debug",
                 "--no-lto",
+                "--no-goma",
                 "--rbe"
             ],
             "name": "ci\\host_debug",
@@ -86,6 +87,7 @@
                 "--runtime-mode",
                 "profile",
                 "--no-lto",
+                "--no-goma",
                 "--rbe"
             ],
             "name": "ci\\host_profile",
@@ -126,6 +128,7 @@
                 "--runtime-mode",
                 "release",
                 "--no-lto",
+                "--no-goma",
                 "--rbe"
             ],
             "name": "ci\\host_release",

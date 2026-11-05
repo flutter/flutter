@@ -28,7 +28,8 @@
                 "arm64",
                 "--runtime-mode",
                 "profile",
-                "--rbe"
+                "--rbe",
+                "--no-goma"
             ],
             "name": "ci/fuchsia_profile_arm64",
             "description": "Produces profile mode artifacts to target arm64 Fuchsia from a Linux host.",
@@ -56,7 +57,8 @@
                 "arm64",
                 "--runtime-mode",
                 "release",
-                "--rbe"
+                "--rbe",
+                "--no-goma"
             ],
             "name": "ci/fuchsia_release_arm64",
             "description": "Produces release mode artifacts to target arm64 Fuchsia from a Linux host.",
@@ -85,7 +87,8 @@
                 "--runtime-mode",
                 "debug",
                 "--no-lto",
-                "--rbe"
+                "--rbe",
+                "--no-goma"
             ],
             "name": "ci/fuchsia_debug_arm64",
             "description": "Produces debug mode artifacts to target arm64 Fuchsia from a Linux host.",
@@ -128,7 +131,8 @@
                 "x64",
                 "--runtime-mode",
                 "profile",
-                "--rbe"
+                "--rbe",
+                "--no-goma"
             ],
             "name": "ci/fuchsia_profile_x64",
             "description": "Produces profile mode artifacts to target x64 Fuchsia from a Linux host.",
@@ -157,7 +161,8 @@
                 "x64",
                 "--runtime-mode",
                 "release",
-                "--rbe"
+                "--rbe",
+                "--no-goma"
             ],
             "name": "ci/fuchsia_release_x64",
             "description": "Produces release mode artifacts to target x64 Fuchsia from a Linux host.",
@@ -187,7 +192,8 @@
                 "--runtime-mode",
                 "debug",
                 "--no-lto",
-                "--rbe"
+                "--rbe",
+                "--no-goma"
             ],
             "name": "ci/fuchsia_debug_x64",
             "description": "Produces debug mode artifacts to target x64 Fuchsia from a Linux host.",

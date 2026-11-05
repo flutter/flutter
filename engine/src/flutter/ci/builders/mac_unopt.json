@@ -23,6 +23,7 @@
                 "--build-embedder-examples",
                 "--use-glfw-swiftshader",
                 "--rbe",
+                "--no-goma",
                 "--xcode-symlinks"
             ],
             "name": "ci/host_debug_arm64_tests",
@@ -73,6 +74,7 @@
                 "--prebuilt-dart-sdk",
                 "--build-embedder-examples",
                 "--rbe",
+                "--no-goma",
                 "--xcode-symlinks"
             ],
             "name": "ci/host_profile_arm64_tests",
@@ -124,6 +126,7 @@
                 "--build-embedder-examples",
                 "--use-glfw-swiftshader",
                 "--rbe",
+                "--no-goma",
                 "--xcode-symlinks"
             ],
             "name": "ci/host_release_arm64_tests",
@@ -171,6 +174,7 @@
                 "arm64",
                 "--no-lto",
                 "--rbe",
+                "--no-goma",
                 "--xcode-symlinks"
             ],
             "name": "ci/host_release_arm64_licenses",
@@ -229,6 +233,7 @@
                 "--no-lto",
                 "--prebuilt-dart-sdk",
                 "--rbe",
+                "--no-goma",
                 "--xcode-symlinks",
                 "--use-glfw-swiftshader"
             ],
@@ -279,6 +284,7 @@
                 "--mac-cpu",
                 "arm64",
                 "--rbe",
+                "--no-goma",
                 "--xcode-symlinks",
                 "--use-glfw-swiftshader"
             ],
@@ -345,6 +351,7 @@
                 "--simulator-cpu",
                 "arm64",
                 "--rbe",
+                "--no-goma",
                 "--xcode-symlinks",
                 "--target-dir",
                 "ci/ios_debug_unopt_sim_arm64"
@@ -413,6 +420,7 @@
                 "arm64",
                 "--darwin-extension-safe",
                 "--rbe",
+                "--no-goma",
                 "--xcode-symlinks",
                 "--target-dir",
                 "ci/ios_debug_unopt_sim_arm64_extension_safe"
