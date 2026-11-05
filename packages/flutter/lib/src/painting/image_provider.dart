@@ -1307,12 +1307,14 @@ class ResizeImage extends ImageProvider<ResizeImageKey> {
   /// [useLogicalSize] is true.
   ///
   /// At least one of this and [height] must be non-null.
+  /// Both must be non-null if [policy] is [ResizeImagePolicy.cover].
   final int? width;
 
   /// The height the image should decode to and cache, in physical pixels unless
   /// [useLogicalSize] is true.
   ///
   /// At least one of this and [width] must be non-null.
+  /// Both must be non-null if [policy] is [ResizeImagePolicy.cover].
   final int? height;
 
   /// The policy that determines how [width] and [height] are interpreted.
@@ -1477,6 +1479,7 @@ class ResizeImage extends ImageProvider<ResizeImageKey> {
             case ResizeImagePolicy.cover:
               final int boxWidth = effectiveWidth!;
               final int boxHeight = effectiveHeight!;
+              assert(boxWidth > 0 && boxHeight > 0);
               // Integer math: a double scale can round 3000 * (448 / 3000) up to 449.
               final bool widthCovers = boxWidth * intrinsicHeight >= boxHeight * intrinsicWidth;
               final int targetWidth = widthCovers
@@ -1485,7 +1488,8 @@ class ResizeImage extends ImageProvider<ResizeImageKey> {
               final int targetHeight = widthCovers
                   ? (boxWidth * intrinsicHeight + intrinsicWidth - 1) ~/ intrinsicWidth
                   : boxHeight;
-              if (!allowUpscaling && targetWidth >= intrinsicWidth) {
+              if (!allowUpscaling &&
+                  (targetWidth >= intrinsicWidth || targetHeight >= intrinsicHeight)) {
                 return const ui.TargetImageSize();
               }
               return ui.TargetImageSize(width: targetWidth, height: targetHeight);
