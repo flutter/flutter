@@ -809,6 +809,7 @@ void main() {
       );
 
       final defaultCommand = AssembleCommand(
+        androidContext: FakeAndroidContext(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true), (
           Target target,
           Environment environment,
@@ -835,6 +836,7 @@ void main() {
       expect(buildManager.cachedAssembleTargets, isEmpty);
 
       final customCommand = AssembleCommand(
+        androidContext: FakeAndroidContext(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true), (
           Target target,
           Environment environment,
@@ -888,6 +890,7 @@ void main() {
           platform: FakePlatform(),
         );
         final command = AssembleCommand(
+          androidContext: FakeAndroidContext(),
           buildSystem: buildSystem,
           extensionBuildManager: buildManager,
           featureFlags: featureFlags,
@@ -1071,6 +1074,7 @@ void main() {
         expect(command.subcommands['bundle'], isA<BuildBundleCommand>());
 
         final assembleCommand = AssembleCommand(
+          androidContext: FakeAndroidContext(),
           buildSystem: TestBuildSystem.all(BuildResult(success: true), (
             Target target,
             Environment environment,
