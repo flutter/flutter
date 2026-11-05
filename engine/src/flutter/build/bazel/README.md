@@ -2734,7 +2734,25 @@ rather than a shared cache because of the instance's IAM: only a worker
 writes the action cache, so a locally run action is never a hit for
 anyone. Measured from a workstation: `fml_unittests`' 676 actions in 93 s
 on the workers, then 38 s from a fresh output base with every action a
-hit. The local disk cache is the same mechanism without the network.
+hit. The local disk cache is the same mechanism without the network. A Mac
+sends its C/C++/Objective-C compiles to the same Linux workers under
+`--config=rbe_mac` (`build/bazel:apple_remote_compiles`: the Apple
+toolchains' compiler becomes `toolchains/apple_clang_wrapper.sh`, which
+runs the Mac's clang on a Mac and `buildtools/linux-x64/clang` of the same
+revision on a worker, over the Xcode SDK view and the engine's libc++
+headers that every compile has as inputs; the links, archives, lipo,
+dsymutil, codesign, Swift and the Dart tools stay on the Mac, as the
+config's strategies and the toolchain's `no-remote-exec` say), and the
+wrapped GN builds' compiles go through the Mac's reclient with
+`--//engine/src/flutter/build/bazel:wrap_rbe` (the SDK views and the Linux
+clang laid under the GN root for `rewrapper-mac-<cpu>.cfg`; ninja at most
+800 jobs there, the recipe's own cap: ninja's Darwin build selects on 1024
+descriptors). Measured on a 16-core Apple-silicon Mac (11-05): the
+`ci_mac_host_debug` install 7:38 with 5,540 compiles on the workers
+against ~16 minutes local; `ci_ios_debug` 8:25 against 14:52; the Dart
+runtime's wrap 91 s of ninja with reclient's cache warm against 333 s
+local. bazel_ci.py adds both flags on a Mac bot, as it adds `--config=rbe`
+on a Linux one; ci.md has the details.
 
 The sandbox is the other measured cost. With the toolchain's header trees as
 directory inputs (see the toolchain section) a compile has ~4,200 inputs,
