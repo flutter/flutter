@@ -1560,28 +1560,65 @@ void main() {
       final ScrollController controller = ScrollController();
       addTearDown(controller.dispose);
 
-      await tester.pumpWidget(_buildPushedHeaderSections(controller));
+      Future<void> verify({Axis scrollDirection = Axis.vertical, bool reverse = false}) async {
+        await tester.pumpWidget(
+          _buildPushedHeaderSections(
+            controller,
+            scrollDirection: scrollDirection,
+            reverse: reverse,
+          ),
+        );
 
-      // At this offset the end of the group has already pushed the "Morning"
-      // header back, but its painted interval still covers the leading edge of
-      // the group's paint area.
-      controller.jumpTo(620);
+        // At this offset the end of the group has already pushed the "Morning"
+        // header back, but its painted interval still covers the leading edge
+        // of the group's paint area.
+        controller.jumpTo(620);
+        await tester.pump();
+        List<String> labels = <String>[
+          for (final SemanticsNode node in tester.semantics.simulatedAccessibilityTraversal())
+            node.label,
+        ];
+        expect(labels, contains('Morning'));
+        expect(labels, contains('Afternoon'));
+
+        // Once pushed completely out of view it leaves the semantics tree.
+        controller.jumpTo(700);
+        await tester.pump();
+        labels = <String>[
+          for (final SemanticsNode node in tester.semantics.simulatedAccessibilityTraversal())
+            node.label,
+        ];
+        expect(labels, isNot(contains('Morning')));
+        expect(labels, contains('Afternoon'));
+      }
+
+      await verify();
+      await verify(reverse: true);
+      await verify(scrollDirection: Axis.horizontal);
+      await verify(scrollDirection: Axis.horizontal, reverse: true);
+
+      handle.dispose();
+    },
+  );
+
+  // SliverEnsureSemantics explicitly requests inclusion: its child must stay
+  // in the semantics tree even when pushed completely out of view.
+  testWidgets(
+    'a SliverEnsureSemantics pinned header pushed off screen remains in the semantics tree',
+    (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      final ScrollController controller = ScrollController();
+      addTearDown(controller.dispose);
+
+      await tester.pumpWidget(_buildPushedHeaderSections(controller, ensureFirstHeader: true));
+
+      controller.jumpTo(700);
       await tester.pump();
-      List<String> labels = <String>[
+      final List<String> labels = <String>[
         for (final SemanticsNode node in tester.semantics.simulatedAccessibilityTraversal())
           node.label,
       ];
       expect(labels, contains('Morning'));
-      expect(labels, contains('Afternoon'));
-
-      // Once pushed completely out of view it leaves the semantics tree.
-      controller.jumpTo(700);
-      await tester.pump();
-      labels = <String>[
-        for (final SemanticsNode node in tester.semantics.simulatedAccessibilityTraversal())
-          node.label,
-      ];
-      expect(labels, isNot(contains('Morning')));
       expect(labels, contains('Afternoon'));
 
       handle.dispose();
@@ -1778,6 +1815,7 @@ Widget _buildPushedHeaderSections(
   ScrollController controller, {
   Axis scrollDirection = Axis.vertical,
   bool reverse = false,
+  bool ensureFirstHeader = false,
 }) {
   return TestWidgetsApp(
     home: Align(
@@ -1794,7 +1832,15 @@ Widget _buildPushedHeaderSections(
             for (final String title in <String>['Morning', 'Afternoon'])
               SliverMainAxisGroup(
                 slivers: <Widget>[
-                  SliverPersistentHeader(pinned: true, delegate: _SemanticsHeaderDelegate(title)),
+                  if (ensureFirstHeader && title == 'Morning')
+                    SliverEnsureSemantics(
+                      sliver: SliverPersistentHeader(
+                        pinned: true,
+                        delegate: _SemanticsHeaderDelegate(title),
+                      ),
+                    )
+                  else
+                    SliverPersistentHeader(pinned: true, delegate: _SemanticsHeaderDelegate(title)),
                   SliverList.list(
                     children: <Widget>[
                       for (int i = 1; i <= (title == 'Morning' ? 8 : 30); i++)
