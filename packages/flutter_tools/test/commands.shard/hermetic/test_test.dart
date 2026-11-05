@@ -2413,7 +2413,8 @@ class _FakeTerminal extends Fake implements AnsiTerminal {
 }
 
 class _FakeDeviceManager extends DeviceManager {
-  _FakeDeviceManager(this._connectedDevices) : super(logger: testLogger);
+  _FakeDeviceManager(this._connectedDevices)
+    : super(logger: testLogger, fileSystem: MemoryFileSystem.test());
 
   final List<Device> _connectedDevices;
 

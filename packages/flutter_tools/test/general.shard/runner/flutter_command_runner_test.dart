@@ -13,6 +13,7 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/experimental/extension_arg_parser.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
@@ -453,10 +454,10 @@ void main() {
           expect(runner.toolContext, same(fakeToolContext));
         });
 
-        test('command attached to runner inherits runner toolContext', () {
+        test('command preserves provided toolContext', () {
           final fakeToolContext = FakeToolContext();
           final runner = FlutterCommandRunner(toolContext: fakeToolContext);
-          final command = FakeFlutterCommand();
+          final command = FakeFlutterCommand(toolContext: fakeToolContext);
           runner.addCommand(command);
           expect(command.toolContext, same(fakeToolContext));
         });
@@ -865,6 +866,9 @@ void main() {
 }
 
 class FakeFlutterCommand extends FlutterCommand {
+  FakeFlutterCommand({ToolContext? toolContext})
+    : super(toolContext: toolContext ?? const DelegatingToolContext());
+
   bool ran = false;
   late OutputPreferences preferences;
   void Function()? onRun;
@@ -902,7 +906,8 @@ class FakeStdio extends Stdio {
 }
 
 final class _FlutterCommandWithItsOwnMachineFlag extends FlutterCommand {
-  _FlutterCommandWithItsOwnMachineFlag({required bool verboseHelp}) {
+  _FlutterCommandWithItsOwnMachineFlag({required bool verboseHelp, ToolContext? toolContext})
+    : super(toolContext: toolContext ?? const DelegatingToolContext()) {
     CommonOptions.machine.addTo(argParser, verboseHelp: verboseHelp);
   }
 
@@ -919,7 +924,8 @@ final class _FlutterCommandWithItsOwnMachineFlag extends FlutterCommand {
 }
 
 final class _FakeParentFlutterCommand extends FlutterCommand {
-  _FakeParentFlutterCommand({required FlutterCommand subcommand, super.toolContext}) {
+  _FakeParentFlutterCommand({required FlutterCommand subcommand, ToolContext? toolContext})
+    : super(toolContext: toolContext ?? const DelegatingToolContext()) {
     addSubcommand(subcommand);
   }
 
@@ -939,8 +945,8 @@ final class _FakeDynamicFlutterCommand extends FlutterCommand with ExtensionArgP
   _FakeDynamicFlutterCommand({
     this.commandName = 'dynamic-cmd',
     FlutterCommand? subcommand,
-    super.toolContext,
-  }) {
+    ToolContext? toolContext,
+  }) : super(toolContext: toolContext ?? const DelegatingToolContext()) {
     if (subcommand != null) {
       addSubcommand(subcommand);
     }

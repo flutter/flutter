@@ -75,8 +75,8 @@ Future<int> run(
       buildSystem: globals.buildSystem,
       buildTargets: globals.buildTargets,
       cache: globals.cache,
-      cocoaPods: globals.cocoaPods,
-      cocoapodsValidator: globals.cocoapodsValidator,
+      cocoaPodsBuilder: () => globals.cocoaPods,
+      cocoapodsValidatorBuilder: () => globals.cocoapodsValidator,
       config: globals.config,
       crashReporter: globals.crashReporter,
       customDevicesConfig: globals.customDevicesConfig,
@@ -89,8 +89,8 @@ Future<int> run(
       fs: globals.fs,
       git: globals.git,
       gradleUtilsBuilder: () => globals.gradleUtils!,
-      iosSimulatorUtils: globals.iosSimulatorUtils,
-      iosWorkflow: globals.iosWorkflow,
+      iosSimulatorUtilsBuilder: () => globals.iosSimulatorUtils,
+      iosWorkflowBuilder: () => globals.iosWorkflow,
       javaBuilder: () => globals.java,
       localEngineLocator: globals.localEngineLocator,
       logger: globals.logger,
@@ -98,7 +98,7 @@ Future<int> run(
       outputPreferences: globals.outputPreferences,
       persistentToolState: globals.persistentToolState,
       platform: globals.platform,
-      plistParser: globals.plistParser,
+      plistParserBuilder: () => globals.plistParser,
       preRunValidator: globals.preRunValidator,
       processInfo: globals.processInfo,
       processManager: globals.processManager,
@@ -110,9 +110,9 @@ Future<int> run(
       terminal: globals.terminal,
       userMessages: globals.userMessages,
       windowsWorkflow: windowsWorkflow,
-      xcdevice: globals.xcdevice,
-      xcode: globals.xcode,
-      xcodeProjectInterpreter: globals.xcodeProjectInterpreter,
+      xcdeviceBuilder: () => globals.xcdevice,
+      xcodeBuilder: () => globals.xcode,
+      xcodeProjectInterpreterBuilder: () => globals.xcodeProjectInterpreter,
     );
     return context.run<int>(
       overrides: <Type, Generator>{DeviceManager: () => toolDeps.deviceManager},
@@ -120,8 +120,14 @@ Future<int> run(
         final ToolContext(:Cache cache, :Logger logger) = toolDeps.toolContext;
         final runner = FlutterCommandRunner(
           analytics: toolDeps.analytics,
+          androidContext: toolDeps.androidContext,
+          cocoaPods: toolDeps.appleContext.cocoaPods,
+          deviceManager: toolDeps.deviceManager,
+          doctor: toolDeps.doctor,
           extensionManager: toolDeps.extensionManager,
           featureFlags: featureFlags,
+          plistParser: toolDeps.appleContext.plistParser,
+          templateRenderer: toolDeps.templateRenderer,
           toolContext: toolDeps.toolContext,
           verboseHelp: verboseHelp,
         );
@@ -216,6 +222,7 @@ Future<int> run(
                 getVersion,
                 shutdownHooks,
                 cache: cache,
+                doctorValidatorsProviderBuilder: toolDeps.doctor.validatorsProviderBuilder,
                 usingLocalEngine: usingLocalEngine,
                 analytics: toolDeps.analytics,
                 featureFlags: featureFlags,
@@ -238,6 +245,7 @@ Future<int> run(
               getVersion,
               shutdownHooks,
               cache: cache,
+              doctorValidatorsProviderBuilder: toolDeps.doctor.validatorsProviderBuilder,
               usingLocalEngine: usingLocalEngine,
               analytics: toolDeps.analytics,
               featureFlags: featureFlags,
@@ -266,6 +274,7 @@ Future<int> _handleToolError(
   String Function() getFlutterVersion,
   ShutdownHooks shutdownHooks, {
   required Cache cache,
+  required DoctorValidatorsProviderBuilder doctorValidatorsProviderBuilder,
   required bool usingLocalEngine,
   required Analytics analytics,
   required FeatureFlags featureFlags,
@@ -280,6 +289,7 @@ Future<int> _handleToolError(
     getFlutterVersion,
     shutdownHooks,
     cache: cache,
+    doctorValidatorsProviderBuilder: doctorValidatorsProviderBuilder,
     usingLocalEngine: usingLocalEngine,
     analytics: analytics,
     featureFlags: featureFlags,
@@ -296,6 +306,7 @@ Future<int> _handleToolErrorImpl(
   String Function() getFlutterVersion,
   ShutdownHooks shutdownHooks, {
   required Cache cache,
+  required DoctorValidatorsProviderBuilder doctorValidatorsProviderBuilder,
   required bool usingLocalEngine,
   required Analytics analytics,
   required FeatureFlags featureFlags,
@@ -396,7 +407,16 @@ Future<int> _handleToolErrorImpl(
         verbose: true /* Capture flutter doctor -v */,
       );
 
-      final doctorText = DoctorText(doctorLogger, cache: cache, clock: globals.systemClock);
+      final doctorText = DoctorText(
+        doctorLogger,
+        doctor: Doctor(
+          analytics: analytics,
+          cache: cache,
+          clock: globals.systemClock,
+          logger: doctorLogger,
+          validatorsProviderBuilder: doctorValidatorsProviderBuilder,
+        ),
+      );
 
       final details = CrashDetails(
         command: _crashCommand(args),
