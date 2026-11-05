@@ -196,7 +196,10 @@ the test for real, and so does the command from `engine/src`.
   benchmark executables from the directory, which the install does not lay:
   the `benchmarks` type runs them as Bazel tests; the real upload is
   `linux_benchmarks`, GN). The licenses test runner, an executable the
-  original ran from the directory, runs as `run_tests.py --type binaries`.
+  original ran from the directory, runs as `run_tests.py --type binaries`
+  (the Linux and the Mac licenses builds alike: the recipe runs a step's
+  path as it is, and the install lays no test, so the converter refuses a
+  `--bazel` build with such a step).
 - Global tests (`tests` at the top of a builder file, run on tester drones
   against the CAS archive of `out/<name>`) stay what they are: a tester
   drone has the installed directory, laid out as GN lays it, and not the
