@@ -173,17 +173,23 @@ void main() {
       expect(result.stdout, contains('Invalid subshard name'));
     });
 
-    test('tool_integration_tests subshards by weight', () async {
-      final ProcessResult result = await runScript(
-        <String, String>{'SHARD': 'tool_integration_tests', 'SUBSHARD': '2_3'},
-        <String>['--dry-run'],
-      );
-      expectExitCode(result, 0);
-      expect(
-        result.stdout,
-        contains(RegExp(r'Selecting subshard 2 of 3 \(\d+ of \d+ tests, estimated weight \d+\)')),
-      );
-    });
+    for (final shard in <String>[
+      'tool_integration_tests',
+      'tool_tests_commands',
+      'web_tool_tests',
+    ]) {
+      test('$shard subshards by weight', () async {
+        final ProcessResult result = await runScript(
+          <String, String>{'SHARD': shard, 'SUBSHARD': '2_3'},
+          <String>['--dry-run'],
+        );
+        expectExitCode(result, 0);
+        expect(
+          result.stdout,
+          contains(RegExp(r'Selecting subshard 2 of 3 \(\d+ of \d+ tests, estimated weight \d+\)')),
+        );
+      });
+    }
 
     test('exits with code 255 when invalid SUBSHARD name', () async {
       final ProcessResult result = await runScript(<String, String>{
@@ -225,7 +231,10 @@ void main() {
       );
       expectExitCode(result, 0);
       expect(result.stdout, contains('SHARD=tool_tests_commands_bazel'));
-      expect(result.stdout, contains(RegExp(r'Selecting subshard 1 of 3 \(tests 1-\d+ of \d+\)')));
+      expect(
+        result.stdout,
+        contains(RegExp(r'Selecting subshard 1 of 3 \(\d+ of \d+ tests, estimated weight \d+\)')),
+      );
       expect(result.stdout, contains('precache'));
       expect(result.stdout, contains('//packages/flutter_tools:test_commands.shard_'));
       expect(result.stdout, isNot(contains('//packages/flutter_tools:commands_shard_hermetic')));

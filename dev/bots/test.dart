@@ -256,15 +256,9 @@ Future<void> _runGeneralToolTests() async {
 }
 
 Future<void> _runCommandsToolTests() async {
-  final List<File> allFiles = Directory(path.join(_toolsPath, 'test', 'commands.shard'))
-      .listSync(recursive: true)
-      .whereType<File>()
-      .toList();
-  final allTests = <String>[];
-  for (final file in allFiles) {
-    if (file.path.endsWith('_test.dart')) {
-      allTests.add(file.path);
-    }
+  final List<String>? testPaths = _selectWeightedToolTests('commands');
+  if (testPaths == null) {
+    return;
   }
 
   Future<void> runTests(List<String> testPaths, {bool allowNoTests = false}) {
@@ -276,7 +270,6 @@ Future<void> _runCommandsToolTests() async {
     );
   }
 
-  final List<String> testPaths = selectIndexOfTotalSubshard<String>(allTests);
   if (useBazel) {
     // The permeable half runs the tool over the cache's facsimile: the
     // desktop's and the web's engine artifacts must be in bin/cache.
@@ -297,15 +290,9 @@ Future<void> _runCommandsToolTests() async {
 }
 
 Future<void> _runWebToolTests() async {
-  final List<File> allFiles = Directory(path.join(_toolsPath, 'test', 'web.shard'))
-      .listSync(recursive: true)
-      .whereType<File>()
-      .toList();
-  final allTests = <String>[];
-  for (final file in allFiles) {
-    if (file.path.endsWith('_test.dart')) {
-      allTests.add(file.path);
-    }
+  final List<String>? testPaths = _selectWeightedToolTests('web');
+  if (testPaths == null) {
+    return;
   }
 
   Future<void> runTests(List<String> testPaths, {bool allowNoTests = false}) {
@@ -318,7 +305,6 @@ Future<void> _runWebToolTests() async {
     );
   }
 
-  final List<String> testPaths = selectIndexOfTotalSubshard<String>(allTests);
   if (useBazel) {
     await precacheForBazelToolTests();
     final shard = BazelShard();
@@ -340,23 +326,9 @@ Future<void> _runWebToolTests() async {
 Future<void> _runToolHostCrossArchTests() async {}
 
 Future<void> _runIntegrationToolTests() async {
-  final List<String> allTests =
-      Directory(path.join(_toolsPath, 'test', 'integration.shard'))
-          .listSync(recursive: true)
-          .whereType<File>()
-          .map<String>((FileSystemEntity entry) => path.relative(entry.path, from: _toolsPath))
-          .where((String testPath) => path.basename(testPath).endsWith('_test.dart'))
-          .toList()
-        ..sort();
-
-  final Map<String, int>? durations = _loadIntegrationTestDurations();
-  if (durations == null) {
+  final List<String>? testPaths = _selectWeightedToolTests('integration');
+  if (testPaths == null) {
     return;
-  }
-  final List<int> known = durations.values.toList()..sort();
-  final int defaultDuration = known.isEmpty ? 0 : known[known.length ~/ 2];
-  int weight(String testPath) {
-    return durations[path.posix.joinAll(path.split(testPath))] ?? defaultDuration;
   }
 
   Future<void> runTests(List<String> testPaths, {bool allowNoTests = false}) {
@@ -369,7 +341,6 @@ Future<void> _runIntegrationToolTests() async {
     );
   }
 
-  final List<String> testPaths = selectWeightedSubshard<String>(allTests, weight: weight);
   if (useBazel) {
     // The tests build through the tool from the cache's facsimile: the
     // desktop's and the web's engine artifacts must be in bin/cache.
@@ -396,16 +367,43 @@ Future<void> _runIntegrationToolTests() async {
   );
 }
 
-/// Seconds per `integration.shard` file on this host, keyed by path relative
-/// to `packages/flutter_tools` with forward slashes. Null after reporting an
+/// This subshard's share of `packages/flutter_tools/test/<shard>.shard`,
+/// balanced by `dev/bots/tool_test_durations.json`. Null after reporting an
+/// error if that file is unusable.
+List<String>? _selectWeightedToolTests(String shard) {
+  final List<String> allTests =
+      Directory(path.join(_toolsPath, 'test', '$shard.shard'))
+          .listSync(recursive: true)
+          .whereType<File>()
+          .map<String>((FileSystemEntity entry) => path.relative(entry.path, from: _toolsPath))
+          .where((String testPath) => path.basename(testPath).endsWith('_test.dart'))
+          .toList()
+        ..sort();
+
+  final Map<String, int>? durations = _loadToolTestDurations();
+  if (durations == null) {
+    return null;
+  }
+  // Unknown files get this shard's median.
+  final known = <int>[
+    for (final MapEntry(key: file, value: seconds) in durations.entries)
+      if (file.startsWith('test/$shard.shard/')) seconds,
+  ]..sort();
+  final int defaultDuration = known.isEmpty ? 0 : known[known.length ~/ 2];
+  int weight(String testPath) {
+    return durations[path.posix.joinAll(path.split(testPath))] ?? defaultDuration;
+  }
+
+  return selectWeightedSubshard<String>(allTests, weight: weight);
+}
+
+/// Seconds per tool test file on this host, keyed by path relative to
+/// `packages/flutter_tools` with forward slashes. Null after reporting an
 /// error if the file is missing or invalid.
-Map<String, int>? _loadIntegrationTestDurations() {
-  final file = File(path.join(flutterRoot, 'dev', 'bots', 'tool_integration_test_durations.json'));
+Map<String, int>? _loadToolTestDurations() {
+  final file = File(path.join(flutterRoot, 'dev', 'bots', 'tool_test_durations.json'));
   void fail(String reason) {
-    foundError(<String>[
-      '$red$reason$reset',
-      'Run: dart dev/bots/update_tool_integration_test_durations.dart',
-    ]);
+    foundError(<String>['$red$reason$reset', 'Run: dart dev/bots/update_tool_test_durations.dart']);
   }
 
   if (!file.existsSync()) {

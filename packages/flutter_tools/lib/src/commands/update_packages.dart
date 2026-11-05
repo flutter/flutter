@@ -35,7 +35,7 @@ typedef _ProjectDeps = ({FlutterProject project, ResolvedDependencies deps});
 /// A command to update internal dependencies across Flutter packages.
 class UpdatePackagesCommand extends FlutterCommand {
   UpdatePackagesCommand({
-    required ToolContext super.toolContext,
+    required super.toolContext,
     required super.verboseHelp,
     @visibleForTesting this._httpClientFactory,
     @visibleForTesting Pub? pub,
@@ -82,9 +82,6 @@ class UpdatePackagesCommand extends FlutterCommand {
 
   final HttpClientFactory? _httpClientFactory;
   final Pub? _injectedPub;
-
-  @override
-  ToolContext get toolContext => super.toolContext!;
 
   final _keyForceUpgrade = 'force-upgrade';
   final _keyUpdateHashes = 'update-hashes';

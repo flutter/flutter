@@ -1035,6 +1035,8 @@ abstract class ResidentRunner extends ResidentHandlers {
     processManager: processManager,
     platform: platform,
     analytics: analytics,
+    projectFactory: toolContext.projectFactory,
+    xcode: xcode,
     projectDir: fileSystem.directory(projectRootPath),
     packageConfigPath: debuggingOptions.buildInfo.packageConfigPath,
     generateDartPluginRegistry: generateDartPluginRegistry,

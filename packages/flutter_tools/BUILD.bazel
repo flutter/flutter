@@ -462,12 +462,16 @@ dart_package_tests(
     tests = glob(["test/commands.shard/permeable/**/*_test.dart"]),
 )
 
-# The integration shard's test files by name, for dev/bots'
-# tool_integration_test_durations_test (which checks the durations file
-# lists exactly them).
+# The test files of the three shards the durations file covers, by name,
+# for dev/bots' tool_test_durations_test (which checks the file lists
+# exactly them).
 filegroup(
-    name = "integration_shard_test_files",
-    srcs = glob(["test/integration.shard/**/*_test.dart"]),
+    name = "durations_shard_test_files",
+    srcs = glob([
+        "test/commands.shard/**/*_test.dart",
+        "test/integration.shard/**/*_test.dart",
+        "test/web.shard/**/*_test.dart",
+    ]),
 )
 
 # The projects the integration shard's tests run the tool in or copy:
