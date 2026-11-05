@@ -1520,37 +1520,10 @@ void main() {
       // last "Morning" items remain inside the cache extent.
       Future<void> verify({Axis scrollDirection = Axis.vertical, bool reverse = false}) async {
         await tester.pumpWidget(
-          TestWidgetsApp(
-            home: Align(
-              alignment: Alignment.topLeft,
-              child: SizedBox(
-                height: VIEWPORT_HEIGHT,
-                width: VIEWPORT_WIDTH,
-                child: CustomScrollView(
-                  scrollDirection: scrollDirection,
-                  reverse: reverse,
-                  controller: controller,
-                  slivers: <Widget>[
-                    const SliverToBoxAdapter(child: SizedBox(height: 100, width: 100)),
-                    for (final String title in <String>['Morning', 'Afternoon'])
-                      SliverMainAxisGroup(
-                        slivers: <Widget>[
-                          SliverPersistentHeader(
-                            pinned: true,
-                            delegate: _SemanticsHeaderDelegate(title),
-                          ),
-                          SliverList.list(
-                            children: <Widget>[
-                              for (int i = 1; i <= (title == 'Morning' ? 8 : 30); i++)
-                                SizedBox(height: 60, width: 60, child: Text('$title item $i')),
-                            ],
-                          ),
-                        ],
-                      ),
-                  ],
-                ),
-              ),
-            ),
+          _buildPushedHeaderSections(
+            controller,
+            scrollDirection: scrollDirection,
+            reverse: reverse,
           ),
         );
 
@@ -1572,6 +1545,44 @@ void main() {
       await verify(reverse: true);
       await verify(scrollDirection: Axis.horizontal);
       await verify(scrollDirection: Axis.horizontal, reverse: true);
+
+      handle.dispose();
+    },
+  );
+
+  // Pinned children that are pushed back but still cover the leading edge of
+  // the group's paint area must remain in the semantics tree; only children
+  // that were pushed completely out of view are removed.
+  testWidgets(
+    'a pinned header still covering the edge of its SliverMainAxisGroup remains in the semantics tree',
+    (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      final ScrollController controller = ScrollController();
+      addTearDown(controller.dispose);
+
+      await tester.pumpWidget(_buildPushedHeaderSections(controller));
+
+      // At this offset the end of the group has already pushed the "Morning"
+      // header back, but its painted interval still covers the leading edge of
+      // the group's paint area.
+      controller.jumpTo(620);
+      await tester.pump();
+      List<String> labels = <String>[
+        for (final SemanticsNode node in tester.semantics.simulatedAccessibilityTraversal())
+          node.label,
+      ];
+      expect(labels, contains('Morning'));
+      expect(labels, contains('Afternoon'));
+
+      // Once pushed completely out of view it leaves the semantics tree.
+      controller.jumpTo(700);
+      await tester.pump();
+      labels = <String>[
+        for (final SemanticsNode node in tester.semantics.simulatedAccessibilityTraversal())
+          node.label,
+      ];
+      expect(labels, isNot(contains('Morning')));
+      expect(labels, contains('Afternoon'));
 
       handle.dispose();
     },
@@ -1758,6 +1769,45 @@ class _SnapPersistentHeaderState extends State<_SnapPersistentHeader>
       delegate: TestDelegate(minExtent: 30, snap: true, tickerProvider: this),
     );
   }
+}
+
+// Two sections ("Morning" and "Afternoon") inside a scrollable with a 100px
+// lead-in, so that the end of the first SliverMainAxisGroup pushes its pinned
+// header off the screen while the second section's header is pinned.
+Widget _buildPushedHeaderSections(
+  ScrollController controller, {
+  Axis scrollDirection = Axis.vertical,
+  bool reverse = false,
+}) {
+  return TestWidgetsApp(
+    home: Align(
+      alignment: Alignment.topLeft,
+      child: SizedBox(
+        height: VIEWPORT_HEIGHT,
+        width: VIEWPORT_WIDTH,
+        child: CustomScrollView(
+          scrollDirection: scrollDirection,
+          reverse: reverse,
+          controller: controller,
+          slivers: <Widget>[
+            const SliverToBoxAdapter(child: SizedBox(height: 100, width: 100)),
+            for (final String title in <String>['Morning', 'Afternoon'])
+              SliverMainAxisGroup(
+                slivers: <Widget>[
+                  SliverPersistentHeader(pinned: true, delegate: _SemanticsHeaderDelegate(title)),
+                  SliverList.list(
+                    children: <Widget>[
+                      for (int i = 1; i <= (title == 'Morning' ? 8 : 30); i++)
+                        SizedBox(height: 60, width: 60, child: Text('$title item $i')),
+                    ],
+                  ),
+                ],
+              ),
+          ],
+        ),
+      ),
+    ),
+  );
 }
 
 class _SemanticsHeaderDelegate extends SliverPersistentHeaderDelegate {
