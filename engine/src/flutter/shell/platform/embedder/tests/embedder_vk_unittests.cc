@@ -4,6 +4,7 @@
 
 #define FML_USED_ON_EMBEDDER
 
+#include <atomic>
 #include <cstring>
 #include <string>
 #include <utility>
@@ -105,6 +106,133 @@ static_assert(
     CheckSameSignature<decltype(QueueSubmit),
                        std::remove_pointer_t<PFN_vkQueueSubmit>>::value);
 }  // namespace
+
+// Exercise the actual compositor cache with images from the engine's Vulkan
+// device. Counting successful backing-store creations distinguishes
+// steady-state reuse from an embedder that explicitly opts out of caching.
+class VulkanBackingStoreCacheTest : public EmbedderTest,
+                                    public ::testing::WithParamInterface<bool> {
+};
+
+TEST_P(VulkanBackingStoreCacheTest, ReusesAndReleasesRenderedBackingStores) {
+  auto& context = GetEmbedderContext<EmbedderTestContextVulkan>();
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface(DlISize(64, 32));
+  builder.SetDartEntrypoint("render_impeller_test");
+  builder.AddCommandLineArgument("--enable-impeller");
+  builder.SetCompositor(/*avoid_backing_store_cache=*/GetParam(),
+                        /*use_present_layers_callback=*/true);
+
+  struct State {
+    fml::RefPtr<TestVulkanContext> context;
+    fml::AutoResetWaitableEvent presented;
+    std::atomic_size_t created = 0;
+    std::atomic_size_t destroyed = 0;
+    std::atomic_size_t collected = 0;
+    std::atomic_size_t frames = 0;
+  } state;
+  state.context = context.vulkan_context();
+
+  struct BackingStore {
+    State* state;
+    TestVulkanImage allocation;
+    FlutterVulkanImage image;
+  };
+
+  auto& compositor = builder.GetCompositor();
+  compositor.user_data = &state;
+  compositor.create_backing_store_callback =
+      [](const FlutterBackingStoreConfig* config, FlutterBackingStore* store,
+         void* user_data) {
+        auto& state = *static_cast<State*>(user_data);
+        auto image = state.context->CreateImage(
+            DlISize(config->size.width, config->size.height));
+        if (!image) {
+          return false;
+        }
+        auto backing = new BackingStore{&state, std::move(*image), {}};
+        backing->image = {
+            sizeof(FlutterVulkanImage),
+            reinterpret_cast<uint64_t>(backing->allocation.GetImage()),
+            VK_FORMAT_R8G8B8A8_UNORM};
+        store->type = kFlutterBackingStoreTypeVulkan;
+        store->vulkan.struct_size = sizeof(FlutterVulkanBackingStore);
+        store->vulkan.image = &backing->image;
+        store->vulkan.user_data = backing;
+        store->vulkan.destruction_callback = [](void* user_data) {
+          auto backing = static_cast<BackingStore*>(user_data);
+          backing->state->destroyed++;
+          delete backing;
+        };
+        state.created++;
+        return true;
+      };
+  compositor.collect_backing_store_callback = [](const FlutterBackingStore*,
+                                                 void* user_data) {
+    static_cast<State*>(user_data)->collected++;
+    return true;
+  };
+  compositor.present_layers_callback = [](const FlutterLayer** layers,
+                                          size_t count, void* user_data) {
+    auto& state = *static_cast<State*>(user_data);
+    EXPECT_EQ(count, 1u);
+    if (count == 1u) {
+      EXPECT_EQ(layers[0]->type, kFlutterLayerContentTypeBackingStore);
+      EXPECT_EQ(layers[0]->backing_store->type, kFlutterBackingStoreTypeVulkan);
+    }
+    state.frames++;
+    state.presented.Signal();
+    return true;
+  };
+
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+  FlutterWindowMetricsEvent event = {};
+  event.struct_size = sizeof(event);
+  event.width = 64;
+  event.height = 32;
+  event.pixel_ratio = 1.0;
+  ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
+            kSuccess);
+  for (int frame = 0; frame < 60; frame++) {
+    state.presented.Wait();
+    if (frame < 59) {
+      ASSERT_EQ(FlutterEngineScheduleFrame(engine.get()), kSuccess);
+    }
+  }
+  EXPECT_EQ(state.created.load(), GetParam() ? state.frames.load() : 1u);
+  RecordProperty("steady_state_frames", std::to_string(state.frames.load()));
+  RecordProperty("steady_state_backing_stores",
+                 std::to_string(state.created.load()));
+
+  // A resize must replace the cached image instead of rendering into the old
+  // dimensions, and teardown must release both generations exactly once.
+  event.width = 96;
+  event.height = 48;
+  ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
+            kSuccess);
+  state.presented.Wait();
+  engine.reset();
+
+  EXPECT_GE(state.frames.load(), 61u);
+  EXPECT_EQ(state.created.load(), GetParam() ? state.frames.load() : 2u);
+  EXPECT_EQ(state.destroyed.load(), state.created.load());
+  EXPECT_EQ(state.collected.load(), state.created.load());
+  RecordProperty("presented_frames", std::to_string(state.frames.load()));
+  RecordProperty("backing_stores_created",
+                 std::to_string(state.created.load()));
+  RecordProperty("backing_stores_destroyed",
+                 std::to_string(state.destroyed.load()));
+  RecordProperty("backing_stores_collected",
+                 std::to_string(state.collected.load()));
+}
+
+INSTANTIATE_TEST_SUITE_P(VulkanCompositor,
+                         VulkanBackingStoreCacheTest,
+                         ::testing::Values(false, true),
+                         [](const ::testing::TestParamInfo<bool>& info) {
+                           return info.param ? "Uncached" : "Cached";
+                         });
 
 TEST_F(EmbedderTest, CanGetVulkanEmbedderContext) {
   EmbedderTestContextVulkan& context =
