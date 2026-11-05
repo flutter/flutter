@@ -4,6 +4,7 @@
 
 #include "flutter/shell/platform/embedder/embedder_render_target_vulkan_impeller.h"
 
+#include "flutter/fml/trace_event.h"
 #include "impeller/display_list/aiks_context.h"
 #include "impeller/renderer/backend/vulkan/formats_vk.h"
 #include "impeller/renderer/backend/vulkan/swapchain/surface_vk.h"
@@ -16,6 +17,8 @@ std::unique_ptr<EmbedderRenderTarget> CreateVulkanImpellerRenderTarget(
     const FlutterBackingStoreConfig& config,
     const std::shared_ptr<impeller::AiksContext>& aiks_context,
     fml::ScopedCleanupClosure on_release) {
+  FML_TRACE_EVENT("flutter", "CreateVulkanImpellerRenderTarget", "width",
+                  config.size.width, "height", config.size.height);
   const auto& store = backing_store.vulkan;
   // The embedder has transferred its baton even if wrapping fails. Destroy it
   // before collecting the backing store, just as on successful target teardown.
