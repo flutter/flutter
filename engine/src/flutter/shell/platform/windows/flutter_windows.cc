@@ -8,6 +8,7 @@
 
 #include <algorithm>
 #include <chrono>
+#include <cstdint>
 #include <cstdlib>
 #include <filesystem>
 #include <memory>
@@ -393,7 +394,7 @@ int64_t FlutterDesktopPluginRegistrarGetEngineId(
   if (!registrar) {
     return 0;
   }
-  return reinterpret_cast<int64_t>(registrar->engine);
+  return reinterpret_cast<intptr_t>(registrar->engine);
 }
 
 UINT FlutterDesktopGetDpiForHWND(HWND hwnd) {

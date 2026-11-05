@@ -7,6 +7,7 @@
 #include <epoxy/egl.h>
 #include <gmodule.h>
 
+#include <cstdint>
 #include <cstring>
 
 #include "flutter/common/constants.h"
@@ -566,7 +567,7 @@ static FlPluginRegistrar* fl_engine_get_registrar_for_plugin(
 
   return fl_plugin_registrar_new(nullptr, self->binary_messenger,
                                  self->texture_registrar,
-                                 reinterpret_cast<int64_t>(self));
+                                 reinterpret_cast<intptr_t>(self));
 }
 
 static void fl_engine_plugin_registry_iface_init(
