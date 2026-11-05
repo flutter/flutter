@@ -80,6 +80,14 @@ class SystemTextMagnifier extends StatefulWidget {
 
   @override
   State<SystemTextMagnifier> createState() => _SystemTextMagnifierState();
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(
+      DiagnosticsProperty<ValueListenable<MagnifierInfo>>('magnifierInfo', magnifierInfo),
+    );
+  }
 }
 
 class _SystemTextMagnifierState extends State<SystemTextMagnifier> {
