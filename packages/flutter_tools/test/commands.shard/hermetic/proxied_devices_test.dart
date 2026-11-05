@@ -156,7 +156,7 @@ void main() {
 
       // Now try to stop the log reader
       expect(fakeLogReader.disposeCalled, false);
-      logReader.dispose();
+      await logReader.dispose();
       await pumpEventQueue();
       expect(fakeLogReader.disposeCalled, true);
     });
@@ -401,7 +401,7 @@ class FakeDeviceLogReader implements DeviceLogReader {
   Future<void> provideVmService(FlutterVmService? connectedVmService) async {}
 
   @override
-  void dispose() {
+  Future<void> dispose() async {
     disposeCalled = true;
   }
 

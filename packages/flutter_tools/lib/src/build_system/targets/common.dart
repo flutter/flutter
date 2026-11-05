@@ -328,7 +328,9 @@ class KernelSnapshot extends Target {
     );
 
     if (darwinPlatform != null) {
-      final FlutterProject flutterProject = FlutterProject.fromDirectory(environment.projectDir);
+      final FlutterProject flutterProject = environment.projectFactory.fromDirectory(
+        environment.projectDir,
+      );
       final XcodeBasedProject xcodeProject = darwinPlatform.xcodeProject(flutterProject);
       flavor = await xcodeProject.parseFlavorFromConfiguration(environment);
     } else {

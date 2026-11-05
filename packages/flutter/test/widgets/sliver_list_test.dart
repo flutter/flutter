@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -380,6 +381,51 @@ void main() {
     expect(s0.index, 5);
     expect(s1.index, 6);
     expect(s2.index, 7);
+  });
+
+  testWidgets('SliverMultiBoxAdaptorElement.childCount scopes 53-bit cap to JS web', (
+    WidgetTester tester,
+  ) async {
+    const jsMaxSafeInteger = 9007199254740991; // 2^53 - 1
+    const jsCap = 9007199254740992; // 2^53
+    int? targetCount;
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: CustomScrollView(
+          slivers: <Widget>[
+            SliverList.builder(
+              itemBuilder: (BuildContext context, int index) {
+                if (targetCount case final int count when index >= count) {
+                  return null;
+                }
+                return const SizedBox(height: 10);
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+
+    final SliverMultiBoxAdaptorElement element = tester.element<SliverMultiBoxAdaptorElement>(
+      find.byType(SliverList),
+    );
+
+    targetCount = jsMaxSafeInteger;
+    expect(element.childCount, jsMaxSafeInteger);
+
+    if (kIsWeb && !kIsWasm) {
+      targetCount = jsCap;
+      expect(() => element.childCount, throwsFlutterError);
+    } else {
+      targetCount = jsCap;
+      expect(element.childCount, jsCap);
+
+      final int above53BitCount = int.parse('18014398509482021'); // 2^54 + 37
+      targetCount = above53BitCount;
+      expect(element.childCount, above53BitCount);
+    }
   });
 }
 
