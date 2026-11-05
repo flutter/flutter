@@ -2238,9 +2238,8 @@ void main() {
       testWidgets('can switch a slot between a cell and a placeholder', (
         WidgetTester tester,
       ) async {
-        // When a cell turns into TableCell.none and back, its element is
-        // reused, so the render object in that slot is kept while it is not
-        // laid out.
+        // When a cell turns into TableCell.none and back, the TableCell in that
+        // slot is updated rather than replaced.
         final tapped = <String>[];
         Widget buildTable({required bool spanned}) {
           return Directionality(
@@ -2312,6 +2311,153 @@ void main() {
         expect(a.parent!.childrenCount, 2);
         expect(a.indexInParent, 0);
         expect(b.indexInParent, 2);
+
+        handle.dispose();
+      });
+
+      // The rect of `node` in the coordinates of the table that it is in.
+      Rect rectInTable(SemanticsNode node) {
+        Rect rect = node.rect;
+        for (
+          SemanticsNode? current = node;
+          current != null && current.role != SemanticsRole.table;
+          current = current.parent
+        ) {
+          if (current.transform != null) {
+            rect = MatrixUtils.transformRect(current.transform!, rect);
+          }
+        }
+        return rect;
+      }
+
+      testWidgets('have their semantics in the row they start in', (WidgetTester tester) async {
+        final SemanticsHandle handle = tester.ensureSemantics();
+        await tester.pumpWidget(
+          Directionality(
+            textDirection: TextDirection.ltr,
+            child: Align(
+              alignment: Alignment.topLeft,
+              child: Table(
+                defaultColumnWidth: const FixedColumnWidth(100.0),
+                children: const <TableRow>[
+                  TableRow(
+                    children: <Widget>[
+                      TableCell(
+                        rowSpan: 2,
+                        verticalAlignment: TableCellVerticalAlignment.bottom,
+                        child: SizedBox(height: 10.0, child: Text('Span')),
+                      ),
+                      SizedBox(height: 50.0),
+                    ],
+                  ),
+                  TableRow(children: <Widget>[TableCell.none, SizedBox(height: 50.0)]),
+                ],
+              ),
+            ),
+          ),
+        );
+
+        // The cell is aligned to the bottom of the second row, but it starts in
+        // the first one.
+        final SemanticsNode span = tester.getSemantics(find.text('Span'));
+        expect(span.parent!.indexInParent, 0);
+        expect(rectInTable(span), const Rect.fromLTRB(0.0, 90.0, 100.0, 100.0));
+
+        handle.dispose();
+      });
+
+      testWidgets('keep a row whose only cell spans several rows', (WidgetTester tester) async {
+        final SemanticsHandle handle = tester.ensureSemantics();
+        await tester.pumpWidget(
+          Directionality(
+            textDirection: TextDirection.ltr,
+            child: Align(
+              alignment: Alignment.topLeft,
+              child: Table(
+                defaultColumnWidth: const FixedColumnWidth(100.0),
+                children: const <TableRow>[
+                  TableRow(
+                    children: <Widget>[
+                      TableCell(rowSpan: 2, child: SizedBox(height: 40.0, child: Text('Span'))),
+                      SizedBox.shrink(),
+                    ],
+                  ),
+                  TableRow(
+                    children: <Widget>[
+                      TableCell.none,
+                      SizedBox(height: 40.0, child: Text('B')),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+
+        // The first row has no height of its own, because the cell that spans
+        // both rows adds its height to the second one.
+        final SemanticsNode span = tester.getSemantics(find.text('Span'));
+        expect(span.parent?.indexInParent, 0);
+        expect(span.parent!.rect.height, 40.0);
+        expect(rectInTable(span), const Rect.fromLTRB(0.0, 0.0, 100.0, 40.0));
+
+        handle.dispose();
+      });
+
+      testWidgets('keep the position of their semantics when another cell changes', (
+        WidgetTester tester,
+      ) async {
+        // A cell whose semantics are not rebuilt keeps the transform that moved
+        // it into its row the last time, so it must not be moved again.
+        final SemanticsHandle handle = tester.ensureSemantics();
+        final label = ValueNotifier<String>('first');
+        addTearDown(label.dispose);
+        await tester.pumpWidget(
+          Directionality(
+            textDirection: TextDirection.ltr,
+            child: Align(
+              alignment: Alignment.topLeft,
+              child: Table(
+                defaultColumnWidth: const FixedColumnWidth(100.0),
+                children: <TableRow>[
+                  TableRow(
+                    children: <Widget>[
+                      const SizedBox(height: 40.0),
+                      ValueListenableBuilder<String>(
+                        valueListenable: label,
+                        builder: (BuildContext context, String value, Widget? child) {
+                          return Semantics(label: value, child: child);
+                        },
+                        child: const SizedBox(height: 40.0),
+                      ),
+                    ],
+                  ),
+                  const TableRow(
+                    children: <Widget>[
+                      TableCell(
+                        rowSpan: 2,
+                        verticalAlignment: TableCellVerticalAlignment.fill,
+                        child: Text('Span'),
+                      ),
+                      SizedBox(height: 50.0),
+                    ],
+                  ),
+                  const TableRow(children: <Widget>[TableCell.none, SizedBox(height: 50.0)]),
+                ],
+              ),
+            ),
+          ),
+        );
+        final SemanticsNode span = tester.getSemantics(find.text('Span'));
+        expect(rectInTable(span), const Rect.fromLTRB(0.0, 40.0, 100.0, 140.0));
+
+        // Only the semantics of the other cell change, so the table is not laid
+        // out again and the semantics of the spanning cell are not rebuilt.
+        label.value = 'second';
+        await tester.pump();
+        expect(find.bySemanticsLabel('second'), findsOneWidget);
+        expect(tester.getSemantics(find.text('Span')), same(span));
+        expect(rectInTable(span), const Rect.fromLTRB(0.0, 40.0, 100.0, 140.0));
 
         handle.dispose();
       });

@@ -141,6 +141,12 @@ class _TableElementRow {
 /// )
 /// ```
 ///
+/// Two spans can overlap as long as neither of them starts in a slot that the
+/// other one covers. The slots that both of them cover hold a [TableCell.none]
+/// as well. Where the spans overlap, the cells are painted in the order of
+/// their rows and then their columns, so the cell that starts in the later row,
+/// or further along the same row, is painted on top.
+///
 /// The [border] leaves out the inner borders inside a span. See
 /// [TableCell.colSpan] and [TableCell.rowSpan] for how spanning cells interact
 /// with [columnWidths] and with the row heights, and [TableCell.none] for what
@@ -518,7 +524,6 @@ class TableCell extends StatelessWidget {
       verticalAlignment = null,
       child = const SizedBox.shrink();
 
-  /// {@template flutter.widgets.table.none}
   /// A table cell that acts as a structural placeholder to preserve the
   /// table’s grid alignment.
   ///
@@ -531,7 +536,6 @@ class TableCell extends StatelessWidget {
   /// span, fail an assertion that names the slot. In release builds, a widget
   /// in a slot that a span covers is not laid out, painted or hit tested, so
   /// it is silently dropped.
-  /// {@endtemplate}
   static const TableCell none = TableCell._none();
 
   /// How this cell is aligned vertically.
@@ -584,7 +588,8 @@ class TableCell extends StatelessWidget {
       colSpan: colSpan,
       rowSpan: rowSpan,
       verticalAlignment: verticalAlignment,
-      child: Semantics(role: SemanticsRole.cell, child: child),
+      // A placeholder is not part of the semantics tree, so it needs no cell.
+      child: colSpan == 0 ? child : Semantics(role: SemanticsRole.cell, child: child),
     );
   }
 }

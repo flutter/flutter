@@ -437,6 +437,38 @@ void main() {
       final defaultDescription = defaultParentData.toString();
       expect(defaultDescription, isNot(contains('cols')));
       expect(defaultDescription, isNot(contains('rows')));
+      expect(defaultDescription, isNot(contains('hidden')));
+
+      // A placeholder.
+      final hiddenParentData = TableCellParentData()
+        ..colSpan = 0
+        ..rowSpan = 0;
+      expect(hiddenParentData.toString(), contains('hidden'));
+    });
+
+    test('colSpan and rowSpan must both be 0 or both be at least 1', () {
+      final table = RenderTable(textDirection: TextDirection.ltr, columns: 1, rows: 1);
+      table.setChild(
+        0,
+        0,
+        sizedBox(100.0, 50.0)
+          ..parentData = (TableCellParentData()
+            ..colSpan = 0
+            ..rowSpan = 1),
+      );
+
+      final errors = <FlutterErrorDetails>[];
+      layout(
+        table,
+        onErrors: () {
+          errors.addAll(TestRenderingFlutterBinding.instance.takeAllFlutterErrorDetails());
+        },
+      );
+      expect(errors, isNotEmpty);
+      expect(
+        errors.first.exception.toString(),
+        contains('colSpan and rowSpan must either both be 0'),
+      );
     });
 
     test('RenderTable correctly distributes column widths when using colSpan', () {
@@ -847,6 +879,38 @@ void main() {
         expect(boxData.offset.dy, 0.0);
       });
 
+      test('Baseline: the dry baseline measures a colSpan against its whole span', () {
+        final table = RenderTable(
+          textDirection: TextDirection.ltr,
+          columns: 2,
+          rows: 1,
+          defaultColumnWidth: const FixedColumnWidth(100.0),
+          defaultVerticalAlignment: TableCellVerticalAlignment.baseline,
+          textBaseline: TextBaseline.alphabetic,
+        );
+        final spanningCell = _WidthBaselineBox(0.5);
+        spanningCell.parentData = TableCellParentData()..colSpan = 2;
+        table.setChild(0, 0, spanningCell);
+        // The placeholder has a baseline of its own, which must not count.
+        final placeholder = _WidthBaselineBox(2.0);
+        placeholder.parentData = TableCellParentData()
+          ..colSpan = 0
+          ..rowSpan = 0;
+        table.setChild(1, 0, placeholder);
+
+        // The spanning cell is 200 pixels wide, so its baseline is at 100.
+        const constraints = BoxConstraints(maxWidth: 400.0);
+        expect(table.getDryBaseline(constraints, TextBaseline.alphabetic), 100.0);
+
+        // The same as the baseline after layout: RenderBaseline moves the table
+        // down so that its baseline is at 150.
+        layout(
+          RenderBaseline(baseline: 150.0, baselineType: TextBaseline.alphabetic, child: table),
+          constraints: constraints,
+        );
+        expect((table.parentData! as BoxParentData).offset.dy, 50.0);
+      });
+
       test('Baseline: a row sized by baseline cells counts toward a rowSpan', () {
         // A rowSpan cell only adds the height that the rows it covers do not
         // already provide. A row whose height comes from baseline-aligned cells
@@ -1239,6 +1303,50 @@ void main() {
       expect(pixel(6, 6), transparent);
     });
 
+    test('clips the inner borders up to the sides that are painted', () async {
+      final Color Function(int, int) pixel = await paintPixels(
+        spanningTable(
+          const TableBorder(
+            top: BorderSide(width: 4.0, style: BorderStyle.none),
+            horizontalInside: BorderSide(width: 6.0, style: BorderStyle.none),
+            verticalInside: BorderSide(width: 2.0, color: borderColor),
+          ),
+          spans: <(int, int), (int, int)>{(0, 0): (2, 1)},
+        ),
+      );
+      // Neither the top border nor the border below A is painted, so the
+      // vertical border inside A is clipped out all the way to the edges of A.
+      expect(pixel(100, 1), transparent);
+      expect(pixel(100, 48), transparent);
+      // The other vertical borders are painted.
+      expect(pixel(100, 75), borderColor);
+      expect(pixel(200, 25), borderColor);
+    });
+
+    test('clips all of a span when the outer border has square corners', () async {
+      // TableBorder paints square corners, despite the borderRadius, because
+      // the left side has a different color.
+      const leftColor = Color(0xFFFF0000);
+      final Color Function(int, int) pixel = await paintPixels(
+        spanningTable(
+          const TableBorder(
+            top: BorderSide(width: 2.0, color: borderColor),
+            right: BorderSide(width: 2.0, color: borderColor),
+            bottom: BorderSide(width: 2.0, color: borderColor),
+            left: BorderSide(width: 2.0, color: leftColor),
+            verticalInside: BorderSide(width: 2.0, color: borderColor),
+            borderRadius: BorderRadius.all(Radius.elliptical(150.0, 50.0)),
+          ),
+          spans: <(int, int), (int, int)>{(0, 0): (2, 1)},
+        ),
+      );
+      // Rounded corners this large would reach past the vertical border inside
+      // A, near the top of the table.
+      expect(pixel(100, 1), borderColor);
+      expect(pixel(100, 3), transparent);
+      expect(pixel(200, 25), borderColor);
+    });
+
     test('clips what a TableBorder subclass paints inside a span', () async {
       final Color Function(int, int) pixel = await paintPixels(
         spanningTable(
@@ -1268,6 +1376,32 @@ void main() {
       expect(table, paintsExactlyCountTimes(#clipRect, 2));
     });
   });
+}
+
+/// A box that is as wide as its constraints allow and 100 pixels tall, with a
+/// baseline at [fraction] of its width.
+class _WidthBaselineBox extends RenderBox {
+  _WidthBaselineBox(this.fraction);
+
+  final double fraction;
+
+  @override
+  Size computeDryLayout(BoxConstraints constraints) {
+    return constraints.constrain(Size(constraints.maxWidth, 100.0));
+  }
+
+  @override
+  void performLayout() {
+    size = computeDryLayout(constraints);
+  }
+
+  @override
+  double? computeDryBaseline(BoxConstraints constraints, TextBaseline baseline) {
+    return constraints.maxWidth * fraction;
+  }
+
+  @override
+  double? computeDistanceToActualBaseline(TextBaseline baseline) => size.width * fraction;
 }
 
 /// A [TableBorder] without sides that fills the whole table with [color].

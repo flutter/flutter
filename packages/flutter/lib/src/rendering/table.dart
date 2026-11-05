@@ -60,7 +60,8 @@ class TableCellParentData extends BoxParentData {
       '${super.toString()}; '
       '${verticalAlignment == null ? "default vertical alignment" : "$verticalAlignment"}'
       '${colSpan <= 1 ? '' : '; $colSpan cols'}'
-      '${rowSpan <= 1 ? '' : '; $rowSpan rows'}';
+      '${rowSpan <= 1 ? '' : '; $rowSpan rows'}'
+      '${_isVisible ? '' : '; hidden'}';
 }
 
 /// Base class to describe how wide a column in a [RenderTable] should be.
@@ -677,12 +678,19 @@ class RenderTable extends RenderBox {
   }
 
   final Map<int, _Index> _idToIndexMap = <int, _Index>{};
+  // The offset that assembleSemanticsNode last added to the transform of each
+  // child, to move it into its row or cell wrapper, and the transform that the
+  // child was left with.
+  final Map<int, ({Matrix4? transform, Offset shift})> _idToSemanticsShift =
+      <int, ({Matrix4? transform, Offset shift})>{};
   final Map<int, SemanticsNode> _cachedRows = <int, SemanticsNode>{};
   final Map<_Index, SemanticsNode> _cachedCells = <_Index, SemanticsNode>{};
 
   @override
   void clearSemantics() {
     super.clearSemantics();
+    _idToIndexMap.clear();
+    _idToSemanticsShift.clear();
     _cachedRows.clear();
     _cachedCells.clear();
   }
@@ -706,11 +714,24 @@ class RenderTable extends RenderBox {
           List<List<SemanticsNode>>.generate(_columns, (int columnIndex) => <SemanticsNode>[]),
     );
 
-    Rect rectWithOffset(SemanticsNode node) {
-      final Offset offset =
-          (node.transform != null ? MatrixUtils.getAsTranslation(node.transform!) : null) ??
-          Offset.zero;
-      return node.rect.shift(offset);
+    // The transform of `child` relative to the table.
+    //
+    // The children are moved into their rows and cell wrappers below by adding
+    // an offset to their transforms. A child whose semantics have not been
+    // rebuilt since then still has that transform, so the offset is taken off
+    // again.
+    Matrix4? tableTransform(SemanticsNode child) {
+      final ({Matrix4? transform, Offset shift})? previous = _idToSemanticsShift[child.id];
+      if (previous == null || !identical(child.transform, previous.transform)) {
+        return child.transform;
+      }
+      return Matrix4.translationValues(-previous.shift.dx, -previous.shift.dy, 0)
+        ..multiply(child.transform ?? Matrix4.identity());
+    }
+
+    Rect rectInTable(SemanticsNode child) {
+      final Matrix4? transform = tableTransform(child);
+      return transform == null ? child.rect : MatrixUtils.transformRect(transform, child.rect);
     }
 
     int findRowIndex(double top) {
@@ -736,14 +757,7 @@ class RenderTable extends RenderBox {
       return -1;
     }
 
-    void shiftTransform(SemanticsNode node, double dx, double dy) {
-      final Matrix4? previousTransform = node.transform;
-      final Offset offset =
-          (previousTransform != null ? MatrixUtils.getAsTranslation(previousTransform) : null) ??
-          Offset.zero;
-      final newTransform = Matrix4.translationValues(offset.dx + dx, offset.dy + dy, 0);
-      node.transform = newTransform;
-    }
+    final List<_Span> spans = _cachedSpannedCells?.spans ?? const <_Span>[];
 
     for (final child in children) {
       if (_idToIndexMap.containsKey(child.id)) {
@@ -754,9 +768,23 @@ class RenderTable extends RenderBox {
           rawCells[y][x].add(child);
         }
       } else {
-        final Rect rect = rectWithOffset(child);
-        final int y = findRowIndex(rect.top);
-        final int x = findColumnIndex(rect.left);
+        final Rect rect = rectInTable(child);
+        int y = findRowIndex(rect.top);
+        int x = findColumnIndex(rect.left);
+        // A child of a spanning cell can start below or to the right of where
+        // the cell starts, for example when the cell is aligned to the bottom.
+        // It still belongs to the row and column that the cell starts in.
+        for (final span in spans) {
+          final int leftColumn = _leftColumnOf(span);
+          if (y >= span.y &&
+              y < span.y + span.rowSpan &&
+              x >= leftColumn &&
+              x < leftColumn + span.colSpan) {
+            y = span.y;
+            x = leftColumn;
+            break;
+          }
+        }
         if (y != -1 && x != -1) {
           rawCells[y][x].add(child);
         }
@@ -764,7 +792,23 @@ class RenderTable extends RenderBox {
     }
 
     for (var y = 0; y < _rows; y++) {
-      final Rect rowBox = getRowBox(y);
+      Rect rowBox = getRowBox(y);
+      // A row has no height of its own when all of its cells that are not
+      // empty span several rows, because they add their height to the last row
+      // that they cover. The row still holds these cells, so it reaches down
+      // to the bottom of the tallest of them.
+      if (rowBox.height == 0) {
+        for (final span in spans) {
+          if (span.y == y) {
+            rowBox = Rect.fromLTRB(
+              rowBox.left,
+              rowBox.top,
+              rowBox.right,
+              math.max(rowBox.bottom, _rowTops[span.y + span.rowSpan]),
+            );
+          }
+        }
+      }
       // Skip row if it's empty
       if (rowBox.height == 0) {
         continue;
@@ -831,24 +875,14 @@ class RenderTable extends RenderBox {
         for (final child in rawChildrens) {
           _idToIndexMap[child.id] = _Index(y, x);
 
-          // Shift child transform.
-          final Rect localRect = rectWithOffset(child);
-          // The rect should satisfy 0 <= localRect.top < localRect.bottom <= rowBox.height
-          final double dy = localRect.bottom > rowBox.height + precisionErrorTolerance
-              ? -_rowTops.elementAt(y)
-              : 0.0;
-
-          // if addCellWrapper is true, the rect is relative to the cell
-          // The rect should satisfy 0 <= localRect.left < localRect.right <= cellWidth
-          // if addCellWrapper is false, the rect is relative to the row
-          // The rect should satisfy _columnLefts!.elementAt(x) <= localRect.left < localRect.right <= _columnLefts!.elementAt(x+1)
-          final double dx = addCellWrapper
-              ? ((localRect.left >= cellWidth) ? -_columnLefts!.elementAt(x) : 0.0)
-              : (localRect.right <= _columnLefts!.elementAt(x) ? _columnLefts!.elementAt(x) : 0.0);
-
-          if (dx != 0 || dy != 0) {
-            shiftTransform(child, dx, dy);
-          }
+          // Move the child from the coordinates of the table into those of the
+          // row, or of the cell wrapper if there is one.
+          final shift = Offset(addCellWrapper ? -_columnLefts!.elementAt(x) : 0.0, -rowBox.top);
+          child.transform = Matrix4.translationValues(shift.dx, shift.dy, 0)
+            ..multiply(tableTransform(child) ?? Matrix4.identity());
+          // Read the transform back, because the setter keeps the previous
+          // transform if it is equal and turns an identity matrix into null.
+          _idToSemanticsShift[child.id] = (transform: child.transform, shift: shift);
         }
 
         cell.indexInParent = x;
@@ -1369,6 +1403,15 @@ class RenderTable extends RenderBox {
   // _rowTops[i + 1] - _rowTops[i], which is O(1) per row.
   _SpannedCells? _cachedSpannedCells;
 
+  // The column, counted from the left, that is the leftmost one that `span`
+  // covers.
+  int _leftColumnOf(_Span span) {
+    return switch (textDirection) {
+      TextDirection.ltr => span.x,
+      TextDirection.rtl => columns - span.x - span.colSpan,
+    };
+  }
+
   /// Computes the visual x-position for a cell, adjusting for text direction
   /// and column span.
   double _computeCellX({
@@ -1403,17 +1446,29 @@ class RenderTable extends RenderBox {
     }
     final List<double> widths = _computeColumnWidths(constraints);
     double? baselineOffset;
+    // Like in [performLayout], a cell that spans several columns is laid out at
+    // the combined width of these columns, and the slots that it covers are
+    // skipped.
+    var coveredUntilColumn = 0;
     for (var col = 0; col < columns; col += 1) {
       final RenderBox? child = _children[col];
-      final childConstraints = BoxConstraints.tightFor(width: widths[col]);
       if (child == null) {
         continue;
       }
       final childParentData = child.parentData! as TableCellParentData;
+      if (col < coveredUntilColumn || !childParentData._isVisible) {
+        continue;
+      }
+      final int colSpan = childParentData.colSpan;
+      coveredUntilColumn = col + colSpan;
+      var spanWidth = 0.0;
+      for (var i = 0; i < colSpan && (col + i) < columns; i++) {
+        spanWidth += widths[col + i];
+      }
+      final childConstraints = BoxConstraints.tightFor(width: spanWidth);
       final double? childBaseline = switch (childParentData.verticalAlignment ??
           defaultVerticalAlignment) {
         TableCellVerticalAlignment.baseline => child.getDryBaseline(childConstraints, baseline),
-        TableCellVerticalAlignment.baseline ||
         TableCellVerticalAlignment.top ||
         TableCellVerticalAlignment.middle ||
         TableCellVerticalAlignment.bottom ||
@@ -1571,6 +1626,24 @@ class RenderTable extends RenderBox {
 
         final int colSpan = childParentData.colSpan;
         final int rowSpan = childParentData.rowSpan;
+        assert(
+          (colSpan == 0) == (rowSpan == 0),
+          'Cell at ($x, $y): colSpan and rowSpan must either both be 0, for a '
+          'TableCell.none placeholder, or both be at least 1, got a colSpan of '
+          '$colSpan and a rowSpan of $rowSpan.',
+        );
+
+        final bool isHiddenCell = spannedCells.isCovered(x, y);
+        assert(
+          isHiddenCell == !childParentData._isVisible,
+          'Cell at ($x, $y): a cell is covered by a span if and only if it is a '
+          'TableCell.none placeholder. A cell covered by a colSpan or rowSpan must '
+          'be declared as TableCell.none, and a TableCell.none must only appear '
+          'where it is covered by a span.',
+        );
+        if (isHiddenCell || !childParentData._isVisible) {
+          continue;
+        }
 
         // Compute the total width covered by this cell's column span.
         var spanWidth = 0.0;
@@ -1620,18 +1693,6 @@ class RenderTable extends RenderBox {
             colSpan: math.min(colSpan, columns - x),
             rowSpan: math.min(rowSpan, rows - y),
           );
-        }
-
-        final bool isHiddenCell = spannedCells.isCovered(x, y);
-        assert(
-          isHiddenCell == !childParentData._isVisible,
-          'Cell at ($x, $y): a cell is covered by a span if and only if it is a '
-          'TableCell.none placeholder. A cell covered by a colSpan or rowSpan must '
-          'be declared as TableCell.none, and a TableCell.none must only appear '
-          'where it is covered by a span.',
-        );
-        if (isHiddenCell) {
-          continue;
         }
 
         // Layout the child according to its vertical alignment.
@@ -1730,7 +1791,7 @@ class RenderTable extends RenderBox {
           'be declared as TableCell.none, and a TableCell.none must only appear '
           'where it is covered by a span.',
         );
-        if (isHiddenCell) {
+        if (isHiddenCell || !childParentData._isVisible) {
           continue;
         }
 
@@ -1893,34 +1954,44 @@ class RenderTable extends RenderBox {
     // The left edges of the columns from left to right, and the right edge of
     // the last column.
     final columnEdges = <double>[..._columnLefts!, _tableWidth];
-    final double verticalInset = border.verticalInside.width / 2.0;
-    final double horizontalInset = border.horizontalInside.width / 2.0;
-    final RRect? insideOuterBorder = border.borderRadius == BorderRadius.zero
+    // A side that is not painted takes up no room, whatever its width.
+    double widthOf(BorderSide side) => side.style == BorderStyle.none ? 0.0 : side.width;
+    final double leftWidth = widthOf(border.left);
+    final double topWidth = widthOf(border.top);
+    final double rightWidth = widthOf(border.right);
+    final double bottomWidth = widthOf(border.bottom);
+    final double verticalInset = widthOf(border.verticalInside) / 2.0;
+    final double horizontalInset = widthOf(border.horizontalInside) / 2.0;
+    // TableBorder only rounds the corners of the outer border when all of its
+    // painted sides have the same color, and paints square corners otherwise.
+    final paintedOuterColors = <Color>{
+      if (border.top.style != BorderStyle.none) border.top.color,
+      if (border.right.style != BorderStyle.none) border.right.color,
+      if (border.bottom.style != BorderStyle.none) border.bottom.color,
+      if (border.left.style != BorderStyle.none) border.left.color,
+    };
+    final RRect? insideOuterBorder =
+        border.borderRadius == BorderRadius.zero || paintedOuterColors.length != 1
         ? null
         : EdgeInsets.fromLTRB(
-            border.left.width + kClipInset,
-            border.top.width + kClipInset,
-            border.right.width + kClipInset,
-            border.bottom.width + kClipInset,
+            leftWidth + kClipInset,
+            topWidth + kClipInset,
+            rightWidth + kClipInset,
+            bottomWidth + kClipInset,
           ).deflateRRect(border.borderRadius.toRRect(rect));
     for (final _Span span in spannedCells.spans) {
       // The span covers the columns from leftColumn up to, but not including,
       // rightColumn, counted from the left.
-      final int leftColumn = switch (textDirection) {
-        TextDirection.ltr => span.x,
-        TextDirection.rtl => columns - span.x - span.colSpan,
-      };
+      final int leftColumn = _leftColumnOf(span);
       final int rightColumn = leftColumn + span.colSpan;
       final int bottomRow = span.y + span.rowSpan;
       final Rect interior = Rect.fromLTRB(
-        rect.left + columnEdges[leftColumn] + (leftColumn == 0 ? border.left.width : verticalInset),
-        rect.top + _rowTops[span.y] + (span.y == 0 ? border.top.width : horizontalInset),
+        rect.left + columnEdges[leftColumn] + (leftColumn == 0 ? leftWidth : verticalInset),
+        rect.top + _rowTops[span.y] + (span.y == 0 ? topWidth : horizontalInset),
         rect.left +
             columnEdges[rightColumn] -
-            (rightColumn == columns ? border.right.width : verticalInset),
-        rect.top +
-            _rowTops[bottomRow] -
-            (bottomRow == rows ? border.bottom.width : horizontalInset),
+            (rightColumn == columns ? rightWidth : verticalInset),
+        rect.top + _rowTops[bottomRow] - (bottomRow == rows ? bottomWidth : horizontalInset),
       ).deflate(kClipInset);
       if (interior.isEmpty) {
         continue;
