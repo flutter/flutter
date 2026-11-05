@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io' show PathExistsException;
 
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
@@ -1748,13 +1749,14 @@ dev_dependencies:
             ..createSync(recursive: true)
             ..writeAsStringSync('{"stale":true}');
 
+      const errorAlreadyExists = 183;
       exceptionHandler.addError(
         nativeAssetsManifestFile,
         FileSystemOp.copy,
-        FileSystemException(
-          "Cannot copy file to '${copiedNativeAssetsManifest.path}'",
+        PathExistsException(
           nativeAssetsManifestFile.path,
-          const OSError('Cannot create a file when that file already exists.', 183),
+          const OSError('Cannot create a file when that file already exists.', errorAlreadyExists),
+          "Cannot copy file to '${copiedNativeAssetsManifest.path}'",
         ),
       );
 
