@@ -2,9 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:process/process.dart';
+
 import '../android/android_workflow.dart' as android_workflow;
 import '../base/common.dart';
+import '../base/io.dart';
+import '../base/logger.dart';
+import '../base/platform.dart';
+import '../base/user_messages.dart';
 import '../context/android_context.dart';
+import '../context/tool_context.dart';
 import '../doctor.dart';
 import '../experimental/extension_manager.dart';
 import '../runner/flutter_command.dart';
@@ -73,14 +80,21 @@ class DoctorCommand extends FlutterCommand {
     android_workflow.AndroidLicenseValidator? androidLicenseValidator = _androidLicenseValidator;
     if (androidLicenseValidator == null && boolArg('android-licenses')) {
       if (_androidContext case final AndroidContext androidContext) {
+        final ToolContext(
+          :Logger logger,
+          :Platform platform,
+          :ProcessManager processManager,
+          :Stdio stdio,
+          :UserMessages userMessages,
+        ) = toolContext;
         androidLicenseValidator = android_workflow.AndroidLicenseValidator(
           androidSdk: androidContext.androidSdk,
           java: androidContext.java,
-          logger: toolContext.logger,
-          platform: toolContext.platform,
-          processManager: toolContext.processManager,
-          stdio: toolContext.stdio,
-          userMessages: toolContext.userMessages,
+          logger: logger,
+          platform: platform,
+          processManager: processManager,
+          stdio: stdio,
+          userMessages: userMessages,
         );
       }
     }

@@ -45,21 +45,22 @@ const _kOptionCoverage = 'coverage';
 const _kOptionCoveragePath = 'coverage-path';
 
 Future<void> main(List<String> args) async {
+  final shutdownHooks = ShutdownHooks();
+  final fs = LocalFileSystem(LocalSignals.instance, Signals.defaultExitSignals, shutdownHooks);
   Directory? tempDir;
   try {
-    tempDir = LocalFileSystem(
-      LocalSignals.instance,
-      Signals.defaultExitSignals,
-      ShutdownHooks(),
-    ).systemTempDirectory.createTempSync('flutter_fuchsia_tester.');
+    tempDir = fs.systemTempDirectory.createTempSync('flutter_fuchsia_tester.');
     final ToolDependencies dependencies = await ToolDependencies.bootstrap(
       analytics: const NoOpAnalytics(),
       flutterRoot: tempDir.path,
+      fs: fs,
+      shutdownHooks: shutdownHooks,
       templateRenderer: const MustacheTemplateRenderer(),
     );
     await run(args, toolContext: dependencies.toolContext);
   } finally {
     tempDir?.deleteSync(recursive: true);
+    await fs.dispose();
   }
   // TODO(ianh): There's apparently some sort of lost async task keeping the
   // process open. Remove the next line once that's been resolved.
@@ -175,6 +176,7 @@ Future<void> run(
   );
   final debuggingOptions = DebuggingOptions.enabled(buildInfo);
   final testRunner = FlutterTestRunner(
+    analytics: const NoOpAnalytics(),
     templateRenderer: const MustacheTemplateRenderer(),
     toolContext: toolContext,
   );

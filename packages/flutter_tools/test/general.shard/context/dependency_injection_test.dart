@@ -34,6 +34,7 @@ import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
 
 class FakeAndroidSdk extends Fake implements AndroidSdk {}
@@ -312,145 +313,48 @@ void main() {
       }
     });
 
-    testUsingContext(
-      'lazily evaluates androidStudio and java upon access in AndroidContext',
-      () async {
-        // Mock Android SDK directory to allow SDK detection.
-        fs.directory('/home/user/Android/Sdk/licenses').createSync(recursive: true);
-
-        var studioEvaluations = 0;
-        var javaEvaluations = 0;
-        final mockStudio = FakeAndroidStudio();
-        final mockJava = FakeJava();
-
-        final ToolDependencies dependencies = await ToolDependencies.bootstrap(
-          androidStudioBuilder: () {
-            studioEvaluations++;
-            return mockStudio;
-          },
-          javaBuilder: () {
-            javaEvaluations++;
-            return mockJava;
-          },
-          fs: fs,
-          logger: logger,
-          platform: platform,
-          processManager: processManager,
-          templateRenderer: FakeTemplateRenderer(),
-        );
-
-        // Neither AndroidStudio nor Java is evaluated during bootstrap or EmulatorManager initialization.
-        expect(studioEvaluations, 0);
-        expect(javaEvaluations, 0);
-
-        // Querying emulator discoverers does not trigger Java or AndroidStudio evaluation.
-        await dependencies.emulatorManager.getAllAvailableEmulators();
-        expect(studioEvaluations, 0);
-        expect(javaEvaluations, 0);
-
-        // Java and AndroidStudio are not evaluated until accessed.
-        final Java? java = dependencies.androidContext.java;
-        expect(javaEvaluations, 1);
-        expect(studioEvaluations, 0);
-        expect(java, same(mockJava));
-
-        final AndroidStudio? studio = dependencies.androidContext.androidStudio;
-        expect(studioEvaluations, 1);
-        expect(studio, same(mockStudio));
-      },
-    );
-
-    testUsingContext(
-      'shares AndroidStudio instance between AndroidContext and default Java.find',
-      () async {
-        // Mock Android SDK directory to allow SDK detection.
-        fs.directory('/home/user/Android/Sdk/licenses').createSync(recursive: true);
-
-        var studioEvaluations = 0;
-        final mockStudio = FakeAndroidStudio();
-
-        final ToolDependencies dependencies = await ToolDependencies.bootstrap(
-          androidStudioBuilder: () {
-            studioEvaluations++;
-            return mockStudio;
-          },
-          fs: fs,
-          logger: logger,
-          platform: platform,
-          processManager: processManager,
-          templateRenderer: FakeTemplateRenderer(),
-        );
-
-        expect(studioEvaluations, 0);
-
-        final Java? java = dependencies.androidContext.java;
-        final AndroidStudio? studio = dependencies.androidContext.androidStudio;
-
-        // Verify AndroidStudio was only evaluated once despite Java.find referencing it.
-        expect(studioEvaluations, 1);
-        expect(studio, same(mockStudio));
-        if (java != null && java.javaSource == JavaSource.androidStudio) {
-          expect(java.javaHome, studio?.javaPath);
-        }
-      },
-    );
-
-    testUsingContext('lazily evaluates androidSdk upon first access in AndroidContext', () async {
-      var sdkEvaluations = 0;
-      final mockSdk = FakeAndroidSdk();
-
+    testWithoutContext('does not eagerly evaluate AndroidStudio, Java, or AndroidSdk during bootstrap or EmulatorManager queries', () async {
+      final strictProcessManager = FakeProcessManager.empty();
       final ToolDependencies dependencies = await ToolDependencies.bootstrap(
-        androidSdkBuilder: () {
-          sdkEvaluations++;
-          return mockSdk;
-        },
+        analytics: const NoOpAnalytics(),
+        flutterVersion: _StubFlutterVersion(),
         fs: fs,
         logger: logger,
         platform: platform,
-        processManager: processManager,
+        processManager: strictProcessManager,
         templateRenderer: FakeTemplateRenderer(),
       );
 
-      // AndroidSdk is not evaluated during bootstrap or EmulatorManager initialization.
-      expect(sdkEvaluations, 0);
+      // Creating the SDK directory after bootstrap proves AndroidSdk was not
+      // evaluated during ToolDependencies.bootstrap (otherwise locateAndroidSdk
+      // would have fallen back to `which -a aapt` on strictProcessManager).
+      fs.directory('/home/user/Android/Sdk/licenses').createSync(recursive: true);
 
-      // AndroidSdk is not evaluated until accessed.
-      final AndroidSdk? sdk = dependencies.androidContext.androidSdk;
-      expect(sdkEvaluations, 1);
-      expect(sdk, same(mockSdk));
-
-      // Subsequent access does not re-evaluate.
-      expect(dependencies.androidContext.androidSdk, same(mockSdk));
-      expect(sdkEvaluations, 1);
+      // Querying emulator discoverers evaluates AndroidSdk lazily and does not
+      // trigger Java or AndroidStudio evaluation.
+      await dependencies.emulatorManager.getAllAvailableEmulators();
+      expect(dependencies.androidContext.androidSdk, isNotNull);
+      expect(strictProcessManager, hasNoRemainingExpectations);
     });
 
-    testUsingContext('lazily evaluates gradleUtils upon first access in AndroidContext', () async {
-      var gradleEvaluations = 0;
+    testWithoutContext('respects explicit overrides for Java and GradleUtils', () async {
+      final mockJava = FakeJava();
       final mockGradle = FakeGradleUtils();
 
       final ToolDependencies dependencies = await ToolDependencies.bootstrap(
-        gradleUtilsBuilder: () {
-          gradleEvaluations++;
-          return mockGradle;
-        },
+        analytics: const NoOpAnalytics(),
+        flutterVersion: _StubFlutterVersion(),
         fs: fs,
+        gradleUtils: mockGradle,
+        java: mockJava,
         logger: logger,
         platform: platform,
         processManager: processManager,
         templateRenderer: FakeTemplateRenderer(),
       );
 
-      // GradleUtils is not evaluated during bootstrap.
-      expect(gradleEvaluations, 0);
-
-      // GradleUtils is not evaluated until accessed.
-      final GradleUtils gradle = dependencies.androidContext.gradleUtils;
-      expect(gradleEvaluations, 1);
-      expect(gradle, same(mockGradle));
-
-      // Subsequent access does not re-evaluate.
+      expect(dependencies.androidContext.java, same(mockJava));
       expect(dependencies.androidContext.gradleUtils, same(mockGradle));
-      expect(gradleEvaluations, 1);
     });
 
     testWithoutContext(
@@ -474,6 +378,21 @@ void main() {
         preRunValidator.validate();
       },
     );
+
+    testWithoutContext('constructs PreRunValidator when enablePreRunValidator is true', () async {
+      final ToolDependencies dependencies = await ToolDependencies.bootstrap(
+        analytics: const NoOpAnalytics(),
+        enablePreRunValidator: true,
+        flutterVersion: _StubFlutterVersion(),
+        fs: fs,
+        logger: logger,
+        platform: platform,
+        processManager: processManager,
+        templateRenderer: FakeTemplateRenderer(),
+      );
+
+      expect(dependencies.toolContext.preRunValidator, isA<PreRunValidator>());
+    });
   });
 
   group('runInContext fallback generators', () {

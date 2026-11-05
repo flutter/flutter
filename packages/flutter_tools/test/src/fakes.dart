@@ -1156,7 +1156,13 @@ class FakeGit extends Fake implements Git {}
 
 class FakeGradleUtils extends Fake implements GradleUtils {}
 
-class FakeCocoaPods extends Fake implements CocoaPods {}
+class FakeCocoaPods extends Fake implements CocoaPods {
+  @override
+  void invalidatePodInstallOutput(XcodeBasedProject xcodeProject) {}
+
+  @override
+  Future<void> setupPodfile(XcodeBasedProject xcodeProject) async {}
+}
 
 class FakeCocoaPodsValidator extends Fake implements CocoaPodsValidator {}
 
@@ -1232,6 +1238,11 @@ class FakeEmulatorManager extends Fake implements EmulatorManager {
   }
 }
 
+class FakeExtensionManager extends Fake implements ExtensionManager {
+  @override
+  void disable() {}
+}
+
 class FakeToolDependencies extends Fake implements ToolDependencies {
   FakeToolDependencies({
     this._analytics,
@@ -1246,9 +1257,10 @@ class FakeToolDependencies extends Fake implements ToolDependencies {
     this._emulatorManager,
     this.extensionBuildManager,
     this.extensionCleanManager,
-    this.extensionManager,
+    this._extensionManager,
     this._featureFlags,
     this._macOSWorkflow,
+    this._templateRenderer,
     this._toolContext,
     this._windowsWorkflow,
   });
@@ -1263,8 +1275,10 @@ class FakeToolDependencies extends Fake implements ToolDependencies {
   final DeviceManager? _deviceManager;
   final Doctor? _doctor;
   final EmulatorManager? _emulatorManager;
+  final ExtensionManager? _extensionManager;
   final FeatureFlags? _featureFlags;
   final MacOSWorkflow? _macOSWorkflow;
+  final TemplateRenderer? _templateRenderer;
   final ToolContext? _toolContext;
   final WindowsWorkflow? _windowsWorkflow;
 
@@ -1310,7 +1324,7 @@ class FakeToolDependencies extends Fake implements ToolDependencies {
   final ExtensionCleanManager? extensionCleanManager;
 
   @override
-  final ExtensionManager? extensionManager;
+  ExtensionManager get extensionManager => _extensionManager ?? FakeExtensionManager();
 
   @override
   FeatureFlags get featureFlags => _featureFlags ?? TestFeatureFlags();
@@ -1318,6 +1332,9 @@ class FakeToolDependencies extends Fake implements ToolDependencies {
   @override
   late final MacOSWorkflow macOSWorkflow =
       _macOSWorkflow ?? MacOSWorkflow(featureFlags: featureFlags, platform: _platform);
+
+  @override
+  TemplateRenderer get templateRenderer => _templateRenderer ?? FakeTemplateRenderer();
 
   @override
   ToolContext get toolContext => _toolContext ?? FakeToolContext();

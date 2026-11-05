@@ -14,9 +14,11 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/template.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/create.dart';
+import 'package:flutter_tools/src/context/android_context.dart';
 import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/doctor.dart';
+import 'package:flutter_tools/src/experimental/extension_manager.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:flutter_tools/src/isolated/mustache_template.dart';
@@ -25,6 +27,7 @@ import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
+import 'context.dart';
 import 'fakes.dart';
 
 export 'package:test/test.dart' hide isInstanceOf, test;
@@ -72,24 +75,30 @@ Future<String> createProject(
 class TestFlutterCommandRunner extends FlutterCommandRunner {
   TestFlutterCommandRunner({
     Analytics? analytics,
+    AndroidContext? androidContext,
     CocoaPods? cocoaPods,
     DeviceManager? deviceManager,
     Doctor? doctor,
+    ExtensionManager? extensionManager,
     FeatureFlags? featureFlags,
     GradleUtils? gradleUtils,
     PlistParser? plistParser,
     TemplateRenderer? templateRenderer,
     ToolContext? toolContext,
+    super.verboseHelp,
   }) : super(
          analytics: analytics ?? _defaultFromContext<Analytics>() ?? const NoOpAnalytics(),
-         androidContext: FakeAndroidContext(
-           gradleUtils: gradleUtils ?? _defaultFromContext<GradleUtils>(),
-         ),
-         cocoaPods: cocoaPods ?? _defaultFromContext<CocoaPods>(),
-         deviceManager: deviceManager ?? _defaultFromContext<DeviceManager>(),
-         doctor: doctor ?? _defaultFromContext<Doctor>(),
-         featureFlags: featureFlags ?? _defaultFromContext<FeatureFlags>(),
-         plistParser: plistParser ?? _defaultFromContext<PlistParser>(),
+         androidContext:
+             androidContext ??
+             FakeAndroidContext(gradleUtils: gradleUtils ?? _defaultFromContext<GradleUtils>()),
+         cocoaPods: cocoaPods ?? _defaultFromContext<CocoaPods>() ?? FakeCocoaPods(),
+         deviceManager:
+             deviceManager ?? _defaultFromContext<DeviceManager>() ?? FakeDeviceManager(),
+         doctor: doctor ?? _defaultFromContext<Doctor>() ?? FakeDoctor(),
+         extensionManager:
+             extensionManager ?? _defaultFromContext<ExtensionManager>() ?? FakeExtensionManager(),
+         featureFlags: featureFlags ?? _defaultFromContext<FeatureFlags>() ?? TestFeatureFlags(),
+         plistParser: plistParser ?? _defaultFromContext<PlistParser>() ?? FakePlistParser(),
          templateRenderer:
              templateRenderer ??
              _defaultFromContext<TemplateRenderer>() ??

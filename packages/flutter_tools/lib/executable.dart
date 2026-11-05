@@ -9,7 +9,6 @@ import 'package:process/process.dart';
 
 import 'runner.dart' as runner;
 import 'src/android/gradle.dart';
-import 'src/base/context.dart';
 import 'src/base/file_system.dart';
 import 'src/base/io.dart';
 import 'src/base/logger.dart';
@@ -58,17 +57,14 @@ import 'src/experimental/extension_manager.dart';
 import 'src/experimental/templates.dart';
 import 'src/features.dart';
 // Files in `isolated` are intentionally excluded from google3 tooling.
-import 'src/hook_runner.dart' show FlutterHookRunner;
 import 'src/isolated/build_targets.dart';
 import 'src/isolated/mustache_template.dart';
 import 'src/isolated/native_assets/test/native_assets.dart';
 import 'src/isolated/resident_web_runner.dart';
 import 'src/native_assets.dart';
-import 'src/pre_run_validator.dart';
 import 'src/project_validator.dart';
 import 'src/runner/flutter_command.dart';
 import 'src/runner/flutter_command_runner.dart';
-import 'src/web/web_runner.dart';
 
 /// Main entry point for commands.
 ///
@@ -134,13 +130,12 @@ Future<void> main(List<String> args) async {
     args,
     (ToolDependencies toolDependencies) {
       final ToolDependencies(
-        :ExtensionManager? extensionManager,
+        :ExtensionManager extensionManager,
         :FeatureFlags featureFlags,
         toolContext: ToolContext(:Cache cache, :FileSystem fs, :Logger logger),
       ) = toolDependencies;
-      final ExtensionManager manager = extensionManager!;
       final templateManager = ExtensionTemplateManager(
-        extensionManager: manager,
+        extensionManager: extensionManager,
         featureFlags: featureFlags,
         fileSystem: fs,
         flutterRoot: cache.flutterRoot,
@@ -153,25 +148,27 @@ Future<void> main(List<String> args) async {
         extensionTemplateManager: templateManager,
       );
     },
-    buildTargets: const BuildTargetsImpl(),
-    extensionEntryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
+    flutterHookRunner: FlutterHookRunnerNative(),
     muteCommandLogging: muteCommandLogging,
-    nativeAssetsBuilder: const TestCompilerNativeAssetsBuilderImpl(),
-    overrides: <Type, Generator>{
-      AnsiTerminal: () => terminal,
-      FlutterHookRunner: () => FlutterHookRunnerNative(),
-      Logger: () => logger,
-      OutputPreferences: () => outputPreferences,
-      Stdio: () => stdio,
-      // The web runner is not supported in google3 because it depends
-      // on dwds.
-      WebRunnerFactory: () => DwdsWebRunnerFactory(),
-    },
-    preRunValidatorBuilder: PreRunValidator.new,
     shutdownHooks: shutdownHooks,
-    templateRenderer: const MustacheTemplateRenderer(),
+    toolDependenciesBuilder: () => ToolDependencies.bootstrap(
+      buildTargets: const BuildTargetsImpl(),
+      enablePreRunValidator: true,
+      extensionEntryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
+      logger: logger,
+      nativeAssetsBuilder: const TestCompilerNativeAssetsBuilderImpl(),
+      outputPreferences: outputPreferences,
+      platform: platform,
+      shutdownHooks: shutdownHooks,
+      stdio: stdio,
+      templateRenderer: const MustacheTemplateRenderer(),
+      terminal: terminal,
+    ),
     verbose: verbose,
     verboseHelp: verboseHelp,
+    // The web runner is not supported in google3 because it depends
+    // on dwds.
+    webRunnerFactory: DwdsWebRunnerFactory(),
   );
 }
 
@@ -183,24 +180,15 @@ Future<void> main(List<String> args) async {
 /// [ArgResults.rest]. `help` is the exception, since the command runner
 /// registers it on the parser itself and so reports it as a parsed command.
 @visibleForTesting
-String? findCommandName(List<String> args, {ToolContext? toolContext}) {
+String? findCommandName(List<String> args) {
   final ArgResults results;
   try {
-    results = FlutterCommandRunner(toolContext: toolContext ?? _FallbackToolContext()).argParser
-        .parse(args);
+    results = FlutterCommandRunner.createGlobalArgParser().parse(args);
   } on ArgParserException {
     // The real parser will complain about these later.
     return null;
   }
   return results.command?.name ?? results.rest.firstOrNull;
-}
-
-class _FallbackToolContext implements ToolContext {
-  @override
-  final OutputPreferences outputPreferences = OutputPreferences();
-
-  @override
-  Object? noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
 List<FlutterCommand> generateCommands({
