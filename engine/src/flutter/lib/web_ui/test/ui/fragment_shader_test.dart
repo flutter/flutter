@@ -2779,13 +2779,7 @@ List<int> _rgbaAt(ByteData pixels, {required int width, required int x, required
   return Uint8List.sublistView(pixels, offset, offset + 4).toList();
 }
 
-bool _debugIsSamplerDisposed(BackendImageShader sampler) {
-  if (sampler is CkImageShader) {
-    return sampler.debugDisposed;
-  }
-  // SkwasmImageShader is only visible when compiling for Skwasm.
-  return (sampler as dynamic).debugDisposed as bool;
-}
+bool _debugIsSamplerDisposed(BackendImageShader sampler) => sampler.debugDisposed;
 
 ui.Image _imageFromShader({required ui.Shader shader, required int imageDimension}) {
   final recorder = ui.PictureRecorder();

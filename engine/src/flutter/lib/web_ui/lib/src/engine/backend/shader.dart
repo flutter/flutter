@@ -19,7 +19,9 @@ abstract class BackendGradient extends BackendShader {
 }
 
 /// The native backend representation of a [ui.ImageShader].
-abstract class BackendImageShader extends BackendShader {}
+abstract class BackendImageShader extends BackendShader {
+  bool get debugDisposed;
+}
 
 /// The native backend representation of a [ui.FragmentShader].
 abstract class BackendFragmentShader extends BackendShader {

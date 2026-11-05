@@ -195,6 +195,7 @@ class SkwasmImageShader extends BackendImageShader implements SkwasmShader {
     }
   }
 
+  @override
   bool get debugDisposed => _handle == null;
 }
 
