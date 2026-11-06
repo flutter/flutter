@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart' show PointerDeviceKind, kSecondaryButton;
+import 'package:flutter/gestures.dart' show kSecondaryButton;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -70,9 +70,9 @@ void main() {
         children: <Widget>[hoverTarget, const ModalBarrier(dismissible: false)],
       );
 
-      final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
       // Start out of hoverTarget
-      await gesture.moveTo(const Offset(100, 100));
+      final TestGesture gesture = await tester.startHoverAt(const Offset(100, 100));
+      addTearDown(gesture.removePointer);
 
       await tester.pumpWidget(subject);
       // Move into hoverTarget and tap
@@ -137,9 +137,9 @@ void main() {
         children: <Widget>[const ModalBarrier(dismissible: false), hoverTarget],
       );
 
-      final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
       // Start out of hoverTarget
-      await gesture.moveTo(const Offset(100, 100));
+      final TestGesture gesture = await tester.startHoverAt(const Offset(100, 100));
+      addTearDown(gesture.removePointer);
       await tester.pumpWidget(subject);
       expect(hovered, isFalse);
 
@@ -531,9 +531,9 @@ void main() {
         ],
       );
 
-      final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
       // Start out of hoverTarget
-      await gesture.moveTo(const Offset(100, 100));
+      final TestGesture gesture = await tester.startHoverAt(const Offset(100, 100));
+      addTearDown(gesture.removePointer);
 
       await tester.pumpWidget(subject);
       // Move into hoverTarget and tap
@@ -608,9 +608,9 @@ void main() {
         ],
       );
 
-      final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
       // Start out of hoverTarget
-      await gesture.moveTo(const Offset(100, 100));
+      final TestGesture gesture = await tester.startHoverAt(const Offset(100, 100));
+      addTearDown(gesture.removePointer);
       await tester.pumpWidget(subject);
       expect(hovered, isFalse);
 
@@ -1017,11 +1017,8 @@ void main() {
       ),
     );
 
-    final TestGesture gesture = await tester.createGesture(
-      kind: PointerDeviceKind.mouse,
-      pointer: 1,
-    );
-    await gesture.addPointer(location: tester.getCenter(find.byType(ModalBarrier)));
+    final TestGesture gesture = await tester.startHover(find.byType(ModalBarrier), pointer: 1);
+    addTearDown(gesture.removePointer);
 
     await tester.pump();
 

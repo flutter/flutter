@@ -731,12 +731,8 @@ void main() {
   testWidgets('Dispatch the mouse events before tip overlay detached', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/96890
     const Duration hoverDelay = Duration.zero;
-    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
-    addTearDown(() async {
-      return gesture.removePointer();
-    });
-    await gesture.addPointer();
-    await gesture.moveTo(const Offset(1.0, 1.0));
+    final TestGesture gesture = await tester.startHoverAt(const Offset(1.0, 1.0));
+    addTearDown(gesture.removePointer);
     await tester.pump();
     await gesture.moveTo(Offset.zero);
 
@@ -828,12 +824,8 @@ void main() {
 
   testWidgets('Tooltip shows/hides when hovered', (WidgetTester tester) async {
     const Duration hoverDelay = Duration.zero;
-    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
-    addTearDown(() async {
-      return gesture.removePointer();
-    });
-    await gesture.addPointer();
-    await gesture.moveTo(const Offset(1.0, 1.0));
+    final TestGesture gesture = await tester.startHoverAt(const Offset(1.0, 1.0));
+    addTearDown(gesture.removePointer);
     await tester.pump();
     await gesture.moveTo(Offset.zero);
 
@@ -890,12 +882,8 @@ void main() {
     WidgetTester tester,
   ) async {
     const hoverDelay = Duration(milliseconds: 700);
-    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
-    addTearDown(() async {
-      return gesture.removePointer();
-    });
-    await gesture.addPointer();
-    await gesture.moveTo(const Offset(1.0, 1.0));
+    final TestGesture gesture = await tester.startHoverAt(const Offset(1.0, 1.0));
+    addTearDown(gesture.removePointer);
     await tester.pump();
     await gesture.moveTo(Offset.zero);
 
@@ -953,12 +941,8 @@ void main() {
     'Tooltip shows/hides when the mouse hovers, and then exits and re-enters in quick succession',
     (WidgetTester tester) async {
       const hoverDelay = Duration(milliseconds: 700);
-      final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
-      addTearDown(() async {
-        return gesture.removePointer();
-      });
-      await gesture.addPointer();
-      await gesture.moveTo(const Offset(1.0, 1.0));
+      final TestGesture gesture = await tester.startHoverAt(const Offset(1.0, 1.0));
+      addTearDown(gesture.removePointer);
 
       await tester.pumpWidget(
         WidgetsApp(
@@ -1045,12 +1029,8 @@ void main() {
 
   testWidgets('Tooltip text is also hoverable', (WidgetTester tester) async {
     const Duration hoverDelay = Duration.zero;
-    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
-    addTearDown(() async {
-      return gesture.removePointer();
-    });
-    await gesture.addPointer();
-    await gesture.moveTo(const Offset(1.0, 1.0));
+    final TestGesture gesture = await tester.startHoverAt(const Offset(1.0, 1.0));
+    addTearDown(gesture.removePointer);
     await tester.pump();
     await gesture.moveTo(Offset.zero);
 
@@ -1147,14 +1127,13 @@ void main() {
       ),
     );
 
-    TestGesture? gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    TestGesture? gesture = await tester.startHoverAt(Offset.zero);
     addTearDown(gesture.removePointer);
 
     // Both the inner and outer containers have tooltips associated with them, but only
     // the currently hovered one should appear, even though the pointer is inside both.
     final Finder outer = find.byKey(outerKey);
     final Finder inner = find.byKey(innerKey);
-    await gesture.moveTo(Offset.zero);
     await tester.pump();
     await gesture.moveTo(tester.getCenter(outer));
     await tester.pump();
@@ -1185,14 +1164,12 @@ void main() {
 
   testWidgets('Tooltip can be dismissed by escape key', (WidgetTester tester) async {
     const Duration hoverDelay = Duration.zero;
-    TestGesture? gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    TestGesture? gesture = await tester.startHoverAt(const Offset(1.0, 1.0));
     addTearDown(() async {
       if (gesture != null) {
         return gesture.removePointer();
       }
     });
-    await gesture.addPointer();
-    await gesture.moveTo(const Offset(1.0, 1.0));
     await tester.pump();
     await gesture.moveTo(Offset.zero);
 
@@ -1292,12 +1269,8 @@ void main() {
   testWidgets('Tooltip does not attempt to show after unmount', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/54096.
     const hoverDelay = Duration(seconds: 1);
-    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
-    addTearDown(() async {
-      return gesture.removePointer();
-    });
-    await gesture.addPointer();
-    await gesture.moveTo(const Offset(1.0, 1.0));
+    final TestGesture gesture = await tester.startHoverAt(const Offset(1.0, 1.0));
+    addTearDown(gesture.removePointer);
     await tester.pump();
     await gesture.moveTo(Offset.zero);
 
@@ -1827,9 +1800,8 @@ void main() {
     void onTriggered() => onTriggeredCalled = true;
 
     const Duration hoverDelay = Duration.zero;
-    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
-    await gesture.addPointer();
-    await gesture.moveTo(Offset.zero);
+    final TestGesture gesture = await tester.startHoverAt(Offset.zero);
+    addTearDown(gesture.removePointer);
 
     await tester.pumpWidget(
       WidgetsApp(
@@ -1865,9 +1837,8 @@ void main() {
 
   testWidgets('dismissAllToolTips dismisses hovered tooltips', (WidgetTester tester) async {
     const Duration hoverDelay = Duration.zero;
-    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
-    await gesture.addPointer();
-    await gesture.moveTo(Offset.zero);
+    final TestGesture gesture = await tester.startHoverAt(Offset.zero);
+    addTearDown(gesture.removePointer);
 
     await tester.pumpWidget(
       WidgetsApp(
@@ -1916,9 +1887,8 @@ void main() {
 
   testWidgets('Hovered tooltips do not dismiss after touchDelay', (WidgetTester tester) async {
     const Duration hoverDelay = Duration.zero;
-    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
-    await gesture.addPointer();
-    await gesture.moveTo(Offset.zero);
+    final TestGesture gesture = await tester.startHoverAt(Offset.zero);
+    addTearDown(gesture.removePointer);
 
     await tester.pumpWidget(
       WidgetsApp(
@@ -1999,9 +1969,8 @@ void main() {
       ),
     );
 
-    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    final TestGesture gesture = await tester.startHover(find.byTooltip(tooltipText));
     addTearDown(gesture.removePointer);
-    await gesture.moveTo(tester.getCenter(find.byTooltip(tooltipText)));
     await tester.pump(const Duration(seconds: 1));
     expect(
       find.text(tooltipText),
@@ -2047,9 +2016,8 @@ void main() {
       ),
     );
 
-    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    final TestGesture gesture = await tester.startHover(find.byTooltip(tooltipText));
     addTearDown(gesture.removePointer);
-    await gesture.moveTo(tester.getCenter(find.byTooltip(tooltipText)));
     await tester.pump(const Duration(seconds: 1));
     expect(
       find.text(tooltipText),
@@ -2098,9 +2066,8 @@ void main() {
       ),
     );
 
-    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    final TestGesture gesture = await tester.startHover(find.byTooltip(tooltipText));
     addTearDown(gesture.removePointer);
-    await gesture.moveTo(tester.getCenter(find.byTooltip(tooltipText)));
     await tester.pump(const Duration(seconds: 1));
     expect(
       find.text(tooltipText),
@@ -2256,9 +2223,7 @@ void main() {
 
     expect(entered, isFalse);
 
-    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
-    await gesture.addPointer();
-    await gesture.moveTo(tester.getCenter(find.byType(RawTooltip)));
+    final TestGesture gesture = await tester.startHover(find.byType(RawTooltip));
     await gesture.removePointer();
 
     expect(entered, isTrue);
@@ -2402,9 +2367,8 @@ void main() {
 
     // Avoid using startGesture here to avoid the PointDown event from also being
     // interpreted as a PointHover event by the Tooltip.
-    final TestGesture mouseGesture1 = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    final TestGesture mouseGesture1 = await tester.startHover(find.byTooltip(tooltipText));
     addTearDown(mouseGesture1.removePointer);
-    await mouseGesture1.moveTo(tester.getCenter(find.byTooltip(tooltipText)));
     await tester.pump(const Duration(seconds: 1));
     expect(
       find.text(tooltipText),
@@ -2420,9 +2384,8 @@ void main() {
     expect(find.text(tooltipText), findsNothing);
     await mouseGesture1.removePointer();
 
-    final TestGesture mouseGesture2 = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    final TestGesture mouseGesture2 = await tester.startHover(find.byTooltip(tooltipText));
     addTearDown(mouseGesture2.removePointer);
-    await mouseGesture2.moveTo(tester.getCenter(find.byTooltip(tooltipText)));
     await tester.pump(const Duration(seconds: 1));
     expect(
       find.text(tooltipText),
@@ -2721,12 +2684,9 @@ void main() {
     );
 
     // Hover over the target widget.
-    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
-    await gesture.addPointer(location: Offset.zero);
-    addTearDown(gesture.removePointer);
-
     final Finder targetFinder = find.text('Hover me');
-    await gesture.moveTo(tester.getCenter(targetFinder));
+    final TestGesture gesture = await tester.startHover(targetFinder);
+    addTearDown(gesture.removePointer);
     await tester.pump();
 
     // Wait for the tooltip to actually appear.
