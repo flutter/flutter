@@ -1323,6 +1323,46 @@ void main() {
       expect(pixel(200, 25), borderColor);
     });
 
+    test('clips the inner borders up to where an aligned stroke is painted', () async {
+      // With rounded corners and sides of different widths, TableBorder paints
+      // the outer border outside of the table when the sides are aligned
+      // outside.
+      final Color Function(int, int) pixel = await paintPixels(
+        spanningTable(
+          const TableBorder(
+            top: BorderSide(
+              width: 4.0,
+              color: borderColor,
+              strokeAlign: BorderSide.strokeAlignOutside,
+            ),
+            right: BorderSide(
+              width: 2.0,
+              color: borderColor,
+              strokeAlign: BorderSide.strokeAlignOutside,
+            ),
+            bottom: BorderSide(
+              width: 2.0,
+              color: borderColor,
+              strokeAlign: BorderSide.strokeAlignOutside,
+            ),
+            left: BorderSide(
+              width: 2.0,
+              color: borderColor,
+              strokeAlign: BorderSide.strokeAlignOutside,
+            ),
+            verticalInside: BorderSide(width: 2.0, color: borderColor),
+            borderRadius: BorderRadius.all(Radius.circular(10.0)),
+          ),
+          spans: <(int, int), (int, int)>{(0, 0): (2, 1)},
+        ),
+      );
+      // Nothing of the top border is painted inside the table, so the vertical
+      // border inside A is clipped out up to the top of the table.
+      expect(pixel(100, 1), transparent);
+      expect(pixel(100, 25), transparent);
+      expect(pixel(100, 75), borderColor);
+    });
+
     test('clips all of a span when the outer border has square corners', () async {
       // TableBorder paints square corners, despite the borderRadius, because
       // the left side has a different color.

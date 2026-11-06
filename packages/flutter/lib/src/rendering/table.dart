@@ -677,7 +677,6 @@ class RenderTable extends RenderBox {
         !(_cachedSpannedCells?.isCovered(childParentData.x!, childParentData.y!) ?? false);
   }
 
-  final Map<int, _Index> _idToIndexMap = <int, _Index>{};
   // The offset that assembleSemanticsNode last added to the transform of each
   // child, to move it into its row or cell wrapper, and the transform that the
   // child was left with.
@@ -689,7 +688,6 @@ class RenderTable extends RenderBox {
   @override
   void clearSemantics() {
     super.clearSemantics();
-    _idToIndexMap.clear();
     _idToSemanticsShift.clear();
     _cachedRows.clear();
     _cachedCells.clear();
@@ -759,37 +757,36 @@ class RenderTable extends RenderBox {
 
     final List<_Span> spans = _cachedSpannedCells?.spans ?? const <_Span>[];
 
+    // Every child is looked up in the table by where it is, so a child that
+    // moved to another cell is found there.
     for (final child in children) {
-      if (_idToIndexMap.containsKey(child.id)) {
-        final _Index index = _idToIndexMap[child.id]!;
-        final int y = index.y;
-        final int x = index.x;
-        if (y < _rows && x < _columns) {
-          rawCells[y][x].add(child);
-        }
-      } else {
-        final Rect rect = rectInTable(child);
-        int y = findRowIndex(rect.top);
-        int x = findColumnIndex(rect.left);
-        // A child of a spanning cell can start below or to the right of where
-        // the cell starts, for example when the cell is aligned to the bottom.
-        // It still belongs to the row and column that the cell starts in.
-        for (final span in spans) {
-          final int leftColumn = _leftColumnOf(span);
-          if (y >= span.y &&
-              y < span.y + span.rowSpan &&
-              x >= leftColumn &&
-              x < leftColumn + span.colSpan) {
-            y = span.y;
-            x = leftColumn;
-            break;
-          }
-        }
-        if (y != -1 && x != -1) {
-          rawCells[y][x].add(child);
+      final Rect rect = rectInTable(child);
+      int y = findRowIndex(rect.top);
+      int x = findColumnIndex(rect.left);
+      // A child of a spanning cell can start below or to the right of where
+      // the cell starts, for example when the cell is aligned to the bottom.
+      // It still belongs to the row and column that the cell starts in.
+      for (final span in spans) {
+        final int leftColumn = _leftColumnOf(span);
+        if (y >= span.y &&
+            y < span.y + span.rowSpan &&
+            x >= leftColumn &&
+            x < leftColumn + span.colSpan) {
+          y = span.y;
+          x = leftColumn;
+          break;
         }
       }
+      if (y != -1 && x != -1) {
+        rawCells[y][x].add(child);
+      }
     }
+
+    // Forget the children that are not part of the table anymore.
+    final childIds = <int>{for (final child in children) child.id};
+    _idToSemanticsShift.removeWhere(
+      (int id, ({Matrix4? transform, Offset shift}) _) => !childIds.contains(id),
+    );
 
     for (var y = 0; y < _rows; y++) {
       Rect rowBox = getRowBox(y);
@@ -873,8 +870,6 @@ class RenderTable extends RenderBox {
             ..rect = Rect.fromLTWH(0, 0, cellWidth, rowBox.height);
         }
         for (final child in rawChildrens) {
-          _idToIndexMap[child.id] = _Index(y, x);
-
           // Move the child from the coordinates of the table into those of the
           // row, or of the cell wrapper if there is one.
           final shift = Offset(addCellWrapper ? -_columnLefts!.elementAt(x) : 0.0, -rowBox.top);
@@ -1954,14 +1949,6 @@ class RenderTable extends RenderBox {
     // The left edges of the columns from left to right, and the right edge of
     // the last column.
     final columnEdges = <double>[..._columnLefts!, _tableWidth];
-    // A side that is not painted takes up no room, whatever its width.
-    double widthOf(BorderSide side) => side.style == BorderStyle.none ? 0.0 : side.width;
-    final double leftWidth = widthOf(border.left);
-    final double topWidth = widthOf(border.top);
-    final double rightWidth = widthOf(border.right);
-    final double bottomWidth = widthOf(border.bottom);
-    final double verticalInset = widthOf(border.verticalInside) / 2.0;
-    final double horizontalInset = widthOf(border.horizontalInside) / 2.0;
     // TableBorder only rounds the corners of the outer border when all of its
     // painted sides have the same color, and paints square corners otherwise.
     final paintedOuterColors = <Color>{
@@ -1970,8 +1957,36 @@ class RenderTable extends RenderBox {
       if (border.bottom.style != BorderStyle.none) border.bottom.color,
       if (border.left.style != BorderStyle.none) border.left.color,
     };
-    final RRect? insideOuterBorder =
-        border.borderRadius == BorderRadius.zero || paintedOuterColors.length != 1
+    final bool hasRoundedCorners =
+        border.borderRadius != BorderRadius.zero && paintedOuterColors.length == 1;
+    // With rounded corners and outer sides that differ, TableBorder paints each
+    // outer side its BorderSide.strokeInset into the table. Otherwise it paints
+    // the whole width of the side inside the table.
+    bool matchesTop(BorderSide side) {
+      return side.color == border.top.color &&
+          side.width == border.top.width &&
+          side.style == border.top.style;
+    }
+
+    final bool usesStrokeInset =
+        hasRoundedCorners &&
+        !(matchesTop(border.right) && matchesTop(border.bottom) && matchesTop(border.left));
+    // A side that is not painted takes up no room, whatever its width.
+    double outerWidthOf(BorderSide side) {
+      if (side.style == BorderStyle.none) {
+        return 0.0;
+      }
+      return usesStrokeInset ? side.strokeInset : side.width;
+    }
+
+    double innerWidthOf(BorderSide side) => side.style == BorderStyle.none ? 0.0 : side.width;
+    final double leftWidth = outerWidthOf(border.left);
+    final double topWidth = outerWidthOf(border.top);
+    final double rightWidth = outerWidthOf(border.right);
+    final double bottomWidth = outerWidthOf(border.bottom);
+    final double verticalInset = innerWidthOf(border.verticalInside) / 2.0;
+    final double horizontalInset = innerWidthOf(border.horizontalInside) / 2.0;
+    final RRect? insideOuterBorder = !hasRoundedCorners
         ? null
         : EdgeInsets.fromLTRB(
             leftWidth + kClipInset,

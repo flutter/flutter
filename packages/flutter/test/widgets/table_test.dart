@@ -2404,6 +2404,53 @@ void main() {
         handle.dispose();
       });
 
+      testWidgets('have semantics that follow a cell into another row', (
+        WidgetTester tester,
+      ) async {
+        final SemanticsHandle handle = tester.ensureSemantics();
+        Widget buildTable({required bool swapped}) {
+          final rows = <TableRow>[
+            const TableRow(
+              key: ValueKey<String>('A'),
+              children: <Widget>[
+                TableCell(child: SizedBox(height: 20.0, child: Text('A'))),
+                SizedBox(height: 20.0),
+              ],
+            ),
+            const TableRow(
+              key: ValueKey<String>('B'),
+              children: <Widget>[
+                TableCell(child: SizedBox(height: 40.0, child: Text('B'))),
+                SizedBox(height: 40.0),
+              ],
+            ),
+          ];
+          return Directionality(
+            textDirection: TextDirection.ltr,
+            child: Align(
+              alignment: Alignment.topLeft,
+              child: Table(
+                defaultColumnWidth: const FixedColumnWidth(100.0),
+                children: swapped ? rows.reversed.toList() : rows,
+              ),
+            ),
+          );
+        }
+
+        await tester.pumpWidget(buildTable(swapped: false));
+        final SemanticsNode a = tester.getSemantics(find.text('A'));
+        expect(a.parent!.indexInParent, 0);
+
+        // The rows have keys, so the cell and its semantics node move along
+        // with the row.
+        await tester.pumpWidget(buildTable(swapped: true));
+        expect(tester.getSemantics(find.text('A')), same(a));
+        expect(a.parent!.indexInParent, 1);
+        expect(rectInTable(a), const Rect.fromLTRB(0.0, 40.0, 100.0, 60.0));
+
+        handle.dispose();
+      });
+
       testWidgets('keep the position of their semantics when another cell changes', (
         WidgetTester tester,
       ) async {
