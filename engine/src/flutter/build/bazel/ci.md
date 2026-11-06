@@ -186,7 +186,11 @@ the test for real, and so does the command from `engine/src`.
   (`run_tests.py --type android` runs the C++ suites on the emulator: no
   Bazel counterpart yet); `local_engine_builds` (local_engine.json's builds
   are `bazel build` targets without installs); the Fuchsia builders; the
-  standalone files (`linux_license`, `linux_benchmarks`, `linux_clangd`);
+  standalone files `linux_benchmarks` and `linux_clangd` (`linux_license`
+  builds with Bazel since 536: its `--enable-minimal-linux`, which only
+  spares GN's pkg-config on a bot without the desktop's packages, asks for
+  what the sysroot-based build has already, and its test runner runs as
+  `run_tests.py --type binaries` as the Mac licenses builder's does);
   Windows. The Mac engine builders build this way since 509
   (`mac_host_engine`, `mac_android_aot_engine`, `mac_ios_engine` and
   `_ddm`), and so do the eight standalone Mac test builders that replaced

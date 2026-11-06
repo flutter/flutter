@@ -1343,16 +1343,16 @@
           "ci/host_release_licenses",
           "--runtime-mode",
           "release",
+          "--no-lto",
           "--no-rbe",
           "--no-goma",
-          "--enable-minimal-linux"
+          "--enable-minimal-linux",
+          "--bazel"
         ],
         "build_directory": "ci/host_release_licenses",
-        "config": null,
-        "unsupported": [
-          "--enable-minimal-linux (not in the converter's table of tools/gn flags)"
-        ],
-        "install": null,
+        "config": "licenses",
+        "unsupported": [],
+        "install": "//engine/src/flutter/ci/builders:licenses",
         "ninja_targets": [
           "flutter/tools/licenses_cpp",
           "flutter/tools/licenses_cpp:licenses_cpp_testrunner"

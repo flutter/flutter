@@ -6,13 +6,19 @@
     "cas_archive": false,
     "name": "licenses",
     "description": "Runs the license check script.",
+    "gclient_variables": {
+        "download_bazelisk": true
+    },
     "gn": [
         "--target-dir",
         "ci/host_release_licenses",
         "--runtime-mode",
         "release",
+        "--no-lto",
         "--no-rbe",
-        "--enable-minimal-linux"
+        "--no-goma",
+        "--enable-minimal-linux",
+        "--bazel"
     ],
     "ninja": {
         "config": "ci/host_release_licenses",
@@ -23,8 +29,15 @@
     },
     "tests": [
         {
+            "language": "python3",
             "name": "Run license_cpp unittests",
-            "script": "out/ci/host_release_licenses/licenses_cpp_testrunner"
+            "script": "flutter/testing/run_tests.py",
+            "parameters": [
+                "--variant",
+                "ci/host_release_licenses",
+                "--type",
+                "binaries"
+            ]
         },
         {
             "name": "Run license_cpp",
