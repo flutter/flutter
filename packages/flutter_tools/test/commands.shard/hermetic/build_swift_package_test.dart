@@ -220,6 +220,7 @@ void main() {
             projectDir.childDirectory('lib').childFile('main.dart').createSync(recursive: true);
 
             final runner = FlutterCommandRunner(
+              templateRenderer: const MustacheTemplateRenderer(),
               toolContext: const DelegatingToolContext(),
               verboseHelp: true,
             );
@@ -268,6 +269,7 @@ void main() {
             projectDir.childDirectory('lib').childFile('main.dart').createSync(recursive: true);
 
             final runner = FlutterCommandRunner(
+              templateRenderer: const MustacheTemplateRenderer(),
               toolContext: const DelegatingToolContext(),
               verboseHelp: true,
             );

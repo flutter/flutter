@@ -761,17 +761,8 @@ void main() async {
     final Image tofuImage = await drawText('>\b<');
 
     // The tab's image should be identical to the space's image but not the tofu's image.
-    // Allow a small color delta for anti-aliasing variations across consecutive passes.
-    final bool tabToSpaceComparison = await comparer.fuzzyCompareImages(
-      tabImage,
-      spaceImage,
-      maxColorDelta: 2.0,
-    );
-    final bool tabToTofuComparison = await comparer.fuzzyCompareImages(
-      tabImage,
-      tofuImage,
-      maxColorDelta: 2.0,
-    );
+    final bool tabToSpaceComparison = await comparer.fuzzyCompareImages(tabImage, spaceImage);
+    final bool tabToTofuComparison = await comparer.fuzzyCompareImages(tabImage, tofuImage);
 
     expect(tabToSpaceComparison, isTrue);
     expect(tabToTofuComparison, isFalse);

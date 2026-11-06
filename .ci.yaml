@@ -104,7 +104,7 @@ platform_properties:
         [
           {"dependency": "android_sdk", "version": "version:37v2"},
           {"dependency": "android_virtual_device", "version": "android_35_google_apis_x64.textpb"},
-          {"dependency": "avd_cipd_version", "version": "build_id:8719362231152674241"},
+          {"dependency": "avd_cipd_version", "version": "build_id:8670032186093418337"},
           {"dependency": "open_jdk", "version": "version:25.0.2"},
           {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
           {"dependency": "cmake", "version": "build_id:8787856497187628321"},
@@ -892,10 +892,7 @@ targets:
           {"dependency": "goldctl", "version": "git_revision:7f66c9b9efb2826e72c61bb2f50cdc20b635dea7"},
           {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
           {"dependency": "cmake", "version": "build_id:8787856497187628321"},
-          {"dependency": "ninja", "version": "version:1.9.0"},
-          {"dependency": "open_jdk", "version": "version:25.0.2"},
-          {"dependency": "android_sdk", "version": "version:37v2"},
-          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
+          {"dependency": "ninja", "version": "version:1.9.0"}
         ]
       shard: framework_tests
       subshard: misc
@@ -3771,7 +3768,6 @@ targets:
   - name: Mac_ios impeller_primitives_perf_suite_ios__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -4296,10 +4292,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "goldctl", "version": "git_revision:7f66c9b9efb2826e72c61bb2f50cdc20b635dea7"},
-          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
-          {"dependency": "open_jdk", "version": "version:25.0.2"},
-          {"dependency": "android_sdk", "version": "version:37v2"},
-          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
+          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
         ]
       shard: framework_tests
       subshard: misc
@@ -5608,34 +5601,6 @@ targets:
         ["devicelab", "hostonly", "mac"]
       task_name: integration_ui_ios_textfield
 
-  - name: Mac_x64 ios_app_with_extensions_test
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    enabled_branches:
-      - stable # TODO(flutter/flutter#189295): Delete this builder after 3.50 is released.
-    timeout: 60
-    properties:
-      dependencies: >-
-        [
-          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
-        ]
-      tags: >
-        ["devicelab", "hostonly", "mac"]
-      task_name: ios_app_with_extensions_test
-
-  - name: Mac_arm64 ios_app_with_extensions_test
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      dependencies: >-
-        [
-          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
-        ]
-      tags: >
-        ["devicelab", "hostonly", "mac", "arm64"]
-      task_name: ios_app_with_extensions_test
-
   - name: Mac ios_defines_test
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -6353,10 +6318,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "goldctl", "version": "git_revision:7f66c9b9efb2826e72c61bb2f50cdc20b635dea7"},
-          {"dependency": "vs_build", "version": "version:vs2019"},
-          {"dependency": "open_jdk", "version": "version:25.0.2"},
-          {"dependency": "android_sdk", "version": "version:37v2"},
-          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
+          {"dependency": "vs_build", "version": "version:vs2019"}
         ]
       shard: framework_tests
       subshard: misc
@@ -6386,10 +6348,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "goldctl", "version": "git_revision:7f66c9b9efb2826e72c61bb2f50cdc20b635dea7"},
-          {"dependency": "vs_build", "version": "version:vs2019"},
-          {"dependency": "open_jdk", "version": "version:25.0.2"},
-          {"dependency": "android_sdk", "version": "version:37v2"},
-          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
+          {"dependency": "vs_build", "version": "version:vs2019"}
         ]
       shard: framework_tests
       subshard: misc
