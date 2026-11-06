@@ -298,9 +298,20 @@ _TREE_ENGINE_CACHE_FILES = {
     "//engine/src/flutter/web_sdk:web_sdk_directory": "flutter_web_sdk",
 }
 
+# Under the prebuilt engine, bin/cache's own bookkeeping comes with its
+# artifacts (@flutter_bin_cache//:stamps: every artifact set's stamp, the
+# engine's stamp and its JSON, the version file, the storage realm), so that
+# the facsimile's stamps say what its artifacts are -- the engine the tool
+# downloaded, which on a developer's machine is the content hash's build,
+# not the checkout's HEAD (the tree's facsimile stamps HEAD, which is what
+# it built) -- and a framework's embedded revision agrees with
+# engine_stamp.json (the content validation tests). An artifact set the
+# tool has not fetched has no stamp here either, and the tool fetches it
+# as the checkout's would.
 _PREBUILT_ENGINE_CACHE = {
     "@flutter_bin_cache//:common_engine": "",
     "@flutter_bin_cache//:web_sdk": "",
+    "@flutter_bin_cache//:stamps": "",
 } | ({} if HOST_OS == "mac" else {
     "@flutter_bin_cache//:host_engine": "",
     "@flutter_bin_cache//:host_engine_profile": "",
@@ -313,25 +324,35 @@ _PREBUILT_ENGINE_CACHE_FILES = {
     "//build_defs/engine:prebuilt_host_engine_release_directory": "artifacts/engine/" + _HOST_ENGINE + "-release",
 } if HOST_OS == "mac" else {}
 
-_TOOL_CACHE_FILES_BASE = _VERSIONED_CACHE_FILES | {
+# The facsimile's single files besides the engine's: the tool's snapshot,
+# the fonts' and the Gradle wrapper's stamps (the archive path their pin
+# names, as the tool writes them) and, on a Mac, the iOS USB artifacts'.
+_TOOL_CACHE_FILES_COMMON = {
     ":flutter_tools_snapshot": "flutter_tools.snapshot",
     # The engine artifacts' storage realm (the checkout's, through
     # @engine_version): a test's tool that downloads an artifact at run
     # time -- the integration shard's `flutter build ios` -- looks under it,
     # as the checkout's tool does; without the file the realm is empty and
-    # a presubmit's engine is a 404 in the release bucket.
+    # a presubmit's engine is a 404 in the release bucket. Always present:
+    # the Gradle plugin reads the file whether or not it needs a realm.
     "//bin/internal:engine_realm": "engine.realm",
+    "//bin/internal:material_fonts_stamp": "material_fonts.stamp",
+    "//bin/internal:gradle_wrapper_stamp": "gradle_wrapper.stamp",
+} | _IOS_USB_STAMPS
+
+# With the engine's directories from the tree: the stamps that vouch for
+# them carry the revision the build stamped into them.
+_TOOL_CACHE_FILES_BASE = _TOOL_CACHE_FILES_COMMON | _VERSIONED_CACHE_FILES | {
     "//bin/internal:flutter_sdk_stamp": "flutter_sdk.stamp",
     "//bin/internal:flutter_web_sdk_stamp": "flutter_web_sdk.stamp",
     "//bin/internal:font_subset_stamp": "font-subset.stamp",
-    "//bin/internal:material_fonts_stamp": "material_fonts.stamp",
-    "//bin/internal:gradle_wrapper_stamp": "gradle_wrapper.stamp",
-} | _HOST_SDK_STAMP | _IOS_USB_STAMPS
+} | _HOST_SDK_STAMP
 
-# The facsimile's single files: with the engine's directories from the tree,
-# or without them under the prebuilt engine (whose files `cache` lays).
+# The facsimile's single files: with the engine's directories from the tree
+# and the stamps that go with them, or with bin/cache's directories under
+# the prebuilt engine, whose stamps `cache` lays with them.
 _TOOL_CACHE_FILES = select({
-    "//build_defs/engine:prebuilt": _TOOL_CACHE_FILES_BASE | _PREBUILT_ENGINE_CACHE_FILES,
+    "//build_defs/engine:prebuilt": _TOOL_CACHE_FILES_COMMON | _PREBUILT_ENGINE_CACHE_FILES,
     "//conditions:default": _TOOL_CACHE_FILES_BASE | _TREE_ENGINE_CACHE_FILES | _PUB_FILES,
 })
 
@@ -349,10 +370,12 @@ _TOOL_CACHE = select({
 # (`flutter precache --ios`: artifacts/engine/ios{,-profile,-release} --
 # Flutter.xcframework over the device and simulator builds, the extension-
 # safe one, gen_snapshot_arm64 -- and the ios-sdk stamp), which only its
-# tests ask the tool for (DevelopmentArtifact.iOS): the device and both
-# simulator builds of the engine per mode, hours the first time.
-# (The iOS engines come from the tree under either configuration for now:
-# bin/cache's, `flutter precache --ios`, is a later step.)
+# tests ask the tool for (DevelopmentArtifact.iOS): from the tree, the
+# device and both simulator builds of the engine per mode, hours the first
+# time; under the prebuilt engine, bin/cache's directories
+# (//build_defs/engine's prebuilt_ios_engine_*_directory) with bin/cache's
+# ios-sdk.stamp among the stamps `cache` lays -- or, where the tool has not
+# fetched them, nothing, and the tool fetches them at run time.
 _IOS_ENGINE_CACHE_FILES = {
     "//engine/src/flutter/build/archives:ios_engine_directory": "artifacts/engine/ios",
     "//engine/src/flutter/build/archives:ios_engine_profile_directory": "artifacts/engine/ios-profile",
@@ -360,8 +383,14 @@ _IOS_ENGINE_CACHE_FILES = {
     "//bin/internal:ios_sdk_stamp": "ios-sdk.stamp",
 } if HOST_OS == "mac" else {}
 
+_PREBUILT_IOS_ENGINE_CACHE_FILES = {
+    "//build_defs/engine:prebuilt_ios_engine_directory": "artifacts/engine/ios",
+    "//build_defs/engine:prebuilt_ios_engine_profile_directory": "artifacts/engine/ios-profile",
+    "//build_defs/engine:prebuilt_ios_engine_release_directory": "artifacts/engine/ios-release",
+} if HOST_OS == "mac" else {}
+
 _APPLE_CACHE_FILES = select({
-    "//build_defs/engine:prebuilt": _TOOL_CACHE_FILES_BASE | _PREBUILT_ENGINE_CACHE_FILES | _IOS_ENGINE_CACHE_FILES,
+    "//build_defs/engine:prebuilt": _TOOL_CACHE_FILES_COMMON | _PREBUILT_ENGINE_CACHE_FILES | _PREBUILT_IOS_ENGINE_CACHE_FILES,
     "//conditions:default": _TOOL_CACHE_FILES_BASE | _TREE_ENGINE_CACHE_FILES | _PUB_FILES | _IOS_ENGINE_CACHE_FILES,
 })
 
@@ -899,7 +928,7 @@ android_build_tools(
 # precache --android` downloads (AndroidGenSnapshotArtifacts, stamp
 # android-sdk), built here for the three CPUs `flutter build apk` builds
 # for by default in the two AOT modes (build/archives' android_engine_*).
-_ANDROID_CACHE_FILES = {
+_ANDROID_ENGINE_CACHE_FILES = {
     "//engine/src/flutter/build/archives:android_engine_%s_%s_gen_snapshot" % (cpu, mode): "artifacts/engine/android-%s-%s/linux-x64" % (cpu, mode)
     for cpu in [
         "arm",
@@ -910,8 +939,17 @@ _ANDROID_CACHE_FILES = {
         "profile",
         "release",
     ]
-} | {
+}
+
+_ANDROID_CACHE_FILES = _ANDROID_ENGINE_CACHE_FILES | {
     "//bin/internal:android_sdk_stamp": "android-sdk.stamp",
+}
+
+# Under the prebuilt engine the gen_snapshots still come from the tree, and
+# their stamp says bin/cache's revision (the facsimile's engine.stamp,
+# among @flutter_bin_cache's stamps) so that the tool takes them as current.
+_PREBUILT_ANDROID_CACHE_FILES = _ANDROID_ENGINE_CACHE_FILES | {
+    "//bin/internal:prebuilt_android_sdk_stamp": "android-sdk.stamp",
 }
 
 # The Android shard: the integration shard's files that build an app, a
@@ -939,7 +977,7 @@ dart_package_tests(
     # configuration for now: bin/cache's, `flutter precache --android`, is a
     # later step.)
     cache_files = select({
-        "//build_defs/engine:prebuilt": _TOOL_CACHE_FILES_BASE | _PREBUILT_ENGINE_CACHE_FILES | _ANDROID_CACHE_FILES,
+        "//build_defs/engine:prebuilt": _TOOL_CACHE_FILES_COMMON | _PREBUILT_ENGINE_CACHE_FILES | _PREBUILT_ANDROID_CACHE_FILES,
         "//conditions:default": _TOOL_CACHE_FILES_BASE | _TREE_ENGINE_CACHE_FILES | _PUB_FILES | _ANDROID_CACHE_FILES,
     }),
     data = glob(["test/integration.shard/test_data/**"]) + _SDK_PACKAGES + _TOOL_DATA + _INTEGRATION_PROJECTS + [
