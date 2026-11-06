@@ -96,6 +96,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       DebuggingOptionDescriptors.enableHcpp,
       WebOptions.deprecatedJsInterop,
       CommonOptions.fatalWarnings,
+      _experimentalFasterTesting,
       _name,
       _plainName,
       _tags,
@@ -129,6 +130,15 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       _uninstall,
     ], verboseHelp: verboseHelp);
   }
+
+  static const _experimentalFasterTesting = FlagOptionDescriptor(
+    name: 'experimental-faster-testing',
+    negatable: false,
+    verboseOnly: true,
+    help:
+        '(deprecated) This option is deprecated and no longer has any effect. '
+        'This flag will be removed in a future version of Flutter.',
+  );
 
   static const _name = MultiOptionDescriptor(
     name: 'name',
@@ -513,6 +523,13 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         'dev_dependencies:\n'
         '  flutter_test:\n'
         '    sdk: flutter\n',
+      );
+    }
+
+    if (getValue(_experimentalFasterTesting)) {
+      logger.printWarning(
+        'The "--experimental-faster-testing" flag is deprecated and no longer '
+        'has any effect. This flag will be removed in a future version of Flutter.',
       );
     }
 

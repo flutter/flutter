@@ -749,6 +749,53 @@ resolution: workspace
     },
   );
 
+  testWithoutContext(
+    '--experimental-faster-testing logs deprecation warning and runs tests',
+    () async {
+      final testRunner = FakeFlutterTestRunner(0);
+      final testCommand = TestCommand(
+        templateRenderer: const MustacheTemplateRenderer(),
+        toolContext: toolContext,
+        testRunner: testRunner,
+      );
+      final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
+
+      await commandRunner.run(const <String>[
+        'test',
+        '--no-pub',
+        '--no-test-assets',
+        '--experimental-faster-testing',
+      ]);
+
+      expect(
+        logger.warningText,
+        contains(
+          'The "--experimental-faster-testing" flag is deprecated and no longer '
+          'has any effect. This flag will be removed in a future version of Flutter.',
+        ),
+      );
+      expect(testRunner.lastExecutionSpec, isNotNull);
+    },
+  );
+
+  testWithoutContext(
+    'omitting --experimental-faster-testing does not log deprecation warning',
+    () async {
+      final testRunner = FakeFlutterTestRunner(0);
+      final testCommand = TestCommand(
+        templateRenderer: const MustacheTemplateRenderer(),
+        toolContext: toolContext,
+        testRunner: testRunner,
+      );
+      final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
+
+      await commandRunner.run(const <String>['test', '--no-pub', '--no-test-assets']);
+
+      expect(logger.warningText, isNot(contains('--experimental-faster-testing')));
+      expect(testRunner.lastExecutionSpec, isNotNull);
+    },
+  );
+
   testUsingContext(
     'Verbose prints phase timings',
     () async {
@@ -2096,6 +2143,7 @@ resolution: workspace
           'enable-hcpp',
           'deprecated-js-interop',
           'fatal-warnings',
+          'experimental-faster-testing',
           'disable-service-auth-codes',
           'disable-service-origin-check',
           'ipv6',
