@@ -204,7 +204,10 @@ static bool Bind(PassBindingsCacheMTL& pass,
     return false;
   }
 
-  auto buffer = DeviceBufferMTL::Cast(*device_buffer).GetMTLBuffer();
+  // Every bind of every draw lands here, and `device_buffer` outlives the call,
+  // so this doesn't pay for reference counting.
+  __unsafe_unretained id<MTLBuffer> buffer =
+      DeviceBufferMTL::Cast(*device_buffer).GetMTLBuffer();
   // The Metal call is a void return and we don't want to make it on nil.
   if (!buffer) {
     return false;
@@ -222,16 +225,25 @@ static bool Bind(PassBindingsCacheMTL& pass,
     return false;
   }
 
+  const TextureMTL& texture_mtl = TextureMTL::Cast(texture);
+  const id<MTLTexture>& resolved_texture = texture_mtl.GetResolvedMTLTexture();
   return pass.SetTexture(stage, bind_index,
-                         TextureMTL::Cast(texture).GetMTLTexture()) &&
+                         resolved_texture ? resolved_texture
+                                          : texture_mtl.GetMTLTexture()) &&
          pass.SetSampler(stage, bind_index,
                          SamplerMTL::Cast(*sampler).GetMTLSamplerState());
 }
 
 // |RenderPass|
 void RenderPassMTL::SetPipeline(PipelineRef pipeline) {
-  const PipelineDescriptor& pipeline_desc = pipeline->GetDescriptor();
   CountPipelineUse(pipeline);
+  has_valid_pipeline_ = true;
+  if (pipeline.get() == bound_pipeline_) {
+    return;
+  }
+  bound_pipeline_ = pipeline.get();
+
+  const PipelineDescriptor& pipeline_desc = pipeline->GetDescriptor();
   primitive_type_ = pipeline_desc.GetPrimitiveType();
   pass_bindings_.SetRenderPipelineState(
       PipelineMTL::Cast(*pipeline).GetMTLRenderPipelineState());
@@ -245,7 +257,6 @@ void RenderPassMTL::SetPipeline(PipelineRef pipeline) {
   [encoder_ setCullMode:ToMTLCullMode(pipeline_desc.GetCullMode())];
   [encoder_ setTriangleFillMode:ToMTLTriangleFillMode(
                                     pipeline_desc.GetPolygonMode())];
-  has_valid_pipeline_ = true;
 }
 
 // |RenderPass|
@@ -341,7 +352,7 @@ absl::Status RenderPassMTL::Draw() {
                    vertexCount:vertex_count_];
     }
   } else {
-    id<MTLBuffer> mtl_index_buffer =
+    __unsafe_unretained id<MTLBuffer> mtl_index_buffer =
         DeviceBufferMTL::Cast(*index_buffer_.GetBuffer()).GetMTLBuffer();
     if (instance_count_ != 1u) {
       [encoder_ drawIndexedPrimitives:ToMTLPrimitiveType(primitive_type_)

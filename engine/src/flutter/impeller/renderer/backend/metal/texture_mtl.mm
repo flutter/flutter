@@ -38,6 +38,10 @@ TextureMTL::TextureMTL(TextureDescriptor p_desc,
     return;
   }
 
+  // A drawable's texture has to wait until it is first needed.
+  if (!drawable) {
+    resolved_texture_ = aquire_proc();
+  }
   is_wrapped_ = wrapped;
   is_valid_ = true;
 }

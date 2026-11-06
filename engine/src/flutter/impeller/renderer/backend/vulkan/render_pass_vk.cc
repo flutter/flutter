@@ -546,8 +546,11 @@ absl::Status RenderPassVK::Draw() {
   }
   const auto descriptor_set = descriptor_result.value();
   const auto pipeline_layout = pipeline_vk.GetPipelineLayout();
-  command_buffer_vk_.bindPipeline(vk::PipelineBindPoint::eGraphics,
-                                  pipeline_vk.GetPipeline());
+  if (const vk::Pipeline pipeline = pipeline_vk.GetPipeline();
+      pipeline != bound_pipeline_) {
+    command_buffer_vk_.bindPipeline(vk::PipelineBindPoint::eGraphics, pipeline);
+    bound_pipeline_ = pipeline;
+  }
 
   for (auto i = 0u; i < descriptor_write_offset_; i++) {
     write_workspace_[i].dstSet = descriptor_set;
@@ -682,7 +685,7 @@ bool RenderPassVK::BindResource(ShaderStage stage,
   const TextureVK& texture_vk = TextureVK::Cast(*texture);
   const SamplerVK& sampler_vk = SamplerVK::Cast(*sampler);
 
-  if (!command_buffer_->Track(texture)) {
+  if (!IsBorrowedTexture(texture) && !command_buffer_->Track(texture)) {
     return false;
   }
 

@@ -5,6 +5,7 @@
 #ifndef FLUTTER_IMPELLER_CORE_TEXTURE_H_
 #define FLUTTER_IMPELLER_CORE_TEXTURE_H_
 
+#include <memory>
 #include <string_view>
 
 #include "flutter/fml/mapping.h"
@@ -81,6 +82,20 @@ class Texture {
 
   Texture& operator=(const Texture&) = delete;
 };
+
+/// A reference to [texture] that does not own it, the texture counterpart to a
+/// `BufferView` made from a raw pointer. Copying it costs no atomics, and
+/// backends do not track it, so the caller must keep the texture alive until
+/// the GPU is done with it.
+template <typename T>
+std::shared_ptr<T> BorrowTexture(T* texture) {
+  return std::shared_ptr<T>(std::shared_ptr<T>(), texture);
+}
+
+/// Whether [texture] came from `BorrowTexture`.
+inline bool IsBorrowedTexture(const std::shared_ptr<const Texture>& texture) {
+  return texture && texture.use_count() == 0;
+}
 
 }  // namespace impeller
 

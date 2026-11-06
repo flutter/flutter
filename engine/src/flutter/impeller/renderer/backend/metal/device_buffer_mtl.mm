@@ -18,10 +18,6 @@ DeviceBufferMTL::DeviceBufferMTL(DeviceBufferDescriptor desc,
 
 DeviceBufferMTL::~DeviceBufferMTL() = default;
 
-id<MTLBuffer> DeviceBufferMTL::GetMTLBuffer() const {
-  return buffer_;
-}
-
 uint8_t* DeviceBufferMTL::OnGetContents() const {
 #if !FML_OS_IOS
   if (storage_mode_ != MTLStorageModeShared &&
