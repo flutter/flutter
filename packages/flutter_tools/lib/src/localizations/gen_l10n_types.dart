@@ -183,6 +183,45 @@ class OptionalParameter {
   final Object value;
 }
 
+/// Dart reserved words that cannot be used as identifiers.
+///
+/// See https://dart.dev/language/keywords.
+const dartReservedWords = <String>{
+  'assert',
+  'break',
+  'case',
+  'catch',
+  'class',
+  'const',
+  'continue',
+  'default',
+  'do',
+  'else',
+  'enum',
+  'extends',
+  'false',
+  'final',
+  'finally',
+  'for',
+  'if',
+  'in',
+  'is',
+  'new',
+  'null',
+  'rethrow',
+  'return',
+  'super',
+  'switch',
+  'this',
+  'throw',
+  'true',
+  'try',
+  'var',
+  'void',
+  'while',
+  'with',
+};
+
 // One message parameter: one placeholder from an @foo entry in the template ARB file.
 //
 // Placeholders are specified as a JSON map with one entry for each placeholder.
@@ -217,8 +256,9 @@ class OptionalParameter {
 // }
 //
 class Placeholder {
-  Placeholder(this.resourceId, this.name, Map<String, Object?> attributes)
-    : example = _stringAttribute(resourceId, name, attributes, 'example'),
+  Placeholder(this.resourceId, String name, Map<String, Object?> attributes)
+    : name = _validateName(resourceId, name),
+      example = _stringAttribute(resourceId, name, attributes, 'example'),
       type = _typeAttribute(resourceId, name, attributes),
       format = _stringAttribute(resourceId, name, attributes, 'format'),
       optionalParameters = _optionalParameters(resourceId, name, attributes),
@@ -245,6 +285,28 @@ class Placeholder {
   // 'format' can contain a number of date time formats separated by `dateFormatPartsDelimiter`.
   List<String> get dateFormatParts => format?.split(_dateFormatPartsDelimiter) ?? <String>[];
   bool get hasValidDateFormat => dateFormatParts.every(validDateFormats.contains);
+
+  static final RegExp _validNameRegExp = RegExp(r'^[a-zA-Z_$][a-zA-Z0-9_$]*$');
+
+  /// Validates that [name] represents a valid Dart parameter identifier.
+  static bool _isValidName(String name) {
+    if (name == '_' || dartReservedWords.contains(name)) {
+      return false;
+    }
+    return _validNameRegExp.hasMatch(name);
+  }
+
+  static String _validateName(String resourceId, String name) {
+    if (!_isValidName(name)) {
+      throw L10nException(
+        'Invalid placeholder name "$name" in message "$resourceId". '
+        'Placeholder names must be valid Dart identifiers: they cannot be empty, '
+        'be a single underscore, start with a number, contain non-alphanumeric '
+        'characters, or be a Dart reserved word.',
+      );
+    }
+    return name;
+  }
 
   // Matches valid Dart type syntax:
   // - Optional library or namespace prefixes, e.g. `prefix.`, `package.prefix.`

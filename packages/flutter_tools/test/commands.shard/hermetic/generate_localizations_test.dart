@@ -170,6 +170,136 @@ flutter:
     expect(processManager, hasNoRemainingExpectations);
   });
 
+  testWithoutContext('throws ToolExit when dart format fails', () async {
+    final File arbFile = fileSystem.file(fileSystem.path.join('lib', 'l10n', 'app_en.arb'))
+      ..createSync(recursive: true);
+    arbFile.writeAsStringSync('''
+{
+  "helloWorld": "Hello, World!",
+  "@helloWorld": {
+    "description": "Sample description"
+  }
+}''');
+    final File pubspecFile = fileSystem.file('pubspec.yaml')..createSync();
+    pubspecFile.writeAsStringSync(BasicProjectWithFlutterGen().pubspec);
+    final processManager = FakeProcessManager.list(<FakeCommand>[
+      const FakeCommand(
+        command: <String>[
+          'Artifact.engineDartBinary',
+          'format',
+          '/lib/l10n/app_localizations_en.dart',
+          '/lib/l10n/app_localizations.dart',
+        ],
+        exitCode: 65,
+        stdout: 'Formatted no files in 0.00 seconds.',
+        stderr: 'Could not format because the source could not be parsed.',
+      ),
+    ]);
+
+    final command = GenerateLocalizationsCommand(
+      toolContext: FakeToolContext(
+        artifacts: artifacts,
+        fs: fileSystem,
+        logger: logger,
+        processManager: processManager,
+      ),
+    );
+
+    await expectLater(
+      createTestCommandRunner(command).run(<String>['gen-l10n', '--format']),
+      throwsToolExit(
+        message: '''
+`dart format` failed with exit code 65
+
+stdout:
+Formatted no files in 0.00 seconds.
+
+stderr:
+Could not format because the source could not be parsed.''',
+      ),
+    );
+    expect(processManager, hasNoRemainingExpectations);
+  });
+
+  testWithoutContext(
+    'throws ToolExit before running dart format when placeholder name is invalid',
+    () async {
+      final File arbFile = fileSystem.file(fileSystem.path.join('lib', 'l10n', 'app_en.arb'))
+        ..createSync(recursive: true);
+      arbFile.writeAsStringSync('''
+{
+  "handsPlayed": "Hands played: {count}",
+  "@handsPlayed": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "No": {
+        "type": "String"
+      },
+      "1": {
+        "type": "String"
+      }
+    }
+  }
+}''');
+      final File pubspecFile = fileSystem.file('pubspec.yaml')..createSync();
+      pubspecFile.writeAsStringSync(BasicProjectWithFlutterGen().pubspec);
+      final processManager = FakeProcessManager.empty();
+
+      final command = GenerateLocalizationsCommand(
+        toolContext: FakeToolContext(
+          artifacts: artifacts,
+          fs: fileSystem,
+          logger: logger,
+          processManager: processManager,
+        ),
+      );
+
+      await expectLater(
+        createTestCommandRunner(command).run(<String>['gen-l10n', '--format']),
+        throwsToolExit(
+          message:
+              'Invalid placeholder name "1" in message "handsPlayed". '
+              'Placeholder names must be valid Dart identifiers: they cannot be empty, '
+              'be a single underscore, start with a number, contain non-alphanumeric '
+              'characters, or be a Dart reserved word.',
+        ),
+      );
+      final Directory outputDirectory = fileSystem.directory(fileSystem.path.join('lib', 'l10n'));
+      expect(outputDirectory.childFile('app_localizations_en.dart').existsSync(), isFalse);
+      expect(outputDirectory.childFile('app_localizations.dart').existsSync(), isFalse);
+      expect(processManager, hasNoRemainingExpectations);
+    },
+  );
+
+  testWithoutContext('throws ToolExit without writing output files when resource ID is a Dart reserved word and --no-format is passed', () async {
+    final File arbFile = fileSystem.file(fileSystem.path.join('lib', 'l10n', 'app_en.arb'))
+      ..createSync(recursive: true);
+    arbFile.writeAsStringSync('''
+{
+  "continue": "Continue"
+}''');
+    final File pubspecFile = fileSystem.file('pubspec.yaml')..createSync();
+    pubspecFile.writeAsStringSync(BasicProjectWithFlutterGen().pubspec);
+
+    final command = GenerateLocalizationsCommand(toolContext: toolContext);
+
+    await expectLater(
+      createTestCommandRunner(command).run(<String>['gen-l10n', '--no-format']),
+      throwsToolExit(
+        message:
+            'Resources names must be valid Dart method names: they have to be '
+            'camel case, cannot start with a number or underscore, cannot '
+            'contain non-alphanumeric characters, and cannot be a Dart '
+            'reserved word.',
+      ),
+    );
+    final Directory outputDirectory = fileSystem.directory(fileSystem.path.join('lib', 'l10n'));
+    expect(outputDirectory.childFile('app_localizations_en.dart').existsSync(), isFalse);
+    expect(outputDirectory.childFile('app_localizations.dart').existsSync(), isFalse);
+  });
+
   testWithoutContext('dart format is not run when --no-format is passed', () async {
     final File arbFile = fileSystem.file(fileSystem.path.join('lib', 'l10n', 'app_en.arb'))
       ..createSync(recursive: true);
