@@ -253,6 +253,19 @@ Future<void> testMain() async {
         ImageType.gif,
       ),
       ('1 frame followed by a garbage byte', <int>[...firstFrame, 0x00], ImageType.gif),
+      for (final int label in <int>[0xfa, 0xfd, 0x80, 0x42])
+        (
+          // Extension introducer, the label, one 3-byte data sub-block and the
+          // block terminator.
+          'a 0x${label.toRadixString(16)} extension between 2 frames',
+          <int>[...firstFrame, 0x21, label, 0x03, 0x01, 0x02, 0x03, 0x00, ...imageFrame, 0x3b],
+          ImageType.animatedGif,
+        ),
+      (
+        'a truncated unknown extension after 1 frame',
+        <int>[...firstFrame, 0x21, 0x80, 0x03, 0x01],
+        ImageType.gif,
+      ),
       (
         // Packed fields 0xf7 declare a 768-byte global color table, which
         // ends exactly where the first frame starts.

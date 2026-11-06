@@ -341,33 +341,13 @@ class GifHeaderReader {
         _position += globalColorTableSizeInBytes;
       }
 
-      var framesFound = 0;
-      // Read the GIF until we find one complete frame followed by the start of
-      // another graphic block, or reach the end of the GIF.
-      while (true) {
-        if (!_maybeSkipSpecialPurposeBlocks()) {
-          return false;
-        }
-        final bool isTrailer = _checkForTrailer();
-        if (isTrailer) {
-          return framesFound > 1;
-        }
-
-        if (framesFound >= 1) {
-          // We already found one complete frame. This is an animated GIF only
-          // if a second graphic block actually begins here. Padding bytes,
-          // garbage or the end of the buffer do not count.
-          return _checkForGraphicBlockStart();
-        }
-
-        // If the next block isn't a special-purpose block, it must be a graphic
-        // block. Skip the graphic block, increase the frame count, and keep
-        // looking for more.
-        if (!_skipGraphicBlock()) {
-          return false;
-        }
-        framesFound++;
+      // Skip the first frame, then check whether a second one starts. Padding
+      // bytes, garbage, the trailer or the end of the buffer do not count as
+      // the start of a second frame.
+      if (!_skipGraphicBlock() || !_maybeSkipSpecialPurposeBlocks()) {
+        return false;
       }
+      return _checkForGraphicBlockStart();
     } catch (_) {
       // Backstop for anything the checks above missed: treat the buffer as
       // malformed rather than throwing. This is a best-effort sniffer, and the
@@ -388,19 +368,11 @@ class GifHeaderReader {
     return signature == 'GIF' && (version == '89a' || version == '87a');
   }
 
-  /// Returns [true] if the next block is a trailer.
-  bool _checkForTrailer() {
-    if (!_hasBytes(1)) {
-      return false;
-    }
-    final int nextByte = bytes.getUint8(_position);
-    return nextByte == 0x3b;
-  }
-
-  /// Skip Special Purpose Blocks (they do not effect decoding).
+  /// Skip extensions that are not part of a graphic block, such as Comment and
+  /// Application Extensions (they do not affect decoding).
   ///
-  /// Returns [false] if a Special Purpose Block is truncated or malformed, in
-  /// which case the read position is no longer at a block boundary.
+  /// Returns [false] if one of these extensions is truncated, in which case the
+  /// read position is no longer at a block boundary.
   bool _maybeSkipSpecialPurposeBlocks() {
     while (_checkForSpecialPurposeBlock()) {
       if (!_skipSpecialPurposeBlock()) {
@@ -410,55 +382,36 @@ class GifHeaderReader {
     return true;
   }
 
-  /// Returns [true] if the next block is a Special-Purpose Block (extension
-  /// label between 0xFA and 0xFF).
+  /// Returns [true] if the next block is an extension that is not part of a
+  /// graphic block: anything other than a Graphic Control Extension (0xF9) or
+  /// a Plain Text Extension (0x01).
+  ///
+  /// This covers the Special Purpose Blocks (Comment and Application
+  /// Extensions) as well as reserved and unknown extension labels.
   bool _checkForSpecialPurposeBlock() {
-    if (!_hasBytes(2)) {
+    if (!_hasBytes(2) || bytes.getUint8(_position) != 0x21) {
       return false;
     }
-    final int extensionIntroducer = bytes.getUint8(_position);
-    if (extensionIntroducer != 0x21) {
-      return false;
-    }
-
     final int extensionLabel = bytes.getUint8(_position + 1);
-
-    // A Special Purpose Block has a label between 0xFA and 0xFF.
-    return extensionLabel >= 0xfa && extensionLabel <= 0xff;
+    return extensionLabel != 0xf9 && extensionLabel != 0x01;
   }
 
-  /// Skips past the current control block.
+  /// Skips past the current extension.
   ///
-  /// Returns [false] if the block is truncated or is not a Comment Extension
-  /// or Application Extension.
+  /// Every extension is the extension introducer, the label and then data
+  /// sub-blocks, so this works for unknown labels too. For an Application
+  /// Extension, the 11-byte application identifier block is skipped as a data
+  /// sub-block.
+  ///
+  /// Returns [false] if the next block is not such an extension or is
+  /// truncated.
   bool _skipSpecialPurposeBlock() {
     if (!_checkForSpecialPurposeBlock()) {
       return false;
     }
-
-    // Skip the extension introducer.
-    _position += 1;
-
-    // Read the extension label to determine if this is a comment block or
-    // application block.
-    final int extensionLabel = _readUint8();
-    if (extensionLabel == 0xfe) {
-      // This is a Comment Extension. Just skip past data sub-blocks.
-      return _skipDataBlocks();
-    } else if (extensionLabel == 0xff) {
-      // This is an Application Extension. Skip past the application identifier
-      // bytes and then skip past the data sub-blocks.
-
-      // Skip the application identifier.
-      if (!_hasBytes(12)) {
-        return false;
-      }
-      _position += 12;
-
-      return _skipDataBlocks();
-    }
-    // Labels 0xFA-0xFD are reserved and their layout is unknown.
-    return false;
+    // Skip the introducer and label, then the data sub-blocks.
+    _position += 2;
+    return _skipDataBlocks();
   }
 
   /// Returns [true] if the next block starts a graphic block: a Graphic
