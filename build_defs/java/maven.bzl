@@ -22,6 +22,14 @@ to underscores, as rules_jvm_external spells them (`androidx_test_core`,
 `org_robolectric_robolectric`), so that a later move to it would rename
 nothing.
 
+Maven Central's files are fetched from Google's mirror of it first
+(maven-central.storage-download.googleapis.com, a copy of repo1.maven.org
+on Cloud Storage) and from repo1.maven.org itself second: repo1 limits
+requests by address, and the CI bots, each fetching the whole set afresh
+into a clean checkout, share theirs (`429 Too Many Requests` on a
+linux_unopt drone, 2026-11-05). The lock keeps the canonical URL; the
+sha256 is checked either way.
+
 This is the engine's own small version of what rules_jvm_external does,
 kept small on purpose: the root module's graph stays the few modules it
 has (the user's call of 2026-10-20 against rules_java and friends), the
@@ -33,6 +41,15 @@ load(":maven.lock.bzl", "MAVEN_ARTIFACTS")
 def _target_name(coordinate):
     group, artifact, _ = coordinate.split(":")
     return ("%s_%s" % (group, artifact)).replace(".", "_").replace("-", "_")
+
+_MAVEN_CENTRAL = "https://repo1.maven.org/maven2/"
+_MAVEN_CENTRAL_MIRROR = "https://maven-central.storage-download.googleapis.com/maven2/"
+
+def _urls(url):
+    """The URLs to try for `url`, in order: Google's mirror of Maven Central before Maven Central."""
+    if url.startswith(_MAVEN_CENTRAL):
+        return [_MAVEN_CENTRAL_MIRROR + url[len(_MAVEN_CENTRAL):], url]
+    return [url]
 
 def _maven_artifacts_impl(ctx):
     build = [
@@ -55,12 +72,12 @@ def _maven_artifacts_impl(ctx):
             # loader and finds by name in one directory
             # (robolectric.dependency.dir): never on a class path.
             jar = "robolectric/%s-%s.jar" % (artifact, version)
-            ctx.download(url = url, output = jar, sha256 = sha256)
+            ctx.download(url = _urls(url), output = jar, sha256 = sha256)
             android_all.append(jar)
             continue
         if packaging == "aar":
             archive = "%s/%s-%s.aar" % (directory, artifact, version)
-            ctx.download(url = url, output = archive, sha256 = sha256)
+            ctx.download(url = _urls(url), output = archive, sha256 = sha256)
             ctx.extract(archive, output = directory)
             ctx.delete(archive)
             jar = "%s/classes.jar" % directory
@@ -81,7 +98,7 @@ def _maven_artifacts_impl(ctx):
             ])
         else:
             jar = "%s/%s-%s.jar" % (directory, artifact, version)
-            ctx.download(url = url, output = jar, sha256 = sha256)
+            ctx.download(url = _urls(url), output = jar, sha256 = sha256)
             build.extend([
                 "# %s (jar)" % coordinate,
                 "filegroup(",
