@@ -1128,37 +1128,34 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
     Animation<double> animation,
     Animation<double> secondaryAnimation,
   ) {
-    final Widget content = DisplayFeatureSubScreen(
-      anchorPoint: anchorPoint,
-      child: Builder(
-        builder: (BuildContext context) {
-          final BottomSheetThemeData sheetTheme = Theme.of(context).bottomSheetTheme;
-          final BottomSheetThemeData defaults = Theme.of(context).useMaterial3
-              ? _BottomSheetDefaultsM3(context)
-              : const BottomSheetThemeData();
-          return _ModalBottomSheet<T>(
-            route: this,
-            animationStyle: sheetAnimationStyle,
-            backgroundColor:
-                backgroundColor ??
-                sheetTheme.modalBackgroundColor ??
-                sheetTheme.backgroundColor ??
-                defaults.backgroundColor,
-            elevation:
-                elevation ??
-                sheetTheme.modalElevation ??
-                sheetTheme.elevation ??
-                defaults.modalElevation,
-            shape: shape,
-            clipBehavior: clipBehavior,
-            constraints: constraints,
-            isScrollControlled: isScrollControlled,
-            scrollControlDisabledMaxHeightRatio: scrollControlDisabledMaxHeightRatio,
-            enableDrag: enableDrag,
-            showDragHandle: showDragHandle ?? (enableDrag && (sheetTheme.showDragHandle ?? false)),
-          );
-        },
-      ),
+    final Widget content = Builder(
+      builder: (BuildContext context) {
+        final BottomSheetThemeData sheetTheme = Theme.of(context).bottomSheetTheme;
+        final BottomSheetThemeData defaults = Theme.of(context).useMaterial3
+            ? _BottomSheetDefaultsM3(context)
+            : const BottomSheetThemeData();
+        return _ModalBottomSheet<T>(
+          route: this,
+          animationStyle: sheetAnimationStyle,
+          backgroundColor:
+              backgroundColor ??
+              sheetTheme.modalBackgroundColor ??
+              sheetTheme.backgroundColor ??
+              defaults.backgroundColor,
+          elevation:
+              elevation ??
+              sheetTheme.modalElevation ??
+              sheetTheme.elevation ??
+              defaults.modalElevation,
+          shape: shape,
+          clipBehavior: clipBehavior,
+          constraints: constraints,
+          isScrollControlled: isScrollControlled,
+          scrollControlDisabledMaxHeightRatio: scrollControlDisabledMaxHeightRatio,
+          enableDrag: enableDrag,
+          showDragHandle: showDragHandle ?? (enableDrag && (sheetTheme.showDragHandle ?? false)),
+        );
+      },
     );
 
     Widget bottomSheet = useSafeArea
@@ -1167,6 +1164,8 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
 
     // Prevent clicks inside the bottom sheet from passing through to the barrier
     bottomSheet = Semantics(hitTestBehavior: SemanticsHitTestBehavior.opaque, child: bottomSheet);
+
+    bottomSheet = DisplayFeatureSubScreen(anchorPoint: anchorPoint, child: bottomSheet);
 
     return capturedThemes?.wrap(bottomSheet) ?? bottomSheet;
   }
