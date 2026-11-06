@@ -213,6 +213,20 @@ void main() {
     },
   );
 
+  testWidgets(
+    'TestPlatformDispatcher sends fake alwaysUse24HourFormat when WidgetsBindingObserver notifiers are called',
+    (WidgetTester tester) async {
+      addTearDown(tester.platformDispatcher.clearAlwaysUse24HourTestValue);
+      final bool defaultFormat = WidgetsBinding.instance.platformDispatcher.alwaysUse24HourFormat;
+      final observer = TestObserver();
+      retrieveTestBinding(tester).addObserver(observer);
+      addTearDown(() => retrieveTestBinding(tester).removeObserver(observer));
+      final bool expectedValue = !defaultFormat;
+      retrieveTestBinding(tester).platformDispatcher.alwaysUse24HourFormatTestValue = expectedValue;
+      expect(observer.alwaysUse24HourFormat, equals(expectedValue));
+    },
+  );
+
   testWidgets('TestPlatformDispatcher.view getter returns the implicit view', (
     WidgetTester tester,
   ) async {
@@ -666,10 +680,16 @@ void main() {
 
 class TestObserver with WidgetsBindingObserver {
   List<Locale>? locales;
+  bool? alwaysUse24HourFormat;
 
   @override
   void didChangeLocales(List<Locale>? locales) {
     this.locales = locales;
+  }
+
+  @override
+  void didChangeAlwaysUse24HourFormat() {
+    alwaysUse24HourFormat = WidgetsBinding.instance.platformDispatcher.alwaysUse24HourFormat;
   }
 }
 
