@@ -1867,18 +1867,23 @@ bazel test --config=android_debug_unopt //engine/src/flutter/shell/platform/andr
 ```
 
 Each test tells Bazel's scheduler `resources:memory:3072`: a Robolectric
-JVM over the embedding's classes peaks at 3.0 GB resident (the activity
+JVM over the embedding's classes peaks at 2.3 GB resident (the activity
 and text-input classes; 0.9 GB on average; sampled every 2 s over the
 suite) under the 8 GB heap cap Gradle's forks have too, so an 8-core,
 30 GB bot runs six at once, as Gradle ran eight (the 12 GB first
 declared here ran them one at a time there: 23 minutes for a suite
-Gradle finishes in four). On this host (24 cores, 94 GB): **87 of 87
-classes pass** -- 1,567 test cases by JUnit's count (Gradle's 1,565
-passed and 3 skipped) -- in 1,119 s at twenty-one at once (the cores are
-the limit: 1,509 s at two, about the same at five); the longest classes
-alone are TextInputPluginTest (65 s on a bot, 124 tests over four SDKs),
-FlutterViewTest (68 s) and FlutterActivityAndFragmentDelegateTest (66 s).
-The compile of the 96 files takes 11 s, the resource APK and R classes 4 s.
+Gradle finishes in four). The JVM runs with the C1 compiler alone and the
+serial collector (`robolectric.bzl`'s JVM_FLAGS): a JVM that lives
+seconds and loads tens of thousands of classes never amortizes C2, and
+six G1 collectors' parallel threads on eight cores contend more than they
+collect -- measured at six at once on 8 CPUs, the suite's summed time
+went 6,605 s → 3,305 (C1 alone) → 2,430 (both), the longest class
+418 s → 133, the wall 1,150 s → 467; Gradle's forks have neither flag but
+run many classes each. On this host (24 cores, 94 GB) before those flags:
+**87 of 87 classes pass** -- 1,567 test cases by JUnit's count (Gradle's
+1,565 passed and 3 skipped) -- in 1,119 s at twenty-one at once (the
+cores are the limit: 1,509 s at two, about the same at five). The compile
+of the 96 files takes 11 s, the resource APK and R classes 4 s.
 
 ## The archives CI uploads: `zip_bundle`
 
