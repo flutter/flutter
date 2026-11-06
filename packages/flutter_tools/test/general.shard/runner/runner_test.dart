@@ -9,12 +9,16 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/executable.dart';
 import 'package:flutter_tools/runner.dart' as runner;
 
+import 'package:flutter_tools/src/android/android_builder.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/android/android_studio.dart';
 import 'package:flutter_tools/src/android/android_workflow.dart';
+import 'package:flutter_tools/src/android/gradle.dart';
 import 'package:flutter_tools/src/android/gradle_utils.dart';
 import 'package:flutter_tools/src/android/java.dart';
+import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/base/bot_detector.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/config.dart';
@@ -35,8 +39,12 @@ import 'package:flutter_tools/src/context/android_context.dart';
 import 'package:flutter_tools/src/context/apple_context.dart';
 import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/context/tool_dependencies.dart';
+import 'package:flutter_tools/src/context_runner.dart';
+import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/devtools_launcher.dart';
 import 'package:flutter_tools/src/features.dart';
+import 'package:flutter_tools/src/flutter_application_package.dart';
 import 'package:flutter_tools/src/flutter_device_manager.dart';
 import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:flutter_tools/src/ios/simulators.dart';
@@ -45,10 +53,14 @@ import 'package:flutter_tools/src/macos/cocoapods_validator.dart';
 import 'package:flutter_tools/src/macos/macos_workflow.dart';
 import 'package:flutter_tools/src/macos/xcdevice.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
+import 'package:flutter_tools/src/mdns_discovery.dart';
+import 'package:flutter_tools/src/native_assets.dart';
 import 'package:flutter_tools/src/persistent_tool_state.dart';
 import 'package:flutter_tools/src/pre_run_validator.dart';
 import 'package:flutter_tools/src/reporting/crash_reporting.dart';
+import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
+import 'package:flutter_tools/src/template.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:flutter_tools/src/windows/windows_workflow.dart';
 import 'package:test/fake.dart';
@@ -82,6 +94,7 @@ Future<ToolDependencies> _bootstrapForTest({
   IOSSimulatorUtils? iosSimulatorUtils,
   Java? java,
   Logger? logger,
+  TestCompilerNativeAssetsBuilder? nativeAssetsBuilder,
   OutputPreferences? outputPreferences,
   PersistentToolState? persistentToolState,
   Platform? platform,
@@ -128,6 +141,7 @@ Future<ToolDependencies> _bootstrapForTest({
     iosSimulatorUtils: iosSimulatorUtils ?? const NoopIOSSimulatorUtils(),
     java: java,
     logger: resolvedLogger,
+    nativeAssetsBuilder: nativeAssetsBuilder,
     outputPreferences: resolvedOutputPreferences,
     persistentToolState:
         persistentToolState ??
@@ -1281,6 +1295,227 @@ void main() {
       expect(command.resolvePlistParser(), same(fakePlistParser));
     });
 
+    // Uses bare `test` rather than `testWithoutContext` because `_NoContext.run`
+    // drops `AppContext` `overrides` and throws on `context.get`.
+    test('populates default AppContext services and nativeAssetsBuilder without eager toolchain evaluation', () async {
+      var sdkEvaluations = 0;
+      var javaEvaluations = 0;
+      var xcdeviceEvaluations = 0;
+      var xcodeEvaluations = 0;
+      final fakeAndroidSdk = FakeAndroidSdk();
+      final fakeNativeAssetsBuilder = _FakeTestCompilerNativeAssetsBuilder();
+      final fakePlistParser = FakePlistParser();
+      final shutdownHooks = ShutdownHooks();
+      late final _ContextRecordingFlutterCommand command;
+      final int exitCode = await runner.run(
+        <String>[_ContextRecordingFlutterCommand.commandName],
+        (ToolDependencies toolDependencies) {
+          command = _ContextRecordingFlutterCommand(toolContext: toolDependencies.toolContext);
+          return <FlutterCommand>[command];
+        },
+        flutterVersion: '[user-branch]/',
+        shutdownHooks: shutdownHooks,
+        toolDependenciesBuilder: () async {
+          final ToolDependencies base = await _bootstrapForTest(
+            deviceManager: FakeDeviceManager(),
+            fs: fs,
+            nativeAssetsBuilder: fakeNativeAssetsBuilder,
+            plistParser: fakePlistParser,
+            shutdownHooks: shutdownHooks,
+          );
+          final ToolDependencies(
+            androidContext: AndroidContext baseAndroid,
+            appleContext: AppleContext baseApple,
+          ) = base;
+          return ToolDependencies(
+            analytics: base.analytics,
+            androidContext: AndroidContext(
+              androidSdkBuilder: () {
+                sdkEvaluations++;
+                return fakeAndroidSdk;
+              },
+              androidStudioBuilder: () => baseAndroid.androidStudio,
+              gradleUtilsBuilder: () => baseAndroid.gradleUtils,
+              javaBuilder: () {
+                javaEvaluations++;
+                return null;
+              },
+            ),
+            androidWorkflow: base.androidWorkflow,
+            appleContext: AppleContext(
+              cocoaPodsBuilder: () => baseApple.cocoaPods,
+              cocoapodsValidatorBuilder: () => baseApple.cocoapodsValidator,
+              iosSimulatorUtilsBuilder: () => baseApple.iosSimulatorUtils,
+              iosWorkflowBuilder: () => baseApple.iosWorkflow,
+              plistParserBuilder: () => fakePlistParser,
+              xcdeviceBuilder: () {
+                xcdeviceEvaluations++;
+                return FakeXCDevice();
+              },
+              xcodeBuilder: () {
+                xcodeEvaluations++;
+                return FakeXcode();
+              },
+              xcodeProjectInterpreterBuilder: () => baseApple.xcodeProjectInterpreter,
+            ),
+            buildSystem: base.buildSystem,
+            buildTargets: base.buildTargets,
+            crashReporter: base.crashReporter,
+            deviceManager: base.deviceManager,
+            doctor: base.doctor,
+            emulatorManager: base.emulatorManager,
+            extensionBuildManager: base.extensionBuildManager,
+            extensionCleanManager: base.extensionCleanManager,
+            extensionManager: base.extensionManager,
+            featureFlags: base.featureFlags,
+            macOSWorkflow: base.macOSWorkflow,
+            templateRenderer: base.templateRenderer,
+            toolContext: base.toolContext,
+            windowsWorkflow: base.windowsWorkflow,
+          );
+        },
+      );
+
+      expect(exitCode, 0);
+      expect(sdkEvaluations, 0);
+      expect(javaEvaluations, 0);
+      expect(xcdeviceEvaluations, 0);
+      expect(xcodeEvaluations, 0);
+      expect(command.resolvePub(), isA<Pub>());
+      expect(command.resolveTemplatePathProvider(), isA<TemplatePathProvider>());
+      expect(command.resolveAssetBundleFactory(), isA<AssetBundleFactory>());
+      expect(command.resolveDevtoolsLauncher(), isA<DevtoolsServerLauncher>());
+      expect(command.resolveMdnsVmServiceDiscovery(), isA<MDnsVmServiceDiscovery>());
+      expect(command.resolveAndroidBuilder(), isA<AndroidGradleBuilder>());
+      expect(command.resolveNativeAssetsBuilder(), same(fakeNativeAssetsBuilder));
+      expect(sdkEvaluations, 0);
+      expect(javaEvaluations, 0);
+      expect(command.resolveApplicationPackageFactory(), isA<FlutterApplicationPackageFactory>());
+      expect(sdkEvaluations, 1);
+      expect(javaEvaluations, 0);
+      expect(command.resolveAndroidValidator(), isA<AndroidValidator>());
+      expect(sdkEvaluations, 1);
+      expect(javaEvaluations, 1);
+    });
+
+    test(
+      'beats enclosing runInContext fallbacks while preserving explicit ancestor overrides',
+      () async {
+        final customAppPackageFactory = _FakeApplicationPackageFactory();
+        final customAssetBundleFactory = _FakeAssetBundleFactory();
+        final customDevtoolsLauncher = FakeDevtoolsLauncher();
+        final customNativeAssetsBuilder = _FakeTestCompilerNativeAssetsBuilder();
+        final customPub = _FakePub();
+        final customTemplatePathProvider = _FakeTemplatePathProvider();
+        final defaultNativeAssetsBuilder = _FakeTestCompilerNativeAssetsBuilder();
+        var sdkEvaluations = 0;
+        var studioEvaluations = 0;
+        var javaEvaluations = 0;
+
+        late _ContextRecordingFlutterCommand firstCommand;
+        late _ContextRecordingFlutterCommand secondCommand;
+
+        await runInContext<void>(
+          () async {
+            Future<int> invokeRunner(void Function(_ContextRecordingFlutterCommand) onCommand) {
+              final shutdownHooks = ShutdownHooks();
+              return runner.run(
+                <String>[_ContextRecordingFlutterCommand.commandName],
+                (ToolDependencies toolDependencies) {
+                  final cmd = _ContextRecordingFlutterCommand(
+                    toolContext: toolDependencies.toolContext,
+                  );
+                  onCommand(cmd);
+                  return <FlutterCommand>[cmd];
+                },
+                flutterVersion: '[user-branch]/',
+                shutdownHooks: shutdownHooks,
+                toolDependenciesBuilder: () async {
+                  final ToolDependencies base = await _bootstrapForTest(
+                    deviceManager: FakeDeviceManager(),
+                    fs: fs,
+                    nativeAssetsBuilder: defaultNativeAssetsBuilder,
+                    shutdownHooks: shutdownHooks,
+                  );
+                  final AndroidContext baseAndroid = base.androidContext;
+                  return ToolDependencies(
+                    analytics: base.analytics,
+                    androidContext: AndroidContext(
+                      androidSdkBuilder: () {
+                        sdkEvaluations++;
+                        return FakeAndroidSdk();
+                      },
+                      androidStudioBuilder: () {
+                        studioEvaluations++;
+                        return _FakeAndroidStudio();
+                      },
+                      gradleUtilsBuilder: () => baseAndroid.gradleUtils,
+                      javaBuilder: () {
+                        javaEvaluations++;
+                        return null;
+                      },
+                    ),
+                    androidWorkflow: base.androidWorkflow,
+                    appleContext: base.appleContext,
+                    buildSystem: base.buildSystem,
+                    buildTargets: base.buildTargets,
+                    crashReporter: base.crashReporter,
+                    deviceManager: base.deviceManager,
+                    doctor: base.doctor,
+                    emulatorManager: base.emulatorManager,
+                    extensionBuildManager: base.extensionBuildManager,
+                    extensionCleanManager: base.extensionCleanManager,
+                    extensionManager: base.extensionManager,
+                    featureFlags: base.featureFlags,
+                    macOSWorkflow: base.macOSWorkflow,
+                    templateRenderer: base.templateRenderer,
+                    toolContext: base.toolContext,
+                    windowsWorkflow: base.windowsWorkflow,
+                  );
+                },
+              );
+            }
+
+            expect(await invokeRunner((cmd) => firstCommand = cmd), 0);
+            expect(await invokeRunner((cmd) => secondCommand = cmd), 0);
+          },
+          overrides: <Type, Generator>{
+            BotDetector: () => const FakeBotDetector(true),
+            ApplicationPackageFactory: () => customAppPackageFactory,
+            AssetBundleFactory: () => customAssetBundleFactory,
+            DevtoolsLauncher: () => customDevtoolsLauncher,
+            Pub: () => customPub,
+            TemplatePathProvider: () => customTemplatePathProvider,
+            TestCompilerNativeAssetsBuilder: () => customNativeAssetsBuilder,
+          },
+        );
+
+        // Explicit ancestor overrides win over runner.dart defaults.
+        expect(firstCommand.resolveApplicationPackageFactory(), same(customAppPackageFactory));
+        expect(firstCommand.resolveAssetBundleFactory(), same(customAssetBundleFactory));
+        expect(firstCommand.resolveDevtoolsLauncher(), same(customDevtoolsLauncher));
+        expect(firstCommand.resolvePub(), same(customPub));
+        expect(firstCommand.resolveTemplatePathProvider(), same(customTemplatePathProvider));
+        expect(firstCommand.resolveNativeAssetsBuilder(), same(customNativeAssetsBuilder));
+
+        // Non-overridden types resolve from each runner.run's ToolDependencies
+        // rather than enclosing runInContext fallbacks (so AndroidBuilder stays
+        // lazy and instances are not cached on the outer runInContext scope).
+        final AndroidBuilder? firstBuilder = firstCommand.resolveAndroidBuilder();
+        final AndroidBuilder? secondBuilder = secondCommand.resolveAndroidBuilder();
+        expect(firstBuilder, isA<AndroidGradleBuilder>());
+        expect(secondBuilder, isA<AndroidGradleBuilder>());
+        expect(firstBuilder, isNot(same(secondBuilder)));
+        expect(sdkEvaluations, 0);
+        expect(studioEvaluations, 0);
+        expect(javaEvaluations, 0);
+        expect(
+          firstCommand.resolveMdnsVmServiceDiscovery(),
+          isNot(same(secondCommand.resolveMdnsVmServiceDiscovery())),
+        );
+      },
+    );
+
     test('applies FeatureFlags to AnsiTerminal and honors enablePreRunValidator', () async {
       final shutdownHooks = ShutdownHooks();
       late final ToolDependencies capturedDependencies;
@@ -1646,8 +1881,17 @@ class _ContextRecordingFlutterCommand extends FlutterCommand {
   AndroidWorkflow? androidWorkflowInstance;
   MacOSWorkflow? macOSWorkflowInstance;
   WindowsWorkflow? windowsWorkflowInstance;
+  late AndroidBuilder? Function() resolveAndroidBuilder;
   late AndroidSdk? Function() resolveAndroidSdk;
+  late AndroidValidator? Function() resolveAndroidValidator;
+  late ApplicationPackageFactory? Function() resolveApplicationPackageFactory;
+  late AssetBundleFactory Function() resolveAssetBundleFactory;
+  late DevtoolsLauncher? Function() resolveDevtoolsLauncher;
+  late MDnsVmServiceDiscovery? Function() resolveMdnsVmServiceDiscovery;
+  late TestCompilerNativeAssetsBuilder? Function() resolveNativeAssetsBuilder;
   late PlistParser Function() resolvePlistParser;
+  late Pub Function() resolvePub;
+  late TemplatePathProvider Function() resolveTemplatePathProvider;
   late XCDevice? Function() resolveXCDevice;
   late Xcode? Function() resolveXcode;
 
@@ -1660,11 +1904,22 @@ class _ContextRecordingFlutterCommand extends FlutterCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     final AppContext commandContext = context;
+    final Zone commandZone = Zone.current;
     androidWorkflowInstance = commandContext.get<AndroidWorkflow>();
     macOSWorkflowInstance = commandContext.get<MacOSWorkflow>();
     windowsWorkflowInstance = commandContext.get<WindowsWorkflow>();
+    resolveAndroidBuilder = () => commandZone.run(() => androidBuilder);
     resolveAndroidSdk = () => commandContext.get<AndroidSdk>();
+    resolveAndroidValidator = () => commandZone.run(() => androidValidator);
+    resolveApplicationPackageFactory = () =>
+        commandZone.run(() => ApplicationPackageFactory.instance);
+    resolveAssetBundleFactory = () => commandZone.run(() => AssetBundleFactory.instance);
+    resolveDevtoolsLauncher = () => commandZone.run(() => DevtoolsLauncher.instance);
+    resolveMdnsVmServiceDiscovery = () => commandZone.run(() => MDnsVmServiceDiscovery.instance);
+    resolveNativeAssetsBuilder = () => commandContext.get<TestCompilerNativeAssetsBuilder>();
     resolvePlistParser = () => commandContext.get<PlistParser>()!;
+    resolvePub = () => commandZone.run(() => pub);
+    resolveTemplatePathProvider = () => commandZone.run(() => templatePathProvider);
     resolveXCDevice = () => commandContext.get<XCDevice>();
     resolveXcode = () => commandContext.get<Xcode>();
     return FlutterCommandResult.success();
@@ -1840,6 +2095,17 @@ class FakeCache extends Fake implements Cache {
 }
 
 class _FakeAndroidStudio extends Fake implements AndroidStudio {}
+
+class _FakeApplicationPackageFactory extends Fake implements ApplicationPackageFactory {}
+
+class _FakeAssetBundleFactory extends Fake implements AssetBundleFactory {}
+
+class _FakePub extends Fake implements Pub {}
+
+class _FakeTemplatePathProvider extends Fake implements TemplatePathProvider {}
+
+class _FakeTestCompilerNativeAssetsBuilder extends Fake
+    implements TestCompilerNativeAssetsBuilder {}
 
 /// Answers `which` lookups like a host where the binary is not on PATH, and
 /// delegates everything else to [FakeProcessManager.any].

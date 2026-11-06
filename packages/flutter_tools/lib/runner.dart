@@ -10,12 +10,16 @@ import 'package:intl/intl_standalone.dart' as intl_standalone;
 import 'package:process/process.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
+import 'src/android/android_builder.dart';
 import 'src/android/android_sdk.dart';
 import 'src/android/android_studio.dart';
 import 'src/android/android_workflow.dart';
+import 'src/android/gradle.dart';
 import 'src/android/gradle_utils.dart';
 import 'src/android/java.dart';
+import 'src/application_package.dart';
 import 'src/artifacts.dart';
+import 'src/asset.dart';
 import 'src/base/async_guard.dart';
 import 'src/base/bot_detector.dart';
 import 'src/base/common.dart';
@@ -42,11 +46,14 @@ import 'src/context/apple_context.dart';
 import 'src/context/tool_context.dart';
 import 'src/context/tool_dependencies.dart';
 import 'src/custom_devices/custom_devices_config.dart';
+import 'src/dart/pub.dart';
 import 'src/device.dart';
+import 'src/devtools_launcher.dart';
 import 'src/doctor.dart';
 import 'src/emulator.dart';
 import 'src/experimental/extension_manager.dart';
 import 'src/features.dart';
+import 'src/flutter_application_package.dart';
 import 'src/git.dart';
 import 'src/hook_runner.dart';
 import 'src/ios/ios_workflow.dart';
@@ -58,14 +65,18 @@ import 'src/macos/cocoapods_validator.dart';
 import 'src/macos/macos_workflow.dart';
 import 'src/macos/xcdevice.dart';
 import 'src/macos/xcode.dart';
+import 'src/mdns_discovery.dart';
+import 'src/native_assets.dart';
 import 'src/persistent_tool_state.dart';
 import 'src/pre_run_validator.dart';
 import 'src/project.dart';
 import 'src/reporting/crash_reporting.dart';
 import 'src/reporting/unified_analytics.dart';
+import 'src/resident_runner.dart';
 import 'src/runner/flutter_command.dart';
 import 'src/runner/flutter_command_runner.dart';
 import 'src/runner/local_engine.dart';
+import 'src/template.dart';
 import 'src/version.dart';
 import 'src/web/web_runner.dart';
 import 'src/windows/windows_workflow.dart';
@@ -175,6 +186,7 @@ Future<int> run(
         :Git git,
         :LocalEngineLocator localEngineLocator,
         :Logger logger,
+        :TestCompilerNativeAssetsBuilder? nativeAssetsBuilder,
         :OperatingSystemUtils os,
         :OutputPreferences outputPreferences,
         :PersistentToolState persistentToolState,
@@ -200,14 +212,45 @@ Future<int> run(
         firstStackTrace = stackTrace;
         return handleError(error, stackTrace);
       }
-      return context.run<int>(
+      final AppContext outerContext = context;
+      return outerContext.run<int>(
         overrides: <Type, Generator>{
           Analytics: () => analytics,
+          if (!outerContext.hasOverride(AndroidBuilder))
+            AndroidBuilder: () => AndroidGradleBuilder.fromContexts(
+              analytics: analytics,
+              androidContext: androidContext,
+              toolContext: toolContext,
+            ),
           AndroidSdk: () => androidContext.androidSdk,
           AndroidStudio: () => androidContext.androidStudio,
+          // Google3's google3_doctor.dart still reads androidValidator via context.get.
+          if (!outerContext.hasOverride(AndroidValidator))
+            AndroidValidator: () => AndroidValidator(
+              androidSdk: androidContext.androidSdk,
+              java: androidContext.java,
+              logger: logger,
+              osUtils: os,
+              platform: platform,
+              processManager: processManager,
+              userMessages: userMessages,
+            ),
           AndroidWorkflow: () => androidWorkflow,
           AnsiTerminal: () => terminal,
+          if (!outerContext.hasOverride(ApplicationPackageFactory))
+            ApplicationPackageFactory: () => FlutterApplicationPackageFactory(
+              androidSdk: androidContext.androidSdk,
+              plistParser: appleContext.plistParser,
+              toolContext: toolContext,
+            ),
           Artifacts: () => artifacts,
+          if (!outerContext.hasOverride(AssetBundleFactory))
+            AssetBundleFactory: () => AssetBundleFactory.defaultInstance(
+              fileSystem: fs,
+              flutterRoot: cache.flutterRoot,
+              logger: logger,
+              platform: platform,
+            ),
           BotDetector: () => botDetector,
           BuildSystem: () => buildSystem,
           BuildTargets: () => buildTargets,
@@ -218,6 +261,13 @@ Future<int> run(
           CrashReporter: () => crashReporter,
           CustomDevicesConfig: () => customDevicesConfig,
           DeviceManager: () => deviceManager,
+          if (!outerContext.hasOverride(DevtoolsLauncher))
+            DevtoolsLauncher: () => DevtoolsServerLauncher(
+              artifacts: artifacts,
+              botDetector: botDetector,
+              logger: logger,
+              processManager: processManager,
+            ),
           Doctor: () => doctor,
           DoctorValidatorsProvider: doctor.validatorsProviderBuilder,
           EmulatorManager: () => emulatorManager,
@@ -234,6 +284,9 @@ Future<int> run(
           LocalEngineLocator: () => localEngineLocator,
           Logger: () => logger,
           MacOSWorkflow: () => macOSWorkflow,
+          if (!outerContext.hasOverride(MDnsVmServiceDiscovery))
+            MDnsVmServiceDiscovery: () =>
+                MDnsVmServiceDiscovery(analytics: analytics, logger: logger, platform: platform),
           OperatingSystemUtils: () => os,
           OutputPreferences: () => outputPreferences,
           PersistentToolState: () => persistentToolState,
@@ -243,11 +296,17 @@ Future<int> run(
           ProcessInfo: () => processInfo,
           ProcessManager: () => processManager,
           ProcessUtils: () => processUtils,
+          if (!outerContext.hasOverride(Pub)) Pub: () => Pub(toolContext: toolContext),
           ShutdownHooks: () => shutdownHooks,
           Signals: () => signals,
           Stdio: () => stdio,
           SystemClock: () => systemClock,
+          if (!outerContext.hasOverride(TemplatePathProvider))
+            TemplatePathProvider: () => TemplatePathProvider(flutterRoot: cache.flutterRoot),
           TemplateRenderer: () => templateRenderer,
+          if (nativeAssetsBuilder != null &&
+              !outerContext.hasOverride(TestCompilerNativeAssetsBuilder))
+            TestCompilerNativeAssetsBuilder: () => nativeAssetsBuilder,
           UserMessages: () => userMessages,
           if (webRunnerFactory != null) WebRunnerFactory: () => webRunnerFactory,
           WindowsWorkflow: () => windowsWorkflow,
