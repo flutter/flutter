@@ -17,7 +17,6 @@ import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/application_package.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:test/fake.dart';
@@ -52,7 +51,7 @@ void main() {
       fs
           .file(
             project.android.hostAppGradleRoot
-                .childFile(globals.platform.isWindows ? 'gradlew.bat' : 'gradlew')
+                .childFile(const LocalPlatform().isWindows ? 'gradlew.bat' : 'gradlew')
                 .path,
           )
           .createSync(recursive: true);
@@ -60,7 +59,7 @@ void main() {
 
     testUsingContext('does not throw and exception when build info is null', () async {
       const aaptPath = 'aaptPath';
-      final File apkFile = globals.fs.file('app.apk');
+      final File apkFile = fs.file('app.apk');
       final sdkVersion = FakeAndroidSdkVersion();
       sdkVersion.aaptPath = aaptPath;
       sdk.latestVersion = sdkVersion;
@@ -92,7 +91,7 @@ void main() {
         applicationBinary: apkFile,
       );
       final logger = BufferLogger.test();
-      final FlutterProject project = await aModuleProject();
+      final FlutterProject project = await aModuleProject(fs: fs, logger: logger);
       project.android.hostAppGradleRoot.childFile('build.gradle').createSync(recursive: true);
       final File appGradle = project.android.hostAppGradleRoot.childFile(
         fs.path.join('app', 'build.gradle'),
@@ -125,7 +124,7 @@ void main() {
 
     testUsingContext('correct debug filename in module projects', () async {
       const aaptPath = 'aaptPath';
-      final File apkFile = globals.fs.file('app-debug.apk');
+      final File apkFile = fs.file('app-debug.apk');
       final sdkVersion = FakeAndroidSdkVersion();
       sdkVersion.aaptPath = aaptPath;
       sdk.latestVersion = sdkVersion;
@@ -165,7 +164,7 @@ void main() {
         applicationBinary: apkFile,
       );
       final logger = BufferLogger.test();
-      final FlutterProject project = await aModuleProject();
+      final FlutterProject project = await aModuleProject(fs: fs, logger: logger);
       project.android.hostAppGradleRoot.childFile('build.gradle').createSync(recursive: true);
       final File appGradle = project.android.hostAppGradleRoot.childFile(
         fs.path.join('app', 'build.gradle'),
@@ -203,7 +202,7 @@ void main() {
 
     testUsingContext('AndroidApk.fromAndroidProject parses manifest with activity-alias', () async {
       final logger = BufferLogger.test();
-      final FlutterProject project = await aModuleProject();
+      final FlutterProject project = await aModuleProject(fs: fs, logger: logger);
       project.android.hostAppGradleRoot.childFile('build.gradle').createSync(recursive: true);
       final File appGradle = project.android.hostAppGradleRoot.childFile(
         fs.path.join('app', 'build.gradle'),
@@ -261,7 +260,7 @@ void main() {
       'AndroidApk.fromAndroidProject returns null if launch activity has no android:name',
       () async {
         final logger = BufferLogger.test();
-        final FlutterProject project = await aModuleProject();
+        final FlutterProject project = await aModuleProject(fs: fs, logger: logger);
         project.android.hostAppGradleRoot.childFile('build.gradle').createSync(recursive: true);
         final File appGradle = project.android.hostAppGradleRoot.childFile(
           fs.path.join('app', 'build.gradle'),
@@ -315,7 +314,7 @@ void main() {
       'Licenses not available, platform and buildtools available, apk exists',
       () async {
         const aaptPath = 'aaptPath';
-        final File apkFile = globals.fs.file('app-debug.apk');
+        final File apkFile = fs.file('app-debug.apk');
         final sdkVersion = FakeAndroidSdkVersion();
         sdkVersion.aaptPath = aaptPath;
         sdk.latestVersion = sdkVersion;
@@ -359,7 +358,7 @@ void main() {
 
       await ApplicationPackageFactory.instance!.getPackageForPlatform(
         TargetPlatform.android_arm,
-        applicationBinary: globals.fs.file('app-debug.apk'),
+        applicationBinary: fs.file('app-debug.apk'),
       );
       expect(fakeProcessManager, hasNoRemainingExpectations);
     }, overrides: overrides);
@@ -414,7 +413,7 @@ void main() {
       );
 
       final logger = BufferLogger.test();
-      final FlutterProject project = await aModuleProject();
+      final FlutterProject project = await aModuleProject(fs: fs, logger: logger);
       project.android.hostAppGradleRoot.childFile('build.gradle').createSync(recursive: true);
       final File appGradle = project.android.hostAppGradleRoot.childFile(
         fs.path.join('app', 'build.gradle'),
@@ -491,7 +490,7 @@ void main() {
         );
 
         final logger = BufferLogger.test();
-        final FlutterProject project = await aModuleProject();
+        final FlutterProject project = await aModuleProject(fs: fs, logger: logger);
         project.android.hostAppGradleRoot.childFile('build.gradle').createSync(recursive: true);
         final File appGradle = project.android.hostAppGradleRoot.childFile(
           fs.path.join('app', 'build.gradle'),
@@ -1359,8 +1358,8 @@ class FakeAndroidSdkVersion extends Fake implements AndroidSdkVersion {
   late String aaptPath;
 }
 
-Future<FlutterProject> aModuleProject() async {
-  final Directory directory = globals.fs.directory('module_project');
+Future<FlutterProject> aModuleProject({required FileSystem fs, required Logger logger}) async {
+  final Directory directory = fs.directory('module_project');
   writePackageConfigFiles(directory: directory, mainLibName: 'my_app');
   directory.childFile('pubspec.yaml').writeAsStringSync('''
 name: my_module
@@ -1368,7 +1367,7 @@ flutter:
   module:
     androidPackage: com.example
 ''');
-  return FlutterProject.fromDirectory(directory, logger: globals.logger);
+  return FlutterProject.fromDirectory(directory, logger: logger);
 }
 
 const String _aaptDataWithActivityAlias = '''
