@@ -39,6 +39,10 @@ abstract class ViewRasterizer {
   /// The queue of render requests for this view.
   final RenderQueue queue = RenderQueue();
 
+  /// Whether this rasterizer has been disposed.
+  bool get isDisposed => _isDisposed;
+  bool _isDisposed = false;
+
   /// The size of the current frame being rasterized.
   BitmapSize currentFrameSize = BitmapSize.zero;
 
@@ -60,6 +64,9 @@ abstract class ViewRasterizer {
   /// Draws the [layerTree] to the screen for the view associated with this
   /// rasterizer.
   Future<void> draw(LayerTree layerTree, FrameTimingRecorder? recorder) async {
+    if (isDisposed) {
+      return;
+    }
     final ui.Size frameSize = view.physicalSize;
     if (frameSize.isEmpty) {
       // Available drawing area is empty. Skip drawing.
@@ -88,6 +95,9 @@ abstract class ViewRasterizer {
 
     final Stopwatch? presentationTimer = Profiler.isBenchmarkMode ? (Stopwatch()..start()) : null;
     await prepareToDraw();
+    if (isDisposed) {
+      return;
+    }
     await viewEmbedder.submitFrame(recorder);
     if (presentationTimer != null) {
       presentationTimer.stop();
@@ -136,6 +146,10 @@ abstract class ViewRasterizer {
 
   /// Disposes this rasterizer.
   void dispose() {
+    if (_isDisposed) {
+      return;
+    }
+    _isDisposed = true;
     viewEmbedder.dispose();
   }
 
