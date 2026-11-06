@@ -356,6 +356,12 @@ _APPLE_CACHE_FILES = select({
 _TOOL_SDK_FILES = {
     ":flutter_launcher": "bin/flutter",
     ":dart_launcher": "bin/dart",
+    # The repository's license at the SDK's root: the tool's cache copies
+    # FLUTTER_ROOT/LICENSE into each engine artifact directory it downloads
+    # (EngineCachedArtifact.updateInner over getLicenseDirs) -- the
+    # integration shard's `flutter build ios` fetches the iOS engine at run
+    # time -- and fails the download without it.
+    "//:LICENSE": "LICENSE",
 }
 
 # The version pins the tool compares the stamps against (and the iOS USB
