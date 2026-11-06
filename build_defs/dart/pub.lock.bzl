@@ -207,9 +207,9 @@ PUB_HOSTED = {
         deps = [],
     ),
     "code_assets": struct(
-        version = "2.1.0",
-        sha256 = "828110d598123b5ea96c00c9f3c72105bf79f8ee36c20a39b26209ade421ec57",
-        url = "https://pub.dev/api/archives/code_assets-2.1.0.tar.gz",
+        version = "2.2.0",
+        sha256 = "1ef22a0be3af9370bd9481ac76db114db92bfe75d5ca2b2d7bc911764478a4d9",
+        url = "https://pub.dev/api/archives/code_assets-2.2.0.tar.gz",
         deps = [
             "collection",
             "hooks",
@@ -955,9 +955,9 @@ PUB_HOSTED = {
         ],
     ),
     "native_toolchain_c": struct(
-        version = "0.19.5",
-        sha256 = "90eaad8059ebc2004a63810a4696ea9acdb02473e47ed3b6b3bafb100ac77e31",
-        url = "https://pub.dev/api/archives/native_toolchain_c-0.19.5.tar.gz",
+        version = "0.19.6",
+        sha256 = "120b6fc66acd8a5ddeaeb1e59b78836bb3ec9919bd9d9dfb1e2401985710c2c0",
+        url = "https://pub.dev/api/archives/native_toolchain_c-0.19.6.tar.gz",
         deps = [
             "code_assets",
             "file",

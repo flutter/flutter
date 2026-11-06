@@ -1518,6 +1518,9 @@ class _CurvedTextScalingPlatformDispatcher implements ui.PlatformDispatcher {
   ui.VoidCallback? onTextScaleFactorChanged;
 
   @override
+  ui.VoidCallback? onAlwaysUse24HourFormatChanged;
+
+  @override
   dynamic noSuchMethod(Invocation invocation) =>
       throw UnimplementedError('${invocation.memberName} is not needed by these tests.');
 }
