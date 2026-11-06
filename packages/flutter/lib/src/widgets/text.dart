@@ -625,6 +625,9 @@ class Text extends StatelessWidget {
   ///
   /// It's rarely necessary to set this property. By default its value
   /// is inherited from the enclosing app with `Localizations.localeOf(context)`.
+  /// If the user's preferred locale is not one of the app's supported locales
+  /// (so the app's locale is only a fallback, such as the default `en_US`),
+  /// no locale is used and the operating system's default locale applies.
   ///
   /// See [RenderParagraph.locale] for more information.
   final Locale? locale;

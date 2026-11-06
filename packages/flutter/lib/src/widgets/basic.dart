@@ -25,11 +25,11 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
+import '_text_locale.dart';
 import 'binding.dart';
 import 'debug.dart';
 import 'framework.dart';
 import 'indexed_stack.dart';
-import 'localizations.dart';
 import 'media_query.dart';
 import 'view.dart';
 import 'widget_span.dart';
@@ -6670,6 +6670,9 @@ class RichText extends MultiChildRenderObjectWidget {
   ///
   /// It's rarely necessary to set this property. By default its value
   /// is inherited from the enclosing app with `Localizations.localeOf(context)`.
+  /// If the user's preferred locale is not one of the app's supported locales
+  /// (so the app's locale is only a fallback, such as the default `en_US`),
+  /// no locale is used and the operating system's default locale applies.
   ///
   /// See [RenderParagraph.locale] for more information.
   final Locale? locale;
@@ -6718,7 +6721,7 @@ class RichText extends MultiChildRenderObjectWidget {
       textWidthBasis: textWidthBasis,
       textHeightBehavior: textHeightBehavior,
       hyphens: hyphens,
-      locale: locale ?? Localizations.maybeLocaleOf(context),
+      locale: locale ?? textLocaleOf(context),
       registrar: selectionRegistrar,
       selectionColor: selectionColor,
       devicePixelRatio: _getDevicePixelRatio(context),
@@ -6740,7 +6743,7 @@ class RichText extends MultiChildRenderObjectWidget {
       ..textWidthBasis = textWidthBasis
       ..textHeightBehavior = textHeightBehavior
       ..hyphens = hyphens
-      ..locale = locale ?? Localizations.maybeLocaleOf(context)
+      ..locale = locale ?? textLocaleOf(context)
       ..registrar = selectionRegistrar
       ..selectionColor = selectionColor
       ..devicePixelRatio = _getDevicePixelRatio(context);

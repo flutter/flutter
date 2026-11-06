@@ -16,6 +16,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
+import '_text_locale.dart';
 import 'actions.dart';
 import 'banner.dart';
 import 'basic.dart';
@@ -1837,11 +1838,16 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
                       child: ListenableBuilder(
                         listenable: _localizationsResolver,
                         builder: (BuildContext context, _) {
+                          final Locale appLocale = _localizationsResolver.locale;
                           return Localizations(
                             isApplicationLevel: true,
-                            locale: _localizationsResolver.locale,
+                            locale: appLocale,
                             delegates: _localizationsResolver.localizationsDelegates.toList(),
-                            child: title ?? result,
+                            child: TextLocaleScope(
+                              applicationLocale: appLocale,
+                              explicitLocale: widget.locale,
+                              child: title ?? result,
+                            ),
                           );
                         },
                       ),
