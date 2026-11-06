@@ -485,11 +485,43 @@ class RenderSliverMainAxisGroup extends RenderSliver
   void visitChildrenForSemantics(RenderObjectVisitor visitor) {
     RenderSliver? child = firstChild;
     while (child != null) {
-      if (child.geometry!.visible || child.geometry!.cacheExtent > 0.0 || child.ensureSemantics) {
+      // Children wrapped in SliverEnsureSemantics are always visited, even
+      // when pushed completely out of view, since they explicitly requested
+      // semantic inclusion.
+      if (child.ensureSemantics ||
+          ((child.geometry!.visible || child.geometry!.cacheExtent > 0.0) &&
+              !_isPushedOutOfView(child))) {
         visitor(child);
       }
       child = childAfter(child);
     }
+  }
+
+  /// Whether the end of the group has pushed this child back far enough that it
+  /// only paints behind the slivers pinned above the group, or entirely off
+  /// the viewport. This can only happen to pinned children, because
+  /// performLayout pushes them out of view by correcting their paintOffset
+  /// while their paintExtent stays positive, leaving them in the semantics
+  /// tree although nothing of them is visible.
+  bool _isPushedOutOfView(RenderSliver child) {
+    final SliverGeometry childGeometry = child.geometry!;
+    if (childGeometry.maxScrollObstructionExtent == 0 || childGeometry.paintExtent == 0) {
+      return false;
+    }
+    final Offset offset = (child.parentData! as SliverPhysicalParentData).paintOffset;
+    return switch (applyGrowthDirectionToAxisDirection(
+      constraints.axisDirection,
+      constraints.growthDirection,
+    )) {
+      AxisDirection.down =>
+        offset.dy + childGeometry.paintExtent <= constraints.overlap + precisionErrorTolerance,
+      AxisDirection.right =>
+        offset.dx + childGeometry.paintExtent <= constraints.overlap + precisionErrorTolerance,
+      AxisDirection.up =>
+        offset.dy >= geometry!.paintExtent - constraints.overlap - precisionErrorTolerance,
+      AxisDirection.left =>
+        offset.dx >= geometry!.paintExtent - constraints.overlap - precisionErrorTolerance,
+    };
   }
 
   static double _fixPrecisionError(double number) {
