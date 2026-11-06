@@ -1,0 +1,22 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# The project flutter_tools' ios_app_with_extensions_test (integration.shard,
+# the apple shard) copies and runs `flutter build ios` in: an app with a
+# companion watchOS target, whose build settings the tool queries.
+
+load("//build_defs/dart:flutter_project.bzl", "FLUTTER_PROJECT_GENERATED")
+
+package(default_visibility = ["//visibility:public"])
+
+filegroup(
+    name = "project",
+    srcs = glob(
+        [
+            "ios/**",
+            "lib/**",
+        ],
+        exclude = FLUTTER_PROJECT_GENERATED,
+    ) + ["pubspec.yaml"],
+)
