@@ -1967,6 +1967,7 @@ Int32List _encodeParagraphStyle(
   String? ellipsis,
   Locale? locale,
   Hyphens? hyphens,
+  bool? fakeMissingFontStyles,
 ) {
   final result = Int32List(8); // also update paragraph_builder.cc
   if (textAlign != null) {
@@ -2022,6 +2023,12 @@ Int32List _encodeParagraphStyle(
   if (hyphens != null) {
     result[0] |= 1 << 13;
     result[7] = hyphens.index;
+  }
+  if (fakeMissingFontStyles != null) {
+    result[0] |= 1 << 14; // Present
+    if (fakeMissingFontStyles) {
+      result[0] |= 1 << 15; // Value
+    }
   }
   return result;
 }
@@ -2106,6 +2113,7 @@ class ParagraphStyle {
     String? ellipsis,
     Locale? locale,
     Hyphens? hyphens,
+    bool? fakeMissingFontStyles,
   }) : _encoded = _encodeParagraphStyle(
          textAlign,
          textDirection,
@@ -2120,6 +2128,7 @@ class ParagraphStyle {
          ellipsis,
          locale,
          hyphens,
+         fakeMissingFontStyles,
        ),
        _fontFamily = fontFamily,
        _fontSize = fontSize,
@@ -2128,7 +2137,8 @@ class ParagraphStyle {
        _ellipsis = ellipsis,
        _locale = locale,
        _leadingDistribution =
-           textHeightBehavior?.leadingDistribution ?? TextLeadingDistribution.proportional;
+           textHeightBehavior?.leadingDistribution ?? TextLeadingDistribution.proportional,
+       _fakeMissingFontStyles = fakeMissingFontStyles;
 
   final Int32List _encoded;
   final String? _fontFamily;
@@ -2138,6 +2148,7 @@ class ParagraphStyle {
   final String? _ellipsis;
   final Locale? _locale;
   final TextLeadingDistribution _leadingDistribution;
+  final bool? _fakeMissingFontStyles;
 
   @override
   bool operator ==(Object other) {
@@ -2155,7 +2166,8 @@ class ParagraphStyle {
         other._ellipsis == _ellipsis &&
         other._locale == _locale &&
         other._leadingDistribution == _leadingDistribution &&
-        _listEquals<int>(other._encoded, _encoded);
+        _listEquals<int>(other._encoded, _encoded) &&
+        other._fakeMissingFontStyles == _fakeMissingFontStyles;
   }
 
   @override
@@ -2167,6 +2179,7 @@ class ParagraphStyle {
     _ellipsis,
     _locale,
     _leadingDistribution,
+    _fakeMissingFontStyles,
   );
 
   @override
@@ -2184,7 +2197,8 @@ class ParagraphStyle {
         'strutStyle: ${_encoded[0] & 0x400 == 0x400 ? _strutStyle : "unspecified"}, '
         'ellipsis: ${_encoded[0] & 0x800 == 0x800 ? '"$_ellipsis"' : "unspecified"}, '
         'locale: ${_encoded[0] & 0x1000 == 0x1000 ? _locale : "unspecified"}, '
-        'hyphens: ${_encoded[0] & 0x2000 == 0x2000 ? Hyphens.values[_encoded[7]] : "unspecified"}'
+        'hyphens: ${_encoded[0] & 0x2000 == 0x2000 ? Hyphens.values[_encoded[7]] : "unspecified"}, '
+        'fakeMissingFontStyles: ${_encoded[0] & 0x4000 == 0x4000 ? (_encoded[0] & 0x8000 == 0x8000 ? "true" : "false") : "unspecified"}'
         ')';
   }
 }

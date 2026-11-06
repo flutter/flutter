@@ -36,6 +36,7 @@ class ParagraphBuilderSkia : public ParagraphBuilder {
  private:
   friend class SkiaParagraphBuilderTests_ParagraphStrutStyle_Test;
   friend class SkiaParagraphBuilderTests_RenderSoftHyphensEnabled_Test;
+  friend class SkiaParagraphBuilderTests_FakeMissingFontStyles_Test;
 
   skia::textlayout::ParagraphPainter::PaintID CreatePaintID(
       const flutter::DlPaint& dl_paint);
