@@ -15,7 +15,7 @@ namespace flutter {
 class EmbedderExternalTextureGL : public flutter::Texture {
  public:
   using ExternalTextureCallback = std::function<
-      std::unique_ptr<FlutterOpenGLTexture>(int64_t, size_t, size_t)>;
+      std::unique_ptr<FlutterOpenGLExternalTexture>(int64_t, size_t, size_t)>;
 
   EmbedderExternalTextureGL(int64_t texture_identifier,
                             const ExternalTextureCallback& callback);
@@ -43,6 +43,7 @@ class EmbedderExternalTextureGL : public flutter::Texture {
  private:
   const ExternalTextureCallback& external_texture_callback_;
   sk_sp<DlImage> last_image_;
+  DlMatrix last_uv_transform_;
 
   sk_sp<DlImage> ResolveTexture(int64_t texture_id,
                                 GrDirectContext* context,

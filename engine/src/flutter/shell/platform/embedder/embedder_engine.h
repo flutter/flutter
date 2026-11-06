@@ -5,34 +5,68 @@
 #ifndef FLUTTER_SHELL_PLATFORM_EMBEDDER_EMBEDDER_ENGINE_H_
 #define FLUTTER_SHELL_PLATFORM_EMBEDDER_EMBEDDER_ENGINE_H_
 
+#include <future>
 #include <memory>
+#include <mutex>
+#include <optional>
 #include <unordered_map>
+#include <vector>
 
 #include "flutter/fml/macros.h"
+#include "flutter/runtime/dart_service_isolate.h"
 #include "flutter/shell/common/shell.h"
 #include "flutter/shell/common/thread_host.h"
 #include "flutter/shell/platform/embedder/embedder.h"
 #include "flutter/shell/platform/embedder/embedder_external_texture_resolver.h"
 #include "flutter/shell/platform/embedder/embedder_thread_host.h"
+
+struct _FlutterPlatformMessageResponseHandle {
+  std::unique_ptr<flutter::PlatformMessage> message;
+};
+
 namespace flutter {
 
 struct ShellArgs;
+
+struct ImageGeneratorFactoryRegistration {
+  ImageGeneratorFactory factory;
+  int32_t priority;
+};
 
 // The object that is returned to the embedder as an opaque pointer to the
 // instance of the Flutter engine.
 class EmbedderEngine {
  public:
   EmbedderEngine(
-      std::unique_ptr<EmbedderThreadHost> thread_host,
+      std::shared_ptr<EmbedderThreadHost> thread_host,
       const TaskRunners& task_runners,
       const Settings& settings,
       RunConfiguration run_configuration,
       const Shell::CreateCallback<PlatformView>& on_create_platform_view,
       const Shell::CreateCallback<Rasterizer>& on_create_rasterizer,
       std::unique_ptr<EmbedderExternalTextureResolver>
-          external_texture_resolver);
+          external_texture_resolver,
+      std::vector<ImageGeneratorFactoryRegistration> image_generators = {});
+
+  EmbedderEngine(std::shared_ptr<EmbedderThreadHost> thread_host,
+                 const TaskRunners& task_runners,
+                 std::unique_ptr<Shell> shell,
+                 std::unique_ptr<EmbedderExternalTextureResolver>
+                     external_texture_resolver);
+
+  EmbedderEngine(const TaskRunners& task_runners, std::unique_ptr<Shell> shell);
 
   ~EmbedderEngine();
+
+  std::unique_ptr<EmbedderEngine> Spawn(
+      const std::shared_ptr<EmbedderThreadHost>& thread_host,
+      const TaskRunners& task_runners,
+      RunConfiguration run_configuration,
+      const std::string& initial_route,
+      const Shell::CreateCallback<PlatformView>& on_create_platform_view,
+      const Shell::CreateCallback<Rasterizer>& on_create_rasterizer,
+      std::unique_ptr<EmbedderExternalTextureResolver>
+          external_texture_resolver) const;
 
   bool LaunchShell();
 
@@ -42,9 +76,15 @@ class EmbedderEngine {
 
   const TaskRunners& GetTaskRunners() const;
 
+  std::shared_ptr<EmbedderThreadHost> GetThreadHost() const;
+
   bool NotifyCreated();
 
   bool NotifyDestroyed();
+
+  void SetRunConfiguration(RunConfiguration run_configuration);
+
+  bool HasValidRunConfiguration() const;
 
   bool RunRootIsolate();
 
@@ -52,6 +92,8 @@ class EmbedderEngine {
 
   bool SetViewportMetrics(int64_t view_id,
                           const flutter::ViewportMetrics& metrics);
+
+  bool OnDisplayUpdates(std::vector<std::unique_ptr<Display>> displays);
 
   bool DispatchPointerDataPacket(
       std::unique_ptr<flutter::PointerDataPacket> packet);
@@ -88,15 +130,96 @@ class EmbedderEngine {
 
   bool ScheduleFrame();
 
+  bool UpdateAssetResolver(
+      std::unique_ptr<AssetResolver> updated_asset_resolver,
+      AssetResolver::AssetResolverType type);
+
+  bool LoadDartDeferredLibrary(
+      intptr_t loading_unit_id,
+      std::unique_ptr<const fml::Mapping> snapshot_data,
+      std::unique_ptr<const fml::Mapping> snapshot_instructions);
+
+  bool LoadDartDeferredLibraryError(intptr_t loading_unit_id,
+                                    const std::string& error_message,
+                                    bool transient);
+
+  bool RegisterImageGenerator(ImageGeneratorFactory factory, int32_t priority);
+
+  Rasterizer::Screenshot Screenshot(Rasterizer::ScreenshotType type,
+                                    bool base64_encode) const;
+
   Shell& GetShell();
 
+  void SetRendererConfig(const FlutterRendererConfig& config) {
+    std::scoped_lock lock(renderer_mutex_);
+    renderer_config_ = config;
+  }
+
+  std::optional<FlutterRendererConfig> GetRendererConfig() const {
+    WaitForDeferredRendererResolution();
+    std::scoped_lock lock(renderer_mutex_);
+    return renderer_config_;
+  }
+
+  void SetExternalTextureResolver(
+      std::unique_ptr<EmbedderExternalTextureResolver> resolver) {
+    std::scoped_lock lock(renderer_mutex_);
+    external_texture_resolver_ = std::move(resolver);
+  }
+
+  void SetDeferredRendererResolvedFuture(std::shared_future<void> future) {
+    deferred_renderer_resolved_future_ = std::move(future);
+  }
+
+  void WaitForDeferredRendererResolution() const {
+    if (deferred_renderer_resolved_future_.valid()) {
+      deferred_renderer_resolved_future_.wait();
+    }
+  }
+
+  void SetSavedProjectArgs(const FlutterProjectArgs& args) {
+    saved_project_args_ = args;
+  }
+
+  const FlutterProjectArgs& GetSavedProjectArgs() const {
+    return saved_project_args_;
+  }
+
+  void SetAssetManager(std::shared_ptr<AssetManager> asset_manager) {
+    asset_manager_ = std::move(asset_manager);
+  }
+
+  std::shared_ptr<AssetManager> GetAssetManager() const {
+    return asset_manager_;
+  }
+
+  void AddImageGenerator(ImageGeneratorFactory factory, int32_t priority) {
+    image_generators_.push_back({std::move(factory), priority});
+  }
+
+  const std::vector<ImageGeneratorFactoryRegistration>& GetImageGenerators()
+      const {
+    return image_generators_;
+  }
+
+  void SetVMServiceUriCallback(
+      const DartServiceIsolate::DartVMServiceServerStateCallback& callback);
+
  private:
-  std::unique_ptr<EmbedderThreadHost> thread_host_;
+  std::shared_ptr<EmbedderThreadHost> thread_host_;
   TaskRunners task_runners_;
   RunConfiguration run_configuration_;
   std::unique_ptr<ShellArgs> shell_args_;
   std::unique_ptr<Shell> shell_;
+  mutable std::mutex renderer_mutex_;
   std::unique_ptr<EmbedderExternalTextureResolver> external_texture_resolver_;
+  std::vector<ImageGeneratorFactoryRegistration> image_generators_;
+  std::optional<FlutterRendererConfig> renderer_config_;
+  std::shared_future<void> deferred_renderer_resolved_future_;
+  FlutterProjectArgs saved_project_args_ = {};
+  std::shared_ptr<AssetManager> asset_manager_;
+  DartServiceIsolate::CallbackHandle vm_service_uri_callback_ = 0;
+  std::vector<fml::closure> pre_launch_tasks_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(EmbedderEngine);
 };

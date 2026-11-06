@@ -11,10 +11,12 @@ namespace flutter {
 EmbedderLayers::EmbedderLayers(DlISize frame_size,
                                double device_pixel_ratio,
                                DlMatrix root_surface_transformation,
-                               uint64_t presentation_time)
+                               uint64_t presentation_time,
+                               uint64_t platform_view_mutation_capabilities)
     : frame_size_(frame_size),
       device_pixel_ratio_(device_pixel_ratio),
       root_surface_transformation_(root_surface_transformation),
+      platform_view_mutation_capabilities_(platform_view_mutation_capabilities),
       presentation_time_(presentation_time) {}
 
 EmbedderLayers::~EmbedderLayers() = default;
@@ -166,7 +168,99 @@ void EmbedderLayers::PushPlatformViewLayer(
                   .get());
         } break;
         case MutatorType::kClipPath: {
-          // Unsupported mutation.
+          const auto& dl_path = mutator->GetPath();
+          auto ref_path = std::make_unique<ReferencedPath>();
+
+          class FlutterPathReceiver final : public DlPathReceiver {
+           public:
+            FlutterPathReceiver(ReferencedPath& path, uint64_t capabilities)
+                : path_(path), capabilities_(capabilities) {}
+
+            void MoveTo(const DlPoint& p2, bool will_be_closed) override {
+              path_.verbs.push_back(kFlutterPathVerbMove);
+              path_.points.push_back({p2.x, p2.y});
+            }
+
+            void LineTo(const DlPoint& p2) override {
+              path_.verbs.push_back(kFlutterPathVerbLine);
+              path_.points.push_back({p2.x, p2.y});
+            }
+
+            void QuadTo(const DlPoint& cp, const DlPoint& p2) override {
+              path_.verbs.push_back(kFlutterPathVerbQuad);
+              path_.points.push_back({cp.x, cp.y});
+              path_.points.push_back({p2.x, p2.y});
+            }
+
+            bool ConicTo(const DlPoint& cp,
+                         const DlPoint& p2,
+                         DlScalar weight) override {
+              if ((capabilities_ &
+                   kFlutterPlatformViewMutationCapabilityPathConics) == 0) {
+                return false;
+              }
+              path_.verbs.push_back(kFlutterPathVerbConic);
+              path_.points.push_back({cp.x, cp.y});
+              path_.points.push_back({p2.x, p2.y});
+              path_.conic_weights.push_back(static_cast<double>(weight));
+              return true;
+            }
+
+            void CubicTo(const DlPoint& cp1,
+                         const DlPoint& cp2,
+                         const DlPoint& p2) override {
+              path_.verbs.push_back(kFlutterPathVerbCubic);
+              path_.points.push_back({cp1.x, cp1.y});
+              path_.points.push_back({cp2.x, cp2.y});
+              path_.points.push_back({p2.x, p2.y});
+            }
+
+            void Close() override {
+              path_.verbs.push_back(kFlutterPathVerbClose);
+            }
+
+           private:
+            ReferencedPath& path_;
+            uint64_t capabilities_;
+          };
+
+          FlutterPathReceiver receiver(*ref_path,
+                                       platform_view_mutation_capabilities_);
+          dl_path.Dispatch(receiver);
+
+          FlutterPlatformViewMutation mutation = {};
+          mutation.type = kFlutterPlatformViewMutationTypeClipPath;
+          mutation.clip_path.struct_size = sizeof(FlutterPath);
+          mutation.clip_path.fill_type =
+              (dl_path.GetFillType() == DlPathFillType::kOdd)
+                  ? kFlutterPathFillTypeEvenOdd
+                  : kFlutterPathFillTypeNonZero;
+          mutation.clip_path.verbs_count = ref_path->verbs.size();
+          mutation.clip_path.verbs =
+              ref_path->verbs.empty() ? nullptr : ref_path->verbs.data();
+          mutation.clip_path.points_count = ref_path->points.size();
+          mutation.clip_path.points =
+              ref_path->points.empty() ? nullptr : ref_path->points.data();
+          mutation.clip_path.conic_weights_count =
+              ref_path->conic_weights.size();
+          mutation.clip_path.conic_weights =
+              ref_path->conic_weights.empty() ? nullptr
+                                              : ref_path->conic_weights.data();
+
+          const auto bounds = dl_path.GetBounds();
+          mutation.clip_path.bounds = FlutterRect{
+              .left = bounds.GetLeft(),
+              .top = bounds.GetTop(),
+              .right = bounds.GetRight(),
+              .bottom = bounds.GetBottom(),
+          };
+
+          paths_referenced_.push_back(std::move(ref_path));
+          mutations_array.push_back(
+              mutations_referenced_
+                  .emplace_back(
+                      std::make_unique<FlutterPlatformViewMutation>(mutation))
+                  .get());
         } break;
         case MutatorType::kTransform: {
           const auto& matrix = mutator->GetMatrix();

@@ -86,7 +86,9 @@ const EmbeddedViewParams* EmbedderExternalView::GetEmbeddedViewParams() const {
   return embedded_view_params_.get();
 }
 
-void EmbedderExternalView::Render(DlCanvas& dl_canvas, bool clear_surface) {
+void EmbedderExternalView::Render(DlCanvas& dl_canvas,
+                                  bool clear_surface,
+                                  const std::vector<DlRect>& difference_clips) {
   TRACE_EVENT0("flutter", "EmbedderExternalView::Render");
   TryEndRecording();
   FML_DCHECK(HasEngineRenderedContents())
@@ -94,9 +96,13 @@ void EmbedderExternalView::Render(DlCanvas& dl_canvas, bool clear_surface) {
          "nothing to render.";
 
   int restore_count = dl_canvas.GetSaveCount();
+  dl_canvas.Save();
   dl_canvas.SetTransform(surface_transformation_);
   if (clear_surface) {
     dl_canvas.Clear(DlColor::kTransparent());
+  }
+  for (const auto& diff_clip : difference_clips) {
+    dl_canvas.ClipRect(diff_clip, DlClipOp::kDifference, /*is_aa=*/false);
   }
   slice_->render_into(&dl_canvas);
   dl_canvas.RestoreToCount(restore_count);

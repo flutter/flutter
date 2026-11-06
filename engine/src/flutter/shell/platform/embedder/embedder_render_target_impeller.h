@@ -16,7 +16,18 @@ class EmbedderRenderTargetImpeller final : public EmbedderRenderTarget {
       std::shared_ptr<impeller::AiksContext> aiks_context,
       std::unique_ptr<impeller::RenderTarget> impeller_target,
       fml::closure on_release,
-      fml::closure framebuffer_destruction_callback);
+      fml::closure framebuffer_destruction_callback,
+      MakeOrClearCurrentCallback on_make_current = nullptr,
+      MakeOrClearCurrentCallback on_clear_current = nullptr);
+
+#ifdef SHELL_ENABLE_VULKAN
+  static std::unique_ptr<EmbedderRenderTarget> MakeVulkan(
+      FlutterBackingStore backing_store,
+      fml::closure on_release,
+      const std::shared_ptr<impeller::AiksContext>& aiks_context,
+      const FlutterBackingStoreConfig& config,
+      const FlutterVulkanBackingStore* vulkan);
+#endif  // SHELL_ENABLE_VULKAN
 
   // |EmbedderRenderTarget|
   ~EmbedderRenderTargetImpeller() override;
@@ -33,10 +44,18 @@ class EmbedderRenderTargetImpeller final : public EmbedderRenderTarget {
   // |EmbedderRenderTarget|
   DlISize GetRenderTargetSize() const override;
 
+  // |EmbedderRenderTarget|
+  SetCurrentResult MaybeMakeCurrent() const override;
+
+  // |EmbedderRenderTarget|
+  SetCurrentResult MaybeClearCurrent() const override;
+
  private:
   std::shared_ptr<impeller::AiksContext> aiks_context_;
   std::unique_ptr<impeller::RenderTarget> impeller_target_;
   fml::closure framebuffer_destruction_callback_;
+  MakeOrClearCurrentCallback on_make_current_;
+  MakeOrClearCurrentCallback on_clear_current_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(EmbedderRenderTargetImpeller);
 };

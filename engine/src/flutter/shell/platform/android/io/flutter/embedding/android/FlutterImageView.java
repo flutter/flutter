@@ -44,6 +44,7 @@ public class FlutterImageView extends View implements RenderSurface {
 
   @NonNull private ImageReader imageReader;
   @Nullable private Image currentImage;
+  @Nullable private HardwareBuffer currentHardwareBuffer;
   @Nullable private Bitmap currentBitmap;
   @Nullable private FlutterRenderer flutterRenderer;
 
@@ -127,7 +128,9 @@ public class FlutterImageView extends View implements RenderSurface {
           height,
           PixelFormat.RGBA_8888,
           3,
-          HardwareBuffer.USAGE_GPU_SAMPLED_IMAGE | HardwareBuffer.USAGE_GPU_COLOR_OUTPUT);
+          HardwareBuffer.USAGE_GPU_SAMPLED_IMAGE
+              | HardwareBuffer.USAGE_GPU_COLOR_OUTPUT
+              | HardwareBuffer.USAGE_CPU_READ_OFTEN);
     } else {
       return ImageReader.newInstance(width, height, PixelFormat.RGBA_8888, 3);
     }
@@ -251,11 +254,25 @@ public class FlutterImageView extends View implements RenderSurface {
       updateCurrentBitmap();
     }
     if (currentBitmap != null) {
+      if (android.os.Build.VERSION.SDK_INT >= API_LEVELS.API_29
+          && currentBitmap.getConfig() == Bitmap.Config.HARDWARE
+          && !canvas.isHardwareAccelerated()) {
+        final Bitmap softwareBitmap = currentBitmap.copy(Bitmap.Config.ARGB_8888, false);
+        if (softwareBitmap != null) {
+          canvas.drawBitmap(softwareBitmap, 0, 0, null);
+          softwareBitmap.recycle();
+          return;
+        }
+      }
       canvas.drawBitmap(currentBitmap, 0, 0, null);
     }
   }
 
   private void closeCurrentImage() {
+    if (android.os.Build.VERSION.SDK_INT >= API_LEVELS.API_29 && currentHardwareBuffer != null) {
+      currentHardwareBuffer.close();
+      currentHardwareBuffer = null;
+    }
     // Close and clear the current image if any.
     if (currentImage != null) {
       currentImage.close();
@@ -265,9 +282,14 @@ public class FlutterImageView extends View implements RenderSurface {
 
   private void updateCurrentBitmap() {
     if (android.os.Build.VERSION.SDK_INT >= API_LEVELS.API_29) {
-      final HardwareBuffer buffer = currentImage.getHardwareBuffer();
-      currentBitmap = Bitmap.wrapHardwareBuffer(buffer, ColorSpace.get(ColorSpace.Named.SRGB));
-      buffer.close();
+      if (currentHardwareBuffer != null) {
+        currentHardwareBuffer.close();
+      }
+      currentHardwareBuffer = currentImage.getHardwareBuffer();
+      if (currentHardwareBuffer != null) {
+        currentBitmap =
+            Bitmap.wrapHardwareBuffer(currentHardwareBuffer, ColorSpace.get(ColorSpace.Named.SRGB));
+      }
     } else {
       final Image.Plane[] imagePlanes = currentImage.getPlanes();
       if (imagePlanes.length != 1) {

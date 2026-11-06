@@ -1061,6 +1061,63 @@ void Shell::OnPlatformViewCreated(std::unique_ptr<Surface> surface) {
   // NOLINTNEXTLINE(clang-analyzer-cplusplus.NewDeleteLeaks)
 }
 
+void Shell::OnPlatformViewCreatedAsync(
+    std::function<std::unique_ptr<Surface>()> create_surface_callback) {
+  TRACE_EVENT0("flutter", "Shell::OnPlatformViewCreatedAsync");
+  FML_DCHECK(is_set_up_);
+  FML_DCHECK(task_runners_.GetPlatformTaskRunner()->RunsTasksOnCurrentThread());
+
+  rasterizer_->DisableThreadMergerIfNeeded();
+
+  auto* platform_view = platform_view_.get();
+  FML_DCHECK(platform_view);
+
+  auto io_task = [io_manager = io_manager_->GetWeakPtr(), platform_view]() {
+    if (io_manager && !io_manager->GetResourceContext()) {
+      sk_sp<GrDirectContext> resource_context =
+          platform_view->CreateResourceContext();
+      io_manager->NotifyResourceContextAvailable(resource_context);
+    }
+  };
+
+  auto ui_task = [engine = engine_->GetWeakPtr()]() {
+    if (engine) {
+      engine->ScheduleFrame();
+    }
+  };
+
+  auto raster_task = fml::MakeCopyable(
+      [create_surface_callback = std::move(create_surface_callback),
+       rasterizer = rasterizer_->GetWeakPtr(),
+       io_task_runner = task_runners_.GetIOTaskRunner(), io_task,
+       ui_task_runner = task_runners_.GetUITaskRunner(), ui_task,
+       &waiting_for_first_frame = waiting_for_first_frame_]() mutable {
+        if (!rasterizer) {
+          return;
+        }
+        std::unique_ptr<Surface> surface =
+            create_surface_callback ? create_surface_callback() : nullptr;
+        if (surface && !surface->IsValid()) {
+          surface.reset();
+        }
+        if (!surface) {
+          FML_LOG(ERROR) << "Failed to create platform view rendering surface";
+          return;
+        }
+
+        rasterizer->EnableThreadMergerIfNeeded();
+        rasterizer->Setup(std::move(surface));
+
+        waiting_for_first_frame.store(true);
+
+        fml::TaskRunner::RunNowOrPostTask(io_task_runner, io_task);
+        fml::TaskRunner::RunNowOrPostTask(ui_task_runner, ui_task);
+      });
+
+  fml::TaskRunner::RunNowOrPostTask(task_runners_.GetRasterTaskRunner(),
+                                    raster_task);
+}
+
 // |PlatformView::Delegate|
 void Shell::OnPlatformViewDestroyed() {
   TRACE_EVENT0("flutter", "Shell::OnPlatformViewDestroyed");
@@ -1554,36 +1611,31 @@ void Shell::OnEngineHandlePlatformMessage(
     if (route_messages_through_platform_thread_ &&
         !platform_message_handler_
              ->DoesHandlePlatformMessageOnPlatformThread()) {
-#if _WIN32
-      // On Windows capturing a TaskRunner with a TaskRunner will cause an
-      // uncaught exception in process shutdown because of the deletion order of
-      // global variables. See also
-      // https://github.com/flutter/flutter/issues/111575.
-      // This won't be an issue until Windows supports background platform
-      // channels (https://github.com/flutter/flutter/issues/93945). Then this
-      // can potentially be addressed by capturing a weak_ptr to an object that
-      // retains the ui TaskRunner, instead of the TaskRunner directly.
-      FML_DCHECK(false);
-#endif
       // We route messages through the platform thread temporarily when the
       // shell is being initialized to be backwards compatible with setting
       // message handlers in the same event as starting the isolate, but after
       // it is started.
-      auto ui_task_runner = task_runners_.GetUITaskRunner();
+      // Capture a weak_ptr to PlatformView instead of retaining the UI
+      // TaskRunner directly in the platform task queue, avoiding Windows static
+      // destruction order crashes if the platform queue is not drained before
+      // process exit (see https://github.com/flutter/flutter/issues/111575).
       task_runners_.GetPlatformTaskRunner()->PostTask(fml::MakeCopyable(
           [weak_platform_message_handler =
                std::weak_ptr<PlatformMessageHandler>(platform_message_handler_),
-           message = std::move(message), ui_task_runner]() mutable {
-            ui_task_runner->PostTask(
-                fml::MakeCopyable([weak_platform_message_handler,
-                                   message = std::move(message)]() mutable {
-                  auto platform_message_handler =
-                      weak_platform_message_handler.lock();
-                  if (platform_message_handler) {
-                    platform_message_handler->HandlePlatformMessage(
-                        std::move(message));
-                  }
-                }));
+           weak_platform_view = weak_platform_view_,
+           message = std::move(message)]() mutable {
+            if (weak_platform_view) {
+              weak_platform_view->GetTaskRunners().GetUITaskRunner()->PostTask(
+                  fml::MakeCopyable([weak_platform_message_handler,
+                                     message = std::move(message)]() mutable {
+                    auto platform_message_handler =
+                        weak_platform_message_handler.lock();
+                    if (platform_message_handler) {
+                      platform_message_handler->HandlePlatformMessage(
+                          std::move(message));
+                    }
+                  }));
+            }
           }));
     } else {
       platform_message_handler_->HandlePlatformMessage(std::move(message));
@@ -1735,7 +1787,7 @@ void Shell::UpdateAssetResolverByType(
       fml::MakeCopyable(
           [engine = weak_engine_, type,
            asset_resolver = std::move(updated_asset_resolver)]() mutable {
-            if (engine) {
+            if (engine && engine->GetAssetManager()) {
               engine->GetAssetManager()->UpdateResolverByType(
                   std::move(asset_resolver), type);
             }
