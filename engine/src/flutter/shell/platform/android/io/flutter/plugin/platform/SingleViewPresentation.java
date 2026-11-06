@@ -62,6 +62,12 @@ class SingleViewPresentation extends Presentation {
     // Contains views that were added directly to the window manager (e.g
     // android.widget.PopupWindow).
     private SingleViewFakeWindowViewGroup fakeWindowViewGroup;
+
+    // The androidx view-tree owners of the window that hosts the FlutterView. They are installed
+    // on every presentation's root view so views that look them up, such as a ComposeView, work
+    // in this separate window. VirtualDisplayController replaces them before each new
+    // presentation; the state keeps the last ones for when no FlutterView is attached.
+    @Nullable private ViewTreeOwners viewTreeOwners;
   }
 
   // A reference to the current accessibility bridge to which accessibility events will be
@@ -197,7 +203,20 @@ class SingleViewPresentation extends Presentation {
     } else {
       rootView.requestFocus();
     }
+    // Must happen before setContentView(): the embedded view looks the owners up when it is
+    // attached to the presentation's window.
+    if (state.viewTreeOwners != null) {
+      state.viewTreeOwners.installOn(rootView);
+    }
     setContentView(rootView);
+  }
+
+  /**
+   * Sets the androidx view-tree owners to install on this presentation's root view. Must be called
+   * before {@link #show()}.
+   */
+  void setViewTreeOwners(@Nullable ViewTreeOwners viewTreeOwners) {
+    state.viewTreeOwners = viewTreeOwners;
   }
 
   public PresentationState detachState() {

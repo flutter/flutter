@@ -5,15 +5,26 @@
 package io.flutter.plugin.platform;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.content.MutableContextWrapper;
 import android.hardware.display.DisplayManager;
 import android.view.Display;
+import android.view.View;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.FrameLayout;
+import androidx.lifecycle.LifecycleOwner;
+import androidx.lifecycle.ViewModelStoreOwner;
+import androidx.lifecycle.ViewTreeLifecycleOwner;
+import androidx.lifecycle.ViewTreeViewModelStoreOwner;
+import androidx.savedstate.SavedStateRegistryOwner;
+import androidx.savedstate.ViewTreeSavedStateRegistryOwner;
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import io.flutter.Build.API_LEVELS;
@@ -79,5 +90,66 @@ public class SingleViewPresentationTest {
     // This should be the mocked instance from construction, not the IMM from the greater
     // Android OS (or Robolectric's shadow, in this case).
     assertEquals(expected, actual);
+  }
+
+  @Test
+  public void onCreate_installsViewTreeOwnersBeforeAttachingView() {
+    Context context = ApplicationProvider.getApplicationContext();
+    Display display =
+        ((DisplayManager) context.getSystemService(Context.DISPLAY_SERVICE)).getDisplay(0);
+
+    FrameLayout hostFlutterView = new FrameLayout(context);
+    LifecycleOwner expectedLifecycleOwner = mock(LifecycleOwner.class);
+    SavedStateRegistryOwner expectedSavedStateOwner = mock(SavedStateRegistryOwner.class);
+    ViewModelStoreOwner expectedViewModelOwner = mock(ViewModelStoreOwner.class);
+    ViewTreeLifecycleOwner.set(hostFlutterView, expectedLifecycleOwner);
+    ViewTreeSavedStateRegistryOwner.set(hostFlutterView, expectedSavedStateOwner);
+    ViewTreeViewModelStoreOwner.set(hostFlutterView, expectedViewModelOwner);
+
+    ViewTreeOwners owners = ViewTreeOwners.findFrom(hostFlutterView);
+    assertNotNull(owners);
+
+    View embeddedView = new View(new MutableContextWrapper(context));
+    final LifecycleOwner[] attachedLifecycleOwner = {null};
+    final SavedStateRegistryOwner[] attachedSavedStateOwner = {null};
+    final ViewModelStoreOwner[] attachedViewModelOwner = {null};
+    embeddedView.addOnAttachStateChangeListener(
+        new View.OnAttachStateChangeListener() {
+          @Override
+          public void onViewAttachedToWindow(View v) {
+            attachedLifecycleOwner[0] = ViewTreeLifecycleOwner.get(v);
+            attachedSavedStateOwner[0] = ViewTreeSavedStateRegistryOwner.get(v);
+            attachedViewModelOwner[0] = ViewTreeViewModelStoreOwner.get(v);
+          }
+
+          @Override
+          public void onViewDetachedFromWindow(View v) {}
+        });
+
+    PlatformView platformView =
+        new PlatformView() {
+          @Override
+          public View getView() {
+            return embeddedView;
+          }
+
+          @Override
+          public void dispose() {}
+        };
+
+    SingleViewPresentation svp =
+        new SingleViewPresentation(
+            context, display, platformView, new AccessibilityEventsDelegate(), 0, null);
+    svp.setViewTreeOwners(owners);
+    svp.onCreate(null);
+
+    assertSame(expectedLifecycleOwner, ViewTreeLifecycleOwner.get(embeddedView));
+    assertSame(expectedSavedStateOwner, ViewTreeSavedStateRegistryOwner.get(embeddedView));
+    assertSame(expectedViewModelOwner, ViewTreeViewModelStoreOwner.get(embeddedView));
+    if (attachedLifecycleOwner[0] != null) {
+      assertSame(expectedLifecycleOwner, attachedLifecycleOwner[0]);
+      assertSame(expectedSavedStateOwner, attachedSavedStateOwner[0]);
+      assertSame(expectedViewModelOwner, attachedViewModelOwner[0]);
+    }
   }
 }
