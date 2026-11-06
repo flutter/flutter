@@ -527,6 +527,7 @@ Future<List<File>> installCodeAssets({
     codesignIdentity,
     flutterTester,
     logger: logger,
+    nativeAssetsFileUri: nativeAssetsFileUri,
     processManager: processManager,
   );
   final manifest = NativeAssetsManifest.fromTargetLocations(assetTargetLocations);
@@ -812,6 +813,7 @@ Future<List<File>> _copyNativeCodeAssetsForOS(
   String? codesignIdentity,
   bool flutterTester, {
   required Logger logger,
+  required Uri nativeAssetsFileUri,
   required ProcessManager processManager,
 }) async {
   // We only have to copy code assets that are bundled within the app.
@@ -828,7 +830,14 @@ Future<List<File>> _copyNativeCodeAssetsForOS(
   if (!targetDir.existsSync()) {
     targetDir.createSync(recursive: true);
   }
+  final String nativeAssetsFilePath = fileSystem.file(nativeAssetsFileUri).path;
   for (final FileSystemEntity entity in await targetDir.list().toList()) {
+    if (fileSystem.path.equals(entity.path, nativeAssetsFilePath) &&
+        fileSystem.typeSync(entity.path, followLinks: false) == .file) {
+      // _writeNativeAssetsJson immediately truncates and overwrites this
+      // manifest file in place, so avoid unlinking it unnecessarily.
+      continue;
+    }
     ErrorHandlingFileSystem.deleteIfExists(entity, recursive: true);
   }
 
