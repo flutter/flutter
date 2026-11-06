@@ -471,6 +471,7 @@ void main() {
     }),
   );
 
+  // Regression test for https://github.com/flutter/flutter/issues/194648
   testUsingContext(
     'ResidentRunner sends one reloadSources request per isolate group',
     () => testbed.run(() async {

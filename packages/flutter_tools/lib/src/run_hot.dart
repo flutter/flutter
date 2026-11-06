@@ -1252,7 +1252,10 @@ Future<OperationResult> defaultReloadSourcesHelper(
 /// so one request per group also updates isolates spawned with `Isolate.spawn`. Sending one
 /// request per isolate would reload the same group once for each of its isolates.
 ///
-/// Isolates without an isolate group ID each receive their own request.
+/// Known limitation: when [pause] is true, only the isolate that receives the request pauses
+/// after the reload, and debuggers re-send breakpoints only to the isolate that paused. A
+/// breakpoint in another isolate of the group that moved with the edit stays in the old code and
+/// is not hit until the debugger sends it again.
 Future<List<Future<vm_service.ReloadReport>>> _reloadDeviceSources(
   FlutterDevice device,
   String entryPath, {
@@ -1260,22 +1263,18 @@ Future<List<Future<vm_service.ReloadReport>>> _reloadDeviceSources(
 }) async {
   final deviceEntryUri = device.devFS!.baseUri!.resolve(entryPath).toString();
   final vm_service.VM vm = await device.vmService!.service.getVM();
+  // TODO(MSOB7YY): Remove the known limitation in the doc comment once DDS and flutter-intellij
+  // re-send breakpoints to every isolate of the group on PausePostRequest.
   final reloadedIsolateGroupIds = <String>{};
-  final reports = <Future<vm_service.ReloadReport>>[];
-  for (final vm_service.IsolateRef isolateRef in vm.isolates!) {
-    final String? isolateGroupId = isolateRef.isolateGroupId;
-    if (isolateGroupId != null && !reloadedIsolateGroupIds.add(isolateGroupId)) {
-      continue;
-    }
-    reports.add(
-      device.vmService!.service.reloadSources(
-        isolateRef.id!,
-        pause: pause,
-        rootLibUri: deviceEntryUri,
-      ),
-    );
-  }
-  return reports;
+  return <Future<vm_service.ReloadReport>>[
+    for (final vm_service.IsolateRef isolateRef in vm.isolates!)
+      if (reloadedIsolateGroupIds.add(isolateRef.isolateGroupId!))
+        device.vmService!.service.reloadSources(
+          isolateRef.id!,
+          pause: pause,
+          rootLibUri: deviceEntryUri,
+        ),
+  ];
 }
 
 void _resetDevFSCompileTime(List<FlutterDevice?> flutterDevices) {
