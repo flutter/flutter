@@ -255,7 +255,7 @@ class ErrorHandlingFile extends ForwardingFileSystemEntity<File, io.File> with F
   @override
   String readAsStringSync({Encoding encoding = utf8}) {
     return _runSync<String>(
-      () => delegate.readAsStringSync(),
+      () => delegate.readAsStringSync(encoding: encoding),
       platform: _platform,
       failureMessage: 'Flutter failed to read a file at "${delegate.path}"',
       posixPermissionSuggestion: _posixPermissionSuggestion(<String>[delegate.path]),
