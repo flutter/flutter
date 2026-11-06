@@ -310,7 +310,7 @@ class CompositeTarget extends Target {
 /// directory to write an output file.
 ///
 /// ```dart
-///   globals.fs.file('build/linux/out')
+///   environment.fileSystem.file('build/linux/out')
 ///     ..createSync()
 ///     ..writeAsStringSync('output data');
 /// ```

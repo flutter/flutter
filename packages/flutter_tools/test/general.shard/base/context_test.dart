@@ -287,6 +287,28 @@ void main() {
           expect(parentConsulted, isFalse);
         });
       });
+
+      group('hasOverride', () {
+        test('returns true for current and ancestor overrides but false for fallbacks', () async {
+          await context.run<void>(
+            fallbacks: <Type, Generator>{String: () => 'fallback'},
+            overrides: <Type, Generator>{int: () => 42},
+            body: () async {
+              expect(context.hasOverride(int), isTrue);
+              expect(context.hasOverride(String), isFalse);
+              expect(context.hasOverride(double), isFalse);
+              await context.run<void>(
+                overrides: <Type, Generator>{double: () => 3.14},
+                body: () {
+                  expect(context.hasOverride(int), isTrue);
+                  expect(context.hasOverride(double), isTrue);
+                  expect(context.hasOverride(String), isFalse);
+                },
+              );
+            },
+          );
+        });
+      });
     });
   });
 }

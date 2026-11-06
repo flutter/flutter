@@ -5,35 +5,40 @@
 import 'dart:io' as io;
 
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../../src/common.dart';
 import '../../src/context.dart';
 import 'utils/project_testing_utils.dart';
 
 void main() {
+  late LocalFileSystem fs;
   late Directory tempDir;
 
   setUp(() async {
-    tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_tree_shaker_test.');
+    fs = LocalFileSystem.test(signals: FakeSignals());
+    tempDir = fs.systemTempDirectory.createTempSync('flutter_tree_shaker_test.');
     await ensureFlutterToolsSnapshot();
   });
 
   tearDown(() async {
     tryToDelete(tempDir);
+    await fs.dispose();
     await restoreFlutterToolsSnapshot();
   });
 
   testUsingContext('tool_backend.dart tree shakes icons successfully', () async {
     final String flutterRoot = getFlutterRoot();
-    final String flutterBin = globals.fs.path.join(
+    final String flutterBin = fs.path.join(
       flutterRoot,
       'bin',
       io.Platform.isWindows ? 'flutter.bat' : 'flutter',
     );
-    final String engineDartBin = globals.artifacts!.getArtifactPath(Artifact.engineDartBinary);
-    final String toolBackend = globals.fs.path.join(
+    final String engineDartBin = context.get<Artifacts>()!.getArtifactPath(
+      Artifact.engineDartBinary,
+    );
+    final String toolBackend = fs.path.join(
       flutterRoot,
       'packages',
       'flutter_tools',
@@ -50,10 +55,10 @@ void main() {
     );
     expect(createResult.exitCode, 0, reason: 'flutter create failed: ${createResult.stderr}');
 
-    final String projectDir = globals.fs.path.join(tempDir.path, 'dummy_app');
+    final String projectDir = fs.path.join(tempDir.path, 'dummy_app');
 
     // 2. Add a single icon reference to main.dart
-    final File mainDart = globals.fs.file(globals.fs.path.join(projectDir, 'lib', 'main.dart'));
+    final File mainDart = fs.file(fs.path.join(projectDir, 'lib', 'main.dart'));
     mainDart.writeAsStringSync('''
 import 'package:flutter/material.dart';
 
@@ -101,7 +106,7 @@ void main() {
 
     // 6. Verify font size
     final String fontPath = io.Platform.isMacOS
-        ? globals.fs.path.join(
+        ? fs.path.join(
             projectDir,
             'build',
             'App.framework',
@@ -112,15 +117,9 @@ void main() {
             'fonts',
             'MaterialIcons-Regular.otf',
           )
-        : globals.fs.path.join(
-            projectDir,
-            'build',
-            'flutter_assets',
-            'fonts',
-            'MaterialIcons-Regular.otf',
-          );
+        : fs.path.join(projectDir, 'build', 'flutter_assets', 'fonts', 'MaterialIcons-Regular.otf');
 
-    final File shakenFont = globals.fs.file(fontPath);
+    final File shakenFont = fs.file(fontPath);
     expect(shakenFont.existsSync(), isTrue);
     final int size = shakenFont.lengthSync();
 

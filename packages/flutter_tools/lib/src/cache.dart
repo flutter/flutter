@@ -16,9 +16,7 @@ import 'package:file/memory.dart';
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
-import 'artifacts.dart';
 import 'base/common.dart';
-import 'base/context.dart';
 import 'base/error_handling_io.dart';
 import 'base/file_system.dart';
 import 'base/io.dart'
@@ -782,10 +780,10 @@ class Cache {
 
   /// Returns the list of artifacts that need updating from [requiredArtifacts].
   Future<List<ArtifactSet>> _collectArtifactsToUpdate(
-    Set<DevelopmentArtifact> requiredArtifacts,
-  ) async {
+    Set<DevelopmentArtifact> requiredArtifacts, {
+    required bool isLocalEngine,
+  }) async {
     final artifactsToUpdate = <ArtifactSet>[];
-    final isLocalEngine = context.get<Artifacts>()?.localEngineInfo != null;
 
     for (final ArtifactSet artifact in _artifacts) {
       if (!requiredArtifacts.contains(artifact.developmentArtifact)) {
@@ -807,12 +805,19 @@ class Cache {
   }
 
   /// Update the cache to contain all `requiredArtifacts`.
-  Future<void> updateAll(Set<DevelopmentArtifact> requiredArtifacts, {bool offline = false}) async {
+  Future<void> updateAll(
+    Set<DevelopmentArtifact> requiredArtifacts, {
+    bool isLocalEngine = false,
+    bool offline = false,
+  }) async {
     if (!_lockEnabled) {
       return;
     }
 
-    final List<ArtifactSet> artifactsToUpdate = await _collectArtifactsToUpdate(requiredArtifacts);
+    final List<ArtifactSet> artifactsToUpdate = await _collectArtifactsToUpdate(
+      requiredArtifacts,
+      isLocalEngine: isLocalEngine,
+    );
 
     if (artifactsToUpdate.isEmpty) {
       return;

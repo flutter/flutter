@@ -8,10 +8,12 @@ import 'dart:convert';
 import 'package:dtd/dtd.dart';
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/commands/widget_preview.dart';
 import 'package:flutter_tools/src/dart/analysis.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/widget_preview/dtd_types.dart';
 import 'package:process/process.dart';
@@ -53,15 +55,15 @@ Future<Stream<String>> startWidgetPreview({
 }) async {
   if (dtdUri != null && !legacyPreviewDetection) {
     final analysisServer = AnalysisServer(
-      globals.artifacts!.getArtifactPath(Artifact.engineDartSdkPath),
+      context.get<Artifacts>()!.getArtifactPath(Artifact.engineDartSdkPath),
       <String>[tempDir.path],
       suppressAnalytics: true,
       toolContext: FakeToolContext(
-        fs: globals.fs,
-        logger: globals.logger,
-        platform: globals.platform,
+        fs: fileSystem,
+        logger: context.get<Logger>(),
+        platform: platform,
         processManager: processManager,
-        terminal: globals.terminal,
+        terminal: context.get<AnsiTerminal>(),
       ),
     );
     addTearDown(() async {

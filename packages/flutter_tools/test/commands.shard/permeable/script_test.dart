@@ -2,10 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io';
+import 'dart:io' show Platform, Process, ProcessResult;
 
+import 'package:flutter_tools/src/base/context.dart';
+import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/cache.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -18,7 +19,8 @@ void main() {
   testUsingContext(
     'flutter command can receive `!`, avoiding expansion by cmd.exe',
     () async {
-      final String flutterBin = globals.fs.path.join(getFlutterRoot(), 'bin', 'flutter.bat');
+      final FileSystem fs = context.get<FileSystem>()!;
+      final String flutterBin = fs.path.join(getFlutterRoot(), 'bin', 'flutter.bat');
 
       final ProcessResult exec = await Process.run(flutterBin, <String>[
         '!',
@@ -32,14 +34,11 @@ void main() {
   );
 
   testUsingContext('windows entrypoint batch scripts do not enable delayed expansion', () {
+    final FileSystem fs = context.get<FileSystem>()!;
     final String flutterRoot = getFlutterRoot();
-    final File flutterBat = globals.fs.file(
-      globals.fs.path.join(flutterRoot, 'bin', 'flutter.bat'),
-    );
-    final File dartBat = globals.fs.file(globals.fs.path.join(flutterRoot, 'bin', 'dart.bat'));
-    final File sharedBat = globals.fs.file(
-      globals.fs.path.join(flutterRoot, 'bin', 'internal', 'shared.bat'),
-    );
+    final File flutterBat = fs.file(fs.path.join(flutterRoot, 'bin', 'flutter.bat'));
+    final File dartBat = fs.file(fs.path.join(flutterRoot, 'bin', 'dart.bat'));
+    final File sharedBat = fs.file(fs.path.join(flutterRoot, 'bin', 'internal', 'shared.bat'));
 
     expect(flutterBat.existsSync(), isTrue);
     expect(dartBat.existsSync(), isTrue);

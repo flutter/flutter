@@ -8,17 +8,17 @@ import 'dart:math' as math;
 import 'package:args/args.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/common.dart';
-import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/exit.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/process.dart';
+import 'package:flutter_tools/src/base/signals.dart';
 import 'package:flutter_tools/src/build_info.dart';
-import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/context/tool_dependencies.dart';
-import 'package:flutter_tools/src/context_runner.dart';
 import 'package:flutter_tools/src/device.dart';
-import 'package:flutter_tools/src/flutter_cache.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/isolated/mustache_template.dart';
 import 'package:flutter_tools/src/isolated/native_assets/test/native_assets.dart';
 import 'package:flutter_tools/src/project.dart';
@@ -44,188 +44,172 @@ const _kRequiredOptions = <String>[
 const _kOptionCoverage = 'coverage';
 const _kOptionCoveragePath = 'coverage-path';
 
-void main(List<String> args) {
-  final Directory tempDir = globals.fs.systemTempDirectory.createTempSync(
-    'flutter_fuchsia_tester.',
-  );
-  runInContext<void>(
-    () => run(args, tempDir),
-    overrides: <Type, Generator>{
-      Analytics: () => const NoOpAnalytics(),
-      Cache: () => FlutterCache(
-        flutterRoot: tempDir.path,
-        fileSystem: globals.fs,
-        logger: globals.logger,
-        osUtils: globals.os,
-        platform: globals.platform,
-        projectFactory: globals.projectFactory,
-      ),
-    },
-  );
-}
-
-Future<void> run(List<String> args, Directory tempDir) async {
+Future<void> main(List<String> args) async {
+  final shutdownHooks = ShutdownHooks();
+  final fs = LocalFileSystem(LocalSignals.instance, Signals.defaultExitSignals, shutdownHooks);
+  Directory? tempDir;
   try {
-    final parser = ArgParser()
-      ..addOption(_kOptionPackages, help: 'The .dart_tool/package_config.json file')
-      ..addOption(_kOptionShell, help: 'The flutter_tester binary')
-      ..addOption(_kOptionTestDirectory, help: 'Directory containing the tests')
-      ..addOption(_kOptionSdkRoot, help: 'Path to the SDK platform files')
-      ..addOption(_kOptionIcudtl, help: 'Path to the ICU data file')
-      ..addOption(
-        _kOptionTests,
-        help: 'Path to json file that maps Dart test files to precompiled dill files',
-      )
-      ..addOption(
-        _kOptionCoverageDirectory,
-        help: 'The path to the directory that will have coverage collected',
-      )
-      ..addFlag(
-        _kOptionCoverage,
-        negatable: false,
-        help: 'Whether to collect coverage information.',
-      )
-      ..addOption(
-        _kOptionCoveragePath,
-        defaultsTo: 'coverage/lcov.info',
-        help: 'Where to store coverage information (if coverage is enabled).',
-      );
-    final ArgResults argResults = parser.parse(args);
-    if (_kRequiredOptions.any((String option) => !argResults.options.contains(option))) {
-      throwToolExit('Missing option! All options must be specified.');
-    }
-    final String flutterTesterBinPath = globals.fs
-        .file(argResults[_kOptionShell])
-        .resolveSymbolicLinksSync();
-    if (!globals.fs.isFileSync(flutterTesterBinPath)) {
-      throwToolExit('Cannot find Flutter shell at $flutterTesterBinPath');
-    }
-
-    final Directory sdkRootSrc = globals.fs.directory(argResults[_kOptionSdkRoot]);
-    if (!globals.fs.isDirectorySync(sdkRootSrc.path)) {
-      throwToolExit('Cannot find SDK files at ${sdkRootSrc.path}');
-    }
-    Directory? coverageDirectory;
-    final coverageDirectoryPath = argResults[_kOptionCoverageDirectory] as String?;
-    if (coverageDirectoryPath != null) {
-      if (!globals.fs.isDirectorySync(coverageDirectoryPath)) {
-        throwToolExit('Cannot find coverage directory at $coverageDirectoryPath');
-      }
-      coverageDirectory = globals.fs.directory(coverageDirectoryPath);
-    }
-
-    // Put the tester shell where runTests expects it.
-    // TODO(garymm): Switch to a Fuchsia-specific Artifacts impl.
-    final Artifacts artifacts = globals.artifacts!;
-    final Link testerDestLink = globals.fs.link(artifacts.getArtifactPath(Artifact.flutterTester));
-    testerDestLink.parent.createSync(recursive: true);
-    testerDestLink.createSync(globals.fs.path.absolute(flutterTesterBinPath));
-
-    final Directory sdkRootDest = globals.fs.directory(
-      artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
-    );
-    sdkRootDest.createSync(recursive: true);
-    for (final FileSystemEntity artifact in sdkRootSrc.listSync()) {
-      globals.fs.link(sdkRootDest.childFile(artifact.basename).path).createSync(artifact.path);
-    }
-    // TODO(tvolkert): Remove once flutter_tester no longer looks for this.
-    globals.fs.link(sdkRootDest.childFile('platform.dill').path).createSync('platform_strong.dill');
-
+    tempDir = fs.systemTempDirectory.createTempSync('flutter_fuchsia_tester.');
     final ToolDependencies dependencies = await ToolDependencies.bootstrap(
-      artifacts: globals.artifacts,
-      cache: globals.cache,
-      fs: globals.fs,
-      logger: globals.logger,
-      platform: globals.platform,
-      processManager: globals.processManager,
+      analytics: const NoOpAnalytics(),
+      flutterRoot: tempDir.path,
+      fs: fs,
+      shutdownHooks: shutdownHooks,
       templateRenderer: const MustacheTemplateRenderer(),
     );
-
-    Directory? testDirectory;
-    CoverageCollector? collector;
-    if (argResults['coverage'] as bool? ?? false) {
-      // If we have a specified coverage directory then accept all libraries by
-      // setting libraryNames to null.
-      final Set<String>? libraryNames = coverageDirectory != null
-          ? null
-          : <String>{FlutterProject.current(globals.fs, logger: globals.logger).manifest.appName};
-      final String packagesPath = globals.fs.path.normalize(
-        globals.fs.path.absolute(argResults[_kOptionPackages] as String),
-      );
-      collector = CoverageCollector(
-        libraryNames: libraryNames,
-        packagesPath: packagesPath,
-        resolver: await CoverageCollector.getResolver(packagesPath),
-        toolContext: dependencies.toolContext,
-      );
-      if (!argResults.options.contains(_kOptionTestDirectory)) {
-        throwToolExit('Use of --coverage requires setting --test-directory');
-      }
-      testDirectory = globals.fs.directory(argResults[_kOptionTestDirectory]);
-    }
-
-    final tests = <String, String>{};
-    final jsonList = List<Map<String, dynamic>>.from(
-      (json.decode(globals.fs.file(argResults[_kOptionTests]).readAsStringSync()) as List<dynamic>)
-          .cast<Map<String, dynamic>>(),
-    );
-    for (final map in jsonList) {
-      final String source = globals.fs.file(map['source']).resolveSymbolicLinksSync();
-      final String dill = globals.fs.file(map['dill']).resolveSymbolicLinksSync();
-      tests[source] = dill;
-    }
-
-    // TODO(dnfield): This should be injected.
-    final buildInfo = BuildInfo(
-      BuildMode.debug,
-      '',
-      treeShakeIcons: false,
-      packageConfigPath: globals.fs.path.normalize(
-        globals.fs.path.absolute(argResults[_kOptionPackages] as String),
-      ),
-    );
-    final debuggingOptions = DebuggingOptions.enabled(buildInfo);
-    final testRunner = FlutterTestRunner(
-      analytics: dependencies.analytics,
-      templateRenderer: const MustacheTemplateRenderer(),
-      toolContext: dependencies.toolContext,
-    );
-    exitCode = await testRunner.runTests(
-      const TestWrapper(),
-      tests.keys.map(Uri.file).toList(),
-      TestExecutionSpecification(
-        debuggingOptions: debuggingOptions,
-        buildInfo: buildInfo,
-        watcher: collector,
-        enableVmService: collector != null,
-        precompiledDillFiles: tests,
-        concurrency: math.max(1, globals.platform.numberOfProcessors - 2),
-        icudtlPath: globals.fs.path.absolute(argResults[_kOptionIcudtl] as String),
-        coverageDirectory: coverageDirectory,
-        nativeAssetsBuilder: const TestCompilerNativeAssetsBuilderImpl(),
-      ),
-    );
-
-    if (collector != null) {
-      // collector expects currentDirectory to be the root of the dart
-      // package (i.e. contains lib/ and test/ sub-dirs). In some cases,
-      // test files may appear to be in the root directory.
-      if (coverageDirectory == null) {
-        globals.fs.currentDirectory = testDirectory!.parent;
-      } else {
-        globals.fs.currentDirectory = testDirectory;
-      }
-      if (!await collector.collectCoverageData(
-        argResults[_kOptionCoveragePath] as String?,
-        coverageDirectory: coverageDirectory,
-      )) {
-        throwToolExit('Failed to collect coverage data');
-      }
-    }
+    await run(args, toolContext: dependencies.toolContext);
   } finally {
-    tempDir.deleteSync(recursive: true);
+    tempDir?.deleteSync(recursive: true);
+    await fs.dispose();
   }
   // TODO(ianh): There's apparently some sort of lost async task keeping the
   // process open. Remove the next line once that's been resolved.
   exit(exitCode);
+}
+
+Future<void> run(
+  List<String> args, {
+  required ToolContext toolContext,
+  TestWrapper testWrapper = const TestWrapper(),
+}) async {
+  final ToolContext(:Artifacts artifacts, :FileSystem fs, :Logger logger, :Platform platform) =
+      toolContext;
+
+  final parser = ArgParser()
+    ..addOption(_kOptionPackages, help: 'The .dart_tool/package_config.json file')
+    ..addOption(_kOptionShell, help: 'The flutter_tester binary')
+    ..addOption(_kOptionTestDirectory, help: 'Directory containing the tests')
+    ..addOption(_kOptionSdkRoot, help: 'Path to the SDK platform files')
+    ..addOption(_kOptionIcudtl, help: 'Path to the ICU data file')
+    ..addOption(
+      _kOptionTests,
+      help: 'Path to json file that maps Dart test files to precompiled dill files',
+    )
+    ..addOption(
+      _kOptionCoverageDirectory,
+      help: 'The path to the directory that will have coverage collected',
+    )
+    ..addFlag(_kOptionCoverage, negatable: false, help: 'Whether to collect coverage information.')
+    ..addOption(
+      _kOptionCoveragePath,
+      defaultsTo: 'coverage/lcov.info',
+      help: 'Where to store coverage information (if coverage is enabled).',
+    );
+  final ArgResults argResults = parser.parse(args);
+  if (_kRequiredOptions.any((String option) => !argResults.options.contains(option))) {
+    throwToolExit('Missing option! All options must be specified.');
+  }
+  final String flutterTesterBinPath = fs.file(argResults[_kOptionShell]).resolveSymbolicLinksSync();
+  if (!fs.isFileSync(flutterTesterBinPath)) {
+    throwToolExit('Cannot find Flutter shell at $flutterTesterBinPath');
+  }
+
+  final Directory sdkRootSrc = fs.directory(argResults[_kOptionSdkRoot]);
+  if (!fs.isDirectorySync(sdkRootSrc.path)) {
+    throwToolExit('Cannot find SDK files at ${sdkRootSrc.path}');
+  }
+  Directory? coverageDirectory;
+  final coverageDirectoryPath = argResults[_kOptionCoverageDirectory] as String?;
+  if (coverageDirectoryPath != null) {
+    if (!fs.isDirectorySync(coverageDirectoryPath)) {
+      throwToolExit('Cannot find coverage directory at $coverageDirectoryPath');
+    }
+    coverageDirectory = fs.directory(coverageDirectoryPath);
+  }
+
+  // Put the tester shell where runTests expects it.
+  // TODO(garymm): Switch to a Fuchsia-specific Artifacts impl.
+  final Link testerDestLink = fs.link(artifacts.getArtifactPath(Artifact.flutterTester));
+  testerDestLink.parent.createSync(recursive: true);
+  testerDestLink.createSync(fs.path.absolute(flutterTesterBinPath));
+
+  final Directory sdkRootDest = fs.directory(
+    artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
+  );
+  sdkRootDest.createSync(recursive: true);
+  for (final FileSystemEntity artifact in sdkRootSrc.listSync()) {
+    fs.link(sdkRootDest.childFile(artifact.basename).path).createSync(artifact.path);
+  }
+  // TODO(tvolkert): Remove once flutter_tester no longer looks for this.
+  fs.link(sdkRootDest.childFile('platform.dill').path).createSync('platform_strong.dill');
+
+  Directory? testDirectory;
+  CoverageCollector? collector;
+  if (argResults['coverage'] as bool? ?? false) {
+    // If we have a specified coverage directory then accept all libraries by
+    // setting libraryNames to null.
+    final Set<String>? libraryNames = coverageDirectory != null
+        ? null
+        : <String>{FlutterProject.current(fs, logger: logger).manifest.appName};
+    final String packagesPath = fs.path.normalize(
+      fs.path.absolute(argResults[_kOptionPackages] as String),
+    );
+    collector = CoverageCollector(
+      libraryNames: libraryNames,
+      packagesPath: packagesPath,
+      resolver: await CoverageCollector.getResolver(packagesPath),
+      toolContext: toolContext,
+    );
+    if (!argResults.options.contains(_kOptionTestDirectory)) {
+      throwToolExit('Use of --coverage requires setting --test-directory');
+    }
+    testDirectory = fs.directory(argResults[_kOptionTestDirectory]);
+  }
+
+  final tests = <String, String>{};
+  final jsonList = List<Map<String, Object?>>.from(
+    (json.decode(fs.file(argResults[_kOptionTests]).readAsStringSync()) as List<Object?>)
+        .cast<Map<String, Object?>>(),
+  );
+  for (final map in jsonList) {
+    final String source = fs.file(map['source']).resolveSymbolicLinksSync();
+    final String dill = fs.file(map['dill']).resolveSymbolicLinksSync();
+    tests[source] = dill;
+  }
+
+  // TODO(dnfield): This should be injected.
+  final buildInfo = BuildInfo(
+    BuildMode.debug,
+    '',
+    treeShakeIcons: false,
+    packageConfigPath: fs.path.normalize(fs.path.absolute(argResults[_kOptionPackages] as String)),
+  );
+  final debuggingOptions = DebuggingOptions.enabled(buildInfo);
+  final testRunner = FlutterTestRunner(
+    analytics: const NoOpAnalytics(),
+    templateRenderer: const MustacheTemplateRenderer(),
+    toolContext: toolContext,
+  );
+  exitCode = await testRunner.runTests(
+    testWrapper,
+    tests.keys.map(Uri.file).toList(),
+    TestExecutionSpecification(
+      debuggingOptions: debuggingOptions,
+      buildInfo: buildInfo,
+      watcher: collector,
+      enableVmService: collector != null,
+      precompiledDillFiles: tests,
+      concurrency: math.max(1, platform.numberOfProcessors - 2),
+      icudtlPath: fs.path.absolute(argResults[_kOptionIcudtl] as String),
+      coverageDirectory: coverageDirectory,
+      nativeAssetsBuilder: const TestCompilerNativeAssetsBuilderImpl(),
+    ),
+  );
+
+  if (collector != null) {
+    // collector expects currentDirectory to be the root of the dart
+    // package (i.e. contains lib/ and test/ sub-dirs). In some cases,
+    // test files may appear to be in the root directory.
+    if (coverageDirectory == null) {
+      fs.currentDirectory = testDirectory!.parent;
+    } else {
+      fs.currentDirectory = testDirectory;
+    }
+    if (!await collector.collectCoverageData(
+      argResults[_kOptionCoveragePath] as String?,
+      coverageDirectory: coverageDirectory,
+    )) {
+      throwToolExit('Failed to collect coverage data');
+    }
+  }
 }

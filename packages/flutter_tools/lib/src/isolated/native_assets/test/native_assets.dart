@@ -109,8 +109,6 @@ Future<TestCompilerNativeAssetsBuildResult> testCompilerBuildNativeAssets(
     pubspecPath,
     flutterRoot: cache.flutterRoot,
     includeDevDependencies: true,
-    androidSdkBuilder: null,
-    visualStudio: VisualStudio(toolContext: toolContext),
   );
 
   if (!platform.isMacOS && !platform.isLinux && !platform.isWindows) {
@@ -149,6 +147,7 @@ Future<TestCompilerNativeAssetsBuildResult> testCompilerBuildNativeAssets(
     ),
     buildDataAssets: true,
     recordedUsesFile: null,
+    visualStudio: VisualStudio(toolContext: toolContext),
   );
 
   // Then "install" the code assets so they can be used at runtime.
