@@ -169,6 +169,15 @@ class RenderPass : public ResourceBinder {
   ///
   virtual bool SetIndexBuffer(BufferView index_buffer, IndexType index_type);
 
+  //----------------------------------------------------------------------------
+  /// @brief      Hints at how much this pass is about to record, for backends
+  ///             that store commands until they are encoded.
+  ///
+  virtual void ReserveCommands(size_t draws,
+                               size_t bound_buffers,
+                               size_t bound_textures,
+                               size_t vertex_buffers) {}
+
   /// Record the currently pending command.
   virtual absl::Status Draw();
 

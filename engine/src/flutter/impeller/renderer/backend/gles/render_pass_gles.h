@@ -36,6 +36,12 @@ class RenderPassGLES final
   bool IsValid() const override;
 
   // |RenderPass|
+  void ReserveCommands(size_t draws,
+                       size_t bound_buffers,
+                       size_t bound_textures,
+                       size_t vertex_buffers) override;
+
+  // |RenderPass|
   void OnSetLabel(std::string_view label) override;
 
   // |RenderPass|

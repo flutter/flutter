@@ -926,6 +926,17 @@ void RenderPassGLES::ResetGLState(const ProcTableGLES& gl) {
 }
 
 // |RenderPass|
+void RenderPassGLES::ReserveCommands(size_t draws,
+                                     size_t bound_buffers,
+                                     size_t bound_textures,
+                                     size_t vertex_buffers) {
+  commands_.reserve(draws);
+  bound_buffers_.reserve(bound_buffers);
+  bound_textures_.reserve(bound_textures);
+  vertex_buffers_.reserve(vertex_buffers);
+}
+
+// |RenderPass|
 bool RenderPassGLES::OnEncodeCommands(const Context& context) const {
   if (!IsValid()) {
     return false;
