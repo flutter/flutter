@@ -307,6 +307,11 @@ bool debugCheckHasTable(BuildContext context) {
   return true;
 }
 
+/// Deprecated. Remove calls to this function.
+///
+/// [runApp] always introduces a [MediaQuery]. [MediaQuery.of] and the specific
+/// accessors already throw if no ancestor exists.
+///
 /// Asserts that the given context has a [MediaQuery] ancestor.
 ///
 /// Used by various widgets to make sure that they are only used in an
@@ -316,6 +321,7 @@ bool debugCheckHasTable(BuildContext context) {
 /// relevant Widget's build method:
 ///
 /// ```dart
+/// // ignore: deprecated_member_use
 /// assert(debugCheckHasMediaQuery(context));
 /// ```
 ///
@@ -324,6 +330,11 @@ bool debugCheckHasTable(BuildContext context) {
 /// hit.
 ///
 /// Does nothing if asserts are disabled. Always returns true.
+@Deprecated(
+  'Remove this call. '
+  'The runApp() function always introduces a MediaQuery. '
+  'This feature was deprecated after v3.49.0-0.2.pre.',
+)
 bool debugCheckHasMediaQuery(BuildContext context) {
   assert(() {
     if (context.widget is! MediaQuery &&

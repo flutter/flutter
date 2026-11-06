@@ -11,7 +11,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
 import 'basic.dart';
-import 'debug.dart';
 import 'framework.dart';
 import 'media_query.dart';
 
@@ -136,7 +135,6 @@ class SnapshotWidget extends SingleChildRenderObjectWidget {
 
   @override
   RenderObject createRenderObject(BuildContext context) {
-    debugCheckHasMediaQuery(context);
     return _RenderSnapshotWidget(
       controller: controller,
       mode: mode,
@@ -148,7 +146,6 @@ class SnapshotWidget extends SingleChildRenderObjectWidget {
 
   @override
   void updateRenderObject(BuildContext context, covariant RenderObject renderObject) {
-    debugCheckHasMediaQuery(context);
     (renderObject as _RenderSnapshotWidget)
       ..controller = controller
       ..mode = mode

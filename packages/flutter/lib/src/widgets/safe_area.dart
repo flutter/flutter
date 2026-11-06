@@ -7,7 +7,6 @@ import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 
 import 'basic.dart';
-import 'debug.dart';
 import 'framework.dart';
 import 'media_query.dart';
 
@@ -111,7 +110,6 @@ class SafeArea extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    assert(debugCheckHasMediaQuery(context));
     EdgeInsets padding = MediaQuery.paddingOf(context);
     // Bottom padding has been consumed - i.e. by the keyboard
     if (maintainBottomViewPadding) {
@@ -204,7 +202,6 @@ class SliverSafeArea extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    assert(debugCheckHasMediaQuery(context));
     final EdgeInsets padding = MediaQuery.paddingOf(context);
     return SliverPadding(
       padding: EdgeInsets.only(

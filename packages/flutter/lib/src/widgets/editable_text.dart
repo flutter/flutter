@@ -33,7 +33,6 @@ import 'basic.dart';
 import 'binding.dart';
 import 'constants.dart';
 import 'context_menu_button_item.dart';
-import 'debug.dart';
 import 'default_selection_style.dart';
 import 'default_text_editing_shortcuts.dart';
 import 'focus_manager.dart';
@@ -5875,7 +5874,6 @@ class EditableTextState extends State<EditableText>
   @protected
   @override
   Widget build(BuildContext context) {
-    assert(debugCheckHasMediaQuery(context));
     super.build(context); // See AutomaticKeepAliveClientMixin.
 
     final TextSelectionControls? controls = widget.selectionControls;
