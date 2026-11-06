@@ -146,10 +146,12 @@ void main() {
     final Finder finder = find.byType(EditableText);
     await tester.showKeyboard(finder);
     expect(focusNode.hasFocus, isTrue);
+    expect(tester.testTextInput.isVisible, isTrue);
 
     await tester.drag(finder, const Offset(0.0, -40.0));
     await tester.pumpAndSettle();
     expect(focusNode.hasFocus, isFalse);
+    expect(tester.testTextInput.isVisible, isFalse);
 
     // Popping back to the route focuses the route's last focused child, which
     // must no longer be the field that the drag dismissed.
@@ -160,6 +162,8 @@ void main() {
     navigatorKey.currentState!.pop();
     await tester.pumpAndSettle();
     expect(focusNode.hasFocus, isFalse);
+    expect(focusNode.enclosingScope!.hasPrimaryFocus, isTrue);
+    expect(tester.testTextInput.isVisible, isFalse);
   });
 
   testWidgets('GridView.builder supports null items', (WidgetTester tester) async {
