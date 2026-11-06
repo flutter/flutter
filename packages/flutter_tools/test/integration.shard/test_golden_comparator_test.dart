@@ -3,19 +3,22 @@
 // found in the LICENSE file.
 
 import 'package:file_testing/file_testing.dart';
+import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/build_info.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/isolated/mustache_template.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/test/test_compiler.dart';
 import 'package:flutter_tools/src/test/test_golden_comparator.dart';
 
 import '../src/common.dart';
-import '../src/context.dart';
 import '../src/fakes.dart';
 import 'test_data/integration_tests_project.dart';
+import 'test_utils.dart';
 
 /// Tests that [`TestGoldenComparator`] is working end-to-end-ish.
 ///
@@ -24,7 +27,7 @@ import 'test_data/integration_tests_project.dart';
 /// that is very different.
 void main() {
   final (File testPng1, File testPng2) = () {
-    final Directory testData = globals.localFileSystem
+    final Directory testData = fileSystem
         .directory(getFlutterRoot())
         .childDirectory('packages')
         .childDirectory('flutter_tools')
@@ -34,15 +37,13 @@ void main() {
     return (testData.childFile('test_1.png'), testData.childFile('test_2.png'));
   }();
 
-  late LocalFileSystem fs;
   late Directory tmpDir;
   late BufferLogger logger;
   late IntegrationTestsProject testProject;
   late FlutterProject project;
 
   setUp(() async {
-    fs = globals.localFileSystem;
-    tmpDir = fs.systemTempDirectory.createTempSync();
+    tmpDir = fileSystem.systemTempDirectory.createTempSync();
     logger = BufferLogger.test();
 
     testProject = IntegrationTestsProject();
@@ -52,6 +53,7 @@ void main() {
   });
 
   tearDown(() {
+    tryToDelete(tmpDir);
     printOnFailure(logger.warningText);
     printOnFailure(logger.errorText);
   });
@@ -60,6 +62,31 @@ void main() {
     final File packageConfig = tmpDir.childDirectory('.dart_tool').childFile('package_config.json');
     expect(packageConfig, exists);
 
+    final String flutterRoot = getFlutterRoot();
+    final cache = Cache.test(
+      rootOverride: fileSystem.directory(flutterRoot),
+      flutterRoot: flutterRoot,
+      fileSystem: fileSystem,
+      logger: logger,
+      platform: platform,
+      processManager: processManager,
+    );
+    final artifacts = CachedArtifacts(
+      fileSystem: fileSystem,
+      cache: cache,
+      platform: platform,
+      operatingSystemUtils: cache.osUtils,
+    );
+    final toolContext = FakeToolContext(
+      artifacts: artifacts,
+      cache: cache,
+      config: Config.test(logger: logger),
+      fs: fileSystem,
+      logger: logger,
+      platform: platform,
+      processManager: processManager,
+      shutdownHooks: ShutdownHooks(),
+    );
     final compiler = TestCompiler(
       BuildInfo(
         BuildMode.debug,
@@ -69,16 +96,21 @@ void main() {
       ),
       project,
       templateRenderer: const MustacheTemplateRenderer(),
-      toolContext: const DelegatingToolContext(),
+      toolContext: toolContext,
     );
-    return TestGoldenComparator(
+    final comparator = TestGoldenComparator(
       compilerFactory: () => compiler,
-      flutterTesterBinPath: globals.artifacts!.getArtifactPath(.flutterTester),
-      toolContext: DelegatingToolContext(logger: logger),
+      flutterTesterBinPath: artifacts.getArtifactPath(.flutterTester),
+      toolContext: toolContext,
     );
+    addTearDown(() async {
+      await toolContext.shutdownHooks.runShutdownHooks(logger);
+      await comparator.close();
+    });
+    return comparator;
   }
 
-  testUsingContext('successful comparison is successful', () async {
+  testWithoutContext('successful comparison is successful', () async {
     final TestGoldenComparator comparator = createComparator();
     final TestGoldenComparison result = await comparator.compare(
       Uri(path: testProject.testFilePath),
@@ -89,7 +121,7 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/174267.
-  testUsingContext('failed comparison is failed but not crashed', () async {
+  testWithoutContext('failed comparison is failed but not crashed', () async {
     final TestGoldenComparator comparator = createComparator();
     final TestGoldenComparison result = await comparator.compare(
       Uri(path: testProject.testFilePath),

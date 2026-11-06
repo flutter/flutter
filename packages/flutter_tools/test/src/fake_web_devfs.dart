@@ -6,9 +6,11 @@ import 'dart:async';
 import 'dart:io' hide Directory, File;
 
 import 'package:dwds/dwds.dart';
+import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/base/config.dart';
+import 'package:flutter_tools/src/base/error_handling_io.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/net.dart';
@@ -20,18 +22,19 @@ import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/devfs.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/isolated/devfs_web.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:flutter_tools/src/web/chrome.dart';
 import 'package:flutter_tools/src/web/compile.dart';
 import 'package:flutter_tools/src/web/devfs_config.dart';
 import 'package:package_config/package_config.dart';
+import 'package:process/process.dart';
 import 'package:test/fake.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
 import 'fake_process_manager.dart';
 import 'fakes.dart';
+import 'testbed.dart';
 
 /// Helper function to create a [WebDevFS] with sensible testbed defaults.
 WebDevFS createWebDevFS({
@@ -66,6 +69,43 @@ WebDevFS createWebDevFS({
   bool testMode = true,
   Map<String, String> webDefines = const <String, String>{},
 }) {
+  final ToolContext resolvedToolContext =
+      toolContext ??
+      () {
+        final ToolContext? testBedContext = TestBed.activeToolContext;
+        final Platform resolvedPlatform =
+            platform ?? testBedContext?.platform ?? const LocalPlatform();
+        final Logger resolvedLogger = logger ?? testBedContext?.logger ?? BufferLogger.test();
+        final FileSystem? baseFileSystem = switch (testBedContext?.fs) {
+          final ErrorHandlingFileSystem errorHandlingFs => errorHandlingFs.fileSystem,
+          final FileSystem otherFs => otherFs,
+          null => null,
+        };
+        final FileSystem resolvedFileSystem =
+            fileSystem ??
+            ErrorHandlingFileSystem(
+              delegate: baseFileSystem ?? MemoryFileSystem.test(),
+              platform: resolvedPlatform,
+            );
+        return FakeToolContext(
+          artifacts:
+              artifacts ??
+              testBedContext?.artifacts ??
+              Artifacts.test(fileSystem: resolvedFileSystem),
+          cache:
+              cache ??
+              testBedContext?.cache ??
+              Cache.test(processManager: FakeProcessManager.any()),
+          config: config ?? testBedContext?.config ?? Config.test(logger: resolvedLogger),
+          fs: resolvedFileSystem,
+          flutterVersion: flutterVersion ?? testBedContext?.flutterVersion ?? FakeFlutterVersion(),
+          logger: resolvedLogger,
+          platform: resolvedPlatform,
+          processManager:
+              processManager ?? testBedContext?.processManager ?? const LocalProcessManager(),
+        );
+      }();
+  final FileSystem resolvedFileSystem = fileSystem ?? resolvedToolContext.fs;
   return WebDevFS(
     packagesFilePath: packagesFilePath,
     urlTunneller: urlTunneller,
@@ -75,7 +115,7 @@ WebDevFS createWebDevFS({
     buildInfo: buildInfo,
     enableDwds: enableDwds,
     ddsConfig: ddsConfig,
-    entrypoint: entrypoint ?? globals.fs.file('lib/main.dart').uri,
+    entrypoint: entrypoint ?? resolvedFileSystem.file('lib/main.dart').uri,
     expressionCompiler: expressionCompiler,
     chromiumLauncher: chromiumLauncher,
     nativeNullAssertions: nativeNullAssertions,
@@ -83,21 +123,10 @@ WebDevFS createWebDevFS({
     webRenderer: webRenderer,
     isWasm: isWasm,
     useLocalCanvasKit: useLocalCanvasKit,
-    rootDirectory: rootDirectory ?? globals.fs.currentDirectory,
+    rootDirectory: rootDirectory ?? resolvedFileSystem.currentDirectory,
     useDwdsWebSocketConnection: useDwdsWebSocketConnection,
     webCrossOriginIsolation: webCrossOriginIsolation,
-    toolContext:
-        toolContext ??
-        FakeToolContext(
-          artifacts: artifacts ?? globals.artifacts!,
-          cache: cache ?? Cache.test(processManager: FakeProcessManager.any()),
-          config: config ?? globals.config,
-          fs: fileSystem ?? globals.fs,
-          flutterVersion: flutterVersion ?? globals.flutterVersion,
-          logger: logger ?? globals.logger,
-          platform: platform ?? globals.platform,
-          processManager: processManager ?? globals.processManager,
-        ),
+    toolContext: resolvedToolContext,
     testMode: testMode,
     webDefines: webDefines,
   );
