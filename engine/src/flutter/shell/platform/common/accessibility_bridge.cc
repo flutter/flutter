@@ -4,6 +4,7 @@
 
 #include "accessibility_bridge.h"
 
+#include <algorithm>
 #include <functional>
 #include <utility>
 
@@ -58,11 +59,13 @@ void AccessibilityBridge::CommitUpdates() {
   std::optional<ui::AXTreeUpdate> remove_reparented =
       CreateRemoveReparentedNodesUpdate();
   if (remove_reparented.has_value()) {
-    tree_->Unserialize(remove_reparented.value());
-
-    std::string error = tree_->error();
-    if (!error.empty()) {
-      FML_LOG(ERROR) << "Failed to update ui::AXTree, error: " << error;
+    if (!tree_->Unserialize(remove_reparented.value())) {
+      FML_LOG(ERROR) << "Failed to update ui::AXTree, error: "
+                     << tree_->error();
+      // Drop the rejected update. Pending nodes left behind would make every
+      // later update fail as well.
+      pending_semantics_node_updates_.clear();
+      pending_semantics_custom_action_updates_.clear();
       assert(false);
       return;
     }
@@ -105,13 +108,13 @@ void AccessibilityBridge::CommitUpdates() {
     update.root_id = results.back().front().id;
   }
 
-  tree_->Unserialize(update);
+  // ui::AXTree never resets error(), so only the return value is per update.
+  bool success = tree_->Unserialize(update);
   pending_semantics_node_updates_.clear();
   pending_semantics_custom_action_updates_.clear();
 
-  std::string error = tree_->error();
-  if (!error.empty()) {
-    FML_LOG(ERROR) << "Failed to update ui::AXTree, error: " << error;
+  if (!success) {
+    FML_LOG(ERROR) << "Failed to update ui::AXTree, error: " << tree_->error();
     return;
   }
   // Handles accessibility events as the result of the semantics update.
@@ -244,9 +247,9 @@ AccessibilityBridge::CreateRemoveReparentedNodesUpdate() {
       ui::AXNodeData* parent = &updates[parent_id];
       auto iter = std::find(parent->child_ids.begin(), parent->child_ids.end(),
                             child_id);
-
-      assert(iter != parent->child_ids.end());
-      parent->child_ids.erase(iter);
+      if (iter != parent->child_ids.end()) {
+        parent->child_ids.erase(iter);
+      }
     }
   }
 
@@ -259,8 +262,22 @@ AccessibilityBridge::CreateRemoveReparentedNodesUpdate() {
       .nodes = std::vector<ui::AXNodeData>(),
   };
 
-  for (std::pair<int32_t, ui::AXNodeData> data : updates) {
-    update.nodes.push_back(std::move(data.second));
+  // A node removed from its parent takes its whole subtree with it, and
+  // ui::AXTree rejects an update to a node that an earlier entry already
+  // removed. Update the deepest parents first.
+  std::vector<std::pair<int, ui::AXNodeData>> nodes_by_depth;
+  for (auto& [parent_id, data] : updates) {
+    int depth = 0;
+    for (ui::AXNode* node = tree_->GetFromId(parent_id)->parent(); node;
+         node = node->parent()) {
+      depth++;
+    }
+    nodes_by_depth.emplace_back(depth, std::move(data));
+  }
+  std::sort(nodes_by_depth.begin(), nodes_by_depth.end(),
+            [](const auto& a, const auto& b) { return a.first > b.first; });
+  for (auto& entry : nodes_by_depth) {
+    update.nodes.push_back(std::move(entry.second));
   }
 
   return update;
@@ -312,8 +329,7 @@ void AccessibilityBridge::ConvertFlutterUpdate(const SemanticsNode& node,
 
 void AccessibilityBridge::SetRoleFromFlutterUpdate(ui::AXNodeData& node_data,
                                                    const SemanticsNode& node) {
-  const FlutterSemanticsFlags* flags = node.flags;
-  FML_DCHECK(flags) << "SemanticsNode::flags must not be null";
+  const FlutterSemanticsFlags* flags = &node.flags;
   if (flags->is_button) {
     node_data.role = ax::mojom::Role::kButton;
     return;
@@ -363,7 +379,7 @@ void AccessibilityBridge::SetRoleFromFlutterUpdate(ui::AXNodeData& node_data,
 
 void AccessibilityBridge::SetStateFromFlutterUpdate(ui::AXNodeData& node_data,
                                                     const SemanticsNode& node) {
-  const FlutterSemanticsFlags* flags = node.flags;
+  const FlutterSemanticsFlags* flags = &node.flags;
   FlutterSemanticsAction actions = node.actions;
   if (flags->is_expanded == FlutterTristate::kFlutterTristateTrue) {
     node_data.AddState(ax::mojom::State::kExpanded);
@@ -438,7 +454,7 @@ void AccessibilityBridge::SetBooleanAttributesFromFlutterUpdate(
     ui::AXNodeData& node_data,
     const SemanticsNode& node) {
   FlutterSemanticsAction actions = node.actions;
-  const FlutterSemanticsFlags* flags = node.flags;
+  const FlutterSemanticsFlags* flags = &node.flags;
   node_data.AddBoolAttribute(ax::mojom::BoolAttribute::kScrollable,
                              actions & kHasScrollingAction);
   node_data.AddBoolAttribute(
@@ -463,7 +479,7 @@ void AccessibilityBridge::SetBooleanAttributesFromFlutterUpdate(
 void AccessibilityBridge::SetIntAttributesFromFlutterUpdate(
     ui::AXNodeData& node_data,
     const SemanticsNode& node) {
-  const FlutterSemanticsFlags* flags = node.flags;
+  const FlutterSemanticsFlags* flags = &node.flags;
   node_data.AddIntAttribute(ax::mojom::IntAttribute::kTextDirection,
                             node.text_direction);
 
@@ -555,7 +571,7 @@ void AccessibilityBridge::SetTooltipFromFlutterUpdate(
 
 void AccessibilityBridge::SetTreeData(const SemanticsNode& node,
                                       ui::AXTreeUpdate& tree_update) {
-  const FlutterSemanticsFlags* flags = node.flags;
+  const FlutterSemanticsFlags* flags = &node.flags;
   // Set selection of the focused node if:
   // 1. this text field has a valid selection
   // 2. this text field doesn't have a valid selection but had selection stored
@@ -596,7 +612,7 @@ AccessibilityBridge::FromFlutterSemanticsNode(
   FML_DCHECK(flutter_node.flags2)
       << "FlutterSemanticsNode2::flags2 must not be null";
 
-  result.flags = flutter_node.flags2;
+  result.flags = *flutter_node.flags2;
   result.actions = flutter_node.actions;
   result.heading_level = flutter_node.heading_level;
   result.text_selection_base = flutter_node.text_selection_base;
