@@ -1862,14 +1862,19 @@ bazel test --config=android_debug_unopt //engine/src/flutter/shell/platform/andr
 bazel test --config=android_debug_unopt //engine/src/flutter/shell/platform/android:java_tests/io.flutter.embedding.android.FlutterActivityTest
 ```
 
-On this host, two tests at a time (a Robolectric JVM holds a sandbox per
-SDK a class runs on; four at once left a 94 GB machine swapping, so each
-test tells Bazel's scheduler `resources:memory:12288`): **87 of 87 classes
-pass in 1,509 s**, 1,567 test cases by JUnit's count (Gradle's 1,565
-passed and 3 skipped); the longest classes are TextInputPluginTest (134 s,
-124 tests over four SDKs), FlutterActivityTest (129 s) and
-FlutterFragmentActivityTest (59 s). The compile of the 96 files takes 11 s,
-the resource APK and R classes 4 s.
+Each test tells Bazel's scheduler `resources:memory:3072`: a Robolectric
+JVM over the embedding's classes peaks at 3.0 GB resident (the activity
+and text-input classes; 0.9 GB on average; sampled every 2 s over the
+suite) under the 8 GB heap cap Gradle's forks have too, so an 8-core,
+30 GB bot runs six at once, as Gradle ran eight (the 12 GB first
+declared here ran them one at a time there: 23 minutes for a suite
+Gradle finishes in four). On this host (24 cores, 94 GB): **87 of 87
+classes pass** -- 1,567 test cases by JUnit's count (Gradle's 1,565
+passed and 3 skipped) -- in 1,119 s at twenty-one at once (the cores are
+the limit: 1,509 s at two, about the same at five); the longest classes
+alone are TextInputPluginTest (65 s on a bot, 124 tests over four SDKs),
+FlutterViewTest (68 s) and FlutterActivityAndFragmentDelegateTest (66 s).
+The compile of the 96 files takes 11 s, the resource APK and R classes 4 s.
 
 ## The archives CI uploads: `zip_bundle`
 
