@@ -271,6 +271,16 @@ const Map<String, GnFlag> gnFlags = <String, GnFlag>{
     GnFlagEffect.assumed,
     note: 'the Impeller suites always run on the wrapped SwiftShader and loader here',
   ),
+  // BUILDCONFIG.gn's is_minimal_linux (the licenses builder, on a bot
+  // without the desktop's development packages): GN skips its pkg-config
+  // lookups for the Linux embedding's libraries (build/config/linux,
+  // shell/platform/linux/config). The Bazel build runs no pkg-config -- the
+  // Linux embedding's libraries come from its sysroot -- so the flag asks
+  // for what it has already.
+  '--enable-minimal-linux': GnFlag(
+    GnFlagEffect.assumed,
+    note: 'the Bazel build runs no pkg-config: the Linux libraries come from the sysroot',
+  ),
   // runtime_args.gni's dart_disable_secure_socket (the size-experiment
   // builders): the Dart wrap's flag, which the archives' names read too
   // (`-size-exp`).

@@ -164,9 +164,8 @@ build:host_profile_test --compilation_mode=opt --//engine/src/flutter/common:run
 build:host_release_test --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=release --platforms=//engine/src/flutter/build/bazel/toolchains:linux_x64_release
 
 # linux_license.json: licenses
-#   --target-dir ci/host_release_licenses --runtime-mode release --no-rbe --no-goma --enable-minimal-linux
-# No configuration: the Bazel build cannot express
-#   --enable-minimal-linux (not in the converter's table of tools/gn flags)
+#   --target-dir ci/host_release_licenses --runtime-mode release --no-lto --no-rbe --no-goma --enable-minimal-linux --bazel
+build:licenses --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=release --platforms=//engine/src/flutter/build/bazel/toolchains:linux_x64_release
 
 # linux_unopt.json: ci/host_debug_unopt
 #   --target-dir ci/host_debug_unopt --runtime-mode debug --unoptimized --prebuilt-dart-sdk --asan --dart-debug --no-rbe --no-goma --bazel
