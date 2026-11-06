@@ -506,16 +506,8 @@ targets:
       config_name: mac_clangd
       cpu: arm64
 
-  - name: Mac mac_unopt
-    recipe: engine_v2/engine_v2
-    properties:
-      config_name: mac_unopt
-      add_recipes_cq: "true"
-    timeout: 120
-
   - name: Mac mac_host_debug_arm64_tests
     recipe: engine_v2/builder
-    bringup: true
     timeout: 120
     properties:
       config_name: mac_host_debug_arm64_tests
@@ -523,7 +515,6 @@ targets:
 
   - name: Mac mac_host_profile_arm64_tests
     recipe: engine_v2/builder
-    bringup: true
     timeout: 120
     properties:
       config_name: mac_host_profile_arm64_tests
@@ -531,7 +522,6 @@ targets:
 
   - name: Mac mac_host_release_arm64_tests
     recipe: engine_v2/builder
-    bringup: true
     timeout: 120
     properties:
       config_name: mac_host_release_arm64_tests
@@ -539,7 +529,6 @@ targets:
 
   - name: Mac mac_host_release_arm64_licenses
     recipe: engine_v2/builder
-    bringup: true
     timeout: 120
     properties:
       config_name: mac_host_release_arm64_licenses
@@ -547,7 +536,6 @@ targets:
 
   - name: Mac mac_release_arm64_tests
     recipe: engine_v2/builder
-    bringup: true
     timeout: 120
     properties:
       config_name: mac_release_arm64_tests
@@ -555,7 +543,6 @@ targets:
 
   - name: Mac mac_host_debug_unopt_arm64
     recipe: engine_v2/builder
-    bringup: true
     timeout: 120
     properties:
       add_recipes_cq: "true"
@@ -564,7 +551,6 @@ targets:
 
   - name: Mac mac_ios_debug_unopt_sim_arm64
     recipe: engine_v2/builder
-    bringup: true
     timeout: 120
     properties:
       add_recipes_cq: "true"
@@ -578,7 +564,6 @@ targets:
 
   - name: Mac mac_ios_debug_unopt_sim_arm64_extension_safe
     recipe: engine_v2/builder
-    bringup: true
     timeout: 120
     properties:
       config_name: mac_ios_debug_unopt_sim_arm64_extension_safe
