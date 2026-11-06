@@ -22,7 +22,6 @@ import 'package:flutter_tools/src/isolated/native_assets/native_assets.dart';
 import 'package:flutter_tools/src/isolated/native_assets/targets.dart';
 import 'package:flutter_tools/src/isolated/native_assets/test/native_assets.dart';
 import 'package:flutter_tools/src/project.dart';
-import 'package:flutter_tools/src/windows/visual_studio.dart';
 import 'package:package_config/package_config_types.dart';
 import 'package:test/fake.dart';
 
@@ -84,6 +83,7 @@ void main() {
         targetPlatform: TargetPlatform.linux_x64,
         projectUri: projectUri,
         fileSystem: fileSystem,
+        featureFlags: featureFlags,
         logger: testLogger,
         buildRunner: FakeFlutterNativeAssetsBuildRunner(
           packagesWithNativeAssetsResult: <String>['bar'],
@@ -128,6 +128,7 @@ void main() {
           targetPlatform: TargetPlatform.windows_x64,
           projectUri: projectUri,
           fileSystem: fileSystem,
+          featureFlags: featureFlags,
           logger: testLogger,
           buildRunner: FakeFlutterNativeAssetsBuildRunner(
             packagesWithNativeAssetsResult: <String>['bar'],
@@ -158,6 +159,7 @@ void main() {
         targetPlatform: TargetPlatform.windows_x64,
         projectUri: projectUri,
         fileSystem: fileSystem,
+        featureFlags: featureFlags,
         logger: testLogger,
         buildRunner: FakeFlutterNativeAssetsBuildRunner(
           packagesWithNativeAssetsResult: <String>['bar'],
@@ -199,6 +201,7 @@ void main() {
           targetPlatform: TargetPlatform.linux_x64,
           projectUri: projectUri,
           fileSystem: fileSystem,
+          featureFlags: featureFlags,
           logger: testLogger,
           buildRunner: FakeFlutterNativeAssetsBuildRunner(
             packagesWithNativeAssetsResult: <String>['bar'],
@@ -239,6 +242,7 @@ void main() {
         targetPlatform: TargetPlatform.linux_x64,
         projectUri: projectUri,
         fileSystem: fileSystem,
+        featureFlags: featureFlags,
         logger: testLogger,
         buildRunner: FakeFlutterNativeAssetsBuildRunner(
           packagesWithNativeAssetsResult: <String>['bar'],
@@ -295,6 +299,7 @@ void main() {
         targetPlatform: TargetPlatform.linux_x64,
         projectUri: projectUri,
         fileSystem: fileSystem,
+        featureFlags: featureFlags,
         logger: testLogger,
         buildRunner: FakeFlutterNativeAssetsBuildRunner(
           packagesWithNativeAssetsResult: <String>['bar'],
@@ -370,6 +375,7 @@ void main() {
           targetPlatform: TargetPlatform.linux_x64,
           projectUri: projectUri,
           fileSystem: fileSystem,
+          featureFlags: featureFlags,
           logger: testLogger,
           buildRunner: FakeFlutterNativeAssetsBuildRunner(
             packagesWithNativeAssetsResult: <String>['bar'],
@@ -421,9 +427,7 @@ void main() {
     final target = _SetCCompilerConfigTarget(
       packagesWithNativeAssetsResult: <String>['bar'],
       buildResult: FakeFlutterNativeAssetsBuilderResult.fromAssets(),
-      fileSystem: fileSystem,
       logger: testLogger,
-      platform: platform,
       processManager: testProcessManager,
     );
 
@@ -432,6 +436,7 @@ void main() {
       targetPlatform: TargetPlatform.tester,
       projectUri: projectUri,
       fileSystem: fileSystem,
+      featureFlags: featureFlags,
       logger: testLogger,
       buildRunner: target,
       buildCodeAssets: BuildCodeAssetsOptions(appBuildDirectory: fileSystem.directory(projectUri)),
@@ -452,9 +457,7 @@ void main() {
       final target = _SetCCompilerConfigTarget(
         packagesWithNativeAssetsResult: <String>['bar'],
         buildResult: FakeFlutterNativeAssetsBuilderResult.fromAssets(),
-        fileSystem: fileSystem,
         logger: testLogger,
-        platform: const LocalPlatform(),
         processManager: processManager,
       );
 
@@ -477,6 +480,7 @@ CMAKE_LINKER:FILEPATH=/usr/bin/ld.ldd
         targetPlatform: TargetPlatform.linux_arm64,
         projectUri: projectUri,
         fileSystem: fileSystem,
+        featureFlags: featureFlags,
         logger: testLogger,
         buildRunner: target,
         buildCodeAssets: BuildCodeAssetsOptions(appBuildDirectory: project.childDirectory('build')),
@@ -506,6 +510,7 @@ CMAKE_LINKER:FILEPATH=/usr/bin/ld.ldd
         targetPlatform: TargetPlatform.windows_x64,
         projectUri: projectUri,
         fileSystem: fileSystem,
+        featureFlags: featureFlags,
         logger: testLogger,
         buildRunner: FakeFlutterNativeAssetsBuildRunner(
           packagesWithNativeAssetsResult: <String>['bar'],
@@ -886,26 +891,13 @@ environment:
 
 class _SetCCompilerConfigTarget extends FakeFlutterNativeAssetsBuildRunner {
   _SetCCompilerConfigTarget({
-    required this.fileSystem,
     required this.logger,
-    required this.platform,
     required this.processManager,
     super.buildResult,
     super.packagesWithNativeAssetsResult,
-  }) : super(
-         visualStudio: VisualStudio(
-           toolContext: FakeToolContext(
-             fs: fileSystem,
-             logger: logger,
-             platform: platform,
-             processManager: processManager,
-           ),
-         ),
-       );
+  });
 
-  final FileSystem fileSystem;
   final Logger logger;
-  final Platform platform;
   final FakeProcessManager processManager;
 
   bool didSetCCompilerConfig = false;
