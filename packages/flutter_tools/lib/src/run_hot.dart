@@ -1252,10 +1252,12 @@ Future<OperationResult> defaultReloadSourcesHelper(
 /// so one request per group also updates isolates spawned with `Isolate.spawn`. Sending one
 /// request per isolate would reload the same group once for each of its isolates.
 ///
-/// Known limitation: when [pause] is true, only the isolate that receives the request pauses
-/// after the reload, and debuggers re-send breakpoints only to the isolate that paused. A
-/// breakpoint in another isolate of the group that moved with the edit stays in the old code and
-/// is not hit until the debugger sends it again.
+/// Limitation: when [pause] is true, this optimization is skipped and every isolate still gets
+/// its own request. The VM pauses only the isolate that received the request, and debuggers
+/// re-send breakpoints only to the isolates that paused. With one request per group, the other
+/// isolates would not get their breakpoints again, so a breakpoint that moved because lines were
+/// added above it would not be hit there. This can be removed once debuggers re-send breakpoints
+/// to every isolate of the group.
 Future<List<Future<vm_service.ReloadReport>>> _reloadDeviceSources(
   FlutterDevice device,
   String entryPath, {
@@ -1263,12 +1265,11 @@ Future<List<Future<vm_service.ReloadReport>>> _reloadDeviceSources(
 }) async {
   final deviceEntryUri = device.devFS!.baseUri!.resolve(entryPath).toString();
   final vm_service.VM vm = await device.vmService!.service.getVM();
-  // TODO(MSOB7YY): Remove the known limitation in the doc comment once DDS and flutter-intellij
-  // re-send breakpoints to every isolate of the group on PausePostRequest.
+  final bool reloadEveryIsolate = pause ?? false;
   final reloadedIsolateGroupIds = <String>{};
   return <Future<vm_service.ReloadReport>>[
     for (final vm_service.IsolateRef isolateRef in vm.isolates!)
-      if (reloadedIsolateGroupIds.add(isolateRef.isolateGroupId!))
+      if (reloadEveryIsolate || reloadedIsolateGroupIds.add(isolateRef.isolateGroupId!))
         device.vmService!.service.reloadSources(
           isolateRef.id!,
           pause: pause,
