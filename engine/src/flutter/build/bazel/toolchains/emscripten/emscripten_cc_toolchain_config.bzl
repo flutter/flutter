@@ -391,8 +391,15 @@ def _impl(ctx):
         "linker_param_file",
     ]
 
-    emcc = tool(tool = ctx.file.emcc)
-    emxx = tool(tool = ctx.file.emxx)
+    # The drivers run the host's Python and the host's SDK binaries (node,
+    # the SDK's clang): on a Linux host those run on the Linux workers too;
+    # a Mac's are Mach-O, which a worker cannot execute (em++.sh: "cannot
+    # execute binary file: Exec format error", the Mac's T80 under
+    # --config=rbe_mac, whose CppCompile strategy names the workers first),
+    # so there every action of the toolchain stays on the machine.
+    local_only = [] if ctx.attr.host_tools_run_remotely else ["no-remote-exec"]
+    emcc = tool(tool = ctx.file.emcc, execution_requirements = local_only)
+    emxx = tool(tool = ctx.file.emxx, execution_requirements = local_only)
     action_configs = [
         action_config(action_name = name, enabled = True, tools = [emcc], implies = compile_implies)
         for name in [
@@ -419,7 +426,7 @@ def _impl(ctx):
         action_config(
             action_name = ACTION_NAMES.cpp_link_static_library,
             enabled = True,
-            tools = [tool(tool = ctx.file.emar)],
+            tools = [tool(tool = ctx.file.emar, execution_requirements = local_only)],
             implies = ["archiver_flags", "linker_param_file"],
         ),
     ]
@@ -469,6 +476,11 @@ emscripten_cc_toolchain_config = rule(
             doc = "A file in the SDK compiler's builtin include directory (upstream/lib/clang/<version>/include).",
         ),
         "python3": attr.label(mandatory = True, allow_single_file = True, doc = "The Python the drivers run under."),
+        "host_tools_run_remotely": attr.bool(
+            default = True,
+            doc = "Whether the SDK's and Python's binaries run on the remote workers (Linux x64): true on a " +
+                  "Linux host, false on a Mac, whose toolchain actions are then marked no-remote-exec.",
+        ),
     },
     provides = [CcToolchainConfigInfo],
 )

@@ -10,6 +10,7 @@
 load(
     "@host_platform//:host.bzl",
     "HOST_CPU_CONSTRAINT",
+    "HOST_OS",
     "HOST_OS_CONSTRAINT",
 )
 load("@rules_cc//cc:defs.bzl", "cc_toolchain")
@@ -77,6 +78,9 @@ emscripten_cc_toolchain_config(
     emcc = "emcc.sh",
     emscripten_marker = "@emsdk//:emscripten_marker",
     emxx = "em++.sh",
+    # The synced SDK and Python are the host's binaries: a Linux host's run
+    # on the Linux workers (linux_web_engine's compiles do), a Mac's cannot.
+    host_tools_run_remotely = HOST_OS == "linux",
     node = "@emsdk//:node",
     python3 = "@cpython3//:bin/python3",
     resource_include_marker = "@emsdk//:resource_include_marker",
