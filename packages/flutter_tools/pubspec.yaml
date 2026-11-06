@@ -72,7 +72,7 @@ dependencies:
   graphs: 2.3.2
   hooks_runner: 1.6.4
   hooks: 2.2.0
-  code_assets: 2.1.0
+  code_assets: 2.2.0
   data_assets: 0.20.0
   record_use: 1.1.1
 
@@ -141,4 +141,4 @@ dartdoc:
   # Exclude this package from the hosted API docs.
   nodoc: true
 
-# PUBSPEC CHECKSUM: 7t5s6a
+# PUBSPEC CHECKSUM: 6n9tvh

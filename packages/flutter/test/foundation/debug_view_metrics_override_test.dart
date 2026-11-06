@@ -1294,6 +1294,7 @@ void main() {
       wrapped.onPlatformConfigurationChanged = () => notifications.add('configuration');
       wrapped.onTextScaleFactorChanged = () => notifications.add('textScaleFactor');
       wrapped.onPlatformBrightnessChanged = () => notifications.add('platformBrightness');
+      wrapped.onAlwaysUse24HourFormatChanged = () => notifications.add('alwaysUse24HourFormat');
       wrapped.onAccessibilityFeaturesChanged = () => notifications.add('accessibilityFeatures');
       wrapped.onMetricsChanged = () => notifications.add('metrics');
 
@@ -1318,9 +1319,9 @@ void main() {
         'accessibilityFeatures',
       ]);
 
-      // The 24 hour format has no callback of its own: the configuration
-      // notification is the only one that names it, and onMetricsChanged is
-      // what tells the framework to re-read it.
+      // The 24 hour format announces onAlwaysUse24HourFormatChanged and
+      // onPlatformConfigurationChanged, and onMetricsChanged is what tells the
+      // framework to re-read it.
       notifications.clear();
       debugSetViewMetricsOverride(
         1,
@@ -1332,7 +1333,7 @@ void main() {
           alwaysUse24HourFormat: true,
         ),
       );
-      expect(notifications, <String>['configuration', 'metrics']);
+      expect(notifications, <String>['configuration', 'alwaysUse24HourFormat', 'metrics']);
 
       // A table that scales differently but reports the same factor is still a
       // change of text scaling.
@@ -1376,6 +1377,7 @@ void main() {
       wrapped.onMetricsChanged = () => notifications.add('metrics');
       wrapped.onTextScaleFactorChanged = () => notifications.add('textScaleFactor');
       wrapped.onPlatformBrightnessChanged = () => notifications.add('platformBrightness');
+      wrapped.onAlwaysUse24HourFormatChanged = () => notifications.add('alwaysUse24HourFormat');
       wrapped.onAccessibilityFeaturesChanged = () => notifications.add('accessibilityFeatures');
 
       for (final MapEntry<String, _MetricChange> entry in _perMetricChange.entries) {
@@ -1383,10 +1385,7 @@ void main() {
         notifications.clear();
         debugSetViewMetricsOverride(1, entry.value(_fullyPopulated));
         expect(notifications.toSet(), switch (entry.key) {
-          // dart:ui has no callback of its own for the 24 hour format: it
-          // reports it through the configuration notification, and the
-          // framework re-reads it when the view metrics change.
-          'alwaysUse24HourFormat' => <String>{'configuration', 'metrics'},
+          'alwaysUse24HourFormat' => <String>{'configuration', 'alwaysUse24HourFormat', 'metrics'},
           'textScaling' => <String>{'configuration', 'textScaleFactor'},
           'platformBrightness' => <String>{'configuration', 'platformBrightness'},
           final String metric when viewMetrics.contains(metric) => <String>{'metrics'},
@@ -1469,6 +1468,16 @@ void main() {
   });
 
   group('engine roll tolerance', () {
+    test('forwards onAlwaysUse24HourFormatChanged', () {
+      final fake = _TwoViewPlatformDispatcher();
+      final ui.PlatformDispatcher dispatcher = debugApplyViewMetricsOverrides(fake);
+      var calls = 0;
+      dispatcher.onAlwaysUse24HourFormatChanged = () => calls += 1;
+      expect(fake.onAlwaysUse24HourFormatChanged, isNotNull);
+      fake.onAlwaysUse24HourFormatChanged!();
+      expect(calls, 1);
+    });
+
     test('wrappers declare no noSuchMethod', () {
       final fake = _TwoViewPlatformDispatcher();
       final ui.PlatformDispatcher dispatcher = debugApplyViewMetricsOverrides(fake);
@@ -1572,6 +1581,9 @@ class _TwoViewPlatformDispatcher implements ui.PlatformDispatcher {
 
   @override
   ui.VoidCallback? onTextScaleFactorChanged;
+
+  @override
+  ui.VoidCallback? onAlwaysUse24HourFormatChanged;
 
   @override
   ui.ViewFocusChangeCallback? onViewFocusChange;

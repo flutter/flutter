@@ -505,6 +505,7 @@ void main() {
               'device',
               'build',
               'clean',
+              'artifact',
             },
           ),
           logger: logger,

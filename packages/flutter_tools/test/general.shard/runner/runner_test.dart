@@ -10,10 +10,13 @@ import 'package:flutter_tools/runner.dart' as runner;
 
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/android/android_studio.dart';
+import 'package:flutter_tools/src/android/android_workflow.dart';
 import 'package:flutter_tools/src/android/gradle_utils.dart';
 import 'package:flutter_tools/src/android/java.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/bot_detector.dart';
+import 'package:flutter_tools/src/base/config.dart';
+import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/exit.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart' as io;
@@ -21,18 +24,30 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/net.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/process.dart';
+import 'package:flutter_tools/src/base/signals.dart';
+import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/devices.dart';
+import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/context/tool_dependencies.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/flutter_device_manager.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:flutter_tools/src/ios/simulators.dart';
+import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/macos/cocoapods_validator.dart';
+import 'package:flutter_tools/src/macos/macos_workflow.dart';
 import 'package:flutter_tools/src/macos/xcdevice.dart';
+import 'package:flutter_tools/src/macos/xcode.dart';
+import 'package:flutter_tools/src/persistent_tool_state.dart';
+import 'package:flutter_tools/src/pre_run_validator.dart';
 import 'package:flutter_tools/src/reporting/crash_reporting.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
+import 'package:flutter_tools/src/version.dart';
+import 'package:flutter_tools/src/windows/windows_workflow.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/testing.dart';
 import 'package:unified_analytics/unified_analytics.dart';
@@ -500,7 +515,7 @@ void main() {
           environment: <String, String>{'FLUTTER_ANALYTICS_LOG_FILE': 'test', 'FLUTTER_ROOT': '/'},
         ),
         FileSystem: () => fileSystem,
-        ProcessManager: () => FakeProcessManager.any(),
+        ProcessManager: _NoWhichProcessManager.new,
         UserMessages: () => CustomBugInstructions(),
         Artifacts: () => Artifacts.test(),
         CrashReporter: () => WaitingCrashReporter(Future<void>.value()),
@@ -616,7 +631,7 @@ void main() {
             },
           ),
           FileSystem: () => fileSystem,
-          ProcessManager: () => FakeProcessManager.any(),
+          ProcessManager: _NoWhichProcessManager.new,
           UserMessages: () => CustomBugInstructions(),
           Artifacts: () => Artifacts.test(),
           CrashReporter: () => WaitingCrashReporter(Future<void>.value()),
@@ -944,6 +959,208 @@ void main() {
         },
       );
     });
+
+    test('throws StateError when TemplateRenderer is neither passed nor overridden', () async {
+      await expectLater(
+        runner.run(
+          <String>[],
+          (ToolDependencies toolDependencies) => <FlutterCommand>[],
+          shutdownHooks: ShutdownHooks(),
+          overrides: <Type, Generator>{
+            BotDetector: () => const FakeBotDetector(true),
+            FileSystem: () => fs,
+            ProcessManager: FakeProcessManager.any,
+            Signals: FakeSignals.new,
+            io.Stdio: FakeStdio.new,
+          },
+        ),
+        throwsA(
+          isA<StateError>().having(
+            (StateError error) => error.message,
+            'message',
+            contains('TemplateRenderer'),
+          ),
+        ),
+      );
+    });
+
+    test('Logger override achieves shared AnsiTerminal and OutputPreferences from bootstrap AppContext', () async {
+      AnsiTerminal? loggerTerminal;
+      OutputPreferences? loggerOutputPreferences;
+      late final ToolDependencies capturedDependencies;
+      late final _ContextRecordingFlutterCommand command;
+      final int exitCode = await runner.run(
+        <String>[_ContextRecordingFlutterCommand.commandName],
+        (ToolDependencies toolDependencies) {
+          capturedDependencies = toolDependencies;
+          command = _ContextRecordingFlutterCommand(toolContext: toolDependencies.toolContext);
+          return <FlutterCommand>[command];
+        },
+        flutterVersion: '[user-branch]/',
+        shutdownHooks: ShutdownHooks(),
+        templateRenderer: FakeTemplateRenderer(),
+        overrides: <Type, Generator>{
+          Analytics: () => const NoOpAnalytics(),
+          BotDetector: () => const FakeBotDetector(true),
+          Config: Config.test,
+          DeviceManager: FakeDeviceManager.new,
+          FileSystem: () => fs,
+          FlutterVersion: FakeFlutterVersion.new,
+          Logger: () {
+            final AppContext loggerContext = context;
+            loggerTerminal = loggerContext.get<AnsiTerminal>();
+            loggerOutputPreferences = loggerContext.get<OutputPreferences>();
+            return BufferLogger.test(
+              terminal: loggerTerminal,
+              outputPreferences: loggerOutputPreferences,
+            );
+          },
+          PersistentToolState: () => PersistentToolState.test(
+            directory: fs.systemTempDirectory,
+            logger: BufferLogger.test(),
+          ),
+          Platform: () =>
+              FakePlatform(environment: <String, String>{'FLUTTER_ROOT': '/sdk', 'HOME': '/'}),
+          ProcessManager: FakeProcessManager.any,
+          Signals: FakeSignals.new,
+          io.Stdio: FakeStdio.new,
+          XcodeProjectInterpreter: FakeXcodeProjectInterpreter.new,
+        },
+      );
+
+      final ToolContext(
+        :Logger logger,
+        :OutputPreferences outputPreferences,
+        :PreRunValidator preRunValidator,
+        :AnsiTerminal terminal,
+      ) = capturedDependencies.toolContext;
+      expect((logger as BufferLogger).errorText, isEmpty);
+      expect(exitCode, 0);
+      expect(preRunValidator, isA<NoOpPreRunValidator>());
+      expect(loggerTerminal, same(terminal));
+      expect(loggerOutputPreferences, same(outputPreferences));
+    });
+
+    test('binds lazy AppleContext, AndroidContext, and workflows into inner AppContext', () async {
+      var sdkEvaluations = 0;
+      var xcdeviceEvaluations = 0;
+      var xcodeEvaluations = 0;
+      final fakeAndroidSdk = FakeAndroidSdk();
+      final fakePlistParser = FakePlistParser();
+      final fakeXCDevice = FakeXCDevice();
+      final fakeXcode = FakeXcode();
+      late final ToolDependencies capturedDependencies;
+      late final _ContextRecordingFlutterCommand command;
+      final int exitCode = await runner.run(
+        <String>[_ContextRecordingFlutterCommand.commandName],
+        (ToolDependencies toolDependencies) {
+          capturedDependencies = toolDependencies;
+          command = _ContextRecordingFlutterCommand(toolContext: toolDependencies.toolContext);
+          return <FlutterCommand>[command];
+        },
+        flutterVersion: '[user-branch]/',
+        shutdownHooks: ShutdownHooks(),
+        templateRenderer: FakeTemplateRenderer(),
+        overrides: <Type, Generator>{
+          Analytics: () => const NoOpAnalytics(),
+          AndroidSdk: () {
+            sdkEvaluations++;
+            return fakeAndroidSdk;
+          },
+          BotDetector: () => const FakeBotDetector(true),
+          Config: Config.test,
+          DeviceManager: FakeDeviceManager.new,
+          FileSystem: () => fs,
+          FlutterVersion: FakeFlutterVersion.new,
+          Logger: BufferLogger.test,
+          PersistentToolState: () => PersistentToolState.test(
+            directory: fs.systemTempDirectory,
+            logger: BufferLogger.test(),
+          ),
+          Platform: () =>
+              FakePlatform(environment: <String, String>{'FLUTTER_ROOT': '/sdk', 'HOME': '/'}),
+          PlistParser: () => fakePlistParser,
+          ProcessManager: FakeProcessManager.any,
+          Signals: FakeSignals.new,
+          io.Stdio: FakeStdio.new,
+          XCDevice: () {
+            xcdeviceEvaluations++;
+            return fakeXCDevice;
+          },
+          Xcode: () {
+            xcodeEvaluations++;
+            return fakeXcode;
+          },
+          XcodeProjectInterpreter: FakeXcodeProjectInterpreter.new,
+        },
+      );
+
+      final Logger logger = capturedDependencies.toolContext.logger;
+      expect((logger as BufferLogger).errorText, isEmpty);
+      expect(exitCode, 0);
+      expect(sdkEvaluations, 0);
+      expect(xcdeviceEvaluations, 0);
+      expect(command.androidWorkflowInstance, same(capturedDependencies.androidWorkflow));
+      expect(command.macOSWorkflowInstance, same(capturedDependencies.macOSWorkflow));
+      expect(command.windowsWorkflowInstance, same(capturedDependencies.windowsWorkflow));
+      expect(command.resolveAndroidSdk(), same(fakeAndroidSdk));
+      expect(sdkEvaluations, 1);
+      expect(capturedDependencies.androidContext.androidSdk, same(fakeAndroidSdk));
+      expect(sdkEvaluations, 1);
+      expect(command.resolveXCDevice(), same(fakeXCDevice));
+      expect(xcdeviceEvaluations, 1);
+      expect(capturedDependencies.appleContext.xcdevice, same(fakeXCDevice));
+      expect(xcdeviceEvaluations, 1);
+      expect(command.resolveXcode(), same(fakeXcode));
+      expect(capturedDependencies.appleContext.xcode, same(fakeXcode));
+      expect(xcodeEvaluations, 1);
+      expect(command.resolvePlistParser(), same(fakePlistParser));
+    });
+
+    test('applies FeatureFlags to AnsiTerminal and honors preRunValidatorBuilder', () async {
+      late final ToolDependencies capturedDependencies;
+      final int exitCode = await runner.run(
+        <String>[_ContextRecordingFlutterCommand.commandName],
+        (ToolDependencies toolDependencies) {
+          capturedDependencies = toolDependencies;
+          return <FlutterCommand>[
+            _ContextRecordingFlutterCommand(toolContext: toolDependencies.toolContext),
+          ];
+        },
+        flutterVersion: '[user-branch]/',
+        preRunValidatorBuilder: PreRunValidator.new,
+        shutdownHooks: ShutdownHooks(),
+        templateRenderer: FakeTemplateRenderer(),
+        overrides: <Type, Generator>{
+          Analytics: () => const NoOpAnalytics(),
+          BotDetector: () => const FakeBotDetector(true),
+          Config: Config.test,
+          DeviceManager: FakeDeviceManager.new,
+          FeatureFlags: TestFeatureFlags.new,
+          FileSystem: () => fs,
+          FlutterVersion: FakeFlutterVersion.new,
+          Logger: BufferLogger.test,
+          PersistentToolState: () => PersistentToolState.test(
+            directory: fs.systemTempDirectory,
+            logger: BufferLogger.test(),
+          ),
+          Platform: () =>
+              FakePlatform(environment: <String, String>{'FLUTTER_ROOT': '/sdk', 'HOME': '/'}),
+          ProcessManager: FakeProcessManager.any,
+          Signals: FakeSignals.new,
+          io.Stdio: FakeStdio.new,
+          XcodeProjectInterpreter: FakeXcodeProjectInterpreter.new,
+        },
+      );
+
+      final ToolContext(:Logger logger, :AnsiTerminal terminal) = capturedDependencies.toolContext;
+      expect(terminal.isCliAnimationEnabled, isTrue);
+      expect(exitCode, 1);
+      expect(
+        (logger as BufferLogger).errorText,
+        contains('Flutter SDK installation appears corrupted'),
+      );
+    });
   });
 
   group('unified_analytics', () {
@@ -1157,6 +1374,9 @@ void main() {
 }
 
 class ArtifactsRecordingFlutterCommand extends FlutterCommand {
+  ArtifactsRecordingFlutterCommand({ToolContext? toolContext})
+    : super(toolContext: toolContext ?? const DelegatingToolContext());
+
   Artifacts? artifacts;
   bool ran = false;
 
@@ -1169,12 +1389,15 @@ class ArtifactsRecordingFlutterCommand extends FlutterCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     ran = true;
-    artifacts = toolContext?.artifacts;
+    artifacts = toolContext.artifacts;
     return FlutterCommandResult.success();
   }
 }
 
 class _DeviceManagerRecordingFlutterCommand extends FlutterCommand {
+  _DeviceManagerRecordingFlutterCommand({ToolContext? toolContext})
+    : super(toolContext: toolContext ?? const DelegatingToolContext());
+
   DeviceManager? deviceManager;
 
   @override
@@ -1185,13 +1408,47 @@ class _DeviceManagerRecordingFlutterCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    deviceManager = globals.deviceManager;
+    deviceManager = super.runner?.deviceManager;
+    return FlutterCommandResult.success();
+  }
+}
+
+class _ContextRecordingFlutterCommand extends FlutterCommand {
+  _ContextRecordingFlutterCommand({required super.toolContext});
+
+  static const commandName = 'record-context';
+
+  AndroidWorkflow? androidWorkflowInstance;
+  MacOSWorkflow? macOSWorkflowInstance;
+  WindowsWorkflow? windowsWorkflowInstance;
+  late AndroidSdk? Function() resolveAndroidSdk;
+  late PlistParser Function() resolvePlistParser;
+  late XCDevice? Function() resolveXCDevice;
+  late Xcode? Function() resolveXcode;
+
+  @override
+  String get description => '';
+
+  @override
+  String get name => commandName;
+
+  @override
+  Future<FlutterCommandResult> runCommand() async {
+    final AppContext commandContext = context;
+    androidWorkflowInstance = commandContext.get<AndroidWorkflow>();
+    macOSWorkflowInstance = commandContext.get<MacOSWorkflow>();
+    windowsWorkflowInstance = commandContext.get<WindowsWorkflow>();
+    resolveAndroidSdk = () => commandContext.get<AndroidSdk>();
+    resolvePlistParser = () => commandContext.get<PlistParser>()!;
+    resolveXCDevice = () => commandContext.get<XCDevice>();
+    resolveXcode = () => commandContext.get<Xcode>();
     return FlutterCommandResult.success();
   }
 }
 
 class CrashingFlutterCommand extends FlutterCommand {
-  CrashingFlutterCommand({this._asyncCrash = false, this._completer});
+  CrashingFlutterCommand({this._asyncCrash = false, this._completer, ToolContext? toolContext})
+    : super(toolContext: toolContext ?? const DelegatingToolContext());
 
   final bool _asyncCrash;
   final Completer<void>? _completer;
@@ -1223,6 +1480,9 @@ class CrashingFlutterCommand extends FlutterCommand {
 }
 
 class MultipleExceptionCrashingFlutterCommand extends FlutterCommand {
+  MultipleExceptionCrashingFlutterCommand({ToolContext? toolContext})
+    : super(toolContext: toolContext ?? const DelegatingToolContext());
+
   final _completer = Completer<void>();
 
   @override
@@ -1251,6 +1511,9 @@ class MultipleExceptionCrashingFlutterCommand extends FlutterCommand {
 }
 
 class _GitNotFoundFlutterCommand extends FlutterCommand {
+  _GitNotFoundFlutterCommand({ToolContext? toolContext})
+    : super(toolContext: toolContext ?? const DelegatingToolContext());
+
   @override
   String get description => '';
 
@@ -1344,3 +1607,35 @@ class FakeCache extends Fake implements Cache {
 }
 
 class _FakeAndroidStudio extends Fake implements AndroidStudio {}
+
+/// Answers `which` lookups like a host where the binary is not on PATH, and
+/// delegates everything else to [FakeProcessManager.any].
+class _NoWhichProcessManager extends Fake implements ProcessManager {
+  final FakeProcessManager delegate = FakeProcessManager.any();
+
+  @override
+  bool canRun(Object? executable, {String? workingDirectory}) =>
+      delegate.canRun(executable, workingDirectory: workingDirectory);
+
+  @override
+  io.ProcessResult runSync(
+    List<Object> command, {
+    String? workingDirectory,
+    Map<String, String>? environment,
+    bool includeParentEnvironment = true,
+    bool runInShell = false,
+    covariant Object? stdoutEncoding = io.systemEncoding,
+    covariant Object? stderrEncoding = io.systemEncoding,
+  }) {
+    if (command.first == 'which') {
+      return io.ProcessResult(0, 1, '', '');
+    }
+    return delegate.runSync(
+      command,
+      workingDirectory: workingDirectory,
+      environment: environment,
+      includeParentEnvironment: includeParentEnvironment,
+      runInShell: runInShell,
+    );
+  }
+}
