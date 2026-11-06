@@ -37,6 +37,8 @@ import '../web/web_options.dart';
 /// this directory, *relative to the package root*, the files will be executed
 /// as Integration Tests.
 const _kIntegrationTestDirectory = 'integration_test';
+const _appleDoublePrefix = '._';
+const _testFileSuffix = '_test.dart';
 
 /// A command to run tests.
 ///
@@ -426,7 +428,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
 
   @override
   Future<FlutterCommandResult> verifyThenRunCommand(String? commandPath) {
-    final ToolContext(:FileSystem fs, :Logger logger) = toolContext;
+    final ToolContext(:FileSystem fs, :Logger logger, :Platform platform) = toolContext;
 
     final List<Uri> testUris = argResults!.rest.map(_parseTestArgument).toList();
     if (testUris.isEmpty) {
@@ -436,33 +438,64 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       if (!testDir.existsSync()) {
         throwToolExit('Test directory "${testDir.path}" not found.');
       }
-      _testFileUris.addAll(_findTests(testDir, fs).map(Uri.file));
+      _testFileUris.addAll(
+        _findTests(testDir, fs).map((String path) => Uri.file(path, windows: platform.isWindows)),
+      );
       if (_testFileUris.isEmpty) {
         throwToolExit(
           'Test directory "${testDir.path}" does not appear to contain any test files.\n'
-          'Test files must be in that directory and end with the pattern "_test.dart".',
+          'Test files must be in that directory and end with the pattern "$_testFileSuffix".',
         );
       }
     } else {
       for (final uri in testUris) {
         // Test files may have query strings to support name/line/col:
         //     flutter test test/foo.dart?name=a&line=1
-        String testPath = uri.replace(query: '').toFilePath();
+        String testPath = uri.replace(query: '').toFilePath(windows: platform.isWindows);
         testPath = fs.path.absolute(testPath);
         testPath = fs.path.normalize(testPath);
         if (fs.isDirectorySync(testPath)) {
-          _testFileUris.addAll(_findTests(fs.directory(testPath), fs).map(Uri.file));
+          _testFileUris.addAll(
+            _findTests(
+              fs.directory(testPath),
+              fs,
+            ).map((String path) => Uri.file(path, windows: platform.isWindows)),
+          );
         } else {
-          _testFileUris.add(Uri.file(testPath).replace(query: uri.query));
+          _testFileUris.add(
+            Uri.file(testPath, windows: platform.isWindows).replace(query: uri.query),
+          );
         }
+      }
+      if (_testFileUris.isEmpty) {
+        throwToolExit(
+          'Specified test directories do not appear to contain any test files.\n'
+          'Test files must be in one of the specified directories and end with the pattern "$_testFileSuffix".',
+        );
       }
     }
 
     // This needs to be set before [super.verifyThenRunCommand] so that the
     // correct [requiredArtifacts] can be identified before [run] takes place.
     final List<String> testFilePaths = _testFileUris
-        .map((Uri uri) => uri.replace(query: '').toFilePath())
+        .map((Uri uri) => uri.replace(query: '').toFilePath(windows: platform.isWindows))
         .toList();
+    for (final testPath in testFilePaths) {
+      final File testFile = fs.file(testPath);
+      if (!testFile.existsSync()) {
+        continue;
+      }
+      try {
+        testFile.readAsStringSync();
+      } on FileSystemException catch (err) {
+        final String? osMessage = err.osError?.message;
+        final String details = osMessage != null && osMessage.isNotEmpty ? osMessage : err.message;
+        throwToolExit(
+          'Failed to read test file "$testPath": $details.\n'
+          'Ensure that the file is a valid UTF-8 encoded Dart test file.',
+        );
+      }
+    }
     _isIntegrationTest = _shouldRunAsIntegrationTests(
       fs.currentDirectory.absolute.path,
       testFilePaths,
@@ -963,13 +996,15 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
 }
 
 /// Searches [directory] and returns files that end with `_test.dart` as
-/// absolute paths.
+/// absolute paths, excluding macOS AppleDouble (`._*`) metadata files.
 Iterable<String> _findTests(Directory directory, FileSystem fs) {
   return directory
       .listSync(recursive: true, followLinks: false)
       .where(
         (FileSystemEntity entity) =>
-            entity.path.endsWith('_test.dart') && fs.isFileSync(entity.path),
+            entity.path.endsWith(_testFileSuffix) &&
+            !entity.basename.startsWith(_appleDoublePrefix) &&
+            fs.isFileSync(entity.path),
       )
       .map((FileSystemEntity entity) => fs.path.absolute(entity.path));
 }

@@ -2328,6 +2328,192 @@ resolution: workspace
       expect(hiddenInVerboseMode, isEmpty);
     });
   });
+
+  group('AppleDouble and non-UTF-8 test file handling', () {
+    const appleDoubleBytes = <int>[
+      0x00,
+      0x05,
+      0x16,
+      0x07,
+      0x00,
+      0x02,
+      0x00,
+      0x00,
+      0xFF,
+      0xFE,
+      0x80,
+      0xC0,
+    ];
+    const invalidUtf8Bytes = <int>[0xFF, 0xFE, 0x76, 0x00, 0x6F, 0x00];
+
+    FakeToolContext createHermeticContext(MemoryFileSystem fileSystem, {Platform? platform}) {
+      return FakeToolContext(
+        fs: fileSystem,
+        logger: BufferLogger.test(),
+        platform: platform ?? FakePlatform(),
+        processManager: FakeProcessManager.empty(),
+        signals: FakeSignals(),
+      );
+    }
+
+    Directory setUpPackage(MemoryFileSystem fileSystem) {
+      final Directory package = fileSystem.currentDirectory.childDirectory('package')
+        ..createSync(recursive: true);
+      package.childFile('pubspec.yaml')
+        ..createSync(recursive: true)
+        ..writeAsStringSync(_pubspecContents);
+      writePackageConfigFiles(
+        directory: package,
+        packages: <String, String>{
+          'test_api': 'file:///path/to/pubcache/.pub-cache/hosted/pub.dartlang.org/test_api-0.2.19',
+          'integration_test': 'file:///path/to/flutter/packages/integration_test',
+        },
+        mainLibName: 'my_app',
+        devDependencies: <String>['test_api', 'integration_test'],
+      );
+      fileSystem.currentDirectory = package.path;
+      return package;
+    }
+
+    testWithoutContext(
+      'ignores AppleDouble sidecar files during default test directory discovery',
+      () async {
+        final fileSystem = MemoryFileSystem.test();
+        final Directory testDir = setUpPackage(fileSystem).childDirectory('test');
+        final File validTest = testDir.childFile('some_test.dart')..createSync(recursive: true);
+        final File leadingUnderscoreTest = testDir.childFile('_helper_test.dart')
+          ..createSync(recursive: true);
+        testDir.childFile('._some_test.dart')
+          ..createSync(recursive: true)
+          ..writeAsBytesSync(appleDoubleBytes);
+        testDir.childDirectory('nested').childFile('._nested_test.dart')
+          ..createSync(recursive: true)
+          ..writeAsBytesSync(appleDoubleBytes);
+
+        final testRunner = FakeFlutterTestRunner(0);
+        final testCommand = TestCommand(
+          templateRenderer: const MustacheTemplateRenderer(),
+          toolContext: createHermeticContext(fileSystem),
+          testRunner: testRunner,
+        );
+        final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
+
+        await commandRunner.run(const <String>['test', '--no-pub', '--no-test-assets']);
+
+        expect(
+          testRunner.lastTestFiles,
+          unorderedEquals(<Uri>[Uri.file(validTest.path), Uri.file(leadingUnderscoreTest.path)]),
+        );
+      },
+    );
+
+    testWithoutContext(
+      'throws ToolExit when test directory contains only AppleDouble sidecar files',
+      () async {
+        final fileSystem = MemoryFileSystem.test();
+        final Directory testDir = setUpPackage(fileSystem).childDirectory('test');
+        testDir.childFile('._some_test.dart')
+          ..createSync(recursive: true)
+          ..writeAsBytesSync(appleDoubleBytes);
+
+        final testRunner = FakeFlutterTestRunner(0);
+        final testCommand = TestCommand(
+          templateRenderer: const MustacheTemplateRenderer(),
+          toolContext: createHermeticContext(fileSystem),
+          testRunner: testRunner,
+        );
+        final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
+
+        await expectLater(
+          () => commandRunner.run(const <String>['test', '--no-pub', '--no-test-assets']),
+          throwsToolExit(
+            message: 'Test directory "test" does not appear to contain any test files.',
+          ),
+        );
+        expect(testRunner.lastTestFiles, isNull);
+      },
+    );
+
+    testWithoutContext(
+      'throws ToolExit when an explicit directory argument contains only AppleDouble files',
+      () async {
+        final fileSystem = MemoryFileSystem.test();
+        final Directory package = setUpPackage(fileSystem);
+        final Directory subDir = package.childDirectory('test').childDirectory('empty_or_sidecars');
+        subDir.childFile('._some_test.dart')
+          ..createSync(recursive: true)
+          ..writeAsBytesSync(appleDoubleBytes);
+
+        final testRunner = FakeFlutterTestRunner(0);
+        final testCommand = TestCommand(
+          templateRenderer: const MustacheTemplateRenderer(),
+          toolContext: createHermeticContext(fileSystem),
+          testRunner: testRunner,
+        );
+        final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
+
+        await expectLater(
+          () => commandRunner.run(<String>['test', '--no-pub', '--no-test-assets', subDir.path]),
+          throwsToolExit(
+            message: 'Specified test directories do not appear to contain any test files.',
+          ),
+        );
+        expect(testRunner.lastTestFiles, isNull);
+      },
+    );
+
+    testWithoutContext('throws ToolExit when a discovered test file is not valid UTF-8', () async {
+      final fileSystem = MemoryFileSystem.test();
+      final Directory testDir = setUpPackage(fileSystem).childDirectory('test');
+      final File invalidFile = testDir.childFile('utf16_test.dart')
+        ..createSync(recursive: true)
+        ..writeAsBytesSync(invalidUtf8Bytes);
+
+      final testRunner = FakeFlutterTestRunner(0);
+      final testCommand = TestCommand(
+        templateRenderer: const MustacheTemplateRenderer(),
+        toolContext: createHermeticContext(fileSystem),
+        testRunner: testRunner,
+      );
+      final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
+
+      await expectLater(
+        () => commandRunner.run(const <String>['test', '--no-pub', '--no-test-assets']),
+        throwsToolExit(message: 'Failed to read test file "${invalidFile.path}"'),
+      );
+      expect(testRunner.lastTestFiles, isNull);
+    });
+
+    testWithoutContext('throws ToolExit when an explicit test file with query parameters is not valid UTF-8 on Windows', () async {
+      final fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
+      final Directory testDir = setUpPackage(fileSystem).childDirectory('test');
+      final File invalidFile = testDir.childFile('binary_test.dart')
+        ..createSync(recursive: true)
+        ..writeAsBytesSync(invalidUtf8Bytes);
+
+      final testRunner = FakeFlutterTestRunner(0);
+      final testCommand = TestCommand(
+        templateRenderer: const MustacheTemplateRenderer(),
+        toolContext: createHermeticContext(
+          fileSystem,
+          platform: FakePlatform(operatingSystem: 'windows'),
+        ),
+        testRunner: testRunner,
+      );
+      final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
+
+      await expectLater(
+        () => commandRunner.run(const <String>[
+          'test',
+          '--no-pub',
+          '--no-test-assets',
+          r'test\binary_test.dart?line=1',
+        ]),
+        throwsToolExit(message: 'Failed to read test file "${invalidFile.path}"'),
+      );
+      expect(testRunner.lastTestFiles, isNull);
+    });
+  });
 }
 
 class FakeFlutterTestRunner extends Fake implements FlutterTestRunner {
@@ -2335,6 +2521,7 @@ class FakeFlutterTestRunner extends Fake implements FlutterTestRunner {
 
   int exitCode;
   Duration? leastRunTime;
+  List<Uri>? lastTestFiles;
   TestExecutionSpecification? lastExecutionSpec;
   bool? get lastEnableVmServiceValue => lastExecutionSpec?.enableVmService;
   DebuggingOptions get lastDebuggingOptionsValue => lastExecutionSpec!.debuggingOptions;
@@ -2350,6 +2537,7 @@ class FakeFlutterTestRunner extends Fake implements FlutterTestRunner {
     List<Uri> testFiles,
     TestExecutionSpecification spec,
   ) async {
+    lastTestFiles = testFiles;
     lastExecutionSpec = spec;
 
     if (leastRunTime != null) {
