@@ -460,6 +460,7 @@ _VERSION_BZL = """\
 
 ENGINE_VERSION = {engine_version}
 CONTENT_HASH = {content_hash}
+PREBUILT_ENGINE_VERSION = {prebuilt_engine_version}
 SKIA_VERSION = {skia_version}
 DART_VERSION = {dart_version}
 ENGINE_REALM = {engine_realm}
@@ -513,6 +514,22 @@ def _content_hash(rctx, root):
         fail("engine_version: %s failed: %s" % (command[-1], result.stderr))
     return result.stdout.strip()
 
+def _prebuilt_engine_version(rctx, root):
+    """The engine in bin/cache: bin/cache/engine.stamp's revision, or empty without one.
+
+    What the tool wrote when it fetched the prebuilt engine (the commit a
+    bot was given, a developer's content hash's build). A facsimile under
+    --config=prebuilt_engine stamps the artifacts it still takes from the
+    tree (the Android shard's gen_snapshots) with this rather than the
+    checkout's HEAD, so that every stamp of the facsimile's cache agrees
+    with the engine.stamp it lays from bin/cache.
+    """
+    stamp = root.get_child("bin", "cache", "engine.stamp")
+    rctx.watch(stamp)
+    if not stamp.exists:
+        return ""
+    return rctx.read(stamp).strip()
+
 def _engine_realm(rctx, root):
     """The engine artifacts' realm: FLUTTER_REALM, else the checkout's bin/cache/engine.realm, else empty.
 
@@ -550,6 +567,7 @@ def _engine_version_repository_impl(rctx):
         skia_version = repr(rctx.attr.skia_version),
         dart_version = repr(rctx.attr.dart_version),
         engine_realm = repr(_engine_realm(rctx, root)),
+        prebuilt_engine_version = repr(_prebuilt_engine_version(rctx, root)),
     ))
     rctx.file("REPO.bazel", "")
 
@@ -564,9 +582,11 @@ build: `engine_version` is the checkout's `git rev-parse HEAD`,
 trees, which are their DEPS pins. This rule does the same at fetch time:
 the first two from git (re-read when HEAD moves; `FLUTTER_BAZEL_ENGINE_VERSION`
 and `FLUTTER_BAZEL_CONTENT_HASH` in the environment override them), the
-last two from deps.lock.bzl through the attributes; and ENGINE_REALM, the
+last two from deps.lock.bzl through the attributes; ENGINE_REALM, the
 artifacts' storage realm (FLUTTER_REALM, else the checkout's
-bin/cache/engine.realm, else empty), for the tool's SDK facsimile.""",
+bin/cache/engine.realm, else empty), for the tool's SDK facsimile; and
+PREBUILT_ENGINE_VERSION, bin/cache/engine.stamp's revision (empty without
+one), for the facsimile's stamps under --config=prebuilt_engine.""",
     attrs = {
         "skia_version": attr.string(mandatory = True, doc = "Skia's DEPS revision."),
         "dart_version": attr.string(mandatory = True, doc = "The Dart SDK's DEPS revision."),

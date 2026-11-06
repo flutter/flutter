@@ -9,7 +9,7 @@
 
 load("@bazel_skylib//rules:copy_file.bzl", "copy_file")
 load("@bazel_skylib//rules:write_file.bzl", "write_file")
-load("@engine_version//:version.bzl", "CONTENT_HASH", "ENGINE_REALM", "ENGINE_VERSION")
+load("@engine_version//:version.bzl", "CONTENT_HASH", "ENGINE_REALM", "ENGINE_VERSION", "PREBUILT_ENGINE_VERSION")
 load("//build_defs/repositories:flutter_sdk_cache.bzl", "IOS_USB_ARTIFACTS")
 
 package(default_visibility = ["//visibility:public"])
@@ -162,6 +162,17 @@ write_file(
     name = "android_sdk_stamp",
     out = "android-sdk.stamp",
     content = [ENGINE_VERSION],
+)
+
+# The same under --config=prebuilt_engine, where the facsimile's engine.stamp
+# is bin/cache's own (the engine the tool downloaded; @flutter_bin_cache's
+# stamps) while the Android gen_snapshots still come from the tree: their
+# stamp says bin/cache's revision, so that the tool takes them as current
+# rather than downloading the set.
+write_file(
+    name = "prebuilt_android_sdk_stamp",
+    out = "prebuilt_android-sdk.stamp",
+    content = [PREBUILT_ENGINE_VERSION],
 )
 
 write_file(

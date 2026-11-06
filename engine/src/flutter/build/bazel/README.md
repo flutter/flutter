@@ -1191,10 +1191,29 @@ executables added to runfiles by hand, cache paths relativized by package
 for an external repository), and the shader include root is found from
 `flutter/runtime_effect.glsl` wherever shader_lib lives.
 
-Limits. The tool's iOS and Android engine directories (`_APPLE_CACHE_FILES`,
-the android shard's `cache_files`) still come from the tree under either
-configuration: the apple and android shards want an engine checkout
-(`flutter precache --ios --android` would serve them the same way; not done).
+Limits. The android shard's gen_snapshots still come from the tree under
+either configuration (`flutter precache --android` would serve them the
+same way; not done): that shard wants an engine checkout. The apple shard
+does not, since 538: on a Mac after `flutter precache --macos --ios` its
+facsimile takes the iOS engine directories from `bin/cache`
+(`@flutter_bin_cache//:ios_engine*` through
+`//build_defs/engine:prebuilt_ios_engine_*_directory`; where the tool has
+not fetched them it fetches them at run time), and under the prebuilt
+engine every facsimile's bookkeeping is bin/cache's own
+(`@flutter_bin_cache//:stamps`: the artifact sets' stamps, `engine.stamp`,
+`engine_stamp.json`, `flutter.version.json`, `engine.realm`, laid with the
+directories), so that its stamps describe the engine the tool downloaded
+-- on a developer's machine the content hash's build, stamped with the
+commit that built it, not the checkout's HEAD -- and the content
+validation tests compare a framework's embedded revision with the stamp
+of the same download (T78/T79 found them differing when the facsimile
+stamped HEAD). The tree's facsimile stamps HEAD, which is what it built;
+the Android gen_snapshots under the prebuilt engine carry bin/cache's
+revision (`//bin/internal:prebuilt_android_sdk_stamp`, from
+`@engine_version`'s `PREBUILT_ENGINE_VERSION`). The prebuilt Mac host
+engine's `FlutterMacOS.xcframework` is assembled with its links made
+again (532; the repository's globs follow the bundle's directory links,
+and a flat copy fails `codesign`).
 Measured (11-02, Linux,
 engine `c5ec59d0…` from `flutter precache --linux --web`): the three root
 suites analyze under the config (2,557 targets; the tree's 2,799);
