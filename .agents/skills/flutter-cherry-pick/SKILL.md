@@ -76,6 +76,7 @@ Trigger this skill by providing a merged PR number or URL and optionally the tar
    - If conflicts were encountered and resolved in Phase 3, gather the documentation of those conflicts.
 3. **Draft the Template:**
    - Fill in the retrieved template fields using LLM reasoning based on the issue and original PR context.
+   - Replace `< Replace with PR number >` with the actual original PR number so the cherry-pick PR links to the original PR.
    - If conflicts were resolved, clearly document them in the PR description (e.g., in the "Description" or "Changelog" section), explaining what was resolved and how.
    - Keep the Markdown structure of the template intact.
    - **CRITICAL:** Remove any instructional text or guidelines within the sections (e.g., "What is the impact...", "Explain this cherry pick...") when replacing them with your responses. Do NOT remove explanations around checkboxes or selection items (e.g., "What is the risk level...", "Are you confident...").
