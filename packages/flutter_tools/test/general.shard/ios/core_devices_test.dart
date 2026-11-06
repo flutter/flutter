@@ -90,10 +90,7 @@ void main() {
           coreDeviceControl: fakeCoreDeviceControl,
           xcodeDebug: FakeXcodeDebug(),
           toolContext: FakeToolContext(logger: logger, processUtils: processUtils),
-          xcode: Xcode.test(
-            processManager: processManager,
-            toolContext: FakeToolContext.macosHost(processManager: processManager),
-          ),
+          xcode: Xcode.test(toolContext: FakeToolContext.macosHost(processManager: processManager)),
           deviceVersion: Version(16, 0, 0),
           lldb: fakeLLDB,
         );
@@ -119,10 +116,7 @@ void main() {
           coreDeviceControl: fakeCoreDeviceControl,
           xcodeDebug: FakeXcodeDebug(),
           toolContext: FakeToolContext(logger: logger, processUtils: processUtils),
-          xcode: Xcode.test(
-            processManager: processManager,
-            toolContext: FakeToolContext.macosHost(processManager: processManager),
-          ),
+          xcode: Xcode.test(toolContext: FakeToolContext.macosHost(processManager: processManager)),
           deviceVersion: Version(16, 0, 0),
         );
 
@@ -150,10 +144,7 @@ void main() {
           coreDeviceControl: fakeCoreDeviceControl,
           xcodeDebug: FakeXcodeDebug(),
           toolContext: FakeToolContext(logger: logger, processUtils: processUtils),
-          xcode: Xcode.test(
-            processManager: processManager,
-            toolContext: FakeToolContext.macosHost(processManager: processManager),
-          ),
+          xcode: Xcode.test(toolContext: FakeToolContext.macosHost(processManager: processManager)),
           deviceVersion: Version(16, 0, 0),
         );
 
@@ -177,10 +168,7 @@ void main() {
           coreDeviceControl: fakeCoreDeviceControl,
           xcodeDebug: FakeXcodeDebug(),
           toolContext: FakeToolContext(logger: logger, processUtils: processUtils),
-          xcode: Xcode.test(
-            processManager: processManager,
-            toolContext: FakeToolContext.macosHost(processManager: processManager),
-          ),
+          xcode: Xcode.test(toolContext: FakeToolContext.macosHost(processManager: processManager)),
           deviceVersion: Version(16, 0, 0),
         );
 
@@ -227,10 +215,7 @@ void main() {
           coreDeviceControl: fakeCoreDeviceControl,
           xcodeDebug: FakeXcodeDebug(),
           toolContext: FakeToolContext(logger: logger, processUtils: processUtils),
-          xcode: Xcode.test(
-            processManager: processManager,
-            toolContext: FakeToolContext.macosHost(processManager: processManager),
-          ),
+          xcode: Xcode.test(toolContext: FakeToolContext.macosHost(processManager: processManager)),
           deviceVersion: Version(16, 0, 0),
           lldb: fakeLLDB,
         );
@@ -281,10 +266,7 @@ void main() {
           coreDeviceControl: fakeCoreDeviceControl,
           xcodeDebug: FakeXcodeDebug(),
           toolContext: FakeToolContext(logger: logger, processUtils: processUtils),
-          xcode: Xcode.test(
-            processManager: processManager,
-            toolContext: FakeToolContext.macosHost(processManager: processManager),
-          ),
+          xcode: Xcode.test(toolContext: FakeToolContext.macosHost(processManager: processManager)),
           deviceVersion: Version(16, 0, 0),
           lldb: fakeLLDB,
         );
@@ -345,10 +327,7 @@ void main() {
           coreDeviceControl: fakeCoreDeviceControl,
           xcodeDebug: FakeXcodeDebug(),
           toolContext: FakeToolContext(logger: logger, processUtils: processUtils),
-          xcode: Xcode.test(
-            processManager: processManager,
-            toolContext: FakeToolContext.macosHost(processManager: processManager),
-          ),
+          xcode: Xcode.test(toolContext: FakeToolContext.macosHost(processManager: processManager)),
           deviceVersion: Version(16, 0, 0),
           lldb: fakeLLDB,
         );
@@ -414,10 +393,7 @@ void main() {
           coreDeviceControl: fakeCoreDeviceControl,
           xcodeDebug: FakeXcodeDebug(),
           toolContext: FakeToolContext(logger: logger, processUtils: processUtils),
-          xcode: Xcode.test(
-            processManager: processManager,
-            toolContext: FakeToolContext.macosHost(processManager: processManager),
-          ),
+          xcode: Xcode.test(toolContext: FakeToolContext.macosHost(processManager: processManager)),
           deviceVersion: Version(16, 0, 0),
           lldb: fakeLLDB,
         );
@@ -470,10 +446,7 @@ void main() {
           coreDeviceControl: fakeCoreDeviceControl,
           xcodeDebug: FakeXcodeDebug(),
           toolContext: FakeToolContext(logger: logger, processUtils: processUtils),
-          xcode: Xcode.test(
-            processManager: processManager,
-            toolContext: FakeToolContext.macosHost(processManager: processManager),
-          ),
+          xcode: Xcode.test(toolContext: FakeToolContext.macosHost(processManager: processManager)),
           deviceVersion: Version(16, 0, 0),
           lldb: fakeLLDB,
         );
@@ -519,10 +492,7 @@ void main() {
           coreDeviceControl: fakeCoreDeviceControl,
           xcodeDebug: FakeXcodeDebug(),
           toolContext: FakeToolContext(logger: logger, processUtils: processUtils),
-          xcode: Xcode.test(
-            processManager: processManager,
-            toolContext: FakeToolContext.macosHost(processManager: processManager),
-          ),
+          xcode: Xcode.test(toolContext: FakeToolContext.macosHost(processManager: processManager)),
           deviceVersion: Version(16, 0, 0),
           lldb: fakeLLDB,
         );
@@ -574,10 +544,7 @@ void main() {
           coreDeviceControl: fakeCoreDeviceControl,
           xcodeDebug: FakeXcodeDebug(),
           toolContext: FakeToolContext(logger: logger, processUtils: processUtils),
-          xcode: Xcode.test(
-            processManager: processManager,
-            toolContext: FakeToolContext.macosHost(processManager: processManager),
-          ),
+          xcode: Xcode.test(toolContext: FakeToolContext.macosHost(processManager: processManager)),
           deviceVersion: Version(16, 0, 0),
           lldb: fakeLLDB,
         );
@@ -623,10 +590,7 @@ void main() {
           coreDeviceControl: fakeCoreDeviceControl,
           xcodeDebug: FakeXcodeDebug(),
           toolContext: FakeToolContext(logger: logger, processUtils: processUtils),
-          xcode: Xcode.test(
-            processManager: processManager,
-            toolContext: FakeToolContext.macosHost(processManager: processManager),
-          ),
+          xcode: Xcode.test(toolContext: FakeToolContext.macosHost(processManager: processManager)),
           deviceVersion: Version(16, 0, 0),
           lldb: fakeLLDB,
         );
@@ -674,10 +638,7 @@ void main() {
           coreDeviceControl: fakeCoreDeviceControl,
           xcodeDebug: FakeXcodeDebug(),
           toolContext: FakeToolContext(logger: logger, processUtils: processUtils),
-          xcode: Xcode.test(
-            processManager: processManager,
-            toolContext: FakeToolContext.macosHost(processManager: processManager),
-          ),
+          xcode: Xcode.test(toolContext: FakeToolContext.macosHost(processManager: processManager)),
           deviceVersion: Version(16, 0, 0),
           lldb: fakeLLDB,
         );
@@ -727,10 +688,7 @@ void main() {
           coreDeviceControl: fakeCoreDeviceControl,
           xcodeDebug: FakeXcodeDebug(),
           toolContext: FakeToolContext(logger: logger, processUtils: processUtils),
-          xcode: Xcode.test(
-            processManager: processManager,
-            toolContext: FakeToolContext.macosHost(processManager: processManager),
-          ),
+          xcode: Xcode.test(toolContext: FakeToolContext.macosHost(processManager: processManager)),
           deviceVersion: Version(16, 0, 0),
           lldb: fakeLLDB,
         );
@@ -767,10 +725,7 @@ void main() {
           coreDeviceControl: FakeIOSCoreDeviceControl(),
           xcodeDebug: fakeXcodeDebug,
           toolContext: FakeToolContext(logger: logger, processUtils: processUtils),
-          xcode: Xcode.test(
-            processManager: processManager,
-            toolContext: FakeToolContext.macosHost(processManager: processManager),
-          ),
+          xcode: Xcode.test(toolContext: FakeToolContext.macosHost(processManager: processManager)),
           deviceVersion: Version(16, 0, 0),
           lldb: FakeLLDB(),
         );
@@ -803,10 +758,7 @@ void main() {
           coreDeviceControl: FakeIOSCoreDeviceControl(),
           xcodeDebug: fakeXcodeDebug,
           toolContext: FakeToolContext(logger: logger, processUtils: processUtils),
-          xcode: Xcode.test(
-            processManager: processManager,
-            toolContext: FakeToolContext.macosHost(processManager: processManager),
-          ),
+          xcode: Xcode.test(toolContext: FakeToolContext.macosHost(processManager: processManager)),
           deviceVersion: Version(16, 0, 0),
           lldb: FakeLLDB(),
         );
@@ -839,10 +791,7 @@ void main() {
           coreDeviceControl: FakeIOSCoreDeviceControl(),
           xcodeDebug: fakeXcodeDebug,
           toolContext: FakeToolContext(logger: logger, processUtils: processUtils),
-          xcode: Xcode.test(
-            processManager: processManager,
-            toolContext: FakeToolContext.macosHost(processManager: processManager),
-          ),
+          xcode: Xcode.test(toolContext: FakeToolContext.macosHost(processManager: processManager)),
           deviceVersion: Version(16, 0, 0),
           lldb: FakeLLDB(),
         );
@@ -875,10 +824,7 @@ void main() {
           coreDeviceControl: FakeIOSCoreDeviceControl(),
           xcodeDebug: fakeXcodeDebug,
           toolContext: FakeToolContext(logger: logger, processUtils: processUtils),
-          xcode: Xcode.test(
-            processManager: processManager,
-            toolContext: FakeToolContext.macosHost(processManager: processManager),
-          ),
+          xcode: Xcode.test(toolContext: FakeToolContext.macosHost(processManager: processManager)),
           deviceVersion: Version(16, 0, 0),
           lldb: FakeLLDB(),
         );
@@ -910,10 +856,7 @@ void main() {
           coreDeviceControl: fakeCoreDeviceControl,
           xcodeDebug: xcodeDebug,
           toolContext: FakeToolContext(logger: logger, processUtils: processUtils),
-          xcode: Xcode.test(
-            processManager: processManager,
-            toolContext: FakeToolContext.macosHost(processManager: processManager),
-          ),
+          xcode: Xcode.test(toolContext: FakeToolContext.macosHost(processManager: processManager)),
           deviceVersion: Version(16, 0, 0),
           lldb: fakeLLDB,
         );
@@ -942,10 +885,7 @@ void main() {
           coreDeviceControl: fakeCoreDeviceControl,
           xcodeDebug: xcodeDebug,
           toolContext: FakeToolContext(logger: logger, processUtils: processUtils),
-          xcode: Xcode.test(
-            processManager: processManager,
-            toolContext: FakeToolContext.macosHost(processManager: processManager),
-          ),
+          xcode: Xcode.test(toolContext: FakeToolContext.macosHost(processManager: processManager)),
           deviceVersion: Version(16, 0, 0),
           lldb: fakeLLDB,
         );
@@ -973,10 +913,7 @@ void main() {
           coreDeviceControl: fakeCoreDeviceControl,
           xcodeDebug: xcodeDebug,
           toolContext: FakeToolContext(logger: logger, processUtils: processUtils),
-          xcode: Xcode.test(
-            processManager: processManager,
-            toolContext: FakeToolContext.macosHost(processManager: processManager),
-          ),
+          xcode: Xcode.test(toolContext: FakeToolContext.macosHost(processManager: processManager)),
           deviceVersion: Version(16, 0, 0),
           lldb: fakeLLDB,
         );
@@ -1003,10 +940,7 @@ void main() {
           coreDeviceControl: fakeCoreDeviceControl,
           xcodeDebug: xcodeDebug,
           toolContext: FakeToolContext(logger: logger, processUtils: processUtils),
-          xcode: Xcode.test(
-            processManager: processManager,
-            toolContext: FakeToolContext.macosHost(processManager: processManager),
-          ),
+          xcode: Xcode.test(toolContext: FakeToolContext.macosHost(processManager: processManager)),
           deviceVersion: Version(16, 0, 0),
           lldb: fakeLLDB,
         );
@@ -1146,7 +1080,6 @@ void main() {
       fakeProcessManager = FakeProcessManager.empty();
       // TODO(fujino): re-use fakeProcessManager
       xcode = Xcode.test(
-        processManager: FakeProcessManager.any(),
         toolContext: FakeToolContext.macosHost(processManager: FakeProcessManager.any()),
       );
       deviceControl = IOSCoreDeviceControl(
@@ -1403,6 +1336,45 @@ invalid JSON
         expect(tempFile, isNot(exists));
         expect(status, false);
       });
+
+      testWithoutContext('Handles FileSystemException deleting temp directory', () async {
+        final Directory tempDir = fileSystem.systemTempDirectory.childDirectory(
+          'core_devices.rand0',
+        );
+        final File tempFile = tempDir.childFile('install_results.json');
+        fakeProcessManager.addCommand(
+          FakeCommand(
+            command: <String>[
+              'xcrun',
+              'devicectl',
+              'device',
+              'install',
+              'app',
+              '--device',
+              deviceId,
+              bundlePath,
+              '--json-output',
+              tempFile.path,
+            ],
+            onRun: (_) {
+              expect(tempFile, exists);
+              tempDir.deleteSync(recursive: true);
+              expect(tempFile, isNot(exists));
+            },
+            exitCode: 1,
+          ),
+        );
+
+        final (bool status, IOSCoreDeviceInstallResult? result) = await deviceControl.installApp(
+          deviceId: deviceId,
+          bundlePath: bundlePath,
+        );
+
+        expect(fakeProcessManager, hasNoRemainingExpectations);
+        expect(logger.traceText, contains('Error executing devicectl: ProcessException'));
+        expect(status, isFalse);
+        expect(result, isNull);
+      });
     });
 
     group('uninstall app', () {
@@ -1642,6 +1614,44 @@ invalid JSON
         expect(logger.errorText, contains('devicectl returned non-JSON response'));
         expect(tempFile, isNot(exists));
         expect(status, false);
+      });
+
+      testWithoutContext('Handles FileSystemException deleting temp directory', () async {
+        final Directory tempDir = fileSystem.systemTempDirectory.childDirectory(
+          'core_devices.rand0',
+        );
+        final File tempFile = tempDir.childFile('uninstall_results.json');
+        fakeProcessManager.addCommand(
+          FakeCommand(
+            command: <String>[
+              'xcrun',
+              'devicectl',
+              'device',
+              'uninstall',
+              'app',
+              '--device',
+              deviceId,
+              bundleId,
+              '--json-output',
+              tempFile.path,
+            ],
+            onRun: (_) {
+              expect(tempFile, exists);
+              tempDir.deleteSync(recursive: true);
+              expect(tempFile, isNot(exists));
+            },
+            exitCode: 1,
+          ),
+        );
+
+        final bool status = await deviceControl.uninstallApp(
+          deviceId: deviceId,
+          bundleId: bundleId,
+        );
+
+        expect(fakeProcessManager, hasNoRemainingExpectations);
+        expect(logger.errorText, contains('Error executing devicectl: ProcessException'));
+        expect(status, isFalse);
       });
     });
 
@@ -2061,6 +2071,45 @@ invalid JSON
         expect(fakeProcessManager, hasNoRemainingExpectations);
         expect(logger.traceText, contains('devicectl returned non-JSON response'));
         expect(tempFile, isNot(exists));
+        expect(result, isNull);
+      });
+
+      testWithoutContext('Handles FileSystemException deleting temp directory', () async {
+        final Directory tempDir = fileSystem.systemTempDirectory.childDirectory(
+          'core_devices.rand0',
+        );
+        final File tempFile = tempDir.childFile('launch_results.json');
+        fakeProcessManager.addCommand(
+          FakeCommand(
+            command: <String>[
+              'xcrun',
+              'devicectl',
+              'device',
+              'process',
+              'launch',
+              '--device',
+              deviceId,
+              '--terminate-existing',
+              '--json-output',
+              tempFile.path,
+              bundleId,
+            ],
+            onRun: (_) {
+              expect(tempFile, exists);
+              tempDir.deleteSync(recursive: true);
+              expect(tempFile, isNot(exists));
+            },
+            exitCode: 1,
+          ),
+        );
+
+        final IOSCoreDeviceLaunchResult? result = await deviceControl.launchApp(
+          deviceId: deviceId,
+          bundleId: bundleId,
+        );
+
+        expect(fakeProcessManager, hasNoRemainingExpectations);
+        expect(logger.traceText, contains('Error executing devicectl: ProcessException'));
         expect(result, isNull);
       });
     });
@@ -2588,6 +2637,46 @@ invalid JSON
         expect(tempFile, isNot(exists));
         expect(status, false);
       });
+
+      testWithoutContext('Handles FileSystemException deleting temp directory', () async {
+        final Directory tempDir = fileSystem.systemTempDirectory.childDirectory(
+          'core_devices.rand0',
+        );
+        final File tempFile = tempDir.childFile('terminate_results.json');
+        fakeProcessManager.addCommand(
+          FakeCommand(
+            command: <String>[
+              'xcrun',
+              'devicectl',
+              'device',
+              'process',
+              'terminate',
+              '--device',
+              deviceId,
+              '--pid',
+              processId.toString(),
+              '--kill',
+              '--json-output',
+              tempFile.path,
+            ],
+            onRun: (_) {
+              expect(tempFile, exists);
+              tempDir.deleteSync(recursive: true);
+              expect(tempFile, isNot(exists));
+            },
+            exitCode: 1,
+          ),
+        );
+
+        final bool status = await deviceControl.terminateProcess(
+          deviceId: deviceId,
+          processId: processId,
+        );
+
+        expect(fakeProcessManager, hasNoRemainingExpectations);
+        expect(logger.traceText, contains('Error executing devicectl: ProcessException'));
+        expect(status, isFalse);
+      });
     });
 
     group('list apps', () {
@@ -3033,6 +3122,45 @@ invalid JSON
         expect(logger.errorText, contains('devicectl returned non-JSON response'));
         expect(tempFile, isNot(exists));
         expect(status, false);
+      });
+
+      testWithoutContext('Handles FileSystemException deleting temp directory', () async {
+        final Directory tempDir = fileSystem.systemTempDirectory.childDirectory(
+          'core_devices.rand0',
+        );
+        final File tempFile = tempDir.childFile('core_device_app_list.json');
+        fakeProcessManager.addCommand(
+          FakeCommand(
+            command: <String>[
+              'xcrun',
+              'devicectl',
+              'device',
+              'info',
+              'apps',
+              '--device',
+              deviceId,
+              '--bundle-id',
+              bundleId,
+              '--json-output',
+              tempFile.path,
+            ],
+            onRun: (_) {
+              expect(tempFile, exists);
+              tempDir.deleteSync(recursive: true);
+              expect(tempFile, isNot(exists));
+            },
+            exitCode: 1,
+          ),
+        );
+
+        final bool status = await deviceControl.isAppInstalled(
+          deviceId: deviceId,
+          bundleId: bundleId,
+        );
+
+        expect(fakeProcessManager, hasNoRemainingExpectations);
+        expect(logger.errorText, contains('Error executing devicectl: ProcessException'));
+        expect(status, isFalse);
       });
     });
 
@@ -4078,6 +4206,41 @@ invalid JSON
         expect(tempFile, isNot(exists));
         expect(logger.traceText, contains('Error reading output file'));
       });
+
+      testWithoutContext('Handles FileSystemException deleting temp directory', () async {
+        final Directory tempDir = fileSystem.systemTempDirectory.childDirectory(
+          'core_devices.rand0',
+        );
+        final File tempFile = tempDir.childFile('core_device_process_list.json');
+        fakeProcessManager.addCommand(
+          FakeCommand(
+            command: <String>[
+              'xcrun',
+              'devicectl',
+              'device',
+              'info',
+              'processes',
+              '--device',
+              deviceId,
+              '--json-output',
+              tempFile.path,
+            ],
+            onRun: (_) {
+              expect(tempFile, exists);
+              tempDir.deleteSync(recursive: true);
+              expect(tempFile, isNot(exists));
+            },
+            exitCode: 1,
+          ),
+        );
+
+        final List<IOSCoreDeviceRunningProcess> processes = await deviceControl.getRunningProcesses(
+          deviceId: deviceId,
+        );
+        expect(processes, isEmpty);
+        expect(fakeProcessManager, hasNoRemainingExpectations);
+        expect(logger.traceText, contains('Error executing devicectl: ProcessException'));
+      });
     });
 
     group('take screenshot', () {
@@ -4187,6 +4350,42 @@ invalid JSON
         expect(fakeProcessManager, hasNoRemainingExpectations);
         expect(tempFile, isNot(exists));
         expect(logger.errorText, contains('devicectl returned unexpected JSON response'));
+      });
+
+      testWithoutContext('Handles FileSystemException deleting temp directory', () async {
+        final Directory tempDir = fileSystem.systemTempDirectory.childDirectory(
+          'core_devices.rand0',
+        );
+        final File tempFile = tempDir.childFile('screenshot_results.json');
+        fakeProcessManager.addCommand(
+          FakeCommand(
+            command: <String>[
+              'xcrun',
+              'devicectl',
+              'device',
+              'capture',
+              'screenshot',
+              '--device',
+              deviceId,
+              '--destination',
+              destination,
+              '--json-output',
+              tempFile.path,
+            ],
+            onRun: (_) {
+              expect(tempFile, exists);
+              tempDir.deleteSync(recursive: true);
+              expect(tempFile, isNot(exists));
+            },
+            exitCode: 1,
+          ),
+        );
+
+        await expectLater(
+          deviceControl.takeScreenshot(deviceId: deviceId, destination: destination),
+          throwsA(isA<ProcessException>()),
+        );
+        expect(fakeProcessManager, hasNoRemainingExpectations);
       });
     });
   });

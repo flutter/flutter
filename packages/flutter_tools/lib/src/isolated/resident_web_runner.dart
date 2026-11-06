@@ -23,7 +23,6 @@ import '../base/utils.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
 import '../build_system/build_targets.dart';
-import '../cache.dart';
 import '../context/tool_context.dart';
 import '../dart/language_version.dart';
 import '../dart/package_map.dart';
@@ -38,7 +37,6 @@ import '../vmservice.dart';
 import '../web/chrome.dart';
 import '../web/compile.dart';
 import '../web/devfs_config.dart';
-import '../web/file_generators/flutter_service_worker_js.dart';
 import '../web/file_generators/main_dart.dart' as main_dart;
 import '../web/web_device.dart';
 import '../web/web_runner.dart';
@@ -334,7 +332,6 @@ class ResidentWebRunner extends ResidentRunner {
             flutterProject,
             target,
             debuggingOptions.buildInfo,
-            ServiceWorkerStrategy.none,
             compilerConfigs: <WebCompilerConfig>[_compilerConfig],
             webDefines: _webDefines,
           );
@@ -494,7 +491,6 @@ class ResidentWebRunner extends ResidentRunner {
             flutterProject,
             target,
             debuggingOptions.buildInfo,
-            ServiceWorkerStrategy.none,
             compilerConfigs: <WebCompilerConfig>[_compilerConfig],
             webDefines: _webDefines,
           );
@@ -716,7 +712,7 @@ class ResidentWebRunner extends ResidentRunner {
       final LanguageVersion languageVersion = determineLanguageVersion(
         fileSystem.file(mainUri),
         packageConfig[flutterProject.manifest.appName],
-        Cache.flutterRoot!,
+        cache.flutterRoot,
       );
 
       final String entrypoint = main_dart.generateMainDartFile(
@@ -735,7 +731,9 @@ class ResidentWebRunner extends ResidentRunner {
     required bool resetCompiler,
   }) async {
     final bool isFirstUpload = !assetBundle.wasBuiltOnce();
-    final bool rebuildBundle = assetBundle.needsBuild();
+    final bool rebuildBundle = assetBundle.needsBuild(
+      manifestPath: flutterProject.pubspecFile.path,
+    );
     if (rebuildBundle) {
       logger.printTrace('Updating assets');
       final int result = await assetBundle.build(
@@ -744,6 +742,7 @@ class ResidentWebRunner extends ResidentRunner {
           environment: environment,
           logger: logger,
         ),
+        manifestPath: flutterProject.pubspecFile.path,
         packageConfigPath: debuggingOptions.buildInfo.packageConfigPath,
         targetPlatform: TargetPlatform.web_javascript,
       );
@@ -881,7 +880,7 @@ class ResidentWebRunner extends ResidentRunner {
             },
             device: device,
             flutterProject: flutterProject,
-            flutterVersion: toolContext.flutterVersion,
+            flutterVersion: flutterVersion,
             printStructuredErrorLogMethod: printStructuredErrorLog,
             vmService: _vmService.service,
           );
