@@ -284,7 +284,12 @@ _IOS_USB_CACHE = {
 # The engine's directories in the facsimile's cache: the tree's archive
 # directories (build/archives; tree artifacts, one path each) -- or, under
 # --config=prebuilt_engine, bin/cache's own files at their paths
-# (flutter_bin_cache.bzl; laid through `cache` with no directory).
+# (flutter_bin_cache.bzl; laid through `cache` with no directory), except
+# a Mac's host engine directories, which hold FlutterMacOS.xcframework: a
+# versioned bundle of directory links that the repository's globs follow,
+# so that laid file by file it comes flat and a codesign refuses it;
+# //build_defs/engine's prebuilt_host_engine_*_directory lay those as
+# directory artifacts with the links made again (the Mac's T78).
 _TREE_ENGINE_CACHE_FILES = {
     "//engine/src/flutter/build/archives:host_engine_directory": "artifacts/engine/" + _HOST_ENGINE,
     "//engine/src/flutter/build/archives:host_engine_profile_directory": "artifacts/engine/" + _HOST_ENGINE + "-profile",
@@ -294,12 +299,19 @@ _TREE_ENGINE_CACHE_FILES = {
 }
 
 _PREBUILT_ENGINE_CACHE = {
+    "@flutter_bin_cache//:common_engine": "",
+    "@flutter_bin_cache//:web_sdk": "",
+} | ({} if HOST_OS == "mac" else {
     "@flutter_bin_cache//:host_engine": "",
     "@flutter_bin_cache//:host_engine_profile": "",
     "@flutter_bin_cache//:host_engine_release": "",
-    "@flutter_bin_cache//:common_engine": "",
-    "@flutter_bin_cache//:web_sdk": "",
-}
+})
+
+_PREBUILT_ENGINE_CACHE_FILES = {
+    "//build_defs/engine:prebuilt_host_engine_directory": "artifacts/engine/" + _HOST_ENGINE,
+    "//build_defs/engine:prebuilt_host_engine_profile_directory": "artifacts/engine/" + _HOST_ENGINE + "-profile",
+    "//build_defs/engine:prebuilt_host_engine_release_directory": "artifacts/engine/" + _HOST_ENGINE + "-release",
+} if HOST_OS == "mac" else {}
 
 _TOOL_CACHE_FILES_BASE = _VERSIONED_CACHE_FILES | {
     ":flutter_tools_snapshot": "flutter_tools.snapshot",
@@ -319,7 +331,7 @@ _TOOL_CACHE_FILES_BASE = _VERSIONED_CACHE_FILES | {
 # The facsimile's single files: with the engine's directories from the tree,
 # or without them under the prebuilt engine (whose files `cache` lays).
 _TOOL_CACHE_FILES = select({
-    "//build_defs/engine:prebuilt": _TOOL_CACHE_FILES_BASE,
+    "//build_defs/engine:prebuilt": _TOOL_CACHE_FILES_BASE | _PREBUILT_ENGINE_CACHE_FILES,
     "//conditions:default": _TOOL_CACHE_FILES_BASE | _TREE_ENGINE_CACHE_FILES | _PUB_FILES,
 })
 
@@ -349,7 +361,7 @@ _IOS_ENGINE_CACHE_FILES = {
 } if HOST_OS == "mac" else {}
 
 _APPLE_CACHE_FILES = select({
-    "//build_defs/engine:prebuilt": _TOOL_CACHE_FILES_BASE | _IOS_ENGINE_CACHE_FILES,
+    "//build_defs/engine:prebuilt": _TOOL_CACHE_FILES_BASE | _PREBUILT_ENGINE_CACHE_FILES | _IOS_ENGINE_CACHE_FILES,
     "//conditions:default": _TOOL_CACHE_FILES_BASE | _TREE_ENGINE_CACHE_FILES | _PUB_FILES | _IOS_ENGINE_CACHE_FILES,
 })
 
@@ -927,7 +939,7 @@ dart_package_tests(
     # configuration for now: bin/cache's, `flutter precache --android`, is a
     # later step.)
     cache_files = select({
-        "//build_defs/engine:prebuilt": _TOOL_CACHE_FILES_BASE | _ANDROID_CACHE_FILES,
+        "//build_defs/engine:prebuilt": _TOOL_CACHE_FILES_BASE | _PREBUILT_ENGINE_CACHE_FILES | _ANDROID_CACHE_FILES,
         "//conditions:default": _TOOL_CACHE_FILES_BASE | _TREE_ENGINE_CACHE_FILES | _PUB_FILES | _ANDROID_CACHE_FILES,
     }),
     data = glob(["test/integration.shard/test_data/**"]) + _SDK_PACKAGES + _TOOL_DATA + _INTEGRATION_PROJECTS + [
