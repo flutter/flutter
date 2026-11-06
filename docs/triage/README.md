@@ -28,7 +28,7 @@ If the bug is **clear enough** for us to act on it, continue with the following 
 
 Ideally every issue would have a sample app that demonstrated the problem.
 
-Performance bugs should have timeline traces.
+Performance bugs should have timeline traces. For Android startup performance, a Perfetto system trace is the most useful (see [Capturing startup traces on Android with Perfetto](../platforms/android/Capturing-startup-traces-with-Perfetto.md)).
 
 Crashes should have crash logs with a Flutter version so that the [flutter-symbolizer-bot](https://github.com/flutter-symbolizer-bot) can do its work (see also [Crashes](../engine/Crashes.md)).
 
