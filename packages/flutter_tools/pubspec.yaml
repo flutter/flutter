@@ -26,7 +26,6 @@ dependencies:
   completion: 1.0.2
   coverage: 1.15.1
   crypto: 3.0.8
-  ffi: 2.2.0
   file: 7.0.1
   flutter_tools_core:
     path: packages/flutter_tools_core
@@ -139,4 +138,4 @@ dartdoc:
   # Exclude this package from the hosted API docs.
   nodoc: true
 
-# PUBSPEC CHECKSUM: rriph5
+# PUBSPEC CHECKSUM: the1bq
