@@ -280,6 +280,7 @@ Future<int> run(
         }) =>
             overriddenDoctorValidatorsProvider ??
             DoctorValidatorsProvider.create(
+              androidContext: androidContext,
               appleContext: appleContext,
               deviceManager: deviceManager,
               extensionManager: extensionManager,

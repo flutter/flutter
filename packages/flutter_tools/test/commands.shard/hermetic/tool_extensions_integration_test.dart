@@ -97,6 +97,7 @@ void main() {
           logger: testLogger,
           validatorsProviderBuilder: ({ExtensionManager? extensionManager}) =>
               DoctorValidatorsProvider.create(
+                androidContext: FakeAndroidContext(),
                 appleContext: FakeAppleContext(),
                 extensionManager: extensionManager,
                 featureFlags: featureFlags,
@@ -180,6 +181,7 @@ void main() {
           logger: testLogger,
           validatorsProviderBuilder: ({ExtensionManager? extensionManager}) =>
               DoctorValidatorsProvider.create(
+                androidContext: FakeAndroidContext(),
                 appleContext: FakeAppleContext(),
                 extensionManager: extensionManager,
                 featureFlags: featureFlags,

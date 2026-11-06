@@ -198,6 +198,7 @@ class ToolDependencies {
     EmulatorManager? emulatorManager,
     List<ExtensionEntryPoint> extensionEntryPoints = const <ExtensionEntryPoint>[],
     FeatureFlags? featureFlags,
+    String? flutterRoot,
     FlutterVersion? flutterVersion,
     FileSystem? fs,
     Git? git,
@@ -381,7 +382,8 @@ class ToolDependencies {
         git ?? Git(currentPlatform: finalPlatform, runProcessWith: finalProcessUtils);
 
     // 7. Project Factory, Operating System Utilities, and Cache
-    final String flutterRoot =
+    final String finalFlutterRoot =
+        flutterRoot ??
         cache?.flutterRoot ??
         Cache.defaultFlutterRoot(
           platform: finalPlatform,
@@ -430,11 +432,14 @@ class ToolDependencies {
       processManager: finalProcessManager,
     );
 
+    late final Artifacts finalArtifacts;
+
     final Cache finalCache =
         cache ??
         FlutterCache(
-          flutterRoot: flutterRoot,
+          flutterRoot: finalFlutterRoot,
           fileSystem: finalFS,
+          isLocalEngineBuilder: () => finalArtifacts.localEngineInfo != null,
           logger: finalLogger,
           platform: finalPlatform,
           osUtils: finalOS,
@@ -447,7 +452,7 @@ class ToolDependencies {
         flutterVersion ??
         FlutterVersion(
           cache: finalCache,
-          flutterRoot: flutterRoot,
+          flutterRoot: finalFlutterRoot,
           fs: finalFS,
           git: finalGit,
           logger: finalLogger,
@@ -526,13 +531,13 @@ class ToolDependencies {
           logger: finalLogger,
           platform: finalPlatform,
           fileSystem: finalFS,
-          flutterRoot: flutterRoot,
+          flutterRoot: finalFlutterRoot,
         );
 
     final finalNativeAssetsBuilder = nativeAssetsBuilder;
 
     // Artifacts will be updated later if a local engine is used.
-    final Artifacts finalArtifacts = switch (artifacts) {
+    finalArtifacts = switch (artifacts) {
       final DeferredArtifacts deferredArtifacts => deferredArtifacts,
       final Artifacts providedArtifacts => DeferredArtifacts(providedArtifacts),
       null => DeferredArtifacts(
@@ -760,6 +765,7 @@ class ToolDependencies {
           validatorsProviderBuilder: ({ExtensionManager? extensionManager}) =>
               doctorValidatorsProvider ??
               DoctorValidatorsProvider.create(
+                androidContext: finalAndroidContext,
                 appleContext: appleContext,
                 deviceManager: finalDeviceManager,
                 extensionManager: extensionManager,
