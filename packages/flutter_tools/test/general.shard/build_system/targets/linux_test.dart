@@ -13,7 +13,6 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/targets/common.dart';
 import 'package:flutter_tools/src/build_system/targets/linux.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:standard_message_codec/standard_message_codec.dart';
 
 import '../../../src/common.dart';
@@ -169,12 +168,11 @@ void main() {
   testUsingContext(
     'DebugBundleLinuxAssets bundles assets for the selected flavor',
     () async {
-      final FileSystem flavorFileSystem = globals.fs;
       final environment = Environment.test(
-        flavorFileSystem.currentDirectory,
+        fileSystem.currentDirectory,
         artifacts: Artifacts.test(),
         processManager: FakeProcessManager.any(),
-        fileSystem: flavorFileSystem,
+        fileSystem: fileSystem,
         logger: BufferLogger.test(),
         defines: <String, String>{kBuildMode: 'debug', kFlavor: 'strawberry'},
         engineVersion: '2',
@@ -183,7 +181,7 @@ void main() {
       environment.buildDir.childFile('app.dill').createSync(recursive: true);
       environment.buildDir.childFile('native_assets.json').createSync(recursive: true);
 
-      flavorFileSystem.file('pubspec.yaml')
+      fileSystem.file('pubspec.yaml')
         ..createSync()
         ..writeAsStringSync('''
 name: example
@@ -198,10 +196,10 @@ flutter:
         - strawberry
 ''');
 
-      flavorFileSystem.file('assets/common/image.png').createSync(recursive: true);
-      flavorFileSystem.file('assets/vanilla/ice-cream.png').createSync(recursive: true);
-      flavorFileSystem.file('assets/strawberry/ice-cream.png').createSync(recursive: true);
-      writePackageConfigFiles(directory: flavorFileSystem.currentDirectory, mainLibName: 'example');
+      fileSystem.file('assets/common/image.png').createSync(recursive: true);
+      fileSystem.file('assets/vanilla/ice-cream.png').createSync(recursive: true);
+      fileSystem.file('assets/strawberry/ice-cream.png').createSync(recursive: true);
+      writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'example');
 
       await const DebugBundleLinuxAssets(TargetPlatform.linux_x64).build(environment);
 
@@ -218,7 +216,7 @@ flutter:
       expect(assetManifest.containsKey('assets/vanilla/ice-cream.png'), isFalse);
     },
     overrides: <Type, Generator>{
-      FileSystem: () => MemoryFileSystem.test(),
+      FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
     },
   );

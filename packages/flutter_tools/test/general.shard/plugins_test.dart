@@ -24,7 +24,6 @@ import 'package:flutter_tools/src/darwin/darwin.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/flutter_manifest.dart';
 import 'package:flutter_tools/src/flutter_plugins.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/isolated/mustache_template.dart';
 import 'package:flutter_tools/src/macos/cocoapods.dart';
@@ -2637,7 +2636,7 @@ flutter:
       late Directory tempDir;
 
       setUp(() {
-        tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_plugin_test.');
+        tempDir = fs.systemTempDirectory.createTempSync('flutter_plugin_test.');
         projectDir = tempDir.childDirectory('flutter_project');
       });
 
@@ -2651,8 +2650,10 @@ flutter:
           ..writeAsStringSync(yamlString);
       }
 
-      testUsingContext('validatePubspecForPlugin works', () async {
-        const pluginYaml = '''
+      testUsingContext(
+        'validatePubspecForPlugin works',
+        () async {
+          const pluginYaml = '''
   flutter:
     plugin:
       platforms:
@@ -2671,15 +2672,20 @@ flutter:
           pluginClass: SomePlugin
           package: AndroidPackage
   ''';
-        createPubspecFile(pluginYaml);
-        validatePubspecForPlugin(
-          projectDir: projectDir.absolute.path,
-          pluginClass: 'SomePlugin',
-          expectedPlatforms: <String>['ios', 'macos', 'windows', 'linux', 'android', 'web'],
-          androidIdentifier: 'AndroidPackage',
-          webFileName: 'lib/SomeFile.dart',
-        );
-      });
+          createPubspecFile(pluginYaml);
+          validatePubspecForPlugin(
+            projectDir: projectDir.absolute.path,
+            pluginClass: 'SomePlugin',
+            expectedPlatforms: <String>['ios', 'macos', 'windows', 'linux', 'android', 'web'],
+            androidIdentifier: 'AndroidPackage',
+            webFileName: 'lib/SomeFile.dart',
+          );
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => fs,
+          ProcessManager: () => FakeProcessManager.any(),
+        },
+      );
 
       testUsingContext(
         'Plugin.fromYaml rejects a plugin class with code-injection characters',
@@ -3213,11 +3219,13 @@ iosPrefix: FLT
       },
     );
 
+    late FileSystem errorAccessDeniedFs;
+
     testUsingContext(
       'Symlink ERROR_ACCESS_DENIED failures show developers paths that were used',
       () async {
         final flutterProject = FakeFlutterProject()
-          ..directory = globals.fs.currentDirectory.childDirectory('app');
+          ..directory = errorAccessDeniedFs.currentDirectory.childDirectory('app');
         final Directory windowsManagedDirectory = flutterProject.directory
             .childDirectory('windows')
             .childDirectory('flutter');
@@ -3283,7 +3291,7 @@ iosPrefix: FLT
             FileSystemOp.create,
             const FileSystemException('', '', OSError('', 5)),
           );
-          return fileSystem;
+          return errorAccessDeniedFs = fileSystem;
         },
         Platform: () => FakePlatform(operatingSystem: 'windows'),
         ProcessManager: () => FakeProcessManager.empty(),
@@ -3648,11 +3656,13 @@ iosPrefix: FLT
     });
   });
 
+  late FileSystem deletingPluginSymlinksFs;
+
   testUsingContext(
     'exits tool when deleting .plugin_symlinks fails',
     () async {
       final flutterProject = FakeFlutterProject()
-        ..directory = globals.fs.currentDirectory.childDirectory('app');
+        ..directory = deletingPluginSymlinksFs.currentDirectory.childDirectory('app');
       final flutterManifest = FakeFlutterManifest();
       final Directory windowsManagedDirectory = flutterProject.directory
           .childDirectory('windows')
@@ -3718,7 +3728,7 @@ iosPrefix: FLT
             OSError('The system cannot find the path specified.', 3),
           ),
         );
-        return fileSystem;
+        return deletingPluginSymlinksFs = fileSystem;
       },
       ProcessManager: () => FakeProcessManager.empty(),
     },

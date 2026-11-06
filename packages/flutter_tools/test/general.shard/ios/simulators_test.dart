@@ -19,7 +19,6 @@ import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/device_port_forwarder.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/application_package.dart';
 import 'package:flutter_tools/src/ios/devices.dart';
 import 'package:flutter_tools/src/ios/simulators.dart';
@@ -1735,7 +1734,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
         );
         testPlistParser.setProperty('CFBundleIdentifier', 'correct');
 
-        final Directory mockDir = globals.fs.currentDirectory;
+        final Directory mockDir = fileSystem.currentDirectory;
         final IOSApp package = PrebuiltIOSApp(
           projectBundleId: 'incorrect',
           bundleName: 'name',
@@ -1782,7 +1781,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
           xcode: xcode,
         );
 
-        final Directory mockDir = globals.fs.currentDirectory;
+        final Directory mockDir = fileSystem.currentDirectory;
         final IOSApp package = PrebuiltIOSApp(
           projectBundleId: 'incorrect',
           bundleName: 'name',
@@ -1840,7 +1839,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
         );
         testPlistParser.setProperty('CFBundleIdentifier', 'correct');
 
-        final Directory mockDir = globals.fs.currentDirectory;
+        final Directory mockDir = fileSystem.currentDirectory;
         final IOSApp package = PrebuiltIOSApp(
           projectBundleId: 'correct',
           bundleName: 'name',
@@ -1933,7 +1932,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
         );
         testPlistParser.setProperty('CFBundleIdentifier', 'correct');
 
-        final Directory mockDir = globals.fs.currentDirectory;
+        final Directory mockDir = fileSystem.currentDirectory;
         final IOSApp package = PrebuiltIOSApp(
           projectBundleId: 'correct',
           bundleName: 'name',
@@ -2006,8 +2005,8 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
       IOSApp buildPackage() => PrebuiltIOSApp(
         projectBundleId: 'correct',
         bundleName: 'name',
-        uncompressedBundle: globals.fs.currentDirectory,
-        applicationPackage: globals.fs.currentDirectory,
+        uncompressedBundle: fileSystem.currentDirectory,
+        applicationPackage: fileSystem.currentDirectory,
       );
 
       testUsingContext(
@@ -2158,7 +2157,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
     testUsingContext(
       'is true on module project',
       () async {
-        globals.fs.file('pubspec.yaml')
+        fileSystem.file('pubspec.yaml')
           ..createSync()
           ..writeAsStringSync(r'''
 name: example
@@ -2167,7 +2166,7 @@ flutter:
   module: {}
 ''');
         final FlutterProject flutterProject = FlutterProject.fromDirectoryTest(
-          globals.fs.currentDirectory,
+          fileSystem.currentDirectory,
         );
 
         final simulator = IOSSimulator(
@@ -2187,7 +2186,7 @@ flutter:
         expect(simulator.isSupportedForProject(flutterProject), true);
       },
       overrides: <Type, Generator>{
-        FileSystem: () => MemoryFileSystem.test(),
+        FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
       },
     );
@@ -2195,10 +2194,10 @@ flutter:
     testUsingContext(
       'is true with editable host app',
       () async {
-        globals.fs.file('pubspec.yaml').createSync();
-        globals.fs.directory('ios').createSync();
+        fileSystem.file('pubspec.yaml').createSync();
+        fileSystem.directory('ios').createSync();
         final FlutterProject flutterProject = FlutterProject.fromDirectoryTest(
-          globals.fs.currentDirectory,
+          fileSystem.currentDirectory,
         );
 
         final simulator = IOSSimulator(
@@ -2218,7 +2217,7 @@ flutter:
         expect(simulator.isSupportedForProject(flutterProject), true);
       },
       overrides: <Type, Generator>{
-        FileSystem: () => MemoryFileSystem.test(),
+        FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
       },
     );
@@ -2226,9 +2225,9 @@ flutter:
     testUsingContext(
       'is false with no host app and no module',
       () async {
-        globals.fs.file('pubspec.yaml').createSync();
+        fileSystem.file('pubspec.yaml').createSync();
         final FlutterProject flutterProject = FlutterProject.fromDirectoryTest(
-          globals.fs.currentDirectory,
+          fileSystem.currentDirectory,
         );
 
         final simulator = IOSSimulator(
@@ -2248,7 +2247,7 @@ flutter:
         expect(simulator.isSupportedForProject(flutterProject), false);
       },
       overrides: <Type, Generator>{
-        FileSystem: () => MemoryFileSystem.test(),
+        FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
       },
     );
