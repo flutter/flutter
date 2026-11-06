@@ -159,6 +159,23 @@
 @property(nonatomic, readonly) FlutterPlatformViewGestureRecognizersBlockingPolicy blockingPolicy;
 @end
 
+/// The views that make up an embedded platform view. These consist of the plugin-provided view,
+/// the touch interceptor wrapper view, and the clipping view at the root of the hierarchy.
+///
+/// Instances must only be accessed on the platform thread.
+@interface FlutterPlatformViewData : NSObject
+
+- (instancetype)init NS_UNAVAILABLE;
+- (instancetype)initWithView:(NSObject<FlutterPlatformView>*)view
+            touchInterceptor:(FlutterTouchInterceptingView*)touchInterceptor
+                    rootView:(UIView*)rootView NS_DESIGNATED_INITIALIZER;
+
+@property(nonatomic, readonly) NSObject<FlutterPlatformView>* view;
+@property(nonatomic, readonly) FlutterTouchInterceptingView* touchInterceptor;
+@property(nonatomic, readonly) UIView* rootView;
+
+@end
+
 @interface UIView (FirstResponder)
 // Returns YES if a view or any of its descendant view is the first responder. Returns NO otherwise.
 @property(nonatomic, readonly) BOOL flt_hasFirstResponderInViewHierarchySubtree;
