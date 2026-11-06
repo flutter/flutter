@@ -247,7 +247,7 @@ class FakeRasterizer extends ViewRasterizer {
 
   @override
   Future<void> rasterize(
-    List<DisplayCanvas> displayCanvases,
+    List<DisplayCanvas> Function() getDisplayCanvases,
     List<ui.Picture> pictures,
     FrameTimingRecorder? recorder,
   ) {
