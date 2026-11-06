@@ -34,7 +34,6 @@ import 'package:flutter_tools/src/context/tool_dependencies.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/flutter_device_manager.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:flutter_tools/src/ios/simulators.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
@@ -65,6 +64,7 @@ void main() {
     late MemoryFileSystem fileSystem;
     late FakeAnalytics fakeAnalytics;
     late FakeStdio fakeStdio;
+    late WaitingCrashReporter crashReporter;
 
     setUp(() {
       // Instead of exiting with dart:io exit(), this causes an exception to
@@ -90,6 +90,7 @@ void main() {
         fakeFlutterVersion: FakeFlutterVersion(),
       );
       fakeStdio = FakeStdio();
+      crashReporter = WaitingCrashReporter(Future<void>.value());
     });
 
     tearDown(() {
@@ -486,7 +487,7 @@ void main() {
           ),
         );
 
-        final File log = globals.fs.file('/flutter_01.log');
+        final File log = fileSystem.file('/flutter_01.log');
         final String logContents = log.readAsStringSync();
         expect(logContents, contains(kCustomBugInstructions));
         expect(logContents, contains('flutter crash'));
@@ -494,7 +495,7 @@ void main() {
         expect(logContents, contains('CrashingFlutterCommand.runCommand'));
         expect(logContents, contains('[!] Flutter'));
 
-        final CrashDetails sentDetails = (globals.crashReporter! as WaitingCrashReporter)._details;
+        final CrashDetails sentDetails = crashReporter._details;
         expect(sentDetails.command, 'flutter crash');
         expect(sentDetails.error.toString(), 'Exception: an exception % --');
         expect(sentDetails.stackTrace.toString(), contains('CrashingFlutterCommand.runCommand'));
@@ -518,7 +519,7 @@ void main() {
         ProcessManager: _NoWhichProcessManager.new,
         UserMessages: () => CustomBugInstructions(),
         Artifacts: () => Artifacts.test(),
-        CrashReporter: () => WaitingCrashReporter(Future<void>.value()),
+        CrashReporter: () => crashReporter,
         HttpClientFactory: () =>
             () => FakeHttpClient.any(),
       },
@@ -602,7 +603,7 @@ void main() {
             ),
           );
 
-          final File log = globals.fs.systemTempDirectory.childFile('flutter_01.log');
+          final File log = fileSystem.systemTempDirectory.childFile('flutter_01.log');
           final String logContents = log.readAsStringSync();
           expect(logContents, contains(kCustomBugInstructions));
           expect(logContents, contains('flutter crash'));
@@ -610,8 +611,7 @@ void main() {
           expect(logContents, contains('CrashingFlutterCommand.runCommand'));
           expect(logContents, contains('[!] Flutter'));
 
-          final CrashDetails sentDetails =
-              (globals.crashReporter! as WaitingCrashReporter)._details;
+          final CrashDetails sentDetails = crashReporter._details;
           expect(sentDetails.command, 'flutter crash');
           expect(sentDetails.error.toString(), 'Exception: an exception % --');
           expect(sentDetails.stackTrace.toString(), contains('CrashingFlutterCommand.runCommand'));
@@ -634,7 +634,7 @@ void main() {
           ProcessManager: _NoWhichProcessManager.new,
           UserMessages: () => CustomBugInstructions(),
           Artifacts: () => Artifacts.test(),
-          CrashReporter: () => WaitingCrashReporter(Future<void>.value()),
+          CrashReporter: () => crashReporter,
           HttpClientFactory: () =>
               () => FakeHttpClient.any(),
         },
@@ -673,7 +673,7 @@ void main() {
         );
 
         expect(
-          (globals.logger as BufferLogger).errorText,
+          testLogger.errorText,
           'Failed to find "git" in the search path.\n'
           '\n'
           'An error was encountered when trying to run git.\n'
@@ -703,7 +703,7 @@ void main() {
         );
 
         expect(
-          (globals.logger as BufferLogger).errorText,
+          testLogger.errorText,
           'Failed to find "git" in the search path.\n'
           '\n'
           'An error was encountered when trying to run git.\n'
@@ -729,13 +729,9 @@ void main() {
           shutdownHooks: ShutdownHooks(),
         );
 
-        expect(
-          (globals.logger as BufferLogger).traceText,
-          isNot(contains('Showed analytics consent message.')),
-        );
+        expect(testLogger.traceText, isNot(contains('Showed analytics consent message.')));
       },
       overrides: <Type, Generator>{
-        Logger: () => BufferLogger.test(),
         FileSystem: () => MemoryFileSystem.test(),
         ProcessManager: () => FakeProcessManager.any(),
         BotDetector: () => const FakeBotDetector(true),
@@ -747,12 +743,27 @@ void main() {
       () async {
         // Regression test for https://github.com/flutter/flutter/issues/154119.
         final stdio = FakeStdio();
+        final loggerFactory = LoggerFactory(
+          outputPreferences: OutputPreferences.test(),
+          terminal: Terminal.test(),
+          stdio: stdio,
+        );
+        final Logger logger = loggerFactory.createLogger(
+          daemon: false,
+          // This is set to true when --machine is detected as an argument in
+          // executable.dart.
+          machine: true,
+          verbose: false,
+          prefixedErrors: false,
+          widgetPreviews: false,
+          windows: false,
+        );
         await runner.run(
           <String>['devices', '--machine'],
           (ToolDependencies toolDependencies) => <FlutterCommand>[
             DevicesCommand(
-              deviceManager: globals.deviceManager!,
-              doctor: globals.doctor!,
+              deviceManager: toolDependencies.deviceManager,
+              doctor: toolDependencies.doctor,
               toolContext: toolDependencies.toolContext,
             ),
           ],
@@ -760,31 +771,15 @@ void main() {
           flutterVersion: '[user-branch]/',
           shutdownHooks: ShutdownHooks(),
           overrides: {
-            Logger: () {
-              final loggerFactory = LoggerFactory(
-                outputPreferences: globals.outputPreferences,
-                terminal: globals.terminal,
-                stdio: stdio,
-              );
-              return loggerFactory.createLogger(
-                daemon: false,
-                // This is set to true when --machine is detected as an argument in
-                // executable.dart.
-                machine: true,
-                verbose: false,
-                prefixedErrors: false,
-                widgetPreviews: false,
-                windows: globals.platform.isWindows,
-              );
-            },
+            Cache: () => FakeCache(fs: fs, logger: logger),
+            Logger: () => logger,
           },
         );
         expect(stdio.writtenToStdout.join(), isNot(contains('Downloading')));
         expect(stdio.writtenToStderr.join(), isNot(contains('Downloading')));
       },
       overrides: <Type, Generator>{
-        Cache: () => FakeCache(),
-        FileSystem: () => MemoryFileSystem.test(),
+        FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
         BotDetector: () => const FakeBotDetector(true),
       },
@@ -793,8 +788,6 @@ void main() {
     testUsingContext(
       'binds bootstrapped DeviceManager into context for command execution',
       () async {
-        expect(globals.deviceManager, isNull);
-
         late final ToolDependencies capturedDependencies;
         final command = _DeviceManagerRecordingFlutterCommand();
         await runner.run(
@@ -1181,7 +1174,7 @@ void main() {
       () async {
         setExitFunctionForTests((int exitCode) {});
 
-        expect(globals.analytics.telemetryEnabled, true);
+        expect(fakeAnalytics.telemetryEnabled, true);
 
         await runner.run(
           <String>['--disable-analytics'],
@@ -1191,7 +1184,7 @@ void main() {
           shutdownHooks: ShutdownHooks(),
         );
 
-        expect(globals.analytics.telemetryEnabled, false);
+        expect(fakeAnalytics.telemetryEnabled, false);
       },
       overrides: <Type, Generator>{
         Analytics: () => fakeAnalytics,
@@ -1208,7 +1201,7 @@ void main() {
       () async {
         setExitFunctionForTests((int exitCode) {});
 
-        expect(globals.analytics.telemetryEnabled, true);
+        expect(fakeAnalytics.telemetryEnabled, true);
 
         await runner.run(
           <String>['--disable-analytics'],
@@ -1216,7 +1209,7 @@ void main() {
           shutdownHooks: ShutdownHooks(),
         );
 
-        expect(globals.analytics.telemetryEnabled, false);
+        expect(fakeAnalytics.telemetryEnabled, false);
 
         await runner.run(
           <String>['--enable-analytics'],
@@ -1224,7 +1217,7 @@ void main() {
           shutdownHooks: ShutdownHooks(),
         );
 
-        expect(globals.analytics.telemetryEnabled, true);
+        expect(fakeAnalytics.telemetryEnabled, true);
       },
       overrides: <Type, Generator>{
         Analytics: () => fakeAnalytics,
@@ -1240,7 +1233,7 @@ void main() {
       '--enable-analytics and --disable-analytics send an event when telemetry is enabled/disabled',
       () async {
         setExitFunctionForTests((int exitCode) {});
-        await globals.analytics.setTelemetry(true);
+        await fakeAnalytics.setTelemetry(true);
 
         await runner.run(
           <String>['--disable-analytics'],
@@ -1248,21 +1241,17 @@ void main() {
           shutdownHooks: ShutdownHooks(),
         );
 
-        expect((globals.analytics as FakeAnalytics).sentEvents, <Event>[
-          Event.analyticsCollectionEnabled(status: false),
-        ]);
+        expect(fakeAnalytics.sentEvents, <Event>[Event.analyticsCollectionEnabled(status: false)]);
 
-        (globals.analytics as FakeAnalytics).sentEvents.clear();
-        expect(globals.analytics.telemetryEnabled, false);
+        fakeAnalytics.sentEvents.clear();
+        expect(fakeAnalytics.telemetryEnabled, false);
         await runner.run(
           <String>['--enable-analytics'],
           (ToolDependencies toolDependencies) => <FlutterCommand>[],
           shutdownHooks: ShutdownHooks(),
         );
 
-        expect((globals.analytics as FakeAnalytics).sentEvents, <Event>[
-          Event.analyticsCollectionEnabled(status: true),
-        ]);
+        expect(fakeAnalytics.sentEvents, <Event>[Event.analyticsCollectionEnabled(status: true)]);
       },
       overrides: <Type, Generator>{
         Analytics: () => fakeAnalytics,
@@ -1279,23 +1268,23 @@ void main() {
       () async {
         setExitFunctionForTests((int exitCode) {});
 
-        await globals.analytics.setTelemetry(false);
+        await fakeAnalytics.setTelemetry(false);
         await runner.run(
           <String>['--disable-analytics'],
           (ToolDependencies toolDependencies) => <FlutterCommand>[],
           shutdownHooks: ShutdownHooks(),
         );
 
-        expect((globals.analytics as FakeAnalytics).sentEvents, isEmpty);
+        expect(fakeAnalytics.sentEvents, isEmpty);
 
-        await globals.analytics.setTelemetry(true);
+        await fakeAnalytics.setTelemetry(true);
         await runner.run(
           <String>['--enable-analytics'],
           (ToolDependencies toolDependencies) => <FlutterCommand>[],
           shutdownHooks: ShutdownHooks(),
         );
 
-        expect((globals.analytics as FakeAnalytics).sentEvents, isEmpty);
+        expect(fakeAnalytics.sentEvents, isEmpty);
       },
       overrides: <Type, Generator>{
         Analytics: () => fakeAnalytics,
@@ -1312,7 +1301,7 @@ void main() {
       () async {
         setExitFunctionForTests((int exitCode) {});
 
-        expect(globals.analytics.telemetryEnabled, true);
+        expect(fakeAnalytics.telemetryEnabled, true);
 
         final int exitCode = await runner.run(
           <String>['--disable-analytics', '--enable-analytics'],
@@ -1324,7 +1313,7 @@ void main() {
 
         expect(exitCode, 1, reason: 'Should return 1 due to conflicting options for telemetry');
         expect(
-          globals.analytics.telemetryEnabled,
+          fakeAnalytics.telemetryEnabled,
           true,
           reason: 'Should not have changed from initialization',
         );
@@ -1345,7 +1334,7 @@ void main() {
         '$flag warns and does not change telemetry when DASH__SUPPRESS_ANALYTICS=true',
         () async {
           setExitFunctionForTests((int exitCode) {});
-          await globals.analytics.setTelemetry(!enable);
+          await fakeAnalytics.setTelemetry(!enable);
 
           await runner.run(
             <String>[flag],
@@ -1355,7 +1344,7 @@ void main() {
             shutdownHooks: ShutdownHooks(),
           );
 
-          expect(globals.analytics.telemetryEnabled, !enable);
+          expect(fakeAnalytics.telemetryEnabled, !enable);
           expect(fakeAnalytics.sentEvents, isEmpty);
           expect(testLogger.warningText, contains('DASH__SUPPRESS_ANALYTICS=true is set'));
           expect(testLogger.statusText, isNot(contains('Analytics reporting')));
@@ -1581,6 +1570,11 @@ class _ErrorOnCanRunFakeProcessManager extends Fake implements FakeProcessManage
 }
 
 class FakeCache extends Fake implements Cache {
+  FakeCache({required this._fs, required this._logger});
+
+  final FileSystem _fs;
+  final Logger _logger;
+
   @override
   String get flutterRoot => '/path/to/sdk/flutter';
 
@@ -1595,11 +1589,11 @@ class FakeCache extends Fake implements Cache {
 
   @override
   Future<void> updateAll(Set<DevelopmentArtifact> requiredArtifacts, {bool offline = false}) async {
-    globals.logger.startProgress('Downloading package Foo').stop();
+    _logger.startProgress('Downloading package Foo').stop();
   }
 
   @override
-  Directory getArtifactDirectory(String name) => globals.fs.directory(name);
+  Directory getArtifactDirectory(String name) => _fs.directory(name);
 
   @override
   MapEntry<String, String> get dyLdLibEntry =>

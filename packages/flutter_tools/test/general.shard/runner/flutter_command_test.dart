@@ -21,13 +21,14 @@ import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/build_system/build_system.dart';
+import 'package:flutter_tools/src/build_system/build_targets.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/run.dart' show RunCommand;
 import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/features.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/pre_run_validator.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
@@ -42,6 +43,7 @@ import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_devices.dart';
 import '../../src/fakes.dart';
+import '../../src/test_build_system.dart';
 import '../../src/test_flutter_command_runner.dart';
 import 'utils.dart';
 
@@ -333,9 +335,10 @@ void main() {
     testUsingContext(
       'uses the error handling file system',
       () async {
-        final flutterCommand = DummyFlutterCommand(
+        late final DummyFlutterCommand flutterCommand;
+        flutterCommand = DummyFlutterCommand(
           commandFunction: () async {
-            expect(globals.fs, isA<ErrorHandlingFileSystem>());
+            expect(flutterCommand.toolContext.fs, isA<ErrorHandlingFileSystem>());
             return const FlutterCommandResult(ExitStatus.success);
           },
         );
@@ -350,7 +353,7 @@ void main() {
     testUsingContext(
       'finds the target file with default values',
       () async {
-        globals.fs.file('lib/main.dart').createSync(recursive: true);
+        fileSystem.file('lib/main.dart').createSync(recursive: true);
         final fakeTargetCommand = FakeTargetCommand();
         final CommandRunner<void> runner = createTestCommandRunner(fakeTargetCommand);
         await runner.run(<String>['test']);
@@ -366,7 +369,7 @@ void main() {
     testUsingContext(
       'finds the target file with specified value',
       () async {
-        globals.fs.file('lib/foo.dart').createSync(recursive: true);
+        fileSystem.file('lib/foo.dart').createSync(recursive: true);
         final fakeTargetCommand = FakeTargetCommand();
         final CommandRunner<void> runner = createTestCommandRunner(fakeTargetCommand);
         await runner.run(<String>['test', '-t', 'lib/foo.dart']);
@@ -426,7 +429,7 @@ void main() {
             commandPath: 'dummy',
             result: 'success',
             commandHasTerminal: false,
-            hostArch: globals.os.hostPlatform.cliName,
+            hostArch: flutterCommand.toolContext.os.hostPlatform.cliName,
             maxRss: 10,
           ),
         ),
@@ -451,7 +454,7 @@ void main() {
             commandPath: 'dummy',
             result: 'warning',
             commandHasTerminal: false,
-            hostArch: globals.os.hostPlatform.cliName,
+            hostArch: flutterCommand.toolContext.os.hostPlatform.cliName,
             maxRss: 10,
           ),
         ),
@@ -475,7 +478,7 @@ void main() {
             commandPath: 'dummy',
             result: 'fail',
             commandHasTerminal: false,
-            hostArch: globals.os.hostPlatform.cliName,
+            hostArch: flutterCommand.toolContext.os.hostPlatform.cliName,
             maxRss: 10,
           ),
         ),
@@ -590,7 +593,7 @@ void main() {
                 commandPath: 'dummy',
                 result: 'killed',
                 commandHasTerminal: false,
-                hostArch: globals.os.hostPlatform.cliName,
+                hostArch: flutterCommand.toolContext.os.hostPlatform.cliName,
                 maxRss: 10,
               ),
             ),
@@ -620,9 +623,10 @@ void main() {
             completer.complete();
           });
           final checkLockCompleter = Completer<void>();
+          final Cache commandCache = const DelegatingToolContext().cache;
           final flutterCommand = DummyFlutterCommand(
             commandFunction: () async {
-              await globals.cache.lock();
+              await commandCache.lock();
               checkLockCompleter.complete();
               final c = Completer<void>();
               await c.future;
@@ -633,7 +637,7 @@ void main() {
           unawaited(flutterCommand.run());
           await checkLockCompleter.future;
 
-          globals.cache.checkLockAcquired();
+          commandCache.checkLockAcquired();
 
           signalController.add(mockSignal);
           await completer.future;
@@ -2374,18 +2378,9 @@ class _TestRunCommandThatOnlyValidates extends RunCommand {
   _TestRunCommandThatOnlyValidates({ToolContext? toolContext})
     : super(
         appleContext: FakeAppleContext(),
-        buildSystem: globals.buildSystem,
-        buildTargets: globals.buildTargets,
-        toolContext:
-            toolContext ??
-            FakeToolContext(
-              fs: globals.fs,
-              logger: globals.logger,
-              platform: globals.platform,
-              processManager: globals.processManager,
-              artifacts: globals.artifacts,
-              cache: globals.cache,
-            ),
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        buildTargets: const NoOpBuildTargets(),
+        toolContext: toolContext ?? const DelegatingToolContext(),
       );
 
   @override

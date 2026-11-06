@@ -12,7 +12,6 @@ import 'package:flutter_tools/src/base/error_handling_io.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/cache.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/plist_parser.dart';
 
 import '../src/common.dart';
@@ -52,7 +51,7 @@ void main() {
 
       late FileSystem localFileSystem;
       await testbed.run(() {
-        localFileSystem = globals.fs;
+        localFileSystem = const DelegatingToolContext().fs;
       });
 
       expect(localFileSystem, isA<ErrorHandlingFileSystem>());
