@@ -47,13 +47,20 @@ abstract class DoctorValidator {
 
   /// Performs validation by invoking [validateImpl].
   ///
-  /// Tracks time taken to execute the validation step.
+  /// Tracks time taken to execute the validation step unless [validateImpl]
+  /// already populated [ValidationResult.executionTime].
   Future<ValidationResult> validate() async {
     final stopwatch = Stopwatch()..start();
     final ValidationResult result = await validateImpl();
     stopwatch.stop();
-    result.executionTime = stopwatch.elapsed;
-    return result;
+    return result.executionTime != null
+        ? result
+        : ValidationResult(
+            result.type,
+            result.messages,
+            statusInfo: result.statusInfo,
+            executionTime: stopwatch.elapsed,
+          );
   }
 
   /// Validation implementation.

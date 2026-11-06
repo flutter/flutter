@@ -109,27 +109,20 @@ class DiagnosticsExtensionClient extends DiagnosticsExtension {
       'DiagnosticsExtensionClient running diagnostics via RPC ("${DiagnosticsExtension.runDiagnosticsMethod}")...',
     );
     try {
-      final Object? response = await connection.sendRequest(
+      final Object? result = await connection.sendRequest(
         DiagnosticsExtension.runDiagnosticsMethod,
       );
-      if (response is List<Object?>) {
-        final results = <ValidationResult>[];
-        for (final Object? element in response) {
-          if (element is Map) {
-            results.add(ValidationResult.fromJson(element.cast<String, Object?>()));
-          }
-        }
-        _logger.printTrace(
-          'DiagnosticsExtensionClient received ${results.length} result(s) via RPC.',
-        );
-        return results;
-      }
+      final List<ValidationResult> results = ValidationResult.listFromJson(result);
       _logger.printTrace(
-        'DiagnosticsExtensionClient received invalid diagnostics response: $response',
+        'DiagnosticsExtensionClient received ${results.length} result(s) via RPC.',
       );
+      return results;
     } on Object catch (err, stack) {
-      _logger.printTrace('DiagnosticsExtensionClient failed to run diagnostics: $err\n$stack');
+      _logger.printWarning(
+        'Failed to run diagnostics for extension "${connection.extensionName}": $err',
+      );
+      _logger.printTrace('$stack');
+      return <ValidationResult>[ValidationResult.crash(err, stack)];
     }
-    return const <ValidationResult>[];
   }
 }

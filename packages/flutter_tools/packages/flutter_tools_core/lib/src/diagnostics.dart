@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:collection/collection.dart';
 import 'package:meta/meta.dart';
 
 import 'json_utils.dart';
@@ -38,7 +39,7 @@ enum ValidationMessageType {
 
 /// A specific message output during a diagnostic validation check.
 @immutable
-class ValidationMessage {
+final class ValidationMessage {
   /// Creates an information level diagnostic [ValidationMessage].
   const ValidationMessage(this.message, {this.contextUrl, String? piiStrippedMessage})
     : type = ValidationMessageType.information,
@@ -57,18 +58,20 @@ class ValidationMessage {
       piiStrippedMessage = piiStrippedMessage ?? message;
 
   /// Deserializes a [ValidationMessage] from a JSON-serializable map.
+  ///
+  /// Throws a [FormatException] if required fields are missing or invalid.
   factory ValidationMessage.fromJson(Map<String, Object?> json) {
-    final String message = json.optionalField<String>(messageKey, defaultValue: '');
-    final String? piiStrippedMessage = json.nullableField<String>(piiStrippedMessageKey);
+    final ValidationMessageType type = _parseMessageType(json.requiredField<String>(typeKey));
+    final String message = json.requiredField<String>(messageKey);
+    final String piiStrippedMessage = json.requiredField<String>(piiStrippedMessageKey);
     final String? contextUrl = json.nullableField<String>(contextUrlKey);
-    final String typeName = json.optionalField<String>(
-      typeKey,
-      defaultValue: ValidationMessageType.information.name,
-    );
-    final ValidationMessageType type = ValidationMessageType.values.firstWhere(
-      (ValidationMessageType t) => t.name == typeName,
-      orElse: () => ValidationMessageType.information,
-    );
+    if (contextUrl != null && type != ValidationMessageType.information) {
+      throw FormatException(
+        'Invalid "$contextUrlKey" in ValidationMessage: "$contextUrlKey" is only '
+        'supported when "$typeKey" is "${ValidationMessageType.information.name}", '
+        'got "${type.name}".',
+      );
+    }
 
     return switch (type) {
       ValidationMessageType.error => ValidationMessage.error(
@@ -85,6 +88,18 @@ class ValidationMessage {
         piiStrippedMessage: piiStrippedMessage,
       ),
     };
+  }
+
+  static ValidationMessageType _parseMessageType(String typeName) {
+    for (final ValidationMessageType value in ValidationMessageType.values) {
+      if (value.name == typeName) {
+        return value;
+      }
+    }
+    throw FormatException(
+      'Invalid "$typeKey" in ValidationMessage: "$typeName". '
+      'Expected one of: ${ValidationMessageType.values.map((ValidationMessageType t) => t.name).join(', ')}.',
+    );
   }
 
   /// Map key for [contextUrl].
@@ -108,7 +123,9 @@ class ValidationMessage {
   /// Optional URL providing additional context or documentation.
   final String? contextUrl;
 
-  /// Optional version of [message] with Personally Identifiable Information (PII) removed.
+  /// Version of [message] with Personally Identifiable Information (PII) removed.
+  ///
+  /// Defaults to [message] when omitted at construction.
   final String piiStrippedMessage;
 
   /// Whether this is an error-level validation message.
@@ -133,20 +150,28 @@ class ValidationMessage {
 
   @override
   bool operator ==(Object other) {
-    return other is ValidationMessage &&
-        other.message == message &&
-        other.type == type &&
-        other.contextUrl == contextUrl;
+    return identical(this, other) ||
+        (other is ValidationMessage &&
+            other.message == message &&
+            other.type == type &&
+            other.contextUrl == contextUrl &&
+            other.piiStrippedMessage == piiStrippedMessage);
   }
 
   @override
-  int get hashCode => Object.hash(type, message, contextUrl);
+  int get hashCode => Object.hash(type, message, contextUrl, piiStrippedMessage);
 }
 
 /// The outcome of a single diagnostic check.
-class ValidationResult {
+@immutable
+final class ValidationResult {
   /// Creates a [ValidationResult] with status [type] and list of [messages].
-  ValidationResult(this.type, this.messages, {this.statusInfo});
+  ValidationResult(
+    this.type,
+    List<ValidationMessage> messages, {
+    this.executionTime,
+    this.statusInfo,
+  }) : messages = List<ValidationMessage>.unmodifiable(messages);
 
   /// Creates a [ValidationResult] representing a crash during execution.
   factory ValidationResult.crash(Object error, [StackTrace? stackTrace]) {
@@ -162,37 +187,38 @@ class ValidationResult {
   }
 
   /// Deserializes a [ValidationResult] from a JSON-serializable map.
+  ///
+  /// Throws a [FormatException] if required fields are missing or invalid.
   factory ValidationResult.fromJson(Map<String, Object?> json) {
-    final String typeName = json.optionalField<String>(
-      typeKey,
-      defaultValue: ValidationType.success.name,
-    );
-    final ValidationType type = ValidationType.values.firstWhere(
-      (ValidationType t) => t.name == typeName,
-      orElse: () => ValidationType.success,
-    );
+    final ValidationType type = _parseValidationType(json.requiredField<String>(typeKey));
     final String? statusInfo = json.nullableField<String>(statusInfoKey);
-
-    final List<ValidationMessage> messages = switch (json[messagesKey]) {
-      final Iterable<Object?> items => <ValidationMessage>[
-        for (final Object? item in items)
-          switch (item) {
-            final Map<Object?, Object?> map => ValidationMessage.fromJson(
-              map.cast<String, Object?>(),
-            ),
-            _ => throw FormatException(
-              'Invalid "$messagesKey" element: expected Map<String, Object?>, got ${item.runtimeType}.',
-            ),
-          },
-      ],
-      null => <ValidationMessage>[],
-      final Object invalid => throw FormatException(
-        'Invalid "$messagesKey": expected Iterable<Object?>, got ${invalid.runtimeType}.',
-      ),
-    };
+    final Iterable<Object?> rawMessages = json.requiredField<Iterable<Object?>>(messagesKey);
+    final messages = <ValidationMessage>[
+      for (final Object? item in rawMessages)
+        if (item case final Map<String, Object?> map)
+          ValidationMessage.fromJson(map)
+        else
+          throw FormatException(
+            'Invalid "$messagesKey" element: expected Map<String, Object?>, got ${item.runtimeType}.',
+          ),
+    ];
 
     return ValidationResult(type, messages, statusInfo: statusInfo);
   }
+
+  static ValidationType _parseValidationType(String typeName) {
+    for (final ValidationType value in ValidationType.values) {
+      if (value.name == typeName) {
+        return value;
+      }
+    }
+    throw FormatException(
+      'Invalid "$typeKey" in ValidationResult: "$typeName". '
+      'Expected one of: ${ValidationType.values.map((ValidationType t) => t.name).join(', ')}.',
+    );
+  }
+
+  static const _messageListEquality = ListEquality<ValidationMessage>();
 
   /// Map key for [messages].
   static const String messagesKey = 'messages';
@@ -202,6 +228,27 @@ class ValidationResult {
 
   /// Map key for [type].
   static const String typeKey = 'type';
+
+  /// Deserializes a list of [ValidationResult] objects from RPC response data.
+  ///
+  /// Throws a [FormatException] if [json] is not an iterable or contains
+  /// invalid entries.
+  static List<ValidationResult> listFromJson(Object? json) {
+    if (json is! Iterable<Object?>) {
+      throw FormatException(
+        'Invalid ValidationResult list: expected Iterable<Object?>, got ${json.runtimeType}.',
+      );
+    }
+    return <ValidationResult>[
+      for (final Object? item in json)
+        if (item is Map<String, Object?>)
+          ValidationResult.fromJson(item)
+        else
+          throw FormatException(
+            'Invalid ValidationResult entry: expected Map<String, Object?>, got ${item.runtimeType}.',
+          ),
+    ];
+  }
 
   /// Status category of the diagnostic check.
   final ValidationType type;
@@ -213,7 +260,10 @@ class ValidationResult {
   final List<ValidationMessage> messages;
 
   /// The time taken to perform the validation.
-  Duration? executionTime;
+  ///
+  /// Populated on the host by `DoctorValidator.validate` and omitted from
+  /// [toMap] and [ValidationResult.fromJson].
+  final Duration? executionTime;
 
   /// Serializes the validation result to a JSON-serializable map.
   Map<String, Object?> toMap() => <String, Object?>{
@@ -223,7 +273,21 @@ class ValidationResult {
   };
 
   @override
-  String toString() {
-    return '$runtimeType($type, $messages, $statusInfo)';
+  String toString() =>
+      'ValidationResult(type: $type, messages: $messages, '
+      'statusInfo: $statusInfo, executionTime: $executionTime)';
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is ValidationResult &&
+            other.type == type &&
+            other.statusInfo == statusInfo &&
+            other.executionTime == executionTime &&
+            _messageListEquality.equals(other.messages, messages));
   }
+
+  @override
+  int get hashCode =>
+      Object.hash(type, statusInfo, executionTime, _messageListEquality.hash(messages));
 }

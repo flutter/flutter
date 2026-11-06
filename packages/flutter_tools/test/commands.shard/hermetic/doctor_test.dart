@@ -937,7 +937,24 @@ void main() {
         throwsToolExit(message: 'Artifacts for engine 1234567890abcdef are missing'),
       );
     });
+
+    testWithoutContext('DoctorValidator.validate populates or preserves executionTime', () async {
+      final ValidationResult measuredResult = await _UnmeasuredValidator().validate();
+      expect(measuredResult.executionTime, isNotNull);
+
+      final ValidationResult presetResult = await PassingValidator('Preset').validate();
+      expect(presetResult.executionTime, Duration.zero);
+    });
   });
+}
+
+class _UnmeasuredValidator extends DoctorValidator {
+  _UnmeasuredValidator() : super('Unmeasured');
+
+  @override
+  Future<ValidationResult> validateImpl() async {
+    return ValidationResult(ValidationType.success, const <ValidationMessage>[]);
+  }
 }
 
 class PassingValidator extends DoctorValidator {
@@ -949,7 +966,7 @@ class PassingValidator extends DoctorValidator {
       ValidationMessage('A helpful message'),
       ValidationMessage('A second, somewhat longer helpful message'),
     ];
-    return ZeroExecutionTimeValidationResult(
+    return _zeroExecutionTimeValidationResult(
       ValidationType.success,
       messages,
       statusInfo: 'with statusInfo',
@@ -968,7 +985,7 @@ class PiiValidator extends DoctorValidator {
         piiStrippedMessage: 'Does not contain PII',
       ),
     ];
-    return ZeroExecutionTimeValidationResult(ValidationType.success, messages);
+    return _zeroExecutionTimeValidationResult(ValidationType.success, messages);
   }
 }
 
@@ -982,7 +999,7 @@ class MissingValidator extends DoctorValidator {
       ValidationMessage('A message that is not an error'),
       ValidationMessage.hint('A hint message'),
     ];
-    return ZeroExecutionTimeValidationResult(ValidationType.missing, messages);
+    return _zeroExecutionTimeValidationResult(ValidationType.missing, messages);
   }
 }
 
@@ -996,7 +1013,7 @@ class NotAvailableValidator extends DoctorValidator {
       ValidationMessage('A message that is not an error'),
       ValidationMessage.hint('A hint message'),
     ];
-    return ZeroExecutionTimeValidationResult(ValidationType.notAvailable, messages);
+    return _zeroExecutionTimeValidationResult(ValidationType.notAvailable, messages);
   }
 }
 
@@ -1022,7 +1039,7 @@ class PartialValidatorWithErrors extends DoctorValidator {
       ValidationMessage.hint('Maybe a hint will help the user'),
       ValidationMessage('An extra message with some verbose details'),
     ];
-    return ZeroExecutionTimeValidationResult(ValidationType.partial, messages);
+    return _zeroExecutionTimeValidationResult(ValidationType.partial, messages);
   }
 }
 
@@ -1035,7 +1052,7 @@ class PartialValidatorWithHintsOnly extends DoctorValidator {
       ValidationMessage.hint('There is a hint here'),
       ValidationMessage('But there is no error'),
     ];
-    return ZeroExecutionTimeValidationResult(ValidationType.partial, messages);
+    return _zeroExecutionTimeValidationResult(ValidationType.partial, messages);
   }
 }
 
@@ -1249,7 +1266,7 @@ class PassingGroupedValidator extends DoctorValidator {
   @override
   Future<ValidationResult> validateImpl() async {
     const messages = <ValidationMessage>[ValidationMessage('A helpful message')];
-    return ZeroExecutionTimeValidationResult(ValidationType.success, messages);
+    return _zeroExecutionTimeValidationResult(ValidationType.success, messages);
   }
 }
 
@@ -1259,7 +1276,7 @@ class MissingGroupedValidator extends DoctorValidator {
   @override
   Future<ValidationResult> validateImpl() async {
     const messages = <ValidationMessage>[ValidationMessage.error('A useful error message')];
-    return ZeroExecutionTimeValidationResult(ValidationType.missing, messages);
+    return _zeroExecutionTimeValidationResult(ValidationType.missing, messages);
   }
 }
 
@@ -1271,7 +1288,7 @@ class PartialGroupedValidator extends DoctorValidator {
     const messages = <ValidationMessage>[
       ValidationMessage.error('An error message for partial installation'),
     ];
-    return ZeroExecutionTimeValidationResult(ValidationType.partial, messages);
+    return _zeroExecutionTimeValidationResult(ValidationType.partial, messages);
   }
 }
 
@@ -1281,7 +1298,7 @@ class PassingGroupedValidatorWithStatus extends DoctorValidator {
   @override
   Future<ValidationResult> validateImpl() async {
     const messages = <ValidationMessage>[ValidationMessage('A different message')];
-    return ZeroExecutionTimeValidationResult(
+    return _zeroExecutionTimeValidationResult(
       ValidationType.success,
       messages,
       statusInfo: 'A status message',
@@ -1356,7 +1373,7 @@ class FakeGroupedValidator extends GroupedValidator {
   @override
   Future<ValidationResult> validateImpl() async {
     final ValidationResult result = await super.validateImpl();
-    return ZeroExecutionTimeValidationResult(
+    return _zeroExecutionTimeValidationResult(
       result.type,
       result.messages,
       statusInfo: result.statusInfo,
@@ -1452,11 +1469,12 @@ class FakeDevice extends Fake implements Device {
   Future<TargetPlatform> get targetPlatform => Future<TargetPlatform>.value(TargetPlatform.android);
 }
 
-class ZeroExecutionTimeValidationResult extends ValidationResult {
-  ZeroExecutionTimeValidationResult(super.type, super.messages, {super.statusInfo});
-
-  @override
-  Duration? get executionTime => Duration.zero;
+ValidationResult _zeroExecutionTimeValidationResult(
+  ValidationType type,
+  List<ValidationMessage> messages, {
+  String? statusInfo,
+}) {
+  return ValidationResult(type, messages, executionTime: Duration.zero, statusInfo: statusInfo);
 }
 
 class FakeDiagnoseDoctor extends Fake implements Doctor {
