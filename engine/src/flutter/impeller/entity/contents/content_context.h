@@ -382,12 +382,13 @@ class ContentContext {
   struct Pipelines;
   std::unique_ptr<Pipelines> pipelines_;
 
-  /// Requests the default variant of every pipeline in `pipelines` from the
-  /// pipeline library of `context`.
+  /// Requests the default variant of every pipeline from the pipeline library
+  /// of `context`.
   ///
-  /// @return     False if a default pipeline descriptor could not be created.
-  static bool CreateDefaultPipelines(const Context& context,
-                                     Pipelines& pipelines);
+  /// @return     The pipelines holding the default variants, or nullptr if a
+  ///             default pipeline descriptor could not be created.
+  static std::unique_ptr<Pipelines> CreateDefaultPipelines(
+      const Context& context);
 
   bool is_valid_ = false;
   std::shared_ptr<Tessellator> tessellator_;
