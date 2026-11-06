@@ -195,38 +195,30 @@ class WebpHeaderReader {
   bool isAnimated() {
     // Always parse from the start so repeated calls give the same answer.
     _position = 0;
-    try {
-      // An animated WebP needs at least the 12-byte RIFF/WEBP header, the
-      // 8-byte 'VP8X' chunk header and the 1-byte VP8X flags.
-      if (bytes.lengthInBytes < 21) {
-        return false;
-      }
-      final bool isWebP = _readWebpHeader();
-      if (!isWebP) {
-        return false;
-      }
-      // If this is an animated WebP, then it must have a 'VP8X' chunk header
-      // with the 'animation' bit set. See: https://developers.google.com/speed/webp/docs/riff_container#extended_file_format
-      final bool isVP8X = _readChunkHeader('VP8X');
-      if (!isVP8X) {
-        return false;
-      }
-
-      // If this is a VP8X style WebP, then the next byte will have a bit which
-      // indicates whether it is animated or not.
-      if (!_hasBytes(1)) {
-        return false;
-      }
-      final int headerByte = _readUint8();
-      const int animatedMask = 1 << 1;
-      return headerByte & animatedMask != 0;
-    } catch (_) {
-      // Backstop for anything the checks above missed: treat the buffer as
-      // malformed rather than throwing. This is a best-effort sniffer, and the
-      // error type of an out-of-bounds read differs between dart2js and
-      // dart2wasm.
+    // An animated WebP needs at least the 12-byte RIFF/WEBP header, the
+    // 8-byte 'VP8X' chunk header and the 1-byte VP8X flags.
+    if (bytes.lengthInBytes < 21) {
       return false;
     }
+    final bool isWebP = _readWebpHeader();
+    if (!isWebP) {
+      return false;
+    }
+    // If this is an animated WebP, then it must have a 'VP8X' chunk header
+    // with the 'animation' bit set. See: https://developers.google.com/speed/webp/docs/riff_container#extended_file_format
+    final bool isVP8X = _readChunkHeader('VP8X');
+    if (!isVP8X) {
+      return false;
+    }
+
+    // If this is a VP8X style WebP, then the next byte will have a bit which
+    // indicates whether it is animated or not.
+    if (!_hasBytes(1)) {
+      return false;
+    }
+    final int headerByte = _readUint8();
+    const int animatedMask = 1 << 1;
+    return headerByte & animatedMask != 0;
   }
 
   /// Reads a RIFF chunk header. Returns [false] if the header FourCC isn't
@@ -303,58 +295,50 @@ class GifHeaderReader {
   bool isAnimated() {
     // Always parse from the start so repeated calls give the same answer.
     _position = 0;
-    try {
-      // A GIF needs at least the 6-byte header and the 7-byte logical screen
-      // descriptor.
-      if (bytes.lengthInBytes < 13) {
-        return false;
-      }
-      final bool isGif = _readGifHeader();
-      if (!isGif) {
-        return false;
-      }
-
-      // Read the logical screen descriptor block.
-      if (!_hasBytes(7)) {
-        return false;
-      }
-
-      // Advance 4 bytes to skip over the screen width and height.
-      _position += 4;
-
-      final int logicalScreenDescriptorFields = _readUint8();
-      const int globalColorTableFlagMask = 1 << 7;
-      final hasGlobalColorTable = logicalScreenDescriptorFields & globalColorTableFlagMask != 0;
-
-      // Skip over the background color index and pixel aspect ratio.
-      _position += 2;
-
-      if (hasGlobalColorTable) {
-        // Skip past the global color table.
-        const int globalColorTableSizeMask = 1 << 2 | 1 << 1 | 1;
-        final int globalColorTableSize = logicalScreenDescriptorFields & globalColorTableSizeMask;
-        // This is 3 * 2^(Global Color Table Size + 1).
-        final int globalColorTableSizeInBytes = 3 * (1 << (globalColorTableSize + 1));
-        if (!_hasBytes(globalColorTableSizeInBytes)) {
-          return false;
-        }
-        _position += globalColorTableSizeInBytes;
-      }
-
-      // Skip the first frame, then check whether a second one starts. Padding
-      // bytes, garbage, the trailer or the end of the buffer do not count as
-      // the start of a second frame.
-      if (!_skipGraphicBlock() || !_maybeSkipSpecialPurposeBlocks()) {
-        return false;
-      }
-      return _checkForGraphicBlockStart();
-    } catch (_) {
-      // Backstop for anything the checks above missed: treat the buffer as
-      // malformed rather than throwing. This is a best-effort sniffer, and the
-      // error type of an out-of-bounds read differs between dart2js and
-      // dart2wasm.
+    // A GIF needs at least the 6-byte header and the 7-byte logical screen
+    // descriptor.
+    if (bytes.lengthInBytes < 13) {
       return false;
     }
+    final bool isGif = _readGifHeader();
+    if (!isGif) {
+      return false;
+    }
+
+    // Read the logical screen descriptor block.
+    if (!_hasBytes(7)) {
+      return false;
+    }
+
+    // Advance 4 bytes to skip over the screen width and height.
+    _position += 4;
+
+    final int logicalScreenDescriptorFields = _readUint8();
+    const int globalColorTableFlagMask = 1 << 7;
+    final hasGlobalColorTable = logicalScreenDescriptorFields & globalColorTableFlagMask != 0;
+
+    // Skip over the background color index and pixel aspect ratio.
+    _position += 2;
+
+    if (hasGlobalColorTable) {
+      // Skip past the global color table.
+      const int globalColorTableSizeMask = 1 << 2 | 1 << 1 | 1;
+      final int globalColorTableSize = logicalScreenDescriptorFields & globalColorTableSizeMask;
+      // This is 3 * 2^(Global Color Table Size + 1).
+      final int globalColorTableSizeInBytes = 3 * (1 << (globalColorTableSize + 1));
+      if (!_hasBytes(globalColorTableSizeInBytes)) {
+        return false;
+      }
+      _position += globalColorTableSizeInBytes;
+    }
+
+    // Skip the first frame, then check whether a second one starts. Padding
+    // bytes, garbage, the trailer or the end of the buffer do not count as
+    // the start of a second frame.
+    if (!_skipGraphicBlock() || !_maybeSkipSpecialPurposeBlocks()) {
+      return false;
+    }
+    return _checkForGraphicBlockStart();
   }
 
   /// Reads the GIF header. Returns [false] if this is not a valid GIF header.
