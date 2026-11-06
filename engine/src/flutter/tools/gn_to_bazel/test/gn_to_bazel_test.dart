@@ -8574,7 +8574,7 @@ cc_library(
   ${build('ci/android_debug', '--android --no-lto', <String>['flutter'])},
   ${build('ci/android_debug_x86', '--android --android-cpu=x86 --no-lto', <String>['flutter'])},
   ${build('ci/android_debug_arm64', '--target-dir ci/android_debug_arm64 --android --android-cpu=arm64 --no-lto --rbe --no-goma', <String>['flutter', 'flutter/shell/platform/android:abi_jars', 'flutter/shell/platform/embedder:embedder-archive'], archives: <String>['out/ci/android_debug_arm64/zip_archives/android-arm64/symbols.zip'])},
-  ${build('ci/host_release_licenses', '--target-dir ci/host_release_licenses --runtime-mode release --no-lto --rbe --no-goma', <String>['flutter/tools/licenses_cpp', 'flutter/tools/licenses_cpp:licenses_cpp_testrunner'], tests: '{"name": "Run license_cpp unittests", "script": "out/ci/host_release_licenses/licenses_cpp_testrunner"}, {"name": "Run another runner", "script": "out/ci/host_release_licenses/other_testrunner"}')}
+  ${build('ci/host_release_licenses', '--target-dir ci/host_release_licenses --runtime-mode release --no-lto --rbe --no-goma --enable-minimal-linux', <String>['flutter/tools/licenses_cpp', 'flutter/tools/licenses_cpp:licenses_cpp_testrunner'], tests: '{"name": "Run license_cpp unittests", "script": "out/ci/host_release_licenses/licenses_cpp_testrunner"}, {"name": "Run another runner", "script": "out/ci/host_release_licenses/other_testrunner"}')}
 ]}''',
         'mac_host_engine.json':
             '{"builds": [${build('ci/mac_host', '--runtime-mode debug --no-lto', <String>['flutter'])}]}',
@@ -8676,7 +8676,7 @@ build:android_debug --compilation_mode=opt --//engine/src/flutter/common:runtime
 build:android_debug_arm64 --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=debug --platforms=//engine/src/flutter/build/bazel/toolchains:android_arm64_debug --//engine/src/flutter/build/bazel:stripped=false
 
 # linux_host_engine.json: ci/host_release_licenses
-#   --target-dir ci/host_release_licenses --runtime-mode release --no-lto --rbe --no-goma
+#   --target-dir ci/host_release_licenses --runtime-mode release --no-lto --rbe --no-goma --enable-minimal-linux
 build:host_release_licenses --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=release --platforms=//engine/src/flutter/build/bazel/toolchains:linux_x64_release
 
 # linux_web_engine_build.json: ci/wasm_release

@@ -717,8 +717,7 @@ test_suite(
 )
 
 # linux_license.json: licenses
-#   no configuration (configs.bazelrc); the flags would be:
-#   --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=release --platforms=//engine/src/flutter/build/bazel/toolchains:linux_x64_release --//engine/src/flutter/build/bazel:lto
+#   bazel run --config=licenses :licenses
 # Tests, run by `bazel test` rather than installed: flutter/tools/licenses_cpp:licenses_cpp_testrunner.
 install(
     name = "licenses",
@@ -731,7 +730,7 @@ install(
     }),
 )
 
-# licenses's tests run from the build directory: licenses_cpp_testrunner.
+# licenses's tests: run_tests.py --type binaries.
 # Other steps, scripts of the checkout: Run license_cpp.
 test_suite(
     name = "licenses_tests",
